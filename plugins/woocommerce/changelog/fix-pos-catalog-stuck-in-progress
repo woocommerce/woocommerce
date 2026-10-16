@@ -1,3 +1,0 @@
-Significance: patch
-Type: fix
-Comment: Recover POS catalog feed generation jobs that were killed (server timeout or out of memory) and left stuck in the in_progress state, and raise the execution time and memory limits during generation.

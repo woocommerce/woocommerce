@@ -10,6 +10,7 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Admin\API;
 use Automattic\WooCommerce\Admin\Notes\Notes;
 use Automattic\WooCommerce\Internal\Admin\Notes\OrderMilestones;
+use Automattic\WooCommerce\Internal\Admin\Notes\ExtensionsWithoutSubscription;
 use Automattic\WooCommerce\Internal\Admin\Notes\WooSubscriptionsNotes;
 use Automattic\WooCommerce\Internal\Admin\Notes\TrackingOptIn;
 use Automattic\WooCommerce\Internal\Admin\Notes\WooCommercePayments;
@@ -22,7 +23,6 @@ use Automattic\WooCommerce\Admin\PluginsHelper;
 use Automattic\WooCommerce\Admin\PluginsInstaller;
 use Automattic\WooCommerce\Admin\ReportExporter;
 use Automattic\WooCommerce\Admin\ReportsSync;
-use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Internal\Admin\CategoryLookup;
 use Automattic\WooCommerce\Internal\Admin\Events;
 use Automattic\WooCommerce\Internal\Admin\Onboarding\Onboarding;
@@ -174,17 +174,21 @@ class FeaturePlugin {
 
 		Onboarding::init();
 
-		if ( FeaturesUtil::feature_is_enabled( 'analytics' ) ) {
+		if ( $this->is_analytics_enabled_during_bootstrap() ) {
 			// Initialize Reports syncing.
 			ReportsSync::init();
 			CategoryLookup::instance()->init();
 			// Initialize Reports exporter.
 			ReportExporter::init();
+		} else {
+			// Already generated exports still need serving and expiring.
+			ReportExporter::init_export_files();
 		}
 
 		// Admin note providers.
 		// @todo These should be bundled in the features/ folder, but loading them from there currently has a load order issue.
 		new WooSubscriptionsNotes();
+		new ExtensionsWithoutSubscription();
 		new OrderMilestones();
 		new TrackingOptIn();
 		new WooCommercePayments();
@@ -192,6 +196,19 @@ class FeaturePlugin {
 		new SellingOnlineCourses();
 		new MagentoMigration();
 		new ScheduledUpdatesPromotion();
+	}
+
+	/**
+	 * Check whether Analytics should be initialized during plugin bootstrap.
+	 *
+	 * Feature definitions contain translated presentation strings and are not safe to build before init.
+	 *
+	 * @return bool
+	 */
+	private function is_analytics_enabled_during_bootstrap(): bool {
+		// Keep this fallback aligned with `enabled_by_default` for Analytics in FeaturesController.
+		return ! Features::is_analytics_disabled_by_legacy_filters()
+			&& 'yes' === get_option( Analytics::TOGGLE_OPTION_NAME, 'yes' );
 	}
 
 	/**

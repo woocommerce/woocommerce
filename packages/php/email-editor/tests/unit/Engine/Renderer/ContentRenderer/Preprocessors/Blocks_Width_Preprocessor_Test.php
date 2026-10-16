@@ -577,9 +577,9 @@ class Blocks_Width_Preprocessor_Test extends \Email_Editor_Unit_Test {
 		$this->assertEquals( '195px', $result[0]['innerBlocks'][1]['email_attrs']['width'] );
 		$this->assertEquals( '265px', $result[0]['innerBlocks'][2]['email_attrs']['width'] );
 		$image_block = $result[0]['innerBlocks'][1]['innerBlocks'][0];
-		$this->assertEquals( '195px', $image_block['email_attrs']['width'] );
+		$this->assertEquals( '195px', $image_block['email_attrs']['width'] ); // 195 column width, no column border or padding.
 		$image_block = $result[0]['innerBlocks'][2]['innerBlocks'][0];
-		$this->assertEquals( '225px', $image_block['email_attrs']['width'] );
+		$this->assertEquals( '195px', $image_block['email_attrs']['width'] ); // 265 - 30 (15px border each side) - 40 (20px padding each side).
 	}
 
 	/**

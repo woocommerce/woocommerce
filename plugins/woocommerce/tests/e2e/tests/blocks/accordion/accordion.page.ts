@@ -34,7 +34,7 @@ export class AccordionPage {
 	) {
 		const parentBlock = (
 			await this.editor.getBlockByName( 'woocommerce/accordion-panel' )
-		 ).nth( index ?? 0 );
+		).nth( index ?? 0 );
 		const clientId =
 			( await parentBlock.getAttribute( 'data-block' ) ) ?? '';
 		const parentClientId =
@@ -88,7 +88,7 @@ export class AccordionPage {
 			const data = accordionData[ index ];
 			const accordionCount = await (
 				await this.editor.getBlockByName( 'woocommerce/accordion-item' )
-			 ).count();
+			).count();
 			if ( index >= accordionCount ) {
 				await this.insertAccordion();
 			}

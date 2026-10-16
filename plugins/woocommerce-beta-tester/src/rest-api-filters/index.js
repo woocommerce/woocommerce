@@ -169,9 +169,8 @@ export default compose(
 		};
 	} ),
 	withDispatch( ( dispatch ) => {
-		const { saveFilter, deleteFilter, toggleFilter } = dispatch(
-			STORE_KEY
-		);
+		const { saveFilter, deleteFilter, toggleFilter } =
+			dispatch( STORE_KEY );
 
 		return {
 			saveFilter,

@@ -36,7 +36,7 @@ export function registerProductField(
 		return;
 	}
 
-	dispatch( productFieldStore ).registerProductField( {
+	void dispatch( productFieldStore ).registerProductField( {
 		attributes: {},
 		...settings,
 	} );

@@ -3,40 +3,38 @@ $thumbnails-gradient-size: 20%;
 $thumbnails-gap: 2%;
 $dialog-padding: 20px;
 
+:where(.wc-block-product-gallery) {
+	--wc-block-product-gallery-large-image-ratio-width: 1;
+	--wc-block-product-gallery-large-image-ratio-height: 1;
+}
+
 :where(.wc-block-product-gallery-large-image) {
 	width: 100%;
 	position: relative;
 	flex-grow: 1;
 	overflow: hidden;
 
-	//When Product Image aspect ratio is auto, we are setting constraints
-	//on the viewer container and display full images in square container.
-	&:has(.wc-block-components-product-image--aspect-ratio-auto) {
-		aspect-ratio: 1/1;
-	}
-
 	:where(.wc-block-product-gallery-large-image__container) {
 		display: flex;
-		overflow: hidden;
+		overflow-x: auto;
+		overflow-y: hidden;
+		scroll-snap-type: x mandatory;
+		scrollbar-width: none;
 		align-items: center;
 		margin: 0;
 		padding: 0;
-		// Chrome drops `scrollTo({behavior:'smooth'})` on `overflow:hidden`
-		// unless `scroll-behavior` is set on the element.
-		scroll-behavior: smooth;
 	}
 
 	:where(.wc-block-product-gallery-large-image__wrapper) {
+		scroll-snap-align: start;
+		scroll-snap-stop: always;
 		flex-shrink: 0;
 		min-width: 100%;
 		max-width: 100%;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-
-		&:has(.wc-block-components-product-image--aspect-ratio-auto) {
-			aspect-ratio: 1/1;
-		}
+		aspect-ratio: var(--wc-block-product-gallery-large-image-ratio-width, 1) / var(--wc-block-product-gallery-large-image-ratio-height, 1);
 	}
 
 	.wc-block-product-gallery-large-image__wrapper[hidden] {
@@ -286,6 +284,10 @@ $dialog-padding: 20px;
 	object-fit: cover;
 	width: fit-content;
 	outline-offset: -2px;
+}
+
+:where(.wc-block-product-gallery-thumbnails__thumbnail__image):focus:not(:focus-visible) {
+	outline: none;
 }
 
 :where(.wc-block-product-gallery-thumbnails__thumbnail__image--is-active) {

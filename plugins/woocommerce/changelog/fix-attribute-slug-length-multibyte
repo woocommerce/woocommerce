@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Reject attribute slugs whose taxonomy name (with the "pa_" prefix) exceeds WordPress's 32-byte limit, instead of incorrectly counting characters. This lets users create attributes with multibyte slugs (Cyrillic, Chinese, etc.) that fit within the limit, and shows a live byte count next to the slug input so users can see how close they are to the limit before submitting.

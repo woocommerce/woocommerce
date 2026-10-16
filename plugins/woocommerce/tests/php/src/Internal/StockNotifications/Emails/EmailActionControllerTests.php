@@ -9,12 +9,15 @@ use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationCancell
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\Factory;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
+use Automattic\WooCommerce\Tests\Internal\StockNotifications\StockNotificationsFeatureTrait;
 use WC_Helper_Product;
 
 /**
  * EmailActionControllerTests tests.
  */
 class EmailActionControllerTests extends \WC_Unit_Test_Case {
+
+	use StockNotificationsFeatureTrait;
 
 	/**
 	 * The System Under Test.
@@ -35,6 +38,7 @@ class EmailActionControllerTests extends \WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		$this->enable_stock_notifications_feature();
 
 		// Intercept redirects so headers aren't emitted, and throw so the trailing `exit;`
 		// in production code never runs during the test.
@@ -50,6 +54,7 @@ class EmailActionControllerTests extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		remove_filter( 'wp_redirect', array( $this, 'intercept_redirect' ) );
+		$this->restore_stock_notifications_feature_option();
 		parent::tearDown();
 	}
 
@@ -180,11 +185,14 @@ class EmailActionControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should set notification status to cancelled and cancellation source to user on unsubscribe.
+	 * @testdox Should set notification status to cancelled and cancellation source to user on unsubscribe from $status.
+	 * @dataProvider provide_cancellable_statuses
+	 *
+	 * @param string $status Initial notification status.
 	 */
-	public function test_process_unsubscribe_action_sets_status_cancelled() {
+	public function test_process_unsubscribe_action_sets_status_cancelled( $status ) {
 		$id = $this->arrange_notification(
-			NotificationStatus::ACTIVE,
+			$status,
 			'unsubscribe_action_key',
 			wp_fast_hash( 'test' )
 		);
@@ -199,6 +207,67 @@ class EmailActionControllerTests extends \WC_Unit_Test_Case {
 		$updated = Factory::get_notification( $id );
 		$this->assertEquals( NotificationStatus::CANCELLED, $updated->get_status() );
 		$this->assertEquals( NotificationCancellationSource::USER, $updated->get_cancellation_source() );
+	}
+
+	/**
+	 * Statuses an unsubscribe link can cancel.
+	 *
+	 * @return array
+	 */
+	public function provide_cancellable_statuses() {
+		return array(
+			'active'  => array( NotificationStatus::ACTIVE ),
+			'pending' => array( NotificationStatus::PENDING ),
+		);
+	}
+
+	/**
+	 * @testdox Should leave a sent notification unchanged and show a neutral notice on unsubscribe.
+	 */
+	public function test_process_unsubscribe_action_leaves_sent_notification_unchanged() {
+		$id           = $this->arrange_notification( NotificationStatus::SENT, 'unsubscribe_action_key', wp_fast_hash( 'test' ) );
+		$notification = Factory::get_notification( $id );
+		$notification->set_date_notified( time() - DAY_IN_SECONDS );
+		$notification->save();
+		$date_notified = Factory::get_notification( $id )->get_date_notified();
+
+		try {
+			$this->sut->validate_and_maybe_process_request( $id, 'test', 'unsubscribe' );
+			$this->fail( 'Expected redirect to be intercepted via exception.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertStringContainsString( 'wp_redirect intercepted', $e->getMessage() );
+		}
+
+		$updated = Factory::get_notification( $id );
+		$this->assertEquals( NotificationStatus::SENT, $updated->get_status() );
+		$this->assertNotNull( $date_notified );
+		$this->assertEquals( $date_notified->getTimestamp(), $updated->get_date_notified()->getTimestamp() );
+		$this->assertNull( $updated->get_date_cancelled() );
+		$this->assertSame( 1, wc_notice_count( 'notice' ) );
+		$this->assertSame( 0, wc_notice_count( 'success' ) );
+	}
+
+	/**
+	 * @testdox Should leave a cancelled notification unchanged and show a neutral notice on unsubscribe.
+	 */
+	public function test_process_unsubscribe_action_leaves_cancelled_notification_unchanged() {
+		$id           = $this->arrange_notification( NotificationStatus::CANCELLED, 'unsubscribe_action_key', wp_fast_hash( 'test' ) );
+		$notification = Factory::get_notification( $id );
+		$notification->set_cancellation_source( NotificationCancellationSource::ADMIN );
+		$notification->save();
+
+		try {
+			$this->sut->validate_and_maybe_process_request( $id, 'test', 'unsubscribe' );
+			$this->fail( 'Expected redirect to be intercepted via exception.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertStringContainsString( 'wp_redirect intercepted', $e->getMessage() );
+		}
+
+		$updated = Factory::get_notification( $id );
+		$this->assertEquals( NotificationStatus::CANCELLED, $updated->get_status() );
+		$this->assertEquals( NotificationCancellationSource::ADMIN, $updated->get_cancellation_source() );
+		$this->assertSame( 1, wc_notice_count( 'notice' ) );
+		$this->assertSame( 0, wc_notice_count( 'success' ) );
 	}
 
 	/**

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-v4 Orders API: align fee/shipping `can_be_refunded` with the refund validator — compare on a tax-inclusive absolute basis (so discount/negative fee lines report refundable) and round to currency precision (so a fully-refunded line is not reported refundable on a sub-cent float residue).

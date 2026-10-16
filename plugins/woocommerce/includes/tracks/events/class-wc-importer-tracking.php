@@ -66,7 +66,7 @@ class WC_Importer_Tracking {
 	 */
 	public function track_product_importer_complete() {
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
-		if ( ! isset( $_REQUEST['nonce'] ) ) {
+		if ( ! isset( $_REQUEST['_wpnonce'] ) ) {
 			return;
 		}
 

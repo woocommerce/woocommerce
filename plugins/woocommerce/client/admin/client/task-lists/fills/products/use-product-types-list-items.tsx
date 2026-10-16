@@ -33,7 +33,7 @@ const useProductTypeListItems = (
 					if ( typeof productType?.onClick === 'function' ) {
 						productType.onClick();
 					} else {
-						createProductByType( productType.key );
+						void createProductByType( productType.key );
 					}
 					recordEvent( 'tasklist_add_product', {
 						method: 'product_template',

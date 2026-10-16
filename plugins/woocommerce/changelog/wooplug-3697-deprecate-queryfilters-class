@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Deprecate the Automattic\WooCommerce\Blocks\QueryFilters class.

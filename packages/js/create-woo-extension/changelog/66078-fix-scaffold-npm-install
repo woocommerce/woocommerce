@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Pin `i18n-calypso` to 8.1.0 in scaffolded extensions so `npm install` no longer fails on an unparseable Yarn `patch:` dependency spec.

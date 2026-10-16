@@ -238,7 +238,7 @@ const blocks = {
 
 /**
  * Blocks that are generic and will likely be pushed up to Gutenberg or a public block registry.
- * Keep in sync with the generic_blocks array in copy-blocks-json.sh
+ * Keep in sync with genericBlocks in copy-blocks-json.sh
  */
 const genericBlocks = {
 	'accordion-group': {
@@ -276,7 +276,7 @@ const getBlockEntries = ( relativePath, blockEntries = blocks ) => {
 				const filePaths = glob.sync(
 					`./assets/js/blocks/${ config.customDir || blockCode }/` +
 						relativePath,
-					{ dotRelative: true }
+					{ dotRelative: true, posix: true }
 				);
 				if ( filePaths.length > 0 ) {
 					return [ blockCode, filePaths ];
@@ -338,32 +338,37 @@ const blockStylingEntries = getBlockEntries(
 
 const entries = {
 	styling: {
-		// Packages styles
-		'packages-style': glob.sync( './packages/**/index.{t,j}s', {
-			dotRelative: true,
-		} ),
+		// Package entry points included in the styling build.
+		'packages-style': glob.sync(
+			'./packages/public-api/{price-format,blocks-components,blocks-checkout}/**/index.{t,j}s',
+			{
+				dotRelative: true,
+				posix: true,
+			}
+		),
 
 		// Shared blocks code
 		'wc-blocks': './assets/js/index.js',
 
 		// Blocks
 		'product-image-gallery':
-			'./assets/js/atomic/blocks/product-elements/product-image-gallery/index.ts',
+			'./assets/js/blocks/product-elements-blocks/product-image-gallery/index.ts',
 
 		...blockStylingEntries,
 	},
 	core: {
-		wcBlocksRegistry: './assets/js/blocks-registry/index.js',
-		blocksCheckoutEvents: './assets/js/events/index.ts',
-		wcSettings: './assets/js/settings/shared/index.ts',
-		wcBlocksData: './assets/js/data/index.ts',
+		wcBlocksRegistry: './packages/public-api/blocks-registry/index.js',
+		blocksCheckoutEvents:
+			'./packages/public-api/blocks-checkout-events/index.ts',
+		wcSettings: './packages/public-api/settings/index.ts',
+		wcBlocksData: './packages/public-api/block-data/index.ts',
 		wcBlocksMiddleware: './assets/js/middleware/index.js',
-		wcBlocksSharedContext: './assets/js/shared/context/index.js',
-		wcBlocksSharedHocs: './assets/js/shared/hocs/index.js',
+		wcBlocksSharedContext: './packages/public-api/shared-context/index.js',
+		wcBlocksSharedHocs: './packages/public-api/shared-hocs/index.js',
 		wcSchemaParser: './assets/js/utils/schema-parser/index.ts',
-		priceFormat: './packages/prices/index.js',
-		wcTypes: './assets/js/types/index.ts',
-		wcEntities: './assets/js/entities/index.ts',
+		priceFormat: './packages/public-api/price-format/index.js',
+		wcTypes: './packages/public-api/types/index.ts',
+		wcEntities: './packages/public-api/entity-registration/index.ts',
 	},
 	main: {
 		// Shared blocks code
@@ -398,8 +403,8 @@ const entries = {
 	},
 	cartAndCheckoutFrontend: {
 		...cartAndCheckoutFrontendEntries,
-		blocksCheckout: './packages/checkout/index.js',
-		blocksComponents: './packages/components/index.ts',
+		blocksCheckout: './packages/public-api/blocks-checkout/index.js',
+		blocksComponents: './packages/public-api/blocks-components/index.ts',
 	},
 };
 

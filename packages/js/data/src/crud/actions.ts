@@ -176,7 +176,7 @@ export function updateItemSuccess(
 
 export const createDispatchActions = <
 	ResourceName extends string,
-	ResourceType extends Item
+	ResourceType extends Item,
 >( {
 	namespace,
 	resourceName,

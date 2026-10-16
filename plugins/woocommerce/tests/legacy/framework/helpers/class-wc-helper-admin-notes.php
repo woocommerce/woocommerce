@@ -19,12 +19,14 @@ class WC_Helper_Admin_Notes {
 	 */
 	public static function reset_notes_dbs() {
 		global $wpdb;
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_admin_notes" ); // @codingStandardsIgnoreLine.
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_admin_note_actions" ); // @codingStandardsIgnoreLine.
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_admin_notes" ); // @codingStandardsIgnoreLine.
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_admin_note_actions" ); // @codingStandardsIgnoreLine.
 	}
 
 	/**
-	 * Create four notes that we can use for notes REST API tests
+	 * Create four notes that we can use for notes REST API tests.
+	 *
+	 * @return int[] Note IDs keyed by their fixture number.
 	 */
 	public static function add_notes_for_tests() {
 		$data_store = WC_Data_Store::load( 'admin-note' );
@@ -92,6 +94,13 @@ class WC_Helper_Admin_Notes {
 			'?s=PHPUNIT_TEST_NOTE_4_ACTION_2_URL'
 		);
 		$note_4->save();
+
+		return array(
+			1 => $note_1->get_id(),
+			2 => $note_2->get_id(),
+			3 => $note_3->get_id(),
+			4 => $note_4->get_id(),
+		);
 	}
 
 	/**

@@ -31,6 +31,7 @@ export type SearchAPIProductType = {
 	currency: string;
 	is_on_sale: boolean;
 	regular_price: number;
+	has_quality_badge?: boolean;
 };
 
 export interface Product {
@@ -64,6 +65,7 @@ export interface Product {
 	currency: string;
 	isOnSale: boolean;
 	regularPrice: number;
+	hasQualityBadge?: boolean;
 }
 
 export interface ProductTracksData {

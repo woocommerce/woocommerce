@@ -73,6 +73,7 @@ test.describe( `${ blockData.name }`, () => {
 
 			await expect( zoomWhileHoveringSetting ).toBeChecked();
 		} );
+
 		test( 'should work on frontend when is enabled', async ( {
 			pageObject,
 			editor,
@@ -126,6 +127,7 @@ test.describe( `${ blockData.name }`, () => {
 				expect( styleOnHover.transform ).toBe( '' );
 			} );
 		} );
+
 		test( 'should not work on frontend when is disabled', async ( {
 			pageObject,
 			editor,
@@ -168,7 +170,7 @@ test.describe( `${ blockData.name }`, () => {
 		pageObject,
 	} ) => {
 		await pageObject.addProductGalleryBlock( { cleanContent: true } );
-		await pageObject.addAddToCartWithOptionsBlock();
+		await pageObject.addClassicAddToCartFormBlock();
 
 		const viewerBlock = await pageObject.getViewerBlock( {
 			page: 'editor',
@@ -185,7 +187,7 @@ test.describe( `${ blockData.name }`, () => {
 		const featuredImageId = await pageObject.getViewerImageId();
 		expect( featuredImageId ).not.toBeNull();
 
-		const cartForm = await pageObject.getAddToCartWithOptionsBlock( {
+		const cartForm = await pageObject.getClassicAddToCartFormBlock( {
 			page: 'frontend',
 		} );
 		const colorSelect = cartForm.getByLabel( 'Color' );
@@ -209,14 +211,98 @@ test.describe( `${ blockData.name }`, () => {
 		} ).toPass( { timeout: 5_000 } );
 	} );
 
-	test.describe( 'Swipe to navigate', () => {
-		test.use( { hasTouch: true } ); // Enable touch support
+	test( 'Variable product gallery: classic Add to Cart Form preserves the parent gallery between variations', async ( {
+		page,
+		editor,
+		pageObject,
+	} ) => {
+		await pageObject.addProductGalleryBlock( { cleanContent: true } );
+		await pageObject.addClassicAddToCartFormBlock();
 
-		test( 'should work on frontend when is enabled', async ( {
-			pageObject,
-			editor,
-			page,
-		} ) => {
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
+
+		await page.goto( blockData.productPage );
+		const featuredImageId = await pageObject.getViewerImageId();
+		expect( featuredImageId ).not.toBeNull();
+		const parentImageIds = await pageObject.getVisibleViewerImageIds();
+		const parentGalleryImageIds = parentImageIds.slice( 1 );
+		expect( parentGalleryImageIds.length ).toBeGreaterThan( 0 );
+
+		const addToCartForm = await pageObject.getClassicAddToCartFormBlock( {
+			page: 'frontend',
+		} );
+		await expect(
+			addToCartForm.locator( 'form.variations_form' )
+		).toBeVisible();
+
+		const colorSelect = addToCartForm.getByLabel( 'Color' );
+		const logoSelect = addToCartForm.getByLabel( 'Logo' );
+
+		await colorSelect.selectOption( 'Blue' );
+		await logoSelect.selectOption( 'Yes' );
+
+		await expect( async () => {
+			const variationImageId = await pageObject.getViewerImageId();
+			expect( variationImageId ).not.toEqual( featuredImageId );
+		} ).toPass( { timeout: 5_000 } );
+
+		const firstVariationImageId = await pageObject.getViewerImageId();
+		const firstVariationImageIds = Array.from(
+			new Set( [ firstVariationImageId, ...parentGalleryImageIds ] )
+		);
+		// Product Gallery blocks update reactively and may not be ready
+		// instantly hence expect().toPass with custom timeout since it's 0 by default.
+		await expect( async () => {
+			const variationImageIds =
+				await pageObject.getVisibleViewerImageIds();
+			const thumbnailImageIds =
+				await pageObject.getVisibleThumbnailImageIds();
+			const activeThumbnailImageId =
+				await pageObject.getActiveThumbnailImageId();
+
+			expect( variationImageIds ).toEqual( firstVariationImageIds );
+			expect( thumbnailImageIds ).toEqual( firstVariationImageIds );
+			expect( activeThumbnailImageId ).toEqual( firstVariationImageId );
+		} ).toPass( { timeout: 5_000 } );
+
+		await logoSelect.selectOption( 'No' );
+
+		// Product Gallery blocks update reactively and may not be ready
+		// instantly hence expect().toPass with custom timeout since it's 0 by default.
+		await expect( async () => {
+			const nextVariationImageId = await pageObject.getViewerImageId();
+			expect( nextVariationImageId ).not.toEqual( firstVariationImageId );
+		} ).toPass( { timeout: 5_000 } );
+
+		const nextVariationImageId = await pageObject.getViewerImageId();
+		const nextVariationImageIds = Array.from(
+			new Set( [ nextVariationImageId, ...parentGalleryImageIds ] )
+		);
+		// Product Gallery blocks update reactively and may not be ready
+		// instantly hence expect().toPass with custom timeout since it's 0 by default.
+		await expect( async () => {
+			const variationImageIds =
+				await pageObject.getVisibleViewerImageIds();
+			const thumbnailImageIds =
+				await pageObject.getVisibleThumbnailImageIds();
+			const activeThumbnailImageId =
+				await pageObject.getActiveThumbnailImageId();
+
+			expect( variationImageIds ).toEqual( nextVariationImageIds );
+			expect( thumbnailImageIds ).toEqual( nextVariationImageIds );
+			expect( activeThumbnailImageId ).toEqual( nextVariationImageId );
+		} ).toPass( { timeout: 5_000 } );
+	} );
+
+	test.describe( 'Frontend navigation', () => {
+		test.use( {
+			hasTouch: true,
+			contextOptions: { reducedMotion: 'no-preference' },
+		} );
+
+		test.beforeEach( async ( { pageObject, editor, page } ) => {
 			await pageObject.addProductGalleryBlock( { cleanContent: true } );
 			await editor.saveSiteEditorEntities( {
 				isOnlyCurrentEntityDirty: true,
@@ -228,7 +314,12 @@ test.describe( `${ blockData.name }`, () => {
 				height: 667,
 				width: 390, // iPhone 12 Pro
 			} );
+		} );
 
+		test( 'updates thumbnail selection during a native swipe', async ( {
+			pageObject,
+			page,
+		} ) => {
 			const viewerBlock = await pageObject.getViewerBlock( {
 				page: 'frontend',
 			} );
@@ -236,64 +327,44 @@ test.describe( `${ blockData.name }`, () => {
 
 			const initialImageId = await pageObject.getViewerImageId();
 
-			// Get the element's bounding box
-			const box = await viewerImage.boundingBox();
-			if ( ! box ) {
-				return;
+			await viewerImage.scrollIntoViewIfNeeded();
+			const box = ( await viewerImage.boundingBox() )!;
+			expect( box ).not.toBeNull();
+
+			// DOM-dispatched touch events cannot trigger the browser's native scrolling.
+			const session = await page.context().newCDPSession( page );
+			const startX = box.x + box.width * 0.8;
+			const y = box.y + box.height / 2;
+			await session.send( 'Input.dispatchTouchEvent', {
+				type: 'touchStart',
+				touchPoints: [ { x: startX, y } ],
+			} );
+			for ( let step = 1; step <= 8; step++ ) {
+				await session.send( 'Input.dispatchTouchEvent', {
+					type: 'touchMove',
+					touchPoints: [
+						{ x: startX - box.width * 0.075 * step, y },
+					],
+				} );
 			}
 
-			// Calculate start and end points for the swipe
-			const swipeStartX = box.x + box.width / 2; // middle of element
-			const swipeStartY = box.y + box.height / 2;
-			const swipeEndX = swipeStartX - 200; // swipe left by 200px
-			const swipeEndY = swipeStartY;
-
-			// Dispatch touch events to simulate swipe
-			await viewerImage.evaluate(
-				( element, { startX, startY, endX, endY } ) => {
-					const touchStart = new TouchEvent( 'touchstart', {
-						bubbles: true,
-						cancelable: true,
-						touches: [
-							new Touch( {
-								identifier: 0,
-								target: element,
-								clientX: startX,
-								clientY: startY,
-							} ),
-						],
-					} );
-
-					const touchMove = new TouchEvent( 'touchmove', {
-						bubbles: true,
-						cancelable: true,
-						touches: [
-							new Touch( {
-								identifier: 0,
-								target: element,
-								clientX: endX,
-								clientY: endY,
-							} ),
-						],
-					} );
-
-					const touchEnd = new TouchEvent( 'touchend', {
-						bubbles: true,
-						cancelable: true,
-						touches: [],
-					} );
-
-					element.dispatchEvent( touchStart );
-					element.dispatchEvent( touchMove );
-					element.dispatchEvent( touchEnd );
-				},
-				{
-					startX: swipeStartX,
-					startY: swipeStartY,
-					endX: swipeEndX,
-					endY: swipeEndY,
-				}
+			const scroller = viewerBlock.locator(
+				'.wc-block-product-gallery-large-image__container'
 			);
+			await expect
+				.poll( () =>
+					scroller.evaluate( ( element ) => element.scrollLeft )
+				)
+				.toBeGreaterThan( 0 );
+			const imageIds = await pageObject.getVisibleViewerImageIds();
+			await expect
+				.poll( () => pageObject.getActiveThumbnailImageId() )
+				.toEqual( imageIds[ 1 ] );
+			await session.send( 'Input.dispatchTouchEvent', {
+				type: 'touchEnd',
+				touchPoints: [],
+			} );
+			await session.detach();
 
 			// Verify dialog is not opened
 			const dialog = page.locator( '.wc-block-product-gallery-dialog' );
@@ -304,7 +375,18 @@ test.describe( `${ blockData.name }`, () => {
 				const nextImageId = await pageObject.getViewerImageId();
 
 				expect( nextImageId ).not.toEqual( initialImageId );
+				expect( await pageObject.getActiveThumbnailImageId() ).toEqual(
+					nextImageId
+				);
 			} ).toPass( { timeout: 1_000 } );
+
+			await expect
+				.poll( () =>
+					scroller.evaluate( ( element ) =>
+						Math.abs( element.scrollLeft - element.clientWidth )
+					)
+				)
+				.toBeLessThan( 1 );
 		} );
 	} );
 } );

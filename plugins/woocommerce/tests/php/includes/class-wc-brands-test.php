@@ -13,9 +13,50 @@ declare( strict_types = 1);
 class WC_Brands_Test extends WC_Unit_Test_Case {
 
 	/**
+	 * The admin menu label must keep translating through the non-contextual `Brands` string.
+	 *
+	 * The menu label is the one label the taxonomy update deliberately keeps as `Brands`. Before the
+	 * update WordPress derived `menu_name` from `labels['name']`, i.e. `__( 'Brands', 'woocommerce' )`,
+	 * so existing translations and `gettext_woocommerce` customizations applied to it. This asserts that
+	 * contract by filtering the non-contextual string and confirming it still reaches `menu_name`, which
+	 * would fail if the label were registered with a context (`_x()` routes through
+	 * `gettext_with_context_woocommerce` and a different catalog entry instead).
+	 *
+	 * @testdox Product brand admin menu label keeps translating through the non-contextual `Brands` string.
+	 */
+	public function test_product_brand_menu_name_uses_non_contextual_brands_translation(): void {
+		$translate_brands = static function ( $translation, $text, $domain ) {
+			if ( 'woocommerce' === $domain && 'Brands' === $text ) {
+				return 'Translated brands';
+			}
+			return $translation;
+		};
+
+		add_filter( 'gettext_woocommerce', $translate_brands, 10, 3 );
+
+		try {
+			WC_Brands::init_taxonomy();
+			$taxonomy = get_taxonomy( 'product_brand' );
+
+			$this->assertInstanceOf( WP_Taxonomy::class, $taxonomy, 'The product brand taxonomy should be registered.' );
+			$this->assertSame(
+				'Translated brands',
+				$taxonomy->labels->menu_name,
+				'The admin menu label should keep resolving through the non-contextual `Brands` translation.'
+			);
+		} finally {
+			remove_filter( 'gettext_woocommerce', $translate_brands, 10 );
+
+			// Restore the taxonomy with its unfiltered labels so later tests are unaffected.
+			WC_Brands::init_taxonomy();
+		}
+	}
+
+	/**
 	 * Tear down test data.
 	 */
 	public function tearDown(): void {
+		$this->remove_added_uploads();
 		parent::tearDown();
 
 		// Clear term cache to prevent interference between tests.
@@ -63,6 +104,46 @@ class WC_Brands_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that `product_brand_thumbnails_description` shortcode clamps invalid `columns`
+	 * values instead of letting them reach the template raw.
+	 *
+	 * Regression test: `columns="0"` (or any non-numeric value) used to fall straight
+	 * through to the template, where `$index % $columns` and the width calculation
+	 * throw a ModuloByZeroError/DivisionByZeroError on PHP8.
+	 */
+	public function test_product_brand_thumbnails_description_shortcode_clamps_invalid_columns() {
+		$data            = $this->setup_brand_test_data();
+		$brands_instance = $data['brands_instance'];
+
+		$output = $brands_instance->output_product_brand_thumbnails_description( array( 'columns' => '0' ) );
+		$this->assertStringContainsString( 'columns-1', $output, 'columns="0" should be clamped to 1' );
+
+		$output = $brands_instance->output_product_brand_thumbnails_description( array( 'columns' => 'abc' ) );
+		$this->assertStringContainsString( 'columns-1', $output, 'Non-numeric columns should fall back to 1' );
+	}
+
+	/**
+	 * Test that `product_brand_thumbnails` shortcode clamps invalid `columns`
+	 * values instead of letting them reach the template raw.
+	 *
+	 * Regression test: `columns="0"` (or any non-numeric value) used to fall straight
+	 * through to the template, where modulo/width calculations throw a
+	 * ModuloByZeroError/DivisionByZeroError on PHP8.
+	 */
+	public function test_product_brand_thumbnails_shortcode_clamps_invalid_columns() {
+		$data            = $this->setup_brand_test_data();
+		$brands_instance = $data['brands_instance'];
+
+		// columns="0" should not throw a division-by-zero error.
+		$output = $brands_instance->output_product_brand_thumbnails( array( 'columns' => '0' ) );
+		$this->assertNotEmpty( $output, 'columns="0" should not produce empty output' );
+
+		// Non-numeric columns should not throw either.
+		$output = $brands_instance->output_product_brand_thumbnails( array( 'columns' => 'abc' ) );
+		$this->assertNotEmpty( $output, 'Non-numeric columns should not produce empty output' );
+	}
+
+	/**
 	 * Test that `product_brand_list` shortcode's `show_empty_brands` argument works as expected.
 	 */
 	public function test_product_brand_list_shortcode_with_show_empty_brands_arg() {
@@ -80,6 +161,54 @@ class WC_Brands_Test extends WC_Unit_Test_Case {
 		// Both brands are shown.
 		$this->assertStringContainsString( 'Full Brand', $output );
 		$this->assertStringContainsString( 'Empty Brand', $output );
+	}
+
+	/**
+	 * @testdox Product brand shortcode renders a valid image style.
+	 * @dataProvider product_brand_shortcode_dimension_provider
+	 *
+	 * @param array<string, string> $dimensions     Shortcode dimensions.
+	 * @param string|null           $expected_style Expected image style.
+	 */
+	public function test_product_brand_shortcode_renders_valid_image_style( array $dimensions, ?string $expected_style ): void {
+		$data = $this->setup_single_brand_shortcode_test_data();
+
+		$output = $data['brands_instance']->output_product_brand(
+			array_merge(
+				array( 'post_id' => $data['product']->get_id() ),
+				$dimensions
+			)
+		);
+		$image  = new WP_HTML_Tag_Processor( $output );
+
+		$this->assertTrue( $image->next_tag( array( 'tag_name' => 'img' ) ) );
+		$this->assertSame( $expected_style, $image->get_attribute( 'style' ) );
+	}
+
+	/**
+	 * Data provider for product brand shortcode dimensions.
+	 *
+	 * @return array<string, array{array<string, string>, string|null}>
+	 */
+	public function product_brand_shortcode_dimension_provider(): array {
+		return array(
+			'empty dimensions'            => array( array(), null ),
+			'numeric dimensions'          => array(
+				array(
+					'width'  => '123',
+					'height' => '567',
+				),
+				'width: 123px; height: 567px;',
+			),
+			'unit width with auto height' => array(
+				array( 'width' => '4rem' ),
+				'width: 4rem; height: auto;',
+			),
+			'unit height with auto width' => array(
+				array( 'height' => '50%' ),
+				'width: auto; height: 50%;',
+			),
+		);
 	}
 
 	/**
@@ -202,6 +331,20 @@ class WC_Brands_Test extends WC_Unit_Test_Case {
 			'empty_brand'         => $empty_brand,
 			'product'             => $product,
 		);
+	}
+
+	/**
+	 * Helper method to set up test data for single brand shortcode tests.
+	 *
+	 * @return array Contains brands instance, brand term IDs, and product ID.
+	 */
+	private function setup_single_brand_shortcode_test_data() {
+		$data         = $this->setup_brand_test_data();
+		$thumbnail_id = $this->factory->attachment->create_upload_object( DIR_TESTDATA . '/images/canola.jpg' );
+
+		update_term_meta( $data['brand_with_products']['term_id'], 'thumbnail_id', $thumbnail_id );
+
+		return $data;
 	}
 
 	/**

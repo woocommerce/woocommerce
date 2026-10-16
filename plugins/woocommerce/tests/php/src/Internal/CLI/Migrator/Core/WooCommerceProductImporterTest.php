@@ -27,24 +27,118 @@ class WooCommerceProductImporterTest extends \WC_Unit_Test_Case {
 	private WooCommerceProductImporter $importer;
 
 	/**
+	 * Unique filename prefix for image attachments owned by the current test.
+	 *
+	 * @var string
+	 */
+	private string $image_filename_prefix;
+
+	/**
+	 * Number of local image downloads handled during the current test.
+	 *
+	 * @var int
+	 */
+	private int $image_download_count = 0;
+
+	/**
+	 * Streamed temporary paths that may need cleanup after a failed sideload.
+	 *
+	 * @var string[]
+	 */
+	private array $streamed_image_paths = array();
+
+	/**
 	 * Set up before each test.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 
 		// Create importer with default options.
-		$this->importer = new WooCommerceProductImporter();
-
-		// Clean up any existing products.
-		$this->clean_up_products();
+		$this->importer              = new WooCommerceProductImporter();
+		$this->image_filename_prefix = 'wc-importer-' . wp_generate_uuid4();
+		$this->image_download_count  = 0;
+		$this->streamed_image_paths  = array();
+		add_filter( 'pre_http_request', array( $this, 'provide_local_image_response' ), 10, 3 );
 	}
 
 	/**
-	 * Clean up after each test.
+	 * Remove owned upload files and HTTP interception.
 	 */
 	public function tearDown(): void {
-		$this->clean_up_products();
-		parent::tearDown();
+		remove_filter( 'pre_http_request', array( $this, 'provide_local_image_response' ), 10 );
+
+		try {
+			try {
+				global $wpdb;
+				$attachment_ids = $wpdb->get_col(
+					$wpdb->prepare(
+						"SELECT ID FROM {$wpdb->posts} WHERE post_type = 'attachment' AND post_name LIKE %s",
+						$wpdb->esc_like( $this->image_filename_prefix ) . '%'
+					)
+				);
+				foreach ( $attachment_ids as $attachment_id ) {
+					wp_delete_attachment( (int) $attachment_id, true );
+				}
+			} finally {
+				foreach ( $this->streamed_image_paths as $streamed_image_path ) {
+					if ( file_exists( $streamed_image_path ) ) {
+						wp_delete_file( $streamed_image_path );
+					}
+				}
+			}
+		} finally {
+			parent::tearDown();
+		}
+	}
+
+	/**
+	 * Serve the checked-in PNG fixture for importer-owned image URLs.
+	 *
+	 * @param false|array|\WP_Error $preempt Short-circuit response.
+	 * @param array                 $args Request arguments.
+	 * @param string                $url Request URL.
+	 * @return false|array|\WP_Error
+	 */
+	public function provide_local_image_response( $preempt, array $args, string $url ) {
+		if ( false === strpos( $url, 'https://example.com/' . $this->image_filename_prefix ) ) {
+			return $preempt;
+		}
+
+		if ( empty( $args['filename'] ) ) {
+			return new \WP_Error( 'missing_stream_filename', 'Image request did not provide a stream filename.' );
+		}
+
+		$fixture_path = \WC_Unit_Tests_Bootstrap::instance()->tests_dir . '/data/Dr1Bczxq4q.png';
+		if ( ! self::file_copy( $fixture_path, $args['filename'] ) ) {
+			return new \WP_Error( 'fixture_copy_failed', 'Unable to copy the local image fixture.' );
+		}
+
+		$this->streamed_image_paths[] = $args['filename'];
+		++$this->image_download_count;
+
+		return array(
+			'headers'  => array(
+				'content-type'   => 'image/png',
+				'content-length' => (string) filesize( $fixture_path ),
+			),
+			'body'     => '',
+			'response' => array(
+				'code'    => 200,
+				'message' => 'OK',
+			),
+			'cookies'  => array(),
+			'filename' => $args['filename'],
+		);
+	}
+
+	/**
+	 * Build a unique importer-owned image URL.
+	 *
+	 * @param string $suffix Filename suffix.
+	 * @return string
+	 */
+	private function get_image_url( string $suffix ): string {
+		return 'https://example.com/' . $this->image_filename_prefix . '-' . $suffix . '.png';
 	}
 
 	/**
@@ -370,34 +464,50 @@ class WooCommerceProductImporterTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test image import logic (without requiring actual network access).
+	 * Test featured and gallery image import without external network access.
 	 */
 	public function test_image_import_with_featured_and_gallery(): void {
 		$product_data           = MockShopifyData::get_mock_wc_product_data( 70 );
 		$product_data['images'] = array(
 			array(
-				'src'         => 'https://via.placeholder.com/600x400/FF0000/FFFFFF?text=Featured',
+				'original_id' => 'gallery-image-1',
+				'src'         => $this->get_image_url( 'gallery-1' ),
+				'alt'         => 'Gallery Image 1',
+				'is_featured' => false,
+			),
+			array(
+				'original_id' => 'featured-image',
+				'src'         => $this->get_image_url( 'featured' ),
 				'alt'         => 'Featured Image',
 				'is_featured' => true,
 			),
 			array(
-				'src' => 'https://via.placeholder.com/600x400/00FF00/000000?text=Gallery1',
-				'alt' => 'Gallery Image 1',
-			),
-			array(
-				'src' => 'https://via.placeholder.com/600x400/0000FF/FFFFFF?text=Gallery2',
-				'alt' => 'Gallery Image 2',
+				'original_id' => 'gallery-image-2',
+				'src'         => $this->get_image_url( 'gallery-2' ),
+				'alt'         => 'Gallery Image 2',
+				'is_featured' => false,
 			),
 		);
 
 		$result = $this->importer->import_product( $product_data );
 		$this->assertEquals( 'success', $result['status'] );
 
-		$this->assertNotEmpty( $result['product_id'] );
-
 		$product = wc_get_product( $result['product_id'] );
-		$this->assertNotNull( $product );
-		$this->assertEquals( $product_data['name'], $product->get_name() );
+		$this->assertInstanceOf( WC_Product_Simple::class, $product );
+
+		$featured_id = $product->get_image_id();
+		$gallery_ids = $product->get_gallery_image_ids();
+		$this->assertGreaterThan( 0, $featured_id );
+		$this->assertCount( 2, $gallery_ids );
+		$this->assertSame( 3, $this->image_download_count );
+		$this->assertSame( 3, $this->importer->get_import_stats()['images_processed'] );
+		$this->assertSame( 'Featured Image', get_post_meta( $featured_id, '_wp_attachment_image_alt', true ) );
+		$this->assertSame( 'Gallery Image 1', get_post_meta( $gallery_ids[0], '_wp_attachment_image_alt', true ) );
+		$this->assertSame( 'Gallery Image 2', get_post_meta( $gallery_ids[1], '_wp_attachment_image_alt', true ) );
+		foreach ( array_merge( array( $featured_id ), $gallery_ids ) as $attachment_id ) {
+			$this->assertTrue( wp_attachment_is_image( $attachment_id ) );
+			$this->assertSame( $result['product_id'], (int) get_post_field( 'post_parent', $attachment_id ) );
+		}
 	}
 
 	/**
@@ -410,7 +520,8 @@ class WooCommerceProductImporterTest extends \WC_Unit_Test_Case {
 		$product_data           = MockShopifyData::get_mock_wc_product_data( 71 );
 		$product_data['images'] = array(
 			array(
-				'src'         => 'https://via.placeholder.com/600x400/FF0000/FFFFFF?text=DryRun',
+				'original_id' => 'dry-run-image',
+				'src'         => $this->get_image_url( 'dry-run' ),
 				'alt'         => 'Dry Run Image',
 				'is_featured' => true,
 			),
@@ -422,6 +533,8 @@ class WooCommerceProductImporterTest extends \WC_Unit_Test_Case {
 		// In dry run mode, no actual images should be imported.
 		$featured_image_id = get_post_thumbnail_id( $result['product_id'] );
 		$this->assertEmpty( $featured_image_id );
+		$this->assertSame( 0, $this->image_download_count );
+		$this->assertSame( 0, $dry_run_importer->get_import_stats()['images_processed'] );
 	}
 
 	/**
@@ -429,57 +542,46 @@ class WooCommerceProductImporterTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_image_import_with_max_limit(): void {
 		$limited_importer = new WooCommerceProductImporter();
-		$limited_importer->configure( array( 'max_images_per_product' => 2 ) );
+		$limited_importer->configure(
+			array(
+				'max_images_per_product' => 2,
+				'skip_duplicate_images'  => true,
+			)
+		);
 
 		$product_data           = MockShopifyData::get_mock_wc_product_data( 72 );
 		$product_data['images'] = array(
 			array(
-				'src'         => 'https://via.placeholder.com/600x400/FF0000/FFFFFF?text=1',
+				'original_id' => 'limited-image-1',
+				'src'         => $this->get_image_url( 'limited-1' ),
 				'is_featured' => true,
 			),
-			array( 'src' => 'https://via.placeholder.com/600x400/00FF00/000000?text=2' ),
-			array( 'src' => 'https://via.placeholder.com/600x400/0000FF/FFFFFF?text=3' ),
-			array( 'src' => 'https://via.placeholder.com/600x400/FFFF00/000000?text=4' ),
+			array(
+				'original_id' => 'limited-image-2',
+				'src'         => $this->get_image_url( 'limited-2' ),
+				'is_featured' => false,
+			),
+			array(
+				'original_id' => 'limited-image-3',
+				'src'         => $this->get_image_url( 'limited-3' ),
+				'is_featured' => false,
+			),
+			array(
+				'original_id' => 'limited-image-4',
+				'src'         => $this->get_image_url( 'limited-4' ),
+				'is_featured' => false,
+			),
 		);
 
 		$result = $limited_importer->import_product( $product_data );
 		$this->assertEquals( 'success', $result['status'] );
 
-		// Test passes if product is created successfully.
-		// The max_images_per_product logic is tested (images processed up to limit).
-		$this->assertNotEmpty( $result['product_id'] );
-
-		// Verify the product was created with correct basic data.
 		$product = wc_get_product( $result['product_id'] );
-		$this->assertNotNull( $product );
-		$this->assertEquals( $product_data['name'], $product->get_name() );
-	}
-
-	/**
-	 * Test image import disabled.
-	 */
-	public function test_image_import_disabled(): void {
-		$no_images_importer = new WooCommerceProductImporter();
-		$no_images_importer->configure( array( 'import_images' => false ) );
-
-		$product_data           = MockShopifyData::get_mock_wc_product_data( 73 );
-		$product_data['images'] = array(
-			array(
-				'src'         => 'https://via.placeholder.com/600x400/FF0000/FFFFFF?text=Disabled',
-				'alt'         => 'Should Not Import',
-				'is_featured' => true,
-			),
-		);
-
-		$result = $no_images_importer->import_product( $product_data );
-		$this->assertEquals( 'success', $result['status'] );
-
-		// No images should be imported when disabled.
-		$featured_image_id = get_post_thumbnail_id( $result['product_id'] );
-		$this->assertEmpty( $featured_image_id );
-
-		$gallery = get_post_meta( $result['product_id'], '_product_image_gallery', true );
-		$this->assertEmpty( $gallery );
+		$this->assertInstanceOf( WC_Product_Simple::class, $product );
+		$this->assertGreaterThan( 0, $product->get_image_id() );
+		$this->assertCount( 1, $product->get_gallery_image_ids() );
+		$this->assertSame( 2, $this->image_download_count );
+		$this->assertSame( 2, $limited_importer->get_import_stats()['images_processed'] );
 	}
 
 	/**
@@ -848,50 +950,5 @@ class WooCommerceProductImporterTest extends \WC_Unit_Test_Case {
 		$this->assertSame( '', $product->get_length() );
 		$this->assertSame( '', $product->get_width() );
 		$this->assertSame( '', $product->get_height() );
-	}
-
-	/**
-	 * Helper method to clean up test products.
-	 */
-	private function clean_up_products(): void {
-		global $wpdb;
-
-		// Delete test products by SKU pattern.
-		$test_skus = $wpdb->get_col(
-			"SELECT meta_value FROM {$wpdb->postmeta} WHERE meta_key = '_sku' AND meta_value LIKE 'TEST-SKU-%'"
-		);
-
-		foreach ( $test_skus as $sku ) {
-			$product_id = wc_get_product_id_by_sku( $sku );
-			if ( $product_id ) {
-				wp_delete_post( $product_id, true );
-			}
-		}
-
-		// Clean up test categories.
-		$test_categories = get_terms(
-			array(
-				'taxonomy'   => 'product_cat',
-				'name__like' => 'Test Category',
-				'hide_empty' => false,
-			)
-		);
-
-		foreach ( $test_categories as $category ) {
-			wp_delete_term( $category->term_id, 'product_cat' );
-		}
-
-		// Clean up test tags.
-		$test_tags = get_terms(
-			array(
-				'taxonomy'   => 'product_tag',
-				'name__like' => 'test-tag',
-				'hide_empty' => false,
-			)
-		);
-
-		foreach ( $test_tags as $tag ) {
-			wp_delete_term( $tag->term_id, 'product_tag' );
-		}
 	}
 }

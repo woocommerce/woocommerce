@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Prepare Marketplace JSX and ref types for React 19 compatibility.

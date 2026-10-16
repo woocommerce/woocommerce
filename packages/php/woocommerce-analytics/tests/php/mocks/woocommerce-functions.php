@@ -54,3 +54,25 @@ if ( ! function_exists( 'WC' ) ) {
 		};
 	}
 }
+
+if ( ! function_exists( 'is_cart' ) ) {
+	/**
+	 * Mock is_cart function.
+	 *
+	 * @return bool Always false; tests exercise generic front-end pages.
+	 */
+	function is_cart() {
+		return false;
+	}
+}
+
+if ( ! function_exists( 'is_account_page' ) ) {
+	/**
+	 * Mock is_account_page function.
+	 *
+	 * @return bool Always false; tests exercise generic front-end pages.
+	 */
+	function is_account_page() {
+		return false;
+	}
+}

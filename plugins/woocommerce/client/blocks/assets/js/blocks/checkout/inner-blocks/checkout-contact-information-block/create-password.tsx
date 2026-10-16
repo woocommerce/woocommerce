@@ -25,7 +25,7 @@ const CreatePassword = () => {
 			return;
 		}
 		if ( passwordStrength < 2 ) {
-			setValidationErrors( {
+			void setValidationErrors( {
 				'account-password': {
 					message: __(
 						'Please create a stronger password',
@@ -36,7 +36,7 @@ const CreatePassword = () => {
 			} );
 			return;
 		}
-		clearValidationError( 'account-password' );
+		void clearValidationError( 'account-password' );
 	}, [
 		clearValidationError,
 		customerPassword,
@@ -53,10 +53,10 @@ const CreatePassword = () => {
 			required={ true }
 			errorId={ 'account-password' }
 			onChange={ ( value: string ) => {
-				__internalSetCustomerPassword( value );
+				void __internalSetCustomerPassword( value );
 
 				if ( ! value ) {
-					setValidationErrors( {
+					void setValidationErrors( {
 						'account-password': {
 							message: __(
 								'Please enter a valid password',

@@ -113,4 +113,30 @@ describe( 'Address Autocomplete Component', () => {
 			} );
 		} );
 	} );
+
+	it( 'removes the autocomplete attribute instead of blanking it when the field has no hint', () => {
+		const { container } = render(
+			<AddressAutocomplete
+				addressType="billing"
+				onChange={ () => {} }
+				id="billing_address_1"
+			/>
+		);
+
+		const input = container.querySelector(
+			'#billing_address_1'
+		) as HTMLInputElement;
+
+		input.setAttribute( 'data-disable-autocomplete', 'on' );
+
+		return waitFor( () => {
+			expect( input.getAttribute( 'autocomplete' ) ).toBe( 'none' );
+		} ).then( () => {
+			input.setAttribute( 'data-disable-autocomplete', 'off' );
+
+			return waitFor( () => {
+				expect( input.hasAttribute( 'autocomplete' ) ).toBe( false );
+			} );
+		} );
+	} );
 } );

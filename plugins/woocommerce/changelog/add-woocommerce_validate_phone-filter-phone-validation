@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add woocommerce_validate_phone filter to allow customizing phone number validation

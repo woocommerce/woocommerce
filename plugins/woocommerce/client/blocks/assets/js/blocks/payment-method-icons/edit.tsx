@@ -55,16 +55,22 @@ const Edit = ( {
 	const { numberOfIcons } = attributes;
 
 	if ( paymentMethods && Object.keys( paymentMethods ).length > 0 ) {
-		const icons = Object.keys( paymentMethods ).reduce( ( acc, type ) => {
-			if ( ! paymentMethods[ type ] || ! paymentMethods[ type ].icon ) {
+		const icons = Object.keys( paymentMethods ).reduce(
+			( acc, type ) => {
+				if (
+					! paymentMethods[ type ] ||
+					! paymentMethods[ type ].icon
+				) {
+					return acc;
+				}
+				acc.push( {
+					type,
+					icon: paymentMethods[ type ].icon,
+				} );
 				return acc;
-			}
-			acc.push( {
-				type,
-				icon: paymentMethods[ type ].icon,
-			} );
-			return acc;
-		}, [] as Array< { type: string; icon: string } > );
+			},
+			[] as Array< { type: string; icon: string } >
+		);
 
 		const iconsToShow =
 			numberOfIcons === 0

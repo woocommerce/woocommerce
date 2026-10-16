@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Preserve percentage widths for email editor columns in previews and rendered emails.

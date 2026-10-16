@@ -23,7 +23,7 @@ interface WithSearchedProductProps {
  * A higher order component that enhances the provided component with products from a search query.
  */
 const withSearchedProducts = <
-	T extends Record< string, unknown > & WithSearchedProductProps
+	T extends Record< string, unknown > & WithSearchedProductProps,
 >(
 	OriginalComponent: React.ComponentType< T & WithInjectedSearchedProducts >
 ) => {

@@ -85,6 +85,7 @@ export const getDataAttrs = ( attributes ) => {
 	const {
 		categoryIds,
 		imageType,
+		offset,
 		orderby,
 		productId,
 		reviewsOnPageLoad,
@@ -101,6 +102,11 @@ export const getDataAttrs = ( attributes ) => {
 		'data-show-load-more': showLoadMore,
 		'data-show-orderby': showOrderby,
 	};
+
+	const normalizedOffset = Number( offset );
+	if ( Number.isInteger( normalizedOffset ) && normalizedOffset > 0 ) {
+		data[ 'data-offset' ] = normalizedOffset;
+	}
 
 	if ( productId ) {
 		data[ 'data-product-id' ] = productId;

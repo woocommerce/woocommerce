@@ -1,14 +1,16 @@
 ---
 post_title: Registering settings UI components
-sidebar_label: Settings UI components
-sidebar_position: 6
+sidebar_label: Register settings UI components
+sidebar_position: 8
 ---
 
 # Registering settings UI components
 
-Use custom components when a WooCommerce settings field needs plugin-specific React UI that cannot be represented by a native field type.
+> **The settings UI is experimental** and subject to change. See the [settings UI status](./settings-ui.md#status) for details.
 
-For most fields, prefer the native renderer. Custom components are best for specialized selectors, previews, or validation flows.
+Use custom components when a WooCommerce settings field needs plugin-specific React UI that cannot be represented by a built-in DataForm field type.
+
+For most fields, prefer DataForm's built-in controls. Custom components are best for specialized selectors, previews, or validation flows.
 
 ## PHP field metadata
 
@@ -52,49 +54,58 @@ Registrations are scoped by settings page and, optionally, by section. This prev
 
 ## Component props
 
-Custom components receive stable field props:
+Custom components receive a stable subset of the DataForm edit-control props:
 
 ```ts
-type SettingsFieldComponentProps = {
+type SettingsEditControlProps = {
+	data: Record< string, string | number | boolean | string[] | null >;
 	field: {
 		id: string;
-		label: string;
-		type: string;
-		description?: string;
-		value?: string | number | boolean | string[] | null;
-		options?: Array< { label: string; value: string } >;
-		component?: string;
+		label?: string;
+		description?: string | JSX.Element;
 		placeholder?: string;
-		disabled?: boolean;
-		customAttributes?: Record< string, string | number | boolean >;
+		elements?: Array< { label: string; value: string } >;
+		getValue: ( args: {
+			item: Record< string, string | number | boolean | string[] | null >;
+		} ) => string | number | boolean | string[] | null;
+		isDisabled: ( args: {
+			item: Record< string, string | number | boolean | string[] | null >;
+		} ) => boolean;
 	};
-	value: string | number | boolean | string[] | null;
-	onChange: ( value: string | number | boolean | string[] | null ) => void;
-	context: {
-		page: string;
-		section?: string;
-	};
+	onChange: (
+		value: Partial<
+			Record< string, string | number | boolean | string[] | null >
+		>
+	) => void;
+	hideLabelFromVision?: boolean;
 };
 ```
 
-Call `onChange()` with the next field value. The settings UI handles hidden input serialization for the field's save adapter.
+Read the current value with `field.getValue( { item: data } )`. Call
+`onChange()` with an object containing the changed field value. The settings UI
+handles hidden input serialization for the field's save adapter.
+
+Check `field.isDisabled( { item: data } )` and render the control disabled when
+it returns `true`. DataForm applies the disabled state to its own controls only,
+so a registered component has to honor it itself.
 
 ## Example component
 
 ```tsx
-import type { SettingsFieldComponentProps } from '@woocommerce/settings-ui';
+import type { SettingsEditControlProps } from '@woocommerce/settings-ui';
 
 export const PaymentMethodPicker = ( {
+	data,
 	field,
-	value,
 	onChange,
-}: SettingsFieldComponentProps ) => {
+}: SettingsEditControlProps ) => {
+	const value = field.getValue( { item: data } );
 	const selectedValues = Array.isArray( value ) ? value : [];
 
 	return (
 		<fieldset>
 			<legend>{ field.label }</legend>
-			{ field.options?.map( ( option ) => {
+			{ field.elements?.map( ( option ) => {
 				const checked = selectedValues.includes( option.value );
 
 				return (
@@ -103,14 +114,14 @@ export const PaymentMethodPicker = ( {
 							type="checkbox"
 							checked={ checked }
 							onChange={ () => {
-								onChange(
-									checked
+								onChange( {
+									[ field.id ]: checked
 										? selectedValues.filter(
 												( item ) =>
 													item !== option.value
 										  )
-										: [ ...selectedValues, option.value ]
-								);
+										: [ ...selectedValues, option.value ],
+								} );
 							} }
 						/>
 						{ option.label }
@@ -154,12 +165,18 @@ registerSettingsExtension( {
 } );
 ```
 
+The PHP schema validator accepts extension-defined field types when their values use the Settings UI value contract. The extension script must register the matching renderer before the page mounts.
+
 Resolution order is:
 
 1. `field.component`
 2. `fieldOverrides[ field.id ]`
 3. `typeRenderers[ field.type ]`
-4. Native field renderer
+4. DataForm's built-in control
+
+If one registry entry is missing, resolution continues to the next registry entry. When a field declares `field.component`, that metadata states that a custom control is required. If no named component, field override, or type renderer resolves it, the page fails closed instead of silently replacing the required control with a built-in one.
+
+For a field without `field.component`, DataForm's built-in control for the field type is the final fallback after field overrides and type renderers. A field type with no registered renderer and no built-in control fails closed.
 
 ## Enqueue the component script
 
@@ -194,3 +211,9 @@ final class My_Plugin_Settings_UI_Page extends LegacySettingsPageAdapter {
 ```
 
 WooCommerce loads the settings UI package first, then your script, then mounts the settings app.
+
+## Failure and fallback behavior
+
+WooCommerce validates server-observable schema metadata and declared script handles before rendering the Settings UI mount. An invalid schema or a script handle that is not registered and enqueued renders the complete classic settings page in the same response.
+
+PHP cannot inspect the component registry in the browser. The Settings UI fails closed when an explicitly required component has no registry fallback, when a field without an explicit component has no registered or built-in control, or when a component throws while rendering. It renders no editable fallback control and no Save action. The error notice offers a **Use classic settings** action that reloads the same page and section with `wc_settings_ui=classic` for that request. The action does not disable the feature flag, persist a preference, or reload automatically.

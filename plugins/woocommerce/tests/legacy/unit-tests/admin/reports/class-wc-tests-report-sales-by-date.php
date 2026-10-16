@@ -13,21 +13,41 @@ use Automattic\WooCommerce\Enums\OrderStatus;
 class WC_Tests_Report_Sales_By_Date extends WC_Unit_Test_Case {
 
 	/**
+	 * Thousands separator to restore after a test overrides it.
+	 *
+	 * @var string|null
+	 */
+	private $original_thousands_sep = null;
+
+	/**
+	 * Counts to give the report through the woocommerce_admin_report_data filter.
+	 *
+	 * @var array
+	 */
+	private $report_counts = array();
+
+	/**
 	 * Load the necessary files, as they're not automatically loaded by WooCommerce.
 	 */
 	public static function setUpBeforeClass(): void {
+		parent::setUpBeforeClass();
+
 		include_once WC_Unit_Tests_Bootstrap::instance()->plugin_dir . '/includes/admin/reports/class-wc-admin-report.php';
 		include_once WC_Unit_Tests_Bootstrap::instance()->plugin_dir . '/includes/admin/reports/class-wc-report-sales-by-date.php';
 	}
 
 	/**
-	 * Set up the test.
+	 * Tear down the test.
 	 */
-	public function setUp(): void {
-		parent::setUp();
-		if ( \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled() ) {
-			$this->markTestSkipped( 'This test is not compatible with the custom orders table.' );
+	public function tearDown(): void {
+		global $wp_locale;
+
+		if ( null !== $this->original_thousands_sep ) {
+			$wp_locale->number_format['thousands_sep'] = $this->original_thousands_sep;
+			$this->original_thousands_sep              = null;
 		}
+
+		parent::tearDown();
 	}
 
 	/**
@@ -43,6 +63,10 @@ class WC_Tests_Report_Sales_By_Date extends WC_Unit_Test_Case {
 	 * Test: get_report_data
 	 */
 	public function test_get_report_data() {
+		if ( \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$this->markTestSkipped( 'This test is not compatible with the custom orders table.' );
+		}
+
 		update_option( 'woocommerce_default_customer_address', 'base' );
 		update_option( 'woocommerce_tax_based_on', 'base' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
@@ -156,5 +180,138 @@ class WC_Tests_Report_Sales_By_Date extends WC_Unit_Test_Case {
 		$this->assertEquals( 0, $data->total_shipping_refunded );
 		$this->assertEquals( 0, $data->total_shipping_tax_refunded );
 		$this->assertEquals( 0, $data->total_refunded_orders );
+	}
+
+	/**
+	 * @testdox Should format chart legend counts with the locale thousands separator.
+	 *
+	 * @dataProvider provide_legend_counts
+	 *
+	 * @param array    $counts   Counts to give the report.
+	 * @param string[] $expected Strings the legend should contain.
+	 */
+	public function test_get_chart_legend_formats_counts_with_locale_separator( $counts, $expected ) {
+		global $wp_locale;
+
+		$this->original_thousands_sep              = $wp_locale->number_format['thousands_sep'];
+		$wp_locale->number_format['thousands_sep'] = '.';
+
+		$this->report_counts = $counts;
+		add_filter( 'woocommerce_admin_report_data', array( $this, 'set_report_counts' ) );
+
+		$report                 = new WC_Report_Sales_By_Date();
+		$report->chart_colours  = array_fill_keys(
+			array( 'sales_amount', 'average', 'net_sales_amount', 'net_average', 'order_count', 'item_count', 'refund_amount', 'shipping_amount', 'coupon_amount' ),
+			'#000000'
+		);
+		$report->start_date     = strtotime( '-1 month' );
+		$report->end_date       = time();
+		$report->chart_groupby  = 'day';
+		$report->group_by_query = 'YEAR(posts.post_date), MONTH(posts.post_date), DAY(posts.post_date)';
+
+		$legend = implode( ' ', wp_list_pluck( $report->get_chart_legend(), 'title' ) );
+
+		foreach ( $expected as $needle ) {
+			$this->assertStringContainsString( $needle, $legend, 'Legend counts should use the locale thousands separator.' );
+		}
+	}
+
+	/**
+	 * Counts to render the legend with, and the strings they should produce.
+	 *
+	 * The refund line is a _n() string, so it needs a case for each form.
+	 *
+	 * @return array[]
+	 */
+	public function provide_legend_counts() {
+		return array(
+			'plural refunds'  => array(
+				array(
+					'total_orders'          => 12345,
+					'total_items'           => 67890,
+					'total_refunded_orders' => 1234,
+					'refunded_order_items'  => 5678,
+				),
+				array(
+					'<strong>12.345</strong> orders placed',
+					'<strong>67.890</strong> items purchased',
+					'refunded 1.234 orders (5.678 items)',
+				),
+			),
+			'singular refund' => array(
+				array(
+					'total_orders'          => 1000,
+					'total_items'           => 2000,
+					'total_refunded_orders' => 1,
+					'refunded_order_items'  => 1500,
+				),
+				array(
+					'<strong>1.000</strong> orders placed',
+					'<strong>2.000</strong> items purchased',
+					'refunded 1 order (1.500 item)',
+				),
+			),
+		);
+	}
+
+	/**
+	 * Give the report the counts the running test needs.
+	 *
+	 * @param stdClass $data Report data.
+	 * @return stdClass
+	 */
+	public function set_report_counts( $data ) {
+		foreach ( $this->report_counts as $key => $value ) {
+			$data->$key = $value;
+		}
+
+		return $data;
+	}
+
+	/**
+	 * @testdox The rendered sales chart preserves filtered currency symbols in valid JavaScript strings.
+	 */
+	public function test_main_chart_encodes_filtered_currency_symbols(): void {
+		$currency_symbol = "'\"\\</script>€雪";
+		$currency_pos    = get_option( 'woocommerce_currency_pos', null );
+		$filter          = static function () use ( $currency_symbol ): string {
+			return $currency_symbol;
+		};
+		$report          = new WC_Report_Sales_By_Date();
+		$report->calculate_current_range( '7day' );
+		$report->get_report_data();
+		$report->chart_colours = array(
+			'sales_amount'     => '#b1d4ea',
+			'net_sales_amount' => '#3498db',
+			'average'          => '#b1d4ea',
+			'net_average'      => '#3498db',
+			'order_count'      => '#dbe1e3',
+			'item_count'       => '#ecf0f1',
+			'shipping_amount'  => '#5cc488',
+			'coupon_amount'    => '#f1c40f',
+			'refund_amount'    => '#e74c3c',
+		);
+
+		update_option( 'woocommerce_currency_pos', 'left' );
+		add_filter( 'woocommerce_currency_symbol', $filter );
+		ob_start();
+		try {
+			$report->get_main_chart();
+			$output = (string) ob_get_contents();
+		} finally {
+			ob_end_clean();
+			remove_filter( 'woocommerce_currency_symbol', $filter );
+			if ( null === $currency_pos ) {
+				delete_option( 'woocommerce_currency_pos' );
+			} else {
+				update_option( 'woocommerce_currency_pos', $currency_pos );
+			}
+		}
+
+		$this->assertSame( 1, substr_count( $output, '</script>' ) );
+		$this->assertSame( 5, preg_match_all( '/prepend_tooltip:\s*("(?:\\\\.|[^"\\\\])*")/', $output, $matches ) );
+		foreach ( $matches[1] as $encoded_symbol ) {
+			$this->assertSame( $currency_symbol, json_decode( $encoded_symbol, true, 512, JSON_THROW_ON_ERROR ) );
+		}
 	}
 }

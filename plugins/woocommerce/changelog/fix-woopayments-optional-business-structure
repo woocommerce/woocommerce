@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Hide unnecessary WooPayments business structure selection during onboarding.

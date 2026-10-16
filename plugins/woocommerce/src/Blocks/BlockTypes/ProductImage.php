@@ -46,12 +46,10 @@ class ProductImage extends AbstractBlock {
 	private function parse_attributes( $attributes ) {
 		// These should match what's set in JS `registerBlockType`.
 		$defaults = array(
-			'showProductLink'                  => true,
-			'imageSizing'                      => 'single',
-			'productId'                        => 'number',
-			'isDescendentOfQueryLoop'          => 'false',
-			'isDescendentOfSingleProductBlock' => 'false',
-			'scale'                            => 'cover',
+			'showProductLink' => true,
+			'imageSizing'     => 'single',
+			'productId'       => 'number',
+			'scale'           => 'cover',
 		);
 
 		return wp_parse_args( $attributes, $defaults );
@@ -105,8 +103,17 @@ class ProductImage extends AbstractBlock {
 
 		$is_link = isset( $attributes['showProductLink'] ) ? $attributes['showProductLink'] : true;
 
+		$padding_styles = wp_style_engine_get_styles(
+			array(
+				'spacing' => array(
+					'padding' => $attributes['style']['spacing']['padding'] ?? null,
+				),
+			)
+		);
+
 		$inner_blocks_container = sprintf(
-			'<div class="wc-block-components-product-image__inner-container">%s</div>',
+			'<div class="wc-block-components-product-image__inner-container" style="%1$s">%2$s</div>',
+			esc_attr( isset( $padding_styles['css'] ) ? $padding_styles['css'] : '' ),
 			$inner_blocks_content
 		);
 
@@ -260,7 +267,72 @@ class ProductImage extends AbstractBlock {
 			$attr['loading'] = $loading_attr;
 		}
 
-		return $provided_image_id_is_valid ? wp_get_attachment_image( $image_id, $image_size, false, $attr ) : $product->get_image( $image_size, $attr );
+		$srcset_aspect_ratio = $aspect_ratio;
+		if ( is_numeric( $srcset_aspect_ratio ) ) {
+			$srcset_aspect_ratio = (string) $srcset_aspect_ratio . '/1';
+		}
+
+		$adjust_srcset = function ( $sources, $size_array, $image_src, $image_meta ) use ( $srcset_aspect_ratio ) {
+			if (
+				! is_string( $srcset_aspect_ratio ) ||
+				! is_array( $sources ) ||
+				! is_array( $image_meta ) ||
+				! isset( $image_meta['width'], $image_meta['height'] ) ||
+				! is_numeric( $image_meta['width'] ) ||
+				! is_numeric( $image_meta['height'] ) ||
+				$image_meta['width'] <= 0 ||
+				$image_meta['height'] <= 0
+			) {
+				return $sources;
+			}
+
+			$aspect_ratio_parts = explode( '/', $srcset_aspect_ratio );
+
+			if (
+				count( $aspect_ratio_parts ) !== 2 ||
+				! is_numeric( $aspect_ratio_parts[0] ) ||
+				! is_numeric( $aspect_ratio_parts[1] ) ||
+				$aspect_ratio_parts[0] <= 0 ||
+				$aspect_ratio_parts[1] <= 0
+			) {
+				return $sources;
+			}
+
+			$block_aspect_ratio = $aspect_ratio_parts[0] / $aspect_ratio_parts[1];
+			$image_aspect_ratio = $image_meta['width'] / $image_meta['height'];
+
+			if ( $image_aspect_ratio > $block_aspect_ratio ) {
+				$stretch_factor = $image_aspect_ratio / $block_aspect_ratio;
+
+				foreach ( $sources as $key => $source ) {
+					if ( ! is_array( $source ) || ! isset( $source['value'] ) || ! is_numeric( $source['value'] ) ) {
+						continue;
+					}
+					$sources[ $key ]['value'] = max( 1, (int) round( $source['value'] / $stretch_factor ) );
+				}
+			}
+
+			return $sources;
+		};
+
+		$maybe_adjust_srcset =
+			'cover' === $attributes['scale'] &&
+			is_string( $srcset_aspect_ratio ) &&
+			false !== strpos( $srcset_aspect_ratio, '/' );
+
+		if ( $maybe_adjust_srcset ) {
+			add_filter( 'wp_calculate_image_srcset', $adjust_srcset, 10, 4 );
+		}
+
+		try {
+			$image_html = $provided_image_id_is_valid ? wp_get_attachment_image( $image_id, $image_size, false, $attr ) : $product->get_image( $image_size, $attr );
+		} finally {
+			if ( $maybe_adjust_srcset ) {
+				remove_filter( 'wp_calculate_image_srcset', $adjust_srcset, 10 );
+			}
+		}
+
+		return $image_html;
 	}
 
 	/**
@@ -285,7 +357,7 @@ class ProductImage extends AbstractBlock {
 	 */
 	protected function render( $attributes, $content, $block ) {
 		$parsed_attributes     = $this->parse_attributes( $attributes );
-		$classes_and_styles    = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
+		$classes_and_styles    = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes', 'padding' ) );
 		$post_id               = isset( $block->context['postId'] ) ? $block->context['postId'] : '';
 		$image_id              = isset( $block->context['imageId'] ) ? (int) $block->context['imageId'] : null;
 		$product               = wc_get_product( $post_id );

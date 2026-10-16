@@ -66,6 +66,16 @@ test.describe( 'Add variable product', { tag: tags.GUTENBERG }, () => {
 			} );
 
 		if ( tourWasDisplayed ) {
+			// Start listening before the click — the save can complete before
+			// the click call returns, and a listener registered afterwards
+			// would never see it.
+			const savePromise = page.waitForResponse(
+				( response ) =>
+					response.url().includes( '/users/' ) &&
+					response.request().method() !== 'GET' &&
+					response.ok()
+			);
+
 			await test.step( 'Tour was displayed, so dismiss it.', async () => {
 				await page
 					.getByRole( 'button', { name: 'Close Tour' } )
@@ -73,11 +83,7 @@ test.describe( 'Add variable product', { tag: tags.GUTENBERG }, () => {
 			} );
 
 			await test.step( "Wait for the tour's dismissal to be saved", async () => {
-				await page.waitForResponse(
-					( response ) =>
-						response.url().includes( '/users/' ) &&
-						response.status() === 200
-				);
+				await savePromise;
 			} );
 		}
 

@@ -21,6 +21,15 @@ if ( ! class_exists( 'WC_REST_Orders_Controller_Tests' ) ) {
  * Test for REST support in the OrdersTableDataStore class.
  */
 class OrdersTableDataStoreRestOrdersControllerTests extends \WC_REST_Orders_Controller_Tests {
+	/**
+	 * Ensure permanent HPOS tables exist before per-test transactions start.
+	 *
+	 * @param \WP_UnitTest_Factory $factory WordPress unit test factory.
+	 */
+	public static function wpSetUpBeforeClass( $factory ): void {
+		parent::wpSetUpBeforeClass( $factory );
+		self::setup_cot_tables();
+	}
 
 	/**
 	 * Initializes system under test.
@@ -33,8 +42,6 @@ class OrdersTableDataStoreRestOrdersControllerTests extends \WC_REST_Orders_Cont
 		// Remove the Test Suite’s use of temporary tables https://wordpress.stackexchange.com/a/220308.
 		remove_filter( 'query', array( $this, '_create_temporary_tables' ) );
 		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
-		OrderHelper::delete_order_custom_tables();
-		OrderHelper::create_order_custom_table_if_not_exist();
 
 		$this->toggle_cot_feature_and_usage( true );
 	}
@@ -49,9 +56,9 @@ class OrdersTableDataStoreRestOrdersControllerTests extends \WC_REST_Orders_Cont
 		add_filter( 'query', array( $this, '_create_temporary_tables' ) );
 		add_filter( 'query', array( $this, '_drop_temporary_tables' ) );
 
-		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
-
 		parent::tearDown();
+
+		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
 	}
 
 	/**

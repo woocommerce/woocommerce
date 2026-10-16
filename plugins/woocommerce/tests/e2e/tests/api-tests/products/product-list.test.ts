@@ -215,12 +215,10 @@ test.describe( 'Products API tests: List All Products', () => {
 				'Vestibulum tortor quam, feugiat vitae, ultricies eget, tempor sit amet, ante. Donec eu libero sit amet quam egestas semper. ' +
 				'Aenean ultricies mi vitae est. Mauris placerat eleifend leo.</p>\n';
 
-			const { source_url: downloadFile } = await getMediaBySlug(
-				'image-01'
-			);
-			const { source_url: downloadFile2 } = await getMediaBySlug(
-				'image-02'
-			);
+			const { source_url: downloadFile } =
+				await getMediaBySlug( 'image-01' );
+			const { source_url: downloadFile2 } =
+				await getMediaBySlug( 'image-02' );
 
 			//const { body: simpleProducts } = await createProducts( [
 			const simpleProducts = await request.post(
@@ -1994,16 +1992,6 @@ test.describe( 'Products API tests: List All Products', () => {
 			);
 			const review1JSON = await review1.json();
 
-			// We need to update the review in order for the product's
-			// average_rating to be recalculated.
-			// See: https://github.com/woocommerce/woocommerce/issues/29906.
-			await request.post(
-				`./wp-json/wc/v3/products/reviews/${ review1JSON.id }`,
-				{
-					data: {},
-				}
-			);
-
 			const review2 = await request.post(
 				'./wp-json/wc/v3/products/reviews',
 				{
@@ -2018,13 +2006,6 @@ test.describe( 'Products API tests: List All Products', () => {
 			);
 			const review2JSON = await review2.json();
 
-			await request.post(
-				`./wp-json/wc/v3/products/reviews/${ review2JSON.id }`,
-				{
-					data: {},
-				}
-			);
-
 			const review3 = await request.post(
 				'./wp-json/wc/v3/products/reviews',
 				{
@@ -2038,13 +2019,6 @@ test.describe( 'Products API tests: List All Products', () => {
 				}
 			);
 			const review3JSON = await review3.json();
-
-			await request.post(
-				`./wp-json/wc/v3/products/reviews/${ review3JSON.id }`,
-				{
-					data: {},
-				}
-			);
 
 			return [ review1JSON.id, review2JSON.id, review3JSON.id ];
 		};
@@ -2100,12 +2074,10 @@ test.describe( 'Products API tests: List All Products', () => {
 				attributes,
 				tags
 			);
-			const externalProducts = await createSampleExternalProducts(
-				categories
-			);
-			const groupedProducts = await createSampleGroupedProduct(
-				categories
-			);
+			const externalProducts =
+				await createSampleExternalProducts( categories );
+			const groupedProducts =
+				await createSampleGroupedProduct( categories );
 			const variableProducts = await createSampleVariableProducts(
 				categories,
 				attributes
@@ -2113,9 +2085,8 @@ test.describe( 'Products API tests: List All Products', () => {
 			const hierarchicalProducts =
 				await createSampleHierarchicalProducts();
 
-			const reviewIds = await createSampleProductReviews(
-				simpleProducts
-			);
+			const reviewIds =
+				await createSampleProductReviews( simpleProducts );
 			const orders = await createSampleProductOrders( simpleProducts );
 
 			return {

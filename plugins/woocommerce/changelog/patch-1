@@ -1,4 +1,0 @@
-Significance: patch
-Type: enhancement
-
-Add unique CSS classes to the order data meta-box columns: order_data_column_general, order_data_column_billing, and order_data_column_shipping.

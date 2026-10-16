@@ -11,8 +11,22 @@ use Automattic\WooCommerce\Blueprint\UseWPFunctions;
 /**
  * Processes SQL execution steps in the Blueprint.
  *
- * Handles the execution of SQL queries with safety checks to prevent
- * unauthorized modifications to sensitive WordPress data.
+ * This step executes SQL supplied by the imported file against the site's
+ * database. Importing a Blueprint that contains it is equivalent to letting the
+ * author of that file run queries on the store, and the only access control is
+ * check_step_capabilities() below.
+ *
+ * The checks in this class inspect the query as text, so they cannot decide what
+ * a statement will actually do: the same write can be expressed in forms the
+ * patterns here do not match. They exist to catch mistakes and casual misuse and
+ * must not be relied on as a security boundary — do not extend them in the
+ * belief that enough patterns will make them one.
+ *
+ * The boundary is the decision to import the file. That decision is where the
+ * control belongs, so the import screen lists what a Blueprint will do —
+ * including how many queries it runs — before any step executes, and states that
+ * a Blueprint should only be imported from a trusted source. Anything that
+ * weakens that disclosure weakens the actual protection here.
  *
  * @package Automattic\WooCommerce\Blueprint\Importers
  */
@@ -35,10 +49,11 @@ class ImportRunSql implements StepProcessor {
 	/**
 	 * Process the SQL execution step.
 	 *
-	 * Validates and executes the SQL query while ensuring:
-	 * 1. Only allowed query types are executed
-	 * 2. No modifications to admin users or roles
-	 * 3. No unauthorized changes to user capabilities
+	 * Runs the text-level checks — statement type, comment patterns, injection
+	 * patterns, protected tables and capability-related option rows — and then
+	 * executes the query in a transaction. See the class docblock for what those
+	 * checks are and are not: they reject recognisable misuse, they do not
+	 * constrain a determined author of the imported file.
 	 *
 	 * @param object $schema The schema containing the SQL query to execute.
 	 * @return StepProcessorResult The result of the SQL execution.

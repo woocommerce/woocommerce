@@ -77,7 +77,7 @@ export const Plugins = ( { nextStep, pluginsToActivate }: Props ) => {
 							install_extensions: true,
 						}
 					);
-					updateOptions( {
+					void updateOptions( {
 						woocommerce_setup_jetpack_opted_in: true,
 					} );
 					nextStep();

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Allow users with the `view_woocommerce_reports` capability to access the Analytics Leaderboards REST endpoint and view leaderboard data.

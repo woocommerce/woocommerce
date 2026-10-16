@@ -11,6 +11,24 @@ use Automattic\WooCommerce\Internal\StockNotifications\Factory;
  */
 class FactoryTests extends \WC_Unit_Test_Case {
 
+	use StockNotificationsFeatureTrait;
+
+	/**
+	 * Set up the test.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+		$this->enable_stock_notifications_feature();
+	}
+
+	/**
+	 * Tear down the test.
+	 */
+	public function tearDown(): void {
+		$this->restore_stock_notifications_feature_option();
+		parent::tearDown();
+	}
+
 	/**
 	 * Test the factory.
 	 */

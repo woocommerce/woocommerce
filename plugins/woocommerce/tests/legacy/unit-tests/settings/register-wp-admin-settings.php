@@ -53,6 +53,24 @@ class WC_Tests_Register_WP_Admin_Settings extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @since 11.2.0
+	 * @covers WC_Register_WP_Admin_Settings::register
+	 */
+	public function test_register_is_idempotent() {
+		$settings = new WC_Register_WP_Admin_Settings( $this->page, 'page' );
+
+		$settings->register();
+		$settings->register();
+
+		$this->assertEquals( has_filter( 'woocommerce_settings_groups', array( $settings, 'register_page_group' ) ), 10 );
+
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Reading the registered groups under test.
+		$groups         = apply_filters( 'woocommerce_settings_groups', array() );
+		$page_group_ids = array_keys( array_column( $groups, 'id' ), $this->page->get_id(), true );
+		$this->assertCount( 1, $page_group_ids, 'Repeat register() calls should not duplicate the settings group.' );
+	}
+
+	/**
 	 * @since 3.0.0
 	 * @covers WC_Register_WP_Admin_Settings::register_page_group
 	 */

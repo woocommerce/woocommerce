@@ -3,10 +3,7 @@
  */
 import { Icon } from '@wordpress/components';
 import { heading } from '@wordpress/icons';
-import {
-	title,
-	description,
-} from '@woocommerce/atomic-blocks/product-elements/title/block.json';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -19,9 +16,12 @@ export const VARIATION_NAME = `${ blockJson.name }/product-title`;
 
 const registerProductTitle = () => {
 	registerElementVariation( CORE_NAME, {
-		blockDescription: description,
+		blockDescription: __(
+			'Display the title of a product.',
+			'woocommerce'
+		),
 		blockIcon: <Icon icon={ heading } />,
-		blockTitle: title,
+		blockTitle: __( 'Product Title', 'woocommerce' ),
 		variationName: VARIATION_NAME,
 		scope: [ 'block', 'inserter' ],
 	} );

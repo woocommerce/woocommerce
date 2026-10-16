@@ -22,7 +22,7 @@ Explore the [Store API](./store-api/README.md) documentation.
 
 ## Dual API (code + GraphQL, experimental)
 
-The dual API is an experimental, code-first API: you write plain PHP classes (the code API) and a build script generates a matching GraphQL endpoint from them. WooCommerce core ships its own dual API, and the underlying infrastructure can be reused by plugins to build their own.
+The dual API is an experimental, code-first API architecture: you write plain PHP classes (the code API) and a build script generates a matching GraphQL endpoint from them. The engine is provided by the WooCommerce Dual API plugin, and any plugin can use it to build its own dual API.
 
 Explore the [Dual API](./dual-api/README.md) documentation.
 

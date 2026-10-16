@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add the `woocommerce_variable_product_taxes_influence_price` filter.

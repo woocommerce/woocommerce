@@ -54,7 +54,7 @@ describe( 'ProductDetails', () => {
 
 	test( 'should not render hidden details', () => {
 		const details = [
-			{ name: 'Lorem', value: 'Ipsum', hidden: true },
+			{ name: 'Lorem', value: 'Ipsum', hidden: '1' },
 			{ name: 'LOREM', value: 'Ipsum', display: 'IPSUM' },
 			{ name: 'LOREM 2', value: 'Ipsum2', display: 'IPSUM 2' },
 		];
@@ -83,10 +83,24 @@ describe( 'ProductDetails', () => {
 		expect( screen.getByText( 'IPSUM 2' ) ).toBeInTheDocument();
 	} );
 
+	// The Store API runs every item_data value through wp_kses_post(), which
+	// string-coerces, so an extension's boolean arrives as '1' or ''.
+	test( 'should treat the string hidden flags the Store API actually sends', () => {
+		const details = [
+			{ name: 'Hidden', value: 'Ipsum', hidden: '1' },
+			{ name: 'Visible', value: 'Ipsum2', hidden: '' },
+		];
+
+		render( <ProductDetails details={ details } /> );
+
+		expect( screen.queryByText( 'Hidden:' ) ).not.toBeInTheDocument();
+		expect( screen.getByText( 'Visible:' ) ).toBeInTheDocument();
+	} );
+
 	test( 'should not render anything if all details are hidden', () => {
 		const details = [
-			{ name: 'Lorem', value: 'Ipsum', hidden: true },
-			{ name: 'LOREM', value: 'Ipsum', display: 'IPSUM', hidden: true },
+			{ name: 'Lorem', value: 'Ipsum', hidden: '1' },
+			{ name: 'LOREM', value: 'Ipsum', display: 'IPSUM', hidden: '1' },
 		];
 
 		const { container } = render( <ProductDetails details={ details } /> );

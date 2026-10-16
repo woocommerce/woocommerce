@@ -11,7 +11,7 @@ $image-placeholder-border-color: #f2f2f2;
 
 // Universal colors for use on the frontend, currently being applied to checkout blocks.
 // Text colour at 20% opacity. Used for low contrast decorative elements such as section borders.
-$universal-border-light: color-mix(in srgb, currentColor 20%, transparent);
+$universal-border-light: var(--wc-separator-color, color-mix(in srgb, currentColor 20%, transparent));
 // Used for radio and checkbox resting state.
 $universal-border-medium: color-mix(in srgb, currentColor 48%, transparent);
 // #1e1e1e on white. Used for low contrast decorative elements such as input borders.

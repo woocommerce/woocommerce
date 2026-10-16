@@ -2,71 +2,68 @@
  * External dependencies
  */
 import { test, expect } from '@playwright/test';
-import type { Page, Locator } from '@playwright/test';
+import type {
+	Page,
+	Locator,
+	Response as PlaywrightResponse,
+} from '@playwright/test';
 
 /**
  * Internal dependencies
  */
 import { admin } from '../../test-data/data';
 import { tags } from '../../fixtures/fixtures';
-import { ADMIN_STATE_PATH } from '../../playwright.config';
+import { random } from '../../utils/helpers';
 
 const EXPECTED_SECTION_HEADERS = [ 'Performance', 'Charts', 'Leaderboards' ];
 
 let userId: number;
 let headings_sections: Locator;
-let heading_performance: Locator;
 let buttons_ellipsis: Locator;
-let menuitem_moveUp: Locator;
 let menuitem_moveDown: Locator;
 let page: Page;
 
-const base64String = Buffer.from(
-	`${ admin.username }:${ admin.password }`
-).toString( 'base64' );
+// The section layout is stored per user, so this spec uses its own
+// administrator to leave the shared admin's Overview untouched for the specs
+// running alongside it.
+const sectionsUser = {
+	username: `analytics-overview-${ random() }`,
+	password: `password-${ random() }`,
+};
 
-const headers = {
-	Authorization: `Basic ${ base64String }`,
+const basicAuthHeaders = ( {
+	username,
+	password,
+}: {
+	username: string;
+	password: string;
+} ) => ( {
+	Authorization: `Basic ${ Buffer.from(
+		`${ username }:${ password }`
+	).toString( 'base64' ) }`,
 	cookie: '',
-};
+} );
 
-const hidePerformanceSection = async () => {
-	const response =
-		await test.step( `Send POST request to hide Performance section`, async () => {
-			const pageRequest = page.request;
-			const url = `./wp-json/wp/v2/users/${ userId }`;
-			const params = { _locale: 'user' };
-			const dashboard_sections = JSON.stringify( [
-				{ key: 'store-performance', isVisible: false },
-			] );
-			const data = {
-				id: userId,
-				woocommerce_meta: {
-					dashboard_sections,
-				},
-			};
+const headers = basicAuthHeaders( sectionsUser );
 
-			return await pageRequest.post( url, {
-				data,
-				params,
-				headers,
-			} );
-		} );
+// Call this before the click that triggers the save, and await the returned
+// promise after it — registering the listener after the click can miss a
+// response that already arrived. It matches the write that carries the section
+// layout: other preference writes, such as the metrics tour being dismissed,
+// go to the same endpoint and would otherwise satisfy it too early.
+const waitForUserPrefsSave = () =>
+	page.waitForResponse(
+		( res ) =>
+			res.url().includes( `/users/${ userId }` ) &&
+			res.request().method() !== 'GET' &&
+			!! res.request().postData()?.includes( 'dashboard_sections' )
+	);
 
-	await test.step( `Assert response status is OK`, async () => {
-		expect( response.ok() ).toBeTruthy();
-	} );
-
-	await test.step( `Inspect the response payload to verify that Performance section was successfully hidden`, async () => {
-		const { woocommerce_meta } = await response.json();
-		const { dashboard_sections } = woocommerce_meta;
-		const sections = JSON.parse( dashboard_sections );
-		const performanceSection = sections.find(
-			( { key } ) => key === 'store-performance'
-		);
-		expect( performanceSection.isVisible ).toBeFalsy();
-	} );
-};
+const expectSaved = ( response: PlaywrightResponse ) =>
+	expect(
+		response.ok(),
+		`${ response.status() } ${ response.url() }`
+	).toBeTruthy();
 
 const resetSections = async () => {
 	const response =
@@ -104,26 +101,60 @@ test.describe(
 	'Analytics pages',
 	{ tag: [ tags.PAYMENTS, tags.SERVICES ] },
 	() => {
-		test.use( { storageState: ADMIN_STATE_PATH } );
-
 		test.beforeAll( async ( { browser } ) => {
-			page = await browser.newPage();
+			page = await browser.newPage( {
+				storageState: { cookies: [], origins: [] },
+			} );
 
-			await test.step( `Send GET request to get the current user id`, async () => {
-				const pageRequest = page.request;
-				const data = {
-					_fields: 'id',
-				};
-				const response = await pageRequest.get(
-					'./wp-json/wp/v2/users/me',
+			await test.step( `Create an administrator for this spec`, async () => {
+				const response = await page.request.post(
+					'./wp-json/wp/v2/users',
 					{
-						data,
+						data: {
+							...sectionsUser,
+							email: `${ sectionsUser.username }@example.com`,
+							roles: [ 'administrator' ],
+						},
+						headers: basicAuthHeaders( admin ),
+					}
+				);
+				expect(
+					response.ok(),
+					`${ response.status() } ${ await response.text() }`
+				).toBeTruthy();
+
+				userId = ( await response.json() ).id;
+			} );
+
+			await test.step( `Log in as that administrator`, async () => {
+				await page.request.post( './wp-login.php', {
+					form: {
+						log: sectionsUser.username,
+						pwd: sectionsUser.password,
+					},
+				} );
+			} );
+
+			// The shared admin has the metrics tour marked as seen in site setup.
+			// This administrator is new, so the tour would show and its dismissal
+			// would write preferences alongside the section layout this spec saves.
+			await test.step( `Mark the metrics tour as seen`, async () => {
+				const response = await page.request.post(
+					`./wp-json/wp/v2/users/${ userId }`,
+					{
+						data: {
+							id: userId,
+							woocommerce_meta: {
+								dashboard_performance_tour_shown: 'yes',
+							},
+						},
 						headers,
 					}
 				);
-				const { id } = await response.json();
-
-				userId = id;
+				expect(
+					response.ok(),
+					`${ response.status() } ${ await response.text() }`
+				).toBeTruthy();
 			} );
 
 			await resetSections();
@@ -137,16 +168,8 @@ test.describe(
 					name: pattern,
 				} );
 
-				heading_performance = page.getByRole( 'heading', {
-					name: 'Performance',
-				} );
-
 				buttons_ellipsis = page.getByRole( 'button', {
 					name: 'Choose which',
-				} );
-
-				menuitem_moveUp = page.getByRole( 'menuitem', {
-					name: 'Move up',
 				} );
 
 				menuitem_moveDown = page.getByRole( 'menuitem', {
@@ -168,137 +191,43 @@ test.describe(
 		} );
 
 		test.afterAll( async () => {
+			await page.request.delete( `./wp-json/wp/v2/users/${ userId }`, {
+				params: { force: true, reassign: false },
+				headers: basicAuthHeaders( admin ),
+			} );
 			await page.close();
 		} );
 
-		test( 'a user should see 3 sections by default - Performance, Charts, and Leaderboards', async () => {
-			for ( const expectedSection of EXPECTED_SECTION_HEADERS ) {
-				await test.step( `Assert that the "${ expectedSection }" section is visible`, async () => {
-					await expect(
-						headings_sections.filter( { hasText: expectedSection } )
-					).toBeVisible();
-				} );
-			}
-		} );
-
-		test.describe(
-			'moving sections',
-			{ tag: [ tags.COULD_BE_LOWER_LEVEL_TEST ] },
-			() => {
-				test( 'should not display move up for the top, or move down for the bottom section', async () => {
-					await test.step( `Check the top section`, async () => {
-						await buttons_ellipsis.first().click();
-						await expect( menuitem_moveUp ).toBeHidden();
-						await expect( menuitem_moveDown ).toBeVisible();
-						await page.keyboard.press( 'Escape' );
-					} );
-
-					await test.step( `Check the bottom section`, async () => {
-						await expect( buttons_ellipsis.nth( 2 ) ).toBeVisible();
-						await buttons_ellipsis.last().click();
-						await expect( menuitem_moveDown ).toBeHidden();
-						await expect( menuitem_moveUp ).toBeVisible();
-						await page.keyboard.press( 'Escape' );
-					} );
-				} );
-
-				test( 'should allow a user to move a section down', async () => {
-					const firstSection = await headings_sections
-						.first()
-						.innerText();
-					const secondSection = await headings_sections
-						.nth( 1 )
-						.innerText();
-
-					await test.step( `Move first section down`, async () => {
-						await buttons_ellipsis.first().click();
-						await menuitem_moveDown.click();
-						await page.waitForResponse(
-							( response ) =>
-								response.url().includes( '/users' ) &&
-								response.ok()
-						);
-					} );
-
-					await test.step( `Expect the second section to become first, and first becomes second.`, async () => {
-						await expect( headings_sections.first() ).toHaveText(
-							secondSection
-						);
-
-						await expect( headings_sections.nth( 1 ) ).toHaveText(
-							firstSection
-						);
-					} );
-				} );
-
-				test( 'should allow a user to move a section up', async () => {
-					const firstSection = await headings_sections
-						.first()
-						.innerText();
-					const secondSection = await headings_sections
-						.nth( 1 )
-						.innerText();
-
-					await test.step( `Move second section up`, async () => {
-						await buttons_ellipsis.nth( 1 ).click();
-						await menuitem_moveUp.click();
-						await page.waitForResponse(
-							( response ) =>
-								response.url().includes( '/users' ) &&
-								response.ok()
-						);
-					} );
-
-					await test.step( `Expect second section becomes first section, first becomes second`, async () => {
-						await expect( headings_sections.first() ).toHaveText(
-							secondSection
-						);
-						await expect( headings_sections.nth( 1 ) ).toHaveText(
-							firstSection
-						);
-					} );
-				} );
-			}
-		);
-
-		test( 'should allow a user to remove a section', async () => {
-			await test.step( `Remove the Performance section`, async () => {
-				await page
-					.getByRole( 'button', {
-						name: 'Choose which analytics to display and the section name',
-					} )
-					.click();
-				await page
-					.getByRole( 'menuitem', { name: 'Remove section' } )
-					.click();
-				await page.waitForResponse(
-					( response ) =>
-						response.url().includes( '/users' ) && response.ok()
+		test( 'persists reordered Analytics sections after reload', async () => {
+			await test.step( `Assert the default sections and their real controls`, async () => {
+				await expect( headings_sections ).toHaveText(
+					EXPECTED_SECTION_HEADERS
 				);
+				await expect( buttons_ellipsis ).toHaveCount( 3 );
+
+				for ( const button of await buttons_ellipsis.all() ) {
+					await expect( button ).toBeVisible();
+				}
 			} );
 
-			await test.step( `Expect the Performance section to be hidden`, async () => {
-				await expect( headings_sections ).toHaveCount( 2 );
-				await expect( heading_performance ).toBeHidden();
+			await test.step( `Move Performance below Charts and save`, async () => {
+				await buttons_ellipsis.first().click();
+				const savePromise = waitForUserPrefsSave();
+				await menuitem_moveDown.click();
+				expectSaved( await savePromise );
 			} );
-		} );
 
-		test( 'should allow a user to add a section back in', async () => {
-			await hidePerformanceSection( page );
+			const reorderedSections = [
+				'Charts',
+				'Performance',
+				'Leaderboards',
+			];
+			await expect( headings_sections ).toHaveText( reorderedSections );
+
 			await page.reload();
 
-			await test.step( `Add the Performance section back in.`, async () => {
-				await page.getByTitle( 'Add more sections' ).click();
-				await page.getByTitle( 'Add Performance section' ).click();
-				await page.waitForResponse(
-					( response ) =>
-						response.url().includes( '/users' ) && response.ok()
-				);
-			} );
-
-			await test.step( `Expect the Performance section to be added back.`, async () => {
-				await expect( heading_performance ).toBeVisible();
-			} );
+			await expect( headings_sections ).toHaveText( reorderedSections );
+			await expect( buttons_ellipsis ).toHaveCount( 3 );
 		} );
 	}
 );

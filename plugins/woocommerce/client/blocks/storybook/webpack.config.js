@@ -42,15 +42,12 @@ module.exports = ( { config: storybookConfig } ) => {
 	storybookConfig.resolve.alias = {
 		...storybookConfig.resolve.alias,
 		...aliases,
-		'@woocommerce/block-settings': require.resolve(
-			'./__mocks__/woocommerce-block-settings.js'
-		),
-		'@woocommerce/base-hooks': require.resolve(
-			'./__mocks__/woocommerce-base-hooks.js'
-		),
-		'wordpress-components': require.resolve(
-			'../node_modules/wordpress-components'
-		),
+		'@woocommerce/block-settings':
+			require.resolve( './__mocks__/woocommerce-block-settings.js' ),
+		'@woocommerce/base-hooks':
+			require.resolve( './__mocks__/woocommerce-base-hooks.js' ),
+		'wordpress-components':
+			require.resolve( '../node_modules/wordpress-components' ),
 	};
 
 	// Resolve `@woocommerce/*` monorepo packages from source via the `wc-source`
@@ -59,16 +56,6 @@ module.exports = ( { config: storybookConfig } ) => {
 	storybookConfig.resolve.conditionNames = [ 'wc-source', '...' ];
 
 	storybookConfig.module.rules.push(
-		{
-			test: /\/stories\/.+\.js$/,
-			use: [
-				{
-					loader: require.resolve( '@storybook/source-loader' ),
-					options: { parser: 'typescript' },
-				},
-			],
-			enforce: 'pre',
-		},
 		...wooBlocksConfig.module.rules,
 		...wooStylingConfig.module.rules
 	);
@@ -88,18 +75,16 @@ module.exports = ( { config: storybookConfig } ) => {
 			)
 	);
 
-	// Storybook's default babel rule excludes node_modules, but `@woocommerce/*`
-	// packages now resolve to their TypeScript source (symlinked under
-	// node_modules), so that source must be transpiled. Added after the filter
-	// above so it isn't stripped. Uses the project's babel.config.js. Scoped to
-	// Storybook — does not touch the shared plugin webpack config.
+	// Transpile the blocks and `@woocommerce/*` package sources after removing
+	// Storybook's default Babel rule above. Storybook 9 no longer transpiles the
+	// blocks' TypeScript through its default preview rule.
 	storybookConfig.module.rules.push( {
 		test: /\.(j|t)sx?$/,
 		// pnpm resolves workspace packages to their real path, so `@woocommerce/*`
 		// source appears as `packages/js/<pkg>/src` (matched here) rather than the
 		// `node_modules/@woocommerce/<pkg>` symlink.
 		include:
-			/[\/\\](?:packages[\/\\]js|node_modules[\/\\]@woocommerce)[\/\\][^\/\\]+[\/\\]src[\/\\]/,
+			/[\/\\](?:(?:packages[\/\\]js|node_modules[\/\\]@woocommerce)[\/\\][^\/\\]+[\/\\]src|plugins[\/\\]woocommerce[\/\\]client[\/\\]blocks[\/\\](?:assets[\/\\]js|packages|storybook))[\/\\]/,
 		loader: 'babel-loader',
 	} );
 

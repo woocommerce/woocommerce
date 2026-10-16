@@ -28,7 +28,6 @@ class TaxSettingsRecommendationsTest extends WC_Unit_Test_Case {
 		$this->sut->init();
 
 		// Routes must register on rest_api_init; firing it runs init()'s callback.
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'rest_api_init' );
 	}
 

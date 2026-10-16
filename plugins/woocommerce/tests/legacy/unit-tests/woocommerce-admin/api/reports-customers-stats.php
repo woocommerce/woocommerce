@@ -7,12 +7,10 @@
  */
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Admin\API\Reports\Customers\DataStore as CustomersDataStore;
 
 /**
  * Reports Customers Stats REST API Test Class
- * @runTestsInSeparateProcesses
- * @preserveGlobalState disabled
- * @group run-in-separate-process
  * @package WooCommerce\Admin\Tests\API
  * @since 3.5.0
  */
@@ -92,7 +90,11 @@ class WC_Admin_Tests_API_Reports_Customers_Stats extends WC_REST_Unit_Test_Case 
 	 */
 	public function test_get_reports() {
 		wp_set_current_user( $this->user );
+		$stale_customer = WC_Helper_Customer::create_customer( 'stale_stats_customer', 'password', 'stale-stats@example.com' );
+		$this->assertNotFalse( CustomersDataStore::update_registered_customer( $stale_customer->get_id() ) );
+		$this->assertNotFalse( CustomersDataStore::get_customer_id_by_user_id( $stale_customer->get_id() ) );
 		WC_Helper_Reports::reset_stats_dbs();
+		$this->assertFalse( CustomersDataStore::get_customer_id_by_user_id( $stale_customer->get_id() ) );
 
 		$test_customers = array();
 

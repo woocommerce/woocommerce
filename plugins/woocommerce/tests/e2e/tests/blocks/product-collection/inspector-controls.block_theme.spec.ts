@@ -7,6 +7,7 @@ import { test as base, expect, BLOCK_THEME_SLUG } from '@woocommerce/e2e-utils';
  * Internal dependencies
  */
 import ProductCollectionPage, { SELECTORS } from './product-collection.page';
+import { getProductCollectionQuery } from '../products/utils';
 
 const test = base.extend< { pageObject: ProductCollectionPage } >( {
 	pageObject: async ( { page, admin, editor }, use ) => {
@@ -190,7 +191,7 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 	} ) => {
 		await pageObject.createNewPostAndInsertBlock();
 
-		await pageObject.addFilter( 'Show Brands' );
+		await pageObject.addFilter( 'Show Product Brands' );
 		await pageObject.checkTaxonomyTerm( 'brands', 'WooCommerce' );
 		await expect( pageObject.productTitles ).toHaveText( [
 			'Album',
@@ -295,6 +296,7 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 	} );
 
 	test( 'Products can be filtered based on price range.', async ( {
+		page,
 		pageObject,
 	} ) => {
 		await pageObject.createNewPostAndInsertBlock();
@@ -313,12 +315,24 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 			max: '17.21',
 		} );
 
+		await expect
+			.poll(
+				async () =>
+					( await getProductCollectionQuery( page ) ).priceRange
+			)
+			.toEqual( { min: 15.28, max: 17.21 } );
 		await expect( pageObject.products ).toHaveCount( 2 );
 
 		await pageObject.setPriceRange( {
 			max: '17.29',
 		} );
 
+		await expect
+			.poll(
+				async () =>
+					( await getProductCollectionQuery( page ) ).priceRange
+			)
+			.toMatchObject( { max: 17.29 } );
 		await expect( pageObject.products ).toHaveCount( 5 );
 
 		await pageObject.publishAndGoToFrontend();
@@ -578,13 +592,14 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 
 			// Disable the option in the first Product Catalog
 			await editor.selectBlocks( productCollection.first() );
+			await expect( defaultQueryType ).toBeChecked();
 			await customQueryType.click();
+			await expect( customQueryType ).toBeChecked();
 
 			// Third Product Catalog
 			// Option should be visible & ENABLED by default
 			await pageObject.insertProductCollection();
 			await pageObject.chooseCollectionInTemplate( 'productCatalog' );
-			await editor.selectBlocks( productCollection.last() );
 
 			await expect( defaultQueryType ).toBeChecked();
 			await expect( customQueryType ).not.toBeChecked();

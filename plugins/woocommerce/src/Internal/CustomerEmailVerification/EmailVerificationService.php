@@ -80,25 +80,28 @@ class EmailVerificationService {
 	}
 
 	/**
-	 * Mark the given user as having verified their current account email address.
+	 * Mark the given user as having verified the expected account email address.
 	 *
 	 * Stores the verified email address, clears any pending key, and fires the
 	 * {@see 'woocommerce_customer_email_verified'} action. No-ops if the user is already
-	 * verified for their current email.
+	 * verified for their current email. The expected email must still match the account email,
+	 * preventing a concurrently changed address from being marked as verified.
 	 *
 	 * @since 11.0.0
 	 *
-	 * @param int $user_id WordPress user ID.
+	 * @param int         $user_id        WordPress user ID.
+	 * @param string|null $expected_email Email address proven by the verification flow.
 	 * @return void
 	 */
-	public function mark_verified( int $user_id ): void {
+	public function mark_verified( int $user_id, ?string $expected_email ): void {
 		if ( $this->is_verified( $user_id ) ) {
 			return;
 		}
 
-		$account_email = $this->get_account_email( $user_id );
+		$account_email  = $this->get_account_email( $user_id );
+		$expected_email = null !== $expected_email ? strtolower( $expected_email ) : null;
 
-		if ( null === $account_email ) {
+		if ( null === $expected_email || null === $account_email || $expected_email !== $account_email ) {
 			return;
 		}
 

@@ -85,7 +85,7 @@ export const EmailPreviewHeader = ( {
 	}, [] );
 
 	useEffect( () => {
-		fetchSubject();
+		void fetchSubject();
 	}, [ fetchSubject ] );
 
 	useEffect( () => {

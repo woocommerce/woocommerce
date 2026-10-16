@@ -76,6 +76,7 @@ export const Edit = ( { attributes }: { attributes: BlockAttributes } ) => {
 				className={ buttonClassName }
 				style={ buttonStyles }
 				disabled
+				aria-disabled="true"
 			>
 				<LeftComponent className="wc-block-next-previous-buttons__icon wc-block-next-previous-buttons__icon--left" />
 			</button>

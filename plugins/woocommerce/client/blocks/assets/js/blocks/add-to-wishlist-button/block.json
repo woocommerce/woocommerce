@@ -2,7 +2,6 @@
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 3,
 	"name": "woocommerce/add-to-wishlist-button",
-	"version": "1.0.0",
 	"title": "Add to Wishlist Button",
 	"description": "Lets shoppers add the current product to their wishlist from the single-product page.",
 	"category": "woocommerce",

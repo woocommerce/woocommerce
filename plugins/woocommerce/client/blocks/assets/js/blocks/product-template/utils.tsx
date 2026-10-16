@@ -122,7 +122,7 @@ const createLocationObject = ( type: LocationType, sourceData: object = {} ) =>
 	( {
 		type,
 		sourceData,
-	} as WooCommerceBlockLocation );
+	} ) as WooCommerceBlockLocation;
 
 type ContextProperties = {
 	templateSlug: string;

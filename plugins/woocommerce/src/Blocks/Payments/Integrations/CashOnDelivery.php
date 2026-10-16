@@ -10,6 +10,8 @@ use WC_Gateway_COD;
  * @since 3.0.0
  */
 final class CashOnDelivery extends AbstractPaymentMethodType {
+	use ShippingRestrictionsSettingsTrait;
+
 	/**
 	 * Payment method name/id/slug (matches id in WC_Gateway_COD in core).
 	 *
@@ -48,29 +50,6 @@ final class CashOnDelivery extends AbstractPaymentMethodType {
 	public function is_active() {
 		return filter_var( $this->get_setting( 'enabled', false ), FILTER_VALIDATE_BOOLEAN );
 	}
-
-	/**
-	 * Return enable_for_virtual option.
-	 *
-	 * @return boolean True if store allows COD payment for orders containing only virtual products.
-	 */
-	private function get_enable_for_virtual() {
-		return filter_var( $this->get_setting( 'enable_for_virtual', false ), FILTER_VALIDATE_BOOLEAN );
-	}
-
-	/**
-	 * Return enable_for_methods option.
-	 *
-	 * @return array Array of shipping methods (string ids) that allow COD. (If empty, all support COD.)
-	 */
-	private function get_enable_for_methods() {
-		$enable_for_methods = $this->get_setting( 'enable_for_methods', [] );
-		if ( '' === $enable_for_methods ) {
-			return [];
-		}
-		return $enable_for_methods;
-	}
-
 
 	/**
 	 * Returns an array of scripts/handles to be registered for this payment method.

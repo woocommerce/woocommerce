@@ -106,7 +106,9 @@ class BreadcrumbsTest extends WP_UnitTestCase {
 	public function test_custom_typography_font_size(): void {
 		$markup = $this->render_breadcrumbs( '{"style":{"typography":{"fontSize":"2rem"}}}' );
 
-		$this->assertStringContainsString( 'font-size: 2rem', $markup, 'Custom font size should be applied as inline style.' );
+		// Fluid typography may render the size as clamp(..., 2rem), so only
+		// require that 2rem appears within the font-size declaration itself.
+		$this->assertMatchesRegularExpression( '/font-size:[^;"]*2rem/', $markup, 'Custom font size should be applied as inline style.' );
 		$this->assertStringNotContainsString( 'has-small-font-size', $markup, 'Default small font size class should be removed for custom typography.' );
 	}
 

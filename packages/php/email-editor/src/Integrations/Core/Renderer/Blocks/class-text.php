@@ -9,6 +9,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Html_Processing_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
 use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Table_Wrapper_Helper;
 
@@ -55,18 +56,15 @@ class Text extends Abstract_Block_Renderer {
 				$alignment_from_class = 'left';
 			}
 
-			// remove has-background to prevent double padding applied for wrapper and inner element.
-			$block_classes = str_replace( 'has-background', '', $block_classes );
-			// remove border related classes because we handle border on wrapping table cell.
-			$block_classes = preg_replace( '/[a-z-]+-border-[a-z-]+/', '', $block_classes );
-			/** @var string $block_classes */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort -- used for phpstan
-			$html->set_attribute( 'class', trim( $block_classes ) );
+			// Remove the background and border classes because we render both on the wrapping table cell.
+			Html_Processing_Helper::remove_wrapper_handled_classes( $html );
 			$block_content = $html->get_updated_html();
 		}
 
 		$block_styles      = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'spacing', 'border', 'background-color', 'color', 'typography' ) );
 		$additional_styles = array(
-			'min-width' => '100%', // prevent Gmail App from shrinking the table on mobile devices.
+			'min-width'  => '100%', // prevent Gmail App from shrinking the table on mobile devices.
+			'word-break' => 'break-word', // prevent long unbreakable words (e.g. URLs) from expanding the table and breaking the email layout.
 		);
 
 		// Add fallback text color when no custom text color or preset text color is set.
@@ -122,6 +120,18 @@ class Text extends Abstract_Block_Renderer {
 
 			// Remove border styles. We apply border styles on the wrapping table cell.
 			$element_style = (string) preg_replace( '/border[^:]*:.?[0-9a-z-()#]+;?/', '', $element_style );
+
+			// Remove the background color for the same reason we remove the background classes: it is
+			// rendered on the wrapping table cell, and a translucent color left here paints twice.
+			// This assumes the cell gets the same color from the block attributes, which is true for
+			// anything the editor saves. Markup that carries an inline background without the matching
+			// attribute loses it, the same way padding, margin, and border above already behave.
+			// The lookbehind keeps the match anchored to the start of a property name, so a longer
+			// property that merely ends in "background-color" (a custom property, say) is not cut in
+			// half, which would leave its prefix fused to the following declaration. Property names
+			// are case-insensitive in CSS and a colon may be surrounded by whitespace, so both are
+			// matched — unlike the class names above, which the CSS inliner matches case-sensitively.
+			$element_style = (string) preg_replace( '/(?<![a-z-])background-color\s*:\s*[^;]+;?/i', '', $element_style );
 
 			// We define the font-size on the wrapper element, but we need to keep font-size definition here
 			// to prevent CSS Inliner from adding a default value and overriding the value set by user, which is on the wrapper element.

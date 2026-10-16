@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Order editing: skip reserved internal meta keys when saving order items, so they cannot be added via the "Add meta" button and stored as invisible meta.

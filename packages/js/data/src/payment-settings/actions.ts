@@ -126,7 +126,7 @@ export function updateProviderOrdering( orderMap: OrderMap ): {
 	type: ACTION_TYPES.UPDATE_PROVIDER_ORDERING;
 } {
 	try {
-		apiFetch( {
+		void apiFetch( {
 			path: WC_ADMIN_NAMESPACE + '/settings/payments/providers/order',
 			method: 'POST',
 			data: {

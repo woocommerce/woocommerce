@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
+use Automattic\WooCommerce\Internal\ProductVariations\SelectedVariationName;
 use Automattic\WooCommerce\Internal\Tax\TaxRateDataStore;
 use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
 use Automattic\WooCommerce\Utilities\DiscountsUtil;
@@ -37,6 +38,13 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @var string shortcode|store-api
 	 */
 	public $cart_context = 'shortcode';
+
+	/**
+	 * How many show_shipping() calls are reading the shipping address fields, so a field filter that recalculates the totals cannot nest the reads without limit.
+	 *
+	 * @var int
+	 */
+	private $shipping_address_field_reads = 0;
 
 	/**
 	 * Contains an array of cart items.
@@ -879,9 +887,15 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return bool|WP_Error
 	 */
 	public function check_cart_item_stock() {
-		$error                    = new WP_Error();
-		$product_qty_in_cart      = $this->get_cart_item_quantities();
-		$current_session_order_id = isset( WC()->session->order_awaiting_payment ) ? absint( WC()->session->order_awaiting_payment ) : absint( WC()->session->get( 'store_api_draft_order', 0 ) );
+		$error               = new WP_Error();
+		$product_qty_in_cart = $this->get_cart_item_quantities();
+		// Identify the shopper's own order so its stock hold is not counted against them.
+		// The classic checkout stores an order ID in `order_awaiting_payment`, but completing a
+		// payment or cancelling an unpaid order writes `false` there instead of unsetting it, so
+		// treat any falsy value as "no order" and fall back to the Store API draft order. Read the
+		// value with get(), because WC_Session::__isset() reports a stored `false` as set.
+		$order_awaiting_payment   = absint( WC()->session->get( 'order_awaiting_payment' ) );
+		$current_session_order_id = $order_awaiting_payment ? $order_awaiting_payment : absint( WC()->session->get( 'store_api_draft_order', 0 ) );
 
 		foreach ( $this->get_cart() as $values ) {
 			$product = $values['data'];
@@ -931,6 +945,35 @@ class WC_Cart extends WC_Legacy_Cart {
 		wc_deprecated_function( 'WC_Cart::get_item_data', '3.3', 'wc_get_formatted_cart_item_data' );
 
 		return wc_get_formatted_cart_item_data( $cart_item, $flat );
+	}
+
+	/**
+	 * Gets the display name for a cart item.
+	 *
+	 * For variations, selected "Any" attribute values that are missing from the
+	 * stored variation name are appended so the name matches fully defined
+	 * variations. The stored product and variation names are not modified.
+	 *
+	 * @since 11.2.0
+	 * @param array           $cart_item Cart item.
+	 * @param WC_Product|null $product   Optional product object to use as the name source,
+	 *                                   e.g. the result of the `woocommerce_cart_item_product` filter.
+	 *                                   Defaults to the cart item's product.
+	 * @return string The product name including any selected "Any" attribute values,
+	 *                or an empty string when no product can be resolved from the arguments.
+	 */
+	public function get_item_product_name( $cart_item, $product = null ) {
+		if ( ! $product instanceof WC_Product ) {
+			$product = is_array( $cart_item ) && isset( $cart_item['data'] ) && $cart_item['data'] instanceof WC_Product ? $cart_item['data'] : null;
+		}
+
+		if ( ! $product instanceof WC_Product ) {
+			return '';
+		}
+
+		$variation = isset( $cart_item['variation'] ) && is_array( $cart_item['variation'] ) ? $cart_item['variation'] : array();
+
+		return wc_get_container()->get( SelectedVariationName::class )->get_product_name( $product, $variation, true );
 	}
 
 	/**
@@ -1609,14 +1652,14 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return array
 	 */
 	public function calculate_shipping() {
-		// Reset totals.
-		$this->set_shipping_total( 0 );
-		$this->set_shipping_tax( 0 );
-		$this->set_shipping_taxes( array() );
-		$this->shipping_methods        = array();
-		$this->has_calculated_shipping = false;
+		$this->clear_shipping_totals();
 
-		if ( ! $this->needs_shipping() || ! $this->show_shipping() ) {
+		$ready = $this->needs_shipping() && $this->show_shipping();
+
+		// A filter run by show_shipping() can calculate the totals again and leave that nested run's shipping behind.
+		$this->clear_shipping_totals();
+
+		if ( ! $ready ) {
 			return $this->shipping_methods;
 		}
 
@@ -1637,6 +1680,17 @@ class WC_Cart extends WC_Legacy_Cart {
 		$this->set_shipping_taxes( $merged_taxes );
 
 		return $this->shipping_methods;
+	}
+
+	/**
+	 * Reset the shipping totals, taxes and methods to none calculated.
+	 */
+	private function clear_shipping_totals(): void {
+		$this->set_shipping_total( 0 );
+		$this->set_shipping_tax( 0 );
+		$this->set_shipping_taxes( array() );
+		$this->shipping_methods        = array();
+		$this->has_calculated_shipping = false;
 	}
 
 	/**
@@ -1836,13 +1890,20 @@ class WC_Cart extends WC_Legacy_Cart {
 				return apply_filters( 'woocommerce_cart_ready_to_calc_shipping', true );
 			}
 
-			if ( 'shortcode' === $this->cart_context ) {
+			// Calling calculate_totals() from an address field filter, such as woocommerce_default_address_fields, triggers show_shipping() again.
+			// Allow one nested field read for compatibility, then use the locale-based check below to prevent unbounded recursion.
+			if ( 'shortcode' === $this->cart_context && $this->shipping_address_field_reads < 2 ) {
 				$country = $this->get_customer()->get_shipping_country();
 				if ( ! $country ) {
 					return false;
 				}
-				$country_fields  = WC()->countries->get_address_fields( $country, 'shipping_' );
-				$checkout_fields = WC()->checkout()->get_checkout_fields();
+				++$this->shipping_address_field_reads;
+				try {
+					$country_fields  = WC()->countries->get_address_fields( $country, 'shipping_' );
+					$checkout_fields = WC()->checkout()->get_checkout_fields();
+				} finally {
+					--$this->shipping_address_field_reads;
+				}
 
 				/**
 				 * Filter to not require shipping state for shipping calculation, even if it is required at checkout.
@@ -1853,7 +1914,7 @@ class WC_Cart extends WC_Legacy_Cart {
 				 * @param bool $show_state Whether to use the state field. Default true.
 				 */
 				$state_enabled  = apply_filters( 'woocommerce_shipping_calculator_enable_state', true );
-				$state_required = isset( $country_fields['shipping_state'] ) && $country_fields['shipping_state']['required'];
+				$state_required = isset( $country_fields['shipping_state'] ) && $country_fields['shipping_state']['required'] && true !== ( $country_fields['shipping_state']['hidden'] ?? false );
 				// Takes care of late unsetting of checkout fields via hooks (woocommerce_checkout_fields, woocommerce_shipping_fields).
 				$checkout_state_field_exists = isset( $checkout_fields['shipping']['shipping_state'] );
 				if ( $state_enabled && $state_required && ! $this->get_customer()->get_shipping_state() && $checkout_state_field_exists ) {
@@ -1868,7 +1929,7 @@ class WC_Cart extends WC_Legacy_Cart {
 				 * @param bool $show_postcode Whether to use the postcode field. Default true.
 				 */
 				$postcode_enabled  = apply_filters( 'woocommerce_shipping_calculator_enable_postcode', true );
-				$postcode_required = isset( $country_fields['shipping_postcode'] ) && $country_fields['shipping_postcode']['required'];
+				$postcode_required = isset( $country_fields['shipping_postcode'] ) && $country_fields['shipping_postcode']['required'] && true !== ( $country_fields['shipping_postcode']['hidden'] ?? false );
 				// Takes care of late unsetting of checkout fields via hooks (woocommerce_checkout_fields, woocommerce_shipping_fields).
 				$checkout_postcode_field_exists = isset( $checkout_fields['shipping']['shipping_postcode'] );
 				if ( $postcode_enabled && $postcode_required && '' === $this->get_customer()->get_shipping_postcode() && $checkout_postcode_field_exists ) {

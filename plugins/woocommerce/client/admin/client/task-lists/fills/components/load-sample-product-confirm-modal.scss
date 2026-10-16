@@ -1,13 +1,13 @@
 .woocommerce-products-load-sample-product-confirm-modal-overlay {
 	@media (min-width: 783px ) {
 		& {
-			left: 35px;
+			inset-inline-start: 35px;
 		}
 	}
 
 	@include break-large {
 		& {
-			left: 160px;
+			inset-inline-start: 160px;
 		}
 	}
 }
@@ -23,7 +23,7 @@
 		margin-top: $gap;
 
 		button {
-			margin-left: $gap;
+			margin-inline-start: $gap;
 		}
 	}
 }

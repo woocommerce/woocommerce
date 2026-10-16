@@ -108,6 +108,22 @@ class NotificationPreferencesDataStore {
 	}
 
 	/**
+	 * Delete a user's stored preferences for this site.
+	 *
+	 * Multisite keeps a separate envelope per site, so this removes only the
+	 * one belonging to the current site.
+	 *
+	 * @param int $user_id The user ID.
+	 *
+	 * @return bool True when an envelope was removed, false when there was nothing stored.
+	 *
+	 * @since 11.2.0
+	 */
+	public function delete( int $user_id ): bool {
+		return Users::delete_site_user_meta( $user_id, self::META_KEY );
+	}
+
+	/**
 	 * Upgrade an envelope to the current schema version.
 	 *
 	 * Pure transformation — does not persist. Missing or malformed

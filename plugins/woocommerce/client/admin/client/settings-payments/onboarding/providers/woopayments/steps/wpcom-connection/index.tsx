@@ -66,7 +66,7 @@ export const JetpackStep: React.FC = () => {
 							const startUrl = currentStep?.actions?.start?.href;
 							if ( startUrl ) {
 								// No need to wait for the response.
-								apiFetch( {
+								void apiFetch( {
 									url: startUrl,
 									method: 'POST',
 									data: {

@@ -13,6 +13,7 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Utilities\RestApiUtil;
@@ -193,6 +194,9 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			case 'delete_user':
 				$return = $this->is_valid_user_action( $arg );
 				break;
+			case 'before_delete_post':
+				$return = $this->is_valid_variation_delete_action( $arg );
+				break;
 		}
 
 		if ( 0 === strpos( $current_action, 'woocommerce_process_shop' ) || 0 === strpos( $current_action, 'woocommerce_process_product' ) ) {
@@ -210,16 +214,50 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * @return bool       True if validation passes.
 	 */
 	private function is_valid_post_action( $arg ) {
-		// Only deliver deleted/restored event for coupons, orders, and products.
-		if ( isset( $GLOBALS['post_type'] ) && ! in_array( $GLOBALS['post_type'], array( 'shop_coupon', 'shop_order', 'product' ), true ) ) {
+		if ( ( ! is_int( $arg ) && ! ( is_string( $arg ) && ctype_digit( $arg ) ) ) || 0 >= (int) $arg ) {
 			return false;
 		}
 
-		// Check if is delivering for the correct resource.
-		if ( isset( $GLOBALS['post_type'] ) && str_replace( 'shop_', '', $GLOBALS['post_type'] ) !== $this->get_resource() ) {
+		$post_id               = absint( $arg );
+		$post_type_to_resource = array_merge(
+			array(
+				'product'           => 'product',
+				'product_variation' => 'product',
+				'shop_coupon'       => 'coupon',
+			),
+			array_fill_keys( wc_get_order_types( 'order-webhooks' ), 'order' )
+		);
+		$post_type             = get_post_type( $post_id );
+
+		return isset( $post_type_to_resource[ $post_type ] ) && $post_type_to_resource[ $post_type ] === $this->get_resource();
+	}
+
+	/**
+	 * Validates permanent deletions for product webhooks: only variations, skipping those already reported.
+	 *
+	 * Trashing through wp_trash_post() fires `product.deleted` and records `_wp_trash_meta_status`,
+	 * so a variation trashed that way is not reported again when it is permanently deleted.
+	 *
+	 * @since  11.3.0
+	 * @param  mixed $arg First hook argument.
+	 * @return bool       True if validation passes.
+	 */
+	private function is_valid_variation_delete_action( $arg ) {
+		if ( 'product' !== $this->get_resource() ) {
+			return true;
+		}
+
+		if ( ! $this->is_valid_post_action( $arg ) ) {
 			return false;
 		}
-		return true;
+
+		$variation_id = absint( $arg );
+
+		if ( 'product_variation' !== get_post_type( $variation_id ) ) {
+			return false;
+		}
+
+		return ProductStatus::TRASH !== get_post_status( $variation_id ) || ! metadata_exists( 'post', $variation_id, '_wp_trash_meta_status' );
 	}
 
 	/**
@@ -547,12 +585,23 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			$message['Webhook Delivery']['Response']['Body'] = 'Webhook body is not logged unless WP_DEBUG mode is turned on. This is to avoid the storing of personal data in the logs.';
 		}
 
-		$logger->info(
-			wc_print_r( $message, true ),
-			array(
-				'source' => 'webhooks-delivery',
-			)
-		);
+		/**
+		 * Filter to disable webhook delivery logging.
+		 *
+		 * @since 11.1.0
+		 * @param bool $enable_logging Whether to log the delivery. Default true.
+		 * @param int  $webhook_id     The webhook ID.
+		 */
+		$enable_logging = apply_filters( 'woocommerce_webhook_enable_delivery_log', true, $this->get_id() );
+
+		if ( $enable_logging ) {
+			$logger->info(
+				wc_print_r( $message, true ),
+				array(
+					'source' => 'webhooks-delivery',
+				)
+			);
+		}
 
 		// Track failures.
 		// Check for a success, which is a 2xx, 301 or 302 Response Code.
@@ -1027,6 +1076,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			),
 			'product.deleted'   => array(
 				'wp_trash_post',
+				'before_delete_post',
 			),
 			'product.restored'  => array(
 				'untrashed_post',

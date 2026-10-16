@@ -29,6 +29,7 @@ class WC_Admin_Tests_API_Onboarding_Profiles extends WC_REST_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		$this->initialize_rest_api_routes();
 
 		$this->user = $this->factory->user->create(
 			array(

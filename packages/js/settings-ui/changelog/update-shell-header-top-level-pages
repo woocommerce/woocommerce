@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Hide the shell header on top-level settings pages and render the save button at the bottom of the page. The header is opt-in via shell.header for drill-down pages.

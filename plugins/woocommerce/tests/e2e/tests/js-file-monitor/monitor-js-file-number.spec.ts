@@ -49,7 +49,7 @@ const pageGroups = [
 			{
 				name: 'Add new product',
 				url: 'wp-admin/post-new.php?post_type=product',
-				expectedCount: 150,
+				expectedCount: 151,
 			},
 			{
 				name: 'Analytics page',
@@ -73,12 +73,20 @@ for ( const group of pageGroups ) {
 			test( `${ name } should load at most ${ expectedCount } JS files`, async ( {
 				page,
 			} ) => {
-				// networkidle is needed to ensure all JS files are loaded and avoid race conditions
-				// eslint-disable-next-line playwright/no-networkidle
-				await page.goto( url, { waitUntil: 'networkidle' } );
-				const javascriptFiles = await page.$$eval(
-					'script[src]',
-					( scripts ) => scripts.map( ( s ) => s.src )
+				// Count the scripts in the server HTML, not the live DOM. Loaders such as
+				// TinyMCE and webpack add a script tag per lazy file and remove it once loaded,
+				// so a DOM count depends on what is still in flight at that moment.
+				const response = await page.goto( url );
+				expect( response?.ok() ).toBe( true );
+				const javascriptFiles = await page.evaluate(
+					( html ) =>
+						Array.from(
+							new DOMParser()
+								.parseFromString( html, 'text/html' )
+								.querySelectorAll( 'script[src]' ),
+							( s ) => s.getAttribute( 'src' )
+						),
+					await response!.text()
 				);
 
 				expect

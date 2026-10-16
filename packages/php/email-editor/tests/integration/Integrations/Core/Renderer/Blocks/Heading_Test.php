@@ -135,6 +135,108 @@ class Heading_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * The preset background class must not stay on the inner element.
+	 *
+	 * The wrapping table cell keeps the block's classes and also carries the resolved background
+	 * inline. Leaving `has-<slug>-background-color` on the heading made the CSS inliner paint the
+	 * same color a second time, which composites to a darker band for a translucent palette color.
+	 */
+	public function testItRemovesPresetBackgroundClassFromInnerElement(): void {
+		$content                        = '<h1 class="wp-block-heading has-vivid-red-background-color has-background">This is Heading 1</h1>';
+		$parsed_heading                 = $this->parsed_heading;
+		$parsed_heading['innerHTML']    = $content;
+		$parsed_heading['innerContent'] = array( $content );
+
+		$rendered = $this->heading_renderer->render( $content, $parsed_heading, $this->rendering_context );
+
+		$html = new \WP_HTML_Tag_Processor( $rendered );
+		$this->assertTrue( $html->next_tag( array( 'tag_name' => 'h1' ) ) );
+		$heading_classes = (string) $html->get_attribute( 'class' );
+		$this->assertStringNotContainsString( 'has-vivid-red-background-color', $heading_classes );
+		$this->assertStringNotContainsString( 'has-background', $heading_classes );
+		// Unrelated classes are untouched.
+		$this->assertStringContainsString( 'wp-block-heading', $heading_classes );
+
+		// The background is still rendered exactly once, on the wrapping table cell.
+		$html = new \WP_HTML_Tag_Processor( $rendered );
+		$this->assertTrue( $html->next_tag( array( 'tag_name' => 'td' ) ) );
+		$this->assertStringContainsString( 'background-color', (string) $html->get_attribute( 'style' ) );
+	}
+
+	/**
+	 * A custom background color set inline must not stay on the inner element either.
+	 */
+	public function testItRemovesInlineBackgroundColorFromInnerElement(): void {
+		$content                        = '<h1 class="wp-block-heading has-background" style="background-color:#c284426b;">This is Heading 1</h1>';
+		$parsed_heading                 = $this->parsed_heading;
+		$parsed_heading['innerHTML']    = $content;
+		$parsed_heading['innerContent'] = array( $content );
+		$parsed_heading['attrs']['style']['color']['background'] = '#c284426b';
+		unset( $parsed_heading['attrs']['backgroundColor'] );
+
+		$rendered = $this->heading_renderer->render( $content, $parsed_heading, $this->rendering_context );
+
+		$html = new \WP_HTML_Tag_Processor( $rendered );
+		$this->assertTrue( $html->next_tag( array( 'tag_name' => 'h1' ) ) );
+		$this->assertStringNotContainsString( 'background-color', (string) $html->get_attribute( 'style' ) );
+
+		$html = new \WP_HTML_Tag_Processor( $rendered );
+		$this->assertTrue( $html->next_tag( array( 'tag_name' => 'td' ) ) );
+		$this->assertStringContainsString( 'background-color:#c284426b', (string) $html->get_attribute( 'style' ) );
+	}
+
+	/**
+	 * Only the background-color declaration itself is removed from the inner element.
+	 *
+	 * The removal is anchored to the start of a property name. Without that anchor a longer
+	 * property ending in "background-color" is cut in half and its prefix is left fused to the
+	 * next declaration, turning `--brand-background-color:#fff;color:red` into `--brand-color:red`
+	 * — a different, valid-looking declaration rather than a visibly broken one.
+	 */
+	public function testItRemovesOnlyTheBackgroundColorDeclarationFromInnerElement(): void {
+		$content                        = '<h1 class="wp-block-heading" style="--brand-background-color:#ffffff;background-color:#c284426b;color:#ff0000;">This is Heading 1</h1>';
+		$parsed_heading                 = $this->parsed_heading;
+		$parsed_heading['innerHTML']    = $content;
+		$parsed_heading['innerContent'] = array( $content );
+
+		$rendered = $this->heading_renderer->render( $content, $parsed_heading, $this->rendering_context );
+
+		$html = new \WP_HTML_Tag_Processor( $rendered );
+		$this->assertTrue( $html->next_tag( array( 'tag_name' => 'h1' ) ) );
+		$heading_style = (string) $html->get_attribute( 'style' );
+
+		// The custom property survives intact, and does not get welded onto the next declaration.
+		$this->assertStringContainsString( '--brand-background-color:#ffffff', $heading_style );
+		$this->assertStringNotContainsString( '--brand-color', $heading_style );
+		// The real background is still gone, and the unrelated declaration is untouched.
+		$this->assertStringNotContainsString( '#c284426b', $heading_style );
+		$this->assertStringContainsString( 'color:#ff0000', $heading_style );
+	}
+
+	/**
+	 * The background is removed however the declaration is spelled.
+	 *
+	 * CSS property names are case-insensitive and a colon may be surrounded by whitespace, so
+	 * `BACKGROUND-COLOR : x` is the same declaration as `background-color:x`. The editor's style
+	 * engine only ever emits the lowercase, unspaced form, but block markup is hand-editable.
+	 */
+	public function testItRemovesBackgroundColorRegardlessOfDeclarationSpelling(): void {
+		$content                        = '<h1 class="wp-block-heading" style="BACKGROUND-COLOR : #c284426b;color:#ff0000;">This is Heading 1</h1>';
+		$parsed_heading                 = $this->parsed_heading;
+		$parsed_heading['innerHTML']    = $content;
+		$parsed_heading['innerContent'] = array( $content );
+
+		$rendered = $this->heading_renderer->render( $content, $parsed_heading, $this->rendering_context );
+
+		$html = new \WP_HTML_Tag_Processor( $rendered );
+		$this->assertTrue( $html->next_tag( array( 'tag_name' => 'h1' ) ) );
+		$heading_style = (string) $html->get_attribute( 'style' );
+
+		$this->assertStringNotContainsStringIgnoringCase( 'background-color', $heading_style );
+		$this->assertStringContainsString( 'color:#ff0000', $heading_style );
+	}
+
+	/**
 	 * Test it uses inherited color from email_attrs when no color is specified
 	 */
 	public function testItUsesInheritedColorFromEmailAttrs(): void {

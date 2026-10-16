@@ -108,7 +108,7 @@ class SyncUI {
 	public function cancel_sync() {
 		$this->security_check();
 		wc_get_logger()->log( 'info', __( 'Approved Download Directories sync: scan has been cancelled.', 'woocommerce' ) );
-		wc_get_container()->get( Synchronize::class )->stop();
+		wc_get_container()->get( Synchronize::class )->cancel();
 	}
 
 	/**

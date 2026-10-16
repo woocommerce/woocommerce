@@ -58,9 +58,9 @@ const getResetEmailTemplateAction = () => {
 			if ( item.source !== 'custom' ) {
 				return false;
 			}
-			if (
-				! ( Boolean( item.plugin ) || Boolean( item.has_theme_file ) )
-			) {
+			if ( ! (
+				Boolean( item.plugin ) || Boolean( item.has_theme_file )
+			) ) {
 				return false;
 			}
 			const { permissions } = item;
@@ -126,7 +126,7 @@ const getResetEmailTemplateAction = () => {
 									);
 
 									// Apply the reset with original blocks
-									editEntityRecord(
+									void editEntityRecord(
 										'postType',
 										item.type,
 										item.id,
@@ -153,11 +153,10 @@ const getResetEmailTemplateAction = () => {
 									} );
 
 									// Invalidate to ensure editor and actions menu see the file version
-									invalidateResolution( 'getEntityRecord', [
-										'postType',
-										item.type,
-										item.id,
-									] );
+									void invalidateResolution(
+										'getEntityRecord',
+										[ 'postType', item.type, item.id ]
+									);
 
 									const successMessage = sprintf(
 										/* translators: The template's title. */
@@ -168,7 +167,7 @@ const getResetEmailTemplateAction = () => {
 										getItemTitle( item )
 									);
 
-									createSuccessNotice( successMessage, {
+									void createSuccessNotice( successMessage, {
 										type: 'snackbar',
 										id: 'reset-email-template-action',
 									} );
@@ -195,7 +194,7 @@ const getResetEmailTemplateAction = () => {
 										errorMessage,
 									} );
 
-									createErrorNotice( errorMessage, {
+									void createErrorNotice( errorMessage, {
 										type: 'snackbar',
 									} );
 

@@ -1,8 +1,8 @@
 /**
  * External dependencies
  */
-import { useArgs } from '@storybook/client-api';
-import type { Story, Meta } from '@storybook/react';
+import { useArgs } from 'storybook/preview-api';
+import type { StoryFn, Meta } from '@storybook/react-webpack5';
 import { INTERACTION_TIMEOUT } from '@woocommerce/storybook-controls';
 import { useDispatch } from '@wordpress/data';
 import { validationStore } from '@woocommerce/block-data';
@@ -25,7 +25,7 @@ const INVALID_COUPON_ERROR = {
 	message: 'Invalid coupon code',
 };
 
-const Template: Story< TotalsCouponProps > = ( args ) => {
+const Template: StoryFn< TotalsCouponProps > = ( args ) => {
 	const [ {}, setArgs ] = useArgs();
 
 	const onSubmit = ( code: string ) => {
@@ -50,7 +50,7 @@ LoadingState.args = {
 	isLoading: true,
 };
 
-export const ErrorState: Story< TotalsCouponProps > = ( args ) => {
+export const ErrorState: StoryFn< TotalsCouponProps > = ( args ) => {
 	const { setValidationErrors } = useDispatch( validationStore );
 
 	setValidationErrors( { coupon: INVALID_COUPON_ERROR } );

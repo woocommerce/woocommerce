@@ -18,7 +18,17 @@ import {
 	DismissableListHeading,
 } from '../settings-recommendations/dismissable-list';
 import { TrackedLink } from '~/components/tracked-link/tracked-link';
-import { useOptionDismiss } from '~/hooks/use-option-dismiss';
+import { type DismissState } from '~/hooks/use-option-dismiss';
+
+export const SHIPPING_RECOMMENDATIONS_DISMISS_OPTION =
+	'woocommerce_settings_shipping_recommendations_hidden';
+
+type ShippingRecommendationsMarketplaceLinkProps = {
+	textProps?: {
+		as?: string;
+		className?: string;
+	};
+};
 
 export const useInstallPlugin = () => {
 	const [ pluginsBeingSetup, setPluginsBeingSetup ] = useState<
@@ -68,14 +78,32 @@ export const useInstallPlugin = () => {
 	return [ pluginsBeingSetup, handleInstall, handleActivate ] as const;
 };
 
+export const ShippingRecommendationsMarketplaceLink = ( {
+	textProps,
+}: ShippingRecommendationsMarketplaceLinkProps ) => (
+	<TrackedLink
+		textProps={ textProps }
+		message={ __(
+			// translators: {{Link}} is a placeholder for a html element.
+			'Visit {{Link}}the WooCommerce Marketplace{{/Link}} to find more shipping, delivery, and fulfillment solutions.',
+			'woocommerce'
+		) }
+		targetUrl={ getAdminLink(
+			'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=shipping-delivery-and-fulfillment'
+		) }
+		linkType="wc-admin"
+		eventName="settings_shipping_recommendation_visit_marketplace_click"
+	/>
+);
+
 export const ShippingRecommendationsList = ( {
 	children,
+	dismissState,
 }: {
 	children: React.ReactNode;
+	dismissState: DismissState;
 } ) => {
-	const { isDismissed, onDismiss } = useOptionDismiss(
-		'woocommerce_settings_shipping_recommendations_hidden'
-	);
+	const { isDismissed, onDismiss } = dismissState;
 
 	return (
 		<DismissableList
@@ -105,18 +133,7 @@ export const ShippingRecommendationsList = ( {
 				) ) }
 			</ul>
 			<CardFooter>
-				<TrackedLink
-					message={ __(
-						// translators: {{Link}} is a placeholder for a html element.
-						'Visit {{Link}}the WooCommerce Marketplace{{/Link}} to find more shipping, delivery, and fulfillment solutions.',
-						'woocommerce'
-					) }
-					targetUrl={ getAdminLink(
-						'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=shipping-delivery-and-fulfillment'
-					) }
-					linkType="wc-admin"
-					eventName="settings_shipping_recommendation_visit_marketplace_click"
-				/>
+				<ShippingRecommendationsMarketplaceLink />
 			</CardFooter>
 		</DismissableList>
 	);

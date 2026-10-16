@@ -16,16 +16,23 @@ import type {
 	Store as WooCommerce,
 	WooCommerceConfig,
 } from '@woocommerce/stores/woocommerce/cart';
+import {
+	formatPriceWithCurrency,
+	normalizeCurrencyResponse,
+} from '@woocommerce/price-format/utils/currency';
 
 /**
  * Internal dependencies
  */
-import {
-	formatPriceWithCurrency,
-	normalizeCurrencyResponse,
-} from '../../../../packages/prices/utils/currency';
-import { CartItem, Currency } from '../../types';
+import type { CartItem, Currency } from '@woocommerce/types';
 import { translateJQueryEventToNative } from '../../base/stores/woocommerce/legacy-events';
+import {
+	getEntryFieldRaw,
+	isItemDataEntryVisible,
+	isLastVisibleEntry,
+	buildCartItemDataAttr,
+} from './utils/item-data';
+import type { ItemData, CartItemDataAttr } from './utils/item-data';
 
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
@@ -93,13 +100,13 @@ function getClosestColor(
 	return getClosestColor( element.parentElement, colorType );
 }
 
-type MiniCart = {
+export type MiniCart = {
 	state: {
 		isHydrated: boolean;
 		isOpen: boolean;
 		totalItemsInCart: number;
 		formattedSubtotal: string;
-		drawerOverlayClass: string;
+		isCartUpdating: boolean;
 		badgeIsVisible: boolean;
 		cartIsEmpty: boolean;
 		drawerRole: string | null;
@@ -117,6 +124,7 @@ type MiniCart = {
 		closeDrawer: () => void;
 		overlayCloseDrawer: ( e: MouseEvent ) => void;
 		handleOverlayKeydown: ( e: KeyboardEvent ) => void;
+		preventCheckoutWhileUpdating: ( e: MouseEvent ) => void;
 	};
 	callbacks: {
 		markAsHydrated: () => void;
@@ -132,21 +140,6 @@ type MiniCartContext = {
 
 type CartItemContext = {
 	cartItem: CartItem;
-};
-
-type ItemData = {
-	raw_attribute?: string | undefined;
-	value?: string | undefined;
-	display?: string;
-	attribute?: string;
-	hidden?: boolean | string | number;
-} & ( { key: string; name?: never } | { key?: never; name: string } );
-
-type CartItemDataAttr = {
-	value: string;
-	name: string;
-	className: string;
-	hidden: boolean;
 };
 
 type DataProperty = 'item_data' | 'variation';
@@ -173,7 +166,7 @@ const getFocusableElements = ( container: HTMLElement | null ) =>
 	container
 		? Array.from(
 				container.querySelectorAll< HTMLElement >( focusableSelectors )
-		  ).filter( ( el ) => el.offsetParent !== null )
+			).filter( ( el ) => el.offsetParent !== null )
 		: [];
 
 const { state: woocommerceState, actions } = store< WooCommerce >(
@@ -181,6 +174,20 @@ const { state: woocommerceState, actions } = store< WooCommerce >(
 	{},
 	{ lock: universalLock }
 );
+
+const dispatchCheckoutEvent = ( eventName: string ) => {
+	try {
+		window.wp.hooks.doAction(
+			`experimental__woocommerce_blocks-checkout-${ eventName }`,
+			{ storeCart: woocommerceState.cart }
+		);
+	} catch ( e ) {
+		// eslint-disable-next-line no-console
+		console.error( e );
+	}
+};
+
+let previousIsOpen: boolean | undefined;
 
 const { state: miniCartState, actions: miniCartActions } = store< MiniCart >(
 	'woocommerce/mini-cart',
@@ -218,10 +225,10 @@ store< MiniCart >(
 
 				const subtotal = displayCartPriceIncludingTax
 					? parseInt( woocommerceState.cart.totals.total_items, 10 ) +
-					  parseInt(
+						parseInt(
 							woocommerceState.cart.totals.total_items_tax,
 							10
-					  )
+						)
 					: parseInt( woocommerceState.cart.totals.total_items, 10 );
 
 				const normalizedCurrency = normalizeCurrencyResponse(
@@ -232,20 +239,17 @@ store< MiniCart >(
 				return formatPriceWithCurrency( subtotal, normalizedCurrency );
 			},
 
+			// The subtotal comes from the server, so it's out of date until a cart update finishes.
+			get isCartUpdating(): boolean {
+				return !! woocommerceState.isCartUpdating;
+			},
+
 			get drawerRole() {
 				return state.isOpen ? 'dialog' : null;
 			},
 
 			get drawerTabIndex() {
 				return state.isOpen ? '-1' : null;
-			},
-
-			get drawerOverlayClass() {
-				const baseClasses =
-					'wc-block-components-drawer__screen-overlay wc-block-components-drawer__screen-overlay--with-slide-out';
-				return state.isOpen
-					? `${ baseClasses } wc-block-components-drawer__screen-overlay--with-slide-in`
-					: `${ baseClasses } wc-block-components-drawer__screen-overlay--is-hidden`;
 			},
 
 			get badgeIsVisible(): boolean {
@@ -319,6 +323,13 @@ store< MiniCart >(
 				state.isOpen = false;
 				state.miniCartButtonRef?.focus();
 			},
+
+			// The checkout button is a link, so it can't be disabled natively.
+			preventCheckoutWhileUpdating: withSyncEvent( ( e: MouseEvent ) => {
+				if ( state.isCartUpdating ) {
+					e.preventDefault();
+				}
+			} ),
 
 			overlayCloseDrawer( e: MouseEvent ) {
 				// Only close the drawer if the overlay itself was clicked.
@@ -399,12 +410,20 @@ store< MiniCart >(
 							document.documentElement.clientWidth +
 							'px',
 					} );
+					if ( previousIsOpen === false ) {
+						dispatchCheckoutEvent( 'mini-cart-open' );
+					}
 				} else {
 					Object.assign( document.body.style, {
 						overflow: '',
 						paddingRight: 0,
 					} );
+					if ( previousIsOpen === true ) {
+						dispatchCheckoutEvent( 'mini-cart-close' );
+					}
 				}
+
+				previousIsOpen = state.isOpen;
 			},
 
 			focusFirstElement() {
@@ -423,33 +442,25 @@ store< MiniCart >(
 );
 
 /**
- * Returns the raw API value for an item_data field. Used by both innerHTML
- * callbacks and the cartItemDataAttr getter.
+ * Resolves the item_data or variation entry for the current wp-each
+ * iteration, falling back to the cart item's first entry when no
+ * per-iteration context is set.
  */
-function getItemDataRaw( field: 'name' | 'value' ): string {
+function resolveDataItemAttr(): ItemData | undefined {
 	const { itemData, dataProperty } = getContext< {
 		itemData: ItemData;
 		dataProperty: DataProperty;
 	} >();
 
-	const dataItemAttr =
-		// eslint-disable-next-line @typescript-eslint/no-use-before-define
-		itemData || cartItemState.cartItem[ dataProperty ]?.[ 0 ];
+	return itemData || cartItemState.cartItem[ dataProperty ]?.[ 0 ];
+}
 
-	if ( ! dataItemAttr ) {
-		return '';
-	}
-
-	if ( field === 'name' ) {
-		return (
-			dataItemAttr.key ||
-			dataItemAttr.attribute ||
-			dataItemAttr.name ||
-			''
-		);
-	}
-
-	return dataItemAttr.display || dataItemAttr.value || '';
+/**
+ * Returns the raw API value for an item_data field. Used by both innerHTML
+ * callbacks and the cartItemDataAttr getter.
+ */
+function getItemDataRaw( field: 'name' | 'value' ): string {
+	return getEntryFieldRaw( resolveDataItemAttr(), field );
 }
 
 const { state: cartItemState } = store(
@@ -728,7 +739,7 @@ const { state: cartItemState } = store(
 
 				const totalLinePrice = displayCartPriceIncludingTax
 					? parseInt( totals.line_subtotal, 10 ) +
-					  parseInt( totals.line_subtotal_tax, 10 )
+						parseInt( totals.line_subtotal_tax, 10 )
 					: parseInt( totals.line_subtotal, 10 );
 
 				const price = formatPriceWithCurrency(
@@ -778,61 +789,27 @@ const { state: cartItemState } = store(
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				return ( window.wc as any )?.blocksCheckout?.applyCheckoutFilter
 					? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-					  ( window.wc as any ).blocksCheckout.applyCheckoutFilter( {
-							filterName: 'showRemoveItemLink',
-							defaultValue: true,
-							extensions: cartItemState.cartItem.extensions,
-							arg: {
-								context: 'cart',
-								cartItem: cartItemState.cartItem,
-								cart: woocommerceState.cart,
-							},
-					  } )
+						( window.wc as any ).blocksCheckout.applyCheckoutFilter(
+							{
+								filterName: 'showRemoveItemLink',
+								defaultValue: true,
+								extensions: cartItemState.cartItem.extensions,
+								arg: {
+									context: 'cart',
+									cartItem: cartItemState.cartItem,
+									cart: woocommerceState.cart,
+								},
+							}
+						)
 					: true;
 			},
 
-			get cartItemDataAttr(): CartItemDataAttr | null {
-				const rawName = getItemDataRaw( 'name' );
-				const rawValue = getItemDataRaw( 'value' );
-
-				if ( ! rawName && ! rawValue ) {
-					return null;
-				}
-
-				const nameTxt = document.createElement( 'textarea' );
-				nameTxt.innerHTML = rawName;
-				const valueTxt = document.createElement( 'textarea' );
-				valueTxt.innerHTML = rawValue;
-
-				const { itemData, dataProperty } = getContext< {
-					itemData: ItemData;
-					dataProperty: DataProperty;
-				} >();
-				const dataItemAttr =
-					itemData || cartItemState.cartItem[ dataProperty ]?.[ 0 ];
-				const hiddenValue = dataItemAttr?.hidden;
-
-				return {
-					name: nameTxt.value ? nameTxt.value + ':' : '',
-					value: valueTxt.value,
-					className: `wc-block-components-product-details__${ nameTxt.value
-						.replace( /([a-z])([A-Z])/g, '$1-$2' )
-						.replace( /<[^>]*>/g, '' )
-						.replace( /[\s_&]+/g, '-' )
-						.toLowerCase() }`,
-					hidden:
-						hiddenValue === true ||
-						hiddenValue === 'true' ||
-						hiddenValue === '1' ||
-						hiddenValue === 1,
-				};
+			get cartItemDataAttr(): CartItemDataAttr {
+				return buildCartItemDataAttr( resolveDataItemAttr() );
 			},
 
 			get cartItemDataAttrHidden(): boolean {
-				return (
-					cartItemState.cartItemDataAttr === null ||
-					!! cartItemState.cartItemDataAttr?.hidden
-				);
+				return ! isItemDataEntryVisible( resolveDataItemAttr() );
 			},
 
 			// Used to index cart item data attributes for wp-each-key.
@@ -878,29 +855,15 @@ const { state: cartItemState } = store(
 					dataProperty: DataProperty;
 				} >();
 
-				const items = cartItemState.cartItem[ dataProperty ];
-				if ( ! items || items.length === 0 ) {
-					return true;
-				}
+				// The cart item's `item_data`/`variation` array elements are
+				// structurally compatible with `ItemData` for every field
+				// these pure helpers read (name/value/hidden sources), even
+				// though the two array types aren't nominally identical.
+				const items = cartItemState.cartItem[
+					dataProperty
+				] as ItemData[];
 
-				// Filter out hidden items
-				const visibleItems = items.filter(
-					( item: ItemData ) =>
-						! (
-							item.hidden === true ||
-							item.hidden === 'true' ||
-							item.hidden === '1' ||
-							// eslint-disable-next-line @typescript-eslint/no-explicit-any
-							( item.hidden as any ) === 1
-						)
-				);
-
-				if ( visibleItems.length === 0 ) {
-					return true;
-				}
-
-				const lastItem = visibleItems[ visibleItems.length - 1 ];
-				return itemData === lastItem;
+				return isLastVisibleEntry( items, itemData );
 			},
 		},
 

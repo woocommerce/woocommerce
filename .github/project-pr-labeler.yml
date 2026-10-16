@@ -1,70 +1,114 @@
 'package: @woocommerce/e2e-utils-playwright':
-  - packages/js/e2e-utils-playwright/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+          - packages/js/e2e-utils-playwright/**/*
 
 'package: @woocommerce/components':
-  - packages/js/components/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+          - packages/js/components/**/*
 
 'package: @woocommerce/csv-export':
-  - packages/js/csv-export/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+          - packages/js/csv-export/**/*
 
 'package: @woocommerce/currency':
-  - packages/js/currency/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+          - packages/js/currency/**/*
 
 'package: @woocommerce/customer-effort-score':
-  - packages/js/customer-effort-score/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+          - packages/js/customer-effort-score/**/*
 
 'package: @woocommerce/data':
-  - packages/js/data/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+          - packages/js/data/**/*
 
 'package: @woocommerce/date':
-  - packages/js/date/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+          - packages/js/date/**/*
 
 'package: dependency-extraction-webpack-plugin':
-  - packages/js/dependency-extraction-webpack-plugin/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+          - packages/js/dependency-extraction-webpack-plugin/**/*
 
 'package: @woocommerce/eslint-plugin':
-  - packages/js/eslint-plugin/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+          - packages/js/eslint-plugin/**/*
 
 'package: @woocommerce/experimental':
-  - packages/js/experimental/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+          - packages/js/experimental/**/*
 
 'package: @woocommerce/explat':
-  - packages/js/explat/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+          - packages/js/explat/**/*
 
 'package: @woocommerce/navigation':
-  - packages/js/navigation/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+          - packages/js/navigation/**/*
 
 'package: @woocommerce/number':
-  - packages/js/number/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+          - packages/js/number/**/*
 
 'package: @woocommerce/onboarding':
-  - packages/js/onboarding/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+          - packages/js/onboarding/**/*
 
 'package: @woocommerce/tracks':
-  - packages/js/tracks/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+          - packages/js/tracks/**/*
 
 'plugin: woocommerce':
-  - plugins/woocommerce/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+          - plugins/woocommerce/**/*
 
 'plugin: woocommerce beta tester':
-  - plugins/woocommerce-beta-tester/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+          - plugins/woocommerce-beta-tester/**/*
 
 'focus: performance tests':
-  - plugins/woocommerce/tests/performance/**/*
-  - plugins/woocommerce/tests/metrics/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+          - plugins/woocommerce/tests/performance/**/*
+          - plugins/woocommerce/tests/metrics/**/*
 
 'focus: api tests':
-  - plugins/woocommerce/tests/e2e/tests/api-tests/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+          - plugins/woocommerce/tests/e2e/tests/api-tests/**/*
 
 'focus: e2e tests':
-  - plugins/woocommerce/tests/e2e/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+          - plugins/woocommerce/tests/e2e/**/*
 
 'Documentation':
-  - docs/**/*
+  - changed-files:
+      - any-glob-to-any-file:
+          - docs/**/*
 
 'focus: monorepo infrastructure':
-  - .github/**/*
-  - bin/**/*
-  - tools/**/*
-  - '**/composer.json'
-  - '**/package.json'
+  - changed-files:
+      - any-glob-to-any-file:
+          - .github/**/*
+          - bin/**/*
+          - tools/**/*
+          - '**/composer.json'
+          - '**/package.json'

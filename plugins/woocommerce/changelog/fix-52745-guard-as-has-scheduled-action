@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Guard every `as_has_scheduled_action()` call behind a helper that falls back to `as_next_scheduled_action()`, preventing a fatal error when another plugin loads a pre-3.3.0 copy of Action Scheduler.

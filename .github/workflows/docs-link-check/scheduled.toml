@@ -1,0 +1,18 @@
+# lychee policy for the scheduled docs external link crawl (docs-link-check.yml).
+#
+# This runs against already-reviewed content on trunk, so it checks every external host
+# and follows redirects. Results are a report, not a merge gate.
+
+no_progress = true
+scheme = ["http", "https"]
+exclude_all_private = true
+exclude_path = ["docs/_docu-tools"]
+
+# Placeholder hosts used in examples.
+exclude = ['^https?://([^/]+\.local|local\.wordpress\.test)/']
+
+# 403 and 429 are bot blocks and rate limits, not dead links.
+accept = "200..=206,403,429"
+timeout = 15
+max_retries = 2
+max_concurrency = 8

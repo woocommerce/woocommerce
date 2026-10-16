@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\Internal\Admin;
 use Automattic\WooCommerce\Enums\DefaultCustomerAddress;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
+use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Admin_Notices;
@@ -367,11 +368,11 @@ class SiteHealth {
 				'check' => fn() => ! WC_Admin_Notices::has_notice( 'download_directories_sync_complete' ),
 				'good'  => array(
 					'label'       => __( 'WooCommerce approved download directories do not require review', 'woocommerce' ),
-					'description' => __( 'There is no completed approved download directories sync waiting for review.', 'woocommerce' ),
+					'description' => __( 'There is no completed approved download directory synchronization waiting for review.', 'woocommerce' ),
 				),
 				'fail'  => array(
 					'label'       => __( 'WooCommerce approved download directories need review', 'woocommerce' ),
-					'description' => __( 'The approved product download directories list was updated. Review it to confirm downloadable product files remain protected.', 'woocommerce' ),
+					'description' => __( 'Approved product download directory synchronization has completed. Review the list to confirm downloadable product files remain protected.', 'woocommerce' ),
 					'actions'     => array(
 						array(
 							'url'   => admin_url( 'admin.php?page=wc-settings&tab=products&section=download_urls' ),
@@ -384,6 +385,30 @@ class SiteHealth {
 								'_wc_notice_nonce'
 							),
 							'label' => __( 'Mark as reviewed', 'woocommerce' ),
+						),
+						array(
+							'url'     => 'https://woocommerce.com/document/approved-download-directories',
+							'label'   => __( 'Learn more about approved directories', 'woocommerce' ),
+							'new_tab' => true,
+						),
+					),
+				),
+			),
+			'woocommerce_approved_download_directories_enforcement' => array(
+				'label' => __( 'WooCommerce approved download directories', 'woocommerce' ),
+				'badge' => 'security',
+				'check' => fn() => Download_Directories::MODE_ENABLED === wc_get_container()->get( Download_Directories::class )->get_mode(),
+				'good'  => array(
+					'label'       => __( 'WooCommerce approved download directory rules are enforced', 'woocommerce' ),
+					'description' => __( 'Downloadable product files are restricted to approved directories.', 'woocommerce' ),
+				),
+				'fail'  => array(
+					'label'       => __( 'WooCommerce approved download directory rules are not enforced', 'woocommerce' ),
+					'description' => __( 'Enable approved download directory rules to control which local and remote locations can be used for downloadable product files. This reduces the risk of exposing unintended files or connecting to unapproved remote locations.', 'woocommerce' ),
+					'actions'     => array(
+						array(
+							'url'   => admin_url( 'admin.php?page=wc-settings&tab=products&section=download_urls' ),
+							'label' => __( 'Review approved directory rules', 'woocommerce' ),
 						),
 						array(
 							'url'     => 'https://woocommerce.com/document/approved-download-directories',

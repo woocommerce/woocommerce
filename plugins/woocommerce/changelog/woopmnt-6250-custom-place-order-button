@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix custom place order button (shortcode checkout) never submitting the order when a shipping address block is present. Client-side validation now only counts visible invalid fields, so the collapsed "Ship to a different address?" shipping fields no longer block submission.

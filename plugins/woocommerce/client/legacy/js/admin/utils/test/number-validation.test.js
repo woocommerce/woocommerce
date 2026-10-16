@@ -1,9 +1,9 @@
 /**
- * Test for isValidFormattedNumber method from utils/number-validation.js
+ * Tests for isValidFormattedNumber and getDecimalCount from utils/number-validation.js
  */
 
 // Import the utility function
-const { isValidFormattedNumber } = require('../number-validation');
+const { isValidFormattedNumber, getDecimalCount } = require('../number-validation');
 
 describe( 'Number Validation Utils - isValidFormattedNumber', () => {
 
@@ -50,6 +50,39 @@ describe( 'Number Validation Utils - isValidFormattedNumber', () => {
 			expect( isValidFormattedNumber( ',123', config ) ).toBe( false ); // starts with separator
 			expect( isValidFormattedNumber( '123,', config ) ).toBe( false ); // ends with separator
 			expect( isValidFormattedNumber( 'abc', config ) ).toBe( false ); // letters
+		} );
+	} );
+
+	describe( 'Weight placeholder limits', () => {
+		const config = {
+			decimalSeparator: ',',
+			thousandSeparator: '.',
+		};
+
+		test.each( [
+			'[weight min="0.5"]',
+			'10 * [weight max="1000.5"]',
+			'[weight min="0.5" max="1.5"] + 2,5',
+			'[weight min="0.5"] + [weight max="1.5"]',
+		] )( 'allows dot-decimal weight limits in %s for server validation', ( value ) => {
+			expect( isValidFormattedNumber( value, config ) ).toBe( true );
+		} );
+
+		test( 'still validates the decimal separator outside weight limits', () => {
+			expect( isValidFormattedNumber( '[weight min="0.5"] * 2.5', config ) ).toBe( false );
+		} );
+
+		test.each( [
+			'[weightless min="0.5"]',
+			'[weight-foo]',
+			'[weight.foo]',
+			'[weight-foo min="0.5"]',
+			'[weight.foo max="1.5"]',
+			'[weight min="0.5"',
+			'[weight min="0.5"] + [weightless min="1.5"]',
+			'[weight min="0.5"] + [weight max="1.5"',
+		] )( 'does not bypass number validation in %s', ( value ) => {
+			expect( isValidFormattedNumber( value, config ) ).toBe( false );
 		} );
 	} );
 
@@ -271,5 +304,55 @@ describe( 'Number Validation Utils - isValidFormattedNumber', () => {
 			expect( isValidFormattedNumber( '[weight] / 2\'75', config ) ).toBe( false );
 			expect( isValidFormattedNumber( '([qty] * 15 5)', config ) ).toBe( false );
 		} );
+	} );
+} );
+
+describe( 'Number Validation Utils - getDecimalCount', () => {
+	const dotConfig = { decimalSeparator: '.', thousandSeparator: ',' };
+	const commaConfig = { decimalSeparator: ',', thousandSeparator: '.' };
+
+	test( 'should import function from utility file', () => {
+		expect( typeof getDecimalCount ).toBe( 'function' );
+		expect( getDecimalCount.length ).toBe( 2 ); // expects 2 parameters: value and config
+	} );
+
+	test( 'should count the digits after the decimal separator', () => {
+		expect( getDecimalCount( '4.596', dotConfig ) ).toBe( 3 );
+		expect( getDecimalCount( '8.69565', dotConfig ) ).toBe( 5 );
+		expect( getDecimalCount( '4.5', dotConfig ) ).toBe( 1 );
+		expect( getDecimalCount( '4', dotConfig ) ).toBe( 0 );
+	} );
+
+	test( 'should use the configured decimal separator', () => {
+		expect( getDecimalCount( '4,596', commaConfig ) ).toBe( 3 );
+		expect( getDecimalCount( '1.234,567', commaConfig ) ).toBe( 3 );
+	} );
+
+	test( 'should ignore thousand separators and surrounding whitespace', () => {
+		expect( getDecimalCount( '1,234.567', dotConfig ) ).toBe( 3 );
+		expect( getDecimalCount( ' 4.596 ', dotConfig ) ).toBe( 3 );
+		expect( getDecimalCount( '1 234,567', { decimalSeparator: ',', thousandSeparator: ' ' } ) ).toBe( 3 );
+		expect( getDecimalCount( '1_234.567', { decimalSeparator: '.', thousandSeparator: '_' } ) ).toBe( 3 );
+	} );
+
+	test( 'should return 0 for values that are not plain numbers', () => {
+		expect( getDecimalCount( '', dotConfig ) ).toBe( 0 );
+		expect( getDecimalCount( '4.', dotConfig ) ).toBe( 0 );
+		expect( getDecimalCount( '1.2.3', dotConfig ) ).toBe( 0 );
+		expect( getDecimalCount( '10 * [qty]', dotConfig ) ).toBe( 0 );
+		expect( getDecimalCount( '10.123 * [qty]', dotConfig ) ).toBe( 0 );
+		expect( getDecimalCount( '[fee min_fee="8.69565"]', dotConfig ) ).toBe( 0 );
+	} );
+
+	test( 'should return 0 for invalid inputs without throwing', () => {
+		expect( getDecimalCount( 4.596, dotConfig ) ).toBe( 0 );
+		expect( getDecimalCount( null, dotConfig ) ).toBe( 0 );
+		expect( getDecimalCount( undefined, dotConfig ) ).toBe( 0 );
+		expect( getDecimalCount( '4.596', null ) ).toBe( 0 );
+		expect( getDecimalCount( '4.596', undefined ) ).toBe( 0 );
+		expect( getDecimalCount( '4.596', 'invalid' ) ).toBe( 0 );
+		expect( getDecimalCount( '4.596', { thousandSeparator: ',' } ) ).toBe( 0 );
+		expect( getDecimalCount( '4.596', { decimalSeparator: 1 } ) ).toBe( 0 );
+		expect( getDecimalCount( '4.596', { decimalSeparator: '' } ) ).toBe( 0 );
 	} );
 } );

@@ -59,7 +59,7 @@ class WC_Tests_Helper_API extends WC_Unit_Test_Case {
 	/**
 	 * Provides a mocked response for various paths and request methods.
 	 *
-	 * This function is called by WP_HTTP_TestCase::http_request_listner().
+	 * This function is called by WP_HTTP_TestCase::http_request_listener().
 	 *
 	 * @param array  $request Request arguments.
 	 * @param string $url URL of the request.

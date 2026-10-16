@@ -41,7 +41,7 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 				array(
 					'methods'             => \WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'install_theme' ),
-					'permission_callback' => array( $this, 'update_item_permissions_check' ),
+					'permission_callback' => array( $this, 'install_item_permissions_check' ),
 				),
 				'schema' => array( $this, 'get_item_schema' ),
 			)
@@ -59,6 +59,21 @@ class OnboardingThemes extends \WC_REST_Data_Controller {
 				'schema' => array( $this, 'get_item_schema' ),
 			)
 		);
+	}
+
+	/**
+	 * Check if a given request has access to install themes.
+	 *
+	 * @param \WP_REST_Request<array<string, mixed>> $request Full details about the request.
+	 * @return \WP_Error|bool
+	 *
+	 * @since 11.0.1
+	 */
+	public function install_item_permissions_check( $request ) {
+		if ( ! current_user_can( 'install_themes' ) ) {
+			return new \WP_Error( 'woocommerce_rest_cannot_update', __( 'Sorry, you cannot install themes.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+		}
+		return true;
 	}
 
 	/**

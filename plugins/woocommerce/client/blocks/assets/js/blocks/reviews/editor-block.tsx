@@ -26,9 +26,11 @@ interface EditorBlockProps {
 	reviews: Review[];
 	totalReviews: number;
 	error?: ErrorObject;
+	hasReviewsHiddenByOffset: boolean;
 	isLoading: boolean;
 	noReviewsPlaceholder: React.ComponentType< {
 		attributes: EditorBlockProps[ 'attributes' ];
+		reason: 'no-reviews' | 'offset';
 	} >;
 }
 
@@ -40,6 +42,7 @@ class EditorBlock extends Component< EditorBlockProps > {
 		const {
 			attributes,
 			error,
+			hasReviewsHiddenByOffset,
 			isLoading,
 			noReviewsPlaceholder: NoReviewsPlaceholder,
 			reviews,
@@ -57,7 +60,14 @@ class EditorBlock extends Component< EditorBlockProps > {
 		}
 
 		if ( reviews.length === 0 && ! isLoading ) {
-			return <NoReviewsPlaceholder attributes={ attributes } />;
+			return (
+				<NoReviewsPlaceholder
+					attributes={ attributes }
+					reason={
+						hasReviewsHiddenByOffset ? 'offset' : 'no-reviews'
+					}
+				/>
+			);
 		}
 
 		const reviewRatingsEnabled = getSetting( 'reviewRatingsEnabled', true );

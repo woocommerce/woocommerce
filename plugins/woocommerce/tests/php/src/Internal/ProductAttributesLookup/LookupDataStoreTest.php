@@ -7,10 +7,10 @@ namespace Automattic\WooCommerce\Tests\Internal\ProductAttributesLookup;
 
 use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
-use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Testing\Tools\FakeQueue;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\ProductStatus;
 
 /**
  * Tests for the LookupDataStore class.
@@ -45,6 +45,8 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
 
+		self::$attributes = array();
+
 		for ( $i = 1; $i <= 3; $i++ ) {
 			$taxonomy_id   = wc_create_attribute(
 				array(
@@ -70,12 +72,12 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 	 * Runs after all the tests.
 	 */
 	public static function tearDownAfterClass(): void {
-		parent::tearDownAfterClass();
-
 		foreach ( self::$attributes as $attribute ) {
 			wc_delete_attribute( $attribute['id'] );
 			unregister_taxonomy( $attribute['name'] );
 		}
+
+		parent::tearDownAfterClass();
 	}
 
 	/**
@@ -87,7 +89,8 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 		parent::setUp();
 
 		$this->lookup_table_name = $wpdb->prefix . 'wc_product_attributes_lookup';
-		$this->sut               = new LookupDataStore();
+		delete_option( 'woocommerce_attribute_lookup_optimized_updates' );
+		$this->sut = new LookupDataStore();
 
 		$this->reset_legacy_proxy_mocks();
 		$this->register_legacy_proxy_class_mocks(
@@ -96,16 +99,7 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 			)
 		);
 
-		$this->get_instance_of( DataRegenerator::class )->truncate_lookup_table();
-	}
-
-	/**
-	 * Runs after each test.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-
-		delete_option( 'woocommerce_attribute_lookup_optimized_updates' );
+		$this->empty_lookup_table();
 	}
 
 	/**
@@ -192,6 +186,61 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 		sort( $expected );
 		sort( $actual );
 		$this->assertEquals( $expected, $actual );
+	}
+
+	/**
+	 * @testdox `create_data_for_product` removes stale data for products that no longer exist.
+	 *
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $use_optimized_db_access 'true' to use optimized db access for the table update.
+	 */
+	public function test_create_data_for_product_removes_data_for_deleted_product( bool $use_optimized_db_access ): void {
+		$product = new \WC_Product_Simple();
+		$this->save( $product );
+		$product_id = $product->get_id();
+		$this->insert_lookup_table_data( $product_id, $product_id, self::$attributes[0]['name'], self::$attributes[0]['term_ids'][0], false, true );
+		$product->delete( true );
+
+		$this->assertFalse( wc_get_product( $product_id ) );
+		$this->assertCount( 1, $this->get_lookup_table_data() );
+
+		$this->sut->create_data_for_product( $product_id, $use_optimized_db_access );
+
+		$this->assertFalse( $this->sut->get_last_create_operation_failed() );
+		$this->assertEmpty( $this->get_lookup_table_data() );
+	}
+
+	/**
+	 * @testdox `create_data_for_product` removes stale data for variations that no longer exist.
+	 *
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $use_optimized_db_access 'true' to use optimized db access for the table update.
+	 */
+	public function test_create_data_for_product_removes_data_for_deleted_variation( bool $use_optimized_db_access ): void {
+		$parent = new \WC_Product_Variable();
+		$this->save( $parent );
+		$parent_id = $parent->get_id();
+
+		$variation = new \WC_Product_Variation();
+		$variation->set_parent_id( $parent_id );
+		$this->save( $variation );
+		$variation_id = $variation->get_id();
+
+		// Variation rows are keyed by the parent id in 'product_or_parent_id'.
+		$this->insert_lookup_table_data( $variation_id, $parent_id, self::$attributes[0]['name'], self::$attributes[0]['term_ids'][0], true, true );
+		$variation->delete( true );
+
+		$this->assertFalse( wc_get_product( $variation_id ) );
+		$this->assertCount( 1, $this->get_lookup_table_data() );
+
+		$this->sut->create_data_for_product( $variation_id, $use_optimized_db_access );
+
+		$this->assertFalse( $this->sut->get_last_create_operation_failed() );
+		$this->assertEmpty( $this->get_lookup_table_data() );
 	}
 
 	/**
@@ -441,11 +490,9 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 
 		switch ( $deletion_mechanism ) {
 			case 'wp_trash_post':
-                // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 				do_action( 'wp_trash_post', $product );
 				break;
 			case 'delete_post':
-                // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 				do_action( 'delete_post', $product->get_id() );
 				break;
 			case 'delete_method_in_product':
@@ -804,6 +851,78 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The shared fixture helper updates the lookup table synchronously without scheduling an action.
+	 */
+	public function test_direct_fixture_helper_updates_lookup_table_without_scheduling(): void {
+		$attribute = self::$attributes[0];
+		$product   = new \WC_Product_Simple();
+		$product->set_stock_status( ProductStockStatus::IN_STOCK );
+		$this->set_product_attributes(
+			$product,
+			array(
+				$attribute['name'] => array(
+					'id'      => $attribute['id'],
+					'options' => array( $attribute['term_ids'][0] ),
+				),
+			)
+		);
+
+		self::with_direct_product_attribute_lookup_updates(
+			static function () use ( $product ) {
+				$product->save();
+			}
+		);
+
+		$this->assertCount( 1, $this->get_lookup_table_data() );
+		$this->assertCount( 0, WC()->get_instance_of( \WC_Queue::class )->get_methods_called() );
+	}
+
+	/**
+	 * @testdox The shared fixture helper preserves nested direct-update scopes and restores the option afterward.
+	 */
+	public function test_direct_fixture_helper_restores_nested_update_mode(): void {
+		update_option( 'woocommerce_attribute_lookup_direct_updates', 'no' );
+
+		self::with_direct_product_attribute_lookup_updates(
+			function () {
+				$this->assertSame( 'yes', get_option( 'woocommerce_attribute_lookup_direct_updates' ) );
+
+				self::with_direct_product_attribute_lookup_updates(
+					function () {
+						$this->assertSame( 'yes', get_option( 'woocommerce_attribute_lookup_direct_updates' ) );
+					}
+				);
+
+				$this->assertSame( 'yes', get_option( 'woocommerce_attribute_lookup_direct_updates' ) );
+			}
+		);
+
+		$this->assertSame( 'no', get_option( 'woocommerce_attribute_lookup_direct_updates' ) );
+	}
+
+	/**
+	 * @testdox `on_product_changed` schedules nothing for products that no longer exist.
+	 */
+	public function test_on_product_changed_skips_deleted_product(): void {
+		$this->set_direct_update_option( false );
+
+		$product = new \WC_Product_Simple();
+		$this->save( $product );
+		$product_id = $product->get_id();
+		$product->delete( true );
+
+		$this->assertFalse( wc_get_product( $product_id ) );
+
+		// Deleting the product schedules a lookup data deletion, that's not what's being tested here.
+		$queue = WC()->get_instance_of( \WC_Queue::class );
+		$queue->clear_methods_called();
+
+		$this->sut->on_product_changed( $product_id );
+
+		$this->assertEmpty( $queue->get_methods_called(), 'No lookup table update should be scheduled for a deleted product.' );
+	}
+
+	/**
 	 * Data provider for on_product_changed tests with direct update option set.
 	 *
 	 * @return array[]
@@ -897,10 +1016,10 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 		$another_product_id = $product_id + 100;
 
 		// The product creation will have populated the table, but we want to start clean.
-		$this->get_instance_of( DataRegenerator::class )->truncate_lookup_table();
+		$this->empty_lookup_table();
 
 		$this->insert_lookup_table_data( $another_product_id, $another_product_id, $another_attribute['name'], $another_attribute['term_ids'][0], false, true );
-		if ( 'creation' !== $expected_action && 'deletion' !== $expected_action ) {
+		if ( 'creation' !== $expected_action ) {
 			$this->insert_lookup_table_data( $product_id, $product_id, $attribute['name'], $attribute['term_ids'][0], false, false );
 		}
 
@@ -995,10 +1114,10 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 		$another_product_id = $variation_id + 100;
 
 		// The product creation will have populated the table, but we want to start clean.
-		$this->get_instance_of( DataRegenerator::class )->truncate_lookup_table();
+		$this->empty_lookup_table();
 
 		$this->insert_lookup_table_data( $another_product_id, $another_product_id, $another_attribute['name'], $another_attribute['term_ids'][0], false, true );
-		if ( 'creation' !== $expected_action && 'deletion' !== $expected_action ) {
+		if ( 'creation' !== $expected_action ) {
 			$this->insert_lookup_table_data( $product_id, $product_id, $non_variation_attribute['name'], $non_variation_attribute['term_ids'][0], false, false );
 			$this->insert_lookup_table_data( $variation_id, $product_id, $variation_attribute['name'], $variation_attribute['term_ids'][0], true, false );
 		}
@@ -1104,10 +1223,10 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 		$another_product_id = $variation_id + 100;
 
 		// The product creation will have populated the table, but we want to start clean.
-		$this->get_instance_of( DataRegenerator::class )->truncate_lookup_table();
+		$this->empty_lookup_table();
 
 		$this->insert_lookup_table_data( $another_product_id, $another_product_id, $another_attribute['name'], $another_attribute['term_ids'][0], false, true );
-		if ( 'creation' !== $expected_action && 'deletion' !== $expected_action ) {
+		if ( 'creation' !== $expected_action ) {
 			$this->insert_lookup_table_data( $variation_id, $product_id, $variation_attribute['name'], $variation_attribute['term_ids'][0], true, false );
 		}
 
@@ -1143,6 +1262,350 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 		sort( $expected );
 		sort( $actual );
 		$this->assertEquals( $expected, $actual );
+	}
+
+	/**
+	 * @testdox 'on_product_changed' regenerates the data for a variation when its status changes and the "direct updates" option is on.
+	 *
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $use_optimized_db_access 'true' to use optimized db access for the table update.
+	 */
+	public function test_on_variation_status_changed_regenerates_data( bool $use_optimized_db_access ) {
+		if ( $use_optimized_db_access ) {
+			update_option( 'woocommerce_attribute_lookup_optimized_updates', 'yes' );
+			$this->sut = new LookupDataStore();
+		}
+		$this->set_direct_update_option( true );
+
+		list( $product, $variation ) = $this->create_variable_product_with_one_variation();
+		$this->empty_lookup_table();
+
+		$this->sut->on_product_changed( $variation, array( 'status' => ProductStatus::PUBLISH ) );
+
+		$this->assertEquals( array( $this->variation_lookup_row( $product, $variation ) ), $this->get_lookup_table_data() );
+	}
+
+	/**
+	 * @testdox 'on_product_changed' ignores a status change of a product that is not a variation.
+	 */
+	public function test_on_product_status_changed_does_nothing() {
+		$this->set_direct_update_option( true );
+
+		list( $product ) = $this->create_variable_product_with_one_variation();
+		$this->empty_lookup_table();
+
+		$this->sut->on_product_changed( $product, array( 'status' => ProductStatus::DRAFT ) );
+
+		$this->assertEmpty( $this->get_lookup_table_data() );
+	}
+
+	/**
+	 * @testdox `create_data_for_product` creates no entries for variations that are not published.
+	 *
+	 * @testWith ["private", false]
+	 *           ["private", true]
+	 *           ["draft", false]
+	 *           ["draft", true]
+	 *           ["pending", false]
+	 *           ["pending", true]
+	 *
+	 * @param string $status The status of the variation that is not published.
+	 * @param bool   $use_optimized_db_access 'true' to use optimized db access for the table update.
+	 */
+	public function test_create_data_for_variable_product_skips_unpublished_variations( string $status, bool $use_optimized_db_access ) {
+		list( $product, $published_variation ) = $this->create_variable_product_with_one_variation();
+
+		$unpublished_variation = new \WC_Product_Variation();
+		$unpublished_variation->set_attributes( array( self::$attributes[1]['name'] => 'term_2_2' ) );
+		$unpublished_variation->set_stock_status( ProductStockStatus::IN_STOCK );
+		$unpublished_variation->set_parent_id( $product->get_id() );
+		$unpublished_variation->set_status( $status );
+		$unpublished_variation->save();
+
+		$product->set_children( array( $published_variation->get_id(), $unpublished_variation->get_id() ) );
+		\WC_Product_Variable::sync( $product );
+		$this->empty_lookup_table();
+
+		$this->sut->create_data_for_product( $product, $use_optimized_db_access );
+
+		$this->assertEquals( array( $this->variation_lookup_row( $product, $published_variation ) ), $this->get_lookup_table_data() );
+	}
+
+	/**
+	 * @testdox `create_data_for_product` creates no entries for a variation that is not published.
+	 *
+	 * @testWith ["private", false]
+	 *           ["private", true]
+	 *           ["draft", false]
+	 *           ["draft", true]
+	 *           ["pending", false]
+	 *           ["pending", true]
+	 *           ["trash", false]
+	 *           ["trash", true]
+	 *
+	 * @param string $status The status of the variation that is not published.
+	 * @param bool   $use_optimized_db_access 'true' to use optimized db access for the table update.
+	 */
+	public function test_create_data_for_unpublished_variation_creates_nothing( string $status, bool $use_optimized_db_access ) {
+		list( $product, $variation ) = $this->create_variable_product_with_one_variation();
+		$variation->set_status( $status );
+		$variation->save();
+		$this->empty_lookup_table();
+		$this->insert_lookup_table_data( $variation->get_id(), $product->get_id(), self::$attributes[1]['name'], self::$attributes[1]['term_ids'][0], true, true );
+
+		$this->sut->create_data_for_product( $variation, $use_optimized_db_access );
+
+		$this->assertEmpty( $this->get_lookup_table_data(), 'Stale rows of an unpublished variation are removed and none are recreated.' );
+	}
+
+	/**
+	 * @testdox Disabling a variation removes its entries and re-enabling it recreates them, when the "direct updates" option is on.
+	 */
+	public function test_disabling_and_enabling_a_variation_updates_its_data() {
+		$this->set_direct_update_option( true );
+
+		list( $product, $variation ) = $this->create_variable_product_with_one_variation();
+		$expected_row                = $this->variation_lookup_row( $product, $variation );
+		$this->assertEquals( array( $expected_row ), $this->get_lookup_table_data(), 'Saving a published variation creates its row.' );
+
+		$variation->set_status( ProductStatus::PRIVATE );
+		$variation->save();
+		$this->assertEmpty( $this->get_lookup_table_data(), 'Disabling the variation removes its row.' );
+
+		$variation->set_status( ProductStatus::PUBLISH );
+		$variation->save();
+		$this->assertEquals( array( $expected_row ), $this->get_lookup_table_data(), 'Re-enabling the variation recreates its row.' );
+	}
+
+	/**
+	 * @testdox `create_data_for_product` creates all the entries for a scheduled or auto-draft variable product with published variations.
+	 *
+	 * @testWith ["future", false]
+	 *           ["future", true]
+	 *           ["auto-draft", false]
+	 *           ["auto-draft", true]
+	 *
+	 * @param string $status The status of the variable product.
+	 * @param bool   $use_optimized_db_access 'true' to use optimized db access for the table update.
+	 */
+	public function test_create_data_for_unpublished_variable_product_creates_all_entries( string $status, bool $use_optimized_db_access ): void {
+		list( $product, $variation_ids ) = $this->create_variable_product_with_variations( $status, 2 );
+		$this->empty_lookup_table();
+
+		$this->sut->create_data_for_product( $product, $use_optimized_db_access );
+
+		$this->assertFalse( $this->sut->get_last_create_operation_failed(), 'The operation succeeds.' );
+		$this->assertEqualsCanonicalizing( $this->variable_product_lookup_rows( $product, $variation_ids ), $this->get_lookup_table_data() );
+	}
+
+	/**
+	 * @testdox `create_data_for_product` with optimized db access creates all the entries of a scheduled variable product that need more than one INSERT batch.
+	 */
+	public function test_create_data_for_scheduled_variable_product_with_many_variations_creates_all_entries(): void {
+		list( $product, $variation_ids ) = $this->create_variable_product_with_variations( ProductStatus::FUTURE, 1 );
+		// The optimized path reads only posts and postmeta, so these variations are seeded directly:
+		// 101 variation rows and the parent row take two 100-row batches.
+		$attribute_meta_key = 'attribute_' . self::$attributes[1]['name'];
+		for ( $i = 0; $i < 100; $i++ ) {
+			$variation_ids[] = wp_insert_post(
+				array(
+					'post_type'   => 'product_variation',
+					'post_status' => ProductStatus::PUBLISH,
+					'post_parent' => $product->get_id(),
+					'meta_input'  => array(
+						$attribute_meta_key => 'term_2_1',
+						'_stock_status'     => ProductStockStatus::IN_STOCK,
+					),
+				)
+			);
+		}
+		$this->empty_lookup_table();
+
+		$this->sut->create_data_for_product( $product->get_id(), true );
+
+		$this->assertFalse( $this->sut->get_last_create_operation_failed(), 'The operation succeeds.' );
+		$this->assertEqualsCanonicalizing( $this->variable_product_lookup_rows( $product, $variation_ids ), $this->get_lookup_table_data() );
+	}
+
+	/**
+	 * @testdox The entries regenerated for a scheduled variable product are kept when the product is published.
+	 *
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $use_optimized_db_access 'true' to use optimized db access for the table update.
+	 */
+	public function test_entries_of_scheduled_variable_product_are_kept_when_it_is_published( bool $use_optimized_db_access ): void {
+		list( $product, $variation_ids ) = $this->create_variable_product_with_variations( ProductStatus::FUTURE, 2 );
+		$this->empty_lookup_table();
+		$expected_rows = $this->variable_product_lookup_rows( $product, $variation_ids );
+
+		if ( $use_optimized_db_access ) {
+			update_option( 'woocommerce_attribute_lookup_optimized_updates', 'yes' );
+			$this->sut = new LookupDataStore();
+		}
+		$this->set_direct_update_option( true );
+
+		$this->sut->on_product_changed( $product, array( 'attributes' => array() ) );
+		$this->assertEqualsCanonicalizing( $expected_rows, $this->get_lookup_table_data(), 'An attribute change regenerates the entries of the scheduled product.' );
+
+		wp_publish_post( $product->get_id() );
+
+		$this->assertSame( ProductStatus::PUBLISH, get_post_status( $product->get_id() ) );
+		$this->assertEqualsCanonicalizing( $expected_rows, $this->get_lookup_table_data(), 'Publishing the product keeps its entries.' );
+	}
+
+	/**
+	 * @testdox `create_data_for_product` with optimized db access creates nothing, without failing, for a variable product in a status it doesn't cover.
+	 */
+	public function test_create_data_for_variable_product_in_uncovered_status_creates_nothing(): void {
+		global $wpdb;
+
+		list( $product ) = $this->create_variable_product_with_variations( ProductStatus::PUBLISH, 2 );
+		// Trashing a product through WordPress trashes its variations too, so only the parent status is changed here.
+		$wpdb->update( $wpdb->posts, array( 'post_status' => ProductStatus::TRASH ), array( 'ID' => $product->get_id() ) );
+		clean_post_cache( $product->get_id() );
+		$this->empty_lookup_table();
+
+		$this->sut->create_data_for_product( $product->get_id(), true );
+
+		$this->assertFalse( $this->sut->get_last_create_operation_failed(), 'The product is not processed as a variation of itself.' );
+		$this->assertEmpty( $this->get_lookup_table_data() );
+	}
+
+	/**
+	 * Create a variable product with a non-variation attribute (self::$attributes[0], first term), a variation
+	 * attribute (self::$attributes[1], all three terms), and published, in-stock variations defined by 'term_2_1'.
+	 *
+	 * @param string $status The status of the variable product; a 'future' product is scheduled a week ahead.
+	 * @param int    $variations_count How many variations to create.
+	 * @return array The product and the ids of its variations: [ \WC_Product_Variable, int[] ].
+	 */
+	private function create_variable_product_with_variations( string $status, int $variations_count ): array {
+		$product = new \WC_Product_Variable();
+		$this->set_product_attributes(
+			$product,
+			array(
+				self::$attributes[0]['name'] => array(
+					'id'      => self::$attributes[0]['id'],
+					'options' => array( self::$attributes[0]['term_ids'][0] ),
+				),
+				self::$attributes[1]['name'] => array(
+					'id'        => self::$attributes[1]['id'],
+					'options'   => self::$attributes[1]['term_ids'],
+					'variation' => true,
+				),
+			)
+		);
+		$product->set_stock_status( ProductStockStatus::IN_STOCK );
+		$product->set_status( $status );
+		if ( ProductStatus::FUTURE === $status ) {
+			$product->set_date_created( time() + WEEK_IN_SECONDS );
+		}
+		$product->save();
+
+		$variation_ids = array();
+		for ( $i = 0; $i < $variations_count; $i++ ) {
+			$variation = new \WC_Product_Variation();
+			$variation->set_attributes( array( self::$attributes[1]['name'] => 'term_2_1' ) );
+			$variation->set_stock_status( ProductStockStatus::IN_STOCK );
+			$variation->set_parent_id( $product->get_id() );
+			$variation_ids[] = $variation->save();
+		}
+
+		$product->set_children( $variation_ids );
+		\WC_Product_Variable::sync( $product );
+
+		return array( $product, $variation_ids );
+	}
+
+	/**
+	 * The lookup table rows expected for a product created by create_variable_product_with_variations.
+	 *
+	 * @param \WC_Product_Variable $product The parent product.
+	 * @param int[]                $variation_ids The ids of the variations.
+	 * @return array Rows in the format returned by get_lookup_table_data.
+	 */
+	private function variable_product_lookup_rows( \WC_Product_Variable $product, array $variation_ids ): array {
+		$rows = array(
+			array(
+				'product_id'             => $product->get_id(),
+				'product_or_parent_id'   => $product->get_id(),
+				'taxonomy'               => self::$attributes[0]['name'],
+				'term_id'                => self::$attributes[0]['term_ids'][0],
+				'is_variation_attribute' => 0,
+				'in_stock'               => 1,
+			),
+		);
+
+		foreach ( $variation_ids as $variation_id ) {
+			$rows[] = array(
+				'product_id'             => $variation_id,
+				'product_or_parent_id'   => $product->get_id(),
+				'taxonomy'               => self::$attributes[1]['name'],
+				'term_id'                => self::$attributes[1]['term_ids'][0],
+				'is_variation_attribute' => 1,
+				'in_stock'               => 1,
+			);
+		}
+
+		return $rows;
+	}
+
+	/**
+	 * Create a published variable product with one variation attribute (self::$attributes[1], all three terms)
+	 * and one published, in-stock variation defined by the first term ('term_2_1').
+	 *
+	 * @return array The product and the variation: [ \WC_Product_Variable, \WC_Product_Variation ].
+	 */
+	private function create_variable_product_with_one_variation(): array {
+		$variation_attribute = self::$attributes[1];
+
+		$product = new \WC_Product_Variable();
+		$this->set_product_attributes(
+			$product,
+			array(
+				$variation_attribute['name'] => array(
+					'id'        => $variation_attribute['id'],
+					'options'   => $variation_attribute['term_ids'],
+					'variation' => true,
+				),
+			)
+		);
+		$product->set_stock_status( ProductStockStatus::IN_STOCK );
+		$product->save();
+
+		$variation = new \WC_Product_Variation();
+		$variation->set_attributes( array( $variation_attribute['name'] => 'term_2_1' ) );
+		$variation->set_stock_status( ProductStockStatus::IN_STOCK );
+		$variation->set_parent_id( $product->get_id() );
+		$variation->save();
+
+		$product->set_children( array( $variation->get_id() ) );
+		\WC_Product_Variable::sync( $product );
+
+		return array( $product, $variation );
+	}
+
+	/**
+	 * The lookup table row expected for a published, in-stock variation created by
+	 * create_variable_product_with_one_variation.
+	 *
+	 * @param \WC_Product_Variable  $product The parent product.
+	 * @param \WC_Product_Variation $variation The variation.
+	 * @return array Row in the format returned by get_lookup_table_data.
+	 */
+	private function variation_lookup_row( \WC_Product_Variable $product, \WC_Product_Variation $variation ): array {
+		return array(
+			'product_id'             => $variation->get_id(),
+			'product_or_parent_id'   => $product->get_id(),
+			'taxonomy'               => self::$attributes[1]['name'],
+			'term_id'                => self::$attributes[1]['term_ids'][0],
+			'is_variation_attribute' => 1,
+			'in_stock'               => 1,
+		);
 	}
 
 	/**
@@ -1226,6 +1689,15 @@ class LookupDataStoreTest extends \WC_Unit_Test_Case {
 
 		$queue = WC()->get_instance_of( \WC_Queue::class );
 		$queue->clear_methods_called();
+	}
+
+	/**
+	 * Empty the lookup table inside the current test transaction.
+	 */
+	private function empty_lookup_table(): void {
+		global $wpdb;
+
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_product_attributes_lookup" );
 	}
 
 	/**

@@ -17,6 +17,7 @@ import { server, http, HttpResponse } from '@woocommerce/test-utils/msw';
 /**
  * Internal dependencies
  */
+import { defaultCartState } from '@woocommerce/block-data/cart/default-state';
 import Fields from '../inner-blocks/checkout-fields-block/frontend';
 import ExpressPayment from '../inner-blocks/checkout-express-payment-block/block';
 import ContactInformation from '../inner-blocks/checkout-contact-information-block/frontend';
@@ -40,11 +41,9 @@ import Fee from '../inner-blocks/checkout-order-summary-fee/frontend';
 import Discount from '../inner-blocks/checkout-order-summary-discount/frontend';
 import Shipping from '../inner-blocks/checkout-order-summary-shipping/frontend';
 import Taxes from '../inner-blocks/checkout-order-summary-taxes/frontend';
-import { defaultCartState } from '../../../data/cart/default-state';
 import Checkout from '../block';
 
 jest.mock( '@wordpress/data', () =>
-	// eslint-disable-next-line @typescript-eslint/no-var-requires -- Must use require due to Jest mock hoisting
 	require( '@woocommerce/blocks-test-utils/mock-editor-store' ).mockWordPressDataWithEditorStore()
 );
 
@@ -559,11 +558,14 @@ describe( 'Testing Checkout', () => {
 			}
 		} );
 
-		// wait for form to be ready
-		await waitFor( () =>
-			expect(
-				screen.getByRole( 'button', { name: /Place order/i } )
-			).toBeVisible()
+		// Wait for the form to be ready. Changing the country recalculates the cart, which
+		// disables the button until the push settles, so allow for the 1.5s push debounce.
+		await waitFor(
+			() =>
+				expect(
+					screen.getByRole( 'button', { name: /Place order/i } )
+				).toBeEnabled(),
+			{ timeout: 5000 }
 		);
 
 		// Submit the form

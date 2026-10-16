@@ -1,5 +1,0 @@
-Significance: patch
-Type: fix
-Comment: Preserve correct aspect ratio on Product Images with imageSizing set to cropped
-
-

@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add image_size query parameter to the products and product variations REST API endpoints, allowing consumers to request a specific registered WordPress image size.

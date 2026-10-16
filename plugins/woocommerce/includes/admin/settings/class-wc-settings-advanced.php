@@ -81,7 +81,7 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 			array(
 				array(
 					'title' => __( 'Page setup', 'woocommerce' ),
-					'desc'  => __( 'These pages need to be set so that WooCommerce knows where to send users to checkout.', 'woocommerce' ),
+					'desc'  => __( 'Select the pages WooCommerce uses for the cart, checkout, accounts, and store policies.', 'woocommerce' ),
 					'type'  => 'title',
 					'id'    => 'advanced_page_options',
 				),
@@ -155,6 +155,31 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 					'css'      => 'min-width:300px;',
 					'type'     => 'single_select_page_with_search',
 					'args'     => array( 'exclude' => wc_get_page_id( 'checkout' ) ),
+					'desc_tip' => true,
+					'autoload' => false,
+				),
+
+				array(
+					'title'    => __( 'Refund and returns policy', 'woocommerce' ),
+					'desc'     => __( 'Select the page describing your store\'s refund and returns policy. WooCommerce shares it with search engines once it is publicly available.', 'woocommerce' ),
+					'id'       => 'woocommerce_refund_returns_page_id',
+					'default'  => '',
+					'class'    => 'wc-page-search',
+					'css'      => 'min-width:300px;',
+					'type'     => 'single_select_page_with_search',
+					'args'     => array(
+						'exclude' => array_values(
+							array_filter(
+								array(
+									wc_get_page_id( 'cart' ),
+									wc_get_page_id( 'checkout' ),
+									wc_get_page_id( 'shop' ),
+									wc_get_page_id( 'myaccount' ),
+								),
+								static fn ( $page_id ) => $page_id > 0
+							)
+						),
+					),
 					'desc_tip' => true,
 					'autoload' => false,
 				),

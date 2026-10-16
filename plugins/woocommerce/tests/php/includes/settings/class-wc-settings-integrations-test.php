@@ -18,7 +18,7 @@ class WC_Settings_Integrations_Test extends WC_Settings_Unit_Test_Case {
 	/**
 	 * @testdox 'get_sections' sets the current section to the id of the first integration if it's not set to anything.
 	 */
-	public function test_get_sections_sets_current_section_to_first_available_inegration_if_not_set() {
+	public function test_get_sections_sets_current_section_to_first_available_integration_if_not_set() {
 		global $current_section;
 
 		$integrations = array(

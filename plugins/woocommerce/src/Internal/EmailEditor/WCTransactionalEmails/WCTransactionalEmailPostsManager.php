@@ -11,6 +11,17 @@ class WCTransactionalEmailPostsManager {
 	const WC_OPTION_NAME = 'woocommerce_email_templates_%_post_id';
 
 	/**
+	 * Post meta key storing the email type on lazily created `woo_email` posts.
+	 *
+	 * Unpublished posts (auto-draft/draft) have no option mapping yet, so the
+	 * meta is the only way to resolve their email type.
+	 *
+	 * @var string
+	 * @since 11.1.0
+	 */
+	const EMAIL_TYPE_META_KEY = '_wc_email_type';
+
+	/**
 	 * Cache group for email template lookups.
 	 *
 	 * @var string
@@ -44,6 +55,13 @@ class WCTransactionalEmailPostsManager {
 	 * @var array<string, string|null>
 	 */
 	private $email_class_name_cache = array();
+
+	/**
+	 * Whether all mapping options were already loaded into the options cache during this request.
+	 *
+	 * @var bool
+	 */
+	private $mapping_options_primed = false;
 
 	/**
 	 * Gets the singleton instance of the class.
@@ -173,7 +191,21 @@ class WCTransactionalEmailPostsManager {
 		);
 
 		if ( empty( $option_name ) ) {
-			return null;
+			// Unpublished posts (auto-draft/draft) have no option mapping yet; fall back to post meta.
+			// The result is intentionally NOT stored in the shared caches:
+			// `get_email_template_post_id()` reverse-searches the in-memory cache
+			// and must only ever see mapped posts, and the object cache has no
+			// invalidation for scratchpad deletion. Repeated calls are cheap via
+			// the post meta cache.
+			$email_type = get_post_meta( $post_id, self::EMAIL_TYPE_META_KEY, true );
+			if ( empty( $email_type ) || ! is_string( $email_type ) ) {
+				// Cache the full miss in memory so repeated lookups within the
+				// request don't rerun the options LIKE scan.
+				$this->post_id_to_email_type_cache[ $post_id ] = null;
+				return null;
+			}
+
+			return $email_type;
 		}
 
 		$email_type = $this->get_email_type_from_option_name( $option_name );
@@ -238,6 +270,8 @@ class WCTransactionalEmailPostsManager {
 			return $post_id_from_cache;
 		}
 
+		$this->maybe_prime_mapping_option_caches();
+
 		$option_name = $this->get_option_name( $email_type );
 		$post_id     = get_option( $option_name );
 
@@ -254,13 +288,22 @@ class WCTransactionalEmailPostsManager {
 	/**
 	 * Deletes the post ID for a specific email template type.
 	 *
-	 * @param string $email_type The type of email template e.g. 'customer_new_account' from the WC_Email->id property.
+	 * @param string   $email_type      The type of email template e.g. 'customer_new_account' from the WC_Email->id property.
+	 * @param int|null $only_if_post_id When given, the mapping is only deleted if it points at this post ID.
+	 *                                  Guards against deleting the mapping of a different post for the same
+	 *                                  email type (e.g. when an unpublished scratchpad post is deleted while
+	 *                                  another post is mapped). Compared against the persisted option value.
+	 *                                  Added in 11.1.0.
 	 */
-	public function delete_email_template( $email_type ) {
+	public function delete_email_template( $email_type, $only_if_post_id = null ) {
 		$option_name = $this->get_option_name( $email_type );
 		$post_id     = get_option( $option_name );
 
 		if ( ! $post_id ) {
+			return;
+		}
+
+		if ( null !== $only_if_post_id && (int) $post_id !== (int) $only_if_post_id ) {
 			return;
 		}
 
@@ -324,6 +367,27 @@ class WCTransactionalEmailPostsManager {
 	 */
 	private function get_option_name( $email_type ) {
 		return str_replace( '%', $email_type, self::WC_OPTION_NAME );
+	}
+
+	/**
+	 * Prime the option caches for all known email type mappings in one query.
+	 *
+	 * With lazy post creation most mappings don't exist, and without priming
+	 * each lookup of a missing mapping costs one SELECT on sites without a
+	 * persistent object cache. Runs once per request.
+	 */
+	private function maybe_prime_mapping_option_caches(): void {
+		if ( $this->mapping_options_primed || ! function_exists( 'wp_prime_option_caches' ) ) {
+			return;
+		}
+		$this->mapping_options_primed = true;
+
+		wp_prime_option_caches(
+			array_map(
+				array( $this, 'get_option_name' ),
+				WCTransactionalEmails::get_transactional_emails()
+			)
+		);
 	}
 
 	/**

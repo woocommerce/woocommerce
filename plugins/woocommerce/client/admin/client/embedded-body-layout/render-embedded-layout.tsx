@@ -77,10 +77,10 @@ const findWrapElement = ( wpBody: HTMLElement ) => {
  */
 const renderNotices = ( wpBody: HTMLElement, wrap: Element ) => {
 	const noticeContainer = document.createElement( 'div' );
+	// Preserve the wrap's initial top spacing when this container breaks its adjacent-sibling selector.
+	noticeContainer.className = 'woocommerce-layout';
 	createRoot( wpBody.insertBefore( noticeContainer, wrap ) ).render(
-		<div className="woocommerce-layout">
-			<NoticeArea />
-		</div>
+		<NoticeArea />
 	);
 };
 

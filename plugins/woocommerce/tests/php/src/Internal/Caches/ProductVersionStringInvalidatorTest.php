@@ -415,7 +415,6 @@ class ProductVersionStringInvalidatorTest extends \WC_Unit_Test_Case {
 		$this->assertNotNull( $version_before, 'Version string should exist before stock update' );
 
 		// Trigger stock update hook.
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'woocommerce_updated_product_stock', $product_id );
 
 		$version_after = $this->version_generator->get_version( "product_{$product_id}", false );
@@ -436,7 +435,6 @@ class ProductVersionStringInvalidatorTest extends \WC_Unit_Test_Case {
 		$this->assertNotNull( $version_before, 'Version string should exist before price update' );
 
 		// Trigger price update hook.
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'woocommerce_updated_product_price', $product_id );
 
 		$version_after = $this->version_generator->get_version( "product_{$product_id}", false );
@@ -457,7 +455,6 @@ class ProductVersionStringInvalidatorTest extends \WC_Unit_Test_Case {
 		$this->assertNotNull( $version_before, 'Version string should exist before sales update' );
 
 		// Trigger sales update hook.
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'woocommerce_updated_product_sales', $product_id );
 
 		$version_after = $this->version_generator->get_version( "product_{$product_id}", false );
@@ -503,7 +500,6 @@ class ProductVersionStringInvalidatorTest extends \WC_Unit_Test_Case {
 		$this->assertNotNull( $version_before, 'Version string should exist before attribute term update' );
 
 		// Trigger edited_term hook.
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'edited_term', $red_term['term_id'], $red_term['term_taxonomy_id'], 'pa_test_color' );
 
 		$version_after = $this->version_generator->get_version( "product_{$product->get_id()}", false );

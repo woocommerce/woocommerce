@@ -101,11 +101,25 @@ const program = new Command( 'ci-jobs' )
 			.filter( Boolean );
 
 		const reports = [ ...new Set( resultsBlobNames ) ];
+		const sharedPluginBuildNeeded = jobs.test.some(
+			( job ) => job.usesSharedPluginBuild
+		);
+		const sharedPluginBuildHasRequiredConsumers = jobs.test.some(
+			( job ) => job.usesSharedPluginBuild && ! job.optional
+		);
 
 		if ( isGithubCI() ) {
 			setOutput( 'lint-jobs', JSON.stringify( jobs.lint ) );
 			setOutput( 'test-jobs', JSON.stringify( jobs.test ) );
 			setOutput( 'report-jobs', JSON.stringify( reports ) );
+			setOutput(
+				'shared-plugin-build-needed',
+				String( sharedPluginBuildNeeded )
+			);
+			setOutput(
+				'shared-plugin-build-has-required-consumers',
+				String( sharedPluginBuildHasRequiredConsumers )
+			);
 			return;
 		}
 
@@ -137,6 +151,13 @@ const program = new Command( 'ci-jobs' )
 			Logger.notice( `No report jobs to run.` );
 		}
 
+		Logger.notice(
+			`Shared plugin build needed: ${ sharedPluginBuildNeeded }`
+		);
+		Logger.notice(
+			`Shared plugin build has required consumers: ${ sharedPluginBuildHasRequiredConsumers }`
+		);
+
 		if ( options.list ) {
 			Object.keys( jobs ).forEach( ( key ) => {
 				const job = jobs[ key ].map(
@@ -163,12 +184,14 @@ const program = new Command( 'ci-jobs' )
 						projectPath,
 						testType,
 						optional,
+						usesSharedPluginBuild,
 					} ) => ( {
 						name,
 						projectName,
 						projectPath,
 						testType,
 						optional,
+						usesSharedPluginBuild,
 					} )
 				);
 			} );
@@ -179,6 +202,8 @@ const program = new Command( 'ci-jobs' )
 					{
 						baseRef: options.baseRef,
 						event: options.event,
+						sharedPluginBuildNeeded,
+						sharedPluginBuildHasRequiredConsumers,
 						...jobs,
 					},
 					null,

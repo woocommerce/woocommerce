@@ -1,4 +1,0 @@
-Significance: patch
-Type: add
-
-Allow POS catalog product feed files to be served by enabling file access on the feed directory while preventing directory listing.

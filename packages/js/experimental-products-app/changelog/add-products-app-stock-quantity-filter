@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add a Stock quantity filter to the experimental products app product list, and rename the field from "Available stock" to "Stock quantity".

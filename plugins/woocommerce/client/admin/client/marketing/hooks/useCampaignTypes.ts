@@ -37,7 +37,7 @@ export const useCampaignTypes = (): UseCampaignTypes => {
 	const { invalidateResolution } = useDispatch( STORE_KEY );
 
 	const refetch = useCallback( () => {
-		invalidateResolution( 'getCampaignTypes', [] );
+		void invalidateResolution( 'getCampaignTypes', [] );
 	}, [ invalidateResolution ] );
 
 	return useSelect(

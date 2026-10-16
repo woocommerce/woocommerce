@@ -19,6 +19,231 @@ class WC_REST_Taxes_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A tax class completes its V3 create, read, list, unsupported update, and delete lifecycle.
+	 */
+	public function test_tax_class_crud_lifecycle(): void {
+		wp_set_current_user( $this->user );
+
+		$class_name = 'Lifecycle Class';
+		$class_slug = sanitize_title( $class_name );
+		$expected   = array(
+			'name' => $class_name,
+			'slug' => $class_slug,
+		);
+
+		$response = $this->do_rest_request( 'taxes/classes', 'POST', array( 'name' => $class_name ) );
+		$this->assertSame( 201, $response->get_status() );
+		$this->assertSame( $expected, $response->get_data() );
+		$this->assertSame( $expected, WC_Tax::get_tax_class_by( 'slug', $class_slug ) );
+
+		$response = $this->do_rest_get_request( 'taxes/classes/' . $class_slug );
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertCount( 1, $response->get_data() );
+		$this->assertSame( $expected, array_intersect_key( $response->get_data()[0], $expected ) );
+
+		$response = $this->do_rest_get_request( 'taxes/classes' );
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertContains( $class_slug, wp_list_pluck( $response->get_data(), 'slug' ) );
+
+		$response = $this->do_rest_request( 'taxes/classes/' . $class_slug, 'PUT', array( 'name' => 'Unsupported update' ) );
+		$this->assertSame( 404, $response->get_status() );
+		$this->assertSame( 'rest_no_route', $response->get_data()['code'] );
+
+		$response = $this->do_rest_request( 'taxes/classes/' . $class_slug, 'DELETE', array( 'force' => true ) );
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( $class_slug, $response->get_data()['slug'] );
+		$this->assertFalse( WC_Tax::get_tax_class_by( 'slug', $class_slug ) );
+
+		$response = $this->do_rest_get_request( 'taxes/classes/' . $class_slug );
+		$this->assertSame( 404, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_tax_class_invalid_slug', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox A tax rate completes its V3 CRUD lifecycle and every read reflects the persisted rate.
+	 */
+	public function test_tax_rate_crud_lifecycle(): void {
+		global $wpdb;
+
+		wp_set_current_user( $this->user );
+
+		$class_slug = WC_Tax::create_tax_class( 'Lifecycle Rate Class' )['slug'];
+
+		$response = $this->do_rest_request(
+			'taxes',
+			'POST',
+			array(
+				'country'   => 'US',
+				'state'     => 'CA',
+				'cities'    => array( 'Los Angeles' ),
+				'postcodes' => array( '90001' ),
+				'rate'      => '4.25',
+				'name'      => 'State Tax',
+				'shipping'  => false,
+				'order'     => 3,
+				'class'     => $class_slug,
+			)
+		);
+		$this->assertSame( 201, $response->get_status() );
+		$data     = $response->get_data();
+		$rate_id  = $data['id'];
+		$expected = array(
+			'id'        => $rate_id,
+			'country'   => 'US',
+			'state'     => 'CA',
+			'postcode'  => '90001',
+			'city'      => 'LOS ANGELES',
+			'rate'      => '4.2500',
+			'name'      => 'State Tax',
+			'priority'  => 1,
+			'compound'  => false,
+			'shipping'  => false,
+			'order'     => 3,
+			'class'     => $class_slug,
+			'postcodes' => array( '90001' ),
+			'cities'    => array( 'LOS ANGELES' ),
+		);
+		$this->assertIsInt( $rate_id );
+		$this->assertSame( $expected, array_intersect_key( $data, $expected ) );
+
+		$response = $this->do_rest_get_request( 'taxes/' . $rate_id );
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( $expected, array_intersect_key( $response->get_data(), $expected ) );
+
+		$response = $this->do_rest_get_request( 'taxes' );
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertContains( $rate_id, wp_list_pluck( $response->get_data(), 'id' ) );
+
+		$response = $this->do_rest_request(
+			'taxes/' . $rate_id,
+			'PUT',
+			array(
+				'rate'     => '5.5',
+				'name'     => 'Updated Tax',
+				'priority' => 2,
+				'compound' => true,
+				'shipping' => true,
+				'order'    => 8,
+			)
+		);
+		$expected = array(
+			'id'       => $rate_id,
+			'rate'     => '5.5000',
+			'name'     => 'Updated Tax',
+			'priority' => 2,
+			'compound' => true,
+			'shipping' => true,
+			'order'    => 8,
+			'class'    => $class_slug,
+		);
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( $expected, array_intersect_key( $response->get_data(), $expected ) );
+
+		$response = $this->do_rest_get_request( 'taxes/' . $rate_id );
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( $expected, array_intersect_key( $response->get_data(), $expected ) );
+
+		$response = $this->do_rest_request( 'taxes/' . $rate_id, 'DELETE', array( 'force' => true ) );
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( $rate_id, $response->get_data()['id'] );
+		$this->assertNull( WC_Tax::_get_tax_rate( $rate_id ) );
+		$remaining_locations = $wpdb->get_var(
+			$wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_tax_rate_locations WHERE tax_rate_id = %d", $rate_id )
+		);
+		$this->assertSame( '0', $remaining_locations );
+
+		$response = $this->do_rest_get_request( 'taxes/' . $rate_id );
+		$this->assertSame( 404, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_invalid_id', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Two tax rates complete V3 batch create, update, and delete lifecycles in order.
+	 */
+	public function test_tax_rate_batch_lifecycle(): void {
+		wp_set_current_user( $this->user );
+
+		$class_slug = WC_Tax::create_tax_class( 'Batch Class' )['slug'];
+
+		$response = $this->do_rest_request(
+			'taxes/batch',
+			'POST',
+			array(
+				'create' => array(
+					array(
+						'country' => 'US',
+						'state'   => 'NY',
+						'rate'    => '4.1',
+						'name'    => 'Batch One',
+						'order'   => 1,
+						'class'   => $class_slug,
+					),
+					array(
+						'country' => 'CA',
+						'state'   => 'BC',
+						'rate'    => '6.2',
+						'name'    => 'Batch Two',
+						'order'   => 2,
+						'class'   => $class_slug,
+					),
+				),
+			)
+		);
+		$this->assertSame( 200, $response->get_status() );
+		$created  = $response->get_data()['create'];
+		$rate_ids = wp_list_pluck( $created, 'id' );
+		$this->assertCount( 2, array_unique( $rate_ids ) );
+		$this->assertContainsOnly( 'int', $rate_ids );
+		$this->assertSame( array( 'Batch One', 'Batch Two' ), wp_list_pluck( $created, 'name' ) );
+		$this->assertSame( array( '4.1000', '6.2000' ), wp_list_pluck( $created, 'rate' ) );
+		$this->assertSame( array( $class_slug, $class_slug ), wp_list_pluck( $created, 'class' ) );
+
+		$response = $this->do_rest_request(
+			'taxes/batch',
+			'POST',
+			array(
+				'update' => array(
+					array(
+						'id'    => $rate_ids[0],
+						'rate'  => '4.1111',
+						'name'  => 'Batch One Updated',
+						'order' => 7,
+					),
+					array(
+						'id'       => $rate_ids[1],
+						'rate'     => '6.2222',
+						'name'     => 'Batch Two Updated',
+						'priority' => 3,
+					),
+				),
+			)
+		);
+		$this->assertSame( 200, $response->get_status() );
+		$updated = $response->get_data()['update'];
+		$this->assertSame( $rate_ids, wp_list_pluck( $updated, 'id' ) );
+		$this->assertSame( array( '4.1111', '6.2222' ), wp_list_pluck( $updated, 'rate' ) );
+		$this->assertSame( array( 'Batch One Updated', 'Batch Two Updated' ), wp_list_pluck( $updated, 'name' ) );
+		$this->assertSame( 7, $updated[0]['order'] );
+		$this->assertSame( 3, $updated[1]['priority'] );
+
+		foreach ( $rate_ids as $index => $rate_id ) {
+			$response = $this->do_rest_get_request( 'taxes/' . $rate_id );
+			$this->assertSame( 200, $response->get_status() );
+			$this->assertSame( $updated[ $index ]['rate'], $response->get_data()['rate'] );
+			$this->assertSame( $updated[ $index ]['name'], $response->get_data()['name'] );
+		}
+
+		$response = $this->do_rest_request( 'taxes/batch', 'POST', array( 'delete' => $rate_ids ) );
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( $rate_ids, wp_list_pluck( $response->get_data()['delete'], 'id' ) );
+
+		foreach ( $rate_ids as $rate_id ) {
+			$this->assertNull( WC_Tax::_get_tax_rate( $rate_id ) );
+			$this->assertSame( 404, $this->do_rest_get_request( 'taxes/' . $rate_id )->get_status() );
+		}
+	}
+
+	/**
 	 * Data provider for test_can_create_and_update_tax_rates_with_multiple_cities_and_postcodes.
 	 *
 	 * @return array

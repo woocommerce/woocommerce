@@ -50,7 +50,7 @@ describe( 'OrdersPanel', () => {
 		).toBeInTheDocument();
 	} );
 
-	it( 'should record activity_panel_orders_orders_begin_fulfillment Tracks event when order is clicked', () => {
+	it( 'should record activity_panel_orders_orders_begin_fulfillment Tracks event when order is clicked', async () => {
 		useSelect.mockReturnValue( {
 			orders: [
 				{
@@ -65,7 +65,7 @@ describe( 'OrdersPanel', () => {
 		const { getByText } = render(
 			<OrdersPanel orderStatuses={ [] } unreadOrdersCount={ 1 } />
 		);
-		userEvent.click( getByText( '0 products' ) );
+		await userEvent.click( getByText( '0 products' ) );
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'activity_panel_orders_orders_begin_fulfillment',
 			{}
@@ -129,5 +129,98 @@ describe( 'OrdersPanel', () => {
 			<OrdersPanel orderStatuses={ [] } unreadOrdersCount={ 1 } />
 		);
 		expect( getByText( 'BTC123' ) ).toBeInTheDocument();
+	} );
+
+	it( 'should show the billing name for a guest order', () => {
+		useSelect.mockReturnValue( {
+			orders: [
+				{
+					total: 123,
+					id: 1,
+					number: 1,
+					customer_id: 0,
+					billing: {
+						first_name: 'Jane',
+						last_name: 'Doe',
+					},
+				},
+			],
+			isError: false,
+			isRequesting: false,
+		} );
+
+		render( <OrdersPanel orderStatuses={ [] } unreadOrdersCount={ 1 } /> );
+		expect( screen.getByText( 'Jane Doe' ) ).toBeInTheDocument();
+	} );
+
+	it( 'should show no name for a guest order with a blank billing name', () => {
+		useSelect.mockReturnValue( {
+			orders: [
+				{
+					total: 123,
+					id: 1,
+					number: 1,
+					customer_id: 0,
+					billing: {
+						first_name: '',
+						last_name: '',
+					},
+				},
+			],
+			isError: false,
+			isRequesting: false,
+		} );
+
+		render( <OrdersPanel orderStatuses={ [] } unreadOrdersCount={ 1 } /> );
+		expect( screen.getByText( 'Order #1' ) ).toBeInTheDocument();
+	} );
+
+	it( 'should prefer the registered customer name over the billing name', () => {
+		useSelect.mockReturnValue( {
+			orders: [
+				{
+					total: 123,
+					id: 1,
+					number: 1,
+					customer_id: 5,
+					billing: {
+						first_name: 'Jane',
+						last_name: 'Doe',
+					},
+				},
+			],
+			customerItems: new Map( [
+				[ 5, { id: 5, user_id: 5, name: 'Registered Customer' } ],
+			] ),
+			isError: false,
+			isRequesting: false,
+		} );
+
+		render( <OrdersPanel orderStatuses={ [] } unreadOrdersCount={ 1 } /> );
+		expect( screen.getByText( 'Registered Customer' ) ).toBeInTheDocument();
+		expect( screen.queryByText( 'Jane Doe' ) ).not.toBeInTheDocument();
+	} );
+
+	it( 'should strip angle brackets from a guest billing name', () => {
+		useSelect.mockReturnValue( {
+			orders: [
+				{
+					total: 123,
+					id: 1,
+					number: 1,
+					customer_id: 0,
+					billing: {
+						first_name: '<b>script</b>',
+						last_name: 'Doe',
+					},
+				},
+			],
+			isError: false,
+			isRequesting: false,
+		} );
+
+		render( <OrdersPanel orderStatuses={ [] } unreadOrdersCount={ 1 } /> );
+		expect( screen.getByText( 'bscript/b Doe' ) ).toBeInTheDocument();
+		expect( screen.queryByText( /</ ) ).not.toBeInTheDocument();
 	} );
 } );

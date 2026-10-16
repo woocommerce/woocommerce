@@ -26,6 +26,14 @@ export const addressFieldsForShippingRates: AddressFieldsForShippingRatesType =
 	[ 'state', 'country', 'postcode', 'city' ];
 
 /**
+ * Checks whether an address field is one the shipping rates depend on.
+ */
+export const isAddressFieldForShippingRates = (
+	field: string
+): field is AddressFieldsForShippingRatesType[ number ] =>
+	( addressFieldsForShippingRates as string[] ).includes( field );
+
+/**
  * Compare two addresses and see if they are the same.
  */
 export const isSameAddress = < T extends ShippingAddress | BillingAddress >(
@@ -54,7 +62,7 @@ const isValidAddressKey = (
  * @return {Object} The address with hidden fields values removed.
  */
 export const emptyHiddenAddressFields = <
-	T extends CartResponseBillingAddress | CartResponseShippingAddress
+	T extends CartResponseBillingAddress | CartResponseShippingAddress,
 >(
 	address: T
 ): T => {
@@ -82,7 +90,7 @@ export const emptyHiddenAddressFields = <
  * @return {Object} The address with all fields values removed.
  */
 export const emptyAddressFields = <
-	T extends CartResponseBillingAddress | CartResponseShippingAddress
+	T extends CartResponseBillingAddress | CartResponseShippingAddress,
 >(
 	address: T
 ): T => {
@@ -166,7 +174,7 @@ export const hasAllFieldsForShippingRates = (
 	);
 
 	const filteredAddressForm = addressFormWithLocale.filter( ( { key } ) =>
-		addressFieldsForShippingRates.includes( key )
+		isAddressFieldForShippingRates( key )
 	);
 
 	return filteredAddressForm.every( ( { key, hidden, required } ) => {

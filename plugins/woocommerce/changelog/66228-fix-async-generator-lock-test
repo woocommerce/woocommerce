@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Fix POS catalog AsyncGenerator integration test to actually exercise the FeedLockException path by opening the feed with open() instead of start() (which returns void).

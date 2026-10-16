@@ -8,12 +8,10 @@ import { TotalsFooterItem } from '@woocommerce/base-components/cart-checkout';
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
 import { __ } from '@wordpress/i18n';
-import { useId, useState } from '@wordpress/element';
 import { Icon } from '@wordpress/components';
 import { chevronDown, chevronUp } from '@wordpress/icons';
 import clsx from 'clsx';
 import { FormattedMonetaryAmount } from '@woocommerce/blocks-components';
-import { useContainerWidthContext } from '@woocommerce/base-context';
 
 /**
  * Internal dependencies
@@ -23,6 +21,7 @@ import {
 	getAllowedBlocks,
 } from '../../../cart-checkout-shared';
 import { OrderMetaSlotFill } from './slotfills';
+import { useOrderSummaryToggle } from './use-order-summary-toggle';
 
 export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
 	const blockProps = useBlockProps();
@@ -32,24 +31,7 @@ export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
 	const allowedBlocks = getAllowedBlocks(
 		innerBlockAreas.CHECKOUT_ORDER_SUMMARY
 	);
-	const { isLarge } = useContainerWidthContext();
-	const [ isOpen, setIsOpen ] = useState( false );
-	const ariaControlsId = useId();
-
-	const orderSummaryProps = ! isLarge
-		? {
-				role: 'button',
-				onClick: () => setIsOpen( ! isOpen ),
-				'aria-expanded': isOpen,
-				'aria-controls': ariaControlsId,
-				tabIndex: 0,
-				onKeyDown: ( event: React.KeyboardEvent ) => {
-					if ( event.key === 'Enter' || event.key === ' ' ) {
-						setIsOpen( ! isOpen );
-					}
-				},
-		  }
-		: {};
+	const { isOpen, ariaControlsId, toggleProps } = useOrderSummaryToggle();
 
 	const defaultTemplate = [
 		[ 'woocommerce/checkout-order-summary-cart-items-block', {}, [] ],
@@ -67,7 +49,7 @@ export const Edit = ( { clientId }: { clientId: string } ): JSX.Element => {
 		<div { ...blockProps }>
 			<div
 				className="wc-block-components-checkout-order-summary__title"
-				{ ...orderSummaryProps }
+				{ ...toggleProps }
 			>
 				<p
 					className="wc-block-components-checkout-order-summary__title-text"

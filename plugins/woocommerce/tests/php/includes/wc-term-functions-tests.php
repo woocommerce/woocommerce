@@ -32,6 +32,13 @@ class WC_Term_Functions_Tests extends \WC_Unit_Test_Case {
 		$this->terms['tag1'] = wp_insert_term( 'Tag 1', 'product_tag' );
 		$this->terms['tag2'] = wp_insert_term( 'Tag 2', 'product_tag' );
 
+		$this->terms['brand_parent'] = wp_insert_term( 'Parent brand', 'product_brand' );
+		$this->terms['brand_child']  = wp_insert_term(
+			'Child brand',
+			'product_brand',
+			array( 'parent' => $this->terms['brand_parent']['term_id'] )
+		);
+
 		$this->products['product1'] = WC_Helper_Product::create_simple_product(
 			true,
 			array(
@@ -54,6 +61,10 @@ class WC_Term_Functions_Tests extends \WC_Unit_Test_Case {
 				'tag_ids'      => array( $this->terms['tag1']['term_id'], $this->terms['tag2']['term_id'] ),
 			)
 		);
+
+		wp_set_object_terms( $this->products['product1']->get_id(), array( $this->terms['brand_child']['term_id'] ), 'product_brand' );
+		wp_set_object_terms( $this->products['product2']->get_id(), array( $this->terms['brand_child']['term_id'] ), 'product_brand' );
+		wp_set_object_terms( $this->products['product3']->get_id(), array( $this->terms['brand_parent']['term_id'] ), 'product_brand' );
 	}
 
 	/**
@@ -76,12 +87,41 @@ class WC_Term_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should honor the attribute's Term ID default without overriding explicit query ordering.
+	 */
+	public function test_attribute_term_id_ordering(): void {
+		global $wc_product_attributes;
+
+		$original_attributes = $wc_product_attributes;
+		$attribute           = WC_Helper_Product::create_attribute( 'id_sort_test', array( 'Zebra', 'Apple', 'Mango' ) );
+		$taxonomy            = $attribute['attribute_taxonomy'];
+		try {
+			wc_update_attribute( $attribute['attribute_id'], array( 'order_by' => 'id' ) );
+			$product_id = $this->products['product1']->get_id();
+			wp_set_object_terms( $product_id, $attribute['term_ids'], $taxonomy );
+
+			$args = array(
+				'taxonomy'   => $taxonomy,
+				'hide_empty' => false,
+				'fields'     => 'names',
+			);
+			$this->assertSame( array( 'Zebra', 'Apple', 'Mango' ), get_terms( $args ), 'Default queries should honor the saved Term ID setting.' );
+			$this->assertSame( array( 'Zebra', 'Apple', 'Mango' ), wc_get_product_terms( $product_id, $taxonomy, array( 'fields' => 'names' ) ), 'Product term queries should use the same default ordering.' );
+			$this->assertSame( array( 'Apple', 'Mango', 'Zebra' ), get_terms( array_merge( $args, array( 'orderby' => 'name' ) ) ), 'An explicit ordering should override the attribute default.' );
+			$this->assertSame( array( 'Mango', 'Apple', 'Zebra' ), get_terms( array_merge( $args, array( 'order' => 'DESC' ) ) ), 'Descending order should use term IDs too.' );
+		} finally {
+			unregister_taxonomy( $taxonomy );
+			$wc_product_attributes = $original_attributes;
+		}
+	}
+
+	/**
 	 * @testdox Term product counts with default settings.
 	 */
 	public function test_term_count_baseline(): void {
 		$terms       = get_terms(
 			array(
-				'taxonomy'   => array( 'product_cat', 'product_tag' ),
+				'taxonomy'   => array( 'product_cat', 'product_tag', 'product_brand' ),
 				'hide_empty' => false,
 			)
 		);
@@ -92,6 +132,8 @@ class WC_Term_Functions_Tests extends \WC_Unit_Test_Case {
 		$this->assertEquals( 1, $term_counts[ $this->terms['child2']['term_id'] ] );
 		$this->assertEquals( 2, $term_counts[ $this->terms['tag1']['term_id'] ] );
 		$this->assertEquals( 2, $term_counts[ $this->terms['tag2']['term_id'] ] );
+		$this->assertEquals( 3, $term_counts[ $this->terms['brand_parent']['term_id'] ] );
+		$this->assertEquals( 2, $term_counts[ $this->terms['brand_child']['term_id'] ] );
 	}
 
 	/**
@@ -106,7 +148,7 @@ class WC_Term_Functions_Tests extends \WC_Unit_Test_Case {
 
 		$terms       = get_terms(
 			array(
-				'taxonomy'   => array( 'product_cat', 'product_tag' ),
+				'taxonomy'   => array( 'product_cat', 'product_tag', 'product_brand' ),
 				'hide_empty' => false,
 			)
 		);
@@ -117,6 +159,8 @@ class WC_Term_Functions_Tests extends \WC_Unit_Test_Case {
 		$this->assertEquals( 1, $term_counts[ $this->terms['child2']['term_id'] ] );
 		$this->assertEquals( 1, $term_counts[ $this->terms['tag1']['term_id'] ] );
 		$this->assertEquals( 2, $term_counts[ $this->terms['tag2']['term_id'] ] );
+		$this->assertEquals( 2, $term_counts[ $this->terms['brand_parent']['term_id'] ] );
+		$this->assertEquals( 1, $term_counts[ $this->terms['brand_child']['term_id'] ] );
 	}
 
 	/**
@@ -130,7 +174,7 @@ class WC_Term_Functions_Tests extends \WC_Unit_Test_Case {
 
 		$terms       = get_terms(
 			array(
-				'taxonomy'   => array( 'product_cat', 'product_tag' ),
+				'taxonomy'   => array( 'product_cat', 'product_tag', 'product_brand' ),
 				'hide_empty' => false,
 			)
 		);
@@ -141,6 +185,28 @@ class WC_Term_Functions_Tests extends \WC_Unit_Test_Case {
 		$this->assertEquals( 0, $term_counts[ $this->terms['child2']['term_id'] ] );
 		$this->assertEquals( 2, $term_counts[ $this->terms['tag1']['term_id'] ] );
 		$this->assertEquals( 1, $term_counts[ $this->terms['tag2']['term_id'] ] );
+		$this->assertEquals( 2, $term_counts[ $this->terms['brand_parent']['term_id'] ] );
+		$this->assertEquals( 1, $term_counts[ $this->terms['brand_child']['term_id'] ] );
+
+		delete_option( 'woocommerce_hide_out_of_stock_items' );
+	}
+
+	/**
+	 * @testdox Recounting terms for one product updates its brand and brand ancestors.
+	 */
+	public function test_recount_terms_by_product_includes_brands(): void {
+		update_option( 'woocommerce_hide_out_of_stock_items', 'yes' );
+		wp_set_object_terms(
+			$this->products['product1']->get_id(),
+			ProductStockStatus::OUT_OF_STOCK,
+			'product_visibility',
+			true
+		);
+
+		_wc_recount_terms_by_product( $this->products['product1']->get_id() );
+
+		$this->assertSame( '1', get_term_meta( $this->terms['brand_parent']['term_id'], 'product_count_product_brand', true ) );
+		$this->assertSame( '0', get_term_meta( $this->terms['brand_child']['term_id'], 'product_count_product_brand', true ) );
 
 		delete_option( 'woocommerce_hide_out_of_stock_items' );
 	}
@@ -218,5 +284,268 @@ class WC_Term_Functions_Tests extends \WC_Unit_Test_Case {
 
 		$featured_product->delete();
 		$regular_product->delete();
+	}
+
+	/**
+	 * @testdox Product categories are sorted by their order term meta when no orderby is requested.
+	 */
+	public function test_product_cat_default_sort_uses_order_term_meta(): void {
+		$unordered = wp_insert_term( 'Category A', 'product_cat' );
+		$third     = wp_insert_term( 'Category B', 'product_cat' );
+		$first     = wp_insert_term( 'Category C', 'product_cat' );
+		$second    = wp_insert_term( 'Category D', 'product_cat' );
+
+		delete_term_meta( $unordered['term_id'], 'order' );
+		update_term_meta( $first['term_id'], 'order', 1 );
+		update_term_meta( $second['term_id'], 'order', 2 );
+		update_term_meta( $third['term_id'], 'order', 3 );
+
+		$terms = get_terms(
+			array(
+				'taxonomy'   => 'product_cat',
+				'hide_empty' => false,
+				'fields'     => 'ids',
+				'include'    => array( $unordered['term_id'], $third['term_id'], $first['term_id'], $second['term_id'] ),
+			)
+		);
+
+		$this->assertSame(
+			array( (int) $unordered['term_id'], (int) $first['term_id'], (int) $second['term_id'], (int) $third['term_id'] ),
+			array_map( 'intval', $terms ),
+			'Categories should come back in order meta sequence, and categories without order meta should still be returned.'
+		);
+	}
+
+	/**
+	 * @testdox A term meta filter passed to get_terms is honored on product categories, without losing the default sorting.
+	 * @dataProvider provider_term_meta_filter_args
+	 *
+	 * @param array $filter_args The meta filter arguments to pass to get_terms().
+	 * @param array $expected    Names of the expected terms, in order.
+	 */
+	public function test_product_cat_honors_caller_term_meta_filter( array $filter_args, array $expected ): void {
+		$second    = wp_insert_term( 'Category A', 'product_cat' );
+		$first     = wp_insert_term( 'Category B', 'product_cat' );
+		$unmatched = wp_insert_term( 'Category C', 'product_cat' );
+
+		add_term_meta( $first['term_id'], 'wc_test_flag', 'yes' );
+		add_term_meta( $second['term_id'], 'wc_test_flag', 'yes' );
+		add_term_meta( $unmatched['term_id'], 'wc_test_flag', 'no' );
+		add_term_meta( $first['term_id'], 'wc_test_marker', 'yes' );
+		add_term_meta( $second['term_id'], 'wc_test_marker', 'yes' );
+		update_term_meta( $unmatched['term_id'], 'order', 0 );
+		update_term_meta( $first['term_id'], 'order', 1 );
+		update_term_meta( $second['term_id'], 'order', 2 );
+
+		$terms = get_terms(
+			array_merge(
+				array(
+					'taxonomy'   => 'product_cat',
+					'hide_empty' => false,
+					'fields'     => 'names',
+					'include'    => array( $second['term_id'], $first['term_id'], $unmatched['term_id'] ),
+				),
+				$filter_args
+			)
+		);
+
+		$this->assertSame(
+			$expected,
+			$terms,
+			'Only the categories matching the meta filter should be returned, in order meta sequence.'
+		);
+	}
+
+	/**
+	 * Both forms WordPress accepts for a term meta filter.
+	 *
+	 * @return array
+	 */
+	public function provider_term_meta_filter_args(): array {
+		return array(
+			'meta_key and meta_value' => array(
+				array(
+					'meta_key'   => 'wc_test_flag', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+					'meta_value' => 'yes', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+				),
+				array( 'Category B', 'Category A' ),
+			),
+			'meta_key only'           => array(
+				array(
+					'meta_key' => 'wc_test_marker', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				),
+				array( 'Category B', 'Category A' ),
+			),
+			'meta_compare !='         => array(
+				array(
+					'meta_key'     => 'wc_test_flag', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+					'meta_value'   => 'no', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+					'meta_compare' => '!=', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_compare
+				),
+				array( 'Category B', 'Category A' ),
+			),
+			'nested meta_query'       => array(
+				array(
+					'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+						array(
+							'key'   => 'wc_test_flag',
+							'value' => 'yes',
+						),
+					),
+				),
+				array( 'Category B', 'Category A' ),
+			),
+			'both forms combined'     => array(
+				array(
+					'meta_key'   => 'wc_test_flag', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+					'meta_value' => 'yes', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+					'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+						array(
+							'key'     => 'order',
+							'value'   => 1,
+							'compare' => '<=',
+						),
+					),
+				),
+				array( 'Category B' ),
+			),
+		);
+	}
+
+	/**
+	 * @testdox The legacy menu_order argument keeps a caller's term meta filter, even with an explicit orderby on a taxonomy WooCommerce doesn't sort.
+	 */
+	public function test_legacy_menu_order_arg_honors_caller_term_meta_filter(): void {
+		$second    = wp_insert_term( 'Tag A', 'product_tag' );
+		$first     = wp_insert_term( 'Tag B', 'product_tag' );
+		$unmatched = wp_insert_term( 'Tag C', 'product_tag' );
+
+		add_term_meta( $first['term_id'], 'wc_test_flag', 'yes' );
+		add_term_meta( $second['term_id'], 'wc_test_flag', 'yes' );
+		add_term_meta( $unmatched['term_id'], 'wc_test_flag', 'no' );
+		update_term_meta( $unmatched['term_id'], 'order', 0 );
+		update_term_meta( $first['term_id'], 'order', 1 );
+		update_term_meta( $second['term_id'], 'order', 2 );
+
+		$terms = get_terms(
+			array(
+				'taxonomy'   => 'product_tag',
+				'hide_empty' => false,
+				'fields'     => 'names',
+				'include'    => array( $second['term_id'], $first['term_id'], $unmatched['term_id'] ),
+				'orderby'    => 'name',
+				'menu_order' => 'ASC',
+				'meta_key'   => 'wc_test_flag', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				'meta_value' => 'yes', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+			)
+		);
+
+		$this->assertSame(
+			array( 'Tag B', 'Tag A' ),
+			$terms,
+			'Only the tags matching the meta filter should be returned, in order meta sequence rather than by name.'
+		);
+	}
+
+	/**
+	 * @testdox Running the same product category query object again returns the same terms, including those without order meta.
+	 * @dataProvider provider_repeat_run_args
+	 *
+	 * @param array $extra_args Extra arguments for the term query.
+	 * @param array $expected   Names of the expected terms, in order.
+	 */
+	public function test_product_cat_repeat_query_returns_same_terms( array $extra_args, array $expected ): void {
+		$unordered = wp_insert_term( 'Category A', 'product_cat' );
+		$first     = wp_insert_term( 'Category B', 'product_cat' );
+		$second    = wp_insert_term( 'Category C', 'product_cat' );
+
+		delete_term_meta( $unordered['term_id'], 'order' );
+		update_term_meta( $first['term_id'], 'order', 1 );
+		update_term_meta( $second['term_id'], 'order', 2 );
+		add_term_meta( $unordered['term_id'], 'wc_test_flag', 'yes' );
+		add_term_meta( $first['term_id'], 'wc_test_flag', 'yes' );
+		add_term_meta( $second['term_id'], 'wc_test_flag', 'no' );
+		add_term_meta( $second['term_id'], 'wc_test_missing', 'yes' );
+
+		$query = new WP_Term_Query(
+			array_merge(
+				array(
+					'taxonomy'   => 'product_cat',
+					'hide_empty' => false,
+					'fields'     => 'id=>name',
+					'include'    => array( $unordered['term_id'], $first['term_id'], $second['term_id'] ),
+				),
+				$extra_args
+			)
+		);
+
+		$this->assertSame( $expected, array_values( $query->terms ), 'The first run should return the expected terms.' );
+		$this->assertSame( $expected, array_values( $query->get_terms() ), 'A second run of the same query object should return the same terms.' );
+	}
+
+	/**
+	 * Query arguments whose results must not change when the query object runs again.
+	 *
+	 * @return array
+	 */
+	public function provider_repeat_run_args(): array {
+		return array(
+			'default sort'          => array( array(), array( 'Category A', 'Category B', 'Category C' ) ),
+			'explicit order key'    => array(
+				array( 'meta_key' => 'order' ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				array( 'Category A', 'Category B', 'Category C' ),
+			),
+			'top-level meta filter' => array(
+				array(
+					'meta_key'   => 'wc_test_flag', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+					'meta_value' => 'yes', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+				),
+				array( 'Category A', 'Category B' ),
+			),
+			'nested meta_query'     => array(
+				array(
+					'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+						array(
+							'key'   => 'wc_test_flag',
+							'value' => 'yes',
+						),
+					),
+				),
+				array( 'Category A', 'Category B' ),
+			),
+			'order key NOT EXISTS'  => array(
+				array(
+					'meta_key'     => 'order', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+					'meta_compare' => 'NOT EXISTS',
+				),
+				array( 'Category A' ),
+			),
+			'top-level NOT EXISTS'  => array(
+				array(
+					'meta_key'     => 'wc_test_missing', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+					'meta_compare' => 'NOT EXISTS', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_compare
+				),
+				array( 'Category A', 'Category B' ),
+			),
+			'compare only, no key'  => array(
+				array( 'meta_compare' => 'EXISTS' ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_compare
+				array( 'Category A', 'Category B', 'Category C' ),
+			),
+			'type only, no key'     => array(
+				array( 'meta_type' => 'NUMERIC' ),
+				array( 'Category A', 'Category B', 'Category C' ),
+			),
+			'nested NOT EXISTS'     => array(
+				array(
+					'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+						array(
+							'key'     => 'wc_test_missing',
+							'compare' => 'NOT EXISTS',
+						),
+					),
+				),
+				array( 'Category A', 'Category B' ),
+			),
+		);
 	}
 }

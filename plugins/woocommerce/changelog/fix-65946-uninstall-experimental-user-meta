@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Remove the push notification preferences, shopper list, and customer email verification user meta when uninstalling with WC_REMOVE_ALL_DATA.

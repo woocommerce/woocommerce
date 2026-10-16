@@ -1,4 +1,0 @@
-Significance: patch
-Type: performance
-
-Store API: skip initializing the available payment gateways on checkout requests that do not provide a payment method.

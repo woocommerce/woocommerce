@@ -156,7 +156,7 @@ export const SettingsProvider = ( {
 			data,
 		} )
 			.then( () => {
-				dispatch( noticesStore ).createSuccessNotice(
+				void dispatch( noticesStore ).createSuccessNotice(
 					__(
 						'Local Pickup settings have been saved.',
 						'woocommerce'
@@ -165,7 +165,7 @@ export const SettingsProvider = ( {
 			} )
 			.catch( () => {
 				setIsDirty( true );
-				dispatch( noticesStore ).createErrorNotice(
+				void dispatch( noticesStore ).createErrorNotice(
 					__(
 						'There was an error saving your Local Pickup settings. Please try again.',
 						'woocommerce'

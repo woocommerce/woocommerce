@@ -29,9 +29,7 @@ test.describe(
 
 			const canvas = await getCanvas( page );
 
-			await canvas
-				.getByRole( 'button', { name: 'Add default block' } )
-				.click();
+			await canvas.getByLabel( /Add default block|Empty block/ ).click();
 
 			await canvas
 				.getByRole( 'document', {

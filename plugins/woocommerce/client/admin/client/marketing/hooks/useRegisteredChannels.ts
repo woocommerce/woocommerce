@@ -41,7 +41,7 @@ const convert = ( data: APIRegisteredChannel ): RegisteredChannel => {
 					// translators: %d: The number of issues to resolve.
 					__( '%d issues to resolve', 'woocommerce' ),
 					data.errors_count
-			  )
+				)
 			: __( 'No issues to resolve', 'woocommerce' );
 
 	return {
@@ -62,7 +62,7 @@ export const useRegisteredChannels = (): UseRegisteredChannels => {
 	const { invalidateResolution } = useDispatch( STORE_KEY );
 
 	const refetch = useCallback( () => {
-		invalidateResolution( 'getRegisteredChannels', [] );
+		void invalidateResolution( 'getRegisteredChannels', [] );
 	}, [ invalidateResolution ] );
 
 	return useSelect(

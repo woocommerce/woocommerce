@@ -137,7 +137,6 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 		// Reset any filters that might have been added.
 		remove_all_filters( 'woocommerce_mcp_include_ability' );
 		remove_all_filters( 'woocommerce_mcp_allow_insecure_transport' );
-		remove_all_filters( 'mcp_validation_enabled' );
 
 		foreach ( $this->registered_ability_ids as $ability_id ) {
 			if ( function_exists( 'wp_unregister_ability' ) ) {
@@ -368,15 +367,6 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should disable MCP validation.
-	 */
-	public function test_disable_mcp_validation_returns_false(): void {
-		$result = MCPAdapterProvider::disable_mcp_validation();
-
-		$this->assertFalse( $result, 'disable_mcp_validation should always return false' );
-	}
-
-	/**
 	 * @testdox Should track initialization state.
 	 */
 	public function test_is_initialized_tracks_state(): void {
@@ -475,7 +465,7 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 		};
 
 		add_action( 'wp_abilities_api_init', $callback );
-		do_action( 'wp_abilities_api_init' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Test bootstrap for Abilities API registration.
+		do_action( 'wp_abilities_api_init' );
 		remove_action( 'wp_abilities_api_init', $callback );
 
 		$this->assertNotWPError( $ability, 'Test ability should register successfully.' );
@@ -517,7 +507,7 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 		};
 
 		add_action( 'wp_abilities_api_categories_init', $callback );
-		do_action( 'wp_abilities_api_categories_init' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Test bootstrap for Abilities API registration.
+		do_action( 'wp_abilities_api_categories_init' );
 		remove_action( 'wp_abilities_api_categories_init', $callback );
 
 		if ( null !== $category ) {

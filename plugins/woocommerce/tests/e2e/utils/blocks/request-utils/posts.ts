@@ -44,7 +44,7 @@ export async function createPostFromFile( this: RequestUtils, name: string ) {
 
 	const compiledTemplate = Handlebars.compile( fileContent );
 
-	return <PostCompiler>{
+	return < PostCompiler >{
 		compile: async ( data: unknown ) => {
 			const content = compiledTemplate( data );
 

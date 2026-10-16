@@ -3,7 +3,8 @@
 		"declaration": true,
 		"importHelpers": true,
 		"target": "esnext",
-		"module": "commonjs",
+		"module": "nodenext",
+		"moduleResolution": "nodenext",
 		"outDir": "dist",
 		"rootDir": "src",
 		"strict": true,
@@ -11,6 +12,9 @@
 			"./node_modules/@types"
 		],
 		"skipLibCheck": true
+	},
+	"ts-node": {
+		"esm": false
 	},
 	"include": [
 		"src/**/*"

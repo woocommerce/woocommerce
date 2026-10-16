@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Scope onboarding task dismissal to the supplied task list so a task ID that exists in more than one list is only dismissed or restored in the list it was actioned from.

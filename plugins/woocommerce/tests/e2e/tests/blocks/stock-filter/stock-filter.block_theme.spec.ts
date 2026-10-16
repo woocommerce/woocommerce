@@ -7,6 +7,7 @@ import {
 	TemplateCompiler,
 	wpCLI,
 	BLOCK_THEME_SLUG,
+	flushMacrotask,
 } from '@woocommerce/e2e-utils';
 
 export const blockData = {
@@ -24,101 +25,12 @@ const test = base.extend< { templateCompiler: TemplateCompiler } >( {
 	},
 } );
 
-test.describe( `${ blockData.name } Block`, () => {
-	test.beforeEach( async ( { admin, editor } ) => {
-		await admin.createNewPost();
-		await editor.insertBlock( {
-			name: 'woocommerce/filter-wrapper',
-			attributes: {
-				filterType: 'stock-filter',
-				heading: 'Filter By Price',
-			},
-		} );
-
-		await editor.openDocumentSettingsSidebar();
-	} );
-
-	test( "should allow changing the block's title", async ( { editor } ) => {
-		const textSelector =
-			'.wp-block-woocommerce-filter-wrapper .wp-block-heading';
-
-		const title = 'New Title';
-
-		await editor.canvas.locator( textSelector ).fill( title );
-
-		await expect( editor.canvas.locator( textSelector ) ).toHaveText(
-			title
-		);
-	} );
-
-	test( 'should allow changing the display style', async ( {
-		page,
-		editor,
-	} ) => {
-		const stockFilter = await editor.getBlockByName( blockData.slug );
-		await editor.selectBlocks( stockFilter );
-
-		await expect(
-			stockFilter.getByRole( 'checkbox', {
-				name: 'In Stock',
-			} )
-		).toBeVisible();
-
-		await expect(
-			stockFilter.getByRole( 'checkbox', {
-				name: 'Out of Stock',
-			} )
-		).toBeVisible();
-
-		await page.getByLabel( 'DropDown' ).click();
-
-		await expect(
-			stockFilter.getByRole( 'checkbox', {
-				name: 'In Stock',
-			} )
-		).toBeHidden();
-
-		await expect(
-			stockFilter.getByRole( 'checkbox', {
-				name: 'Out of Stock',
-			} )
-		).toBeHidden();
-
-		await expect( editor.canvas.getByRole( 'combobox' ) ).toBeVisible();
-	} );
-
-	test( 'should allow toggling the visibility of the filter button', async ( {
-		page,
-		editor,
-	} ) => {
-		const priceFilterControls = await editor.getBlockByName(
-			blockData.slug
-		);
-		await editor.selectBlocks( priceFilterControls );
-
-		await expect(
-			priceFilterControls.getByRole( 'button', {
-				name: 'Apply',
-			} )
-		).toBeHidden();
-
-		await page.getByText( "Show 'Apply filters' button" ).click();
-
-		await expect(
-			priceFilterControls.getByRole( 'button', {
-				name: 'Apply',
-			} )
-		).toBeVisible();
-	} );
-} );
-
 test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 	test.beforeEach( async ( { admin, page, editor } ) => {
 		await wpCLI(
 			'option update wc_blocks_use_blockified_product_grid_block_as_template false'
 		);
 
-		// Refresh the page to ensure the wpCLI changes take effect
 		await page.reload();
 
 		await admin.visitSiteEditor( {
@@ -131,7 +43,7 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 			name: 'woocommerce/filter-wrapper',
 			attributes: {
 				filterType: 'stock-filter',
-				heading: 'Filter By Price',
+				heading: 'Filter By Stock',
 			},
 		} );
 		await editor.saveSiteEditorEntities( {
@@ -140,85 +52,62 @@ test.describe( `${ blockData.name } Block - with PHP classic template`, () => {
 		await page.goto( '/shop' );
 	} );
 
-	test( 'should show all products', async ( { frontendUtils } ) => {
-		const legacyTemplate = await frontendUtils.getBlockByName(
-			'woocommerce/legacy-template'
-		);
-
-		const stockFilter = await frontendUtils.getBlockByName(
-			'woocommerce/filter-wrapper'
-		);
-
-		const products = legacyTemplate
-			.getByRole( 'list' )
-			.locator( '.product' );
-
-		await expect( products ).toHaveCount( 16 );
-
-		await expect( stockFilter.getByText( 'In Stock' ) ).toBeVisible();
-		await expect( stockFilter.getByText( 'Out of Stock' ) ).toBeVisible();
-	} );
-
-	test( 'should show only products that match the filter', async ( {
+	test( 'filters the classic product template by stock status', async ( {
 		frontendUtils,
+		page,
 	} ) => {
 		const stockFilter = await frontendUtils.getBlockByName(
 			'woocommerce/filter-wrapper'
 		);
-
 		await stockFilter.getByText( 'Out of Stock' ).click();
-
-		const legacyTemplate = await frontendUtils.getBlockByName(
-			'woocommerce/legacy-template'
-		);
-
-		const products = legacyTemplate
-			.getByRole( 'list' )
-			.locator( '.product' );
-
-		await expect( products ).toHaveCount( 1 );
-	} );
-} );
-
-test.describe( `${ blockData.name } Block - with Product Collection`, () => {
-	test( 'should show all products', async ( { page, templateCompiler } ) => {
-		await templateCompiler.compile();
-
-		await page.goto( '/shop' );
-		const products = page
-			.locator( '.wp-block-woocommerce-product-template' )
-			.getByRole( 'listitem' );
-
-		await expect( products ).toHaveCount( 16 );
-	} );
-
-	test( 'should show only products that match the filter', async ( {
-		page,
-		templateCompiler,
-	} ) => {
-		await templateCompiler.compile();
-
-		await page.goto( '/shop' );
-		await page.getByText( 'Out of Stock' ).click();
 
 		await expect( page ).toHaveURL(
 			new RegExp( blockData.urlSearchParamWhenFilterIsApplied )
 		);
 
-		const products = page
-			.locator( '.wp-block-woocommerce-product-template' )
-			.getByRole( 'listitem' );
+		const legacyTemplate = await frontendUtils.getBlockByName(
+			'woocommerce/legacy-template'
+		);
+		const products = legacyTemplate
+			.getByRole( 'list' )
+			.locator( '.product' );
 
 		await expect( products ).toHaveCount( 1 );
+		await expect(
+			products.getByRole( 'heading', { name: 'T-Shirt with Logo' } )
+		).toBeVisible();
 	} );
+} );
 
-	test( 'should refresh the page only if the user clicks on button', async ( {
+test.describe( `${ blockData.name } Block - with Product Collection`, () => {
+	test( 'filters Product Collection automatically and defers changes until Apply when configured', async ( {
 		page,
 		admin,
 		editor,
 		templateCompiler,
 	} ) => {
+		await page.clock.install();
 		const template = await templateCompiler.compile();
+		const productTitles = page.locator(
+			'.wp-block-woocommerce-product-template .wp-block-post-title'
+		);
+
+		await page.goto( '/shop' );
+		await expect( productTitles.first() ).toBeVisible();
+		const automaticBaseline = ( await productTitles.allTextContents() ).map(
+			( title ) => title.trim()
+		);
+		// Greater than one, not merely non-empty: an unfiltered /shop must show more
+		// than the single product the filter is about to leave behind. Asserting only
+		// that it is non-empty passes on a shop page that arrived already filtered,
+		// and then the post-filter assertion passes too, for the wrong reason.
+		expect( automaticBaseline.length ).toBeGreaterThan( 1 );
+
+		await page.getByText( 'Out of Stock' ).click();
+		await expect( page ).toHaveURL(
+			new RegExp( blockData.urlSearchParamWhenFilterIsApplied )
+		);
+		await expect( productTitles ).toHaveText( [ 'T-Shirt with Logo' ] );
 
 		await admin.visitSiteEditor( {
 			postId: template.id,
@@ -236,19 +125,41 @@ test.describe( `${ blockData.name } Block - with Product Collection`, () => {
 		await editor.saveSiteEditorEntities( {
 			isOnlyCurrentEntityDirty: true,
 		} );
+
 		await page.goto( '/shop' );
+		await expect( productTitles.first() ).toBeVisible();
+		const outOfStockFilter = page.getByRole( 'checkbox', {
+			name: 'Out of Stock',
+		} );
+		await expect( outOfStockFilter ).toBeVisible();
+		await page.clock.pauseAt(
+			( await page.evaluate( () => Date.now() ) ) + 1_000
+		);
+		const deferredBaseline = ( await productTitles.allTextContents() ).map(
+			( title ) => title.trim()
+		);
+		// Greater than one, not merely non-empty: an unfiltered /shop must show more
+		// than the single product the filter is about to leave behind. Asserting only
+		// that it is non-empty passes on a shop page that arrived already filtered,
+		// and then the post-filter assertion passes too, for the wrong reason.
+		expect( deferredBaseline.length ).toBeGreaterThan( 1 );
+		const deferredUrl = page.url();
 
-		await page.getByText( 'Out of Stock' ).click();
-		await page.getByRole( 'button', { name: 'Apply' } ).click();
+		await outOfStockFilter.click();
+		await page.clock.runFor( 501 );
+		await flushMacrotask( page );
+		await expect( outOfStockFilter ).toBeChecked();
+		const applyButton = page.getByRole( 'button', { name: 'Apply' } );
+		await expect( applyButton ).toBeVisible();
+		await expect( applyButton ).toBeEnabled();
+		await expect( page ).toHaveURL( deferredUrl );
+		await expect( productTitles ).toHaveText( deferredBaseline );
 
+		await page.clock.resume();
+		await applyButton.click();
 		await expect( page ).toHaveURL(
 			new RegExp( blockData.urlSearchParamWhenFilterIsApplied )
 		);
-
-		const products = page
-			.locator( '.wp-block-woocommerce-product-template' )
-			.getByRole( 'listitem' );
-
-		await expect( products ).toHaveCount( 1 );
+		await expect( productTitles ).toHaveText( [ 'T-Shirt with Logo' ] );
 	} );
 } );

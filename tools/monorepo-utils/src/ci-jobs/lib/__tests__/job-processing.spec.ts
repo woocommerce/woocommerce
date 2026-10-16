@@ -93,7 +93,7 @@ describe( 'Job Processing', () => {
 			expect( jobs.test ).toHaveLength( 0 );
 		} );
 
-		it( 'should throw when invalid var to replace in lint command', () => {
+		it( 'should throw when invalid var to replace in lint command', async () => {
 			const promise = createJobsForChanges(
 				{
 					name: 'test',
@@ -116,7 +116,7 @@ describe( 'Job Processing', () => {
 				{}
 			);
 
-			expect( promise ).rejects.toThrow();
+			await expect( promise ).rejects.toThrow();
 		} );
 
 		it( 'should not trigger a lint job that has already been created', async () => {
@@ -1010,6 +1010,274 @@ describe( 'Job Processing', () => {
 			} );
 		} );
 
+		it( 'should not trigger job when all changes are ignored', async () => {
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Lint,
+								changes: [ /.*/ ],
+								ignore: [ /\.md$/ ],
+								command: 'test-lint',
+								events: [],
+							},
+						],
+					},
+					dependencies: [],
+				},
+				{
+					test: [ 'README.md' ],
+				},
+				{}
+			);
+
+			expect( jobs.lint ).toHaveLength( 0 );
+			expect( jobs.test ).toHaveLength( 0 );
+		} );
+
+		it( 'should trigger job when changes remain after ignoring', async () => {
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Lint,
+								changes: [ /.*/ ],
+								ignore: [ /\.md$/ ],
+								command: 'test-lint',
+								events: [],
+							},
+						],
+					},
+					dependencies: [],
+				},
+				{
+					test: [ 'README.md', 'test.js' ],
+				},
+				{}
+			);
+
+			expect( jobs.lint ).toHaveLength( 1 );
+			expect( jobs.lint ).toContainEqual( {
+				projectName: 'test',
+				projectPath: 'test',
+				command: 'test-lint',
+			} );
+		} );
+
+		it( 'should not force test job for dependency changes the job ignores', async () => {
+			const testType = 'unit';
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Test,
+								testType,
+								name: 'With Ignore',
+								shardingArguments: [],
+								events: [],
+								changes: [ /test.js$/ ],
+								ignore: [ /\.md$/ ],
+								command: 'test-cmd',
+							},
+							{
+								type: JobType.Test,
+								testType,
+								name: 'Without Ignore',
+								shardingArguments: [],
+								events: [],
+								changes: [ /test.js$/ ],
+								command: 'test-cmd-other',
+							},
+						],
+					},
+					dependencies: [
+						{
+							name: 'test-a',
+							path: 'test-a',
+							dependencies: [],
+						},
+					],
+				},
+				{
+					'test-a': [ 'README.md' ],
+				},
+				{}
+			);
+
+			// The ignore is scoped to the job: the sibling without one is
+			// still forced by the dependency's changes.
+			expect( jobs.test ).toHaveLength( 1 );
+			expect( jobs.test ).toContainEqual( {
+				projectName: 'test',
+				projectPath: 'test',
+				name: 'Without Ignore',
+				command: 'test-cmd-other',
+				shardNumber: 0,
+				testEnv: {
+					shouldCreate: false,
+					envVars: {},
+				},
+				testType,
+			} );
+		} );
+
+		it( 'should force test job when an ignored change spawns dependency jobs', async () => {
+			const testType = 'unit';
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Test,
+								testType,
+								name: 'Default',
+								shardingArguments: [],
+								events: [],
+								changes: [ /test.js$/ ],
+								ignore: [ /\.md$/ ],
+								command: 'test-cmd',
+							},
+						],
+					},
+					dependencies: [
+						{
+							name: 'test-a',
+							path: 'test-a',
+							ciConfig: {
+								jobs: [
+									{
+										type: JobType.Test,
+										testType,
+										name: 'Default A',
+										shardingArguments: [],
+										events: [],
+										changes: [ /\.md$/ ],
+										command: 'test-cmd-a',
+									},
+								],
+							},
+							dependencies: [],
+						},
+					],
+				},
+				{
+					'test-a': [ 'README.md' ],
+				},
+				{}
+			);
+
+			// The dependency's own job triggered, so the dependent must
+			// retest regardless of what it ignores.
+			expect( jobs.test ).toHaveLength( 2 );
+		} );
+
+		it( 'should not trigger test job when the listed dependency only has ignored changes', async () => {
+			const testType = 'unit';
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Test,
+								testType,
+								name: 'Default',
+								shardingArguments: [],
+								events: [],
+								changes: [ /test.js$/ ],
+								ignore: [ /\.md$/ ],
+								command: 'test-cmd',
+								onlyForDependencies: [ 'test-a' ],
+							},
+						],
+					},
+					dependencies: [
+						{
+							name: 'test-a',
+							path: 'test-a',
+							dependencies: [],
+						},
+					],
+				},
+				{
+					'test-a': [ 'README.md' ],
+				},
+				{}
+			);
+
+			expect( jobs.test ).toHaveLength( 0 );
+		} );
+
+		it( 'should not force lint job for ignored shared ESLint project changes', async () => {
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Lint,
+								changes: [ /test.js$/ ],
+								ignore: [ /\.md$/ ],
+								command: 'test-lint',
+								events: [],
+							},
+						],
+					},
+					dependencies: [
+						{
+							name: '@woocommerce/eslint-plugin',
+							path: 'packages/js/eslint-plugin',
+							dependencies: [],
+						},
+					],
+				},
+				{
+					'@woocommerce/eslint-plugin': [ 'README.md' ],
+				},
+				{}
+			);
+
+			expect( jobs.lint ).toHaveLength( 0 );
+		} );
+
+		it( 'should trigger job with ignore when all changes are forced', async () => {
+			const jobs = await createJobsForChanges(
+				{
+					name: 'test',
+					path: 'test',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Lint,
+								changes: [ /test.js$/ ],
+								ignore: [ /.*/ ],
+								command: 'test-lint',
+								events: [],
+							},
+						],
+					},
+					dependencies: [],
+				},
+				true,
+				{}
+			);
+
+			expect( jobs.lint ).toHaveLength( 1 );
+		} );
+
 		it( 'should trigger test job for single node and parse test environment config', async () => {
 			const testType = 'unit';
 			jest.mocked( parseTestEnvConfig ).mockResolvedValue( {
@@ -1069,6 +1337,79 @@ describe( 'Job Processing', () => {
 				},
 				testType: 'unit',
 			} );
+		} );
+
+		it( 'should mark jobs configured to use the shared plugin build', async () => {
+			jest.mocked( parseTestEnvConfig ).mockResolvedValue( {} );
+
+			const jobs = await createJobsForChanges(
+				{
+					name: '@woocommerce/plugin-woocommerce',
+					path: 'plugins/woocommerce',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Test,
+								testType: 'e2e',
+								name: 'Default',
+								shardingArguments: [],
+								events: [],
+								changes: [ /test.js$/ ],
+								command: 'test-cmd',
+								usesSharedPluginBuild: true,
+								testEnv: {
+									start: 'test-start',
+									config: {},
+								},
+							},
+						],
+					},
+					dependencies: [],
+				},
+				{
+					'@woocommerce/plugin-woocommerce': [ 'test.js' ],
+				},
+				{}
+			);
+
+			expect( jobs.test ).toHaveLength( 1 );
+			expect( jobs.test[ 0 ].usesSharedPluginBuild ).toBe( true );
+		} );
+
+		it( 'should not mark jobs without the shared plugin build flag', async () => {
+			jest.mocked( parseTestEnvConfig ).mockResolvedValue( {} );
+
+			const jobs = await createJobsForChanges(
+				{
+					name: '@woocommerce/plugin-woocommerce',
+					path: 'plugins/woocommerce',
+					ciConfig: {
+						jobs: [
+							{
+								type: JobType.Test,
+								testType: 'e2e',
+								name: 'Default',
+								shardingArguments: [],
+								events: [],
+								changes: [ /test.js$/ ],
+								command: 'test-cmd',
+								testEnv: {
+									start: 'test-start',
+									config: {},
+								},
+							},
+						],
+					},
+					dependencies: [],
+				},
+				{
+					'@woocommerce/plugin-woocommerce': [ 'test.js' ],
+				},
+				{}
+			);
+
+			expect( jobs.test ).toHaveLength( 1 );
+			expect( jobs.test[ 0 ].usesSharedPluginBuild ).toBeUndefined();
 		} );
 
 		it( 'should trigger all jobs for a single node with changes set to "true"', async () => {
@@ -1520,64 +1861,118 @@ describe( 'Job Processing', () => {
 			);
 		} );
 
-		it.each( [ [ [] ], [ [ '--sharding=1/1' ] ] ] )(
-			'should not create sharded jobs for shards',
-			async ( shardingArguments ) => {
-				const jobs = getShardedJobs(
-					{
-						projectName: 'test',
-						projectPath: 'test',
-						name: 'Default',
-						command: 'test-cmd',
-						shardNumber: 0,
-						testEnv: {
-							shouldCreate: false,
-							envVars: {},
-						},
-						optional: false,
-						testType: 'e2e',
-						report: {
-							resultsBlobName: 'blob-name',
-							resultsPath: 'results-path',
-							allure: false,
-						},
-					},
-					{
-						type: JobType.Test,
-						testType: 'e2e',
-						name: 'Default',
-						shardingArguments,
-						events: [],
-						changes: [ /test.js$/ ],
-						command: 'test-cmd',
-						report: {
-							resultsBlobName: 'blob-name',
-							resultsPath: 'results-path',
-							allure: false,
-						},
-					}
-				);
-
-				expect( jobs ).toHaveLength( 1 );
-				expect( jobs ).toContainEqual( {
+		it( 'should not create sharded jobs when there are no sharding arguments', async () => {
+			const jobs = getShardedJobs(
+				{
 					projectName: 'test',
 					projectPath: 'test',
 					name: 'Default',
 					command: 'test-cmd',
 					shardNumber: 0,
-					optional: false,
-					testType: 'e2e',
 					testEnv: {
 						shouldCreate: false,
 						envVars: {},
 					},
+					optional: false,
+					testType: 'e2e',
 					report: {
 						resultsBlobName: 'blob-name',
 						resultsPath: 'results-path',
 						allure: false,
 					},
-				} );
-			}
-		);
+				},
+				{
+					type: JobType.Test,
+					testType: 'e2e',
+					name: 'Default',
+					shardingArguments: [],
+					events: [],
+					changes: [ /test.js$/ ],
+					command: 'test-cmd',
+					report: {
+						resultsBlobName: 'blob-name',
+						resultsPath: 'results-path',
+						allure: false,
+					},
+				}
+			);
+
+			expect( jobs ).toHaveLength( 1 );
+			expect( jobs ).toContainEqual( {
+				projectName: 'test',
+				projectPath: 'test',
+				name: 'Default',
+				command: 'test-cmd',
+				shardNumber: 0,
+				optional: false,
+				testType: 'e2e',
+				testEnv: {
+					shouldCreate: false,
+					envVars: {},
+				},
+				report: {
+					resultsBlobName: 'blob-name',
+					resultsPath: 'results-path',
+					allure: false,
+				},
+			} );
+		} );
+
+		it( 'should apply a single sharding argument as one job without an N/M suffix', async () => {
+			const jobs = getShardedJobs(
+				{
+					projectName: 'test',
+					projectPath: 'test',
+					name: 'Default',
+					command: 'test-cmd',
+					shardNumber: 0,
+					testEnv: {
+						shouldCreate: false,
+						envVars: {},
+					},
+					optional: false,
+					testType: 'e2e',
+					report: {
+						resultsBlobName: 'blob-name',
+						resultsPath: 'results-path',
+						allure: false,
+					},
+				},
+				{
+					type: JobType.Test,
+					testType: 'e2e',
+					name: 'Default',
+					shardingArguments: [ '--shard-arg-1' ],
+					events: [],
+					changes: [ /test.js$/ ],
+					command: 'test-cmd',
+					report: {
+						resultsBlobName: 'blob-name',
+						resultsPath: 'results-path',
+						allure: false,
+					},
+				}
+			);
+
+			expect( jobs ).toHaveLength( 1 );
+			expect( jobs ).toContainEqual( {
+				projectName: 'test',
+				projectPath: 'test',
+				name: 'Default',
+				command: 'test-cmd --shard-arg-1',
+				shardNumber: 0,
+				optional: false,
+				testType: 'e2e',
+				testEnv: {
+					shouldCreate: false,
+					envVars: {},
+				},
+				report: {
+					resultsBlobName: 'blob-name',
+					resultsPath: 'results-path',
+					allure: false,
+				},
+			} );
+		} );
 	} );
 } );

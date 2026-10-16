@@ -1,3 +1,0 @@
-Significance: patch
-Type: fix
-Comment: Analytics: prevent a Division by zero error when syncing monetary-only refunds on stores that use decimal item quantities.

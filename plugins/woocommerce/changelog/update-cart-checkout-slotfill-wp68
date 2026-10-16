@@ -1,3 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Update the cart/checkout Slot Fill to source from the WordPress 6.8 @wordpress/components package, removing the separately pinned wp-6.5 copy.

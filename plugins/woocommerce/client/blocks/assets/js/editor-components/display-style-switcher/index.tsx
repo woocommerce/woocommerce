@@ -146,7 +146,9 @@ export const DisplayStyleSwitcher = ( {
 	const [ displayStyleBlocksAttributes, setDisplayStyleBlocksAttributes ] =
 		useState< Record< string, Record< string, unknown > > >( {} );
 
-	if ( displayStyleOptions.length === 0 ) return null;
+	if ( displayStyleOptions.length === 0 ) {
+		return null;
+	}
 
 	return (
 		<ToggleGroupControl
@@ -185,7 +187,7 @@ export const DisplayStyleSwitcher = ( {
 					setDisplayStyleBlocksAttributes(
 						nextDisplayStyleBlocksAttributes
 					);
-					replaceBlock(
+					void replaceBlock(
 						currentStyleBlock.clientId,
 						createBlock(
 							value,
@@ -198,7 +200,7 @@ export const DisplayStyleSwitcher = ( {
 						getFallbackDisplayStyleInsertionPoint
 					);
 
-					insertBlock(
+					void insertBlock(
 						createBlock( value ),
 						insertionPoint.index,
 						insertionPoint.rootClientId,
@@ -227,7 +229,9 @@ export function resetDisplayStyleBlock(
 	contextKey = SELECTABLE_ITEMS_CONTEXT
 ) {
 	const parentBlock = select( 'core/block-editor' ).getBlock( clientId );
-	if ( ! parentBlock ) return;
+	if ( ! parentBlock ) {
+		return;
+	}
 
 	const displayStyleOptions = getDisplayStyleOptions(
 		parentBlock.name,

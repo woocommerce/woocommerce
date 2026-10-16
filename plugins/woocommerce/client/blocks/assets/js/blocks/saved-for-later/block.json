@@ -2,16 +2,17 @@
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 3,
 	"name": "woocommerce/saved-for-later",
-	"version": "1.0.0",
 	"title": "Saved for Later",
 	"description": "Display items the shopper has saved from their cart for later.",
 	"category": "woocommerce",
 	"keywords": [ "WooCommerce", "Saved for Later" ],
 	"textdomain": "woocommerce",
+	"blockHooks": {
+		"woocommerce/cart": "after"
+	},
 	"attributes": {
 		"columnCount": {
-			"type": "number",
-			"default": 5
+			"type": "number"
 		}
 	},
 	"allowedBlocks": [ "core/heading" ],
@@ -19,6 +20,7 @@
 		 "align": [ "wide", "full" ],
 		"interactivity": true,
 		"html": false,
+		"multiple": false,
 		"reusable": false,
 		"spacing": {
 			"margin": true,

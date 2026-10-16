@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Internal\Logging\OrderLogsCleanupHelper;
 use Automattic\WooCommerce\Internal\Logging\OrderLogsDeletionProcessor;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\Testing\Tools\TestingContainer;
 
@@ -112,6 +113,7 @@ class OrderLogsCleanupTest extends \WC_Unit_Test_Case {
 		$wpdb->delete( $wpdb->postmeta, array( 'meta_key' => '_debug_log_source' ) );
 
 		self::delete_all_log_files();
+		as_unschedule_all_actions( OrderLogsCleanupHelper::EXTENDED_CLEANUP_HOOK );
 
 		$this->sut                = $this->container->get( OrderLogsDeletionProcessor::class );
 		$this->sut_cleanup_helper = $this->container->get( OrderLogsCleanupHelper::class );
@@ -131,6 +133,7 @@ class OrderLogsCleanupTest extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		self::delete_all_log_files();
+		as_unschedule_all_actions( OrderLogsCleanupHelper::EXTENDED_CLEANUP_HOOK );
 		parent::tearDown();
 		if ( $this->data_store_filter_callback ) {
 				remove_filter( 'woocommerce_order_data_store', $this->data_store_filter_callback, 99999 );
@@ -447,9 +450,10 @@ class OrderLogsCleanupTest extends \WC_Unit_Test_Case {
 	 */
 	private function create_orders_with_logs( int $count ): array {
 		$order_ids = array();
+		$product   = ProductHelper::create_simple_product();
 
 		for ( $i = 0; $i < $count; $i++ ) {
-			$order = OrderHelper::create_order();
+			$order = OrderHelper::create_order( 1, $product );
 			$order->add_meta_data( '_debug_log_source_pending_deletion', 'place-order-debug-' . $i );
 			$order->save();
 			$order_ids[] = $order->get_id();
@@ -473,6 +477,8 @@ class OrderLogsCleanupTest extends \WC_Unit_Test_Case {
 
 		// Backdate the "old" file's modification time to 4 days ago.
 		touch( $old_files[0]->get_path(), time() - 4 * DAY_IN_SECONDS ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_touch
+		// Drop the stale stat cache entry from before the touch.
+		clearstatcache();
 
 		$recent_files = $file_controller->get_files( array( 'source' => 'place-order-debug-recent' ) );
 		$this->assertCount( 1, $recent_files );
@@ -534,9 +540,239 @@ class OrderLogsCleanupTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox cleanup() deletes one batch of old log files per run and schedules a follow-up run to drain the rest.
+	 */
+	public function test_cleanup_deletes_one_batch_of_log_files_and_reschedules(): void {
+		$file_controller = wc_get_container()->get( FileController::class );
+		$log_directory   = Settings::get_log_directory();
+
+		$extra      = 5;
+		$file_count = OrderLogsCleanupHelper::MAX_FILES_PER_RUN + $extra;
+		$date       = gmdate( 'Y-m-d', strtotime( '-4 days' ) );
+		$old_time   = time() - 4 * DAY_IN_SECONDS;
+
+		// Create the files directly; going through the logger would be much slower.
+		for ( $i = 0; $i < $file_count; $i++ ) {
+			$path = $log_directory . "place-order-debug-{$i}-{$date}-" . md5( (string) $i ) . '.log';
+			file_put_contents( $path, 'entry' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+			touch( $path, $old_time ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_touch
+		}
+		// Drop the stale stat cache entry from before the touch.
+		clearstatcache();
+
+		$this->assertEquals( $file_count, $file_controller->get_files( array( 'source' => 'place-order-debug' ), true ) );
+
+		$this->sut_cleanup_helper->cleanup();
+
+		$this->assertEquals(
+			$extra,
+			$file_controller->get_files( array( 'source' => 'place-order-debug' ), true ),
+			'Only one batch should be deleted per run'
+		);
+		$this->assertTrue(
+			as_has_scheduled_action( OrderLogsCleanupHelper::EXTENDED_CLEANUP_HOOK, array(), 'woocommerce' ),
+			'A follow-up run should be scheduled while files remain'
+		);
+
+		as_unschedule_all_actions( OrderLogsCleanupHelper::EXTENDED_CLEANUP_HOOK );
+		$this->sut_cleanup_helper->cleanup();
+
+		$this->assertEquals(
+			0,
+			$file_controller->get_files( array( 'source' => 'place-order-debug' ), true ),
+			'The follow-up run should delete the remaining files'
+		);
+		$this->assertFalse(
+			as_has_scheduled_action( OrderLogsCleanupHelper::EXTENDED_CLEANUP_HOOK, array(), 'woocommerce' ),
+			'No follow-up run should be scheduled once the backlog is drained'
+		);
+	}
+
+	/**
+	 * @testdox cleanup() deletes one batch of dangling order meta per run and schedules a follow-up run to drain the rest.
+	 */
+	public function test_cleanup_deletes_one_batch_of_dangling_orders_and_reschedules(): void {
+		$this->setup_hpos_and_reset_container( true );
+
+		$extra       = 5;
+		$order_count = OrderLogsCleanupHelper::MAX_ORDERS_PER_RUN + $extra;
+
+		for ( $i = 0; $i < $order_count; $i++ ) {
+			$order = wc_create_order();
+			$order->set_date_created( strtotime( '-5 days' ) );
+			$order->add_meta_data( '_debug_log_source', 'place-order-debug-drain-' . $i, true );
+			$order->save();
+		}
+
+		$this->assertEquals( $order_count, $this->count_debug_log_source_meta_entries() );
+
+		$this->sut_cleanup_helper->cleanup();
+
+		$this->assertEquals(
+			$extra,
+			$this->count_debug_log_source_meta_entries(),
+			'Only one batch should be cleaned up per run'
+		);
+		$this->assertTrue(
+			as_has_scheduled_action( OrderLogsCleanupHelper::EXTENDED_CLEANUP_HOOK, array(), 'woocommerce' ),
+			'A follow-up run should be scheduled while dangling orders remain'
+		);
+
+		as_unschedule_all_actions( OrderLogsCleanupHelper::EXTENDED_CLEANUP_HOOK );
+		$this->sut_cleanup_helper->cleanup();
+
+		$this->assertEquals(
+			0,
+			$this->count_debug_log_source_meta_entries(),
+			'The follow-up run should clean up the remaining orders'
+		);
+	}
+
+	/**
+	 * @testdox The cleanup helper registers the extended cleanup callback when the container initializes it.
+	 */
+	public function test_extended_cleanup_hook_is_registered_on_init(): void {
+		$this->assertNotFalse(
+			has_action( OrderLogsCleanupHelper::EXTENDED_CLEANUP_HOOK, array( $this->sut_cleanup_helper, 'cleanup' ) )
+		);
+	}
+
+	/**
+	 * @testdox An in-progress extended cleanup run still schedules the next follow-up run.
+	 */
+	public function test_extended_cleanup_schedules_a_follow_up_while_running(): void {
+		$this->setup_hpos_and_reset_container( true );
+
+		// Two full batches, so the second run still has a batch left to hand over.
+		for ( $i = 0; $i < 2 * OrderLogsCleanupHelper::MAX_ORDERS_PER_RUN; $i++ ) {
+			$order = wc_create_order();
+			$order->set_date_created( strtotime( '-5 days' ) );
+			$order->add_meta_data( '_debug_log_source', 'place-order-debug-running-' . $i, true );
+			$order->save();
+		}
+
+		$this->sut_cleanup_helper->cleanup();
+		$first = $this->get_pending_extended_cleanup_ids();
+		$this->assertCount( 1, $first );
+
+		// Simulate the queue runner picking the action up, then run it.
+		\ActionScheduler::store()->log_execution( current( $first ) );
+		$this->sut_cleanup_helper->cleanup();
+
+		$second = $this->get_pending_extended_cleanup_ids();
+		$this->assertCount( 1, $second, 'A follow-up run should be scheduled while the current one is in progress' );
+		$this->assertNotEquals( current( $first ), current( $second ) );
+
+		// as_unschedule_all_actions() only cancels pending actions, so drop the in-progress one here.
+		\ActionScheduler::store()->delete_action( current( $first ) );
+	}
+
+	/**
+	 * Get the IDs of the pending extended cleanup actions.
+	 *
+	 * @return array
+	 */
+	private function get_pending_extended_cleanup_ids(): array {
+		return as_get_scheduled_actions(
+			array(
+				'hook'     => OrderLogsCleanupHelper::EXTENDED_CLEANUP_HOOK,
+				'args'     => array(),
+				'group'    => 'woocommerce',
+				'status'   => \ActionScheduler_Store::STATUS_PENDING,
+				'per_page' => 5,
+			),
+			'ids'
+		);
+	}
+
+	/**
+	 * Count the `_debug_log_source` meta entries in the HPOS orders meta table.
+	 *
+	 * @return int
+	 */
+	private function count_debug_log_source_meta_entries(): int {
+		global $wpdb;
+
+		// phpcs:disable WordPress.DB.SlowDBQuery
+		return (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->prefix}wc_orders_meta WHERE meta_key = %s", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				'_debug_log_source'
+			)
+		);
+		// phpcs:enable WordPress.DB.SlowDBQuery
+	}
+
+	/**
+	 * @testdox cleanup() removes both the meta and the log file of a dangling order when the FileV2 handler is the default.
+	 */
+	public function test_cleanup_removes_dangling_order_meta_and_file_with_file_v2_handler(): void {
+		$handler         = new LogHandlerFileV2();
+		$file_controller = wc_get_container()->get( FileController::class );
+
+		$order = OrderHelper::create_order();
+		$order->set_date_created( strtotime( '-5 days' ) );
+		$order->add_meta_data( '_debug_log_source', 'place-order-debug-dangling', true );
+		$order->save();
+
+		$handler->handle( time(), 'debug', 'a step', array( 'source' => 'place-order-debug-dangling' ) );
+		$files = $file_controller->get_files( array( 'source' => 'place-order-debug-dangling' ) );
+		$this->assertCount( 1, $files );
+		touch( $files[0]->get_path(), time() - 4 * DAY_IN_SECONDS ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_touch
+		// Drop the stale stat cache entry from before the touch.
+		clearstatcache();
+
+		$this->sut_cleanup_helper->cleanup();
+
+		$order_reloaded = wc_get_order( $order->get_id() );
+		$this->assertEmpty( $order_reloaded->get_meta( '_debug_log_source' ) );
+		$this->assertCount(
+			0,
+			$file_controller->get_files( array( 'source' => 'place-order-debug-dangling' ) ),
+			'The dangling order\'s log file should be deleted by the file sweep'
+		);
+	}
+
+	/**
+	 * @testdox cleanup() deletes dangling order meta but does not sweep log files when the default handler is not FileV2.
+	 */
+	public function test_cleanup_skips_file_sweep_when_handler_is_not_file_v2(): void {
+		$handler         = new LogHandlerFileV2();
+		$file_controller = wc_get_container()->get( FileController::class );
+
+		$order = OrderHelper::create_order();
+		$order->set_date_created( strtotime( '-5 days' ) );
+		$order->add_meta_data( '_debug_log_source', 'place-order-debug-dbhandler', true );
+		$order->save();
+
+		$handler->handle( time(), 'debug', 'a step', array( 'source' => 'place-order-debug-dbhandler' ) );
+		$files = $file_controller->get_files( array( 'source' => 'place-order-debug-dbhandler' ) );
+		$this->assertCount( 1, $files );
+		touch( $files[0]->get_path(), time() - 4 * DAY_IN_SECONDS ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_touch
+		// Drop the stale stat cache entry from before the touch.
+		clearstatcache();
+
+		update_option( 'woocommerce_logs_default_handler', \WC_Log_Handler_DB::class );
+
+		try {
+			$this->sut_cleanup_helper->cleanup();
+		} finally {
+			delete_option( 'woocommerce_logs_default_handler' );
+		}
+
+		$order_reloaded = wc_get_order( $order->get_id() );
+		$this->assertEmpty( $order_reloaded->get_meta( '_debug_log_source' ), 'Dangling meta should still be cleaned up' );
+		$this->assertCount(
+			1,
+			$file_controller->get_files( array( 'source' => 'place-order-debug-dbhandler' ) ),
+			'The file sweep should not run when the FileV2 handler is not the default'
+		);
+	}
+
+	/**
 	 * Initialize HPOS and reset the DI container resolutions
-	 * (resetting the container is needed because the tested class checks for HPOS activation
-	 * only once when the DI container first retrieves it).
+	 * (resetting the container is needed because OrderLogsDeletionProcessor checks for HPOS
+	 * activation only once when the DI container first retrieves it).
 	 *
 	 * @param bool $enable_hpos Test with HPOS active or not.
 	 */
@@ -551,16 +787,6 @@ class OrderLogsCleanupTest extends \WC_Unit_Test_Case {
 	 * Delete all place-order-debug log files using the FileV2 controller.
 	 */
 	private static function delete_all_log_files(): void {
-		$file_controller = wc_get_container()->get( FileController::class );
-		$files           = $file_controller->get_files(
-			array(
-				'source'   => 'place-order-debug',
-				'per_page' => 1000,
-			)
-		);
-
-		if ( is_array( $files ) && ! empty( $files ) ) {
-			$file_controller->delete_files( array_map( fn( $file ) => $file->get_file_id(), $files ) );
-		}
+		wc_get_container()->get( FileController::class )->delete_stale_files( 'place-order-debug', PHP_INT_MAX, PHP_INT_MAX );
 	}
 }

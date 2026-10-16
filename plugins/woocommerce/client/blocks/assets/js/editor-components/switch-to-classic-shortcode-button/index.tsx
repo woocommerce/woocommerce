@@ -78,7 +78,7 @@ export function SwitchToClassicShortcodeButton( {
 		} );
 
 		if ( classicShortcodeBlock ) {
-			selectBlock( classicShortcodeBlock.clientId );
+			void selectBlock( classicShortcodeBlock.clientId );
 		}
 	};
 
@@ -88,12 +88,12 @@ export function SwitchToClassicShortcodeButton( {
 	};
 
 	const handleUndoClick = () => {
-		undo();
+		void undo();
 		recordEvent( 'switch_to_classic_shortcode_undo', eventValue );
 	};
 
 	const handleSwitchClick = () => {
-		replaceBlock(
+		void replaceBlock(
 			clientId,
 			createBlock( 'woocommerce/classic-shortcode', {
 				shortcode,
@@ -101,7 +101,7 @@ export function SwitchToClassicShortcodeButton( {
 		);
 		recordEvent( 'switch_to_classic_shortcode_confirm', eventValue );
 		selectClassicShortcodeBlock();
-		createInfoNotice( snackbarLabel, {
+		void createInfoNotice( snackbarLabel, {
 			actions: [
 				{
 					label: __( 'Undo', 'woocommerce' ),

@@ -2,6 +2,8 @@
 declare(strict_types=1);
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\Utils\ProductDescriptionUtils;
+
 /**
  * ProductDescription class.
  */
@@ -12,14 +14,6 @@ class ProductDescription extends AbstractBlock {
 	 * @var string
 	 */
 	protected $block_name = 'product-description';
-
-	/**
-	 * Keeps track of seen product IDs to prevent recursive rendering.
-	 *
-	 * @var array
-	 */
-	private static $seen_ids = array();
-
 
 	/**
 	 * Render the block.
@@ -36,40 +30,29 @@ class ProductDescription extends AbstractBlock {
 			return '';
 		}
 
-		$product_id = $block->context['postId'];
-
-		// Prevent recursive rendering.
-		if ( isset( self::$seen_ids[ $product_id ] ) ) {
-			if ( defined( 'WP_DEBUG' ) && WP_DEBUG && defined( 'WP_DEBUG_DISPLAY' ) && WP_DEBUG_DISPLAY ) {
-				return __( '[product description rendering halted]', 'woocommerce' );
-			}
-			return '';
-		}
-
-		self::$seen_ids[ $product_id ] = true;
+		$product_id = absint( $block->context['postId'] );
 
 		// Get the product.
 		$product = wc_get_product( $product_id );
 		if ( ! $product ) {
-			unset( self::$seen_ids[ $product_id ] );
 			return '';
 		}
 
-		// Get the description content.
-		$description = $product->get_description();
-		/**
-		 * This filter is documented in wp-includes/post-template.php.
-		 * We follow core/content block to replace ]]> with ]&gt;
-		 */
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
-		$description = apply_filters( 'the_content', str_replace( ']]>', ']]&gt;', $description ) );
+		$description = ProductDescriptionUtils::guarded_format(
+			$product,
+			function () use ( $product ) {
+				/**
+				 * This filter is documented in wp-includes/post-template.php.
+				 * We follow core/content block to replace ]]> with ]&gt;
+				 */
+				// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+				return apply_filters( 'the_content', str_replace( ']]>', ']]&gt;', $product->get_description() ) );
+			}
+		);
+
 		if ( empty( $description ) ) {
-			unset( self::$seen_ids[ $product_id ] );
 			return '';
 		}
-
-		// Remove this product from the seen array.
-		unset( self::$seen_ids[ $product_id ] );
 
 		// Add wrapper with block attributes.
 		$wrapper_attributes = get_block_wrapper_attributes(

@@ -175,6 +175,12 @@ abstract class ItemSchema extends ProductSchema {
 				'items'       => [
 					'type'       => 'object',
 					'properties' => [
+						'raw_key' => [
+							'description' => __( 'Machine-readable name for the metadata, set by the extension that added it. Never translated, so clients can match on it.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => [ 'view', 'edit' ],
+							'readonly'    => true,
+						],
 						'name'    => [
 							'description' => __( 'Name of the metadata.', 'woocommerce' ),
 							'type'        => 'string',
@@ -318,7 +324,9 @@ abstract class ItemSchema extends ProductSchema {
 				'context'     => [ 'view', 'edit' ],
 				'readonly'    => true,
 			],
-			self::EXTENDING_KEY    => $this->get_extended_schema( self::IDENTIFIER ),
+			// static:: so each subclass advertises the extensions registered against its own
+			// endpoint. self:: here would resolve to the inherited ProductSchema identifier.
+			self::EXTENDING_KEY    => $this->get_extended_schema( static::IDENTIFIER ),
 		];
 	}
 }

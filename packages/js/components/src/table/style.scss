@@ -28,8 +28,8 @@
 	}
 
 	$row-text-height: 1.1375rem;
-	$row-height: '#{$gap * 2} + #{$row-text-height} + 1px';
-	$header-row-height: '#{$gap-smaller * 2} + #{$row-text-height} + 1px';
+	$row-height: "#{$gap * 2} + #{$row-text-height} + 1px";
+	$header-row-height: "#{$gap-smaller * 2} + #{$row-text-height} + 1px";
 	&.is-empty {
 		align-items: center;
 		background: $gray-100;
@@ -57,7 +57,7 @@
 		grid-template-columns: auto 1fr auto;
 	}
 
-	@include breakpoint( '<960px' ) {
+	@include breakpoint( "<960px" ) {
 		&.has-search {
 			.woocommerce-table__actions {
 				grid-gap: $gap-small;
@@ -106,7 +106,7 @@
 
 	&::after,
 	&::before {
-		content: '';
+		content: "";
 		position: absolute;
 		top: 0;
 		width: 60px;
@@ -222,7 +222,7 @@
 	color: $gray-700;
 	font-weight: bold;
 
-	@include breakpoint( '<782px' ) {
+	@include breakpoint( "<782px" ) {
 		@include font-size( 13 );
 	}
 }

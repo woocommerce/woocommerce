@@ -119,10 +119,8 @@ class WC_REST_Variations_Controller_Tests extends WC_REST_Unit_Test_Case {
 		// Given.
 		wp_set_current_user( $this->user );
 
-		// Creates 3 variable products to have more variations.
-		for ( $i = 0; $i < 3; $i++ ) {
-			WC_Helper_Product::create_variation_product();
-		}
+		// Creates a variable product with enough variations for multiple pages.
+		WC_Helper_Product::create_variation_product();
 
 		// When.
 		$request = new WP_REST_Request( 'GET', '/wc/v3/variations' );
@@ -140,8 +138,8 @@ class WC_REST_Variations_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'X-WP-TotalPages', $headers );
 		$total       = (int) $headers['X-WP-Total'];
 		$total_pages = (int) $headers['X-WP-TotalPages'];
-		$this->assertSame( 18, $total ); // 3 variable products * 6 variations per product.
-		$this->assertSame( 9, $total_pages );
+		$this->assertSame( 6, $total );
+		$this->assertSame( 3, $total_pages );
 	}
 
 	/**

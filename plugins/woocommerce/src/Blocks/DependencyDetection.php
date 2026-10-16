@@ -53,6 +53,7 @@ final class DependencyDetection {
 		'blocksComponents'      => 'wc-blocks-components',
 		'wcTypes'               => 'wc-types',
 		'sanitize'              => 'wc-sanitize',
+		'wcEntities'            => 'wc-entities',
 	);
 
 	/**

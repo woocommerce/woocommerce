@@ -117,6 +117,8 @@ class WC_Admin_Tests_OnboardingTasks_Task extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'content', $json );
 		$this->assertArrayHasKey( 'actionLabel', $json );
 		$this->assertArrayHasKey( 'actionUrl', $json );
+		$this->assertArrayHasKey( 'imageUrl', $json );
+		$this->assertArrayHasKey( 'imageAlt', $json );
 		$this->assertArrayHasKey( 'isComplete', $json );
 		$this->assertArrayHasKey( 'canView', $json );
 		$this->assertArrayHasKey( 'time', $json );
@@ -125,6 +127,25 @@ class WC_Admin_Tests_OnboardingTasks_Task extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'isSnoozed', $json );
 		$this->assertArrayHasKey( 'isSnoozeable', $json );
 		$this->assertArrayHasKey( 'snoozedUntil', $json );
+	}
+
+	/**
+	 * Tests that a task exposes empty image metadata by default.
+	 */
+	public function test_default_image_metadata() {
+		$task = new TestTask(
+			new TaskList( array( 'id' => 'setup' ) ),
+			array(
+				'id' => 'wc-unit-test-task',
+			)
+		);
+
+		$this->assertSame( '', $task->get_image_url() );
+		$this->assertSame( '', $task->get_image_alt() );
+
+		$json = $task->get_json();
+		$this->assertSame( '', $json['imageUrl'] );
+		$this->assertSame( '', $json['imageAlt'] );
 	}
 
 	/**

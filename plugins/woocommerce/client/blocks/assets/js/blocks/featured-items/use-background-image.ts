@@ -109,7 +109,9 @@ export function useBackgroundImage( {
 					willReadFrequently: true,
 				} );
 
-				if ( ! ctx ) return;
+				if ( ! ctx ) {
+					return;
+				}
 
 				ctx.drawImage( img, 0, 0, width, height );
 
@@ -130,9 +132,7 @@ export function useBackgroundImage( {
 					return false;
 				} )();
 
-				if ( isImageBgTransparent !== hasTransparentPixels ) {
-					setIsImageBgTransparent( hasTransparentPixels );
-				}
+				setIsImageBgTransparent( hasTransparentPixels );
 			};
 		} else {
 			setIsImageBgTransparent( true );

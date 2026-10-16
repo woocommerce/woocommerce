@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Move the product archive title fallback check from E2E to PHPUnit.
+

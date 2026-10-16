@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Harden Blocks non-null assertion lint rule to error.
