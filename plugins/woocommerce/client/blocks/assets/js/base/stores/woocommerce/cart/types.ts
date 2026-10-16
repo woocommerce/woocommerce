@@ -28,7 +28,11 @@ export type OptimisticCartItem = {
 export type AddCartItemPayload = {
 	/** The product or variation id. */
 	id: number;
-	/** The amount to add to the cart. Defaults to 1 when omitted. */
+	/**
+	 * The amount to add to the cart. Defaults to 1 when omitted. A numeric
+	 * string from untyped data, such as a server-rendered context value, is
+	 * added as the number it holds.
+	 */
 	quantity?: number;
 	/** The selected attributes, when the product is a variation. */
 	variation?: SelectedAttributes[];
