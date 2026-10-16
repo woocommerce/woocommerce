@@ -1,6 +1,12 @@
 const focusableSelector =
 	'a[href], area[href], button, input, select, textarea, iframe, object, embed, summary, audio[controls], video[controls], [tabindex], [contenteditable]:not([contenteditable="false"])';
 
+/**
+ * Collect visible, enabled controls in tab order, with one stop per named radio group.
+ *
+ * @param container Element whose descendants should be checked.
+ * @return Tabbable descendants, ordered by positive tabindex and then document order.
+ */
 export function getTabbableElements( container: HTMLElement ): HTMLElement[] {
 	const elements = Array.from(
 		container.querySelectorAll< HTMLElement >( focusableSelector )
@@ -49,6 +55,13 @@ const openOverlays = new Set< HTMLElement >();
 let previousOverflow = '';
 let previousOverflowPriority = '';
 
+/**
+ * Lock body scrolling while any registered overlay is open, restoring the original
+ * inline overflow value and priority after the last overlay closes.
+ *
+ * @param element Product Filters block root identifying the overlay.
+ * @param isOpen  Whether this overlay should hold a scroll lock.
+ */
 export function setOverlayScrolling( element: HTMLElement, isOpen: boolean ) {
 	if ( isOpen ) {
 		if ( openOverlays.size === 0 ) {
@@ -72,6 +85,12 @@ export function setOverlayScrolling( element: HTMLElement, isOpen: boolean ) {
 	}
 }
 
+/**
+ * Identify the last registered open overlay so only it handles dialog keyboard events.
+ *
+ * @param element Product Filters block root identifying the overlay.
+ * @return Whether this instance is last in the open-overlay registration order.
+ */
 export function isTopmostOverlay( element: HTMLElement ) {
 	const overlays = Array.from( openOverlays );
 	return overlays[ overlays.length - 1 ] === element;

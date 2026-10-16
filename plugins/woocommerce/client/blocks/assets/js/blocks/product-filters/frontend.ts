@@ -36,18 +36,34 @@ const BLOCK_NAME = PRODUCT_FILTERS_STORE_NAME;
 
 const overlayOpenState = new WeakMap< HTMLElement, boolean >();
 
+/**
+ * Resolve the Product Filters instance owning the current Interactivity API element.
+ *
+ * @return The enclosing block, or null/undefined when none is available.
+ */
 function getFiltersElement() {
 	return getElement().ref?.closest< HTMLElement >(
 		'.wc-block-product-filters'
 	);
 }
 
+/**
+ * Find the dialog within a specific Product Filters instance.
+ *
+ * @param element Product Filters block root.
+ * @return The dialog element, or null when it is absent.
+ */
 function getOverlayDialog( element: HTMLElement ) {
 	return element.querySelector< HTMLElement >(
 		'.wc-block-product-filters__overlay-dialog'
 	);
 }
 
+/**
+ * Focus the first tabbable control, falling back to the dialog itself.
+ *
+ * @param element Product Filters block root.
+ */
 function focusOverlay( element: HTMLElement ) {
 	const dialog = getOverlayDialog( element );
 	if ( dialog ) {
