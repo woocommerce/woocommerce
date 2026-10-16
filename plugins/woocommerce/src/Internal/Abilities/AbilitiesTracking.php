@@ -253,11 +253,13 @@ class AbilitiesTracking {
 			return;
 		}
 
-		$index = $this->find_frame( $ability_name );
-		if ( null !== $index && ! $this->frames[ $index ]['executing'] ) {
+		$index = $this->find_frame( $ability_name, false );
+		if ( null !== $index ) {
 			// Opened by wp_ability_invoked; time only the execution so durations match on WordPress 7.0.
-			$this->frames[ $index ]['executing'] = true;
-			$this->frames[ $index ]['start']     = microtime( true );
+			$frame                  = $this->frames[ $index ];
+			$frame['executing']     = true;
+			$frame['start']         = microtime( true );
+			$this->frames[ $index ] = $frame;
 			return;
 		}
 
@@ -481,7 +483,8 @@ class AbilitiesTracking {
 	/**
 	 * Finish tracking the innermost open invocation of an ability.
 	 *
-	 * Invocations opened after it are calls that failed without a closing hook (WordPress 7.0).
+	 * Invocations opened after it are calls that failed without a closing hook. On WordPress 7.0, a failed recursive
+	 * call of the same ability can't be told apart from the outer call, so their outcomes can swap; counts stay right.
 	 *
 	 * @param mixed $ability_name The ability name.
 	 * @param bool  $executing    Execution state the invocation must be in; hooks before and after execution share filters with other callers.
@@ -492,8 +495,8 @@ class AbilitiesTracking {
 			return;
 		}
 
-		$index = $this->find_frame( $ability_name );
-		if ( null === $index || $executing !== $this->frames[ $index ]['executing'] ) {
+		$index = $this->find_frame( $ability_name, $executing );
+		if ( null === $index ) {
 			return;
 		}
 
@@ -509,14 +512,17 @@ class AbilitiesTracking {
 	}
 
 	/**
-	 * Find the innermost open invocation of an ability.
+	 * Find the innermost open invocation of an ability in a given execution state.
+	 *
+	 * Matching the state keeps a recursive call that failed without a closing hook from hiding its outer call.
 	 *
 	 * @param string $ability_name The ability name.
+	 * @param bool   $executing    Whether the invocation must have started executing.
 	 * @return int|null Index in the frames stack, or null when none is open.
 	 */
-	private function find_frame( string $ability_name ): ?int {
+	private function find_frame( string $ability_name, bool $executing ): ?int {
 		for ( $index = count( $this->frames ) - 1; $index >= 0; $index-- ) {
-			if ( $ability_name === $this->frames[ $index ]['name'] ) {
+			if ( $ability_name === $this->frames[ $index ]['name'] && $executing === $this->frames[ $index ]['executing'] ) {
 				return $index;
 			}
 		}

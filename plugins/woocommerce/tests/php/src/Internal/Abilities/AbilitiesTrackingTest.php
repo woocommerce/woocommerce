@@ -605,6 +605,30 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should keep the outer call's result when a recursive call fails without a closing hook.
+	 */
+	public function test_keeps_outer_result_when_recursive_call_fails_without_closing_hook(): void {
+		$this->skip_unless_wordpress_exposes_all_outcomes();
+		$calls = 0;
+		add_filter(
+			'wp_ability_normalize_input',
+			static function ( $input ) use ( &$calls ) {
+				return 2 === ++$calls ? new WP_Error( 'tracking_test_normalize' ) : $input;
+			}
+		);
+		$this->execute_result = function () {
+			wp_get_ability( self::ABILITY_ID )->execute();
+			return array( 'ok' => true );
+		};
+		$this->start_mcp_tool_call();
+
+		wp_get_ability( self::ABILITY_ID )->execute();
+		$this->sut->handle_shutdown();
+
+		$this->assertEqualsCanonicalizing( array( 'none', 'unknown' ), array_column( $this->sut->recorded, 'error_code' ), 'The outer success and the inner unknown failure should both be recorded' );
+	}
+
+	/**
 	 * @testdox Should record long ability names in full.
 	 */
 	public function test_records_long_ability_names_in_full(): void {
