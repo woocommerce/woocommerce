@@ -1241,6 +1241,8 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 				return new \WP_Error( 'test_refused', 'Refused.' );
 			}
 		);
+		$this->reset_registries();
+		AbilitiesLoader::init_extensions();
 		$this->set_feature( false );
 		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
 
@@ -1252,6 +1254,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			)
 		);
 
+		$this->assertNotEmpty( ExtensibleAbilities::get_validators( 'product' ) );
 		$this->assertSame( 'Pencil', $output['product']['name'] );
 	}
 
