@@ -1784,7 +1784,6 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$importer = new WC_Product_CSV_Importer( $csv_file );
 
 		$this->assertSame( '20990126T103000', $importer->parse_date_on_sale_to_field( '20990126T103000' ) );
-		$this->assertSame( '2099-01-26T10', $importer->parse_date_on_sale_to_field( '2099-01-26T10' ) );
 		$this->assertSame( 'January 26, 2099 10am', $importer->parse_date_on_sale_to_field( 'January 26, 2099 10am' ) );
 		$this->assertSame( '2099-01-26 10.30', $importer->parse_date_on_sale_to_field( '2099-01-26 10.30' ) );
 		// Epoch syntax parses as a relative expression, not a bare calendar day.

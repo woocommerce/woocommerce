@@ -733,7 +733,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		// stripped before probing. strtotime() only knows English weekday names, so the same
 		// applies here. The probe is only used for classification: the result below is rebuilt
 		// from the parsed day, which also avoids PHP moving the date to the next matching weekday.
-		$probe = preg_replace( '/^(?:mon|tue(?:s)?|wed(?:nes)?|thu(?:rs)?|fri|sat(?:ur)?|sun)(?:day)?\.?,?\s+/i', '', $parsed );
+		$probe = (string) preg_replace( '/^(?:mon|tue(?:s)?|wed(?:nes)?|thu(?:rs)?|fri|sat(?:ur)?|sun)(?:day)?\.?,?\s+/i', '', $parsed );
 		$date  = date_parse( $probe );
 
 		// date_parse() reports an hour for every timed format strtotime() understands, not
