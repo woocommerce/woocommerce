@@ -9,7 +9,7 @@
  * that keeps its own schedule triggers its own renewals. The engine decides nothing about
  * what a due contract means: renewing, skipping or clearing the due moment is the owner's call.
  * A handler is expected to move or clear the due moment; one that does not is notified
- * again on a later tick, behind contracts locked less recently.
+ * again by a later or overlapping tick, behind contracts locked less recently.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Integration\Dispatch
  */
@@ -125,8 +125,8 @@ final class DueDispatcher {
 		}
 
 		if ( ! self::is_scheduled() ) {
-			// `$unique = true` is a best-effort dedup; the per-contract lock keeps a
-			// duplicate recurring action from notifying a contract twice.
+			// `$unique = true` is a best-effort dedup; the per-contract lock keeps a duplicate
+			// recurring action from notifying a contract while another run holds it.
 			as_schedule_recurring_action( time() + self::INTERVAL_SECONDS, self::INTERVAL_SECONDS, self::HOOK, array(), self::GROUP, true );
 		}
 
@@ -261,7 +261,7 @@ final class DueDispatcher {
 		try {
 			$this->contracts->release_lock( $lock );
 		} catch ( Throwable $e ) {
-			wc_get_logger()->error(
+			wc_get_logger()->warning(
 				sprintf( 'DueDispatcher::run_batch(): failed to release the due lock on contract %d; it expires on its own. %s', $lock->get_contract_id(), $e->getMessage() ),
 				array(
 					'source'      => self::LOG_SOURCE,

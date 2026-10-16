@@ -60,9 +60,9 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox A tick that overlaps a running notification does not notify the same contract again.
+	 * @testdox A tick that overlaps a running notification skips the contract that notification holds locked.
 	 */
-	public function test_overlapping_ticks_notify_once(): void {
+	public function test_an_overlapping_tick_skips_a_contract_being_notified(): void {
 		$nested = null;
 		ConsumerRegistry::register(
 			self::OWNER,
@@ -83,6 +83,38 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 		$this->assertSame( 1, $this->sut->run_batch( $this->now() ) );
 		$this->assertSame( 0, $nested, 'The overlapping tick finds the contract locked.' );
 		$this->assertCount( 1, $this->calls );
+	}
+
+	/**
+	 * @testdox A tick that scanned before an overlapping notification released renotifies an idle handler's contract but skips a moved one.
+	 */
+	public function test_an_overlapping_tick_renotifies_only_a_contract_left_due(): void {
+		$first  = $this->create_due_contract( '2026-02-13 00:00:00' );
+		$idle   = $this->create_due_contract( '2026-02-14 00:00:00' );
+		$moved  = $this->create_due_contract( '2026-02-15 00:00:00' );
+		$nested = null;
+		ConsumerRegistry::register(
+			self::OWNER,
+			array(
+				'contract_due_handler' => function ( ContractView $contract, array $context ) use ( $first, $moved, &$nested ): void {
+					$this->calls[] = array(
+						'contract' => $contract,
+						'context'  => $context,
+					);
+					if ( $first === $contract->get_id() && null === $nested ) {
+						// The outer tick has scanned all three; this one notifies and releases the other two first.
+						$nested = ( new DueDispatcher() )->run_batch( $this->now() );
+					}
+					if ( $moved === $contract->get_id() ) {
+						Contracts::update( $moved, array( 'next_payment_gmt' => '2026-03-15 00:00:00' ), $context['lock'] );
+					}
+				},
+			)
+		);
+
+		$this->assertSame( 2, $this->sut->run_batch( $this->now() ), 'The outer tick notifies the first and the idle contract.' );
+		$this->assertSame( 2, $nested );
+		$this->assertSame( array( $first, $idle, $moved, $idle ), $this->notified_ids(), 'Only the contract left due is notified again.' );
 	}
 
 	/**
@@ -299,7 +331,7 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 
 		$this->fail_next_query( '/^\s*UPDATE\s+\S*contracts\s+SET\s+lock_token\s*=\s*NULL/i' );
 		$errors = $this->capture_engine_log(
-			'error',
+			'warning',
 			array( 'contract_id' => $first ),
 			function (): void {
 				$this->assertSame( 2, $this->sut->run_batch( $this->now() ), 'A failed release still counts as notified.' );

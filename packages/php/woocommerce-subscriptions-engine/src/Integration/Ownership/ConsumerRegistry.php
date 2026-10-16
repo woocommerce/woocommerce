@@ -54,7 +54,10 @@ final class ConsumerRegistry {
 	 *                                     (UTC) and `$context['lock']` (the dispatcher's
 	 *                                     `ContractLock`). The dispatcher releases the lock when the
 	 *                                     handler returns, unless the handler already did, and keeps
-	 *                                     it until it expires when the handler throws.
+	 *                                     it until it expires when the handler throws. A handler
+	 *                                     that leaves the contract due (same due moment) is notified
+	 *                                     again by a later or overlapping scan; moving or clearing
+	 *                                     the due moment stops that.
 	 */
 	public static function register( string $slug, array $config = array() ): void {
 		$slug = trim( $slug );
