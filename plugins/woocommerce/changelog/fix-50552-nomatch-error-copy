@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Replace the misleading "not allowed to access this page" error with copy that reflects the real cause, a page that couldn't be found.
