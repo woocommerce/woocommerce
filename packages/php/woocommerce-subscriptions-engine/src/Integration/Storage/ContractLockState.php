@@ -18,8 +18,12 @@ defined( 'ABSPATH' ) || exit;
  * {@see ContractRepository} through {@see ContractLock::get_state()}; any other caller gets
  * `_doing_it_wrong()`.
  *
- * Trust: child-table writes skip the database check for {@see self::TRUST_WINDOW_SECONDS}
- * after the last stamp (acquire, extend or verify). Times are monotonic, in seconds.
+ * Why: the contract row write checks the lock in its own statement, but fencing every item,
+ * address, meta and cycle statement the same way would join the contract row each time. This
+ * caches the last database confirmation (acquire, extend or verify) instead, and child writes
+ * trust it for {@see self::TRUST_WINDOW_SECONDS}, far shorter than the lock's lifetime and
+ * ending at least that long before expiry, so a takeover cannot land inside the trust. Past
+ * it, the next child write re-checks the lock with one read. Times are monotonic, in seconds.
  *
  * @internal Engine storage only.
  */
