@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix duplicate and missing variations when apps and integrations page through them by menu order using the REST API.
