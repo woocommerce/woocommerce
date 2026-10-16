@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Refresh pending WooPayments Test Drive accounts when webhook updates are delayed.
