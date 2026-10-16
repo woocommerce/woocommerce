@@ -114,7 +114,7 @@ class OrderNotesQuery extends AbstractDomainAbility implements AbilityDefinition
 	public static function can_view_order( $input = array() ): bool {
 		$order_id = self::get_id_from_input( $input );
 
-		return $order_id > 0 && wc_rest_check_post_permissions( 'shop_order', 'read', $order_id );
+		return $order_id > 0 && self::check_order_permission( $order_id, 'read' );
 	}
 
 	/**
