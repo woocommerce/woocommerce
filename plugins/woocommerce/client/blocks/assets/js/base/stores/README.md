@@ -4,8 +4,8 @@ This folder contains the Interactivity API (iAPI) stores that WooCommerce blocks
 
 Stores in this folder:
 
--   [`woocommerce/products`](#woocommerceproducts-store) — server-populated cache of product and variation data in Store API format.
--   [`woocommerce` product data](#woocommerce-store-product-data) — the same product and variation data, seeded by the same PHP loaders into the `woocommerce` store, as raw data only.
+-   [`woocommerce/products`](#woocommerceproducts-store) — server-populated cache of product and variation data in Store API format. It is going to be removed once every block reads product data from the `woocommerce` store.
+-   [`woocommerce` product data](#woocommerce-store-product-data) — the same product and variation data, seeded by the same PHP loaders into the `woocommerce` store, as raw data only. New code reads product data from here.
 -   [`woocommerce/cart`](#woocommercecart-store) — cart state and actions (with mutation batching for performance). `addCartItem` resolves with a structured per-call outcome (`AddCartItemOutcome`) instead of `void`, and the store's cross-cutting side effects (sync event, legacy event, screen-reader announcement) fire exactly once per batch cycle, not once per request — see below.
 
 ---
@@ -81,7 +81,7 @@ All loaders require a consent statement (they are experimental APIs). The litera
 
 Loaders are idempotent — calling them multiple times for the same ID (or the same variation parent) is cheap.
 
-Each loader writes its data to the `woocommerce` store as well as to `woocommerce/products`; see [`woocommerce` store: product data](#woocommerce-store-product-data).
+Each loader writes its data to the `woocommerce` store as well as to `woocommerce/products`, until `woocommerce/products` is removed; see [`woocommerce` store: product data](#woocommerce-store-product-data).
 
 #### Load a single product
 
@@ -242,11 +242,13 @@ For variable products, `findProduct` returns `null` when no variation matches th
 
 The `woocommerce` store holds the same product and variation data as `woocommerce/products`: `state.products` and `state.productVariations`, keyed by ID, in Store API format (`ProductResponseItem`). It holds the raw data only. It has no selection (`productId` / `variationId`) and no getters (`productInContext`, `findProduct`, …); for the "current" product, use [`woocommerce/products`](#woocommerceproducts-store).
 
+The duplication is temporary. `woocommerce/products` is going to be removed once every block reads its product data from the `woocommerce` store. Read product and variation data from `woocommerce` in new code, and use `woocommerce/products` only for the selection and getters that `woocommerce` doesn't have yet. Don't add features to `woocommerce/products`.
+
 **Source files:**
 
 -   JS: `plugins/woocommerce/client/blocks/assets/js/base/stores/woocommerce/products.ts` (declares the members and their type, `WooCommerceProductData`, re-exported from `woocommerce/index.ts`)
 -   PHP: `plugins/woocommerce/src/Blocks/SharedStores/ProductsStore.php`
--   Tests: `plugins/woocommerce/tests/php/src/Blocks/SharedStores/ProductsStore.php` (each loader seeds both stores with equal values, and adds no getters or selection to `woocommerce`)
+-   Tests: `plugins/woocommerce/tests/php/src/Blocks/SharedStores/ProductsStore.php` (each loader seeds the products or variations it loads into the `woocommerce` state, keyed by ID)
 
 ### How it is populated
 
@@ -254,7 +256,7 @@ The [`woocommerce/products` loaders](#populating-state-php) seed both stores. Ea
 
 Only the loaders write to both. Data added to `woocommerce/products` any other way — a direct `wp_interactivity_state( 'woocommerce/products', … )` call or a client-side write — is not copied to `woocommerce`.
 
-The product data is serialized for both namespaces, so it appears twice in the page's interactivity state.
+The product data is serialized for both namespaces, so it appears twice in the page's interactivity state until `woocommerce/products` is removed.
 
 ### Reading it from directives (SSR)
 
