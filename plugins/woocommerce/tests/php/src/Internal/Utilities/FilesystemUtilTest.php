@@ -367,37 +367,83 @@ class FilesystemUtilTest extends WC_Unit_Test_Case {
 	 * @testdox 'resolve_upload_file_path' resolves a path relative to the site root when wp-content lives outside ABSPATH (e.g. symlinked-core hosts).
 	 */
 	public function test_resolve_upload_file_path_relative_to_site_root(): void {
-		$site_root = sys_get_temp_dir() . '/wc-fsutil-siteroot-' . wp_generate_uuid4();
-		$path      = $this->make_temp_file( $site_root );
+		$site_root   = sys_get_temp_dir() . '/wc-fsutil-siteroot-' . wp_generate_uuid4();
+		$uploads_dir = $site_root . '/wp-content/uploads';
+		$path        = $this->make_temp_file( $uploads_dir );
+
+		$this->temp_dirs[] = $site_root . '/wp-content';
+		$this->temp_dirs[] = $site_root;
 
 		Constants::set_constant( 'WP_CONTENT_DIR', $site_root . '/wp-content' );
+		add_filter(
+			'upload_dir',
+			function ( $dirs ) use ( $uploads_dir ) {
+				$dirs['basedir'] = $uploads_dir;
+				$dirs['path']    = $uploads_dir;
+				return $dirs;
+			}
+		);
 
-		$this->assertSame( $path, FilesystemUtil::resolve_upload_file_path( basename( $path ) ) );
+		$this->assertSame( $path, FilesystemUtil::resolve_upload_file_path( 'wp-content/uploads/' . basename( $path ) ) );
 	}
 
 	/**
 	 * @testdox 'resolve_upload_file_path' never uses a stream URL as-is: probing user-supplied streams (e.g. phar://) with is_readable() could trigger wrapper side effects.
 	 */
 	public function test_resolve_upload_file_path_does_not_use_stream_urls_as_is(): void {
-		$stream_url = 'phar://evil.phar/payload.csv';
-
-		$this->assertSame( ABSPATH . $stream_url, FilesystemUtil::resolve_upload_file_path( $stream_url ) );
+		foreach ( array( 'phar://evil.phar/payload.csv', 'PHAR://evil.phar/payload.csv' ) as $stream_url ) {
+			$this->assertSame( ABSPATH . $stream_url, FilesystemUtil::resolve_upload_file_path( $stream_url ) );
+		}
 	}
 
 	/**
-	 * @testdox 'resolve_upload_file_path' resolution bases are broader than the validation allowlist: a resolved site-root file outside ABSPATH and uploads is still rejected by 'validate_upload_file_path'.
+	 * @testdox 'resolve_upload_file_path' returns the ABSPATH fallback for paths containing NUL bytes without throwing.
 	 */
-	public function test_resolved_site_root_path_outside_allowed_locations_fails_validation(): void {
+	public function test_resolve_upload_file_path_nul_byte(): void {
+		$file_path = "sample.csv\0.txt";
+
+		$this->assertSame( ABSPATH . $file_path, FilesystemUtil::resolve_upload_file_path( $file_path ) );
+	}
+
+	/**
+	 * @testdox 'resolve_upload_file_path' skips a readable site-root file outside ABSPATH and uploads and returns the ABSPATH fallback, which 'validate_upload_file_path' rejects.
+	 */
+	public function test_resolve_upload_file_path_skips_site_root_file_outside_allowed_locations(): void {
 		$site_root = sys_get_temp_dir() . '/wc-fsutil-siteroot-' . wp_generate_uuid4();
 		$path      = $this->make_temp_file( $site_root );
+		$file_name = basename( $path );
 
 		Constants::set_constant( 'WP_CONTENT_DIR', $site_root . '/wp-content' );
 
-		$resolved = FilesystemUtil::resolve_upload_file_path( basename( $path ) );
-		$this->assertSame( $path, $resolved );
+		$resolved = FilesystemUtil::resolve_upload_file_path( $file_name );
+		$this->assertSame( ABSPATH . $file_name, $resolved );
 
 		$this->expectException( \Exception::class );
 		FilesystemUtil::validate_upload_file_path( $resolved );
+	}
+
+	/**
+	 * @testdox 'resolve_upload_file_path' prefers the uploads candidate when a readable site-root file outside the allowlist shadows it.
+	 */
+	public function test_resolve_upload_file_path_prefers_allowed_uploads_over_site_root_shadow(): void {
+		$upload_dir   = wp_get_upload_dir();
+		$uploads_file = $this->make_temp_file( $upload_dir['basedir'] );
+		$file_name    = basename( $uploads_file );
+		$site_root    = sys_get_temp_dir() . '/wc-fsutil-siteroot-' . wp_generate_uuid4();
+
+		wp_mkdir_p( $site_root );
+		$this->temp_dirs[] = $site_root;
+		$site_root_file    = $site_root . '/' . $file_name;
+		FilesystemUtil::get_wp_filesystem_direct()->put_contents( $site_root_file, '' );
+		$this->temp_files[] = $site_root_file;
+
+		Constants::set_constant( 'WP_CONTENT_DIR', $site_root . '/wp-content' );
+
+		$this->assertSame(
+			$uploads_file,
+			FilesystemUtil::resolve_upload_file_path( $file_name ),
+			'A readable site-root candidate outside the allowlist must not shadow the valid uploads candidate.'
+		);
 	}
 
 	/**
