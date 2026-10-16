@@ -56,8 +56,10 @@ class UcpCartMapper {
 		$line_items = array();
 
 		foreach ( $items as $cart_item ) {
-			// The Store API keeps variation attributes apart from the name; a UCP title
-			// is one string, so rejoin them the way WC_Product_Variation::get_name() does.
+			// The Store API keeps variation attributes apart from the name; a UCP title is
+			// one string, so rejoin them as "Parent - a, b". WooCommerce builds stored
+			// variation names the same way but leaves the attributes out past two; here
+			// every attribute is kept, since the agent has no other place to read them.
 			$title  = (string) $cart_item['name'];
 			$values = array_column( (array) $cart_item['variation'], 'value' );
 			if ( ! empty( $values ) ) {

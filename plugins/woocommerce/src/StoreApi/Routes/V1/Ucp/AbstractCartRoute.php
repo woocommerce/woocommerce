@@ -15,6 +15,10 @@ use Automattic\WooCommerce\StoreApi\Utilities\UcpUtils;
  *
  * Inherits session binding, cart loading and draft order sync from the Store API cart
  * route. Adds the UCP envelope, and keys the session off the path instead of a header.
+ *
+ * Writes are last-wins, as for every Store API cart: the session row is read when the
+ * request starts and written whole at shutdown, with no lock or version check. Two
+ * callers updating the same cart id at once can overwrite each other's lines.
  */
 abstract class AbstractCartRoute extends StoreApiCartRoute {
 	/**
