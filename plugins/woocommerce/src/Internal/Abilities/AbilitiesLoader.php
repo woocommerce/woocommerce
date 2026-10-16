@@ -8,6 +8,9 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities;
 
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
+use Automattic\WooCommerce\Internal\Abilities\Domain\CouponCreate;
+use Automattic\WooCommerce\Internal\Abilities\Domain\CouponsQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\CouponUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderAddNote;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderUpdateStatus;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrdersQuery;
@@ -43,6 +46,9 @@ class AbilitiesLoader {
 		ProductCreate::class,
 		ProductDelete::class,
 		ProductUpdate::class,
+		CouponsQuery::class,
+		CouponCreate::class,
+		CouponUpdate::class,
 	);
 
 	/**

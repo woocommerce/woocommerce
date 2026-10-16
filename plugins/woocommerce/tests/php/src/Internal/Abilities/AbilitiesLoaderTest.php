@@ -40,6 +40,9 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		'woocommerce/orders-query',
 		'woocommerce/order-update-status',
 		'woocommerce/order-add-note',
+		'woocommerce/coupons-query',
+		'woocommerce/coupon-create',
+		'woocommerce/coupon-update',
 	);
 
 	/**
@@ -69,6 +72,13 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @var array
 	 */
 	private $created_order_ids = array();
+
+	/**
+	 * Coupon IDs created by these tests.
+	 *
+	 * @var array
+	 */
+	private $created_coupon_ids = array();
 
 	/**
 	 * Original action counts captured for restoration in tearDown.
@@ -140,6 +150,10 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			if ( $order ) {
 				$order->delete( true );
 			}
+		}
+
+		foreach ( $this->created_coupon_ids as $coupon_id ) {
+			wp_delete_post( $coupon_id, true );
 		}
 
 		foreach ( $this->created_product_ids as $product_id ) {
@@ -251,6 +265,21 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				'idempotent'  => false,
 				'destructive' => false,
 			),
+			'woocommerce/coupons-query'       => array(
+				'readonly'    => true,
+				'idempotent'  => true,
+				'destructive' => false,
+			),
+			'woocommerce/coupon-create'       => array(
+				'readonly'    => false,
+				'idempotent'  => false,
+				'destructive' => false,
+			),
+			'woocommerce/coupon-update'       => array(
+				'readonly'    => false,
+				'idempotent'  => false,
+				'destructive' => true,
+			),
 		);
 
 		foreach ( $expectations as $ability_id => $annotations ) {
@@ -301,6 +330,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$schemas = array(
 			'woocommerce/products-query' => 'products',
 			'woocommerce/orders-query'   => 'orders',
+			'woocommerce/coupons-query'  => 'coupons',
 		);
 
 		foreach ( $schemas as $ability_id => $collection_key ) {
@@ -670,6 +700,25 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 					'note' => 'denied',
 				),
 			),
+			'coupons-query'       => array(
+				'woocommerce/coupons-query',
+				array(
+					'id' => 1,
+				),
+			),
+			'coupon-create'       => array(
+				'woocommerce/coupon-create',
+				array(
+					'code' => 'forbidden',
+				),
+			),
+			'coupon-update'       => array(
+				'woocommerce/coupon-update',
+				array(
+					'id'     => 1,
+					'amount' => '10',
+				),
+			),
 		);
 	}
 
@@ -1037,6 +1086,17 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				array(
 					'id'   => -123,
 					'note' => 'Invalid',
+				),
+			),
+			'coupons-query'       => array(
+				'woocommerce/coupons-query',
+				array( 'id' => -123 ),
+			),
+			'coupon-update'       => array(
+				'woocommerce/coupon-update',
+				array(
+					'id'     => -123,
+					'amount' => '10',
 				),
 			),
 		);
@@ -1500,6 +1560,142 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			remove_filter( 'woocommerce_stock_amount', array( $this, 'preserve_fractional_stock_amount' ) );
 			add_filter( 'woocommerce_stock_amount', 'intval' );
 		}
+	}
+
+	/*
+	 * ---------------------------------------------------------------------
+	 * Coupons
+	 * ---------------------------------------------------------------------
+	 */
+
+	/**
+	 * @testdox Should create a published fixed cart coupon with the given limits and restrictions.
+	 */
+	public function test_coupon_create_returns_new_coupon(): void {
+		$result = wp_get_ability( 'woocommerce/coupon-create' )->execute(
+			array(
+				'code'                 => 'Store-Credit-1',
+				'amount'               => '140',
+				'usage_limit'          => 1,
+				'usage_limit_per_user' => 1,
+				'email_restrictions'   => array( 'customer@example.com' ),
+			)
+		);
+
+		$this->assertNotWPError( $result );
+		$this->created_coupon_ids[] = $result['coupon']['id'];
+		$this->assertSame( 'store-credit-1', $result['coupon']['code'] );
+		$this->assertSame( 'publish', $result['coupon']['status'] );
+		$this->assertSame( 'fixed_cart', $result['coupon']['discount_type'] );
+		$this->assertSame( '140', $result['coupon']['amount'] );
+		$this->assertSame( 1, $result['coupon']['usage_limit'] );
+		$this->assertSame( array( 'customer@example.com' ), $result['coupon']['email_restrictions'] );
+	}
+
+	/**
+	 * @testdox Should reject creating a coupon with a code that already exists.
+	 */
+	public function test_coupon_create_rejects_duplicate_code(): void {
+		$this->create_coupon_for_test( 'taken-code' );
+
+		$result = wp_get_ability( 'woocommerce/coupon-create' )->execute( array( 'code' => 'taken-code' ) );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_coupon_code_exists', $result->get_error_code() );
+	}
+
+	/**
+	 * @testdox Should find a coupon by its exact code.
+	 */
+	public function test_coupons_query_finds_coupon_by_code(): void {
+		$coupon = $this->create_coupon_for_test( 'find-me' );
+
+		$result = wp_get_ability( 'woocommerce/coupons-query' )->execute( array( 'code' => 'find-me' ) );
+
+		$this->assertNotWPError( $result );
+		$this->assertCount( 1, $result['coupons'] );
+		$this->assertSame( $coupon->get_id(), $result['coupons'][0]['id'] );
+	}
+
+	/**
+	 * @testdox Should return a not found error for an unknown coupon code.
+	 */
+	public function test_coupons_query_returns_not_found_for_unknown_code(): void {
+		$result = wp_get_ability( 'woocommerce/coupons-query' )->execute( array( 'code' => 'does-not-exist' ) );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_coupon_not_found', $result->get_error_code() );
+	}
+
+	/**
+	 * @testdox Should top up a used coupon by changing its amount and usage limits while keeping its usage count.
+	 */
+	public function test_coupon_update_changes_amount_and_limits_and_keeps_usage_count(): void {
+		$coupon = $this->create_coupon_for_test( 'top-up' );
+		$coupon->set_usage_count( 1 );
+		$coupon->save();
+
+		$result = wp_get_ability( 'woocommerce/coupon-update' )->execute(
+			array(
+				'id'                   => $coupon->get_id(),
+				'amount'               => '140',
+				'usage_limit'          => 2,
+				'usage_limit_per_user' => 2,
+			)
+		);
+
+		$this->assertNotWPError( $result );
+		$this->assertSame( '140', $result['coupon']['amount'] );
+		$this->assertSame( 2, $result['coupon']['usage_limit'] );
+		$this->assertSame( 2, $result['coupon']['usage_limit_per_user'] );
+		$this->assertSame( 1, $result['coupon']['usage_count'] );
+	}
+
+	/**
+	 * @testdox Should require at least one field when updating a coupon.
+	 */
+	public function test_coupon_update_requires_at_least_one_field(): void {
+		$coupon = $this->create_coupon_for_test( 'nothing-to-change' );
+
+		$result = wp_get_ability( 'woocommerce/coupon-update' )->execute( array( 'id' => $coupon->get_id() ) );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_coupon_update_no_fields', $result->get_error_code() );
+	}
+
+	/**
+	 * @testdox Should reject invalid email restrictions when updating a coupon.
+	 */
+	public function test_coupon_update_rejects_invalid_email_restrictions(): void {
+		$coupon = $this->create_coupon_for_test( 'bad-email' );
+
+		$result = wp_get_ability( 'woocommerce/coupon-update' )->execute(
+			array(
+				'id'                 => $coupon->get_id(),
+				'email_restrictions' => array( 'not-an-email' ),
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_coupon_email_invalid', $result->get_error_code() );
+	}
+
+	/**
+	 * @testdox Should return a not found error when the ID is not a coupon.
+	 */
+	public function test_coupon_update_rejects_non_coupon_ids(): void {
+		$product                     = \WC_Helper_Product::create_simple_product();
+		$this->created_product_ids[] = $product->get_id();
+
+		$result = wp_get_ability( 'woocommerce/coupon-update' )->execute(
+			array(
+				'id'     => $product->get_id(),
+				'amount' => '10',
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_coupon_not_found', $result->get_error_code() );
 	}
 
 	/**
@@ -2458,5 +2654,21 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			array( 'ID' => $order->get_id() )
 		);
 		clean_post_cache( $order->get_id() );
+	}
+
+	/**
+	 * Create a published coupon for a test.
+	 *
+	 * @param string $code Coupon code.
+	 * @return \WC_Coupon
+	 */
+	private function create_coupon_for_test( string $code ): \WC_Coupon {
+		$coupon = new \WC_Coupon();
+		$coupon->set_code( $code );
+		$coupon->set_amount( '10' );
+		$coupon->save();
+		$this->created_coupon_ids[] = $coupon->get_id();
+
+		return $coupon;
 	}
 }
