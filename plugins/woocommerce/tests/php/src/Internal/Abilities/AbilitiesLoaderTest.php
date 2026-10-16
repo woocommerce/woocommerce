@@ -632,9 +632,9 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @return array
 	 */
 	private function capture_order_query_args( array $input ): array {
-		$captured = array();
+		$captured = null;
 		$capture  = static function ( $args ) use ( &$captured ) {
-			$captured = $args;
+			$captured ??= $args;
 			return $args;
 		};
 
@@ -647,7 +647,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		$this->assertNotWPError( $result );
 
-		return $captured;
+		return $captured ?? array();
 	}
 
 	/**
