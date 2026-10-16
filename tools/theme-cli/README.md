@@ -1,6 +1,6 @@
 # WooCommerce theme CLI
 
-`@woocommerce/theme-cli` provides shared development tooling for WooCommerce themes in `themes/<slug>/`. Themes are versioned independently of WooCommerce Core. Each theme is its own private pnpm workspace package, with its own version, commands, changelog, and release lifecycle. Shared development tooling lives in the private `@woocommerce/theme-cli` workspace package, with shared Composer dependencies in `tools/theme-cli/`. Individual themes keep their development manifests out of installable ZIPs.
+`@woocommerce/theme-cli` provides shared development tooling for WooCommerce themes in `themes/<slug>/`. Themes are versioned independently of WooCommerce Core. Each theme is its own private pnpm workspace package, with its own version, commands, changelog, and release lifecycle. Shared development tooling lives in the private `@woocommerce/theme-cli` workspace package, with shared Composer dependencies in `tools/theme-cli/`. Theme directories under `themes/` are discovered automatically.
 
 ## Setup
 
@@ -86,9 +86,9 @@ pnpm --filter=@woocommerce/theme-cli validate <slug>
 pnpm --filter=@woocommerce/theme-cli build <slug>
 ```
 
-This packages the current commit's theme files into `themes/<slug>/artifacts/<slug>-<version>.zip`, with a single `<slug>/` directory. The version comes from the committed `style.css`. Assets, licenses, and `readme.txt` are included; development manifests, dependencies, local configuration, changelog fragments, and development documentation are excluded. Uncommitted edits are excluded, so commit theme changes before building their ZIP.
+The shared `build-zip.mjs` command runs `wp-scripts plugin-zip --root-folder=<slug>` using the theme's `package.json` `files` field to select theme assets, templates, PHP files, and metadata. wp-scripts follows npm's packaging rules, which also include `package.json` and README files. The shared command creates the artifacts directory and moves the ZIP to `themes/<slug>/artifacts/<slug>.zip`. Builds include current working files, including uncommitted changes.
 
-Theme content checks belong to `validate`; `build` packages the committed files. ZIP generation does not publish a release.
+Theme content checks belong to `validate`; `build` creates the ZIP with wp-scripts. ZIP generation does not publish a release.
 
 ## Adding a theme
 

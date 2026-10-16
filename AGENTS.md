@@ -276,7 +276,7 @@ Replace `<slug>` with the directory name of an existing theme, such as `purple`:
 # Lint CSS, Markdown, and JavaScript, then run WordPress Theme Check.
 pnpm --filter=@woocommerce/theme-cli validate <slug>
 
-# Build a ZIP from the current commit's theme files.
+# Build a ZIP from the theme's working files.
 pnpm --filter=@woocommerce/theme-cli build <slug>
 
 # Start the theme's local environment using Playground by default.
@@ -296,7 +296,7 @@ pnpm --filter=@woocommerce/theme-cli validate --all
 
 Add theme changes to that theme's own changelog; the shared CLI changelog is for tooling changes. Keep the theme package version, `style.css` version, and `readme.txt` stable tag in sync. Preserve source provenance and licenses. Live release publishing remains deferred.
 
-Builds write `themes/<slug>/artifacts/<slug>-<version>.zip` with a single theme directory and exclude development files. They package source from the current commit only.
+Theme packages use `wp-scripts plugin-zip` to write `themes/<slug>/artifacts/<slug>.zip` with a single theme directory. Each package's `files` field selects the theme files to include from the working directory.
 
 See [the theme CLI README](tools/theme-cli/README.md) and the selected theme's README for setup details. Validation lints CSS, Markdown, and JavaScript with wp-scripts, then runs the official WordPress Theme Check command in a separate Docker environment.
 
