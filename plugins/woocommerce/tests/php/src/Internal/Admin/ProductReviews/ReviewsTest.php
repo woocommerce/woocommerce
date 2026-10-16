@@ -10,6 +10,7 @@ use ReflectionException;
 use stdClass;
 use WC_Unit_Test_Case;
 use WP_Comment;
+use WP_Screen;
 
 /**
  * Tests for the admin reviews handler.
@@ -393,6 +394,105 @@ class ReviewsTest extends WC_Unit_Test_Case {
 			'new_current_screen' => $reviews_screen,
 			'expected_result'    => true,
 		];
+	}
+
+	/**
+	 * @testdox `load_javascript` enqueues both core comment scripts that drive the review row actions on the reviews screen.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::load_javascript()
+	 *
+	 * @return void
+	 */
+	public function test_load_javascript_enqueues_the_comment_scripts_on_the_reviews_screen(): void {
+		$reviews = wc_get_container()->get( Reviews::class );
+
+		$this->turn_on_comment_hotkeys_for_the_current_user();
+		$this->set_admin_screen( 'product_page_product-reviews' );
+		$previous_scripts = $this->reset_registered_scripts();
+
+		try {
+			$this->assertTrue( $reviews->is_reviews_page(), 'The reviews page should be the current screen.' );
+			$this->assertTrue( wp_script_is( 'admin-comments', 'registered' ), 'The core admin-comments script should be registered on an admin screen.' );
+			$this->assertTrue( wp_script_is( 'jquery-table-hotkeys', 'registered' ), 'The core jquery-table-hotkeys script should be registered on an admin screen.' );
+
+			$reviews->load_javascript();
+
+			$this->assertTrue(
+				wp_script_is( 'admin-comments', 'enqueued' ),
+				'The reviews screen should enqueue the core admin-comments script, which runs the approve, spam and trash row actions without a page reload.'
+			);
+			$this->assertTrue(
+				wp_script_is( 'jquery-table-hotkeys', 'enqueued' ),
+				'The reviews screen should enqueue the core jquery-table-hotkeys script for a user who has comment keyboard shortcuts turned on.'
+			);
+		} finally {
+			$GLOBALS['wp_scripts'] = $previous_scripts; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restoring the registry drops everything the test enqueued.
+		}
+	}
+
+	/**
+	 * @testdox `load_javascript` leaves both core comment scripts alone outside the reviews screen.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::load_javascript()
+	 *
+	 * @return void
+	 */
+	public function test_load_javascript_does_not_enqueue_the_comment_scripts_outside_the_reviews_screen(): void {
+		$reviews = wc_get_container()->get( Reviews::class );
+
+		$this->turn_on_comment_hotkeys_for_the_current_user();
+		$this->set_admin_screen( 'edit-product' );
+		$previous_scripts = $this->reset_registered_scripts();
+
+		try {
+			$this->assertFalse( $reviews->is_reviews_page(), 'The products list should not count as the reviews page.' );
+			$this->assertTrue( wp_script_is( 'admin-comments', 'registered' ), 'The core admin-comments script should be registered on an admin screen.' );
+			$this->assertTrue( wp_script_is( 'jquery-table-hotkeys', 'registered' ), 'The core jquery-table-hotkeys script should be registered on an admin screen.' );
+
+			$reviews->load_javascript();
+
+			$this->assertFalse( wp_script_is( 'admin-comments', 'enqueued' ), 'Only the reviews screen should enqueue the core admin-comments script.' );
+			$this->assertFalse( wp_script_is( 'jquery-table-hotkeys', 'enqueued' ), 'Only the reviews screen should enqueue the core jquery-table-hotkeys script.' );
+		} finally {
+			$GLOBALS['wp_scripts'] = $previous_scripts; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restoring the registry drops everything the test enqueued.
+		}
+	}
+
+	/**
+	 * Turn the core comment keyboard shortcuts on for the current user.
+	 *
+	 * `enqueue_comment_hotkeys_js()` enqueues its script only for a user who has them on.
+	 *
+	 * @return void
+	 */
+	private function turn_on_comment_hotkeys_for_the_current_user(): void {
+		wp_set_current_user( $this->factory()->user->create( array( 'role' => 'administrator' ) ) );
+		update_user_option( get_current_user_id(), 'comment_shortcuts', 'true' );
+	}
+
+	/**
+	 * Make an admin screen current without running the `current_screen` callbacks.
+	 *
+	 * @param string $hook_name Screen hook name.
+	 * @return void
+	 */
+	private function set_admin_screen( string $hook_name ): void {
+		$GLOBALS['current_screen'] = WP_Screen::get( $hook_name ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- tearDown restores the pre-test screen.
+	}
+
+	/**
+	 * Rebuild the script registry so it reflects the current screen.
+	 *
+	 * WordPress registers the admin-only default scripts once, when the registry is first built, which
+	 * in a test run happens long before a screen is current.
+	 *
+	 * @return mixed The registry to restore.
+	 */
+	private function reset_registered_scripts() {
+		$previous_scripts      = $GLOBALS['wp_scripts'] ?? null;
+		$GLOBALS['wp_scripts'] = null; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- The caller restores the registry.
+
+		return $previous_scripts;
 	}
 
 	/**

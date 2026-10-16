@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Render the product data panel checkboxes, the all-view Approve review action and the reviews screen scripts in PHPUnit
