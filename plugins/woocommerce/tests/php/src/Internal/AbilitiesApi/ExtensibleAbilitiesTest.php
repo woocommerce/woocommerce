@@ -974,7 +974,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 							'type'   => 'object',
 							$keyword => array( $branch ),
 						),
-						'output_schema'       => AbilityExtensions::add_fields_schema( array( 'type' => 'object' ), 'product' ),
+						'output_schema'       => ExtensibleAbilities::add_fields_schema( array( 'type' => 'object' ), 'product' ),
 						'permission_callback' => '__return_true',
 						'ability_class'       => TestProductRenameAbility::class,
 						'meta'                => array( 'show_in_rest' => true ),
