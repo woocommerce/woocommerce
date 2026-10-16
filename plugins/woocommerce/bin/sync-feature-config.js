@@ -6,7 +6,7 @@
  * that artifact instead of the bind-mounted source checkout, so feature flag
  * changes made by regenerating feature-config.php in the source tree (e.g.
  * ci:legacy-minicart-flag-off) would never reach the site under test. This
- * script bridges that gap; outside CI it is a no-op.
+ * script bridges that gap; without WC_SHARED_PLUGIN_BUILD_PATH it is a no-op.
  */
 
 const fs = require( 'fs' );
