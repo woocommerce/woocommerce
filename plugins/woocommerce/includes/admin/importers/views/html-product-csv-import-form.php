@@ -71,7 +71,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							<?php
 							printf(
 								/* translators: %s: example relative file path. */
-								esc_html__( 'Relative to your WordPress directory, for example %s. Absolute paths are also accepted.', 'woocommerce' ),
+								esc_html__( 'Absolute or relative path to a CSV file in your WordPress or uploads directory, for example %s.', 'woocommerce' ),
 								'<code>wp-content/uploads/products.csv</code>'
 							);
 							?>
