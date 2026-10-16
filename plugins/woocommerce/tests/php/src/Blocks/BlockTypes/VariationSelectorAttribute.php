@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Tests\Blocks\Helpers\BlockTypeRegistryTrait;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsMocks;
 use WC_Unit_Test_Case;
@@ -13,6 +14,7 @@ use WC_Unit_Test_Case;
  * Tests for the VariationSelectorAttribute block type.
  */
 class VariationSelectorAttribute extends WC_Unit_Test_Case {
+	use BlockTypeRegistryTrait;
 
 	/**
 	 * Register blocks required for do_blocks tests.
@@ -20,10 +22,23 @@ class VariationSelectorAttribute extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		AddToCartWithOptionsMocks::register(
-			'add-to-cart-with-options-variation-selector-attribute',
-			'add-to-cart-with-options-variation-selector-attribute-name'
+		$this->replace_block_types(
+			AddToCartWithOptionsMocks::get_mock_classes(
+				'add-to-cart-with-options-variation-selector-attribute',
+				'add-to-cart-with-options-variation-selector-attribute-name'
+			)
 		);
+	}
+
+	/**
+	 * Put back the block types setUp() replaced.
+	 */
+	public function tearDown(): void {
+		try {
+			$this->restore_block_types();
+		} finally {
+			parent::tearDown();
+		}
 	}
 
 	/**
