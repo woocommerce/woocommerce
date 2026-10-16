@@ -811,6 +811,29 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 					?.quantity
 			).toBe( 1 );
 		} );
+
+		it( 'adds an amount given as a numeric string as the number it holds', async () => {
+			const captured = mockBatchFetch();
+			const actions = await loadCartStore();
+			seedCart( [] );
+
+			// Untyped callers (e.g. a server-rendered context value) can pass
+			// a string although the declared type is a number.
+			const quantity = '2' as unknown as number;
+			await runAction( actions.addCartItem( { id: 88, quantity } ) );
+
+			expect( mockState.cart.items ).toHaveLength( 1 );
+			expect( mockState.cart.items[ 0 ].quantity ).toBe( 2 );
+
+			await runAction( actions.addCartItem( { id: 88, quantity } ) );
+
+			expect( mockState.cart.items ).toHaveLength( 1 );
+			expect( mockState.cart.items[ 0 ].quantity ).toBe( 4 );
+			expect( captured.map( ( request ) => request.body ) ).toEqual( [
+				{ id: 88, quantity: 2 },
+				{ id: 88, quantity: 2 },
+			] );
+		} );
 	} );
 
 	describe( 'updateCartItem', () => {
@@ -1181,6 +1204,24 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			);
 			expect( added ).toBeDefined();
 			expect( added?.quantity ).toBe( 2 );
+		} );
+
+		it( 'adds an item amount given as a numeric string as the number it holds', async () => {
+			const captured = mockBatchFetch();
+			const actions = await loadCartStore();
+			seedCart( [ makeKeyedLine( { id: 42, quantity: 1 } ) ] );
+
+			await runAction(
+				actions.batchAddCartItems( [
+					{ id: 42, quantity: '2' as unknown as number },
+				] )
+			);
+
+			expect( mockState.cart.items ).toHaveLength( 1 );
+			expect( mockState.cart.items[ 0 ].quantity ).toBe( 3 );
+			expect( captured.map( ( request ) => request.body ) ).toEqual( [
+				{ id: 42, quantity: 2 },
+			] );
 		} );
 	} );
 

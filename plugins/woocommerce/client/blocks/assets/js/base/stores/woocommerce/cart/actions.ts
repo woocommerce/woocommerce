@@ -511,8 +511,9 @@ const { actions } = store< Store >(
 				// The amount posted is always the caller's delta, never a
 				// function of the matched line. The rendered quantity is the
 				// current one (which includes optimistic updates from previous
-				// clicks) plus that delta, so rapid clicks compound.
-				const delta = quantity ?? 1;
+				// clicks) plus that delta, so rapid clicks compound. A numeric
+				// string from untyped data counts as the number it holds.
+				const delta = Number( quantity ?? 1 );
 				const targetQuantity = ( existingItem?.quantity ?? 0 ) + delta;
 
 				// Track what changes we're making for notice comparison.
@@ -706,8 +707,9 @@ const { actions } = store< Store >(
 						} );
 
 						// As in `addCartItem`, the amount posted is the item's
-						// delta, never a function of the matched line.
-						const delta = item.quantity ?? 1;
+						// delta, never a function of the matched line, and a
+						// numeric string counts as the number it holds.
+						const delta = Number( item.quantity ?? 1 );
 						const targetQuantity =
 							( existingItem?.quantity ?? 0 ) + delta;
 
