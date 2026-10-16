@@ -8,6 +8,9 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
+use Automattic\WooCommerce\Utilities\NumberUtil;
+
 /**
  * Process the web hooks at the end of the request.
  *
@@ -30,11 +33,31 @@ function wc_webhook_execute_queue() {
 				'arg'        => $data['arg'],
 			);
 
-			$next_scheduled_date = WC()->queue()->get_next( 'woocommerce_deliver_webhook_async', $queue_args, 'woocommerce-webhooks' );
+			$next_scheduled = as_next_scheduled_action( 'woocommerce_deliver_webhook_async', $queue_args, 'woocommerce-webhooks' );
 
 			// Make webhooks unique - only schedule one webhook every 10 minutes to maintain backward compatibility with WP Cron behaviour seen in WC < 3.5.0.
-			if ( is_null( $next_scheduled_date ) || $next_scheduled_date->getTimestamp() >= ( 600 + gmdate( 'U' ) ) ) {
-				WC()->queue()->add( 'woocommerce_deliver_webhook_async', $queue_args, 'woocommerce-webhooks' );
+			// A pending delivery has a timestamp; an in-progress delivery (true) or none (false) gets a new one.
+			if ( ! is_numeric( $next_scheduled ) || $next_scheduled >= ( 600 + time() ) ) {
+				/**
+				 * Filters the Action Scheduler priority of a queued webhook delivery.
+				 *
+				 * Runs at shutdown, only when a new delivery is about to be scheduled: not when a pending
+				 * delivery within the next 10 minutes is reused, and not for synchronous deliveries
+				 * (`woocommerce_webhook_deliver_async` false). Lower values run first. The value is clamped
+				 * to 0-255; a non-numeric or non-finite value leaves the default. On a loaded Action Scheduler
+				 * without priority support (before 3.6.0) a non-default priority is dropped and a debug entry
+				 * is logged under the `action-scheduler` source.
+				 *
+				 * @since 11.3.0
+				 *
+				 * @param int        $priority The delivery priority. Default 10.
+				 * @param WC_Webhook $webhook  The webhook being delivered.
+				 * @param mixed      $arg      The argument the webhook fired with, usually the resource ID.
+				 */
+				$priority = apply_filters( 'woocommerce_webhook_delivery_priority', 10, $data['webhook'], $data['arg'] );
+				$priority = NumberUtil::normalize_integer( $priority, 10, 0, 255 );
+
+				ActionSchedulerUtil::schedule_single( time(), 'woocommerce_deliver_webhook_async', $queue_args, 'woocommerce-webhooks', false, $priority );
 			}
 		} else {
 			// Deliver immediately.
