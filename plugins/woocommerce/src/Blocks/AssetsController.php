@@ -100,6 +100,7 @@ final class AssetsController {
 		$this->api->register_script( 'wc-blocks-checkout', 'assets/client/blocks/blocks-checkout.js' );
 		$this->api->register_script( 'wc-blocks-checkout-events', 'assets/client/blocks/blocks-checkout-events.js' );
 		$this->api->register_script( 'wc-schema-parser', 'assets/client/blocks/wc-schema-parser.js', array(), false );
+		$this->api->register_script( 'wc-input-mask', 'assets/client/blocks/input-mask.js', array(), false );
 
 		// Sanitize.
 		$this->api->register_script(

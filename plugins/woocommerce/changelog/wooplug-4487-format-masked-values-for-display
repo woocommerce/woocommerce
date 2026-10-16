@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Format masked additional checkout field values for display (order confirmation, emails, admin) when the raw value fits the mask; otherwise show the raw value.
