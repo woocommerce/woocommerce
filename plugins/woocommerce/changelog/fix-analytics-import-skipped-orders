@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Analytics: import all orders when importing historical data, even when older test orders are skipped.
