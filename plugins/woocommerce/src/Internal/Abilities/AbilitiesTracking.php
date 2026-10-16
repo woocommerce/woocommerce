@@ -127,6 +127,13 @@ class AbilitiesTracking {
 	private array $rest_frames_opened = array();
 
 	/**
+	 * Number of events not recorded because the per-request limit was reached.
+	 *
+	 * @var int
+	 */
+	private int $events_dropped = 0;
+
+	/**
 	 * Number of invocations opened in this request.
 	 *
 	 * @var int
@@ -404,6 +411,12 @@ class AbilitiesTracking {
 	 * Hand the recorded events to the Tracks client.
 	 */
 	private function flush_events(): void {
+		$last = array_key_last( $this->events );
+		if ( null !== $last && $this->events_dropped > 0 ) {
+			$this->events[ $last ]['events_dropped'] = $this->events_dropped;
+			$this->events_dropped                    = 0;
+		}
+
 		foreach ( $this->events as $properties ) {
 			$this->send_event( $properties );
 		}
@@ -417,10 +430,17 @@ class AbilitiesTracking {
 	 * @param bool   $executing    Whether execution already started (WordPress 7.0 path).
 	 */
 	private function open_frame( string $ability_name, bool $executing ): void {
-		// Calls that fail without a closing hook keep their frame until shutdown, so loops must not grow this unbounded.
 		// Consent is per site, and the site can change mid-request with switch_to_blog().
-		if ( count( $this->frames ) >= self::MAX_EVENTS_PER_REQUEST || ! \WC_Site_Tracking::is_tracking_enabled() ) {
+		if ( ! \WC_Site_Tracking::is_tracking_enabled() ) {
 			return;
+		}
+
+		// Calls that fail without a closing hook keep their frame until shutdown. Recording the oldest one as an
+		// unknown failure keeps the stack bounded and lets later closing hooks still find their own frame.
+		if ( count( $this->frames ) >= self::MAX_EVENTS_PER_REQUEST ) {
+			$oldest = $this->frames[0];
+			array_shift( $this->frames );
+			$this->add_event( $oldest, null, false );
 		}
 
 		$this->frames[] = $this->create_frame( $ability_name, $executing );
@@ -501,6 +521,7 @@ class AbilitiesTracking {
 	private function add_event( array $frame, $outcome, bool $has_duration ): void {
 		if ( count( $this->events ) >= self::MAX_EVENTS_PER_REQUEST ) {
 			if ( ! $this->is_long_running_process() ) {
+				++$this->events_dropped;
 				return;
 			}
 			$this->flush_events();

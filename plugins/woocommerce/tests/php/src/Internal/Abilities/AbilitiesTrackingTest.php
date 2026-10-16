@@ -564,6 +564,31 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 		$this->sut->handle_shutdown();
 
 		$this->assertCount( 25, $this->sut->recorded );
+		$this->assertSame( 5, $this->sut->recorded[24]['events_dropped'], 'The last event should report how many were dropped' );
+		$this->assertArrayNotHasKey( 'events_dropped', $this->sut->recorded[0] );
+	}
+
+	/**
+	 * @testdox Should keep closing hooks matched to their own call after many unclosed failures on WordPress 7.0.
+	 */
+	public function test_keeps_frames_matched_after_many_unclosed_failures(): void {
+		foreach ( array( 'wp_ability_invoked', 'wp_pre_execute_ability', 'wp_ability_validate_input', 'wp_ability_permission_result', 'wp_ability_execute_result', 'wp_ability_validate_output' ) as $hook ) {
+			remove_all_filters( $hook );
+		}
+		$this->start_mcp_tool_call();
+		$ability = wp_get_ability( self::ABILITY_ID );
+
+		$this->execute_result = new WP_Error( 'tracking_test_failure' );
+		for ( $i = 0; $i < 26; $i++ ) {
+			$ability->execute();
+		}
+		$this->execute_result = array( 'ok' => true );
+		$ability->execute();
+		$this->sut->handle_shutdown();
+
+		$outcomes = array_count_values( array_column( $this->sut->recorded, 'outcome' ) );
+		$this->assertSame( 1, $outcomes['success'] ?? 0, 'The successful call should be recorded as the only success' );
+		$this->assertSame( 2, end( $this->sut->recorded )['events_dropped'] );
 	}
 
 	/**
