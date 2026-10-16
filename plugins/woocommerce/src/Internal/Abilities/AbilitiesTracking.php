@@ -590,6 +590,7 @@ class AbilitiesTracking {
 				$event['duration_ms'] = (int) round( ( microtime( true ) - $frame['start'] ) * 1000 );
 			}
 			$event['is_test'] = 'production' === wp_get_environment_type() ? 'false' : 'true';
+			$event['is_a11n'] = self::is_a11n() ? 'true' : 'false';
 
 			$properties = \WC_Tracks::get_properties( \WC_Tracks::PREFIX . self::EVENT_NAME, $event );
 			// The request URL and referrer can carry ability input, e.g. in the query string of GET run requests.
@@ -727,6 +728,29 @@ class AbilitiesTracking {
 		return is_callable( array( $rest_authentication, 'is_signed_with_blog_token' ) )
 			&& is_callable( array( $rest_authentication, 'is_signed_with_user_token' ) )
 			&& ( $rest_authentication::is_signed_with_blog_token() || $rest_authentication::is_signed_with_user_token() );
+	}
+
+	/**
+	 * Whether an Automattician made the call: signed in on WordPress.com, or through the Automattic proxy.
+	 *
+	 * Only detectable on WordPress.com and Atomic; always false elsewhere.
+	 *
+	 * @return bool
+	 */
+	private static function is_a11n(): bool {
+		if ( function_exists( 'is_automattician' ) && is_automattician() ) {
+			return true;
+		}
+		if ( defined( 'AT_PROXIED_REQUEST' ) && AT_PROXIED_REQUEST ) {
+			return true;
+		}
+		if ( function_exists( 'wpcom_is_proxied_request' ) ) {
+			return (bool) wpcom_is_proxied_request();
+		}
+		if ( isset( $_SERVER['A8C_PROXIED_REQUEST'] ) && is_string( $_SERVER['A8C_PROXIED_REQUEST'] ) ) {
+			return '1' === sanitize_text_field( wp_unslash( $_SERVER['A8C_PROXIED_REQUEST'] ) );
+		}
+		return defined( 'A8C_PROXIED_REQUEST' ) && A8C_PROXIED_REQUEST;
 	}
 
 	/**

@@ -21,7 +21,7 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 
 	private const LONG_ABILITY_ID = 'woocommerce/tracking-test-with-a-long-name-that-goes-past-sixty-four-characters';
 
-	private const SERVER_KEYS = array( 'REQUEST_SCHEME', 'HTTP_HOST', 'REQUEST_URI', 'HTTP_REFERER', 'HTTP_MCP_PROTOCOL_VERSION', 'HTTP_MCP_SESSION_ID' );
+	private const SERVER_KEYS = array( 'REQUEST_SCHEME', 'HTTP_HOST', 'REQUEST_URI', 'HTTP_REFERER', 'HTTP_MCP_PROTOCOL_VERSION', 'HTTP_MCP_SESSION_ID', 'A8C_PROXIED_REQUEST' );
 
 	/**
 	 * The System Under Test, with events captured instead of sent.
@@ -359,6 +359,19 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 		$this->sut->handle_shutdown();
 
 		$this->assertSame( array( 'cookie', 'application_password' ), array_column( $this->sut->recorded, 'auth' ) );
+	}
+
+	/**
+	 * @testdox Should record whether the call came through the Automattic proxy.
+	 */
+	public function test_records_is_a11n(): void {
+		$ability = wp_get_ability( self::ABILITY_ID );
+		$ability->execute();
+		$_SERVER['A8C_PROXIED_REQUEST'] = '1';
+		$ability->execute();
+		$this->sut->handle_shutdown();
+
+		$this->assertSame( array( 'false', 'true' ), array_column( $this->sut->recorded, 'is_a11n' ) );
 	}
 
 	/**
