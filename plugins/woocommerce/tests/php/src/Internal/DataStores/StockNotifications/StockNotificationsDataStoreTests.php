@@ -329,6 +329,21 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 		$this->assertSame( NotificationStatus::ACTIVE, $fired[1][1] );
 		$this->assertSame( NotificationStatus::CANCELLED, $fired[1][2] );
 		$this->assertSame( NotificationStatus::CANCELLED, $fired[1][3]->get_status() );
+
+		// An update-action listener that changes the status in memory does not affect the persisted pair.
+		add_action(
+			'woocommerce_update_stock_notification',
+			function ( $id, $notification ) {
+				$notification->set_status( NotificationStatus::CANCELLED );
+			},
+			10,
+			2
+		);
+		$notification->set_status( NotificationStatus::ACTIVE );
+		$notification->save();
+		$this->assertCount( 3, $fired );
+		$this->assertSame( NotificationStatus::CANCELLED, $fired[2][1] );
+		$this->assertSame( NotificationStatus::ACTIVE, $fired[2][2] );
 	}
 
 	/**

@@ -316,6 +316,8 @@ CREATE TABLE $meta_table_name (
 			$notification->apply_changes();
 		}
 
+		$status_to = $notification->get_status( 'edit' );
+
 		/**
 		 * Action: woocommerce_update_stock_notification
 		 *
@@ -329,7 +331,6 @@ CREATE TABLE $meta_table_name (
 		 */
 		do_action( 'woocommerce_update_stock_notification', $notification->get_id(), $notification );
 
-		$status_to = $notification->get_status( 'edit' );
 		if ( array_key_exists( 'status', $changes ) && $status_from !== $status_to ) {
 			/**
 			 * Action: woocommerce_stock_notification_status_changed
