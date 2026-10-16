@@ -274,4 +274,38 @@ class WC_REST_Customers_Controller_Test extends WC_Unit_Test_Case {
 		$this->assertEquals( 'test_value', $customer->get_meta( 'test_key' ) );
 		$this->assertEmpty( $customer->get_meta( '_internal_test_key' ) );
 	}
+
+	/**
+	 * @testdox Customers can be filtered by registration date with before and after.
+	 */
+	public function test_get_items_filters_by_registration_date(): void {
+		wp_set_current_user( $this->admin_id );
+		$old_id = self::factory()->user->create(
+			array(
+				'role'            => 'customer',
+				'user_registered' => '2020-01-01 00:00:00',
+			)
+		);
+		$new_id = self::factory()->user->create(
+			array(
+				'role'            => 'customer',
+				'user_registered' => '2024-01-01 00:00:00',
+			)
+		);
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/customers' );
+		$request->set_param( 'role', 'customer' );
+		$request->set_param( 'include', array( $old_id, $new_id ) );
+		$request->set_param( 'per_page', 10 );
+		$request->set_param( 'page', 1 );
+		$request->set_param( 'orderby', 'id' );
+		$request->set_param( 'dates_are_gmt', true );
+
+		$request->set_param( 'after', '2022-01-01T00:00:00' );
+		$this->assertSame( array( $new_id ), wp_list_pluck( $this->sut->get_items( $request )->get_data(), 'id' ) );
+
+		$request->set_param( 'after', null );
+		$request->set_param( 'before', '2022-01-01T00:00:00' );
+		$this->assertSame( array( $old_id ), wp_list_pluck( $this->sut->get_items( $request )->get_data(), 'id' ) );
+	}
 }
