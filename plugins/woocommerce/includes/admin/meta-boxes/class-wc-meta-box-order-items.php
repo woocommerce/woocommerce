@@ -22,6 +22,25 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Meta_Box_Order_Items {
 
 	/**
+	 * Pad editable prices to the currency decimals without rounding away stored precision.
+	 *
+	 * @internal
+	 * @since 11.3.0
+	 * @param string $value Decimal amount from an order item.
+	 * @return string
+	 */
+	public static function format_price_for_editing( string $value ): string {
+		$decimals = wc_get_price_decimals();
+
+		if ( '' !== $value && $decimals > 0 ) {
+			$parts = explode( '.', $value, 2 );
+			$value = $parts[0] . '.' . str_pad( $parts[1] ?? '', $decimals, '0' );
+		}
+
+		return wc_format_localized_price( $value );
+	}
+
+	/**
 	 * Output the metabox.
 	 *
 	 * @param WP_Post|WC_Order $post Post or order object.

@@ -158,16 +158,16 @@ $item_name = apply_filters( 'woocommerce_order_item_name', $item->get_name(), $i
 			<div class="split-input">
 				<div class="input">
 					<label><?php esc_attr_e( 'Before discount', 'woocommerce' ); ?></label>
-					<input type="text" name="line_subtotal[<?php echo absint( $item_id ); ?>]" placeholder="<?php echo esc_attr( wc_format_localized_price( 0 ) ); ?>" value="<?php echo esc_attr( wc_format_localized_price( $item->get_subtotal() ) ); ?>" class="line_subtotal wc_input_price" data-subtotal="<?php echo esc_attr( wc_format_localized_price( $item->get_subtotal() ) ); ?>" />
+					<input type="text" name="line_subtotal[<?php echo absint( $item_id ); ?>]" placeholder="<?php echo esc_attr( WC_Meta_Box_Order_Items::format_price_for_editing( '0' ) ); ?>" value="<?php echo esc_attr( WC_Meta_Box_Order_Items::format_price_for_editing( $item->get_subtotal() ) ); ?>" class="line_subtotal wc_input_price" data-subtotal="<?php echo esc_attr( WC_Meta_Box_Order_Items::format_price_for_editing( $item->get_subtotal() ) ); ?>" />
 				</div>
 				<div class="input">
 					<label><?php esc_attr_e( 'Total', 'woocommerce' ); ?></label>
-					<input type="text" name="line_total[<?php echo absint( $item_id ); ?>]" placeholder="<?php echo esc_attr( wc_format_localized_price( 0 ) ); ?>" value="<?php echo esc_attr( wc_format_localized_price( $item->get_total() ) ); ?>" class="line_total wc_input_price" data-tip="<?php esc_attr_e( 'After pre-tax discounts.', 'woocommerce' ); ?>" data-total="<?php echo esc_attr( wc_format_localized_price( $item->get_total() ) ); ?>" />
+					<input type="text" name="line_total[<?php echo absint( $item_id ); ?>]" placeholder="<?php echo esc_attr( WC_Meta_Box_Order_Items::format_price_for_editing( '0' ) ); ?>" value="<?php echo esc_attr( WC_Meta_Box_Order_Items::format_price_for_editing( $item->get_total() ) ); ?>" class="line_total wc_input_price" data-tip="<?php esc_attr_e( 'After pre-tax discounts.', 'woocommerce' ); ?>" data-total="<?php echo esc_attr( WC_Meta_Box_Order_Items::format_price_for_editing( $item->get_total() ) ); ?>" />
 				</div>
 			</div>
 		</div>
 		<div class="refund" style="display: none;">
-			<input type="text" name="refund_line_total[<?php echo absint( $item_id ); ?>]" placeholder="<?php echo esc_attr( wc_format_localized_price( 0 ) ); ?>" class="refund_line_total wc_input_price" />
+			<input type="text" name="refund_line_total[<?php echo absint( $item_id ); ?>]" placeholder="<?php echo esc_attr( WC_Meta_Box_Order_Items::format_price_for_editing( '0' ) ); ?>" class="refund_line_total wc_input_price" />
 		</div>
 	</td>
 
@@ -201,16 +201,16 @@ $item_name = apply_filters( 'woocommerce_order_item_name', $item->get_name(), $i
 					<div class="split-input">
 						<div class="input">
 							<label><?php esc_attr_e( 'Before discount', 'woocommerce' ); ?></label>
-							<input type="text" name="line_subtotal_tax[<?php echo absint( $item_id ); ?>][<?php echo esc_attr( $tax_item_id ); ?>]" placeholder="<?php echo esc_attr( wc_format_localized_price( 0 ) ); ?>" value="<?php echo esc_attr( wc_format_localized_price( $tax_item_subtotal ) ); ?>" class="line_subtotal_tax wc_input_price" data-subtotal_tax="<?php echo esc_attr( wc_format_localized_price( $tax_item_subtotal ) ); ?>" data-tax_id="<?php echo esc_attr( $tax_item_id ); ?>" />
+							<input type="text" name="line_subtotal_tax[<?php echo absint( $item_id ); ?>][<?php echo esc_attr( $tax_item_id ); ?>]" placeholder="<?php echo esc_attr( WC_Meta_Box_Order_Items::format_price_for_editing( '0' ) ); ?>" value="<?php echo esc_attr( WC_Meta_Box_Order_Items::format_price_for_editing( $tax_item_subtotal ) ); ?>" class="line_subtotal_tax wc_input_price" data-subtotal_tax="<?php echo esc_attr( WC_Meta_Box_Order_Items::format_price_for_editing( $tax_item_subtotal ) ); ?>" data-tax_id="<?php echo esc_attr( $tax_item_id ); ?>" />
 						</div>
 						<div class="input">
 							<label><?php esc_attr_e( 'Total', 'woocommerce' ); ?></label>
-							<input type="text" name="line_tax[<?php echo absint( $item_id ); ?>][<?php echo esc_attr( $tax_item_id ); ?>]" placeholder="<?php echo esc_attr( wc_format_localized_price( 0 ) ); ?>" value="<?php echo esc_attr( wc_format_localized_price( $tax_item_total ) ); ?>" class="line_tax wc_input_price" data-total_tax="<?php echo esc_attr( wc_format_localized_price( $tax_item_total ) ); ?>" data-tax_id="<?php echo esc_attr( $tax_item_id ); ?>" />
+							<input type="text" name="line_tax[<?php echo absint( $item_id ); ?>][<?php echo esc_attr( $tax_item_id ); ?>]" placeholder="<?php echo esc_attr( WC_Meta_Box_Order_Items::format_price_for_editing( '0' ) ); ?>" value="<?php echo esc_attr( WC_Meta_Box_Order_Items::format_price_for_editing( $tax_item_total ) ); ?>" class="line_tax wc_input_price" data-total_tax="<?php echo esc_attr( WC_Meta_Box_Order_Items::format_price_for_editing( $tax_item_total ) ); ?>" data-tax_id="<?php echo esc_attr( $tax_item_id ); ?>" />
 						</div>
 					</div>
 				</div>
 				<div class="refund" style="display: none;">
-					<input type="text" name="refund_line_tax[<?php echo absint( $item_id ); ?>][<?php echo esc_attr( $tax_item_id ); ?>]" placeholder="<?php echo esc_attr( wc_format_localized_price( 0 ) ); ?>" class="refund_line_tax wc_input_price" data-tax_id="<?php echo esc_attr( $tax_item_id ); ?>" />
+					<input type="text" name="refund_line_tax[<?php echo absint( $item_id ); ?>][<?php echo esc_attr( $tax_item_id ); ?>]" placeholder="<?php echo esc_attr( WC_Meta_Box_Order_Items::format_price_for_editing( '0' ) ); ?>" class="refund_line_tax wc_input_price" data-tax_id="<?php echo esc_attr( $tax_item_id ); ?>" />
 				</div>
 			</td>
 			<?php

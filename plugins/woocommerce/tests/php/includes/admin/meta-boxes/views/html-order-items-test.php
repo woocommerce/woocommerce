@@ -7,10 +7,116 @@
 
 declare( strict_types = 1 );
 
+use Automattic\WooCommerce\Enums\TaxBasedOn;
+
 /**
  * Tests for the order items meta box view.
  */
 class WC_Admin_Meta_Box_Order_Items_View_Test extends WC_Unit_Test_Case {
+
+	/**
+	 * @testdox Editable price formatting pads currency decimals without rounding stored amounts.
+	 *
+	 * @testWith ["3.7", 2, ".", "3.70"]
+	 *           ["3.7", 2, ",", "3,70"]
+	 *           ["3.7001", 2, ".", "3.7001"]
+	 *           ["-3.7", 2, ".", "-3.70"]
+	 *           ["0", 2, ".", "0.00"]
+	 *           ["", 2, ".", ""]
+	 *           ["3", 0, ".", "3"]
+	 *           ["3.7", 0, ".", "3.7"]
+	 *           ["3.7", 3, ".", "3.700"]
+	 *
+	 * @param string $value     Stored amount.
+	 * @param int    $decimals  Currency decimals.
+	 * @param string $separator Decimal separator.
+	 * @param string $expected  Formatted amount.
+	 */
+	public function test_format_price_for_editing( string $value, int $decimals, string $separator, string $expected ): void {
+		update_option( 'woocommerce_price_num_decimals', $decimals );
+		update_option( 'woocommerce_price_decimal_sep', $separator );
+
+		$this->assertSame( $expected, WC_Meta_Box_Order_Items::format_price_for_editing( $value ) );
+	}
+
+	/**
+	 * @testdox Editable order prices retain currency decimals when internal rounding precision is reduced.
+	 *
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $filter_numeric_values Whether item filters return floats instead of decimal strings.
+	 */
+	public function test_editable_prices_retain_currency_decimals( bool $filter_numeric_values ): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_tax_based_on', TaxBasedOn::BASE );
+		update_option( 'woocommerce_price_num_decimals', 2 );
+		add_filter( 'woocommerce_internal_rounding_precision', static fn() => 2 );
+		$rate_id         = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '21.0000',
+				'tax_rate_name'     => 'Tax',
+				'tax_rate_priority' => 1,
+				'tax_rate_compound' => 0,
+				'tax_rate_shipping' => 1,
+				'tax_rate_class'    => '',
+			)
+		);
+		$product         = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'price'         => '21.30',
+				'regular_price' => '21.30',
+			)
+		);
+		$order           = wc_create_order();
+		$product_item_id = $order->add_product( $product, 1 );
+		$fee             = new WC_Order_Item_Fee();
+		$fee->set_name( 'Fee' );
+		$fee->set_amount( '10' );
+		$fee->set_total( '10' );
+		$order->add_item( $fee );
+		$shipping = new WC_Order_Item_Shipping();
+		$shipping->set_method_id( 'flat_rate' );
+		$shipping->set_total( '10' );
+		$order->add_item( $shipping );
+		$order->calculate_totals();
+		$order->save();
+		$fee_id      = $fee->get_id();
+		$shipping_id = $shipping->get_id();
+		if ( $filter_numeric_values ) {
+			add_filter( 'woocommerce_order_item_get_total', 'floatval' );
+			add_filter( 'woocommerce_order_item_get_subtotal', 'floatval' );
+		}
+
+		ob_start();
+		include WC_ABSPATH . 'includes/admin/meta-boxes/views/html-order-items.php';
+		$xpath = $this->get_xpath_for_html( ob_get_clean() );
+
+		foreach (
+			array(
+				"line_subtotal[$product_item_id]"        => '17.60',
+				"line_total[$product_item_id]"           => '17.60',
+				"line_subtotal_tax[$product_item_id][$rate_id]" => '3.70',
+				"line_tax[$product_item_id][$rate_id]"   => '3.70',
+				"line_total[$fee_id]"                    => '10.00',
+				"line_tax[$fee_id][$rate_id]"            => '2.10',
+				"shipping_cost[$shipping_id]"            => '10.00',
+				"shipping_taxes[$shipping_id][$rate_id]" => '2.10',
+			) as $name => $expected
+		) {
+			$inputs = $xpath->query( "//input[@name='$name']" );
+			$this->assertSame( 1, $inputs->length, "Expected the $name input." );
+			$this->assertSame( $expected, $inputs->item( 0 )->getAttribute( 'value' ), "$name should retain currency decimals." );
+		}
+
+		$item = $order->get_item( $product_item_id );
+		$this->assertSame( '17.6', $item->get_total( 'edit' ), 'Formatting must not change the stored item total.' );
+		$this->assertSame( '3.7', $item->get_taxes()['total'][ $rate_id ], 'Formatting must not change stored taxes.' );
+	}
 
 	/**
 	 * @testdox Order item totals pass discount and refund amounts to wc_price as negative amounts.
