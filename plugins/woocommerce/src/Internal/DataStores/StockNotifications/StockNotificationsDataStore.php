@@ -415,6 +415,7 @@ CREATE TABLE $meta_table_name (
 				'product_id'         => array(),
 				'user_id'            => 0,
 				'user_email'         => '',
+				'customer'           => array(),
 				'last_attempt_limit' => 0,
 				'start_date'         => 0,
 				'end_date'           => 0,
@@ -464,6 +465,32 @@ CREATE TABLE $meta_table_name (
 		if ( $args['user_email'] ) {
 			$where[]        = 'user_email = %s';
 			$where_values[] = EmailNormalizer::normalize( (string) $args['user_email'] );
+		}
+
+		if ( ! empty( $args['customer'] ) ) {
+			$customer_ids    = array();
+			$customer_emails = array();
+			foreach ( (array) $args['customer'] as $customer ) {
+				if ( is_numeric( $customer ) ) {
+					$customer_ids[] = absint( $customer );
+				} elseif ( is_string( $customer ) && '' !== EmailNormalizer::normalize( $customer ) ) {
+					$customer_emails[] = EmailNormalizer::normalize( $customer );
+				}
+			}
+
+			$customer_ids    = array_values( array_unique( array_filter( $customer_ids ) ) );
+			$customer_emails = array_values( array_unique( $customer_emails ) );
+			$customer_where  = array();
+			if ( ! empty( $customer_ids ) ) {
+				$customer_where[] = 'user_id IN (' . implode( ',', array_fill( 0, count( $customer_ids ), '%d' ) ) . ')';
+				$where_values     = array_merge( $where_values, $customer_ids );
+			}
+			if ( ! empty( $customer_emails ) ) {
+				$customer_where[] = 'user_email IN (' . implode( ',', array_fill( 0, count( $customer_emails ), '%s' ) ) . ')';
+				$where_values     = array_merge( $where_values, $customer_emails );
+			}
+
+			$where[] = empty( $customer_where ) ? '1=0' : '(' . implode( ' OR ', $customer_where ) . ')';
 		}
 
 		if ( $args['last_attempt_limit'] > 0 ) {

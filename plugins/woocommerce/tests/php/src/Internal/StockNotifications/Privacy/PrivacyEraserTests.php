@@ -3,7 +3,10 @@
 declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\StockNotifications\Privacy;
 
+use Automattic\WooCommerce\Internal\DataStores\StockNotifications\StockNotificationsDataStore;
+use Automattic\WooCommerce\Internal\DataStores\StockNotifications\StockNotificationsMetaDataStore;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationCancellationSource;
+use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Privacy\PrivacyEraser;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
@@ -168,5 +171,225 @@ class PrivacyEraserTests extends \WC_Unit_Test_Case {
 		$this->assertNotSame( NotificationStatus::CANCELLED, $untouched_notification->get_status() );
 		$this->assertSame( $other, $untouched_notification->get_user_id() );
 		$this->assertSame( 'other@doe.com', $untouched_notification->get_user_email() );
+	}
+
+	/**
+	 * @testdox Should export a user's sign-ups under their previous and current email once each, plus guest rows for the current email, and leave other users out.
+	 */
+	public function test_privacy_exporter_matches_email_and_user_id(): void {
+		$user_id = self::factory()->user->create( array( 'user_email' => 'old@doe.com' ) );
+		$other   = self::factory()->user->create( array( 'user_email' => 'other@doe.com' ) );
+		$product = \WC_Helper_Product::create_simple_product();
+
+		$user_notification = new Notification();
+		$user_notification->set_user_id( $user_id );
+		$user_notification->set_user_email( 'old@doe.com' );
+		$user_notification->set_product_id( $product->get_id() );
+		$user_notification_id = $user_notification->save();
+
+		$guest_notification = new Notification();
+		$guest_notification->set_user_email( 'new@doe.com' );
+		$guest_notification->set_product_id( $product->get_id() );
+		$guest_notification_id = $guest_notification->save();
+
+		$other_notification = new Notification();
+		$other_notification->set_user_id( $other );
+		$other_notification->set_user_email( 'other@doe.com' );
+		$other_notification->set_product_id( $product->get_id() );
+		$other_notification->save();
+
+		wp_update_user(
+			array(
+				'ID'         => $user_id,
+				'user_email' => 'new@doe.com',
+			)
+		);
+
+		$current_notification = new Notification();
+		$current_notification->set_user_id( $user_id );
+		$current_notification->set_user_email( 'new@doe.com' );
+		$current_notification->set_product_id( $product->get_id() );
+		$current_notification->set_status( NotificationStatus::SENT );
+		$current_notification->set_date_created( 1700000000 );
+		$current_notification->set_date_notified( 1700003600 );
+		$current_notification_id = $current_notification->save();
+
+		$response = PrivacyEraser::export_notification_data( 'New@Doe.COM' );
+
+		$this->assertTrue( $response['done'] );
+		$this->assertSame(
+			array(
+				'stock-notification-' . $user_notification_id,
+				'stock-notification-' . $guest_notification_id,
+				'stock-notification-' . $current_notification_id,
+			),
+			array_column( $response['data'], 'item_id' )
+		);
+
+		$item = $response['data'][0];
+		$this->assertSame( 'woocommerce_stock_notifications', $item['group_id'] );
+
+		$values = array_column( $item['data'], 'value', 'name' );
+		$this->assertSame( $product->get_name(), $values['Product'] );
+		$this->assertSame( $product->get_permalink(), $values['Product URL'] );
+		$this->assertSame( 'old@doe.com', $values['Email'] );
+		$this->assertSame( 'Pending', $values['Status'] );
+		$this->assertNotSame( '', $values['Date signed up'] );
+		$this->assertSame( '', $values['Date notified'] );
+
+		$date_format = get_option( 'date_format' ) . ', ' . get_option( 'time_format' );
+		$sent_values = array_column( $response['data'][2]['data'], 'value', 'name' );
+		$this->assertSame( 'Sent', $sent_values['Status'] );
+		$this->assertSame( wc_format_datetime( new \WC_DateTime( '@1700000000' ), $date_format ), $sent_values['Date signed up'] );
+		$this->assertSame( wc_format_datetime( new \WC_DateTime( '@1700003600' ), $date_format ), $sent_values['Date notified'] );
+	}
+
+	/**
+	 * @testdox Should export nothing for an empty or invalid email instead of every sign-up.
+	 */
+	public function test_privacy_exporter_ignores_empty_and_invalid_email(): void {
+		$notification = new Notification();
+		$notification->set_user_email( 'jon@doe.com' );
+		$notification->set_product_id( 1 );
+		$notification->save();
+
+		foreach ( array( '', '   ', '0', 'not-an-email' ) as $email ) {
+			$response = PrivacyEraser::export_notification_data( $email );
+			$this->assertSame( array(), $response['data'], "Email '{$email}' should export nothing." );
+			$this->assertTrue( $response['done'] );
+		}
+
+		$erased = PrivacyEraser::erase_notification_data( '' );
+		$this->assertFalse( $erased['items_removed'] );
+		$this->assertSame( 'jon@doe.com', ( new Notification( $notification->get_id() ) )->get_user_email() );
+	}
+
+	/**
+	 * @testdox Should export the product ID when the product has been deleted.
+	 */
+	public function test_privacy_exporter_falls_back_to_product_id(): void {
+		$notification = new Notification();
+		$notification->set_user_email( 'jon@doe.com' );
+		$notification->set_product_id( 987654 );
+		$notification->save();
+
+		$response = PrivacyEraser::export_notification_data( 'jon@doe.com' );
+		$values   = array_column( $response['data'][0]['data'], 'value', 'name' );
+
+		$this->assertSame( 'Product #987654', $values['Product'] );
+		$this->assertSame( '', $values['Product URL'] );
+	}
+
+	/**
+	 * @testdox Should register the exporter alongside the eraser.
+	 */
+	public function test_privacy_exporter_is_registered(): void {
+		$privacy = new PrivacyEraser();
+		$privacy->register_erasers_exporters();
+
+		$exporters = apply_filters( 'wp_privacy_personal_data_exporters', array() );
+
+		$this->assertArrayHasKey( 'woocommerce-customer-stock-notifications', $exporters );
+		$callback = $exporters['woocommerce-customer-stock-notifications']['callback'];
+		$this->assertIsCallable( $callback );
+		$this->assertSame( array( $privacy, 'export_notification_data' ), $callback );
+	}
+
+	/**
+	 * @testdox Should export a variation as its parent title followed by the attributes once.
+	 */
+	public function test_privacy_exporter_formats_variation_name(): void {
+		$product   = \WC_Helper_Product::create_variation_product();
+		$variation = wc_get_product( $product->get_children()[0] );
+
+		$notification = new Notification();
+		$notification->set_user_email( 'jon@doe.com' );
+		$notification->set_product_id( $variation->get_id() );
+		$notification->save();
+
+		$response = PrivacyEraser::export_notification_data( 'jon@doe.com' );
+		$values   = array_column( $response['data'][0]['data'], 'value', 'name' );
+
+		$this->assertSame( $product->get_name() . ' size: small', $values['Product'] );
+		$this->assertSame( $variation->get_permalink(), $values['Product URL'] );
+	}
+
+	/**
+	 * @testdox Should export sign-ups ten per page and report done on the last page.
+	 */
+	public function test_privacy_exporter_paginates(): void {
+		for ( $i = 1; $i <= 10; $i++ ) {
+			$notification = new Notification();
+			$notification->set_user_email( 'jon@doe.com' );
+			$notification->set_product_id( $i );
+			$notification->save();
+		}
+
+		$full_page = PrivacyEraser::export_notification_data( 'jon@doe.com', 1 );
+		$this->assertCount( 10, $full_page['data'] );
+		$this->assertTrue( $full_page['done'] );
+
+		$notification = new Notification();
+		$notification->set_user_email( 'jon@doe.com' );
+		$notification->set_product_id( 11 );
+		$notification->save();
+
+		$first_page = PrivacyEraser::export_notification_data( 'jon@doe.com', 1 );
+		$this->assertCount( 10, $first_page['data'] );
+		$this->assertFalse( $first_page['done'] );
+
+		$second_page = PrivacyEraser::export_notification_data( 'jon@doe.com', 2 );
+		$this->assertCount( 1, $second_page['data'] );
+		$this->assertTrue( $second_page['done'] );
+
+		$this->assertEmpty( array_intersect( array_column( $first_page['data'], 'item_id' ), array_column( $second_page['data'], 'item_id' ) ) );
+	}
+
+	/**
+	 * @testdox Should report done with no data when the email has no sign-ups.
+	 */
+	public function test_privacy_exporter_returns_done_when_empty(): void {
+		$response = PrivacyEraser::export_notification_data( 'nobody@doe.com' );
+
+		$this->assertSame( array(), $response['data'] );
+		$this->assertTrue( $response['done'] );
+	}
+
+	/**
+	 * @testdox Should skip sign-ups of other customers when the data store ignores the `customer` query argument.
+	 */
+	public function test_privacy_export_and_erase_skip_other_customers_rows(): void {
+		$mine = new Notification();
+		$mine->set_user_email( 'jon@doe.com' );
+		$mine->set_product_id( 1 );
+		$mine_id = $mine->save();
+
+		$other = new Notification();
+		$other->set_user_email( 'other@doe.com' );
+		$other->set_product_id( 1 );
+		$other_id = $other->save();
+
+		$store = new class() extends StockNotificationsDataStore {
+			/**
+			 * Query like a store written before the `customer` argument existed.
+			 *
+			 * @param array $args The arguments.
+			 * @return array<int>|array<Notification>|int
+			 */
+			public function query( array $args ) {
+				unset( $args['customer'] );
+				return parent::query( $args );
+			}
+		};
+		$store->init( wc_get_container()->get( StockNotificationsMetaDataStore::class ), wc_get_container()->get( DatabaseUtil::class ) );
+		add_filter( 'woocommerce_stock_notification_data_store', fn() => $store );
+
+		$response = PrivacyEraser::export_notification_data( 'jon@doe.com' );
+		$this->assertSame( array( 'stock-notification-' . $mine_id ), array_column( $response['data'], 'item_id' ) );
+
+		$erased = PrivacyEraser::erase_notification_data( 'jon@doe.com' );
+		$this->assertTrue( $erased['items_removed'] );
+		$this->assertSame( NotificationStatus::CANCELLED, ( new Notification( $mine_id ) )->get_status() );
+		$this->assertSame( 'other@doe.com', ( new Notification( $other_id ) )->get_user_email() );
 	}
 }
