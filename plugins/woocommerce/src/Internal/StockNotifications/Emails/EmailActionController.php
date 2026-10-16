@@ -103,6 +103,11 @@ class EmailActionController {
 		$notification = $this->get_notification_to_be_processed( $notification_id );
 
 		if ( ! $notification ) {
+			// A deleted sign-up gets the same generic notice as a bad key, so the
+			// response does not reveal whether the notification ever existed.
+			if ( self::ACTION_VERIFY === $action || self::ACTION_UNSUBSCRIBE === $action ) {
+				$this->redirect_with_notice( $action, $this->get_invalid_link_notice_text( $action ), 'error' );
+			}
 			return;
 		}
 
@@ -142,21 +147,25 @@ class EmailActionController {
 	 * @return void
 	 */
 	private function process_verification_action( Notification $notification, string $action_key ): void {
-		if ( ! $notification->check_verification_key( $action_key ) ) {
-			$notice_text = $notification->is_verification_key_expired()
-				? esc_html__( 'This verification link has expired. Sign up again to request a new one.', 'woocommerce' )
-				: esc_html__( 'This verification link is no longer valid. Please use the link in the most recent verification email.', 'woocommerce' );
-			$this->redirect_with_notice( self::ACTION_VERIFY, $notice_text, 'error' );
+		// A mismatched key gets the generic notice regardless of status, so the
+		// response does not reveal the sign-up's state to anyone guessing keys.
+		if ( ! $notification->verification_key_matches( $action_key ) ) {
+			$this->redirect_with_notice( self::ACTION_VERIFY, $this->get_invalid_link_notice_text( self::ACTION_VERIFY ), 'error' );
 		}
 
-		// Guard against re-hits of a still-valid verification URL (double-click, email prefetch,
+		// Guard against re-hits of a verification URL (double-click, email prefetch,
 		// link-scanner bots). Without this, each hit would re-dispatch the verified email.
+		// Checked before expiry so a verified sign-up reports as verified even once its link is stale.
 		$status = $notification->get_status();
 		if ( NotificationStatus::PENDING !== $status ) {
 			$notice_text = NotificationStatus::CANCELLED === $status
 				? esc_html__( 'This sign-up has been cancelled, so it can no longer be verified.', 'woocommerce' )
 				: esc_html__( 'This sign-up has already been verified.', 'woocommerce' );
 			$this->redirect_with_notice( self::ACTION_VERIFY, $notice_text, 'notice' );
+		}
+
+		if ( $notification->is_verification_key_expired() ) {
+			$this->redirect_with_notice( self::ACTION_VERIFY, esc_html__( 'This verification link has expired. Sign up again to request a new one.', 'woocommerce' ), 'error' );
 		}
 
 		$notification->set_status( NotificationStatus::ACTIVE );
@@ -195,7 +204,7 @@ class EmailActionController {
 	 */
 	private function process_unsubscribe_action( Notification $notification, string $action_key ): void {
 		if ( ! $notification->check_unsubscribe_key( $action_key ) ) {
-			$this->redirect_with_notice( self::ACTION_UNSUBSCRIBE, esc_html__( 'This unsubscribe link is no longer valid.', 'woocommerce' ), 'error' );
+			$this->redirect_with_notice( self::ACTION_UNSUBSCRIBE, $this->get_invalid_link_notice_text( self::ACTION_UNSUBSCRIBE ), 'error' );
 		}
 
 		$status = $notification->get_status();
@@ -218,6 +227,20 @@ class EmailActionController {
 		/* translators: %2$s product name, %1$s user email */
 		$notice_text = sprintf( esc_html__( 'Successfully unsubscribed %1$s. You will not receive a notification when "%2$s" becomes available.', 'woocommerce' ), $notification->get_user_email(), $product->get_name() );
 		$this->redirect_with_notice( self::ACTION_UNSUBSCRIBE, $notice_text );
+	}
+
+	/**
+	 * Returns the generic notice shown when an email link cannot be matched to a sign-up.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param string $action The email action: 'verify' or 'unsubscribe'.
+	 * @return string
+	 */
+	private function get_invalid_link_notice_text( string $action ): string {
+		return self::ACTION_VERIFY === $action
+			? esc_html__( 'This verification link is no longer valid. Please use the link in the most recent verification email.', 'woocommerce' )
+			: esc_html__( 'This unsubscribe link is no longer valid.', 'woocommerce' );
 	}
 
 	/**

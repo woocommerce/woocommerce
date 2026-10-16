@@ -370,6 +370,52 @@ class EmailActionControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should report an already-verified sign-up as verified even after its verification link has expired.
+	 */
+	public function test_process_verification_action_on_already_verified_notification_with_expired_key_reports_verified() {
+		$id = $this->arrange_notification(
+			NotificationStatus::ACTIVE,
+			'verification_action_key',
+			( time() - Config::get_verification_expiration_time_threshold() - MINUTE_IN_SECONDS ) . ':' . wp_fast_hash( 'test' )
+		);
+
+		$this->email_manager
+			->expects( $this->never() )
+			->method( 'send_verified_email' );
+
+		$this->assert_request_redirects( $id, 'test', 'verify' );
+
+		$this->assertEquals( NotificationStatus::ACTIVE, Factory::get_notification( $id )->get_status() );
+		$this->assertSame( 1, wc_notice_count( 'notice' ) );
+		$this->assertSame( 0, wc_notice_count( 'error' ) );
+	}
+
+	/**
+	 * @testdox Should show a generic error notice when the $action link points at a notification that no longer exists.
+	 * @dataProvider provider_email_actions
+	 *
+	 * @param string $action Email action: 'verify' or 'unsubscribe'.
+	 */
+	public function test_process_action_with_missing_notification_shows_error_notice( string $action ) {
+		$this->assert_request_redirects( PHP_INT_MAX, 'any-key', $action );
+
+		$this->assertSame( 1, wc_notice_count( 'error' ) );
+		$this->assertSame( 0, wc_notice_count( 'success' ) );
+	}
+
+	/**
+	 * Email actions that reach the shopper via a link.
+	 *
+	 * @return array[]
+	 */
+	public function provider_email_actions(): array {
+		return array(
+			array( 'verify' ),
+			array( 'unsubscribe' ),
+		);
+	}
+
+	/**
 	 * @testdox Should show an error notice and leave the notification unchanged when the unsubscribe key is garbage.
 	 */
 	public function test_process_unsubscribe_action_with_invalid_key_leaves_notification_unchanged() {

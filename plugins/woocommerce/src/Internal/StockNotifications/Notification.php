@@ -483,13 +483,21 @@ class Notification extends \WC_Data {
 	 * @return bool True if the key is valid, false otherwise.
 	 */
 	public function check_verification_key( string $key ): bool {
+		return $this->verification_key_matches( $key ) && ! $this->is_verification_key_expired();
+	}
+
+	/**
+	 * Check whether the given key matches the stored verification key hash, ignoring expiration.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param string $key The key to check.
+	 * @return bool True if a verification key is stored and the given key matches it, false otherwise.
+	 */
+	public function verification_key_matches( string $key ): bool {
 		$action_key = (string) $this->get_meta( 'verification_action_key' );
 
 		if ( ! str_contains( $action_key, ':' ) ) {
-			return false;
-		}
-
-		if ( $this->is_verification_key_expired() ) {
 			return false;
 		}
 
