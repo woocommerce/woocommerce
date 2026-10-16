@@ -1233,7 +1233,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 				WHERE shipping_class_posts.post_type = 'product'
 					OR (
 						shipping_class_posts.post_type = 'product_variation'
-						AND shipping_class_posts.post_status = '" . \Automattic\WooCommerce\Enums\ProductStatus::PUBLISH . "'
+						AND shipping_class_posts.post_status = 'publish'
 					)
 			) ",
 			$shipping_class
