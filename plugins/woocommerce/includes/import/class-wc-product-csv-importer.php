@@ -708,6 +708,42 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	}
 
 	/**
+	 * Parse the "date on sale to" field from a CSV.
+	 *
+	 * A date-only value becomes the end of that day (23:59:59), matching the product edit
+	 * screen. Values with a time, a timezone, a Unix timestamp or a relative expression are
+	 * left as written.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param string $value Field value.
+	 *
+	 * @return string|null
+	 */
+	public function parse_date_on_sale_to_field( $value ) {
+		$parsed = $this->parse_datetime_field( $value );
+
+		if ( null === $parsed ) {
+			return null;
+		}
+
+		// date_parse() reports hour=0 for "Monday, January 26, 2099", so strip the weekday before probing.
+		$probe = (string) preg_replace( '/^(?:mon|tue(?:s)?|wed(?:nes)?|thu(?:rs)?|fri|sat(?:ur)?|sun)(?:day)?\.?,?\s+/i', '', $parsed );
+		$date  = date_parse( $probe );
+
+		// Date-only input reports hour === false; a time, a timezone (is_localtime) or a relative expression does not.
+		if (
+			false === $date['year'] || false === $date['month'] || false === $date['day']
+			|| false !== $date['hour'] || isset( $date['relative'] ) || ! empty( $date['is_localtime'] )
+		) {
+			return $parsed;
+		}
+
+		// Built from Y/M/D, not a timestamp, so no offset can move the day.
+		return sprintf( '%04d-%02d-%02d 23:59:59', $date['year'], $date['month'], $date['day'] );
+	}
+
+	/**
 	 * Parse backorders from a CSV.
 	 *
 	 * @param string $value Field value.
@@ -876,7 +912,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			'published'         => array( $this, 'parse_published_field' ),
 			'featured'          => array( $this, 'parse_bool_field' ),
 			'date_on_sale_from' => array( $this, 'parse_datetime_field' ),
-			'date_on_sale_to'   => array( $this, 'parse_datetime_field' ),
+			'date_on_sale_to'   => array( $this, 'parse_date_on_sale_to_field' ),
 			'name'              => array( $this, 'parse_skip_field' ),
 			'short_description' => array( $this, 'parse_description_field' ),
 			'description'       => array( $this, 'parse_description_field' ),
