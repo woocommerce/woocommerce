@@ -56,6 +56,7 @@
 - [woocommerce_order_shipping_to_display_tax_label](#woocommerce_order_shipping_to_display_tax_label)
 - [woocommerce_pay_order_product_has_enough_stock](#woocommerce_pay_order_product_has_enough_stock)
 - [woocommerce_pay_order_product_in_stock](#woocommerce_pay_order_product_in_stock)
+- [woocommerce_preselected_payment_method](#woocommerce_preselected_payment_method)
 - [woocommerce_product_details_hooked_blocks](#woocommerce_product_details_hooked_blocks)
 - [woocommerce_product_image_loading_attr](#woocommerce_product_image_loading_attr)
 - [woocommerce_product_review_comment_form_args](#woocommerce_product_review_comment_form_args)
@@ -1378,6 +1379,32 @@ apply_filters( 'woocommerce_pay_order_product_in_stock', bool $is_in_stock, \WC_
 ### Source
 
 - [StoreApi/Utilities/OrderController.php](../../../../../../src/StoreApi/Utilities/OrderController.php)
+
+---
+
+## woocommerce_preselected_payment_method
+
+
+Filters the payment method the Checkout block starts with when the shopper hasn't picked one yet.
+
+```php
+apply_filters( 'woocommerce_preselected_payment_method', string $payment_method, array $available_gateways )
+```
+
+### Description
+
+Return a gateway id from `$available_gateways` to preselect it, or an empty string to select nothing; any other value selects nothing. The shopper's own choice, kept in the session, never goes through this filter. Attaching a callback also makes that choice last one purchase: it is forgotten when the cart becomes empty. Attach the callback by `init` at the latest.
+
+### Parameters
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| $payment_method | string | Gateway id WooCommerce would preselect: the customer's default saved card's gateway, else the first available gateway, or '' when there is none. |
+| $available_gateways | array | Gateways available for this cart, keyed by id. |
+
+### Source
+
+- [StoreApi/Utilities/PaymentUtils.php](../../../../../../src/StoreApi/Utilities/PaymentUtils.php)
 
 ---
 

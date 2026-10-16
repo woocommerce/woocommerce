@@ -228,6 +228,7 @@ The following event emitters are available to extensions to register observers t
 Observers registered to this event emitter will receive nothing as an argument. Also, all observers will be executed before the checkout handles the responses from the emitters. Observers registered to this emitter can return `true` if they have nothing to communicate back to checkout, `false` if they want checkout to go back to `IDLE` status state, or an object with any of the following properties:
 
 -   `errorMessage`: This will be added as an error notice on the checkout context.
+-   `context`: The notice context to show `errorMessage` in, for example `noticeContexts.PAYMENTS`. Defaults to `wc/checkout`.
 -   `validationErrors`: This will be set as inline validation errors on checkout fields. If your observer wants to trigger validation errors it can use the following shape for the errors:
     -   This is an object where keys are the property names the validation error is for (that correspond to a checkout field, eg `country` or `coupon`) and values are the error message describing the validation problem.
 

@@ -8,6 +8,7 @@ import { PlainPaymentMethods } from '@woocommerce/types';
  * Internal dependencies
  */
 import { store as paymentStore } from '../index';
+import { checkoutData } from '../../checkout/constants';
 
 export const setDefaultPaymentMethod = async (
 	paymentMethods: PlainPaymentMethods
@@ -27,6 +28,19 @@ export const setDefaultPaymentMethod = async (
 		activePaymentMethod &&
 		allPaymentMethodKeys.includes( activePaymentMethod )
 	) {
+		return;
+	}
+
+	// When the server answered with no payment method, it decided to preselect nothing: never pick one
+	// here, and clear a selected method that the browser can no longer use rather than swap it for
+	// another. Without a server answer, as in the editor, the fallback below runs.
+	if ( checkoutData?.payment_method === '' ) {
+		if ( activePaymentMethod ) {
+			void dispatch( paymentStore ).__internalSetPaymentIdle();
+			void dispatch( paymentStore ).__internalSetActivePaymentMethod(
+				''
+			);
+		}
 		return;
 	}
 
