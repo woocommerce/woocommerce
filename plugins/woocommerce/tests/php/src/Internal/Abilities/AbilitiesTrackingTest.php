@@ -179,7 +179,7 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 		$this->assertCount( 1, $this->sut->recorded, 'One event should be recorded per call' );
 		$event = $this->sut->recorded[0];
 		$this->assertSame( 'wcadmin_ability_called', $event['_en'] );
-		$this->assertSame( 'woocommerce__tracking_test', $event['ability_name'] );
+		$this->assertSame( 'woocommerce__tracking-test', $event['ability_name'] );
 		$this->assertSame( 'success', $event['outcome'] );
 		$this->assertSame( 'none', $event['error_code'] );
 		$this->assertSame( 'mcp', $event['channel'] );
@@ -530,8 +530,8 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 		$this->assertCount( 2, $this->sut->recorded );
 		$this->assertSame(
 			array(
-				'woocommerce__tracking_test'       => 'success',
-				'woocommerce__tracking_test_inner' => 'success',
+				'woocommerce__tracking-test'       => 'success',
+				'woocommerce__tracking-test-inner' => 'success',
 			),
 			$outcomes
 		);
@@ -620,8 +620,8 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 
 		$events = array_column( $this->sut->recorded, null, 'ability_name' );
 		$this->assertCount( 2, $this->sut->recorded );
-		$this->assertSame( 'success', $events['woocommerce__tracking_test']['outcome'] );
-		$this->assertSame( 'unknown', $events['woocommerce__tracking_test_inner']['error_code'] );
+		$this->assertSame( 'success', $events['woocommerce__tracking-test']['outcome'] );
+		$this->assertSame( 'unknown', $events['woocommerce__tracking-test-inner']['error_code'] );
 	}
 
 	/**
@@ -680,7 +680,7 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 		wp_get_ability( self::LONG_ABILITY_ID )->execute();
 		$this->sut->handle_shutdown();
 
-		$this->assertSame( 'woocommerce__tracking_test_with_a_long_name_that_goes_past_sixty_four_characters', $this->sut->recorded[0]['ability_name'] );
+		$this->assertSame( 'woocommerce__tracking-test-with-a-long-name-that-goes-past-sixty-four-characters', $this->sut->recorded[0]['ability_name'] );
 	}
 
 	/**

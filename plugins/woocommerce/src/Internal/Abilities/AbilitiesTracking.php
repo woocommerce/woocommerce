@@ -608,8 +608,8 @@ class AbilitiesTracking {
 			}
 
 			$event = array(
-				// Not truncated, and normalized per part with `__` at the `/`: either would let different abilities collide.
-				'ability_name'    => implode( '__', array_map( static fn( $part ) => self::normalize_value( $part, null ), explode( '/', $frame['name'], 2 ) ) ),
+				// The `/` becomes `__`. Hyphens in the slug stay, so `products-query` and `products_query` stay different events.
+				'ability_name'    => implode( '__', explode( '/', strtolower( $frame['name'] ), 2 ) ),
 				'outcome'         => true === $outcome ? 'success' : 'error',
 				'error_code'      => $error_code,
 				'channel'         => $frame['channel'],
