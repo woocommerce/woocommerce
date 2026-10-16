@@ -7,11 +7,16 @@
 
 		.woocommerce-review-order__title,
 		.woocommerce-review-order__intro,
-		.woocommerce-review-order__legend,
 		.woocommerce-review-order__notice,
 		.woocommerce-review-order__form {
 			display: none;
 		}
+	}
+
+	// Nested for the weight to beat a theme's own button rules.
+	& &__submit[aria-disabled="true"] {
+		opacity: 0.5;
+		cursor: not-allowed;
 	}
 
 	&__items {
@@ -35,6 +40,7 @@
 		font-size: 1.25em;
 		line-height: 1.2;
 		font-weight: 500;
+		overflow-wrap: anywhere;
 
 		a {
 			text-decoration: underline;
@@ -84,18 +90,30 @@
 	}
 
 	&__item-review-textarea {
+		// Border-box or the theme's border and padding push `width: 100%`
+		// past the column, which breaks reflow at narrow widths.
+		box-sizing: border-box;
 		width: 100%;
 		min-height: 6em;
 		resize: vertical;
 	}
 
+	// Rendered empty, so the margin must not leave a gap when it is.
 	&__item-rating-error {
 		margin: 0.5em 0 1em;
 		color: var(--wc-red, #a00);
+
+		&:empty {
+			margin: 0;
+		}
 	}
 
 	&__item-status {
 		margin: 0.5em 0 0;
+
+		&:empty {
+			margin: 0;
+		}
 
 		&--ok {
 			color: var(--wc-green, #007518);
@@ -170,12 +188,13 @@
 	gap: 0.25em;
 	line-height: 1;
 
+	// Spacing lives in the labels' padding rather than a `gap`, so no pixel
+	// between two stars is outside a tap target.
 	&__stars {
 		display: inline-flex;
 		flex-direction: row-reverse;
 		justify-content: flex-end;
 		align-items: center;
-		gap: 4px;
 	}
 
 	// Visually hide radios, keep them in the a11y tree.
@@ -195,7 +214,7 @@
 	&__star {
 		cursor: pointer;
 		display: inline-flex;
-		padding: 0;
+		padding: 0 2px;
 		margin: 0;
 		color: currentcolor;
 	}
@@ -211,25 +230,19 @@
 		width: 24px;
 		height: 24px;
 		fill: currentcolor;
-		opacity: 0.3;
+		// Keeps the 3:1 of WCAG 1.4.11 for any text colour down to #3e3e3e.
+		opacity: 0.55;
 		transition: opacity 100ms ease-in-out;
 	}
 
 	// Checked input fills its own star + every following sibling (visual left).
-	&__input:checked ~ .woocommerce-star-rating__star .woocommerce-star-rating__icon {
+	&__input:checked ~ &__star &__icon {
 		opacity: 1;
 	}
 
-	&__stars:hover .woocommerce-star-rating__icon {
-		opacity: 0.3;
-	}
-
-	&__star:hover .woocommerce-star-rating__icon,
-	&__star:hover ~ .woocommerce-star-rating__star .woocommerce-star-rating__icon {
-		opacity: 1;
-	}
-
-	&__input:focus-visible + .woocommerce-star-rating__star {
+	// Not `:focus-visible`: the clipped radios have no other indicator, and
+	// script-moved focus after a click does not match it.
+	&__input:focus + .woocommerce-star-rating__star {
 		outline: 2px solid currentcolor;
 		outline-offset: 2px;
 	}

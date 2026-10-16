@@ -7,6 +7,85 @@
 	'use strict';
 
 	var ERROR_CLASS = 'woocommerce-review-order__item-rating-error';
+	var STATUS_CLASS = 'woocommerce-review-order__item-status';
+	var uid = 0;
+
+	/**
+	 * Add or remove one token from a space-separated attribute.
+	 *
+	 * @param {HTMLElement} el
+	 * @param {string}      attr
+	 * @param {string}      token
+	 * @param {boolean}     on
+	 */
+	function toggleToken( el, attr, token, on ) {
+		var tokens = ( el.getAttribute( attr ) || '' )
+			.split( /\s+/ )
+			.filter( function ( entry ) {
+				return entry && entry !== token;
+			} );
+		if ( on ) {
+			tokens.push( token );
+		}
+		if ( tokens.length ) {
+			el.setAttribute( attr, tokens.join( ' ' ) );
+		} else {
+			el.removeAttribute( attr );
+		}
+	}
+
+	/**
+	 * The row's message element, created only for a theme override that
+	 * dropped the paragraph the templates render up front.
+	 *
+	 * @param {HTMLElement} row       `.woocommerce-review-order__item`
+	 * @param {string}      className Element class.
+	 * @param {?string}     role      ARIA role, or null for a plain paragraph.
+	 * @return {HTMLElement}
+	 */
+	function rowRegion( row, className, role ) {
+		// Any depth: a theme override may wrap it, and a child-only lookup
+		// would miss it and add another on every call.
+		var region = row.querySelector( '.' + className );
+		if ( region ) {
+			return region;
+		}
+
+		region = document.createElement( 'p' );
+		region.className = className;
+		if ( role ) {
+			region.setAttribute( 'role', role );
+		}
+
+		if ( STATUS_CLASS === className ) {
+			row.appendChild( region );
+			return region;
+		}
+
+		// Under the title, not below the stars, so the message is at the top
+		// of the row on tall layouts.
+		var title = row.querySelector(
+			'.woocommerce-review-order__item-title'
+		);
+		if ( title ) {
+			title.parentNode.insertBefore( region, title.nextSibling );
+		} else {
+			row.insertBefore( region, row.firstChild );
+		}
+		return region;
+	}
+
+	/**
+	 * @param {HTMLElement} el
+	 * @return {string} The element's id, assigning a generated one if needed.
+	 */
+	function idOf( el ) {
+		if ( ! el.id ) {
+			uid += 1;
+			el.id = 'woocommerce-review-order-region-' + uid;
+		}
+		return el.id;
+	}
 
 	/**
 	 * @param {HTMLElement} container `.woocommerce-star-rating` element.
@@ -15,8 +94,9 @@
 		var inputs = Array.prototype.slice.call(
 			container.querySelectorAll( '.woocommerce-star-rating__input' )
 		);
-		var captionId = container.getAttribute( 'aria-describedby' );
-		var caption = captionId ? document.getElementById( captionId ) : null;
+		var caption = container.querySelector(
+			'.woocommerce-star-rating__caption'
+		);
 
 		function syncCaption() {
 			if ( ! caption ) {
@@ -36,21 +116,30 @@
 			input.dispatchEvent( new window.Event( 'change', { bubbles: true } ) );
 		}
 
-		// DOM order is 5..1; under row-reverse the next visual star is the previous DOM input.
+		// DOM order is 5..1, so the next visual star is the previous input;
+		// RTL flips the row again, taking the horizontal keys with it.
 		inputs.forEach( function ( input, index ) {
 			input.addEventListener( 'change', syncCaption );
 
 			input.addEventListener( 'keydown', function ( event ) {
+				var rtl =
+					'rtl' ===
+					window.getComputedStyle( container ).direction;
+				var forward = ( index - 1 + inputs.length ) % inputs.length;
+				var backward = ( index + 1 ) % inputs.length;
 				var nextIndex = null;
 				switch ( event.key ) {
 					case 'ArrowRight':
+						nextIndex = rtl ? backward : forward;
+						break;
 					case 'ArrowDown':
-						nextIndex =
-							( index - 1 + inputs.length ) % inputs.length;
+						nextIndex = forward;
 						break;
 					case 'ArrowLeft':
+						nextIndex = rtl ? forward : backward;
+						break;
 					case 'ArrowUp':
-						nextIndex = ( index + 1 ) % inputs.length;
+						nextIndex = backward;
 						break;
 					case 'Home':
 						nextIndex = inputs.length - 1;
@@ -115,8 +204,19 @@
 	}
 
 	/**
+	 * @param {HTMLElement} submit Submit button.
+	 * @return {boolean} Whether the dirty gate is currently closed.
+	 */
+	function isGated( submit ) {
+		return 'true' === submit.getAttribute( 'aria-disabled' );
+	}
+
+	/**
 	 * Enable / disable the review-order submit button based on whether at
 	 * least one row has been edited since page load.
+	 *
+	 * `aria-disabled` rather than `disabled`, so the button stays in the tab
+	 * order and a screen reader can reach it.
 	 *
 	 * @param {HTMLFormElement} form `.woocommerce-review-order__form`
 	 */
@@ -138,8 +238,24 @@
 		);
 
 		function syncSubmit() {
-			submit.disabled = ! rows.some( isRowDirty );
+			var ready = ! form.wcReviewOrderSubmitting && rows.some( isRowDirty );
+			submit.setAttribute( 'aria-disabled', ready ? 'false' : 'true' );
 		}
+
+		// `aria-disabled` does not stop the browser submitting, and the AJAX
+		// handler bails out without `data-ajax-url`. `requestSubmit()` raises
+		// no click, so both events need the guard.
+		submit.addEventListener( 'click', function ( event ) {
+			if ( isGated( submit ) ) {
+				event.preventDefault();
+			}
+		} );
+
+		form.addEventListener( 'submit', function ( event ) {
+			if ( isGated( submit ) ) {
+				event.preventDefault();
+			}
+		} );
 
 		// Expose so initAjaxSubmit can re-run the gate after the request completes.
 		form.syncReviewOrderSubmitGate = syncSubmit;
@@ -151,41 +267,86 @@
 	}
 
 	/**
+	 * Show or clear a row's rating error. Not announced on its own: the
+	 * caller focuses the first invalid rating, and `aria-describedby` carries
+	 * the rest when the customer reaches them.
+	 *
 	 * @param {HTMLElement} row     `.woocommerce-review-order__item`
 	 * @param {boolean}     visible Whether the error should be shown.
 	 */
 	function setRowRatingError( row, visible ) {
-		var existing = row.querySelector( ':scope > .' + ERROR_CLASS );
+		var region = rowRegion( row, ERROR_CLASS, null );
+		// On the radios, not the group: a screen reader reports these for the
+		// focused element, and focus lands on a radio.
+		var inputs = Array.prototype.slice.call(
+			row.querySelectorAll( '.woocommerce-star-rating__input' )
+		);
+
 		if ( ! visible ) {
-			if ( existing ) {
-				existing.parentNode.removeChild( existing );
-			}
+			region.textContent = '';
+			inputs.forEach( function ( input ) {
+				if ( ! input.hasAttribute( 'aria-invalid' ) ) {
+					return;
+				}
+				input.removeAttribute( 'aria-invalid' );
+				toggleToken( input, 'aria-describedby', region.id, false );
+			} );
 			return;
 		}
-		if ( existing ) {
-			return;
-		}
+
 		var i18n = ( window.wcOrderReview && window.wcOrderReview.i18n ) || {};
-		var msg =
+		region.textContent =
 			i18n.rating_required ||
 			'Please rate this product before submitting your review.';
-		var note = document.createElement( 'p' );
-		note.className = ERROR_CLASS;
-		note.setAttribute( 'role', 'alert' );
-		note.textContent = msg;
 
-		// Anchor the error directly under the product title when the row has
-		// one so the customer sees the message at the top of the row, not
-		// buried below the stars on tall layouts. Fall back to prepending
-		// into the row itself so the error is never silently dropped if a
-		// theme override removes the title element.
-		var title = row.querySelector(
-			'.woocommerce-review-order__item-title'
-		);
-		if ( title ) {
-			title.parentNode.insertBefore( note, title.nextSibling );
-		} else {
-			row.insertBefore( note, row.firstChild );
+		inputs.forEach( function ( input ) {
+			input.setAttribute( 'aria-invalid', 'true' );
+			toggleToken( input, 'aria-describedby', idOf( region ), true );
+		} );
+	}
+
+	/**
+	 * Focus a group's first star in reading order, which the reversed markup
+	 * puts last in DOM order.
+	 *
+	 * @param {HTMLElement} scope Rating group, or any ancestor of one.
+	 * @return {?HTMLElement} The focused radio, or null.
+	 */
+	function focusFirstStar( scope ) {
+		if ( ! scope ) {
+			return null;
+		}
+		var inputs = scope.querySelectorAll( '.woocommerce-star-rating__input' );
+		var first = inputs[ inputs.length - 1 ];
+		if ( ! first || typeof first.focus !== 'function' ) {
+			return null;
+		}
+		// The radios are 1px, so letting the browser scroll to one can leave
+		// the message it points at off-screen.
+		first.focus( { preventScroll: true } );
+		return first;
+	}
+
+	/**
+	 * Bring an invalid row's rating error into view, then its focused star.
+	 *
+	 * @param {HTMLElement}  input   Radio carrying `aria-invalid`.
+	 * @param {?HTMLElement} focused Radio `focusFirstStar` focused, if any.
+	 */
+	function revealRatingError( input, focused ) {
+		var row = input.closest( '.woocommerce-review-order__item' );
+		var message = row && row.querySelector( '.' + ERROR_CLASS );
+		if ( message && typeof message.scrollIntoView === 'function' ) {
+			// `start`, not `center`: in the stacked layout the stars sit below
+			// the image, and centring the message pushes them off-screen.
+			message.scrollIntoView( { block: 'start' } );
+		}
+
+		// Stacked, the two are ~360px apart and a short viewport cannot hold
+		// both, so the ring wins: it is the clipped radios' only indicator.
+		var label = focused && focused.labels && focused.labels[ 0 ];
+		if ( label && typeof label.scrollIntoView === 'function' ) {
+			label.scrollIntoView( { block: 'nearest' } );
 		}
 	}
 
@@ -241,12 +402,7 @@
 	 * @param {string}      [text] Optional message override.
 	 */
 	function renderRowStatus( row, status, text ) {
-		var existing = row.querySelector(
-			'.woocommerce-review-order__item-status'
-		);
-		if ( existing ) {
-			existing.parentNode.removeChild( existing );
-		}
+		var region = rowRegion( row, STATUS_CLASS, 'status' );
 		var i18n =
 			( window.wcOrderReview && window.wcOrderReview.i18n ) || {};
 		var defaults = {
@@ -257,13 +413,12 @@
 			error:
 				i18n.error || 'Something went wrong, please try again.',
 		};
-		var note = document.createElement( 'p' );
-		note.className =
-			'woocommerce-review-order__item-status woocommerce-review-order__item-status--' +
-			status;
-		note.setAttribute( 'role', 'status' );
-		note.textContent = text || defaults[ status ] || defaults.error;
-		row.appendChild( note );
+
+		[ 'ok', 'pending_moderation', 'error' ].forEach( function ( name ) {
+			region.classList.remove( STATUS_CLASS + '--' + name );
+		} );
+		region.classList.add( STATUS_CLASS, STATUS_CLASS + '--' + status );
+		region.textContent = text || defaults[ status ] || defaults.error;
 	}
 
 	/**
@@ -282,22 +437,29 @@
 		form.addEventListener( 'submit', function ( event ) {
 			event.preventDefault();
 
+			var submit = form.querySelector(
+				'.woocommerce-review-order__submit'
+			);
+			if ( form.wcReviewOrderSubmitting || ( submit && isGated( submit ) ) ) {
+				return;
+			}
+
 			if ( ! validate() ) {
-				var firstError = form.querySelector( '.' + ERROR_CLASS );
-				if ( firstError && typeof firstError.scrollIntoView === 'function' ) {
-					firstError.scrollIntoView( {
-						behavior: 'smooth',
-						block: 'center',
-					} );
+				var firstInvalid = form.querySelector(
+					'.woocommerce-star-rating__input[aria-invalid="true"]'
+				);
+				if ( firstInvalid ) {
+					var focused = focusFirstStar(
+						firstInvalid.closest( '.woocommerce-star-rating' )
+					);
+					revealRatingError( firstInvalid, focused );
 				}
 				return;
 			}
 
-			var submit = form.querySelector(
-				'.woocommerce-review-order__submit'
-			);
+			form.wcReviewOrderSubmitting = true;
 			if ( submit ) {
-				submit.disabled = true;
+				submit.setAttribute( 'aria-disabled', 'true' );
 			}
 
 			window
@@ -368,6 +530,19 @@
 							);
 							if ( success ) {
 								success.hidden = false;
+								// `is-success` hides the form and the
+								// focused button in it. The heading, not
+								// the container: an unnamed div announces
+								// nothing in some screen readers.
+								var target =
+									success.querySelector( 'h1, h2' ) ||
+									success;
+								if ( ! target.hasAttribute( 'tabindex' ) ) {
+									target.setAttribute( 'tabindex', '-1' );
+								}
+								if ( typeof target.focus === 'function' ) {
+									target.focus( { preventScroll: true } );
+								}
 							}
 							if (
 								typeof wrapper.scrollIntoView === 'function'
@@ -397,10 +572,11 @@
 					);
 				} )
 				.then( function () {
+					form.wcReviewOrderSubmitting = false;
 					if ( typeof form.syncReviewOrderSubmitGate === 'function' ) {
 						form.syncReviewOrderSubmitGate();
 					} else if ( submit ) {
-						submit.disabled = false;
+						submit.setAttribute( 'aria-disabled', 'false' );
 					}
 				} );
 		} );
@@ -418,6 +594,19 @@
 		}
 		dismiss.addEventListener( 'click', function () {
 			notice.classList.add( 'woocommerce-review-order__notice--hidden' );
+
+			// The dismiss button goes with the notice, so focus would fall to
+			// the document. Tabindex set here for theme overrides without it.
+			var wrapper = notice.closest( '.woocommerce-review-order' );
+			var heading = ( wrapper || document ).querySelector(
+				'.woocommerce-review-order__title'
+			);
+			if ( heading && typeof heading.focus === 'function' ) {
+				if ( ! heading.hasAttribute( 'tabindex' ) ) {
+					heading.setAttribute( 'tabindex', '-1' );
+				}
+				heading.focus();
+			}
 		} );
 	}
 
