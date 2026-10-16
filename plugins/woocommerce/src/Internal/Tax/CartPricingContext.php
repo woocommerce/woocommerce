@@ -50,16 +50,24 @@ class CartPricingContext {
 	private $mini_cart_depths = array();
 
 	/**
+	 * Calculation and dispatch depths at which catalog pricing scopes began.
+	 *
+	 * @var array<int, array{calculation_depth: int, dispatch_depth: int}>
+	 */
+	private $catalog_pricing_scopes = array();
+
+	/**
 	 * Register hooks.
 	 *
 	 * @since 11.3.0
 	 * @internal
 	 */
 	final public function init(): void {
-		$this->dispatch_stack    = array();
-		$this->dispatch_contexts = array();
-		$this->calculation_depth = 0;
-		$this->mini_cart_depths  = array();
+		$this->dispatch_stack         = array();
+		$this->dispatch_contexts      = array();
+		$this->calculation_depth      = 0;
+		$this->mini_cart_depths       = array();
+		$this->catalog_pricing_scopes = array();
 		// Register the route context only after a route matches, and clear it right after the callback.
 		add_filter( 'rest_request_before_callbacks', array( $this, 'handle_rest_request_before_callbacks' ), 10, 3 );
 		add_filter( 'rest_request_after_callbacks', array( $this, 'handle_rest_request_after_callbacks' ), 10, 3 );
@@ -87,6 +95,11 @@ class CartPricingContext {
 	 * @return bool True when the cart is being priced.
 	 */
 	public function is_active(): bool {
+		$scope = empty( $this->catalog_pricing_scopes ) ? null : end( $this->catalog_pricing_scopes );
+		if ( null !== $scope && count( $this->dispatch_stack ) <= $scope['dispatch_depth'] && $this->calculation_depth <= $scope['calculation_depth'] ) {
+			return false;
+		}
+
 		$dispatch_context = empty( $this->dispatch_stack ) ? null : ( $this->dispatch_contexts[ end( $this->dispatch_stack ) ] ?? null );
 
 		if ( null !== $dispatch_context ) {
@@ -94,6 +107,29 @@ class CartPricingContext {
 		}
 
 		return $this->calculation_depth > 0 || is_cart() || is_checkout();
+	}
+
+	/**
+	 * Price catalog products without applying the billing fallback for a cart without shipping.
+	 *
+	 * Cart calculations started inside the callback still use the cart pricing context.
+	 *
+	 * @since 11.3.0
+	 * @internal
+	 *
+	 * @param callable $callback Renders or prepares catalog products.
+	 * @return mixed Callback result.
+	 */
+	public function with_catalog_pricing( callable $callback ) {
+		$this->catalog_pricing_scopes[] = array(
+			'calculation_depth' => $this->calculation_depth,
+			'dispatch_depth'    => count( $this->dispatch_stack ),
+		);
+		try {
+			return $callback();
+		} finally {
+			array_pop( $this->catalog_pricing_scopes );
+		}
 	}
 
 	/**

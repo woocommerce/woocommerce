@@ -51,6 +51,102 @@ class CartPricingContextTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Restores cart pricing after a catalog callback throws, including nested cart calculations.
+	 */
+	public function test_catalog_pricing_scope_restores_cart_context(): void {
+		$inside = null;
+		$during = null;
+		$after  = null;
+
+		$this->dispatch_test_route(
+			'/wc/store/v1/cart',
+			$this->as_cart_route(
+				function ( $request ) use ( &$inside, &$during, &$after ) {
+					unset( $request ); // Avoid parameter not used PHPCS errors.
+					try {
+						$this->sut->with_catalog_pricing(
+							function () use ( &$inside, &$during ): void {
+								$inside = $this->sut->is_active();
+								$this->sut->handle_calculation_start();
+								$during = $this->sut->is_active();
+								$this->sut->handle_calculation_end();
+								throw new \RuntimeException( 'Catalog rendering failed' );
+							}
+						);
+					} catch ( \RuntimeException $e ) {
+						unset( $e ); // The failure exercises the scope's finally block.
+					}
+					$after = $this->sut->is_active();
+					return rest_ensure_response( array( 'ok' => true ) );
+				}
+			)
+		);
+
+		$this->assertFalse( $inside, 'Catalog prices should not use the cart context.' );
+		$this->assertTrue( $during, 'Nested cart calculations should still use the cart context.' );
+		$this->assertTrue( $after, 'Cart pricing should resume after an exception in catalog rendering.' );
+	}
+
+	/**
+	 * @testdox A nested cart route prices the cart while catalog cross-sells are being priced.
+	 */
+	public function test_nested_cart_route_inside_catalog_pricing_scope(): void {
+		$catalog  = null;
+		$inner    = null;
+		$non_cart = null;
+		$after    = null;
+
+		$this->create_rest_server_with_routes(
+			array(
+				function () use ( &$catalog, &$inner, &$non_cart, &$after ): void {
+					$this->register_test_route(
+						'/wc/store/v1/products/test-inner',
+						function ( $request ) use ( &$non_cart ) {
+							unset( $request ); // Avoid parameter not used PHPCS errors.
+							$non_cart = $this->sut->is_active();
+							return rest_ensure_response( array( 'ok' => true ) );
+						}
+					);
+					$this->register_test_route(
+						'/wc/store/v1/cart/test-inner',
+						$this->as_cart_route(
+							function ( $request ) use ( &$inner ) {
+								unset( $request ); // Avoid parameter not used PHPCS errors.
+								$inner = $this->sut->is_active();
+								return rest_ensure_response( array( 'ok' => true ) );
+							}
+						)
+					);
+					$this->register_test_route(
+						'/wc/store/v1/cart/test-outer',
+						$this->as_cart_route(
+							function ( $request ) use ( &$catalog, &$after ) {
+								unset( $request ); // Avoid parameter not used PHPCS errors.
+								$this->sut->with_catalog_pricing(
+									function () use ( &$catalog ): void {
+										$catalog = $this->sut->is_active();
+										rest_do_request( new \WP_REST_Request( 'GET', '/wc/store/v1/products/test-inner' ) );
+										rest_do_request( new \WP_REST_Request( 'GET', '/wc/store/v1/cart/test-inner' ) );
+									}
+								);
+								$after = $this->sut->is_active();
+								return rest_ensure_response( array( 'ok' => true ) );
+							}
+						)
+					);
+				},
+			)
+		);
+
+		rest_do_request( new \WP_REST_Request( 'GET', '/wc/store/v1/cart/test-outer' ) );
+
+		$this->assertFalse( $catalog, 'Cross-sell catalog prices should not use the cart context.' );
+		$this->assertFalse( $non_cart, 'A nested product route should not inherit the outer cart context.' );
+		$this->assertTrue( $inner, 'A nested cart route should price the cart independently of its caller.' );
+		$this->assertTrue( $after, 'The outer cart route should resume cart pricing after the catalog scope.' );
+	}
+
+	/**
 	 * @testdox Is active for Store API cart and checkout routes.
 	 */
 	public function test_is_active_for_store_api_cart_and_checkout_routes(): void {

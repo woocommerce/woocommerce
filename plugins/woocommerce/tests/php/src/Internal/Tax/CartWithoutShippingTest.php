@@ -200,6 +200,55 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Prices classic cart cross-sells using shipping tax while the cart uses billing tax.
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
+	 */
+	public function test_classic_cart_cross_sell_uses_catalog_tax(): void {
+		$this->set_up_cross_sell_tax_fixture();
+		add_filter( 'woocommerce_is_cart', '__return_true' );
+
+		try {
+			ob_start();
+			try {
+				woocommerce_cross_sell_display();
+			} finally {
+				$markup = (string) ob_get_clean();
+			}
+		} finally {
+			remove_filter( 'woocommerce_is_cart', '__return_true' );
+		}
+
+		$this->assertStringContainsString( wc_price( 110 ), $markup, 'The physical cross-sell should use shipping tax.' );
+		$this->assertStringNotContainsString( wc_price( 127 ), $markup, 'The cross-sell should not use billing tax.' );
+		WC()->cart->calculate_totals();
+		$this->assertEquals( 2.7, WC()->cart->get_cart_contents_tax(), 'The virtual cart item should still use billing tax.' );
+	}
+
+	/**
+	 * @testdox Prices Store API cross-sells using shipping tax while virtual cart items use billing tax.
+	 */
+	public function test_store_api_cross_sell_uses_catalog_tax(): void {
+		$cross_sell = $this->set_up_cross_sell_tax_fixture();
+		$result     = null;
+
+		$this->dispatch_test_route(
+			'/wc/store/v1/products',
+			function ( $request ) use ( &$result ) {
+				unset( $request ); // Avoid parameter not used PHPCS errors.
+				StoreApi::container();
+				$hydration = new Hydration( $this->createMock( AssetDataRegistry::class ) );
+				$result    = $hydration->get_rest_api_response_data( '/wc/store/v1/cart' );
+				return rest_ensure_response( array( 'ok' => true ) );
+			}
+		);
+
+		$this->assertSame( '1270', $result['body']['items'][0]['prices']->price, 'The virtual cart item should use billing tax.' );
+		$this->assertSame( $cross_sell->get_id(), $result['body']['cross_sells'][0]['id'], 'The expected cross-sell should appear in the cart response.' );
+		$this->assertSame( '11000', $result['body']['cross_sells'][0]['prices']->price, 'The physical cross-sell should use shipping tax.' );
+	}
+
+	/**
 	 * @testdox Uses the billing address for cart totals calculated outside the cart and checkout.
 	 */
 	public function test_uses_billing_address_for_cart_totals_outside_cart_and_checkout(): void {
@@ -589,6 +638,32 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 		$this->assertSame( array( 'US', 'CA', '90001', 'Los Angeles' ), $taxable_address, 'A cart product that needs shipping should keep the local pickup location as the taxable address.' );
 		// Shipping methods left enabled by other tests can add shipping tax, so check the item tax only.
 		$this->assertEquals( 1.0, WC()->cart->get_cart_contents_tax(), 'Cart item tax should use the local pickup location rate.' );
+	}
+
+	/**
+	 * Set up a virtual cart item with a physical cross-sell and different billing and shipping tax rates.
+	 *
+	 * @return \WC_Product Physical cross-sell product.
+	 */
+	private function set_up_cross_sell_tax_fixture(): \WC_Product {
+		$this->customer->set_billing_location( 'HU', '', '', '' );
+		$this->create_tax_rate( 'HU', '27.0000' );
+		$this->create_tax_rate( 'US', '10.0000' );
+		update_option( 'woocommerce_tax_display_shop', 'incl' );
+		update_option( 'woocommerce_tax_display_cart', 'incl' );
+
+		$cross_sell = \WC_Helper_Product::create_simple_product();
+		$cross_sell->set_price( 100 );
+		$cross_sell->set_regular_price( 100 );
+		$cross_sell->save();
+
+		$cart_product = \WC_Helper_Product::create_simple_product();
+		$cart_product->set_virtual( true );
+		$cart_product->set_cross_sell_ids( array( $cross_sell->get_id() ) );
+		$cart_product->save();
+		WC()->cart->add_to_cart( $cart_product->get_id() );
+
+		return $cross_sell;
 	}
 
 	/**

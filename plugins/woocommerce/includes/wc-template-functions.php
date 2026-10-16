@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
+use Automattic\WooCommerce\Internal\Tax\CartPricingContext;
 use Automattic\WooCommerce\Internal\Utilities\HtmlSanitizer;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
@@ -2732,16 +2733,20 @@ if ( ! function_exists( 'woocommerce_cross_sell_display' ) ) {
 			_prime_post_caches( array_filter( array_map( fn( $product ) => (int) $product->get_image_id(), $cross_sells ) ) );
 		}
 
-		wc_get_template(
-			'cart/cross-sells.php',
-			array(
-				'cross_sells'    => $cross_sells,
+		wc_get_container()->get( CartPricingContext::class )->with_catalog_pricing(
+			static function () use ( $cross_sells, $limit, $orderby, $columns ) {
+				wc_get_template(
+					'cart/cross-sells.php',
+					array(
+						'cross_sells'    => $cross_sells,
 
-				// Not used now, but used in previous version of cross-sells.php.
-				'posts_per_page' => $limit,
-				'orderby'        => $orderby,
-				'columns'        => $columns,
-			)
+						// Not used now, but used in previous version of cross-sells.php.
+						'posts_per_page' => $limit,
+						'orderby'        => $orderby,
+						'columns'        => $columns,
+					)
+				);
+			}
 		);
 	}
 }
