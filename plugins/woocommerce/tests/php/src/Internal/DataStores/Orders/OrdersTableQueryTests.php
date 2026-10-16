@@ -542,8 +542,11 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 			remove_filter( 'query', $capture );
 		}
 
-		$count_pattern = '/^SELECT COUNT\(.*?\) FROM ' . preg_quote( $wpdb->prefix . 'wc_orders', '/' ) . '\b/i';
-		$this->assertCount( $expected_count_statements, preg_grep( $count_pattern, $statements ), 'Unexpected number of order count queries.' );
+		$count_statements = array_filter(
+			$statements,
+			static fn( $sql ) => 0 === stripos( $sql, 'SELECT COUNT(' ) && false !== stripos( $sql, " FROM {$wpdb->prefix}wc_orders " )
+		);
+		$this->assertCount( $expected_count_statements, $count_statements, 'Unexpected number of order count queries.' );
 
 		return $query;
 	}
