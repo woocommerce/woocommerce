@@ -1069,21 +1069,34 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 			$this->assertNotFalse( $wpdb->update( $wpdb->wc_product_meta_lookup, array( 'stock_quantity' => 99 ), array( 'product_id' => $product_id ) ), "Failed to seed lookup row for {$case}." );
 		}
 
+		// Pages walk the whole lookup table by primary key, so the expected statement counts follow its row count.
+		$lookup_rows    = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->wc_product_meta_lookup}" );
+		$expected_pages = (int) ceil( $lookup_rows / 2 );
+		$this->assertGreaterThanOrEqual( 3, $expected_pages, 'The fixtures must span at least three pages.' );
+
 		$update_statements = array();
-		$capture_updates   = function ( $query ) use ( &$update_statements, $wpdb ) {
+		$id_page_queries   = array();
+		$capture_queries   = function ( $query ) use ( &$update_statements, &$id_page_queries, $wpdb ) {
 			if ( preg_match( '/^\s*UPDATE\s/i', $query ) && false !== strpos( $query, $wpdb->wc_product_meta_lookup ) ) {
 				$update_statements[] = $query;
+			} elseif ( preg_match( '/^\s*SELECT\s/i', $query ) && false !== strpos( $query, $wpdb->wc_product_meta_lookup ) ) {
+				$id_page_queries[] = $query;
 			}
 			return $query;
 		};
-		add_filter( 'query', $capture_updates );
+		add_filter( 'query', $capture_queries );
 		try {
 			wc_update_product_lookup_tables_column( 'stock_quantity', 2 );
 		} finally {
-			remove_filter( 'query', $capture_updates );
+			remove_filter( 'query', $capture_queries );
 		}
 		$this->assertSame( '', $wpdb->last_error, 'Regeneration must complete without a database error.' );
-		$this->assertCount( 3, $update_statements, 'Five managed products with a batch size of two take three UPDATE statements.' );
+		$this->assertCount( $expected_pages, $update_statements, 'Each page of lookup rows takes one UPDATE statement.' );
+		// A full last page costs one extra, empty, page read before the loop can stop.
+		$this->assertCount( intdiv( $lookup_rows, 2 ) + 1, $id_page_queries, 'Product IDs are read one page per batch, never all at once.' );
+		foreach ( $id_page_queries as $page_query ) {
+			$this->assertMatchesRegularExpression( '/LIMIT\s+2\b/', $page_query, 'Each ID page is bounded by the batch size.' );
+		}
 
 		$values = $this->read_stock_lookup_values( $fixtures );
 		$this->assertSame( 3.0, $values['first'] );

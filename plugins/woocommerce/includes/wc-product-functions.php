@@ -2290,13 +2290,27 @@ function wc_update_product_lookup_tables_column( $column, $batch_size = 250 ) {
 			);
 			break;
 		case 'stock_quantity':
-			// Managed-stock IDs are fetched first and updated in batches: each UPDATE is bound to a short primary key list,
-			// so it never scans the whole lookup table and keeps transactions small for replication and checkout stock locks.
-			$product_ids = array_map(
-				'intval',
-				$wpdb->get_col( "SELECT DISTINCT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_manage_stock' AND meta_value = 'yes'" )
-			);
-			foreach ( array_chunk( $product_ids, max( 1, (int) $batch_size ) ) as $batch_ids ) {
+			// The lookup table is walked one primary-key page at a time, so PHP memory and transaction size stay bounded by
+			// the batch size on any catalog (replication lag, checkout stock locks). Paging the lookup table rather than
+			// the managed-stock meta keeps every statement primary-key driven; a keyset over postmeta flips to a filesort
+			// of the whole meta key range once the page size grows. The subquery still limits writes to managed stock.
+			$batch_size = max( 1, (int) $batch_size );
+			$last_id    = 0;
+			do {
+				$batch_ids = array_map(
+					'intval',
+					$wpdb->get_col(
+						$wpdb->prepare(
+							"SELECT product_id FROM {$wpdb->wc_product_meta_lookup} WHERE product_id > %d ORDER BY product_id ASC LIMIT %d",
+							$last_id,
+							$batch_size
+						)
+					)
+				);
+				$page_size = count( $batch_ids );
+				if ( 0 === $page_size ) {
+					break;
+				}
 				$in_values = implode( ',', $batch_ids );
 				// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $in_values is a list of integers.
 				$wpdb->query(
@@ -2308,10 +2322,14 @@ function wc_update_product_lookup_tables_column( $column, $batch_size = 250 ) {
 						lookup_table.stock_quantity = meta.meta_value
 					WHERE
 						lookup_table.product_id IN ( {$in_values} )
+						AND lookup_table.product_id IN (
+							SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_manage_stock' AND meta_value = 'yes'
+						)
 					"
 				);
 				// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			}
+				$last_id = end( $batch_ids );
+			} while ( $page_size === $batch_size );
 			break;
 		case 'sku':
 		case 'global_unique_id':
