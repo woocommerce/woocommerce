@@ -59,11 +59,6 @@ final class ContractRepository {
 	private const CONTRACT_SELECT = '*, ( lock_token IS NOT NULL AND locked_until_gmt > UTC_TIMESTAMP() ) AS lock_live';
 
 	/**
-	 * SQL condition: the contract row carries no live lock.
-	 */
-	private const NO_LIVE_LOCK = '( lock_token IS NULL OR locked_until_gmt <= UTC_TIMESTAMP() )';
-
-	/**
 	 * SQL condition: the contract row carries the live lock with the bound token.
 	 */
 	private const HOLDS_LOCK = 'lock_token = %s AND locked_until_gmt > UTC_TIMESTAMP()';
@@ -89,9 +84,9 @@ final class ContractRepository {
 	 * deleted again, so a retry is not blocked by its own creation key.
 	 *
 	 * @param Contract $contract  Contract to insert.
-	 * @param string   $operation Operation label, 1-64 characters.
+	 * @param string   $operation Operation label, 1-64 of `[a-z0-9_-]`.
 	 * @return ContractLock|null The lock on the new contract; null when the extension already holds its creation key.
-	 * @throws \InvalidArgumentException If `$operation` is empty or longer than 64 characters.
+	 * @throws \InvalidArgumentException If `$operation` is not a valid label.
 	 * @throws \RuntimeException If the contract row or a child row insert fails.
 	 */
 	public function insert_locked( Contract $contract, string $operation ): ?ContractLock {
@@ -765,6 +760,7 @@ final class ContractRepository {
 		$contracts          = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 		$cutoff             = self::format_utc( $now );
 		$owner_placeholders = implode( ', ', array_fill( 0, count( $owners ), '%s' ) );
+		$no_live_lock       = self::no_live_lock();
 
 		$args = array_merge( $owners, array( $cutoff, Contract::SCHEDULE_SOURCE_ENGINE, $limit ) );
 
@@ -780,7 +776,7 @@ final class ContractRepository {
 				FROM {$contracts}
 				WHERE extension_slug IN ( {$owner_placeholders} ) AND next_payment_gmt IS NOT NULL AND next_payment_gmt <= %s
 				  AND schedule_source = %s
-				  AND ( lock_token IS NULL OR locked_until_gmt <= UTC_TIMESTAMP() )
+				  AND {$no_live_lock}
 				ORDER BY locked_until_gmt ASC, next_payment_gmt ASC, id ASC
 				LIMIT %d",
 				$args
@@ -820,10 +816,10 @@ final class ContractRepository {
 	 * `$seen_next_payment_gmt` it also requires the contract still to carry that due moment.
 	 *
 	 * @param int         $contract_id           Contract id.
-	 * @param string      $operation             Operation label, 1-64 characters.
+	 * @param string      $operation             Operation label, 1-64 of `[a-z0-9_-]`.
 	 * @param string|null $seen_next_payment_gmt The due moment the caller read, or null for no check.
 	 * @return ContractLock|null The lock, or null when the contract is locked, missing or its due moment moved.
-	 * @throws \InvalidArgumentException If `$operation` is empty or longer than 64 characters.
+	 * @throws \InvalidArgumentException If `$operation` is not a valid label.
 	 * @throws \RuntimeException If the write fails.
 	 */
 	public function acquire_lock( int $contract_id, string $operation, ?string $seen_next_payment_gmt = null ): ?ContractLock {
@@ -832,7 +828,7 @@ final class ContractRepository {
 		self::assert_operation( $operation );
 
 		$table        = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
-		$no_live_lock = self::NO_LIVE_LOCK;
+		$no_live_lock = self::no_live_lock();
 		$token        = bin2hex( random_bytes( 16 ) );
 		$values       = array( $token, ContractLock::TTL_SECONDS, $operation, $contract_id );
 		$due          = '';
@@ -863,6 +859,7 @@ final class ContractRepository {
 	 *
 	 * @param int $contract_id Contract id.
 	 * @return array{exists: bool, operation: ?string, locked_until_gmt: ?string}
+	 * @throws \RuntimeException If the read fails.
 	 */
 	public function get_lock_holder( int $contract_id ): array {
 		global $wpdb;
@@ -874,6 +871,9 @@ final class ContractRepository {
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
 		$row = $wpdb->get_row( $wpdb->prepare( $sql, $contract_id ), ARRAY_A );
+		if ( '' !== $wpdb->last_error ) {
+			throw new \RuntimeException( esc_html( sprintf( 'Failed to read the lock on contract %d: %s', $contract_id, $wpdb->last_error ) ) );
+		}
 
 		if ( ! is_array( $row ) ) {
 			return array(
@@ -904,7 +904,7 @@ final class ContractRepository {
 	private function extend_lock( ContractLock $lock ): void {
 		global $wpdb;
 
-		$state = self::state_of( $lock );
+		$state = self::get_state_of( $lock );
 
 		$table      = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 		$holds_lock = self::HOLDS_LOCK;
@@ -940,7 +940,7 @@ final class ContractRepository {
 	public function release_lock( ContractLock $lock ): void {
 		global $wpdb;
 
-		$state = self::state_of( $lock );
+		$state = self::get_state_of( $lock );
 		if ( $state->is_released() ) {
 			return;
 		}
@@ -968,9 +968,10 @@ final class ContractRepository {
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
 	/**
 	 * Fence a child-table write (cycles, meta, items, addresses) made with `$lock`; within 60 s
-	 * of the lock's last database stamp it costs no query. Past that the lock is re-verified on
-	 * the database clock and trusted for up to 60 s more, or, with 60 s or less left (by the
-	 * local estimate or the database), extended once and refused after that.
+	 * of the lock's last database stamp it costs no query. Past that, the lock is extended once when
+	 * the local estimate gives 120 s or less left; otherwise it is re-verified on the database clock
+	 * and trusted for up to 60 s more, extended once with 60 s or less left, and refused once the
+	 * extend is used.
 	 *
 	 * @param ContractLock $lock The held lock.
 	 * @throws ContractLockedException If the lock was released, lost or is about to expire.
@@ -979,7 +980,7 @@ final class ContractRepository {
 	public function fence_children( ContractLock $lock ): void {
 		global $wpdb;
 
-		$state = self::state_of( $lock );
+		$state = self::get_state_of( $lock );
 		if ( $state->is_released() ) {
 			$this->throw_locked( $lock->get_contract_id() );
 		}
@@ -1056,14 +1057,15 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Refuse an operation label that is empty or longer than its column.
+	 * Refuse an operation label that is not a slug of 1-64 lowercase letters, digits,
+	 * underscores or hyphens (the schedule source rule).
 	 *
 	 * @param string $operation Operation label.
-	 * @throws \InvalidArgumentException If the label is empty or longer than 64 characters.
+	 * @throws \InvalidArgumentException If the label is not a valid slug.
 	 */
 	private static function assert_operation( string $operation ): void {
-		if ( '' === $operation || mb_strlen( $operation, 'UTF-8' ) > 64 ) {
-			throw new \InvalidArgumentException( 'A lock operation label must be 1-64 characters.' );
+		if ( 1 !== preg_match( '/^[a-z0-9_-]{1,64}$/D', $operation ) ) {
+			throw new \InvalidArgumentException( 'A lock operation label must be 1-64 lowercase letters, digits, underscores or hyphens.' );
 		}
 	}
 
@@ -1095,7 +1097,7 @@ final class ContractRepository {
 	 *
 	 * @param ContractLock $lock The lock.
 	 */
-	private static function state_of( ContractLock $lock ): ContractLockState {
+	private static function get_state_of( ContractLock $lock ): ContractLockState {
 		static $reader = null;
 
 		if ( null === $reader ) {
@@ -1109,6 +1111,17 @@ final class ContractRepository {
 		}
 
 		return $reader( $lock );
+	}
+
+	/**
+	 * SQL condition: the contract row, under `$alias` when given, carries no live lock.
+	 *
+	 * @param string $alias Contract table alias, or '' for an unaliased table.
+	 */
+	private static function no_live_lock( string $alias = '' ): string {
+		$column = '' === $alias ? '' : $alias . '.';
+
+		return "( {$column}lock_token IS NULL OR {$column}locked_until_gmt <= UTC_TIMESTAMP() )";
 	}
 
 	/**
@@ -1305,7 +1318,7 @@ final class ContractRepository {
 		$values    = array( $key, maybe_serialize( $value ), $contract_id );
 		$where     = 'c.id = %d';
 		if ( null === $lock ) {
-			$where .= ' AND ( c.lock_token IS NULL OR c.locked_until_gmt <= UTC_TIMESTAMP() )';
+			$where .= ' AND ' . self::no_live_lock( 'c' );
 		}
 		if ( $if_absent ) {
 			$where   .= " AND NOT EXISTS ( SELECT 1 FROM {$meta} m WHERE m.contract_id = %d AND m.meta_key = %s )";
@@ -1454,7 +1467,7 @@ final class ContractRepository {
 			$sql = "UPDATE {$meta} m SET m.meta_value = %s WHERE {$where}";
 		} else {
 			$sql = "UPDATE {$meta} m JOIN {$contracts} c ON c.id = m.contract_id SET m.meta_value = %s
-				WHERE {$where} AND ( c.lock_token IS NULL OR c.locked_until_gmt <= UTC_TIMESTAMP() )";
+				WHERE {$where} AND " . self::no_live_lock( 'c' );
 		}
 
 		// The WHERE clause is built from fixed fragments above; every value is a placeholder.
@@ -1504,7 +1517,7 @@ final class ContractRepository {
 			$sql = "DELETE m FROM {$meta} m WHERE {$where}";
 		} else {
 			$sql = "DELETE m FROM {$meta} m JOIN {$contracts} c ON c.id = m.contract_id
-				WHERE {$where} AND ( c.lock_token IS NULL OR c.locked_until_gmt <= UTC_TIMESTAMP() )";
+				WHERE {$where} AND " . self::no_live_lock( 'c' );
 		}
 
 		// The WHERE clause is built from fixed fragments above; every value is a placeholder.
@@ -1705,7 +1718,7 @@ final class ContractRepository {
 			$sql      = "UPDATE {$cycles} SET {$set_clause} WHERE id = %d AND status = %s AND contract_id = %d";
 		} else {
 			$sql = "UPDATE {$cycles} cy JOIN {$contracts} c ON c.id = cy.contract_id SET {$set_clause}
-				WHERE cy.id = %d AND cy.status = %s AND ( c.lock_token IS NULL OR c.locked_until_gmt <= UTC_TIMESTAMP() )";
+				WHERE cy.id = %d AND cy.status = %s AND " . self::no_live_lock( 'c' );
 		}
 
 		// The SET clause is built from fixed fragments above; every value is a placeholder.
@@ -1930,7 +1943,7 @@ final class ContractRepository {
 		$name_list        = implode( ', ', $names );
 		$placeholder_list = implode( ', ', $placeholders );
 		$values[]         = $cycle->get_contract_id();
-		$fence            = null === $lock ? ' AND ( c.lock_token IS NULL OR c.locked_until_gmt <= UTC_TIMESTAMP() )' : '';
+		$fence            = null === $lock ? ' AND ' . self::no_live_lock( 'c' ) : '';
 
 		// LOCK IN SHARE MODE makes the fence read block on a concurrent lock write under READ COMMITTED too.
 		$sql = "INSERT INTO `{$table}` ( {$name_list} ) SELECT {$placeholder_list} FROM `{$contracts}` c WHERE c.id = %d{$fence} LOCK IN SHARE MODE";
@@ -2177,10 +2190,10 @@ final class ContractRepository {
 
 		$values[] = $contract_id;
 		$set      = implode( ', ', $assignments );
-		$fence    = self::NO_LIVE_LOCK;
+		$fence    = self::no_live_lock();
 		if ( null !== $lock ) {
 			$fence    = self::HOLDS_LOCK;
-			$values[] = self::state_of( $lock )->get_token();
+			$values[] = self::get_state_of( $lock )->get_token();
 		}
 
 		// Column names come from the entity's storage keys, never from input; every value is a placeholder.

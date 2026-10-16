@@ -29,7 +29,7 @@ final class ContractLockState {
 	 * Seconds child writes trust a lock after its last database stamp, and the minimum
 	 * remaining lifetime a verify requires.
 	 */
-	public const TRUST_WINDOW_SECONDS = 60;
+	private const TRUST_WINDOW_SECONDS = 60;
 
 	/**
 	 * Engine-generated token.

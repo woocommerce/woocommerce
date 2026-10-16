@@ -120,7 +120,7 @@ final class Contracts {
 	 * lock expires after {@see ContractLock::TTL_SECONDS}. An expired lock is taken over.
 	 *
 	 * @param int    $contract_id Contract id.
-	 * @param string $operation   Operation label (1-64 characters), shown to callers that conflict.
+	 * @param string $operation   Operation label (1-64 of `[a-z0-9_-]`), shown to callers that conflict.
 	 * @return ContractLock|null The held lock; null when another operation holds it or the contract does not exist.
 	 * @throws InvalidArgumentException If the label is invalid.
 	 */
@@ -159,7 +159,7 @@ final class Contracts {
 	 * `creation_key` (1-100 characters), which makes the create idempotent per extension.
 	 *
 	 * @param array<string, mixed> $args      Contract fields, as for {@see self::create()}, plus `creation_key`.
-	 * @param string               $operation Operation label (1-64 characters).
+	 * @param string               $operation Operation label (1-64 of `[a-z0-9_-]`).
 	 * @return array{contract: ContractView, lock: ContractLock}|null The new contract and its lock;
 	 *                                                                null when the extension already created a contract with this `creation_key`.
 	 * @throws InvalidArgumentException If `extension_slug` is missing, a value or the label is invalid.

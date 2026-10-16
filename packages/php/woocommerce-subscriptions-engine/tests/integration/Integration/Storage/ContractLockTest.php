@@ -11,6 +11,7 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Integration\Integrati
 
 use EngineIntegrationTestCase;
 use InvalidArgumentException;
+use RuntimeException;
 use ReflectionClass;
 use ReflectionProperty;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\ContractLock;
@@ -160,12 +161,24 @@ class ContractLockTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox Operation labels must be 1-64 characters.
+	 * @testdox A failed lock holder read throws instead of reading as a missing contract.
+	 */
+	public function test_a_failed_lock_holder_read_throws(): void {
+		$id = $this->insert_contract();
+
+		$this->fail_next_query( '/AS live, lock_operation/' );
+		$this->expectException( RuntimeException::class );
+		$this->expectExceptionMessage( 'Failed to read the lock on contract' );
+		$this->sut->get_lock_holder( $id );
+	}
+
+	/**
+	 * @testdox Operation labels must be 1-64 lowercase letters, digits, underscores or hyphens.
 	 */
 	public function test_operation_label_is_validated(): void {
 		$id = $this->insert_contract();
 
-		foreach ( array( '', str_repeat( 'o', 65 ) ) as $operation ) {
+		foreach ( array( '', str_repeat( 'o', 65 ), 'Hold', 'hold now', '<b>hold</b>', "hold\n", 'hôld' ) as $operation ) {
 			try {
 				$this->sut->acquire_lock( $id, $operation );
 				$this->fail( 'Expected an invalid label to be refused.' );
@@ -175,6 +188,7 @@ class ContractLockTest extends EngineIntegrationTestCase {
 		}
 
 		$this->assertInstanceOf( ContractLock::class, $this->sut->acquire_lock( $id, str_repeat( 'o', 64 ) ) );
+		$this->assertInstanceOf( ContractLock::class, $this->sut->acquire_lock( $this->insert_contract(), 'renewal_retry-2' ) );
 	}
 
 	/**
