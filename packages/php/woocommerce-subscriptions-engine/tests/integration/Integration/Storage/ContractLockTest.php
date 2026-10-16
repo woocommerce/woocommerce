@@ -12,7 +12,6 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Integration\Integrati
 use EngineIntegrationTestCase;
 use InvalidArgumentException;
 use RuntimeException;
-use ReflectionClass;
 use ReflectionProperty;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\ContractLock;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\ContractLockedException;
@@ -366,23 +365,45 @@ class ContractLockTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox A lock forged through reflection cannot write child rows once its trust is checked.
+	 * @testdox A lock built outside the engine repository gets a doing-it-wrong notice and is still built.
+	 */
+	public function test_a_lock_built_outside_the_repository_is_doing_it_wrong(): void {
+		$this->setExpectedIncorrectUsage( ContractLock::class . '::__construct' );
+
+		$lock = new ContractLock( 7, 'hold', str_repeat( 'a', 32 ) );
+
+		$this->assertSame( 7, $lock->get_contract_id() );
+	}
+
+	/**
+	 * @testdox Locks the repository builds raise no notice.
+	 */
+	public function test_repository_locks_raise_no_notice(): void {
+		$notices = 0;
+		$count   = static function () use ( &$notices ): void {
+			++$notices;
+		};
+		add_action( 'doing_it_wrong_run', $count );
+		try {
+			$this->acquire( $this->insert_contract() );
+			$this->assertNotNull( $this->sut->insert_locked( Contract::create( array( 'extension_slug' => 'engine-tests' ) ), 'checkout' ) );
+		} finally {
+			remove_action( 'doing_it_wrong_run', $count );
+		}
+
+		$this->assertSame( 0, $notices );
+	}
+
+	/**
+	 * @testdox A lock built from a forged token cannot write child rows once its trust is checked.
 	 */
 	public function test_a_forged_lock_cannot_write_child_rows_past_a_verify(): void {
 		$id = $this->insert_contract();
 		$this->pin_db_clock( '2035-01-01 00:00:00' );
 		$this->acquire( $id );
 
-		$forged = ( new ReflectionClass( ContractLock::class ) )->newInstanceWithoutConstructor();
-		foreach ( array(
-			'contract_id' => $id,
-			'operation'   => 'forged',
-			'state'       => new ContractLockState( str_repeat( 'f', 32 ) ),
-		) as $name => $value ) {
-			$property = new ReflectionProperty( ContractLock::class, $name );
-			$property->setAccessible( true );
-			$property->setValue( $forged, $value );
-		}
+		$this->setExpectedIncorrectUsage( ContractLock::class . '::__construct' );
+		$forged = new ContractLock( $id, 'forged', str_repeat( 'f', 32 ) );
 		$this->age_lock_trust( $forged );
 
 		try {

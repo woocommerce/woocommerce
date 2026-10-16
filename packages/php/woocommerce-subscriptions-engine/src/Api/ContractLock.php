@@ -19,8 +19,9 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * One operation's hold on one contract for one request: writes that pass it belong to the
- * holder's operation, and other writes are refused with {@see ContractLockedException}. The
- * token and trust state are engine-only (reflection and array casts are outside the contract).
+ * holder's operation, and other writes are refused with {@see ContractLockedException}. It
+ * guards honest callers against accidental interleaving, not code set on bypassing it
+ * (reflection, closures, direct SQL).
  */
 final class ContractLock implements Serializable {
 
@@ -51,16 +52,24 @@ final class ContractLock implements Serializable {
 	private $state; // @phpstan-ignore property.onlyWritten
 
 	/**
-	 * Built by the repository through a scope-bound closure.
+	 * Take locks through {@see Contracts::lock()} or {@see Contracts::create()}. A lock built
+	 * by any caller but the engine repository gets `_doing_it_wrong()`: it would bypass the
+	 * lock lifetime.
 	 *
-	 * @param int               $contract_id Contract id.
-	 * @param string            $operation   Operation label.
-	 * @param ContractLockState $state       Token and trust state.
+	 * @param int    $contract_id Contract id.
+	 * @param string $operation   Operation label.
+	 * @param string $token       The stored token.
 	 */
-	private function __construct( int $contract_id, string $operation, ContractLockState $state ) {
+	public function __construct( int $contract_id, string $operation, string $token ) {
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace -- two frames, no arguments: only the caller's class is read.
+		$caller = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 2 )[1]['class'] ?? '';
+		if ( ContractRepository::class !== $caller ) {
+			_doing_it_wrong( __METHOD__, esc_html__( 'Take a contract lock with Contracts::lock() or Contracts::create(); a lock built from a stored token bypasses the lock lifetime.', 'woocommerce-subscriptions-engine' ), '0.0.1' );
+		}
+
 		$this->contract_id = $contract_id;
 		$this->operation   = $operation;
-		$this->state       = $state;
+		$this->state       = new ContractLockState( $token );
 	}
 
 	/**

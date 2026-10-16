@@ -21,6 +21,7 @@ use PHPUnit\Framework\TestCase;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\ContractLock;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\ContractLockedException;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractLockState;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
 
 /**
  * @covers \Automattic\WooCommerce\SubscriptionsEngine\Api\ContractLock
@@ -31,13 +32,17 @@ class ContractLockTest extends TestCase {
 
 	private const TOKEN = '0123456789abcdef0123456789abcdef';
 
+	/**
+	 * A lock built in the repository's scope, as the engine builds it, so no notice is raised
+	 * (unit tests load no WordPress).
+	 */
 	private function issue(): ContractLock {
 		$factory = Closure::bind(
 			static function ( string $token ): ContractLock {
-				return new ContractLock( 7, 'hold', new ContractLockState( $token ) );
+				return new ContractLock( 7, 'hold', $token );
 			},
 			null,
-			ContractLock::class
+			ContractRepository::class
 		);
 
 		return $factory( self::TOKEN );
@@ -60,7 +65,7 @@ class ContractLockTest extends TestCase {
 	}
 
 	/**
-	 * @testdox The only public methods are the accessors, release, and the methods that refuse cloning and serialization.
+	 * @testdox The only public methods are the constructor, the accessors, release, and the methods that refuse cloning and serialization.
 	 */
 	public function test_public_surface(): void {
 		$names = array();
@@ -70,10 +75,9 @@ class ContractLockTest extends TestCase {
 		sort( $names );
 
 		$this->assertSame(
-			array( '__clone', '__debugInfo', '__serialize', '__unserialize', 'get_contract_id', 'get_operation', 'release', 'serialize', 'unserialize' ),
+			array( '__clone', '__construct', '__debugInfo', '__serialize', '__unserialize', 'get_contract_id', 'get_operation', 'release', 'serialize', 'unserialize' ),
 			$names
 		);
-		$this->assertTrue( ( new ReflectionMethod( ContractLock::class, '__construct' ) )->isPrivate() );
 	}
 
 	/**

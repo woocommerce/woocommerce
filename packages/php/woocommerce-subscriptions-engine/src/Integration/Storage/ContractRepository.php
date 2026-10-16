@@ -89,7 +89,7 @@ final class ContractRepository {
 			return null;
 		}
 
-		$lock = self::new_lock( (int) $contract->get_id(), $operation, $token );
+		$lock = new ContractLock( (int) $contract->get_id(), $operation, $token );
 
 		$this->insert_children_or_discard( $contract );
 
@@ -831,7 +831,7 @@ final class ContractRepository {
 			throw new \RuntimeException( esc_html( sprintf( 'Failed to lock contract %d: %s', $contract_id, $wpdb->last_error ) ) );
 		}
 
-		return 1 === $updated ? self::new_lock( $contract_id, $operation, $token ) : null;
+		return 1 === $updated ? new ContractLock( $contract_id, $operation, $token ) : null;
 	}
 	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 
@@ -1060,45 +1060,18 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Build a lock just stored with a full TTL. Scope-bound to the lock class, whose constructor is private.
-	 *
-	 * @param int    $contract_id Contract id.
-	 * @param string $operation   Operation label.
-	 * @param string $token       The stored token.
-	 */
-	private static function new_lock( int $contract_id, string $operation, string $token ): ContractLock {
-		static $factory = null;
-
-		if ( null === $factory ) {
-			$factory = Closure::bind(
-				static function ( int $id, string $label, ContractLockState $state ): ContractLock {
-					return new ContractLock( $id, $label, $state );
-				},
-				null,
-				ContractLock::class
-			);
-		}
-
-		return $factory( $contract_id, $operation, new ContractLockState( $token ) );
-	}
-
-	/**
 	 * A lock's token and trust state. Scope-bound to the lock class, so neither has a public accessor.
 	 *
 	 * @param ContractLock $lock The lock.
 	 */
 	private static function get_state_of( ContractLock $lock ): ContractLockState {
-		static $reader = null;
-
-		if ( null === $reader ) {
-			$reader = Closure::bind(
-				static function ( ContractLock $held ): ContractLockState {
-					return $held->state;
-				},
-				null,
-				ContractLock::class
-			);
-		}
+		$reader = Closure::bind(
+			static function ( ContractLock $held ): ContractLockState {
+				return $held->state;
+			},
+			null,
+			ContractLock::class
+		);
 
 		return $reader( $lock );
 	}
