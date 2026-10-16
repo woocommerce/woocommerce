@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep coupon usage counts accurate when coupons are added to or removed from existing orders, or orders are trashed, restored or deleted.

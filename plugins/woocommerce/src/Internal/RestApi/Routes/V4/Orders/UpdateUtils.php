@@ -11,6 +11,7 @@ namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\Orders\CouponsController;
 use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Schema\OrderSchema;
 use Automattic\WooCommerce\Enums\OrderItemType;
@@ -68,6 +69,13 @@ class UpdateUtils {
 		// Make sure gateways are loaded so hooks from gateways fire on save/create.
 		WC()->payment_gateways();
 
+		$coupons_controller = wc_get_container()->get( CouponsController::class );
+		$syncs_coupons      = isset( $request['coupon_lines'] );
+		if ( $syncs_coupons ) {
+			$previous_coupon_codes   = $order->get_coupon_codes();
+			$previous_usage_identity = $coupons_controller->get_usage_identity( $order );
+		}
+
 		// Handle all writable props.
 		foreach ( $data_keys as $key ) {
 			$value = $request[ $key ];
@@ -109,6 +117,10 @@ class UpdateUtils {
 
 		// Save before calculating totals to ensure all line items are up to date.
 		$order->save();
+
+		if ( $syncs_coupons ) {
+			$coupons_controller->sync_usage_counts( $order, $previous_coupon_codes, $previous_usage_identity );
+		}
 
 		// If items have changed, recalculate order totals.
 		if ( isset( $request['billing'] ) || isset( $request['shipping'] ) || isset( $request['line_items'] ) || isset( $request['shipping_lines'] ) || isset( $request['fee_lines'] ) ) {
