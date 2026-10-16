@@ -379,22 +379,41 @@ function wc_format_coupon_code( $value ) {
  *
  * Uses sanitize_post_field since coupon codes are stored as post_titles - the sanitization and escaping must match.
  *
- * Due to the unfiltered_html capability that some (admin) users have, we need to account for slashes.
+ * Every user gets the kses WordPress applies to post titles for users without the unfiltered_html capability, so
+ * codes are stored and looked up the same way whoever saves or enters them. WordPress's own wp_filter_kses() is taken
+ * off title_save_pre while the title filters run, because it expects slashed input and would strip backslashes, and
+ * wp_kses() is applied directly instead.
  *
  * The html_entity_decode() call handles coupon codes that contain special characters like ampersands (&), quotes ("),
  * and other HTML entities. Without this decoding step, coupon codes with special characters would fail to match
  * during application, causing legitimate coupons to be rejected.
  *
+ * @see WC_Formatting_Functions_Test::test_wc_sanitize_coupon_code
  * @see WC_Cart_Test::test_coupon_codes_with_special_characters
  *
  * @since  3.6.0
  * @since  10.0.0 Decode HTML entities here instead of via woocommerce_coupon_code filter.
- * @param  string $value Coupon code to format.
+ * @since  11.3.0 Use the kses context WordPress applies to post titles instead of `entities`.
+ * @param  string|null $value Coupon code to format.
  * @return string
  */
 function wc_sanitize_coupon_code( $value ) {
-	$value = wp_kses( sanitize_post_field( 'post_title', html_entity_decode( $value ?? '', ENT_COMPAT, get_bloginfo( 'charset' ) ), 0, 'db' ), 'entities' );
-	return current_user_can( 'unfiltered_html' ) ? $value : stripslashes( $value );
+	$value         = html_entity_decode( $value ?? '', ENT_COMPAT, get_bloginfo( 'charset' ) );
+	$kses_priority = has_filter( 'title_save_pre', 'wp_filter_kses' );
+
+	if ( false !== $kses_priority ) {
+		remove_filter( 'title_save_pre', 'wp_filter_kses', $kses_priority );
+	}
+
+	try {
+		$value = sanitize_post_field( 'post_title', $value, 0, 'db' );
+	} finally {
+		if ( false !== $kses_priority ) {
+			add_filter( 'title_save_pre', 'wp_filter_kses', $kses_priority );
+		}
+	}
+
+	return wp_kses( $value, 'title_save_pre' );
 }
 
 /**

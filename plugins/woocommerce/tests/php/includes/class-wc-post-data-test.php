@@ -34,26 +34,236 @@ class WC_Post_Data_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox coupon code should be always sanitized.
+	 * Data provider of coupon codes, as entered and as stored.
+	 *
+	 * @return array[]
 	 */
-	public function test_coupon_code_sanitization() {
-		$this->login_as_role( 'shop_manager' );
-		$coupon    = WC_Helper_Coupon::create_coupon( 'a&a' );
-		$post_data = get_post( $coupon->get_id() );
-		$this->assertEquals( 'a&amp;a', $post_data->post_title );
-		$coupon->delete( true );
+	public function data_provider_coupon_codes(): array {
+		return array(
+			'ampersand'                             => array( 'B&Q', 'B&amp;Q' ),
+			'apostrophe'                            => array( "TEST'S", "TEST'S" ),
+			'ampersand and apostrophe'              => array( "M&M'S", "M&amp;M'S" ),
+			'double quotes'                         => array( 'TEST"2024"', 'TEST"2024"' ),
+			'percent followed by digits'            => array( '%20TEST', '%20TEST' ),
+			'non-ASCII'                             => array( 'CAFÉ', 'CAFÉ' ),
+			'greater-than sign'                     => array( 'a>b', 'a&gt;b' ),
+			'less-than sign'                        => array( '10<20', '10&lt;20' ),
+			'backslash'                             => array( 'a\\b', 'a\\b' ),
+			'allowed HTML tags'                     => array( '<b>bold</b>', '<b>bold</b>' ),
+			// WordPress 7.2's wp_kses() reads these differently, so the stored codes before and after it are both accepted.
+			'ampersand before a legacy entity name' => array( '50&cent', array( '50&amp;cent', '50¢' ) ),
+			'tag-like text'                         => array( 'x<5>y', array( 'xy', 'x&lt;5&gt;y' ) ),
+		);
+	}
 
+	/**
+	 * Data provider for test_coupon_code_is_stored_consistently_and_found_by_customers.
+	 *
+	 * @return array[]
+	 */
+	public function data_provider_coupon_codes_by_role(): array {
+		$data = array();
+		// Shop managers lack unfiltered_html, like guests, so WordPress runs their titles through kses. Administrators don't.
+		foreach ( array( 'shop_manager', 'administrator' ) as $role ) {
+			foreach ( $this->data_provider_coupon_codes() as $label => $code ) {
+				$data[ "{$label} saved by {$role}" ] = array( $role, $code[0], $code[1] );
+			}
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Create a coupon the same way as the coupon edit screen, which passes slashed $_POST data to wp_insert_post().
+	 *
+	 * @param string $code Coupon code as entered.
+	 * @return int Coupon ID.
+	 */
+	private function create_coupon_from_edit_screen( string $code ): int {
+		return wp_insert_post(
+			wp_slash(
+				array(
+					'post_title'  => $code,
+					'post_type'   => 'shop_coupon',
+					'post_status' => 'publish',
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox Should allow subclasses to override the original one-argument post data method.
+	 */
+	public function test_wp_insert_post_data_supports_legacy_subclasses(): void {
+		$sut = new class() extends WC_Post_Data {
+			/**
+			 * Process post data using the original method signature.
+			 *
+			 * @param array $data Slashed post data.
+			 * @return array
+			 */
+			public static function wp_insert_post_data( $data ) {
+				$data['post_title'] = 'prefix-' . $data['post_title'];
+				return parent::wp_insert_post_data( $data );
+			}
+		};
+
+		$data = $sut::wp_insert_post_data(
+			array(
+				'post_type'  => 'shop_coupon',
+				'post_title' => 'B&Q',
+			)
+		);
+
+		$this->assertSame( 'prefix-B&amp;Q', $data['post_title'] );
+	}
+
+	/**
+	 * @testdox Should display an ampersand in the coupon list without double encoding it.
+	 */
+	public function test_coupon_list_displays_ampersand(): void {
+		global $post;
+
+		require_once WC_ABSPATH . 'includes/admin/list-tables/class-wc-admin-list-table-coupons.php';
 		$this->login_as_administrator();
-		$coupon    = WC_Helper_Coupon::create_coupon( 'b&b' );
-		$post_data = get_post( $coupon->get_id() );
-		$this->assertEquals( 'b&amp;b', $post_data->post_title );
-		$coupon->delete( true );
+		$coupon_id = $this->create_coupon_from_edit_screen( 'Coupon&Test' );
+		$post      = get_post( $coupon_id ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- The list table reads the current row from the global post.
+		$sut       = new WC_Admin_List_Table_Coupons();
+
+		$this->expectOutputRegex( '/>coupon&amp;test<\/a>/' );
+		$sut->render_columns( 'coupon_code', $coupon_id );
+	}
+
+	/**
+	 * @testdox Should store coupon codes in the same format for every role, and find them by the code customers enter.
+	 *
+	 * @dataProvider data_provider_coupon_codes_by_role
+	 *
+	 * @param string          $role           Role saving the coupon.
+	 * @param string          $code           Code as entered by the merchant and by the customer.
+	 * @param string|string[] $expected_title Expected post_title in the database, or the titles accepted on different WordPress versions.
+	 */
+	public function test_coupon_code_is_stored_consistently_and_found_by_customers( string $role, string $code, $expected_title ): void {
+		$this->login_as_role( $role );
+
+		$coupon_id = $this->create_coupon_from_edit_screen( $code );
+
+		$this->assertContains( get_post( $coupon_id )->post_title, (array) $expected_title, 'Unexpected stored coupon code' );
 
 		wp_set_current_user( 0 );
-		$coupon    = WC_Helper_Coupon::create_coupon( 'c&c' );
-		$post_data = get_post( $coupon->get_id() );
-		$this->assertEquals( 'c&amp;c', $post_data->post_title );
-		$coupon->delete( true );
+		$this->assertSame( $coupon_id, wc_get_coupon_id_by_code( wc_format_coupon_code( $code ) ), 'The coupon should be found by the code as entered' );
+	}
+
+	/**
+	 * @testdox Should keep the stored coupon code when another user updates the coupon.
+	 *
+	 * @dataProvider data_provider_coupon_codes
+	 *
+	 * @param string          $code           Code as entered by the merchant.
+	 * @param string|string[] $expected_title Expected post_title in the database, or the titles accepted on different WordPress versions.
+	 */
+	public function test_coupon_code_is_unchanged_when_the_coupon_is_updated( string $code, $expected_title ): void {
+		$this->login_as_administrator();
+		$coupon_id = $this->create_coupon_from_edit_screen( $code );
+
+		// wp_update_post() slashes the stored post before saving it again, and shop managers' titles go through kses.
+		$this->login_as_role( 'shop_manager' );
+		wp_update_post(
+			array(
+				'ID'          => $coupon_id,
+				'post_status' => 'draft',
+			)
+		);
+
+		$this->assertContains( get_post( $coupon_id )->post_title, (array) $expected_title );
+	}
+
+	/**
+	 * @testdox Should show coupon codes decoded on the edit screen, and keep the stored code when saved again.
+	 *
+	 * @dataProvider data_provider_coupon_codes
+	 *
+	 * @param string          $code           Code as entered by the merchant.
+	 * @param string|string[] $expected_title Expected post_title in the database, or the titles accepted on different WordPress versions.
+	 */
+	public function test_coupon_code_is_shown_as_entered_on_the_edit_screen( string $code, $expected_title ): void {
+		$this->login_as_administrator();
+		$coupon_id = $this->create_coupon_from_edit_screen( $code );
+
+		// The edit screen prints this value in the title field, and the browser decodes it once.
+		$shown_code     = html_entity_decode( get_post( $coupon_id, OBJECT, 'edit' )->post_title, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+		$expected_shown = array_map(
+			static function ( $title ) {
+				return html_entity_decode( $title, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+			},
+			(array) $expected_title
+		);
+
+		$this->assertContains( $shown_code, $expected_shown, 'The edit screen should show the stored code, decoded' );
+
+		wp_update_post(
+			wp_slash(
+				array(
+					'ID'         => $coupon_id,
+					'post_title' => $shown_code,
+				)
+			)
+		);
+
+		$this->assertContains( get_post( $coupon_id )->post_title, (array) $expected_title, 'Saving the shown code should not change the stored code' );
+	}
+
+	/**
+	 * @testdox Should leave the edit screen title of other post types unchanged.
+	 */
+	public function test_edit_post_title_is_unchanged_for_other_post_types(): void {
+		$post_id = self::factory()->post->create();
+
+		$this->assertSame( 'a&amp;b', WC_Post_Data::handle_edit_post_title( 'a&amp;b', $post_id ) );
+	}
+
+	/**
+	 * @testdox Should store coupon codes saved through the coupon object, as the REST API does.
+	 *
+	 * @testWith ["B&Q", "b&amp;q"]
+	 *           ["TEST'S", "test's"]
+	 *           ["50&cent", ["50&amp;cent", "50¢"]]
+	 *           ["x<5>y", ["xy", "x&lt;5&gt;y"]]
+	 *
+	 * @param string          $code           Code as entered.
+	 * @param string|string[] $expected_title Expected post_title in the database, or the titles accepted on different WordPress versions.
+	 */
+	public function test_coupon_code_saved_with_crud_is_stored_consistently( string $code, $expected_title ): void {
+		$this->login_as_administrator();
+
+		$coupon = new WC_Coupon();
+		$coupon->set_code( $code );
+		$coupon->save();
+
+		$this->assertContains( get_post( $coupon->get_id() )->post_title, (array) $expected_title, 'Unexpected stored coupon code' );
+
+		wp_set_current_user( 0 );
+		$this->assertSame( $coupon->get_id(), wc_get_coupon_id_by_code( wc_format_coupon_code( $code ) ), 'The coupon should be found by the code as entered' );
+	}
+
+	/**
+	 * @testdox Should encode emoji in coupon codes when the posts table can't store them, like WordPress does.
+	 */
+	public function test_coupon_code_emoji_is_encoded_for_utf8_tables(): void {
+		global $wpdb;
+
+		add_filter(
+			'pre_get_col_charset',
+			function ( $charset, $table, $column ) use ( $wpdb ) {
+				return $wpdb->posts === $table && 'post_title' === $column ? 'utf8' : $charset;
+			},
+			10,
+			3
+		);
+
+		$coupon_id = $this->create_coupon_from_edit_screen( 'SALE🎉' );
+
+		$this->assertSame( 'SALE&#x1f389;', get_post( $coupon_id )->post_title );
 	}
 
 	/**

@@ -53,6 +53,7 @@ class WC_Post_Data {
 		add_filter( 'update_order_item_metadata', array( __CLASS__, 'update_order_item_metadata' ), 10, 5 );
 		add_filter( 'update_post_metadata', array( __CLASS__, 'update_post_metadata' ), 10, 5 );
 		add_filter( 'wp_insert_post_data', array( __CLASS__, 'wp_insert_post_data' ) );
+		add_filter( 'edit_post_title', array( __CLASS__, 'handle_edit_post_title' ), 10, 2 );
 		add_filter( 'oembed_response_data', array( __CLASS__, 'filter_oembed_response_data' ), 10, 2 );
 		add_filter( 'wp_untrash_post_status', array( __CLASS__, 'wp_untrash_post_status' ), 10, 3 );
 
@@ -371,11 +372,39 @@ class WC_Post_Data {
 		} elseif ( 'product' === $data['post_type'] && ProductStatus::AUTO_DRAFT === $data['post_status'] ) {
 			$data['post_title'] = 'AUTO-DRAFT';
 		} elseif ( 'shop_coupon' === $data['post_type'] ) {
+			global $wpdb;
+
 			// Coupons should never allow unfiltered HTML.
 			$data['post_title'] = wp_filter_kses( $data['post_title'] );
+
+			// Since WordPress 7.2, kses decodes the emoji wp_insert_post() encoded for columns that can't store them.
+			if ( in_array( $wpdb->get_col_charset( $wpdb->posts, 'post_title' ), array( 'utf8', 'utf8mb3' ), true ) ) {
+				$data['post_title'] = wp_encode_emoji( $data['post_title'] );
+			}
 		}
 
 		return $data;
+	}
+
+	/**
+	 * Decode coupon codes for the title field on the coupon edit screen.
+	 *
+	 * Coupon codes are stored with `&`, `<` and `>` encoded, and WordPress encodes titles again for editing, so the field
+	 * would show `&amp;` instead of `&`. Saving the decoded code stores it in the same format as before.
+	 *
+	 * @since 11.3.0
+	 * @internal
+	 *
+	 * @param string $title   Post title.
+	 * @param int    $post_id Post ID.
+	 * @return string
+	 */
+	public static function handle_edit_post_title( $title, $post_id ) {
+		if ( ! is_string( $title ) || 'shop_coupon' !== get_post_type( $post_id ) ) {
+			return $title;
+		}
+
+		return html_entity_decode( $title, ENT_QUOTES | ENT_HTML5, get_bloginfo( 'charset' ) );
 	}
 
 	/**

@@ -13,6 +13,26 @@ declare( strict_types = 1 );
 class WC_Formatting_Functions_Test extends \WC_Unit_Test_Case {
 
 	/**
+	 * User IDs to sanitize coupon codes as, keyed by role, with 0 for a guest.
+	 *
+	 * @var int[]
+	 */
+	private static $user_ids_by_role = array();
+
+	/**
+	 * Create the users shared by the tests in this class.
+	 *
+	 * @param WP_UnitTest_Factory $factory Test data factory.
+	 */
+	public static function wpSetUpBeforeClass( $factory ): void {
+		self::$user_ids_by_role = array(
+			'guest'         => 0,
+			'shop_manager'  => $factory->user->create( array( 'role' => 'shop_manager' ) ),
+			'administrator' => $factory->user->create( array( 'role' => 'administrator' ) ),
+		);
+	}
+
+	/**
 	 * Starts each test with an empty WC_Admin_Settings errors array.
 	 */
 	public function setUp(): void {
@@ -38,22 +58,52 @@ class WC_Formatting_Functions_Test extends \WC_Unit_Test_Case {
 	 */
 	public function data_provider_test_wc_sanitize_coupon_code(): array {
 		return array(
-			array( 'DUMMYCOUPON', 'DUMMYCOUPON' ),
-			array( 'a&amp;a', 'a&a' ),
-			array( "test's", "test's" ),
+			'null'                                  => array( null, '' ),
+			'plain code'                            => array( 'DUMMYCOUPON', 'DUMMYCOUPON' ),
+			'ampersand is stored encoded'           => array( 'a&a', 'a&amp;a' ),
+			'encoded ampersand'                     => array( 'a&amp;a', 'a&amp;a' ),
+			'double-encoded ampersand'              => array( 'a&amp;amp;a', 'a&amp;a' ),
+			'ampersand before a semicolon'          => array( 'R&D;x', 'R&amp;D;x' ),
+			'non-ASCII with ampersand'              => array( 'ÜBER&ÄRGER', 'ÜBER&amp;ÄRGER' ),
+			'apostrophe is not slashed'             => array( "test's", "test's" ),
+			'double quotes'                         => array( 'TEST"2024"', 'TEST"2024"' ),
+			'encoded double quotes'                 => array( 'TEST&quot;2024&quot;', 'TEST"2024"' ),
+			'named entity is decoded'               => array( 'a&copy;b', 'a©b' ),
+			'non-breaking space entity is decoded'  => array( 'a&nbsp;b', "a\u{00A0}b" ),
+			'percent followed by digits is kept'    => array( '%20test', '%20test' ),
+			'percent sign'                          => array( '50%off', '50%off' ),
+			'greater-than sign'                     => array( 'a>b', 'a&gt;b' ),
+			'less-than sign before a digit'         => array( '10<20', '10&lt;20' ),
+			'backslash is kept'                     => array( 'a\\b', 'a\\b' ),
+			'surrounding whitespace is trimmed'     => array( '  padded  ', 'padded' ),
+			'control characters are removed'        => array( "a\0b\x07c", 'abc' ),
+			'allowed HTML tags are kept'            => array( '<b>bold</b>', '<b>bold</b>' ),
+			// WordPress 7.2's wp_kses() reads these differently, so the results before and after it are both accepted.
+			'ampersand before a legacy entity name' => array( '50&cent', array( '50&amp;cent', '50¢' ) ),
+			'less-than sign before a letter'        => array( 'a<b', array( 'a&lt;b', 'a' ) ),
+			'tag-like text with a numeric name'     => array( 'x<5>y', array( 'xy', 'x&lt;5&gt;y' ) ),
+			'encoded apostrophe'                    => array( 'a&#039;b', array( 'a&#039;b', "a'b" ) ),
+			'named apostrophe'                      => array( 'a&apos;b', array( 'a&apos;b', "a'b" ) ),
 		);
 	}
 
 	/**
-	 * Test wc_sanitize_coupon_code() function.
+	 * @testdox Should sanitize coupon codes the same way for guests, shop managers and administrators.
 	 *
 	 * @dataProvider data_provider_test_wc_sanitize_coupon_code
 	 *
-	 * @param string $assert Expected result.
-	 * @param string $input Input for wc_sanitize_coupon_code().
+	 * @param string|null     $input    Input for wc_sanitize_coupon_code().
+	 * @param string|string[] $expected Expected result, or the results accepted on different WordPress versions.
 	 */
-	public function test_wc_sanitize_coupon_code( string $assert, string $input ) {
-		$this->assertSame( $assert, wc_sanitize_coupon_code( $input ) );
+	public function test_wc_sanitize_coupon_code( ?string $input, $expected ): void {
+		foreach ( self::$user_ids_by_role as $role => $user_id ) {
+			wp_set_current_user( $user_id );
+
+			$sanitized = wc_sanitize_coupon_code( $input );
+
+			$this->assertContains( $sanitized, (array) $expected, "Unexpected result for {$role}" );
+			$this->assertSame( $sanitized, wc_sanitize_coupon_code( $sanitized ), "Sanitizing again should not change the code for {$role}" );
+		}
 	}
 
 	/**
@@ -121,8 +171,8 @@ class WC_Formatting_Functions_Test extends \WC_Unit_Test_Case {
 			'thousand sep: space'           => array( 'woocommerce_price_thousand_sep', ' ', ' ', false ),
 			'thousand sep: two spaces'      => array( 'woocommerce_price_thousand_sep', '  ', '  ', false ),
 			'thousand sep: empty'           => array( 'woocommerce_price_thousand_sep', '', '', false ),
-			'thousand sep: nbsp entity'     => array( 'woocommerce_price_thousand_sep', '&nbsp;', '&nbsp;', false ),
-			'thousand sep: comma entity'    => array( 'woocommerce_price_thousand_sep', '&#44;', '&#044;', false ),
+			'thousand sep: nbsp entity'     => array( 'woocommerce_price_thousand_sep', '&nbsp;', "\u{00A0}", false ),
+			'thousand sep: comma entity'    => array( 'woocommerce_price_thousand_sep', '&#44;', ',', false ),
 			'thousand sep: not submitted'   => array( 'woocommerce_price_thousand_sep', null, '|', false ),
 			'thousand sep: single digit'    => array( 'woocommerce_price_thousand_sep', '1', '|', true ),
 			'thousand sep: digit+symbol'    => array( 'woocommerce_price_thousand_sep', '1,', '|', true ),
@@ -150,7 +200,8 @@ class WC_Formatting_Functions_Test extends \WC_Unit_Test_Case {
 
 		$result = wc_format_option_price_separators( $raw_value, array( 'id' => $option_id ), $raw_value );
 
-		$this->assertSame( $expected, $result );
+		// Compare the separator as displayed, since WordPress 7.2's wp_kses() stores character references as the characters themselves.
+		$this->assertSame( $expected, html_entity_decode( $result, ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
 
 		$errors = $this->get_wc_admin_settings_errors();
 
