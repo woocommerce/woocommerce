@@ -742,6 +742,64 @@ class CheckoutFields {
 	}
 
 	/**
+	 * Validates customer field values one by one and returns the ones that can be saved.
+	 *
+	 * Adds an error for each required field that is empty and each value that fails its field rules. Location-level rules are
+	 * not run here; use validate_fields_for_location() for those.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param WC_Customer $customer         Customer the values are for, used to evaluate conditional rules.
+	 * @param array       $field_values     Field values keyed by field ID, used to check required fields.
+	 * @param array       $sanitized_values Sanitized field values keyed by field ID, used for validation and the returned values.
+	 * @param string      $location         The location of the fields (address|contact).
+	 * @param string      $group            The group of the fields (billing|shipping|other).
+	 * @param WP_Error    $errors           Error object that receives an error for each invalid field.
+	 * @return array Values to save keyed by field ID. Empty optional fields are included as ''.
+	 */
+	public function get_valid_customer_field_values( WC_Customer $customer, array $field_values, array $sanitized_values, string $location, string $group, WP_Error $errors ): array {
+		$document_object = new DocumentObject(
+			[
+				'customer' => [
+					( 'address' === $location ? $group . '_address' : 'additional_fields' ) => $sanitized_values,
+				],
+			]
+		);
+		$document_object->set_customer( $customer );
+		$document_object->set_context( 'address' === $location ? $group . '_address' : $location );
+
+		$valid_values = [];
+
+		foreach ( $this->get_contextual_fields_for_location( $location, $document_object ) as $field_key => $field ) {
+			if ( empty( $field_values[ $field_key ] ) ) {
+				if ( true === $field['required'] ) {
+					$errors->add(
+						'required_field',
+						/* translators: %s: is the field label */
+						sprintf( __( '%s is required', 'woocommerce' ), '<strong>' . $field['label'] . '</strong>' )
+					);
+					continue;
+				}
+				$valid_values[ $field_key ] = '';
+				continue;
+			}
+
+			$sanitized_value = $sanitized_values[ $field_key ] ?? '';
+			$valid_check     = $this->validate_field( $field, $sanitized_value );
+
+			if ( is_wp_error( $valid_check ) && $valid_check->has_errors() ) {
+				// Get one error message from the WP_Error object per field to avoid overlapping error messages.
+				$errors->add( $valid_check->get_error_code(), $valid_check->get_error_message() );
+				continue;
+			}
+
+			$valid_values[ $field_key ] = $sanitized_value;
+		}
+
+		return $valid_values;
+	}
+
+	/**
 	 * Validates a set of fields for a given location against custom validation rules.
 	 *
 	 * @param array  $fields Array of key value pairs of field values to validate.

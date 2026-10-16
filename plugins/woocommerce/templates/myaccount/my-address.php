@@ -12,7 +12,7 @@
  *
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 9.3.0
+ * @version 11.3.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -50,11 +50,24 @@ $col    = 1;
 	<div class="u-columns woocommerce-Addresses col2-set addresses">
 <?php endif; ?>
 
+<?php
+$formatted_addresses = array();
+foreach ( array_keys( $get_addresses ) as $name ) {
+	$formatted_addresses[ $name ] = wc_get_account_formatted_address( $name );
+}
+$copyable_from = array(
+	'billing'  => 'shipping',
+	'shipping' => 'billing',
+);
+?>
+
 <?php foreach ( $get_addresses as $name => $address_title ) : ?>
 	<?php
-		$address = wc_get_account_formatted_address( $name );
-		$col     = $col * -1;
-		$oldcol  = $oldcol * -1;
+		$address     = $formatted_addresses[ $name ];
+		$copy_source = $copyable_from[ $name ] ?? '';
+		$can_copy    = ! $address && $copy_source && ! empty( $formatted_addresses[ $copy_source ] );
+		$col         = $col * -1;
+		$oldcol      = $oldcol * -1;
 	?>
 
 	<div class="u-column<?php echo $col < 0 ? 1 : 2; ?> col-<?php echo $oldcol < 0 ? 1 : 2; ?> woocommerce-Address">
@@ -70,6 +83,16 @@ $col    = 1;
 				?>
 			</a>
 		</header>
+		<?php if ( $can_copy ) : ?>
+			<p class="woocommerce-Address-copy">
+				<a href="<?php echo esc_url( WC_Form_Handler::get_copy_address_url( $name ) ); ?>" class="copy no-prefetch" rel="nofollow">
+					<?php
+						/* translators: %s: Address title of the address being copied, e.g. "Billing address" */
+						printf( esc_html__( 'Copy %s', 'woocommerce' ), esc_html( $get_addresses[ $copy_source ] ) );
+					?>
+				</a>
+			</p>
+		<?php endif; ?>
 		<address>
 			<?php
 				echo $address ? wp_kses_post( $address ) : esc_html_e( 'You have not set up this type of address yet.', 'woocommerce' );

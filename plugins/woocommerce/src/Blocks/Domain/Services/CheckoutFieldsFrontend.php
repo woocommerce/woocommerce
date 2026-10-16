@@ -308,49 +308,9 @@ class CheckoutFieldsFrontend {
 		$field_values           = $this->get_posted_additional_field_values( $location, $group, false ); // These values are used to see if required fields have values.
 		$sanitized_field_values = $this->get_posted_additional_field_values( $location, $group ); // These values are used to validate custom rules, generate the document object, and save fields to the account.
 
-		$document_object = new DocumentObject(
-			[
-				'customer' => [
-					( 'address' === $location ? $group . '_address' : 'additional_fields' ) => $sanitized_field_values,
-				],
-			]
-		);
-		$document_object->set_customer( $customer );
-		$document_object->set_context( 'address' === $location ? $group . '_address' : $location );
-		$fields = $this->checkout_fields_controller->get_contextual_fields_for_location( $location, $document_object );
-
-		// Holds values to be persisted to the customer object.
-		$persist_fields = [];
+		// Validate individual fields. Errors are added to the $errors object, and each field is validated regardless of other field errors.
 		$errors         = new \WP_Error();
-
-		// Validate individual fields against the document object. Errors are added to the $errors object, and each field is validated regardless of other field errors.
-		foreach ( $fields as $field_key => $field ) {
-			$field_value = $field_values[ $field_key ];
-
-			if ( empty( $field_value ) ) {
-				if ( true === $field['required'] ) {
-					$errors->add(
-						'required_field',
-						/* translators: %s: is the field label */
-						sprintf( __( '%s is required', 'woocommerce' ), '<strong>' . $field['label'] . '</strong>' )
-					);
-					continue;
-				}
-				$persist_fields[ $field_key ] = '';
-				continue;
-			}
-
-			$sanitized_field_value = $sanitized_field_values[ $field_key ];
-			$valid_check           = $this->checkout_fields_controller->validate_field( $field, $sanitized_field_value );
-
-			if ( is_wp_error( $valid_check ) && $valid_check->has_errors() ) {
-				// Get one error message from the WP_Error object per field to avoid overlapping error messages.
-				$errors->add( $valid_check->get_error_code(), $valid_check->get_error_message() );
-				continue;
-			}
-
-			$persist_fields[ $field_key ] = $sanitized_field_value;
-		}
+		$persist_fields = $this->checkout_fields_controller->get_valid_customer_field_values( $customer, $field_values, $sanitized_field_values, $location, $group, $errors );
 
 		// Validate all fields for this location (this runs custom validation callbacks). If an error is found, no values will be persisted to the customer object.
 		$location_validation = $this->checkout_fields_controller->validate_fields_for_location( $sanitized_field_values, $location, $group );
