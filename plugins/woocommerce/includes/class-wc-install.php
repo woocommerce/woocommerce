@@ -1289,6 +1289,8 @@ class WC_Install {
 		add_option( 'woocommerce_thumbnail_image_width', '300', '', 'yes' );
 		add_option( 'woocommerce_checkout_highlight_required_fields', 'yes', '', 'yes' );
 		add_option( 'woocommerce_demo_store', 'no', '', 'no' );
+		// An existing store can still be onboarding; only inherit on its first installation.
+		add_option( 'woocommerce_shipping_prices_include_tax', false === get_option( 'woocommerce_version' ) ? get_option( 'woocommerce_prices_include_tax', 'no' ) : 'no' );
 
 		if ( self::is_new_install() ) {
 			// Define initial tax classes.

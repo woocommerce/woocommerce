@@ -84,13 +84,30 @@ class WC_Tax {
 	 * @return array
 	 */
 	public static function calc_shipping_tax( $price, $rates ) {
+		return self::calc_shipping_tax_maybe_inclusive( $price, $rates, false );
+	}
+
+	/**
+	 * Calculate shipping tax with a method-specific tax inclusion default.
+	 *
+	 * Separate from calc_shipping_tax() to preserve its subclass signature.
+	 *
+	 * @internal
+	 * @param float $price Shipping cost.
+	 * @param array $rates Tax rates.
+	 * @param bool  $prices_include_tax Whether the entered cost includes tax.
+	 * @return array
+	 * @since 11.3.0
+	 */
+	public static function calc_shipping_tax_maybe_inclusive( $price, $rates, $prices_include_tax ) {
 		/**
 		 * Filter to control if shipping prices include tax.
 		 *
 		 * @since 10.6.0
-		 * @param bool $shipping_prices_include_tax True if shipping cost is gross (includes tax), false if net. Default false.
+		 * @since 11.3.0 Supporting shipping methods default to the store's shipping tax setting.
+		 * @param bool $shipping_prices_include_tax True if shipping cost is gross (includes tax), false if net.
 		 */
-		$shipping_prices_include_tax = wc_string_to_bool( apply_filters( 'woocommerce_shipping_prices_include_tax', false ) );
+		$shipping_prices_include_tax = wc_string_to_bool( apply_filters( 'woocommerce_shipping_prices_include_tax', $prices_include_tax ) );
 
 		if ( $shipping_prices_include_tax ) {
 			$taxes = self::calc_inclusive_tax( $price, $rates );
