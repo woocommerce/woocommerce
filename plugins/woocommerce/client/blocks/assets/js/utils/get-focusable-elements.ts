@@ -3,7 +3,7 @@
  * Disabled fields, hidden inputs, and aria-hidden fields are excluded.
  * A negative tabindex is excluded for elements that are not already a link, field, or button.
  */
-export const FOCUSABLE_SELECTOR = [
+const FOCUSABLE_SELECTOR = [
 	'a[href]',
 	'input:not([disabled]):not([type="hidden"]):not([aria-hidden])',
 	'select:not([disabled]):not([aria-hidden])',

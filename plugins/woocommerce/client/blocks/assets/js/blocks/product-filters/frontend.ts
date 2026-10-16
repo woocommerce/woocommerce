@@ -190,7 +190,6 @@ const productFiltersStore = {
 	actions: {
 		openOverlay: () => {
 			const context = getContext< ProductFiltersContext >();
-			const root = getBlockRoot();
 			context.isOverlayOpened = true;
 			if ( document.getElementById( 'wpadminbar' ) ) {
 				const scrollTop = (
@@ -204,6 +203,7 @@ const productFiltersStore = {
 				);
 			}
 
+			const root = getBlockRoot();
 			if ( ! root ) {
 				return;
 			}
