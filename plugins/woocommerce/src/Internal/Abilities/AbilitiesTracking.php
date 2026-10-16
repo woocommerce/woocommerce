@@ -87,7 +87,7 @@ class AbilitiesTracking {
 	/**
 	 * Open ability invocations, innermost last.
 	 *
-	 * @var array<int, array{name: string, channel: string, rest_namespace: string, start: float, executing: bool}>
+	 * @var array<int, array{name: string, channel: string, rest_namespace: string, external_client: string, start: float, executing: bool}>
 	 */
 	private array $frames = array();
 
@@ -463,15 +463,18 @@ class AbilitiesTracking {
 	 *
 	 * @param string $ability_name The ability name.
 	 * @param bool   $executing    Whether execution already started.
-	 * @return array{name: string, channel: string, rest_namespace: string, start: float, executing: bool}
+	 * @return array{name: string, channel: string, rest_namespace: string, external_client: string, start: float, executing: bool}
 	 */
 	private function create_frame( string $ability_name, bool $executing ): array {
+		$channel = $this->get_channel();
 		return array(
-			'name'           => $ability_name,
-			'channel'        => $this->get_channel(),
-			'rest_namespace' => $this->get_rest_namespace(),
-			'start'          => microtime( true ),
-			'executing'      => $executing,
+			'name'            => $ability_name,
+			'channel'         => $channel,
+			'rest_namespace'  => $this->get_rest_namespace(),
+			// Resolved now: the request metadata it reads is gone once the REST request finishes.
+			'external_client' => 'mcp' === $channel ? $this->get_external_client() : self::NONE,
+			'start'           => microtime( true ),
+			'executing'       => $executing,
 		);
 	}
 
@@ -525,9 +528,9 @@ class AbilitiesTracking {
 	 *
 	 * Properties are built now, so the user, site and time are those of the call rather than of shutdown.
 	 *
-	 * @param array{name: string, channel: string, rest_namespace: string, start: float, executing: bool} $frame        The invocation.
-	 * @param true|WP_Error|null                                                                          $outcome      True for success, a WP_Error for a known failure, null for an unknown failure.
-	 * @param bool                                                                                        $has_duration Whether the duration is known.
+	 * @param array{name: string, channel: string, rest_namespace: string, external_client: string, start: float, executing: bool} $frame        The invocation.
+	 * @param true|WP_Error|null                                                                                                   $outcome      True for success, a WP_Error for a known failure, null for an unknown failure.
+	 * @param bool                                                                                                                 $has_duration Whether the duration is known.
 	 */
 	private function add_event( array $frame, $outcome, bool $has_duration ): void {
 		// Telemetry must never break the ability call: this runs third-party filters and Jetpack code inside core's hooks.
@@ -567,7 +570,7 @@ class AbilitiesTracking {
 				'channel'         => $frame['channel'],
 				'rest_namespace'  => $frame['rest_namespace'],
 				'auth'            => $auth,
-				'external_client' => 'mcp' === $frame['channel'] ? $this->get_external_client() : self::NONE,
+				'external_client' => $frame['external_client'],
 			);
 
 			if ( $has_duration ) {
@@ -578,6 +581,11 @@ class AbilitiesTracking {
 			$properties = \WC_Tracks::get_properties( \WC_Tracks::PREFIX . self::EVENT_NAME, $event );
 			// The request URL and referrer can carry ability input, e.g. in the query string of GET run requests.
 			unset( $properties['_dl'], $properties['_dr'] );
+			if ( null === $outcome ) {
+				// Unknown failures are recorded later than the call (WordPress 7.0 has no hook for them), so use the call's
+				// start time. Site and user are still read now; they differ only if the request switched them since.
+				$properties['_ts'] = number_format( round( $frame['start'] * 1000 ), 0, '', '' );
+			}
 
 			$this->events[] = $properties;
 		} catch ( \Throwable $e ) {
@@ -743,6 +751,20 @@ class AbilitiesTracking {
 	 * @return string
 	 */
 	private function get_external_client(): string {
+		try {
+			return $this->resolve_external_client();
+		} catch ( \Throwable $e ) {
+			// The session lookup is MCP Adapter code; a failure there must not break the ability call.
+			return self::NONE;
+		}
+	}
+
+	/**
+	 * Resolve and cache the MCP client.
+	 *
+	 * @return string
+	 */
+	private function resolve_external_client(): string {
 		if ( null === $this->external_client ) {
 			$name = $this->get_mcp_client_name_from_request() ?? self::get_mcp_client_name_from_session();
 			if ( null === $name ) {

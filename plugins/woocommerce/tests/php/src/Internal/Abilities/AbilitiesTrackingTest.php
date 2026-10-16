@@ -581,6 +581,30 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should keep the client and time of an MCP call whose failure is only recorded at shutdown.
+	 */
+	public function test_keeps_context_of_failures_recorded_at_shutdown(): void {
+		foreach ( array( 'wp_ability_invoked', 'wp_pre_execute_ability', 'wp_ability_validate_input', 'wp_ability_permission_result', 'wp_ability_execute_result', 'wp_ability_validate_output' ) as $hook ) {
+			remove_all_filters( $hook );
+		}
+		$_SERVER['HTTP_MCP_PROTOCOL_VERSION'] = '2026-07-28';
+		$this->execute_result                 = new WP_Error( 'tracking_test_failure' );
+		$this->register_route_that_runs_ability( 'tracking-mcp/v1', '/mcp', 'POST' );
+		$request = new WP_REST_Request( 'POST', '/tracking-mcp/v1/mcp' );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_body( (string) wp_json_encode( array( 'params' => array( '_meta' => array( 'io.modelcontextprotocol/clientInfo' => array( 'name' => 'claude-code' ) ) ) ) ) );
+
+		$called_at = microtime( true ) * 1000;
+		rest_do_request( $request );
+		usleep( 50000 );
+		$this->sut->handle_shutdown();
+
+		$this->assertSame( 'unknown', $this->sut->recorded[0]['error_code'] );
+		$this->assertSame( 'claude_code', $this->sut->recorded[0]['external_client'], 'The client must be read while the request is active' );
+		$this->assertLessThan( $called_at + 40, (float) $this->sut->recorded[0]['_ts'], 'The event should carry the time of the call, not of shutdown' );
+	}
+
+	/**
 	 * @testdox Should record long ability names in full.
 	 */
 	public function test_records_long_ability_names_in_full(): void {
