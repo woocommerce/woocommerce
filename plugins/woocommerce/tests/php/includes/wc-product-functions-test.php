@@ -1670,6 +1670,61 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Related caches trim old variants and keep two large alternating queries cacheable.
+	 * @testWith [false, 8192]
+	 *           [true, 65536]
+	 *
+	 * @param bool $external_cache Whether transients use the object cache.
+	 * @param int  $budget         Cache size target.
+	 */
+	public function test_related_product_cache_has_size_limit( bool $external_cache, int $budget ): void {
+		$product_id = $this->factory->post->create( array( 'post_type' => 'product' ) );
+		$related_id = $this->factory->post->create( array( 'post_type' => 'product' ) );
+		$category   = $this->factory->term->create( array( 'taxonomy' => 'product_cat' ) );
+		wp_set_object_terms( $product_id, $category, 'product_cat' );
+		wp_set_object_terms( $related_id, $category, 'product_cat' );
+		$key      = 'wc_related_' . $product_id;
+		$previous = wp_using_ext_object_cache();
+		wp_using_ext_object_cache( $external_cache );
+		try {
+			$legacy = array();
+			for ( $context = 0; $context < 20000; ++$context ) {
+				$legacy[ "legacy=$context" ] = array( $context );
+			}
+			set_transient( $key, $legacy, DAY_IN_SECONDS );
+			wc_get_related_products( $product_id, 5 );
+			$cached = get_transient( $key );
+			$this->assertLessThanOrEqual( $budget, strlen( maybe_serialize( $cached ) ), 'An oversized pre-upgrade cache must be trimmed.' );
+			$this->assertArrayHasKey( 'legacy=19999', $cached, 'The newest pre-upgrade queries should remain cached.' );
+
+			$min_count = PHP_INT_MAX;
+			for ( $context = 0; $context < 1000; ++$context ) {
+				wc_get_related_products( $product_id, 5, array( 100000 + $context ) );
+				if ( $context >= 500 ) {
+					$min_count = min( $min_count, count( get_transient( $key ) ) );
+				}
+			}
+			$this->assertLessThanOrEqual( $budget, strlen( maybe_serialize( get_transient( $key ) ) ) );
+			$this->assertGreaterThan( 2, $min_count, 'Only the oldest queries should be evicted.' );
+			foreach ( array( 100000, 200000 ) as $exclude_start ) {
+				wc_get_related_products( $product_id, 1, range( $exclude_start, $exclude_start + 10000 ) );
+			}
+			$cached = get_transient( $key );
+			$this->assertCount( 2, $cached );
+			$this->assertEquals( array( $related_id ), wc_get_related_products( $product_id, 1, range( 100000, 110000 ) ) );
+			$this->assertSame( $cached, get_transient( $key ), 'Repeating a large query must use its retained entry.' );
+			$old_query            = array_key_first( $cached );
+			$cached[ $old_query ] = array();
+			set_transient( $key, $cached, DAY_IN_SECONDS );
+			wc_get_related_products( $product_id, 1, range( 100000, 110000 ) );
+			wc_get_related_products( $product_id, 1 );
+			$this->assertArrayHasKey( $old_query, get_transient( $key ), 'A refreshed query must survive the next eviction.' );
+		} finally {
+			wp_using_ext_object_cache( $previous );
+		}
+	}
+
+	/**
 	 * @testdox Product category list preserves WordPress term-list order by default.
 	 */
 	public function test_wc_get_product_category_list_preserves_default_order(): void {
