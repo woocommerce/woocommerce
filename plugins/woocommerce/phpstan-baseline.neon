@@ -9985,12 +9985,6 @@ parameters:
 			path: includes/class-wc-cart-totals.php
 
 		-
-			message: '#^Parameter \#1 \$value of method WC_Cart\:\:set_shipping_taxes\(\) expects array, array\|int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-cart-totals.php
-
-		-
 			message: '#^Parameter \#1 \$value of method WC_Cart\:\:set_shipping_total\(\) expects string, float\|int given\.$#'
 			identifier: argument.type
 			count: 1
