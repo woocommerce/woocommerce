@@ -31,16 +31,11 @@ import {
 	responseTypes,
 } from '@woocommerce/types';
 import { checkoutEvents } from '@woocommerce/blocks-checkout-events';
-import { isDefaultPaymentMethodFiltered } from '@woocommerce/block-settings';
 
 /**
  * Internal dependencies
  */
-import {
-	preparePaymentData,
-	processCheckoutResponseHeaders,
-	validatePaymentMethodSelection,
-} from './utils';
+import { preparePaymentData, processCheckoutResponseHeaders } from './utils';
 import { useShippingDataContext } from './shipping';
 import { useStoreCart } from '../../hooks/cart/use-store-cart';
 import { useCheckoutAddress } from '../../hooks/use-checkout-address';
@@ -108,7 +103,6 @@ const CheckoutProcessor = () => {
 		hasPaymentError,
 		isPaymentReady,
 		shouldSavePayment,
-		hasAvailablePaymentMethods,
 	} = useSelect( ( select ) => {
 		const store = select( paymentStore );
 
@@ -119,8 +113,6 @@ const CheckoutProcessor = () => {
 			hasPaymentError: store.hasPaymentError(),
 			isPaymentReady: store.isPaymentReady(),
 			shouldSavePayment: store.getShouldSavePaymentMethod(),
-			hasAvailablePaymentMethods:
-				Object.keys( store.getAvailablePaymentMethods() ).length > 0,
 		};
 	}, [] );
 
@@ -214,22 +206,8 @@ const CheckoutProcessor = () => {
 			};
 		}
 
-		return validatePaymentMethodSelection( {
-			preselectPaymentMethod: ! isDefaultPaymentMethodFiltered(),
-			hasPaymentMethods: hasAvailablePaymentMethods,
-			cartNeedsPayment,
-			activePaymentMethod,
-			isExpressPaymentMethodActive,
-		} );
-	}, [
-		hasValidationErrors,
-		hasPaymentError,
-		shippingErrorStatus.hasError,
-		hasAvailablePaymentMethods,
-		cartNeedsPayment,
-		activePaymentMethod,
-		isExpressPaymentMethodActive,
-	] );
+		return true;
+	}, [ hasValidationErrors, hasPaymentError, shippingErrorStatus.hasError ] );
 
 	// Validate the checkout using the CHECKOUT_VALIDATION_BEFORE_PROCESSING event
 	useEffect( () => {

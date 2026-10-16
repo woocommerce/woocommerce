@@ -3,56 +3,7 @@
  */
 import triggerFetch from '@wordpress/api-fetch';
 import { dispatch } from '@wordpress/data';
-import { __ } from '@wordpress/i18n';
 import { checkoutStore } from '@woocommerce/block-data';
-import { responseTypes } from '@woocommerce/types';
-
-/**
- * Internal dependencies
- */
-import {
-	noticeContexts,
-	PAYMENT_METHOD_REQUIRED_NOTICE_ID,
-} from '../../event-emit';
-
-/**
- * Checks that a payment method is selected when the order needs one.
- *
- * Only runs when the store doesn't preselect a payment method and the shopper has
- * a list to pick from; otherwise the server validates the submission as it always has.
- * Returns true when the checkout can proceed, or an error response for the
- * payment section when the shopper still has to pick a method. The notice is
- * pinned to an id so the option lists can remove it once a method is picked.
- */
-export const validatePaymentMethodSelection = ( {
-	preselectPaymentMethod,
-	hasPaymentMethods,
-	cartNeedsPayment,
-	activePaymentMethod,
-	isExpressPaymentMethodActive,
-}: {
-	preselectPaymentMethod: boolean;
-	hasPaymentMethods: boolean;
-	cartNeedsPayment: boolean;
-	activePaymentMethod: string;
-	isExpressPaymentMethodActive: boolean;
-} ) => {
-	if (
-		preselectPaymentMethod ||
-		! hasPaymentMethods ||
-		! cartNeedsPayment ||
-		isExpressPaymentMethodActive ||
-		activePaymentMethod
-	) {
-		return true;
-	}
-	return {
-		type: responseTypes.ERROR,
-		errorMessage: __( 'Please select a payment method.', 'woocommerce' ),
-		context: noticeContexts.PAYMENTS,
-		id: PAYMENT_METHOD_REQUIRED_NOTICE_ID,
-	};
-};
 
 /**
  * Utility function for preparing payment data for the request.

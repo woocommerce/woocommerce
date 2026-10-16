@@ -25,7 +25,6 @@ import type {
 	CustomerPaymentMethodConfiguration,
 	SavedPaymentMethod,
 } from '@woocommerce/block-data/payment/types';
-import { PAYMENT_METHOD_REQUIRED_NOTICE_ID } from '../../../base/context/event-emit';
 
 /**
  * Returns the option object for a cc or echeck saved payment method token.
@@ -151,10 +150,6 @@ const SavedPaymentMethodOptions = () => {
 						);
 						removeNotice(
 							'wc-payment-error',
-							noticeContexts.PAYMENTS
-						);
-						removeNotice(
-							PAYMENT_METHOD_REQUIRED_NOTICE_ID,
 							noticeContexts.PAYMENTS
 						);
 						dispatchCheckoutEvent( 'set-active-payment-method', {
