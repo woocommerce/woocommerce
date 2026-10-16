@@ -324,9 +324,10 @@ woocommerce.get("products/attributes").parsed_response
 
 #### Available parameters
 
-| Parameter | Type   | Description                                                                                                                  |
-| --------- | ------ | ---------------------------------------------------------------------------------------------------------------------------- |
-| `context` | string | Scope under which the request is made; determines fields present in response. Options: `view` and `edit`. Default is `view`. |
+| Parameter | Type            | Description                                                                                                                                                  |
+| --------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `context` | string          | Scope under which the request is made; determines fields present in response. Options: `view` and `edit`. Default is `view`.                                 |
+| `slug`    | string or array | Limit result set to attributes with a specific slug, for example `pa_color` or `color`. Pass an array, such as `slug[]=color&slug[]=size`, to match several. |
 
 ## Update a product attribute
 

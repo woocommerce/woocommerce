@@ -136,8 +136,8 @@ class ProductAttributes extends \WC_REST_Product_Attributes_Controller {
 	/**
 	 * Get all attributes, with support for searching (which includes custom attributes).
 	 *
-	 * @param WP_REST_Request $request The API request.
-	 * @return WP_REST_Response
+	 * @param \WP_REST_Request<array<string, mixed>> $request The API request.
+	 * @return \WP_REST_Response
 	 */
 	public function get_items( $request ) {
 		if ( empty( $request['search'] ) ) {
