@@ -55,6 +55,7 @@ class WC_Settings_Accounts_Test extends WC_Settings_Unit_Test_Case {
 			'woocommerce_enable_myaccount_registration'    => 'checkbox',
 			'woocommerce_registration_generate_username'   => 'checkbox',
 			'woocommerce_registration_generate_password'   => 'checkbox',
+			'woocommerce_cart_behavior_on_logout'          => 'select',
 			'woocommerce_erasure_request_removes_order_data' => 'checkbox',
 			'woocommerce_erasure_request_removes_download_data' => 'checkbox',
 			'woocommerce_allow_bulk_remove_personal_data'  => 'checkbox',

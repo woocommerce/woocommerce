@@ -92,7 +92,8 @@ class WC_Session_Handler extends WC_Session {
 		add_action( 'wp', array( $this, 'maybe_set_customer_session_cookie' ), 99 );
 		add_action( 'template_redirect', array( $this, 'destroy_session_if_empty' ), 999 );
 		add_action( 'shutdown', array( $this, 'save_data' ), 20 );
-		add_action( 'wp_logout', array( $this, 'destroy_session' ) );
+		// CartLogoutBehavior hooks wp_logout at 5 and 15 to carry the cart across this teardown.
+		add_action( 'wp_logout', array( $this, 'destroy_session' ), 10 );
 
 		if ( ! is_user_logged_in() ) {
 			add_filter( 'nonce_user_logged_out', array( $this, 'maybe_update_nonce_user_logged_out' ), 10, 2 );
