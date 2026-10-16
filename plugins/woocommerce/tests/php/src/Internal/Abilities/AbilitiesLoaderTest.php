@@ -2177,6 +2177,48 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should check the order-notes-query permission against the capabilities of an order type that an extension registers.
+	 */
+	public function test_order_notes_query_uses_the_capabilities_of_the_order_type(): void {
+		global $wc_order_types, $post_type_meta_caps, $wpdb;
+
+		$meta_caps = $post_type_meta_caps;
+		wc_register_order_type(
+			'shop_test_private',
+			array(
+				'capability_type'          => 'shop_test_private',
+				'exclude_from_order_views' => true,
+				'add_order_meta_boxes'     => false,
+			)
+		);
+		$order                     = \WC_Helper_Order::create_order();
+		$this->created_order_ids[] = $order->get_id();
+		$wpdb->update( $wpdb->posts, array( 'post_type' => 'shop_test_private' ), array( 'ID' => $order->get_id() ) );
+		$wpdb->update( OrdersTableDataStore::get_orders_table_name(), array( 'type' => 'shop_test_private' ), array( 'id' => $order->get_id() ) );
+		clean_post_cache( $order->get_id() );
+		wp_cache_flush();
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'shop_manager' ) ) );
+		$ability = wp_get_ability( 'woocommerce/order-notes-query' );
+
+		try {
+			$this->assertSame( 'shop_test_private', OrderUtil::get_order_type( $order->get_id() ) );
+
+			$refused = $ability->execute( array( 'id' => $order->get_id() ) );
+
+			$this->assertWPError( $refused );
+			$this->assertSame( 'ability_invalid_permissions', $refused->get_error_code() );
+
+			wp_get_current_user()->add_cap( 'read_private_shop_test_privates' );
+
+			$this->assertIsArray( $ability->execute( array( 'id' => $order->get_id() ) ) );
+		} finally {
+			unset( $wc_order_types['shop_test_private'] );
+			unregister_post_type( 'shop_test_private' );
+			$post_type_meta_caps = $meta_caps; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- unregister_post_type() removes the shop_order meta caps too.
+		}
+	}
+
+	/**
 	 * @testdox Should exclude checkout-draft orders from default order queries.
 	 *
 	 * @dataProvider provider_order_storage_engines
