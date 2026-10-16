@@ -43,6 +43,9 @@ class PickupLocation extends WC_Shipping_Method {
 		$this->cost             = $this->get_option( 'cost' );
 		$this->supports         = [ 'settings', 'local-pickup' ];
 		$this->pickup_locations = get_option( $this->id . '_pickup_locations', [] );
+		if ( self::class === static::class ) {
+			$this->supports[] = 'costs-entered-with-tax';
+		}
 		add_filter( 'woocommerce_attribute_label', array( $this, 'translate_meta_data' ), 10, 3 );
 	}
 
