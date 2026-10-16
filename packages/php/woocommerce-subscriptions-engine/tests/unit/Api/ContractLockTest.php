@@ -60,7 +60,7 @@ class ContractLockTest extends TestCase {
 	}
 
 	/**
-	 * @testdox The only public methods are the accessors, extend, release and the magic methods.
+	 * @testdox The only public methods are the accessors, release, and the methods that refuse cloning and serialization.
 	 */
 	public function test_public_surface(): void {
 		$names = array();
@@ -70,7 +70,7 @@ class ContractLockTest extends TestCase {
 		sort( $names );
 
 		$this->assertSame(
-			array( '__clone', '__debugInfo', '__serialize', '__unserialize', '__wakeup', 'get_contract_id', 'get_operation', 'release' ),
+			array( '__clone', '__debugInfo', '__serialize', '__unserialize', 'get_contract_id', 'get_operation', 'release', 'serialize', 'unserialize' ),
 			$names
 		);
 		$this->assertTrue( ( new ReflectionMethod( ContractLock::class, '__construct' ) )->isPrivate() );
@@ -126,6 +126,18 @@ class ContractLockTest extends TestCase {
 	public function test_unserialize_of_a_crafted_payload_throws(): void {
 		$class   = ContractLock::class;
 		$payload = sprintf( 'O:%d:"%s":1:{s:11:"contract_id";i:7;}', strlen( $class ), $class );
+
+		$this->expectException( LogicException::class );
+
+		unserialize( $payload ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_unserialize
+	}
+
+	/**
+	 * @testdox A crafted legacy C: payload, which skips __unserialize(), cannot be unserialized either.
+	 */
+	public function test_unserialize_of_a_crafted_legacy_payload_throws(): void {
+		$class   = ContractLock::class;
+		$payload = sprintf( 'C:%d:"%s":0:{}', strlen( $class ), $class );
 
 		$this->expectException( LogicException::class );
 
