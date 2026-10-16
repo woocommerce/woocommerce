@@ -203,6 +203,52 @@ describe( 'Product Results Count announcement', () => {
 		);
 	} );
 
+	describe( 'on a page loaded with a query string', () => {
+		beforeEach( () => {
+			window.history.pushState( {}, '', '/shop/?orderby=price' );
+		} );
+
+		afterEach( () => {
+			window.history.pushState( {}, '', '/' );
+		} );
+
+		it( 'announces the count once on page load', async () => {
+			announce(
+				'Showing 1–16 of 28 results Sorted by price: low to high'
+			);
+			announce(
+				'Showing 1–16 of 28 results Sorted by price: low to high',
+				document.createElement( 'div' )
+			);
+			await settle();
+
+			expect( mockSpeak ).toHaveBeenCalledTimes( 1 );
+			expect( mockSpeak ).toHaveBeenCalledWith(
+				'Showing 1–16 of 28 results Sorted by price: low to high',
+				'polite'
+			);
+		} );
+
+		it( 'does not let a mounting block replace a changed count', async () => {
+			announce( 'Showing 1–16 of 28 results' );
+			await settle();
+			mockSpeak.mockReset();
+
+			announce( 'Showing 17–28 of 28 results' );
+			announce(
+				'Showing 1–4 of 12 results',
+				document.createElement( 'div' )
+			);
+			await settle();
+
+			expect( mockSpeak ).toHaveBeenCalledTimes( 1 );
+			expect( mockSpeak ).toHaveBeenCalledWith(
+				'Showing 17–28 of 28 results',
+				'polite'
+			);
+		} );
+	} );
+
 	it( 'does not announce an empty count', async () => {
 		announce( 'Showing 1–16 of 28 results' );
 		announce( '' );

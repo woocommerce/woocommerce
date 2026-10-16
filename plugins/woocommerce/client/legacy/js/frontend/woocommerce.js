@@ -250,7 +250,9 @@ function focus_populate_live_region() {
  * Refresh the sorted by live region.
  *
  * Skips when the Interactivity API product filters are present on the page,
- * as those manage the result count updates themselves.
+ * as those manage the result count updates themselves. Also skips the Product
+ * Results Count block, which announces the count itself; rewriting its HTML
+ * would detach the text that client-side navigation updates.
  */
 function refresh_sorted_by_live_region() {
 	var sorted_by_live_region = document.querySelector(
@@ -263,7 +265,8 @@ function refresh_sorted_by_live_region() {
 	if (
 		! sorted_by_live_region ||
 		! window.location.search ||
-		hasInteractivityFilters
+		hasInteractivityFilters ||
+		sorted_by_live_region.closest( '.wc-block-product-results-count' )
 	) {
 		return;
 	}

@@ -21,6 +21,12 @@ const lastAnnouncements = new WeakMap< HTMLElement, string >();
 let pendingAnnouncement:
 	{ timer: ReturnType< typeof setTimeout >; isChanged: boolean } | undefined;
 
+/**
+ * Whether a full page load should announce the count. Matches the legacy script, which
+ * announced it whenever the URL had a query string (for example after a sort that reloads the page).
+ */
+const shouldAnnounceOnPageLoad = (): boolean => window.location.search !== '';
+
 const productResultsCountStore = {
 	callbacks: {
 		/**
@@ -41,9 +47,11 @@ const productResultsCountStore = {
 				lastAnnouncements.set( ref, announcement );
 			}
 
-			const isChanged = announcement !== previousAnnouncement;
+			const isFirstRun = previousAnnouncement === undefined;
+			const isChanged =
+				! isFirstRun && announcement !== previousAnnouncement;
 			if (
-				previousAnnouncement === undefined ||
+				( isFirstRun && ! shouldAnnounceOnPageLoad() ) ||
 				! announcement ||
 				( ! isChanged && pendingAnnouncement?.isChanged )
 			) {
