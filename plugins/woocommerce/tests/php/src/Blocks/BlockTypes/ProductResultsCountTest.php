@@ -137,4 +137,14 @@ class ProductResultsCountTest extends WP_UnitTestCase {
 		$this->assertNull( $p->get_attribute( 'role' ), 'The block announces the count itself, so the paragraph must not be a second live region.' );
 		$this->assertNull( $p->get_attribute( 'aria-relevant' ), 'The paragraph should not keep live-region settings.' );
 	}
+
+	/**
+	 * @testdox Registers the block stylesheet under its existing handle at the interactivity build path.
+	 */
+	public function test_style_handle_points_to_interactivity_build(): void {
+		$style = wp_styles()->query( 'wc-blocks-style-product-results-count', 'registered' );
+
+		$this->assertInstanceOf( \_WP_Dependency::class, $style, 'The block style handle should stay registered.' );
+		$this->assertStringContainsString( 'assets/client/blocks/woocommerce/product-results-count-style.css', (string) $style->src, 'An interactive block is built to the woocommerce/ folder, not to product-results-count.css.' );
+	}
 }

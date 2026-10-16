@@ -25,6 +25,20 @@ class ProductResultsCount extends AbstractBlock {
 	}
 
 	/**
+	 * Get the frontend style handles for this block type.
+	 *
+	 * The interactivity build writes this block's stylesheet to the woocommerce/ folder, so the default
+	 * path would 404. The handle names stay the same for code that depends on or dequeues them.
+	 *
+	 * @return string[]
+	 */
+	protected function get_block_type_style() {
+		$this->asset_api->register_style( 'wc-blocks-style-' . $this->block_name, $this->asset_api->get_block_asset_build_path( 'woocommerce/' . $this->block_name . '-style', 'css' ), array(), 'all', true );
+
+		return array( 'wc-blocks-style', 'wc-blocks-style-' . $this->block_name );
+	}
+
+	/**
 	 * Render the block.
 	 *
 	 * @param array     $attributes Block attributes.
