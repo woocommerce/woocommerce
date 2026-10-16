@@ -244,7 +244,6 @@ class WC_Shipping_Legacy_Free_Shipping extends WC_Shipping_Method {
 			'id'      => $this->id,
 			'label'   => $this->title,
 			'cost'    => 0,
-			'taxes'   => false,
 			'package' => $package,
 		);
 		$this->add_rate( $args );
