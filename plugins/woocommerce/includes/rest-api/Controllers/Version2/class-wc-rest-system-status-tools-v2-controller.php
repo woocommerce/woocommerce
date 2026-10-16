@@ -133,7 +133,7 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 			'clear_transients'                     => array(
 				'name'   => __( 'WooCommerce transients', 'woocommerce' ),
 				'button' => __( 'Clear transients', 'woocommerce' ),
-				'desc'   => __( 'This tool will clear the product/shop transients cache.', 'woocommerce' ),
+				'desc'   => __( 'This tool clears product and shop transients. Persistent product caches are cleared in the background.', 'woocommerce' ),
 			),
 			'clear_expired_transients'             => array(
 				'name'   => __( 'Expired transients', 'woocommerce' ),
@@ -565,8 +565,17 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 				wc_get_container()->get( DatabaseUtil::class )->delete_transients_by_prefix(
 					array_merge( ProductUtil::PRODUCT_SPECIFIC_TRANSIENT_PREFIXES, array( 'wc_product_loop_', 'wc_report_' ) )
 				);
+				try {
+					wc_get_container()->get( ProductUtil::class )->schedule_product_transient_cleanup();
+				} catch ( RuntimeException $exception ) {
+					$ran     = false;
+					$message = __( 'Could not schedule product cache cleanup. Try again.', 'woocommerce' );
+					break;
+				}
 
-				$message = __( 'Product transients cleared', 'woocommerce' );
+				$message = wp_using_ext_object_cache()
+					? __( 'Product cache cleanup has been scheduled.', 'woocommerce' )
+					: __( 'Product transients cleared', 'woocommerce' );
 				break;
 
 			case 'clear_expired_transients':
