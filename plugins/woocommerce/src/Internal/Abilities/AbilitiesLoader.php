@@ -8,7 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities;
 
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
-use Automattic\WooCommerce\Abilities\AbilityExtensions;
+use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderAddNote;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderNotesQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderUpdateStatus;
@@ -97,7 +97,7 @@ class AbilitiesLoader {
 	 */
 	public static function register_core_resources(): void {
 		foreach ( array( 'product', 'order', 'order_item' ) as $resource_name ) {
-			AbilityExtensions::register_resource( $resource_name );
+			ExtensibleAbilities::register_resource( $resource_name );
 		}
 	}
 
@@ -109,28 +109,28 @@ class AbilitiesLoader {
 	 * @since 11.3.0
 	 */
 	public static function init_extensions(): void {
-		if ( did_action( 'woocommerce_ability_extensions_init' ) || ! AbilityExtensions::is_enabled() ) {
+		if ( did_action( 'woocommerce_extensible_abilities_init' ) || ! ExtensibleAbilities::is_enabled() ) {
 			return;
 		}
 
 		/**
-		 * Fires when extensions can register their resources with AbilityExtensions.
+		 * Fires when extensions can register their resources with ExtensibleAbilities.
 		 *
-		 * Fires one time, before `woocommerce_ability_extensions_init`, only when the
-		 * experimental `ability_extensions` feature is on.
+		 * Fires one time, before `woocommerce_extensible_abilities_init`, only when the
+		 * experimental `extensible_abilities` feature is on.
 		 *
 		 * @since 11.3.0
 		 */
 		do_action( 'woocommerce_ability_resources_init' );
 
 		/**
-		 * Fires when extensions can register their fields with AbilityExtensions.
+		 * Fires when extensions can register their fields with ExtensibleAbilities.
 		 *
-		 * Fires one time, only when the experimental `ability_extensions` feature is on.
+		 * Fires one time, only when the experimental `extensible_abilities` feature is on.
 		 *
 		 * @since 11.3.0
 		 */
-		do_action( 'woocommerce_ability_extensions_init' );
+		do_action( 'woocommerce_extensible_abilities_init' );
 	}
 
 	/**

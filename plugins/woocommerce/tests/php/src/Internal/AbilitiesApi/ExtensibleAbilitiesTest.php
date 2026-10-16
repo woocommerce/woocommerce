@@ -1,19 +1,19 @@
 <?php
 /**
- * AbilityExtensionsTest class file.
+ * ExtensibleAbilitiesTest class file.
  */
 
 declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\AbilitiesApi;
 
-use Automattic\WooCommerce\Abilities\AbilityExtensions;
+use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 
 /**
  * Namespaced extension fields in the output of the product and order abilities, read through the REST route.
  */
-class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
+class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 	private const CODE_SCHEMA = array(
 		'type'  => 'string',
@@ -66,7 +66,7 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 		$this->reset_registries();
 		wp_set_current_user( self::$administrator_id );
 		$this->set_feature( true );
-		add_action( 'woocommerce_ability_extensions_init', array( $this, 'register_test_fields' ) );
+		add_action( 'woocommerce_extensible_abilities_init', array( $this, 'register_test_fields' ) );
 	}
 
 	/**
@@ -75,7 +75,7 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	public function tearDown(): void {
 		global $wp_actions;
 
-		remove_action( 'woocommerce_ability_extensions_init', array( $this, 'register_test_fields' ) );
+		remove_action( 'woocommerce_extensible_abilities_init', array( $this, 'register_test_fields' ) );
 		$this->set_feature( false );
 		$this->reset_registries();
 		wp_set_current_user( 0 );
@@ -90,12 +90,12 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Register the fields of two extensions, the way an extension does inside woocommerce_ability_extensions_init.
+	 * Register the fields of two extensions, the way an extension does inside woocommerce_extensible_abilities_init.
 	 *
 	 * @internal
 	 */
 	public function register_test_fields(): void {
-		AbilityExtensions::register_field(
+		ExtensibleAbilities::register_field(
 			array(
 				'resource'     => 'product',
 				'namespace'    => 'test-ext',
@@ -107,7 +107,7 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 				},
 			)
 		);
-		AbilityExtensions::register_field(
+		ExtensibleAbilities::register_field(
 			array(
 				'resource'     => 'product',
 				'namespace'    => 'other_ext',
@@ -118,7 +118,7 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 				},
 			)
 		);
-		AbilityExtensions::register_field(
+		ExtensibleAbilities::register_field(
 			array(
 				'resource'     => 'order',
 				'namespace'    => 'test-ext',
@@ -129,7 +129,7 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 				},
 			)
 		);
-		AbilityExtensions::register_field(
+		ExtensibleAbilities::register_field(
 			array(
 				'resource'     => 'order_item',
 				'namespace'    => 'test-ext',
@@ -209,11 +209,11 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 		$this->assertSame( self::CODE_SCHEMA, $product['properties']['test-ext']['properties']['code'] );
 		$this->assertSame( array( 'type' => 'string' ), $order['extensions']['properties']['test-ext']['properties']['note'] );
 		$this->assertSame( array( 'type' => 'string' ), $order['line_items']['items']['properties']['extensions']['properties']['test-ext']['properties']['gift'] );
-		$this->assertSame( array( 'type' => 'object' ), AbilityExtensions::add_fields_schema( array( 'type' => 'object' ), 'customer' ) );
+		$this->assertSame( array( 'type' => 'object' ), ExtensibleAbilities::add_fields_schema( array( 'type' => 'object' ), 'customer' ) );
 	}
 
 	/**
-	 * @testdox Should fire woocommerce_ability_extensions_init one time, before the abilities build their schemas.
+	 * @testdox Should fire woocommerce_extensible_abilities_init one time, before the abilities build their schemas.
 	 */
 	public function test_init_action_fires_once_before_the_schemas(): void {
 		$events     = array();
@@ -224,15 +224,15 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 			$events[] = $name;
 			return $args;
 		};
-		add_action( 'woocommerce_ability_extensions_init', $on_init );
+		add_action( 'woocommerce_extensible_abilities_init', $on_init );
 		add_filter( 'wp_register_ability_args', $on_ability, 10, 2 );
 
 		$this->get_output_schema( 'woocommerce/products-query' );
 		do_action( 'wp_abilities_api_init' );
 
-		remove_action( 'woocommerce_ability_extensions_init', $on_init );
+		remove_action( 'woocommerce_extensible_abilities_init', $on_init );
 		remove_filter( 'wp_register_ability_args', $on_ability, 10 );
-		$this->assertSame( 1, did_action( 'woocommerce_ability_extensions_init' ) );
+		$this->assertSame( 1, did_action( 'woocommerce_extensible_abilities_init' ) );
 		$this->assertSame( 'extensions', $events[0] );
 		$this->assertSame( 1, count( array_keys( $events, 'extensions', true ) ) );
 		$this->assertContains( 'woocommerce/products-query', $events );
@@ -242,11 +242,11 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	 * @testdox Should refuse a field that is registered after the init action, and keep the abilities valid.
 	 */
 	public function test_a_field_registered_after_the_init_action_is_refused(): void {
-		$this->setExpectedIncorrectUsage( AbilityExtensions::class . '::register_field' );
+		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_field' );
 		$this->get_output_schema( 'woocommerce/products-query' );
 		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen late' ) );
 
-		AbilityExtensions::register_field(
+		ExtensibleAbilities::register_field(
 			array(
 				'resource'     => 'product',
 				'namespace'    => 'late-ext',
@@ -258,7 +258,7 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 		$products = array_column( $this->run_ability( 'woocommerce/products-query', array( 'search' => 'Pen late' ) )['products'], null, 'id' );
 
 		$this->assertArrayNotHasKey( 'late-ext', $products[ $product->get_id() ]['extensions'] ?? array() );
-		$this->assertArrayNotHasKey( 'late-ext', AbilityExtensions::add_fields_to_object( array(), 'product', $product )['extensions'] ?? array() );
+		$this->assertArrayNotHasKey( 'late-ext', ExtensibleAbilities::add_fields_to_object( array(), 'product', $product )['extensions'] ?? array() );
 	}
 
 	/**
@@ -266,10 +266,10 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	 */
 	public function test_register_resource_lets_an_extension_register_fields_on_its_own_resource(): void {
 		$register_resource = static function () {
-			AbilityExtensions::register_resource( 'ticket' );
+			ExtensibleAbilities::register_resource( 'ticket' );
 		};
 		$register_field    = static function () {
-			AbilityExtensions::register_field(
+			ExtensibleAbilities::register_field(
 				array(
 					'resource'     => 'ticket',
 					'namespace'    => 'test-ext',
@@ -280,13 +280,13 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 			);
 		};
 		add_action( 'woocommerce_ability_resources_init', $register_resource, 99 );
-		add_action( 'woocommerce_ability_extensions_init', $register_field, 1 );
+		add_action( 'woocommerce_extensible_abilities_init', $register_field, 1 );
 		$this->get_output_schema( 'woocommerce/products-query' );
 		remove_action( 'woocommerce_ability_resources_init', $register_resource, 99 );
-		remove_action( 'woocommerce_ability_extensions_init', $register_field, 1 );
+		remove_action( 'woocommerce_extensible_abilities_init', $register_field, 1 );
 
-		$output = AbilityExtensions::add_fields_to_object( array(), 'ticket', new \stdClass() );
-		$schema = AbilityExtensions::add_fields_schema( array( 'type' => 'object' ), 'ticket' );
+		$output = ExtensibleAbilities::add_fields_to_object( array(), 'ticket', new \stdClass() );
+		$schema = ExtensibleAbilities::add_fields_schema( array( 'type' => 'object' ), 'ticket' );
 
 		$this->assertSame( array( 'test-ext' => array( 'code' => 'T1' ) ), $output['extensions'] );
 		$this->assertSame( array( 'type' => 'string' ), $schema['properties']['extensions']['properties']['test-ext']['properties']['code'] );
@@ -296,18 +296,18 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	 * @testdox Should refuse a resource that is registered after the resources action.
 	 */
 	public function test_a_resource_registered_after_the_resources_action_is_refused(): void {
-		$this->setExpectedIncorrectUsage( AbilityExtensions::class . '::register_resource' );
+		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_resource' );
 		$this->get_output_schema( 'woocommerce/products-query' );
 
-		AbilityExtensions::register_resource( 'late_resource' );
+		ExtensibleAbilities::register_resource( 'late_resource' );
 
-		$resources = new \ReflectionProperty( AbilityExtensions::class, 'resources' );
+		$resources = new \ReflectionProperty( ExtensibleAbilities::class, 'resources' );
 		$resources->setAccessible( true );
 		$this->assertSame( array( 'product', 'order', 'order_item' ), array_keys( $resources->getValue() ) );
 	}
 
 	/**
-	 * @testdox Should not fire woocommerce_ability_extensions_init or change the abilities with the feature off.
+	 * @testdox Should not fire woocommerce_extensible_abilities_init or change the abilities with the feature off.
 	 */
 	public function test_nothing_changes_with_the_feature_off(): void {
 		$this->set_feature( false );
@@ -326,7 +326,7 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 		)['orders'];
 
 		$this->assertSame( 0, did_action( 'woocommerce_ability_resources_init' ) );
-		$this->assertSame( 0, did_action( 'woocommerce_ability_extensions_init' ) );
+		$this->assertSame( 0, did_action( 'woocommerce_extensible_abilities_init' ) );
 		$this->assertArrayNotHasKey( 'extensions', $this->get_output_schema( 'woocommerce/products-query' )['properties']['products']['items']['properties'] );
 		$this->assertArrayNotHasKey( 'extensions', $products[0] );
 		$this->assertArrayNotHasKey( 'extensions', $orders[0] );
@@ -351,7 +351,7 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 						'type'       => 'object',
 						'properties' => array( 'id' => array( 'type' => 'integer' ) ),
 					),
-					'output_schema'       => AbilityExtensions::add_fields_schema(
+					'output_schema'       => ExtensibleAbilities::add_fields_schema(
 						array(
 							'type'       => 'object',
 							'properties' => array( 'id' => array( 'type' => 'integer' ) ),
@@ -360,7 +360,7 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 					),
 					'execute_callback'    => static function ( array $input ) {
 						$product = wc_get_product( $input['id'] );
-						return AbilityExtensions::add_fields_to_object( array( 'id' => $product->get_id() ), 'product', $product );
+						return ExtensibleAbilities::add_fields_to_object( array( 'id' => $product->get_id() ), 'product', $product );
 					},
 					'permission_callback' => '__return_true',
 					'meta'                => array(
@@ -382,7 +382,7 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	 * @testdox Should refuse a field with invalid arguments, and keep the first registration of a namespace and field.
 	 */
 	public function test_invalid_and_duplicate_fields_are_refused(): void {
-		$this->setExpectedIncorrectUsage( AbilityExtensions::class . '::register_field' );
+		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_field' );
 		$valid = array(
 			'resource'     => 'order',
 			'namespace'    => 'test-ext',
@@ -393,12 +393,12 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 		AbilitiesLoader::register_core_resources();
 		$this->register_test_fields();
 
-		AbilityExtensions::register_field( $valid );
-		AbilityExtensions::register_field( array_merge( $valid, array( 'namespace' => 'Test Ext' ) ) );
-		AbilityExtensions::register_field( array_merge( $valid, array( 'field' => '' ) ) );
-		AbilityExtensions::register_field( array_merge( $valid, array( 'field' => 'other' ), array( 'schema' => null ) ) );
-		AbilityExtensions::register_field( array_merge( $valid, array( 'field' => 'other' ), array( 'get_callback' => 'not_a_function' ) ) );
-		AbilityExtensions::register_field(
+		ExtensibleAbilities::register_field( $valid );
+		ExtensibleAbilities::register_field( array_merge( $valid, array( 'namespace' => 'Test Ext' ) ) );
+		ExtensibleAbilities::register_field( array_merge( $valid, array( 'field' => '' ) ) );
+		ExtensibleAbilities::register_field( array_merge( $valid, array( 'field' => 'other' ), array( 'schema' => null ) ) );
+		ExtensibleAbilities::register_field( array_merge( $valid, array( 'field' => 'other' ), array( 'get_callback' => 'not_a_function' ) ) );
+		ExtensibleAbilities::register_field(
 			array_merge(
 				$valid,
 				array(
@@ -407,12 +407,12 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 				)
 			)
 		);
-		AbilityExtensions::register_field( array_merge( $valid, array( 'field' => 'other' ), array( 'schema' => array( 'description' => 'x' ) ) ) );
+		ExtensibleAbilities::register_field( array_merge( $valid, array( 'field' => 'other' ), array( 'schema' => array( 'description' => 'x' ) ) ) );
 		$order = \WC_Helper_Order::create_order();
 
 		$this->assertSame(
 			array( 'test-ext' => array( 'note' => 'order-' . $order->get_id() ) ),
-			AbilityExtensions::add_fields_to_object( array(), 'order', $order )['extensions']
+			ExtensibleAbilities::add_fields_to_object( array(), 'order', $order )['extensions']
 		);
 	}
 
@@ -447,7 +447,7 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 			),
 		);
 		foreach ( $fields as $field => $args ) {
-			AbilityExtensions::register_field(
+			ExtensibleAbilities::register_field(
 				array(
 					'resource'  => 'order',
 					'namespace' => 'values',
@@ -457,7 +457,7 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 		}
 		$order = \WC_Helper_Order::create_order();
 
-		$output = AbilityExtensions::add_fields_to_object( array(), 'order', $order );
+		$output = ExtensibleAbilities::add_fields_to_object( array(), 'order', $order );
 
 		$this->assertSame(
 			array(
@@ -472,11 +472,11 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	 * @testdox Should leave out and report one time a value that does not match its schema, and keep the output valid.
 	 */
 	public function test_a_value_that_does_not_match_its_schema_is_left_out(): void {
-		$this->setExpectedIncorrectUsage( AbilityExtensions::class . '::register_field' );
+		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_field' );
 		add_action(
-			'woocommerce_ability_extensions_init',
+			'woocommerce_extensible_abilities_init',
 			static function () {
-				AbilityExtensions::register_field(
+				ExtensibleAbilities::register_field(
 					array(
 						'resource'     => 'product',
 						'namespace'    => 'test-ext',
@@ -553,7 +553,7 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 	 * @param bool $enabled Whether the feature is on.
 	 */
 	private function set_feature( bool $enabled ): void {
-		update_option( 'woocommerce_feature_' . AbilityExtensions::FEATURE_ID . '_enabled', $enabled ? 'yes' : 'no' );
+		update_option( 'woocommerce_feature_' . ExtensibleAbilities::FEATURE_ID . '_enabled', $enabled ? 'yes' : 'no' );
 	}
 
 	/**
@@ -563,12 +563,12 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 		global $wp_actions;
 
 		foreach ( array( 'fields', 'reported' ) as $property ) {
-			$reflection = new \ReflectionProperty( AbilityExtensions::class, $property );
+			$reflection = new \ReflectionProperty( ExtensibleAbilities::class, $property );
 			$reflection->setAccessible( true );
 			$reflection->setValue( null, array() );
 		}
 
-		$reflection = new \ReflectionProperty( AbilityExtensions::class, 'resources' );
+		$reflection = new \ReflectionProperty( ExtensibleAbilities::class, 'resources' );
 		$reflection->setAccessible( true );
 		$reflection->setValue( null, array() );
 
@@ -579,6 +579,6 @@ class AbilityExtensionsTest extends \WC_REST_Unit_Test_Case {
 				$instance->setValue( null, null );
 			}
 		}
-		unset( $wp_actions['wp_abilities_api_init'], $wp_actions['wp_abilities_api_categories_init'], $wp_actions['woocommerce_ability_resources_init'], $wp_actions['woocommerce_ability_extensions_init'] );
+		unset( $wp_actions['wp_abilities_api_init'], $wp_actions['wp_abilities_api_categories_init'], $wp_actions['woocommerce_ability_resources_init'], $wp_actions['woocommerce_extensible_abilities_init'] );
 	}
 }

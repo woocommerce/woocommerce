@@ -8,7 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities\Domain\Traits;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
-use Automattic\WooCommerce\Abilities\AbilityExtensions;
+use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
@@ -166,7 +166,7 @@ trait OrderAbilityTrait {
 				'line_items'           => array(
 					'type'        => 'array',
 					'description' => __( 'Order line items. Only present when include_line_items is true.', 'woocommerce' ),
-					'items'       => AbilityExtensions::add_fields_schema(
+					'items'       => ExtensibleAbilities::add_fields_schema(
 						array(
 							'type'                 => 'object',
 							'properties'           => array(
@@ -186,7 +186,7 @@ trait OrderAbilityTrait {
 			),
 			'additionalProperties' => false,
 		);
-		return AbilityExtensions::add_fields_schema( $schema, 'order' );
+		return ExtensibleAbilities::add_fields_schema( $schema, 'order' );
 	}
 
 	/**
@@ -295,7 +295,7 @@ trait OrderAbilityTrait {
 					continue;
 				}
 
-				$data['line_items'][] = AbilityExtensions::add_fields_to_object(
+				$data['line_items'][] = ExtensibleAbilities::add_fields_to_object(
 					array(
 						'id'           => $item->get_id(),
 						'name'         => $item->get_name(),
@@ -311,6 +311,6 @@ trait OrderAbilityTrait {
 			}
 		}
 
-		return AbilityExtensions::add_fields_to_object( $data, 'order', $order );
+		return ExtensibleAbilities::add_fields_to_object( $data, 'order', $order );
 	}
 }

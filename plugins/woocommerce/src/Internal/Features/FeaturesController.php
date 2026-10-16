@@ -7,7 +7,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Features;
 
-use Automattic\WooCommerce\Abilities\AbilityExtensions;
+use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreview;
 use WC_Tracks;
 use WC_Site_Tracking;
@@ -756,8 +756,8 @@ class FeaturesController {
 				'is_experimental'              => true,
 				'disable_ui'                   => false,
 			),
-			AbilityExtensions::FEATURE_ID          => array(
-				'name'                         => __( 'Ability extensions', 'woocommerce' ),
+			ExtensibleAbilities::FEATURE_ID        => array(
+				'name'                         => __( 'Extensible abilities', 'woocommerce' ),
 				'description'                  => __( 'Let extensions add their fields to the output of WooCommerce abilities.', 'woocommerce' ),
 				'is_experimental'              => true,
 				'enabled_by_default'           => false,

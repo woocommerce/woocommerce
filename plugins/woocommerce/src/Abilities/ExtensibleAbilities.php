@@ -1,6 +1,6 @@
 <?php
 /**
- * Ability extensions class file.
+ * Extensible abilities class file.
  */
 
 declare( strict_types=1 );
@@ -16,17 +16,17 @@ defined( 'ABSPATH' ) || exit;
  *
  * An extension registers a resource inside the `woocommerce_ability_resources_init`
  * action. It registers a field on a resource, such as `product`, inside the
- * `woocommerce_ability_extensions_init` action, which fires after. An ability that formats an
+ * `woocommerce_extensible_abilities_init` action, which fires after. An ability that formats an
  * object of that resource returns the field values under
  * `extensions.<namespace>.<field>`, and lists the fields in its output schema.
  *
- * The API is experimental while the `ability_extensions` feature exists.
+ * The API is experimental while the `extensible_abilities` feature exists.
  *
  * @since 11.3.0
  */
-class AbilityExtensions {
+class ExtensibleAbilities {
 
-	public const FEATURE_ID = 'ability_extensions';
+	public const FEATURE_ID = 'extensible_abilities';
 
 	/**
 	 * Fields keyed by resource, then namespace, then field name.
@@ -89,7 +89,7 @@ class AbilityExtensions {
 	/**
 	 * Register a field that the abilities of a resource return under `extensions.<namespace>.<field>`.
 	 *
-	 * Call it inside the `woocommerce_ability_extensions_init` action. A call after that action is refused.
+	 * Call it inside the `woocommerce_extensible_abilities_init` action. A call after that action is refused.
 	 * The resource must be registered with `register_resource()` in the earlier `woocommerce_ability_resources_init` action.
 	 *
 	 * @since 11.3.0
@@ -111,8 +111,8 @@ class AbilityExtensions {
 	 * }
 	 */
 	public static function register_field( array $args ): void {
-		if ( did_action( 'woocommerce_ability_extensions_init' ) && ! doing_action( 'woocommerce_ability_extensions_init' ) ) {
-			wc_doing_it_wrong( __METHOD__, __( 'Register a field inside the woocommerce_ability_extensions_init action, before the abilities build their schemas.', 'woocommerce' ), '11.3.0' );
+		if ( did_action( 'woocommerce_extensible_abilities_init' ) && ! doing_action( 'woocommerce_extensible_abilities_init' ) ) {
+			wc_doing_it_wrong( __METHOD__, __( 'Register a field inside the woocommerce_extensible_abilities_init action, before the abilities build their schemas.', 'woocommerce' ), '11.3.0' );
 			return;
 		}
 		foreach ( array( 'resource', 'namespace', 'field' ) as $key ) {
@@ -134,7 +134,7 @@ class AbilityExtensions {
 				__METHOD__,
 				sprintf(
 					/* translators: %s: resource name. */
-					__( 'The "%s" resource is not registered. Call AbilityExtensions::register_resource() first.', 'woocommerce' ),
+					__( 'The "%s" resource is not registered. Call ExtensibleAbilities::register_resource() first.', 'woocommerce' ),
 					$args['resource']
 				),
 				'11.3.0'
@@ -195,7 +195,7 @@ class AbilityExtensions {
 				} catch ( \Throwable $e ) {
 					wc_get_logger()->error(
 						sprintf( 'Ability field "%s.%s" of "%s" failed: %s', $namespace, $field, $resource_name, $e->getMessage() ),
-						array( 'source' => 'ability-extensions' )
+						array( 'source' => 'extensible-abilities' )
 					);
 					continue;
 				}
@@ -217,7 +217,7 @@ class AbilityExtensions {
 	/**
 	 * Add the `extensions` property to an object schema when the feature is on.
 	 * It lists each namespace with its fields. Call it after the
-	 * `woocommerce_ability_extensions_init` action, when the ability builds its
+	 * `woocommerce_extensible_abilities_init` action, when the ability builds its
 	 * schema. The schema stays unchanged when no field is registered for the resource.
 	 *
 	 * @since 11.3.0
@@ -278,7 +278,7 @@ class AbilityExtensions {
 			$args['resource'],
 			$valid->get_error_message()
 		);
-		wc_get_logger()->error( $message, array( 'source' => 'ability-extensions' ) );
+		wc_get_logger()->error( $message, array( 'source' => 'extensible-abilities' ) );
 		wc_doing_it_wrong( __CLASS__ . '::register_field', $message, '11.3.0' );
 		return false;
 	}
