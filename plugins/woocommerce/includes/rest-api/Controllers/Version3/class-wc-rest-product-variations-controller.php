@@ -984,6 +984,17 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 	protected function prepare_objects_query( $request ) {
 		$args = WC_REST_CRUD_Controller::prepare_objects_query( $request );
 
+		// Break orderby ties by ID so pages don't overlap. menu_order ties always go newest first, like the admin
+		// variations list (WC_AJAX::load_variations). The 'slug' orderby arrives here as 'name', mapped by prepare_items_query().
+		if ( 'menu_order' === $args['orderby'] ) {
+			$args['orderby'] = array(
+				'menu_order' => $args['order'] ?? '',
+				'ID'         => 'DESC',
+			);
+		} elseif ( in_array( $args['orderby'], array( 'title', 'name' ), true ) ) {
+			$args['orderby'] .= ' ID';
+		}
+
 		// Set post_status.
 		$args['post_status'] = $request['status'];
 
