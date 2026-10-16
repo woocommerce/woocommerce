@@ -42,6 +42,81 @@ class ProductUtil {
 	);
 
 	/**
+	 * Register hooks.
+	 *
+	 * @since 11.3.0
+	 * @internal
+	 */
+	public function register(): void {
+		add_action( 'woocommerce_delete_product_transients_batch', array( $this, 'handle_woocommerce_delete_product_transients_batch' ) );
+	}
+
+	/**
+	 * Schedule cleanup of existing products' persistent transients for the current site.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param int $last_id Last product ID processed, or zero to start cleanup.
+	 * @return bool False if cleanup could not be scheduled.
+	 */
+	public function schedule_product_transient_cleanup( int $last_id = 0 ): bool {
+		if ( ! wp_using_ext_object_cache() ) {
+			return true;
+		}
+
+		// A new cleanup replaces any queued one instead of running alongside it.
+		if ( 0 === $last_id ) {
+			as_unschedule_all_actions( 'woocommerce_delete_product_transients_batch' );
+		}
+
+		return (bool) as_enqueue_async_action( 'woocommerce_delete_product_transients_batch', array( $last_id ), 'woocommerce' );
+	}
+
+	/**
+	 * Delete one batch of persistent product transients, bypassing per-transient deletion actions.
+	 * The scheduled action retains the last processed ID for the next batch.
+	 *
+	 * @since 11.3.0
+	 * @internal
+	 *
+	 * @param mixed $last_id Last product ID processed.
+	 * @return void
+	 * @throws \RuntimeException If the batch cannot be read or continued.
+	 */
+	public function handle_woocommerce_delete_product_transients_batch( $last_id ): void {
+		if ( ! wp_using_ext_object_cache() ) {
+			return;
+		}
+
+		global $wpdb;
+		$products = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT ID, post_type FROM {$wpdb->posts} WHERE post_type IN ('product', 'product_variation') AND ID > %d ORDER BY ID LIMIT 100",
+				absint( $last_id )
+			)
+		);
+		if ( $wpdb->last_error ) {
+			throw new \RuntimeException( 'Unable to read products for transient cleanup.' );
+		}
+
+		$keys = array();
+		foreach ( $products as $product ) {
+			$prefixes = 'product_variation' === $product->post_type ? array( 'wc_related_' ) : self::PRODUCT_SPECIFIC_TRANSIENT_PREFIXES;
+			foreach ( $prefixes as $prefix ) {
+				$keys[] = $prefix . $product->ID;
+			}
+			$last_id = (int) $product->ID;
+		}
+
+		if ( $keys ) {
+			wp_cache_delete_multiple( $keys, 'transient' );
+		}
+		if ( 100 === count( $products ) && ! $this->schedule_product_transient_cleanup( $last_id ) ) {
+			throw new \RuntimeException( 'Unable to schedule the next product transient cleanup batch.' );
+		}
+	}
+
+	/**
 	 * Get a product ID from a product, post, or numeric value.
 	 *
 	 * @since 11.3.0
