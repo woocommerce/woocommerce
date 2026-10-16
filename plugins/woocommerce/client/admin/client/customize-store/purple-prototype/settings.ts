@@ -14,6 +14,8 @@ export type PurplePrototypeSettings = {
 	container: PurpleContainer;
 	layout: PurpleLayout;
 	state: 'real' | PurpleState;
+	// Which version of the setup wizard's Purple step to show.
+	wizard: 'two-options' | 'purple-only';
 	purpleSlug: string;
 	purpleInstalled: boolean;
 	purpleActive: boolean;
@@ -32,6 +34,7 @@ const DEFAULT_SETTINGS: PurplePrototypeSettings = {
 	container: 'task-page',
 	layout: 'stacked-images-left',
 	state: 'real',
+	wizard: 'two-options',
 	purpleSlug: 'purple',
 	purpleInstalled: false,
 	purpleActive: false,

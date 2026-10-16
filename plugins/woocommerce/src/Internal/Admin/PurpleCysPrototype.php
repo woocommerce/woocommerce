@@ -41,6 +41,7 @@ class PurpleCysPrototype {
 		'container' => array( 'task-page', 'modal' ),
 		'layout'    => array( 'stacked-images-left' ),
 		'state'     => array( 'real', 'default', 'installing', 'installed', 'activating', 'active', 'error' ),
+		'wizard'    => array( 'two-options', 'purple-only' ),
 	);
 
 	/**
@@ -489,10 +490,26 @@ class PurpleCysPrototype {
 			array(
 				'id'     => $parent . '-wizard-heading',
 				'parent' => $parent . '-wizard',
-				'title'  => __( 'Setup wizard', 'woocommerce' ),
+				'title'  => __( 'Setup wizard step', 'woocommerce' ),
 				'meta'   => array( 'class' => 'purple-cys-prototype-heading' ),
 			)
 		);
+
+		$wizard_steps = array(
+			'two-options' => __( 'Two options', 'woocommerce' ),
+			'purple-only' => __( 'Purple only', 'woocommerce' ),
+		);
+		foreach ( $wizard_steps as $value => $label ) {
+			$wp_admin_bar->add_node(
+				array(
+					'id'     => $parent . '-wizard-' . $value,
+					'parent' => $parent . '-wizard',
+					'title'  => $label,
+					'href'   => $this->get_action_url( 'wizard', $value ),
+					'meta'   => array( 'class' => 'purple-cys-prototype-option' . ( $settings['wizard'] === $value ? ' is-active' : '' ) ),
+				)
+			);
+		}
 
 		// The Purple step comes right after the extensions step, so open the wizard there.
 		$wp_admin_bar->add_node(

@@ -5,6 +5,7 @@ import '@wordpress/theme/design-tokens.css';
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { Badge } from '@wordpress/ui';
+import clsx from 'clsx';
 import type { ReactNode } from 'react';
 
 /**
@@ -58,7 +59,8 @@ const ThemeOption = ( {
 
 /**
  * Prototype step after the extensions step: start with Purple, or keep the current theme.
- * Each option has its own button, so nothing is chosen by default.
+ * Each option has its own button, so nothing is chosen by default. The "Purple only" version
+ * from the prototype menu shows a single Purple card with a link to keep the current theme.
  */
 export const PurpleTheme = ( {
 	sendEvent,
@@ -68,7 +70,8 @@ export const PurpleTheme = ( {
 	navigationProgress: number;
 	context: CoreProfilerStateMachineContext;
 } ) => {
-	const { activeTheme } = getPurplePrototypeSettings();
+	const { activeTheme, wizard } = getPurplePrototypeSettings();
+	const isPurpleOnly = wizard === 'purple-only';
 
 	const complete = ( usePurple: boolean ) =>
 		sendEvent( {
@@ -94,7 +97,14 @@ export const PurpleTheme = ( {
 						'woocommerce'
 					) }
 				/>
-				<div className="woocommerce-profiler-purple-theme__options">
+				<div
+					className={ clsx(
+						'woocommerce-profiler-purple-theme__options',
+						{
+							'is-purple-only': isPurpleOnly,
+						}
+					) }
+				>
 					<ThemeOption
 						image={ purplePreview }
 						imageAlt={ __(
@@ -111,14 +121,29 @@ export const PurpleTheme = ( {
 							'woocommerce'
 						) }
 					>
-						<Button
-							className="woocommerce-profiler-purple-theme__button"
-							variant="primary"
-							__next40pxDefaultSize
-							onClick={ () => complete( true ) }
-						>
-							{ __( 'Install Purple', 'woocommerce' ) }
-						</Button>
+						<div className="woocommerce-profiler-purple-theme__buttons">
+							<Button
+								className="woocommerce-profiler-purple-theme__button"
+								variant="primary"
+								__next40pxDefaultSize
+								onClick={ () => complete( true ) }
+							>
+								{ __( 'Install Purple', 'woocommerce' ) }
+							</Button>
+							{ isPurpleOnly && (
+								<Button
+									className="woocommerce-profiler-purple-theme__button"
+									variant="tertiary"
+									__next40pxDefaultSize
+									onClick={ () => complete( false ) }
+								>
+									{ __(
+										'Keep my current theme',
+										'woocommerce'
+									) }
+								</Button>
+							) }
+						</div>
 						<p className="woocommerce-profiler-purple-theme__note">
 							{ __(
 								'We’ll install Purple and activate it as your store’s theme.',
@@ -126,30 +151,35 @@ export const PurpleTheme = ( {
 							) }
 						</p>
 					</ThemeOption>
-					<ThemeOption
-						image={ activeTheme.screenshot }
-						imageAlt=""
-						title={ __( 'Keep your current theme', 'woocommerce' ) }
-						description={ __(
-							'Stay with the theme you have now. You can try Purple later from Customize your store.',
-							'woocommerce'
-						) }
-					>
-						<Button
-							className="woocommerce-profiler-purple-theme__button"
-							variant="secondary"
-							__next40pxDefaultSize
-							onClick={ () => complete( false ) }
-						>
-							{ __( 'Keep current theme', 'woocommerce' ) }
-						</Button>
-						<p className="woocommerce-profiler-purple-theme__note">
-							{ __(
-								'Your store keeps its current design.',
+					{ ! isPurpleOnly && (
+						<ThemeOption
+							image={ activeTheme.screenshot }
+							imageAlt=""
+							title={ __(
+								'Keep your current theme',
 								'woocommerce'
 							) }
-						</p>
-					</ThemeOption>
+							description={ __(
+								'Stay with the theme you have now. You can try Purple later from Customize your store.',
+								'woocommerce'
+							) }
+						>
+							<Button
+								className="woocommerce-profiler-purple-theme__button"
+								variant="secondary"
+								__next40pxDefaultSize
+								onClick={ () => complete( false ) }
+							>
+								{ __( 'Keep current theme', 'woocommerce' ) }
+							</Button>
+							<p className="woocommerce-profiler-purple-theme__note">
+								{ __(
+									'Your store keeps its current design.',
+									'woocommerce'
+								) }
+							</p>
+						</ThemeOption>
+					) }
 				</div>
 			</div>
 		</div>

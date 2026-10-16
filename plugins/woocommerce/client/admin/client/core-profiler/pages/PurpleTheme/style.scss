@@ -124,4 +124,16 @@
 
 .woocommerce-profiler-purple-theme__options {
 	margin-block-end: 48px;
+
+	// "Purple only" version: one card, centered.
+	&.is-purple-only {
+		grid-template-columns: minmax(300px, 600px);
+	}
+}
+
+.woocommerce-profiler-purple-theme__buttons {
+	display: flex;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: $gap-small;
 }
