@@ -19,6 +19,8 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 
 	private const UNTRACKED_ABILITY_ID = 'tracking-test/other';
 
+	private const LONG_ABILITY_ID = 'woocommerce/tracking-test-with-a-long-name-that-goes-past-sixty-four-characters';
+
 	private const SERVER_KEYS = array( 'REQUEST_SCHEME', 'HTTP_HOST', 'REQUEST_URI', 'HTTP_REFERER', 'HTTP_MCP_PROTOCOL_VERSION', 'HTTP_MCP_SESSION_ID' );
 
 	/**
@@ -143,7 +145,7 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 
 		try {
 			// The abilities registry is a singleton that outlives the test.
-			foreach ( array( self::ABILITY_ID, self::INNER_ABILITY_ID, self::UNTRACKED_ABILITY_ID ) as $ability_id ) {
+			foreach ( array( self::ABILITY_ID, self::INNER_ABILITY_ID, self::UNTRACKED_ABILITY_ID, self::LONG_ABILITY_ID ) as $ability_id ) {
 				if ( function_exists( 'wp_has_ability' ) && wp_has_ability( $ability_id ) ) {
 					wp_unregister_ability( $ability_id );
 				}
@@ -515,6 +517,18 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should record long ability names in full.
+	 */
+	public function test_records_long_ability_names_in_full(): void {
+		$this->start_mcp_tool_call();
+
+		wp_get_ability( self::LONG_ABILITY_ID )->execute();
+		$this->sut->handle_shutdown();
+
+		$this->assertSame( 'woocommerce_tracking_test_with_a_long_name_that_goes_past_sixty_four_characters', $this->sut->recorded[0]['ability_name'] );
+	}
+
+	/**
 	 * @testdox Should not record abilities outside the woocommerce namespace.
 	 */
 	public function test_ignores_abilities_outside_woocommerce_namespace(): void {
@@ -732,6 +746,7 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 				self::ABILITY_ID           => $execute,
 				self::INNER_ABILITY_ID     => fn() => array( 'ok' => true ),
 				self::UNTRACKED_ABILITY_ID => $execute,
+				self::LONG_ABILITY_ID      => $execute,
 			);
 			foreach ( $abilities as $ability_id => $callback ) {
 				wp_register_ability(

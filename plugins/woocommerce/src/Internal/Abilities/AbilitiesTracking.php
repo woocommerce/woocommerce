@@ -541,7 +541,8 @@ class AbilitiesTracking {
 		}
 
 		$event = array(
-			'ability_name'      => self::normalize_value( $frame['name'] ),
+			// Not truncated: ability names have no length limit, and truncated names could collide.
+			'ability_name'      => self::normalize_value( $frame['name'], null ),
 			'outcome'           => true === $outcome ? 'success' : 'error',
 			'error_code'        => $error_code,
 			'channel'           => $frame['channel'],
@@ -699,11 +700,15 @@ class AbilitiesTracking {
 	/**
 	 * Convert a value to lowercase words separated by underscores, as Tracks property values expect.
 	 *
-	 * @param string $value The value.
+	 * @param string   $value      The value.
+	 * @param int|null $max_length Maximum length, or null for no limit.
 	 * @return string The normalized value, or 'none' when nothing is left.
 	 */
-	private static function normalize_value( string $value ): string {
+	private static function normalize_value( string $value, ?int $max_length = 64 ): string {
 		$value = trim( (string) preg_replace( '/[^a-z0-9]+/', '_', strtolower( $value ) ), '_' );
-		return '' === $value ? self::NONE : substr( $value, 0, 64 );
+		if ( '' === $value ) {
+			return self::NONE;
+		}
+		return null === $max_length ? $value : (string) substr( $value, 0, $max_length );
 	}
 }
