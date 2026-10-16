@@ -279,6 +279,52 @@ class DataSynchronizerTests extends \HposTestCase {
 	}
 
 	/**
+	 * @testdox When HPOS is authoritative and sync is disabled, deleting a post with the ID of an existing order is prevented and the order keeps its items.
+	 *
+	 * @testWith ["shop_order_placehold"]
+	 *           ["post"]
+	 *
+	 * @param string $post_type Post type of the post sharing the order's ID.
+	 */
+	public function test_post_deletion_is_prevented_while_order_exists_in_hpos( string $post_type ): void {
+		global $wpdb;
+
+		$this->toggle_cot_authoritative( true );
+		$this->disable_cot_sync();
+
+		$order_id = OrderHelper::create_order()->get_id();
+		$wpdb->update( $wpdb->posts, array( 'post_type' => $post_type ), array( 'ID' => $order_id ) );
+		clean_post_cache( $order_id );
+		$this->assertSame( $post_type, get_post_type( $order_id ) );
+
+		$count_items_query = $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d", $order_id );
+		$items_before      = (int) $wpdb->get_var( $count_items_query ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$this->assertGreaterThan( 0, $items_before );
+
+		$result = wp_delete_post( $order_id, true );
+
+		$this->assertFalse( $result, 'Deleting the post should fail.' );
+		$this->assertSame( $post_type, get_post_type( $order_id ), 'The post should still exist.' );
+		$this->assertSame( $items_before, (int) $wpdb->get_var( $count_items_query ), 'The order should keep its items.' ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+	}
+
+	/**
+	 * @testdox When HPOS is authoritative, a placeholder post whose order no longer exists in HPOS can be deleted.
+	 */
+	public function test_orphaned_placeholder_post_can_be_deleted(): void {
+		$this->toggle_cot_authoritative( true );
+		$this->disable_cot_sync();
+
+		$order_id = OrderHelper::create_order()->get_id();
+		$this->direct_delete_cot_order( $order_id );
+
+		$result = wp_delete_post( $order_id, true );
+
+		$this->assertInstanceOf( \WP_Post::class, $result, 'Deleting an orphaned placeholder post should succeed.' );
+		$this->assertNull( get_post( $order_id ), 'The orphaned placeholder post should be gone.' );
+	}
+
+	/**
 	 * @testdox When sync is disabled and the posts table is authoritative, deleting an order generates a deletion record in the meta table if the order exists in the backup table.
 	 *
 	 * @testWith [true]

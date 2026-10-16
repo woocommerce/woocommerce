@@ -59508,7 +59508,7 @@ parameters:
 		-
 			message: '#^Access to property \$post_type on an unknown class Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\WP_Post\.$#'
 			identifier: class.notFound
-			count: 2
+			count: 1
 			path: src/Internal/DataStores/Orders/DataSynchronizer.php
 
 		-
