@@ -145,6 +145,34 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A refund is excluded along with an order whose conditions come out NULL.
+	 */
+	public function test_refund_of_order_with_null_condition_is_excluded(): void {
+		$order     = \WC_Helper_Order::create_order();
+		$refund_id = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 1,
+			)
+		)->get_id();
+		add_filter(
+			'woocommerce_analytics_orders_import_where_clauses',
+			function ( $clauses, $table_alias ) {
+				// NULL for orders and true for refunds, like a comparison against an empty nullable column.
+				$column    = OrderUtil::custom_orders_table_usage_is_enabled() ? 'type' : 'post_type';
+				$clauses[] = "IF( {$table_alias}.{$column} = 'shop_order', NULL, 1 )";
+				return $clauses;
+			},
+			10,
+			2
+		);
+
+		$this->assertTrue( OrdersScheduler::is_excluded_from_import( $order->get_id() ) );
+		$this->assertTrue( OrdersScheduler::is_excluded_from_import( $refund_id ), 'The refund inherits the exclusion of its order.' );
+		$this->assertNotContains( $refund_id, array_map( 'intval', OrdersScheduler::get_items( 100, 1, false, true )->ids ) );
+	}
+
+	/**
 	 * @testdox A "skip existing" import that pages one record at a time finishes with excluded refunds present.
 	 */
 	public function test_skip_existing_import_finishes_with_excluded_refunds(): void {
