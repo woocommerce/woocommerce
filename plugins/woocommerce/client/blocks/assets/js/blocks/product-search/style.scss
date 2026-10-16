@@ -36,3 +36,60 @@
 		}
 	}
 }
+
+// Live results dropdown (opt-in "Show products while typing" setting).
+.wc-block-product-search--live {
+	.wc-block-product-search__live-results {
+		position: absolute;
+		top: 100%;
+		left: 0;
+		right: 0;
+		z-index: 100;
+		margin-top: $gap-smallest;
+		background: $white;
+		border: 1px solid $gray-300;
+		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+		max-height: 70vh;
+		overflow-y: auto;
+
+		ul {
+			list-style: none;
+			margin: 0;
+			padding: 0;
+		}
+
+		li a {
+			display: flex;
+			align-items: center;
+			gap: $gap-small;
+			padding: $gap-smaller $gap-small;
+			text-decoration: none;
+			color: inherit;
+
+			&:hover,
+			&.is-active {
+				background: $gray-100;
+			}
+
+			img {
+				width: 36px;
+				height: auto;
+				flex: 0 0 auto;
+			}
+		}
+	}
+
+	.wc-block-product-search__live-results-name {
+		flex: 1 1 auto;
+		min-width: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.wc-block-product-search__live-results-price {
+		flex: 0 0 auto;
+		font-weight: 600;
+		white-space: nowrap;
+	}
+}

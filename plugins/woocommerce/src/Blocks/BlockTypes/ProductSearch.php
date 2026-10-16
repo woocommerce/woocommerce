@@ -1,4 +1,7 @@
 <?php
+
+declare( strict_types = 1 );
+
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 /**
@@ -14,6 +17,14 @@ class ProductSearch extends AbstractBlock {
 	protected $block_name = 'product-search';
 
 	/**
+	 * Initialize this block type.
+	 */
+	protected function initialize(): void {
+		parent::initialize();
+		add_filter( 'render_block_core/search', array( $this, 'add_live_results' ), 10, 2 );
+	}
+
+	/**
 	 * Get the frontend script handle for this block type.
 	 *
 	 * @param string $key Data to get, or default to everything.
@@ -21,6 +32,48 @@ class ProductSearch extends AbstractBlock {
 	 */
 	protected function get_block_type_script( $key = null ) {
 		return null;
+	}
+
+	/**
+	 * Enable live results on a Product Search variation that opted in.
+	 *
+	 * The Product Search block is a variation of `core/search`, so its frontend
+	 * behaviour attaches at render time: when the rendered block carries this
+	 * variation's namespace and the `liveResults` attribute, the wrapper gains a
+	 * marker class and the view script (which attaches only to marked blocks)
+	 * is enqueued.
+	 *
+	 * @param string $block_content Rendered block content.
+	 * @param array  $block         Parsed block data.
+	 * @return string
+	 */
+	public function add_live_results( $block_content, $block ) {
+		$attributes = $block['attrs'] ?? array();
+		if (
+			'woocommerce/product-search' !== ( $attributes['namespace'] ?? '' )
+			|| true !== ( $attributes['liveResults'] ?? false )
+		) {
+			return $block_content;
+		}
+
+		$processor = new \WP_HTML_Tag_Processor( $block_content );
+		if ( ! $processor->next_tag( array( 'class_name' => 'wp-block-search' ) ) ) {
+			return $block_content;
+		}
+		$processor->add_class( 'wc-block-product-search--live' );
+
+		$handle = 'wc-' . $this->block_name . '-block-frontend';
+		if ( ! wp_script_is( $handle, 'registered' ) ) {
+			$this->asset_api->register_script(
+				$handle,
+				$this->asset_api->get_block_asset_build_path( $this->block_name . '-frontend' ),
+				array()
+			);
+		}
+		wp_enqueue_script( $handle );
+		wp_enqueue_style( 'wc-blocks-style-' . $this->block_name );
+
+		return $processor->get_updated_html();
 	}
 
 	/**
