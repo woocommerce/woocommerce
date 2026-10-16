@@ -46,6 +46,7 @@ class Api {
 	public function init() {
 		add_action( 'init', array( $this->payment_method_registry, 'initialize' ), 5 );
 		add_filter( 'woocommerce_blocks_register_script_dependencies', array( $this, 'add_payment_method_script_dependencies' ), 10, 2 );
+		add_filter( 'register_block_type_args', array( $this, 'maybe_add_payment_method_style_handles' ), 10, 2 );
 		add_action( 'woocommerce_blocks_checkout_enqueue_data', array( $this, 'add_payment_method_script_data' ) );
 		add_action( 'woocommerce_blocks_cart_enqueue_data', array( $this, 'add_payment_method_script_data' ) );
 		add_action( 'woocommerce_blocks_payment_method_type_registration', array( $this, 'register_payment_method_integrations' ) );
@@ -87,6 +88,42 @@ class Api {
 			$editor_handles,
 			array( 'wc-cart-block-frontend', 'wc-checkout-block-frontend' )
 		);
+	}
+
+	/**
+	 * Add payment method style handles to the Cart and Checkout block types. Expected to hook into the `register_block_type_args` filter.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param array  $args       Block type registration arguments.
+	 * @param string $block_type Block type name.
+	 * @return array
+	 */
+	public function maybe_add_payment_method_style_handles( $args, $block_type ) {
+		if ( ! is_array( $args ) ) {
+			return $args;
+		}
+
+		if ( ! in_array( $block_type, [ 'woocommerce/cart', 'woocommerce/checkout' ], true ) ) {
+			return $args;
+		}
+
+		$payment_method_style_handles = $this->payment_method_registry->get_all_active_payment_method_style_handles();
+
+		if ( [] === $payment_method_style_handles ) {
+			return $args;
+		}
+
+		$style_handles_property = is_admin() ? 'editor_style_handles' : 'view_style_handles';
+		$current_style_handles  = $args[ $style_handles_property ] ?? [];
+
+		$args[ $style_handles_property ] = array_values(
+			array_unique(
+				array_merge( $current_style_handles, $payment_method_style_handles )
+			)
+		);
+
+		return $args;
 	}
 
 	/**

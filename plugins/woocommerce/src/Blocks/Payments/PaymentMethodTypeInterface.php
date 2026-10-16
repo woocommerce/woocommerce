@@ -5,7 +5,7 @@ use Automattic\WooCommerce\Blocks\Integrations\IntegrationInterface;
 
 interface PaymentMethodTypeInterface extends IntegrationInterface {
 	/**
-	 * Returns if this payment method should be active. If false, the scripts will not be enqueued.
+	 * Returns if this payment method should be active. If false, the scripts and styles will not be enqueued.
 	 *
 	 * @return boolean
 	 */
