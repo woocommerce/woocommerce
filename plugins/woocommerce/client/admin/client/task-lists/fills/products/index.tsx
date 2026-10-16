@@ -84,7 +84,7 @@ export const Products = () => {
 		getOnboardingProductType()
 	);
 
-	const { productTypes, isRequesting } = useProductTypeListItems(
+	const { productTypes } = useProductTypeListItems(
 		getProductTypes(),
 		surfacedProductTypeKeys
 	);
@@ -179,7 +179,6 @@ export const Products = () => {
 						setIsConfirmingLoadSampleProducts( true )
 					}
 					showOtherOptions={ isExpanded }
-					isTaskListItemClicked={ isRequesting }
 				/>
 				<ViewControlButton
 					isExpanded={ isExpanded }
@@ -192,11 +191,7 @@ export const Products = () => {
 						setIsExpanded( ! isExpanded );
 					} }
 				/>
-				<Stack
-					items={ footerStack }
-					showOtherOptions={ false }
-					isTaskListItemClicked={ isRequesting }
-				/>
+				<Stack items={ footerStack } showOtherOptions={ false } />
 				{ Array.isArray( recommendations ) &&
 				recommendations.length > 0 ? (
 					<ProductRecommendations items={ recommendations } />

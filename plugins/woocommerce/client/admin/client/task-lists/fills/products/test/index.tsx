@@ -17,6 +17,7 @@ import {
 	productTypes,
 } from '../constants';
 import { getAdminSetting } from '~/utils/admin-settings';
+import { useCreateProductByType } from '../use-create-product-by-type';
 
 // Mock window.location
 const mockLocation = {
@@ -47,9 +48,7 @@ jest.mock( '~/utils/admin-settings', () => ( {
 } ) );
 
 jest.mock( '../use-create-product-by-type', () => ( {
-	useCreateProductByType: jest
-		.fn()
-		.mockReturnValue( { createProductByType: jest.fn() } ),
+	useCreateProductByType: jest.fn(),
 } ) );
 
 global.fetch = jest.fn().mockImplementation( () =>
@@ -67,6 +66,10 @@ const confirmModalText =
 describe( 'Products', () => {
 	beforeEach( () => {
 		jest.clearAllMocks();
+		( useCreateProductByType as jest.Mock ).mockReturnValue( {
+			createProductByType: jest.fn(),
+			requestingType: null,
+		} );
 		// @ts-expect-error -- outdated type definition
 		removeAllFilters( SETUP_TASKLIST_PRODUCTS_AFTER_FILTER );
 
@@ -324,6 +327,32 @@ describe( 'Products', () => {
 		expect( mockLocation.href ).toContain(
 			'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=merchandising'
 		);
+	} );
+
+	it( 'should show one spinner on the requested product type and ignore clicks on the others', async () => {
+		( getAdminSetting as jest.Mock ).mockImplementation( () => ( {
+			profile: { product_types: null },
+		} ) );
+		const createProductByType = jest.fn();
+		( useCreateProductByType as jest.Mock ).mockReturnValue( {
+			createProductByType,
+			requestingType: 'physical',
+		} );
+		const { container, getByRole } = render( <Products /> );
+
+		expect(
+			container.querySelectorAll( '.components-spinner' )
+		).toHaveLength( 1 );
+		expect(
+			getByRole( 'menuitem', { name: /Physical product/ } ).querySelector(
+				'.components-spinner'
+			)
+		).toBeInTheDocument();
+
+		await userEvent.click(
+			getByRole( 'menuitem', { name: /Variable product/ } )
+		);
+		expect( createProductByType ).not.toHaveBeenCalled();
 	} );
 
 	describe( 'Printful banner visibility', () => {
