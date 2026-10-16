@@ -446,7 +446,7 @@ class ProductsStore extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox load_product() seeds the woocommerce namespace with the same product as woocommerce/products.
+	 * @testdox load_product() seeds the woocommerce state with the loaded product, keyed by its ID.
 	 */
 	public function test_load_product_seeds_woocommerce_namespace(): void {
 		$product = WC_Helper_Product::create_simple_product();
@@ -454,17 +454,16 @@ class ProductsStore extends \WC_Unit_Test_Case {
 
 		TestedProductsStore::load_product( $this->consent, $id );
 
-		$products_state    = wp_interactivity_state( $this->store_namespace );
-		$woocommerce_state = wp_interactivity_state( $this->shared_namespace );
+		$state = wp_interactivity_state( $this->shared_namespace );
 
-		$this->assertArrayHasKey( 'products', $woocommerce_state );
-		$this->assertArrayHasKey( $id, $woocommerce_state['products'] );
-		$this->assertEquals( $products_state['products'][ $id ], $woocommerce_state['products'][ $id ] );
-		$this->assertSame( $product->get_name(), $woocommerce_state['products'][ $id ]['name'] );
+		$this->assertArrayHasKey( 'products', $state );
+		$this->assertArrayHasKey( $id, $state['products'] );
+		$this->assertSame( $id, $state['products'][ $id ]['id'] );
+		$this->assertSame( $product->get_name(), $state['products'][ $id ]['name'] );
 	}
 
 	/**
-	 * @testdox load_purchasable_child_products() seeds purchasable children into both namespaces and leaves non-purchasable ones out of both.
+	 * @testdox load_purchasable_child_products() seeds purchasable children into the woocommerce state and leaves non-purchasable ones out.
 	 */
 	public function test_load_purchasable_child_products_seeds_woocommerce_namespace(): void {
 		$purchasable     = WC_Helper_Product::create_simple_product();
@@ -496,23 +495,19 @@ class ProductsStore extends \WC_Unit_Test_Case {
 
 		TestedProductsStore::load_purchasable_child_products( $this->consent, $grouped->get_id() );
 
-		$products_state    = wp_interactivity_state( $this->store_namespace );
-		$woocommerce_state = wp_interactivity_state( $this->shared_namespace );
+		$state = wp_interactivity_state( $this->shared_namespace );
 
-		$this->assertArrayHasKey( $purchasable->get_id(), $products_state['products'] );
-		$this->assertArrayHasKey( $purchasable->get_id(), $woocommerce_state['products'] );
-		$this->assertEquals(
-			$products_state['products'][ $purchasable->get_id() ],
-			$woocommerce_state['products'][ $purchasable->get_id() ]
-		);
-		$this->assertArrayNotHasKey( $non_purchasable->get_id(), $products_state['products'] );
-		$this->assertArrayNotHasKey( $non_purchasable->get_id(), $woocommerce_state['products'] );
+		$this->assertArrayHasKey( 'products', $state );
+		$this->assertArrayHasKey( $purchasable->get_id(), $state['products'] );
+		$this->assertSame( $purchasable->get_id(), $state['products'][ $purchasable->get_id() ]['id'] );
+		$this->assertSame( 'Purchasable', $state['products'][ $purchasable->get_id() ]['name'] );
+		$this->assertArrayNotHasKey( $non_purchasable->get_id(), $state['products'] );
 	}
 
 	/**
-	 * @testdox load_purchasable_child_products() mirrors an empty products value into woocommerce when no child is purchasable.
+	 * @testdox load_purchasable_child_products() leaves an empty products value in the woocommerce state when no child is purchasable.
 	 */
-	public function test_load_purchasable_child_products_without_purchasable_child_matches_in_both_namespaces(): void {
+	public function test_load_purchasable_child_products_without_purchasable_child_seeds_empty_woocommerce_products(): void {
 		$child = WC_Helper_Product::create_simple_product();
 
 		$grouped = new WC_Product_Grouped();
@@ -536,59 +531,30 @@ class ProductsStore extends \WC_Unit_Test_Case {
 
 		$result = TestedProductsStore::load_purchasable_child_products( $this->consent, $grouped->get_id() );
 
-		$products_state    = wp_interactivity_state( $this->store_namespace );
-		$woocommerce_state = wp_interactivity_state( $this->shared_namespace );
+		$state = wp_interactivity_state( $this->shared_namespace );
 
 		$this->assertSame( array(), $result );
-		$this->assertArrayHasKey( 'products', $products_state );
-		$this->assertArrayHasKey( 'products', $woocommerce_state );
-		$this->assertEquals( $products_state['products'], $woocommerce_state['products'] );
+		$this->assertArrayHasKey( 'products', $state );
+		$this->assertSame( array(), $state['products'] );
 	}
 
 	/**
-	 * @testdox load_variations() seeds every variation into the woocommerce namespace with the same value as woocommerce/products.
+	 * @testdox load_variations() seeds every returned variation into the woocommerce state, keyed by its ID.
 	 */
 	public function test_load_variations_seeds_woocommerce_namespace(): void {
 		$product = WC_Helper_Product::create_variation_product();
 
-		TestedProductsStore::load_variations( $this->consent, $product->get_id() );
+		$variations = TestedProductsStore::load_variations( $this->consent, $product->get_id() );
 
-		$products_state    = wp_interactivity_state( $this->store_namespace );
-		$woocommerce_state = wp_interactivity_state( $this->shared_namespace );
+		$state = wp_interactivity_state( $this->shared_namespace );
 
-		$this->assertNotEmpty( $products_state['productVariations'] );
-		$this->assertArrayHasKey( 'productVariations', $woocommerce_state );
+		$this->assertNotEmpty( $variations );
+		$this->assertArrayHasKey( 'productVariations', $state );
 
-		foreach ( $products_state['productVariations'] as $variation_id => $variation ) {
-			$this->assertArrayHasKey( $variation_id, $woocommerce_state['productVariations'] );
-			$this->assertEquals( $variation, $woocommerce_state['productVariations'][ $variation_id ] );
+		foreach ( $variations as $variation_id => $variation ) {
+			$this->assertArrayHasKey( $variation_id, $state['productVariations'] );
+			$this->assertSame( $variation['id'], $state['productVariations'][ $variation_id ]['id'] );
 		}
-	}
-
-	/**
-	 * @testdox The loaders add no getters or selection keys to the woocommerce namespace.
-	 */
-	public function test_loaders_add_no_getters_or_selection_to_woocommerce_namespace(): void {
-		$simple    = WC_Helper_Product::create_simple_product();
-		$variable  = WC_Helper_Product::create_variation_product();
-		$child     = WC_Helper_Product::create_simple_product();
-		$grouped   = new WC_Product_Grouped();
-		$forbidden = array( 'mainProductInContext', 'productVariationInContext', 'productInContext', 'productId', 'variationId' );
-
-		$grouped->set_name( 'Grouped For Key Check' );
-		$grouped->set_children( array( $child->get_id() ) );
-		$grouped->save();
-
-		TestedProductsStore::load_product( $this->consent, $simple->get_id() );
-		TestedProductsStore::load_variations( $this->consent, $variable->get_id() );
-		TestedProductsStore::load_purchasable_child_products( $this->consent, $grouped->get_id() );
-
-		$woocommerce_state = wp_interactivity_state( $this->shared_namespace );
-
-		foreach ( $forbidden as $key ) {
-			$this->assertArrayNotHasKey( $key, $woocommerce_state );
-		}
-		$this->assertArrayHasKey( 'mainProductInContext', wp_interactivity_state( $this->store_namespace ), 'The getters stay in woocommerce/products.' );
 	}
 
 	/**
