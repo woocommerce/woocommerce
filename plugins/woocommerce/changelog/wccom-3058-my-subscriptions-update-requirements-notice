@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Explain My Subscriptions update failures caused by WordPress or PHP requirements, and keep Try again from reloading the page.

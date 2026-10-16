@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent inaccurate product refunds and Analytics reports when refunding orders through the REST API.
