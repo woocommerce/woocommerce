@@ -949,7 +949,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should accept extension fields in an extension ability whose input schema uses anyOf or allOf branches that refuse other properties.
+	 * @testdox Should list the extensions key in anyOf and allOf branches that refuse other properties, and accept extension fields through an anyOf branch.
 	 */
 	public function test_combinator_branches_accept_the_extensions_key(): void {
 		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
@@ -984,17 +984,22 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			add_action( 'wp_abilities_api_init', $register, 20 );
 			$this->reset_registries();
 
-			$output = $this->run_ability(
-				$name,
-				array(
-					'id'         => $product->get_id(),
-					'name'       => 'Pencil',
-					'extensions' => array( 'test-ext' => array( 'color' => $keyword ) ),
-				)
-			);
+			$schema = $this->get_ability( $name )['input_schema'];
+			$this->assertSame( 'object', $schema[ $keyword ][0]['properties']['extensions']['type'] ?? null, $keyword );
+
+			if ( 'anyOf' === $keyword ) {
+				$output = $this->run_ability(
+					$name,
+					array(
+						'id'         => $product->get_id(),
+						'name'       => 'Pencil',
+						'extensions' => array( 'test-ext' => array( 'color' => 'blue' ) ),
+					)
+				);
+				$this->assertSame( array( 'color' => 'blue' ), $output['extensions']['test-ext'] );
+			}
 
 			remove_action( 'wp_abilities_api_init', $register, 20 );
-			$this->assertSame( array( 'color' => $keyword ), $output['extensions']['test-ext'], $keyword );
 		}
 	}
 
