@@ -20,7 +20,8 @@ defined( 'ABSPATH' ) || exit;
  * Tracks client. Ability input and output are never recorded.
  *
  * WordPress 7.0 only fires hooks around successful executions, so failures there are recorded on shutdown
- * with an `unknown` error code and no duration. WordPress 7.1+ hooks expose every outcome.
+ * with an `unknown` error code and no duration. WordPress 7.1+ hooks expose the other outcomes. A missing
+ * input schema is returned before those hooks and stays `unknown`.
  *
  * @since 11.3.0
  */
@@ -162,6 +163,7 @@ class AbilitiesTracking {
 		}
 
 		add_action( 'wp_ability_invoked', array( $this, 'handle_wp_ability_invoked' ) );
+		add_filter( 'wp_ability_normalize_input', array( $this, 'handle_wp_ability_normalize_input' ), PHP_INT_MAX, 2 );
 		add_filter( 'wp_pre_execute_ability', array( $this, 'handle_wp_pre_execute_ability' ), PHP_INT_MAX, 2 );
 		add_filter( 'wp_ability_validate_input', array( $this, 'handle_wp_ability_validate_input' ), PHP_INT_MAX, 3 );
 		add_filter( 'wp_ability_permission_result', array( $this, 'handle_wp_ability_permission_result' ), PHP_INT_MAX, 2 );
@@ -187,6 +189,24 @@ class AbilitiesTracking {
 		if ( self::is_tracked_ability( $ability_name ) ) {
 			$this->open_frame( $ability_name, false );
 		}
+	}
+
+	/**
+	 * Handle the wp_ability_normalize_input filter (WordPress 7.1+), to record a rejected normalization.
+	 *
+	 * A missing input schema never reaches this filter. That failure stays unclosed and is recorded as unknown.
+	 *
+	 * @internal
+	 *
+	 * @param mixed  $input        The normalized input, or a WP_Error when a filter rejected it. Not recorded.
+	 * @param string $ability_name The ability name.
+	 * @return mixed The unchanged value.
+	 */
+	public function handle_wp_ability_normalize_input( $input, $ability_name ) {
+		if ( is_wp_error( $input ) ) {
+			$this->close_frame( $ability_name, false, $input );
+		}
+		return $input;
 	}
 
 	/**
@@ -403,6 +423,11 @@ class AbilitiesTracking {
 	 * @param array<string, mixed> $properties All Tracks properties of the event.
 	 */
 	protected function send_event( array $properties ): void {
+		$user = wp_get_current_user();
+		// WC_Tracks::record_event() skips the test suite, whose users use the wptests_ table prefix.
+		if ( $user instanceof \WP_User && 'wptests_capabilities' === $user->cap_key ) {
+			return;
+		}
 		\WC_Tracks_Client::record_event_batched( $properties );
 	}
 

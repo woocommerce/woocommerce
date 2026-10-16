@@ -21,7 +21,24 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 
 	private const LONG_ABILITY_ID = 'woocommerce/tracking-test-with-a-long-name-that-goes-past-sixty-four-characters';
 
+	private const NO_SCHEMA_ABILITY_ID = 'woocommerce/tracking-test-no-schema';
+
 	private const SERVER_KEYS = array( 'REQUEST_SCHEME', 'HTTP_HOST', 'REQUEST_URI', 'HTTP_REFERER', 'HTTP_MCP_PROTOCOL_VERSION', 'HTTP_MCP_SESSION_ID', 'A8C_PROXIED_REQUEST' );
+
+	/**
+	 * Hooks that exist only on WordPress 7.1. Removed from this instance to exercise the 7.0 path.
+	 *
+	 * @var string[]
+	 */
+	private const WORDPRESS_7_1_HOOKS = array(
+		'wp_ability_invoked',
+		'wp_pre_execute_ability',
+		'wp_ability_normalize_input',
+		'wp_ability_validate_input',
+		'wp_ability_permission_result',
+		'wp_ability_execute_result',
+		'wp_ability_validate_output',
+	);
 
 	/**
 	 * The System Under Test, with events captured instead of sent.
@@ -119,8 +136,12 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 		global $wp_actions;
 
 		try {
+			if ( isset( $this->sut ) ) {
+				$this->remove_instance_callbacks( $this->sut );
+			}
+
 			// The abilities registry is a singleton that outlives the test.
-			foreach ( array( self::ABILITY_ID, self::INNER_ABILITY_ID, self::UNTRACKED_ABILITY_ID, self::LONG_ABILITY_ID ) as $ability_id ) {
+			foreach ( array( self::ABILITY_ID, self::INNER_ABILITY_ID, self::UNTRACKED_ABILITY_ID, self::LONG_ABILITY_ID, self::NO_SCHEMA_ABILITY_ID ) as $ability_id ) {
 				if ( function_exists( 'wp_has_ability' ) && wp_has_ability( $ability_id ) ) {
 					wp_unregister_ability( $ability_id );
 				}
@@ -449,14 +470,29 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should record a failure without a closing hook as unknown on shutdown.
+	 * @testdox Should record an input-normalization error with its error code.
 	 */
-	public function test_records_failure_without_closing_hook_as_unknown(): void {
+	public function test_records_normalize_input_error(): void {
 		$this->skip_unless_wordpress_exposes_all_outcomes();
 		add_filter( 'wp_ability_normalize_input', fn() => new WP_Error( 'tracking_test_normalize' ) );
 		$this->start_mcp_tool_call();
 
 		wp_get_ability( self::ABILITY_ID )->execute();
+		$this->sut->handle_shutdown();
+
+		$this->assertCount( 1, $this->sut->recorded );
+		$this->assertSame( 'tracking_test_normalize', $this->sut->recorded[0]['error_code'] );
+		$this->assertArrayNotHasKey( 'duration_ms', $this->sut->recorded[0] );
+	}
+
+	/**
+	 * @testdox Should record a missing input schema as unknown, because that failure has no closing hook.
+	 */
+	public function test_records_missing_input_schema_as_unknown(): void {
+		$this->skip_unless_wordpress_exposes_all_outcomes();
+		$this->start_mcp_tool_call();
+
+		wp_get_ability( self::NO_SCHEMA_ABILITY_ID )->execute( array( 'raw' => true ) );
 		$this->sut->handle_shutdown();
 
 		$this->assertCount( 1, $this->sut->recorded );
@@ -523,9 +559,7 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	 * @testdox Should fall back to the execution hooks available in WordPress 7.0.
 	 */
 	public function test_falls_back_to_wordpress_7_0_hooks(): void {
-		foreach ( array( 'wp_ability_invoked', 'wp_pre_execute_ability', 'wp_ability_validate_input', 'wp_ability_permission_result', 'wp_ability_execute_result', 'wp_ability_validate_output' ) as $hook ) {
-			remove_all_filters( $hook );
-		}
+		$this->remove_instance_callbacks( $this->sut, self::WORDPRESS_7_1_HOOKS );
 		$this->start_mcp_tool_call();
 		$ability = wp_get_ability( self::ABILITY_ID );
 
@@ -573,9 +607,7 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	 * @testdox Should record a failed inner call as unknown when its outer call succeeds on WordPress 7.0.
 	 */
 	public function test_records_failed_inner_call_on_wordpress_7_0(): void {
-		foreach ( array( 'wp_ability_invoked', 'wp_pre_execute_ability', 'wp_ability_validate_input', 'wp_ability_permission_result', 'wp_ability_execute_result', 'wp_ability_validate_output' ) as $hook ) {
-			remove_all_filters( $hook );
-		}
+		$this->remove_instance_callbacks( $this->sut, self::WORDPRESS_7_1_HOOKS );
 		$this->inner_result   = new WP_Error( 'tracking_test_inner_failure' );
 		$this->execute_result = function () {
 			wp_get_ability( self::INNER_ABILITY_ID )->execute();
@@ -596,9 +628,7 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	 * @testdox Should keep the client and time of an MCP call whose failure is only recorded at shutdown.
 	 */
 	public function test_keeps_context_of_failures_recorded_at_shutdown(): void {
-		foreach ( array( 'wp_ability_invoked', 'wp_pre_execute_ability', 'wp_ability_validate_input', 'wp_ability_permission_result', 'wp_ability_execute_result', 'wp_ability_validate_output' ) as $hook ) {
-			remove_all_filters( $hook );
-		}
+		$this->remove_instance_callbacks( $this->sut, self::WORDPRESS_7_1_HOOKS );
 		$_SERVER['HTTP_MCP_PROTOCOL_VERSION'] = '2026-07-28';
 		$this->execute_result                 = new WP_Error( 'tracking_test_failure' );
 		$this->register_route_that_runs_ability( 'tracking-mcp/v1', '/mcp', 'POST' );
@@ -618,7 +648,7 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should keep the outer call's result when a recursive call fails without a closing hook.
+	 * @testdox Should keep the outer call's result when a recursive call fails during input normalization.
 	 */
 	public function test_keeps_outer_result_when_recursive_call_fails_without_closing_hook(): void {
 		$this->skip_unless_wordpress_exposes_all_outcomes();
@@ -638,7 +668,7 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 		wp_get_ability( self::ABILITY_ID )->execute();
 		$this->sut->handle_shutdown();
 
-		$this->assertEqualsCanonicalizing( array( 'none', 'unknown' ), array_column( $this->sut->recorded, 'error_code' ), 'The outer success and the inner unknown failure should both be recorded' );
+		$this->assertEqualsCanonicalizing( array( 'none', 'tracking_test_normalize' ), array_column( $this->sut->recorded, 'error_code' ), 'The outer success and the inner normalization error should both be recorded' );
 	}
 
 	/**
@@ -714,9 +744,7 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	 * @testdox Should keep closing hooks matched to their own call after many unclosed failures on WordPress 7.0.
 	 */
 	public function test_keeps_frames_matched_after_many_unclosed_failures(): void {
-		foreach ( array( 'wp_ability_invoked', 'wp_pre_execute_ability', 'wp_ability_validate_input', 'wp_ability_permission_result', 'wp_ability_execute_result', 'wp_ability_validate_output' ) as $hook ) {
-			remove_all_filters( $hook );
-		}
+		$this->remove_instance_callbacks( $this->sut, self::WORDPRESS_7_1_HOOKS );
 		$this->start_mcp_tool_call();
 		$ability = wp_get_ability( self::ABILITY_ID );
 
@@ -812,6 +840,32 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 		$sut->handle_shutdown();
 
 		$this->assertCount( 1, $sut->recorded, 'Only the call on the opted-in site should be recorded' );
+	}
+
+	/**
+	 * @testdox Should not queue Tracks pixels for the unit-test user.
+	 */
+	public function test_does_not_queue_pixels_for_unit_test_users(): void {
+		$queue = new \ReflectionProperty( \WC_Tracks_Client::class, 'pixel_batch_queue' );
+		$queue->setAccessible( true );
+		$before        = count( $queue->getValue() );
+		$user          = wp_get_current_user();
+		$cap_key       = $user->cap_key;
+		$user->cap_key = 'wptests_capabilities';
+		$tracker       = new AbilitiesTracking();
+		$tracker->handle_init();
+
+		try {
+			wp_get_ability( self::ABILITY_ID )->execute();
+			$this->sut->handle_shutdown();
+			$tracker->handle_shutdown();
+		} finally {
+			$user->cap_key = $cap_key;
+			$this->remove_instance_callbacks( $tracker );
+		}
+
+		$this->assertNotEmpty( $this->sut->recorded, 'The call should still be observed by the test double' );
+		$this->assertCount( $before, $queue->getValue() );
 	}
 
 	/**
@@ -940,6 +994,33 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Remove one instance's callbacks so later tests keep theirs.
+	 *
+	 * @param object        $instance  The instance.
+	 * @param string[]|null $only_hooks Limit to these hooks, or null for every hook.
+	 */
+	private function remove_instance_callbacks( object $instance, ?array $only_hooks = null ): void {
+		global $wp_filter;
+
+		$removals = array();
+		foreach ( $wp_filter as $hook_name => $hook ) {
+			if ( null !== $only_hooks && ! in_array( $hook_name, $only_hooks, true ) ) {
+				continue;
+			}
+			foreach ( $hook->callbacks as $priority => $callbacks ) {
+				foreach ( $callbacks as $callback ) {
+					if ( is_array( $callback['function'] ) && $instance === $callback['function'][0] ) {
+						$removals[] = array( $hook_name, $callback['function'], $priority );
+					}
+				}
+			}
+		}
+		foreach ( $removals as $removal ) {
+			remove_filter( $removal[0], $removal[1], $removal[2] );
+		}
+	}
+
+	/**
 	 * Count callbacks of an instance attached to any hook, except the constructor's init hook.
 	 *
 	 * @param object $instance The instance.
@@ -993,23 +1074,24 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 				self::INNER_ABILITY_ID     => fn() => $this->inner_result,
 				self::UNTRACKED_ABILITY_ID => $execute,
 				self::LONG_ABILITY_ID      => $execute,
+				self::NO_SCHEMA_ABILITY_ID => static fn() => array( 'ok' => true ),
 			);
 			foreach ( $abilities as $ability_id => $callback ) {
-				wp_register_ability(
-					$ability_id,
-					array(
-						'label'               => 'Tracking test',
-						'description'         => 'Ability used by the tracking tests.',
-						'category'            => 'woocommerce',
-						'input_schema'        => array(
-							'type'    => 'object',
-							'default' => array(),
-						),
-						'execute_callback'    => $callback,
-						'permission_callback' => fn() => $this->permission,
-						'meta'                => array( 'show_in_rest' => true ),
-					)
+				$args = array(
+					'label'               => 'Tracking test',
+					'description'         => 'Ability used by the tracking tests.',
+					'category'            => 'woocommerce',
+					'execute_callback'    => $callback,
+					'permission_callback' => fn() => $this->permission,
+					'meta'                => array( 'show_in_rest' => true ),
 				);
+				if ( self::NO_SCHEMA_ABILITY_ID !== $ability_id ) {
+					$args['input_schema'] = array(
+						'type'    => 'object',
+						'default' => array(),
+					);
+				}
+				wp_register_ability( $ability_id, $args );
 			}
 		};
 		add_action( 'wp_abilities_api_init', $register_abilities );
