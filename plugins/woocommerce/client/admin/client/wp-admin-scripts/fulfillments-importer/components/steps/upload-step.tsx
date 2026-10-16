@@ -1,0 +1,371 @@
+/**
+ * External dependencies
+ */
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { __, sprintf } from '@wordpress/i18n';
+import {
+	BaseControl,
+	Button,
+	Card,
+	CardBody,
+	CheckboxControl,
+	DropZone,
+	FormFileUpload,
+	Icon,
+	Notice,
+	TextControl,
+} from '@wordpress/components';
+import { chevronDown, chevronUp } from '@wordpress/icons';
+
+/**
+ * Internal dependencies
+ */
+import { prepare } from '../../data/api';
+import { errorMessage } from '../../hooks/use-chunked-import';
+import { downloadCsv } from '../../utils/csv';
+import type { StepComponentProps } from './types';
+
+// The server value arrives through the localized settings once the import endpoints land.
+const FALLBACK_MAX_ROWS = 5000;
+
+const SAMPLE_CSV = [
+	'order_number,tracking_number,shipment_provider,tracking_url,items',
+	'1001,1Z999AA10123456784,UPS,https://www.ups.com/track?tracknum=1Z999AA10123456784,',
+	'1002,9400100000000000000000,USPS,,',
+].join( '\n' );
+
+function formatBytes( bytes: number ): string {
+	if ( bytes < 1024 ) {
+		/* translators: %s: file size in bytes. */
+		return sprintf( __( '%s B', 'woocommerce' ), String( bytes ) );
+	}
+	const kb = bytes / 1024;
+	if ( kb < 1024 ) {
+		/* translators: %s: file size in kilobytes. */
+		return sprintf( __( '%s KB', 'woocommerce' ), kb.toFixed( 1 ) );
+	}
+	/* translators: %s: file size in megabytes. */
+	return sprintf( __( '%s MB', 'woocommerce' ), ( kb / 1024 ).toFixed( 1 ) );
+}
+
+function downloadSampleCsv(): void {
+	downloadCsv( 'fulfillments-sample.csv', SAMPLE_CSV );
+}
+
+/**
+ * The server validates thoroughly; this only keeps obvious non-CSV drops
+ * (images, PDFs) from being staged.
+ */
+export function isCsvLikeFile( file: File ): boolean {
+	return (
+		/\.(csv|txt)$/i.test( file.name ) ||
+		[ 'text/csv', 'text/plain', 'application/csv' ].includes( file.type )
+	);
+}
+
+const UploadStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
+	const [ localError, setLocalError ] = useState< string | null >( null );
+	const [ showAdvanced, setShowAdvanced ] = useState( false );
+
+	// The prepare request in flight, if any. It is aborted when the file
+	// changes, when a new prepare starts and when the step unmounts, so a
+	// late response cannot attach its token to a newer wizard session.
+	const prepareRef = useRef< AbortController | null >( null );
+	useEffect( () => {
+		return () => {
+			prepareRef.current?.abort();
+		};
+	}, [] );
+
+	// Latest generation, read when a response arrives rather than when the
+	// request was sent, so a RESET while this step stays mounted is seen too.
+	const generationRef = useRef( state.generation );
+	useEffect( () => {
+		generationRef.current = state.generation;
+	}, [ state.generation ] );
+
+	// wp_localize_script casts scalars to strings, so coerce before formatting.
+	const maxRows =
+		Number( window.wcFulfillmentsImporterSettings?.maxRows ) ||
+		FALLBACK_MAX_ROWS;
+
+	const setFile = useCallback(
+		( next: File | null ) => {
+			prepareRef.current?.abort();
+			prepareRef.current = null;
+			setLocalError( null );
+			dispatch( { type: 'SET_FILE', file: next } );
+		},
+		[ dispatch ]
+	);
+
+	// Both the picker and the drop zone go through the same check.
+	const acceptFile = useCallback(
+		( next: File | null ) => {
+			if ( ! next ) {
+				return;
+			}
+			if ( ! isCsvLikeFile( next ) ) {
+				setLocalError(
+					__(
+						'Invalid file type. The importer supports CSV and TXT file formats.',
+						'woocommerce'
+					)
+				);
+				return;
+			}
+			setFile( next );
+		},
+		[ setFile ]
+	);
+
+	const onFileChosen = useCallback(
+		( event: React.ChangeEvent< HTMLInputElement > ) => {
+			acceptFile( event.target.files?.[ 0 ] ?? null );
+		},
+		[ acceptFile ]
+	);
+
+	const onFilesDrop = useCallback(
+		( files: File[] ) => acceptFile( files[ 0 ] ?? null ),
+		[ acceptFile ]
+	);
+
+	const onContinue = useCallback( async () => {
+		if ( ! state.file ) {
+			setLocalError(
+				__( 'Choose a CSV file to upload.', 'woocommerce' )
+			);
+			return;
+		}
+		setLocalError( null );
+
+		prepareRef.current?.abort();
+		const controller = new AbortController();
+		prepareRef.current = controller;
+		const generation = state.generation;
+		// True once this attempt was aborted or the wizard restarted; nothing
+		// from it may reach the reducer after that.
+		const isStale = () =>
+			controller.signal.aborted || generationRef.current !== generation;
+
+		dispatch( { type: 'SET_BUSY', value: true } );
+		// Keep a copy of the content: the File handle references the on-disk
+		// file, so a later read fails if it was moved or edited, and the
+		// summary's failed-rows export needs the bytes that were uploaded.
+		let text: string | null = null;
+		try {
+			text = await state.file.text();
+		} catch ( error ) {
+			// Breadcrumb for a later export failure.
+			window.console?.warn?.(
+				'Fulfillments importer: could not cache the file content.',
+				error
+			);
+		}
+		if ( isStale() ) {
+			return;
+		}
+		dispatch( { type: 'SET_FILE_TEXT', text } );
+		try {
+			const response = await prepare( {
+				file: state.file,
+				delimiter: state.delimiter,
+				notifyCustomer: state.notifyCustomer,
+				updateExisting: state.updateExisting,
+				signal: controller.signal,
+			} );
+			if ( isStale() ) {
+				return;
+			}
+			dispatch( { type: 'PREPARE_OK', payload: response } );
+		} catch ( error ) {
+			if ( isStale() ) {
+				return;
+			}
+			// apiFetch rejects with a plain object, so extract the server's
+			// actionable message instead of collapsing to a generic one.
+			dispatch( { type: 'ERROR', message: errorMessage( error ) } );
+		} finally {
+			if ( prepareRef.current === controller ) {
+				prepareRef.current = null;
+			}
+		}
+	}, [
+		state.file,
+		state.delimiter,
+		state.notifyCustomer,
+		state.updateExisting,
+		state.generation,
+		dispatch,
+	] );
+
+	const fileLabel = state.file
+		? sprintf(
+				/* translators: 1: file name, 2: file size */
+				__( '%1$s (%2$s)', 'woocommerce' ),
+				state.file.name,
+				formatBytes( state.file.size )
+		  )
+		: __( 'No file selected.', 'woocommerce' );
+
+	return (
+		<div className="woocommerce-fulfillment-importer-step woocommerce-fulfillment-importer-step--upload">
+			<Card className="woocommerce-fulfillment-importer-step__card">
+				<CardBody>
+					<h2>{ __( 'Upload a CSV file', 'woocommerce' ) }</h2>
+					<p>
+						{ __(
+							'Choose a CSV exported from your warehouse or 3PL. We support the common header aliases, and you can adjust the mapping in the next step.',
+							'woocommerce'
+						) }
+					</p>
+
+					{ localError || state.error ? (
+						<Notice
+							status="error"
+							isDismissible
+							onRemove={ () => {
+								setLocalError( null );
+								dispatch( { type: 'CLEAR_ERROR' } );
+							} }
+						>
+							{ localError || state.error }
+						</Notice>
+					) : null }
+
+					{ /* The file input is hidden, so the label is visual only. */ }
+					<BaseControl __nextHasNoMarginBottom>
+						<BaseControl.VisualLabel>
+							{ __( 'CSV file', 'woocommerce' ) }
+						</BaseControl.VisualLabel>
+						<div className="woocommerce-fulfillment-importer-dropzone">
+							<DropZone
+								label={ __(
+									'Drop your CSV file here',
+									'woocommerce'
+								) }
+								onFilesDrop={ onFilesDrop }
+							/>
+							<span className="woocommerce-fulfillment-importer-dropzone__hint">
+								{ __( 'Drag a CSV file here', 'woocommerce' ) }
+							</span>
+							<FormFileUpload
+								accept=".csv,text/csv,text/plain"
+								onChange={ onFileChosen }
+								render={ ( { openFileDialog } ) => (
+									<Button
+										variant="secondary"
+										onClick={ openFileDialog }
+									>
+										{ __(
+											'Choose CSV file',
+											'woocommerce'
+										) }
+									</Button>
+								) }
+							/>
+						</div>
+					</BaseControl>
+
+					<p
+						className="woocommerce-fulfillment-importer-file-label"
+						aria-live="polite"
+					>
+						{ fileLabel }
+					</p>
+
+					<p className="woocommerce-fulfillment-importer-file-requirements">
+						{ __(
+							'Required columns: order number, tracking number, carrier. Optional: tracking URL, items.',
+							'woocommerce'
+						) }
+					</p>
+
+					<div className="woocommerce-fulfillment-importer-file-meta">
+						<Button variant="link" onClick={ downloadSampleCsv }>
+							{ __(
+								'Download a sample CSV file',
+								'woocommerce'
+							) }
+						</Button>
+						<span>
+							{ sprintf(
+								/* translators: %s: maximum number of rows per file. */
+								__( 'Up to %s rows per file', 'woocommerce' ),
+								maxRows.toLocaleString()
+							) }
+						</span>
+					</div>
+
+					<CheckboxControl
+						__nextHasNoMarginBottom
+						label={ __(
+							'Update existing fulfillments when the tracking number matches.',
+							'woocommerce'
+						) }
+						checked={ state.updateExisting }
+						onChange={ ( value: boolean ) =>
+							dispatch( { type: 'SET_UPDATE_EXISTING', value } )
+						}
+					/>
+				</CardBody>
+			</Card>
+
+			<Card className="woocommerce-fulfillment-importer-step__card">
+				<CardBody>
+					{ /* A heading inside a button loses its role, not the reverse. */ }
+					<h2 className="woocommerce-fulfillment-importer-advanced-toggle">
+						<button
+							type="button"
+							aria-expanded={ showAdvanced }
+							aria-controls="wc-fulfillments-importer-advanced"
+							onClick={ () => setShowAdvanced( ( v ) => ! v ) }
+						>
+							{ __( 'Advanced options', 'woocommerce' ) }
+							<Icon
+								icon={ showAdvanced ? chevronUp : chevronDown }
+							/>
+						</button>
+					</h2>
+					<div
+						id="wc-fulfillments-importer-advanced"
+						hidden={ ! showAdvanced }
+					>
+						<TextControl
+							__next40pxDefaultSize
+							__nextHasNoMarginBottom
+							label={ __( 'CSV delimiter', 'woocommerce' ) }
+							help={ __(
+								'Single character used to separate columns in the CSV. Defaults to comma.',
+								'woocommerce'
+							) }
+							value={ state.delimiter }
+							placeholder=","
+							maxLength={ 1 }
+							onChange={ ( value: string ) =>
+								dispatch( {
+									type: 'SET_DELIMITER',
+									delimiter: value.slice( 0, 1 ),
+								} )
+							}
+						/>
+					</div>
+				</CardBody>
+			</Card>
+
+			<footer className="woocommerce-fulfillment-importer-step__footer">
+				<Button
+					variant="primary"
+					onClick={ onContinue }
+					isBusy={ state.isBusy }
+					disabled={ ! state.file || state.isBusy }
+				>
+					{ __( 'Continue', 'woocommerce' ) }
+				</Button>
+			</footer>
+		</div>
+	);
+};
+
+export default UploadStep;
