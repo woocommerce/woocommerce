@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop Mini-Cart color settings from adding a class key to the theme's color palette.
