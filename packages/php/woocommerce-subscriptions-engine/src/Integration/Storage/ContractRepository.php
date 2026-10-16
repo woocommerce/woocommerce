@@ -213,8 +213,8 @@ final class ContractRepository {
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
 	/**
 	 * Write the named contract columns from the entity in one statement, and replace items /
-	 * addresses when named. With `$lock` the row write lands only while that lock lives; without
-	 * one only while no lock lives, and items / addresses are replaced under an internal lock.
+	 * addresses when named, all under `$lock`, or without one under an internal lock taken and
+	 * released here (refused while another operation holds the lock).
 	 *
 	 * @param Contract           $contract Contract carrying the values. Must have an id.
 	 * @param array<int, string> $fields   Contract column names, plus `items` / `addresses`.
@@ -244,8 +244,7 @@ final class ContractRepository {
 			}
 		}
 
-		$replaces_children = in_array( 'items', $fields, true ) || in_array( 'addresses', $fields, true );
-		if ( null !== $lock || ! $replaces_children ) {
+		if ( null !== $lock ) {
 			return $this->write_fields( $contract, $fields, $lock );
 		}
 
@@ -282,11 +281,11 @@ final class ContractRepository {
 	 *
 	 * @param Contract           $contract Contract carrying its id and the values.
 	 * @param array<int, string> $fields   Requested fields (validated).
-	 * @param ContractLock|null  $lock     The lock, or null (row-only writes).
+	 * @param ContractLock       $lock     The caller's or the internal lock.
 	 * @return bool False when the contract row no longer exists.
 	 * @throws ContractLockedException If the fence refuses the write.
 	 */
-	private function write_fields( Contract $contract, array $fields, ?ContractLock $lock ): bool {
+	private function write_fields( Contract $contract, array $fields, ContractLock $lock ): bool {
 		$contract_id = (int) $contract->get_id();
 		$columns     = array_intersect_key( $contract->to_storage(), array_flip( $fields ) );
 		$updated     = $this->write_contract_row( $contract_id, $columns, $lock );
@@ -298,10 +297,6 @@ final class ContractRepository {
 				return false;
 			}
 			throw self::locked_exception( $contract_id, $holder ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the exception message is not output.
-		}
-
-		if ( null === $lock ) {
-			return true;
 		}
 
 		if ( in_array( 'items', $fields, true ) ) {
@@ -2177,17 +2172,17 @@ final class ContractRepository {
 
 	/**
 	 * Write contract columns (plus `date_updated_gmt`, and a `write_seq` bump so a matched row
-	 * always counts as changed) in one fenced UPDATE: with `$lock` it matches only while that
-	 * lock lives, without one only while no lock lives. Strings are checked against their column
-	 * lengths first, since WordPress runs without strict SQL modes and MySQL would shorten them.
+	 * always counts as changed) in one UPDATE that matches only while `$lock` lives. Strings are
+	 * checked against their column lengths first, since WordPress runs without strict SQL modes
+	 * and MySQL would shorten them.
 	 *
 	 * @param int                            $contract_id Contract id.
 	 * @param array<string, int|string|null> $columns     Contract column values keyed by column name (from {@see Contract::to_storage()}).
-	 * @param ContractLock|null              $lock        The caller's lock, or null.
+	 * @param ContractLock                   $lock        The held lock.
 	 * @return int The number of rows the statement changed.
 	 * @throws \RuntimeException If a value is longer than its column, or the write fails.
 	 */
-	private function write_contract_row( int $contract_id, array $columns, ?ContractLock $lock ): int {
+	private function write_contract_row( int $contract_id, array $columns, ContractLock $lock ): int {
 		global $wpdb;
 
 		$table                       = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
@@ -2212,12 +2207,9 @@ final class ContractRepository {
 		}
 
 		$values[] = $contract_id;
+		$values[] = $lock->get_state()->get_token();
 		$set      = implode( ', ', $assignments );
-		$fence    = self::no_live_lock();
-		if ( null !== $lock ) {
-			$fence    = self::HOLDS_LOCK;
-			$values[] = $lock->get_state()->get_token();
-		}
+		$fence    = self::HOLDS_LOCK;
 
 		// Column names come from the entity's storage keys, never from input; every value is a placeholder.
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare

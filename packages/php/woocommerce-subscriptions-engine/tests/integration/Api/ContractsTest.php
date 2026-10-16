@@ -1463,6 +1463,41 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox An unlocked row-only update takes and releases the internal lock, is refused while another operation holds the lock, and reads as missing for an unknown contract.
+	 */
+	public function test_an_unlocked_row_update_uses_the_internal_lock(): void {
+		$id = $this->contract_with_currency();
+
+		$acquires = 0;
+		$record   = static function ( $query ) use ( &$acquires ) {
+			if ( is_string( $query ) && 1 === preg_match( "/SET lock_token = '[0-9a-f]{32}'/", $query ) ) {
+				++$acquires;
+			}
+			return $query;
+		};
+		add_filter( 'query', $record );
+		try {
+			$this->assertInstanceOf( ContractView::class, Contracts::update( $id, array( 'status' => ContractStatus::ON_HOLD ) ) );
+		} finally {
+			remove_filter( 'query', $record );
+		}
+		$this->assertSame( 1, $acquires, 'The internal lock is taken once.' );
+		$this->assertNull( $this->view( $id )->get_lock_state(), 'The internal lock is released.' );
+		$this->assertSame( ContractStatus::ON_HOLD, $this->view( $id )->get_status() );
+
+		$this->take_lock( $id, 'renewal' );
+		try {
+			Contracts::update( $id, array( 'status' => ContractStatus::ACTIVE ) );
+			$this->fail( 'Expected a conflict.' );
+		} catch ( ContractLockedException $e ) {
+			$this->assertSame( 'renewal', $e->get_operation() );
+		}
+		$this->assertSame( ContractStatus::ON_HOLD, $this->view( $id )->get_status() );
+
+		$this->assertNull( Contracts::update( 999999, array( 'status' => ContractStatus::ACTIVE ) ) );
+	}
+
+	/**
 	 * @testdox An unlocked items update refused by a live lock reads the holder once to report it.
 	 */
 	public function test_a_refused_internal_lock_reads_the_holder_once(): void {

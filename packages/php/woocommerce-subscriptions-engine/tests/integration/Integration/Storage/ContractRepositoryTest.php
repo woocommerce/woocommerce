@@ -1214,7 +1214,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox update_fields writes the contract row in exactly one UPDATE statement.
+	 * @testdox An unlocked update_fields writes the contract row in one UPDATE, between the internal lock's acquire and release.
 	 */
 	public function test_a_contract_write_is_one_update_statement(): void {
 		$id = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
@@ -1230,7 +1230,11 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 			}
 		);
 
-		$this->assertCount( 1, $statements, 'update_fields() writes status and due moment in one UPDATE.' );
+		$this->assertCount( 3, $statements, 'The internal lock acquire, the row write, the release.' );
+		$this->assertMatchesRegularExpression( "/SET lock_token = '[0-9a-f]{32}'/", $statements[0] );
+		$this->assertStringContainsString( '`status` = ', $statements[1] );
+		$this->assertStringContainsString( '`next_payment_gmt` = NULL', $statements[1], 'Status and due moment are written in one UPDATE.' );
+		$this->assertStringContainsString( 'SET lock_token = NULL', $statements[2] );
 		$stored = $this->sut->find( $id );
 		$this->assertInstanceOf( Contract::class, $stored );
 		$this->assertSame( ContractStatus::ON_HOLD, $stored->get_status() );
