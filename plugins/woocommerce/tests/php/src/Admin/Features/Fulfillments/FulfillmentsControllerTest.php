@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Admin\Features\Fulfillments;
 
 use Automattic\WooCommerce\Admin\Features\Fulfillments\DataStore\FulfillmentsDataStore;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentsController;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\Importer\ImportSession;
 use WC_Unit_Test_Case;
 
 /**
@@ -45,6 +46,19 @@ class FulfillmentsControllerTest extends WC_Unit_Test_Case {
 			update_option( 'woocommerce_feature_fulfillments_enabled', $this->original_fulfillments_flag );
 		}
 		parent::tearDown();
+	}
+
+	/**
+	 * @testdox register() attaches the import session cleanup handler even while the feature flag is off.
+	 */
+	public function test_register_attaches_cleanup_handler_with_feature_disabled(): void {
+		update_option( 'woocommerce_feature_fulfillments_enabled', 'no' );
+		remove_action( ImportSession::CLEANUP_HOOK, array( ImportSession::class, 'handle_cleanup_hook' ), 10 );
+		$this->assertFalse( has_action( ImportSession::CLEANUP_HOOK, array( ImportSession::class, 'handle_cleanup_hook' ) ) );
+
+		$this->sut->register();
+
+		$this->assertSame( 10, has_action( ImportSession::CLEANUP_HOOK, array( ImportSession::class, 'handle_cleanup_hook' ) ) );
 	}
 
 	/**
