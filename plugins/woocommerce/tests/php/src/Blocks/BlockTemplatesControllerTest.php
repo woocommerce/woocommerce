@@ -1,14 +1,19 @@
 <?php
-declare( strict_types = 1 );
+
+declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks;
 
 use Automattic\WooCommerce\Blocks\BlockTemplatesController;
+use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
+use Automattic\WooCommerce\Blocks\Templates\AbstractTemplatePart;
+use Automattic\WooCommerce\Blocks\Templates\AbstractTemplateWithFallback;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 use WC_Unit_Test_Case;
+use WP_Block_Template;
 
 /**
- * Tests for the BlockTemplatesController class.
+ * Integration tests for the block templates controller.
  */
 class BlockTemplatesControllerTest extends WC_Unit_Test_Case {
 
@@ -20,160 +25,463 @@ class BlockTemplatesControllerTest extends WC_Unit_Test_Case {
 	private $sut;
 
 	/**
-	 * Post IDs created during a test.
-	 *
-	 * @var int[]
-	 */
-	private $created_template_part_ids = array();
-
-	/**
-	 * Active theme before each test, restored in tearDown.
+	 * Original active theme stylesheet.
 	 *
 	 * @var string
 	 */
-	private $original_theme;
+	private $original_stylesheet;
 
 	/**
-	 * Set up test fixtures.
+	 * Set up a block theme and isolated template caches.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->original_theme = get_stylesheet();
-		switch_theme( 'twentytwentyfour' );
+
+		$this->original_stylesheet = get_stylesheet();
+		switch_theme( 'twentytwentytwo' );
 		$this->sut = new BlockTemplatesController();
-		$this->flush_block_template_caches();
+		wp_cache_delete_multiple( array( 'wp_template-ids', 'wp_template_part-ids' ), 'woocommerce_blocks' );
 	}
 
 	/**
-	 * Tear down test fixtures.
+	 * Restore the theme.
+	 *
+	 * The posts, terms and object-cache entries this class creates go back with the
+	 * transaction rollback and the cache flush the base class already performs.
 	 */
 	public function tearDown(): void {
-		foreach ( $this->created_template_part_ids as $post_id ) {
-			wp_delete_post( $post_id, true );
-		}
-		$this->created_template_part_ids = array();
-		$this->flush_block_template_caches();
-		switch_theme( $this->original_theme );
+		switch_theme( $this->original_stylesheet );
+
 		parent::tearDown();
 	}
 
 	/**
-	 * @testdox Should not prepend customised WooCommerce template parts when querying by wp_id.
+	 * @testdox WooCommerce registers its default templates, wires the taxonomy fallbacks, and exposes exact file-backed template and part objects.
 	 */
-	public function test_wp_id_query_does_not_prepend_unrelated_woo_templates(): void {
-		$woo_template_part   = $this->create_template_part( 'woo-custom-template-part' . uniqid(), BlockTemplateUtils::PLUGIN_SLUG );
-		$theme_template_part = $this->create_template_part( 'theme-custom-template-part' . uniqid(), get_stylesheet() );
-		$this->flush_block_template_caches();
+	public function test_registered_template_catalog_and_directories(): void {
+		$wp_registry       = \WP_Block_Templates_Registry::get_instance();
+		$registered_before = $wp_registry->get_all_registered();
 
-		$new_template = BlockTemplateUtils::build_template_result_from_post( $theme_template_part );
-		$result       = $this->sut->add_db_templates_with_woo_slug(
-			array( $new_template ),
-			array( 'wp_id' => $theme_template_part->ID ),
-			'wp_template_part'
+		$registered_names = array(
+			'woocommerce//archive-product',
+			'woocommerce//coming-soon',
+			'woocommerce//order-confirmation',
+			'woocommerce//page-cart',
+			'woocommerce//page-checkout',
+			'woocommerce//product-search-results',
+			'woocommerce//single-product',
+			'woocommerce//taxonomy-product_attribute',
 		);
 
-		$this->assertNotEmpty( $result, 'A wp_id query should return the requested template part.' );
-		$this->assertSame(
-			$theme_template_part->ID,
-			(int) $result[0]->wp_id,
-			'create_item uses the first result as the created template part.'
-		);
-
-		foreach ( $result as $template ) {
-			$this->assertSame(
-				$theme_template_part->ID,
-				(int) ( $template->wp_id ?? 0 ),
-				'A wp_id query must not include unrelated WooCommerce templates.'
-			);
+		foreach ( $registered_names as $registered_name ) {
+			$this->assertArrayNotHasKey( $registered_name, $registered_before, "{$registered_name} must start unregistered." );
 		}
 
-		$this->assertNotContains(
-			$woo_template_part->post_name,
-			array_column( $result, 'slug' ),
-			'Customised WooCommerce template parts must not leak into wp_id queries for other parts.'
-		);
+		try {
+			$registry = new BlockTemplatesRegistry();
+			$registry->init();
+
+			foreach ( $registered_names as $registered_name ) {
+				$template = $wp_registry->get_registered( $registered_name );
+				$this->assertInstanceOf( WP_Block_Template::class, $template );
+				$this->assertSame( get_stylesheet() . '//' . $template->slug, $template->id );
+				$this->assertSame( get_stylesheet(), $template->theme );
+				$this->assertSame( 'woocommerce', $template->plugin );
+				$this->assertSame( 'plugin', $template->source );
+				$this->assertSame( 'plugin', $template->origin );
+				$this->assertSame( 'wp_template', $template->type );
+				$this->assertSame( 'publish', $template->status );
+				$this->assertNotSame( '', trim( $template->content ) );
+			}
+
+			// Taxonomy templates skip register_block_template(), so the registry calling
+			// init() on them is their only wiring. Check the hooks that call attaches.
+			$fallback_template_slugs = array(
+				'taxonomy-product_cat',
+				'taxonomy-product_tag',
+				'taxonomy-product_attribute',
+				'taxonomy-product_brand',
+			);
+			foreach ( $fallback_template_slugs as $fallback_template_slug ) {
+				$fallback_template = $registry->get_template( $fallback_template_slug );
+				$this->assertInstanceOf( AbstractTemplateWithFallback::class, $fallback_template, "{$fallback_template_slug} must be in the registry." );
+				$this->assertSame(
+					1,
+					has_filter( 'taxonomy_template_hierarchy', array( $fallback_template, 'template_hierarchy' ) ),
+					"{$fallback_template_slug} must hook taxonomy_template_hierarchy."
+				);
+				$this->assertSame(
+					10,
+					has_action( 'template_redirect', array( $fallback_template, 'render_block_template' ) ),
+					"{$fallback_template_slug} must hook template_redirect."
+				);
+			}
+
+			$template_slugs = array(
+				'archive-product',
+				'product-search-results',
+				'taxonomy-product_attribute',
+				'single-product',
+				'page-cart',
+				'page-checkout',
+				'order-confirmation',
+			);
+			foreach ( $template_slugs as $template_slug ) {
+				$this->assert_file_template_contract( $template_slug, 'wp_template' );
+			}
+
+			foreach ( array( 'mini-cart', 'external-product-add-to-cart-with-options', 'checkout-header' ) as $template_part_slug ) {
+				$this->assertInstanceOf( AbstractTemplatePart::class, $registry->get_template( $template_part_slug ), "{$template_part_slug} must be in the registry." );
+				$this->assert_file_template_contract( $template_part_slug, 'wp_template_part' );
+			}
+
+			$plugin_root = dirname( __DIR__, 4 );
+			$this->assertFileExists( $plugin_root . '/templates/templates/archive-product.html' );
+			$this->assertFileExists( $plugin_root . '/templates/parts/external-product-add-to-cart-with-options.html' );
+		} finally {
+			// WP_Block_Templates_Registry is a static singleton the base teardown does
+			// not reach; $wp_filter it rebuilds from the suite baseline on its own.
+			$registered_after = $wp_registry->get_all_registered();
+			foreach ( array_diff( array_keys( $registered_after ), array_keys( $registered_before ) ) as $registered_name ) {
+				unregister_block_template( $registered_name );
+			}
+		}
 	}
 
 	/**
-	 * @testdox Should still return a customised WooCommerce template part when queried by its own wp_id.
+	 * @testdox Theme customizations suppress duplicate Woo customizations until the theme customization is deleted.
 	 */
-	public function test_wp_id_query_returns_matching_customised_woo_template(): void {
-		$woo_template_part = $this->create_template_part( 'woo-custom-template-part' . uniqid(), BlockTemplateUtils::PLUGIN_SLUG );
-		$this->create_template_part( 'other-woo-custom-template-part' . uniqid(), BlockTemplateUtils::PLUGIN_SLUG );
-		$this->flush_block_template_caches();
+	public function test_resolves_saved_template_and_part_precedence(): void {
+		$theme_slug = get_stylesheet();
 
-		$result = $this->sut->add_db_templates_with_woo_slug(
+		$template_woo_id        = $this->create_template_post(
+			'archive-product',
+			'Woo customized catalog',
+			'wp_template',
+			BlockTemplateUtils::PLUGIN_SLUG
+		);
+		$template_theme_id      = $this->create_template_post(
+			'archive-product',
+			'Theme customized catalog',
+			'wp_template',
+			$theme_slug
+		);
+		$template_current_id    = $this->create_template_post(
+			'page-cart',
+			'Woo current-origin cart',
+			'wp_template',
+			BlockTemplateUtils::PLUGIN_SLUG
+		);
+		$template_deprecated_id = $this->create_template_post(
+			'product-search-results',
+			'Woo deprecated-origin search',
+			'wp_template',
+			BlockTemplateUtils::DEPRECATED_PLUGIN_SLUG
+		);
+
+		$theme_template         = $this->build_template_result( $template_theme_id );
+		$theme_template->origin = 'theme';
+		$template_query         = array(
+			'slug__in' => array( 'archive-product', 'page-cart', 'product-search-results' ),
+		);
+
+		$template_results = $this->sut->add_db_templates_with_woo_slug(
+			array( $theme_template ),
+			$template_query,
+			'wp_template'
+		);
+
+		$this->assert_same_template_sequence(
+			$template_results,
+			$this->sut->add_db_templates_with_woo_slug( array( $theme_template ), $template_query, 'wp_template' )
+		);
+		$this->assertSame(
+			array( 'archive-product', 'page-cart', 'product-search-results' ),
+			$this->sorted_slugs( $template_results )
+		);
+		$this->assert_template_contract(
+			$this->find_template( $template_results, 'archive-product' ),
+			$template_theme_id,
+			$theme_slug,
+			'theme',
+			'Theme customized catalog',
+			'wp_template'
+		);
+		$this->assert_template_contract(
+			$this->find_template( $template_results, 'page-cart' ),
+			$template_current_id,
+			BlockTemplateUtils::PLUGIN_SLUG,
+			'plugin',
+			'Woo current-origin cart',
+			'wp_template'
+		);
+		$this->assert_template_contract(
+			$this->find_template( $template_results, 'product-search-results' ),
+			$template_deprecated_id,
+			BlockTemplateUtils::DEPRECATED_PLUGIN_SLUG,
+			'plugin',
+			'Woo deprecated-origin search',
+			'wp_template'
+		);
+
+		wp_delete_post( $template_theme_id, true );
+		$template_results_without_theme = $this->sut->add_db_templates_with_woo_slug(
 			array(),
-			array( 'wp_id' => $woo_template_part->ID ),
+			$template_query,
+			'wp_template'
+		);
+		$this->assert_template_contract(
+			$this->find_template( $template_results_without_theme, 'archive-product' ),
+			$template_woo_id,
+			BlockTemplateUtils::PLUGIN_SLUG,
+			'plugin',
+			'Woo customized catalog',
+			'wp_template'
+		);
+
+		$part_woo_id        = $this->create_template_post(
+			'external-product-add-to-cart-with-options',
+			'Woo customized external options',
+			'wp_template_part',
+			BlockTemplateUtils::PLUGIN_SLUG
+		);
+		$part_theme_id      = $this->create_template_post(
+			'external-product-add-to-cart-with-options',
+			'Theme customized external options',
+			'wp_template_part',
+			$theme_slug
+		);
+		$part_deprecated_id = $this->create_template_post(
+			'mini-cart',
+			'Woo deprecated-origin mini-cart',
+			'wp_template_part',
+			BlockTemplateUtils::DEPRECATED_PLUGIN_SLUG
+		);
+
+		$theme_part         = $this->build_template_result( $part_theme_id );
+		$theme_part->origin = 'theme';
+		$part_query         = array(
+			'slug__in' => array( 'external-product-add-to-cart-with-options', 'mini-cart' ),
+		);
+		$part_results       = $this->sut->add_db_templates_with_woo_slug(
+			array( $theme_part ),
+			$part_query,
 			'wp_template_part'
 		);
 
-		$this->assertNotEmpty( $result, 'Customised WooCommerce template parts must remain findable by wp_id.' );
+		$this->assert_same_template_sequence(
+			$part_results,
+			$this->sut->add_db_templates_with_woo_slug( array( $theme_part ), $part_query, 'wp_template_part' )
+		);
 		$this->assertSame(
-			$woo_template_part->ID,
-			(int) $result[0]->wp_id,
-			'The matching customised WooCommerce template part should be returned first.'
+			array( 'external-product-add-to-cart-with-options', 'mini-cart' ),
+			$this->sorted_slugs( $part_results )
+		);
+		$this->assert_template_contract(
+			$this->find_template( $part_results, 'external-product-add-to-cart-with-options' ),
+			$part_theme_id,
+			$theme_slug,
+			'theme',
+			'Theme customized external options',
+			'wp_template_part'
+		);
+		$this->assert_template_contract(
+			$this->find_template( $part_results, 'mini-cart' ),
+			$part_deprecated_id,
+			BlockTemplateUtils::DEPRECATED_PLUGIN_SLUG,
+			'plugin',
+			'Woo deprecated-origin mini-cart',
+			'wp_template_part'
 		);
 
-		foreach ( $result as $template ) {
-			$this->assertSame(
-				$woo_template_part->ID,
-				(int) ( $template->wp_id ?? 0 ),
-				'A wp_id query must not include other customised WooCommerce templates.'
-			);
-		}
+		wp_delete_post( $part_theme_id, true );
+		$part_results_without_theme = $this->sut->add_db_templates_with_woo_slug(
+			array(),
+			$part_query,
+			'wp_template_part'
+		);
+		$this->assert_template_contract(
+			$this->find_template( $part_results_without_theme, 'external-product-add-to-cart-with-options' ),
+			$part_woo_id,
+			BlockTemplateUtils::PLUGIN_SLUG,
+			'plugin',
+			'Woo customized external options',
+			'wp_template_part'
+		);
 	}
 
 	/**
-	 * @testdox Should still include customised WooCommerce template parts when the query has no wp_id.
-	 */
-	public function test_query_without_wp_id_includes_customised_woo_templates(): void {
-		$woo_template_part = $this->create_template_part( 'woo-custom-template-part' . uniqid(), BlockTemplateUtils::PLUGIN_SLUG );
-		$this->flush_block_template_caches();
-
-		$result = $this->sut->add_db_templates_with_woo_slug( array(), array(), 'wp_template_part' );
-
-		$this->assertContains(
-			$woo_template_part->post_name,
-			array_column( $result, 'slug' ),
-			'Unfiltered queries should still surface customised WooCommerce template parts.'
-		);
-	}
-
-	/**
-	 * Creates a template part post attributed to a theme.
+	 * Build a template result from a fixture post with explicit type guards.
 	 *
-	 * @param string $slug          Post slug.
-	 * @param string $theme         Theme term name.
-	 * @return \WP_Post
+	 * @param int $post_id Template post ID.
+	 * @return WP_Block_Template
 	 */
-	private function create_template_part( string $slug, string $theme ): \WP_Post {
-		$term = get_term_by( 'name', $theme, 'wp_theme', ARRAY_A );
-		if ( ! $term ) {
-			$term = wp_insert_term( $theme, 'wp_theme' );
+	private function build_template_result( int $post_id ): WP_Block_Template {
+		$post = get_post( $post_id );
+		if ( ! $post instanceof \WP_Post ) {
+			throw new \RuntimeException( 'The template fixture post is unavailable.' );
 		}
 
+		$template = BlockTemplateUtils::build_template_result_from_post( $post );
+		if ( is_wp_error( $template ) ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Preserve the exact fixture error in the test failure.
+			throw new \RuntimeException( $template->get_error_message() );
+		}
+
+		return $template;
+	}
+
+	/**
+	 * Assert a WooCommerce file-backed template contract.
+	 *
+	 * @param string $slug Template slug.
+	 * @param string $type Template type.
+	 */
+	private function assert_file_template_contract( string $slug, string $type ): void {
+		$template = $this->sut->get_block_file_template(
+			null,
+			BlockTemplateUtils::PLUGIN_SLUG . '//' . $slug,
+			$type
+		);
+
+		$this->assertInstanceOf( WP_Block_Template::class, $template );
+		$this->assertSame( BlockTemplateUtils::PLUGIN_SLUG . '//' . $slug, $template->id );
+		$this->assertSame( BlockTemplateUtils::PLUGIN_SLUG, $template->theme );
+		$this->assertSame( $slug, $template->slug );
+		$this->assertSame( $type, $template->type );
+		$this->assertSame( 'plugin', $template->source );
+		$this->assertSame( 'plugin', $template->origin );
+		$this->assertNotSame( '', trim( $template->content ) );
+	}
+
+	/**
+	 * Create a real saved block template or template part.
+	 *
+	 * @param string $slug Template slug.
+	 * @param string $content Template content.
+	 * @param string $type Template post type.
+	 * @param string $theme Theme term name.
+	 * @return int Post ID.
+	 */
+	private function create_template_post( string $slug, string $content, string $type, string $theme ): int {
 		$post_id = wp_insert_post(
 			array(
 				'post_name'    => $slug,
-				'post_type'    => 'wp_template_part',
 				'post_title'   => $slug,
+				'post_content' => $content,
 				'post_status'  => 'publish',
-				'post_content' => '<!-- wp:paragraph --><p>Test</p><!-- /wp:paragraph -->',
-			)
+				'post_type'    => $type,
+			),
+			true
 		);
 
-		wp_set_post_terms( $post_id, array( $term['term_id'] ), 'wp_theme' );
-		$this->created_template_part_ids[] = $post_id;
+		if ( is_wp_error( $post_id ) ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Preserve the exact fixture error in the test failure.
+			throw new \RuntimeException( $post_id->get_error_message() );
+		}
 
-		return get_post( $post_id );
+		$this->assign_term( $post_id, $theme, 'wp_theme' );
+
+		if ( 'wp_template_part' === $type ) {
+			$this->assign_term( $post_id, 'general', 'wp_template_part_area' );
+		}
+
+		return $post_id;
 	}
 
 	/**
-	 * Clears template ID caches so newly created posts are visible.
+	 * Assign a taxonomy term, recording it when the test creates it.
+	 *
+	 * @param int    $post_id Post ID.
+	 * @param string $term_name Term name.
+	 * @param string $taxonomy Taxonomy name.
 	 */
-	private function flush_block_template_caches(): void {
-		wp_cache_delete( 'wp_template-ids', 'woocommerce_blocks' );
-		wp_cache_delete( 'wp_template_part-ids', 'woocommerce_blocks' );
+	private function assign_term( int $post_id, string $term_name, string $taxonomy ): void {
+		$term = get_term_by( 'name', $term_name, $taxonomy, ARRAY_A );
+		if ( ! $term ) {
+			$term = wp_insert_term( $term_name, $taxonomy );
+			if ( is_wp_error( $term ) ) {
+				// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Preserve the exact fixture error in the test failure.
+				throw new \RuntimeException( $term->get_error_message() );
+			}
+		}
+
+		$result = wp_set_post_terms( $post_id, array( (int) $term['term_id'] ), $taxonomy );
+		if ( is_wp_error( $result ) ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Preserve the exact fixture error in the test failure.
+			throw new \RuntimeException( $result->get_error_message() );
+		}
+	}
+
+	/**
+	 * Find one template by slug and prove duplicate suppression.
+	 *
+	 * @param WP_Block_Template[] $templates Templates.
+	 * @param string              $slug Template slug.
+	 * @return WP_Block_Template
+	 */
+	private function find_template( array $templates, string $slug ): WP_Block_Template {
+		$matches = array_values(
+			array_filter(
+				$templates,
+				static function ( $template ) use ( $slug ) {
+					return $slug === $template->slug;
+				}
+			)
+		);
+
+		$this->assertCount( 1, $matches, "Expected exactly one {$slug} result." );
+
+		return $matches[0];
+	}
+
+	/**
+	 * Assert the externally visible saved-template contract.
+	 *
+	 * @param WP_Block_Template $template Template result.
+	 * @param int               $post_id Expected post ID.
+	 * @param string            $theme Expected theme.
+	 * @param string            $origin Expected origin.
+	 * @param string            $content Expected content.
+	 * @param string            $type Expected type.
+	 */
+	private function assert_template_contract( WP_Block_Template $template, int $post_id, string $theme, string $origin, string $content, string $type ): void {
+		$this->assertSame( $post_id, $template->wp_id );
+		$this->assertSame( $theme . '//' . $template->slug, $template->id );
+		$this->assertSame( $theme, $template->theme );
+		$this->assertSame( $origin, $template->origin );
+		$this->assertSame( $content, $template->content );
+		$this->assertSame( $type, $template->type );
+		$this->assertSame( 'custom', $template->source );
+		$this->assertSame( 'publish', $template->status );
+		// The fixtures are created with post_title set to the slug, which is exactly
+		// the case update_template_data() rewrites back to the canonical title. Without
+		// this, deleting that branch leaves every assertion here green -- and keeping
+		// customised templates from losing their name is what issue 42221 was about,
+		// which the deleted E2E titles cited by name.
+		$this->assertSame( BlockTemplateUtils::get_block_template_title( $template->slug ), $template->title );
+	}
+
+	/**
+	 * Return sorted slugs from template results.
+	 *
+	 * @param WP_Block_Template[] $templates Templates.
+	 * @return string[]
+	 */
+	private function sorted_slugs( array $templates ): array {
+		$slugs = array_column( $templates, 'slug' );
+		sort( $slugs );
+
+		return $slugs;
+	}
+
+	/**
+	 * Assert two calls preserve exact result order and identities.
+	 *
+	 * @param WP_Block_Template[] $expected First results.
+	 * @param WP_Block_Template[] $actual Second results.
+	 */
+	private function assert_same_template_sequence( array $expected, array $actual ): void {
+		$this->assertSame( array_column( $expected, 'id' ), array_column( $actual, 'id' ) );
 	}
 }
