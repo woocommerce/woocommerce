@@ -77,7 +77,7 @@ final class ContractRepository {
 	public function insert_locked( Contract $contract, string $operation ): ?ContractLock {
 		self::assert_operation( $operation );
 
-		$token    = bin2hex( random_bytes( 16 ) );
+		$token    = self::new_token();
 		$inserted = $this->insert_row(
 			$contract,
 			array(
@@ -812,7 +812,7 @@ final class ContractRepository {
 
 		$table        = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 		$no_live_lock = self::no_live_lock();
-		$token        = bin2hex( random_bytes( 16 ) );
+		$token        = self::new_token();
 		$values       = array( $token, ContractLock::TTL_SECONDS, $operation, $contract_id );
 		$due          = '';
 		if ( null !== $seen_next_payment_gmt ) {
@@ -1050,6 +1050,13 @@ final class ContractRepository {
 		if ( 1 !== preg_match( '/^[a-z0-9_-]{1,64}$/D', $operation ) ) {
 			throw new \InvalidArgumentException( 'A lock operation label must be 1-64 lowercase letters, digits, underscores or hyphens.' );
 		}
+	}
+
+	/**
+	 * A new lock token: 32 hex characters, the `lock_token` column width.
+	 */
+	private static function new_token(): string {
+		return bin2hex( random_bytes( 16 ) );
 	}
 
 	/**
