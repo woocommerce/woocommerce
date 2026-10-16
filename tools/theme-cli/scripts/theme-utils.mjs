@@ -45,10 +45,12 @@ export async function discoverThemes( root = themesRoot ) {
 		if ( ! entry.isDirectory() ) {
 			continue;
 		}
-		try {
-			await fs.access( path.join( root, entry.name, 'style.css' ) );
-			await fs.access( path.join( root, entry.name, 'theme.json' ) );
-		} catch {
+		const markers = await Promise.allSettled(
+			[ 'package.json', 'style.css', 'theme.json' ].map( ( file ) =>
+				fs.access( path.join( root, entry.name, file ) )
+			)
+		);
+		if ( ! markers.some( ( result ) => result.status === 'fulfilled' ) ) {
 			continue;
 		}
 		assertThemeSlug( entry.name );
