@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\Tests\Admin\Features\Fulfillments;
 
 use Automattic\WooCommerce\Admin\Features\Fulfillments\DataStore\FulfillmentsDataStore;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentsRenderer;
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Providers\AmazonLogisticsShippingProvider;
@@ -417,31 +418,29 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 		$empty_provider_order_id   = $this->create_order_with_shipment_provider( '' );
 		$known_provider_order_id   = $this->create_order_with_shipment_provider( 'dhl' );
 
-		$_GET['shipping_provider'] = '__other__';
-		$args                      = $this->renderer->filter_orders_by_shipping_provider( array() );
-		unset( $_GET['shipping_provider'] );
+		$order_ids = $this->get_order_ids( '__other__' );
 
 		$this->assertContains(
 			$unknown_provider_order_id,
-			$args['post__in'],
+			$order_ids,
 			'A provider outside the known list should match the "Other" filter'
 		);
 		$this->assertNotContains(
 			$empty_provider_order_id,
-			$args['post__in'],
+			$order_ids,
 			'A fulfillment saved without a shipping provider should not match the "Other" filter'
 		);
 
 		if ( $is_known_providers ) {
 			$this->assertNotContains(
 				$known_provider_order_id,
-				$args['post__in'],
+				$order_ids,
 				'A known provider should not match the "Other" filter'
 			);
 		} else {
 			$this->assertContains(
 				$known_provider_order_id,
-				$args['post__in'],
+				$order_ids,
 				'With no known providers, any non-empty provider should match the "Other" filter'
 			);
 		}
@@ -559,45 +558,29 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The HPOS orders query is filtered to the matching order ids when no post__in exists yet.
+	 * @testdox The HPOS filter carries the requested provider through as a query marker.
 	 */
-	public function test_filter_orders_sets_post_in_when_absent(): void {
-		$this->seed_fulfillment( 301, 'acme-couriers' );
-
+	public function test_filter_orders_sets_provider_marker(): void {
 		$this->with_provider_param(
 			'acme-couriers',
 			function () {
 				$args = $this->renderer->filter_orders_by_shipping_provider( array() );
-				$this->assertSame( array( 301 ), $args['post__in'] );
+				$this->assertSame( 'acme-couriers', $args['fulfillment_shipping_provider'] );
+				$this->assertArrayNotHasKey( 'post__in', $args, 'The optimized filter must not materialize a post__in id list.' );
 			}
 		);
 	}
 
 	/**
-	 * @testdox The HPOS filter intersects an existing post__in with the provider matches.
+	 * @testdox The HPOS filter leaves any existing query arguments in place while adding the marker.
 	 */
-	public function test_filter_orders_intersects_existing_post_in(): void {
-		$this->seed_fulfillment( 401, 'acme-couriers' );
-		$this->seed_fulfillment( 402, 'acme-couriers' );
-
+	public function test_filter_orders_preserves_existing_args(): void {
 		$this->with_provider_param(
 			'acme-couriers',
 			function () {
 				$args = $this->renderer->filter_orders_by_shipping_provider( array( 'post__in' => array( 401, 999 ) ) );
-				$this->assertSame( array( 401 ), array_values( $args['post__in'] ), 'Only the id present in both sets should remain.' );
-			}
-		);
-	}
-
-	/**
-	 * @testdox The HPOS filter returns a no-match sentinel when the provider has no orders.
-	 */
-	public function test_filter_orders_returns_zero_when_no_match(): void {
-		$this->with_provider_param(
-			'provider-with-no-orders',
-			function () {
-				$args = $this->renderer->filter_orders_by_shipping_provider( array() );
-				$this->assertSame( array( 0 ), $args['post__in'], 'An unmatched provider should force an empty result set.' );
+				$this->assertSame( array( 401, 999 ), $args['post__in'], 'An existing post__in must be preserved, not replaced.' );
+				$this->assertSame( 'acme-couriers', $args['fulfillment_shipping_provider'] );
 			}
 		);
 	}
@@ -612,11 +595,35 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The legacy orders query is filtered to the matching order ids.
+	 * @testdox The HPOS clause filter restricts the orders table to the provider subquery.
 	 */
-	public function test_filter_legacy_orders_sets_post_in(): void {
-		$this->seed_fulfillment( 501, 'acme-couriers' );
+	public function test_filter_orders_table_clauses_injects_subquery(): void {
+		$orders_table = OrdersTableDataStore::get_orders_table_name();
 
+		$clauses = $this->renderer->filter_orders_table_clauses_by_shipping_provider(
+			array( 'where' => '1=1' ),
+			null,
+			array( 'fulfillment_shipping_provider' => 'acme-couriers' )
+		);
+
+		$this->assertStringContainsString( "{$orders_table}.id IN (", $clauses['where'] );
+		$this->assertStringContainsString( $GLOBALS['wpdb']->prefix . 'wc_order_fulfillments', $clauses['where'] );
+		$this->assertStringStartsWith( '1=1 AND ', $clauses['where'], 'The existing WHERE must be preserved.' );
+	}
+
+	/**
+	 * @testdox The HPOS clause filter is a no-op when the provider marker is absent.
+	 */
+	public function test_filter_orders_table_clauses_noop_without_marker(): void {
+		$clauses = array( 'where' => '1=1' );
+
+		$this->assertSame( $clauses, $this->renderer->filter_orders_table_clauses_by_shipping_provider( $clauses, null, array() ) );
+	}
+
+	/**
+	 * @testdox The legacy filter marks the main orders query with the requested provider.
+	 */
+	public function test_filter_legacy_orders_sets_provider_marker(): void {
 		$query = new WP_Query();
 		$query->set( 'post_type', 'shop_order' );
 
@@ -627,7 +634,8 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 					'acme-couriers',
 					function () use ( $query ) {
 						$this->renderer->filter_legacy_orders_by_shipping_provider( $query );
-						$this->assertSame( array( 501 ), $query->get( 'post__in' ) );
+						$this->assertSame( 'acme-couriers', $query->get( 'fulfillment_shipping_provider' ) );
+						$this->assertEmpty( $query->get( 'post__in' ), 'The optimized filter must not materialize a post__in id list.' );
 					}
 				);
 			}
@@ -638,8 +646,6 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 	 * @testdox The legacy filter does nothing when the query is not the admin main orders query.
 	 */
 	public function test_filter_legacy_orders_skips_non_main_query(): void {
-		$this->seed_fulfillment( 601, 'acme-couriers' );
-
 		// A secondary query: not registered as the main query, so the guard must bail.
 		$query = new WP_Query();
 		$query->set( 'post_type', 'shop_order' );
@@ -653,7 +659,7 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 				'acme-couriers',
 				function () use ( $query ) {
 					$this->renderer->filter_legacy_orders_by_shipping_provider( $query );
-					$this->assertEmpty( $query->get( 'post__in' ), 'A non-main query should not be filtered.' );
+					$this->assertEmpty( $query->get( 'fulfillment_shipping_provider' ), 'A non-main query should not be marked.' );
 				}
 			);
 		} finally {
@@ -666,16 +672,86 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Invoke the private provider-to-order-ids query.
+	 * @testdox The legacy clause filter restricts the posts table to the provider subquery.
+	 */
+	public function test_filter_legacy_orders_clauses_injects_subquery(): void {
+		global $wpdb;
+
+		$query = new WP_Query();
+		$query->set( 'fulfillment_shipping_provider', 'acme-couriers' );
+
+		$clauses = $this->renderer->filter_legacy_orders_clauses_by_shipping_provider( array( 'where' => '' ), $query );
+
+		$this->assertStringContainsString( "{$wpdb->posts}.ID IN (", $clauses['where'] );
+		$this->assertStringContainsString( $wpdb->prefix . 'wc_order_fulfillments', $clauses['where'] );
+	}
+
+	/**
+	 * @testdox The legacy clause filter is a no-op when the provider marker is absent.
+	 */
+	public function test_filter_legacy_orders_clauses_noop_without_marker(): void {
+		$clauses = array( 'where' => " AND {$GLOBALS['wpdb']->posts}.post_status = 'wc-completed'" );
+
+		$query = new WP_Query();
+
+		$this->assertSame( $clauses, $this->renderer->filter_legacy_orders_clauses_by_shipping_provider( $clauses, $query ) );
+	}
+
+	/**
+	 * @testdox Running a legacy orders query with the provider marker returns only the matching orders and count.
+	 */
+	public function test_legacy_query_returns_only_matching_orders(): void {
+		$match_a   = $this->create_shop_order_post();
+		$match_b   = $this->create_shop_order_post();
+		$other     = $this->create_shop_order_post();
+		$no_filled = $this->create_shop_order_post();
+
+		$this->seed_fulfillment( $match_a, 'acme-couriers' );
+		$this->seed_fulfillment( $match_b, 'acme-couriers' );
+		$this->seed_fulfillment( $other, 'other-co' );
+
+		add_filter( 'posts_clauses', array( $this->renderer, 'filter_legacy_orders_clauses_by_shipping_provider' ), 10, 2 );
+		try {
+			$query = new WP_Query(
+				array(
+					'post_type'                     => 'shop_order',
+					'post_status'                   => 'wc-processing',
+					'fields'                        => 'ids',
+					'posts_per_page'                => -1,
+					'fulfillment_shipping_provider' => 'acme-couriers',
+				)
+			);
+		} finally {
+			remove_filter( 'posts_clauses', array( $this->renderer, 'filter_legacy_orders_clauses_by_shipping_provider' ), 10 );
+		}
+
+		$ids = array_map( 'absint', $query->posts );
+		sort( $ids );
+		$expected = array( $match_a, $match_b );
+		sort( $expected );
+
+		$this->assertSame( $expected, $ids, 'Only orders whose fulfillment uses the provider should be returned.' );
+		$this->assertSame( 2, (int) $query->found_posts, 'The found-rows count must match the filtered result set.' );
+		$this->assertNotContains( $other, $ids );
+		$this->assertNotContains( $no_filled, $ids );
+	}
+
+	/**
+	 * Build the provider subquery and run it, returning the matching order ids.
 	 *
 	 * @param string $provider The provider key or the __other__ sentinel.
 	 * @return array<int> The matching order ids.
 	 */
 	private function get_order_ids( string $provider ): array {
-		$method = new \ReflectionMethod( FulfillmentsRenderer::class, 'get_order_ids_by_shipping_provider' );
-		$method->setAccessible( true );
+		global $wpdb;
 
-		return $method->invoke( $this->renderer, $provider );
+		$method = new \ReflectionMethod( FulfillmentsRenderer::class, 'get_shipping_provider_order_ids_subquery' );
+		$method->setAccessible( true );
+		$subquery = $method->invoke( $this->renderer, $provider );
+
+		// The subquery is already prepared inside the method under test.
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		return array_map( 'absint', $wpdb->get_col( $subquery ) );
 	}
 
 	/**
@@ -717,6 +793,20 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 				unset( $GLOBALS['current_screen'] );
 			}
 		}
+	}
+
+	/**
+	 * Insert a shop_order post and return its id.
+	 *
+	 * @return int The created order post id.
+	 */
+	private function create_shop_order_post(): int {
+		return (int) wp_insert_post(
+			array(
+				'post_type'   => 'shop_order',
+				'post_status' => 'wc-processing',
+			)
+		);
 	}
 
 	/**
