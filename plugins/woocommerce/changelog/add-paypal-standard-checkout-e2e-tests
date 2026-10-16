@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add e2e tests covering the PayPal Standard checkout flow (payment method availability, order button label, and redirect to PayPal).
