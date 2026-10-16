@@ -25,10 +25,7 @@ import {
 } from '../../types';
 import { setQueryAttribute, getDefaultSettings } from '../../utils';
 import ColumnsControl from './columns-control';
-import {
-	InheritQueryControl,
-	FilterableControl,
-} from './use-page-context-control';
+import { InheritQueryControl } from './use-page-context-control';
 import useCarouselLayoutAdjustments from './use-carousel-layout-adjustments';
 import useEmailPaginationAdjustments from './use-email-pagination-adjustments';
 import useEmailColumnAdjustments from './use-email-column-adjustments';
@@ -93,8 +90,6 @@ const ProductCollectionInspectorControls = (
 	const showCustomQueryControls = inherit === false;
 	const showInheritQueryControl =
 		isArchiveTemplate && shouldShowFilter( CoreFilterNames.INHERIT );
-	const showFilterableControl =
-		! isArchiveTemplate && shouldShowFilter( CoreFilterNames.FILTERABLE );
 	const showCustomOrderControl =
 		showCustomQueryControls && shouldShowFilter( CoreFilterNames.ORDER );
 	const showDefaultOrderControl = ! showCustomQueryControls;
@@ -203,9 +198,6 @@ const ProductCollectionInspectorControls = (
 			>
 				{ showInheritQueryControl && (
 					<InheritQueryControl { ...queryControlProps } />
-				) }
-				{ showFilterableControl && (
-					<FilterableControl { ...queryControlProps } />
 				) }
 				{ showCustomOrderControl && (
 					<CustomQueryOrderByControl { ...queryControlProps } />

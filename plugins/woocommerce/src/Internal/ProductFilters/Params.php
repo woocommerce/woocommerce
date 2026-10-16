@@ -49,6 +49,43 @@ class Params implements FilterUrlParam {
 	}
 
 	/**
+	 * Read one collection's filter selections from the request URL.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param int|null $query_id Collection ID, or null for global filters.
+	 * @return array<string, string> Selections keyed by effective filter name.
+	 */
+	public function get_filter_params( ?int $query_id = null ): array {
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Values are validated below against registered filter parameters.
+		$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : '';
+		$query       = wp_parse_url( $request_uri, PHP_URL_QUERY );
+		$url_params  = array();
+		parse_str( is_string( $query ) ? $query : '', $url_params );
+		$prefix = null === $query_id ? '' : 'wcp-' . $query_id . '-';
+		$params = array();
+
+		foreach ( $this->get_param_keys() as $key ) {
+			$value = $url_params[ $prefix . $key ] ?? null;
+			if ( ! is_string( $value ) || '' === $value ) {
+				continue;
+			}
+			if ( in_array( $key, $this->get_param( 'price' ), true ) && ( ! is_numeric( $value ) || ! is_finite( (float) $value ) || (float) $value < 0 ) ) {
+				continue;
+			}
+			if ( 'rating_filter' === $key && ! preg_match( '/^[1-5](,[1-5])*$/', $value ) ) {
+				continue;
+			}
+			if ( 0 === strpos( $key, 'query_type_' ) && ! in_array( $value, array( 'and', 'or' ), true ) ) {
+				continue;
+			}
+			$params[ $key ] = $value;
+		}
+
+		return $params;
+	}
+
+	/**
 	 * Get the param.
 	 *
 	 * @param string $type The type of param to get.

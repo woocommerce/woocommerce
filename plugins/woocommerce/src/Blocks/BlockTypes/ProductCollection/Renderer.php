@@ -40,6 +40,13 @@ class Renderer {
 	);
 
 	/**
+	 * Collection IDs rendered in this request.
+	 *
+	 * @var array<int, true>
+	 */
+	private $rendered_query_ids = array();
+
+	/**
 	 * Whether an ancestor block provided a `cart` product reference context
 	 * for the Product Collection currently being rendered.
 	 *
@@ -85,6 +92,17 @@ class Renderer {
 			},
 			100,
 			1
+		);
+		add_filter(
+			'render_block_woocommerce/product-filters',
+			function ( $html, $parsed_block, $instance ) {
+				if ( $instance->context['query']['isProductCollectionBlock'] ?? false ) {
+					$this->render_state['has_filters'] = ! empty( $html );
+				}
+				return $html;
+			},
+			10,
+			3
 		);
 		add_filter( 'render_block_core/query-pagination', array( $this, 'add_navigation_link_directives' ), 10, 3 );
 		add_filter( 'render_block_context', array( $this, 'extend_context_for_inner_blocks' ), 11, 2 );
@@ -135,6 +153,13 @@ class Renderer {
 			return '';
 		}
 
+		$query_id = $block['attrs']['queryId'] ?? 0;
+		if ( isset( $this->rendered_query_ids[ $query_id ] ) ) {
+			// The router cannot distinguish collections sharing an ID, even when their saved queries differ.
+			wp_interactivity_config( 'core/router', array( 'clientNavigationDisabled' => true ) );
+		}
+		$this->rendered_query_ids[ $query_id ] = true;
+
 		$block_content = $this->enhance_product_collection_with_interactivity( $block_content, $block );
 
 		// Reset the render state for the next render.
@@ -179,7 +204,7 @@ class Renderer {
 	 * @return bool
 	 */
 	private function should_prevent_render() {
-		return ! $this->render_state['has_results'] && ! $this->render_state['has_no_results_block'];
+		return ! $this->render_state['has_results'] && ! $this->render_state['has_no_results_block'] && empty( $this->render_state['has_filters'] );
 	}
 
 	/**
@@ -446,6 +471,11 @@ class Renderer {
 		// Target only product collection's inner blocks that use the 'query' context.
 		if ( ! isset( $context['query'] ) || ! isset( $context['query']['isProductCollectionBlock'] ) || ! $context['query']['isProductCollectionBlock'] ) {
 			return $context;
+		}
+
+		if ( 'woocommerce/product-filters' === $block_name && ( $context['query']['inherit'] ?? false ) ) {
+			// A null override also clears the saved ID when WordPress refreshes available context.
+			$context['queryId'] = null;
 		}
 
 		// Check parent block contexts (in order of specificity).

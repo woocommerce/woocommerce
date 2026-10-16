@@ -77,7 +77,6 @@ const getBlockifiedTemplate = () =>
 					perPage: 5,
 					pages: 1,
 					woocommerceStockStatus: [ 'instock', 'onbackorder' ],
-					filterable: false,
 				},
 				displayLayout: {
 					type: 'flex',

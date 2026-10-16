@@ -125,9 +125,7 @@ const isInProductArchive = () => {
 	return false;
 };
 
-const isFirstBlockThatUsesPageContext = (
-	property: 'inherit' | 'filterable'
-) => {
+const isFirstBlockThatUsesPageContext = () => {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet, natively.
 	const { getBlocksByName, getBlock } = select( blockEditorStore );
@@ -139,7 +137,7 @@ const isFirstBlockThatUsesPageContext = (
 		( clientId ) => {
 			const block = getBlock( clientId );
 
-			return block.attributes?.query?.[ property ];
+			return block.attributes?.query?.inherit;
 		}
 	);
 
@@ -147,15 +145,7 @@ const isFirstBlockThatUsesPageContext = (
 };
 
 export function getDefaultValueOfInherit() {
-	return isInProductArchive()
-		? isFirstBlockThatUsesPageContext( 'inherit' )
-		: false;
-}
-
-export function getDefaultValueOfFilterable() {
-	return ! isInProductArchive()
-		? isFirstBlockThatUsesPageContext( 'filterable' )
-		: false;
+	return isInProductArchive() ? isFirstBlockThatUsesPageContext() : false;
 }
 
 /**
@@ -501,7 +491,6 @@ export const getDefaultQueryForSettingsSection = (
 	orderBy: DEFAULT_QUERY.orderBy as TProductCollectionOrderBy,
 	order: DEFAULT_QUERY.order as TProductCollectionOrder,
 	inherit: getDefaultValueOfInherit(),
-	filterable: getDefaultValueOfFilterable(),
 	perPage: DEFAULT_QUERY.perPage,
 	offset: DEFAULT_QUERY.offset,
 	pages: DEFAULT_QUERY.pages,
@@ -526,7 +515,6 @@ export const getDefaultProductCollection = () =>
 			query: {
 				...DEFAULT_ATTRIBUTES.query,
 				inherit: getDefaultValueOfInherit(),
-				filterable: getDefaultValueOfFilterable(),
 			},
 		},
 		createBlocksFromInnerBlocksTemplate( INNER_BLOCKS_TEMPLATE )

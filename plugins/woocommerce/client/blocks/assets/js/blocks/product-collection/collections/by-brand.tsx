@@ -31,7 +31,7 @@ const attributes = {
 		columns: 5,
 		shrinkColumns: true,
 	},
-	hideControls: [ CoreFilterNames.HAND_PICKED, CoreFilterNames.FILTERABLE ],
+	hideControls: [ CoreFilterNames.HAND_PICKED ],
 };
 
 const heading: InnerBlockTemplate = [

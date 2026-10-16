@@ -50,7 +50,6 @@ const attributes = {
 		CoreFilterNames.STOCK_STATUS,
 		CoreFilterNames.HAND_PICKED,
 		CoreFilterNames.TAXONOMY,
-		CoreFilterNames.FILTERABLE,
 		CoreFilterNames.CREATED,
 		CoreFilterNames.PRICE_RANGE,
 	],

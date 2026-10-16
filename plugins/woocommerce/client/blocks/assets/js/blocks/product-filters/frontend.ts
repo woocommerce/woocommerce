@@ -232,11 +232,28 @@ const productFiltersStore = {
 				: getContext< ProductFiltersContext >();
 
 			const config = getConfig( BLOCK_NAME );
-			const url = new URL( config.canonicalUrl );
+			const { queryId } = context;
+			const prefix = queryId === undefined ? '' : `wcp-${ queryId }-`;
+			const url = new URL(
+				queryId === undefined
+					? config.canonicalUrl
+					: window.location.href
+			);
 			const { searchParams } = url;
 
-			for ( const key in context.params ) {
-				searchParams.delete( key );
+			if ( queryId === undefined ) {
+				new URL( window.location.href ).searchParams.forEach(
+					( value, key ) => searchParams.set( key, value )
+				);
+				searchParams.delete( 'paged' );
+				searchParams.delete( 'product-page' );
+			} else {
+				searchParams.delete( `query-${ queryId }-page` );
+			}
+
+			for ( const key of config.filterParamKeys ??
+				Object.keys( context.params ) ) {
+				searchParams.delete( `${ prefix }${ key }` );
 			}
 
 			for ( const key in state.params ) {
@@ -256,7 +273,7 @@ const productFiltersStore = {
 					}
 				}
 
-				searchParams.set( key, decodedValue );
+				searchParams.set( `${ prefix }${ key }`, decodedValue );
 			}
 
 			if ( window.location.href === url.href ) {
