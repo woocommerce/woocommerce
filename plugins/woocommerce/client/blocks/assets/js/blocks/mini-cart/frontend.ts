@@ -106,6 +106,7 @@ export type MiniCart = {
 		isOpen: boolean;
 		totalItemsInCart: number;
 		formattedSubtotal: string;
+		isCartUpdating: boolean;
 		badgeIsVisible: boolean;
 		cartIsEmpty: boolean;
 		drawerRole: string | null;
@@ -123,6 +124,7 @@ export type MiniCart = {
 		closeDrawer: () => void;
 		overlayCloseDrawer: ( e: MouseEvent ) => void;
 		handleOverlayKeydown: ( e: KeyboardEvent ) => void;
+		preventCheckoutWhileUpdating: ( e: MouseEvent ) => void;
 	};
 	callbacks: {
 		markAsHydrated: () => void;
@@ -164,7 +166,7 @@ const getFocusableElements = ( container: HTMLElement | null ) =>
 	container
 		? Array.from(
 				container.querySelectorAll< HTMLElement >( focusableSelectors )
-		  ).filter( ( el ) => el.offsetParent !== null )
+			).filter( ( el ) => el.offsetParent !== null )
 		: [];
 
 const { state: woocommerceState, actions } = store< WooCommerce >(
@@ -172,6 +174,20 @@ const { state: woocommerceState, actions } = store< WooCommerce >(
 	{},
 	{ lock: universalLock }
 );
+
+const dispatchCheckoutEvent = ( eventName: string ) => {
+	try {
+		window.wp.hooks.doAction(
+			`experimental__woocommerce_blocks-checkout-${ eventName }`,
+			{ storeCart: woocommerceState.cart }
+		);
+	} catch ( e ) {
+		// eslint-disable-next-line no-console
+		console.error( e );
+	}
+};
+
+let previousIsOpen: boolean | undefined;
 
 const { state: miniCartState, actions: miniCartActions } = store< MiniCart >(
 	'woocommerce/mini-cart',
@@ -209,10 +225,10 @@ store< MiniCart >(
 
 				const subtotal = displayCartPriceIncludingTax
 					? parseInt( woocommerceState.cart.totals.total_items, 10 ) +
-					  parseInt(
+						parseInt(
 							woocommerceState.cart.totals.total_items_tax,
 							10
-					  )
+						)
 					: parseInt( woocommerceState.cart.totals.total_items, 10 );
 
 				const normalizedCurrency = normalizeCurrencyResponse(
@@ -221,6 +237,11 @@ store< MiniCart >(
 				);
 
 				return formatPriceWithCurrency( subtotal, normalizedCurrency );
+			},
+
+			// The subtotal comes from the server, so it's out of date until a cart update finishes.
+			get isCartUpdating(): boolean {
+				return !! woocommerceState.isCartUpdating;
 			},
 
 			get drawerRole() {
@@ -303,6 +324,13 @@ store< MiniCart >(
 				state.miniCartButtonRef?.focus();
 			},
 
+			// The checkout button is a link, so it can't be disabled natively.
+			preventCheckoutWhileUpdating: withSyncEvent( ( e: MouseEvent ) => {
+				if ( state.isCartUpdating ) {
+					e.preventDefault();
+				}
+			} ),
+
 			overlayCloseDrawer( e: MouseEvent ) {
 				// Only close the drawer if the overlay itself was clicked.
 				if ( e.target === e.currentTarget ) {
@@ -382,12 +410,20 @@ store< MiniCart >(
 							document.documentElement.clientWidth +
 							'px',
 					} );
+					if ( previousIsOpen === false ) {
+						dispatchCheckoutEvent( 'mini-cart-open' );
+					}
 				} else {
 					Object.assign( document.body.style, {
 						overflow: '',
 						paddingRight: 0,
 					} );
+					if ( previousIsOpen === true ) {
+						dispatchCheckoutEvent( 'mini-cart-close' );
+					}
 				}
+
+				previousIsOpen = state.isOpen;
 			},
 
 			focusFirstElement() {
@@ -703,7 +739,7 @@ const { state: cartItemState } = store(
 
 				const totalLinePrice = displayCartPriceIncludingTax
 					? parseInt( totals.line_subtotal, 10 ) +
-					  parseInt( totals.line_subtotal_tax, 10 )
+						parseInt( totals.line_subtotal_tax, 10 )
 					: parseInt( totals.line_subtotal, 10 );
 
 				const price = formatPriceWithCurrency(
@@ -753,16 +789,18 @@ const { state: cartItemState } = store(
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				return ( window.wc as any )?.blocksCheckout?.applyCheckoutFilter
 					? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-					  ( window.wc as any ).blocksCheckout.applyCheckoutFilter( {
-							filterName: 'showRemoveItemLink',
-							defaultValue: true,
-							extensions: cartItemState.cartItem.extensions,
-							arg: {
-								context: 'cart',
-								cartItem: cartItemState.cartItem,
-								cart: woocommerceState.cart,
-							},
-					  } )
+						( window.wc as any ).blocksCheckout.applyCheckoutFilter(
+							{
+								filterName: 'showRemoveItemLink',
+								defaultValue: true,
+								extensions: cartItemState.cartItem.extensions,
+								arg: {
+									context: 'cart',
+									cartItem: cartItemState.cartItem,
+									cart: woocommerceState.cart,
+								},
+							}
+						)
 					: true;
 			},
 

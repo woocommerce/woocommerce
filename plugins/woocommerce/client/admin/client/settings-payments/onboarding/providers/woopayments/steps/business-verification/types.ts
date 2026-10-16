@@ -3,11 +3,7 @@
  */
 
 export type OnboardingSteps =
-	| 'activate'
-	| 'business'
-	| 'store'
-	| 'embedded'
-	| 'loading';
+	'activate' | 'business' | 'store' | 'embedded' | 'loading';
 
 export type OnboardingFields = {
 	country?: string;
@@ -65,8 +61,7 @@ export interface EmbeddedKycSessionCreateResult {
 }
 
 export type EmbeddedAccountInitializationFailureReason =
-	| 'bad_session'
-	| 'init_error';
+	'bad_session' | 'init_error';
 
 export interface EmbeddedAccountInitializationFailure {
 	reason: EmbeddedAccountInitializationFailureReason;

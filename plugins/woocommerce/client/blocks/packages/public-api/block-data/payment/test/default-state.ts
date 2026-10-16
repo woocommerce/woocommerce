@@ -51,7 +51,7 @@ const getDefaultPaymentStateWithMocks = ( {
 		} ) );
 
 		// Get a fresh copy of the state
-		// eslint-disable-next-line @typescript-eslint/no-var-requires -- Cloning using structuredClone is not supported in jsdom and Object.assign won't work as the state contains objects that need to be reset too. This is a clean way to get a fresh copy of the state.
+
 		state = require( '../default-state' ).defaultPaymentState;
 	} );
 
