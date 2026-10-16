@@ -1,20 +1,28 @@
 /**
  * External dependencies
  */
-import { act, render } from '@testing-library/react';
+import { act, render, waitFor } from '@testing-library/react';
 import { dispatch } from '@wordpress/data';
-import { checkoutStore, paymentStore } from '@woocommerce/block-data';
+import {
+	cartStore,
+	checkoutStore,
+	paymentStore,
+} from '@woocommerce/block-data';
 import { checkoutEvents } from '@woocommerce/blocks-checkout-events';
+import { previewCart } from '@woocommerce/resource-previews';
+import { server, http, HttpResponse } from '@woocommerce/test-utils/msw';
 
 /**
  * Internal dependencies
  */
 import { CheckoutEventsProvider } from '../index';
+import { EditorProvider } from '../../../editor-context';
 
-// Mock the registry functions
-jest.mock( '@woocommerce/blocks-registry', () => ( {
-	getPaymentMethods: jest.fn( () => ( {} ) ),
-	getExpressPaymentMethods: jest.fn( () => ( {
+// Mock the registry functions. Like the real registry, they return the same objects on every call, so a re-render does
+// not re-run the provider's payment method check.
+jest.mock( '@woocommerce/blocks-registry', () => {
+	const paymentMethods = {};
+	const expressPaymentMethods = {
 		stripe: {
 			name: 'stripe',
 			title: 'Stripe',
@@ -33,8 +41,12 @@ jest.mock( '@woocommerce/blocks-registry', () => ( {
 				style: [],
 			},
 		},
-	} ) ),
-} ) );
+	};
+	return {
+		getPaymentMethods: jest.fn( () => paymentMethods ),
+		getExpressPaymentMethods: jest.fn( () => expressPaymentMethods ),
+	};
+} );
 
 describe( 'CheckoutEventsContext', () => {
 	let mockSetRegisteredExpressPaymentMethods: jest.Mock;
@@ -145,5 +157,106 @@ describe( 'CheckoutEventsContext', () => {
 		expect( successCallback ).not.toHaveBeenCalled();
 		expect( successCallback2 ).not.toHaveBeenCalled();
 		expect( failCallback ).toHaveBeenCalled();
+	} );
+} );
+
+describe( 'CheckoutEventsProvider payment method checks', () => {
+	let updateAvailablePaymentMethods: jest.SpyInstance;
+	let releaseCart: () => void;
+
+	/**
+	 * Holds the cart request until releaseCart() is called. The cart store requests the cart as soon as its
+	 * resolution is invalidated, so the handler is in place before that.
+	 */
+	const holdCartRequest = () => {
+		const cartReleased = new Promise< void >( ( resolve ) => {
+			releaseCart = resolve;
+		} );
+		server.use(
+			http.get( '/wc/store/v1/cart', async () => {
+				await cartReleased;
+				return HttpResponse.json( previewCart );
+			} )
+		);
+		act( () => {
+			dispatch( cartStore ).invalidateResolutionForStore();
+		} );
+	};
+
+	beforeAll( () => {
+		// Tell the cart store the shopper has items in their cart, so it waits for the cart request instead of
+		// treating the cart as empty and marking it loaded when the window load event fires.
+		document.cookie = 'woocommerce_items_in_cart=1';
+	} );
+
+	afterAll( () => {
+		document.cookie =
+			'woocommerce_items_in_cart=; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+	} );
+
+	beforeEach( () => {
+		releaseCart = () => undefined;
+		// The cart store also runs this action once the cart loads, so tests count calls from the moment they render.
+		updateAvailablePaymentMethods = jest
+			.spyOn(
+				dispatch( paymentStore ),
+				'__internalUpdateAvailablePaymentMethods'
+			)
+			.mockImplementation( jest.fn() );
+	} );
+
+	afterEach( () => {
+		releaseCart();
+		updateAvailablePaymentMethods.mockRestore();
+	} );
+
+	it( 'waits for the cart before checking which payment methods the shopper can use', async () => {
+		holdCartRequest();
+
+		render(
+			<CheckoutEventsProvider redirectUrl="local">
+				<div />
+			</CheckoutEventsProvider>
+		);
+
+		expect( updateAvailablePaymentMethods ).not.toHaveBeenCalled();
+
+		releaseCart();
+
+		// The cart store runs the first check once the cart arrives. It may be debounced by a second.
+		await waitFor(
+			() => expect( updateAvailablePaymentMethods ).toHaveBeenCalled(),
+			{ timeout: 2000 }
+		);
+	} );
+
+	it( 'checks payment methods on mount when the cart has already loaded', () => {
+		act( () => {
+			dispatch( cartStore ).receiveCart( previewCart );
+			dispatch( cartStore ).finishResolution( 'getCartData' );
+		} );
+		updateAvailablePaymentMethods.mockClear();
+
+		render(
+			<CheckoutEventsProvider redirectUrl="local">
+				<div />
+			</CheckoutEventsProvider>
+		);
+
+		expect( updateAvailablePaymentMethods ).toHaveBeenCalledTimes( 1 );
+	} );
+
+	it( 'checks payment methods in the editor without waiting for the cart', () => {
+		holdCartRequest();
+
+		render(
+			<EditorProvider currentPostId={ 1 }>
+				<CheckoutEventsProvider redirectUrl="local">
+					<div />
+				</CheckoutEventsProvider>
+			</EditorProvider>
+		);
+
+		expect( updateAvailablePaymentMethods ).toHaveBeenCalledTimes( 1 );
 	} );
 } );

@@ -1,0 +1,20 @@
+{
+	"name": "@woocommerce/theme-cli",
+	"description": "Shared development tools for WooCommerce themes.",
+	"private": true,
+	"license": "GPL-2.0-or-later",
+	"engines": {
+		"node": "^24.15.0"
+	},
+	"scripts": {
+		"build": "node scripts/build-zip.mjs",
+		"validate": "node scripts/validate-theme.mjs",
+		"changelog": "composer exec -- changelogger",
+		"lint": "prettier --check scripts package.json composer.json .wp-env.json",
+		"wp-env": "node scripts/env.mjs"
+	},
+	"devDependencies": {
+		"@wordpress/env": "catalog:tooling",
+		"ajv": "^8.17.1"
+	}
+}

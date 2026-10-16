@@ -106,6 +106,7 @@ export type MiniCart = {
 		isOpen: boolean;
 		totalItemsInCart: number;
 		formattedSubtotal: string;
+		isCartUpdating: boolean;
 		badgeIsVisible: boolean;
 		cartIsEmpty: boolean;
 		drawerRole: string | null;
@@ -123,6 +124,7 @@ export type MiniCart = {
 		closeDrawer: () => void;
 		overlayCloseDrawer: ( e: MouseEvent ) => void;
 		handleOverlayKeydown: ( e: KeyboardEvent ) => void;
+		preventCheckoutWhileUpdating: ( e: MouseEvent ) => void;
 	};
 	callbacks: {
 		markAsHydrated: () => void;
@@ -237,6 +239,11 @@ store< MiniCart >(
 				return formatPriceWithCurrency( subtotal, normalizedCurrency );
 			},
 
+			// The subtotal comes from the server, so it's out of date until a cart update finishes.
+			get isCartUpdating(): boolean {
+				return !! woocommerceState.isCartUpdating;
+			},
+
 			get drawerRole() {
 				return state.isOpen ? 'dialog' : null;
 			},
@@ -316,6 +323,13 @@ store< MiniCart >(
 				state.isOpen = false;
 				state.miniCartButtonRef?.focus();
 			},
+
+			// The checkout button is a link, so it can't be disabled natively.
+			preventCheckoutWhileUpdating: withSyncEvent( ( e: MouseEvent ) => {
+				if ( state.isCartUpdating ) {
+					e.preventDefault();
+				}
+			} ),
 
 			overlayCloseDrawer( e: MouseEvent ) {
 				// Only close the drawer if the overlay itself was clicked.
