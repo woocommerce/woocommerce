@@ -93,7 +93,7 @@ class OrderNotesQuery extends AbstractDomainAbility implements AbilityDefinition
 					return array(
 						'id'            => (int) $note->id,
 						'author'        => (string) $note->added_by,
-						'date_created'  => wc_rest_prepare_date_response( $note->date_created, false ),
+						'date_created'  => $note->date_created ? $note->date_created->format( 'c' ) : null,
 						'note'          => (string) $note->content,
 						'customer_note' => (bool) $note->customer_note,
 					);
