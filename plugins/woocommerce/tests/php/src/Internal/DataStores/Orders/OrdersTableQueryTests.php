@@ -538,6 +538,7 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 		add_filter( 'query', $capture );
 		try {
 			$query = new OrdersTableQuery( $args );
+			$this->assertSame( '', $wpdb->last_error, 'The order query should not produce a database error.' );
 		} finally {
 			remove_filter( 'query', $capture );
 		}
@@ -560,6 +561,8 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	 * @param bool $fts_enabled    Whether full-text search is enabled.
 	 */
 	public function test_first_search_page_supplies_total( int $matches, bool $count_expected, bool $fts_enabled ): void {
+		// The full-text address index created for this class includes the phone column added in 9.4.
+		update_option( 'woocommerce_db_version', WC_VERSION );
 		add_filter( 'pre_option_' . CustomOrdersTableController::HPOS_FTS_INDEX_OPTION, static fn() => $fts_enabled ? 'yes' : 'no' );
 		add_filter( 'pre_option_' . CustomOrdersTableController::HPOS_FTS_ADDRESS_INDEX_CREATED_OPTION, static fn() => 'yes' );
 		add_filter( 'pre_option_' . CustomOrdersTableController::HPOS_FTS_ORDER_ITEM_INDEX_CREATED_OPTION, static fn() => 'yes' );
