@@ -1,10 +1,12 @@
 const mockGetServerContext = jest.fn();
+const mockGetElement = jest.fn();
 const mockSpeak = jest.fn();
 let mockCallbacks: { announceResultsCount: () => void } | null = null;
 
 jest.mock(
 	'@wordpress/interactivity',
 	() => ( {
+		getElement: mockGetElement,
 		getServerContext: mockGetServerContext,
 		store: jest.fn( ( _name, definition ) => {
 			mockCallbacks = definition.callbacks;
@@ -18,10 +20,13 @@ jest.mock( '@wordpress/a11y', () => ( { speak: mockSpeak } ), {
 	virtual: true,
 } );
 
-const announce = ( text: string ) => {
+const firstBlock = document.createElement( 'div' );
+
+const announce = ( text: string, block: HTMLElement = firstBlock ) => {
 	if ( ! mockCallbacks ) {
 		throw new Error( 'Product Results Count store was not registered.' );
 	}
+	mockGetElement.mockReturnValue( { ref: block } );
 	mockGetServerContext.mockReturnValue( { announcement: text } );
 	mockCallbacks.announceResultsCount();
 };
@@ -37,6 +42,7 @@ describe( 'Product Results Count announcement', () => {
 		jest.useFakeTimers();
 		jest.resetModules();
 		mockGetServerContext.mockReset();
+		mockGetElement.mockReset();
 		mockSpeak.mockReset();
 		mockCallbacks = null;
 		await jest.isolateModulesAsync( async () => {
@@ -50,6 +56,17 @@ describe( 'Product Results Count announcement', () => {
 
 	it( 'does not announce on the initial render', async () => {
 		announce( 'Showing 1–16 of 28 results' );
+		await settle();
+
+		expect( mockSpeak ).not.toHaveBeenCalled();
+	} );
+
+	it( 'does not announce on the initial render of several blocks', async () => {
+		announce( 'Showing 1–16 of 28 results' );
+		announce(
+			'Showing 1–16 of 28 results',
+			document.createElement( 'div' )
+		);
 		await settle();
 
 		expect( mockSpeak ).not.toHaveBeenCalled();

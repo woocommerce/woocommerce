@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { getServerContext, store } from '@wordpress/interactivity';
+import { getElement, getServerContext, store } from '@wordpress/interactivity';
 
 const BLOCK_NAME = 'woocommerce/product-results-count';
 
@@ -15,7 +15,8 @@ type ProductResultsCountContext = {
 	announcement: string;
 };
 
-let isInitialRender = true;
+// Blocks that have run their first watch; that run is the page load, not a navigation.
+const renderedBlocks = new WeakSet< HTMLElement >();
 let pendingAnnouncement: ReturnType< typeof setTimeout > | null = null;
 
 const productResultsCountStore = {
@@ -33,8 +34,13 @@ const productResultsCountStore = {
 				pendingAnnouncement = null;
 			}
 
-			if ( isInitialRender || ! announcement ) {
-				isInitialRender = false;
+			const { ref } = getElement();
+			const isFirstRun = ! ref || ! renderedBlocks.has( ref );
+			if ( ref ) {
+				renderedBlocks.add( ref );
+			}
+
+			if ( isFirstRun || ! announcement ) {
 				return;
 			}
 
