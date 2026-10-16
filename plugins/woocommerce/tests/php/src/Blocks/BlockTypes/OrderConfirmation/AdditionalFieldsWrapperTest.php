@@ -51,7 +51,11 @@ class AdditionalFieldsWrapperTest extends WC_Unit_Test_Case {
 		};
 		$block->publish_data();
 
-		$data = ( new \ReflectionMethod( AssetDataRegistry::class, 'get' ) )->invoke( $registry );
+		$get_method = new \ReflectionMethod( AssetDataRegistry::class, 'get' );
+		if ( PHP_VERSION_ID < 80100 ) {
+			$get_method->setAccessible( true );
+		}
+		$data = $get_method->invoke( $registry );
 		$this->assertArrayHasKey( $field_id, $data['additionalOrderFields'], 'Order fields must reach the editor.' );
 		$this->assertSame( $data['additionalFields'], $data['additionalOrderFields'], 'The existing setting must remain available.' );
 	}
