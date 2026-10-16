@@ -263,7 +263,7 @@ CSS;
 				</button>
 				<div class="wc-block-product-filters__overlay">
 					<div class="wc-block-product-filters__overlay-wrapper" data-wp-on--click="actions.closeOverlayOnBackdrop">
-						<div
+						<section
 							class="wc-block-product-filters__overlay-dialog"
 							role="dialog"
 							aria-label="<?php echo esc_html__( 'Product Filters', 'woocommerce' ); ?>"
@@ -295,7 +295,7 @@ CSS;
 									<span><?php echo esc_html__( 'Apply', 'woocommerce' ); ?></span>
 								</button>
 							</footer>
-						</div>
+						</section>
 					</div>
 				</div>
 			<?php else : ?>
