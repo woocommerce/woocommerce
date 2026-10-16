@@ -87,6 +87,76 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Product searches return a partial title match.
+	 */
+	public function test_product_search_returns_partial_title_match(): void {
+		$target_token = wp_generate_password( 16, false );
+		$search_term  = substr( $target_token, 4, 8 );
+		$target_name  = 'Search target ' . $target_token;
+		$control_name = 'Unrelated fixture';
+		$target       = null;
+		$control      = null;
+
+		$this->assertFalse(
+			false !== stripos( $control_name, $search_term ),
+			'The control title must not contain the target search substring.'
+		);
+
+		try {
+			$target = WC_Helper_Product::create_simple_product();
+			$target->set_name( $target_name );
+			$target->set_status( 'publish' );
+			$target->set_date_created( '2024-01-02 00:00:00' );
+			$target->save();
+
+			$control = WC_Helper_Product::create_simple_product();
+			$control->set_name( $control_name );
+			$control->set_status( 'publish' );
+			$control->set_date_created( '2024-01-01 00:00:00' );
+			$control->save();
+
+			$this->assertSame(
+				array( $target->get_id() ),
+				$this->get_search_results( $search_term ),
+				'A strict interior title substring should return only its matching product.'
+			);
+		} finally {
+			if ( $control instanceof WC_Product ) {
+				$control->delete( true );
+			}
+
+			if ( $target instanceof WC_Product ) {
+				$target->delete( true );
+			}
+		}
+	}
+
+	/**
+	 * @testdox Product searches return no results for a missing term.
+	 */
+	public function test_product_search_returns_no_results_for_missing_term(): void {
+		$control = null;
+
+		try {
+			$control = WC_Helper_Product::create_simple_product();
+			$control->set_name( 'Product Search Control ' . wp_generate_password( 8, false ) );
+			$control->set_status( 'publish' );
+			$control->set_date_created( '2024-01-01 00:00:00' );
+			$control->save();
+
+			$this->assertSame(
+				array(),
+				$this->get_search_results( 'Missing Product Search ' . wp_generate_password( 8, false ) ),
+				'A missing product search term should not admit unrelated published products.'
+			);
+		} finally {
+			if ( $control instanceof WC_Product ) {
+				$control->delete( true );
+			}
+		}
+	}
+
+	/**
 	 * @testdox Product searches prioritize titles that match parsed search terms.
 	 * @dataProvider parsed_search_term_provider
 	 *
@@ -643,6 +713,166 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Products list shipping-class filter lists a variable product whose variation uses the class.
+	 */
+	public function test_shipping_class_filter_includes_variable_product_with_matching_variation(): void {
+		list( $term_id, $slug ) = $this->create_shipping_class();
+
+		$simple_in_class = WC_Helper_Product::create_simple_product();
+		wp_set_object_terms( $simple_in_class->get_id(), array( $term_id ), 'product_shipping_class' );
+
+		$variable = new WC_Product_Variable();
+		$variable->save();
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $variable->get_id() );
+		$variation->set_status( 'publish' );
+		$variation->set_regular_price( '10' );
+		$variation->save();
+		wp_set_object_terms( $variation->get_id(), array( $term_id ), 'product_shipping_class' );
+
+		$unrelated = WC_Helper_Product::create_simple_product();
+
+		$results = $this->query_product_ids_for_shipping_class( $slug );
+
+		$this->assertContains( $simple_in_class->get_id(), $results, 'A product directly in the shipping class should be listed.' );
+		$this->assertContains( $variable->get_id(), $results, 'A variable product whose variation uses the class should be listed via its parent.' );
+		$this->assertNotContains( $unrelated->get_id(), $results, 'A product not in the class should not be listed.' );
+		$this->assertNotContains( $variation->get_id(), $results, 'The variation itself is never a row in the products list.' );
+	}
+
+	/**
+	 * @testdox Products list shipping-class filter does not surface the parent of a non-published variation.
+	 */
+	public function test_shipping_class_filter_ignores_non_published_variation_parent(): void {
+		list( $term_id, $slug ) = $this->create_shipping_class();
+
+		$variable = new WC_Product_Variable();
+		$variable->save();
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $variable->get_id() );
+		$variation->set_status( 'private' );
+		$variation->set_regular_price( '10' );
+		$variation->save();
+		wp_set_object_terms( $variation->get_id(), array( $term_id ), 'product_shipping_class' );
+
+		$results = $this->query_product_ids_for_shipping_class( $slug );
+
+		$this->assertNotContains( $variable->get_id(), $results, 'A class used only by a non-published variation should not surface its parent.' );
+	}
+
+	/**
+	 * @testdox Products list shipping-class filter returns no products for an unused class.
+	 */
+	public function test_shipping_class_filter_returns_nothing_for_unused_class(): void {
+		list( , $slug ) = $this->create_shipping_class();
+
+		$product = WC_Helper_Product::create_simple_product();
+
+		$results = $this->query_product_ids_for_shipping_class( $slug );
+
+		$this->assertNotContains( $product->get_id(), $results, 'A class with no products assigned should match nothing.' );
+		$this->assertSame( array(), $results, 'An unused shipping class should return an empty list, not every product.' );
+	}
+
+	/**
+	 * @testdox Products list shipping-class filter matches nothing for an array-shaped request instead of fataling or listing everything.
+	 * @testWith ["heavy"]
+	 *           ["!!!"]
+	 *
+	 * @param string $value Single value supplied as an array-shaped request ("!!!" sanitizes to an empty slug).
+	 */
+	public function test_shipping_class_filter_handles_array_shaped_request( string $value ): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$request = array( $value );
+
+		$original_get                   = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Test cleanup restores the raw original request data.
+		$_GET['product_shipping_class'] = $request;
+
+		try {
+			$query_vars = $this->sut->request_query(
+				array(
+					'post_type'              => 'product',
+					'post_status'            => 'any',
+					'posts_per_page'         => -1,
+					'fields'                 => 'ids',
+					'product_shipping_class' => $request,
+				)
+			);
+			$results    = array_map( 'intval', ( new WP_Query( $query_vars ) )->get_posts() );
+		} finally {
+			$_GET = $original_get; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			remove_filter( 'posts_clauses', array( $this->sut, 'filter_shipping_class_post_clauses' ) );
+		}
+
+		$this->assertNotContains( $product->get_id(), $results, 'An array-shaped request with no real class should not list unrelated products.' );
+		$this->assertSame( array(), $results, 'An invalid shipping-class request should match nothing, not the whole catalog.' );
+	}
+
+	/**
+	 * @testdox Products list shipping-class filter drops the core taxonomy query var.
+	 */
+	public function test_shipping_class_filter_removes_core_taxonomy_query_var(): void {
+		list( , $slug ) = $this->create_shipping_class();
+
+		$original_get                   = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Test cleanup restores the raw original request data.
+		$_GET['product_shipping_class'] = $slug;
+
+		try {
+			$query_vars = $this->sut->request_query(
+				array(
+					'post_type'              => 'product',
+					'product_shipping_class' => $slug,
+				)
+			);
+		} finally {
+			$_GET = $original_get; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			remove_filter( 'posts_clauses', array( $this->sut, 'filter_shipping_class_post_clauses' ) );
+		}
+
+		$this->assertArrayNotHasKey( 'product_shipping_class', $query_vars, 'The direct-product taxonomy query var must be removed so core does not exclude variation parents.' );
+	}
+
+	/**
+	 * @testdox Products list shipping-class filter combined with a non-matching search returns no products.
+	 */
+	public function test_shipping_class_filter_with_non_matching_search_returns_nothing(): void {
+		list( $term_id, $slug ) = $this->create_shipping_class();
+
+		$in_class = WC_Helper_Product::create_simple_product();
+		$in_class->set_name( 'Bulky lamp ' . wp_generate_password( 8, false ) );
+		$in_class->save();
+		wp_set_object_terms( $in_class->get_id(), array( $term_id ), 'product_shipping_class' );
+
+		$out_of_class = WC_Helper_Product::create_simple_product();
+		$search_token = wp_generate_password( 12, false );
+		$out_of_class->set_name( 'Unrelated ' . $search_token );
+		$out_of_class->save();
+
+		$original_get                   = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Test cleanup restores the raw original request data.
+		$_GET['product_shipping_class'] = $slug;
+
+		try {
+			$query_vars = $this->sut->request_query(
+				array(
+					'post_type'              => 'product',
+					'post_status'            => 'any',
+					'posts_per_page'         => -1,
+					'fields'                 => 'ids',
+					'product_shipping_class' => $slug,
+					's'                      => $search_token,
+				)
+			);
+			$results    = array_map( 'intval', ( new WP_Query( $query_vars ) )->get_posts() );
+		} finally {
+			$_GET = $original_get; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			remove_filter( 'posts_clauses', array( $this->sut, 'filter_shipping_class_post_clauses' ) );
+		}
+
+		$this->assertNotContains( $out_of_class->get_id(), $results, 'A search match outside the shipping class must not appear.' );
+		$this->assertSame( array(), $results, 'A search with no product in the shipping class should return nothing, not the whole catalog.' );
+	}
+
+	/**
 	 * Products list out-of-stock filter includes variable products with out-of-stock variations.
 	 *
 	 * @testdox Products list out-of-stock filter includes variable products with out-of-stock variations.
@@ -1002,6 +1232,49 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 			return $callback();
 		} finally {
 			$_GET = $original_get;
+		}
+	}
+
+	/**
+	 * Create a product shipping class term with a unique slug.
+	 *
+	 * @return array{int, string} The term ID and its slug.
+	 */
+	private function create_shipping_class(): array {
+		$slug = sanitize_title( 'ship ' . wp_generate_password( 8, false, false ) );
+		$term = wp_insert_term( 'Shipping ' . $slug, 'product_shipping_class', array( 'slug' => $slug ) );
+
+		return array( (int) $term['term_id'], $slug );
+	}
+
+	/**
+	 * Query the products list filtered by a shipping class slug.
+	 *
+	 * @param string $shipping_class Shipping class slug.
+	 * @return int[]
+	 */
+	private function query_product_ids_for_shipping_class( string $shipping_class ): array {
+		$original_get                   = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Test cleanup restores the raw original request data.
+		$_GET['product_shipping_class'] = $shipping_class;
+
+		try {
+			// Pass the query var too, mirroring the admin request where the taxonomy query var is active.
+			$query_vars = $this->sut->request_query(
+				array(
+					'post_type'              => 'product',
+					'post_status'            => 'any',
+					'posts_per_page'         => -1,
+					'fields'                 => 'ids',
+					'product_shipping_class' => $shipping_class,
+				)
+			);
+
+			$query = new WP_Query( $query_vars );
+
+			return array_map( 'intval', $query->get_posts() );
+		} finally {
+			$_GET = $original_get; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			remove_filter( 'posts_clauses', array( $this->sut, 'filter_shipping_class_post_clauses' ) );
 		}
 	}
 

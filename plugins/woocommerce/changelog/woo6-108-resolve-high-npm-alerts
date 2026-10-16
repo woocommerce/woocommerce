@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Update npm dependencies that resolve high-severity security advisories.

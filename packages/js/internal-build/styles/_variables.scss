@@ -1,13 +1,13 @@
-@import '@automattic/color-studio/dist/color-variables.scss';
+@import "@automattic/color-studio/dist/color-variables.scss";
 
 // Import Gutenberg variables
-@import '@wordpress/base-styles/colors.scss';
-@import '@wordpress/base-styles/variables.scss';
-@import '@wordpress/base-styles/mixins.scss';
-@import '@wordpress/base-styles/breakpoints.scss';
-@import '@wordpress/base-styles/animations.scss';
-@import '@wordpress/base-styles/z-index.scss';
-@import '@wordpress/base-styles/default-custom-properties.scss';
+@import "@wordpress/base-styles/colors.scss";
+@import "@wordpress/base-styles/variables.scss";
+@import "@wordpress/base-styles/mixins.scss";
+@import "@wordpress/base-styles/breakpoints.scss";
+@import "@wordpress/base-styles/animations.scss";
+@import "@wordpress/base-styles/z-index.scss";
+@import "@wordpress/base-styles/default-custom-properties.scss";
 
 $fallback-gutter: 24px;
 $fallback-gutter-large: 40px;

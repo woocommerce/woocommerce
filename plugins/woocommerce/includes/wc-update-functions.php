@@ -19,15 +19,19 @@
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
+use Automattic\WooCommerce\Admin\API\Reports\Orders\DataStore as OrdersDataStore;
 use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\Notes\Notes;
 use Automattic\WooCommerce\Database\Migrations\MigrationHelper;
 use Automattic\WooCommerce\Enums\DefaultCustomerAddress;
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Admin\Marketing\MarketingSpecs;
 use Automattic\WooCommerce\Internal\Admin\Notes\WooSubscriptionsNotes;
 use Automattic\WooCommerce\Internal\AssignDefaultCategory;
+use Automattic\WooCommerce\Internal\Caches\CouponCodeLookupInvalidator;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
@@ -2262,10 +2266,7 @@ function wc_update_450_sanitize_coupons_code() {
 		ARRAY_A
 	);
 
-	if ( empty( $coupons ) ) {
-		delete_option( 'woocommerce_update_450_last_coupon_id' );
-		return false;
-	}
+	$codes_changed = false;
 
 	foreach ( $coupons as $key => $data ) {
 		$coupon_id = intval( $data['ID'] );
@@ -2288,10 +2289,15 @@ function wc_update_450_sanitize_coupons_code() {
 				)
 			);
 
-			// Clean cache.
+			// Clean post cache.
 			clean_post_cache( $coupon_id );
-			wp_cache_delete( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $data['post_title'], 'coupons' );
+			$codes_changed = true;
 		}
+	}
+
+	// Remember the rewrite for the last batch, which is where the lookup cache is cleaned.
+	if ( $codes_changed ) {
+		update_option( 'woocommerce_update_450_codes_changed', 'yes' );
 	}
 
 	// Start the run again.
@@ -2300,6 +2306,19 @@ function wc_update_450_sanitize_coupons_code() {
 	}
 
 	delete_option( 'woocommerce_update_450_last_coupon_id' );
+
+	/*
+	 * A rewritten code leaves its lookup entry behind under the old spelling, and those keys
+	 * cannot be deleted one by one: wc_get_coupon_id_by_code() hashes the caller's raw input, so
+	 * an entry can be keyed on a representation this function never sees. Rotating the group is
+	 * what reaches all of them, and it runs here, once per migration, rather than in every batch
+	 * that happened to rewrite something.
+	 */
+	if ( 'yes' === get_option( 'woocommerce_update_450_codes_changed' ) ) {
+		delete_option( 'woocommerce_update_450_codes_changed' );
+		wc_get_container()->get( CouponCodeLookupInvalidator::class )->invalidate_all();
+	}
+
 	return false;
 }
 
@@ -3991,6 +4010,212 @@ function wc_update_11203_normalize_stock_notification_emails() {
 	}
 
 	delete_option( $last_id_option );
+
+	return false;
+}
+
+/**
+ * Persist the legacy variation price hash option for existing stores so get_option returns an explicit value.
+ *
+ * @return void
+ */
+function wc_update_1130_set_legacy_variation_price_hash_option() {
+	if ( false === get_option( 'woocommerce_use_legacy_get_variations_price_hash' ) ) {
+		add_option( 'woocommerce_use_legacy_get_variations_price_hash', 'yes', '', true );
+	}
+}
+
+/**
+ * Delete the product attributes lookup rows of variations that are not published.
+ *
+ * Disabled variations (status 'private') used to keep their lookup rows, so attribute filters offered and
+ * counted terms that only a disabled variation carried. Rows are now only written for published variations
+ * and a status change refreshes them, but rows written before that are never revisited.
+ *
+ * Runs in batches of unpublished variations, so the lookup table is never locked wholesale: it is one of the
+ * largest tables on a variation-heavy store, and every filtered catalogue page reads it. A database error, or a
+ * progress cursor that can't be saved, is logged and stops the migration without a retry.
+ *
+ * @since 11.3.0
+ *
+ * @return bool True when another batch is left to process, false when done or stopped.
+ */
+function wc_update_1130_delete_unpublished_variation_lookup_rows() {
+	global $wpdb;
+
+	$lookup_data_store = wc_get_container()->get( LookupDataStore::class );
+	if ( ! $lookup_data_store->check_lookup_table_exists() ) {
+		return false;
+	}
+
+	$last_id_option = 'woocommerce_update_1130_last_unpublished_variation_id';
+	$lookup_table   = $lookup_data_store->get_lookup_table_name();
+
+	// Driving from the posts side keeps the batch bounded by unpublished variations, which are the selective
+	// set here, and lets the query use the post_type/post_status index instead of scanning the lookup table.
+	$variation_ids = $wpdb->get_col(
+		$wpdb->prepare(
+			"SELECT ID FROM {$wpdb->posts}
+			WHERE ID > %d AND post_type = 'product_variation' AND post_status != %s
+			ORDER BY ID ASC
+			LIMIT 250",
+			(int) get_option( $last_id_option, 0 ),
+			ProductStatus::PUBLISH
+		)
+	);
+
+	if ( '' === $wpdb->last_error && ! empty( $variation_ids ) ) {
+		$variation_ids   = array_map( 'intval', $variation_ids );
+		$id_placeholders = implode( ', ', array_fill( 0, count( $variation_ids ), '%d' ) );
+
+		// Rows of a variation are always variation attribute rows, so matching on the id alone is enough. The
+		// status is checked again here: with direct updates on, a variation re-enabled since the batch was
+		// selected already has its rows back, and they must stay.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- The table name comes from the data store, and trusted table names are interpolated directly because that is what WooCommerceInternal.DB.IdentifierPlaceholder.Unguarded asks for; placeholders are generated per ID.
+		$deleted = $wpdb->query(
+			$wpdb->prepare(
+				"DELETE lookup FROM {$lookup_table} AS lookup
+				INNER JOIN {$wpdb->posts} AS posts ON posts.ID = lookup.product_id
+				WHERE lookup.product_id IN ( {$id_placeholders} ) AND posts.post_status != %s",
+				array_merge( $variation_ids, array( ProductStatus::PUBLISH ) )
+			)
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+
+		if ( false !== $deleted ) {
+			// A concurrent run (the queue plus `wp wc update`) may already have saved this id or a later one, and update_option()
+			// reports that as false just like a failed write. It can also replace a later cursor with this one, which only makes a
+			// run reselect variations whose rows are already gone. The variations stay unpublished, so without a saved cursor the
+			// next run would pick the same batch again.
+			$cursor = end( $variation_ids );
+			if ( (int) get_option( $last_id_option, 0 ) >= $cursor || update_option( $last_id_option, $cursor, false ) ) {
+				return true;
+			}
+			// Re-read from the database. If the other run created the option after this process found it missing, the stale
+			// "missing" entry sits in 'notoptions', not under the option's own key.
+			wp_cache_delete( $last_id_option, 'options' );
+			wp_cache_delete( 'notoptions', 'options' );
+			if ( (int) get_option( $last_id_option, 0 ) >= $cursor ) {
+				return true;
+			}
+			wc_get_logger()->error(
+				'Stopped deleting the lookup rows of unpublished variations: the progress cursor could not be saved.',
+				array( 'source' => 'wc_update_1130_delete_unpublished_variation_lookup_rows' )
+			);
+		}
+	}
+
+	if ( '' !== $wpdb->last_error ) {
+		wc_get_logger()->error(
+			sprintf( 'Stopped deleting the lookup rows of unpublished variations: %s', $wpdb->last_error ),
+			array( 'source' => 'wc_update_1130_delete_unpublished_variation_lookup_rows' )
+		);
+	}
+
+	delete_option( $last_id_option );
+
+	// The layered nav counts cached from the deleted rows would otherwise be served until they expire, a day later.
+	WC_Cache_Helper::invalidate_attribute_count( wc_get_attribute_taxonomy_names() );
+
+	return false;
+}
+
+/**
+ * Delete the option that used to hold the back-in-stock restock admin notice.
+ *
+ * The notice is now stored per user in a transient. A notice pending at upgrade time would otherwise leave
+ * an autoloaded row behind that nothing reads or deletes any more.
+ *
+ * @since 11.3.0
+ */
+function wc_update_1130_delete_stock_notification_sync_notice_option(): void {
+	delete_option( 'wc_customer_stock_notifications_product_sync_notice' );
+}
+
+/**
+ * Backfill the payment method on Analytics order stats rows written before the column existed.
+ *
+ * A database error is logged and stops the backfill without a retry.
+ *
+ * @since 11.3.0
+ *
+ * @return bool True when another batch is due, false when done or stopped.
+ */
+function wc_update_1130_backfill_order_stats_payment_method() {
+	global $wpdb;
+
+	$stats_table    = $wpdb->prefix . 'wc_order_stats';
+	$last_id_option = 'woocommerce_update_1130_last_payment_method_order_id';
+
+	if ( $stats_table !== $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $stats_table ) ) ) {
+		return false;
+	}
+
+	$order_ids = $wpdb->get_col(
+		$wpdb->prepare(
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name cannot be prepared.
+			"SELECT order_id FROM {$stats_table} WHERE order_id > %d ORDER BY order_id ASC LIMIT 500",
+			(int) get_option( $last_id_option, 0 )
+		)
+	);
+
+	if ( '' === $wpdb->last_error && $order_ids ) {
+		$id_list = implode( ',', array_map( 'absint', $order_ids ) );
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- Table names and the id list are code-defined.
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$orders_table = OrdersTableDataStore::get_orders_table_name();
+			$from_orders  = "UPDATE {$stats_table} stats
+				JOIN {$orders_table} orders ON orders.id = stats.order_id
+				SET stats.payment_method = orders.payment_method
+				WHERE stats.order_id IN ({$id_list})
+				AND stats.payment_method IS NULL
+				AND orders.payment_method != ''";
+			$refund_join  = "JOIN {$orders_table} refund_orders ON refund_orders.id = refunds.order_id AND refund_orders.type = 'shop_order_refund'";
+		} else {
+			$from_orders = "UPDATE {$stats_table} stats
+				JOIN {$wpdb->postmeta} meta ON meta.post_id = stats.order_id AND meta.meta_key = '_payment_method'
+				SET stats.payment_method = meta.meta_value
+				WHERE stats.order_id IN ({$id_list})
+				AND stats.payment_method IS NULL
+				AND meta.meta_value != ''";
+			$refund_join = "JOIN {$wpdb->posts} refund_orders ON refund_orders.ID = refunds.order_id AND refund_orders.post_type = 'shop_order_refund'";
+		}
+
+		// A refund holds no payment method of its own, so it takes the refunded order's. That order has the lower id, so its row is already filled.
+		// The join on the order type leaves out other child orders, which the sync stores without the parent's payment method.
+		$from_parents = "UPDATE {$stats_table} refunds
+			{$refund_join}
+			JOIN {$stats_table} parents ON parents.order_id = refunds.parent_id
+			SET refunds.payment_method = parents.payment_method
+			WHERE refunds.order_id IN ({$id_list})
+			AND refunds.parent_id != 0
+			AND refunds.payment_method IS NULL
+			AND parents.payment_method IS NOT NULL";
+
+		$updated = false !== $wpdb->query( $from_orders ) && false !== $wpdb->query( $from_parents );
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
+
+		if ( $updated ) {
+			update_option( $last_id_option, (int) end( $order_ids ), false );
+
+			return true;
+		}
+	}
+
+	if ( '' !== $wpdb->last_error ) {
+		wc_get_logger()->error(
+			sprintf( 'Stopped backfilling the Analytics payment method: %s', $wpdb->last_error ),
+			array( 'source' => 'wc-updater' )
+		);
+	}
+
+	delete_option( $last_id_option );
+
+	// The report rows cached before the column was filled would otherwise be served for a week.
+	ReportsCache::invalidate();
+	// The same goes for the Orders report payment method filter, cached for a year.
+	wp_cache_delete( OrdersDataStore::ORDERS_PAYMENT_METHODS_ALL_CACHE_KEY, 'woocommerce_analytics' );
 
 	return false;
 }

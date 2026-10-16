@@ -5,7 +5,12 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Controllers;
 
 use Automattic\WooCommerce\Internal\PushNotifications\Controllers\PushNotificationRestController;
+use Automattic\WooCommerce\Internal\PushNotifications\Dispatchers\InternalNotificationDispatcher;
+use Automattic\WooCommerce\Internal\PushNotifications\Enums\AuthorizationFailureReason;
+use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
+use Automattic\WooCommerce\RestApi\UnitTests\LoggerSpyTrait;
 use Automattic\WooCommerce\StoreApi\Utilities\JsonWebToken;
+use WC_Rate_Limiter;
 use WC_Unit_Test_Case;
 use WP_REST_Request;
 use WP_REST_Server;
@@ -14,6 +19,8 @@ use WP_REST_Server;
  * Tests for the PushNotificationRestController class.
  */
 class PushNotificationRestControllerTest extends WC_Unit_Test_Case {
+	use LoggerSpyTrait;
+
 
 	/**
 	 * REST server used to verify route registration.
@@ -66,9 +73,9 @@ class PushNotificationRestControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should reject requests without an authorization header.
+	 * @testdox Should reject requests with neither an authorization header nor a token query parameter.
 	 */
-	public function test_authorize_rejects_missing_header(): void {
+	public function test_authorize_rejects_missing_credential(): void {
 		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/send' );
 		$request->set_body( '{}' );
 
@@ -160,6 +167,123 @@ class PushNotificationRestControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Builds a request shaped like the one the dispatcher sends: a JSON POST
+	 * whose credential is in the query string. The content type matters,
+	 * because {@see WP_REST_Request::set_param()} writes into whichever bucket
+	 * the parameter order puts first, so without it a parameter set here would
+	 * land in the POST body rather than the query string and the test would
+	 * pass without exercising the URL at all.
+	 *
+	 * @param string $body       The request body.
+	 * @param string $token      The credential, or an empty string to omit it.
+	 * @param string $auth_token Authorization header credential, or an empty string to omit the header.
+	 * @return WP_REST_Request
+	 */
+	private function build_request( string $body, string $token = '', string $auth_token = '' ): WP_REST_Request {
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/send' );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_body( $body );
+
+		if ( '' !== $token ) {
+			$request->set_query_params( array( InternalNotificationDispatcher::TOKEN_QUERY_PARAM => $token ) );
+		}
+
+		if ( '' !== $auth_token ) {
+			$request->set_header( 'Authorization', 'Bearer ' . $auth_token );
+		}
+
+		return $request;
+	}
+
+	/**
+	 * Builds a token valid for the given body.
+	 *
+	 * @param string $body The body the token is signed over.
+	 * @return string
+	 */
+	private function build_token( string $body ): string {
+		return JsonWebToken::create(
+			array(
+				'iss'       => get_site_url(),
+				'exp'       => time() + 30,
+				'body_hash' => hash( 'sha256', $body ),
+			),
+			wp_salt( 'auth' )
+		);
+	}
+
+	/**
+	 * @testdox Should accept a valid JWT supplied via the token query parameter when the header is absent.
+	 */
+	public function test_authorize_accepts_valid_jwt_via_query_param(): void {
+		$body = '{"notifications":[]}';
+
+		$result = $this->sut->authorize( $this->build_request( $body, $this->build_token( $body ) ) );
+
+		$this->assertTrue( $result );
+	}
+
+	/**
+	 * @testdox Should reject an invalid JWT supplied via the token query parameter.
+	 */
+	public function test_authorize_rejects_invalid_jwt_via_query_param(): void {
+		$result = $this->sut->authorize( $this->build_request( '{}', 'invalid.token.here' ) );
+
+		$this->assertWPError( $result );
+	}
+
+	/**
+	 * The credential is sent in the URL, so the request body must never be
+	 * consulted for it. WP_REST_Request::get_param() searches the JSON body
+	 * before the query string, so reading the token that way would find this
+	 * one. Asserting on the missing-credential message rather than only on the
+	 * error proves the body was not read, since a body that was read would
+	 * produce a different rejection reason.
+	 *
+	 * @testdox Should not read the credential from the request body.
+	 */
+	public function test_authorize_does_not_read_credential_from_body(): void {
+		$body = (string) wp_json_encode(
+			array(
+				'notifications' => array(),
+				InternalNotificationDispatcher::TOKEN_QUERY_PARAM => $this->build_token( '{}' ),
+			)
+		);
+
+		$result = $this->sut->authorize( $this->build_request( $body ) );
+
+		$this->assertWPError( $result );
+		$this->assertStringContainsString( 'Missing credential', $result->get_error_message() );
+	}
+
+	/**
+	 * @testdox Should reject an array-valued token query parameter without a type error.
+	 */
+	public function test_authorize_rejects_array_token_query_param(): void {
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/send' );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_body( '{}' );
+		$request->set_query_params( array( InternalNotificationDispatcher::TOKEN_QUERY_PARAM => array( 'a', 'b' ) ) );
+
+		$result = $this->sut->authorize( $request );
+
+		$this->assertWPError( $result );
+	}
+
+	/**
+	 * @testdox Should prefer the Authorization header over the token query parameter.
+	 */
+	public function test_authorize_prefers_header_over_query_param(): void {
+		$body = '{"notifications":[]}';
+
+		$result = $this->sut->authorize(
+			$this->build_request( $body, $this->build_token( $body ), 'invalid.token.here' )
+		);
+
+		$this->assertWPError( $result );
+	}
+
+	/**
 	 * @testdox Should return success when no notifications are provided.
 	 */
 	public function test_create_returns_success_for_empty_notifications(): void {
@@ -194,5 +318,106 @@ class PushNotificationRestControllerTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( 200, $result->get_status() );
 		$this->assertTrue( $result->get_data()['success'] );
+	}
+
+	/**
+	 * @testdox Should record one refused request per rate limit window, however many arrive.
+	 */
+	public function test_authorize_rate_limits_the_refusal_line(): void {
+		$body = '{"notifications":[{"type":"store_order","resource_id":1}]}';
+
+		$first = new WP_REST_Request( 'POST', '/wc-push-notifications/send' );
+		$first->set_body( $body );
+		$this->sut->authorize( $first );
+
+		$this->assertCount( 1, $this->get_logs_by_level( 'warning' ) );
+
+		$second = new WP_REST_Request( 'POST', '/wc-push-notifications/send' );
+		$second->set_body( $body );
+		$this->sut->authorize( $second );
+
+		$this->assertCount( 1, $this->get_logs_by_level( 'warning' ) );
+	}
+
+	/**
+	 * @testdox Should log a refused request only when the body carries a notifications key.
+	 */
+	public function test_authorize_logs_refusals_only_for_loopback_shaped_bodies(): void {
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/send' );
+		$request->set_body( '{"notifications":[{"type":"store_order","resource_id":1}]}' );
+		$this->sut->authorize( $request );
+
+		$this->assertLogged(
+			'warning',
+			'Loopback request refused: Missing credential',
+			array(
+				'source'        => PushNotifications::FEATURE_NAME,
+				'step'          => 'loopback_started',
+				'outcome'       => 'auth_failed',
+				'reason'        => AuthorizationFailureReason::CREDENTIAL_MISSING,
+				'notifications' => 1,
+			)
+		);
+	}
+
+	/**
+	 * The rate limit would also stop the line, so this puts the next allowed
+	 * time in the past first. Without that the test passes whether or not the
+	 * body is checked at all, since the limiter returns early either way.
+	 *
+	 * @testdox Should not log a refused request whose body is not ours, even when nothing is rate limited.
+	 */
+	public function test_authorize_does_not_log_a_refusal_without_our_body(): void {
+		WC_Rate_Limiter::set_rate_limit( PushNotificationRestController::AUTH_FAILURE_LOG_RATE_LIMIT_ID, -60 );
+		$this->captured_logs = array();
+
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/send' );
+		$request->set_body( '{"anything":"else"}' );
+		$this->sut->authorize( $request );
+
+		$this->assertSame( array(), $this->captured_logs, 'A refused request without our body must not be logged.' );
+	}
+
+	/**
+	 * @testdox Should log a malformed body with the step fields.
+	 */
+	public function test_create_logs_malformed_body(): void {
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/send' );
+		$request->set_body( '{}' );
+
+		$this->sut->create( $request );
+
+		$this->assertLogged(
+			'warning',
+			'empty or missing notifications array',
+			array(
+				'source'  => PushNotifications::FEATURE_NAME,
+				'step'    => 'loopback_started',
+				'outcome' => 'malformed_body',
+			)
+		);
+	}
+
+	/**
+	 * @testdox Should log a notification that cannot be built, with the type and resource it named.
+	 */
+	public function test_create_logs_invalid_notification(): void {
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/send' );
+		$request->set_body( '{"notifications":[{"type":"unknown_type","resource_id":7}]}' );
+
+		$result = $this->sut->create( $request );
+
+		$this->assertSame( 200, $result->get_status() );
+		$this->assertLogged(
+			'error',
+			'Failed to process notification:',
+			array(
+				'source'      => PushNotifications::FEATURE_NAME,
+				'step'        => 'loopback_started',
+				'outcome'     => 'invalid_notification',
+				'type'        => 'unknown_type',
+				'resource_id' => 7,
+			)
+		);
 	}
 }

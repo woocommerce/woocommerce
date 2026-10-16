@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Move 4 Single Product page E2E tests to PHPUnit; SingleProductTemplateTests owns the body classes and ProductRatingTest owns the review visibility.
+

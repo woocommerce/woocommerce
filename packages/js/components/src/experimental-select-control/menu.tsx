@@ -66,7 +66,7 @@ export const Menu = ( {
 		}
 	}, [ isOpen, scrollIntoViewOnOpen ] );
 
-	/* eslint-disable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events */
+	/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 	/* Disabled because of the onmouseup on the ul element below. */
 	return (
 		<div
@@ -106,7 +106,7 @@ export const Menu = ( {
 			</div>
 		</div>
 	);
-	/* eslint-enable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events */
+	/* eslint-enable jsx-a11y/no-noninteractive-element-interactions */
 };
 
 export const MenuSlot = () =>

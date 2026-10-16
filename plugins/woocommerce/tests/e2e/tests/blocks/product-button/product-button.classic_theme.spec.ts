@@ -1,22 +1,41 @@
 /**
  * External dependencies
  */
-import { expect, test, CLASSIC_THEME_SLUG } from '@woocommerce/e2e-utils';
+import {
+	expect,
+	test as base,
+	CLASSIC_THEME_SLUG,
+} from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
  */
 import { blockData } from './utils';
+import ProductCollectionPage from '../product-collection/product-collection.page';
 
+const test = base.extend< { productCollectionPage: ProductCollectionPage } >( {
+	productCollectionPage: async ( { page, admin, editor }, use ) => {
+		const pageObject = new ProductCollectionPage( {
+			page,
+			admin,
+			editor,
+		} );
+		await use( pageObject );
+	},
+} );
 test.describe( `${ blockData.name } Block`, () => {
 	test.beforeEach( async ( { page, requestUtils } ) => {
 		await requestUtils.activateTheme( CLASSIC_THEME_SLUG );
 		await page.goto( '/product-collection/' );
 	} );
 
-	// The block's only classic-theme coverage. Here the legacy `add-to-cart.js`
-	// loads next to the block's own script, and nothing at a lower layer
-	// exercises the two together, so this journey stays in the browser.
+	test( 'should be visible', async ( { frontendUtils } ) => {
+		const blocks = await frontendUtils.getBlockByName( blockData.slug );
+		await expect( blocks ).toHaveCount(
+			blockData.selectors.frontend.productsToDisplay
+		);
+	} );
+
 	test( 'should add product to the cart', async ( {
 		frontendUtils,
 		page,

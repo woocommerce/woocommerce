@@ -362,7 +362,7 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 			}
 
 			// Skip items with values already in the product details area of the product name.
-			if ( null !== $decoded_item_name && wc_is_attribute_in_product_name( wp_specialchars_decode( $display_value, ENT_QUOTES ), $decoded_item_name ) ) {
+			if ( null !== $decoded_item_name && wc_is_attribute_in_product_name( wp_specialchars_decode( $display_value, ENT_QUOTES ), $decoded_item_name, $product ) ) {
 				continue;
 			}
 

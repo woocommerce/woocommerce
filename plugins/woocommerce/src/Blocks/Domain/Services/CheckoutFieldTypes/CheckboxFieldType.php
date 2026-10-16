@@ -50,6 +50,29 @@ class CheckboxFieldType extends AbstractFieldType {
 	}
 
 	/**
+	 * Converts the stored '1'/'0' meta value back to a boolean, returning null for missing or empty values.
+	 *
+	 * @param mixed $value The stored value.
+	 * @return bool|null
+	 */
+	public function from_storage( $value ) {
+		return null === $value || '' === $value ? null : '1' === $value;
+	}
+
+	/**
+	 * Declares checkbox values as booleans in the REST API value schema.
+	 *
+	 * @param array $field_schema The schema built for the field so far.
+	 * @param array $field        The field.
+	 * @return array The updated schema.
+	 */
+	public function prepare_value_schema( array $field_schema, array $field ): array {
+		$field_schema['type'] = 'boolean';
+
+		return $field_schema;
+	}
+
+	/**
 	 * Sets the checked and unchecked values woocommerce_form_field() should submit.
 	 *
 	 * @param array $form_field The woocommerce_form_field() arguments built from the field.

@@ -1046,6 +1046,8 @@ class WC_Checkout {
 						)
 					);
 				}
+			} elseif ( $this->is_shipping_withheld_for_missing_address() ) {
+				$errors->add( 'shipping', __( 'Please enter an address to continue.', 'woocommerce' ) );
 			} else {
 				$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
 
@@ -1068,6 +1070,28 @@ class WC_Checkout {
 		}
 
 		do_action( 'woocommerce_after_checkout_validation', $data, $errors );
+	}
+
+	/**
+	 * Check whether shipping was left out because "Hide shipping costs until an address is entered" found the address incomplete.
+	 *
+	 * Without this check an order could be saved with no shipping line, for example when a store removes billing
+	 * address fields and the empty values are copied over the shipping address. Stores that turn off shipping
+	 * calculation through the woocommerce_cart_ready_to_calc_shipping filter are left alone.
+	 *
+	 * @return bool
+	 */
+	private function is_shipping_withheld_for_missing_address(): bool {
+		if ( 'yes' !== get_option( 'woocommerce_shipping_cost_requires_address' ) || WC()->cart->has_calculated_shipping() ) {
+			return false;
+		}
+
+		/**
+		 * This filter is documented in includes/class-wc-cart.php.
+		 *
+		 * @since 2.7.0
+		 */
+		return (bool) apply_filters( 'woocommerce_cart_ready_to_calc_shipping', true );
 	}
 
 	/**
@@ -1201,10 +1225,21 @@ class WC_Checkout {
 	 * Process an order that doesn't require payment.
 	 *
 	 * @since 3.0.0
+	 * @throws Exception If the order is missing or a cancelled unpaid order would be marked paid.
 	 * @param int $order_id Order ID.
 	 */
 	protected function process_order_without_payment( $order_id ) {
 		$order = wc_get_order( $order_id );
+
+		if ( ! $order instanceof WC_Order ) {
+			throw new Exception( esc_html__( 'Unable to process this order. Please try again.', 'woocommerce' ) );
+		}
+
+		// A cancelled order can reach this path after a stale cache read; never revive it without payment.
+		if ( 0 < $order->get_total() && ! $order->is_paid() && $order->has_status( OrderStatus::CANCELLED ) ) {
+			throw new Exception( esc_html__( 'This order cannot be completed without payment. Please try again.', 'woocommerce' ) );
+		}
+
 		$order->payment_complete();
 		wc_empty_cart();
 
@@ -1438,6 +1473,18 @@ class WC_Checkout {
 					array( 'order_object' => $order )
 				);
 
+				/**
+				 * Fires after the checkout creates the order, but before payment is processed.
+				 *
+				 * Do not use this action for payment-completion logic or to call WC_Order::payment_complete().
+				 * Use woocommerce_payment_complete or woocommerce_order_status_completed instead.
+				 *
+				 * @since 1.1.0
+				 *
+				 * @param int                      $order_id    Order ID.
+				 * @param array                    $posted_data Posted checkout data.
+				 * @param WC_Order|WC_Order_Refund $order       Order object.
+				 */
 				do_action( 'woocommerce_checkout_order_processed', $order_id, $posted_data, $order );
 
 				wc_log_order_step(

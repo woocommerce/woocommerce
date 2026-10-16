@@ -26,9 +26,8 @@ export const LysSurvey = ( {
 	const [ score, setScore ] = useState< number | null >( null );
 	const [ feedbackText, setFeedbackText ] = useState< string >( '' );
 	const [ isShowThanks, setIsShowThanks ] = useState< boolean >( false );
-	const [ isShowSurvey, setIsShowSurvey ] = useState< boolean >(
-		! hasCompleteSurvey
-	);
+	const [ isShowSurvey, setIsShowSurvey ] =
+		useState< boolean >( ! hasCompleteSurvey );
 	const shouldShowComment = isInteger( score );
 
 	const sendData = () => {

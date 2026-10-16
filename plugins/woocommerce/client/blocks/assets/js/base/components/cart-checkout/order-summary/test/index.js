@@ -8,6 +8,10 @@ import { previewCart } from '@woocommerce/resource-previews';
  * Internal dependencies
  */
 import OrderSummary from '../index';
+import { textContentMatcher } from '../../../../../../../tests/utils/find-by-text';
+
+// The screen reader label repeats the price, so only the visible one is queried.
+const visibleOnly = { ignore: 'script, style, .screen-reader-text' };
 
 jest.mock( '@woocommerce/base-context', () => ( {
 	...jest.requireActual( '@woocommerce/base-context' ),
@@ -41,7 +45,9 @@ describe( 'Order Summary', () => {
 			/>
 		);
 
-		expect( screen.getByText( '16€' ) ).toBeTruthy();
+		expect(
+			screen.getByText( textContentMatcher( '16€' ), visibleOnly )
+		).toBeInTheDocument();
 	} );
 
 	it( 'renders correct cart line subtotal when product price is 0', async () => {
@@ -68,6 +74,8 @@ describe( 'Order Summary', () => {
 			/>
 		);
 
-		expect( screen.getByText( '$0.00' ) ).toBeTruthy();
+		expect(
+			screen.getByText( textContentMatcher( '$0.00' ), visibleOnly )
+		).toBeInTheDocument();
 	} );
 } );

@@ -45,6 +45,11 @@ class WC_Helper {
 	private const CACHE_KEY_CONNECTION_DATA = '_woocommerce_helper_connection_data';
 
 	/**
+	 * Transient holding the connected user's subscriptions, see get_subscriptions().
+	 */
+	private const CACHE_KEY_SUBSCRIPTIONS = '_woocommerce_helper_subscriptions';
+
+	/**
 	 * Transient holding the last failed Helper API subscriptions response, so the
 	 * failure can be surfaced to the merchant instead of rendering as an empty
 	 * subscription list.
@@ -1290,7 +1295,8 @@ class WC_Helper {
 		do_action( 'woocommerce_helper_subscriptions_refresh' );
 		self::_flush_authentication_cache();
 		self::_flush_subscriptions_cache();
-		self::_flush_updates_cache();
+		// Keep the cached updates so they're still listed if the forced check fails.
+		WC_Helper_Updater::expire_updates_cache();
 		self::flush_product_usage_notice_rules_cache();
 
 		// A manual refresh resets any rate-limit backoff so the subsequent
@@ -1681,7 +1687,7 @@ class WC_Helper {
 	/**
 	 * Get subscription state of a given product ID.
 	 *
-	 * @since TBD
+	 * @since 9.2.0
 	 *
 	 * @param int $product_id The product id.
 	 *
@@ -2100,6 +2106,17 @@ class WC_Helper {
 	}
 
 	/**
+	 * Whether the subscription list is cached, so get_subscriptions() won't call WooCommerce.com.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @return bool
+	 */
+	public static function has_cached_subscriptions(): bool {
+		return is_array( get_transient( self::CACHE_KEY_SUBSCRIPTIONS ) );
+	}
+
+	/**
 	 * Get the connected user's subscriptions.
 	 *
 	 * @return array
@@ -2107,7 +2124,7 @@ class WC_Helper {
 	 * phpcs:ignore Squiz.Commenting.FunctionCommentThrowTag.Missing -- As we wrap the throw in a try/catch.
 	 */
 	public static function get_subscriptions() {
-		$cache_key = '_woocommerce_helper_subscriptions';
+		$cache_key = self::CACHE_KEY_SUBSCRIPTIONS;
 		$data      = get_transient( $cache_key );
 		if ( false !== $data ) {
 			if ( is_array( $data ) ) {
@@ -2126,6 +2143,9 @@ class WC_Helper {
 
 		try {
 			$request_uri = wp_unslash( $_SERVER['REQUEST_URI'] ?? '' ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			$is_ajax     = false !== stripos( $request_uri, 'admin-ajax.php' );
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Only labels the request; the ajax handler checks its own nonce.
+			$ajax_action = $is_ajax ? sanitize_text_field( wp_unslash( $_REQUEST['action'] ?? '' ) ) : '';
 			$source      = '';
 			if ( WC_Helper_API_Backoff::is_refresh_request() ) :
 				$source = 'refresh-button';
@@ -2135,7 +2155,9 @@ class WC_Helper {
 				$source = 'plugins';
 			elseif ( false !== stripos( $request_uri, 'wc-admin' ) ) :
 				$source = 'inbox-notes';
-			elseif ( false !== stripos( $request_uri, 'admin-ajax.php' ) ) :
+			elseif ( 'woocommerce_load_status_widget' === $ajax_action ) :
+				$source = 'dashboard-widget';
+			elseif ( $is_ajax ) :
 				$source = 'heartbeat-api';
 			elseif ( false !== stripos( $request_uri, 'installer' ) ) :
 				$source = 'wccom-site-installer';
@@ -2301,9 +2323,13 @@ class WC_Helper {
 
 			$subscription['local'] = self::get_subscription_local_data( $subscription );
 
-			$subscription['has_update'] = false;
+			$subscription['has_update']              = false;
+			$subscription['update_requires_php_met'] = true;
 			if ( $subscription['local']['installed'] && ! empty( $updates[ $subscription['product_id'] ] ) ) {
 				$subscription['has_update'] = version_compare( $updates[ $subscription['product_id'] ]['version'], $subscription['local']['version'], '>' );
+				// Mirrors core's pre-download check (no error code); a malformed value counts as met, as before.
+				$requires_php                            = $updates[ $subscription['product_id'] ]['requires_php'] ?? '';
+				$subscription['update_requires_php_met'] = ! is_scalar( $requires_php ) || is_php_version_compatible( (string) $requires_php );
 			}
 
 			if ( ! empty( $updates[ $subscription['product_id'] ] ) ) {
@@ -3053,7 +3079,7 @@ class WC_Helper {
 	 * @return void
 	 */
 	public static function _flush_subscriptions_cache() {
-		delete_transient( '_woocommerce_helper_subscriptions' );
+		delete_transient( self::CACHE_KEY_SUBSCRIPTIONS );
 	}
 
 	/**
@@ -3289,6 +3315,8 @@ class WC_Helper {
 		}
 
 		self::_flush_subscriptions_cache();
+		// A backoff from the pre-connect (public) update-check shouldn't block the first authenticated one.
+		WC_Helper_API_Backoff::clear( WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK );
 		self::_flush_updates_cache();
 		self::flush_product_usage_notice_rules_cache();
 	}
