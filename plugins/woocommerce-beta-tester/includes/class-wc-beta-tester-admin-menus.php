@@ -206,7 +206,7 @@ Copy and paste the system status report from **WooCommerce > System Status** in 
 			// Get SSR.
 			$api      = new WC_REST_System_Status_Controller();
 			$schema   = $api->get_item_schema();
-			$mappings = $api->get_item_mappings();
+			$mappings = $api->get_item_mappings_per_fields( array( 'environment' ) );
 			$response = array();
 
 			foreach ( $mappings as $section => $values ) {
