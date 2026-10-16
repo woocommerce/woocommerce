@@ -5689,12 +5689,6 @@ parameters:
 			path: includes/admin/meta-boxes/views/html-order-fee.php
 
 		-
-			message: '#^Parameter \#1 \$value of function wc_format_localized_price expects string, int given\.$#'
-			identifier: argument.type
-			count: 4
-			path: includes/admin/meta-boxes/views/html-order-fee.php
-
-		-
 			message: '#^Variable \$cogs_is_enabled might not be defined\.$#'
 			identifier: variable.undefined
 			count: 1
@@ -5794,12 +5788,6 @@ parameters:
 			message: '#^Parameter \#1 \$text of function esc_html expects string, int given\.$#'
 			identifier: argument.type
 			count: 1
-			path: includes/admin/meta-boxes/views/html-order-item.php
-
-		-
-			message: '#^Parameter \#1 \$value of function wc_format_localized_price expects string, int given\.$#'
-			identifier: argument.type
-			count: 6
 			path: includes/admin/meta-boxes/views/html-order-item.php
 
 		-
@@ -5920,12 +5908,6 @@ parameters:
 			message: '#^Parameter \#1 \$text of function esc_attr expects string, int given\.$#'
 			identifier: argument.type
 			count: 5
-			path: includes/admin/meta-boxes/views/html-order-shipping.php
-
-		-
-			message: '#^Parameter \#1 \$value of function wc_format_localized_price expects string, int given\.$#'
-			identifier: argument.type
-			count: 4
 			path: includes/admin/meta-boxes/views/html-order-shipping.php
 
 		-
