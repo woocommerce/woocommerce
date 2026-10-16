@@ -589,25 +589,22 @@ $limit_clause",
 			$operator = '<';
 		}
 
-		$sql = $wpdb->prepare(
+		$changed_orders_count_sql = $wpdb->prepare(
 			"
-SELECT(
-	COALESCE(($missing_orders_count_sql), 0)
-	+
-	(SELECT COUNT(1) FROM (
-		SELECT orders.id FROM $orders_table orders
-		JOIN $wpdb->posts posts on posts.ID = orders.id
-		WHERE
-		  posts.post_type IN ($order_post_type_placeholder)
-		  AND orders.date_updated_gmt $operator posts.post_modified_gmt
-	) x)
-) count",
+SELECT COUNT(1) FROM $orders_table orders
+JOIN $wpdb->posts posts ON posts.ID = orders.id
+WHERE
+  posts.post_type IN ($order_post_type_placeholder)
+  AND orders.date_updated_gmt $operator posts.post_modified_gmt",
 			$order_post_types
 		);
 		// phpcs:enable
 
+		// MySQL cannot reference the same temporary table twice in one query.
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		$pending_count = (int) $wpdb->get_var( $sql );
+		$pending_count = (int) $wpdb->get_var( $missing_orders_count_sql );
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$pending_count += (int) $wpdb->get_var( $changed_orders_count_sql );
 
 		$deleted_from_table = $this->get_current_deletion_record_meta_value();
 
