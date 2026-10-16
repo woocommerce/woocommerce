@@ -54,6 +54,30 @@ class AbilitiesTracking {
 	private const ABILITIES_RUN_ROUTE_REGEX = '#^/wp-abilities/v\d+/abilities/.+/run$#i';
 
 	/**
+	 * Known MCP clients, as normalized name tokens mapped to the recorded value. Checked in order.
+	 *
+	 * @var array<string, string>
+	 */
+	private const KNOWN_MCP_CLIENTS = array(
+		'claude_code'          => 'claude_code',
+		'claude'               => 'claude',
+		'codex'                => 'codex',
+		'chatgpt'              => 'chatgpt',
+		'openai'               => 'chatgpt',
+		'cursor'               => 'cursor',
+		'windsurf'             => 'windsurf',
+		'vscode'               => 'vscode',
+		'visual_studio_code'   => 'vscode',
+		'copilot'              => 'copilot',
+		'gemini'               => 'gemini',
+		'cline'                => 'cline',
+		'goose'                => 'goose',
+		'zed'                  => 'zed',
+		'mcp_inspector'        => 'mcp_inspector',
+		'mcp_wordpress_remote' => 'mcp_wordpress_remote',
+	);
+
+	/**
 	 * Value sent for properties that don't apply or are unknown.
 	 *
 	 * @var string
@@ -82,18 +106,18 @@ class AbilitiesTracking {
 	private ?bool $is_mcp_request = null;
 
 	/**
-	 * Normalized MCP client name, resolved on the first MCP tool call.
+	 * MCP client recorded with events, resolved when first needed.
 	 *
-	 * @var string
+	 * @var string|null
 	 */
-	private string $mcp_client = self::NONE;
+	private ?string $external_client = null;
 
 	/**
-	 * Routes of the REST requests being dispatched, outermost first.
+	 * REST requests being dispatched, outermost first.
 	 *
-	 * @var string[]
+	 * @var array<int, WP_REST_Request<array<string, mixed>>>
 	 */
-	private array $rest_routes = array();
+	private array $rest_requests = array();
 
 	/**
 	 * Constructor.
@@ -273,10 +297,7 @@ class AbilitiesTracking {
 	 * @return mixed The unchanged arguments.
 	 */
 	public function handle_mcp_adapter_pre_tool_call( $args ) {
-		if ( ! $this->is_mcp_request ) {
-			$this->is_mcp_request = true;
-			$this->mcp_client     = self::get_mcp_client_name();
-		}
+		$this->is_mcp_request = true;
 		return $args;
 	}
 
@@ -293,7 +314,7 @@ class AbilitiesTracking {
 	public function handle_rest_request_before_callbacks( $response, $handler, $request ) {
 		unset( $handler );
 		if ( $request instanceof WP_REST_Request ) {
-			$this->rest_routes[] = $request->get_route();
+			$this->rest_requests[] = $request;
 		}
 		return $response;
 	}
@@ -311,7 +332,7 @@ class AbilitiesTracking {
 	public function handle_rest_request_after_callbacks( $response, $handler, $request ) {
 		unset( $handler );
 		if ( $request instanceof WP_REST_Request ) {
-			array_pop( $this->rest_routes );
+			array_pop( $this->rest_requests );
 		}
 		return $response;
 	}
@@ -460,7 +481,7 @@ class AbilitiesTracking {
 			'channel'           => $frame['channel'],
 			'rest_namespace'    => $frame['rest_namespace'],
 			'uses_app_password' => function_exists( 'rest_get_authenticated_app_password' ) && rest_get_authenticated_app_password() ? 'true' : 'false',
-			'external_client'   => 'mcp' === $frame['channel'] ? $this->mcp_client : self::NONE,
+			'external_client'   => 'mcp' === $frame['channel'] ? $this->get_external_client() : self::NONE,
 		);
 
 		if ( $has_duration ) {
@@ -484,8 +505,8 @@ class AbilitiesTracking {
 		if ( $this->is_mcp_request() ) {
 			return 'mcp';
 		}
-		foreach ( $this->rest_routes as $route ) {
-			if ( 1 === preg_match( self::ABILITIES_RUN_ROUTE_REGEX, $route ) ) {
+		foreach ( $this->rest_requests as $request ) {
+			if ( 1 === preg_match( self::ABILITIES_RUN_ROUTE_REGEX, $request->get_route() ) ) {
 				return 'rest';
 			}
 		}
@@ -521,10 +542,10 @@ class AbilitiesTracking {
 	 * @return string
 	 */
 	private function get_rest_namespace(): string {
-		if ( ! $this->rest_routes ) {
+		if ( ! $this->rest_requests ) {
 			return self::NONE;
 		}
-		$segments = explode( '/', ltrim( $this->rest_routes[0], '/' ), 2 );
+		$segments = explode( '/', ltrim( $this->rest_requests[0]->get_route(), '/' ), 2 );
 		return self::normalize_value( $segments[0] );
 	}
 
@@ -553,24 +574,60 @@ class AbilitiesTracking {
 	}
 
 	/**
-	 * Get the MCP client name from the MCP Adapter session (2025-11-25 protocol and earlier).
+	 * Get the MCP client, as one of the known clients, `other` or `none`.
 	 *
-	 * The name is supplied by the MCP client.
+	 * The client supplies its own name, so only known clients are recorded by name.
 	 *
-	 * @return string Normalized client name, or 'none' when unavailable.
+	 * @return string
 	 */
-	private static function get_mcp_client_name(): string {
+	private function get_external_client(): string {
+		if ( null === $this->external_client ) {
+			$name = $this->get_mcp_client_name_from_request() ?? self::get_mcp_client_name_from_session();
+			if ( null === $name ) {
+				$this->external_client = self::NONE;
+			} else {
+				$this->external_client = 'other';
+				$tokens                = '_' . self::normalize_value( $name ) . '_';
+				foreach ( self::KNOWN_MCP_CLIENTS as $needle => $client ) {
+					if ( false !== strpos( $tokens, '_' . $needle . '_' ) ) {
+						$this->external_client = $client;
+						break;
+					}
+				}
+			}
+		}
+		return $this->external_client;
+	}
+
+	/**
+	 * Get the MCP client name from the request metadata, which MCP 2026-07-28 sends with every request.
+	 *
+	 * @return string|null
+	 */
+	private function get_mcp_client_name_from_request(): ?string {
+		$request = $this->rest_requests[0] ?? null;
+		$message = $request ? $request->get_json_params() : null;
+		$name    = is_array( $message ) ? ( $message['params']['_meta']['io.modelcontextprotocol/clientInfo']['name'] ?? null ) : null;
+		return is_string( $name ) ? $name : null;
+	}
+
+	/**
+	 * Get the MCP client name from the MCP Adapter session (MCP 2025-11-25 and earlier).
+	 *
+	 * @return string|null
+	 */
+	private static function get_mcp_client_name_from_session(): ?string {
 		$session_manager = array( 'WP\MCP\Transport\Infrastructure\SessionManager', 'get_session' );
 		$session_id      = isset( $_SERVER['HTTP_MCP_SESSION_ID'] ) && is_string( $_SERVER['HTTP_MCP_SESSION_ID'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_MCP_SESSION_ID'] ) ) : '';
 
 		if ( '' === $session_id || ! get_current_user_id() || ! is_callable( $session_manager ) ) {
-			return self::NONE;
+			return null;
 		}
 
 		$session = call_user_func( $session_manager, get_current_user_id(), $session_id );
 		$name    = is_array( $session ) ? ( $session['client_params']['clientInfo']['name'] ?? null ) : null;
 
-		return is_string( $name ) ? self::normalize_value( $name ) : self::NONE;
+		return is_string( $name ) ? $name : null;
 	}
 
 	/**

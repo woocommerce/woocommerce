@@ -231,20 +231,7 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	 * @testdox Should record calls inside other REST routes with the route namespace only.
 	 */
 	public function test_records_namespace_of_other_rest_routes(): void {
-		$register_route = function (): void {
-			register_rest_route(
-				'tracking-test/v1',
-				'/orders/(?P<id>\d+)',
-				array(
-					'methods'             => 'GET',
-					'callback'            => fn() => wp_get_ability( self::ABILITY_ID )->execute(),
-					'permission_callback' => '__return_true',
-				)
-			);
-		};
-		rest_get_server();
-		add_action( 'rest_api_init', $register_route );
-		do_action( 'rest_api_init', rest_get_server() );
+		$this->register_route_that_runs_ability( 'tracking-test/v1', '/orders/(?P<id>\d+)', 'GET' );
 
 		rest_do_request( new WP_REST_Request( 'GET', '/tracking-test/v1/orders/123' ) );
 		$this->sut->handle_shutdown();
@@ -252,6 +239,67 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 		$this->assertCount( 1, $this->sut->recorded );
 		$this->assertSame( 'other', $this->sut->recorded[0]['channel'] );
 		$this->assertSame( 'tracking_test', $this->sut->recorded[0]['rest_namespace'] );
+	}
+
+	/**
+	 * @testdox Should record known MCP clients from request metadata, and other clients as other.
+	 * @testWith ["Claude Code", "claude_code"]
+	 *           ["claude-ai", "claude"]
+	 *           ["cursor-vscode", "cursor"]
+	 *           ["Visual Studio Code", "vscode"]
+	 *           ["openai-mcp", "chatgpt"]
+	 *           ["Jane's laptop agent", "other"]
+	 *
+	 * @param string $client_name Client name sent by the MCP client.
+	 * @param string $expected    Recorded external_client.
+	 */
+	public function test_records_known_mcp_clients_from_request_metadata( string $client_name, string $expected ): void {
+		$_SERVER['HTTP_MCP_PROTOCOL_VERSION'] = '2026-07-28';
+		$this->register_route_that_runs_ability( 'tracking-mcp/v1', '/mcp', 'POST' );
+		$request = new WP_REST_Request( 'POST', '/tracking-mcp/v1/mcp' );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_body(
+			(string) wp_json_encode(
+				array(
+					'jsonrpc' => '2.0',
+					'id'      => 1,
+					'method'  => 'tools/call',
+					'params'  => array(
+						'name'  => 'products-query',
+						'_meta' => array( 'io.modelcontextprotocol/clientInfo' => array( 'name' => $client_name ) ),
+					),
+				)
+			)
+		);
+
+		rest_do_request( $request );
+		$this->sut->handle_shutdown();
+
+		$this->assertSame( 'mcp', $this->sut->recorded[0]['channel'] );
+		$this->assertSame( $expected, $this->sut->recorded[0]['external_client'] );
+	}
+
+	/**
+	 * @testdox Should read the MCP client from the MCP Adapter session when the request has no client metadata.
+	 */
+	public function test_records_mcp_client_from_adapter_session(): void {
+		if ( ! class_exists( 'WP\MCP\Transport\Infrastructure\SessionManager' ) ) {
+			class_alias( FakeMcpSessionManager::class, 'WP\MCP\Transport\Infrastructure\SessionManager' );
+		}
+		if ( ! is_a( 'WP\MCP\Transport\Infrastructure\SessionManager', FakeMcpSessionManager::class, true ) ) {
+			$this->markTestSkipped( 'The MCP Adapter plugin is loaded.' );
+		}
+		$_SERVER['HTTP_MCP_SESSION_ID'] = 'session-1';
+		FakeMcpSessionManager::$sessions[ self::$administrator_id ]['session-1'] = array( 'client_params' => array( 'clientInfo' => array( 'name' => 'claude-code' ) ) );
+
+		try {
+			wp_get_ability( self::ABILITY_ID )->execute();
+		} finally {
+			FakeMcpSessionManager::$sessions = array();
+		}
+		$this->sut->handle_shutdown();
+
+		$this->assertSame( 'claude_code', $this->sut->recorded[0]['external_client'] );
 	}
 
 	/**
@@ -529,6 +577,30 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 		$this->sut->handle_shutdown();
 
 		$this->assertSame( array( 'administrator', 'shop_manager' ), array_column( $this->sut->recorded, 'role' ) );
+	}
+
+	/**
+	 * Register a REST route whose callback runs the test ability.
+	 *
+	 * @param string $route_namespace Route namespace.
+	 * @param string $route           Route.
+	 * @param string $method          HTTP method.
+	 */
+	private function register_route_that_runs_ability( string $route_namespace, string $route, string $method ): void {
+		$register_route = function () use ( $route_namespace, $route, $method ): void {
+			register_rest_route(
+				$route_namespace,
+				$route,
+				array(
+					'methods'             => $method,
+					'callback'            => fn() => wp_get_ability( self::ABILITY_ID )->execute(),
+					'permission_callback' => '__return_true',
+				)
+			);
+		};
+		rest_get_server();
+		add_action( 'rest_api_init', $register_route );
+		do_action( 'rest_api_init', rest_get_server() );
 	}
 
 	/**
