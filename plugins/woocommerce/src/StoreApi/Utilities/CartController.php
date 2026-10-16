@@ -854,7 +854,7 @@ class CartController {
 			'line_items' => $cart->get_cart_hash(),
 			'shipping'   => md5( wp_json_encode( [ $cart->get_shipping_methods(), wc()->session->get( 'chosen_shipping_methods' ) ] ) ),
 			'fees'       => md5( wp_json_encode( $cart->get_fees() ) ),
-			'coupons'    => md5( wp_json_encode( $cart->get_applied_coupons() ) ),
+			'coupons'    => md5( wp_json_encode( [ $cart->get_applied_coupons(), $cart->get_coupon_discount_totals(), $cart->get_coupon_discount_tax_totals() ] ) ),
 			'taxes'      => md5( wp_json_encode( $cart->get_taxes() ) ),
 		];
 	}
