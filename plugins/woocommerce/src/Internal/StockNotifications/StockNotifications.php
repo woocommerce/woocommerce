@@ -16,6 +16,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\AsyncTasks\NotificationsP
 use Automattic\WooCommerce\Internal\StockNotifications\Admin\AdminManager;
 use Automattic\WooCommerce\Internal\StockNotifications\Admin\SettingsController;
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\MyAccountEndpoint;
+use Automattic\WooCommerce\Internal\StockNotifications\Frontend\NotificationClaimService;
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\ProductPageIntegration;
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\FormHandlerService;
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\NotificationManagementService;
@@ -123,6 +124,7 @@ class StockNotifications implements RegisterHooksInterface {
 
 		$container->get( NotificationManagementService::class );
 		$container->get( MyAccountEndpoint::class );
+		$container->get( NotificationClaimService::class );
 
 		// The settings filters must attach outside admin too, or the REST settings
 		// API (`is_admin()` is false there) never sees the feature's settings.
