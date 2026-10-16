@@ -1,7 +1,11 @@
 /**
  * External dependencies
  */
-import { checkoutStore, paymentStore } from '@woocommerce/block-data';
+import {
+	cartStore,
+	checkoutStore,
+	paymentStore,
+} from '@woocommerce/block-data';
 import { useSelect } from '@wordpress/data';
 
 /**
@@ -25,7 +29,11 @@ export const useCheckoutSubmit = () => {
 	} = useSelect( ( select ) => {
 		const store = select( checkoutStore );
 		return {
-			isCalculating: store.isCalculating(),
+			// Also wait for shipping address changes that are not sent yet. Otherwise the button is enabled while the
+			// shopper types a postcode, then disables itself mid-click when the field blurs, and the click is lost.
+			isCalculating:
+				store.isCalculating() ||
+				select( cartStore ).isShippingRatesStale(),
 			isBeforeProcessing: store.isBeforeProcessing(),
 			isProcessing: store.isProcessing(),
 			isAfterProcessing: store.isAfterProcessing(),
