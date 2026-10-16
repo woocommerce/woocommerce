@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Update the bundled @wordpress/admin-ui to 2.5.0 to share one @wordpress/ui copy; no merchant-facing change.
+
