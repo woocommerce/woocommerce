@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\StoreApi\Utilities;
 
-use Automattic\WooCommerce\Internal\Checkout\PaymentMethodPreselection;
-
 /**
  * PaymentUtils
  *
@@ -87,22 +85,75 @@ class PaymentUtils {
 	}
 
 	/**
-	 * Returns the default payment method for a customer.
+	 * Returns the payment method the checkout starts with.
 	 *
-	 * When the store does not preselect a payment method, only the shopper's own
-	 * choice from the session is returned; the saved card and first-gateway fallbacks are skipped.
+	 * When a callback is attached to the `woocommerce_default_payment_method` filter, the
+	 * shopper's own choice from the session wins while it is still available for the cart, and otherwise
+	 * the filter decides. Without a callback, the order is unchanged: default saved card, then the
+	 * session, then the first enabled gateway.
 	 *
 	 * @return string
 	 */
 	public static function get_default_payment_method() {
-		$preselect = PaymentMethodPreselection::is_enabled();
+		if ( ! has_filter( 'woocommerce_default_payment_method' ) ) {
+			return self::get_unfiltered_default_payment_method();
+		}
 
-		if ( $preselect ) {
-			$saved_payment_methods = self::get_saved_payment_methods();
-			// A saved payment method exists, set as default.
-			if ( $saved_payment_methods && ! empty( $saved_payment_methods['default'] ) ) {
-				return $saved_payment_methods['default']['method']['gateway'] ?? '';
-			}
+		$available_gateways    = WC()->payment_gateways()->get_available_payment_gateways();
+		$chosen_payment_method = WC()->session->get( 'chosen_payment_method' );
+
+		if ( is_string( $chosen_payment_method ) && '' !== $chosen_payment_method && isset( $available_gateways[ $chosen_payment_method ] ) ) {
+			return $chosen_payment_method;
+		}
+
+		$payment_method = self::get_default_available_payment_method( $available_gateways );
+
+		/**
+		 * Filters the payment method the Checkout block starts with when the shopper hasn't picked one yet.
+		 *
+		 * Return a gateway id from `$available_gateways` to preselect it, or an empty string to select nothing;
+		 * any other value selects nothing. The shopper's own choice, kept in the session, never goes through this
+		 * filter. Attaching a callback also makes that choice last one purchase: it is forgotten when the cart
+		 * becomes empty. Attach the callback by `init` at the latest.
+		 *
+		 * @since 11.3.0
+		 *
+		 * @param string $payment_method     Gateway id WooCommerce would preselect: the customer's default saved
+		 *                                   card's gateway, else the first available gateway, or '' when there is none.
+		 * @param array  $available_gateways Gateways available for this cart, keyed by id.
+		 */
+		$filtered = apply_filters( 'woocommerce_default_payment_method', $payment_method, $available_gateways );
+
+		return is_string( $filtered ) && isset( $available_gateways[ $filtered ] ) ? $filtered : '';
+	}
+
+	/**
+	 * The default payment method among the available gateways: the default saved card's gateway, else the first one.
+	 *
+	 * @param array $available_gateways Gateways available for this cart, keyed by id.
+	 * @return string Gateway id, or '' when nothing is available.
+	 */
+	private static function get_default_available_payment_method( array $available_gateways ): string {
+		$saved_payment_methods = self::get_saved_payment_methods();
+		$saved_card_gateway    = $saved_payment_methods['default']['method']['gateway'] ?? '';
+
+		if ( '' !== $saved_card_gateway && isset( $available_gateways[ $saved_card_gateway ] ) ) {
+			return $saved_card_gateway;
+		}
+
+		return empty( $available_gateways ) ? '' : (string) array_key_first( $available_gateways );
+	}
+
+	/**
+	 * The default payment method when no filter decides it: saved card, session, then the first enabled gateway.
+	 *
+	 * @return string
+	 */
+	private static function get_unfiltered_default_payment_method() {
+		$saved_payment_methods = self::get_saved_payment_methods();
+		// A saved payment method exists, set as default.
+		if ( $saved_payment_methods && ! empty( $saved_payment_methods['default'] ) ) {
+			return $saved_payment_methods['default']['method']['gateway'] ?? '';
 		}
 
 		$chosen_payment_method = WC()->session->get( 'chosen_payment_method' );
@@ -110,10 +161,6 @@ class PaymentUtils {
 		// If payment method is already stored in session, use it.
 		if ( $chosen_payment_method ) {
 			return $chosen_payment_method;
-		}
-
-		if ( ! $preselect ) {
-			return '';
 		}
 
 		// If no saved payment method exists, use the first enabled payment method.
