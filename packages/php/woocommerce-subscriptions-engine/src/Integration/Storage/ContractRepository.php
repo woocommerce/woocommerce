@@ -1283,7 +1283,7 @@ final class ContractRepository {
 	 * @param string            $key         Meta key.
 	 * @param mixed             $value       Meta value; serialized when not scalar.
 	 * @param bool              $if_absent   Whether to insert only when the key has no row.
-	 * @param ContractLock|null $lock        The caller's (fenced) lock, or null.
+	 * @param ContractLock|null $lock        The caller's lock, already checked by fence_meta(), or null.
 	 * @return int|null The new meta row id, or null when nothing was inserted (or the duplicate was removed).
 	 * @throws \RuntimeException If the insert, or the removal of a duplicate, fails.
 	 */
@@ -1294,6 +1294,8 @@ final class ContractRepository {
 		$contracts = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 		$values    = array( $key, maybe_serialize( $value ), $contract_id );
 		$where     = 'c.id = %d';
+		// A lock was checked by the caller's fence_meta() (this contract, still held) and cannot be
+		// taken over while trusted (ContractLockState), so only an unlocked write fences in SQL.
 		if ( null === $lock ) {
 			$where .= ' AND ' . self::no_live_lock( 'c' );
 		}
@@ -1430,7 +1432,7 @@ final class ContractRepository {
 	 * @param string            $key         Meta key.
 	 * @param mixed             $value       New value; serialized when not scalar.
 	 * @param mixed             $prev_value  Only update rows holding this value; null updates all rows for the key.
-	 * @param ContractLock|null $lock        The caller's (fenced) lock, or null.
+	 * @param ContractLock|null $lock        The caller's lock, already checked by fence_meta(), or null.
 	 * @return int The number of rows changed.
 	 * @throws \RuntimeException If the write fails.
 	 */
@@ -1446,6 +1448,8 @@ final class ContractRepository {
 			$values[] = maybe_serialize( $prev_value );
 		}
 
+		// A lock was checked by the caller's fence_meta() (this contract, still held) and cannot be
+		// taken over while trusted (ContractLockState), so only an unlocked write fences in SQL.
 		if ( null !== $lock ) {
 			$sql = "UPDATE {$meta} m SET m.meta_value = %s WHERE {$where}";
 		} else {
@@ -1496,6 +1500,8 @@ final class ContractRepository {
 			$values[] = maybe_serialize( $value );
 		}
 
+		// A lock was checked by fence_meta() above (this contract, still held) and cannot be
+		// taken over while trusted (ContractLockState), so only an unlocked write fences in SQL.
 		if ( null !== $lock ) {
 			$sql = "DELETE m FROM {$meta} m WHERE {$where}";
 		} else {
