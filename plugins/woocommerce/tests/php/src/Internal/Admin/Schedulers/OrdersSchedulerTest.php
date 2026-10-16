@@ -6,6 +6,9 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin\Schedulers;
 use Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler;
 use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\Taxes\DataStore as TaxesDataStore;
+use Automattic\WooCommerce\Enums\OrderInternalStatus;
+use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\RestApi\UnitTests\LoggerSpyTrait;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Unit_Test_Case;
 
@@ -15,6 +18,7 @@ use WC_Unit_Test_Case;
  * @class OrdersSchedulerTest
  */
 class OrdersSchedulerTest extends WC_Unit_Test_Case {
+	use LoggerSpyTrait;
 
 	/**
 	 * Set up the test environment.
@@ -42,6 +46,445 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 		$this->clear_scheduled_batch_processor();
 
 		delete_option( OrdersScheduler::SCHEDULED_IMPORT_OPTION );
+	}
+
+	/**
+	 * Hook the import filter that keeps child orders out of Analytics, for the active order storage.
+	 *
+	 * @return callable The filter callback, for removal.
+	 */
+	private function exclude_child_orders_from_import(): callable {
+		$callback = function ( $clauses, $table_alias ) {
+			$clauses[] = OrderUtil::custom_orders_table_usage_is_enabled()
+				? "NOT ( {$table_alias}.type = 'shop_order' AND {$table_alias}.parent_order_id <> 0 )"
+				: "NOT ( {$table_alias}.post_type = 'shop_order' AND {$table_alias}.post_parent <> 0 )";
+			return $clauses;
+		};
+		add_filter( 'woocommerce_analytics_orders_import_where_clauses', $callback, 10, 2 );
+
+		return $callback;
+	}
+
+	/**
+	 * Create a completed parent order, a completed child order pointing at it, and a refund of the parent.
+	 *
+	 * @return int[] Parent, child and refund IDs.
+	 */
+	private function create_parent_child_and_refund(): array {
+		$parent = \WC_Helper_Order::create_order();
+		$parent->set_status( OrderStatus::COMPLETED );
+		$parent->save();
+
+		$child = \WC_Helper_Order::create_order();
+		$child->set_parent_id( $parent->get_id() );
+		$child->set_status( OrderStatus::COMPLETED );
+		$child->save();
+
+		$refund = wc_create_refund(
+			array(
+				'order_id' => $parent->get_id(),
+				'amount'   => 1,
+			)
+		);
+
+		return array( $parent->get_id(), $child->get_id(), $refund->get_id() );
+	}
+
+	/**
+	 * Order and refund IDs currently in the order stats table.
+	 *
+	 * @return int[]
+	 */
+	private function get_imported_order_ids(): array {
+		global $wpdb;
+
+		return array_map( 'intval', $wpdb->get_col( "SELECT order_id FROM {$wpdb->prefix}wc_order_stats" ) );
+	}
+
+	/**
+	 * Status recorded for a record in the order stats table.
+	 *
+	 * @param int $order_id Order or refund ID.
+	 * @return string|null
+	 */
+	private function get_imported_status( int $order_id ): ?string {
+		global $wpdb;
+
+		return $wpdb->get_var( $wpdb->prepare( "SELECT status FROM {$wpdb->prefix}wc_order_stats WHERE order_id = %d", $order_id ) );
+	}
+
+	/**
+	 * @testdox A refund inherits the exclusion of its parent order in every import path.
+	 */
+	public function test_refund_of_excluded_record_is_not_imported(): void {
+		list( $parent_id, $child_id, $refund_id ) = $this->create_parent_child_and_refund();
+		$child_refund_id                          = wc_create_refund(
+			array(
+				'order_id' => $child_id,
+				'amount'   => 1,
+			)
+		)->get_id();
+		$this->exclude_child_orders_from_import();
+
+		$items = OrdersScheduler::get_items( 100, 1, false, true );
+		$ids   = array_map( 'intval', $items->ids );
+		$this->assertSame( $items->total, count( $ids ), 'The count and the page must agree.' );
+		$this->assertNotContains( $child_refund_id, $ids );
+		$this->assertContains( $refund_id, $ids, 'A refund of a kept order is still imported.' );
+		$this->assertTrue( OrdersScheduler::is_excluded_from_import( $child_refund_id ) );
+
+		OrdersScheduler::import( $child_refund_id );
+		$this->assertSame( -1, OrdersStatsDataStore::update( wc_get_order( $child_refund_id ) ) );
+		OrdersScheduler::process_pending_batch( '2000-01-01 00:00:00', 0 );
+
+		$imported = $this->get_imported_order_ids();
+		$this->assertNotContains( $child_refund_id, $imported );
+		$this->assertNotContains( $child_id, $imported );
+		$this->assertContains( $parent_id, $imported );
+		$this->assertContains( $refund_id, $imported );
+	}
+
+	/**
+	 * @testdox A refund is excluded along with an order whose conditions come out NULL.
+	 */
+	public function test_refund_of_order_with_null_condition_is_excluded(): void {
+		$order     = \WC_Helper_Order::create_order();
+		$refund_id = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 1,
+			)
+		)->get_id();
+		add_filter(
+			'woocommerce_analytics_orders_import_where_clauses',
+			function ( $clauses, $table_alias ) {
+				// NULL for orders and true for refunds, like a comparison against an empty nullable column.
+				$column    = OrderUtil::custom_orders_table_usage_is_enabled() ? 'type' : 'post_type';
+				$clauses[] = "IF( {$table_alias}.{$column} = 'shop_order', NULL, 1 )";
+				return $clauses;
+			},
+			10,
+			2
+		);
+
+		$this->assertTrue( OrdersScheduler::is_excluded_from_import( $order->get_id() ) );
+		$this->assertTrue( OrdersScheduler::is_excluded_from_import( $refund_id ), 'The refund inherits the exclusion of its order.' );
+		$this->assertNotContains( $refund_id, array_map( 'intval', OrdersScheduler::get_items( 100, 1, false, true )->ids ) );
+	}
+
+	/**
+	 * @testdox A "skip existing" import that pages one record at a time finishes with excluded refunds present.
+	 */
+	public function test_skip_existing_import_finishes_with_excluded_refunds(): void {
+		list( , $child_id ) = $this->create_parent_child_and_refund();
+		wc_create_refund(
+			array(
+				'order_id' => $child_id,
+				'amount'   => 1,
+			)
+		);
+		$this->exclude_child_orders_from_import();
+
+		// ImportScheduler::import_batch() always reads page 1 while skipping existing records, so a
+		// counted record that never lands would be served again and again.
+		$rounds = 0;
+		do {
+			$items = OrdersScheduler::get_items( 1, 1, false, true );
+			foreach ( $items->ids as $id ) {
+				OrdersScheduler::import( (int) $id );
+			}
+			++$rounds;
+		} while ( $items->ids && $rounds < 10 );
+
+		$this->assertSame( 0, OrdersScheduler::get_items( 1, 1, false, true )->total, 'Every counted record was imported.' );
+	}
+
+	/**
+	 * @testdox A record imported before a condition excluded it keeps syncing through the scheduled batch.
+	 */
+	public function test_record_imported_before_exclusion_keeps_syncing(): void {
+		list( , $child_id ) = $this->create_parent_child_and_refund();
+		OrdersScheduler::import( $child_id );
+		$this->assertSame( OrderInternalStatus::COMPLETED, $this->get_imported_status( $child_id ) );
+		$this->exclude_child_orders_from_import();
+
+		$child = wc_get_order( $child_id );
+		$child->set_status( OrderStatus::CANCELLED );
+		$child->save();
+		OrdersScheduler::process_pending_batch( '2000-01-01 00:00:00', 0 );
+
+		$this->assertFalse( OrdersScheduler::is_excluded_from_import( $child_id ), 'A record Analytics holds is never excluded.' );
+		$this->assertSame( OrderInternalStatus::CANCELLED, $this->get_imported_status( $child_id ) );
+	}
+
+	/**
+	 * @testdox A new refund of an excluded order that Analytics holds is imported, so its sale is not overstated.
+	 */
+	public function test_new_refund_of_held_excluded_record_is_imported(): void {
+		list( , $child_id ) = $this->create_parent_child_and_refund();
+		OrdersScheduler::import( $child_id );
+		$this->exclude_child_orders_from_import();
+
+		$child_refund_id = wc_create_refund(
+			array(
+				'order_id' => $child_id,
+				'amount'   => 1,
+			)
+		)->get_id();
+
+		$this->assertFalse( OrdersScheduler::is_excluded_from_import( $child_refund_id ) );
+		$this->assertContains( $child_refund_id, array_map( 'intval', OrdersScheduler::get_items( 100, 1, false, true )->ids ) );
+
+		OrdersScheduler::import( $child_refund_id );
+
+		$this->assertContains( $child_refund_id, $this->get_imported_order_ids() );
+	}
+
+	/**
+	 * @testdox A record with no row in the orders table is not excluded.
+	 */
+	public function test_is_excluded_from_import_ignores_missing_record(): void {
+		add_filter(
+			'woocommerce_analytics_orders_import_where_clauses',
+			function ( $clauses ) {
+				$clauses[] = '0';
+				return $clauses;
+			}
+		);
+
+		$this->assertFalse( OrdersScheduler::is_excluded_from_import( 999999999 ) );
+	}
+
+	/**
+	 * @testdox get_items() logs the error when the import conditions make the count query fail.
+	 */
+	public function test_get_items_logs_failed_count_query(): void {
+		global $wpdb;
+		$this->create_parent_child_and_refund();
+		add_filter(
+			'woocommerce_analytics_orders_import_where_clauses',
+			function ( $clauses ) {
+				$clauses[] = 'no_such_column_for_this_test = 1';
+				return $clauses;
+			}
+		);
+
+		$suppress = $wpdb->suppress_errors();
+		$items    = OrdersScheduler::get_items( 100, 1, false, true );
+		$wpdb->suppress_errors( $suppress );
+
+		$this->assertSame( 0, $items->total );
+		$this->assertSame( array(), $items->ids );
+		$this->assertLogged( 'error', 'Could not count the orders to import' );
+	}
+
+	/**
+	 * @testdox get_items() applies the import conditions filter to both the count and the IDs.
+	 */
+	public function test_get_items_honors_import_where_clauses_filter(): void {
+		list( $parent_id, $child_id, $refund_id ) = $this->create_parent_child_and_refund();
+
+		$unfiltered = OrdersScheduler::get_items( 100, 1, false, true );
+		$callback   = $this->exclude_child_orders_from_import();
+		$filtered   = OrdersScheduler::get_items( 100, 1, false, true );
+		remove_filter( 'woocommerce_analytics_orders_import_where_clauses', $callback, 10 );
+
+		$unfiltered_ids = array_map( 'intval', $unfiltered->ids );
+		$filtered_ids   = array_map( 'intval', $filtered->ids );
+
+		$this->assertContains( $child_id, $unfiltered_ids );
+		$this->assertSame( $unfiltered->total - 1, $filtered->total );
+		$this->assertNotContains( $child_id, $filtered_ids );
+		$this->assertContains( $parent_id, $filtered_ids );
+		$this->assertContains( $refund_id, $filtered_ids, 'A refund keeps its order in the parent column and must survive a child-order condition.' );
+	}
+
+	/**
+	 * @testdox import() skips a record the import conditions filter excludes and imports the rest.
+	 */
+	public function test_import_skips_record_excluded_by_import_where_clauses_filter(): void {
+		list( $parent_id, $child_id, $refund_id ) = $this->create_parent_child_and_refund();
+		$callback                                 = $this->exclude_child_orders_from_import();
+
+		OrdersScheduler::import( $child_id );
+		OrdersScheduler::import( $parent_id );
+		remove_filter( 'woocommerce_analytics_orders_import_where_clauses', $callback, 10 );
+
+		$imported = $this->get_imported_order_ids();
+		$this->assertNotContains( $child_id, $imported );
+		$this->assertContains( $parent_id, $imported );
+		$this->assertContains( $refund_id, $imported );
+	}
+
+	/**
+	 * @testdox The scheduled import batch skips a record the import conditions filter excludes.
+	 */
+	public function test_process_pending_batch_skips_excluded_record(): void {
+		list( $parent_id, $child_id ) = $this->create_parent_child_and_refund();
+		$callback                     = $this->exclude_child_orders_from_import();
+
+		OrdersScheduler::process_pending_batch( '2000-01-01 00:00:00', 0 );
+		remove_filter( 'woocommerce_analytics_orders_import_where_clauses', $callback, 10 );
+
+		$imported = $this->get_imported_order_ids();
+		$this->assertContains( $parent_id, $imported );
+		$this->assertNotContains( $child_id, $imported );
+	}
+
+	/**
+	 * @testdox The stats data store refuses a record the import conditions filter excludes.
+	 */
+	public function test_stats_data_store_update_skips_excluded_record(): void {
+		list( , $child_id ) = $this->create_parent_child_and_refund();
+		$callback           = $this->exclude_child_orders_from_import();
+
+		$result = OrdersStatsDataStore::update( wc_get_order( $child_id ) );
+		remove_filter( 'woocommerce_analytics_orders_import_where_clauses', $callback, 10 );
+
+		$this->assertSame( -1, $result );
+		$this->assertNotContains( $child_id, $this->get_imported_order_ids() );
+	}
+
+	/**
+	 * @testdox An excluded record is dropped from the failed imports list instead of being retried forever.
+	 */
+	public function test_import_clears_failed_entry_for_excluded_record(): void {
+		list( , $child_id ) = $this->create_parent_child_and_refund();
+		OrdersScheduler::record_failed_order_import( $child_id );
+		$callback = $this->exclude_child_orders_from_import();
+
+		OrdersScheduler::import( $child_id );
+		remove_filter( 'woocommerce_analytics_orders_import_where_clauses', $callback, 10 );
+
+		$this->assertNotContains( $child_id, OrdersScheduler::get_failed_order_imports()['ids'] );
+	}
+
+	/**
+	 * @testdox Without the filter a child order is counted and imported as before.
+	 */
+	public function test_child_order_is_imported_without_import_where_clauses_filter(): void {
+		list( , $child_id ) = $this->create_parent_child_and_refund();
+
+		$this->assertContains( $child_id, array_map( 'intval', OrdersScheduler::get_items( 100, 1, false, true )->ids ) );
+
+		OrdersScheduler::import( $child_id );
+
+		$this->assertContains( $child_id, $this->get_imported_order_ids() );
+	}
+
+	/**
+	 * @testdox A filter return that is not an array of strings is ignored.
+	 */
+	public function test_import_where_clauses_filter_ignores_invalid_return(): void {
+		list( , $child_id ) = $this->create_parent_child_and_refund();
+
+		foreach ( array( false, array( 42, '  ', null ) ) as $invalid_return ) {
+			$callback = function () use ( $invalid_return ) {
+				return $invalid_return;
+			};
+			add_filter( 'woocommerce_analytics_orders_import_where_clauses', $callback );
+
+			$items = OrdersScheduler::get_items( 100, 1, false, true );
+			$this->assertContains( $child_id, array_map( 'intval', $items->ids ) );
+			$this->assertFalse( OrdersScheduler::is_excluded_from_import( $child_id ) );
+
+			remove_filter( 'woocommerce_analytics_orders_import_where_clauses', $callback );
+		}
+	}
+
+	/**
+	 * @testdox A '0' condition excludes every record instead of being dropped as empty.
+	 */
+	public function test_import_where_clauses_filter_keeps_zero_condition(): void {
+		list( $parent_id ) = $this->create_parent_child_and_refund();
+		$callback          = function ( $clauses ) {
+			$clauses[] = '0';
+			return $clauses;
+		};
+		add_filter( 'woocommerce_analytics_orders_import_where_clauses', $callback );
+
+		$items    = OrdersScheduler::get_items( 100, 1, false, true );
+		$excluded = OrdersScheduler::is_excluded_from_import( $parent_id );
+		remove_filter( 'woocommerce_analytics_orders_import_where_clauses', $callback );
+
+		$this->assertSame( 0, $items->total );
+		$this->assertSame( array(), $items->ids );
+		$this->assertTrue( $excluded );
+	}
+
+	/**
+	 * @testdox A condition with a literal percent sign, such as a LIKE pattern, survives the prepared queries.
+	 */
+	public function test_import_where_clauses_filter_allows_like_patterns(): void {
+		list( $parent_id, $child_id, $refund_id ) = $this->create_parent_child_and_refund();
+		$callback                                 = function ( $clauses, $table_alias ) {
+			$column    = OrderUtil::custom_orders_table_usage_is_enabled() ? 'type' : 'post_type';
+			$clauses[] = "{$table_alias}.{$column} NOT LIKE '%shop_order_refund'"; // Starts with %s, which prepare() would read as a placeholder.
+			return $clauses;
+		};
+		add_filter( 'woocommerce_analytics_orders_import_where_clauses', $callback, 10, 2 );
+
+		$items           = OrdersScheduler::get_items( 100, 1, false, true );
+		$refund_excluded = OrdersScheduler::is_excluded_from_import( $refund_id );
+		$parent_excluded = OrdersScheduler::is_excluded_from_import( $parent_id );
+		remove_filter( 'woocommerce_analytics_orders_import_where_clauses', $callback, 10 );
+
+		$ids = array_map( 'intval', $items->ids );
+		$this->assertSame( $items->total, count( $ids ), 'The count and the page must agree.' );
+		$this->assertContains( $parent_id, $ids );
+		$this->assertContains( $child_id, $ids );
+		$this->assertNotContains( $refund_id, $ids );
+		$this->assertTrue( $refund_excluded );
+		$this->assertFalse( $parent_excluded );
+	}
+
+	/**
+	 * @testdox A failing exclusion probe does not count as an exclusion, so the record stays on the failed list.
+	 */
+	public function test_is_excluded_from_import_treats_query_error_as_not_excluded(): void {
+		global $wpdb;
+		list( , $child_id ) = $this->create_parent_child_and_refund();
+		OrdersScheduler::record_failed_order_import( $child_id );
+		$callback = function ( $clauses ) {
+			$clauses[] = 'no_such_column_for_this_test = 1';
+			return $clauses;
+		};
+		add_filter( 'woocommerce_analytics_orders_import_where_clauses', $callback );
+
+		$suppress = $wpdb->suppress_errors();
+		$excluded = OrdersScheduler::is_excluded_from_import( $child_id );
+		$wpdb->suppress_errors( $suppress );
+		remove_filter( 'woocommerce_analytics_orders_import_where_clauses', $callback );
+
+		$this->assertFalse( $excluded );
+		$this->assertContains( $child_id, OrdersScheduler::get_failed_order_imports()['ids'] );
+	}
+
+	/**
+	 * @testdox The scheduled batch leaves the cursor unchanged when the import conditions make the query fail.
+	 */
+	public function test_process_pending_batch_keeps_cursor_when_filtered_query_fails(): void {
+		global $wpdb;
+		list( $parent_id ) = $this->create_parent_child_and_refund();
+		update_option( OrdersScheduler::LAST_PROCESSED_ORDER_DATE_OPTION, '2000-01-01 00:00:00', false );
+		update_option( OrdersScheduler::LAST_PROCESSED_ORDER_ID_OPTION, 0, false );
+		$callback = function ( $clauses ) {
+			$clauses[] = 'no_such_column_for_this_test = 1';
+			return $clauses;
+		};
+		add_filter( 'woocommerce_analytics_orders_import_where_clauses', $callback );
+
+		$suppress = $wpdb->suppress_errors();
+		OrdersScheduler::process_pending_batch();
+		$wpdb->suppress_errors( $suppress );
+		remove_filter( 'woocommerce_analytics_orders_import_where_clauses', $callback );
+
+		$this->assertSame( '2000-01-01 00:00:00', get_option( OrdersScheduler::LAST_PROCESSED_ORDER_DATE_OPTION ), 'The cursor must not move past orders the failed query never returned.' );
+		$this->assertNotContains( $parent_id, $this->get_imported_order_ids() );
+
+		// Once the condition is gone, the same cursor picks the orders up.
+		OrdersScheduler::process_pending_batch();
+		$this->assertContains( $parent_id, $this->get_imported_order_ids() );
 	}
 
 	/**
