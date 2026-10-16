@@ -1203,7 +1203,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$later = $this->insert_contract_due_at( '2026-06-20 00:00:00', ContractStatus::ACTIVE );
 
 		$this->pin_db_clock( '2026-07-15 00:00:00' );
-		$this->lock( $id, 'due' );
+		$this->lock( $id, 'engine_due_dispatch' );
 
 		$this->pin_db_clock( '2026-07-15 00:09:59' );
 		$this->assertSame( array( $later ), $this->due_ids( $now, 50 ), 'A live lock hides the contract.' );
@@ -1280,7 +1280,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 */
 	public function test_due_moment_writes_leave_the_lock_alone(): void {
 		$id   = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
-		$lock = $this->sut->acquire_lock( $id, 'due' );
+		$lock = $this->sut->acquire_lock( $id, 'engine_due_dispatch' );
 		$this->assertNotNull( $lock );
 		$before = $this->sut->get_lock_holder( $id );
 

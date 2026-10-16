@@ -46,7 +46,7 @@ final class DueDispatcher {
 	/**
 	 * Operation label of the lock the dispatcher takes for a due notification.
 	 */
-	public const LOCK_OPERATION = 'due';
+	public const LOCK_OPERATION = 'engine_due_dispatch';
 
 	/**
 	 * Scan cadence, in seconds (every 10 minutes).

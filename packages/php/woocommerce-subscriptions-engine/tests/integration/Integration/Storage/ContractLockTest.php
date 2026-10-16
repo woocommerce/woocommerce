@@ -146,9 +146,9 @@ class ContractLockTest extends EngineIntegrationTestCase {
 	public function test_acquire_with_an_equality_condition(): void {
 		$id = $this->insert_contract( '2026-06-20 00:00:00' );
 
-		$this->assertNull( $this->sut->acquire_lock( $id, 'due', array( 'next_payment_gmt' => '2026-06-15 00:00:00' ) ) );
+		$this->assertNull( $this->sut->acquire_lock( $id, 'engine_due_dispatch', array( 'next_payment_gmt' => '2026-06-15 00:00:00' ) ) );
 		$this->assertNull( $this->sut->get_lock_holder( $id )['operation'] );
-		$this->assertInstanceOf( ContractLock::class, $this->sut->acquire_lock( $id, 'due', array( 'next_payment_gmt' => '2026-06-20 00:00:00' ) ) );
+		$this->assertInstanceOf( ContractLock::class, $this->sut->acquire_lock( $id, 'engine_due_dispatch', array( 'next_payment_gmt' => '2026-06-20 00:00:00' ) ) );
 	}
 
 	/**
@@ -156,11 +156,11 @@ class ContractLockTest extends EngineIntegrationTestCase {
 	 */
 	public function test_acquire_with_a_null_condition(): void {
 		$set = $this->insert_contract( '2026-06-20 00:00:00' );
-		$this->assertNull( $this->sut->acquire_lock( $set, 'due', array( 'next_payment_gmt' => null ) ) );
+		$this->assertNull( $this->sut->acquire_lock( $set, 'engine_due_dispatch', array( 'next_payment_gmt' => null ) ) );
 		$this->assertNull( $this->sut->get_lock_holder( $set )['operation'] );
 
 		$cleared = $this->insert_contract( null );
-		$this->assertInstanceOf( ContractLock::class, $this->sut->acquire_lock( $cleared, 'due', array( 'next_payment_gmt' => null ) ) );
+		$this->assertInstanceOf( ContractLock::class, $this->sut->acquire_lock( $cleared, 'engine_due_dispatch', array( 'next_payment_gmt' => null ) ) );
 	}
 
 	/**
@@ -172,7 +172,7 @@ class ContractLockTest extends EngineIntegrationTestCase {
 		$this->assertNull(
 			$this->sut->acquire_lock(
 				$id,
-				'due',
+				'engine_due_dispatch',
 				array(
 					'next_payment_gmt' => '2026-06-20 00:00:00',
 					'status'           => ContractStatus::ON_HOLD,
@@ -184,7 +184,7 @@ class ContractLockTest extends EngineIntegrationTestCase {
 			ContractLock::class,
 			$this->sut->acquire_lock(
 				$id,
-				'due',
+				'engine_due_dispatch',
 				array(
 					'next_payment_gmt' => '2026-06-20 00:00:00',
 					'status'           => ContractStatus::ACTIVE,
@@ -201,7 +201,7 @@ class ContractLockTest extends EngineIntegrationTestCase {
 
 		foreach ( array( array( 'lock_token' => null ), array( 'customer_id' => 1 ), array( 'status' => array( ContractStatus::ACTIVE ) ) ) as $conditions ) {
 			try {
-				$this->sut->acquire_lock( $id, 'due', $conditions );
+				$this->sut->acquire_lock( $id, 'engine_due_dispatch', $conditions );
 				$this->fail( 'Expected an invalid condition to throw.' );
 			} catch ( InvalidArgumentException $e ) {
 				$this->assertNull( $this->sut->get_lock_holder( $id )['operation'] );
