@@ -139,7 +139,7 @@ class BlockTemplatesRegistry {
 	/**
 	 * Lazily load registered WooCommerce template file contents into the registry.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 * @internal
 	 *
 	 * @param mixed  $result        Pass-through (null to let WP continue).
@@ -170,7 +170,7 @@ class BlockTemplatesRegistry {
 	/**
 	 * Covers the singular resolution path (get_block_file_template) which bypasses get_block_templates() entirely.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 * @internal
 	 *
 	 * @param mixed  $result        Pass-through (null to let WP continue).
