@@ -11,25 +11,25 @@ import { recordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
-import { ProductType } from './constants';
+import { MarketplaceSuggestionPlacementType, ProductType } from './constants';
 import './stack.scss';
 import useRecordCompletionTime from '../use-record-completion-time';
 
 type StackProps = StackWithLoadSampleBlurb | StackWithoutText;
 
+type StackItem = ( ProductType | MarketplaceSuggestionPlacementType ) & {
+	onClick: () => void;
+};
+
 type StackWithLoadSampleBlurb = {
-	items: ( ProductType & {
-		onClick: () => void;
-	} )[];
+	items: StackItem[];
 	onClickLoadSampleProduct: () => void;
 	showOtherOptions?: boolean;
 	isTaskListItemClicked?: boolean;
 };
 
 type StackWithoutText = {
-	items: ( ProductType & {
-		onClick: () => void;
-	} )[];
+	items: StackItem[];
 	showOtherOptions: false;
 	onClickLoadSampleProduct?: () => void;
 	isTaskListItemClicked?: boolean;
