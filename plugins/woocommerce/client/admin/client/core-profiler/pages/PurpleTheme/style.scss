@@ -152,7 +152,11 @@
 		font-size: 14px;
 	}
 
-	// Stacked like "Set up my store" and "Skip guided setup" on the wizard's first screen.
-	gap: $gap;
+	// The note sits close under Install Purple, with more room before "Keep my current theme".
+	gap: $gap-small;
+
+	.woocommerce-profiler-purple-theme__note + .woocommerce-profiler-purple-theme__continue {
+		margin-block-start: $gap-small;
+	}
 }
 

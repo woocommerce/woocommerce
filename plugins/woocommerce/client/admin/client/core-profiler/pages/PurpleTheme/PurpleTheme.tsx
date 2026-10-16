@@ -185,12 +185,6 @@ export const PurpleTheme = ( {
 				</div>
 				{ isPurpleOnly && (
 					<div className="woocommerce-profiler-purple-theme__footer">
-						<p className="woocommerce-profiler-purple-theme__note">
-							{ __(
-								'We’ll install Purple and activate it as your store’s theme.',
-								'woocommerce'
-							) }
-						</p>
 						<Button
 							className="woocommerce-profiler-purple-theme__continue"
 							variant="primary"
@@ -198,6 +192,12 @@ export const PurpleTheme = ( {
 						>
 							{ __( 'Install Purple', 'woocommerce' ) }
 						</Button>
+						<p className="woocommerce-profiler-purple-theme__note">
+							{ __(
+								'We’ll install Purple and activate it as your store’s theme.',
+								'woocommerce'
+							) }
+						</p>
 						<Button
 							className="woocommerce-profiler-purple-theme__continue"
 							variant="tertiary"
