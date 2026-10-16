@@ -207,6 +207,14 @@ class AsyncGenerator {
 
 		$is_first_chunk = self::STATE_SCHEDULED === $status['state'];
 
+		// A continuation saved by an older version tracked pages rather than product IDs, so it cannot be
+		// resumed. Restart it from scratch right away instead of leaving it for the stuck-job recovery.
+		if ( ! $is_first_chunk && ! isset( $status['last_product_id'] ) ) {
+			$this->discard_feed( $status );
+			unset( $status['page'] );
+			$is_first_chunk = true;
+		}
+
 		// A continuation must know which feed file it is appending to. If it doesn't, the status is
 		// corrupt; bail and let the heartbeat-based recovery restart generation from scratch.
 		if ( ! $is_first_chunk && empty( $status['file_name'] ) ) {
@@ -222,7 +230,7 @@ class AsyncGenerator {
 
 			if ( $is_first_chunk ) {
 				$status['file_name']       = $feed->open();
-				$status['page']            = 1;
+				$status['last_product_id'] = 0;
 				$status['processed']       = 0;
 				$status['entries_written'] = 0;
 			} else {
@@ -243,26 +251,26 @@ class AsyncGenerator {
 
 			$this->apply_mapper_args( $status['args'] ?? array() );
 
-			$start_page     = max( 1, (int) ( $status['page'] ?? 1 ) );
+			// The walker's total only counts products after `last_product_id`, so add what earlier chunks processed.
 			$base_processed = (int) ( $status['processed'] ?? 0 );
-			$progress       = $walker->walk_batches(
+			$progress       = $walker->walk_chunk(
 				function ( WalkerProgress $progress ) use ( &$status, $option_key, $base_processed ) {
 					// Refresh progress and the heartbeat after every batch, so polling sees smooth progress
 					// within a chunk rather than a single jump at the chunk boundary.
-					$status = $this->update_progress( $status, $base_processed + $progress->processed_items, $progress->total_count );
+					$status = $this->update_progress( $status, $base_processed + $progress->processed_items, $base_processed + $progress->total_count );
 					update_option( $option_key, $status );
 				},
-				$start_page,
+				(int) $status['last_product_id'],
 				$this->get_chunk_batch_count( $option_key )
 			);
 
 			// The feed's entry count is already cumulative across chunks (open() seeds it with the running
 			// total when resuming), so store it as-is rather than adding to the previous total.
-			$status                    = $this->update_progress( $status, $base_processed + $progress->processed_items, $progress->total_count );
+			$status                    = $this->update_progress( $status, $base_processed + $progress->processed_items, $base_processed + $progress->total_count );
 			$status['entries_written'] = $feed->get_entry_count();
-			$status['page']            = $start_page + $progress->processed_batches;
+			$status['last_product_id'] = $progress->last_product_id;
 
-			$is_complete = $progress->total_batch_count <= 0 || (int) $status['page'] > $progress->total_batch_count;
+			$is_complete = $progress->processed_batches >= $progress->total_batch_count;
 
 			if ( $is_complete ) {
 				$feed->end();
