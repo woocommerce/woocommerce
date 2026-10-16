@@ -66,7 +66,7 @@ The `_items` meta key is required and must be an array of objects describing whi
 | `item_id` | integer | The order line item ID.                        |
 | `qty`     | number  | Positive quantity of the item being fulfilled. |
 
-Other common (optional) meta keys: `_tracking_number`, `_shipment_provider`, `_tracking_url`. Meta keys prefixed with an underscore are private and only shown to merchants and in customer emails; unprefixed keys are also shown to merchants and customers alongside the fulfillment.
+Other common (optional) meta keys: `_tracking_number`, `_shipment_provider`, `_tracking_url`, and `_date_fulfilled` (stored as GMT and returned in ISO 8601 format, e.g. `2024-01-16T11:45:00Z`). Meta keys prefixed with an underscore are private and only shown to merchants and in customer emails; unprefixed keys are also shown to merchants and customers alongside the fulfillment.
 
 ## List fulfillments for an order
 
@@ -156,6 +156,8 @@ woocommerce.get("orders/723/fulfillments").parsed_response
 </Tabs>
 
 ## Create a fulfillment
+
+On create, `meta_data` is itself a required parameter (it must contain at least the `_items` entry). Omitting the `meta_data` wrapper returns a `400` with the code `rest_missing_callback_param`.
 
 ```http
 POST /wp-json/wc/v3/orders/<id>/fulfillments
@@ -401,7 +403,7 @@ woocommerce.get("orders/723/fulfillments/2").parsed_response
 
 ## Update a fulfillment
 
-Any `meta_data` entries not included in the request are removed from the fulfillment, so send the full set of metadata you want the fulfillment to have.
+Any `meta_data` entries not included in the request are removed from the fulfillment, so send the full set of metadata you want the fulfillment to have. As a safeguard against accidental data loss, if the request's `meta_data` is non-empty but every entry is malformed (no valid key), the existing metadata is left untouched rather than cleared.
 
 ```http
 PUT /wp-json/wc/v3/orders/<id>/fulfillments/<fulfillment_id>
@@ -1071,4 +1073,4 @@ Common error codes for the fulfillments endpoints:
 -   `woocommerce_rest_order_id_missing` - The order ID is required but was not supplied.
 -   `rest_missing_callback_param` - A required parameter was omitted, for example a missing `tracking_number`.
 -   `woocommerce_rest_tracking_number_missing` - The `tracking_number` parameter was supplied but is empty.
--   Standard authentication/authorization errors when the current user lacks `manage_woocommerce` and isn't the order's owner.
+-   Standard authentication/authorization errors. Creating, updating, and deleting fulfillments requires the `manage_woocommerce` capability. A customer who owns the order (but lacks `manage_woocommerce`) has read-only access: they can list and retrieve the order's fulfillments and metadata, but write requests return an authorization error.
