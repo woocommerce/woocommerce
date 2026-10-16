@@ -378,15 +378,21 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 	}
 
 	/**
-	 * Add the `wc-` prefix to a status that is registered with it. The order
-	 * query adds the prefix only to order statuses, not to the statuses of
-	 * other order types.
+	 * Add the `wc-` prefix to a status of another order type that is registered
+	 * with it. The order query adds the prefix to order statuses itself, so those
+	 * stay without it, as `woocommerce_order_query_args` callbacks expect.
 	 *
 	 * @param string $status Status slug without the `wc-` prefix.
 	 * @return string
 	 */
 	private static function prepare_status_arg( string $status ): string {
-		return in_array( 'wc-' . $status, get_post_stati(), true ) ? 'wc-' . $status : $status;
+		$prefixed = 'wc-' . $status;
+
+		if ( array_key_exists( $prefixed, wc_get_order_statuses() ) ) {
+			return $status;
+		}
+
+		return in_array( $prefixed, get_post_stati(), true ) ? $prefixed : $status;
 	}
 
 	/**
