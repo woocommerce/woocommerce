@@ -2222,7 +2222,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 					$this->sut->update_fields( $contract, array( 'items' ), $lock );
 					$this->fail( 'Expected the failed delete to throw.' );
 				} catch ( \RuntimeException $e ) {
-					$this->assertStringContainsString( 'Failed to delete item rows', $e->getMessage() );
+					$this->assertStringContainsString( 'Failed to delete old item rows', $e->getMessage() );
 				}
 			}
 		);

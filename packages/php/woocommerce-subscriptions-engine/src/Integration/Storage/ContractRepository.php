@@ -2248,7 +2248,7 @@ final class ContractRepository {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 		$deleted = $wpdb->query( $wpdb->prepare( "DELETE FROM {$table} WHERE contract_id = %d{$keep}", $values ) );
 		if ( false === $deleted ) {
-			throw new \RuntimeException( sprintf( 'Failed to delete item rows for contract %d: %s', (int) $contract_id, esc_html( $wpdb->last_error ) ) );
+			throw new \RuntimeException( sprintf( 'Failed to delete old item rows for contract %d: %s', (int) $contract_id, esc_html( $wpdb->last_error ) ) );
 		}
 	}
 
