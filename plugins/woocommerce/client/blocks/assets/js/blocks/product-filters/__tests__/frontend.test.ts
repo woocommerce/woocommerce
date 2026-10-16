@@ -10,6 +10,7 @@ import type { ProductFiltersStore } from '../frontend';
 const mockGetContext = jest.fn();
 const mockGetServerContext = jest.fn();
 const mockGetConfig = jest.fn();
+const mockGetElement = jest.fn();
 const mockReload = jest.fn();
 
 jest.mock( '../../../utils/navigation', () => ( {
@@ -27,6 +28,8 @@ jest.mock(
 		getContext: mockGetContext,
 		getServerContext: mockGetServerContext,
 		getConfig: mockGetConfig,
+		getElement: mockGetElement,
+		withSyncEvent: ( callback: unknown ) => callback,
 		store: jest.fn( ( _name, definition ) => {
 			mockRegisteredStore = {
 				state: definition.state,
@@ -57,6 +60,8 @@ describe( 'product filters interactivity store', () => {
 		mockGetContext.mockReset();
 		mockGetServerContext.mockReset();
 		mockGetConfig.mockReset();
+		mockGetElement.mockReset();
+		mockGetElement.mockReturnValue( { ref: null } );
 		mockReload.mockReset();
 		mockRegisteredStore = null;
 
@@ -204,6 +209,50 @@ describe( 'product filters interactivity store', () => {
 			currentTarget: wrapper,
 		} as unknown as MouseEvent );
 		expect( context.isOverlayOpened ).toBe( false );
+	} );
+
+	it( 'focuses the dialog after the overlay is shown', () => {
+		if ( ! mockRegisteredStore ) {
+			throw new Error( 'Product filters store was not registered.' );
+		}
+
+		const root = document.createElement( 'div' );
+		root.className = 'wc-block-product-filters';
+		const dialog = document.createElement( 'div' );
+		dialog.className = 'wc-block-product-filters__overlay-dialog';
+		const closeButton = document.createElement( 'button' );
+		Object.defineProperty( closeButton, 'offsetParent', {
+			get: () => document.body,
+		} );
+		dialog.append( closeButton );
+		root.append( dialog );
+		document.body.append( root );
+
+		const context = { isOverlayOpened: false };
+		mockGetContext.mockReturnValue( context );
+		mockGetElement.mockReturnValue( { ref: root } );
+
+		let frame: ( ( time: number ) => void ) | undefined;
+		const requestAnimationFrameSpy = jest
+			.spyOn( window, 'requestAnimationFrame' )
+			.mockImplementation( ( callback ) => {
+				frame = callback;
+				return 1;
+			} );
+
+		try {
+			mockRegisteredStore.actions.openOverlay();
+
+			expect( context.isOverlayOpened ).toBe( true );
+			expect( root.ownerDocument.activeElement ).not.toBe( closeButton );
+
+			frame?.( 0 );
+
+			expect( root.ownerDocument.activeElement ).toBe( closeButton );
+		} finally {
+			root.remove();
+			requestAnimationFrameSpy.mockRestore();
+		}
 	} );
 
 	it( 'does not add child-owned index metadata to selectable items', () => {
