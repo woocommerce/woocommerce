@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Clarify the misleading HPOS "orders out of sync" message and warn before running a full order sync
