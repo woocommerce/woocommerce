@@ -56,16 +56,16 @@ class PaymentMethodPreselection implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Forget the shopper's payment choice once the cart is emptied, so the next purchase starts from nothing.
+	 * Forget the shopper's payment choice once the cart is emptied, so the next purchase starts from the filter.
 	 *
-	 * The cart is emptied after every placed order. Only stores that don't preselect a payment method
-	 * need this; elsewhere the remembered choice keeps working as before.
+	 * The cart is usually emptied after a placed order. Only stores that decide the starting method
+	 * through the filter need this; elsewhere the remembered choice keeps working as before.
 	 *
 	 * @internal
 	 */
 	public function forget_chosen_payment_method(): void {
 		// The cart can be emptied in contexts without a session, such as WP-CLI or tests that null it.
-		if ( self::is_enabled() || ! ( WC()->session instanceof \WC_Session ) ) {
+		if ( ! has_filter( 'woocommerce_default_payment_method' ) || ! ( WC()->session instanceof \WC_Session ) ) {
 			return;
 		}
 
