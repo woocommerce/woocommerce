@@ -4,7 +4,8 @@ This folder contains the Interactivity API (iAPI) stores that WooCommerce blocks
 
 Stores in this folder:
 
--   [`woocommerce/products`](#woocommerceproducts-store) — server-populated cache of product and variation data in Store API format.
+-   [`woocommerce/products`](#woocommerceproducts-store) — server-populated cache of product and variation data in Store API format. It is going to be removed once every block reads product data from the `woocommerce` store.
+-   [`woocommerce` product data](#woocommerce-store-product-data) — the same product and variation data, seeded by the same PHP loaders into the `woocommerce` store, as raw data only. New code reads product data from here.
 -   [`woocommerce/cart`](#woocommercecart-store) — cart state and actions (with mutation batching for performance). `addCartItem` resolves with a structured per-call outcome (`AddCartItemOutcome`) instead of `void`, and the store's cross-cutting side effects (sync event, legacy event, screen-reader announcement) fire exactly once per batch cycle, not once per request — see below.
 
 ---
@@ -79,6 +80,8 @@ All loaders require a consent statement (they are experimental APIs). The litera
 ```
 
 Loaders are idempotent — calling them multiple times for the same ID (or the same variation parent) is cheap.
+
+Each loader writes its data to the `woocommerce` store as well as to `woocommerce/products`, until `woocommerce/products` is removed; see [`woocommerce` store: product data](#woocommerce-store-product-data).
 
 #### Load a single product
 
@@ -235,9 +238,77 @@ For variable products, `findProduct` returns `null` when no variation matches th
 
 ---
 
+## `woocommerce` store: product data
+
+The `woocommerce` store holds the same product and variation data as `woocommerce/products`: `state.products` and `state.productVariations`, keyed by ID, in Store API format (`ProductResponseItem`). It holds the raw data only. It has no selection (`productId` / `variationId`) and no getters (`productInContext`, `findProduct`, …); for the "current" product, use [`woocommerce/products`](#woocommerceproducts-store).
+
+The duplication is temporary. `woocommerce/products` is going to be removed once every block reads its product data from the `woocommerce` store. Read product and variation data from `woocommerce` in new code, and use `woocommerce/products` only for the selection and getters that `woocommerce` doesn't have yet. Don't add features to `woocommerce/products`.
+
+**Source files:**
+
+-   JS: `plugins/woocommerce/client/blocks/assets/js/base/stores/woocommerce/products.ts` (declares the members and their type, `WooCommerceProductData`, re-exported from `woocommerce/index.ts`)
+-   PHP: `plugins/woocommerce/src/Blocks/SharedStores/ProductsStore.php`
+-   Tests: `plugins/woocommerce/tests/php/src/Blocks/SharedStores/ProductsStore.php` (each loader seeds the products or variations it loads into the `woocommerce` state, keyed by ID)
+
+### How it is populated
+
+The [`woocommerce/products` loaders](#populating-state-php) seed both stores. Each call to `wc_interactivity_api_load_product`, `wc_interactivity_api_load_purchasable_child_products` or `wc_interactivity_api_load_variations` — or to the `ProductsStore::load_*` method behind it — writes the same value under the same key to `woocommerce` and to `woocommerce/products`. A call that writes nothing to `woocommerce/products` (a product or variation parent already loaded in the request, a grouped parent that is missing or has no children, a product with no variations) writes nothing to `woocommerce` either. So every product and variation a loader seeds holds equal values in both stores, including the Store API error body stored for an ID that matches no publicly viewable product.
+
+Only the loaders write to both. Data added to `woocommerce/products` any other way — a direct `wp_interactivity_state( 'woocommerce/products', … )` call or a client-side write — is not copied to `woocommerce`.
+
+The product data is serialized for both namespaces, so it appears twice in the page's interactivity state until `woocommerce/products` is removed.
+
+### Reading it from directives (SSR)
+
+The data is in the `woocommerce` server state as soon as the loader returns, so bindings on it render in the server HTML, before JavaScript loads. Load before you bind, then bind by ID:
+
+```php
+wc_interactivity_api_load_product(
+    'I acknowledge that using experimental APIs means my theme or plugin will inevitably break in the next version of WooCommerce',
+    $product_id
+);
+
+printf(
+    '<span data-wp-interactive="woocommerce" data-wp-text="state.products.%d.name"></span>',
+    $product_id
+);
+```
+
+Variations bind the same way, through `state.productVariations.<id>`.
+
+### Reading it from JS (client)
+
+There is no separate script module for the product data. The `@woocommerce/stores/woocommerce/cart` module assembles the whole `woocommerce` store, product data included, so import it for its side effects and type the store with `WooCommerceProductData`:
+
+```ts
+import { store } from '@wordpress/interactivity';
+import '@woocommerce/stores/woocommerce/cart';
+import type { WooCommerceProductData } from '@woocommerce/stores/woocommerce/cart';
+
+// Stores are locked to prevent 3PD usage until the API is stable.
+const universalLock =
+	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
+
+const { state } = store< { state: WooCommerceProductData } >(
+	'woocommerce',
+	{},
+	{ lock: universalLock }
+);
+
+const product = state.products[ productId ];
+const variation = state.productVariations[ variationId ];
+```
+
+On the client, both members read the same values as in `woocommerce/products`:
+
+-   **No loader ran on the page** → `{}` for both, not `undefined`, once the `woocommerce` module has loaded. The defaults come from that module: on a page that loads only `woocommerce/products`, `store( 'woocommerce' ).state.products` reads `undefined`, so import `@woocommerce/stores/woocommerce/cart` in any code that reads it.
+-   **Client-side navigation** (for example, Product Collection's enhanced pagination) → products and variations the loaders seed on the new page are merged into both stores, next to those already loaded.
+
+---
+
 ## `woocommerce/cart` store
 
-The `woocommerce` Interactivity API store (`base/stores/woocommerce/`) holds cart state and actions, with mutation batching for performance. This section covers the `addCartItem` outcome contract and the once-per-cycle cross-cutting side effects below — it is not a write-up of the store's full state shape, its other actions, or the rest of the mutation batcher's internals.
+The `woocommerce` Interactivity API store (`base/stores/woocommerce/`) holds cart state and actions, with mutation batching for performance, alongside the [product data](#woocommerce-store-product-data) described above. This section covers the `addCartItem` outcome contract and the once-per-cycle cross-cutting side effects below — it is not a write-up of the store's full state shape, its other actions, or the rest of the mutation batcher's internals.
 
 ### The `addCartItem` outcome contract
 
