@@ -14,9 +14,9 @@ use Automattic\WooCommerce\SubscriptionsEngine\Api\ContractLock;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Token, trust window and extend / release flags of one lock. Held privately by the lock and
- * reached only by {@see ContractRepository} through a scope-bound closure, so a caller holding
- * a lock cannot read the token or move its trust.
+ * Token, trust window and extend / release flags of one lock. Held by the lock and read by
+ * {@see ContractRepository} through {@see ContractLock::get_state()}; any other caller gets
+ * `_doing_it_wrong()`.
  *
  * Trust: child-table writes skip the database check for {@see self::TRUST_WINDOW_SECONDS}
  * after the last stamp (acquire, extend or verify). Times are monotonic, in seconds.
