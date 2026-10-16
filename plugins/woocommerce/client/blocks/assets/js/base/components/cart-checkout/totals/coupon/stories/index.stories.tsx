@@ -4,8 +4,6 @@
 import { useArgs } from 'storybook/preview-api';
 import type { StoryFn, Meta } from '@storybook/react-webpack5';
 import { INTERACTION_TIMEOUT } from '@woocommerce/storybook-controls';
-import { useDispatch } from '@wordpress/data';
-import { validationStore } from '@woocommerce/block-data';
 
 /**
  * Internal dependencies
@@ -20,18 +18,13 @@ export default {
 	},
 } as Meta< TotalsCouponProps >;
 
-const INVALID_COUPON_ERROR = {
-	hidden: false,
-	message: 'Invalid coupon code',
-};
-
 const Template: StoryFn< TotalsCouponProps > = ( args ) => {
 	const [ {}, setArgs ] = useArgs();
 
 	const onSubmit = ( code: string ) => {
 		args.onSubmit?.( code );
 		setArgs( { isLoading: true } );
-		return new Promise( ( resolve ) => {
+		return new Promise< boolean >( ( resolve ) => {
 			setTimeout( () => {
 				setArgs( { isLoading: false } );
 				resolve( true );
@@ -50,16 +43,15 @@ LoadingState.args = {
 	isLoading: true,
 };
 
+// Type a code and click Apply to see the error the server would return.
 export const ErrorState: StoryFn< TotalsCouponProps > = ( args ) => {
-	const { setValidationErrors } = useDispatch( validationStore );
+	const onSubmit = () => Promise.reject( new Error( 'Invalid coupon code' ) );
 
-	setValidationErrors( { coupon: INVALID_COUPON_ERROR } );
-
-	return <TotalsCoupon { ...args } />;
+	return (
+		<TotalsCoupon
+			{ ...args }
+			displayCouponForm={ true }
+			onSubmit={ onSubmit }
+		/>
+	);
 };
-
-ErrorState.decorators = [
-	( StoryComponent ) => {
-		return <StoryComponent />;
-	},
-];

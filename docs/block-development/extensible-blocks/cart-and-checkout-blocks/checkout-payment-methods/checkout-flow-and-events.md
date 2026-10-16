@@ -205,7 +205,7 @@ import {
 
 The helper functions are described below:
 
--   `isSuccessResponse`, `isErrorResponse` and `isFailResponse`: These are helper functions that receive a value and report via boolean whether the object is a type of response expected. For event emitters that receive responses from registered observers, a `type` property on the returned object from the observer indicates what type of response it is and event emitters will react according to that type. So for instance if an observer returned `{ type: 'success' }` the emitter could feed that to `isSuccessResponse` and it would return `true`. You can see an example of this being implemented for the [payment processing emitted event here](https://github.com/woocommerce/woocommerce/blob/df02d62e2d41e9007da44cb87fea2b7a9551f55c/plugins/woocommerce/client/blocks/packages/public-api/types/type-guards/observers.ts#L41-L65).
+-   `isSuccessResponse`, `isErrorResponse` and `isFailResponse`: These are helper functions that receive a value and report via boolean whether the object is a type of response expected. For event emitters that receive responses from registered observers, a `type` property on the returned object from the observer indicates what type of response it is and event emitters will react according to that type. So for instance if an observer returned `{ type: 'success' }` the emitter could feed that to `isSuccessResponse` and it would return `true`. You can see an example of this being implemented for the [payment processing emitted event here](https://github.com/woocommerce/woocommerce/blob/df02d62e2d41e9007da44cb87fea2b7a9551f55c/plugins/woocommerce/client/blocks/assets/js/types/type-guards/observers.ts#L41-L65).
 -   `noticeContexts`: This is an object containing properties referencing areas where notices can be targeted in the checkout. The object has the following properties:
     -   `PAYMENTS`: This is a reference to the notice area in the payment methods step.
     -   `EXPRESS_PAYMENTS`: This is a reference to the notice area in the express payment methods step.
@@ -229,7 +229,7 @@ Observers registered to this event emitter will receive nothing as an argument. 
 
 -   `errorMessage`: This will be added as an error notice on the checkout context.
 -   `validationErrors`: This will be set as inline validation errors on checkout fields. If your observer wants to trigger validation errors it can use the following shape for the errors:
-    -   This is an object where keys are the property names the validation error is for (that correspond to a checkout field, eg `country` or `coupon`) and values are the error message describing the validation problem.
+    -   This is an object where each key is the validation error id of a checkout field (for example `billing_email` or `shipping_postcode`) and each value is an object with a `message` string and a `hidden` boolean, such as `{ message: 'Enter a valid postcode.', hidden: false }`. Values in any other shape are ignored. A key that matches no field still blocks Place Order without showing anything, so also return an `errorMessage`.
 
 This event is emitted when the checkout status is `BEFORE_PROCESSING` (which happens at validation time, after the checkout form submission is triggered by the user - or Express Payment methods).
 
@@ -334,7 +334,7 @@ When an error response is returned by an observer, the payment method context st
 -   `message`: The string provided here will be set as an error notice.
 -   `messageContext`: If provided, this will target the given area for the error notice (this is where `noticeContexts` mentioned earlier come in to play). Otherwise, the notice will be added to the `noticeContexts.PAYMENTS` area.
 -   `validationErrors`: This will be set as inline validation errors on checkout fields. If your observer wants to trigger validation errors it can use the following shape for the errors:
-    -   This is an object where keys are the property names the validation error is for (that correspond to a checkout field, eg `country` or `coupon`) and values are the error message describing the validation problem.
+    -   This is an object where each key is the validation error id of a checkout field (for example `billing_email` or `shipping_postcode`) and each value is an object with a `message` string and a `hidden` boolean, such as `{ message: 'Enter a valid postcode.', hidden: false }`. Values in any other shape are ignored. A key that matches no field still blocks Place Order without showing anything, so also return a `message`.
 
 If the response object doesn't match any of the above conditions, then the fallback is to set the payment status as `SUCCESS`.
 
