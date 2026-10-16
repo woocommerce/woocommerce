@@ -875,6 +875,483 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Resuming a pending order with an unchanged cart keeps its item IDs.
+	 */
+	public function test_create_order_resume_keeps_item_ids_when_cart_is_unchanged(): void {
+		$order_id        = $this->create_order_with_line_item_and_fee();
+		$before          = $this->get_order_item_ids_by_type( $order_id );
+		$line_item_calls = did_action( 'woocommerce_checkout_create_order_line_item' );
+		$fee_item_calls  = did_action( 'woocommerce_checkout_create_order_fee_item' );
+
+		$resumed_id = $this->resume_order( $order_id );
+
+		$this->assertSame( $order_id, $resumed_id );
+		$this->assertSame( $before, $this->get_order_item_ids_by_type( $order_id ) );
+		$this->assertSame( $line_item_calls, did_action( 'woocommerce_checkout_create_order_line_item' ), 'Kept line items should not be created again.' );
+		$this->assertSame( $fee_item_calls, did_action( 'woocommerce_checkout_create_order_fee_item' ), 'Kept fees should not be created again.' );
+		$this->assertSame( (float) WC()->cart->get_total( 'edit' ), (float) wc_get_order( $order_id )->get_total(), 'The order total should match the cart.' );
+	}
+
+	/**
+	 * @testdox Resuming a pending order replaces the items whose cart section changed and keeps the line items.
+	 */
+	public function test_create_order_resume_replaces_changed_items_only(): void {
+		$order_id = $this->create_order_with_line_item_and_fee();
+		$before   = $this->get_order_item_ids_by_type( $order_id );
+		$order    = wc_get_order( $order_id );
+		$order->update_meta_data( '_fees_hash', 'stale' );
+		$order->save();
+		$line_item_calls = did_action( 'woocommerce_checkout_create_order_line_item' );
+		$fee_item_calls  = did_action( 'woocommerce_checkout_create_order_fee_item' );
+
+		$this->resume_order( $order_id );
+		$after = $this->get_order_item_ids_by_type( $order_id );
+		$order = wc_get_order( $order_id );
+
+		$this->assertSame( $before['line_item'], $after['line_item'], 'Line items should keep their IDs.' );
+		$this->assertCount( 1, $after['fee'], 'The fee should be added again once, not duplicated.' );
+		$this->assertNotSame( $before['fee'], $after['fee'], 'The fee should be replaced.' );
+		$this->assertSame( $line_item_calls, did_action( 'woocommerce_checkout_create_order_line_item' ), 'Kept line items should not be created again.' );
+		$this->assertSame( $fee_item_calls + 1, did_action( 'woocommerce_checkout_create_order_fee_item' ), 'The replaced fee should be created once.' );
+		$this->assertSame( 5.0, (float) array_values( $order->get_fees() )[0]->get_total(), 'The replaced fee should keep the cart amount.' );
+		$this->assertSame( (float) WC()->cart->get_total( 'edit' ), (float) $order->get_total(), 'The order total should match the cart.' );
+	}
+
+	/**
+	 * @testdox Resuming a pending order fires woocommerce_remove_order_items once for each item type it replaces.
+	 */
+	public function test_create_order_resume_removes_each_changed_item_type_once(): void {
+		$order_id = $this->create_order_with_line_item_and_fee();
+		$order    = wc_get_order( $order_id );
+		$order->update_meta_data( '_fees_hash', 'stale' );
+		$order->save();
+		$removed_types = array();
+		add_action(
+			'woocommerce_remove_order_items',
+			function ( $order, $type ) use ( &$removed_types ) {
+				unset( $order );
+				$removed_types[] = $type;
+			},
+			10,
+			2
+		);
+
+		$this->resume_order( $order_id );
+
+		$this->assertSame( array( 'fee' ), $removed_types, 'Only the changed fee type should be removed, once.' );
+	}
+
+	/**
+	 * @testdox Resuming a pending order keeps every original item when checkout fails before the order is saved.
+	 */
+	public function test_create_order_resume_keeps_original_items_when_checkout_fails(): void {
+		$order_id = $this->create_order_with_line_item_and_fee();
+		$order    = wc_get_order( $order_id );
+		$order->update_meta_data( '_fees_hash', 'stale' );
+		$order->save();
+		wc_add_order_item(
+			$order_id,
+			array(
+				'order_item_name' => 'Extension gift',
+				'order_item_type' => 'line_item',
+			)
+		);
+		$before = $this->get_order_item_ids_by_type( $order_id );
+		add_action(
+			'woocommerce_checkout_create_order',
+			function () {
+				throw new Exception( 'Simulated checkout failure' );
+			}
+		);
+
+		$result = $this->resume_order( $order_id );
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertSame( 'Simulated checkout failure', $result->get_error_message() );
+		$this->assertCount( 2, $before['line_item'], 'The extension line item should be on the order before resuming.' );
+		$this->assertSame( $before, $this->get_order_item_ids_by_type( $order_id ), 'The changed fee and the extension line item should not be deleted.' );
+	}
+
+	/**
+	 * @testdox Resuming a pending order created before section hashes were stored keeps line items and replaces the rest.
+	 */
+	public function test_create_order_resume_without_stored_section_hashes_keeps_line_items(): void {
+		$order_id = $this->create_order_with_line_item_and_fee();
+		$before   = $this->get_order_item_ids_by_type( $order_id );
+		$order    = wc_get_order( $order_id );
+		foreach ( array( '_shipping_hash', '_fees_hash', '_coupons_hash', '_taxes_hash' ) as $meta_key ) {
+			$order->delete_meta_data( $meta_key );
+		}
+		$order->save();
+
+		$this->resume_order( $order_id );
+		$after = $this->get_order_item_ids_by_type( $order_id );
+
+		$this->assertSame( $before['line_item'], $after['line_item'] );
+		$this->assertCount( 1, $after['fee'] );
+		$this->assertNotSame( $before['fee'], $after['fee'] );
+		$this->assertNotEmpty( wc_get_order( $order_id )->get_meta( '_fees_hash' ), 'The section hashes should be stored again.' );
+	}
+
+	/**
+	 * @testdox Resuming a pending order removes item types the cart doesn't track, so extensions that add them at checkout don't duplicate them.
+	 */
+	public function test_create_order_resume_removes_untracked_item_types(): void {
+		$order_id = $this->create_order_with_line_item_and_fee();
+		$before   = $this->get_order_item_ids_by_type( $order_id );
+		wc_add_order_item(
+			$order_id,
+			array(
+				'order_item_name' => 'Extension item',
+				'order_item_type' => 'test_extension_item',
+			)
+		);
+
+		$this->resume_order( $order_id );
+		$after = $this->get_order_item_ids_by_type( $order_id );
+
+		$this->assertArrayNotHasKey( 'test_extension_item', $after );
+		$this->assertSame( $before['line_item'], $after['line_item'] );
+	}
+
+	/**
+	 * @testdox Resuming a pending order doesn't duplicate items that an extension adds in woocommerce_checkout_create_order.
+	 */
+	public function test_create_order_resume_does_not_duplicate_items_added_in_create_order_action(): void {
+		add_action(
+			'woocommerce_checkout_create_order',
+			function ( WC_Order $order ) {
+				$fee = new WC_Order_Item_Fee();
+				$fee->set_name( 'Extension surcharge' );
+				$fee->set_total( '2' );
+				$order->add_item( $fee );
+
+				$line_item = new WC_Order_Item_Product();
+				$line_item->set_name( 'Extension gift' );
+				$line_item->set_quantity( 1 );
+				$order->add_item( $line_item );
+			}
+		);
+		$order_id = $this->create_order_with_line_item_and_fee();
+		$before   = $this->get_order_item_names_by_id( $order_id );
+
+		$this->resume_order( $order_id );
+		$this->resume_order( $order_id );
+		$after = $this->get_order_item_names_by_id( $order_id );
+
+		$this->assertSame( array( 'Dummy Product', 'Extension gift' ), array_values( $after['line_item'] ), 'Each line item should exist once.' );
+		$this->assertSame( array( 'Handling', 'Extension surcharge' ), array_values( $after['fee'] ), 'Each fee should exist once.' );
+		$this->assertSame( array_search( 'Dummy Product', $before['line_item'], true ), array_search( 'Dummy Product', $after['line_item'], true ), 'The cart line item should keep its ID.' );
+		$this->assertSame( array_search( 'Handling', $before['fee'], true ), array_search( 'Handling', $after['fee'], true ), 'The cart fee should keep its ID.' );
+	}
+
+	/**
+	 * @testdox Resuming a pending order that has no record of its cart items replaces every item.
+	 */
+	public function test_create_order_resume_without_cart_item_ids_replaces_all_items(): void {
+		$order_id = $this->create_order_with_line_item_and_fee();
+		$before   = $this->get_order_item_ids_by_type( $order_id );
+		$order    = wc_get_order( $order_id );
+		$order->delete_meta_data( '_cart_order_item_ids' );
+		$order->save();
+
+		$this->resume_order( $order_id );
+		$after = $this->get_order_item_ids_by_type( $order_id );
+
+		$this->assertSame( array_keys( $before ), array_keys( $after ), 'The same item types should exist.' );
+		foreach ( $before as $type => $ids ) {
+			$this->assertCount( count( $ids ), $after[ $type ], "Each {$type} item should be added again once." );
+			$this->assertEmpty( array_intersect( $ids, $after[ $type ] ), "Each {$type} item should be replaced." );
+		}
+	}
+
+	/**
+	 * @testdox Resuming a pending order keeps its tax line when taxes are unchanged and replaces it once when they changed.
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $taxes_changed Whether the order's stored tax hash no longer matches the cart.
+	 */
+	public function test_create_order_resume_keeps_or_replaces_tax_lines( bool $taxes_changed ): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'DE',
+				'tax_rate'          => '19.0000',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+		$customer          = WC()->customer;
+		$original_customer = array(
+			'billing_country'  => $customer->get_billing_country(),
+			'shipping_country' => $customer->get_shipping_country(),
+			'is_vat_exempt'    => $customer->get_is_vat_exempt(),
+		);
+		$customer->set_billing_country( 'DE' );
+		$customer->set_shipping_country( 'DE' );
+		$customer->set_is_vat_exempt( false );
+		try {
+			$order_id = $this->create_order_with_line_item_and_fee();
+			$before   = $this->get_order_item_ids_by_type( $order_id );
+			if ( $taxes_changed ) {
+				$order = wc_get_order( $order_id );
+				$order->update_meta_data( '_taxes_hash', 'stale' );
+				$order->save();
+			}
+
+			$this->resume_order( $order_id );
+			$after    = $this->get_order_item_ids_by_type( $order_id );
+			$order    = wc_get_order( $order_id );
+			$cart_tax = (float) WC()->cart->get_total_tax();
+		} finally {
+			$customer->set_billing_country( $original_customer['billing_country'] );
+			$customer->set_shipping_country( $original_customer['shipping_country'] );
+			$customer->set_is_vat_exempt( $original_customer['is_vat_exempt'] );
+		}
+
+		$this->assertSame( $before['line_item'], $after['line_item'], 'Line items should keep their IDs.' );
+		$this->assertCount( 1, $after['tax'], 'The order should have one tax line.' );
+		if ( $taxes_changed ) {
+			$this->assertNotSame( $before['tax'], $after['tax'], 'The tax line should be replaced.' );
+		} else {
+			$this->assertSame( $before['tax'], $after['tax'], 'The tax line should keep its ID.' );
+		}
+		$this->assertSame( 'DE-VAT-1', array_values( $order->get_taxes() )[0]->get_rate_code() );
+		$this->assertEqualsWithDelta( $cart_tax, (float) $order->get_total_tax(), 0.001, 'The order tax total should match the cart.' );
+	}
+
+	/**
+	 * @testdox Resuming a pending order replaces every item when woocommerce_checkout_keep_order_items_on_resume returns false.
+	 */
+	public function test_create_order_resume_replaces_all_items_when_keeping_is_filtered_off(): void {
+		$order_id = $this->create_order_with_line_item_and_fee();
+		$before   = $this->get_order_item_ids_by_type( $order_id );
+		add_filter( 'woocommerce_checkout_keep_order_items_on_resume', '__return_false' );
+		$line_item_hook_calls = did_action( 'woocommerce_checkout_create_order_line_item' );
+
+		$this->resume_order( $order_id );
+		$after = $this->get_order_item_ids_by_type( $order_id );
+
+		$this->assertSame( $line_item_hook_calls + 1, did_action( 'woocommerce_checkout_create_order_line_item' ), 'The line item hook should fire again.' );
+		$this->assertSame( array_keys( $before ), array_keys( $after ), 'The same item types should exist.' );
+		foreach ( $before as $type => $ids ) {
+			$this->assertCount( count( $ids ), $after[ $type ], "Each {$type} item should be added again once." );
+			$this->assertEmpty( array_intersect( $ids, $after[ $type ] ), "Each {$type} item should be replaced." );
+		}
+	}
+
+	/**
+	 * @testdox Resuming a pending order replaces line items that no longer match the cart, even when the cart hash still matches.
+	 */
+	public function test_create_order_resume_replaces_line_items_when_cart_hash_misses_a_quantity_change(): void {
+		// A cart hash that only covers product IDs, so a quantity change doesn't change it.
+		add_filter(
+			'woocommerce_cart_hash',
+			function ( $hash, $cart_session ) {
+				unset( $hash );
+				return md5( wp_json_encode( wp_list_pluck( (array) $cart_session, 'product_id' ) ) );
+			},
+			10,
+			2
+		);
+		$order_id = $this->create_order_with_line_item_and_fee();
+		$before   = $this->get_order_item_ids_by_type( $order_id );
+		WC()->cart->set_quantity( array_key_first( WC()->cart->get_cart() ), 3 );
+		WC()->cart->calculate_totals();
+
+		$resumed_id = $this->resume_order( $order_id );
+
+		$this->assertSame( $order_id, $resumed_id, 'The order should still be resumed.' );
+		$this->assert_line_items_match_cart( $order_id );
+		$this->assertNotSame( $before['line_item'], $this->get_order_item_ids_by_type( $order_id )['line_item'], 'The line item should be replaced.' );
+	}
+
+	/**
+	 * @testdox Resuming a pending order replaces line items a merchant edited, so they match the cart again.
+	 */
+	public function test_create_order_resume_replaces_line_items_edited_after_checkout(): void {
+		$order_id = $this->create_order_with_line_item_and_fee();
+		$before   = $this->get_order_item_ids_by_type( $order_id );
+		$order    = wc_get_order( $order_id );
+		$item     = array_values( $order->get_items() )[0];
+		$item->set_quantity( 2 );
+		$item->set_subtotal( (float) $item->get_subtotal() * 2 );
+		$item->set_total( (float) $item->get_total() * 2 );
+		$item->save();
+		$order->calculate_totals();
+
+		$this->resume_order( $order_id );
+
+		$this->assert_line_items_match_cart( $order_id );
+		$this->assertNotSame( $before['line_item'], $this->get_order_item_ids_by_type( $order_id )['line_item'], 'The edited line item should be replaced.' );
+	}
+
+	/**
+	 * @testdox remove_order_items_not_matching_cart() keeps shipping lines while the cart hasn't evaluated shipping.
+	 */
+	public function test_remove_order_items_not_matching_cart_keeps_unevaluated_shipping(): void {
+		$order    = wc_create_order();
+		$shipping = new WC_Order_Item_Shipping();
+		$shipping->set_method_title( 'Flat rate' );
+		$order->add_item( $shipping );
+		$order->update_meta_data( '_shipping_hash', 'stale' );
+		$order->save();
+		// A cart that needs shipping but hasn't calculated it yet.
+		$cart = $this->createMock( WC_Cart::class );
+		$cart->method( 'needs_shipping' )->willReturn( true );
+		$cart->method( 'has_calculated_shipping' )->willReturn( false );
+		$cart->method( 'get_cart' )->willReturn( array() );
+
+		$kept_types = $this->sut->remove_order_items_not_matching_cart(
+			$order,
+			$cart,
+			array(
+				'line_items' => 'line-items',
+				'shipping'   => 'shipping',
+				'fees'       => 'fees',
+				'coupons'    => 'coupons',
+				'taxes'      => 'taxes',
+			)
+		);
+
+		$this->assertContains( 'shipping', $kept_types );
+		$this->assertCount( 1, $order->get_items( 'shipping' ), 'The shipping line should stay on the order.' );
+	}
+
+	/**
+	 * Asserts that an order's line items have the cart's quantities and totals.
+	 *
+	 * @param int $order_id The order ID.
+	 */
+	private function assert_line_items_match_cart( int $order_id ): void {
+		$order      = wc_get_order( $order_id );
+		$line_items = array_values( $order->get_items() );
+		$cart_items = array_values( WC()->cart->get_cart() );
+
+		$this->assertCount( count( $cart_items ), $line_items, 'The order should have one line item per cart item.' );
+		$this->assertSame( (int) $cart_items[0]['quantity'], (int) $line_items[0]->get_quantity(), 'The line item quantity should match the cart.' );
+		$this->assertSame( (float) $cart_items[0]['line_total'], (float) $line_items[0]->get_total(), 'The line item total should match the cart.' );
+	}
+
+	/**
+	 * @testdox An Error thrown while resuming an order doesn't make a later set_data_from_cart() call skip item types.
+	 */
+	public function test_create_order_resume_error_does_not_leave_item_types_skipped(): void {
+		$order_id = $this->create_order_with_line_item_and_fee();
+		// This filter runs after the resumed order's kept item types are set and before set_data_from_cart().
+		add_filter(
+			'woocommerce_checkout_customer_id',
+			function () {
+				throw new Error( 'Extension error' );
+			}
+		);
+
+		try {
+			$this->resume_order( $order_id );
+			$this->fail( 'The Error should reach the caller.' );
+		} catch ( Error $e ) {
+			$this->assertSame( 'Extension error', $e->getMessage() );
+		}
+
+		$order = new WC_Order();
+		$this->sut->set_data_from_cart( $order );
+
+		$this->assertCount( 1, $order->get_items(), 'set_data_from_cart() should add the line item.' );
+	}
+
+	/**
+	 * Creates an order from a cart with one product and one fee.
+	 *
+	 * @return int The order ID.
+	 */
+	private function create_order_with_line_item_and_fee(): int {
+		$product = WC_Helper_Product::create_simple_product();
+		add_action(
+			'woocommerce_cart_calculate_fees',
+			function ( WC_Cart $cart ) {
+				$cart->add_fee( 'Handling', 5 );
+			}
+		);
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->calculate_totals();
+
+		$order_id = $this->sut->create_order( array( 'payment_method' => WC_Gateway_BACS::ID ) );
+		$this->assertIsInt( $order_id );
+
+		return $order_id;
+	}
+
+	/**
+	 * Runs checkout again with the order set as awaiting payment, as when a shopper retries a failed payment.
+	 *
+	 * @param int $order_id The order awaiting payment.
+	 * @return int|WP_Error The order ID returned by create_order().
+	 */
+	private function resume_order( int $order_id ) {
+		$original = WC()->session->get( 'order_awaiting_payment' );
+		WC()->session->set( 'order_awaiting_payment', $order_id );
+		try {
+			return $this->sut->create_order( array( 'payment_method' => WC_Gateway_BACS::ID ) );
+		} finally {
+			WC()->session->set( 'order_awaiting_payment', $original );
+		}
+	}
+
+	/**
+	 * Reads an order's persisted item IDs, grouped by item type.
+	 *
+	 * @param int $order_id The order ID.
+	 * @return array<string, int[]>
+	 */
+	private function get_order_item_ids_by_type( int $order_id ): array {
+		global $wpdb;
+
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT order_item_id, order_item_type FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d ORDER BY order_item_id",
+				$order_id
+			)
+		);
+
+		$ids_by_type = array();
+		foreach ( $rows as $row ) {
+			$ids_by_type[ $row->order_item_type ][] = (int) $row->order_item_id;
+		}
+		ksort( $ids_by_type );
+
+		return $ids_by_type;
+	}
+
+	/**
+	 * Reads an order's persisted item names, keyed by item ID and grouped by item type.
+	 *
+	 * @param int $order_id The order ID.
+	 * @return array<string, array<int, string>>
+	 */
+	private function get_order_item_names_by_id( int $order_id ): array {
+		global $wpdb;
+
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT order_item_id, order_item_name, order_item_type FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d ORDER BY order_item_id",
+				$order_id
+			)
+		);
+
+		$names_by_type = array();
+		foreach ( $rows as $row ) {
+			$names_by_type[ $row->order_item_type ][ (int) $row->order_item_id ] = $row->order_item_name;
+		}
+
+		return $names_by_type;
+	}
+
+	/**
 	 * @testdox create_order_fee_lines sets tax status to 'none' for non-taxable cart fees and 'taxable' for taxable ones.
 	 *
 	 * @testWith [true, "taxable", ""]

@@ -8,12 +8,14 @@
  * @version 3.4.0
  */
 
+use Automattic\WooCommerce\Enums\OrderItemType;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 use Automattic\WooCommerce\Internal\ProductVariations\SelectedVariationName;
 use Automattic\WooCommerce\Internal\Tax\TaxRateDataStore;
+use Automattic\WooCommerce\StoreApi\Utilities\CartController;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -61,6 +63,32 @@ class WC_Checkout {
 	 * @var WC_Customer
 	 */
 	private $logged_in_customer = null;
+
+	/**
+	 * Order item types whose cart hash is stored as order meta, keyed by the hash name. The Store API uses the same
+	 * hashes, from CartController::get_cart_hashes(). Line items are tracked by the order's cart hash instead.
+	 *
+	 * @var array<string, string>
+	 */
+	private const CART_HASHED_ORDER_ITEM_TYPES = array(
+		'shipping' => OrderItemType::SHIPPING,
+		'fees'     => OrderItemType::FEE,
+		'coupons'  => OrderItemType::COUPON,
+		'taxes'    => OrderItemType::TAX,
+	);
+
+	/**
+	 * Order meta that stores the IDs of the items created from the cart, grouped by item type. Items added later, for
+	 * example in the woocommerce_checkout_create_order action, aren't stored, so a resumed order doesn't keep them.
+	 */
+	private const CART_ORDER_ITEM_IDS_META_KEY = '_cart_order_item_ids';
+
+	/**
+	 * Item types that create_order() kept on a resumed order, so set_data_from_cart() doesn't add them again.
+	 *
+	 * @var string[]
+	 */
+	private $kept_order_item_types = array();
 
 	/**
 	 * Gets the main WC_Checkout Instance.
@@ -412,6 +440,7 @@ class WC_Checkout {
 		try {
 			$order_id           = absint( WC()->session->get( 'order_awaiting_payment' ) );
 			$cart_hash          = WC()->cart->get_cart_hash();
+			$cart_hashes        = ( new CartController() )->get_cart_hashes();
 			$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
 			$order              = $order_id ? wc_get_order( $order_id ) : null;
 
@@ -432,8 +461,24 @@ class WC_Checkout {
 				 */
 				do_action( 'woocommerce_resume_order', $order_id );
 
-				// Remove all items - we will re-add them later.
-				$order->remove_order_items();
+				/**
+				 * Filters whether a resumed classic checkout order keeps the items the cart hasn't changed, so their
+				 * IDs stay the same. Return false to remove every item and add it again from the cart, which also
+				 * fires the woocommerce_checkout_create_order_*_item hooks for every item again.
+				 *
+				 * @since 11.3.0
+				 *
+				 * @param bool              $keep_items Whether to keep unchanged items. Default true.
+				 * @param WC_Abstract_Order $order      The resumed order.
+				 */
+				$keep_items = apply_filters( 'woocommerce_checkout_keep_order_items_on_resume', true, $order );
+
+				if ( true === $keep_items ) {
+					// The rest of the items are added again from the cart later.
+					$this->kept_order_item_types = $this->remove_changed_order_items( $order, $cart_hashes );
+				} else {
+					$order->remove_order_items();
+				}
 			} else {
 				$order = new WC_Order();
 			}
@@ -474,6 +519,15 @@ class WC_Checkout {
 			$order->set_customer_note( isset( $data['order_comments'] ) ? $data['order_comments'] : '' );
 			$order->set_payment_method( isset( $available_gateways[ $data['payment_method'] ] ) ? $available_gateways[ $data['payment_method'] ] : $data['payment_method'] );
 			$this->set_data_from_cart( $order );
+			$cart_order_items = $order->get_items( $this->get_cart_order_item_types() );
+
+			foreach ( array_keys( self::CART_HASHED_ORDER_ITEM_TYPES ) as $hash_name ) {
+				// Unevaluated shipping keeps its previous hash, so it's replaced once the cart evaluates it.
+				if ( 'shipping' === $hash_name && ! $this->cart_has_evaluated_shipping( WC()->cart ) ) {
+					continue;
+				}
+				$order->update_meta_data( "_{$hash_name}_hash", $cart_hashes[ $hash_name ] );
+			}
 
 			if ( $order->has_cogs() && $this->cogs_is_enabled() ) {
 				$order->calculate_cogs_total_value();
@@ -488,6 +542,13 @@ class WC_Checkout {
 
 			// Save the order.
 			$order_id = $order->save();
+
+			$cart_order_item_ids = array();
+			foreach ( $cart_order_items as $item ) {
+				$cart_order_item_ids[ $item->get_type() ][] = $item->get_id();
+			}
+			$order->update_meta_data( self::CART_ORDER_ITEM_IDS_META_KEY, $cart_order_item_ids );
+			$order->save_meta_data();
 
 			// Defense-in-depth: if the cart still has items but the persisted order has none,
 			// the save silently dropped every line item (e.g. a $wpdb->insert() returning false
@@ -532,6 +593,9 @@ class WC_Checkout {
 				do_action( 'woocommerce_checkout_order_exception', $order );
 			}
 			return new WP_Error( 'checkout-error', $e->getMessage() );
+		} finally {
+			// Reset on every path, including Errors, so a later set_data_from_cart() call adds every item type.
+			$this->kept_order_item_types = array();
 		}
 	}
 
@@ -551,11 +615,191 @@ class WC_Checkout {
 		$order->set_cart_tax( WC()->cart->get_cart_contents_tax() + WC()->cart->get_fee_tax() );
 		$order->set_shipping_tax( WC()->cart->get_shipping_tax() );
 		$order->set_total( WC()->cart->get_total( 'edit' ) );
-		$this->create_order_line_items( $order, WC()->cart );
-		$this->create_order_fee_lines( $order, WC()->cart );
-		$this->create_order_shipping_lines( $order, WC()->session->get( 'chosen_shipping_methods' ), WC()->shipping()->get_packages() );
-		$this->create_order_tax_lines( $order, WC()->cart );
-		$this->create_order_coupon_lines( $order, WC()->cart );
+		if ( $this->should_add_order_items( OrderItemType::LINE_ITEM ) ) {
+			$this->create_order_line_items( $order, WC()->cart );
+		}
+		if ( $this->should_add_order_items( OrderItemType::FEE ) ) {
+			$this->create_order_fee_lines( $order, WC()->cart );
+		}
+		if ( $this->should_add_order_items( OrderItemType::SHIPPING ) ) {
+			$this->create_order_shipping_lines( $order, WC()->session->get( 'chosen_shipping_methods' ), WC()->shipping()->get_packages() );
+		}
+		if ( $this->should_add_order_items( OrderItemType::TAX ) ) {
+			$this->create_order_tax_lines( $order, WC()->cart );
+		}
+		if ( $this->should_add_order_items( OrderItemType::COUPON ) ) {
+			$this->create_order_coupon_lines( $order, WC()->cart );
+		}
+	}
+
+	/**
+	 * Whether set_data_from_cart() should add items of a type, or keep the ones create_order() kept on a resumed order.
+	 *
+	 * @param string $item_type Order item type.
+	 * @return bool
+	 */
+	private function should_add_order_items( string $item_type ): bool {
+		return ! in_array( $item_type, $this->kept_order_item_types, true );
+	}
+
+	/**
+	 * The order item types that set_data_from_cart() creates from the cart.
+	 *
+	 * @return string[]
+	 */
+	private function get_cart_order_item_types(): array {
+		return array_merge( array( OrderItemType::LINE_ITEM ), array_values( self::CART_HASHED_ORDER_ITEM_TYPES ) );
+	}
+
+	/**
+	 * Removes the order items that no longer match the cart, and returns the item types it kept. The classic checkout and
+	 * the Store API both use it, so a resumed order keeps the same items whichever checkout updates it.
+	 *
+	 * Line items are kept while the order's cart hash matches and they still match the cart's items. Other types are
+	 * kept while their section hash matches, and shipping is also kept until the cart has evaluated it.
+	 *
+	 * @internal
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param WC_Order              $order       The order.
+	 * @param WC_Cart               $cart        The cart.
+	 * @param array<string, string> $cart_hashes Cart hashes from CartController::get_cart_hashes().
+	 * @return string[] The kept item types.
+	 */
+	public function remove_order_items_not_matching_cart( WC_Order $order, WC_Cart $cart, array $cart_hashes ): array {
+		$kept_types = array();
+
+		if ( $order->get_cart_hash() === $cart_hashes['line_items'] && $this->line_items_match_cart( $order->get_items( OrderItemType::LINE_ITEM ), $cart ) ) {
+			$kept_types[] = OrderItemType::LINE_ITEM;
+		} else {
+			$order->remove_order_items( OrderItemType::LINE_ITEM );
+		}
+
+		foreach ( self::CART_HASHED_ORDER_ITEM_TYPES as $hash_name => $item_type ) {
+			$is_unchanged = $order->get_meta( "_{$hash_name}_hash" ) === $cart_hashes[ $hash_name ];
+			// Shipping isn't replaced before the cart evaluates it, so the order doesn't lose its shipping lines.
+			$is_unevaluated_shipping = OrderItemType::SHIPPING === $item_type && ! $this->cart_has_evaluated_shipping( $cart );
+
+			if ( $is_unchanged || $is_unevaluated_shipping ) {
+				$kept_types[] = $item_type;
+			} else {
+				$order->remove_order_items( $item_type );
+			}
+		}
+
+		return $kept_types;
+	}
+
+	/**
+	 * Whether the cart has evaluated shipping: it calculated it, or it needs none and its shipping methods were loaded.
+	 * A null methods value means evaluation hasn't run, while an empty array means it ran and found none.
+	 *
+	 * @param WC_Cart $cart The cart.
+	 * @return bool
+	 */
+	private function cart_has_evaluated_shipping( WC_Cart $cart ): bool {
+		return $cart->has_calculated_shipping() || ( ! $cart->needs_shipping() && null !== $cart->get_shipping_methods() );
+	}
+
+	/**
+	 * Whether an order's line items have the same products, quantities and amounts as the cart's items.
+	 *
+	 * Tax amounts aren't compared: recalculating the order's totals recalculates item taxes, which can then differ
+	 * slightly from the cart's, for example when prices include tax and tax is rounded at subtotal.
+	 *
+	 * @param WC_Order_Item[] $line_items The order's line items.
+	 * @param WC_Cart         $cart       The cart.
+	 * @return bool
+	 */
+	private function line_items_match_cart( array $line_items, WC_Cart $cart ): bool {
+		$order_values = array();
+		foreach ( $line_items as $item ) {
+			if ( ! $item instanceof WC_Order_Item_Product ) {
+				return false;
+			}
+			$order_values[] = $this->get_line_item_values( $item->get_product_id(), $item->get_variation_id(), $item->get_quantity(), $item->get_subtotal(), $item->get_total() );
+		}
+
+		$cart_values = array();
+		foreach ( $cart->get_cart() as $values ) {
+			$cart_values[] = $this->get_line_item_values( $values['product_id'] ?? 0, $values['variation_id'] ?? 0, $values['quantity'] ?? 0, $values['line_subtotal'] ?? 0, $values['line_total'] ?? 0 );
+		}
+
+		sort( $order_values );
+		sort( $cart_values );
+
+		return $order_values === $cart_values;
+	}
+
+	/**
+	 * Joins a line item's product, quantity and amounts into one string, rounded so order and cart values compare equal.
+	 *
+	 * @param int|float|string ...$values Product ID, variation ID, quantity, subtotal and total.
+	 * @return string
+	 */
+	private function get_line_item_values( ...$values ): string {
+		return implode( '|', array_map( fn( $value ) => wc_format_decimal( $value, wc_get_rounding_precision() ), $values ) );
+	}
+
+	/**
+	 * Removes the items of a resumed order that no longer match the cart, and returns the item types it kept.
+	 *
+	 * Only cart-created items of unchanged types are kept: line items, whose cart hash already matches, and types whose
+	 * section hash matches. A type with a missing cart item is rebuilt, as is every type when the order has no record of
+	 * its cart items. Other items, such as ones extensions add at checkout, are removed so they aren't duplicated.
+	 *
+	 * @param WC_Abstract_Order     $order       The resumed order.
+	 * @param array<string, string> $cart_hashes Cart hashes from CartController::get_cart_hashes().
+	 * @return string[] The kept item types.
+	 */
+	private function remove_changed_order_items( WC_Abstract_Order $order, array $cart_hashes ): array {
+		global $wpdb;
+
+		$cart_order_item_ids = $order->get_meta( self::CART_ORDER_ITEM_IDS_META_KEY );
+		if ( ! $order instanceof WC_Order || ! is_array( $cart_order_item_ids ) ) {
+			// Without a record of the cart's items, they can't be told apart from items added by extensions.
+			$order->remove_order_items();
+			return array();
+		}
+
+		// Keep only the items the cart created. A type that's missing one of them is added again from the cart.
+		$incomplete_types = array();
+		foreach ( $this->get_cart_order_item_types() as $item_type ) {
+			$cart_item_ids = array_map( 'absint', (array) ( $cart_order_item_ids[ $item_type ] ?? array() ) );
+			$order_items   = $order->get_items( $item_type );
+
+			if ( array_diff( $cart_item_ids, array_keys( $order_items ) ) ) {
+				$incomplete_types[] = $item_type;
+				continue;
+			}
+
+			foreach ( array_diff( array_keys( $order_items ), $cart_item_ids ) as $item_id ) {
+				$order->remove_item( $item_id );
+			}
+		}
+
+		// Incomplete types still have to be removed when the cart check kept them; types it removed aren't removed again.
+		$matching_types = $this->remove_order_items_not_matching_cart( $order, WC()->cart, $cart_hashes );
+		foreach ( array_intersect( $matching_types, $incomplete_types ) as $item_type ) {
+			$order->remove_order_items( $item_type );
+		}
+		$kept_types = array_values( array_diff( $matching_types, $incomplete_types ) );
+
+		// Read the types directly: get_items() only finds types registered with woocommerce_order_type_to_group, so it would miss some extension items.
+		$persisted_types = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT DISTINCT order_item_type FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d",
+				$order->get_id()
+			)
+		);
+
+		// Cart item types were handled above. Their removed rows are still in the table until the order is saved.
+		foreach ( array_diff( $persisted_types, $kept_types, $this->get_cart_order_item_types() ) as $item_type ) {
+			$order->remove_order_items( $item_type );
+		}
+
+		return $kept_types;
 	}
 	/**
 	 * Add line items to the order.

@@ -838,39 +838,32 @@ class OrderController {
 		$cart_controller = new CartController();
 		$cart            = $cart_controller->get_cart_instance();
 		$cart_hashes     = $cart_controller->get_cart_hashes();
+		$checkout        = WC()->checkout();
+		$kept_types      = $checkout->remove_order_items_not_matching_cart( $order, $cart, $cart_hashes );
 
-		if ( $order->get_cart_hash() !== $cart_hashes['line_items'] ) {
+		if ( ! in_array( OrderItemType::LINE_ITEM, $kept_types, true ) ) {
 			$order->set_cart_hash( $cart_hashes['line_items'] );
-			$order->remove_order_items( OrderItemType::LINE_ITEM );
-			wc()->checkout->create_order_line_items( $order, $cart );
+			$checkout->create_order_line_items( $order, $cart );
 		}
 
-		// Shipping is evaluated after calculation, or when no shipping is needed and methods were initialized.
-		// A non-null methods value means evaluation ran; it may still be an empty array.
-		$shipping_evaluated = $cart->has_calculated_shipping() || ( ! $cart->needs_shipping() && null !== $cart->get_shipping_methods() );
-
-		if ( $shipping_evaluated && $order->get_meta( '_shipping_hash' ) !== $cart_hashes['shipping'] ) {
-			$order->remove_order_items( OrderItemType::SHIPPING );
-			wc()->checkout->create_order_shipping_lines( $order, wc()->session->get( 'chosen_shipping_methods' ), wc()->shipping()->get_packages() );
+		if ( ! in_array( OrderItemType::SHIPPING, $kept_types, true ) ) {
+			$checkout->create_order_shipping_lines( $order, wc()->session->get( 'chosen_shipping_methods' ), wc()->shipping()->get_packages() );
 			$order->update_meta_data( '_shipping_hash', $cart_hashes['shipping'] );
 		}
 
-		if ( $order->get_meta( '_coupons_hash' ) !== $cart_hashes['coupons'] ) {
-			$order->remove_order_items( OrderItemType::COUPON );
+		if ( ! in_array( OrderItemType::COUPON, $kept_types, true ) ) {
 			$order->update_meta_data( '_coupons_hash', $cart_hashes['coupons'] );
-			wc()->checkout->create_order_coupon_lines( $order, $cart );
+			$checkout->create_order_coupon_lines( $order, $cart );
 		}
 
-		if ( $order->get_meta( '_fees_hash' ) !== $cart_hashes['fees'] ) {
+		if ( ! in_array( OrderItemType::FEE, $kept_types, true ) ) {
 			$order->update_meta_data( '_fees_hash', $cart_hashes['fees'] );
-			$order->remove_order_items( OrderItemType::FEE );
-			wc()->checkout->create_order_fee_lines( $order, $cart );
+			$checkout->create_order_fee_lines( $order, $cart );
 		}
 
-		if ( $order->get_meta( '_taxes_hash' ) !== $cart_hashes['taxes'] ) {
+		if ( ! in_array( OrderItemType::TAX, $kept_types, true ) ) {
 			$order->update_meta_data( '_taxes_hash', $cart_hashes['taxes'] );
-			$order->remove_order_items( OrderItemType::TAX );
-			wc()->checkout->create_order_tax_lines( $order, $cart );
+			$checkout->create_order_tax_lines( $order, $cart );
 		}
 	}
 
