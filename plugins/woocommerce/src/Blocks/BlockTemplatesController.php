@@ -50,7 +50,7 @@ class BlockTemplatesController {
 	/**
 	 * Short-circuits rendering of `core/template-part` blocks that belong to WooCommerce (header, footer, navigation etc. are skipped).
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 * @internal
 	 *
 	 * @param string|null    $pre_render   The pre-rendered content, or null to let the block render normally.
@@ -101,7 +101,7 @@ class BlockTemplatesController {
 	 * Renders the `core/template-part` block on the server.
 	 * Introduced because the core handling for template parts only supports templates from the current theme, not from a plugin.
 	 *
-	 * @deprecated 11.3.0
+	 * @deprecated 11.4.0
 	 *
 	 * @param array $attributes The block attributes.
 	 * @return string
@@ -109,7 +109,7 @@ class BlockTemplatesController {
 	public function render_woocommerce_template_part( $attributes ) {
 		// Superseded by pre_render_woocommerce_template_part. The old approach (add_plugin_templates_parts_support) replaced
 		// the render_callback for all core/template-part blocks, not just WooCommerce ones.
-		wc_deprecated_function( __METHOD__, '11.3.0' );
+		wc_deprecated_function( __METHOD__, '11.4.0' );
 
 		if ( isset( $attributes['theme'] ) && 'woocommerce/woocommerce' === $attributes['theme'] ) {
 			$template_part = get_block_template( $attributes['theme'] . '//' . $attributes['slug'], 'wp_template_part' );
@@ -134,7 +134,7 @@ class BlockTemplatesController {
 	 * By default, the Template Part Block only supports template parts that are in the current theme directory.
 	 * This render_callback wrapper allows us to add support for plugin-housed template parts.
 	 *
-	 * @deprecated 11.3.0
+	 * @deprecated 11.4.0
 	 *
 	 * @param array $settings Array of determined settings for registering a block type.
 	 * @param array $metadata     Metadata provided for registering a block type.
@@ -142,7 +142,7 @@ class BlockTemplatesController {
 	 * @return array
 	 */
 	public function add_plugin_templates_parts_support( $settings, $metadata ) {
-		wc_deprecated_function( __METHOD__, '11.3.0' );
+		wc_deprecated_function( __METHOD__, '11.4.0' );
 
 		if (
 			isset( $metadata['name'], $settings['render_callback'] ) &&
@@ -275,13 +275,13 @@ class BlockTemplatesController {
 	/**
 	 * Run hooks on block templates. Previous was addressing https://github.com/WordPress/gutenberg/issues/71139 on WordPress 6.8 and lower.
 	 *
-	 * @deprecated 11.3.0
+	 * @deprecated 11.4.0
 	 *
 	 * @param array $templates The block templates.
 	 * @return array The block templates.
 	 */
 	public function run_hooks_on_block_templates( $templates ) {
-		wc_deprecated_function( __METHOD__, '11.3.0' );
+		wc_deprecated_function( __METHOD__, '11.4.0' );
 
 		foreach ( $templates as $template ) {
 			if ( 'plugin' === $template->source && 'woocommerce' === $template->plugin ) {
