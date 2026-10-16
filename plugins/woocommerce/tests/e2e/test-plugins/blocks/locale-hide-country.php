@@ -10,6 +10,11 @@
 
 declare(strict_types=1);
 
+// Only requests from specs that enable this plugin send the cookie.
+if ( ! isset( $_COOKIE['woocommerce-blocks-test-locale-hide-country'] ) ) {
+	return;
+}
+
 add_filter(
 	'woocommerce_get_country_locale',
 	function ( $locales ) {
