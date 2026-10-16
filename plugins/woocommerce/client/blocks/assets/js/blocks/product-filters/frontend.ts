@@ -210,9 +210,15 @@ const productFiltersStore = {
 			const dialog = root.querySelector< HTMLElement >(
 				'.wc-block-product-filters__overlay-dialog'
 			);
-			if ( dialog ) {
-				getFocusableElements( dialog )[ 0 ]?.focus();
+			if ( ! dialog ) {
+				return;
 			}
+
+			// The open class is applied on the next render. Until then the
+			// drawer is `visibility: hidden` and cannot take focus.
+			requestAnimationFrame( () => {
+				getFocusableElements( dialog )[ 0 ]?.focus();
+			} );
 		},
 		closeOverlay: () => {
 			const context = getContext< ProductFiltersContext >();
