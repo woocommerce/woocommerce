@@ -376,7 +376,18 @@ class ContractLockTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox Locks the repository builds raise no notice.
+	 * @testdox Reading a lock's state outside the engine repository gets a doing-it-wrong notice and still returns it.
+	 */
+	public function test_lock_state_outside_the_repository_is_doing_it_wrong(): void {
+		$lock = $this->acquire( $this->insert_contract() );
+
+		$this->setExpectedIncorrectUsage( ContractLock::class . '::get_state' );
+
+		$this->assertFalse( $lock->get_state()->is_released() );
+	}
+
+	/**
+	 * @testdox Locks the repository builds, and fenced writes that read their state, raise no notice.
 	 */
 	public function test_repository_locks_raise_no_notice(): void {
 		$notices = 0;
@@ -385,7 +396,15 @@ class ContractLockTest extends EngineIntegrationTestCase {
 		};
 		add_action( 'doing_it_wrong_run', $count );
 		try {
-			$this->acquire( $this->insert_contract() );
+			$id   = $this->insert_contract();
+			$lock = $this->acquire( $id );
+			$this->age_lock_trust( $lock );
+			$contract = $this->sut->find( $id );
+			$this->assertInstanceOf( Contract::class, $contract );
+			$contract->set_status( ContractStatus::ON_HOLD );
+			$this->assertTrue( $this->sut->update_fields( $contract, array( 'status' ), $lock ) );
+			$this->assertIsInt( $this->sut->add_meta( $id, 'note', 'x', false, $lock ) );
+			$lock->release();
 			$this->assertNotNull( $this->sut->insert_locked( Contract::create( array( 'extension_slug' => 'engine-tests' ) ), 'checkout' ) );
 		} finally {
 			remove_action( 'doing_it_wrong_run', $count );

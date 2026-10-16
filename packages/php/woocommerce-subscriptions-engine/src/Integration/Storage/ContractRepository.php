@@ -22,7 +22,6 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage;
 
-use Closure;
 use DateTimeImmutable;
 use DateTimeZone;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\ContractLock;
@@ -887,7 +886,7 @@ final class ContractRepository {
 	private function extend_lock( ContractLock $lock ): void {
 		global $wpdb;
 
-		$state = self::get_state_of( $lock );
+		$state = $lock->get_state();
 
 		$table      = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 		$holds_lock = self::HOLDS_LOCK;
@@ -923,7 +922,7 @@ final class ContractRepository {
 	public function release_lock( ContractLock $lock ): void {
 		global $wpdb;
 
-		$state = self::get_state_of( $lock );
+		$state = $lock->get_state();
 		if ( $state->is_released() ) {
 			return;
 		}
@@ -963,7 +962,7 @@ final class ContractRepository {
 	public function fence_children( ContractLock $lock ): void {
 		global $wpdb;
 
-		$state = self::get_state_of( $lock );
+		$state = $lock->get_state();
 		if ( $state->is_released() ) {
 			$this->throw_locked( $lock->get_contract_id() );
 		}
@@ -1057,23 +1056,6 @@ final class ContractRepository {
 	 */
 	private static function new_token(): string {
 		return bin2hex( random_bytes( 16 ) );
-	}
-
-	/**
-	 * A lock's token and trust state. Scope-bound to the lock class, so neither has a public accessor.
-	 *
-	 * @param ContractLock $lock The lock.
-	 */
-	private static function get_state_of( ContractLock $lock ): ContractLockState {
-		$reader = Closure::bind(
-			static function ( ContractLock $held ): ContractLockState {
-				return $held->state;
-			},
-			null,
-			ContractLock::class
-		);
-
-		return $reader( $lock );
 	}
 
 	/**
@@ -1994,7 +1976,7 @@ final class ContractRepository {
 				$contracts  = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 				$holds_lock = self::HOLDS_LOCK;
 				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
-				$held = null !== $wpdb->get_var( $wpdb->prepare( "SELECT 1 FROM {$contracts} WHERE id = %d AND {$holds_lock}", $contract_id, self::get_state_of( $lock )->get_token() ) );
+				$held = null !== $wpdb->get_var( $wpdb->prepare( "SELECT 1 FROM {$contracts} WHERE id = %d AND {$holds_lock}", $contract_id, $lock->get_state()->get_token() ) );
 			}
 		} catch ( \RuntimeException $e ) {
 			return;
@@ -2193,7 +2175,7 @@ final class ContractRepository {
 		$fence    = self::no_live_lock();
 		if ( null !== $lock ) {
 			$fence    = self::HOLDS_LOCK;
-			$values[] = self::get_state_of( $lock )->get_token();
+			$values[] = $lock->get_state()->get_token();
 		}
 
 		// Column names come from the entity's storage keys, never from input; every value is a placeholder.

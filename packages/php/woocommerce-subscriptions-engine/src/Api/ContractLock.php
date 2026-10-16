@@ -45,11 +45,11 @@ final class ContractLock implements Serializable {
 	private $operation;
 
 	/**
-	 * Token and trust state; the repository reads it through a scope-bound closure.
+	 * Token and trust state.
 	 *
 	 * @var ContractLockState
 	 */
-	private $state; // @phpstan-ignore property.onlyWritten
+	private $state;
 
 	/**
 	 * Take locks through {@see Contracts::lock()} or {@see Contracts::create()}. A lock built
@@ -61,9 +61,7 @@ final class ContractLock implements Serializable {
 	 * @param string $token       The stored token.
 	 */
 	public function __construct( int $contract_id, string $operation, string $token ) {
-		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace -- two frames, no arguments: only the caller's class is read.
-		$caller = debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 2 )[1]['class'] ?? '';
-		if ( ContractRepository::class !== $caller ) {
+		if ( ! self::is_called_by_repository() ) {
 			_doing_it_wrong( __METHOD__, esc_html__( 'Take a contract lock with Contracts::lock() or Contracts::create(); a lock built from a stored token bypasses the lock lifetime.', 'woocommerce-subscriptions-engine' ), '0.0.1' );
 		}
 
@@ -84,6 +82,18 @@ final class ContractLock implements Serializable {
 	 */
 	public function get_operation(): string {
 		return $this->operation;
+	}
+
+	/**
+	 * The token and trust state, engine-only: pass the lock to the `Contracts` write methods
+	 * instead. Any caller but the engine repository gets `_doing_it_wrong()`.
+	 */
+	public function get_state(): ContractLockState {
+		if ( ! self::is_called_by_repository() ) {
+			_doing_it_wrong( __METHOD__, esc_html__( 'The lock state is engine-only; pass the lock to Contracts write methods instead.', 'woocommerce-subscriptions-engine' ), '0.0.1' );
+		}
+
+		return $this->state;
 	}
 
 	/**
@@ -159,5 +169,13 @@ final class ContractLock implements Serializable {
 	 */
 	public function __clone() {
 		throw new LogicException( 'A contract lock cannot be cloned.' );
+	}
+
+	/**
+	 * Whether the caller of the public method that asks (two frames up) is the engine repository.
+	 */
+	private static function is_called_by_repository(): bool {
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_debug_backtrace -- three frames, no arguments: only the caller's class is read.
+		return ContractRepository::class === ( debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS, 3 )[2]['class'] ?? '' );
 	}
 }

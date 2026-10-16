@@ -65,7 +65,7 @@ class ContractLockTest extends TestCase {
 	}
 
 	/**
-	 * @testdox The only public methods are the constructor, the accessors, release, and the methods that refuse cloning and serialization.
+	 * @testdox The only public methods are the constructor, the accessors, the engine-only state, release, and the methods that refuse cloning and serialization.
 	 */
 	public function test_public_surface(): void {
 		$names = array();
@@ -75,7 +75,7 @@ class ContractLockTest extends TestCase {
 		sort( $names );
 
 		$this->assertSame(
-			array( '__clone', '__construct', '__debugInfo', '__serialize', '__unserialize', 'get_contract_id', 'get_operation', 'release', 'serialize', 'unserialize' ),
+			array( '__clone', '__construct', '__debugInfo', '__serialize', '__unserialize', 'get_contract_id', 'get_operation', 'get_state', 'release', 'serialize', 'unserialize' ),
 			$names
 		);
 	}
