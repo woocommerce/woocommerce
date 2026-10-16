@@ -161,6 +161,15 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 			return $extension_args;
 		}
 
+		if ( isset( $extension_args['post__not_in'] ) ) {
+			$args['exclude'] = array_merge( $args['exclude'] ?? array(), $extension_args['post__not_in'] );
+			unset( $extension_args['post__not_in'] );
+		}
+		if ( isset( $extension_args['post__in'] ) && ! empty( $args['exclude'] ) ) {
+			$include                    = array_values( array_diff( $extension_args['post__in'], $args['exclude'] ) );
+			$extension_args['post__in'] = empty( $include ) ? array( 0 ) : $include;
+		}
+
 		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
 			$args = array_merge_recursive( $args, $extension_args );
 		} else {
