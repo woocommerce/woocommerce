@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
 use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\RemoteSpecs\RemoteSpecsEngine;
 use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\StoredStateSetupForProducts;
+use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
 
 /**
  * Remote Inbox Notifications engine.
@@ -54,8 +55,8 @@ class RemoteInboxNotificationsEngine extends RemoteSpecsEngine {
 			function () {
 				$queue = WC()->queue();
 				// Custom queues, including subclasses, must retain their search overrides.
-				if ( \WC_Action_Queue::class === get_class( $queue ) && function_exists( 'as_has_scheduled_action' ) ) {
-					if ( as_has_scheduled_action( 'woocommerce_run_on_woocommerce_admin_updated', array(), 'woocommerce-remote-inbox-engine' ) ) {
+				if ( \WC_Action_Queue::class === get_class( $queue ) ) {
+					if ( ActionSchedulerUtil::has_scheduled_action( 'woocommerce_run_on_woocommerce_admin_updated', array(), 'woocommerce-remote-inbox-engine' ) ) {
 						return;
 					}
 				} else {

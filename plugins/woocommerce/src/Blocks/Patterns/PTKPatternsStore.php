@@ -2,6 +2,7 @@
 
 namespace Automattic\WooCommerce\Blocks\Patterns;
 
+use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
 use WP_Upgrader;
 
 /**
@@ -75,16 +76,11 @@ class PTKPatternsStore {
 			return;
 		}
 
-		if ( did_action( 'action_scheduler_init' ) ) {
-			as_unschedule_all_actions( self::FETCH_PATTERNS_ACTION, array(), 'woocommerce' );
-		} else {
-			add_action(
-				'action_scheduler_init',
-				function () {
-					as_unschedule_all_actions( self::FETCH_PATTERNS_ACTION, array(), 'woocommerce' );
-				}
-			);
-		}
+		ActionSchedulerUtil::when_ready(
+			function () {
+				as_unschedule_all_actions( self::FETCH_PATTERNS_ACTION, array(), 'woocommerce' );
+			}
+		);
 	}
 
 	/**

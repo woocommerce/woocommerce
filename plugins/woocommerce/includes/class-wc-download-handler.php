@@ -10,6 +10,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Enums\ActionSchedulerFeature;
+use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
 use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
 
 /**
@@ -1043,7 +1045,7 @@ class WC_Download_Handler {
 	 * @param bool                     $defer           If tracking the download should be deferred.
 	 *
 	 * @return void
-	 * @throws Exception If the active version of Action Scheduler is less than 3.6.0.
+	 * @throws Exception If the loaded Action Scheduler cannot schedule unique actions matched on their args; caught and logged below.
 	 *
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
@@ -1074,13 +1076,14 @@ class WC_Download_Handler {
 			 */
 			$window = absint( apply_filters( 'woocommerce_partial_download_tracking_window', 30 * MINUTE_IN_SECONDS, $download->get_id() ) );
 
-			// If we do not have Action Scheduler 3.6.0+ (this would be an unexpected scenario) then we cannot
-			// track partial downloads, because we require support for unique actions.
-			if ( version_compare( ActionScheduler_Versions::instance()->latest_version(), '3.6.0', '<' ) ) {
+			// Each download, user and IP gets one unique action matched on those args. A loaded Action Scheduler
+			// without that (before 4.0.0, an unexpected scenario) would collapse different downloads into one action,
+			// and an emulated uniqueness check could double-count concurrent range requests, so refuse to track instead.
+			if ( ! ActionSchedulerUtil::supports( ActionSchedulerFeature::UNIQUE_ARGS ) ) {
 				throw new Exception( 'Support for unique scheduled actions is not currently available.' );
 			}
 
-			as_schedule_single_action(
+			ActionSchedulerUtil::schedule_single(
 				time() + $window,
 				self::TRACK_DOWNLOAD_CALLBACK,
 				array(
