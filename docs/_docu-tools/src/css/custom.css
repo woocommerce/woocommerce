@@ -124,6 +124,10 @@ h1, h2, h3, h4, h5, h6,
   padding-left: 0;
 }
 
+.markdown img {
+  border-radius: 8px;
+}
+
 .markdown ol > li {
   counter-increment: item;
   position: relative;
