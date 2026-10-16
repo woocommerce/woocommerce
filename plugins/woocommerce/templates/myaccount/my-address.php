@@ -85,7 +85,7 @@ $copyable_from = array(
 		</header>
 		<?php if ( $can_copy ) : ?>
 			<p class="woocommerce-Address-copy">
-				<a href="<?php echo esc_url( WC_Form_Handler::get_copy_address_url( $name ) ); ?>" class="copy">
+				<a href="<?php echo esc_url( WC_Form_Handler::get_copy_address_url( $name ) ); ?>" class="copy no-prefetch" rel="nofollow">
 					<?php
 						/* translators: %s: Address title of the address being copied, e.g. "Billing address" */
 						printf( esc_html__( 'Copy %s', 'woocommerce' ), esc_html( $get_addresses[ $copy_source ] ) );

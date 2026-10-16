@@ -636,6 +636,33 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox copy_address() refuses a $header prefetch request so a hovered link does not copy the address.
+	 *
+	 * @testWith ["HTTP_SEC_PURPOSE", "prefetch"]
+	 *           ["HTTP_SEC_PURPOSE", "prefetch;prerender"]
+	 *           ["HTTP_PURPOSE", "prefetch"]
+	 *           ["HTTP_X_MOZ", "prefetch"]
+	 * @covers WC_Form_Handler::copy_address()
+	 *
+	 * @param string $header Server variable of the request header.
+	 * @param string $value  Header value.
+	 */
+	public function test_copy_address_rejects_prefetch_request( string $header, string $value ): void {
+		$customer = $this->create_customer_with_address( 'billing' );
+		$this->prepare_copy_address_request( 'shipping' );
+		$_SERVER[ $header ] = $value;
+
+		try {
+			WC_Form_Handler::copy_address();
+			$this->fail( 'Expected copy_address() to stop a prefetch request.' );
+		} catch ( WPDieException $e ) {
+			$this->assertSame( '', ( new WC_Customer( $customer->get_id() ) )->get_shipping_address_1(), 'A prefetch request should not copy the address.' );
+		} finally {
+			unset( $_SERVER[ $header ] );
+		}
+	}
+
+	/**
 	 * @testdox copy_address() does nothing for a logged-out visitor.
 	 *
 	 * @covers WC_Form_Handler::copy_address()

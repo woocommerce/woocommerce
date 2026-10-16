@@ -412,6 +412,13 @@ class WC_Form_Handler {
 
 		wc_nocache_headers();
 
+		// Browsers and link preloaders mark prefetch requests with these headers. A non-2xx response makes them discard it.
+		$purpose = wc_clean( wp_unslash( $_SERVER['HTTP_SEC_PURPOSE'] ?? $_SERVER['HTTP_PURPOSE'] ?? $_SERVER['HTTP_X_PURPOSE'] ?? $_SERVER['HTTP_X_MOZ'] ?? '' ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitized with wc_clean().
+
+		if ( is_string( $purpose ) && false !== stripos( $purpose, 'prefetch' ) ) {
+			wp_die( esc_html__( 'The address could not be copied. Please try again.', 'woocommerce' ), '', array( 'response' => 503 ) );
+		}
+
 		$target_type  = sanitize_key( wp_unslash( $_GET['copy-address'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- The nonce is verified below.
 		$source_types = array(
 			'billing'  => 'shipping',
