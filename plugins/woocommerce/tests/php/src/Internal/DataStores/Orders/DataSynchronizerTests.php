@@ -279,16 +279,23 @@ class DataSynchronizerTests extends \HposTestCase {
 	}
 
 	/**
-	 * @testdox When HPOS is authoritative and sync is disabled, deleting the placeholder post of an existing order is prevented and the order keeps its items.
+	 * @testdox When HPOS is authoritative and sync is disabled, deleting a post with the ID of an existing order is prevented and the order keeps its items.
+	 *
+	 * @testWith ["shop_order_placehold"]
+	 *           ["post"]
+	 *
+	 * @param string $post_type Post type of the post sharing the order's ID.
 	 */
-	public function test_placeholder_post_deletion_is_prevented_while_order_exists_in_hpos(): void {
+	public function test_post_deletion_is_prevented_while_order_exists_in_hpos( string $post_type ): void {
 		global $wpdb;
 
 		$this->toggle_cot_authoritative( true );
 		$this->disable_cot_sync();
 
 		$order_id = OrderHelper::create_order()->get_id();
-		$this->assertSame( DataSynchronizer::PLACEHOLDER_ORDER_POST_TYPE, get_post_type( $order_id ) );
+		$wpdb->update( $wpdb->posts, array( 'post_type' => $post_type ), array( 'ID' => $order_id ) );
+		clean_post_cache( $order_id );
+		$this->assertSame( $post_type, get_post_type( $order_id ) );
 
 		$count_items_query = $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d", $order_id );
 		$items_before      = (int) $wpdb->get_var( $count_items_query ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
@@ -296,8 +303,8 @@ class DataSynchronizerTests extends \HposTestCase {
 
 		$result = wp_delete_post( $order_id, true );
 
-		$this->assertFalse( $result, 'Deleting the placeholder post of an existing order should fail.' );
-		$this->assertSame( DataSynchronizer::PLACEHOLDER_ORDER_POST_TYPE, get_post_type( $order_id ), 'The placeholder post should still exist.' );
+		$this->assertFalse( $result, 'Deleting the post should fail.' );
+		$this->assertSame( $post_type, get_post_type( $order_id ), 'The post should still exist.' );
 		$this->assertSame( $items_before, (int) $wpdb->get_var( $count_items_query ), 'The order should keep its items.' ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 	}
 
