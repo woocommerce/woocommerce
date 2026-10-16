@@ -705,6 +705,9 @@ class WC_Checkout {
 	/**
 	 * Whether an order's line items have the same products, quantities and amounts as the cart's items.
 	 *
+	 * Tax amounts aren't compared: recalculating the order's totals recalculates item taxes, which can then differ
+	 * slightly from the cart's, for example when prices include tax and tax is rounded at subtotal.
+	 *
 	 * @param WC_Order_Item[] $line_items The order's line items.
 	 * @param WC_Cart         $cart       The cart.
 	 * @return bool
@@ -715,12 +718,12 @@ class WC_Checkout {
 			if ( ! $item instanceof WC_Order_Item_Product ) {
 				return false;
 			}
-			$order_values[] = $this->get_line_item_values( $item->get_product_id(), $item->get_variation_id(), $item->get_quantity(), $item->get_subtotal(), $item->get_subtotal_tax(), $item->get_total(), $item->get_total_tax() );
+			$order_values[] = $this->get_line_item_values( $item->get_product_id(), $item->get_variation_id(), $item->get_quantity(), $item->get_subtotal(), $item->get_total() );
 		}
 
 		$cart_values = array();
 		foreach ( $cart->get_cart() as $values ) {
-			$cart_values[] = $this->get_line_item_values( $values['product_id'] ?? 0, $values['variation_id'] ?? 0, $values['quantity'] ?? 0, $values['line_subtotal'] ?? 0, $values['line_subtotal_tax'] ?? 0, $values['line_total'] ?? 0, $values['line_tax'] ?? 0 );
+			$cart_values[] = $this->get_line_item_values( $values['product_id'] ?? 0, $values['variation_id'] ?? 0, $values['quantity'] ?? 0, $values['line_subtotal'] ?? 0, $values['line_total'] ?? 0 );
 		}
 
 		sort( $order_values );
@@ -732,7 +735,7 @@ class WC_Checkout {
 	/**
 	 * Joins a line item's product, quantity and amounts into one string, rounded so order and cart values compare equal.
 	 *
-	 * @param int|float|string ...$values Product ID, variation ID, quantity, subtotal, subtotal tax, total and total tax.
+	 * @param int|float|string ...$values Product ID, variation ID, quantity, subtotal and total.
 	 * @return string
 	 */
 	private function get_line_item_values( ...$values ): string {

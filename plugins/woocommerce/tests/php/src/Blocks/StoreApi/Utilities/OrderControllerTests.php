@@ -525,6 +525,46 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox update_order_from_cart() keeps line items when prices include tax and tax is rounded at subtotal.
+	 *
+	 * @testWith ["7.2500", "12.34"]
+	 *           ["8.8750", "23.45"]
+	 *
+	 * @param string $tax_rate The tax rate percentage.
+	 * @param string $price    The product price, including tax.
+	 */
+	public function test_update_order_from_cart_keeps_line_items_with_prices_including_tax_rounded_at_subtotal( string $tax_rate, string $price ): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_tax_round_at_subtotal', 'yes' );
+		\WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate'          => $tax_rate,
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => $price ) );
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id() );
+		WC()->cart->calculate_totals();
+		// create_order_from_cart() recalculates the order totals, which recalculates the item taxes without rounding.
+		$order           = $this->sut->create_order_from_cart();
+		$line_item_ids   = array_keys( $order->get_items() );
+		$line_item_calls = did_action( 'woocommerce_checkout_create_order_line_item' );
+
+		$this->sut->update_order_from_cart( $order );
+
+		$this->assertSame( $line_item_ids, array_keys( $order->get_items() ), 'The line items should be kept.' );
+		$this->assertSame( $line_item_calls, did_action( 'woocommerce_checkout_create_order_line_item' ), 'The line items should not be created again.' );
+	}
+
+	/**
 	 * Helper method to set shipping address on an order.
 	 *
 	 * @param \WC_Order $order Order object.
