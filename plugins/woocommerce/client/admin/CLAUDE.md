@@ -490,18 +490,12 @@ Coverage reports help identify untested code paths.
 
 ### Extension Development
 
-The `docs/examples/extensions/` directory contains examples for:
+Report, task, dashboard section, SQL and table column examples are `@woocommerce/create-woo-extension` variants (`packages/js/create-woo-extension/`).
 
-- Adding custom reports
-- Creating inbox notifications
-- Adding dashboard sections
-- Creating custom tasks
-- Modifying tables and columns
-
-To build examples:
+`docs/examples/extensions/` holds a few smaller examples. Build one by naming its directory in `WC_EXT`; see `docs/examples/extensions/README.md`:
 
 ```bash
-pnpm run example
+WC_EXT=simple-inbox-note pnpm run example
 ```
 
 ### Changelog Management
