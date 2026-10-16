@@ -203,9 +203,10 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 		$this->sut->handle_shutdown();
 
 		$this->assertSame( 200, $response->get_status(), 'The ability should run through REST' );
-		$this->assertCount( 1, $this->sut->recorded, 'The direct call after the REST request is not a REST call' );
+		$this->assertCount( 2, $this->sut->recorded );
 		$this->assertSame( 'rest', $this->sut->recorded[0]['channel'] );
 		$this->assertSame( 'success', $this->sut->recorded[0]['outcome'] );
+		$this->assertSame( 'php', $this->sut->recorded[1]['channel'], 'The direct call after the REST request is not a REST call' );
 	}
 
 	/**
@@ -362,13 +363,15 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should not record direct PHP calls.
+	 * @testdox Should record direct PHP calls as the php channel.
 	 */
-	public function test_ignores_direct_php_calls(): void {
+	public function test_records_direct_php_calls(): void {
 		wp_get_ability( self::ABILITY_ID )->execute();
 		$this->sut->handle_shutdown();
 
-		$this->assertSame( array(), $this->sut->recorded );
+		$this->assertCount( 1, $this->sut->recorded );
+		$this->assertSame( 'php', $this->sut->recorded[0]['channel'] );
+		$this->assertSame( 'none', $this->sut->recorded[0]['external_client'] );
 	}
 
 	/**

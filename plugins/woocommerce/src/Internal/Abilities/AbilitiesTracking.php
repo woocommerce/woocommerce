@@ -63,7 +63,7 @@ class AbilitiesTracking {
 	/**
 	 * Open ability invocations, innermost last.
 	 *
-	 * @var array<int, array{name: string, channel: ?string, start: float, executing: bool}>
+	 * @var array<int, array{name: string, channel: string, start: float, executing: bool}>
 	 */
 	private array $frames = array();
 
@@ -414,12 +414,12 @@ class AbilitiesTracking {
 	/**
 	 * Turn a finished invocation into event properties.
 	 *
-	 * @param array{name: string, channel: ?string, start: float, executing: bool} $frame        The invocation.
-	 * @param true|WP_Error|null                                                   $outcome      True for success, a WP_Error for a known failure, null for an unknown failure.
-	 * @param bool                                                                 $has_duration Whether the duration is known.
+	 * @param array{name: string, channel: string, start: float, executing: bool} $frame        The invocation.
+	 * @param true|WP_Error|null                                                  $outcome      True for success, a WP_Error for a known failure, null for an unknown failure.
+	 * @param bool                                                                $has_duration Whether the duration is known.
 	 */
 	private function add_event( array $frame, $outcome, bool $has_duration ): void {
-		if ( null === $frame['channel'] || count( $this->events ) >= self::MAX_EVENTS_PER_REQUEST ) {
+		if ( count( $this->events ) >= self::MAX_EVENTS_PER_REQUEST ) {
 			return;
 		}
 
@@ -446,18 +446,24 @@ class AbilitiesTracking {
 	}
 
 	/**
-	 * Identify how the ability was invoked, or null when the caller is not tracked.
+	 * Identify how the ability was invoked.
 	 *
-	 * @return string|null
+	 * @return string
 	 */
-	private function get_channel(): ?string {
+	private function get_channel(): string {
 		if ( $this->is_mcp_request ) {
 			return 'mcp';
 		}
 		if ( $this->in_abilities_rest_run ) {
 			return 'rest';
 		}
-		return null;
+		if ( defined( 'WP_CLI' ) && WP_CLI ) {
+			return 'cli';
+		}
+		if ( wp_doing_cron() ) {
+			return 'cron';
+		}
+		return 'php';
 	}
 
 	/**
