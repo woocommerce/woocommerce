@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep items added to the cart when another request from the same shopper finishes later, instead of losing them.
