@@ -110,6 +110,7 @@ class ProductFilters extends AbstractBlock {
 	:where(.wc-block-product-filters).is-mobile-overlay .wc-block-product-filters__overlay {
 		position: relative;
 		pointer-events: auto;
+		visibility: visible;
 		inset: 0;
 		z-index: auto;
 		background: inherit;
