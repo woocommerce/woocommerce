@@ -710,10 +710,9 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	/**
 	 * Parse the "date on sale to" field from a CSV.
 	 *
-	 * A bare calendar day, with or without a leading weekday name ("Monday, January 26, 2099"
-	 * as exported by Excel), becomes the end of that day (23:59:59), matching the product edit
-	 * screen. A value that already carries a time, or a relative expression such as "now",
-	 * is left as the caller wrote it.
+	 * A date-only value becomes the end of that day (23:59:59), matching the product edit
+	 * screen. Values with a time, a timezone, a Unix timestamp or a relative expression are
+	 * left as written.
 	 *
 	 * @since 11.3.0
 	 *
@@ -728,17 +727,11 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			return null;
 		}
 
-		// date_parse() reports a weekday-prefixed day ("Monday, January 26, 2099") with hour 0
-		// and a relative weekday, same as if a midnight time were written, so the weekday is
-		// stripped before probing. strtotime() only knows English weekday names, so the same
-		// applies here. The probe is only used for classification: the result below is rebuilt
-		// from the parsed day, which also avoids PHP moving the date to the next matching weekday.
+		// date_parse() reports hour=0 for "Monday, January 26, 2099", so strip the weekday before probing.
 		$probe = (string) preg_replace( '/^(?:mon|tue(?:s)?|wed(?:nes)?|thu(?:rs)?|fri|sat(?:ur)?|sun)(?:day)?\.?,?\s+/i', '', $parsed );
 		$date  = date_parse( $probe );
 
-		// date_parse() reports an hour for every timed format strtotime() understands, not
-		// just "10:00", flags relative expressions separately, and sets is_localtime when the
-		// value carries a timezone ("2099-01-26Z"), which also makes it a point in time.
+		// Date-only input reports hour === false; a time, a timezone (is_localtime) or a relative expression does not.
 		if (
 			false === $date['year'] || false === $date['month'] || false === $date['day']
 			|| false !== $date['hour'] || isset( $date['relative'] ) || ! empty( $date['is_localtime'] )
@@ -746,7 +739,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			return $parsed;
 		}
 
-		// Built from the parsed day, not a timestamp round-trip, so no timezone can move it.
+		// Built from Y/M/D, not a timestamp, so no offset can move the day.
 		return sprintf( '%04d-%02d-%02d 23:59:59', $date['year'], $date['month'], $date['day'] );
 	}
 

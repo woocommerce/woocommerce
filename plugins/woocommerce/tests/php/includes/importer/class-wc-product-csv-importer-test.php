@@ -1761,7 +1761,6 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 
 		$this->assertSame( '2099-01-26 10:30:00', $importer->parse_date_on_sale_to_field( '2099-01-26 10:30:00' ) );
 		$this->assertSame( '2099-01-26 10:30', $importer->parse_date_on_sale_to_field( '2099-01-26 10:30' ) );
-		// Also the exact format this importer emits for Unix timestamps.
 		$this->assertSame( '2099-01-26T10:30:00Z', $importer->parse_date_on_sale_to_field( '2099-01-26T10:30:00Z' ) );
 	}
 
@@ -1777,7 +1776,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox "date on sale to" values with a colonless time component are preserved (detection is via date_parse(), not a colon regex).
+	 * @testdox "date on sale to" values with a colonless time component are preserved.
 	 */
 	public function test_parse_date_on_sale_to_field_preserves_colonless_time_component() {
 		$csv_file = __DIR__ . '/sample.csv';
@@ -1786,7 +1785,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( '20990126T103000', $importer->parse_date_on_sale_to_field( '20990126T103000' ) );
 		$this->assertSame( 'January 26, 2099 10am', $importer->parse_date_on_sale_to_field( 'January 26, 2099 10am' ) );
 		$this->assertSame( '2099-01-26 10.30', $importer->parse_date_on_sale_to_field( '2099-01-26 10.30' ) );
-		// Epoch syntax parses as a relative expression, not a bare calendar day.
+		// Epoch syntax parses as a relative expression.
 		$this->assertSame( '@4073068800', $importer->parse_date_on_sale_to_field( '@4073068800' ) );
 	}
 
@@ -1865,7 +1864,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	 * @testdox Importing a CSV with a date-only "date sale price ends" stores end-of-day, matching admin (#35321).
 	 */
 	public function test_import_date_on_sale_to_date_only_is_end_of_day() {
-		// A non-UTC zone so any drift in the parse → set_date_prop → meta round trip shows up below.
+		// Non-UTC zone so any day drift shows up.
 		update_option( 'timezone_string', 'Pacific/Auckland' );
 
 		$product = WC_Helper_Product::create_simple_product();
@@ -1919,7 +1918,6 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 
 		$this->assertNotNull( $date_to, 'date_on_sale_to should be set' );
 		$this->assertNotNull( $date_from, 'date_on_sale_from should be set' );
-		// WC_DateTime::date() renders site-local, so these assert admin-parity values, not UTC.
 		$this->assertSame( '23:59:59', $date_to->date( 'H:i:s' ), 'date_on_sale_to should be end-of-day (site-local) to match admin' );
 		$this->assertSame( '2099-01-26', $date_to->date( 'Y-m-d' ), 'date_on_sale_to calendar day must not drift in a non-UTC site timezone' );
 		$this->assertSame( '00:00:00', $date_from->date( 'H:i:s' ), 'date_on_sale_from should remain start-of-day' );
@@ -1945,7 +1943,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Re-importing the same CSV is idempotent: the sale-end timestamp is unchanged, the end-of-day bump does not compound, and no duplicate scheduled actions pile up.
+	 * @testdox Re-importing the same CSV leaves the sale-end timestamp and the pending end-sale action unchanged.
 	 */
 	public function test_import_date_on_sale_to_reimport_is_idempotent() {
 		$product = WC_Helper_Product::create_simple_product();
@@ -2003,7 +2001,6 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$first_timestamp = $first->getTimestamp();
 		$this->assertCount( 1, $pending_end_actions(), 'exactly one pending end-sale action after the first import' );
 
-		// The parser reads the raw CSV value again, never the stored one, so nothing changes.
 		$make_importer()->import();
 		$second = wc_get_product( $product->get_id() )->get_date_on_sale_to();
 
@@ -2016,13 +2013,13 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The first re-import after upgrading to the end-of-day behaviour is not a no-op: it moves a pre-upgrade midnight value to 23:59:59 and reschedules the sale-end action (#35321).
+	 * @testdox Re-importing a date-only value stored as midnight before the fix moves it to 23:59:59 and reschedules the end-sale action (#35321).
 	 */
 	public function test_import_date_on_sale_to_first_reimport_after_upgrade_is_not_a_noop() {
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_sku( 'issue-35321-upgrade-sku' );
 		$product->set_regular_price( '10.00' );
-		// Midnight is what the pre-#35321 callback stored for a date-only value.
+		// Midnight is what the importer stored for a date-only value before the fix.
 		$product->set_date_on_sale_to( '2099-01-26 00:00:00' );
 		$product->save();
 
