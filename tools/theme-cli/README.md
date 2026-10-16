@@ -4,16 +4,15 @@
 
 ## Setup
 
-Use the monorepo's Node and pnpm versions. Validation runs WordPress Theme Check in Docker, so Docker must be running. PHP and Composer are only needed for changelog commands.
+Use the monorepo's Node and pnpm versions. PHP and Composer are required for PHP validation and changelog commands. Validation runs WordPress Theme Check in Docker, so Docker must be running.
 
 Run these commands from the repository root:
 
 ```bash
 pnpm install
-
-# Only needed for changelog commands.
-composer install --working-dir=tools/theme-cli
 ```
+
+The theme CLI's postinstall command installs its shared Composer dependencies, including PHPCS and WordPress Coding Standards.
 
 ## Validation
 
@@ -31,6 +30,10 @@ pnpm --filter=@woocommerce/theme-cli validate --all
 pnpm --filter=@woocommerce/theme-cli validate --all --fix
 ```
 
+
+Validation runs from the theme directory and discovers its ESLint, Stylelint, and Markdownlint configuration. Each theme's lint and Prettier configurations inherit defaults directly from the repository root. ESLint uses the theme's Prettier configuration for JavaScript formatting. Keep theme-specific settings, such as the text domain and block template formatting, in the theme's configuration files so editors and validation use the same settings.
+
+PHP validation runs the theme's `composer run-script phpcs` command, which uses its `phpcs.xml.dist` ruleset with the shared PHPCS installation. Purple's ruleset follows its [existing WordPress Coding Standards configuration](https://github.com/woocommerce/woo-themes/blob/trunk/purple/phpcs.xml.dist). With `--fix`, `composer run-script phpcbf` applies supported fixes before PHPCS checks the result.
 
 ## Local environments
 
@@ -57,4 +60,4 @@ Theme content checks belong to `validate`; `build` creates the ZIP with wp-scrip
 
 ## Adding a theme
 
-Add a standalone block theme under `themes/<slug>/`, preserving its licenses and using the slug as its text domain. Run validation with that slug, and add a changelog fragment to that theme's `changelog/` directory. Register the theme explicitly in `pnpm-workspace.yaml`; a wildcard is not required.
+Add a standalone block theme under `themes/<slug>/`, preserving its licenses and using the slug as its text domain. Add `eslint.config.mjs`, `stylelint.config.mjs`, `.markdownlint.json`, and `prettier.config.mjs` that inherit the repository root configurations. Add `phpcs.xml.dist` and Composer scripts for `phpcs` and `phpcbf`, following Purple's example and setting the theme's text domain and minimum WordPress version. Run validation with that slug, and add a changelog fragment to that theme's `changelog/` directory. Register the theme explicitly in `pnpm-workspace.yaml`; a wildcard is not required.

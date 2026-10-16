@@ -14,7 +14,7 @@ export async function runThemeCheck( slug ) {
 			'theme-check',
 			'run',
 			slug,
-			'--exec=WP_CLI::add_hook( "after_wp_load", fn() => add_filter( "theme_scandir_exclusions", fn( $excluded ) => array_merge( $excluded, [ "artifacts", "composer.json", "composer.lock", "package.json" ] ) ) );',
+			'--exec=WP_CLI::add_hook( "after_wp_load", fn() => add_filter( "theme_scandir_exclusions", fn( $excluded ) => array_merge( $excluded, [ "artifacts", "composer.json", "composer.lock", "package.json", "phpcs.xml.dist" ] ) ) );',
 		] );
 	} finally {
 		if ( ( await run( [ 'stop' ] ) ) !== 0 ) {

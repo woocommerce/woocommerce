@@ -1,17 +1,13 @@
-import path from 'node:path';
 import { runThemeCheck } from './theme-check.mjs';
 import {
 	discoverThemes,
 	getThemeDirectory,
 	isMain,
 	runCommand,
-	toolingRoot,
 } from './theme-utils.mjs';
 
-const repositoryRoot = path.resolve( toolingRoot, '../..' );
-
 /**
- * Lint a theme's JavaScript, CSS, and Markdown, then run WordPress Theme Check
+ * Lint a theme's JavaScript, CSS, Markdown, and PHP, then run WordPress Theme Check
  * in a separate Docker environment.
  *
  */
@@ -19,30 +15,9 @@ export async function validateTheme( slug, fix = false ) {
 	process.stdout.write( `Validating ${ slug }\n` );
 	const directory = await getThemeDirectory( slug );
 	const checks = [
-		[
-			'lint-js',
-			'.',
-			'--config',
-			path.join( repositoryRoot, 'eslint.config.mjs' ),
-			'--no-error-on-unmatched-pattern',
-			'--rule',
-			JSON.stringify( {
-				'@wordpress/i18n-text-domain': [
-					'error',
-					{ allowedTextDomain: slug },
-				],
-			} ),
-		],
-		[
-			'lint-style',
-			'--config',
-			path.join( repositoryRoot, 'stylelint.config.cjs' ),
-		],
-		[
-			'lint-md-docs',
-			'--config',
-			path.join( repositoryRoot, '.markdownlint.json' ),
-		],
+		[ 'lint-js', '.', '--no-error-on-unmatched-pattern' ],
+		[ 'lint-style' ],
+		[ 'lint-md-docs' ],
 	];
 	let status = 0;
 	for ( const check of checks ) {
@@ -54,6 +29,14 @@ export async function validateTheme( slug, fix = false ) {
 		if ( checkStatus !== 0 ) {
 			status = 1;
 		}
+	}
+	const runPHP = ( script ) =>
+		runCommand( 'composer', [ 'run-script', script ], {
+			cwd: directory,
+		} );
+	const fixStatus = fix ? runPHP( 'phpcbf' ) : 0;
+	if ( fixStatus > 1 || runPHP( 'phpcs' ) !== 0 ) {
+		status = 1;
 	}
 	const themeCheckStatus = await runThemeCheck( slug );
 	return status === 0 && themeCheckStatus === 0 ? 0 : 1;

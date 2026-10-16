@@ -4,9 +4,14 @@
 	"type": "project",
 	"license": "GPL-2.0-or-later",
 	"require-dev": {
-		"automattic/jetpack-changelogger": "3.3.0"
+		"automattic/jetpack-changelogger": "3.3.0",
+		"dealerdirect/phpcodesniffer-composer-installer": "^1.1",
+		"wp-coding-standards/wpcs": "^3.3"
 	},
 	"config": {
+		"allow-plugins": {
+			"dealerdirect/phpcodesniffer-composer-installer": true
+		},
 		"platform": {
 			"php": "7.4"
 		},

@@ -33,16 +33,13 @@
 	},
 	"config": {
 		"ci": {
-			"tests": [
-				{
-					"name": "Theme validation",
-					"command": "validate",
-					"changes": "**/*",
-					"events": [
-						"pull_request"
-					]
-				}
-			]
+			"lint": {
+				"command": "validate",
+				"changes": "**/*",
+				"events": [
+					"pull_request"
+				]
+			}
 		}
 	}
 }

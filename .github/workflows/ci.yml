@@ -209,7 +209,7 @@ jobs:
         with:
           install: '${{ matrix.projectName }}...'
           pull-package-deps: '${{ matrix.projectName }}'
-          php-version:  ${{ ( ( matrix.projectName == '@woocommerce/plugin-woocommerce' && '7.4' ) || 'false' ) }}
+          php-version:  ${{ ( matrix.projectName == '@woocommerce/plugin-woocommerce' && '7.4' ) || ( startsWith( matrix.projectName, '@woocommerce/theme-' ) && '8.1' ) || 'false' }}
           # cs2pr turns the PHPCS checkstyle report into inline annotations in the
           # 'Lint: PHP inline annotations' step; installed here alongside PHP (and
           # only where PHP installs) rather than in a second setup-php invocation.
