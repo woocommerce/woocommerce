@@ -47,9 +47,9 @@ final class ContractRepository {
 	private const LOG_SOURCE = 'woocommerce-subscriptions-engine';
 
 	/**
-	 * Operation label of the lock the engine takes around a multi-statement write made without one.
+	 * Operation label of the lock the engine takes around an unlocked contract update.
 	 */
-	private const INTERNAL_LOCK_OPERATION = 'subscriptions_engine';
+	private const INTERNAL_LOCK_OPERATION = 'engine_contract_update';
 
 	/**
 	 * The contract columns every contract read selects: the row plus whether its lock is live
