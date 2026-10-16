@@ -1701,7 +1701,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$data_store = $coupon->get_data_store();
 
 		// Check specific for guest checkouts here as well since WC_Cart handles that separately in check_customer_coupons.
-		if ( $data_store && 0 === $this->get_customer_id() ) {
+		// Order types without a customer ID are treated as guests.
+		$customer_id = is_callable( array( $this, 'get_customer_id' ) ) ? $this->get_customer_id() : 0;
+		if ( $data_store && 0 === $customer_id && is_callable( array( $this, 'get_billing_email' ) ) ) {
 			$usage_count = $data_store->get_usage_by_email( $coupon, $this->get_billing_email() );
 			if ( 0 < $coupon->get_usage_limit_per_user() && $usage_count >= $coupon->get_usage_limit_per_user() ) {
 				return new WP_Error(
@@ -1733,12 +1735,18 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		// Record usage so counts and validation is correct.
 		$used_by = $this->get_user_id();
 
-		if ( ! $used_by ) {
+		if ( ! $used_by && is_callable( array( $this, 'get_billing_email' ) ) ) {
 			$used_by = $this->get_billing_email();
 		}
 
+		/**
+		 * Data store wrapper.
+		 *
+		 * @var WC_Data_Store $order_data_store
+		 */
 		$order_data_store = $this->get_data_store();
-		if ( $order_data_store->get_recorded_coupon_usage_counts( $this ) ) {
+		// @phpstan-ignore-next-line method.notFound (Guarded by has_callable() and called via __call() on the underlying order data store instance.)
+		if ( $order_data_store->has_callable( 'get_recorded_coupon_usage_counts' ) && $order_data_store->get_recorded_coupon_usage_counts( $this ) ) {
 			$coupon->increase_usage_count( $used_by );
 		}
 

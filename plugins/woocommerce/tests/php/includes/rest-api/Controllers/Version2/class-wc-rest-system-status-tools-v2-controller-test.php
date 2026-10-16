@@ -1,5 +1,7 @@
 <?php
 
+use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\Query as OrdersStatsQuery;
+
 /**
  * Class WC_REST_System_Status_Tools_V2_Controller.
  */
@@ -144,6 +146,62 @@ class WC_REST_System_Status_Tools_V2_Controller_Test extends WC_REST_Unit_Test_C
 		// Verify the woocommerce-attributes cache group was invalidated by checking that the prefix changed.
 		$prefix_after = WC_Cache_Helper::get_cache_prefix( 'woocommerce-attributes' );
 		$this->assertNotEquals( $prefix_before, $prefix_after, 'Cache prefix should have changed after invalidation' );
+	}
+
+	/**
+	 * @testdox Clear transients tool deletes the per-product, product shortcode and report transients, and keeps other transients.
+	 */
+	public function test_execute_tool_clear_transients_deletes_transients_of_every_product() {
+		wp_set_current_user( $this->user );
+
+		$product    = WC_Helper_Product::create_variation_product();
+		$product_id = $product->get_id();
+		$product->get_variation_prices();
+		$product->child_has_weight();
+		$product->child_has_dimensions();
+		wc_get_related_products( $product_id );
+		do_shortcode( '[products]' );
+		( new OrdersStatsQuery( array() ) )->get_data();
+		set_transient( 'wc_facebook_test', 'kept', DAY_IN_SECONDS );
+		set_transient( 'other_plugin_cache', 'kept', DAY_IN_SECONDS );
+
+		$core_transients = array(
+			'wc_var_prices_' . $product_id,
+			'wc_product_children_' . $product_id,
+			'wc_child_has_weight_' . $product_id,
+			'wc_child_has_dimensions_' . $product_id,
+			'wc_related_' . $product_id,
+			'wc_product_loop_',
+			'wc_report_orders_stats_',
+		);
+		foreach ( $core_transients as $name ) {
+			$this->assertNotEmpty( $this->get_option_names_starting_with( '_transient_' . $name ), "Arrange should create the $name transient" );
+			$this->assertNotEmpty( $this->get_option_names_starting_with( '_transient_timeout_' . $name ), "Arrange should create the $name transient timeout" );
+		}
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'PUT', '/wc/v2/system_status/tools/clear_transients' ) );
+
+		$this->assertTrue( $response->get_data()['success'], 'The tool should report success' );
+		foreach ( $core_transients as $name ) {
+			$this->assertSame( array(), $this->get_option_names_starting_with( '_transient_' . $name ), "The $name transient should be deleted" );
+			$this->assertSame( array(), $this->get_option_names_starting_with( '_transient_timeout_' . $name ), "The $name transient timeout should be deleted" );
+		}
+		foreach ( array( 'wc_facebook_test', 'other_plugin_cache' ) as $name ) {
+			$this->assertSame( array( "_transient_$name" ), $this->get_option_names_starting_with( "_transient_$name" ), "Another plugin's $name transient should be kept" );
+			$this->assertSame( array( "_transient_timeout_$name" ), $this->get_option_names_starting_with( "_transient_timeout_$name" ), "Another plugin's $name transient timeout should be kept" );
+		}
+	}
+
+	/**
+	 * Get the names of the rows in the options table whose name starts with a given string.
+	 *
+	 * @param string $prefix Start of the option name.
+	 * @return string[] Matching option names.
+	 */
+	private function get_option_names_starting_with( string $prefix ): array {
+		global $wpdb;
+
+		return $wpdb->get_col( $wpdb->prepare( "SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s", $wpdb->esc_like( $prefix ) . '%' ) );
 	}
 
 	/**

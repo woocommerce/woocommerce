@@ -4,8 +4,8 @@
  * `(contract_id, kind)` with counters derived from its rows (not a stored entity).
  *
  * An immutable billing record frozen at billing (snapshot references, period
- * boundaries, `expected_total`); only `status`, `order_id`, and `reason` may change
- * afterwards. The `count` is the chargeable number and idempotency anchor, nullable
+ * boundaries, `expected_total`). Only the repository's compare-and-set tools change a
+ * stored cycle's `status`, `order_id`, `reason` and claim afterwards. The `count` is the chargeable number and idempotency anchor, nullable
  * for non-counting cycles (e.g. a future trial). Money is a decimal-safe string;
  * timestamps are GMT strings (`Y-m-d H:i:s`).
  *
@@ -143,9 +143,9 @@ final class Cycle {
 	private $extension_slug;
 
 	/**
-	 * Crash-recovery lease expiry (GMT string), or null. Set when a `pending` cycle is
-	 * claimed; a stuck pending cycle past this moment is reclaimable. The create-as-claim
-	 * UNIQUE index is the primary concurrency guard - this only recovers a crashed charge.
+	 * Claim expiry (GMT string), or null. Set when a caller appends a cycle claimed, claims
+	 * it, or transitions it with a claim; once it passes, another caller may claim the
+	 * cycle. The chain's UNIQUE positions remain the primary guard against a duplicate cycle.
 	 *
 	 * @var string|null
 	 */
@@ -160,14 +160,14 @@ final class Cycle {
 	private $retry_at_gmt;
 
 	/**
-	 * Typed plan snapshot held in memory, or null.
+	 * Typed plan snapshot attached on read from `plan_snapshot_id`, or null.
 	 *
 	 * @var PlanSnapshot|null
 	 */
 	private $plan_snapshot;
 
 	/**
-	 * Typed items snapshot held in memory, or null.
+	 * Typed items snapshot attached on read from `items_snapshot_id`, or null.
 	 *
 	 * @var ItemsSnapshot|null
 	 */
@@ -197,8 +197,6 @@ final class Cycle {
 		$this->extension_slug    = Coercion::coerce_nullable_string( $data['extension_slug'] ?? null );
 		$this->claimed_until_gmt = Coercion::coerce_nullable_string( $data['claimed_until'] ?? null );
 		$this->retry_at_gmt      = Coercion::coerce_nullable_string( $data['retry_at'] ?? null );
-		$this->plan_snapshot     = ( $data['plan_snapshot'] ?? null ) instanceof PlanSnapshot ? $data['plan_snapshot'] : null;
-		$this->items_snapshot    = ( $data['items_snapshot'] ?? null ) instanceof ItemsSnapshot ? $data['items_snapshot'] : null;
 	}
 
 	/**
@@ -208,15 +206,16 @@ final class Cycle {
 	 * `currency`. Optional: `sequence_no` (absent or null: the append assigns the chain's
 	 * next position), `count` (absent or null for a non-counting cycle; the caller owns
 	 * the numbering), `status` (defaults to `pending`), `kind` (defaults to billing), `reason`,
-	 * `order_id`, `extension_slug`, `plan_snapshot_id`, `items_snapshot_id`,
-	 * `plan_snapshot`, `items_snapshot`.
+	 * `order_id`, `extension_slug`, `plan_snapshot_id`, `items_snapshot_id`. Snapshot value
+	 * objects are attached only when a stored cycle is read.
 	 *
 	 * @param array<string, mixed> $args Cycle attributes.
 	 * @throws DomainException If the attributes are not valid.
 	 */
 	public static function create( array $args ): self {
-		// A new cycle is always unsaved; never adopt a caller-supplied id.
-		unset( $args['id'] );
+		// A new cycle is always unsaved; never adopt a caller-supplied id. A claim is
+		// stamped by the database when the cycle is appended, never carried in.
+		unset( $args['id'], $args['claimed_until'] );
 
 		$cycle = new self( $args );
 
@@ -244,9 +243,6 @@ final class Cycle {
 	 * @throws DomainException If the stored status is not a well-formed status slug.
 	 */
 	public static function from_storage( array $row ): self {
-		// The typed snapshot value objects are attached on load, never hydrated here.
-		unset( $row['plan_snapshot'], $row['items_snapshot'] );
-
 		return new self( $row );
 	}
 
@@ -334,40 +330,10 @@ final class Cycle {
 	}
 
 	/**
-	 * Set the cycle status.
-	 *
-	 * Any status may follow any other: the engine enforces no transition table. A
-	 * changed status must be registered (an unregistered value, such as one built
-	 * through {@see new CycleStatus()}, is rejected); setting the current status
-	 * is a no-op, so a hydrated unregistered status can be saved unchanged.
-	 *
-	 * @param CycleStatus $status Target status.
-	 * @throws DomainException If the status changes to an unregistered value.
-	 */
-	public function set_status( CycleStatus $status ): void {
-		if ( $this->status->equals( $status ) ) {
-			return;
-		}
-
-		self::assert_status( $status );
-
-		$this->status = $status;
-	}
-
-	/**
 	 * Open-ended annotation, or null.
 	 */
 	public function get_reason(): ?string {
 		return $this->reason;
-	}
-
-	/**
-	 * Annotate the cycle with an open-ended reason. Always writable.
-	 *
-	 * @param string|null $reason Reason text, or null to clear.
-	 */
-	public function set_reason( ?string $reason ): void {
-		$this->reason = $reason;
 	}
 
 	/**
@@ -406,34 +372,10 @@ final class Cycle {
 	}
 
 	/**
-	 * Record the plan snapshot row id once it is stored. Write-once: only fills an
-	 * unset id, never re-points the frozen reference.
-	 *
-	 * @param int $plan_snapshot_id Snapshot row id.
-	 * @throws DomainException If a plan snapshot id is already recorded.
-	 */
-	public function set_plan_snapshot_id( int $plan_snapshot_id ): void {
-		$this->assert_snapshot_ref_unset( 'plan_snapshot_id', $this->plan_snapshot_id );
-		$this->plan_snapshot_id = $plan_snapshot_id;
-	}
-
-	/**
 	 * Items snapshot row id, or null.
 	 */
 	public function get_items_snapshot_id(): ?int {
 		return $this->items_snapshot_id;
-	}
-
-	/**
-	 * Record the items snapshot row id once it is stored. Write-once companion to
-	 * {@see self::set_plan_snapshot_id()}.
-	 *
-	 * @param int $items_snapshot_id Snapshot row id.
-	 * @throws DomainException If an items snapshot id is already recorded.
-	 */
-	public function set_items_snapshot_id( int $items_snapshot_id ): void {
-		$this->assert_snapshot_ref_unset( 'items_snapshot_id', $this->items_snapshot_id );
-		$this->items_snapshot_id = $items_snapshot_id;
 	}
 
 	/**
@@ -444,16 +386,6 @@ final class Cycle {
 	}
 
 	/**
-	 * Link the cycle to its order. One of the few post-freeze-mutable fields (with
-	 * `status` and `reason`): the order id is stamped once the charge order exists.
-	 *
-	 * @param int $order_id Linked order id.
-	 */
-	public function set_order_id( int $order_id ): void {
-		$this->order_id = $order_id;
-	}
-
-	/**
 	 * Owning extension slug, or null.
 	 */
 	public function get_extension_slug(): ?string {
@@ -461,20 +393,10 @@ final class Cycle {
 	}
 
 	/**
-	 * Crash-recovery lease expiry (GMT string), or null.
+	 * Crash-recovery claim expiry (GMT string), or null.
 	 */
 	public function get_claimed_until_gmt(): ?string {
 		return $this->claimed_until_gmt;
-	}
-
-	/**
-	 * Set (or clear) the crash-recovery lease expiry. Post-freeze-mutable (with `status`,
-	 * `order_id`, `reason`): a claim stamps it, and a reclaim/resolve may re-stamp or clear it.
-	 *
-	 * @param string|null $claimed_until_gmt Lease expiry GMT string, or null to clear.
-	 */
-	public function set_claimed_until_gmt( ?string $claimed_until_gmt ): void {
-		$this->claimed_until_gmt = $claimed_until_gmt;
 	}
 
 	/**
@@ -482,15 +404,6 @@ final class Cycle {
 	 */
 	public function get_retry_at_gmt(): ?string {
 		return $this->retry_at_gmt;
-	}
-
-	/**
-	 * Set (or clear) the reserved retry moment. Reserved for a later retry/dunning pass.
-	 *
-	 * @param string|null $retry_at_gmt Retry moment GMT string, or null to clear.
-	 */
-	public function set_retry_at_gmt( ?string $retry_at_gmt ): void {
-		$this->retry_at_gmt = $retry_at_gmt;
 	}
 
 	/**
@@ -539,7 +452,7 @@ final class Cycle {
 	 * Serialize the cycle row (excluding the generated id/timestamps). Status is
 	 * stored as its plain string value.
 	 *
-	 * @return array<string, mixed>
+	 * @return array<string, int|string|null>
 	 */
 	public function to_storage(): array {
 		return array(
@@ -560,22 +473,6 @@ final class Cycle {
 			'claimed_until'     => $this->claimed_until_gmt,
 			'retry_at'          => $this->retry_at_gmt,
 		);
-	}
-
-	/**
-	 * Guard a snapshot row-id stamp so it is write-once; a second stamp would
-	 * re-point a frozen reference.
-	 *
-	 * @param string   $field   Field being stamped, for the error message.
-	 * @param int|null $current The currently recorded id (must be null to stamp).
-	 * @throws DomainException If the id is already recorded.
-	 */
-	private function assert_snapshot_ref_unset( string $field, ?int $current ): void {
-		if ( null !== $current ) {
-			throw new DomainException(
-				sprintf( 'Cycle: "%s" is frozen and cannot be re-pointed.', $field )
-			);
-		}
 	}
 
 	/**
@@ -643,8 +540,8 @@ final class Cycle {
 	}
 
 	/**
-	 * Reject a status value that is not registered. Write paths only
-	 * ({@see self::create()}, {@see self::set_status()}); storage hydration keeps an
+	 * Reject a status value that is not registered. Write path only
+	 * ({@see self::create()}); storage hydration keeps an
 	 * unregistered stored value verbatim.
 	 *
 	 * @param CycleStatus $status Status to check.
@@ -661,8 +558,7 @@ final class Cycle {
 	/**
 	 * Resolve a status input into a typed {@see CycleStatus}. A `CycleStatus` passes
 	 * through; null defaults to `pending`; a string is wrapped (slug format checked).
-	 * Registration is checked by {@see self::create()} and {@see self::set_status()},
-	 * not here, so storage hydration keeps an unregistered stored value.
+	 * Registration is checked by {@see self::create()}, not here, so storage hydration keeps an unregistered stored value.
 	 *
 	 * @param mixed $status Raw status value (a CycleStatus, null, or a status string).
 	 * @return CycleStatus

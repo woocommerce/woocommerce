@@ -99,6 +99,13 @@ final class CycleView {
 	private $order_id;
 
 	/**
+	 * Recorded reason (e.g. why a charge failed), or null.
+	 *
+	 * @var string|null
+	 */
+	private $reason;
+
+	/**
 	 * Use {@see self::from_cycle()}.
 	 */
 	private function __construct() {
@@ -124,6 +131,7 @@ final class CycleView {
 		$view->expected_total = $cycle->get_expected_total();
 		$view->currency       = $cycle->get_currency();
 		$view->order_id       = $cycle->get_order_id();
+		$view->reason         = $cycle->get_reason();
 
 		return $view;
 	}
@@ -203,5 +211,12 @@ final class CycleView {
 	 */
 	public function get_order_id(): ?int {
 		return $this->order_id;
+	}
+
+	/**
+	 * Recorded reason (e.g. why a charge failed), or null.
+	 */
+	public function get_reason(): ?string {
+		return $this->reason;
 	}
 }
