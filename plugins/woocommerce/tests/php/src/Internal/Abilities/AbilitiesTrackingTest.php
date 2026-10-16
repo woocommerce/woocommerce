@@ -45,6 +45,13 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	private $permission = true;
 
 	/**
+	 * What the inner test ability's execute callback returns.
+	 *
+	 * @var mixed
+	 */
+	private $inner_result = array( 'ok' => true );
+
+	/**
 	 * Administrator user ID.
 	 *
 	 * @var int
@@ -189,7 +196,7 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'mcp', $event['channel'] );
 		$this->assertSame( 'none', $event['external_client'], 'Without an MCP session the client is unknown' );
 		$this->assertIsInt( $event['duration_ms'] );
-		$this->assertContains( $event['is_test'], array( 'true', 'false' ) );
+		$this->assertSame( 'production' === wp_get_environment_type() ? 'false' : 'true', $event['is_test'] );
 		$this->assertArrayNotHasKey( 'error', $event, 'A property named error makes Tracks drop the event' );
 	}
 
@@ -517,6 +524,41 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should record calls made during cron as the cron channel.
+	 */
+	public function test_records_cron_channel(): void {
+		add_filter( 'wp_doing_cron', '__return_true' );
+
+		wp_get_ability( self::ABILITY_ID )->execute();
+		$this->sut->handle_shutdown();
+
+		$this->assertSame( 'cron', $this->sut->recorded[0]['channel'] );
+	}
+
+	/**
+	 * @testdox Should record a failed inner call as unknown when its outer call succeeds on WordPress 7.0.
+	 */
+	public function test_records_failed_inner_call_on_wordpress_7_0(): void {
+		foreach ( array( 'wp_ability_invoked', 'wp_pre_execute_ability', 'wp_ability_validate_input', 'wp_ability_permission_result', 'wp_ability_execute_result', 'wp_ability_validate_output' ) as $hook ) {
+			remove_all_filters( $hook );
+		}
+		$this->inner_result   = new WP_Error( 'tracking_test_inner_failure' );
+		$this->execute_result = function () {
+			wp_get_ability( self::INNER_ABILITY_ID )->execute();
+			return array( 'ok' => true );
+		};
+		$this->start_mcp_tool_call();
+
+		wp_get_ability( self::ABILITY_ID )->execute();
+		$this->sut->handle_shutdown();
+
+		$events = array_column( $this->sut->recorded, null, 'ability_name' );
+		$this->assertCount( 2, $this->sut->recorded );
+		$this->assertSame( 'success', $events['woocommerce_tracking_test']['outcome'] );
+		$this->assertSame( 'unknown', $events['woocommerce_tracking_test_inner']['error_code'] );
+	}
+
+	/**
 	 * @testdox Should record long ability names in full.
 	 */
 	public function test_records_long_ability_names_in_full(): void {
@@ -744,7 +786,7 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 		$register_abilities = function () use ( $execute ): void {
 			$abilities = array(
 				self::ABILITY_ID           => $execute,
-				self::INNER_ABILITY_ID     => fn() => array( 'ok' => true ),
+				self::INNER_ABILITY_ID     => fn() => $this->inner_result,
 				self::UNTRACKED_ABILITY_ID => $execute,
 				self::LONG_ABILITY_ID      => $execute,
 			);
