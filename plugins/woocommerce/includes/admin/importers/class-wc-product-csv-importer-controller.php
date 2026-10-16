@@ -778,6 +778,7 @@ class WC_Product_CSV_Importer_Controller {
 			__( 'ID', 'woocommerce' )                      => 'id',
 			__( 'Type', 'woocommerce' )                    => 'type',
 			__( 'SKU', 'woocommerce' )                     => 'sku',
+			__( 'GTIN, UPC, EAN, or ISBN', 'woocommerce' ) => 'global_unique_id',
 			__( 'Name', 'woocommerce' )                    => 'name',
 			__( 'Published', 'woocommerce' )               => 'published',
 			__( 'Is featured?', 'woocommerce' )            => 'featured',
