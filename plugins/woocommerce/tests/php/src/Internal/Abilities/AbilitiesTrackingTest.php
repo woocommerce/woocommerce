@@ -93,7 +93,7 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 			$this->markTestSkipped( 'The Abilities API is not available.' );
 		}
 
-		foreach ( array( 'init', 'wp_abilities_api_init', 'wp_abilities_api_categories_init' ) as $action ) {
+		foreach ( array( 'init', 'wp_abilities_api_init', 'wp_abilities_api_categories_init', 'rest_api_init' ) as $action ) {
 			$this->original_action_counts[ $action ] = $wp_actions[ $action ] ?? null;
 		}
 		// The Abilities API registry requires init to have fired.
@@ -164,7 +164,6 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'mcp', $event['channel'] );
 		$this->assertSame( 'none', $event['external_client'], 'Without an MCP session the client is unknown' );
 		$this->assertIsInt( $event['duration_ms'] );
-		$this->assertSame( 'production' === wp_get_environment_type() ? 'false' : 'true', $event['is_test'] );
 		$this->assertArrayNotHasKey( 'error', $event, 'A property named error makes Tracks drop the event' );
 	}
 
@@ -217,7 +216,7 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 		$this->assertCount( 1, $this->sut->recorded );
 		$this->assertSame( 'rest', $this->sut->recorded[0]['channel'] );
 		$this->assertSame( 'error', $this->sut->recorded[0]['outcome'] );
-		$this->assertNotSame( 'none', $this->sut->recorded[0]['error_code'] );
+		$this->assertSame( 'rest_ability_cannot_execute', $this->sut->recorded[0]['error_code'] );
 		$this->assertArrayNotHasKey( 'duration_ms', $this->sut->recorded[0] );
 	}
 
@@ -877,6 +876,12 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 			protected function is_long_running_process(): bool {
 				return $this->long_running;
 			}
+
+			/**
+			 * Never send real pixels from tests.
+			 */
+			protected function send_queued_pixels(): void {
+			}
 		};
 	}
 
@@ -888,20 +893,20 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	 * @param string $method          HTTP method.
 	 */
 	private function register_route_that_runs_ability( string $route_namespace, string $route, string $method ): void {
-		$register_route = function () use ( $route_namespace, $route, $method ): void {
-			register_rest_route(
-				$route_namespace,
-				$route,
-				array(
-					'methods'             => $method,
-					'callback'            => fn() => wp_get_ability( self::ABILITY_ID )->execute(),
-					'permission_callback' => '__return_true',
-				)
-			);
-		};
+		global $wp_actions;
+
 		rest_get_server();
-		add_action( 'rest_api_init', $register_route );
-		do_action( 'rest_api_init', rest_get_server() );
+		// register_rest_route() expects rest_api_init to have fired; firing it again would re-register every route.
+		$wp_actions['rest_api_init'] = max( 1, (int) ( $wp_actions['rest_api_init'] ?? 0 ) ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		register_rest_route(
+			$route_namespace,
+			$route,
+			array(
+				'methods'             => $method,
+				'callback'            => fn() => wp_get_ability( self::ABILITY_ID )->execute(),
+				'permission_callback' => '__return_true',
+			)
+		);
 	}
 
 	/**

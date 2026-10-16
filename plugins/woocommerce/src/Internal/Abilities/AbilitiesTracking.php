@@ -406,6 +406,13 @@ class AbilitiesTracking {
 	}
 
 	/**
+	 * Send the pixels queued in the batched Tracks client now, instead of on shutdown.
+	 */
+	protected function send_queued_pixels(): void {
+		\WC_Tracks_Client::send_batched_pixels();
+	}
+
+	/**
 	 * Whether this process can outlive many requests' worth of calls, such as an MCP STDIO server run with WP-CLI.
 	 *
 	 * @return bool
@@ -547,7 +554,7 @@ class AbilitiesTracking {
 					return;
 				}
 				$this->flush_events();
-				\WC_Tracks_Client::send_batched_pixels();
+				$this->send_queued_pixels();
 			}
 
 			// The call itself may have turned tracking off.
