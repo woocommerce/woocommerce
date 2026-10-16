@@ -382,11 +382,11 @@ class SettingsTest extends WC_Unit_Test_Case {
 
 		$setting = $this->find_setting( $this->get_wc_admin_group_settings(), 'woocommerce_actionable_order_statuses' );
 		$this->assertSame( array( 'processing', 'on-hold' ), $setting['default'], 'The page should drop the status it cannot display.' );
+		$this->assertContains( 'not-a-real-status', Settings::get_default_actionable_order_statuses(), 'The runtime default should keep the status the page drops.' );
 
 		$this->save_wc_admin_setting( 'woocommerce_actionable_order_statuses', array( 'processing', 'on-hold' ) );
 
 		$this->assertFalse( get_option( 'woocommerce_actionable_order_statuses' ), 'The shown list is a subset of the runtime default, so it must not be stored.' );
-		$this->assertContains( 'not-a-real-status', Settings::get_default_actionable_order_statuses(), 'The runtime default should keep applying the filter.' );
 	}
 
 	/**
