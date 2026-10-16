@@ -20,6 +20,11 @@ final class UcpDiscovery implements RegisterHooksInterface {
 	public const QUERY_VAR = 'wc_ucp_discovery';
 
 	/**
+	 * Rewrite rule regex for `/.well-known/ucp`.
+	 */
+	public const RULE = '^\.well-known/ucp/?$';
+
+	/**
 	 * Register hooks.
 	 */
 	public function register(): void {
@@ -37,7 +42,7 @@ final class UcpDiscovery implements RegisterHooksInterface {
 			return;
 		}
 
-		add_rewrite_rule( '^\.well-known/ucp/?$', 'index.php?' . self::QUERY_VAR . '=1', 'top' );
+		add_rewrite_rule( self::RULE, 'index.php?' . self::QUERY_VAR . '=1', 'top' );
 		add_filter( 'query_vars', array( $this, 'add_query_var' ), 0 );
 		add_action( 'parse_request', array( $this, 'maybe_render' ), 0 );
 	}
@@ -70,8 +75,15 @@ final class UcpDiscovery implements RegisterHooksInterface {
 	 * @param \WP $wp Current WordPress environment instance.
 	 */
 	public function maybe_render( \WP $wp ): void {
-		if ( '1' !== ( $wp->query_vars[ self::QUERY_VAR ] ?? '' ) ) {
+		// Check the matched rule, not only the query var: WP also fills public query vars from $_GET/$_POST.
+		if ( self::RULE !== $wp->matched_rule || '1' !== ( $wp->query_vars[ self::QUERY_VAR ] ?? '' ) ) {
 			return;
+		}
+
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput
+		if ( ! in_array( $_SERVER['REQUEST_METHOD'] ?? '', array( 'GET', 'HEAD' ), true ) ) {
+			status_header( 405 );
+			exit;
 		}
 
 		// UCP requires a publicly cacheable profile with a max-age of at least 60 seconds.

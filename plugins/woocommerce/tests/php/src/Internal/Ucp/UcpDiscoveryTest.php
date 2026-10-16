@@ -10,7 +10,7 @@ use Automattic\WooCommerce\StoreApi\Utilities\UcpUtils;
  * Tests for the `/.well-known/ucp` discovery profile.
  */
 class UcpDiscoveryTest extends \WC_Unit_Test_Case {
-	private const RULE = '^\.well-known/ucp/?$';
+	private const RULE = UcpDiscovery::RULE;
 
 	/**
 	 * System under test.
@@ -90,5 +90,62 @@ class UcpDiscoveryTest extends \WC_Unit_Test_Case {
 
 		$this->sut->maybe_flush_rewrite_rules( UcpUtils::FEATURE_ID );
 		$this->assertSame( 'yes', get_option( 'woocommerce_queue_flush_rewrite_rules' ) );
+	}
+
+	/**
+	 * Run maybe_render() for a request, capturing output and treating wp_send_json()'s exit as an exception.
+	 *
+	 * @param string $matched_rule Value of WP::$matched_rule.
+	 * @param string $query_var    Value of the discovery query var.
+	 * @return string|null Captured output, or null when the renderer returned without sending.
+	 */
+	private function render( string $matched_rule, string $query_var ): ?string {
+		$wp               = new \WP();
+		$wp->matched_rule = $matched_rule;
+		$wp->query_vars   = array( UcpDiscovery::QUERY_VAR => $query_var );
+
+		$_SERVER['REQUEST_METHOD'] = 'GET';
+		$die_handler               = function () {
+			return function () {
+				throw new \WPDieException();
+			};
+		};
+		add_filter( 'wp_doing_ajax', '__return_true' );
+		add_filter( 'wp_die_ajax_handler', $die_handler );
+
+		ob_start();
+		try {
+			$this->sut->maybe_render( $wp );
+			ob_end_clean();
+			return null;
+		} catch ( \WPDieException $e ) {
+			return ob_get_clean();
+		} finally {
+			remove_filter( 'wp_doing_ajax', '__return_true' );
+			remove_filter( 'wp_die_ajax_handler', $die_handler );
+		}
+	}
+
+	/**
+	 * @testdox maybe_render sends the profile as JSON when the rewrite rule matched.
+	 */
+	public function test_maybe_render_sends_profile(): void {
+		$output = $this->render( self::RULE, '1' );
+
+		$this->assertNotNull( $output );
+		$this->assertSame( $this->sut->get_profile(), json_decode( $output, true ) );
+	}
+
+	/**
+	 * @testdox maybe_render ignores requests where the query var is set but the rewrite rule did not match.
+	 * @testWith ["", "1"]
+	 *           ["^shop/?$", "1"]
+	 *           ["^\\.well-known/ucp/?$", ""]
+	 *
+	 * @param string $matched_rule Matched rewrite rule.
+	 * @param string $query_var    Discovery query var value.
+	 */
+	public function test_maybe_render_ignores_other_requests( string $matched_rule, string $query_var ): void {
+		$this->assertNull( $this->render( $matched_rule, $query_var ) );
 	}
 }
