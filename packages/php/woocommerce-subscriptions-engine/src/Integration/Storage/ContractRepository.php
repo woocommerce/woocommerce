@@ -1905,8 +1905,8 @@ final class ContractRepository {
 		$placeholder_list = implode( ', ', $placeholders );
 		$values[]         = $cycle->get_contract_id();
 
-		// Selecting from the contract row inserts nothing for a missing contract; the row is share-locked for the statement.
-		$sql = "INSERT INTO `{$table}` ( {$name_list} ) SELECT {$placeholder_list} FROM `{$contracts}` c WHERE c.id = %d LOCK IN SHARE MODE";
+		// Selecting from the contract row inserts nothing for a missing contract; the caller's lock covers the row.
+		$sql = "INSERT INTO `{$table}` ( {$name_list} ) SELECT {$placeholder_list} FROM `{$contracts}` c WHERE c.id = %d";
 
 		// Column names come from the entity's storage keys, never from input; every value is a placeholder.
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared

@@ -1574,7 +1574,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	 */
 	public function test_a_failed_child_insert_under_a_lock_conflict_is_a_lock_conflict(): void {
 		$meta   = '/^\s*INSERT INTO \S*contract_meta .* LOCK IN SHARE MODE$/s';
-		$cycles = '/^\s*INSERT INTO `?\S*subscription_cycles`? .* LOCK IN SHARE MODE$/s';
+		$cycles = '/^\s*INSERT INTO `?\S*subscription_cycles`? .* FROM `?\S*subscription_contracts`? c WHERE c\.id = \d+$/s';
 
 		$id = $this->contract_with_currency();
 		$this->take_lock( $id, 'renewal' );
@@ -1626,7 +1626,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 			$this->assertStringContainsString( 'Failed to add contract meta', $e->getMessage() );
 		}
 
-		$this->fail_next_query( '/^\s*INSERT INTO `?\S*subscription_cycles`? .* LOCK IN SHARE MODE$/s' );
+		$this->fail_next_query( '/^\s*INSERT INTO `?\S*subscription_cycles`? .* FROM `?\S*subscription_contracts`? c WHERE c\.id = \d+$/s' );
 		try {
 			$this->add_cycle_locked( $id, $this->cycle_args() );
 			$this->fail( 'Expected the failed insert to throw.' );
