@@ -20,67 +20,81 @@ abstract class AbstractTemplateCompatibility {
 	protected $hook_data;
 
 	/**
+	 * The `template_include` callback registered by each compatibility class, keyed by class name.
+	 *
+	 * @var array<string, callable>
+	 */
+	private static $template_include_callbacks = array();
+
+	/**
 	 * Initialization method.
+	 *
+	 * Several templates can match one request (e.g. the Shop with a product tag filter), so the hooks are registered once per compatibility class.
 	 */
 	public function init() {
+		$registered_callback = self::$template_include_callbacks[ static::class ] ?? null;
+
+		// Checking the registration, not a flag, lets a hook reset (as between PHPUnit tests) allow registering again.
+		if ( null !== $registered_callback && false !== has_filter( 'template_include', $registered_callback ) ) {
+			return;
+		}
+
 		$this->set_hook_data();
 
-		add_filter(
-			'template_include',
-			function ( $template ) {
-				$this->set_compatibility_layer_flag();
+		$template_include_callback = function ( $template ) {
+			$this->set_compatibility_layer_flag();
 
-				add_filter(
-					'render_block_data',
-					function ( $parsed_block, $source_block, $parent_block ) {
-						/**
-						* Filter to disable the compatibility layer for the blockified templates.
-						*
-						* This hook allows to disable the compatibility layer for the blockified templates.
-						*
-						* @since 7.6.0
-						* @param bool $is_disabled_compatibility_layer Whether the compatibility layer should be disabled.
-						*/
-						$is_disabled_compatibility_layer = apply_filters( 'woocommerce_disable_compatibility_layer', false );
+			add_filter(
+				'render_block_data',
+				function ( $parsed_block, $source_block, $parent_block ) {
+					/**
+					* Filter to disable the compatibility layer for the blockified templates.
+					*
+					* This hook allows to disable the compatibility layer for the blockified templates.
+					*
+					* @since 7.6.0
+					* @param bool $is_disabled_compatibility_layer Whether the compatibility layer should be disabled.
+					*/
+					$is_disabled_compatibility_layer = apply_filters( 'woocommerce_disable_compatibility_layer', false );
 
-						if ( $is_disabled_compatibility_layer ) {
-							return $parsed_block;
-						}
+					if ( $is_disabled_compatibility_layer ) {
+						return $parsed_block;
+					}
 
-						return $this->update_render_block_data( $parsed_block, $source_block, $parent_block );
-					},
-					10,
-					3
-				);
+					return $this->update_render_block_data( $parsed_block, $source_block, $parent_block );
+				},
+				10,
+				3
+			);
 
-				add_filter(
-					'render_block',
-					function ( $block_content, $block ) {
-						/**
-						* Filter to disable the compatibility layer for the blockified templates.
-						*
-						* This hook allows to disable the compatibility layer for the blockified.
-						*
-						* @since 7.6.0
-						* @param bool $is_disabled_compatibility_layer Whether the compatibility layer should be disabled.
-						*/
-						$is_disabled_compatibility_layer = apply_filters( 'woocommerce_disable_compatibility_layer', false );
+			add_filter(
+				'render_block',
+				function ( $block_content, $block ) {
+					/**
+					* Filter to disable the compatibility layer for the blockified templates.
+					*
+					* This hook allows to disable the compatibility layer for the blockified.
+					*
+					* @since 7.6.0
+					* @param bool $is_disabled_compatibility_layer Whether the compatibility layer should be disabled.
+					*/
+					$is_disabled_compatibility_layer = apply_filters( 'woocommerce_disable_compatibility_layer', false );
 
-						if ( $is_disabled_compatibility_layer ) {
-							return $block_content;
-						}
+					if ( $is_disabled_compatibility_layer ) {
+						return $block_content;
+					}
 
-						return $this->inject_hooks( $block_content, $block );
-					},
-					10,
-					2
-				);
+					return $this->inject_hooks( $block_content, $block );
+				},
+				10,
+				2
+			);
 
-				return $template;
-			},
-			10,
-			1
-		);
+			return $template;
+		};
+
+		self::$template_include_callbacks[ static::class ] = $template_include_callback;
+		add_filter( 'template_include', $template_include_callback, 10, 1 );
 	}
 
 	/**

@@ -4,6 +4,11 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Tests\Blocks\Templates;
 
 use Automattic\WooCommerce\Blocks\Templates\ArchiveProductTemplatesCompatibility;
+use Automattic\WooCommerce\Blocks\Templates\ProductCatalogTemplate;
+use Automattic\WooCommerce\Blocks\Templates\ProductCategoryTemplate;
+use Automattic\WooCommerce\Blocks\Templates\ProductSearchResultsTemplate;
+use Automattic\WooCommerce\Blocks\Templates\ProductTagTemplate;
+use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplateCompatibility;
 use WC_Unit_Test_Case;
 
 /**
@@ -33,11 +38,19 @@ class ArchiveProductTemplatesCompatibilityTest extends WC_Unit_Test_Case {
 	private $shop_page_id = 0;
 
 	/**
+	 * Product post type `has_archive` value captured before each test.
+	 *
+	 * @var string|bool
+	 */
+	private $original_product_has_archive;
+
+	/**
 	 * @inheritdoc
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->original_shop_page_id = get_option( 'woocommerce_shop_page_id' );
+		$this->original_shop_page_id        = get_option( 'woocommerce_shop_page_id' );
+		$this->original_product_has_archive = get_post_type_object( 'product' )->has_archive;
 
 		foreach ( array( 'wp_query', 'wp_the_query' ) as $global_name ) {
 			$this->query_snapshots[ $global_name ] = array(
@@ -58,6 +71,8 @@ class ArchiveProductTemplatesCompatibilityTest extends WC_Unit_Test_Case {
 				unset( $GLOBALS[ $global_name ] ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore prior absence of the query global.
 			}
 		}
+
+		get_post_type_object( 'product' )->has_archive = $this->original_product_has_archive;
 
 		if ( false === $this->original_shop_page_id ) {
 			delete_option( 'woocommerce_shop_page_id' );
@@ -211,6 +226,112 @@ class ArchiveProductTemplatesCompatibilityTest extends WC_Unit_Test_Case {
 			'attrs'     => array( 'isInherited' => 1 ),
 		);
 		$this->assertSame( '', $sut->inject_hooks( '', $empty_product_template ) );
+	}
+
+	/**
+	 * @testdox Runs an injected loop hook once when several archive templates match the request.
+	 * @dataProvider overlapping_archive_templates_provider
+	 *
+	 * @param string   $taxonomy         Product taxonomy filtered in the request.
+	 * @param array    $query_args       Query arguments added to the request besides the taxonomy term.
+	 * @param string[] $template_classes Templates whose conditions all match the request.
+	 */
+	public function test_runs_loop_hook_once_when_archive_templates_overlap( string $taxonomy, array $query_args, array $template_classes ): void {
+		// The test theme doesn't declare WooCommerce support, so products are registered without an archive.
+		get_post_type_object( 'product' )->has_archive = 'shop';
+
+		$term = self::factory()->term->create_and_get(
+			array(
+				'taxonomy' => $taxonomy,
+				'slug'     => 'compatibility-overlap',
+			)
+		);
+		$this->go_to( add_query_arg( array_merge( $query_args, array( $taxonomy => $term->slug ) ), home_url( '/' ) ) );
+		$GLOBALS['wp_the_query'] = $GLOBALS['wp_query']; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Product archive conditionals read the main query global.
+		$this->assertTrue( is_post_type_archive( 'product' ) && is_tax( $taxonomy ), 'The request should match both the product archive and the taxonomy archive.' );
+
+		foreach ( $template_classes as $template_class ) {
+			( new $template_class() )->render_block_template();
+		}
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- WordPress owns this hook; the test applies the real callbacks registered by the templates.
+		apply_filters( 'template_include', 'index.php' );
+
+		$hook_calls = 0;
+		add_action(
+			'woocommerce_before_shop_loop',
+			static function () use ( &$hook_calls ) {
+				++$hook_calls;
+				echo esc_html( '__HOOK_MARKER__' );
+			}
+		);
+
+		$tree = array(
+			'blockName'   => 'woocommerce/product-collection',
+			'attrs'       => array( 'query' => array( 'inherit' => true ) ),
+			'innerBlocks' => array(
+				array(
+					'blockName'   => 'woocommerce/product-template',
+					'attrs'       => array(),
+					'innerBlocks' => array(),
+				),
+			),
+		);
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- WordPress owns this hook; the test applies the real callbacks registered by the templates.
+		$marked = apply_filters( 'render_block_data', $tree, $tree, null );
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- WordPress owns this hook; the test applies the real callbacks registered by the templates.
+		$rendered = apply_filters( 'render_block', '__BLOCK_SENTINEL__', $marked['innerBlocks'][0], new \WP_Block( $marked['innerBlocks'][0] ) );
+
+		$this->assertSame( 1, $hook_calls, 'woocommerce_before_shop_loop should run once however many templates match the request.' );
+		$this->assertSame( 1, substr_count( $rendered, '__HOOK_MARKER__' ), 'The hook output should be injected once.' );
+		$this->assertSame( 1, substr_count( $rendered, '__BLOCK_SENTINEL__' ), 'The block content should be rendered once.' );
+		$this->assertLessThan( strpos( $rendered, '__BLOCK_SENTINEL__' ), strpos( $rendered, '__HOOK_MARKER__' ), 'woocommerce_before_shop_loop should render before the Product Template, as declared in the hook data.' );
+	}
+
+	/**
+	 * Requests where more than one archive template matches.
+	 *
+	 * @return array<string, array{string, array<string, string>, string[]}>
+	 */
+	public function overlapping_archive_templates_provider(): array {
+		return array(
+			'Shop filtered by product tag'          => array( 'product_tag', array( 'post_type' => 'product' ), array( ProductCatalogTemplate::class, ProductTagTemplate::class ) ),
+			'Shop filtered by product category'     => array( 'product_cat', array( 'post_type' => 'product' ), array( ProductCatalogTemplate::class, ProductCategoryTemplate::class ) ),
+			'Product search filtered by a category' => array(
+				'product_cat',
+				array(
+					's'         => 'compatibility',
+					'post_type' => 'product',
+				),
+				array( ProductSearchResultsTemplate::class, ProductCategoryTemplate::class ),
+			),
+		);
+	}
+
+	/**
+	 * @testdox Registers the hooks once per compatibility class, and again after the hooks are reset.
+	 */
+	public function test_registers_template_include_once_per_compatibility_class(): void {
+		$initial_count = $this->count_template_include_callbacks();
+
+		( new ArchiveProductTemplatesCompatibility() )->init();
+		( new ArchiveProductTemplatesCompatibility() )->init();
+		$this->assertSame( $initial_count + 1, $this->count_template_include_callbacks(), 'A second archive layer in the same request should not register again.' );
+
+		( new SingleProductTemplateCompatibility() )->init();
+		$this->assertSame( $initial_count + 2, $this->count_template_include_callbacks(), 'The single product layer should keep its own registration.' );
+
+		remove_all_filters( 'template_include' );
+		( new ArchiveProductTemplatesCompatibility() )->init();
+		$this->assertSame( 1, $this->count_template_include_callbacks(), 'After the hooks are reset, the archive layer should register again.' );
+	}
+
+	/**
+	 * Counts the callbacks registered on `template_include` at the default priority.
+	 */
+	private function count_template_include_callbacks(): int {
+		global $wp_filter;
+
+		return isset( $wp_filter['template_include'] ) ? count( $wp_filter['template_include']->callbacks[10] ?? array() ) : 0;
 	}
 
 	/**
