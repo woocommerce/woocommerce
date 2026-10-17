@@ -72,7 +72,7 @@ class ComingSoonRequestHandler {
 	 * @internal
 	 *
 	 * @param string $template The path to the previously determined template.
-	 * @return string The path to the 'coming soon' template or any empty string to prevent further template loading in FSE themes.
+	 * @return string The path to the 'coming soon' template. Exits after rendering the page to prevent further template loading.
 	 */
 	public function handle_template_include( $template ) {
 		if ( ! $this->should_show_coming_soon() ) {
@@ -112,14 +112,7 @@ class ComingSoonRequestHandler {
 			get_footer();
 		}
 
-		if ( $is_fse_theme ) {
-			// Since we've already rendered a template, return empty string to ensure no other template is rendered.
-			return '';
-		} else {
-			// In non-FSE themes, other templates will still be rendered.
-			// We need to exit to prevent further processing.
-			exit();
-		}
+		exit();
 	}
 
 	/**

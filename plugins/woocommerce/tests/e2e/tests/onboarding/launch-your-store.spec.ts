@@ -8,6 +8,7 @@ import { WC_ADMIN_API_PATH } from '@woocommerce/e2e-utils-playwright';
  * Internal dependencies
  */
 import { expect, tags, test } from '../../fixtures/fixtures';
+import { setFilterValue } from '../../utils/filters';
 import { setOption } from '../../utils/options';
 import { activateTheme, DEFAULT_THEME } from '../../utils/themes';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
@@ -353,6 +354,45 @@ function runComingSoonTests( themeContext = '' ) {
 			)
 		).toBeVisible();
 	} );
+
+	test(
+		`Later template_include callback cannot add a second document${ testSuffix }`,
+		{ tag: [ tags.SKIP_ON_PRESSABLE, tags.SKIP_ON_WPCOM ] },
+		async ( { page, baseURL } ) => {
+			try {
+				await setOption(
+					request,
+					baseURL,
+					'woocommerce_coming_soon',
+					'yes'
+				);
+				await setOption(
+					request,
+					baseURL,
+					'woocommerce_store_pages_only',
+					'yes'
+				);
+			} catch ( error ) {
+				console.log( error );
+			}
+
+			// wp-env mounts the always-on E2E helper plugin at this path.
+			await setFilterValue(
+				page,
+				'template_include',
+				'/var/www/html/wp-content/plugins/woocommerce-e2e-test-helper/fixtures/late-template-include.php',
+				999
+			);
+
+			const response = await page.goto( 'shop/' );
+			// The raw body is needed: a browser merges multiple documents into one DOM.
+			const html = await response.text();
+
+			expect( html ).toContain( 'Great things are on the horizon' );
+			expect( html.match( /<!doctype html/gi ) ).toHaveLength( 1 );
+			expect( html ).not.toContain( 'Late template_include fixture' );
+		}
+	);
 }
 
 test.describe( 'Launch Your Store front end - logged out', () => {

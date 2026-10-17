@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix Coming Soon pages on block themes rendering additional templates from later template_include callbacks.
