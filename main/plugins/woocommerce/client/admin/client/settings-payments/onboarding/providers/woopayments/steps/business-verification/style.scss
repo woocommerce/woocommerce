@@ -1,0 +1,226 @@
+@import "@wordpress/base-styles/_colors.native.scss";
+
+$gutenberg-blueberry: #3858e9;
+$gutenberg-blueberry-focus: #1d35b4;
+
+// Adjust styles for the #business_verification step to prevent vertical overflow.
+#business_verification.settings-payments-onboarding-modal__step {
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	overflow: hidden;
+}
+
+.settings-payments-onboarding-modal__step-business-verification {
+	min-height: 100%;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	flex: 1;
+
+	&-content {
+		overflow-y: auto;
+		display: flex;
+		flex-direction: column;
+		flex: 1;
+
+		a {
+			text-decoration: none;
+		}
+
+		.stepper {
+			&__nav {
+				position: fixed;
+				top: 0;
+				left: 0;
+				right: 0;
+				height: 80px;
+				padding-top: 8px;
+				padding-left: 8px;
+				padding-right: 8px;
+				display: grid;
+				grid-template-columns: 94px 1fr; // Sizing counted for the right padding inside 1st column (logo)
+				align-items: stretch;
+				background-color: #fff;
+				border-bottom: 1px solid $gray-300;
+				z-index: 10;
+
+				&-button {
+					color: var(--wp-components-color-accent, $gutenberg-blueberry);
+					cursor: pointer;
+					background-color: transparent;
+					border: none;
+					display: flex;
+					align-items: center;
+					padding: $gap-large;
+					font-size: 14px;
+
+					.gridicons-chevron-left {
+						fill: var(--wp-components-color-accent, $gutenberg-blueberry);
+						margin-right: 2px;
+					}
+
+					&:last-child {
+						justify-self: end;
+					}
+
+					&.hide {
+						visibility: hidden;
+					}
+				}
+
+				&-logo {
+					justify-self: center;
+					align-self: center;
+					height: 17px;
+				}
+			}
+
+			&__wrapper {
+				width: 620px;
+				max-width: 620px;
+				margin: 56px auto;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+
+				@media screen and ( max-width: $break-xlarge ) {
+					width: 100%;
+					padding: 0 $gap;
+					margin: $gap auto;
+				}
+			}
+
+			&__heading {
+				font-size: 20px;
+				line-height: 24px;
+				font-weight: 500;
+				font-family: "SF Pro Display", $default-font;
+				color: $gray-900;
+				text-align: center;
+
+				@media screen and ( max-width: $break-mobile ) {
+					text-align: left;
+					text-wrap: auto;
+				}
+			}
+
+			&__subheading {
+				font-size: 13px;
+				line-height: 20px;
+				font-weight: 400;
+				text-align: center;
+				text-wrap: wrap;
+				color: $gray-700;
+				margin: $gap-small 0 $gap-largest;
+
+				@media screen and ( max-width: $break-mobile ) {
+					text-align: left;
+				}
+			}
+
+			&__content {
+				width: 100%;
+			}
+
+			&__cta {
+				display: block;
+				width: 100%;
+				height: 40px; // Matching the updated WP Component. We can remove this when we update Components version.
+				margin-top: $gap-large;
+				&.inline {
+					width: auto; // Adjust the button width not to take 100%.
+					margin-top: 0; // No need to have margin in this case.
+				}
+			}
+		}
+
+		.woopayments-inline-notice {
+			background-color: $gray-0;
+			&__content {
+				display: flex;
+				width: 100%;
+				&__title {
+					width: inherit;
+				}
+				&__actions {
+					width: auto;
+					padding-top: 0;
+				}
+			}
+		}
+
+		.woopayments-banner-notice--embedded-kyc {
+			&.is-warning {
+				background-color: lighten($alert-yellow, 35%);
+			}
+
+			&.is-error {
+				background-color: lighten($alert-red, 35%);
+			}
+		}
+
+		.woopayments-onboarding__tos {
+			font-size: 12px;
+		}
+
+		.component-grouped-select-control__button-value {
+			color: $gray-900;
+		}
+
+		.complete-business-info-task__option-description {
+			font-size: 12px;
+			color: $gray-700;
+			line-height: 16px;
+			margin-top: 4px;
+		}
+
+		.components-base-control,
+		.components-custom-select-control,
+		.components-grouped-select-control {
+			margin-bottom: $gap-large;
+		}
+
+		.components-custom-select-control button.components-custom-select-control__button,
+		.components-grouped-select-control button.components-grouped-select-control__button {
+			margin: 0;
+		}
+
+		.components-custom-select-control .components-custom-select-control__menu,
+		.components-grouped-select-control .components-grouped-select-control__list {
+			margin-left: 0;
+			margin-right: 0;
+
+			// Use :after to force the list to take on more vertical space so that when opened in a container with scroll,
+			// the list does not sit flush with the bottom.
+			&::after {
+				content: " ";
+				position: absolute;
+				top: 0;
+				height: 100%;
+				width: 1px;
+				margin-top: $gap-larger; // This is what makes the list take more vertical space.
+				background: transparent;
+				pointer-events: none;
+				z-index: 0;
+
+				@media screen and ( max-width: $break-xlarge ) {
+					margin-top: $gap; // Align the bottom gap with the side padding.
+				}
+			}
+		}
+
+		.components-form-field__error {
+			margin: -$gap 0 $gap;
+		}
+	}
+}
+
+// Wrap loader so it's centered and does not get cut.
+.embedded-kyc-loader-wrapper {
+	text-align: center;
+	height: 35px;
+	&.padded {
+		padding-top: 61px; // Takes the same padding as Stripe embedded component.
+	}
+}

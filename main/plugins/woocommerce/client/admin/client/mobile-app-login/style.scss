@@ -1,0 +1,96 @@
+// Shared QR-direct-login layout rules. Imported from the modal package so
+// the standalone page renders the QR + number-match / approved / rejected
+// states identically to the modal.
+@import "../homescreen/mobile-app-modal/components/qr-direct-login.scss";
+
+.woocommerce-mobile-app-login {
+	display: flex;
+	justify-content: center;
+	padding: $gap-large;
+
+	&__card {
+		width: 100%;
+		max-width: 560px;
+		border-top: 4px solid $studio-woocommerce-purple-50;
+		overflow: hidden;
+	}
+
+	&__body {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		text-align: center;
+		padding: $gap-largest;
+	}
+
+	// Real Woo wordmark at the top of the card. Matches the 91×24 SVG from
+	// `~/core-profiler/components/navigation/woologo`.
+	&__logo {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		margin: 0 auto $gap;
+		line-height: 0;
+
+		svg {
+			width: 91px;
+			height: 24px;
+		}
+	}
+
+	&__heading {
+		font-size: 24px;
+		font-weight: 600;
+		line-height: 1.25;
+		letter-spacing: 0;
+		color: $gray-900;
+		margin: 0 0 $gap;
+	}
+
+	&__intro {
+		color: $gray-700;
+		font-size: 14px;
+		line-height: 1.5;
+		margin: 0 0 $gap-large;
+		max-width: 420px;
+	}
+
+	&__qr {
+		margin-bottom: $gap-large;
+
+		// Centre the QR + meta column as a unit on this single-column page.
+		// The component itself uses a horizontal flex layout in the READY
+		// state (QR on the left, timer + renew on the right), we just
+		// re-anchor that whole row to the centre here.
+		.woocommerce-qr-direct-login {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			text-align: center;
+		}
+
+		.woocommerce-qr-direct-login.woocommerce-qr-direct-login--ready {
+			flex-direction: row;
+			justify-content: center;
+			text-align: left;
+		}
+	}
+
+	&__actions {
+		margin-bottom: $gap-large;
+	}
+
+	&__faq {
+		margin-top: $gap-large;
+		padding-top: 16px;
+		border-top: 1px solid #f0f0f0;
+		color: $gray-700;
+		font-size: 13px;
+		line-height: 1.5;
+		text-align: center;
+
+		a {
+			color: #007cba;
+		}
+	}
+}

@@ -1,0 +1,77 @@
+$border-radius: 4px;
+$author-image-size: 16px;
+
+.woocommerce-marketing-learn-marketing-card {
+	&__body {
+		display: flex;
+		flex-wrap: wrap;
+	}
+
+	&__post {
+		width: 340px;
+		height: 318px;
+		padding: $gap-large;
+		text-decoration: none;
+	}
+
+	&__post-img {
+		width: 292px;
+		height: 166px;
+		background: #e9e9e9;
+		margin-bottom: 16px;
+		border-radius: $border-radius;
+
+		&--placeholder {
+			@include placeholder();
+		}
+
+		img {
+			display: block;
+			width: 100%;
+			height: 100%;
+			border-radius: $border-radius;
+		}
+	}
+
+	&__post-title {
+		font-size: 14px;
+		font-weight: 700;
+		line-height: 18px;
+		color: $gray-900;
+		margin-bottom: 12px;
+
+		&--placeholder {
+			@include placeholder();
+		}
+	}
+
+	&__post-description {
+		font-size: 12px;
+		line-height: 17px;
+		color: #757575;
+		display: flex;
+		gap: 8px;
+
+		&--placeholder {
+			@include placeholder();
+			width: 33%;
+		}
+
+		img {
+			width: $author-image-size;
+			height: $author-image-size;
+		}
+	}
+
+	&__footer {
+		&--placeholder {
+			@include placeholder();
+			width: 150px;
+			height: 32px;
+		}
+	}
+
+	.woocommerce-empty-content {
+		margin: $gap-large auto;
+	}
+}
