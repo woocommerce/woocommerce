@@ -109,7 +109,7 @@ class RemoteInboxNotificationsDataSourcePollerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A read in which every source returns a complete, valid list records its slugs and fetch time.
+	 * @testdox A complete canonical response records its slugs and fetch time, independently of other sources.
 	 */
 	public function test_complete_read_records_published_snapshot(): void {
 		$before = time();
@@ -118,7 +118,7 @@ class RemoteInboxNotificationsDataSourcePollerTest extends WC_Unit_Test_Case {
 
 		$snapshot = $this->sut->get_published_snapshot();
 		$this->assertNotNull( $snapshot, 'A complete read must record a snapshot.' );
-		$this->assertEqualsCanonicalizing( array( 'remote-alert-a', 'remote-alert-b', 'remote-alert-c' ), $snapshot['slugs'] );
+		$this->assertEqualsCanonicalizing( array( 'remote-alert-a', 'remote-alert-b' ), $snapshot['slugs'] );
 		$this->assertGreaterThanOrEqual( $before, $snapshot['fetched_at'], 'The snapshot time must not predate the read.' );
 		$this->assertLessThanOrEqual( time(), $snapshot['fetched_at'], 'The snapshot time must not be in the future.' );
 	}
@@ -164,7 +164,7 @@ class RemoteInboxNotificationsDataSourcePollerTest extends WC_Unit_Test_Case {
 		$valid_canonical = $this->encode_specs( 'remote-alert-a' );
 		$valid_auxiliary = $this->encode_specs( 'remote-alert-c' );
 		$invalid_spec    = $this->create_spec( 'remote-alert-invalid' );
-		unset( $invalid_spec->type );
+		unset( $invalid_spec->slug );
 
 		return array(
 			'canonical transport failure'   => array( null, $valid_auxiliary, true, array( 'remote-alert-c' ) ),
@@ -172,15 +172,83 @@ class RemoteInboxNotificationsDataSourcePollerTest extends WC_Unit_Test_Case {
 			'canonical error object'        => array( '{"code":"rest_no_route"}', $valid_auxiliary, true, array( 'remote-alert-c' ) ),
 			'canonical truncated JSON'      => array( substr( $this->encode_specs( 'remote-alert-a', 'remote-alert-b' ), 0, -20 ), $valid_auxiliary, true, array( 'remote-alert-c' ) ),
 			'canonical HTML error page'     => array( '<html><body>502 Bad Gateway</body></html>', $valid_auxiliary, true, array( 'remote-alert-c' ) ),
-			'canonical invalid spec'        => array( (string) wp_json_encode( array( $this->create_spec( 'remote-alert-a' ), $invalid_spec ) ), $valid_auxiliary, true, array( 'remote-alert-a', 'remote-alert-c' ) ),
+			'canonical missing slug'        => array( (string) wp_json_encode( array( $this->create_spec( 'remote-alert-a' ), $invalid_spec ) ), $valid_auxiliary, true, array( 'remote-alert-a', 'remote-alert-c' ) ),
 			'canonical duplicate slug'      => array( $this->encode_specs( 'remote-alert-a', 'remote-alert-a' ), $valid_auxiliary, true, array( 'remote-alert-a', 'remote-alert-c' ) ),
-			'auxiliary transport failure'   => array( $valid_canonical, null, true, array( 'remote-alert-a' ) ),
 			'canonical source filtered out' => array( $valid_canonical, $valid_auxiliary, false, array( 'remote-alert-c' ) ),
 		);
 	}
 
+
 	/**
-	 * @testdox A failed read keeps the previous snapshot, and an older read cannot replace a newer one.
+	 * @testdox An auxiliary outage does not veto the canonical published slugs.
+	 */
+	public function test_auxiliary_failure_does_not_veto_snapshot(): void {
+		$this->responses[ self::AUXILIARY_URL ] = null;
+
+		$this->assertTrue( $this->sut->read_specs_from_data_sources() );
+
+		$snapshot = $this->sut->get_published_snapshot();
+		$this->assertNotNull( $snapshot );
+		$this->assertEqualsCanonicalizing( array( 'remote-alert-a', 'remote-alert-b' ), $snapshot['slugs'] );
+	}
+
+	/**
+	 * @testdox Identifiable invalid specs remain published even when none can be cached.
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $include_valid Whether the canonical response also has a runnable spec.
+	 */
+	public function test_snapshot_preserves_invalid_spec_slugs( bool $include_valid ): void {
+		$invalid = $this->create_spec( 'remote-alert-invalid' );
+		unset( $invalid->type );
+		$specs = array( $invalid );
+		if ( $include_valid ) {
+			$specs[] = $this->create_spec( 'remote-alert-valid' );
+		}
+		$this->data_sources                        = array( $this->data_sources[0] );
+		$this->responses[ $this->data_sources[0] ] = (string) wp_json_encode( $specs );
+
+		$this->assertSame( $include_valid, $this->sut->read_specs_from_data_sources(), 'The existing return value describes runnable specs.' );
+
+		$snapshot = $this->sut->get_published_snapshot();
+		$this->assertNotNull( $snapshot );
+		$this->assertContains( 'remote-alert-invalid', $snapshot['slugs'] );
+		$this->assertCount( $include_valid ? 2 : 1, $snapshot['slugs'] );
+		$cached = $this->sut->get_cached_specs();
+		$this->assertArrayNotHasKey( 'remote-alert-invalid', is_array( $cached ) ? $cached : array() );
+	}
+
+	/**
+	 * @testdox Malformed identities cannot authorize withdrawal or crash spec merging.
+	 * @testWith [null]
+	 *           [""]
+	 *           [["invalid"]]
+	 *           [false]
+	 *
+	 * @param mixed $slug Malformed identity.
+	 */
+	public function test_malformed_identity_clears_snapshot( $slug ): void {
+		$invalid                                   = $this->create_spec( 'remote-alert-invalid' );
+		$invalid->slug                             = $slug;
+		$this->responses[ $this->data_sources[0] ] = (string) wp_json_encode( array( $invalid ) );
+		set_transient(
+			self::SNAPSHOT_TRANSIENT,
+			array(
+				'fetched_at' => time(),
+				'slugs'      => array( 'old' ),
+			),
+			DAY_IN_SECONDS
+		);
+
+		$this->assertTrue( $this->sut->read_specs_from_data_sources() );
+
+		$this->assertNull( $this->sut->get_published_snapshot() );
+		$this->assertSame( array( 'remote-alert-c' ), array_keys( $this->sut->get_cached_specs() ) );
+	}
+
+	/**
+	 * @testdox A failed read clears the previous snapshot, and an older complete read cannot replace a newer one.
 	 */
 	public function test_snapshot_only_moves_forward(): void {
 		$this->sut->read_specs_from_data_sources();
@@ -192,7 +260,7 @@ class RemoteInboxNotificationsDataSourcePollerTest extends WC_Unit_Test_Case {
 		$this->sut->delete_specs_transient();
 
 		$this->assertFalse( $this->sut->read_specs_from_data_sources() );
-		$this->assertSame( $complete_snapshot, $this->sut->get_published_snapshot(), 'A read that returns nothing carries no newer evidence.' );
+		$this->assertNull( $this->sut->get_published_snapshot(), 'A failed canonical read must not leave stale absence evidence available.' );
 
 		$newer_snapshot = array(
 			'fetched_at' => time() + HOUR_IN_SECONDS,

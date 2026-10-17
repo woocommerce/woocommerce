@@ -151,7 +151,7 @@ class RemoteInboxNotificationsEngine extends RemoteSpecsEngine {
 		$data_source_poller = RemoteInboxNotificationsDataSourcePoller::get_instance();
 		$specs              = $data_source_poller->get_specs_from_data_sources();
 
-		if ( false === $specs || ! is_countable( $specs ) || count( $specs ) === 0 ) {
+		if ( false === $specs || ! is_countable( $specs ) ) {
 			return;
 		}
 
@@ -177,7 +177,7 @@ class RemoteInboxNotificationsEngine extends RemoteSpecsEngine {
 	}
 
 	/**
-	 * Move unactioned WooCommerce.com alerts to pending once a complete feed read no longer contains their specs.
+	 * Move unactioned WooCommerce.com-owned alerts to pending when the canonical feed no longer lists them.
 	 *
 	 * Only alerts that last changed status well before that read are hidden, so an older read (for example, one
 	 * cached for another locale) cannot hide an alert that newer specs made visible.
@@ -224,6 +224,15 @@ class RemoteInboxNotificationsEngine extends RemoteSpecsEngine {
 
 			$note->set_status( Note::E_WC_ADMIN_NOTE_PENDING );
 			$note->save();
+			wc_get_logger()->info(
+				'Changed an unactioned Store Alert to pending because it is no longer published by WooCommerce.com.',
+				array(
+					'source'     => 'remote-inbox-notifications',
+					'note_id'    => $note->get_id(),
+					'slug'       => $note->get_name(),
+					'fetched_at' => $snapshot['fetched_at'],
+				)
+			);
 		}
 	}
 

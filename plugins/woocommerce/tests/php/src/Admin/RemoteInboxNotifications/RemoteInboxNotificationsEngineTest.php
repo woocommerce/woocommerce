@@ -417,6 +417,121 @@ class RemoteInboxNotificationsEngineTest extends WC_Unit_Test_Case {
 		$this->assertSame( Note::E_WC_ADMIN_NOTE_ACTIONED, $this->get_status( $dismissed ), 'Republishing must not undo a dismissal.' );
 	}
 
+
+	/**
+	 * @testdox Canonical identities reconcile alerts despite invalid specs or an auxiliary outage.
+	 * @testWith ["valid", false]
+	 *           ["missing_type", false]
+	 *           ["missing_locale", false]
+	 *           ["invalid_rule", false]
+	 *           ["missing_type", true]
+	 *
+	 * @param string $shape        Shape of the published spec.
+	 * @param bool   $cached_specs Whether an older executable cache exists.
+	 */
+	public function test_run_reconciles_canonical_identities( string $shape, bool $cached_specs ): void {
+		$published = $this->create_note( 'remote-alert-published' );
+		$withdrawn = $this->create_note( 'remote-alert-withdrawn' );
+		$cached    = $this->create_note( 'remote-alert-cached' );
+		$spec      = $this->create_spec( 'remote-alert-published' );
+		if ( 'missing_type' === $shape ) {
+			unset( $spec->type );
+		} elseif ( 'missing_locale' === $shape ) {
+			$spec->locales = array();
+		} elseif ( 'invalid_rule' === $shape ) {
+			$spec->rules = array( (object) array( 'type' => 'publish_before_time' ) );
+		}
+
+		$poller = RemoteInboxNotificationsDataSourcePoller::get_instance();
+		$this->arrange_feed( array( $this->create_spec( 'remote-alert-cached' ) ), null );
+		if ( ! $cached_specs ) {
+			$poller->delete_specs_transient();
+		}
+		$canonical_url = RemoteInboxNotificationsDataSourcePoller::get_data_sources()[0];
+		add_filter(
+			DataSourcePoller::FILTER_NAME,
+			fn( $sources, $id ) => RemoteInboxNotificationsDataSourcePoller::ID === $id ? array( $canonical_url, 'https://example.com/unavailable-feed' ) : $sources,
+			10,
+			2
+		);
+		add_filter(
+			'pre_http_request',
+			static function ( $preempt, $args, $url ) use ( $canonical_url, $spec ) {
+				unset( $args );
+				if ( 0 !== strpos( $url, $canonical_url ) ) {
+					return $preempt;
+				}
+				return array(
+					'body'     => wp_json_encode( array( $spec ) ),
+					'headers'  => array(),
+					'response' => array( 'code' => 200 ),
+				);
+			},
+			20,
+			3
+		);
+
+		$poller->read_specs_from_data_sources();
+		RemoteInboxNotificationsEngine::run();
+
+		$this->assertSame( Note::E_WC_ADMIN_NOTE_UNACTIONED, $this->get_status( $published ), 'Published identities are protected even when their specs cannot run.' );
+		$this->assertSame( Note::E_WC_ADMIN_NOTE_PENDING, $this->get_status( $withdrawn ), 'Canonical evidence must not depend on an auxiliary feed or runnable specs.' );
+		$this->assertSame( $cached_specs ? Note::E_WC_ADMIN_NOTE_UNACTIONED : Note::E_WC_ADMIN_NOTE_PENDING, $this->get_status( $cached ), 'Previously cached specs remain protected when processed.' );
+	}
+
+	/**
+	 * @testdox A malformed specs filter result does not authorize withdrawal.
+	 * @testWith [null]
+	 *           [123]
+	 *           ["invalid"]
+	 *
+	 * @param mixed $filtered_specs Malformed filtered specs.
+	 */
+	public function test_run_ignores_invalid_filtered_specs( $filtered_specs ): void {
+		$withdrawn = $this->create_note( 'remote-alert-withdrawn' );
+		$this->arrange_feed( array( $this->create_spec( 'remote-alert-published' ) ), time() );
+		add_filter(
+			DataSourcePoller::FILTER_NAME_SPECS,
+			fn( $specs, $id ) => RemoteInboxNotificationsDataSourcePoller::ID === $id ? $filtered_specs : $specs,
+			10,
+			2
+		);
+
+		RemoteInboxNotificationsEngine::run();
+
+		$this->assertSame( Note::E_WC_ADMIN_NOTE_UNACTIONED, $this->get_status( $withdrawn ) );
+	}
+
+	/**
+	 * @testdox A withdrawal logs its persisted transition once, without logging preserved alerts.
+	 */
+	public function test_run_logs_withdrawal_once(): void {
+		$withdrawn = $this->create_note( 'remote-alert-withdrawn' );
+		$this->create_note( 'remote-alert-published' );
+		$fetched_at = time();
+		$this->arrange_feed( array( $this->create_spec( 'remote-alert-published' ) ), $fetched_at );
+		$logger = $this->createMock( \WC_Logger_Interface::class );
+		$logger->expects( $this->once() )->method( 'info' )->with(
+			$this->isType( 'string' ),
+			$this->callback(
+				function ( $context ) use ( $withdrawn, $fetched_at ) {
+					$this->assertSame( Note::E_WC_ADMIN_NOTE_PENDING, $this->get_status( $withdrawn ), 'Only a persisted transition should be logged.' );
+					$this->assertSame( 'remote-inbox-notifications', $context['source'] );
+					$this->assertSame( $withdrawn->get_id(), $context['note_id'] );
+					$this->assertSame( 'remote-alert-withdrawn', $context['slug'] );
+					$this->assertSame( $fetched_at, $context['fetched_at'] );
+					return true;
+				}
+			)
+		);
+		add_filter( 'woocommerce_logging_class', static fn() => $logger );
+
+		RemoteInboxNotificationsEngine::run();
+		RemoteInboxNotificationsEngine::run();
+
+		$this->assertSame( Note::E_WC_ADMIN_NOTE_PENDING, $this->get_status( $withdrawn ) );
+	}
+
 	/**
 	 * Cache the given specs for the current locale and record a matching published snapshot.
 	 *

@@ -25,21 +25,11 @@ class RemoteInboxNotificationsDataSourcePoller extends DataSourcePoller {
 	private const PUBLISHED_SNAPSHOT_TRANSIENT = 'woocommerce_admin_remote_inbox_notifications_published_snapshot';
 
 	/**
-	 * Progress tracked at the start of a read.
-	 */
-	private const READ_START = array(
-		'complete'                  => true,
-		'includes_canonical_source' => false,
-		'slugs'                     => array(),
-	);
-
-	/**
-	 * Progress of the read in flight: whether every source so far returned a nonempty list of valid,
-	 * uniquely keyed specs, whether the WooCommerce.com feed was among them, and the merged slugs.
+	 * Published identities from this read's canonical response, or null when it is not authoritative.
 	 *
-	 * @var array{complete: bool, includes_canonical_source: bool, slugs: array<int|string>}
+	 * @var string[]|null
 	 */
-	private $current_read = self::READ_START;
+	private $published_slugs = null;
 
 	/**
 	 * Default data sources array.
@@ -73,33 +63,31 @@ class RemoteInboxNotificationsDataSourcePoller extends DataSourcePoller {
 	}
 
 	/**
-	 * Read the data sources, and record which specs were published when every source returned a complete list.
+	 * Read the data sources and record the identities published by the canonical WooCommerce.com feed.
 	 *
-	 * Any other read that returns specs clears the recorded snapshot, because those specs are newer evidence of what is published.
+	 * Invalid specs with usable slugs still count as published. An inconclusive canonical response clears the snapshot.
 	 *
 	 * @since 11.3.0
 	 *
 	 * @return bool Whether any specs were read.
 	 */
 	public function read_specs_from_data_sources() {
-		$fetched_at = time();
-		$this->start_read();
+		$fetched_at            = time();
+		$this->published_slugs = null;
 
 		$result = parent::read_specs_from_data_sources();
 
-		if ( true === $result ) {
-			if ( $this->current_read['complete'] && $this->current_read['includes_canonical_source'] ) {
-				$this->save_published_snapshot( $fetched_at, array_map( 'strval', $this->current_read['slugs'] ) );
-			} else {
-				delete_transient( self::PUBLISHED_SNAPSHOT_TRANSIENT );
-			}
+		if ( null !== $this->published_slugs ) {
+			$this->save_published_snapshot( $fetched_at, $this->published_slugs );
+		} else {
+			delete_transient( self::PUBLISHED_SNAPSHOT_TRANSIENT );
 		}
 
 		return $result;
 	}
 
 	/**
-	 * Get the spec slugs from the latest read in which every data source returned a complete list.
+	 * Get the published identities from the latest complete canonical response.
 	 *
 	 * An empty or failed response never produces a snapshot, because the feed cannot tell those apart.
 	 *
@@ -122,7 +110,7 @@ class RemoteInboxNotificationsDataSourcePoller extends DataSourcePoller {
 	}
 
 	/**
-	 * Merge the specs of one data source, tracking whether its response was complete.
+	 * Merge runnable specs and track canonical publication identities independently of validation.
 	 *
 	 * @since 11.3.0
 	 *
@@ -132,26 +120,27 @@ class RemoteInboxNotificationsDataSourcePoller extends DataSourcePoller {
 	 * @return void
 	 */
 	protected function merge_specs( $specs_to_merge_in, &$specs, $url ) {
-		$source_specs = array();
-		parent::merge_specs( $specs_to_merge_in, $source_specs, $url );
+		parent::merge_specs( $specs_to_merge_in, $specs, $url );
 
-		$this->current_read['complete'] = $this->current_read['complete']
-			&& count( $source_specs ) > 0
-			&& count( $source_specs ) === count( $specs_to_merge_in );
-
-		if ( in_array( $url, self::get_data_sources(), true ) ) {
-			$this->current_read['includes_canonical_source'] = true;
+		if ( ! in_array( $url, self::get_data_sources(), true ) ) {
+			return;
 		}
 
-		$specs                       = array_replace( $specs, $source_specs );
-		$this->current_read['slugs'] = array_keys( $specs );
-	}
-
-	/**
-	 * Reset the progress tracked for a new read.
-	 */
-	private function start_read(): void {
-		$this->current_read = self::READ_START;
+		$this->published_slugs = null;
+		$slugs                 = array();
+		foreach ( $specs_to_merge_in as $spec ) {
+			if ( ! isset( $spec->slug ) || ! is_scalar( $spec->slug ) || '' === (string) $spec->slug ) {
+				return;
+			}
+			$slug = (string) $spec->slug;
+			if ( isset( $slugs[ $slug ] ) ) {
+				return;
+			}
+			$slugs[ $slug ] = $slug;
+		}
+		if ( ! empty( $slugs ) ) {
+			$this->published_slugs = array_values( $slugs );
+		}
 	}
 
 	/**
@@ -188,9 +177,9 @@ class RemoteInboxNotificationsDataSourcePoller extends DataSourcePoller {
 		$logger         = self::get_logger();
 		$logger_context = array( 'source' => $url );
 
-		if ( ! isset( $spec->slug ) ) {
+		if ( ! isset( $spec->slug ) || ! is_scalar( $spec->slug ) || '' === (string) $spec->slug ) {
 			$logger->error(
-				'Spec is invalid because the slug is missing in feed',
+				'Spec is invalid because the slug is missing or invalid in feed',
 				$logger_context
 			);
 			// phpcs:ignore
