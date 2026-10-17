@@ -800,7 +800,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 				const { store } = await import( '@wordpress/interactivity' );
 				const unlockKey =
 					'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
-				await import( '@woocommerce/stores/woocommerce/cart' );
+				await import( '@woocommerce/stores/woocommerce' );
 				const { actions } = store(
 					'woocommerce',
 					{},
@@ -1537,8 +1537,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 		} );
 
 		for ( const optionStyle of [ 'chips', 'dropdown' ] as (
-			| 'chips'
-			| 'dropdown'
+			'chips' | 'dropdown'
 		)[] ) {
 			// eslint-disable-next-line playwright/expect-expect
 			test( `${ optionStyle }: Test the autoselect block attribute`, async ( {

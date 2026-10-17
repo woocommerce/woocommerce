@@ -82,7 +82,7 @@ jest.mock(
 	{ virtual: true }
 );
 
-jest.mock( '@woocommerce/stores/woocommerce/cart', () => ( {} ) );
+jest.mock( '@woocommerce/stores/woocommerce', () => ( {} ) );
 jest.mock( '@woocommerce/stores/woocommerce/products', () => ( {} ) );
 jest.mock( '@woocommerce/stores/store-notices', () => ( {} ) );
 

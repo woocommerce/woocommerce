@@ -16,8 +16,8 @@
  * External dependencies
  */
 import { store, getConfig } from '@wordpress/interactivity';
-import '@woocommerce/stores/woocommerce/cart';
-import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
+import '@woocommerce/stores/woocommerce';
+import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce';
 
 /**
  * Internal dependencies

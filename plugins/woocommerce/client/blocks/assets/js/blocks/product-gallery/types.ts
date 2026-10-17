@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { WooCommerceConfig } from '@woocommerce/stores/woocommerce/cart';
+import type { WooCommerceConfig } from '@woocommerce/stores/woocommerce';
 
 export interface ProductGalleryBlockAttributes {
 	hoverZoom: boolean;
