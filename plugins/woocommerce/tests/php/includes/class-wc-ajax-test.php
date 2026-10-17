@@ -112,6 +112,120 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * Call the private `maybe_add_order_item` method.
+	 *
+	 * @param int   $order_id     Order ID.
+	 * @param array $items_to_add Items to add.
+	 */
+	private function add_items_to_order( int $order_id, array $items_to_add ): void {
+		$maybe_add_order_item_func = function () use ( $order_id, $items_to_add ) {
+			return static::maybe_add_order_item( $order_id, '', $items_to_add );
+		};
+		$maybe_add_order_item_func->call( new WC_AJAX() );
+	}
+
+	/**
+	 * @testdox Should apply a coupon to products added after the coupon was applied to an empty order.
+	 */
+	public function test_add_item_after_coupon_on_empty_order_applies_discount(): void {
+		WC_Helper_Coupon::create_coupon(
+			'tenpercent',
+			array(
+				'discount_type' => 'percent',
+				'coupon_amount' => '10',
+			)
+		);
+		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 10 ) );
+		$order   = wc_create_order();
+
+		$result = $order->apply_coupon( 'tenpercent' );
+		$this->assertTrue( $result, 'The coupon should apply to the empty order' );
+
+		$this->add_items_to_order(
+			$order->get_id(),
+			array(
+				array(
+					'id'  => $product->get_id(),
+					'qty' => 2,
+				),
+			)
+		);
+
+		$order       = wc_get_order( $order->get_id() );
+		$coupon_item = current( $order->get_items( 'coupon' ) );
+		$line_item   = current( $order->get_items() );
+
+		$this->assertEquals( 2, $coupon_item->get_discount(), 'The coupon discount should include the added product' );
+		$this->assertEquals( 18, $line_item->get_total(), 'The added line item should be discounted' );
+		$this->assertEquals( 18, $order->get_total(), 'The order total should include the coupon discount' );
+	}
+
+	/**
+	 * @testdox Should apply an existing coupon to a product added to an order that already has items.
+	 */
+	public function test_add_item_after_coupon_on_order_with_items_applies_discount(): void {
+		WC_Helper_Coupon::create_coupon(
+			'tenpercent',
+			array(
+				'discount_type' => 'percent',
+				'coupon_amount' => '10',
+			)
+		);
+		$product_a = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 10 ) );
+		$product_b = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 10 ) );
+		$order     = wc_create_order();
+		$order->add_product( $product_a, 1 );
+		$order->calculate_totals();
+		$order->apply_coupon( 'tenpercent' );
+
+		$this->add_items_to_order(
+			$order->get_id(),
+			array(
+				array(
+					'id'  => $product_b->get_id(),
+					'qty' => 1,
+				),
+			)
+		);
+
+		$order       = wc_get_order( $order->get_id() );
+		$coupon_item = current( $order->get_items( 'coupon' ) );
+
+		foreach ( $order->get_items() as $line_item ) {
+			$this->assertEquals( 9, $line_item->get_total(), 'Every line item should be discounted' );
+		}
+		$this->assertEquals( 2, $coupon_item->get_discount(), 'The coupon discount should include both products' );
+		$this->assertEquals( 18, $order->get_total(), 'The order total should include the coupon discount' );
+	}
+
+	/**
+	 * @testdox Should keep edited line totals when adding a product to an order without coupons.
+	 */
+	public function test_add_item_to_order_without_coupons_keeps_line_totals(): void {
+		$product_a = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 10 ) );
+		$product_b = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 10 ) );
+		$order     = wc_create_order();
+		$item_id   = $order->add_product( $product_a, 1 );
+		$item      = $order->get_item( $item_id );
+		$item->set_total( 5 );
+		$item->save();
+
+		$this->add_items_to_order(
+			$order->get_id(),
+			array(
+				array(
+					'id'  => $product_b->get_id(),
+					'qty' => 1,
+				),
+			)
+		);
+
+		$order = wc_get_order( $order->get_id() );
+
+		$this->assertEquals( 5, $order->get_item( $item_id )->get_total(), 'The edited line total should not be reset' );
+	}
+
+	/**
 	 * Creating an API Key with too long of a description should report failure.
 	 */
 	public function test_create_api_key_long_description_failure() {
