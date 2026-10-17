@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\StockNotifications\Emails;
 
 use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailManager;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
+use Automattic\WooCommerce\Internal\StockNotifications\Frontend\MyAccountEndpoint;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Tests\Internal\StockNotifications\StockNotificationsFeatureTrait;
 use WC_Helper_Product;
@@ -71,6 +72,7 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 		// whatever filters are active for them, rather than inheriting this test's list.
 		$this->reset_email_singleton();
 		parent::tearDown();
+		WC()->query->init_query_vars();
 	}
 
 	/**
@@ -199,6 +201,70 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 			'verify'             => array( 'send_verify_email' ),
 			'verified'           => array( 'send_verified_email' ),
 		);
+	}
+
+	/**
+	 * @testdox Should link registered recipients to account management and preserve guest unsubscribe links.
+	 * @testWith [false, false, "stock-notifications"]
+	 *           [true, false, "stock-notifications"]
+	 *           [false, false, "restock-alerts"]
+	 *           [true, false, "restock-alerts"]
+	 *           [false, true, "stock-notifications"]
+	 *           [true, true, "stock-notifications"]
+	 *           [false, false, ""]
+	 *           [true, false, ""]
+	 *           [false, true, ""]
+	 *           [true, true, ""]
+	 *           [false, false, "stock-notifications", true]
+	 *           [true, false, "stock-notifications", true]
+	 *           [false, false, "restock-alerts", true]
+	 *           [true, false, "restock-alerts", true]
+	 *           [false, true, "stock-notifications", true]
+	 *           [true, true, "stock-notifications", true]
+	 *           [false, false, "", true]
+	 *           [true, false, "", true]
+	 *           [false, true, "", true]
+	 *           [true, true, "", true]
+	 *
+	 * @param bool   $verified Whether to render the confirmation email.
+	 * @param bool   $guest Whether the signup belongs to a guest.
+	 * @param string $endpoint The configured account endpoint.
+	 * @param bool   $plain_text Whether to render the plain-text email instead of HTML.
+	 */
+	public function test_email_footer_links( bool $verified, bool $guest, string $endpoint, bool $plain_text = false ): void {
+		update_option( MyAccountEndpoint::ENDPOINT_OPTION, $endpoint );
+		new MyAccountEndpoint();
+		WC()->query->init_query_vars();
+		$notification = $this->build_notification();
+		if ( ! $guest ) {
+			$notification->set_user_id( self::factory()->user->create( array( 'role' => 'customer' ) ) );
+			$notification->save();
+		}
+
+		$emails = WC()->mailer()->get_emails();
+		$sut    = $emails[ $verified ? 'WC_Email_Customer_Stock_Notification_Verified' : 'WC_Email_Customer_Stock_Notification' ];
+		$sut->prepare_email( $notification );
+		$content = $plain_text ? $sut->get_content_plain() : $sut->get_content_html();
+		$pattern = $plain_text ? '/^.*: (https?:\/\/\S+)$/m' : '/href="([^"]+)" id="notification__unsubscribe_link"/';
+		$this->assertSame( 1, preg_match( $pattern, $content, $matches ), 'The footer must contain its management link.' );
+		$link = html_entity_decode( $matches[1], ENT_QUOTES );
+		parse_str( (string) wp_parse_url( $link, PHP_URL_QUERY ), $query );
+
+		$this->assertSame( 'back-in-stock-notifications', $query['utm_source'] );
+		$this->assertSame( 'email', $query['utm_medium'] );
+		if ( $guest || '' === $endpoint ) {
+			$this->assertSame( 'unsubscribe', $query['email_link_action'] );
+			$this->assertTrue( ( new Notification( $notification->get_id() ) )->check_unsubscribe_key( $query['email_link_action_key'] ), 'The unsubscribe link must contain the persisted unsubscribe key.' );
+			$this->assertSame( (string) $notification->get_id(), $query['notification_id'] );
+			$this->assertStringContainsString( 'To stop receiving these messages,', $content );
+			$this->assertStringNotContainsString( 'To manage your notifications,', $content );
+		} else {
+			$this->assertSame( wc_get_account_endpoint_url( $endpoint ), remove_query_arg( array( 'utm_source', 'utm_medium' ), $link ) );
+			$this->assertArrayNotHasKey( 'email_link_action', $query );
+			$this->assertArrayNotHasKey( 'email_link_action_key', $query );
+			$this->assertStringContainsString( 'To manage your notifications,', $content );
+			$this->assertStringNotContainsString( 'To stop receiving these messages,', $content );
+		}
 	}
 
 	/**
