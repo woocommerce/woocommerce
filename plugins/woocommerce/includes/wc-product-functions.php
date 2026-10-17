@@ -1482,9 +1482,16 @@ function wc_get_related_products( $product_id, $limit = 5, $exclude_ids = array(
 		}
 
 		if ( $transient && is_array( $transient ) ) {
+			unset( $transient[ $query_args ] );
 			$transient[ $query_args ] = $related_posts;
 		} else {
 			$transient = array( $query_args => $related_posts );
+		}
+
+		// Keep the latest two queries when over budget, so large alternating queries remain cacheable.
+		$size_limit = wp_using_ext_object_cache() ? 65536 : 8192;
+		if ( strlen( maybe_serialize( $transient ) ) > $size_limit ) {
+			$transient = array_slice( $transient, -2, null, true );
 		}
 
 		set_transient( $transient_name, $transient, DAY_IN_SECONDS );
