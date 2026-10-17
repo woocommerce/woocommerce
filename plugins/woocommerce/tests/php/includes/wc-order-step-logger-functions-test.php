@@ -41,9 +41,6 @@ class WC_Order_Step_Logger_Functions_Test extends \WC_Unit_Test_Case {
 		// Clean up log files.
 		$this->clean_up_log_files();
 
-		// Clear the WC_LOG_THRESHOLD constant if set.
-		Constants::clear_single_constant( 'WC_LOG_THRESHOLD' );
-
 		// Reset logging settings.
 		delete_option( 'woocommerce_logs_level_threshold' );
 
