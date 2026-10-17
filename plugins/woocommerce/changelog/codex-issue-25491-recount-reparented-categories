@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure product category counts update when categories are moved between parents.
