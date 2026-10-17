@@ -648,6 +648,96 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Adding a variable product without a variation links to the product unless the request is for its own page.
+	 *
+	 * @dataProvider provide_variable_product_notice_requests
+	 * @covers WC_Form_Handler::add_to_cart_action()
+	 * @covers WC_Form_Handler::add_to_cart_handler_variable()
+	 * @covers WC_Form_Handler::is_request_for_product_page()
+	 *
+	 * @param string $permalink_structure Permalink structure for the store.
+	 * @param string $requested_page      Page the request is for: 'own', 'own-unslashed', 'other', 'home', or 'none' for no request URI.
+	 * @param bool   $expect_link         Whether the notice should link to the product.
+	 */
+	public function test_variable_product_notice_links_to_the_product_unless_on_its_page( string $permalink_structure, string $requested_page, bool $expect_link ): void {
+		$original_permalink_structure = (string) get_option( 'permalink_structure' );
+		$this->use_permalink_structure( $permalink_structure );
+
+		try {
+			$product     = WC_Helper_Product::create_variation_product();
+			$product_url = get_permalink( $product->get_id() );
+
+			if ( 'own' === $requested_page ) {
+				$requested_url = $product_url;
+			} elseif ( 'own-unslashed' === $requested_page ) {
+				// The handler runs before the canonical redirect adds the slash back.
+				$requested_url = untrailingslashit( $product_url );
+			} elseif ( 'other' === $requested_page ) {
+				$requested_url = get_permalink( WC_Helper_Product::create_variation_product()->get_id() );
+			} elseif ( 'home' === $requested_page ) {
+				$requested_url = home_url( '/' );
+			} else {
+				$requested_url = null;
+			}
+
+			if ( null === $requested_url ) {
+				unset( $_SERVER['REQUEST_URI'] );
+			} else {
+				$_SERVER['REQUEST_URI'] = wp_make_link_relative( $requested_url );
+			}
+			$_REQUEST['add-to-cart'] = $product->get_id();
+
+			WC_Form_Handler::add_to_cart_action();
+		} finally {
+			$this->use_permalink_structure( $original_permalink_structure );
+		}
+
+		$notices = wc_get_notices( 'error' );
+		$this->assertCount( 1, $notices, 'Adding the parent product should add one error notice.' );
+
+		if ( $expect_link ) {
+			$this->assertStringContainsString( 'href="' . esc_url( $product_url ) . '"', $notices[0]['notice'], 'The notice should link to the product.' );
+		} else {
+			$this->assertStringContainsString( 'Please choose product options for', $notices[0]['notice'], 'The notice should name the product without linking to it.' );
+			$this->assertStringNotContainsString( '<a ', $notices[0]['notice'], 'The notice should not link to the page the shopper is on.' );
+		}
+	}
+
+	/**
+	 * Requests for the variable product notice test.
+	 *
+	 * @return array<string, array{string, string, bool}>
+	 */
+	public static function provide_variable_product_notice_requests(): array {
+		return array(
+			'plain permalinks, own product page'      => array( '', 'own', false ),
+			'plain permalinks, another product page'  => array( '', 'other', true ),
+			'plain permalinks, home page'             => array( '', 'home', true ),
+			'pretty permalinks, own product page'     => array( '/%postname%/', 'own', false ),
+			'pretty permalinks, another product page' => array( '/%postname%/', 'other', true ),
+			'pretty permalinks, own page, no slash'   => array( '/%postname%/', 'own-unslashed', false ),
+			'no request URI'                          => array( '/%postname%/', 'none', true ),
+		);
+	}
+
+	/**
+	 * Switch the permalink structure, re-registering products so their permalinks follow it.
+	 *
+	 * @param string $structure Permalink structure.
+	 */
+	private function use_permalink_structure( string $structure ): void {
+		$product_taxonomies = get_object_taxonomies( 'product' );
+
+		$this->set_permalink_structure( $structure );
+		unregister_post_type( 'product' );
+		WC_Post_Types::register_post_types();
+
+		foreach ( $product_taxonomies as $taxonomy ) {
+			register_taxonomy_for_object_type( $taxonomy, 'product' );
+		}
+	}
+
+	/**
 	 * Prepares request globals for the account details handler.
 	 *
 	 * @param array<string,string> $fields Account detail fields.

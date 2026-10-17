@@ -1175,11 +1175,7 @@ class WC_Form_Handler {
 
 		// Prevent parent variable product from being added to cart.
 		if ( empty( $variation_id ) && $product && $product->is_type( ProductType::VARIABLE ) ) {
-			$current_url        = isset( $_SERVER['REQUEST_URI'] ) ? wp_parse_url( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ), PHP_URL_PATH ) : '';
-			$product_url        = wp_parse_url( get_permalink( $product_id ), PHP_URL_PATH );
-			$is_in_product_page = $current_url && $product_url && untrailingslashit( $current_url ) === untrailingslashit( $product_url );
-
-			if ( $is_in_product_page ) {
+			if ( self::is_request_for_product_page( $product_id ) ) {
 				/* translators: 1: product name */
 				$error_message = sprintf( __( 'Please choose product options for %1$s.', 'woocommerce' ), esc_html( $product->get_name() ) );
 			} else {
@@ -1198,6 +1194,39 @@ class WC_Form_Handler {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Whether the current request is for the given product's page.
+	 *
+	 * Plain permalinks put every product on the home URL's path, so the permalink's query vars must match too.
+	 *
+	 * @since 11.3.0
+	 * @param int $product_id Product ID.
+	 * @return bool
+	 */
+	private static function is_request_for_product_page( $product_id ): bool {
+		if ( empty( $_SERVER['REQUEST_URI'] ) ) {
+			return false;
+		}
+
+		$request_url = wp_parse_url( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) );
+		$product_url = wp_parse_url( (string) get_permalink( $product_id ) );
+
+		if ( empty( $request_url['path'] ) || empty( $product_url['path'] ) || untrailingslashit( $request_url['path'] ) !== untrailingslashit( $product_url['path'] ) ) {
+			return false;
+		}
+
+		wp_parse_str( $request_url['query'] ?? '', $request_query );
+		wp_parse_str( $product_url['query'] ?? '', $product_query );
+
+		foreach ( $product_query as $key => $value ) {
+			if ( ! isset( $request_query[ $key ] ) || $request_query[ $key ] !== $value ) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	/**
