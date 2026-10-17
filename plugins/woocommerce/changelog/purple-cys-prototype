@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Add a flagged prototype of Purple in Customize your store; flag is off in production builds.
+

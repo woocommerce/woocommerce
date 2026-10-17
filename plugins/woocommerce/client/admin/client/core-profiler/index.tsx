@@ -13,6 +13,7 @@ import {
 	ErrorActorEvent,
 	fromCallback,
 	or,
+	and,
 } from 'xstate5';
 import { useMachine, useSelector } from '@xstate5/react';
 import { useMemo } from '@wordpress/element';
@@ -38,6 +39,7 @@ import {
 	CoreProfilerStep,
 	CoreProfilerCompletedSteps,
 	experimentalSettingOptionsStore as settingOptionsStore,
+	OPTIONS_STORE_NAME,
 } from '@woocommerce/data';
 import { initializeExPlat } from '@woocommerce/explat';
 import { CountryStateOption } from '@woocommerce/onboarding';
@@ -68,6 +70,9 @@ import { getStoreLocationNotSavedQuery } from './utils/store-location-not-saved'
 import { CoreProfilerLoader } from './components/loader/Loader';
 import { Plugins } from './pages/Plugins/Plugins';
 import { NoPermissionsError } from './pages/Plugins/NoPermissions';
+import { PurpleTheme } from './pages/PurpleTheme/PurpleTheme';
+import { getPurplePrototypeSettings } from '~/customize-store/purple-prototype/settings';
+import { runPurpleAction } from '~/customize-store/purple-prototype/purple-actions';
 import { useFullScreen } from '~/utils';
 import './style.scss';
 import {
@@ -136,6 +141,8 @@ export type CoreProfilerStateMachineContext = {
 	currentUserEmail: string | undefined;
 	currentUser?: WCUser;
 	storeLocationNotSaved: boolean;
+	// Prototype only: the choice made on the Purple step.
+	purpleUsePurple?: boolean;
 };
 
 const getAllowTrackingOption = fromPromise( async () =>
@@ -812,6 +819,60 @@ export const coreProfilerMachineActors = {
 	pluginInstallerMachine,
 	exitToWooHome,
 	exitToJetpackAuth,
+	// Prototype only: a short demo loader after the Purple step. It installs and activates
+	// Purple when chosen, marks "Customize your store" done, and skips the extensions.
+	purpleDemoSetup: fromCallback< CoreProfilerEvents, { usePurple: boolean } >(
+		( { sendBack, input } ) => {
+			const MIN_DURATION_MS = 4000;
+			const startedAt = Date.now();
+			let purpleDone = ! input.usePurple;
+			let finished = false;
+
+			const finishIfReady = () => {
+				if (
+					! finished &&
+					purpleDone &&
+					Date.now() - startedAt >= MIN_DURATION_MS
+				) {
+					finished = true;
+					sendBack( { type: 'PURPLE_DEMO_SETUP_DONE' } );
+				}
+			};
+
+			const progressSteps = [ 30, 50, 70, 80 ];
+			const timers = progressSteps.map( ( progress, index ) =>
+				setTimeout(
+					() => {
+						sendBack( {
+							type: 'PURPLE_DEMO_SETUP_PROGRESS',
+							payload: { progress },
+						} );
+						finishIfReady();
+					},
+					( ( index + 1 ) * MIN_DURATION_MS ) / progressSteps.length
+				)
+			);
+
+			if ( input.usePurple ) {
+				const settings = getPurplePrototypeSettings();
+				runPurpleAction( settings, 'install' )
+					.then( () => runPurpleAction( settings, 'activate' ) )
+					.then( () =>
+						dispatch( OPTIONS_STORE_NAME ).updateOptions( {
+							woocommerce_admin_customize_store_completed: 'yes',
+						} )
+					)
+					// A failed theme install shouldn't block the rest of the setup.
+					.catch( () => undefined )
+					.finally( () => {
+						purpleDone = true;
+						finishIfReady();
+					} );
+			}
+
+			return () => timers.forEach( clearTimeout );
+		}
+	),
 };
 export const coreProfilerStateMachineDefinition = createMachine( {
 	id: 'coreProfiler',
@@ -1545,6 +1606,27 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 							src: 'getPlugins',
 							onDone: [
 								{
+									// Prototype only: when there are no extensions to offer, still show the
+									// Purple step instead of finishing setup.
+									target: 'purpleTheme',
+									guard: and( [
+										'isPurpleThemeStepEnabled',
+										( {
+											event,
+										}: {
+											event: DoneActorEvent<
+												Extension[]
+											>;
+										} ) =>
+											event.output.length === 0 ||
+											event.output.every(
+												( plugin: Extension ) =>
+													plugin.is_activated
+											),
+									] ),
+									actions: 'handlePlugins',
+								},
+								{
 									target: 'pluginsSkipped',
 									guard: ( {
 										event,
@@ -1651,30 +1733,74 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 						},
 					],
 					on: {
-						PLUGINS_PAGE_SKIPPED: {
-							actions: [
-								{
-									type: 'recordTracksStepSkipped',
-									params: { step: 'plugins' },
-								},
-								spawnChild( 'updateProfilerCompletedSteps', {
-									input: { step: 'plugins' },
-								} ),
-							],
-							target: 'pluginsSkipped',
-						},
-						PLUGINS_PAGE_COMPLETED_WITHOUT_SELECTING_PLUGINS: {
-							target: 'postPluginInstallation.noPluginsSelected',
-							actions: [
-								{
-									type: 'recordTracksStepSkipped',
-									params: { step: 'plugins' },
-								},
-								spawnChild( 'updateProfilerCompletedSteps', {
-									input: { step: 'plugins' },
-								} ),
-							],
-						},
+						PLUGINS_PAGE_SKIPPED: [
+							{
+								// Prototype only: show the Purple step before finishing.
+								guard: 'isPurpleThemeStepEnabled',
+								target: 'purpleTheme',
+								actions: [
+									{
+										type: 'recordTracksStepSkipped',
+										params: { step: 'plugins' },
+									},
+									spawnChild(
+										'updateProfilerCompletedSteps',
+										{
+											input: { step: 'plugins' },
+										}
+									),
+								],
+							},
+							{
+								actions: [
+									{
+										type: 'recordTracksStepSkipped',
+										params: { step: 'plugins' },
+									},
+									spawnChild(
+										'updateProfilerCompletedSteps',
+										{
+											input: { step: 'plugins' },
+										}
+									),
+								],
+								target: 'pluginsSkipped',
+							},
+						],
+						PLUGINS_PAGE_COMPLETED_WITHOUT_SELECTING_PLUGINS: [
+							{
+								// Prototype only: show the Purple step before finishing.
+								guard: 'isPurpleThemeStepEnabled',
+								target: 'purpleTheme',
+								actions: [
+									{
+										type: 'recordTracksStepSkipped',
+										params: { step: 'plugins' },
+									},
+									spawnChild(
+										'updateProfilerCompletedSteps',
+										{
+											input: { step: 'plugins' },
+										}
+									),
+								],
+							},
+							{
+								target: 'postPluginInstallation.noPluginsSelected',
+								actions: [
+									{
+										type: 'recordTracksStepSkipped',
+										params: { step: 'plugins' },
+									},
+									spawnChild(
+										'updateProfilerCompletedSteps',
+										{
+											input: { step: 'plugins' },
+										}
+									),
+								],
+							},
+						],
 						PLUGINS_LEARN_MORE_LINK_CLICKED: {
 							actions: [
 								{
@@ -1683,12 +1809,73 @@ export const coreProfilerStateMachineDefinition = createMachine( {
 								},
 							],
 						},
-						PLUGINS_INSTALLATION_REQUESTED: {
-							target: 'installPlugins',
-							actions: [
-								'assignPluginsSelected',
-								'recordTracksPluginsInstallationRequest',
-							],
+						PLUGINS_INSTALLATION_REQUESTED: [
+							{
+								// Prototype only: choose a theme before the extensions install.
+								guard: 'isPurpleThemeStepEnabled',
+								target: 'purpleTheme',
+								actions: [
+									'assignPluginsSelected',
+									'recordTracksPluginsInstallationRequest',
+								],
+							},
+							{
+								target: 'installPlugins',
+								actions: [
+									'assignPluginsSelected',
+									'recordTracksPluginsInstallationRequest',
+								],
+							},
+						],
+					},
+				},
+				// Prototype only: start with Purple or keep the current theme. For demos, a short
+				// fake loader follows and the extensions are not installed.
+				purpleTheme: {
+					initial: 'choose',
+					states: {
+						choose: {
+							meta: {
+								progress: 90,
+								component: PurpleTheme,
+							},
+							on: {
+								PURPLE_THEME_STEP_COMPLETED: {
+									target: 'demoSetup',
+									actions: assign( {
+										purpleUsePurple: ( { event } ) =>
+											event.payload.usePurple,
+										loader: {
+											progress: 10,
+											useStages: 'plugins',
+										},
+									} ),
+								},
+							},
+						},
+						demoSetup: {
+							invoke: {
+								src: 'purpleDemoSetup',
+								input: ( { context } ) => ( {
+									usePurple: !! context.purpleUsePurple,
+								} ),
+							},
+							on: {
+								PURPLE_DEMO_SETUP_PROGRESS: {
+									actions: assign( {
+										loader: ( { event } ) => ( {
+											progress: event.payload.progress,
+											useStages: 'plugins',
+										} ),
+									} ),
+								},
+								PURPLE_DEMO_SETUP_DONE: {
+									target: '#plugins.postPluginInstallation.noPluginsSelected',
+								},
+							},
+							meta: {
+								component: CoreProfilerLoader,
+							},
 						},
 					},
 				},
@@ -1952,6 +2139,11 @@ export const CoreProfilerController = ( {
 				hasPluginInstallationErrors: ( { context } ) => {
 					return context.pluginsInstallationErrors.length > 0;
 				},
+				// Prototype only. Skip the step when Purple is already the store theme.
+				isPurpleThemeStepEnabled: () =>
+					Boolean(
+						window.wcAdminFeatures?.[ 'purple-cys-prototype' ]
+					) && ! getPurplePrototypeSettings().purpleActive,
 				userHasNoInstallPluginsPermission: ( { context } ) => {
 					return (
 						context?.currentUser?.capabilities.install_plugins !==
