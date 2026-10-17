@@ -717,6 +717,32 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	}
 
 	/**
+	 * Throws when a line item quantity has decimals but the store only allows whole quantities.
+	 *
+	 * Runs before any item is saved, so an invalid quantity rejects the whole request.
+	 *
+	 * @since 11.3.0
+	 * @param mixed $line_items Posted line items.
+	 * @throws WC_REST_Exception When a quantity is invalid.
+	 */
+	protected function validate_line_item_quantities( $line_items ) {
+		if ( ! is_array( $line_items ) ) {
+			return;
+		}
+
+		foreach ( $line_items as $item ) {
+			if ( ! is_array( $item ) || ! isset( $item['quantity'] ) ) {
+				continue;
+			}
+
+			$quantity = (float) $item['quantity'];
+			if ( (float) wc_stock_amount( $quantity ) !== round( $quantity, WC_ROUNDING_PRECISION ) ) {
+				throw new WC_REST_Exception( 'woocommerce_rest_invalid_quantity', esc_html__( 'Quantity must be a whole number unless the store allows decimal quantities.', 'woocommerce' ), 400 );
+			}
+		}
+	}
+
+	/**
 	 * Prepare a single order for create or update.
 	 *
 	 * @param  WP_REST_Request $request Request object.
@@ -728,6 +754,8 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		$order     = new WC_Order( $id );
 		$schema    = $this->get_item_schema();
 		$data_keys = array_keys( array_filter( $schema['properties'], array( $this, 'filter_writable_props' ) ) );
+
+		$this->validate_line_item_quantities( $request['line_items'] );
 
 		// Handle all writable props.
 		foreach ( $data_keys as $key ) {
@@ -749,7 +777,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 						if ( is_array( $value ) ) {
 							foreach ( $value as $item ) {
 								if ( is_array( $item ) ) {
-									if ( $this->item_is_null( $item ) || ( isset( $item['quantity'] ) && 0 === $item['quantity'] ) ) {
+									if ( $this->item_is_null( $item ) || ( isset( $item['quantity'] ) && 0.0 === (float) $item['quantity'] ) ) {
 										$order->remove_item( $item['id'] );
 									} else {
 										$this->set_item( $order, $key, $item );
@@ -1585,7 +1613,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 							),
 							'quantity'         => array(
 								'description' => __( 'Quantity ordered.', 'woocommerce' ),
-								'type'        => 'integer',
+								'type'        => 'number',
 								'context'     => array( 'view', 'edit' ),
 							),
 							'tax_class'        => array(

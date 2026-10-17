@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Accept fractional line item quantities when creating or updating orders through the REST API.

@@ -2418,4 +2418,90 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 			),
 		);
 	}
+
+	/**
+	 * @testdox A fractional line item quantity is accepted when stores allow decimal quantities.
+	 */
+	public function test_order_update_accepts_fractional_line_item_quantity(): void {
+		remove_filter( 'woocommerce_stock_amount', 'intval' );
+		add_filter( 'woocommerce_stock_amount', 'floatval' );
+		$order = WC_Helper_Order::create_order();
+		$items = $order->get_items();
+		$item  = reset( $items );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
+		$request->set_body_params(
+			array(
+				'line_items' => array(
+					array(
+						'id'       => $item->get_id(),
+						'quantity' => 1.5,
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$quantity = wc_get_order( $order->get_id() )->get_item( $item->get_id() )->get_quantity();
+		remove_filter( 'woocommerce_stock_amount', 'floatval' );
+		add_filter( 'woocommerce_stock_amount', 'intval' );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertEquals( 1.5, $quantity );
+	}
+
+	/**
+	 * @testdox A fractional line item quantity rejects the whole update when the store only allows whole quantities.
+	 */
+	public function test_order_update_rejects_fractional_quantity_by_default(): void {
+		$order             = WC_Helper_Order::create_order();
+		$items             = $order->get_items();
+		$item              = reset( $items );
+		$original_quantity = $item->get_quantity();
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
+		$request->set_body_params(
+			array(
+				'line_items' => array(
+					array(
+						'id'       => $item->get_id(),
+						'quantity' => $original_quantity + 2,
+					),
+					array(
+						'product_id' => WC_Helper_Product::create_simple_product()->get_id(),
+						'quantity'   => 1.5,
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_invalid_quantity', $response->get_data()['code'] );
+		$this->assertEquals( $original_quantity, wc_get_order( $order->get_id() )->get_item( $item->get_id() )->get_quantity() );
+	}
+
+	/**
+	 * @testdox Setting a line item quantity to 0 still removes the item.
+	 */
+	public function test_order_update_with_zero_quantity_removes_line_item(): void {
+		$order = WC_Helper_Order::create_order();
+		$items = $order->get_items();
+		$item  = reset( $items );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
+		$request->set_body_params(
+			array(
+				'line_items' => array(
+					array(
+						'id'       => $item->get_id(),
+						'quantity' => 0,
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertFalse( wc_get_order( $order->get_id() )->get_item( $item->get_id() ) );
+	}
 }
