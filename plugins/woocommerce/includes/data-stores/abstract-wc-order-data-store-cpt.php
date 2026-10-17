@@ -253,6 +253,18 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 				wp_update_post( array_merge( array( 'ID' => $order->get_id() ), $post_data ) );
 			}
 			$order->read_meta_data( true ); // Refresh internal meta data, in case things were hooked into `save_post` or another WP hook.
+		} elseif ( ! empty( $changes ) ) {
+			// Changes stored in meta, like new totals after editing items, still count as a modification of the order.
+			$order->set_date_modified( time() );
+			$GLOBALS['wpdb']->update(
+				$GLOBALS['wpdb']->posts,
+				array(
+					'post_modified'     => gmdate( 'Y-m-d H:i:s', $order->get_date_modified( 'edit' )->getOffsetTimestamp() ),
+					'post_modified_gmt' => gmdate( 'Y-m-d H:i:s', $order->get_date_modified( 'edit' )->getTimestamp() ),
+				),
+				array( 'ID' => $order->get_id() )
+			);
+			clean_post_cache( $order->get_id() );
 		}
 		$this->update_post_meta( $order );
 		$order->apply_changes();

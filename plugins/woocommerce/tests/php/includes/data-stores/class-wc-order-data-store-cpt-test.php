@@ -1697,4 +1697,52 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			$this->assertGreaterThan( 0, $item->get_product_id(), 'Item should have a product ID from cached meta' );
 		}
 	}
+
+	/**
+	 * @testdox Saving an order whose changes are all stored in meta, like new totals, updates its modified date.
+	 */
+	public function test_update_with_meta_only_changes_updates_date_modified(): void {
+		$order = OrderHelper::create_order();
+		$past  = '2020-01-01 00:00:00';
+		$GLOBALS['wpdb']->update(
+			$GLOBALS['wpdb']->posts,
+			array(
+				'post_modified'     => $past,
+				'post_modified_gmt' => $past,
+			),
+			array( 'ID' => $order->get_id() )
+		);
+		clean_post_cache( $order->get_id() );
+
+		$order = wc_get_order( $order->get_id() );
+		$this->assertSame( strtotime( $past ), $order->get_date_modified()->getTimestamp() );
+
+		$order->set_total( (float) $order->get_total() + 5 );
+		$order->save();
+
+		$this->assertGreaterThan( strtotime( $past ), $order->get_date_modified()->getTimestamp(), 'The order object should have the new modified date.' );
+		$this->assertGreaterThan( strtotime( $past ), wc_get_order( $order->get_id() )->get_date_modified()->getTimestamp(), 'The stored order should have the new modified date.' );
+	}
+
+	/**
+	 * @testdox Saving an order without changes keeps its modified date.
+	 */
+	public function test_update_without_changes_keeps_date_modified(): void {
+		$order = OrderHelper::create_order();
+		$past  = '2020-01-01 00:00:00';
+		$GLOBALS['wpdb']->update(
+			$GLOBALS['wpdb']->posts,
+			array(
+				'post_modified'     => $past,
+				'post_modified_gmt' => $past,
+			),
+			array( 'ID' => $order->get_id() )
+		);
+		clean_post_cache( $order->get_id() );
+
+		$order = wc_get_order( $order->get_id() );
+		$order->save();
+
+		$this->assertSame( strtotime( $past ), wc_get_order( $order->get_id() )->get_date_modified()->getTimestamp() );
+	}
 }
