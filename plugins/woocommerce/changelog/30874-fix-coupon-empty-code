@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show an error, and block the save in the browser, when a coupon is saved without a coupon code.
