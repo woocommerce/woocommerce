@@ -53,6 +53,8 @@ $store_base_country_display = isset( $countries[ $store_base_country ] ) ? $stor
 $states                     = WC()->countries->get_states( $store_base_country );
 $store_base_state           = $settings['store_base_state'] ?? '';
 $store_base_state_display   = is_array( $states ) && isset( $states[ $store_base_state ] ) ? $states[ $store_base_state ] . ' (' . $store_base_state . ')' : $store_base_state;
+$store_base_postcode        = $settings['store_base_postcode'] ?? '';
+$store_base_city            = $settings['store_base_city'] ?? '';
 
 $tax_based_on_labels  = array(
 	TaxBasedOn::SHIPPING => __( 'Customer shipping address', 'woocommerce' ),
@@ -907,6 +909,16 @@ if ( 0 < $mu_plugins_count ) :
 			<td data-export-label="Store base state"><?php esc_html_e( 'Store base state', 'woocommerce' ); ?>:</td>
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'The state or region configured as the store base location.', 'woocommerce' ) ); ?></td>
 			<td><?php echo $store_base_state_display ? esc_html( $store_base_state_display ) : '<mark class="no">&ndash;</mark>'; ?></td>
+		</tr>
+		<tr>
+			<td data-export-label="Store base postcode"><?php esc_html_e( 'Store base postcode', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'The postcode configured as the store base location, used to estimate tax before a customer enters an address.', 'woocommerce' ) ); ?></td>
+			<td><?php echo $store_base_postcode ? esc_html( $store_base_postcode ) : '<mark class="no">&ndash;</mark>'; ?></td>
+		</tr>
+		<tr>
+			<td data-export-label="Store base city"><?php esc_html_e( 'Store base city', 'woocommerce' ); ?>:</td>
+			<td class="help"><?php echo wc_help_tip( esc_html__( 'The city configured as the store base location, used to estimate tax before a customer enters an address.', 'woocommerce' ) ); ?></td>
+			<td><?php echo $store_base_city ? esc_html( $store_base_city ) : '<mark class="no">&ndash;</mark>'; ?></td>
 		</tr>
 		<tr>
 			<td data-export-label="Default customer location"><?php esc_html_e( 'Default customer location', 'woocommerce' ); ?>:</td>

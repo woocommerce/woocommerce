@@ -711,6 +711,18 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 						),
+						'store_base_postcode'            => array(
+							'description' => __( 'Store base postcode.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+						),
+						'store_base_city'                => array(
+							'description' => __( 'Store base city.', 'woocommerce' ),
+							'type'        => 'string',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+						),
 						'default_customer_location'      => array(
 							'description' => __( 'Default customer location.', 'woocommerce' ),
 							'type'        => 'string',
@@ -1595,6 +1607,8 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 			'tax_rate_count'                 => absint( $tax_rate_count ),
 			'store_base_country'             => WC()->countries->get_base_country(),
 			'store_base_state'               => WC()->countries->get_base_state(),
+			'store_base_postcode'            => WC()->countries->get_base_postcode(),
+			'store_base_city'                => WC()->countries->get_base_city(),
 			'default_customer_location'      => get_option( 'woocommerce_default_customer_address', DefaultCustomerAddress::BASE ),
 			'taxonomies'                     => $term_response,
 			'product_visibility_terms'       => $product_visibility_terms,
