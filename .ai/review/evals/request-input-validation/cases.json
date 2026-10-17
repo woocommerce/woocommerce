@@ -1,0 +1,59 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G07A-v4",
+			"path": "plugins/woocommerce/includes/class-wc-request-input-validation.php",
+			"before": {
+				"file": "fixtures/G07A/before.php"
+			},
+			"after": {
+				"file": "fixtures/G07A/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "search[]"
+			}
+		},
+		{
+			"id": "G07B-v3",
+			"path": "plugins/woocommerce/includes/class-wc-request-input-validation.php",
+			"before": {
+				"file": "fixtures/G07B/before.php"
+			},
+			"after": {
+				"file": "fixtures/G07B/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "postcode"
+			}
+		},
+		{
+			"id": "G07C-v3",
+			"path": "plugins/woocommerce/includes/class-wc-request-input-validation.php",
+			"before": {
+				"file": "fixtures/G07C/before.php"
+			},
+			"after": {
+				"file": "fixtures/G07C/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G07D-v3",
+			"path": "plugins/woocommerce/includes/class-wc-request-input-validation.php",
+			"before": {
+				"file": "fixtures/G07D/before.php"
+			},
+			"after": {
+				"file": "fixtures/G07D/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		}
+	]
+}

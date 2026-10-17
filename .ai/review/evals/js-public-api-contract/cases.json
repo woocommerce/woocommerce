@@ -1,0 +1,59 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G30A-v3",
+			"path": "packages/js/currency/src/index.ts",
+			"before": {
+				"file": "fixtures/G30A/before.ts"
+			},
+			"after": {
+				"file": "fixtures/G30A/after.ts"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "default"
+			}
+		},
+		{
+			"id": "G30B-v3",
+			"path": "packages/js/currency/src/utils.tsx",
+			"before": {
+				"file": "fixtures/G30B/before.tsx"
+			},
+			"after": {
+				"file": "fixtures/G30B/after.tsx"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "formatAmount"
+			}
+		},
+		{
+			"id": "G30C-v3",
+			"path": "packages/js/currency/src/index.ts",
+			"before": {
+				"file": "fixtures/G30C/before.ts"
+			},
+			"after": {
+				"file": "fixtures/G30C/after.ts"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G30D-v3",
+			"path": "packages/js/currency/src/utils.tsx",
+			"before": {
+				"file": "fixtures/G30D/before.tsx"
+			},
+			"after": {
+				"file": "fixtures/G30D/after.tsx"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		}
+	]
+}

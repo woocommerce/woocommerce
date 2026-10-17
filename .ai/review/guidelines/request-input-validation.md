@@ -18,4 +18,6 @@
 
 **How to confirm:** Can the param be sent as `x[]=`? Is there an `is_string` or `wc_clean` before the string op? For validators, list what producers send today: extensions, old data, locales (`1` / `'1'` / `'yes'`, older postcode formats).
 
+Follow the REST dispatcher before treating an endpoint parameter as unchecked. For an argument with a declared `type` and no explicit `sanitize_callback`, `WP_REST_Request::sanitize_params()` supplies `rest_parse_request_arg`, which validates and sanitizes against that argument schema before the endpoint callback. A `required` string argument rejects arrays and missing input. This protection does not cover direct callback calls or routes that override or disable the default sanitizer.
+
 **Don't flag when:** The REST schema already declares the type, so WP rejects arrays before the callback. A validator that only runs on new input with no existing writers.

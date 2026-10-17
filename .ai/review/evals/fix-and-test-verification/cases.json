@@ -1,0 +1,59 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G24A-v3",
+			"path": "plugins/woocommerce/includes/class-wc-eval-24.php",
+			"before": {
+				"file": "fixtures/G24A/before.php"
+			},
+			"after": {
+				"file": "fixtures/G24A/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "get_status"
+			}
+		},
+		{
+			"id": "G24B-v3",
+			"path": "plugins/woocommerce/includes/class-wc-eval-24.php",
+			"before": {
+				"file": "fixtures/G24B/before.php"
+			},
+			"after": {
+				"file": "fixtures/G24B/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "catalog_page"
+			}
+		},
+		{
+			"id": "G24C-v4",
+			"path": "plugins/woocommerce/includes/class-wc-eval-24.php",
+			"before": {
+				"file": "fixtures/G24C/before.php"
+			},
+			"after": {
+				"file": "fixtures/G24C/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G24D-v3",
+			"path": "plugins/woocommerce/includes/class-wc-eval-24.php",
+			"before": {
+				"file": "fixtures/G24D/before.php"
+			},
+			"after": {
+				"file": "fixtures/G24D/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		}
+	]
+}
