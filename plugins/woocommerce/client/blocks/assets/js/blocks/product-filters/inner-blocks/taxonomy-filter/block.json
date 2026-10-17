@@ -53,7 +53,7 @@
 			}
 		}
 	},
-	"usesContext": [ "query", "filterParams" ],
+	"usesContext": [ "query", "filterParams", "productFiltersKey" ],
 	"attributes": {
 		"taxonomy": {
 			"type": "string",
