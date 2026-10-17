@@ -940,17 +940,30 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		}
 
 		// Add the 'wc-' prefix to status if needed.
+		$status_error = null;
 		if ( ! empty( $query_vars['post_status'] ) ) {
-			if ( is_array( $query_vars['post_status'] ) ) {
-				foreach ( $query_vars['post_status'] as &$status ) {
-					$status = wc_is_order_status( 'wc-' . $status ) ? 'wc-' . $status : $status;
-				}
-			} else {
-				$query_vars['post_status'] = wc_is_order_status( 'wc-' . $query_vars['post_status'] ) ? 'wc-' . $query_vars['post_status'] : $query_vars['post_status'];
+			$statuses = is_string( $query_vars['post_status'] )
+				? explode( ',', $query_vars['post_status'] )
+				: (array) $query_vars['post_status'];
+
+			$order_statuses            = array_keys( wc_get_order_statuses() );
+			$query_vars['post_status'] = array();
+			foreach ( array_filter( $statuses, 'is_string' ) as $status ) {
+				// Lowercase here, because WP_Query strips uppercase letters from a status instead of lowercasing them.
+				$status                      = strtolower( trim( $status ) );
+				$query_vars['post_status'][] = in_array( 'wc-' . $status, $order_statuses, true ) ? 'wc-' . $status : $status;
+			}
+
+			if ( empty( $query_vars['post_status'] ) ) {
+				$status_error = new WP_Error( 'woocommerce_invalid_order_status', __( 'Order statuses must be strings.', 'woocommerce' ) );
 			}
 		}
 
 		$wp_query_args = parent::get_wp_query_args( $query_vars );
+
+		if ( $status_error ) {
+			$wp_query_args['errors'][] = $status_error;
+		}
 
 		if ( ! isset( $wp_query_args['date_query'] ) ) {
 			$wp_query_args['date_query'] = array();
@@ -1101,7 +1114,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 
 		$args = $this->get_wp_query_args( $query_vars );
 
-		if ( ! empty( $args['errors'] ) ) {
+		if ( ! empty( $args['errors'] ) || $this->has_only_unknown_statuses( $args ) ) {
 			$query = (object) array(
 				'posts'         => array(),
 				'found_posts'   => 0,
@@ -1128,6 +1141,32 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		}
 
 		return $orders;
+	}
+
+	/**
+	 * Check whether none of the requested statuses are registered. WP_Query drops the status clause in that case,
+	 * which would return every order. Runs on the final query args so changes made by query filters are respected.
+	 * Statuses from wc_get_order_statuses() also count as known, so queries that run before they are registered
+	 * on `init` (e.g. during upgrades) still find orders.
+	 *
+	 * @param array $wp_query_args Final WP_Query args.
+	 * @return bool
+	 */
+	private function has_only_unknown_statuses( array $wp_query_args ): bool {
+		$post_status = $wp_query_args['post_status'] ?? null;
+
+		// WP_Query treats '0' as no status and applies its defaults, so it counts as an unknown status here.
+		if ( empty( $post_status ) && '0' !== $post_status ) {
+			return false;
+		}
+
+		// Normalize like WP_Query::parse_query(): arrays go through sanitize_key(), strings lose disallowed characters (including uppercase).
+		$requested_statuses = is_array( $post_status )
+			? array_map( 'sanitize_key', array_filter( $post_status, 'is_string' ) )
+			: explode( ',', (string) preg_replace( '|[^a-z0-9_,-]|', '', is_scalar( $post_status ) ? (string) $post_status : '' ) );
+		$known_statuses     = array_merge( array( 'any', 'all' ), get_post_stati(), array_keys( wc_get_order_statuses() ) );
+
+		return ! array_intersect( $requested_statuses, $known_statuses );
 	}
 
 	/**

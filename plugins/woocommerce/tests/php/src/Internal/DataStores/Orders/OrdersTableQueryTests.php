@@ -801,6 +801,210 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox wc_get_orders returns no orders when filtering by an unregistered custom status.
+	 *
+	 * @dataProvider order_storage_provider
+	 * @param bool $hpos_enabled Whether HPOS is enabled.
+	 */
+	public function test_wc_get_orders_returns_empty_for_unregistered_custom_status( bool $hpos_enabled ): void {
+		$this->toggle_cot_feature_and_usage( $hpos_enabled );
+		$this->create_order_with_unregistered_custom_status();
+		$this->create_orders_with_interleaved_statuses( 3 );
+
+		$queried_order_ids = wc_get_orders(
+			array(
+				'status' => 'foobar',
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertSame( array(), $queried_order_ids, 'An unregistered custom status should not match orphaned or core-status orders' );
+	}
+
+	/**
+	 * @testdox wc_get_orders retains known statuses when filtering by known and unknown statuses.
+	 *
+	 * @dataProvider order_storage_provider
+	 * @param bool $hpos_enabled Whether HPOS is enabled.
+	 */
+	public function test_wc_get_orders_filters_by_known_status_when_mixed_with_unknown_status( bool $hpos_enabled ): void {
+		$this->toggle_cot_feature_and_usage( $hpos_enabled );
+		$this->create_order_with_unregistered_custom_status();
+		$core_order_ids = $this->create_orders_with_interleaved_statuses( 3 );
+
+		$queried_order_ids = wc_get_orders(
+			array(
+				'status' => array( OrderStatus::PROCESSING, 'foobar' ),
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertSame( array( $core_order_ids[1] ), $queried_order_ids, 'Known statuses should still be applied when unknown statuses are also requested' );
+	}
+
+	/**
+	 * @testdox wc_get_orders returns only matching orders when a known status is supplied in uppercase.
+	 *
+	 * @dataProvider order_storage_provider
+	 * @param bool $hpos_enabled Whether HPOS is enabled.
+	 */
+	public function test_wc_get_orders_filters_by_uppercase_known_status( bool $hpos_enabled ): void {
+		$this->toggle_cot_feature_and_usage( $hpos_enabled );
+		$order_ids = $this->create_orders_with_interleaved_statuses( 3 );
+
+		$queried_order_ids = wc_get_orders(
+			array(
+				'status' => 'WC-COMPLETED',
+				'limit'  => -1,
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertSame( array( $order_ids[2] ), $queried_order_ids, 'An uppercase known status should match its registered lowercase counterpart and return only the matching orders.' );
+	}
+
+	/**
+	 * @testdox wc_get_orders matches a known status surrounded by whitespace.
+	 *
+	 * @dataProvider order_storage_provider
+	 * @param bool $hpos_enabled Whether HPOS is enabled.
+	 */
+	public function test_wc_get_orders_trims_status_values( bool $hpos_enabled ): void {
+		$this->toggle_cot_feature_and_usage( $hpos_enabled );
+		$order_ids = $this->create_orders_with_interleaved_statuses( 3 );
+
+		$queried_order_ids = wc_get_orders(
+			array(
+				'status' => array( ' ' . OrderStatus::COMPLETED . ' ' ),
+				'limit'  => -1,
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertSame( array( $order_ids[2] ), $queried_order_ids, 'Whitespace around a known status should be ignored on both order storages.' );
+	}
+
+	/**
+	 * @testdox wc_get_orders ignores non-string values in the status array instead of throwing a TypeError.
+	 *
+	 * @dataProvider order_storage_provider
+	 * @param bool $hpos_enabled Whether HPOS is enabled.
+	 */
+	public function test_wc_get_orders_ignores_non_string_status_values( bool $hpos_enabled ): void {
+		$this->toggle_cot_feature_and_usage( $hpos_enabled );
+		$order_ids = $this->create_orders_with_interleaved_statuses( 3 );
+
+		$queried_order_ids = wc_get_orders(
+			array(
+				'status' => array( OrderStatus::COMPLETED, array( 'nested' ), new \stdClass() ),
+				'limit'  => -1,
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertSame( array( $order_ids[2] ), $queried_order_ids, 'Non-string status values should be ignored while valid statuses are still applied.' );
+	}
+
+	/**
+	 * @testdox wc_get_orders returns no orders when every status value is non-string.
+	 *
+	 * @dataProvider order_storage_provider
+	 * @param bool $hpos_enabled Whether HPOS is enabled.
+	 */
+	public function test_wc_get_orders_returns_empty_when_all_status_values_are_non_string( bool $hpos_enabled ): void {
+		$this->toggle_cot_feature_and_usage( $hpos_enabled );
+		$this->create_orders_with_interleaved_statuses( 3 );
+
+		$queried_order_ids = wc_get_orders(
+			array(
+				'status' => array( array( 'nested' ), new \stdClass() ),
+				'limit'  => -1,
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertSame( array(), $queried_order_ids, 'A status array with only non-string values should not be treated as "any" and return every order.' );
+	}
+
+	/**
+	 * @testdox wc_get_orders returns no orders when every status value is an empty-like string.
+	 *
+	 * @dataProvider empty_like_status_provider
+	 * @param bool         $hpos_enabled Whether HPOS is enabled.
+	 * @param string|array $statuses     The status query var value.
+	 */
+	public function test_wc_get_orders_returns_empty_when_all_status_values_are_empty_like( bool $hpos_enabled, $statuses ): void {
+		$this->toggle_cot_feature_and_usage( $hpos_enabled );
+		$this->create_orders_with_interleaved_statuses( 3 );
+
+		$queried_order_ids = wc_get_orders(
+			array(
+				'status' => $statuses,
+				'limit'  => -1,
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertSame( array(), $queried_order_ids, 'A status with only empty-like strings should not drop the status condition and return every order.' );
+	}
+
+	/**
+	 * Provides statuses whose values are dropped as empty, for both order storages.
+	 *
+	 * @return array<string, array{bool, string|array}>
+	 */
+	public function empty_like_status_provider(): array {
+		return array(
+			'HPOS, zero'              => array( true, array( '0' ) ),
+			'HPOS, scalar zero'       => array( true, '0' ),
+			'HPOS, empty'             => array( true, array( '' ) ),
+			'HPOS, whitespace'        => array( true, array( '  ' ) ),
+			'legacy CPT, zero'        => array( false, array( '0' ) ),
+			'legacy CPT, scalar zero' => array( false, '0' ),
+			'legacy CPT, empty'       => array( false, array( '' ) ),
+			'legacy CPT, whitespace'  => array( false, array( '  ' ) ),
+		);
+	}
+
+	/**
+	 * Provides order storage configurations.
+	 *
+	 * @return array<string, array{bool}>
+	 */
+	public function order_storage_provider(): array {
+		return array(
+			'HPOS'       => array( true ),
+			'legacy CPT' => array( false ),
+		);
+	}
+
+	/**
+	 * Creates an order with a custom status, then unregisters the status.
+	 */
+	private function create_order_with_unregistered_custom_status(): void {
+		global $wp_post_statuses;
+
+		$register_custom_status = function ( array $statuses ): array {
+			$statuses['wc-foobar'] = 'Foobar';
+			return $statuses;
+		};
+
+		register_post_status(
+			'wc-foobar',
+			array(
+				'label'               => 'Foobar',
+				'exclude_from_search' => false,
+			)
+		);
+		add_filter( 'wc_order_statuses', $register_custom_status );
+		$order = new WC_Order();
+		$order->set_status( 'foobar' );
+		$order->save();
+		remove_filter( 'wc_order_statuses', $register_custom_status );
+		unset( $wp_post_statuses['wc-foobar'] );
+	}
+
+	/**
 	 * Helper function to create orders with interleaved statuses and strictly decreasing creation dates.
 	 *
 	 * @param int $count Number of orders to create.
