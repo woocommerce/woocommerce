@@ -222,9 +222,8 @@ class ExtensibleAbilities {
 	 *     Filter arguments.
 	 *
 	 *     @type string   $resource  Resource whose list ability applies the filters. Core's `products-query` and
-	 *                               `orders-query` apply the filters of `product` and `order`. No list ability
-	 *                               returns `order_item`, so a filter on it is refused. The list ability of
-	 *                               another resource must call `get_query_args()` and `add_query_filters_schema()` itself.
+	 *                               `orders-query` apply the filters of `product` and `order`. The list ability
+	 *                               of another resource must call `get_query_args()` and `add_query_filters_schema()` itself.
 	 *     @type string   $namespace Slug of the extension that owns the filter, such as `subscriptions`.
 	 *     @type string   $filter    Filter name inside the namespace, such as `subscribable`.
 	 *     @type array    $schema    JSON schema of the value. Its `description` tells agents how to use the filter.
@@ -269,10 +268,6 @@ class ExtensibleAbilities {
 				),
 				'11.3.0'
 			);
-			return;
-		}
-		if ( 'order_item' === $args['resource'] ) {
-			wc_doing_it_wrong( __METHOD__, __( 'No list ability returns order items, so a filter on "order_item" never runs. Register the filter on "order" instead.', 'woocommerce' ), '11.3.0' );
 			return;
 		}
 		if ( ! is_array( $args['schema'] ?? null ) || ! isset( $args['schema']['type'] ) ) {

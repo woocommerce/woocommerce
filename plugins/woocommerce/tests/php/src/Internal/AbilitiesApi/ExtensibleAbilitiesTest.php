@@ -759,29 +759,6 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should refuse a filter on order items, because no list ability returns them.
-	 */
-	public function test_a_filter_on_order_items_is_refused(): void {
-		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_query_filter' );
-		$register = static function () {
-			ExtensibleAbilities::register_query_filter(
-				array(
-					'resource'  => 'order_item',
-					'namespace' => 'test-ext',
-					'filter'    => 'gift',
-					'schema'    => array( 'type' => 'boolean' ),
-					'callback'  => static fn() => array( 'meta_query' => array( array( 'key' => 'gift' ) ) ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-				)
-			);
-		};
-		add_action( 'woocommerce_extensible_abilities_init', $register );
-		$this->get_ability( 'woocommerce/orders-query' );
-		remove_action( 'woocommerce_extensible_abilities_init', $register );
-
-		$this->assertSame( array(), ExtensibleAbilities::get_query_args( 'order_item', array( 'filters' => array( 'extensions' => array( 'test-ext' => array( 'gift' => true ) ) ) ) ) );
-	}
-
-	/**
 	 * @testdox Should return a 400 error and not run the filter when a value that skipped validation fails its schema.
 	 */
 	public function test_a_filter_value_that_fails_its_schema_is_refused(): void {
