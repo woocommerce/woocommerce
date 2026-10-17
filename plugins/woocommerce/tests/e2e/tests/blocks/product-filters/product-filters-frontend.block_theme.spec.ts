@@ -66,19 +66,22 @@ test.describe( 'woocommerce/product-filters - Frontend', () => {
 				name: 'Close',
 			} );
 
-			await expect( closeOverlayButton ).toBeVisible();
+			await expect( closeOverlayButton ).toBeFocused();
 
 			await closeOverlayButton.click();
 
+			await expect( openOverlayButton ).toBeFocused();
 			await expect( overlay ).toHaveCount( 0 );
 
 			// Close overlay by hitting Esc.
 			await openOverlayButton.click();
 
 			await expect( overlay ).toBeInViewport();
+			await expect( closeOverlayButton ).toBeFocused();
 
 			await page.keyboard.press( 'Escape' );
 
+			await expect( openOverlayButton ).toBeFocused();
 			await expect( overlay ).toHaveCount( 0 );
 
 			// Close overlay by clicking Apply button.
@@ -90,10 +93,13 @@ test.describe( 'woocommerce/product-filters - Frontend', () => {
 				name: 'Apply',
 			} );
 
-			await expect( applyButton ).toBeVisible();
+			await applyButton.focus();
+			await page.keyboard.press( 'Tab' );
+			await expect( closeOverlayButton ).toBeFocused();
 
 			await applyButton.click();
 
+			await expect( openOverlayButton ).toBeFocused();
 			await expect( overlay ).toHaveCount( 0 );
 		} );
 
