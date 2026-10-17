@@ -1984,4 +1984,61 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 			wp_delete_file( $file );
 		}
 	}
+
+	/**
+	 * @testdox Empty sale date cells clear the sale schedule, while invalid dates leave it unchanged.
+	 */
+	public function test_import_clears_sale_dates_from_empty_cells(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_sale_price( 5 );
+		$product->set_date_on_sale_from( '2099-01-01' );
+		$product->set_date_on_sale_to( '2099-02-01' );
+		$product->save();
+
+		$this->import_sale_dates_row( $product->get_id() . ',not-a-date,' );
+		$product = wc_get_product( $product->get_id() );
+		$this->assertNotNull( $product->get_date_on_sale_from( 'edit' ), 'An invalid date should leave the start date unchanged.' );
+		$this->assertNull( $product->get_date_on_sale_to( 'edit' ), 'An empty cell should clear the end date.' );
+
+		$this->import_sale_dates_row( $product->get_id() . ', ,' );
+		$this->assertNull( wc_get_product( $product->get_id() )->get_date_on_sale_from( 'edit' ), 'A blank cell should clear the start date.' );
+	}
+
+	/**
+	 * @testdox parse_datetime_field returns an empty string for empty values and null for invalid ones.
+	 */
+	public function test_parse_datetime_field_empty_and_invalid_values(): void {
+		$importer = new WC_Product_CSV_Importer( __DIR__ . '/sample.csv', array( 'parse' => false ) );
+
+		$this->assertSame( '', $importer->parse_datetime_field( '' ) );
+		$this->assertSame( '', $importer->parse_datetime_field( '  ' ) );
+		$this->assertNull( $importer->parse_datetime_field( 'not-a-date' ) );
+		$this->assertSame( '2099-01-26', $importer->parse_datetime_field( '2099-01-26' ) );
+	}
+
+	/**
+	 * Imports one row that updates a product's sale dates.
+	 *
+	 * @param string $csv_row CSV row after the header.
+	 */
+	private function import_sale_dates_row( string $csv_row ): void {
+		$csv_file = trailingslashit( get_temp_dir() ) . 'import-sale-dates.csv';
+		file_put_contents( $csv_file, "ID,Date sale price starts,Date sale price ends\n" . $csv_row . "\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
+
+		$importer = new WC_Product_CSV_Importer(
+			$csv_file,
+			array(
+				'parse'           => true,
+				'update_existing' => true,
+				'mapping'         => array(
+					'ID'                     => 'id',
+					'Date sale price starts' => 'date_on_sale_from',
+					'Date sale price ends'   => 'date_on_sale_to',
+				),
+			)
+		);
+		$importer->import();
+
+		wp_delete_file( $csv_file );
+	}
 }
