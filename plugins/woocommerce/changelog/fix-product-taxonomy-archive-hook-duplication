@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent duplicate compatibility hook registration when multiple template handlers match the same request.
