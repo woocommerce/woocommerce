@@ -194,11 +194,13 @@ CSS;
 			}
 		);
 
-		$block_context         = array_merge(
+		$product_filters_key = wp_unique_prefixed_id( 'wc-product-filters-' );
+		$block_context       = array_merge(
 			$block->context,
 			array(
-				'filterParams'  => $filter_params,
-				'activeFilters' => $active_filters,
+				'filterParams'      => $filter_params,
+				'activeFilters'     => $active_filters,
+				'productFiltersKey' => $product_filters_key,
 			),
 		);
 		$inner_blocks          = array_reduce(
@@ -220,7 +222,13 @@ CSS;
 		$overlay_mode     = $this->get_overlay_mode( $attributes );
 		$has_overlay      = 'off' !== $overlay_mode;
 		$overlay_position = isset( $attributes['overlayPosition'] ) && 'right' === $attributes['overlayPosition'] ? 'right' : 'left';
-		$wrapper_classes  = array( 'wc-block-product-filters' );
+
+		$state               = wp_interactivity_state( 'woocommerce/product-filters' );
+		$filter_empty_states = $state['filterEmptyStates'][ $product_filters_key ] ?? array();
+		$wrapper_classes     = array( 'wc-block-product-filters' );
+		if ( ! empty( $filter_empty_states ) && ! in_array( false, $filter_empty_states, true ) ) {
+			$wrapper_classes[] = 'wc-block-product-filters--empty';
+		}
 		if ( ! $has_overlay ) {
 			$wrapper_classes[] = 'is-filter-drawer-disabled';
 		}
