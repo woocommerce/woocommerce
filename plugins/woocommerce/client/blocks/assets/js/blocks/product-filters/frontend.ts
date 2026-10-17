@@ -167,6 +167,10 @@ const productFiltersStore = {
 				),
 			} ) );
 		},
+		get overlayDialogRole() {
+			const { isOverlayOpened } = getContext< ProductFiltersContext >();
+			return isOverlayOpened ? 'dialog' : null;
+		},
 	},
 	actions: {
 		openOverlay: () => {
