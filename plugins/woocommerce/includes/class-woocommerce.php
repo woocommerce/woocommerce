@@ -664,6 +664,15 @@ final class WooCommerce {
 	/**
 	 * Returns true if the request is a store REST API request.
 	 *
+	 * The UCP namespace counts as one while the `ucp` feature is enabled: like the Store API it
+	 * returns data rather than rendered pages, so callers can skip the same work — block and
+	 * template registration, site tracking. With the feature off the routes do not exist, and
+	 * the path is treated like any other REST request.
+	 *
+	 * This is a rendering decision only. StoreApi\Authentication keeps its own, narrower check
+	 * and does not treat UCP as Store API: its filters assume a browser client with a nonce,
+	 * which a UCP agent never sends, so UCP routes must not inherit them.
+	 *
 	 * @return bool
 	 */
 	public function is_store_api_request() {
@@ -671,13 +680,22 @@ final class WooCommerce {
 			return false;
 		}
 
-		// Pretty permalinks: the Store API namespace is part of the path, e.g. /wp-json/wc/store/v1/cart. Match the
+		$namespaces = array( 'wc/store/' );
+		if ( \Automattic\WooCommerce\StoreApi\Utilities\UcpUtils::is_enabled() ) {
+			$namespaces[] = 'wc/ucp/';
+		}
+
+		// Pretty permalinks: the namespace is part of the path, e.g. /wp-json/wc/store/v1/cart. Match the
 		// path only (a leading slash anchors the prefix) so a REST-like query argument such as
 		// /some-page/?arg=/wp-json/wc/store/ is not mistaken for a Store API request.
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		$path = wp_parse_url( '/' . ltrim( (string) wp_unslash( $_SERVER['REQUEST_URI'] ), '/' ), PHP_URL_PATH );
-		if ( is_string( $path ) && false !== strpos( $path, '/' . trailingslashit( rest_get_url_prefix() ) . 'wc/store/' ) ) {
-			return true;
+		if ( is_string( $path ) ) {
+			foreach ( $namespaces as $namespace ) {
+				if ( false !== strpos( $path, '/' . trailingslashit( rest_get_url_prefix() ) . $namespace ) ) {
+					return true;
+				}
+			}
 		}
 
 		// Plain permalinks: the route is passed as a query parameter, e.g. ?rest_route=/wc/store/v1/cart.
@@ -685,8 +703,10 @@ final class WooCommerce {
 		if ( isset( $_GET['rest_route'] ) && is_string( $_GET['rest_route'] ) ) {
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reading the route only, no state change.
 			$rest_route = '/' . ltrim( rawurldecode( sanitize_text_field( wp_unslash( $_GET['rest_route'] ) ) ), '/' );
-			if ( 0 === strpos( $rest_route, '/wc/store/' ) ) {
-				return true;
+			foreach ( $namespaces as $namespace ) {
+				if ( 0 === strpos( $rest_route, '/' . $namespace ) ) {
+					return true;
+				}
 			}
 		}
 
