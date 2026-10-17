@@ -8800,6 +8800,11 @@ table.bar_chart {
 					min-width: 100%;
 				}
 			}
+
+			small code {
+				font-size: inherit;
+				white-space: nowrap;
+			}
 		}
 
 		@media screen and (min-width: 783px) {
