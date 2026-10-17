@@ -3265,4 +3265,51 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 			)
 		);
 	}
+
+	/**
+	 * @testdox It reports converted option values in English, whatever the site language.
+	 */
+	public function test_canonicalize_option_values_notice_is_not_translated(): void {
+		$this->setExpectedIncorrectUsage( SettingsUISchema::class . '::canonicalize_option_values' );
+		add_filter(
+			'gettext',
+			function ( $translation, $text, $domain ) {
+				return 'woocommerce' === $domain ? 'Übersetzt: ' . $text : $translation;
+			},
+			10,
+			3
+		);
+		$messages = array();
+		add_action(
+			'doing_it_wrong_run',
+			function ( $function_name, $message ) use ( &$messages ) {
+				$messages[ $function_name ] = $message;
+			},
+			10,
+			2
+		);
+
+		SettingsUISchema::canonicalize_option_values(
+			$this->get_native_schema_with_field(
+				array(
+					'id'      => 'acme_tier',
+					'type'    => 'select',
+					'value'   => 1,
+					'options' => array(
+						array(
+							'label' => 'One',
+							'value' => 1,
+						),
+					),
+				)
+			)
+		);
+
+		$this->assertArrayHasKey( SettingsUISchema::class . '::canonicalize_option_values', $messages, 'Converting a value should raise a notice.' );
+		$this->assertStringStartsWith(
+			'A Settings UI schema provider supplied non-string option, field, or visibility values that WooCommerce converted for compatibility: acme_tier.',
+			$messages[ SettingsUISchema::class . '::canonicalize_option_values' ],
+			'The notice should be the English message with the field id.'
+		);
+	}
 }

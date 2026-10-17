@@ -54,3 +54,39 @@ bin/composer/phpcs/vendor/bin/phpcs -s \
 ```
 
 Only the two unguarded `%i` cases (cases 1 and 2) should be reported.
+
+## `WooCommerceInternal.I18n.DiagnosticMessage`
+
+Flags a WordPress translation call (`__()`, `esc_html__()`, `_n()` and the rest) inside the message passed to a developer diagnostic: `wc_doing_it_wrong()`, `_doing_it_wrong()`, `trigger_error()`, `wp_trigger_error()`, `user_error()`, `error_log()`, and the replacement or message of the deprecation notices (`wc_deprecated_*()`, `_deprecated_*()`, `apply_filters_deprecated()`, `do_action_deprecated()`, `wc_do_deprecated_action()`). Calls made through `LegacyProxy`, such as `$this->proxy->call_function( 'wc_doing_it_wrong', ... )`, are checked too.
+
+These messages are read in logs, filtered by monitoring tools, and searched by developers and support. A translated message reads differently on every site language, so a log filter or a search for the English text misses it. PHP's own errors are English for the same reason.
+
+**How to satisfy the sniff:** pass the English string directly. Keep any escaping the message had, without the translation:
+
+```php
+wc_doing_it_wrong( __FUNCTION__, 'This function should not be called before woocommerce_init.', '2.3' );
+
+wc_doing_it_wrong(
+	__METHOD__,
+	sprintf( esc_html( 'A settings section is already registered for "%s".' ), esc_html( $section_id ) ),
+	'10.9.0'
+);
+```
+
+WordPress still translates its own wrapper around these messages (for example "Function %1$s was called incorrectly."), so only the WooCommerce part of a PHP notice is guaranteed to be English. Strings shown to merchants or shoppers stay translated, even when an error causes them.
+
+The sniff only sees translation calls written inside the diagnostic call. It does not follow a translated string built elsewhere and passed in through a variable, a property or a wrapper method, so keep those English by hand.
+
+### Verifying the sniff
+
+The fixture `WooCommerceInternal/Tests/I18n/DiagnosticMessageUnitTest.inc` documents the flagged and allowed cases:
+
+```sh
+cd plugins/woocommerce
+vendor/bin/phpcs -s \
+  --standard=tests/Tools/phpcs/WooCommerceInternal/ruleset.xml \
+  --sniffs=WooCommerceInternal.I18n.DiagnosticMessage \
+  tests/Tools/phpcs/WooCommerceInternal/Tests/I18n/DiagnosticMessageUnitTest.inc
+```
+
+Only cases 1 to 6, 12 and 13 should be reported, one error each.

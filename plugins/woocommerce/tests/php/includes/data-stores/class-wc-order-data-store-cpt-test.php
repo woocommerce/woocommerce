@@ -1697,4 +1697,40 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			$this->assertGreaterThan( 0, $item->get_product_id(), 'Item should have a product ID from cached meta' );
 		}
 	}
+
+	/**
+	 * @testdox Unsupported order query arguments are reported in English, with the singular or plural wording for their count, whatever the site language.
+	 *
+	 * @testWith [["meta_query"], "Order query argument (meta_query) is not supported on the current order datastore."]
+	 *           [["meta_query", "field_query"], "Order query arguments (meta_query, field_query) are not supported on the current order datastore."]
+	 *
+	 * @param string[] $unsupported_args Unsupported query arguments to pass.
+	 * @param string   $expected_message Expected start of the diagnostic message.
+	 */
+	public function test_query_reports_unsupported_args_in_english( array $unsupported_args, string $expected_message ): void {
+		$this->setExpectedIncorrectUsage( WC_Order_Data_Store_CPT::class . '::query' );
+		add_filter(
+			'ngettext',
+			function ( $translation, $single, $plural, $number, $domain ) {
+				return 'woocommerce' === $domain ? 'Übersetzt: ' . ( 1 === $number ? $single : $plural ) : $translation;
+			},
+			10,
+			5
+		);
+		$messages = array();
+		add_action(
+			'doing_it_wrong_run',
+			function ( $function_name, $message ) use ( &$messages ) {
+				$messages[ $function_name ] = $message;
+			},
+			10,
+			2
+		);
+
+		$query_vars = array_fill_keys( $unsupported_args, array( array( 'key' => '_unsupported_probe' ) ) );
+		( new WC_Order_Data_Store_CPT() )->query( $query_vars );
+
+		$this->assertArrayHasKey( WC_Order_Data_Store_CPT::class . '::query', $messages, 'Unsupported arguments should raise a notice.' );
+		$this->assertStringStartsWith( $expected_message, $messages[ WC_Order_Data_Store_CPT::class . '::query' ], 'The notice should use the English wording for the argument count.' );
+	}
 }
