@@ -109,6 +109,74 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Recalculating coupons reuses an unsaved coupon item instead of adding a duplicate.
+	 */
+	public function test_recalculate_coupons_reuses_unsaved_coupon_item(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$order   = wc_create_order();
+		$order->add_product(
+			$product,
+			1,
+			array(
+				'subtotal' => 100,
+				'total'    => 100,
+			)
+		);
+		$order->save();
+
+		$coupon = new WC_Coupon();
+		$coupon->set_code( 'unsaved-coupon-item' );
+		$coupon->set_discount_type( 'percent' );
+		$coupon->set_amount( 10 );
+		$coupon->save();
+
+		$coupon_item = new WC_Order_Item_Coupon();
+		$coupon_item->set_code( 'unsaved-coupon-item' );
+		$order->add_item( $coupon_item );
+
+		$order->recalculate_coupons();
+
+		$coupon_items = $order->get_items( 'coupon' );
+		$this->assertCount( 1, $coupon_items, 'The unsaved coupon item should not be duplicated.' );
+		$this->assertEquals( 10, reset( $coupon_items )->get_discount(), 'The coupon discount should be set on the existing item.' );
+	}
+
+	/**
+	 * @testdox Recalculating coupons discounts each unsaved line item without failing.
+	 */
+	public function test_recalculate_coupons_with_unsaved_line_items(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$coupon  = new WC_Coupon();
+		$coupon->set_code( 'unsaved-line-items' );
+		$coupon->set_discount_type( 'percent' );
+		$coupon->set_amount( 10 );
+		$coupon->save();
+
+		$order = new WC_Order();
+		foreach ( array( 100, 50 ) as $total ) {
+			$line_item = new WC_Order_Item_Product();
+			$line_item->set_product( $product );
+			$line_item->set_quantity( 1 );
+			$line_item->set_subtotal( $total );
+			$line_item->set_total( $total );
+			$order->add_item( $line_item );
+		}
+		$coupon_item = new WC_Order_Item_Coupon();
+		$coupon_item->set_code( 'unsaved-line-items' );
+		$order->add_item( $coupon_item );
+
+		$order->recalculate_coupons();
+
+		$line_totals = array_map(
+			fn( $item ) => (float) $item->get_total(),
+			array_values( $order->get_items() )
+		);
+		$this->assertEqualsCanonicalizing( array( 90.0, 45.0 ), $line_totals, 'Each unsaved line item should get its own discount.' );
+		$this->assertCount( 1, $order->get_items( 'coupon' ), 'The coupon item should not be duplicated.' );
+		$this->assertEquals( 15, $order->get_discount_total() );
+	}
+
+	/**
 	 * @testdox Order and refund defaults capture the store tax mode without pending changes.
 	 * @dataProvider provide_order_tax_defaults
 	 *
