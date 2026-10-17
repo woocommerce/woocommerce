@@ -1,0 +1,3 @@
+Significance: patch
+Type: fix
+Comment: Trigger change event on cleared sale price schedule date inputs so variation rows are marked dirty and saved. Fixes issue where clicking "Cancel schedule" did not persist after saving.
