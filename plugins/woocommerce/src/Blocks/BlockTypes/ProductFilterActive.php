@@ -66,6 +66,21 @@ final class ProductFilterActive extends AbstractBlock {
 			'storeNamespace' => 'woocommerce/product-filters',
 		);
 
+		$is_empty            = empty( $removable_items );
+		$product_filters_key = $block->context['productFiltersKey'] ?? '';
+		if ( is_string( $product_filters_key ) && '' !== $product_filters_key ) {
+			wp_interactivity_state(
+				'woocommerce/product-filters',
+				array(
+					'filterEmptyStates' => array(
+						$product_filters_key => array(
+							wp_unique_prefixed_id( 'product-filter-' ) => $is_empty,
+						),
+					),
+				)
+			);
+		}
+
 		$wrapper_attributes = array(
 			'data-wp-interactive'  => 'woocommerce/product-filters',
 			'data-wp-key'          => wp_unique_prefixed_id( $this->get_full_block_name() ),
