@@ -67,7 +67,7 @@ catalogs:
         '@wordpress/theme': 0.17.0
         '@wordpress/ui': 0.17.0
         '@wordpress/undo-manager': 1.33.1
-        '@wordpress/views': 1.0.8
+        '@wordpress/views': 2.0.0
         '@wordpress/base-styles': 6.9.1
 
     # Shared build tooling used across workspace packages.

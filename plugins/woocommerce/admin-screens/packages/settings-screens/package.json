@@ -1,0 +1,6 @@
+{
+	"name": "@woocommerce/settings-screens",
+	"private": true,
+	"module": "build-module/index.mjs",
+	"wpScriptModuleExports": "./build-module/index.mjs"
+}
