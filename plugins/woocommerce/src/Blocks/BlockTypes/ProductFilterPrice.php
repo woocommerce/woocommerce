@@ -155,7 +155,22 @@ final class ProductFilterPrice extends AbstractBlock {
 			)
 		);
 
-		if ( $min_range === $max_range || ! $max_range ) {
+		$is_empty            = $min_range === $max_range || ! $max_range;
+		$product_filters_key = $block->context['productFiltersKey'] ?? '';
+		if ( is_string( $product_filters_key ) && '' !== $product_filters_key ) {
+			wp_interactivity_state(
+				'woocommerce/product-filters',
+				array(
+					'filterEmptyStates' => array(
+						$product_filters_key => array(
+							wp_unique_prefixed_id( 'product-filter-' ) => $is_empty,
+						),
+					),
+				)
+			);
+		}
+
+		if ( $is_empty ) {
 			$wrapper_attributes['hidden'] = true;
 			$wrapper_attributes['class']  = 'wc-block-product-filter--hidden';
 			return sprintf(
