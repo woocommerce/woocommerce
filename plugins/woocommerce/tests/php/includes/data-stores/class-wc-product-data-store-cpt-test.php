@@ -76,6 +76,24 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A trashed product can be permanently deleted using the same object.
+	 */
+	public function test_force_delete_after_trashing_product(): void {
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Product to delete' );
+		$product->save();
+		$id = $product->get_id();
+
+		$this->assertTrue( $product->delete(), 'Trashing should succeed.' );
+		$this->assertSame( $id, $product->get_id(), 'Trashing should retain the product ID.' );
+		$this->assertSame( 'trash', get_post_status( $id ), 'The product should be in the trash.' );
+
+		$this->assertTrue( $product->delete( true ), 'Permanent deletion should succeed.' );
+		$this->assertSame( 0, $product->get_id(), 'Permanent deletion should clear the product ID.' );
+		$this->assertNull( get_post( $id ), 'The product should no longer exist.' );
+	}
+
+	/**
 	 * Create a simple product with the given name and status, for OR-term search tests.
 	 *
 	 * @param string $name   Product name.
