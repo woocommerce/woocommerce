@@ -1,0 +1,3 @@
+Significance: patch
+Type: fix
+Comment: Refuse a query filter value that fails its schema, and a query filter on order items, in the unreleased extensible abilities feature.

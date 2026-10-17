@@ -759,6 +759,63 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should refuse a filter on order items, because no list ability returns them.
+	 */
+	public function test_a_filter_on_order_items_is_refused(): void {
+		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_query_filter' );
+		$register = static function () {
+			ExtensibleAbilities::register_query_filter(
+				array(
+					'resource'  => 'order_item',
+					'namespace' => 'test-ext',
+					'filter'    => 'gift',
+					'schema'    => array( 'type' => 'boolean' ),
+					'callback'  => static fn() => array( 'meta_query' => array( array( 'key' => 'gift' ) ) ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+				)
+			);
+		};
+		add_action( 'woocommerce_extensible_abilities_init', $register );
+		$this->get_ability( 'woocommerce/orders-query' );
+		remove_action( 'woocommerce_extensible_abilities_init', $register );
+
+		$this->assertSame( array(), ExtensibleAbilities::get_query_args( 'order_item', array( 'filters' => array( 'extensions' => array( 'test-ext' => array( 'gift' => true ) ) ) ) ) );
+	}
+
+	/**
+	 * @testdox Should return a 400 error and not run the filter when a value that skipped validation fails its schema.
+	 */
+	public function test_a_filter_value_that_fails_its_schema_is_refused(): void {
+		$called   = false;
+		$register = static function () use ( &$called ) {
+			ExtensibleAbilities::register_query_filter(
+				array(
+					'resource'  => 'order',
+					'namespace' => 'test-ext',
+					'filter'    => 'tags',
+					'schema'    => array(
+						'type'        => 'array',
+						'items'       => array( 'type' => 'string' ),
+						'uniqueItems' => true,
+					),
+					'callback'  => static function () use ( &$called ) {
+						$called = true;
+						return array();
+					},
+				)
+			);
+		};
+		add_action( 'woocommerce_extensible_abilities_init', $register );
+		$this->get_ability( 'woocommerce/orders-query' );
+		remove_action( 'woocommerce_extensible_abilities_init', $register );
+
+		$result = ExtensibleAbilities::get_query_args( 'order', array( 'filters' => array( 'extensions' => array( 'test-ext' => array( 'tags' => array( 'gift', 'gift' ) ) ) ) ) );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 400, $result->get_error_data()['status'] );
+		$this->assertFalse( $called );
+	}
+
+	/**
 	 * @testdox Should refuse a filter that is registered after the init action.
 	 */
 	public function test_a_filter_registered_after_the_init_action_is_refused(): void {
