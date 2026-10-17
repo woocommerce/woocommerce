@@ -53,7 +53,13 @@
 			}
 		}
 	},
-	"usesContext": [ "query", "filterParams" ],
+	"usesContext": [
+		"query",
+		"queryId",
+		"collection",
+		"productCollectionLocation",
+		"filterParams"
+	],
 	"attributes": {
 		"attributeId": {
 			"type": "number",

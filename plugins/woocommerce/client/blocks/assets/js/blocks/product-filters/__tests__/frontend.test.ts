@@ -247,19 +247,20 @@ describe( 'product filters interactivity store', () => {
 			// producing `%25D4%25B1%25D5%25B8%25D6%2582%25D5%25A4%25D5%25AB%25D5%25B8%25D5%25A3%25D5%25AB%25D6%2580%25D6%2584`
 			// instead of the intended `%D4%B1%D5%B8%D6%82%D5%A4%D5%AB%D5%B8%D5%A3%D5%AB%D6%80%D6%84`.
 			expectedUrl:
-				'https://example.com/shop/?color=%D4%B1%D5%B8%D6%82%D5%A4%D5%AB%D5%B8%D5%A3%D5%AB%D6%80%D6%84',
+				'https://example.com/shop/?existing=1&color=%D4%B1%D5%B8%D6%82%D5%A4%D5%AB%D5%B8%D5%A3%D5%AB%D6%80%D6%84',
 		},
 		{
 			description: 'latin value',
 			label: 'Blue',
 			value: 'blue',
-			expectedUrl: 'https://example.com/shop/?color=blue',
+			expectedUrl: 'https://example.com/shop/?existing=1&color=blue',
 		},
 		{
 			description: 'malformed encoded value',
 			label: 'Invalid',
 			value: '%E0%A4%A',
-			expectedUrl: 'https://example.com/shop/?color=%25E0%25A4%25A',
+			expectedUrl:
+				'https://example.com/shop/?existing=1&color=%25E0%25A4%25A',
 			expectConsoleWarn: true,
 		},
 	].forEach(
@@ -351,6 +352,53 @@ describe( 'product filters interactivity store', () => {
 					consoleWarnSpy.mockRestore();
 				}
 			} );
+		}
+	);
+
+	it.each( [ 0, 17 ] )(
+		'scopes navigation and clearing to collection %i',
+		( queryId ) => {
+			if ( ! mockRegisteredStore ) {
+				throw new Error( 'Product filters store was not registered.' );
+			}
+			window.history.replaceState(
+				{},
+				'',
+				`https://example.com/shop/?min_price=5&wcp-${ queryId }-min_price=10&wcp-${ queryId }-maker=old&wcp-28-min_price=60&query-${ queryId }-page=3&query-28-page=2&campaign=spring`
+			);
+			const context = {
+				queryId,
+				params: { min_price: '10', maker: 'old' },
+				activeFilters: [
+					{
+						type: 'taxonomy/product_brand',
+						value: 'acme',
+						activeLabel: 'Acme',
+					},
+				],
+				forcePageReload: true,
+			};
+			mockGetContext.mockReturnValue( context );
+			mockGetServerContext.mockReturnValue( context );
+			mockGetConfig.mockReturnValue( {
+				canonicalUrl: 'https://example.com/shop/',
+				filterParamKeys: [ 'min_price', 'maker' ],
+				taxonomyParamsMap: { product_brand: 'maker' },
+			} );
+
+			expect( mockRegisteredStore.state.params ).toEqual( {
+				maker: 'acme',
+			} );
+			mockRegisteredStore.actions.navigate().next();
+			expect( mockReload ).toHaveBeenLastCalledWith(
+				`https://example.com/shop/?min_price=5&wcp-28-min_price=60&query-28-page=2&campaign=spring&wcp-${ queryId }-maker=acme`
+			);
+
+			context.activeFilters = [];
+			mockRegisteredStore.actions.navigate().next();
+			expect( mockReload ).toHaveBeenLastCalledWith(
+				'https://example.com/shop/?min_price=5&wcp-28-min_price=60&query-28-page=2&campaign=spring'
+			);
 		}
 	);
 

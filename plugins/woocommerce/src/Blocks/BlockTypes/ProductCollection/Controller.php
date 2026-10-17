@@ -382,10 +382,9 @@ class Controller extends AbstractBlock {
 		$block_context_query['tax_query'] = ! empty( $query['tax_query'] ) ? $query['tax_query'] : array();
 		$block_context_query['queryId']   = $block->context['queryId'] ?? null;
 
-		$inherit    = $block->context['query']['inherit'] ?? false;
-		$filterable = $block->context['query']['filterable'] ?? false;
-
-		$is_exclude_applied_filters = ! ( $inherit || $filterable );
+		if ( ! ( $block_context_query['inherit'] ?? false ) ) {
+			$block_context_query['filterParams'] = wc_get_container()->get( \Automattic\WooCommerce\Internal\ProductFilters\Params::class )->get_filter_params( $block_context_query['queryId'] );
+		}
 
 		$collection_args = array(
 			'name'                      => $block->context['collection'] ?? '',
@@ -396,8 +395,7 @@ class Controller extends AbstractBlock {
 		return $this->query_builder->get_final_frontend_query(
 			$collection_args,
 			$block_context_query,
-			$page,
-			$is_exclude_applied_filters
+			$page
 		);
 	}
 

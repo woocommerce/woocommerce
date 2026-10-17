@@ -28,7 +28,7 @@ class ProductFilters extends AbstractBlock {
 	 * @return string[]
 	 */
 	protected function get_block_type_uses_context() {
-		return array( 'postId', 'query', 'queryId', 'forcePageReload' );
+		return array( 'postId', 'query', 'queryId', 'collection', 'productCollectionLocation', 'forcePageReload' );
 	}
 
 	/**
@@ -175,10 +175,17 @@ CSS;
 
 		wp_enqueue_script( 'wc-settings' );
 
-		$query_id      = $block->context['queryId'] ?? 0;
-		$filter_params = $this->get_filter_params( $query_id );
+		$query_id      = $block->context['queryId'] ?? null;
+		$params        = wc_get_container()->get( Params::class );
+		$filter_params = $params->get_filter_params( $query_id );
 
-		wp_interactivity_config( $this->get_full_block_name(), [ 'canonicalUrl' => $this->get_canonical_url_no_pagination( $filter_params ) ] );
+		wp_interactivity_config(
+			$this->get_full_block_name(),
+			array(
+				'canonicalUrl'    => $this->get_canonical_url_no_pagination( $params->get_filter_params() ),
+				'filterParamKeys' => $params->get_param_keys(),
+			)
+		);
 
 		/**
 		 * Filter hook to modify the selected filter items.
@@ -216,6 +223,9 @@ CSS;
 			// frontend can fall back to the global interactivity config.
 			'forcePageReload' => isset( $block->context['forcePageReload'] ) ? (bool) $block->context['forcePageReload'] : null,
 		);
+		if ( null !== $query_id ) {
+			$interactivity_context['queryId'] = $query_id;
+		}
 
 		$overlay_mode     = $this->get_overlay_mode( $attributes );
 		$has_overlay      = 'off' !== $overlay_mode;
@@ -349,40 +359,10 @@ CSS;
 					array(
 						'attrs'       => $block->parsed_block['attrs'] ?? array(),
 						'innerBlocks' => $block->parsed_block['innerBlocks'] ?? array(),
+						'queryId'     => $block->context['queryId'] ?? null,
 					)
 				)
 			)
-		);
-	}
-
-	/**
-	 * Parse the filter parameters from the URL.
-	 * For now we only get the global query params from the URL. In the future,
-	 * we should get the query params based on $query_id.
-	 *
-	 * @param int $query_id Query ID.
-	 * @return array Parsed filter params.
-	 */
-	private function get_filter_params( $query_id ) {
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : '';
-
-		$parsed_url = wp_parse_url( esc_url_raw( $request_uri ) );
-
-		if ( empty( $parsed_url['query'] ) ) {
-			return array();
-		}
-
-		parse_str( $parsed_url['query'], $url_query_params );
-
-		$filter_param_keys = wc_get_container()->get( Params::class )->get_param_keys();
-
-		return array_filter(
-			$url_query_params,
-			function ( $key ) use ( $filter_param_keys ) {
-				return in_array( $key, $filter_param_keys, true );
-			},
-			ARRAY_FILTER_USE_KEY
 		);
 	}
 

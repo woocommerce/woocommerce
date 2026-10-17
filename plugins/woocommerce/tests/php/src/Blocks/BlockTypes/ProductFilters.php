@@ -37,6 +37,71 @@ class ProductFilters extends \WP_UnitTestCase {
 	private $canonical_method;
 
 	/**
+	 * Local counts retain merchant criteria, even when a shopper selection leaves no products.
+	 */
+	public function test_nested_local_filters_preserve_saved_taxonomy_and_empty_collection(): void {
+		$red  = self::factory()->term->create(
+			array(
+				'taxonomy' => 'product_cat',
+				'name'     => 'Local red',
+				'slug'     => 'local-red',
+			)
+		);
+		$blue = self::factory()->term->create(
+			array(
+				'taxonomy' => 'product_cat',
+				'name'     => 'Local blue',
+				'slug'     => 'local-blue',
+			)
+		);
+		foreach ( array( 10, 30, 40 ) as $price ) {
+			$product = \WC_Helper_Product::create_simple_product();
+			$product->set_regular_price( (string) $price );
+			$product->set_category_ids( array( 40 === $price ? $blue : $red ) );
+			$product->save();
+		}
+		$attributes = array(
+			'queryId' => 0,
+			'query'   => array(
+				'isProductCollectionBlock' => true,
+				'postType'                 => 'product',
+				'inherit'                  => false,
+				'perPage'                  => 10,
+				'taxQuery'                 => array( 'product_cat' => array( $red ) ),
+			),
+		);
+		$markup     = '<!-- wp:woocommerce/product-collection ' . wp_json_encode( $attributes ) . ' --><div class="wp-block-woocommerce-product-collection">'
+			. '<!-- wp:woocommerce/product-filters --><div class="wp-block-woocommerce-product-filters">'
+			. '<!-- wp:woocommerce/product-filter-taxonomy {"taxonomy":"product_cat","showCounts":true} --><div>'
+			. '<!-- wp:woocommerce/product-filter-checkbox-list --><div class="wc-block-product-filter-checkbox-list"></div><!-- /wp:woocommerce/product-filter-checkbox-list -->'
+			. '</div><!-- /wp:woocommerce/product-filter-taxonomy --></div><!-- /wp:woocommerce/product-filters -->'
+			. '<!-- wp:woocommerce/product-template --><!-- wp:post-title /--><!-- /wp:woocommerce/product-template -->'
+			. '</div><!-- /wp:woocommerce/product-collection -->';
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- Restore the original request verbatim after the test.
+		$original_uri = $_SERVER['REQUEST_URI'] ?? null;
+		try {
+			$_SERVER['REQUEST_URI'] = '/?wcp-0-categories=local-blue&wcp-0-min_price=20&min_price=999';
+			$html                   = do_blocks( $markup );
+			$this->assertStringContainsString( 'wp-block-woocommerce-product-collection', $html );
+			$this->assertStringNotContainsString( 'wp-block-post-title', $html );
+			$this->assertStringContainsString( 'aria-label="Local red"', $html );
+			$this->assertStringNotContainsString( 'aria-label="Local blue"', $html );
+			$this->assertStringContainsString( 'data-wp-text="context.item.count">1</span>', $html );
+
+			$_SERVER['REQUEST_URI'] = '/?wcp-0-categories=local-red&min_price=999';
+			$html                   = do_blocks( $markup );
+			$this->assertStringContainsString( 'wp-block-post-title', $html );
+			$this->assertStringContainsString( 'data-wp-text="context.item.count">2</span>', $html );
+		} finally {
+			if ( null === $original_uri ) {
+				unset( $_SERVER['REQUEST_URI'] );
+			} else {
+				$_SERVER['REQUEST_URI'] = $original_uri;
+			}
+		}
+	}
+
+	/**
 	 * Set up the test subject and dependencies.
 	 *
 	 * @return void

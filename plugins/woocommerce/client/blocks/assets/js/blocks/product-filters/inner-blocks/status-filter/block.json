@@ -71,7 +71,13 @@
 			"default": true
 		}
 	},
-	"usesContext": [ "query", "filterParams" ],
+	"usesContext": [
+		"query",
+		"queryId",
+		"collection",
+		"productCollectionLocation",
+		"filterParams"
+	],
 	"example": {
 		"attributes": {
 			"isPreview": true
