@@ -20,7 +20,7 @@ class RemoteInboxNotificationsDataSourcePoller extends DataSourcePoller {
 	const ID = 'remote_inbox_notifications';
 
 	/**
-	 * Transient holding the spec slugs and fetch time of the latest complete read.
+	 * Transient holding the latest read's fetch time and published slugs, or null slugs for an inconclusive read.
 	 */
 	private const PUBLISHED_SNAPSHOT_TRANSIENT = 'woocommerce_admin_remote_inbox_notifications_published_snapshot';
 
@@ -65,7 +65,7 @@ class RemoteInboxNotificationsDataSourcePoller extends DataSourcePoller {
 	/**
 	 * Read the data sources and record the identities published by the canonical WooCommerce.com feed.
 	 *
-	 * Invalid specs with usable slugs still count as published. An inconclusive canonical response clears the snapshot.
+	 * Invalid specs with usable slugs still count as published. An inconclusive response retains only its timestamp to reject older reads.
 	 *
 	 * @since 11.3.0
 	 *
@@ -77,11 +77,7 @@ class RemoteInboxNotificationsDataSourcePoller extends DataSourcePoller {
 
 		$result = parent::read_specs_from_data_sources();
 
-		if ( null !== $this->published_slugs ) {
-			$this->save_published_snapshot( $fetched_at, $this->published_slugs );
-		} else {
-			delete_transient( self::PUBLISHED_SNAPSHOT_TRANSIENT );
-		}
+		$this->save_published_snapshot( $fetched_at, $this->published_slugs );
 
 		return $result;
 	}
@@ -94,7 +90,7 @@ class RemoteInboxNotificationsDataSourcePoller extends DataSourcePoller {
 	 * @internal
 	 * @since 11.3.0
 	 *
-	 * @return array{fetched_at: int, slugs: string[]}|null The snapshot, or null when none is stored.
+	 * @return array{fetched_at: int, slugs: string[]}|null The snapshot, or null when the latest read is inconclusive or absent.
 	 */
 	public function get_published_snapshot(): ?array {
 		$snapshot = get_transient( self::PUBLISHED_SNAPSHOT_TRANSIENT );
@@ -144,14 +140,14 @@ class RemoteInboxNotificationsDataSourcePoller extends DataSourcePoller {
 	}
 
 	/**
-	 * Store a published snapshot unless a newer one is already stored.
+	 * Store a read's publication evidence unless a newer read is already stored.
 	 *
-	 * @param int      $fetched_at When the read started.
-	 * @param string[] $slugs      Spec slugs returned by the read.
+	 * @param int           $fetched_at When the read started.
+	 * @param string[]|null $slugs      Published slugs, or null for an inconclusive read.
 	 */
-	private function save_published_snapshot( int $fetched_at, array $slugs ): void {
-		$stored = $this->get_published_snapshot();
-		if ( null !== $stored && $stored['fetched_at'] > $fetched_at ) {
+	private function save_published_snapshot( int $fetched_at, ?array $slugs ): void {
+		$stored = get_transient( self::PUBLISHED_SNAPSHOT_TRANSIENT );
+		if ( is_array( $stored ) && is_int( $stored['fetched_at'] ?? null ) && $stored['fetched_at'] > $fetched_at ) {
 			return;
 		}
 

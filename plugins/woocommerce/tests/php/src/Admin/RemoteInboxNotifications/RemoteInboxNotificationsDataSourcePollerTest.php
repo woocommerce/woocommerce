@@ -275,6 +275,89 @@ class RemoteInboxNotificationsDataSourcePollerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox An inconclusive read retains its timestamp without authorizing withdrawal, and a later complete read can recover.
+	 */
+	public function test_inconclusive_read_retains_timestamp(): void {
+		$healthy_responses = $this->responses;
+		$this->responses   = array_fill_keys( array_keys( $healthy_responses ), null );
+		$before            = time();
+
+		$this->assertFalse( $this->sut->read_specs_from_data_sources() );
+
+		$stored = get_transient( self::SNAPSHOT_TRANSIENT );
+		$this->assertIsArray( $stored, 'An inconclusive read must retain its timestamp to reject older reads.' );
+		$this->assertGreaterThanOrEqual( $before, $stored['fetched_at'] );
+		$this->assertLessThanOrEqual( time(), $stored['fetched_at'] );
+		$this->assertNull( $this->sut->get_published_snapshot(), 'The retained timestamp must not authorize withdrawal.' );
+
+		$stored['fetched_at'] -= HOUR_IN_SECONDS;
+		set_transient( self::SNAPSHOT_TRANSIENT, $stored, DAY_IN_SECONDS );
+		$this->responses = $healthy_responses;
+
+		$this->assertTrue( $this->sut->read_specs_from_data_sources() );
+		$this->assertSame( array( 'remote-alert-a', 'remote-alert-b' ), $this->sut->get_published_snapshot()['slugs'] );
+	}
+
+	/**
+	 * @testdox An older read cannot replace the timestamp of a newer inconclusive read.
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $complete Whether the older read returns complete publication evidence.
+	 */
+	public function test_older_read_preserves_inconclusive_timestamp( bool $complete ): void {
+		$newer_read = array(
+			'fetched_at' => time() + HOUR_IN_SECONDS,
+			'slugs'      => null,
+		);
+		set_transient( self::SNAPSHOT_TRANSIENT, $newer_read, DAY_IN_SECONDS );
+		if ( ! $complete ) {
+			$this->responses = array_fill_keys( array_keys( $this->responses ), null );
+		}
+
+		$this->assertSame( $complete, $this->sut->read_specs_from_data_sources() );
+
+		$this->assertSame( $newer_read, get_transient( self::SNAPSHOT_TRANSIENT ), 'Older reads must preserve the newer timestamp even without published slugs.' );
+		$this->assertNull( $this->sut->get_published_snapshot(), 'An older complete read must not restore stale publication evidence.' );
+	}
+
+	/**
+	 * @testdox An older inconclusive read cannot erase a newer complete snapshot.
+	 */
+	public function test_older_inconclusive_read_preserves_complete_snapshot(): void {
+		$newer_snapshot = array(
+			'fetched_at' => time() + HOUR_IN_SECONDS,
+			'slugs'      => array( 'remote-alert-newer' ),
+		);
+		set_transient( self::SNAPSHOT_TRANSIENT, $newer_snapshot, DAY_IN_SECONDS );
+		$this->responses[ $this->data_sources[0] ] = null;
+
+		$this->assertTrue( $this->sut->read_specs_from_data_sources() );
+
+		$this->assertSame( $newer_snapshot, $this->sut->get_published_snapshot(), 'An older inconclusive read must not discard newer evidence.' );
+	}
+
+	/**
+	 * @testdox A malformed stored timestamp cannot block a fresh complete response.
+	 */
+	public function test_malformed_timestamp_does_not_block_complete_read(): void {
+		set_transient(
+			self::SNAPSHOT_TRANSIENT,
+			array(
+				'fetched_at' => (string) ( time() + HOUR_IN_SECONDS ),
+				'slugs'      => null,
+			),
+			DAY_IN_SECONDS
+		);
+
+		$this->assertTrue( $this->sut->read_specs_from_data_sources() );
+
+		$snapshot = $this->sut->get_published_snapshot();
+		$this->assertNotNull( $snapshot, 'Only valid timestamps may prevent a complete read from saving its evidence.' );
+		$this->assertSame( array( 'remote-alert-a', 'remote-alert-b' ), $snapshot['slugs'] );
+	}
+
+	/**
 	 * @testdox Stored snapshot slugs are returned as a list of strings.
 	 */
 	public function test_snapshot_slugs_are_normalized(): void {
