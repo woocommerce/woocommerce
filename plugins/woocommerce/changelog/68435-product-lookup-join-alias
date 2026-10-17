@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep product searches and best-selling product lists working when extensions join the product lookup table.
