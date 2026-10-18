@@ -74,7 +74,7 @@ A `finding` expectation requires a finding on that path containing the specified
 
 ## Optional prepared pair
 
-`public-php-api-bc` includes an optional [internal helpers and extension contracts](public-php-api-bc/groups/internal-helpers-and-extension-contracts/README.md) package. It pairs a historical MCP false-positive regression with a Stripe positive control.
+`public-php-api-bc` includes an optional [pair of eval cases](public-php-api-bc/groups/internal-helpers-and-extension-contracts/README.md). The cases cover a historical MCP false-positive regression and a Stripe positive control.
 
 The committed suite does not register these cases. The runner does not discover `cases.template.json` automatically. `prepare.py` creates a new, separate checkout and registers both cases and their group there. That checkout contains 162 cases.
 
