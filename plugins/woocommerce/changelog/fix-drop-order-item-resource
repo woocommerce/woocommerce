@@ -1,0 +1,3 @@
+Significance: patch
+Type: fix
+Comment: Remove the order_item resource from the unreleased extensible abilities feature.

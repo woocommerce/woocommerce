@@ -166,21 +166,18 @@ trait OrderAbilityTrait {
 				'line_items'           => array(
 					'type'        => 'array',
 					'description' => __( 'Order line items. Only present when include_line_items is true.', 'woocommerce' ),
-					'items'       => ExtensibleAbilities::add_fields_schema(
-						array(
-							'type'                 => 'object',
-							'properties'           => array(
-								'id'           => array( 'type' => 'integer' ),
-								'name'         => array( 'type' => 'string' ),
-								'product_id'   => array( 'type' => 'integer' ),
-								'variation_id' => array( 'type' => 'integer' ),
-								'quantity'     => array( 'type' => 'integer' ),
-								'subtotal'     => array( 'type' => 'string' ),
-								'total'        => array( 'type' => 'string' ),
-							),
-							'additionalProperties' => false,
+					'items'       => array(
+						'type'                 => 'object',
+						'properties'           => array(
+							'id'           => array( 'type' => 'integer' ),
+							'name'         => array( 'type' => 'string' ),
+							'product_id'   => array( 'type' => 'integer' ),
+							'variation_id' => array( 'type' => 'integer' ),
+							'quantity'     => array( 'type' => 'integer' ),
+							'subtotal'     => array( 'type' => 'string' ),
+							'total'        => array( 'type' => 'string' ),
 						),
-						'order_item'
+						'additionalProperties' => false,
 					),
 				),
 			),
@@ -309,18 +306,14 @@ trait OrderAbilityTrait {
 					continue;
 				}
 
-				$data['line_items'][] = ExtensibleAbilities::add_fields_to_object(
-					array(
-						'id'           => $item->get_id(),
-						'name'         => $item->get_name(),
-						'product_id'   => $item->get_product_id(),
-						'variation_id' => $item->get_variation_id(),
-						'quantity'     => $item->get_quantity(),
-						'subtotal'     => $item->get_subtotal(),
-						'total'        => $item->get_total(),
-					),
-					'order_item',
-					$item
+				$data['line_items'][] = array(
+					'id'           => $item->get_id(),
+					'name'         => $item->get_name(),
+					'product_id'   => $item->get_product_id(),
+					'variation_id' => $item->get_variation_id(),
+					'quantity'     => $item->get_quantity(),
+					'subtotal'     => $item->get_subtotal(),
+					'total'        => $item->get_total(),
 				);
 			}
 		}

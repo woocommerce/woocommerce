@@ -168,17 +168,6 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 				},
 			)
 		);
-		ExtensibleAbilities::register_field(
-			array(
-				'resource'     => 'order_item',
-				'namespace'    => 'test-ext',
-				'field'        => 'gift',
-				'schema'       => array( 'type' => 'string' ),
-				'get_callback' => static function ( \WC_Order_Item $item ) {
-					return 'item-' . $item->get_id();
-				},
-			)
-		);
 		$writable = array(
 			array( 'product', 'test-ext', 'color', array( 'type' => 'string' ) ),
 			array( 'product', 'other_ext', 'count', array( 'type' => 'integer' ) ),
@@ -824,11 +813,10 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should return order and line item fields under their namespace.
+	 * @testdox Should return order fields under their namespace.
 	 */
 	public function test_order_reads_return_fields_under_their_namespace(): void {
 		$order = \WC_Helper_Order::create_order();
-		$item  = current( $order->get_items() );
 
 		$listed = $this->run_ability(
 			'woocommerce/orders-query',
@@ -846,7 +834,6 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		);
 
 		$this->assertSame( array( 'test-ext' => array( 'note' => 'order-' . $order->get_id() ) ), $listed['extensions'] );
-		$this->assertSame( array( 'test-ext' => array( 'gift' => 'item-' . $item->get_id() ) ), $listed['line_items'][0]['extensions'] );
 		$this->assertSame( array( 'test-ext' => array( 'note' => 'order-' . $order->get_id() ) ), $noted['order']['extensions'] );
 	}
 
@@ -862,7 +849,6 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->assertSame( array( 'type' => 'integer' ), $products['properties']['other_ext']['properties']['code'] );
 		$this->assertSame( self::CODE_SCHEMA, $product['properties']['test-ext']['properties']['code'] );
 		$this->assertSame( array( 'type' => 'string' ), $order['extensions']['properties']['test-ext']['properties']['note'] );
-		$this->assertSame( array( 'type' => 'string' ), $order['line_items']['items']['properties']['extensions']['properties']['test-ext']['properties']['gift'] );
 		$this->assertSame( array( 'type' => 'object' ), ExtensibleAbilities::add_fields_schema( array( 'type' => 'object' ), 'customer' ) );
 		$this->assertFalse( $products['additionalProperties'] );
 		$this->assertFalse( $products['properties']['test-ext']['additionalProperties'] );
@@ -959,7 +945,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 		$resources = new \ReflectionProperty( ExtensibleAbilities::class, 'resources' );
 		$resources->setAccessible( true );
-		$this->assertSame( array( 'product', 'order', 'order_item' ), array_keys( $resources->getValue() ) );
+		$this->assertSame( array( 'product', 'order' ), array_keys( $resources->getValue() ) );
 	}
 
 	/**

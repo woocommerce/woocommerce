@@ -88,7 +88,7 @@ class ExtensibleAbilities {
 	 * Register a resource that abilities format, so extensions can register fields on it.
 	 *
 	 * Call it inside the `woocommerce_extensible_abilities_resources_init` action. A call after that action is refused.
-	 * Core registers `product`, `order` and `order_item` there. An
+	 * Core registers `product` and `order` there. An
 	 * extension registers a resource that its own abilities format, and then calls `add_fields_to_object()`
 	 * and `add_fields_schema()` from those abilities, exactly as Core's abilities do.
 	 * Registering the same resource again does nothing.
@@ -121,7 +121,7 @@ class ExtensibleAbilities {
 	 * @param array $args {
 	 *     Field arguments.
 	 *
-	 *     @type string   $resource     Resource that an ability formats, for example `product`, `order` or `order_item`.
+	 *     @type string   $resource     Resource that an ability formats, for example `product` or `order`.
 	 *     @type string   $namespace    Slug of the extension that owns the field, such as `subscriptions`.
 	 *     @type string   $field        Field name inside the namespace, such as `trial_length`.
 	 *     @type array    $schema       JSON schema of the value. It needs a `type`. Its `title` is the label clients show.
