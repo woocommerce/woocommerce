@@ -62,19 +62,11 @@
 			"type": "string",
 			"default": "woocommerce/product-filter-checkbox-list"
 		},
-		"isPreview": {
-			"type": "boolean",
-			"default": false
-		},
 		"hideEmpty": {
 			"type": "boolean",
 			"default": true
 		}
 	},
 	"usesContext": [ "query", "filterParams" ],
-	"example": {
-		"attributes": {
-			"isPreview": true
-		}
-	}
+	"example": {}
 }

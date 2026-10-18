@@ -57,13 +57,18 @@ jest.mock( '@woocommerce/block-data/schema/selectors', () => ( {
 	} ) ),
 } ) );
 
+// Mock usePreviewMode to true so preview data is loaded in test environment
+jest.mock( '@woocommerce/base-hooks', () => ( {
+	...jest.requireActual( '@woocommerce/base-hooks' ),
+	usePreviewMode: jest.fn( () => true ),
+} ) );
+
 async function setup( attributes: BlockAttributes ) {
 	const testBlock = [
 		{
 			name: 'woocommerce/product-filter-taxonomy',
 			attributes: {
 				...attributes,
-				isPreview: true,
 			},
 		},
 	];

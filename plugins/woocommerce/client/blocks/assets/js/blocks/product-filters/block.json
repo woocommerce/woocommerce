@@ -39,10 +39,6 @@
 	"textdomain": "woocommerce",
 	"usesContext": [ "postId", "query", "queryId", "forcePageReload" ],
 	"attributes": {
-		"isPreview": {
-			"type": "boolean",
-			"default": false
-		},
 		"overlayMode": {
 			"type": "string",
 			"enum": [ "off", "mobile", "always" ]
@@ -52,11 +48,7 @@
 			"enum": [ "left", "right" ]
 		}
 	},
-	"example": {
-		"attributes": {
-			"isPreview": true
-		}
-	},
+	"example": {},
 	"viewScriptModule": "woocommerce/product-filters",
 	"style": "file:../woocommerce/product-filters-style.css",
 	"editorStyle": "file:../woocommerce/product-filters-editor.css"
