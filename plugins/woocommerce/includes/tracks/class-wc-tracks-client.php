@@ -94,7 +94,7 @@ class WC_Tracks_Client {
 	/**
 	 * Record a Tracks event
 	 *
-	 * @param  array $event Array of event properties.
+	 * @param  array|WC_Tracks_Event $event Event, or an array of event properties.
 	 * @return bool|WP_Error         True on success, WP_Error on failure.
 	 */
 	public static function record_event( $event ) {
@@ -121,7 +121,7 @@ class WC_Tracks_Client {
 	 *
 	 * @since 10.5.0
 	 *
-	 * @param  array $event Array of event properties.
+	 * @param  array|WC_Tracks_Event $event Event, or an array of event properties.
 	 * @return bool|WP_Error         True on success, WP_Error on failure.
 	 */
 	public static function record_event_batched( $event ) {

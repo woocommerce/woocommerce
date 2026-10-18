@@ -117,19 +117,10 @@ class WC_Tracks {
 	 * @return bool|WP_Error True for success or WP_Error if the event pixel could not be fired.
 	 */
 	public static function record_event( $event_name, $event_properties = array() ) {
-		/**
-		 * Don't track users who don't have tracking enabled.
-		 */
-		if ( ! WC_Site_Tracking::is_tracking_enabled() ) {
+		if ( ! self::can_record_event() ) {
 			return false;
 		}
 
-		$user = wp_get_current_user();
-
-		// We don't want to track user events during unit tests/CI runs.
-		if ( $user instanceof WP_User && 'wptests_capabilities' === $user->cap_key ) {
-			return false;
-		}
 		$prefixed_event_name = self::PREFIX . $event_name;
 		$properties          = self::get_properties( $prefixed_event_name, $event_properties );
 		$event_obj           = new WC_Tracks_Event( $properties );
@@ -139,6 +130,46 @@ class WC_Tracks {
 		}
 
 		return $event_obj->record();
+	}
+
+	/**
+	 * Record an event in Tracks, sent with the other queued server-side events on shutdown instead of right away.
+	 * Where record_event() would use the footer pixel (page views), this does too. Queued events stay in memory until
+	 * shutdown, so long-running processes (WP-CLI, queue workers) should flush with WC_Tracks_Client::send_batched_pixels().
+	 *
+	 * @since 11.3.0
+	 * @param string $event_name The name of the event.
+	 * @param array  $event_properties Custom properties to send with the event.
+	 * @return bool|WP_Error True for success or WP_Error if the event pixel could not be generated.
+	 */
+	public static function record_event_batched( $event_name, $event_properties = array() ) {
+		if ( ! self::can_record_event() ) {
+			return false;
+		}
+
+		$event_obj = new WC_Tracks_Event( self::get_properties( self::PREFIX . $event_name, $event_properties ) );
+
+		if ( is_wp_error( $event_obj->error ) ) {
+			return $event_obj->error;
+		}
+
+		return $event_obj->record_batched();
+	}
+
+	/**
+	 * Whether events can be recorded: the site allows tracking, and this isn't the unit test suite.
+	 *
+	 * @return bool
+	 */
+	private static function can_record_event() {
+		if ( ! WC_Site_Tracking::is_tracking_enabled() ) {
+			return false;
+		}
+
+		$user = wp_get_current_user();
+
+		// We don't want to track user events during unit tests/CI runs.
+		return ! ( $user instanceof WP_User && 'wptests_capabilities' === $user->cap_key );
 	}
 
 	/**

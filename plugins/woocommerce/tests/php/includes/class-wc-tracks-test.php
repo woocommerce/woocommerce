@@ -40,6 +40,88 @@ class WC_Tracks_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox record_event_batched() queues a server-side event to be sent with the others on shutdown.
+	 */
+	public function test_record_event_batched_queues_server_side_events(): void {
+		if ( ! class_exists( 'WpOrg\Requests\Requests' ) && ! class_exists( 'Requests' ) ) {
+			$this->markTestSkipped( 'Requests library not available for batching.' );
+		}
+
+		$result = $this->record_batched_as_site_user( 'batched_probe', true, true );
+
+		$this->assertTrue( $result );
+		$this->assertCount( 1, $this->batch_queue );
+		$this->assertStringContainsString( '_en=wcadmin_batched_probe', $this->batch_queue[0] );
+		$this->assertStringContainsString( 'probe=yes', $this->batch_queue[0] );
+	}
+
+	/**
+	 * @testdox record_event_batched() records nothing when the site doesn't allow tracking.
+	 */
+	public function test_record_event_batched_respects_tracking_opt_out(): void {
+		$result = $this->record_batched_as_site_user( 'batched_probe', false, true );
+
+		$this->assertFalse( $result );
+		$this->assertSame( array(), $this->batch_queue );
+	}
+
+	/**
+	 * @testdox record_event_batched() uses the footer pixel on page views, like record_event().
+	 */
+	public function test_record_event_batched_uses_footer_pixel_on_page_views(): void {
+		$before = count( WC_Tracks_Footer_Pixel::get_events() );
+
+		$result = $this->record_batched_as_site_user( 'batched_probe', true, false );
+
+		$this->assertTrue( $result );
+		$this->assertSame( array(), $this->batch_queue );
+		$this->assertCount( $before + 1, WC_Tracks_Footer_Pixel::get_events() );
+		// The footer pixel would otherwise send it on shutdown.
+		WC_Tracks_Footer_Pixel::clear_events();
+	}
+
+	/**
+	 * Server-side pixels queued by the last record_batched_as_site_user() call.
+	 *
+	 * @var array
+	 */
+	private $batch_queue = array();
+
+	/**
+	 * Call record_event_batched() as a site user (not the test suite's), then capture and clear the batch queue.
+	 *
+	 * @param string $event_name   Event name.
+	 * @param bool   $tracking     Whether the site allows tracking.
+	 * @param bool   $rest_request Whether this is a REST request.
+	 * @return bool|WP_Error
+	 */
+	private function record_batched_as_site_user( string $event_name, bool $tracking, bool $rest_request ) {
+		$user          = wp_get_current_user();
+		$cap_key       = $user->cap_key;
+		$user->cap_key = 'wp_capabilities';
+		$queue         = new ReflectionProperty( 'WC_Tracks_Client', 'pixel_batch_queue' );
+		$queue->setAccessible( true );
+		update_option( 'woocommerce_allow_tracking', $tracking ? 'yes' : 'no' );
+		if ( $rest_request ) {
+			\Automattic\Jetpack\Constants::set_constant( 'REST_REQUEST', true );
+		}
+
+		try {
+			return WC_Tracks::record_event_batched( $event_name, array( 'probe' => 'yes' ) );
+		} finally {
+			$this->batch_queue = $queue->getValue();
+			$queue->setValue( array() );
+			$hooked = new ReflectionProperty( 'WC_Tracks_Client', 'shutdown_hook_registered' );
+			$hooked->setAccessible( true );
+			$hooked->setValue( false );
+			remove_action( 'shutdown', array( 'WC_Tracks_Client', 'send_batched_pixels' ), 20 );
+			$user->cap_key = $cap_key;
+			\Automattic\Jetpack\Constants::clear_single_constant( 'REST_REQUEST' );
+			delete_option( 'woocommerce_allow_tracking' );
+		}
+	}
+
+	/**
 	 * Test that custom event properties are returned when passed.
 	 */
 	public function test_get_properties() {

@@ -31408,18 +31408,6 @@ parameters:
 			path: includes/tracks/class-wc-tracks-event.php
 
 		-
-			message: '#^Parameter \#1 \$event of static method WC_Tracks_Client\:\:record_event\(\) expects array, \$this\(WC_Tracks_Event\) given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/tracks/class-wc-tracks-event.php
-
-		-
-			message: '#^Parameter \#1 \$event of static method WC_Tracks_Footer_Pixel\:\:record_event\(\) expects array, \$this\(WC_Tracks_Event\) given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/tracks/class-wc-tracks-event.php
-
-		-
 			message: '#^Call to function is_wp_error\(\) with WC_Tracks_Event will always evaluate to false\.$#'
 			identifier: function.impossibleType
 			count: 1

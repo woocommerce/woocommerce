@@ -55,11 +55,34 @@ class WC_Tracks_Event {
 	 * @return bool Always returns true.
 	 */
 	public function record() {
-		if ( wp_doing_ajax() || Constants::is_true( 'REST_REQUEST' ) || Constants::is_true( 'WP_CLI' ) || wp_doing_cron() ) {
+		if ( self::is_server_side_request() ) {
 			return WC_Tracks_Client::record_event( $this );
 		}
 
 		return WC_Tracks_Footer_Pixel::record_event( $this );
+	}
+
+	/**
+	 * Record the event like record(), but queue server-side sends to go out together on shutdown.
+	 *
+	 * @since 11.3.0
+	 * @return bool|WP_Error True for success or WP_Error if the event pixel could not be generated.
+	 */
+	public function record_batched() {
+		if ( self::is_server_side_request() ) {
+			return WC_Tracks_Client::record_event_batched( $this );
+		}
+
+		return WC_Tracks_Footer_Pixel::record_event( $this );
+	}
+
+	/**
+	 * Whether the event is sent from the server: requests that render no page footer for the pixel.
+	 *
+	 * @return bool
+	 */
+	private static function is_server_side_request() {
+		return wp_doing_ajax() || Constants::is_true( 'REST_REQUEST' ) || Constants::is_true( 'WP_CLI' ) || wp_doing_cron();
 	}
 
 	/**

@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Add WC_Tracks::record_event_batched() to send server-side Tracks events together at the end of the request.
