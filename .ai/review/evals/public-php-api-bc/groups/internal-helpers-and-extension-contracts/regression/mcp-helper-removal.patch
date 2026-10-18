@@ -1,0 +1,143 @@
+diff --git a/plugins/woocommerce/changelog/wooai-1427-upgrade-the-mcp-adapter-to-041 b/plugins/woocommerce/changelog/wooai-1427-upgrade-the-mcp-adapter-to-041
+new file mode 100644
+index 0000000000000000000000000000000000000000..4d8d24588dacf6003e9521b05b04ca5a882de730
+--- /dev/null
++++ b/plugins/woocommerce/changelog/wooai-1427-upgrade-the-mcp-adapter-to-041
+@@ -0,0 +1,4 @@
++Significance: patch
++Type: dev
++
++Update wordpress/mcp-adapter to 0.4.1, so the mcp-adapter-execute-ability tool returns the error message of a failed ability, and MCP clients receive the readOnlyHint tool annotation.
+diff --git a/plugins/woocommerce/composer.json b/plugins/woocommerce/composer.json
+index e2875a3e4ee14587ef04723cac0a4259825d6442..fbb62799c4acfc6dc690a9c73305c6dd7a97513c 100644
+--- a/plugins/woocommerce/composer.json
++++ b/plugins/woocommerce/composer.json
+@@ -58,7 +58,7 @@
+ 		"woocommerce/blueprint": "*",
+ 		"woocommerce/email-editor": "*",
+ 		"wordpress/abilities-api": "^0.4.0",
+-		"wordpress/mcp-adapter": "^0.3.0"
++		"wordpress/mcp-adapter": "^0.4.1"
+ 	},
+ 	"require-dev": {
+ 		"automattic/jetpack-changelogger": "^3.3.0",
+diff --git a/plugins/woocommerce/composer.lock b/plugins/woocommerce/composer.lock
+index d1019092c56569ce07ea24aa46f34c1be1ff8a92..ca7a25da3b36007a24f5ac5fe05622a4b46c099c 100644
+--- a/plugins/woocommerce/composer.lock
++++ b/plugins/woocommerce/composer.lock
+@@ -4,7 +4,7 @@
+         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+         "This file is @generated automatically"
+     ],
+-    "content-hash": "f9699e27da79e78a8d87819fd558fe9e",
++    "content-hash": "06d02ce09e769dc0580bad769b68083c",
+     "packages": [
+         {
+             "name": "automattic/block-delimiter",
+@@ -1399,16 +1399,16 @@
+         },
+         {
+             "name": "wordpress/mcp-adapter",
+-            "version": "v0.3.0",
++            "version": "v0.4.1",
+             "source": {
+                 "type": "git",
+                 "url": "https://github.com/WordPress/mcp-adapter.git",
+-                "reference": "653ca8d95180b25809b1a1dc489d8305ec5beb63"
++                "reference": "1a0f9ab868e34b4375be42e873f60765e6632505"
+             },
+             "dist": {
+                 "type": "zip",
+-                "url": "https://api.github.com/repos/WordPress/mcp-adapter/zipball/653ca8d95180b25809b1a1dc489d8305ec5beb63",
+-                "reference": "653ca8d95180b25809b1a1dc489d8305ec5beb63",
++                "url": "https://api.github.com/repos/WordPress/mcp-adapter/zipball/1a0f9ab868e34b4375be42e873f60765e6632505",
++                "reference": "1a0f9ab868e34b4375be42e873f60765e6632505",
+                 "shasum": ""
+             },
+             "require": {
+@@ -1489,7 +1489,7 @@
+                 "issues": "https://github.com/wordpress/mcp-adapter/issues",
+                 "source": "https://github.com/wordpress/mcp-adapter"
+             },
+-            "time": "2025-11-06T14:56:51+00:00"
++            "time": "2025-12-09T06:56:51+00:00"
+         }
+     ],
+     "packages-dev": [
+diff --git a/plugins/woocommerce/src/Internal/MCP/MCPAdapterProvider.php b/plugins/woocommerce/src/Internal/MCP/MCPAdapterProvider.php
+index 71bfd01e7d924756555f911b8dacf1aaf573ac56..ffd54b213c7cd25d346bd33fdb3b53892b1695d4 100644
+--- a/plugins/woocommerce/src/Internal/MCP/MCPAdapterProvider.php
++++ b/plugins/woocommerce/src/Internal/MCP/MCPAdapterProvider.php
+@@ -115,15 +115,6 @@ class MCPAdapterProvider {
+ 			return;
+ 		}
+ 
+-		/*
+-		 * Temporarily disable MCP validation during server creation.
+-		 * Workaround for validator bug with union types (e.g., ["integer", "null"]).
+-		 * This will be removed once the mcp-adapter validator bug is fixed.
+-		 *
+-		 * @see https://github.com/WordPress/mcp-adapter/issues/47
+-		 */
+-		add_filter( 'mcp_validation_enabled', array( __CLASS__, 'disable_mcp_validation' ), 999 );
+-
+ 		try {
+ 			// Create MCP server.
+ 			$adapter->create_server(
+@@ -145,9 +136,6 @@ class MCPAdapterProvider {
+ 					array( 'source' => 'woocommerce-mcp' )
+ 				);
+ 			}
+-		} finally {
+-			// Re-enable MCP validation immediately after server creation.
+-			remove_filter( 'mcp_validation_enabled', array( __CLASS__, 'disable_mcp_validation' ), 999 );
+ 		}
+ 	}
+ 
+@@ -220,18 +208,6 @@ class MCPAdapterProvider {
+ 		return false;
+ 	}
+ 
+-	/**
+-	 * Temporarily disable MCP validation.
+-	 *
+-	 * Used as a callback for the mcp_validation_enabled filter to work around
+-	 * validator bugs with union types.
+-	 *
+-	 * @return bool Always returns false to disable validation.
+-	 */
+-	public static function disable_mcp_validation(): bool {
+-		return false;
+-	}
+-
+ 	/**
+ 	 * Check if MCP adapter is initialized.
+ 	 *
+diff --git a/plugins/woocommerce/tests/php/src/Internal/MCP/MCPAdapterProviderTest.php b/plugins/woocommerce/tests/php/src/Internal/MCP/MCPAdapterProviderTest.php
+index 8a04ad3d73d18a1d6ccc0f281e320a8f90d180fe..ad19c06d849473c821313a23f739201408583fff 100644
+--- a/plugins/woocommerce/tests/php/src/Internal/MCP/MCPAdapterProviderTest.php
++++ b/plugins/woocommerce/tests/php/src/Internal/MCP/MCPAdapterProviderTest.php
+@@ -137,7 +137,6 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
+ 		// Reset any filters that might have been added.
+ 		remove_all_filters( 'woocommerce_mcp_include_ability' );
+ 		remove_all_filters( 'woocommerce_mcp_allow_insecure_transport' );
+-		remove_all_filters( 'mcp_validation_enabled' );
+ 
+ 		foreach ( $this->registered_ability_ids as $ability_id ) {
+ 			if ( function_exists( 'wp_unregister_ability' ) ) {
+@@ -367,15 +366,6 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
+ 		$this->assertSame( array( 0 ), array_keys( $result ), 'Should re-index array after filter override.' );
+ 	}
+ 
+-	/**
+-	 * @testdox Should disable MCP validation.
+-	 */
+-	public function test_disable_mcp_validation_returns_false(): void {
+-		$result = MCPAdapterProvider::disable_mcp_validation();
+-
+-		$this->assertFalse( $result, 'disable_mcp_validation should always return false' );
+-	}
+-
+ 	/**
+ 	 * @testdox Should track initialization state.
+ 	 */

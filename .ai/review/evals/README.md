@@ -1,10 +1,12 @@
 # AI review guideline evals
 
-Each of the original 40 review guidelines has two bug cases and two safe boundary cases: 160 cases in total. The root `ai-review-config.json` links each guideline to its suite. The later `perf-blocking-remote-call` guideline is outside this initial corpus.
+This corpus covers 40 review guidelines with two bug cases and two safe boundary cases per guideline, for 160 registered cases. The root `ai-review-config.json` links each guideline to its suite. The `perf-blocking-remote-call` guideline is outside this corpus.
+
+The committed suites contain only these 160 inline cases. An [optional prepared pair](#optional-prepared-pair) adds two historical patch cases in a separate generated checkout.
 
 ## Set up the runner
 
-These evals require `a8c-review` V2 with the `eval` command. The runner is currently an internal tool and is not distributed with WooCommerce; you need access to an existing AI Review CLI checkout. Contributors without access can still inspect and edit the JSON suites and source fixtures.
+These evals use the separate A8C review CLI. Model runs require a compatible CLI checkout and access to the configured review engines. Contributors can inspect and edit the JSON suites and source fixtures without running a model.
 
 Install PHP 8.2+, Composer, Node.js 18+ and Git. From your AI Review CLI checkout (replace the example path):
 
@@ -50,7 +52,9 @@ a8c-review eval
 a8c-review eval --guideline sql-clause-filter-contract
 ```
 
-`--plan` validates the definitions and reads the fixtures without calling models. Live runs inherit this repository's personas, models, prompts and routing. They require credentials for both the configured Claude and Codex engines. No model override is introduced by these suites.
+`--plan` validates the definitions and reads the fixtures without calling models. In the committed checkout it reports 160 cases. Live runs inherit this repository's personas, models, prompts and routing. They require credentials for both the configured Claude and Codex engines. No model override is introduced by these suites.
+
+An unfiltered `eval` selects every registered case. Use `--guideline`, `--case` or `--group` to narrow the selection.
 
 Each live run prints a new results directory in the system temporary directory. Save that directory elsewhere if you need to retain the evidence. To run just one case:
 
@@ -58,7 +62,7 @@ Each live run prints a new results directory in the system temporary directory. 
 a8c-review eval --guideline hook-payload-contract --case G01A-v3
 ```
 
-The default timeout is 600 seconds per reviewer attempt; `--timeout 300` changes it to 300 seconds. It is not a limit for the whole suite.
+The default timeout is 600 seconds per reviewer attempt. `--timeout 300` changes it to 300 seconds. It is not a limit for the whole suite.
 
 If a case reports `Native review failed`, inspect its `stdout.json` and `stderr.log` beneath the printed results directory. An authentication or quota error means the review did not complete, not that the case failed its expectation. For a quota limit, stop the run with Ctrl+C and rerun after quota is available. `--plan` does not check authentication or quota.
 
@@ -66,11 +70,48 @@ Each fixture directory contains before and after source files. The suite's `path
 
 The runner creates an isolated Git repository containing the case file and configured review prompts. It does not copy the whole WooCommerce checkout. Include the surrounding code needed to establish a case's behavior in its before and after files.
 
-A `finding` expectation requires a finding on that path containing the specified case-insensitive literal. A `quiet` expectation requires no findings, including suppressed ones. Wording changes can fail a case even when the reviewer detects the bug; an unrelated finding can pass if it contains the literal. Inspect the finding's reasoning against the fixture before treating the automated score as evidence of detection. Routing alone does not determine whether a case passes.
+A `finding` expectation requires a finding on that path containing the specified case-insensitive literal. A `quiet` expectation requires no findings, including suppressed ones. Wording changes can fail a case even when the reviewer detects the bug. An unrelated finding can pass if it contains the literal. A case with `locations` requires the finding's primary file and line to match. An `introduced_by` anchor alone cannot satisfy it. Inspect the finding's reasoning against the fixture before treating the automated score as evidence of detection. Routing alone does not determine whether a case passes.
+
+## Optional prepared pair
+
+`public-php-api-bc` includes an optional [internal helpers and extension contracts](public-php-api-bc/groups/internal-helpers-and-extension-contracts/README.md) package. It pairs a historical MCP false-positive regression with a Stripe positive control.
+
+The committed suite does not register these cases. The runner does not discover `cases.template.json` automatically. `prepare.py` creates a new, separate checkout and registers both cases and their group there. That checkout contains 162 cases.
+
+Grouping does not change the default selection. Always pass `--group internal-helpers-and-extension-contracts` when running the prepared pair.
+
+The prepared pair needs a CLI checkout with native patch replay, historical `base_commit` and `groups` support. The CLI version string does not identify these features. Check that `a8c-review eval --help` lists `--group`, then run `--plan` on the prepared checkout. The group README lists the source prerequisites and exact commands.
+
+## Adding cases
+
+Keep every file for a guideline's cases under its suite directory, the directory holding its `cases.json`. The runner excludes that directory from the reviewed fixture, so expectations and notes there are not shown to the reviewer. Do not put expected results or case labels in source a reviewer can see. A suite can be laid out like this:
+
+```text
+<guideline>/
+├── cases.json
+├── fixtures/<case>/before.php
+├── fixtures/<case>/after.php
+└── groups/<group-id>/
+    ├── README.md
+    ├── regression/<change>.patch
+    └── controls/<change>.patch
+```
+
+A case ID is the stable name used for `--case`, results and comparisons between runs. Do not reuse or rename an ID once results have been reported for it. Give a revised case a new version suffix.
+
+A suite may optionally list `groups`. Each group names one `regression` case and a nonempty list of `controls` from the same suite. For example, the regression can reproduce a reviewer false positive, and the controls check that a fix still reports real problems. A case belongs to at most one group. Each case keeps its own expectation and is graded on its own. There is no combined group result. Keep a group's files under `groups/<group-id>/`, with an optional `README.md` describing the cases and their roles. Register the group itself only in `cases.json`. Run a group with `--group <group-id>`. Combine it with `--guideline` or `--case` to run only cases matching every option. Selecting only some of a group's cases, for example with `--case`, prints a warning naming the missing ones.
+
+Each entry in `groups` references IDs already declared in `cases`:
+
+```json
+{ "id": "example-group", "regression": "G00E-example-v1", "controls": ["G00A-example-v1"] }
+```
+
+Groups require a CLI checkout that supports them. Earlier versions reject a suite containing `groups`. Check that `a8c-review eval --help` lists `--group` before running such a suite. Suites without `groups`, including the committed 160 cases, also run on earlier inline-case versions.
 
 ## Limitations
 
-Case IDs are versioned. Fixture directories may retain their original names; the suite identifies the current case version. Evaluate revised cases again before relying on their results.
+Case IDs are versioned. Fixture directories may retain their original names. The suite identifies the current case version. Evaluate revised cases again before relying on their results.
 
 These cases exercise review behavior on selected changes. They do not measure production-wide accuracy or isolate a guideline's effect from the broader review prompt.
 

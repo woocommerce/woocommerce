@@ -16,7 +16,9 @@
 
 - A public or protected signature, default, or return type changed.
 - A public class, method, function, or constant removed or renamed without a deprecated wrapper.
-The `Internal` namespace and `@internal` are not exempt.
+Supported or evidenced extension contracts remain covered under `Internal` or `@internal`.
+PHP visibility alone does not establish that an implementation helper is such a contract.
+Trace callers, registrations, and dependency behavior before treating removal as a runtime regression.
 
 **How to confirm:** Grep in-tree implementors and callers, and treat an empty result as "no in-tree consumer", not "safe". Check for a `wc_deprecated_function` wrapper or a default implementation in an abstract base.
 
