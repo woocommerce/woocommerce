@@ -652,6 +652,24 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should finish the response before sending events, unless there are none or it runs under WP-CLI.
+	 */
+	public function test_finishes_the_response_before_sending_events(): void {
+		$this->start_mcp_tool_call();
+		$this->sut->handle_shutdown();
+		$this->assertSame( array(), $this->sut->finished_after, 'There was nothing to send' );
+
+		wp_get_ability( self::ABILITY_ID )->execute();
+		$this->sut->handle_shutdown();
+		$this->assertSame( array( 0 ), $this->sut->finished_after, 'Once, before the event was sent' );
+
+		$this->sut->long_running = true;
+		wp_get_ability( self::ABILITY_ID )->execute();
+		$this->sut->handle_shutdown();
+		$this->assertSame( array( 0 ), $this->sut->finished_after, 'No client waits under WP-CLI' );
+	}
+
+	/**
 	 * @testdox Should not record calls or REST rejections from logged-out visitors.
 	 */
 	public function test_ignores_logged_out_visitors(): void {
@@ -1045,6 +1063,20 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 			 * Never send real pixels from tests.
 			 */
 			protected function send_queued_pixels(): void {
+			}
+
+			/**
+			 * How many events had been sent each time the response was finished.
+			 *
+			 * @var int[]
+			 */
+			public array $finished_after = array();
+
+			/**
+			 * Note when the response would be finished.
+			 */
+			protected function finish_response(): void {
+				$this->finished_after[] = count( $this->recorded );
 			}
 		};
 	}

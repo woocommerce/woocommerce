@@ -422,6 +422,11 @@ class AbilitiesTracking {
 			$this->add_event( array_pop( $this->frames ), null, false );
 		}
 
+		// The caller shouldn't wait for the Tracks send. Under WP-CLI no caller is waiting.
+		if ( $this->events && ! $this->is_long_running_process() ) {
+			$this->finish_response();
+		}
+
 		$this->flush_events();
 	}
 
@@ -437,6 +442,22 @@ class AbilitiesTracking {
 			return;
 		}
 		\WC_Tracks_Client::record_event_batched( $properties );
+	}
+
+	/**
+	 * Send the response to the client and keep running, where the server supports it (PHP-FPM, LiteSpeed), as
+	 * wp-cron.php and WC_Background_Emailer do. Elsewhere the client keeps waiting for the send, as before.
+	 */
+	protected function finish_response(): void {
+		// Only one request can hold a PHP session; release it so the client's next request doesn't wait.
+		if ( session_id() ) {
+			session_write_close();
+		}
+		if ( function_exists( 'fastcgi_finish_request' ) ) {
+			fastcgi_finish_request();
+		} elseif ( function_exists( 'litespeed_finish_request' ) ) {
+			litespeed_finish_request();
+		}
 	}
 
 	/**
