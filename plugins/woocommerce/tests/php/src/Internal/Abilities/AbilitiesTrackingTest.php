@@ -216,12 +216,10 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 		$this->sut->handle_shutdown();
 
 		$this->assertSame( 200, $response->get_status(), 'The ability should run through REST' );
-		$this->assertCount( 2, $this->sut->recorded );
+		$this->assertCount( 1, $this->sut->recorded, 'The direct call after the REST request is not an agent call' );
 		$this->assertSame( 'rest', $this->sut->recorded[0]['channel'] );
 		$this->assertSame( 'wp_abilities', $this->sut->recorded[0]['rest_namespace'] );
 		$this->assertSame( 'success', $this->sut->recorded[0]['outcome'] );
-		$this->assertSame( 'other', $this->sut->recorded[1]['channel'], 'The direct call after the REST request is not a REST call' );
-		$this->assertSame( 'none', $this->sut->recorded[1]['rest_namespace'] );
 	}
 
 	/**
@@ -255,17 +253,15 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should record calls inside other REST routes with the route namespace only.
+	 * @testdox Should not record calls inside other REST routes.
 	 */
-	public function test_records_namespace_of_other_rest_routes(): void {
+	public function test_ignores_calls_inside_other_rest_routes(): void {
 		$this->register_route_that_runs_ability( 'tracking-test/v1', '/orders/(?P<id>\d+)', 'GET' );
 
 		rest_do_request( new WP_REST_Request( 'GET', '/tracking-test/v1/orders/123' ) );
 		$this->sut->handle_shutdown();
 
-		$this->assertCount( 1, $this->sut->recorded );
-		$this->assertSame( 'other', $this->sut->recorded[0]['channel'] );
-		$this->assertSame( 'tracking_test', $this->sut->recorded[0]['rest_namespace'] );
+		$this->assertSame( array(), $this->sut->recorded );
 	}
 
 	/**
@@ -350,6 +346,7 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	 * @testdox Should not report Jetpack authentication for signature arguments Jetpack didn't verify.
 	 */
 	public function test_does_not_trust_unverified_jetpack_signature_arguments(): void {
+		$this->start_mcp_tool_call();
 		$_GET['token']     = 'abc:1:2';
 		$_GET['signature'] = 'forged';
 
@@ -369,6 +366,7 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	public function test_records_auth_method(): void {
 		global $wp_rest_application_password_uuid;
 
+		$this->start_mcp_tool_call();
 		$ability = wp_get_ability( self::ABILITY_ID );
 		$ability->execute();
 		$wp_rest_application_password_uuid = 'f5bd2b1a-0000-4000-8000-000000000000'; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
@@ -386,6 +384,7 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	 * @testdox Should record whether the call came through the Automattic proxy.
 	 */
 	public function test_records_is_a11n(): void {
+		$this->start_mcp_tool_call();
 		$ability = wp_get_ability( self::ABILITY_ID );
 		$ability->execute();
 		$_SERVER['A8C_PROXIED_REQUEST'] = '1';
@@ -576,17 +575,16 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should record calls made during cron as the cron channel.
+	 * @testdox Should not record calls made during cron.
 	 */
-	public function test_records_cron_channel(): void {
+	public function test_ignores_cron_calls(): void {
 		add_filter( 'wp_doing_cron', '__return_true' );
 		wp_set_current_user( 0 );
 
 		wp_get_ability( self::ABILITY_ID )->execute();
 		$this->sut->handle_shutdown();
 
-		$this->assertSame( 'cron', $this->sut->recorded[0]['channel'] );
-		$this->assertSame( 'none', $this->sut->recorded[0]['auth'] );
+		$this->assertSame( array(), $this->sut->recorded );
 	}
 
 	/**
@@ -595,6 +593,7 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	public function test_ignores_logged_out_visitors(): void {
 		wp_set_current_user( 0 );
 
+		$this->start_mcp_tool_call();
 		wp_get_ability( self::ABILITY_ID )->execute();
 		$this->permission = false;
 		rest_do_request( new WP_REST_Request( 'POST', '/wp-abilities/v1/abilities/' . self::ABILITY_ID . '/run' ) );
@@ -696,15 +695,13 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should record direct PHP calls as the other channel.
+	 * @testdox Should not record direct PHP calls outside MCP, the Abilities REST API and WP-CLI.
 	 */
-	public function test_records_direct_php_calls(): void {
+	public function test_ignores_direct_php_calls(): void {
 		wp_get_ability( self::ABILITY_ID )->execute();
 		$this->sut->handle_shutdown();
 
-		$this->assertCount( 1, $this->sut->recorded );
-		$this->assertSame( 'other', $this->sut->recorded[0]['channel'] );
-		$this->assertSame( 'none', $this->sut->recorded[0]['external_client'] );
+		$this->assertSame( array(), $this->sut->recorded );
 	}
 
 	/**
@@ -856,6 +853,7 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 		$tracker->handle_init();
 
 		try {
+			$this->start_mcp_tool_call();
 			wp_get_ability( self::ABILITY_ID )->execute();
 			$this->sut->handle_shutdown();
 			$tracker->handle_shutdown();

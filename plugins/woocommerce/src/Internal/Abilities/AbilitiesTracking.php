@@ -487,6 +487,11 @@ class AbilitiesTracking {
 			return;
 		}
 
+		// Only agent entry points. Direct PHP and cron calls are plugin internals and could add a pixel to every page view.
+		if ( ! in_array( $this->get_channel(), array( 'mcp', 'rest', 'cli' ), true ) ) {
+			return;
+		}
+
 		// Calls that fail without a closing hook keep their frame until shutdown. Recording the oldest one as an
 		// unknown failure keeps the stack bounded and lets later closing hooks still find their own frame.
 		if ( count( $this->frames ) >= self::MAX_EVENTS_PER_REQUEST ) {
@@ -654,11 +659,12 @@ class AbilitiesTracking {
 				return 'rest';
 			}
 		}
-		if ( defined( 'WP_CLI' ) && WP_CLI ) {
-			return 'cli';
-		}
+		// Before WP-CLI: `wp cron event run` defines DOING_CRON, and that is scheduled work, not an agent.
 		if ( wp_doing_cron() ) {
 			return 'cron';
+		}
+		if ( defined( 'WP_CLI' ) && WP_CLI ) {
+			return 'cli';
 		}
 		return 'other';
 	}
