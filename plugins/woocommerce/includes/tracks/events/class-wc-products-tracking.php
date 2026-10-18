@@ -344,6 +344,10 @@ class WC_Products_Tracking {
 
 		$product = wc_get_product( $post_id );
 
+		if ( ! $product instanceof WC_Product ) {
+			return;
+		}
+
 		$product_type_options        = self::get_product_type_options( $post_id );
 		$product_type_options_string = self::get_product_type_options_string( $product_type_options );
 
