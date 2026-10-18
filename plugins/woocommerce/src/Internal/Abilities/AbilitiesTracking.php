@@ -174,8 +174,8 @@ class AbilitiesTracking {
 		add_filter( 'mcp_adapter_pre_tool_call', array( $this, 'handle_mcp_adapter_pre_tool_call' ) );
 		add_filter( 'rest_request_before_callbacks', array( $this, 'handle_rest_request_before_callbacks' ), 10, 3 );
 		add_filter( 'rest_request_after_callbacks', array( $this, 'handle_rest_request_after_callbacks' ), 10, 3 );
-		// Runs before WC_Tracks_Client sends batched pixels at priority 20.
-		add_action( 'shutdown', array( $this, 'handle_shutdown' ), 19 );
+		// Last, so every other shutdown handler still finishes before the response does.
+		add_action( 'shutdown', array( $this, 'handle_shutdown' ), PHP_INT_MAX );
 	}
 
 	/**
@@ -422,12 +422,33 @@ class AbilitiesTracking {
 			$this->add_event( array_pop( $this->frames ), null, false );
 		}
 
-		// The caller shouldn't wait for the Tracks send. Under WP-CLI no caller is waiting.
-		if ( $this->events && ! $this->is_long_running_process() ) {
-			$this->finish_response();
+		if ( ! $this->events ) {
+			return;
+		}
+
+		try {
+			/**
+			 * Filters whether the response is sent to the client before the ability events go to Tracks, on servers that
+			 * support it (PHP-FPM, LiteSpeed). Return false to keep the client waiting for the send.
+			 *
+			 * @since 11.3.0
+			 *
+			 * @param bool $finish_response Whether to finish the response first. Default true.
+			 */
+			if ( ! $this->is_long_running_process() && apply_filters( 'woocommerce_ability_tracking_finish_response', true ) ) {
+				$this->finish_response();
+			}
+		} catch ( \Throwable $e ) {
+			unset( $e );
 		}
 
 		$this->flush_events();
+		// This runs after WC_Tracks_Client's own send at priority 20, so the queued pixels are sent here.
+		try {
+			$this->send_queued_pixels();
+		} catch ( \Throwable $e ) {
+			unset( $e );
+		}
 	}
 
 	/**
