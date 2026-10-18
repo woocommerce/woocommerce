@@ -257,7 +257,15 @@ class AbilitiesTracking {
 	public function handle_wp_ability_permission_result( $permission, $ability_name ) {
 		if ( true !== $permission ) {
 			// Matches the error WP_Ability::execute() returns for denied calls.
-			$this->close_frame( $ability_name, false, new WP_Error( 'ability_invalid_permissions' ) );
+			$error = new WP_Error( 'ability_invalid_permissions' );
+			// The MCP Adapter checks permission before executing and never runs a refused call, so no frame is open.
+			// Only a tool call counts: other permission checks in the same request aren't refused calls.
+			if ( self::is_tracked_ability( $ability_name ) && null === $this->find_frame( $ability_name, false ) && $this->is_json_rpc_tool_call() ) {
+				$this->add_event( $this->create_frame( $ability_name, false ), $error, false );
+				++$this->frames_opened;
+			} else {
+				$this->close_frame( $ability_name, false, $error );
+			}
 		}
 		return $permission;
 	}
@@ -681,7 +689,27 @@ class AbilitiesTracking {
 		if ( null === $this->is_mcp_request ) {
 			$this->is_mcp_request = isset( $_SERVER['HTTP_MCP_PROTOCOL_VERSION'] ) || isset( $_SERVER['HTTP_MCP_SESSION_ID'] );
 		}
-		return $this->is_mcp_request;
+		return $this->is_mcp_request || $this->is_json_rpc_tool_call();
+	}
+
+	/**
+	 * Whether the outermost REST request is a JSON-RPC `tools/call`, as every MCP tool call over HTTP is, including from
+	 * 2025-03-26 clients that send no MCP headers. Batches (2025-03-26) are checked message by message.
+	 *
+	 * @return bool
+	 */
+	private function is_json_rpc_tool_call(): bool {
+		$request = $this->rest_requests[0] ?? null;
+		$body    = $request ? $request->get_json_params() : null;
+		if ( ! is_array( $body ) ) {
+			return false;
+		}
+		foreach ( isset( $body['jsonrpc'] ) ? array( $body ) : $body as $message ) {
+			if ( is_array( $message ) && '2.0' === ( $message['jsonrpc'] ?? null ) && 'tools/call' === ( $message['method'] ?? null ) ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**

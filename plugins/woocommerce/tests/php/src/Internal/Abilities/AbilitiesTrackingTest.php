@@ -343,6 +343,70 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should detect MCP tool calls from a JSON-RPC body when the client sends no MCP headers.
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $batch Whether the tool call is sent in a JSON-RPC batch.
+	 */
+	public function test_detects_mcp_tool_calls_from_json_rpc_body( bool $batch ): void {
+		$this->register_route_that_runs_ability( 'tracking-test/v1', '/mcp', 'POST' );
+		$message = array(
+			'jsonrpc' => '2.0',
+			'id'      => 1,
+			'method'  => 'tools/call',
+			'params'  => array( 'name' => 'tracking-test' ),
+		);
+		$request = new WP_REST_Request( 'POST', '/tracking-test/v1/mcp' );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_body( (string) wp_json_encode( $batch ? array( $message ) : $message ) );
+
+		rest_do_request( $request );
+		$this->sut->handle_shutdown();
+
+		$this->assertCount( 1, $this->sut->recorded );
+		$this->assertSame( 'mcp', $this->sut->recorded[0]['channel'] );
+	}
+
+	/**
+	 * @testdox Should record MCP tool calls the MCP Adapter refuses on its permission check before execution, and no other permission checks.
+	 * @testWith ["tools/call", 1]
+	 *           ["tools/list", 0]
+	 *
+	 * @param string $method   JSON-RPC method of the MCP request.
+	 * @param int    $expected Expected number of events.
+	 */
+	public function test_records_mcp_calls_refused_before_execution( string $method, int $expected ): void {
+		$this->skip_unless_wordpress_exposes_all_outcomes();
+		// An MCP request by its headers, so only the JSON-RPC method tells a tool call from a listing.
+		$_SERVER['HTTP_MCP_PROTOCOL_VERSION'] = '2025-11-25';
+		$this->permission                     = false;
+		$request                              = new WP_REST_Request( 'POST', '/mcp/mcp-adapter-default-server' );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_body(
+			(string) wp_json_encode(
+				array(
+					'jsonrpc' => '2.0',
+					'id'      => 1,
+					'method'  => $method,
+				)
+			)
+		);
+		$this->sut->handle_rest_request_before_callbacks( null, null, $request );
+
+		wp_get_ability( self::ABILITY_ID )->check_permissions();
+		$this->sut->handle_shutdown();
+
+		$this->assertCount( $expected, $this->sut->recorded );
+		if ( 0 === $expected ) {
+			return;
+		}
+		$this->assertSame( 'error', $this->sut->recorded[0]['outcome'] );
+		$this->assertSame( 'ability_invalid_permissions', $this->sut->recorded[0]['error_code'] );
+		$this->assertSame( 'mcp', $this->sut->recorded[0]['channel'] );
+	}
+
+	/**
 	 * @testdox Should not report Jetpack authentication for signature arguments Jetpack didn't verify.
 	 */
 	public function test_does_not_trust_unverified_jetpack_signature_arguments(): void {
