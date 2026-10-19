@@ -28,7 +28,7 @@ use Automattic\WooCommerce\Admin\API\Reports\SqlQuery;
  *     // ...
  *     /**
  *      * Return your results with the help of the interval & total methods and queries.
- *      * @return stdClass|WP_Error $data filled with your results.
+ *      * @return \stdClass|\WP_Error $data filled with your results.
  *      &ast;/
  *     public function get_noncached_stats_data( $query_args, $params, &$data, $expected_interval_count ) {
  *         $this->initialize_queries();
@@ -90,7 +90,7 @@ trait StatsDataStoreTrait {
 	 *
 	 * @see get_data
 	 * @param array $query_args Query parameters.
-	 * @return stdClass|WP_Error Data object, or error.
+	 * @return \stdClass|\WP_Error Data object, or error.
 	 */
 	public function get_noncached_data( $query_args ) {
 		$params                  = $this->get_limit_params( $query_args );

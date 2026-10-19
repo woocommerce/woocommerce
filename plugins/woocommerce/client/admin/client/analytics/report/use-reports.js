@@ -146,7 +146,7 @@ const getReports = () => {
 					navArgs: {
 						id: 'woocommerce-analytics-stock-notifications',
 					},
-			  }
+				}
 			: null,
 		{
 			report: 'customers',

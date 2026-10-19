@@ -40234,19 +40234,7 @@ parameters:
 			path: src/Admin/API/Reports/Coupons/Stats/DataStore.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Coupons\\Stats\\DataStore\:\:get_noncached_data\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Coupons/Stats/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Coupons\\Stats\\DataStore\:\:get_noncached_data\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Coupons/Stats/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Coupons\\Stats\\DataStore\:\:get_noncached_data\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\WP_Error but returns Automattic\\WooCommerce\\Admin\\API\\Reports\\Coupons\\Stats\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\Coupons\\Stats\\WP_Error\|\(object\{totals\: null, intervals\: array, total\: int, pages\: int, page_no\: int\}&stdClass\)\.$#'
+			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Coupons\\Stats\\DataStore\:\:get_noncached_data\(\) should return stdClass\|WP_Error but returns Automattic\\WooCommerce\\Admin\\API\\Reports\\Coupons\\Stats\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\Coupons\\Stats\\WP_Error\|\(object\{totals\: null, intervals\: array, total\: int, pages\: int, page_no\: int\}&stdClass\)\.$#'
 			identifier: return.type
 			count: 1
 			path: src/Admin/API/Reports/Coupons/Stats/DataStore.php
@@ -41236,19 +41224,7 @@ parameters:
 			path: src/Admin/API/Reports/Downloads/Stats/DataStore.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Downloads\\Stats\\DataStore\:\:get_noncached_data\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Downloads/Stats/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Downloads\\Stats\\DataStore\:\:get_noncached_data\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Downloads/Stats/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Downloads\\Stats\\DataStore\:\:get_noncached_data\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\WP_Error but returns Automattic\\WooCommerce\\Admin\\API\\Reports\\Downloads\\Stats\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\Downloads\\Stats\\WP_Error\|\(object\{totals\: null, intervals\: array, total\: int, pages\: int, page_no\: int\}&stdClass\)\.$#'
+			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Downloads\\Stats\\DataStore\:\:get_noncached_data\(\) should return stdClass\|WP_Error but returns Automattic\\WooCommerce\\Admin\\API\\Reports\\Downloads\\Stats\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\Downloads\\Stats\\WP_Error\|\(object\{totals\: null, intervals\: array, total\: int, pages\: int, page_no\: int\}&stdClass\)\.$#'
 			identifier: return.type
 			count: 1
 			path: src/Admin/API/Reports/Downloads/Stats/DataStore.php
@@ -42052,19 +42028,7 @@ parameters:
 			path: src/Admin/API/Reports/Orders/Stats/DataStore.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\Stats\\DataStore\:\:get_noncached_data\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Orders/Stats/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\Stats\\DataStore\:\:get_noncached_data\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Orders/Stats/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\Stats\\DataStore\:\:get_noncached_data\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\WP_Error but returns Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\Stats\\WP_Error\|stdClass\.$#'
+			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\Stats\\DataStore\:\:get_noncached_data\(\) should return stdClass\|WP_Error but returns Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\Stats\\WP_Error\|stdClass\.$#'
 			identifier: return.type
 			count: 1
 			path: src/Admin/API/Reports/Orders/Stats/DataStore.php
@@ -42712,19 +42676,7 @@ parameters:
 			path: src/Admin/API/Reports/Products/Stats/DataStore.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Products\\Stats\\DataStore\:\:get_noncached_data\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Products/Stats/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Products\\Stats\\DataStore\:\:get_noncached_data\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Products/Stats/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Products\\Stats\\DataStore\:\:get_noncached_data\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\WP_Error but returns Automattic\\WooCommerce\\Admin\\API\\Reports\\Products\\Stats\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\Products\\Stats\\WP_Error\|\(object\{totals\: null, intervals\: array, total\: int, pages\: int, page_no\: int\}&stdClass\)\.$#'
+			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Products\\Stats\\DataStore\:\:get_noncached_data\(\) should return stdClass\|WP_Error but returns Automattic\\WooCommerce\\Admin\\API\\Reports\\Products\\Stats\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\Products\\Stats\\WP_Error\|\(object\{totals\: null, intervals\: array, total\: int, pages\: int, page_no\: int\}&stdClass\)\.$#'
 			identifier: return.type
 			count: 1
 			path: src/Admin/API/Reports/Products/Stats/DataStore.php
@@ -43360,19 +43312,7 @@ parameters:
 			path: src/Admin/API/Reports/Taxes/Stats/DataStore.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Taxes\\Stats\\DataStore\:\:get_noncached_data\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Taxes/Stats/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Taxes\\Stats\\DataStore\:\:get_noncached_data\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Taxes/Stats/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Taxes\\Stats\\DataStore\:\:get_noncached_data\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\WP_Error but returns Automattic\\WooCommerce\\Admin\\API\\Reports\\Taxes\\Stats\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\Taxes\\Stats\\WP_Error\|\(object\{totals\: null, intervals\: array, total\: int, pages\: int, page_no\: int\}&stdClass\)\.$#'
+			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Taxes\\Stats\\DataStore\:\:get_noncached_data\(\) should return stdClass\|WP_Error but returns Automattic\\WooCommerce\\Admin\\API\\Reports\\Taxes\\Stats\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\Taxes\\Stats\\WP_Error\|\(object\{totals\: null, intervals\: array, total\: int, pages\: int, page_no\: int\}&stdClass\)\.$#'
 			identifier: return.type
 			count: 1
 			path: src/Admin/API/Reports/Taxes/Stats/DataStore.php
@@ -44020,19 +43960,7 @@ parameters:
 			path: src/Admin/API/Reports/Variations/Stats/DataStore.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Variations\\Stats\\DataStore\:\:get_noncached_data\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Variations/Stats/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Variations\\Stats\\DataStore\:\:get_noncached_data\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Variations/Stats/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Variations\\Stats\\DataStore\:\:get_noncached_data\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\WP_Error but returns Automattic\\WooCommerce\\Admin\\API\\Reports\\Variations\\Stats\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\Variations\\Stats\\WP_Error\|\(object\{totals\: null, intervals\: array, total\: int, pages\: int, page_no\: int\}&stdClass\)\.$#'
+			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Variations\\Stats\\DataStore\:\:get_noncached_data\(\) should return stdClass\|WP_Error but returns Automattic\\WooCommerce\\Admin\\API\\Reports\\Variations\\Stats\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\Variations\\Stats\\WP_Error\|\(object\{totals\: null, intervals\: array, total\: int, pages\: int, page_no\: int\}&stdClass\)\.$#'
 			identifier: return.type
 			count: 1
 			path: src/Admin/API/Reports/Variations/Stats/DataStore.php
