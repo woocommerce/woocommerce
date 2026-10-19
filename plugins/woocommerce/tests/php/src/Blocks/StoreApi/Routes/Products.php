@@ -235,6 +235,19 @@ class Products extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox Should allow empty price filter values used by product filter blocks.
+	 */
+	public function test_allows_empty_price_filter_values(): void {
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$request->set_param( 'min_price', '' );
+		$request->set_param( 'max_price', '' );
+
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status(), 'Empty price filters should be ignored.' );
+	}
+
+	/**
 	 * Test conversion of product to rest response.
 	 */
 	public function test_prepare_item() {
