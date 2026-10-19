@@ -1478,17 +1478,23 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		$data = $this->import_rows( $this->parsed_data );
 
 		if ( $this->params['update_existing'] && $this->file_position >= filesize( $this->file ) ) {
-			foreach ( $queue->get_batch( $this->deferred_batch_size ) as $position => $row ) {
-				if ( $this->params['prevent_timeouts'] && ( $this->time_exceeded() || $this->memory_exceeded() ) ) {
-					break;
-				}
+			$processed_rows = ! empty( $this->parsed_data );
+			$unlimited      = $this->params['lines'] < 0 && ! $this->params['prevent_timeouts'];
+			do {
+				$batch = $queue->get_batch( $this->deferred_batch_size );
+				foreach ( $batch as $position => $row ) {
+					if ( $processed_rows && $this->params['prevent_timeouts'] && ( $this->time_exceeded() || $this->memory_exceeded() ) ) {
+						break;
+					}
 
-				$result = $this->import_rows( array( $row ), true );
-				foreach ( $result as $type => $items ) {
-					$data[ $type ] = array_merge( $data[ $type ], $items );
+					$result = $this->import_rows( array( $row ), true );
+					foreach ( $result as $type => $items ) {
+						$data[ $type ] = array_merge( $data[ $type ], $items );
+					}
+					$queue->delete( $position );
+					$processed_rows = true;
 				}
-				$queue->delete( $position );
-			}
+			} while ( $unlimited && ! empty( $batch ) );
 		}
 
 		return $data;
@@ -1512,6 +1518,54 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	}
 
 	/**
+	 * Identify a row's current product and the match keys it may establish on save.
+	 *
+	 * @param array $row Formatted product row.
+	 * @return array{product_id: int, identifiers: string[]} Current product and its proposed match keys.
+	 */
+	private function get_deferred_row_identity( array $row ): array {
+		$id               = absint( $row['id'] ?? 0 );
+		$sku              = $row['sku'] ?? '';
+		$global_unique_id = $this->normalize_global_unique_id( $row['global_unique_id'] ?? '' );
+		if ( ! $id && $sku ) {
+			$id = wc_get_product_id_by_sku( $sku );
+		} elseif ( ! $id && '' !== $global_unique_id ) {
+			$matched_id = $this->match_product_id_by_global_unique_id( $global_unique_id, $row['type'] ?? '' );
+			$id         = is_wp_error( $matched_id ) ? 0 : $matched_id;
+		}
+
+		$identifiers = array();
+		if ( $id ) {
+			$identifiers[] = 'id:' . $id;
+		}
+		if ( $sku ) {
+			$identifiers[] = 'sku:' . $sku;
+		}
+		if ( '' !== $global_unique_id ) {
+			$identifiers[] = 'global_unique_id:' . $global_unique_id;
+		}
+		return array(
+			'product_id'  => $id,
+			'identifiers' => $identifiers,
+		);
+	}
+
+	/**
+	 * Queue an update while retaining the product matched before any pending SKU changes.
+	 *
+	 * @param DeferredRows $queue Import's deferred rows.
+	 * @param array        $row Formatted product row.
+	 * @param array        $identity Matched product and proposed keys.
+	 * @phpstan-param array{product_id: int, identifiers: string[]} $identity
+	 */
+	private function defer_product_row( DeferredRows $queue, array $row, array $identity ): void {
+		if ( $identity['product_id'] ) {
+			$row['id'] = $identity['product_id'];
+		}
+		$queue->save( $this->file_position, $row, $identity['identifiers'] );
+	}
+
+	/**
 	 * Import formatted rows without repeating their formatting callbacks.
 	 *
 	 * @param array $rows Formatted product rows.
@@ -1520,6 +1574,8 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 */
 	private function import_rows( array $rows, bool $final_pass = false ): array {
 		$update_existing = $this->params['update_existing'];
+		$queue           = new DeferredRows( $this->file );
+		$has_pending     = $update_existing && ! $final_pass && $queue->has_rows();
 		$data            = array(
 			'imported'            => array(),
 			'imported_variations' => array(),
@@ -1537,6 +1593,14 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 				$this->file_position = $this->parsed_file_positions[ $parsed_data_key ] ?? $this->file_position;
 			}
 
+			if ( $has_pending ) {
+				$identity = $this->get_deferred_row_identity( $parsed_data );
+				if ( $identity['identifiers'] && $queue->has_identifier( $identity['identifiers'][0] ) ) {
+					$this->defer_product_row( $queue, $parsed_data, $identity );
+					continue;
+				}
+			}
+
 			$missing_parent = false;
 			if ( $update_existing && isset( $parsed_data['_unresolved_parent_sku'] ) && empty( $parsed_data['parent_id'] ) ) {
 				$parent_sku = $parsed_data['_unresolved_parent_sku'];
@@ -1544,7 +1608,8 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 				if ( ! $parent_id ) {
 					if ( ! $final_pass && is_string( $parent_sku ) && '' !== $parent_sku ) {
-						( new DeferredRows( $this->file ) )->save( $this->file_position, $parsed_data );
+						$this->defer_product_row( $queue, $parsed_data, $this->get_deferred_row_identity( $parsed_data ) );
+						$has_pending = true;
 						continue;
 					}
 

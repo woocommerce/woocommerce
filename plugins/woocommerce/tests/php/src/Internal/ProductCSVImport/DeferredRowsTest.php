@@ -30,6 +30,45 @@ class DeferredRowsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Product identity indexes persist until the last matching source row is removed and clear on restart.
+	 */
+	public function test_product_identity_index_lifecycle(): void {
+		$sut = new DeferredRows( 'import.csv' );
+		$sut->save( 100, array( 'sku' => 'later' ), array( 'id:123', 'sku:later' ) );
+		$sut->save( 20, array( 'sku' => 'earlier' ), array( 'id:123', 'sku:earlier' ) );
+		$sut->save( 20, array( 'sku' => 'earlier' ), array( 'id:123', 'sku:earlier' ) );
+
+		$sut = new DeferredRows( 'import.csv' );
+		$this->assertTrue( $sut->has_identifier( 'id:123' ), 'Pending product identities must survive new requests.' );
+		$this->assertFalse( $sut->has_identifier( 'id:456' ), 'Unrelated products should not wait for the queue.' );
+		$this->assertArrayNotHasKey( '_deferred_identifiers', $sut->get_batch( 1 )[20], 'Internal indexes must not reach import hooks.' );
+		$sut->delete( 20 );
+		$this->assertTrue( $sut->has_identifier( 'id:123' ), 'Deleting the first row must retain the later row index.' );
+		$this->assertFalse( $sut->has_identifier( 'sku:earlier' ), 'An identity with no pending rows must be removed.' );
+		$sut->clear();
+		$this->assertFalse( $sut->has_identifier( 'id:123' ), 'Restarting must remove product indexes.' );
+		$this->assertFalse( $sut->has_identifier( 'sku:later' ), 'Restarting must remove proposed SKU indexes.' );
+		$this->assertFalse( $sut->has_rows(), 'Identity indexes must not be mistaken for source rows.' );
+	}
+
+	/**
+	 * @testdox SKU identities share an index across case differences without changing the stored rows.
+	 */
+	public function test_case_insensitive_sku_identity_lifecycle(): void {
+		$sut = new DeferredRows( 'import.csv' );
+		$sut->save( 20, array( 'sku' => 'Child-New' ), array( 'sku:Child-New' ) );
+		$sut = new DeferredRows( 'import.csv' );
+
+		$this->assertTrue( $sut->has_identifier( 'sku:child-new' ), 'A differently cased reference must find the pending SKU.' );
+		$this->assertSame( 'Child-New', $sut->get_batch( 1 )[20]['sku'], 'Identity matching must not change the imported SKU.' );
+		$sut->save( 100, array( 'sku' => 'child-new' ), array( 'sku:child-new' ) );
+		$sut->delete( 20 );
+		$this->assertTrue( $sut->has_identifier( 'sku:CHILD-NEW' ), 'Deleting the earlier row must retain the shared index for the later row.' );
+		$sut->clear();
+		$this->assertFalse( $sut->has_identifier( 'sku:Child-New' ), 'Clearing the last row must remove the shared SKU index.' );
+	}
+
+	/**
 	 * @testdox Clearing an import leaves other users and source files untouched.
 	 */
 	public function test_import_isolation_and_restart(): void {

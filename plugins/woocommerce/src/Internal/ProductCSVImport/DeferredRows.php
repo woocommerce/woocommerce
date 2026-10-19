@@ -33,16 +33,43 @@ class DeferredRows {
 	 *
 	 * @since 11.3.0
 	 *
-	 * @param int   $position Position immediately after the source row.
-	 * @param array $row Formatted row and unresolved parent reference.
+	 * @param int      $position Position immediately after the source row.
+	 * @param array    $row Formatted row and unresolved parent reference.
+	 * @param string[] $identifiers Product identities that must retain source order.
 	 * @throws \RuntimeException When the row cannot be stored.
 	 */
-	public function save( int $position, array $row ): void {
+	public function save( int $position, array $row, array $identifiers = array() ): void {
 		$key = $this->get_key( $position );
+		if ( $identifiers ) {
+			$row['_deferred_identifiers'] = $identifiers;
+		}
 
 		if ( ! update_option( $key, $row, false ) && get_option( $key ) !== $row ) {
 			throw new \RuntimeException( 'Unable to store a deferred product import row.' );
 		}
+
+		$index_keys = array_map( array( $this, 'get_identifier_key' ), $identifiers );
+		if ( $index_keys ) {
+			wp_prime_option_caches( $index_keys );
+		}
+		foreach ( $index_keys as $index_key ) {
+			$latest = max( $position, (int) get_option( $index_key, 0 ) );
+			if ( ! update_option( $index_key, $latest, false ) && (int) get_option( $index_key, 0 ) !== $latest ) {
+				throw new \RuntimeException( 'Unable to index a deferred product import row.' );
+			}
+		}
+	}
+
+	/**
+	 * Check whether an earlier row for a product is still pending.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param string $identifier Product identity.
+	 * @return bool
+	 */
+	public function has_identifier( string $identifier ): bool {
+		return false !== get_option( $this->get_identifier_key( $identifier ), false );
 	}
 
 	/**
@@ -61,6 +88,7 @@ class DeferredRows {
 		foreach ( $keys as $key ) {
 			$row = get_option( $key );
 			if ( is_array( $row ) ) {
+				unset( $row['_deferred_identifiers'] );
 				$rows[ (int) substr( $key, strlen( $this->prefix ) ) ] = $row;
 			}
 		}
@@ -89,8 +117,18 @@ class DeferredRows {
 	 */
 	public function delete( int $position ): void {
 		$key = $this->get_key( $position );
+		$row = get_option( $key );
 		if ( ! delete_option( $key ) && false !== get_option( $key, false ) ) {
 			throw new \RuntimeException( 'Unable to remove a deferred product import row.' );
+		}
+		$index_keys = array_map( array( $this, 'get_identifier_key' ), $row['_deferred_identifiers'] ?? array() );
+		if ( $index_keys ) {
+			wp_prime_option_caches( $index_keys );
+		}
+		foreach ( $index_keys as $index_key ) {
+			if ( (int) get_option( $index_key, 0 ) === $position && ! delete_option( $index_key ) && false !== get_option( $index_key, false ) ) {
+				throw new \RuntimeException( 'Unable to remove a deferred product import index.' );
+			}
 		}
 	}
 
@@ -117,6 +155,19 @@ class DeferredRows {
 	 */
 	private function get_key( int $position ): string {
 		return $this->prefix . sprintf( '%020d', $position );
+	}
+
+	/**
+	 * Get an identity index key outside the source-row prefix.
+	 *
+	 * @param string $identifier Product identity.
+	 * @return string
+	 */
+	private function get_identifier_key( string $identifier ): string {
+		if ( 0 === strpos( $identifier, 'sku:' ) ) {
+			$identifier = wc_strtolower( $identifier );
+		}
+		return '_' . $this->prefix . md5( $identifier );
 	}
 
 	/**

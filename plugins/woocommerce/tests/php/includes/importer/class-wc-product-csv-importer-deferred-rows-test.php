@@ -276,6 +276,154 @@ class WC_Product_CSV_Importer_Deferred_Rows_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox An unlimited import drains more than one batch of deferred children in a single request.
+	 */
+	public function test_unlimited_import_drains_deferred_rows(): void {
+		list( $parent, $variation ) = $this->create_products();
+		$rows                       = array( array( $variation->get_id(), ProductType::VARIATION, 'variation-new', 'parent-new' ) );
+		$expected_ids               = array( $variation->get_id(), $parent->get_id() );
+		for ( $index = 1; $index <= 30; ++$index ) {
+			$child = new WC_Product_Variation();
+			$child->set_parent_id( $parent->get_id() );
+			$child->save();
+			$rows[]         = array( $child->get_id(), ProductType::VARIATION, 'child-new-' . $index, 'parent-new' );
+			$expected_ids[] = $child->get_id();
+		}
+		$rows[]                   = array( $parent->get_id(), ProductType::VARIABLE, 'parent-new', '' );
+		$file                     = $this->create_csv( $rows );
+		$args                     = $this->get_args( -1 );
+		$args['prevent_timeouts'] = false;
+		$sut                      = new WC_Product_CSV_Importer( $file, $args );
+
+		$result = $sut->import();
+
+		$this->assertEqualsCanonicalizing( $expected_ids, $result['updated'], 'All 31 children and their parent should update in one request.' );
+		$this->assertEmpty( $result['failed'], 'All deferred parents should resolve.' );
+		$this->assertSame( 100, $sut->get_percent_complete(), 'An unlimited import should finish without another request.' );
+		$this->assertFalse( ( new DeferredRows( $file ) )->has_rows(), 'No deferred rows should remain.' );
+	}
+
+	/**
+	 * @testdox Fresh EOF requests attempt one deferred row even when their resource budget is already exhausted.
+	 * @testWith ["memory_exceeded"]
+	 *           ["time_exceeded"]
+	 *
+	 * @param string $limit_method Resource limit to simulate.
+	 */
+	public function test_final_pass_makes_progress_under_resource_pressure( string $limit_method ): void {
+		list( $parent, $variation ) = $this->create_products();
+		$file                       = $this->create_csv(
+			array(
+				array( $variation->get_id(), ProductType::VARIATION, 'variation-new', 'parent-new' ),
+				array( $variation->get_id(), ProductType::VARIATION, 'variation-newer', 'parent-new' ),
+			)
+		);
+		$parsed                     = ( new WC_Product_CSV_Importer( $file, $this->get_args( -1 ) ) )->get_parsed_data();
+		$queue                      = new DeferredRows( $file );
+		foreach ( $parsed as $index => $row ) {
+			$queue->save( $index + 1, $row );
+		}
+		$parent->set_sku( 'parent-new' );
+		$parent->save();
+
+		foreach ( array( 99, 100 ) as $expected_progress ) {
+			$sut = $this->getMockBuilder( WC_Product_CSV_Importer::class )
+				->setConstructorArgs( array( $file, $this->get_args( 1, filesize( $file ) ) ) )
+				->onlyMethods( array( 'time_exceeded', 'memory_exceeded' ) )
+				->getMock();
+			$sut->method( 'time_exceeded' )->willReturn( 'time_exceeded' === $limit_method );
+			$sut->method( 'memory_exceeded' )->willReturn( 'memory_exceeded' === $limit_method );
+
+			$result = $sut->import();
+
+			$this->assertSame( array( $variation->get_id() ), $result['updated'], 'Each fresh request should process exactly one pending row.' );
+			$this->assertEmpty( $result['failed'], 'The renamed parent should resolve.' );
+			$this->assertSame( $expected_progress, $sut->get_percent_complete(), 'Repeated requests should eventually complete the queue.' );
+		}
+		$this->assertFalse( $queue->has_rows(), 'Resource pressure must not leave the queue stalled.' );
+		$this->assertSame( 'variation-newer', wc_get_product( $variation->get_id() )->get_sku(), 'Both deferred updates should have been applied in order.' );
+	}
+
+	/**
+	 * @testdox Later updates to a deferred variation retain source order across requests and match keys.
+	 * @testWith [-1, "id"]
+	 *           [1, "id"]
+	 *           [-1, "sku"]
+	 *           [1, "sku"]
+	 *           [-1, "old_sku"]
+	 *           [1, "old_sku"]
+	 *           [-1, "global_unique_id"]
+	 *           [1, "global_unique_id"]
+	 *
+	 * @param int    $batch_size Source rows per request.
+	 * @param string $match_key How the later row identifies the variation.
+	 */
+	public function test_later_updates_do_not_run_before_deferred_rows( int $batch_size, string $match_key ): void {
+		list( $parent, $variation ) = $this->create_products();
+		$variation->set_global_unique_id( '1234567890123' );
+		$variation->save();
+		$file = $this->create_csv(
+			array(
+				array( $variation->get_id(), ProductType::VARIATION, 'variation-new', 'parent-new' ),
+				array( $parent->get_id(), ProductType::VARIABLE, 'parent-new', '' ),
+				array( 'id' === $match_key ? $variation->get_id() : '', ProductType::VARIATION, 'old_sku' === $match_key ? 'variation-old' : ( 'sku' === $match_key ? 'variation-new' : '' ), 'parent-old' ),
+			)
+		);
+		add_filter(
+			'woocommerce_product_importer_parsed_data',
+			static function ( $row ) use ( $variation, $match_key ) {
+				if ( ProductType::VARIATION === $row['type'] ) {
+					$earlier              = 'parent-new' === ( $row['_unresolved_parent_sku'] ?? '' );
+					$row['regular_price'] = $earlier ? '10' : '20';
+					if ( $earlier ) {
+						$row['description'] = 'Retained from the first row';
+					} else {
+						$row['parent_id'] = $variation->get_parent_id();
+						if ( 'global_unique_id' === $match_key ) {
+							$row['global_unique_id'] = '1234567890123';
+						}
+					}
+				}
+				return $row;
+			}
+		);
+
+		$result = $this->run_import( $file, $batch_size );
+
+		$this->assertEmpty( $result['failed'], 'Both variation updates should succeed.' );
+		$this->assertCount( 3, $result['updated'], 'The parent and both variation rows should run exactly once.' );
+		$this->assertSame( '20', wc_get_product( $variation->get_id() )->get_regular_price(), 'The later price must win over the deferred price.' );
+		$this->assertSame( 'Retained from the first row', wc_get_product( $variation->get_id() )->get_description(), 'Fields absent from the later row must still be imported from the earlier row.' );
+	}
+
+	/**
+	 * @testdox Differently cased references to a deferred SKU update the original variation instead of creating a duplicate.
+	 * @testWith [-1]
+	 *           [1]
+	 *
+	 * @param int $batch_size Source rows per request.
+	 */
+	public function test_deferred_sku_references_are_case_insensitive( int $batch_size ): void {
+		list( $parent, $variation ) = $this->create_products();
+		$file                       = $this->create_csv(
+			array(
+				array( $variation->get_id(), ProductType::VARIATION, 'Child-New', 'parent-new' ),
+				array( '', ProductType::VARIATION, 'child-new', 'id:' . $parent->get_id() ),
+				array( $parent->get_id(), ProductType::VARIABLE, 'parent-new', '' ),
+			)
+		);
+
+		$result = $this->run_import( $file, $batch_size );
+
+		$this->assertEmpty( $result['failed'], 'Case differences must not cause a duplicated SKU failure.' );
+		$this->assertEmpty( $result['imported_variations'], 'The later reference must not create another variation.' );
+		$this->assertSame( array( $parent->get_id(), $variation->get_id(), $variation->get_id() ), $result['updated'], 'Both variation rows must update the original product in source order.' );
+		$this->assertSame( $variation->get_id(), wc_get_product_id_by_sku( 'Child-New' ), 'The original variation must own the renamed SKU.' );
+		$this->assertSame( 'child-new', wc_get_product( $variation->get_id() )->get_sku(), 'The later row should retain its original SKU casing.' );
+		$this->assertFalse( ( new DeferredRows( $file ) )->has_rows(), 'The import should leave no pending rows.' );
+	}
+
+	/**
 	 * @testdox A parsed-data filter can resolve a parent without being overridden by a pending reference.
 	 */
 	public function test_respects_parent_resolved_by_parsed_data_filter(): void {
