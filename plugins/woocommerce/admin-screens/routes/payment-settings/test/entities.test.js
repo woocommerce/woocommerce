@@ -24,13 +24,14 @@ async function getRegistry() {
 	return registry;
 }
 
-it( 'keeps the label and fields that the stage reads from the entity config', async () => {
+it( 'keeps the label, title and fields from the entity config', async () => {
 	const registry = await getRegistry();
 	const config = registry
 		.select( coreStore )
 		.getEntityConfig( ENTITY_KIND, 'cheque' );
 
 	expect( config.label ).toBe( 'Check payments' );
+	expect( config.getTitle() ).toBe( 'Check payments' );
 	expect( config.fields.map( ( field ) => field.id ) ).toEqual( [
 		'enabled',
 		'title',

@@ -18,6 +18,7 @@ export interface SettingsEntityConfig {
 	baseURL: string;
 	key: string;
 	label: string;
+	getTitle: () => string;
 	fields: Field< SettingsRecord >[];
 }
 
@@ -32,6 +33,7 @@ export function getCoreEntities(): SettingsEntityConfig[] {
 			baseURL: '/wc/v3/payment_gateways',
 			key: 'id',
 			label: __( 'Check payments', 'woocommerce' ),
+			getTitle: () => __( 'Check payments', 'woocommerce' ),
 			fields: [
 				{
 					id: 'enabled',
