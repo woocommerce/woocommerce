@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix replaced order items not being saved on sites using the SQLite database integration, such as WordPress Studio and Playground.
