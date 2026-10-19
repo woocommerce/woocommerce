@@ -1,0 +1,24 @@
+/*
+ * Compatibility styles for WooCommerce 11.2 and older.
+ */
+
+/* Remove Product Specifications unnecessary margin.
+ * Fixed upstream in https://github.com/woocommerce/woocommerce/pull/69150.
+ */
+.wp-block-product-specifications-item__value p {
+	margin: 0
+}
+
+/* Checkbox alignment for reviews form.
+ * Fixed upstream in https://github.com/woocommerce/woocommerce/pull/68696.
+ */
+ .wp-block-woocommerce-product-review-form .comment-form-cookies-consent {
+	align-items: flex-start;
+}
+
+/* Remove Cart Order Summary heading block textarea padding in the editor.
+ * Fixed upstream in https://github.com/woocommerce/woocommerce/pull/69150.
+ */
+.wp-block-woocommerce-cart-order-summary-heading-block textarea {
+	padding-inline-start: 0;
+}
