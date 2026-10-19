@@ -299,7 +299,27 @@ test( 'persists a non-modal method added to an existing zone', async ( {
 		)
 		.click();
 
-	await page.getByRole( 'button', { name: 'Add shipping method' } ).click();
+	// The edit screen binds the add-method modal after its methods table renders, so
+	// wait for the existing method, then retry opening the modal in case the first
+	// click lands before the handler is bound.
+	await expect(
+		page.locator( '.wc-shipping-zone-method-title', {
+			hasText: 'Flat rate',
+		} )
+	).toBeVisible();
+
+	const addMethodButton = page.getByRole( 'button', {
+		name: 'Add shipping method',
+	} );
+	const createMethodHeading = page.getByRole( 'heading', {
+		name: 'Create shipping method',
+	} );
+	await expect( async () => {
+		if ( ! ( await createMethodHeading.isVisible() ) ) {
+			await addMethodButton.click();
+		}
+		await expect( createMethodHeading ).toBeVisible( { timeout: 3000 } );
+	} ).toPass( { timeout: 20000 } );
 	await page.getByText( 'E2E Non-Modal Method' ).click();
 
 	const addMethodResponsePromise = page.waitForResponse( ( response ) =>
