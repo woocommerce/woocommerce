@@ -61063,30 +61063,6 @@ parameters:
 			path: src/Internal/Logging/SafeGlobalFunctionProxy.php
 
 		-
-			message: '#^Call to an undefined method object\:\:create_server\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/MCP/MCPAdapterProvider.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\MCP\\Transport\\WooCommerceRestTransport\:\:check_permission\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
-			identifier: missingType.generics
-			count: 1
-			path: src/Internal/MCP/Transport/WooCommerceRestTransport.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\MCP\\Transport\\WooCommerceRestTransport\:\:validate_request\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
-			identifier: missingType.generics
-			count: 1
-			path: src/Internal/MCP/Transport/WooCommerceRestTransport.php
-
-		-
-			message: '#^Parameter \#1 \$request of method Automattic\\WooCommerce\\Internal\\MCP\\Transport\\WooCommerceRestTransport\:\:validate_request\(\) expects WP_REST_Request, WP_REST_Request\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/MCP/Transport/WooCommerceRestTransport.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\OrderCouponDataMigrator\:\:convert_item\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1

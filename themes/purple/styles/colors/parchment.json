@@ -1,0 +1,63 @@
+{
+	"settings": {
+		"color": {
+			"palette": [
+				{
+					"color": "#f1ede2",
+					"name": "Base",
+					"slug": "theme-1"
+				},
+				{
+					"color": "#111111",
+					"name": "Contrast",
+					"slug": "theme-2"
+				},
+				{
+					"color": "#36141d",
+					"name": "Primary",
+					"slug": "theme-3"
+				},
+				{
+					"color": "#47443d",
+					"name": "Contrast Alt",
+					"slug": "theme-4"
+				},
+				{
+					"color": "#fffbf0",
+					"name": "Base Alt",
+					"slug": "theme-5"
+				},
+				{
+					"color": "rgba(17, 17, 17, 0.2)",
+					"name": "Border",
+					"slug": "theme-6"
+				},
+				{
+					"color": "#001bcc",
+					"name": "Accent",
+					"slug": "theme-7"
+				}
+			],
+			"duotone": [
+				{
+					"colors": [
+						"#111111",
+						"#f1ede2"
+					],
+					"name": "Duotone 1",
+					"slug": "duotone-1"
+				},
+				{
+					"colors": [
+						"#111111",
+						"#fffbf0"
+					],
+					"name": "Duotone 2",
+					"slug": "duotone-2"
+				}
+			]
+		}
+	},
+	"version": 3,
+	"title": "Parchment"
+}
