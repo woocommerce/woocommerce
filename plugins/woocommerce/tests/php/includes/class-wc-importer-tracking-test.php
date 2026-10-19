@@ -141,8 +141,12 @@ class WC_Importer_Tracking_Test extends \WC_Unit_Test_Case {
 	public function test_events_not_recorded_with_nonce_for_another_action(): void {
 		$_REQUEST['_wpnonce'] = wp_create_nonce( 'wc-product-import' );
 		$_REQUEST['file']     = '/tmp/products.csv';
+		$events_by_step       = array(
+			'import' => 'wcadmin_product_import_start',
+			'done'   => 'wcadmin_product_import_complete',
+		);
 
-		foreach ( array( 'import' => 'wcadmin_product_import_start', 'done' => 'wcadmin_product_import_complete' ) as $step => $event ) {
+		foreach ( $events_by_step as $step => $event ) {
 			$_REQUEST['step'] = $step;
 
 			do_action( 'product_page_product_importer' );
