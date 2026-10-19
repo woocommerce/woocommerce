@@ -5,6 +5,7 @@ export const SHOP_PAGE_TEMPLATE_BLOCK_TYPES = [
 	'woocommerce/breadcrumbs',
 	'woocommerce/catalog-sorting',
 	'woocommerce/product-results-count',
+	'woocommerce/legacy-template',
 ];
 
 /**
