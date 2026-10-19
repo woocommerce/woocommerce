@@ -29,8 +29,8 @@ export const useCheckoutSubmit = () => {
 	} = useSelect( ( select ) => {
 		const store = select( checkoutStore );
 		return {
-			// Also wait for shipping address changes that are not sent yet. Otherwise the button is enabled while the
-			// shopper types a postcode, then disables itself mid-click when the field blurs, and the click is lost.
+			// Shipping address changes are sent after a debounce, so the shipping rates are out of date before the
+			// request starts. Count that wait as calculating, so the checkout stays disabled from the change to the new rates.
 			isCalculating:
 				store.isCalculating() ||
 				select( cartStore ).isShippingRatesStale(),

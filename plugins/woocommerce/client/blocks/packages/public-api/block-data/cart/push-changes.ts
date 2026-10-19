@@ -301,8 +301,8 @@ export const pushChanges = ( debounced = true ): void => {
 	debouncedUpdateCustomerData();
 
 	// Picking a country or state is a deliberate choice rather than typing, and it invalidates the
-	// shipping rates already on screen. Push it straight away so the rates reload, and the Place
-	// order button is enabled again, without waiting for the debounce.
+	// shipping rates already on screen. Push it straight away so the rates reload without waiting
+	// for the debounce.
 	const pickedFieldChanged = ( [ 'country', 'state' ] as const ).some(
 		( field ) =>
 			customerData.billingAddress[ field ] !==
