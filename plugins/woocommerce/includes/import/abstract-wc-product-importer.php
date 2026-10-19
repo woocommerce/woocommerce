@@ -348,7 +348,14 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			}
 
 			if ( ProductType::VARIATION === $object->get_type() ) {
-				$this->set_variation_data( $object, $data );
+				$variation_result = $this->set_variation_data( $object, $data );
+
+				// A row that names a parent which cannot be used must not be saved: set_props() already applied
+				// that parent ID and the data store would persist it as 0, detaching the variation. Rows without
+				// a parent column keep the variation's existing parent, so their error is not fatal.
+				if ( is_wp_error( $variation_result ) && isset( $data['parent_id'] ) ) {
+					return $variation_result;
+				}
 			} else {
 				$this->set_product_data( $object, $data );
 			}
