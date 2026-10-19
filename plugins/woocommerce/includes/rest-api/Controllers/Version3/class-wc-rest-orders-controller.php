@@ -115,6 +115,8 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 		$schema    = $this->get_item_schema();
 		$data_keys = array_keys( array_filter( $schema['properties'], array( $this, 'filter_writable_props' ) ) );
 
+		$this->validate_line_item_quantities( $request['line_items'] );
+
 		// Handle all writable props.
 		foreach ( $data_keys as $key ) {
 			$value = $request[ $key ];
@@ -141,7 +143,7 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 						if ( is_array( $value ) ) {
 							foreach ( $value as $item ) {
 								if ( is_array( $item ) ) {
-									if ( $this->item_is_null( $item ) || ( isset( $item['quantity'] ) && 0 === $item['quantity'] ) ) {
+									if ( $this->item_is_null( $item ) || ( isset( $item['quantity'] ) && 0.0 === (float) $item['quantity'] ) ) {
 										$this->remove_item( $order, $key, $item['id'] );
 									} else {
 										$this->set_item( $order, $key, $item );
