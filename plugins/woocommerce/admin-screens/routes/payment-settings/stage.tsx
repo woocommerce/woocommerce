@@ -121,8 +121,10 @@ function OfflinePaymentSettings( { gateway }: { gateway: OfflineGateway } ) {
 			enabled: false,
 			title: '',
 			description: '',
-			values: {},
-			groups: {},
+			instructions: '',
+			enable_for_methods: [],
+			enable_for_virtual: true,
+			settings: {},
 			...edited,
 			countries: Object.fromEntries(
 				( countryData.records ?? [] ).map( ( country ) => [

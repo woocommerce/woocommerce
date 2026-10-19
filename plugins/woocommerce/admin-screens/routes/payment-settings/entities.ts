@@ -46,16 +46,11 @@ export interface OfflineSettings extends Record< string, unknown > {
 	enabled: boolean;
 	title: string;
 	description: string;
-	values: Record< string, string | boolean | string[] | BankAccount[] > & {
-		instructions?: string;
-		enable_for_methods?: string[];
-		enable_for_virtual?: string;
-		account_details?: BankAccount[];
-	};
-	groups: Record<
-		string,
-		{ fields: { id: string; options?: ShippingOptions }[] }
-	>;
+	instructions: string;
+	enable_for_methods: string[];
+	enable_for_virtual: boolean;
+	account_details?: BankAccount[];
+	settings: Record< string, { value: unknown; options?: ShippingOptions } >;
 	countries?: Record< string, string >;
 	default_country?: string;
 }
@@ -68,15 +63,14 @@ export function getOfflineGateway( page?: string ) {
 }
 
 /**
- * Describe the Core settings entities using the existing v4 gateway endpoint.
+ * Describe the Core examples using the supported v3 gateway endpoint.
  */
 export function getOfflineEntities() {
 	return OFFLINE_GATEWAYS.map( ( gateway ) => ( {
 		kind: ENTITY_KIND,
 		name: gateway.id,
-		baseURL: '/wc/v4/settings/payment-gateways',
+		baseURL: '/wc/v3/payment_gateways',
 		key: 'id',
-		mergedEdits: { values: true },
 		label: gateway.title,
 		getTitle: () => gateway.title,
 	} ) );

@@ -41,7 +41,7 @@ beforeEach( () => {
 	getEntityRecord.mockResolvedValue( { id: 'cod' } );
 } );
 
-it( 'loads a directly linked Core gateway from the v4 entity registered before navigation', async () => {
+it( 'loads a directly linked example from its v3 entity registered before navigation', async () => {
 	await route.beforeLoad( { params: { page: 'cod' } } );
 	await route.loader( { params: { page: 'cod' } } );
 
@@ -49,7 +49,7 @@ it( 'loads a directly linked Core gateway from the v4 entity registered before n
 		expect.arrayContaining( [
 			expect.objectContaining( {
 				name: 'cod',
-				baseURL: '/wc/v4/settings/payment-gateways',
+				baseURL: '/wc/v3/payment_gateways',
 				key: 'id',
 			} ),
 		] )

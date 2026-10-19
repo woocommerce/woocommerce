@@ -1,11 +1,8 @@
 /**
  * Internal dependencies
  */
-import { getOfflineFields } from '../fields';
 import { getAccountCountry, getShippingElements } from '../entities';
-import type { BankAccount, OfflineSettings } from '../entities';
-
-jest.mock( '../bank-accounts', () => ( { BankAccounts: () => null } ) );
+import type { BankAccount } from '../entities';
 
 const account: BankAccount = {
 	account_name: 'Merchant',
@@ -15,29 +12,6 @@ const account: BankAccount = {
 	iban: '',
 	bic: '',
 };
-const settings: OfflineSettings = {
-	id: 'bacs',
-	enabled: false,
-	title: 'Bank transfer',
-	description: '',
-	values: {
-		instructions: 'Keep this text',
-		enable_for_virtual: 'no',
-		account_details: [ account ],
-	},
-	groups: {},
-};
-
-it( 'serializes the virtual-orders checkbox without dropping other gateway values', () => {
-	const field = getOfflineFields( 'bacs', settings ).find(
-		( item ) => item.id === 'values.enable_for_virtual'
-	);
-	expect( field?.getValue?.( { item: settings } ) ).toBe( false );
-	expect( field?.setValue?.( { item: settings, value: true } ) ).toEqual( {
-		values: { ...settings.values, enable_for_virtual: 'yes' },
-	} );
-} );
-
 it( 'preserves shipping instance IDs when flattening grouped choices', () => {
 	expect(
 		getShippingElements( {

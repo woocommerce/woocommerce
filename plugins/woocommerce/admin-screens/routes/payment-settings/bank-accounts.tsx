@@ -23,9 +23,9 @@ export function BankAccounts( {
 	data,
 	onChange,
 }: DataFormControlProps< OfflineSettings > ) {
-	const accounts = data.values.account_details ?? [];
+	const accounts = data.account_details ?? [];
 	const setAccounts = ( next: BankAccount[] ) => {
-		onChange( { values: { ...data.values, account_details: next } } );
+		onChange( { account_details: next } );
 	};
 	const update = ( index: number, edits: Partial< BankAccount > ) => {
 		setAccounts(

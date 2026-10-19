@@ -6,25 +6,35 @@
  * @since 3.5.0
  */
 
+declare( strict_types=1 );
+
 use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
 
 /**
  * Payment gateway test class.
+ *
+ * @mixin \PHPUnit\Framework\TestCase WordPress's polyfill ancestry is not fully resolved by PHPStan.
  */
 class Payment_Gateways extends WC_REST_Unit_Test_Case {
 	use ArraySubsetAsserts;
+
+	/** @var int Administrator ID. */
+	private $user;
 
 	/**
 	 * Setup our test server, endpoints, and user info.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->endpoint = new WC_REST_Payment_Gateways_Controller();
-		$this->user     = $this->factory->user->create(
+		$user = $this->factory->user->create(
 			array(
 				'role' => 'administrator',
 			)
 		);
+		if ( is_wp_error( $user ) ) {
+			self::fail( $user->get_error_message() );
+		}
+		$this->user = $user;
 	}
 
 	/**
@@ -33,29 +43,29 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 	 * Clearing first matters: init() writes each gateway into a slot keyed by its order, so on its own it
 	 * leaves stale gateways behind in the slots the new order no longer uses.
 	 */
-	private function rebuild_payment_gateways() {
+	private function rebuild_payment_gateways(): void {
 		$gateways                   = WC_Payment_Gateways::instance();
 		$gateways->payment_gateways = array();
 		$gateways->init();
 	}
 
 	/**
-	 * Test route registration.
+	 * @testdox The payment gateway routes are registered.
 	 *
 	 * @since 3.5.0
 	 */
-	public function test_register_routes() {
+	public function test_register_routes(): void {
 		$routes = $this->server->get_routes();
 		$this->assertArrayHasKey( '/wc/v3/payment_gateways', $routes );
 		$this->assertArrayHasKey( '/wc/v3/payment_gateways/(?P<id>[\w-]+)', $routes );
 	}
 
 	/**
-	 * Test getting all payment gateways.
+	 * @testdox All payment gateways can be read.
 	 *
 	 * @since 3.5.0
 	 */
-	public function test_get_payment_gateways() {
+	public function test_get_payment_gateways(): void {
 		wp_set_current_user( $this->user );
 
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/payment_gateways' ) );
@@ -81,7 +91,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 		$matching_gateway_data = current(
 			array_filter(
 				$gateways,
-				function( $gateway ) {
+				function ( $gateway ) {
 					return WC_Gateway_Cheque::ID === $gateway['id'];
 				}
 			)
@@ -131,22 +141,22 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests to make sure payment gateways cannot viewed without valid permissions.
+	 * @testdox Payment gateways cannot be read without permission.
 	 *
 	 * @since 3.5.0
 	 */
-	public function test_get_payment_gateways_without_permission() {
+	public function test_get_payment_gateways_without_permission(): void {
 		wp_set_current_user( 0 );
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/payment_gateways' ) );
 		$this->assertEquals( 401, $response->get_status() );
 	}
 
 	/**
-	 * Test getting a single payment gateway.
+	 * @testdox A single payment gateway can be read.
 	 *
 	 * @since 3.5.0
 	 */
-	public function test_get_payment_gateway() {
+	public function test_get_payment_gateway(): void {
 		wp_set_current_user( $this->user );
 
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/payment_gateways/paypal' ) );
@@ -185,33 +195,33 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test getting a payment gateway without valid permissions.
+	 * @testdox A payment gateway cannot be read without permission.
 	 *
 	 * @since 3.5.0
 	 */
-	public function test_get_payment_gateway_without_permission() {
+	public function test_get_payment_gateway_without_permission(): void {
 		wp_set_current_user( 0 );
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/payment_gateways/paypal' ) );
 		$this->assertEquals( 401, $response->get_status() );
 	}
 
 	/**
-	 * Test getting a payment gateway with an invalid id.
+	 * @testdox An unknown gateway cannot be read.
 	 *
 	 * @since 3.5.0
 	 */
-	public function test_get_payment_gateway_invalid_id() {
+	public function test_get_payment_gateway_invalid_id(): void {
 		wp_set_current_user( $this->user );
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/payment_gateways/totally_fake_method' ) );
 		$this->assertEquals( 404, $response->get_status() );
 	}
 
 	/**
-	 * Test updating a single payment gateway.
+	 * @testdox A single payment gateway can be updated.
 	 *
 	 * @since 3.5.0
 	 */
-	public function test_update_payment_gateway() {
+	public function test_update_payment_gateway(): void {
 		wp_set_current_user( $this->user );
 
 		// Test defaults.
@@ -302,7 +312,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 	/**
 	 * @testdox A gateway update reaches storage, so a later request reads the new state.
 	 */
-	public function test_update_payment_gateway_persists_to_storage() {
+	public function test_update_payment_gateway_persists_to_storage(): void {
 		wp_set_current_user( $this->user );
 
 		// No settings payload here, so the write has to happen for the top level fields on their own.
@@ -342,7 +352,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 	/**
 	 * @testdox Gateway order persists and decides where a gateway sits in the collection.
 	 */
-	public function test_update_payment_gateway_order_persists_to_storage() {
+	public function test_update_payment_gateway_order_persists_to_storage(): void {
 		wp_set_current_user( $this->user );
 
 		// BACS loads before cheque, so putting cheque first means the registry has to reorder them.
@@ -371,11 +381,11 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test updating a payment gateway without valid permissions.
+	 * @testdox A payment gateway cannot be updated without permission.
 	 *
 	 * @since 3.5.0
 	 */
-	public function test_update_payment_gateway_without_permission() {
+	public function test_update_payment_gateway_without_permission(): void {
 		wp_set_current_user( 0 );
 		$request = new WP_REST_Request( 'POST', '/wc/v3/payment_gateways/paypal' );
 		$request->set_body_params(
@@ -391,11 +401,11 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test updating a payment gateway with an invalid id.
+	 * @testdox An unknown gateway cannot be updated.
 	 *
 	 * @since 3.5.0
 	 */
-	public function test_update_payment_gateway_invalid_id() {
+	public function test_update_payment_gateway_invalid_id(): void {
 		wp_set_current_user( $this->user );
 		$request = new WP_REST_Request( 'POST', '/wc/v3/payment_gateways/totally_fake_method' );
 		$request->set_body_params(
@@ -408,11 +418,11 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test the payment gateway schema.
+	 * @testdox The gateway schema retains its legacy fields and adds editable offline values.
 	 *
 	 * @since 3.5.0
 	 */
-	public function test_payment_gateway_schema() {
+	public function test_payment_gateway_schema(): void {
 		wp_set_current_user( $this->user );
 
 		$request    = new WP_REST_Request( 'OPTIONS', '/wc/v3/payment_gateways' );
@@ -420,7 +430,7 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertEquals( 9, count( $properties ) );
+		$this->assertEquals( 13, count( $properties ) );
 		$this->assertArrayHasKey( 'id', $properties );
 		$this->assertArrayHasKey( 'title', $properties );
 		$this->assertArrayHasKey( 'description', $properties );
@@ -430,15 +440,19 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'method_description', $properties );
 		$this->assertArrayHasKey( 'method_supports', $properties );
 		$this->assertArrayHasKey( 'settings', $properties );
+		$this->assertArrayHasKey( 'instructions', $properties );
+		$this->assertArrayHasKey( 'enable_for_methods', $properties );
+		$this->assertArrayHasKey( 'enable_for_virtual', $properties );
+		$this->assertArrayHasKey( 'account_details', $properties );
 	}
 
 	/**
 	 * Loads a particular gateway's settings so we can correctly test API output.
 	 *
 	 * @since 3.5.0
-	 * @param string $gateway_class Name of WC_Payment_Gateway class.
+	 * @param class-string<WC_Payment_Gateway> $gateway_class Name of WC_Payment_Gateway class.
 	 */
-	private function get_settings( $gateway_class ) {
+	private function get_settings( $gateway_class ): array {
 		$gateway  = new $gateway_class();
 		$settings = array();
 		$gateway->init_form_fields();
@@ -468,5 +482,4 @@ class Payment_Gateways extends WC_REST_Unit_Test_Case {
 		}
 		return $settings;
 	}
-
 }

@@ -24,19 +24,17 @@ it( 'keeps pending virtual-order and shipping edits in the same gateway record',
 	await core.addEntities( getOfflineEntities() );
 	await core.receiveEntityRecords( ENTITY_KIND, 'cod', {
 		id: 'cod',
-		values: {
-			instructions: 'Keep these instructions',
-			enable_for_virtual: 'yes',
-			enable_for_methods: [],
-		},
+		instructions: 'Keep these instructions',
+		enable_for_virtual: true,
+		enable_for_methods: [],
 	} );
 	core.finishResolution( 'getEntityRecord', [ ENTITY_KIND, 'cod', 'cod' ] );
 
 	await core.editEntityRecord( ENTITY_KIND, 'cod', 'cod', {
-		values: { enable_for_virtual: 'no' },
+		enable_for_virtual: false,
 	} );
 	await core.editEntityRecord( ENTITY_KIND, 'cod', 'cod', {
-		values: { enable_for_methods: [ 'flat_rate' ] },
+		enable_for_methods: [ 'flat_rate' ],
 	} );
 
 	expect(
@@ -45,10 +43,8 @@ it( 'keeps pending virtual-order and shipping edits in the same gateway record',
 			.getEditedEntityRecord( ENTITY_KIND, 'cod', 'cod' )
 	).toEqual( {
 		id: 'cod',
-		values: {
-			instructions: 'Keep these instructions',
-			enable_for_virtual: 'no',
-			enable_for_methods: [ 'flat_rate' ],
-		},
+		instructions: 'Keep these instructions',
+		enable_for_virtual: false,
+		enable_for_methods: [ 'flat_rate' ],
 	} );
 } );

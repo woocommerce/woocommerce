@@ -7,21 +7,28 @@ pnpm --filter=@woocommerce/plugin-woocommerce build:project:admin-screens
 pnpm --filter=@woocommerce/plugin-woocommerce watch:build:project:admin-screens
 ```
 
-The build writes to `plugins/woocommerce/assets/client/routes`. Build the checkout before enabling the page.
+The build writes to `plugins/woocommerce/assets/client/routes`. Build the checkout before enabling the examples.
 
-## Offline payment settings
+## Payment settings examples
 
-The `payment-settings-screen` and `rest-api-v4` flags, and WordPress's View Config API, are required. With those available, the existing settings links for direct bank transfer, check payments and cash on delivery open the new page. Otherwise they keep their existing destinations.
+The Core offline methods demonstrate the shared route, entity registration, fields and Save/Discard flow. They do not replace the existing payment settings pages or their links. Extension-provided pages and sub-pages are follow-up work.
 
-For development, enable both flags with an mu-plugin:
+The examples require the `payment-settings-screen` flag and WordPress's View Config API, not REST API v4. Enable the flag with an mu-plugin:
 
 ```php
 <?php
 add_filter( 'woocommerce_admin_features', static function ( $features ) {
-    return array_unique( array_merge( $features, array( 'payment-settings-screen', 'rest-api-v4' ) ) );
+    $features[] = 'payment-settings-screen';
+    return array_unique( $features );
 } );
 ```
 
-The routes are `/settings/bacs`, `/settings/cheque` and `/settings/cod` on `admin.php?page=wc-payment-settings-wp-admin`. The route registers the Core entities with `addEntities()`, checks the URL parameter against core-data's registered entities and reads and saves through `/wc/v4/settings/payment-gateways/{id}`. Fields are defined on the client; layouts come from View Config. Bank accounts use the gateway endpoint's `values.account_details`, which retains the existing `woocommerce_bacs_accounts` storage.
+Open `admin.php?page=wc-payment-settings-wp-admin&p=/settings/cheque`, or use `/settings/bacs` and `/settings/cod`. The route registers entities with `addEntities()` and resolves the URL parameter through core-data's registered entities. Fields are client-defined; layouts come from View Config.
 
-Check save/reload, discard, server errors, shipping restrictions and adding/reordering/removing bank accounts. Restore any test changes afterwards. Extension-provided pages and sub-pages are follow-up work, not supported by this PR.
+## V3 data contract
+
+The examples use `/wc/v3/payment_gateways/{id}`. Core offline gateways expose editable `instructions`, `enable_for_methods` and `enable_for_virtual` fields alongside the existing `settings` metadata. BACS also exposes `account_details`. Updates accept the same shapes returned by reads, so the page and Core's review-changes panel use ordinary entity saves.
+
+Existing `settings` requests retain their legacy path. New-field requests validate before writing, reject conflicting legacy/new values, preserve omitted fields and use the existing gateway settings and BACS account options. An empty `account_details` array clears accounts. A single request is not a database transaction.
+
+Check old/new settings round-trips, Save/Discard, shipping restrictions, bank-account editing and Core's review-changes panel. Restore test settings and remove the temporary flag afterwards. The classic BACS form preserves optional account country metadata through hidden inputs; its visible controls are unchanged.

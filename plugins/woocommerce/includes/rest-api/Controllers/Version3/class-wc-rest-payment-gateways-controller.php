@@ -8,6 +8,8 @@
  * @since   3.0.0
  */
 
+use Automattic\WooCommerce\Internal\RestApi\Routes\V3\PaymentGateways\OfflineGatewaySettings;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -24,6 +26,27 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Payment_Gateways_V2_Co
 	 * @var string
 	 */
 	protected $namespace = 'wc/v3';
+
+	/**
+	 * Update optional Core offline fields while preserving the legacy request path.
+	 *
+	 * @since 11.3.0
+	 * @param WP_REST_Request $request Request data.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function update_item( $request ) {
+		$offline = wc_get_container()->get( OfflineGatewaySettings::class );
+		if ( ! $offline->has_fields( $request ) ) {
+			return parent::update_item( $request );
+		}
+		$gateway = $this->get_gateway( $request );
+		if ( null === $gateway ) {
+			return parent::update_item( $request );
+		}
+		$result = $offline->update( $gateway, $request, $this );
+		return is_wp_error( $result ) ? $result : rest_ensure_response( $this->prepare_item_for_response( $gateway, $request ) );
+	}
 
 	/**
 	 * Prepare a payment gateway for response.
@@ -46,6 +69,7 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Payment_Gateways_V2_Co
 			'settings'           => $this->get_settings( $gateway ),
 		);
 
+		$item    = array_merge( $item, wc_get_container()->get( OfflineGatewaySettings::class )->get_values( $gateway ) );
 		$context = ! empty( $request['context'] ) ? $request['context'] : 'view';
 		$data    = $this->add_additional_fields_to_object( $item, $request );
 		$data    = $this->filter_response_by_context( $data, $context );
@@ -221,6 +245,7 @@ class WC_REST_Payment_Gateways_Controller extends WC_REST_Payment_Gateways_V2_Co
 			),
 		);
 
+		$schema['properties'] = array_merge( $schema['properties'], wc_get_container()->get( OfflineGatewaySettings::class )->get_schema() );
 		return $this->add_additional_fields_schema( $schema );
 	}
 

@@ -25,10 +25,7 @@ export function getOfflineFields(
 		cod: __( 'Enable cash on delivery payments', 'woocommerce' ),
 	};
 	const shippingOptions =
-		Object.values( data?.groups ?? {} )
-			.flatMap( ( group ) => group.fields )
-			.find( ( field ) => field.id === 'enable_for_methods' )?.options ??
-		{};
+		data?.settings[ 'enable_for_methods' ]?.options ?? {};
 	const fields: Field< OfflineSettings >[] = [
 		{
 			id: 'enabled',
@@ -56,7 +53,7 @@ export function getOfflineFields(
 			),
 		},
 		{
-			id: 'values.instructions',
+			id: 'instructions',
 			type: 'text',
 			Edit: 'textarea',
 			label: __( 'Instructions', 'woocommerce' ),
@@ -66,7 +63,7 @@ export function getOfflineFields(
 			),
 		},
 		{
-			id: 'values.enable_for_methods',
+			id: 'enable_for_methods',
 			type: 'array',
 			label: __( 'Enable for shipping methods', 'woocommerce' ),
 			description: __(
@@ -76,26 +73,19 @@ export function getOfflineFields(
 			elements: getShippingElements( shippingOptions ),
 		},
 		{
-			id: 'values.enable_for_virtual',
+			id: 'enable_for_virtual',
 			type: 'boolean',
 			label: __( 'Accept for virtual orders', 'woocommerce' ),
-			getValue: ( { item } ) => item.values.enable_for_virtual !== 'no',
-			setValue: ( { item, value } ) => ( {
-				values: {
-					...item.values,
-					enable_for_virtual: value ? 'yes' : 'no',
-				},
-			} ),
 		},
 	];
 	if ( gatewayId === 'bacs' ) {
 		fields.push( {
-			id: 'values.account_details',
+			id: 'account_details',
 			label: __( 'Bank accounts', 'woocommerce' ),
 			Edit: BankAccounts,
 			isValid: {
 				custom: ( item ) => {
-					const accounts = item.values.account_details ?? [];
+					const accounts = item.account_details ?? [];
 					return accounts.every( ( account ) => {
 						const country = getAccountCountry(
 							account,

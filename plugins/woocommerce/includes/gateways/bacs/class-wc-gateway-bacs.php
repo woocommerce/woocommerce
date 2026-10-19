@@ -8,7 +8,6 @@
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Gateways\ShippingMethodRestrictionsTrait;
 use Automattic\WooCommerce\Internal\Admin\Settings\Utils as SettingsUtils;
-use Automattic\WooCommerce\Internal\Admin\Screens\Settings\PaymentSettingsScreen;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -190,7 +189,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 									++$i;
 
 									echo '<tr class="account">
-										<td class="sort"></td>
+										<td class="sort"><input type="hidden" name="bacs_country_code[' . esc_attr( (string) $i ) . ']" value="' . esc_attr( is_string( $account['country_code'] ?? null ) ? $account['country_code'] : '' ) . '" /></td>
 										<td><input type="text" value="' . esc_attr( wp_unslash( $account['account_name'] ) ) . '" name="bacs_account_name[' . esc_attr( $i ) . ']" /></td>
 										<td><input type="text" value="' . esc_attr( $account['account_number'] ) . '" name="bacs_account_number[' . esc_attr( $i ) . ']" /></td>
 										<td><input type="text" value="' . esc_attr( wp_unslash( $account['bank_name'] ) ) . '" name="bacs_bank_name[' . esc_attr( $i ) . ']" /></td>
@@ -216,7 +215,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 							var size = jQuery('#bacs_accounts').find('tbody .account').length;
 
 							jQuery('<tr class="account">\
-									<td class="sort"></td>\
+									<td class="sort"><input type="hidden" name="bacs_country_code[' + size + ']" value="" /></td>\
 									<td><input type="text" name="bacs_account_name[' + size + ']" /></td>\
 									<td><input type="text" name="bacs_account_number[' + size + ']" /></td>\
 									<td><input type="text" name="bacs_bank_name[' + size + ']" /></td>\
@@ -252,6 +251,7 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 			$sort_codes      = wc_clean( wp_unslash( $_POST['bacs_sort_code'] ) );
 			$ibans           = wc_clean( wp_unslash( $_POST['bacs_iban'] ) );
 			$bics            = wc_clean( wp_unslash( $_POST['bacs_bic'] ) );
+			$country_codes   = isset( $_POST['bacs_country_code'] ) && is_array( $_POST['bacs_country_code'] ) ? wc_clean( wp_unslash( $_POST['bacs_country_code'] ) ) : array();
 
 			foreach ( $account_names as $i => $name ) {
 				if ( ! isset( $account_names[ $i ] ) ) {
@@ -266,6 +266,9 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 					'iban'           => $ibans[ $i ],
 					'bic'            => $bics[ $i ],
 				);
+				if ( isset( $country_codes[ $i ] ) && is_string( $country_codes[ $i ] ) && preg_match( '/^[A-Z]{2}$/', $country_codes[ $i ] ) ) {
+					$accounts[ count( $accounts ) - 1 ]['country_code'] = $country_codes[ $i ];
+				}
 			}
 		}
 		// phpcs:enable
@@ -499,11 +502,6 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 	 * @return string The settings page URL for the gateway.
 	 */
 	public function get_settings_url() {
-		$experimental_url = wc_get_container()->get( PaymentSettingsScreen::class )->get_url( $this->id );
-		if ( null !== $experimental_url ) {
-			return $experimental_url;
-		}
-
 		$should_use_react_settings_page = $this->is_reactified_settings_page();
 
 		// We must not include both the path and the section query parameter, as this can cause weird behavior.

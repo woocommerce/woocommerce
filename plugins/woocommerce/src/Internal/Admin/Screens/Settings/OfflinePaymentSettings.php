@@ -48,9 +48,9 @@ final class OfflinePaymentSettings {
 		if ( ! Features::is_enabled( 'payment-settings-screen' ) || ! is_object( $config ) || ! is_callable( array( $config, 'merge' ) ) ) {
 			return $config;
 		}
-		$fields = array( 'enabled', 'title', 'description', 'values.instructions', 'values.enable_for_methods', 'values.enable_for_virtual' );
+		$fields = array( 'enabled', 'title', 'description', 'instructions', 'enable_for_methods', 'enable_for_virtual' );
 		if ( 'bacs' === $gateway_id ) {
-			$fields[] = 'values.account_details';
+			$fields[] = 'account_details';
 		}
 		return $config->merge(
 			array(

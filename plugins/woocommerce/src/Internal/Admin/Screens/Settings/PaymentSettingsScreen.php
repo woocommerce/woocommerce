@@ -80,7 +80,7 @@ final class PaymentSettingsScreen {
 	/**
 	 * Whether the screen can be used on this site.
 	 *
-	 * It needs both experimental feature flags and WordPress's View Config API.
+	 * It needs the feature flag and WordPress's View Config API.
 	 *
 	 * @since 11.3.0
 	 *
@@ -88,28 +88,7 @@ final class PaymentSettingsScreen {
 	 */
 	public function is_available(): bool {
 		return Features::is_enabled( self::FEATURE_FLAG )
-			&& Features::is_enabled( 'rest-api-v4' )
 			&& function_exists( 'wp_get_entity_view_config' );
-	}
-
-	/**
-	 * Link a Core offline method to the experimental screen when it is available.
-	 *
-	 * @since 11.3.0
-	 * @param string $gateway_id Core offline gateway ID.
-	 * @return string|null The experimental URL, or null to keep the existing screen.
-	 */
-	public function get_url( string $gateway_id ): ?string {
-		if ( ! in_array( $gateway_id, array( 'bacs', 'cheque', 'cod' ), true ) || ! $this->is_available() ) {
-			return null;
-		}
-		return add_query_arg(
-			array(
-				'page' => self::PAGE_SLUG,
-				'p'    => '/settings/' . $gateway_id,
-			),
-			admin_url( 'admin.php' )
-		);
 	}
 
 	/**
