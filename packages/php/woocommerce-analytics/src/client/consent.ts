@@ -7,6 +7,8 @@ const debug = debugFactory( 'wc-analytics:consent' );
 
 const WP_CONSENT_API_STATISTICS_TYPE = 'statistics' as const;
 
+const WP_CONSENT_API_POLL_INTERVAL = 250;
+
 /**
  * Consent utility functions for WP Consent API integration
  */
@@ -24,12 +26,24 @@ export class ConsentManager {
 	}
 
 	/**
+	 * Check if the site runs the WP Consent API, including while its script has not loaded yet.
+	 */
+	isWpConsentApiActive(): boolean {
+		return this.isWpConsentApiAvailable() || window.wcAnalytics?.consentApiActive === true;
+	}
+
+	/**
 	 * Check if user has consent for analytics/statistics tracking
 	 *
 	 * @return The consent status
 	 */
 	hasAnalyticsConsent(): boolean {
 		if ( ! this.isWpConsentApiAvailable() ) {
+			if ( this.isWpConsentApiActive() ) {
+				debug( 'WP Consent API script not loaded yet, no consent until it is' );
+				return false;
+			}
+
 			debug( 'WP Consent API not available, defaulting to true for backward compatibility' );
 			return true;
 		}
@@ -37,6 +51,27 @@ export class ConsentManager {
 		const hasConsent = window.wp_has_consent!( WP_CONSENT_API_STATISTICS_TYPE );
 		debug( 'Analytics consent status:', hasConsent );
 		return hasConsent;
+	}
+
+	/**
+	 * Run the callback once the WP Consent API script has loaded, which a delay-JS plugin can hold back until interaction.
+	 *
+	 * @param callback - The callback to run.
+	 */
+	waitForConsentApi( callback: () => void ): void {
+		if ( this.isWpConsentApiAvailable() || ! this.isWpConsentApiActive() ) {
+			callback();
+			return;
+		}
+
+		debug( 'Waiting for the WP Consent API script to load' );
+		// The script dispatches no event when it loads.
+		const timer = window.setInterval( () => {
+			if ( this.isWpConsentApiAvailable() ) {
+				window.clearInterval( timer );
+				callback();
+			}
+		}, WP_CONSENT_API_POLL_INTERVAL );
 	}
 
 	/**
@@ -76,7 +111,7 @@ export class ConsentManager {
 	 * Initialize the consent change listener if not already done
 	 */
 	private initializeConsentListener(): void {
-		if ( this.isListenerInitialized || ! this.isWpConsentApiAvailable() ) {
+		if ( this.isListenerInitialized || ! this.isWpConsentApiActive() ) {
 			return;
 		}
 

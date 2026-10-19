@@ -325,6 +325,25 @@ class Universal_Page_Output_Test extends BaseTestCase {
 	}
 
 	/**
+	 * Test that the page output tells the client there is no WP Consent API.
+	 */
+	public function test_page_output_reports_the_consent_api_inactive(): void {
+		$this->assertStringContainsString( 'wcAnalytics.consentApiActive = false;', $this->render_analytics_data() );
+	}
+
+	/**
+	 * Test that the page output tells the client the WP Consent API is active, whether or not its script has loaded.
+	 *
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
+	 */
+	public function test_page_output_reports_the_consent_api_active(): void {
+		require_once __DIR__ . '/mocks/wp-consent-api-functions.php';
+
+		$this->assertStringContainsString( 'wcAnalytics.consentApiActive = true;', $this->render_analytics_data() );
+	}
+
+	/**
 	 * Test that the server-fired pixel path keeps its request-derived
 	 * properties. That path runs on uncached requests and is the only place
 	 * where pixel.wp.com can learn the visitor's real IP, user agent and

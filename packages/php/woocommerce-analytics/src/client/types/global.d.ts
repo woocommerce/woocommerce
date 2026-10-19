@@ -12,6 +12,7 @@ declare global {
 			pages: Record< string, boolean >;
 			breadcrumbs?: string[];
 			assets_url: string;
+			consentApiActive?: boolean;
 		};
 		_wca?: {
 			push: ( props: Record< string, unknown > ) => void;
