@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<ruleset name="WooCommerce themes">
+	<description>Shared WordPress coding standards for WooCommerce themes.</description>
+
+	<exclude-pattern>*/node_modules/*</exclude-pattern>
+	<exclude-pattern>*/vendor/*</exclude-pattern>
+
+	<arg name="extensions" value="php"/>
+	<arg name="tab-width" value="4"/>
+	<arg value="sp"/>
+	<arg name="parallel" value="8"/>
+
+	<rule ref="WordPress"/>
+
+	<!-- Inline PHP inside serialized block markup must keep its exact
+	     placement: reflowing it onto separate lines changes the blocks'
+	     innerHTML and risks block validation in the editor. -->
+	<rule ref="Squiz.PHP.EmbeddedPhp">
+		<exclude-pattern>*/patterns/*</exclude-pattern>
+	</rule>
+
+</ruleset>

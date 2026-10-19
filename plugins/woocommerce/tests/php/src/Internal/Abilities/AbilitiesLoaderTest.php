@@ -10,7 +10,6 @@ namespace Automattic\WooCommerce\Tests\Internal\Abilities;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesCategories;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderAddNote;
-use Automattic\WooCommerce\Internal\Abilities\Domain\ProductCreate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductDelete;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductsQuery;
@@ -40,6 +39,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		'woocommerce/orders-query',
 		'woocommerce/order-update-status',
 		'woocommerce/order-add-note',
+		'woocommerce/order-notes-query',
 	);
 
 	/**
@@ -85,7 +85,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	private $original_cot_state = null;
 
 	/**
-	 * Whether HPOS/COT tables were set up by the current test.
+	 * Whether the current test uses the permanent HPOS/COT tables.
 	 *
 	 * @var bool
 	 */
@@ -98,6 +98,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 */
 	public static function wpSetUpBeforeClass( $factory ): void {
 		self::$administrator_id = $factory->user->create( array( 'role' => 'administrator' ) );
+		self::setup_cot_tables();
 	}
 
 	/**
@@ -110,13 +111,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		foreach ( array( 'init', 'wp_abilities_api_init', 'wp_abilities_api_categories_init' ) as $action ) {
 			$this->original_action_counts[ $action ] = $wp_actions[ $action ] ?? null;
-		}
-
-		if ( ! function_exists( 'wp_register_ability' ) ) {
-			$abilities_bootstrap = WC_ABSPATH . 'vendor/wordpress/abilities-api/includes/bootstrap.php';
-			if ( file_exists( $abilities_bootstrap ) ) {
-				require_once $abilities_bootstrap;
-			}
 		}
 
 		// WordPress 6.9+ requires init to have fired before the Abilities API registry can be initialized.
@@ -249,6 +243,11 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			'woocommerce/order-add-note'      => array(
 				'readonly'    => false,
 				'idempotent'  => false,
+				'destructive' => false,
+			),
+			'woocommerce/order-notes-query'   => array(
+				'readonly'    => true,
+				'idempotent'  => true,
 				'destructive' => false,
 			),
 		);
@@ -399,8 +398,255 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$query_schema  = wp_get_ability( 'woocommerce/orders-query' )->get_input_schema();
 		$update_schema = wp_get_ability( 'woocommerce/order-update-status' )->get_input_schema();
 
-		$this->assertNotContains( 'checkout-draft', $query_schema['properties']['status']['enum'] ?? array() );
+		$this->assertNotContains( 'checkout-draft', $query_schema['properties']['status']['anyOf'][0]['enum'] ?? array() );
 		$this->assertNotContains( 'checkout-draft', $update_schema['properties']['status']['enum'] ?? array() );
+	}
+
+	/**
+	 * @testdox Should list shop_order by default, and not refunds or HPOS placeholders.
+	 */
+	public function test_orders_query_type_defaults_to_shop_order(): void {
+		$schema = wp_get_ability( 'woocommerce/orders-query' )->get_input_schema();
+		$types  = $schema['properties']['type']['enum'] ?? array();
+
+		$this->assertSame( 'shop_order', $schema['properties']['type']['default'] ?? null );
+		$this->assertContains( 'shop_order', $types );
+		$this->assertNotContains( 'shop_order_refund', $types );
+		$this->assertNotContains( 'shop_order_placehold', $types );
+
+		$query_args = $this->capture_order_query_args( array() );
+
+		$this->assertSame( 'shop_order', $query_args['type'] ?? null );
+	}
+
+	/**
+	 * @testdox Should query an order type and status that an extension registers.
+	 */
+	public function test_orders_query_accepts_registered_order_type_and_status(): void {
+		global $wc_order_types, $post_type_meta_caps;
+
+		$meta_caps = $post_type_meta_caps;
+		$this->unregister_domain_abilities();
+		wc_register_order_type(
+			'shop_test_contract',
+			array(
+				'capability_type'          => 'shop_order',
+				'exclude_from_order_views' => true,
+				'add_order_meta_boxes'     => false,
+			)
+		);
+		register_post_status(
+			'wc-test-active',
+			array(
+				'label'               => 'Active',
+				'exclude_from_search' => false,
+			)
+		);
+
+		try {
+			$this->register_domain_abilities();
+
+			$ability = wp_get_ability( 'woocommerce/orders-query' );
+			$input   = $ability->get_input_schema()['properties'];
+			$output  = $ability->get_output_schema()['properties']['orders']['items']['properties'];
+
+			$this->assertContains( 'shop_test_contract', $input['type']['enum'] );
+			$this->assertContains( 'test-active', $input['status']['anyOf'][0]['enum'] );
+			$this->assertContains( 'test-active', $output['status']['enum'] );
+
+			$query_args = $this->capture_order_query_args(
+				array(
+					'type'   => 'shop_test_contract',
+					'status' => 'test-active',
+				)
+			);
+
+			$this->assertSame( 'shop_test_contract', $query_args['type'] ?? null );
+			$this->assertSame( array( 'wc-test-active' ), $query_args['status'] ?? null );
+		} finally {
+			$this->unregister_domain_abilities();
+			unset( $wc_order_types['shop_test_contract'], $GLOBALS['wp_post_statuses']['wc-test-active'] );
+			unregister_post_type( 'shop_test_contract' );
+			$post_type_meta_caps = $meta_caps; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- unregister_post_type() removes the shop_order meta caps too.
+			$this->register_domain_abilities();
+		}
+	}
+
+	/**
+	 * @testdox Should pass the default order statuses without the wc- prefix, as before, for shop_order.
+	 */
+	public function test_orders_query_default_statuses_match_trunk_for_shop_order(): void {
+		$expected = array();
+		foreach ( array_keys( wc_get_order_statuses() ) as $status ) {
+			if ( 'wc-checkout-draft' !== $status ) {
+				$expected[] = OrderUtil::remove_status_prefix( $status );
+			}
+		}
+
+		$query_args = $this->capture_order_query_args( array() );
+
+		$this->assertSame( $expected, $query_args['status'] ?? null );
+	}
+
+	/**
+	 * @testdox Should not accept a status that is excluded from search, but return it in the output.
+	 */
+	public function test_a_status_excluded_from_search_is_not_queryable(): void {
+		global $wc_order_types, $post_type_meta_caps;
+
+		$meta_caps = $post_type_meta_caps;
+		$this->unregister_domain_abilities();
+		wc_register_order_type(
+			'shop_test_contract',
+			array(
+				'capability_type'          => 'shop_order',
+				'exclude_from_order_views' => true,
+				'add_order_meta_boxes'     => false,
+			)
+		);
+		register_post_status(
+			'wc-test-hidden',
+			array(
+				'label'               => 'Hidden',
+				'exclude_from_search' => true,
+			)
+		);
+
+		try {
+			$this->register_domain_abilities();
+
+			$ability = wp_get_ability( 'woocommerce/orders-query' );
+			$input   = $ability->get_input_schema()['properties'];
+			$output  = $ability->get_output_schema()['properties']['orders']['items']['properties'];
+
+			$this->assertNotContains( 'test-hidden', $input['status']['anyOf'][0]['enum'] );
+			$this->assertContains( 'test-hidden', $output['status']['enum'] );
+
+			$query_args = $this->capture_order_query_args( array( 'type' => 'shop_test_contract' ) );
+
+			$this->assertNotContains( 'test-hidden', $query_args['status'] ?? array() );
+			$this->assertNotContains( 'wc-test-hidden', $query_args['status'] ?? array() );
+		} finally {
+			$this->unregister_domain_abilities();
+			unset( $wc_order_types['shop_test_contract'], $GLOBALS['wp_post_statuses']['wc-test-hidden'] );
+			unregister_post_type( 'shop_test_contract' );
+			$post_type_meta_caps = $meta_caps; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- unregister_post_type() removes the shop_order meta caps too.
+			$this->register_domain_abilities();
+		}
+	}
+
+	/**
+	 * @testdox Should accept a list of statuses and reject a list with an unknown status.
+	 */
+	public function test_orders_query_accepts_a_list_of_statuses(): void {
+		$query_args = $this->capture_order_query_args( array( 'status' => array( 'on-hold', 'processing' ) ) );
+
+		$this->assertSame( array( 'on-hold', 'processing' ), $query_args['status'] ?? null );
+
+		$result = wp_get_ability( 'woocommerce/orders-query' )->execute( array( 'status' => array( 'processing', 'not-a-status' ) ) );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'ability_invalid_input', $result->get_error_code() );
+	}
+
+	/**
+	 * @testdox Should refuse a status that another order type registers, and keep the order status.
+	 */
+	public function test_order_update_status_refuses_status_of_another_order_type(): void {
+		$order                     = \WC_Helper_Order::create_order();
+		$this->created_order_ids[] = $order->get_id();
+		$status_before             = $order->get_status();
+
+		$this->unregister_domain_abilities();
+		register_post_status(
+			'wc-test-active',
+			array(
+				'label'               => 'Active',
+				'exclude_from_search' => false,
+			)
+		);
+
+		try {
+			$this->register_domain_abilities();
+
+			$ability = wp_get_ability( 'woocommerce/order-update-status' );
+			$this->assertContains( 'test-active', $ability->get_input_schema()['properties']['status']['enum'] );
+
+			$result = $ability->execute(
+				array(
+					'id'     => $order->get_id(),
+					'status' => 'test-active',
+				)
+			);
+		} finally {
+			$this->unregister_domain_abilities();
+			unset( $GLOBALS['wp_post_statuses']['wc-test-active'] );
+			$this->register_domain_abilities();
+		}
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_order_status_invalid', $result->get_error_code() );
+		$this->assertSame( 400, $result->get_error_data()['status'] ?? null );
+		$this->assertSame( $status_before, wc_get_order( $order->get_id() )->get_status() );
+	}
+
+	/**
+	 * @testdox Should reject an order type that is not registered.
+	 */
+	public function test_orders_query_rejects_unknown_order_type(): void {
+		$result = wp_get_ability( 'woocommerce/orders-query' )->execute( array( 'type' => 'shop_order_refund' ) );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'ability_invalid_input', $result->get_error_code() );
+	}
+
+	/**
+	 * @testdox Should check the permission against the actual type of the order ID.
+	 */
+	public function test_orders_query_refuses_id_of_unsupported_order_type(): void {
+		$order                     = \WC_Helper_Order::create_order();
+		$this->created_order_ids[] = $order->get_id();
+		$refund                    = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 1,
+			)
+		);
+
+		$result = wp_get_ability( 'woocommerce/orders-query' )->execute(
+			array(
+				'id'   => $refund->get_id(),
+				'type' => 'shop_order',
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'ability_invalid_permissions', $result->get_error_code() );
+	}
+
+	/**
+	 * Run the orders query ability and return the arguments of its order query.
+	 *
+	 * @param array $input Ability input.
+	 * @return array
+	 */
+	private function capture_order_query_args( array $input ): array {
+		$captured = null;
+		$capture  = static function ( $args ) use ( &$captured ) {
+			$captured ??= $args;
+			return $args;
+		};
+
+		add_filter( 'woocommerce_order_query_args', $capture );
+		try {
+			$result = wp_get_ability( 'woocommerce/orders-query' )->execute( $input );
+		} finally {
+			remove_filter( 'woocommerce_order_query_args', $capture );
+		}
+
+		$this->assertNotWPError( $result );
+
+		return $captured ?? array();
 	}
 
 	/**
@@ -668,6 +914,12 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				array(
 					'id'   => 1,
 					'note' => 'denied',
+				),
+			),
+			'order-notes-query'   => array(
+				'woocommerce/order-notes-query',
+				array(
+					'id' => 1,
 				),
 			),
 		);
@@ -1038,6 +1290,10 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 					'id'   => -123,
 					'note' => 'Invalid',
 				),
+			),
+			'order-notes-query'   => array(
+				'woocommerce/order-notes-query',
+				array( 'id' => -123 ),
 			),
 		);
 	}
@@ -1417,7 +1673,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should reject invalid grouped product IDs before setting children.
 	 */
 	public function test_product_create_rejects_invalid_grouped_product_ids(): void {
-		$result = ProductCreate::execute(
+		$result = wp_get_ability( 'woocommerce/product-create' )->execute_change(
 			array(
 				'name'               => 'Invalid Grouped Product',
 				'product_type_alias' => 'grouped',
@@ -1433,7 +1689,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should reject fields that are unsupported by the selected product type alias.
 	 */
 	public function test_product_create_rejects_fields_not_supported_by_product_type_alias(): void {
-		$result = ProductCreate::execute(
+		$result = wp_get_ability( 'woocommerce/product-create' )->execute_change(
 			array(
 				'name'               => 'Invalid Grouped Product',
 				'product_type_alias' => 'grouped',
@@ -1846,6 +2102,119 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertSame( $order->get_id(), $result['orders'][0]['id'] );
 		$this->assertNotEmpty( $result['orders'][0]['line_items'] );
 		$this->assertNotEmpty( $result['orders'][0]['currency_symbol'] );
+	}
+
+	/**
+	 * @testdox Should list every note of an order, newest first.
+	 *
+	 * @dataProvider provider_order_storage_engines
+	 *
+	 * @param bool $hpos_enabled Whether HPOS/COT should be enabled for the test.
+	 */
+	public function test_order_notes_query_lists_every_note( bool $hpos_enabled ): void {
+		$this->set_order_storage_for_test( $hpos_enabled );
+
+		$order                     = \WC_Helper_Order::create_order();
+		$this->created_order_ids[] = $order->get_id();
+
+		$newer_note_id = $order->add_order_note( 'Internal note.' );
+		$order->add_order_note( 'Customer note.', true );
+
+		// A note with a higher ID but an older date must sort after the newer one.
+		wp_update_comment(
+			array(
+				'comment_ID'       => $newer_note_id,
+				'comment_date'     => '2030-01-01 00:00:00',
+				'comment_date_gmt' => '2030-01-01 00:00:00',
+			)
+		);
+
+		update_option( 'timezone_string', 'America/Sao_Paulo' );
+
+		$result = wp_get_ability( 'woocommerce/order-notes-query' )->execute( array( 'id' => $order->get_id() ) );
+
+		$this->assertNotWPError( $result );
+
+		$by_content = array_column( $result['notes'], 'customer_note', 'note' );
+		$this->assertTrue( $by_content['Customer note.'] );
+		$this->assertFalse( $by_content['Internal note.'] );
+
+		$dates_by_content = array_column( $result['notes'], 'date_created', 'note' );
+		$this->assertSame( '2029-12-31T21:00:00-03:00', $dates_by_content['Internal note.'] );
+
+		$this->assertContainsOnly( 'int', array_column( $result['notes'], 'id' ) );
+		$this->assertSame( $newer_note_id, $result['notes'][0]['id'], 'Notes should be newest first by creation date.' );
+	}
+
+	/**
+	 * @testdox Should return a not-found error when order-notes-query receives an unknown order ID.
+	 */
+	public function test_order_notes_query_returns_not_found_for_unknown_id(): void {
+		$result = wp_get_ability( 'woocommerce/order-notes-query' )->execute( array( 'id' => 999999 ) );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_order_not_found', $result->get_error_code() );
+	}
+
+	/**
+	 * @testdox Should check the order-notes-query permission against the actual type of the order ID.
+	 */
+	public function test_order_notes_query_refuses_id_of_unsupported_order_type(): void {
+		$order                     = \WC_Helper_Order::create_order();
+		$this->created_order_ids[] = $order->get_id();
+		$refund                    = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 1,
+			)
+		);
+
+		$result = wp_get_ability( 'woocommerce/order-notes-query' )->execute( array( 'id' => $refund->get_id() ) );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'ability_invalid_permissions', $result->get_error_code() );
+	}
+
+	/**
+	 * @testdox Should check the order-notes-query permission against the capabilities of an order type that an extension registers.
+	 */
+	public function test_order_notes_query_uses_the_capabilities_of_the_order_type(): void {
+		global $wc_order_types, $post_type_meta_caps, $wpdb;
+
+		$meta_caps = $post_type_meta_caps;
+		wc_register_order_type(
+			'shop_test_private',
+			array(
+				'capability_type'          => 'shop_test_private',
+				'exclude_from_order_views' => true,
+				'add_order_meta_boxes'     => false,
+			)
+		);
+		$order                     = \WC_Helper_Order::create_order();
+		$this->created_order_ids[] = $order->get_id();
+		$wpdb->update( $wpdb->posts, array( 'post_type' => 'shop_test_private' ), array( 'ID' => $order->get_id() ) );
+		$wpdb->update( OrdersTableDataStore::get_orders_table_name(), array( 'type' => 'shop_test_private' ), array( 'id' => $order->get_id() ) );
+		clean_post_cache( $order->get_id() );
+		wp_cache_flush();
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'shop_manager' ) ) );
+		$ability = wp_get_ability( 'woocommerce/order-notes-query' );
+
+		try {
+			$this->assertSame( 'shop_test_private', OrderUtil::get_order_type( $order->get_id() ) );
+
+			$refused = $ability->execute( array( 'id' => $order->get_id() ) );
+
+			$this->assertWPError( $refused );
+			$this->assertSame( 'ability_invalid_permissions', $refused->get_error_code() );
+
+			wp_get_current_user()->add_cap( 'read_private_shop_test_privates' );
+
+			$this->assertIsArray( $ability->execute( array( 'id' => $order->get_id() ) ) );
+		} finally {
+			unset( $wc_order_types['shop_test_private'] );
+			unregister_post_type( 'shop_test_private' );
+			$post_type_meta_caps = $meta_caps; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- unregister_post_type() removes the shop_order meta caps too.
+		}
 	}
 
 	/**
@@ -2396,9 +2765,10 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		}
 
 		if ( $hpos_enabled && ! $this->cot_setup_for_test ) {
-			$this->setup_cot();
+			// Keep the permanent HPOS tables outside the per-test transaction.
+			remove_filter( 'query', array( $this, '_create_temporary_tables' ) );
+			remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
 			$this->cot_setup_for_test = true;
-			return;
 		}
 
 		$this->toggle_cot_feature_and_usage( $hpos_enabled );
