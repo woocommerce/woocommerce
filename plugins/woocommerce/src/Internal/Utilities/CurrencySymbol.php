@@ -46,8 +46,9 @@ class CurrencySymbol {
 
 		$placeholder_length = strlen( '%1$s' );
 		$between            = (string) substr( $format, min( $symbol_pos, $amount_pos ) + $placeholder_length, abs( $amount_pos - $symbol_pos ) - $placeholder_length );
-		$visible            = html_entity_decode( (string) preg_replace( '/<[^>]*>/', '', $between ), ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5 );
-		$has_space          = 1 === preg_match( '/[\s\p{Zs}]/u', $visible );
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.strip_tags_strip_tags -- wp_strip_all_tags() trims, which would drop a plain-space separator.
+		$visible   = html_entity_decode( strip_tags( $between ), ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5 );
+		$has_space = 1 === preg_match( '/[\s\p{Zs}]/u', $visible );
 
 		if ( $symbol_pos < $amount_pos ) {
 			return $has_space ? CurrencyPosition::LEFT_SPACE : CurrencyPosition::LEFT;
