@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Update bundled WordPress admin-ui and interface dependencies; no merchant-facing change.
+
