@@ -29,7 +29,8 @@ class CurrencySymbol {
 	/**
 	 * Get the currency symbol position, as one of the CurrencyPosition values.
 	 *
-	 * Any text between the symbol and the amount in the price format is treated as a space.
+	 * Only visible whitespace between the symbol and the amount in the price format counts as a space,
+	 * so markup is ignored and entities such as `&nbsp;` are decoded first.
 	 * Falls back to the option when the format is missing either placeholder.
 	 *
 	 * @return string
@@ -43,8 +44,10 @@ class CurrencySymbol {
 			return (string) get_option( 'woocommerce_currency_pos' );
 		}
 
-		// Placeholders are adjacent when they are exactly one placeholder length apart.
-		$has_space = abs( $amount_pos - $symbol_pos ) > strlen( '%1$s' );
+		$placeholder_length = strlen( '%1$s' );
+		$between            = (string) substr( $format, min( $symbol_pos, $amount_pos ) + $placeholder_length, abs( $amount_pos - $symbol_pos ) - $placeholder_length );
+		$visible            = html_entity_decode( (string) preg_replace( '/<[^>]*>/', '', $between ), ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML5 );
+		$has_space          = 1 === preg_match( '/[\s\p{Zs}]/u', $visible );
 
 		if ( $symbol_pos < $amount_pos ) {
 			return $has_space ? CurrencyPosition::LEFT_SPACE : CurrencyPosition::LEFT;
