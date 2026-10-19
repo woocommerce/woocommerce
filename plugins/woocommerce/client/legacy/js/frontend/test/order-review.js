@@ -338,7 +338,43 @@ describe( 'Review Order frontend behavior', () => {
 		expect( status.textContent ).toBe( '' );
 		expect( error ).not.toBeNull();
 		expect( error.textContent ).toBe( '' );
+		// The error text is deliberately not announced on its own, so the
+		// paragraph must carry no role at all.
+		expect( error.hasAttribute( 'role' ) ).toBe( false );
 	} );
+
+	test.each( [
+		[ 'no role', '', 'status' ],
+		// An empty token list leaves the element without a role.
+		[ 'an empty role', ' role=""', 'status' ],
+		[ 'a blank role', ' role=" "', 'status' ],
+		[ 'the shipped role', ' role="status"', 'status' ],
+		[ 'its own role', ' role="alert"', 'alert' ],
+	] )(
+		'announces an override status paragraph that ships with %s',
+		( label, roleAttr, expected ) => {
+			document.body.innerHTML = `
+				<form class="woocommerce-review-order__form" method="post" action="https://example.test/wp-admin/admin-ajax.php">
+					<div class="woocommerce-review-order__item" data-row-index="0" data-initial-rating="0" data-initial-text="">
+						<div class="woocommerce-star-rating">
+							<input class="woocommerce-star-rating__input" name="rating" type="radio" value="5" data-label="Perfect" />
+						</div>
+						<p class="woocommerce-review-order__item-status"${ roleAttr }></p>
+					</div>
+					<button class="woocommerce-review-order__submit" type="submit">Submit</button>
+				</form>
+			`;
+
+			initializeReviewOrder();
+
+			const regions = document.querySelectorAll(
+				'.woocommerce-review-order__item-status'
+			);
+			// Reused, not duplicated beside the override's own.
+			expect( regions ).toHaveLength( 1 );
+			expect( regions[ 0 ].getAttribute( 'role' ) ).toBe( expected );
+		}
+	);
 
 	test( 'explains a gated submit with a hint the button points at', () => {
 		window.wcOrderReview = {

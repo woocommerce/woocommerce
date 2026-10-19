@@ -49,6 +49,14 @@
 		// would miss it and add another on every call.
 		var region = row.querySelector( '.' + className );
 		if ( region ) {
+			// An override may render the paragraph without the role. Only
+			// when it has none, so a deliberate `role="alert"` survives;
+			// `role=""` counts as none, since an empty token list leaves the
+			// element without a role.
+			var existingRole = ( region.getAttribute( 'role' ) || '' ).trim();
+			if ( role && ! existingRole ) {
+				region.setAttribute( 'role', role );
+			}
 			return region;
 		}
 
