@@ -1,3 +1,5 @@
+import fs from 'node:fs/promises';
+import path from 'node:path';
 import { runThemeCheck } from './theme-check.mjs';
 import {
 	discoverThemes,
@@ -5,6 +7,40 @@ import {
 	isMain,
 	runCommand,
 } from './theme-utils.mjs';
+
+export async function checkThemeVersion( directory ) {
+	const [ stylesheet, manifest, readme ] = await Promise.all(
+		[ 'style.css', 'package.json', 'readme.txt' ].map( ( file ) =>
+			fs.readFile( path.join( directory, file ), 'utf8' )
+		)
+	);
+	const versions = {
+		'style.css': stylesheet
+			.match( /^[ \t/*#@]*Version:[ \t]*([^\r\n]*)/im )?.[ 1 ]
+			.trim(),
+		'package.json': JSON.parse( manifest ).version,
+		'readme.txt': readme
+			.match( /^[ \t]*Stable tag:[ \t]*([^\r\n]*)/im )?.[ 1 ]
+			.trim(),
+	};
+	const values = Object.values( versions );
+	if (
+		values.some(
+			( version ) => typeof version !== 'string' || ! version
+		) ||
+		new Set( values ).size !== 1
+	) {
+		const details = Object.entries( versions )
+			.map(
+				( [ file, version ] ) =>
+					`${ file }: ${ version || '(missing)' }`
+			)
+			.join( ', ' );
+		throw new Error(
+			`Theme versions must be present and match. ${ details }.`
+		);
+	}
+}
 
 /**
  * Lint a theme's JavaScript, CSS, Markdown, and PHP, then run WordPress Theme Check
@@ -14,6 +50,7 @@ import {
 export async function validateTheme( slug, fix = false ) {
 	process.stdout.write( `Validating ${ slug }\n` );
 	const directory = await getThemeDirectory( slug );
+	await checkThemeVersion( directory );
 	const checks = [
 		[ 'lint-js', '.', '--no-error-on-unmatched-pattern' ],
 		[ 'lint-style' ],
