@@ -306,7 +306,7 @@ describe( 'Review Order frontend behavior', () => {
 	} );
 
 	test( 'registers both row regions up front for an override that drops them', () => {
-		// A row template copied before the paragraphs shipped.
+		// A row template override that renders neither paragraph.
 		document.body.innerHTML = `
 			<form class="woocommerce-review-order__form" method="post" action="https://example.test/wp-admin/admin-ajax.php">
 				<div class="woocommerce-review-order__item" data-row-index="0" data-initial-rating="0" data-initial-text="">

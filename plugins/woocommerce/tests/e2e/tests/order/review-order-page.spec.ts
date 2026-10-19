@@ -694,9 +694,7 @@ test.describe(
 				expect( await checkedValue() ).toBe( '1' );
 
 				// A selection fills up to it and no further, and hovering a
-				// higher star must add no fill the customer did not pick: the
-				// old preview filled the hovered star, so a 4-star selection
-				// read as 5 with the pointer on star 5.
+				// higher star must add no fill the customer did not pick.
 				await rateRow( row, 4 );
 				for ( const stars of [ 1, 2, 3, 4 ] ) {
 					await expectFilled( stars );

@@ -402,8 +402,7 @@
 		);
 
 		// Up front, because a live region created in the same step that fills
-		// it is not announced, and an override copied before the templates
-		// rendered these has neither.
+		// it is not announced, and an override may render neither paragraph.
 		rows.forEach( function ( row ) {
 			rowRegion( row, ERROR_CLASS, null );
 			rowRegion( row, STATUS_CLASS, 'status' );
