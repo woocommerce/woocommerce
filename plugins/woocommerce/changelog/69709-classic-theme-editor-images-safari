@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop images from disappearing in the block editor on Safari for sites using a classic theme.
