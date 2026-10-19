@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep the heading alignment set in the email editor in sent block emails, instead of forcing headings to the left.
