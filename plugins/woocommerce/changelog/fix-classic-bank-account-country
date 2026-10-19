@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Preserve bank account countries when saving direct bank transfer settings in the classic editor.

@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add v3 REST API support for editing offline payment instructions, restrictions and bank accounts.
