@@ -1,10 +1,7 @@
 <?php
-declare( strict_types = 1 );
-
 namespace Automattic\WooCommerce\Blocks\Templates;
 
 use Automattic\WooCommerce\Blocks\Templates\ArchiveProductTemplatesCompatibility;
-use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 
 /**
  * ProductCatalogTemplate class.
