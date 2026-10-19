@@ -18,6 +18,11 @@ test.use( { storageState: ADMIN_STATE_PATH } );
 const isOrderFormPost = ( request: Request ) =>
 	request.method() === 'POST' && request.resourceType() === 'document';
 
+// The order form saves to admin.php with HPOS and post.php with posts storage.
+const isOrderSaveUrl = ( url: URL ) =>
+	url.pathname.endsWith( '/wp-admin/admin.php' ) ||
+	url.pathname.endsWith( '/wp-admin/post.php' );
+
 test.describe( 'Edit order', { tag: [ tags.SERVICES, tags.HPOS ] }, () => {
 	let orderId: number,
 		secondOrderId: number,
@@ -228,19 +233,15 @@ test.describe( 'Edit order', { tag: [ tags.SERVICES, tags.HPOS ] }, () => {
 			.locator( 'select[name="wc_order_action"]' )
 			.selectOption( 'send_order_details' );
 
-		// Hold the save request (admin.php for HPOS, post.php for posts storage) so the second click
-		// lands on the same page, like a double-click on a slow site.
+		// Hold the save request so the second click lands on the same page, like a double-click on a slow site.
 		let releaseSave = () => {};
 		const saveReleased = new Promise< void >( ( resolve ) => {
 			releaseSave = resolve;
 		} );
-		await page.route(
-			( url ) => /\/wp-admin\/(admin|post)\.php$/.test( url.pathname ),
-			async ( route ) => {
-				await saveReleased;
-				await route.continue().catch( () => undefined );
-			}
-		);
+		await page.route( isOrderSaveUrl, async ( route ) => {
+			await saveReleased;
+			await route.continue().catch( () => undefined );
+		} );
 
 		// Mouse clicks don't wait for the pending navigation, unlike locator clicks.
 		const updateButton = ( await page
