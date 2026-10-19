@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Utilities;
 
+use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\StoreApi\Utilities\ProductQueryFilters;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 
@@ -188,26 +189,105 @@ class ProductQueryFiltersTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should count safely when a custom status key contains a quote.
+	 * @testdox Should count products with custom status keys containing SQL-sensitive characters.
+	 * @testWith ["custom'quoted"]
+	 *           ["custom%s"]
+	 * @param string $status Custom stock status key.
 	 */
-	public function test_quoted_stock_status_option(): void {
+	public function test_custom_stock_status_option( string $status ): void {
 		global $wpdb;
 
-		$status  = "custom'quoted";
 		$options = static function ( $statuses ) use ( $status ) {
-			$statuses[ $status ] = 'Quoted custom status';
+			$statuses[ $status ] = 'Custom stock status';
 			return $statuses;
 		};
 		add_filter( 'woocommerce_product_stock_status_options', $options, 20 );
 		try {
+			( new FixtureData() )->get_simple_product(
+				array(
+					'name'          => 'Custom stock product',
+					'stock_status'  => $status,
+					'regular_price' => 10,
+				)
+			);
 			$result = ( new ProductQueryFilters() )->get_stock_status_counts( new \WP_REST_Request( 'GET', '/wc/store/v1/products' ) );
 		} finally {
 			remove_filter( 'woocommerce_product_stock_status_options', $options, 20 );
 		}
 
-		$this->assertSame( '', $wpdb->last_error, 'A quote in a status key must not break the count statement.' );
+		$this->assertSame( '', $wpdb->last_error, 'Custom status keys must not break the count statement.' );
+		$this->assertArrayHasKey( $status, $result );
+		$this->assertSame( '1', $result[ $status ] );
 		$this->assertSame( '1', $result['custom1'] );
 		$this->assertSame( '2', $result['custom2'] );
 		$this->assertCount( 6, $result, 'Every status from the filter should be present in the result.' );
+	}
+
+	/**
+	 * @testdox Should preserve literal percent signs in product searches when counting stock statuses.
+	 */
+	public function test_stock_counts_with_percent_in_search(): void {
+		$this->products[0]->set_name( 'Discount 50%s' );
+		$this->products[0]->save();
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$request->set_param( 'search', '50%s' );
+
+		$result = ( new ProductQueryFilters() )->get_stock_status_counts( $request );
+
+		$this->assertSame( '1', $result['custom1'] );
+		$this->assertSame( '0', $result['custom2'] );
+	}
+
+	/**
+	 * @testdox Should count only visible out-of-stock products while retaining their status key.
+	 * @testWith ["yes", "0"]
+	 *           ["no", "1"]
+	 * @param string $hide_out_of_stock Whether out-of-stock products are hidden.
+	 * @param string $expected_count Expected out-of-stock count.
+	 */
+	public function test_stock_counts_with_out_of_stock_visibility( string $hide_out_of_stock, string $expected_count ): void {
+		update_option( 'woocommerce_hide_out_of_stock_items', $hide_out_of_stock );
+		( new FixtureData() )->get_simple_product(
+			array(
+				'name'          => 'Out of stock product',
+				'stock_status'  => ProductStockStatus::OUT_OF_STOCK,
+				'regular_price' => 10,
+			)
+		);
+
+		$result = ( new ProductQueryFilters() )->get_stock_status_counts( new \WP_REST_Request( 'GET', '/wc/store/v1/products' ) );
+
+		$this->assertArrayHasKey( ProductStockStatus::OUT_OF_STOCK, $result );
+		$this->assertSame( $expected_count, $result[ ProductStockStatus::OUT_OF_STOCK ] );
+		$this->assertSame( '1', $result['custom1'] );
+		$this->assertSame( '2', $result['custom2'] );
+	}
+
+	/**
+	 * @testdox Should return string zero counts without warnings when the count query fails.
+	 */
+	public function test_stock_counts_when_query_fails(): void {
+		global $wpdb;
+
+		$fail_count_query = static function ( $sql ) {
+			if ( false !== strpos( $sql, "meta_key = '_stock_status'" ) ) {
+				return 'SELECT missing_stock_status_column';
+			}
+			return $sql;
+		};
+		$suppress_errors  = $wpdb->suppress_errors( true );
+		add_filter( 'query', $fail_count_query );
+		try {
+			$result = ( new ProductQueryFilters() )->get_stock_status_counts( new \WP_REST_Request( 'GET', '/wc/store/v1/products' ) );
+			$this->assertNotEmpty( $wpdb->last_error, 'The count query must fail to exercise the fallback.' );
+		} finally {
+			remove_filter( 'query', $fail_count_query );
+			$wpdb->suppress_errors( $suppress_errors );
+		}
+
+		$this->assertCount( 5, $result );
+		foreach ( $result as $count ) {
+			$this->assertSame( '0', $count );
+		}
 	}
 }

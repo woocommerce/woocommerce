@@ -1,7 +1,6 @@
 <?php
 namespace Automattic\WooCommerce\StoreApi\Utilities;
 
-use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\StoreApi\Utilities\ProductQuery;
 
 /**
@@ -53,12 +52,8 @@ class ProductQueryFilters {
 	 */
 	public function get_stock_status_counts( $request ) {
 		global $wpdb;
-		$product_query         = new ProductQuery();
-		$stock_status_options  = array_map( 'esc_sql', array_keys( wc_get_product_stock_status_options() ) );
-		$hide_outofstock_items = get_option( 'woocommerce_hide_out_of_stock_items' );
-		if ( 'yes' === $hide_outofstock_items ) {
-			unset( $stock_status_options[ ProductStockStatus::OUT_OF_STOCK ] );
-		}
+		$product_query        = new ProductQuery();
+		$stock_status_options = array_keys( wc_get_product_stock_status_options() );
 		if ( empty( $stock_status_options ) ) {
 			return array();
 		}
@@ -81,9 +76,12 @@ class ProductQueryFilters {
 		$selects             = array();
 		$statuses            = array();
 		foreach ( $stock_status_options as $index => $status ) {
-			$escaped_status = esc_sql( $status );
-			$selects[]      = "COUNT( DISTINCT CASE WHEN postmeta.meta_value = '{$escaped_status}' THEN posts.ID END ) as status_{$index}";
-			$statuses[]     = "'{$escaped_status}'";
+			$selects[]  = $wpdb->prepare(
+				'COUNT( DISTINCT CASE WHEN postmeta.meta_value = %s THEN posts.ID END ) as status_%d',
+				$status,
+				$index
+			);
+			$statuses[] = $wpdb->prepare( '%s', $status );
 		}
 
 		$stock_status_count_sql = '
@@ -96,7 +94,7 @@ class ProductQueryFilters {
 		";
 		$result = $wpdb->get_row( $stock_status_count_sql ); // phpcs:ignore
 		foreach ( $stock_status_options as $index => $status ) {
-			$stock_status_counts[ $status ] = $result->{"status_{$index}"};
+			$stock_status_counts[ $status ] = $result->{"status_{$index}"} ?? '0';
 		}
 
 		return $stock_status_counts;
