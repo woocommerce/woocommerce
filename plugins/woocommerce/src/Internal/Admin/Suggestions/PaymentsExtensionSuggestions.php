@@ -4258,7 +4258,7 @@ class PaymentsExtensionSuggestions {
 			),
 			self::EVERGREEN         => array(
 				'_type'  => self::TYPE_PSP,
-				// Evergreen does not have an icon on .org. Will be default for now.
+				'icon'   => plugins_url( 'assets/images/onboarding/icons/evergreen.svg', WC_PLUGIN_FILE ),
 				'plugin' => array(
 					'_type' => self::PLUGIN_TYPE_WPORG,
 					'slug'  => 'evergreen-payments-northwest-gateway-wc',

@@ -12,8 +12,8 @@ import { setupServer } from 'msw/node';
 import { initializeEditor } from '../../../../../tests/integration/helpers/integration-test-editor';
 import { textContentMatcher } from '../../../../../tests/utils/find-by-text';
 import '../';
-import '../../../atomic/blocks/product-elements/price';
-import '../../../atomic/blocks/product-elements/summary';
+import '../../product-elements-blocks/price';
+import '../../product-elements-blocks/summary';
 
 const mockProduct = {
 	id: 82,

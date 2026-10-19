@@ -5,20 +5,18 @@
  * @package WooCommerce\Tests\Functions.
  */
 
-use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
-use Automattic\WooCommerce\Caches\OrderCache;
-use Automattic\WooCommerce\Utilities\OrderUtil;
-use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
-use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
-use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
+use Automattic\WooCommerce\Admin\API\Reports\Orders\DataStore as OrdersDataStore;
+use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
 use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\Notes\Notes;
 use Automattic\WooCommerce\Blocks\InboxNotifications;
 use Automattic\WooCommerce\Blocks\Options as BlockOptions;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
+use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\VariationGallery\Package as VariationGalleryPackage;
 
@@ -28,29 +26,9 @@ use Automattic\WooCommerce\Internal\VariationGallery\Package as VariationGallery
 class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 
 	/**
-	 * Whether HPOS was authoritative before the test.
-	 *
-	 * @var bool
-	 */
-	private $previous_hpos_state;
-
-	/**
-	 * Set up test fixtures.
-	 */
-	public function setUp(): void {
-		parent::setUp();
-		// Tests that migrate orders leave the two storages out of sync, which would otherwise block restoring the storage setting.
-		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
-		$this->previous_hpos_state = OrderUtil::custom_orders_table_usage_is_enabled();
-		OrderHelper::create_order_custom_table_if_not_exist();
-	}
-
-	/**
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
-		OrderHelper::toggle_cot_feature_and_usage( $this->previous_hpos_state );
-		remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 		Constants::clear_single_constant( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' );
 		delete_option( 'woocommerce_feature_customer_stock_notifications_enabled' );
 		parent::tearDown();
@@ -58,6 +36,8 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test wc_update_343_cleanup_foreign_keys() function.
+	 *
+	 * @ddlInTransaction The update callback under test drops foreign keys.
 	 */
 	public function test_verify_wc_update_343_cleanup_foreign_keys_removes_foreign_keys() {
 		global $wpdb;
@@ -87,6 +67,8 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test wc_update_352_drop_download_log_fk() function.
+	 *
+	 * @ddlInTransaction The update callback under test drops foreign keys.
 	 */
 	public function test_verify_wc_update_352_drop_download_log_fk_removes_foreign_keys() {
 		global $wpdb;
@@ -112,6 +94,8 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test wc_update_700_remove_download_log_fk() function.
+	 *
+	 * @ddlInTransaction The update callback under test drops foreign keys.
 	 */
 	public function test_verify_wc_update_700_remove_download_log_fk_removes_foreign_keys() {
 		global $wpdb;
@@ -658,6 +642,304 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Migration deletes the lookup rows of unpublished variations and keeps every other row.
+	 *
+	 * @testWith ["private"]
+	 *           ["draft"]
+	 *           ["pending"]
+	 *           ["trash"]
+	 *
+	 * @param string $status The status of the variation that is not published.
+	 */
+	public function test_wc_update_1130_delete_unpublished_variation_lookup_rows( string $status ): void {
+		global $wpdb;
+
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		$product       = WC_Helper_Product::create_variation_product();
+		$variation_ids = $product->get_children();
+		$this->assertGreaterThanOrEqual( 2, count( $variation_ids ) );
+
+		$unpublished_variation = wc_get_product( $variation_ids[0] );
+		$unpublished_variation->set_status( $status );
+		$unpublished_variation->save();
+
+		$lookup_table = $wpdb->prefix . 'wc_product_attributes_lookup';
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$wpdb->query( "DELETE FROM {$lookup_table}" );
+		$rows = array(
+			array( $product->get_id(), 0 ),
+			array( $variation_ids[0], 1 ),
+			array( $variation_ids[1], 1 ),
+		);
+		foreach ( $rows as list( $product_id, $is_variation_attribute ) ) {
+			$wpdb->insert(
+				$lookup_table,
+				array(
+					'product_id'             => $product_id,
+					'product_or_parent_id'   => $product->get_id(),
+					'taxonomy'               => 'pa_size',
+					'term_id'                => 1,
+					'is_variation_attribute' => $is_variation_attribute,
+					'in_stock'               => 1,
+				),
+				array( '%d', '%d', '%s', '%d', '%d', '%d' )
+			);
+		}
+
+		// Saving the variation queued its own invalidation, flush it so that only the migration's is observed.
+		WC_Cache_Helper::delete_transients_on_shutdown();
+		$counts_transient = 'wc_layered_nav_counts_pa_size';
+		set_transient( $counts_transient, array( 'query_hash' => array( 1 => 2 ) ) );
+
+		$batches = 0;
+		while ( wc_update_1130_delete_unpublished_variation_lookup_rows() ) {
+			++$batches;
+			$this->assertLessThan( 10, $batches, 'The migration reschedules itself until every batch is done.' );
+		}
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$remaining = array_map( 'intval', $wpdb->get_col( "SELECT product_id FROM {$lookup_table}" ) );
+		$this->assertEqualsCanonicalizing( array( $product->get_id(), $variation_ids[1] ), $remaining );
+
+		WC_Cache_Helper::delete_transients_on_shutdown();
+		$this->assertFalse( get_transient( $counts_transient ), 'The layered nav counts cached from the deleted rows are invalidated.' );
+
+		$this->assertFalse(
+			get_option( 'woocommerce_update_1130_last_unpublished_variation_id' ),
+			'The batch cursor is cleaned up once the migration is done.'
+		);
+	}
+
+	/**
+	 * @testdox Migration keeps the rows of a variation that was published after its batch was selected.
+	 */
+	public function test_wc_update_1130_delete_unpublished_variation_lookup_rows_rechecks_the_status_at_delete_time(): void {
+		global $wpdb;
+
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		$product      = WC_Helper_Product::create_variation_product();
+		$variation_id = $product->get_children()[0];
+		$variation    = wc_get_product( $variation_id );
+		$variation->set_status( ProductStatus::PRIVATE );
+		$variation->save();
+
+		$lookup_table = $wpdb->prefix . 'wc_product_attributes_lookup';
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$wpdb->query( "DELETE FROM {$lookup_table}" );
+		$wpdb->insert(
+			$lookup_table,
+			array(
+				'product_id'             => $variation_id,
+				'product_or_parent_id'   => $product->get_id(),
+				'taxonomy'               => 'pa_size',
+				'term_id'                => 1,
+				'is_variation_attribute' => 1,
+				'in_stock'               => 1,
+			),
+			array( '%d', '%d', '%s', '%d', '%d', '%d' )
+		);
+
+		// With direct updates on, a save that re-enables the variation writes its rows back between the batch
+		// SELECT and the DELETE. Publishing it the moment the DELETE is issued reproduces that ordering.
+		$republished = false;
+		add_filter(
+			'query',
+			function ( $query ) use ( &$republished, $lookup_table, $variation_id ) {
+				if ( ! $republished && str_starts_with( ltrim( $query ), 'DELETE' ) && str_contains( $query, $lookup_table ) ) {
+					$republished = true;
+					global $wpdb;
+					$wpdb->update( $wpdb->posts, array( 'post_status' => ProductStatus::PUBLISH ), array( 'ID' => $variation_id ) );
+				}
+				return $query;
+			}
+		);
+
+		while ( wc_update_1130_delete_unpublished_variation_lookup_rows() ) {
+			continue;
+		}
+
+		$this->assertTrue( $republished, 'The variation is published while the batch DELETE is issued.' );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$remaining = array_map( 'intval', $wpdb->get_col( "SELECT product_id FROM {$lookup_table}" ) );
+		$this->assertSame( array( $variation_id ), $remaining, 'The rows of a variation published since its batch was selected are kept.' );
+	}
+
+	/**
+	 * @testdox Migration handles unpublished variations 250 at a time and resumes after the last one it handled.
+	 */
+	public function test_wc_update_1130_delete_unpublished_variation_lookup_rows_in_batches(): void {
+		global $wpdb;
+
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		$lookup_table = $wpdb->prefix . 'wc_product_attributes_lookup';
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$wpdb->query( "DELETE FROM {$lookup_table}" );
+
+		$insert_post = function ( string $post_type, string $status, int $parent_id = 0 ) use ( $wpdb ): int {
+			$wpdb->insert(
+				$wpdb->posts,
+				array(
+					'post_type'   => $post_type,
+					'post_status' => $status,
+					'post_parent' => $parent_id,
+				),
+				array( '%s', '%s', '%d' )
+			);
+			return (int) $wpdb->insert_id;
+		};
+
+		$parent_id       = $insert_post( 'product', ProductStatus::PUBLISH );
+		$unpublished_ids = array();
+		$published_id    = 0;
+		for ( $i = 0; $i < 251; $i++ ) {
+			// A published variation inside the first batch's id range must keep its rows.
+			if ( 125 === $i ) {
+				$published_id = $insert_post( 'product_variation', ProductStatus::PUBLISH, $parent_id );
+			}
+			$unpublished_ids[] = $insert_post( 'product_variation', ProductStatus::PRIVATE, $parent_id );
+		}
+
+		foreach ( array_merge( $unpublished_ids, array( $published_id ) ) as $variation_id ) {
+			$wpdb->insert(
+				$lookup_table,
+				array(
+					'product_id'             => $variation_id,
+					'product_or_parent_id'   => $parent_id,
+					'taxonomy'               => 'pa_size',
+					'term_id'                => 1,
+					'is_variation_attribute' => 1,
+					'in_stock'               => 1,
+				),
+				array( '%d', '%d', '%s', '%d', '%d', '%d' )
+			);
+		}
+
+		$this->assertSame(
+			'251',
+			$wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type = 'product_variation' AND post_status != 'publish'" ),
+			'Only the seeded variations are unpublished, so the batch boundaries are the ones asserted below.'
+		);
+
+		$remaining = function () use ( $wpdb, $lookup_table ): array {
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			return array_map( 'intval', $wpdb->get_col( "SELECT product_id FROM {$lookup_table} ORDER BY product_id" ) );
+		};
+
+		$this->assertTrue( wc_update_1130_delete_unpublished_variation_lookup_rows(), 'The first batch leaves work for another run.' );
+		$this->assertSame( array( $published_id, $unpublished_ids[250] ), $remaining(), 'The first batch handles the 250 lowest unpublished ids and skips the published one among them.' );
+
+		$this->assertTrue( wc_update_1130_delete_unpublished_variation_lookup_rows(), 'The second batch resumes after the last id of the first one.' );
+		$this->assertSame( array( $published_id ), $remaining(), 'The second batch handles the remaining unpublished variation.' );
+
+		$this->assertFalse( wc_update_1130_delete_unpublished_variation_lookup_rows(), 'An empty batch ends the migration.' );
+		$this->assertFalse( get_option( 'woocommerce_update_1130_last_unpublished_variation_id' ), 'The batch cursor is cleaned up once the migration is done.' );
+	}
+
+	/**
+	 * @testdox Migration keeps going when another run has already saved the same or a later cursor.
+	 *
+	 * @testWith [0]
+	 *           [1000]
+	 *
+	 * @param int $ahead How far past this batch the other run has already moved the cursor.
+	 */
+	public function test_wc_update_1130_delete_unpublished_variation_lookup_rows_accepts_a_concurrent_cursor( int $ahead ): void {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		$variation_id = $this->create_private_variation_with_lookup_row();
+		$option       = 'woocommerce_update_1130_last_unpublished_variation_id';
+		$lookup_table = $GLOBALS['wpdb']->prefix . 'wc_product_attributes_lookup';
+		// The other run saves its cursor while this one is deleting the same batch. It is another process, so it writes the
+		// row without going through this process's option cache, which still holds the option as missing.
+		add_filter(
+			'query',
+			function ( $query ) use ( $option, $variation_id, $ahead, $lookup_table ) {
+				global $wpdb;
+				if ( str_starts_with( ltrim( $query ), 'DELETE' ) && str_contains( $query, $lookup_table ) ) {
+					$wpdb->query(
+						$wpdb->prepare(
+							"INSERT INTO {$wpdb->options} ( option_name, option_value, autoload ) VALUES ( %s, %d, 'off' )",
+							$option,
+							$variation_id + $ahead
+						)
+					);
+				}
+				return $query;
+			}
+		);
+
+		$this->assertTrue( wc_update_1130_delete_unpublished_variation_lookup_rows(), 'A cursor saved by another run is progress, not a failure.' );
+		$this->assertGreaterThanOrEqual( $variation_id, (int) get_option( $option ), 'The saved cursor covers this batch.' );
+	}
+
+	/**
+	 * @testdox Migration stops instead of reselecting the same batch when its cursor can't be saved.
+	 */
+	public function test_wc_update_1130_delete_unpublished_variation_lookup_rows_stops_when_the_cursor_cannot_be_saved(): void {
+		global $wpdb;
+
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		$this->create_private_variation_with_lookup_row();
+		$option = 'woocommerce_update_1130_last_unpublished_variation_id';
+		add_filter(
+			"pre_update_option_{$option}",
+			function ( $value, $old_value ) {
+				return $old_value;
+			},
+			10,
+			2
+		);
+		// Saving the variation queued its own invalidation, flush it so that only the migration's is observed.
+		WC_Cache_Helper::delete_transients_on_shutdown();
+		$counts_transient = 'wc_layered_nav_counts_pa_size';
+		set_transient( $counts_transient, array( 'query_hash' => array( 1 => 2 ) ) );
+
+		$this->assertFalse( wc_update_1130_delete_unpublished_variation_lookup_rows(), 'An unsaved cursor would select the same batch forever, so the migration stops.' );
+		$this->assertFalse( get_option( $option ), 'The cursor is cleaned up when the migration stops.' );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$this->assertSame( '0', $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}wc_product_attributes_lookup" ), 'The batch deleted before the stop stays deleted.' );
+		WC_Cache_Helper::delete_transients_on_shutdown();
+		$this->assertFalse( get_transient( $counts_transient ), 'The layered nav counts cached from the deleted batch are invalidated when the migration stops.' );
+	}
+
+	/**
+	 * Create a variable product with one private variation, leaving that variation's row as the lookup table's only row.
+	 *
+	 * @return int The id of the private variation.
+	 */
+	private function create_private_variation_with_lookup_row(): int {
+		global $wpdb;
+
+		$product      = WC_Helper_Product::create_variation_product();
+		$variation_id = $product->get_children()[0];
+		$variation    = wc_get_product( $variation_id );
+		$variation->set_status( ProductStatus::PRIVATE );
+		$variation->save();
+
+		$lookup_table = $wpdb->prefix . 'wc_product_attributes_lookup';
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$wpdb->query( "DELETE FROM {$lookup_table}" );
+		$wpdb->insert(
+			$lookup_table,
+			array(
+				'product_id'             => $variation_id,
+				'product_or_parent_id'   => $product->get_id(),
+				'taxonomy'               => 'pa_size',
+				'term_id'                => 1,
+				'is_variation_attribute' => 1,
+				'in_stock'               => 1,
+			),
+			array( '%d', '%d', '%s', '%d', '%d', '%d' )
+		);
+
+		return $variation_id;
+	}
+
+	/**
 	 * @testdox wc_update_1120_cleanup_inherited_variation_images removes a variation thumbnail that duplicates the parent's featured image.
 	 */
 	public function test_wc_update_1120_removes_variation_thumbnail_duplicating_parent() {
@@ -750,169 +1032,6 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 		update_post_meta( $variation_id, '_thumbnail_id', $variation_thumbnail_id );
 
 		return $variation_id;
-	}
-
-	/**
-	 * @testdox wc_update_1130_repair_hpos_order_dates_from_posts should fill HPOS dates that an earlier migration left empty from the order's post.
-	 */
-	public function test_wc_update_1130_repairs_hpos_dates_from_posts(): void {
-		global $wpdb;
-
-		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
-
-		update_option( 'timezone_string', 'Europe/Amsterdam' );
-		$order_id = OrderHelper::create_complex_wp_post_order();
-		$wpdb->update(
-			$wpdb->posts,
-			array(
-				'post_date_gmt'     => '0000-00-00 00:00:00',
-				'post_modified_gmt' => '0000-00-00 00:00:00',
-			),
-			array( 'ID' => $order_id )
-		);
-		clean_post_cache( $order_id );
-		wc_get_container()->get( PostsToOrdersMigrationController::class )->migrate_orders( array( $order_id ) );
-		$orders_table = OrdersTableDataStore::get_orders_table_name();
-		// The shape earlier migrations left behind.
-		$wpdb->update(
-			$orders_table,
-			array(
-				'date_created_gmt' => '0000-00-00 00:00:00',
-				'date_updated_gmt' => null,
-			),
-			array( 'id' => $order_id )
-		);
-		$post = get_post( $order_id );
-
-		// A second order whose legacy data was cleaned up: the post is a placeholder but keeps its date columns.
-		$cleaned_id = OrderHelper::create_complex_wp_post_order();
-		$wpdb->update( $wpdb->posts, array( 'post_date_gmt' => '0000-00-00 00:00:00' ), array( 'ID' => $cleaned_id ) );
-		clean_post_cache( $cleaned_id );
-		wc_get_container()->get( PostsToOrdersMigrationController::class )->migrate_orders( array( $cleaned_id ) );
-		$wpdb->update( $orders_table, array( 'date_created_gmt' => '0000-00-00 00:00:00' ), array( 'id' => $cleaned_id ) );
-		$wpdb->update( $wpdb->posts, array( 'post_type' => DataSynchronizer::PLACEHOLDER_ORDER_POST_TYPE ), array( 'ID' => $cleaned_id ) );
-		clean_post_cache( $cleaned_id );
-		$cleaned_post = get_post( $cleaned_id );
-
-		// A cached order object without a date must not survive the repair.
-		$order_cache = wc_get_container()->get( OrderCache::class );
-		$order_cache->set( wc_get_order( $order_id ), $order_id );
-		// Creating the orders queued their own imports: clear them so the assertion below is about the routine.
-		as_unschedule_all_actions( 'wc-admin_import_orders' );
-
-		$this->assertFalse( wc_update_1130_repair_hpos_order_dates_from_posts(), 'A single small batch should not request another run' );
-
-		$row = $wpdb->get_row( $wpdb->prepare( "SELECT date_created_gmt, date_updated_gmt FROM {$orders_table} WHERE id = %d", $order_id ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$this->assertSame( get_gmt_from_date( $post->post_date ), $row->date_created_gmt, 'Created date should come from post_date converted with the site timezone' );
-		$this->assertSame( get_gmt_from_date( $post->post_modified ), $row->date_updated_gmt, 'Updated date should come from post_modified' );
-		$this->assertNotSame( $post->post_date, $row->date_created_gmt, 'The local date must have been converted' );
-		$this->assertSame( get_gmt_from_date( $cleaned_post->post_date ), $wpdb->get_var( $wpdb->prepare( "SELECT date_created_gmt FROM {$orders_table} WHERE id = %d", $cleaned_id ) ), 'A cleaned-up order is repaired from its placeholder post' ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$this->assertFalse( $order_cache->is_cached( $order_id ), 'The cached order object must be dropped' );
-		$this->assertNotFalse( as_next_scheduled_action( 'wc-admin_import_orders', array( $order_id ) ), 'The Analytics import must be queued for the repaired order' );
-	}
-
-	/**
-	 * @testdox wc_update_1130_repair_hpos_order_dates_from_posts should import repaired orders inline when Analytics scheduling is disabled.
-	 */
-	public function test_wc_update_1130_imports_inline_when_analytics_scheduling_is_disabled(): void {
-		global $wpdb;
-
-		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
-
-		$order_id = OrderHelper::create_complex_wp_post_order();
-		wc_get_container()->get( PostsToOrdersMigrationController::class )->migrate_orders( array( $order_id ) );
-		$orders_table = OrdersTableDataStore::get_orders_table_name();
-		$wpdb->update( $orders_table, array( 'date_created_gmt' => '0000-00-00 00:00:00' ), array( 'id' => $order_id ) );
-		OrderHelper::toggle_cot_feature_and_usage( true );
-		// Creating the order queued its own import. Start from a clean slate so only the routine's behaviour is measured.
-		as_unschedule_all_actions( 'wc-admin_import_orders' );
-		$wpdb->delete( $wpdb->prefix . 'wc_order_stats', array( 'order_id' => $order_id ) );
-		add_filter( 'woocommerce_analytics_disable_action_scheduling', '__return_true' );
-
-		wc_update_1130_repair_hpos_order_dates_from_posts();
-
-		$this->assertFalse( as_next_scheduled_action( 'wc-admin_import_orders', array( $order_id ) ), 'Nothing should be queued when scheduling is disabled' );
-		$this->assertNotNull( $wpdb->get_var( $wpdb->prepare( "SELECT order_id FROM {$wpdb->prefix}wc_order_stats WHERE order_id = %d", $order_id ) ), 'The order should have been imported inline' );
-	}
-
-	/**
-	 * Insert a full batch of HPOS rows with no created date whose posts have no date either, so the repair has to advance its cursor.
-	 *
-	 * @return int The id of the last row in the batch.
-	 */
-	private function insert_full_batch_of_unrepairable_orders(): int {
-		global $wpdb;
-
-		$orders_table = OrdersTableDataStore::get_orders_table_name();
-		$first_id     = (int) $wpdb->get_var( "SELECT GREATEST( COALESCE( ( SELECT MAX( ID ) FROM {$wpdb->posts} ), 0 ), COALESCE( ( SELECT MAX( id ) FROM {$orders_table} ), 0 ) )" ) + 1; // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$posts        = array();
-		$orders       = array();
-		for ( $id = $first_id; $id < $first_id + 500; $id++ ) {
-			$posts[]  = "( {$id}, 'shop_order', 'wc-completed', '0000-00-00 00:00:00', '0000-00-00 00:00:00', '0000-00-00 00:00:00', '0000-00-00 00:00:00', '', '', '', '', '', '' )";
-			$orders[] = "( {$id}, 'shop_order', 'wc-completed', NULL, '2026-01-01 00:00:00' )";
-		}
-		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Generated integers and literals only.
-		$wpdb->query( "INSERT INTO {$wpdb->posts} ( ID, post_type, post_status, post_date, post_date_gmt, post_modified, post_modified_gmt, post_content, post_title, post_excerpt, to_ping, pinged, post_content_filtered ) VALUES " . implode( ',', $posts ) );
-		$wpdb->query( "INSERT INTO {$orders_table} ( id, type, status, date_created_gmt, date_updated_gmt ) VALUES " . implode( ',', $orders ) );
-		// phpcs:enable
-
-		return $first_id + 499;
-	}
-
-	/**
-	 * @testdox wc_update_1130_repair_hpos_order_dates_from_posts should keep going when another run has already saved the same or a later cursor.
-	 *
-	 * @testWith [0]
-	 *           [1000]
-	 *
-	 * @param int $ahead How far past this batch the other run has already moved the cursor.
-	 */
-	public function test_wc_update_1130_accepts_a_cursor_saved_by_a_concurrent_run( int $ahead ): void {
-		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
-
-		$last_id      = $this->insert_full_batch_of_unrepairable_orders();
-		$option       = 'woocommerce_update_1130_last_repaired_order_id';
-		$orders_table = OrdersTableDataStore::get_orders_table_name();
-		// The other run saves its cursor right after this one has read its batch.
-		$concurrent_save = function ( $query ) use ( $option, $last_id, $ahead, $orders_table ) {
-			if ( false !== strpos( $query, "FROM {$orders_table} o" ) ) {
-				update_option( $option, $last_id + $ahead, false );
-			}
-			return $query;
-		};
-		add_filter( 'query', $concurrent_save );
-
-		$this->assertTrue( wc_update_1130_repair_hpos_order_dates_from_posts(), 'A cursor saved by another run is progress, not a failure' );
-		$this->assertSame( $last_id + $ahead, (int) get_option( $option ), 'The cursor must never move backwards' );
-	}
-
-	/**
-	 * @testdox wc_update_1130_repair_hpos_order_dates_from_posts should leave rows alone when they have dates or their post has none.
-	 */
-	public function test_wc_update_1130_leaves_dated_rows_and_dateless_posts_alone(): void {
-		global $wpdb;
-
-		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
-
-		$dated_id    = OrderHelper::create_complex_wp_post_order();
-		$dateless_id = OrderHelper::create_complex_wp_post_order();
-		$wpdb->update(
-			$wpdb->posts,
-			array(
-				'post_date'     => '0000-00-00 00:00:00',
-				'post_date_gmt' => '0000-00-00 00:00:00',
-			),
-			array( 'ID' => $dateless_id )
-		);
-		clean_post_cache( $dateless_id );
-		wc_get_container()->get( PostsToOrdersMigrationController::class )->migrate_orders( array( $dated_id, $dateless_id ) );
-		$orders_table = OrdersTableDataStore::get_orders_table_name();
-		$dated_before = $wpdb->get_var( $wpdb->prepare( "SELECT date_created_gmt FROM {$orders_table} WHERE id = %d", $dated_id ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-
-		$this->assertFalse( wc_update_1130_repair_hpos_order_dates_from_posts() );
-
-		$this->assertSame( $dated_before, $wpdb->get_var( $wpdb->prepare( "SELECT date_created_gmt FROM {$orders_table} WHERE id = %d", $dated_id ) ), 'A dated row must not change' ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$this->assertSame( '0000-00-00 00:00:00', $wpdb->get_var( $wpdb->prepare( "SELECT date_created_gmt FROM {$orders_table} WHERE id = %d", $dateless_id ) ), 'A post with no date gives nothing to repair from' ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	}
 
 	/**
@@ -1042,5 +1161,174 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( 'no', get_option( 'woocommerce_use_legacy_get_variations_price_hash' ), 'Migration must not overwrite an existing option.' );
 
 		delete_option( 'woocommerce_use_legacy_get_variations_price_hash' );
+	}
+
+	/**
+	 * @testdox wc_update_1130_delete_stock_notification_sync_notice_option deletes the old restock notice option.
+	 */
+	public function test_wc_update_1130_delete_stock_notification_sync_notice_option(): void {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		update_option( 'wc_customer_stock_notifications_product_sync_notice', '<p>pending</p>' );
+		wc_update_1130_delete_stock_notification_sync_notice_option();
+		$this->assertFalse( get_option( 'wc_customer_stock_notifications_product_sync_notice' ) );
+	}
+
+	/**
+	 * @testdox Migration backfills the payment method on order and refund rows, then clears its cursor, the report cache and the payment method filter cache.
+	 */
+	public function test_wc_update_1130_backfill_order_stats_payment_method(): void {
+		global $wpdb;
+
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		$order = WC_Helper_Order::create_order();
+		$order->set_payment_method( 'cheque' );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		OrdersStatsDataStore::sync_order( $order->get_id() );
+
+		$refund = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 10.00,
+			)
+		);
+		$this->assertNotWPError( $refund );
+		OrdersStatsDataStore::sync_order( $refund->get_id() );
+
+		// A child order that is not a refund, such as a scheduled payment, has no gateway until it is paid.
+		$child_order = wc_create_order( array( 'parent' => $order->get_id() ) );
+		OrdersStatsDataStore::sync_order( $child_order->get_id() );
+
+		$stats_table = $wpdb->prefix . 'wc_order_stats';
+
+		$get_payment_method = function ( $order_id ) use ( $wpdb, $stats_table ) {
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is code-defined.
+			return $wpdb->get_var( $wpdb->prepare( "SELECT payment_method FROM {$stats_table} WHERE order_id = %d", $order_id ) );
+		};
+
+		// Reproduce the rows as they were written before the column existed.
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is code-defined.
+		$wpdb->query( "UPDATE {$stats_table} SET payment_method = NULL" );
+		$this->assertNull( $get_payment_method( $order->get_id() ), 'The order row should start without a payment method.' );
+
+		// A wc-admin page load before the backfill ends caches the payment method filter without the gateway.
+		wp_cache_delete( OrdersDataStore::ORDERS_PAYMENT_METHODS_ALL_CACHE_KEY, 'woocommerce_analytics' );
+		$this->assertSame( array(), OrdersDataStore::get_all_payment_methods() );
+
+		$cache_key        = 'wc_update_1130_payment_method_report';
+		$version_key      = ReportsCache::VERSION_OPTION . '-transient-version';
+		$original_version = get_transient( $version_key );
+		set_transient( $version_key, 'stale-version' );
+
+		try {
+			ReportsCache::set( $cache_key, 'stale-value' );
+			$this->assertSame( 'stale-value', ReportsCache::get( $cache_key ) );
+
+			$batches = 0;
+			while ( wc_update_1130_backfill_order_stats_payment_method() ) {
+				++$batches;
+				$this->assertLessThan( 10, $batches, 'The migration reschedules itself until every batch is done.' );
+			}
+
+			$this->assertFalse( ReportsCache::get( $cache_key ), 'The report rows cached without a payment method are invalidated on completion.' );
+		} finally {
+			delete_transient( $cache_key );
+			if ( false === $original_version ) {
+				delete_transient( $version_key );
+			} else {
+				set_transient( $version_key, $original_version );
+			}
+		}
+
+		$this->assertSame( 'cheque', $get_payment_method( $order->get_id() ) );
+		$this->assertSame( 'cheque', $get_payment_method( $refund->get_id() ), 'A refund takes the payment method of the order it refunds.' );
+		$this->assertNull( $get_payment_method( $child_order->get_id() ), 'A child order that is not a refund does not take the payment method of its parent.' );
+		$this->assertFalse( get_option( 'woocommerce_update_1130_last_payment_method_order_id' ), 'The cursor is cleared on completion.' );
+		$this->assertSame( array( 'cheque' ), OrdersDataStore::get_all_payment_methods(), 'The payment method filter cached before the backfill ended is cleared on completion.' );
+	}
+
+	/**
+	 * @testdox Migration carries its cursor between batches, so it reaches the rows past the first batch.
+	 */
+	public function test_wc_update_1130_backfill_order_stats_payment_method_in_batches(): void {
+		global $wpdb;
+
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		$stats_table = $wpdb->prefix . 'wc_order_stats';
+		$cursor      = 'woocommerce_update_1130_last_payment_method_order_id';
+		$date        = gmdate( 'Y-m-d H:i:s' );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is code-defined.
+		$first_id = (int) $wpdb->get_var( "SELECT MAX(order_id) FROM {$stats_table}" ) + 1;
+		$last_id  = $first_id + 500;
+
+		// One full batch of rows and one row more. The cursor is under test, so the rows need no order behind them.
+		for ( $order_id = $first_id; $order_id <= $last_id; $order_id++ ) {
+			$wpdb->insert(
+				$stats_table,
+				array(
+					'order_id'         => $order_id,
+					'status'           => OrderInternalStatus::COMPLETED,
+					'customer_id'      => 0,
+					'date_created'     => $date,
+					'date_created_gmt' => $date,
+				),
+				array( '%d', '%s', '%d', '%s', '%s' )
+			);
+		}
+
+		// Start past the rows other tests may have left, so the batches hold only the rows above.
+		update_option( $cursor, $first_id - 1, false );
+
+		$this->assertTrue( wc_update_1130_backfill_order_stats_payment_method(), 'A full batch leaves work for another run.' );
+		$this->assertSame( $first_id + 499, (int) get_option( $cursor ), 'The cursor is saved at the last id of the batch.' );
+
+		$this->assertTrue( wc_update_1130_backfill_order_stats_payment_method(), 'The second batch resumes after the cursor.' );
+		$this->assertSame( $last_id, (int) get_option( $cursor ), 'The second batch takes the row past the first batch.' );
+
+		$this->assertFalse( wc_update_1130_backfill_order_stats_payment_method(), 'An empty batch ends the migration.' );
+		$this->assertFalse( get_option( $cursor ), 'The cursor is cleared on completion.' );
+	}
+
+	/**
+	 * @testdox Migration stops at a failed write, clears its cursor and leaves the row without a payment method.
+	 */
+	public function test_wc_update_1130_backfill_order_stats_payment_method_stops_on_failed_write(): void {
+		global $wpdb;
+
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		$order = WC_Helper_Order::create_order();
+		$order->set_payment_method( 'cheque' );
+		$order->save();
+		OrdersStatsDataStore::sync_order( $order->get_id() );
+
+		$stats_table = $wpdb->prefix . 'wc_order_stats';
+		$cursor      = 'woocommerce_update_1130_last_payment_method_order_id';
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is code-defined.
+		$wpdb->query( "UPDATE {$stats_table} SET payment_method = NULL" );
+		update_option( $cursor, $order->get_id() - 1, false );
+
+		$break_update = function ( $query ) use ( $stats_table ) {
+			return 0 === strpos( $query, "UPDATE {$stats_table} " ) ? "UPDATE {$stats_table} SET no_such_column = 1" : $query;
+		};
+		add_filter( 'query', $break_update );
+		$suppressed = $wpdb->suppress_errors();
+
+		try {
+			$this->assertFalse( wc_update_1130_backfill_order_stats_payment_method(), 'A failed write does not request another run.' );
+		} finally {
+			$wpdb->suppress_errors( $suppressed );
+			remove_filter( 'query', $break_update );
+		}
+
+		$this->assertFalse( get_option( $cursor ), 'The cursor saved by an earlier batch is cleared after a failed write.' );
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is code-defined.
+		$row = $wpdb->get_row( $wpdb->prepare( "SELECT payment_method FROM {$stats_table} WHERE order_id = %d", $order->get_id() ), ARRAY_A );
+		$this->assertSame( array( 'payment_method' => null ), $row, 'The row keeps a NULL payment method after a failed write.' );
 	}
 }

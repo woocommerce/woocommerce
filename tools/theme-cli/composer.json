@@ -1,0 +1,31 @@
+{
+	"name": "woocommerce/theme-cli",
+	"description": "Shared development tools for WooCommerce themes.",
+	"type": "project",
+	"license": "GPL-2.0-or-later",
+	"require-dev": {
+		"automattic/jetpack-changelogger": "3.3.0",
+		"dealerdirect/phpcodesniffer-composer-installer": "^1.1",
+		"wp-coding-standards/wpcs": "^3.3"
+	},
+	"config": {
+		"allow-plugins": {
+			"dealerdirect/phpcodesniffer-composer-installer": true
+		},
+		"platform": {
+			"php": "7.4"
+		},
+		"sort-packages": true
+	},
+	"extra": {
+		"changelogger": {
+			"versioning": "wordpress",
+			"types": {
+				"fix": "Fixes an existing bug",
+				"add": "Adds functionality",
+				"update": "Updates existing functionality",
+				"dev": "Development related task"
+			}
+		}
+	}
+}

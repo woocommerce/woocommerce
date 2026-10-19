@@ -211,6 +211,7 @@ class Analytics {
 				'dashboard_chart_type',
 				'dashboard_chart_interval',
 				'dashboard_leaderboard_rows',
+				'dashboard_performance_tour_shown',
 				'order_attribution_install_banner_dismissed',
 				'scheduled_updates_promotion_notice_dismissed',
 			)
@@ -1115,8 +1116,8 @@ class Analytics {
 					} );
 			} );
 
-			if ( fixBtn ) {
-				actionCell.insertBefore( checkBtn, fixBtn );
+			if ( fixBtn && fixBtn.parentNode ) {
+				fixBtn.parentNode.insertBefore( checkBtn, fixBtn );
 			} else {
 				actionCell.appendChild( checkBtn );
 			}

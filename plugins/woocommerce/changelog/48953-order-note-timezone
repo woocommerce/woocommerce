@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show order note times in the current store timezone after the timezone setting changes.

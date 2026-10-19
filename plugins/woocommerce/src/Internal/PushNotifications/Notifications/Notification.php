@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\PushNotifications\Notifications;
 
+use Automattic\WooCommerce\Internal\PushNotifications\Enums\SuppressionReason;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
 use InvalidArgumentException;
 
@@ -294,6 +295,20 @@ abstract class Notification {
 	}
 
 	/**
+	 * Extra fields that identify this notification beyond its type and resource
+	 * ID, in the form {@see self::from_array()} accepts.
+	 *
+	 * Identity only, for the reasons {@see self::get_safety_net_args()} gives.
+	 *
+	 * @return array<string, mixed>
+	 *
+	 * @since 11.2.0
+	 */
+	public function get_identity_data(): array {
+		return array();
+	}
+
+	/**
 	 * Canonical positional ActionScheduler arguments for the safety-net job.
 	 *
 	 * Single source of truth shared by the scheduler (and its dedupe guard) and
@@ -312,12 +327,21 @@ abstract class Notification {
 	 * @since 10.9.0
 	 */
 	public function get_safety_net_args(): array {
-		return array( $this->get_type(), $this->get_resource_id() );
+		$args          = array( $this->get_type(), $this->get_resource_id() );
+		$identity_data = $this->get_identity_data();
+
+		// Skipped when empty so an in-flight safety net for a type without
+		// identity data still cancels.
+		if ( ! empty( $identity_data ) ) {
+			$args[] = $identity_data;
+		}
+
+		return $args;
 	}
 
 	/**
-	 * Decide whether this notification should be delivered to a user given
-	 * their stored preference value for {@see static::get_type()}.
+	 * Returns which preference stops this notification reaching a user, or null
+	 * where it should reach them.
 	 *
 	 * `$pref_value` is whatever the user has stored under this notification
 	 * type's preference key, or `null` if they have nothing stored. The
@@ -329,29 +353,48 @@ abstract class Notification {
 	 *
 	 * Default: read the universal `enabled` sub-field, defaulting to `true`
 	 * when the value is missing or has no `enabled` key (so newly-added
-	 * notification types are opt-in by default). Subclasses override to
-	 * read richer sub-fields and to consult their own resource (e.g.
-	 * compare an order total to the user's `min_value`).
+	 * notification types are opt-in by default). Subclasses override to read
+	 * richer sub-fields and to consult their own resource, returning the first
+	 * reason that applies.
 	 *
-	 * Subclasses must keep this side-effect-free — the {@see NotificationProcessor}
-	 * may call it once per recipient user per notification.
+	 * Subclasses must keep this side-effect-free, since the
+	 * {@see NotificationProcessor} may call it once per recipient user per
+	 * notification.
 	 *
 	 * @param mixed $pref_value The user's stored preference value, or null.
-	 * @return bool True if this notification should be sent to that user.
+	 * @return string|null One of the SuppressionReason constants, or null to send.
 	 *
-	 * @since 10.9.0
+	 * @since 11.3.0
 	 */
-	public function should_send_to_user( $pref_value ): bool {
+	public function get_suppression_reason( $pref_value ): ?string {
 		if ( null === $pref_value ) {
-			return true;
+			return null;
 		}
 
 		if ( is_array( $pref_value ) ) {
-			return (bool) ( $pref_value['enabled'] ?? true );
+			return ( $pref_value['enabled'] ?? true ) ? null : SuppressionReason::NOTIFICATIONS_OFF;
 		}
 
 		// Defensive fallback for unexpected scalar values; the service
 		// always normalises stored prefs to the array shape above.
-		return (bool) $pref_value;
+		return $pref_value ? null : SuppressionReason::NOTIFICATIONS_OFF;
+	}
+
+	/**
+	 * Whether this notification should be delivered to a user.
+	 *
+	 * Kept so a request that loaded older code during a plugin update does not
+	 * fatal on a call that has moved. Nothing in the plugin calls it; use
+	 * {@see get_suppression_reason()}, which also names why not.
+	 *
+	 * @deprecated 11.3.0 Use get_suppression_reason() instead.
+	 *
+	 * @param mixed $pref_value The user's stored preference value, or null.
+	 * @return bool
+	 *
+	 * @since 10.9.0
+	 */
+	public function should_send_to_user( $pref_value ): bool {
+		return null === $this->get_suppression_reason( $pref_value );
 	}
 }

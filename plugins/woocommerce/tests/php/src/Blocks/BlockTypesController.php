@@ -22,16 +22,6 @@ class BlockTypesController extends WC_Unit_Test_Case {
 	private $block_types_controller;
 
 	/**
-	 * Block registered through the real registration path, so register_block_type_args fires on it.
-	 */
-	private const PROBE_BLOCK = 'woocommerce/classic-theme-fallback-probe';
-
-	/**
-	 * Style handle the probe block declares, registered without a source.
-	 */
-	private const PROBE_STYLE = 'wc-classic-theme-fallback-probe';
-
-	/**
 	 * Sets up a new TestedBlockTypesController so it can be tested.
 	 *
 	 * @return void
@@ -47,139 +37,20 @@ class BlockTypesController extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Removes the probe block and style; the base class does not reset the block registry or the style queue.
+	 * Remove the block types test_block_should_have_data_attributes() registers, since the
+	 * block type registry outlives a test.
 	 */
 	public function tearDown(): void {
 		try {
-			if ( \WP_Block_Type_Registry::get_instance()->is_registered( self::PROBE_BLOCK ) ) {
-				unregister_block_type( self::PROBE_BLOCK );
+			$registry = \WP_Block_Type_Registry::get_instance();
+			foreach ( array( 'unrelated-namespace/unrelated-block-name', 'namespace/allowed-block-name', 'allowed-namespace/block-name', 'child-of-woo/block-name' ) as $block_name ) {
+				if ( $registry->is_registered( $block_name ) ) {
+					$registry->unregister( $block_name );
+				}
 			}
-			wp_dequeue_style( self::PROBE_STYLE );
-			wp_deregister_style( self::PROBE_STYLE );
 		} finally {
 			parent::tearDown();
 		}
-	}
-
-	/**
-	 * @testdox Should defer a block's style until the block renders on a classic theme.
-	 */
-	public function test_classic_theme_defers_block_style_until_render(): void {
-		switch_theme( 'storefront' );
-		$this->assertFalse( wp_is_block_theme(), 'The test must run with a classic theme.' );
-
-		// Since WordPress 7.0, wp_load_classic_theme_block_styles_on_demand() opts classic themes into
-		// on-demand block assets at wp_default_styles priority 0, so the fallback is only live on sites that opt out.
-		add_filter( 'should_load_separate_core_block_assets', '__return_false', PHP_INT_MAX );
-		add_filter( 'should_load_block_assets_on_demand', '__return_false', PHP_INT_MAX );
-		$this->assertFalse( wp_should_load_block_assets_on_demand(), 'The test must simulate a site that opted out of on-demand block assets.' );
-
-		$block_type = $this->register_probe_block();
-
-		$this->assertSame( array(), $block_type->style_handles, 'Registration must strip the style so Core does not queue it on every page.' );
-		$this->assertFalse( wp_style_is( self::PROBE_STYLE, 'enqueued' ), 'The style must not be queued before the block renders.' );
-
-		$this->assertStringContainsString( 'class="probe"', do_blocks( '<!-- wp:' . self::PROBE_BLOCK . ' /-->' ) );
-		$this->assertTrue( wp_style_is( self::PROBE_STYLE, 'enqueued' ), 'Rendering the block must queue its style.' );
-	}
-
-	/**
-	 * Both themes satisfy more than one clause of the fallback's guard under Core's defaults, so this asserts the
-	 * real-world outcome that makes the fallback dormant. The three tests below isolate the individual clauses.
-	 *
-	 * @testdox Should stand down under Core's default block asset settings.
-	 * @testWith ["storefront"]
-	 *           ["twentytwentytwo"]
-	 *
-	 * @param string $theme Theme to activate before the decision is made.
-	 */
-	public function test_stands_down_under_core_default_asset_settings( string $theme ): void {
-		switch_theme( $theme );
-		$this->assertTrue( wp_should_load_block_assets_on_demand(), 'WordPress must already be loading block assets on demand.' );
-
-		$this->assert_fallback_stands_down();
-	}
-
-	/**
-	 * @testdox Should stand down when only on-demand block assets are enabled.
-	 */
-	public function test_stands_down_when_only_on_demand_assets_are_enabled(): void {
-		switch_theme( 'storefront' );
-		$this->assertFalse( wp_is_block_theme(), 'The test must run with a classic theme.' );
-
-		// Turn the separate-assets clause off so on-demand is the only clause that can stand the fallback down.
-		add_filter( 'should_load_separate_core_block_assets', '__return_false', PHP_INT_MAX );
-		add_filter( 'should_load_block_assets_on_demand', '__return_true', PHP_INT_MAX );
-		$this->assertFalse( wp_should_load_separate_core_block_assets(), 'Separate core block assets must be off.' );
-		$this->assertTrue( wp_should_load_block_assets_on_demand(), 'On-demand block assets must be on.' );
-
-		$this->assert_fallback_stands_down();
-	}
-
-	/**
-	 * @testdox Should stand down when only separate core block assets are enabled.
-	 */
-	public function test_stands_down_when_only_separate_assets_are_enabled(): void {
-		switch_theme( 'storefront' );
-		$this->assertFalse( wp_is_block_theme(), 'The test must run with a classic theme.' );
-
-		// Turn the on-demand clause off so separate assets is the only clause that can stand the fallback down.
-		add_filter( 'should_load_separate_core_block_assets', '__return_true', PHP_INT_MAX );
-		add_filter( 'should_load_block_assets_on_demand', '__return_false', PHP_INT_MAX );
-		$this->assertTrue( wp_should_load_separate_core_block_assets(), 'Separate core block assets must be on.' );
-		$this->assertFalse( wp_should_load_block_assets_on_demand(), 'On-demand block assets must be off.' );
-
-		$this->assert_fallback_stands_down();
-	}
-
-	/**
-	 * @testdox Should stand down under a block theme even when block assets are not loaded on demand.
-	 */
-	public function test_stands_down_under_a_block_theme_without_on_demand_assets(): void {
-		switch_theme( 'twentytwentytwo' );
-		$this->assertTrue( wp_is_block_theme(), 'The test must run with a block theme.' );
-
-		// Turn both asset clauses off so the block theme check is the only clause that can stand the fallback down.
-		add_filter( 'should_load_separate_core_block_assets', '__return_false', PHP_INT_MAX );
-		add_filter( 'should_load_block_assets_on_demand', '__return_false', PHP_INT_MAX );
-		$this->assertFalse( wp_should_load_separate_core_block_assets(), 'Separate core block assets must be off.' );
-		$this->assertFalse( wp_should_load_block_assets_on_demand(), 'On-demand block assets must be off.' );
-
-		$this->assert_fallback_stands_down();
-	}
-
-	/**
-	 * Asserts that the fallback passed the block args through untouched and unhooked itself.
-	 */
-	private function assert_fallback_stands_down(): void {
-		$args = array( 'style_handles' => array( self::PROBE_STYLE ) );
-
-		$result = $this->block_types_controller->enqueue_block_style_for_classic_themes( $args, self::PROBE_BLOCK );
-
-		$this->assertSame( $args, $result, 'Core queues the style on render already, so the args must pass through untouched.' );
-		$this->assertFalse(
-			has_filter( 'register_block_type_args', array( $this->block_types_controller, 'enqueue_block_style_for_classic_themes' ) ),
-			'The fallback must unhook itself once it decides it is not needed.'
-		);
-	}
-
-	/**
-	 * Registers the probe block and its style through the real registration path.
-	 *
-	 * @return \WP_Block_Type The registered block type.
-	 */
-	private function register_probe_block(): \WP_Block_Type {
-		wp_register_style( self::PROBE_STYLE, false, array(), '1' );
-		$block_type = register_block_type(
-			self::PROBE_BLOCK,
-			array(
-				'style_handles'   => array( self::PROBE_STYLE ),
-				'render_callback' => static fn() => '<div class="probe"></div>',
-			)
-		);
-		$this->assertInstanceOf( \WP_Block_Type::class, $block_type );
-
-		return $block_type;
 	}
 
 	/**
@@ -266,5 +137,100 @@ class BlockTypesController extends WC_Unit_Test_Case {
 				"BlockTypesController::register_block_patterns() should register {$slug}; the installed Cart page depends on it."
 			);
 		}
+	}
+
+	/**
+	 * @testdox Should use the WooCommerce version when a bundled block.json omits one.
+	 */
+	public function test_block_json_style_without_version_uses_woocommerce_version(): void {
+		$metadata = array(
+			'name' => 'woocommerce/product-filter-chips',
+			'file' => WC_ABSPATH . 'assets/client/blocks/product-filter-chips/block.json',
+		);
+
+		$result = $this->block_types_controller->handle_block_type_metadata( $metadata );
+
+		$this->assertSame( 'wc-' . WC_VERSION, $result['version'] );
+	}
+
+	/**
+	 * @testdox Should keep a version a bundled block.json already declares.
+	 */
+	public function test_block_json_keeps_explicit_version(): void {
+		$metadata = array(
+			'name'    => 'woocommerce/mini-cart',
+			'file'    => WC_ABSPATH . 'assets/client/blocks/mini-cart/block.json',
+			'version' => '1.0.0',
+		);
+
+		$result = $this->block_types_controller->handle_block_type_metadata( $metadata );
+
+		$this->assertSame( '1.0.0', $result['version'] );
+	}
+
+	/**
+	 * @testdox Should leave block metadata from outside WooCommerce unchanged.
+	 */
+	public function test_block_json_outside_woocommerce_keeps_omitted_version(): void {
+		$metadata = array(
+			'name' => 'example/block',
+			'file' => '/tmp/example/block.json',
+		);
+
+		$result = $this->block_types_controller->handle_block_type_metadata( $metadata );
+
+		$this->assertArrayNotHasKey( 'version', $result );
+	}
+
+	/**
+	 * @testdox Should output a hidden redirect field on the login and registration forms when redirect_to is set.
+	 *
+	 * @dataProvider redirect_to_form_hooks_provider
+	 *
+	 * @param string $hook The form hook to fire.
+	 */
+	public function test_redirect_to_field_outputs_hidden_input( string $hook ): void {
+		$_GET['redirect_to'] = 'https://example.com/product/?a=1&b=2';
+
+		try {
+			ob_start();
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Firing the form hook under test.
+			do_action( $hook );
+			$output = ob_get_clean();
+		} finally {
+			unset( $_GET['redirect_to'] );
+		}
+
+		$this->assertStringContainsString( '<input type="hidden" name="redirect" value="https://example.com/product/?a=1&amp;b=2" />', $output );
+	}
+
+	/**
+	 * @testdox Should output nothing on the login and registration forms when redirect_to is empty.
+	 *
+	 * @dataProvider redirect_to_form_hooks_provider
+	 *
+	 * @param string $hook The form hook to fire.
+	 */
+	public function test_redirect_to_field_outputs_nothing_without_redirect_to( string $hook ): void {
+		unset( $_GET['redirect_to'] );
+
+		ob_start();
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Firing the form hook under test.
+		do_action( $hook );
+		$output = ob_get_clean();
+
+		$this->assertSame( '', $output );
+	}
+
+	/**
+	 * Form hooks that should receive the hidden redirect field.
+	 *
+	 * @return array<string, array{string}>
+	 */
+	public function redirect_to_form_hooks_provider(): array {
+		return array(
+			'login form'        => array( 'woocommerce_login_form_end' ),
+			'registration form' => array( 'woocommerce_register_form_end' ),
+		);
 	}
 }

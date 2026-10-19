@@ -107,7 +107,7 @@ export const Edit = ( {
 														text: '',
 													} ),
 											},
-									  ]
+										]
 									: []
 							}
 						>

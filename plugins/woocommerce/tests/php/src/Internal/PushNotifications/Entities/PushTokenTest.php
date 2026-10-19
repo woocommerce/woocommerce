@@ -962,6 +962,26 @@ class PushTokenTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Tests an empty last sent time is never reported as the current time.
+	 *
+	 * `date_create_immutable()` rejects only genuinely unparseable strings. It
+	 * reads an empty string as the current time and the MySQL zero date as year
+	 * -0001, so the guards ahead of it are load-bearing rather than redundant.
+	 * Folding them away would make an unsent token report as sent right now,
+	 * the precise opposite of what this field is for.
+	 */
+	public function test_an_empty_last_sent_at_is_not_reported_as_now() {
+		foreach ( array( '', '0000-00-00 00:00:00', '   ' ) as $stored ) {
+			$push_token = new PushToken( array( 'last_sent_at_gmt' => $stored ) );
+
+			$this->assertNull(
+				$push_token->get_last_sent_at_gmt(),
+				sprintf( 'Expected null for stored value "%s".', $stored )
+			);
+		}
+	}
+
+	/**
 	 * @testdox Tests the REST format adds diagnostic fields without altering the WPCOM send payload.
 	 *
 	 * `to_wpcom_format()` is the per-token payload the dispatcher POSTs to WPCOM
@@ -1014,5 +1034,18 @@ class PushTokenTest extends WC_Unit_Test_Case {
 		$this->assertNull( $rest_format['id'] );
 		$this->assertNull( $rest_format['device_uuid'] );
 		$this->assertNull( $rest_format['platform'] );
+	}
+
+	/**
+	 * @testdox Tests the last sent time defaults to null and is exposed in the response.
+	 */
+	public function test_it_exposes_the_last_sent_at_time() {
+		$this->assertNull( ( new PushToken() )->get_last_sent_at_gmt() );
+
+		$push_token = new PushToken( array( 'last_sent_at_gmt' => '2026-08-11 16:00:00' ) );
+
+		$this->assertSame( '2026-08-11 16:00:00', $push_token->get_last_sent_at_gmt() );
+		$this->assertSame( '2026-08-11T16:00:00', $push_token->to_rest_format()['last_sent_at_gmt'] );
+		$this->assertArrayNotHasKey( 'last_sent_at_gmt', $push_token->to_wpcom_format() );
 	}
 }

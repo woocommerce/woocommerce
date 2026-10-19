@@ -2,13 +2,17 @@
  * External dependencies
  */
 import { recordEvent } from '@woocommerce/tracks';
+import { createActor, fromPromise, waitFor } from 'xstate5';
 
 /**
  * Internal dependencies
  */
 import tracksActions, { resetShippingPartnerImpressionFlag } from '../tracks';
 import type { CoreProfilerStateMachineContext } from '../../index';
-import type { PluginInstallError } from '../../services/installAndActivatePlugins';
+import {
+	pluginInstallerMachine,
+	PluginInstallError,
+} from '../../services/installAndActivatePlugins';
 
 jest.mock( '@woocommerce/tracks', () => ( {
 	recordEvent: jest.fn(),
@@ -138,6 +142,37 @@ describe( 'Core Profiler shipping partner tracking', () => {
 						eventName === 'shipping_partner_impression'
 				)
 			).toHaveLength( 1 );
+		} );
+	} );
+
+	describe( 'recordTracksPluginsInstallationRequest (coreprofiler_store_extensions_continue)', () => {
+		it( 'should report selected :alt plugins by slug', () => {
+			tracksActions.recordTracksPluginsInstallationRequest( {
+				context: makeContext(),
+				event: {
+					type: 'PLUGINS_INSTALLATION_REQUESTED',
+					payload: {
+						pluginsShown: [
+							'mailpoet',
+							'woocommerce-services:tax',
+						],
+						pluginsSelected: [
+							'mailpoet:alt',
+							'woocommerce-services:tax',
+						],
+						pluginsUnselected: [],
+					},
+				},
+			} );
+
+			expect( recordEvent ).toHaveBeenCalledWith(
+				'coreprofiler_store_extensions_continue',
+				{
+					shown: [ 'mailpoet', 'woocommerce-services:tax' ],
+					selected: [ 'mailpoet', 'woocommerce-services:tax' ],
+					unselected: [],
+				}
+			);
 		} );
 	} );
 
@@ -408,4 +443,120 @@ describe( 'Core Profiler shipping partner tracking', () => {
 			);
 		} );
 	} );
+} );
+
+describe( 'Core Profiler installation timing', () => {
+	beforeEach( () => {
+		jest.clearAllMocks();
+	} );
+
+	it.each( [
+		[
+			'woocommerce-services:tax',
+			'woocommerce-services',
+			'woocommerce_services',
+		],
+		[
+			'woocommerce-services:shipping',
+			'woocommerce-services',
+			'woocommerce_services',
+		],
+		[
+			'woocommerce-paypal-payments:wallet-only',
+			'woocommerce-paypal-payments',
+			'woocommerce_paypal_payments',
+		],
+	] )(
+		'records the server duration for %s in both completion events',
+		async ( plugin, slug, trackKey ) => {
+			const machine = pluginInstallerMachine.provide( {
+				actors: {
+					installPlugin: fromPromise( async () => ( {
+						data: {
+							install_time: { [ slug ]: 4000 },
+						},
+					} ) ),
+				},
+				actions: {
+					updateParentWithPluginProgress: jest.fn(),
+					updateParentWithInstallationSuccess: ( { context } ) => {
+						tracksActions.recordSuccessfulPluginInstallation( {
+							context: makeContext(),
+							event: {
+								type: 'PLUGINS_INSTALLATION_COMPLETED',
+								payload: {
+									installationCompletedResult: {
+										installedPlugins:
+											context.installedPlugins,
+										totalTime: 12000,
+									},
+								},
+							},
+						} );
+					},
+				},
+			} );
+			const service = createActor( machine, {
+				input: {
+					selectedPlugins: [ plugin ],
+					pluginsAvailable: [],
+				},
+			} ).start();
+
+			await waitFor( service, ( snapshot ) =>
+				snapshot.matches( 'reportSuccess' )
+			);
+
+			expect( recordEvent ).toHaveBeenCalledWith(
+				'coreprofiler_store_extension_installed_and_activated',
+				{
+					success: true,
+					extension: trackKey,
+					install_time: '2-5s',
+				}
+			);
+			expect( recordEvent ).toHaveBeenCalledWith(
+				'coreprofiler_store_extensions_installed_and_activated',
+				{
+					success: true,
+					installed_extensions: [ trackKey ],
+					total_time: '10-15s',
+					[ `install_time_${ trackKey }` ]: '2-5s',
+				}
+			);
+			expect( recordEvent ).toHaveBeenCalledTimes( 2 );
+			service.stop();
+		}
+	);
+
+	it.each( [ 'mailpoet', 'mailpoet:alt' ] )(
+		'preserves the normalized identifier and duration for %s',
+		( plugin ) => {
+			tracksActions.recordSuccessfulPluginInstallation( {
+				context: makeContext(),
+				event: {
+					type: 'PLUGINS_INSTALLATION_COMPLETED',
+					payload: {
+						installationCompletedResult: {
+							installedPlugins: [ { plugin, installTime: 4000 } ],
+							totalTime: 12000,
+						},
+					},
+				},
+			} );
+			expect( recordEvent ).toHaveBeenCalledWith(
+				'coreprofiler_store_extension_installed_and_activated',
+				{ success: true, extension: 'mailpoet', install_time: '2-5s' }
+			);
+			expect( recordEvent ).toHaveBeenCalledWith(
+				'coreprofiler_store_extensions_installed_and_activated',
+				{
+					success: true,
+					installed_extensions: [ 'mailpoet' ],
+					total_time: '10-15s',
+					install_time_mailpoet: '2-5s',
+				}
+			);
+		}
+	);
 } );

@@ -19,10 +19,13 @@
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
+use Automattic\WooCommerce\Admin\API\Reports\Orders\DataStore as OrdersDataStore;
 use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\Notes\Notes;
 use Automattic\WooCommerce\Database\Migrations\MigrationHelper;
 use Automattic\WooCommerce\Enums\DefaultCustomerAddress;
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Admin\Marketing\MarketingSpecs;
@@ -4012,167 +4015,6 @@ function wc_update_11203_normalize_stock_notification_emails() {
 }
 
 /**
- * Give HPOS orders migrated without a created or updated date the dates their posts still hold.
- *
- * Earlier migrations copied a zero post_date_gmt verbatim, so the HPOS row ended up with no created date and the next
- * save stamped it with the current time. Only rows whose date is NULL or the zero date are touched, and only when the
- * order's post has a usable date. Placeholder posts count too: legacy cleanup keeps the date columns when it converts a
- * post, and placeholders created for new HPOS orders carry the order's own date. Repaired orders are dropped from the
- * order caches and queued for the Analytics import, which skipped them while they had no date. Batched, returns true
- * while rows remain.
- *
- * @return bool True to run again.
- */
-function wc_update_1130_repair_hpos_order_dates_from_posts() {
-	global $wpdb;
-
-	$orders_table = \Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore::get_orders_table_name();
-	if ( $orders_table !== $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $orders_table ) ) ) {
-		return false;
-	}
-
-	$last_id_option = 'woocommerce_update_1130_last_repaired_order_id';
-	$batch_size     = 500;
-	$zero           = '0000-00-00 00:00:00';
-	$type_list      = array();
-	$post_types     = array_merge( wc_get_order_types( 'cot-migration' ), array( \Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer::PLACEHOLDER_ORDER_POST_TYPE ) );
-	foreach ( $post_types as $post_type ) {
-		$escaped = esc_sql( $post_type );
-		if ( is_string( $escaped ) ) {
-			$type_list[] = "'" . $escaped . "'";
-		}
-	}
-	$type_list = implode( ',', $type_list );
-
-	// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table names and the escaped type list cannot be prepared.
-	$rows = $wpdb->get_results(
-		$wpdb->prepare(
-			"SELECT o.id, o.date_created_gmt, o.date_updated_gmt, p.post_date, p.post_date_gmt, p.post_modified, p.post_modified_gmt
-			FROM {$orders_table} o
-			INNER JOIN {$wpdb->posts} p ON p.ID = o.id AND p.post_type IN ({$type_list})
-			WHERE o.id > %d
-			AND ( o.date_created_gmt IS NULL OR o.date_created_gmt = %s OR o.date_updated_gmt IS NULL OR o.date_updated_gmt = %s )
-			ORDER BY o.id ASC
-			LIMIT %d",
-			(int) get_option( $last_id_option, 0 ),
-			$zero,
-			$zero,
-			$batch_size
-		)
-	);
-	// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-
-	if ( '' !== $wpdb->last_error ) {
-		wc_get_logger()->error( sprintf( 'Stopped repairing HPOS order dates: %s', $wpdb->last_error ), array( 'source' => 'wc-updater' ) );
-		delete_option( $last_id_option );
-		return false;
-	}
-
-	// The rule WordPress applies to its own posts: the GMT column, or the local one when the GMT one is the zero date.
-	$gmt_from_post = function ( $gmt_date, $local_date ) use ( $zero ) {
-		if ( $gmt_date && $zero !== $gmt_date ) {
-			return $gmt_date;
-		}
-		if ( ! $local_date || $zero === $local_date ) {
-			return null;
-		}
-		$datetime = date_create( $local_date, wp_timezone() );
-		return $datetime ? $datetime->setTimezone( new DateTimeZone( 'UTC' ) )->format( 'Y-m-d H:i:s' ) : null;
-	};
-
-	// Repaired orders leave the caches (a cached object still has no date and would stamp the current time on its next save)
-	// and get queued for the Analytics import, which skipped them while they had no date.
-	$forget_and_import = function ( array $order_ids ) {
-		if ( ! $order_ids ) {
-			return;
-		}
-		wc_get_container()->get( \Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore::class )->clear_cached_data( $order_ids );
-		$order_cache = wc_get_container()->get( \Automattic\WooCommerce\Caches\OrderCache::class );
-		// With Analytics disabled nothing handles the import action, and queueing it would only leave failed actions behind.
-		$import_hook    = \Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler::get_action( 'import' );
-		$import_handled = is_string( $import_hook ) && has_action( $import_hook );
-		/**
-		 * Filters whether Analytics runs its imports inline instead of queueing them.
-		 *
-		 * @since 4.0.0
-		 * @param bool $disable Whether Action Scheduler is bypassed.
-		 */
-		$import_inline = ! get_option( 'schema-ActionScheduler_StoreSchema' ) || apply_filters( 'woocommerce_analytics_disable_action_scheduling', false );
-		foreach ( $order_ids as $order_id ) {
-			$order_cache->remove( $order_id );
-			if ( ! $import_handled ) {
-				continue;
-			}
-			if ( $import_inline ) {
-				\Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler::import( $order_id );
-				continue;
-			}
-			// Queued directly: OrdersScheduler::schedule_action() first searches every pending action for a duplicate, which gets
-			// slower with each order queued here. A duplicate import only rewrites the same stats row.
-			WC()->queue()->schedule_single( time() + 5, $import_hook, array( $order_id ), (string) \Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler::$group );
-		}
-	};
-
-	$repaired_ids = array();
-	foreach ( $rows as $row ) {
-		$columns = array();
-		if ( ! $row->date_created_gmt || $zero === $row->date_created_gmt ) {
-			$columns['date_created_gmt'] = $gmt_from_post( $row->post_date_gmt, $row->post_date );
-		}
-		if ( ! $row->date_updated_gmt || $zero === $row->date_updated_gmt ) {
-			$columns['date_updated_gmt'] = $gmt_from_post( $row->post_modified_gmt, $row->post_modified );
-		}
-		$columns = array_filter( $columns );
-		if ( empty( $columns ) ) {
-			continue;
-		}
-		// Each column is written only while it is still empty, so a save that lands between the read and the write wins.
-		$assignments = array();
-		$values      = array();
-		foreach ( $columns as $column => $value ) {
-			$assignments[] = "{$column} = IF( {$column} IS NULL OR {$column} = %s, %s, {$column} )";
-			$values[]      = $zero;
-			$values[]      = $value;
-		}
-		$values[] = (int) $row->id;
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- Table and column names are code-defined, values go through prepare().
-		$updated = $wpdb->query( $wpdb->prepare( "UPDATE {$orders_table} SET " . implode( ', ', $assignments ) . ' WHERE id = %d', $values ) );
-		if ( false === $updated ) {
-			wc_get_logger()->error( sprintf( 'Stopped repairing HPOS order dates at order #%d: %s', (int) $row->id, $wpdb->last_error ), array( 'source' => 'wc-updater' ) );
-			$forget_and_import( $repaired_ids );
-			delete_option( $last_id_option );
-			return false;
-		}
-		// Zero rows means a save or another run filled the dates first, and that writer already took care of the rest.
-		if ( $updated > 0 ) {
-			$repaired_ids[] = (int) $row->id;
-		}
-	}
-
-	$forget_and_import( $repaired_ids );
-
-	if ( count( $rows ) === $batch_size ) {
-		// The cursor only ever moves forward: a concurrent run (the queue plus `wp wc update`) may already have saved this id or a
-		// later one, and update_option() reports that as false just like a failed write. Without a saved cursor the next run would
-		// pick the same rows again, and rows whose post has no date never leave the selection.
-		$cursor = (int) end( $rows )->id;
-		if ( (int) get_option( $last_id_option, 0 ) < $cursor && ! update_option( $last_id_option, $cursor, false ) ) {
-			wp_cache_delete( $last_id_option, 'options' );
-			if ( (int) get_option( $last_id_option, 0 ) < $cursor ) {
-				wc_get_logger()->error( 'Stopped repairing HPOS order dates: the progress cursor could not be saved.', array( 'source' => 'wc-updater' ) );
-				delete_option( $last_id_option );
-				return false;
-			}
-		}
-		return true;
-	}
-
-	delete_option( $last_id_option );
-
-	return false;
-}
-
-/**
  * Persist the legacy variation price hash option for existing stores so get_option returns an explicit value.
  *
  * @return void
@@ -4181,4 +4023,199 @@ function wc_update_1130_set_legacy_variation_price_hash_option() {
 	if ( false === get_option( 'woocommerce_use_legacy_get_variations_price_hash' ) ) {
 		add_option( 'woocommerce_use_legacy_get_variations_price_hash', 'yes', '', true );
 	}
+}
+
+/**
+ * Delete the product attributes lookup rows of variations that are not published.
+ *
+ * Disabled variations (status 'private') used to keep their lookup rows, so attribute filters offered and
+ * counted terms that only a disabled variation carried. Rows are now only written for published variations
+ * and a status change refreshes them, but rows written before that are never revisited.
+ *
+ * Runs in batches of unpublished variations, so the lookup table is never locked wholesale: it is one of the
+ * largest tables on a variation-heavy store, and every filtered catalogue page reads it. A database error, or a
+ * progress cursor that can't be saved, is logged and stops the migration without a retry.
+ *
+ * @since 11.3.0
+ *
+ * @return bool True when another batch is left to process, false when done or stopped.
+ */
+function wc_update_1130_delete_unpublished_variation_lookup_rows() {
+	global $wpdb;
+
+	$lookup_data_store = wc_get_container()->get( LookupDataStore::class );
+	if ( ! $lookup_data_store->check_lookup_table_exists() ) {
+		return false;
+	}
+
+	$last_id_option = 'woocommerce_update_1130_last_unpublished_variation_id';
+	$lookup_table   = $lookup_data_store->get_lookup_table_name();
+
+	// Driving from the posts side keeps the batch bounded by unpublished variations, which are the selective
+	// set here, and lets the query use the post_type/post_status index instead of scanning the lookup table.
+	$variation_ids = $wpdb->get_col(
+		$wpdb->prepare(
+			"SELECT ID FROM {$wpdb->posts}
+			WHERE ID > %d AND post_type = 'product_variation' AND post_status != %s
+			ORDER BY ID ASC
+			LIMIT 250",
+			(int) get_option( $last_id_option, 0 ),
+			ProductStatus::PUBLISH
+		)
+	);
+
+	if ( '' === $wpdb->last_error && ! empty( $variation_ids ) ) {
+		$variation_ids   = array_map( 'intval', $variation_ids );
+		$id_placeholders = implode( ', ', array_fill( 0, count( $variation_ids ), '%d' ) );
+
+		// Rows of a variation are always variation attribute rows, so matching on the id alone is enough. The
+		// status is checked again here: with direct updates on, a variation re-enabled since the batch was
+		// selected already has its rows back, and they must stay.
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- The table name comes from the data store, and trusted table names are interpolated directly because that is what WooCommerceInternal.DB.IdentifierPlaceholder.Unguarded asks for; placeholders are generated per ID.
+		$deleted = $wpdb->query(
+			$wpdb->prepare(
+				"DELETE lookup FROM {$lookup_table} AS lookup
+				INNER JOIN {$wpdb->posts} AS posts ON posts.ID = lookup.product_id
+				WHERE lookup.product_id IN ( {$id_placeholders} ) AND posts.post_status != %s",
+				array_merge( $variation_ids, array( ProductStatus::PUBLISH ) )
+			)
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+
+		if ( false !== $deleted ) {
+			// A concurrent run (the queue plus `wp wc update`) may already have saved this id or a later one, and update_option()
+			// reports that as false just like a failed write. It can also replace a later cursor with this one, which only makes a
+			// run reselect variations whose rows are already gone. The variations stay unpublished, so without a saved cursor the
+			// next run would pick the same batch again.
+			$cursor = end( $variation_ids );
+			if ( (int) get_option( $last_id_option, 0 ) >= $cursor || update_option( $last_id_option, $cursor, false ) ) {
+				return true;
+			}
+			// Re-read from the database. If the other run created the option after this process found it missing, the stale
+			// "missing" entry sits in 'notoptions', not under the option's own key.
+			wp_cache_delete( $last_id_option, 'options' );
+			wp_cache_delete( 'notoptions', 'options' );
+			if ( (int) get_option( $last_id_option, 0 ) >= $cursor ) {
+				return true;
+			}
+			wc_get_logger()->error(
+				'Stopped deleting the lookup rows of unpublished variations: the progress cursor could not be saved.',
+				array( 'source' => 'wc_update_1130_delete_unpublished_variation_lookup_rows' )
+			);
+		}
+	}
+
+	if ( '' !== $wpdb->last_error ) {
+		wc_get_logger()->error(
+			sprintf( 'Stopped deleting the lookup rows of unpublished variations: %s', $wpdb->last_error ),
+			array( 'source' => 'wc_update_1130_delete_unpublished_variation_lookup_rows' )
+		);
+	}
+
+	delete_option( $last_id_option );
+
+	// The layered nav counts cached from the deleted rows would otherwise be served until they expire, a day later.
+	WC_Cache_Helper::invalidate_attribute_count( wc_get_attribute_taxonomy_names() );
+
+	return false;
+}
+
+/**
+ * Delete the option that used to hold the back-in-stock restock admin notice.
+ *
+ * The notice is now stored per user in a transient. A notice pending at upgrade time would otherwise leave
+ * an autoloaded row behind that nothing reads or deletes any more.
+ *
+ * @since 11.3.0
+ */
+function wc_update_1130_delete_stock_notification_sync_notice_option(): void {
+	delete_option( 'wc_customer_stock_notifications_product_sync_notice' );
+}
+
+/**
+ * Backfill the payment method on Analytics order stats rows written before the column existed.
+ *
+ * A database error is logged and stops the backfill without a retry.
+ *
+ * @since 11.3.0
+ *
+ * @return bool True when another batch is due, false when done or stopped.
+ */
+function wc_update_1130_backfill_order_stats_payment_method() {
+	global $wpdb;
+
+	$stats_table    = $wpdb->prefix . 'wc_order_stats';
+	$last_id_option = 'woocommerce_update_1130_last_payment_method_order_id';
+
+	if ( $stats_table !== $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $stats_table ) ) ) {
+		return false;
+	}
+
+	$order_ids = $wpdb->get_col(
+		$wpdb->prepare(
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name cannot be prepared.
+			"SELECT order_id FROM {$stats_table} WHERE order_id > %d ORDER BY order_id ASC LIMIT 500",
+			(int) get_option( $last_id_option, 0 )
+		)
+	);
+
+	if ( '' === $wpdb->last_error && $order_ids ) {
+		$id_list = implode( ',', array_map( 'absint', $order_ids ) );
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- Table names and the id list are code-defined.
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$orders_table = OrdersTableDataStore::get_orders_table_name();
+			$from_orders  = "UPDATE {$stats_table} stats
+				JOIN {$orders_table} orders ON orders.id = stats.order_id
+				SET stats.payment_method = orders.payment_method
+				WHERE stats.order_id IN ({$id_list})
+				AND stats.payment_method IS NULL
+				AND orders.payment_method != ''";
+			$refund_join  = "JOIN {$orders_table} refund_orders ON refund_orders.id = refunds.order_id AND refund_orders.type = 'shop_order_refund'";
+		} else {
+			$from_orders = "UPDATE {$stats_table} stats
+				JOIN {$wpdb->postmeta} meta ON meta.post_id = stats.order_id AND meta.meta_key = '_payment_method'
+				SET stats.payment_method = meta.meta_value
+				WHERE stats.order_id IN ({$id_list})
+				AND stats.payment_method IS NULL
+				AND meta.meta_value != ''";
+			$refund_join = "JOIN {$wpdb->posts} refund_orders ON refund_orders.ID = refunds.order_id AND refund_orders.post_type = 'shop_order_refund'";
+		}
+
+		// A refund holds no payment method of its own, so it takes the refunded order's. That order has the lower id, so its row is already filled.
+		// The join on the order type leaves out other child orders, which the sync stores without the parent's payment method.
+		$from_parents = "UPDATE {$stats_table} refunds
+			{$refund_join}
+			JOIN {$stats_table} parents ON parents.order_id = refunds.parent_id
+			SET refunds.payment_method = parents.payment_method
+			WHERE refunds.order_id IN ({$id_list})
+			AND refunds.parent_id != 0
+			AND refunds.payment_method IS NULL
+			AND parents.payment_method IS NOT NULL";
+
+		$updated = false !== $wpdb->query( $from_orders ) && false !== $wpdb->query( $from_parents );
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
+
+		if ( $updated ) {
+			update_option( $last_id_option, (int) end( $order_ids ), false );
+
+			return true;
+		}
+	}
+
+	if ( '' !== $wpdb->last_error ) {
+		wc_get_logger()->error(
+			sprintf( 'Stopped backfilling the Analytics payment method: %s', $wpdb->last_error ),
+			array( 'source' => 'wc-updater' )
+		);
+	}
+
+	delete_option( $last_id_option );
+
+	// The report rows cached before the column was filled would otherwise be served for a week.
+	ReportsCache::invalidate();
+	// The same goes for the Orders report payment method filter, cached for a year.
+	wp_cache_delete( OrdersDataStore::ORDERS_PAYMENT_METHODS_ALL_CACHE_KEY, 'woocommerce_analytics' );
+
+	return false;
 }

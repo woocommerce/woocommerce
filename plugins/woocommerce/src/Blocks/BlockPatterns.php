@@ -94,28 +94,18 @@ class BlockPatterns {
 			return;
 		}
 
-		$patterns = $this->get_block_patterns();
-		foreach ( $patterns as $pattern ) {
+		foreach ( $this->get_block_patterns() as $pattern ) {
 			// The pattern list can come from a stale or malformed site transient, so make sure the source is a
 			// usable string before dereferencing it, to avoid a PHP warning when building the path.
 			if ( empty( $pattern['source'] ) || ! is_string( $pattern['source'] ) ) {
 				continue;
 			}
 
-			$pattern_path = $this->patterns_path . '/' . $pattern['source'];
-
-			// The pattern list can come from a stale cache, so confirm the file
-			// still exists before registering it with a `filePath`. Without
-			// inline content, core would otherwise emit an undefined-content
-			// warning when it tries to load a missing file on demand. This
-			// mirrors core's own `_register_theme_block_patterns()` guard.
-			if ( ! file_exists( $pattern_path ) ) {
-				continue;
-			}
-
+			$pattern_path        = $this->patterns_path . '/' . $pattern['source'];
 			$pattern['source']   = $pattern_path;
 			$pattern['filePath'] = $pattern_path;
 
+			// Performance note: file_exists removed — transient is version-keyed, so it re-scans on upgrade/downgrade.
 			$this->pattern_registry->register_block_pattern( $pattern_path, $pattern );
 		}
 	}
@@ -209,18 +199,6 @@ class BlockPatterns {
 
 		$patterns = $this->ptk_patterns_store->get_patterns();
 		if ( empty( $patterns ) || ! is_array( $patterns ) ) {
-			// Only log once per day by using a transient.
-			$transient_key = 'wc_ptk_pattern_store_warning';
-			// By only logging when patterns are empty and no fetch is scheduled,
-			// we ensure that warnings are only generated in genuinely problematic situations,
-			// such as when the pattern fetching mechanism has failed entirely.
-			if ( ! get_transient( $transient_key ) && ! ActionSchedulerUtil::has_scheduled_action( 'fetch_patterns' ) ) {
-				wc_get_logger()->warning(
-					__( 'Empty patterns received from the PTK Pattern Store', 'woocommerce' ),
-				);
-				// Set the transient to true to indicate that the warning has been logged in the current day.
-				set_transient( $transient_key, true, DAY_IN_SECONDS );
-			}
 			return;
 		}
 

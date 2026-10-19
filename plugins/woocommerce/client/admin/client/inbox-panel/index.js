@@ -204,7 +204,7 @@ const renderNotes = ( {
 								</Button>
 							</CardFooter>
 						);
-				  } )() }
+					} )() }
 		</Card>
 	);
 };

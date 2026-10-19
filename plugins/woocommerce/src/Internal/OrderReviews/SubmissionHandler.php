@@ -8,6 +8,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\OrderReviews;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use WC_Comments;
 use WC_Order;
 
 /**
@@ -340,12 +341,18 @@ class SubmissionHandler {
 			// Tag a row the checks rejected (spam/trash) as an automatic rejection,
 			// so a later valid resubmission is treated as a fresh attempt rather
 			// than a moderator's final verdict by has_rejected_review().
-			if ( in_array( wp_get_comment_status( $comment_id ), array( 'spam', 'trash' ), true ) ) {
+			$comment_status = wp_get_comment_status( $comment_id );
+			if ( in_array( $comment_status, array( 'spam', 'trash' ), true ) ) {
 				update_comment_meta( (int) $comment_id, self::AUTO_REJECTED_META_KEY, 1 );
 			}
 
+			// Core recounts an approved comment before writing its meta, so recount once the rating is stored.
+			if ( 'approved' === $comment_status ) {
+				WC_Comments::clear_transients( $review_post_id );
+			}
+
 			$result['comment_id'] = (int) $comment_id;
-			$result['status']     = 'approved' === wp_get_comment_status( $comment_id ) ? 'ok' : 'pending_moderation';
+			$result['status']     = 'approved' === $comment_status ? 'ok' : 'pending_moderation';
 
 			$request_slot_comments[ $slot_key ] = $result;
 			$results[ $row_index ]              = $result;
@@ -384,14 +391,14 @@ class SubmissionHandler {
 				array(
 					'comment_ID'      => $existing_id,
 					'comment_content' => $content,
+					// Stored by core before it recounts the product's ratings.
+					'comment_meta'    => array( 'rating' => $rating ),
 				)
 			)
 		);
 		if ( false === $update_ok || is_wp_error( $update_ok ) ) {
 			return array( 'error' => 'update_failed' );
 		}
-
-		update_comment_meta( $existing_id, 'rating', $rating );
 
 		// Drive the status explicitly so a previously auto-rejected row is untrashed
 		// when it now approves or holds. Only when it actually changes, so an

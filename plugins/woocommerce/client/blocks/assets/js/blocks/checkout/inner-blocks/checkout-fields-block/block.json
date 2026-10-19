@@ -1,6 +1,5 @@
 {
 	"name": "woocommerce/checkout-fields-block",
-	"version": "1.0.0",
 	"title": "Checkout Fields",
 	"description": "Column containing checkout address fields.",
 	"category": "woocommerce",

@@ -3,9 +3,12 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Admin;
 
+use Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler;
 use Automattic\WooCommerce\Internal\Admin\Settings;
+use WC_Helper_Order;
 use WC_REST_Setting_Options_Controller;
 use WC_Unit_Test_Case;
+use WP_REST_Request;
 
 /**
  * Tests for the Settings class.
@@ -287,6 +290,160 @@ class SettingsTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( array(), $setting['default'], 'An empty filtered default should stay empty in the UI.' );
 		$this->assertSame( array(), Settings::get_default_excluded_order_statuses(), 'The UI and runtime consumers should agree.' );
+	}
+
+	/**
+	 * @testdox The preloaded component settings expose the filtered defaults so "Reset defaults" can restore them.
+	 */
+	public function test_component_settings_expose_filtered_defaults(): void {
+		$this->add_default_status_filter( 'woocommerce_analytics_settings_default_actionable_order_statuses' );
+		// The settings are only injected in admin; the base tearDown unsets the current screen.
+		set_current_screen( 'dashboard' );
+
+		$settings = $this->sut->add_component_settings( array() );
+
+		$this->assertArrayHasKey( 'wcAdminSettingsDefaults', $settings, 'Defaults should be preloaded alongside wcAdminSettings.' );
+		$this->assertContains( 'refunded', $settings['wcAdminSettingsDefaults']['woocommerce_actionable_order_statuses'], 'The filtered default should reach the client.' );
+		$this->assertSame(
+			array( 'pending', 'cancelled', 'failed' ),
+			$settings['wcAdminSettingsDefaults']['woocommerce_excluded_report_order_statuses'],
+			'An unfiltered setting should keep its built-in default.'
+		);
+	}
+
+	/**
+	 * @testdox The preloaded component settings expose coupon discount types, including ones added by extensions.
+	 */
+	public function test_component_settings_expose_coupon_types(): void {
+		$add_type = function ( $types ) {
+			$types['custom_discount'] = 'Custom discount';
+			return $types;
+		};
+		add_filter( 'woocommerce_coupon_discount_types', $add_type );
+		$this->added_filters[] = array( 'woocommerce_coupon_discount_types', $add_type );
+		// Coupon types are only injected on wc-admin pages; the base tearDown unsets the current screen.
+		set_current_screen( 'dashboard' );
+		$_GET['page'] = 'wc-admin'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+		try {
+			$settings = $this->sut->add_component_settings( array() );
+		} finally {
+			unset( $_GET['page'] );
+		}
+
+		$this->assertSame( 'Custom discount', $settings['couponTypes']['custom_discount'] ?? null, 'A discount type added through the filter should reach the client.' );
+		$this->assertArrayHasKey( 'percent', $settings['couponTypes'], 'Core discount types should still be included.' );
+	}
+
+	/**
+	 * @testdox The preloaded component settings list the installed payment gateways by title, then any other gateway the stored orders were paid with, by id.
+	 */
+	public function test_component_settings_include_payment_gateways_that_are_no_longer_installed(): void {
+		foreach ( array( 'bacs', 'a_removed_gateway', '' ) as $payment_method ) {
+			$order = WC_Helper_Order::create_order();
+			$order->set_payment_method( $payment_method );
+			$order->save();
+			OrdersScheduler::import( $order->get_id() );
+		}
+		// Payment gateways are only injected on wc-admin pages; the base tearDown unsets the current screen.
+		set_current_screen( 'dashboard' );
+		$_GET['page'] = 'wc-admin'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+		try {
+			$gateways = $this->sut->add_component_settings( array() )['paymentGateways'];
+		} finally {
+			unset( $_GET['page'] );
+		}
+
+		$installed = array_keys( WC()->payment_gateways()->payment_gateways() );
+		$this->assertSame( $installed, array_slice( array_keys( $gateways ), 0, count( $installed ) ), 'The installed gateways should stay first, in their order.' );
+		$this->assertSame( 'Direct bank transfer', $gateways['bacs'], 'An installed gateway should keep its title.' );
+		$this->assertSame( 'a_removed_gateway', $gateways['a_removed_gateway'], 'A gateway that is gone should be listed under its id.' );
+		$this->assertArrayNotHasKey( '', $gateways, 'An order placed without a gateway should not add an empty option.' );
+	}
+
+	/**
+	 * @testdox The preloaded component settings leave the payment gateways out outside the wc-admin app, which is the only place that reads them.
+	 */
+	public function test_component_settings_leave_payment_gateways_out_outside_wc_admin(): void {
+		set_current_screen( 'dashboard' );
+
+		$this->assertArrayNotHasKey( 'paymentGateways', $this->sut->add_component_settings( array() ) );
+	}
+
+	/**
+	 * @testdox Saving an order status list that matches the default deletes the option, so the default filter keeps applying.
+	 */
+	public function test_saving_default_order_statuses_keeps_default_filter_applying(): void {
+		$this->add_default_status_filter( 'woocommerce_analytics_settings_default_actionable_order_statuses' );
+		update_option( 'woocommerce_actionable_order_statuses', array( 'processing' ) );
+
+		// What "Reset defaults" sends: the filtered default, here in a different order.
+		$this->save_wc_admin_setting( 'woocommerce_actionable_order_statuses', array( 'refunded', 'on-hold', 'processing' ) );
+
+		$this->assertFalse( get_option( 'woocommerce_actionable_order_statuses' ), 'A list matching the default should not be stored.' );
+
+		remove_filter( 'woocommerce_analytics_settings_default_actionable_order_statuses', array( $this, 'add_status_to_defaults' ) );
+		$setting = $this->find_setting( $this->get_wc_admin_group_settings(), 'woocommerce_actionable_order_statuses' );
+
+		$this->assertSame( array( 'processing', 'on-hold' ), $setting['value'], 'A later change to the default should still reach the setting.' );
+	}
+
+	/**
+	 * @testdox Saving the built-in default shown when a filter returns only undisplayable statuses stores it, so reports keep excluding what the page showed.
+	 */
+	public function test_saving_fallback_default_stores_it_when_runtime_default_differs(): void {
+		$callback = function () {
+			return array( 'not-a-real-status' );
+		};
+		add_filter( 'woocommerce_analytics_settings_default_excluded_order_statuses', $callback );
+		$this->added_filters[] = array( 'woocommerce_analytics_settings_default_excluded_order_statuses', $callback );
+
+		$setting = $this->find_setting( $this->get_wc_admin_group_settings(), 'woocommerce_excluded_report_order_statuses' );
+		$this->assertSame( array( 'pending', 'cancelled', 'failed' ), $setting['default'], 'The page should fall back to the built-in default.' );
+
+		$this->save_wc_admin_setting( 'woocommerce_excluded_report_order_statuses', array( 'pending', 'cancelled', 'failed' ) );
+
+		$this->assertSame( array( 'pending', 'cancelled', 'failed' ), get_option( 'woocommerce_excluded_report_order_statuses' ), 'The shown list differs from the runtime default, so it must be stored.' );
+	}
+
+	/**
+	 * @testdox Saving an order status list that differs from the default stores it.
+	 */
+	public function test_saving_non_default_order_statuses_stores_them(): void {
+		$this->save_wc_admin_setting( 'woocommerce_excluded_report_order_statuses', array( 'pending', 'failed' ) );
+
+		$this->assertSame( array( 'pending', 'failed' ), get_option( 'woocommerce_excluded_report_order_statuses' ) );
+	}
+
+	/**
+	 * @testdox Saving an empty order status list stores it, so clearing every status is not undone by the default.
+	 */
+	public function test_saving_empty_order_statuses_stores_them(): void {
+		$this->save_wc_admin_setting( 'woocommerce_excluded_report_order_statuses', array() );
+
+		$this->assertSame( array(), get_option( 'woocommerce_excluded_report_order_statuses' ) );
+	}
+
+	/**
+	 * Save a wc_admin setting through the REST settings controller, the path the Analytics settings page uses.
+	 *
+	 * @param string $id    Setting id.
+	 * @param mixed  $value Value to save.
+	 */
+	private function save_wc_admin_setting( string $id, $value ): void {
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/settings/wc_admin/' . $id );
+		$request->set_url_params(
+			array(
+				'group_id' => 'wc_admin',
+				'id'       => $id,
+			)
+		);
+		$request->set_param( 'value', $value );
+
+		$response = ( new WC_REST_Setting_Options_Controller() )->update_item( $request );
+
+		$this->assertNotWPError( $response, 'The setting should save without an error' );
 	}
 
 	/**

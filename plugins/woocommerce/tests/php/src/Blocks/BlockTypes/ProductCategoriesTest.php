@@ -128,4 +128,30 @@ class ProductCategoriesTest extends WC_Unit_Test_Case {
 		$this->assertStringNotContainsString( '>Empty<', $this->render_product_categories() );
 		$this->assertStringContainsString( '>Empty<', $this->render_product_categories( '{"hasEmpty":true}' ) );
 	}
+
+	/**
+	 * @testdox Should render nothing, without warnings, when the current category's children have no visible products.
+	 * @testWith ["hidden", "instock", "no"]
+	 *           ["visible", "outofstock", "yes"]
+	 *
+	 * @param string $catalog_visibility Catalog visibility of the only product.
+	 * @param string $stock_status       Stock status of the only product.
+	 * @param string $hide_out_of_stock  Value of the woocommerce_hide_out_of_stock_items option.
+	 */
+	public function test_children_only_without_visible_products( string $catalog_visibility, string $stock_status, string $hide_out_of_stock ): void {
+		update_option( 'woocommerce_hide_out_of_stock_items', $hide_out_of_stock );
+		$accessories_id = (int) wp_insert_term( 'Accessories', 'product_cat' )['term_id'];
+		$scarves_id     = (int) wp_insert_term( 'Scarves', 'product_cat', array( 'parent' => $accessories_id ) )['term_id'];
+		WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'category_ids'       => array( $scarves_id ),
+				'catalog_visibility' => $catalog_visibility,
+				'stock_status'       => $stock_status,
+			)
+		);
+		$this->go_to( get_term_link( $accessories_id, 'product_cat' ) );
+
+		$this->assertSame( '', $this->render_product_categories( '{"showChildrenOnly":true}' ) );
+	}
 }

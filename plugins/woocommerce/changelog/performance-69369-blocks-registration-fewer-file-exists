@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Trimmed the number of file_exists calls during blocks initialization for better performance.

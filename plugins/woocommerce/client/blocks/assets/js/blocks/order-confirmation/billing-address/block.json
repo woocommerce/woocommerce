@@ -1,6 +1,5 @@
 {
 	"name": "woocommerce/order-confirmation-billing-address",
-	"version": "1.0.0",
 	"title": "Billing Address",
 	"description": "Display the order confirmation billing address.",
 	"category": "woocommerce",

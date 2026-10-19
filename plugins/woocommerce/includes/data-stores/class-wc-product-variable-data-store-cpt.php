@@ -31,6 +31,13 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	protected $prices_array = array();
 
 	/**
+	 * Cached prices array hash pairs for child variations.
+	 *
+	 * @var array<string,string>
+	 */
+	private $prices_hashes = array();
+
+	/**
 	 * Read attributes from post meta.
 	 *
 	 * @param WC_Product $product Product object.
@@ -325,13 +332,33 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * Can be filtered by plugins which modify costs, but otherwise will include the raw meta costs unlike get_price() which runs costs through the woocommerce_get_price filter.
 	 * This is to ensure modified prices are not cached, unless intended.
 	 *
-	 * @param WC_Product $product Product object.
+	 * @param WC_Product $product     Product object.
 	 * @param bool       $for_display If true, prices will be adapted for display based on the `woocommerce_tax_display_shop` setting (including or excluding taxes).
 	 *
 	 * @return array of prices
 	 * @since  3.0.0
 	 */
 	public function read_price_data( &$product, $for_display = false ) {
+		$hashes = $this->prime_price_data_cache( $product );
+		$hash   = $for_display ? $hashes->hash_display : $hashes->hash_raw;
+
+		return array_key_exists( $hash, $this->prices_array ) ? $this->prices_array[ $hash ] : array();
+	}
+
+	/**
+	 * Primes the price data cache (request-level and when necessary transient).
+	 *
+	 * @param WC_Product $product Product object.
+	 * @return object{ hash_display:string, hash_raw:string }
+	 */
+	private function prime_price_data_cache( &$product ): object {
+		// Performance note: cache hash pairs so $hash_raw calculation costs nothing for repetitive calls.
+		$hash_display = $this->get_price_hash( $product, true );
+		if ( ! array_key_exists( $hash_display, $this->prices_hashes ) ) {
+			$this->prices_hashes[ $hash_display ] = $this->get_price_hash( $product, false );
+		}
+		$hash_raw = $this->prices_hashes[ $hash_display ];
+
 		/**
 		 * If you are here to investigate performance of this method: yes, it is heavy in RAM and CPU usage overall.
 		 *
@@ -348,16 +375,14 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		 * That leaves single optimization route:
 		 * - rewrite this method, if breaking the contracts is an option (it's not as per WooCommerce v11.1)
 		 */
-		$price_hash = $this->get_price_hash( $product, $for_display );
-		if ( empty( $this->prices_array[ $price_hash ] ) ) {
+		if ( empty( $this->prices_array[ $hash_display ] ) || empty( $this->prices_array[ $hash_raw ] ) ) {
 			/**
 			 * Transient name for storing prices for this product (note: Max transient length is 45)
 			 *
 			 * @since 2.5.0 a single transient is used per product for all prices, rather than many transients per product.
 			 */
-			$transient_name      = 'wc_var_prices_' . $product->get_id();
-			$transient_version   = WC_Cache_Helper::get_transient_version( 'product' );
-			$opposite_price_hash = $this->taxes_influence_price( $product ) ? null : $this->get_price_hash( $product, ! $for_display );
+			$transient_name    = 'wc_var_prices_' . $product->get_id();
+			$transient_version = WC_Cache_Helper::get_transient_version( 'product' );
 
 			// If the prices are not valid, reset the transient cache.
 			$transient_cached_prices_array = array_filter( (array) json_decode( (string) get_transient( $transient_name ), true ) );
@@ -367,12 +392,14 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 
 			// If the prices are not stored for this hash, generate them and add to the transient.
 			// Check also the opposite price hash as it may have changed (see get_price_hash).
-			if ( empty( $transient_cached_prices_array[ $price_hash ] ) || ( null !== $opposite_price_hash && empty( $transient_cached_prices_array[ $opposite_price_hash ] ) ) ) {
-				$prices_array = array(
+			if ( empty( $transient_cached_prices_array[ $hash_display ] ) || empty( $transient_cached_prices_array[ $hash_raw ] ) ) {
+				$empty_prices         = array(
 					'price'         => array(),
 					'regular_price' => array(),
 					'sale_price'    => array(),
 				);
+				$display_prices_array = $empty_prices;
+				$raw_prices_array     = $empty_prices;
 
 				$variation_ids = $product->get_visible_children();
 
@@ -381,7 +408,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 					_prime_post_caches( $variation_ids );
 				}
 
-				$tax_display_mode = $for_display ? get_option( 'woocommerce_tax_display_shop' ) : null;
+				$tax_display_mode = get_option( 'woocommerce_tax_display_shop' );
 				$price_decimals   = wc_get_price_decimals();
 				foreach ( $variation_ids as $variation_id ) {
 					$variation = wc_get_product( $variation_id );
@@ -457,61 +484,29 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 							$sale_price = $regular_price;
 						}
 
-						// If we are getting prices for display, we need to account for taxes.
-						if ( $for_display ) {
-							if ( TaxDisplayMode::INCLUSIVE === $tax_display_mode ) {
-								$price         = '' === $price ? '' : wc_get_price_including_tax(
-									$variation,
-									array(
-										'qty'   => 1,
-										'price' => $price,
-									)
-								);
-								$regular_price = '' === $regular_price ? '' : wc_get_price_including_tax(
-									$variation,
-									array(
-										'qty'   => 1,
-										'price' => $regular_price,
-									)
-								);
-								$sale_price    = '' === $sale_price ? '' : wc_get_price_including_tax(
-									$variation,
-									array(
-										'qty'   => 1,
-										'price' => $sale_price,
-									)
-								);
-							} else {
-								$price         = '' === $price ? '' : wc_get_price_excluding_tax(
-									$variation,
-									array(
-										'qty'   => 1,
-										'price' => $price,
-									)
-								);
-								$regular_price = '' === $regular_price ? '' : wc_get_price_excluding_tax(
-									$variation,
-									array(
-										'qty'   => 1,
-										'price' => $regular_price,
-									)
-								);
-								$sale_price    = '' === $sale_price ? '' : wc_get_price_excluding_tax(
-									$variation,
-									array(
-										'qty'   => 1,
-										'price' => $sale_price,
-									)
-								);
-							}
+						// Capture raw prices before tax adjustment.
+						$raw_prices_array['price'][ $variation_id ]         = wc_format_decimal( $price, $price_decimals );
+						$raw_prices_array['regular_price'][ $variation_id ] = wc_format_decimal( $regular_price, $price_decimals );
+						$raw_prices_array['sale_price'][ $variation_id ]    = wc_format_decimal( $sale_price, $price_decimals );
+
+						// Tax-adjust for display prices.
+						if ( TaxDisplayMode::INCLUSIVE === $tax_display_mode ) {
+							$price         = '' === $price ? '' : wc_get_price_including_tax( $variation, array( 'price' => $price ) );
+							$regular_price = '' === $regular_price ? '' : wc_get_price_including_tax( $variation, array( 'price' => $regular_price ) );
+							$sale_price    = '' === $sale_price ? '' : wc_get_price_including_tax( $variation, array( 'price' => $sale_price ) );
+						} else {
+							$price         = '' === $price ? '' : wc_get_price_excluding_tax( $variation, array( 'price' => $price ) );
+							$regular_price = '' === $regular_price ? '' : wc_get_price_excluding_tax( $variation, array( 'price' => $regular_price ) );
+							$sale_price    = '' === $sale_price ? '' : wc_get_price_excluding_tax( $variation, array( 'price' => $sale_price ) );
 						}
 
-						$prices_array['price'][ $variation_id ]         = wc_format_decimal( $price, $price_decimals );
-						$prices_array['regular_price'][ $variation_id ] = wc_format_decimal( $regular_price, $price_decimals );
-						$prices_array['sale_price'][ $variation_id ]    = wc_format_decimal( $sale_price, $price_decimals );
+						$display_prices_array['price'][ $variation_id ]         = wc_format_decimal( $price, $price_decimals );
+						$display_prices_array['regular_price'][ $variation_id ] = wc_format_decimal( $regular_price, $price_decimals );
+						$display_prices_array['sale_price'][ $variation_id ]    = wc_format_decimal( $sale_price, $price_decimals );
 
 						if ( has_filter( 'woocommerce_variation_prices_array' ) ) {
-							$original_prices_array = $prices_array;
+							$original_display_prices_array = $display_prices_array;
+							$original_raw_prices_array     = $raw_prices_array;
 
 							/**
 							 * Filter the variation prices array before storing in transient cache.
@@ -526,23 +521,16 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 							 * @param WC_Product   $variation    The variation product object.
 							 * @param bool         $for_display  Whether prices are for display (with tax adjustments) or for calculations.
 							 */
-							$prices_array = apply_filters( 'woocommerce_variation_prices_array', $prices_array, $variation, $for_display );
-							if ( null !== $opposite_price_hash ) {
-								// $for_display doesn't affect raw prices here, but a woocommerce_variation_prices_array hook might.
-								// phpcs:ignore WooCommerce.Commenting.CommentHooks
-								$opposite_prices_array = apply_filters( 'woocommerce_variation_prices_array', $original_prices_array, $variation, ! $for_display );
-								if ( $opposite_prices_array !== $prices_array ) {
-									$opposite_price_hash = null;
-								}
-							}
+							$display_prices_array = apply_filters( 'woocommerce_variation_prices_array', $original_display_prices_array, $variation, true );
+							$raw_prices_array     = apply_filters( 'woocommerce_variation_prices_array', $original_raw_prices_array, $variation, false );
 						}
 					}
 				}
 
 				// Add all pricing data to the transient array: ensure the hashes always pushed to the end.
-				foreach ( array_filter( array( $price_hash, $opposite_price_hash ) ) as $hash ) {
+				foreach ( array( $hash_display, $hash_raw ) as $hash ) {
 					unset( $transient_cached_prices_array[ $hash ] );
-					foreach ( $prices_array as $key => $values ) {
+					foreach ( ( $hash === $hash_display ? $display_prices_array : $raw_prices_array ) as $key => $values ) {
 						$transient_cached_prices_array[ $hash ][ $key ] = $values;
 					}
 				}
@@ -586,8 +574,8 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 			 * @param WC_Product $product      The variable product object.
 			 * @param bool       $for_display  Whether prices are being retrieved for display.
 			 */
-			$this->prices_array[ $price_hash ] = apply_filters( 'woocommerce_variation_prices', $transient_cached_prices_array[ $price_hash ], $product, $for_display );
-			if ( $this->prices_array[ $price_hash ] !== $transient_cached_prices_array[ $price_hash ] && ! $this->validate_prices_data( array( $price_hash => $this->prices_array[ $price_hash ] ), $transient_version ) ) {
+			$this->prices_array[ $hash_display ] = apply_filters( 'woocommerce_variation_prices', $transient_cached_prices_array[ $hash_display ], $product, true );
+			if ( $this->prices_array[ $hash_display ] !== $transient_cached_prices_array[ $hash_display ] && ! $this->validate_prices_data( array( $hash_display => $this->prices_array[ $hash_display ] ), $transient_version ) ) {
 				wc_doing_it_wrong(
 					__METHOD__,
 					__( '`woocommerce_variation_prices` returned an unsupported data format. The value is currently used as-is but will be ignored in a future release. Ensure your callback returns the expected array structure.', 'woocommerce' ),
@@ -595,18 +583,20 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 				);
 			}
 
-			if ( null !== $opposite_price_hash && $opposite_price_hash !== $price_hash ) {
-				$this->prices_array[ $opposite_price_hash ] = apply_filters( 'woocommerce_variation_prices', $transient_cached_prices_array[ $opposite_price_hash ], $product, ! $for_display );
-				if ( $this->prices_array[ $opposite_price_hash ] !== $transient_cached_prices_array[ $opposite_price_hash ] && ! $this->validate_prices_data( array( $opposite_price_hash => $this->prices_array[ $opposite_price_hash ] ), $transient_version ) ) {
-					wc_doing_it_wrong(
-						__METHOD__,
-						__( '`woocommerce_variation_prices` returned an unsupported data format. The value is currently used as-is but will be ignored in a future release. Ensure your callback returns the expected array structure.', 'woocommerce' ),
-						'11.1'
-					);
-				}
+			$this->prices_array[ $hash_raw ] = apply_filters( 'woocommerce_variation_prices', $transient_cached_prices_array[ $hash_raw ], $product, false );
+			if ( $this->prices_array[ $hash_raw ] !== $transient_cached_prices_array[ $hash_raw ] && ! $this->validate_prices_data( array( $hash_raw => $this->prices_array[ $hash_raw ] ), $transient_version ) ) {
+				wc_doing_it_wrong(
+					__METHOD__,
+					__( '`woocommerce_variation_prices` returned an unsupported data format. The value is currently used as-is but will be ignored in a future release. Ensure your callback returns the expected array structure.', 'woocommerce' ),
+					'11.1'
+				);
 			}
 		}
-		return $this->prices_array[ $price_hash ];
+
+		return (object) array(
+			'hash_display' => $hash_display,
+			'hash_raw'     => $hash_raw,
+		);
 	}
 
 	/**
@@ -616,8 +606,11 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 	 * @return bool True if the prices will be different with or without taxes.
 	 *
 	 * @since 10.4.0
+	 * @deprecated since 11.3.0 after read_price_data method optimization renders this method obsolete
 	 */
 	protected function taxes_influence_price( $product ): bool {
+		wc_deprecated_function( __METHOD__, '11.3.0' );
+
 		if ( ! $product->is_taxable() ) {
 			$taxes_influence_price = false;
 		} elseif ( empty( WC_Tax::get_rates( $product->get_tax_class() ) ) ) {
@@ -625,7 +618,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		} else {
 			// Taxes influence the price regardless of VAT exempt status. Even when a
 			// customer is VAT exempt, the displayed prices differ from non-exempt
-			// prices, so they need separate cache entries and the opposite_price_hash
+			// prices, so they need separate cache entries and the hash_raw
 			// optimization should not apply. Returning false here was causing cached
 			// non-exempt prices to be served to VAT exempt customers.
 			$taxes_influence_price = true;
@@ -644,8 +637,9 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		 * @param WC_Product $product               The variable product being evaluated.
 		 *
 		 * @since 10.9.0
+		 * @deprecated since 11.3.0 after read_price_data method optimization renders this filter obsolete
 		 */
-		return (bool) apply_filters( 'woocommerce_variable_product_taxes_influence_price', $taxes_influence_price, $product );
+		return (bool) apply_filters_deprecated( 'woocommerce_variable_product_taxes_influence_price', array( $taxes_influence_price, $product ), '11.3.0' );
 	}
 
 	/**
@@ -731,10 +725,12 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		 * @param array      $price_hash Array of factors used to generate the cache key hash.
 		 * @param WC_Product $product     The variable product object.
 		 * @param bool       $for_display Whether prices are for display (with tax adjustments) or calculations.
+		 * @return array
 		 */
 		$price_hash = apply_filters( 'woocommerce_get_variation_prices_hash', $price_hash, $product, $for_display );
 
-		return md5( wp_json_encode( $price_hash ) );
+		// Pushing $for_display into the hash array is means of scoping, introduced in order to reduce hash collisions risk.
+		return md5( wp_json_encode( array( $price_hash, (bool) $for_display ) ) );
 	}
 
 	/**
@@ -829,124 +825,6 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 		}
 
 		return $has_matches;
-	}
-
-	/**
-	 * Decide whether stored variation data leaves room for the variation to be purchasable and in stock.
-	 *
-	 * This mirrors the filter-free core of WC_Product_Variation::is_purchasable() && is_in_stock(): published,
-	 * not out of stock, and a regular or sale price present. It is a pre-check, not a verdict: filters,
-	 * subclasses and custom data stores can still change the real answer either way. A missing stock status
-	 * counts as in stock, matching the product object default.
-	 *
-	 * Called with `self::` here and by class name from WC_Product_Variable, on purpose. The two callers read
-	 * the same state from different places (this query, and the primed caches), so they have to reach the
-	 * same predicate; a subclass that redefined it for one path would silently reorder only the other.
-	 *
-	 * @internal
-	 *
-	 * @since 11.2.0
-	 *
-	 * @param string $status        Post status.
-	 * @param string $stock_status  Stored `_stock_status` ('' when absent).
-	 * @param string $regular_price Stored `_regular_price`.
-	 * @param string $sale_price    Stored `_sale_price`.
-	 * @return bool
-	 */
-	public static function stored_state_allows_purchase( string $status, string $stock_status, string $regular_price, string $sale_price ): bool {
-		if ( ProductStatus::PUBLISH !== $status ) {
-			return false;
-		}
-		if ( '' !== $stock_status && ProductStockStatus::OUT_OF_STOCK === $stock_status ) {
-			return false;
-		}
-		return '' !== $regular_price || '' !== $sale_price;
-	}
-
-	/**
-	 * Narrow a list of variation IDs to those that could be purchasable and in stock, judged on stored data only.
-	 *
-	 * See stored_state_allows_purchase() for the predicate. Input order is preserved; duplicates and unknown
-	 * IDs are dropped. Reads wp_posts and wp_postmeta directly, by primary key and post_id index only, in
-	 * two unchunked IN() lookups sized by the caller's children count (measured linear: 8 ms at 500 IDs,
-	 * 144 ms at 50,000 against a 16 MB max_allowed_packet).
-	 *
-	 * @internal
-	 *
-	 * @since 11.2.0
-	 *
-	 * @param WC_Product $product       Parent variable product, used for log context on a failed read.
-	 * @param int[]      $variation_ids Variation IDs to narrow, typically `WC_Product_Variable::get_children()`.
-	 * @return int[] Subset of `$variation_ids` that may be purchasable.
-	 */
-	public function get_purchasable_variation_candidates( $product, array $variation_ids ): array {
-		global $wpdb;
-
-		$variation_ids = array_values( array_unique( array_map( 'intval', $variation_ids ) ) );
-		if ( empty( $variation_ids ) ) {
-			return array();
-		}
-
-		$placeholders = implode( ', ', array_fill( 0, count( $variation_ids ), '%d' ) );
-
-		$status_query = "SELECT ID, post_status FROM {$wpdb->posts} WHERE ID IN ( {$placeholders} )";
-		// ORDER BY meta_id so duplicate rows resolve the way get_post_meta( ..., true ) resolves them.
-		$meta_query = "SELECT post_id, meta_key, meta_value FROM {$wpdb->postmeta} WHERE post_id IN ( {$placeholders} ) AND meta_key IN ( '_stock_status', '_regular_price', '_sale_price' ) ORDER BY meta_id ASC";
-
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		$statuses = $wpdb->get_results( $wpdb->prepare( $status_query, ...$variation_ids ), ARRAY_A );
-		// last_error is reset per query, so capture it here or a clean second query would hide a failed first one.
-		$error = $wpdb->last_error;
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		$meta  = $wpdb->get_results( $wpdb->prepare( $meta_query, ...$variation_ids ), ARRAY_A );
-		$error = '' !== $error ? $error : $wpdb->last_error;
-
-		if ( '' !== $error ) {
-			wc_get_logger()->error(
-				'Failed to read stored state for purchasable variation candidates.',
-				array(
-					'source'     => 'product-variable-data-store',
-					'product_id' => $product->get_id(),
-					'error'      => $error,
-				)
-			);
-		}
-
-		$state = array();
-		foreach ( (array) $statuses as $row ) {
-			$state[ (int) $row['ID'] ] = array(
-				'status'         => (string) $row['post_status'],
-				'_stock_status'  => '',
-				'_regular_price' => '',
-				'_sale_price'    => '',
-			);
-		}
-		$seen = array();
-		foreach ( (array) $meta as $row ) {
-			$id  = (int) $row['post_id'];
-			$key = $row['meta_key'];
-			if ( ! isset( $state[ $id ] ) || isset( $seen[ $id ][ $key ] ) ) {
-				continue;
-			}
-			$seen[ $id ][ $key ] = true;
-			// maybe_unserialize() so a serialized value reads the same here as it does through get_post_meta().
-			$value                = maybe_unserialize( $row['meta_value'] );
-			$state[ $id ][ $key ] = is_scalar( $value ) ? (string) $value : '';
-		}
-
-		return array_values(
-			array_filter(
-				$variation_ids,
-				function ( $variation_id ) use ( $state ) {
-					return isset( $state[ $variation_id ] ) && self::stored_state_allows_purchase(
-						$state[ $variation_id ]['status'],
-						$state[ $variation_id ]['_stock_status'],
-						$state[ $variation_id ]['_regular_price'],
-						$state[ $variation_id ]['_sale_price']
-					);
-				}
-			)
-		);
 	}
 
 	/**

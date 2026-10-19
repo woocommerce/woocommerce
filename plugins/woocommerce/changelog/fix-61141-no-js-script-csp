@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Allow JavaScript detection to work with nonce-based Content Security Policies.

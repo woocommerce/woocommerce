@@ -92,8 +92,7 @@ class Filterer {
 			$in_stock_clause = '';
 		}
 
-		$attribute_ids_for_and_filtering = array();
-		$clauses                         = array();
+		$clauses = array();
 		foreach ( $attributes_to_filter_by as $taxonomy => $data ) {
 			$all_terms                  = get_terms( $taxonomy, array( 'hide_empty' => false ) );
 			$term_ids_by_slug           = wp_list_pluck( $all_terms, 'term_id', 'slug' );
@@ -106,7 +105,24 @@ class Filterer {
 
 			if ( 0 !== $count ) {
 				if ( $is_and_query && $count > 1 ) {
-					$attribute_ids_for_and_filtering = array_merge( $attribute_ids_for_and_filtering, $term_ids_to_filter_by );
+					$clauses[] = "
+						{$clause_root}
+						SELECT product_or_parent_id
+						FROM {$this->lookup_table_name} lt
+						WHERE is_variation_attribute=0
+						{$in_stock_clause}
+						AND term_id in {$term_ids_to_filter_by_list}
+						GROUP BY product_id
+						HAVING COUNT(product_id)={$count}
+						UNION
+						SELECT product_or_parent_id
+						FROM {$this->lookup_table_name} lt
+						WHERE is_variation_attribute=1
+						{$in_stock_clause}
+						AND term_id in {$term_ids_to_filter_by_list}
+						GROUP BY product_or_parent_id
+						HAVING COUNT(DISTINCT term_id)={$count}
+					)";
 				} else {
 					$clauses[] = "
 							{$clause_root}
@@ -117,29 +133,6 @@ class Filterer {
 						)";
 				}
 			}
-		}
-
-		if ( ! empty( $attribute_ids_for_and_filtering ) ) {
-			$count                      = count( $attribute_ids_for_and_filtering );
-			$term_ids_to_filter_by_list = '(' . join( ',', $attribute_ids_for_and_filtering ) . ')';
-			$clauses[]                  = "
-				{$clause_root}
-				SELECT product_or_parent_id
-				FROM {$this->lookup_table_name} lt
-				WHERE is_variation_attribute=0
-				{$in_stock_clause}
-				AND term_id in {$term_ids_to_filter_by_list}
-				GROUP BY product_id
-				HAVING COUNT(product_id)={$count}
-				UNION
-				SELECT product_or_parent_id
-				FROM {$this->lookup_table_name} lt
-				WHERE is_variation_attribute=1
-				{$in_stock_clause}
-				AND term_id in {$term_ids_to_filter_by_list}
-				GROUP BY product_or_parent_id
-				HAVING COUNT(DISTINCT term_id)={$count}
-			)";
 		}
 
 		if ( ! empty( $clauses ) ) {
@@ -304,19 +297,22 @@ class Filterer {
 			$attributes_to_filter_by = \WC_Query::get_layered_nav_chosen_attributes();
 
 			if ( ! empty( $attributes_to_filter_by ) ) {
-				$and_term_ids = array();
-
 				foreach ( $attributes_to_filter_by as $taxonomy => $data ) {
 					if ( 'and' !== $data['query_type'] ) {
 						continue;
 					}
-					$all_terms             = get_terms( $taxonomy, array( 'hide_empty' => false ) );
-					$term_ids_by_slug      = wp_list_pluck( $all_terms, 'term_id', 'slug' );
-					$term_ids_to_filter_by = array_values( array_intersect_key( $term_ids_by_slug, array_flip( $data['terms'] ) ) );
-					$and_term_ids          = array_merge( $and_term_ids, $term_ids_to_filter_by );
-				}
+					$all_terms        = get_terms(
+						array(
+							'taxonomy'   => $taxonomy,
+							'hide_empty' => false,
+						)
+					);
+					$term_ids_by_slug = wp_list_pluck( $all_terms, 'term_id', 'slug' );
+					$and_term_ids     = array_values( array_intersect_key( $term_ids_by_slug, array_flip( $data['terms'] ) ) );
 
-				if ( ! empty( $and_term_ids ) ) {
+					if ( empty( $and_term_ids ) ) {
+						continue;
+					}
 					$terms_count   = count( $and_term_ids );
 					$term_ids_list = '(' . join( ',', $and_term_ids ) . ')';
 					// The extra derived table ("SELECT product_or_parent_id FROM") is needed for performance
