@@ -91,6 +91,14 @@ jest.mock( '../../../../events', () => ( {
 const useSettingsMock = useSettings as jest.Mock;
 const fontSizePickerMock = FontSizePicker as unknown as jest.Mock;
 
+const selectAppearance = ( value: {
+	fontStyle?: string;
+	fontWeight?: string;
+} ) => {
+	expect( fontAppearance.onChange ).toBeDefined();
+	act( () => fontAppearance.onChange( value ) );
+};
+
 describe( 'TypographyElementPanel', () => {
 	beforeEach( () => {
 		fontSizePickerMock.mockClear();
@@ -122,12 +130,7 @@ describe( 'TypographyElementPanel', () => {
 
 		render( <TypographyElementPanel element="text" headingLevel="" /> );
 
-		act( () =>
-			fontAppearance.onChange( {
-				fontStyle: 'italic',
-				fontWeight: '700',
-			} )
-		);
+		selectAppearance( { fontStyle: 'italic', fontWeight: '700' } );
 
 		// Two separate writes would both read the same stale theme, so the
 		// second would overwrite the first and drop `fontStyle`.
@@ -148,12 +151,7 @@ describe( 'TypographyElementPanel', () => {
 			<TypographyElementPanel element="heading" headingLevel="h2" />
 		);
 
-		act( () =>
-			fontAppearance.onChange( {
-				fontStyle: 'italic',
-				fontWeight: '400',
-			} )
-		);
+		selectAppearance( { fontStyle: 'italic', fontWeight: '400' } );
 
 		expect( emailStyles.updateStyles ).toHaveBeenCalledTimes( 1 );
 		expect( emailStyles.updateStyles ).toHaveBeenCalledWith( {
@@ -165,15 +163,38 @@ describe( 'TypographyElementPanel', () => {
 		} );
 	} );
 
+	it( 'clears both Appearance props in a single update when deselected', () => {
+		emailStyles.userStyles = {
+			typography: {
+				fontSize: '16px',
+				fontStyle: 'italic',
+				fontWeight: '700',
+			},
+			color: { text: '#111111' },
+		};
+
+		render( <TypographyElementPanel element="text" headingLevel="" /> );
+
+		// What the Appearance tool's onDeselect hands back.
+		selectAppearance( { fontStyle: undefined, fontWeight: undefined } );
+
+		expect( emailStyles.updateStyleProp ).not.toHaveBeenCalled();
+		expect( emailStyles.updateStyles ).toHaveBeenCalledTimes( 1 );
+		// toStrictEqual, so a missing key fails rather than matching undefined.
+		expect( emailStyles.updateStyles.mock.calls[ 0 ][ 0 ] ).toStrictEqual( {
+			typography: {
+				fontSize: '16px',
+				fontStyle: undefined,
+				fontWeight: undefined,
+			},
+			color: { text: '#111111' },
+		} );
+	} );
+
 	it( 'stores both Appearance props under the element for other elements', () => {
 		render( <TypographyElementPanel element="link" headingLevel="" /> );
 
-		act( () =>
-			fontAppearance.onChange( {
-				fontStyle: 'italic',
-				fontWeight: '700',
-			} )
-		);
+		selectAppearance( { fontStyle: 'italic', fontWeight: '700' } );
 
 		expect( emailStyles.updateStyles ).toHaveBeenCalledTimes( 1 );
 		expect( emailStyles.updateStyles ).toHaveBeenCalledWith( {
