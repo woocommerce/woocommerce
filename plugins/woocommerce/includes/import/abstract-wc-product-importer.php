@@ -905,7 +905,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * can contain the separator, as in `Red, "Blue, navy", Green`. Quotes that are
 	 * balanced inside a segment (`"Large" size`, `15"`) never open or close a value.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 *
 	 * @param string[] $segments  Segments produced by splitting the cell on the separator.
 	 * @param string   $separator Separator the segments were split on.
