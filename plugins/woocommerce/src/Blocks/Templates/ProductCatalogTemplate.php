@@ -25,7 +25,7 @@ class ProductCatalogTemplate extends AbstractTemplate {
 	 */
 	public function init() {
 		add_action( 'template_redirect', array( $this, 'render_block_template' ) );
-		add_filter( 'get_block_templates', array( $this, 'handle_get_block_templates' ), 20, 3 );
+		add_filter( 'get_block_templates', array( $this, 'handle_get_block_templates_for_post_content' ), 20, 3 );
 		add_filter( 'get_post_metadata', array( $this, 'handle_get_post_metadata' ), 10, 4 );
 	}
 
@@ -51,6 +51,30 @@ class ProductCatalogTemplate extends AbstractTemplate {
 		}
 
 		return $value;
+	}
+
+	/**
+	 * Ensure WordPress can read the first Product Catalog template at index 0.
+	 * See https://core.trac.wordpress.org/ticket/62407
+	 *
+	 * @internal
+	 *
+	 * @param \WP_Block_Template[] $templates Available templates.
+	 * @param array                $query Template query arguments.
+	 * @param string               $template_type Template type.
+	 * @return \WP_Block_Template[]
+	 */
+	public static function handle_get_block_templates_for_post_content( $templates, $query, $template_type ) {
+		if (
+			'wp_template' === $template_type &&
+			is_array( $templates ) &&
+			is_array( $query['slug__in'] ?? null ) &&
+			in_array( self::SLUG, $query['slug__in'], true )
+		) {
+			return array_values( $templates );
+		}
+
+		return $templates;
 	}
 
 	/**
