@@ -206,10 +206,10 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	/**
 	 * Find a product previously mapped from an original CSV ID.
 	 *
-	 * Only mappings backed by an `_original_id` meta row are cached: successful
-	 * lookups and placeholders created by this instance. Misses are not cached
-	 * because a later row or a hook can still create the mapping. The cache
-	 * assumes placeholders are not deleted while a batch is being parsed.
+	 * Cached mappings are successful `_original_id` meta lookups, placeholders created by
+	 * this instance, and products matched by SKU when updating a row whose ID is missing.
+	 * Misses are not cached because a later row or a hook can still create the mapping.
+	 * The cache assumes placeholders are not deleted while a batch is being parsed.
 	 *
 	 * @param int $original_id Original product ID from the CSV file.
 	 * @return int Mapped product ID, or 0 when no mapping exists.
@@ -232,10 +232,10 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	}
 
 	/**
-	 * Remember a placeholder created for an original CSV ID during this import request.
+	 * Remember the product an original CSV ID resolved to during this import request.
 	 *
 	 * @param int $original_id Original product ID from the CSV file.
-	 * @param int $product_id  Placeholder product ID.
+	 * @param int $product_id  Product ID the original ID now maps to.
 	 */
 	private function remember_original_id_mapping( $original_id, $product_id ): void {
 		$original_id = absint( $original_id );
@@ -351,7 +351,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 		// Not updating? Make sure we have a new placeholder for this ID.
 		if ( ! $this->params['update_existing'] ) {
-			$row_sku     = $this->get_row_sku();
+			$row_sku     = $this->get_row_value( 'sku' );
 			$id_from_sku = $row_sku ? wc_get_product_id_by_sku( $row_sku ) : 0;
 
 			// If row has a SKU, make sure placeholder was not made already.
@@ -377,10 +377,10 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		// An ID exported from another site may not exist here. Fall back to the row's SKU so the
 		// row updates the matching product instead of failing later with an invalid product error.
 		if ( ! in_array( get_post_type( $id ), array( 'product', 'product_variation' ), true ) ) {
-			$row_sku     = $this->get_row_sku();
+			$row_sku     = $this->get_row_value( 'sku' );
 			$id_from_sku = $row_sku ? wc_get_product_id_by_sku( $row_sku ) : 0;
 
-			if ( $id_from_sku ) {
+			if ( $id_from_sku && $this->row_type_matches_product( $id_from_sku ) ) {
 				$this->remember_original_id_mapping( $id, $id_from_sku );
 				return $id_from_sku;
 			}
@@ -390,18 +390,41 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	}
 
 	/**
-	 * Get the SKU column value of the row currently being parsed.
+	 * Get a column value of the row currently being parsed.
 	 *
-	 * @return string Raw SKU cell value, or an empty string when the file has no SKU column.
+	 * @param string $key Mapped column key, such as 'sku' or 'type'.
+	 * @return string Raw cell value, or an empty string when the file has no such column.
 	 */
-	private function get_row_sku(): string {
-		$sku_column_index = array_search( 'sku', $this->get_mapped_keys(), true );
+	private function get_row_value( string $key ): string {
+		$column_index = array_search( $key, $this->get_mapped_keys(), true );
 
-		if ( false === $sku_column_index ) {
+		if ( false === $column_index ) {
 			return '';
 		}
 
-		return (string) ( $this->raw_data[ $this->parsing_raw_data_index ][ $sku_column_index ] ?? '' );
+		return (string) ( $this->raw_data[ $this->parsing_raw_data_index ][ $column_index ] ?? '' );
+	}
+
+	/**
+	 * Whether the row's Type column agrees with an existing product on being a variation.
+	 *
+	 * A SKU match across that line would make get_product_object() convert the product, so the
+	 * fallback refuses it. A row without a Type column cannot convert anything and always matches.
+	 *
+	 * @param int $product_id Existing product ID matched by SKU.
+	 * @return bool
+	 */
+	private function row_type_matches_product( int $product_id ): bool {
+		$row_type = $this->get_row_value( 'type' );
+
+		if ( '' === $row_type ) {
+			return true;
+		}
+
+		$row_is_variation     = in_array( ProductType::VARIATION, array_map( 'trim', explode( ',', strtolower( $row_type ) ) ), true );
+		$product_is_variation = 'product_variation' === get_post_type( $product_id );
+
+		return $row_is_variation === $product_is_variation;
 	}
 
 	/**
@@ -1472,7 +1495,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			}
 
 			if ( $sku ) {
-				$id_from_sku = wc_get_product_id_by_sku( $sku );
+				$id_from_sku = absint( wc_get_product_id_by_sku( $sku ) );
 				$product     = $id_from_sku ? wc_get_product( $id_from_sku ) : false;
 				$sku_exists  = $product && 'importing' !== $product->get_status();
 			}
@@ -1548,7 +1571,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 			if ( is_wp_error( $result ) ) {
 				if ( $id_exists && $sku_exists && $id !== $id_from_sku ) {
-					$result = $this->add_id_sku_conflict_hint( $result, $id, $sku, $id_from_sku );
+					$result = $this->add_id_sku_conflict_hint( $result, $id, (string) $sku, $id_from_sku );
 				}
 				$result->add_data( array( 'row' => $this->get_row_id( $parsed_data ) ) );
 				$data['failed'][] = $result;

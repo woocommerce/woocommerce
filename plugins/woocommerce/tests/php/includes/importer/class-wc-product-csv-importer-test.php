@@ -2064,4 +2064,148 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$this->assertStringContainsString( sprintf( 'belongs to product #%d', $owns_sku->get_id() ), $message );
 		$this->assertSame( 'IMPORT-40274-B', wc_get_product( $matched_by_id->get_id() )->get_sku(), 'The product matched by ID keeps its own SKU' );
 	}
+
+	/**
+	 * Import a CSV file with "Update existing products" enabled and remove the file afterwards.
+	 *
+	 * @param string $csv_file Path to the CSV file.
+	 * @param array  $mapping  Column mapping.
+	 * @return array Import results.
+	 */
+	private function import_for_update( string $csv_file, array $mapping ): array {
+		$importer = new WC_Product_CSV_Importer(
+			$csv_file,
+			array(
+				'parse'           => true,
+				'update_existing' => true,
+				'mapping'         => $mapping,
+			)
+		);
+		$data     = $importer->import();
+
+		wp_delete_file( $csv_file );
+
+		return $data;
+	}
+
+	/**
+	 * @testdox Should update a variation matched by SKU when its ID does not exist and its parent resolves.
+	 */
+	public function test_import_falls_back_to_sku_for_variation_rows_40274(): void {
+		$parent = WC_Helper_Product::create_variation_product();
+		$parent->set_sku( 'IMPORT-40274-PARENT' );
+		$parent->save();
+		$variation = wc_get_product( $parent->get_children()[0] );
+		$variation->set_sku( 'IMPORT-40274-VAR' );
+		$variation->save();
+
+		$missing_id = $variation->get_id() + 1000;
+		$csv_file   = trailingslashit( get_temp_dir() ) . 'import-40274-variation-fallback.csv';
+		file_put_contents( $csv_file, "ID,Type,SKU,Regular price,Parent\n{$missing_id},variation,IMPORT-40274-VAR,42,IMPORT-40274-PARENT\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
+
+		$data = $this->import_for_update(
+			$csv_file,
+			array(
+				'ID'            => 'id',
+				'Type'          => 'type',
+				'SKU'           => 'sku',
+				'Regular price' => 'regular_price',
+				'Parent'        => 'parent_id',
+			)
+		);
+
+		$this->assertSame( array( $variation->get_id() ), $data['updated'] );
+		$this->assertEmpty( $data['failed'] );
+		$updated = wc_get_product( $variation->get_id() );
+		$this->assertSame( '42', $updated->get_regular_price() );
+		$this->assertSame( $parent->get_id(), $updated->get_parent_id(), 'The variation must stay attached to its parent' );
+	}
+
+	/**
+	 * @testdox Should fail a variation row whose parent cannot be found instead of detaching the variation.
+	 */
+	public function test_import_fails_variation_row_with_missing_parent_40274(): void {
+		$parent = WC_Helper_Product::create_variation_product();
+		$parent->set_sku( 'IMPORT-40274-PARENT-B' );
+		$parent->save();
+		$variation = wc_get_product( $parent->get_children()[0] );
+		$variation->set_sku( 'IMPORT-40274-VAR-B' );
+		$variation->save();
+		$original_name = $variation->get_name();
+
+		$missing_id = $variation->get_id() + 1000;
+		$csv_file   = trailingslashit( get_temp_dir() ) . 'import-40274-variation-missing-parent.csv';
+		file_put_contents( $csv_file, "ID,Type,SKU,Name,Parent\n{$missing_id},variation,IMPORT-40274-VAR-B,Renamed variation,id:" . ( $missing_id + 1 ) . "\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
+
+		$data = $this->import_for_update(
+			$csv_file,
+			array(
+				'ID'     => 'id',
+				'Type'   => 'type',
+				'SKU'    => 'sku',
+				'Name'   => 'name',
+				'Parent' => 'parent_id',
+			)
+		);
+
+		$this->assertEmpty( $data['updated'] );
+		$this->assertCount( 1, $data['failed'] );
+		$this->assertStringContainsString( 'parent does not exist', $data['failed'][0]->get_error_message() );
+		$unchanged = wc_get_product( $variation->get_id() );
+		$this->assertSame( $parent->get_id(), $unchanged->get_parent_id(), 'A failed row must not change the parent' );
+		$this->assertSame( $original_name, $unchanged->get_name() );
+	}
+
+	/**
+	 * @testdox Should not match a row to a product of the other post type by SKU, so nothing is converted.
+	 */
+	public function test_import_sku_fallback_refuses_variation_to_simple_match_40274(): void {
+		$simple = WC_Helper_Product::create_simple_product();
+		$simple->set_sku( 'IMPORT-40274-SIMPLE' );
+		$simple->save();
+
+		$missing_id = $simple->get_id() + 1000;
+		$csv_file   = trailingslashit( get_temp_dir() ) . 'import-40274-type-mismatch.csv';
+		file_put_contents( $csv_file, "ID,Type,SKU,Name\n{$missing_id},variation,IMPORT-40274-SIMPLE,Should stay a simple product\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
+
+		$data = $this->import_for_update(
+			$csv_file,
+			array(
+				'ID'   => 'id',
+				'Type' => 'type',
+				'SKU'  => 'sku',
+				'Name' => 'name',
+			)
+		);
+
+		$this->assertEmpty( $data['updated'] );
+		$this->assertCount( 1, $data['failed'] );
+		$this->assertSame( 'product', get_post_type( $simple->get_id() ), 'The simple product must not be converted to a variation' );
+	}
+
+	/**
+	 * @testdox Should not use the first column as the SKU when the file has no SKU column.
+	 */
+	public function test_import_without_sku_column_does_not_use_first_column_as_sku_40274(): void {
+		$csv_file = trailingslashit( get_temp_dir() ) . 'import-40274-no-sku-column.csv';
+		file_put_contents( $csv_file, "ID,Type,Name\n987654,simple,Product without a SKU column\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
+
+		$importer = new WC_Product_CSV_Importer(
+			$csv_file,
+			array(
+				'parse'   => true,
+				'mapping' => array(
+					'ID'   => 'id',
+					'Type' => 'type',
+					'Name' => 'name',
+				),
+			)
+		);
+		$data     = $importer->import();
+
+		wp_delete_file( $csv_file );
+
+		$this->assertCount( 1, $data['imported'] );
+		$this->assertSame( '', wc_get_product( $data['imported'][0] )->get_sku() );
+	}
 }
