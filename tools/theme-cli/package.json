@@ -23,8 +23,7 @@
 			"lint": {
 				"command": "lint",
 				"changes": [
-					"**/*",
-					".markdownlint.json"
+					"**/*"
 				]
 			}
 		}
