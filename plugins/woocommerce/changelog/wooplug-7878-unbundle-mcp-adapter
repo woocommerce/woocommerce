@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Remove the deprecated WooCommerce MCP endpoint. Use the MCP Adapter plugin to access WooCommerce abilities over MCP.

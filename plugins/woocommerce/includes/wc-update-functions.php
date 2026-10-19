@@ -19,6 +19,8 @@
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
+use Automattic\WooCommerce\Admin\API\Reports\Orders\DataStore as OrdersDataStore;
 use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\Notes\Notes;
 use Automattic\WooCommerce\Database\Migrations\MigrationHelper;
@@ -4128,4 +4130,92 @@ function wc_update_1130_delete_unpublished_variation_lookup_rows() {
  */
 function wc_update_1130_delete_stock_notification_sync_notice_option(): void {
 	delete_option( 'wc_customer_stock_notifications_product_sync_notice' );
+}
+
+/**
+ * Backfill the payment method on Analytics order stats rows written before the column existed.
+ *
+ * A database error is logged and stops the backfill without a retry.
+ *
+ * @since 11.3.0
+ *
+ * @return bool True when another batch is due, false when done or stopped.
+ */
+function wc_update_1130_backfill_order_stats_payment_method() {
+	global $wpdb;
+
+	$stats_table    = $wpdb->prefix . 'wc_order_stats';
+	$last_id_option = 'woocommerce_update_1130_last_payment_method_order_id';
+
+	if ( $stats_table !== $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $stats_table ) ) ) {
+		return false;
+	}
+
+	$order_ids = $wpdb->get_col(
+		$wpdb->prepare(
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name cannot be prepared.
+			"SELECT order_id FROM {$stats_table} WHERE order_id > %d ORDER BY order_id ASC LIMIT 500",
+			(int) get_option( $last_id_option, 0 )
+		)
+	);
+
+	if ( '' === $wpdb->last_error && $order_ids ) {
+		$id_list = implode( ',', array_map( 'absint', $order_ids ) );
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- Table names and the id list are code-defined.
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$orders_table = OrdersTableDataStore::get_orders_table_name();
+			$from_orders  = "UPDATE {$stats_table} stats
+				JOIN {$orders_table} orders ON orders.id = stats.order_id
+				SET stats.payment_method = orders.payment_method
+				WHERE stats.order_id IN ({$id_list})
+				AND stats.payment_method IS NULL
+				AND orders.payment_method != ''";
+			$refund_join  = "JOIN {$orders_table} refund_orders ON refund_orders.id = refunds.order_id AND refund_orders.type = 'shop_order_refund'";
+		} else {
+			$from_orders = "UPDATE {$stats_table} stats
+				JOIN {$wpdb->postmeta} meta ON meta.post_id = stats.order_id AND meta.meta_key = '_payment_method'
+				SET stats.payment_method = meta.meta_value
+				WHERE stats.order_id IN ({$id_list})
+				AND stats.payment_method IS NULL
+				AND meta.meta_value != ''";
+			$refund_join = "JOIN {$wpdb->posts} refund_orders ON refund_orders.ID = refunds.order_id AND refund_orders.post_type = 'shop_order_refund'";
+		}
+
+		// A refund holds no payment method of its own, so it takes the refunded order's. That order has the lower id, so its row is already filled.
+		// The join on the order type leaves out other child orders, which the sync stores without the parent's payment method.
+		$from_parents = "UPDATE {$stats_table} refunds
+			{$refund_join}
+			JOIN {$stats_table} parents ON parents.order_id = refunds.parent_id
+			SET refunds.payment_method = parents.payment_method
+			WHERE refunds.order_id IN ({$id_list})
+			AND refunds.parent_id != 0
+			AND refunds.payment_method IS NULL
+			AND parents.payment_method IS NOT NULL";
+
+		$updated = false !== $wpdb->query( $from_orders ) && false !== $wpdb->query( $from_parents );
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
+
+		if ( $updated ) {
+			update_option( $last_id_option, (int) end( $order_ids ), false );
+
+			return true;
+		}
+	}
+
+	if ( '' !== $wpdb->last_error ) {
+		wc_get_logger()->error(
+			sprintf( 'Stopped backfilling the Analytics payment method: %s', $wpdb->last_error ),
+			array( 'source' => 'wc-updater' )
+		);
+	}
+
+	delete_option( $last_id_option );
+
+	// The report rows cached before the column was filled would otherwise be served for a week.
+	ReportsCache::invalidate();
+	// The same goes for the Orders report payment method filter, cached for a year.
+	wp_cache_delete( OrdersDataStore::ORDERS_PAYMENT_METHODS_ALL_CACHE_KEY, 'woocommerce_analytics' );
+
+	return false;
 }

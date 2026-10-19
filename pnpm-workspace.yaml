@@ -83,8 +83,10 @@ catalogs:
         '@wordpress/env': 11.17.0
         '@wordpress/prettier-config': 4.56.0
         '@wordpress/postcss-plugins-preset': 5.56.0
+        '@wordpress/scripts': 32.6.0
         '@wordpress/stylelint-config': ^23.14.0
         postcss: ^8.5.26
+        prettier: npm:wp-prettier@3.9.6
         stylelint: ^16.9.0
         webpack: 5.97.x
 
@@ -97,6 +99,7 @@ packages:
     - 'plugins/woocommerce/client/blocks'
     - 'plugins/woocommerce/client/legacy'
     - 'tools/monorepo-merge'
+    - 'themes/*'
     - 'tools/theme-cli'
     - 'tools/code-analyzer'
     - 'tools/compare-perf'
