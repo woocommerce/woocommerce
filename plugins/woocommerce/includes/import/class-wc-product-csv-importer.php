@@ -410,6 +410,26 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	}
 
 	/**
+	 * Parse an attribute default value from a CSV.
+	 *
+	 * The default is matched against the attribute options with a strict comparison, so
+	 * it goes through the same parsing as the values: a quoted default loses its quotes
+	 * the way the quoted option does. A cell that would split into several values is
+	 * kept as it was, since the default is a single value.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param string $value Field value.
+	 *
+	 * @return string
+	 */
+	public function parse_attribute_default_field( $value ) {
+		$values = $this->parse_comma_field( $value );
+
+		return 1 === count( $values ) ? $values[0] : wc_clean( $value );
+	}
+
+	/**
 	 * Parse a field that is generally '1' or '0' but can be something else.
 	 *
 	 * @param string $value Field value.
@@ -925,6 +945,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		 */
 		$prefix_match_data_formatting = array(
 			'attributes:value'    => array( $this, 'parse_comma_field' ),
+			'attributes:default'  => array( $this, 'parse_attribute_default_field' ),
 			'attributes:visible'  => array( $this, 'parse_bool_field' ),
 			'attributes:taxonomy' => array( $this, 'parse_bool_field' ),
 			'downloads:url'       => array( $this, 'parse_download_file_field' ),

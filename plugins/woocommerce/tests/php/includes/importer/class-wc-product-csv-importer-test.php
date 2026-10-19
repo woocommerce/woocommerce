@@ -2030,4 +2030,54 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 
 		$this->assertSame( array( 'New York', 'Boston', '15"' ), array_map( fn( $id ) => get_term( $id, 'product_tag' )->name, $term_ids ) );
 	}
+
+	/**
+	 * @testdox Should parse an attribute default like a single attribute value.
+	 * @testWith ["\"Premium\"", "Premium"]
+	 *           ["\"Blue, navy\"", "Blue, navy"]
+	 *           ["Blue, navy", "Blue, navy"]
+	 *           ["Basic", "Basic"]
+	 *           ["", ""]
+	 *
+	 * @param string $value    Raw CSV cell value.
+	 * @param string $expected Expected default.
+	 */
+	public function test_parse_attribute_default_field( string $value, string $expected ): void {
+		$importer = new WC_Product_CSV_Importer( __DIR__ . '/sample.csv' );
+
+		$this->assertSame( $expected, $importer->parse_attribute_default_field( $value ) );
+	}
+
+	/**
+	 * @testdox Should keep a quoted attribute default matched to its unquoted option when importing a variable product.
+	 */
+	public function test_import_keeps_quoted_attribute_default(): void {
+		$csv_file = trailingslashit( get_temp_dir() ) . 'import-quoted-attribute-default.csv';
+		file_put_contents( $csv_file, "SKU,Type,Name,Attribute 1 name,Attribute 1 value(s),Attribute 1 default,Attribute 1 visible,Attribute 1 global\nIMPORT-QUOTED-DEFAULT,variable,Quoted default,Edition,\"\"\"Premium\"\", Basic\",\"\"\"Premium\"\"\",1,0\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
+
+		$importer = new WC_Product_CSV_Importer(
+			$csv_file,
+			array(
+				'parse'   => true,
+				'mapping' => array(
+					'SKU'                  => 'sku',
+					'Type'                 => 'type',
+					'Name'                 => 'name',
+					'Attribute 1 name'     => 'attributes:name1',
+					'Attribute 1 value(s)' => 'attributes:value1',
+					'Attribute 1 default'  => 'attributes:default1',
+					'Attribute 1 visible'  => 'attributes:visible1',
+					'Attribute 1 global'   => 'attributes:taxonomy1',
+				),
+			)
+		);
+		$data     = $importer->import();
+
+		wp_delete_file( $csv_file );
+
+		$this->assertCount( 1, $data['imported'] );
+		$product = wc_get_product( $data['imported'][0] );
+		$this->assertSame( array( 'Premium', 'Basic' ), $product->get_attributes()['edition']->get_options() );
+		$this->assertSame( array( 'edition' => 'Premium' ), $product->get_default_attributes() );
+	}
 }
