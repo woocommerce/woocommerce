@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep double-quoted values containing commas together when importing comma-separated product CSV fields like attributes.
