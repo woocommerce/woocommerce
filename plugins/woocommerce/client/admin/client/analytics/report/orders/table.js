@@ -14,10 +14,14 @@ import { CurrencyContext } from '@woocommerce/currency';
  * Internal dependencies
  */
 import ReportTable from '../../components/report-table';
-import { getAdminSetting } from '~/utils/admin-settings';
+import { getAdminSetting, PAYMENT_GATEWAYS } from '~/utils/admin-settings';
 
 const capitalizeFirstLetter = ( expr ) =>
 	expr.charAt( 0 ).toUpperCase() + expr.slice( 1 );
+
+// Gateways that are no longer installed keep the id stored on the order.
+const getPaymentMethodTitle = ( paymentMethod ) =>
+	PAYMENT_GATEWAYS[ paymentMethod ] || paymentMethod || '';
 
 class OrdersReportTable extends Component {
 	constructor() {
@@ -98,6 +102,12 @@ class OrdersReportTable extends Component {
 				required: false,
 				isSortable: false,
 			},
+			{
+				label: __( 'Payment method', 'woocommerce' ),
+				key: 'payment_method',
+				required: false,
+				isSortable: false,
+			},
 		];
 	}
 
@@ -131,6 +141,7 @@ class OrdersReportTable extends Component {
 				parent_id: parentId,
 				status,
 				customer_type: customerType,
+				payment_method: paymentMethod,
 			} = row;
 			const extendedInfo = row.extended_info || {};
 			const { coupons, customer, products } = extendedInfo;
@@ -251,6 +262,10 @@ class OrdersReportTable extends Component {
 				{
 					display: extendedInfo.attribution.origin,
 					value: extendedInfo.attribution.origin,
+				},
+				{
+					display: getPaymentMethodTitle( paymentMethod ),
+					value: getPaymentMethodTitle( paymentMethod ),
 				},
 			];
 		} );
