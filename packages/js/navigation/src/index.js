@@ -236,7 +236,7 @@ export const useQuery = () => {
  *
  * @param {string} param The parameter in the querystring which should be updated (ex `page`, `per_page`)
  * @param {string} path  Admin page path, e.g. `/analytics/orders` (defaults to the current path). Used as-is for the `path` query arg; `./` and `../` segments are not resolved against the current path.
- * @param {string} query object of current query params (defaults to current querystring).
+ * @param {Object} query object of current query params (defaults to current querystring).
  * @return {Function} A callback which will update `param` to the passed value when called.
  */
 export function onQueryChange( param, path = getPath(), query = getQuery() ) {
