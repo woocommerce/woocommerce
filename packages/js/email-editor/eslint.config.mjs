@@ -36,6 +36,8 @@ export default [
 			 * disable it for the package source.
 			 */
 			'@wordpress/i18n-text-domain': 'off',
+			// Use recommended `@wordpress/ui` components.
+			'@wordpress/use-recommended-components': 'error',
 		},
 	},
 ];

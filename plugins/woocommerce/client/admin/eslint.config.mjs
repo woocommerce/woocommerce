@@ -61,4 +61,11 @@ export default [
 			'react/react-in-jsx-scope': 'off',
 		},
 	},
+	{
+		// Folders that already use `@wordpress/ui`.
+		files: [ 'client/settings-payments/**/*.{js,jsx,ts,tsx}' ],
+		rules: {
+			'@wordpress/use-recommended-components': 'error',
+		},
+	},
 ];

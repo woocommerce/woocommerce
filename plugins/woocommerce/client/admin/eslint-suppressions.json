@@ -1,0 +1,37 @@
+{
+  "client/settings-payments/components/buttons/back-button.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "client/settings-payments/components/ellipsis-menu-content/ellipsis-menu-content.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "client/settings-payments/components/incentive-banner/incentive-banner.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 2
+    }
+  },
+  "client/settings-payments/components/incentive-modal/incentive-modal.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 3
+    }
+  },
+  "client/settings-payments/components/payment-gateway-list-item/payment-gateway-list-item.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "client/settings-payments/components/settings/index.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 2
+    }
+  },
+  "client/settings-payments/onboarding/providers/woopayments/steps/payment-methods-selection/list-item.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  }
+}
