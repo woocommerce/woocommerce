@@ -38,7 +38,8 @@ use Automattic\WooCommerce\Internal\Email\DeferredEmailQueue;
 use Automattic\WooCommerce\Internal\Email\EmailLogger;
 use Automattic\WooCommerce\Internal\Admin\Marketplace;
 use Automattic\WooCommerce\Internal\Admin\OrderMilestoneEasterEgg;
-use Automattic\WooCommerce\Internal\Admin\Settings\PaymentSettingsScreen;
+use Automattic\WooCommerce\Internal\Admin\Screens\Settings\ChequeSettings;
+use Automattic\WooCommerce\Internal\Admin\Screens\Settings\PaymentSettingsScreen;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\{LoggingUtil, TimeUtil};
 use Automattic\WooCommerce\Internal\Logging\OrderLogsCleanupHelper;
@@ -413,6 +414,7 @@ final class WooCommerce {
 		$container->get( OrderMilestoneEasterEgg::class );
 		$container->get( CustomerEmailVerification::class );
 		$container->get( OrderLogsCleanupHelper::class );
+		$container->get( ChequeSettings::class );
 		$container->get( PaymentSettingsScreen::class );
 		$container->get( AbilitiesTracking::class );
 
