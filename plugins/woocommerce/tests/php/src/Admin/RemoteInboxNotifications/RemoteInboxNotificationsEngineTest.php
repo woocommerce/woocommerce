@@ -320,6 +320,62 @@ class RemoteInboxNotificationsEngineTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A selected alert that is no longer eligible when reloaded is neither hidden nor logged as withdrawn.
+	 * @dataProvider ineligible_reloaded_note_provider
+	 *
+	 * @param array  $updates         Changes visible at reload; date_created values are offsets from the feed read.
+	 * @param string $expected_status Status that cleanup must preserve.
+	 */
+	public function test_run_rechecks_reloaded_note( array $updates, string $expected_status ): void {
+		$withdrawn  = $this->create_note( 'remote-alert-withdrawn' );
+		$fetched_at = time();
+		$this->arrange_feed( array( $this->create_spec( 'remote-alert-published' ) ), $fetched_at );
+		if ( isset( $updates['date_created'] ) ) {
+			$updates['date_created'] += $fetched_at;
+		}
+
+		$reloaded = false;
+		add_action(
+			'woocommerce_note_loaded',
+			static function ( $note ) use ( $withdrawn, $updates, &$reloaded ) {
+				if ( $reloaded || ! $note instanceof Note || $note->get_id() !== $withdrawn->get_id() ) {
+					return;
+				}
+				// Make the reload reflect a change that happened after the candidate query.
+				$reloaded = true;
+				$note->set_props( $updates );
+				$note->save();
+			}
+		);
+		$logger = $this->createMock( \WC_Logger_Interface::class );
+		$logger->expects( $this->never() )->method( 'info' );
+		add_filter( 'woocommerce_logging_class', static fn() => $logger );
+
+		RemoteInboxNotificationsEngine::run();
+
+		$this->assertTrue( $reloaded, 'The alert must have reached the reload after candidate selection.' );
+		$this->assertSame( $expected_status, $this->get_status( $withdrawn ) );
+	}
+
+	/**
+	 * Changes that make a previously selected alert ineligible for withdrawal.
+	 *
+	 * @return array
+	 */
+	public function ineligible_reloaded_note_provider(): array {
+		return array(
+			'actioned'       => array( array( 'status' => Note::E_WC_ADMIN_NOTE_ACTIONED ), Note::E_WC_ADMIN_NOTE_ACTIONED ),
+			'snoozed'        => array( array( 'status' => Note::E_WC_ADMIN_NOTE_SNOOZED ), Note::E_WC_ADMIN_NOTE_SNOOZED ),
+			'deleted'        => array( array( 'is_deleted' => true ), Note::E_WC_ADMIN_NOTE_UNACTIONED ),
+			'other source'   => array( array( 'source' => 'woocommerce' ), Note::E_WC_ADMIN_NOTE_UNACTIONED ),
+			'not an alert'   => array( array( 'type' => Note::E_WC_ADMIN_NOTE_INFORMATIONAL ), Note::E_WC_ADMIN_NOTE_UNACTIONED ),
+			'published slug' => array( array( 'name' => 'remote-alert-published' ), Note::E_WC_ADMIN_NOTE_UNACTIONED ),
+			'at age cutoff'  => array( array( 'date_created' => -HOUR_IN_SECONDS ), Note::E_WC_ADMIN_NOTE_UNACTIONED ),
+			'refreshed'      => array( array( 'date_created' => 0 ), Note::E_WC_ADMIN_NOTE_UNACTIONED ),
+		);
+	}
+
+	/**
 	 * @testdox An alert that became visible after, or shortly before, the complete read is not hidden by it.
 	 */
 	public function test_run_does_not_hide_alerts_newer_than_the_published_snapshot(): void {
