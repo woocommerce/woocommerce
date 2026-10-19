@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add ExtensibleAbilities::register_validator() to the experimental extensible abilities feature. A validator can refuse a change before the one save, in the product abilities and in the ActionableAbility classes of extensions.

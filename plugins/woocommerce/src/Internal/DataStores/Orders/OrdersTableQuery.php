@@ -614,8 +614,10 @@ class OrdersTableQuery {
 			$query['column']  = $local_to_gmt_date_keys[ $query['column'] ];
 			$op               = isset( $query['after'] ) ? 'after' : 'before';
 			$date_value_local = $query[ $op ];
-			$date_value_gmt   = wc_string_to_timestamp( get_gmt_from_date( wc_string_to_datetime( $date_value_local ) ) );
-			$query[ $op ]     = $this->date_to_date_query_arg( $date_value_gmt );
+			// date_create() honors an offset in the string; wc_string_to_datetime() re-applies the site offset to formats like "10:00:00.500Z" or "+02".
+			$parsed_date    = is_string( $date_value_local ) && ! is_numeric( $date_value_local ) ? date_create( $date_value_local, wp_timezone() ) : false;
+			$date_value_gmt = $parsed_date ? $parsed_date->getTimestamp() : wc_string_to_timestamp( get_gmt_from_date( wc_string_to_datetime( $date_value_local ) ) );
+			$query[ $op ]   = $this->date_to_date_query_arg( $date_value_gmt );
 		}
 
 		return $query;

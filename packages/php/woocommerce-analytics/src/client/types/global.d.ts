@@ -17,6 +17,8 @@ declare global {
 			push: ( props: Record< string, unknown > ) => void;
 		};
 		wp_has_consent?: ( type: string ) => boolean;
+		waitfor_consent_hook?: string;
+		wp_consent_type?: string;
 	}
 }
 
