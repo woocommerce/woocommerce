@@ -387,7 +387,7 @@ Enable customers to change the sorting order of the products.
 
 - **Name:** woocommerce/catalog-sorting
 - **Category:** woocommerce
-- **Supports:** color (text, ~~background~~), interactivity, typography (fontSize)
+- **Supports:** color (background, gradients, text), interactivity, spacing (margin, padding), typography (fontSize, textAlign)
 - **Attributes:** fontSize, useLabel
 
 ## Product Category Description - woocommerce/category-description
@@ -396,7 +396,7 @@ Displays the current category description.
 
 - **Name:** woocommerce/category-description
 - **Category:** woocommerce
-- **Supports:** color (background, text), spacing (margin, padding), typography, ~~align~~, ~~html~~
+- **Supports:** color (background, gradients, link, text), spacing (margin, padding), typography (fontSize, lineHeight), ~~align~~, ~~html~~
 - **Attributes:** textAlign
 
 ## Product Category Title - woocommerce/category-title
@@ -405,7 +405,7 @@ Displays the current category title and lets permitted users edit it.
 
 - **Name:** woocommerce/category-title
 - **Category:** woocommerce
-- **Supports:** color (background, text), spacing (margin, padding), typography, ~~align~~, ~~html~~
+- **Supports:** color (background, gradients, link, text), spacing (margin, padding), typography (fontSize, lineHeight), ~~align~~, ~~html~~
 - **Attributes:** isLink, level, linkTarget, rel, textAlign
 
 ## Checkout - woocommerce/checkout
@@ -1060,7 +1060,7 @@ Display a collection of products from your store.
 - **Name:** woocommerce/product-collection
 - **Category:** woocommerce
 - **Supports:** align (full, wide), anchor, email, interactivity, ~~html~~
-- **Attributes:** __privatePreviewState, collection, convertedFromProducts, dimensions, displayLayout, forcePageReload, hideControls, query, queryContextIncludes, queryId, tagName
+- **Attributes:** collection, convertedFromProducts, dimensions, displayLayout, forcePageReload, hideControls, query, queryContextIncludes, queryId, tagName
 
 ## No results - woocommerce/product-collection-no-results
 
@@ -1402,7 +1402,7 @@ Display the number of products on the archive page or search result page.
 
 - **Name:** woocommerce/product-results-count
 - **Category:** woocommerce
-- **Supports:** color (text, ~~background~~), interactivity (clientNavigation), typography (fontSize)
+- **Supports:** color (background, gradients, text), interactivity (clientNavigation), spacing (margin, padding), typography (fontSize, textAlign)
 
 ## Product Reviews - woocommerce/product-reviews
 
@@ -1545,7 +1545,7 @@ Contains the block elements used to render a product.
 
 - **Name:** woocommerce/product-template
 - **Category:** woocommerce
-- **Supports:** align (full, wide), anchor, color (background, gradients, link, text), email, interactivity, layout (~~allowEditing~~, ~~allowInheriting~~, ~~allowSizingOnChildren~~, ~~allowSwitching~~, ~~allowVerticalAlignment~~), typography (fontSize, lineHeight), ~~html~~, ~~inserter~~, ~~reusable~~
+- **Supports:** align (full, wide), anchor, color (background, gradients, link, text), email, interactivity, layout (~~allowEditing~~, ~~allowInheriting~~, ~~allowSizingOnChildren~~, ~~allowSwitching~~, ~~allowVerticalAlignment~~), shadow, spacing (margin, padding), typography (fontSize, lineHeight), ~~html~~, ~~inserter~~, ~~reusable~~
 
 ## Top Rated Products - woocommerce/product-top-rated
 

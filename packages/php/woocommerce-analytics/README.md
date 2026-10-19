@@ -127,6 +127,8 @@ not from the filter, and the option is written there.
 
 The package integrates with [WP Consent API](https://wordpress.org/plugins/wp-consent-api/) to ensure GDPR and privacy regulation compliance. Tracking only occurs when users have granted consent for statistics collection.
 
+With WP Consent API active, `stats.wp.com/s-*.js`, which sets the `tk_*` referrer cookies, prints as `type="text/plain"` and only runs after statistics consent. Dequeuing or filtering its `woocommerce-analytics` script handle works as before.
+
 When WP Consent API is not available, the package defaults to allowing all tracking to maintain backward compatibility.
 
 ## Tracked Events

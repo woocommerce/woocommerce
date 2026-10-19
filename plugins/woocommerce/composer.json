@@ -35,10 +35,6 @@
 		},
 		{
 			"type": "vcs",
-			"url": "https://github.com/WordPress/mcp-adapter.git"
-		},
-		{
-			"type": "vcs",
 			"url": "https://github.com/WordPress/abilities-api"
 		}
 	],
@@ -50,15 +46,13 @@
 		"automattic/jetpack-config": "3.0.0",
 		"automattic/jetpack-connection": "^6.11.1",
 		"automattic/jetpack-constants": "^3.0.1",
-		"automattic/tracks-shared-utils": "^1.0",
+		"automattic/tracks-shared-utils": "^1.1",
 		"composer/installers": "^1.9",
 		"maxmind-db/reader": "^1.11",
 		"opis/json-schema": "*",
 		"woocommerce/action-scheduler": "4.1.0",
 		"woocommerce/blueprint": "*",
-		"woocommerce/email-editor": "*",
-		"wordpress/abilities-api": "^0.4.0",
-		"wordpress/mcp-adapter": "^0.3.0"
+		"woocommerce/email-editor": "*"
 	},
 	"require-dev": {
 		"automattic/jetpack-changelogger": "^3.3.0",
@@ -73,6 +67,7 @@
 		"spatie/phpunit-watcher": "^1.23",
 		"szepeviktor/phpstan-wordpress": "^2.0",
 		"woocommerce/monorepo-plugin": "*",
+		"wordpress/abilities-api": "^0.4.0",
 		"yoast/phpunit-polyfills": "^2.0"
 	},
 	"config": {
@@ -146,7 +141,11 @@
 		"phpcbf": [
 			"phpcbf -p"
 		],
+		"generate-pattern-translations": [
+			"@php bin/generate-pattern-translations.php"
+		],
 		"makepot-audit": [
+			"@generate-pattern-translations",
 			"wp --allow-root i18n make-pot . --include=\"woocommerce.php,assets,i18n,includes,lib,packages,patterns,src,templates\" --slug=woocommerce"
 		],
 		"makepot": [

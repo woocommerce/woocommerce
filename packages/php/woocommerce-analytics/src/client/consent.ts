@@ -40,6 +40,29 @@ export class ConsentManager {
 	}
 
 	/**
+	 * Run the callback once the consent type is known.
+	 *
+	 * A consent plugin that sets the consent type late, for example from the visitor's region, sets
+	 * `waitfor_consent_hook`. Until it dispatches `wp_consent_type_defined`, `wp_has_consent()` answers from the
+	 * fallback consent type, which reports consent when it is empty.
+	 *
+	 * @param callback - The callback to run.
+	 */
+	waitForConsentType( callback: () => void ): void {
+		if (
+			! this.isWpConsentApiAvailable() ||
+			! window.waitfor_consent_hook ||
+			typeof window.wp_consent_type !== 'undefined'
+		) {
+			callback();
+			return;
+		}
+
+		debug( 'Waiting for the consent type to be defined' );
+		document.addEventListener( 'wp_consent_type_defined', callback, { once: true } );
+	}
+
+	/**
 	 * Add a listener for consent changes
 	 *
 	 * @param callback - The callback to call when consent changes

@@ -10,6 +10,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Integration\Integration\Storage;
 
 use EngineIntegrationTestCase;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\Coercion;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller;
 
@@ -290,10 +291,42 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox The schema version is 2.6.0 (plans as records, plan meta table).
+	 * @testdox The schema version is 2.7.0 (due dispatch).
 	 */
-	public function test_schema_version_is_2_6_0(): void {
-		$this->assertSame( '2.6.0', SchemaInstaller::get_version() );
+	public function test_schema_version_is_2_7_0(): void {
+		$this->assertSame( '2.7.0', SchemaInstaller::get_version() );
+	}
+
+	/**
+	 * @testdox Contracts default schedule_source to the engine's own schedule, in a column wide enough for extension slugs.
+	 */
+	public function test_contracts_schedule_source_defaults_to_the_engine(): void {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$row = $wpdb->get_row( $wpdb->prepare( "SHOW COLUMNS FROM {$table} LIKE %s", 'schedule_source' ), ARRAY_A );
+
+		$this->assertIsArray( $row, 'Expected a contracts.schedule_source column.' );
+		$this->assertSame( Contract::SCHEDULE_SOURCE_ENGINE, $row['Default'] ?? null );
+		$this->assertSame( 'varchar(64)', $row['Type'] ?? null );
+	}
+
+	/**
+	 * @testdox Contracts carry a nullable claimed_until column for the due-dispatch claim.
+	 */
+	public function test_contracts_claimed_until_is_nullable(): void {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$row = $wpdb->get_row( $wpdb->prepare( "SHOW COLUMNS FROM {$table} LIKE %s", 'claimed_until' ), ARRAY_A );
+
+		$this->assertIsArray( $row, 'Expected a contracts.claimed_until column.' );
+		$this->assertSame( 'YES', $row['Null'] ?? null, 'Expected contracts.claimed_until to be NULLable.' );
+		$this->assertSame( 'datetime', $row['Type'] ?? null );
 	}
 
 	/**
@@ -359,7 +392,7 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox The cycle dispatcher columns (claimed_until lease, reserved retry_at) are nullable.
+	 * @testdox The cycle dispatcher columns (claimed_until claim, reserved retry_at) are nullable.
 	 */
 	public function test_cycles_table_dispatcher_columns_are_nullable(): void {
 		global $wpdb;
@@ -395,9 +428,43 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 
 		$this->assertContains( 'chain_seq', $indexes, 'Expected the UNIQUE (contract_id, kind, sequence_no) index.' );
 		$this->assertContains( 'chain_count', $indexes, 'Expected the UNIQUE (contract_id, kind, count) index.' );
-		$this->assertContains( 'due', $indexes, 'Expected the due (kind, status, starts_at_gmt) index.' );
 		$this->assertContains( 'order_id', $indexes, 'Expected the (order_id) index.' );
 		$this->assertContains( 'contract_kind', $indexes, 'Expected the (contract_id, kind) index.' );
+	}
+
+	/**
+	 * @testdox The installer declares no cycles due index (the due dispatcher scans contracts).
+	 *
+	 * Reads the schema the installer hands to dbDelta rather than the live table: dbDelta never
+	 * drops an index, so a long-lived test database may still carry one from an earlier schema.
+	 */
+	public function test_cycles_schema_declares_no_due_index(): void {
+		$queries = array();
+		$capture = static function ( array $dbdelta_queries ) use ( &$queries ): array {
+			$queries = array_merge( $queries, $dbdelta_queries );
+
+			// Run no DDL: it would implicitly commit the test transaction.
+			return array();
+		};
+
+		add_filter( 'dbdelta_queries', $capture );
+		try {
+			SchemaInstaller::install();
+		} finally {
+			remove_filter( 'dbdelta_queries', $capture );
+		}
+
+		$cycles = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
+		$create = '';
+		foreach ( $queries as $query ) {
+			if ( is_string( $query ) && false !== strpos( $query, "CREATE TABLE {$cycles} (" ) ) {
+				$create = $query;
+			}
+		}
+
+		$this->assertNotSame( '', $create, 'Expected the installer to declare the cycles table.' );
+		$this->assertStringContainsString( 'KEY contract_kind (contract_id, kind)', $create );
+		$this->assertDoesNotMatchRegularExpression( '/\bKEY due\b/', $create );
 	}
 
 	public function test_cycles_chain_sequence_index_columns_are_in_order(): void {
@@ -415,17 +482,6 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 		$this->assertSame(
 			array( 'contract_id', 'kind', 'count' ),
 			$this->index_columns( $table, 'chain_count' )
-		);
-	}
-
-	public function test_cycles_due_index_columns_are_in_scan_order(): void {
-		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
-
-		// The dispatcher scans the due index as (kind, status, starts_at_gmt); the
-		// column order is load-bearing, so assert it exactly, not just existence.
-		$this->assertSame(
-			array( 'kind', 'status', 'starts_at_gmt' ),
-			$this->index_columns( $table, 'due' )
 		);
 	}
 
