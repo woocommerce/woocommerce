@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Add translator context to the Orders list table "Status" column so it can be translated independently of the unrelated "Status" strings elsewhere in the admin.

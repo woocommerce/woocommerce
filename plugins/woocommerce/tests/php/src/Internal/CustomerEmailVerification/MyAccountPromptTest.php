@@ -201,7 +201,7 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 	public function test_should_show_prompt_returns_false_for_verified_customer(): void {
 		$user_id = wc_create_new_customer( 'prompt-verified@example.com', 'promptverified', 'pw' );
 		wp_set_current_user( $user_id );
-		$this->service->mark_verified( $user_id );
+		$this->service->mark_verified( $user_id, 'prompt-verified@example.com' );
 
 		$this->assertFalse( $this->sut->should_show_prompt(), 'Verified customers should not see the prompt' );
 	}
@@ -212,7 +212,7 @@ class MyAccountPromptTest extends WC_Unit_Test_Case {
 	public function test_should_show_prompt_ignores_filter_for_verified_customer(): void {
 		$user_id = wc_create_new_customer( 'prompt-verified-filtered@example.com', 'promptverifiedfiltered', 'pw' );
 		wp_set_current_user( $user_id );
-		$this->service->mark_verified( $user_id );
+		$this->service->mark_verified( $user_id, 'prompt-verified-filtered@example.com' );
 
 		add_filter( 'woocommerce_customer_email_verification_should_show_prompt', '__return_true' );
 		$this->assertFalse( $this->sut->should_show_prompt(), 'A verified customer should never see the prompt, even if a filter tries to force it on.' );

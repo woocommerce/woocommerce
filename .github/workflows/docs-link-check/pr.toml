@@ -30,7 +30,7 @@ max_redirects = 0
 
 # Only 400, 404, and 410 (plus transport failures) fail the check. Auth challenges, bot
 # blocks, rate limits, and server errors do not prove a link is dead.
-accept = "200..=399,401,403,405..=409,411..=599"
+accept = "200..=399,401..=403,405..=409,411..=599"
 timeout = 10
 max_retries = 2
 max_concurrency = 4

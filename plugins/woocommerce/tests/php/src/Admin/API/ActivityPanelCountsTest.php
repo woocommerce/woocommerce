@@ -243,4 +243,35 @@ class ActivityPanelCountsTest extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertSame( 2, $data['orders_to_fulfill_count'] );
 	}
+
+	/**
+	 * Test that the filter-added actionable status drives the endpoint's default count when
+	 * the option has never been saved, matching the reports and the Analytics Settings screen.
+	 * Counts are asymmetric (1 processing, 2 completed) so falling back to the built-in
+	 * processing/on-hold defaults would count 1 instead of 3.
+	 */
+	public function test_filtered_default_actionable_statuses_drive_default_count() {
+		wp_set_current_user( $this->user );
+
+		WC_Helper_Order::create_order( 1, null, array( 'status' => OrderStatus::PROCESSING ) );
+		WC_Helper_Order::create_order( 1, null, array( 'status' => OrderStatus::COMPLETED ) );
+		WC_Helper_Order::create_order( 1, null, array( 'status' => OrderStatus::COMPLETED ) );
+
+		delete_option( 'woocommerce_actionable_order_statuses' );
+		$add_completed = function ( $statuses ) {
+			$statuses[] = OrderStatus::COMPLETED;
+			return $statuses;
+		};
+		add_filter( 'woocommerce_analytics_settings_default_actionable_order_statuses', $add_completed );
+		$this->reregister_routes();
+
+		$request  = new WP_REST_Request( 'GET', self::ENDPOINT );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		remove_filter( 'woocommerce_analytics_settings_default_actionable_order_statuses', $add_completed );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertSame( 3, $data['orders_to_fulfill_count'] );
+	}
 }

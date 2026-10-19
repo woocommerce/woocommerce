@@ -10,10 +10,12 @@ use Automattic\WooCommerce\Internal\PushNotifications\Controllers\NotificationPr
 use Automattic\WooCommerce\Internal\PushNotifications\Controllers\PushNotificationRestController;
 use Automattic\WooCommerce\Internal\PushNotifications\Controllers\PushNotificationStatusRestController;
 use Automattic\WooCommerce\Internal\PushNotifications\Controllers\PushTokenRestController;
+use Automattic\WooCommerce\Internal\PushNotifications\Controllers\StepLogRestController;
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\DriverAvailabilityService;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationRetryHandler;
+use Automattic\WooCommerce\Internal\PushNotifications\Services\UserDataCleanupService;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\PendingNotificationStore;
 use Automattic\WooCommerce\Internal\PushNotifications\Triggers\NewOrderNotificationTrigger;
 use Automattic\WooCommerce\Internal\PushNotifications\Triggers\NewReviewNotificationTrigger;
@@ -74,6 +76,22 @@ class PushNotifications {
 		// the state and fall back if needed.
 		wc_get_container()->get( PushNotificationStatusRestController::class )->register();
 
+		// Also registered ahead of the enablement check. Tokens stored while the
+		// feature was on stay in the database once it is off, and a user deleted
+		// in the meantime must not leave records behind for a later reconnection
+		// to start sending against.
+		wc_get_container()->get( UserDataCleanupService::class )->register();
+
+		// Registered ahead of the enablement check so the token list can still be
+		// read on a store that has been switched off. The controller registers the
+		// write routes only while the module is enabled, like everything below.
+		( new PushTokenRestController() )->register();
+
+		// Registered ahead of the enablement check for the same reason: a store
+		// is most worth reading the step log for once push notifications have
+		// been switched off, which is often why they were switched off.
+		wc_get_container()->get( StepLogRestController::class )->register();
+
 		if ( ! $this->should_be_enabled() ) {
 			return;
 		}
@@ -82,7 +100,6 @@ class PushNotifications {
 
 		wc_get_container()->get( PendingNotificationStore::class )->register();
 
-		( new PushTokenRestController() )->register();
 		( new PushNotificationRestController() )->register();
 		( new NotificationPreferencesRestController() )->register();
 		( new NewOrderNotificationTrigger() )->register();

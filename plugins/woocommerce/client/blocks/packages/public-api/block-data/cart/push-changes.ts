@@ -3,7 +3,7 @@
  */
 import {
 	debounce,
-	addressFieldsForShippingRates,
+	isAddressFieldForShippingRates,
 } from '@woocommerce/base-utils';
 import { CartBillingAddress, CartShippingAddress } from '@woocommerce/types';
 import { select, dispatch } from '@wordpress/data';
@@ -104,6 +104,49 @@ const updateDirtyProps = () => {
 };
 
 /**
+ * Fields a country change resets, since their values only make sense for the previous country.
+ */
+const countryDependentFields = [ 'state', 'postcode' ] as const;
+
+/**
+ * Returns the dirty props that need to pass validation before the address can be pushed.
+ *
+ * When the country changes, the state and postcode are reset and are therefore invalid until
+ * the customer fills them in again. Waiting for them would leave the server calculating
+ * shipping for the previous country, so they are skipped while they are still empty.
+ */
+const getDirtyPropsToValidate = (
+	dirtyProps: BaseAddressKey[],
+	address: CartBillingAddress | CartShippingAddress
+): BaseAddressKey[] => {
+	if ( ! dirtyProps.includes( 'country' ) ) {
+		return dirtyProps;
+	}
+
+	const emptiedByCountryChange = countryDependentFields.filter(
+		( field ) => ! address[ field ]
+	) as BaseAddressKey[];
+
+	return dirtyProps.filter(
+		( key ) => ! emptiedByCountryChange.includes( key )
+	);
+};
+
+const isShippingRatesUpdateQueued = () =>
+	!! select( cartStore ).getCartMeta().isShippingRatesUpdateQueued;
+
+/**
+ * Updates the queued shipping rates flag, skipping the dispatch when it is unchanged.
+ */
+const setShippingRatesUpdateQueued = ( isQueued: boolean ) => {
+	if ( isShippingRatesUpdateQueued() !== isQueued ) {
+		dispatch( cartStore ).__internalSetShippingRatesUpdateQueued(
+			isQueued
+		);
+	}
+};
+
+/**
  * Function to dispatch an update to the server.
  */
 const updateCustomerData = (): void => {
@@ -127,18 +170,31 @@ const updateCustomerData = (): void => {
 
 	if ( ! needsPush ) {
 		localState.doingPush = false;
+		setShippingRatesUpdateQueued( false );
 		return;
 	}
 
 	// Check props are valid, or abort.
-	if ( ! validateDirtyProps( localState.dirtyProps ) ) {
+	if (
+		! validateDirtyProps( {
+			billingAddress: getDirtyPropsToValidate(
+				localState.dirtyProps.billingAddress,
+				localState.customerData.billingAddress
+			),
+			shippingAddress: getDirtyPropsToValidate(
+				localState.dirtyProps.shippingAddress,
+				localState.customerData.shippingAddress
+			),
+		} )
+	) {
 		localState.doingPush = false;
+		setShippingRatesUpdateQueued( false );
 		return;
 	}
 
 	const haveAddressFieldsForShippingRatesChanged =
-		localState.dirtyProps.shippingAddress.some( ( field ) =>
-			addressFieldsForShippingRates.includes( field as string )
+		localState.dirtyProps.shippingAddress.some(
+			isAddressFieldForShippingRates
 		);
 
 	dispatch( cartStore )
@@ -163,6 +219,9 @@ const updateCustomerData = (): void => {
 			localState.doingPush = false;
 			processErrorResponse( response );
 		} );
+
+	// Cleared once the request has started, so the shipping rates loading state takes over without a gap.
+	setShippingRatesUpdateQueued( false );
 };
 
 /**
@@ -193,23 +252,54 @@ export const pushChanges = ( debounced = true ): void => {
 		return;
 	}
 
-	if (
-		isShallowEqual(
-			localState.customerData,
-			select( cartStore ).getCustomerData()
-		)
-	) {
+	const customerData = select( cartStore ).getCustomerData();
+
+	if ( isShallowEqual( localState.customerData, customerData ) ) {
 		return;
 	}
 
-	if ( debounced ) {
-		debouncedUpdateCustomerData();
-	} else {
+	if (
+		! isShippingRatesUpdateQueued() &&
+		getDirtyKeys(
+			localState.customerData.shippingAddress,
+			customerData.shippingAddress
+		).some( isAddressFieldForShippingRates )
+	) {
+		setShippingRatesUpdateQueued( true );
+	}
+
+	if ( ! debounced ) {
+		updateCustomerData();
+		return;
+	}
+
+	debouncedUpdateCustomerData();
+
+	// Picking a country is a deliberate choice rather than typing, and it invalidates the
+	// shipping rates already on screen. Push it straight away so the rates reload instead of
+	// showing the previous country's options for the length of the debounce.
+	const countryChanged =
+		customerData.billingAddress.country !==
+			localState.customerData.billingAddress.country ||
+		customerData.shippingAddress.country !==
+			localState.customerData.shippingAddress.country;
+
+	if ( countryChanged ) {
+		// Push now rather than flushing the debounce: while a push is running this is a no-op,
+		// and the run scheduled above still sends the change once that push finishes.
 		updateCustomerData();
 	}
 };
 
 // Cancel the debounced updateCustomerData function and trigger it immediately.
 export const flushChanges = (): void => {
-	debouncedUpdateCustomerData.flush();
+	if ( localState.doingPush ) {
+		// A push is already running, so this one would be a no-op anyway. Leave the scheduled
+		// run alone: flushing it here would cancel it, and the changes made during the running
+		// push would never reach the server.
+		return;
+	}
+
+	debouncedUpdateCustomerData.clear();
+	updateCustomerData();
 };

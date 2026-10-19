@@ -7,6 +7,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Features;
 
+use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreview;
 use WC_Tracks;
 use WC_Site_Tracking;
@@ -123,6 +124,20 @@ class FeaturesController {
 	 * @var bool
 	 */
 	private bool $registered_additional_features_via_class_calls = false;
+
+	/**
+	 * Flag indicating if hardcoded feature definitions are currently being initialized.
+	 *
+	 * @var bool
+	 */
+	private bool $initializing_feature_definitions = false;
+
+	/**
+	 * Flag indicating if a notice for reentrant feature definition access has been issued.
+	 *
+	 * @var bool
+	 */
+	private bool $issued_feature_definitions_notice = false;
 
 	/**
 	 * Flag indicating if we are currently delaying plugin normalization.
@@ -260,9 +275,7 @@ class FeaturesController {
 	 * @return array[]
 	 */
 	private function get_feature_definitions() {
-		if ( empty( $this->features ) ) {
-			$this->init_feature_definitions();
-		}
+		$this->maybe_init_feature_definitions();
 
 		if ( ! $this->registered_additional_features_via_class_calls ) {
 			// This needs to be set to true *before* additional feature definition calls are made,
@@ -280,6 +293,37 @@ class FeaturesController {
 		}
 
 		return $this->features;
+	}
+
+	/**
+	 * Initialize hardcoded feature definitions if they have not been initialized yet.
+	 */
+	private function maybe_init_feature_definitions(): void {
+		if ( $this->initializing_feature_definitions ) {
+			if ( ! $this->issued_feature_definitions_notice ) {
+				// Set this before issuing the notice because wc_doing_it_wrong() invokes gettext callbacks.
+				$this->issued_feature_definitions_notice = true;
+				wc_doing_it_wrong(
+					__METHOD__,
+					__( 'FeaturesController methods that access feature definitions should not be called while feature definitions are being initialized. Use the woocommerce_init action or later.', 'woocommerce' ),
+					'11.3.0'
+				);
+			}
+
+			return;
+		}
+
+		if ( ! empty( $this->features ) ) {
+			return;
+		}
+
+		$this->initializing_feature_definitions = true;
+
+		try {
+			$this->init_feature_definitions();
+		} finally {
+			$this->initializing_feature_definitions = false;
+		}
 	}
 
 	/**
@@ -592,12 +636,30 @@ class FeaturesController {
 			),
 			'mcp_integration'                      => array(
 				'name'                         => __( 'WooCommerce MCP', 'woocommerce' ),
-				'description'                  => $this->get_mcp_integration_description(),
-				'enabled_by_default'           => false,
-				'disable_ui'                   => false,
+				'description'                  => __(
+					'The WooCommerce MCP endpoint was removed. Use the MCP Adapter plugin to access WooCommerce abilities over MCP.',
+					'woocommerce'
+				),
 				'is_experimental'              => true,
+				'enabled_by_default'           => false,
+				'disable_ui'                   => true,
+				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
-				'is_legacy'                    => false,
+				'deprecated_since'             => '11.3.0',
+				'deprecated_value'             => false,
+			),
+			'ucp'                                  => array(
+				'name'                         => __( 'Universal Commerce Protocol', 'woocommerce' ),
+				'description'                  => __(
+					'Expose the catalog to AI shopping agents through UCP endpoints.',
+					'woocommerce'
+				),
+				'enabled_by_default'           => false,
+				// Hidden: the flag is set by the integration that drives UCP, not by merchants.
+				'disable_ui'                   => true,
+				'is_experimental'              => true,
+				'skip_compatibility_checks'    => true,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
 			'destroy-empty-sessions'               => array(
 				'name'                         => __( 'Clear Customer Sessions When Empty', 'woocommerce' ),
@@ -694,6 +756,15 @@ class FeaturesController {
 				'is_experimental'              => true,
 				'disable_ui'                   => false,
 			),
+			ExtensibleAbilities::FEATURE_ID        => array(
+				'name'                         => __( 'Extensible abilities', 'woocommerce' ),
+				'description'                  => __( 'Let extensions add their fields to the output of WooCommerce abilities.', 'woocommerce' ),
+				'is_experimental'              => true,
+				'enabled_by_default'           => false,
+				'disable_ui'                   => false,
+				'skip_compatibility_checks'    => true,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+			),
 		);
 
 		if ( ! $tracking_enabled ) {
@@ -732,44 +803,6 @@ class FeaturesController {
 	}
 
 	/**
-	 * Generate the description for the MCP integration feature.
-	 *
-	 * @return string The feature description with conditional permalink warning and documentation link.
-	 */
-	private function get_mcp_integration_description() {
-		$base_description = __( 'Enable WooCommerce MCP (Model Context Protocol) for AI-powered store operations. AI-generated results and actions can be unpredictable - please review before executing in your store.', 'woocommerce' );
-
-		// Check permalink structure requirement.
-		$permalink_structure = get_option( 'permalink_structure' );
-		if ( empty( $permalink_structure ) ) {
-			$permalinks_url    = admin_url( 'options-permalink.php' );
-			$permalink_warning = sprintf(
-				'<br><br><strong>%s:</strong> %s <a href="%s">%s</a>',
-				__( 'Configuration Required', 'woocommerce' ),
-				__( 'WordPress permalinks must be set to anything other than "Plain" for MCP to work.', 'woocommerce' ),
-				$permalinks_url,
-				__( 'Configure Permalinks', 'woocommerce' )
-			);
-			// Add documentation link to permalink warning.
-			$documentation_link = sprintf(
-				' <a href="%s" target="_blank">%s</a>',
-				'https://github.com/woocommerce/woocommerce/blob/trunk/docs/features/mcp/README.md',
-				__( 'Learn more', 'woocommerce' )
-			);
-			return $base_description . $permalink_warning . $documentation_link;
-		}
-
-		// Add documentation link.
-		$documentation_link = sprintf(
-			' <a href="%s" target="_blank">%s</a>',
-			'https://github.com/woocommerce/woocommerce/blob/trunk/docs/features/mcp/README.md',
-			__( 'Learn more', 'woocommerce' )
-		);
-
-		return $base_description . $documentation_link;
-	}
-
-	/**
 	 * Function to trigger the (now deprecated) 'woocommerce_register_feature_definitions' hook.
 	 *
 	 * This function must execute immediately before the 'before_woocommerce_init'
@@ -783,9 +816,7 @@ class FeaturesController {
 			return;
 		}
 
-		if ( empty( $this->features ) ) {
-			$this->init_feature_definitions();
-		}
+		$this->maybe_init_feature_definitions();
 
 		/**
 		 * The action for registering features.

@@ -11,6 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
 use Automattic\WooCommerce\Admin\API\Reports\TimeInterval;
+use Automattic\WooCommerce\Internal\Admin\Settings;
 
 /**
  * Common parent for custom report data stores.
@@ -842,9 +843,27 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 	 * @return array
 	 */
 	protected static function get_excluded_report_order_statuses() {
-		$excluded_statuses = \WC_Admin_Settings::get_option( 'woocommerce_excluded_report_order_statuses', array( 'pending', 'failed', 'cancelled' ) );
-		$excluded_statuses = array_merge( array( 'auto-draft', 'trash' ), array_map( 'esc_sql', $excluded_statuses ) );
-		return apply_filters( 'woocommerce_analytics_excluded_order_statuses', $excluded_statuses );
+		$default_excluded_statuses = Settings::get_default_excluded_order_statuses();
+		$excluded_statuses         = \WC_Admin_Settings::get_option( 'woocommerce_excluded_report_order_statuses', $default_excluded_statuses );
+		$excluded_statuses         = Settings::get_valid_order_statuses_or_default( $excluded_statuses, $default_excluded_statuses );
+		$excluded_statuses         = array_merge( array( 'auto-draft', 'trash' ), array_map( 'esc_sql', $excluded_statuses ) );
+
+		// Keep the value a broken filter would otherwise replace, so the merchant's saved
+		// selection survives it.
+		$pre_filter_statuses = $excluded_statuses;
+
+		/**
+		 * Filter the list of excluded order statuses for customer history and analytics reports.
+		 *
+		 * @since 4.0.0
+		 * @param array $excluded_statuses Order statuses to exclude.
+		 */
+		$excluded_statuses = apply_filters( 'woocommerce_analytics_excluded_order_statuses', $excluded_statuses );
+		if ( ! is_array( $excluded_statuses ) ) {
+			wc_doing_it_wrong( __METHOD__, 'The woocommerce_analytics_excluded_order_statuses filter must return an array.', '11.2.0' );
+			$excluded_statuses = $pre_filter_statuses;
+		}
+		return $excluded_statuses;
 	}
 
 	/**
@@ -1467,6 +1486,60 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 		} else {
 			$sql_query->add_sql_clause( 'order_by', 'DESC' );
 		}
+	}
+
+	/**
+	 * Returns payment gateway subquery to be used in WHERE SQL query, based on query arguments from the user.
+	 *
+	 * The include and exclude clauses are always joined with AND, so that "is bacs" and "is not cheque"
+	 * narrow the result together even under `match=any`.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param array $query_args Parameters supplied by the user.
+	 * @return string
+	 */
+	protected function get_payment_method_subquery( $query_args ) {
+		global $wpdb;
+
+		$table      = $wpdb->prefix . 'wc_order_stats';
+		$subqueries = array();
+
+		$included = $this->get_payment_method_list( $query_args, 'payment_method_is' );
+		if ( $included ) {
+			$subqueries[] = "{$table}.payment_method IN ( {$included} )";
+		}
+
+		$excluded = $this->get_payment_method_list( $query_args, 'payment_method_is_not' );
+		if ( $excluded ) {
+			// NOT IN would drop the NULL rows, which are not the excluded gateway either.
+			$subqueries[] = "( {$table}.payment_method IS NULL OR {$table}.payment_method NOT IN ( {$excluded} ) )";
+		}
+
+		return implode( ' AND ', $subqueries );
+	}
+
+	/**
+	 * Build a quoted SQL list from the payment gateway ids held in a query argument.
+	 *
+	 * @param array  $query_args Parameters supplied by the user.
+	 * @param string $field      Query argument holding the ids.
+	 * @return string Comma separated list of quoted ids, empty when there is nothing to filter on.
+	 */
+	private function get_payment_method_list( $query_args, $field ) {
+		$payment_methods = isset( $query_args[ $field ] ) && is_array( $query_args[ $field ] ) ? $query_args[ $field ] : array();
+		$payment_methods = array_filter(
+			array_map( 'strval', $payment_methods ),
+			function ( $payment_method ) {
+				return '' !== $payment_method;
+			}
+		);
+
+		if ( ! $payment_methods ) {
+			return '';
+		}
+
+		return "'" . implode( "','", array_map( 'esc_sql', $payment_methods ) ) . "'";
 	}
 
 	/**

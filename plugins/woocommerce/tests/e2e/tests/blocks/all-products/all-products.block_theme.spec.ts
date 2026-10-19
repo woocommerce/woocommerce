@@ -4,13 +4,10 @@
 import {
 	BLOCK_THEME_SLUG,
 	expect,
+	getProductAttributeIds,
 	PostCompiler,
 	test as base,
 } from '@woocommerce/e2e-utils';
-
-/**
- * Internal dependencies
- */
 
 const BLOCK_NAME = 'woocommerce/all-products';
 
@@ -65,7 +62,9 @@ test.describe( `${ BLOCK_NAME } Block`, () => {
 		page,
 		postCompiler,
 	} ) => {
-		const post = await postCompiler.compile();
+		const post = await postCompiler.compile(
+			await getProductAttributeIds()
+		);
 
 		const productsResponse = page.waitForResponse(
 			( response ) =>

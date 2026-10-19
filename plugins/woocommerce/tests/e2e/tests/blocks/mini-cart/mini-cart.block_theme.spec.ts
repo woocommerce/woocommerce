@@ -45,7 +45,7 @@ test.describe( `${ blockData.name } Block`, () => {
 				).toBeVisible();
 			} else {
 				await expect( page.getByRole( 'dialog' ) ).toContainText(
-					'Your cart is currently empty!'
+					'Your cart is empty'
 				);
 			}
 		}
@@ -103,7 +103,7 @@ test.describe( `${ blockData.name } Block`, () => {
 		await miniCartUtils.openMiniCart();
 
 		await expect( page.getByRole( 'dialog' ) ).toContainText(
-			'Your shopping cart is empty'
+			'Your cart is empty'
 		);
 		await expect(
 			page.getByRole( 'link', { name: 'Return to shop' } )
@@ -119,7 +119,7 @@ test.describe( `${ blockData.name } Block`, () => {
 		await miniCartUtils.openMiniCart();
 
 		await expect( page.getByRole( 'dialog' ) ).toContainText(
-			'Your shopping cart is empty'
+			'Your cart is empty'
 		);
 
 		await page.getByRole( 'button', { name: 'Close' } ).click();
@@ -135,7 +135,7 @@ test.describe( `${ blockData.name } Block`, () => {
 		await miniCartUtils.openMiniCart();
 
 		await expect( page.getByRole( 'dialog' ) ).toContainText(
-			'Your shopping cart is empty'
+			'Your cart is empty'
 		);
 
 		await page.mouse.click( 0, 0 );
@@ -249,12 +249,12 @@ test.describe( `${ blockData.name } Block`, () => {
 		await expect( page.getByText( 'Subtotal' ) ).toBeVisible();
 
 		await expect(
-			miniCartDialog.getByRole( 'link', { name: 'View cart' } )
+			miniCartDialog.getByRole( 'link', { name: 'Cart' } )
 		).toBeVisible();
 
 		await expect(
 			miniCartDialog.getByRole( 'link', {
-				name: 'Go to checkout',
+				name: 'Checkout',
 			} )
 		).toBeVisible();
 	} );
@@ -317,9 +317,7 @@ test.describe( `${ blockData.name } Block`, () => {
 			.getByRole( 'button', { name: 'Remove Polo from cart' } )
 			.click();
 
-		await expect(
-			page.getByText( 'Your shopping cart is empty' )
-		).toBeVisible();
+		await expect( page.getByText( 'Your cart is empty' ) ).toBeVisible();
 	} );
 
 	test( 'should allow to proceed to the cart page', async ( {
@@ -332,7 +330,7 @@ test.describe( `${ blockData.name } Block`, () => {
 		await miniCartUtils.openMiniCart();
 		await page
 			.getByRole( 'dialog' )
-			.getByRole( 'link', { name: 'View cart' } )
+			.getByRole( 'link', { name: 'Cart' } )
 			.click();
 		await expect( page ).toHaveURL( /\/cart\/?$/ );
 	} );
@@ -347,7 +345,7 @@ test.describe( `${ blockData.name } Block`, () => {
 		await miniCartUtils.openMiniCart();
 		await page
 			.getByRole( 'dialog' )
-			.getByRole( 'link', { name: 'Go to checkout' } )
+			.getByRole( 'link', { name: 'Checkout' } )
 			.click();
 		await expect( page ).toHaveURL( /\/checkout\/?$/ );
 	} );

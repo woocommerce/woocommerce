@@ -621,7 +621,8 @@ class WC_Settings_Emails extends WC_Settings_Page {
 			$template_version = $post_id ? (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::VERSION_META_KEY, true ) : '';
 			$was_backfilled   = $post_id ? (bool) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::BACKFILLED_META_KEY, true ) : false;
 
-			$file_template_preview_url = in_array( $email->id, $block_editor_email_ids, true )
+			$block_editor_supported    = in_array( $email->id, $block_editor_email_ids, true );
+			$file_template_preview_url = $block_editor_supported
 				? wp_nonce_url( admin_url( '?preview_woo_block_email=true&email_id=' . $email->id ), 'preview-woo-block-email' )
 				: null;
 
@@ -632,6 +633,7 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				'email_key'                 => strtolower( $email_key ),
 				'email_class_name'          => get_class( $email ),
 				'post_id'                   => $post_id,
+				'block_editor_supported'    => $block_editor_supported,
 				'file_template_preview_url' => $file_template_preview_url,
 				'enabled'                   => $email->is_enabled(),
 				'manual'                    => $email->is_manual(),
@@ -668,15 +670,8 @@ class WC_Settings_Emails extends WC_Settings_Page {
 			data-edit-template-url="<?php echo esc_attr( $edit_template_url ); ?>"
 			data-email-template-id="<?php echo esc_attr( $email_template_id ); ?>"
 		>
-			<div style="
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			padding: 12px;
-			height: 40px;
-			width: 100%;
-			">
-				<h3> <?php esc_html_e( 'Loading&hellip;', 'woocommerce' ); ?>  </h3>
+			<div class="woocommerce-email-listing-placeholder" role="status">
+				<p><?php esc_html_e( 'Loading&hellip;', 'woocommerce' ); ?></p>
 			</div>
 		</div>
 		<div>

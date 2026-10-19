@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\StockNotifications;
 
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\Config;
+use Automattic\WooCommerce\Internal\StockNotifications\Factory;
 
 /**
  * NotificationTests data tests.
@@ -22,7 +23,7 @@ class NotificationTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @after
+	 * Tear down the test.
 	 */
 	public function tearDown(): void {
 		// Clean up all notifications.
@@ -94,6 +95,57 @@ class NotificationTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should list the variation's own attributes alongside the posted "Any" attributes.
+	 */
+	public function test_get_product_formatted_variation_list_merges_posted_attributes(): void {
+		$variable_product = \WC_Helper_Product::create_variation_product();
+		// The first variation only sets "size"; "colour" is left as "Any".
+		$variation_id = $variable_product->get_children()[0];
+
+		$notification = new Notification();
+		$notification->set_product_id( $variation_id );
+		$notification->set_user_email( 'test@example.com' );
+		$notification->save();
+
+		$this->assertSame( 'size: small', $notification->get_product_formatted_variation_list( true ), 'Without posted attributes only the fixed attributes should be listed' );
+
+		// Posted attributes only hold the "Any" values; "attribute_pa_stale" is not a variation attribute and must be dropped.
+		$notification->update_meta_data(
+			'posted_attributes',
+			array(
+				'attribute_pa_colour' => 'red',
+				'attribute_pa_stale'  => 'gone',
+			)
+		);
+		$notification->save();
+
+		$this->assertSame( 'size: small, colour: red', $notification->get_product_formatted_variation_list( true ), 'The fixed attribute should be kept and the posted "Any" attribute added' );
+	}
+
+	/**
+	 * @testdox Should keep the variation's fixed attribute value when a different value was posted for it.
+	 */
+	public function test_get_product_formatted_variation_list_keeps_fixed_attribute_over_posted(): void {
+		$variable_product = \WC_Helper_Product::create_variation_product();
+		// The first variation fixes "size" to "small"; "colour" is left as "Any".
+		$variation_id = $variable_product->get_children()[0];
+
+		$notification = new Notification();
+		$notification->set_product_id( $variation_id );
+		$notification->set_user_email( 'test@example.com' );
+		$notification->update_meta_data(
+			'posted_attributes',
+			array(
+				'attribute_pa_size'   => 'large',
+				'attribute_pa_colour' => 'red',
+			)
+		);
+		$notification->save();
+
+		$this->assertSame( 'size: small, colour: red', $notification->get_product_formatted_variation_list( true ), 'The fixed attribute should win over the posted value, while the "Any" attribute is filled in' );
+	}
+
+	/**
 	 * Test the get_product_permalink method.
 	 */
 	public function test_get_product_permalink() {
@@ -145,6 +197,21 @@ class NotificationTests extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertSame( $expected, $notification->get_product_permalink(), 'Permalink should carry the variation attribute and the posted "Any" attribute, and nothing else' );
+	}
+
+	/**
+	 * @testdox Should return an empty string for an unsaved product, as used by the email preview, instead of linking to the global post.
+	 */
+	public function test_get_product_permalink_for_unsaved_product(): void {
+		$notification = Factory::create_dummy_notification();
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- get_permalink( 0 ) falls back to the global post.
+		$GLOBALS['post'] = get_post( $this->factory->post->create() );
+
+		try {
+			$this->assertSame( '', $notification->get_product_permalink() );
+		} finally {
+			unset( $GLOBALS['post'] );
+		}
 	}
 
 	/**
@@ -268,5 +335,32 @@ class NotificationTests extends \WC_Unit_Test_Case {
 		$notification->save();
 
 		$this->assertFalse( $notification->check_verification_key( 'test' ) );
+	}
+
+	/**
+	 * @testdox set_user_email() should store the canonical (trimmed, lowercased) form.
+	 */
+	public function test_set_user_email_stores_canonical_form(): void {
+		$notification = new Notification();
+		$notification->set_product_id( 1 );
+		$notification->set_user_email( ' Foo@Bar.COM ' );
+		$notification->save();
+
+		$this->assertSame( 'foo@bar.com', $notification->get_user_email() );
+		$this->assertSame( 'foo@bar.com', ( new Notification( $notification->get_id() ) )->get_user_email() );
+	}
+
+	/**
+	 * @testdox validate() should still reject an invalid email after normalization.
+	 */
+	public function test_invalid_user_email_fails_validation(): void {
+		$notification = new Notification();
+		$notification->set_product_id( 1 );
+		$notification->set_user_email( 'Not An Email' );
+
+		$result = $notification->save();
+
+		$this->assertInstanceOf( \WP_Error::class, $result );
+		$this->assertSame( 'User Email is invalid.', $result->get_error_message() );
 	}
 }

@@ -32,7 +32,7 @@ export async function waitForStoreResolvers< T >( fn: () => T ) {
 		// resolve before we consider the editor initialized is to flush micro tasks,
 		// similar to the approach found in `@testing-library/react`.
 		// https://github.com/callstack/react-native-testing-library/blob/a010ffdbca906615279ecc3abee423525e528101/src/flushMicroTasks.js#L15-L23.
-		// eslint-disable-next-line testing-library/no-unnecessary-act, @typescript-eslint/no-empty-function
+		// eslint-disable-next-line testing-library/no-unnecessary-act
 		await act( async () => {} );
 
 		return result;

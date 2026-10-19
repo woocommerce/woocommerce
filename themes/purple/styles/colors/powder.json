@@ -1,0 +1,63 @@
+{
+	"settings": {
+		"color": {
+			"palette": [
+				{
+					"color": "#d6d8c7",
+					"name": "Base",
+					"slug": "theme-1"
+				},
+				{
+					"color": "#111111",
+					"name": "Contrast",
+					"slug": "theme-2"
+				},
+				{
+					"color": "#3d3012",
+					"name": "Primary",
+					"slug": "theme-3"
+				},
+				{
+					"color": "#47443d",
+					"name": "Contrast Alt",
+					"slug": "theme-4"
+				},
+				{
+					"color": "#f1ead8",
+					"name": "Base Alt",
+					"slug": "theme-5"
+				},
+				{
+					"color": "rgba(17, 17, 17, 0.2)",
+					"name": "Border",
+					"slug": "theme-6"
+				},
+				{
+					"color": "#a80003",
+					"name": "Accent",
+					"slug": "theme-7"
+				}
+			],
+			"duotone": [
+				{
+					"colors": [
+						"#111111",
+						"#d6d8c7"
+					],
+					"name": "Duotone 1",
+					"slug": "duotone-1"
+				},
+				{
+					"colors": [
+						"#111111",
+						"#f1ead8"
+					],
+					"name": "Duotone 2",
+					"slug": "duotone-2"
+				}
+			]
+		}
+	},
+	"version": 3,
+	"title": "Powder"
+}

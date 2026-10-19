@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Ignore array values for the analytics report export filename instead of raising a PHP warning.

@@ -458,13 +458,26 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 
 		// Filter by on sale products.
 		if ( is_bool( $request['on_sale'] ) ) {
-			$on_sale_key = $request['on_sale'] ? 'post__in' : 'post__not_in';
 			$on_sale_ids = wc_get_product_ids_on_sale();
 
 			// Use 0 when there's no on sale products to avoid return all products.
 			$on_sale_ids = empty( $on_sale_ids ) ? array( 0 ) : $on_sale_ids;
 
-			$args[ $on_sale_key ] += $on_sale_ids;
+			if ( $request['on_sale'] || ! empty( $args['post__in'] ) ) {
+				$post_in = empty( $args['post__in'] ) ? $on_sale_ids : $args['post__in'];
+
+				// WP_Query ignores post__not_in when post__in is set, so the on_sale filter and exclude are applied to post__in.
+				if ( $request['on_sale'] ) {
+					$post_in = array_intersect( $post_in, $on_sale_ids );
+				} else {
+					$post_in = array_diff( $post_in, $on_sale_ids );
+				}
+				$post_in = array_diff( $post_in, (array) $args['post__not_in'] );
+
+				$args['post__in'] = empty( $post_in ) ? array( 0 ) : array_values( $post_in );
+			} else {
+				$args['post__not_in'] = array_merge( (array) $args['post__not_in'], $on_sale_ids );
+			}
 		}
 
 		// Force the post_type argument, since it's not a user input variable.
@@ -601,7 +614,10 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 	 * @return     string
 	 */
 	protected function get_attribute_taxonomy_label( $name ) {
-		$tax    = get_taxonomy( $name );
+		$tax = get_taxonomy( $name );
+		if ( ! $tax ) {
+			return wc_attribute_taxonomy_slug( $name );
+		}
 		$labels = get_taxonomy_labels( $tax );
 
 		return $labels->singular_name;
@@ -640,7 +656,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 		// Taxonomy attribute name.
 		if ( $attribute->is_taxonomy() ) {
 			$taxonomy = $attribute->get_taxonomy_object();
-			return $taxonomy->attribute_label;
+			return $taxonomy ? $taxonomy->attribute_label : $slug;
 		}
 
 		// Custom product attribute name.

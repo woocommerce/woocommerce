@@ -892,7 +892,7 @@ class ProductSchema extends AbstractSchema {
 				continue;
 			}
 
-			$terms = $attribute->is_taxonomy() ? array_map( [ $this, 'prepare_product_attribute_taxonomy_value' ], $attribute->get_terms() ) : array_map( [ $this, 'prepare_product_attribute_value' ], $attribute->get_options() );
+			$terms = $attribute->is_taxonomy() ? array_map( [ $this, 'prepare_product_attribute_taxonomy_value' ], (array) $attribute->get_terms() ) : array_map( [ $this, 'prepare_product_attribute_value' ], $attribute->get_options() );
 			// Custom attribute names are sanitized to be the array keys.
 			// So when we do the array_key_exists check below we also need to sanitize the attribute names.
 

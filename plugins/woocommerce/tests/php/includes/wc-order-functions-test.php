@@ -5,6 +5,7 @@
  * @package WooCommerce\Tests\Order.
  */
 
+use Automattic\WooCommerce\Caches\OrderCache;
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Utilities\Users;
@@ -176,6 +177,75 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 		$order->untrash();
 		$this->assertEquals( 1, $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
 		$this->assertEquals( 1, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox wc_update_coupon_usage_counts() does not count coupon usage for a refund.
+	 */
+	public function test_wc_update_coupon_usage_counts_ignores_refunds() {
+		$coupon = WC_Helper_Coupon::create_coupon( 'test_usage_on_refund' );
+		$refund = wc_create_refund(
+			array(
+				'order_id' => WC_Helper_Order::create_order( 0 )->get_id(),
+				'amount'   => 1,
+			)
+		);
+		$item   = new WC_Order_Item_Coupon();
+		$item->set_code( $coupon->get_code() );
+		$refund->add_item( $item );
+		$refund->save();
+
+		wc_update_coupon_usage_counts( $refund->get_id() );
+
+		$coupon = new WC_Coupon( $coupon->get_code() );
+		$this->assertSame( 0, $coupon->get_usage_count() );
+		$this->assertSame( array(), $coupon->get_used_by() );
+	}
+
+	/**
+	 * @testdox wc_update_coupon_usage_counts() does not count coupon usage for an order whose data store cannot record it.
+	 */
+	public function test_wc_update_coupon_usage_counts_skips_orders_whose_data_store_cannot_record_usage() {
+		$coupon = WC_Helper_Coupon::create_coupon( 'test_usage_without_recording_support' );
+		$order  = WC_Helper_Order::create_order();
+		$item   = new WC_Order_Item_Coupon();
+		$item->set_code( $coupon->get_code() );
+		$order->add_item( $item );
+		$order->save();
+
+		// Load the order with a data store that lacks the coupon usage methods of WC_Order_Data_Store_Interface.
+		add_filter(
+			'woocommerce_data_stores',
+			function ( $stores ) {
+				$stores['test-basic-order'] = new class() extends Abstract_WC_Order_Data_Store_CPT {
+				};
+				return $stores;
+			}
+		);
+		$order_class = get_class(
+			new class() extends WC_Order {
+				/**
+				 * Get a data store without the coupon usage methods.
+				 *
+				 * @return WC_Data_Store
+				 */
+				public function get_data_store() {
+					return WC_Data_Store::load( 'test-basic-order' );
+				}
+			}
+		);
+		add_filter(
+			'woocommerce_order_class',
+			function () use ( $order_class ) {
+				return $order_class;
+			}
+		);
+		wc_get_container()->get( OrderCache::class )->remove( $order->get_id() );
+
+		wc_update_coupon_usage_counts( $order->get_id() );
+		wc_update_coupon_usage_counts( $order->get_id() );
+
+		$this->assertSame( 0, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
 	}
 
 	/**
@@ -556,5 +626,79 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 		// Cleanup.
 		$order->delete();
 		$customer->delete();
+	}
+
+	/**
+	 * @testdox Should record the logged-in user who issued the refund.
+	 */
+	public function test_wc_create_refund_records_the_current_user(): void {
+		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $user_id );
+
+		$order  = WC_Helper_Order::create_order();
+		$refund = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 10,
+			)
+		);
+
+		$this->assertNotWPError( $refund );
+		$this->assertSame( $user_id, $refund->get_refunded_by() );
+		$this->assertSame(
+			$user_id,
+			wc_get_order( $refund->get_id() )->get_refunded_by(),
+			'The refunding user should survive a round trip through the data store.'
+		);
+	}
+
+	/**
+	 * @testdox Should attribute a refund to nobody when no user is logged in, rather than to user 1.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/36329
+	 */
+	public function test_wc_create_refund_records_no_user_when_nobody_is_logged_in(): void {
+		wp_set_current_user( 0 );
+
+		$order  = WC_Helper_Order::create_order();
+		$refund = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 10,
+			)
+		);
+
+		$this->assertNotWPError( $refund );
+		$this->assertSame( 0, $refund->get_refunded_by() );
+		$this->assertSame(
+			0,
+			wc_get_order( $refund->get_id() )->get_refunded_by(),
+			'An unattributed refund should stay unattributed after a round trip through the data store.'
+		);
+	}
+
+	/**
+	 * @testdox Should show an order note's time in the current site timezone after the timezone changes.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/48953
+	 */
+	public function test_wc_get_order_note_uses_current_site_timezone(): void {
+		update_option( 'timezone_string', 'America/New_York' );
+		$note_id = wp_insert_comment(
+			array(
+				'comment_post_ID'  => WC_Helper_Order::create_order()->get_id(),
+				'comment_type'     => 'order_note',
+				'comment_content'  => 'Order status changed from Pending payment to Completed.',
+				'comment_approved' => 1,
+				'comment_date'     => '2024-06-28 11:34:05',
+				'comment_date_gmt' => '2024-06-28 15:34:05',
+			)
+		);
+
+		update_option( 'timezone_string', 'Asia/Tokyo' );
+		$note = wc_get_order_note( $note_id );
+
+		$this->assertSame( strtotime( '2024-06-28 15:34:05 UTC' ), $note->date_created->getTimestamp(), 'The note should keep the moment it was created.' );
+		$this->assertSame( '2024-06-29 00:34:05', $note->date_created->date( 'Y-m-d H:i:s' ), 'The note should be shown in the new site timezone.' );
 	}
 }

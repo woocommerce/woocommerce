@@ -385,7 +385,7 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$order    = $this->create_complex_cot_order();
 		$order_id = $order->get_id();
 
-		$this->assertIsInteger( $order_id );
+		$this->assertIsInt( $order_id );
 		$this->assertLessThan( $order_id, 0 );
 
 		wp_cache_flush();
@@ -616,6 +616,98 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 		$this->assertSame( '1', get_comment( $note_id )->comment_approved, 'Order note should be restored when the order is untrashed' );
 		$this->assertSame( '1', get_comment( $third_party_comment_id )->comment_approved, 'Third-party comment should be restored when the order is untrashed' );
 		//phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders
+	}
+
+	/**
+	 * @testdox When the order's previous status is no longer registered, untrash falls back to pending and still reports success.
+	 */
+	public function test_cot_datastore_untrash_falls_back_to_pending_for_invalid_previous_status() {
+		$this->toggle_cot_feature_and_usage( true );
+
+		$order = $this->create_complex_cot_order();
+		$order->set_status( OrderStatus::ON_HOLD );
+		$order->save();
+
+		$this->sut->trash_order( $order );
+		$this->sut->read( $order );
+
+		// Simulate the plugin that registered the order's previous status being deactivated.
+		$order->update_meta_data( '_wp_trash_meta_status', 'wc-unregistered-status' );
+		$order->save_meta_data();
+
+		$this->sut->read( $order );
+		$result = $this->sut->untrash_order( $order );
+
+		$this->assertTrue( $result, 'untrash_order() should report success on the pending fallback path' );
+		$this->assertSame( OrderStatus::PENDING, $order->get_status() );
+		$this->assertEmpty( $order->get_meta( '_wp_trash_meta_status' ), 'Trash meta should still be cleaned up on the pending fallback path' );
+	}
+
+	/**
+	 * Data provider for tests that run with the posts sync both on and off.
+	 *
+	 * @return array[]
+	 */
+	public function data_provider_sync_enabled(): array {
+		return array(
+			'sync off' => array( false ),
+			'sync on'  => array( true ),
+		);
+	}
+
+	/**
+	 * @testdox Untrash does not fire 'woocommerce_update_order' when the clock ticks over a second during the restore, but a later save does.
+	 * @dataProvider data_provider_sync_enabled
+	 *
+	 * @param bool $sync_enabled Whether the posts sync is on.
+	 */
+	public function test_cot_datastore_untrash_does_not_fire_update_hook_across_second_boundary( bool $sync_enabled ) {
+		$this->toggle_cot_feature_and_usage( true );
+		if ( $sync_enabled ) {
+			$this->enable_cot_sync();
+		} else {
+			$this->disable_cot_sync();
+		}
+
+		$order = $this->create_complex_cot_order();
+		$order->set_status( OrderStatus::ON_HOLD );
+		$order->save();
+
+		$this->sut->trash_order( $order );
+		$this->sut->read( $order );
+
+		// Make the post-save meta cleanup see a "later" time than the date_modified the save just wrote.
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'current_time' => function ( $type, $gmt = 0 ) {
+					unset( $type, $gmt );
+					return gmdate( 'Y-m-d H:i:s', time() + HOUR_IN_SECONDS );
+				},
+			)
+		);
+
+		$update_count = 0;
+		$callback     = function () use ( &$update_count ) {
+			++$update_count;
+		};
+		add_action( 'woocommerce_update_order', $callback );
+
+		$this->assertTrue( $this->sut->untrash_order( $order ) );
+		$this->assertSame( 0, $update_count, 'Untrash should not fire woocommerce_update_order' );
+
+		$order = wc_get_order( $order->get_id() );
+		$this->assertSame( OrderStatus::ON_HOLD, $order->get_status() );
+		$this->assertEmpty( $order->get_meta( '_wp_trash_meta_status' ) );
+		if ( $sync_enabled ) {
+			$this->assertSame( OrderInternalStatus::ON_HOLD, get_post_status( $order->get_id() ) );
+			$this->assertEmpty( get_post_meta( $order->get_id(), '_wp_trash_meta_status', true ) );
+		}
+
+		$order->set_customer_note( 'Edited after restore' );
+		$order->save();
+		remove_action( 'woocommerce_update_order', $callback );
+
+		$this->assertSame( 1, $update_count, 'A save after the restore should fire woocommerce_update_order' );
 	}
 
 	/**
@@ -2522,6 +2614,112 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	}
 
 	/**
+	 * @testdox Generic order persistence saves the store tax-mode default captured at construction.
+	 */
+	public function test_create_without_explicit_prices_include_tax_keeps_default(): void {
+		$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
+		$order             = null;
+
+		try {
+			update_option( 'woocommerce_prices_include_tax', 'yes' );
+			$order = new WC_Order();
+			update_option( 'woocommerce_prices_include_tax', 'no' );
+			$this->switch_data_store( $order, $this->sut );
+			$order->save();
+
+			wp_cache_flush();
+
+			$r_order = new WC_Order();
+			$r_order->set_id( $order->get_id() );
+			$this->switch_data_store( $r_order, $this->sut );
+			$this->sut->read( $r_order );
+
+			$this->assertTrue(
+				$r_order->get_prices_include_tax(),
+				'Persistence should use the default captured at construction, not the current store setting.'
+			);
+			$this->assertArrayNotHasKey( 'prices_include_tax', $r_order->get_changes() );
+		} finally {
+			if ( $order ) {
+				$order->delete( true );
+			}
+			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
+		}
+	}
+
+	/**
+	 * @testDox An explicitly set prices_include_tax value is persisted as given, not replaced by the store setting.
+	 */
+	public function test_create_keeps_explicit_prices_include_tax_value(): void {
+		$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
+		$order             = null;
+
+		try {
+			update_option( 'woocommerce_prices_include_tax', 'yes' );
+			$order = new WC_Order();
+			$this->switch_data_store( $order, $this->sut );
+			$order->set_prices_include_tax( false );
+			$order->save();
+
+			wp_cache_flush();
+
+			$r_order = new WC_Order();
+			$r_order->set_id( $order->get_id() );
+			$this->switch_data_store( $r_order, $this->sut );
+			$this->sut->read( $r_order );
+
+			$this->assertFalse(
+				$r_order->get_prices_include_tax(),
+				'An order explicitly created as tax exclusive should stay tax exclusive on a tax inclusive store.'
+			);
+		} finally {
+			if ( $order ) {
+				$order->delete( true );
+			}
+			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
+		}
+	}
+
+	/**
+	 * @testdox An HPOS order with a null tax-mode column uses the store default without a pending edit.
+	 */
+	public function test_read_with_null_prices_include_tax_uses_store_default(): void {
+		global $wpdb;
+
+		$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
+		$order             = new WC_Order();
+
+		try {
+			update_option( 'woocommerce_prices_include_tax', 'yes' );
+			$this->switch_data_store( $order, $this->sut );
+			$order->save();
+
+			$operational_data_table = $this->sut::get_operational_data_table_name();
+			$wpdb->query(
+				$wpdb->prepare(
+					"UPDATE {$operational_data_table} SET prices_include_tax = NULL WHERE order_id = %d", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					$order->get_id()
+				)
+			);
+			wp_cache_flush();
+
+			$read_order = new WC_Order();
+			$read_order->set_id( $order->get_id() );
+			$this->switch_data_store( $read_order, $this->sut );
+			$this->sut->read( $read_order );
+
+			$this->assertTrue(
+				$read_order->get_prices_include_tax(),
+				'A missing stored value should use the constructor default.'
+			);
+			$this->assertArrayNotHasKey( 'prices_include_tax', $read_order->get_changes() );
+		} finally {
+			$order->delete( true );
+			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
+		}
+	}
+
+	/**
 	 * @testDox Test that inserting with strict SQL mode is also supported.
 	 */
 	public function test_order_create_with_strict_mode_and_null_values() {
@@ -3544,6 +3742,131 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 
 		$query = new OrdersTableQuery( array( 'date_created' => '<2023-09-01' ) );
 		$this->assertEquals( 0, count( $query->orders ) );
+	}
+
+	/**
+	 * @testdox A 'date_query' value on a local date column is converted to UTC once, whatever its format.
+	 * @testWith ["after", "2024-05-01T10:00:00.500Z", ["late"]]
+	 *           ["before", "2024-05-01T10:00:00.500Z", ["early", "middle"]]
+	 *           ["after", "2024-05-01T12:00:00+02", ["late"]]
+	 *           ["before", "2024-05-01T12:00:00+02", ["early", "middle"]]
+	 *           ["after", "2024-05-01T10:00:00Z", ["late"]]
+	 *           ["after", "2024-05-01 15:30:00", ["late"]]
+	 *           ["before", "2024-05-01 15:30:00", ["early", "middle"]]
+	 *
+	 * @param string   $operator        The date query operator, 'after' or 'before'.
+	 * @param string   $date_value      A date equal to 10:00 UTC, in the format a REST API client may send.
+	 * @param string[] $expected_orders Labels of the orders the query should return.
+	 */
+	public function test_local_date_query_converts_date_values_to_utc_once( string $operator, string $date_value, array $expected_orders ): void {
+		$order_ids = array(
+			'early'  => $this->create_order_created_at( '2024-05-01T04:00:00Z' ),
+			// Falls between the correct boundary (10:00 UTC) and 04:30 UTC, where applying the +05:30 site offset twice puts it.
+			'middle' => $this->create_order_created_at( '2024-05-01T07:00:00Z' ),
+			'late'   => $this->create_order_created_at( '2024-05-01T11:00:00Z' ),
+		);
+
+		$query = new OrdersTableQuery(
+			array(
+				'date_query' => array(
+					array(
+						'column'  => 'post_date',
+						$operator => $date_value,
+					),
+				),
+			)
+		);
+
+		foreach ( $order_ids as $label => $order_id ) {
+			$this->assertSame(
+				in_array( $label, $expected_orders, true ),
+				in_array( $order_id, $query->orders, true ),
+				"Unexpected result for the '{$label}' order with '{$operator}' => '{$date_value}'."
+			);
+		}
+	}
+
+	/**
+	 * @testdox A relative 'date_query' value on a local date column is resolved in the site timezone without an extra offset.
+	 */
+	public function test_local_date_query_resolves_relative_values_once(): void {
+		$now       = time();
+		$recent_id = $this->create_order_created_at( $now - HOUR_IN_SECONDS );
+		// Falls between the correct boundary (one day ago) and one moved back by the +05:30 site offset.
+		$boundary_id = $this->create_order_created_at( $now - DAY_IN_SECONDS - ( 3 * HOUR_IN_SECONDS ) );
+		$old_id      = $this->create_order_created_at( $now - ( 3 * DAY_IN_SECONDS ) );
+
+		$query = new OrdersTableQuery(
+			array(
+				'date_query' => array(
+					array(
+						'column' => 'post_date',
+						'after'  => '-1 day',
+					),
+				),
+			)
+		);
+
+		$this->assertContains( $recent_id, $query->orders, 'An order from an hour ago should match "after -1 day".' );
+		$this->assertNotContains( $boundary_id, $query->orders, 'An order from 27 hours ago should not match "after -1 day".' );
+		$this->assertNotContains( $old_id, $query->orders, 'An order from three days ago should not match "after -1 day".' );
+	}
+
+	/**
+	 * @testdox An unparseable 'date_query' value on a local date column keeps its existing behavior.
+	 */
+	public function test_local_date_query_keeps_existing_behavior_for_unparseable_values(): void {
+		$order_id = $this->create_order_created_at( '2024-05-01T11:00:00Z' );
+
+		$query = new OrdersTableQuery(
+			array(
+				'date_query' => array(
+					array(
+						'column' => 'post_date',
+						'after'  => 'not a date',
+					),
+				),
+			)
+		);
+
+		// wc_string_to_datetime() resolves an unparseable value to the Unix epoch, so every order matches.
+		$this->assertContains( $order_id, $query->orders, 'An unparseable "after" value should still resolve to the Unix epoch.' );
+	}
+
+	/**
+	 * @testdox A WC_DateTime 'date_query' value on a local date column keeps its existing behavior.
+	 */
+	public function test_local_date_query_keeps_existing_behavior_for_wc_datetime_values(): void {
+		$earlier_id = $this->create_order_created_at( '2024-05-01T07:00:00Z' );
+		$later_id   = $this->create_order_created_at( '2024-05-01T11:00:00Z' );
+
+		$query = new OrdersTableQuery(
+			array(
+				'date_query' => array(
+					array(
+						'column' => 'post_date',
+						'after'  => new \WC_DateTime( '2024-05-01 10:00:00', new DateTimeZone( 'UTC' ) ),
+					),
+				),
+			)
+		);
+
+		$this->assertNotContains( $earlier_id, $query->orders, 'An order created before 10:00 UTC should not match.' );
+		$this->assertContains( $later_id, $query->orders, 'An order created after 10:00 UTC should match.' );
+	}
+
+	/**
+	 * Create an order in the orders table with the given creation date.
+	 *
+	 * @param string|int $date_created A creation date accepted by WC_Order::set_date_created().
+	 * @return int The order ID.
+	 */
+	private function create_order_created_at( $date_created ): int {
+		$order = new WC_Order();
+		$order->set_date_created( $date_created );
+		$this->sut->create( $order );
+
+		return $order->get_id();
 	}
 
 	/**

@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Clean up legacy `isDescendentOf` attributes from product element blocks and preserve backward compatibility with deprecated block definitions.

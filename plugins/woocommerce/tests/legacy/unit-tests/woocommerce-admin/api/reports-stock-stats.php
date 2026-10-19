@@ -33,6 +33,15 @@ class WC_Admin_Tests_API_Reports_Stock_Stats extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Tear down.
+	 */
+	public function tearDown(): void {
+		unset( $GLOBALS['current_screen'] );
+
+		parent::tearDown();
+	}
+
+	/**
 	 * Test route registration.
 	 */
 	public function test_register_routes() {
@@ -100,6 +109,35 @@ class WC_Admin_Tests_API_Reports_Stock_Stats extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 1, $reports['totals'][ ProductStockStatus::ON_BACKORDER ] );
 		$this->assertEquals( 3, $reports['totals'][ ProductStockStatus::LOW_STOCK ] );
 		$this->assertEquals( 13, $reports['totals'][ ProductStockStatus::IN_STOCK ] );
+	}
+
+	/**
+	 * The products total is cached store-wide for 30 days, so it must not depend on the context
+	 * of whichever request happened to prime it. Left to its default, WP_Query also counts draft,
+	 * pending and scheduled products in an admin context.
+	 */
+	public function test_get_reports_products_total_ignores_unpublished_products() {
+		wp_set_current_user( $this->user );
+		WC_Helper_Reports::reset_stats_dbs();
+		delete_transient( 'wc_admin_product_count' );
+
+		$this->create_stock_products( 2, ProductStockStatus::IN_STOCK );
+		$this->factory->post->create_many(
+			3,
+			array(
+				'post_type'   => 'product',
+				'post_status' => 'draft',
+			)
+		);
+
+		set_current_screen( 'edit-post' );
+		$this->assertTrue( is_admin(), 'The report must be requested in an admin context.' );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', $this->endpoint ) );
+		$reports  = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 2, $reports['totals']['products'] );
 	}
 
 	/**

@@ -1,6 +1,5 @@
 {
 	"name": "woocommerce/checkout-shipping-methods-block",
-	"version": "1.0.0",
 	"title": "Shipping Options",
 	"description": "Display shipping options and rates for your store.",
 	"category": "woocommerce",

@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Move my-account shipping-address saving below E2E; two browser titles become one.
+

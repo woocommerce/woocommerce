@@ -1,10 +1,18 @@
 /**
  * Internal dependencies
  */
-import type { NoticeOptions } from '~/lib/notices/types';
+import type {
+	NoticeAction as BaseNoticeAction,
+	NoticeOptions as BaseNoticeOptions,
+} from '~/lib/notices/types';
 import { Subscription } from '../components/my-subscriptions/types';
 
-export type { NoticeAction, NoticeOptions } from '~/lib/notices/types';
+/** Notice can't set a link target, so `openInNewTab` actions are rendered separately as external links. */
+export type NoticeAction = BaseNoticeAction & { openInNewTab?: boolean };
+
+export type NoticeOptions = Omit< BaseNoticeOptions, 'actions' > & {
+	actions?: NoticeAction[];
+};
 
 /**
  * Notice key shared by everything that refreshes subscriptions, so a refresh
@@ -41,6 +49,11 @@ export type MarketplaceContextType = {
 			docs_url?: string;
 		};
 	};
+	/**
+	 * Variation of the product preview experiment, or null when it hasn't
+	 * loaded or the store isn't in the experiment.
+	 */
+	productPreviewVariation: string | null;
 };
 
 export type SubscriptionsContextType = {

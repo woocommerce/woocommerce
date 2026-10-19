@@ -40,6 +40,13 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 	private $add_long_status_callback = null;
 
 	/**
+	 * Filters added during a test, as [ tag, callback ] pairs, removed in tearDown().
+	 *
+	 * @var array[]
+	 */
+	private $added_filters = array();
+
+	/**
 	 * Previous HPOS state.
 	 *
 	 * @var bool
@@ -96,6 +103,10 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 		}
 
 		delete_option( 'woocommerce_excluded_report_order_statuses' );
+		foreach ( $this->added_filters as $added_filter ) {
+			remove_filter( $added_filter[0], $added_filter[1] );
+		}
+		$this->added_filters = array();
 		if ( null !== $this->add_long_status_callback ) {
 			remove_filter( 'wc_order_statuses', $this->add_long_status_callback );
 			unset( $GLOBALS['wp_post_statuses']['wc-competition-completed'] );
@@ -494,6 +505,61 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Tooltip should fall back to default excluded statuses when the default-statuses filter returns a non-array.
+	 */
+	public function test_tooltip_falls_back_when_default_excluded_statuses_filter_returns_non_array(): void {
+		OrderHelper::toggle_cot_feature_and_usage( true );
+		add_filter( 'woocommerce_analytics_settings_default_excluded_order_statuses', '__return_false' );
+
+		$customer_id = $this->factory->user->create();
+
+		$order = WC_Helper_Order::create_order( $customer_id );
+		$order->set_status( 'completed' );
+		$order->save();
+
+		ob_start();
+		$this->sut->output( $order );
+		$output = ob_get_clean();
+
+		remove_filter( 'woocommerce_analytics_settings_default_excluded_order_statuses', '__return_false' );
+
+		$this->assertStringContainsString( 'pending payment', $output, 'Tooltip should still mention "pending payment"' );
+		$this->assertStringContainsString( 'failed', $output, 'Tooltip should still mention "failed"' );
+		$this->assertStringContainsString( 'cancelled', $output, 'Tooltip should still mention "cancelled"' );
+	}
+
+	/**
+	 * @testdox Tooltip should reflect a custom status added by the default-statuses filter when the option was never saved.
+	 */
+	public function test_tooltip_reflects_default_excluded_statuses_filter(): void {
+		delete_option( 'woocommerce_excluded_report_order_statuses' );
+		$add_label  = function ( $statuses ) {
+			$statuses['wc-custom-excluded'] = 'Custom Excluded';
+			return $statuses;
+		};
+		$add_custom = function ( $statuses ) {
+			$statuses[] = 'custom-excluded';
+			return $statuses;
+		};
+		add_filter( 'wc_order_statuses', $add_label );
+		add_filter( 'woocommerce_analytics_settings_default_excluded_order_statuses', $add_custom );
+		$this->added_filters[] = array( 'wc_order_statuses', $add_label );
+		$this->added_filters[] = array( 'woocommerce_analytics_settings_default_excluded_order_statuses', $add_custom );
+
+		$customer_id = $this->factory->user->create();
+
+		$order = WC_Helper_Order::create_order( $customer_id );
+		$order->set_status( 'completed' );
+		$order->save();
+
+		ob_start();
+		$this->sut->output( $order );
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( 'custom excluded', $output, 'Tooltip should mention the status added by the default-statuses filter.' );
+	}
+
+	/**
 	 * @testdox Tooltip should reflect custom excluded statuses option.
 	 */
 	public function test_tooltip_reflects_custom_option(): void {
@@ -703,14 +769,17 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 		\WC_Helper_Reports::reset_stats_dbs();
 
 		$new_customer_fired = 0;
-		$callback           = static function () use ( &$new_customer_fired ) {
+		$new_customer_id    = null;
+		$callback           = static function ( $customer_id ) use ( &$new_customer_fired, &$new_customer_id ) {
 			++$new_customer_fired;
+			$new_customer_id = $customer_id;
 		};
 		add_action( 'woocommerce_analytics_new_customer', $callback );
 
 		try {
 			ob_start();
 			try {
+				$this->sut->output( $order );
 				$this->sut->output( $order );
 				$output = (string) ob_get_contents();
 			} finally {
@@ -723,6 +792,17 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 			$new_customers_after_render = $new_customer_fired;
 
 			OrdersStatsDataStore::update( new AdminOrder( $order->get_id() ) );
+			$this->assertSame( 1, $new_customer_fired, 'The first import should fire the new-customer action once.' );
+			$this->assertSame( (int) CustomersDataStore::get_existing_customer_id_from_order( $order ), $new_customer_id, 'The action should receive the analytics customer ID linked to the order.' );
+
+			ob_start();
+			try {
+				$this->sut->output( $order );
+				$this->sut->output( $order );
+			} finally {
+				ob_end_clean();
+			}
+			OrdersStatsDataStore::update( new AdminOrder( $order->get_id() ) );
 
 			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is provided by the data store.
 			$customers_after_import = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$customer_lookup_table}" );
@@ -733,8 +813,8 @@ class CustomerHistoryTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'order-attribution-total-orders', $output, 'Should render the metabox template.' );
 		$this->assertSame( 0, $customers_after_render, 'Rendering customer history should not create an analytics customer.' );
 		$this->assertSame( 0, $new_customers_after_render, 'Rendering customer history should not fire the new-customer action.' );
-		$this->assertSame( 1, $customers_after_import, 'Importing the order should create one analytics customer.' );
-		$this->assertSame( 1, $new_customer_fired, 'Importing the order should fire the new-customer action once.' );
+		$this->assertSame( 1, $customers_after_import, 'Repeated views and imports should reuse the analytics customer.' );
+		$this->assertSame( 1, $new_customer_fired, 'Repeated views and imports should not fire the new-customer action again.' );
 	}
 
 	/**

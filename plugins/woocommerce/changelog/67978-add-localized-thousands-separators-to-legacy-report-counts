@@ -1,4 +1,0 @@
-Significance: minor
-Type: enhancement
-
-Format count values in the legacy Reports chart legends with locale-aware thousands separators.

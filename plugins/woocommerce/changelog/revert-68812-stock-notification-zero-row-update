@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop reporting an error when saving a back in stock notification whose row did not need to change.

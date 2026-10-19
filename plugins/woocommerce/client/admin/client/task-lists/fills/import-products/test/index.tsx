@@ -36,7 +36,7 @@ describe( 'Products', () => {
 	test( 'should fire "tasklist_add_product_from_scratch_click" event when the button clicked', async () => {
 		const { getByRole } = render( <Products /> );
 
-		userEvent.click(
+		await userEvent.click(
 			getByRole( 'button', { name: 'Or add your products from scratch' } )
 		);
 		await waitFor( () =>
@@ -49,7 +49,7 @@ describe( 'Products', () => {
 	test( 'should fire "tasklist_add_product" event when the csv option clicked', async () => {
 		const { getByRole } = render( <Products /> );
 
-		userEvent.click(
+		await userEvent.click(
 			getByRole( 'menuitem', {
 				name: 'FROM A CSV FILE Import all products at once by uploading a CSV file.',
 			} )
@@ -77,7 +77,7 @@ describe( 'Products', () => {
 		} );
 		const { getByRole } = render( <Products /> );
 
-		userEvent.click(
+		await userEvent.click(
 			getByRole( 'menuitem', {
 				name: 'FROM A CSV FILE Import all products at once by uploading a CSV file.',
 			} )
@@ -88,35 +88,34 @@ describe( 'Products', () => {
 				'tasklist_add_product',
 				{ method: 'import' }
 			);
-
-			expect( recordEvent ).toHaveBeenNthCalledWith(
-				2,
-				'task_completion_time',
-				{
-					task_name: 'products',
-					time: '0-2s',
-				}
-			);
 		} );
+		expect( recordEvent ).toHaveBeenNthCalledWith(
+			2,
+			'task_completion_time',
+			{
+				task_name: 'products',
+				time: '0-2s',
+			}
+		);
 	} );
 
 	it( 'should send a request to load sample products when the "Import sample products" button is clicked', async () => {
 		const fetchMock = jest.spyOn( global, 'fetch' );
 		const { queryByText, getByRole } = render( <Products /> );
 
-		userEvent.click(
+		await userEvent.click(
 			getByRole( 'button', { name: 'Or add your products from scratch' } )
 		);
 		expect( queryByText( 'Load Sample Products' ) ).toBeInTheDocument();
 
-		userEvent.click(
+		await userEvent.click(
 			getByRole( 'link', { name: 'Load Sample Products' } )
 		);
 		await waitFor( () =>
 			expect( queryByText( confirmModalText ) ).toBeInTheDocument()
 		);
 
-		userEvent.click(
+		await userEvent.click(
 			getByRole( 'button', { name: 'Import sample products' } )
 		);
 		await waitFor( () =>
@@ -137,19 +136,19 @@ describe( 'Products', () => {
 	it( 'should close the confirmation modal when the cancel button is clicked', async () => {
 		const { queryByText, getByRole } = render( <Products /> );
 
-		userEvent.click(
+		await userEvent.click(
 			getByRole( 'button', { name: 'Or add your products from scratch' } )
 		);
 		expect( queryByText( 'Load Sample Products' ) ).toBeInTheDocument();
 
-		userEvent.click(
+		await userEvent.click(
 			getByRole( 'link', { name: 'Load Sample Products' } )
 		);
 		await waitFor( () =>
 			expect( queryByText( confirmModalText ) ).toBeInTheDocument()
 		);
 
-		userEvent.click( getByRole( 'button', { name: 'Cancel' } ) );
+		await userEvent.click( getByRole( 'button', { name: 'Cancel' } ) );
 		expect( queryByText( confirmModalText ) ).not.toBeInTheDocument();
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'tasklist_cancel_load_sample_products_click'

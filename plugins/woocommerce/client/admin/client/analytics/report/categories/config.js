@@ -90,15 +90,17 @@ const filterValues = [
 				chartMode: 'item-comparison',
 				path: [ 'select_category' ],
 				settings: {
-					type: 'categories',
 					param: 'categories',
 					getLabels: getCategoryLabels,
 					labels: {
+						button: __( 'Single Category', 'woocommerce' ),
+					},
+					searchProps: {
+						type: 'categories',
 						placeholder: __(
 							'Type to search for a category',
 							'woocommerce'
 						),
-						button: __( 'Single Category', 'woocommerce' ),
 					},
 				},
 			},
@@ -109,7 +111,6 @@ const filterValues = [
 		value: 'compare-categories',
 		chartMode: 'item-comparison',
 		settings: {
-			type: 'categories',
 			param: 'categories',
 			getLabels: getCategoryLabels,
 			labels: {
@@ -117,12 +118,15 @@ const filterValues = [
 					'Check at least two categories below to compare',
 					'woocommerce'
 				),
+				title: __( 'Compare Categories', 'woocommerce' ),
+				update: __( 'Compare', 'woocommerce' ),
+			},
+			searchProps: {
+				type: 'categories',
 				placeholder: __(
 					'Search for categories to compare',
 					'woocommerce'
 				),
-				title: __( 'Compare Categories', 'woocommerce' ),
-				update: __( 'Compare', 'woocommerce' ),
 			},
 			onClick: addCesSurveyForAnalytics,
 		},

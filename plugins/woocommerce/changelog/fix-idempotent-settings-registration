@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix settings groups being registered twice, and settings pages or email classes registered from admin_init callbacks being dropped.

@@ -1,0 +1,294 @@
+/*
+Theme Name: Purple
+Theme URI: https://wordpress.com/themes/purple
+Author: Automattic
+Author URI: https://automattic.com/
+Description: Purple is a WooCommerce starter theme made for the Site Editor and modern commerce. Its clean styles and adaptable color system suit any catalog: fashion and clothing, jewelry, beauty, home decor, food and drink, or digital downloads. Commerce-ready templates and curated patterns cover the storefront from product pages and filterable shop views to cart and checkout. Ten color palettes and ten font pairings make it easy to match your brand in a click, and the theme works well with Jetpack blocks, supports RTL languages, and is fully translation-ready. Whether you’re launching your first online store or refreshing an established one, Purple is a versatile foundation for selling with WordPress and WooCommerce.
+Requires at least: 7.1
+Tested up to: 7.1
+Requires PHP: 7.4
+WC requires at least: 11.1
+WC tested up to: 11.2
+Version: 1.0.3
+License: GNU General Public License v2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
+Text Domain: purple
+Tags: e-commerce, one-column, two-columns, three-columns, four-columns, wide-blocks, block-patterns, block-styles, featured-images, full-site-editing, style-variations, template-editing, rtl-language-support, threaded-comments, translation-ready
+*/
+
+/* ==========================================================================
+   Forms
+   ========================================================================== */
+
+/* WooCommerce's classic form fields (.form-row .input-text, selects,
+ * select2) and extensions rendering the same markup (e.g. Gift Cards)
+ * read these tokens; WooCommerce defines them 4px/gray on :root. The
+ * cart/checkout block components hardcode their values instead and are
+ * squared selector by selector in the sections below. On body rather
+ * than :root so this wins the tie against WooCommerce's own :root
+ * definition regardless of stylesheet order. */
+body {
+	--wc-form-border-color: var(--wp--preset--color--theme-6);
+	--wc-form-border-radius: 0;
+}
+
+/* ==========================================================================
+   WooCommerce — Mini cart
+   ========================================================================== */
+
+/* WooCommerce's outlined component buttons (e.g. the mini cart "View cart")
+ * use currentColor and a hardcoded #1e1e1e hover; align them with the
+ * theme's outline button style. The doubled class outranks WooCommerce's
+ * own rules regardless of stylesheet order. */
+.wc-block-components-button.wc-block-components-button:not(.is-link).outlined,
+.wc-block-components-button.wc-block-components-button:not(.is-link).is-style-outline {
+	color: var(--wp--custom--outline-button-color);
+}
+
+.wc-block-components-button.wc-block-components-button:not(.is-link).outlined:hover,
+.wc-block-components-button.wc-block-components-button:not(.is-link).outlined:focus,
+.wc-block-components-button.wc-block-components-button:not(.is-link).outlined:active,
+.wc-block-components-button.wc-block-components-button:not(.is-link).is-style-outline:hover,
+.wc-block-components-button.wc-block-components-button:not(.is-link).is-style-outline:focus,
+.wc-block-components-button.wc-block-components-button:not(.is-link).is-style-outline:active {
+	background-color: color-mix(in srgb, currentColor 5%, transparent);
+	color: var(--wp--custom--outline-button-color);
+}
+
+/* ==========================================================================
+   WooCommerce — Cart & Checkout
+   ========================================================================== */
+
+/* Styles for WooCommerce blocks that can't be styled via the editor yet. */
+/* https://github.com/woocommerce/woocommerce/issues/59322 */
+
+.wc-block-components-checkout-step__heading,
+.wc-block-components-checkout-order-summary__title,
+.wc-block-components-totals-coupon,
+.wc-block-components-totals-item {
+	color: var(--wp--preset--color--theme-2);
+}
+
+.wp-block-woocommerce-checkout .wc-block-components-title {
+	font-size: var(--wp--preset--font-size--large);
+}
+
+.wc-block-components-form .wc-block-components-checkout-step {
+	margin-bottom: var(--wp--preset--spacing--50);
+}
+
+.wp-block-woocommerce-checkout-order-summary-block {
+	border-radius: 0;
+}
+
+/* Cart scope covers the shipping calculator fields, which reuse the same
+ * components as the checkout form. */
+.wp-block-woocommerce-cart .wc-block-components-text-input:not(.has-error) input,
+.wp-block-woocommerce-cart .wc-block-components-textarea:not(.has-error),
+.wp-block-woocommerce-cart .wc-blocks-components-select:not(.has-error) .wc-blocks-components-select__select,
+.wp-block-woocommerce-cart .wc-blocks-components-select:not(.has-error) .wc-blocks-components-select__container,
+.wp-block-woocommerce-cart .wc-block-components-checkbox__input[type="checkbox"],
+.wp-block-woocommerce-checkout .wc-block-components-text-input:not(.has-error) input,
+.wp-block-woocommerce-checkout .wc-block-components-textarea:not(.has-error),
+.wp-block-woocommerce-checkout .wc-blocks-components-select:not(.has-error) .wc-blocks-components-select__select,
+.wp-block-woocommerce-checkout .wc-blocks-components-select:not(.has-error) .wc-blocks-components-select__container,
+.wp-block-woocommerce-checkout .wc-block-components-checkbox__input[type="checkbox"] {
+	border-color: var(--wp--preset--color--theme-6);
+	border-radius: 0;
+}
+
+.wp-block-woocommerce-cart .wc-block-components-text-input:not(.has-error) input:focus,
+.wp-block-woocommerce-cart .wc-block-components-textarea:not(.has-error):focus,
+.wp-block-woocommerce-cart .wc-blocks-components-select:not(.has-error) .wc-blocks-components-select__select:focus,
+.wp-block-woocommerce-checkout .wc-block-components-text-input:not(.has-error) input:focus,
+.wp-block-woocommerce-checkout .wc-block-components-textarea:not(.has-error):focus,
+.wp-block-woocommerce-checkout .wc-blocks-components-select:not(.has-error) .wc-blocks-components-select__select:focus {
+	border-color: var(--wp--preset--color--theme-6);
+	box-shadow: 0 0 0 0.5px var(--wp--preset--color--theme-6);
+}
+
+/* Coupon and gift card fields sit in the order summary, where WooCommerce's
+ * component styles tie the generic override above on specificity and load
+ * later, keeping their rounded corners. The doubled component class wins
+ * the tie; the cart block and extension fields that reuse the text-input
+ * component (e.g. Gift Cards) get the same treatment. */
+.wp-block-woocommerce-cart .wc-block-components-text-input.wc-block-components-text-input input,
+.wp-block-woocommerce-checkout .wc-block-components-text-input.wc-block-components-text-input input {
+	border-radius: 0;
+}
+
+/* The Gift Cards extension's cart/checkout panel ships its own text input
+ * component with a hardcoded 4px radius; its classic product-page fields
+ * read --wc-form-border-radius and need no override. */
+.wc-gift-cards-text-input input {
+	border-color: var(--wp--preset--color--theme-6);
+	border-radius: 0;
+}
+
+/* WooCommerce Payments hardcodes a 5px radius and gray border on the
+ * WooPay save-details phone input; match the other checkout fields. */
+.woopay-save-new-user-container .save-details-form.form-row .phone-input.phone-input {
+	border-color: var(--wp--preset--color--theme-6);
+	border-radius: 0;
+}
+
+/* Square the remaining cart/checkout components WooCommerce rounds with
+ * hardcoded 4px values (no variable, no editor UI). Doubled classes beat
+ * WooCommerce's specificity ties regardless of stylesheet order. Radio
+ * inputs keep their 50% radius; circular radios are intentional. The
+ * express payment box outline is drawn in three pieces: two title-row
+ * pseudo-elements hold its top corners and the content box its bottom
+ * ones; the branded express buttons keep their own rounding. */
+.wc-block-components-express-payment--checkout .wc-block-components-express-payment__title-container.wc-block-components-express-payment__title-container::before,
+.wc-block-components-express-payment--checkout .wc-block-components-express-payment__title-container.wc-block-components-express-payment__title-container::after,
+.wc-block-components-express-payment--checkout .wc-block-components-express-payment__content.wc-block-components-express-payment__content,
+.wc-block-checkout__payment-method .wc-block-components-radio-control-accordion-option.wc-block-components-radio-control-accordion-option:first-child::after,
+.wc-block-checkout__payment-method .wc-block-components-radio-control-accordion-option.wc-block-components-radio-control-accordion-option:last-child::after,
+.wc-block-components-radio-control--highlight-checked.wc-block-components-radio-control--highlight-checked::after,
+.wc-block-components-radio-control--highlight-checked .wc-block-components-radio-control-accordion-option--checked-option-highlighted.wc-block-components-radio-control-accordion-option--checked-option-highlighted,
+.wc-block-components-radio-control--highlight-checked label.wc-block-components-radio-control__option--checked-option-highlighted.wc-block-components-radio-control__option--checked-option-highlighted,
+.wc-block-components-address-card.wc-block-components-address-card,
+.wc-block-components-local-pickup-select--multiple.wc-block-components-local-pickup-select--multiple,
+.wc-block-components-address-autocomplete-suggestions.wc-block-components-address-autocomplete-suggestions {
+	border-radius: 0;
+}
+
+/* WooCommerce rings the selected shipping/payment option with an inset
+ * box-shadow. Theme-6 carries 20% alpha in every palette, so any ring
+ * painted with it composites over the group's own border (same color)
+ * and darkens the shared pixels. Drop the ring; the group border is the
+ * outline and the filled radio dot carries the selected state. */
+.wc-block-components-radio-control--highlight-checked .wc-block-components-radio-control-accordion-option--checked-option-highlighted.wc-block-components-radio-control-accordion-option--checked-option-highlighted,
+.wc-block-components-radio-control--highlight-checked label.wc-block-components-radio-control__option--checked-option-highlighted.wc-block-components-radio-control__option--checked-option-highlighted {
+	box-shadow: none;
+}
+
+/* WooCommerce strips the group border's top or bottom edge when the
+ * first or last option is the selected one, expecting the ring to draw
+ * that edge; with the ring gone, restore the sides and their margin
+ * nudges so the box stays fully outlined. */
+.wc-block-components-radio-control--highlight-checked.wc-block-components-radio-control--highlight-checked.wc-block-components-radio-control--highlight-checked--first-selected::after {
+	border-top: 1px solid var(--wp--preset--color--theme-6);
+	margin-top: 0;
+}
+
+.wc-block-components-radio-control--highlight-checked.wc-block-components-radio-control--highlight-checked.wc-block-components-radio-control--highlight-checked--last-selected::after {
+	border-bottom: 1px solid var(--wp--preset--color--theme-6);
+	margin-bottom: 0;
+}
+
+/* The boxes around these components are WooCommerce ::after overlays and
+ * component borders drawn at 20% ink (or a hardcoded gray), a shade
+ * darker than the theme-6 field borders beside them; align them all. */
+.wc-block-components-radio-control--highlight-checked.wc-block-components-radio-control--highlight-checked::after,
+.wc-block-components-express-payment--checkout .wc-block-components-express-payment__title-container.wc-block-components-express-payment__title-container::before,
+.wc-block-components-express-payment--checkout .wc-block-components-express-payment__title-container.wc-block-components-express-payment__title-container::after,
+.wc-block-components-express-payment--checkout .wc-block-components-express-payment__content.wc-block-components-express-payment__content,
+.wc-block-components-address-card.wc-block-components-address-card,
+.wc-block-components-local-pickup-select--multiple.wc-block-components-local-pickup-select--multiple,
+.wc-block-components-address-autocomplete-suggestions.wc-block-components-address-autocomplete-suggestions {
+	border-color: var(--wp--preset--color--theme-6);
+}
+
+/* The separator lines between unselected options are 1px ::after
+ * overlays painted with a 20% ink background, not a border. */
+.wc-block-components-radio-control--highlight-checked .wc-block-components-radio-control__option.wc-block-components-radio-control__option::after,
+.wc-block-components-radio-control--highlight-checked div.wc-block-components-radio-control-accordion-option.wc-block-components-radio-control-accordion-option::after {
+	background: var(--wp--preset--color--theme-6);
+}
+
+/* ==========================================================================
+   WooCommerce — My Account
+   ========================================================================== */
+
+/* My Account — classic shortcode UI; https://github.com/woocommerce/woocommerce/issues/59391 */
+.woocommerce-account .entry-content > .woocommerce {
+	padding-top: var(--wp--preset--spacing--70);
+	padding-bottom: var(--wp--preset--spacing--90);
+}
+
+.woocommerce-account form .form-row:not(.woocommerce-invalid) .input-text,
+.woocommerce-account form .form-row:not(.woocommerce-invalid) select,
+.woocommerce-account form .form-row:not(.woocommerce-invalid) textarea,
+.woocommerce-account .woocommerce-Input:not([type="hidden"]),
+.woocommerce-account .select2-container .select2-selection {
+	border-color: var(--wp--preset--color--theme-6);
+	border-radius: 0;
+}
+
+.woocommerce-account form .form-row:not(.woocommerce-invalid) .input-text:focus,
+.woocommerce-account form .form-row:not(.woocommerce-invalid) select:focus,
+.woocommerce-account form .form-row:not(.woocommerce-invalid) textarea:focus,
+.woocommerce-account .woocommerce-Input:not([type="hidden"]):focus,
+.woocommerce-account .select2-container--open .select2-selection,
+.woocommerce-account .select2-container--focus .select2-selection {
+	border-color: var(--wp--preset--color--theme-6);
+}
+
+.woocommerce form.checkout_coupon,
+.woocommerce form.login,
+.woocommerce form.register {
+	border: none;
+	padding: 0;
+}
+
+.woocommerce form .form-row {
+	padding: 0;
+	margin-bottom: var(--wp--preset--spacing--20);
+}
+
+.woocommerce form .form-row label:not(:has(input[type="checkbox"])) {
+	margin-bottom: 0.25em;
+}
+
+.woocommerce-form-login .form-row:has(.woocommerce-form-login__submit) {
+	align-items: center;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0;
+}
+
+.woocommerce-form-login .form-row .woocommerce-form-login__rememberme {
+	margin: 0;
+}
+
+.woocommerce-form-login .woocommerce-form-login__submit {
+	float: none;
+	margin: 0;
+	order: -1;
+}
+
+.woocommerce-LostPassword.lost_password {
+	margin-bottom: 0;
+	margin-top: var(--wp--preset--spacing--50);
+}
+
+/* WOOPRD-1561: My Account address styles. */
+.woocommerce-account .addresses .title .edit {
+	float: none;
+}
+
+.woocommerce-account .addresses address {
+	font-style: normal;
+}
+
+
+/* Closed accordion panels are server-rendered without [hidden] (the
+ * Interactivity API only applies it after hydration), so they flash open
+ * on load. Collapse them from first paint via the server-rendered
+ * aria-expanded state. Scoped to scripting: enabled so no-JS visitors
+ * keep the all-panels-open fallback. */
+@media (scripting: enabled) {
+	.wp-block-accordion-heading:has([aria-expanded="false"]) + .wp-block-accordion-panel {
+		height: 0;
+		overflow: visible clip;
+	}
+}
+
+/* ==========================================================================
+   WooCommerce — Cart
+   ========================================================================== */
+
+.wc-block-cart-item__quantity {
+	margin-top: var(--wp--preset--spacing--20);
+}

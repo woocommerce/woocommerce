@@ -78,10 +78,10 @@ export const reducer: Reducer< State, Action > = (
 						[ key ]: action.error
 							? {
 									error: action.payload,
-							  }
+								}
 							: {
 									data: action.payload,
-							  },
+								},
 					},
 					meta: {
 						total: meta.total,
@@ -95,10 +95,10 @@ export const reducer: Reducer< State, Action > = (
 				campaignTypes: action.error
 					? {
 							error: action.payload,
-					  }
+						}
 					: {
 							data: action.payload,
-					  },
+						},
 			};
 
 		default:

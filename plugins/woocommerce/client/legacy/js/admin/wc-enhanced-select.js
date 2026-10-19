@@ -326,16 +326,16 @@ jQuery( function ( $ ) {
 				$( ':input.wc-page-search' )
 					.filter( ':not(.enhanced)' )
 					.each( function () {
+						var minimumInputLength = $( this ).data(
+							'minimum_input_length'
+						);
 						var select2_args = {
 							allowClear: $( this ).data( 'allow_clear' )
 								? true
 								: false,
 							placeholder: $( this ).data( 'placeholder' ),
-							minimumInputLength: $( this ).data(
-								'minimum_input_length'
-							)
-								? $( this ).data( 'minimum_input_length' )
-								: '3',
+							minimumInputLength:
+								minimumInputLength != null ? minimumInputLength : 3,
 							escapeMarkup: function ( m ) {
 								return m;
 							},

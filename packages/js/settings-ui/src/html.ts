@@ -14,5 +14,5 @@ export const createSettingsHelpElement = ( html?: string ) =>
 				dangerouslySetInnerHTML: {
 					__html: sanitizeSettingsHtml( html ),
 				},
-		  } )
+			} )
 		: undefined;

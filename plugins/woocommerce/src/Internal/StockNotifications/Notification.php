@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Internal\StockNotifications;
 
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationCancellationSource;
+use Automattic\WooCommerce\Internal\StockNotifications\Utilities\EmailNormalizer;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -236,10 +237,12 @@ class Notification extends \WC_Data {
 	/**
 	 * Set the user email.
 	 *
+	 * The value is stored in canonical form (trimmed, lowercased).
+	 *
 	 * @param string $user_email User email.
 	 */
 	public function set_user_email( string $user_email ) {
-		$this->set_prop( 'user_email', $user_email );
+		$this->set_prop( 'user_email', EmailNormalizer::normalize( $user_email ) );
 	}
 
 	/**
@@ -386,16 +389,11 @@ class Notification extends \WC_Data {
 	public function get_product_formatted_variation_list( bool $flat = false ) {
 
 		$product = $this->get_product();
-		if ( ! $product || ! $product->is_type( array( 'variation' ) ) ) {
+		if ( ! $product instanceof \WC_Product_Variation ) {
 			return '';
 		}
 
-		// Replace list with custom data.
-		$attributes = $this->get_meta( 'posted_attributes' );
-		if ( ! $attributes ) {
-			$attributes = $product->get_attributes();
-		}
-
+		$attributes = $this->get_variation_attributes_with_posted_data( $product );
 		if ( empty( $attributes ) ) {
 			return '';
 		}
@@ -424,21 +422,42 @@ class Notification extends \WC_Data {
 	public function get_product_permalink() {
 
 		$product = $this->get_product();
-		if ( ! $product ) {
+		if ( ! $product || ! $product->get_id() ) {
 			return '';
 		}
 
 		$posted_attributes = $this->get_meta( 'posted_attributes' );
 		if ( ! $product instanceof \WC_Product_Variation || empty( $posted_attributes ) || ! is_array( $posted_attributes ) ) {
-			return $product->get_permalink();
+			return (string) $product->get_permalink();
 		}
 
-		// Posted attributes hold only the values chosen for "Any" attributes, so merge them over the variation's own attributes to build a complete link.
-		// Keys that no longer belong to the variation (e.g. a removed attribute) are dropped so they don't leak into the URL.
-		$variation_attributes = $product->get_variation_attributes();
-		$attributes           = array_merge( $variation_attributes, array_intersect_key( $posted_attributes, $variation_attributes ) );
+		return (string) $product->get_permalink( array( 'variation' => $this->get_variation_attributes_with_posted_data( $product ) ) );
+	}
 
-		return $product->get_permalink( array( 'variation' => $attributes ) );
+	/**
+	 * Get the variation's attributes, with the shopper's posted values filled in.
+	 *
+	 * Posted values only fill the variation's "Any" attributes (empty values); the variation's fixed values always win.
+	 * Keys that no longer belong to the variation (e.g. a removed attribute) are dropped.
+	 *
+	 * @param \WC_Product_Variation $product The notification's variation.
+	 * @return array
+	 */
+	private function get_variation_attributes_with_posted_data( \WC_Product_Variation $product ): array {
+		$variation_attributes = $product->get_variation_attributes();
+		$posted_attributes    = $this->get_meta( 'posted_attributes' );
+		if ( empty( $posted_attributes ) || ! is_array( $posted_attributes ) ) {
+			return $variation_attributes;
+		}
+
+		$any_attributes = array_filter(
+			$variation_attributes,
+			static function ( $value ) {
+				return '' === $value;
+			}
+		);
+
+		return array_merge( $variation_attributes, array_intersect_key( $posted_attributes, $any_attributes ) );
 	}
 
 	/**

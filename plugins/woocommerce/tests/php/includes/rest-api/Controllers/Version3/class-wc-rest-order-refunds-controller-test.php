@@ -86,6 +86,105 @@ class WC_REST_Order_Refunds_Controller_Test extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Explicit item refunds reject amounts above the order line's paid total.
+	 */
+	public function test_explicit_refund_rejects_line_overage(): void {
+		wp_set_current_user( 1 );
+		$order   = WC_Helper_Order::create_order();
+		$item_id = current( $order->get_items( 'line_item' ) )->get_id();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders/' . $order->get_id() . '/refunds' );
+		$request->set_body_params(
+			array(
+				'amount'     => '3',
+				'api_refund' => false,
+				'line_items' => array(
+					array(
+						'id'           => $item_id,
+						'quantity'     => 0,
+						'refund_total' => 30000,
+					),
+				),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 422, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_refund_total_exceeds_line', $response->get_data()['code'] );
+		$this->assertCount( 0, wc_get_order( $order->get_id() )->get_refunds() );
+	}
+
+	/**
+	 * @testdox Explicit item refunds reject amounts exceeding the remaining balance after a partial refund.
+	 */
+	public function test_explicit_refund_rejects_overage_after_partial_refund(): void {
+		wp_set_current_user( 1 );
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( '100' );
+		$product->save();
+		$order = wc_create_order();
+		$order->add_product( $product, 1 );
+		$order->calculate_totals();
+		$order->save();
+		$item_id = current( $order->get_items( 'line_item' ) )->get_id();
+		$url     = '/wc/v3/orders/' . $order->get_id() . '/refunds';
+
+		foreach ( array( 50, 60 ) as $refund_total ) {
+			$request = new WP_REST_Request( 'POST', $url );
+			$request->set_body_params(
+				array(
+					'amount'     => (string) $refund_total,
+					'api_refund' => false,
+					'line_items' => array(
+						array(
+							'id'           => $item_id,
+							'quantity'     => 0,
+							'refund_total' => $refund_total,
+						),
+					),
+				)
+			);
+			$response = $this->server->dispatch( $request );
+			if ( 50 === $refund_total ) {
+				$this->assertSame( 201, $response->get_status(), 'The first partial refund should succeed.' );
+			}
+		}
+
+		$this->assertSame( 422, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_refund_total_exceeds_remaining', $response->get_data()['code'] );
+		$this->assertCount( 1, wc_get_order( $order->get_id() )->get_refunds() );
+	}
+
+	/**
+	 * @testdox Explicit item refunds reject allocations above their stated order refund amount.
+	 */
+	public function test_explicit_refund_rejects_amount_below_item_total(): void {
+		wp_set_current_user( 1 );
+		$order   = WC_Helper_Order::create_order();
+		$item_id = current( $order->get_items( 'line_item' ) )->get_id();
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders/' . $order->get_id() . '/refunds' );
+		$request->set_body_params(
+			array(
+				'amount'     => '3',
+				'api_refund' => false,
+				'line_items' => array(
+					array(
+						'id'           => $item_id,
+						'refund_total' => 4,
+					),
+				),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_invalid_refund_amount', $response->get_data()['code'] );
+		$this->assertCount( 0, wc_get_order( $order->get_id() )->get_refunds() );
+	}
+
+	/**
 	 * Test if line, fees and shipping items are all included in refund response.
 	 */
 	public function test_items_response_fields() {
@@ -162,5 +261,40 @@ class WC_REST_Order_Refunds_Controller_Test extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 201, $response->get_status() );
 
 		$this->assert_incomplete_meta_data_handled_correctly( wc_get_order( $response->get_data()['id'] ) );
+	}
+
+	/**
+	 * @testdox Should report refunded_by as 0 when no user issued the refund.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/36329
+	 */
+	public function test_refunded_by_is_zero_when_no_user_issued_the_refund(): void {
+		wp_set_current_user( 1 );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( '10' );
+		$product->save();
+
+		$order = wc_create_order();
+		$order->add_product( $product, 1 );
+		$order->calculate_totals();
+		$order->save();
+
+		// A refund with no recorded user, as a gateway webhook or cron run produces.
+		$refund = new WC_Order_Refund();
+		$refund->set_amount( 5 );
+		$refund->set_parent_id( $order->get_id() );
+		$refund->set_refunded_by( 0 );
+		$refund->save();
+
+		$request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order->get_id() . '/refunds/' . $refund->get_id() );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame(
+			0,
+			$response->get_data()['refunded_by'],
+			'An unattributed refund reports 0 rather than the id of user 1.'
+		);
 	}
 }
