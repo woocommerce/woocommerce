@@ -4,13 +4,17 @@
 	"type": "project",
 	"license": "GPL-2.0-or-later",
 	"require-dev": {
-		"automattic/jetpack-changelogger": "3.3.0"
+		"automattic/jetpack-changelogger": "3.3.0",
+		"wp-coding-standards/wpcs": "^3.0"
 	},
 	"config": {
 		"platform": {
 			"php": "7.4"
 		},
-		"sort-packages": true
+		"sort-packages": true,
+		"allow-plugins": {
+			"dealerdirect/phpcodesniffer-composer-installer": true
+		}
 	},
 	"extra": {
 		"changelogger": {
