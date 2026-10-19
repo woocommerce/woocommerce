@@ -16,7 +16,7 @@
 	},
 	"devDependencies": {
 		"@wordpress/env": "catalog:tooling",
-		"@wordpress/scripts": "32.6.0"
+		"@wordpress/scripts": "catalog:tooling"
 	},
 	"config": {
 		"ci": {
