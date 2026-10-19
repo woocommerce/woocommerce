@@ -33,6 +33,7 @@
 	"dependencies": {
 		"@wordpress/admin-ui": "catalog:wp-bundled",
 		"@wordpress/components": "catalog:wp-min",
+		"@wordpress/compose": "catalog:wp-min",
 		"@wordpress/core-data": "catalog:wp-min",
 		"@wordpress/data": "catalog:wp-min",
 		"@wordpress/dataviews": "catalog:wp-bundled",

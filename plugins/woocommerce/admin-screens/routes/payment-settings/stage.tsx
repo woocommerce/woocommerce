@@ -3,6 +3,7 @@
  */
 import { Breadcrumbs, Page } from '@wordpress/admin-ui';
 import { Spinner } from '@wordpress/components';
+import { useViewportMatch } from '@wordpress/compose';
 import { store as coreStore, useEntityRecord } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
 import { DataForm, useFormValidity } from '@wordpress/dataviews';
@@ -47,6 +48,7 @@ function SettingsForm( { config }: { config: SettingsEntityConfig } ) {
 	const { kind, name, label, fields } = config;
 	const { record, editedRecord, hasEdits, edit, save } =
 		useEntityRecord< SettingsRecord >( kind, name, name );
+	const isNarrow = useViewportMatch( 'medium', '<' );
 	const { form } = useViewConfig( { kind, name } );
 	const [ notice, setNotice ] = useState< {
 		status: 'success' | 'error';
@@ -122,6 +124,32 @@ function SettingsForm( { config }: { config: SettingsEntityConfig } ) {
 		'admin.php?page=wc-settings&tab=checkout',
 		window.location.href
 	).toString();
+	const formActions = (
+		<Stack direction="row" gap="sm" justify="end">
+			<Button
+				variant="outline"
+				size="compact"
+				disabled={ isSaving || ! hasEdits }
+				onClick={ () => {
+					if ( record ) {
+						edit( record );
+						setNotice( undefined );
+					}
+				} }
+			>
+				{ __( 'Discard changes', 'woocommerce' ) }
+			</Button>
+			<Button
+				variant="solid"
+				size="compact"
+				loading={ isSaving }
+				disabled={ isSaving || ! hasEdits || ! isValid }
+				onClick={ () => void saveSettings() }
+			>
+				{ __( 'Save changes', 'woocommerce' ) }
+			</Button>
+		</Stack>
+	);
 	return (
 		<Page
 			ariaLabel={ label }
@@ -138,32 +166,8 @@ function SettingsForm( { config }: { config: SettingsEntityConfig } ) {
 			}
 			showSidebarToggle={ false }
 			hasPadding
-			actions={
-				<Stack direction="row" gap="sm" wrap="wrap">
-					<Button
-						variant="outline"
-						size="compact"
-						disabled={ isSaving || ! hasEdits }
-						onClick={ () => {
-							if ( record ) {
-								edit( record );
-								setNotice( undefined );
-							}
-						} }
-					>
-						{ __( 'Discard changes', 'woocommerce' ) }
-					</Button>
-					<Button
-						variant="solid"
-						size="compact"
-						loading={ isSaving }
-						disabled={ isSaving || ! hasEdits || ! isValid }
-						onClick={ () => void saveSettings() }
-					>
-						{ __( 'Save changes', 'woocommerce' ) }
-					</Button>
-				</Stack>
-			}
+			// The Page header doesn't wrap its actions, so they move below the form on small screens.
+			actions={ isNarrow ? undefined : formActions }
 		>
 			<Stack
 				direction="column"
@@ -194,6 +198,7 @@ function SettingsForm( { config }: { config: SettingsEntityConfig } ) {
 						}
 					} }
 				/>
+				{ isNarrow && formActions }
 			</Stack>
 		</Page>
 	);
