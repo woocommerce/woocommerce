@@ -46,17 +46,6 @@ function isValidFilterOptionItem(
 	);
 }
 
-function getBlockRoot(): HTMLElement | null {
-	const { ref } = getElement();
-	if ( ! ( ref instanceof Element ) ) {
-		return null;
-	}
-	if ( ref.classList.contains( 'wc-block-product-filters' ) ) {
-		return ref;
-	}
-	return ref.closest( '.wc-block-product-filters' );
-}
-
 function getFilterLabel( item: ValidFilterOptionItem ): string {
 	const label = item.ariaLabel ?? item.label;
 	return typeof label === 'string' && label.length > 0 ? label : item.value;
@@ -190,6 +179,7 @@ const productFiltersStore = {
 	actions: {
 		openOverlay: () => {
 			const context = getContext< ProductFiltersContext >();
+			context.openButtonRef = getElement().ref;
 			context.isOverlayOpened = true;
 			if ( document.getElementById( 'wpadminbar' ) ) {
 				const scrollTop = (
@@ -202,43 +192,12 @@ const productFiltersStore = {
 					`max(calc(var(--wp-admin--admin-bar--height) - ${ scrollTop }px), 0px)`
 				);
 			}
-
-			const root = getBlockRoot();
-			if ( ! root ) {
-				return;
-			}
-			const dialog = root.querySelector< HTMLElement >(
-				'.wc-block-product-filters__overlay-dialog'
-			);
-			if ( ! dialog ) {
-				return;
-			}
-
-			// The open class is applied on the next render. Until then the
-			// drawer is `visibility: hidden` and cannot take focus.
-			requestAnimationFrame( () => {
-				if ( ! context.isOverlayOpened ) {
-					return;
-				}
-				getFocusableElements( dialog )[ 0 ]?.focus();
-			} );
 		},
 		closeOverlay: () => {
 			const context = getContext< ProductFiltersContext >();
 			context.isOverlayOpened = false;
-
-			// Focus the open button so the focus target doesn't stay inside the
-			// overlay.
-			const root = getBlockRoot();
-			if ( ! root ) {
-				return;
-			}
-			const openButton = root.querySelector< HTMLElement >(
-				'.wc-block-product-filters__open-overlay'
-			);
-			if ( openButton ) {
-				openButton.focus();
-			}
+			context.openButtonRef?.focus();
+			context.openButtonRef = null;
 		},
 		closeOverlayOnBackdrop: ( event: MouseEvent ) => {
 			if ( event.target === event.currentTarget ) {
@@ -261,14 +220,7 @@ const productFiltersStore = {
 				return;
 			}
 
-			const root = getBlockRoot();
-			if ( ! root ) {
-				return;
-			}
-
-			const dialog = root.querySelector< HTMLElement >(
-				'.wc-block-product-filters__overlay-dialog'
-			);
+			const { ref: dialog } = getElement();
 			if ( ! dialog ) {
 				return;
 			}
@@ -378,6 +330,21 @@ const productFiltersStore = {
 		},
 	},
 	callbacks: {
+		focusOverlay: () => {
+			const context = getContext< ProductFiltersContext >();
+			if ( ! context.isOverlayOpened ) {
+				return;
+			}
+			const { ref: dialog } = getElement();
+
+			// Wait for the open class to make the drawer visible before focusing.
+			const frame = requestAnimationFrame( () => {
+				if ( context.isOverlayOpened ) {
+					getFocusableElements( dialog )[ 0 ]?.focus();
+				}
+			} );
+			return () => cancelAnimationFrame( frame );
+		},
 		initColors: () => {
 			const el = getElement();
 			if ( ! el.ref ) {

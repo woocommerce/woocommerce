@@ -20,6 +20,7 @@ jest.mock( '../../../utils/navigation', () => ( {
 let mockRegisteredStore: {
 	state: ProductFiltersStore[ 'state' ];
 	actions: ProductFiltersStore[ 'actions' ];
+	callbacks: ProductFiltersStore[ 'callbacks' ];
 } | null = null;
 
 jest.mock(
@@ -34,6 +35,7 @@ jest.mock(
 			mockRegisteredStore = {
 				state: definition.state,
 				actions: definition.actions,
+				callbacks: definition.callbacks,
 			};
 			return mockRegisteredStore;
 		} ),
@@ -66,7 +68,7 @@ describe( 'product filters interactivity store', () => {
 		mockRegisteredStore = null;
 
 		jest.isolateModules( () => {
-			require( '../frontend' );
+			jest.requireActual( '../frontend' );
 		} );
 	} );
 
@@ -217,20 +219,19 @@ describe( 'product filters interactivity store', () => {
 		}
 
 		const root = document.createElement( 'div' );
-		root.className = 'wc-block-product-filters';
+		const openButton = document.createElement( 'button' );
 		const dialog = document.createElement( 'div' );
-		dialog.className = 'wc-block-product-filters__overlay-dialog';
 		const closeButton = document.createElement( 'button' );
 		Object.defineProperty( closeButton, 'offsetParent', {
 			get: () => document.body,
 		} );
 		dialog.append( closeButton );
-		root.append( dialog );
+		root.append( openButton, dialog );
 		document.body.append( root );
 
 		const context = { isOverlayOpened: false };
 		mockGetContext.mockReturnValue( context );
-		mockGetElement.mockReturnValue( { ref: root } );
+		mockGetElement.mockReturnValue( { ref: openButton } );
 
 		let frame: ( ( time: number ) => void ) | undefined;
 		const requestAnimationFrameSpy = jest
@@ -242,6 +243,8 @@ describe( 'product filters interactivity store', () => {
 
 		try {
 			mockRegisteredStore.actions.openOverlay();
+			mockGetElement.mockReturnValue( { ref: dialog } );
+			mockRegisteredStore.callbacks.focusOverlay();
 
 			expect( context.isOverlayOpened ).toBe( true );
 			expect( root.ownerDocument.activeElement ).not.toBe( closeButton );
@@ -249,6 +252,9 @@ describe( 'product filters interactivity store', () => {
 			frame?.( 0 );
 
 			expect( root.ownerDocument.activeElement ).toBe( closeButton );
+
+			mockRegisteredStore.actions.closeOverlay();
+			expect( root.ownerDocument.activeElement ).toBe( openButton );
 		} finally {
 			root.remove();
 			requestAnimationFrameSpy.mockRestore();

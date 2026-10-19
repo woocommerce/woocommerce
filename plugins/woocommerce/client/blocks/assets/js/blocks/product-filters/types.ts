@@ -36,6 +36,7 @@ export type ActiveFilterItem = {
 
 export type ProductFiltersContext = {
 	isOverlayOpened: boolean;
+	openButtonRef?: HTMLElement | null;
 	params: Record< string, string >;
 	activeFilters: ActiveFilterItem[];
 	items?: FilterOptionItem[];
