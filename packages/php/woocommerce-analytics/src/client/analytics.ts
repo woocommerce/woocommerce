@@ -54,14 +54,13 @@ export class Analytics {
 			this.apiClient.init();
 		}
 
+		consentManager.addConsentChangeListener( this.handleConsentChange );
+
 		/*
 		 * Initialize the session manager and record the page_view event
 		 * only if the ClickHouse (ch) feature is enabled as these events are relevant exclusively when ClickHouse is active.
 		 */
 		if ( this.features.sessionTracking ) {
-			// Set up consent change listener
-			consentManager.addConsentChangeListener( this.handleConsentChange );
-
 			this.sessionManager.init();
 			const { sessionId, landingPage, isEngaged, isNewSession } = this.sessionManager;
 
@@ -249,8 +248,16 @@ export class Analytics {
 	handleConsentChange = ( hasConsent: boolean ): void => {
 		if ( ! hasConsent ) {
 			// Consent withdrawn - clear session data if session tracking is enabled
-			this.sessionManager.clearSession();
-		} else if ( ! this.sessionManager.sessionId ) {
+			if ( this.features.sessionTracking ) {
+				this.sessionManager.clearSession();
+			}
+			return;
+		}
+
+		// Withdrawing consent expired `tk_ai`, and init does not run again on this page.
+		this.maybeSetAnonId();
+
+		if ( this.features.sessionTracking && ! this.sessionManager.sessionId ) {
 			// Consent granted - reinitialize session if needed
 			this.sessionManager.init();
 		}
