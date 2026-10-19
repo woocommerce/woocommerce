@@ -416,6 +416,7 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	 * @testWith ["mcp-adapter/get-ability-info", "woocommerce/tracking-test", true, "info", "woocommerce__tracking-test"]
 	 *           ["mcp-adapter/discover-abilities", "", true, "list", "none"]
 	 *           ["mcp-adapter/get-ability-info", "tracking-test/other", true, "", ""]
+	 *           ["mcp-adapter/get-ability-info", "woocommerce/not-registered", true, "", ""]
 	 *           ["mcp-adapter/get-ability-info", "woocommerce/tracking-test", false, "", ""]
 	 *
 	 * @param string $adapter_ability   Adapter ability the agent calls.
@@ -433,7 +434,7 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 		$this->sut->handle_shutdown();
 
 		if ( '' === $discovery ) {
-			$this->assertSame( array(), $this->sut->recorded, 'Neither other plugins\' abilities nor direct PHP calls are recorded' );
+			$this->assertSame( array(), $this->sut->recorded, 'Unregistered names, other plugins, and direct PHP calls are not recorded' );
 			return;
 		}
 		$this->assertCount( 1, $this->sut->recorded, 'Only the discovery event; the adapter ability itself is not an ability call' );
