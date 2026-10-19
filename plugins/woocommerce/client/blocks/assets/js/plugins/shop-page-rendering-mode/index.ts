@@ -16,7 +16,7 @@ const ShopPageRenderingMode = () => {
 			'shop' in STORE_PAGES ? STORE_PAGES.shop?.id : undefined;
 
 		const isBlockTheme =
-			select( coreStore ).getCurrentTheme().is_block_theme;
+			select( coreStore )?.getCurrentTheme()?.is_block_theme;
 
 		return (
 			isBlockTheme &&
