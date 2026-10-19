@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Keep double-quoted values containing commas together when importing comma-separated product CSV fields like attributes.
+Treat a double-quoted value in a comma-separated product CSV field as one value without the quotes, instead of splitting it on commas.
