@@ -74,31 +74,6 @@ class ProductCatalogTemplate extends AbstractTemplate {
 		return $templates;
 	}
 
-	/**
-	 * Limit the Shop page's editor template choices to the Product Catalog.
-	 *
-	 * @internal
-	 *
-	 * @param \WP_Block_Template[] $templates Available templates.
-	 * @param array                $query Template query arguments.
-	 * @param string               $template_type Template type.
-	 * @return \WP_Block_Template[]
-	 */
-	public function handle_get_block_templates( $templates, $query, $template_type ) {
-		if (
-			'wp_template' === $template_type && isset( $query['slug'] ) && get_post_field( 'post_name', wc_get_page_id( 'shop' ) ) === $query['slug'] && wp_is_block_theme()
-		) {
-			// Query without the page slug to preserve customized WooCommerce templates' precedence.
-			$catalog_templates = get_block_templates( array( 'slug__in' => array( self::SLUG ) ), 'wp_template' );
-			foreach ( $catalog_templates as $template ) {
-				if ( $template instanceof \WP_Block_Template && self::SLUG === $template->slug ) {
-					return array( $template );
-				}
-			}
-		}
-
-		return $templates;
-	}
 
 	/**
 	 * Returns the title of the template.
@@ -136,6 +111,7 @@ class ProductCatalogTemplate extends AbstractTemplate {
 	 * @see https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/6278
 	 *
 	 * @param bool $is_support Whether the active theme supports block templates.
+	 * @return void
 	 */
 	public function remove_block_template_support_for_shop_page( $is_support ) {
 		wc_deprecated_function( __METHOD__, '11.3.0' );

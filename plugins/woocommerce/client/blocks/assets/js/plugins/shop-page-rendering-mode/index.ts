@@ -1,11 +1,12 @@
 /**
  * External dependencies
  */
+import { STORE_PAGES } from '@woocommerce/settings';
+import { store as coreStore } from '@wordpress/core-data';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { store as editorStore } from '@wordpress/editor';
 import { useEffect } from '@wordpress/element';
 import { registerPlugin } from '@wordpress/plugins';
-import { getSetting, STORE_PAGES } from '@woocommerce/settings';
 
 const ShopPageRenderingMode = () => {
 	const { setRenderingMode } = useDispatch( editorStore );
@@ -14,8 +15,11 @@ const ShopPageRenderingMode = () => {
 		const shopPageId =
 			'shop' in STORE_PAGES ? STORE_PAGES.shop?.id : undefined;
 
+		const isBlockTheme =
+			select( coreStore ).getCurrentTheme().is_block_theme;
+
 		return (
-			getSetting( 'isBlockTheme', false ) &&
+			isBlockTheme &&
 			!! shopPageId &&
 			!! editor &&
 			editor.getCurrentPostType() === 'page' &&
