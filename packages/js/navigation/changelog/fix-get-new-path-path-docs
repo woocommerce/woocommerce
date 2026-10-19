@@ -1,4 +1,4 @@
 Significance: patch
 Type: dev
-Comment: Clarify in the getNewPath, updateQueryString and onQueryChange docs that the path argument is used as-is and relative segments are not resolved. Docs only.
+Comment: Clarify the navigation `path` argument docs and fix README markdown lint issues; docs only.
 
