@@ -193,7 +193,7 @@ class DataStore extends StockNotificationsDataStore implements DataStoreInterfac
 		$this->update_intervals_sql_params( $query_args, $db_interval_count, $expected_interval_count, $table_name );
 		$this->interval_query->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
 		$this->interval_query->add_sql_clause( 'limit', $this->get_sql_clause( 'limit' ) );
-		$this->interval_query->add_sql_clause( 'select', ', MAX( ' . $this->get_local_datetime_sql( $table_name, $this->date_column_name ) . ' ) AS datetime_anchor' );
+		$this->interval_query->add_sql_clause( 'select', ', MAX( ' . $this->get_local_datetime_sql( $table_name, $this->date_column_name, $query_args ) . ' ) AS datetime_anchor' );
 
 		if ( '' !== $selections ) {
 			$this->interval_query->add_sql_clause( 'select', ', ' . $selections );
@@ -267,7 +267,7 @@ class DataStore extends StockNotificationsDataStore implements DataStoreInterfac
 		global $wpdb;
 
 		$table_name = self::get_db_table_name();
-		$interval   = $this->get_interval_sql( $query_args['interval'], $table_name, $column );
+		$interval   = $this->get_interval_sql( $query_args['interval'], $table_name, $column, $query_args );
 
 		$rows = $wpdb->get_results(
 			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared -- built from internal clauses and a prepared condition.
