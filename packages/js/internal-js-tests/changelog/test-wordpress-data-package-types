@@ -1,3 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Check published WordPress data types under bundler resolution; no production change.
