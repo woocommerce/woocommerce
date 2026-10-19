@@ -59,11 +59,11 @@ catalogs:
     # they are not provided as WordPress script externals.
     # https://github.com/WordPress/gutenberg/blob/e1d5efda04d8a8d868f220392f89f68cf37f1893/packages/dependency-extraction-webpack-plugin/lib/util.js#L2-L14
     wp-bundled:
-        '@wordpress/admin-ui': 2.4.1
+        '@wordpress/admin-ui': 2.5.0
         '@wordpress/dataviews': 20.0.0
         '@wordpress/fields': 0.25.11
         '@wordpress/icons': 11.0.1
-        '@wordpress/interface': 9.18.5
+        '@wordpress/interface': 10.3.0
         '@wordpress/theme': 0.17.0
         '@wordpress/ui': 0.17.0
         '@wordpress/undo-manager': 1.33.1
@@ -83,8 +83,10 @@ catalogs:
         '@wordpress/env': 11.17.0
         '@wordpress/prettier-config': 4.56.0
         '@wordpress/postcss-plugins-preset': 5.56.0
+        '@wordpress/scripts': 32.6.0
         '@wordpress/stylelint-config': ^23.14.0
         postcss: ^8.5.26
+        prettier: npm:wp-prettier@3.9.6
         stylelint: ^16.9.0
         webpack: 5.97.x
 
@@ -97,6 +99,7 @@ packages:
     - 'plugins/woocommerce/client/blocks'
     - 'plugins/woocommerce/client/legacy'
     - 'tools/monorepo-merge'
+    - 'themes/*'
     - 'tools/theme-cli'
     - 'tools/code-analyzer'
     - 'tools/compare-perf'
