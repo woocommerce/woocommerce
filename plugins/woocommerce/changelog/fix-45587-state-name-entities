@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show accented state names such as "Ancône" correctly in addresses when a translation stores them as HTML entities.
