@@ -129,6 +129,8 @@ The package integrates with [WP Consent API](https://wordpress.org/plugins/wp-co
 
 With WP Consent API active, `stats.wp.com/s-*.js`, which sets the `tk_*` referrer cookies, prints as `type="text/plain"` and only runs after statistics consent. Dequeuing or filtering its `woocommerce-analytics` script handle works as before.
 
+Withdrawing statistics consent expires the `tk_*` cookies on the page and drops events not yet sent. A page loaded with statistics consent denied expires any `tk_*` cookies left from an earlier visit.
+
 When WP Consent API is not available, the package defaults to allowing all tracking to maintain backward compatibility.
 
 ## Tracked Events
