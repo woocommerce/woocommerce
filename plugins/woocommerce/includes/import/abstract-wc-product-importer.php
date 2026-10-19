@@ -883,8 +883,8 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	}
 
 	/**
-	 * Explode CSV cell values using commas by default, and handling escaped
-	 * separators.
+	 * Explode CSV cell values using commas by default, handling escaped
+	 * separators and values wrapped in double quotes.
 	 *
 	 * @since  3.2.0
 	 * @param  string $value     Value to explode.
@@ -892,9 +892,53 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * @return array
 	 */
 	protected function explode_values( $value, $separator = ',' ) {
-		$value  = str_replace( '\\,', '::separator::', $value );
-		$values = explode( $separator, $value );
-		$values = array_map( array( $this, 'explode_values_formatter' ), $values );
+		$value    = str_replace( '\\,', '::separator::', $value );
+		$segments = explode( $separator, $value );
+		$values   = $this->group_quoted_values( is_array( $segments ) ? $segments : array( $value ), $separator );
+		$values   = array_map( array( $this, 'explode_values_formatter' ), $values );
+
+		return $values;
+	}
+
+	/**
+	 * Re-join exploded segments that were wrapped in double quotes, so a quoted value
+	 * can contain the separator, as in `Red, "Blue, navy", Green`.
+	 *
+	 * A quote only opens a group at the start of a trimmed segment and only closes it at
+	 * the end of one. A group without a closing quote is left split as it was, so values
+	 * that merely contain a quote character (such as `5" Wheel`) are not affected.
+	 *
+	 * @param string[] $segments  Segments produced by splitting the cell on the separator.
+	 * @param string   $separator Separator the segments were split on.
+	 * @return string[]
+	 */
+	protected function group_quoted_values( array $segments, $separator ) {
+		$values = array();
+		$count  = count( $segments );
+
+		for ( $i = 0; $i < $count; $i++ ) {
+			if ( '"' !== substr( trim( $segments[ $i ] ), 0, 1 ) ) {
+				$values[] = $segments[ $i ];
+				continue;
+			}
+
+			for ( $end = $i; $end < $count; $end++ ) {
+				$candidate = trim( $segments[ $end ] );
+				// The opening segment needs more than the opening quote itself to also close the group.
+				if ( '"' === substr( $candidate, -1 ) && ( $end > $i || strlen( $candidate ) > 1 ) ) {
+					break;
+				}
+			}
+
+			if ( $end >= $count ) {
+				$values[] = $segments[ $i ];
+				continue;
+			}
+
+			$quoted   = trim( implode( $separator, array_slice( $segments, $i, $end - $i + 1 ) ) );
+			$values[] = (string) substr( $quoted, 1, -1 );
+			$i        = $end;
+		}
 
 		return $values;
 	}

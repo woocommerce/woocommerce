@@ -1984,4 +1984,35 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 			wp_delete_file( $file );
 		}
 	}
+
+	/**
+	 * @testdox Should keep double-quoted values together and leave other values untouched when splitting comma-separated fields.
+	 * @dataProvider provider_parse_comma_field_quoted_values
+	 *
+	 * @param string $value    Raw CSV cell value.
+	 * @param array  $expected Expected list of values.
+	 */
+	public function test_parse_comma_field_handles_quoted_values( string $value, array $expected ): void {
+		$importer = new WC_Product_CSV_Importer( __DIR__ . '/sample.csv' );
+
+		$this->assertSame( $expected, $importer->parse_comma_field( $value ) );
+	}
+
+	/**
+	 * Data provider for test_parse_comma_field_handles_quoted_values.
+	 *
+	 * @return array[]
+	 */
+	public function provider_parse_comma_field_quoted_values(): array {
+		return array(
+			'quoted value with commas'    => array( 'Red, "Blue, navy", Green', array( 'Red', 'Blue, navy', 'Green' ) ),
+			'whole cell quoted'           => array( '"New, no box. Multiple quantity, minor shelf wear."', array( 'New, no box. Multiple quantity, minor shelf wear.' ) ),
+			'backslash-escaped comma'     => array( 'Red\\, Green, Blue', array( 'Red, Green', 'Blue' ) ),
+			'escaped comma inside quotes' => array( '"Red\\, Green, Blue", Black', array( 'Red, Green, Blue', 'Black' ) ),
+			'quote inside a value'        => array( 'Red, 5" Wheel, Green', array( 'Red', '5" Wheel', 'Green' ) ),
+			'quote not closing a segment' => array( '"Large" size, Small', array( '"Large" size', 'Small' ) ),
+			'unterminated quote'          => array( 'Red, "Blue', array( 'Red', '"Blue' ) ),
+			'plain list'                  => array( 'Red, Green', array( 'Red', 'Green' ) ),
+		);
+	}
 }
