@@ -32,6 +32,7 @@ class CycleViewTest extends TestCase {
 				'expected_total' => '20.00',
 				'currency'       => 'USD',
 				'order_id'       => 77,
+				'reason'         => 'payment-failed',
 			)
 		);
 
@@ -48,6 +49,7 @@ class CycleViewTest extends TestCase {
 		$this->assertSame( '20.00000000', $view->get_expected_total() );
 		$this->assertSame( 'USD', $view->get_currency() );
 		$this->assertSame( 77, $view->get_order_id() );
+		$this->assertSame( 'payment-failed', $view->get_reason() );
 	}
 
 	public function test_a_non_counting_cycle_without_an_order_reads_null(): void {
@@ -68,6 +70,7 @@ class CycleViewTest extends TestCase {
 
 		$this->assertNull( $view->get_count() );
 		$this->assertNull( $view->get_order_id() );
+		$this->assertNull( $view->get_reason() );
 		$this->assertSame( 'pending', $view->get_status() );
 	}
 }

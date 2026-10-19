@@ -58,12 +58,15 @@ export const TrackedLink = ( {
 				components: {
 					Link: (
 						<Link
-							onClick={ () => {
+							// Link skips onClick on Cmd/Ctrl/Alt/Shift-click so the browser can open a new tab, so track in the capture phase.
+							onClickCapture={ () => {
 								if ( onClickCallback ) {
 									onClickCallback();
 								} else {
 									recordEvent( eventName, eventProperties );
 								}
+							} }
+							onClick={ () => {
 								if ( linkType !== 'external' ) {
 									window.location.href = targetUrl;
 									return false;
