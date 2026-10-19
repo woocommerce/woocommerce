@@ -19,8 +19,12 @@ export function environmentArgs( args ) {
 	return args;
 }
 
-export async function prepareEnvironment( slug, environment = '' ) {
-	const directory = await getThemeDirectory( slug );
+export async function prepareEnvironment(
+	slug,
+	environment = '',
+	themeDirectory
+) {
+	const directory = themeDirectory ?? ( await getThemeDirectory( slug ) );
 	await fs.access( path.join( directory, 'style.css' ) );
 	await fs.access( path.join( directory, 'theme.json' ) );
 	const config = JSON.parse(
@@ -42,8 +46,17 @@ export async function prepareEnvironment( slug, environment = '' ) {
 	return configPath;
 }
 
-export async function runEnvironment( slug, args, environment = '' ) {
-	const configPath = await prepareEnvironment( slug, environment );
+export async function runEnvironment(
+	slug,
+	args,
+	environment = '',
+	themeDirectory
+) {
+	const configPath = await prepareEnvironment(
+		slug,
+		environment,
+		themeDirectory
+	);
 	const env = { ...process.env };
 	if ( environment ) {
 		env.WP_ENV_HOME ??= path.join(
