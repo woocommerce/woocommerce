@@ -61,6 +61,19 @@ final class BillingAddress extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox The billing phone reads as entered after wptexturize() runs over the block output.
+	 */
+	public function test_billing_phone_survives_wptexturize(): void {
+		$order = \WC_Helper_Order::create_order();
+		$order->set_billing_phone( '555--0100' );
+		$order->save();
+
+		$text = html_entity_decode( wp_strip_all_tags( wptexturize( $this->render( $order ) ) ), ENT_QUOTES | ENT_HTML5 );
+
+		$this->assertStringContainsString( '555--0100', $text, 'The phone should not be texturized into an en dash.' );
+	}
+
+	/**
 	 * Create an order placed via the Store API with a value persisted for the billing group of the test field.
 	 *
 	 * @param string $value Field value.

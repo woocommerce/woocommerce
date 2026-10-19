@@ -4,6 +4,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation;
 
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
+use Automattic\WooCommerce\Internal\Utilities\HtmlSanitizer;
 
 /**
  * BillingAddress class.
@@ -32,7 +33,7 @@ class BillingAddress extends AbstractOrderConfirmationBlock {
 		}
 
 		$address = '<address>' . wp_kses_post( $order->get_formatted_billing_address() ) . '</address>';
-		$phone   = $order->get_billing_phone() ? '<p class="woocommerce-customer-details--phone">' . esc_html( $order->get_billing_phone() ) . '</p>' : '';
+		$phone   = $order->get_billing_phone() ? '<p class="woocommerce-customer-details--phone">' . wc_get_container()->get( HtmlSanitizer::class )->esc_html_exact( $order->get_billing_phone() ) . '</p>' : '';
 
 		$controller = Package::container()->get( CheckoutFields::class );
 		$custom     = $this->render_additional_fields(

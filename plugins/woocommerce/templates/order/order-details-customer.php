@@ -12,12 +12,15 @@
  *
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 8.7.0
+ * @version 11.4.0
  */
+
+use Automattic\WooCommerce\Internal\Utilities\HtmlSanitizer;
 
 defined( 'ABSPATH' ) || exit;
 
-$show_shipping = ! wc_ship_to_billing_address_only() && $order->needs_shipping_address();
+$show_shipping  = ! wc_ship_to_billing_address_only() && $order->needs_shipping_address();
+$html_sanitizer = wc_get_container()->get( HtmlSanitizer::class );
 ?>
 <section class="woocommerce-customer-details">
 
@@ -34,11 +37,11 @@ $show_shipping = ! wc_ship_to_billing_address_only() && $order->needs_shipping_a
 		<?php echo wp_kses_post( $order->get_formatted_billing_address( esc_html__( 'N/A', 'woocommerce' ) ) ); ?>
 
 		<?php if ( $order->get_billing_phone() ) : ?>
-			<p class="woocommerce-customer-details--phone"><?php echo esc_html( $order->get_billing_phone() ); ?></p>
+			<p class="woocommerce-customer-details--phone"><?php echo $html_sanitizer->esc_html_exact( $order->get_billing_phone() ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_html_exact() escapes for HTML. ?></p>
 		<?php endif; ?>
 
 		<?php if ( $order->get_billing_email() ) : ?>
-			<p class="woocommerce-customer-details--email"><?php echo esc_html( $order->get_billing_email() ); ?></p>
+			<p class="woocommerce-customer-details--email"><?php echo $html_sanitizer->esc_html_exact( $order->get_billing_email() ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_html_exact() escapes for HTML. ?></p>
 		<?php endif; ?>
 
 		<?php
@@ -63,7 +66,7 @@ $show_shipping = ! wc_ship_to_billing_address_only() && $order->needs_shipping_a
 				<?php echo wp_kses_post( $order->get_formatted_shipping_address( esc_html__( 'N/A', 'woocommerce' ) ) ); ?>
 
 				<?php if ( $order->get_shipping_phone() ) : ?>
-					<p class="woocommerce-customer-details--phone"><?php echo esc_html( $order->get_shipping_phone() ); ?></p>
+					<p class="woocommerce-customer-details--phone"><?php echo $html_sanitizer->esc_html_exact( $order->get_shipping_phone() ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_html_exact() escapes for HTML. ?></p>
 				<?php endif; ?>
 
 				<?php

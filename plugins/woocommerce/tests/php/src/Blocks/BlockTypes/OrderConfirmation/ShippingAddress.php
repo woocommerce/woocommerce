@@ -61,6 +61,23 @@ final class ShippingAddress extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox The shipping phone reads as entered after wptexturize() runs over the block output.
+	 */
+	public function test_shipping_phone_survives_wptexturize(): void {
+		$order = \WC_Helper_Order::create_order();
+		$order->set_shipping_address_1( 'WooAddress' );
+		$order->set_shipping_city( 'WooCity' );
+		$order->set_shipping_postcode( '12345' );
+		$order->set_shipping_country( 'US' );
+		$order->set_shipping_phone( '555--0200' );
+		$order->save();
+
+		$text = html_entity_decode( wp_strip_all_tags( wptexturize( $this->render( $order ) ) ), ENT_QUOTES | ENT_HTML5 );
+
+		$this->assertStringContainsString( '555--0200', $text, 'The phone should not be texturized into an en dash.' );
+	}
+
+	/**
 	 * Create an order placed via the Store API, with a shipping address and a value persisted for the shipping group of the test field.
 	 *
 	 * @param string $value Field value.
