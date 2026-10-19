@@ -53,10 +53,26 @@ test.describe( 'Shopper My Account Create Account', () => {
 				);
 			}
 		} finally {
+			const restorationErrors: Error[] = [];
 			for ( const [ settingId, value ] of originalSettingValues ) {
-				await restApi.put( `${ accountSettingsPath }/${ settingId }`, {
-					value,
-				} );
+				try {
+					await restApi.put(
+						`${ accountSettingsPath }/${ settingId }`,
+						{ value }
+					);
+				} catch ( error ) {
+					restorationErrors.push(
+						new Error(
+							`Failed to restore ${ settingId }: ${ String( error ) }`
+						)
+					);
+				}
+			}
+			if ( restorationErrors.length ) {
+				throw new AggregateError(
+					restorationErrors,
+					'Failed to restore My Account registration settings.'
+				);
 			}
 		}
 	} );
