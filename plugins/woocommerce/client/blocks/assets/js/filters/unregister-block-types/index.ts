@@ -89,6 +89,9 @@ domReady( () => {
 
 	// DOM readiness does not guarantee the editor has loaded its current post.
 	const unsubscribe = subscribe( () => {
+		if ( ! select( editorStore ).getCurrentPostId() ) {
+			return;
+		}
 		unsubscribe();
 		unregisterBlocks();
 	}, editorStore );
