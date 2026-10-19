@@ -1130,6 +1130,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	 * @testWith ["none", ""]
 	 *           ["line_item_name", ""]
 	 *           ["line_item_tax", "line_item"]
+	 *           ["line_item_tax_split", "line_item"]
 	 *           ["shipping_total", "shipping"]
 	 *           ["shipping_tax", "shipping"]
 	 *           ["tax_line", "tax"]
@@ -1339,7 +1340,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Creates an order from a taxed cart with one product, one fee, a coupon and flat rate shipping, shipped to Germany.
+	 * Creates an order from a cart taxed at two rates, with one product, one fee, a coupon and flat rate shipping, shipped to Germany.
 	 * The caller restores the customer's countries and deletes the flat rate.
 	 *
 	 * @return int The order ID.
@@ -1355,6 +1356,18 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 				'tax_rate_compound' => '0',
 				'tax_rate_shipping' => '1',
 				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+		WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'DE',
+				'tax_rate'          => '5.0000',
+				'tax_rate_name'     => 'Local tax',
+				'tax_rate_priority' => '2',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '2',
 				'tax_rate_class'    => '',
 			)
 		);
@@ -1408,6 +1421,18 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 						'subtotal' => array( $rate_id => (float) $line_item->get_subtotal_tax() + 1 ),
 					)
 				);
+				$line_item->save();
+				break;
+			case 'line_item_tax_split':
+				// Moves tax from one rate to the other, so the item's tax sums don't change.
+				$taxes       = $line_item->get_taxes();
+				$first_rate  = array_key_first( $taxes['total'] );
+				$second_rate = array_key_last( $taxes['total'] );
+				foreach ( array( 'total', 'subtotal' ) as $tax_type ) {
+					$taxes[ $tax_type ][ $first_rate ]  = (float) $taxes[ $tax_type ][ $first_rate ] + 1;
+					$taxes[ $tax_type ][ $second_rate ] = (float) $taxes[ $tax_type ][ $second_rate ] - 1;
+				}
+				$line_item->set_taxes( $taxes );
 				$line_item->save();
 				break;
 			case 'shipping_total':

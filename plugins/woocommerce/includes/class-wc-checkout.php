@@ -723,7 +723,7 @@ class WC_Checkout {
 			if ( $compare_taxes ) {
 				array_push( $values, $item->get_subtotal_tax( 'edit' ), $item->get_total_tax( 'edit' ) );
 			}
-			$order_values[] = $this->get_compared_values( ...$values );
+			$order_values[] = $this->get_compared_values( ...$values ) . ( $compare_taxes ? $this->get_compared_rate_taxes( $item->get_taxes( 'edit' ) ) : '' );
 		}
 
 		$cart_values = array();
@@ -732,7 +732,7 @@ class WC_Checkout {
 			if ( $compare_taxes ) {
 				array_push( $values, $cart_item['line_subtotal_tax'] ?? 0, $cart_item['line_tax'] ?? 0 );
 			}
-			$cart_values[] = $this->get_compared_values( ...$values );
+			$cart_values[] = $this->get_compared_values( ...$values ) . ( $compare_taxes ? $this->get_compared_rate_taxes( (array) ( $cart_item['line_tax_data'] ?? array() ) ) : '' );
 		}
 
 		sort( $order_values );
@@ -806,6 +806,26 @@ class WC_Checkout {
 		}
 
 		return $changed_types;
+	}
+
+	/**
+	 * Joins a line item's subtotal and total tax for each rate into one string, so a change in how tax is split between
+	 * rates is found even when the sums stay the same.
+	 *
+	 * @param array $taxes Taxes by rate ID, under 'subtotal' and 'total' keys.
+	 * @return string
+	 */
+	private function get_compared_rate_taxes( array $taxes ): string {
+		$compared = '';
+		foreach ( array( 'subtotal', 'total' ) as $tax_type ) {
+			$rate_taxes = (array) ( $taxes[ $tax_type ] ?? array() );
+			ksort( $rate_taxes );
+			foreach ( $rate_taxes as $rate_id => $tax ) {
+				$compared .= "|{$tax_type}:" . $this->get_compared_values( $rate_id, $tax );
+			}
+		}
+
+		return $compared;
 	}
 
 	/**
