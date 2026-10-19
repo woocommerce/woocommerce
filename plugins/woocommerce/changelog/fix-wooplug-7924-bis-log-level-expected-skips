@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Log expected back-in-stock processing skips, such as a product that is no longer in stock, at info level instead of error.

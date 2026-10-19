@@ -155,7 +155,7 @@ class CustomerStockNotificationVerifiedEmail extends WC_Email {
 						'email_link_action_key' => $unsubscribe_key,
 						'notification_id'       => $notification->get_id(),
 					),
-					get_option( 'siteurl' )
+					home_url( '/' )
 				)
 			),
 		);
