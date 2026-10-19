@@ -637,6 +637,14 @@ test.describe(
 			try {
 				await page.goto( reviewOrderUrl( order ) );
 
+				// Without this the icons fade over 100ms, and an assertion
+				// that a star is unfilled passes on the first sample of a
+				// fill that is still fading in.
+				await page.addStyleTag( {
+					content:
+						'.woocommerce-star-rating__icon { transition: none !important; }',
+				} );
+
 				const row = page
 					.locator( '.woocommerce-review-order__item' )
 					.nth( 0 );
@@ -652,7 +660,6 @@ test.describe(
 					row
 						.locator( '.woocommerce-star-rating__input:checked' )
 						.getAttribute( 'value' );
-				// Polled: the icons have a 100ms opacity transition.
 				const iconOpacity = ( stars: number ) =>
 					starLabel( stars )
 						.locator( '.woocommerce-star-rating__icon' )
@@ -661,13 +668,12 @@ test.describe(
 								window.getComputedStyle( icon ).opacity
 							)
 						);
-				const expectFilled = ( stars: number ) =>
-					expect.poll( () => iconOpacity( stars ) ).toBe( 1 );
-				const expectUnfilled = ( stars: number ) =>
-					expect.poll( () => iconOpacity( stars ) ).toBeLessThan( 1 );
+				const expectFilled = async ( stars: number ) =>
+					expect( await iconOpacity( stars ) ).toBe( 1 );
+				const expectUnfilled = async ( stars: number ) =>
+					expect( await iconOpacity( stars ) ).toBeLessThan( 1 );
 
-				// Read before anything is checked, so no transition is in
-				// flight. A floor, not an equality: below 0.55 the unfilled
+				// A floor, not an equality: below 0.55 the unfilled
 				// star drops under the 3:1 of WCAG 1.4.11.
 				const resting = await iconOpacity( 1 );
 				expect( resting ).toBeGreaterThanOrEqual( 0.55 );
@@ -687,17 +693,23 @@ test.describe(
 				await page.keyboard.press( 'Home' );
 				expect( await checkedValue() ).toBe( '1' );
 
-				// The fill must follow the selection wherever the pointer is:
-				// a hover rule that overrides it leaves the stars showing a
-				// rating the customer did not pick.
+				// A selection fills up to it and no further, and hovering a
+				// higher star must add no fill the customer did not pick: the
+				// old preview filled the hovered star, so a 4-star selection
+				// read as 5 with the pointer on star 5.
 				await rateRow( row, 4 );
-				await expectFilled( 4 );
+				for ( const stars of [ 1, 2, 3, 4 ] ) {
+					await expectFilled( stars );
+				}
 				await expectUnfilled( 5 );
 
-				await starLabel( 2 ).hover();
-				await expectFilled( 4 );
+				await starLabel( 5 ).hover();
+				for ( const stars of [ 1, 2, 3, 4 ] ) {
+					await expectFilled( stars );
+				}
 				await expectUnfilled( 5 );
 
+				// The fill still follows the next selection under that pointer.
 				await page.keyboard.press( 'End' );
 				expect( await checkedValue() ).toBe( '5' );
 				await expectFilled( 5 );
