@@ -507,13 +507,29 @@ class WC_Form_Handler {
 			wc_add_notice( $error_message, 'error' );
 		}
 
+		// Set the additional fields before the action below, so it sees the whole copied address. Nothing is saved on errors.
+		foreach ( $persist_fields as $field_key => $value ) {
+			$checkout_fields->persist_field_for_customer( $field_key, $value, $customer, $target_type );
+		}
+
+		/**
+		 * Fires before a customer's copied address is saved, so extensions can reject it by adding an error notice.
+		 *
+		 * Unlike woocommerce_after_save_address_validation, there's no submitted form, so read the copied values from
+		 * the customer instead of the request.
+		 *
+		 * @since 11.3.0
+		 *
+		 * @param int         $user_id     User ID being saved.
+		 * @param string      $target_type Address type being written; 'billing' or 'shipping'.
+		 * @param string      $source_type Address type being copied; 'billing' or 'shipping'.
+		 * @param WC_Customer $customer    The customer, with the copied address set but not saved.
+		 */
+		do_action( 'woocommerce_before_copy_address_save', $user_id, $target_type, $source_type, $customer );
+
 		if ( 0 < wc_notice_count( 'error' ) ) {
 			wp_safe_redirect( $redirect_url );
 			exit;
-		}
-
-		foreach ( $persist_fields as $field_key => $value ) {
-			$checkout_fields->persist_field_for_customer( $field_key, $value, $customer, $target_type );
 		}
 
 		$customer->save();

@@ -547,6 +547,51 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox copy_address() fires woocommerce_before_copy_address_save with the copied address set on the customer.
+	 *
+	 * @covers WC_Form_Handler::copy_address()
+	 */
+	public function test_copy_address_fires_before_save_action_with_copied_address(): void {
+		$customer  = $this->create_customer_with_address( 'billing' );
+		$hook_args = null;
+		add_action(
+			'woocommerce_before_copy_address_save',
+			function ( $user_id, $target_type, $source_type, $hook_customer ) use ( &$hook_args ) {
+				$hook_args = array( $user_id, $target_type, $source_type, $hook_customer->get_shipping_address_1( 'edit' ) );
+			},
+			10,
+			4
+		);
+
+		$this->prepare_copy_address_request( 'shipping' );
+		$this->dispatch_copy_address_expecting_redirect();
+
+		$this->assertSame( array( $customer->get_id(), 'shipping', 'billing', $customer->get_billing_address_1() ), $hook_args );
+	}
+
+	/**
+	 * @testdox copy_address() doesn't save the copied address when woocommerce_before_copy_address_save adds an error notice.
+	 *
+	 * @covers WC_Form_Handler::copy_address()
+	 */
+	public function test_copy_address_is_rejected_by_error_in_before_save_action(): void {
+		$customer = $this->create_customer_with_address( 'billing' );
+		add_action(
+			'woocommerce_before_copy_address_save',
+			function () {
+				wc_add_notice( 'Extension rejected the address.', 'error' );
+			}
+		);
+
+		$this->prepare_copy_address_request( 'shipping' );
+		$this->dispatch_copy_address_expecting_redirect();
+
+		$this->assertSame( 'Extension rejected the address.', wc_get_notices( 'error' )[0]['notice'] ?? null );
+		$this->assertEmpty( wc_get_notices( 'success' ), 'A rejected copy should not show a success notice.' );
+		$this->assertSame( '', ( new WC_Customer( $customer->get_id() ) )->get_shipping_address_1(), 'A rejected copy should not be saved.' );
+	}
+
+	/**
 	 * @testdox copy_address() uses the account email when copying a shipping address into billing.
 	 *
 	 * @covers WC_Form_Handler::copy_address()
