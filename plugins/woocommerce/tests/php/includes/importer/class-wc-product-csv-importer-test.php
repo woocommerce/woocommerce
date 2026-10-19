@@ -1984,4 +1984,84 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 			wp_delete_file( $file );
 		}
 	}
+
+	/**
+	 * @testdox Should update the product matched by SKU when a row's ID does not exist on the site and existing products are being updated.
+	 */
+	public function test_import_falls_back_to_sku_when_id_does_not_exist_40274(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_sku( 'IMPORT-40274-A' );
+		$product->set_name( 'Original name' );
+		$product->save();
+
+		$missing_id = $product->get_id() + 1000;
+		$csv_file   = trailingslashit( get_temp_dir() ) . 'import-40274-sku-fallback.csv';
+		file_put_contents( $csv_file, "ID,Type,SKU,Name\n{$missing_id},simple,IMPORT-40274-A,Updated by SKU\n" . ( $missing_id + 1 ) . ",simple,IMPORT-40274-NONE,Row with no match\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
+
+		$importer = new WC_Product_CSV_Importer(
+			$csv_file,
+			array(
+				'parse'           => true,
+				'update_existing' => true,
+				'mapping'         => array(
+					'ID'   => 'id',
+					'Type' => 'type',
+					'SKU'  => 'sku',
+					'Name' => 'name',
+				),
+			)
+		);
+		$data     = $importer->import();
+
+		wp_delete_file( $csv_file );
+
+		$this->assertSame( array( $product->get_id() ), $data['updated'] );
+		$this->assertEmpty( $data['failed'], 'A row whose ID is missing but whose SKU exists must not fail' );
+		$this->assertEmpty( $data['imported'] );
+		$this->assertCount( 1, $data['skipped'], 'A row matching neither ID nor SKU is still skipped' );
+		$this->assertSame( 'No matching product exists to update.', $data['skipped'][0]->get_error_message() );
+		$this->assertSame( 'Updated by SKU', wc_get_product( $product->get_id() )->get_name() );
+		$this->assertSame( 0, wc_get_product_id_by_sku( 'IMPORT-40274-NONE' ) );
+	}
+
+	/**
+	 * @testdox Should explain the conflict when a row's ID and SKU point at two different existing products.
+	 */
+	public function test_import_explains_id_and_sku_conflict_40274(): void {
+		$matched_by_id = WC_Helper_Product::create_simple_product();
+		$matched_by_id->set_sku( 'IMPORT-40274-B' );
+		$matched_by_id->save();
+
+		$owns_sku = WC_Helper_Product::create_simple_product();
+		$owns_sku->set_sku( 'IMPORT-40274-C' );
+		$owns_sku->save();
+
+		$csv_file = trailingslashit( get_temp_dir() ) . 'import-40274-id-sku-conflict.csv';
+		file_put_contents( $csv_file, "ID,Type,SKU,Name\n{$matched_by_id->get_id()},simple,IMPORT-40274-C,Conflicting row\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
+
+		$importer = new WC_Product_CSV_Importer(
+			$csv_file,
+			array(
+				'parse'           => true,
+				'update_existing' => true,
+				'mapping'         => array(
+					'ID'   => 'id',
+					'Type' => 'type',
+					'SKU'  => 'sku',
+					'Name' => 'name',
+				),
+			)
+		);
+		$data     = $importer->import();
+
+		wp_delete_file( $csv_file );
+
+		$this->assertEmpty( $data['updated'] );
+		$this->assertCount( 1, $data['failed'] );
+		$message = $data['failed'][0]->get_error_message();
+		$this->assertStringContainsString( 'Invalid or duplicated SKU.', $message );
+		$this->assertStringContainsString( sprintf( 'matches product #%d', $matched_by_id->get_id() ), $message );
+		$this->assertStringContainsString( sprintf( 'belongs to product #%d', $owns_sku->get_id() ), $message );
+		$this->assertSame( 'IMPORT-40274-B', wc_get_product( $matched_by_id->get_id() )->get_sku(), 'The product matched by ID keeps its own SKU' );
+	}
 }

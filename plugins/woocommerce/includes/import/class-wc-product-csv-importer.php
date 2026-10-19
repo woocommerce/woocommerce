@@ -328,7 +328,8 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * Parse the ID field.
 	 *
 	 * If we're not doing an update, create a placeholder product so mapping works
-	 * for rows following this one.
+	 * for rows following this one. When updating, an ID that does not exist on
+	 * this site falls back to the product matching the row's SKU.
 	 *
 	 * @param string $value Field value.
 	 *
@@ -350,10 +351,8 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 		// Not updating? Make sure we have a new placeholder for this ID.
 		if ( ! $this->params['update_existing'] ) {
-			$mapped_keys      = $this->get_mapped_keys();
-			$sku_column_index = absint( array_search( 'sku', $mapped_keys, true ) );
-			$row_sku          = isset( $this->raw_data[ $this->parsing_raw_data_index ][ $sku_column_index ] ) ? $this->raw_data[ $this->parsing_raw_data_index ][ $sku_column_index ] : '';
-			$id_from_sku      = $row_sku ? wc_get_product_id_by_sku( $row_sku ) : '';
+			$row_sku     = $this->get_row_sku();
+			$id_from_sku = $row_sku ? wc_get_product_id_by_sku( $row_sku ) : 0;
 
 			// If row has a SKU, make sure placeholder was not made already.
 			if ( $id_from_sku ) {
@@ -375,7 +374,34 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			return $placeholder_id;
 		}
 
+		// An ID exported from another site may not exist here. Fall back to the row's SKU so the
+		// row updates the matching product instead of failing later with an invalid product error.
+		if ( ! in_array( get_post_type( $id ), array( 'product', 'product_variation' ), true ) ) {
+			$row_sku     = $this->get_row_sku();
+			$id_from_sku = $row_sku ? wc_get_product_id_by_sku( $row_sku ) : 0;
+
+			if ( $id_from_sku ) {
+				$this->remember_original_id_mapping( $id, $id_from_sku );
+				return $id_from_sku;
+			}
+		}
+
 		return $id;
+	}
+
+	/**
+	 * Get the SKU column value of the row currently being parsed.
+	 *
+	 * @return string Raw SKU cell value, or an empty string when the file has no SKU column.
+	 */
+	private function get_row_sku(): string {
+		$sku_column_index = array_search( 'sku', $this->get_mapped_keys(), true );
+
+		if ( false === $sku_column_index ) {
+			return '';
+		}
+
+		return (string) ( $this->raw_data[ $this->parsing_raw_data_index ][ $sku_column_index ] ?? '' );
 	}
 
 	/**
@@ -1424,6 +1450,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			$global_unique_id = $this->normalize_global_unique_id( $parsed_data['global_unique_id'] ?? '' );
 			$id_exists        = false;
 			$sku_exists       = false;
+			$id_from_sku      = 0;
 
 			if ( $update_existing && ! $id && ! $sku && '' !== $global_unique_id ) {
 				$id = $this->match_product_id_by_global_unique_id( $global_unique_id, $parsed_data['type'] ?? '' );
@@ -1520,6 +1547,9 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			$result = $this->process_item( $parsed_data );
 
 			if ( is_wp_error( $result ) ) {
+				if ( $id_exists && $sku_exists && $id !== $id_from_sku ) {
+					$result = $this->add_id_sku_conflict_hint( $result, $id, $sku, $id_from_sku );
+				}
 				$result->add_data( array( 'row' => $this->get_row_id( $parsed_data ) ) );
 				$data['failed'][] = $result;
 			} elseif ( $result['updated'] ) {
@@ -1539,5 +1569,29 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		}
 
 		return $data;
+	}
+
+	/**
+	 * Explain a failed row whose ID and SKU point at two different existing products.
+	 *
+	 * @param WP_Error $error       Error returned when processing the row.
+	 * @param int      $id          Product ID the row's ID column resolved to.
+	 * @param string   $sku         SKU column value of the row.
+	 * @param int      $id_from_sku Product ID that already uses the row's SKU.
+	 * @return WP_Error
+	 */
+	private function add_id_sku_conflict_hint( WP_Error $error, int $id, string $sku, int $id_from_sku ): WP_Error {
+		return new WP_Error(
+			$error->get_error_code(),
+			sprintf(
+				/* translators: 1: original error message, 2: product ID matched by the row's ID, 3: SKU, 4: product ID that already uses the SKU */
+				__( '%1$s The ID of this row matches product #%2$d, but its SKU "%3$s" already belongs to product #%4$d. Point the ID and SKU at the same product, or remove one of them.', 'woocommerce' ),
+				$error->get_error_message(),
+				$id,
+				$sku,
+				$id_from_sku
+			),
+			$error->get_error_data()
+		);
 	}
 }
