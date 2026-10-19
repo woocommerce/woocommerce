@@ -86,16 +86,6 @@ const RELAXED_TEST_RULES = {
 	'testing-library/await-async-utils': 'warn',
 	'testing-library/no-manual-cleanup': 'warn',
 	'testing-library/no-wait-for-multiple-assertions': 'warn',
-	// Now reach the TypeScript tests that were previously unlinted.
-	'jest/expect-expect': 'warn',
-	'jest/no-conditional-expect': 'warn',
-	'jest/no-mocks-import': 'warn',
-	'jest/no-done-callback': 'warn',
-	'jest/no-alias-methods': 'warn',
-	'jest/no-export': 'warn',
-	'jest/no-jasmine-globals': 'warn',
-	'jest/no-identical-title': 'warn',
-	'jest/valid-expect': 'warn',
 };
 
 /*

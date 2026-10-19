@@ -61,7 +61,7 @@
 		"@testing-library/react": "^16.x.x",
 		"@wordpress/i18n": "catalog:wp-min",
 		"@wordpress/private-apis": "catalog:wp-min",
-		"@wordpress/jest-console": "^5.4.0",
+		"@wordpress/jest-console": "^9.3.0",
 		"regenerator-runtime": "^0.13.11"
 	},
 	"devDependencies": {
@@ -88,7 +88,7 @@
 		"typescript": "5.7.x"
 	},
 	"peerDependencies": {
-		"@wordpress/data": "^10.19.0",
+		"@wordpress/data": "^10.57.0",
 		"react": "18.3.x",
 		"react-dom": "18.3.x"
 	},

@@ -3,5 +3,10 @@
     "@wordpress/use-recommended-components": {
       "count": 3
     }
+  },
+  "src/components/WCPayBenefits/WCPayBenefits.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
   }
 }

@@ -52,8 +52,7 @@ module.exports = defineConfig( [
 		],
 		rules: {
 			// Temporary conversion to warnings until the below are all handled.
-			'jest/no-deprecated-functions': 'warn',
-			'jest/valid-title': 'warn',
+			'vitest/valid-title': 'warn',
 		},
 	},
 ] );

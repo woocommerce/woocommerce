@@ -1,5 +1,35 @@
 {
+  "assets/js/blocks/accordion/accordion-group/edit.js": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "assets/js/blocks/accordion/inner-blocks/accordion-item/edit.js": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
   "assets/js/blocks/add-to-cart-form/edit.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "assets/js/blocks/add-to-cart-with-options/variation-selector/attribute/edit.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "assets/js/blocks/attribute-filter/edit.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 2
+    }
+  },
+  "assets/js/blocks/cart-checkout-shared/block-settings/express-payment-settings.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 3
+    }
+  },
+  "assets/js/blocks/cart-checkout-shared/block-settings/index.tsx": {
     "@wordpress/use-recommended-components": {
       "count": 1
     }
@@ -9,12 +39,52 @@
       "count": 1
     }
   },
+  "assets/js/blocks/cart/inner-blocks/cart-order-summary-taxes/edit.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "assets/js/blocks/catalog-sorting/edit.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "assets/js/blocks/category-title/edit.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 2
+    }
+  },
+  "assets/js/blocks/checkout/address-field-controls.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 2
+    }
+  },
+  "assets/js/blocks/checkout/inner-blocks/checkout-actions-block/edit.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 2
+    }
+  },
   "assets/js/blocks/checkout/inner-blocks/checkout-contact-information-block/edit.tsx": {
     "@wordpress/use-recommended-components": {
       "count": 1
     }
   },
+  "assets/js/blocks/checkout/inner-blocks/checkout-order-summary-cart-items/edit.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "assets/js/blocks/checkout/inner-blocks/checkout-order-summary-taxes/edit.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
   "assets/js/blocks/checkout/inner-blocks/checkout-payment-block/edit.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "assets/js/blocks/checkout/inner-blocks/checkout-shipping-method-block/edit.tsx": {
     "@wordpress/use-recommended-components": {
       "count": 1
     }
@@ -26,22 +96,37 @@
   },
   "assets/js/blocks/checkout/inner-blocks/checkout-terms-block/edit.tsx": {
     "@wordpress/use-recommended-components": {
-      "count": 1
+      "count": 3
     }
   },
   "assets/js/blocks/classic-shortcode/index.tsx": {
     "@wordpress/use-recommended-components": {
+      "count": 2
+    }
+  },
+  "assets/js/blocks/coupon-code/components/general-settings.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 2
+    }
+  },
+  "assets/js/blocks/coupon-code/components/usage-limits.tsx": {
+    "@wordpress/use-recommended-components": {
       "count": 1
+    }
+  },
+  "assets/js/blocks/coupon-code/components/usage-restrictions.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 2
     }
   },
   "assets/js/blocks/customer-account/sidebar-settings.tsx": {
     "@wordpress/use-recommended-components": {
-      "count": 1
+      "count": 2
     }
   },
   "assets/js/blocks/featured-items/inspector-controls.tsx": {
     "@wordpress/use-recommended-components": {
-      "count": 1
+      "count": 4
     }
   },
   "assets/js/blocks/featured-items/with-edit-mode.tsx": {
@@ -49,12 +134,27 @@
       "count": 2
     }
   },
-  "assets/js/blocks/mini-cart/edit.tsx": {
+  "assets/js/blocks/handpicked-products/inspector-controls.tsx": {
     "@wordpress/use-recommended-components": {
       "count": 1
     }
   },
+  "assets/js/blocks/mini-cart/edit.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 4
+    }
+  },
   "assets/js/blocks/order-confirmation/create-account/edit.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 2
+    }
+  },
+  "assets/js/blocks/price-filter/edit.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "assets/js/blocks/product-categories/block.tsx": {
     "@wordpress/use-recommended-components": {
       "count": 1
     }
@@ -64,17 +164,67 @@
       "count": 1
     }
   },
+  "assets/js/blocks/product-collection/edit/index.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "assets/js/blocks/product-collection/edit/inspector-advanced-controls/force-page-reload-control.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
   "assets/js/blocks/product-collection/edit/inspector-controls/attributes-control.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "assets/js/blocks/product-collection/edit/inspector-controls/columns-control.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "assets/js/blocks/product-collection/edit/inspector-controls/created-control.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 3
+    }
+  },
+  "assets/js/blocks/product-collection/edit/inspector-controls/featured-products-control.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 2
+    }
+  },
+  "assets/js/blocks/product-collection/edit/inspector-controls/keyword-control.tsx": {
     "@wordpress/use-recommended-components": {
       "count": 1
     }
   },
   "assets/js/blocks/product-collection/edit/inspector-controls/linked-product-control.tsx": {
     "@wordpress/use-recommended-components": {
+      "count": 4
+    }
+  },
+  "assets/js/blocks/product-collection/edit/inspector-controls/on-sale-control.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "assets/js/blocks/product-collection/edit/inspector-controls/price-range-control/PriceTextField.tsx": {
+    "@wordpress/use-recommended-components": {
       "count": 1
     }
   },
   "assets/js/blocks/product-collection/edit/inspector-controls/price-range-control/index.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 2
+    }
+  },
+  "assets/js/blocks/product-collection/edit/inspector-controls/products-per-page-control.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "assets/js/blocks/product-collection/edit/inspector-controls/related-by-control.tsx": {
     "@wordpress/use-recommended-components": {
       "count": 1
     }
@@ -84,12 +234,127 @@
       "count": 2
     }
   },
+  "assets/js/blocks/product-details/edit.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "assets/js/blocks/product-elements-blocks/image/edit.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "assets/js/blocks/product-elements-blocks/related-products/edit.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "assets/js/blocks/product-elements-blocks/sale-badge/edit.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "assets/js/blocks/product-elements-blocks/summary/edit.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "assets/js/blocks/product-elements-blocks/title/edit.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "assets/js/blocks/product-filters/inner-blocks/attribute-filter/inspector.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "assets/js/blocks/product-filters/inner-blocks/price-slider/edit.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "assets/js/blocks/product-filters/inner-blocks/rating-filter/components/inspector.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 4
+    }
+  },
+  "assets/js/blocks/product-filters/inner-blocks/status-filter/inspector.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "assets/js/blocks/product-filters/inner-blocks/taxonomy-filter/inspector.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "assets/js/blocks/product-gallery/block-settings/index.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "assets/js/blocks/product-query/inspector-controls.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
   "assets/js/blocks/product-query/inspector-controls/attributes-filter.tsx": {
     "@wordpress/use-recommended-components": {
       "count": 1
     }
   },
+  "assets/js/blocks/product-reviews/inner-blocks/review-author-name/edit.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "assets/js/blocks/product-reviews/inner-blocks/review-date/edit.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
   "assets/js/blocks/product-reviews/inner-blocks/review-form/edit.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "assets/js/blocks/product-reviews/inner-blocks/reviews-title/edit.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "assets/js/blocks/product-search/inspector-controls.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 2
+    }
+  },
+  "assets/js/blocks/product-specifications/edit.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "assets/js/blocks/products/edit.js": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "assets/js/blocks/rating-filter/edit.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 2
+    }
+  },
+  "assets/js/blocks/reviews/all-reviews/block.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "assets/js/blocks/reviews/edit-utils.js": {
+    "@wordpress/use-recommended-components": {
+      "count": 3
+    }
+  },
+  "assets/js/blocks/reviews/reviews-by-category/block.tsx": {
     "@wordpress/use-recommended-components": {
       "count": 1
     }
@@ -104,24 +369,74 @@
       "count": 2
     }
   },
+  "assets/js/blocks/stock-filter/edit.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "assets/js/editor-components/default-notice/index.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
   "assets/js/editor-components/external-link-card/index.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "assets/js/editor-components/grid-content-control/index.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "assets/js/editor-components/grid-layout-control/index.tsx": {
     "@wordpress/use-recommended-components": {
       "count": 1
     }
   },
   "assets/js/editor-components/incompatible-extension-notice/index.tsx": {
     "@wordpress/use-recommended-components": {
+      "count": 2
+    }
+  },
+  "assets/js/editor-components/product-stock-control/index.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "assets/js/editor-components/search-list-control/item.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "assets/js/editor-components/search-list-control/search-list-control.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "assets/js/editor-components/switch-to-classic-shortcode-button/index.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "assets/js/editor-components/upgrade-downgrade-notice/upgrade-downgrade-notice.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "assets/js/extensions/shipping-methods/pickup-location/edit-location/form.tsx": {
+    "@wordpress/use-recommended-components": {
       "count": 1
     }
   },
   "assets/js/extensions/shipping-methods/pickup-location/general-settings.tsx": {
     "@wordpress/use-recommended-components": {
-      "count": 1
+      "count": 4
     }
   },
   "assets/js/extensions/shipping-methods/pickup-location/location-settings.tsx": {
     "@wordpress/use-recommended-components": {
-      "count": 1
+      "count": 2
     }
   },
   "assets/js/extensions/shipping-methods/shared-components/settings-card/index.tsx": {
