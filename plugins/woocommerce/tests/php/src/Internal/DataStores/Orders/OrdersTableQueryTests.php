@@ -843,24 +843,75 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox wc_get_orders returns only matching orders when a known status is supplied in uppercase.
+	 * @testdox wc_get_orders supports the "$status" special status.
 	 *
-	 * @dataProvider order_storage_provider
-	 * @param bool $hpos_enabled Whether HPOS is enabled.
+	 * @dataProvider special_status_provider
+	 * @param bool   $hpos_enabled Whether HPOS is enabled.
+	 * @param string $status       Special status value.
 	 */
-	public function test_wc_get_orders_filters_by_uppercase_known_status( bool $hpos_enabled ): void {
+	public function test_wc_get_orders_supports_special_status_values( bool $hpos_enabled, string $status ): void {
 		$this->toggle_cot_feature_and_usage( $hpos_enabled );
 		$order_ids = $this->create_orders_with_interleaved_statuses( 3 );
 
 		$queried_order_ids = wc_get_orders(
 			array(
-				'status' => 'WC-COMPLETED',
+				'limit'  => -1,
+				'status' => $status,
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertSame( $order_ids, $queried_order_ids, 'A special status should not filter out orders with registered statuses.' );
+	}
+
+	/**
+	 * Provides special status values supported by order queries, for both order storages.
+	 *
+	 * @return array<string, array{bool, string}>
+	 */
+	public function special_status_provider(): array {
+		return array(
+			'HPOS, any'       => array( true, 'any' ),
+			'HPOS, all'       => array( true, 'all' ),
+			'legacy CPT, any' => array( false, 'any' ),
+			'legacy CPT, all' => array( false, 'all' ),
+		);
+	}
+
+	/**
+	 * @testdox wc_get_orders returns only matching orders when the known status "$status" is supplied in uppercase.
+	 *
+	 * @dataProvider uppercase_status_provider
+	 * @param bool   $hpos_enabled Whether HPOS is enabled.
+	 * @param string $status       Uppercase status value.
+	 */
+	public function test_wc_get_orders_filters_by_uppercase_known_status( bool $hpos_enabled, string $status ): void {
+		$this->toggle_cot_feature_and_usage( $hpos_enabled );
+		$order_ids = $this->create_orders_with_interleaved_statuses( 3 );
+
+		$queried_order_ids = wc_get_orders(
+			array(
+				'status' => $status,
 				'limit'  => -1,
 				'return' => 'ids',
 			)
 		);
 
 		$this->assertSame( array( $order_ids[2] ), $queried_order_ids, 'An uppercase known status should match its registered lowercase counterpart and return only the matching orders.' );
+	}
+
+	/**
+	 * Provides uppercase variants of a known status, with and without the prefix, for both order storages.
+	 *
+	 * @return array<string, array{bool, string}>
+	 */
+	public function uppercase_status_provider(): array {
+		return array(
+			'HPOS, prefixed'         => array( true, 'WC-COMPLETED' ),
+			'HPOS, unprefixed'       => array( true, 'COMPLETED' ),
+			'legacy CPT, prefixed'   => array( false, 'WC-COMPLETED' ),
+			'legacy CPT, unprefixed' => array( false, 'COMPLETED' ),
+		);
 	}
 
 	/**

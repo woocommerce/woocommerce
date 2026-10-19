@@ -1700,38 +1700,6 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox CPT order queries support the "$status" special status.
-	 *
-	 * @dataProvider cpt_special_status_provider
-	 * @param string $status Special status value.
-	 */
-	public function test_cpt_order_queries_support_special_status_values( string $status ): void {
-		$order_ids = $this->create_orders_with_interleaved_statuses( 3 );
-
-		$queried_order_ids = wc_get_orders(
-			array(
-				'limit'  => -1,
-				'status' => $status,
-				'return' => 'ids',
-			)
-		);
-
-		$this->assertSame( $order_ids, $queried_order_ids );
-	}
-
-	/**
-	 * Provides special status values supported by CPT order queries.
-	 *
-	 * @return array<string, array{string}>
-	 */
-	public function cpt_special_status_provider(): array {
-		return array(
-			'any' => array( 'any' ),
-			'all' => array( 'all' ),
-		);
-	}
-
-	/**
 	 * @testdox CPT order queries return matching orders when the "$filter" filter replaces an unknown status with a registered one.
 	 *
 	 * @dataProvider cpt_query_args_filter_provider
@@ -1816,6 +1784,46 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox CPT order queries return matching orders when a query filter sets a status that WP_Query normalizes to a registered one.
+	 *
+	 * @dataProvider cpt_filtered_status_normalized_by_wp_query_provider
+	 * @param string|array $post_status Status value set by the filter.
+	 */
+	public function test_cpt_order_queries_validate_filtered_status_as_wp_query_normalizes_it( $post_status ): void {
+		$order_ids = $this->create_orders_with_interleaved_statuses( 3 );
+
+		add_filter(
+			'woocommerce_order_data_store_cpt_get_orders_query',
+			function ( $wp_query_args ) use ( $post_status ) {
+				$wp_query_args['post_status'] = $post_status;
+				return $wp_query_args;
+			}
+		);
+
+		$queried_order_ids = wc_get_orders(
+			array(
+				'status' => 'foobar',
+				'limit'  => -1,
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertSame( array( $order_ids[2] ), $queried_order_ids, 'A status that WP_Query can match after its own normalization should not be treated as unknown.' );
+	}
+
+	/**
+	 * Provides status values that WP_Query normalizes to a registered status.
+	 *
+	 * @return array<string, array{string|array}>
+	 */
+	public function cpt_filtered_status_normalized_by_wp_query_provider(): array {
+		return array(
+			'uppercase in array'              => array( array( 'WC-COMPLETED' ) ),
+			'trailing whitespace in a string' => array( 'wc-completed ' ),
+		);
+	}
+
+	/**
 	 * @testdox CPT order queries with default statuses still find orders before order statuses are registered, as during upgrades.
 	 */
 	public function test_cpt_order_queries_find_orders_before_order_statuses_are_registered(): void {
@@ -1841,6 +1849,33 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		}
 
 		$this->assertEqualsCanonicalizing( $order_ids, $queried_order_ids, 'Default order statuses should count as known even before they are registered, so early queries such as the HPOS new-shop check still find orders.' );
+	}
+
+	/**
+	 * @testdox CPT order queries return no orders for an order status that was left out of the post status registration.
+	 */
+	public function test_cpt_order_queries_return_empty_for_order_status_left_out_of_registration(): void {
+		global $wp_post_statuses;
+
+		$this->create_orders_with_interleaved_statuses( 3 );
+
+		$registered_statuses = $wp_post_statuses;
+		unset( $wp_post_statuses[ OrderInternalStatus::COMPLETED ] );
+
+		try {
+			$queried_order_ids = wc_get_orders(
+				array(
+					'status' => OrderStatus::COMPLETED,
+					'limit'  => -1,
+					'return' => 'ids',
+				)
+			);
+		} finally {
+			// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restoring the global changed above.
+			$wp_post_statuses = $registered_statuses;
+		}
+
+		$this->assertSame( array(), $queried_order_ids, 'A status listed by wc_get_order_statuses() but not registered as a post status should not make the query return every order.' );
 	}
 
 	/**
