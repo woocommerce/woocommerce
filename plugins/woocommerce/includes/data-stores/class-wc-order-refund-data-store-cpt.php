@@ -66,7 +66,7 @@ class WC_Order_Refund_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT im
 		 */
 		do_action( 'woocommerce_delete_order_refund', $id );
 
-		if ( ! $parent_order_id || ! empty( $args['suppress_filters'] ) ) {
+		if ( ! $parent_order_id || ! empty( $args['suppress_filters'] ) || isset( self::$orders_being_deleted[ $parent_order_id ] ) ) {
 			return;
 		}
 

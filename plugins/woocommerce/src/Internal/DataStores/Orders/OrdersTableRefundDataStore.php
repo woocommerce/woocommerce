@@ -106,7 +106,7 @@ class OrdersTableRefundDataStore extends OrdersTableDataStore {
 		 */
 		do_action( 'woocommerce_delete_order_refund', $refund_id );
 
-		if ( ! $parent_order_id || ! empty( $args['suppress_filters'] ) || self::is_deleting_child_orders_of( $parent_order_id ) ) {
+		if ( ! $parent_order_id || ! empty( $args['suppress_filters'] ) || isset( self::$orders_being_deleted[ $parent_order_id ] ) ) {
 			return;
 		}
 
