@@ -9,6 +9,7 @@
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Enums\ShippingTaxClass;
 use Automattic\WooCommerce\Internal\Admin\EmailImprovements\EmailImprovements;
 use Automattic\WooCommerce\Internal\Caches\ProductCacheController;
 use Automattic\WooCommerce\Internal\TransientFiles\TransientFilesEngine;
@@ -417,6 +418,7 @@ class WC_Install {
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'enable_analytics_scheduled_import' ), 20 );
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'enable_product_instance_caching_for_newly_installed' ), 20 );
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'disable_legacy_variation_price_hash_for_newly_installed' ), 20 );
+		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'split_shipping_tax_for_newly_installed' ), 20 );
 		add_action( 'woocommerce_updated', array( __CLASS__, 'enable_email_improvements_for_existing_merchants' ), 20 );
 		add_action( 'woocommerce_run_update_callback', array( __CLASS__, 'run_update_callback' ) );
 		add_action( 'woocommerce_update_db_to_current_version', array( __CLASS__, 'update_db_version' ) );
@@ -1398,6 +1400,19 @@ class WC_Install {
 	 */
 	public static function disable_legacy_variation_price_hash_for_newly_installed(): void {
 		add_option( 'woocommerce_use_legacy_get_variations_price_hash', 'no', '', true );
+	}
+
+	/**
+	 * Split shipping tax by cart item value for new stores, unless a value other than the default was set before install.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @return void
+	 */
+	public static function split_shipping_tax_for_newly_installed(): void {
+		if ( ShippingTaxClass::INHERIT === get_option( 'woocommerce_shipping_tax_class' ) ) {
+			update_option( 'woocommerce_shipping_tax_class', ShippingTaxClass::SPLIT_BY_ITEM_VALUE );
+		}
 	}
 
 	/**

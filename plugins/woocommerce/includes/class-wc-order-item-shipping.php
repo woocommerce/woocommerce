@@ -8,6 +8,7 @@
  */
 
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
+use Automattic\WooCommerce\Internal\Tax\ShippingTaxSplit;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -39,6 +40,7 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 	 * Calculate item taxes.
 	 *
 	 * @since  3.2.0
+	 * @since  11.4.0 Accepts an optional 'tax_class_costs' key, a value per tax class to split the cost by.
 	 * @param  array $calculate_tax_for Location data to get taxes for. Required.
 	 * @return bool  True if taxes were calculated.
 	 */
@@ -47,8 +49,19 @@ class WC_Order_Item_Shipping extends WC_Order_Item {
 			return false;
 		}
 		if ( wc_tax_enabled() && ProductTaxStatus::TAXABLE === $this->get_tax_status() ) {
-			$tax_rates = WC_Tax::find_shipping_rates( $calculate_tax_for );
-			$taxes     = WC_Tax::calc_tax( $this->get_total(), $tax_rates, false );
+			if ( empty( $calculate_tax_for['tax_class_costs'] ) || ! is_array( $calculate_tax_for['tax_class_costs'] ) ) {
+				$tax_rates = WC_Tax::find_shipping_rates( $calculate_tax_for );
+				$taxes     = WC_Tax::calc_tax( $this->get_total(), $tax_rates, false );
+			} else {
+				$taxes = array();
+
+				foreach ( ShippingTaxSplit::split_cost( (float) $this->get_total(), $calculate_tax_for['tax_class_costs'] ) as $tax_class => $cost ) {
+					if ( ShippingTaxSplit::NON_TAXABLE !== $tax_class ) {
+						$tax_rates = WC_Tax::find_shipping_rates( array_merge( $calculate_tax_for, array( 'tax_class' => (string) $tax_class ) ) );
+						$taxes     = wc_array_merge_recursive_numeric( $taxes, WC_Tax::calc_tax( $cost, $tax_rates, false ) );
+					}
+				}
+			}
 			$this->set_taxes( array( 'total' => $taxes ) );
 		} else {
 			$this->set_taxes( false );
