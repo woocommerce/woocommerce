@@ -59,7 +59,7 @@ Return a URL with set query parameters.
 | Param | Type | Description |
 | --- | --- | --- |
 | query | <code>Object</code> | object of params to be updated. |
-| path | <code>String</code> | Relative path (defaults to current path). |
+| path | <code>String</code> | Admin page path, e.g. <code>/analytics/orders</code> (defaults to the current path). Used as-is for the <code>path</code> query arg; <code>./</code> and <code>../</code> segments are not resolved against the current path. |
 | currentQuery | <code>Object</code> | object of current query params (defaults to current querystring). |
 
 ### getQuery() ⇒ <code>Object</code>
@@ -75,7 +75,7 @@ This function returns an event handler for the given `param`
 | Param | Type | Description |
 | --- | --- | --- |
 | param | <code>string</code> | The parameter in the querystring which should be updated (ex `page`, `per_page`) |
-| path | <code>string</code> | Relative path (defaults to current path). |
+| path | <code>string</code> | Admin page path, e.g. <code>/analytics/orders</code> (defaults to the current path). Used as-is for the <code>path</code> query arg; <code>./</code> and <code>../</code> segments are not resolved against the current path. |
 | query | <code>string</code> | object of current query params (defaults to current querystring). |
 
 ### updateQueryString(query, path, currentQuery)
@@ -84,7 +84,7 @@ Updates the query parameters of the current page.
 | Param | Type | Description |
 | --- | --- | --- |
 | query | <code>Object</code> | object of params to be updated. |
-| path | <code>String</code> | Relative path (defaults to current path). |
+| path | <code>String</code> | Admin page path, e.g. <code>/analytics/orders</code> (defaults to the current path). Used as-is for the <code>path</code> query arg; <code>./</code> and <code>../</code> segments are not resolved against the current path. |
 | currentQuery | <code>Object</code> | object of current query params (defaults to current querystring). |
 
 ### flattenFilters(filters) ⇒ <code>Array</code>

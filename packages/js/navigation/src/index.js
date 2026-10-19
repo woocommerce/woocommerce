@@ -103,7 +103,7 @@ export function getSetOfIdsFromQuery( queryString = '' ) {
  * Updates the query parameters of the current page.
  *
  * @param {Object} query        object of params to be updated.
- * @param {string} path         Relative path (defaults to current path).
+ * @param {string} path         Admin page path, e.g. `/analytics/orders` (defaults to the current path). Used as-is for the `path` query arg; `./` and `../` segments are not resolved against the current path.
  * @param {Object} currentQuery object of current query params (defaults to current querystring).
  * @param {string} page         Page key (defaults to "wc-admin")
  */
@@ -235,7 +235,7 @@ export const useQuery = () => {
  * This function returns an event handler for the given `param`
  *
  * @param {string} param The parameter in the querystring which should be updated (ex `page`, `per_page`)
- * @param {string} path  Relative path (defaults to current path).
+ * @param {string} path  Admin page path, e.g. `/analytics/orders` (defaults to the current path). Used as-is for the `path` query arg; `./` and `../` segments are not resolved against the current path.
  * @param {string} query object of current query params (defaults to current querystring).
  * @return {Function} A callback which will update `param` to the passed value when called.
  */
