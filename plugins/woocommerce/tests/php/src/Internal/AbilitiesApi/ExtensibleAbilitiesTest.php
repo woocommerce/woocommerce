@@ -759,6 +759,40 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return a 400 error and not run the filter when a value that skipped validation fails its schema.
+	 */
+	public function test_a_filter_value_that_fails_its_schema_is_refused(): void {
+		$called   = false;
+		$register = static function () use ( &$called ) {
+			ExtensibleAbilities::register_query_filter(
+				array(
+					'resource'  => 'order',
+					'namespace' => 'test-ext',
+					'filter'    => 'tags',
+					'schema'    => array(
+						'type'        => 'array',
+						'items'       => array( 'type' => 'string' ),
+						'uniqueItems' => true,
+					),
+					'callback'  => static function () use ( &$called ) {
+						$called = true;
+						return array();
+					},
+				)
+			);
+		};
+		add_action( 'woocommerce_extensible_abilities_init', $register );
+		$this->get_ability( 'woocommerce/orders-query' );
+		remove_action( 'woocommerce_extensible_abilities_init', $register );
+
+		$result = ExtensibleAbilities::get_query_args( 'order', array( 'filters' => array( 'extensions' => array( 'test-ext' => array( 'tags' => array( 'gift', 'gift' ) ) ) ) ) );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 400, $result->get_error_data()['status'] );
+		$this->assertFalse( $called );
+	}
+
+	/**
 	 * @testdox Should refuse a filter that is registered after the init action.
 	 */
 	public function test_a_filter_registered_after_the_init_action_is_refused(): void {
