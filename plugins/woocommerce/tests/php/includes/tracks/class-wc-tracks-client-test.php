@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+use Automattic\Jetpack\Constants;
+
 /**
  * Class WC_Tracks_Client_Test.
  */
@@ -517,5 +519,155 @@ class WC_Tracks_Client_Test extends \WC_Unit_Test_Case {
 
 		// Clean up filter.
 		remove_filter( 'wc_tracks_use_batch_requests', '__return_false' );
+	}
+
+	/**
+	 * Connect a user through the Jetpack connection package, with WordPress.com user data already cached.
+	 *
+	 * @param int    $user_id  Local user id.
+	 * @param mixed  $wpcom_id WordPress.com user id as returned by the connection package, or null for no cached data.
+	 * @param string $secret   Token secret.
+	 */
+	private function connect_user( int $user_id, $wpcom_id, string $secret = 'secret' ): void {
+		update_option( 'woocommerce_allow_tracking', 'yes' );
+		Jetpack_Options::update_option( 'user_tokens', array( $user_id => "key.{$secret}.{$user_id}" ) );
+		if ( null !== $wpcom_id ) {
+			set_transient( "jetpack_connected_user_data_{$user_id}", array( 'ID' => $wpcom_id ) );
+		}
+	}
+
+	/**
+	 * Count lookups of the user's WordPress.com data and fail any request to WordPress.com.
+	 *
+	 * @param int $user_id Local user id.
+	 * @return object Counter whose `count` property is the number of lookups so far.
+	 */
+	private function watch_wpcom_lookups( int $user_id ): object {
+		$lookups = (object) array( 'count' => 0 );
+		add_filter(
+			"pre_transient_jetpack_connected_user_data_{$user_id}",
+			function ( $pre ) use ( $lookups ) {
+				++$lookups->count;
+				return $pre;
+			}
+		);
+		add_filter(
+			'pre_http_request',
+			function ( $response, $args, $url ) {
+				return false === strpos( $url, 'pixel.wp.com' ) ? new WP_Error( 'http_request_failed', 'Blocked in tests.' ) : $response;
+			},
+			5,
+			3
+		);
+		return $lookups;
+	}
+
+	/**
+	 * @testdox Should identify a user connected through the connection package with their WordPress.com id.
+	 * @testWith ["12345678"]
+	 *           [12345678]
+	 *
+	 * @param mixed $wpcom_id WordPress.com user id as returned by the connection package.
+	 */
+	public function test_get_identity_uses_wpcom_id_for_connected_user( $wpcom_id ): void {
+		$user_id = self::factory()->user->create();
+		$this->connect_user( $user_id, $wpcom_id );
+
+		$identity = WC_Tracks_Client::get_identity( $user_id );
+
+		$this->assertSame(
+			array(
+				'_ut' => 'wpcom:user_id',
+				'_ui' => '12345678',
+			),
+			$identity
+		);
+		$this->assertSame( '', get_user_meta( $user_id, '_woocommerce_tracks_anon_id', true ), 'No anonymous id should be stored for a connected user.' );
+		$this->assertSame( '', get_user_meta( $user_id, 'jetpack_tracks_anon_id', true ), 'The connection package fallback should not run.' );
+	}
+
+	/**
+	 * @testdox Should reuse the stored WordPress.com id without asking WordPress.com again.
+	 */
+	public function test_get_identity_reuses_stored_wpcom_id(): void {
+		$user_id = self::factory()->user->create();
+		$this->connect_user( $user_id, '12345678' );
+		WC_Tracks_Client::get_identity( $user_id );
+		delete_transient( "jetpack_connected_user_data_{$user_id}" );
+		$lookups = $this->watch_wpcom_lookups( $user_id );
+
+		$this->assertSame( '12345678', WC_Tracks_Client::get_identity( $user_id )['_ui'] );
+		$this->assertSame( 0, $lookups->count, 'The stored id should be used without looking it up.' );
+	}
+
+	/**
+	 * @testdox Should look the WordPress.com id up again after the user reconnects with a new token.
+	 */
+	public function test_get_identity_resolves_again_after_reconnect(): void {
+		$user_id = self::factory()->user->create();
+		$this->connect_user( $user_id, '12345678', 'old' );
+		WC_Tracks_Client::get_identity( $user_id );
+
+		$this->connect_user( $user_id, '23456789', 'new' );
+
+		$this->assertSame( '23456789', WC_Tracks_Client::get_identity( $user_id )['_ui'] );
+	}
+
+	/**
+	 * @testdox Should stay anonymous when the user has no connection token.
+	 */
+	public function test_get_identity_stays_anonymous_without_user_token(): void {
+		update_option( 'woocommerce_allow_tracking', 'yes' );
+		Jetpack_Options::update_option( 'user_tokens', array() );
+		$user_id = self::factory()->user->create();
+
+		$identity = WC_Tracks_Client::get_identity( $user_id );
+
+		$this->assertSame( 'anon', $identity['_ut'] );
+		$this->assertSame( get_user_meta( $user_id, '_woocommerce_tracks_anon_id', true ), $identity['_ui'], 'The anonymous path should be unchanged.' );
+		$this->assertSame( '', get_user_meta( $user_id, '_woocommerce_tracks_wpcom_id', true ) );
+	}
+
+	/**
+	 * @testdox Should stay anonymous when usage tracking is disabled.
+	 */
+	public function test_get_identity_stays_anonymous_when_tracking_disabled(): void {
+		$user_id = self::factory()->user->create();
+		$this->connect_user( $user_id, '12345678' );
+		update_option( 'woocommerce_allow_tracking', 'no' );
+
+		$this->assertSame( 'anon', WC_Tracks_Client::get_identity( $user_id )['_ut'] );
+		$this->assertSame( '', get_user_meta( $user_id, '_woocommerce_tracks_wpcom_id', true ) );
+	}
+
+	/**
+	 * @testdox Should stay anonymous and not retry on every event when the WordPress.com lookup fails.
+	 */
+	public function test_get_identity_stays_anonymous_when_lookup_fails(): void {
+		$user_id = self::factory()->user->create();
+		$this->connect_user( $user_id, null );
+		$lookups = $this->watch_wpcom_lookups( $user_id );
+
+		$this->assertSame( 'anon', WC_Tracks_Client::get_identity( $user_id )['_ut'] );
+		$this->assertSame( 'anon', WC_Tracks_Client::get_identity( $user_id )['_ut'] );
+		$this->assertSame( 1, $lookups->count, 'A failed lookup should not be retried on the next event.' );
+	}
+
+	/**
+	 * @testdox Should keep using the Jetpack plugin's identity when the Jetpack plugin is active.
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
+	 */
+	public function test_get_identity_uses_jetpack_plugin_when_active(): void {
+		class_alias( self::class, 'Jetpack' );
+		Constants::set_constant( 'JETPACK__VERSION', '14.0' );
+		$user_id = self::factory()->user->create();
+		$this->connect_user( $user_id, '12345678' );
+		update_user_meta( $user_id, 'jetpack_tracks_wpcom_id', '87654321' );
+
+		$identity = WC_Tracks_Client::get_identity( $user_id );
+
+		$this->assertSame( '87654321', $identity['_ui'], 'The Jetpack plugin path should decide the identity.' );
+		$this->assertSame( '', get_user_meta( $user_id, '_woocommerce_tracks_wpcom_id', true ) );
 	}
 }

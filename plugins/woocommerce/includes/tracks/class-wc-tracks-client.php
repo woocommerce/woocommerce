@@ -6,6 +6,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\Jetpack\JetpackConnection;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -223,6 +224,7 @@ class WC_Tracks_Client {
 
 	/**
 	 * Get a user's identity to send to Tracks. If Jetpack exists, default to its implementation.
+	 * Otherwise use the WordPress.com user id when the user is connected through the bundled connection package.
 	 *
 	 * @param int $user_id User id.
 	 * @return array Identity properties.
@@ -244,6 +246,14 @@ class WC_Tracks_Client {
 			}
 		}
 
+		$wpcom_user_id = self::get_connected_wpcom_user_id( (int) $user_id );
+		if ( $wpcom_user_id ) {
+			return array(
+				'_ut' => 'wpcom:user_id',
+				'_ui' => $wpcom_user_id,
+			);
+		}
+
 		// Start with a previously set cookie.
 		$anon_id = isset( $_COOKIE['tk_ai'] ) ? sanitize_text_field( wp_unslash( $_COOKIE['tk_ai'] ) ) : false;
 
@@ -263,6 +273,50 @@ class WC_Tracks_Client {
 			'_ut' => 'anon',
 			'_ui' => $anon_id,
 		);
+	}
+
+	/**
+	 * Get the WordPress.com user id of a user connected through the Jetpack connection package.
+	 *
+	 * The id is stored against a hash of the user's token, so WordPress.com is asked once per connection, not per event,
+	 * and again after a reconnect. Read here rather than via Tracking::tracks_get_identity(), which drops integer ids.
+	 *
+	 * @param int $user_id User id.
+	 * @return string WordPress.com user id, or an empty string if the user is not connected or the lookup failed.
+	 */
+	private static function get_connected_wpcom_user_id( int $user_id ): string {
+		if ( ! $user_id || ! WC_Site_Tracking::is_tracking_enabled() ) {
+			return '';
+		}
+
+		$manager = JetpackConnection::get_manager();
+		$token   = $manager->get_tokens()->get_access_token( $user_id );
+		if ( ! isset( $token->secret ) ) {
+			return '';
+		}
+
+		$prefix = hash( 'sha256', $token->secret ) . ':';
+		$stored = get_user_meta( $user_id, '_woocommerce_tracks_wpcom_id', true );
+		if ( is_string( $stored ) && 0 === strpos( $stored, $prefix ) ) {
+			return substr( $stored, strlen( $prefix ) );
+		}
+
+		$failed_key = 'wc_tracks_wpcom_id_failed_' . $user_id;
+		if ( get_transient( $failed_key ) ) {
+			return '';
+		}
+
+		$user_data     = $manager->get_connected_user_data( $user_id );
+		$wpcom_user_id = is_array( $user_data ) && isset( $user_data['ID'] ) ? absint( $user_data['ID'] ) : 0;
+		if ( ! $wpcom_user_id ) {
+			// The connection package does not cache failed lookups, so avoid a remote request on every event.
+			set_transient( $failed_key, 1, HOUR_IN_SECONDS );
+			return '';
+		}
+
+		update_user_meta( $user_id, '_woocommerce_tracks_wpcom_id', $prefix . $wpcom_user_id );
+
+		return (string) $wpcom_user_id;
 	}
 
 	/**

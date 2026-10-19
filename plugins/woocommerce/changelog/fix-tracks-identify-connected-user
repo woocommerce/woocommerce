@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Usage tracking now identifies users connected to WordPress.com when the Jetpack plugin is not installed.
