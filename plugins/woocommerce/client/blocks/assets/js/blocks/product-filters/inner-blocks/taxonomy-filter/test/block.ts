@@ -136,7 +136,7 @@ describe( 'Taxonomy Filter block', () => {
 
 			// Should display the taxonomy label as heading
 			expect( block.getByText( /Category/i ) ).toBeInTheDocument();
-			expect( block.getByText( /Sample Item 1/i ) ).toBeInTheDocument();
+			expect( block.getByText( 'Sample Item 1' ) ).toBeInTheDocument();
 			expect(
 				blockElement.querySelector(
 					'.wc-block-product-filter-checkbox-list'
