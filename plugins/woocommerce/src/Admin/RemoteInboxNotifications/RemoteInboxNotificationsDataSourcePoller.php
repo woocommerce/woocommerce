@@ -85,7 +85,7 @@ class RemoteInboxNotificationsDataSourcePoller extends DataSourcePoller {
 	/**
 	 * Get the published identities from the latest complete canonical response.
 	 *
-	 * An empty or failed response never produces a snapshot, because the feed cannot tell those apart.
+	 * Inconclusive reads store their fetch time with null slugs to reject older reads, but this method returns null for them.
 	 *
 	 * @internal
 	 * @since 11.3.0
@@ -130,6 +130,13 @@ class RemoteInboxNotificationsDataSourcePoller extends DataSourcePoller {
 			}
 			$slug = (string) $spec->slug;
 			if ( isset( $slugs[ $slug ] ) ) {
+				wc_get_logger()->warning(
+					'Skipping Store Alert withdrawal cleanup because the canonical feed contains a duplicate slug.',
+					array(
+						'source' => $url,
+						'slug'   => $slug,
+					)
+				);
 				return;
 			}
 			$slugs[ $slug ] = $slug;
