@@ -2,6 +2,11 @@
  * External dependencies
  */
 import debugFactory from 'debug';
+/**
+ * Internal dependencies
+ */
+import { consentManager } from './consent';
+import { clearTrackingCookies } from './tracking-cookies';
 
 const debug = debugFactory( 'wc-analytics:tracking-script' );
 
@@ -57,5 +62,11 @@ export function activateTrackingScript(): void {
 		}
 	}
 	script.nonce = held.nonce;
+	// s.js sets its cookies as it runs, even when consent was withdrawn while it was downloading.
+	script.addEventListener( 'load', () => {
+		if ( ! consentManager.hasAnalyticsConsent() ) {
+			clearTrackingCookies();
+		}
+	} );
 	held.replaceWith( script );
 }

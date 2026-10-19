@@ -88,6 +88,7 @@ describe( 'client entry point', () => {
 		delete window.wp_has_consent;
 		delete window.waitfor_consent_hook;
 		delete window.wp_consent_type;
+		delete window._wca;
 		document.cookie = 'tk_or=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
 	} );
 
@@ -180,6 +181,16 @@ describe( 'client entry point', () => {
 		changeConsent( 'deny' );
 
 		expect( document.cookie ).not.toContain( 'tk_or=' );
+	} );
+
+	it( 'drops the events waiting for s.js when statistics consent is withdrawn before it loads', async () => {
+		window.wp_has_consent = () => true;
+		await loadPage();
+		window._wca = [ { _en: 'woocommerceanalytics_page_view' } ] as unknown as typeof window._wca;
+
+		changeConsent( 'deny' );
+
+		expect( window._wca ).toEqual( [] );
 	} );
 
 	it( 'clears tracking cookies from an earlier visit when statistics consent is denied on load', async () => {

@@ -27,6 +27,10 @@ jQuery( () => {
 			startTracking();
 		} else {
 			clearTrackingCookies();
+			// Until s.js loads, events wait in this array, and s.js sends them when it arrives.
+			if ( Array.isArray( window._wca ) ) {
+				window._wca.length = 0;
+			}
 		}
 	} );
 
