@@ -1321,12 +1321,55 @@ class WC_AJAX {
 
 			// Coupons already on the order were applied before these items existed, so apply them again to include the new items.
 			if ( ! empty( $added_items ) && $order instanceof WC_Order && $order->get_items( 'coupon' ) ) {
+				// recalculate_coupons() uses the saved address for discounts and taxes, so give it the address typed in the editor without saving it.
+				$use_editor_tax_location = null;
+				if ( ! empty( $tax_location['country'] ) ) {
+					$editor_tax_location     = $order->get_taxable_location( $tax_location );
+					$use_editor_tax_location = function ( $location, $location_order ) use ( $order, $editor_tax_location ) {
+						return $location_order->get_id() === $order->get_id() ? $editor_tax_location : $location;
+					};
+					add_filter( 'woocommerce_order_get_tax_location', $use_editor_tax_location, PHP_INT_MAX, 2 );
+				}
+
+				// When prices include tax, the discount is taken from the price with tax, so the new items need their tax first.
+				if ( $order->get_prices_include_tax() ) {
+					$order->calculate_taxes();
+				}
+
+				// recalculate_coupons() resets every line total, so find the amount each existing line was edited by hand, to keep it.
+				// Apply the coupons to the existing lines only: the gap between the saved total and that total is the hand edit.
+				$hand_edits     = array();
+				$existing_items = array_filter( array_diff_key( $order->get_items(), $added_items ), fn( $item ) => $item instanceof WC_Order_Item_Product );
+				if ( $existing_items ) {
+					$saved_totals     = array_map( fn( $item ) => (float) $item->get_total(), $existing_items );
+					$hide_added_items = function ( $items, $items_order ) use ( $order, $added_items ) {
+						return $items_order === $order ? array_diff_key( $items, $added_items ) : $items;
+					};
+					add_filter( 'woocommerce_order_get_items', $hide_added_items, PHP_INT_MAX, 2 );
+					$order->recalculate_coupons();
+					remove_filter( 'woocommerce_order_get_items', $hide_added_items, PHP_INT_MAX );
+
+					foreach ( $existing_items as $item_id => $item ) {
+						$hand_edit = $saved_totals[ $item_id ] - (float) $item->get_total();
+						// Gaps smaller than the price precision come from rounding, not from a hand edit.
+						if ( 0.0 !== (float) NumberUtil::round( $hand_edit, wc_get_price_decimals() ) ) {
+							$hand_edits[ $item_id ] = $hand_edit;
+						}
+					}
+				}
+
 				$order->recalculate_coupons();
 
-				// recalculate_coupons() uses the saved address for taxes, so use the address typed in the editor when there is one.
-				if ( ! empty( $tax_location['country'] ) ) {
-					$order->calculate_taxes( $tax_location );
-					$order->calculate_totals( false );
+				if ( $hand_edits ) {
+					foreach ( $hand_edits as $item_id => $hand_edit ) {
+						$item = $existing_items[ $item_id ];
+						$item->set_total( wc_format_decimal( max( 0, (float) $item->get_total() + $hand_edit ) ) );
+					}
+					$order->calculate_totals();
+				}
+
+				if ( $use_editor_tax_location ) {
+					remove_filter( 'woocommerce_order_get_tax_location', $use_editor_tax_location, PHP_INT_MAX );
 				}
 			}
 

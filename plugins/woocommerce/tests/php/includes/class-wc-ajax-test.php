@@ -340,8 +340,36 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	 * @testdox Should use the editor tax location when coupons are applied again to an added product.
 	 */
 	public function test_add_item_after_coupon_uses_editor_tax_location(): void {
+		$order     = $this->add_item_to_coupon_order_with_editor_tax_location( false );
+		$line_item = current( $order->get_items() );
+
+		$this->assertEquals( 21.6, $line_item->get_total(), 'The added line item should be discounted' );
+		$this->assertEqualsWithDelta( 1.94, (float) $line_item->get_total_tax(), 0.01, 'The line tax should use the editor country rate' );
+		$this->assertEqualsWithDelta( 23.54, (float) $order->get_total(), 0.01, 'The order total should use the editor country tax' );
+		$this->assertSame( '', $order->get_billing_country(), 'The unsaved billing country must not be persisted' );
+	}
+
+	/**
+	 * @testdox Should use the editor tax location for the coupon discount when prices include tax.
+	 */
+	public function test_add_item_after_coupon_uses_editor_tax_location_with_prices_including_tax(): void {
+		$order     = $this->add_item_to_coupon_order_with_editor_tax_location( true );
+		$line_item = current( $order->get_items() );
+
+		$this->assertEqualsWithDelta( 22.21, (float) $order->get_total(), 0.01, 'The order total should be 10% off the price with the editor country tax' );
+		$this->assertEqualsWithDelta( 0.09, (float) $line_item->get_total_tax() / (float) $line_item->get_total(), 0.001, 'The line tax should use the editor country rate' );
+		$this->assertSame( '', $order->get_billing_country(), 'The unsaved billing country must not be persisted' );
+	}
+
+	/**
+	 * Create an order with a 10% coupon in a store based in BE (6% tax), then add a product priced 24 with NL (9% tax) typed in the editor.
+	 *
+	 * @param bool $prices_include_tax Whether prices are entered with tax.
+	 * @return WC_Order The order loaded again after the product was added.
+	 */
+	private function add_item_to_coupon_order_with_editor_tax_location( bool $prices_include_tax ): WC_Order {
 		update_option( 'woocommerce_calc_taxes', 'yes' );
-		update_option( 'woocommerce_prices_include_tax', 'no' );
+		update_option( 'woocommerce_prices_include_tax', $prices_include_tax ? 'yes' : 'no' );
 		update_option( 'woocommerce_default_country', 'BE' );
 		update_option( 'woocommerce_tax_based_on', 'billing' );
 
@@ -391,13 +419,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 			)
 		);
 
-		$order     = wc_get_order( $order->get_id() );
-		$line_item = current( $order->get_items() );
-
-		$this->assertEquals( 21.6, $line_item->get_total(), 'The added line item should be discounted' );
-		$this->assertEqualsWithDelta( 1.94, (float) $line_item->get_total_tax(), 0.01, 'The line tax should use the editor country rate' );
-		$this->assertEqualsWithDelta( 23.54, (float) $order->get_total(), 0.01, 'The order total should use the editor country tax' );
-		$this->assertSame( '', $order->get_billing_country(), 'The unsaved billing country must not be persisted' );
+		return wc_get_order( $order->get_id() );
 	}
 
 	/**
@@ -425,6 +447,48 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		$order = wc_get_order( $order->get_id() );
 
 		$this->assertEquals( 5, $order->get_item( $item_id )->get_total(), 'The edited line total should not be reset' );
+	}
+
+	/**
+	 * @testdox Should keep a hand edited line total when coupons are applied again to an added product.
+	 */
+	public function test_add_item_after_coupon_keeps_edited_line_totals(): void {
+		WC_Helper_Coupon::create_coupon(
+			'fiveoff',
+			array(
+				'discount_type' => 'fixed_cart',
+				'coupon_amount' => '5',
+			)
+		);
+		$product_a = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 10 ) );
+		$product_b = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 10 ) );
+		$order     = wc_create_order();
+		$item_id   = $order->add_product( $product_a, 1 );
+		$order->apply_coupon( 'fiveoff' );
+
+		// The coupon makes the line total 5. Take 1 more off by hand.
+		$item = $order->get_item( $item_id );
+		$item->set_total( 4 );
+		$item->save();
+
+		$this->add_items_to_order(
+			$order->get_id(),
+			array(
+				array(
+					'id'  => $product_b->get_id(),
+					'qty' => 1,
+				),
+			)
+		);
+
+		$order       = wc_get_order( $order->get_id() );
+		$added_item  = current( array_diff_key( $order->get_items(), array( $item_id => true ) ) );
+		$coupon_item = current( $order->get_items( 'coupon' ) );
+
+		$this->assertEquals( 6.5, $order->get_item( $item_id )->get_total(), 'The edited line should keep the amount taken off by hand' );
+		$this->assertEquals( 7.5, $added_item->get_total(), 'The added line should get its share of the coupon' );
+		$this->assertEquals( 5, $coupon_item->get_discount(), 'The coupon discount should stay 5' );
+		$this->assertEquals( 14, $order->get_total(), 'The order total should include the coupon and the hand edit' );
 	}
 
 	/**
