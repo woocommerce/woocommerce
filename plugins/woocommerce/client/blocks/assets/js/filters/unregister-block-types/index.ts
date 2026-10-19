@@ -47,7 +47,7 @@ const getBlockTypesToUnregister = (): string[] => {
 	if ( blockEditorContext === 'post' ) {
 		const shopPageId =
 			'shop' in STORE_PAGES ? STORE_PAGES.shop?.id : undefined;
-		const postId = select( editorStore ).getCurrentPostId() ?? null;
+		const postId = select( editorStore )?.getCurrentPostId() ?? null;
 
 		const isShopPageEditor =
 			getSetting( 'currentThemeIsFSETheme', false ) &&
