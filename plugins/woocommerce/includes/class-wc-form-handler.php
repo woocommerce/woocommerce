@@ -376,7 +376,7 @@ class WC_Form_Handler {
 	/**
 	 * Get the URL that copies the customer's other saved address into an empty address type.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 *
 	 * @param string $address_type Address type to copy into; 'billing' or 'shipping'.
 	 * @return string
@@ -395,7 +395,7 @@ class WC_Form_Handler {
 	 *
 	 * The target address is only written when it has not been set up yet, so a stale link cannot overwrite an address.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 *
 	 * @return void
 	 */
@@ -518,7 +518,7 @@ class WC_Form_Handler {
 		 * Unlike woocommerce_after_save_address_validation, there's no submitted form, so read the copied values from
 		 * the customer instead of the request.
 		 *
-		 * @since 11.3.0
+		 * @since 11.4.0
 		 *
 		 * @param int         $user_id     User ID being saved.
 		 * @param string      $target_type Address type being written; 'billing' or 'shipping'.
@@ -537,7 +537,7 @@ class WC_Form_Handler {
 		/**
 		 * Fires after a customer copies one of their saved addresses into the other address type from My Account.
 		 *
-		 * @since 11.3.0
+		 * @since 11.4.0
 		 *
 		 * @param int         $user_id     User ID being saved.
 		 * @param string      $target_type Address type that was written; 'billing' or 'shipping'.

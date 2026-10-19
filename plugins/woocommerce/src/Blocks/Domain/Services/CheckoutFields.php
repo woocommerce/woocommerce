@@ -747,7 +747,7 @@ class CheckoutFields {
 	 * Adds an error for each required field that is empty and each value that fails its field rules. Location-level rules are
 	 * not run here; use validate_fields_for_location() for those.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 *
 	 * @param WC_Customer $customer         Customer the values are for, used to evaluate conditional rules.
 	 * @param array       $field_values     Field values keyed by field ID, used to check required fields.
