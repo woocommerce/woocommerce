@@ -112,7 +112,7 @@ class WC_Importer_Tracking_Test extends \WC_Unit_Test_Case {
 		$events = $this->get_tracks_events( 'wcadmin_product_import_start' );
 		$this->assertNotEmpty( $events, 'The start event should be recorded for a valid nonce' );
 		$event = end( $events );
-		$this->assertEquals( true, $event->update_existing );
+		$this->assertTrue( $event->update_existing );
 		$this->assertEquals( ';', $event->delimiter );
 	}
 
@@ -133,5 +133,21 @@ class WC_Importer_Tracking_Test extends \WC_Unit_Test_Case {
 		do_action( 'product_page_product_importer' );
 
 		$this->assertNotRecordedTracksEvent( 'wcadmin_product_import_start' );
+	}
+
+	/**
+	 * @testdox Should ignore a valid nonce that was created for another action.
+	 */
+	public function test_events_not_recorded_with_nonce_for_another_action(): void {
+		$_REQUEST['_wpnonce'] = wp_create_nonce( 'wc-product-import' );
+		$_REQUEST['file']     = '/tmp/products.csv';
+
+		foreach ( array( 'import' => 'wcadmin_product_import_start', 'done' => 'wcadmin_product_import_complete' ) as $step => $event ) {
+			$_REQUEST['step'] = $step;
+
+			do_action( 'product_page_product_importer' );
+
+			$this->assertNotRecordedTracksEvent( $event );
+		}
 	}
 }

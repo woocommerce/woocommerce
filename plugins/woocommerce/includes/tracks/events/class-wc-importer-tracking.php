@@ -87,7 +87,7 @@ class WC_Importer_Tracking {
 	 *
 	 * @return bool
 	 */
-	private function has_valid_nonce() {
+	private function has_valid_nonce(): bool {
 		$nonce = isset( $_REQUEST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) ) : '';
 
 		return (bool) wp_verify_nonce( $nonce, 'woocommerce-csv-importer' );
