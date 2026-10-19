@@ -7,6 +7,8 @@ use Automattic\WooCommerce\Admin\API\Reports\Cache as ReportsCache;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
+use Exception;
+use WC_Data_Store;
 use WC_Helper_Product;
 use WC_REST_Unit_Test_Case;
 
@@ -67,6 +69,28 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 200, $this->request( '/wc-analytics/reports/stock', array() )->get_status(), 'Other analytics routes should exist either way.' );
 		foreach ( array( self::ENDPOINT, self::ENDPOINT . '/stats' ) as $route ) {
 			$this->assertSame( $expected_status, $this->request( $route, self::PERIOD )->get_status(), "Unexpected status for {$route}." );
+		}
+	}
+
+	/**
+	 * @testdox Should register the report data stores only when the feature is enabled.
+	 * @testWith ["yes", true]
+	 *           ["no", false]
+	 *
+	 * @param string $enabled    Feature option value.
+	 * @param bool   $registered Whether the data stores should load.
+	 */
+	public function test_data_stores_follow_the_feature_state( string $enabled, bool $registered ): void {
+		update_option( StockNotifications::ENABLE_OPTION_NAME, $enabled );
+
+		foreach ( array( 'report-stock-notifications', 'report-stock-notifications-stats' ) as $name ) {
+			try {
+				WC_Data_Store::load( $name );
+				$loaded = true;
+			} catch ( Exception $e ) {
+				$loaded = false;
+			}
+			$this->assertSame( $registered, $loaded, "Unexpected data store state for {$name}." );
 		}
 	}
 
