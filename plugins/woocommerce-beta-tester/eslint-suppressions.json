@@ -4,6 +4,11 @@
       "count": 1
     }
   },
+  "src/features/index.js": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
   "src/live-branches/App.tsx": {
     "@wordpress/use-recommended-components": {
       "count": 1
@@ -12,6 +17,36 @@
   "src/live-branches/components/BranchList.tsx": {
     "@wordpress/use-recommended-components": {
       "count": 4
+    }
+  },
+  "src/options/index.js": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "src/payments/index.js": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "src/remote-inbox-notifications/index.js": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "src/remote-logging/index.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 2
+    }
+  },
+  "src/tools/commands/set-wccom-base-url.js": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "src/tools/index.js": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
     }
   }
 }

@@ -1,0 +1,7 @@
+{
+  "src/settings-ui-page.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  }
+}
