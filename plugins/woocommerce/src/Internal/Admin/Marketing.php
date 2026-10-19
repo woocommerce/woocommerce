@@ -6,7 +6,6 @@
 namespace Automattic\WooCommerce\Internal\Admin;
 
 use Automattic\WooCommerce\Admin\Features\Features;
-use Automattic\WooCommerce\Admin\Marketing\InstalledExtensions;
 use Automattic\WooCommerce\Admin\PageController;
 
 /**
@@ -60,8 +59,6 @@ class Marketing {
 
 		// Overwrite submenu default ordering for marketing menu. High priority gives plugins the chance to register their own menu items.
 		add_action( 'admin_menu', array( $this, 'reorder_marketing_submenu' ), 99 );
-
-		add_filter( 'woocommerce_admin_shared_settings', array( $this, 'component_settings' ), 30 );
 	}
 
 	/**
@@ -218,22 +215,5 @@ class Marketing {
 		$new_menu_order = array_merge( $new_menu_order, $marketing_submenu );
 
 		$submenu['woocommerce-marketing'] = $new_menu_order;  //phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-	}
-
-	/**
-	 * Add settings for marketing feature.
-	 *
-	 * @param array $settings Component settings.
-	 * @return array
-	 */
-	public function component_settings( $settings ) {
-		// Bail early if not on a wc-admin powered page.
-		if ( ! PageController::is_admin_page() ) {
-			return $settings;
-		}
-
-		$settings['marketing']['installedExtensions'] = InstalledExtensions::get_data();
-
-		return $settings;
 	}
 }
