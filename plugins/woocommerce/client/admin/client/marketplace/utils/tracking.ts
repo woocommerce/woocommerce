@@ -13,6 +13,8 @@ interface MarketplaceViewProps {
 	search_term?: string;
 	product_type?: string;
 	category?: string;
+	utm_source?: string;
+	utm_campaign?: string;
 }
 
 function isWCComConnected(): boolean {
@@ -35,12 +37,17 @@ function recordMarketplaceView( props: MarketplaceViewProps ) {
 	const search_term = props.search_term || null;
 	const product_type = props.product_type || null;
 	const category = props.category || null;
+	const utm_source = props.utm_source || null;
+	const utm_campaign = props.utm_campaign || null;
 
 	const eventProps = {
 		...( view && { view } ),
 		...( search_term && { search_term } ),
 		...( product_type && { product_type } ),
 		...( category && { category } ),
+		// Links into the marketplace from elsewhere in wp-admin carry these, so the arrival can be attributed.
+		...( utm_source && { utm_source } ),
+		...( utm_campaign && { utm_campaign } ),
 		wccom_connected: isWCComConnected(),
 	};
 

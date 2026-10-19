@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\Tests\Blocks\BlockTypes\ProductCollection\Utils;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\ProductCollectionMock;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\TaxDisplayMode;
 use Automattic\WooCommerce\Internal\ProductFilters\QueryClauses;
 use WC_Helper_Product;
 use WP_Query;
@@ -74,6 +75,35 @@ class QueryBuilder extends \WP_UnitTestCase {
 		$this->assertCount( 4, $merged_query['post__in'] );
 
 		delete_transient( 'wc_products_onsale' );
+	}
+
+	/**
+	 * @testdox Should return no products when no products are on sale.
+	 */
+	public function test_merging_on_sale_queries_without_products_on_sale(): void {
+		set_transient( 'wc_products_onsale', array(), DAY_IN_SECONDS * 30 );
+
+		$parsed_block                                        = Utils::get_base_parsed_block();
+		$parsed_block['attrs']['query']['woocommerceOnSale'] = true;
+
+		$merged_query = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
+
+		$this->assertSame( array( 0 ), $merged_query['post__in'], 'The on sale filter should match no products when none are on sale.' );
+	}
+
+	/**
+	 * @testdox Should return no products when no products are on sale and hand-picked products are set.
+	 */
+	public function test_merging_on_sale_queries_without_products_on_sale_and_handpicked_products(): void {
+		set_transient( 'wc_products_onsale', array(), DAY_IN_SECONDS * 30 );
+
+		$parsed_block                                        = Utils::get_base_parsed_block();
+		$parsed_block['attrs']['query']['woocommerceOnSale'] = true;
+		$parsed_block['attrs']['query']['woocommerceHandPickedProducts'] = array( 1, 2 );
+
+		$merged_query = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
+
+		$this->assertSame( array( 0 ), $merged_query['post__in'], 'Hand-picked products should not be returned when none are on sale.' );
 	}
 
 	/**
@@ -739,7 +769,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 
 		$merged_query = Utils::initialize_merged_query( $this->block_instance, $parsed_block );
 
-		$this->assertEquals( array( -1 ), $merged_query['post__in'] );
+		$this->assertEquals( array( 0 ), $merged_query['post__in'] );
 	}
 
 	/**
@@ -1428,6 +1458,50 @@ class QueryBuilder extends \WP_UnitTestCase {
 					$query['orderBy']    = 'title';
 					$query['order']      = 'asc';
 					break;
+				case 'decimal-minimum-price':
+					// Pin the two options that decide the branch, so the price range filter
+					// always builds its non-tax-adjusted clause. The transaction rolls them back.
+					update_option( 'woocommerce_calc_taxes', 'no' );
+					update_option( 'woocommerce_tax_display_shop', TaxDisplayMode::EXCLUSIVE );
+
+					$decimal_product     = $fixtures->get_simple_product(
+						array(
+							'name'          => 'Decimal inspector target',
+							'regular_price' => '15.50',
+							'status'        => 'publish',
+							'stock_status'  => ProductStockStatus::IN_STOCK,
+						)
+					);
+					$products[]          = $decimal_product;
+					$query['post__in'][] = $decimal_product->get_id();
+					$query['priceRange'] = array(
+						'min' => 15.28,
+					);
+					$query['orderBy']    = 'title';
+					$query['order']      = 'asc';
+					break;
+				case 'decimal-maximum-price':
+					// Pin the two options that decide the branch, so the price range filter
+					// always builds its non-tax-adjusted clause. The transaction rolls them back.
+					update_option( 'woocommerce_calc_taxes', 'no' );
+					update_option( 'woocommerce_tax_display_shop', TaxDisplayMode::EXCLUSIVE );
+
+					$decimal_product     = $fixtures->get_simple_product(
+						array(
+							'name'          => 'Decimal inspector target',
+							'regular_price' => '10.25',
+							'status'        => 'publish',
+							'stock_status'  => ProductStockStatus::IN_STOCK,
+						)
+					);
+					$products[]          = $decimal_product;
+					$query['post__in'][] = $decimal_product->get_id();
+					$query['priceRange'] = array(
+						'max' => 10.28,
+					);
+					$query['orderBy']    = 'title';
+					$query['order']      = 'asc';
+					break;
 				case 'inclusive-price':
 					$query['priceRange'] = array(
 						'min' => 10,
@@ -1531,19 +1605,21 @@ class QueryBuilder extends \WP_UnitTestCase {
 	 */
 	public function inspector_query_result_provider(): array {
 		return array(
-			'category'         => array( 'category', array( 'Alpha inspector target' ) ),
-			'tag'              => array( 'tag', array( 'Alpha inspector target' ) ),
-			'brand'            => array( 'brand', array( 'Alpha inspector target' ) ),
-			'combined attrs'   => array( 'attributes', array( 'Alpha inspector target' ) ),
-			'keyword search'   => array( 'search', array( 'Alpha inspector target' ) ),
-			'stock'            => array( 'stock', array( 'Alpha inspector target' ) ),
-			'minimum price'    => array( 'minimum-price', array( 'Alpha inspector target', 'Zulu inspector distractor' ) ),
-			'maximum price'    => array( 'maximum-price', array( 'Alpha inspector target', 'Below inspector distractor' ) ),
-			'inclusive price'  => array( 'inclusive-price', array( 'Alpha inspector target' ) ),
-			'created before'   => array( 'created-before', array( 'Alpha inspector target' ) ),
-			'created within'   => array( 'created-within', array( 'Zulu inspector distractor' ) ),
-			'hand picked'      => array( 'hand-picked', array( 'Zulu inspector distractor', 'Alpha inspector target' ) ),
-			'title descending' => array( 'title-descending', array( 'Zulu inspector distractor', 'Alpha inspector target' ) ),
+			'category'              => array( 'category', array( 'Alpha inspector target' ) ),
+			'tag'                   => array( 'tag', array( 'Alpha inspector target' ) ),
+			'brand'                 => array( 'brand', array( 'Alpha inspector target' ) ),
+			'combined attrs'        => array( 'attributes', array( 'Alpha inspector target' ) ),
+			'keyword search'        => array( 'search', array( 'Alpha inspector target' ) ),
+			'stock'                 => array( 'stock', array( 'Alpha inspector target' ) ),
+			'minimum price'         => array( 'minimum-price', array( 'Alpha inspector target', 'Zulu inspector distractor' ) ),
+			'maximum price'         => array( 'maximum-price', array( 'Alpha inspector target', 'Below inspector distractor' ) ),
+			'decimal minimum price' => array( 'decimal-minimum-price', array( 'Decimal inspector target' ) ),
+			'decimal maximum price' => array( 'decimal-maximum-price', array( 'Alpha inspector target', 'Below inspector distractor', 'Decimal inspector target' ) ),
+			'inclusive price'       => array( 'inclusive-price', array( 'Alpha inspector target' ) ),
+			'created before'        => array( 'created-before', array( 'Alpha inspector target' ) ),
+			'created within'        => array( 'created-within', array( 'Zulu inspector distractor' ) ),
+			'hand picked'           => array( 'hand-picked', array( 'Zulu inspector distractor', 'Alpha inspector target' ) ),
+			'title descending'      => array( 'title-descending', array( 'Zulu inspector distractor', 'Alpha inspector target' ) ),
 		);
 	}
 

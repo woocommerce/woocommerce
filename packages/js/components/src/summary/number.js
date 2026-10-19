@@ -116,10 +116,7 @@ const SummaryNumber = ( {
 						{ label }
 					</Text>
 					{ labelTooltipText && (
-						<Tooltip
-							text={ labelTooltipText }
-							position="top center"
-						>
+						<Tooltip text={ labelTooltipText } placement="top">
 							<div className="woocommerce-summary__info-tooltip">
 								<Icon
 									width={ 20 }
@@ -146,7 +143,7 @@ const SummaryNumber = ( {
 								? `${ prevLabel } ${ prevValue }`
 								: __( 'N/A', 'woocommerce' )
 						}
-						position="top center"
+						placement="top"
 					>
 						<div
 							className="woocommerce-summary__item-delta"
