@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Bucket Stock notifications report intervals with the DST offset in force when each sign-up was made.
