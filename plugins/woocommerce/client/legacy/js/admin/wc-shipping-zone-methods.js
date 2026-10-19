@@ -655,8 +655,16 @@
 
 								shippingMethodView.highlightOnFocus( '.wc-shipping-modal-price' );
 							} else {
-								shippingMethodView.model.trigger( 'change:methods' );
-								shippingMethodView.model.trigger( 'saved:methods' );
+								// Non-modal methods are already added server-side; flush any pending zone edits and
+								// re-render, mirroring the modal settings-save path so new zones keep their locations.
+								if ( _.size( shippingMethodView.model.changes ) ) {
+									// Stay blocked across the async save, like the modal path, so the
+									// Save button can't be clicked again while the request is in flight.
+									shippingMethodView.block();
+									shippingMethodView.model.save();
+								} else {
+									shippingMethodView.model.onSaveResponse( response, textStatus );
+								}
 							}
 
 							$( document.body ).trigger( 'init_tooltips' );

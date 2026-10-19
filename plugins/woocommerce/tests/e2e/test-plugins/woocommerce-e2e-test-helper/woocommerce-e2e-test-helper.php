@@ -359,3 +359,75 @@ add_filter(
 	'__return_zero',
 	PHP_INT_MAX
 );
+
+/*
+ * -----------------------------------------------------------------------------
+ * Shipping methods
+ * -----------------------------------------------------------------------------
+ *
+ * Registers a zone shipping method that supports instance settings but deliberately
+ * not 'instance-settings-modal', like UPS/USPS. Core ships no such method, so the
+ * shipping-zone save flow for non-modal methods has no coverage without one.
+ */
+add_action(
+	'woocommerce_shipping_init',
+	function () {
+		if ( class_exists( 'WC_E2E_Nonmodal_Shipping_Method' ) ) {
+			return;
+		}
+
+		/**
+		 * A minimal instance-based shipping method that omits 'instance-settings-modal'
+		 * so it configures on a full settings page instead of the zones modal.
+		 */
+		class WC_E2E_Nonmodal_Shipping_Method extends WC_Shipping_Method {
+			/**
+			 * @param int $instance_id Instance id.
+			 */
+			public function __construct( $instance_id = 0 ) {
+				$this->id                 = 'e2e_nonmodal';
+				$this->instance_id        = absint( $instance_id );
+				$this->method_title       = 'E2E Non-Modal Method';
+				$this->method_description = 'Instance settings without a modal, for save-flow testing.';
+				$this->supports           = array( 'shipping-zones', 'instance-settings' );
+				$this->init();
+			}
+
+			/**
+			 * Load settings and hook the save handler.
+			 */
+			public function init() {
+				$this->instance_form_fields = array(
+					'title' => array(
+						'title'   => 'Title',
+						'type'    => 'text',
+						'default' => 'E2E Non-Modal Method',
+					),
+				);
+				$this->title                = $this->get_option( 'title' );
+				add_action( 'woocommerce_update_options_shipping_' . $this->id, array( $this, 'process_admin_options' ) );
+			}
+
+			/**
+			 * @param array $package Shipping package.
+			 */
+			public function calculate_shipping( $package = array() ) {
+				$this->add_rate(
+					array(
+						'id'    => $this->id . $this->instance_id,
+						'label' => $this->title,
+						'cost'  => 0,
+					)
+				);
+			}
+		}
+	}
+);
+
+add_filter(
+	'woocommerce_shipping_methods',
+	function ( $methods ) {
+		$methods['e2e_nonmodal'] = 'WC_E2E_Nonmodal_Shipping_Method';
+		return $methods;
+	}
+);
