@@ -466,7 +466,7 @@ class WC_Checkout {
 				 * IDs stay the same. Return false to remove every item and add it again from the cart, which also
 				 * fires the woocommerce_checkout_create_order_*_item hooks for every item again.
 				 *
-				 * @since 11.3.0
+				 * @since 11.4.0
 				 *
 				 * @param bool              $keep_items Whether to keep unchanged items. Default true.
 				 * @param WC_Abstract_Order $order      The resumed order.
@@ -660,7 +660,7 @@ class WC_Checkout {
 	 *
 	 * @internal
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 *
 	 * @param WC_Order              $order       The order.
 	 * @param WC_Cart               $cart        The cart.
