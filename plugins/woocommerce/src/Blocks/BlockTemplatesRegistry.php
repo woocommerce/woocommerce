@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Blocks;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 use Automattic\WooCommerce\Blocks\Templates\AbstractTemplate;
 use Automattic\WooCommerce\Blocks\Templates\AbstractTemplatePart;
+use Automattic\WooCommerce\Blocks\Templates\ArchiveProductTemplatesCompatibility;
 use Automattic\WooCommerce\Blocks\Templates\MiniCartTemplate;
 use Automattic\WooCommerce\Blocks\Templates\CartTemplate;
 use Automattic\WooCommerce\Blocks\Templates\CheckoutTemplate;
@@ -18,6 +19,7 @@ use Automattic\WooCommerce\Blocks\Templates\ProductCategoryTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductTagTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductSearchResultsTemplate;
 use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplate;
+use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplateCompatibility;
 use Automattic\WooCommerce\Blocks\Templates\SimpleProductAddToCartWithOptionsTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ExternalProductAddToCartWithOptionsTemplate;
 use Automattic\WooCommerce\Blocks\Templates\VariableProductAddToCartWithOptionsTemplate;
@@ -44,6 +46,44 @@ class BlockTemplatesRegistry {
 	 * @var array<string,string>
 	 */
 	private $template_paths = array();
+
+	/**
+	 * Shared hook compatibility for product archives.
+	 *
+	 * @var ArchiveProductTemplatesCompatibility|null
+	 */
+	private $archive_compatibility;
+
+	/**
+	 * Shared hook compatibility for single products.
+	 *
+	 * @var SingleProductTemplateCompatibility|null
+	 */
+	private $single_product_compatibility;
+
+	/**
+	 * Initialize the shared product archive compatibility layer.
+	 *
+	 * @internal
+	 */
+	public function init_archive_compatibility(): void {
+		if ( null === $this->archive_compatibility ) {
+			$this->archive_compatibility = new ArchiveProductTemplatesCompatibility();
+		}
+		$this->archive_compatibility->init();
+	}
+
+	/**
+	 * Initialize the shared single product compatibility layer.
+	 *
+	 * @internal
+	 */
+	public function init_single_product_compatibility(): void {
+		if ( null === $this->single_product_compatibility ) {
+			$this->single_product_compatibility = new SingleProductTemplateCompatibility();
+		}
+		$this->single_product_compatibility->init();
+	}
 
 	/**
 	 * Initialization method.
