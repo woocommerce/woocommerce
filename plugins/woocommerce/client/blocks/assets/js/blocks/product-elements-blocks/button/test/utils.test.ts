@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { OptimisticCartItem } from '@woocommerce/stores/woocommerce/cart';
+import type { OptimisticCartItem } from '@woocommerce/stores/woocommerce';
 
 /**
  * Internal dependencies
