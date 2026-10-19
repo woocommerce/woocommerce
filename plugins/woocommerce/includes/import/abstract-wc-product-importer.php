@@ -902,35 +902,43 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 
 	/**
 	 * Re-join exploded segments that were wrapped in double quotes, so a quoted value
-	 * can contain the separator, as in `Red, "Blue, navy", Green`.
+	 * can contain the separator, as in `Red, "Blue, navy", Green`. Quotes that are
+	 * balanced inside a segment (`"Large" size`, `15"`) never open or close a value.
 	 *
-	 * A quote only opens a group at the start of a trimmed segment and only closes it at
-	 * the end of one. A group without a closing quote is left split as it was, so values
-	 * that merely contain a quote character (such as `5" Wheel`) are not affected.
+	 * @since 11.3.0
 	 *
 	 * @param string[] $segments  Segments produced by splitting the cell on the separator.
 	 * @param string   $separator Separator the segments were split on.
 	 * @return string[]
 	 */
 	protected function group_quoted_values( array $segments, $separator ) {
-		$values = array();
-		$count  = count( $segments );
+		$values        = array();
+		$count         = count( $segments );
+		$unclosed_from = $count;
 
 		for ( $i = 0; $i < $count; $i++ ) {
-			if ( '"' !== substr( trim( $segments[ $i ] ), 0, 1 ) ) {
-				$values[] = $segments[ $i ];
-				continue;
-			}
+			$segment = trim( $segments[ $i ] );
+			$end     = false;
 
-			for ( $end = $i; $end < $count; $end++ ) {
-				$candidate = trim( $segments[ $end ] );
-				// The opening segment needs more than the opening quote itself to also close the group.
-				if ( '"' === substr( $candidate, -1 ) && ( $end > $i || strlen( $candidate ) > 1 ) ) {
-					break;
+			if ( $this->opens_quoted_value( $segment ) ) {
+				if ( $this->is_self_closed_quoted_value( $segment ) ) {
+					$end = $i;
+				} elseif ( $i < $unclosed_from ) {
+					for ( $end = $i + 1; $end < $count; $end++ ) {
+						if ( $this->closes_quoted_value( trim( $segments[ $end ] ) ) ) {
+							break;
+						}
+					}
+
+					// Nothing after this segment closes a quote, so later openers cannot be closed either.
+					if ( $end >= $count ) {
+						$unclosed_from = $i;
+						$end           = false;
+					}
 				}
 			}
 
-			if ( $end >= $count ) {
+			if ( false === $end ) {
 				$values[] = $segments[ $i ];
 				continue;
 			}
@@ -941,6 +949,38 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		}
 
 		return $values;
+	}
+
+	/**
+	 * Whether a trimmed segment starts a double-quoted value: it begins with a quote that the
+	 * segment either closes itself (`"Large"`) or leaves open (`"Blue`, an odd number of quotes).
+	 *
+	 * @param string $segment Trimmed segment.
+	 * @return bool
+	 */
+	private function opens_quoted_value( string $segment ): bool {
+		return '"' === substr( $segment, 0, 1 ) && ( $this->is_self_closed_quoted_value( $segment ) || 1 === substr_count( $segment, '"' ) % 2 );
+	}
+
+	/**
+	 * Whether a trimmed segment is a complete double-quoted value on its own, such as `"Large"`.
+	 *
+	 * @param string $segment Trimmed segment.
+	 * @return bool
+	 */
+	private function is_self_closed_quoted_value( string $segment ): bool {
+		return strlen( $segment ) > 1 && '"' === substr( $segment, 0, 1 ) && '"' === substr( $segment, -1 );
+	}
+
+	/**
+	 * Whether a trimmed segment ends a double-quoted value opened by an earlier segment: it ends
+	 * with a quote that is not balanced inside the segment, such as `navy"` but not `15" Wheel"`.
+	 *
+	 * @param string $segment Trimmed segment.
+	 * @return bool
+	 */
+	private function closes_quoted_value( string $segment ): bool {
+		return '"' === substr( $segment, -1 ) && 1 === substr_count( $segment, '"' ) % 2;
 	}
 
 	/**

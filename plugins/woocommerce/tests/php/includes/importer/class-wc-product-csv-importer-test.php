@@ -2011,8 +2011,23 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 			'escaped comma inside quotes' => array( '"Red\\, Green, Blue", Black', array( 'Red, Green, Blue', 'Black' ) ),
 			'quote inside a value'        => array( 'Red, 5" Wheel, Green', array( 'Red', '5" Wheel', 'Green' ) ),
 			'quote not closing a segment' => array( '"Large" size, Small', array( '"Large" size', 'Small' ) ),
+			'closed quote then inch mark' => array( '"Large" size, 15"', array( '"Large" size', '15"' ) ),
+			'balanced quotes in both'     => array( '"Pro" edition, Small "S"', array( '"Pro" edition', 'Small "S"' ) ),
+			'quotes inside a group'       => array( '"a, "b", c"', array( 'a, "b", c' ) ),
+			'empty quoted value'          => array( '""', array( '' ) ),
 			'unterminated quote'          => array( 'Red, "Blue', array( 'Red', '"Blue' ) ),
 			'plain list'                  => array( 'Red, Green', array( 'Red', 'Green' ) ),
 		);
+	}
+
+	/**
+	 * @testdox Should keep a double-quoted tag together when tags are separated by spaces.
+	 */
+	public function test_parse_tags_spaces_field_handles_quoted_values(): void {
+		$importer = new WC_Product_CSV_Importer( __DIR__ . '/sample.csv' );
+
+		$term_ids = $importer->parse_tags_spaces_field( '"New York" Boston 15"' );
+
+		$this->assertSame( array( 'New York', 'Boston', '15"' ), array_map( fn( $id ) => get_term( $id, 'product_tag' )->name, $term_ids ) );
 	}
 }
