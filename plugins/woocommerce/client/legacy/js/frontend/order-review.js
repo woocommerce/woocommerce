@@ -8,6 +8,7 @@
 
 	var ERROR_CLASS = 'woocommerce-review-order__item-rating-error';
 	var STATUS_CLASS = 'woocommerce-review-order__item-status';
+	var HINT_CLASS = 'woocommerce-review-order__submit-hint';
 	var uid = 0;
 
 	/**
@@ -212,6 +213,30 @@
 	}
 
 	/**
+	 * The hint that says why a gated submit does nothing. Created here rather
+	 * than rendered by the template, because the gate only exists when this
+	 * script runs.
+	 *
+	 * @param {HTMLElement} submit Submit button.
+	 * @return {HTMLElement}
+	 */
+	function submitHint( submit ) {
+		var parent = submit.parentNode || submit;
+		var hint = parent.querySelector( '.' + HINT_CLASS );
+		if ( hint ) {
+			return hint;
+		}
+
+		var i18n = ( window.wcOrderReview && window.wcOrderReview.i18n ) || {};
+		hint = document.createElement( 'p' );
+		hint.className = HINT_CLASS;
+		hint.textContent =
+			i18n.submit_hint || 'Add or change a rating or review to submit.';
+		parent.appendChild( hint );
+		return hint;
+	}
+
+	/**
 	 * Enable / disable the review-order submit button based on whether at
 	 * least one row has been edited since page load.
 	 *
@@ -236,10 +261,19 @@
 		var rows = Array.prototype.slice.call(
 			form.querySelectorAll( '.woocommerce-review-order__item' )
 		);
+		var hint = submitHint( submit );
 
 		function syncSubmit() {
-			var ready = ! form.wcReviewOrderSubmitting && rows.some( isRowDirty );
+			var dirty = rows.some( isRowDirty );
+			var ready = ! form.wcReviewOrderSubmitting && dirty;
 			submit.setAttribute( 'aria-disabled', ready ? 'false' : 'true' );
+			// Keyed on `dirty`, not `ready`: an in-flight submit closes the
+			// gate too, and the hint would then name the wrong reason. An
+			// override that renders the form with no rows offers nothing to
+			// add or change either.
+			var explain = ! dirty && rows.length > 0;
+			hint.hidden = ! explain;
+			toggleToken( submit, 'aria-describedby', idOf( hint ), explain );
 		}
 
 		// `aria-disabled` does not stop the browser submitting, and the AJAX
@@ -358,6 +392,14 @@
 		var rows = Array.prototype.slice.call(
 			form.querySelectorAll( '.woocommerce-review-order__item' )
 		);
+
+		// Up front, because a live region created in the same step that fills
+		// it is not announced, and an override copied before the templates
+		// rendered these has neither.
+		rows.forEach( function ( row ) {
+			rowRegion( row, ERROR_CLASS, null );
+			rowRegion( row, STATUS_CLASS, 'status' );
+		} );
 
 		function validate() {
 			var ok = true;

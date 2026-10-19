@@ -305,6 +305,112 @@ describe( 'Review Order frontend behavior', () => {
 		expect( prevented ).toEqual( [ true, false ] );
 	} );
 
+	test( 'registers both row regions up front for an override that drops them', () => {
+		// A row template copied before the paragraphs shipped.
+		document.body.innerHTML = `
+			<form class="woocommerce-review-order__form" method="post" action="https://example.test/wp-admin/admin-ajax.php">
+				<div class="woocommerce-review-order__item" data-row-index="0" data-initial-rating="0" data-initial-text="">
+					<p class="woocommerce-review-order__item-title">CRR Product</p>
+					<div class="woocommerce-star-rating">
+						<input class="woocommerce-star-rating__input" name="rating" type="radio" value="5" data-label="Perfect" />
+					</div>
+					<textarea class="woocommerce-review-order__item-review-textarea"></textarea>
+				</div>
+				<button class="woocommerce-review-order__submit" type="submit">Submit</button>
+			</form>
+		`;
+
+		initializeReviewOrder();
+
+		const row = document.querySelector(
+			'.woocommerce-review-order__item'
+		);
+		const status = row.querySelector(
+			'.woocommerce-review-order__item-status'
+		);
+		const error = row.querySelector(
+			'.woocommerce-review-order__item-rating-error'
+		);
+
+		// A live region first created when its text is written is not
+		// announced, so both have to exist and be empty before any write.
+		expect( status.getAttribute( 'role' ) ).toBe( 'status' );
+		expect( status.textContent ).toBe( '' );
+		expect( error ).not.toBeNull();
+		expect( error.textContent ).toBe( '' );
+	} );
+
+	test( 'explains a gated submit with a hint the button points at', () => {
+		window.wcOrderReview = {
+			i18n: { submit_hint: 'Rate or review something first.' },
+		};
+		document.body.innerHTML = `
+			<form class="woocommerce-review-order__form" method="post" action="https://example.test/wp-admin/admin-ajax.php">
+				<div class="woocommerce-review-order__item" data-initial-rating="0" data-initial-text="">
+					<div class="woocommerce-star-rating">
+						<input class="woocommerce-star-rating__input" name="rating" type="radio" value="5" data-label="Perfect" />
+					</div>
+				</div>
+				<div class="woocommerce-review-order__actions">
+					<button class="woocommerce-review-order__submit" type="submit">Submit</button>
+				</div>
+			</form>
+		`;
+
+		initializeReviewOrder();
+
+		const form = document.querySelector(
+			'.woocommerce-review-order__form'
+		);
+		const submit = form.querySelector(
+			'.woocommerce-review-order__submit'
+		);
+		const hint = form.querySelector(
+			'.woocommerce-review-order__submit-hint'
+		);
+
+		expect( hint.parentElement ).toBe( submit.parentElement );
+		expect( hint.textContent ).toBe( 'Rate or review something first.' );
+		expect( hint.hidden ).toBe( false );
+		expect(
+			submit.getAttribute( 'aria-describedby' ).split( /\s+/ )
+		).toContain( hint.id );
+
+		const rating = form.querySelector( '.woocommerce-star-rating__input' );
+		rating.checked = true;
+		rating.dispatchEvent( new Event( 'change', { bubbles: true } ) );
+
+		// Nothing left to explain once the button works.
+		expect( hint.hidden ).toBe( true );
+		expect( submit.hasAttribute( 'aria-describedby' ) ).toBe( false );
+	} );
+
+	test( 'keeps the hint quiet on an override that renders no rows', () => {
+		document.body.innerHTML = `
+			<form class="woocommerce-review-order__form" method="post" action="https://example.test/wp-admin/admin-ajax.php">
+				<button class="woocommerce-review-order__submit" type="submit">Submit</button>
+			</form>
+		`;
+
+		initializeReviewOrder();
+
+		const form = document.querySelector(
+			'.woocommerce-review-order__form'
+		);
+		const submit = form.querySelector(
+			'.woocommerce-review-order__submit'
+		);
+		const hint = form.querySelector(
+			'.woocommerce-review-order__submit-hint'
+		);
+
+		// Nothing to add or change, so the gate stays shut and the hint must
+		// not name an action the page does not offer.
+		expect( submit.getAttribute( 'aria-disabled' ) ).toBe( 'true' );
+		expect( hint.hidden ).toBe( true );
+		expect( submit.hasAttribute( 'aria-describedby' ) ).toBe( false );
+	} );
+
 	test( 'moves focus into the thank-you view once the form is hidden', async () => {
 		const ajaxUrl = 'https://example.test/wp-admin/admin-ajax.php';
 		window.fetch = jest.fn( () =>
@@ -447,6 +553,12 @@ describe( 'Review Order frontend behavior', () => {
 		textarea.value = 'Still typing.';
 		textarea.dispatchEvent( new Event( 'input', { bubbles: true } ) );
 		expect( submit.getAttribute( 'aria-disabled' ) ).toBe( 'true' );
+
+		// The row is edited, so the hint would name the wrong reason here.
+		expect(
+			form.querySelector( '.woocommerce-review-order__submit-hint' )
+				.hidden
+		).toBe( true );
 	} );
 
 	test.each( [

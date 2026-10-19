@@ -7,6 +7,9 @@
 
 		.woocommerce-review-order__title,
 		.woocommerce-review-order__intro,
+		// Core no longer renders the legend; kept for template overrides
+		// copied before it was dropped.
+		.woocommerce-review-order__legend,
 		.woocommerce-review-order__notice,
 		.woocommerce-review-order__form {
 			display: none;
@@ -17,6 +20,11 @@
 	& &__submit[aria-disabled="true"] {
 		opacity: 0.5;
 		cursor: not-allowed;
+	}
+
+	&__submit-hint {
+		margin: 0.5em 0 0;
+		font-size: 0.875em;
 	}
 
 	&__items {
