@@ -276,7 +276,7 @@ export const isWCAdmin = ( url = window.location.href ) => {
  * or the router as appropriate.
  *
  * @param {Object} args     - All arguments.
- * @param {string} args.url - Relative path or absolute url to navigate to
+ * @param {string} args.url - Admin page path (written as-is into the `path` query arg, like getNewPath), an admin-relative URL such as `admin.php?page=wc-settings`, or an absolute URL.
  */
 export const navigateTo = ( { url } ) => {
 	const parsedUrl = parseAdminUrl( url );
