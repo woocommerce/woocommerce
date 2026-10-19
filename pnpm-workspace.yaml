@@ -18,9 +18,9 @@ catalogs:
         '@wordpress/commands': 1.33.5
         '@wordpress/components': 30.6.5
         '@wordpress/compose': 7.33.1
-        '@wordpress/core-data': 7.33.9
+        '@wordpress/core-data': 7.40.0
         '@wordpress/create-block': 4.76.1
-        '@wordpress/data': 10.33.1
+        '@wordpress/data': 10.40.0
         '@wordpress/data-controls': 4.33.1
         '@wordpress/date': 5.33.1
         '@wordpress/deprecated': 4.33.1
