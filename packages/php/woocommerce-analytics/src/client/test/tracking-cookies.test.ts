@@ -5,7 +5,7 @@
 /**
  * External dependencies
  */
-import { afterEach, describe, expect, it } from '@jest/globals';
+import { afterEach, describe, expect, it, jest } from '@jest/globals';
 
 /**
  * Internal dependencies
@@ -44,6 +44,16 @@ describe( 'clearTrackingCookies', () => {
 		clearTrackingCookies();
 
 		expect( document.cookie ).toBe( '' );
+	} );
+
+	it( 'writes a host-only expiry, which browsers keep apart from a same-host domain cookie', () => {
+		document.cookie = 'tk_ai=host; path=/';
+		const setCookie = jest.spyOn( Document.prototype, 'cookie', 'set' );
+
+		clearTrackingCookies();
+
+		expect( setCookie ).toHaveBeenCalledWith( 'tk_ai=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT' );
+		setCookie.mockRestore();
 	} );
 
 	it( 'leaves other cookies alone', () => {
