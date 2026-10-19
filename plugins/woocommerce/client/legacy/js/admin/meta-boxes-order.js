@@ -49,7 +49,8 @@ jQuery( function ( $ ) {
 		 * Bound to the body so handlers on the form itself run first and can still cancel the submission.
 		 */
 		prevent_double_submit: function ( e ) {
-			var $form = $( this );
+			var $form = $( this ),
+				$buttons;
 
 			if ( $form.data( 'wc-order-submitting' ) ) {
 				e.preventDefault();
@@ -60,11 +61,23 @@ jQuery( function ( $ ) {
 				return;
 			}
 
-			$form.data( 'wc-order-submitting', true );
-			$form
+			// Skip buttons that are already disabled, so unlocking leaves them as they were.
+			$buttons = $form
 				.find( '#woocommerce-order-actions :submit' )
+				.not( '.disabled, [aria-disabled="true"]' )
 				.addClass( 'disabled' )
 				.attr( 'aria-disabled', 'true' );
+			$form.data( 'wc-order-submitting', $buttons );
+
+			// Handlers further up the page run after this one and can still cancel the submission.
+			setTimeout( function () {
+				if (
+					e.isDefaultPrevented() ||
+					( e.originalEvent && e.originalEvent.defaultPrevented )
+				) {
+					wc_meta_boxes_order.unlock_order_form( $form );
+				}
+			} );
 		},
 
 		/**
@@ -75,11 +88,20 @@ jQuery( function ( $ ) {
 				return;
 			}
 
-			$( 'form#order, form#post' )
-				.removeData( 'wc-order-submitting' )
-				.find( '#woocommerce-order-actions :submit' )
-				.removeClass( 'disabled' )
-				.removeAttr( 'aria-disabled' );
+			$( 'form#order, form#post' ).each( function () {
+				wc_meta_boxes_order.unlock_order_form( $( this ) );
+			} );
+		},
+
+		unlock_order_form: function ( $form ) {
+			var $buttons = $form.data( 'wc-order-submitting' );
+
+			if ( $buttons ) {
+				$buttons
+					.removeClass( 'disabled' )
+					.removeAttr( 'aria-disabled' );
+				$form.removeData( 'wc-order-submitting' );
+			}
 		},
 
 		change_country: function( e, stickValue ) {
