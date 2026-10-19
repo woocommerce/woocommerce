@@ -69121,12 +69121,6 @@ parameters:
 			path: src/StoreApi/Utilities/ProductQuery.php
 
 		-
-			message: '#^Cannot unset offset ''outofstock'' on list\<string\>\.$#'
-			identifier: unset.offset
-			count: 1
-			path: src/StoreApi/Utilities/ProductQueryFilters.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Utilities\\ProductQueryFilters\:\:get_attribute_counts\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
 			count: 1
