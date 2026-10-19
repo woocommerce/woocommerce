@@ -82,6 +82,37 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should bucket each sign-up with the DST offset in force when it was made, not the current one.
+	 */
+	public function test_intervals_honour_dst_per_row(): void {
+		update_option( 'timezone_string', 'America/Los_Angeles' );
+		// 23:30 local on 2026-01-15 (PST, UTC-8) and on 2026-07-15 (PDT, UTC-7). Shifting both by
+		// the current offset puts one of them on the next day, whichever season the test runs in.
+		$this->insert_row( 1, NotificationStatus::ACTIVE, '2026-01-16 07:30:00', 'winter@example.com' );
+		$this->insert_row( 1, NotificationStatus::ACTIVE, '2026-07-16 06:30:00', 'summer@example.com' );
+
+		foreach ( array( '2026-01-15', '2026-07-15' ) as $day ) {
+			$next_day = gmdate( 'Y-m-d', strtotime( $day . ' +1 day' ) );
+			$stats    = $this->get_stats(
+				array(
+					'after'  => $day . 'T00:00:00',
+					'before' => $next_day . 'T23:59:59',
+					'order'  => 'asc',
+				)
+			);
+
+			$this->assertSame(
+				array(
+					$day      => 1,
+					$next_day => 0,
+				),
+				array_column( array_map( array( $this, 'flatten_interval' ), $stats['intervals'] ), 'signups', 'interval' ),
+				"The sign-up at 23:30 local on {$day} belongs to that day."
+			);
+		}
+	}
+
+	/**
 	 * @testdox Should compute totals from non-pending sign-ups, sends in the period and current active sign-ups.
 	 */
 	public function test_totals(): void {
