@@ -12,6 +12,7 @@ use Automattic\WooCommerce\StoreApi\Routes\V1\AbstractCartRoute;
  * Cart pricing covers cart totals calculations, mini-cart renders, the cart and checkout pages,
  * and Store API cart and checkout routes, including those loaded through Blocks hydration.
  *
+ * @internal
  * @since 11.3.0
  */
 class CartPricingContext {
@@ -91,6 +92,7 @@ class CartPricingContext {
 	 * Outside any dispatch, a running cart calculation or the cart and checkout pages count.
 	 *
 	 * @since 11.3.0
+	 * @internal
 	 *
 	 * @return bool True when the cart is being priced.
 	 */
