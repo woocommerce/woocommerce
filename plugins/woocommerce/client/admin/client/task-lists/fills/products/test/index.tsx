@@ -353,6 +353,7 @@ describe( 'Products', () => {
 			getByRole( 'menuitem', { name: /Variable product/ } )
 		);
 		expect( createProductByType ).not.toHaveBeenCalled();
+		expect( recordEvent ).not.toHaveBeenCalled();
 	} );
 
 	describe( 'Printful banner visibility', () => {

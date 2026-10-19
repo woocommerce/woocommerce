@@ -84,27 +84,16 @@ export const Products = () => {
 		getOnboardingProductType()
 	);
 
+	const { recordCompletionTime } = useRecordCompletionTime( 'products' );
 	const { productTypes } = useProductTypeListItems(
 		getProductTypes(),
-		surfacedProductTypeKeys
+		surfacedProductTypeKeys,
+		{ onClick: recordCompletionTime }
 	);
-	const { recordCompletionTime } = useRecordCompletionTime( 'products' );
 
 	const recommendations: ProductRecommendation[] = getAdminSetting(
 		'productsListEmptySuggestions',
 		[]
-	);
-
-	const productTypesWithTimeRecord = useMemo(
-		() =>
-			productTypes.map( ( productType ) => ( {
-				...productType,
-				onClick: (): void => {
-					productType.onClick();
-					recordCompletionTime();
-				},
-			} ) ),
-		[ recordCompletionTime, productTypes ]
 	);
 
 	const { loadSampleProduct, isLoadingSampleProducts } =
@@ -115,13 +104,12 @@ export const Products = () => {
 		} );
 
 	const visibleProductTypes = useMemo( () => {
-		const surfacedProductTypes = productTypesWithTimeRecord.filter(
-			( productType ) =>
-				surfacedProductTypeKeys.includes( productType.key )
+		const surfacedProductTypes = productTypes.filter( ( productType ) =>
+			surfacedProductTypeKeys.includes( productType.key )
 		);
 		if ( isExpanded ) {
 			// To show product types in same order, we need to push the other product types to the end.
-			productTypesWithTimeRecord.forEach(
+			productTypes.forEach(
 				( productType ) =>
 					! surfacedProductTypes.includes( productType ) &&
 					surfacedProductTypes.push( productType )
@@ -138,7 +126,7 @@ export const Products = () => {
 			surfacedProductTypes
 		) as typeof surfacedProductTypes;
 		return surfacedProductTypesAndAppendedProducts;
-	}, [ surfacedProductTypeKeys, isExpanded, productTypesWithTimeRecord ] );
+	}, [ surfacedProductTypeKeys, isExpanded, productTypes ] );
 
 	const footerStack = useMemo( () => {
 		const importCSVItemWithTimeRecord = {

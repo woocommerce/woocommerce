@@ -1,7 +1,9 @@
 /**
  * External dependencies
  */
+import { speak } from '@wordpress/a11y';
 import { useDispatch } from '@wordpress/data';
+import { __ } from '@wordpress/i18n';
 import { itemsStore } from '@woocommerce/data';
 import { navigateTo } from '@woocommerce/navigation';
 import { getAdminLink } from '@woocommerce/settings';
@@ -42,6 +44,7 @@ export const useCreateProductByType = () => {
 
 	const createProductByType = async ( type: ProductTypeKey ) => {
 		setRequestingType( type );
+		speak( __( 'Creating your product…', 'woocommerce' ) );
 
 		const url = await getProductEditPageLink( type );
 		if ( url ) {
