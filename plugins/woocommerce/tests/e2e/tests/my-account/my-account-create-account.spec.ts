@@ -40,6 +40,7 @@ test.describe( 'Shopper My Account Create Account', () => {
 	} );
 
 	test.afterAll( async ( { restApi } ) => {
+		const cleanupErrors: unknown[] = [];
 		try {
 			const response = await restApi.get(
 				`${ WC_API_PATH }/customers?email=${ encodeURIComponent(
@@ -52,8 +53,9 @@ test.describe( 'Shopper My Account Create Account', () => {
 					{ force: true }
 				);
 			}
+		} catch ( error ) {
+			cleanupErrors.push( error );
 		} finally {
-			const restorationErrors: Error[] = [];
 			for ( const [ settingId, value ] of originalSettingValues ) {
 				try {
 					await restApi.put(
@@ -61,19 +63,19 @@ test.describe( 'Shopper My Account Create Account', () => {
 						{ value }
 					);
 				} catch ( error ) {
-					restorationErrors.push(
+					cleanupErrors.push(
 						new Error(
 							`Failed to restore ${ settingId }: ${ String( error ) }`
 						)
 					);
 				}
 			}
-			if ( restorationErrors.length ) {
-				throw new AggregateError(
-					restorationErrors,
-					'Failed to restore My Account registration settings.'
-				);
-			}
+		}
+		if ( cleanupErrors.length ) {
+			throw new AggregateError(
+				cleanupErrors,
+				'Failed to clean up My Account registration test state.'
+			);
 		}
 	} );
 
