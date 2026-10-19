@@ -9,11 +9,30 @@ import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 import { expect, test } from '../../fixtures/fixtures';
 
 const customerEmailAddress = `john.doe.${ Date.now() }@example.com`;
+const originalSettingValues = new Map< string, string >();
+const accountSettingsPath = `${ WC_API_PATH }/settings/account`;
+const registrationSettingIds = [
+	'woocommerce_enable_myaccount_registration',
+	'woocommerce_registration_generate_password',
+];
 
 test.describe( 'Shopper My Account Create Account', () => {
 	test.beforeAll( async ( { restApi } ) => {
+		for ( const settingId of registrationSettingIds ) {
+			const response = await restApi.get(
+				`${ accountSettingsPath }/${ settingId }`
+			);
+			originalSettingValues.set( settingId, response.data.value );
+		}
+
 		await restApi.put(
-			`${ WC_API_PATH }/settings/account/woocommerce_enable_myaccount_registration`,
+			`${ accountSettingsPath }/woocommerce_enable_myaccount_registration`,
+			{
+				value: 'yes',
+			}
+		);
+		await restApi.put(
+			`${ accountSettingsPath }/woocommerce_registration_generate_password`,
 			{
 				value: 'yes',
 			}
@@ -21,28 +40,25 @@ test.describe( 'Shopper My Account Create Account', () => {
 	} );
 
 	test.afterAll( async ( { restApi } ) => {
-		// get a list of all customers and delete the one we created
-		await restApi
-			.get( `${ WC_API_PATH }/customers` )
-			.then( ( response ) => {
-				for ( let i = 0; i < response.data.length; i++ ) {
-					if ( response.data[ i ].email === customerEmailAddress ) {
-						restApi.delete(
-							`${ WC_API_PATH }/customers/${ response.data[ i ].id }`,
-							{
-								force: true,
-							}
-						);
-					}
-				}
-			} );
-
-		await restApi.put(
-			`${ WC_API_PATH }/settings/account/woocommerce_enable_myaccount_registration`,
-			{
-				value: 'no',
+		try {
+			const response = await restApi.get(
+				`${ WC_API_PATH }/customers?email=${ encodeURIComponent(
+					customerEmailAddress
+				) }`
+			);
+			for ( const customer of response.data ) {
+				await restApi.delete(
+					`${ WC_API_PATH }/customers/${ customer.id }`,
+					{ force: true }
+				);
 			}
-		);
+		} finally {
+			for ( const [ settingId, value ] of originalSettingValues ) {
+				await restApi.put( `${ accountSettingsPath }/${ settingId }`, {
+					value,
+				} );
+			}
+		}
 	} );
 
 	test( 'can create a new account via my account', async ( { page } ) => {
