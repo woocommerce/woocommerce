@@ -2151,6 +2151,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$this->assertEmpty( $data['updated'] );
 		$this->assertCount( 1, $data['failed'] );
 		$this->assertStringContainsString( 'parent does not exist', $data['failed'][0]->get_error_message() );
+		$this->assertStringContainsString( "ID {$missing_id}", $data['failed'][0]->get_error_data()['row'], 'The row label must show the ID from the file, not the matched variation' );
 		$unchanged = wc_get_product( $variation->get_id() );
 		$this->assertSame( $parent->get_id(), $unchanged->get_parent_id(), 'A failed row must not change the parent' );
 		$this->assertSame( $original_name, $unchanged->get_name() );

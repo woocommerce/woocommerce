@@ -1271,12 +1271,17 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	/**
 	 * Get a string to identify the row from parsed data.
 	 *
+	 * The ID shown is the one from the file, also when parsing mapped it to a
+	 * placeholder or to the product matched by SKU, so the label matches the CSV.
+	 *
 	 * @param array $parsed_data Parsed data.
 	 *
 	 * @return string
 	 */
 	protected function get_row_id( $parsed_data ) {
 		$id               = isset( $parsed_data['id'] ) ? absint( $parsed_data['id'] ) : 0;
+		$csv_id           = array_search( $id, $this->original_id_map, true );
+		$id               = false === $csv_id ? $id : $csv_id;
 		$sku              = isset( $parsed_data['sku'] ) ? esc_attr( $parsed_data['sku'] ) : '';
 		$global_unique_id = isset( $parsed_data['global_unique_id'] ) ? esc_attr( $parsed_data['global_unique_id'] ) : '';
 		$name             = isset( $parsed_data['name'] ) ? esc_attr( $parsed_data['name'] ) : '';
