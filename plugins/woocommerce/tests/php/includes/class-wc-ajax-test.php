@@ -253,10 +253,11 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	 *
 	 * @param int   $order_id     Order ID.
 	 * @param array $items_to_add Items to add.
+	 * @param array $tax_location Tax location entered in the order editor.
 	 */
-	private function add_items_to_order( int $order_id, array $items_to_add ): void {
-		$maybe_add_order_item_func = function () use ( $order_id, $items_to_add ) {
-			return static::maybe_add_order_item( $order_id, '', $items_to_add );
+	private function add_items_to_order( int $order_id, array $items_to_add, array $tax_location = array() ): void {
+		$maybe_add_order_item_func = function () use ( $order_id, $items_to_add, $tax_location ) {
+			return static::maybe_add_order_item( $order_id, '', $items_to_add, $tax_location );
 		};
 		$maybe_add_order_item_func->call( new WC_AJAX() );
 	}
@@ -333,6 +334,70 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		}
 		$this->assertEquals( 2, $coupon_item->get_discount(), 'The coupon discount should include both products' );
 		$this->assertEquals( 18, $order->get_total(), 'The order total should include the coupon discount' );
+	}
+
+	/**
+	 * @testdox Should use the editor tax location when coupons are applied again to an added product.
+	 */
+	public function test_add_item_after_coupon_uses_editor_tax_location(): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', 'no' );
+		update_option( 'woocommerce_default_country', 'BE' );
+		update_option( 'woocommerce_tax_based_on', 'billing' );
+
+		WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'BE',
+				'tax_rate'          => '6.0000',
+				'tax_rate_name'     => 'Belgian VAT',
+				'tax_rate_priority' => 1,
+				'tax_rate_class'    => '',
+			)
+		);
+		WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'NL',
+				'tax_rate'          => '9.0000',
+				'tax_rate_name'     => 'Dutch VAT',
+				'tax_rate_priority' => 1,
+				'tax_rate_class'    => '',
+			)
+		);
+
+		WC_Helper_Coupon::create_coupon(
+			'tenpercent',
+			array(
+				'discount_type' => 'percent',
+				'coupon_amount' => '10',
+			)
+		);
+		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 24 ) );
+		$order   = wc_create_order();
+		$order->apply_coupon( 'tenpercent' );
+
+		$this->add_items_to_order(
+			$order->get_id(),
+			array(
+				array(
+					'id'  => $product->get_id(),
+					'qty' => 1,
+				),
+			),
+			array(
+				'country'  => 'NL',
+				'state'    => '',
+				'postcode' => '',
+				'city'     => '',
+			)
+		);
+
+		$order     = wc_get_order( $order->get_id() );
+		$line_item = current( $order->get_items() );
+
+		$this->assertEquals( 21.6, $line_item->get_total(), 'The added line item should be discounted' );
+		$this->assertEqualsWithDelta( 1.94, (float) $line_item->get_total_tax(), 0.01, 'The line tax should use the editor country rate' );
+		$this->assertEqualsWithDelta( 23.54, (float) $order->get_total(), 0.01, 'The order total should use the editor country tax' );
+		$this->assertSame( '', $order->get_billing_country(), 'The unsaved billing country must not be persisted' );
 	}
 
 	/**

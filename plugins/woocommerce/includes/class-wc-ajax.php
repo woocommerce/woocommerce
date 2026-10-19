@@ -1322,6 +1322,12 @@ class WC_AJAX {
 			// Coupons already on the order were applied before these items existed, so apply them again to include the new items.
 			if ( ! empty( $added_items ) && $order instanceof WC_Order && $order->get_items( 'coupon' ) ) {
 				$order->recalculate_coupons();
+
+				// recalculate_coupons() uses the saved address for taxes, so use the address typed in the editor when there is one.
+				if ( ! empty( $tax_location['country'] ) ) {
+					$order->calculate_taxes( $tax_location );
+					$order->calculate_totals( false );
+				}
 			}
 
 			// Get HTML to return.
