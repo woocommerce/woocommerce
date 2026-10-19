@@ -118,6 +118,7 @@ export const AddToCartButton = ( {
 	className,
 	style,
 	collection,
+	noticeContext,
 }: AddToCartButtonAttributes ): JSX.Element => {
 	const {
 		id,
@@ -128,7 +129,10 @@ export const AddToCartButton = ( {
 		is_in_stock: isInStock,
 	} = product;
 	const { dispatchStoreEvent } = useStoreEvents();
-	const { cartQuantity, addingToCart, addToCart } = useStoreAddToCart( id );
+	const { cartQuantity, addingToCart, addToCart } = useStoreAddToCart(
+		id,
+		noticeContext
+	);
 	const addedToCart = Number.isFinite( cartQuantity ) && cartQuantity > 0;
 
 	// Check if this is a cart-contents collection
@@ -356,6 +360,7 @@ export const Block = ( props: BlockAttributes ): JSX.Element => {
 								}
 								productEntity={ props.product }
 								collection={ collection }
+								noticeContext={ props.noticeContext }
 							/>
 						) : (
 							<AddToCartButtonPlaceholder

@@ -61063,30 +61063,6 @@ parameters:
 			path: src/Internal/Logging/SafeGlobalFunctionProxy.php
 
 		-
-			message: '#^Call to an undefined method object\:\:create_server\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/MCP/MCPAdapterProvider.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\MCP\\Transport\\WooCommerceRestTransport\:\:check_permission\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
-			identifier: missingType.generics
-			count: 1
-			path: src/Internal/MCP/Transport/WooCommerceRestTransport.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\MCP\\Transport\\WooCommerceRestTransport\:\:validate_request\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
-			identifier: missingType.generics
-			count: 1
-			path: src/Internal/MCP/Transport/WooCommerceRestTransport.php
-
-		-
-			message: '#^Parameter \#1 \$request of method Automattic\\WooCommerce\\Internal\\MCP\\Transport\\WooCommerceRestTransport\:\:validate_request\(\) expects WP_REST_Request, WP_REST_Request\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/MCP/Transport/WooCommerceRestTransport.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\OrderCouponDataMigrator\:\:convert_item\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -65341,12 +65317,6 @@ parameters:
 			path: src/Internal/StockNotifications/Admin/ListTable.php
 
 		-
-			message: '#^Call to an undefined method Automattic\\WooCommerce\\Internal\\StockNotifications\\Admin\\ListTable\:\:get_product_formatted_variation_list\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/StockNotifications/Admin/ListTable.php
-
-		-
 			message: '#^Call to an undefined method WC_Data_Store\:\:query\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -65617,24 +65587,6 @@ parameters:
 			path: src/Internal/StockNotifications/AsyncTasks/CycleStateService.php
 
 		-
-			message: '#^Call to method error\(\) on an unknown class Automattic\\WooCommerce\\Internal\\StockNotifications\\AsyncTasks\\Logger\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Internal/StockNotifications/AsyncTasks/NotificationsProcessor.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\Internal\\StockNotifications\\AsyncTasks\\NotificationsProcessor\:\:\$logger \(Automattic\\WooCommerce\\Internal\\StockNotifications\\AsyncTasks\\Logger\) does not accept WC_Logger_Interface\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/Internal/StockNotifications/AsyncTasks/NotificationsProcessor.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\Internal\\StockNotifications\\AsyncTasks\\NotificationsProcessor\:\:\$logger has unknown class Automattic\\WooCommerce\\Internal\\StockNotifications\\AsyncTasks\\Logger as its type\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/StockNotifications/AsyncTasks/NotificationsProcessor.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\StockNotifications\\DataRetentionController\:\:clear_daily_task\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -65797,12 +65749,6 @@ parameters:
 			path: src/Internal/StockNotifications/Emails/CustomerStockNotificationVerifyEmail.php
 
 		-
-			message: '#^@param string \$url does not accept actual type of parameter\: string\|false\.$#'
-			identifier: parameter.phpDocType
-			count: 2
-			path: src/Internal/StockNotifications/Emails/EmailActionController.php
-
-		-
 			message: '#^Cannot call method get_name\(\) on WC_Product\|false\|null\.$#'
 			identifier: method.nonObject
 			count: 2
@@ -65840,12 +65786,6 @@ parameters:
 
 		-
 			message: '#^Call to method get_image_id\(\) on an unknown class Automattic\\WooCommerce\\Internal\\StockNotifications\\Emails\\WC_Product\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/StockNotifications/Emails/EmailTemplatesController.php
-
-		-
-			message: '#^Call to method get_name\(\) on an unknown class Automattic\\WooCommerce\\Internal\\StockNotifications\\Emails\\WC_Product\.$#'
 			identifier: class.notFound
 			count: 1
 			path: src/Internal/StockNotifications/Emails/EmailTemplatesController.php
@@ -65912,12 +65852,6 @@ parameters:
 
 		-
 			message: '#^Parameter \$product of method Automattic\\WooCommerce\\Internal\\StockNotifications\\Emails\\EmailTemplatesController\:\:email_product_price\(\) has invalid type Automattic\\WooCommerce\\Internal\\StockNotifications\\Emails\\WC_Product\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/StockNotifications/Emails/EmailTemplatesController.php
-
-		-
-			message: '#^Parameter \$product of method Automattic\\WooCommerce\\Internal\\StockNotifications\\Emails\\EmailTemplatesController\:\:email_product_title\(\) has invalid type Automattic\\WooCommerce\\Internal\\StockNotifications\\Emails\\WC_Product\.$#'
 			identifier: class.notFound
 			count: 1
 			path: src/Internal/StockNotifications/Emails/EmailTemplatesController.php
