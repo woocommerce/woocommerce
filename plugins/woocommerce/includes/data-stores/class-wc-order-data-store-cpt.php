@@ -955,7 +955,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		if ( ! empty( $wp_query_args['post_status'] ) ) {
 			$statuses = is_array( $wp_query_args['post_status'] ) ? $wp_query_args['post_status'] : explode( ',', $wp_query_args['post_status'] );
 
-			if ( empty( array_intersect( $statuses, array_merge( get_post_stati(), array( 'any' ) ) ) ) ) {
+			if ( empty( array_intersect( $statuses, array_merge( get_post_stati(), array( 'any', 'all' ) ) ) ) ) {
 				$wp_query_args['errors'][] = new WP_Error( 'woocommerce_order_query_unregistered_status', __( 'None of the requested order statuses is registered.', 'woocommerce' ) );
 			}
 		}

@@ -831,6 +831,7 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			'comma-separated registered'   => array( 'wc-processing,wc-completed', 2 ),
 			'comma-separated unregistered' => array( 'not-registered,also-not-registered', 0 ),
 			'any'                          => array( 'any', 2 ),
+			'all'                          => array( 'all', 2 ),
 		);
 	}
 
