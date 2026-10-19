@@ -52834,12 +52834,6 @@ parameters:
 			path: src/Blocks/Templates/AbstractTemplateCompatibility.php
 
 		-
-			message: '#^Parameter \$parent_block of method Automattic\\WooCommerce\\Blocks\\Templates\\AbstractTemplateCompatibility\:\:update_render_block_data\(\) has invalid type Automattic\\WooCommerce\\Blocks\\Templates\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/Templates/AbstractTemplateCompatibility.php
-
-		-
 			message: '#^Binary operation "\+" between int\|string and 1 results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 3
