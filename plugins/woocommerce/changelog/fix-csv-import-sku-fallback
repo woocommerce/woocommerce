@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Match product CSV rows by SKU when their ID does not exist on the site during an update import, instead of failing them.
