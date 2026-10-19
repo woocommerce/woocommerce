@@ -1,0 +1,377 @@
+{
+  "client/activity-panel/highlight-tooltip/index.js": {
+    "@wordpress/use-recommended-components": {
+      "count": 4
+    }
+  },
+  "client/analytics/components/leaderboard/index.js": {
+    "@wordpress/use-recommended-components": {
+      "count": 3
+    }
+  },
+  "client/analytics/report/customers/table.js": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "client/analytics/settings/import-mode-confirmation-modal.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "client/customize-store/index.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 3
+    }
+  },
+  "client/customize-store/site-hub/index.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "client/dashboard/dashboard-charts/block.js": {
+    "@wordpress/use-recommended-components": {
+      "count": 3
+    }
+  },
+  "client/homescreen/activity-panel/index.js": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "client/homescreen/activity-panel/reviews/index.js": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "client/homescreen/stats-overview/index.js": {
+    "@wordpress/use-recommended-components": {
+      "count": 4
+    }
+  },
+  "client/inbox-panel/index.js": {
+    "@wordpress/use-recommended-components": {
+      "count": 3
+    }
+  },
+  "client/launch-your-store/hub/main-content/components/resizable-frame.jsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "client/launch-your-store/hub/sidebar/components/launch-store-hub.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "client/launch-your-store/hub/sidebar/components/sidebar-container.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 3
+    }
+  },
+  "client/layout/NoMatch.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 2
+    }
+  },
+  "client/layout/store-alerts/index.js": {
+    "@wordpress/use-recommended-components": {
+      "count": 4
+    }
+  },
+  "client/layout/store-alerts/placeholder.js": {
+    "@wordpress/use-recommended-components": {
+      "count": 4
+    }
+  },
+  "client/marketing/components/CollapsibleCard/CollapsibleCard.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 5
+    }
+  },
+  "client/marketing/coupons/card/index.js": {
+    "@wordpress/use-recommended-components": {
+      "count": 3
+    }
+  },
+  "client/marketing/overview-multichannel/Campaigns/Campaigns.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 4
+    }
+  },
+  "client/marketing/overview-multichannel/Channels/Channels.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 4
+    }
+  },
+  "client/marketing/overview-multichannel/DiscoverTools/PluginsTabPanel.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "client/marketing/overview-multichannel/IntroductionBanner/IntroductionBanner.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "client/marketplace/components/header-account/header-account.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "client/marketplace/components/my-subscriptions/my-subscriptions.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "client/marketplace/components/my-subscriptions/notices.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "client/marketplace/components/product-card/product-card.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "client/marketplace/components/promo-card/promo-card.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 2
+    }
+  },
+  "client/mobile-app-login/index.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 2
+    }
+  },
+  "client/order-attribution-install-banner/order-attribution-install-banner.js": {
+    "@wordpress/use-recommended-components": {
+      "count": 2
+    }
+  },
+  "client/payments-welcome/apms.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 5
+    }
+  },
+  "client/payments-welcome/banner.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 3
+    }
+  },
+  "client/payments-welcome/faq-simple.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "client/payments/payment-recommendations.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 3
+    }
+  },
+  "client/settings-email/settings-email-listing-recipients.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "client/settings-email/settings-email-listing-status.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "client/settings-payments/components/buttons/back-button.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "client/settings-payments/components/ellipsis-menu-content/ellipsis-menu-content.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "client/settings-payments/components/incentive-banner/incentive-banner.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 2
+    }
+  },
+  "client/settings-payments/components/incentive-modal/incentive-modal.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 3
+    }
+  },
+  "client/settings-payments/components/payment-gateway-list-item/payment-gateway-list-item.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "client/settings-payments/components/settings/index.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 2
+    }
+  },
+  "client/settings-payments/onboarding/providers/woopayments/steps/payment-methods-selection/list-item.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "client/settings-recommendations/dismissable-list.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 2
+    }
+  },
+  "client/settings/conflict-error-slotfill.js": {
+    "@wordpress/use-recommended-components": {
+      "count": 2
+    }
+  },
+  "client/shipping/packlink-item.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "client/shipping/shipping-recommendations-utils.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "client/shipping/shipstation-item.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "client/shipping/woocommerce-shipping-item.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "client/store-management-links/index.js": {
+    "@wordpress/use-recommended-components": {
+      "count": 3
+    }
+  },
+  "client/task-lists/components/back-button.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "client/task-lists/components/task-list.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 2
+    }
+  },
+  "client/task-lists/fills/Marketing/TaskPromo.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 3
+    }
+  },
+  "client/task-lists/fills/Marketing/index.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 2
+    }
+  },
+  "client/task-lists/fills/PaymentGatewaySuggestions/components/List/Item.js": {
+    "@wordpress/use-recommended-components": {
+      "count": 3
+    }
+  },
+  "client/task-lists/fills/PaymentGatewaySuggestions/components/List/List.js": {
+    "@wordpress/use-recommended-components": {
+      "count": 3
+    }
+  },
+  "client/task-lists/fills/PaymentGatewaySuggestions/components/List/Placeholder.js": {
+    "@wordpress/use-recommended-components": {
+      "count": 5
+    }
+  },
+  "client/task-lists/fills/PaymentGatewaySuggestions/components/Setup/Placeholder.js": {
+    "@wordpress/use-recommended-components": {
+      "count": 2
+    }
+  },
+  "client/task-lists/fills/PaymentGatewaySuggestions/components/Setup/Setup.js": {
+    "@wordpress/use-recommended-components": {
+      "count": 2
+    }
+  },
+  "client/task-lists/fills/PaymentGatewaySuggestions/components/WCPayBNPL/Suggestion.js": {
+    "@wordpress/use-recommended-components": {
+      "count": 3
+    }
+  },
+  "client/task-lists/fills/products/product-recommendations.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "client/task-lists/fills/shipping-recommendation/shipping-recommendation.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 2
+    }
+  },
+  "client/task-lists/fills/shipping/index.js": {
+    "@wordpress/use-recommended-components": {
+      "count": 2
+    }
+  },
+  "client/task-lists/fills/tax/components/partners.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 3
+    }
+  },
+  "client/task-lists/fills/tax/index.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 2
+    }
+  },
+  "client/task-lists/setup-task-list/components/task-list-completed-header.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 2
+    }
+  },
+  "client/task-lists/setup-task-list/components/task-list-completed.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 2
+    }
+  },
+  "client/task-lists/setup-task-list/setup-task-list.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "client/tax/tax-recommendations.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 2
+    }
+  },
+  "client/wp-admin-scripts/email-editor-integration/reset-notification-email-content.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 3
+    }
+  },
+  "client/wp-admin-scripts/email-editor-integration/sidebar_settings.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "client/wp-admin-scripts/email-editor-integration/update-banner.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "client/wp-admin-scripts/fulfillments/components/shipment-form/shipment-tracking-number-form.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "client/wp-admin-scripts/print-shipping-label-banner/shipping-banner/index.js": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "client/wp-admin-scripts/woo-product-usage-notice/modal.js": {
+    "@wordpress/use-recommended-components": {
+      "count": 5
+    }
+  }
+}
