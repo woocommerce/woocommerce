@@ -109,7 +109,7 @@ class CreateAccount extends AbstractOrderConfirmationBlock {
 	 * @return string[]
 	 */
 	protected function get_block_type_style() {
-		return array_merge( parent::get_block_type_style(), [ 'wc-blocks-packages-style' ] );
+		return array_merge( (array) parent::get_block_type_style(), [ 'wc-blocks-packages-style' ] );
 	}
 
 	/**
