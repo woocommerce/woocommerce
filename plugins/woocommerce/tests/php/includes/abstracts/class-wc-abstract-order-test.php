@@ -1744,7 +1744,8 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	 */
 	public static function provide_failed_order_item_delete_queries(): array {
 		return array(
-			'item metadata delete' => array( 'DELETE itemmeta FROM' ),
+			'item ID lookup'       => array( 'SELECT order_item_id FROM {prefix}woocommerce_order_items WHERE order_id' ),
+			'item metadata delete' => array( 'DELETE FROM {prefix}woocommerce_order_itemmeta' ),
 			'item row delete'      => array( 'DELETE FROM {prefix}woocommerce_order_items' ),
 		);
 	}
