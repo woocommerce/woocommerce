@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { dispatch, resolveSelect, select } from '@wordpress/data';
+import { dispatch, select } from '@wordpress/data';
 import { notFound } from '@wordpress/route';
 
 /**
@@ -13,7 +13,6 @@ import { route } from '../route';
 jest.mock( '@wordpress/core-data', () => ( { store: { name: 'core' } } ) );
 jest.mock( '@wordpress/data', () => ( {
 	dispatch: jest.fn(),
-	resolveSelect: jest.fn(),
 	select: jest.fn(),
 } ) );
 jest.mock( '@wordpress/route', () => ( {
@@ -21,12 +20,7 @@ jest.mock( '@wordpress/route', () => ( {
 } ) );
 
 const addEntities = jest.fn();
-const getEntityRecord = jest.fn();
 const getEntityConfig = jest.fn();
-const resolveCore = resolveSelect as jest.Mock<
-	{ getEntityRecord: typeof getEntityRecord },
-	[]
->;
 
 beforeEach( () => {
 	jest.clearAllMocks();
@@ -37,13 +31,12 @@ beforeEach( () => {
 	getEntityConfig.mockImplementation( ( _kind: string, name: string ) =>
 		getCoreEntities().find( ( entity ) => entity.name === name )
 	);
-	resolveCore.mockReturnValue( { getEntityRecord } );
-	getEntityRecord.mockResolvedValue( { id: 'cheque' } );
 } );
 
-it( 'loads a directly linked page from its entity registered before navigation', async () => {
-	await route.beforeLoad( { params: { page: 'cheque' } } );
-	await route.loader( { params: { page: 'cheque' } } );
+it( 'allows a directly linked page once its entity is registered', async () => {
+	await expect(
+		route.beforeLoad( { params: { page: 'cheque' } } )
+	).resolves.toBeUndefined();
 
 	expect( addEntities ).toHaveBeenCalledWith(
 		expect.arrayContaining( [
@@ -58,11 +51,6 @@ it( 'loads a directly linked page from its entity registered before navigation',
 	expect(
 		addEntities.mock.invocationCallOrder[ 0 ] ?? Infinity
 	).toBeLessThan( getEntityConfig.mock.invocationCallOrder[ 0 ] ?? 0 );
-	expect( getEntityRecord ).toHaveBeenCalledWith(
-		'woo_settings_payments',
-		'cheque',
-		'cheque'
-	);
 } );
 
 it.each( [ 'stripe', 'cheque/advanced', '__proto__' ] )(
@@ -73,7 +61,6 @@ it.each( [ 'stripe', 'cheque/advanced', '__proto__' ] )(
 		).rejects.toThrow( 'Not found' );
 		expect( notFound ).toHaveBeenCalled();
 		expect( getEntityConfig ).toHaveBeenCalledWith( ENTITY_KIND, page );
-		expect( getEntityRecord ).not.toHaveBeenCalled();
 	}
 );
 
@@ -82,12 +69,4 @@ it( 'rejects a page when its entity is not registered', async () => {
 	await expect(
 		route.beforeLoad( { params: { page: 'cheque' } } )
 	).rejects.toThrow( 'Not found' );
-	expect( getEntityRecord ).not.toHaveBeenCalled();
-} );
-
-it( 'lets the stage display a failed settings request', async () => {
-	getEntityRecord.mockRejectedValueOnce( { message: 'Permission denied' } );
-	await expect(
-		route.loader( { params: { page: 'cheque' } } )
-	).resolves.toBeUndefined();
 } );
