@@ -20,7 +20,10 @@ defined( 'ABSPATH' ) || exit;
  * object of that resource returns the field values under
  * `extensions.<namespace>.<field>`, and lists the fields in its output schema.
  * An ActionableAbility writes the same `extensions` input to the fields that
- * have an `update_callback`, and saves the object one time.
+ * have an `update_callback`, runs the validators of the resource, and saves
+ * the object one time.
+ * An extension also registers a query filter, which the list ability of the
+ * resource accepts under `filters.extensions.<namespace>.<filter>`.
  *
  * The API is experimental while the `extensible_abilities` feature exists.
  *
@@ -45,6 +48,13 @@ class ExtensibleAbilities {
 	private static array $resources = array();
 
 	/**
+	 * Validators keyed by resource.
+	 *
+	 * @var array<string, array<int, array<string, mixed>>>
+	 */
+	private static array $validators = array();
+
+	/**
 	 * Fields already reported for a value that does not match the schema, keyed by resource, namespace and field.
 	 *
 	 * @var array<string, bool>
@@ -61,6 +71,18 @@ class ExtensibleAbilities {
 	public static function is_enabled(): bool {
 		return FeaturesUtil::feature_is_enabled( self::FEATURE_ID );
 	}
+
+	/**
+	 * Query filters keyed by resource, then namespace, then filter name.
+	 *
+	 * @var array<string, array<string, array<string, array<string, mixed>>>>
+	 */
+	private static array $filters = array();
+
+	/**
+	 * Query arguments that a filter callback can return.
+	 */
+	private const QUERY_ARG_KEYS = array( 'meta_query', 'tax_query', 'include_ids', 'exclude_ids' );
 
 	/**
 	 * Register a resource that abilities format, so extensions can register fields on it.
@@ -189,6 +211,321 @@ class ExtensibleAbilities {
 	}
 
 	/**
+	 * Register a filter that the list ability of a resource accepts under `filters.extensions.<namespace>.<filter>`.
+	 *
+	 * Call it inside the `woocommerce_extensible_abilities_init` action. A call after that action is refused.
+	 * The resource must be registered with `register_resource()`.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param array $args {
+	 *     Filter arguments.
+	 *
+	 *     @type string   $resource  Resource whose list ability applies the filters. Core's `products-query` and
+	 *                               `orders-query` apply the filters of `product` and `order`. The list ability
+	 *                               of another resource must call `get_query_args()` and `add_query_filters_schema()` itself.
+	 *     @type string   $namespace Slug of the extension that owns the filter, such as `subscriptions`.
+	 *     @type string   $filter    Filter name inside the namespace, such as `subscribable`.
+	 *     @type array    $schema    JSON schema of the value. Its `description` tells agents how to use the filter.
+	 *     @type callable $callback  Receives the value, sanitized with the schema, and returns query arguments:
+	 *                               a `meta_query`, for products also a `tax_query`, `include_ids` or
+	 *                               `exclude_ids`. Core adds each one to the query with AND. Return a
+	 *                               WP_Error to refuse the value. A `tax_query` is accepted only for
+	 *                               `product`. Any other key, or a `tax_query` for another resource, fails the call.
+	 *                               `include_ids` and `exclude_ids` are lists of object IDs. Use them for
+	 *                               data that is not meta, such as order items or a table of the extension:
+	 *                               query that data and return the IDs that match. Core keeps the IDs that
+	 *                               every `include_ids` filter returns, then drops the IDs that any
+	 *                               `exclude_ids` filter returns. An empty `include_ids` matches nothing.
+	 * }
+	 */
+	public static function register_query_filter( array $args ): void {
+		if ( did_action( 'woocommerce_extensible_abilities_init' ) && ! doing_action( 'woocommerce_extensible_abilities_init' ) ) {
+			wc_doing_it_wrong( __METHOD__, __( 'Register a filter inside the woocommerce_extensible_abilities_init action, before the abilities build their schemas.', 'woocommerce' ), '11.3.0' );
+			return;
+		}
+		foreach ( array( 'resource', 'namespace', 'filter' ) as $key ) {
+			if ( ! is_string( $args[ $key ] ?? null ) || '' === $args[ $key ] || sanitize_key( $args[ $key ] ) !== $args[ $key ] || ctype_digit( $args[ $key ] ) ) {
+				wc_doing_it_wrong(
+					__METHOD__,
+					sprintf(
+						/* translators: %s: argument name. */
+						__( 'The "%s" argument must be a slug of lowercase letters, numbers, dashes and underscores, not only numbers.', 'woocommerce' ),
+						$key
+					),
+					'11.3.0'
+				);
+				return;
+			}
+		}
+		if ( ! isset( self::$resources[ $args['resource'] ] ) ) {
+			wc_doing_it_wrong(
+				__METHOD__,
+				sprintf(
+					/* translators: %s: resource name. */
+					__( 'The "%s" resource is not registered. Call ExtensibleAbilities::register_resource() first.', 'woocommerce' ),
+					$args['resource']
+				),
+				'11.3.0'
+			);
+			return;
+		}
+		if ( ! is_array( $args['schema'] ?? null ) || ! isset( $args['schema']['type'] ) ) {
+			wc_doing_it_wrong( __METHOD__, __( 'The "schema" argument must be an array with a "type".', 'woocommerce' ), '11.3.0' );
+			return;
+		}
+		if ( ! is_callable( $args['callback'] ?? null ) ) {
+			wc_doing_it_wrong( __METHOD__, __( 'The "callback" argument must be callable.', 'woocommerce' ), '11.3.0' );
+			return;
+		}
+		if ( isset( self::$filters[ $args['resource'] ][ $args['namespace'] ][ $args['filter'] ] ) ) {
+			wc_doing_it_wrong(
+				__METHOD__,
+				sprintf(
+					/* translators: 1: extension namespace, 2: filter name, 3: resource name. */
+					__( 'The filter "%1$s.%2$s" of "%3$s" is already registered.', 'woocommerce' ),
+					$args['namespace'],
+					$args['filter'],
+					$args['resource']
+				),
+				'11.3.0'
+			);
+			return;
+		}
+
+		self::$filters[ $args['resource'] ][ $args['namespace'] ][ $args['filter'] ] = $args;
+	}
+
+	/**
+	 * Add the `filters.extensions` property to the input schema of a list
+	 * ability, when the feature is on and the resource has filters. It does
+	 * not allow other filters, because a filter that the query ignores
+	 * returns wrong results.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param array<string, mixed> $schema        Input schema.
+	 * @param string               $resource_name Resource.
+	 * @return array<string, mixed>
+	 */
+	public static function add_query_filters_schema( array $schema, string $resource_name ): array {
+		if ( empty( self::$filters[ $resource_name ] ) || ! self::is_enabled() ) {
+			return $schema;
+		}
+
+		$extensions = array(
+			'type'                 => 'object',
+			'description'          => __( 'Filters that extensions add, keyed by extension namespace, then filter.', 'woocommerce' ),
+			'properties'           => array(),
+			'additionalProperties' => false,
+		);
+		foreach ( self::$filters[ $resource_name ] as $namespace => $filters ) {
+			$extensions['properties'][ $namespace ] = array(
+				'type'                 => 'object',
+				'properties'           => array_map(
+					static function ( array $args ): array {
+						return $args['schema'];
+					},
+					$filters
+				),
+				'additionalProperties' => false,
+			);
+		}
+		$schema['properties']['filters'] = array(
+			'type'                 => 'object',
+			'properties'           => array( 'extensions' => $extensions ),
+			'additionalProperties' => false,
+		);
+		return $schema;
+	}
+
+	/**
+	 * Get the query arguments of the filters in the input of a list ability.
+	 * Each key holds one clause for each filter, so `array_merge_recursive()`
+	 * adds them to WP_Query or wc_get_orders() arguments with AND. `post__in`
+	 * holds the IDs that every `include_ids` filter returned, without the IDs
+	 * that any `exclude_ids` filter returned, or `0` when none remain, because
+	 * an empty `post__in` does not filter. Without `include_ids`, the excluded
+	 * IDs go to `post__not_in`, which WP_Query ignores next to `post__in`.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param string               $resource_name Resource.
+	 * @param array<string, mixed> $input         Ability input.
+	 * @return array<string, array>|\WP_Error The error of a filter that refused its value or failed.
+	 */
+	public static function get_query_args( string $resource_name, array $input ) {
+		$query_args = array();
+		$include    = null;
+		$exclude    = array();
+		if ( ! self::is_enabled() ) {
+			return $query_args;
+		}
+
+		foreach ( self::$filters[ $resource_name ] ?? array() as $namespace => $filters ) {
+			foreach ( $filters as $filter => $args ) {
+				if ( ! is_array( $input['filters']['extensions'][ $namespace ] ?? null ) || ! array_key_exists( $filter, $input['filters']['extensions'][ $namespace ] ) ) {
+					continue;
+				}
+
+				$value = rest_sanitize_value_from_schema( $input['filters']['extensions'][ $namespace ][ $filter ], $args['schema'], $filter );
+				try {
+					$clauses = call_user_func( $args['callback'], $value );
+				} catch ( \Throwable $e ) {
+					wc_get_logger()->error(
+						sprintf( 'Ability filter "%s.%s" of "%s" failed: %s', $namespace, $filter, $resource_name, $e->getMessage() ),
+						array( 'source' => 'extensible-abilities' )
+					);
+					$clauses = null;
+				}
+				if ( is_wp_error( $clauses ) ) {
+					return $clauses;
+				}
+				if (
+					! is_array( $clauses )
+					|| ! empty( array_diff_key( $clauses, array_flip( self::QUERY_ARG_KEYS ) ) )
+					|| ( 'product' !== $resource_name && isset( $clauses['tax_query'] ) )
+					|| in_array( false, array_map( 'is_array', $clauses ), true )
+				) {
+					return new \WP_Error(
+						'woocommerce_ability_extension_filter_failed',
+						/* translators: %s: filter name, such as subscriptions.subscribable. */
+						sprintf( __( 'The "%s" filter failed.', 'woocommerce' ), $namespace . '.' . $filter ),
+						array( 'status' => 500 )
+					);
+				}
+				if ( isset( $clauses['include_ids'] ) ) {
+					$filter_ids = self::get_filter_ids( $clauses['include_ids'], $namespace . '.' . $filter );
+					if ( is_wp_error( $filter_ids ) ) {
+						return $filter_ids;
+					}
+					$include = null === $include ? $filter_ids : array_values( array_intersect( $include, $filter_ids ) );
+					unset( $clauses['include_ids'] );
+				}
+				if ( isset( $clauses['exclude_ids'] ) ) {
+					$filter_ids = self::get_filter_ids( $clauses['exclude_ids'], $namespace . '.' . $filter );
+					if ( is_wp_error( $filter_ids ) ) {
+						return $filter_ids;
+					}
+					$exclude = array_merge( $exclude, $filter_ids );
+					unset( $clauses['exclude_ids'] );
+				}
+				foreach ( $clauses as $key => $clause ) {
+					if ( empty( $clause ) ) {
+						continue;
+					}
+					$query_args[ $key ][] = $clause;
+				}
+			}
+		}
+		if ( null !== $include ) {
+			$include                = array_values( array_diff( $include, $exclude ) );
+			$query_args['post__in'] = empty( $include ) ? array( 0 ) : $include;
+		} elseif ( ! empty( $exclude ) ) {
+			$query_args['post__not_in'] = array_values( array_unique( $exclude ) );
+		}
+		return $query_args;
+	}
+
+	/**
+	 * The IDs that a filter returned, as integers.
+	 *
+	 * @param array  $ids    IDs from the filter callback.
+	 * @param string $filter Filter name, such as `subscriptions.related_to`.
+	 * @return int[]|\WP_Error An error when an ID is not a positive integer.
+	 */
+	private static function get_filter_ids( array $ids, string $filter ) {
+		$valid = array_filter(
+			array_map(
+				static fn( $id ) => filter_var( $id, FILTER_VALIDATE_INT, array( 'options' => array( 'min_range' => 1 ) ) ),
+				$ids
+			)
+		);
+		if ( count( $valid ) !== count( $ids ) ) {
+			return new \WP_Error(
+				'woocommerce_ability_extension_filter_failed',
+				/* translators: %s: filter name, such as subscriptions.subscribable. */
+				sprintf( __( 'The "%s" filter failed.', 'woocommerce' ), $filter ),
+				array( 'status' => 500 )
+			);
+		}
+		return array_values( array_unique( $valid ) );
+	}
+
+	/**
+	 * Register a validator that can refuse a change to an object of a resource.
+	 *
+	 * Call it inside the `woocommerce_extensible_abilities_init` action. Validators
+	 * run only when the `extensible_abilities` feature is on.
+	 *
+	 * Use a field `update_callback` to refuse a bad value of one field. It runs
+	 * only when the input sends that field. Use a validator to refuse a change as
+	 * a whole. It runs on every change of the resource, also when the input sends
+	 * no extension fields. For example, a validator refuses a product change that
+	 * would break a subscription plan.
+	 *
+	 * Core's product abilities run validators. Core's order abilities keep their
+	 * trunk write for now, so validators for `order` run only in the
+	 * ActionableAbility classes of extensions.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param array $args {
+	 *     Validator arguments.
+	 *
+	 *     @type string   $resource  Resource that an ActionableAbility changes, such as `product`.
+	 *     @type string   $namespace Slug of the extension that owns the validator, such as `subscriptions`.
+	 *     @type callable $callback  Receives the changed object and the ability, after Core's changes and the
+	 *                               field callbacks, before the one save. It returns a WP_Error to refuse the
+	 *                               change, and then nothing is saved. The error gets the namespace in its
+	 *                               data, and the 400 status when it has no status. Its message can name the
+	 *                               ability or screen to use instead. Rules:
+	 *                               1. It only reads. It does not change the object, save, send email or
+	 *                                  make HTTP requests.
+	 *                               2. It checks the ability name when the extension's own abilities
+	 *                                  change the same resource.
+	 * }
+	 */
+	public static function register_validator( array $args ): void {
+		if ( did_action( 'woocommerce_extensible_abilities_init' ) && ! doing_action( 'woocommerce_extensible_abilities_init' ) ) {
+			wc_doing_it_wrong( __METHOD__, __( 'Register a validator inside the woocommerce_extensible_abilities_init action.', 'woocommerce' ), '11.3.0' );
+			return;
+		}
+		foreach ( array( 'resource', 'namespace' ) as $key ) {
+			if ( ! is_string( $args[ $key ] ?? null ) || '' === $args[ $key ] || sanitize_key( $args[ $key ] ) !== $args[ $key ] ) {
+				wc_doing_it_wrong(
+					__METHOD__,
+					sprintf(
+						/* translators: %s: argument name. */
+						__( 'The "%s" argument must be a slug of lowercase letters, numbers, dashes and underscores.', 'woocommerce' ),
+						$key
+					),
+					'11.3.0'
+				);
+				return;
+			}
+		}
+		if ( ! is_callable( $args['callback'] ?? null ) ) {
+			wc_doing_it_wrong( __METHOD__, __( 'The "callback" argument must be callable.', 'woocommerce' ), '11.3.0' );
+			return;
+		}
+		if ( ! isset( self::$resources[ $args['resource'] ] ) ) {
+			wc_doing_it_wrong(
+				__METHOD__,
+				sprintf(
+					/* translators: %s: resource name. */
+					__( 'The "%s" resource is not registered. Call ExtensibleAbilities::register_resource() first.', 'woocommerce' ),
+					$args['resource']
+				),
+				'11.3.0'
+			);
+			return;
+		}
+
+		self::$validators[ $args['resource'] ][] = $args;
+	}
+
+	/**
 	 * Add the field values of an object to its formatted output, under
 	 * `extensions.<namespace>.<field>`. A value is cast to its schema type, so
 	 * `'12'` becomes `12` for an integer field. A field that throws or returns a
@@ -285,6 +622,18 @@ class ExtensibleAbilities {
 	 */
 	public static function get_fields( string $resource_name ): array {
 		return self::$fields[ $resource_name ] ?? array();
+	}
+
+	/**
+	 * Validators of a resource.
+	 *
+	 * @internal
+	 *
+	 * @param string $resource_name Resource.
+	 * @return array<int, array<string, mixed>>
+	 */
+	public static function get_validators( string $resource_name ): array {
+		return self::$validators[ $resource_name ] ?? array();
 	}
 
 	/**

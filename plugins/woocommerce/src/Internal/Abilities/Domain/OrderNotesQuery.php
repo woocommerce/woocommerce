@@ -104,20 +104,6 @@ class OrderNotesQuery extends AbstractDomainAbility implements AbilityDefinition
 	}
 
 	/**
-	 * Check order read access for an ability input payload.
-	 *
-	 * @param mixed $input Ability input.
-	 * @return bool
-	 *
-	 * @since 11.3.0
-	 */
-	public static function can_view_order( $input = array() ): bool {
-		$order_id = self::get_id_from_input( $input );
-
-		return $order_id > 0 && wc_rest_check_post_permissions( 'shop_order', 'read', $order_id );
-	}
-
-	/**
 	 * Get the ability input schema.
 	 *
 	 * @return array
