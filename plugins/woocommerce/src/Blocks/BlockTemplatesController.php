@@ -226,6 +226,10 @@ class BlockTemplatesController {
 	 * @return array The block templates.
 	 */
 	public function run_hooks_on_block_templates( $templates ) {
+		if ( ! is_array( $templates ) ) {
+			$templates = array();
+		}
+
 		foreach ( $templates as $template ) {
 			if ( 'plugin' === $template->source && 'woocommerce' === $template->plugin ) {
 				$template->content = apply_block_hooks_to_content( $template->content, $template, 'insert_hooked_blocks_and_set_ignored_hooked_blocks_metadata' );
@@ -246,6 +250,10 @@ class BlockTemplatesController {
 	 * @return array
 	 */
 	public function add_db_templates_with_woo_slug( $query_result, $query, $template_type ) {
+		if ( ! is_array( $query_result ) ) {
+			$query_result = array();
+		}
+
 		$slugs = isset( $query['slug__in'] ) ? $query['slug__in'] : array();
 
 		if ( ! BlockTemplateUtils::supports_block_templates( $template_type ) && ! in_array( ComingSoonTemplate::SLUG, $slugs, true ) ) {

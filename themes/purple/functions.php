@@ -32,8 +32,8 @@ if ( ! function_exists( 'purple_hide_store_templates_from_template_picker' ) ) :
 	 * @param string              $template_type wp_template or wp_template_part.
 	 * @return WP_Block_Template[]
 	 */
-	function purple_hide_store_templates_from_template_picker( array $templates, array $query, string $template_type ): array {
-		if ( 'wp_template' !== $template_type || empty( $query['post_type'] ) ) {
+	function purple_hide_store_templates_from_template_picker( $templates, $query, $template_type ) {
+		if ( ! is_array( $templates ) || 'wp_template' !== $template_type || empty( $query['post_type'] ) ) {
 			return $templates;
 		}
 
