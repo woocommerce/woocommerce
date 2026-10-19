@@ -708,22 +708,31 @@ class WC_Checkout {
 	 * Tax amounts aren't compared: recalculating the order's totals recalculates item taxes, which can then differ
 	 * slightly from the cart's, for example when prices include tax and tax is rounded at subtotal.
 	 *
-	 * @param WC_Order_Item[] $line_items The order's line items.
-	 * @param WC_Cart         $cart       The cart.
+	 * @param WC_Order_Item[] $line_items    The order's line items.
+	 * @param WC_Cart         $cart          The cart.
+	 * @param bool            $compare_taxes Whether to compare tax amounts too, for orders whose totals weren't recalculated.
 	 * @return bool
 	 */
-	private function line_items_match_cart( array $line_items, WC_Cart $cart ): bool {
+	private function line_items_match_cart( array $line_items, WC_Cart $cart, bool $compare_taxes = false ): bool {
 		$order_values = array();
 		foreach ( $line_items as $item ) {
 			if ( ! $item instanceof WC_Order_Item_Product ) {
 				return false;
 			}
-			$order_values[] = $this->get_line_item_values( $item->get_product_id(), $item->get_variation_id(), $item->get_quantity(), $item->get_subtotal(), $item->get_total() );
+			$values = array( $item->get_product_id(), $item->get_variation_id(), $item->get_quantity(), $item->get_subtotal(), $item->get_total() );
+			if ( $compare_taxes ) {
+				array_push( $values, $item->get_subtotal_tax( 'edit' ), $item->get_total_tax( 'edit' ) );
+			}
+			$order_values[] = $this->get_compared_values( ...$values );
 		}
 
 		$cart_values = array();
-		foreach ( $cart->get_cart() as $values ) {
-			$cart_values[] = $this->get_line_item_values( $values['product_id'] ?? 0, $values['variation_id'] ?? 0, $values['quantity'] ?? 0, $values['line_subtotal'] ?? 0, $values['line_total'] ?? 0 );
+		foreach ( $cart->get_cart() as $cart_item ) {
+			$values = array( $cart_item['product_id'] ?? 0, $cart_item['variation_id'] ?? 0, $cart_item['quantity'] ?? 0, $cart_item['line_subtotal'] ?? 0, $cart_item['line_total'] ?? 0 );
+			if ( $compare_taxes ) {
+				array_push( $values, $cart_item['line_subtotal_tax'] ?? 0, $cart_item['line_tax'] ?? 0 );
+			}
+			$cart_values[] = $this->get_compared_values( ...$values );
 		}
 
 		sort( $order_values );
@@ -733,12 +742,79 @@ class WC_Checkout {
 	}
 
 	/**
-	 * Joins a line item's product, quantity and amounts into one string, rounded so order and cart values compare equal.
+	 * The order item types whose amounts no longer add up to the cart's, for example after a merchant edits the order.
 	 *
-	 * @param int|float|string ...$values Product ID, variation ID, quantity, subtotal and total.
+	 * Only for the classic checkout: it copies amounts from the cart without recalculating them, so unchanged items
+	 * match the cart exactly, tax amounts included. Shipping is only compared once the cart has evaluated it.
+	 *
+	 * @param WC_Order $order The resumed order.
+	 * @param WC_Cart  $cart  The cart.
+	 * @return string[]
+	 */
+	private function get_order_item_types_not_matching_cart_amounts( WC_Order $order, WC_Cart $cart ): array {
+		$order_values = array(
+			OrderItemType::FEE    => array(),
+			OrderItemType::COUPON => array(),
+			OrderItemType::TAX    => array(),
+		);
+		$cart_values  = $order_values;
+
+		foreach ( $order->get_fees() as $fee ) {
+			$order_values[ OrderItemType::FEE ][] = $this->get_compared_values( $fee->get_total( 'edit' ), $fee->get_total_tax( 'edit' ) );
+		}
+		foreach ( $cart->get_fees() as $fee ) {
+			$cart_values[ OrderItemType::FEE ][] = $this->get_compared_values( $fee->total, $fee->tax );
+		}
+
+		foreach ( $order->get_coupons() as $coupon ) {
+			$order_values[ OrderItemType::COUPON ][] = $coupon->get_code( 'edit' ) . '|' . $this->get_compared_values( $coupon->get_discount( 'edit' ), $coupon->get_discount_tax( 'edit' ) );
+		}
+		foreach ( array_keys( $cart->get_coupons() ) as $code ) {
+			$cart_values[ OrderItemType::COUPON ][] = $code . '|' . $this->get_compared_values( $cart->get_coupon_discount_amount( $code ), $cart->get_coupon_discount_tax_amount( $code ) );
+		}
+
+		foreach ( $order->get_taxes() as $tax ) {
+			$order_values[ OrderItemType::TAX ][] = $this->get_compared_values( $tax->get_rate_id( 'edit' ), $tax->get_tax_total( 'edit' ), $tax->get_shipping_tax_total( 'edit' ) );
+		}
+		foreach ( array_keys( $cart->get_cart_contents_taxes() + $cart->get_shipping_taxes() + $cart->get_fee_taxes() ) as $rate_id ) {
+			$cart_values[ OrderItemType::TAX ][] = $this->get_compared_values( $rate_id, $cart->get_tax_amount( $rate_id ), $cart->get_shipping_tax_amount( $rate_id ) );
+		}
+
+		if ( $this->cart_has_evaluated_shipping( $cart ) ) {
+			$shipping_total = 0;
+			$shipping_tax   = 0;
+			foreach ( $order->get_shipping_methods() as $shipping ) {
+				$shipping_total += (float) $shipping->get_total( 'edit' );
+				$shipping_tax   += (float) $shipping->get_total_tax( 'edit' );
+			}
+			$order_values[ OrderItemType::SHIPPING ] = array( $this->get_compared_values( $shipping_total, $shipping_tax ) );
+			$cart_values[ OrderItemType::SHIPPING ]  = array( $this->get_compared_values( $cart->get_shipping_total(), $cart->get_shipping_tax() ) );
+		}
+
+		$changed_types = array();
+		foreach ( $order_values as $item_type => $values ) {
+			$cart_type_values = $cart_values[ $item_type ] ?? array();
+			sort( $values );
+			sort( $cart_type_values );
+			if ( $values !== $cart_type_values ) {
+				$changed_types[] = $item_type;
+			}
+		}
+
+		if ( ! $this->line_items_match_cart( $order->get_items( OrderItemType::LINE_ITEM ), $cart, true ) ) {
+			$changed_types[] = OrderItemType::LINE_ITEM;
+		}
+
+		return $changed_types;
+	}
+
+	/**
+	 * Joins IDs, quantities and amounts into one string, rounded so order and cart values compare equal.
+	 *
+	 * @param int|float|string ...$values The values to compare.
 	 * @return string
 	 */
-	private function get_line_item_values( ...$values ): string {
+	private function get_compared_values( ...$values ): string {
 		return implode( '|', array_map( fn( $value ) => wc_format_decimal( $value, wc_get_rounding_precision() ), $values ) );
 	}
 
@@ -746,8 +822,9 @@ class WC_Checkout {
 	 * Removes the items of a resumed order that no longer match the cart, and returns the item types it kept.
 	 *
 	 * Only cart-created items of unchanged types are kept: line items, whose cart hash already matches, and types whose
-	 * section hash matches. A type with a missing cart item is rebuilt, as is every type when the order has no record of
-	 * its cart items. Other items, such as ones extensions add at checkout, are removed so they aren't duplicated.
+	 * section hash matches. A type with a missing cart item, or whose amounts no longer match the cart, is rebuilt, as is
+	 * every type when the order has no record of its cart items. Other items, such as ones extensions add at checkout, are
+	 * removed so they aren't duplicated.
 	 *
 	 * @param WC_Abstract_Order     $order       The resumed order.
 	 * @param array<string, string> $cart_hashes Cart hashes from CartController::get_cart_hashes().
@@ -764,13 +841,13 @@ class WC_Checkout {
 		}
 
 		// Keep only the items the cart created. A type that's missing one of them is added again from the cart.
-		$incomplete_types = array();
+		$changed_types = array();
 		foreach ( $this->get_cart_order_item_types() as $item_type ) {
 			$cart_item_ids = array_map( 'absint', (array) ( $cart_order_item_ids[ $item_type ] ?? array() ) );
 			$order_items   = $order->get_items( $item_type );
 
 			if ( array_diff( $cart_item_ids, array_keys( $order_items ) ) ) {
-				$incomplete_types[] = $item_type;
+				$changed_types[] = $item_type;
 				continue;
 			}
 
@@ -779,12 +856,15 @@ class WC_Checkout {
 			}
 		}
 
-		// Incomplete types still have to be removed when the cart check kept them; types it removed aren't removed again.
+		// Kept items have to add up to the cart's amounts, since the order's totals are set from the cart.
+		$changed_types = array_unique( array_merge( $changed_types, $this->get_order_item_types_not_matching_cart_amounts( $order, WC()->cart ) ) );
+
+		// Changed types still have to be removed when the cart check kept them; types it removed aren't removed again.
 		$matching_types = $this->remove_order_items_not_matching_cart( $order, WC()->cart, $cart_hashes );
-		foreach ( array_intersect( $matching_types, $incomplete_types ) as $item_type ) {
+		foreach ( array_intersect( $matching_types, $changed_types ) as $item_type ) {
 			$order->remove_order_items( $item_type );
 		}
-		$kept_types = array_values( array_diff( $matching_types, $incomplete_types ) );
+		$kept_types = array_values( array_diff( $matching_types, $changed_types ) );
 
 		// Read the types directly: get_items() only finds types registered with woocommerce_order_type_to_group, so it would miss some extension items.
 		$persisted_types = $wpdb->get_col(

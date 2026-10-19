@@ -1126,6 +1126,58 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Resuming a pending order replaces the items whose amounts a merchant edited, and keeps items edited without changing amounts.
+	 * @testWith ["none", ""]
+	 *           ["line_item_name", ""]
+	 *           ["line_item_tax", "line_item"]
+	 *           ["shipping_total", "shipping"]
+	 *           ["shipping_tax", "shipping"]
+	 *           ["tax_line", "tax"]
+	 *           ["fee_total", "fee"]
+	 *           ["coupon_discount", "coupon"]
+	 *
+	 * @param string $edit          The merchant edit to make to the order.
+	 * @param string $replaced_type The item type that should be replaced, or an empty string when none should be.
+	 */
+	public function test_create_order_resume_replaces_items_with_edited_amounts( string $edit, string $replaced_type ): void {
+		$customer          = WC()->customer;
+		$original_customer = array(
+			'billing_country'  => $customer->get_billing_country(),
+			'shipping_country' => $customer->get_shipping_country(),
+			'is_vat_exempt'    => $customer->get_is_vat_exempt(),
+		);
+		try {
+			$order_id = $this->create_order_with_shipping_taxes_and_coupon();
+			$before   = $this->get_order_item_ids_by_type( $order_id );
+			$this->edit_order_item_amounts( wc_get_order( $order_id ), $edit );
+
+			$this->resume_order( $order_id );
+			$after     = $this->get_order_item_ids_by_type( $order_id );
+			$order     = wc_get_order( $order_id );
+			$cart_tax  = (float) WC()->cart->get_total_tax();
+			$cart_ship = (float) WC()->cart->get_shipping_total();
+		} finally {
+			$customer->set_billing_country( $original_customer['billing_country'] );
+			$customer->set_shipping_country( $original_customer['shipping_country'] );
+			$customer->set_is_vat_exempt( $original_customer['is_vat_exempt'] );
+			WC_Helper_Shipping::delete_simple_flat_rate();
+		}
+
+		$this->assertSame( array( 'coupon', 'fee', 'line_item', 'shipping', 'tax' ), array_keys( $before ), 'The order should have every cart item type.' );
+		foreach ( $before as $type => $ids ) {
+			if ( $type === $replaced_type ) {
+				$this->assertCount( count( $ids ), $after[ $type ], "The edited {$type} items should be added again once." );
+				$this->assertEmpty( array_intersect( $ids, $after[ $type ] ), "The edited {$type} items should be replaced." );
+			} else {
+				$this->assertSame( $ids, $after[ $type ], "The {$type} items should keep their IDs." );
+			}
+		}
+		$this->assertSame( (float) WC()->cart->get_total( 'edit' ), (float) $order->get_total(), 'The order total should match the cart.' );
+		$this->assertEqualsWithDelta( $cart_tax, (float) $order->get_total_tax(), 0.001, 'The order tax total should match the cart.' );
+		$this->assertEqualsWithDelta( $cart_ship, (float) $order->get_shipping_total(), 0.001, 'The order shipping total should match the cart.' );
+	}
+
+	/**
 	 * @testdox Resuming a pending order replaces every item when woocommerce_checkout_keep_order_items_on_resume returns false.
 	 */
 	public function test_create_order_resume_replaces_all_items_when_keeping_is_filtered_off(): void {
@@ -1284,6 +1336,101 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		$this->assertIsInt( $order_id );
 
 		return $order_id;
+	}
+
+	/**
+	 * Creates an order from a taxed cart with one product, one fee, a coupon and flat rate shipping, shipped to Germany.
+	 * The caller restores the customer's countries and deletes the flat rate.
+	 *
+	 * @return int The order ID.
+	 */
+	private function create_order_with_shipping_taxes_and_coupon(): int {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'DE',
+				'tax_rate'          => '19.0000',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+		WC_Helper_Shipping::create_simple_flat_rate( 10 );
+		WC()->customer->set_billing_country( 'DE' );
+		WC()->customer->set_shipping_country( 'DE' );
+		WC()->customer->set_is_vat_exempt( false );
+		$coupon = WC_Helper_Coupon::create_coupon( 'resume-coupon' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		add_action(
+			'woocommerce_cart_calculate_fees',
+			function ( WC_Cart $cart ) {
+				$cart->add_fee( 'Handling', 5, true );
+			}
+		);
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->apply_coupon( $coupon->get_code() );
+		WC()->cart->calculate_totals();
+		$this->assertTrue( WC()->cart->has_calculated_shipping(), 'The cart should have calculated shipping.' );
+
+		$order_id = $this->sut->create_order( array( 'payment_method' => WC_Gateway_BACS::ID ) );
+		$this->assertIsInt( $order_id );
+
+		return $order_id;
+	}
+
+	/**
+	 * Edits an order's items the way a merchant can in the order editor, without recalculating the order.
+	 *
+	 * @param WC_Order $order The order.
+	 * @param string   $edit  The edit to make.
+	 */
+	private function edit_order_item_amounts( WC_Order $order, string $edit ): void {
+		$line_item = array_values( $order->get_items() )[0];
+		$shipping  = array_values( $order->get_shipping_methods() )[0];
+		$tax       = array_values( $order->get_taxes() )[0];
+		$fee       = array_values( $order->get_fees() )[0];
+		$coupon    = array_values( $order->get_coupons() )[0];
+		$rate_id   = $tax->get_rate_id();
+
+		switch ( $edit ) {
+			case 'line_item_name':
+				$line_item->set_name( 'Renamed product' );
+				$line_item->save();
+				break;
+			case 'line_item_tax':
+				$line_item->set_taxes(
+					array(
+						'total'    => array( $rate_id => (float) $line_item->get_total_tax() + 1 ),
+						'subtotal' => array( $rate_id => (float) $line_item->get_subtotal_tax() + 1 ),
+					)
+				);
+				$line_item->save();
+				break;
+			case 'shipping_total':
+				$shipping->set_total( (float) $shipping->get_total() + 5 );
+				$shipping->save();
+				break;
+			case 'shipping_tax':
+				$shipping->set_taxes( array( 'total' => array( $rate_id => (float) $shipping->get_total_tax() + 1 ) ) );
+				$shipping->save();
+				break;
+			case 'tax_line':
+				$tax->set_tax_total( (float) $tax->get_tax_total() + 1 );
+				$tax->save();
+				break;
+			case 'fee_total':
+				$fee->set_total( (float) $fee->get_total() + 1 );
+				$fee->save();
+				break;
+			case 'coupon_discount':
+				$coupon->set_discount( (float) $coupon->get_discount() + 1 );
+				$coupon->save();
+				break;
+		}
 	}
 
 	/**
