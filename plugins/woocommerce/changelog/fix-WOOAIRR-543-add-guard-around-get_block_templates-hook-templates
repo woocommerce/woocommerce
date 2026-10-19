@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent fatal if plugin returns a non-array value in the get_block_templates filter
