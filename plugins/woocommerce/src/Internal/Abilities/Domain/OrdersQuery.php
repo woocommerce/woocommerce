@@ -8,6 +8,8 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
+use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
+use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderAbilityTrait;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
@@ -75,6 +77,14 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 	 */
 	public static function execute( array $input ) {
 		$include_line_items = (bool) ( $input['include_line_items'] ?? false );
+
+		if ( ! empty( $input['id'] ) && ! empty( $input['filters'] ) ) {
+			return new \WP_Error(
+				'woocommerce_ability_filters_with_id',
+				__( 'Send either an id or filters, not both.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
+		}
 
 		if ( ! empty( $input['id'] ) ) {
 			$order = self::get_order_from_input( $input );
@@ -146,6 +156,26 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 			$args['date_query'][] = $modified_date_query;
 		}
 
+		$extension_args = ExtensibleAbilities::get_query_args( 'order', $input );
+		if ( is_wp_error( $extension_args ) ) {
+			return $extension_args;
+		}
+
+		if ( isset( $extension_args['post__not_in'] ) ) {
+			$args['exclude'] = array_merge( (array) ( $args['exclude'] ?? array() ), $extension_args['post__not_in'] );
+			unset( $extension_args['post__not_in'] );
+		}
+		if ( isset( $extension_args['post__in'] ) && ! empty( $args['exclude'] ) ) {
+			$include                    = array_values( array_diff( $extension_args['post__in'], (array) $args['exclude'] ) );
+			$extension_args['post__in'] = empty( $include ) ? array( 0 ) : $include;
+		}
+
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$args = array_merge_recursive( $args, $extension_args );
+		} else {
+			$args[ AbilitiesLoader::EXTENSION_QUERY_VAR ] = $extension_args;
+		}
+
 		$results = wc_get_orders( $args );
 		$orders  = is_object( $results ) && isset( $results->orders ) ? $results->orders : array();
 		$orders  = array_values(
@@ -209,7 +239,7 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 	 * @return array
 	 */
 	private static function get_input_schema(): array {
-		return array(
+		$schema = array(
 			'type'                 => 'object',
 			'properties'           => array(
 				'id'                 => array(
@@ -311,6 +341,7 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 			'additionalProperties' => false,
 			'default'              => array(),
 		);
+		return ExtensibleAbilities::add_query_filters_schema( $schema, 'order' );
 	}
 
 	/**
@@ -378,15 +409,17 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 	}
 
 	/**
-	 * Add the `wc-` prefix to a status that is registered with it. The order
-	 * query adds the prefix only to order statuses, not to the statuses of
-	 * other order types.
+	 * Add the `wc-` prefix to a status of another order type that is registered
+	 * with it. The order query adds the prefix to order statuses itself, so those
+	 * stay without it, as `woocommerce_order_query_args` callbacks expect.
 	 *
 	 * @param string $status Status slug without the `wc-` prefix.
 	 * @return string
 	 */
 	private static function prepare_status_arg( string $status ): string {
-		return in_array( 'wc-' . $status, get_post_stati(), true ) ? 'wc-' . $status : $status;
+		$prefixed = 'wc-' . $status;
+
+		return ! wc_is_order_status( $prefixed ) && in_array( $prefixed, get_post_stati(), true ) ? $prefixed : $status;
 	}
 
 	/**
