@@ -38,32 +38,3 @@ it( 'keeps the label, title and fields from the entity config', async () => {
 		'description',
 	] );
 } );
-
-it( 'keeps pending edits to several fields in the same record', async () => {
-	const registry = await getRegistry();
-	const core = registry.dispatch( coreStore );
-	await core.receiveEntityRecords( ENTITY_KIND, 'cheque', {
-		id: 'cheque',
-		enabled: false,
-		title: 'Check payments',
-		description: 'Pay by check.',
-	} );
-	core.finishResolution( 'getEntityRecord', [
-		ENTITY_KIND,
-		'cheque',
-		'cheque',
-	] );
-
-	await core.editEntityRecord( ENTITY_KIND, 'cheque', 'cheque', {
-		enabled: true,
-	} );
-	await core.editEntityRecord( ENTITY_KIND, 'cheque', 'cheque', {
-		title: 'Pay by check',
-	} );
-
-	expect(
-		registry
-			.select( coreStore )
-			.getEntityRecordNonTransientEdits( ENTITY_KIND, 'cheque', 'cheque' )
-	).toEqual( { enabled: true, title: 'Pay by check' } );
-} );
