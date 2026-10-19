@@ -28,7 +28,6 @@ const useProductTypeListItems = (
 
 	const productTypes = useMemo(
 		() =>
-			// The cast lets `after` hold the spinner; the literal item types only allow their own `after`.
 			_productTypes.map( ( productType: ProductTypeWithOnclick ) => ( {
 				...productType,
 				...( requestingType === productType.key && {
@@ -56,6 +55,7 @@ const useProductTypeListItems = (
 						onClick();
 					}
 				},
+				// The cast lets `after` hold the spinner; the literal item types only allow their own `after`.
 			} ) ) as Array< ProductType & { onClick: () => void } >,
 		[
 			_productTypes,

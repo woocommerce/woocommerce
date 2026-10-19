@@ -3,6 +3,7 @@
  */
 import { act, renderHook } from '@testing-library/react';
 import { useDispatch } from '@wordpress/data';
+import { navigateTo } from '@woocommerce/navigation';
 
 /**
  * Internal dependencies
@@ -33,7 +34,26 @@ describe( 'useCreateProductByType', () => {
 
 		await act( () => result.current.createProductByType( 'physical' ) );
 
+		expect( navigateTo ).toHaveBeenCalledWith( {
+			url: expect.stringContaining( 'post.php?post=7&action=edit' ),
+		} );
 		expect( result.current.requestingType ).toBe( 'physical' );
+	} );
+
+	it( 'should clear the busy state when the page is restored from the back/forward cache', async () => {
+		( useDispatch as jest.Mock ).mockReturnValue( {
+			createProductFromTemplate: jest.fn().mockResolvedValue( { id: 7 } ),
+		} );
+		const { result } = renderHook( () => useCreateProductByType() );
+		await act( () => result.current.createProductByType( 'physical' ) );
+
+		const pageShow = new Event( 'pageshow' );
+		Object.defineProperty( pageShow, 'persisted', { value: true } );
+		act( () => {
+			window.dispatchEvent( pageShow );
+		} );
+
+		expect( result.current.requestingType ).toBeNull();
 	} );
 
 	it( 'should clear the busy state when the request fails', async () => {
