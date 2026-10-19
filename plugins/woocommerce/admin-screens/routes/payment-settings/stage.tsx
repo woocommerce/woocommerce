@@ -28,7 +28,6 @@ import {
 } from './entities';
 import type { OfflineGateway, OfflineSettings } from './entities';
 import { getOfflineFields } from './fields';
-import './style.scss';
 
 const EMPTY_FORM: Form = { fields: [] };
 
@@ -210,11 +209,7 @@ function OfflinePaymentSettings( { gateway }: { gateway: OfflineGateway } ) {
 			showSidebarToggle={ false }
 			hasPadding
 			actions={
-				<Stack
-					gap="sm"
-					wrap="wrap"
-					className="wc-offline-settings__actions"
-				>
+				<Stack direction="row" gap="sm" wrap="wrap">
 					<Button
 						variant="outline"
 						size="compact"
@@ -240,7 +235,7 @@ function OfflinePaymentSettings( { gateway }: { gateway: OfflineGateway } ) {
 				</Stack>
 			}
 		>
-			<Stack direction="column" gap="lg" className="wc-offline-settings">
+			<Stack direction="column" gap="lg">
 				{ notice && (
 					<Notice.Root intent={ notice.status }>
 						<Notice.Description>

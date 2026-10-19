@@ -96,10 +96,7 @@ export function BankAccounts( {
 					},
 				];
 				return (
-					<fieldset
-						key={ index }
-						className="wc-offline-settings__account"
-					>
+					<fieldset key={ index }>
 						<legend>
 							{ sprintf(
 								/* translators: %d: bank account position. */ __(
