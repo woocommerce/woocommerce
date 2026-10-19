@@ -141,6 +141,7 @@ class RemoteInboxNotificationsDataSourcePoller extends DataSourcePoller {
 			}
 			$slugs[ $slug ] = $slug;
 		}
+		// An empty list is inconclusive: WooCommerce.com also serves one when its own notifications query fails.
 		if ( ! empty( $slugs ) ) {
 			$this->published_slugs = array_values( $slugs );
 		}
