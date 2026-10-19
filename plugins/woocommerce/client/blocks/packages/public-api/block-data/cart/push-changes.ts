@@ -22,8 +22,8 @@ const localState = {
 	customerDataIsInitialized: false,
 	// True when a push is currently happening to avoid simultaneous pushes.
 	doingPush: false,
-	// True when a change that should be sent right away was made while a push was running.
-	pushWhenDone: false,
+	// True when changes were flushed while a push was running, so they are sent when it ends.
+	flushWhenPushEnds: false,
 	// Local cache of the last pushed customerData used for comparisons.
 	customerData: {
 		billingAddress: {} as CartBillingAddress,
@@ -199,11 +199,11 @@ const updateCustomerData = (): void => {
 			isAddressFieldForShippingRates
 		);
 
-	const finishPush = () => {
+	const endPush = () => {
 		localState.doingPush = false;
 
-		if ( localState.pushWhenDone ) {
-			localState.pushWhenDone = false;
+		if ( localState.flushWhenPushEnds ) {
+			localState.flushWhenPushEnds = false;
 			updateCustomerData();
 		}
 	};
@@ -224,11 +224,11 @@ const updateCustomerData = (): void => {
 		.then( () => {
 			localState.dirtyProps.billingAddress = [];
 			localState.dirtyProps.shippingAddress = [];
-			finishPush();
+			endPush();
 		} )
 		.catch( ( response ) => {
 			processErrorResponse( response );
-			finishPush();
+			endPush();
 		} );
 
 	// Cleared once the request has started, so the shipping rates loading state takes over without a gap.
@@ -247,12 +247,12 @@ const debouncedUpdateCustomerData = debounce( () => {
 }, 1500 );
 
 /**
- * Sends the changes without waiting for the debounce. If a push is running, they are sent as soon
- * as it finishes; the scheduled run is kept as a fallback and finds nothing left to send.
+ * Sends the changes without waiting for the debounce. Pushes do not overlap, so while one is running
+ * the changes are sent when it ends; the scheduled run is kept as a fallback and finds nothing left to send.
  */
-const pushNow = (): void => {
+export const flushChanges = (): void => {
 	if ( localState.doingPush ) {
-		localState.pushWhenDone = true;
+		localState.flushWhenPushEnds = true;
 		return;
 	}
 
@@ -312,11 +312,6 @@ export const pushChanges = ( debounced = true ): void => {
 	);
 
 	if ( pickedFieldChanged ) {
-		pushNow();
+		flushChanges();
 	}
-};
-
-// Skip the debounce and send the changes now, or as soon as the running push finishes.
-export const flushChanges = (): void => {
-	pushNow();
 };
