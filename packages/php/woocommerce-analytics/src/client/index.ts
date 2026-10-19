@@ -5,6 +5,7 @@
  */
 import './public-path';
 import { consentManager } from './consent';
+import { clearTrackingCookies } from './tracking-cookies';
 import { activateTrackingScript } from './tracking-script';
 
 /**
@@ -24,12 +25,17 @@ jQuery( () => {
 	consentManager.addConsentChangeListener( ( hasConsent: boolean ) => {
 		if ( hasConsent ) {
 			startTracking();
+		} else {
+			clearTrackingCookies();
 		}
 	} );
 
 	consentManager.waitForConsentType( () => {
 		if ( consentManager.hasAnalyticsConsent() ) {
 			startTracking();
+		} else {
+			// Consent may have been withdrawn on a page without analytics, after an earlier visit set these.
+			clearTrackingCookies();
 		}
 	} );
 } );

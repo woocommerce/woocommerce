@@ -88,6 +88,7 @@ describe( 'client entry point', () => {
 		delete window.wp_has_consent;
 		delete window.waitfor_consent_hook;
 		delete window.wp_consent_type;
+		document.cookie = 'tk_or=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
 	} );
 
 	it( 'loads s.js and analytics when statistics consent is given', async () => {
@@ -169,5 +170,32 @@ describe( 'client entry point', () => {
 
 		expect( isTrackingScriptLoaded() ).toBe( true );
 		expect( mockInitAnalytics ).toHaveBeenCalledTimes( 1 );
+	} );
+
+	it( 'clears the tracking cookies when statistics consent is withdrawn on the page', async () => {
+		window.wp_has_consent = () => true;
+		await loadPage();
+		document.cookie = 'tk_or=1; path=/';
+
+		changeConsent( 'deny' );
+
+		expect( document.cookie ).not.toContain( 'tk_or=' );
+	} );
+
+	it( 'clears tracking cookies from an earlier visit when statistics consent is denied on load', async () => {
+		window.wp_has_consent = () => false;
+		document.cookie = 'tk_or=1; path=/';
+
+		await loadPage();
+
+		expect( document.cookie ).not.toContain( 'tk_or=' );
+	} );
+
+	it( 'keeps the tracking cookies when there is no consent plugin', async () => {
+		document.cookie = 'tk_or=1; path=/';
+
+		await loadPage( 'regular' );
+
+		expect( document.cookie ).toContain( 'tk_or=1' );
 	} );
 } );

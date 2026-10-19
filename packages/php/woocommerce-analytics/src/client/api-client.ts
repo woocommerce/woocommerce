@@ -5,6 +5,7 @@ import debugFactory from 'debug';
 /**
  * Internal dependencies
  */
+import { consentManager } from './consent';
 import { BATCH_SIZE, DEBOUNCE_DELAY } from './constants';
 import type { ApiEvent, ApiFetchResponse } from './types/shared';
 
@@ -112,6 +113,12 @@ export class ApiClient {
 		}
 
 		if ( this.eventQueue.length === 0 ) {
+			return;
+		}
+
+		if ( ! consentManager.hasAnalyticsConsent() ) {
+			debug( 'Dropping %d queued events because statistics consent was withdrawn', this.eventQueue.length );
+			this.eventQueue = [];
 			return;
 		}
 
