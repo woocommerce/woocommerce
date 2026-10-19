@@ -134,26 +134,13 @@ class ProductCatalogTemplate extends AbstractTemplate {
 	/**
 	 * Hide Shop page template controls for classic themes.
 	 *
+	 * @deprecated 11.3.0
+	 *
 	 * @see https://github.com/woocommerce/woocommerce-gutenberg-products-block/issues/6278
 	 *
 	 * @param bool $is_support Whether the active theme supports block templates.
-	 *
-	 * @return bool
 	 */
 	public function remove_block_template_support_for_shop_page( $is_support ) {
-		global $pagenow, $post;
-
-		if (
-			is_admin() &&
-			'post.php' === $pagenow &&
-			! wp_is_block_theme() &&
-			function_exists( 'wc_get_page_id' ) &&
-			is_a( $post, 'WP_Post' ) &&
-			wc_get_page_id( 'shop' ) === $post->ID
-		) {
-			return false;
-		}
-
-		return $is_support;
+		wc_deprecated_function( __METHOD__, '11.3.0' );
 	}
 }
