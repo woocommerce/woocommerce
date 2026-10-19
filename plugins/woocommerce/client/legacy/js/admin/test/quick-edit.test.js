@@ -1,125 +1,65 @@
-/**
- * @jest-environment jest-fixed-jsdom
- */
-
 describe( 'Product Quick Edit measurements', () => {
-	let clickHandler;
-	let fieldValues;
-	let inlineValues;
-	let editButton;
+	let $;
 
-	const chain = () => {
-		const object = {
-			length: 0,
-			add: () => object,
-			attr: () => object,
-			closest: () => object,
-			datepicker: () => object,
-			find: () => object,
-			hide: () => object,
-			is: () => false,
-			on: () => object,
-			parent: () => object,
-			prop: () => object,
-			removeAttr: () => object,
-			show: () => object,
-			text: () => '',
-			toggle: () => object,
-			trigger: () => object,
-			val: () => object,
-		};
-		return object;
-	};
-
-	beforeEach( () => {
+	beforeAll( () => {
+		// jQuery binds document-ready callbacks on a timer once the document is loaded.
 		jest.useFakeTimers();
 		jest.resetModules();
-		fieldValues = {};
-		inlineValues = {};
-		editButton = {};
 
-		const measurementFields = new Map( [
-			[ 'input[name="_weight"]', '_weight' ],
-			[ 'input[name="_length"]', '_length' ],
-			[ 'input[name="_width"]', '_width' ],
-			[ 'input[name="_height"]', '_height' ],
-		] );
-
-		const jQueryMock = ( selector, context ) => {
-			if ( 'function' === typeof selector ) {
-				selector( jQueryMock );
-				return;
-			}
-
-			if ( '#the-list' === selector ) {
-				return {
-					on: ( event, delegatedSelector, handler ) => {
-						if ( 'click' === event && '.editinline' === delegatedSelector ) {
-							clickHandler = handler;
-						}
-					},
-				};
-			}
-
-			if ( selector === editButton ) {
-				return { closest: () => ( { attr: () => 'post-1' } ) };
-			}
-
-			if ( '#woocommerce_inline_1' === selector ) {
-				return {
-					find: ( inlineSelector ) => ( {
-						length: 0,
-						text: () => inlineValues[ inlineSelector.slice( 1 ).trim() ] || '',
-					} ),
-				};
-			}
-
-			const field = measurementFields.get( selector );
-			if ( field && '.inline-edit-row' === context ) {
-				return {
-					val: ( value ) => {
-						fieldValues[ field ] = value;
-					},
-				};
-			}
-
-			return chain();
-		};
-
-		global.jQuery = jQueryMock;
+		$ = require( 'jquery' );
+		global.jQuery = $;
 		global.inlineEditPost = { revert: jest.fn() };
 		global.woocommerce_admin = { decimal_point: '.' };
 		global.woocommerce_quick_edit = { strings: { allow_reviews: '' } };
-		require( '../quick-edit' );
-	} );
 
-	afterEach( () => {
+		document.body.innerHTML = `
+			<table>
+				<tbody id="the-list">
+					<tr id="post-1">
+						<td><button type="button" class="editinline"></button></td>
+					</tr>
+				</tbody>
+			</table>
+			<div id="woocommerce_inline_1">
+				<div class="weight">1.25</div>
+				<div class="length">2.50</div>
+				<div class="width">3.75</div>
+				<div class="height">4.00</div>
+			</div>
+			<div class="inline-edit-row">
+				<input name="_weight">
+				<input name="_length">
+				<input name="_width">
+				<input name="_height">
+			</div>
+		`;
+
+		require( '../quick-edit' );
+		jest.runAllTimers();
 		jest.useRealTimers();
 	} );
 
+	afterAll( () => {
+		document.body.innerHTML = '';
+		delete global.jQuery;
+		delete global.inlineEditPost;
+		delete global.woocommerce_admin;
+		delete global.woocommerce_quick_edit;
+	} );
+
 	test.each( [
-		[ ',', '1.25', '1,25' ],
-		[ '.', '1.25', '1.25' ],
-		[ ',', '', '' ],
+		[ ',', '1,25', '2,50', '3,75', '4,00' ],
+		[ '.', '1.25', '2.50', '3.75', '4.00' ],
 	] )(
-		'populates measurements when the decimal separator is %s and the stored value is %j',
-		( decimalPoint, storedValue, expectedValue ) => {
-			woocommerce_admin.decimal_point = decimalPoint;
-			inlineValues = {
-				weight: storedValue,
-				length: storedValue,
-				width: storedValue,
-				height: storedValue,
-			};
+		'populates measurements when the decimal separator is %s',
+		( decimalPoint, weight, length, width, height ) => {
+			global.woocommerce_admin.decimal_point = decimalPoint;
+			$( '.editinline' ).trigger( 'click' );
 
-			clickHandler.call( editButton );
-
-			expect( fieldValues ).toEqual( {
-				_weight: expectedValue,
-				_length: expectedValue,
-				_width: expectedValue,
-				_height: expectedValue,
-			} );
+			expect( document.querySelector( 'input[name="_weight"]' ).value ).toBe( weight );
+			expect( document.querySelector( 'input[name="_length"]' ).value ).toBe( length );
+			expect( document.querySelector( 'input[name="_width"]' ).value ).toBe( width );
+			expect( document.querySelector( 'input[name="_height"]' ).value ).toBe( height );
 		}
 	);
 } );
