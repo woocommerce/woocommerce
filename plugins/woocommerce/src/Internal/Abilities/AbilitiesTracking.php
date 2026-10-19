@@ -17,7 +17,8 @@ defined( 'ABSPATH' ) || exit;
  * Records a Tracks event for each WooCommerce ability invocation.
  *
  * Hooks only collect data in memory. Events are sent once per request on shutdown through the batched
- * Tracks client. Ability input and output are never recorded.
+ * Tracks client. Ability input and output are never recorded, except the name of a registered ability an agent
+ * looks up through the MCP Adapter.
  *
  * WordPress 7.0 only fires hooks around successful executions, so failures there are recorded on shutdown
  * with an `unknown` error code and no duration. WordPress 7.1+ hooks expose the other outcomes. A missing
@@ -33,6 +34,20 @@ class AbilitiesTracking {
 	 * @var string
 	 */
 	private const EVENT_NAME = 'ability_called';
+
+	/**
+	 * Tracks event for agents looking up abilities through the MCP Adapter, without the `wcadmin_` prefix.
+	 *
+	 * @var string
+	 */
+	private const DISCOVERY_EVENT_NAME = 'ability_discovered';
+
+	/**
+	 * Channels whose calls are recorded: agent entry points, not plugin internals.
+	 *
+	 * @var string[]
+	 */
+	private const TRACKED_CHANNELS = array( 'mcp', 'rest', 'cli' );
 
 	/**
 	 * Only abilities in this namespace are tracked.
@@ -170,7 +185,7 @@ class AbilitiesTracking {
 		add_action( 'wp_before_execute_ability', array( $this, 'handle_wp_before_execute_ability' ) );
 		add_filter( 'wp_ability_execute_result', array( $this, 'handle_wp_ability_execute_result' ), PHP_INT_MAX, 2 );
 		add_filter( 'wp_ability_validate_output', array( $this, 'handle_wp_ability_validate_output' ), PHP_INT_MAX, 3 );
-		add_action( 'wp_after_execute_ability', array( $this, 'handle_wp_after_execute_ability' ) );
+		add_action( 'wp_after_execute_ability', array( $this, 'handle_wp_after_execute_ability' ), 10, 2 );
 		add_filter( 'mcp_adapter_pre_tool_call', array( $this, 'handle_mcp_adapter_pre_tool_call' ) );
 		add_filter( 'rest_request_before_callbacks', array( $this, 'handle_rest_request_before_callbacks' ), 10, 3 );
 		add_filter( 'rest_request_after_callbacks', array( $this, 'handle_rest_request_after_callbacks' ), 10, 3 );
@@ -336,9 +351,11 @@ class AbilitiesTracking {
 	 * @internal
 	 *
 	 * @param string $ability_name The ability name.
+	 * @param mixed  $input        The input. Only read for MCP Adapter discovery.
 	 */
-	public function handle_wp_after_execute_ability( $ability_name ): void {
+	public function handle_wp_after_execute_ability( $ability_name, $input = null ): void {
 		$this->close_frame( $ability_name, true, null );
+		$this->record_discovery( $ability_name, $input );
 	}
 
 	/**
@@ -538,7 +555,7 @@ class AbilitiesTracking {
 		}
 
 		// Only agent entry points. Direct PHP and cron calls are plugin internals and could add a pixel to every page view.
-		if ( ! in_array( $this->get_channel(), array( 'mcp', 'rest', 'cli' ), true ) ) {
+		if ( ! in_array( $this->get_channel(), self::TRACKED_CHANNELS, true ) ) {
 			return;
 		}
 
@@ -624,15 +641,79 @@ class AbilitiesTracking {
 	}
 
 	/**
-	 * Turn a finished invocation into Tracks properties.
-	 *
-	 * Properties are built now, so the user, site and time are those of the call rather than of shutdown.
+	 * Queue a finished invocation as an ability_called event.
 	 *
 	 * @param array{name: string, channel: string, rest_namespace: string, external_client: string, start: float, executing: bool} $frame        The invocation.
 	 * @param true|WP_Error|null                                                                                                   $outcome      True for success, a WP_Error for a known failure, null for an unknown failure.
 	 * @param bool                                                                                                                 $has_duration Whether the duration is known.
 	 */
 	private function add_event( array $frame, $outcome, bool $has_duration ): void {
+		$error_code = self::NONE;
+		if ( $outcome instanceof WP_Error ) {
+			$error_code = self::get_error_code( $outcome );
+		} elseif ( null === $outcome ) {
+			$error_code = 'unknown';
+		}
+
+		$event = array(
+			'ability_name'    => self::get_event_ability_name( $frame['name'] ),
+			'outcome'         => true === $outcome ? 'success' : 'error',
+			'error_code'      => $error_code,
+			'channel'         => $frame['channel'],
+			'rest_namespace'  => $frame['rest_namespace'],
+			'external_client' => $frame['external_client'],
+		);
+		if ( $has_duration ) {
+			$event['duration_ms'] = (int) round( ( microtime( true ) - $frame['start'] ) * 1000 );
+		}
+
+		// Unknown failures are recorded later than the call (WordPress 7.0 has no hook for them), so they keep the call's
+		// start time. Site and user are still read now; they differ only if the request switched them since.
+		$this->queue_event( self::EVENT_NAME, $event, null === $outcome ? $frame['start'] : null );
+	}
+
+	/**
+	 * Record an agent looking up abilities through the MCP Adapter: `get-ability-info` for a tracked ability, or
+	 * `discover-abilities`. A separate event, so ability_called stays one row per call. Successful lookups only.
+	 *
+	 * @param mixed $ability_name The ability that ran.
+	 * @param mixed $input        Its input.
+	 */
+	private function record_discovery( $ability_name, $input ): void {
+		if ( 'mcp-adapter/discover-abilities' === $ability_name ) {
+			$looked_up = null;
+		} elseif ( 'mcp-adapter/get-ability-info' === $ability_name && is_array( $input ) && self::is_tracked_ability( $input['ability_name'] ?? null ) && wp_has_ability( $input['ability_name'] ) ) {
+			$looked_up = $input['ability_name'];
+		} else {
+			return;
+		}
+
+		$channel = $this->get_channel();
+		if ( ! in_array( $channel, self::TRACKED_CHANNELS, true ) ) {
+			return;
+		}
+
+		$this->queue_event(
+			self::DISCOVERY_EVENT_NAME,
+			array(
+				'ability_name'    => null === $looked_up ? self::NONE : self::get_event_ability_name( $looked_up ),
+				'discovery'       => null === $looked_up ? 'list' : 'info',
+				'channel'         => $channel,
+				'external_client' => 'mcp' === $channel ? $this->get_external_client() : self::NONE,
+			)
+		);
+	}
+
+	/**
+	 * Add the properties every event carries and queue the event for sending.
+	 *
+	 * Properties are built now, so the user, site and time are those of the call rather than of shutdown.
+	 *
+	 * @param string               $event_name Event name, without the `wcadmin_` prefix.
+	 * @param array<string, mixed> $event      Event-specific properties.
+	 * @param float|null           $started    microtime() to record as the event time, or null for now.
+	 */
+	private function queue_event( string $event_name, array $event, ?float $started = null ): void {
 		// Telemetry must never break the ability call: this runs third-party filters and Jetpack code inside core's hooks.
 		try {
 			if ( count( $this->events ) >= self::MAX_EVENTS_PER_REQUEST ) {
@@ -655,44 +736,33 @@ class AbilitiesTracking {
 				return;
 			}
 
-			$error_code = self::NONE;
-			if ( $outcome instanceof WP_Error ) {
-				$error_code = self::get_error_code( $outcome );
-			} elseif ( null === $outcome ) {
-				$error_code = 'unknown';
-			}
-
-			$event = array(
-				// The `/` becomes `__`. Hyphens in the slug stay, so `products-query` and `products_query` stay different events.
-				'ability_name'    => implode( '__', explode( '/', strtolower( $frame['name'] ), 2 ) ),
-				'outcome'         => true === $outcome ? 'success' : 'error',
-				'error_code'      => $error_code,
-				'channel'         => $frame['channel'],
-				'rest_namespace'  => $frame['rest_namespace'],
-				'auth'            => $auth,
-				'external_client' => $frame['external_client'],
-			);
-
-			if ( $has_duration ) {
-				$event['duration_ms'] = (int) round( ( microtime( true ) - $frame['start'] ) * 1000 );
-			}
+			$event['auth'] = $auth;
 			// Many local installs (localhost, .local, .test, DDEV, Lando) still report production.
 			$event['is_test'] = ( 'production' !== wp_get_environment_type() || ( class_exists( Status::class ) && ( new Status() )->is_local_site() ) ) ? 'true' : 'false';
 			$event['is_a11n'] = self::is_a11n() ? 'true' : 'false';
 
-			$properties = \WC_Tracks::get_properties( \WC_Tracks::PREFIX . self::EVENT_NAME, $event );
+			$properties = \WC_Tracks::get_properties( \WC_Tracks::PREFIX . $event_name, $event );
 			// The request URL and referrer can carry ability input, e.g. in the query string of GET run requests.
 			unset( $properties['_dl'], $properties['_dr'] );
-			if ( null === $outcome ) {
-				// Unknown failures are recorded later than the call (WordPress 7.0 has no hook for them), so use the call's
-				// start time. Site and user are still read now; they differ only if the request switched them since.
-				$properties['_ts'] = number_format( round( $frame['start'] * 1000 ), 0, '', '' );
+			if ( null !== $started ) {
+				$properties['_ts'] = number_format( round( $started * 1000 ), 0, '', '' );
 			}
 
 			$this->events[] = $properties;
 		} catch ( \Throwable $e ) {
 			unset( $e );
 		}
+	}
+
+	/**
+	 * Ability name as recorded: the `/` becomes `__`, and hyphens stay, so `products-query` and `products_query` stay
+	 * different events.
+	 *
+	 * @param string $ability_name Ability name.
+	 * @return string
+	 */
+	private static function get_event_ability_name( string $ability_name ): string {
+		return implode( '__', explode( '/', strtolower( $ability_name ), 2 ) );
 	}
 
 	/**

@@ -23,6 +23,11 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 
 	private const NO_SCHEMA_ABILITY_ID = 'woocommerce/tracking-test-no-schema';
 
+	/**
+	 * Stand-ins for the MCP Adapter's discovery abilities, which aren't loaded in unit tests.
+	 */
+	private const ADAPTER_DISCOVERY_IDS = array( 'mcp-adapter/get-ability-info', 'mcp-adapter/discover-abilities' );
+
 	private const SERVER_KEYS = array( 'REQUEST_SCHEME', 'HTTP_HOST', 'REQUEST_URI', 'HTTP_REFERER', 'HTTP_MCP_PROTOCOL_VERSION', 'HTTP_MCP_SESSION_ID', 'A8C_PROXIED_REQUEST' );
 
 	/**
@@ -141,7 +146,7 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 			}
 
 			// The abilities registry is a singleton that outlives the test.
-			foreach ( array( self::ABILITY_ID, self::INNER_ABILITY_ID, self::UNTRACKED_ABILITY_ID, self::LONG_ABILITY_ID, self::NO_SCHEMA_ABILITY_ID ) as $ability_id ) {
+			foreach ( array_merge( array( self::ABILITY_ID, self::INNER_ABILITY_ID, self::UNTRACKED_ABILITY_ID, self::LONG_ABILITY_ID, self::NO_SCHEMA_ABILITY_ID ), self::ADAPTER_DISCOVERY_IDS ) as $ability_id ) {
 				if ( function_exists( 'wp_has_ability' ) && wp_has_ability( $ability_id ) ) {
 					wp_unregister_ability( $ability_id );
 				}
@@ -404,6 +409,40 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'error', $this->sut->recorded[0]['outcome'] );
 		$this->assertSame( 'ability_invalid_permissions', $this->sut->recorded[0]['error_code'] );
 		$this->assertSame( 'mcp', $this->sut->recorded[0]['channel'] );
+	}
+
+	/**
+	 * @testdox Should record MCP Adapter discovery of WooCommerce abilities as a separate event.
+	 * @testWith ["mcp-adapter/get-ability-info", "woocommerce/tracking-test", true, "info", "woocommerce__tracking-test"]
+	 *           ["mcp-adapter/discover-abilities", "", true, "list", "none"]
+	 *           ["mcp-adapter/get-ability-info", "tracking-test/other", true, "", ""]
+	 *           ["mcp-adapter/get-ability-info", "woocommerce/tracking-test", false, "", ""]
+	 *
+	 * @param string $adapter_ability   Adapter ability the agent calls.
+	 * @param string $looked_up         Ability it asks about, or '' for none.
+	 * @param bool   $over_mcp          Whether the call comes through MCP rather than a direct PHP call.
+	 * @param string $discovery         Expected discovery property, or '' when nothing is recorded.
+	 * @param string $recorded_ability  Expected ability_name.
+	 */
+	public function test_records_adapter_discovery( string $adapter_ability, string $looked_up, bool $over_mcp, string $discovery, string $recorded_ability ): void {
+		if ( $over_mcp ) {
+			$this->start_mcp_tool_call();
+		}
+
+		wp_get_ability( $adapter_ability )->execute( '' === $looked_up ? array() : array( 'ability_name' => $looked_up ) );
+		$this->sut->handle_shutdown();
+
+		if ( '' === $discovery ) {
+			$this->assertSame( array(), $this->sut->recorded, 'Neither other plugins\' abilities nor direct PHP calls are recorded' );
+			return;
+		}
+		$this->assertCount( 1, $this->sut->recorded, 'Only the discovery event; the adapter ability itself is not an ability call' );
+		$event = $this->sut->recorded[0];
+		$this->assertSame( 'wcadmin_ability_discovered', $event['_en'] );
+		$this->assertSame( $discovery, $event['discovery'] );
+		$this->assertSame( $recorded_ability, $event['ability_name'] );
+		$this->assertSame( 'mcp', $event['channel'] );
+		$this->assertSame( 'none', $event['external_client'], 'No MCP session, so the client is unknown' );
 	}
 
 	/**
@@ -1240,6 +1279,22 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 					);
 				}
 				wp_register_ability( $ability_id, $args );
+			}
+			foreach ( self::ADAPTER_DISCOVERY_IDS as $ability_id ) {
+				wp_register_ability(
+					$ability_id,
+					array(
+						'label'               => 'Adapter discovery',
+						'description'         => 'Stand-in for an MCP Adapter discovery ability.',
+						'category'            => 'woocommerce',
+						'input_schema'        => array(
+							'type'    => 'object',
+							'default' => array(),
+						),
+						'execute_callback'    => static fn() => array( 'ok' => true ),
+						'permission_callback' => '__return_true',
+					)
+				);
 			}
 		};
 		add_action( 'wp_abilities_api_init', $register_abilities );
