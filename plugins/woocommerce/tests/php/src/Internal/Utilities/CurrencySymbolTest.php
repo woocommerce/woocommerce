@@ -94,6 +94,9 @@ class CurrencySymbolTest extends WC_Unit_Test_Case {
 			'left with nbsp'           => array( '%1$s&nbsp;%2$s', CurrencyPosition::LEFT_SPACE ),
 			'right with code appended' => array( '%2$s&nbsp;%1$sPLN', CurrencyPosition::RIGHT_SPACE ),
 			'left with code prepended' => array( 'USD%1$s%2$s', CurrencyPosition::LEFT ),
+			'left with empty markup'   => array( '%1$s<span></span>%2$s', CurrencyPosition::LEFT ),
+			'right with spaced markup' => array( '%2$s<span>&nbsp;</span>%1$s', CurrencyPosition::RIGHT_SPACE ),
+			'left with dash'           => array( '%1$s-%2$s', CurrencyPosition::LEFT ),
 		);
 	}
 
