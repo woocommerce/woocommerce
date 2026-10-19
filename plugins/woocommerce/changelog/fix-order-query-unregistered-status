@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Return no orders from a posts-storage order query when none of the requested statuses is registered, instead of orders of every status.

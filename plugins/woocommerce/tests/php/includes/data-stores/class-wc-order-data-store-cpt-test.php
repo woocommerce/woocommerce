@@ -800,6 +800,74 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Order queries skip statuses that are not registered, and return no orders when no requested status is registered.
+	 *
+	 * @dataProvider data_provider_query_with_unregistered_statuses
+	 *
+	 * @param string|array $status         Status query var.
+	 * @param int          $expected_count Expected number of orders.
+	 */
+	public function test_query_with_unregistered_statuses( $status, int $expected_count ): void {
+		$processing = OrderHelper::create_order();
+		$processing->set_status( 'processing' );
+		$processing->save();
+		$completed = OrderHelper::create_order();
+		$completed->set_status( 'completed' );
+		$completed->save();
+
+		$this->assertCount( $expected_count, wc_get_orders( array( 'status' => $status ) ) );
+	}
+
+	/**
+	 * Data provider for test_query_with_unregistered_statuses.
+	 *
+	 * @return array
+	 */
+	public function data_provider_query_with_unregistered_statuses(): array {
+		return array(
+			'registered status'            => array( 'processing', 1 ),
+			'unregistered status'          => array( 'not-registered', 0 ),
+			'registered and unregistered'  => array( array( 'processing', 'not-registered' ), 1 ),
+			'comma-separated registered'   => array( 'wc-processing,wc-completed', 2 ),
+			'comma-separated unregistered' => array( 'not-registered,also-not-registered', 0 ),
+			'any'                          => array( 'any', 2 ),
+		);
+	}
+
+	/**
+	 * @testdox An order status that something removed from the registered post statuses does not return orders of every status.
+	 */
+	public function test_query_with_status_removed_from_registration(): void {
+		global $wp_post_statuses;
+
+		$processing = OrderHelper::create_order();
+		$processing->set_status( 'processing' );
+		$processing->save();
+		$completed = OrderHelper::create_order();
+		$completed->set_status( 'completed' );
+		$completed->save();
+
+		$registered = $wp_post_statuses['wc-completed'];
+		unset( $wp_post_statuses['wc-completed'] );
+
+		try {
+			$orders = wc_get_orders( array( 'status' => 'completed' ) );
+			$page   = wc_get_orders(
+				array(
+					'status'   => 'completed',
+					'paginate' => true,
+				)
+			);
+		} finally {
+			$wp_post_statuses['wc-completed'] = $registered; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		}
+
+		$this->assertSame( array(), $orders );
+		$this->assertSame( 0, $page->total );
+		$this->assertSame( array(), $page->orders );
+	}
+
+	/**
 	 * Test that order props saved by data stores are read correctly.
 	 */
 	public function test_reading_order_basic_props() {

@@ -952,6 +952,14 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 
 		$wp_query_args = parent::get_wp_query_args( $query_vars );
 
+		if ( ! empty( $wp_query_args['post_status'] ) ) {
+			$statuses = is_array( $wp_query_args['post_status'] ) ? $wp_query_args['post_status'] : explode( ',', $wp_query_args['post_status'] );
+
+			if ( empty( array_intersect( $statuses, array_merge( get_post_stati(), array( 'any' ) ) ) ) ) {
+				$wp_query_args['errors'][] = new WP_Error( 'woocommerce_order_query_unregistered_status', __( 'None of the requested order statuses is registered.', 'woocommerce' ) );
+			}
+		}
+
 		if ( ! isset( $wp_query_args['date_query'] ) ) {
 			$wp_query_args['date_query'] = array();
 		}
