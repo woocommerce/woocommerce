@@ -2,32 +2,30 @@
  * External dependencies
  */
 import { store as coreStore } from '@wordpress/core-data';
-import { dispatch, resolveSelect } from '@wordpress/data';
+import { dispatch, resolveSelect, select } from '@wordpress/data';
 import { notFound } from '@wordpress/route';
 
 /**
  * Internal dependencies
  */
-import {
-	ENTITY_KIND,
-	SUPPORT_ENTITIES,
-	getOfflineEntities,
-	getOfflineGateway,
-} from './entities';
+import { ENTITY_KIND, SUPPORT_ENTITIES, getOfflineEntities } from './entities';
 
 export const route = {
 	beforeLoad: async ( { params }: { params: { page?: string } } ) => {
-		if ( ! getOfflineGateway( params.page ) ) {
-			throw notFound();
-		}
 		await dispatch( coreStore ).addEntities( [
 			...getOfflineEntities(),
 			...SUPPORT_ENTITIES,
 		] );
+		if (
+			! params.page ||
+			! select( coreStore ).getEntityConfig( ENTITY_KIND, params.page )
+		) {
+			throw notFound();
+		}
 	},
 	loader: async ( { params }: { params: { page?: string } } ) => {
-		const gateway = getOfflineGateway( params.page );
-		if ( ! gateway ) {
+		const { page } = params;
+		if ( ! page ) {
 			throw notFound();
 		}
 		// The pinned data package does not type resolveSelect().
@@ -41,7 +39,7 @@ export const route = {
 			}
 		 )( coreStore );
 		await resolver
-			.getEntityRecord( ENTITY_KIND, gateway.id, gateway.id )
+			.getEntityRecord( ENTITY_KIND, page, page )
 			.catch( () => undefined );
 	},
 };
