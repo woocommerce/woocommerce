@@ -215,6 +215,26 @@ class Products extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox Should return a bad request response for invalid price filter values.
+	 * @testWith ["min_price", "true"]
+	 *           ["max_price", "10.99"]
+	 *           ["min_price", "-1"]
+	 *
+	 * @param string $param Price filter parameter.
+	 * @param string $value Price filter value.
+	 */
+	public function test_rejects_invalid_price_filter_values( string $param, string $value ): void {
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$request->set_param( $param, $value );
+
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 400, $response->get_status(), 'Invalid price filters should return HTTP 400.' );
+		$this->assertSame( 'rest_invalid_param', $data['code'], 'The response should identify an invalid request parameter.' );
+	}
+
+	/**
 	 * Test conversion of product to rest response.
 	 */
 	public function test_prepare_item() {
