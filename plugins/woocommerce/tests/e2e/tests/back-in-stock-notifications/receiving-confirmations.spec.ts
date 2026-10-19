@@ -267,8 +267,10 @@ test.describe(
 
 			await page.goto( corruptEmailLinkKey( verifyLink ) );
 
-			// A rejected key is a no-op: no redirect to the shop, no notice.
-			await expect( page ).toHaveURL( /notification_id=/ );
+			// A rejected key changes nothing, but the shopper is told why.
+			await expect(
+				page.getByText( bisNotice.verifyLinkInvalid, { exact: true } )
+			).toBeVisible();
 			await expect(
 				page.getByText( bisNotice.verified( product.name ) )
 			).toHaveCount( 0 );
@@ -307,7 +309,9 @@ test.describe(
 			await expireVerificationLinks( page );
 			await page.goto( verifyLink );
 
-			await expect( page ).toHaveURL( /notification_id=/ );
+			await expect(
+				page.getByText( bisNotice.verifyLinkExpired, { exact: true } )
+			).toBeVisible();
 			await expect(
 				page.getByText( bisNotice.verified( product.name ) )
 			).toHaveCount( 0 );

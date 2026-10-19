@@ -213,8 +213,12 @@ test.describe(
 
 			await page.goto( corruptEmailLinkKey( unsubscribeLink ) );
 
-			// A rejected key is a no-op: no redirect to the shop, no notice.
-			await expect( page ).toHaveURL( /notification_id=/ );
+			// A rejected key changes nothing, but the shopper is told why.
+			await expect(
+				page.getByText( bisNotice.unsubscribeLinkInvalid, {
+					exact: true,
+				} )
+			).toBeVisible();
 			await expect(
 				page.getByText( bisNotice.alreadySent, { exact: true } )
 			).toHaveCount( 0 );
@@ -227,7 +231,7 @@ test.describe(
 			await expect( row.getByText( /Cancelled/i ) ).toHaveCount( 0 );
 
 			// Positive control: the untouched link is accepted, so the page
-			// above showed no notice because of the key and not because the
+			// above rejected the link because of the key and not because the
 			// link is broken.
 			await page.goto( unsubscribeLink );
 			await expect(
