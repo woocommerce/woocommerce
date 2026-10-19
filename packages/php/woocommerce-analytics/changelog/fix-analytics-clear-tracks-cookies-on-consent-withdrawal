@@ -1,0 +1,4 @@
+Significance: patch
+Type: fixed
+
+Remove Tracks cookies and stop sending queued events as soon as a visitor withdraws statistics consent.
