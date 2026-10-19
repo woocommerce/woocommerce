@@ -27,9 +27,13 @@ const isTrackingScriptLoaded = () =>
 /**
  * Print the s.js tag the way PHP does, then run the entry point as a fresh page load and let its dynamic import settle.
  *
- * @param printedTag - `held` with a consent plugin, `regular` without one.
+ * @param printedTag     - `held` with a consent plugin, `regular` without one.
+ * @param consentManaged - Whether a consent plugin decides, so the client waits for a delayed WP Consent API script.
  */
-async function loadPage( printedTag: 'held' | 'regular' = 'held' ) {
+async function loadPage(
+	printedTag: 'held' | 'regular' = 'held',
+	consentManaged = printedTag === 'held'
+) {
 	const tag = document.createElement( 'script' );
 	tag.setAttribute( 'src', TRACKING_SCRIPT_URL );
 	if ( printedTag === 'held' ) {
@@ -45,7 +49,7 @@ async function loadPage( printedTag: 'held' | 'regular' = 'held' ) {
 		features: {},
 		pages: {},
 		assets_url: '',
-		consentApiActive: printedTag === 'held',
+		consentManaged,
 	};
 	// A fresh registry also makes the dynamic import of `../init` run its mock factory again.
 	jest.resetModules();
@@ -60,8 +64,8 @@ const flushPromises = () => new Promise( resolve => setTimeout( resolve, 0 ) );
  *
  * @param hasConsent - What `wp_has_consent()` answers.
  */
-async function loadDelayedConsentApi( hasConsent: boolean ) {
-	window.wp_has_consent = () => hasConsent;
+async function loadDelayedConsentApi( hasConsent: boolean | ( () => boolean ) ) {
+	window.wp_has_consent = typeof hasConsent === 'function' ? hasConsent : () => hasConsent;
 	await new Promise( resolve => setTimeout( resolve, 300 ) );
 }
 
@@ -174,6 +178,30 @@ describe( 'client entry point', () => {
 
 		expect( isTrackingScriptLoaded() ).toBe( true );
 		expect( mockInitAnalytics ).toHaveBeenCalledTimes( 1 );
+	} );
+
+	it( 'loads s.js and analytics without waiting for a delayed WP Consent API script that no consent plugin uses', async () => {
+		await loadPage( 'held', false );
+
+		expect( isTrackingScriptLoaded() ).toBe( true );
+		expect( mockInitAnalytics ).toHaveBeenCalledTimes( 1 );
+	} );
+
+	it( 'waits for the consent type after a delayed WP Consent API script loads', async () => {
+		await loadPage();
+
+		// The script sets the hook from the page, and reports consent until a consent type is set.
+		window.waitfor_consent_hook = '1';
+		await loadDelayedConsentApi( () => window.wp_consent_type === undefined );
+		expect( isTrackingScriptLoaded() ).toBe( false );
+		expect( mockInitAnalytics ).not.toHaveBeenCalled();
+
+		window.wp_consent_type = 'optin';
+		document.dispatchEvent( new CustomEvent( 'wp_consent_type_defined' ) );
+		await flushPromises();
+
+		expect( isTrackingScriptLoaded() ).toBe( false );
+		expect( mockInitAnalytics ).not.toHaveBeenCalled();
 	} );
 
 	it( 'leaves a regular s.js tag alone when there is no consent plugin', async () => {

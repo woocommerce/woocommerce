@@ -16,3 +16,14 @@ if ( ! function_exists( 'wp_has_consent' ) ) {
 		return false;
 	}
 }
+
+if ( ! function_exists( 'wp_get_consent_type' ) ) {
+	/**
+	 * Mock of the WP Consent API consent type, which consent plugins set through the same filter.
+	 *
+	 * @return string
+	 */
+	function wp_get_consent_type() { // phpcs:ignore Universal.Files.SeparateFunctionsFromOO.Mixed
+		return apply_filters( 'wp_get_consent_type', '' );
+	}
+}

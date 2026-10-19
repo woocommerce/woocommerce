@@ -17,33 +17,31 @@ export class ConsentManager {
 	private isListenerInitialized = false;
 
 	/**
-	 * Check if WP Consent API is available
-	 *
-	 * @return The consent status
+	 * Check if the WP Consent API script has loaded, so `wp_has_consent()` can be called.
 	 */
 	isWpConsentApiAvailable(): boolean {
 		return typeof window.wp_has_consent === 'function';
 	}
 
 	/**
-	 * Check if the site runs the WP Consent API, including while its script has not loaded yet.
+	 * Check if a consent plugin decides on consent but the WP Consent API script, which a delay-JS plugin can hold back, has not loaded.
 	 */
-	isWpConsentApiActive(): boolean {
-		return this.isWpConsentApiAvailable() || window.wcAnalytics?.consentApiActive === true;
+	isWaitingForConsentApi(): boolean {
+		return ! this.isWpConsentApiAvailable() && window.wcAnalytics?.consentManaged === true;
 	}
 
 	/**
-	 * Check if user has consent for analytics/statistics tracking
+	 * Check if user has consent for analytics/statistics tracking, which is never the case while waiting for the WP Consent API script.
 	 *
 	 * @return The consent status
 	 */
 	hasAnalyticsConsent(): boolean {
-		if ( ! this.isWpConsentApiAvailable() ) {
-			if ( this.isWpConsentApiActive() ) {
-				debug( 'WP Consent API script not loaded yet, no consent until it is' );
-				return false;
-			}
+		if ( this.isWaitingForConsentApi() ) {
+			debug( 'WP Consent API script not loaded yet, no consent until it is' );
+			return false;
+		}
 
+		if ( ! this.isWpConsentApiAvailable() ) {
 			debug( 'WP Consent API not available, defaulting to true for backward compatibility' );
 			return true;
 		}
@@ -54,12 +52,12 @@ export class ConsentManager {
 	}
 
 	/**
-	 * Run the callback once the WP Consent API script has loaded, which a delay-JS plugin can hold back until interaction.
+	 * Run the callback once the WP Consent API script has loaded, or right away when there is no need to wait for it.
 	 *
 	 * @param callback - The callback to run.
 	 */
 	waitForConsentApi( callback: () => void ): void {
-		if ( this.isWpConsentApiAvailable() || ! this.isWpConsentApiActive() ) {
+		if ( ! this.isWaitingForConsentApi() ) {
 			callback();
 			return;
 		}
@@ -111,7 +109,10 @@ export class ConsentManager {
 	 * Initialize the consent change listener if not already done
 	 */
 	private initializeConsentListener(): void {
-		if ( this.isListenerInitialized || ! this.isWpConsentApiActive() ) {
+		if (
+			this.isListenerInitialized ||
+			( ! this.isWpConsentApiAvailable() && ! this.isWaitingForConsentApi() )
+		) {
 			return;
 		}
 

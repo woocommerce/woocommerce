@@ -15,7 +15,7 @@ describe( 'ConsentManager.waitForConsentType', () => {
 		delete window.wp_consent_type;
 	} );
 
-	it( 'runs right away without the WP Consent API', () => {
+	it( 'runs right away when no consent plugin decides', () => {
 		window.waitfor_consent_hook = '1';
 		const callback = jest.fn();
 
@@ -70,7 +70,7 @@ describe( 'ConsentManager with a delayed WP Consent API script', () => {
 			features: {},
 			pages: {},
 			assets_url: '',
-			consentApiActive: true,
+			consentManaged: true,
 		};
 	} );
 
@@ -84,8 +84,8 @@ describe( 'ConsentManager with a delayed WP Consent API script', () => {
 		expect( new ConsentManager().hasAnalyticsConsent() ).toBe( false );
 	} );
 
-	it( 'reports consent without the WP Consent API', () => {
-		window.wcAnalytics!.consentApiActive = false;
+	it( 'reports consent when no consent plugin decides', () => {
+		window.wcAnalytics!.consentManaged = false;
 
 		expect( new ConsentManager().hasAnalyticsConsent() ).toBe( true );
 	} );
@@ -112,8 +112,8 @@ describe( 'ConsentManager with a delayed WP Consent API script', () => {
 		expect( callback ).toHaveBeenCalledTimes( 1 );
 	} );
 
-	it( 'runs right away without the WP Consent API', () => {
-		window.wcAnalytics!.consentApiActive = false;
+	it( 'runs right away when no consent plugin decides', () => {
+		window.wcAnalytics!.consentManaged = false;
 		const callback = jest.fn();
 
 		new ConsentManager().waitForConsentApi( callback );
