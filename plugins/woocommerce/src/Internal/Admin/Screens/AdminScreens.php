@@ -23,36 +23,19 @@ class AdminScreens {
 	private const REGISTER_MODULES_FUNCTION = 'woocommerce_routes_register_script_modules';
 
 	/**
-	 * Whether the build output exists, which it doesn't in a checkout that hasn't been built.
-	 *
-	 * @since 11.3.0
-	 *
-	 * @return bool
-	 */
-	public function is_build_available(): bool {
-		return is_readable( $this->get_build_file() );
-	}
-
-	/**
 	 * Load the build output, once.
 	 *
 	 * @since 11.3.0
 	 *
-	 * @return bool Whether the build output is loaded.
+	 * @return void
 	 */
-	public function load(): bool {
-		if ( ! $this->is_build_available() ) {
-			return false;
-		}
-
+	public function load(): void {
 		require_once $this->get_build_file();
 		// wp-build registers its script modules on `wp_default_scripts`, which has usually fired by `init`.
 		if ( did_action( 'wp_default_scripts' ) && function_exists( self::REGISTER_MODULES_FUNCTION ) ) {
 			// @phpstan-ignore argument.type (wp-build generates this function in the build output, which PHPStan does not load.)
 			call_user_func( self::REGISTER_MODULES_FUNCTION );
 		}
-
-		return true;
 	}
 
 	/**

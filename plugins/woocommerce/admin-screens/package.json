@@ -32,15 +32,14 @@
 	},
 	"dependencies": {
 		"@wordpress/admin-ui": "catalog:wp-bundled",
-		"@wordpress/api-fetch": "catalog:wp-min",
 		"@wordpress/components": "catalog:wp-min",
 		"@wordpress/core-data": "catalog:wp-min",
 		"@wordpress/data": "catalog:wp-min",
 		"@wordpress/dataviews": "catalog:wp-bundled",
+		"@wordpress/html-entities": "catalog:wp-min",
 		"@wordpress/i18n": "catalog:wp-min",
 		"@wordpress/route": "catalog:wp-min",
 		"@wordpress/ui": "catalog:wp-bundled",
-		"@wordpress/url": "catalog:wp-min",
 		"@wordpress/views": "catalog:wp-bundled",
 		"react": "18.3.x",
 		"react-dom": "18.3.x"

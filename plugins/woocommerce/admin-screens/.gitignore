@@ -1,5 +1,2 @@
 # wp-build output, a symlink to ../assets/client/routes
 /build
-# wp-build's intermediate output for shared packages
-/packages/*/build-module
-/packages/*/build-style

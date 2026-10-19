@@ -8,6 +8,7 @@
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Gateways\ShippingMethodRestrictionsTrait;
 use Automattic\WooCommerce\Internal\Admin\Settings\Utils as SettingsUtils;
+use Automattic\WooCommerce\Internal\Admin\Screens\Settings\PaymentSettingsScreen;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -498,6 +499,11 @@ class WC_Gateway_BACS extends WC_Payment_Gateway {
 	 * @return string The settings page URL for the gateway.
 	 */
 	public function get_settings_url() {
+		$experimental_url = wc_get_container()->get( PaymentSettingsScreen::class )->get_url( $this->id );
+		if ( null !== $experimental_url ) {
+			return $experimental_url;
+		}
+
 		$should_use_react_settings_page = $this->is_reactified_settings_page();
 
 		// We must not include both the path and the section query parameter, as this can cause weird behavior.

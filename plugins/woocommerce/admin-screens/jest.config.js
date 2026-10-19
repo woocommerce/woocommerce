@@ -8,8 +8,8 @@ module.exports = {
 	preset: `<rootDir>/${ presetDir }`,
 	transform: {
 		...preset.transform,
-		// wp-build keeps code in `routes/` and `packages/`, which the shared preset doesn't transform.
-		'(routes|packages)/.*\\.[jt]sx?$': [
+		// The shared preset does not transform wp-build routes.
+		'routes/.*\\.[jt]sx?$': [
 			'ts-jest',
 			{
 				tsconfig: `<rootDir>/${ presetDir }/tsconfig-jest.json`,

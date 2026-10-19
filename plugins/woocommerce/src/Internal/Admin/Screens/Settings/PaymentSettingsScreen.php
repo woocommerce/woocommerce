@@ -67,10 +67,11 @@ final class PaymentSettingsScreen {
 	 * @internal
 	 */
 	public function handle_init(): void {
-		if ( ! is_admin() || is_network_admin() || ! $this->is_available() || ! $this->admin_screens->load() ) {
+		if ( ! is_admin() || is_network_admin() || ! $this->is_available() ) {
 			return;
 		}
 
+		$this->admin_screens->load();
 		add_action( 'admin_menu', array( $this, 'handle_admin_menu' ) );
 		add_action( 'admin_head', array( $this, 'handle_admin_head' ) );
 		add_filter( 'submenu_file', array( $this, 'handle_submenu_file' ) );
@@ -79,7 +80,7 @@ final class PaymentSettingsScreen {
 	/**
 	 * Whether the screen can be used on this site.
 	 *
-	 * It needs the feature flag, WordPress's View Config and Fields APIs, and the build output.
+	 * It needs both experimental feature flags and WordPress's View Config API.
 	 *
 	 * @since 11.3.0
 	 *
@@ -87,9 +88,28 @@ final class PaymentSettingsScreen {
 	 */
 	public function is_available(): bool {
 		return Features::is_enabled( self::FEATURE_FLAG )
-			&& function_exists( 'wp_get_entity_view_config' )
-			&& ( class_exists( 'WP_Fields_Registry' ) || class_exists( 'Gutenberg_Fields_Registry' ) )
-			&& $this->admin_screens->is_build_available();
+			&& Features::is_enabled( 'rest-api-v4' )
+			&& function_exists( 'wp_get_entity_view_config' );
+	}
+
+	/**
+	 * Link a Core offline method to the experimental screen when it is available.
+	 *
+	 * @since 11.3.0
+	 * @param string $gateway_id Core offline gateway ID.
+	 * @return string|null The experimental URL, or null to keep the existing screen.
+	 */
+	public function get_url( string $gateway_id ): ?string {
+		if ( ! in_array( $gateway_id, array( 'bacs', 'cheque', 'cod' ), true ) || ! $this->is_available() ) {
+			return null;
+		}
+		return add_query_arg(
+			array(
+				'page' => self::PAGE_SLUG,
+				'p'    => '/settings/' . $gateway_id,
+			),
+			admin_url( 'admin.php' )
+		);
 	}
 
 	/**

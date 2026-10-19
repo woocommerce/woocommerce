@@ -1,38 +1,27 @@
 # Admin screens
 
-Admin screens built with [wp-build](https://www.npmjs.com/package/@wordpress/build), DataViews and DataForm. Each folder in `routes/` is one route, and each folder in `packages/` is a script module that other plugins can import.
-
-The build writes to `plugins/woocommerce/assets/client/routes`, which `Automattic\WooCommerce\Internal\Admin\Screens\AdminScreens` loads.
+Experimental admin pages built with wp-build, DataForm and core-data. Routes live in `routes/`; there is no exported screen-registration package.
 
 ```sh
 pnpm --filter=@woocommerce/plugin-woocommerce build:project:admin-screens
 pnpm --filter=@woocommerce/plugin-woocommerce watch:build:project:admin-screens
 ```
 
-## Settings screens
+The build writes to `plugins/woocommerce/assets/client/routes`. Build the checkout before enabling the page.
 
-Experimental settings screens that extensions register. They are behind the `payment-settings-screen` feature flag, and every part of them can change in any release. See `plugins/woocommerce/tests/e2e/test-plugins/payment-settings-example` for a working example.
+## Offline payment settings
 
-Each screen is a route on the `wc-payment-settings` page. The extension registers the route with a script module, and the module renders the screen with `createSettingsScreen()` from the `@woocommerce/settings-screens` script module, built from `packages/settings-screens`. WooCommerce draws the form, saves it, and shows its breadcrumbs, so every screen looks and works the same.
+The `payment-settings-screen` and `rest-api-v4` flags, and WordPress's View Config API, are required. With those available, the existing settings links for direct bank transfer, check payments and cash on delivery open the new page. Otherwise they keep their existing destinations.
 
-A screen ID has one or two segments: `my-gateway`, or `my-gateway/advanced` for a sub-page. A sub-page is an ordinary screen: it registers its own fields, layout and module, and nothing is inherited from its parent. Sub-pages can share their parent's endpoint, so the endpoint must keep the stored value of any field a save leaves out. The only area so far is `payments`.
+For development, enable both flags with an mu-plugin:
 
-1. Register a script module that depends on `@woocommerce/settings-screens` and exports what `createSettingsScreen()` returns:
+```php
+<?php
+add_filter( 'woocommerce_admin_features', static function ( $features ) {
+    return array_unique( array_merge( $features, array( 'payment-settings-screen', 'rest-api-v4' ) ) );
+} );
+```
 
-    ```js
-    import { createSettingsScreen } from '@woocommerce/settings-screens';
+The routes are `/settings/bacs`, `/settings/cheque` and `/settings/cod` on `admin.php?page=wc-payment-settings-wp-admin`. The route registers the Core entities with `addEntities()` and reads and saves through `/wc/v4/settings/payment-gateways/{id}`. Fields are defined on the client; layouts come from View Config. Bank accounts use the gateway endpoint's `values.account_details`, which retains the existing `woocommerce_bacs_accounts` storage.
 
-    export const { route, stage } = createSettingsScreen( {
-        id: 'my-gateway',
-        area: 'payments',
-        title: 'My gateway settings',
-        restPath: '/my-gateway/v1/settings',
-    } );
-    ```
-
-    `restPath` is an endpoint that reads (`GET`) and saves (`POST`) the settings as one flat object and returns the stored settings after a save. A sub-page also passes `parent: { id, title }`, which its breadcrumbs link to.
-2. Register the screen's route on the `wc-payment-settings-wp-admin_init` action, which wp-build generates for the page, with `woocommerce_routes_register_wc_payment_settings_wp_admin_route( '/settings/my-gateway', 'my-gateway/settings-screen', 'my-gateway/settings-screen' )`. The module is both the route's content and route module. Use `/settings/{id}` as the path, with the same ID as `createSettingsScreen()`.
-3. Register fields with the Fields API on the `wp_fields_api_init` action, using the entity kind `woo_settings_{area}` and the screen ID as the entity name. Field modules can add JavaScript parts, such as custom controls. A module only gets WordPress packages through the `window.wp` globals the page already loads.
-4. Set the layout with the `get_entity_view_config_woo_settings_{area}_{id}` filter.
-
-The screen opens at `admin.php?page=wc-payment-settings-wp-admin&p=/settings/{id}`, so a sub-page opens at `p=/settings/{gateway}/{sub-page}`. Moving between registered screens doesn't reload the page.
+Check save/reload, discard, server errors, shipping restrictions and adding/reordering/removing bank accounts. Restore any test changes afterwards. Extension-provided pages and sub-pages are follow-up work, not supported by this PR.

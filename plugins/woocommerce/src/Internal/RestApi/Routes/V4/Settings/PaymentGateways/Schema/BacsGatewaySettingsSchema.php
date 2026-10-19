@@ -197,6 +197,10 @@ class BacsGatewaySettingsSchema extends AbstractPaymentGatewaySettingsSchema {
 
 			// Only add if at least one field is filled.
 			if ( array_filter( $validated_account ) ) {
+				if ( isset( $account['country_code'] ) ) {
+					$validated_account['country_code'] = sanitize_text_field( $account['country_code'] );
+				}
+
 				$validated_accounts[] = $validated_account;
 			}
 		}

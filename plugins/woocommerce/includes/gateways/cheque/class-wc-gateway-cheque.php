@@ -8,6 +8,7 @@
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Gateways\ShippingMethodRestrictionsTrait;
 use Automattic\WooCommerce\Internal\Admin\Settings\Utils as SettingsUtils;
+use Automattic\WooCommerce\Internal\Admin\Screens\Settings\PaymentSettingsScreen;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -186,6 +187,11 @@ class WC_Gateway_Cheque extends WC_Payment_Gateway {
 	 * @return string The settings page URL for the gateway.
 	 */
 	public function get_settings_url() {
+		$experimental_url = wc_get_container()->get( PaymentSettingsScreen::class )->get_url( $this->id );
+		if ( null !== $experimental_url ) {
+			return $experimental_url;
+		}
+
 		// Search for a WC_Settings_Payment_Gateways instance in the settings pages.
 		$payments_settings_page = null;
 		foreach ( WC_Admin_Settings::get_settings_pages() as $settings_page ) {

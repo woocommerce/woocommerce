@@ -31,7 +31,6 @@ const rulesOf = ( configs ) =>
 	Object.assign( {}, ...configs.map( ( config ) => config.rules ?? {} ) );
 
 export default [
-	{ ignores: [ 'packages/*/build-module/', 'packages/*/build-style/' ] },
 	...woocommerce.map( escalateWarnings ),
 	{
 		files: [ '**/*.ts', '**/*.tsx' ],
