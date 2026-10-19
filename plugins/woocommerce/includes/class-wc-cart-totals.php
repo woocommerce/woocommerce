@@ -14,6 +14,7 @@
  */
 
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
+use Automattic\WooCommerce\Internal\Tax\ShippingTaxSplit;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -263,8 +264,13 @@ final class WC_Cart_Totals {
 			}
 			if ( ! $item->taxable ) {
 				$costs['non-taxable'] += $item->total;
-			} elseif ( 'inherit' === $item->tax_class ) {
-				$costs[ reset( $item_tax_classes ) ] += $item->total;
+			} elseif ( ShippingTaxSplit::is_based_on_items( $item->tax_class ) ) {
+				$split_values = $item->object instanceof WC_Shipping_Rate ? wc_get_container()->get( ShippingTaxSplit::class )->get_rate_values( $item->object ) : null;
+				$item_costs   = null === $split_values ? array( reset( $item_tax_classes ) => $item->total ) : ShippingTaxSplit::split_cost( (float) $item->total, $split_values );
+
+				foreach ( $item_costs as $tax_class => $cost ) {
+					$costs[ $tax_class ] = ( $costs[ $tax_class ] ?? 0 ) + $cost;
+				}
 			} else {
 				$costs[ $item->tax_class ] += $item->total;
 			}
