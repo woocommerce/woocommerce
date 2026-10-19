@@ -30,8 +30,28 @@ export class ApiClient {
 		// Send any pending events when the page is about to unload
 		window.addEventListener( 'beforeunload', this.flush );
 		window.addEventListener( 'pagehide', this.flush );
+		consentManager.addConsentChangeListener( hasConsent => {
+			if ( ! hasConsent ) {
+				this.dropQueuedEvents();
+			}
+		} );
 
 		this.isInitialized = true;
+	};
+
+	/**
+	 * Drop events that are queued but not sent yet, for when statistics consent is withdrawn.
+	 */
+	private dropQueuedEvents = (): void => {
+		if ( this.debounceTimer ) {
+			clearTimeout( this.debounceTimer );
+			this.debounceTimer = null;
+		}
+
+		if ( this.eventQueue.length > 0 ) {
+			debug( 'Dropping %d queued events because statistics consent was withdrawn', this.eventQueue.length );
+			this.eventQueue = [];
+		}
 	};
 
 	/**
@@ -116,9 +136,9 @@ export class ApiClient {
 			return;
 		}
 
+		// A failed send can put events back after consent was withdrawn.
 		if ( ! consentManager.hasAnalyticsConsent() ) {
-			debug( 'Dropping %d queued events because statistics consent was withdrawn', this.eventQueue.length );
-			this.eventQueue = [];
+			this.dropQueuedEvents();
 			return;
 		}
 

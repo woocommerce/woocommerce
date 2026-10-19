@@ -8,6 +8,11 @@ import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals
  */
 import { ApiClient } from '../api-client';
 
+const changeConsent = ( value: 'allow' | 'deny' ) =>
+	document.dispatchEvent(
+		new CustomEvent( 'wp_listen_for_consent_change', { detail: { statistics: value } } )
+	);
+
 describe( 'ApiClient', () => {
 	const sendBeacon = jest.fn( () => true );
 
@@ -55,6 +60,22 @@ describe( 'ApiClient', () => {
 
 		hasConsent = true;
 		window.dispatchEvent( new Event( 'pagehide' ) );
+
+		expect( sendBeacon ).not.toHaveBeenCalled();
+	} );
+
+	it( 'drops events queued before a withdrawal when consent is granted again before they are sent', () => {
+		let hasConsent = true;
+		window.wp_has_consent = () => hasConsent;
+		const client = new ApiClient();
+		client.init();
+
+		client.addEvent( 'page_view' );
+		hasConsent = false;
+		changeConsent( 'deny' );
+		hasConsent = true;
+		changeConsent( 'allow' );
+		jest.advanceTimersByTime( 1000 );
 
 		expect( sendBeacon ).not.toHaveBeenCalled();
 	} );
