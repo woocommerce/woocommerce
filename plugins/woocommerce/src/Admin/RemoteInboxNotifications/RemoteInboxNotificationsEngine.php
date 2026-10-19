@@ -218,24 +218,7 @@ class RemoteInboxNotificationsEngine extends RemoteSpecsEngine {
 			}
 
 			$note = Notes::get_note( $alert->note_id );
-			// Eligibility may have changed since the candidate query.
-			if ( ! $note instanceof Note
-				|| Note::E_WC_ADMIN_NOTE_UNACTIONED !== $note->get_status( 'edit' )
-				|| $note->get_is_deleted( 'edit' )
-				|| 'woocommerce.com' !== $note->get_source( 'edit' )
-				|| ! in_array( $note->get_type( 'edit' ), array( Note::E_WC_ADMIN_NOTE_ERROR, Note::E_WC_ADMIN_NOTE_UPDATE ), true )
-				|| isset( $published_slugs[ $note->get_name( 'edit' ) ] )
-			) {
-				continue;
-			}
-
-			/**
-			 * Last status-change date.
-			 *
-			 * @var \WC_DateTime|null $date_created
-			 */
-			$date_created = $note->get_date_created( 'edit' );
-			if ( null === $date_created || $date_created->getTimestamp() <= 0 || $date_created->getTimestamp() >= $changed_before ) {
+			if ( ! $note instanceof Note ) {
 				continue;
 			}
 
