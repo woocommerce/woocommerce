@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Return an error when REST API orders add line items for deleted or unknown products, instead of adding them at a zero price.

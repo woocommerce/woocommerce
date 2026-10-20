@@ -22,6 +22,7 @@ use Automattic\WooCommerce\Utilities\StringUtil;
 use Automattic\WooCommerce\Internal\Utilities\Users;
 use WC_REST_Exception;
 use WC_Order;
+use WC_Product;
 use WP_REST_Request;
 use WP_Http;
 use WC_Order_Item_Product;
@@ -359,6 +360,12 @@ class UpdateUtils {
 	protected function prepare_line_item_data( $request_data, $action = 'create', $item = null ) {
 		$item    = is_null( $item ) ? new WC_Order_Item_Product( ! empty( $request_data['id'] ) ? $request_data['id'] : '' ) : $item;
 		$product = wc_get_product( $this->get_product_id_from_line_item( $request_data, $action ) );
+
+		// Only new items must resolve, so orders whose products were deleted later stay editable.
+		// A deleted variation can still load as an empty object, so its post must exist too.
+		if ( 'create' === $action && ( ! $product instanceof WC_Product || ! get_post_type( $product->get_id() ) ) ) {
+			throw new WC_REST_Exception( 'woocommerce_rest_invalid_product_id', esc_html__( 'Invalid product ID.', 'woocommerce' ), (int) WP_Http::BAD_REQUEST );
+		}
 
 		if ( $product && $product !== $item->get_product() ) {
 			$item->set_product( $product );

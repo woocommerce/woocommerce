@@ -1580,6 +1580,104 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Line items that point to a missing product.
+	 *
+	 * @return array<string, array{callable(): array<string, int|string>}>
+	 */
+	public function provide_line_items_with_missing_product(): array {
+		return array(
+			'deleted product'   => array(
+				static function (): array {
+					$product    = WC_Helper_Product::create_simple_product();
+					$product_id = $product->get_id();
+					$product->delete( true );
+
+					return array( 'product_id' => $product_id );
+				},
+			),
+			'deleted variation' => array(
+				static function (): array {
+					$variable  = WC_Helper_Product::create_variation_product();
+					$variation = wc_get_product( $variable->get_children()[0] );
+					$line_item = array(
+						'product_id'   => $variable->get_id(),
+						'variation_id' => $variation->get_id(),
+					);
+					$variation->delete( true );
+
+					return $line_item;
+				},
+			),
+			'unknown SKU'       => array(
+				static function (): array {
+					return array( 'sku' => 'missing-sku' );
+				},
+			),
+		);
+	}
+
+	/**
+	 * @testdox POST /orders rejects a line item for a missing product ($_dataName), and creates no order.
+	 * @dataProvider provide_line_items_with_missing_product
+	 *
+	 * @param callable $build_line_item Builds the line item payload.
+	 */
+	public function test_create_order_rejects_line_item_with_missing_product( callable $build_line_item ): void {
+		$line_item   = $build_line_item();
+		$query_args  = array(
+			'return' => 'ids',
+			'limit'  => -1,
+		);
+		$order_count = count( wc_get_orders( $query_args ) );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders' );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body( wp_json_encode( array( 'line_items' => array( $line_item ) ) ) );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 400, $response->get_status(), 'The request should be rejected.' );
+		$this->assertSame( 'woocommerce_rest_invalid_product_id', $response->get_data()['code'], 'The error should name the invalid product.' );
+		$this->assertCount( $order_count, wc_get_orders( $query_args ), 'No order should be created.' );
+	}
+
+	/**
+	 * @testdox PUT /orders rejects a new line item for a deleted product.
+	 */
+	public function test_update_order_rejects_new_line_item_with_deleted_product(): void {
+		list( $order ) = $this->create_order_with_line_item();
+		$deleted       = WC_Helper_Product::create_simple_product();
+		$deleted_id    = $deleted->get_id();
+		$deleted->delete( true );
+
+		$response = $this->dispatch_line_item_update( $order->get_id(), array( 'product_id' => $deleted_id ) );
+
+		$this->assertSame( 400, $response->get_status(), 'The request should be rejected.' );
+		$this->assertSame( 'woocommerce_rest_invalid_product_id', $response->get_data()['code'], 'The error should name the invalid product.' );
+		$this->assertCount( 1, wc_get_order( $order->get_id() )->get_items(), 'The order should keep only its original line item.' );
+	}
+
+	/**
+	 * @testdox PUT /orders still updates an existing line item whose product was deleted.
+	 */
+	public function test_update_existing_line_item_with_deleted_product_succeeds(): void {
+		list( $order, $item_id ) = $this->create_order_with_line_item();
+		$product_id              = ( new WC_Order_Item_Product( $item_id ) )->get_product_id();
+		wc_get_product( $product_id )->delete( true );
+
+		$response = $this->dispatch_line_item_update(
+			$order->get_id(),
+			array(
+				'id'         => $item_id,
+				'product_id' => $product_id,
+				'quantity'   => 2,
+			)
+		);
+
+		$this->assertSame( 200, $response->get_status(), 'The update should succeed.' );
+		$this->assertSame( 2, ( new WC_Order_Item_Product( $item_id ) )->get_quantity(), 'The quantity should be updated.' );
+	}
+
+	/**
 	 * Builds a variable product with a single variation carrying a real "color" attribute.
 	 *
 	 * @return array Two-element array: the WC_Product_Variable parent and its WC_Product_Variation.
