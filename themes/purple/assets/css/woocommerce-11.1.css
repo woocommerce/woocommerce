@@ -1,0 +1,19 @@
+/*
+ * Compatibility styles for WooCommerce 11.1 and older.
+ */
+
+/* Fix Catalog Sorting alignment.
+ * Fixed upstream in https://github.com/woocommerce/woocommerce/pull/68024.
+ */
+.woocommerce.wc-block-catalog-sorting,
+.woocommerce.wc-block-catalog-sorting .components-disabled,
+.woocommerce.wc-block-catalog-sorting form.woocommerce-ordering {
+	align-items: center;
+	display: flex;
+	gap: 0.3em;
+	margin-bottom: 0;
+}
+.woocommerce.wc-block-catalog-sorting label,
+.woocommerce.wc-block-catalog-sorting.wc-block-catalog-sorting label.orderby-label {
+	margin: 0;
+}

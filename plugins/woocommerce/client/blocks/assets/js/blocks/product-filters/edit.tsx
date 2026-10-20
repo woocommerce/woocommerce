@@ -112,7 +112,7 @@ export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 
 				<div className="wc-block-product-filters__overlay">
 					<div className="wc-block-product-filters__overlay-wrapper">
-						<div
+						<section
 							className="wc-block-product-filters__overlay-dialog"
 							role="dialog"
 						>
@@ -140,7 +140,7 @@ export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 									</span>
 								</button>
 							</footer>
-						</div>
+						</section>
 					</div>
 				</div>
 			</>

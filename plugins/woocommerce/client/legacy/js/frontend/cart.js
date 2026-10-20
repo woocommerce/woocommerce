@@ -333,6 +333,7 @@ jQuery( function ( $ ) {
 				type: 'post',
 				url: get_url( 'update_shipping_method' ),
 				data: data,
+				wc_form_encoding: true,
 				dataType: 'html',
 				success: function ( response ) {
 					update_cart_totals_div( response );
@@ -375,6 +376,7 @@ jQuery( function ( $ ) {
 				type: $form.attr( 'method' ),
 				url: $form.attr( 'action' ),
 				data: $form.serialize(),
+				wc_form_encoding: true,
 				dataType: 'html',
 				success: function ( response ) {
 					update_wc_div( response );
@@ -492,6 +494,7 @@ jQuery( function ( $ ) {
 				type: $form.attr( 'method' ),
 				url: $form.attr( 'action' ),
 				data: $form.serialize(),
+				wc_form_encoding: true,
 				dataType: 'html',
 				success: function ( response ) {
 					update_wc_div( response, preserve_notices );
@@ -625,6 +628,7 @@ jQuery( function ( $ ) {
 				type: 'POST',
 				url: get_url( 'apply_coupon' ),
 				data: data,
+				wc_form_encoding: true,
 				dataType: 'html',
 				success: function ( response ) {
 					$(
@@ -683,6 +687,7 @@ jQuery( function ( $ ) {
 				type: 'POST',
 				url: get_url( 'remove_coupon' ),
 				data: data,
+				wc_form_encoding: true,
 				dataType: 'html',
 				success: function ( response ) {
 					$(
@@ -742,6 +747,7 @@ jQuery( function ( $ ) {
 				type: $form.attr( 'method' ),
 				url: $form.attr( 'action' ),
 				data: $form.serialize(),
+				wc_form_encoding: true,
 				dataType: 'html',
 				success: function ( response ) {
 					update_wc_div( response );

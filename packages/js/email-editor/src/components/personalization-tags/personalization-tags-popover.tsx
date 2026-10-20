@@ -7,7 +7,11 @@ import { __ } from '@wordpress/i18n';
 
 type PersonalizationTagsPopoverProps = {
 	contentRef: React.RefObject< HTMLElement >;
-	onUpdate: ( originalValue: string, updatedValue: string ) => void;
+	onUpdate: (
+		originalValue: string,
+		updatedValue: string,
+		anchor?: HTMLElement
+	) => void;
 };
 
 /**
@@ -95,7 +99,11 @@ const PersonalizationTagsPopover = ( {
 							<Button
 								isPrimary
 								onClick={ () => {
-									onUpdate( originalValue, updatedValue );
+									onUpdate(
+										originalValue,
+										updatedValue,
+										anchor
+									);
 									setIsPopoverVisible( false );
 								} }
 							>

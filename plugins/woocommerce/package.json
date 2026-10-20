@@ -2,7 +2,7 @@
 	"name": "@woocommerce/plugin-woocommerce",
 	"private": true,
 	"title": "WooCommerce",
-	"version": "11.3.0",
+	"version": "11.4.0",
 	"homepage": "https://woocommerce.com/",
 	"repository": {
 		"type": "git",
@@ -1319,7 +1319,7 @@
 		"@woocommerce/internal-build": "workspace:*",
 		"@wordpress/browserslist-config": "next",
 		"@wordpress/e2e-test-utils-playwright": "catalog:wp-min",
-		"@wordpress/env": "11.9.0",
+		"@wordpress/env": "catalog:tooling",
 		"allure-commandline": "^2.32.2",
 		"allure-playwright": "^3.1.0",
 		"autoprefixer": "9.8.6",
@@ -1335,7 +1335,7 @@
 		"handlebars": "^4.7.9",
 		"jest": "29.5.x",
 		"playwright-ctrf-json-reporter": "0.0.27",
-		"prettier": "npm:wp-prettier@3.9.6",
+		"prettier": "catalog:tooling",
 		"rimraf": "5.0.5",
 		"typescript": "5.7.x",
 		"wp-textdomain": "1.0.1"

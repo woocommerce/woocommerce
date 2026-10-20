@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix the plain-text version of emails corrupting every personalization tag after the tenth.
