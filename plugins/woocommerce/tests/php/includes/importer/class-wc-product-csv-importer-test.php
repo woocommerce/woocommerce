@@ -2269,4 +2269,27 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( 'product', get_post_type( $simple->get_id() ), 'The product must not be converted to a variation' );
 		$this->assertTrue( has_term( 'import-40274-parent-check-tag', 'product_tag', $simple->get_id() ), 'The product keeps its tags' );
 	}
+
+	/**
+	 * @testdox Should label a failed row with its own ID even when another row was matched by SKU to the same product.
+	 */
+	public function test_import_labels_rows_with_their_own_id_40274(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_sku( 'IMPORT-40274-LABEL-A' );
+		$product->save();
+
+		$other = WC_Helper_Product::create_simple_product();
+		$other->set_sku( 'IMPORT-40274-LABEL-B' );
+		$other->save();
+
+		$missing_id = $other->get_id() + 1000;
+		$csv        = "ID,Type,SKU,Name\n" .
+			"{$missing_id},simple,IMPORT-40274-LABEL-A,Matched by SKU\n" .
+			"{$product->get_id()},simple,IMPORT-40274-LABEL-B,Conflicting row\n";
+
+		$data = $this->import_csv_rows( $csv );
+
+		$this->assertCount( 1, $data['failed'], 'The conflicting row fails' );
+		$this->assertStringContainsString( "ID {$product->get_id()}", $data['failed'][0]->get_error_data()['row'], 'The label shows the ID from that row' );
+	}
 }

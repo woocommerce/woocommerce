@@ -65,6 +65,20 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	private $sku_matched_original_ids = array();
 
 	/**
+	 * ID cells from the file, keyed by parsed row, so result labels show the ID the merchant can find in the CSV.
+	 *
+	 * @var array<int, int>
+	 */
+	private $parsed_row_csv_ids = array();
+
+	/**
+	 * ID cell from the file for the row being imported.
+	 *
+	 * @var int
+	 */
+	private $importing_row_csv_id = 0;
+
+	/**
 	 * Initialize importer.
 	 *
 	 * @param string $file   File to read.
@@ -1271,6 +1285,8 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 				$data[ $mapped_keys[ $id ] ] = call_user_func( $parse_functions[ $id ], $value );
 			}
 
+			$this->parsed_row_csv_ids[ count( $this->parsed_data ) ] = absint( $this->get_row_value( 'id' ) );
+
 			/**
 			 * Filter product importer parsed data.
 			 *
@@ -1294,9 +1310,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * @return string
 	 */
 	protected function get_row_id( $parsed_data ) {
-		$id               = isset( $parsed_data['id'] ) ? absint( $parsed_data['id'] ) : 0;
-		$csv_id           = array_search( $id, $this->original_id_map, true );
-		$id               = false === $csv_id ? $id : $csv_id;
+		$id               = $this->importing_row_csv_id ? $this->importing_row_csv_id : ( isset( $parsed_data['id'] ) ? absint( $parsed_data['id'] ) : 0 );
 		$sku              = isset( $parsed_data['sku'] ) ? esc_attr( $parsed_data['sku'] ) : '';
 		$global_unique_id = isset( $parsed_data['global_unique_id'] ) ? esc_attr( $parsed_data['global_unique_id'] ) : '';
 		$name             = isset( $parsed_data['name'] ) ? esc_attr( $parsed_data['name'] ) : '';
@@ -1483,6 +1497,8 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		);
 
 		foreach ( $this->parsed_data as $parsed_data_key => $parsed_data ) {
+			$this->importing_row_csv_id = $this->parsed_row_csv_ids[ $parsed_data_key ] ?? 0;
+
 			do_action( 'woocommerce_product_import_before_import', $parsed_data );
 
 			$id  = isset( $parsed_data['id'] ) ? absint( $parsed_data['id'] ) : 0;
