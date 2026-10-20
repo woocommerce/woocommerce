@@ -254,6 +254,7 @@ CSS;
 				<button
 					type="button"
 					class="wc-block-product-filters__open-overlay"
+					data-wp-init="callbacks.initOverlay"
 					data-wp-on--click="actions.openOverlay"
 				>
 					<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

@@ -330,6 +330,22 @@ const productFiltersStore = {
 		},
 	},
 	callbacks: {
+		initOverlay: () => {
+			const { ref: openButton } = getElement();
+			if ( ! openButton ) {
+				return;
+			}
+			const context = getContext< ProductFiltersContext >();
+			const observer = new ResizeObserver( () => {
+				// Responsive CSS hides the opener when filters become inline.
+				if ( getComputedStyle( openButton ).display === 'none' ) {
+					context.isOverlayOpened = false;
+					context.openButtonRef = null;
+				}
+			} );
+			observer.observe( openButton );
+			return () => observer.disconnect();
+		},
 		focusOverlay: () => {
 			const context = getContext< ProductFiltersContext >();
 			if ( ! context.isOverlayOpened ) {
