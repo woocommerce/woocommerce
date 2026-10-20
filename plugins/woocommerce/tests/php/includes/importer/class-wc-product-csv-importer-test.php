@@ -2185,6 +2185,42 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should not match by SKU when the type the row would save differs from the matched product's type.
+	 */
+	public function test_import_sku_fallback_refuses_other_saved_types_40274(): void {
+		$parent = WC_Helper_Product::create_variation_product();
+		$parent->set_sku( 'IMPORT-40274-TYPE-PARENT' );
+		$parent->save();
+		$variation = wc_get_product( $parent->get_children()[0] );
+		$variation->set_sku( 'IMPORT-40274-TYPE-VAR' );
+		$variation->save();
+
+		$missing_id = $variation->get_id() + 1000;
+		$csv_file   = trailingslashit( get_temp_dir() ) . 'import-40274-saved-type.csv';
+		file_put_contents( // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
+			$csv_file,
+			"ID,Type,SKU,Name\n" .
+			"{$missing_id},,IMPORT-40274-TYPE-VAR,Empty type saves as simple\n" .
+			( $missing_id + 1 ) . ",simple,IMPORT-40274-TYPE-PARENT,Simple row for a variable product\n"
+		);
+
+		$data = $this->import_for_update(
+			$csv_file,
+			array(
+				'ID'   => 'id',
+				'Type' => 'type',
+				'SKU'  => 'sku',
+				'Name' => 'name',
+			)
+		);
+
+		$this->assertEmpty( $data['updated'], 'Neither row may update the product matched by SKU' );
+		$this->assertCount( 2, $data['failed'] );
+		$this->assertSame( 'product_variation', get_post_type( $variation->get_id() ), 'The variation must not be converted to a simple product' );
+		$this->assertSame( ProductType::VARIABLE, WC_Product_Factory::get_product_type( $parent->get_id() ), 'The variable product must not be converted to a simple product' );
+	}
+
+	/**
 	 * @testdox Should not use the first column as the SKU when the file has no SKU column.
 	 */
 	public function test_import_without_sku_column_does_not_use_first_column_as_sku_40274(): void {

@@ -416,25 +416,36 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	}
 
 	/**
-	 * Whether the row's Type column agrees with an existing product on being a variation.
+	 * Whether the row would save the product matched by SKU as the type it already has.
 	 *
-	 * A SKU match across that line would make get_product_object() convert the product, so the
-	 * fallback refuses it. A row without a Type column cannot convert anything and always matches.
+	 * Any other type would make get_product_object() convert the product, so the fallback refuses it,
+	 * as Global Unique ID matching does. A file without a Type column cannot convert anything.
 	 *
 	 * @param int $product_id Existing product ID matched by SKU.
 	 * @return bool
 	 */
 	private function row_type_matches_product( int $product_id ): bool {
-		$row_type = $this->get_row_value( 'type' );
-
-		if ( '' === $row_type ) {
+		if ( ! in_array( 'type', $this->get_mapped_keys(), true ) ) {
 			return true;
 		}
 
-		$row_is_variation     = in_array( ProductType::VARIATION, array_map( 'trim', explode( ',', strtolower( $row_type ) ) ), true );
-		$product_is_variation = 'product_variation' === get_post_type( $product_id );
+		$row_type = $this->get_type_from_values( $this->parse_comma_field( $this->get_row_value( 'type' ) ) );
 
-		return $row_is_variation === $product_is_variation;
+		return WC_Product_Factory::get_product_type( $product_id ) === $row_type;
+	}
+
+	/**
+	 * Get the product type a parsed Type cell saves as.
+	 *
+	 * The cell also holds the virtual and downloadable flags. The first other value is the type, and an empty cell means simple.
+	 *
+	 * @param string[] $values Parsed Type cell values.
+	 * @return string
+	 */
+	private function get_type_from_values( array $values ): string {
+		$type = current( array_diff( array_map( 'strtolower', $values ), array( 'virtual', 'downloadable' ) ) );
+
+		return $type ? $type : ProductType::SIMPLE;
 	}
 
 	/**
@@ -1067,13 +1078,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			$data['type']         = array_map( 'strtolower', $data['type'] );
 			$data['virtual']      = in_array( 'virtual', $data['type'], true );
 			$data['downloadable'] = in_array( 'downloadable', $data['type'], true );
-
-			// Convert type to string.
-			$data['type'] = current( array_diff( $data['type'], array( 'virtual', 'downloadable' ) ) );
-
-			if ( ! $data['type'] ) {
-				$data['type'] = ProductType::SIMPLE;
-			}
+			$data['type']         = $this->get_type_from_values( $data['type'] );
 		}
 
 		// Status is mapped from a special published field.
