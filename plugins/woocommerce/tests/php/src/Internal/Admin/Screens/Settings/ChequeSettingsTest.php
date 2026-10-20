@@ -33,7 +33,7 @@ class ChequeSettingsTest extends WC_Unit_Test_Case {
 		add_filter(
 			'woocommerce_admin_features',
 			static function ( $features ) {
-				$features[] = 'payment-settings-screen';
+				$features[] = 'experimental-admin-screens';
 				return $features;
 			}
 		);
@@ -75,7 +75,7 @@ class ChequeSettingsTest extends WC_Unit_Test_Case {
 		add_filter(
 			'woocommerce_admin_features',
 			static function ( $features ) {
-				return array_values( array_diff( $features, array( 'payment-settings-screen' ) ) );
+				return array_values( array_diff( $features, array( 'experimental-admin-screens' ) ) );
 			}
 		);
 		$config = $this->get_config();

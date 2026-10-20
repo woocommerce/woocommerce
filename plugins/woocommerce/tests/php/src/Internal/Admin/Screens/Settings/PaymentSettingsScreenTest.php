@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Screens\Settings;
 
+use Automattic\WooCommerce\Internal\Admin\Screens\AdminScreens;
 use Automattic\WooCommerce\Internal\Admin\Screens\Settings\PaymentSettingsScreen;
 use WC_Unit_Test_Case;
 
@@ -58,5 +59,22 @@ class PaymentSettingsScreenTest extends WC_Unit_Test_Case {
 
 		$this->assertNotFalse( has_action( 'admin_notices', '__return_null' ), 'admin_notices callbacks should stay' );
 		$this->assertNotFalse( has_action( 'all_admin_notices', '__return_null' ), 'all_admin_notices callbacks should stay' );
+	}
+
+	/**
+	 * @testdox Should remove the generated full-screen page while the flag is off.
+	 */
+	public function test_removes_full_screen_page_when_flag_is_off(): void {
+		add_filter(
+			'woocommerce_admin_features',
+			static function ( $features ) {
+				return array_values( array_diff( $features, array( AdminScreens::FEATURE_FLAG ) ) );
+			}
+		);
+		add_action( 'admin_init', 'woocommerce_routes_wc_payment_settings_intercept_render' );
+
+		$this->sut->handle_admin_init();
+
+		$this->assertFalse( has_action( 'admin_init', 'woocommerce_routes_wc_payment_settings_intercept_render' ), 'The full-screen page should not render without the screen' );
 	}
 }

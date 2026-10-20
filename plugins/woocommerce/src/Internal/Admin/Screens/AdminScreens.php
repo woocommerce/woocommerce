@@ -7,6 +7,8 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\Screens;
 
+use Automattic\WooCommerce\Admin\Features\Features;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -18,14 +20,36 @@ defined( 'ABSPATH' ) || exit;
 class AdminScreens {
 
 	/**
-	 * Load the build output, once.
-	 *
-	 * @since 11.4.0
-	 *
-	 * @return void
+	 * Feature flag that controls the experimental admin screens until they are released.
 	 */
-	public function load(): void {
-		require_once $this->get_build_file();
+	public const FEATURE_FLAG = 'experimental-admin-screens';
+
+	/**
+	 * Register hooks.
+	 *
+	 * @internal
+	 */
+	public function __construct() {
+		add_action( 'init', array( $this, 'handle_init' ) );
+	}
+
+	/**
+	 * Load the build output in admin requests while the flag is on.
+	 *
+	 * @internal
+	 *
+	 * @since 11.3.0
+	 */
+	public function handle_init(): void {
+		if ( ! is_admin() || ! Features::is_enabled( self::FEATURE_FLAG ) ) {
+			return;
+		}
+
+		// Development builds that only watch the admin client don't produce this file.
+		$build_file = $this->get_build_file();
+		if ( is_readable( $build_file ) ) {
+			require_once $build_file;
+		}
 	}
 
 	/**

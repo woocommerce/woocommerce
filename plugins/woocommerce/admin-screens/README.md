@@ -15,12 +15,12 @@ The build writes to `plugins/woocommerce/assets/client/routes`.
 
 Cheque is the Core example. It uses the existing `/wc/v3/payment_gateways/cheque` endpoint and doesn't replace the classic settings page or its links.
 
-The screen needs the `payment-settings-screen` flag and WordPress's View Config API. Enable the flag with an mu-plugin:
+The screen needs the `experimental-admin-screens` flag and WordPress's View Config API. Enable the flag with an mu-plugin:
 
 ```php
 <?php
 add_filter( 'woocommerce_admin_features', static function ( $features ) {
-    $features[] = 'payment-settings-screen';
+    $features[] = 'experimental-admin-screens';
     return array_unique( $features );
 } );
 ```
