@@ -457,6 +457,124 @@ describe( 'product filters interactivity store', () => {
 		}
 	);
 
+	it.each( [ 'completion', 'failure', 'history', 'other navigation' ] )(
+		'preserves overlapping changes and resets pending state on %s',
+		( finish ) => {
+			if ( ! mockRegisteredStore ) {
+				throw new Error( 'Product filters store was not registered.' );
+			}
+			const { actions } = mockRegisteredStore;
+			window.history.replaceState(
+				{},
+				'',
+				'https://example.com/shop/?query-0-page=2&query-28-page=3'
+			);
+			mockGetConfig.mockReturnValue( {
+				filterParamKeys: [ 'categories' ],
+				taxonomyParamsMap: { product_cat: 'categories' },
+			} );
+			const routerNavigate = jest.fn();
+			const router = {
+				actions: { navigate: routerNavigate },
+			} as unknown as typeof import( '@wordpress/interactivity-router' );
+			const navigate = ( queryId: number, value: string ) => {
+				const context = {
+					queryId,
+					params: {},
+					activeFilters: value
+						? [ { type: 'taxonomy/product_cat', value } ]
+						: [],
+				};
+				mockGetContext.mockReturnValue( context );
+				mockGetServerContext.mockReturnValue( context );
+				const iterator = actions.navigate();
+				iterator.next();
+				iterator.next( router );
+				return iterator;
+			};
+
+			const first = navigate( 0, 'shirts' );
+			const second = navigate( 28, 'hats' );
+			expect( routerNavigate ).toHaveBeenLastCalledWith(
+				'https://example.com/shop/?wcp-0-categories=shirts&wcp-28-categories=hats'
+			);
+			first.next();
+			const clear = navigate( 0, '' );
+			expect( routerNavigate ).toHaveBeenLastCalledWith(
+				'https://example.com/shop/?wcp-28-categories=hats'
+			);
+			second.next();
+			let error;
+			try {
+				if ( finish === 'failure' ) {
+					clear.throw( new Error( 'Navigation failed' ) );
+				}
+			} catch ( caught ) {
+				error = caught;
+			}
+			expect( error ).toEqual(
+				finish === 'failure'
+					? new Error( 'Navigation failed' )
+					: undefined
+			);
+			if ( finish === 'history' ) {
+				window.dispatchEvent( new PopStateEvent( 'popstate' ) );
+			} else if ( finish === 'other navigation' ) {
+				window.history.replaceState( {}, '', '/shop/?campaign=summer' );
+			} else {
+				clear.next();
+			}
+			const next = navigate( 0, 'boots' );
+			expect( routerNavigate ).toHaveBeenLastCalledWith(
+				finish === 'other navigation'
+					? 'https://example.com/shop/?campaign=summer&wcp-0-categories=boots'
+					: 'https://example.com/shop/?query-28-page=3&wcp-0-categories=boots'
+			);
+			next.next();
+		}
+	);
+
+	it( 'does not restore cleared local parameters from the global canonical URL', () => {
+		if ( ! mockRegisteredStore ) {
+			throw new Error( 'Product filters store was not registered.' );
+		}
+		window.history.replaceState( {}, '', '/shop/?wcp-0-categories=shirts' );
+		mockGetConfig.mockReturnValue( {
+			canonicalUrl: 'https://example.com/shop/?wcp-0-categories=shirts',
+			filterParamKeys: [ 'categories' ],
+			taxonomyParamsMap: { product_cat: 'categories' },
+		} );
+		mockGetContext.mockReturnValue( { activeFilters: [] } );
+		mockGetServerContext.mockReturnValue( { queryId: 0, params: {} } );
+		const local = mockRegisteredStore.actions.navigate();
+		local.next();
+		mockGetServerContext.mockReturnValue( { params: {} } );
+		mockGetContext.mockReturnValue( {
+			activeFilters: [ { type: 'taxonomy/product_cat', value: 'hats' } ],
+		} );
+		const global = mockRegisteredStore.actions.navigate();
+		global.next();
+		const navigate = jest.fn();
+		const router = {
+			actions: { navigate },
+		} as unknown as typeof import( '@wordpress/interactivity-router' );
+		global.next( router );
+		local.next( router );
+		expect( navigate.mock.calls ).toEqual( [
+			[ 'https://example.com/shop/?categories=hats' ],
+		] );
+		window.history.replaceState( {}, '', '/shop/?categories=hats' );
+		global.next();
+		mockGetContext.mockReturnValue( { activeFilters: [] } );
+		const clear = mockRegisteredStore.actions.navigate();
+		clear.next();
+		clear.next( router );
+		expect( navigate ).toHaveBeenLastCalledWith(
+			'https://example.com/shop/'
+		);
+		clear.next();
+	} );
+
 	it( 'triggers a full-page reload instead of router when forcePageReload is true', () => {
 		if ( ! mockRegisteredStore ) {
 			throw new Error( 'Product filters store was not registered.' );

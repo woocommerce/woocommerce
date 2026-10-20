@@ -30,6 +30,12 @@ const {
 
 const BLOCK_NAME = PRODUCT_FILTERS_STORE_NAME;
 
+let pendingNavigation: { source: string; destination: string } | undefined;
+
+window.addEventListener( 'popstate', () => {
+	pendingNavigation = undefined;
+} );
+
 type ValidFilterOptionItem = FilterOptionItem & {
 	type: string;
 	value: string;
@@ -281,17 +287,17 @@ const productFiltersStore = {
 			const config = getConfig( BLOCK_NAME );
 			const { queryId } = context;
 			const prefix = queryId === undefined ? '' : `wcp-${ queryId }-`;
+			const currentUrl =
+				pendingNavigation?.source === window.location.href
+					? pendingNavigation.destination
+					: window.location.href;
 			const url = new URL(
-				queryId === undefined
-					? config.canonicalUrl
-					: window.location.href
+				queryId === undefined ? config.canonicalUrl : currentUrl
 			);
+			url.search = new URL( currentUrl ).search;
 			const { searchParams } = url;
 
 			if ( queryId === undefined ) {
-				new URL( window.location.href ).searchParams.forEach(
-					( value, key ) => searchParams.set( key, value )
-				);
 				searchParams.delete( 'paged' );
 				searchParams.delete( 'product-page' );
 			} else {
@@ -323,7 +329,7 @@ const productFiltersStore = {
 				searchParams.set( `${ prefix }${ key }`, decodedValue );
 			}
 
-			if ( window.location.href === url.href ) {
+			if ( currentUrl === url.href ) {
 				return;
 			}
 
@@ -340,10 +346,23 @@ const productFiltersStore = {
 				return;
 			}
 
-			const routerModule: typeof import( '@wordpress/interactivity-router' ) =
-				yield import( '@wordpress/interactivity-router' );
+			const navigation = {
+				source: window.location.href,
+				destination: url.href,
+			};
+			pendingNavigation = navigation;
+			try {
+				const routerModule: typeof import( '@wordpress/interactivity-router' ) =
+					yield import( '@wordpress/interactivity-router' );
 
-			yield routerModule.actions.navigate( url.href );
+				if ( pendingNavigation === navigation ) {
+					yield routerModule.actions.navigate( url.href );
+				}
+			} finally {
+				if ( pendingNavigation === navigation ) {
+					pendingNavigation = undefined;
+				}
+			}
 		},
 	},
 	callbacks: {
