@@ -8,7 +8,10 @@
 use Automattic\WooCommerce\Caches\OrderCache;
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
+use Automattic\WooCommerce\Internal\Orders\UnpaidOrderTimeoutMarker;
 use Automattic\WooCommerce\Internal\Utilities\Users;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
  * Class WC_Order_Functions_Test
@@ -700,5 +703,69 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 
 		$this->assertSame( strtotime( '2024-06-28 15:34:05 UTC' ), $note->date_created->getTimestamp(), 'The note should keep the moment it was created.' );
 		$this->assertSame( '2024-06-29 00:34:05', $note->date_created->date( 'Y-m-d H:i:s' ), 'The note should be shown in the new site timezone.' );
+	}
+
+	/**
+	 * @testdox wc_cancel_unpaid_orders() marks the orders it cancels before the status hooks run.
+	 */
+	public function test_wc_cancel_unpaid_orders_marks_orders_cancelled_by_timeout(): void {
+		global $wpdb;
+
+		$original_manage_stock = get_option( 'woocommerce_manage_stock' );
+		$original_hold_minutes = get_option( 'woocommerce_hold_stock_minutes' );
+		update_option( 'woocommerce_manage_stock', 'yes' );
+		update_option( 'woocommerce_hold_stock_minutes', '60' );
+
+		$order_cache = wc_get_container()->get( OrderCache::class );
+		$expired     = time() - 3 * HOUR_IN_SECONDS;
+		$orders      = array();
+		foreach ( array( 'checkout', 'admin' ) as $created_via ) {
+			$order = WC_Helper_Order::create_order();
+			$order->set_created_via( $created_via );
+			$order->save();
+			$orders[ $created_via ] = $order->get_id();
+
+			if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+				$wpdb->update( OrdersTableDataStore::get_orders_table_name(), array( 'date_updated_gmt' => gmdate( 'Y-m-d H:i:s', $expired ) ), array( 'id' => $order->get_id() ) );
+			} else {
+				$wpdb->update(
+					$wpdb->posts,
+					array(
+						'post_modified'     => get_date_from_gmt( gmdate( 'Y-m-d H:i:s', $expired ) ),
+						'post_modified_gmt' => gmdate( 'Y-m-d H:i:s', $expired ),
+					),
+					array( 'ID' => $order->get_id() )
+				);
+				clean_post_cache( $order->get_id() );
+			}
+			$order_cache->remove( $order->get_id() );
+		}
+
+		$marked_in_hook = null;
+		$callback       = function ( $order_id ) use ( $order_cache, &$marked_in_hook ) {
+			$order_cache->remove( $order_id );
+			$marked_in_hook = UnpaidOrderTimeoutMarker::is_marked( wc_get_order( $order_id ) );
+		};
+		add_action( 'woocommerce_order_status_pending_to_cancelled', $callback );
+
+		wc_cancel_unpaid_orders();
+
+		remove_action( 'woocommerce_order_status_pending_to_cancelled', $callback );
+		as_unschedule_all_actions( 'woocommerce_cancel_unpaid_orders' );
+		update_option( 'woocommerce_manage_stock', $original_manage_stock );
+		update_option( 'woocommerce_hold_stock_minutes', $original_hold_minutes );
+
+		$order_cache->remove( $orders['checkout'] );
+		$order_cache->remove( $orders['admin'] );
+		$cancelled = wc_get_order( $orders['checkout'] );
+		$untouched = wc_get_order( $orders['admin'] );
+		$notes     = implode( ' ', wp_list_pluck( wc_get_order_notes( array( 'order_id' => $orders['checkout'] ) ), 'content' ) );
+
+		$this->assertSame( OrderStatus::CANCELLED, $cancelled->get_status() );
+		$this->assertTrue( $marked_in_hook, 'The marker should be saved before the status hooks run.' );
+		$this->assertTrue( UnpaidOrderTimeoutMarker::is_marked( $cancelled ) );
+		$this->assertStringContainsString( 'Unpaid order cancelled', $notes );
+		$this->assertSame( OrderStatus::PENDING, $untouched->get_status() );
+		$this->assertFalse( UnpaidOrderTimeoutMarker::is_marked( $untouched ) );
 	}
 }

@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
+use Automattic\WooCommerce\Internal\Orders\UnpaidOrderTimeoutMarker;
 use Automattic\WooCommerce\Internal\Utilities\Users;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
@@ -1164,7 +1165,7 @@ function wc_cancel_unpaid_orders() {
 			 * @param WC_Order $order          The unpaid order object.
 			 */
 			if ( apply_filters( 'woocommerce_cancel_unpaid_order', in_array( $order->get_created_via(), array( 'checkout', 'store-api' ), true ), $order ) ) {
-				$order->update_status( OrderStatus::CANCELLED, __( 'Unpaid order cancelled - time limit reached.', 'woocommerce' ) );
+				wc_get_container()->get( UnpaidOrderTimeoutMarker::class )->cancel_unpaid_order( $order, __( 'Unpaid order cancelled - time limit reached.', 'woocommerce' ) );
 			}
 		}
 	}
