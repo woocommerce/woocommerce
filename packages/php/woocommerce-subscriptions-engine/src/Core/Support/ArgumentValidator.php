@@ -59,18 +59,19 @@ final class ArgumentValidator {
 	}
 
 	/**
-	 * Validate and return a non-empty string.
+	 * Validate and return a non-empty string. Null (a missing argument) and '' are reported
+	 * as required.
 	 *
 	 * @param string $key   Field name.
 	 * @param mixed  $value Caller value.
-	 * @throws InvalidInputException If the value is not a string, or is empty.
+	 * @throws InvalidInputException If the value is missing, empty or not a string.
 	 */
 	public static function validate_non_empty_string( string $key, $value ): string {
+		if ( null === $value || '' === $value ) {
+			throw self::refuse( ValidationErrorCode::REQUIRED, $key, 'must be a non-empty string' );
+		}
 		if ( ! is_string( $value ) ) {
 			throw self::refuse( ValidationErrorCode::INVALID_TYPE, $key, 'must be a non-empty string', array( 'type' => 'string' ) );
-		}
-		if ( '' === $value ) {
-			throw self::refuse( ValidationErrorCode::REQUIRED, $key, 'must be a non-empty string' );
 		}
 
 		return $value;

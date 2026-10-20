@@ -20,15 +20,17 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Api;
 
-use DomainException;
 use InvalidArgumentException;
 use RuntimeException;
 use Throwable;
 use WP_Error;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\View\PlanView;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ArgumentValidator;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\InvalidInputException;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ValidationErrorCode;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanRepository;
-use Automattic\WooCommerce\SubscriptionsEngine\Integration\Support\ArgumentValidator;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Support\ArgumentFilter;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -90,17 +92,18 @@ final class Plans {
 	 *                                   `billing_policy`, `pricing_policy`, `delivery_policy`
 	 *                                   (string-keyed arrays the owning extension interprets, or null).
 	 * @return PlanView The new plan, built from the written fields (no re-read).
-	 * @throws InvalidArgumentException If a required key is missing or a value is invalid, or a
-	 *                                  {@see ValidationException} when the owning extension refuses the plan.
+	 * @throws ValidationException If a required key is missing or a value is invalid (with the
+	 *                             engine code, `field` and `params`), or the owning extension refuses the plan.
 	 * @throws RuntimeException If a validation callback throws (the callback's throwable is chained
 	 *                          as the previous exception) or the insert fails (no previous exception).
 	 */
 	public static function create( array $args ): PlanView {
-		$filtered_args  = ArgumentValidator::filter_known_keys( __METHOD__, $args, self::PLAN_KEYS );
-		$extension_slug = ArgumentValidator::validate_nullable_string( 'extension_slug', $filtered_args['extension_slug'] ?? null );
-		unset( $filtered_args['extension_slug'] );
+		$filtered_args = ArgumentFilter::filter_known_keys( __METHOD__, $args, self::PLAN_KEYS );
 
 		try {
+			$extension_slug = ArgumentValidator::validate_nullable_string( 'extension_slug', $filtered_args['extension_slug'] ?? null );
+			unset( $filtered_args['extension_slug'] );
+
 			// The entity requires a name on create; apply() then sets every field, the name included.
 			$plan = Plan::create(
 				array(
@@ -109,8 +112,8 @@ final class Plans {
 				)
 			);
 			self::apply( $plan, $filtered_args );
-		} catch ( DomainException $e ) {
-			throw new InvalidArgumentException( $e->getMessage(), 0, $e ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the entity message is not output.
+		} catch ( InvalidInputException $e ) {
+			throw ValidationException::from_core( $e ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- from_core() escapes the message.
 		}
 
 		self::validate_with_extension( $plan );
@@ -142,31 +145,32 @@ final class Plans {
 	 *                       another writer changed meanwhile may be stale here, not in storage);
 	 *                       null when no plan of that extension has the id (also when it is
 	 *                       deleted before the write).
-	 * @throws InvalidArgumentException If `extension_slug` is missing or a value is invalid, or a
-	 *                                  {@see ValidationException} when the owning extension refuses the plan.
+	 * @throws ValidationException If `extension_slug` is missing or a value is invalid (with the
+	 *                             engine code, `field` and `params`), or the owning extension refuses the plan.
 	 * @throws RuntimeException If a validation callback throws (the callback's throwable is chained
 	 *                          as the previous exception) or the update fails (no previous exception).
 	 */
 	public static function update( int $plan_id, array $args ): ?PlanView {
-		$filtered_args  = ArgumentValidator::filter_known_keys( __METHOD__, $args, self::PLAN_KEYS );
-		$extension_slug = ArgumentValidator::validate_non_empty_string( 'extension_slug', $filtered_args['extension_slug'] ?? null );
-		unset( $filtered_args['extension_slug'] );
-
-		$repository = new PlanRepository();
-		$plan       = $repository->find( $plan_id, $extension_slug );
-		if ( null === $plan ) {
-			return null;
-		}
-
-		$fields = array_keys( $filtered_args );
-		if ( array() === $fields ) {
-			return PlanView::from_plan( $plan );
-		}
+		$filtered_args = ArgumentFilter::filter_known_keys( __METHOD__, $args, self::PLAN_KEYS );
+		$repository    = new PlanRepository();
 
 		try {
+			$extension_slug = ArgumentValidator::validate_non_empty_string( 'extension_slug', $filtered_args['extension_slug'] ?? null );
+			unset( $filtered_args['extension_slug'] );
+
+			$plan = $repository->find( $plan_id, $extension_slug );
+			if ( null === $plan ) {
+				return null;
+			}
+
+			$fields = array_keys( $filtered_args );
+			if ( array() === $fields ) {
+				return PlanView::from_plan( $plan );
+			}
+
 			self::apply( $plan, $filtered_args );
-		} catch ( DomainException $e ) {
-			throw new InvalidArgumentException( $e->getMessage(), 0, $e ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the entity message is not output.
+		} catch ( InvalidInputException $e ) {
+			throw ValidationException::from_core( $e ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- from_core() escapes the message.
 		}
 
 		self::validate_with_extension( $plan );
@@ -272,30 +276,39 @@ final class Plans {
 	 *     @type int             $offset         Plans to skip (for paging), a non-negative integer. Default 0.
 	 * }
 	 * @return array<int, PlanView>
-	 * @throws InvalidArgumentException If a value is invalid: an empty or non-string slug or status,
-	 *                                  `any` as a slug, a non-positive or non-integer id, limit or offset.
+	 * @throws ValidationException If a value is invalid: an empty or non-string slug or status,
+	 *                             `any` as a slug, a non-positive or non-integer id, limit or offset.
 	 */
 	public static function list( array $args = array() ): array {
-		$filtered_args = ArgumentValidator::filter_known_keys( __METHOD__, $args, self::LIST_KEYS );
+		$filtered_args = ArgumentFilter::filter_known_keys( __METHOD__, $args, self::LIST_KEYS );
 
-		$query = array(
-			'orderby' => 'id',
-			'order'   => 'asc',
-			'limit'   => ArgumentValidator::validate_nullable_id( 'limit', $filtered_args['limit'] ?? null ) ?? self::DEFAULT_LIST_LIMIT,
-			'offset'  => ArgumentValidator::validate_non_negative_int( 'offset', $filtered_args['offset'] ?? 0 ),
-		);
-		if ( array_key_exists( 'extension_slug', $filtered_args ) ) {
-			$extension_slugs = array_values( array_unique( ArgumentValidator::validate_string_list( 'extension_slug', $filtered_args['extension_slug'] ) ) );
-			if ( in_array( 'any', $extension_slugs, true ) ) {
-				throw new InvalidArgumentException( '"extension_slug" must not be "any": leave it out to list every extension\'s plans.' );
+		try {
+			$query = array(
+				'orderby' => 'id',
+				'order'   => 'asc',
+				'limit'   => ArgumentValidator::validate_nullable_id( 'limit', $filtered_args['limit'] ?? null ) ?? self::DEFAULT_LIST_LIMIT,
+				'offset'  => ArgumentValidator::validate_non_negative_int( 'offset', $filtered_args['offset'] ?? 0 ),
+			);
+			if ( array_key_exists( 'extension_slug', $filtered_args ) ) {
+				$extension_slugs = array_values( array_unique( ArgumentValidator::validate_string_list( 'extension_slug', $filtered_args['extension_slug'] ) ) );
+				if ( in_array( 'any', $extension_slugs, true ) ) {
+					$any = new InvalidInputException(
+						ValidationErrorCode::INVALID_VALUE,
+						'extension_slug',
+						'"extension_slug" must not be "any": leave it out to list every extension\'s plans.'
+					);
+					throw ValidationException::from_core( $any ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- from_core() escapes the message.
+				}
+				$query['extension_slugs'] = $extension_slugs;
 			}
-			$query['extension_slugs'] = $extension_slugs;
-		}
-		if ( array_key_exists( 'status', $filtered_args ) ) {
-			$query['status'] = ArgumentValidator::validate_string_list( 'status', $filtered_args['status'] );
-		}
-		if ( array_key_exists( 'ids', $filtered_args ) ) {
-			$query['ids'] = ArgumentValidator::validate_id_list( 'ids', $filtered_args['ids'] );
+			if ( array_key_exists( 'status', $filtered_args ) ) {
+				$query['status'] = ArgumentValidator::validate_string_list( 'status', $filtered_args['status'] );
+			}
+			if ( array_key_exists( 'ids', $filtered_args ) ) {
+				$query['ids'] = ArgumentValidator::validate_id_list( 'ids', $filtered_args['ids'] );
+			}
+		} catch ( InvalidInputException $e ) {
+			throw ValidationException::from_core( $e ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- from_core() escapes the message.
 		}
 
 		return array_map(
@@ -306,7 +319,7 @@ final class Plans {
 		);
 	}
 
-	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- the DomainException comes from the entity setters, not a throw in this method.
+	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- the InvalidInputException comes from the checks and entity setters, not a throw in this method.
 	/**
 	 * Validate the caller's field shapes and apply them to a plan through its setters,
 	 * which enforce the entity invariants. Nothing is written to storage; an invalid value
@@ -314,8 +327,7 @@ final class Plans {
 	 *
 	 * @param Plan                 $plan Plan to change.
 	 * @param array<string, mixed> $args Caller fields (known keys only, no `extension_slug`).
-	 * @throws InvalidArgumentException If a value has the wrong shape.
-	 * @throws DomainException If a value breaks an entity invariant (from the entity setters).
+	 * @throws InvalidInputException If a value has the wrong shape or breaks an entity invariant.
 	 */
 	private static function apply( Plan $plan, array $args ): void {
 		foreach ( $args as $key => $value ) {
@@ -358,6 +370,9 @@ final class Plans {
 			 * including status-only updates, so the plan's extension can refuse it.
 			 *
 			 * Add errors to $errors to refuse the write; act only on your own $extension_slug.
+			 * Give an error `field` data (bracket path, such as `billing_policy[interval]`, with
+			 * optional `params`) and REST reports it under that top-level arg in `rest_invalid_param`;
+			 * an error without `field` is reported as a general 400.
 			 * The view is the would-be state after the write (its id is 0 on create) and is
 			 * read-only.
 			 *

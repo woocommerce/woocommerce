@@ -115,6 +115,7 @@ class ArgumentValidatorTest extends TestCase {
 			'string'                => array( 'validate_string', array( 'status', 5 ), ValidationErrorCode::INVALID_TYPE, 'status', $type_string, '"status" must be a string.' ),
 			'nullable string'       => array( 'validate_nullable_string', array( 'title', 5 ), ValidationErrorCode::INVALID_TYPE, 'title', $type_string, '"title" must be null or a string.' ),
 			'non-empty not string'  => array( 'validate_non_empty_string', array( 'extension_slug', 5 ), ValidationErrorCode::INVALID_TYPE, 'extension_slug', $type_string, '"extension_slug" must be a non-empty string.' ),
+			'non-empty null'        => array( 'validate_non_empty_string', array( 'extension_slug', null ), ValidationErrorCode::REQUIRED, 'extension_slug', array(), '"extension_slug" must be a non-empty string.' ),
 			'non-empty empty'       => array( 'validate_non_empty_string', array( 'extension_slug', '' ), ValidationErrorCode::REQUIRED, 'extension_slug', array(), '"extension_slug" must be a non-empty string.' ),
 			'positive int type'     => array( 'validate_positive_int', array( 'claim_seconds', null ), ValidationErrorCode::INVALID_TYPE, 'claim_seconds', $type_integer, '"claim_seconds" must be a positive integer.' ),
 			'positive int zero'     => array( 'validate_positive_int', array( 'claim_seconds', 0 ), ValidationErrorCode::OUT_OF_BOUNDS, 'claim_seconds', $min_one, '"claim_seconds" must be a positive integer.' ),
