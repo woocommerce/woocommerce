@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Allow integrations to fetch order notes a page at a time without loading every note at once.
