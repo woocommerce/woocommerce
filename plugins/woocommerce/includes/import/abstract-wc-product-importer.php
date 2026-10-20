@@ -307,8 +307,15 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 				}
 			}
 
+			// A blank Parent cell names no parent, so the variation keeps the one it has.
+			if ( isset( $data['parent_id'] ) && '' === $data['parent_id'] ) {
+				unset( $data['parent_id'] );
+			}
+
 			// Check a named parent before get_product_object() turns the post into a variation, so a failing row changes nothing.
-			if ( isset( $data['type'], $data['parent_id'] ) && ProductType::VARIATION === $data['type'] ) {
+			$is_variation_row = isset( $data['type'] ) ? ProductType::VARIATION === $data['type'] : 'product_variation' === get_post_type( absint( $data['id'] ?? 0 ) );
+
+			if ( $is_variation_row && isset( $data['parent_id'] ) ) {
 				$parent = $this->get_variation_parent( $data['parent_id'] );
 
 				if ( is_wp_error( $parent ) ) {
@@ -357,14 +364,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			}
 
 			if ( ProductType::VARIATION === $object->get_type() ) {
-				$variation_result = $this->set_variation_data( $object, $data );
-
-				// A row that names a parent which cannot be used must not be saved: set_props() already applied
-				// that parent ID and the data store would persist it as 0, detaching the variation. Rows without
-				// a parent column keep the variation's existing parent, so their error is not fatal.
-				if ( is_wp_error( $variation_result ) && isset( $data['parent_id'] ) ) {
-					return $variation_result;
-				}
+				$this->set_variation_data( $object, $data );
 			} else {
 				$this->set_product_data( $object, $data );
 			}
@@ -564,7 +564,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 *
 	 * @param WC_Product $variation Product instance.
 	 * @param array      $data    Item data.
-	 * @return WC_Product|WP_Error
+	 * @return WP_Error|null Error when the parent cannot hold the variation.
 	 * @throws Exception If data cannot be set.
 	 */
 	protected function set_variation_data( &$variation, $data ) {
@@ -620,6 +620,8 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 
 			$variation->set_attributes( $attributes );
 		}
+
+		return null;
 	}
 
 	/**

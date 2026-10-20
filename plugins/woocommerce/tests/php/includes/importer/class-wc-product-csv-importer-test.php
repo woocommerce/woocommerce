@@ -2268,8 +2268,35 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertCount( 1, $data['failed'], 'A variation row with a missing parent fails' );
+		$this->assertSame( 'woocommerce_product_importer_missing_variation_parent_id', $data['failed'][0]->get_error_code(), 'The row fails on its parent' );
 		$this->assertSame( 'product', get_post_type( $simple->get_id() ), 'The product must not be converted to a variation' );
 		$this->assertTrue( has_term( 'import-40274-parent-check-tag', 'product_tag', $simple->get_id() ), 'The product keeps its tags' );
+	}
+
+	/**
+	 * @testdox Should keep a variation's parent when its Parent cell is blank, and check the parent of rows without a Type column.
+	 */
+	public function test_import_blank_parent_keeps_parent_and_untyped_rows_are_checked_40274(): void {
+		$parent   = WC_Helper_Product::create_variation_product();
+		$children = $parent->get_children();
+		$csv      = "ID,Name,Parent\n" .
+			"{$children[0]},Blank parent,\n" .
+			"{$children[1]},Missing parent,id:" . ( max( $children ) + 1000 ) . "\n";
+
+		$data = $this->import_csv_rows(
+			$csv,
+			array(
+				'ID'     => 'id',
+				'Name'   => 'name',
+				'Parent' => 'parent_id',
+			)
+		);
+
+		$this->assertSame( array( $children[0] ), $data['updated'], 'The row with a blank Parent cell is updated' );
+		$this->assertSame( $parent->get_id(), wc_get_product( $children[0] )->get_parent_id(), 'A blank Parent cell keeps the parent' );
+		$this->assertCount( 1, $data['failed'], 'The row naming a missing parent fails' );
+		$this->assertSame( 'woocommerce_product_importer_missing_variation_parent_id', $data['failed'][0]->get_error_code(), 'The untyped row fails on its parent' );
+		$this->assertSame( $parent->get_id(), wc_get_product( $children[1] )->get_parent_id(), 'The failed row keeps the parent' );
 	}
 
 	/**
