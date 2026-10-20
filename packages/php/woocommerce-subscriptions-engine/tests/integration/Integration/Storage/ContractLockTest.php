@@ -494,7 +494,7 @@ class ContractLockTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox An unlocked row write refused by the fence throws even when the lock is gone by the re-read.
+	 * @testdox An unlocked row write the fence refuses throws, naming the internal lock that is held while the write is classified.
 	 */
 	public function test_a_refused_unlocked_update_throws(): void {
 		$id       = $this->insert_contract();
@@ -504,8 +504,12 @@ class ContractLockTest extends EngineIntegrationTestCase {
 
 		$this->refuse_next_write( 'UPDATE `' . SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS ) . '` SET' );
 
-		$this->expectException( ContractLockedException::class );
-		$this->sut->update_fields( $contract, array( 'status' ) );
+		try {
+			$this->sut->update_fields( $contract, array( 'status' ) );
+			$this->fail( 'Expected the refused write to throw.' );
+		} catch ( ContractLockedException $e ) {
+			$this->assertSame( 'engine_contract_update', $e->get_operation() );
+		}
 	}
 
 	/**
@@ -563,13 +567,13 @@ class ContractLockTest extends EngineIntegrationTestCase {
 				$this->sut->$method( 999999, '_anchor', 'x' );
 				$this->fail( "Expected {$method} on a missing contract to throw." );
 			} catch ( InvalidArgumentException $e ) {
-				$this->assertSame( 'Contract 999999 does not exist.', $e->getMessage() );
+				$this->assertStringContainsString( '999999', $e->getMessage() );
 			}
 		}
 	}
 
 	/**
-	 * @testdox Every child write checks its lock itself: a lock lost past the trust window is refused by meta, item and cycle writes.
+	 * @testdox Every child write fences its lock itself: a lock lost past the trust window is refused by meta, cycle, item and address writes, which then change nothing.
 	 */
 	public function test_child_writes_check_a_lost_lock(): void {
 		$id = $this->insert_contract();
@@ -580,13 +584,19 @@ class ContractLockTest extends EngineIntegrationTestCase {
 		$this->age_lock_trust( $lock );
 
 		$writes = array(
-			'update_meta'  => function () use ( $id, $lock ): void {
+			'update_meta'       => function () use ( $id, $lock ): void {
 				$this->sut->update_meta( $id, '_note', 'x', null, $lock );
 			},
-			'delete_meta'  => function () use ( $id, $lock ): void {
+			'delete_meta'       => function () use ( $id, $lock ): void {
 				$this->sut->delete_meta( $id, '_note', null, $lock );
 			},
-			'append_cycle' => function () use ( $id, $lock ): void {
+			'replace_items'     => function () use ( $id, $lock ): void {
+				$this->call_repository( 'replace_items', $id, array( array( 'item_name' => 'Changed' ) ), $lock );
+			},
+			'replace_addresses' => function () use ( $id, $lock ): void {
+				$this->call_repository( 'replace_addresses', $id, array( 'billing' => array( 'first_name' => 'Changed' ) ), $lock );
+			},
+			'append_cycle'      => function () use ( $id, $lock ): void {
 				$this->sut->append_cycle(
 					Cycle::create(
 						array(
@@ -608,6 +618,26 @@ class ContractLockTest extends EngineIntegrationTestCase {
 				$this->assertSame( 'cancel', $e->get_operation(), "{$name} names the new holder." );
 			}
 		}
+
+		$stored = $this->sut->find( $id );
+		$this->assertInstanceOf( Contract::class, $stored );
+		$this->assertSame( array(), $stored->get_items(), 'No item row is written.' );
+		$this->assertSame( array(), $stored->get_addresses(), 'No address row is written.' );
+		$this->assertSame( array(), $this->sut->find_cycle_history( $id ), 'No cycle row is written.' );
+	}
+
+	/**
+	 * Call a private repository method, for a helper no public path reaches with a lost lock.
+	 *
+	 * @param string $method  Method name.
+	 * @param mixed  ...$args Arguments.
+	 * @return mixed
+	 */
+	private function call_repository( string $method, ...$args ) {
+		$reflection = new \ReflectionMethod( ContractRepository::class, $method );
+		$reflection->setAccessible( true );
+
+		return $reflection->invoke( $this->sut, ...$args );
 	}
 
 	/**

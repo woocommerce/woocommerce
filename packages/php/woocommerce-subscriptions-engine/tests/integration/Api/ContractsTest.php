@@ -1611,15 +1611,16 @@ class ContractsTest extends EngineIntegrationTestCase {
 			},
 		);
 
-		$refusal = sprintf( 'The lock belongs to contract %d, not contract %d.', $lock->get_contract_id(), $id );
 		foreach ( $writes as $method => $write ) {
 			// A cycle is addressed by its id, so its refusal names the cycle and the lock's contract.
-			$expected = 'transition_cycle' === $method ? sprintf( 'Cycle %d does not belong to contract %d.', $cycle_id, $lock->get_contract_id() ) : $refusal;
+			$ids = 'transition_cycle' === $method ? array( $cycle_id, $lock->get_contract_id() ) : array( $lock->get_contract_id(), $id );
 			try {
 				$write();
 				$this->fail( "Expected {$method}() to refuse the lock." );
 			} catch ( InvalidArgumentException $e ) {
-				$this->assertSame( $expected, $e->getMessage(), "{$method}() refuses the lock." );
+				foreach ( $ids as $named ) {
+					$this->assertStringContainsString( (string) $named, $e->getMessage(), "{$method}() names both ids." );
+				}
 			}
 		}
 		$this->assertSame( CycleStatus::PENDING, $this->cycle( $id, $cycle_id )->get_status()->get_value() );

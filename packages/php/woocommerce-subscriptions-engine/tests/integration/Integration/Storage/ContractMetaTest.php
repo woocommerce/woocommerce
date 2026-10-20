@@ -141,7 +141,7 @@ class ContractMetaTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox update_meta() on an existing key is one UPDATE, with or without the lock.
+	 * @testdox update_meta() on an existing key writes one UPDATE: between the internal lock's acquire and release, or alone under a trusted lock.
 	 */
 	public function test_update_meta_on_an_existing_key_is_one_statement(): void {
 		global $wpdb;

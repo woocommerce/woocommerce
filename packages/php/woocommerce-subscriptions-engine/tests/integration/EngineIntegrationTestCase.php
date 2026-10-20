@@ -246,7 +246,7 @@ abstract class EngineIntegrationTestCase extends WP_UnitTestCase {
 
 	/**
 	 * Make the next `$times` statements starting with `$prefix` match no row, as if their fence
-	 * refused them, while no lock is live by the time the write is classified.
+	 * refused them.
 	 *
 	 * @param string $prefix Start of the statement to refuse.
 	 * @param int    $times  How many matching statements to refuse.

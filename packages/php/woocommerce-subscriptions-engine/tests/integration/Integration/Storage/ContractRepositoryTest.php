@@ -890,18 +890,15 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox update_fields writing identical values in the same second still changes the row (write_seq) and returns true.
+	 * @testdox An unlocked update_fields writing identical values in the same second returns true.
 	 */
-	public function test_an_identical_write_still_changes_the_row(): void {
-		global $wpdb;
-
+	public function test_an_identical_unlocked_write_returns_true(): void {
 		$id       = $this->insert_released( $this->make_contract() );
 		$contract = $this->sut->find( $id );
 		$this->assertInstanceOf( Contract::class, $contract );
 
 		for ( $i = 0; $i < 2; $i++ ) {
 			$this->assertTrue( $this->sut->update_fields( $contract, array( 'status', 'next_payment_gmt' ) ) );
-			$this->assertSame( 1, $wpdb->rows_affected, 'A matched row always counts as changed.' );
 		}
 
 		$stored = $this->sut->find( $id );
@@ -2030,9 +2027,9 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox An identical same-second write with the lock still matches and returns true.
+	 * @testdox An identical same-second write with the lock still changes the row (write_seq) and returns true.
 	 */
-	public function test_an_identical_locked_write_is_a_no_op(): void {
+	public function test_an_identical_locked_write_still_changes_the_row(): void {
 		global $wpdb;
 
 		$id       = $this->insert_released( $this->make_contract() );
@@ -2041,7 +2038,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 
 		for ( $i = 0; $i < 2; $i++ ) {
 			$this->assertTrue( $this->sut->update_fields( $contract, array( 'status' ), $lock ) );
-			$this->assertSame( 1, $wpdb->rows_affected );
+			$this->assertSame( 1, $wpdb->rows_affected, 'A matched row always counts as changed.' );
 		}
 	}
 
