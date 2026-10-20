@@ -20,6 +20,13 @@ const defaultDevDependencies = {
 	'@wordpress/prettier-config': 'latest',
 	'@wordpress/scripts': 'latest',
 	/*
+	 * Match the `react` and `react-dom` peer range of `@woocommerce/components`
+	 * (packages/js/components/package.json) instead of npm selecting React 19.
+	 * Update these when that range changes.
+	 */
+	react: '18.3.x',
+	'react-dom': '18.3.x',
+	/*
 	 * Without this, `@wordpress/prettier-config`'s `prettier: >=3` peer hoists plain
 	 * prettier over wp-prettier. Pinned to match `@woocommerce/eslint-plugin`.
 	 */

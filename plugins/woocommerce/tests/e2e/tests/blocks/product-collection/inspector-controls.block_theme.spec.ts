@@ -8,8 +8,29 @@ import { test as base, expect, BLOCK_THEME_SLUG } from '@woocommerce/e2e-utils';
  */
 import ProductCollectionPage, { SELECTORS } from './product-collection.page';
 import { getProductCollectionQuery } from '../products/utils';
+import { locks } from '../../../fixtures/fixtures';
 
-const test = base.extend< { pageObject: ProductCollectionPage } >( {
+const TAXONOMY_TEMPLATES = [
+	{
+		slug: `${ BLOCK_THEME_SLUG }//taxonomy-product_cat`,
+		title: 'Products by Category',
+	},
+	{
+		slug: `${ BLOCK_THEME_SLUG }//taxonomy-product_tag`,
+		title: 'Products by Tag',
+	},
+	{
+		slug: `${ BLOCK_THEME_SLUG }//taxonomy-product_brand`,
+		title: 'Products by Brand',
+	},
+];
+
+const test = base.extend< {
+	pageObject: ProductCollectionPage;
+	createTaxonomyTemplate: (
+		template: ( typeof TAXONOMY_TEMPLATES )[ number ]
+	) => Promise< void >;
+} >( {
 	pageObject: async ( { page, admin, editor }, use ) => {
 		const pageObject = new ProductCollectionPage( {
 			page,
@@ -17,6 +38,31 @@ const test = base.extend< { pageObject: ProductCollectionPage } >( {
 			editor,
 		} );
 		await use( pageObject );
+	},
+	createTaxonomyTemplate: async ( { admin, editor, requestUtils }, use ) => {
+		const deleteTemplate = ( slug: string ) =>
+			requestUtils
+				.rest( {
+					method: 'DELETE',
+					path: `/wp/v2/templates/${ slug }`,
+					params: { force: true },
+				} )
+				.catch( ( error ) => {
+					if ( error?.code !== 'rest_template_not_found' ) {
+						throw error;
+					}
+				} );
+		let createdSlug: string | undefined;
+		await use( async ( { slug, title } ) => {
+			// A stopped run can leave the template, and then the Site Editor does not offer it.
+			await deleteTemplate( slug );
+			createdSlug = slug;
+			await admin.visitSiteEditor( { postType: 'wp_template' } );
+			await editor.createTemplate( { templateName: title } );
+		} );
+		if ( createdSlug ) {
+			await deleteTemplate( createdSlug );
+		}
 	},
 } );
 
@@ -444,42 +490,26 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 			} );
 		} );
 
-		[
-			{
-				slug: `${ BLOCK_THEME_SLUG }//taxonomy-product_cat`,
-				title: 'Products by Category',
-			},
-			{
-				slug: `${ BLOCK_THEME_SLUG }//taxonomy-product_tag`,
-				title: 'Products by Tag',
-			},
-			{
-				slug: `${ BLOCK_THEME_SLUG }//taxonomy-product_brand`,
-				title: 'Products by Brand',
-			},
-		].forEach( ( template ) => {
-			test( `should be visible in archive template: ${ template.slug }`, async ( {
-				admin,
-				pageObject,
-				editor,
-			} ) => {
-				await admin.visitSiteEditor( {
-					postType: 'wp_template',
-				} );
-				await editor.createTemplate( {
-					templateName: template.title,
-				} );
-				await pageObject.insertProductCollection();
-				await pageObject.chooseCollectionInTemplate();
-				await pageObject.focusProductCollection();
-				await editor.openDocumentSettingsSidebar();
+		TAXONOMY_TEMPLATES.forEach( ( template ) => {
+			test(
+				`should be visible in archive template: ${ template.slug }`,
+				{
+					lock: locks.TAXONOMY_TEMPLATES,
+				},
+				async ( { pageObject, editor, createTaxonomyTemplate } ) => {
+					await createTaxonomyTemplate( template );
+					await pageObject.insertProductCollection();
+					await pageObject.chooseCollectionInTemplate();
+					await pageObject.focusProductCollection();
+					await editor.openDocumentSettingsSidebar();
 
-				await expect(
-					pageObject
-						.locateSidebarSettings()
-						.getByLabel( SELECTORS.usePageContextControl )
-				).toBeVisible();
-			} );
+					await expect(
+						pageObject
+							.locateSidebarSettings()
+							.getByLabel( SELECTORS.usePageContextControl )
+					).toBeVisible();
+				}
+			);
 		} );
 
 		[
@@ -609,9 +639,7 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 			pageObject,
 			editor,
 			page,
-			requestUtils,
 		} ) => {
-			await requestUtils.setFeatureFlag( 'experimental-blocks', true );
 			await pageObject.createNewPostAndInsertBlock();
 
 			await expect( pageObject.products ).toHaveCount( 9 );
@@ -667,10 +695,7 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 			pageObject,
 			editor,
 			page,
-			requestUtils,
 		} ) => {
-			await requestUtils.setFeatureFlag( 'experimental-blocks', true );
-
 			await pageObject.createNewPostAndInsertBlock();
 
 			await expect( pageObject.products ).toHaveCount( 9 );
