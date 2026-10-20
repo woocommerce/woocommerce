@@ -800,7 +800,7 @@ class StyleAttributesUtils {
 	 * @param string[] $path Path to the desired global styles value.
 	 * @return mixed The resolved global styles value.
 	 */
-	public static function get_global_styles( array $path = array()) {
+	public static function get_global_styles( array $path = array() ) {
 		static $resolved_styles = array();
 
 		// To keep the caching self-contained, we also keep the cache reset trackers encapsulated here.
