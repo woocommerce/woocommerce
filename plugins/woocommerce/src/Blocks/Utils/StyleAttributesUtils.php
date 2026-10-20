@@ -814,9 +814,9 @@ class StyleAttributesUtils {
 		}
 
 		// The wp_get_global_styles downstream workflows has some caching, but merging routines are heavy.
-		$theme                     = get_stylesheet();
-		$resolved_styles[ $theme ] = $resolved_styles[ $theme ] ?? wp_get_global_styles();
+		$cache_key                     = get_stylesheet() . '-' . get_current_blog_id();
+		$resolved_styles[ $cache_key ] = $resolved_styles[ $cache_key ] ?? wp_get_global_styles();
 
-		return ArrayUtil::get_nested_value( $resolved_styles[ $theme ], implode( '::', $path ), $resolved_styles[ $theme ] );
+		return ArrayUtil::get_nested_value( $resolved_styles[ $cache_key ], implode( '::', $path ), $resolved_styles[ $cache_key ] );
 	}
 }
