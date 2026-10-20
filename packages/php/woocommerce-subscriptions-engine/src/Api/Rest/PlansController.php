@@ -585,73 +585,157 @@ final class PlansController extends WP_REST_Controller {
 
 	/**
 	 * Report validation errors as WordPress reports invalid request params: errors with a
-	 * `field` become one `rest_invalid_param` error, keyed by top-level arg in `params`
-	 * (translated messages) and `details` (code, message and data); errors without one are
-	 * added to it. With no `field` on any error, the errors return as a plain 400.
+	 * `field` become one `rest_invalid_param` error (see {@see self::get_invalid_param_error()});
+	 * errors without one are added to it. With no `field` on any error, the errors return
+	 * as a plain 400.
 	 *
 	 * @param WP_Error $errors Validation errors.
 	 */
 	private function get_validation_error( WP_Error $errors ): WP_Error {
-		$by_arg    = array();
-		$fieldless = new WP_Error();
-
-		foreach ( $errors->get_error_codes() as $code ) {
-			$messages = $errors->get_error_messages( $code );
-			$all_data = $errors->get_all_error_data( $code );
-
-			$fields = array();
-			foreach ( $all_data as $data ) {
-				if ( is_array( $data ) && isset( $data['field'] ) && is_string( $data['field'] ) && '' !== $data['field'] ) {
-					$fields[] = $data['field'];
-				}
-			}
-
-			// WP_Error keeps the data per code, not per message: pair them only when each message has its own fielded data.
-			if ( count( $messages ) !== count( $all_data ) || count( $fields ) !== count( $all_data ) ) {
-				foreach ( $messages as $message ) {
-					$fieldless->add( $code, $message );
-				}
-				foreach ( $all_data as $data ) {
-					$fieldless->add_data( $data, $code );
-				}
-				continue;
-			}
-
-			foreach ( $messages as $index => $message ) {
-				$field = $fields[ $index ];
-				$arg   = false !== strpos( $field, '.' ) ? substr( $field, 0, (int) strpos( $field, '.' ) ) : $field;
-
-				if ( ! isset( $by_arg[ $arg ] ) ) {
-					$by_arg[ $arg ] = new WP_Error();
-				}
-				$by_arg[ $arg ]->add( $code, $this->get_field_message( $field, $message ), $all_data[ $index ] );
-			}
-		}
-
-		if ( array() === $by_arg ) {
+		$paired = $this->get_paired_errors( $errors );
+		if ( array() === $paired['fielded'] ) {
 			return $this->as_bad_request( $errors );
 		}
 
-		$params  = array();
-		$details = array();
-		foreach ( $by_arg as $arg => $arg_errors ) {
-			$params[ $arg ]  = implode( ' ', $arg_errors->get_error_messages() );
-			$details[ $arg ] = rest_convert_error_to_response( $arg_errors )->get_data();
+		$error = $this->get_invalid_param_error( $paired['fielded'] );
+		$this->merge_fieldless_errors( $error, $paired['fieldless'] );
+
+		return $error;
+	}
+
+	/**
+	 * Pair each error message with its own data, in `WP_Error` order (codes in first-seen
+	 * order, then each code's errors in addition order). A code's errors are fielded only
+	 * when each message has its own data with a `field`; otherwise they stay fieldless.
+	 *
+	 * @param WP_Error $errors Validation errors.
+	 * @return array{fielded: list<array{code: string, message: string, field: string, data: array<mixed>}>, fieldless: WP_Error}
+	 */
+	private function get_paired_errors( WP_Error $errors ): array {
+		$fielded   = array();
+		$fieldless = new WP_Error();
+
+		foreach ( $errors->get_error_codes() as $code ) {
+			$code     = (string) $code;
+			$messages = $errors->get_error_messages( $code );
+			$all_data = $errors->get_all_error_data( $code );
+
+			$pairs = array();
+			foreach ( $messages as $index => $message ) {
+				$data = $all_data[ $index ] ?? null;
+				if ( count( $messages ) !== count( $all_data ) || ! is_array( $data ) || ! isset( $data['field'] ) || ! is_string( $data['field'] ) || '' === $data['field'] ) {
+					$pairs = null;
+					break;
+				}
+				$pairs[] = array(
+					'code'    => $code,
+					'message' => $message,
+					'field'   => $data['field'],
+					'data'    => $data,
+				);
+			}
+
+			if ( null !== $pairs ) {
+				$fielded = array_merge( $fielded, $pairs );
+				continue;
+			}
+
+			// WP_Error keeps the data per code, not per message: without a pairing, keep the code's errors as they are.
+			foreach ( $messages as $message ) {
+				$fieldless->add( $code, $message );
+			}
+			foreach ( $all_data as $data ) {
+				$fieldless->add_data( $data, $code );
+			}
 		}
 
-		$error = new WP_Error(
+		return array(
+			'fielded'   => $fielded,
+			'fieldless' => $fieldless,
+		);
+	}
+
+	/**
+	 * The `rest_invalid_param` error for fielded errors. Keyed by top-level arg: `params`
+	 * holds the arg's sentences naming their fields, and `details` the arg's first error
+	 * (code, that sentence and its own data). `errors` maps each full dot path to its
+	 * errors' code, field-free message and params.
+	 *
+	 * @param list<array{code: string, message: string, field: string, data: array<mixed>}> $fielded Paired, fielded errors.
+	 */
+	private function get_invalid_param_error( array $fielded ): WP_Error {
+		$params       = array();
+		$details      = array();
+		$field_errors = array();
+		foreach ( $fielded as $error ) {
+			$arg     = $this->get_top_level_arg( $error['field'] );
+			$message = $this->get_field_message( $error['field'], $error['message'] );
+
+			$params[ $arg ][] = $message;
+			if ( ! isset( $details[ $arg ] ) ) {
+				$details[ $arg ] = array(
+					'code'    => $error['code'],
+					'message' => $message,
+					'data'    => $error['data'],
+				);
+			}
+			$field_errors[ $error['field'] ][] = array(
+				'code'    => $error['code'],
+				'message' => $error['message'],
+				'params'  => isset( $error['data']['params'] ) && is_array( $error['data']['params'] ) ? $error['data']['params'] : array(),
+			);
+		}
+
+		return new WP_Error(
 			'rest_invalid_param',
 			/* translators: %s: List of invalid parameters. */
 			sprintf( __( 'Invalid parameter(s): %s' ), implode( ', ', array_keys( $params ) ) ), // phpcs:ignore WordPress.WP.I18n.MissingArgDomain -- WordPress core's own message for invalid request params, in its default domain.
 			array(
 				'status'  => 400,
-				'params'  => $params,
+				'params'  => array_map(
+					static function ( array $messages ): string {
+						return implode( ' ', $messages );
+					},
+					$params
+				),
 				'details' => $details,
+				'errors'  => $field_errors,
 			)
 		);
-		$error->merge_from( $this->as_bad_request( $fieldless ) );
+	}
 
-		return $error;
+	/**
+	 * Add fieldless errors to the response error, each with a 400 status unless it has
+	 * its own. A `rest_invalid_param` one is added without its data, so it can never
+	 * replace the response's data.
+	 *
+	 * @param WP_Error $error     The `rest_invalid_param` response error.
+	 * @param WP_Error $fieldless Errors without a field.
+	 */
+	private function merge_fieldless_errors( WP_Error $error, WP_Error $fieldless ): void {
+		$fieldless = $this->as_bad_request( $fieldless );
+		foreach ( $fieldless->get_error_codes() as $code ) {
+			foreach ( $fieldless->get_error_messages( $code ) as $message ) {
+				$error->add( $code, $message );
+			}
+			if ( 'rest_invalid_param' === $code ) {
+				continue;
+			}
+			foreach ( $fieldless->get_all_error_data( $code ) as $data ) {
+				$error->add_data( $data, $code );
+			}
+		}
+	}
+
+	/**
+	 * The top-level request arg of a dot path: the path up to its first dot.
+	 *
+	 * @param string $field Field, in dot notation.
+	 */
+	private function get_top_level_arg( string $field ): string {
+		$dot = strpos( $field, '.' );
+
+		return false === $dot ? $field : substr( $field, 0, $dot );
 	}
 
 	/**
