@@ -20,9 +20,9 @@ WooCommerce is a WordPress e-commerce plugin organized as a monorepo with:
 
 ## Available Skills
 
-The `.ai/skills/` directory contains procedural HOW-TO instructions:
+The `.ai/skills/` directory contains procedural HOW-TO instructions. Each skill's full instructions are in `.ai/skills/<skill-name>/SKILL.md` — read that file and follow it before starting work the skill covers:
 
-- **`woocommerce-backend-dev`** - Backend PHP conventions and unit tests. **Invoke before writing any PHP test files.**
+- **`woocommerce-backend-dev`** - Backend PHP conventions and unit tests. **Read before writing any PHP test files.**
 - **`woocommerce-dev-cycle`** - Testing and linting workflows (PHP, JS, markdown)
 - **`woocommerce-local-env`** - Local environment setup, wp-env commands, and WooCommerce build watchers
 - **`woocommerce-copy-guidelines`** - UI text standards (sentence case rules)
@@ -31,7 +31,8 @@ The `.ai/skills/` directory contains procedural HOW-TO instructions:
 - **`woocommerce-git-commit`** - Commit changes with conventional messages and smart grouping
 - **`woocommerce-git-draft-pr`** - Create draft PRs with proper template, changelog, and milestone handling
 - **`woocommerce-email-editor`** - Email editor development setup and Mailpit configuration
-- **`woocommerce-performance`** - Performance guardrails. **Invoke when writing or reviewing PHP code.**
+- **`woocommerce-performance`** - Performance guardrails. **Read when writing or reviewing PHP code.**
+- **`woocommerce-store-api`** - Store API (`/wc/store/v1/*`) route, schema, and authentication conventions
 
 ## Project Architecture
 
@@ -257,6 +258,45 @@ WooCommerce names its enumerated string vocabularies — order statuses, product
 - **Respect the plugin lifecycle.** Some code paths (REST controllers, report queries) can run during install or upgrade, before the autoloader resolves classes under `src/`; referencing an enum class there is a fatal (`Class ... not found`). Code that can execute mid-install or mid-upgrade keeps its string literals.
 - **Near-duplicate vocabularies are distinct classes on purpose.** `OrderStatus` holds the unprefixed values (`completed`) most WooCommerce APIs expect; `OrderInternalStatus` holds the `wc-`-prefixed variants (`wc-completed`) WordPress stores. Reach for the class that matches what the consuming API expects.
 
+## Theme Development
+
+Each theme lives in its own private pnpm workspace package under `themes/<slug>/`, with independent versioning, changelogs, and releases. Shared tooling lives in `tools/theme-cli/` as `@woocommerce/theme-cli`. Register each theme explicitly in `pnpm-workspace.yaml`.
+
+Run setup from the repository root:
+
+```sh
+pnpm install --frozen-lockfile
+composer install --working-dir=tools/theme-cli
+```
+
+### Theme Commands
+
+Replace `<slug>` with the directory name of an existing theme, such as `purple`:
+
+```sh
+# Lint CSS, Markdown, and JavaScript, then run WordPress Theme Check.
+pnpm --filter=@woocommerce/theme-cli validate <slug>
+
+# Build a ZIP from the theme's working files.
+pnpm --filter=@woocommerce/theme-cli build <slug>
+
+# Start the theme's local environment using Playground by default.
+pnpm --filter=@woocommerce/theme-cli wp-env start <slug>
+
+# Start using Docker instead.
+pnpm --filter=@woocommerce/theme-cli wp-env start <slug> --runtime=docker
+
+# Stop the theme's local environment.
+pnpm --filter=@woocommerce/theme-cli wp-env stop <slug>
+
+# Lint and validate all themes.
+pnpm --filter=@woocommerce/theme-cli validate --all
+```
+
+`@woocommerce/theme-cli` provides the `wp-env` command, dependency, and shared configuration at `tools/theme-cli/.wp-env.json`.
+
+See [the theme CLI README](tools/theme-cli/README.md) and the selected theme's README for setup details. Validation lints CSS, Markdown, and JavaScript with wp-scripts, then runs the official WordPress Theme Check command in a separate Docker environment.
+
 ## Block Development
 
 ### Block Styling
@@ -326,6 +366,8 @@ This is part of the WooCommerce monorepo:
 - Root-level scripts coordinate across packages
 - Some dependencies shared across packages
 
+**Dependency changes and `pnpm-lock.yaml`.** Adding, updating or removing a dependency can make pnpm rewrite unrelated lockfile lines. Before committing a lockfile change, follow "Dependency Changes" in `.ai/skills/woocommerce-dev-cycle/code-quality.md`; it says when to trim the diff to your entries and when to commit pnpm's output as written.
+
 ## Historical Context
 
 **Why two code styles?** The `plugins/woocommerce/includes/` directory predates modern PHP practices. New code uses PSR-4 and dependency injection in `plugins/woocommerce/src/`.
@@ -343,4 +385,4 @@ Automated reviews complement the [Review Requirements](#review-requirements); th
 - This doc provides context; skills provide procedures
 - When in doubt about HOW to do something, check the skills
 - When in doubt about WHAT something is or WHERE it fits, check this doc
-- Skills are invoked automatically when relevant to the task
+- Read the matching skill's `SKILL.md` in `.ai/skills/` before doing work it covers

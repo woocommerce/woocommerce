@@ -7,10 +7,14 @@ import {
 	BlockAttributes,
 } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
-import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
+import {
+	BlockContextProvider,
+	InnerBlocks,
+	useBlockProps,
+} from '@wordpress/block-editor';
 import { page } from '@wordpress/icons';
 import { CHECKOUT_PAGE_ID, CART_PAGE_ID } from '@woocommerce/block-settings';
-import { useEffect } from '@wordpress/element';
+import { useMemo } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -18,13 +22,7 @@ import { useEffect } from '@wordpress/element';
 import metadata from './block.json';
 import './editor.scss';
 
-const Edit = ( {
-	attributes,
-	setAttributes,
-}: {
-	attributes: BlockAttributes;
-	setAttributes: ( attrs: BlockAttributes ) => void;
-} ) => {
+const Edit = ( { attributes }: { attributes: BlockAttributes } ) => {
 	const TEMPLATE: InnerBlockTemplate[] = [
 		[ 'core/post-title', { align: 'wide', level: 1 } ],
 		[ 'core/post-content', { align: 'wide' } ],
@@ -34,27 +32,26 @@ const Edit = ( {
 		className: 'wp-block-woocommerce-page-content-wrapper',
 	} );
 
-	useEffect( () => {
-		if ( ! attributes.postId && attributes.page ) {
-			let postId = 0;
+	// Provide the previewed page as block context rather than writing it to
+	// attributes on mount, which flagged the template dirty on open (#48936).
+	// On the frontend the queried post supplies this context.
+	let postId = 0;
+	if ( attributes.page === 'checkout' ) {
+		postId = CHECKOUT_PAGE_ID;
+	} else if ( attributes.page === 'cart' ) {
+		postId = CART_PAGE_ID;
+	}
 
-			if ( attributes.page === 'checkout' ) {
-				postId = CHECKOUT_PAGE_ID;
-			}
-
-			if ( attributes.page === 'cart' ) {
-				postId = CART_PAGE_ID;
-			}
-
-			if ( postId ) {
-				setAttributes( { postId, postType: 'page' } );
-			}
-		}
-	}, [ attributes, setAttributes ] );
+	const context = useMemo(
+		() => ( postId ? { postId, postType: 'page' } : {} ),
+		[ postId ]
+	);
 
 	return (
 		<div { ...blockProps }>
-			<InnerBlocks template={ TEMPLATE } />
+			<BlockContextProvider value={ context }>
+				<InnerBlocks template={ TEMPLATE } />
+			</BlockContextProvider>
 		</div>
 	);
 };

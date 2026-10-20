@@ -39,9 +39,17 @@ class BlockTemplatesRegistry {
 	private $templates = array();
 
 	/**
+	 * Authoritative map for registered template name ('woocommerce//slug') to its HTML file path.
+	 *
+	 * @var array<string,string>
+	 */
+	private $template_paths = array();
+
+	/**
 	 * Initialization method.
 	 */
 	public function init() {
+		$templates = array();
 		if ( BlockTemplateUtils::supports_block_templates( 'wp_template' ) ) {
 			$templates = array(
 				ProductCatalogTemplate::SLUG       => new ProductCatalogTemplate(),
@@ -55,10 +63,10 @@ class BlockTemplatesRegistry {
 				OrderConfirmationTemplate::SLUG    => new OrderConfirmationTemplate(),
 				SingleProductTemplate::SLUG        => new SingleProductTemplate(),
 			);
-		} else {
-			$templates = array();
 		}
 		$templates[ ComingSoonTemplate::SLUG ] = new ComingSoonTemplate();
+
+		$template_parts = array();
 		if ( BlockTemplateUtils::supports_block_templates( 'wp_template_part' ) ) {
 			$template_parts = array(
 				MiniCartTemplate::SLUG       => new MiniCartTemplate(),
@@ -82,28 +90,27 @@ class BlockTemplatesRegistry {
 					}
 				}
 			}
-		} else {
-			$template_parts = array();
 		}
 
-		// Init all templates.
 		$directory = BlockTemplateUtils::get_templates_directory( 'wp_template' );
 		foreach ( $templates as $template ) {
 			$template->init();
 
-			// Taxonomy templates are registered automatically by WordPress and are made available through the Add Template menu.
+			// Taxonomy templates are registered automatically by WordPress and are added through the Add Template menu.
 			if ( ! $template->is_taxonomy_template ) {
+				$template_name                          = 'woocommerce//' . $template::SLUG;
+				$this->template_paths[ $template_name ] = $directory . '/' . $template::SLUG . '.html';
 				register_block_template(
-					'woocommerce//' . $template::SLUG,
+					$template_name,
 					array(
 						'title'       => $template->get_template_title(),
 						'description' => $template->get_template_description(),
-						// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
-						'content'     => file_get_contents( $directory . '/' . $template::SLUG . '.html' ),
 					)
 				);
 			}
 		}
+		add_filter( 'pre_get_block_templates', array( $this, 'lazy_load_requested_templates_content' ), 0, 3 );
+		add_filter( 'pre_get_block_file_template', array( $this, 'lazy_load_single_template_content' ), 0, 3 );
 
 		foreach ( $template_parts as $template_part ) {
 			$template_part->init();
@@ -130,6 +137,52 @@ class BlockTemplatesRegistry {
 	}
 
 	/**
+	 * Lazily load registered WooCommerce template file contents into the registry.
+	 *
+	 * @since 11.4.0
+	 * @internal
+	 *
+	 * @param mixed  $result        Pass-through (null to let WP continue).
+	 * @param array  $query         Query arguments.
+	 * @param string $template_type Template type.
+	 * @return mixed Unmodified $result.
+	 */
+	public function lazy_load_requested_templates_content( $result, $query, $template_type ) {
+		if ( 'wp_template' === $template_type && ! empty( $this->template_paths ) && ! isset( $query['wp_id'] ) ) {
+			// On front-end pages slug__in defines the target slugs; in other contexts we need to load all templates.
+			$target_templates = array_map( static fn( $slug ) => 'woocommerce//' . $slug, $query['slug__in'] ?? array() );
+			$target_templates = empty( $target_templates ) ? $this->template_paths : array_intersect_key( $this->template_paths, array_flip( $target_templates ) );
+			if ( ! empty( $target_templates ) ) {
+				$registry = \WP_Block_Templates_Registry::get_instance();
+				foreach ( $target_templates as $template_name => $template_path ) {
+					$template = $registry->get_registered( $template_name );
+					if ( $template && '' === $template->content ) {
+						$template->content = (string) file_get_contents( $template_path ); // phpcs:ignore WordPress.WP.AlternativeFunctions
+					}
+					unset( $this->template_paths[ $template_name ] );
+				}
+			}
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Covers the singular resolution path (get_block_file_template) which bypasses get_block_templates() entirely.
+	 *
+	 * @since 11.4.0
+	 * @internal
+	 *
+	 * @param mixed  $result        Pass-through (null to let WP continue).
+	 * @param string $id            Template identifier (e.g. 'theme_name//slug').
+	 * @param string $template_type Template type.
+	 * @return mixed Unmodified $result.
+	 */
+	public function lazy_load_single_template_content( $result, $id, $template_type ) {
+		return $this->lazy_load_requested_templates_content( $result, array( 'slug__in' => array( explode( '//', $id, 2 )[1] ?? '' ) ), $template_type );
+	}
+
+	/**
 	 * Returns the template matching the slug
 	 *
 	 * @param string $template_slug Slug of the template to retrieve.
@@ -137,10 +190,6 @@ class BlockTemplatesRegistry {
 	 * @return AbstractTemplate|AbstractTemplatePart|null
 	 */
 	public function get_template( $template_slug ) {
-		if ( array_key_exists( $template_slug, $this->templates ) ) {
-			$registered_template = $this->templates[ $template_slug ];
-			return $registered_template;
-		}
-		return null;
+		return $this->templates[ $template_slug ] ?? null;
 	}
 }

@@ -389,16 +389,11 @@ class Notification extends \WC_Data {
 	public function get_product_formatted_variation_list( bool $flat = false ) {
 
 		$product = $this->get_product();
-		if ( ! $product || ! $product->is_type( array( 'variation' ) ) ) {
+		if ( ! $product instanceof \WC_Product_Variation ) {
 			return '';
 		}
 
-		// Replace list with custom data.
-		$attributes = $this->get_meta( 'posted_attributes' );
-		if ( ! $attributes ) {
-			$attributes = $product->get_attributes();
-		}
-
+		$attributes = $this->get_variation_attributes_with_posted_data( $product );
 		if ( empty( $attributes ) ) {
 			return '';
 		}
@@ -436,12 +431,33 @@ class Notification extends \WC_Data {
 			return (string) $product->get_permalink();
 		}
 
-		// Posted attributes hold only the values chosen for "Any" attributes, so merge them over the variation's own attributes to build a complete link.
-		// Keys that no longer belong to the variation (e.g. a removed attribute) are dropped so they don't leak into the URL.
-		$variation_attributes = $product->get_variation_attributes();
-		$attributes           = array_merge( $variation_attributes, array_intersect_key( $posted_attributes, $variation_attributes ) );
+		return (string) $product->get_permalink( array( 'variation' => $this->get_variation_attributes_with_posted_data( $product ) ) );
+	}
 
-		return (string) $product->get_permalink( array( 'variation' => $attributes ) );
+	/**
+	 * Get the variation's attributes, with the shopper's posted values filled in.
+	 *
+	 * Posted values only fill the variation's "Any" attributes (empty values); the variation's fixed values always win.
+	 * Keys that no longer belong to the variation (e.g. a removed attribute) are dropped.
+	 *
+	 * @param \WC_Product_Variation $product The notification's variation.
+	 * @return array
+	 */
+	private function get_variation_attributes_with_posted_data( \WC_Product_Variation $product ): array {
+		$variation_attributes = $product->get_variation_attributes();
+		$posted_attributes    = $this->get_meta( 'posted_attributes' );
+		if ( empty( $posted_attributes ) || ! is_array( $posted_attributes ) ) {
+			return $variation_attributes;
+		}
+
+		$any_attributes = array_filter(
+			$variation_attributes,
+			static function ( $value ) {
+				return '' === $value;
+			}
+		);
+
+		return array_merge( $variation_attributes, array_intersect_key( $posted_attributes, $any_attributes ) );
 	}
 
 	/**
@@ -467,20 +483,48 @@ class Notification extends \WC_Data {
 	 * @return bool True if the key is valid, false otherwise.
 	 */
 	public function check_verification_key( string $key ): bool {
+		return $this->verification_key_matches( $key ) && ! $this->is_verification_key_expired();
+	}
+
+	/**
+	 * Check whether the given key matches the stored verification key hash, ignoring expiration.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param string $key The key to check.
+	 * @return bool True if a verification key is stored and the given key matches it, false otherwise.
+	 */
+	public function verification_key_matches( string $key ): bool {
 		$action_key = (string) $this->get_meta( 'verification_action_key' );
 
 		if ( ! str_contains( $action_key, ':' ) ) {
 			return false;
 		}
 
-		list( $timestamp, $hash ) = explode( ':', $action_key, 2 );
+		list( , $hash ) = explode( ':', $action_key, 2 );
 
-		$threshold = Config::get_verification_expiration_time_threshold();
-		if ( time() - (int) $timestamp > $threshold ) {
+		return wp_verify_fast_hash( $key, $hash );
+	}
+
+	/**
+	 * Check whether the stored verification key is past its expiration time.
+	 *
+	 * A missing or malformed key is not reported as expired.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @return bool True if a verification key is stored and has expired, false otherwise.
+	 */
+	public function is_verification_key_expired(): bool {
+		$action_key = (string) $this->get_meta( 'verification_action_key' );
+
+		if ( ! str_contains( $action_key, ':' ) ) {
 			return false;
 		}
 
-		return wp_verify_fast_hash( $key, $hash );
+		list( $timestamp ) = explode( ':', $action_key, 2 );
+
+		return time() - (int) $timestamp > Config::get_verification_expiration_time_threshold();
 	}
 
 	/**
