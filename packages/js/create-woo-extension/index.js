@@ -88,6 +88,11 @@ module.exports = {
 			npmDependencies: [
 				...defaultDependencies,
 				'@woocommerce/onboarding',
+				// The add-task template imports these directly; declare them to satisfy
+				// import/no-extraneous-dependencies without relying on transitive dependencies.
+				'@woocommerce/data',
+				'@wordpress/data',
+				'@wordpress/plugins',
 			],
 		},
 		'dashboard-section': {
@@ -102,6 +107,12 @@ module.exports = {
 				'dashboard-section',
 				'src'
 			),
+			npmDependencies: [
+				...defaultDependencies,
+				'@woocommerce/currency',
+				'@wordpress/icons',
+				'moment',
+			],
 		},
 		'table-column': {
 			pluginTemplatesPath: join( __dirname, 'variants', 'table-column' ),
