@@ -619,6 +619,54 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A global SQL filter that shortens the result page preserves the total and pagination.
+	 * @testWith ["LIMIT 0, 2", [0, 1]]
+	 *           ["LIMIT 4, 5", [4, 5]]
+	 *
+	 * @param string $limits           Replacement SQL limit and offset.
+	 * @param int[]  $expected_indexes Indexes of the orders expected on the page.
+	 */
+	public function test_globally_rewritten_query_keeps_count( string $limits, array $expected_indexes ): void {
+		global $wpdb;
+
+		$ids = array();
+		for ( $i = 0; $i < 6; $i++ ) {
+			$order = new WC_Order();
+			$order->set_transaction_id( 'rewritten-search' );
+			$order->save();
+			$ids[] = $order->get_id();
+		}
+
+		$rewrite = static function ( $sql ) use ( $wpdb, $limits ) {
+			if ( 0 === strpos( $sql, "SELECT {$wpdb->prefix}wc_orders.id" ) && false !== strpos( $sql, 'rewritten-search' ) ) {
+				return str_replace( 'LIMIT 0, 5', $limits, $sql );
+			}
+			return $sql;
+		};
+		add_filter( 'query', $rewrite );
+		try {
+			$query = $this->query_and_assert_count_statements(
+				array(
+					's'             => 'rewritten-search',
+					'search_filter' => 'transaction_id',
+					'limit'         => 5,
+					'paginate'      => true,
+					'return'        => 'ids',
+					'orderby'       => 'ID',
+					'order'         => 'ASC',
+				),
+				1
+			);
+		} finally {
+			remove_filter( 'query', $rewrite );
+		}
+
+		$this->assertSame( array( $ids[ $expected_indexes[0] ], $ids[ $expected_indexes[1] ] ), $query->orders );
+		$this->assertSame( 6, $query->found_orders );
+		$this->assertSame( 2, $query->max_num_pages );
+	}
+
+	/**
 	 * @testdox The count query still runs when the page cannot prove the total.
 	 * @dataProvider provider_pages_that_cannot_prove_total
 	 *

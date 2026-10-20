@@ -1480,7 +1480,11 @@ class OrdersTableQuery {
 		$row_count = (int) ( $this->limits[1] ?? 0 );
 
 		if ( $row_count > 0 || $offset > 0 ) {
-			$first_page_holds_all = $this->can_infer_first_page_total && 0 === $offset && count( $this->orders ) < $row_count;
+			// Compare after WordPress's normal placeholder removal to detect SQL changed during execution.
+			$first_page_holds_all = $this->can_infer_first_page_total
+				&& 0 === $offset
+				&& count( $this->orders ) < $row_count
+				&& $wpdb->last_query === $wpdb->remove_placeholder_escape( $this->sql );
 
 			$this->found_orders  = $first_page_holds_all ? count( $this->orders ) : absint( $wpdb->get_var( $this->count_sql ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 			$this->max_num_pages = $row_count > 0
