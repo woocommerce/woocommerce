@@ -27,6 +27,34 @@ export class Admin extends CoreAdmin {
 	}: AdminConstructorProps ) {
 		super( { page, pageUtils, editor } );
 		this.wpCoreVersion = wpCoreVersion;
+
+		// The editors load the settings sidebar state from the admin user's
+		// preferences, which every parallel worker shares and saves. Open it
+		// on load so a sidebar closed in another worker does not leak into
+		// this test. Core Admin binds these helpers in its constructor, so
+		// they are wrapped here instead of overridden as methods.
+		const { createNewPost, editPost, visitSiteEditor } = this;
+		this.createNewPost = async ( ...args ) => {
+			await createNewPost.call( this, ...args );
+			await this.openSettingsSidebar();
+		};
+		this.editPost = async ( ...args ) => {
+			await editPost.call( this, ...args );
+			await this.openSettingsSidebar();
+		};
+		this.visitSiteEditor = async ( ...args ) => {
+			await visitSiteEditor.call( this, ...args );
+			await this.openSettingsSidebar();
+		};
+	}
+
+	private async openSettingsSidebar() {
+		await this.page.waitForFunction( () => window?.wp?.data );
+		await this.page.evaluate( () =>
+			window.wp.data
+				.dispatch( 'core/preferences' )
+				.set( 'core', 'isComplementaryAreaVisible', true )
+		);
 	}
 
 	async visitWidgetEditor() {
