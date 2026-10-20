@@ -19,7 +19,11 @@ const defaultDevDependencies = {
 	'@woocommerce/eslint-plugin': '^4.0.0',
 	'@wordpress/prettier-config': 'latest',
 	'@wordpress/scripts': 'latest',
-	/* Match WooCommerce's peer dependencies instead of npm selecting React 19. */
+	/*
+	 * Match the `react` and `react-dom` peer range of `@woocommerce/components`
+	 * (packages/js/components/package.json) instead of npm selecting React 19.
+	 * Update these when that range changes.
+	 */
 	react: '18.3.x',
 	'react-dom': '18.3.x',
 	/*
