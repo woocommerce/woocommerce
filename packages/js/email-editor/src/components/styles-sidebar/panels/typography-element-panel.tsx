@@ -94,6 +94,9 @@ export function TypographyElementPanel( {
 		element,
 		headingLevel
 	);
+	const renderedFontFamily =
+		getElementStyles( styles, element, headingLevel, true ).typography
+			.fontFamily ?? styles?.typography?.fontFamily;
 	const {
 		fontFamily,
 		fontSize,
@@ -393,7 +396,7 @@ export function TypographyElementPanel( {
 					fontFamilyFaces={ getFontFamilyFaces(
 						allFontFamilies,
 						fontWeights,
-						fontFamily,
+						renderedFontFamily,
 						{ fontStyle, fontWeight }
 					) }
 					hasFontStyles

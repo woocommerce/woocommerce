@@ -12,6 +12,8 @@ import {
  * Internal dependencies
  */
 import { TypographyElementPanel } from '../typography-element-panel';
+import { useEmailStyles } from '../../../../hooks';
+import { getElementStyles } from '../../utils';
 
 // Holds the `onChange` the panel passes to FontAppearanceControl, so tests can
 // fire an Appearance selection the way the dropdown does.
@@ -71,14 +73,14 @@ jest.mock( '../../../../hooks/use-user-theme', () => ( {
 jest.mock( '../../../../hooks', () => ( {
 	setImmutably: jest.requireActual( '../../../../hooks/use-email-styles' )
 		.setImmutably,
-	useEmailStyles: () => emailStyles,
+	useEmailStyles: jest.fn( () => emailStyles ),
 } ) );
 
 jest.mock( '../../utils', () => ( {
-	getElementStyles: () => ( {
+	getElementStyles: jest.fn( () => ( {
 		typography: { fontSize: '16px', fontFamily: 'Inter, sans-serif' },
 		color: {},
-	} ),
+	} ) ),
 	getFontFamilyFaces: jest.requireActual( '../../utils' ).getFontFamilyFaces,
 } ) );
 
@@ -98,6 +100,25 @@ jest.mock( '../../../../events', () => ( {
 const useSettingsMock = useSettings as jest.Mock;
 const fontSizePickerMock = FontSizePicker as unknown as jest.Mock;
 const fontAppearanceControlMock = FontAppearanceControl as unknown as jest.Mock;
+const useEmailStylesMock = useEmailStyles as jest.Mock;
+const getElementStylesMock = getElementStyles as jest.Mock;
+
+const mockFontSettings = () =>
+	useSettingsMock.mockImplementation( ( ...paths: string[] ) => {
+		if ( paths[ 0 ] === 'spacing.units' ) {
+			return [ [ 'px' ] ];
+		}
+		if ( paths[ 0 ] === 'custom.fontWeights' ) {
+			return [ { inter: '300, 700' } ];
+		}
+		return [
+			[],
+			{
+				default: [],
+				theme: [ { slug: 'inter', fontFamily: 'Inter, sans-serif' } ],
+			},
+		];
+	} );
 
 const selectAppearance = ( value: {
 	fontStyle?: string;
@@ -216,23 +237,7 @@ describe( 'TypographyElementPanel', () => {
 	} );
 
 	it( 'passes the weights the theme lists for the font to the appearance control', () => {
-		useSettingsMock.mockImplementation( ( ...paths: string[] ) => {
-			if ( paths[ 0 ] === 'spacing.units' ) {
-				return [ [ 'px' ] ];
-			}
-			if ( paths[ 0 ] === 'custom.fontWeights' ) {
-				return [ { inter: '300, 700' } ];
-			}
-			return [
-				[],
-				{
-					default: [],
-					theme: [
-						{ slug: 'inter', fontFamily: 'Inter, sans-serif' },
-					],
-				},
-			];
-		} );
+		mockFontSettings();
 
 		render( <TypographyElementPanel element="text" headingLevel="" /> );
 
@@ -244,5 +249,27 @@ describe( 'TypographyElementPanel', () => {
 			{ fontStyle: 'normal', fontWeight: '700' },
 			{ fontStyle: 'italic', fontWeight: '700' },
 		] );
+	} );
+
+	it( 'uses the inherited font when the element has no font of its own', () => {
+		mockFontSettings();
+		getElementStylesMock.mockImplementation(
+			jest.requireActual( '../../utils' ).getElementStyles
+		);
+		useEmailStylesMock.mockReturnValue( {
+			...emailStyles,
+			styles: {
+				typography: { fontFamily: 'Inter, sans-serif' },
+				elements: { h2: { typography: { fontSize: '28px' } } },
+			},
+		} );
+
+		render(
+			<TypographyElementPanel element="heading" headingLevel="h2" />
+		);
+
+		expect(
+			fontAppearanceControlMock.mock.calls[ 0 ][ 0 ].fontFamilyFaces
+		).toHaveLength( 4 );
 	} );
 } );
