@@ -208,6 +208,11 @@ It is not a contract break when, and only when, you can point at one of these in
   count);
 - the symbol is introduced by this same diff, so no release has it.
 
+When input validation rejects a value excluded by the pre-change documented contract, do not emit
+an extension-regression finding based only on that value's former implicit coercion. Read the contract
+and check a supported input path. A demonstrated working consumer or a supported input that now fails
+is still a finding. This exception does not apply to undocumented input contracts.
+
 If the PR description or changelog entry explicitly states the BC impact, rate it `medium`: `fix here`
 if it renames or removes a public symbol without the deprecation path AGENTS.md requires, otherwise
 `follow-up`. If you can't verify the mechanism at the changed line, report it at `medium` with `low`

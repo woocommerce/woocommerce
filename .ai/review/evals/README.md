@@ -2,7 +2,7 @@
 
 This corpus covers 40 review guidelines with two bug cases and two safe boundary cases per guideline, for 160 registered cases. The root `ai-review-config.json` links each guideline to its suite. The `perf-blocking-remote-call` guideline is outside this corpus.
 
-The committed suites contain only these 160 inline cases. An [optional prepared pair](#optional-prepared-pair) adds two historical patch cases in a separate generated checkout.
+The committed suites contain only these 160 inline cases. [Optional prepared pairs](#optional-prepared-pair) add historical patch cases in separate generated checkouts.
 
 ## Set up the runner
 
@@ -81,6 +81,18 @@ The committed suite does not register these cases. The runner does not discover 
 Grouping does not change the default selection. Always pass `--group internal-helpers-and-extension-contracts` when running the prepared pair.
 
 The prepared pair needs a CLI checkout with native patch replay, historical `base_commit` and `groups` support. The CLI version string does not identify these features. Check that `a8c-review eval --help` lists `--group`, then run `--plan` on the prepared checkout. The group README lists the source prerequisites and exact commands.
+
+## Event-name contract pair
+
+The optional [event-name pair](js-public-api-contract/groups/event-name-contract/README.md) tests whether the reviewer distinguishes documented inputs from incidental coercion.
+
+Its preparation script creates a separate 162-case checkout from committed policy files and existing local source objects. The default 160 cases remain unchanged.
+
+## CSS cascade pair
+
+The optional [TextControl cascade pair](react-render-and-keyboard/groups/text-control-cascade/README.md) checks the prior computed styles before reporting a new sizing regression.
+
+It replays the complete historical patch and a collapsed-input control from the same parent. Its preparation script creates a separate 162-case checkout. The default 160 cases remain unchanged.
 
 ## Adding cases
 

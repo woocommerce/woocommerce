@@ -94,6 +94,13 @@ blocks, and changes that break layout in the editor iframe (e.g. a `column-gap` 
 editor forces to `display: block`; removing the only spacing rule between elements). Prefer logical
 properties (`margin-inline-start`) over physical ones so RTL works.
 
+
+Before attributing a CSS regression to a new declaration, establish the prior computed property
+from matching rules and upstream component styles. A min-height does not imply height: auto.
+Do not report duplicate size constraints as a new fixed height when an existing rule imposed it.
+Keep findings for demonstrated changes to layout, clipping, or interaction. Check added changelog
+files before claiming that a change is undocumented.
+
 **Imports.** A file must not import from its own package barrel (`from '../'`, `from '../index'`) when
 that barrel re-exports it: this causes circular-dependency crashes in some builds. Importing a module
 with global side effects (e.g. one that sets the global `moment` locale) changes behavior for every
