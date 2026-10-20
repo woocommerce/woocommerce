@@ -2,16 +2,18 @@
  * External dependencies
  */
 import { STORE_PAGES } from '@woocommerce/settings';
+// Use the store name to avoid adding wp-editor as a dependency on widget screens.
+import { CORE_EDITOR_STORE } from '@woocommerce/utils/wordpress-stores';
 import { store as coreStore } from '@wordpress/core-data';
-import { useDispatch, useSelect } from '@wordpress/data';
-import { store as editorStore } from '@wordpress/editor';
+import { select as selectStore, useDispatch, useSelect } from '@wordpress/data';
+import domReady from '@wordpress/dom-ready';
 import { useEffect } from '@wordpress/element';
 import { registerPlugin } from '@wordpress/plugins';
 
 const ShopPageRenderingMode = () => {
-	const { setRenderingMode } = useDispatch( editorStore );
+	const { setRenderingMode } = useDispatch( CORE_EDITOR_STORE );
 	const shouldPreviewTemplate = useSelect( ( select ) => {
-		const editor = select( editorStore );
+		const editor = select( CORE_EDITOR_STORE );
 		const shopPageId =
 			'shop' in STORE_PAGES ? STORE_PAGES.shop?.id : undefined;
 
@@ -38,6 +40,10 @@ const ShopPageRenderingMode = () => {
 	return null;
 };
 
-registerPlugin( 'woocommerce-shop-page-rendering-mode', {
-	render: ShopPageRenderingMode,
+domReady( () => {
+	if ( selectStore( CORE_EDITOR_STORE ) ) {
+		registerPlugin( 'woocommerce-shop-page-rendering-mode', {
+			render: ShopPageRenderingMode,
+		} );
+	}
 } );

@@ -5,6 +5,10 @@ import { getBlockTypes, unregisterBlockType } from '@wordpress/blocks';
 import { getSetting } from '@woocommerce/settings';
 import { select, subscribe } from '@wordpress/data';
 
+jest.mock( '@woocommerce/utils', () =>
+	jest.requireActual( '@woocommerce/utils/wordpress-stores' )
+);
+
 jest.mock( '@wordpress/data', () => ( {
 	select: jest.fn(),
 	subscribe: jest.fn(),
