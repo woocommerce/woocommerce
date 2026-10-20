@@ -795,18 +795,28 @@ class StyleAttributesUtils {
 	/**
 	 * Request-level caching wrapper for wp_get_global_styles, which is pretty expensive in runtime.
 	 *
+	 * @since 10.4.0
+	 *
 	 * @param string[] $path Path to the desired global styles value.
 	 * @return mixed The resolved global styles value.
 	 */
-	public static function get_global_styles( array $path = array() ) {
+	public static function get_global_styles( array $path = array()) {
 		static $resolved_styles = array();
 
+		// To keep the caching self-contained, we also keep the cache reset trackers encapsulated here.
+		static $cache_reset_callback = null;
+		if ( null === $cache_reset_callback ) {
+			$cache_reset_callback = static function () use ( &$resolved_styles ) {
+				$resolved_styles = array();
+			};
+			add_action( 'switch_theme', $cache_reset_callback );
+			add_action( 'start_previewing_theme', $cache_reset_callback );
+		}
+
 		// The wp_get_global_styles downstream workflows has some caching, but merging routines are heavy.
-		// In PHPUnit environment, workarounds are bypassing upstream caching hence we skip static cache to keep tests green.
 		$theme                     = get_stylesheet();
 		$resolved_styles[ $theme ] = $resolved_styles[ $theme ] ?? wp_get_global_styles();
-		$target_styles             = defined( 'WP_RUN_CORE_TESTS' ) ? wp_get_global_styles() : $resolved_styles[ $theme ];
 
-		return ArrayUtil::get_nested_value( $target_styles, implode( '::', $path ), $target_styles );
+		return ArrayUtil::get_nested_value( $resolved_styles[ $theme ], implode( '::', $path ), $resolved_styles[ $theme ] );
 	}
 }
