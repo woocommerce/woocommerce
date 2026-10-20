@@ -179,7 +179,10 @@ class Hydration {
 			return false;
 		}
 
-		// Always release the cart pricing context registered from the dispatch filter, even when a callback throws.
+		$cart_pricing_context = wc_get_container()->get( CartPricingContext::class );
+		$cart_pricing_context->start_dispatch( $request, $handler );
+
+		// End the dispatch even when a callback throws, so a cart route context cannot leak into the rest of the page.
 		try {
 			/**
 			 * Similar to WP core's `rest_dispatch_request` filter, this allows plugin to override hydrating the request.
@@ -213,7 +216,7 @@ class Hydration {
 			 */
 			$response = apply_filters( 'woocommerce_hydration_request_after_callbacks', $response, $handler, $request );
 		} finally {
-			wc_get_container()->get( CartPricingContext::class )->end_dispatch( $request );
+			$cart_pricing_context->end_dispatch( $request );
 		}
 
 		return $response;

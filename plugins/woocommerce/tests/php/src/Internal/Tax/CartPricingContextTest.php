@@ -343,8 +343,8 @@ class CartPricingContextTest extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox Is active for a cart route loaded through Blocks hydration, and only while it runs.
 	 *
-	 * Hydration calls the cart route callback directly, so the context is registered from the
-	 * hydration filters instead of rest_request_before_callbacks.
+	 * Hydration calls the cart route callback directly, without rest_request_before_callbacks,
+	 * so it starts and ends the dispatch itself.
 	 */
 	public function test_is_active_for_cart_route_loaded_through_hydration(): void {
 		$during = null;
@@ -353,8 +353,7 @@ class CartPricingContextTest extends \WC_Unit_Test_Case {
 			$during = $this->sut->is_active();
 			return $response;
 		};
-		// Runs before the context is cleared at the default priority.
-		add_filter( 'woocommerce_hydration_request_after_callbacks', $probe, 9 );
+		add_filter( 'woocommerce_hydration_request_after_callbacks', $probe );
 
 		$this->dispatch_test_route(
 			'/wc/store/v1/products',
@@ -378,11 +377,13 @@ class CartPricingContextTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_clears_hydration_context_when_dispatch_filter_throws(): void {
 		$after    = null;
-		$throwing = function () {
-			throw new \Exception( 'Hydration failure' );
+		$throwing = function ( $hydration_result ) {
+			if ( $this->sut->is_active() ) {
+				throw new \Exception( 'Hydration failure' );
+			}
+			return $hydration_result;
 		};
-		// Runs after the context is registered at the default priority.
-		add_filter( 'woocommerce_hydration_dispatch_request', $throwing, 11 );
+		add_filter( 'woocommerce_hydration_dispatch_request', $throwing );
 
 		$this->dispatch_test_route(
 			'/wc/store/v1/products',
@@ -422,11 +423,7 @@ class CartPricingContextTest extends \WC_Unit_Test_Case {
 				$hydration = new Hydration( $this->createMock( AssetDataRegistry::class ) );
 				// The cart controller creates a nonce after its response catch blocks.
 				add_filter( 'nonce_life', $throwing );
-				try {
-					$hydration->get_rest_api_response_data( '/wc/store/v1/cart' );
-				} finally {
-					remove_filter( 'nonce_life', $throwing );
-				}
+				$hydration->get_rest_api_response_data( '/wc/store/v1/cart' );
 				$after = $this->sut->is_active();
 				return rest_ensure_response( array( 'ok' => true ) );
 			}
@@ -443,8 +440,10 @@ class CartPricingContextTest extends \WC_Unit_Test_Case {
 	public function test_restores_context_after_nested_request_catches_failed_calculation(): void {
 		$this->add_product_to_cart();
 		$outer    = null;
-		$throwing = function (): void {
-			throw new \Exception( 'Calculation failure' );
+		$throwing = function ( $cart ): void {
+			if ( $cart instanceof \WC_Cart ) {
+				throw new \Exception( 'Calculation failure' );
+			}
 		};
 		add_action( 'woocommerce_before_calculate_totals', $throwing );
 
@@ -688,18 +687,14 @@ class CartPricingContextTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Assert the dispatch stack and context map are both empty.
+	 * Assert the dispatch stack is empty.
 	 *
 	 * @param string $message Assertion failure message.
 	 */
 	private function assert_dispatch_stack_empty( string $message ): void {
-		$reflection     = new \ReflectionClass( $this->sut );
-		$stack_property = $reflection->getProperty( 'dispatch_stack' );
+		$stack_property = ( new \ReflectionClass( $this->sut ) )->getProperty( 'dispatch_stack' );
 		$stack_property->setAccessible( true );
-		$contexts_property = $reflection->getProperty( 'dispatch_contexts' );
-		$contexts_property->setAccessible( true );
 
-		$this->assertSame( array(), $stack_property->getValue( $this->sut ), "Dispatch stack should be empty. {$message}" );
-		$this->assertSame( array(), $contexts_property->getValue( $this->sut ), "Dispatch contexts should be empty. {$message}" );
+		$this->assertSame( array(), $stack_property->getValue( $this->sut ), $message );
 	}
 }

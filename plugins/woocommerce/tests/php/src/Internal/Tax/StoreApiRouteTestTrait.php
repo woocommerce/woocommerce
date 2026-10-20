@@ -112,6 +112,7 @@ trait StoreApiRouteTestTrait {
 			 * Run the wrapped callback.
 			 *
 			 * @param \WP_REST_Request $request Request object.
+			 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
 			 * @return mixed
 			 */
 			public function handle( \WP_REST_Request $request ) {

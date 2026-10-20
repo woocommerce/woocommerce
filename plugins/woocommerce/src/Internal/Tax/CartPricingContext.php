@@ -23,18 +23,11 @@ class CartPricingContext {
 	private const MINI_CART_TEMPLATE = 'cart/mini-cart.php';
 
 	/**
-	 * Stack of dispatch IDs for Store API requests and hydrated routes.
+	 * Stack of Store API and hydrated route dispatches, with whether each is a cart or checkout route and the calculation depth when it started.
 	 *
-	 * @var int[]
+	 * @var array<int, array{id: int, is_cart_or_checkout: bool, calculation_depth: int}>
 	 */
 	private $dispatch_stack = array();
-
-	/**
-	 * Map of dispatch IDs to whether the route is a cart or checkout route, and the calculation and mini-cart depths when the dispatch started.
-	 *
-	 * @var array<int, array{is_cart_or_checkout: bool, calculation_depth: int, mini_cart_count: int}>
-	 */
-	private $dispatch_contexts = array();
 
 	/**
 	 * Nesting depth of cart totals calculations and mini-cart renders, which price the cart on any page.
@@ -42,13 +35,6 @@ class CartPricingContext {
 	 * @var int
 	 */
 	private $calculation_depth = 0;
-
-	/**
-	 * Calculation depths saved when mini-cart renders started, restored when each render ends.
-	 *
-	 * @var int[]
-	 */
-	private $mini_cart_depths = array();
 
 	/**
 	 * Calculation and dispatch depths at which catalog pricing scopes began.
@@ -65,17 +51,12 @@ class CartPricingContext {
 	 */
 	final public function init(): void {
 		$this->dispatch_stack         = array();
-		$this->dispatch_contexts      = array();
 		$this->calculation_depth      = 0;
-		$this->mini_cart_depths       = array();
 		$this->catalog_pricing_scopes = array();
 		// Register the route context only after a route matches, and clear it right after the callback.
+		// Blocks hydration calls route callbacks directly, so it starts and ends its dispatches itself.
 		add_filter( 'rest_request_before_callbacks', array( $this, 'handle_rest_request_before_callbacks' ), 10, 3 );
 		add_filter( 'rest_request_after_callbacks', array( $this, 'handle_rest_request_after_callbacks' ), 10, 3 );
-		// Blocks hydration calls cart and checkout route callbacks directly, without the REST dispatch
-		// lifecycle, so the context is registered from its own before/after filters instead.
-		add_filter( 'woocommerce_hydration_dispatch_request', array( $this, 'handle_hydration_dispatch_request' ), 10, 4 );
-		add_filter( 'woocommerce_hydration_request_after_callbacks', array( $this, 'handle_hydration_request_after_callbacks' ), 10, 3 );
 		// Cart totals are saved in the session and mini-cart line prices are calculated on render,
 		// so both can happen outside the cart and checkout pages.
 		add_action( 'woocommerce_before_calculate_totals', array( $this, 'handle_calculation_start' ), PHP_INT_MIN, 0 );
@@ -102,10 +83,10 @@ class CartPricingContext {
 			return false;
 		}
 
-		$dispatch_context = empty( $this->dispatch_stack ) ? null : ( $this->dispatch_contexts[ end( $this->dispatch_stack ) ] ?? null );
+		$dispatch = empty( $this->dispatch_stack ) ? null : end( $this->dispatch_stack );
 
-		if ( null !== $dispatch_context ) {
-			return $this->calculation_depth > $dispatch_context['calculation_depth'] || $dispatch_context['is_cart_or_checkout'];
+		if ( null !== $dispatch ) {
+			return $this->calculation_depth > $dispatch['calculation_depth'] || $dispatch['is_cart_or_checkout'];
 		}
 
 		return $this->calculation_depth > 0 || is_cart() || is_checkout();
@@ -155,7 +136,7 @@ class CartPricingContext {
 	}
 
 	/**
-	 * Start a mini-cart render.
+	 * Start a mini-cart render, which prices the cart like a calculation.
 	 *
 	 * @since 11.3.0
 	 * @internal
@@ -163,16 +144,13 @@ class CartPricingContext {
 	 * @param mixed $template_name Template name.
 	 */
 	public function handle_template_part_start( $template_name ): void {
-		if ( self::MINI_CART_TEMPLATE !== $template_name ) {
-			return;
+		if ( self::MINI_CART_TEMPLATE === $template_name ) {
+			$this->handle_calculation_start();
 		}
-
-		$this->mini_cart_depths[] = $this->calculation_depth;
-		++$this->calculation_depth;
 	}
 
 	/**
-	 * End a mini-cart render, restoring the calculation depth from before it started.
+	 * End a mini-cart render.
 	 *
 	 * @since 11.3.0
 	 * @internal
@@ -180,33 +158,32 @@ class CartPricingContext {
 	 * @param mixed $template_name Template name.
 	 */
 	public function handle_template_part_end( $template_name ): void {
-		if ( self::MINI_CART_TEMPLATE !== $template_name || empty( $this->mini_cart_depths ) ) {
-			return;
+		if ( self::MINI_CART_TEMPLATE === $template_name ) {
+			$this->handle_calculation_end();
 		}
-
-		$this->calculation_depth = (int) array_pop( $this->mini_cart_depths );
 	}
 
 	/**
-	 * Register the Store API route context after a route matches, before its callback runs.
+	 * Start the Store API route dispatch after a route matches, before its callback runs.
 	 *
 	 * @since 11.3.0
 	 * @internal
 	 *
-	 * @param mixed            $response Result to send to the client.
-	 * @param mixed            $handler  Route handler for the request.
-	 * @param \WP_REST_Request $request  Request used to generate the response.
-	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
+	 * @param mixed $response Result to send to the client.
+	 * @param mixed $handler  Route handler for the request.
+	 * @param mixed $request  Request used to generate the response.
 	 * @return mixed The response.
 	 */
-	public function handle_rest_request_before_callbacks( $response, $handler, \WP_REST_Request $request ) {
-		$this->register_dispatch_context( $request, self::is_cart_route_handler( $handler ) );
+	public function handle_rest_request_before_callbacks( $response, $handler, $request ) {
+		if ( $request instanceof \WP_REST_Request ) {
+			$this->start_dispatch( $request, $handler );
+		}
 
 		return $response;
 	}
 
 	/**
-	 * Clear the Store API route context after the route callback runs.
+	 * End the Store API route dispatch after the route callback runs.
 	 *
 	 * Paired with rest_request_before_callbacks inside WP_REST_Server::respond_to_request(),
 	 * so the stack stays balanced for both external and internal (rest_do_request) dispatches.
@@ -214,59 +191,65 @@ class CartPricingContext {
 	 * @since 11.3.0
 	 * @internal
 	 *
-	 * @param mixed            $response Result to send to the client.
-	 * @param mixed            $handler  Route handler for the request.
-	 * @param \WP_REST_Request $request  Request used to generate the response.
-	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
-	 * @return mixed The response.
-	 */
-	public function handle_rest_request_after_callbacks( $response, $handler, \WP_REST_Request $request ) {
-		$this->end_dispatch( $request );
-
-		return $response;
-	}
-
-	/**
-	 * Register the route context for a route hydrated by Blocks hydration.
-	 *
-	 * @since 11.3.0
-	 * @internal
-	 *
-	 * @param mixed $hydration_result Result of the hydration. If not null, it is used as the response.
-	 * @param mixed $request          Request used to generate the response.
-	 * @param mixed $path             Request path matched for the request.
-	 * @param mixed $handler          Route handler used for the request.
-	 * @return mixed The hydration result.
-	 */
-	public function handle_hydration_dispatch_request( $hydration_result, $request, $path, $handler = null ) {
-		if ( ! $request instanceof \WP_REST_Request ) {
-			return $hydration_result;
-		}
-
-		$this->register_dispatch_context( $request, self::is_cart_route_handler( $handler ) );
-
-		return $hydration_result;
-	}
-
-	/**
-	 * Clear the hydration route context after the hydrated route callback runs.
-	 *
-	 * Paired with the woocommerce_hydration_dispatch_request filter inside Hydration::get_response_from_controller().
-	 *
-	 * @since 11.3.0
-	 * @internal
-	 *
 	 * @param mixed $response Result to send to the client.
-	 * @param mixed $handler  Route handler used for the request.
+	 * @param mixed $handler  Route handler for the request.
 	 * @param mixed $request  Request used to generate the response.
 	 * @return mixed The response.
 	 */
-	public function handle_hydration_request_after_callbacks( $response, $handler, $request ) {
+	public function handle_rest_request_after_callbacks( $response, $handler, $request ) {
 		if ( $request instanceof \WP_REST_Request ) {
 			$this->end_dispatch( $request );
 		}
 
 		return $response;
+	}
+
+	/**
+	 * Start a dispatch, which prices the cart when its handler is a Store API cart or checkout route.
+	 *
+	 * Every call must be paired with end_dispatch() for the same request.
+	 *
+	 * @since 11.3.0
+	 * @internal
+	 *
+	 * @param \WP_REST_Request $request Request being dispatched.
+	 * @param mixed            $handler Route handler for the request.
+	 * @phpstan-template T of array
+	 * @phpstan-param \WP_REST_Request<T> $request
+	 */
+	public function start_dispatch( \WP_REST_Request $request, $handler ): void {
+		$this->dispatch_stack[] = array(
+			'id'                  => spl_object_id( $request ),
+			'is_cart_or_checkout' => self::is_cart_route_handler( $handler ),
+			'calculation_depth'   => $this->calculation_depth,
+		);
+	}
+
+	/**
+	 * End a dispatch, dropping it and any inner dispatches left on the stack above it.
+	 *
+	 * The calculation depth goes back to its value from when the dispatch started, so an exception
+	 * caught inside the dispatch cannot leave the cart priced for the rest of the request.
+	 * Calling it again for a dispatch that already ended does nothing.
+	 *
+	 * @since 11.3.0
+	 * @internal
+	 *
+	 * @param \WP_REST_Request $request Request whose dispatch should end.
+	 * @phpstan-template T of array
+	 * @phpstan-param \WP_REST_Request<T> $request
+	 */
+	public function end_dispatch( \WP_REST_Request $request ): void {
+		$dispatch_id = spl_object_id( $request );
+
+		// Search from the top, in case a leaked dispatch reused the same object ID.
+		for ( $index = count( $this->dispatch_stack ) - 1; $index >= 0; $index-- ) {
+			if ( $dispatch_id === $this->dispatch_stack[ $index ]['id'] ) {
+				$this->calculation_depth = $this->dispatch_stack[ $index ]['calculation_depth'];
+				array_splice( $this->dispatch_stack, $index );
+				return;
+			}
+		}
 	}
 
 	/**
@@ -279,55 +262,5 @@ class CartPricingContext {
 		$callback = is_array( $handler ) ? ( $handler['callback'] ?? null ) : null;
 
 		return is_array( $callback ) && ( $callback[0] ?? null ) instanceof AbstractCartRoute;
-	}
-
-	/**
-	 * Push a dispatch context on the stack.
-	 *
-	 * @param \WP_REST_Request $request             Request used to generate the response.
-	 * @param bool             $is_cart_or_checkout Whether the request is handled by a Store API cart or checkout route.
-	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
-	 */
-	private function register_dispatch_context( \WP_REST_Request $request, bool $is_cart_or_checkout ): void {
-		$dispatch_id = spl_object_id( $request );
-
-		$this->dispatch_contexts[ $dispatch_id ] = array(
-			'is_cart_or_checkout' => $is_cart_or_checkout,
-			'calculation_depth'   => $this->calculation_depth,
-			'mini_cart_count'     => count( $this->mini_cart_depths ),
-		);
-		$this->dispatch_stack[]                  = $dispatch_id;
-	}
-
-	/**
-	 * End a dispatch, dropping its context and any inner contexts left on the stack above it.
-	 *
-	 * Calculation and mini-cart depths go back to their values from when the dispatch started, so an
-	 * exception caught inside the dispatch cannot leave the cart priced for the rest of the request.
-	 * Calling it again for a dispatch that already ended does nothing.
-	 *
-	 * @since 11.3.0
-	 * @internal
-	 *
-	 * @param \WP_REST_Request $request Request whose context should be cleared.
-	 * @phpstan-template T of array
-	 * @phpstan-param \WP_REST_Request<T> $request
-	 */
-	public function end_dispatch( \WP_REST_Request $request ): void {
-		$dispatch_id = spl_object_id( $request );
-		// Search from the top, in case a leaked context reused the same object ID.
-		$stack_key = array_search( $dispatch_id, array_reverse( $this->dispatch_stack, true ), true );
-		$context   = $this->dispatch_contexts[ $dispatch_id ] ?? null;
-
-		if ( false === $stack_key || null === $context ) {
-			return;
-		}
-
-		foreach ( array_splice( $this->dispatch_stack, (int) $stack_key ) as $ended_dispatch_id ) {
-			unset( $this->dispatch_contexts[ $ended_dispatch_id ] );
-		}
-
-		$this->calculation_depth = $context['calculation_depth'];
-		$this->mini_cart_depths  = array_slice( $this->mini_cart_depths, 0, $context['mini_cart_count'] );
 	}
 }

@@ -202,7 +202,6 @@ class WC_Customer extends WC_Legacy_Customer {
 		}
 
 		if ( wc_get_container()->get( CartWithoutShipping::class )->should_use_billing_address( $this ) ) {
-			// Nothing in the cart needs shipping, so use the billing address.
 			$tax_based_on = TaxBasedOn::BILLING;
 		}
 

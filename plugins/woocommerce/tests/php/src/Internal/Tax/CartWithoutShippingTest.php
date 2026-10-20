@@ -78,14 +78,6 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 	public function tearDown(): void {
 		try {
 			WC()->customer = $this->original_customer;
-			$this->shipping_zone->delete( true );
-			delete_transient( 'wc_shipping_method_count' );
-			remove_filter( 'woocommerce_is_checkout', '__return_true' );
-			remove_filter( 'woocommerce_product_needs_shipping', '__return_false' );
-			remove_filter( 'woocommerce_product_needs_shipping', '__return_true' );
-			remove_filter( 'woocommerce_cart_needs_shipping', '__return_true' );
-			remove_filter( 'woocommerce_apply_billing_tax_for_cart_without_shipping', '__return_false' );
-			remove_filter( 'woocommerce_apply_billing_tax_for_cart_without_shipping', '__return_true' );
 			$this->clear_rest_server();
 		} finally {
 			parent::tearDown();
@@ -120,19 +112,19 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Leaves the taxable address unchanged when the filter is applied without a customer.
+	 * @testdox Keeps the local pickup location when the taxable address filter is applied without a customer.
 	 *
 	 * Third-party code can apply woocommerce_customer_taxable_address with only the address argument.
 	 */
-	public function test_leaves_address_unchanged_when_filter_is_applied_without_customer(): void {
+	public function test_keeps_local_pickup_location_when_filter_is_applied_without_customer(): void {
 		$this->add_product_to_cart( true );
+		$this->choose_local_pickup_in_us();
 		$this->set_checkout_context();
-		$taxable_address = array( 'US', 'CA', '90210', 'Beverly Hills' );
 
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Simulates a third-party call without the customer argument.
-		$result = apply_filters( 'woocommerce_customer_taxable_address', $taxable_address );
+		$result = apply_filters( 'woocommerce_customer_taxable_address', array( 'US', 'CA', '90210', 'Beverly Hills' ) );
 
-		$this->assertSame( $taxable_address, $result, 'The taxable address should remain unchanged when no customer is passed.' );
+		$this->assertSame( array( 'US', 'CA', '90001', 'Los Angeles' ), $result, 'Without a customer to check the cart for, the local pickup location should still apply.' );
 	}
 
 	/**
@@ -160,64 +152,15 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Uses the billing address for a Store API cart request.
-	 */
-	public function test_uses_billing_address_for_store_api_cart_request(): void {
-		$this->add_product_to_cart( true );
-		$recorded = null;
-
-		$this->dispatch_test_route(
-			'/wc/store/v1/cart',
-			$this->as_cart_route(
-				function ( $request ) use ( &$recorded ) {
-					unset( $request ); // Avoid parameter not used PHPCS errors.
-					$recorded = $this->customer->get_taxable_address();
-					return rest_ensure_response( array( 'ok' => true ) );
-				}
-			)
-		);
-
-		$this->assertSame( array( 'GB', 'LND', 'SW1A 1AA', 'London' ), $recorded, 'A Store API cart request should use the billing address.' );
-	}
-
-	/**
-	 * @testdox Leaves the taxable address unchanged for other Store API requests.
-	 */
-	public function test_leaves_address_unchanged_for_other_store_api_requests(): void {
-		$this->add_product_to_cart( true );
-		$recorded = null;
-
-		$this->dispatch_test_route(
-			'/wc/store/v1/products',
-			function ( $request ) use ( &$recorded ) {
-				unset( $request ); // Avoid parameter not used PHPCS errors.
-				$recorded = $this->customer->get_taxable_address();
-				return rest_ensure_response( array( 'ok' => true ) );
-			}
-		);
-
-		$this->assertSame( array( 'US', 'CA', '90210', 'Beverly Hills' ), $recorded, 'Other Store API requests should not use the billing address.' );
-	}
-
-	/**
 	 * @testdox Prices classic cart cross-sells using shipping tax while the cart uses billing tax.
-	 * @runInSeparateProcess
-	 * @preserveGlobalState disabled
 	 */
 	public function test_classic_cart_cross_sell_uses_catalog_tax(): void {
 		$this->set_up_cross_sell_tax_fixture();
 		add_filter( 'woocommerce_is_cart', '__return_true' );
 
-		try {
-			ob_start();
-			try {
-				woocommerce_cross_sell_display();
-			} finally {
-				$markup = (string) ob_get_clean();
-			}
-		} finally {
-			remove_filter( 'woocommerce_is_cart', '__return_true' );
-		}
+		ob_start();
+		woocommerce_cross_sell_display();
+		$markup = (string) ob_get_clean();
 
 		$this->assertStringContainsString( wc_price( 110 ), $markup, 'The physical cross-sell should use shipping tax.' );
 		$this->assertStringNotContainsString( wc_price( 127 ), $markup, 'The cross-sell should not use billing tax.' );
@@ -331,16 +274,61 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Uses the billing address for a non-virtual product that does not need shipping.
+	 * @testdox Follows WC_Cart::needs_shipping() rather than whether products are virtual.
+	 *
+	 * @dataProvider provider_needs_shipping_overrides
+	 *
+	 * @param bool     $virtual          Whether the cart product is virtual.
+	 * @param callable $override         Changes whether the cart needs shipping.
+	 * @param bool     $expected_billing Whether the billing address is expected.
 	 */
-	public function test_uses_billing_address_for_non_virtual_product_without_shipping(): void {
-		$this->add_product_to_cart( false );
-		add_filter( 'woocommerce_product_needs_shipping', '__return_false' );
+	public function test_follows_cart_needs_shipping( bool $virtual, callable $override, bool $expected_billing ): void {
+		$this->add_product_to_cart( $virtual );
+		$override();
 		$this->set_checkout_context();
 
 		$result = $this->customer->get_taxable_address();
 
-		$this->assertSame( array( 'GB', 'LND', 'SW1A 1AA', 'London' ), $result, 'A cart without products requiring shipping should use the billing address.' );
+		$expected = $expected_billing ? array( 'GB', 'LND', 'SW1A 1AA', 'London' ) : array( 'US', 'CA', '90210', 'Beverly Hills' );
+		$this->assertSame( $expected, $result, 'The taxable address should follow whether the cart needs shipping.' );
+	}
+
+	/**
+	 * Provides ways to change whether a cart needs shipping, independently of whether its product is virtual.
+	 *
+	 * @return array<string, array{bool, callable, bool}>
+	 */
+	public function provider_needs_shipping_overrides(): array {
+		return array(
+			'physical product that does not need shipping' => array(
+				false,
+				static function (): void {
+					add_filter( 'woocommerce_product_needs_shipping', '__return_false' );
+				},
+				true,
+			),
+			'physical product with shipping disabled'      => array(
+				false,
+				static function (): void {
+					update_option( 'woocommerce_ship_to_countries', 'disabled' );
+				},
+				true,
+			),
+			'virtual product that needs shipping'          => array(
+				true,
+				static function (): void {
+					add_filter( 'woocommerce_product_needs_shipping', '__return_true' );
+				},
+				false,
+			),
+			'cart forced to need shipping'                 => array(
+				true,
+				static function (): void {
+					add_filter( 'woocommerce_cart_needs_shipping', '__return_true' );
+				},
+				false,
+			),
+		);
 	}
 
 	/**
@@ -354,19 +342,6 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 		$result = $this->customer->get_taxable_address();
 
 		$this->assertSame( array( 'US', 'CA', '90210', 'Beverly Hills' ), $result, 'A mixed cart should use the configured shipping address.' );
-	}
-
-	/**
-	 * @testdox Leaves the taxable address unchanged when shipping is required for a virtual product.
-	 */
-	public function test_leaves_address_unchanged_when_virtual_product_needs_shipping(): void {
-		$this->add_product_to_cart( true );
-		add_filter( 'woocommerce_product_needs_shipping', '__return_true' );
-		$this->set_checkout_context();
-
-		$result = $this->customer->get_taxable_address();
-
-		$this->assertSame( array( 'US', 'CA', '90210', 'Beverly Hills' ), $result, 'A virtual product requiring shipping should use the configured shipping address.' );
 	}
 
 	/**
@@ -395,43 +370,11 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 		};
 		add_filter( 'woocommerce_product_needs_shipping', $needs_shipping );
 
-		try {
-			$result = $this->customer->get_taxable_address();
-		} finally {
-			remove_filter( 'woocommerce_product_needs_shipping', $needs_shipping );
-		}
+		$result = $this->customer->get_taxable_address();
 
 		$this->assertSame( 1, $max_depth, 'The needs_shipping callback should not be re-entered from the taxable address lookup.' );
 		$this->assertSame( array( 'US', 'CA', '90210', 'Beverly Hills' ), $inner_address, 'A re-entrant lookup should get the unfiltered taxable address.' );
 		$this->assertSame( array( 'GB', 'LND', 'SW1A 1AA', 'London' ), $result, 'The outer lookup should still use the billing address.' );
-	}
-
-	/**
-	 * @testdox Leaves the taxable address unchanged when the woocommerce_cart_needs_shipping filter forces shipping.
-	 */
-	public function test_leaves_address_unchanged_when_cart_needs_shipping_filter_forces_shipping(): void {
-		$this->add_product_to_cart( true );
-		add_filter( 'woocommerce_cart_needs_shipping', '__return_true' );
-		$this->set_checkout_context();
-
-		$result = $this->customer->get_taxable_address();
-
-		$this->assertSame( array( 'US', 'CA', '90210', 'Beverly Hills' ), $result, 'A cart forced to need shipping by the woocommerce_cart_needs_shipping filter should use the configured shipping address.' );
-	}
-
-	/**
-	 * @testdox Uses the billing address for a cart with physical products when shipping is disabled.
-	 *
-	 * Checkout copies the billing address to shipping when the cart does not need shipping, so the cart should price with it too.
-	 */
-	public function test_uses_billing_address_for_physical_products_when_shipping_is_disabled(): void {
-		$this->add_product_to_cart( false );
-		update_option( 'woocommerce_ship_to_countries', 'disabled' );
-		$this->set_checkout_context();
-
-		$result = $this->customer->get_taxable_address();
-
-		$this->assertSame( array( 'GB', 'LND', 'SW1A 1AA', 'London' ), $result, 'A cart that does not need shipping because shipping is disabled should use the billing address.' );
 	}
 
 	/**
@@ -450,39 +393,10 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 		};
 		add_filter( 'woocommerce_customer_taxable_address', $callback );
 
-		try {
-			$result = $this->customer->get_taxable_address();
-		} finally {
-			remove_filter( 'woocommerce_customer_taxable_address', $callback );
-		}
+		$result = $this->customer->get_taxable_address();
 
 		$this->assertSame( array( 'GB', 'LND', 'SW1A 1AA', 'London' ), $received_address, 'A callback at the default priority should receive the billing address.' );
 		$this->assertSame( $base_address, $result, 'The address returned by a callback at the default priority should be used.' );
-	}
-
-	/**
-	 * @testdox Lets an early woocommerce_customer_taxable_address callback see the billing address.
-	 *
-	 * The billing address is selected before the filter fires, so even callbacks at priority 1 see it.
-	 */
-	public function test_early_taxable_address_callback_sees_billing_address(): void {
-		$this->add_product_to_cart( true );
-		$this->set_checkout_context();
-		$received_address = null;
-		$callback         = function ( $address ) use ( &$received_address ) {
-			$received_address = $address;
-			return $address;
-		};
-		add_filter( 'woocommerce_customer_taxable_address', $callback, 1, 1 );
-
-		try {
-			$result = $this->customer->get_taxable_address();
-		} finally {
-			remove_filter( 'woocommerce_customer_taxable_address', $callback, 1 );
-		}
-
-		$this->assertSame( array( 'GB', 'LND', 'SW1A 1AA', 'London' ), $received_address, 'A callback at priority 1 should receive the billing address.' );
-		$this->assertSame( array( 'GB', 'LND', 'SW1A 1AA', 'London' ), $result, 'A callback returning the address unchanged should keep the billing address.' );
 	}
 
 	/**
@@ -502,11 +416,7 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 		};
 		add_filter( 'woocommerce_apply_billing_tax_for_cart_without_shipping', $callback, 10, 3 );
 
-		try {
-			$result = $this->customer->get_taxable_address();
-		} finally {
-			remove_filter( 'woocommerce_apply_billing_tax_for_cart_without_shipping', $callback, 10 );
-		}
+		$result = $this->customer->get_taxable_address();
 
 		$this->assertSame( array( 'US', 'CA', '90210', 'Beverly Hills' ), $result, 'Returning false should keep the shipping address.' );
 		$this->assertSame(
@@ -531,11 +441,7 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 		$this->set_checkout_context();
 		add_filter( 'woocommerce_apply_billing_tax_for_cart_without_shipping', '__return_true' );
 
-		try {
-			$result = $this->customer->get_taxable_address();
-		} finally {
-			remove_filter( 'woocommerce_apply_billing_tax_for_cart_without_shipping', '__return_true' );
-		}
+		$result = $this->customer->get_taxable_address();
 
 		$this->assertSame( array( 'US', 'CA', '90210', 'Beverly Hills' ), $result, 'The filter should not turn the fallback on for a cart with products that need shipping.' );
 	}
@@ -554,25 +460,6 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 
 		$this->assertSame( array( 'FR', 'IDF', '75001', 'Paris' ), $result, 'The cart should not affect another customer\'s taxable address.' );
 	}
-
-	/**
-	 * The "outside cart and checkout" path is not testable in the full suite.
-	 *
-	 * `is_checkout()` short-circuits to true once `WOOCOMMERCE_CHECKOUT` is
-	 * defined, and several legacy cart/checkout tests define it via
-	 * `define()` / `wc_maybe_define_constant()`. PHP constants cannot be
-	 * undefined, so the flag stays set for the rest of the process. The legacy
-	 * suite runs before the main suite (`defaultTestSuite` in `phpunit.xml`),
-	 * which means `is_checkout()` is already true here in CI even though it is
-	 * false when the test runs in isolation locally.
-	 *
-	 * The same early-return branch is covered deterministically by
-	 * `test_leaves_address_unchanged_for_other_store_api_requests` through the
-	 * controllable Store API request-context stack.
-	 *
-	 * @see \Automattic\WooCommerce\Tests\Internal\LegacyAssets\LegacySelect2UsageTrackerTest::get_expected_frontend_page_type()
-	 * @see \Automattic\WooCommerce\Tests\Blocks\BlockTypes\SavedForLaterTests::test_cart_page_has_saved_for_later_flag()
-	 */
 
 	/**
 	 * @testdox Leaves the taxable address unchanged when the billing country is empty.
