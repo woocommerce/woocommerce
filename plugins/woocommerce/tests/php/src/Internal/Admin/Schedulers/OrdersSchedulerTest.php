@@ -50,19 +50,50 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 
 	/**
 	 * Hook the import filter that keeps child orders out of Analytics, for the active order storage.
-	 *
-	 * @return callable The filter callback, for removal.
 	 */
-	private function exclude_child_orders_from_import(): callable {
-		$callback = function ( $clauses, $table_alias ) {
-			$clauses[] = OrderUtil::custom_orders_table_usage_is_enabled()
-				? "NOT ( {$table_alias}.type = 'shop_order' AND {$table_alias}.parent_order_id <> 0 )"
-				: "NOT ( {$table_alias}.post_type = 'shop_order' AND {$table_alias}.post_parent <> 0 )";
+	private function exclude_child_orders_from_import(): void {
+		add_filter(
+			'woocommerce_analytics_orders_import_where_clauses',
+			function ( $clauses, $table_alias ) {
+				$clauses[] = OrderUtil::custom_orders_table_usage_is_enabled()
+					? "NOT ( {$table_alias}.type = 'shop_order' AND {$table_alias}.parent_order_id <> 0 )"
+					: "NOT ( {$table_alias}.post_type = 'shop_order' AND {$table_alias}.post_parent <> 0 )";
+				return $clauses;
+			},
+			10,
+			2
+		);
+	}
+
+	/**
+	 * Hook the import filter to add one fixed condition.
+	 *
+	 * @param string $condition SQL condition.
+	 * @return callable The filter callback, for tests that remove it before a retry.
+	 */
+	private function add_import_condition( string $condition ): callable {
+		$callback = function ( $clauses ) use ( $condition ) {
+			$clauses[] = $condition;
 			return $clauses;
 		};
-		add_filter( 'woocommerce_analytics_orders_import_where_clauses', $callback, 10, 2 );
+		add_filter( 'woocommerce_analytics_orders_import_where_clauses', $callback );
 
 		return $callback;
+	}
+
+	/**
+	 * Refund 1 of an order.
+	 *
+	 * @param int $order_id Order ID.
+	 * @return int Refund ID.
+	 */
+	private function create_refund( int $order_id ): int {
+		return wc_create_refund(
+			array(
+				'order_id' => $order_id,
+				'amount'   => 1,
+			)
+		)->get_id();
 	}
 
 	/**
@@ -80,14 +111,7 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 		$child->set_status( OrderStatus::COMPLETED );
 		$child->save();
 
-		$refund = wc_create_refund(
-			array(
-				'order_id' => $parent->get_id(),
-				'amount'   => 1,
-			)
-		);
-
-		return array( $parent->get_id(), $child->get_id(), $refund->get_id() );
+		return array( $parent->get_id(), $child->get_id(), $this->create_refund( $parent->get_id() ) );
 	}
 
 	/**
@@ -118,30 +142,25 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	 */
 	public function test_refund_of_excluded_record_is_not_imported(): void {
 		list( $parent_id, $child_id, $refund_id ) = $this->create_parent_child_and_refund();
-		$child_refund_id                          = wc_create_refund(
-			array(
-				'order_id' => $child_id,
-				'amount'   => 1,
-			)
-		)->get_id();
+		$child_refund_id                          = $this->create_refund( $child_id );
 		$this->exclude_child_orders_from_import();
 
 		$items = OrdersScheduler::get_items( 100, 1, false, true );
 		$ids   = array_map( 'intval', $items->ids );
 		$this->assertSame( $items->total, count( $ids ), 'The count and the page must agree.' );
-		$this->assertNotContains( $child_refund_id, $ids );
+		$this->assertNotContains( $child_refund_id, $ids, 'get_items() must leave out the refund of an excluded order.' );
 		$this->assertContains( $refund_id, $ids, 'A refund of a kept order is still imported.' );
-		$this->assertTrue( OrdersScheduler::is_excluded_from_import( $child_refund_id ) );
+		$this->assertTrue( OrdersScheduler::is_excluded_from_import( $child_refund_id ), 'The per-record check must exclude the refund too.' );
 
 		OrdersScheduler::import( $child_refund_id );
-		$this->assertSame( -1, OrdersStatsDataStore::update( wc_get_order( $child_refund_id ) ) );
+		$this->assertSame( -1, OrdersStatsDataStore::update( wc_get_order( $child_refund_id ) ), 'The stats data store must skip the refund.' );
 		OrdersScheduler::process_pending_batch( '2000-01-01 00:00:00', 0 );
 
 		$imported = $this->get_imported_order_ids();
-		$this->assertNotContains( $child_refund_id, $imported );
-		$this->assertNotContains( $child_id, $imported );
-		$this->assertContains( $parent_id, $imported );
-		$this->assertContains( $refund_id, $imported );
+		$this->assertNotContains( $child_refund_id, $imported, 'No import path may write the refund of an excluded order.' );
+		$this->assertNotContains( $child_id, $imported, 'The excluded order stays out.' );
+		$this->assertContains( $parent_id, $imported, 'The scheduled batch imports the kept order.' );
+		$this->assertContains( $refund_id, $imported, 'The scheduled batch imports the refund of the kept order.' );
 	}
 
 	/**
@@ -149,12 +168,7 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	 */
 	public function test_refund_of_order_with_null_condition_is_excluded(): void {
 		$order     = \WC_Helper_Order::create_order();
-		$refund_id = wc_create_refund(
-			array(
-				'order_id' => $order->get_id(),
-				'amount'   => 1,
-			)
-		)->get_id();
+		$refund_id = $this->create_refund( $order->get_id() );
 		add_filter(
 			'woocommerce_analytics_orders_import_where_clauses',
 			function ( $clauses, $table_alias ) {
@@ -167,9 +181,9 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 			2
 		);
 
-		$this->assertTrue( OrdersScheduler::is_excluded_from_import( $order->get_id() ) );
+		$this->assertTrue( OrdersScheduler::is_excluded_from_import( $order->get_id() ), 'A NULL condition excludes the order.' );
 		$this->assertTrue( OrdersScheduler::is_excluded_from_import( $refund_id ), 'The refund inherits the exclusion of its order.' );
-		$this->assertNotContains( $refund_id, array_map( 'intval', OrdersScheduler::get_items( 100, 1, false, true )->ids ) );
+		$this->assertNotContains( $refund_id, array_map( 'intval', OrdersScheduler::get_items( 100, 1, false, true )->ids ), 'get_items() agrees with the per-record check.' );
 	}
 
 	/**
@@ -177,12 +191,7 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	 */
 	public function test_skip_existing_import_finishes_with_excluded_refunds(): void {
 		list( , $child_id ) = $this->create_parent_child_and_refund();
-		wc_create_refund(
-			array(
-				'order_id' => $child_id,
-				'amount'   => 1,
-			)
-		);
+		$this->create_refund( $child_id );
 		$this->exclude_child_orders_from_import();
 
 		// ImportScheduler::import_batch() always reads page 1 while skipping existing records, so a
@@ -225,15 +234,10 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 		OrdersScheduler::import( $child_id );
 		$this->exclude_child_orders_from_import();
 
-		$child_refund_id = wc_create_refund(
-			array(
-				'order_id' => $child_id,
-				'amount'   => 1,
-			)
-		)->get_id();
+		$child_refund_id = $this->create_refund( $child_id );
 
-		$this->assertFalse( OrdersScheduler::is_excluded_from_import( $child_refund_id ) );
-		$this->assertContains( $child_refund_id, array_map( 'intval', OrdersScheduler::get_items( 100, 1, false, true )->ids ) );
+		$this->assertFalse( OrdersScheduler::is_excluded_from_import( $child_refund_id ), 'A refund of a held order is not excluded.' );
+		$this->assertContains( $child_refund_id, array_map( 'intval', OrdersScheduler::get_items( 100, 1, false, true )->ids ), 'get_items() counts it.' );
 
 		OrdersScheduler::import( $child_refund_id );
 
@@ -244,13 +248,7 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	 * @testdox A record with no row in the orders table is not excluded.
 	 */
 	public function test_is_excluded_from_import_ignores_missing_record(): void {
-		add_filter(
-			'woocommerce_analytics_orders_import_where_clauses',
-			function ( $clauses ) {
-				$clauses[] = '0';
-				return $clauses;
-			}
-		);
+		$this->add_import_condition( '0' );
 
 		$this->assertFalse( OrdersScheduler::is_excluded_from_import( 999999999 ) );
 	}
@@ -261,19 +259,13 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	public function test_get_items_logs_failed_count_query(): void {
 		global $wpdb;
 		$this->create_parent_child_and_refund();
-		add_filter(
-			'woocommerce_analytics_orders_import_where_clauses',
-			function ( $clauses ) {
-				$clauses[] = 'no_such_column_for_this_test = 1';
-				return $clauses;
-			}
-		);
+		$this->add_import_condition( 'no_such_column_for_this_test = 1' );
 
 		$suppress = $wpdb->suppress_errors();
 		$items    = OrdersScheduler::get_items( 100, 1, false, true );
 		$wpdb->suppress_errors( $suppress );
 
-		$this->assertSame( 0, $items->total );
+		$this->assertSame( 0, $items->total, 'A failed count reads as nothing to import.' );
 		$this->assertSame( array(), $items->ids );
 		$this->assertLogged( 'error', 'Could not count the orders to import' );
 	}
@@ -285,15 +277,14 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 		list( $parent_id, $child_id, $refund_id ) = $this->create_parent_child_and_refund();
 
 		$unfiltered = OrdersScheduler::get_items( 100, 1, false, true );
-		$callback   = $this->exclude_child_orders_from_import();
-		$filtered   = OrdersScheduler::get_items( 100, 1, false, true );
-		remove_filter( 'woocommerce_analytics_orders_import_where_clauses', $callback, 10 );
+		$this->exclude_child_orders_from_import();
+		$filtered = OrdersScheduler::get_items( 100, 1, false, true );
 
 		$unfiltered_ids = array_map( 'intval', $unfiltered->ids );
 		$filtered_ids   = array_map( 'intval', $filtered->ids );
 
-		$this->assertContains( $child_id, $unfiltered_ids );
-		$this->assertSame( $unfiltered->total - 1, $filtered->total );
+		$this->assertContains( $child_id, $unfiltered_ids, 'Without the filter the child order is imported as before.' );
+		$this->assertSame( $unfiltered->total - 1, $filtered->total, 'The count drops by the excluded child order.' );
 		$this->assertNotContains( $child_id, $filtered_ids );
 		$this->assertContains( $parent_id, $filtered_ids );
 		$this->assertContains( $refund_id, $filtered_ids, 'A refund keeps its order in the parent column and must survive a child-order condition.' );
@@ -304,11 +295,10 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	 */
 	public function test_import_skips_record_excluded_by_import_where_clauses_filter(): void {
 		list( $parent_id, $child_id, $refund_id ) = $this->create_parent_child_and_refund();
-		$callback                                 = $this->exclude_child_orders_from_import();
+		$this->exclude_child_orders_from_import();
 
 		OrdersScheduler::import( $child_id );
 		OrdersScheduler::import( $parent_id );
-		remove_filter( 'woocommerce_analytics_orders_import_where_clauses', $callback, 10 );
 
 		$imported = $this->get_imported_order_ids();
 		$this->assertNotContains( $child_id, $imported );
@@ -321,10 +311,9 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	 */
 	public function test_process_pending_batch_skips_excluded_record(): void {
 		list( $parent_id, $child_id ) = $this->create_parent_child_and_refund();
-		$callback                     = $this->exclude_child_orders_from_import();
+		$this->exclude_child_orders_from_import();
 
 		OrdersScheduler::process_pending_batch( '2000-01-01 00:00:00', 0 );
-		remove_filter( 'woocommerce_analytics_orders_import_where_clauses', $callback, 10 );
 
 		$imported = $this->get_imported_order_ids();
 		$this->assertContains( $parent_id, $imported );
@@ -336,10 +325,9 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	 */
 	public function test_stats_data_store_update_skips_excluded_record(): void {
 		list( , $child_id ) = $this->create_parent_child_and_refund();
-		$callback           = $this->exclude_child_orders_from_import();
+		$this->exclude_child_orders_from_import();
 
 		$result = OrdersStatsDataStore::update( wc_get_order( $child_id ) );
-		remove_filter( 'woocommerce_analytics_orders_import_where_clauses', $callback, 10 );
 
 		$this->assertSame( -1, $result );
 		$this->assertNotContains( $child_id, $this->get_imported_order_ids() );
@@ -351,45 +339,42 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	public function test_import_clears_failed_entry_for_excluded_record(): void {
 		list( , $child_id ) = $this->create_parent_child_and_refund();
 		OrdersScheduler::record_failed_order_import( $child_id );
-		$callback = $this->exclude_child_orders_from_import();
+		$this->exclude_child_orders_from_import();
 
 		OrdersScheduler::import( $child_id );
-		remove_filter( 'woocommerce_analytics_orders_import_where_clauses', $callback, 10 );
 
 		$this->assertNotContains( $child_id, OrdersScheduler::get_failed_order_imports()['ids'] );
 	}
 
 	/**
-	 * @testdox Without the filter a child order is counted and imported as before.
+	 * Filter returns the import ignores.
+	 *
+	 * @return array<string, array<mixed>>
 	 */
-	public function test_child_order_is_imported_without_import_where_clauses_filter(): void {
-		list( , $child_id ) = $this->create_parent_child_and_refund();
-
-		$this->assertContains( $child_id, array_map( 'intval', OrdersScheduler::get_items( 100, 1, false, true )->ids ) );
-
-		OrdersScheduler::import( $child_id );
-
-		$this->assertContains( $child_id, $this->get_imported_order_ids() );
+	public function provider_invalid_import_where_clauses(): array {
+		return array(
+			'not an array'          => array( false ),
+			'non-strings and blank' => array( array( 42, '  ', null ) ),
+		);
 	}
 
 	/**
 	 * @testdox A filter return that is not an array of strings is ignored.
+	 * @dataProvider provider_invalid_import_where_clauses
+	 *
+	 * @param mixed $invalid_return Value the filter returns.
 	 */
-	public function test_import_where_clauses_filter_ignores_invalid_return(): void {
+	public function test_import_where_clauses_filter_ignores_invalid_return( $invalid_return ): void {
 		list( , $child_id ) = $this->create_parent_child_and_refund();
-
-		foreach ( array( false, array( 42, '  ', null ) ) as $invalid_return ) {
-			$callback = function () use ( $invalid_return ) {
+		add_filter(
+			'woocommerce_analytics_orders_import_where_clauses',
+			function () use ( $invalid_return ) {
 				return $invalid_return;
-			};
-			add_filter( 'woocommerce_analytics_orders_import_where_clauses', $callback );
+			}
+		);
 
-			$items = OrdersScheduler::get_items( 100, 1, false, true );
-			$this->assertContains( $child_id, array_map( 'intval', $items->ids ) );
-			$this->assertFalse( OrdersScheduler::is_excluded_from_import( $child_id ) );
-
-			remove_filter( 'woocommerce_analytics_orders_import_where_clauses', $callback );
-		}
+		$this->assertContains( $child_id, array_map( 'intval', OrdersScheduler::get_items( 100, 1, false, true )->ids ), 'get_items() ignores the return.' );
+		$this->assertFalse( OrdersScheduler::is_excluded_from_import( $child_id ), 'The per-record check ignores the return.' );
 	}
 
 	/**
@@ -397,19 +382,13 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	 */
 	public function test_import_where_clauses_filter_keeps_zero_condition(): void {
 		list( $parent_id ) = $this->create_parent_child_and_refund();
-		$callback          = function ( $clauses ) {
-			$clauses[] = '0';
-			return $clauses;
-		};
-		add_filter( 'woocommerce_analytics_orders_import_where_clauses', $callback );
+		$this->add_import_condition( '0' );
 
-		$items    = OrdersScheduler::get_items( 100, 1, false, true );
-		$excluded = OrdersScheduler::is_excluded_from_import( $parent_id );
-		remove_filter( 'woocommerce_analytics_orders_import_where_clauses', $callback );
+		$items = OrdersScheduler::get_items( 100, 1, false, true );
 
-		$this->assertSame( 0, $items->total );
+		$this->assertSame( 0, $items->total, 'get_items() must count nothing.' );
 		$this->assertSame( array(), $items->ids );
-		$this->assertTrue( $excluded );
+		$this->assertTrue( OrdersScheduler::is_excluded_from_import( $parent_id ), 'The per-record check must exclude too.' );
 	}
 
 	/**
@@ -424,18 +403,15 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 		};
 		add_filter( 'woocommerce_analytics_orders_import_where_clauses', $callback, 10, 2 );
 
-		$items           = OrdersScheduler::get_items( 100, 1, false, true );
-		$refund_excluded = OrdersScheduler::is_excluded_from_import( $refund_id );
-		$parent_excluded = OrdersScheduler::is_excluded_from_import( $parent_id );
-		remove_filter( 'woocommerce_analytics_orders_import_where_clauses', $callback, 10 );
+		$items = OrdersScheduler::get_items( 100, 1, false, true );
 
 		$ids = array_map( 'intval', $items->ids );
 		$this->assertSame( $items->total, count( $ids ), 'The count and the page must agree.' );
 		$this->assertContains( $parent_id, $ids );
 		$this->assertContains( $child_id, $ids );
-		$this->assertNotContains( $refund_id, $ids );
-		$this->assertTrue( $refund_excluded );
-		$this->assertFalse( $parent_excluded );
+		$this->assertNotContains( $refund_id, $ids, 'The LIKE condition excludes refunds in the prepared page query.' );
+		$this->assertTrue( OrdersScheduler::is_excluded_from_import( $refund_id ), 'The LIKE condition excludes refunds in the prepared probe.' );
+		$this->assertFalse( OrdersScheduler::is_excluded_from_import( $parent_id ) );
 	}
 
 	/**
@@ -444,11 +420,7 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	public function test_failed_exclusion_check_skips_import_and_keeps_record_for_retry(): void {
 		global $wpdb;
 		list( , $child_id ) = $this->create_parent_child_and_refund();
-		$callback           = function ( $clauses ) {
-			$clauses[] = 'no_such_column_for_this_test = 1';
-			return $clauses;
-		};
-		add_filter( 'woocommerce_analytics_orders_import_where_clauses', $callback );
+		$callback           = $this->add_import_condition( 'no_such_column_for_this_test = 1' );
 
 		$suppress = $wpdb->suppress_errors();
 		$excluded = OrdersScheduler::is_excluded_from_import( $child_id );
@@ -513,11 +485,7 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 		list( $parent_id ) = $this->create_parent_child_and_refund();
 		update_option( OrdersScheduler::LAST_PROCESSED_ORDER_DATE_OPTION, '2000-01-01 00:00:00', false );
 		update_option( OrdersScheduler::LAST_PROCESSED_ORDER_ID_OPTION, 0, false );
-		$callback = function ( $clauses ) {
-			$clauses[] = 'no_such_column_for_this_test = 1';
-			return $clauses;
-		};
-		add_filter( 'woocommerce_analytics_orders_import_where_clauses', $callback );
+		$callback = $this->add_import_condition( 'no_such_column_for_this_test = 1' );
 
 		$suppress = $wpdb->suppress_errors();
 		OrdersScheduler::process_pending_batch();
