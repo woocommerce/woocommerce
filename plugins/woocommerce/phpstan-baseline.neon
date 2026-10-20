@@ -49534,12 +49534,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ComingSoon.php
 
 		-
-			message: '#^Call to function is_null\(\) with mixed will always evaluate to false\.$#'
-			identifier: function.impossibleType
-			count: 1
-			path: src/Blocks/BlockTypes/CustomerAccount.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\CustomerAccount\:\:initialize\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -49572,12 +49566,6 @@ parameters:
 		-
 			message: '#^Parameter \$context of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\CustomerAccount\:\:modify_hooked_block_attributes\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Post\.$#'
 			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/CustomerAccount.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\Blocks\\BlockTypes\\CustomerAccount\:\:\$hooked_block_placements \(array\) in isset\(\) is not nullable\.$#'
-			identifier: isset.property
 			count: 1
 			path: src/Blocks/BlockTypes/CustomerAccount.php
 
@@ -49684,12 +49672,6 @@ parameters:
 			path: src/Blocks/BlockTypes/HandpickedProducts.php
 
 		-
-			message: '#^Call to function is_null\(\) with mixed will always evaluate to false\.$#'
-			identifier: function.impossibleType
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCart.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCart\:\:enqueue_data\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -49786,21 +49768,9 @@ parameters:
 			path: src/Blocks/BlockTypes/MiniCart.php
 
 		-
-			message: '#^Property Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCart\:\:\$hooked_block_placements \(array\) in isset\(\) is not nullable\.$#'
-			identifier: isset.property
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCart.php
-
-		-
 			message: '#^Result of && is always false\.$#'
 			identifier: booleanAnd.alwaysFalse
 			count: 1
-			path: src/Blocks/BlockTypes/MiniCart.php
-
-		-
-			message: '#^Ternary operator condition is always true\.$#'
-			identifier: ternary.alwaysTrue
-			count: 2
 			path: src/Blocks/BlockTypes/MiniCart.php
 
 		-
@@ -52830,12 +52800,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\Templates\\AbstractTemplateCompatibility\:\:set_hook_data\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Blocks/Templates/AbstractTemplateCompatibility.php
-
-		-
-			message: '#^Parameter \$parent_block of method Automattic\\WooCommerce\\Blocks\\Templates\\AbstractTemplateCompatibility\:\:update_render_block_data\(\) has invalid type Automattic\\WooCommerce\\Blocks\\Templates\\WP_Block\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Blocks/Templates/AbstractTemplateCompatibility.php
 
@@ -60812,12 +60776,6 @@ parameters:
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Features\\FeaturesController\:\:init\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Features/FeaturesController.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Features\\FeaturesController\:\:init_compatibility_info_by_feature\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: src/Internal/Features/FeaturesController.php

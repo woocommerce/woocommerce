@@ -20,9 +20,9 @@ WooCommerce is a WordPress e-commerce plugin organized as a monorepo with:
 
 ## Available Skills
 
-The `.ai/skills/` directory contains procedural HOW-TO instructions. Each skill's full instructions are in `.ai/skills/<skill-name>/SKILL.md` — read that file and follow it before starting work the skill covers:
+The `.ai/skills/` directory contains procedural HOW-TO instructions:
 
-- **`woocommerce-backend-dev`** - Backend PHP conventions and unit tests. **Read before writing any PHP test files.**
+- **`woocommerce-backend-dev`** - Backend PHP conventions and unit tests. **Invoke before writing any PHP test files.**
 - **`woocommerce-dev-cycle`** - Testing and linting workflows (PHP, JS, markdown)
 - **`woocommerce-local-env`** - Local environment setup, wp-env commands, and WooCommerce build watchers
 - **`woocommerce-copy-guidelines`** - UI text standards (sentence case rules)
@@ -31,8 +31,7 @@ The `.ai/skills/` directory contains procedural HOW-TO instructions. Each skill'
 - **`woocommerce-git-commit`** - Commit changes with conventional messages and smart grouping
 - **`woocommerce-git-draft-pr`** - Create draft PRs with proper template, changelog, and milestone handling
 - **`woocommerce-email-editor`** - Email editor development setup and Mailpit configuration
-- **`woocommerce-performance`** - Performance guardrails. **Read when writing or reviewing PHP code.**
-- **`woocommerce-store-api`** - Store API (`/wc/store/v1/*`) route, schema, and authentication conventions
+- **`woocommerce-performance`** - Performance guardrails. **Invoke when writing or reviewing PHP code.**
 
 ## Project Architecture
 
@@ -385,4 +384,4 @@ Automated reviews complement the [Review Requirements](#review-requirements); th
 - This doc provides context; skills provide procedures
 - When in doubt about HOW to do something, check the skills
 - When in doubt about WHAT something is or WHERE it fits, check this doc
-- Read the matching skill's `SKILL.md` in `.ai/skills/` before doing work it covers
+- Skills are invoked automatically when relevant to the task

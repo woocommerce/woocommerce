@@ -1,0 +1,82 @@
+{
+  "src/abbreviated-card/index.js": {
+    "@wordpress/use-recommended-components": {
+      "count": 2
+    }
+  },
+  "src/advanced-filters/index.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 4
+    }
+  },
+  "src/badge/stories/badge.story.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 2
+    }
+  },
+  "src/compare-filter/button.js": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "src/compare-filter/index.js": {
+    "@wordpress/use-recommended-components": {
+      "count": 4
+    }
+  },
+  "src/date-range-filter-picker/content.js": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "src/experimental-select-control/menu-item.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "src/experimental.js": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "src/form-section/stories/form-section.story.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 2
+    }
+  },
+  "src/summary/number.js": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "src/table/index.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 5
+    }
+  },
+  "src/table/stories/table-placeholder.story.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "src/table/stories/table-summary-placeholder.story.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 2
+    }
+  },
+  "src/table/stories/table-summary.story.jsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 2
+    }
+  },
+  "src/table/stories/table.story.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "src/tour-kit/components/step.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 4
+    }
+  }
+}
