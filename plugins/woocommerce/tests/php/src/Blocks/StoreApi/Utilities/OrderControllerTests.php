@@ -565,6 +565,117 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox update_order_from_cart() replaces shipping and fee lines whose amounts a merchant edited, so the order total matches the cart.
+	 *
+	 * @testWith ["none", ""]
+	 *           ["shipping_total", "shipping"]
+	 *           ["fee_total", "fee"]
+	 *
+	 * @param string $edit          The merchant edit to make to the order.
+	 * @param string $replaced_type The item type that should be replaced, or an empty string when none should be.
+	 */
+	public function test_update_order_from_cart_replaces_shipping_and_fees_with_edited_amounts( string $edit, string $replaced_type ): void {
+		try {
+			$order  = $this->create_order_with_shipping_and_fee();
+			$before = $this->get_item_ids_by_type( $order );
+			if ( 'shipping_total' === $edit ) {
+				$shipping = array_values( $order->get_shipping_methods() )[0];
+				$shipping->set_total( (float) $shipping->get_total() + 5 );
+				$shipping->save();
+			} elseif ( 'fee_total' === $edit ) {
+				$fee = array_values( $order->get_fees() )[0];
+				$fee->set_total( (float) $fee->get_total() + 10 );
+				$fee->save();
+			}
+
+			$this->sut->update_order_from_cart( $order );
+			$after      = $this->get_item_ids_by_type( $order );
+			$cart_total = (float) WC()->cart->get_total( 'edit' );
+		} finally {
+			\WC_Helper_Shipping::delete_simple_flat_rate();
+		}
+
+		foreach ( $before as $type => $ids ) {
+			if ( $type === $replaced_type ) {
+				$this->assertCount( count( $ids ), $after[ $type ], "The edited {$type} lines should be added again once." );
+				$this->assertEmpty( array_intersect( $ids, $after[ $type ] ), "The edited {$type} lines should be replaced." );
+			} else {
+				$this->assertSame( $ids, $after[ $type ], "The {$type} lines should keep their IDs." );
+			}
+		}
+		$this->assertSame( $cart_total, (float) $order->get_total(), 'The order total should match the cart.' );
+	}
+
+	/**
+	 * @testdox update_order_from_cart() keeps shipping and fee lines added outside the cart, along with the cart's own lines.
+	 */
+	public function test_update_order_from_cart_keeps_shipping_and_fees_added_outside_the_cart(): void {
+		try {
+			$order     = $this->create_order_with_shipping_and_fee();
+			$extra_fee = new \WC_Order_Item_Fee();
+			$extra_fee->set_name( 'Extension surcharge' );
+			$extra_fee->set_total( '2' );
+			$extra_shipping = new \WC_Order_Item_Shipping();
+			$extra_shipping->set_method_title( 'Extension shipping' );
+			$extra_shipping->set_total( '3' );
+			$order->add_item( $extra_fee );
+			$order->add_item( $extra_shipping );
+			$order->save();
+			$before = $this->get_item_ids_by_type( $order );
+
+			$this->sut->update_order_from_cart( $order );
+		} finally {
+			\WC_Helper_Shipping::delete_simple_flat_rate();
+		}
+
+		$after = $this->get_item_ids_by_type( $order );
+		$this->assertSame( $before['fee'], $after['fee'], 'The cart fee and the extension fee should keep their IDs.' );
+		$this->assertSame( $before['shipping'], $after['shipping'], 'The cart shipping line and the extension shipping line should keep their IDs.' );
+	}
+
+	/**
+	 * Creates a Store API order from a cart with one product, one fee and flat rate shipping.
+	 * The caller deletes the flat rate.
+	 *
+	 * @return \WC_Order
+	 */
+	private function create_order_with_shipping_and_fee(): \WC_Order {
+		\WC_Helper_Shipping::create_simple_flat_rate( 10 );
+		add_action(
+			'woocommerce_cart_calculate_fees',
+			function ( \WC_Cart $cart ) {
+				$cart->add_fee( 'Handling', 5 );
+			}
+		);
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id() );
+		WC()->cart->calculate_totals();
+		$this->assertTrue( WC()->cart->has_calculated_shipping(), 'The cart should have calculated shipping.' );
+
+		$order = $this->sut->create_order_from_cart();
+		$this->assertCount( 1, $order->get_shipping_methods(), 'The order should have a shipping line.' );
+		$this->assertCount( 1, $order->get_fees(), 'The order should have a fee.' );
+
+		return $order;
+	}
+
+	/**
+	 * Reads an order's item IDs, grouped by item type.
+	 *
+	 * @param \WC_Order $order The order.
+	 * @return array<string, int[]>
+	 */
+	private function get_item_ids_by_type( \WC_Order $order ): array {
+		$ids_by_type = array();
+		foreach ( array( 'line_item', 'shipping', 'fee' ) as $type ) {
+			$ids_by_type[ $type ] = array_keys( $order->get_items( $type ) );
+		}
+
+		return $ids_by_type;
+	}
+
+	/**
 	 * Helper method to set shipping address on an order.
 	 *
 	 * @param \WC_Order $order Order object.

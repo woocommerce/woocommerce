@@ -656,7 +656,8 @@ class WC_Checkout {
 	 * the Store API both use it, so a resumed order keeps the same items whichever checkout updates it.
 	 *
 	 * Line items are kept while the order's cart hash matches and they still match the cart's items. Other types are
-	 * kept while their section hash matches, and shipping is also kept until the cart has evaluated it.
+	 * kept while their section hash matches and, for shipping and fees, the cart's amounts are still on the order.
+	 * Shipping is also kept until the cart has evaluated it.
 	 *
 	 * @internal
 	 *
@@ -677,7 +678,7 @@ class WC_Checkout {
 		}
 
 		foreach ( self::CART_HASHED_ORDER_ITEM_TYPES as $hash_name => $item_type ) {
-			$is_unchanged = $order->get_meta( "_{$hash_name}_hash" ) === $cart_hashes[ $hash_name ];
+			$is_unchanged = $order->get_meta( "_{$hash_name}_hash" ) === $cart_hashes[ $hash_name ] && $this->order_has_cart_amounts( $order, $cart, $item_type );
 			// Shipping isn't replaced before the cart evaluates it, so the order doesn't lose its shipping lines.
 			$is_unevaluated_shipping = OrderItemType::SHIPPING === $item_type && ! $this->cart_has_evaluated_shipping( $cart );
 
@@ -689,6 +690,49 @@ class WC_Checkout {
 		}
 
 		return $kept_types;
+	}
+
+	/**
+	 * Whether every shipping rate or fee in the cart is still on the order with the same amount, for example after a
+	 * merchant edits the order. Other lines on the order, such as ones extensions add, are allowed. Taxes aren't compared,
+	 * since recalculating the order's totals recalculates them.
+	 *
+	 * @param WC_Order $order     The order.
+	 * @param WC_Cart  $cart      The cart.
+	 * @param string   $item_type Order item type. Types other than shipping and fees always match.
+	 * @return bool
+	 */
+	private function order_has_cart_amounts( WC_Order $order, WC_Cart $cart, string $item_type ): bool {
+		$order_values = array();
+		$cart_values  = array();
+
+		if ( OrderItemType::SHIPPING === $item_type ) {
+			foreach ( $order->get_shipping_methods() as $shipping ) {
+				$order_values[] = $shipping->get_method_id( 'edit' ) . ':' . $shipping->get_instance_id( 'edit' ) . '|' . $this->get_compared_values( $shipping->get_total( 'edit' ) );
+			}
+			foreach ( (array) $cart->get_shipping_methods() as $rate ) {
+				if ( $rate instanceof WC_Shipping_Rate ) {
+					$cart_values[] = $rate->get_method_id() . ':' . $rate->get_instance_id() . '|' . $this->get_compared_values( $rate->get_cost() );
+				}
+			}
+		} elseif ( OrderItemType::FEE === $item_type ) {
+			foreach ( $order->get_fees() as $fee ) {
+				$order_values[] = $this->get_compared_values( $fee->get_total( 'edit' ) );
+			}
+			foreach ( $cart->get_fees() as $fee ) {
+				$cart_values[] = $this->get_compared_values( $fee->total );
+			}
+		}
+
+		foreach ( $cart_values as $cart_value ) {
+			$key = array_search( $cart_value, $order_values, true );
+			if ( false === $key ) {
+				return false;
+			}
+			unset( $order_values[ $key ] );
+		}
+
+		return true;
 	}
 
 	/**

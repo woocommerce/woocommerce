@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Charge the total shown in the Checkout block when a shopper retries an order whose shipping or fees a merchant edited.
