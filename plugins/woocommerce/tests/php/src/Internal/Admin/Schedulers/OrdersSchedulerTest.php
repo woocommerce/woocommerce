@@ -449,11 +449,15 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 			}
 		);
 
+		$imports_before = did_action( 'woocommerce_order_scheduler_after_import_order' );
+
 		$suppress = $wpdb->suppress_errors();
 		OrdersScheduler::import( $order->get_id() );
 		$wpdb->suppress_errors( $suppress );
 
-		$this->assertNotContains( $order->get_id(), $this->get_imported_order_ids() );
+		$this->assertNotContains( $order->get_id(), $this->get_imported_order_ids(), 'The broken stats data writes no stats row.' );
+		$this->assertNotSame( '0', $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}wc_order_product_lookup WHERE order_id = %d", $order->get_id() ) ), 'The other lookup syncs still run.' );
+		$this->assertSame( $imports_before + 1, did_action( 'woocommerce_order_scheduler_after_import_order' ), 'The after-import action still fires.' );
 		$this->assertLogged( 'error', "Could not save the Analytics stats of record #{$order->get_id()}" );
 		$this->assertContains( $order->get_id(), OrdersScheduler::get_failed_order_imports()['ids'], 'The record stays on the list Analytics settings retries.' );
 	}

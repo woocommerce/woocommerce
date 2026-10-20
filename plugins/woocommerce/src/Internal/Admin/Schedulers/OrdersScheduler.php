@@ -383,7 +383,8 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 
 	/**
 	 * Imports a single order or refund to update lookup tables for.
-	 * An order whose tax lookup rows could not be written stays on the failed imports list.
+	 * An order whose stats or tax lookup rows could not be written, or whose exclusion check fails,
+	 * stays on the failed imports list.
 	 *
 	 * @internal
 	 * @param int $order_id Order or refund ID.
