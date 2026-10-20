@@ -34,7 +34,7 @@ export const setDefaultPaymentMethod = async (
 	// When the server answered with no payment method, it decided to preselect nothing: never pick one
 	// here, and clear a selected method that the browser can no longer use rather than swap it for
 	// another. Without a server answer, as in the editor, the fallback below runs.
-	if ( checkoutData?.payment_method === '' ) {
+	if ( checkoutData.payment_method === '' ) {
 		if ( activePaymentMethod ) {
 			void dispatch( paymentStore ).__internalSetPaymentIdle();
 			void dispatch( paymentStore ).__internalSetActivePaymentMethod(

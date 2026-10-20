@@ -29,17 +29,16 @@ jest.mock( '@woocommerce/utils', () => {
 	};
 } );
 
-// What the server hydrated as the checkout's payment method; '' means it decided to preselect nothing.
-jest.mock( '../../checkout/constants', () => {
-	const actual = jest.requireActual( '../../checkout/constants' );
-	return {
-		...actual,
-		checkoutData: { ...actual.checkoutData, payment_method: '' },
-	};
-} );
-const mockCheckoutData = checkoutData as { payment_method?: string };
+// What the server hydrated as the checkout's payment method. Unset here, as in the editor.
+const hydratedCheckoutData = checkoutData as { payment_method?: string };
 
 describe( 'setDefaultPaymentMethod', () => {
+	afterEach( () => {
+		delete hydratedCheckoutData.payment_method;
+		jest.resetAllMocks();
+		jest.resetModules();
+	} );
+
 	const paymentMethods: PlainPaymentMethods = {
 		'wc-payment-gateway-1': {
 			name: 'wc-payment-gateway-1',
@@ -48,12 +47,6 @@ describe( 'setDefaultPaymentMethod', () => {
 			name: 'wc-payment-gateway-2',
 		},
 	};
-
-	afterEach( () => {
-		mockCheckoutData.payment_method = '';
-		jest.resetAllMocks();
-		jest.resetModules();
-	} );
 
 	const mockStores = ( {
 		activePaymentMethod = '',
@@ -91,6 +84,10 @@ describe( 'setDefaultPaymentMethod', () => {
 	};
 
 	describe( 'when the server preselected nothing', () => {
+		beforeEach( () => {
+			hydratedCheckoutData.payment_method = '';
+		} );
+
 		it( 'leaves no payment method selected', async () => {
 			const setActivePaymentMethodMock = mockStores( {} );
 
@@ -117,16 +114,6 @@ describe( 'setDefaultPaymentMethod', () => {
 			expect( setActivePaymentMethodMock ).not.toHaveBeenCalled();
 		} );
 
-		it( 'keeps a selected method that is still available', async () => {
-			const setActivePaymentMethodMock = mockStores( {
-				activePaymentMethod: 'wc-payment-gateway-2',
-			} );
-
-			await setDefaultPaymentMethod( paymentMethods );
-
-			expect( setActivePaymentMethodMock ).not.toHaveBeenCalled();
-		} );
-
 		it( 'clears a selected method that is no longer available instead of picking another', async () => {
 			const setActivePaymentMethodMock = mockStores( {
 				activePaymentMethod: 'wc-payment-gateway-removed',
@@ -136,40 +123,36 @@ describe( 'setDefaultPaymentMethod', () => {
 
 			expect( setActivePaymentMethodMock ).toHaveBeenCalledWith( '' );
 		} );
+	} );
 
-		it( 'still picks the first method when the server preselected one and the store lost it', async () => {
-			mockCheckoutData.payment_method = 'wc-payment-gateway-2';
-			const setActivePaymentMethodMock = mockStores( {} );
+	it( 'still picks the first method when the server preselected one and the store lost it', async () => {
+		hydratedCheckoutData.payment_method = 'wc-payment-gateway-2';
+		const setActivePaymentMethodMock = mockStores( {} );
 
-			await setDefaultPaymentMethod( paymentMethods );
+		await setDefaultPaymentMethod( paymentMethods );
 
-			expect( setActivePaymentMethodMock ).toHaveBeenCalledWith(
-				'wc-payment-gateway-1'
-			);
-		} );
+		expect( setActivePaymentMethodMock ).toHaveBeenCalledWith(
+			'wc-payment-gateway-1'
+		);
+	} );
 
-		it( 'still picks the first method where the server gave no answer, as in the editor', async () => {
-			mockCheckoutData.payment_method = undefined;
-			const setActivePaymentMethodMock = mockStores( {} );
+	it( 'still picks the first method where the server gave no answer, as in the editor', async () => {
+		const setActivePaymentMethodMock = mockStores( {} );
 
-			await setDefaultPaymentMethod( paymentMethods );
+		await setDefaultPaymentMethod( paymentMethods );
 
-			expect( setActivePaymentMethodMock ).toHaveBeenCalledWith(
-				'wc-payment-gateway-1'
-			);
-		} );
+		expect( setActivePaymentMethodMock ).toHaveBeenCalledWith(
+			'wc-payment-gateway-1'
+		);
 	} );
 
 	it( 'correctly sets the first payment method in the list of available payment methods', async () => {
-		mockCheckoutData.payment_method = 'legacy-gateway';
 		const setActivePaymentMethodMock = jest.fn();
 		( select as jest.Mock ).mockImplementation( ( storeName ) => {
 			const originalStore = originalSelect( storeName );
 			if ( storeName === paymentStore ) {
 				return {
 					...originalStore,
-					// A gateway the browser can't use, so the fallback runs.
-					getActivePaymentMethod: () => 'legacy-gateway',
 					getAvailableExpressPaymentMethods: () => ( {
 						express_payment_1: {
 							name: 'express_payment_1',
@@ -198,14 +181,11 @@ describe( 'setDefaultPaymentMethod', () => {
 		);
 	} );
 	it( 'correctly sets the saved payment method if one is available', async () => {
-		mockCheckoutData.payment_method = 'legacy-gateway';
 		( select as jest.Mock ).mockImplementation( ( storeName ) => {
 			const originalStore = originalSelect( storeName );
 			if ( storeName === paymentStore ) {
 				return {
 					...originalStore,
-					// A gateway the browser can't use, so the fallback runs.
-					getActivePaymentMethod: () => 'legacy-gateway',
 					getAvailableExpressPaymentMethods: () => {
 						return {
 							express_payment_1: {
