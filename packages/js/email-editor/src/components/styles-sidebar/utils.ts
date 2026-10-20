@@ -87,6 +87,28 @@ type FontFamily = {
 	fontFace?: FontFace[];
 };
 
+const PRESET_PREFIX = 'var:preset|font-family|';
+const CSS_VAR_PREFIX = 'var(--wp--preset--font-family--';
+
+/**
+ * Gets the font family slug from a preset reference.
+ *
+ * @param fontFamily The font family value.
+ * @return The slug, or undefined when the value is not a preset reference.
+ */
+const getFontFamilySlug = ( fontFamily: string | undefined ) => {
+	if ( fontFamily?.startsWith( PRESET_PREFIX ) ) {
+		return fontFamily.slice( PRESET_PREFIX.length );
+	}
+	if (
+		fontFamily?.startsWith( CSS_VAR_PREFIX ) &&
+		fontFamily.endsWith( ')' )
+	) {
+		return fontFamily.slice( CSS_VAR_PREFIX.length, -1 );
+	}
+	return undefined;
+};
+
 /**
  * Gets the font faces the Appearance control should offer for a font.
  *
@@ -105,11 +127,12 @@ export const getFontFamilyFaces = (
 	fontFamily: string | undefined,
 	current: FontFace
 ): FontFace[] | undefined => {
-	const slug = fontFamily?.match( /font-family(?:\||--)([\w-]+)/ )?.[ 1 ];
-	const family = fontFamilies.find(
-		( item ) =>
-			item.fontFamily === fontFamily || ( !! slug && item.slug === slug )
-	);
+	const slug = getFontFamilySlug( fontFamily );
+	const family =
+		fontFamilies.find( ( item ) => item.fontFamily === fontFamily ) ??
+		( slug
+			? fontFamilies.find( ( item ) => item.slug === slug )
+			: undefined );
 	const weights = ( family?.slug ? fontWeights?.[ family.slug ] : '' )
 		?.split( ',' )
 		.map( ( weight ) => weight.trim() )

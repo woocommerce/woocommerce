@@ -156,6 +156,24 @@ describe( 'getFontFamilyFaces', () => {
 		).toHaveLength( 8 );
 	} );
 
+	it( 'matches the font value before reading a preset slug from it', () => {
+		const custom = {
+			slug: 'custom',
+			fontFamily: 'my-font-family--arial',
+		};
+		expect(
+			getFontFamilyFaces(
+				[ ...fontFamilies, custom ],
+				{ ...fontWeights, custom: '300' },
+				custom.fontFamily,
+				{}
+			)
+		).toEqual( [
+			{ fontStyle: 'normal', fontWeight: '300' },
+			{ fontStyle: 'italic', fontWeight: '300' },
+		] );
+	} );
+
 	it.each( [
 		[ 'the font is not in the list', undefined, fontWeights ],
 		[ 'the theme lists no weights for the font', arial.fontFamily, {} ],
