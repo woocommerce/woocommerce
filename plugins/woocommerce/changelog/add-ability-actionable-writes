@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add ActionableAbility to the experimental extensible abilities feature. With it on, product create and product update accept extension fields under extensions.<namespace>.<field>, and save Core and extension fields one time.

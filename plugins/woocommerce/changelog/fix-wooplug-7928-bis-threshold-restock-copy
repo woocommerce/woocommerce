@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Name the restocked products in the back-in-stock notification admin notice, show it only to the store manager who restocked them, and fix the wording of the unverified sign-up deletion setting.
