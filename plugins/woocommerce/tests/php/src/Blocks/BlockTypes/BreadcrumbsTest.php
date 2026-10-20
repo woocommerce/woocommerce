@@ -68,6 +68,7 @@ class BreadcrumbsTest extends WP_UnitTestCase {
 				return new WP_Theme_JSON_Data( $data, 'user' );
 			}
 		);
+		wp_clean_theme_json_cache();
 	}
 
 	/**
