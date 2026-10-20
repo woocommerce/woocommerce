@@ -85,6 +85,23 @@ class PaymentUtils {
 	}
 
 	/**
+	 * Returns the payment method the checkout carries: the shopper's session choice while that gateway
+	 * is enabled, otherwise the default from get_default_payment_method(). The draft response and the
+	 * draft order sync both use this, so they agree.
+	 *
+	 * @return string
+	 */
+	public static function get_checkout_payment_method(): string {
+		$chosen_payment_method = (string) WC()->session->get( 'chosen_payment_method' );
+
+		if ( '' !== $chosen_payment_method && isset( self::get_enabled_payment_gateways()[ $chosen_payment_method ] ) ) {
+			return $chosen_payment_method;
+		}
+
+		return (string) self::get_default_payment_method();
+	}
+
+	/**
 	 * Returns the default payment method for a customer: the default saved card, then the method
 	 * remembered in the session, then the first enabled gateway. The `woocommerce_default_payment_method`
 	 * filter runs last and can replace that answer.

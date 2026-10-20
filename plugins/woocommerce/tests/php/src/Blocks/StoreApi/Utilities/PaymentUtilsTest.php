@@ -237,6 +237,34 @@ class PaymentUtilsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should carry the shopper's session choice through the checkout even when the callback returns nothing.
+	 */
+	public function test_checkout_payment_method_keeps_the_session_choice_with_a_callback(): void {
+		add_filter( self::FILTER, '__return_empty_string' );
+
+		$this->assertSame( 'cod', PaymentUtils::get_checkout_payment_method() );
+	}
+
+	/**
+	 * @testdox Should fall back to the default when the session choice is a disabled gateway.
+	 */
+	public function test_checkout_payment_method_ignores_a_disabled_session_choice(): void {
+		WC()->session->set( 'chosen_payment_method', 'paypal' );
+		add_filter( self::FILTER, '__return_empty_string' );
+
+		$this->assertSame( '', PaymentUtils::get_checkout_payment_method() );
+	}
+
+	/**
+	 * @testdox Should fall back to the default without a session choice.
+	 */
+	public function test_checkout_payment_method_falls_back_to_the_default_without_a_session_choice(): void {
+		WC()->session->set( 'chosen_payment_method', null );
+
+		$this->assertSame( 'bacs', PaymentUtils::get_checkout_payment_method() );
+	}
+
+	/**
 	 * Hide COD from the available gateways, as a shipping restriction would, while it stays enabled.
 	 *
 	 * @param array $gateways Available gateways keyed by id.
