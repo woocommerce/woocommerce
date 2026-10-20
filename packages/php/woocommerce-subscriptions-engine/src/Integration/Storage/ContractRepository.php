@@ -1333,8 +1333,8 @@ final class ContractRepository {
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
 	/**
 	 * Insert one meta row as `INSERT ... SELECT` from the contract row, so a missing contract
-	 * inserts nothing; with `$if_absent` only while the key has no row. Every meta write holds the
-	 * contract's lock, so that absence check cannot race another add.
+	 * inserts nothing; with `$if_absent` only when a plain read finds no row for the key. Every
+	 * meta write holds the contract's lock, so that read cannot race another add.
 	 *
 	 * @param int          $contract_id Contract id.
 	 * @param string       $key         Meta key.
@@ -1351,21 +1351,15 @@ final class ContractRepository {
 
 		$this->check_child_lock( $lock, $contract_id );
 
-		$meta      = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_META );
-		$contracts = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
-		$values    = array( $key, maybe_serialize( $value ), $contract_id );
-		$where     = 'c.id = %d';
-		if ( $if_absent ) {
-			$where   .= " AND NOT EXISTS ( SELECT 1 FROM {$meta} m WHERE m.contract_id = %d AND m.meta_key = %s )";
-			$values[] = $contract_id;
-			$values[] = $key;
+		if ( $if_absent && $this->has_meta_key( $contract_id, $key ) ) {
+			return null;
 		}
 
-		$sql = "INSERT INTO {$meta} ( contract_id, meta_key, meta_value ) SELECT c.id, %s, %s FROM {$contracts} c WHERE {$where}";
+		$meta      = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_META );
+		$contracts = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 
-		// Fixed SQL fragments only; every value is a placeholder.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
-		$inserted = $wpdb->query( $wpdb->prepare( $sql, $values ) );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$inserted = $wpdb->query( $wpdb->prepare( "INSERT INTO {$meta} ( contract_id, meta_key, meta_value ) SELECT c.id, %s, %s FROM {$contracts} c WHERE c.id = %d", $key, maybe_serialize( $value ), $contract_id ) );
 
 		if ( false === $inserted ) {
 			$failure = new \RuntimeException( sprintf( 'Failed to add contract meta "%s" for contract %d: %s', esc_html( $key ), (int) $contract_id, esc_html( $wpdb->last_error ) ) );
@@ -1610,20 +1604,94 @@ final class ContractRepository {
 		return $values;
 	}
 
+	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
 	/**
 	 * Append a cycle to its chain `(contract_id, kind)` under `$lock`. An unassigned `sequence_no`
-	 * becomes the chain's highest plus one in the same INSERT. The id and position are stamped back
-	 * on the entity (left unassigned, with a warning, when that read-back fails after the row landed).
+	 * becomes the chain's highest plus one, read under the lock before the insert; the chain's
+	 * UNIQUE indexes still refuse a taken position or count. The new id is set on the entity.
 	 *
 	 * @param Cycle        $cycle Cycle to append. Carries its contract id and kind.
 	 * @param ContractLock $lock  The caller's lock on the cycle's contract.
-	 * @throws DuplicateCycleException If a chain UNIQUE index rejects the row (the position is already taken).
+	 * @throws DuplicateCycleException If a chain UNIQUE index rejects the row (the position or count is taken).
 	 * @throws ContractLockedException If `$lock` was lost.
-	 * @throws \InvalidArgumentException If the contract does not exist, or the lock is for another contract.
-	 * @throws \RuntimeException If the cycle insert fails for any other reason (the database error is in the message).
+	 * @throws \InvalidArgumentException If the lock is for another contract.
+	 * @throws \RuntimeException If a value is longer than its column, or the position read or the insert fails.
 	 */
 	public function append_cycle( Cycle $cycle, ContractLock $lock ): void {
-		$this->insert_cycle( $cycle, $lock );
+		global $wpdb;
+
+		$this->check_child_lock( $lock, $cycle->get_contract_id() );
+
+		if ( $cycle->awaits_sequence_no() ) {
+			$sequence_no = $this->get_next_sequence_no( $cycle->get_contract_id(), $cycle->get_kind() );
+			$cycle->assign_sequence_no( $sequence_no );
+		}
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
+		$now   = gmdate( 'Y-m-d H:i:s' );
+
+		$columns                     = $cycle->to_storage();
+		$columns['date_created_gmt'] = $now;
+		$columns['date_updated_gmt'] = $now;
+
+		$names        = array();
+		$placeholders = array();
+		$values       = array();
+		foreach ( $columns as $column => $value ) {
+			$names[] = "`{$column}`";
+			if ( null === $value ) {
+				$placeholders[] = 'NULL';
+				continue;
+			}
+			if ( is_string( $value ) ) {
+				self::assert_fits_column( $table, $column, $value );
+			}
+			$placeholders[] = '%s';
+			$values[]       = (string) $value;
+		}
+
+		$name_list        = implode( ', ', $names );
+		$placeholder_list = implode( ', ', $placeholders );
+
+		// Column names come from the entity's storage keys, never from input; every value is a placeholder.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+		$inserted = $wpdb->query( $wpdb->prepare( "INSERT INTO `{$table}` ( {$name_list} ) VALUES ( {$placeholder_list} )", $values ) );
+
+		if ( false === $inserted ) {
+			$db_error = $wpdb->last_error;
+			if ( false !== stripos( $db_error, 'Duplicate entry' ) ) {
+				// A chain UNIQUE index rejected the row: the position is already taken.
+				throw new DuplicateCycleException( esc_html( 'Cycle position already exists: ' . $db_error ) );
+			}
+			$this->throw_if_insert_lost_to_lock( $cycle->get_contract_id(), $lock );
+			throw new \RuntimeException( esc_html( 'Failed to insert cycle. ' . $db_error ) );
+		}
+
+		$cycle->set_id( (int) $wpdb->insert_id );
+	}
+	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
+
+	/**
+	 * The next position in a chain: its highest `sequence_no` plus one. A plain read under the
+	 * caller's lock; a locking read here would gap-lock the chain index and deadlock concurrent
+	 * first appends under REPEATABLE READ.
+	 *
+	 * @param int    $contract_id Contract id.
+	 * @param string $kind        Chain kind.
+	 * @throws \RuntimeException If the read fails.
+	 */
+	private function get_next_sequence_no( int $contract_id, string $kind ): int {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$next = $wpdb->get_var( $wpdb->prepare( "SELECT COALESCE( MAX( sequence_no ), 0 ) + 1 FROM `{$table}` WHERE contract_id = %d AND kind = %s", $contract_id, $kind ) );
+		if ( '' !== $wpdb->last_error ) {
+			throw new \RuntimeException( esc_html( sprintf( 'Failed to read the next cycle position for contract %d: %s', $contract_id, $wpdb->last_error ) ) );
+		}
+
+		return Coercion::coerce_int( $next );
 	}
 
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
@@ -1845,105 +1913,6 @@ final class ContractRepository {
 
 		return $cycle;
 	}
-
-	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
-	/**
-	 * Insert a cycle row as `INSERT ... SELECT` from the contract row and stamp the generated id
-	 * (and an assigned `sequence_no`) back onto the entity. String values are checked against
-	 * their column lengths first, as `$wpdb->insert()` would. A failed position read-back after
-	 * the row landed logs a warning and leaves the entity's position unassigned.
-	 *
-	 * @param Cycle        $cycle Cycle to insert. Carries its contract id and kind.
-	 * @param ContractLock $lock  The held lock.
-	 * @throws DuplicateCycleException If a chain UNIQUE index rejects the row.
-	 * @throws ContractLockedException If `$lock` was lost.
-	 * @throws \InvalidArgumentException If the contract does not exist, or the lock is for another contract.
-	 * @throws \RuntimeException If a value is longer than its column, or the insert fails for any other reason.
-	 */
-	private function insert_cycle( Cycle $cycle, ContractLock $lock ): void {
-		global $wpdb;
-
-		$this->check_child_lock( $lock, $cycle->get_contract_id() );
-
-		$table     = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
-		$contracts = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
-		$now       = gmdate( 'Y-m-d H:i:s' );
-		$assign    = $cycle->awaits_sequence_no();
-
-		$columns                     = $cycle->to_storage();
-		$columns['date_created_gmt'] = $now;
-		$columns['date_updated_gmt'] = $now;
-
-		$names        = array();
-		$placeholders = array();
-		$values       = array();
-		foreach ( $columns as $column => $value ) {
-			$names[] = "`{$column}`";
-			if ( 'sequence_no' === $column && $assign ) {
-				// The next position in the chain, read by the inserting statement itself.
-				$placeholders[] = "( SELECT COALESCE( MAX( s.sequence_no ), 0 ) + 1 FROM `{$table}` s WHERE s.contract_id = %d AND s.kind = %s )";
-				$values[]       = $cycle->get_contract_id();
-				$values[]       = $cycle->get_kind();
-				continue;
-			}
-			if ( null === $value ) {
-				$placeholders[] = 'NULL';
-				continue;
-			}
-			if ( is_string( $value ) ) {
-				self::assert_fits_column( $table, $column, $value );
-			}
-			$placeholders[] = '%s';
-			$values[]       = (string) $value;
-		}
-
-		$name_list        = implode( ', ', $names );
-		$placeholder_list = implode( ', ', $placeholders );
-		$values[]         = $cycle->get_contract_id();
-
-		// Selecting from the contract row inserts nothing for a missing contract; the caller's lock covers the row.
-		$sql = "INSERT INTO `{$table}` ( {$name_list} ) SELECT {$placeholder_list} FROM `{$contracts}` c WHERE c.id = %d";
-
-		// Column names come from the entity's storage keys, never from input; every value is a placeholder.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
-		$inserted = $wpdb->query( $wpdb->prepare( $sql, $values ) );
-
-		if ( false === $inserted ) {
-			$db_error = $wpdb->last_error;
-			if ( false !== stripos( $db_error, 'Duplicate entry' ) ) {
-				// A chain UNIQUE index rejected the row: the position is already taken.
-				throw new DuplicateCycleException( esc_html( 'Cycle position already exists: ' . $db_error ) );
-			}
-			$this->throw_if_insert_lost_to_lock( $cycle->get_contract_id(), $lock );
-			throw new \RuntimeException( esc_html( 'Failed to insert cycle. ' . $db_error ) );
-		}
-
-		if ( 0 === $inserted ) {
-			$this->throw_unfenced_insert( $cycle->get_contract_id() );
-		}
-
-		$id = (int) $wpdb->insert_id;
-		$cycle->set_id( $id );
-
-		if ( $assign ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$sequence_no = $wpdb->get_var( $wpdb->prepare( "SELECT sequence_no FROM `{$table}` WHERE id = %d", $id ) );
-			if ( null === $sequence_no ) {
-				// The append landed: report it, with the position left unassigned.
-				wc_get_logger()->warning(
-					sprintf( 'ContractRepository: could not read the position of appended cycle %d. %s', $id, $wpdb->last_error ),
-					array(
-						'source'      => self::LOG_SOURCE,
-						'contract_id' => $cycle->get_contract_id(),
-						'cycle_id'    => $id,
-					)
-				);
-				return;
-			}
-			$cycle->assign_sequence_no( Coercion::coerce_int( $sequence_no ) );
-		}
-	}
-	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
 	/**

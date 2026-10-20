@@ -220,8 +220,8 @@ final class Contracts {
 	/**
 	 * Append a cycle to a contract's chain `(contract_id, kind)`, append-if-absent on the chain's
 	 * unique positions: a taken position or count is a lost race and returns null. A storage
-	 * failure throws a `RuntimeException` and writes nothing; a landed row whose position cannot
-	 * be read back has `sequence_no` 0 (logged). Unknown keys raise a `_doing_it_wrong()` notice.
+	 * failure throws a `RuntimeException` and writes nothing. Unknown keys raise a
+	 * `_doing_it_wrong()` notice.
 	 *
 	 * @param int                  $contract_id Contract id.
 	 * @param array<string, mixed> $args        Cycle fields: `starts_at_gmt`, `ends_at_gmt` and
@@ -233,8 +233,8 @@ final class Contracts {
 	 * @param ContractLock         $lock        The caller's lock on this contract, from {@see self::lock()},
 	 *                                          {@see self::create()} or the due handler's context.
 	 * @return CycleView|null The appended cycle, or null when the position or count is already taken.
-	 * @throws InvalidArgumentException If a required key is missing, a value is invalid, the contract
-	 *                                  does not exist, or the lock is for another contract.
+	 * @throws InvalidArgumentException If a required key is missing, a value is invalid, or the lock
+	 *                                  is for another contract.
 	 * @throws ContractLockedException If `$lock` was lost.
 	 */
 	public static function add_cycle( int $contract_id, array $args, ContractLock $lock ): ?CycleView {

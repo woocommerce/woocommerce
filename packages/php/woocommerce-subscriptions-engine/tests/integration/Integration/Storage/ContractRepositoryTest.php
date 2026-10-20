@@ -1837,7 +1837,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox Appends without a sequence_no, locked or not, take the next position in one insert.
+	 * @testdox Appends without a sequence_no take the next position: one read of the position, then the insert.
 	 */
 	public function test_append_without_a_sequence_no_takes_the_next_position(): void {
 		global $wpdb;
@@ -1858,7 +1858,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$lock->release();
 
 		$this->assertSame( array( 1, 2, 3 ), array( $first->get_sequence_no(), $second->get_sequence_no(), $third->get_sequence_no() ) );
-		$this->assertSame( 2, $append_queries, 'Under a trusted lock: the insert, then the read of its assigned position.' );
+		$this->assertSame( 2, $append_queries, 'Under a trusted lock: the position read, then the insert.' );
 		$head = $this->find_newest_cycle( $id );
 		$this->assertInstanceOf( Cycle::class, $head );
 		$this->assertSame( $third->get_id(), $head->get_id() );
@@ -2112,26 +2112,6 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 			$this->fail( 'Expected a transition with a taken-over lock to be refused.' );
 		} catch ( ContractLockedException $e ) {
 			$this->assertSame( CycleStatus::FAILED, $this->find_cycle( $cycle_id )->get_status()->get_value() );
-		}
-	}
-
-	/**
-	 * @testdox An append to a contract deleted under the lock throws and writes no orphan row.
-	 */
-	public function test_an_append_to_an_unknown_contract_throws(): void {
-		global $wpdb;
-
-		$id   = $this->insert_released( $this->make_contract() );
-		$lock = $this->lock( $id );
-		$this->sut->delete( $id );
-
-		try {
-			$this->sut->append_cycle( $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00' ), $lock );
-			$this->fail( 'Expected an append to an unknown contract to throw.' );
-		} catch ( \InvalidArgumentException $e ) {
-			$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-			$this->assertSame( '0', $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE contract_id = %d", $id ) ) );
 		}
 	}
 

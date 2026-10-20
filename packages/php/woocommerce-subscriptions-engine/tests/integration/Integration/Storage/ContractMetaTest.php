@@ -63,7 +63,7 @@ class ContractMetaTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox A repeated unique add, with or without the lock, keeps one row and checks the key in its insert.
+	 * @testdox A repeated unique add, with or without the lock, keeps one row: a plain read of the key, then the insert.
 	 */
 	public function test_unique_add_is_idempotent(): void {
 		global $wpdb;
@@ -79,12 +79,12 @@ class ContractMetaTest extends EngineIntegrationTestCase {
 
 		$queries = $wpdb->num_queries;
 		$this->assertIsInt( $this->sut->add_meta( $this->id, 'single', 'x', true ) );
-		$this->assertSame( 3, $wpdb->num_queries - $queries, 'Unlocked: the internal lock acquire, the insert, the release; no read before the insert.' );
+		$this->assertSame( 4, $wpdb->num_queries - $queries, 'Unlocked: the internal lock acquire, the key read, the insert, the release.' );
 
 		$lock    = $this->lock();
 		$queries = $wpdb->num_queries;
 		$this->assertIsInt( $this->sut->add_meta( $this->id, 'single-locked', 'x', true, $lock ) );
-		$this->assertSame( 1, $wpdb->num_queries - $queries, 'With a trusted lock: the insert only.' );
+		$this->assertSame( 2, $wpdb->num_queries - $queries, 'With a trusted lock: the key read, then the insert.' );
 		$lock->release();
 
 		$this->assertSame( array( 'one' ), $this->sut->get_meta( $this->id, 'note' ) );

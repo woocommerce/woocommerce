@@ -947,27 +947,20 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox A failed position read-back after the append landed returns the cycle with position 0 and logs a warning.
+	 * @testdox A failed read of the next position throws and appends nothing.
 	 */
-	public function test_a_failed_position_read_back_returns_the_appended_cycle(): void {
+	public function test_a_failed_position_read_throws_and_appends_nothing(): void {
 		$id = $this->contract_with_currency();
 		$this->add_cycle( $id, $this->cycle_args() );
 
-		$this->fail_next_query( '/^\s*SELECT sequence_no FROM\s/i' );
-		$view = null;
-		$logs = $this->capture_engine_log(
-			'warning',
-			array( 'contract_id' => $id ),
-			function () use ( $id, &$view ) {
-				$view = $this->add_cycle_locked( $id, $this->cycle_args() );
-			}
-		);
-
-		$this->assertInstanceOf( CycleView::class, $view );
-		$this->assertSame( 0, $view->get_sequence_no() );
-		$this->assertNotSame( array(), $logs, 'The warning is logged.' );
-		$this->assertSame( $view->get_id(), $logs[0]['cycle_id'] );
-		$this->assertSame( 2, $this->cycle( $id, $view->get_id() )->get_sequence_no(), 'The row landed at the next position.' );
+		$this->fail_next_query( '/^\s*SELECT COALESCE\( MAX\( sequence_no \)/i' );
+		try {
+			$this->add_cycle_locked( $id, $this->cycle_args() );
+			$this->fail( 'Expected the failed read to throw.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertStringContainsString( 'next cycle position', $e->getMessage() );
+		}
+		$this->assertCount( 1, Contracts::get_cycles( $id ), 'Nothing is appended.' );
 	}
 
 	public function test_a_taken_count_returns_null(): void {
@@ -1574,7 +1567,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 	 */
 	public function test_a_failed_child_insert_under_a_lock_conflict_is_a_lock_conflict(): void {
 		$meta   = '/^\s*INSERT INTO \S*contract_meta .* FROM \S*subscription_contracts c WHERE c\.id = \d+/s';
-		$cycles = '/^\s*INSERT INTO `?\S*subscription_cycles`? .* FROM `?\S*subscription_contracts`? c WHERE c\.id = \d+$/s';
+		$cycles = '/^\s*INSERT INTO `?\S*subscription_cycles`? .* VALUES /s';
 
 		$id = $this->contract_with_currency();
 		$this->pin_db_clock( '2035-01-01 00:00:00' );
@@ -1620,7 +1613,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 			$this->assertStringContainsString( 'Failed to add contract meta', $e->getMessage() );
 		}
 
-		$this->fail_next_query( '/^\s*INSERT INTO `?\S*subscription_cycles`? .* FROM `?\S*subscription_contracts`? c WHERE c\.id = \d+$/s' );
+		$this->fail_next_query( '/^\s*INSERT INTO `?\S*subscription_cycles`? .* VALUES /s' );
 		try {
 			$this->add_cycle_locked( $id, $this->cycle_args() );
 			$this->fail( 'Expected the failed insert to throw.' );

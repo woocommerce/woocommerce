@@ -43,7 +43,7 @@ final class CycleView {
 	private $kind;
 
 	/**
-	 * Position in the chain; 0 when the append could not read it back.
+	 * Position in the chain, from 1.
 	 *
 	 * @var int
 	 */
@@ -123,7 +123,7 @@ final class CycleView {
 		$view->id             = (int) $cycle->get_id();
 		$view->contract_id    = $cycle->get_contract_id();
 		$view->kind           = $cycle->get_kind();
-		$view->sequence_no    = $cycle->awaits_sequence_no() ? 0 : $cycle->get_sequence_no();
+		$view->sequence_no    = $cycle->get_sequence_no();
 		$view->count          = $cycle->get_count();
 		$view->status         = $cycle->get_status()->get_value();
 		$view->starts_at_gmt  = $cycle->get_starts_at_gmt();
@@ -158,8 +158,7 @@ final class CycleView {
 	}
 
 	/**
-	 * Position in the chain, from 1. 0 only on a view returned by an append that landed but
-	 * could not read the assigned position back (a stored cycle always reads its position).
+	 * Position in the chain, from 1.
 	 */
 	public function get_sequence_no(): int {
 		return $this->sequence_no;
