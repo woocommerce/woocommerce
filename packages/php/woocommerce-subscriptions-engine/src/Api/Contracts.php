@@ -157,7 +157,7 @@ final class Contracts {
 		$operation        = ArgumentValidator::validate_string( 'operation', $filtered_options['operation'] ?? self::CREATE_OPERATION );
 		$contract         = self::build( $args );
 
-		$lock = ( new ContractRepository() )->insert_locked( $contract, $operation );
+		$lock = ( new ContractRepository() )->insert( $contract, $operation );
 		if ( null === $lock ) {
 			return null;
 		}

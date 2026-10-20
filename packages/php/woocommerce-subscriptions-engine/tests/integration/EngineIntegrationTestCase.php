@@ -131,7 +131,7 @@ abstract class EngineIntegrationTestCase extends WP_UnitTestCase {
 	 * @return int The new contract id.
 	 */
 	protected function insert_released( Contract $contract ): int {
-		$lock = ( new ContractRepository() )->insert_locked( $contract, 'create' );
+		$lock = ( new ContractRepository() )->insert( $contract, 'create' );
 		$this->assertInstanceOf( ContractLock::class, $lock );
 		$lock->release();
 
@@ -213,6 +213,35 @@ abstract class EngineIntegrationTestCase extends WP_UnitTestCase {
 		$this->assertIsNumeric( $contract_id, "Cycle {$cycle_id} exists." );
 
 		return (int) $contract_id;
+	}
+
+	/**
+	 * Whether the contract exists and who holds its lock (the repository's private holder read).
+	 *
+	 * @param int $contract_id Contract id.
+	 * @return array{exists: bool, operation: ?string}
+	 */
+	protected function get_lock_holder( int $contract_id ): array {
+		$method = new ReflectionMethod( ContractRepository::class, 'get_lock_holder' );
+		$method->setAccessible( true );
+		$holder = $method->invoke( new ContractRepository(), $contract_id );
+		$this->assertIsArray( $holder );
+
+		return array(
+			'exists'    => (bool) ( $holder['exists'] ?? false ),
+			'operation' => is_string( $holder['operation'] ?? null ) ? $holder['operation'] : null,
+		);
+	}
+
+	/**
+	 * Run the repository's private child-write fence on `$lock`.
+	 *
+	 * @param ContractLock $lock The lock.
+	 */
+	protected function fence_children( ContractLock $lock ): void {
+		$method = new ReflectionMethod( ContractRepository::class, 'fence_children' );
+		$method->setAccessible( true );
+		$method->invoke( new ContractRepository(), $lock );
 	}
 
 	/**

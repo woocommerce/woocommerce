@@ -1272,7 +1272,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertInstanceOf( Contract::class, $stored );
 		$this->assertSame( ContractStatus::ACTIVE, $stored->get_status() );
 		$this->assertSame( '2026-06-15 00:00:00', $stored->get_next_payment_gmt() );
-		$this->assertNotNull( $this->sut->get_lock_holder( $id )['operation'] );
+		$this->assertNotNull( $this->get_lock_holder( $id )['operation'] );
 	}
 
 	/**
@@ -1282,7 +1282,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$id   = $this->insert_contract_due_at( '2026-06-15 00:00:00', ContractStatus::ACTIVE );
 		$lock = $this->sut->acquire_lock( $id, 'engine_due_dispatch' );
 		$this->assertNotNull( $lock );
-		$before = $this->sut->get_lock_holder( $id );
+		$before = $this->get_lock_holder( $id );
 
 		$contract = $this->sut->find( $id );
 		$this->assertInstanceOf( Contract::class, $contract );
@@ -1291,7 +1291,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$contract->set_next_payment_gmt( null );
 		$this->assertTrue( $this->sut->update_fields( $contract, array( 'next_payment_gmt' ), $lock ) );
 
-		$this->assertSame( $before, $this->sut->get_lock_holder( $id ) );
+		$this->assertSame( $before, $this->get_lock_holder( $id ) );
 	}
 
 	/**
@@ -2079,7 +2079,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$lock->release();
 		$this->assertTrue( $this->sut->update_fields( $contract, array( 'status', 'items' ) ) );
 		$this->assertSame( ContractStatus::ON_HOLD, $this->stored_status( $id ) );
-		$this->assertNull( $this->sut->get_lock_holder( $id )['operation'], 'The internal lock is released.' );
+		$this->assertNull( $this->get_lock_holder( $id )['operation'], 'The internal lock is released.' );
 	}
 
 	/**
@@ -2288,7 +2288,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 			'/^\s*INSERT\s+INTO\s+\S*contract_addresses/i',
 			function () use ( $build ): void {
 				try {
-					$this->sut->insert_locked( $build(), 'checkout' );
+					$this->sut->insert( $build(), 'checkout' );
 					$this->fail( 'Expected the failed address insert to throw.' );
 				} catch ( \RuntimeException $e ) {
 					$this->assertStringContainsString( 'address row', $e->getMessage() );
@@ -2305,7 +2305,7 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$this->assertSame( '0', $wpdb->get_var( "SELECT COUNT(*) FROM {$items} WHERE contract_id NOT IN ( SELECT id FROM {$contracts} )" ), 'No orphaned items.' );
 
 		$retry = $build();
-		$this->assertNotNull( $this->sut->insert_locked( $retry, 'checkout' ) );
+		$this->assertNotNull( $this->sut->insert( $retry, 'checkout' ) );
 		$this->assertIsInt( $retry->get_id() );
 		$this->assertSame( array( 'Coffee bag' ), $this->item_names( (int) $retry->get_id() ) );
 	}
@@ -2421,18 +2421,18 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	public function test_creation_key_is_unique_per_extension(): void {
 		global $wpdb;
 
-		$this->assertNotNull( $this->sut->insert_locked( $this->keyed_contract( 'lite', 'order:42' ), 'checkout' ) );
-		$this->assertNull( $this->sut->insert_locked( $this->keyed_contract( 'lite', 'order:42' ), 'checkout' ) );
+		$this->assertNotNull( $this->sut->insert( $this->keyed_contract( 'lite', 'order:42' ), 'checkout' ) );
+		$this->assertNull( $this->sut->insert( $this->keyed_contract( 'lite', 'order:42' ), 'checkout' ) );
 
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$this->assertSame( '1', $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE creation_key = %s AND extension_slug = %s", 'order:42', 'lite' ) ) );
 
-		$this->assertNotNull( $this->sut->insert_locked( $this->keyed_contract( 'other-ext', 'order:42' ), 'checkout' ), 'Another extension may use the same key.' );
-		$this->assertNotNull( $this->sut->insert_locked( $this->keyed_contract( 'lite', 'Order:42' ), 'checkout' ), 'Keys differing only in case are distinct.' );
-		$this->assertNotNull( $this->sut->insert_locked( $this->keyed_contract( 'lite', 'ördér:42' ), 'checkout' ), 'Keys differing only in accents are distinct.' );
-		$this->assertNotNull( $this->sut->insert_locked( $this->keyed_contract( 'lite', null ), 'checkout' ) );
-		$this->assertNotNull( $this->sut->insert_locked( $this->keyed_contract( 'lite', null ), 'checkout' ), 'Null keys never collide.' );
+		$this->assertNotNull( $this->sut->insert( $this->keyed_contract( 'other-ext', 'order:42' ), 'checkout' ), 'Another extension may use the same key.' );
+		$this->assertNotNull( $this->sut->insert( $this->keyed_contract( 'lite', 'Order:42' ), 'checkout' ), 'Keys differing only in case are distinct.' );
+		$this->assertNotNull( $this->sut->insert( $this->keyed_contract( 'lite', 'ördér:42' ), 'checkout' ), 'Keys differing only in accents are distinct.' );
+		$this->assertNotNull( $this->sut->insert( $this->keyed_contract( 'lite', null ), 'checkout' ) );
+		$this->assertNotNull( $this->sut->insert( $this->keyed_contract( 'lite', null ), 'checkout' ), 'Null keys never collide.' );
 	}
 
 	/**
@@ -2440,12 +2440,12 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	 */
 	public function test_a_locked_insert_is_locked_from_birth(): void {
 		$contract = $this->make_contract();
-		$lock     = $this->sut->insert_locked( $contract, 'checkout' );
+		$lock     = $this->sut->insert( $contract, 'checkout' );
 		$id       = (int) $contract->get_id();
 
 		$this->assertNotNull( $lock );
 		$this->assertSame( $id, $lock->get_contract_id() );
-		$this->assertSame( 'checkout', $this->sut->get_lock_holder( $id )['operation'] );
+		$this->assertSame( 'checkout', $this->get_lock_holder( $id )['operation'] );
 		$this->assertCount( 1, $this->item_ids( $id ), 'Items are written under the lock.' );
 
 		try {
@@ -2465,8 +2465,8 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	public function test_a_locked_insert_with_a_duplicate_key_returns_null(): void {
 		$first = $this->insert_released( $this->keyed_contract( 'lite', 'order:7' ) );
 
-		$this->assertNull( $this->sut->insert_locked( $this->keyed_contract( 'lite', 'order:7' ), 'checkout' ) );
-		$this->assertNull( $this->sut->get_lock_holder( $first )['operation'] );
+		$this->assertNull( $this->sut->insert( $this->keyed_contract( 'lite', 'order:7' ), 'checkout' ) );
+		$this->assertNull( $this->get_lock_holder( $first )['operation'] );
 	}
 
 	/**

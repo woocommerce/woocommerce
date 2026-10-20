@@ -52,7 +52,9 @@ final class ConsumerRegistry {
 	 *                                     `callable( ContractView $contract, array $context ): void`,
 	 *                                     called when a contract is due, with `$context['due_at']`
 	 *                                     (UTC) and `$context['lock']` (the dispatcher's
-	 *                                     `ContractLock`). The dispatcher releases the lock when the
+	 *                                     `ContractLock`, operation `engine_due_dispatch`, which
+	 *                                     other callers see while the handler runs). The
+	 *                                     dispatcher releases the lock when the
 	 *                                     handler returns, unless the handler already did, and keeps
 	 *                                     it until it expires when the handler throws. A handler
 	 *                                     that leaves the contract due (same due moment) is notified

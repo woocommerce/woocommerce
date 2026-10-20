@@ -107,7 +107,7 @@ class ContractLockTest extends EngineIntegrationTestCase {
 				'exists'    => true,
 				'operation' => 'hold',
 			),
-			$this->sut->get_lock_holder( $id )
+			$this->get_lock_holder( $id )
 		);
 	}
 
@@ -124,7 +124,7 @@ class ContractLockTest extends EngineIntegrationTestCase {
 
 		$this->pin_db_clock( '2035-01-01 00:10:00' );
 		$new = $this->acquire( $id, 'cancel' );
-		$this->assertSame( 'cancel', $this->sut->get_lock_holder( $id )['operation'] );
+		$this->assertSame( 'cancel', $this->get_lock_holder( $id )['operation'] );
 
 		$contract = $this->sut->find( $id );
 		$this->assertInstanceOf( Contract::class, $contract );
@@ -147,7 +147,7 @@ class ContractLockTest extends EngineIntegrationTestCase {
 		$id = $this->insert_contract( '2026-06-20 00:00:00' );
 
 		$this->assertNull( $this->sut->acquire_lock( $id, 'engine_due_dispatch', array( 'next_payment_gmt' => '2026-06-15 00:00:00' ) ) );
-		$this->assertNull( $this->sut->get_lock_holder( $id )['operation'] );
+		$this->assertNull( $this->get_lock_holder( $id )['operation'] );
 		$this->assertInstanceOf( ContractLock::class, $this->sut->acquire_lock( $id, 'engine_due_dispatch', array( 'next_payment_gmt' => '2026-06-20 00:00:00' ) ) );
 	}
 
@@ -157,7 +157,7 @@ class ContractLockTest extends EngineIntegrationTestCase {
 	public function test_acquire_with_a_null_condition(): void {
 		$set = $this->insert_contract( '2026-06-20 00:00:00' );
 		$this->assertNull( $this->sut->acquire_lock( $set, 'engine_due_dispatch', array( 'next_payment_gmt' => null ) ) );
-		$this->assertNull( $this->sut->get_lock_holder( $set )['operation'] );
+		$this->assertNull( $this->get_lock_holder( $set )['operation'] );
 
 		$cleared = $this->insert_contract( null );
 		$this->assertInstanceOf( ContractLock::class, $this->sut->acquire_lock( $cleared, 'engine_due_dispatch', array( 'next_payment_gmt' => null ) ) );
@@ -179,7 +179,7 @@ class ContractLockTest extends EngineIntegrationTestCase {
 				)
 			)
 		);
-		$this->assertNull( $this->sut->get_lock_holder( $id )['operation'] );
+		$this->assertNull( $this->get_lock_holder( $id )['operation'] );
 		$this->assertInstanceOf(
 			ContractLock::class,
 			$this->sut->acquire_lock(
@@ -204,7 +204,7 @@ class ContractLockTest extends EngineIntegrationTestCase {
 				$this->sut->acquire_lock( $id, 'engine_due_dispatch', $conditions );
 				$this->fail( 'Expected an invalid condition to throw.' );
 			} catch ( InvalidArgumentException $e ) {
-				$this->assertNull( $this->sut->get_lock_holder( $id )['operation'] );
+				$this->assertNull( $this->get_lock_holder( $id )['operation'] );
 			}
 		}
 	}
@@ -214,7 +214,7 @@ class ContractLockTest extends EngineIntegrationTestCase {
 	 */
 	public function test_unknown_contract(): void {
 		$this->assertNull( $this->sut->acquire_lock( 999999, 'hold' ) );
-		$this->assertFalse( $this->sut->get_lock_holder( 999999 )['exists'] );
+		$this->assertFalse( $this->get_lock_holder( 999999 )['exists'] );
 	}
 
 	/**
@@ -226,7 +226,7 @@ class ContractLockTest extends EngineIntegrationTestCase {
 		$this->fail_next_query( '/AS live, lock_operation/' );
 		$this->expectException( RuntimeException::class );
 		$this->expectExceptionMessage( 'Failed to read the lock on contract' );
-		$this->sut->get_lock_holder( $id );
+		$this->get_lock_holder( $id );
 	}
 
 	/**
@@ -240,7 +240,7 @@ class ContractLockTest extends EngineIntegrationTestCase {
 				$this->sut->acquire_lock( $id, $operation );
 				$this->fail( 'Expected an invalid label to be refused.' );
 			} catch ( InvalidArgumentException $e ) {
-				$this->assertNull( $this->sut->get_lock_holder( $id )['operation'] );
+				$this->assertNull( $this->get_lock_holder( $id )['operation'] );
 			}
 		}
 
@@ -284,7 +284,7 @@ class ContractLockTest extends EngineIntegrationTestCase {
 		$this->acquire( $id, 'cancel' );
 		$old->release();
 
-		$holder = $this->sut->get_lock_holder( $id );
+		$holder = $this->get_lock_holder( $id );
 		$this->assertNotNull( $holder['operation'] );
 		$this->assertSame( 'cancel', $holder['operation'] );
 	}
@@ -298,10 +298,10 @@ class ContractLockTest extends EngineIntegrationTestCase {
 		$lock = $this->acquire( $id );
 		$this->age_to_near_expiry( $lock );
 
-		$this->sut->fence_children( $lock );
+		$this->fence_children( $lock );
 
 		$this->assertTrue( $this->lock_state( $lock )->has_extended() );
-		$this->assertSame( 'hold', $this->sut->get_lock_holder( $id )['operation'] );
+		$this->assertSame( 'hold', $this->get_lock_holder( $id )['operation'] );
 	}
 
 	/**
@@ -316,7 +316,7 @@ class ContractLockTest extends EngineIntegrationTestCase {
 		$this->pin_db_clock( '2035-01-01 00:10:00' );
 
 		$this->expectException( ContractLockedException::class );
-		$this->sut->fence_children( $lock );
+		$this->fence_children( $lock );
 	}
 
 	/**
@@ -330,25 +330,25 @@ class ContractLockTest extends EngineIntegrationTestCase {
 		$lock = $this->acquire( $id );
 
 		$queries = $wpdb->num_queries;
-		$this->sut->fence_children( $lock );
+		$this->fence_children( $lock );
 		$this->assertSame( $queries, $wpdb->num_queries, 'A trusted lock costs no query.' );
 
 		$this->pin_db_clock( '2035-01-01 00:09:30' );
 		$this->age_lock_trust( $lock );
-		$this->sut->fence_children( $lock );
+		$this->fence_children( $lock );
 		$this->assertTrue( $this->lock_state( $lock )->has_extended(), 'Past the window the fence extends once.' );
 		$this->assertSame( '2035-01-01 00:19:30', $this->lock_columns( $id )['locked_until_gmt'] );
 		$this->assertTrue( $this->lock_state( $lock )->is_trusted() );
 
 		$this->pin_db_clock( '2035-01-01 00:15:00' );
 		$this->age_lock_trust( $lock );
-		$this->sut->fence_children( $lock );
+		$this->fence_children( $lock );
 		$this->assertTrue( $this->lock_state( $lock )->is_trusted(), 'With 270 s left the verify trusts it again.' );
 
 		$this->pin_db_clock( '2035-01-01 00:18:31' );
 		$this->age_lock_trust( $lock );
 		$this->expectException( ContractLockedException::class );
-		$this->sut->fence_children( $lock );
+		$this->fence_children( $lock );
 	}
 
 	/**
@@ -359,14 +359,14 @@ class ContractLockTest extends EngineIntegrationTestCase {
 		$this->pin_db_clock( '2035-01-01 00:00:00' );
 		$lock = $this->acquire( $id );
 		$this->age_to_near_expiry( $lock );
-		$this->sut->fence_children( $lock );
+		$this->fence_children( $lock );
 		$this->assertTrue( $this->lock_state( $lock )->has_extended() );
 
 		$this->pin_db_clock( '2035-01-01 00:10:00' );
 		$this->age_lock_trust( $lock );
 
 		$this->expectException( ContractLockedException::class );
-		$this->sut->fence_children( $lock );
+		$this->fence_children( $lock );
 	}
 
 	/**
@@ -377,7 +377,7 @@ class ContractLockTest extends EngineIntegrationTestCase {
 		$lock->release();
 
 		$this->expectException( ContractLockedException::class );
-		$this->sut->fence_children( $lock );
+		$this->fence_children( $lock );
 	}
 
 	/**
@@ -393,7 +393,7 @@ class ContractLockTest extends EngineIntegrationTestCase {
 
 		$this->pin_db_clock( '2035-01-01 00:08:30' );
 		$queries = $wpdb->num_queries;
-		$this->sut->fence_children( $lock );
+		$this->fence_children( $lock );
 
 		$this->assertSame( 1, $wpdb->num_queries - $queries, 'One extend write, no verify read.' );
 		$this->assertTrue( $this->lock_state( $lock )->has_extended() );
@@ -463,7 +463,7 @@ class ContractLockTest extends EngineIntegrationTestCase {
 			$this->assertTrue( $this->sut->update_fields( $contract, array( 'status' ), $lock ) );
 			$this->assertIsInt( $this->sut->add_meta( $id, 'note', 'x', false, $lock ) );
 			$lock->release();
-			$this->assertNotNull( $this->sut->insert_locked( Contract::create( array( 'extension_slug' => 'engine-tests' ) ), 'checkout' ) );
+			$this->assertNotNull( $this->sut->insert( Contract::create( array( 'extension_slug' => 'engine-tests' ) ), 'checkout' ) );
 		} finally {
 			remove_action( 'doing_it_wrong_run', $count );
 		}
@@ -532,7 +532,7 @@ class ContractLockTest extends EngineIntegrationTestCase {
 			remove_filter( 'query', $count );
 		}
 		$this->assertSame( 5, $acquires, 'Each write takes the internal lock.' );
-		$this->assertNull( $this->sut->get_lock_holder( $id )['operation'], 'Each write releases it.' );
+		$this->assertNull( $this->get_lock_holder( $id )['operation'], 'Each write releases it.' );
 
 		$this->sut->add_meta( $id, '_anchor', 'a' );
 		$this->acquire( $id, 'renewal' );
