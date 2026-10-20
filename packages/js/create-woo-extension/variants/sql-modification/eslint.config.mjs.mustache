@@ -1,6 +1,7 @@
 import woocommerce from '@woocommerce/eslint-plugin';
 
 export default [
+	{ ignores: [ 'build/**', 'vendor/**' ] },
 	...woocommerce.configs.recommended,
 	{
 		rules: {
