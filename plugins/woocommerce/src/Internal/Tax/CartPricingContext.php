@@ -13,7 +13,7 @@ use Automattic\WooCommerce\StoreApi\Routes\V1\AbstractCartRoute;
  * and Store API cart and checkout routes, including those loaded through Blocks hydration.
  *
  * @internal
- * @since 11.3.0
+ * @since 11.4.0
  */
 class CartPricingContext {
 
@@ -51,7 +51,7 @@ class CartPricingContext {
 	/**
 	 * Register hooks.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 *
 	 * @internal
 	 */
@@ -75,7 +75,7 @@ class CartPricingContext {
 	 * Inside a Store API dispatch the route decides, unless a cart calculation started within that dispatch.
 	 * Outside any dispatch, a running cart calculation or the cart and checkout pages count.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 *
 	 * @internal
 	 *
@@ -101,7 +101,7 @@ class CartPricingContext {
 	 *
 	 * Cart calculations started inside the callback still use the cart pricing context.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 *
 	 * @internal
 	 *
@@ -209,7 +209,7 @@ class CartPricingContext {
 	 *
 	 * Every call must be paired with end_dispatch() for the same request.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 *
 	 * @internal
 	 *
@@ -233,7 +233,7 @@ class CartPricingContext {
 	 * the dispatch started, so an exception caught inside it cannot change pricing for the rest of the request.
 	 * Calling it again for a dispatch that already ended does nothing.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 *
 	 * @internal
 	 *

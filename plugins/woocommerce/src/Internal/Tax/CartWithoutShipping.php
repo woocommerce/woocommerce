@@ -10,7 +10,7 @@ use Automattic\WooCommerce\Enums\TaxBasedOn;
  * Decides when shipping-based tax should use the billing address because nothing in the cart ships.
  *
  * @internal
- * @since 11.3.0
+ * @since 11.4.0
  */
 class CartWithoutShipping {
 
@@ -31,7 +31,7 @@ class CartWithoutShipping {
 	/**
 	 * Set up the cart pricing context.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 *
 	 * @internal
 	 *
@@ -44,7 +44,7 @@ class CartWithoutShipping {
 	/**
 	 * Determine whether the customer's billing address should be used for tax because tax is based on shipping and no product in their cart needs shipping.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 *
 	 * @param \WC_Customer $customer The customer whose taxable address is being determined.
 	 * @return bool True when the billing address should be used.
@@ -84,7 +84,7 @@ class CartWithoutShipping {
 			 * Return false to keep using the shipping address. The filter only fires when the cart qualifies,
 			 * so it cannot turn the fallback on for other carts. It may fire multiple times per request.
 			 *
-			 * @since 11.3.0
+			 * @since 11.4.0
 			 *
 			 * @param bool         $use_billing Always true when fired.
 			 * @param \WC_Customer $customer    Customer whose taxable address is being resolved.
