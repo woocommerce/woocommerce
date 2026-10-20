@@ -1619,6 +1619,8 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			}
 		}
 
+		$this->importing_row_csv_id = 0;
+
 		return $data;
 	}
 
