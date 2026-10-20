@@ -176,6 +176,13 @@ class Woocommerce_Analytics {
 	 * Place script to call s.js, Store Analytics.
 	 */
 	public static function enqueue_tracking_script() {
+		// Proxy tracking sends events without s.js, which would only set referrer cookies. Keep the handle, with no src, for scripts that depend on it.
+		if ( \Automattic\Woocommerce_Analytics\Features::is_proxy_tracking_enabled() ) {
+			wp_register_script( self::TRACKING_SCRIPT_HANDLE, false, array(), null ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion -- There is no src to version.
+			wp_enqueue_script( self::TRACKING_SCRIPT_HANDLE );
+			return;
+		}
+
 		$url = sprintf(
 			'https://stats.wp.com/s-%d.js',
 			gmdate( 'YW' )
