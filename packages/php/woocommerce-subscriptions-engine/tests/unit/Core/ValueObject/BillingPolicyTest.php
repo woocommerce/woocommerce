@@ -143,7 +143,13 @@ class BillingPolicyTest extends TestCase {
 			),
 			'trial length missing'      => array(
 				static function (): void {
-					new BillingPolicy( 'month', 1, null, null, array( 'unit' => 'day' ) );
+					BillingPolicy::from_array(
+						array(
+							'period'         => 'month',
+							'interval'       => 1,
+							'trial_duration' => array( 'unit' => 'day' ),
+						)
+					);
 				},
 				ValidationErrorCode::REQUIRED,
 				'trial_duration[length]',
@@ -151,7 +157,13 @@ class BillingPolicyTest extends TestCase {
 			),
 			'trial unit missing'        => array(
 				static function (): void {
-					new BillingPolicy( 'month', 1, null, null, array( 'length' => 7 ) );
+					BillingPolicy::from_array(
+						array(
+							'period'         => 'month',
+							'interval'       => 1,
+							'trial_duration' => array( 'length' => 7 ),
+						)
+					);
 				},
 				ValidationErrorCode::REQUIRED,
 				'trial_duration[unit]',
@@ -159,14 +171,14 @@ class BillingPolicyTest extends TestCase {
 			),
 			'trial length not integer'  => array(
 				static function (): void {
-					new BillingPolicy(
-						'month',
-						1,
-						null,
-						null,
+					BillingPolicy::from_array(
 						array(
-							'length' => '7',
-							'unit'   => 'day',
+							'period'         => 'month',
+							'interval'       => 1,
+							'trial_duration' => array(
+								'length' => '7',
+								'unit'   => 'day',
+							),
 						)
 					);
 				},
@@ -176,14 +188,14 @@ class BillingPolicyTest extends TestCase {
 			),
 			'trial unit not a string'   => array(
 				static function (): void {
-					new BillingPolicy(
-						'month',
-						1,
-						null,
-						null,
+					BillingPolicy::from_array(
 						array(
-							'length' => 7,
-							'unit'   => 1,
+							'period'         => 'month',
+							'interval'       => 1,
+							'trial_duration' => array(
+								'length' => 7,
+								'unit'   => 1,
+							),
 						)
 					);
 				},

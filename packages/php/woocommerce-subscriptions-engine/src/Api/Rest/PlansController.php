@@ -596,13 +596,15 @@ final class PlansController extends WP_REST_Controller {
 			$messages = $errors->get_error_messages( $code );
 			$all_data = $errors->get_all_error_data( $code );
 
-			// WP_Error keeps the data per code, not per message: pair them only when each message has its own fielded data.
-			$is_fielded = count( $messages ) === count( $all_data );
+			$fields = array();
 			foreach ( $all_data as $data ) {
-				$is_fielded = $is_fielded && is_array( $data ) && isset( $data['field'] ) && is_string( $data['field'] ) && '' !== $data['field'];
+				if ( is_array( $data ) && isset( $data['field'] ) && is_string( $data['field'] ) && '' !== $data['field'] ) {
+					$fields[] = $data['field'];
+				}
 			}
 
-			if ( ! $is_fielded ) {
+			// WP_Error keeps the data per code, not per message: pair them only when each message has its own fielded data.
+			if ( count( $messages ) !== count( $all_data ) || count( $fields ) !== count( $all_data ) ) {
 				foreach ( $messages as $message ) {
 					$fieldless->add( $code, $message );
 				}
@@ -613,14 +615,13 @@ final class PlansController extends WP_REST_Controller {
 			}
 
 			foreach ( $messages as $index => $message ) {
-				$data  = $all_data[ $index ];
-				$field = Coercion::coerce_string( $data['field'] );
+				$field = $fields[ $index ];
 				$arg   = false !== strpos( $field, '[' ) ? substr( $field, 0, (int) strpos( $field, '[' ) ) : $field;
 
 				if ( ! isset( $by_arg[ $arg ] ) ) {
 					$by_arg[ $arg ] = new WP_Error();
 				}
-				$by_arg[ $arg ]->add( $code, $message, $data );
+				$by_arg[ $arg ]->add( $code, $message, $all_data[ $index ] );
 			}
 		}
 

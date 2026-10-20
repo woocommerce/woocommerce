@@ -117,8 +117,9 @@ final class ValidationException extends InvalidArgumentException {
 				break;
 			case ValidationErrorCode::NOT_IN_ENUM:
 				if ( isset( $params['allowed'] ) && is_array( $params['allowed'] ) ) {
+					$allowed = array_filter( $params['allowed'], 'is_string' );
 					/* translators: 1: field name, 2: comma-separated list of allowed values. */
-					return sprintf( __( '%1$s is not one of %2$s.', 'woocommerce' ), $field, implode( ', ', array_map( 'strval', $params['allowed'] ) ) );
+					return sprintf( __( '%1$s is not one of %2$s.', 'woocommerce' ), $field, implode( ', ', $allowed ) );
 				}
 				break;
 			case ValidationErrorCode::NOT_REGISTERED:

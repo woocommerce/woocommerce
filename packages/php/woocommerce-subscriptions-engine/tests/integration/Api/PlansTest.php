@@ -91,7 +91,6 @@ class PlansTest extends EngineIntegrationTestCase {
 	 * @param string              $field Expected field.
 	 */
 	private function assert_engine_error( ValidationException $e, string $code, string $field ): void {
-		$this->assertInstanceOf( InvalidArgumentException::class, $e );
 		$this->assertInstanceOf( InvalidInputException::class, $e->getPrevious() );
 		$this->assertSame( array( $code ), $e->get_errors()->get_error_codes() );
 
@@ -212,7 +211,9 @@ class PlansTest extends EngineIntegrationTestCase {
 		} catch ( ValidationException $e ) {
 			$this->assert_engine_error( $e, ValidationErrorCode::NOT_REGISTERED, 'status' );
 			$this->assertSame( 'status "nonsense" is not registered.', $e->get_errors()->get_error_message( ValidationErrorCode::NOT_REGISTERED ) );
-			$this->assertSame( esc_html( $e->getPrevious()->getMessage() ), $e->getMessage(), 'The exception message stays the English Core message.' );
+			$previous = $e->getPrevious();
+			$this->assertInstanceOf( InvalidInputException::class, $previous );
+			$this->assertSame( esc_html( $previous->getMessage() ), $e->getMessage(), 'The exception message stays the English Core message.' );
 		}
 
 		try {

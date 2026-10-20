@@ -55,6 +55,7 @@ class ValidationExceptionTest extends EngineIntegrationTestCase {
 
 		$this->assertNotEmpty( $codes );
 		foreach ( $codes as $code ) {
+			$this->assertIsString( $code );
 			$this->assertArrayHasKey( $code, self::SAMPLE_PARAMS, sprintf( 'Add sample params and a message for "%s".', $code ) );
 
 			$message = self::message_for( $code, 'name', self::SAMPLE_PARAMS[ $code ] );
@@ -107,13 +108,19 @@ class ValidationExceptionTest extends EngineIntegrationTestCase {
 
 	/**
 	 * @testdox from_core keeps the English message, chains the Core error and carries field and params data.
+	 *
+	 * @throws ValidationException Thrown and caught as an InvalidArgumentException.
 	 */
 	public function test_from_core_keeps_the_english_message_and_chains_the_core_error(): void {
 		$core = new InvalidInputException( ValidationErrorCode::NOT_REGISTERED, 'status', 'Plan: status "<b>" is not registered.', array( 'value' => '<b>' ) );
 
-		$e = ValidationException::from_core( $core );
+		try {
+			throw ValidationException::from_core( $core );
+		} catch ( InvalidArgumentException $caught ) {
+			$e = $caught;
+		}
 
-		$this->assertInstanceOf( InvalidArgumentException::class, $e );
+		$this->assertInstanceOf( ValidationException::class, $e, 'Callers catching InvalidArgumentException keep working.' );
 		$this->assertSame( esc_html( $core->getMessage() ), $e->getMessage() );
 		$this->assertSame( $core, $e->getPrevious() );
 		$this->assertSame( array( ValidationErrorCode::NOT_REGISTERED ), $e->get_errors()->get_error_codes() );

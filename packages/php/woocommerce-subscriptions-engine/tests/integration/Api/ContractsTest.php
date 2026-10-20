@@ -341,7 +341,6 @@ class ContractsTest extends EngineIntegrationTestCase {
 			$operation();
 			$this->fail( sprintf( 'Expected a ValidationException with "%s" on "%s".', $code, $field ) );
 		} catch ( ValidationException $e ) {
-			$this->assertInstanceOf( InvalidArgumentException::class, $e );
 			$this->assertSame( array( $code ), $e->get_errors()->get_error_codes() );
 
 			$data = $e->get_errors()->get_error_data( $code );

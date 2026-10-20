@@ -328,7 +328,7 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		);
 		// The PATCH route has no arg schema, so the facade rejects.
 		$patched_data = $this->assert_invalid_param( $patched, 'pricing_policy', 'invalid_type' );
-		$this->assertSame( 'pricing_policy is not of type object.', $patched_data['data']['params']['pricing_policy'] );
+		$this->assertSame( 'pricing_policy is not of type object.', $this->nested( $patched_data, array( 'data', 'params', 'pricing_policy' ) ) );
 
 		// The rejected writes left the plan untouched and created nothing.
 		$fetched = $this->request( 'GET', self::BASE . '/' . $id, array(), array( 'extension_slug' => self::EXTENSION_SLUG ) );
@@ -373,8 +373,8 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		foreach ( array( $patched, $created ) as $response ) {
 			$data = $this->assert_invalid_param( $response, 'name', 'required' );
 			$this->assertSame( 'Invalid parameter(s): name', $data['message'] );
-			$this->assertSame( 'name is required.', $data['data']['params']['name'] );
-			$this->assertSame( 'name', $data['data']['details']['name']['data']['field'] );
+			$this->assertSame( 'name is required.', $this->nested( $data, array( 'data', 'params', 'name' ) ) );
+			$this->assertSame( 'name', $this->nested( $data, array( 'data', 'details', 'name', 'data', 'field' ) ) );
 		}
 	}
 
@@ -399,7 +399,7 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		);
 
 		$data = $this->assert_invalid_param( $created, 'name', 'required' );
-		$this->assertSame( 'name est obligatoire.', $data['data']['params']['name'] );
+		$this->assertSame( 'name est obligatoire.', $this->nested( $data, array( 'data', 'params', 'name' ) ) );
 	}
 
 	public function test_a_callback_error_with_a_field_is_reported_under_its_top_level_arg(): void {
@@ -421,7 +421,7 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		$data = $this->assert_invalid_param( $this->create_rejected_plan(), 'billing_policy', 'out_of_bounds' );
 
 		$this->assertSame( 'Invalid parameter(s): billing_policy', $data['message'] );
-		$this->assertSame( array( 'billing_policy' => 'Interval must be at least 1.' ), $data['data']['params'] );
+		$this->assertSame( array( 'billing_policy' => 'Interval must be at least 1.' ), $this->nested( $data, array( 'data', 'params' ) ) );
 		$this->assertSame(
 			array(
 				'code'    => 'out_of_bounds',
@@ -431,7 +431,7 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 					'params' => array( 'min' => 1 ),
 				),
 			),
-			$data['data']['details']['billing_policy']
+			$this->nested( $data, array( 'data', 'details', 'billing_policy' ) )
 		);
 	}
 
@@ -452,9 +452,9 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 				'billing_policy' => 'Bad interval.',
 				'pricing_policy' => 'Bad amount.',
 			),
-			$data['data']['params']
+			$this->nested( $data, array( 'data', 'params' ) )
 		);
-		$this->assertSame( 'pricing_policy[one_time_fees][0][amount]', $data['data']['details']['pricing_policy']['data']['field'] );
+		$this->assertSame( 'pricing_policy[one_time_fees][0][amount]', $this->nested( $data, array( 'data', 'details', 'pricing_policy', 'data', 'field' ) ) );
 	}
 
 	public function test_fielded_and_fieldless_callback_errors_return_one_400_with_both(): void {
@@ -469,7 +469,7 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 
 		$data = $this->assert_invalid_param( $this->create_rejected_plan(), 'billing_policy', 'invalid_value' );
 
-		$this->assertSame( array( 'billing_policy' => 'Bad interval.' ), $data['data']['params'] );
+		$this->assertSame( array( 'billing_policy' => 'Bad interval.' ), $this->nested( $data, array( 'data', 'params' ) ) );
 		$this->assertSame(
 			array(
 				array(
@@ -949,7 +949,7 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 				'status'         => 'never-registered',
 			)
 		);
-		$this->assertSame( 'not_registered', $this->assert_invalid_param( $unknown, 'status', 'not_registered' )['data']['details']['status']['code'] );
+		$this->assert_invalid_param( $unknown, 'status', 'not_registered' );
 
 		$bad_patch = $this->request(
 			'PATCH',
@@ -1051,7 +1051,7 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 			)
 		);
 		$data    = $this->assert_invalid_param( $created, 'status', 'not_registered' );
-		$this->assertSame( 'status "never-registered" is not registered.', $data['data']['params']['status'] );
+		$this->assertSame( 'status "never-registered" is not registered.', $this->nested( $data, array( 'data', 'params', 'status' ) ) );
 
 		$schema = ( new PlansController() )->get_public_item_schema();
 		$this->assertIsArray( $schema['properties']['status'] );
@@ -1189,9 +1189,9 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		$this->assertSame( 400, $response->get_status() );
 		$data = $this->response_data( $response );
 		$this->assertSame( 'rest_invalid_param', $data['code'] );
-		$this->assertIsString( $data['data']['params'][ $arg ] ?? null );
-		$this->assertNotSame( '', $data['data']['params'][ $arg ] );
-		$this->assertSame( $code, $data['data']['details'][ $arg ]['code'] ?? null );
+		$this->assertIsString( $this->nested( $data, array( 'data', 'params', $arg ) ) );
+		$this->assertNotSame( '', $this->nested( $data, array( 'data', 'params', $arg ) ) );
+		$this->assertSame( $code, $this->nested( $data, array( 'data', 'details', $arg, 'code' ) ) );
 
 		return $data;
 	}
@@ -1287,6 +1287,24 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		}
 
 		return $ids;
+	}
+
+	/**
+	 * Get a value at a key path, asserting each level is an array that has the key.
+	 *
+	 * @param array<array-key, mixed> $data Data.
+	 * @param array<int, array-key>   $path Keys, outermost first.
+	 * @return mixed
+	 */
+	private function nested( array $data, array $path ) {
+		$value = $data;
+		foreach ( $path as $key ) {
+			$this->assertIsArray( $value );
+			$this->assertArrayHasKey( $key, $value );
+			$value = $value[ $key ];
+		}
+
+		return $value;
 	}
 
 	/**
