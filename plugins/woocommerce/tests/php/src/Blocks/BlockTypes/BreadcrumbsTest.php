@@ -69,7 +69,7 @@ class BreadcrumbsTest extends WP_UnitTestCase {
 				return new WP_Theme_JSON_Data( $data, 'user' );
 			}
 		);
-		\Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils::get_global_styles( array(), true );
+		StyleAttributesUtils::get_global_styles( array(), true );
 	}
 
 	/**
