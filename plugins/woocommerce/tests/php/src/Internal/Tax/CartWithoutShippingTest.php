@@ -13,6 +13,9 @@ use Automattic\WooCommerce\StoreApi\StoreApi;
 
 /**
  * Tests for the CartWithoutShipping class.
+ *
+ * Besides the fallback rules, these tests check the tax results for cart totals, mini-cart renders, hydrated cart
+ * requests and cross-sells. CartPricingContextTest covers how nested and failed work is unwound.
  */
 class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 
@@ -161,6 +164,7 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 
 		$this->assertStringContainsString( wc_price( 110 ), $markup, 'The physical cross-sell should use shipping tax.' );
 		$this->assertStringNotContainsString( wc_price( 127 ), $markup, 'The cross-sell should not use billing tax.' );
+		$this->assertSame( array( 'HU', '', '', '' ), $this->customer->get_taxable_address(), 'The cart should use the billing address again once the cross-sells are rendered.' );
 		WC()->cart->calculate_totals();
 		$this->assertEquals( 2.7, WC()->cart->get_cart_contents_tax(), 'The virtual cart item should still use billing tax.' );
 	}
