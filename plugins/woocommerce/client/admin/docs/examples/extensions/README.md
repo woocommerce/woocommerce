@@ -1,12 +1,6 @@
 # WooCommerce Admin Extension Examples
 
-To start a new extension from a working example, use [`@woocommerce/create-woo-extension`](../../../../../../../packages/js/create-woo-extension/README.md). It generates a standalone plugin with its own build and wp-env setup. For example, this creates a plugin that adds a report page under **Analytics**:
-
-```bash
-npx @wordpress/create-block -t @woocommerce/create-woo-extension --variant=add-report my-extension-name
-```
-
-The former `add-report` and `add-task` examples from this directory now live there, with other [variants](../../../../../../../packages/js/create-woo-extension/README.md#variants).
+Use `simple-inbox-note` to try an example from this directory. It adds a note to the inbox on **WooCommerce > Home**.
 
 ## Build an example from this directory
 
@@ -33,8 +27,25 @@ To load it in the WooCommerce wp-env, add it to the `plugins` list in `plugins/w
 
 Run `pnpm wc:env` from the monorepo root to apply the change. wp-env activates the plugins in this list, and activating the example adds its note. Open **WooCommerce > Home** in WordPress admin to see the "Hello From Inbox Note!" note in the inbox. If Home opens the setup wizard instead, select **Skip guided setup**, choose your store's country or region, and select **Go to my store**.
 
-To change the example, edit the files in this directory, not the generated copy, and run the `example` command again. The note is added when the plugin is activated, so deactivate and reactivate it to see your changes. Delete the generated `plugins/woocommerce/client/<example>` directory when you are done; Git does not ignore it.
+## Edit the example
 
-## Examples in this directory
+Edit the files in `simple-inbox-note/` under this directory, not the generated copy, and run the `example` command again. The note is stored when the plugin is activated, so rebuilding alone does not update it. Under **Plugins > Installed Plugins**, deactivate and reactivate **WooCommerce Admin Simple Inbox Note Example**, then reload **WooCommerce > Home** to see your changes.
 
-- `simple-inbox-note` adds a note to the inbox on **WooCommerce > Home**.
+## Clean up
+
+1. Under **Plugins > Installed Plugins**, deactivate **WooCommerce Admin Simple Inbox Note Example**. This removes its note.
+2. Remove `./client/simple-inbox-note` from the `plugins` list in `plugins/woocommerce/.wp-env.override.json`, keeping `.` and any other entries.
+3. Delete the generated `plugins/woocommerce/client/simple-inbox-note` directory; Git does not ignore it.
+4. Run `pnpm wc:env` from the monorepo root to apply the configuration change.
+
+## Scaffold a standalone extension
+
+The former `add-report` and `add-task` examples now live in [`@woocommerce/create-woo-extension`](../../../../../../../packages/js/create-woo-extension/README.md), alongside other [variants](../../../../../../../packages/js/create-woo-extension/README.md#variants). The scaffold generates a standalone plugin with its own build and wp-env setup.
+
+**Known limitation:** the published scaffold version 2.0.1 currently fails dependency installation with npm `ERESOLVE` because of a React version conflict. The command below is affected; use the inbox-note walkthrough above to try a working example while the scaffold fix is pending.
+
+The report variant is selected with:
+
+```bash
+npx @wordpress/create-block -t @woocommerce/create-woo-extension --variant=add-report my-extension-name
+```
