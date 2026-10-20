@@ -437,8 +437,8 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	/**
 	 * Whether the row would save the product matched by SKU as the type it already has.
 	 *
-	 * Any other type would make get_product_object() convert the product, so the fallback refuses it,
-	 * as Global Unique ID matching does. A file without a Type column cannot convert anything.
+	 * Any other type would make get_product_object() convert the product, so the fallback declines the
+	 * match and the row fails with a hint naming the product. A file without a Type column cannot convert anything.
 	 *
 	 * @param int $product_id Existing product ID matched by SKU.
 	 * @return bool
@@ -1598,8 +1598,8 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			$result = $this->process_item( $parsed_data );
 
 			if ( is_wp_error( $result ) ) {
-				if ( $id_exists && $sku_exists && $id !== $id_from_sku ) {
-					$result = $this->add_id_sku_conflict_hint( $result, $id, (string) $sku, $id_from_sku );
+				if ( $sku_exists && $id !== $id_from_sku && ( $id_exists || ( $update_existing && $id ) ) ) {
+					$result = $this->add_sku_match_hint( $result, $id, $id_exists, (string) $sku, $id_from_sku );
 				}
 				$result->add_data( array( 'row' => $this->get_row_id( $parsed_data ) ) );
 				$data['failed'][] = $result;
@@ -1625,26 +1625,42 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	}
 
 	/**
-	 * Explain a failed row whose ID and SKU point at two different existing products.
+	 * Explain a failed row whose SKU belongs to another product than the one its ID points at.
+	 *
+	 * Either the ID matches a different product, or it matches none and the SKU fallback declined a product of
+	 * another type. A failure about the row's own type is left as it is.
 	 *
 	 * @param WP_Error $error       Error returned when processing the row.
 	 * @param int      $id          Product ID the row's ID column resolved to.
+	 * @param bool     $id_exists   Whether that ID is an existing product.
 	 * @param string   $sku         SKU column value of the row.
 	 * @param int      $id_from_sku Product ID that already uses the row's SKU.
 	 * @return WP_Error
 	 */
-	private function add_id_sku_conflict_hint( WP_Error $error, int $id, string $sku, int $id_from_sku ): WP_Error {
-		return new WP_Error(
-			$error->get_error_code(),
-			sprintf(
+	private function add_sku_match_hint( WP_Error $error, int $id, bool $id_exists, string $sku, int $id_from_sku ): WP_Error {
+		if ( 'woocommerce_product_importer_invalid_type' === $error->get_error_code() ) {
+			return $error;
+		}
+
+		if ( $id_exists ) {
+			$message = sprintf(
 				/* translators: 1: original error message, 2: product ID matched by the row's ID, 3: SKU, 4: product ID that already uses the SKU */
 				__( '%1$s The ID of this row matches product #%2$d, but its SKU "%3$s" already belongs to product #%4$d. Point the ID and SKU at the same product, or remove one of them.', 'woocommerce' ),
 				$error->get_error_message(),
 				$id,
 				$sku,
 				$id_from_sku
-			),
-			$error->get_error_data()
-		);
+			);
+		} else {
+			$message = sprintf(
+				/* translators: 1: original error message, 2: SKU, 3: product ID that uses the SKU */
+				__( '%1$s The ID of this row does not exist on this site, and its SKU "%2$s" belongs to product #%3$d, which has a different product type than the row. Use the same type in the row, or remove the SKU.', 'woocommerce' ),
+				$error->get_error_message(),
+				$sku,
+				$id_from_sku
+			);
+		}
+
+		return new WP_Error( $error->get_error_code(), $message, $error->get_error_data() );
 	}
 }

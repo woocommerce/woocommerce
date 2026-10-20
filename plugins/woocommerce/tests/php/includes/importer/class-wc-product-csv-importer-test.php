@@ -2148,6 +2148,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 
 		$this->assertEmpty( $data['updated'], 'A variation row must not update a simple product' );
 		$this->assertCount( 1, $data['failed'], 'A variation row for a simple product fails' );
+		$this->assertStringContainsString( 'different product type', $data['failed'][0]->get_error_message(), 'The failure explains why the SKU did not match' );
 		$this->assertSame( 'product', get_post_type( $simple->get_id() ), 'The simple product must not be converted to a variation' );
 	}
 
@@ -2171,6 +2172,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 
 		$this->assertEmpty( $data['updated'], 'Neither row may update the product matched by SKU' );
 		$this->assertCount( 2, $data['failed'], 'Both rows fail' );
+		$this->assertStringContainsString( 'different product type', $data['failed'][0]->get_error_message(), 'The failure explains why the SKU did not match' );
 		$this->assertSame( 'product_variation', get_post_type( $variation->get_id() ), 'The variation must not be converted to a simple product' );
 		$this->assertSame( ProductType::VARIABLE, WC_Product_Factory::get_product_type( $parent->get_id() ), 'The variable product must not be converted to a simple product' );
 	}
@@ -2268,5 +2270,20 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$this->assertCount( 1, $data['failed'], 'A variation row with a missing parent fails' );
 		$this->assertSame( 'product', get_post_type( $simple->get_id() ), 'The product must not be converted to a variation' );
 		$this->assertTrue( has_term( 'import-40274-parent-check-tag', 'product_tag', $simple->get_id() ), 'The product keeps its tags' );
+	}
+
+	/**
+	 * @testdox Should not add the SKU hint to a failure about the row's own type.
+	 */
+	public function test_import_does_not_add_sku_hint_to_invalid_type_errors_40274(): void {
+		$matched_by_id = WC_Helper_Product::create_simple_product();
+		$owns_sku      = WC_Helper_Product::create_simple_product();
+		$owns_sku->set_sku( 'IMPORT-40274-HINT' );
+		$owns_sku->save();
+
+		$data = $this->import_csv_rows( "ID,Type,SKU,Name\n{$matched_by_id->get_id()},not-a-type,IMPORT-40274-HINT,Bad type\n" );
+
+		$this->assertCount( 1, $data['failed'], 'A row with an unknown type fails' );
+		$this->assertSame( 'Invalid product type.', $data['failed'][0]->get_error_message(), 'The type error is shown on its own' );
 	}
 }
