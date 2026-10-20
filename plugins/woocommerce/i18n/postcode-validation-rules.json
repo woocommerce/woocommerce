@@ -1,7 +1,7 @@
 {
 	"generatedFrom": {
 		"package": "postcode-validator",
-		"version": "3.10.22"
+		"version": "3.9.2"
 	},
 	"rules": {
 		"AT": {
