@@ -34,6 +34,7 @@ jQuery( function ( $ ) {
 			$( 'a.load_customer_billing' ).on( 'click', this.load_billing );
 			$( 'a.load_customer_shipping' ).on( 'click', this.load_shipping );
 			$( '#customer_user' ).on( 'change', this.change_customer_user );
+			// The order edit form is form#order with HPOS and form#post with posts storage.
 			$( document.body ).on(
 				'submit',
 				'form#order, form#post',
@@ -43,8 +44,8 @@ jQuery( function ( $ ) {
 		},
 
 		/**
-		 * Ignore repeat submissions of the order form, e.g. from a double-click on Update. Each submission
-		 * runs order actions and status change hooks again, so a second request sends duplicate emails.
+		 * Ignore repeat submissions of the order form, e.g. from a double-click on Update. The server
+		 * runs the selected order action on every submission it receives, so only the first may go through.
 		 *
 		 * Bound to the body so handlers on the form itself run first and can still cancel the submission.
 		 */
@@ -93,6 +94,9 @@ jQuery( function ( $ ) {
 			} );
 		},
 
+		/**
+		 * Restore the Order actions buttons that were disabled when the form was locked, and clear the lock.
+		 */
 		unlock_order_form: function ( $form ) {
 			var $buttons = $form.data( 'wc-order-submitting' );
 
