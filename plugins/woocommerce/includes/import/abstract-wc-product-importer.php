@@ -307,6 +307,15 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 				}
 			}
 
+			// Check a named parent before get_product_object() turns the post into a variation, so a failing row changes nothing.
+			if ( isset( $data['type'], $data['parent_id'] ) && ProductType::VARIATION === $data['type'] ) {
+				$parent = $this->get_variation_parent( $data['parent_id'] );
+
+				if ( is_wp_error( $parent ) ) {
+					return $parent;
+				}
+			}
+
 			$object   = $this->get_product_object( $data );
 			$updating = false;
 
@@ -531,6 +540,26 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	}
 
 	/**
+	 * Get the parent product a variation row names.
+	 *
+	 * @param mixed $parent_id Parsed parent ID, or null when the row has no parent column.
+	 * @return WC_Product|WP_Error The parent, or an error when it is missing or is itself a variation.
+	 */
+	private function get_variation_parent( $parent_id ) {
+		$parent = null === $parent_id ? false : wc_get_product( $parent_id );
+
+		if ( ! $parent ) {
+			return new WP_Error( 'woocommerce_product_importer_missing_variation_parent_id', __( 'Variation cannot be imported: Missing parent ID or parent does not exist yet.', 'woocommerce' ), array( 'status' => 401 ) );
+		}
+
+		if ( $parent->is_type( ProductType::VARIATION ) ) {
+			return new WP_Error( 'woocommerce_product_importer_parent_set_as_variation', __( 'Variation cannot be imported: Parent product cannot be a product variation', 'woocommerce' ), array( 'status' => 401 ) );
+		}
+
+		return $parent;
+	}
+
+	/**
 	 * Set variation data.
 	 *
 	 * @param WC_Product $variation Product instance.
@@ -539,26 +568,13 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * @throws Exception If data cannot be set.
 	 */
 	protected function set_variation_data( &$variation, $data ) {
-		$parent = false;
+		$parent = $this->get_variation_parent( $data['parent_id'] ?? null );
 
-		// Check if parent exist.
-		if ( isset( $data['parent_id'] ) ) {
-			$parent = wc_get_product( $data['parent_id'] );
-
-			if ( $parent ) {
-				$variation->set_parent_id( $parent->get_id() );
-			}
+		if ( is_wp_error( $parent ) ) {
+			return $parent;
 		}
 
-		// Stop if parent does not exists.
-		if ( ! $parent ) {
-			return new WP_Error( 'woocommerce_product_importer_missing_variation_parent_id', __( 'Variation cannot be imported: Missing parent ID or parent does not exist yet.', 'woocommerce' ), array( 'status' => 401 ) );
-		}
-
-		// Stop if parent is a product variation.
-		if ( $parent->is_type( ProductType::VARIATION ) ) {
-			return new WP_Error( 'woocommerce_product_importer_parent_set_as_variation', __( 'Variation cannot be imported: Parent product cannot be a product variation', 'woocommerce' ), array( 'status' => 401 ) );
-		}
+		$variation->set_parent_id( $parent->get_id() );
 
 		if ( isset( $data['raw_attributes'] ) ) {
 			$attributes        = array();

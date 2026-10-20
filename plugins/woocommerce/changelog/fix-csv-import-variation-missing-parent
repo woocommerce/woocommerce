@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Fail product CSV variation rows whose parent product cannot be found, instead of saving the variation without a parent.
+Fail product CSV variation rows whose parent is missing or invalid, without changing the product or saving it detached.

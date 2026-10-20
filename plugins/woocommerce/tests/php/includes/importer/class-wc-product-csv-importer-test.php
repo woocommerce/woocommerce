@@ -2245,4 +2245,28 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( 'product', get_post_type( $product_c->get_id() ), 'The simple product must not be converted to a variation' );
 		$this->assertTrue( has_term( 'import-40274-kept-tag', 'product_tag', $product_c->get_id() ), 'The simple product keeps its tags' );
 	}
+
+	/**
+	 * @testdox Should fail a variation row with an unusable parent before converting the product its ID points at.
+	 */
+	public function test_import_checks_variation_parent_before_converting_the_product_40274(): void {
+		$simple = WC_Helper_Product::create_simple_product();
+		wp_set_object_terms( $simple->get_id(), 'import-40274-parent-check-tag', 'product_tag' );
+
+		$csv = "ID,Type,Name,Parent\n{$simple->get_id()},variation,Should stay simple,id:" . ( $simple->get_id() + 1000 ) . "\n";
+
+		$data = $this->import_csv_rows(
+			$csv,
+			array(
+				'ID'     => 'id',
+				'Type'   => 'type',
+				'Name'   => 'name',
+				'Parent' => 'parent_id',
+			)
+		);
+
+		$this->assertCount( 1, $data['failed'], 'A variation row with a missing parent fails' );
+		$this->assertSame( 'product', get_post_type( $simple->get_id() ), 'The product must not be converted to a variation' );
+		$this->assertTrue( has_term( 'import-40274-parent-check-tag', 'product_tag', $simple->get_id() ), 'The product keeps its tags' );
+	}
 }
