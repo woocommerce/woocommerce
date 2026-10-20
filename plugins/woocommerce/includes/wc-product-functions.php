@@ -417,13 +417,10 @@ add_action( 'template_redirect', 'wc_product_canonical_redirect', 5 );
  * @return string
  */
 function wc_placeholder_img_src( $size = 'woocommerce_thumbnail' ) {
-	$src               = WC()->plugin_url() . '/assets/images/placeholder.webp';
 	$placeholder_image = get_option( 'woocommerce_placeholder_image', 0 );
-
 	if ( ! empty( $placeholder_image ) ) {
 		if ( is_numeric( $placeholder_image ) ) {
 			$image = wp_get_attachment_image_src( $placeholder_image, $size );
-
 			if ( ! empty( $image[0] ) ) {
 				$src = $image[0];
 			}
@@ -432,7 +429,15 @@ function wc_placeholder_img_src( $size = 'woocommerce_thumbnail' ) {
 		}
 	}
 
-	return apply_filters( 'woocommerce_placeholder_img_src', $src );
+	/**
+	 * Filters the placeholder image source URL.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $src Placeholder image URL.
+	 * @return string
+	 */
+	return apply_filters( 'woocommerce_placeholder_img_src', $src ?? ( WC()->plugin_url() . '/assets/images/placeholder.webp' ) );
 }
 
 /**

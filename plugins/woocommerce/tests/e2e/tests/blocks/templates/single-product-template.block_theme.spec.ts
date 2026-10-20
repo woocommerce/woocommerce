@@ -8,6 +8,7 @@ test.describe( 'Single Product template', () => {
 		admin,
 		editor,
 		page,
+		requestUtils,
 		wpCoreVersion,
 	} ) => {
 		const testData = {
@@ -19,51 +20,73 @@ test.describe( 'Single Product template', () => {
 		};
 		const userText = 'Hello World in the Belt template';
 
-		// Create the specific product template.
-		await admin.visitSiteEditor( { path: `/${ testData.templateType }` } );
+		try {
+			// Create the specific product template.
+			await admin.visitSiteEditor( {
+				path: `/${ testData.templateType }`,
+			} );
 
-		await page
-			.getByRole( 'button', {
-				name:
-					wpCoreVersion >= 6.8 ? 'Add Template' : 'Add New Template',
-			} )
-			.click();
+			await page
+				.getByRole( 'button', {
+					name:
+						wpCoreVersion >= 6.8
+							? 'Add Template'
+							: 'Add New Template',
+				} )
+				.click();
 
-		await page
-			.getByRole( 'button', { name: 'Single item: Product' } )
-			.click();
+			await page
+				.getByRole( 'button', { name: 'Single item: Product' } )
+				.click();
 
-		await page
-			.getByPlaceholder( 'Search products' )
-			.fill( testData.productName );
-		await page
-			.getByRole( 'option', { name: testData.productName } )
-			.click();
-		await page.getByLabel( 'Close', { exact: true } ).click();
+			await page
+				.getByPlaceholder( 'Search products' )
+				.fill( testData.productName );
+			await page
+				.getByRole( 'option', { name: testData.productName } )
+				.click();
+			await page.getByLabel( 'Close', { exact: true } ).click();
 
-		await editor.canvas.locator( 'body' ).waitFor( { timeout: 20000 } );
+			await editor.canvas.locator( 'body' ).waitFor( { timeout: 20000 } );
 
-		// Edit the template.
-		await editor.insertBlock( {
-			name: 'core/paragraph',
-			attributes: { content: userText },
-		} );
-		await editor.saveSiteEditorEntities( {
-			isOnlyCurrentEntityDirty: true,
-		} );
+			// Edit the template.
+			await editor.insertBlock( {
+				name: 'core/paragraph',
+				attributes: { content: userText },
+			} );
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
 
-		// Verify edits are visible.
-		await page.goto( testData.permalink );
-		await expect( page.getByText( userText ).first() ).toBeVisible();
+			// Verify edits are visible.
+			await page.goto( testData.permalink );
+			await expect( page.getByText( userText ).first() ).toBeVisible();
 
-		// Revert edition.
-		await admin.visitSiteEditor( {
-			postType: testData.templateType,
-		} );
-		await editor.revertTemplate( { templateName: testData.templateName } );
-		await page.goto( testData.permalink );
+			// Revert edition.
+			await admin.visitSiteEditor( {
+				postType: testData.templateType,
+			} );
+			await editor.revertTemplate( {
+				templateName: testData.templateName,
+			} );
+			await page.goto( testData.permalink );
 
-		// Verify the edits are no longer visible.
-		await expect( page.getByText( userText ) ).toHaveCount( 0 );
+			// Verify the edits are no longer visible.
+			await expect( page.getByText( userText ) ).toHaveCount( 0 );
+		} finally {
+			const templates = (
+				await requestUtils.getTemplates( 'wp_template' )
+			).filter(
+				( { slug, wp_id: wpId } ) =>
+					slug === testData.templatePath && wpId
+			);
+			for ( const { id } of templates ) {
+				await requestUtils.rest( {
+					method: 'DELETE',
+					path: `/wp/v2/templates/${ id }`,
+					params: { force: true },
+				} );
+			}
+		}
 	} );
 } );

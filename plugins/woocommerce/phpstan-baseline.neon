@@ -11725,18 +11725,6 @@ parameters:
 			path: includes/class-wc-form-handler.php
 
 		-
-			message: '#^Parameter \#2 \$country of function wc_format_postcode expects string, array\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-form-handler.php
-
-		-
-			message: '#^Parameter \#2 \$country of static method WC_Validation\:\:is_postcode\(\) expects string, array\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-form-handler.php
-
-		-
 			message: '#^Parameter \#2 \$quantity of method WC_Cart\:\:add_to_cart\(\) expects int, float\|int given\.$#'
 			identifier: argument.type
 			count: 2
@@ -48370,12 +48358,6 @@ parameters:
 			path: src/Blocks/BlockTemplatesController.php
 
 		-
-			message: '#^Callback expects 1 parameter, \$accepted_args is set to 3\.$#'
-			identifier: arguments.count
-			count: 1
-			path: src/Blocks/BlockTemplatesController.php
-
-		-
 			message: '#^Default value of the parameter \#2 \$template_type \(string\) of method Automattic\\WooCommerce\\Blocks\\BlockTemplatesController\:\:block_template_is_available\(\) is incompatible with type array\.$#'
 			identifier: parameter.defaultValue
 			count: 1
@@ -48396,12 +48378,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTemplatesController\:\:add_block_template_details\(\) should return Automattic\\WooCommerce\\Blocks\\WP_Block_Template\|null but returns Automattic\\WooCommerce\\Blocks\\Utils\\WP_Block_Template\.$#'
 			identifier: return.type
-			count: 1
-			path: src/Blocks/BlockTemplatesController.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTemplatesController\:\:add_plugin_templates_parts_support\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: src/Blocks/BlockTemplatesController.php
 
@@ -48480,12 +48456,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTemplatesRegistry\:\:init\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockTemplatesRegistry.php
-
-		-
-			message: '#^Parameter \#2 \$args of function register_block_template expects array\{title\?\: string, description\?\: string, content\?\: string, post_types\?\: array\<string\>, plugin\?\: string\}, array\{title\: string, description\: string, content\: string\|false\} given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTemplatesRegistry.php
 
@@ -49564,12 +49534,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ComingSoon.php
 
 		-
-			message: '#^Call to function is_null\(\) with mixed will always evaluate to false\.$#'
-			identifier: function.impossibleType
-			count: 1
-			path: src/Blocks/BlockTypes/CustomerAccount.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\CustomerAccount\:\:initialize\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -49602,12 +49566,6 @@ parameters:
 		-
 			message: '#^Parameter \$context of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\CustomerAccount\:\:modify_hooked_block_attributes\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Post\.$#'
 			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/CustomerAccount.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\Blocks\\BlockTypes\\CustomerAccount\:\:\$hooked_block_placements \(array\) in isset\(\) is not nullable\.$#'
-			identifier: isset.property
 			count: 1
 			path: src/Blocks/BlockTypes/CustomerAccount.php
 
@@ -49714,12 +49672,6 @@ parameters:
 			path: src/Blocks/BlockTypes/HandpickedProducts.php
 
 		-
-			message: '#^Call to function is_null\(\) with mixed will always evaluate to false\.$#'
-			identifier: function.impossibleType
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCart.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCart\:\:enqueue_data\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -49816,21 +49768,9 @@ parameters:
 			path: src/Blocks/BlockTypes/MiniCart.php
 
 		-
-			message: '#^Property Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCart\:\:\$hooked_block_placements \(array\) in isset\(\) is not nullable\.$#'
-			identifier: isset.property
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCart.php
-
-		-
 			message: '#^Result of && is always false\.$#'
 			identifier: booleanAnd.alwaysFalse
 			count: 1
-			path: src/Blocks/BlockTypes/MiniCart.php
-
-		-
-			message: '#^Ternary operator condition is always true\.$#'
-			identifier: ternary.alwaysTrue
-			count: 2
 			path: src/Blocks/BlockTypes/MiniCart.php
 
 		-
@@ -52860,12 +52800,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\Templates\\AbstractTemplateCompatibility\:\:set_hook_data\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Blocks/Templates/AbstractTemplateCompatibility.php
-
-		-
-			message: '#^Parameter \$parent_block of method Automattic\\WooCommerce\\Blocks\\Templates\\AbstractTemplateCompatibility\:\:update_render_block_data\(\) has invalid type Automattic\\WooCommerce\\Blocks\\Templates\\WP_Block\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Blocks/Templates/AbstractTemplateCompatibility.php
 
@@ -59508,7 +59442,7 @@ parameters:
 		-
 			message: '#^Access to property \$post_type on an unknown class Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\WP_Post\.$#'
 			identifier: class.notFound
-			count: 2
+			count: 1
 			path: src/Internal/DataStores/Orders/DataSynchronizer.php
 
 		-
@@ -60842,12 +60776,6 @@ parameters:
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Features\\FeaturesController\:\:init\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Features/FeaturesController.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Features\\FeaturesController\:\:init_compatibility_info_by_feature\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: src/Internal/Features/FeaturesController.php

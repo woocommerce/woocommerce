@@ -117,6 +117,7 @@ const test = base.extend<
 		shippingUtils: ShippingUtils;
 		localPickupUtils: LocalPickupUtils;
 		miniCartUtils: MiniCartUtils;
+		resetDatabaseAfterEachTest: boolean;
 	},
 	{
 		requestUtils: RequestUtils;
@@ -129,7 +130,10 @@ const test = base.extend<
 	editor: async ( { page, wpCoreVersion }, use ) => {
 		await use( new Editor( { page, wpCoreVersion } ) );
 	},
-	page: async ( { page }, use ) => {
+	// Workers share one site, so a project that runs specs in parallel must turn
+	// this off: one worker's reset would wipe the data of the others.
+	resetDatabaseAfterEachTest: [ true, { option: true } ],
+	page: async ( { page, resetDatabaseAfterEachTest }, use ) => {
 		page.on( 'console', observeConsoleLogging );
 
 		await use( page );
@@ -148,24 +152,26 @@ const test = base.extend<
 		// Dispose the current APIRequestContext to free up resources.
 		await page.request.dispose();
 
-		// Navigate away before resetting the DB so the page stops issuing
-		// Store API requests against a half-dropped database. Otherwise late
-		// in-flight fetches are served the WordPress install page (HTTP 200,
-		// text/html) and surface as "The response is not a valid JSON
-		// response." console noise.
-		try {
-			await page.goto( 'about:blank' );
-		} catch ( error ) {
-			// Ignore errors if page is already closed/navigated away.
-			// eslint-disable-next-line no-console
-			console.log(
-				'Failed to navigate away before DB reset:',
-				error.message
-			);
-		}
+		if ( resetDatabaseAfterEachTest ) {
+			// Navigate away before resetting the DB so the page stops issuing
+			// Store API requests against a half-dropped database. Otherwise late
+			// in-flight fetches are served the WordPress install page (HTTP 200,
+			// text/html) and surface as "The response is not a valid JSON
+			// response." console noise.
+			try {
+				await page.goto( 'about:blank' );
+			} catch ( error ) {
+				// Ignore errors if page is already closed/navigated away.
+				// eslint-disable-next-line no-console
+				console.log(
+					'Failed to navigate away before DB reset:',
+					error.message
+				);
+			}
 
-		// Reset the database to the initial state via snapshot import.
-		await restoreBlocksDatabase( DB_EXPORT_FILE );
+			// Reset the database to the initial state via snapshot import.
+			await restoreBlocksDatabase( DB_EXPORT_FILE );
+		}
 	},
 	pageUtils: async ( { page }, use ) => {
 		await use( new PageUtils( { page } ) );

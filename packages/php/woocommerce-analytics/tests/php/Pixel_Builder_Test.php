@@ -361,6 +361,23 @@ class Pixel_Builder_Test extends BaseTestCase {
 	}
 
 	/**
+	 * Test validate_and_sanitize encodes nested arrays and objects as JSON.
+	 */
+	public function test_validate_and_sanitize_handles_nested_arrays_and_objects(): void {
+		$properties = array(
+			'_en'    => 'woocommerceanalytics_test_event',
+			'nested' => array( 1, array( 2 ) ),
+			'obj'    => (object) array( 'a' => 1 ),
+		);
+
+		$result = Pixel_Builder::validate_and_sanitize( $properties );
+
+		$this->assertIsArray( $result );
+		$this->assertSame( '[1,[2]]', $result['nested'] );
+		$this->assertSame( '{"a":1}', $result['obj'] );
+	}
+
+	/**
 	 * Test validate_and_sanitize returns error for invalid property name.
 	 */
 	public function test_validate_and_sanitize_returns_error_for_invalid_prop_name(): void {

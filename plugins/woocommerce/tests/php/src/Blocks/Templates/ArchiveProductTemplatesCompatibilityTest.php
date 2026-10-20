@@ -4,6 +4,10 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Tests\Blocks\Templates;
 
 use Automattic\WooCommerce\Blocks\Templates\ArchiveProductTemplatesCompatibility;
+use Automattic\WooCommerce\Blocks\Templates\ProductCatalogTemplate;
+use Automattic\WooCommerce\Blocks\Templates\ProductCategoryTemplate;
+use Automattic\WooCommerce\Blocks\Templates\ProductSearchResultsTemplate;
+use Automattic\WooCommerce\Blocks\Templates\ProductTagTemplate;
 use WC_Unit_Test_Case;
 
 /**
@@ -33,11 +37,19 @@ class ArchiveProductTemplatesCompatibilityTest extends WC_Unit_Test_Case {
 	private $shop_page_id = 0;
 
 	/**
+	 * Product archive registration before the test.
+	 *
+	 * @var string|bool
+	 */
+	private $original_product_has_archive;
+
+	/**
 	 * @inheritdoc
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->original_shop_page_id = get_option( 'woocommerce_shop_page_id' );
+		$this->original_shop_page_id        = get_option( 'woocommerce_shop_page_id' );
+		$this->original_product_has_archive = get_post_type_object( 'product' )->has_archive;
 
 		foreach ( array( 'wp_query', 'wp_the_query' ) as $global_name ) {
 			$this->query_snapshots[ $global_name ] = array(
@@ -51,6 +63,7 @@ class ArchiveProductTemplatesCompatibilityTest extends WC_Unit_Test_Case {
 	 * @inheritdoc
 	 */
 	public function tearDown(): void {
+		get_post_type_object( 'product' )->has_archive = $this->original_product_has_archive;
 		foreach ( $this->query_snapshots as $global_name => $snapshot ) {
 			if ( $snapshot['exists'] ) {
 				$GLOBALS[ $global_name ] = $snapshot['value']; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the exact pre-test query global.
@@ -211,6 +224,138 @@ class ArchiveProductTemplatesCompatibilityTest extends WC_Unit_Test_Case {
 			'attrs'     => array( 'isInherited' => 1 ),
 		);
 		$this->assertSame( '', $sut->inject_hooks( '', $empty_product_template ) );
+	}
+
+	/**
+	 * @testdox Registered rendering callbacks respect the disable filter and resume when it is removed.
+	 */
+	public function test_registered_render_callbacks_respect_disable_filter(): void {
+		$sut    = $this->initialize_archive_compatibility();
+		$target = $this->get_marked_target_block( $sut, 'core/post-title' );
+		$tree   = array(
+			'blockName'   => 'woocommerce/product-collection',
+			'attrs'       => array( 'query' => array( 'inherit' => true ) ),
+			'innerBlocks' => array(),
+		);
+		add_action(
+			'woocommerce_shop_loop_item_title',
+			static function () {
+				echo esc_html( '__HOOK_MARKER__' );
+			}
+		);
+
+		foreach ( array( false, true, false ) as $disabled ) {
+			if ( $disabled ) {
+				add_filter( 'woocommerce_disable_compatibility_layer', '__return_true', 99 );
+			} else {
+				remove_filter( 'woocommerce_disable_compatibility_layer', '__return_true', 99 );
+			}
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- WordPress owns this filter.
+			$marked = apply_filters( 'render_block_data', $tree, $tree, null );
+			if ( $disabled ) {
+				$this->assertArrayNotHasKey( 'isInherited', $marked['attrs'], 'Disabled compatibility must not mark inherited blocks.' );
+			} else {
+				$this->assertSame( 1, $marked['attrs']['isInherited'], 'Enabled compatibility must mark inherited blocks.' );
+			}
+
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- WordPress owns this filter.
+			$output = apply_filters( 'render_block', '__BLOCK_SENTINEL__', $target, new \WP_Block( $target ) );
+			$this->assertSame( $disabled ? 0 : 1, substr_count( $output, '__HOOK_MARKER__' ), 'The rendering callback must check the disable filter even for an already-marked block.' );
+			$this->assertSame( 1, substr_count( $output, '__BLOCK_SENTINEL__' ), 'The rendering callback must preserve block content.' );
+		}
+	}
+
+	/**
+	 * @testdox Renders archive hooks once per loop and product when template handlers overlap.
+	 * @dataProvider overlapping_requests_provider
+	 *
+	 * @param string $taxonomy Product taxonomy.
+	 * @param bool   $search   Whether the request is a product search.
+	 */
+	public function test_overlapping_templates_render_hooks_once( string $taxonomy, bool $search ): void {
+		get_post_type_object( 'product' )->has_archive = 'shop';
+		$term_id                                       = self::factory()->term->create(
+			array(
+				'taxonomy' => $taxonomy,
+				'slug'     => 'compatibility-overlap',
+			)
+		);
+		$product_ids                                   = array();
+		foreach ( array( 'First', 'Second' ) as $name ) {
+			$product = \WC_Helper_Product::create_simple_product();
+			$product->set_name( 'Compatibility ' . $name );
+			$product->save();
+			wp_set_object_terms( $product->get_id(), $term_id, $taxonomy );
+			$product_ids[] = $product->get_id();
+		}
+		$query_args = array(
+			'post_type' => 'product',
+			$taxonomy   => 'compatibility-overlap',
+			'orderby'   => 'ID',
+			'order'     => 'ASC',
+		);
+		if ( $search ) {
+			$query_args['s'] = 'Compatibility';
+		}
+		$this->go_to( add_query_arg( $query_args, home_url( '/' ) ) );
+		$GLOBALS['wp_the_query'] = $GLOBALS['wp_query']; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Product archive conditionals read the main query.
+		$this->assertTrue( is_post_type_archive( 'product' ) && is_tax( $taxonomy ), 'Both archive handlers must match the request.' );
+
+		$item_ids = array();
+		add_action(
+			'woocommerce_after_shop_loop_item',
+			static function () use ( &$item_ids ) {
+				$item_ids[] = get_the_ID();
+				echo '<span class="compatibility-item-marker"></span>';
+			},
+			99
+		);
+		add_action(
+			'woocommerce_before_shop_loop',
+			static function () {
+				echo '<span class="compatibility-loop-marker"></span>';
+			},
+			99
+		);
+		$hook_snapshot = array();
+		foreach ( $GLOBALS['wp_filter'] as $hook => $callbacks ) {
+			$hook_snapshot[ $hook ] = clone $callbacks;
+		}
+		// Static inner content avoids Featured Item's unrelated core/post-title global-post reset.
+		$markup = '<!-- wp:woocommerce/product-collection {"query":{"postType":"product","inherit":true}} --><div class="wp-block-woocommerce-product-collection"><!-- wp:woocommerce/product-template --><!-- wp:paragraph --><p>__PRODUCT_CONTENT__</p><!-- /wp:paragraph --><!-- /wp:woocommerce/product-template --></div><!-- /wp:woocommerce/product-collection -->';
+
+		foreach ( array( 'initial', 'repeated setup', 'hook reset' ) as $stage ) {
+			if ( 'hook reset' === $stage ) {
+				$GLOBALS['wp_filter'] = $hook_snapshot; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Simulate the hook restoration between WordPress tests.
+			}
+			$item_ids = array();
+			foreach ( array( ProductCatalogTemplate::class, ProductCategoryTemplate::class, ProductTagTemplate::class, ProductSearchResultsTemplate::class ) as $template_class ) {
+				( new $template_class() )->render_block_template();
+			}
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- WordPress owns this filter.
+			apply_filters( 'template_include', 'index.php' );
+			$output = do_blocks( $markup );
+			$this->assertSame( $product_ids, $item_ids, $stage . ': each product hook should fire once.' );
+			$this->assertSame( 2, substr_count( $output, 'compatibility-item-marker' ), $stage . ': product hook output should not repeat.' );
+			$this->assertSame( 1, substr_count( $output, 'compatibility-loop-marker' ), $stage . ': loop hook output should not repeat.' );
+			$this->assertSame( 2, substr_count( $output, '__PRODUCT_CONTENT__' ), $stage . ': product content should remain present.' );
+		}
+
+		do_blocks( $markup );
+		$this->assertSame( array_merge( $product_ids, $product_ids ), $item_ids, 'A separate loop should still fire its own product hooks.' );
+	}
+
+	/**
+	 * Requests matching both catalog/search and taxonomy handlers.
+	 *
+	 * @return array
+	 */
+	public function overlapping_requests_provider(): array {
+		return array(
+			'Shop and tag'        => array( 'product_tag', false ),
+			'Shop and category'   => array( 'product_cat', false ),
+			'Search and category' => array( 'product_cat', true ),
+		);
 	}
 
 	/**
