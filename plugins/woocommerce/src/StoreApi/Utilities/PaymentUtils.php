@@ -118,7 +118,7 @@ class PaymentUtils {
 		 * Return a gateway id from `$available_gateways` to preselect it, or an empty string to select nothing;
 		 * any other value selects nothing. Attach the callback by `init` at the latest.
 		 *
-		 * @since 11.3.0
+		 * @since 11.4.0
 		 *
 		 * @param string $payment_method     Gateway id WooCommerce would preselect: the customer's default saved
 		 *                                   card's gateway, the method remembered in the session, or the first
