@@ -27,9 +27,11 @@ jQuery( () => {
 		}
 	} );
 
-	consentManager.waitForConsentType( () => {
-		if ( consentManager.hasAnalyticsConsent() ) {
-			startTracking();
-		}
-	} );
+	consentManager.waitForConsentApi( () =>
+		consentManager.waitForConsentType( () => {
+			if ( consentManager.hasAnalyticsConsent() ) {
+				startTracking();
+			}
+		} )
+	);
 } );
