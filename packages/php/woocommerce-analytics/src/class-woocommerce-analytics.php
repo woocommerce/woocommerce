@@ -173,7 +173,7 @@ class Woocommerce_Analytics {
 	}
 
 	/**
-	 * Place script to call s.js, Store Analytics.
+	 * Place script to call s.js, Store Analytics, or only its handle when proxy tracking is enabled.
 	 */
 	public static function enqueue_tracking_script() {
 		// Proxy tracking sends events without s.js, which would only set referrer cookies. Keep the handle, with no src, for scripts that depend on it.
