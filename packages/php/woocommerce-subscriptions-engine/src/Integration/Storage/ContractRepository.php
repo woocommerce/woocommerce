@@ -32,6 +32,8 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\Coercion;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\InvalidInputException;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ValidationErrorCode;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\ItemsSnapshot;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
 
@@ -1732,7 +1734,7 @@ final class ContractRepository {
 	 * @param array<string, mixed> $changes     Optional `order_id` (?int), `reason` (?string); present keys are written, null clears.
 	 * @param ContractLock         $lock        The caller's lock on the cycle's contract.
 	 * @return bool True when this caller won the transition (for a same-status call: the cycle holds the status and the values).
-	 * @throws \DomainException If `$to_status` is not a registered cycle status.
+	 * @throws InvalidInputException If `$to_status` is not a registered cycle status.
 	 * @throws \InvalidArgumentException If the cycle does not exist, or belongs to another contract than `$lock`.
 	 * @throws ContractLockedException If `$lock` was lost.
 	 * @throws \RuntimeException If the write fails.
@@ -1741,7 +1743,14 @@ final class ContractRepository {
 		global $wpdb;
 
 		if ( ! CycleStatus::is_registered( $to_status ) ) {
-			throw new \DomainException( esc_html( sprintf( 'ContractRepository::transition_cycle(): cycle status "%s" is not registered.', $to_status ) ) );
+			// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the message is not output; the facade escapes it.
+			throw new InvalidInputException(
+				ValidationErrorCode::NOT_REGISTERED,
+				'to_status',
+				sprintf( 'ContractRepository::transition_cycle(): cycle status "%s" is not registered.', $to_status ),
+				array( 'value' => $to_status )
+			);
+			// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 
 		// The contract match is in the UPDATE's WHERE clause: this method knows only the cycle id.

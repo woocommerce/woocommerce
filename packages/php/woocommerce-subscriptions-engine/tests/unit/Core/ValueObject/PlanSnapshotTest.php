@@ -11,6 +11,7 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Unit\Core\ValueObject
 
 use DomainException;
 use PHPUnit\Framework\TestCase;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\InvalidInputException;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
 
@@ -133,7 +134,7 @@ class PlanSnapshotTest extends TestCase {
 			)
 		);
 
-		$this->expectException( DomainException::class );
+		$this->expectException( InvalidInputException::class );
 		$snapshot->read_billing_policy();
 	}
 
@@ -159,7 +160,7 @@ class PlanSnapshotTest extends TestCase {
 			)
 		);
 
-		$this->expectException( DomainException::class );
+		$this->expectException( InvalidInputException::class );
 		$snapshot->read_billing_policy();
 	}
 
