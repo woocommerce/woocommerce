@@ -1,6 +1,6 @@
 <?php
 /**
- * ValidationException - a write refused because its input is not valid.
+ * ValidationException - a facade call refused because its input is not valid.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Api
  */
@@ -22,7 +22,7 @@ defined( 'ABSPATH' ) || exit;
  * {@see self::from_core()}) or a `woocommerce_subscriptions_engine_validate_plan`
  * callback. Callers read {@see self::get_errors()}: each error's code (a
  * {@see ValidationErrorCode} or the extension's own), its translated message, and
- * its data, with `field` (bracket path) and `params` for engine errors.
+ * its data, with `field` (dot path) and `params` for engine errors.
  * `getMessage()` stays English, for logs.
  */
 final class ValidationException extends InvalidArgumentException {
@@ -62,7 +62,7 @@ final class ValidationException extends InvalidArgumentException {
 		$params = $e->get_params();
 		$errors = new WP_Error(
 			$e->get_error_code(),
-			self::get_translated_message( $e->get_error_code(), $field, $params ),
+			self::get_translated_message( $e->get_error_code(), $params ),
 			array(
 				'field'  => $field,
 				'params' => $params,
@@ -80,57 +80,54 @@ final class ValidationException extends InvalidArgumentException {
 	}
 
 	/**
-	 * Translated message for an error code. An unknown code, or params a message cannot
-	 * use, get the generic message, so a code a third party constructs never fails here.
+	 * Translated, field-free message for an error code. An unknown code, or params a
+	 * message cannot use, get the generic message, so a code a third party constructs
+	 * never fails here.
 	 *
 	 * @param string               $code   Error code.
-	 * @param string               $field  Field, in bracket notation.
 	 * @param array<string, mixed> $params Message values.
 	 */
-	private static function get_translated_message( string $code, string $field, array $params ): string {
+	private static function get_translated_message( string $code, array $params ): string {
 		$min = isset( $params['min'] ) && is_int( $params['min'] ) ? $params['min'] : null;
 		$max = isset( $params['max'] ) && is_int( $params['max'] ) ? $params['max'] : null;
 
 		switch ( $code ) {
 			case ValidationErrorCode::REQUIRED:
-				/* translators: %s: field name. */
-				return sprintf( __( '%s is required.', 'woocommerce' ), $field );
+				return __( 'This field is required.', 'woocommerce' );
 			case ValidationErrorCode::INVALID_TYPE:
 				if ( isset( $params['type'] ) && is_string( $params['type'] ) ) {
-					/* translators: 1: field name, 2: expected type, such as string or integer. */
-					return sprintf( __( '%1$s is not of type %2$s.', 'woocommerce' ), $field, $params['type'] );
+					/* translators: %s: expected type, such as string or integer. */
+					return sprintf( __( 'Must be of type %s.', 'woocommerce' ), $params['type'] );
 				}
 				break;
 			case ValidationErrorCode::OUT_OF_BOUNDS:
 				if ( null !== $min && null !== $max ) {
-					/* translators: 1: field name, 2: lowest allowed number, 3: highest allowed number. */
-					return sprintf( __( '%1$s must be between %2$d and %3$d.', 'woocommerce' ), $field, $min, $max );
+					/* translators: 1: lowest allowed number, 2: highest allowed number. */
+					return sprintf( __( 'Must be between %1$d and %2$d.', 'woocommerce' ), $min, $max );
 				}
 				if ( null !== $min ) {
-					/* translators: 1: field name, 2: lowest allowed number. */
-					return sprintf( __( '%1$s must be greater than or equal to %2$d.', 'woocommerce' ), $field, $min );
+					/* translators: %d: lowest allowed number. */
+					return sprintf( __( 'Must be greater than or equal to %d.', 'woocommerce' ), $min );
 				}
 				if ( null !== $max ) {
-					/* translators: 1: field name, 2: highest allowed number. */
-					return sprintf( __( '%1$s must be less than or equal to %2$d.', 'woocommerce' ), $field, $max );
+					/* translators: %d: highest allowed number. */
+					return sprintf( __( 'Must be less than or equal to %d.', 'woocommerce' ), $max );
 				}
 				break;
 			case ValidationErrorCode::NOT_IN_ENUM:
 				if ( isset( $params['allowed'] ) && is_array( $params['allowed'] ) ) {
-					$allowed = array_filter( $params['allowed'], 'is_string' );
-					/* translators: 1: field name, 2: comma-separated list of allowed values. */
-					return sprintf( __( '%1$s is not one of %2$s.', 'woocommerce' ), $field, implode( ', ', $allowed ) );
+					/* translators: %l: list of allowed values, such as "day, week, and month". */
+					return wp_sprintf( __( 'Must be one of %l.', 'woocommerce' ), array_values( array_filter( $params['allowed'], 'is_string' ) ) );
 				}
 				break;
 			case ValidationErrorCode::NOT_REGISTERED:
 				if ( isset( $params['value'] ) && is_scalar( $params['value'] ) ) {
-					/* translators: 1: field name, 2: the status that is not registered. */
-					return sprintf( __( '%1$s "%2$s" is not registered.', 'woocommerce' ), $field, (string) $params['value'] );
+					/* translators: %s: the status that is not registered. */
+					return sprintf( __( '"%s" is not registered.', 'woocommerce' ), (string) $params['value'] );
 				}
 				break;
 		}
 
-		/* translators: %s: field name. */
-		return sprintf( __( '%s is not valid.', 'woocommerce' ), $field );
+		return __( 'This value is not valid.', 'woocommerce' );
 	}
 }

@@ -97,7 +97,6 @@ class PlansTest extends EngineIntegrationTestCase {
 		$data = $e->get_errors()->get_error_data( $code );
 		$this->assertIsArray( $data );
 		$this->assertSame( $field, $data['field'] );
-		$this->assertStringContainsString( $field, $e->get_errors()->get_error_message( $code ) );
 	}
 
 	/**
@@ -210,7 +209,7 @@ class PlansTest extends EngineIntegrationTestCase {
 			$this->fail( 'Expected a ValidationException.' );
 		} catch ( ValidationException $e ) {
 			$this->assert_engine_error( $e, ValidationErrorCode::NOT_REGISTERED, 'status' );
-			$this->assertSame( 'status "nonsense" is not registered.', $e->get_errors()->get_error_message( ValidationErrorCode::NOT_REGISTERED ) );
+			$this->assertSame( '"nonsense" is not registered.', $e->get_errors()->get_error_message( ValidationErrorCode::NOT_REGISTERED ) );
 			$previous = $e->getPrevious();
 			$this->assertInstanceOf( InvalidInputException::class, $previous );
 			$this->assertSame( esc_html( $previous->getMessage() ), $e->getMessage(), 'The exception message stays the English Core message.' );
@@ -227,7 +226,7 @@ class PlansTest extends EngineIntegrationTestCase {
 			$this->fail( 'Expected a ValidationException.' );
 		} catch ( ValidationException $e ) {
 			$this->assert_engine_error( $e, ValidationErrorCode::REQUIRED, 'name' );
-			$this->assertSame( 'name is required.', $e->get_errors()->get_error_message( ValidationErrorCode::REQUIRED ) );
+			$this->assertSame( 'This field is required.', $e->get_errors()->get_error_message( ValidationErrorCode::REQUIRED ) );
 		}
 	}
 
@@ -1146,7 +1145,7 @@ class PlansTest extends EngineIntegrationTestCase {
 			'any extension slug'   => array( array( 'extension_slug' => 'any' ), ValidationErrorCode::INVALID_VALUE, 'extension_slug' ),
 			'any in a slug list'   => array( array( 'extension_slug' => array( self::OWNER, 'any' ) ), ValidationErrorCode::INVALID_VALUE, 'extension_slug' ),
 			'status not a string'  => array( array( 'status' => 5 ), ValidationErrorCode::INVALID_TYPE, 'status' ),
-			'id not positive'      => array( array( 'ids' => array( 0, 1 ) ), ValidationErrorCode::OUT_OF_BOUNDS, 'ids[0]' ),
+			'id not positive'      => array( array( 'ids' => array( 0, 1 ) ), ValidationErrorCode::OUT_OF_BOUNDS, 'ids.0' ),
 			'ids not a list'       => array( array( 'ids' => array( 'a' => 1 ) ), ValidationErrorCode::INVALID_TYPE, 'ids' ),
 			'zero limit'           => array( array( 'limit' => 0 ), ValidationErrorCode::OUT_OF_BOUNDS, 'limit' ),
 			'negative offset'      => array( array( 'offset' => -1 ), ValidationErrorCode::OUT_OF_BOUNDS, 'offset' ),

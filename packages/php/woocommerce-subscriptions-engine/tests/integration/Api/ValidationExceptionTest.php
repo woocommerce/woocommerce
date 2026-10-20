@@ -47,7 +47,7 @@ class ValidationExceptionTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox Every error code has its own message that names the field.
+	 * @testdox Every error code has its own message, and no message names the field.
 	 */
 	public function test_every_error_code_has_a_message(): void {
 		$codes   = ( new ReflectionClass( ValidationErrorCode::class ) )->getConstants();
@@ -58,9 +58,9 @@ class ValidationExceptionTest extends EngineIntegrationTestCase {
 			$this->assertIsString( $code );
 			$this->assertArrayHasKey( $code, self::SAMPLE_PARAMS, sprintf( 'Add sample params and a message for "%s".', $code ) );
 
-			$message = self::message_for( $code, 'name', self::SAMPLE_PARAMS[ $code ] );
+			$message = self::message_for( $code, 'acme_field', self::SAMPLE_PARAMS[ $code ] );
 
-			$this->assertStringContainsString( 'name', $message, $code );
+			$this->assertStringNotContainsString( 'acme_field', $message, $code );
 			if ( ValidationErrorCode::INVALID_VALUE !== $code ) {
 				$this->assertNotSame( $generic, $message, sprintf( '"%s" falls back to the generic message.', $code ) );
 			}
@@ -68,24 +68,51 @@ class ValidationExceptionTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox The messages interpolate the field and params.
+	 * @testdox The messages interpolate the params.
 	 */
 	public function test_the_messages_interpolate_the_params(): void {
-		$this->assertSame( 'name is required.', self::message_for( ValidationErrorCode::REQUIRED, 'name' ) );
-		$this->assertSame( 'interval is not of type integer.', self::message_for( ValidationErrorCode::INVALID_TYPE, 'interval', array( 'type' => 'integer' ) ) );
-		$this->assertSame( 'period is not one of day, week.', self::message_for( ValidationErrorCode::NOT_IN_ENUM, 'period', self::SAMPLE_PARAMS[ ValidationErrorCode::NOT_IN_ENUM ] ) );
-		$this->assertSame( 'currency is not valid.', self::message_for( ValidationErrorCode::INVALID_VALUE, 'currency' ) );
-		$this->assertSame( 'status "seasonal" is not registered.', self::message_for( ValidationErrorCode::NOT_REGISTERED, 'status', array( 'value' => 'seasonal' ) ) );
+		$this->assertSame( 'This field is required.', self::message_for( ValidationErrorCode::REQUIRED, 'name' ) );
+		$this->assertSame( 'Must be of type integer.', self::message_for( ValidationErrorCode::INVALID_TYPE, 'interval', array( 'type' => 'integer' ) ) );
+		$this->assertSame( 'This value is not valid.', self::message_for( ValidationErrorCode::INVALID_VALUE, 'currency' ) );
+		$this->assertSame( '"seasonal" is not registered.', self::message_for( ValidationErrorCode::NOT_REGISTERED, 'status', array( 'value' => 'seasonal' ) ) );
+	}
+
+	/**
+	 * @testdox not_in_enum lists the allowed values with translated separators.
+	 */
+	public function test_not_in_enum_lists_the_allowed_values_with_translated_separators(): void {
+		$allowed = array( 'allowed' => array( 'day', 'week', 'month', 'year' ) );
+
+		$this->assertSame( wp_sprintf( 'Must be one of %l.', $allowed['allowed'] ), self::message_for( ValidationErrorCode::NOT_IN_ENUM, 'period', $allowed ) );
+		$this->assertSame( 'Must be one of day, week, month, and year.', self::message_for( ValidationErrorCode::NOT_IN_ENUM, 'period', $allowed ) );
+
+		add_filter(
+			'gettext',
+			static function ( $translation, $text, $domain ) {
+				if ( 'default' !== $domain ) {
+					return $translation;
+				}
+				if ( '%1$s, %2$s' === $text ) {
+					return '%1$s; %2$s';
+				}
+
+				return '%1$s, and %2$s' === $text ? '%1$s or %2$s' : $translation;
+			},
+			10,
+			3
+		);
+
+		$this->assertSame( 'Must be one of day; week; month or year.', self::message_for( ValidationErrorCode::NOT_IN_ENUM, 'period', $allowed ) );
 	}
 
 	/**
 	 * @testdox out_of_bounds picks its message by the bounds present.
 	 */
 	public function test_out_of_bounds_picks_its_message_by_the_bounds_present(): void {
-		$this->assertSame( 'limit must be greater than or equal to 1.', self::message_for( ValidationErrorCode::OUT_OF_BOUNDS, 'limit', array( 'min' => 1 ) ) );
-		$this->assertSame( 'min_cycles must be less than or equal to 2.', self::message_for( ValidationErrorCode::OUT_OF_BOUNDS, 'min_cycles', array( 'max' => 2 ) ) );
+		$this->assertSame( 'Must be greater than or equal to 1.', self::message_for( ValidationErrorCode::OUT_OF_BOUNDS, 'limit', array( 'min' => 1 ) ) );
+		$this->assertSame( 'Must be less than or equal to 2.', self::message_for( ValidationErrorCode::OUT_OF_BOUNDS, 'min_cycles', array( 'max' => 2 ) ) );
 		$this->assertSame(
-			'value must be between 0 and 100.',
+			'Must be between 0 and 100.',
 			self::message_for(
 				ValidationErrorCode::OUT_OF_BOUNDS,
 				'value',
@@ -101,9 +128,10 @@ class ValidationExceptionTest extends EngineIntegrationTestCase {
 	 * @testdox An unknown code, or params a message cannot use, get the generic message.
 	 */
 	public function test_an_unknown_code_gets_the_generic_message(): void {
-		$this->assertSame( 'name is not valid.', self::message_for( 'acme_unknown', 'name' ) );
-		$this->assertSame( 'limit is not valid.', self::message_for( ValidationErrorCode::OUT_OF_BOUNDS, 'limit' ) );
-		$this->assertSame( 'name is not valid.', self::message_for( ValidationErrorCode::INVALID_TYPE, 'name', array( 'type' => 3 ) ) );
+		$this->assertSame( 'This value is not valid.', self::message_for( 'acme_unknown', 'name' ) );
+		$this->assertSame( 'This value is not valid.', self::message_for( ValidationErrorCode::OUT_OF_BOUNDS, 'limit' ) );
+		$this->assertSame( 'This value is not valid.', self::message_for( ValidationErrorCode::INVALID_TYPE, 'name', array( 'type' => 3 ) ) );
+		$this->assertSame( 'This value is not valid.', self::message_for( ValidationErrorCode::NOT_IN_ENUM, 'period', array( 'allowed' => 'day' ) ) );
 	}
 
 	/**
@@ -140,12 +168,12 @@ class ValidationExceptionTest extends EngineIntegrationTestCase {
 		add_filter(
 			'gettext',
 			static function ( $translation, $text, $domain ) {
-				return 'woocommerce' === $domain && '%s is required.' === $text ? '%s est obligatoire.' : $translation;
+				return 'woocommerce' === $domain && 'This field is required.' === $text ? 'Ce champ est obligatoire.' : $translation;
 			},
 			10,
 			3
 		);
 
-		$this->assertSame( 'name est obligatoire.', self::message_for( ValidationErrorCode::REQUIRED, 'name' ) );
+		$this->assertSame( 'Ce champ est obligatoire.', self::message_for( ValidationErrorCode::REQUIRED, 'name' ) );
 	}
 }

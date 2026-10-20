@@ -17,8 +17,8 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Validation error thrown by Core checks, entities and value objects.
  *
- * The code is one of {@see ValidationErrorCode}, the field uses bracket notation
- * (`name`, `trial_duration[length]`, `items[2]`) and the params hold the values the
+ * The code is one of {@see ValidationErrorCode}, the field is a dot path
+ * (`name`, `trial_duration.length`, `items.2`) and the params hold the values the
  * code's message needs. The message is an English developer message, for logs.
  */
 final class InvalidInputException extends DomainException {
@@ -31,7 +31,7 @@ final class InvalidInputException extends DomainException {
 	private $error_code;
 
 	/**
-	 * Field the error concerns, in bracket notation.
+	 * Field the error concerns, in dot notation.
 	 *
 	 * @var string
 	 */
@@ -48,7 +48,7 @@ final class InvalidInputException extends DomainException {
 	 * Build the exception.
 	 *
 	 * @param string               $error_code Stable error code, one of {@see ValidationErrorCode}.
-	 * @param string               $field      Field the error concerns, in bracket notation.
+	 * @param string               $field      Field the error concerns, in dot notation.
 	 * @param string               $message    English developer message.
 	 * @param array<string, mixed> $params     Values the code's message needs.
 	 */
@@ -67,7 +67,7 @@ final class InvalidInputException extends DomainException {
 	}
 
 	/**
-	 * Field the error concerns, in bracket notation.
+	 * Field the error concerns, in dot notation.
 	 */
 	public function get_field(): string {
 		return $this->field;

@@ -37,7 +37,7 @@ final class ArgumentValidator {
 	 */
 	public static function validate_currency( $value ): ?string {
 		if ( null !== $value && ( ! is_string( $value ) || 1 !== preg_match( '/^[A-Z]{3}\z/', $value ) ) ) {
-			throw self::refuse( ValidationErrorCode::INVALID_VALUE, 'currency', 'must be null or a three-letter uppercase ISO-4217 code' );
+			throw self::get_invalid_input( ValidationErrorCode::INVALID_VALUE, 'currency', 'must be null or a three-letter uppercase ISO-4217 code' );
 		}
 
 		return $value;
@@ -52,7 +52,7 @@ final class ArgumentValidator {
 	 */
 	public static function validate_string( string $key, $value ): string {
 		if ( ! is_string( $value ) ) {
-			throw self::refuse( ValidationErrorCode::INVALID_TYPE, $key, 'must be a string', array( 'type' => 'string' ) );
+			throw self::get_invalid_input( ValidationErrorCode::INVALID_TYPE, $key, 'must be a string', array( 'type' => 'string' ) );
 		}
 
 		return $value;
@@ -68,10 +68,10 @@ final class ArgumentValidator {
 	 */
 	public static function validate_non_empty_string( string $key, $value ): string {
 		if ( null === $value || '' === $value ) {
-			throw self::refuse( ValidationErrorCode::REQUIRED, $key, 'must be a non-empty string' );
+			throw self::get_invalid_input( ValidationErrorCode::REQUIRED, $key, 'must be a non-empty string' );
 		}
 		if ( ! is_string( $value ) ) {
-			throw self::refuse( ValidationErrorCode::INVALID_TYPE, $key, 'must be a non-empty string', array( 'type' => 'string' ) );
+			throw self::get_invalid_input( ValidationErrorCode::INVALID_TYPE, $key, 'must be a non-empty string', array( 'type' => 'string' ) );
 		}
 
 		return $value;
@@ -86,7 +86,7 @@ final class ArgumentValidator {
 	 */
 	public static function validate_nullable_string( string $key, $value ): ?string {
 		if ( null !== $value && ! is_string( $value ) ) {
-			throw self::refuse( ValidationErrorCode::INVALID_TYPE, $key, 'must be null or a string', array( 'type' => 'string' ) );
+			throw self::get_invalid_input( ValidationErrorCode::INVALID_TYPE, $key, 'must be null or a string', array( 'type' => 'string' ) );
 		}
 
 		return $value;
@@ -131,7 +131,7 @@ final class ArgumentValidator {
 
 	/**
 	 * Validate a list of positive integer ids (digit strings are cast) and return it.
-	 * An item is reported by its index (`ids[1]`).
+	 * An item is reported by its index (`ids.1`).
 	 *
 	 * @param string $key   Field name.
 	 * @param mixed  $value Caller value.
@@ -140,12 +140,12 @@ final class ArgumentValidator {
 	 */
 	public static function validate_id_list( string $key, $value ): array {
 		if ( ! self::is_list( $value ) ) {
-			throw self::refuse( ValidationErrorCode::INVALID_TYPE, $key, 'must be a list of positive integers', array( 'type' => 'array' ) );
+			throw self::get_invalid_input( ValidationErrorCode::INVALID_TYPE, $key, 'must be a list of positive integers', array( 'type' => 'array' ) );
 		}
 
 		$ids = array();
 		foreach ( $value as $index => $id ) {
-			$ids[] = self::validate_positive_int( self::item_field( $key, $index ), $id );
+			$ids[] = self::validate_positive_int( self::get_item_field( $key, $index ), $id );
 		}
 
 		return $ids;
@@ -153,7 +153,7 @@ final class ArgumentValidator {
 
 	/**
 	 * Validate a non-empty string or a list of them and return it as a list. An item is
-	 * reported by its index (`status[1]`).
+	 * reported by its index (`status.1`).
 	 *
 	 * @param string $key   Field name.
 	 * @param mixed  $value Caller value.
@@ -165,12 +165,12 @@ final class ArgumentValidator {
 			return array( self::validate_non_empty_string( $key, $value ) );
 		}
 		if ( ! self::is_list( $value ) ) {
-			throw self::refuse( ValidationErrorCode::INVALID_TYPE, $key, 'must be a non-empty string or a list of them', array( 'type' => 'array' ) );
+			throw self::get_invalid_input( ValidationErrorCode::INVALID_TYPE, $key, 'must be a non-empty string or a list of them', array( 'type' => 'array' ) );
 		}
 
 		$strings = array();
 		foreach ( $value as $index => $item ) {
-			$strings[] = self::validate_non_empty_string( self::item_field( $key, $index ), $item );
+			$strings[] = self::validate_non_empty_string( self::get_item_field( $key, $index ), $item );
 		}
 
 		return $strings;
@@ -186,7 +186,7 @@ final class ArgumentValidator {
 	 */
 	public static function validate_nullable_array( string $key, $value ): ?array {
 		if ( null !== $value && ! is_array( $value ) ) {
-			throw self::refuse( ValidationErrorCode::INVALID_TYPE, $key, 'must be null or an array', array( 'type' => 'object' ) );
+			throw self::get_invalid_input( ValidationErrorCode::INVALID_TYPE, $key, 'must be null or an array', array( 'type' => 'object' ) );
 		}
 
 		return $value;
@@ -215,7 +215,7 @@ final class ArgumentValidator {
 			}
 		}
 
-		throw self::refuse( ValidationErrorCode::INVALID_VALUE, $key, 'must be null, a DateTimeInterface, or a GMT "Y-m-d H:i:s" string' );
+		throw self::get_invalid_input( ValidationErrorCode::INVALID_VALUE, $key, 'must be null, a DateTimeInterface, or a GMT "Y-m-d H:i:s" string' );
 	}
 
 	/**
@@ -231,7 +231,7 @@ final class ArgumentValidator {
 		}
 
 		if ( ! is_int( $value ) && ! is_float( $value ) && ! ( is_string( $value ) && is_numeric( $value ) ) ) {
-			throw self::refuse( ValidationErrorCode::INVALID_TYPE, $key, 'must be a number or a numeric string', array( 'type' => 'number' ) );
+			throw self::get_invalid_input( ValidationErrorCode::INVALID_TYPE, $key, 'must be a number or a numeric string', array( 'type' => 'number' ) );
 		}
 
 		return MoneyScale::normalize_money( $value );
@@ -239,7 +239,7 @@ final class ArgumentValidator {
 
 	/**
 	 * Validate a list of arrays and return it with string-keyed rows. A row is reported
-	 * by its index (`items[0]`).
+	 * by its index (`items.0`).
 	 *
 	 * @param string $key   Field name.
 	 * @param mixed  $value Caller value.
@@ -248,13 +248,13 @@ final class ArgumentValidator {
 	 */
 	public static function validate_list_of_arrays( string $key, $value ): array {
 		if ( ! self::is_list( $value ) ) {
-			throw self::refuse( ValidationErrorCode::INVALID_TYPE, $key, 'must be a list of arrays', array( 'type' => 'array' ) );
+			throw self::get_invalid_input( ValidationErrorCode::INVALID_TYPE, $key, 'must be a list of arrays', array( 'type' => 'array' ) );
 		}
 
 		$rows = array();
 		foreach ( $value as $index => $row ) {
 			if ( ! is_array( $row ) ) {
-				throw self::refuse( ValidationErrorCode::INVALID_TYPE, self::item_field( $key, $index ), 'must be an array', array( 'type' => 'object' ) );
+				throw self::get_invalid_input( ValidationErrorCode::INVALID_TYPE, self::get_item_field( $key, $index ), 'must be an array', array( 'type' => 'object' ) );
 			}
 			$rows[] = Coercion::coerce_string_keyed( $row );
 		}
@@ -264,7 +264,7 @@ final class ArgumentValidator {
 
 	/**
 	 * Validate the shape of contract addresses: a map keyed `billing` / `shipping` with
-	 * array values. An address is reported by its type (`addresses[billing]`).
+	 * array values. An address is reported by its type (`addresses.billing`).
 	 *
 	 * @param mixed $value Caller value.
 	 * @return array<string, array<int|string, mixed>>
@@ -272,18 +272,18 @@ final class ArgumentValidator {
 	 */
 	public static function validate_contract_addresses( $value ): array {
 		if ( ! is_array( $value ) ) {
-			throw self::refuse( ValidationErrorCode::INVALID_TYPE, 'addresses', 'must be an array keyed "billing" / "shipping"', array( 'type' => 'object' ) );
+			throw self::get_invalid_input( ValidationErrorCode::INVALID_TYPE, 'addresses', 'must be an array keyed "billing" / "shipping"', array( 'type' => 'object' ) );
 		}
 
 		$types     = array( Contract::ADDRESS_BILLING, Contract::ADDRESS_SHIPPING );
 		$addresses = array();
 		foreach ( $value as $type => $address ) {
-			$field = self::item_field( 'addresses', $type );
+			$field = self::get_item_field( 'addresses', $type );
 			if ( ! in_array( $type, $types, true ) ) {
-				throw self::refuse( ValidationErrorCode::NOT_IN_ENUM, $field, 'is not an address type; use "billing" or "shipping"', array( 'allowed' => $types ) );
+				throw self::get_invalid_input( ValidationErrorCode::NOT_IN_ENUM, $field, 'is not an address type; use "billing" or "shipping"', array( 'allowed' => $types ) );
 			}
 			if ( ! is_array( $address ) ) {
-				throw self::refuse( ValidationErrorCode::INVALID_TYPE, $field, 'must be an array', array( 'type' => 'object' ) );
+				throw self::get_invalid_input( ValidationErrorCode::INVALID_TYPE, $field, 'must be an array', array( 'type' => 'object' ) );
 			}
 
 			$addresses[ $type ] = $address;
@@ -304,10 +304,10 @@ final class ArgumentValidator {
 	private static function validate_int_at_least( string $key, $value, int $min, string $requirement ): int {
 		$value = self::cast_digit_string( $value );
 		if ( ! is_int( $value ) ) {
-			throw self::refuse( ValidationErrorCode::INVALID_TYPE, $key, $requirement, array( 'type' => 'integer' ) );
+			throw self::get_invalid_input( ValidationErrorCode::INVALID_TYPE, $key, $requirement, array( 'type' => 'integer' ) );
 		}
 		if ( $value < $min ) {
-			throw self::refuse( ValidationErrorCode::OUT_OF_BOUNDS, $key, $requirement, array( 'min' => $min ) );
+			throw self::get_invalid_input( ValidationErrorCode::OUT_OF_BOUNDS, $key, $requirement, array( 'min' => $min ) );
 		}
 
 		return $value;
@@ -317,22 +317,22 @@ final class ArgumentValidator {
 	 * Build the validation error for a refused value; the message quotes the field.
 	 *
 	 * @param string               $code        Error code.
-	 * @param string               $field       Field, in bracket notation.
+	 * @param string               $field       Field, in dot notation.
 	 * @param string               $requirement What the value must be, for the message.
 	 * @param array<string, mixed> $params      Message values.
 	 */
-	private static function refuse( string $code, string $field, string $requirement, array $params = array() ): InvalidInputException {
+	private static function get_invalid_input( string $code, string $field, string $requirement, array $params = array() ): InvalidInputException {
 		return new InvalidInputException( $code, $field, sprintf( '"%s" %s.', $field, $requirement ), $params );
 	}
 
 	/**
-	 * Bracket path of a list item or map entry.
+	 * Dot path of a list item or map entry.
 	 *
 	 * @param string     $key   Field name.
 	 * @param int|string $index Item index or map key.
 	 */
-	private static function item_field( string $key, $index ): string {
-		return $key . '[' . $index . ']';
+	private static function get_item_field( string $key, $index ): string {
+		return $key . '.' . $index;
 	}
 
 	/**

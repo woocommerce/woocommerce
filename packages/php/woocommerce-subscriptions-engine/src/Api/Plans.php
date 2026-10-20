@@ -370,7 +370,7 @@ final class Plans {
 			 * including status-only updates, so the plan's extension can refuse it.
 			 *
 			 * Add errors to $errors to refuse the write; act only on your own $extension_slug.
-			 * Give an error `field` data (bracket path, such as `billing_policy[interval]`, with
+			 * Give an error `field` data (dot path, such as `billing_policy.interval`, with
 			 * optional `params`) and REST reports it under that top-level arg in `rest_invalid_param`;
 			 * an error without `field` is reported as a general 400.
 			 * The view is the would-be state after the write (its id is 0 on create) and is

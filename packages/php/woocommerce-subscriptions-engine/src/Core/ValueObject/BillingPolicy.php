@@ -233,13 +233,13 @@ final class BillingPolicy {
 		if ( $length <= 0 ) {
 			throw new InvalidInputException(
 				ValidationErrorCode::OUT_OF_BOUNDS,
-				'trial_duration[length]',
+				'trial_duration.length',
 				sprintf( 'BillingPolicy::compute_first_renewal_from(): trial length must be positive, got %d.', $length ),
 				array( 'min' => 1 )
 			);
 		}
 
-		$normalized_unit = $this->normalize_unit( $unit, 'trial_duration[unit]' );
+		$normalized_unit = $this->normalize_unit( $unit, 'trial_duration.unit' );
 
 		return $contract_start
 			->setTimezone( new DateTimeZone( 'UTC' ) )
@@ -265,7 +265,7 @@ final class BillingPolicy {
 	 * Validate and pass through a period/trial unit.
 	 *
 	 * @param string $unit  The raw unit.
-	 * @param string $field Field the unit came from, in bracket notation.
+	 * @param string $field Field the unit came from, in dot notation.
 	 * @throws InvalidInputException If the unit is not one of day/week/month/year.
 	 */
 	private function normalize_unit( string $unit, string $field ): string {
@@ -331,24 +331,24 @@ final class BillingPolicy {
 		}
 
 		if ( ! array_key_exists( 'length', $trial_duration ) ) {
-			throw new InvalidInputException( ValidationErrorCode::REQUIRED, 'trial_duration[length]', "BillingPolicy: trial_duration['length'] is required." );
+			throw new InvalidInputException( ValidationErrorCode::REQUIRED, 'trial_duration.length', 'BillingPolicy: trial_duration.length is required.' );
 		}
 		if ( ! array_key_exists( 'unit', $trial_duration ) ) {
-			throw new InvalidInputException( ValidationErrorCode::REQUIRED, 'trial_duration[unit]', "BillingPolicy: trial_duration['unit'] is required." );
+			throw new InvalidInputException( ValidationErrorCode::REQUIRED, 'trial_duration.unit', 'BillingPolicy: trial_duration.unit is required.' );
 		}
 		if ( ! is_int( $trial_duration['length'] ) ) {
 			throw new InvalidInputException(
 				ValidationErrorCode::INVALID_TYPE,
-				'trial_duration[length]',
-				sprintf( "BillingPolicy: trial_duration['length'] must be an integer, got %s.", gettype( $trial_duration['length'] ) ),
+				'trial_duration.length',
+				sprintf( 'BillingPolicy: trial_duration.length must be an integer, got %s.', gettype( $trial_duration['length'] ) ),
 				array( 'type' => 'integer' )
 			);
 		}
 		if ( ! is_string( $trial_duration['unit'] ) ) {
 			throw new InvalidInputException(
 				ValidationErrorCode::INVALID_TYPE,
-				'trial_duration[unit]',
-				sprintf( "BillingPolicy: trial_duration['unit'] must be a string, got %s.", gettype( $trial_duration['unit'] ) ),
+				'trial_duration.unit',
+				sprintf( 'BillingPolicy: trial_duration.unit must be a string, got %s.', gettype( $trial_duration['unit'] ) ),
 				array( 'type' => 'string' )
 			);
 		}

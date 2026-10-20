@@ -219,8 +219,11 @@ final class PlansController extends WP_REST_Controller {
 		}
 
 		$exception = ValidationException::from_core( $error );
+		$errors    = $exception->get_errors();
+		$code      = (string) $errors->get_error_code();
 
-		return $exception->get_errors();
+		// WordPress copies this message into `params.status` as is, so it names the field itself.
+		return new WP_Error( $code, $this->get_field_message( 'status', $errors->get_error_message( $code ) ), $errors->get_error_data( $code ) );
 	}
 
 	/**
@@ -616,12 +619,12 @@ final class PlansController extends WP_REST_Controller {
 
 			foreach ( $messages as $index => $message ) {
 				$field = $fields[ $index ];
-				$arg   = false !== strpos( $field, '[' ) ? substr( $field, 0, (int) strpos( $field, '[' ) ) : $field;
+				$arg   = false !== strpos( $field, '.' ) ? substr( $field, 0, (int) strpos( $field, '.' ) ) : $field;
 
 				if ( ! isset( $by_arg[ $arg ] ) ) {
 					$by_arg[ $arg ] = new WP_Error();
 				}
-				$by_arg[ $arg ]->add( $code, $message, $all_data[ $index ] );
+				$by_arg[ $arg ]->add( $code, $this->get_field_message( $field, $message ), $all_data[ $index ] );
 			}
 		}
 
@@ -649,6 +652,17 @@ final class PlansController extends WP_REST_Controller {
 		$error->merge_from( $this->as_bad_request( $fieldless ) );
 
 		return $error;
+	}
+
+	/**
+	 * A validation message that names its field, for REST `params` and `details`.
+	 *
+	 * @param string $field   Field, in dot notation.
+	 * @param string $message Translated, field-free message.
+	 */
+	private function get_field_message( string $field, string $message ): string {
+		/* translators: 1: field name, such as billing_policy.interval, 2: validation message. */
+		return sprintf( __( '%1$s: %2$s', 'woocommerce' ), $field, $message );
 	}
 
 	/**

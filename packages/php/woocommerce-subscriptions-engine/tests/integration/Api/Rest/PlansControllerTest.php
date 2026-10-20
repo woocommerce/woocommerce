@@ -328,7 +328,7 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		);
 		// The PATCH route has no arg schema, so the facade rejects.
 		$patched_data = $this->assert_invalid_param( $patched, 'pricing_policy', 'invalid_type' );
-		$this->assertSame( 'pricing_policy is not of type object.', $this->nested( $patched_data, array( 'data', 'params', 'pricing_policy' ) ) );
+		$this->assertSame( 'pricing_policy: Must be of type object.', $this->nested( $patched_data, array( 'data', 'params', 'pricing_policy' ) ) );
 
 		// The rejected writes left the plan untouched and created nothing.
 		$fetched = $this->request( 'GET', self::BASE . '/' . $id, array(), array( 'extension_slug' => self::EXTENSION_SLUG ) );
@@ -373,7 +373,7 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		foreach ( array( $patched, $created ) as $response ) {
 			$data = $this->assert_invalid_param( $response, 'name', 'required' );
 			$this->assertSame( 'Invalid parameter(s): name', $data['message'] );
-			$this->assertSame( 'name is required.', $this->nested( $data, array( 'data', 'params', 'name' ) ) );
+			$this->assertSame( 'name: This field is required.', $this->nested( $data, array( 'data', 'params', 'name' ) ) );
 			$this->assertSame( 'name', $this->nested( $data, array( 'data', 'details', 'name', 'data', 'field' ) ) );
 		}
 	}
@@ -383,7 +383,7 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		add_filter(
 			'gettext',
 			static function ( $translation, $text, $domain ) {
-				return 'woocommerce' === $domain && '%s is required.' === $text ? '%s est obligatoire.' : $translation;
+				return 'woocommerce' === $domain && 'This field is required.' === $text ? 'Ce champ est obligatoire.' : $translation;
 			},
 			10,
 			3
@@ -399,7 +399,7 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		);
 
 		$data = $this->assert_invalid_param( $created, 'name', 'required' );
-		$this->assertSame( 'name est obligatoire.', $this->nested( $data, array( 'data', 'params', 'name' ) ) );
+		$this->assertSame( 'name: Ce champ est obligatoire.', $this->nested( $data, array( 'data', 'params', 'name' ) ) );
 	}
 
 	public function test_a_callback_error_with_a_field_is_reported_under_its_top_level_arg(): void {
@@ -411,7 +411,7 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 					'out_of_bounds',
 					'Interval must be at least 1.',
 					array(
-						'field'  => 'billing_policy[interval]',
+						'field'  => 'billing_policy.interval',
 						'params' => array( 'min' => 1 ),
 					)
 				);
@@ -421,13 +421,13 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		$data = $this->assert_invalid_param( $this->create_rejected_plan(), 'billing_policy', 'out_of_bounds' );
 
 		$this->assertSame( 'Invalid parameter(s): billing_policy', $data['message'] );
-		$this->assertSame( array( 'billing_policy' => 'Interval must be at least 1.' ), $this->nested( $data, array( 'data', 'params' ) ) );
+		$this->assertSame( array( 'billing_policy' => 'billing_policy.interval: Interval must be at least 1.' ), $this->nested( $data, array( 'data', 'params' ) ) );
 		$this->assertSame(
 			array(
 				'code'    => 'out_of_bounds',
-				'message' => 'Interval must be at least 1.',
+				'message' => 'billing_policy.interval: Interval must be at least 1.',
 				'data'    => array(
-					'field'  => 'billing_policy[interval]',
+					'field'  => 'billing_policy.interval',
 					'params' => array( 'min' => 1 ),
 				),
 			),
@@ -440,8 +440,8 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		add_action(
 			'woocommerce_subscriptions_engine_validate_plan',
 			static function ( WP_Error $errors ): void {
-				$errors->add( 'invalid_value', 'Bad interval.', array( 'field' => 'billing_policy[interval]' ) );
-				$errors->add( 'invalid_value', 'Bad amount.', array( 'field' => 'pricing_policy[one_time_fees][0][amount]' ) );
+				$errors->add( 'invalid_value', 'Bad interval.', array( 'field' => 'billing_policy.interval' ) );
+				$errors->add( 'invalid_value', 'Bad amount.', array( 'field' => 'pricing_policy.one_time_fees.0.amount' ) );
 			}
 		);
 
@@ -449,12 +449,12 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 
 		$this->assertSame(
 			array(
-				'billing_policy' => 'Bad interval.',
-				'pricing_policy' => 'Bad amount.',
+				'billing_policy' => 'billing_policy.interval: Bad interval.',
+				'pricing_policy' => 'pricing_policy.one_time_fees.0.amount: Bad amount.',
 			),
 			$this->nested( $data, array( 'data', 'params' ) )
 		);
-		$this->assertSame( 'pricing_policy[one_time_fees][0][amount]', $this->nested( $data, array( 'data', 'details', 'pricing_policy', 'data', 'field' ) ) );
+		$this->assertSame( 'pricing_policy.one_time_fees.0.amount', $this->nested( $data, array( 'data', 'details', 'pricing_policy', 'data', 'field' ) ) );
 	}
 
 	public function test_fielded_and_fieldless_callback_errors_return_one_400_with_both(): void {
@@ -463,13 +463,13 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 			'woocommerce_subscriptions_engine_validate_plan',
 			static function ( WP_Error $errors ): void {
 				$errors->add( 'acme_general', 'Something is off.' );
-				$errors->add( 'invalid_value', 'Bad interval.', array( 'field' => 'billing_policy[interval]' ) );
+				$errors->add( 'invalid_value', 'Bad interval.', array( 'field' => 'billing_policy.interval' ) );
 			}
 		);
 
 		$data = $this->assert_invalid_param( $this->create_rejected_plan(), 'billing_policy', 'invalid_value' );
 
-		$this->assertSame( array( 'billing_policy' => 'Bad interval.' ), $this->nested( $data, array( 'data', 'params' ) ) );
+		$this->assertSame( array( 'billing_policy' => 'billing_policy.interval: Bad interval.' ), $this->nested( $data, array( 'data', 'params' ) ) );
 		$this->assertSame(
 			array(
 				array(
@@ -1051,7 +1051,7 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 			)
 		);
 		$data    = $this->assert_invalid_param( $created, 'status', 'not_registered' );
-		$this->assertSame( 'status "never-registered" is not registered.', $this->nested( $data, array( 'data', 'params', 'status' ) ) );
+		$this->assertSame( 'status: "never-registered" is not registered.', $this->nested( $data, array( 'data', 'params', 'status' ) ) );
 
 		$schema = ( new PlansController() )->get_public_item_schema();
 		$this->assertIsArray( $schema['properties']['status'] );

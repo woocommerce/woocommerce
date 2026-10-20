@@ -152,7 +152,7 @@ class BillingPolicyTest extends TestCase {
 					);
 				},
 				ValidationErrorCode::REQUIRED,
-				'trial_duration[length]',
+				'trial_duration.length',
 				array(),
 			),
 			'trial unit missing'        => array(
@@ -166,7 +166,7 @@ class BillingPolicyTest extends TestCase {
 					);
 				},
 				ValidationErrorCode::REQUIRED,
-				'trial_duration[unit]',
+				'trial_duration.unit',
 				array(),
 			),
 			'trial length not integer'  => array(
@@ -183,7 +183,7 @@ class BillingPolicyTest extends TestCase {
 					);
 				},
 				ValidationErrorCode::INVALID_TYPE,
-				'trial_duration[length]',
+				'trial_duration.length',
 				array( 'type' => 'integer' ),
 			),
 			'trial unit not a string'   => array(
@@ -200,7 +200,7 @@ class BillingPolicyTest extends TestCase {
 					);
 				},
 				ValidationErrorCode::INVALID_TYPE,
-				'trial_duration[unit]',
+				'trial_duration.unit',
 				array( 'type' => 'string' ),
 			),
 			'trial length not positive' => array(
@@ -218,7 +218,7 @@ class BillingPolicyTest extends TestCase {
 					$policy->compute_first_renewal_from( $start );
 				},
 				ValidationErrorCode::OUT_OF_BOUNDS,
-				'trial_duration[length]',
+				'trial_duration.length',
 				array( 'min' => 1 ),
 			),
 			'unknown trial unit'        => array(
@@ -236,7 +236,7 @@ class BillingPolicyTest extends TestCase {
 					$policy->compute_first_renewal_from( $start );
 				},
 				ValidationErrorCode::NOT_IN_ENUM,
-				'trial_duration[unit]',
+				'trial_duration.unit',
 				$units,
 			),
 		);
