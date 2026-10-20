@@ -6,6 +6,8 @@ import domReady from '@wordpress/dom-ready';
 import { getSetting, STORE_PAGES } from '@woocommerce/settings';
 import { select, subscribe } from '@wordpress/data';
 import { store as editorStore } from '@wordpress/editor';
+// Use the store name to avoid adding wp-editor as a dependency on widget screens.
+import { CORE_EDITOR_STORE } from '@woocommerce/utils';
 
 /**
  * Internal dependencies
@@ -40,14 +42,13 @@ const getBlockEditorContext = (): BlockEditorContext => {
 	return 'other';
 };
 
-const getBlockTypesToUnregister = (): string[] => {
+const getBlockTypesToUnregister = ( postId?: number ): string[] => {
 	const registeredBlockTypes = getBlockTypes().map( ( { name } ) => name );
 	const blockEditorContext = getBlockEditorContext();
 
 	if ( blockEditorContext === 'post' ) {
 		const shopPageId =
 			'shop' in STORE_PAGES ? STORE_PAGES.shop?.id : undefined;
-		const postId = select( editorStore )?.getCurrentPostId() ?? null;
 
 		const isShopPageEditor =
 			getSetting( 'currentThemeIsFSETheme', false ) &&
@@ -75,13 +76,13 @@ const getBlockTypesToUnregister = (): string[] => {
 	return [];
 };
 
-domReady( () => {
-	const unregisterBlocks = () => {
-		getBlockTypesToUnregister().forEach( ( blockType ) => {
-			unregisterBlockType( blockType );
-		} );
-	};
+const unregisterBlocks = ( postId?: number ) => {
+	getBlockTypesToUnregister( postId ).forEach( ( blockType ) => {
+		unregisterBlockType( blockType );
+	} );
+};
 
+domReady( () => {
 	if ( getBlockEditorContext() !== 'post' ) {
 		unregisterBlocks();
 		return;
@@ -89,10 +90,12 @@ domReady( () => {
 
 	// DOM readiness does not guarantee the editor has loaded its current post.
 	const unsubscribe = subscribe( () => {
-		if ( ! select( editorStore ).getCurrentPostId() ) {
+		if ( ! select( CORE_EDITOR_STORE ).getCurrentPostId() ) {
 			return;
 		}
+
+		const postId = select( editorStore )?.getCurrentPostId() ?? null;
 		unsubscribe();
-		unregisterBlocks();
-	}, editorStore );
+		unregisterBlocks( postId );
+	}, CORE_EDITOR_STORE );
 } );

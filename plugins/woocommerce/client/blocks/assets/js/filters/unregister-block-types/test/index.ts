@@ -10,10 +10,6 @@ jest.mock( '@wordpress/data', () => ( {
 	subscribe: jest.fn(),
 } ) );
 
-jest.mock( '@wordpress/editor', () => ( {
-	store: { name: 'core/editor' },
-} ) );
-
 jest.mock( '@woocommerce/settings', () => ( {
 	getSetting: jest.fn(),
 	STORE_PAGES: { shop: { id: 42 } },
