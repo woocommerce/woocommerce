@@ -11,6 +11,13 @@ use Automattic\WooCommerce\Utilities\ArrayUtil;
  */
 class StyleAttributesUtils {
 
+	/**
+	 * Cached global styles keyed by theme slug and blog ID.
+	 *
+	 * @var array
+	 */
+	private static array $resolved_styles = array();
+
 	// Empty style array.
 	const EMPTY_STYLE = [
 		'class' => '',
@@ -797,10 +804,11 @@ class StyleAttributesUtils {
 	 *
 	 * @since 10.4.0
 	 *
-	 * @param string[] $path Path to the desired global styles value.
+	 * @param string[] $path        Path to the desired global styles value.
+	 * @param bool     $reset_cache Whether to reset the cache.
 	 * @return mixed The resolved global styles value.
 	 */
-	public static function get_global_styles( array $path = array() ) {
+	public static function get_global_styles( array $path = array(), bool $reset_cache = false ) {
 		static $resolved_styles = array();
 
 		// To keep the caching self-contained, we also keep the cache reset trackers encapsulated here.
@@ -815,7 +823,7 @@ class StyleAttributesUtils {
 
 		// The wp_get_global_styles downstream workflows has some caching, but merging routines are heavy.
 		$cache_key                     = get_stylesheet() . '-' . get_current_blog_id();
-		$resolved_styles[ $cache_key ] = $resolved_styles[ $cache_key ] ?? wp_get_global_styles();
+		$resolved_styles[ $cache_key ] = $reset_cache ? wp_get_global_styles() : ( $resolved_styles[ $cache_key ] ?? wp_get_global_styles() );
 
 		return ArrayUtil::get_nested_value( $resolved_styles[ $cache_key ], implode( '::', $path ), $resolved_styles[ $cache_key ] );
 	}

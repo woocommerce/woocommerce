@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use WP_Theme_JSON_Data;
 use WP_UnitTestCase;
 
@@ -68,7 +69,7 @@ class BreadcrumbsTest extends WP_UnitTestCase {
 				return new WP_Theme_JSON_Data( $data, 'user' );
 			}
 		);
-		wp_clean_theme_json_cache();
+		\Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils::get_global_styles( array(), true );
 	}
 
 	/**
