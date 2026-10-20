@@ -414,7 +414,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 			return;
 		}
 		if ( $excluded ) {
-			// The record can never finish importing, so keep it off the list Analytics settings retries.
+			// The record is excluded, so drop it from the list Analytics settings retries.
 			self::clear_failed_order_import( $order_id );
 			return;
 		}
@@ -904,13 +904,12 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	}
 
 	/**
-	 * Build the SQL that keeps a record in the Analytics order import despite the import conditions filter.
+	 * Build the WHERE fragment that applies the import conditions filter to an Analytics order import query.
 	 *
 	 * A record is kept when Analytics already holds it, so it keeps syncing, or when it passes the
 	 * conditions and, for a refund, its parent is not an excluded order Analytics does not hold.
 	 * Every import query shares this fragment, so what is counted is what gets imported.
 	 *
-	 * @since 11.3.0
 	 * @param string $table_alias Table name or alias the query uses for the orders or posts table.
 	 * @return string Empty string while the filter adds nothing, or a condition starting with ' AND '.
 	 */
@@ -934,7 +933,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 		$parent_conditions = self::get_import_conditions( 'parent_order', $table_name );
 		$stats_table       = OrdersStatsDataStore::get_db_table_name();
 
-		// The callers interpolate this fragment into $wpdb->prepare(), so a literal percent sign
+		// Some callers interpolate this fragment into $wpdb->prepare(), so a literal percent sign
 		// (a LIKE pattern, say) must not read as a placeholder. $wpdb->query() restores it.
 		// A parent whose conditions come out NULL counts as excluded, as it does in the per-record probe.
 		return $wpdb->add_placeholder_escape(
@@ -967,15 +966,12 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 		/**
 		 * Filters the SQL conditions that decide which orders and refunds Analytics imports.
 		 *
-		 * Conditions are inserted as raw SQL into the historical count and page queries, the scheduled
-		 * import query and the per-record check, so bind any values with $wpdb->prepare(). Prefix column
-		 * names with $table_alias, which varies per query; $table_name says which table is queried, the
-		 * orders table under HPOS (`type`, `status`, `parent_order_id`) or the posts table otherwise
-		 * (`post_type`, `post_status`, `post_parent`). A refund inherits the exclusion of its parent order.
-		 * Records imported before a condition excluded them keep syncing until historical data is deleted
-		 * and re-imported.
+		 * Conditions are raw SQL, so bind any values with $wpdb->prepare(), and prefix columns with $table_alias.
+		 * The filter runs a second time per query with the alias `parent_order`, because a refund inherits the
+		 * exclusion of its parent order. Records imported before a condition excluded them keep syncing until
+		 * historical data is deleted and re-imported.
 		 *
-		 * @since 11.3.0
+		 * @since 11.4.0
 		 *
 		 * @param string[] $clauses     SQL conditions, joined with AND. Empty by default.
 		 * @param string   $table_alias Alias to prefix column names with.
@@ -996,12 +992,13 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	/**
 	 * Whether the `woocommerce_analytics_orders_import_where_clauses` filter leaves a record out of the import.
 	 *
-	 * Costs nothing while the filter is unused and one primary-key probe otherwise. Applies the same
-	 * rules as the import queries: a record Analytics already holds is never excluded, and a refund
-	 * inherits the exclusion of a parent order Analytics does not hold.
+	 * Applies the same rules as the import queries: a record Analytics already holds is never excluded,
+	 * and a refund inherits the exclusion of a parent order Analytics does not hold.
 	 *
 	 * @internal
-	 * @since 11.3.0
+	 *
+	 * @since 11.4.0
+	 *
 	 * @param int $order_id Order or refund ID.
 	 * @return bool|null Whether the record is excluded, or null when the check failed (the error is logged).
 	 */
