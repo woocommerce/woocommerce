@@ -552,6 +552,37 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Migration keeps emoji in coupon codes encoded when the posts table can't store them, like coupon saves do.
+	 *
+	 * @testWith ["SALE&#x1f389;", "SALE&#x1f389;"]
+	 *           ["B&Q&#x1f389;", "B&amp;Q&#x1f389;"]
+	 *
+	 * @param string $stored_title   Title stored before the migration.
+	 * @param string $expected_title Title expected after the migration.
+	 */
+	public function test_wc_update_450_sanitize_coupons_code_keeps_emoji_encoded_for_utf8_tables( string $stored_title, string $expected_title ): void {
+		global $wpdb;
+
+		$coupon_id = $this->create_coupon_with_stored_title( $stored_title );
+
+		add_filter(
+			'pre_get_col_charset',
+			function ( $charset, $table, $column ) use ( $wpdb ) {
+				return $wpdb->posts === $table && 'post_title' === $column ? 'utf8' : $charset;
+			},
+			10,
+			3
+		);
+		update_option( 'woocommerce_update_450_last_coupon_id', $coupon_id - 1 );
+
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+
+		$this->run_wc_update_450_sanitize_coupons_code_to_completion();
+
+		$this->assertSame( $expected_title, get_post( $coupon_id )->post_title );
+	}
+
+	/**
 	 * Create a coupon and write its title directly, as the 4.5.0 migration exists for titles WordPress would not store today.
 	 *
 	 * @param string $title Raw post title to store.

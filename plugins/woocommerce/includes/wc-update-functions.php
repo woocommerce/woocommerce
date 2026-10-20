@@ -2265,10 +2265,16 @@ function wc_update_450_sanitize_coupons_code() {
 	);
 
 	$codes_changed = false;
+	$encode_emoji  = in_array( $wpdb->get_col_charset( $wpdb->posts, 'post_title' ), array( 'utf8', 'utf8mb3' ), true );
 
 	foreach ( $coupons as $key => $data ) {
 		$coupon_id = intval( $data['ID'] );
 		$code      = wc_sanitize_coupon_code( $data['post_title'] );
+
+		// Like coupon saves, keep emoji encoded when the column can't store them.
+		if ( $encode_emoji ) {
+			$code = wp_encode_emoji( $code );
+		}
 
 		if ( ! empty( $code ) && $data['post_title'] !== $code ) {
 			$wpdb->update(
