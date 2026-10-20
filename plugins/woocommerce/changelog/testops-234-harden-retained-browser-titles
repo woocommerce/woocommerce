@@ -1,4 +1,3 @@
 Significance: patch
 Type: dev
-
-Make the product export, email settings preview and email editor review drawer browser titles assert what their names claim
+Comment: Tighten product export and email browser title tests; no production change.
