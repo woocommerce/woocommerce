@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import type { Request } from '@playwright/test';
 import { ApiClient, WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**
@@ -14,10 +15,19 @@ import { wpCLI } from '../../utils/cli';
 
 test.use( { storageState: ADMIN_STATE_PATH } );
 
+const isOrderFormPost = ( request: Request ) =>
+	request.method() === 'POST' && request.resourceType() === 'document';
+
+// The order form saves to admin.php with HPOS and post.php with posts storage.
+const isOrderSaveUrl = ( url: URL ) =>
+	url.pathname.endsWith( '/wp-admin/admin.php' ) ||
+	url.pathname.endsWith( '/wp-admin/post.php' );
+
 test.describe( 'Edit order', { tag: [ tags.SERVICES, tags.HPOS ] }, () => {
 	let orderId: number,
 		secondOrderId: number,
 		orderToCancel: number,
+		doubleClickOrderId: number,
 		customerId: number;
 	const username = `big.archie.${ Date.now() }`;
 
@@ -42,6 +52,14 @@ test.describe( 'Edit order', { tag: [ tags.SERVICES, tags.HPOS ] }, () => {
 			} )
 			.then( ( response: { data: { id: number } } ) => {
 				orderToCancel = response.data.id;
+			} );
+		await restApi
+			.post( `${ WC_API_PATH }/orders`, {
+				status: 'processing',
+				billing: { email: `${ username }@email.addr` },
+			} )
+			.then( ( response: { data: { id: number } } ) => {
+				doubleClickOrderId = response.data.id;
 			} );
 		await restApi
 			.post( `${ WC_API_PATH }/customers`, {
@@ -89,6 +107,10 @@ test.describe( 'Edit order', { tag: [ tags.SERVICES, tags.HPOS ] }, () => {
 		await restApi.delete( `${ WC_API_PATH }/orders/${ orderToCancel }`, {
 			force: true,
 		} );
+		await restApi.delete(
+			`${ WC_API_PATH }/orders/${ doubleClickOrderId }`,
+			{ force: true }
+		);
 		await restApi.delete( `${ WC_API_PATH }/customers/${ customerId }`, {
 			force: true,
 		} );
@@ -195,6 +217,54 @@ test.describe( 'Edit order', { tag: [ tags.SERVICES, tags.HPOS ] }, () => {
 		await expect( page.locator( 'input[name=order_date]' ) ).toHaveValue(
 			'2018-12-14'
 		);
+	} );
+
+	test( 'double-clicking Update only submits the order once', async ( {
+		page,
+	} ) => {
+		await page.goto(
+			`wp-admin/admin.php?page=wc-orders&action=edit&id=${ doubleClickOrderId }`
+		);
+
+		const requests: Request[] = [];
+		page.on( 'request', ( request ) => requests.push( request ) );
+
+		await page
+			.locator( 'select[name="wc_order_action"]' )
+			.selectOption( 'send_order_details' );
+
+		// Hold the save request so the second click lands on the same page, like a double-click on a slow site.
+		let releaseSave = () => {};
+		const saveReleased = new Promise< void >( ( resolve ) => {
+			releaseSave = resolve;
+		} );
+		await page.route( isOrderSaveUrl, async ( route ) => {
+			await saveReleased;
+			await route.continue().catch( () => undefined );
+		} );
+
+		// Mouse clicks don't wait for the pending navigation, unlike locator clicks.
+		const updateButton = ( await page
+			.locator( 'button.save_order' )
+			.boundingBox() )!;
+		const x = updateButton.x + updateButton.width / 2;
+		const y = updateButton.y + updateButton.height / 2;
+		const firstPost = page.waitForRequest( isOrderFormPost );
+		await page.mouse.click( x, y );
+		await firstPost;
+		await page.mouse.click( x, y );
+		releaseSave();
+
+		await expect(
+			page
+				.locator( 'div.notice-success > p' )
+				.filter( { hasText: /^Order updated/ } )
+		).toBeVisible();
+		const orderDetailsSentNotes = page
+			.locator( '#woocommerce-order-notes .note_content' )
+			.filter( { hasText: 'Order details manually sent to customer.' } );
+		await expect( orderDetailsSentNotes ).toHaveCount( 1 );
+		expect( requests.filter( isOrderFormPost ) ).toHaveLength( 1 );
 	} );
 
 	test( 'saving an order does not trigger a false unsaved-changes warning', async ( {
