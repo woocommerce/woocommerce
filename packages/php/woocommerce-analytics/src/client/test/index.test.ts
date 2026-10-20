@@ -14,7 +14,6 @@ jest.mock( '../init', () => {
 } );
 
 const addedListeners: Array< [ string, EventListenerOrEventListenerObject ] > = [];
-const startedIntervals: number[] = [];
 
 const getTrackingScripts = () =>
 	Array.from( document.querySelectorAll< HTMLScriptElement >( 'script' ) ).filter(
@@ -57,16 +56,16 @@ async function loadPage(
 	await flushPromises();
 }
 
-const flushPromises = () => new Promise( resolve => setTimeout( resolve, 0 ) );
+const flushPromises = () => jest.advanceTimersByTimeAsync( 0 );
 
 /**
- * Load the WP Consent API script that a delay-JS plugin held back, and give the client time to notice it.
+ * Load the WP Consent API script that a delay-JS plugin held back, and run the client's next check for it.
  *
  * @param hasConsent - What `wp_has_consent()` answers.
  */
 async function loadDelayedConsentApi( hasConsent: boolean | ( () => boolean ) ) {
 	window.wp_has_consent = typeof hasConsent === 'function' ? hasConsent : () => hasConsent;
-	await new Promise( resolve => setTimeout( resolve, 300 ) );
+	await jest.runOnlyPendingTimersAsync();
 }
 
 function changeConsent( value: 'allow' | 'deny' ) {
@@ -82,7 +81,9 @@ describe( 'client entry point', () => {
 		( window as unknown as { jQuery: ( callback: () => void ) => void } ).jQuery = callback =>
 			callback();
 
-		// Track listeners and intervals so one test's page cannot react to events dispatched in the next.
+		jest.useFakeTimers();
+
+		// Track listeners so one test's page cannot react to events dispatched in the next.
 		const addEventListener = document.addEventListener.bind( document );
 		jest.spyOn( document, 'addEventListener' ).mockImplementation(
 			( type: string, listener, options ) => {
@@ -90,13 +91,6 @@ describe( 'client entry point', () => {
 				addEventListener( type, listener, options );
 			}
 		);
-
-		const setInterval = window.setInterval.bind( window );
-		jest.spyOn( window, 'setInterval' ).mockImplementation( ( handler, timeout ) => {
-			const id = setInterval( handler, timeout );
-			startedIntervals.push( id );
-			return id;
-		} );
 	} );
 
 	afterEach( () => {
@@ -104,8 +98,7 @@ describe( 'client entry point', () => {
 			document.removeEventListener( type, listener )
 		);
 		addedListeners.length = 0;
-		startedIntervals.forEach( id => window.clearInterval( id ) );
-		startedIntervals.length = 0;
+		jest.useRealTimers();
 		jest.restoreAllMocks();
 		mockInitAnalytics.mockClear();
 		document.head.replaceChildren();
@@ -176,6 +169,18 @@ describe( 'client entry point', () => {
 		changeConsent( 'allow' );
 		await flushPromises();
 
+		expect( isTrackingScriptLoaded() ).toBe( true );
+		expect( mockInitAnalytics ).toHaveBeenCalledTimes( 1 );
+	} );
+
+	it( 'loads s.js and analytics once when consent is granted as a delayed WP Consent API script loads', async () => {
+		await loadPage();
+
+		window.wp_has_consent = () => true;
+		changeConsent( 'allow' );
+		await jest.runOnlyPendingTimersAsync();
+
+		expect( getTrackingScripts() ).toHaveLength( 1 );
 		expect( isTrackingScriptLoaded() ).toBe( true );
 		expect( mockInitAnalytics ).toHaveBeenCalledTimes( 1 );
 	} );

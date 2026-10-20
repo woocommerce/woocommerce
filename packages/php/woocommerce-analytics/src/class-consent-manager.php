@@ -40,7 +40,12 @@ class Consent_Manager {
 			return false;
 		}
 
-		if ( ! function_exists( 'wp_get_consent_type' ) || \wp_get_consent_type() ) {
+		// Only a stand-in defines wp_has_consent() alone, and it ships no script for the client to wait for.
+		if ( ! function_exists( 'wp_get_consent_type' ) ) {
+			return false;
+		}
+
+		if ( \wp_get_consent_type() ) {
 			return true;
 		}
 

@@ -344,6 +344,18 @@ class Universal_Page_Output_Test extends BaseTestCase {
 	}
 
 	/**
+	 * Test that the page output tells the client no consent plugin decides when only wp_has_consent() is defined.
+	 *
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
+	 */
+	public function test_page_output_reports_consent_unmanaged_with_only_wp_has_consent(): void {
+		require_once __DIR__ . '/mocks/wp-has-consent-function.php';
+
+		$this->assertStringContainsString( 'wcAnalytics.consentManaged = false;', $this->render_analytics_data() );
+	}
+
+	/**
 	 * Test that the page output tells the client a consent plugin decides when it sets a consent type.
 	 *
 	 * @runInSeparateProcess

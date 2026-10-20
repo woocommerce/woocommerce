@@ -15,7 +15,7 @@ describe( 'ConsentManager.waitForConsentType', () => {
 		delete window.wp_consent_type;
 	} );
 
-	it( 'runs right away when no consent plugin decides', () => {
+	it( 'runs right away without the WP Consent API', () => {
 		window.waitfor_consent_hook = '1';
 		const callback = jest.fn();
 
@@ -94,11 +94,11 @@ describe( 'ConsentManager with a delayed WP Consent API script', () => {
 		const callback = jest.fn();
 
 		new ConsentManager().waitForConsentApi( callback );
-		jest.advanceTimersByTime( 1000 );
+		jest.runOnlyPendingTimers();
 		expect( callback ).not.toHaveBeenCalled();
 
 		window.wp_has_consent = () => false;
-		jest.advanceTimersByTime( 1000 );
+		jest.runOnlyPendingTimers();
 
 		expect( callback ).toHaveBeenCalledTimes( 1 );
 	} );

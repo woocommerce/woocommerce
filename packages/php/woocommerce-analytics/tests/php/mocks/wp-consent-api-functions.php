@@ -5,17 +5,7 @@
  * @package automattic/woocommerce-analytics
  */
 
-if ( ! function_exists( 'wp_has_consent' ) ) {
-	/**
-	 * Mock of the WP Consent API check.
-	 *
-	 * @param string $category Consent category.
-	 * @return bool
-	 */
-	function wp_has_consent( $category ) { // phpcs:ignore Universal.Files.SeparateFunctionsFromOO.Mixed, VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
-		return false;
-	}
-}
+require_once __DIR__ . '/wp-has-consent-function.php';
 
 if ( ! function_exists( 'wp_get_consent_type' ) ) {
 	/**
