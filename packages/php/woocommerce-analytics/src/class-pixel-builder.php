@@ -187,10 +187,12 @@ class Pixel_Builder {
 	 * Indexed arrays of scalars become a comma-joined string; other arrays and objects become JSON.
 	 * Not URL-encoded here: http_build_query() encodes the whole URL, so encoding twice stores `%2F` in Tracks.
 	 *
+	 * @internal Shared with WC_Analytics_Tracking's payload budget; the format may change.
+	 *
 	 * @since 0.18.1
 	 *
 	 * @param mixed $value Property value.
-	 * @return mixed The scalar it serializes to; scalars and null are returned as-is.
+	 * @return mixed The scalar it serializes to: '' for an empty array or a value JSON cannot encode; scalars and null as-is.
 	 */
 	public static function flatten_property_value( $value ) {
 		if ( ! is_array( $value ) && ! is_object( $value ) ) {
