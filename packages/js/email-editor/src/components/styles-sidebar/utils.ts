@@ -161,5 +161,6 @@ export const getFontFamilyFaces = (
 			String( face.fontWeight ) === fontWeight
 	);
 
-	return isOffered ? faces : [ ...faces, { fontStyle, fontWeight } ];
+	// First, because core skips single weights listed after a variable weight range.
+	return isOffered ? faces : [ { fontStyle, fontWeight }, ...faces ];
 };

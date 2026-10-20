@@ -193,8 +193,25 @@ describe( 'getFontFamilyFaces', () => {
 				fontWeight: '300',
 			} )
 		).toEqual( [
-			...regularAndBold,
 			{ fontStyle: 'normal', fontWeight: '300' },
+			...regularAndBold,
+		] );
+	} );
+
+	it( 'puts a saved weight before a variable weight range', () => {
+		const variable = {
+			slug: 'variable',
+			fontFamily: 'Variable, sans-serif',
+			fontFace: [ { fontStyle: 'normal', fontWeight: '300 700' } ],
+		};
+		expect(
+			getFontFamilyFaces( [ variable ], {}, variable.fontFamily, {
+				fontStyle: 'normal',
+				fontWeight: '900',
+			} )
+		).toEqual( [
+			{ fontStyle: 'normal', fontWeight: '900' },
+			...variable.fontFace,
 		] );
 	} );
 
