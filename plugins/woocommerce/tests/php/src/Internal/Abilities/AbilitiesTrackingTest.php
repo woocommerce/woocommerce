@@ -24,7 +24,7 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	private const NO_SCHEMA_ABILITY_ID = 'woocommerce/tracking-test-no-schema';
 
 	/**
-	 * Stand-ins for the MCP Adapter's discovery abilities, which aren't loaded in unit tests.
+	 * The MCP Adapter's discovery abilities. The tests register stand-ins when the Adapter isn't loaded.
 	 */
 	private const ADAPTER_DISCOVERY_IDS = array( 'mcp-adapter/get-ability-info', 'mcp-adapter/discover-abilities' );
 
@@ -95,6 +95,13 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	private array $original_server = array();
 
 	/**
+	 * Adapter discovery stand-ins this test registered, so real MCP Adapter abilities are left alone.
+	 *
+	 * @var string[]
+	 */
+	private array $registered_adapter_ids = array();
+
+	/**
 	 * Create shared fixtures.
 	 *
 	 * @param \WP_UnitTest_Factory $factory Factory.
@@ -146,7 +153,7 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 			}
 
 			// The abilities registry is a singleton that outlives the test.
-			foreach ( array_merge( array( self::ABILITY_ID, self::INNER_ABILITY_ID, self::UNTRACKED_ABILITY_ID, self::LONG_ABILITY_ID, self::NO_SCHEMA_ABILITY_ID ), self::ADAPTER_DISCOVERY_IDS ) as $ability_id ) {
+			foreach ( array_merge( array( self::ABILITY_ID, self::INNER_ABILITY_ID, self::UNTRACKED_ABILITY_ID, self::LONG_ABILITY_ID, self::NO_SCHEMA_ABILITY_ID ), $this->registered_adapter_ids ) as $ability_id ) {
 				if ( function_exists( 'wp_has_ability' ) && wp_has_ability( $ability_id ) ) {
 					wp_unregister_ability( $ability_id );
 				}
@@ -1282,6 +1289,10 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 				wp_register_ability( $ability_id, $args );
 			}
 			foreach ( self::ADAPTER_DISCOVERY_IDS as $ability_id ) {
+				if ( wp_has_ability( $ability_id ) ) {
+					continue;
+				}
+				$this->registered_adapter_ids[] = $ability_id;
 				wp_register_ability(
 					$ability_id,
 					array(
