@@ -45,7 +45,7 @@ class ContractViewTest extends TestCase {
 			'discount_total'       => '1.00',
 			'shipping_total'       => '5.00',
 			'tax_total'            => '2.50',
-			'schedule_source'      => Contract::SCHEDULE_SOURCE_GATEWAY,
+			'schedule_source'      => 'my_gateway',
 		);
 	}
 
@@ -72,7 +72,7 @@ class ContractViewTest extends TestCase {
 		$this->assertSame( '1.00000000', $view->get_discount_total() );
 		$this->assertSame( '5.00000000', $view->get_shipping_total() );
 		$this->assertSame( '2.50000000', $view->get_tax_total() );
-		$this->assertSame( Contract::SCHEDULE_SOURCE_GATEWAY, $view->get_schedule_source() );
+		$this->assertSame( 'my_gateway', $view->get_schedule_source() );
 	}
 
 	public function test_optional_fields_read_as_null(): void {

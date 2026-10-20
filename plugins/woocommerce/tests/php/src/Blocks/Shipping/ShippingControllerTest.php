@@ -93,13 +93,12 @@ class ShippingControllerTest extends \WC_Unit_Test_Case {
 
 		try {
 			$woocommerce = $this->backup_wc;
+			WC()->session->set( 'chosen_shipping_methods', null );
 			foreach ( $this->previous_shipping_address as $key => $value ) {
 				WC()->customer->{"set_shipping_{$key}"}( $value );
 			}
-			// A test may null WC()->shipping, which leaves a dynamic property on the WC singleton,
-			// and register a lone pickup method on the shared WC_Shipping. Undo both.
+			// A test may null WC()->shipping, which leaves a dynamic property on the WC singleton.
 			unset( WC()->shipping );
-			WC()->shipping()->unregister_shipping_methods();
 		} finally {
 			parent::tearDown();
 		}
@@ -315,6 +314,91 @@ class ShippingControllerTest extends \WC_Unit_Test_Case {
 		$location = $this->shipping_controller->filter_order_tax_location( $default_location, $order );
 
 		$this->assertSame( $default_location, $location, 'Without a captured pickup address the location should be unchanged.' );
+	}
+
+	/**
+	 * @testdox filter_taxable_address does not tax a zone local_pickup rate at the pickup location sharing its instance id.
+	 */
+	public function test_filter_taxable_address_ignores_pickup_locations_for_zone_local_pickup(): void {
+		$this->save_pickup_locations();
+		WC()->session->set( 'chosen_shipping_methods', array( 'local_pickup:1' ) );
+
+		$address = array( 'US', 'CA', '90210', 'Beverly Hills' );
+
+		$this->assertSame( $address, $this->shipping_controller->filter_taxable_address( $address ), 'A zone local_pickup instance id is not a pickup location index.' );
+	}
+
+	/**
+	 * @testdox filter_taxable_address returns the chosen pickup location address for pickup_location rates.
+	 */
+	public function test_filter_taxable_address_returns_chosen_pickup_location_address(): void {
+		$this->save_pickup_locations();
+		WC()->session->set( 'chosen_shipping_methods', array( 'pickup_location:1' ) );
+
+		$this->assertSame(
+			array( 'US', 'NY', '10001', 'New York' ),
+			$this->shipping_controller->filter_taxable_address( array( 'US', 'CA', '90210', 'Beverly Hills' ) )
+		);
+	}
+
+	/**
+	 * @testdox filter_taxable_address tolerates a pickup location address without a state.
+	 */
+	public function test_filter_taxable_address_handles_pickup_location_without_state(): void {
+		update_option(
+			'pickup_location_pickup_locations',
+			array(
+				array(
+					'name'    => 'Paris',
+					'address' => array(
+						'country'  => 'FR',
+						'postcode' => '75001',
+						'city'     => 'Paris',
+					),
+					'details' => '',
+					'enabled' => true,
+				),
+			)
+		);
+		WC()->session->set( 'chosen_shipping_methods', array( 'pickup_location:0' ) );
+
+		$this->assertSame(
+			array( 'FR', '', '75001', 'Paris' ),
+			$this->shipping_controller->filter_taxable_address( array( 'US', 'CA', '90210', 'Beverly Hills' ) )
+		);
+	}
+
+	/**
+	 * Saves two pickup locations, Austin at index 0 and New York at index 1.
+	 */
+	private function save_pickup_locations(): void {
+		update_option(
+			'pickup_location_pickup_locations',
+			array(
+				array(
+					'name'    => 'Austin',
+					'address' => array(
+						'country'  => 'US',
+						'state'    => 'TX',
+						'postcode' => '73301',
+						'city'     => 'Austin',
+					),
+					'details' => '',
+					'enabled' => true,
+				),
+				array(
+					'name'    => 'New York',
+					'address' => array(
+						'country'  => 'US',
+						'state'    => 'NY',
+						'postcode' => '10001',
+						'city'     => 'New York',
+					),
+					'details' => '',
+					'enabled' => true,
+				),
+			)
+		);
 	}
 
 	/**
@@ -683,6 +767,210 @@ class ShippingControllerTest extends \WC_Unit_Test_Case {
 				},
 				'the default locale hides it',
 			),
+		);
+	}
+
+
+	/**
+	 * The classic cart hides the whole shipping section through `WC_Cart::show_shipping()` instead,
+	 * because there pickup is one of the shipping methods rather than a separate choice.
+	 *
+	 * @testdox The classic cart is left alone, whatever the setting says.
+	 */
+	public function test_the_classic_cart_is_left_alone(): void {
+		WC()->cart->cart_context = 'shortcode';
+		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
+
+		$packages = $this->shipping_controller->remove_shipping_if_no_address(
+			array( $this->package_offering( array( 'flat_rate:1', 'pickup_location:0' ) ) )
+		);
+
+		$this->assertSame(
+			array( 'flat_rate:1', 'pickup_location:0' ),
+			array_keys( $packages[0]['rates'] ),
+			'The classic cart decides this for itself and should not be filtered here.'
+		);
+	}
+
+	/**
+	 * @testdox Every package is hidden, not just the first one.
+	 */
+	public function test_every_package_is_hidden_not_just_the_first(): void {
+		$this->shopper_is_on_the_block_checkout();
+		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
+
+		$packages = $this->shipping_controller->remove_shipping_if_no_address(
+			array(
+				$this->package_offering( array( 'flat_rate:1', 'pickup_location:0' ) ),
+				$this->package_offering( array( 'flat_rate:2', 'pickup_location:0' ) ),
+			)
+		);
+
+		$this->assertCount( 2, $packages, 'Both packages should still be there, with less in them.' );
+		$this->assertSame( array( 'pickup_location:0' ), array_keys( $packages[0]['rates'] ), 'The first package should be stripped.' );
+		$this->assertSame( array( 'pickup_location:0' ), array_keys( $packages[1]['rates'] ), 'And so should the second.' );
+	}
+
+	/**
+	 * `WC()->customer` starts out null and is only built once a session exists, so this filter can
+	 * run with no customer to ask. With nothing known about where the shopper is, there is no
+	 * address, and the setting says to wait for one.
+	 *
+	 * @testdox With no customer to ask, delivery is hidden rather than shown.
+	 */
+	public function test_delivery_is_hidden_when_there_is_no_customer_to_ask(): void {
+		$this->shopper_is_on_the_block_checkout();
+		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
+
+		$customer      = WC()->customer;
+		WC()->customer = null;
+
+		try {
+			$packages = $this->shipping_controller->remove_shipping_if_no_address(
+				array( $this->package_offering( array( 'flat_rate:1', 'pickup_location:0' ) ) )
+			);
+		} finally {
+			WC()->customer = $customer;
+		}
+
+		$this->assertSame(
+			array( 'pickup_location:0' ),
+			array_keys( $packages[0]['rates'] ),
+			'Without a customer there is no address to have entered, so delivery should stay hidden.'
+		);
+	}
+
+	/**
+	 * This filter checks `instanceof WC_Shipping_Rate` before reading the rate, so an entry an
+	 * extension added that is not a rate is dropped.
+	 * On a real request this guard is never reached: `filter_shipping_packages()`
+	 * runs first on the same hook and fatals on the same entry. It only protects direct calls.
+	 *
+	 * @testdox A non-rate entry in the rates array does not survive the hiding.
+	 */
+	public function test_only_real_rates_survive_the_hiding(): void {
+		$this->shopper_is_on_the_block_checkout();
+		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
+
+		$package                               = $this->package_offering( array( 'flat_rate:1', 'pickup_location:0' ) );
+		$package['rates']['pickup_location:9'] = 'not a rate at all';
+
+		$packages = $this->shipping_controller->remove_shipping_if_no_address( array( $package ) );
+
+		$this->assertSame(
+			array( 'pickup_location:0' ),
+			array_keys( $packages[0]['rates'] ),
+			'Something that only looks like a pickup rate by its key should not be kept.'
+		);
+	}
+
+	/**
+	 * The whole order is collected in one go, so it only makes sense to offer collection when every
+	 * package can be collected. That is not something the settings screen says; it follows from an
+	 * order having a single tax location, which the method's own docblock gives as the reason.
+	 *
+	 * @testdox Collection stays on offer while every package can be collected.
+	 */
+	public function test_collection_stays_while_every_package_can_be_collected(): void {
+		$this->shopper_is_on_the_block_checkout();
+
+		$packages = $this->shipping_controller->filter_shipping_packages(
+			array(
+				$this->package_offering( array( 'flat_rate:1', 'pickup_location:0' ) ),
+				$this->package_offering( array( 'flat_rate:2', 'pickup_location:0' ) ),
+			)
+		);
+
+		$this->assertSame( array( 'flat_rate:1', 'pickup_location:0' ), array_keys( $packages[0]['rates'] ), 'Nothing should be withdrawn from the first package.' );
+		$this->assertSame( array( 'flat_rate:2', 'pickup_location:0' ), array_keys( $packages[1]['rates'] ), 'Nor from the second.' );
+	}
+
+	/**
+	 * @testdox When one package cannot be collected, collection disappears from the whole order.
+	 */
+	public function test_one_uncollectable_package_withdraws_collection_from_the_order(): void {
+		$this->shopper_is_on_the_block_checkout();
+
+		$packages = $this->shipping_controller->filter_shipping_packages(
+			array(
+				$this->package_offering( array( 'flat_rate:1', 'pickup_location:0' ) ),
+				$this->package_offering( array( 'flat_rate:2' ) ),
+			)
+		);
+
+		$this->assertSame( array( 'flat_rate:1' ), array_keys( $packages[0]['rates'] ), 'The collectable package should lose collection too, or the order could not be collected in one go.' );
+		$this->assertSame( array( 'flat_rate:2' ), array_keys( $packages[1]['rates'] ), 'The uncollectable package is left as it was.' );
+	}
+
+	/**
+	 * A package can come back with nothing on offer, for example when nothing in it can be shipped
+	 * to the address given.
+	 *
+	 * @testdox A package offering nothing at all counts as one that cannot be collected.
+	 */
+	public function test_a_package_with_no_rates_counts_as_uncollectable(): void {
+		$this->shopper_is_on_the_block_checkout();
+
+		$packages = $this->shipping_controller->filter_shipping_packages(
+			array(
+				$this->package_offering( array( 'pickup_location:0' ) ),
+				$this->package_offering( array() ),
+			)
+		);
+
+		$this->assertSame( array(), array_keys( $packages[0]['rates'] ), 'A package with no options at all cannot be collected, so collection goes from the order.' );
+		$this->assertSame( array(), array_keys( $packages[1]['rates'] ), 'And the empty package is still an empty package.' );
+	}
+
+	/**
+	 * What the shopper ends up with when both rules apply at once, through the filter the two are
+	 * really attached to rather than by calling them in a chosen order.
+	 *
+	 * @testdox With costs hidden, no address and a package that cannot be collected, nothing is offered.
+	 */
+	public function test_an_uncollectable_package_leaves_an_addressless_shopper_with_nothing(): void {
+		$this->shopper_is_on_the_block_checkout();
+		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
+
+		$packages = apply_filters(
+			'woocommerce_shipping_packages',
+			array(
+				$this->package_offering( array( 'flat_rate:1', 'pickup_location:0' ) ),
+				$this->package_offering( array( 'flat_rate:2' ) ),
+			)
+		);
+
+		$this->assertSame( array(), array_keys( $packages[0]['rates'] ), 'Collection went because the order cannot be collected, and delivery went because there is no address.' );
+		$this->assertSame( array(), array_keys( $packages[1]['rates'] ), 'The same is true of the package that was never collectable.' );
+	}
+
+	/**
+	 * Unlike the sibling filter above it, this one asks no question about where the shopper is, so
+	 * the classic cart loses collection in the same way. The reason holds there too: the classic
+	 * cart also taxes a collected order at one place, the shop base. The collection method here is
+	 * `local_pickup` rather than `pickup_location`, because that is what a classic cart offers.
+	 *
+	 * @testdox On the classic cart too, one uncollectable package withdraws collection.
+	 */
+	public function test_the_classic_cart_also_loses_collection_for_the_whole_order(): void {
+		WC()->cart->cart_context = 'shortcode';
+
+		$packages = $this->shipping_controller->filter_shipping_packages(
+			array(
+				$this->package_offering( array( 'flat_rate:1', 'local_pickup:3' ) ),
+				$this->package_offering( array( 'flat_rate:2' ) ),
+			)
+		);
+
+		$this->assertSame(
+			array( 'flat_rate:1' ),
+			array_keys( $packages[0]['rates'] ),
+			'Collection should go from the classic cart as well, since this filter does not ask which cart it is.'
+		);
+		$this->assertSame(
+			array( 'flat_rate:2' ),
+			array_keys( $packages[1]['rates'] ),
+			'The package that was never collectable is left as it was.'
 		);
 	}
 }
