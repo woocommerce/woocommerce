@@ -131,7 +131,9 @@ With WP Consent API active, `stats.wp.com/s-*.js`, which sets the `tk_*` referre
 
 Withdrawing statistics consent expires the `tk_*` cookies on the page and drops events not yet sent. A page loaded with statistics consent denied expires any `tk_*` cookies left from an earlier visit.
 
-When WP Consent API is not available, the package defaults to allowing all tracking to maintain backward compatibility.
+If an optimization plugin delays the WP Consent API script, for example until the visitor interacts with the page, nothing is tracked until that script loads and reports statistics consent, and a visit where it never loads is not tracked. This applies when a consent plugin sets a consent type through `wp_get_consent_type` or sets it later in the browser through `wp_consent_api_waitfor_consent_hook`. Both are read into the cacheable page, so they must resolve to the same value for every request. A consent plugin that sets `window.wp_consent_type` only in JavaScript, without either filter, is not detected, and tracking starts before the delayed script loads.
+
+When WP Consent API is not active, the package defaults to allowing all tracking to maintain backward compatibility.
 
 ## Tracked Events
 

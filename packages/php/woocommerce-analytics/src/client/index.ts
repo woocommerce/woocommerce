@@ -34,12 +34,14 @@ jQuery( () => {
 		}
 	} );
 
-	consentManager.waitForConsentType( () => {
-		if ( consentManager.hasAnalyticsConsent() ) {
-			startTracking();
-		} else {
-			// Consent may have been withdrawn on a page without analytics, after an earlier visit set these.
-			clearTrackingCookies();
-		}
-	} );
+	consentManager.waitForConsentApi( () =>
+		consentManager.waitForConsentType( () => {
+			if ( consentManager.hasAnalyticsConsent() ) {
+				startTracking();
+			} else {
+				// Consent may have been withdrawn on a page without analytics, after an earlier visit set these.
+				clearTrackingCookies();
+			}
+		} )
+	);
 } );
