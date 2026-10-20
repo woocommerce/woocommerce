@@ -9,7 +9,6 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Unit\Core\Entity;
 
-use LogicException;
 use PHPUnit\Framework\TestCase;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
@@ -18,12 +17,14 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\ItemsSnapshot;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ValidationErrorCode;
 use Automattic\WooCommerce\SubscriptionsEngine\Tests\Unit\AssertsInvalidInput;
+use Automattic\WooCommerce\SubscriptionsEngine\Tests\Unit\AssertsInternalInvariant;
 
 /**
  * @covers \Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle
  */
 class CycleTest extends TestCase {
 
+	use AssertsInternalInvariant;
 	use AssertsInvalidInput;
 
 	protected function tearDown(): void {
@@ -291,16 +292,22 @@ class CycleTest extends TestCase {
 		$cycle = $this->make_pending();
 		$cycle->set_plan_snapshot( PlanSnapshot::from_array( array( 'selling_plan_id' => 9 ) ) );
 
-		$this->expectException( LogicException::class );
-		$cycle->set_plan_snapshot( PlanSnapshot::from_array( array( 'selling_plan_id' => 10 ) ) );
+		$this->assert_internal_invariant(
+			static function () use ( $cycle ): void {
+				$cycle->set_plan_snapshot( PlanSnapshot::from_array( array( 'selling_plan_id' => 10 ) ) );
+			}
+		);
 	}
 
 	public function test_items_snapshot_vo_cannot_be_replaced(): void {
 		$cycle = $this->make_pending();
 		$cycle->set_items_snapshot( ItemsSnapshot::from_items( array() ) );
 
-		$this->expectException( LogicException::class );
-		$cycle->set_items_snapshot( ItemsSnapshot::from_items( array( array( 'product_id' => 1 ) ) ) );
+		$this->assert_internal_invariant(
+			static function () use ( $cycle ): void {
+				$cycle->set_items_snapshot( ItemsSnapshot::from_items( array( array( 'product_id' => 1 ) ) ) );
+			}
+		);
 	}
 
 	public function test_from_storage_hydrates_a_persisted_cycle(): void {
@@ -425,6 +432,47 @@ class CycleTest extends TestCase {
 		);
 	}
 
+	public function test_create_reports_every_invalid_attribute(): void {
+		$this->assert_invalid_inputs(
+			static function (): void {
+				Cycle::create(
+					array(
+						'contract_id' => 0,
+						'status'      => 'Not A Slug',
+					)
+				);
+			},
+			array(
+				array( ValidationErrorCode::OUT_OF_BOUNDS, 'contract_id', array( 'min' => 1 ) ),
+				array( ValidationErrorCode::REQUIRED, 'starts_at_gmt', array() ),
+				array( ValidationErrorCode::REQUIRED, 'ends_at_gmt', array() ),
+				array( ValidationErrorCode::REQUIRED, 'currency', array() ),
+				array( ValidationErrorCode::INVALID_VALUE, 'status', array() ),
+			)
+		);
+	}
+
+	public function test_create_reports_an_unregistered_status_with_the_other_errors(): void {
+		$this->assert_invalid_inputs(
+			static function (): void {
+				Cycle::create(
+					array(
+						'contract_id'   => 7,
+						'starts_at_gmt' => '2026-02-01 00:00:00',
+						'ends_at_gmt'   => '2026-03-01 00:00:00',
+						'currency'      => 'USD',
+						'count'         => 0,
+						'status'        => 'never-registered',
+					)
+				);
+			},
+			array(
+				array( ValidationErrorCode::OUT_OF_BOUNDS, 'count', array( 'min' => 1 ) ),
+				array( ValidationErrorCode::NOT_REGISTERED, 'status', array( 'value' => 'never-registered' ) ),
+			)
+		);
+	}
+
 	public function test_create_without_a_sequence_no_leaves_it_to_the_append(): void {
 		$this->assertTrue( $this->make_unpositioned()->awaits_sequence_no() );
 		$this->assertFalse( $this->make_pending()->awaits_sequence_no() );
@@ -439,9 +487,11 @@ class CycleTest extends TestCase {
 	}
 
 	public function test_an_unassigned_sequence_no_cannot_be_read(): void {
-		$this->expectException( LogicException::class );
-
-		$this->make_unpositioned()->get_sequence_no();
+		$this->assert_internal_invariant(
+			function (): void {
+				$this->make_unpositioned()->get_sequence_no();
+			}
+		);
 	}
 
 	public function test_the_sequence_no_can_be_assigned_once(): void {
@@ -465,9 +515,11 @@ class CycleTest extends TestCase {
 	}
 
 	public function test_an_assigned_sequence_no_cannot_be_reassigned(): void {
-		$this->expectException( LogicException::class );
-
-		$this->make_pending()->assign_sequence_no( 2 );
+		$this->assert_internal_invariant(
+			function (): void {
+				$this->make_pending()->assign_sequence_no( 2 );
+			}
+		);
 	}
 
 	public function test_id_can_be_stamped_after_persistence(): void {

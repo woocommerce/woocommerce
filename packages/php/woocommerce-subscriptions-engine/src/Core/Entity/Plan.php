@@ -19,8 +19,9 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Plan entity.
  *
- * Construct via {@see self::create()} for a new (unsaved) plan or
- * {@see self::from_storage()} when hydrating a stored row.
+ * Construct via {@see self::create()} for a new (unsaved) plan,
+ * {@see self::from_storage()} when hydrating a stored row, or {@see self::draft()}
+ * for the unchecked view of a refused write.
  */
 final class Plan {
 
@@ -88,7 +89,7 @@ final class Plan {
 	private $date_updated_gmt;
 
 	/**
-	 * Use {@see self::create()} or {@see self::from_storage()}. Coerces each attribute
+	 * Use {@see self::create()}, {@see self::from_storage()} or {@see self::draft()}. Coerces each attribute
 	 * to its property type; unknown keys are ignored, missing keys take the default.
 	 *
 	 * @param array<string, mixed> $data Raw attributes keyed by property name.
@@ -107,6 +108,7 @@ final class Plan {
 
 	/**
 	 * Build a new, unsaved plan. `extension_slug` and a non-empty `name` are required.
+	 * Every invalid attribute is reported in one exception.
 	 *
 	 * @param array<string, mixed> $args Keys `name`, `status` (default {@see PlanStatus::ACTIVE}), `extension_slug`, `billing_policy`, `pricing_policy`, `delivery_policy`.
 	 * @throws InvalidInputException If the plan attributes are not valid.
@@ -116,17 +118,39 @@ final class Plan {
 		unset( $args['id'], $args['date_created_gmt'], $args['date_updated_gmt'] );
 
 		// Checked before construction, which coerces a non-array payload to null.
-		self::assert_policy( 'billing_policy', $args['billing_policy'] ?? null );
-		self::assert_policy( 'pricing_policy', $args['pricing_policy'] ?? null );
-		self::assert_policy( 'delivery_policy', $args['delivery_policy'] ?? null );
+		$policy_errors = array(
+			self::get_policy_error( 'billing_policy', $args['billing_policy'] ?? null ),
+			self::get_policy_error( 'pricing_policy', $args['pricing_policy'] ?? null ),
+			self::get_policy_error( 'delivery_policy', $args['delivery_policy'] ?? null ),
+		);
 
 		$plan = new self( $args );
 
-		self::assert_name( $plan->name );
-		self::assert_status( $plan->status );
-		self::assert_extension_slug( $plan->extension_slug );
+		$errors = array_filter(
+			array_merge(
+				array(
+					self::get_name_error( $plan->name ),
+					self::get_status_error( $plan->status ),
+					self::get_extension_slug_error( $plan->extension_slug ),
+				),
+				$policy_errors
+			)
+		);
+		if ( array() !== $errors ) {
+			throw InvalidInputException::from_errors( array_values( $errors ) );
+		}
 
 		return $plan;
+	}
+
+	/**
+	 * Build a plan from raw attributes without checking them: the would-be plan of a
+	 * refused write, shown to validation callbacks. Never store it.
+	 *
+	 * @param array<string, mixed> $data Raw attributes keyed by property name.
+	 */
+	public static function draft( array $data ): self {
+		return new self( $data );
 	}
 
 	/**
@@ -171,7 +195,11 @@ final class Plan {
 	 * @throws InvalidInputException If the name is empty.
 	 */
 	public function set_name( string $name ): void {
-		self::assert_name( $name );
+		$error = self::get_name_error( $name );
+		if ( null !== $error ) {
+			throw $error;
+		}
+
 		$this->name = $name;
 	}
 
@@ -194,7 +222,11 @@ final class Plan {
 			return;
 		}
 
-		self::assert_status( $status );
+		$error = self::get_status_error( $status );
+		if ( null !== $error ) {
+			throw $error;
+		}
+
 		$this->status = $status;
 	}
 
@@ -221,7 +253,11 @@ final class Plan {
 	 * @throws InvalidInputException If the payload is not an object (string-keyed array).
 	 */
 	public function set_billing_policy( ?array $billing_policy ): void {
-		self::assert_policy( 'billing_policy', $billing_policy );
+		$error = self::get_policy_error( 'billing_policy', $billing_policy );
+		if ( null !== $error ) {
+			throw $error;
+		}
+
 		$this->billing_policy = Coercion::coerce_nullable_string_keyed( $billing_policy );
 	}
 
@@ -241,7 +277,11 @@ final class Plan {
 	 * @throws InvalidInputException If the payload is not an object (string-keyed array).
 	 */
 	public function set_pricing_policy( ?array $pricing_policy ): void {
-		self::assert_policy( 'pricing_policy', $pricing_policy );
+		$error = self::get_policy_error( 'pricing_policy', $pricing_policy );
+		if ( null !== $error ) {
+			throw $error;
+		}
+
 		$this->pricing_policy = Coercion::coerce_nullable_string_keyed( $pricing_policy );
 	}
 
@@ -261,7 +301,11 @@ final class Plan {
 	 * @throws InvalidInputException If the payload is not an object (string-keyed array).
 	 */
 	public function set_delivery_policy( ?array $delivery_policy ): void {
-		self::assert_policy( 'delivery_policy', $delivery_policy );
+		$error = self::get_policy_error( 'delivery_policy', $delivery_policy );
+		if ( null !== $error ) {
+			throw $error;
+		}
+
 		$this->delivery_policy = Coercion::coerce_nullable_string_keyed( $delivery_policy );
 	}
 
@@ -315,69 +359,73 @@ final class Plan {
 	}
 
 	/**
-	 * Refuse an empty or whitespace-only name.
+	 * The error for an empty or whitespace-only name, or null.
 	 *
 	 * @param string $name Name to check.
-	 * @throws InvalidInputException If `$name` is empty.
 	 */
-	private static function assert_name( string $name ): void {
+	private static function get_name_error( string $name ): ?InvalidInputException {
 		if ( '' === trim( $name ) ) {
-			throw new InvalidInputException( ValidationErrorCode::REQUIRED, 'name', 'Plan: name is required and must be a non-empty string.' );
+			return new InvalidInputException( ValidationErrorCode::REQUIRED, 'name', 'Plan: name is required and must be a non-empty string.' );
 		}
+
+		return null;
 	}
 
 	/**
-	 * Refuse a status that is not a registered plan status.
+	 * The error for a status that is not a registered plan status, or null.
 	 *
 	 * @param string $status Status to check.
-	 * @throws InvalidInputException If `$status` is not registered.
 	 */
-	private static function assert_status( string $status ): void {
+	private static function get_status_error( string $status ): ?InvalidInputException {
 		if ( ! PlanStatus::is_registered( $status ) ) {
-			throw new InvalidInputException(
+			return new InvalidInputException(
 				ValidationErrorCode::NOT_REGISTERED,
 				'status',
 				sprintf( 'Plan: status "%s" is not registered.', $status ),
 				array( 'value' => $status )
 			);
 		}
+
+		return null;
 	}
 
 	/**
-	 * Refuse a missing or empty owning extension slug.
+	 * The error for a missing or empty owning extension slug, or null.
 	 *
 	 * @param string|null $extension_slug Extension slug to check.
-	 * @throws InvalidInputException If `$extension_slug` is null or empty.
 	 */
-	private static function assert_extension_slug( ?string $extension_slug ): void {
+	private static function get_extension_slug_error( ?string $extension_slug ): ?InvalidInputException {
 		if ( null === $extension_slug || '' === $extension_slug ) {
-			throw new InvalidInputException( ValidationErrorCode::REQUIRED, 'extension_slug', 'Plan: extension_slug is required and must be a non-empty string.' );
+			return new InvalidInputException( ValidationErrorCode::REQUIRED, 'extension_slug', 'Plan: extension_slug is required and must be a non-empty string.' );
 		}
+
+		return null;
 	}
 
 	/**
-	 * Refuse a policy payload that is not an object or null. Any keyed array is an object,
-	 * including numeric keys (a JSON `{"123": ...}` decodes to an int key); only a list (keys
-	 * 0..n-1), which would come back as a JSON array, is refused. An empty array is accepted
-	 * (a JSON `{}` decodes to it). The same rule for each of the three policies.
+	 * The error for a policy payload that is not an object or null, or null. Any keyed
+	 * array is an object, including numeric keys (a JSON `{"123": ...}` decodes to an int
+	 * key); only a list (keys 0..n-1), which would come back as a JSON array, is refused.
+	 * An empty array is accepted (a JSON `{}` decodes to it). One rule for the three policies.
 	 *
 	 * @param string $field Policy field name, reported as the error's field.
 	 * @param mixed  $value Candidate payload.
-	 * @throws InvalidInputException If the value is a non-empty list or not an array.
 	 */
-	private static function assert_policy( string $field, $value ): void {
+	private static function get_policy_error( string $field, $value ): ?InvalidInputException {
 		if ( null === $value ) {
-			return;
+			return null;
 		}
 
 		$is_list = is_array( $value ) && array() !== $value && array_keys( $value ) === range( 0, count( $value ) - 1 );
 		if ( ! is_array( $value ) || $is_list ) {
-			throw new InvalidInputException(
+			return new InvalidInputException(
 				ValidationErrorCode::INVALID_TYPE,
 				$field,
 				sprintf( 'Plan: %s must be an object or null.', $field ),
 				array( 'type' => 'object' )
 			);
 		}
+
+		return null;
 	}
 }

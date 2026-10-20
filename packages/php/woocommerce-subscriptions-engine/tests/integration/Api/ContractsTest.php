@@ -390,7 +390,10 @@ class ContractsTest extends EngineIntegrationTestCase {
 			static function () use ( $id ): void {
 				Contracts::add_cycle( $id, array( 'currency' => 'USD' ) );
 			},
-			array( array( ValidationErrorCode::REQUIRED, 'starts_at_gmt' ) )
+			array(
+				array( ValidationErrorCode::REQUIRED, 'starts_at_gmt' ),
+				array( ValidationErrorCode::REQUIRED, 'ends_at_gmt' ),
+			)
 		);
 		$this->assert_validation_errors(
 			static function () use ( $cycle ): void {

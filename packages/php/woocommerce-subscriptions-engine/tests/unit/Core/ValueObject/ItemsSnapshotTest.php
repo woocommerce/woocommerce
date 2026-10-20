@@ -9,14 +9,16 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Unit\Core\ValueObject;
 
-use LogicException;
 use PHPUnit\Framework\TestCase;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\ItemsSnapshot;
+use Automattic\WooCommerce\SubscriptionsEngine\Tests\Unit\AssertsInternalInvariant;
 
 /**
  * @covers \Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\ItemsSnapshot
  */
 class ItemsSnapshotTest extends TestCase {
+
+	use AssertsInternalInvariant;
 
 	/**
 	 * A representative two-item set.
@@ -85,8 +87,10 @@ class ItemsSnapshotTest extends TestCase {
 	}
 
 	public function test_negative_schema_version_throws(): void {
-		$this->expectException( LogicException::class );
-
-		ItemsSnapshot::from_items( $this->sample_items(), -1 );
+		$this->assert_internal_invariant(
+			function (): void {
+				ItemsSnapshot::from_items( $this->sample_items(), -1 );
+			}
+		);
 	}
 }

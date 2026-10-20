@@ -248,6 +248,48 @@ class PlanTest extends TestCase {
 	}
 
 	/**
+	 * @testdox create reports every invalid attribute in one exception.
+	 */
+	public function test_create_reports_every_invalid_attribute(): void {
+		$this->assert_invalid_inputs(
+			static function (): void {
+				Plan::create(
+					array(
+						'name'           => '',
+						'status'         => 'never-registered',
+						'pricing_policy' => array( 'a', 'b' ),
+					)
+				);
+			},
+			array(
+				array( ValidationErrorCode::REQUIRED, 'name', array() ),
+				array( ValidationErrorCode::NOT_REGISTERED, 'status', array( 'value' => 'never-registered' ) ),
+				array( ValidationErrorCode::REQUIRED, 'extension_slug', array() ),
+				array( ValidationErrorCode::INVALID_TYPE, 'pricing_policy', array( 'type' => 'object' ) ),
+			)
+		);
+	}
+
+	/**
+	 * @testdox draft keeps refused values without checking them.
+	 */
+	public function test_draft_keeps_refused_values(): void {
+		$plan = Plan::draft(
+			array(
+				'id'             => 4,
+				'name'           => '',
+				'status'         => 'never-registered',
+				'extension_slug' => 'my-ext',
+			)
+		);
+
+		$this->assertSame( 4, $plan->get_id() );
+		$this->assertSame( '', $plan->get_name() );
+		$this->assertSame( 'never-registered', $plan->get_status() );
+		$this->assertSame( 'my-ext', $plan->get_extension_slug() );
+	}
+
+	/**
 	 * @testdox set_name rejects an empty name.
 	 */
 	public function test_set_name_rejects_an_empty_name(): void {

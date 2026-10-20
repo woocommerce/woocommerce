@@ -696,7 +696,10 @@ final class Contracts {
 		}
 
 		$contract->set_payment_instrument( new PaymentInstrumentRef( $token_id, $gateway, $title ) );
-		$contract->assert_money_has_currency();
+		$error = $contract->get_money_currency_error();
+		if ( null !== $error ) {
+			throw $error;
+		}
 	}
 	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 

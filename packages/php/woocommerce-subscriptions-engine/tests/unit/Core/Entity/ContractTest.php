@@ -132,7 +132,7 @@ class ContractTest extends TestCase {
 			)
 		);
 
-		$contract->assert_money_has_currency();
+		$this->assertNull( $contract->get_money_currency_error() );
 		$this->assertNull( $contract->get_currency() );
 	}
 
@@ -149,12 +149,32 @@ class ContractTest extends TestCase {
 		);
 		$contract->set_currency( null );
 
-		$this->assert_invalid_input(
-			static function () use ( $contract ): void {
-				$contract->assert_money_has_currency();
+		$error = $contract->get_money_currency_error();
+		$this->assertInstanceOf( InvalidInputException::class, $error );
+		$this->assertSame( ValidationErrorCode::REQUIRED, $error->get_error_code() );
+		$this->assertSame( 'currency', $error->get_field() );
+	}
+
+	/**
+	 * @testdox create() reports every invalid attribute in one exception.
+	 */
+	public function test_create_reports_every_invalid_attribute(): void {
+		$this->assert_invalid_inputs(
+			static function (): void {
+				Contract::create(
+					array(
+						'extension_slug'  => 'acme-subs',
+						'status'          => 'never-registered',
+						'schedule_source' => 'Not a slug',
+						'billing_total'   => '10',
+					)
+				);
 			},
-			ValidationErrorCode::REQUIRED,
-			'currency'
+			array(
+				array( ValidationErrorCode::NOT_REGISTERED, 'status', array( 'value' => 'never-registered' ) ),
+				array( ValidationErrorCode::INVALID_VALUE, 'schedule_source', array() ),
+				array( ValidationErrorCode::REQUIRED, 'currency', array() ),
+			)
 		);
 	}
 
