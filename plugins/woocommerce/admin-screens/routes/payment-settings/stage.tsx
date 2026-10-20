@@ -105,21 +105,8 @@ function SettingsForm( { config }: { config: SettingsEntityConfig } ) {
 			} );
 		}
 	};
-	if ( loadError || ( formResolved && ! form ) ) {
-		return (
-			<Notice.Root intent="error">
-				<Notice.Description>
-					{ getErrorMessage(
-						loadError,
-						__( 'Unable to load settings.', 'woocommerce' )
-					) }
-				</Notice.Description>
-			</Notice.Root>
-		);
-	}
-	if ( ! data || ! form ) {
-		return <Spinner />;
-	}
+	const hasLoadError = !! loadError || ( formResolved && ! form );
+	const isReady = ! hasLoadError && !! data && !! form;
 	const paymentsUrl = new URL(
 		'admin.php?page=wc-settings&tab=checkout',
 		window.location.href
@@ -167,13 +154,28 @@ function SettingsForm( { config }: { config: SettingsEntityConfig } ) {
 			showSidebarToggle={ false }
 			hasPadding
 			// The Page header doesn't wrap its actions, so they move below the form on small screens.
-			actions={ isNarrow ? undefined : formActions }
+			actions={ isReady && ! isNarrow ? formActions : undefined }
 		>
 			<Stack
 				direction="column"
 				gap="lg"
 				className="woocommerce-payment-settings__content"
 			>
+				{ hasLoadError && (
+					<Notice.Root intent="error">
+						<Notice.Description>
+							{ getErrorMessage(
+								loadError,
+								__( 'Unable to load settings.', 'woocommerce' )
+							) }
+						</Notice.Description>
+					</Notice.Root>
+				) }
+				{ ! hasLoadError && ! isReady && (
+					<Stack direction="row" justify="center">
+						<Spinner />
+					</Stack>
+				) }
 				{ notice && (
 					<Notice.Root intent={ notice.status }>
 						<Notice.Description>
@@ -186,19 +188,21 @@ function SettingsForm( { config }: { config: SettingsEntityConfig } ) {
 						/>
 					</Notice.Root>
 				) }
-				<DataForm
-					data={ data }
-					fields={ fields }
-					form={ form }
-					validity={ validity }
-					onChange={ ( edits ) => {
-						if ( ! isSaving ) {
-							setNotice( undefined );
-							edit( edits );
-						}
-					} }
-				/>
-				{ isNarrow && formActions }
+				{ isReady && (
+					<DataForm
+						data={ data }
+						fields={ fields }
+						form={ form }
+						validity={ validity }
+						onChange={ ( edits ) => {
+							if ( ! isSaving ) {
+								setNotice( undefined );
+								edit( edits );
+							}
+						} }
+					/>
+				) }
+				{ isReady && isNarrow && formActions }
 			</Stack>
 		</Page>
 	);
