@@ -1,7 +1,12 @@
 /**
  * External dependencies
  */
-import { expect, test as base, customerFile } from '@woocommerce/e2e-utils';
+import {
+	expect,
+	test as base,
+	customerFile,
+	enableTestPlugin,
+} from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -23,10 +28,8 @@ test.describe( 'Shopper → Additional Checkout Fields', () => {
 	test.describe( 'Logged in shopper', () => {
 		test.use( { storageState: customerFile } );
 
-		test.beforeEach( async ( { requestUtils } ) => {
-			await requestUtils.activatePlugin(
-				'woocommerce-blocks-test-additional-checkout-fields'
-			);
+		test.beforeEach( async ( { context } ) => {
+			await enableTestPlugin( context, 'additional-checkout-fields' );
 		} );
 
 		test( 'Shopper can fill in the checkout form with additional fields and can have different value for same field in shipping and billing address', async ( {

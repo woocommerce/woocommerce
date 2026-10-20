@@ -179,10 +179,23 @@ read: [Playwright Best Practices](https://playwright.dev/docs/best-practices).
 
 ### Parallel, locked, and serial specs
 
-Core specs run on one shared site, in two Playwright projects: `core-parallel` runs specs in several workers at the same time, and `core-serial` runs them one at a time. Put each spec in one of three groups:
+Core and Blocks specs each run in two Playwright projects on one shared site. The parallel project runs specs in several workers at the same time. The serial project runs them one at a time, in one worker.
 
-1. **Parallel.** The spec does not change site-wide state. It makes its own products, orders, customers, and pages, and does not change shared settings. This is the default: every spec runs in `core-parallel` unless something else is set.
-2. **Parallel with a lock.** The spec changes a site-wide option, but only specs that change the same option read it. Give all those specs the same [test lock](https://playwright.dev/docs/test-parallel#test-locks) from `locks` in `fixtures/fixtures.ts`. Specs that share a lock never run at the same time, in any worker or project. Add a new entry to `locks` if none fits.
+| Project | Specs | Workers | After each test | Command |
+| --- | --- | --- | --- | --- |
+| `core-parallel` | Core specs not in `serialRunSpecs` | Several | Nothing | `pnpm test:e2e:core-parallel` |
+| `core-serial` | Core specs in `serialRunSpecs` | 1 | Nothing | `pnpm test:e2e:core-serial` |
+| `blocks-parallel` | Blocks specs not in `blocksSerialSpecs` | Several | Nothing | `pnpm test:e2e:blocks:parallel` |
+| `blocks-serial` | Blocks specs in `blocksSerialSpecs` | 1 | Database reset | `pnpm test:e2e:blocks:serial` |
+
+Both lists are in `playwright.config.ts`. A spec that is not on a list runs in the parallel project.
+
+Run one project at a time, as CI does: each project runs in its own CI jobs. A serial spec changes state that parallel specs read, and the `blocks-serial` database reset deletes the data of the tests that run in parallel. `pnpm test:e2e:blocks` runs `blocks-parallel` first, then `blocks-serial`.
+
+Put each new spec in the first of these three types that works for it:
+
+1. **Parallel.** The spec does not change site-wide state. It makes its own products, orders, customers, pages, and templates, with unique names, and does not change shared settings. It cleans up what it makes, because `core-parallel` and `blocks-parallel` do not reset the database.
+2. **Parallel with a lock.** The spec changes a site-wide option, but only specs that change the same option read it. Give all those specs the same [test lock](https://playwright.dev/docs/test-parallel#test-locks) from `locks` in `fixtures/fixtures.ts`. Specs that share a lock never run at the same time, in any worker or project. Add a new entry to `locks` if none fits. Set the option back in `afterEach` or `afterAll`.
 
     ```ts
     import { test, locks } from '../../fixtures/fixtures';
@@ -192,11 +205,11 @@ Core specs run on one shared site, in two Playwright projects: `core-parallel` r
     } );
     ```
 
-    The core projects do not use `fullyParallel`, so one worker runs a whole spec file. A lock on one test holds for the whole file, including `beforeAll` and `afterAll`.
+    The projects do not use `fullyParallel`, so one worker runs a whole spec file. A lock on one test holds for the whole file, including `beforeAll` and `afterAll`. Blocks specs import `locks` from the same file.
 
-3. **Serial.** The spec changes a setting that many other specs read, such as tax, store address, or permalinks. A lock cannot help here, because the specs that read the setting do not take the lock. Add the spec to `serialRunSpecs` in `playwright.config.ts`, so it runs in `core-serial`.
+3. **Serial.** Use this type only when the first two cannot work: the spec changes a setting that many other specs read, such as tax, store address, permalinks, the active theme, or a site-wide template. A lock cannot help here, because the specs that read the setting do not take the lock. Add the spec to `serialRunSpecs` or `blocksSerialSpecs`, under the comment that gives the reason.
 
-Prefer the first group. A spec that changes a setting only for itself can often use its own data instead, for example its own tax class or customer.
+A spec that changes a setting only for itself can often use its own data instead, for example its own tax class, customer, product, or template. Each serial spec makes the serial project slower and adds to the CI time of every pull request.
 
 ### Gotchas
 
@@ -221,7 +234,9 @@ How a helper is wired up depends on when it needs to be active:
         - **Test helper REST API** — endpoints (`e2e-feature-flags`, `e2e-options`, `e2e-environment`, `e2e-theme`) for toggling feature flags, setting/deleting options, reading environment info and switching themes during a test.
         - **Timing overrides** — fixed filters removing production delays and throttles that only slow tests down or make them flaky: WordPress' comment flood protection, and the 1-minute wait before the first Back in Stock Notifications batch. Unconditional rather than cookie-driven, because they must also apply to REST requests made outside the browser.
     - `wc-email-template-sync-test-helper` — see below (email template sync fixtures for RSM-146).
-- **Per-test block plugins** live in `tests/e2e/test-plugins/blocks/`, mounted (not auto-activated) via the `woocommerce-blocks-test-plugins` mapping. Each is activated and deactivated by the spec that needs it (e.g. `wp plugin activate woocommerce-blocks-test-plugins/<file>.php`), because they change store behavior globally and must not be on for every test.
+- **Per-test block plugins** live in `tests/e2e/test-plugins/blocks/`, mounted (not auto-activated) via the `woocommerce-blocks-test-plugins` mapping. They change store behavior, so they must not act for every test.
+    - The plugins in `COOKIE_GATED_TEST_PLUGINS` (`utils/blocks/test-plugins.ts`) are activated once by `blocks setup`. Each one acts only on requests that send a cookie named after its slug. A spec turns one on for its own browser context with `enableTestPlugin( context, '<plugin>' )`, so the spec can run in `blocks-parallel`.
+    - The other plugins are activated and deactivated by the spec that needs them (e.g. `wp plugin activate woocommerce-blocks-test-plugins/<file>.php`). Specs that do this are serial, because the plugin acts for all workers and `activatePlugin` races other specs on the `active_plugins` option.
 
 `woocommerce-cleanup` also lives under `test-plugins/`, but it is **not** in the wp-env `plugins` array — it's an on-demand site-reset tool installed only by the external (non-wp-env) setup path, `bin/test-env-setup-external.sh`.
 

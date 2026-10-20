@@ -1,6 +1,8 @@
 <?xml version="1.0"?>
-<ruleset name="WooCommerce themes">
-	<description>Shared WordPress coding standards for WooCommerce themes.</description>
+<ruleset name="Purple">
+	<description>WordPress coding standards configuration for the Purple theme.</description>
+
+	<file>.</file>
 
 	<exclude-pattern>*/node_modules/*</exclude-pattern>
 	<exclude-pattern>*/vendor/*</exclude-pattern>
@@ -19,4 +21,13 @@
 		<exclude-pattern>*/patterns/*</exclude-pattern>
 	</rule>
 
+	<rule ref="WordPress.WP.I18n">
+		<properties>
+			<property name="text_domain" type="array">
+				<element value="purple"/>
+			</property>
+		</properties>
+	</rule>
+
+	<config name="minimum_wp_version" value="7.1"/>
 </ruleset>
