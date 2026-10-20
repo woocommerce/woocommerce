@@ -18,10 +18,10 @@ apply_filters( 'woocommerce_default_payment_method', $payment_method, $available
 
 | Argument | Type | Description |
 | --- | --- | --- |
-| `$payment_method` | `string` | The gateway id WooCommerce would preselect: the customer's default saved card's gateway, else the first available gateway, or `''` when there is none. |
+| `$payment_method` | `string` | The gateway id WooCommerce would preselect: the customer's default saved card's gateway, the method remembered in the session, or the first enabled gateway, or `''` when there is none. |
 | `$available_gateways` | `array` | The gateways available for the current cart, keyed by gateway id. |
 
-Return a gateway id from `$available_gateways` to preselect it, or an empty string to select nothing. Any other value selects nothing.
+Return a gateway id from `$available_gateways` to preselect it, or an empty string to select nothing. Any other value selects nothing. Returning `$payment_method` unchanged keeps WooCommerce's answer as it is.
 
 Attach the callback by `init` at the latest. The server asks the filter on every Store API checkout request, and the cart listeners check for a callback whenever the cart becomes empty, so a callback that exists only on some requests makes them disagree.
 
@@ -29,7 +29,7 @@ Attach the callback by `init` at the latest. The server asks the filter on every
 
 Once a callback is attached:
 
-- The shopper's own choice always wins. It's kept in the session, never passed through the filter, and survives a reload.
+- The Checkout block keeps the shopper's own choice while that gateway is enabled, and it survives a reload. The filter decides what the block starts with before they choose.
 - The choice lasts one purchase. It's forgotten when the cart becomes empty, usually after the order, so the next purchase starts from the filter's answer again.
 - The block follows the server. When the filter returns nothing, nothing is selected, and the block doesn't fall back to the first method. When it returns a gateway, that gateway is selected as it would be today, including the customer's default saved card for it.
 

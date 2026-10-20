@@ -85,67 +85,42 @@ class PaymentUtils {
 	}
 
 	/**
-	 * Returns the payment method the checkout starts with.
-	 *
-	 * When a callback is attached to the `woocommerce_default_payment_method` filter, the
-	 * shopper's own choice from the session wins while it is still available for the cart, and otherwise
-	 * the filter decides. Without a callback, the order is unchanged: default saved card, then the
-	 * session, then the first enabled gateway.
+	 * Returns the default payment method for a customer: the default saved card, then the method
+	 * remembered in the session, then the first enabled gateway. The `woocommerce_default_payment_method`
+	 * filter runs last and can replace that answer.
 	 *
 	 * @return string
 	 */
 	public static function get_default_payment_method() {
-		if ( ! has_filter( 'woocommerce_default_payment_method' ) ) {
-			return self::get_unfiltered_default_payment_method();
-		}
-
-		$available_gateways    = WC()->payment_gateways()->get_available_payment_gateways();
-		$chosen_payment_method = WC()->session->get( 'chosen_payment_method' );
-
-		if ( is_string( $chosen_payment_method ) && '' !== $chosen_payment_method && isset( $available_gateways[ $chosen_payment_method ] ) ) {
-			return $chosen_payment_method;
-		}
-
-		$payment_method = self::get_default_available_payment_method( $available_gateways );
+		$payment_method     = self::get_unfiltered_default_payment_method();
+		$available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
 
 		/**
-		 * Filters the payment method the Checkout block starts with when the shopper hasn't picked one yet.
+		 * Filters the payment method the Checkout block starts with.
 		 *
 		 * Return a gateway id from `$available_gateways` to preselect it, or an empty string to select nothing;
-		 * any other value selects nothing. The shopper's own choice, kept in the session, never goes through this
-		 * filter. Attaching a callback also makes that choice last one purchase: it is forgotten when the cart
-		 * becomes empty. Attach the callback by `init` at the latest.
+		 * any other value selects nothing. Attach the callback by `init` at the latest.
 		 *
 		 * @since 11.3.0
 		 *
 		 * @param string $payment_method     Gateway id WooCommerce would preselect: the customer's default saved
-		 *                                   card's gateway, else the first available gateway, or '' when there is none.
+		 *                                   card's gateway, the method remembered in the session, or the first
+		 *                                   enabled gateway; '' when there is none.
 		 * @param array  $available_gateways Gateways available for this cart, keyed by id.
 		 */
 		$filtered = apply_filters( 'woocommerce_default_payment_method', $payment_method, $available_gateways );
+
+		// An unchanged answer passes through as before, even when that gateway isn't available for the cart;
+		// the block then falls back to the first method it can use. A callback's answer must be available.
+		if ( $filtered === $payment_method ) {
+			return $payment_method;
+		}
 
 		return is_string( $filtered ) && isset( $available_gateways[ $filtered ] ) ? $filtered : '';
 	}
 
 	/**
-	 * The default payment method among the available gateways: the default saved card's gateway, else the first one.
-	 *
-	 * @param array $available_gateways Gateways available for this cart, keyed by id.
-	 * @return string Gateway id, or '' when nothing is available.
-	 */
-	private static function get_default_available_payment_method( array $available_gateways ): string {
-		$saved_payment_methods = self::get_saved_payment_methods();
-		$saved_card_gateway    = $saved_payment_methods['default']['method']['gateway'] ?? '';
-
-		if ( '' !== $saved_card_gateway && isset( $available_gateways[ $saved_card_gateway ] ) ) {
-			return $saved_card_gateway;
-		}
-
-		return empty( $available_gateways ) ? '' : (string) array_key_first( $available_gateways );
-	}
-
-	/**
-	 * The default payment method when no filter decides it: saved card, session, then the first enabled gateway.
+	 * The default payment method before the filter: saved card, session, then the first enabled gateway.
 	 *
 	 * @return string
 	 */

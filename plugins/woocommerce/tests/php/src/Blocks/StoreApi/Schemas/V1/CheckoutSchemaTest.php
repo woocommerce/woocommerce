@@ -41,19 +41,10 @@ class CheckoutSchemaTest extends WC_Unit_Test_Case {
 	private $field_id = 'plugin-namespace/gov-id';
 
 	/**
-	 * Gateway instances before the test; they cache their settings, which the rollback doesn't reset.
-	 *
-	 * @var array
-	 */
-	private $payment_gateways_before_test = array();
-
-	/**
 	 * Set up before test.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-
-		$this->payment_gateways_before_test = WC()->payment_gateways()->payment_gateways;
 
 		add_filter( 'doing_it_wrong_trigger_error', '__return_false' );
 
@@ -84,74 +75,7 @@ class CheckoutSchemaTest extends WC_Unit_Test_Case {
 		__internal_woocommerce_blocks_deregister_checkout_field( $this->field_id );
 		remove_filter( 'doing_it_wrong_trigger_error', '__return_false' );
 
-		try {
-			parent::tearDown();
-		} finally {
-			wp_cache_delete( 'woocommerce_bacs_settings', 'options' );
-			WC()->payment_gateways()->payment_gateways = $this->payment_gateways_before_test;
-			WC()->session->set( 'chosen_payment_method', null );
-		}
-	}
-
-	/**
-	 * @testdox Should keep the shopper's choice in the draft response when a callback decides the default.
-	 */
-	public function test_draft_response_keeps_the_shoppers_choice_with_a_callback(): void {
-		$this->enable_bacs();
-		WC()->session->set( 'chosen_payment_method', 'bacs' );
-		add_filter( 'woocommerce_default_payment_method', '__return_empty_string' );
-
-		$response = $this->sut->get_draft_response( WC()->cart, WC()->customer );
-
-		$this->assertSame( 'bacs', $response['payment_method'] );
-	}
-
-	/**
-	 * @testdox Should leave the draft response without a payment method when the callback selects nothing and nothing was chosen.
-	 */
-	public function test_draft_response_has_no_payment_method_when_the_callback_selects_nothing(): void {
-		$this->enable_bacs();
-		WC()->session->set( 'chosen_payment_method', null );
-		add_filter( 'woocommerce_default_payment_method', '__return_empty_string' );
-
-		$response = $this->sut->get_draft_response( WC()->cart, WC()->customer );
-
-		$this->assertSame( '', $response['payment_method'] );
-	}
-
-	/**
-	 * @testdox Should ignore a session choice that is enabled but not available for this cart when a callback decides the default.
-	 */
-	public function test_draft_response_ignores_an_unavailable_session_choice_with_a_callback(): void {
-		$this->enable_bacs();
-		WC()->session->set( 'chosen_payment_method', 'bacs' );
-		add_filter( 'woocommerce_available_payment_gateways', array( $this, 'hide_bacs' ) );
-		add_filter( 'woocommerce_default_payment_method', '__return_empty_string' );
-
-		$response = $this->sut->get_draft_response( WC()->cart, WC()->customer );
-
-		$this->assertSame( '', $response['payment_method'] );
-	}
-
-	/**
-	 * Hide Direct bank transfer from the gateways available for the cart while it stays enabled.
-	 *
-	 * @param array $gateways Available gateways keyed by id.
-	 * @return array
-	 */
-	public function hide_bacs( $gateways ) {
-		unset( $gateways['bacs'] );
-		return $gateways;
-	}
-
-	/**
-	 * Enable Direct bank transfer and rebuild the gateway instances so they see it.
-	 */
-	private function enable_bacs(): void {
-		$bacs_settings            = (array) get_option( 'woocommerce_bacs_settings', array() );
-		$bacs_settings['enabled'] = 'yes';
-		update_option( 'woocommerce_bacs_settings', $bacs_settings );
-		WC()->payment_gateways()->init();
+		parent::tearDown();
 	}
 
 	/**

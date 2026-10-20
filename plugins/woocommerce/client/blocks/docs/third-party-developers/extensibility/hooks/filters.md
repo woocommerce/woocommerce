@@ -893,7 +893,7 @@ apply_filters( 'woocommerce_checkout_must_be_logged_in_message', string $message
 ## woocommerce_default_payment_method
 
 
-Filters the payment method the Checkout block starts with when the shopper hasn't picked one yet.
+Filters the payment method the Checkout block starts with.
 
 ```php
 apply_filters( 'woocommerce_default_payment_method', string $payment_method, array $available_gateways )
@@ -901,13 +901,13 @@ apply_filters( 'woocommerce_default_payment_method', string $payment_method, arr
 
 ### Description
 
-Return a gateway id from `$available_gateways` to preselect it, or an empty string to select nothing; any other value selects nothing. The shopper's own choice, kept in the session, never goes through this filter. Attaching a callback also makes that choice last one purchase: it is forgotten when the cart becomes empty. Attach the callback by `init` at the latest.
+Return a gateway id from `$available_gateways` to preselect it, or an empty string to select nothing; any other value selects nothing. Attach the callback by `init` at the latest.
 
 ### Parameters
 
 | Argument | Type | Description |
 | -------- | ---- | ----------- |
-| $payment_method | string | Gateway id WooCommerce would preselect: the customer's default saved card's gateway, else the first available gateway, or '' when there is none. |
+| $payment_method | string | Gateway id WooCommerce would preselect: the customer's default saved card's gateway, the method remembered in the session, or the first enabled gateway; '' when there is none. |
 | $available_gateways | array | Gateways available for this cart, keyed by id. |
 
 ### Source

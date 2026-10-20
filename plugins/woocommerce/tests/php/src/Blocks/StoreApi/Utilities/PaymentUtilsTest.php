@@ -56,7 +56,6 @@ class PaymentUtilsTest extends WC_Unit_Test_Case {
 	 * @testdox Should return the gateway remembered in the session without a callback, as before.
 	 */
 	public function test_default_payment_method_follows_trunk_without_a_callback(): void {
-		// BACS is first in the enabled list, so only the session read can produce COD.
 		$this->assertSame( 'cod', PaymentUtils::get_default_payment_method() );
 	}
 
@@ -70,41 +69,58 @@ class PaymentUtilsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should select nothing when the callback returns an empty string.
+	 * @testdox Should fall back to the first enabled gateway without a saved card or a session choice, as before.
+	 */
+	public function test_default_payment_method_falls_back_to_the_first_enabled_gateway_without_a_callback(): void {
+		WC()->session->set( 'chosen_payment_method', null );
+
+		$this->assertSame( 'bacs', PaymentUtils::get_default_payment_method() );
+	}
+
+	/**
+	 * @testdox Should keep an unavailable session choice without a callback, as before.
+	 */
+	public function test_default_payment_method_keeps_an_unavailable_session_choice_without_a_callback(): void {
+		add_filter( 'woocommerce_available_payment_gateways', array( $this, 'hide_cod' ) );
+
+		$this->assertSame( 'cod', PaymentUtils::get_default_payment_method() );
+	}
+
+	/**
+	 * @testdox Should return nothing when the callback returns nothing, even over a session choice.
 	 */
 	public function test_default_payment_method_is_empty_when_the_callback_returns_nothing(): void {
-		WC()->session->set( 'chosen_payment_method', null );
 		add_filter( self::FILTER, '__return_empty_string' );
 
 		$this->assertSame( '', PaymentUtils::get_default_payment_method() );
 	}
 
 	/**
-	 * @testdox Should return the gateway the callback picks.
+	 * @testdox Should return the available gateway the callback picks.
 	 */
 	public function test_default_payment_method_is_the_gateway_the_callback_picks(): void {
-		WC()->session->set( 'chosen_payment_method', null );
-		// BACS is first, so only the callback can produce COD.
 		add_filter(
 			self::FILTER,
 			function () {
-				return 'cod';
+				return 'bacs';
 			}
 		);
 
-		$this->assertSame( 'cod', PaymentUtils::get_default_payment_method() );
+		$this->assertSame( 'bacs', PaymentUtils::get_default_payment_method() );
 	}
 
 	/**
-	 * @testdox Should select nothing when the callback answer is not a gateway id.
+	 * @testdox Should return nothing when the callback answers with something that isn't a gateway id.
+	 *
 	 * @testWith ["nope"]
 	 *           [null]
-	 *           [true]
+	 *           [false]
+	 *           [0]
+	 *           [["bacs"]]
 	 *
 	 * @param mixed $answer What the callback returns.
 	 */
 	public function test_default_payment_method_returns_nothing_when_the_callback_answer_is_invalid( $answer ): void {
-		WC()->session->set( 'chosen_payment_method', null );
 		add_filter(
 			self::FILTER,
 			function () use ( $answer ) {
@@ -116,11 +132,9 @@ class PaymentUtilsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should select nothing when the callback picks a gateway that is not enabled.
+	 * @testdox Should return nothing when the callback picks a gateway that is not enabled.
 	 */
 	public function test_default_payment_method_returns_nothing_when_the_callback_picks_a_disabled_gateway(): void {
-		WC()->session->set( 'chosen_payment_method', null );
-		// PayPal is registered but not enabled, so it is never available.
 		add_filter(
 			self::FILTER,
 			function () {
@@ -132,7 +146,7 @@ class PaymentUtilsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should select nothing when the callback picks a gateway that is enabled but not available for this cart.
+	 * @testdox Should return nothing when the callback picks a gateway that is enabled but not available for this cart.
 	 */
 	public function test_default_payment_method_returns_nothing_when_the_callback_picks_an_unavailable_gateway(): void {
 		WC()->session->set( 'chosen_payment_method', null );
@@ -148,97 +162,53 @@ class PaymentUtilsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should ignore a session choice that is enabled but not available for this cart and ask the callback.
+	 * @testdox Should pass an unchanged answer through even when that gateway is not available, as without a callback.
 	 */
-	public function test_default_payment_method_ignores_an_unavailable_session_choice(): void {
+	public function test_default_payment_method_passes_an_unchanged_answer_through(): void {
 		add_filter( 'woocommerce_available_payment_gateways', array( $this, 'hide_cod' ) );
-		$received = '';
 		add_filter(
 			self::FILTER,
-			function ( $method ) use ( &$received ) {
-				$received = $method;
-				return 'bacs';
-			}
-		);
-
-		$this->assertSame( 'bacs', PaymentUtils::get_default_payment_method() );
-		$this->assertSame( 'bacs', $received, 'The callback sees the first available gateway, not the unavailable session choice.' );
-	}
-
-	/**
-	 * @testdox Should ignore a session choice for a disabled gateway and ask the callback instead.
-	 */
-	public function test_default_payment_method_ignores_a_disabled_session_choice(): void {
-		WC()->session->set( 'chosen_payment_method', 'paypal' );
-		add_filter(
-			self::FILTER,
-			function () {
-				return 'bacs';
-			}
-		);
-
-		$this->assertSame( 'bacs', PaymentUtils::get_default_payment_method() );
-	}
-
-	/**
-	 * @testdox Should keep the shopper's own choice and not ask the callback.
-	 */
-	public function test_default_payment_method_keeps_the_shoppers_choice_and_skips_the_callback(): void {
-		$called = false;
-		add_filter(
-			self::FILTER,
-			function () use ( &$called ) {
-				$called = true;
-				return '';
+			function ( $payment_method ) {
+				return $payment_method;
 			}
 		);
 
 		$this->assertSame( 'cod', PaymentUtils::get_default_payment_method() );
-		$this->assertFalse( $called, 'The shopper already chose, so the filter must not run.' );
 	}
 
 	/**
-	 * @testdox Should keep the shopper's own choice over their default saved card with a callback attached.
+	 * @testdox Should pass the session choice and the available gateways to the callback.
 	 */
-	public function test_default_payment_method_keeps_the_shoppers_choice_over_their_saved_card_with_a_callback(): void {
-		$this->create_default_saved_card( $this->login_as_role( 'customer' ), 'bacs' );
-		add_filter( self::FILTER, '__return_empty_string' );
-
-		$this->assertSame( 'cod', PaymentUtils::get_default_payment_method() );
-	}
-
-	/**
-	 * @testdox Should pass the saved card's gateway and the available gateways to the callback.
-	 */
-	public function test_callback_receives_the_saved_card_gateway_and_the_available_gateways(): void {
-		WC()->session->set( 'chosen_payment_method', null );
-		$this->create_default_saved_card( $this->login_as_role( 'customer' ), 'cod' );
+	public function test_callback_receives_the_session_choice_and_the_available_gateways(): void {
 		$received = array();
 		add_filter(
 			self::FILTER,
-			function ( $method, $gateways ) use ( &$received ) {
-				$received = array( $method, array_keys( $gateways ) );
-				return $method;
+			function ( $payment_method, $available_gateways ) use ( &$received ) {
+				$received = array( $payment_method, $available_gateways );
+				return $payment_method;
 			},
 			10,
 			2
 		);
 
-		$this->assertSame( 'cod', PaymentUtils::get_default_payment_method() );
-		$this->assertSame( array( 'cod', array( 'bacs', 'cod' ) ), $received );
+		PaymentUtils::get_default_payment_method();
+
+		$this->assertSame( 'cod', $received[0] );
+		$this->assertSame( array( 'bacs', 'cod' ), array_keys( $received[1] ) );
+		$this->assertContainsOnlyInstancesOf( \WC_Payment_Gateway::class, $received[1] );
 	}
 
 	/**
-	 * @testdox Should pass the first available gateway to the callback when there is no saved card.
+	 * @testdox Should pass the saved card's gateway to the callback when the customer has one.
 	 */
-	public function test_callback_receives_the_first_available_gateway_without_a_saved_card(): void {
-		WC()->session->set( 'chosen_payment_method', null );
+	public function test_callback_receives_the_saved_card_gateway(): void {
+		$this->create_default_saved_card( $this->login_as_role( 'customer' ), 'bacs' );
 		$received = '';
 		add_filter(
 			self::FILTER,
-			function ( $method ) use ( &$received ) {
-				$received = $method;
-				return '';
+			function ( $payment_method ) use ( &$received ) {
+				$received = $payment_method;
+				return $payment_method;
 			}
 		);
 
@@ -248,17 +218,16 @@ class PaymentUtilsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should pass the first available gateway when the saved card's gateway is not available.
+	 * @testdox Should pass the first enabled gateway to the callback without a saved card or a session choice.
 	 */
-	public function test_callback_receives_the_first_gateway_when_the_saved_card_gateway_is_unavailable(): void {
+	public function test_callback_receives_the_first_enabled_gateway(): void {
 		WC()->session->set( 'chosen_payment_method', null );
-		$this->create_default_saved_card( $this->login_as_role( 'customer' ), 'paypal' );
 		$received = '';
 		add_filter(
 			self::FILTER,
-			function ( $method ) use ( &$received ) {
-				$received = $method;
-				return '';
+			function ( $payment_method ) use ( &$received ) {
+				$received = $payment_method;
+				return $payment_method;
 			}
 		);
 
