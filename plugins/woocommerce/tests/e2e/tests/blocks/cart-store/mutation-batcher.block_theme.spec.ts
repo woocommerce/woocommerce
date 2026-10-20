@@ -14,11 +14,13 @@
 /**
  * External dependencies
  */
-import { expect, test as base } from '@woocommerce/e2e-utils';
+import { expect, guestFile, test as base } from '@woocommerce/e2e-utils';
 
 const test = base.extend( {} );
 
 test.describe( 'Mutation Batcher', () => {
+	test.use( { storageState: guestFile } );
+
 	test.beforeEach( async ( { frontendUtils } ) => {
 		// The shop page has iAPI product-button blocks, which means the
 		// interactivity API and cart store are loaded and hydrated.
@@ -201,33 +203,6 @@ test.describe( 'Mutation Batcher', () => {
 		test( 'N concurrent successful adds fire each effect exactly once', async ( {
 			page,
 		} ) => {
-			// This project reuses one authenticated user's persistent cart
-			// across every test in the file (not a fresh guest cart per
-			// test), so start from a known-clean cart in a preliminary
-			// evaluate call, *before* the batch-request route is installed —
-			// otherwise the cleanup's own request(s) would pollute the count
-			// below.
-			await page.evaluate( async () => {
-				const { store } = await import( '@wordpress/interactivity' );
-				const unlockKey =
-					'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
-
-				await import( '@woocommerce/stores/woocommerce/cart' );
-				const { actions, state } = store(
-					'woocommerce',
-					{},
-					{ lock: unlockKey }
-				);
-
-				await actions.refreshCartItems();
-				const existingKeys = state.cart.items.map(
-					( item: { key: string } ) => item.key
-				);
-				for ( const key of existingKeys ) {
-					await actions.removeCartItem( key );
-				}
-			} );
-
 			const batchRequests: number[] = [];
 
 			await page.route( '**/wc/store/v1/batch**', async ( route ) => {
@@ -411,33 +386,6 @@ test.describe( 'Mutation Batcher', () => {
 		test( 'a mixed successful/failed add cycle fires each effect once and preserves the failed item', async ( {
 			page,
 		} ) => {
-			// This project reuses one authenticated user's persistent cart
-			// across every test in the file (not a fresh guest cart per
-			// test), so start from a known-clean cart in a preliminary
-			// evaluate call, *before* the batch-request route is installed —
-			// otherwise the cleanup's own request(s) would pollute the count
-			// below.
-			await page.evaluate( async () => {
-				const { store } = await import( '@wordpress/interactivity' );
-				const unlockKey =
-					'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
-
-				await import( '@woocommerce/stores/woocommerce/cart' );
-				const { actions, state } = store(
-					'woocommerce',
-					{},
-					{ lock: unlockKey }
-				);
-
-				await actions.refreshCartItems();
-				const existingKeys = state.cart.items.map(
-					( item: { key: string } ) => item.key
-				);
-				for ( const key of existingKeys ) {
-					await actions.removeCartItem( key );
-				}
-			} );
-
 			const batchRequests: number[] = [];
 
 			await page.route( '**/wc/store/v1/batch**', async ( route ) => {
