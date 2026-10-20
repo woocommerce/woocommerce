@@ -227,6 +227,45 @@ class ArchiveProductTemplatesCompatibilityTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Registered rendering callbacks respect the disable filter and resume when it is removed.
+	 */
+	public function test_registered_render_callbacks_respect_disable_filter(): void {
+		$sut    = $this->initialize_archive_compatibility();
+		$target = $this->get_marked_target_block( $sut, 'core/post-title' );
+		$tree   = array(
+			'blockName'   => 'woocommerce/product-collection',
+			'attrs'       => array( 'query' => array( 'inherit' => true ) ),
+			'innerBlocks' => array(),
+		);
+		add_action(
+			'woocommerce_shop_loop_item_title',
+			static function () {
+				echo esc_html( '__HOOK_MARKER__' );
+			}
+		);
+
+		foreach ( array( false, true, false ) as $disabled ) {
+			if ( $disabled ) {
+				add_filter( 'woocommerce_disable_compatibility_layer', '__return_true', 99 );
+			} else {
+				remove_filter( 'woocommerce_disable_compatibility_layer', '__return_true', 99 );
+			}
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- WordPress owns this filter.
+			$marked = apply_filters( 'render_block_data', $tree, $tree, null );
+			if ( $disabled ) {
+				$this->assertArrayNotHasKey( 'isInherited', $marked['attrs'], 'Disabled compatibility must not mark inherited blocks.' );
+			} else {
+				$this->assertSame( 1, $marked['attrs']['isInherited'], 'Enabled compatibility must mark inherited blocks.' );
+			}
+
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- WordPress owns this filter.
+			$output = apply_filters( 'render_block', '__BLOCK_SENTINEL__', $target, new \WP_Block( $target ) );
+			$this->assertSame( $disabled ? 0 : 1, substr_count( $output, '__HOOK_MARKER__' ), 'The rendering callback must check the disable filter even for an already-marked block.' );
+			$this->assertSame( 1, substr_count( $output, '__BLOCK_SENTINEL__' ), 'The rendering callback must preserve block content.' );
+		}
+	}
+
+	/**
 	 * @testdox Renders archive hooks once per loop and product when template handlers overlap.
 	 * @dataProvider overlapping_requests_provider
 	 *
