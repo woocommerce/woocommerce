@@ -1444,6 +1444,22 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox A same-status transition that writes nothing returns false while the cycle does not hold the values.
+	 */
+	public function test_a_same_status_transition_that_writes_nothing_returns_false_for_other_values(): void {
+		$cycle_id = $this->pending_cycle_id();
+		$this->assertTrue( $this->transition_cycle_row_locked( $cycle_id, CycleStatus::PENDING, CycleStatus::PENDING, array( 'order_id' => 4242 ) ) );
+
+		$cycles = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
+		$this->refuse_next_write( "UPDATE {$cycles} SET" );
+		$this->assertFalse( $this->transition_cycle_row_locked( $cycle_id, CycleStatus::PENDING, CycleStatus::PENDING, array( 'order_id' => 5151 ) ), 'Another order_id is not stored.' );
+
+		$this->refuse_next_write( "UPDATE {$cycles} SET" );
+		$this->assertTrue( $this->transition_cycle_row_locked( $cycle_id, CycleStatus::PENDING, CycleStatus::PENDING, array( 'order_id' => 4242 ) ), 'The stored order_id already holds.' );
+		$this->assertSame( 4242, $this->find_cycle( $cycle_id )->get_order_id() );
+	}
+
+	/**
 	 * @testdox transition_cycle keeps the stored order when order_id is omitted and clears it on null.
 	 */
 	public function test_transition_cycle_order_id_is_written_only_when_present(): void {

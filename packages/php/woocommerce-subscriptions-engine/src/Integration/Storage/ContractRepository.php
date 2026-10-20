@@ -1741,14 +1741,14 @@ final class ContractRepository {
 	/**
 	 * Move a cycle from `$from_status` to `$to_status` under `$lock` in one compare-and-set UPDATE
 	 * that lands only while the row still carries `$from_status` and belongs to the lock's
-	 * contract. A same-status call returns true while the cycle holds that status.
+	 * contract. A same-status call returns true once the cycle holds that status and the values.
 	 *
 	 * @param int                  $cycle_id    Cycle id.
 	 * @param string               $from_status The status the caller read; the compare-and-set predicate (not validated).
 	 * @param string               $to_status   The status to write; must be a registered cycle status.
 	 * @param array<string, mixed> $changes     Optional `order_id` (?int), `reason` (?string); present keys are written, null clears.
 	 * @param ContractLock         $lock        The caller's lock on the cycle's contract.
-	 * @return bool True when this caller won the transition (for a same-status call: the cycle holds that status).
+	 * @return bool True when this caller won the transition (for a same-status call: the cycle holds the status and the values).
 	 * @throws \DomainException If `$to_status` is not a registered cycle status.
 	 * @throws \InvalidArgumentException If the cycle does not exist, or belongs to another contract than `$lock`.
 	 * @throws ContractLockedException If `$lock` was lost.
@@ -1807,31 +1807,32 @@ final class ContractRepository {
 			return true;
 		}
 
-		return $this->classify_lost_transition( $cycle_id, $from_status, $to_status, $lock );
+		return $this->classify_lost_transition( $cycle_id, $from_status, $to_status, $changes, $lock );
 	}
 	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
 	/**
 	 * Tell apart why a cycle transition changed no row, from the stored cycle: a same-status call
-	 * on a cycle in that status matched a row whose values already held (a no-op win), and a
-	 * moved status is a lost compare-and-set.
+	 * whose status and values are already stored is a no-op win; anything else is a lost
+	 * compare-and-set.
 	 *
-	 * @param int          $cycle_id    Cycle id.
-	 * @param string       $from_status The compare-and-set predicate.
-	 * @param string       $to_status   The status written.
-	 * @param ContractLock $lock        The caller's lock.
+	 * @param int                  $cycle_id    Cycle id.
+	 * @param string               $from_status The compare-and-set predicate.
+	 * @param string               $to_status   The status written.
+	 * @param array<string, mixed> $changes     The `order_id` / `reason` changes written.
+	 * @param ContractLock         $lock        The caller's lock.
 	 * @return bool True for a same-status no-op, false when the status moved.
 	 * @throws \InvalidArgumentException If the cycle does not exist, or belongs to another contract than `$lock`.
 	 * @throws \RuntimeException If the read fails.
 	 */
-	private function classify_lost_transition( int $cycle_id, string $from_status, string $to_status, ContractLock $lock ): bool {
+	private function classify_lost_transition( int $cycle_id, string $from_status, string $to_status, array $changes, ContractLock $lock ): bool {
 		global $wpdb;
 
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$row = $wpdb->get_row( $wpdb->prepare( "SELECT contract_id, status FROM {$table} WHERE id = %d", $cycle_id ), ARRAY_A );
+		$row = $wpdb->get_row( $wpdb->prepare( "SELECT contract_id, status, order_id, reason FROM {$table} WHERE id = %d", $cycle_id ), ARRAY_A );
 		if ( '' !== $wpdb->last_error ) {
 			throw new \RuntimeException( esc_html( sprintf( 'Failed to read cycle %d: %s', $cycle_id, $wpdb->last_error ) ) );
 		}
@@ -1846,9 +1847,33 @@ final class ContractRepository {
 
 		$status = Coercion::coerce_string( $row['status'] ?? '' );
 
-		return $from_status === $to_status && $status === $to_status;
+		return $from_status === $to_status && $status === $to_status && self::has_values( $row, $changes );
 	}
 	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
+
+	/**
+	 * Whether a stored cycle row already has the `order_id` / `reason` values of `$changes`.
+	 *
+	 * @param array<string, mixed> $row     Cycle row (`order_id`, `reason`).
+	 * @param array<string, mixed> $changes Changes: optional `order_id`, `reason`.
+	 */
+	private static function has_values( array $row, array $changes ): bool {
+		if ( array_key_exists( 'order_id', $changes ) ) {
+			$intended = null === $changes['order_id'] ? null : Coercion::coerce_int( $changes['order_id'] );
+			if ( Coercion::coerce_nullable_int( $row['order_id'] ?? null ) !== $intended ) {
+				return false;
+			}
+		}
+
+		if ( array_key_exists( 'reason', $changes ) ) {
+			$intended = null === $changes['reason'] ? null : Coercion::coerce_string( $changes['reason'] );
+			if ( Coercion::coerce_nullable_string( $row['reason'] ?? null ) !== $intended ) {
+				return false;
+			}
+		}
+
+		return true;
+	}
 
 	/**
 	 * A window of a chain's cycle history, newest first - the paginated read for
