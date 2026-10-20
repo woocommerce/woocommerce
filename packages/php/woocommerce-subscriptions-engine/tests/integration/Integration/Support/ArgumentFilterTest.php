@@ -47,13 +47,13 @@ class ArgumentFilterTest extends EngineIntegrationTestCase {
 		$this->setExpectedIncorrectUsage( 'facade' );
 
 		$rows = ArgumentFilter::filter_contract_items(
+			'facade',
 			array(
 				array(
 					'item_name' => 'Coffee',
 					'price'     => '1',
 				),
-			),
-			'facade'
+			)
 		);
 
 		$this->assertSame( array( array( 'item_name' => 'Coffee' ) ), $rows );
@@ -63,13 +63,13 @@ class ArgumentFilterTest extends EngineIntegrationTestCase {
 		$this->setExpectedIncorrectUsage( 'facade' );
 
 		$addresses = ArgumentFilter::filter_contract_addresses(
+			'facade',
 			array(
 				'billing' => array(
 					'first_name' => 'Ada',
 					'zip'        => '1',
 				),
-			),
-			'facade'
+			)
 		);
 
 		$this->assertSame( array( 'billing' => array( 'first_name' => 'Ada' ) ), $addresses );

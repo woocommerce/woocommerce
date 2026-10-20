@@ -56,11 +56,11 @@ final class ArgumentFilter {
 	/**
 	 * Drop unknown keys from contract item rows, with a notice per key.
 	 *
+	 * @param string                           $function_name Function named in the notice.
 	 * @param array<int, array<string, mixed>> $rows          Item rows, shape already checked.
-	 * @param string                           $function_name Function named in the notice; defaults to this method.
 	 * @return array<int, array<string, mixed>>
 	 */
-	public static function filter_contract_items( array $rows, string $function_name = __METHOD__ ): array {
+	public static function filter_contract_items( string $function_name, array $rows ): array {
 		$allowed  = array_fill_keys( Contract::ITEM_FIELDS, true );
 		$filtered = array();
 		foreach ( $rows as $row ) {
@@ -73,11 +73,11 @@ final class ArgumentFilter {
 	/**
 	 * Drop unknown keys from contract addresses, with a notice per key.
 	 *
+	 * @param string                                  $function_name Function named in the notice.
 	 * @param array<string, array<int|string, mixed>> $addresses     Addresses by type, shape already checked.
-	 * @param string                                  $function_name Function named in the notice; defaults to this method.
 	 * @return array<string, array<string, mixed>>
 	 */
-	public static function filter_contract_addresses( array $addresses, string $function_name = __METHOD__ ): array {
+	public static function filter_contract_addresses( string $function_name, array $addresses ): array {
 		$allowed  = array_fill_keys( Contract::ADDRESS_FIELDS, true );
 		$filtered = array();
 		foreach ( $addresses as $type => $address ) {

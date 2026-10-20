@@ -416,6 +416,165 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox create reports every ill-typed argument at once and writes nothing.
+	 */
+	public function test_create_reports_every_ill_typed_argument(): void {
+		$before = Contracts::count();
+
+		$this->assert_validation_errors(
+			static function (): void {
+				Contracts::create(
+					array(
+						'extension_slug' => self::EXTENSION_SLUG,
+						'currency'       => 'usd',
+						'customer_id'    => 'x',
+						'addresses'      => array( 'home' => array( 'first_name' => 'Ada' ) ),
+					)
+				);
+			},
+			array(
+				array( ValidationErrorCode::INVALID_TYPE, 'customer_id', array( 'type' => 'integer' ) ),
+				array( ValidationErrorCode::INVALID_VALUE, 'currency', array() ),
+				array( ValidationErrorCode::NOT_IN_ENUM, 'addresses.home', array( 'allowed' => array( 'billing', 'shipping' ) ) ),
+			)
+		);
+		$this->assertSame( $before, Contracts::count() );
+	}
+
+	/**
+	 * @testdox create reports every contract refusal at once.
+	 */
+	public function test_create_reports_every_contract_refusal(): void {
+		$this->assert_validation_errors(
+			static function (): void {
+				Contracts::create(
+					array(
+						'extension_slug'  => self::EXTENSION_SLUG,
+						'status'          => 'never-registered',
+						'schedule_source' => 'Not a slug',
+						'billing_total'   => '10',
+					)
+				);
+			},
+			array(
+				array( ValidationErrorCode::NOT_REGISTERED, 'status' ),
+				array( ValidationErrorCode::INVALID_VALUE, 'schedule_source' ),
+				array( ValidationErrorCode::REQUIRED, 'currency' ),
+			)
+		);
+	}
+
+	/**
+	 * @testdox update reports every contract refusal at once and writes nothing.
+	 */
+	public function test_update_reports_every_contract_refusal(): void {
+		$id     = $this->contract_with_currency();
+		$before = $this->entity( $id )->to_storage();
+
+		$this->assert_validation_errors(
+			static function () use ( $id ): void {
+				Contracts::update(
+					$id,
+					array(
+						'status'          => 'never-registered',
+						'schedule_source' => 'Not a slug',
+					)
+				);
+			},
+			array(
+				array( ValidationErrorCode::NOT_REGISTERED, 'status' ),
+				array( ValidationErrorCode::INVALID_VALUE, 'schedule_source' ),
+			)
+		);
+		$this->assertSame( $before, $this->entity( $id )->to_storage() );
+	}
+
+	/**
+	 * @testdox update checks its arguments before reading, so invalid arguments throw for a missing contract.
+	 */
+	public function test_update_checks_its_arguments_before_reading(): void {
+		$this->assert_validation_errors(
+			static function (): void {
+				Contracts::update( 999999, array( 'customer_id' => 0 ) );
+			},
+			array( array( ValidationErrorCode::OUT_OF_BOUNDS, 'customer_id' ) )
+		);
+		$this->assertNull( Contracts::update( 999999, array( 'customer_id' => 5 ) ) );
+	}
+
+	/**
+	 * @testdox add_cycle reports every refusal at once: ill-typed arguments before the cycle is built.
+	 */
+	public function test_add_cycle_reports_every_refusal(): void {
+		$id = $this->contract_with_currency();
+
+		$this->assert_validation_errors(
+			static function () use ( $id ): void {
+				Contracts::add_cycle( $id, array( 'kind' => '' ) );
+			},
+			array(
+				array( ValidationErrorCode::REQUIRED, 'kind' ),
+				array( ValidationErrorCode::REQUIRED, 'starts_at_gmt' ),
+				array( ValidationErrorCode::REQUIRED, 'ends_at_gmt' ),
+				array( ValidationErrorCode::REQUIRED, 'currency' ),
+			)
+		);
+		$this->assert_validation_errors(
+			static function () use ( $id ): void {
+				Contracts::add_cycle(
+					$id,
+					array(
+						'count'         => 0,
+						'starts_at_gmt' => 'soon',
+						'ends_at_gmt'   => 'later',
+					)
+				);
+			},
+			array(
+				array( ValidationErrorCode::OUT_OF_BOUNDS, 'count' ),
+				array( ValidationErrorCode::INVALID_VALUE, 'starts_at_gmt' ),
+				array( ValidationErrorCode::INVALID_VALUE, 'ends_at_gmt' ),
+			)
+		);
+		$this->assertSame( 0, $this->stored_cycle_count( $id ) );
+	}
+
+	/**
+	 * @testdox transition_cycle and get_cycles report every invalid value at once.
+	 */
+	public function test_cycle_tools_report_every_invalid_value(): void {
+		$id    = $this->contract_with_currency();
+		$cycle = $this->add_cycle( $id, $this->cycle_args( array( 'status' => CycleStatus::PENDING ) ) );
+
+		$this->assert_validation_errors(
+			static function () use ( $cycle ): void {
+				Contracts::transition_cycle(
+					$cycle->get_id(),
+					CycleStatus::PENDING,
+					CycleStatus::BILLED,
+					array(
+						'order_id'      => 'x',
+						'claim_seconds' => 0,
+					)
+				);
+			},
+			array(
+				array( ValidationErrorCode::INVALID_TYPE, 'order_id' ),
+				array( ValidationErrorCode::OUT_OF_BOUNDS, 'claim_seconds' ),
+			)
+		);
+		$this->assert_validation_errors(
+			static function () use ( $id ): void {
+				Contracts::get_cycles( $id, -1, -2 );
+			},
+			array(
+				array( ValidationErrorCode::OUT_OF_BOUNDS, 'limit', array( 'min' => 0 ) ),
+				array( ValidationErrorCode::OUT_OF_BOUNDS, 'offset', array( 'min' => 0 ) ),
+			)
+		);
+	}
+
+	/**
 	 * @dataProvider provide_invalid_fields
 	 *
 	 * @param array<string, mixed> $fields Invalid fields.
