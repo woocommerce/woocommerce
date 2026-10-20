@@ -76,24 +76,24 @@ class HtmlSanitizer {
 	}
 
 	/**
-	 * Escapes an email address or phone number for HTML so it still displays as stored after wptexturize() runs.
+	 * Escapes text for an HTML text node so the page shows it exactly as stored, even after wptexturize() runs.
 	 *
-	 * Block themes texturize the whole rendered template, which turns `48x17` into `48×17` and `--` into `–`.
-	 * wptexturize() skips numeric entities, so the characters it rewrites in these values are written as entities.
-	 * Entities already in the text are kept, as esc_html() keeps them.
+	 * Block themes texturize the whole rendered template, which turns `48x17` into `48×17` and ` (tm)` into ` ™`.
+	 * Every printable ASCII character is written as a numeric entity: wptexturize() only rewrites ASCII patterns and
+	 * skips entities. Other characters are kept, since they are neither rewritten nor special in HTML.
 	 *
 	 * @since 11.4.0
 	 *
-	 * @param string $text An email address or phone number.
+	 * @param string $text Plain text, such as an email address or phone number.
 	 * @return string Text escaped for an HTML text node.
 	 */
 	public function esc_html_exact( string $text ): string {
 		return (string) preg_replace_callback(
-			'/&(?:#[0-9]+|#[xX][0-9a-fA-F]+|[a-zA-Z][a-zA-Z0-9]*);|[-.x`]/',
+			'/[\x20-\x7E]/',
 			static function ( array $matches ): string {
-				return '&' === $matches[0][0] ? $matches[0] : '&#' . ord( $matches[0] ) . ';';
+				return '&#' . ord( $matches[0] ) . ';';
 			},
-			esc_html( $text )
+			wp_check_invalid_utf8( $text )
 		);
 	}
 
