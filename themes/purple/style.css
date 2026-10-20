@@ -41,16 +41,30 @@ body {
  * theme's outline button style. The doubled class outranks WooCommerce's
  * own rules regardless of stylesheet order. */
 .wc-block-components-button.wc-block-components-button:not(.is-link).outlined,
-.wc-block-components-button.wc-block-components-button:not(.is-link).is-style-outline {
+.wc-block-components-button.wc-block-components-button:not(
+		.is-link
+	).is-style-outline {
 	color: var(--wp--custom--outline-button-color);
 }
 
-.wc-block-components-button.wc-block-components-button:not(.is-link).outlined:hover,
-.wc-block-components-button.wc-block-components-button:not(.is-link).outlined:focus,
-.wc-block-components-button.wc-block-components-button:not(.is-link).outlined:active,
-.wc-block-components-button.wc-block-components-button:not(.is-link).is-style-outline:hover,
-.wc-block-components-button.wc-block-components-button:not(.is-link).is-style-outline:focus,
-.wc-block-components-button.wc-block-components-button:not(.is-link).is-style-outline:active {
+.wc-block-components-button.wc-block-components-button:not(
+		.is-link
+	).outlined:hover,
+.wc-block-components-button.wc-block-components-button:not(
+		.is-link
+	).outlined:focus,
+.wc-block-components-button.wc-block-components-button:not(
+		.is-link
+	).outlined:active,
+.wc-block-components-button.wc-block-components-button:not(
+		.is-link
+	).is-style-outline:hover,
+.wc-block-components-button.wc-block-components-button:not(
+		.is-link
+	).is-style-outline:focus,
+.wc-block-components-button.wc-block-components-button:not(
+		.is-link
+	).is-style-outline:active {
 	background-color: color-mix(in srgb, currentColor 5%, transparent);
 	color: var(--wp--custom--outline-button-color);
 }
@@ -83,26 +97,49 @@ body {
 
 /* Cart scope covers the shipping calculator fields, which reuse the same
  * components as the checkout form. */
-.wp-block-woocommerce-cart .wc-block-components-text-input:not(.has-error) input,
+.wp-block-woocommerce-cart
+	.wc-block-components-text-input:not(.has-error)
+	input,
 .wp-block-woocommerce-cart .wc-block-components-textarea:not(.has-error),
-.wp-block-woocommerce-cart .wc-blocks-components-select:not(.has-error) .wc-blocks-components-select__select,
-.wp-block-woocommerce-cart .wc-blocks-components-select:not(.has-error) .wc-blocks-components-select__container,
-.wp-block-woocommerce-cart .wc-block-components-checkbox__input[type="checkbox"],
-.wp-block-woocommerce-checkout .wc-block-components-text-input:not(.has-error) input,
+.wp-block-woocommerce-cart
+	.wc-blocks-components-select:not(.has-error)
+	.wc-blocks-components-select__select,
+.wp-block-woocommerce-cart
+	.wc-blocks-components-select:not(.has-error)
+	.wc-blocks-components-select__container,
+.wp-block-woocommerce-cart
+	.wc-block-components-checkbox__input[type="checkbox"],
+.wp-block-woocommerce-checkout
+	.wc-block-components-text-input:not(.has-error)
+	input,
 .wp-block-woocommerce-checkout .wc-block-components-textarea:not(.has-error),
-.wp-block-woocommerce-checkout .wc-blocks-components-select:not(.has-error) .wc-blocks-components-select__select,
-.wp-block-woocommerce-checkout .wc-blocks-components-select:not(.has-error) .wc-blocks-components-select__container,
-.wp-block-woocommerce-checkout .wc-block-components-checkbox__input[type="checkbox"] {
+.wp-block-woocommerce-checkout
+	.wc-blocks-components-select:not(.has-error)
+	.wc-blocks-components-select__select,
+.wp-block-woocommerce-checkout
+	.wc-blocks-components-select:not(.has-error)
+	.wc-blocks-components-select__container,
+.wp-block-woocommerce-checkout
+	.wc-block-components-checkbox__input[type="checkbox"] {
 	border-color: var(--wp--preset--color--theme-6);
 	border-radius: 0;
 }
 
-.wp-block-woocommerce-cart .wc-block-components-text-input:not(.has-error) input:focus,
+.wp-block-woocommerce-cart
+	.wc-block-components-text-input:not(.has-error)
+	input:focus,
 .wp-block-woocommerce-cart .wc-block-components-textarea:not(.has-error):focus,
-.wp-block-woocommerce-cart .wc-blocks-components-select:not(.has-error) .wc-blocks-components-select__select:focus,
-.wp-block-woocommerce-checkout .wc-block-components-text-input:not(.has-error) input:focus,
-.wp-block-woocommerce-checkout .wc-block-components-textarea:not(.has-error):focus,
-.wp-block-woocommerce-checkout .wc-blocks-components-select:not(.has-error) .wc-blocks-components-select__select:focus {
+.wp-block-woocommerce-cart
+	.wc-blocks-components-select:not(.has-error)
+	.wc-blocks-components-select__select:focus,
+.wp-block-woocommerce-checkout
+	.wc-block-components-text-input:not(.has-error)
+	input:focus,
+.wp-block-woocommerce-checkout
+	.wc-block-components-textarea:not(.has-error):focus,
+.wp-block-woocommerce-checkout
+	.wc-blocks-components-select:not(.has-error)
+	.wc-blocks-components-select__select:focus {
 	border-color: var(--wp--preset--color--theme-6);
 	box-shadow: 0 0 0 0.5px var(--wp--preset--color--theme-6);
 }
@@ -112,8 +149,12 @@ body {
  * later, keeping their rounded corners. The doubled component class wins
  * the tie; the cart block and extension fields that reuse the text-input
  * component (e.g. Gift Cards) get the same treatment. */
-.wp-block-woocommerce-cart .wc-block-components-text-input.wc-block-components-text-input input,
-.wp-block-woocommerce-checkout .wc-block-components-text-input.wc-block-components-text-input input {
+.wp-block-woocommerce-cart
+	.wc-block-components-text-input.wc-block-components-text-input
+	input,
+.wp-block-woocommerce-checkout
+	.wc-block-components-text-input.wc-block-components-text-input
+	input {
 	border-radius: 0;
 }
 
@@ -127,7 +168,9 @@ body {
 
 /* WooCommerce Payments hardcodes a 5px radius and gray border on the
  * WooPay save-details phone input; match the other checkout fields. */
-.woopay-save-new-user-container .save-details-form.form-row .phone-input.phone-input {
+.woopay-save-new-user-container
+	.save-details-form.form-row
+	.phone-input.phone-input {
 	border-color: var(--wp--preset--color--theme-6);
 	border-radius: 0;
 }
@@ -139,14 +182,21 @@ body {
  * express payment box outline is drawn in three pieces: two title-row
  * pseudo-elements hold its top corners and the content box its bottom
  * ones; the branded express buttons keep their own rounding. */
-.wc-block-components-express-payment--checkout .wc-block-components-express-payment__title-container.wc-block-components-express-payment__title-container::before,
-.wc-block-components-express-payment--checkout .wc-block-components-express-payment__title-container.wc-block-components-express-payment__title-container::after,
-.wc-block-components-express-payment--checkout .wc-block-components-express-payment__content.wc-block-components-express-payment__content,
-.wc-block-checkout__payment-method .wc-block-components-radio-control-accordion-option.wc-block-components-radio-control-accordion-option:first-child::after,
-.wc-block-checkout__payment-method .wc-block-components-radio-control-accordion-option.wc-block-components-radio-control-accordion-option:last-child::after,
+.wc-block-components-express-payment--checkout
+	.wc-block-components-express-payment__title-container.wc-block-components-express-payment__title-container::before,
+.wc-block-components-express-payment--checkout
+	.wc-block-components-express-payment__title-container.wc-block-components-express-payment__title-container::after,
+.wc-block-components-express-payment--checkout
+	.wc-block-components-express-payment__content.wc-block-components-express-payment__content,
+.wc-block-checkout__payment-method
+	.wc-block-components-radio-control-accordion-option.wc-block-components-radio-control-accordion-option:first-child::after,
+.wc-block-checkout__payment-method
+	.wc-block-components-radio-control-accordion-option.wc-block-components-radio-control-accordion-option:last-child::after,
 .wc-block-components-radio-control--highlight-checked.wc-block-components-radio-control--highlight-checked::after,
-.wc-block-components-radio-control--highlight-checked .wc-block-components-radio-control-accordion-option--checked-option-highlighted.wc-block-components-radio-control-accordion-option--checked-option-highlighted,
-.wc-block-components-radio-control--highlight-checked label.wc-block-components-radio-control__option--checked-option-highlighted.wc-block-components-radio-control__option--checked-option-highlighted,
+.wc-block-components-radio-control--highlight-checked
+	.wc-block-components-radio-control-accordion-option--checked-option-highlighted.wc-block-components-radio-control-accordion-option--checked-option-highlighted,
+.wc-block-components-radio-control--highlight-checked
+	label.wc-block-components-radio-control__option--checked-option-highlighted.wc-block-components-radio-control__option--checked-option-highlighted,
 .wc-block-components-address-card.wc-block-components-address-card,
 .wc-block-components-local-pickup-select--multiple.wc-block-components-local-pickup-select--multiple,
 .wc-block-components-address-autocomplete-suggestions.wc-block-components-address-autocomplete-suggestions {
@@ -158,8 +208,10 @@ body {
  * painted with it composites over the group's own border (same color)
  * and darkens the shared pixels. Drop the ring; the group border is the
  * outline and the filled radio dot carries the selected state. */
-.wc-block-components-radio-control--highlight-checked .wc-block-components-radio-control-accordion-option--checked-option-highlighted.wc-block-components-radio-control-accordion-option--checked-option-highlighted,
-.wc-block-components-radio-control--highlight-checked label.wc-block-components-radio-control__option--checked-option-highlighted.wc-block-components-radio-control__option--checked-option-highlighted {
+.wc-block-components-radio-control--highlight-checked
+	.wc-block-components-radio-control-accordion-option--checked-option-highlighted.wc-block-components-radio-control-accordion-option--checked-option-highlighted,
+.wc-block-components-radio-control--highlight-checked
+	label.wc-block-components-radio-control__option--checked-option-highlighted.wc-block-components-radio-control__option--checked-option-highlighted {
 	box-shadow: none;
 }
 
@@ -181,9 +233,12 @@ body {
  * component borders drawn at 20% ink (or a hardcoded gray), a shade
  * darker than the theme-6 field borders beside them; align them all. */
 .wc-block-components-radio-control--highlight-checked.wc-block-components-radio-control--highlight-checked::after,
-.wc-block-components-express-payment--checkout .wc-block-components-express-payment__title-container.wc-block-components-express-payment__title-container::before,
-.wc-block-components-express-payment--checkout .wc-block-components-express-payment__title-container.wc-block-components-express-payment__title-container::after,
-.wc-block-components-express-payment--checkout .wc-block-components-express-payment__content.wc-block-components-express-payment__content,
+.wc-block-components-express-payment--checkout
+	.wc-block-components-express-payment__title-container.wc-block-components-express-payment__title-container::before,
+.wc-block-components-express-payment--checkout
+	.wc-block-components-express-payment__title-container.wc-block-components-express-payment__title-container::after,
+.wc-block-components-express-payment--checkout
+	.wc-block-components-express-payment__content.wc-block-components-express-payment__content,
 .wc-block-components-address-card.wc-block-components-address-card,
 .wc-block-components-local-pickup-select--multiple.wc-block-components-local-pickup-select--multiple,
 .wc-block-components-address-autocomplete-suggestions.wc-block-components-address-autocomplete-suggestions {
@@ -192,8 +247,10 @@ body {
 
 /* The separator lines between unselected options are 1px ::after
  * overlays painted with a 20% ink background, not a border. */
-.wc-block-components-radio-control--highlight-checked .wc-block-components-radio-control__option.wc-block-components-radio-control__option::after,
-.wc-block-components-radio-control--highlight-checked div.wc-block-components-radio-control-accordion-option.wc-block-components-radio-control-accordion-option::after {
+.wc-block-components-radio-control--highlight-checked
+	.wc-block-components-radio-control__option.wc-block-components-radio-control__option::after,
+.wc-block-components-radio-control--highlight-checked
+	div.wc-block-components-radio-control-accordion-option.wc-block-components-radio-control-accordion-option::after {
 	background: var(--wp--preset--color--theme-6);
 }
 
@@ -271,7 +328,6 @@ body {
 .woocommerce-account .addresses address {
 	font-style: normal;
 }
-
 
 /* Closed accordion panels are server-rendered without [hidden] (the
  * Interactivity API only applies it after hydration), so they flash open

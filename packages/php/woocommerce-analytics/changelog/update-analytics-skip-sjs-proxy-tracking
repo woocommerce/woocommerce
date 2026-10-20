@@ -1,0 +1,4 @@
+Significance: patch
+Type: changed
+
+Stop loading the stats.wp.com tracking script and its referrer cookies when analytics proxy tracking is enabled.

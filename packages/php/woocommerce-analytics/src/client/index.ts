@@ -9,7 +9,7 @@ import { clearTrackingCookies } from './tracking-cookies';
 import { activateTrackingScript } from './tracking-script';
 
 /**
- * Start tracking. Safe to call again, and s.js sends the events analytics queues in `window._wca` whenever it arrives.
+ * Start tracking. Safe to call again. Without proxy tracking, s.js sends the events analytics queues in `window._wca` whenever it arrives.
  */
 function startTracking() {
 	activateTrackingScript();
