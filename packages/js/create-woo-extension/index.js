@@ -19,6 +19,9 @@ const defaultDevDependencies = {
 	'@woocommerce/eslint-plugin': '^4.0.0',
 	'@wordpress/prettier-config': 'latest',
 	'@wordpress/scripts': 'latest',
+	/* Match WooCommerce's peer dependencies instead of npm selecting React 19. */
+	react: '18.3.x',
+	'react-dom': '18.3.x',
 	/*
 	 * Without this, `@wordpress/prettier-config`'s `prettier: >=3` peer hoists plain
 	 * prettier over wp-prettier. Pinned to match `@woocommerce/eslint-plugin`.
