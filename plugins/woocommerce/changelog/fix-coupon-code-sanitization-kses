@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Show coupon codes with `&` correctly in the coupon editor, and fix a critical error with some codes that contain `<`.
+Keep coupon codes with special characters working on WordPress 7.2, show `&` correctly in the coupon editor, and fix a critical error with some codes containing `<`.
