@@ -215,32 +215,34 @@ describe( 'TypographyElementPanel', () => {
 		} );
 	} );
 
-	it( 'passes the font faces of a theme font to the appearance control', () => {
-		const fontFace = [
-			{ fontFamily: 'Inter', fontStyle: 'normal', fontWeight: '300' },
-		];
-		useSettingsMock.mockImplementation( ( ...paths: string[] ) =>
-			paths[ 0 ] === 'spacing.units'
-				? [ [ 'px' ] ]
-				: [
-						[],
-						{
-							default: [],
-							theme: [
-								{
-									slug: 'inter',
-									fontFamily: 'Inter, sans-serif',
-									fontFace,
-								},
-							],
-						},
-					]
-		);
+	it( 'passes the weights the theme lists for the font to the appearance control', () => {
+		useSettingsMock.mockImplementation( ( ...paths: string[] ) => {
+			if ( paths[ 0 ] === 'spacing.units' ) {
+				return [ [ 'px' ] ];
+			}
+			if ( paths[ 0 ] === 'custom.fontWeights' ) {
+				return [ { inter: [ '300', '700' ] } ];
+			}
+			return [
+				[],
+				{
+					default: [],
+					theme: [
+						{ slug: 'inter', fontFamily: 'Inter, sans-serif' },
+					],
+				},
+			];
+		} );
 
 		render( <TypographyElementPanel element="text" headingLevel="" /> );
 
 		expect(
 			fontAppearanceControlMock.mock.calls[ 0 ][ 0 ].fontFamilyFaces
-		).toEqual( fontFace );
+		).toEqual( [
+			{ fontStyle: 'normal', fontWeight: '300' },
+			{ fontStyle: 'italic', fontWeight: '300' },
+			{ fontStyle: 'normal', fontWeight: '700' },
+			{ fontStyle: 'italic', fontWeight: '700' },
+		] );
 	} );
 } );

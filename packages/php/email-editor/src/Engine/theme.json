@@ -219,6 +219,34 @@
 		}
       ]
     },
+    "custom": {
+      "fontWeights": {
+        "arial": ["400", "700"],
+        "comic-sans-ms": ["400", "700"],
+        "courier-new": ["400", "700"],
+        "georgia": ["400", "700"],
+        "lucida": ["400", "700"],
+        "tahoma": ["400", "700"],
+        "times-new-roman": ["400", "700"],
+        "trebuchet-ms": ["400", "700"],
+        "verdana": ["400", "700"],
+        "arvo": ["400", "700"],
+        "lato": ["300", "400", "500", "700"],
+        "lora": ["400", "700"],
+        "merriweather": ["400", "700"],
+        "merriweather-sans": ["300", "400", "500", "700"],
+        "noticia-text": ["400", "700"],
+        "open-sans": ["300", "400", "500", "700"],
+        "playfair-display": ["400", "700"],
+        "roboto": ["300", "400", "500", "700"],
+        "source-sans-pro": ["300", "400", "500", "700"],
+        "oswald": ["400", "700"],
+        "raleway": ["400", "700"],
+        "permanent-marker": ["400", "700"],
+        "pacifico": ["400", "700"],
+        "inter": ["300", "400", "500", "700"]
+      }
+    },
     "useRootPaddingAwareAlignments": true
   },
   "styles": {

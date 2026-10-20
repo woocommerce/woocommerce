@@ -12,6 +12,7 @@ In this file we want to document settings and styles that are specific to the em
 - **spacing**: We allow only px units, because they are the most reliable in email clients. We may add the support for other units later with some sort of conversion to px. We also disable margins because they are not supported in our renderer (margin collapsing might be tricky).
 - **border**: We want to allow all types of borders and border styles.
 - **typography**: We enable fontWeight, fontStyle, and letterSpacing because they are supported by our renderer. We disable the dropCap appearance setting because it is not supported. We also define a set of basic font families that are safe to use with emails. The list was copied from the battle-tested legacy editor.
+- **custom.fontWeights**: The font weights the editor offers for each font family, keyed by the font family slug. The email does not load web fonts, so the reader sees the first font in the stack that their device has. Most of those fonts only come in regular and bold. Stacks that fall back to Helvetica Neue also have light and medium on Apple devices. Italic is offered for every weight. A font family with its own `fontFace` list uses that list instead. A font family with neither shows every weight.
 
 ## Styles
 

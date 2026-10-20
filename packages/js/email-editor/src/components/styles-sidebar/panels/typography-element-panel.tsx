@@ -71,6 +71,9 @@ export function TypographyElementPanel( {
 		'typography.fontFamilies'
 	);
 	const [ availableUnits ] = useSettings( 'spacing.units' ) as [ string[] ];
+	const [ fontWeights ] = useSettings( 'custom.fontWeights' ) as [
+		Record< string, string[] > | undefined,
+	];
 
 	// Ref: https://github.com/WordPress/gutenberg/issues/59778
 	const fontFamilies = blockLevelFontFamilies?.default || [];
@@ -389,6 +392,7 @@ export function TypographyElementPanel( {
 					onChange={ setFontAppearance }
 					fontFamilyFaces={ getFontFamilyFaces(
 						allFontFamilies,
+						fontWeights,
 						fontFamily,
 						{ fontStyle, fontWeight }
 					) }

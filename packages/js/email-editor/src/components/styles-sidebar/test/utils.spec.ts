@@ -89,6 +89,12 @@ describe( 'getFontFamilyFaces', () => {
 		slug: 'arial',
 		fontFamily: "Arial, 'Helvetica Neue', Helvetica, sans-serif",
 	};
+	const openSans = {
+		name: 'Open Sans',
+		slug: 'open-sans',
+		fontFamily:
+			"'open sans', 'helvetica neue', helvetica, arial, sans-serif",
+	};
 	const inter = {
 		name: 'Inter',
 		slug: 'inter',
@@ -98,6 +104,12 @@ describe( 'getFontFamilyFaces', () => {
 			{ fontFamily: 'Inter', fontStyle: 'normal', fontWeight: '600' },
 		],
 	};
+	const fontFamilies = [ arial, openSans, inter ];
+	const fontWeights = {
+		arial: [ '400', '700' ],
+		'open-sans': [ '300', '400', '500', '700' ],
+		inter: [ '400', '700' ],
+	};
 	const regularAndBold = [
 		{ fontStyle: 'normal', fontWeight: '400' },
 		{ fontStyle: 'italic', fontWeight: '400' },
@@ -105,36 +117,60 @@ describe( 'getFontFamilyFaces', () => {
 		{ fontStyle: 'italic', fontWeight: '700' },
 	];
 
-	it( 'offers regular and bold for a font without font faces', () => {
+	it( 'offers the weights the theme lists for the font, each with italic', () => {
 		expect(
-			getFontFamilyFaces( [ arial, inter ], arial.fontFamily, {} )
+			getFontFamilyFaces(
+				fontFamilies,
+				fontWeights,
+				arial.fontFamily,
+				{}
+			)
 		).toEqual( regularAndBold );
+		expect(
+			getFontFamilyFaces(
+				fontFamilies,
+				fontWeights,
+				openSans.fontFamily,
+				{}
+			)?.map( ( face ) => face.fontWeight )
+		).toEqual( [ '300', '300', '400', '400', '500', '500', '700', '700' ] );
 	} );
 
-	it( 'uses the font faces of a font that has them', () => {
+	it( 'prefers the font faces of a font that has them', () => {
 		expect(
-			getFontFamilyFaces( [ arial, inter ], inter.fontFamily, {} )
+			getFontFamilyFaces(
+				fontFamilies,
+				fontWeights,
+				inter.fontFamily,
+				{}
+			)
 		).toEqual( inter.fontFace );
 	} );
 
 	it.each( [
-		'var:preset|font-family|inter',
-		'var(--wp--preset--font-family--inter)',
+		'var:preset|font-family|open-sans',
+		'var(--wp--preset--font-family--open-sans)',
 	] )( 'finds the font from a preset reference: %s', ( fontFamily ) => {
 		expect(
-			getFontFamilyFaces( [ arial, inter ], fontFamily, {} )
-		).toEqual( inter.fontFace );
+			getFontFamilyFaces( fontFamilies, fontWeights, fontFamily, {} )
+		).toHaveLength( 8 );
 	} );
 
-	it( 'offers regular and bold when the font is not in the list', () => {
-		expect( getFontFamilyFaces( [ arial ], undefined, {} ) ).toEqual(
-			regularAndBold
-		);
+	it.each( [
+		[ 'the font is not in the list', undefined, fontWeights ],
+		[ 'the theme lists no weights for the font', arial.fontFamily, {} ],
+		[ 'the theme lists no weights at all', arial.fontFamily, undefined ],
+	] )( 'leaves the list to core when %s', ( _, fontFamily, weights ) => {
+		expect(
+			getFontFamilyFaces( fontFamilies, weights, fontFamily, {
+				fontWeight: '300',
+			} )
+		).toBeUndefined();
 	} );
 
 	it( 'keeps a saved weight that the font does not offer', () => {
 		expect(
-			getFontFamilyFaces( [ arial ], arial.fontFamily, {
+			getFontFamilyFaces( fontFamilies, fontWeights, arial.fontFamily, {
 				fontStyle: 'normal',
 				fontWeight: '300',
 			} )
@@ -146,7 +182,7 @@ describe( 'getFontFamilyFaces', () => {
 
 	it( 'does not add a saved value the font already offers', () => {
 		expect(
-			getFontFamilyFaces( [ arial ], arial.fontFamily, {
+			getFontFamilyFaces( fontFamilies, fontWeights, arial.fontFamily, {
 				fontStyle: 'italic',
 				fontWeight: 700,
 			} )

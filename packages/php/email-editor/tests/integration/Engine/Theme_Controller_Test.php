@@ -256,6 +256,20 @@ class Theme_Controller_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test that every email font family has a list of font weights
+	 */
+	public function testItProvidesFontWeightsForEveryFontFamily(): void {
+		$settings     = $this->theme_controller->get_settings();
+		$font_weights = $settings['custom']['fontWeights'] ?? array();
+
+		foreach ( $settings['typography']['fontFamilies']['default'] as $font_family ) {
+			$this->assertNotEmpty( $font_weights[ $font_family['slug'] ] ?? array(), $font_family['slug'] );
+		}
+		$this->assertSame( array( '400', '700' ), $font_weights['arial'] );
+		$this->assertSame( array( '300', '400', '500', '700' ), $font_weights['open-sans'] );
+	}
+
+	/**
 	 * Test if the theme controller returns correct preset variables map
 	 */
 	public function testItReturnsCorrectPresetVariablesMap(): void {

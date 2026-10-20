@@ -87,36 +87,41 @@ type FontFamily = {
 	fontFace?: FontFace[];
 };
 
-const EMAIL_SAFE_FONT_FACES: FontFace[] = [
-	{ fontStyle: 'normal', fontWeight: '400' },
-	{ fontStyle: 'italic', fontWeight: '400' },
-	{ fontStyle: 'normal', fontWeight: '700' },
-	{ fontStyle: 'italic', fontWeight: '700' },
-];
-
 /**
  * Gets the font faces the Appearance control should offer for a font.
  *
- * Without font faces, core offers every weight, but most email fonts only come in regular and bold.
- * A saved style or weight is kept in the list so the control still shows it.
+ * Email fonts have no font faces, so core would offer every weight. The email theme lists the
+ * weights each font can show, and a saved style or weight is kept so the control still shows it.
  *
  * @param fontFamilies The font families from the theme settings.
+ * @param fontWeights  The weights each font family can show, keyed by slug.
  * @param fontFamily   The selected font family value or preset reference.
  * @param current      The saved font style and weight.
+ * @return The font faces, or undefined to let core offer every weight.
  */
 export const getFontFamilyFaces = (
 	fontFamilies: FontFamily[],
+	fontWeights: Record< string, string[] > | undefined,
 	fontFamily: string | undefined,
 	current: FontFace
-): FontFace[] => {
+): FontFace[] | undefined => {
 	const slug = fontFamily?.match( /font-family(?:\||--)([\w-]+)/ )?.[ 1 ];
 	const family = fontFamilies.find(
 		( item ) =>
 			item.fontFamily === fontFamily || ( !! slug && item.slug === slug )
 	);
-	const faces = family?.fontFace?.length
-		? family.fontFace
-		: EMAIL_SAFE_FONT_FACES;
+	const weights = family?.slug ? fontWeights?.[ family.slug ] : undefined;
+	let faces: FontFace[];
+	if ( family?.fontFace?.length ) {
+		faces = family.fontFace;
+	} else if ( weights?.length ) {
+		faces = weights.flatMap( ( fontWeight ) => [
+			{ fontStyle: 'normal', fontWeight },
+			{ fontStyle: 'italic', fontWeight },
+		] );
+	} else {
+		return undefined;
+	}
 
 	if ( ! current.fontStyle && ! current.fontWeight ) {
 		return faces;
