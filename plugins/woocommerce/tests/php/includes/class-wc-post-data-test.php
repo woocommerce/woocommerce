@@ -48,11 +48,10 @@ class WC_Post_Data_Test extends \WC_Unit_Test_Case {
 			'non-ASCII'                             => array( 'CAFÉ', 'CAFÉ' ),
 			'greater-than sign'                     => array( 'a>b', 'a&gt;b' ),
 			'less-than sign'                        => array( '10<20', '10&lt;20' ),
+			'ampersand before a legacy entity name' => array( '50&cent', '50&amp;cent' ),
 			'backslash'                             => array( 'a\\b', 'a\\b' ),
-			'allowed HTML tags'                     => array( '<b>bold</b>', '<b>bold</b>' ),
-			// WordPress 7.2's wp_kses() reads these differently, so the stored codes before and after it are both accepted.
-			'ampersand before a legacy entity name' => array( '50&cent', array( '50&amp;cent', '50¢' ) ),
-			'tag-like text'                         => array( 'x<5>y', array( 'xy', 'x&lt;5&gt;y' ) ),
+			'tag-like text'                         => array( 'x<5>y', 'x&lt;5&gt;y' ),
+			'HTML tags'                             => array( '<b>bold</b>', '&lt;b&gt;bold&lt;/b&gt;' ),
 		);
 	}
 
@@ -92,30 +91,47 @@ class WC_Post_Data_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should allow subclasses to override the original one-argument post data method.
+	 * @testdox Should not let post title filters change coupon codes on save or lookup.
+	 *
+	 * @testWith ["title_save_pre"]
+	 *           ["pre_post_title"]
+	 *
+	 * @param string $hook_name Post title filter.
 	 */
-	public function test_wp_insert_post_data_supports_legacy_subclasses(): void {
-		$sut = new class() extends WC_Post_Data {
-			/**
-			 * Process post data using the original method signature.
-			 *
-			 * @param array $data Slashed post data.
-			 * @return array
-			 */
-			public static function wp_insert_post_data( $data ) {
-				$data['post_title'] = 'prefix-' . $data['post_title'];
-				return parent::wp_insert_post_data( $data );
+	public function test_post_title_filters_do_not_change_coupon_codes( string $hook_name ): void {
+		add_filter(
+			$hook_name,
+			static function ( $title ) {
+				return $title . '-filtered';
 			}
-		};
+		);
+		$this->login_as_role( 'shop_manager' );
 
-		$data = $sut::wp_insert_post_data(
-			array(
-				'post_type'  => 'shop_coupon',
-				'post_title' => 'B&Q',
-			)
+		$coupon_id = $this->create_coupon_from_edit_screen( 'B&Q' );
+		$post_id   = self::factory()->post->create( array( 'post_title' => 'Post' ) );
+
+		$this->assertSame( 'Post-filtered', get_post( $post_id )->post_title, 'Other post types should still be filtered' );
+		$this->assertSame( 'B&amp;Q', get_post( $coupon_id )->post_title, 'Unexpected stored coupon code' );
+
+		wp_set_current_user( 0 );
+		$this->assertSame( $coupon_id, wc_get_coupon_id_by_code( wc_format_coupon_code( 'B&Q' ) ), 'The coupon should be found by the code as entered' );
+	}
+
+	/**
+	 * @testdox Should keep changes that other wp_insert_post_data filters make to coupon codes.
+	 */
+	public function test_wp_insert_post_data_filters_can_change_coupon_codes(): void {
+		add_filter(
+			'wp_insert_post_data',
+			static function ( $data ) {
+				$data['post_title'] = 'changed';
+				return $data;
+			}
 		);
 
-		$this->assertSame( 'prefix-B&amp;Q', $data['post_title'] );
+		$coupon_id = $this->create_coupon_from_edit_screen( 'B&Q' );
+
+		$this->assertSame( 'changed', get_post( $coupon_id )->post_title );
 	}
 
 	/**
@@ -139,16 +155,16 @@ class WC_Post_Data_Test extends \WC_Unit_Test_Case {
 	 *
 	 * @dataProvider data_provider_coupon_codes_by_role
 	 *
-	 * @param string          $role           Role saving the coupon.
-	 * @param string          $code           Code as entered by the merchant and by the customer.
-	 * @param string|string[] $expected_title Expected post_title in the database, or the titles accepted on different WordPress versions.
+	 * @param string $role           Role saving the coupon.
+	 * @param string $code           Code as entered by the merchant and by the customer.
+	 * @param string $expected_title Expected post_title in the database.
 	 */
-	public function test_coupon_code_is_stored_consistently_and_found_by_customers( string $role, string $code, $expected_title ): void {
+	public function test_coupon_code_is_stored_consistently_and_found_by_customers( string $role, string $code, string $expected_title ): void {
 		$this->login_as_role( $role );
 
 		$coupon_id = $this->create_coupon_from_edit_screen( $code );
 
-		$this->assertContains( get_post( $coupon_id )->post_title, (array) $expected_title, 'Unexpected stored coupon code' );
+		$this->assertSame( $expected_title, get_post( $coupon_id )->post_title, 'Unexpected stored coupon code' );
 
 		wp_set_current_user( 0 );
 		$this->assertSame( $coupon_id, wc_get_coupon_id_by_code( wc_format_coupon_code( $code ) ), 'The coupon should be found by the code as entered' );
@@ -159,10 +175,10 @@ class WC_Post_Data_Test extends \WC_Unit_Test_Case {
 	 *
 	 * @dataProvider data_provider_coupon_codes
 	 *
-	 * @param string          $code           Code as entered by the merchant.
-	 * @param string|string[] $expected_title Expected post_title in the database, or the titles accepted on different WordPress versions.
+	 * @param string $code           Code as entered by the merchant.
+	 * @param string $expected_title Expected post_title in the database.
 	 */
-	public function test_coupon_code_is_unchanged_when_the_coupon_is_updated( string $code, $expected_title ): void {
+	public function test_coupon_code_is_unchanged_when_the_coupon_is_updated( string $code, string $expected_title ): void {
 		$this->login_as_administrator();
 		$coupon_id = $this->create_coupon_from_edit_screen( $code );
 
@@ -175,31 +191,25 @@ class WC_Post_Data_Test extends \WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertContains( get_post( $coupon_id )->post_title, (array) $expected_title );
+		$this->assertSame( $expected_title, get_post( $coupon_id )->post_title );
 	}
 
 	/**
-	 * @testdox Should show coupon codes decoded on the edit screen, and keep the stored code when saved again.
+	 * @testdox Should show coupon codes as entered on the edit screen, and keep the stored code when saved again.
 	 *
 	 * @dataProvider data_provider_coupon_codes
 	 *
-	 * @param string          $code           Code as entered by the merchant.
-	 * @param string|string[] $expected_title Expected post_title in the database, or the titles accepted on different WordPress versions.
+	 * @param string $code           Code as entered by the merchant.
+	 * @param string $expected_title Expected post_title in the database.
 	 */
-	public function test_coupon_code_is_shown_as_entered_on_the_edit_screen( string $code, $expected_title ): void {
+	public function test_coupon_code_is_shown_as_entered_on_the_edit_screen( string $code, string $expected_title ): void {
 		$this->login_as_administrator();
 		$coupon_id = $this->create_coupon_from_edit_screen( $code );
 
 		// The edit screen prints this value in the title field, and the browser decodes it once.
-		$shown_code     = html_entity_decode( get_post( $coupon_id, OBJECT, 'edit' )->post_title, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
-		$expected_shown = array_map(
-			static function ( $title ) {
-				return html_entity_decode( $title, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
-			},
-			(array) $expected_title
-		);
+		$shown_code = html_entity_decode( get_post( $coupon_id, OBJECT, 'edit' )->post_title, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
 
-		$this->assertContains( $shown_code, $expected_shown, 'The edit screen should show the stored code, decoded' );
+		$this->assertSame( $code, $shown_code, 'The edit screen should show the code as entered' );
 
 		wp_update_post(
 			wp_slash(
@@ -210,7 +220,7 @@ class WC_Post_Data_Test extends \WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertContains( get_post( $coupon_id )->post_title, (array) $expected_title, 'Saving the shown code should not change the stored code' );
+		$this->assertSame( $expected_title, get_post( $coupon_id )->post_title, 'Saving the shown code should not change the stored code' );
 	}
 
 	/**
@@ -219,7 +229,7 @@ class WC_Post_Data_Test extends \WC_Unit_Test_Case {
 	public function test_edit_post_title_is_unchanged_for_other_post_types(): void {
 		$post_id = self::factory()->post->create();
 
-		$this->assertSame( 'a&amp;b', WC_Post_Data::handle_edit_post_title( 'a&amp;b', $post_id ) );
+		$this->assertSame( 'a&amp;b', WC_Post_Data::decode_coupon_code_for_editing( 'a&amp;b', $post_id ) );
 	}
 
 	/**
@@ -227,20 +237,20 @@ class WC_Post_Data_Test extends \WC_Unit_Test_Case {
 	 *
 	 * @testWith ["B&Q", "b&amp;q"]
 	 *           ["TEST'S", "test's"]
-	 *           ["50&cent", ["50&amp;cent", "50¢"]]
-	 *           ["x<5>y", ["xy", "x&lt;5&gt;y"]]
+	 *           ["50&cent", "50&amp;cent"]
+	 *           ["x<5>y", "x&lt;5&gt;y"]
 	 *
-	 * @param string          $code           Code as entered.
-	 * @param string|string[] $expected_title Expected post_title in the database, or the titles accepted on different WordPress versions.
+	 * @param string $code           Code as entered.
+	 * @param string $expected_title Expected post_title in the database.
 	 */
-	public function test_coupon_code_saved_with_crud_is_stored_consistently( string $code, $expected_title ): void {
+	public function test_coupon_code_saved_with_crud_is_stored_consistently( string $code, string $expected_title ): void {
 		$this->login_as_administrator();
 
 		$coupon = new WC_Coupon();
 		$coupon->set_code( $code );
 		$coupon->save();
 
-		$this->assertContains( get_post( $coupon->get_id() )->post_title, (array) $expected_title, 'Unexpected stored coupon code' );
+		$this->assertSame( $expected_title, get_post( $coupon->get_id() )->post_title, 'Unexpected stored coupon code' );
 
 		wp_set_current_user( 0 );
 		$this->assertSame( $coupon->get_id(), wc_get_coupon_id_by_code( wc_format_coupon_code( $code ) ), 'The coupon should be found by the code as entered' );
