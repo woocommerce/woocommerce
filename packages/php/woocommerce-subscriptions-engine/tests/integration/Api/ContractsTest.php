@@ -964,6 +964,25 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$this->assertCount( 1, Contracts::get_cycles( $id ), 'Nothing is appended.' );
 	}
 
+	/**
+	 * @testdox A failed append whose position or count is already stored is a lost race, whatever the database message says.
+	 */
+	public function test_a_taken_position_is_recognised_without_the_error_text(): void {
+		$id    = $this->contract_with_currency();
+		$cycle = '/^\s*INSERT INTO `\S*subscription_cycles`/';
+		$this->add_cycle( $id, $this->cycle_args( array( 'count' => 1 ) ) );
+
+		$this->fail_next_query( $cycle );
+		$this->assertNull( $this->add_cycle_locked( $id, $this->cycle_args( array( 'sequence_no' => 1 ) ) ), 'A taken position.' );
+
+		$this->fail_next_query( $cycle );
+		$this->assertNull( $this->add_cycle_locked( $id, $this->cycle_args( array( 'count' => 1 ) ) ), 'A taken count.' );
+
+		$this->fail_next_query( $cycle );
+		$this->expectException( \RuntimeException::class );
+		$this->add_cycle_locked( $id, $this->cycle_args() );
+	}
+
 	public function test_a_taken_count_returns_null(): void {
 		$id = $this->contract_with_currency();
 		$this->add_cycle( $id, $this->cycle_args( array( 'count' => 1 ) ) );

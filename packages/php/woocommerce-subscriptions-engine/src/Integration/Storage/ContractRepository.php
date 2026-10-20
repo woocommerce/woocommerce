@@ -1679,8 +1679,8 @@ final class ContractRepository {
 
 		if ( false === $inserted ) {
 			$db_error = $wpdb->last_error;
-			if ( false !== stripos( $db_error, 'Duplicate entry' ) ) {
-				// A chain UNIQUE index rejected the row: the position is already taken.
+			// A taken position is recognised by reading it back: the server's error text is localized.
+			if ( $this->has_cycle_position( $cycle ) ) {
 				throw new DuplicateCycleException( esc_html( 'Cycle position already exists: ' . $db_error ) );
 			}
 			$this->throw_if_lock_lost( $lock );
@@ -1690,6 +1690,29 @@ final class ContractRepository {
 		$cycle->set_id( (int) $wpdb->insert_id );
 	}
 	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
+
+	/**
+	 * Whether the cycle's chain already holds its position or its count. A failed read reads as
+	 * false, so the caller reports its own insert failure.
+	 *
+	 * @param Cycle $cycle Cycle that failed to insert, with its position assigned.
+	 */
+	private function has_cycle_position( Cycle $cycle ): bool {
+		global $wpdb;
+
+		$table  = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
+		$where  = 'contract_id = %d AND kind = %s AND ( sequence_no = %d';
+		$values = array( $cycle->get_contract_id(), $cycle->get_kind(), $cycle->get_sequence_no() );
+		if ( null !== $cycle->get_count() ) {
+			$where   .= ' OR count = %d';
+			$values[] = $cycle->get_count();
+		}
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+		$found = $wpdb->get_var( $wpdb->prepare( "SELECT 1 FROM `{$table}` WHERE {$where} ) LIMIT 1", $values ) );
+
+		return null !== $found;
+	}
 
 	/**
 	 * The next position in a chain: its highest `sequence_no` plus one. A plain read under the
