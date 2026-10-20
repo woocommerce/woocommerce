@@ -4,7 +4,7 @@
 	"scripts": {
 		"build": "rm -rf build ../assets/client/routes && mkdir -p ../assets/client/routes && ln -s ../assets/client/routes build && wp-build",
 		"lint": "eslint . && tsc --project tsconfig.json",
-		"test:js": "jest --config ./jest.config.js",
+		"test:js": "jest --config ./jest.config.js --passWithNoTests",
 		"watch:build": "rm -rf build ../assets/client/routes && mkdir -p ../assets/client/routes && ln -s ../assets/client/routes build && wp-build --watch"
 	},
 	"config": {
