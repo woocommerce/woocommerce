@@ -23,11 +23,6 @@ import './style.scss';
 
 const EMPTY_FORM: Form = { fields: [] };
 
-interface ResolutionSelectors {
-	hasFinishedResolution: ( selector: string, args: unknown[] ) => boolean;
-	getResolutionError: ( selector: string, args: unknown[] ) => unknown;
-}
-
 /**
  * Use REST error messages without assuming requests reject with Error instances.
  */
@@ -54,24 +49,14 @@ function SettingsForm( { config }: { config: SettingsEntityConfig } ) {
 		status: 'success' | 'error';
 		message: string;
 	} >();
-	const { isSaving, loadError, formResolved } = useSelect(
+	const { isSaving, loadError } = useSelect(
 		( select ) => {
 			const core = select( coreStore );
-			const metadata = core as unknown as ResolutionSelectors;
 			return {
 				isSaving: core.isSavingEntityRecord( kind, name, name ),
-				loadError:
-					metadata.getResolutionError( 'getEntityRecord', [
-						kind,
-						name,
-						name,
-					] ) ??
-					metadata.getResolutionError( 'getViewConfig', [
-						kind,
-						name,
-					] ),
-				formResolved: metadata.hasFinishedResolution( 'getViewConfig', [
+				loadError: core.getResolutionError( 'getEntityRecord', [
 					kind,
+					name,
 					name,
 				] ),
 			};
@@ -105,7 +90,7 @@ function SettingsForm( { config }: { config: SettingsEntityConfig } ) {
 			} );
 		}
 	};
-	const hasLoadError = !! loadError || ( formResolved && ! form );
+	const hasLoadError = !! loadError;
 	const isReady = ! hasLoadError && !! data && !! form;
 	const paymentsUrl = new URL(
 		'admin.php?page=wc-settings&tab=checkout',
