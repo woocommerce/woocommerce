@@ -415,7 +415,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			return '';
 		}
 
-		return sanitize_text_field( $this->convert_to_utf8( (string) ( $this->raw_data[ $this->parsing_raw_data_index ][ $column_index ] ?? '' ) ) );
+		return sanitize_text_field( self::convert_to_utf8( (string) ( $this->raw_data[ $this->parsing_raw_data_index ][ $column_index ] ?? '' ) ) );
 	}
 
 	/**
@@ -424,7 +424,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * @param string $value Raw cell value.
 	 * @return string
 	 */
-	private function convert_to_utf8( $value ) {
+	private static function convert_to_utf8( $value ): string {
 		if ( ! function_exists( 'mb_convert_encoding' ) ) {
 			return wp_check_invalid_utf8( $value, true );
 		}
@@ -448,7 +448,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			return true;
 		}
 
-		$row_type = $this->get_type_from_values( $this->parse_comma_field( $this->get_row_value( 'type' ) ) );
+		$row_type = self::get_type_from_values( array_map( 'strtolower', $this->parse_comma_field( $this->get_row_value( 'type' ) ) ) );
 
 		return WC_Product_Factory::get_product_type( $product_id ) === $row_type;
 	}
@@ -458,11 +458,11 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 *
 	 * The cell also holds the virtual and downloadable flags. The first other value is the type, and an empty cell means simple.
 	 *
-	 * @param string[] $values Parsed Type cell values.
+	 * @param string[] $values Parsed Type cell values, lowercased.
 	 * @return string
 	 */
-	private function get_type_from_values( array $values ): string {
-		$type = current( array_diff( array_map( 'strtolower', $values ), array( 'virtual', 'downloadable' ) ) );
+	private static function get_type_from_values( array $values ): string {
+		$type = current( array_diff( $values, array( 'virtual', 'downloadable' ) ) );
 
 		return $type ? $type : ProductType::SIMPLE;
 	}
@@ -1097,7 +1097,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			$data['type']         = array_map( 'strtolower', $data['type'] );
 			$data['virtual']      = in_array( 'virtual', $data['type'], true );
 			$data['downloadable'] = in_array( 'downloadable', $data['type'], true );
-			$data['type']         = $this->get_type_from_values( $data['type'] );
+			$data['type']         = self::get_type_from_values( $data['type'] );
 		}
 
 		// Status is mapped from a special published field.
@@ -1274,7 +1274,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 					continue;
 				}
 
-				$data[ $mapped_keys[ $id ] ] = call_user_func( $parse_functions[ $id ], $this->convert_to_utf8( $value ) );
+				$data[ $mapped_keys[ $id ] ] = call_user_func( $parse_functions[ $id ], self::convert_to_utf8( $value ) );
 			}
 
 			$this->parsed_row_csv_ids[ count( $this->parsed_data ) ] = absint( $this->get_row_value( 'id' ) );
