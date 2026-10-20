@@ -994,7 +994,7 @@ final class ContractRepository {
 	 * @throws ContractLockedException If another operation holds the lock.
 	 * @throws \RuntimeException If the lock write or the holder read fails.
 	 */
-	private function acquire_internal_lock( int $contract_id ): ?ContractLock {
+	public function acquire_internal_lock( int $contract_id ): ?ContractLock {
 		$lock = $this->acquire_lock( $contract_id, self::INTERNAL_LOCK_OPERATION );
 		if ( null !== $lock ) {
 			return $lock;
@@ -1014,7 +1014,7 @@ final class ContractRepository {
 	 *
 	 * @param ContractLock $lock The internal lock.
 	 */
-	private function release_internal_lock( ContractLock $lock ): void {
+	public function release_internal_lock( ContractLock $lock ): void {
 		try {
 			$this->release_lock( $lock );
 		} catch ( \RuntimeException $e ) {

@@ -750,6 +750,15 @@ final class Contract {
 	}
 
 	/**
+	 * Forget the lock state read with the row, once the lock it reported has been released.
+	 *
+	 * @internal Used by the contracts facade after its internal lock.
+	 */
+	public function clear_lock_state(): void {
+		$this->lock_state = null;
+	}
+
+	/**
 	 * Line items.
 	 *
 	 * @return array<int, array<string, mixed>>

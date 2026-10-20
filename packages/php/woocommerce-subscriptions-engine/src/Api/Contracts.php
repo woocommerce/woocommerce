@@ -189,9 +189,47 @@ final class Contracts {
 		}
 
 		$filtered_args = ArgumentValidator::filter_known_keys( __METHOD__, $args, self::CONTRACT_KEYS );
+		$repository    = new ContractRepository();
 
-		$repository = new ContractRepository();
-		$contract   = $repository->find( $contract_id );
+		if ( null !== $lock || array() === $filtered_args ) {
+			$contract = self::update_contract( $repository, $contract_id, $filtered_args, $lock );
+			return null === $contract ? null : ContractView::from_contract( $contract, true );
+		}
+
+		// The internal lock covers the read the write is validated against, not only the write.
+		$internal_lock = $repository->acquire_internal_lock( $contract_id );
+		if ( null === $internal_lock ) {
+			return null;
+		}
+		try {
+			$contract = self::update_contract( $repository, $contract_id, $filtered_args, $internal_lock );
+		} finally {
+			$repository->release_internal_lock( $internal_lock );
+		}
+		if ( null === $contract ) {
+			return null;
+		}
+
+		// The view reports no lock: the one read with the row was the internal lock, now released.
+		$contract->clear_lock_state();
+
+		return ContractView::from_contract( $contract, true );
+	}
+	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
+
+	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
+	/**
+	 * Read the contract, apply and validate the fields, and write them behind {@see self::update()}.
+	 *
+	 * @param ContractRepository   $repository    Repository.
+	 * @param int                  $contract_id   Contract id.
+	 * @param array<string, mixed> $filtered_args Known fields to write.
+	 * @param ContractLock|null    $lock          The held lock, or null when there is nothing to write.
+	 * @return Contract|null The contract with the written fields; null when it does not exist.
+	 * @throws InvalidArgumentException If a value is invalid.
+	 */
+	private static function update_contract( ContractRepository $repository, int $contract_id, array $filtered_args, ?ContractLock $lock ): ?Contract {
+		$contract = $repository->find( $contract_id );
 		if ( null === $contract ) {
 			return null;
 		}
@@ -203,8 +241,8 @@ final class Contracts {
 		}
 
 		$fields = array_keys( $filtered_args );
-		if ( array() === $fields ) {
-			return ContractView::from_contract( $contract, true );
+		if ( null === $lock || array() === $fields ) {
+			return $contract;
 		}
 
 		$updated = $repository->update_fields( $contract, $fields, $lock );
@@ -212,7 +250,7 @@ final class Contracts {
 			return null;
 		}
 
-		return ContractView::from_contract( $contract, true );
+		return $contract;
 	}
 	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 
