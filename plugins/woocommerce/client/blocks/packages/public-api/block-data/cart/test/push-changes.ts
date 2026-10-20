@@ -49,6 +49,16 @@ jest.mock( '@woocommerce/utils', () => ( {
 	isSiteEditorPage: jest.fn().mockReturnValue( true ),
 } ) );
 
+// US has a state list to pick from. GB does not, so its state is typed into a text input.
+jest.mock( '@woocommerce/block-settings', () => ( {
+	...jest.requireActual( '@woocommerce/block-settings' ),
+	__esModule: true,
+	STATES: {
+		US: { NY: 'New York', TX: 'Texas' },
+		GB: {},
+	},
+} ) );
+
 // Mocking processErrorResponse because we don't actually care about processing the error response, we just don't want
 // pushChanges to throw an error.
 jest.mock( '../../utils', () => ( {
@@ -728,6 +738,42 @@ describe( 'pushChanges', () => {
 		pushChanges();
 
 		expect( updateCustomerDataMock ).toHaveBeenCalledTimes( 1 );
+	} );
+
+	it( 'Waits for the debounce when the state is typed rather than picked from a list', async () => {
+		jest.useFakeTimers();
+		const shippingAddress = {
+			...initialShippingAddress,
+			city: 'London',
+			state: '',
+			postcode: 'SW1A 2AA',
+			country: 'GB',
+		};
+		getCustomerDataMock.mockReturnValue( {
+			billingAddress: { ...initialBillingAddress },
+			shippingAddress,
+		} );
+
+		// The country change is pushed straight away.
+		pushChanges();
+		await Promise.resolve();
+		updateCustomerDataMock.mockClear();
+
+		getCustomerDataMock.mockReturnValue( {
+			billingAddress: { ...initialBillingAddress },
+			shippingAddress: { ...shippingAddress, state: 'Greater Lon' },
+		} );
+
+		pushChanges();
+
+		// Pushing every keystroke would send each partial county to the server.
+		expect( updateCustomerDataMock ).not.toHaveBeenCalled();
+
+		jest.advanceTimersByTime( 1500 );
+
+		expect( updateCustomerDataMock ).toHaveBeenCalledTimes( 1 );
+
+		jest.useRealTimers();
 	} );
 
 	it( 'Pushes the address when the billing country changes, even though the reset state and postcode are invalid', async () => {

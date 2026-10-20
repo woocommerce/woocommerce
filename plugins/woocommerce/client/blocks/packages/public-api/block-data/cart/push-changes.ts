@@ -5,6 +5,7 @@ import {
 	debounce,
 	isAddressFieldForShippingRates,
 } from '@woocommerce/base-utils';
+import { STATES } from '@woocommerce/block-settings';
 import { CartBillingAddress, CartShippingAddress } from '@woocommerce/types';
 import { select, dispatch } from '@wordpress/data';
 import isShallowEqual from '@wordpress/is-shallow-equal';
@@ -133,6 +134,12 @@ const getDirtyPropsToValidate = (
 		( key ) => ! emptiedByCountryChange.includes( key )
 	);
 };
+
+/**
+ * Returns true when the country's state field is a list to pick from. Countries without one use a text input.
+ */
+const hasStateList = ( country: string ): boolean =>
+	Object.keys( STATES[ country ] ?? {} ).length > 0;
 
 const isShippingRatesUpdateQueued = () =>
 	!! select( cartStore ).getCartMeta().isShippingRatesUpdateQueued;
@@ -300,16 +307,21 @@ export const pushChanges = ( debounced = true ): void => {
 
 	debouncedUpdateCustomerData();
 
-	// Picking a country or state is a deliberate choice rather than typing, and it invalidates the
-	// shipping rates already on screen. Push it straight away so the rates reload without waiting
-	// for the debounce.
-	const pickedFieldChanged = ( [ 'country', 'state' ] as const ).some(
-		( field ) =>
-			customerData.billingAddress[ field ] !==
-				localState.customerData.billingAddress[ field ] ||
-			customerData.shippingAddress[ field ] !==
-				localState.customerData.shippingAddress[ field ]
-	);
+	// Picking a country, or a state from a list, is a deliberate choice rather than typing, and it
+	// invalidates the shipping rates already on screen. Push it straight away so the rates reload
+	// without waiting for the debounce. A state typed into a text input waits like any other field.
+	const pickedFieldChanged = (
+		[ 'billingAddress', 'shippingAddress' ] as const
+	 ).some( ( addressType ) => {
+		const address = customerData[ addressType ];
+		const previousAddress = localState.customerData[ addressType ];
+
+		return (
+			address.country !== previousAddress.country ||
+			( address.state !== previousAddress.state &&
+				hasStateList( address.country ) )
+		);
+	} );
 
 	if ( pickedFieldChanged ) {
 		flushChanges();
