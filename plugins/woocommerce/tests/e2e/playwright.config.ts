@@ -264,7 +264,6 @@ const blocksSerialSpecs = [
 	'**/tests/blocks/checkout/checkout-block-locale-hide-country.block_theme.spec.ts',
 
 	// Create or edit products and categories that catalog specs count.
-	'**/tests/blocks/cart-store/parent-item-key.block_theme.spec.ts',
 	'**/tests/blocks/product-collection/product-collection-errors.block_theme.spec.ts',
 ];
 

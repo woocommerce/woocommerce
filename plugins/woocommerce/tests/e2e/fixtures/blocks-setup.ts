@@ -107,11 +107,15 @@ setup( 'blocks setup', async () => {
 		await prepareAttributes();
 	}
 
-	console.log( '├ Activating cookie-gated test plugins…' );
+	console.log( '├ Activating test plugins…' );
+	// `cart-line-identity` acts only on add-to-cart requests with its flags.
+	const testPlugins = [ ...COOKIE_GATED_TEST_PLUGINS, 'cart-line-identity' ];
 	await wpCLI(
-		`plugin activate ${ COOKIE_GATED_TEST_PLUGINS.map(
-			( plugin ) => `woocommerce-blocks-test-plugins/${ plugin }.php`
-		).join( ' ' ) }`
+		`plugin activate ${ testPlugins
+			.map(
+				( plugin ) => `woocommerce-blocks-test-plugins/${ plugin }.php`
+			)
+			.join( ' ' ) }`
 	);
 
 	console.log( '├ Exporting database snapshot…' );
