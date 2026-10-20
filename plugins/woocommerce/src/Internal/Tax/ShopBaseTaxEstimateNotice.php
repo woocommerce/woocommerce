@@ -109,19 +109,20 @@ class ShopBaseTaxEstimateNotice {
 			);
 		}
 
-		$country        = $countries->get_base_country();
-		$state          = $countries->get_base_state();
-		$postcode       = $countries->get_base_postcode();
-		$city           = $countries->get_base_city();
-		$has_address    = '' !== $postcode || '' !== $city;
-		$tax_based_on   = TaxBasedOn::BASE === get_option( 'woocommerce_tax_based_on', TaxBasedOn::SHIPPING );
-		$base_args      = array(
+		$country      = $countries->get_base_country();
+		$state        = $countries->get_base_state();
+		$postcode     = $countries->get_base_postcode();
+		$city         = $countries->get_base_city();
+		$has_address  = '' !== $postcode || '' !== $city;
+		$tax_based_on = TaxBasedOn::BASE === get_option( 'woocommerce_tax_based_on', TaxBasedOn::SHIPPING );
+		$base_args    = array(
 			'country'  => $country,
 			'state'    => $state,
 			'postcode' => $postcode,
 			'city'     => $city,
 		);
-		$standard_rates = WC_Tax::find_rates( array_merge( $base_args, array( 'tax_class' => '' ) ) );
+		// get_rates_from_location() applies the woocommerce_matched_rates filter, so the estimate reflects the rate the shopper is actually quoted.
+		$standard_rates = WC_Tax::get_rates_from_location( '', array( $country, $state, $postcode, $city ) );
 
 		// Lead line: what is taxed, and where.
 		if ( $has_address ) {
@@ -158,7 +159,7 @@ class ShopBaseTaxEstimateNotice {
 	/**
 	 * Summarize the estimated rate for each tax class at the store address.
 	 *
-	 * @param array $base_args find_rates() args for the store address (without tax_class).
+	 * @param array $base_args Store address parts keyed country/state/postcode/city.
 	 * @return string
 	 */
 	private function rate_summary( array $base_args ): string {
@@ -169,7 +170,7 @@ class ShopBaseTaxEstimateNotice {
 
 		$parts = array();
 		foreach ( $classes as $slug => $label ) {
-			$rates = WC_Tax::find_rates( array_merge( $base_args, array( 'tax_class' => $slug ) ) );
+			$rates = WC_Tax::get_rates_from_location( $slug, array( $base_args['country'], $base_args['state'], $base_args['postcode'], $base_args['city'] ) );
 
 			if ( empty( $rates ) ) {
 				$parts[] = esc_html( $label ) . ': &ndash;';
