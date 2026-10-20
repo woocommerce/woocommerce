@@ -16,7 +16,6 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Core\Entity;
 
-use DomainException;
 use LogicException;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\MoneyScale;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\Coercion;
@@ -288,11 +287,11 @@ final class Cycle {
 	 * @internal Used by the repository's append.
 	 *
 	 * @param int $sequence_no Position, monotonic from 1.
-	 * @throws DomainException If the position is already assigned or `$sequence_no` is not positive.
+	 * @throws LogicException If the position is already assigned ({@see InvalidInputException}, a LogicException, if `$sequence_no` is not positive).
 	 */
 	public function assign_sequence_no( int $sequence_no ): void {
 		if ( null !== $this->sequence_no ) {
-			throw new DomainException( 'Cycle: sequence_no is already assigned.' );
+			throw new LogicException( 'Cycle: sequence_no is already assigned.' );
 		}
 		self::assert_sequence_no( $sequence_no );
 
@@ -402,11 +401,11 @@ final class Cycle {
 	 * unset value object, never swaps the frozen snapshot.
 	 *
 	 * @param PlanSnapshot $plan_snapshot Snapshot value object.
-	 * @throws DomainException If a plan snapshot value object is already attached.
+	 * @throws LogicException If a plan snapshot value object is already attached.
 	 */
 	public function set_plan_snapshot( PlanSnapshot $plan_snapshot ): void {
 		if ( null !== $this->plan_snapshot ) {
-			throw new DomainException( 'Cycle: the plan snapshot is frozen and cannot be replaced.' );
+			throw new LogicException( 'Cycle: the plan snapshot is frozen and cannot be replaced.' );
 		}
 		$this->plan_snapshot = $plan_snapshot;
 	}
@@ -423,11 +422,11 @@ final class Cycle {
 	 * {@see self::set_plan_snapshot()}.
 	 *
 	 * @param ItemsSnapshot $items_snapshot Snapshot value object.
-	 * @throws DomainException If an items snapshot value object is already attached.
+	 * @throws LogicException If an items snapshot value object is already attached.
 	 */
 	public function set_items_snapshot( ItemsSnapshot $items_snapshot ): void {
 		if ( null !== $this->items_snapshot ) {
-			throw new DomainException( 'Cycle: the items snapshot is frozen and cannot be replaced.' );
+			throw new LogicException( 'Cycle: the items snapshot is frozen and cannot be replaced.' );
 		}
 		$this->items_snapshot = $items_snapshot;
 	}

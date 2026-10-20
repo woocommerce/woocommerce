@@ -15,7 +15,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject;
 
-use DomainException;
+use LogicException;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -46,11 +46,11 @@ final class ItemsSnapshot {
 	 *
 	 * @param array<int, array<string, mixed>> $items          Ordered line items.
 	 * @param int                              $schema_version Payload-format version.
-	 * @throws DomainException If the schema version is not positive.
+	 * @throws LogicException If the schema version is not positive.
 	 */
 	private function __construct( array $items, int $schema_version ) {
 		if ( $schema_version < 1 ) {
-			throw new DomainException(
+			throw new LogicException(
 				sprintf( 'ItemsSnapshot: schema_version must be 1 or greater, got %d.', $schema_version )
 			);
 		}
@@ -64,7 +64,7 @@ final class ItemsSnapshot {
 	 *
 	 * @param array<int, array<string, mixed>> $items          Ordered line items.
 	 * @param int                              $schema_version Payload-format version. Defaults to 1.
-	 * @throws DomainException If the schema version is not positive.
+	 * @throws LogicException If the schema version is not positive.
 	 */
 	public static function from_items( array $items, int $schema_version = 1 ): self {
 		return new self( $items, $schema_version );
@@ -76,7 +76,7 @@ final class ItemsSnapshot {
 	 *
 	 * @param array<int, array<string, mixed>> $payload        Serialized ordered line items.
 	 * @param int                              $schema_version Payload-format version the payload was written in.
-	 * @throws DomainException If the schema version is not positive.
+	 * @throws LogicException If the schema version is not positive.
 	 */
 	public static function from_payload( array $payload, int $schema_version = 1 ): self {
 		return new self( $payload, $schema_version );

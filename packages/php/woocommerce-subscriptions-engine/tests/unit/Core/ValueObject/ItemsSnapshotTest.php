@@ -9,7 +9,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Unit\Core\ValueObject;
 
-use DomainException;
+use LogicException;
 use PHPUnit\Framework\TestCase;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\ItemsSnapshot;
 
@@ -85,7 +85,7 @@ class ItemsSnapshotTest extends TestCase {
 	}
 
 	public function test_negative_schema_version_throws(): void {
-		$this->expectException( DomainException::class );
+		$this->expectException( LogicException::class );
 
 		ItemsSnapshot::from_items( $this->sample_items(), -1 );
 	}

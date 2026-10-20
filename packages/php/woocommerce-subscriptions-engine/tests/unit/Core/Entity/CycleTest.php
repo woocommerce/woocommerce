@@ -9,7 +9,6 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Unit\Core\Entity;
 
-use DomainException;
 use LogicException;
 use PHPUnit\Framework\TestCase;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
@@ -292,7 +291,7 @@ class CycleTest extends TestCase {
 		$cycle = $this->make_pending();
 		$cycle->set_plan_snapshot( PlanSnapshot::from_array( array( 'selling_plan_id' => 9 ) ) );
 
-		$this->expectException( DomainException::class );
+		$this->expectException( LogicException::class );
 		$cycle->set_plan_snapshot( PlanSnapshot::from_array( array( 'selling_plan_id' => 10 ) ) );
 	}
 
@@ -300,7 +299,7 @@ class CycleTest extends TestCase {
 		$cycle = $this->make_pending();
 		$cycle->set_items_snapshot( ItemsSnapshot::from_items( array() ) );
 
-		$this->expectException( DomainException::class );
+		$this->expectException( LogicException::class );
 		$cycle->set_items_snapshot( ItemsSnapshot::from_items( array( array( 'product_id' => 1 ) ) ) );
 	}
 
@@ -466,7 +465,7 @@ class CycleTest extends TestCase {
 	}
 
 	public function test_an_assigned_sequence_no_cannot_be_reassigned(): void {
-		$this->expectException( DomainException::class );
+		$this->expectException( LogicException::class );
 
 		$this->make_pending()->assign_sequence_no( 2 );
 	}

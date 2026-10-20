@@ -9,7 +9,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Unit\Core\ValueObject;
 
-use DomainException;
+use LogicException;
 use PHPUnit\Framework\TestCase;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\InvalidInputException;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
@@ -92,7 +92,7 @@ class PlanSnapshotTest extends TestCase {
 	}
 
 	public function test_negative_schema_version_throws(): void {
-		$this->expectException( DomainException::class );
+		$this->expectException( LogicException::class );
 
 		PlanSnapshot::from_array( array( 'selling_plan_id' => 7 ), 0 );
 	}
