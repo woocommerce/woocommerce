@@ -1998,22 +1998,15 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$csv_file   = trailingslashit( get_temp_dir() ) . 'import-40274-sku-fallback.csv';
 		file_put_contents( $csv_file, "ID,Type,SKU,Name\n{$missing_id},simple,IMPORT-40274-A,Updated by SKU\n" . ( $missing_id + 1 ) . ",simple,IMPORT-40274-NONE,Row with no match\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
 
-		$importer = new WC_Product_CSV_Importer(
+		$data = $this->import_for_update(
 			$csv_file,
 			array(
-				'parse'           => true,
-				'update_existing' => true,
-				'mapping'         => array(
-					'ID'   => 'id',
-					'Type' => 'type',
-					'SKU'  => 'sku',
-					'Name' => 'name',
-				),
+				'ID'   => 'id',
+				'Type' => 'type',
+				'SKU'  => 'sku',
+				'Name' => 'name',
 			)
 		);
-		$data     = $importer->import();
-
-		wp_delete_file( $csv_file );
 
 		$this->assertSame( array( $product->get_id() ), $data['updated'] );
 		$this->assertEmpty( $data['failed'], 'A row whose ID is missing but whose SKU exists must not fail' );
@@ -2039,22 +2032,15 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$csv_file = trailingslashit( get_temp_dir() ) . 'import-40274-id-sku-conflict.csv';
 		file_put_contents( $csv_file, "ID,Type,SKU,Name\n{$matched_by_id->get_id()},simple,IMPORT-40274-C,Conflicting row\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
 
-		$importer = new WC_Product_CSV_Importer(
+		$data = $this->import_for_update(
 			$csv_file,
 			array(
-				'parse'           => true,
-				'update_existing' => true,
-				'mapping'         => array(
-					'ID'   => 'id',
-					'Type' => 'type',
-					'SKU'  => 'sku',
-					'Name' => 'name',
-				),
+				'ID'   => 'id',
+				'Type' => 'type',
+				'SKU'  => 'sku',
+				'Name' => 'name',
 			)
 		);
-		$data     = $importer->import();
-
-		wp_delete_file( $csv_file );
 
 		$this->assertEmpty( $data['updated'] );
 		$this->assertCount( 1, $data['failed'] );

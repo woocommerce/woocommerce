@@ -351,7 +351,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			return 0;
 		}
 
-		// See if this maps to an ID placeholder already.
+		// Reuse a placeholder or meta mapping. IDs matched by SKU are matched again on every row.
 		$mapped_product_id = isset( $this->sku_matched_original_ids[ $id ] ) ? 0 : $this->get_product_id_by_original_id( $id );
 
 		if ( $mapped_product_id ) {
