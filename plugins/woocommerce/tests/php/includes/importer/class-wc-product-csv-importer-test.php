@@ -2235,4 +2235,50 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( array( $product->get_id() ), $data['updated'] );
 		$this->assertSame( 'Updated by trimmed SKU', wc_get_product( $product->get_id() )->get_name() );
 	}
+
+	/**
+	 * @testdox Should match each row by its own SKU when the file repeats a missing ID, so one product is not updated twice.
+	 */
+	public function test_import_sku_fallback_does_not_reuse_mapping_for_repeated_ids_40274(): void {
+		$product_a = WC_Helper_Product::create_simple_product();
+		$product_a->set_sku( 'IMPORT-40274-REPEAT-A' );
+		$product_a->set_name( 'Original A' );
+		$product_a->save();
+
+		$product_c = WC_Helper_Product::create_simple_product();
+		$product_c->set_sku( 'IMPORT-40274-REPEAT-C' );
+		$product_c->save();
+		wp_set_object_terms( $product_c->get_id(), 'import-40274-kept-tag', 'product_tag' );
+
+		$id_one   = $product_c->get_id() + 1000;
+		$id_two   = $id_one + 1;
+		$csv_file = trailingslashit( get_temp_dir() ) . 'import-40274-repeated-id.csv';
+		file_put_contents( // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
+			$csv_file,
+			"ID,Type,SKU,Name\n" .
+			"{$id_one},simple,IMPORT-40274-REPEAT-A,Title A\n" .
+			"{$id_one},simple,IMPORT-40274-REPEAT-B,Title B\n" .
+			"{$id_two},simple,IMPORT-40274-REPEAT-C,Title C\n" .
+			"{$id_two},variation,IMPORT-40274-REPEAT-C,Title C\n"
+		);
+
+		$data = $this->import_for_update(
+			$csv_file,
+			array(
+				'ID'   => 'id',
+				'Type' => 'type',
+				'SKU'  => 'sku',
+				'Name' => 'name',
+			)
+		);
+
+		$this->assertSame( array( $product_a->get_id(), $product_c->get_id() ), $data['updated'], 'Only the rows whose own SKU matches update a product' );
+		$this->assertCount( 1, $data['skipped'], 'The repeated ID with an unknown SKU is skipped' );
+		$this->assertCount( 1, $data['failed'], 'The repeated ID with a variation type is refused' );
+		$updated_a = wc_get_product( $product_a->get_id() );
+		$this->assertSame( 'Title A', $updated_a->get_name() );
+		$this->assertSame( 'IMPORT-40274-REPEAT-A', $updated_a->get_sku() );
+		$this->assertSame( 'product', get_post_type( $product_c->get_id() ), 'The simple product must not be converted to a variation' );
+		$this->assertTrue( has_term( 'import-40274-kept-tag', 'product_tag', $product_c->get_id() ), 'The simple product keeps its tags' );
+	}
 }

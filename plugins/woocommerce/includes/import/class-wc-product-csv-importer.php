@@ -56,6 +56,15 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	private $original_id_map = array();
 
 	/**
+	 * Original CSV IDs that the update fallback mapped to a product by SKU.
+	 *
+	 * A file can repeat such an ID for another product, so each row with it is matched by its own SKU again.
+	 *
+	 * @var array<int, true>
+	 */
+	private $sku_matched_original_ids = array();
+
+	/**
 	 * Initialize importer.
 	 *
 	 * @param string $file   File to read.
@@ -343,7 +352,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		}
 
 		// See if this maps to an ID placeholder already.
-		$mapped_product_id = $this->get_product_id_by_original_id( $id );
+		$mapped_product_id = isset( $this->sku_matched_original_ids[ $id ] ) ? 0 : $this->get_product_id_by_original_id( $id );
 
 		if ( $mapped_product_id ) {
 			return $mapped_product_id;
@@ -382,6 +391,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 			if ( $id_from_sku && $this->row_type_matches_product( $id_from_sku ) ) {
 				$this->remember_original_id_mapping( $id, $id_from_sku );
+				$this->sku_matched_original_ids[ $id ] = true;
 				return $id_from_sku;
 			}
 		}
