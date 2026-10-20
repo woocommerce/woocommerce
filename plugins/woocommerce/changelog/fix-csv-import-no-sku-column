@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop product CSV imports without a SKU column from saving each row's ID as its SKU.
