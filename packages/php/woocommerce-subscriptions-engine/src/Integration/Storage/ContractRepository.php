@@ -838,11 +838,11 @@ final class ContractRepository {
 
 	/**
 	 * Whether the contract exists and who holds its lock, read on the database clock. The
-	 * operation and expiry are set only while the lock is live. Writes use it to shape errors
-	 * only (it may lag on a replica), never to decide that a write landed.
+	 * operation is set only while the lock is live. Writes use it to shape errors only (it may
+	 * lag on a replica), never to decide that a write landed.
 	 *
 	 * @param int $contract_id Contract id.
-	 * @return array{exists: bool, operation: ?string, locked_until_gmt: ?string}
+	 * @return array{exists: bool, operation: ?string}
 	 * @throws \RuntimeException If the read fails.
 	 */
 	public function get_lock_holder( int $contract_id ): array {
@@ -850,7 +850,7 @@ final class ContractRepository {
 
 		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
 
-		$sql = "SELECT ( lock_token IS NOT NULL AND locked_until_gmt > UTC_TIMESTAMP() ) AS live, lock_operation, locked_until_gmt
+		$sql = "SELECT ( lock_token IS NOT NULL AND locked_until_gmt > UTC_TIMESTAMP() ) AS live, lock_operation
 			FROM {$table} WHERE id = %d";
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.NotPrepared
@@ -861,18 +861,16 @@ final class ContractRepository {
 
 		if ( ! is_array( $row ) ) {
 			return array(
-				'exists'           => false,
-				'operation'        => null,
-				'locked_until_gmt' => null,
+				'exists'    => false,
+				'operation' => null,
 			);
 		}
 
 		$live = ! empty( $row['live'] );
 
 		return array(
-			'exists'           => true,
-			'operation'        => $live ? Coercion::coerce_nullable_string( $row['lock_operation'] ?? null ) : null,
-			'locked_until_gmt' => $live ? Coercion::coerce_nullable_string( $row['locked_until_gmt'] ?? null ) : null,
+			'exists'    => true,
+			'operation' => $live ? Coercion::coerce_nullable_string( $row['lock_operation'] ?? null ) : null,
 		);
 	}
 
@@ -1087,13 +1085,11 @@ final class ContractRepository {
 	/**
 	 * A conflict carrying the holder already read.
 	 *
-	 * @param int                                                                $contract_id Contract id.
-	 * @param array{exists: bool, operation: ?string, locked_until_gmt: ?string} $holder      The lock holder read.
+	 * @param int                                     $contract_id Contract id.
+	 * @param array{exists: bool, operation: ?string} $holder      The lock holder read.
 	 */
 	private static function locked_exception( int $contract_id, array $holder ): ContractLockedException {
-		$locked_until = null === $holder['locked_until_gmt'] ? null : new DateTimeImmutable( $holder['locked_until_gmt'], new DateTimeZone( 'UTC' ) );
-
-		return new ContractLockedException( $contract_id, $holder['operation'], $locked_until );
+		return new ContractLockedException( $contract_id, $holder['operation'] );
 	}
 
 	/**

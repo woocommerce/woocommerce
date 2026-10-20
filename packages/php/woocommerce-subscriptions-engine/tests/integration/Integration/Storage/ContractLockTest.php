@@ -101,11 +101,11 @@ class ContractLockTest extends EngineIntegrationTestCase {
 		$this->assertSame( $id, $lock->get_contract_id() );
 		$this->assertSame( 'hold', $lock->get_operation() );
 		$this->assertNull( $this->sut->acquire_lock( $id, 'cancel' ) );
+		$this->assertSame( '2035-01-01 00:10:00', $this->lock_columns( $id )['locked_until_gmt'] );
 		$this->assertSame(
 			array(
-				'exists'           => true,
-				'operation'        => 'hold',
-				'locked_until_gmt' => '2035-01-01 00:10:00',
+				'exists'    => true,
+				'operation' => 'hold',
 			),
 			$this->sut->get_lock_holder( $id )
 		);
@@ -337,7 +337,7 @@ class ContractLockTest extends EngineIntegrationTestCase {
 		$this->age_lock_trust( $lock );
 		$this->sut->fence_children( $lock );
 		$this->assertTrue( $this->lock_state( $lock )->has_extended(), 'Past the window the fence extends once.' );
-		$this->assertSame( '2035-01-01 00:19:30', $this->sut->get_lock_holder( $id )['locked_until_gmt'] );
+		$this->assertSame( '2035-01-01 00:19:30', $this->lock_columns( $id )['locked_until_gmt'] );
 		$this->assertTrue( $this->lock_state( $lock )->is_trusted() );
 
 		$this->pin_db_clock( '2035-01-01 00:15:00' );
@@ -397,7 +397,7 @@ class ContractLockTest extends EngineIntegrationTestCase {
 
 		$this->assertSame( 1, $wpdb->num_queries - $queries, 'One extend write, no verify read.' );
 		$this->assertTrue( $this->lock_state( $lock )->has_extended() );
-		$this->assertSame( '2035-01-01 00:18:30', $this->sut->get_lock_holder( $id )['locked_until_gmt'] );
+		$this->assertSame( '2035-01-01 00:18:30', $this->lock_columns( $id )['locked_until_gmt'] );
 	}
 
 	/**

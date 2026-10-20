@@ -10,8 +10,6 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Unit\Api;
 
 use Closure;
-use DateTimeImmutable;
-use DateTimeZone;
 use LogicException;
 use ReflectionClass;
 use ReflectionMethod;
@@ -223,20 +221,17 @@ class ContractLockTest extends TestCase {
 	}
 
 	/**
-	 * @testdox ContractLockedException carries the holder's label and expiry, never a token.
+	 * @testdox ContractLockedException carries the holder's label, never a token.
 	 */
 	public function test_locked_exception_exposes_the_holder(): void {
-		$until     = new DateTimeImmutable( '2026-10-15 12:10:00', new DateTimeZone( 'UTC' ) );
-		$exception = new ContractLockedException( 7, 'renewal', $until );
+		$exception = new ContractLockedException( 7, 'renewal' );
 
 		$this->assertSame( 7, $exception->get_contract_id() );
 		$this->assertSame( 'renewal', $exception->get_operation() );
-		$this->assertSame( $until, $exception->get_locked_until() );
 		$this->assertStringContainsString( 'renewal', $exception->getMessage() );
 		$this->assertStringContainsString( '7', $exception->getMessage() );
 
-		$unknown = new ContractLockedException( 7, null, null );
+		$unknown = new ContractLockedException( 7, null );
 		$this->assertNull( $unknown->get_operation() );
-		$this->assertNull( $unknown->get_locked_until() );
 	}
 }

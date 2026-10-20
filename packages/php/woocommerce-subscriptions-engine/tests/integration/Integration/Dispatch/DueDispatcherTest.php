@@ -685,7 +685,7 @@ class DueDispatcherTest extends EngineIntegrationTestCase {
 	 * The contract's live lock holder.
 	 *
 	 * @param int $id Contract id.
-	 * @return array{exists: bool, operation: ?string, locked_until_gmt: ?string}
+	 * @return array{exists: bool, operation: ?string}
 	 */
 	private function get_lock_holder( int $id ): array {
 		return ( new ContractRepository() )->get_lock_holder( $id );

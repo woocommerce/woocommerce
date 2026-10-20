@@ -2001,7 +2001,6 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 			$this->fail( 'Expected an unlocked write to be refused while the lock lives.' );
 		} catch ( ContractLockedException $e ) {
 			$this->assertSame( 'hold', $e->get_operation() );
-			$this->assertSame( '2035-01-01 00:10:00', $e->get_locked_until() ? $e->get_locked_until()->format( 'Y-m-d H:i:s' ) : null );
 		}
 		$this->assertSame( ContractStatus::ON_HOLD, $this->stored_status( $id ) );
 
