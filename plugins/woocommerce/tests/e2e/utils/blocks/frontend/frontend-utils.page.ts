@@ -132,6 +132,16 @@ export class FrontendUtils {
 			// descendant text, so a product cannot be selected by text the
 			// card repeats, and keep it exact, or "Beanie" also selects
 			// "Beanie with Logo".
+			//
+			// The request starts after the click returns, so the tracker below
+			// alone can resolve before it. A guest gets its session cookie
+			// only from this response.
+			const cartUpdated = this.page.waitForResponse( ( response ) =>
+				[
+					...STORE_API_CART_WRITE_REQUEST_URLS,
+					'wc-ajax=add_to_cart',
+				].some( ( url ) => response.url().includes( url ) )
+			);
 			await this.page
 				.locator( 'li.product' )
 				.filter( {
@@ -142,6 +152,7 @@ export class FrontendUtils {
 				} )
 				.locator( '.add_to_cart_button' )
 				.click();
+			await cartUpdated;
 		} else {
 			await this.page.click( 'text=Add to cart' );
 		}

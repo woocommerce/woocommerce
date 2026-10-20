@@ -16,26 +16,30 @@ test.describe( `${ blockData.slug } Block`, () => {
 		editor,
 	} ) => {
 		const template = await requestUtils.createTemplate( 'wp_template', {
-			slug: 'sorter',
-			title: 'Sorter',
+			slug: `catalog-sorting-test-${ test.info().repeatEachIndex }`,
+			title: `Catalog Sorting Test ${ test.info().repeatEachIndex }`,
 			content: 'placeholder',
 		} );
 
-		await admin.visitSiteEditor( {
-			postId: template.id,
-			postType: 'wp_template',
-			canvas: 'edit',
-		} );
+		try {
+			await admin.visitSiteEditor( {
+				postId: template.id,
+				postType: 'wp_template',
+				canvas: 'edit',
+			} );
 
-		await expect(
-			editor.getCustomHtmlBlockContentLocator( 'placeholder' )
-		).toBeVisible();
+			await expect(
+				editor.getCustomHtmlBlockContentLocator( 'placeholder' )
+			).toBeVisible();
 
-		await editor.insertBlock( {
-			name: blockData.slug,
-		} );
+			await editor.insertBlock( {
+				name: blockData.slug,
+			} );
 
-		const block = await editor.getBlockByName( blockData.slug );
-		await expect( block ).toHaveText( 'Default sorting' );
+			const block = await editor.getBlockByName( blockData.slug );
+			await expect( block ).toHaveText( 'Default sorting' );
+		} finally {
+			await requestUtils.revertTemplate( 'wp_template', template.id );
+		}
 	} );
 } );

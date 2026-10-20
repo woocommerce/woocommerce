@@ -10,6 +10,7 @@ namespace Automattic;
 
 use Automattic\Jetpack\Assets;
 use Automattic\Jetpack\Connection\Manager as Jetpack_Connection;
+use Automattic\Woocommerce_Analytics\Consent_Manager;
 use Automattic\Woocommerce_Analytics\My_Account;
 use Automattic\Woocommerce_Analytics\Universal;
 use Automattic\Woocommerce_Analytics\WC_Analytics_Tracking_Proxy;
@@ -63,6 +64,13 @@ class Woocommerce_Analytics {
 	 * @var string
 	 */
 	const PROXY_TRACKING_EVER_ENABLED_OPTION = 'woocommerce_analytics_proxy_tracking_ever_enabled';
+
+	/**
+	 * Script handle for s.js, registered with no src when proxy tracking is enabled. WordPress prints its tag with the id `{handle}-js`.
+	 *
+	 * @var string
+	 */
+	private const TRACKING_SCRIPT_HANDLE = 'woocommerce-analytics';
 
 	/**
 	 * Initializer.
@@ -165,16 +173,28 @@ class Woocommerce_Analytics {
 	}
 
 	/**
-	 * Place script to call s.js, Store Analytics.
+	 * Place script to call s.js, Store Analytics, or only its handle when proxy tracking is enabled.
 	 */
 	public static function enqueue_tracking_script() {
+		// Proxy tracking sends events without s.js, which would only set referrer cookies.
+		if ( \Automattic\Woocommerce_Analytics\Features::is_proxy_tracking_enabled() ) {
+			wp_register_script( self::TRACKING_SCRIPT_HANDLE, false, array(), null, false ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion -- There is no src to version.
+			wp_enqueue_script( self::TRACKING_SCRIPT_HANDLE );
+			return;
+		}
+
 		$url = sprintf(
 			'https://stats.wp.com/s-%d.js',
 			gmdate( 'YW' )
 		);
 
+		// s.js sets referrer cookies as soon as it runs, so with a consent plugin it prints inert for the client to run after consent.
+		if ( Consent_Manager::is_consent_api_active() ) {
+			add_filter( 'wp_script_attributes', array( __CLASS__, 'hold_tracking_script_until_consent' ) );
+		}
+
 		wp_enqueue_script(
-			'woocommerce-analytics',
+			self::TRACKING_SCRIPT_HANDLE,
 			$url,
 			array(),
 			null, // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion -- The version is set in the URL.
@@ -183,6 +203,25 @@ class Woocommerce_Analytics {
 				'strategy'  => 'defer',
 			)
 		);
+	}
+
+	/**
+	 * Print the s.js tag as `type="text/plain"` so it does not run until the client activates it after statistics consent.
+	 *
+	 * @since 0.18.1
+	 *
+	 * @param mixed $attributes The script tag attributes.
+	 * @return mixed
+	 */
+	public static function hold_tracking_script_until_consent( $attributes ) {
+		if ( ! is_array( $attributes ) || ( $attributes['id'] ?? '' ) !== self::TRACKING_SCRIPT_HANDLE . '-js' ) {
+			return $attributes;
+		}
+
+		$attributes['type']                      = 'text/plain';
+		$attributes['data-wc-analytics-consent'] = Consent_Manager::WP_CONSENT_API_STATISTICS_TYPE;
+
+		return $attributes;
 	}
 
 	/**

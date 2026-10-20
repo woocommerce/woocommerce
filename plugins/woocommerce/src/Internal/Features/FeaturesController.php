@@ -7,6 +7,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Features;
 
+use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreview;
 use WC_Tracks;
 use WC_Site_Tracking;
@@ -266,6 +267,7 @@ class FeaturesController {
 		}
 
 		$this->features[ $slug ] = $args;
+		$this->init_compatibility_info_by_feature( (string) $slug );
 	}
 
 	/**
@@ -635,12 +637,17 @@ class FeaturesController {
 			),
 			'mcp_integration'                      => array(
 				'name'                         => __( 'WooCommerce MCP', 'woocommerce' ),
-				'description'                  => $this->get_mcp_integration_description(),
-				'enabled_by_default'           => false,
-				'disable_ui'                   => false,
+				'description'                  => __(
+					'The WooCommerce MCP endpoint was removed. Use the MCP Adapter plugin to access WooCommerce abilities over MCP.',
+					'woocommerce'
+				),
 				'is_experimental'              => true,
+				'enabled_by_default'           => false,
+				'disable_ui'                   => true,
+				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
-				'is_legacy'                    => false,
+				'deprecated_since'             => '11.3.0',
+				'deprecated_value'             => false,
 			),
 			'ucp'                                  => array(
 				'name'                         => __( 'Universal Commerce Protocol', 'woocommerce' ),
@@ -750,6 +757,15 @@ class FeaturesController {
 				'is_experimental'              => true,
 				'disable_ui'                   => false,
 			),
+			ExtensibleAbilities::FEATURE_ID        => array(
+				'name'                         => __( 'Extensible abilities', 'woocommerce' ),
+				'description'                  => __( 'Let extensions add their fields to the output of WooCommerce abilities.', 'woocommerce' ),
+				'is_experimental'              => true,
+				'enabled_by_default'           => false,
+				'disable_ui'                   => false,
+				'skip_compatibility_checks'    => true,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+			),
 		);
 
 		if ( ! $tracking_enabled ) {
@@ -775,9 +791,12 @@ class FeaturesController {
 
 	/**
 	 * Initialize the compatibility_info_by_feature property after all the features have been added.
+	 *
+	 * @param string|null $feature Feature ID (falls back to iterating all features).
+	 * @return void
 	 */
-	private function init_compatibility_info_by_feature() {
-		foreach ( array_keys( $this->features ) as $feature_id ) {
+	private function init_compatibility_info_by_feature( ?string $feature = null ): void {
+		foreach ( (array) ( $feature ?? array_keys( $this->features ) ) as $feature_id ) {
 			if ( ! isset( $this->compatibility_info_by_feature[ $feature_id ] ) ) {
 				$this->compatibility_info_by_feature[ $feature_id ] = array(
 					FeaturePluginCompatibility::COMPATIBLE => array(),
@@ -785,44 +804,6 @@ class FeaturesController {
 				);
 			}
 		}
-	}
-
-	/**
-	 * Generate the description for the MCP integration feature.
-	 *
-	 * @return string The feature description with conditional permalink warning and documentation link.
-	 */
-	private function get_mcp_integration_description() {
-		$base_description = __( 'Enable WooCommerce MCP (Model Context Protocol) for AI-powered store operations. AI-generated results and actions can be unpredictable - please review before executing in your store.', 'woocommerce' );
-
-		// Check permalink structure requirement.
-		$permalink_structure = get_option( 'permalink_structure' );
-		if ( empty( $permalink_structure ) ) {
-			$permalinks_url    = admin_url( 'options-permalink.php' );
-			$permalink_warning = sprintf(
-				'<br><br><strong>%s:</strong> %s <a href="%s">%s</a>',
-				__( 'Configuration Required', 'woocommerce' ),
-				__( 'WordPress permalinks must be set to anything other than "Plain" for MCP to work.', 'woocommerce' ),
-				$permalinks_url,
-				__( 'Configure Permalinks', 'woocommerce' )
-			);
-			// Add documentation link to permalink warning.
-			$documentation_link = sprintf(
-				' <a href="%s" target="_blank">%s</a>',
-				'https://github.com/woocommerce/woocommerce/blob/trunk/docs/features/mcp/README.md',
-				__( 'Learn more', 'woocommerce' )
-			);
-			return $base_description . $permalink_warning . $documentation_link;
-		}
-
-		// Add documentation link.
-		$documentation_link = sprintf(
-			' <a href="%s" target="_blank">%s</a>',
-			'https://github.com/woocommerce/woocommerce/blob/trunk/docs/features/mcp/README.md',
-			__( 'Learn more', 'woocommerce' )
-		);
-
-		return $base_description . $documentation_link;
 	}
 
 	/**
@@ -959,7 +940,7 @@ class FeaturesController {
 	 * @since 10.5.0
 	 */
 	public function get_feature_definition( string $feature_id ): ?array {
-		return $this->get_feature_definitions()[ $feature_id ] ?? null;
+		return $this->features[ $feature_id ] ?? $this->get_feature_definitions()[ $feature_id ] ?? null;
 	}
 
 	/**
@@ -972,28 +953,27 @@ class FeaturesController {
 	 * @return bool True if the feature is enabled, false if not or if the feature doesn't exist.
 	 */
 	public function feature_is_enabled( string $feature_id ): bool {
-		$feature = $this->get_feature_definition( $feature_id );
-
-		if ( null === $feature ) {
+		$definition = $this->features[ $feature_id ] ?? $this->get_feature_definitions()[ $feature_id ] ?? null;
+		if ( null === $definition ) {
 			return false;
 		}
 
 		// Handle deprecated features - return the backwards-compatible value.
-		if ( ! empty( $feature['deprecated_since'] ) ) {
-			return (bool) ( $feature['deprecated_value'] ?? false );
+		if ( ! empty( $definition['deprecated_since'] ) ) {
+			return (bool) ( $definition['deprecated_value'] ?? false );
 		}
 
+		// Dedicated overrides to bypass the settings.
 		if ( 'analytics' === $feature_id && WCAdminFeatures::is_analytics_disabled_by_legacy_filters() ) {
 			return false;
 		}
-
-		if ( $this->is_preview_email_improvements_enabled( $feature_id ) ) {
+		if ( 'email_improvements' === $feature_id && $this->is_preview_email_improvements_enabled() ) {
 			return true;
 		}
 
-		$default_value = $this->feature_is_enabled_by_default( $feature_id ) ? 'yes' : 'no';
-		$value         = 'yes' === get_option( $this->feature_enable_option_name( $feature_id ), $default_value );
-		return $value;
+		$default_value = ! empty( $definition['enabled_by_default'] ) ? 'yes' : 'no';
+		$option_key    = ! empty( $definition['option_key'] ) ? $definition['option_key'] : sprintf( 'woocommerce_feature_%s_enabled', $feature_id );
+		return 'yes' === get_option( $option_key, $default_value );
 	}
 
 	/**
@@ -1003,9 +983,9 @@ class FeaturesController {
 	 * @return boolean TRUE if the feature is enabled by default, FALSE otherwise.
 	 */
 	private function feature_is_enabled_by_default( string $feature_id ): bool {
-		$features = $this->get_feature_definitions();
+		$definition = $this->features[ $feature_id ] ?? $this->get_feature_definitions()[ $feature_id ] ?? null;
 
-		return ! empty( $features[ $feature_id ]['enabled_by_default'] );
+		return ! empty( $definition['enabled_by_default'] );
 	}
 
 	/**
@@ -1154,9 +1134,7 @@ class FeaturesController {
 	 * @return bool True if the feature exists.
 	 */
 	private function feature_exists( string $feature_id ): bool {
-		$features = $this->get_feature_definitions();
-
-		return isset( $features[ $feature_id ] );
+		return null !== ( $this->features[ $feature_id ] ?? $this->get_feature_definitions()[ $feature_id ] ?? null );
 	}
 
 	/**
@@ -1272,13 +1250,9 @@ class FeaturesController {
 	 * @return string The option that enables or disables the feature.
 	 */
 	public function feature_enable_option_name( string $feature_id ): string {
-		$features = $this->get_feature_definitions();
+		$definition = $this->features[ $feature_id ] ?? $this->get_feature_definitions()[ $feature_id ] ?? null;
 
-		if ( ! empty( $features[ $feature_id ]['option_key'] ) ) {
-			return $features[ $feature_id ]['option_key'];
-		}
-
-		return "woocommerce_feature_{$feature_id}_enabled";
+		return ! empty( $definition['option_key'] ) ? $definition['option_key'] : sprintf( 'woocommerce_feature_%s_enabled', $feature_id );
 	}
 
 	/**
@@ -1290,9 +1264,9 @@ class FeaturesController {
 	 * @return bool TRUE if the compatibility checks should be skipped.
 	 */
 	public function should_skip_compatibility_checks( string $feature_id ): bool {
-		$features = $this->get_feature_definitions();
+		$definition = $this->features[ $feature_id ] ?? $this->get_feature_definitions()[ $feature_id ] ?? null;
 
-		return ! empty( $features[ $feature_id ]['skip_compatibility_checks'] );
+		return ! empty( $definition['skip_compatibility_checks'] );
 	}
 
 	/**
@@ -2178,21 +2152,16 @@ class FeaturesController {
 	 * Check if the email improvements feature is enabled in preview mode in Settings > Emails.
 	 * This is used to force the email improvements feature without affecting shoppers.
 	 *
-	 * @param string $feature_id The feature id.
 	 * @return bool Whether the email improvements feature is enabled in preview mode.
 	 */
-	private function is_preview_email_improvements_enabled( string $feature_id ): bool {
-		if ( 'email_improvements' !== $feature_id ) {
-			return false;
-		}
+	private function is_preview_email_improvements_enabled(): bool {
 		/**
 		 * This filter is documented in templates/emails/email-styles.php
 		 *
 		 * @since 9.9.0
 		 * @param bool $is_email_preview Whether the email is being previewed.
 		 */
-		$is_email_preview = apply_filters( 'woocommerce_is_email_preview', false );
-		if ( $is_email_preview ) {
+		if ( apply_filters( 'woocommerce_is_email_preview', false ) ) {
 			return get_transient( EmailPreview::TRANSIENT_PREVIEW_EMAIL_IMPROVEMENTS ) === 'yes';
 		}
 		return false;
