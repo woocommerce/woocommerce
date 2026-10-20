@@ -3003,19 +3003,26 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	 */
 	public function test_add_order_fee_percentage_uses_items_after_discounts(): void {
 		$order = $this->create_order_with_20_percent_tax();
-		WC_Helper_Coupon::create_coupon(
-			'tenpercent',
-			array(
-				'discount_type' => 'percent',
-				'coupon_amount' => '10',
-			)
-		);
-		$this->assertTrue( $order->apply_coupon( 'tenpercent' ), 'Fixture coupon should apply.' );
+		$this->apply_10_percent_coupon( $order );
 
 		$fee = $this->add_order_fee_via_ajax( $order, '10%' );
 
 		// The coupon brings the items to 90, so 10% is 9.
 		$this->assertEquals( 9.0, (float) $fee->get_total(), 'Percentage fee should use the items after discounts.' );
+	}
+
+	/**
+	 * @testdox Percentage order fees use the stored discount total, not a filtered one.
+	 */
+	public function test_add_order_fee_percentage_ignores_filtered_discount_total(): void {
+		$order = $this->create_order_with_20_percent_tax();
+		$this->apply_10_percent_coupon( $order );
+		add_filter( 'woocommerce_order_get_discount_total', '__return_zero' );
+
+		$fee = $this->add_order_fee_via_ajax( $order, '10%' );
+
+		// The stored discount is 10, so the base stays 90 even though the filter reports 0.
+		$this->assertEquals( 9.0, (float) $fee->get_total(), 'Percentage fee should use the stored discount total.' );
 	}
 
 	/**
@@ -3095,6 +3102,22 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		$this->assertEquals( $prices_include_tax ? 100.0 : 120.0, (float) $order->get_total(), 'Fixture order should have the expected gross total.' );
 
 		return $order;
+	}
+
+	/**
+	 * Apply a 10% percentage coupon to an order for order fee AJAX tests.
+	 *
+	 * @param WC_Order $order Order to apply the coupon to.
+	 */
+	private function apply_10_percent_coupon( WC_Order $order ): void {
+		WC_Helper_Coupon::create_coupon(
+			'tenpercent',
+			array(
+				'discount_type' => 'percent',
+				'coupon_amount' => '10',
+			)
+		);
+		$this->assertTrue( $order->apply_coupon( 'tenpercent' ), 'Fixture coupon should apply.' );
 	}
 
 	/**

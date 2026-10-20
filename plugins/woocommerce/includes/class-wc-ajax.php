@@ -1377,7 +1377,7 @@ class WC_AJAX {
 				$order->calculate_totals( false );
 				$formatted_amount = $amount;
 				$percent          = floatval( trim( $amount, '%' ) );
-				$base             = (float) $order->get_subtotal() - (float) $order->get_discount_total();
+				$base             = (float) $order->get_subtotal() - (float) $order->get_discount_total( 'edit' );
 				$amount           = NumberUtil::round( $base * ( $percent / 100 ), wc_get_price_decimals() );
 			} else {
 				$amount           = floatval( $amount );
