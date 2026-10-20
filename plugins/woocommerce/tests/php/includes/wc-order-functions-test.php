@@ -335,7 +335,7 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 	public function test_wc_update_coupon_usage_counts_admin_applied_coupon_paid_later_counts_once() {
 		$coupon = WC_Helper_Coupon::create_coupon( 'admin-coupon' );
 		$order  = WC_Helper_Order::create_order();
-		$order->set_status( 'auto-draft' );
+		$order->set_status( OrderStatus::AUTO_DRAFT );
 		$order->save();
 
 		$result = $order->apply_coupon_using_edited_totals( $coupon->get_code() );
