@@ -72,7 +72,7 @@ export function TypographyElementPanel( {
 	);
 	const [ availableUnits ] = useSettings( 'spacing.units' ) as [ string[] ];
 	const [ fontWeights ] = useSettings( 'custom.fontWeights' ) as [
-		Record< string, string[] > | undefined,
+		Record< string, string > | undefined,
 	];
 
 	// Ref: https://github.com/WordPress/gutenberg/issues/59778

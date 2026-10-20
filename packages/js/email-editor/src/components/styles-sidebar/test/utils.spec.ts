@@ -106,9 +106,9 @@ describe( 'getFontFamilyFaces', () => {
 	};
 	const fontFamilies = [ arial, openSans, inter ];
 	const fontWeights = {
-		arial: [ '400', '700' ],
-		'open-sans': [ '300', '400', '500', '700' ],
-		inter: [ '400', '700' ],
+		arial: '400, 700',
+		'open-sans': '300,400, 500 ,700',
+		inter: '400, 700',
 	};
 	const regularAndBold = [
 		{ fontStyle: 'normal', fontWeight: '400' },

@@ -94,14 +94,14 @@ type FontFamily = {
  * weights each font can show, and a saved style or weight is kept so the control still shows it.
  *
  * @param fontFamilies The font families from the theme settings.
- * @param fontWeights  The weights each font family can show, keyed by slug.
+ * @param fontWeights  The comma-separated weights each font family can show, keyed by slug.
  * @param fontFamily   The selected font family value or preset reference.
  * @param current      The saved font style and weight.
  * @return The font faces, or undefined to let core offer every weight.
  */
 export const getFontFamilyFaces = (
 	fontFamilies: FontFamily[],
-	fontWeights: Record< string, string[] > | undefined,
+	fontWeights: Record< string, string > | undefined,
 	fontFamily: string | undefined,
 	current: FontFace
 ): FontFace[] | undefined => {
@@ -110,7 +110,10 @@ export const getFontFamilyFaces = (
 		( item ) =>
 			item.fontFamily === fontFamily || ( !! slug && item.slug === slug )
 	);
-	const weights = family?.slug ? fontWeights?.[ family.slug ] : undefined;
+	const weights = ( family?.slug ? fontWeights?.[ family.slug ] : '' )
+		?.split( ',' )
+		.map( ( weight ) => weight.trim() )
+		.filter( Boolean );
 	let faces: FontFace[];
 	if ( family?.fontFace?.length ) {
 		faces = family.fontFace;

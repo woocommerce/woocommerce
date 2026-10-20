@@ -221,7 +221,7 @@ describe( 'TypographyElementPanel', () => {
 				return [ [ 'px' ] ];
 			}
 			if ( paths[ 0 ] === 'custom.fontWeights' ) {
-				return [ { inter: [ '300', '700' ] } ];
+				return [ { inter: '300, 700' } ];
 			}
 			return [
 				[],

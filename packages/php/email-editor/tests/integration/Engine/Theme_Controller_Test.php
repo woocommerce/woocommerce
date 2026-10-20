@@ -265,8 +265,8 @@ class Theme_Controller_Test extends \Email_Editor_Integration_Test_Case {
 		foreach ( $settings['typography']['fontFamilies']['default'] as $font_family ) {
 			$this->assertNotEmpty( $font_weights[ $font_family['slug'] ] ?? array(), $font_family['slug'] );
 		}
-		$this->assertSame( array( '400', '700' ), $font_weights['arial'] );
-		$this->assertSame( array( '300', '400', '500', '700' ), $font_weights['open-sans'] );
+		$this->assertSame( '400, 700', $font_weights['arial'] );
+		$this->assertSame( '300, 400, 500, 700', $font_weights['open-sans'] );
 	}
 
 	/**
