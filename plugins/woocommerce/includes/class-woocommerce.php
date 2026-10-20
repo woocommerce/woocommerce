@@ -21,8 +21,9 @@ use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableControlle
 use Automattic\WooCommerce\Internal\DownloadPermissionsAdjuster;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\LegacyAssets\LegacySelect2UsageTracker;
-use Automattic\WooCommerce\Internal\MCP\MCPAdapterProvider;
+use Automattic\WooCommerce\Internal\MCP\McpEndpointRemoval;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesRegistry;
+use Automattic\WooCommerce\Internal\Abilities\AbilitiesTracking;
 use Automattic\WooCommerce\Internal\ProductAttributes\VisualAttributeTermAdmin;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
@@ -37,6 +38,7 @@ use Automattic\WooCommerce\Internal\Email\DeferredEmailQueue;
 use Automattic\WooCommerce\Internal\Email\EmailLogger;
 use Automattic\WooCommerce\Internal\Admin\Marketplace;
 use Automattic\WooCommerce\Internal\Admin\OrderMilestoneEasterEgg;
+use Automattic\WooCommerce\Internal\Admin\Settings\PaymentSettingsScreen;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\{LoggingUtil, TimeUtil};
 use Automattic\WooCommerce\Internal\Logging\OrderLogsCleanupHelper;
@@ -61,7 +63,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '11.3.0-dev';
+	public $version = '11.4.0-dev';
 
 	/**
 	 * WooCommerce Schema version.
@@ -403,7 +405,7 @@ final class WooCommerce {
 		$container->get( DeferredEmailQueue::class );
 		$container->get( AddressProviderController::class );
 		$container->get( AbilitiesRegistry::class );
-		$container->get( MCPAdapterProvider::class );
+		$container->get( McpEndpointRemoval::class );
 		$container->get( CouponCodeLookupInvalidator::class );
 		$container->get( ProductVersionStringInvalidator::class );
 		$container->get( OrdersVersionStringInvalidator::class );
@@ -411,6 +413,8 @@ final class WooCommerce {
 		$container->get( OrderMilestoneEasterEgg::class );
 		$container->get( CustomerEmailVerification::class );
 		$container->get( OrderLogsCleanupHelper::class );
+		$container->get( PaymentSettingsScreen::class );
+		$container->get( AbilitiesTracking::class );
 
 		/**
 		 * These classes have a register method for attaching hooks.
@@ -438,6 +442,7 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\StockNotifications\StockNotifications::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ScheduledSalePriceReconciler::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalController::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\Ucp\UcpDiscovery::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Admin\OrderTaxLookupMigrator::class )->register();
 
 		// Classes inheriting from RestApiControllerBase.
@@ -1142,7 +1147,10 @@ final class WooCommerce {
 	 * @return string
 	 */
 	public function plugin_path() {
-		return untrailingslashit( plugin_dir_path( WC_PLUGIN_FILE ) );
+		static $plugin_path = null;
+		$plugin_path        = $plugin_path ?? untrailingslashit( plugin_dir_path( WC_PLUGIN_FILE ) );
+
+		return $plugin_path;
 	}
 
 	/**

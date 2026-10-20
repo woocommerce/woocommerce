@@ -15,7 +15,7 @@ WooCommerce currently uses two feature-flag systems in Blocks:
 
 | Flag | Defaults | Current Blocks usage |
 | --- | --- | --- |
-| `experimental-blocks` | Enabled in [development](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/admin/config/development.json) and disabled in [core builds](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/admin/config/core.json). | Exposed to the editor through [`isExperimentalBlocksEnabled()`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/assets/js/settings/blocks/feature-flags.ts). It currently gates the **Disable product descriptions** editor control in Checkout Order Summary Cart Items. It does not determine which block scripts webpack builds or which general block types are registered. |
+| `experimental-blocks` | Enabled in [development](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/admin/config/development.json) and disabled in [core builds](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/admin/config/core.json). | Exposed to the editor through [`isExperimentalBlocksEnabled()`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/assets/js/settings/blocks/feature-flags.ts). It currently gates the **Disable product descriptions** editor control in Checkout Order Summary Cart Items and conditional checkout-field processing in the Store API. It does not determine which block scripts webpack builds or which general block types are registered. |
 | `rest-api-v4` | Disabled in both development and core build configurations. | Exposed through [`isExperimentalWcRestApiV4Enabled()`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/assets/js/settings/blocks/feature-flags.ts). It switches product entities from `/wc/v3/products` to `/wc/v4/products`, registers the settings entity, and enables the v4 product-data paths used by Product Price and Product Button in the editor. |
 
 ### Runtime feature flags
@@ -101,8 +101,11 @@ See the [available SlotFills](https://github.com/woocommerce/woocommerce/blob/tr
 | `experimental__woocommerce_blocks-cart-view-link` | `product` |
 | `experimental__woocommerce_blocks-cart-remove-item` | `product`, `quantity` |
 | `experimental__woocommerce_blocks-cart-set-item-quantity` | `product`, `quantity` |
+| `experimental__woocommerce_blocks-cart-updated` | `storeCart`, `previousStoreCart` |
 | `experimental__woocommerce_blocks-product-view-link` | `product` |
 | `experimental__woocommerce_blocks-product-list-render` | `products`, `listName` |
+
+`experimental__woocommerce_blocks-cart-updated` is emitted by the `wc/store/cart` data store instead of `useStoreEvents`. It fires each time a cart from a Store API response is applied to the store, after cart notices are shown and items that left the cart are no longer marked as pending delete.
 
 Examples:
 
@@ -132,6 +135,16 @@ wp.hooks.addAction(
 );
 
 wp.hooks.addAction(
+	'experimental__woocommerce_blocks-cart-updated',
+	'plugin/namespace',
+	( { storeCart, previousStoreCart } ) => {
+		console.log(
+			`The cart went from ${ previousStoreCart.itemsCount } to ${ storeCart.itemsCount } items`
+		);
+	}
+);
+
+wp.hooks.addAction(
 	'experimental__woocommerce_blocks-product-view-link',
 	'plugin/namespace',
 	( { product } ) => {
@@ -147,6 +160,9 @@ Checkout events use the `experimental__woocommerce_blocks-checkout-` prefix. `di
 | Action | Additional parameters |
 | --- | --- |
 | `experimental__woocommerce_blocks-checkout-submit` | None |
+| `experimental__woocommerce_blocks-checkout-cart-render` | None |
+| `experimental__woocommerce_blocks-checkout-mini-cart-open` | None |
+| `experimental__woocommerce_blocks-checkout-mini-cart-close` | None |
 | `experimental__woocommerce_blocks-checkout-set-selected-shipping-rate` | `shippingRateId` |
 | `experimental__woocommerce_blocks-checkout-set-active-payment-method` | `paymentMethodSlug` |
 | `experimental__woocommerce_blocks-checkout-render-checkout-form` | None |

@@ -470,7 +470,7 @@ const TestAccountStep = () => {
 						setIsResetAccountModalOpen( true );
 					},
 				},
-		  ]
+			]
 		: [
 				{
 					label: __( 'Try Again', 'woocommerce' ),
@@ -509,7 +509,7 @@ const TestAccountStep = () => {
 						closeModal();
 					},
 				},
-		  ];
+			];
 
 	// Render loading/error state.
 	return (

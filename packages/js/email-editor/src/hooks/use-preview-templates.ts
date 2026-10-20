@@ -152,7 +152,7 @@ export function usePreviewTemplates(
 					templateToPreview.push( {
 						id: template.id,
 						slug: template.slug,
-						// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+
 						previewContentParsed: parsedTemplate,
 						emailParsed:
 							contentPattern.emailBlocks ?? contentPattern.blocks,

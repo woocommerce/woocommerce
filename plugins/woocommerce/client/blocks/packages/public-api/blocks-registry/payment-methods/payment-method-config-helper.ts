@@ -101,6 +101,6 @@ export const getCanMakePayment = (
 				canPay,
 				extensionsConfig.canMakePayment,
 				paymentMethodName
-		  )
+			)
 		: canPay;
 };

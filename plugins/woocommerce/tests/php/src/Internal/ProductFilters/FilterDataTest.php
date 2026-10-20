@@ -2,6 +2,7 @@
 
 namespace Automattic\WooCommerce\Tests\Internal\ProductFilters;
 
+use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductFilters\FilterDataProvider;
 use Automattic\WooCommerce\Internal\ProductFilters\QueryClauses;
 use Automattic\WooCommerce\Internal\ProductFilters\TaxonomyHierarchyData;
@@ -55,6 +56,33 @@ class FilterDataTest extends AbstractProductFiltersTest {
 	}
 
 	/**
+	 * @testdox Missing variations are excluded from lookup counts, including after changing the option.
+	 */
+	public function test_attribute_counts_exclude_missing_variations(): void {
+		$product                = wc_get_product( $this->products[4]->get_id() );
+		$blue                   = get_term_by( 'slug', 'blue-slug', 'pa_color' )->term_id;
+		$attributes             = $product->get_attributes();
+		$attributes['pa_color'] = clone $attributes['pa_color'];
+		$attributes['pa_color']->set_options( array_merge( $attributes['pa_color']->get_options(), array( $blue ) ) );
+		$product->set_attributes( $attributes );
+		$product->save();
+		wc_get_container()->get( LookupDataStore::class )->create_data_for_product( $product );
+		$query_vars = array(
+			'post_type' => 'product',
+			'post__in'  => array( $product->get_id() ),
+		);
+
+		foreach ( array(
+			'yes' => 0,
+			'no'  => 1,
+		) as $lookup => $expected ) {
+			update_option( 'woocommerce_attribute_lookup_enabled', $lookup );
+			$counts = $this->sut->get_attribute_counts( $query_vars, 'pa_color' );
+			$this->assertSame( $expected, $counts[ $blue ] ?? 0, 'Lookup option: ' . $lookup );
+		}
+	}
+
+	/**
 	 * @testdox Test price range without filter.
 	 */
 	public function test_get_filtered_price_with_default_query() {
@@ -83,15 +111,15 @@ class FilterDataTest extends AbstractProductFiltersTest {
 		$key_method->setAccessible( true );
 
 		$rename = static function ( array $params ): array {
-			$params['product_brand'] = 'wc_brands';
+			$params['taxonomy']['product_brand'] = 'wc_brands';
 			return $params;
 		};
-		add_filter( 'woocommerce_product_filter_taxonomy_params', $rename );
+		add_filter( 'woocommerce_product_filter_params', $rename );
 
 		$renamed_key = $key_method->invoke( $this->sut, $query_vars, 'price' );
 		$unfiltered  = (array) $this->sut->get_filtered_price( $query_vars );
 
-		remove_filter( 'woocommerce_product_filter_taxonomy_params', $rename );
+		remove_filter( 'woocommerce_product_filter_params', $rename );
 		$this->clear_params_cache();
 
 		$this->assertNotSame( $renamed_key, $key_method->invoke( $this->sut, $query_vars, 'price' ) );

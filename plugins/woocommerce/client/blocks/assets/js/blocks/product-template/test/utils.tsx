@@ -47,7 +47,7 @@ beforeAll( () => {
 								type: 'boolean',
 								default: false,
 							},
-					  }
+						}
 					: {},
 			edit: () => null,
 			save: () => null,

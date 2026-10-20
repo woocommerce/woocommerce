@@ -186,6 +186,21 @@ const renderInnerBlocks = ( {
 				return parsedElement;
 			}
 
+			// Template markup lives in `content`, not `childNodes`, so copy it over as HTML.
+			if ( node instanceof HTMLTemplateElement ) {
+				return cloneElement(
+					parsedElement as React.ReactElement<
+						Record< string, unknown >
+					>,
+					{
+						key: componentKey,
+						...( parsedElement?.props || {} ),
+						children: undefined,
+						dangerouslySetInnerHTML: { __html: node.innerHTML },
+					}
+				);
+			}
+
 			const renderedChildren = node.childNodes.length
 				? renderInnerBlocks( {
 						block,
@@ -193,7 +208,7 @@ const renderInnerBlocks = ( {
 						children: node.childNodes,
 						depth: depth + 1,
 						blockWrapper,
-				  } )
+					} )
 				: undefined;
 
 			// We pass props here rather than componentProps to avoid the data attributes being renamed.
@@ -205,11 +220,11 @@ const renderInnerBlocks = ( {
 							...( parsedElement?.props || {} ),
 						},
 						renderedChildren
-				  )
+					)
 				: cloneElement( parsedElement, {
 						key: componentKey,
 						...( parsedElement?.props || {} ),
-				  } );
+					} );
 		}
 
 		// This will wrap inner blocks with the provided wrapper. If no wrapper is provided, we default to Fragment.

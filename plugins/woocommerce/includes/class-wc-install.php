@@ -18,6 +18,7 @@ use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Synchronize as Download_Directories_Sync;
 use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrdersStatsDataStore;
+use Automattic\WooCommerce\Admin\API\Reports\Taxes\DataStore as TaxesDataStore;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\WCCom\ConnectionHelper as WCConnectionHelper;
@@ -367,6 +368,9 @@ class WC_Install {
 		'11.3.0'   => array(
 			'wc_update_1130_set_legacy_variation_price_hash_option',
 			'wc_update_1130_delete_unpublished_variation_lookup_rows',
+			'wc_update_1130_split_tax_lookup_taxable_amount',
+			'wc_update_1130_delete_stock_notification_sync_notice_option',
+			'wc_update_1130_backfill_order_stats_payment_method',
 		),
 	);
 
@@ -1485,7 +1489,8 @@ class WC_Install {
 	net_total double DEFAULT 0 NOT NULL,
 	returning_customer tinyint(1) DEFAULT NULL,
 	status varchar(20) NOT NULL,
-	customer_id bigint(20) unsigned NOT NULL" .
+	customer_id bigint(20) unsigned NOT NULL,
+	payment_method varchar(100) DEFAULT NULL" .
 		( $should_have_fulfillment_column ? ',
 	fulfillment_status varchar(50) DEFAULT NULL' : '' ) . ',
 	PRIMARY KEY (order_id),
@@ -1494,7 +1499,8 @@ class WC_Install {
 	KEY status (status)' .
 		( $should_have_fulfillment_column ? ',
 	KEY fulfillment_status (fulfillment_status)' : '' ) . ",
-	KEY idx_date_paid_status_parent (date_paid, status, parent_id)
+	KEY idx_date_paid_status_parent (date_paid, status, parent_id),
+	KEY idx_payment_method_date_paid_status (payment_method, date_paid, status)
 ) $collate;";
 	}
 
@@ -1814,6 +1820,8 @@ class WC_Install {
 
 		// Clear table caches.
 		delete_transient( 'wc_attribute_taxonomies' );
+		TaxesDataStore::flush_lookup_columns_cache();
+		OrdersStatsDataStore::flush_payment_method_column_cache();
 
 		return $db_delta_result;
 	}
@@ -2133,6 +2141,8 @@ CREATE TABLE {$wpdb->prefix}wc_order_tax_lookup (
 	order_tax double DEFAULT 0 NOT NULL,
 	total_tax double DEFAULT 0 NOT NULL,
 	taxable_amount double DEFAULT 0 NOT NULL,
+	order_taxable_amount double DEFAULT NULL,
+	shipping_taxable_amount double DEFAULT NULL,
 	PRIMARY KEY (order_id, tax_rate_id, order_item_id),
 	KEY tax_rate_id (tax_rate_id),
 	KEY date_created (date_created)

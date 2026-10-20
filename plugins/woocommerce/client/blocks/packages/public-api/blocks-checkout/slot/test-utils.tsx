@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { render } from '@testing-library/react';
-import { Provider as SlotFillProvider } from 'wordpress-components-slotfill/build-module/slot-fill'; // eslint-disable-line @typescript-eslint/no-unused-vars -- Provider is used as JSX.
+import { Provider as SlotFillProvider } from 'wordpress-components-slotfill/build-module/slot-fill';
 
 type SlotFillComponent = {
 	( props: { children: React.ReactNode } ): JSX.Element;

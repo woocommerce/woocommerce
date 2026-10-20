@@ -3,10 +3,21 @@
  * Tests for WC_Webhook class.
  */
 
+use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
+
 /**
  * Tests for WC_Webhook class.
  */
 class WC_Webhook_Test extends WC_Unit_Test_Case {
+	use HPOSToggleTrait;
+
+	/**
+	 * Ensure permanent HPOS tables exist before per-test transactions start.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		self::setup_cot_tables();
+	}
 
 	/**
 	 * @testdox Check that post-action validation uses the affected post ID.
@@ -101,6 +112,38 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 			// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Test isolates arbitrary global request state.
 			$GLOBALS['post'] = get_post( $product_id );
 			$this->assertFalse( $this->call_is_valid_post_action( $webhook, 0 ) );
+		} finally {
+			if ( $had_global_post ) {
+				// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the global request state changed for this test.
+				$GLOBALS['post'] = $original_post;
+			} else {
+				unset( $GLOBALS['post'] );
+			}
+		}
+	}
+
+	/**
+	 * @testdox Variation-delete validation rejects a non-ID argument even when the global post is a variation.
+	 *
+	 * @testWith [0]
+	 *           ["abc"]
+	 *
+	 * @param mixed $arg Hook argument that is not a valid post ID.
+	 */
+	public function test_is_valid_variation_delete_action_rejects_non_id_with_global_variation( $arg ): void {
+		$had_global_post = array_key_exists( 'post', $GLOBALS );
+		$original_post   = $GLOBALS['post'] ?? null;
+		$product         = WC_Helper_Product::create_variation_product();
+		$webhook         = new WC_Webhook();
+		$webhook->set_topic( 'product.deleted' );
+		$call_is_valid_variation_delete_action = function ( $arg ) {
+			return $this->is_valid_variation_delete_action( $arg );
+		};
+
+		try {
+			// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Test isolates arbitrary global request state.
+			$GLOBALS['post'] = get_post( $product->get_children()[0] );
+			$this->assertFalse( $call_is_valid_variation_delete_action->call( $webhook, $arg ) );
 		} finally {
 			if ( $had_global_post ) {
 				// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the global request state changed for this test.
@@ -212,20 +255,7 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 		$product       = WC_Helper_Product::create_variation_product();
 		$expected_ids  = array_merge( array( $product->get_id() ), $product->get_children() );
 		$delivered_ids = array();
-		$webhook       = $this->create_active_webhook( 'product.deleted' );
-
-		remove_action( 'woocommerce_webhook_process_delivery', 'wc_webhook_process_delivery', 10 );
-		add_action(
-			'woocommerce_webhook_process_delivery',
-			function ( $delivering_webhook, $arg ) use ( $webhook, &$delivered_ids ) {
-				if ( $webhook === $delivering_webhook ) {
-					$delivered_ids[] = $arg;
-				}
-			},
-			10,
-			2
-		);
-		$webhook->enqueue();
+		$this->record_deliveries( $this->create_active_webhook( 'product.deleted' ), $delivered_ids );
 
 		wp_trash_post( $product->get_id() );
 
@@ -242,8 +272,155 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 		$expected_ids  = array_merge( array( $product->get_id() ), $product->get_children() );
 		$delivered_ids = array();
 		wp_trash_post( $product->get_id() );
+		$this->record_deliveries( $this->create_active_webhook( 'product.restored' ), $delivered_ids );
 
-		$webhook = $this->create_active_webhook( 'product.restored' );
+		wp_untrash_post( $product->get_id() );
+
+		sort( $expected_ids );
+		sort( $delivered_ids );
+		$this->assertSame( $expected_ids, $delivered_ids );
+	}
+
+	/**
+	 * @testdox Product deletion webhooks are delivered when a variation is permanently deleted.
+	 */
+	public function test_product_deletion_webhook_delivers_for_permanently_deleted_variation(): void {
+		$product       = WC_Helper_Product::create_variation_product();
+		$variation_id  = $product->get_children()[0];
+		$delivered_ids = array();
+		$this->record_deliveries( $this->create_active_webhook( 'product.deleted' ), $delivered_ids );
+
+		wc_get_product( $variation_id )->delete( true );
+
+		$this->assertSame( array( $variation_id ), $delivered_ids );
+	}
+
+	/**
+	 * @testdox Product deletion webhooks are delivered for the variations removed when a variable product changes type.
+	 */
+	public function test_product_deletion_webhook_delivers_for_variations_removed_by_type_change(): void {
+		$product       = WC_Helper_Product::create_variation_product();
+		$expected_ids  = $product->get_children();
+		$delivered_ids = array();
+		$this->record_deliveries( $this->create_active_webhook( 'product.deleted' ), $delivered_ids );
+
+		( new WC_Product_Simple( $product->get_id() ) )->save();
+
+		sort( $expected_ids );
+		sort( $delivered_ids );
+		$this->assertSame( $expected_ids, $delivered_ids );
+	}
+
+	/**
+	 * @testdox Product deletion webhooks are not delivered again when a trashed variable product is permanently deleted.
+	 */
+	public function test_product_deletion_webhook_skips_already_trashed_variations_of_deleted_product(): void {
+		$product       = WC_Helper_Product::create_variation_product();
+		$delivered_ids = array();
+		wp_trash_post( $product->get_id() );
+		$this->record_deliveries( $this->create_active_webhook( 'product.deleted' ), $delivered_ids );
+
+		wp_delete_post( $product->get_id(), true );
+
+		$this->assertSame( array(), $delivered_ids );
+	}
+
+	/**
+	 * @testdox Product deletion webhooks are not delivered again when a trashed variation is permanently deleted.
+	 */
+	public function test_product_deletion_webhook_skips_already_trashed_variation(): void {
+		$product       = WC_Helper_Product::create_variation_product();
+		$variation_id  = $product->get_children()[0];
+		$delivered_ids = array();
+		wc_get_product( $variation_id )->delete();
+		$this->record_deliveries( $this->create_active_webhook( 'product.deleted' ), $delivered_ids );
+
+		wc_get_product( $variation_id )->delete( true );
+
+		$this->assertSame( array(), $delivered_ids );
+	}
+
+	/**
+	 * @testdox Product deletion webhooks are delivered for a variation moved to trash without wp_trash_post().
+	 */
+	public function test_product_deletion_webhook_delivers_for_variation_trashed_without_wp_trash_post(): void {
+		$product       = WC_Helper_Product::create_variation_product();
+		$variation_id  = $product->get_children()[0];
+		$variation     = wc_get_product( $variation_id );
+		$delivered_ids = array();
+		$variation->set_status( ProductStatus::TRASH );
+		$variation->save();
+		$this->record_deliveries( $this->create_active_webhook( 'product.deleted' ), $delivered_ids );
+
+		$variation->delete( true );
+
+		$this->assertSame( array( $variation_id ), $delivered_ids );
+	}
+
+	/**
+	 * @testdox Product deletion webhooks are not delivered when a pre_delete_post filter cancels the variation deletion.
+	 */
+	public function test_product_deletion_webhook_skips_variation_deletion_cancelled_by_pre_delete_post(): void {
+		$product       = WC_Helper_Product::create_variation_product();
+		$variation_id  = $product->get_children()[0];
+		$delivered_ids = array();
+		add_filter(
+			'pre_delete_post',
+			function ( $check, $post ) use ( $variation_id ) {
+				return $variation_id === $post->ID ? false : $check;
+			},
+			10,
+			2
+		);
+		$this->record_deliveries( $this->create_active_webhook( 'product.deleted' ), $delivered_ids );
+
+		wc_get_product( $variation_id )->delete( true );
+
+		$this->assertNotNull( get_post( $variation_id ), 'The filter should have kept the variation' );
+		$this->assertSame( array(), $delivered_ids );
+	}
+
+	/**
+	 * @testdox Product deletion webhooks are not delivered when a post that is not a variation is permanently deleted.
+	 */
+	public function test_product_deletion_webhook_skips_permanently_deleted_non_variation_post(): void {
+		$post_id       = $this->factory->post->create();
+		$delivered_ids = array();
+		$this->record_deliveries( $this->create_active_webhook( 'product.deleted' ), $delivered_ids );
+
+		wp_delete_post( $post_id, true );
+
+		$this->assertSame( array(), $delivered_ids );
+	}
+
+	/**
+	 * @testdox Non-product webhooks that add before_delete_post by filter still deliver for trashed posts.
+	 */
+	public function test_non_product_webhook_on_before_delete_post_delivers_for_trashed_post(): void {
+		$coupon_id     = WC_Helper_Coupon::create_coupon()->get_id();
+		$delivered_ids = array();
+		wp_trash_post( $coupon_id );
+		add_filter(
+			'woocommerce_webhook_topic_hooks',
+			function ( $topic_hooks ) {
+				$topic_hooks['coupon.deleted'][] = 'before_delete_post';
+				return $topic_hooks;
+			}
+		);
+		$this->record_deliveries( $this->create_active_webhook( 'coupon.deleted' ), $delivered_ids );
+
+		wp_delete_post( $coupon_id, true );
+
+		$this->assertSame( array( $coupon_id ), $delivered_ids, 'The variation-only check should not apply to coupon webhooks' );
+	}
+
+	/**
+	 * Enqueue a webhook and record the resource IDs it would deliver, without sending them.
+	 *
+	 * @param WC_Webhook   $webhook       Webhook to enqueue.
+	 * @param array<mixed> $delivered_ids Receives each delivered resource ID.
+	 */
+	private function record_deliveries( WC_Webhook $webhook, array &$delivered_ids ): void {
 		remove_action( 'woocommerce_webhook_process_delivery', 'wc_webhook_process_delivery', 10 );
 		add_action(
 			'woocommerce_webhook_process_delivery',
@@ -256,12 +433,58 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 			2
 		);
 		$webhook->enqueue();
+	}
 
-		wp_untrash_post( $product->get_id() );
+	/**
+	 * @testdox Deleting a refund delivers an order.updated webhook with the parent order payload.
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $hpos_on_or_off True to test with HPOS on, false to test with HPOS off.
+	 */
+	public function test_refund_deletion_delivers_order_updated_webhook( bool $hpos_on_or_off ): void {
+		// Remove the Test Suite’s use of temporary tables https://wordpress.stackexchange.com/a/220308.
+		remove_filter( 'query', array( $this, '_create_temporary_tables' ) );
+		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
+		$this->toggle_cot_authoritative( $hpos_on_or_off );
 
-		sort( $expected_ids );
-		sort( $delivered_ids );
-		$this->assertSame( $expected_ids, $delivered_ids );
+		$order  = WC_Helper_Order::create_order();
+		$refund = wc_create_refund(
+			array(
+				'order_id'       => $order->get_id(),
+				'amount'         => 1,
+				'refund_payment' => false,
+			)
+		);
+
+		$this->assertInstanceOf( WC_Order_Refund::class, $refund, 'The refund fixture should be created.' );
+		$refund_id = $refund->get_id();
+
+		$payloads = array();
+		$webhook  = $this->create_active_webhook( 'order.updated' );
+		$webhook->set_user_id( 1 );
+
+		remove_action( 'woocommerce_webhook_process_delivery', 'wc_webhook_process_delivery', 10 );
+		add_action(
+			'woocommerce_webhook_process_delivery',
+			function ( $delivering_webhook, $arg ) use ( $webhook, &$payloads ) {
+				if ( $webhook === $delivering_webhook ) {
+					$payloads[] = $delivering_webhook->build_payload( $arg );
+				}
+			},
+			10,
+			2
+		);
+		$webhook->enqueue();
+
+		$refund->delete( true );
+
+		$this->assertCount( 1, $payloads, 'The refund deletion should queue one webhook payload.' );
+		$this->assertArrayNotHasKey( 'code', $payloads[0], 'The payload should not contain a REST API error.' );
+		$this->assertArrayHasKey( 'id', $payloads[0] );
+		$this->assertSame( $order->get_id(), $payloads[0]['id'], 'The payload should represent the parent order.' );
+		$this->assertArrayHasKey( 'refunds', $payloads[0] );
+		$this->assertNotContains( $refund_id, wp_list_pluck( $payloads[0]['refunds'], 'id' ), 'The payload should not contain the deleted refund.' );
 	}
 
 	/**

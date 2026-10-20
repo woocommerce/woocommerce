@@ -311,4 +311,90 @@ class OrdersTableRefundDataStoreTests extends \WC_Unit_Test_Case {
 		$this->assertEquals( 2, $hook_called_count['woocommerce_update_order_refund'] );
 	}
 
+	/**
+	 * @testdox Deleting a refund fires woocommerce_order_refund_deleted with the parent order and refund IDs.
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $hpos_on_or_off True to test with HPOS on, false to test with HPOS off.
+	 */
+	public function test_refund_deletion_fires_order_refund_deleted( bool $hpos_on_or_off ): void {
+		$this->toggle_cot_authoritative( $hpos_on_or_off );
+		$order  = OrderHelper::create_order();
+		$refund = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 1,
+			)
+		);
+
+		$hook_args = array();
+		$callback  = function ( ...$args ) use ( &$hook_args ) {
+			$hook_args[] = $args;
+		};
+		add_action( 'woocommerce_order_refund_deleted', $callback, 10, 2 );
+
+		$refund_id = $refund->get_id();
+		$refund->delete( true );
+
+		$this->assertSame( array( array( $order->get_id(), $refund_id ) ), $hook_args, 'The hook should fire once with the order and refund IDs.' );
+	}
+
+	/**
+	 * @testdox Deleting an order does not fire woocommerce_order_refund_deleted for its refunds.
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $hpos_on_or_off True to test with HPOS on, false to test with HPOS off.
+	 */
+	public function test_order_deletion_does_not_fire_order_refund_deleted( bool $hpos_on_or_off ): void {
+		$this->toggle_cot_authoritative( $hpos_on_or_off );
+		$order  = OrderHelper::create_order();
+		$refund = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 1,
+			)
+		);
+
+		$order_refund_deleted = did_action( 'woocommerce_order_refund_deleted' );
+
+		$order->delete( true );
+
+		$this->assertFalse( wc_get_order( $refund->get_id() ), 'The refund should be deleted along with the order.' );
+		$this->assertSame( $order_refund_deleted, did_action( 'woocommerce_order_refund_deleted' ), 'The hook should not fire for an order that is being deleted.' );
+	}
+
+	/**
+	 * @testdox Deleting a refund from an order deletion callback does not fire woocommerce_order_refund_deleted.
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $hpos_on_or_off True to test with HPOS on, false to test with HPOS off.
+	 */
+	public function test_refund_deletion_during_order_deletion_does_not_fire_order_refund_deleted( bool $hpos_on_or_off ): void {
+		$this->toggle_cot_authoritative( $hpos_on_or_off );
+		$order  = OrderHelper::create_order();
+		$refund = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 1,
+			)
+		);
+
+		$refund_deleted_count = did_action( 'woocommerce_delete_order_refund' );
+		$order_refund_deleted = did_action( 'woocommerce_order_refund_deleted' );
+
+		add_action(
+			'woocommerce_before_delete_order',
+			function () use ( $refund ) {
+				$refund->delete( true );
+			}
+		);
+
+		$order->delete( true );
+
+		$this->assertSame( $refund_deleted_count + 1, did_action( 'woocommerce_delete_order_refund' ), 'The refund should be deleted through its data store.' );
+		$this->assertSame( $order_refund_deleted, did_action( 'woocommerce_order_refund_deleted' ), 'The hook should not fire for an order that is being deleted.' );
+	}
 }
