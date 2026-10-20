@@ -39,7 +39,7 @@ import {
  */
 import { useEmailStyles, setImmutably } from '../../../hooks';
 import { storeName } from '../../../store';
-import { getElementStyles } from '../utils';
+import { getElementStyles, getFontFamilyFaces } from '../utils';
 import { useHasTextColorInTypographyPanel } from '../hooks';
 import { ColorDropdownItem } from './color-dropdown-item';
 import { recordEvent, debouncedRecordEvent } from '../../../events';
@@ -74,6 +74,9 @@ export function TypographyElementPanel( {
 
 	// Ref: https://github.com/WordPress/gutenberg/issues/59778
 	const fontFamilies = blockLevelFontFamilies?.default || [];
+	const allFontFamilies = [ 'default', 'theme', 'custom' ].flatMap(
+		( origin ) => blockLevelFontFamilies?.[ origin ] ?? []
+	);
 	const theme = useSelect( ( select ) => select( storeName ).getTheme(), [] );
 	const colorGradientSettings = useMultipleOriginColorsAndGradients();
 	// Text color renders here only when the running WordPress no longer offers
@@ -384,6 +387,11 @@ export function TypographyElementPanel( {
 						fontWeight,
 					} }
 					onChange={ setFontAppearance }
+					fontFamilyFaces={ getFontFamilyFaces(
+						allFontFamilies,
+						fontFamily,
+						{ fontStyle, fontWeight }
+					) }
 					hasFontStyles
 					hasFontWeights
 					size="__unstable-large"

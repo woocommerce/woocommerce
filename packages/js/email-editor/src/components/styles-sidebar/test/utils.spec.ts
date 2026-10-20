@@ -2,7 +2,11 @@
  * Internal dependencies
  */
 import { EmailStyles } from '../../../store';
-import { getElementStyles, getHeadingElementStyles } from '../utils';
+import {
+	getElementStyles,
+	getFontFamilyFaces,
+	getHeadingElementStyles,
+} from '../utils';
 
 describe( 'getElementStyles', () => {
 	it( 'always returns typography and color objects, even when missing', () => {
@@ -76,5 +80,76 @@ describe( 'getHeadingElementStyles', () => {
 			fontWeight: '700',
 			fontSize: '32px',
 		} );
+	} );
+} );
+
+describe( 'getFontFamilyFaces', () => {
+	const arial = {
+		name: 'Arial',
+		slug: 'arial',
+		fontFamily: "Arial, 'Helvetica Neue', Helvetica, sans-serif",
+	};
+	const inter = {
+		name: 'Inter',
+		slug: 'inter',
+		fontFamily: 'Inter, sans-serif',
+		fontFace: [
+			{ fontFamily: 'Inter', fontStyle: 'normal', fontWeight: '300' },
+			{ fontFamily: 'Inter', fontStyle: 'normal', fontWeight: '600' },
+		],
+	};
+	const regularAndBold = [
+		{ fontStyle: 'normal', fontWeight: '400' },
+		{ fontStyle: 'italic', fontWeight: '400' },
+		{ fontStyle: 'normal', fontWeight: '700' },
+		{ fontStyle: 'italic', fontWeight: '700' },
+	];
+
+	it( 'offers regular and bold for a font without font faces', () => {
+		expect(
+			getFontFamilyFaces( [ arial, inter ], arial.fontFamily, {} )
+		).toEqual( regularAndBold );
+	} );
+
+	it( 'uses the font faces of a font that has them', () => {
+		expect(
+			getFontFamilyFaces( [ arial, inter ], inter.fontFamily, {} )
+		).toEqual( inter.fontFace );
+	} );
+
+	it.each( [
+		'var:preset|font-family|inter',
+		'var(--wp--preset--font-family--inter)',
+	] )( 'finds the font from a preset reference: %s', ( fontFamily ) => {
+		expect(
+			getFontFamilyFaces( [ arial, inter ], fontFamily, {} )
+		).toEqual( inter.fontFace );
+	} );
+
+	it( 'offers regular and bold when the font is not in the list', () => {
+		expect( getFontFamilyFaces( [ arial ], undefined, {} ) ).toEqual(
+			regularAndBold
+		);
+	} );
+
+	it( 'keeps a saved weight that the font does not offer', () => {
+		expect(
+			getFontFamilyFaces( [ arial ], arial.fontFamily, {
+				fontStyle: 'normal',
+				fontWeight: '300',
+			} )
+		).toEqual( [
+			...regularAndBold,
+			{ fontStyle: 'normal', fontWeight: '300' },
+		] );
+	} );
+
+	it( 'does not add a saved value the font already offers', () => {
+		expect(
+			getFontFamilyFaces( [ arial ], arial.fontFamily, {
+				fontStyle: 'italic',
+				fontWeight: 700,
+			} )
+		).toEqual( regularAndBold );
 	} );
 } );
