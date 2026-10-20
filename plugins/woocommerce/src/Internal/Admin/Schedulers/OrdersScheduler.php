@@ -267,6 +267,7 @@ class OrdersScheduler extends ImportScheduler {
 				$offset
 			)
 		) : array(); // phpcs:ignore unprepared SQL ok.
+		self::log_last_db_error( 'Could not query the orders to import' );
 
 		return (object) array(
 			'total' => absint( $count ),
@@ -329,6 +330,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 				$offset
 			)
 		) : array(); // phpcs:ignore unprepared SQL ok.
+		self::log_last_db_error( 'Could not query the orders to import' );
 
 		return (object) array(
 			'total' => absint( $count ),
@@ -427,7 +429,12 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 			return;
 		}
 
-		OrdersStatsDataStore::sync_order( $order_id );
+		if ( false === OrdersStatsDataStore::sync_order( $order_id ) ) {
+			// No stats row was written, so the import did not land: keep the record on the list Analytics
+			// settings retries instead of writing its other lookup rows.
+			self::record_failed_order_import( $order_id );
+			return;
+		}
 		ProductsDataStore::sync_order_products( $order_id );
 		CouponsDataStore::sync_order_coupons( $order_id );
 		$taxes_synced = TaxesDataStore::sync_order_taxes( $order_id );

@@ -470,6 +470,42 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox import() keeps a record on the failed list, and writes no other lookup rows, when its stats row is not written.
+	 */
+	public function test_import_keeps_record_for_retry_when_stats_write_fails(): void {
+		global $wpdb;
+		$order = \WC_Helper_Order::create_order();
+		add_filter(
+			'woocommerce_analytics_update_order_stats_data',
+			function ( $data ) {
+				$data['no_such_column_for_this_test'] = 1;
+				return $data;
+			}
+		);
+
+		$suppress = $wpdb->suppress_errors();
+		OrdersScheduler::import( $order->get_id() );
+		$wpdb->suppress_errors( $suppress );
+
+		$this->assertNotContains( $order->get_id(), $this->get_imported_order_ids() );
+		$this->assertSame( '0', $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}wc_order_product_lookup WHERE order_id = %d", $order->get_id() ) ), 'Product lookup rows wait for the retry.' );
+		$this->assertContains( $order->get_id(), OrdersScheduler::get_failed_order_imports()['ids'], 'The record stays on the list Analytics settings retries.' );
+	}
+
+	/**
+	 * @testdox Re-syncing a record whose stats row is unchanged counts as a success, so import() does not mark it failed.
+	 */
+	public function test_resync_of_unchanged_record_is_not_a_failed_import(): void {
+		$order = \WC_Helper_Order::create_order();
+		OrdersScheduler::import( $order->get_id() );
+
+		$this->assertTrue( OrdersStatsDataStore::update( wc_get_order( $order->get_id() ) ), 'Writing an identical stats row reports success.' );
+
+		OrdersScheduler::import( $order->get_id() );
+		$this->assertNotContains( $order->get_id(), OrdersScheduler::get_failed_order_imports()['ids'] );
+	}
+
+	/**
 	 * @testdox The scheduled batch leaves the cursor unchanged when the import conditions make the query fail.
 	 */
 	public function test_process_pending_batch_keeps_cursor_when_filtered_query_fails(): void {
