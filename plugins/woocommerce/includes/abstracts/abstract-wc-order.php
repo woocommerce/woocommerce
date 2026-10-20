@@ -1895,7 +1895,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$order_data_store = $this->get_data_store();
 		// @phpstan-ignore-next-line method.notFound (Guarded by has_callable() and called via __call() on the underlying order data store instance.)
 		$has_recorded = $order_data_store->has_callable( 'get_recorded_coupon_usage_counts' ) && $order_data_store->get_recorded_coupon_usage_counts( $this );
-		$this->set_recorded_coupon_usage_counts( $has_recorded );
 
 		$used_by = $this->get_user_id();
 		if ( ! $used_by && is_callable( array( $this, 'get_billing_email' ) ) ) {
@@ -1909,6 +1908,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				$coupon_object = new WC_Coupon( $code );
 
 				if ( $has_recorded ) {
+					// Mirror the stored flag into this instance so clearing it below is tracked as a change and saved.
+					$this->set_recorded_coupon_usage_counts( true );
 					$coupon_object->decrease_usage_count( $used_by );
 
 					$remaining_codes = array_filter( $this->get_coupon_codes(), fn( $remaining_code ) => ! StringUtil::is_null_or_whitespace( $remaining_code ) );
