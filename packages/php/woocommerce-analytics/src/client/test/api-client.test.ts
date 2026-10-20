@@ -79,4 +79,36 @@ describe( 'ApiClient', () => {
 
 		expect( sendBeacon ).not.toHaveBeenCalled();
 	} );
+
+	it( 'drops a batch that fails after consent was withdrawn, even when consent is granted again', async () => {
+		let hasConsent = true;
+		window.wp_has_consent = () => hasConsent;
+		sendBeacon.mockReturnValueOnce( false ).mockReturnValueOnce( false );
+		let failFirstRequest: ( error: Error ) => void = () => {};
+		const fetchMock = jest
+			.fn< typeof fetch >()
+			.mockReturnValueOnce(
+				new Promise( ( _resolve, reject ) => {
+					failFirstRequest = reject;
+				} )
+			)
+			.mockResolvedValue( { ok: true, json: async () => ( {} ) } as Response );
+		global.fetch = fetchMock;
+		const client = new ApiClient();
+		client.init();
+
+		client.addEvent( 'before_withdrawal' );
+		client.flush();
+		hasConsent = false;
+		changeConsent( 'deny' );
+		failFirstRequest( new Error( 'Network error' ) );
+		await jest.runAllTimersAsync();
+		hasConsent = true;
+		changeConsent( 'allow' );
+		client.addEvent( 'after_regrant' );
+		client.flush();
+
+		expect( fetchMock ).toHaveBeenCalledTimes( 2 );
+		expect( fetchMock.mock.calls[ 1 ][ 1 ]?.body ).not.toContain( 'before_withdrawal' );
+	} );
 } );
