@@ -40,6 +40,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		'woocommerce/order-update-status',
 		'woocommerce/order-add-note',
 		'woocommerce/order-notes-query',
+		'woocommerce/payment-gateways-query',
 	);
 
 	/**
@@ -210,42 +211,47 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_canonical_ability_annotations_match_intent(): void {
 		$expectations = array(
-			'woocommerce/products-query'      => array(
+			'woocommerce/products-query'         => array(
 				'readonly'    => true,
 				'idempotent'  => true,
 				'destructive' => false,
 			),
-			'woocommerce/product-create'      => array(
+			'woocommerce/product-create'         => array(
 				'readonly'    => false,
 				'idempotent'  => false,
 				'destructive' => false,
 			),
-			'woocommerce/product-update'      => array(
+			'woocommerce/product-update'         => array(
 				'readonly'    => false,
 				'idempotent'  => false,
 				'destructive' => true,
 			),
-			'woocommerce/product-delete'      => array(
+			'woocommerce/product-delete'         => array(
 				'readonly'    => false,
 				'idempotent'  => true,
 				'destructive' => true,
 			),
-			'woocommerce/orders-query'        => array(
+			'woocommerce/orders-query'           => array(
 				'readonly'    => true,
 				'idempotent'  => true,
 				'destructive' => false,
 			),
-			'woocommerce/order-update-status' => array(
+			'woocommerce/order-update-status'    => array(
 				'readonly'    => false,
 				'idempotent'  => false,
 				'destructive' => true,
 			),
-			'woocommerce/order-add-note'      => array(
+			'woocommerce/order-add-note'         => array(
 				'readonly'    => false,
 				'idempotent'  => false,
 				'destructive' => false,
 			),
-			'woocommerce/order-notes-query'   => array(
+			'woocommerce/order-notes-query'      => array(
+				'readonly'    => true,
+				'idempotent'  => true,
+				'destructive' => false,
+			),
+			'woocommerce/payment-gateways-query' => array(
 				'readonly'    => true,
 				'idempotent'  => true,
 				'destructive' => false,
@@ -298,8 +304,9 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_collection_output_schemas_describe_pagination_metadata(): void {
 		$schemas = array(
-			'woocommerce/products-query' => 'products',
-			'woocommerce/orders-query'   => 'orders',
+			'woocommerce/products-query'         => 'products',
+			'woocommerce/orders-query'           => 'orders',
+			'woocommerce/payment-gateways-query' => 'gateways',
 		);
 
 		foreach ( $schemas as $ability_id => $collection_key ) {
@@ -871,56 +878,60 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	public function provider_canonical_abilities_with_minimal_input(): array {
 		// Valid-shape input only — permission check should fire before execute.
 		return array(
-			'products-query'      => array(
+			'products-query'         => array(
 				'woocommerce/products-query',
 				array(
 					'id' => 1,
 				),
 			),
-			'product-create'      => array(
+			'product-create'         => array(
 				'woocommerce/product-create',
 				array(
 					'name' => 'Forbidden',
 				),
 			),
-			'product-update'      => array(
+			'product-update'         => array(
 				'woocommerce/product-update',
 				array(
 					'id'   => 1,
 					'name' => 'Forbidden',
 				),
 			),
-			'product-delete'      => array(
+			'product-delete'         => array(
 				'woocommerce/product-delete',
 				array(
 					'id' => 1,
 				),
 			),
-			'orders-query'        => array(
+			'orders-query'           => array(
 				'woocommerce/orders-query',
 				array(
 					'id' => 1,
 				),
 			),
-			'order-update-status' => array(
+			'order-update-status'    => array(
 				'woocommerce/order-update-status',
 				array(
 					'id'     => 1,
 					'status' => 'processing',
 				),
 			),
-			'order-add-note'      => array(
+			'order-add-note'         => array(
 				'woocommerce/order-add-note',
 				array(
 					'id'   => 1,
 					'note' => 'denied',
 				),
 			),
-			'order-notes-query'   => array(
+			'order-notes-query'      => array(
 				'woocommerce/order-notes-query',
 				array(
 					'id' => 1,
 				),
+			),
+			'payment-gateways-query' => array(
+				'woocommerce/payment-gateways-query',
+				array(),
 			),
 		);
 	}
@@ -2691,6 +2702,107 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		$this->assertNotWPError( $result );
 		$this->assertSame( '1', get_comment_meta( $result['note_id'], 'is_customer_note', true ) );
+	}
+
+	/**
+	 * @testdox Should never return the API credentials of a configured gateway.
+	 */
+	public function test_payment_gateways_query_omits_gateway_credentials(): void {
+		update_option(
+			'woocommerce_paypal_settings',
+			array(
+				'_should_load'          => 'yes',
+				'enabled'               => 'yes',
+				'title'                 => 'PayPal',
+				'api_username'          => 'live-api-username',
+				'api_password'          => 'live-api-password',
+				'api_signature'         => 'live-api-signature',
+				'sandbox_api_username'  => 'sandbox-api-username',
+				'sandbox_api_password'  => 'sandbox-api-password',
+				'sandbox_api_signature' => 'sandbox-api-signature',
+				'identity_token'        => 'pdt-identity-token',
+			)
+		);
+
+		try {
+			self::reload_payment_gateways();
+
+			$result = wp_get_ability( 'woocommerce/payment-gateways-query' )->execute( array( 'id' => 'paypal' ) );
+		} finally {
+			delete_option( 'woocommerce_paypal_settings' );
+			self::reload_payment_gateways();
+		}
+
+		$this->assertNotWPError( $result );
+		$this->assertCount( 1, $result['gateways'] );
+		$this->assertSame(
+			array( 'id', 'title', 'method_title', 'description', 'enabled' ),
+			array_keys( $result['gateways'][0] )
+		);
+		$this->assertTrue( $result['gateways'][0]['enabled'] );
+
+		$encoded = wp_json_encode( $result );
+		foreach ( array( 'api-username', 'api-password', 'api-signature', 'pdt-identity-token' ) as $secret ) {
+			$this->assertStringNotContainsString( $secret, $encoded, "Output should not contain the {$secret} setting." );
+		}
+	}
+
+	/**
+	 * @testdox Should list every loaded gateway, enabled or not, with a boolean enabled flag.
+	 */
+	public function test_payment_gateways_query_lists_loaded_gateways(): void {
+		update_option( 'woocommerce_bacs_settings', array( 'enabled' => 'yes' ) );
+		update_option( 'woocommerce_cheque_settings', array( 'enabled' => 'no' ) );
+
+		try {
+			self::reload_payment_gateways();
+
+			$result = wp_get_ability( 'woocommerce/payment-gateways-query' )->execute( array() );
+		} finally {
+			delete_option( 'woocommerce_bacs_settings' );
+			delete_option( 'woocommerce_cheque_settings' );
+			self::reload_payment_gateways();
+		}
+
+		$this->assertNotWPError( $result );
+
+		$enabled_by_id = array_column( $result['gateways'], 'enabled', 'id' );
+		$this->assertTrue( $enabled_by_id['bacs'] );
+		$this->assertFalse( $enabled_by_id['cheque'] );
+		$this->assertArrayHasKey( 'cod', $enabled_by_id );
+		$this->assertSame( 'Direct bank transfer', array_column( $result['gateways'], 'method_title', 'id' )['bacs'] );
+		$this->assertSame( 1, $result['total_pages'] );
+		$this->assertSame( count( $result['gateways'] ), $result['per_page'] );
+	}
+
+	/**
+	 * @testdox Should let a shop manager query payment gateways.
+	 */
+	public function test_payment_gateways_query_allows_shop_manager(): void {
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'shop_manager' ) ) );
+
+		$result = wp_get_ability( 'woocommerce/payment-gateways-query' )->execute( array( 'id' => 'bacs' ) );
+
+		$this->assertNotWPError( $result );
+		$this->assertSame( 'bacs', $result['gateways'][0]['id'] );
+	}
+
+	/**
+	 * @testdox Should return a not-found error for an unknown payment gateway ID.
+	 */
+	public function test_payment_gateways_query_returns_not_found_for_unknown_id(): void {
+		$result = wp_get_ability( 'woocommerce/payment-gateways-query' )->execute( array( 'id' => 'no-such-gateway' ) );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_payment_gateway_not_found', $result->get_error_code() );
+	}
+
+	/**
+	 * Rebuild the loaded payment gateways from the current options, since init() only appends.
+	 */
+	private static function reload_payment_gateways(): void {
+		WC()->payment_gateways()->payment_gateways = array();
+		WC()->payment_gateways()->init();
 	}
 
 	/**
