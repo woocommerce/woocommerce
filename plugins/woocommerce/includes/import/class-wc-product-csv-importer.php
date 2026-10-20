@@ -56,15 +56,6 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	private $original_id_map = array();
 
 	/**
-	 * Original CSV IDs that the update fallback mapped to a product by SKU.
-	 *
-	 * A file can repeat such an ID for another product, so each row with it is matched by its own SKU again.
-	 *
-	 * @var array<int, true>
-	 */
-	private $sku_matched_original_ids = array();
-
-	/**
 	 * ID cells from the file, keyed by parsed row, so result labels show the ID the merchant can find in the CSV.
 	 *
 	 * @var array<int, int>
@@ -229,10 +220,10 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	/**
 	 * Find a product previously mapped from an original CSV ID.
 	 *
-	 * Cached mappings are successful `_original_id` meta lookups, placeholders created by
-	 * this instance, and products matched by SKU when updating a row whose ID is missing.
-	 * Misses are not cached because a later row or a hook can still create the mapping.
-	 * The cache assumes placeholders are not deleted while a batch is being parsed.
+	 * Only mappings backed by an `_original_id` meta row are cached: successful
+	 * lookups and placeholders created by this instance. Misses are not cached
+	 * because a later row or a hook can still create the mapping. The cache
+	 * assumes placeholders are not deleted while a batch is being parsed.
 	 *
 	 * @param int $original_id Original product ID from the CSV file.
 	 * @return int Mapped product ID, or 0 when no mapping exists.
@@ -255,10 +246,10 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	}
 
 	/**
-	 * Remember the product an original CSV ID resolved to during this import request.
+	 * Remember a placeholder created for an original CSV ID during this import request.
 	 *
 	 * @param int $original_id Original product ID from the CSV file.
-	 * @param int $product_id  Product ID the original ID now maps to.
+	 * @param int $product_id  Placeholder product ID.
 	 */
 	private function remember_original_id_mapping( $original_id, $product_id ): void {
 		$original_id = absint( $original_id );
@@ -365,8 +356,8 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			return 0;
 		}
 
-		// Reuse a placeholder or meta mapping. IDs matched by SKU are matched again on every row.
-		$mapped_product_id = isset( $this->sku_matched_original_ids[ $id ] ) ? 0 : $this->get_product_id_by_original_id( $id );
+		// See if this maps to an ID placeholder already.
+		$mapped_product_id = $this->get_product_id_by_original_id( $id );
 
 		if ( $mapped_product_id ) {
 			return $mapped_product_id;
@@ -404,8 +395,6 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			$id_from_sku = $row_sku ? wc_get_product_id_by_sku( $row_sku ) : 0;
 
 			if ( $id_from_sku && $this->row_type_matches_product( $id_from_sku ) ) {
-				$this->remember_original_id_mapping( $id, $id_from_sku );
-				$this->sku_matched_original_ids[ $id ] = true;
 				return $id_from_sku;
 			}
 		}
