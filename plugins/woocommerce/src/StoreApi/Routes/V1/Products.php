@@ -350,6 +350,7 @@ class Products extends AbstractRoute {
 		$params['min_price'] = array(
 			'description'       => __( 'Limit result set to products based on a minimum price, provided using the smallest unit of the currency.', 'woocommerce' ),
 			'type'              => 'string',
+			'pattern'           => '^[0-9]*$',
 			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
@@ -357,6 +358,7 @@ class Products extends AbstractRoute {
 		$params['max_price'] = array(
 			'description'       => __( 'Limit result set to products based on a maximum price, provided using the smallest unit of the currency.', 'woocommerce' ),
 			'type'              => 'string',
+			'pattern'           => '^[0-9]*$',
 			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',
 		);

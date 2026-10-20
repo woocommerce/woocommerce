@@ -1,5 +1,4 @@
-<?php
-declare( strict_types=1 );
+<?php // phpcs:ignore Generic.PHP.RequireStrictTypes.MissingDeclaration -- Preserve scalar coercion for compatibility with extension-provided data.
 
 namespace Automattic\WooCommerce\Blocks\Templates;
 
