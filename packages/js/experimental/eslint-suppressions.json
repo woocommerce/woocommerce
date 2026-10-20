@@ -1,0 +1,12 @@
+{
+  "src/experimental-list/task-item/index.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "src/text.ts": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  }
+}
