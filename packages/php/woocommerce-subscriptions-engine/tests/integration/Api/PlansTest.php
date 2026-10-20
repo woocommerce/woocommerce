@@ -847,6 +847,163 @@ class PlansTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox create reports every ill-typed argument at once and does not ask the extension.
+	 */
+	public function test_create_reports_every_ill_typed_argument_without_asking_the_extension(): void {
+		$calls = 0;
+		add_action(
+			self::HOOK,
+			static function () use ( &$calls ): void {
+				++$calls;
+			}
+		);
+
+		$this->assert_validation_errors(
+			function (): void {
+				$this->create(
+					array(
+						'name'           => 5,
+						'billing_policy' => 'monthly',
+					)
+				);
+			},
+			array(
+				array( ValidationErrorCode::INVALID_TYPE, 'name', array( 'type' => 'string' ) ),
+				array( ValidationErrorCode::INVALID_TYPE, 'billing_policy', array( 'type' => 'object' ) ),
+			)
+		);
+		$this->assertSame( 0, $calls );
+	}
+
+	/**
+	 * @testdox create reports the plan's refusals and the extension's together, the plan's first.
+	 */
+	public function test_create_reports_the_plan_and_extension_refusals_together(): void {
+		$before = $this->plan_count();
+		$views  = array();
+		add_action(
+			self::HOOK,
+			static function ( WP_Error $errors, PlanView $plan ) use ( &$views ): void {
+				$views[] = $plan;
+				$errors->add( 'out_of_bounds', 'Must not exceed 100 for a percentage policy.', array( 'field' => 'pricing_policy.policies.0.value' ) );
+			},
+			10,
+			2
+		);
+
+		$e = $this->assert_validation_errors(
+			function (): void {
+				$this->create(
+					array(
+						'name'   => '',
+						'status' => 'never-registered',
+					)
+				);
+			},
+			array(
+				array( ValidationErrorCode::REQUIRED, 'name' ),
+				array( ValidationErrorCode::NOT_REGISTERED, 'status' ),
+				array( ValidationErrorCode::OUT_OF_BOUNDS, 'pricing_policy.policies.0.value' ),
+			)
+		);
+
+		$this->assertCount( 1, $views );
+		$this->assertSame( '', $views[0]->get_name() );
+		$this->assertSame( 'never-registered', $views[0]->get_status() );
+		$this->assertInstanceOf( InvalidInputException::class, $e->getPrevious() );
+		$this->assertStringContainsString( 'Must not exceed 100 for a percentage policy.', $e->getMessage() );
+		$this->assertSame( $before, $this->plan_count() );
+	}
+
+	/**
+	 * @testdox update asks the extension about the would-be plan when the plan refuses, and writes nothing.
+	 */
+	public function test_update_asks_the_extension_about_the_refused_would_be_plan(): void {
+		$id     = $this->create( array( 'pricing_policy' => array( 'policies' => array() ) ) );
+		$before = $this->stored( $id )->to_storage();
+		$views  = array();
+		add_action(
+			self::HOOK,
+			static function ( WP_Error $errors, PlanView $plan ) use ( &$views ): void {
+				$views[] = $plan;
+				$errors->add( 'acme_refused', 'Refused.', array( 'field' => 'pricing_policy' ) );
+			},
+			10,
+			2
+		);
+
+		$this->assert_validation_errors(
+			static function () use ( $id ): void {
+				Plans::update(
+					$id,
+					array(
+						'extension_slug' => self::OWNER,
+						'name'           => '',
+						'pricing_policy' => array( 'policies' => array( 'x' ) ),
+					)
+				);
+			},
+			array(
+				array( ValidationErrorCode::REQUIRED, 'name' ),
+				array( 'acme_refused', 'pricing_policy' ),
+			)
+		);
+
+		$this->assertCount( 1, $views );
+		$this->assertSame( $id, $views[0]->get_id() );
+		$this->assertSame( '', $views[0]->get_name() );
+		$this->assertSame( array( 'policies' => array( 'x' ) ), $views[0]->get_pricing_policy() );
+		$this->assertSame( $before['billing_policy'], $views[0]->get_billing_policy() );
+		$this->assertSame( $before, $this->stored( $id )->to_storage() );
+	}
+
+	/**
+	 * @testdox update checks its arguments before reading, so ill-typed arguments throw for a missing plan.
+	 */
+	public function test_update_checks_its_arguments_before_reading(): void {
+		$this->assert_validation_errors(
+			static function (): void {
+				Plans::update(
+					999999,
+					array(
+						'extension_slug' => self::OWNER,
+						'name'           => 5,
+					)
+				);
+			},
+			array( array( ValidationErrorCode::INVALID_TYPE, 'name' ) )
+		);
+		$this->assertNull(
+			Plans::update(
+				999999,
+				array(
+					'extension_slug' => self::OWNER,
+					'name'           => 'Fine',
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox a throwing callback is a runtime exception even when the plan itself is refused.
+	 */
+	public function test_a_throwing_callback_wins_over_a_plan_refusal(): void {
+		add_action(
+			self::HOOK,
+			static function (): void {
+				throw new \LogicException( 'boom' );
+			}
+		);
+
+		try {
+			$this->create( array( 'name' => '' ) );
+			$this->fail( 'Expected RuntimeException.' );
+		} catch ( RuntimeException $e ) {
+			$this->assertInstanceOf( \LogicException::class, $e->getPrevious() );
+		}
+	}
+
+	/**
 	 * @testdox a failed insert throws a runtime exception without a previous exception.
 	 */
 	public function test_a_failed_insert_throws_a_runtime_exception_without_a_previous_exception(): void {
@@ -1119,6 +1276,34 @@ class PlansTest extends EngineIntegrationTestCase {
 				Plans::list( $args );
 			},
 			array( array( $code, $field ) )
+		);
+	}
+
+	/**
+	 * @testdox list reports every invalid value at once.
+	 */
+	public function test_list_reports_every_invalid_value(): void {
+		$this->assert_validation_errors(
+			static function (): void {
+				Plans::list(
+					array(
+						'limit'          => 0,
+						'offset'         => -1,
+						'extension_slug' => array( 'a', 'any' ),
+					)
+				);
+			},
+			array(
+				array( ValidationErrorCode::OUT_OF_BOUNDS, 'limit', array( 'min' => 1 ) ),
+				array( ValidationErrorCode::OUT_OF_BOUNDS, 'offset', array( 'min' => 0 ) ),
+				array( ValidationErrorCode::INVALID_VALUE, 'extension_slug', array() ),
+			)
+		);
+		$this->assert_validation_errors(
+			static function (): void {
+				Plans::list( array( 'ids' => array( 1, 0 ) ) );
+			},
+			array( array( ValidationErrorCode::OUT_OF_BOUNDS, 'ids.1', array( 'min' => 1 ) ) )
 		);
 	}
 
