@@ -91,7 +91,7 @@ final class Plans {
 	 *                                   (string-keyed arrays the owning extension interprets, or null).
 	 * @return PlanView The new plan, built from the written fields (no re-read).
 	 * @throws InvalidArgumentException If a required key is missing or a value is invalid, or a
-	 *                                  {@see PlanValidationException} when the owning extension refuses the plan.
+	 *                                  {@see ValidationException} when the owning extension refuses the plan.
 	 * @throws RuntimeException If a validation callback throws (the callback's throwable is chained
 	 *                          as the previous exception) or the insert fails (no previous exception).
 	 */
@@ -143,7 +143,7 @@ final class Plans {
 	 *                       null when no plan of that extension has the id (also when it is
 	 *                       deleted before the write).
 	 * @throws InvalidArgumentException If `extension_slug` is missing or a value is invalid, or a
-	 *                                  {@see PlanValidationException} when the owning extension refuses the plan.
+	 *                                  {@see ValidationException} when the owning extension refuses the plan.
 	 * @throws RuntimeException If a validation callback throws (the callback's throwable is chained
 	 *                          as the previous exception) or the update fails (no previous exception).
 	 */
@@ -344,7 +344,7 @@ final class Plans {
 	 * Let the plan's extension validate the would-be plan before it is written.
 	 *
 	 * @param Plan $plan The would-be plan (unsaved on create).
-	 * @throws PlanValidationException If a callback added errors.
+	 * @throws ValidationException If a callback added errors.
 	 * @throws RuntimeException If a callback threw, with the callback's throwable as the previous
 	 *                          exception. The REST controller relies on that to tell it from a failed write.
 	 */
@@ -385,7 +385,7 @@ final class Plans {
 		}
 
 		if ( $errors->has_errors() ) {
-			throw new PlanValidationException( $errors ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- The exception escapes its message.
+			throw new ValidationException( $errors ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- The exception escapes its message.
 		}
 	}
 }

@@ -15,7 +15,7 @@ use InvalidArgumentException;
 use RuntimeException;
 use WP_Error;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\Plans;
-use Automattic\WooCommerce\SubscriptionsEngine\Api\PlanValidationException;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\ValidationException;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\View\PlanView;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\PlanStatus;
@@ -25,7 +25,7 @@ use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstall
 
 /**
  * @covers \Automattic\WooCommerce\SubscriptionsEngine\Api\Plans
- * @covers \Automattic\WooCommerce\SubscriptionsEngine\Api\PlanValidationException
+ * @covers \Automattic\WooCommerce\SubscriptionsEngine\Api\ValidationException
  */
 class PlansTest extends EngineIntegrationTestCase {
 
@@ -173,7 +173,7 @@ class PlansTest extends EngineIntegrationTestCase {
 			$this->create( $overrides );
 			$this->fail( 'Expected InvalidArgumentException.' );
 		} catch ( InvalidArgumentException $e ) {
-			$this->assertNotInstanceOf( PlanValidationException::class, $e );
+			$this->assertNotInstanceOf( ValidationException::class, $e );
 		}
 
 		$this->assertSame( $before, $this->plan_count() );
@@ -498,7 +498,7 @@ class PlansTest extends EngineIntegrationTestCase {
 			Plans::update( $id, $args );
 			$this->fail( 'Expected InvalidArgumentException.' );
 		} catch ( InvalidArgumentException $e ) {
-			$this->assertNotInstanceOf( PlanValidationException::class, $e );
+			$this->assertNotInstanceOf( ValidationException::class, $e );
 		}
 
 		$this->assertSame( $before, $this->stored( $id )->to_storage() );
@@ -588,7 +588,7 @@ class PlansTest extends EngineIntegrationTestCase {
 			Plans::update( $id, array( 'extension_slug' => self::OWNER ) + $args );
 			$this->fail( 'Expected InvalidArgumentException.' );
 		} catch ( InvalidArgumentException $e ) {
-			$this->assertNotInstanceOf( PlanValidationException::class, $e );
+			$this->assertNotInstanceOf( ValidationException::class, $e );
 		}
 
 		$this->assertSame( $before, $this->stored( $id )->to_storage() );
@@ -763,8 +763,8 @@ class PlansTest extends EngineIntegrationTestCase {
 
 		try {
 			$this->create();
-			$this->fail( 'Expected PlanValidationException.' );
-		} catch ( PlanValidationException $e ) {
+			$this->fail( 'Expected ValidationException.' );
+		} catch ( ValidationException $e ) {
 			$this->assertSame( array( 'acme_bad_pricing', 'acme_bad_billing' ), $e->get_errors()->get_error_codes() );
 			$this->assertSame( array( 'status' => 400 ), $e->get_errors()->get_error_data( 'acme_bad_pricing' ) );
 			$this->assertSame( 'Pricing is wrong. Billing is wrong.', $e->getMessage() );
@@ -793,8 +793,8 @@ class PlansTest extends EngineIntegrationTestCase {
 					'name'           => 'Refused',
 				)
 			);
-			$this->fail( 'Expected PlanValidationException.' );
-		} catch ( PlanValidationException $e ) {
+			$this->fail( 'Expected ValidationException.' );
+		} catch ( ValidationException $e ) {
 			$this->assertSame( array( 'acme_no' ), $e->get_errors()->get_error_codes() );
 		}
 

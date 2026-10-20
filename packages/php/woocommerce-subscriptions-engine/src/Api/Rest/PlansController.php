@@ -12,7 +12,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\SubscriptionsEngine\Api\Rest;
 
 use Automattic\WooCommerce\SubscriptionsEngine\Api\Plans;
-use Automattic\WooCommerce\SubscriptionsEngine\Api\PlanValidationException;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\ValidationException;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\View\PlanView;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\PlanStatus;
@@ -304,7 +304,7 @@ final class PlansController extends WP_REST_Controller {
 
 		try {
 			$plan = Plans::create( $args );
-		} catch ( PlanValidationException $e ) {
+		} catch ( ValidationException $e ) {
 			return $this->as_bad_request( $e->get_errors() );
 		} catch ( InvalidArgumentException $e ) {
 			return $this->invalid_error( $e->getMessage() );
@@ -337,7 +337,7 @@ final class PlansController extends WP_REST_Controller {
 		try {
 			// A plan of another extension reads as missing: the facade scopes the update to the request's extension slug.
 			$plan = Plans::update( Coercion::coerce_int( $request->get_param( 'id' ) ), $args );
-		} catch ( PlanValidationException $e ) {
+		} catch ( ValidationException $e ) {
 			return $this->as_bad_request( $e->get_errors() );
 		} catch ( InvalidArgumentException $e ) {
 			return $this->invalid_error( $e->getMessage() );
