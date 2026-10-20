@@ -36,5 +36,38 @@ it( 'keeps the label, title and fields from the entity config', async () => {
 		'enabled',
 		'title',
 		'description',
+		'instructions',
 	] );
+} );
+
+describe( 'instructions field', () => {
+	const field = getCoreEntities()[ 0 ].fields.find(
+		( { id } ) => id === 'instructions'
+	);
+
+	it( 'reads the value from the setting description the endpoint returns', () => {
+		expect(
+			field.getValue( {
+				item: {
+					settings: {
+						instructions: { type: 'textarea', value: 'Pay soon.' },
+					},
+				},
+			} )
+		).toBe( 'Pay soon.' );
+	} );
+
+	it( 'reads the plain value from an edited record', () => {
+		expect(
+			field.getValue( {
+				item: { settings: { instructions: 'Pay today.' } },
+			} )
+		).toBe( 'Pay today.' );
+	} );
+
+	it( 'writes the plain value in the shape the endpoint saves', () => {
+		expect( field.setValue( { item: {}, value: 'Pay today.' } ) ).toEqual( {
+			settings: { instructions: 'Pay today.' },
+		} );
+	} );
 } );

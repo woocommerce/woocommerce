@@ -53,7 +53,7 @@ final class ChequeSettings {
 								'type'          => 'card',
 								'isCollapsible' => false,
 							),
-							'children' => array( 'enabled', 'title', 'description' ),
+							'children' => array( 'enabled', 'title', 'description', 'instructions' ),
 						),
 					),
 				),

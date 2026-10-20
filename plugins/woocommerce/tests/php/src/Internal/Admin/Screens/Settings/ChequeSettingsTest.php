@@ -55,7 +55,7 @@ class ChequeSettingsTest extends WC_Unit_Test_Case {
 										'type'          => 'card',
 										'isCollapsible' => false,
 									),
-									'children' => array( 'enabled', 'title', 'description' ),
+									'children' => array( 'enabled', 'title', 'description', 'instructions' ),
 								),
 							),
 						),

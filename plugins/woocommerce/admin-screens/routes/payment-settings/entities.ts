@@ -23,6 +23,21 @@ export interface SettingsEntityConfig {
 }
 
 /**
+ * Read a gateway setting from the v3 endpoint, which returns each setting as a field description
+ * with a `value` but takes the plain value back, so an edited record holds the plain value.
+ */
+function getGatewaySetting( item: SettingsRecord, key: string ): string {
+	const settings = item[ 'settings' ] as
+		Record< string, unknown > | undefined;
+	const setting = settings?.[ key ];
+	if ( typeof setting === 'string' ) {
+		return setting;
+	}
+	const value = ( setting as { value?: unknown } | undefined )?.value;
+	return typeof value === 'string' ? value : '';
+}
+
+/**
  * Describe Core's example page, which uses the existing v3 payment gateways endpoint.
  */
 export function getCoreEntities(): SettingsEntityConfig[] {
@@ -59,6 +74,21 @@ export function getCoreEntities(): SettingsEntityConfig[] {
 						'Payment method description that the customer will see during checkout.',
 						'woocommerce'
 					),
+				},
+				{
+					id: 'instructions',
+					type: 'text',
+					Edit: 'textarea',
+					label: __( 'Instructions', 'woocommerce' ),
+					description: __(
+						'Instructions that will be added to the thank you page and emails.',
+						'woocommerce'
+					),
+					getValue: ( { item } ) =>
+						getGatewaySetting( item, 'instructions' ),
+					setValue: ( { value }: { value: unknown } ) => ( {
+						settings: { instructions: value },
+					} ),
 				},
 			],
 		},
