@@ -296,10 +296,9 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 	 * @dataProvider provide_non_object_pricing_policies
 	 *
 	 * @param mixed  $invalid     Non-object pricing payload.
-	 * @param string $create_code Create error code: core schema validation rejects a scalar first.
-	 * @param string $patch_code  PATCH error code: the route has no arg schema, so the facade rejects.
+	 * @param string $create_code Create detail code: core schema validation rejects a scalar first.
 	 */
-	public function test_non_object_pricing_policy_is_rejected( $invalid, string $create_code, string $patch_code ): void {
+	public function test_non_object_pricing_policy_is_rejected( $invalid, string $create_code ): void {
 		wp_set_current_user( $this->admin_id );
 
 		$id = $this->create_plan( 'Patch target' );
@@ -317,8 +316,7 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 				'pricing_policy' => $invalid,
 			)
 		);
-		$this->assertSame( 400, $created->get_status() );
-		$this->assertSame( $create_code, $this->response_data( $created )['code'] );
+		$this->assert_invalid_param( $created, 'pricing_policy', $create_code );
 
 		$patched = $this->request(
 			'PATCH',
@@ -328,13 +326,9 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 				'pricing_policy' => $invalid,
 			)
 		);
-		$this->assertSame( 400, $patched->get_status() );
-		$patched_data = $this->response_data( $patched );
-		$this->assertSame( $patch_code, $patched_data['code'] );
-		$this->assertIsString( $patched_data['message'] );
-		if ( 'woocommerce_subscriptions_engine_invalid_plan' === $patch_code ) {
-			$this->assertStringContainsString( 'pricing_policy', $patched_data['message'], 'REST errors carry the facade message, which names the invalid field.' );
-		}
+		// The PATCH route has no arg schema, so the facade rejects.
+		$patched_data = $this->assert_invalid_param( $patched, 'pricing_policy', 'invalid_type' );
+		$this->assertSame( 'pricing_policy is not of type object.', $patched_data['data']['params']['pricing_policy'] );
 
 		// The rejected writes left the plan untouched and created nothing.
 		$fetched = $this->request( 'GET', self::BASE . '/' . $id, array(), array( 'extension_slug' => self::EXTENSION_SLUG ) );
@@ -346,16 +340,16 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @return array<string, array{0: mixed, 1: string, 2: string}>
+	 * @return array<string, array{0: mixed, 1: string}>
 	 */
 	public function provide_non_object_pricing_policies(): array {
 		return array(
-			'list'   => array( array( array( 'type' => 'bogo' ) ), 'woocommerce_subscriptions_engine_invalid_plan', 'woocommerce_subscriptions_engine_invalid_plan' ),
-			'string' => array( 'bogo', 'rest_invalid_param', 'woocommerce_subscriptions_engine_invalid_plan' ),
+			'list'   => array( array( array( 'type' => 'bogo' ) ), 'invalid_type' ),
+			'string' => array( 'bogo', 'rest_invalid_type' ),
 		);
 	}
 
-	public function test_update_rejects_an_empty_name_with_a_message_naming_the_field(): void {
+	public function test_an_empty_name_is_reported_per_field_on_create_and_update(): void {
 		wp_set_current_user( $this->admin_id );
 		$id = $this->create_plan( 'Monthly' );
 
@@ -367,12 +361,125 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 				'name'           => '',
 			)
 		);
+		$created = $this->request(
+			'POST',
+			self::BASE,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'name'           => '',
+			)
+		);
 
-		$this->assertSame( 400, $patched->get_status() );
-		$data = $this->response_data( $patched );
-		$this->assertSame( 'woocommerce_subscriptions_engine_invalid_plan', $data['code'] );
-		$this->assertIsString( $data['message'] );
-		$this->assertStringContainsString( 'name', $data['message'] );
+		foreach ( array( $patched, $created ) as $response ) {
+			$data = $this->assert_invalid_param( $response, 'name', 'required' );
+			$this->assertSame( 'Invalid parameter(s): name', $data['message'] );
+			$this->assertSame( 'name is required.', $data['data']['params']['name'] );
+			$this->assertSame( 'name', $data['data']['details']['name']['data']['field'] );
+		}
+	}
+
+	public function test_the_per_field_message_is_translated(): void {
+		wp_set_current_user( $this->admin_id );
+		add_filter(
+			'gettext',
+			static function ( $translation, $text, $domain ) {
+				return 'woocommerce' === $domain && '%s is required.' === $text ? '%s est obligatoire.' : $translation;
+			},
+			10,
+			3
+		);
+
+		$created = $this->request(
+			'POST',
+			self::BASE,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'name'           => '',
+			)
+		);
+
+		$data = $this->assert_invalid_param( $created, 'name', 'required' );
+		$this->assertSame( 'name est obligatoire.', $data['data']['params']['name'] );
+	}
+
+	public function test_a_callback_error_with_a_field_is_reported_under_its_top_level_arg(): void {
+		wp_set_current_user( $this->admin_id );
+		add_action(
+			'woocommerce_subscriptions_engine_validate_plan',
+			static function ( WP_Error $errors ): void {
+				$errors->add(
+					'out_of_bounds',
+					'Interval must be at least 1.',
+					array(
+						'field'  => 'billing_policy[interval]',
+						'params' => array( 'min' => 1 ),
+					)
+				);
+			}
+		);
+
+		$data = $this->assert_invalid_param( $this->create_rejected_plan(), 'billing_policy', 'out_of_bounds' );
+
+		$this->assertSame( 'Invalid parameter(s): billing_policy', $data['message'] );
+		$this->assertSame( array( 'billing_policy' => 'Interval must be at least 1.' ), $data['data']['params'] );
+		$this->assertSame(
+			array(
+				'code'    => 'out_of_bounds',
+				'message' => 'Interval must be at least 1.',
+				'data'    => array(
+					'field'  => 'billing_policy[interval]',
+					'params' => array( 'min' => 1 ),
+				),
+			),
+			$data['data']['details']['billing_policy']
+		);
+	}
+
+	public function test_two_same_code_callback_errors_on_different_fields_are_both_reported(): void {
+		wp_set_current_user( $this->admin_id );
+		add_action(
+			'woocommerce_subscriptions_engine_validate_plan',
+			static function ( WP_Error $errors ): void {
+				$errors->add( 'invalid_value', 'Bad interval.', array( 'field' => 'billing_policy[interval]' ) );
+				$errors->add( 'invalid_value', 'Bad amount.', array( 'field' => 'pricing_policy[one_time_fees][0][amount]' ) );
+			}
+		);
+
+		$data = $this->assert_invalid_param( $this->create_rejected_plan(), 'billing_policy', 'invalid_value' );
+
+		$this->assertSame(
+			array(
+				'billing_policy' => 'Bad interval.',
+				'pricing_policy' => 'Bad amount.',
+			),
+			$data['data']['params']
+		);
+		$this->assertSame( 'pricing_policy[one_time_fees][0][amount]', $data['data']['details']['pricing_policy']['data']['field'] );
+	}
+
+	public function test_fielded_and_fieldless_callback_errors_return_one_400_with_both(): void {
+		wp_set_current_user( $this->admin_id );
+		add_action(
+			'woocommerce_subscriptions_engine_validate_plan',
+			static function ( WP_Error $errors ): void {
+				$errors->add( 'acme_general', 'Something is off.' );
+				$errors->add( 'invalid_value', 'Bad interval.', array( 'field' => 'billing_policy[interval]' ) );
+			}
+		);
+
+		$data = $this->assert_invalid_param( $this->create_rejected_plan(), 'billing_policy', 'invalid_value' );
+
+		$this->assertSame( array( 'billing_policy' => 'Bad interval.' ), $data['data']['params'] );
+		$this->assertSame(
+			array(
+				array(
+					'code'    => 'acme_general',
+					'message' => 'Something is off.',
+					'data'    => array( 'status' => 400 ),
+				),
+			),
+			$data['additional_errors']
+		);
 	}
 
 	public function test_validate_action_receives_errors_a_plan_view_and_slug(): void {
@@ -744,8 +851,11 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		foreach ( array( 'any,' . self::EXTENSION_SLUG, self::EXTENSION_SLUG . ',', ',' . self::EXTENSION_SLUG, 'lite,,test' ) as $extension_slug ) {
 			$list = $this->request( 'GET', self::BASE, array(), array( 'extension_slug' => $extension_slug ) );
 
-			$this->assertSame( 400, $list->get_status(), 'Failed for extension_slug=' . $extension_slug );
+			$this->assert_invalid_param( $list, 'extension_slug', 'invalid_value' );
 		}
+
+		$blank = $this->request( 'GET', self::BASE, array(), array( 'extension_slug' => ' ' ) );
+		$this->assert_invalid_param( $blank, 'extension_slug', 'required' );
 	}
 
 	public function test_list_with_any_extension_slug_returns_all_plans(): void {
@@ -839,7 +949,7 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 				'status'         => 'never-registered',
 			)
 		);
-		$this->assertSame( 400, $unknown->get_status() );
+		$this->assertSame( 'not_registered', $this->assert_invalid_param( $unknown, 'status', 'not_registered' )['data']['details']['status']['code'] );
 
 		$bad_patch = $this->request(
 			'PATCH',
@@ -921,8 +1031,11 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 				)
 			);
 
-			$this->assertSame( 400, $response->get_status() );
+			$this->assert_invalid_param( $response, 'extension_slug', 'invalid_value' );
 		}
+
+		$missing = $this->request( 'POST', self::BASE, array( 'name' => 'No scope' ) );
+		$this->assert_invalid_param( $missing, 'extension_slug', 'required' );
 	}
 
 	public function test_create_validates_the_status_and_keeps_the_callback_out_of_the_schema(): void {
@@ -937,8 +1050,8 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 				'status'         => 'never-registered',
 			)
 		);
-		$this->assertSame( 400, $created->get_status() );
-		$this->assertSame( 'rest_invalid_param', $this->response_data( $created )['code'] );
+		$data    = $this->assert_invalid_param( $created, 'status', 'not_registered' );
+		$this->assertSame( 'status "never-registered" is not registered.', $data['data']['params']['status'] );
 
 		$schema = ( new PlansController() )->get_public_item_schema();
 		$this->assertIsArray( $schema['properties']['status'] );
@@ -1061,6 +1174,44 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		$response = rest_do_request( new WP_REST_Request( 'DELETE', self::BASE . '/' . $id ) );
 
 		$this->assertContains( $response->get_status(), array( 404, 405 ), 'DELETE must not remove plans.' );
+	}
+
+	/**
+	 * Assert a WordPress-shaped invalid param error: 400 `rest_invalid_param` with a
+	 * message under `params[ $arg ]` and the error code under `details[ $arg ]`.
+	 *
+	 * @param WP_REST_Response $response Response.
+	 * @param string           $arg      Top-level arg.
+	 * @param string           $code     Expected detail error code.
+	 * @return array<array-key, mixed> The response data.
+	 */
+	private function assert_invalid_param( WP_REST_Response $response, string $arg, string $code ): array {
+		$this->assertSame( 400, $response->get_status() );
+		$data = $this->response_data( $response );
+		$this->assertSame( 'rest_invalid_param', $data['code'] );
+		$this->assertIsString( $data['data']['params'][ $arg ] ?? null );
+		$this->assertNotSame( '', $data['data']['params'][ $arg ] );
+		$this->assertSame( $code, $data['data']['details'][ $arg ]['code'] ?? null );
+
+		return $data;
+	}
+
+	/**
+	 * POST a valid plan that a validate_plan callback is expected to refuse.
+	 */
+	private function create_rejected_plan(): WP_REST_Response {
+		return $this->request(
+			'POST',
+			self::BASE,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'name'           => 'Rejected',
+				'billing_policy' => array(
+					'period'   => 'month',
+					'interval' => 1,
+				),
+			)
+		);
 	}
 
 	/**

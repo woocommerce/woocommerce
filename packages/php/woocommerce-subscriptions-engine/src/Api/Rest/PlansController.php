@@ -17,9 +17,10 @@ use Automattic\WooCommerce\SubscriptionsEngine\Api\View\PlanView;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\PlanStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\Coercion;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\InvalidInputException;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ValidationErrorCode;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanRepository;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Support\RESTPermissions;
-use InvalidArgumentException;
 use RuntimeException;
 use WP_Error;
 use WP_REST_Controller;
@@ -202,21 +203,24 @@ final class PlansController extends WP_REST_Controller {
 	}
 
 	/**
-	 * Validate a status param: any registered plan status.
+	 * Validate a status param: any registered plan status. WordPress reports the returned
+	 * error under `params.status` / `details.status` of its `rest_invalid_param` error.
 	 *
 	 * @param mixed $value Param value.
 	 * @return true|WP_Error
 	 */
 	public function validate_status_param( $value ) {
-		if ( is_string( $value ) && PlanStatus::is_registered( $value ) ) {
+		if ( ! is_string( $value ) ) {
+			$error = new InvalidInputException( ValidationErrorCode::INVALID_TYPE, 'status', 'status must be a string.', array( 'type' => 'string' ) );
+		} elseif ( ! PlanStatus::is_registered( $value ) ) {
+			$error = new InvalidInputException( ValidationErrorCode::NOT_REGISTERED, 'status', 'status must be a registered plan status.', array( 'value' => $value ) );
+		} else {
 			return true;
 		}
 
-		return new WP_Error(
-			'rest_invalid_param',
-			__( 'status must be a registered plan status.', 'woocommerce-subscriptions-engine' ),
-			array( 'status' => 400 )
-		);
+		$exception = ValidationException::from_core( $error );
+
+		return $exception->get_errors();
 	}
 
 	/**
@@ -305,9 +309,7 @@ final class PlansController extends WP_REST_Controller {
 		try {
 			$plan = Plans::create( $args );
 		} catch ( ValidationException $e ) {
-			return $this->as_bad_request( $e->get_errors() );
-		} catch ( InvalidArgumentException $e ) {
-			return $this->invalid_error( $e->getMessage() );
+			return $this->get_validation_error( $e->get_errors() );
 		} catch ( RuntimeException $e ) {
 			return $this->write_failed_error( $e, 'woocommerce_subscriptions_engine_plan_create_failed' );
 		}
@@ -338,9 +340,7 @@ final class PlansController extends WP_REST_Controller {
 			// A plan of another extension reads as missing: the facade scopes the update to the request's extension slug.
 			$plan = Plans::update( Coercion::coerce_int( $request->get_param( 'id' ) ), $args );
 		} catch ( ValidationException $e ) {
-			return $this->as_bad_request( $e->get_errors() );
-		} catch ( InvalidArgumentException $e ) {
-			return $this->invalid_error( $e->getMessage() );
+			return $this->get_validation_error( $e->get_errors() );
 		} catch ( RuntimeException $e ) {
 			return $this->write_failed_error( $e, 'woocommerce_subscriptions_engine_plan_update_failed' );
 		}
@@ -581,6 +581,76 @@ final class PlansController extends WP_REST_Controller {
 	}
 
 	/**
+	 * Report validation errors as WordPress reports invalid request params: errors with a
+	 * `field` become one `rest_invalid_param` error, keyed by top-level arg in `params`
+	 * (translated messages) and `details` (code, message and data); errors without one are
+	 * added to it. With no `field` on any error, the errors return as a plain 400.
+	 *
+	 * @param WP_Error $errors Validation errors.
+	 */
+	private function get_validation_error( WP_Error $errors ): WP_Error {
+		$by_arg    = array();
+		$fieldless = new WP_Error();
+
+		foreach ( $errors->get_error_codes() as $code ) {
+			$messages = $errors->get_error_messages( $code );
+			$all_data = $errors->get_all_error_data( $code );
+
+			// WP_Error keeps the data per code, not per message: pair them only when each message has its own fielded data.
+			$is_fielded = count( $messages ) === count( $all_data );
+			foreach ( $all_data as $data ) {
+				$is_fielded = $is_fielded && is_array( $data ) && isset( $data['field'] ) && is_string( $data['field'] ) && '' !== $data['field'];
+			}
+
+			if ( ! $is_fielded ) {
+				foreach ( $messages as $message ) {
+					$fieldless->add( $code, $message );
+				}
+				foreach ( $all_data as $data ) {
+					$fieldless->add_data( $data, $code );
+				}
+				continue;
+			}
+
+			foreach ( $messages as $index => $message ) {
+				$data  = $all_data[ $index ];
+				$field = Coercion::coerce_string( $data['field'] );
+				$arg   = false !== strpos( $field, '[' ) ? substr( $field, 0, (int) strpos( $field, '[' ) ) : $field;
+
+				if ( ! isset( $by_arg[ $arg ] ) ) {
+					$by_arg[ $arg ] = new WP_Error();
+				}
+				$by_arg[ $arg ]->add( $code, $message, $data );
+			}
+		}
+
+		if ( array() === $by_arg ) {
+			return $this->as_bad_request( $errors );
+		}
+
+		$params  = array();
+		$details = array();
+		foreach ( $by_arg as $arg => $arg_errors ) {
+			$params[ $arg ]  = implode( ' ', $arg_errors->get_error_messages() );
+			$details[ $arg ] = rest_convert_error_to_response( $arg_errors )->get_data();
+		}
+
+		$error = new WP_Error(
+			'rest_invalid_param',
+			/* translators: %s: List of invalid parameters. */
+			sprintf( __( 'Invalid parameter(s): %s' ), implode( ', ', array_keys( $params ) ) ), // phpcs:ignore WordPress.WP.I18n.MissingArgDomain -- WordPress core's own message for invalid request params, in its default domain.
+			array(
+				'status'  => 400,
+				'params'  => $params,
+				'details' => $details,
+			)
+		);
+		$error->merge_from( $this->as_bad_request( $fieldless ) );
+
+		return $error;
+	}
+
+	/**
 	 * Give each error code without a status a 400 status.
 	 *
 	 * @param WP_Error $errors Validation errors.
@@ -605,11 +675,11 @@ final class PlansController extends WP_REST_Controller {
 	private function get_multiple_extension_slugs( WP_REST_Request $request ) {
 		$raw = $request->get_param( 'extension_slug' );
 		if ( null === $raw ) {
-			return $this->invalid_error( __( 'extension_slug is required.', 'woocommerce-subscriptions-engine' ) );
+			return $this->get_extension_slug_error( ValidationErrorCode::REQUIRED, 'extension_slug is required.' );
 		}
 		$raw_string = trim( Coercion::coerce_string( $raw ) );
 		if ( '' === $raw_string ) {
-			return $this->invalid_error( __( 'extension_slug is required.', 'woocommerce-subscriptions-engine' ) );
+			return $this->get_extension_slug_error( ValidationErrorCode::REQUIRED, 'extension_slug is required.' );
 		}
 
 		if ( 'any' === $raw_string ) {
@@ -620,7 +690,7 @@ final class PlansController extends WP_REST_Controller {
 		foreach ( explode( ',', $raw_string ) as $possible_slug ) {
 			$slug = trim( $possible_slug );
 			if ( '' === $slug || 'any' === $slug || ! $this->is_valid_extension_slug( $slug ) ) {
-				return $this->invalid_error( __( 'extension_slug must be "any" or a comma-separated list of extension slugs.', 'woocommerce-subscriptions-engine' ) );
+				return $this->get_extension_slug_error( ValidationErrorCode::INVALID_VALUE, 'extension_slug must be "any" or a comma-separated list of extension slugs.' );
 			}
 
 			$slugs[ $slug ] = $slug;
@@ -638,18 +708,30 @@ final class PlansController extends WP_REST_Controller {
 	private function get_single_extension_slug( WP_REST_Request $request ) {
 		$raw = $request->get_param( 'extension_slug' );
 		if ( null === $raw ) {
-			return $this->invalid_error( __( 'extension_slug is required.', 'woocommerce-subscriptions-engine' ) );
+			return $this->get_extension_slug_error( ValidationErrorCode::REQUIRED, 'extension_slug is required.' );
 		}
 		$raw_string = trim( Coercion::coerce_string( $raw ) );
 		if ( '' === $raw_string ) {
-			return $this->invalid_error( __( 'extension_slug is required.', 'woocommerce-subscriptions-engine' ) );
+			return $this->get_extension_slug_error( ValidationErrorCode::REQUIRED, 'extension_slug is required.' );
 		}
 
 		if ( 'any' === $raw_string || false !== strpos( $raw_string, ',' ) || ! $this->is_valid_extension_slug( $raw_string ) ) {
-			return $this->invalid_error( __( 'extension_slug must be a concrete extension slug.', 'woocommerce-subscriptions-engine' ) );
+			return $this->get_extension_slug_error( ValidationErrorCode::INVALID_VALUE, 'extension_slug must be a concrete extension slug.' );
 		}
 
 		return $raw_string;
+	}
+
+	/**
+	 * The `extension_slug` param error, in the validation error shape.
+	 *
+	 * @param string $code    Error code.
+	 * @param string $message English developer message.
+	 */
+	private function get_extension_slug_error( string $code, string $message ): WP_Error {
+		$exception = ValidationException::from_core( new InvalidInputException( $code, 'extension_slug', $message ) );
+
+		return $this->get_validation_error( $exception->get_errors() );
 	}
 
 	/**
@@ -680,19 +762,6 @@ final class PlansController extends WP_REST_Controller {
 			'woocommerce_subscriptions_engine_plan_not_found',
 			__( 'Plan not found.', 'woocommerce-subscriptions-engine' ),
 			array( 'status' => 404 )
-		);
-	}
-
-	/**
-	 * Invalid request error.
-	 *
-	 * @param string $message Message.
-	 */
-	private function invalid_error( string $message ): WP_Error {
-		return new WP_Error(
-			'woocommerce_subscriptions_engine_invalid_plan',
-			$message,
-			array( 'status' => 400 )
 		);
 	}
 }
