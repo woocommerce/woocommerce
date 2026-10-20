@@ -13,12 +13,9 @@ const ERROR_ID = 'payment-method';
 /**
  * Asks the shopper to select a payment method when the server preselected nothing.
  *
- * The error is registered only while nothing is selected, which never happens when the server
- * preselects a method, since the block then always has one. It starts hidden and Place order
- * reveals it with the other field errors. While it shows, the options sit in a `has-error` wrapper
- * so the checkout focuses the first one, as for a field in error, and the message sits below the
- * list so it stays in view after that focus. The payment step itself only renders when the cart
- * needs payment.
+ * The error is registered only while nothing is selected and stays hidden until Place order
+ * reveals it with the other field errors. The `has-error` wrapper lets the checkout focus the
+ * first option, and the message sits below the list so it stays in view after that focus.
  */
 const PaymentMethodRequiredError = ( {
 	children,
