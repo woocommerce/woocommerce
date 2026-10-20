@@ -37,7 +37,8 @@ class ShopBaseTaxEstimateNotice {
 
 		$location = get_option( 'woocommerce_default_customer_address', DefaultCustomerAddress::BASE );
 
-		if ( DefaultCustomerAddress::BASE === $location ) {
+		// Base tax mode taxes every order at the store address regardless of the default location, so its message wins.
+		if ( DefaultCustomerAddress::BASE === $location || TaxBasedOn::BASE === get_option( 'woocommerce_tax_based_on', TaxBasedOn::SHIPPING ) ) {
 			return $this->shop_base_notice();
 		}
 

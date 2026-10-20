@@ -139,6 +139,34 @@ class ShopBaseTaxEstimateNoticeTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox In shop-base tax mode the base-address message wins even with no default customer location.
+	 */
+	public function test_shop_base_tax_mode_overrides_no_location(): void {
+		update_option( 'woocommerce_tax_based_on', 'base' );
+		update_option( 'woocommerce_default_customer_address', '' );
+		$this->add_standard_rate();
+
+		$notice = $this->sut->get_notice();
+
+		$this->assertStringContainsString( 'All orders are taxed at your store base address', $notice['estimate'] );
+		$this->assertStringNotContainsString( 'No tax is shown until the customer enters their address', $notice['estimate'] );
+	}
+
+	/**
+	 * @testdox In shop-base tax mode the base-address message wins even when geolocating.
+	 */
+	public function test_shop_base_tax_mode_overrides_geolocation(): void {
+		update_option( 'woocommerce_tax_based_on', 'base' );
+		update_option( 'woocommerce_default_customer_address', 'geolocation' );
+		$this->add_standard_rate();
+
+		$notice = $this->sut->get_notice();
+
+		$this->assertStringContainsString( 'All orders are taxed at your store base address', $notice['estimate'] );
+		$this->assertStringNotContainsString( 'estimated from their detected country and state', $notice['estimate'] );
+	}
+
+	/**
 	 * @testdox Shows the store address, the per-class rates, and a way to change it for customer-based tax.
 	 */
 	public function test_shop_base_customer_mode_shows_rates(): void {
