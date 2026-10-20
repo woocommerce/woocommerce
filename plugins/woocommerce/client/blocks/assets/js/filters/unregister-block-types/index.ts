@@ -5,7 +5,6 @@ import { getBlockTypes, unregisterBlockType } from '@wordpress/blocks';
 import domReady from '@wordpress/dom-ready';
 import { getSetting, STORE_PAGES } from '@woocommerce/settings';
 import { select, subscribe } from '@wordpress/data';
-import { store as editorStore } from '@wordpress/editor';
 // Use the store name to avoid adding wp-editor as a dependency on widget screens.
 import { CORE_EDITOR_STORE } from '@woocommerce/utils';
 
@@ -94,7 +93,7 @@ domReady( () => {
 			return;
 		}
 
-		const postId = select( editorStore )?.getCurrentPostId() ?? null;
+		const postId = select( CORE_EDITOR_STORE )?.getCurrentPostId() ?? null;
 		unsubscribe();
 		unregisterBlocks( postId );
 	}, CORE_EDITOR_STORE );
