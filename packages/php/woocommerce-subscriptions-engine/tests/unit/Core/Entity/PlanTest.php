@@ -9,16 +9,19 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Unit\Core\Entity;
 
-use DomainException;
 use PHPUnit\Framework\TestCase;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\PlanStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\StatusRegistry;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ValidationErrorCode;
+use Automattic\WooCommerce\SubscriptionsEngine\Tests\Unit\AssertsInvalidInput;
 
 /**
  * @covers \Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan
  */
 class PlanTest extends TestCase {
+
+	use AssertsInvalidInput;
 
 	protected function tearDown(): void {
 		StatusRegistry::reset();
@@ -147,16 +150,22 @@ class PlanTest extends TestCase {
 	 * @param mixed  $value Bad value.
 	 */
 	public function test_create_rejects_a_non_object_policy( string $field, $value ): void {
-		$this->expectException( DomainException::class );
-		$this->expectExceptionMessage( $field );
-
-		Plan::create(
-			array(
-				'extension_slug' => 'my-ext',
-				'name'           => 'Bad',
-				$field           => $value,
-			)
+		$e = $this->assert_invalid_input(
+			static function () use ( $field, $value ): void {
+				Plan::create(
+					array(
+						'extension_slug' => 'my-ext',
+						'name'           => 'Bad',
+						$field           => $value,
+					)
+				);
+			},
+			ValidationErrorCode::INVALID_TYPE,
+			$field,
+			array( 'type' => 'object' )
 		);
+
+		$this->assertStringContainsString( $field, $e->getMessage() );
 	}
 
 	/**
@@ -206,28 +215,35 @@ class PlanTest extends TestCase {
 	 *
 	 * @param array<string, mixed> $args    Create args.
 	 * @param string               $message Expected message.
+	 * @param string               $field   Expected field.
 	 */
-	public function test_create_requires_a_name_and_an_extension_slug( array $args, string $message ): void {
-		$this->expectException( DomainException::class );
-		$this->expectExceptionMessage( $message );
+	public function test_create_requires_a_name_and_an_extension_slug( array $args, string $message, string $field ): void {
+		$e = $this->assert_invalid_input(
+			static function () use ( $args ): void {
+				Plan::create( $args );
+			},
+			ValidationErrorCode::REQUIRED,
+			$field
+		);
 
-		Plan::create( $args );
+		$this->assertSame( $message, $e->getMessage() );
 	}
 
 	/**
-	 * @return array<string, array{0: array<string, mixed>, 1: string}>
+	 * @return array<string, array{0: array<string, mixed>, 1: string, 2: string}>
 	 */
 	public function provide_missing_required_args(): array {
 		return array(
-			'no name'           => array( array( 'extension_slug' => 'my-ext' ), 'Plan: name is required and must be a non-empty string.' ),
+			'no name'           => array( array( 'extension_slug' => 'my-ext' ), 'Plan: name is required and must be a non-empty string.', 'name' ),
 			'blank name'        => array(
 				array(
 					'extension_slug' => 'my-ext',
 					'name'           => '   ',
 				),
 				'Plan: name is required and must be a non-empty string.',
+				'name',
 			),
-			'no extension slug' => array( array( 'name' => 'Box' ), 'Plan: extension_slug is required and must be a non-empty string.' ),
+			'no extension slug' => array( array( 'name' => 'Box' ), 'Plan: extension_slug is required and must be a non-empty string.', 'extension_slug' ),
 		);
 	}
 
@@ -237,9 +253,13 @@ class PlanTest extends TestCase {
 	public function test_set_name_rejects_an_empty_name(): void {
 		$plan = self::create_plan( 'Named' );
 
-		$this->expectException( DomainException::class );
-
-		$plan->set_name( '' );
+		$this->assert_invalid_input(
+			static function () use ( $plan ): void {
+				$plan->set_name( '' );
+			},
+			ValidationErrorCode::REQUIRED,
+			'name'
+		);
 	}
 
 	/**
@@ -252,9 +272,14 @@ class PlanTest extends TestCase {
 		$plan   = self::create_plan( 'Bad' );
 		$setter = 'set_' . $field;
 
-		$this->expectException( DomainException::class );
-
-		$plan->{$setter}( array( 'a', 'b' ) );
+		$this->assert_invalid_input(
+			static function () use ( $plan, $setter ): void {
+				$plan->{$setter}( array( 'a', 'b' ) );
+			},
+			ValidationErrorCode::INVALID_TYPE,
+			$field,
+			array( 'type' => 'object' )
+		);
 	}
 
 	/**
@@ -287,14 +312,19 @@ class PlanTest extends TestCase {
 	 * @testdox create rejects an unregistered status.
 	 */
 	public function test_create_rejects_an_unregistered_status(): void {
-		$this->expectException( DomainException::class );
-
-		Plan::create(
-			array(
-				'extension_slug' => 'my-ext',
-				'name'           => 'Unknown',
-				'status'         => 'seasonal',
-			)
+		$this->assert_invalid_input(
+			static function (): void {
+				Plan::create(
+					array(
+						'extension_slug' => 'my-ext',
+						'name'           => 'Unknown',
+						'status'         => 'seasonal',
+					)
+				);
+			},
+			ValidationErrorCode::NOT_REGISTERED,
+			'status',
+			array( 'value' => 'seasonal' )
 		);
 	}
 
@@ -304,9 +334,14 @@ class PlanTest extends TestCase {
 	public function test_set_status_rejects_an_unregistered_status(): void {
 		$plan = self::create_plan( 'Unknown' );
 
-		$this->expectException( DomainException::class );
-
-		$plan->set_status( 'seasonal' );
+		$this->assert_invalid_input(
+			static function () use ( $plan ): void {
+				$plan->set_status( 'seasonal' );
+			},
+			ValidationErrorCode::NOT_REGISTERED,
+			'status',
+			array( 'value' => 'seasonal' )
+		);
 	}
 
 	/**

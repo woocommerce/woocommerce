@@ -17,11 +17,15 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\StatusRegistry;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\ItemsSnapshot;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ValidationErrorCode;
+use Automattic\WooCommerce\SubscriptionsEngine\Tests\Unit\AssertsInvalidInput;
 
 /**
  * @covers \Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle
  */
 class CycleTest extends TestCase {
+
+	use AssertsInvalidInput;
 
 	protected function tearDown(): void {
 		StatusRegistry::reset();
@@ -87,16 +91,21 @@ class CycleTest extends TestCase {
 	}
 
 	public function test_create_requires_a_contract_id(): void {
-		$this->expectException( DomainException::class );
-
-		Cycle::create(
-			array(
-				'sequence_no'    => 1,
-				'starts_at_gmt'  => '2026-02-01 00:00:00',
-				'ends_at_gmt'    => '2026-03-01 00:00:00',
-				'expected_total' => '20.00',
-				'currency'       => 'USD',
-			)
+		$this->assert_invalid_input(
+			function (): void {
+				Cycle::create(
+					array(
+						'sequence_no'    => 1,
+						'starts_at_gmt'  => '2026-02-01 00:00:00',
+						'ends_at_gmt'    => '2026-03-01 00:00:00',
+						'expected_total' => '20.00',
+						'currency'       => 'USD',
+					)
+				);
+			},
+			ValidationErrorCode::OUT_OF_BOUNDS,
+			'contract_id',
+			array( 'min' => 1 )
 		);
 	}
 
@@ -115,35 +124,67 @@ class CycleTest extends TestCase {
 	}
 
 	public function test_create_rejects_an_empty_kind(): void {
-		$this->expectException( DomainException::class );
-
-		$this->make_pending( array( 'kind' => '' ) );
+		$this->assert_invalid_input(
+			function (): void {
+				$this->make_pending( array( 'kind' => '' ) );
+			},
+			ValidationErrorCode::REQUIRED,
+			'kind'
+		);
 	}
 
 	public function test_create_rejects_a_non_positive_sequence_no(): void {
-		$this->expectException( DomainException::class );
-
-		$this->make_pending( array( 'sequence_no' => 0 ) );
+		$this->assert_invalid_input(
+			function (): void {
+				$this->make_pending( array( 'sequence_no' => 0 ) );
+			},
+			ValidationErrorCode::OUT_OF_BOUNDS,
+			'sequence_no',
+			array( 'min' => 1 )
+		);
 	}
 
-	public function test_create_requires_a_start_and_an_end(): void {
-		$this->expectException( DomainException::class );
-		$this->expectExceptionMessage( 'starts_at_gmt and ends_at_gmt are required' );
+	public function test_create_requires_a_start(): void {
+		$this->assert_invalid_input(
+			function (): void {
+				$this->make_pending( array( 'starts_at_gmt' => null ) );
+			},
+			ValidationErrorCode::REQUIRED,
+			'starts_at_gmt'
+		);
+	}
 
-		$this->make_pending( array( 'ends_at_gmt' => null ) );
+	public function test_create_requires_an_end(): void {
+		$this->assert_invalid_input(
+			function (): void {
+				$this->make_pending( array( 'ends_at_gmt' => null ) );
+			},
+			ValidationErrorCode::REQUIRED,
+			'ends_at_gmt'
+		);
 	}
 
 	public function test_create_requires_a_currency(): void {
-		$this->expectException( DomainException::class );
-		$this->expectExceptionMessage( 'currency is required' );
+		$e = $this->assert_invalid_input(
+			function (): void {
+				$this->make_pending( array( 'currency' => null ) );
+			},
+			ValidationErrorCode::REQUIRED,
+			'currency'
+		);
 
-		$this->make_pending( array( 'currency' => null ) );
+		$this->assertStringContainsString( 'currency is required', $e->getMessage() );
 	}
 
 	public function test_create_rejects_a_non_positive_count(): void {
-		$this->expectException( DomainException::class );
-
-		$this->make_pending( array( 'count' => 0 ) );
+		$this->assert_invalid_input(
+			function (): void {
+				$this->make_pending( array( 'count' => 0 ) );
+			},
+			ValidationErrorCode::OUT_OF_BOUNDS,
+			'count',
+			array( 'min' => 1 )
+		);
 	}
 
 	public function test_create_allows_a_null_count_for_a_non_counting_cycle(): void {
@@ -155,9 +196,14 @@ class CycleTest extends TestCase {
 	}
 
 	public function test_create_rejects_an_invalid_status(): void {
-		$this->expectException( DomainException::class );
-
-		$this->make_pending( array( 'status' => 'nonsense' ) );
+		$this->assert_invalid_input(
+			function (): void {
+				$this->make_pending( array( 'status' => 'nonsense' ) );
+			},
+			ValidationErrorCode::NOT_REGISTERED,
+			'status',
+			array( 'value' => 'nonsense' )
+		);
 	}
 
 	public function test_create_carries_order_id_and_owner(): void {
@@ -213,9 +259,14 @@ class CycleTest extends TestCase {
 	}
 
 	public function test_create_rejects_an_unregistered_status_instance(): void {
-		$this->expectException( DomainException::class );
-
-		$this->make_pending( array( 'status' => new CycleStatus( 'nope' ) ) );
+		$this->assert_invalid_input(
+			function (): void {
+				$this->make_pending( array( 'status' => new CycleStatus( 'nope' ) ) );
+			},
+			ValidationErrorCode::NOT_REGISTERED,
+			'status',
+			array( 'value' => 'nope' )
+		);
 	}
 
 	public function test_period_boundaries_are_frozen_at_construction(): void {
@@ -404,9 +455,14 @@ class CycleTest extends TestCase {
 	}
 
 	public function test_assign_sequence_no_rejects_a_non_positive_value(): void {
-		$this->expectException( DomainException::class );
-
-		$this->make_unpositioned()->assign_sequence_no( 0 );
+		$this->assert_invalid_input(
+			function (): void {
+				$this->make_unpositioned()->assign_sequence_no( 0 );
+			},
+			ValidationErrorCode::OUT_OF_BOUNDS,
+			'sequence_no',
+			array( 'min' => 1 )
+		);
 	}
 
 	public function test_an_assigned_sequence_no_cannot_be_reassigned(): void {

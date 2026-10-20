@@ -15,18 +15,22 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Unit\Core\Entity;
 
-use DomainException;
 use PHPUnit\Framework\TestCase;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\StatusRegistry;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PaymentInstrumentRef;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\InvalidInputException;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ValidationErrorCode;
+use Automattic\WooCommerce\SubscriptionsEngine\Tests\Unit\AssertsInvalidInput;
 
 /**
  * @covers \Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract
  */
 class ContractTest extends TestCase {
+
+	use AssertsInvalidInput;
 
 	protected function tearDown(): void {
 		StatusRegistry::reset();
@@ -101,15 +105,20 @@ class ContractTest extends TestCase {
 	 * @testdox create() rejects a non-zero total without a currency.
 	 */
 	public function test_create_rejects_a_non_zero_total_without_a_currency(): void {
-		$this->expectException( DomainException::class );
-		$this->expectExceptionMessage( 'money totals require a currency' );
-
-		Contract::create(
-			array(
-				'extension_slug' => 'acme-subs',
-				'billing_total'  => '10',
-			)
+		$e = $this->assert_invalid_input(
+			static function (): void {
+				Contract::create(
+					array(
+						'extension_slug' => 'acme-subs',
+						'billing_total'  => '10',
+					)
+				);
+			},
+			ValidationErrorCode::REQUIRED,
+			'currency'
 		);
+
+		$this->assertStringContainsString( 'money totals require a currency', $e->getMessage() );
 	}
 
 	/**
@@ -140,27 +149,41 @@ class ContractTest extends TestCase {
 		);
 		$contract->set_currency( null );
 
-		$this->expectException( DomainException::class );
-		$contract->assert_money_has_currency();
+		$this->assert_invalid_input(
+			static function () use ( $contract ): void {
+				$contract->assert_money_has_currency();
+			},
+			ValidationErrorCode::REQUIRED,
+			'currency'
+		);
 	}
 
 	/**
 	 * @testdox create() requires an extension_slug.
 	 */
 	public function test_create_requires_an_extension_slug(): void {
-		$this->expectException( DomainException::class );
-		$this->expectExceptionMessage( 'Contract: extension_slug is required' );
+		$e = $this->assert_invalid_input(
+			static function (): void {
+				Contract::create( array() );
+			},
+			ValidationErrorCode::REQUIRED,
+			'extension_slug'
+		);
 
-		Contract::create( array() );
+		$this->assertStringContainsString( 'Contract: extension_slug is required', $e->getMessage() );
 	}
 
 	/**
 	 * @testdox create() rejects an empty extension_slug.
 	 */
 	public function test_create_rejects_an_empty_extension_slug(): void {
-		$this->expectException( DomainException::class );
-
-		Contract::create( array( 'extension_slug' => '' ) );
+		$this->assert_invalid_input(
+			static function (): void {
+				Contract::create( array( 'extension_slug' => '' ) );
+			},
+			ValidationErrorCode::REQUIRED,
+			'extension_slug'
+		);
 	}
 
 	/**
@@ -218,10 +241,15 @@ class ContractTest extends TestCase {
 	public function test_set_schedule_source_rejects_an_invalid_slug( string $schedule_source ): void {
 		$contract = Contract::create( array( 'extension_slug' => 'acme-subs' ) );
 
-		$this->expectException( DomainException::class );
-		$this->expectExceptionMessage( sprintf( 'Contract: invalid schedule source "%s".', $schedule_source ) );
+		$e = $this->assert_invalid_input(
+			static function () use ( $contract, $schedule_source ): void {
+				$contract->set_schedule_source( $schedule_source );
+			},
+			ValidationErrorCode::INVALID_VALUE,
+			'schedule_source'
+		);
 
-		$contract->set_schedule_source( $schedule_source );
+		$this->assertSame( sprintf( 'Contract: invalid schedule source "%s".', $schedule_source ), $e->getMessage() );
 	}
 
 	/**
@@ -346,18 +374,23 @@ class ContractTest extends TestCase {
 	 * @testdox create() rejects an invalid status.
 	 */
 	public function test_create_rejects_an_invalid_status(): void {
-		$this->expectException( DomainException::class );
-
-		Contract::create(
-			array(
-				'extension_slug'  => 'acme-subs',
-				'customer_id'     => 1,
-				'currency'        => 'USD',
-				'selling_plan_id' => 2,
-				'origin_order_id' => 3,
-				'start_gmt'       => '2026-01-01 00:00:00',
-				'status'          => 'nonsense',
-			)
+		$this->assert_invalid_input(
+			static function (): void {
+				Contract::create(
+					array(
+						'extension_slug'  => 'acme-subs',
+						'customer_id'     => 1,
+						'currency'        => 'USD',
+						'selling_plan_id' => 2,
+						'origin_order_id' => 3,
+						'start_gmt'       => '2026-01-01 00:00:00',
+						'status'          => 'nonsense',
+					)
+				);
+			},
+			ValidationErrorCode::NOT_REGISTERED,
+			'status',
+			array( 'value' => 'nonsense' )
 		);
 	}
 
@@ -365,18 +398,22 @@ class ContractTest extends TestCase {
 	 * @testdox create() rejects an invalid schedule source.
 	 */
 	public function test_create_rejects_an_invalid_schedule_source(): void {
-		$this->expectException( DomainException::class );
-
-		Contract::create(
-			array(
-				'extension_slug'  => 'acme-subs',
-				'customer_id'     => 1,
-				'currency'        => 'USD',
-				'selling_plan_id' => 2,
-				'origin_order_id' => 3,
-				'start_gmt'       => '2026-01-01 00:00:00',
-				'schedule_source' => 'Not a slug',
-			)
+		$this->assert_invalid_input(
+			static function (): void {
+				Contract::create(
+					array(
+						'extension_slug'  => 'acme-subs',
+						'customer_id'     => 1,
+						'currency'        => 'USD',
+						'selling_plan_id' => 2,
+						'origin_order_id' => 3,
+						'start_gmt'       => '2026-01-01 00:00:00',
+						'schedule_source' => 'Not a slug',
+					)
+				);
+			},
+			ValidationErrorCode::INVALID_VALUE,
+			'schedule_source'
 		);
 	}
 
@@ -632,8 +669,11 @@ class ContractTest extends TestCase {
 
 		try {
 			$contract->set_status( 'never-registered' );
-			$this->fail( 'Expected a DomainException for an unregistered status.' );
-		} catch ( DomainException $e ) {
+			$this->fail( 'Expected an InvalidInputException for an unregistered status.' );
+		} catch ( InvalidInputException $e ) {
+			$this->assertSame( ValidationErrorCode::NOT_REGISTERED, $e->get_error_code() );
+			$this->assertSame( 'status', $e->get_field() );
+			$this->assertSame( array( 'value' => 'never-registered' ), $e->get_params() );
 			$this->assertSame( ContractStatus::ACTIVE, $contract->get_status() );
 		}
 	}

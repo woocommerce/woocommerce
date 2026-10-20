@@ -20,6 +20,8 @@ use DomainException;
 use LogicException;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\MoneyScale;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\Coercion;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\InvalidInputException;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ValidationErrorCode;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\ItemsSnapshot;
 
@@ -200,7 +202,7 @@ final class Cycle {
 	 * objects are attached only when a stored cycle is read.
 	 *
 	 * @param array<string, mixed> $args Cycle attributes.
-	 * @throws DomainException If the attributes are not valid.
+	 * @throws InvalidInputException If the attributes are not valid.
 	 */
 	public static function create( array $args ): self {
 		// A new cycle is always unsaved; never adopt a caller-supplied id.
@@ -229,7 +231,7 @@ final class Cycle {
 	 * written), so a value written by a since-deactivated extension round-trips unchanged.
 	 *
 	 * @param array<string, mixed> $row Cycle row.
-	 * @throws DomainException If the stored status is not a well-formed status slug.
+	 * @throws InvalidInputException If the stored status is not a well-formed status slug.
 	 */
 	public static function from_storage( array $row ): self {
 		return new self( $row );
@@ -460,11 +462,16 @@ final class Cycle {
 	 * Refuse a missing (non-positive) owning contract id.
 	 *
 	 * @param int $contract_id Contract id to check.
-	 * @throws DomainException If `$contract_id` is not positive.
+	 * @throws InvalidInputException If `$contract_id` is not positive.
 	 */
 	private static function assert_contract_id( int $contract_id ): void {
 		if ( $contract_id < 1 ) {
-			throw new DomainException( 'Cycle: contract_id is required.' );
+			throw new InvalidInputException(
+				ValidationErrorCode::OUT_OF_BOUNDS,
+				'contract_id',
+				sprintf( 'Cycle: contract_id must be 1 or greater, got %d.', $contract_id ),
+				array( 'min' => 1 )
+			);
 		}
 	}
 
@@ -473,11 +480,11 @@ final class Cycle {
 	 * any non-empty kind is accepted so a third party may introduce its own.
 	 *
 	 * @param string $kind Kind to validate.
-	 * @throws DomainException If `$kind` is empty.
+	 * @throws InvalidInputException If `$kind` is empty.
 	 */
 	private static function assert_kind( string $kind ): void {
 		if ( '' === $kind ) {
-			throw new DomainException( 'Cycle: kind must not be empty.' );
+			throw new InvalidInputException( ValidationErrorCode::REQUIRED, 'kind', 'Cycle: kind must not be empty.' );
 		}
 	}
 
@@ -486,11 +493,14 @@ final class Cycle {
 	 *
 	 * @param string $starts_at_gmt Start (GMT).
 	 * @param string $ends_at_gmt   End (GMT).
-	 * @throws DomainException If either moment is missing.
+	 * @throws InvalidInputException If either moment is missing.
 	 */
 	private static function assert_period( string $starts_at_gmt, string $ends_at_gmt ): void {
-		if ( '' === $starts_at_gmt || '' === $ends_at_gmt ) {
-			throw new DomainException( 'Cycle: starts_at_gmt and ends_at_gmt are required.' );
+		if ( '' === $starts_at_gmt ) {
+			throw new InvalidInputException( ValidationErrorCode::REQUIRED, 'starts_at_gmt', 'Cycle: starts_at_gmt is required.' );
+		}
+		if ( '' === $ends_at_gmt ) {
+			throw new InvalidInputException( ValidationErrorCode::REQUIRED, 'ends_at_gmt', 'Cycle: ends_at_gmt is required.' );
 		}
 	}
 
@@ -498,11 +508,11 @@ final class Cycle {
 	 * Refuse a cycle without a currency.
 	 *
 	 * @param string $currency Currency code.
-	 * @throws DomainException If the currency is missing.
+	 * @throws InvalidInputException If the currency is missing.
 	 */
 	private static function assert_currency( string $currency ): void {
 		if ( '' === $currency ) {
-			throw new DomainException( 'Cycle: currency is required.' );
+			throw new InvalidInputException( ValidationErrorCode::REQUIRED, 'currency', 'Cycle: currency is required.' );
 		}
 	}
 
@@ -510,12 +520,15 @@ final class Cycle {
 	 * Validate a sequence number.
 	 *
 	 * @param int $sequence_no Sequence number to validate.
-	 * @throws DomainException If `$sequence_no` is not positive.
+	 * @throws InvalidInputException If `$sequence_no` is not positive.
 	 */
 	private static function assert_sequence_no( int $sequence_no ): void {
 		if ( $sequence_no < 1 ) {
-			throw new DomainException(
-				sprintf( 'Cycle: sequence_no must be 1 or greater, got %d.', $sequence_no )
+			throw new InvalidInputException(
+				ValidationErrorCode::OUT_OF_BOUNDS,
+				'sequence_no',
+				sprintf( 'Cycle: sequence_no must be 1 or greater, got %d.', $sequence_no ),
+				array( 'min' => 1 )
 			);
 		}
 	}
@@ -526,12 +539,15 @@ final class Cycle {
 	 * unregistered stored value verbatim.
 	 *
 	 * @param CycleStatus $status Status to check.
-	 * @throws DomainException If the status is not registered.
+	 * @throws InvalidInputException If the status is not registered.
 	 */
 	private static function assert_status( CycleStatus $status ): void {
 		if ( ! CycleStatus::is_registered( $status->get_value() ) ) {
-			throw new DomainException(
-				sprintf( 'Cycle: status "%s" is not registered.', $status->get_value() )
+			throw new InvalidInputException(
+				ValidationErrorCode::NOT_REGISTERED,
+				'status',
+				sprintf( 'Cycle: status "%s" is not registered.', $status->get_value() ),
+				array( 'value' => $status->get_value() )
 			);
 		}
 	}
@@ -543,7 +559,7 @@ final class Cycle {
 	 *
 	 * @param mixed $status Raw status value (a CycleStatus, null, or a status string).
 	 * @return CycleStatus
-	 * @throws DomainException If a status string is not a well-formed status slug.
+	 * @throws InvalidInputException If a status string is not a well-formed status slug.
 	 */
 	private static function coerce_status( $status ): CycleStatus {
 		if ( $status instanceof CycleStatus ) {
@@ -561,12 +577,15 @@ final class Cycle {
 	 * Validate a chargeable count: null (a non-counting cycle) or a positive integer.
 	 *
 	 * @param int|null $count Count to validate.
-	 * @throws DomainException If a present count is not positive.
+	 * @throws InvalidInputException If a present count is not positive.
 	 */
 	private static function assert_count( ?int $count ): void {
 		if ( null !== $count && $count < 1 ) {
-			throw new DomainException(
-				sprintf( 'Cycle: count must be 1 or greater when set, got %d.', $count )
+			throw new InvalidInputException(
+				ValidationErrorCode::OUT_OF_BOUNDS,
+				'count',
+				sprintf( 'Cycle: count must be 1 or greater when set, got %d.', $count ),
+				array( 'min' => 1 )
 			);
 		}
 	}

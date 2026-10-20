@@ -10,8 +10,9 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Core\Entity;
 
-use DomainException;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\Coercion;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\InvalidInputException;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ValidationErrorCode;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -108,7 +109,7 @@ final class Plan {
 	 * Build a new, unsaved plan. `extension_slug` and a non-empty `name` are required.
 	 *
 	 * @param array<string, mixed> $args Keys `name`, `status` (default {@see PlanStatus::ACTIVE}), `extension_slug`, `billing_policy`, `pricing_policy`, `delivery_policy`.
-	 * @throws DomainException If the plan attributes are not valid.
+	 * @throws InvalidInputException If the plan attributes are not valid.
 	 */
 	public static function create( array $args ): self {
 		// A new plan is always unsaved; never adopt a caller-supplied id or stored dates.
@@ -167,7 +168,7 @@ final class Plan {
 	 * Set the display name.
 	 *
 	 * @param string $name Display name; must not be empty.
-	 * @throws DomainException If the name is empty.
+	 * @throws InvalidInputException If the name is empty.
 	 */
 	public function set_name( string $name ): void {
 		self::assert_name( $name );
@@ -186,7 +187,7 @@ final class Plan {
 	 * unregistered status survives it.
 	 *
 	 * @param string $status Plan status; must be registered.
-	 * @throws DomainException If the status is not registered.
+	 * @throws InvalidInputException If the status is not registered.
 	 */
 	public function set_status( string $status ): void {
 		if ( $status === $this->status ) {
@@ -217,7 +218,7 @@ final class Plan {
 	 * Replace the billing payload.
 	 *
 	 * @param array<array-key, mixed>|null $billing_policy Billing payload; must be string-keyed.
-	 * @throws DomainException If the payload is not an object (string-keyed array).
+	 * @throws InvalidInputException If the payload is not an object (string-keyed array).
 	 */
 	public function set_billing_policy( ?array $billing_policy ): void {
 		self::assert_policy( 'billing_policy', $billing_policy );
@@ -237,7 +238,7 @@ final class Plan {
 	 * Replace the pricing payload.
 	 *
 	 * @param array<array-key, mixed>|null $pricing_policy Pricing payload; must be string-keyed.
-	 * @throws DomainException If the payload is not an object (string-keyed array).
+	 * @throws InvalidInputException If the payload is not an object (string-keyed array).
 	 */
 	public function set_pricing_policy( ?array $pricing_policy ): void {
 		self::assert_policy( 'pricing_policy', $pricing_policy );
@@ -257,7 +258,7 @@ final class Plan {
 	 * Replace the delivery payload.
 	 *
 	 * @param array<array-key, mixed>|null $delivery_policy Delivery payload; must be string-keyed.
-	 * @throws DomainException If the payload is not an object (string-keyed array).
+	 * @throws InvalidInputException If the payload is not an object (string-keyed array).
 	 */
 	public function set_delivery_policy( ?array $delivery_policy ): void {
 		self::assert_policy( 'delivery_policy', $delivery_policy );
@@ -317,11 +318,11 @@ final class Plan {
 	 * Refuse an empty or whitespace-only name.
 	 *
 	 * @param string $name Name to check.
-	 * @throws DomainException If `$name` is empty.
+	 * @throws InvalidInputException If `$name` is empty.
 	 */
 	private static function assert_name( string $name ): void {
 		if ( '' === trim( $name ) ) {
-			throw new DomainException( 'Plan: name is required and must be a non-empty string.' );
+			throw new InvalidInputException( ValidationErrorCode::REQUIRED, 'name', 'Plan: name is required and must be a non-empty string.' );
 		}
 	}
 
@@ -329,11 +330,16 @@ final class Plan {
 	 * Refuse a status that is not a registered plan status.
 	 *
 	 * @param string $status Status to check.
-	 * @throws DomainException If `$status` is not registered.
+	 * @throws InvalidInputException If `$status` is not registered.
 	 */
 	private static function assert_status( string $status ): void {
 		if ( ! PlanStatus::is_registered( $status ) ) {
-			throw new DomainException( sprintf( 'Plan: status "%s" is not registered.', $status ) );
+			throw new InvalidInputException(
+				ValidationErrorCode::NOT_REGISTERED,
+				'status',
+				sprintf( 'Plan: status "%s" is not registered.', $status ),
+				array( 'value' => $status )
+			);
 		}
 	}
 
@@ -341,11 +347,11 @@ final class Plan {
 	 * Refuse a missing or empty owning extension slug.
 	 *
 	 * @param string|null $extension_slug Extension slug to check.
-	 * @throws DomainException If `$extension_slug` is null or empty.
+	 * @throws InvalidInputException If `$extension_slug` is null or empty.
 	 */
 	private static function assert_extension_slug( ?string $extension_slug ): void {
 		if ( null === $extension_slug || '' === $extension_slug ) {
-			throw new DomainException( 'Plan: extension_slug is required and must be a non-empty string.' );
+			throw new InvalidInputException( ValidationErrorCode::REQUIRED, 'extension_slug', 'Plan: extension_slug is required and must be a non-empty string.' );
 		}
 	}
 
@@ -355,9 +361,9 @@ final class Plan {
 	 * 0..n-1), which would come back as a JSON array, is refused. An empty array is accepted
 	 * (a JSON `{}` decodes to it). The same rule for each of the three policies.
 	 *
-	 * @param string $field Policy field name, for the error message.
+	 * @param string $field Policy field name, reported as the error's field.
 	 * @param mixed  $value Candidate payload.
-	 * @throws DomainException If the value is a non-empty list or not an array.
+	 * @throws InvalidInputException If the value is a non-empty list or not an array.
 	 */
 	private static function assert_policy( string $field, $value ): void {
 		if ( null === $value ) {
@@ -366,7 +372,12 @@ final class Plan {
 
 		$is_list = is_array( $value ) && array() !== $value && array_keys( $value ) === range( 0, count( $value ) - 1 );
 		if ( ! is_array( $value ) || $is_list ) {
-			throw new DomainException( sprintf( 'Plan: %s must be an object or null.', $field ) );
+			throw new InvalidInputException(
+				ValidationErrorCode::INVALID_TYPE,
+				$field,
+				sprintf( 'Plan: %s must be an object or null.', $field ),
+				array( 'type' => 'object' )
+			);
 		}
 	}
 }
