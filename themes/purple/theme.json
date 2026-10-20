@@ -58,18 +58,12 @@
 			],
 			"duotone": [
 				{
-					"colors": [
-						"#111111",
-						"#FFFFFF"
-					],
+					"colors": [ "#111111", "#FFFFFF" ],
 					"name": "Duotone 1",
 					"slug": "duotone-1"
 				},
 				{
-					"colors": [
-						"#111111",
-						"#f2edff"
-					],
+					"colors": [ "#111111", "#f2edff" ],
 					"name": "Duotone 2",
 					"slug": "duotone-2"
 				}
@@ -583,8 +577,8 @@
 						},
 						"spacing": {
 							"padding": {
-							"left": "0",
-							"right": "var(--wp--preset--spacing--10)"
+								"left": "0",
+								"right": "var(--wp--preset--spacing--10)"
 							}
 						}
 					}

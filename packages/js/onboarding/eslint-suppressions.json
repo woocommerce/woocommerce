@@ -1,0 +1,7 @@
+{
+  "src/components/WCPayBanner/WCPayBanner.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 3
+    }
+  }
+}

@@ -6,7 +6,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 10.8.0
+ * @version 11.3.0
  *
  * @var string             $name      Form field name (e.g. `reviews[123][rating]`).
  * @var string             $id_prefix Prefix used for unique radio ids.
@@ -27,7 +27,6 @@ $reversed = array_reverse( $labels, true );
 	class="woocommerce-star-rating"
 	role="radiogroup"
 	aria-labelledby="<?php echo esc_attr( $label_id ); ?>"
-	aria-describedby="<?php echo esc_attr( $caption_id ); ?>"
 >
 	<div class="woocommerce-star-rating__stars">
 		<?php foreach ( $reversed as $value => $label ) : ?>
@@ -69,9 +68,9 @@ $reversed = array_reverse( $labels, true );
 		<?php endforeach; ?>
 	</div>
 
+	<?php // Visual only: each radio's own label already carries this text. ?>
 	<span
 		id="<?php echo esc_attr( $caption_id ); ?>"
 		class="woocommerce-star-rating__caption"
-		aria-live="polite"
 	><?php echo esc_html( $initial_caption ); ?></span>
 </div>

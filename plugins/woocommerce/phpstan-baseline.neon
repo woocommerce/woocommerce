@@ -11725,18 +11725,6 @@ parameters:
 			path: includes/class-wc-form-handler.php
 
 		-
-			message: '#^Parameter \#2 \$country of function wc_format_postcode expects string, array\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-form-handler.php
-
-		-
-			message: '#^Parameter \#2 \$country of static method WC_Validation\:\:is_postcode\(\) expects string, array\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-form-handler.php
-
-		-
 			message: '#^Parameter \#2 \$quantity of method WC_Cart\:\:add_to_cart\(\) expects int, float\|int given\.$#'
 			identifier: argument.type
 			count: 2
@@ -48370,12 +48358,6 @@ parameters:
 			path: src/Blocks/BlockTemplatesController.php
 
 		-
-			message: '#^Callback expects 1 parameter, \$accepted_args is set to 3\.$#'
-			identifier: arguments.count
-			count: 1
-			path: src/Blocks/BlockTemplatesController.php
-
-		-
 			message: '#^Default value of the parameter \#2 \$template_type \(string\) of method Automattic\\WooCommerce\\Blocks\\BlockTemplatesController\:\:block_template_is_available\(\) is incompatible with type array\.$#'
 			identifier: parameter.defaultValue
 			count: 1
@@ -48396,12 +48378,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTemplatesController\:\:add_block_template_details\(\) should return Automattic\\WooCommerce\\Blocks\\WP_Block_Template\|null but returns Automattic\\WooCommerce\\Blocks\\Utils\\WP_Block_Template\.$#'
 			identifier: return.type
-			count: 1
-			path: src/Blocks/BlockTemplatesController.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTemplatesController\:\:add_plugin_templates_parts_support\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: src/Blocks/BlockTemplatesController.php
 
@@ -48480,12 +48456,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTemplatesRegistry\:\:init\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockTemplatesRegistry.php
-
-		-
-			message: '#^Parameter \#2 \$args of function register_block_template expects array\{title\?\: string, description\?\: string, content\?\: string, post_types\?\: array\<string\>, plugin\?\: string\}, array\{title\: string, description\: string, content\: string\|false\} given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTemplatesRegistry.php
 
@@ -52860,12 +52830,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\Templates\\AbstractTemplateCompatibility\:\:set_hook_data\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Blocks/Templates/AbstractTemplateCompatibility.php
-
-		-
-			message: '#^Parameter \$parent_block of method Automattic\\WooCommerce\\Blocks\\Templates\\AbstractTemplateCompatibility\:\:update_render_block_data\(\) has invalid type Automattic\\WooCommerce\\Blocks\\Templates\\WP_Block\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Blocks/Templates/AbstractTemplateCompatibility.php
 
@@ -59508,7 +59472,7 @@ parameters:
 		-
 			message: '#^Access to property \$post_type on an unknown class Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\WP_Post\.$#'
 			identifier: class.notFound
-			count: 2
+			count: 1
 			path: src/Internal/DataStores/Orders/DataSynchronizer.php
 
 		-
@@ -65747,12 +65711,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: src/Internal/StockNotifications/Emails/CustomerStockNotificationVerifyEmail.php
-
-		-
-			message: '#^@param string \$url does not accept actual type of parameter\: string\|false\.$#'
-			identifier: parameter.phpDocType
-			count: 2
-			path: src/Internal/StockNotifications/Emails/EmailActionController.php
 
 		-
 			message: '#^Cannot call method get_name\(\) on WC_Product\|false\|null\.$#'

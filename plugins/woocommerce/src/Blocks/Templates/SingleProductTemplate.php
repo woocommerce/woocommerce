@@ -1,8 +1,10 @@
 <?php
+declare( strict_types=1 );
 namespace Automattic\WooCommerce\Blocks\Templates;
 
+use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
+use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\SharedStores\ProductsStore;
-use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplateCompatibility;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 
 /**
@@ -52,8 +54,7 @@ class SingleProductTemplate extends AbstractTemplate {
 		if ( ! is_embed() && is_singular( 'product' ) ) {
 			global $post;
 
-			$compatibility_layer = new SingleProductTemplateCompatibility();
-			$compatibility_layer->init();
+			Package::container()->get( BlockTemplatesRegistry::class )->init_single_product_compatibility();
 
 			$product = wc_get_product( $post->ID );
 			if ( $product ) {
