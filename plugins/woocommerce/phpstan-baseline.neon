@@ -48472,12 +48472,6 @@ parameters:
 			path: src/Blocks/BlockTemplatesRegistry.php
 
 		-
-			message: '#^Parameter \#2 \$args of function register_block_template expects array\{title\?\: string, description\?\: string, content\?\: string, post_types\?\: array\<string\>, plugin\?\: string\}, array\{title\: string, description\: string, content\: string\|false\} given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTemplatesRegistry.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\AbstractBlock\:\:enqueue_assets\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
