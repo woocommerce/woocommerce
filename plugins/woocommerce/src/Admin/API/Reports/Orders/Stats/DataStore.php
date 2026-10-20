@@ -545,8 +545,9 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			return -1;
 		}
 
-		// Same defense-in-depth for records the import conditions filter excludes.
-		if ( OrdersScheduler::is_excluded_from_import( (int) $order->get_id() ) ) {
+		// Same defense-in-depth for records the import conditions filter excludes, or may exclude
+		// when the check fails.
+		if ( false !== OrdersScheduler::is_excluded_from_import( (int) $order->get_id() ) ) {
 			return -1;
 		}
 

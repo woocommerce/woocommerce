@@ -406,7 +406,14 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 			return;
 		}
 
-		if ( self::is_excluded_from_import( (int) $order_id ) ) {
+		$excluded = self::is_excluded_from_import( (int) $order_id );
+		if ( null === $excluded ) {
+			// The exclusion is unknown, so neither import the record nor drop it: keep it on the list
+			// Analytics settings retries.
+			self::record_failed_order_import( $order_id );
+			return;
+		}
+		if ( $excluded ) {
 			// The record can never finish importing, so keep it off the list Analytics settings retries.
 			self::clear_failed_order_import( $order_id );
 			return;
@@ -996,9 +1003,9 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	 * @internal
 	 * @since 11.3.0
 	 * @param int $order_id Order or refund ID.
-	 * @return bool
+	 * @return bool|null Whether the record is excluded, or null when the check failed (the error is logged).
 	 */
-	public static function is_excluded_from_import( int $order_id ): bool {
+	public static function is_excluded_from_import( int $order_id ): ?bool {
 		global $wpdb;
 
 		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
@@ -1021,13 +1028,11 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table names and filtered SQL conditions are interpolated; the ID is prepared.
 		$kept = $wpdb->get_var( $wpdb->prepare( "SELECT COALESCE( ( 1 {$where} ), 0 ) FROM {$from} WHERE {$id_column} = %d LIMIT 1", $order_id ) );
 
-		// A failed probe must not pass as an exclusion: the import then runs (and may fail) as usual
-		// instead of silently dropping the record and clearing its failed-import entry.
-		if ( '' !== $wpdb->last_error || null === $kept ) {
-			return false;
+		if ( self::log_last_db_error( "Could not check whether record #{$order_id} is excluded from the import" ) ) {
+			return null;
 		}
 
-		return ! (int) $kept;
+		return null !== $kept && ! (int) $kept;
 	}
 
 	/**

@@ -439,13 +439,12 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A failing exclusion probe does not count as an exclusion, so the record stays on the failed list.
+	 * @testdox A failing exclusion check logs the error, imports nothing and keeps the record on the failed list.
 	 */
-	public function test_is_excluded_from_import_treats_query_error_as_not_excluded(): void {
+	public function test_failed_exclusion_check_skips_import_and_keeps_record_for_retry(): void {
 		global $wpdb;
 		list( , $child_id ) = $this->create_parent_child_and_refund();
-		OrdersScheduler::record_failed_order_import( $child_id );
-		$callback = function ( $clauses ) {
+		$callback           = function ( $clauses ) {
 			$clauses[] = 'no_such_column_for_this_test = 1';
 			return $clauses;
 		};
@@ -453,11 +452,21 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 
 		$suppress = $wpdb->suppress_errors();
 		$excluded = OrdersScheduler::is_excluded_from_import( $child_id );
+		OrdersScheduler::import( $child_id );
+		$updated = OrdersStatsDataStore::update( wc_get_order( $child_id ) );
 		$wpdb->suppress_errors( $suppress );
 		remove_filter( 'woocommerce_analytics_orders_import_where_clauses', $callback );
 
-		$this->assertFalse( $excluded );
-		$this->assertContains( $child_id, OrdersScheduler::get_failed_order_imports()['ids'] );
+		$this->assertNull( $excluded, 'A failed check is neither an exclusion nor a pass.' );
+		$this->assertLogged( 'error', "Could not check whether record #{$child_id} is excluded from the import" );
+		$this->assertSame( -1, $updated, 'The stats data store must not write a record whose exclusion is unknown.' );
+		$this->assertNotContains( $child_id, $this->get_imported_order_ids() );
+		$this->assertContains( $child_id, OrdersScheduler::get_failed_order_imports()['ids'], 'The record stays on the list Analytics settings retries.' );
+
+		// Once the condition is fixed, the retry imports the record.
+		OrdersScheduler::import( $child_id );
+		$this->assertContains( $child_id, $this->get_imported_order_ids() );
+		$this->assertNotContains( $child_id, OrdersScheduler::get_failed_order_imports()['ids'] );
 	}
 
 	/**
