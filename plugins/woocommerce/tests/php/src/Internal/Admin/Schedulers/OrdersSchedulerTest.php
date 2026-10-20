@@ -214,7 +214,7 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	public function test_record_imported_before_exclusion_keeps_syncing(): void {
 		list( , $child_id ) = $this->create_parent_child_and_refund();
 		OrdersScheduler::import( $child_id );
-		$this->assertSame( OrderInternalStatus::COMPLETED, $this->get_imported_status( $child_id ) );
+		$this->assertSame( OrderInternalStatus::COMPLETED, $this->get_imported_status( $child_id ), 'The child is imported before the condition exists.' );
 		$this->exclude_child_orders_from_import();
 
 		$child = wc_get_order( $child_id );
@@ -223,7 +223,7 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 		OrdersScheduler::process_pending_batch( '2000-01-01 00:00:00', 0 );
 
 		$this->assertFalse( OrdersScheduler::is_excluded_from_import( $child_id ), 'A record Analytics holds is never excluded.' );
-		$this->assertSame( OrderInternalStatus::CANCELLED, $this->get_imported_status( $child_id ) );
+		$this->assertSame( OrderInternalStatus::CANCELLED, $this->get_imported_status( $child_id ), 'The status change reaches the held stats row.' );
 	}
 
 	/**
@@ -241,7 +241,7 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 
 		OrdersScheduler::import( $child_refund_id );
 
-		$this->assertContains( $child_refund_id, $this->get_imported_order_ids() );
+		$this->assertContains( $child_refund_id, $this->get_imported_order_ids(), 'import() writes the new refund of the held order.' );
 	}
 
 	/**
@@ -250,7 +250,7 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	public function test_is_excluded_from_import_ignores_missing_record(): void {
 		$this->add_import_condition( '0' );
 
-		$this->assertFalse( OrdersScheduler::is_excluded_from_import( 999999999 ) );
+		$this->assertFalse( OrdersScheduler::is_excluded_from_import( 999999999 ), 'With no row to evaluate, the conditions cannot exclude the record.' );
 	}
 
 	/**
@@ -302,9 +302,9 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 		OrdersScheduler::import( $parent_id );
 
 		$imported = $this->get_imported_order_ids();
-		$this->assertNotContains( $child_id, $imported );
-		$this->assertContains( $parent_id, $imported );
-		$this->assertContains( $refund_id, $imported );
+		$this->assertNotContains( $child_id, $imported, 'The excluded child order is not imported.' );
+		$this->assertContains( $parent_id, $imported, 'The kept parent order is imported.' );
+		$this->assertContains( $refund_id, $imported, 'Importing the parent also syncs its refund.' );
 	}
 
 	/**
@@ -330,7 +330,7 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 
 		$result = OrdersStatsDataStore::update( wc_get_order( $child_id ) );
 
-		$this->assertSame( -1, $result );
+		$this->assertSame( -1, $result, 'update() reports an excluded record as skipped (-1), not failed.' );
 		$this->assertNotContains( $child_id, $this->get_imported_order_ids() );
 	}
 
@@ -348,20 +348,9 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Filter returns the import ignores.
-	 *
-	 * @return array<string, array<mixed>>
-	 */
-	public function provider_invalid_import_where_clauses(): array {
-		return array(
-			'not an array'          => array( false ),
-			'non-strings and blank' => array( array( 42, '  ', null ) ),
-		);
-	}
-
-	/**
 	 * @testdox A filter return that is not an array of strings is ignored.
-	 * @dataProvider provider_invalid_import_where_clauses
+	 * @testWith [false]
+	 *           [[42, "  ", null]]
 	 *
 	 * @param mixed $invalid_return Value the filter returns.
 	 */
@@ -397,12 +386,16 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	 */
 	public function test_import_where_clauses_filter_allows_like_patterns(): void {
 		list( $parent_id, $child_id, $refund_id ) = $this->create_parent_child_and_refund();
-		$callback                                 = function ( $clauses, $table_alias ) {
-			$column    = OrderUtil::custom_orders_table_usage_is_enabled() ? 'type' : 'post_type';
-			$clauses[] = "{$table_alias}.{$column} NOT LIKE '%shop_order_refund'"; // Starts with %s, which prepare() would read as a placeholder.
-			return $clauses;
-		};
-		add_filter( 'woocommerce_analytics_orders_import_where_clauses', $callback, 10, 2 );
+		add_filter(
+			'woocommerce_analytics_orders_import_where_clauses',
+			function ( $clauses, $table_alias ) {
+				$column    = OrderUtil::custom_orders_table_usage_is_enabled() ? 'type' : 'post_type';
+				$clauses[] = "{$table_alias}.{$column} NOT LIKE '%shop_order_refund'"; // Starts with %s, which prepare() would read as a placeholder.
+				return $clauses;
+			},
+			10,
+			2
+		);
 
 		$items = OrdersScheduler::get_items( 100, 1, false, true );
 
