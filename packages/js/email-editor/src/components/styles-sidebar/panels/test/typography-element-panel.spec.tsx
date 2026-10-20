@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { render } from '@testing-library/react';
+import { act, render } from '@testing-library/react';
 import { FontSizePicker } from '@wordpress/components';
 import { useSettings } from '@wordpress/block-editor';
 
@@ -9,6 +9,20 @@ import { useSettings } from '@wordpress/block-editor';
  * Internal dependencies
  */
 import { TypographyElementPanel } from '../typography-element-panel';
+
+// Holds the `onChange` the panel passes to FontAppearanceControl, so tests can
+// fire an Appearance selection the way the dropdown does.
+const fontAppearance: {
+	onChange?: ( value: { fontStyle?: string; fontWeight?: string } ) => void;
+} = {};
+
+const emailStyles = {
+	styles: {},
+	defaultStyles: {},
+	userStyles: {} as Record< string, unknown >,
+	updateStyleProp: jest.fn(),
+	updateStyles: jest.fn(),
+};
 
 jest.mock( '@wordpress/components', () => ( {
 	FontSizePicker: jest.fn( () => null ),
@@ -18,7 +32,10 @@ jest.mock( '@wordpress/components', () => ( {
 
 jest.mock( '@wordpress/block-editor', () => ( {
 	useSettings: jest.fn(),
-	__experimentalFontAppearanceControl: () => null,
+	__experimentalFontAppearanceControl: ( props ) => {
+		fontAppearance.onChange = props.onChange;
+		return null;
+	},
 	__experimentalLetterSpacingControl: () => null,
 	__experimentalFontFamilyControl: () => null,
 	LineHeightControl: () => null,
@@ -40,15 +57,18 @@ jest.mock( '@wordpress/global-styles-engine', () => ( {
 	getPresetVariableFromValue: jest.fn(),
 } ) );
 
+// Stubbed so the real `use-email-styles` module below can load without
+// pulling in `@wordpress/core-data`.
+jest.mock( '../../../../hooks/use-user-theme', () => ( {
+	useUserTheme: () => ( { userTheme: {}, updateUserTheme: jest.fn() } ),
+} ) );
+
+// `setImmutably` stays real: the panel builds the saved styles object with it,
+// and a stub would hide whether both Appearance props survive the write.
 jest.mock( '../../../../hooks', () => ( {
-	useEmailStyles: () => ( {
-		styles: {},
-		defaultStyles: {},
-		userStyles: {},
-		updateStyleProp: jest.fn(),
-		updateStyles: jest.fn(),
-	} ),
-	setImmutably: jest.fn(),
+	setImmutably: jest.requireActual( '../../../../hooks/use-email-styles' )
+		.setImmutably,
+	useEmailStyles: () => emailStyles,
 } ) );
 
 jest.mock( '../../utils', () => ( {
@@ -71,23 +91,118 @@ jest.mock( '../../../../events', () => ( {
 const useSettingsMock = useSettings as jest.Mock;
 const fontSizePickerMock = FontSizePicker as unknown as jest.Mock;
 
+const selectAppearance = ( value: {
+	fontStyle?: string;
+	fontWeight?: string;
+} ) => {
+	expect( fontAppearance.onChange ).toBeDefined();
+	act( () => fontAppearance.onChange( value ) );
+};
+
 describe( 'TypographyElementPanel', () => {
 	beforeEach( () => {
 		fontSizePickerMock.mockClear();
-	} );
-
-	it( 'passes the spacing units from the email theme to the font size picker', () => {
+		emailStyles.updateStyleProp.mockClear();
+		emailStyles.updateStyles.mockClear();
+		emailStyles.userStyles = {};
+		delete fontAppearance.onChange;
 		useSettingsMock.mockImplementation( ( ...paths: string[] ) =>
 			paths[ 0 ] === 'spacing.units'
 				? [ [ 'px' ] ]
 				: [ [], { default: [] } ]
 		);
+	} );
 
+	it( 'passes the spacing units from the email theme to the font size picker', () => {
 		render( <TypographyElementPanel element="text" headingLevel="" /> );
 
 		expect( fontSizePickerMock ).toHaveBeenCalled();
 		expect( fontSizePickerMock.mock.calls[ 0 ][ 0 ].units ).toEqual( [
 			'px',
 		] );
+	} );
+
+	it( 'stores both Appearance props in a single update, keeping other user styles', () => {
+		emailStyles.userStyles = {
+			typography: { fontSize: '16px' },
+			color: { text: '#111111' },
+		};
+
+		render( <TypographyElementPanel element="text" headingLevel="" /> );
+
+		selectAppearance( { fontStyle: 'italic', fontWeight: '700' } );
+
+		// Two separate writes would both read the same stale theme, so the
+		// second would overwrite the first and drop `fontStyle`.
+		expect( emailStyles.updateStyleProp ).not.toHaveBeenCalled();
+		expect( emailStyles.updateStyles ).toHaveBeenCalledTimes( 1 );
+		expect( emailStyles.updateStyles ).toHaveBeenCalledWith( {
+			typography: {
+				fontSize: '16px',
+				fontStyle: 'italic',
+				fontWeight: '700',
+			},
+			color: { text: '#111111' },
+		} );
+	} );
+
+	it( 'stores both Appearance props under the heading level for headings', () => {
+		render(
+			<TypographyElementPanel element="heading" headingLevel="h2" />
+		);
+
+		selectAppearance( { fontStyle: 'italic', fontWeight: '400' } );
+
+		expect( emailStyles.updateStyles ).toHaveBeenCalledTimes( 1 );
+		expect( emailStyles.updateStyles ).toHaveBeenCalledWith( {
+			elements: {
+				h2: {
+					typography: { fontStyle: 'italic', fontWeight: '400' },
+				},
+			},
+		} );
+	} );
+
+	it( 'clears both Appearance props in a single update when deselected', () => {
+		emailStyles.userStyles = {
+			typography: {
+				fontSize: '16px',
+				fontStyle: 'italic',
+				fontWeight: '700',
+			},
+			color: { text: '#111111' },
+		};
+
+		render( <TypographyElementPanel element="text" headingLevel="" /> );
+
+		// What the Appearance tool's onDeselect hands back.
+		selectAppearance( { fontStyle: undefined, fontWeight: undefined } );
+
+		expect( emailStyles.updateStyleProp ).not.toHaveBeenCalled();
+		expect( emailStyles.updateStyles ).toHaveBeenCalledTimes( 1 );
+		// toStrictEqual, so a missing key fails rather than matching undefined.
+		expect( emailStyles.updateStyles.mock.calls[ 0 ][ 0 ] ).toStrictEqual( {
+			typography: {
+				fontSize: '16px',
+				fontStyle: undefined,
+				fontWeight: undefined,
+			},
+			color: { text: '#111111' },
+		} );
+	} );
+
+	it( 'stores both Appearance props under the element for other elements', () => {
+		render( <TypographyElementPanel element="link" headingLevel="" /> );
+
+		selectAppearance( { fontStyle: 'italic', fontWeight: '700' } );
+
+		expect( emailStyles.updateStyles ).toHaveBeenCalledTimes( 1 );
+		expect( emailStyles.updateStyles ).toHaveBeenCalledWith( {
+			elements: {
+				link: {
+					typography: { fontStyle: 'italic', fontWeight: '700' },
+				},
+			},
+		} );
 	} );
 } );

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Save the italic Appearance options in the email editor Styles sidebar instead of silently reverting to the non-italic equivalent.

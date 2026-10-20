@@ -139,20 +139,26 @@ export function TypographyElementPanel( {
 	const showToolFontSize =
 		element !== 'heading' || headingLevel !== 'heading';
 
+	// Text styles live at the root of the styles object, every other element
+	// under `elements`, and headings under their level.
+	const getElementStylePath = useCallback(
+		( path ) => {
+			if ( element === 'heading' ) {
+				return [ 'elements', headingLevel, ...path ];
+			}
+			if ( element === 'text' ) {
+				return [ ...path ];
+			}
+			return [ 'elements', element, ...path ];
+		},
+		[ element, headingLevel ]
+	);
+
 	const updateElementStyleProp = useCallback(
 		( path, newValue ) => {
-			if ( element === 'heading' ) {
-				updateStyleProp(
-					[ 'elements', headingLevel, ...path ],
-					newValue
-				);
-			} else if ( element === 'text' ) {
-				updateStyleProp( [ ...path ], newValue );
-			} else {
-				updateStyleProp( [ 'elements', element, ...path ], newValue );
-			}
+			updateStyleProp( getElementStylePath( path ), newValue );
 		},
-		[ element, updateStyleProp, headingLevel ]
+		[ getElementStylePath, updateStyleProp ]
 	);
 
 	const setTextColor = ( newValue ) => {
@@ -256,8 +262,20 @@ export function TypographyElementPanel( {
 		fontStyle: newFontStyle,
 		fontWeight: newFontWeight,
 	} ) => {
-		updateElementStyleProp( [ 'typography', 'fontStyle' ], newFontStyle );
-		updateElementStyleProp( [ 'typography', 'fontWeight' ], newFontWeight );
+		// Single update — a second updateStyleProp call in the same handler
+		// would work from a stale userTheme and clobber this edit, dropping
+		// fontStyle.
+		updateStyles(
+			setImmutably(
+				setImmutably(
+					userStyles ?? {},
+					getElementStylePath( [ 'typography', 'fontStyle' ] ),
+					newFontStyle
+				),
+				getElementStylePath( [ 'typography', 'fontWeight' ] ),
+				newFontWeight
+			)
+		);
 		debouncedRecordEvent(
 			'styles_sidebar_screen_typography_element_panel_set_font_appearance',
 			{
