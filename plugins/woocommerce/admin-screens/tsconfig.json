@@ -18,12 +18,14 @@
 		"noPropertyAccessFromIndexSignature": true,
 		"noUnusedLocals": true,
 		"noUnusedParameters": true,
-		"paths": {
-			"@wordpress/data/build-types/*": [
-				"./node_modules/@wordpress/data/build-types/*"
-			]
-		}
+		"composite": true
 	},
-	"include": [ "**/*.ts", "**/*.tsx" ],
-	"exclude": [ "node_modules" ]
+	"include": [
+		"**/*.ts",
+		"**/*.tsx"
+	],
+	"exclude": [
+		"node_modules"
+	],
+	"references": []
 }

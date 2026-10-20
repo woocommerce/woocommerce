@@ -49,6 +49,7 @@
 		"@types/react": "18.3.x",
 		"@typescript-eslint/eslint-plugin": "^8.63.0",
 		"@woocommerce/eslint-config": "workspace:*",
+		"@woocommerce/internal-build": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
 		"@wordpress/browserslist-config": "next",
 		"@wordpress/build": "catalog:tooling",

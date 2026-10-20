@@ -2810,6 +2810,9 @@ importers:
       '@woocommerce/eslint-config':
         specifier: workspace:*
         version: link:../../../tools/eslint-config
+      '@woocommerce/internal-build':
+        specifier: workspace:*
+        version: link:../../../packages/js/internal-build
       '@woocommerce/internal-js-tests':
         specifier: workspace:*
         version: link:../../../packages/js/internal-js-tests
