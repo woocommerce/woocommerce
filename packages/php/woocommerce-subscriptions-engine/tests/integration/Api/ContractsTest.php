@@ -11,12 +11,12 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Integration\Api;
 
 use DateTimeImmutable;
 use DateTimeZone;
-use DomainException;
 use EngineIntegrationTestCase;
 use InvalidArgumentException;
 use WC_Order;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\ContractLockedException;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\Contracts;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\ValidationException;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\View\ContractView;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\View\CycleView;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
@@ -24,6 +24,8 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\StatusRegistry;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\InvalidInputException;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ValidationErrorCode;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller;
 
@@ -319,11 +321,122 @@ class ContractsTest extends EngineIntegrationTestCase {
 					'status'         => 'nonsense',
 				)
 			);
-			$this->fail( 'Expected an InvalidArgumentException.' );
-		} catch ( InvalidArgumentException $e ) {
-			$this->assertInstanceOf( DomainException::class, $e->getPrevious() );
-			$this->assertSame( $e->getPrevious()->getMessage(), $e->getMessage() );
+			$this->fail( 'Expected a ValidationException.' );
+		} catch ( ValidationException $e ) {
+			$this->assertInstanceOf( InvalidInputException::class, $e->getPrevious() );
+			$this->assertSame( esc_html( $e->getPrevious()->getMessage() ), $e->getMessage() );
+			$this->assertSame( array( ValidationErrorCode::NOT_REGISTERED ), $e->get_errors()->get_error_codes() );
 		}
+	}
+
+	/**
+	 * Run an operation and assert it is refused with an engine validation error.
+	 *
+	 * @param callable $operation Operation expected to be refused.
+	 * @param string   $code      Expected error code.
+	 * @param string   $field     Expected field.
+	 */
+	private function assert_refused( callable $operation, string $code, string $field ): void {
+		try {
+			$operation();
+			$this->fail( sprintf( 'Expected a ValidationException with "%s" on "%s".', $code, $field ) );
+		} catch ( ValidationException $e ) {
+			$this->assertInstanceOf( InvalidArgumentException::class, $e );
+			$this->assertSame( array( $code ), $e->get_errors()->get_error_codes() );
+
+			$data = $e->get_errors()->get_error_data( $code );
+			$this->assertIsArray( $data );
+			$this->assertSame( $field, $data['field'] );
+			$this->assertStringContainsString( $field, $e->get_errors()->get_error_message( $code ) );
+		}
+	}
+
+	/**
+	 * @testdox Contract writes report the error code and field.
+	 */
+	public function test_contract_writes_report_the_error_code_and_field(): void {
+		$this->assert_refused(
+			static function (): void {
+				Contracts::create(
+					array(
+						'extension_slug' => self::EXTENSION_SLUG,
+						'currency'       => 'usd',
+					)
+				);
+			},
+			ValidationErrorCode::INVALID_VALUE,
+			'currency'
+		);
+		$this->assert_refused(
+			static function (): void {
+				Contracts::create(
+					array(
+						'extension_slug' => self::EXTENSION_SLUG,
+						'billing_total'  => '10',
+					)
+				);
+			},
+			ValidationErrorCode::REQUIRED,
+			'currency'
+		);
+		$this->assert_refused(
+			static function (): void {
+				Contracts::create(
+					array(
+						'extension_slug'  => self::EXTENSION_SLUG,
+						'schedule_source' => 'Not a slug',
+					)
+				);
+			},
+			ValidationErrorCode::INVALID_VALUE,
+			'schedule_source'
+		);
+
+		$id = $this->contract_with_currency();
+		$this->assert_refused(
+			static function () use ( $id ): void {
+				Contracts::update( $id, array( 'addresses' => array( 'home' => array( 'first_name' => 'Ada' ) ) ) );
+			},
+			ValidationErrorCode::NOT_IN_ENUM,
+			'addresses[home]'
+		);
+	}
+
+	/**
+	 * @testdox Cycle writes and reads report the error code and field.
+	 */
+	public function test_cycle_writes_report_the_error_code_and_field(): void {
+		$id    = $this->contract_with_currency();
+		$cycle = $this->add_cycle( $id, $this->cycle_args( array( 'status' => CycleStatus::PENDING ) ) );
+
+		$this->assert_refused(
+			static function () use ( $id ): void {
+				Contracts::add_cycle( $id, array( 'currency' => 'USD' ) );
+			},
+			ValidationErrorCode::REQUIRED,
+			'starts_at_gmt'
+		);
+		$this->assert_refused(
+			static function () use ( $cycle ): void {
+				Contracts::claim_cycle( $cycle->get_id(), CycleStatus::PENDING, 0 );
+			},
+			ValidationErrorCode::OUT_OF_BOUNDS,
+			'claim_seconds'
+		);
+		$this->assert_refused(
+			static function () use ( $cycle ): void {
+				Contracts::transition_cycle( $cycle->get_id(), CycleStatus::PENDING, 'never-registered' );
+			},
+			ValidationErrorCode::NOT_REGISTERED,
+			'to_status'
+		);
+		$this->assert_refused(
+			static function () use ( $id ): void {
+				Contracts::get_cycles( $id, -1 );
+			},
+			ValidationErrorCode::OUT_OF_BOUNDS,
+			'limit'
+		);
 	}
 
 	/**
