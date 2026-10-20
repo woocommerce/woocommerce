@@ -2274,6 +2274,44 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should fail an update row whose parent is not an existing variable product instead of moving the variation.
+	 */
+	public function test_import_update_requires_an_existing_variable_parent_40274(): void {
+		$parent = WC_Helper_Product::create_variation_product();
+		$parent->set_sku( 'IMPORT-40274-REAL-PARENT' );
+		$parent->save();
+		$children = $parent->get_children();
+
+		$simple = WC_Helper_Product::create_simple_product();
+		$simple->set_sku( 'IMPORT-40274-SIMPLE-PARENT' );
+		$simple->save();
+
+		$first  = wc_get_product( $children[0] );
+		$second = wc_get_product( $children[1] );
+		$csv    = "ID,Type,SKU,Name,Parent\n" .
+			"{$first->get_id()},variation,{$first->get_sku()},Unknown parent,IMPORT-40274-NO-SUCH-PARENT\n" .
+			"{$second->get_id()},variation,{$second->get_sku()},Simple parent,IMPORT-40274-SIMPLE-PARENT\n";
+
+		$data = $this->import_csv_rows(
+			$csv,
+			array(
+				'ID'     => 'id',
+				'Type'   => 'type',
+				'SKU'    => 'sku',
+				'Name'   => 'name',
+				'Parent' => 'parent_id',
+			)
+		);
+
+		$this->assertEmpty( $data['updated'], 'Neither variation may be moved' );
+		$this->assertCount( 2, $data['failed'], 'Both rows fail' );
+		$this->assertSame( 'woocommerce_product_importer_variation_parent_not_variable', $data['failed'][0]->get_error_code(), 'A placeholder parent is refused' );
+		$this->assertSame( 'woocommerce_product_importer_variation_parent_not_variable', $data['failed'][1]->get_error_code(), 'A simple parent is refused' );
+		$this->assertSame( $parent->get_id(), wc_get_product( $first->get_id() )->get_parent_id(), 'The first variation keeps its parent' );
+		$this->assertSame( $parent->get_id(), wc_get_product( $second->get_id() )->get_parent_id(), 'The second variation keeps its parent' );
+	}
+
+	/**
 	 * @testdox Should keep a variation's parent when its Parent cell is blank, and check the parent of rows without a Type column.
 	 */
 	public function test_import_blank_parent_keeps_parent_and_untyped_rows_are_checked_40274(): void {

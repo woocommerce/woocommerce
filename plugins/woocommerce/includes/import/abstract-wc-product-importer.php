@@ -542,8 +542,10 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	/**
 	 * Get the parent product a variation row names.
 	 *
+	 * An update import never fills in a placeholder parent, so there the parent must be an existing variable product.
+	 *
 	 * @param mixed $parent_id Parsed parent ID, or null when the row has no parent column.
-	 * @return WC_Product|WP_Error The parent, or an error when it is missing or is itself a variation.
+	 * @return WC_Product|WP_Error The parent, or an error when it cannot hold the variation.
 	 */
 	private function get_variation_parent( $parent_id ) {
 		$parent = null === $parent_id ? false : wc_get_product( $parent_id );
@@ -554,6 +556,10 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 
 		if ( $parent->is_type( ProductType::VARIATION ) ) {
 			return new WP_Error( 'woocommerce_product_importer_parent_set_as_variation', __( 'Variation cannot be imported: Parent product cannot be a product variation', 'woocommerce' ), array( 'status' => 401 ) );
+		}
+
+		if ( ! empty( $this->params['update_existing'] ) && ( ! $parent instanceof WC_Product_Variable || in_array( $parent->get_status(), array( 'importing', ProductStatus::TRASH ), true ) ) ) {
+			return new WP_Error( 'woocommerce_product_importer_variation_parent_not_variable', __( 'Variation cannot be imported: Parent product must be an existing variable product.', 'woocommerce' ), array( 'status' => 401 ) );
 		}
 
 		return $parent;
