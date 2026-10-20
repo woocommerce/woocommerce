@@ -86,15 +86,15 @@ class PaymentUtils {
 
 	/**
 	 * Returns the payment method the checkout carries: the shopper's session choice while that gateway
-	 * is enabled, otherwise the default from get_default_payment_method(). The draft response and the
-	 * draft order sync both use this, so they agree.
+	 * is available for the cart, otherwise the default from get_default_payment_method(). The draft
+	 * response and the draft order sync both use this, so they agree.
 	 *
 	 * @return string
 	 */
 	public static function get_checkout_payment_method(): string {
 		$chosen_payment_method = (string) WC()->session->get( 'chosen_payment_method' );
 
-		if ( '' !== $chosen_payment_method && isset( self::get_enabled_payment_gateways()[ $chosen_payment_method ] ) ) {
+		if ( '' !== $chosen_payment_method && isset( WC()->payment_gateways()->get_available_payment_gateways()[ $chosen_payment_method ] ) ) {
 			return $chosen_payment_method;
 		}
 

@@ -246,6 +246,16 @@ class PaymentUtilsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should fall back to the default when the session choice is enabled but not available for this cart.
+	 */
+	public function test_checkout_payment_method_ignores_an_unavailable_session_choice(): void {
+		add_filter( 'woocommerce_available_payment_gateways', array( $this, 'hide_cod' ) );
+		add_filter( self::FILTER, '__return_empty_string' );
+
+		$this->assertSame( '', PaymentUtils::get_checkout_payment_method() );
+	}
+
+	/**
 	 * @testdox Should fall back to the default when the session choice is a disabled gateway.
 	 */
 	public function test_checkout_payment_method_ignores_a_disabled_session_choice(): void {

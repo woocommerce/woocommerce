@@ -261,7 +261,7 @@ class CheckoutSchema extends AbstractSchema {
 	 * @return array
 	 */
 	public function get_draft_response( \WC_Cart $cart, \WC_Customer $customer ) {
-		// The shopper's session-stored selection survives the next render while its gateway is still enabled; see PaymentUtils.
+		// The shopper's session-stored selection survives the next render while its gateway is still available for the cart; see PaymentUtils.
 		$payment_method = PaymentUtils::get_checkout_payment_method();
 
 		return [
