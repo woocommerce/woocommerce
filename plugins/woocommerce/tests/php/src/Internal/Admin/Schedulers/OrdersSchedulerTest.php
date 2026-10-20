@@ -436,7 +436,7 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox import() keeps a record on the failed list, and writes no other lookup rows, when its stats row is not written.
+	 * @testdox import() logs the error and keeps a record on the failed list when its stats row is not written.
 	 */
 	public function test_import_keeps_record_for_retry_when_stats_write_fails(): void {
 		global $wpdb;
@@ -454,7 +454,7 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 		$wpdb->suppress_errors( $suppress );
 
 		$this->assertNotContains( $order->get_id(), $this->get_imported_order_ids() );
-		$this->assertSame( '0', $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}wc_order_product_lookup WHERE order_id = %d", $order->get_id() ) ), 'Product lookup rows wait for the retry.' );
+		$this->assertLogged( 'error', "Could not save the Analytics stats of record #{$order->get_id()}" );
 		$this->assertContains( $order->get_id(), OrdersScheduler::get_failed_order_imports()['ids'], 'The record stays on the list Analytics settings retries.' );
 	}
 
