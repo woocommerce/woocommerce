@@ -459,7 +459,7 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 
 		$this->assertNull( $excluded, 'A failed check is neither an exclusion nor a pass.' );
 		$this->assertLogged( 'error', "Could not check whether record #{$child_id} is excluded from the import" );
-		$this->assertSame( -1, $updated, 'The stats data store must not write a record whose exclusion is unknown.' );
+		$this->assertFalse( $updated, 'The stats data store reports a failed sync and writes nothing.' );
 		$this->assertNotContains( $child_id, $this->get_imported_order_ids() );
 		$this->assertContains( $child_id, OrdersScheduler::get_failed_order_imports()['ids'], 'The record stays on the list Analytics settings retries.' );
 
