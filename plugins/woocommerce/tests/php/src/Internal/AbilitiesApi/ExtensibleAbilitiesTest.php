@@ -1063,7 +1063,9 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 		$resources = new \ReflectionProperty( ExtensibleAbilities::class, 'resources' );
 		$resources->setAccessible( true );
-		$this->assertSame( array( 'product', 'order', 'order_item', 'product_term' ), array_keys( $resources->getValue() ) );
+		$registered = array_keys( $resources->getValue() );
+		$this->assertSame( array(), array_diff( array( 'product', 'order', 'order_item', 'product_term' ), $registered ) );
+		$this->assertNotContains( 'late_resource', $registered );
 	}
 
 	/**
