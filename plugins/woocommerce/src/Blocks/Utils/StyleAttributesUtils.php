@@ -11,13 +11,6 @@ use Automattic\WooCommerce\Utilities\ArrayUtil;
  */
 class StyleAttributesUtils {
 
-	/**
-	 * Cached global styles keyed by theme slug and blog ID.
-	 *
-	 * @var array
-	 */
-	private static array $resolved_styles = array();
-
 	// Empty style array.
 	const EMPTY_STYLE = [
 		'class' => '',
