@@ -1873,6 +1873,40 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should page order notes without changing unpaginated results or type filtering.
+	 */
+	public function test_wc_get_order_notes_pagination(): void {
+		$order = $this->create_order();
+		$order->add_order_note( 'First internal note' );
+		add_filter( 'woocommerce_email_log_add_order_note', '__return_false' );
+		try {
+			$order->add_order_note( 'Customer note', 1 );
+		} finally {
+			remove_filter( 'woocommerce_email_log_add_order_note', '__return_false' );
+		}
+		$order->add_order_note( 'Last internal note' );
+
+		$args = array(
+			'order_id' => $order->get_id(),
+			'limit'    => 1,
+		);
+		$this->assertSame( 'Last internal note', wc_get_order_notes( $args + array( 'page' => 1 ) )[0]->content );
+		$this->assertSame( 'Customer note', wc_get_order_notes( $args + array( 'page' => 2 ) )[0]->content );
+		$this->assertSame( 'First internal note', wc_get_order_notes( $args + array( 'page' => 3 ) )[0]->content );
+		$this->assertEmpty( wc_get_order_notes( $args + array( 'page' => 4 ) ) );
+		$this->assertCount( 3, wc_get_order_notes( array( 'order_id' => $order->get_id() ) ) );
+		$this->assertSame(
+			'First internal note',
+			wc_get_order_notes(
+				$args + array(
+					'page' => 2,
+					'type' => 'internal',
+				)
+			)[0]->content
+		);
+	}
+
+	/**
 	 * Test wc_create_order_note().
 	 *
 	 * @since 3.2.0
