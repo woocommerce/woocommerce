@@ -426,7 +426,23 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			return '';
 		}
 
-		return sanitize_text_field( (string) ( $this->raw_data[ $this->parsing_raw_data_index ][ $column_index ] ?? '' ) );
+		return sanitize_text_field( $this->convert_to_utf8( (string) ( $this->raw_data[ $this->parsing_raw_data_index ][ $column_index ] ?? '' ) ) );
+	}
+
+	/**
+	 * Convert a cell from the file to UTF-8 before it is parsed.
+	 *
+	 * @param string $value Raw cell value.
+	 * @return string
+	 */
+	private function convert_to_utf8( $value ) {
+		if ( ! function_exists( 'mb_convert_encoding' ) ) {
+			return wp_check_invalid_utf8( $value, true );
+		}
+
+		$encoding = mb_detect_encoding( $value, mb_detect_order(), true );
+
+		return (string) mb_convert_encoding( $value, 'UTF-8', $encoding ? $encoding : 'UTF-8' );
 	}
 
 	/**
@@ -1249,7 +1265,6 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	protected function set_parsed_data() {
 		$parse_functions = $this->get_formatting_callback();
 		$mapped_keys     = $this->get_mapped_keys();
-		$use_mb          = function_exists( 'mb_convert_encoding' );
 
 		// Parse the data.
 		foreach ( $this->raw_data as $row_index => $row ) {
@@ -1270,19 +1285,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 					continue;
 				}
 
-				// Convert UTF8.
-				if ( $use_mb ) {
-					$encoding = mb_detect_encoding( $value, mb_detect_order(), true );
-					if ( $encoding ) {
-						$value = mb_convert_encoding( $value, 'UTF-8', $encoding );
-					} else {
-						$value = mb_convert_encoding( $value, 'UTF-8', 'UTF-8' );
-					}
-				} else {
-					$value = wp_check_invalid_utf8( $value, true );
-				}
-
-				$data[ $mapped_keys[ $id ] ] = call_user_func( $parse_functions[ $id ], $value );
+				$data[ $mapped_keys[ $id ] ] = call_user_func( $parse_functions[ $id ], $this->convert_to_utf8( $value ) );
 			}
 
 			$this->parsed_row_csv_ids[ count( $this->parsed_data ) ] = absint( $this->get_row_value( 'id' ) );
