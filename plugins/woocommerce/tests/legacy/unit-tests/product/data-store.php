@@ -113,27 +113,17 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Creating a product syncs post fields changed by woocommerce_new_product_data before woocommerce_new_product fires, and later saves keep them.
+	 * @testdox Creating a product puts a slug set by woocommerce_new_product_data on the object, and leaves the text fields as the caller set them.
 	 */
-	public function test_product_create_syncs_filtered_post_fields(): void {
+	public function test_product_create_syncs_filtered_slug_only(): void {
 		$filter_post_data = function ( $data ) {
-			$data['post_title']     = 'Filtered title';
-			$data['post_name']      = 'filtered-slug';
-			$data['post_excerpt']   = 'Filtered summary.';
-			$data['menu_order']     = 7;
-			$data['comment_status'] = 'closed';
+			$data['post_name']    = 'filtered-slug';
+			$data['post_excerpt'] = 'Filtered summary.';
 			return $data;
 		};
-		$created_values   = array();
-		$capture_created  = function ( $product_id, $created_product ) use ( &$created_values ) {
-			$created_values = array(
-				'name'              => $created_product->get_name( 'edit' ),
-				'slug'              => $created_product->get_slug( 'edit' ),
-				'short_description' => $created_product->get_short_description( 'edit' ),
-				'menu_order'        => $created_product->get_menu_order( 'edit' ),
-				'reviews_allowed'   => $created_product->get_reviews_allowed( 'edit' ),
-				'regular_price'     => $created_product->get_regular_price( 'edit' ),
-			);
+		$created_slug     = null;
+		$capture_created  = function ( $product_id, $created_product ) use ( &$created_slug ) {
+			$created_slug = $created_product->get_slug( 'edit' );
 		};
 		add_filter( 'woocommerce_new_product_data', $filter_post_data );
 		add_action( 'woocommerce_new_product', $capture_created, 10, 2 );
@@ -141,30 +131,17 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 		$product = new WC_Product_Simple();
 		$product->set_name( 'Input title' );
 		$product->set_short_description( 'Input summary.' );
-		$product->set_reviews_allowed( true );
-		$product->set_regular_price( '42' );
 		$product->save();
 
 		remove_filter( 'woocommerce_new_product_data', $filter_post_data );
 
-		$expected = array(
-			'name'              => 'Filtered title',
-			'slug'              => 'filtered-slug',
-			'short_description' => 'Filtered summary.',
-			'menu_order'        => 7,
-			'reviews_allowed'   => false,
-			'regular_price'     => '42',
-		);
-		$this->assertSame( $expected, $created_values, 'woocommerce_new_product should receive the persisted values' );
+		$this->assertSame( 'filtered-slug', $created_slug, 'woocommerce_new_product should receive the stored slug' );
+		$this->assertSame( 'Input summary.', $product->get_short_description( 'edit' ), 'Text fields should keep the caller value' );
 
 		$product->set_menu_order( 8 );
 		$product->save();
 
-		$product_id = $product->get_id();
-		$this->assertSame( 'Filtered title', get_post_field( 'post_title', $product_id ), 'A later save should not restore the pre-filter title' );
-		$this->assertSame( 'filtered-slug', get_post_field( 'post_name', $product_id ), 'A later save should not clear the filtered slug' );
-		$this->assertSame( 'Filtered summary.', get_post_field( 'post_excerpt', $product_id ), 'A later save should not restore the pre-filter summary' );
-		$this->assertSame( 'closed', get_post_field( 'comment_status', $product_id ), 'A later save should not reopen reviews' );
+		$this->assertSame( 'filtered-slug', get_post_field( 'post_name', $product->get_id() ), 'A later save should not clear the filtered slug' );
 	}
 
 	/**
@@ -286,44 +263,64 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Updating a product puts post fields changed on save on the object and in woocommerce_update_product, so a later save keeps them.
+	 * @testdox Saving the same product object again stores its name and description exactly as the first save did, backslashes included.
 	 */
-	public function test_product_update_syncs_filtered_post_fields(): void {
+	public function test_product_second_save_keeps_stored_backslashes(): void {
 		$product = new WC_Product_Simple();
-		$product->set_name( 'Filtered update hat' );
-		$product->set_short_description( 'Typed by the merchant' );
+		$product->set_name( 'Manual C:\\\\Tools' );
+		$product->set_description( '{"path":"C:\\\\Manuals","label":"Say \\"hello\\""}' );
 		$product->save();
-		$product_id = $product->get_id();
+		$product_id         = $product->get_id();
+		$stored_title       = get_post_field( 'post_title', $product_id );
+		$stored_description = get_post_field( 'post_content', $product_id );
 
-		$filter_excerpt = function ( $data, $postarr ) use ( $product_id ) {
-			if ( isset( $postarr['ID'] ) && $product_id === (int) $postarr['ID'] ) {
-				$data['post_excerpt'] = 'Set by filter';
+		$product->set_menu_order( 1 );
+		$product->save();
+
+		$this->assertSame( $stored_title, get_post_field( 'post_title', $product_id ), 'An unrelated save should not strip backslashes from the name' );
+		$this->assertSame( $stored_description, get_post_field( 'post_content', $product_id ), 'An unrelated save should not strip backslashes from the description' );
+	}
+
+	/**
+	 * @testdox Creating a product does not move values from woocommerce_product_get_name filters into the object.
+	 */
+	public function test_product_create_keeps_unfiltered_name_on_object(): void {
+		add_filter(
+			'woocommerce_product_get_name',
+			function ( $name ) {
+				return $name . ' [display]';
 			}
-			return $data;
-		};
-		add_filter( 'wp_insert_post_data', $filter_excerpt, 10, 2 );
-		$updated_short_description = null;
-		add_action(
-			'woocommerce_update_product',
-			function ( $updated_id, $updated_product ) use ( &$updated_short_description ) {
-				$updated_short_description = $updated_product->get_short_description( 'edit' );
-			},
-			10,
-			2
 		);
 
-		$product->set_name( 'Filtered update cap' );
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Filtered hat' );
 		$product->save();
-		remove_filter( 'wp_insert_post_data', $filter_excerpt, 10 );
 
-		$this->assertSame( 'Set by filter', $product->get_short_description( 'edit' ), 'The saved object should have the stored summary' );
-		$this->assertSame( 'Set by filter', $updated_short_description, 'woocommerce_update_product should receive the stored summary' );
-		$this->assertSame( array(), $product->get_changes(), 'A saved product should have no pending changes' );
+		$this->assertSame( 'Filtered hat', $product->get_name( 'edit' ), 'The stored name should not replace the caller value' );
+		$this->assertSame( 'Filtered hat [display]', $product->get_name(), 'The getter filter should run once' );
+	}
+
+	/**
+	 * @testdox Updating a product does not report its unchanged creation date as a change.
+	 */
+	public function test_product_update_does_not_report_unchanged_date_created(): void {
+		$product_id = WC_Helper_Product::create_simple_product()->get_id();
+		$product    = new WC_Product_Simple( $product_id );
+		$changes    = null;
+		add_action(
+			'woocommerce_product_object_updated_props',
+			function ( $updated_product ) use ( $product, &$changes ) {
+				if ( $updated_product === $product ) {
+					$changes = $updated_product->get_changes();
+				}
+			}
+		);
 
 		$product->set_menu_order( 4 );
 		$product->save();
 
-		$this->assertSame( 'Set by filter', get_post_field( 'post_excerpt', $product_id ), 'A later save should not restore the pre-filter summary' );
+		$this->assertArrayHasKey( 'menu_order', $changes, 'The callback should see the menu order change' );
+		$this->assertArrayNotHasKey( 'date_created', $changes, 'An unchanged creation date should not be reported' );
 	}
 
 	/**
@@ -352,13 +349,29 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 			return $date_modified ? $date_modified->getTimestamp() : null;
 		};
 
+		// A non-UTC site, so a local time stored as GMT is detected.
+		add_filter(
+			'pre_option_gmt_offset',
+			function () {
+				return 3;
+			}
+		);
+
 		$age_product();
 		$product = new WC_Product_Simple( $product_id );
 		$product->set_regular_price( '12' );
 		$product->save();
 
-		$this->assertNotSame( wc_string_to_timestamp( '2020-01-01 00:00:00' ), $stored_modified(), 'A meta-only save should record the save time' );
+		$this->assertEqualsWithDelta( time(), $stored_modified(), 60, 'A meta-only save should record the save time in GMT' );
 		$this->assertSame( $stored_modified(), $object_modified( $product ), 'A meta-only save should put the stored modified date on the object' );
+
+		$age_product();
+		$product = new WC_Product_Simple( $product_id );
+		$product->set_menu_order( 2 );
+		$product->save();
+
+		$this->assertEqualsWithDelta( time(), $stored_modified(), 60, 'A post update should record the save time' );
+		$this->assertSame( $stored_modified(), $object_modified( $product ), 'A post update should put the stored modified date on the object' );
 
 		$age_product();
 		$product           = new WC_Product_Simple( $product_id );
