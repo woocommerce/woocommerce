@@ -23,14 +23,13 @@ apply_filters( 'woocommerce_default_payment_method', $payment_method, $available
 
 Return a gateway id from `$available_gateways` to preselect it, or an empty string to select nothing. Any other value selects nothing. Returning `$payment_method` unchanged keeps WooCommerce's answer as it is.
 
-Attach the callback by `init` at the latest. The server asks the filter on every Store API checkout request, and the cart listeners check for a callback whenever the cart becomes empty, so a callback that exists only on some requests makes them disagree.
+Attach the callback by `init` at the latest, so it is in place for every Store API checkout request.
 
 ## What changes for shoppers
 
 Once a callback is attached:
 
 - The Checkout block keeps the shopper's own choice while that gateway is enabled, and it survives a reload. The filter decides what the block starts with before they choose.
-- The choice lasts one purchase. It's forgotten when the cart becomes empty, usually after the order, so the next purchase starts from the filter's answer again.
 - The block follows the server. When the filter returns nothing, nothing is selected, and the block doesn't fall back to the first method. When it returns a gateway, that gateway is selected as it would be today, including the customer's default saved card for it.
 
 Without a callback, nothing changes.
@@ -59,6 +58,30 @@ add_filter(
 		return $payment_method;
 	}
 );
+```
+
+## Forgetting the choice after each purchase
+
+WooCommerce remembers the shopper's choice in the session until it expires, so their next purchase in the same session starts with it. A store that must have the shopper choose anew for each purchase can clear it when the cart becomes empty. Both hooks are needed: removing the last item by hand doesn't fire `woocommerce_cart_emptied`.
+
+```php
+add_action( 'woocommerce_cart_emptied', 'myshop_forget_payment_choice' );
+add_action(
+	'woocommerce_cart_item_removed',
+	function ( $cart_item_key, $cart ) {
+		if ( $cart->is_empty() ) {
+			myshop_forget_payment_choice();
+		}
+	},
+	10,
+	2
+);
+
+function myshop_forget_payment_choice() {
+	if ( WC()->session instanceof WC_Session ) {
+		WC()->session->set( 'chosen_payment_method', null );
+	}
+}
 ```
 
 ## Things to keep in mind
