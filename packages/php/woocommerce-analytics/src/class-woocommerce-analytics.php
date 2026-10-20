@@ -66,7 +66,7 @@ class Woocommerce_Analytics {
 	const PROXY_TRACKING_EVER_ENABLED_OPTION = 'woocommerce_analytics_proxy_tracking_ever_enabled';
 
 	/**
-	 * Script handle for s.js. WordPress prints its tag with the id `{handle}-js`.
+	 * Script handle for s.js, registered with no src when proxy tracking is enabled. WordPress prints its tag with the id `{handle}-js`.
 	 *
 	 * @var string
 	 */
@@ -176,9 +176,9 @@ class Woocommerce_Analytics {
 	 * Place script to call s.js, Store Analytics, or only its handle when proxy tracking is enabled.
 	 */
 	public static function enqueue_tracking_script() {
-		// Proxy tracking sends events without s.js, which would only set referrer cookies. Keep the handle, with no src, for scripts that depend on it.
+		// Proxy tracking sends events without s.js, which would only set referrer cookies.
 		if ( \Automattic\Woocommerce_Analytics\Features::is_proxy_tracking_enabled() ) {
-			wp_register_script( self::TRACKING_SCRIPT_HANDLE, false, array(), null ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion -- There is no src to version.
+			wp_register_script( self::TRACKING_SCRIPT_HANDLE, false, array(), null, false ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion -- There is no src to version.
 			wp_enqueue_script( self::TRACKING_SCRIPT_HANDLE );
 			return;
 		}
