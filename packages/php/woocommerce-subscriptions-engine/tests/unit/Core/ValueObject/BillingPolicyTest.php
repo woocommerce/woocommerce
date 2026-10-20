@@ -364,21 +364,61 @@ class BillingPolicyTest extends TestCase {
 	}
 
 	/**
-	 * @testdox construction refuses an unknown period.
+	 * @testdox from_array reports every invalid value in one exception.
 	 */
-	public function test_construction_refuses_an_unknown_period(): void {
-		$this->expectException( InvalidInputException::class );
-
-		new BillingPolicy( 'fortnight', 1, null, null, null );
+	public function test_from_array_reports_every_invalid_value(): void {
+		$this->assert_invalid_inputs(
+			static function (): void {
+				BillingPolicy::from_array(
+					array(
+						'interval'       => 0,
+						'min_cycles'     => -1,
+						'trial_duration' => array( 'length' => 'x' ),
+					)
+				);
+			},
+			array(
+				array( ValidationErrorCode::REQUIRED, 'period', array() ),
+				array( ValidationErrorCode::OUT_OF_BOUNDS, 'interval', array( 'min' => 1 ) ),
+				array( ValidationErrorCode::OUT_OF_BOUNDS, 'min_cycles', array( 'min' => 0 ) ),
+				array( ValidationErrorCode::INVALID_TYPE, 'trial_duration.length', array( 'type' => 'integer' ) ),
+				array( ValidationErrorCode::REQUIRED, 'trial_duration.unit', array() ),
+			)
+		);
 	}
 
 	/**
-	 * @testdox construction refuses a non-positive interval.
+	 * @testdox The construction reports every invalid value in one exception.
 	 */
-	public function test_construction_refuses_a_non_positive_interval(): void {
-		$this->expectException( InvalidInputException::class );
+	public function test_construction_reports_every_invalid_value(): void {
+		$this->assert_invalid_inputs(
+			static function (): void {
+				new BillingPolicy( 'fortnight', 0, null, -2, null );
+			},
+			array(
+				array( ValidationErrorCode::NOT_IN_ENUM, 'period', array( 'allowed' => array( 'day', 'week', 'month', 'year' ) ) ),
+				array( ValidationErrorCode::OUT_OF_BOUNDS, 'interval', array( 'min' => 1 ) ),
+				array( ValidationErrorCode::OUT_OF_BOUNDS, 'max_cycles', array( 'min' => 0 ) ),
+			)
+		);
+	}
 
-		new BillingPolicy( 'month', 0, null, null, null );
+	/**
+	 * @testdox min_cycles above max_cycles is checked only when both bounds pass their own checks.
+	 */
+	public function test_the_cycle_bounds_check_runs_only_on_valid_bounds(): void {
+		$this->assert_invalid_inputs(
+			static function (): void {
+				new BillingPolicy( 'month', 1, 5, 2, null );
+			},
+			array( array( ValidationErrorCode::OUT_OF_BOUNDS, 'min_cycles', array( 'max' => 2 ) ) )
+		);
+		$this->assert_invalid_inputs(
+			static function (): void {
+				new BillingPolicy( 'month', 1, -1, 2, null );
+			},
+			array( array( ValidationErrorCode::OUT_OF_BOUNDS, 'min_cycles', array( 'min' => 0 ) ) )
+		);
 	}
 
 	public function test_non_array_trial_duration_throws(): void {

@@ -32,7 +32,7 @@ final class ArgumentValidator {
 	/**
 	 * Errors recorded by the collecting form, in recording order.
 	 *
-	 * @var array<int, InvalidInputException>
+	 * @var list<InvalidInputException>
 	 */
 	private $errors = array();
 

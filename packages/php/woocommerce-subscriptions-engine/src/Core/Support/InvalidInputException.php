@@ -49,7 +49,7 @@ final class InvalidInputException extends DomainException {
 	/**
 	 * Every single error, when built from several; empty for a single error.
 	 *
-	 * @var array<int, InvalidInputException>
+	 * @var list<InvalidInputException>
 	 */
 	private $errors = array();
 
@@ -97,7 +97,7 @@ final class InvalidInputException extends DomainException {
 	 * and params, and join the English messages.
 	 *
 	 * @param array<int, InvalidInputException> $errors Errors, at least one.
-	 * @phpstan-param non-empty-list<InvalidInputException> $errors
+	 * @phpstan-param list<InvalidInputException> $errors
 	 * @throws LogicException If `$errors` is empty (an engine bug, not input).
 	 */
 	public static function from_errors( array $errors ): self {

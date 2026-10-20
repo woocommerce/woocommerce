@@ -106,7 +106,6 @@ class InvalidInputExceptionTest extends TestCase {
 	 */
 	public function test_from_errors_refuses_an_empty_list(): void {
 		try {
-			// @phpstan-ignore-next-line argument.type -- Deliberately empty.
 			InvalidInputException::from_errors( array() );
 			$this->fail( 'Expected a LogicException.' );
 		} catch ( LogicException $e ) {
