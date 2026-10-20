@@ -268,6 +268,7 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 		$this->assertSame( 0, $items->total, 'A failed count reads as nothing to import.' );
 		$this->assertSame( array(), $items->ids );
 		$this->assertLogged( 'error', 'Could not count the orders to import' );
+		$this->assertCount( 1, $this->get_logs_by_level( 'error' ), 'Only the failed count is logged, not the page query it skipped.' );
 	}
 
 	/**

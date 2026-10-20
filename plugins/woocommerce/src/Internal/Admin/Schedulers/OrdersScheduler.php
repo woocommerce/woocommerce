@@ -252,7 +252,12 @@ class OrdersScheduler extends ImportScheduler {
 			AND post_status NOT IN ( 'wc-auto-draft', 'auto-draft', 'trash' )
 			{$where_clause}" // phpcs:ignore unprepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQL.InterpolatedNotPrepared SQL ok.
 		);
-		self::log_last_db_error( 'Could not count the orders to import' );
+		if ( self::log_last_db_error( 'Could not count the orders to import' ) ) {
+			return (object) array(
+				'total' => 0,
+				'ids'   => array(),
+			);
+		}
 
 		$order_ids = absint( $count ) > 0 ? $wpdb->get_col(
 			$wpdb->prepare(
@@ -267,7 +272,7 @@ class OrdersScheduler extends ImportScheduler {
 				$offset
 			)
 		) : array(); // phpcs:ignore unprepared SQL ok.
-		self::log_last_db_error( 'Could not query the orders to import' );
+		self::log_last_db_error( 'Could not query orders to import' );
 
 		return (object) array(
 			'total' => absint( $count ),
@@ -315,7 +320,12 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 {$where_clause}
 "
 		); // phpcs:ignore unprepared SQL ok.
-		self::log_last_db_error( 'Could not count the orders to import' );
+		if ( self::log_last_db_error( 'Could not count the orders to import' ) ) {
+			return (object) array(
+				'total' => 0,
+				'ids'   => array(),
+			);
+		}
 
 		$order_ids = absint( $count ) > 0 ? $wpdb->get_col(
 			$wpdb->prepare(
@@ -330,7 +340,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 				$offset
 			)
 		) : array(); // phpcs:ignore unprepared SQL ok.
-		self::log_last_db_error( 'Could not query the orders to import' );
+		self::log_last_db_error( 'Could not query orders to import' );
 
 		return (object) array(
 			'total' => absint( $count ),
