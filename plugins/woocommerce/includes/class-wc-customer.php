@@ -190,7 +190,7 @@ class WC_Customer extends WC_Legacy_Customer {
 	/**
 	 * Get taxable address.
 	 *
-	 * @see Automattic\WooCommerce\Internal\Tax\CartWithoutShipping
+	 * @see \Automattic\WooCommerce\Internal\Tax\CartWithoutShipping
 	 * @return array
 	 */
 	public function get_taxable_address() {

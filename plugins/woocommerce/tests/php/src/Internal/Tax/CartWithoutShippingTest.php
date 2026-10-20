@@ -40,22 +40,18 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 	private $original_customer;
 
 	/**
-	 * Shipping zone with a flat rate method, so a cart with physical products needs shipping.
-	 *
-	 * @var \WC_Shipping_Zone
-	 */
-	private $shipping_zone;
-
-	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 
-		$cart_pricing_context = wc_get_container()->get( CartPricingContext::class );
+		// Fresh instances, so state left by earlier tests cannot leak in; WC_Customer and Blocks hydration resolve them from the container.
+		$cart_pricing_context = new CartPricingContext();
 		$cart_pricing_context->init();
-		$this->sut = wc_get_container()->get( CartWithoutShipping::class );
+		$this->sut = new CartWithoutShipping();
 		$this->sut->init( $cart_pricing_context );
+		wc_get_container()->replace( CartPricingContext::class, $cart_pricing_context );
+		wc_get_container()->replace( CartWithoutShipping::class, $this->sut );
 		$this->customer = new \WC_Customer();
 		$this->customer->set_billing_location( 'GB', 'LND', 'SW1A 1AA', 'London' );
 		$this->customer->set_shipping_location( 'US', 'CA', '90210', 'Beverly Hills' );
@@ -65,10 +61,10 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 		update_option( 'woocommerce_tax_based_on', TaxBasedOn::SHIPPING );
 
 		// WC_Cart::needs_shipping() is false for every cart when no shipping method exists.
-		$this->shipping_zone = new \WC_Shipping_Zone();
-		$this->shipping_zone->set_zone_name( 'Test Zone' );
-		$this->shipping_zone->save();
-		$this->shipping_zone->add_shipping_method( 'flat_rate' );
+		$shipping_zone = new \WC_Shipping_Zone();
+		$shipping_zone->set_zone_name( 'Test Zone' );
+		$shipping_zone->save();
+		$shipping_zone->add_shipping_method( 'flat_rate' );
 		delete_transient( 'wc_shipping_method_count' );
 	}
 
@@ -78,6 +74,7 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 	public function tearDown(): void {
 		try {
 			WC()->customer = $this->original_customer;
+			$this->reset_container_replacements();
 			$this->clear_rest_server();
 		} finally {
 			parent::tearDown();
@@ -155,12 +152,12 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 	 * @testdox Prices classic cart cross-sells using shipping tax while the cart uses billing tax.
 	 */
 	public function test_classic_cart_cross_sell_uses_catalog_tax(): void {
-		$this->set_up_cross_sell_tax_fixture();
+		$cross_sell = $this->set_up_cross_sell_tax_fixture();
 		add_filter( 'woocommerce_is_cart', '__return_true' );
 
-		ob_start();
-		woocommerce_cross_sell_display();
-		$markup = (string) ob_get_clean();
+		// Render the template directly: woocommerce_cross_sell_display() skips rendering when is_checkout() is true,
+		// and legacy tests define WOOCOMMERCE_CHECKOUT for the rest of the process.
+		$markup = wc_get_template_html( 'cart/cross-sells.php', array( 'cross_sells' => array( $cross_sell ) ) );
 
 		$this->assertStringContainsString( wc_price( 110 ), $markup, 'The physical cross-sell should use shipping tax.' );
 		$this->assertStringNotContainsString( wc_price( 127 ), $markup, 'The cross-sell should not use billing tax.' );
@@ -195,7 +192,7 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 	 * @testdox Uses the billing address for cart totals calculated outside the cart and checkout.
 	 */
 	public function test_uses_billing_address_for_cart_totals_outside_cart_and_checkout(): void {
-		$this->create_billing_country_tax_rate();
+		$this->create_tax_rate( 'GB', '20.0000' );
 		$this->add_product_to_cart( true );
 		$total_tax     = null;
 		$after_address = null;
@@ -219,7 +216,7 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 	 * @testdox Uses the billing address for mini-cart prices rendered outside the cart and checkout.
 	 */
 	public function test_uses_billing_address_for_mini_cart_outside_cart_and_checkout(): void {
-		$this->create_billing_country_tax_rate();
+		$this->create_tax_rate( 'GB', '20.0000' );
 		$this->add_product_to_cart( true );
 		update_option( 'woocommerce_tax_display_cart', 'incl' );
 		$mini_cart     = '';
@@ -248,7 +245,7 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 	 * is unreliable in CI because legacy tests define the WOOCOMMERCE_CHECKOUT constant for the rest of the process.
 	 */
 	public function test_uses_billing_address_for_cart_loaded_through_hydration(): void {
-		$this->create_billing_country_tax_rate();
+		$this->create_tax_rate( 'GB', '20.0000' );
 		$this->add_product_to_cart( true );
 		update_option( 'woocommerce_tax_display_cart', 'incl' );
 		$item_price    = null;
@@ -496,7 +493,7 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 	 * Removing an item recalculates the totals before the session drops the local pickup choice.
 	 */
 	public function test_uses_billing_address_for_totals_after_last_shippable_item_is_removed_with_local_pickup(): void {
-		$this->create_billing_country_tax_rate();
+		$this->create_tax_rate( 'GB', '20.0000' );
 		$this->add_product_to_cart( true );
 		$shippable_item_key = $this->add_product_to_cart( false );
 		$this->choose_local_pickup_in_us();
@@ -513,7 +510,7 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 	 * Only the pickup location's postcode has a tax rate, so no other address can produce the expected tax.
 	 */
 	public function test_uses_local_pickup_location_for_totals_when_product_needs_shipping(): void {
-		$this->create_billing_country_tax_rate();
+		$this->create_tax_rate( 'GB', '20.0000' );
 		$this->create_tax_rate( 'US', '10.0000', '90001' );
 		$this->add_product_to_cart( false );
 		$this->choose_local_pickup_in_us();
@@ -589,13 +586,6 @@ class CartWithoutShippingTest extends \WC_Unit_Test_Case {
 			)
 		);
 		WC()->session->set( 'chosen_shipping_methods', array( 'pickup_location:0' ) );
-	}
-
-	/**
-	 * Enable taxes with a 20% standard rate for the billing country only.
-	 */
-	private function create_billing_country_tax_rate(): void {
-		$this->create_tax_rate( 'GB', '20.0000' );
 	}
 
 	/**

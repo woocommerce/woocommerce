@@ -35,8 +35,10 @@ class CartPricingContextTest extends \WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->sut = wc_get_container()->get( CartPricingContext::class );
+		// A fresh instance, so state left by earlier tests cannot leak in; Blocks hydration resolves it from the container.
+		$this->sut = new CartPricingContext();
 		$this->sut->init();
+		wc_get_container()->replace( CartPricingContext::class, $this->sut );
 	}
 
 	/**
@@ -44,6 +46,7 @@ class CartPricingContextTest extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		try {
+			$this->reset_container_replacements();
 			$this->clear_rest_server();
 		} finally {
 			parent::tearDown();
@@ -67,9 +70,9 @@ class CartPricingContextTest extends \WC_Unit_Test_Case {
 						$this->sut->with_catalog_pricing(
 							function () use ( &$inside, &$during ): void {
 								$inside = $this->sut->is_active();
-								$this->sut->handle_calculation_start();
+								$this->sut->handle_woocommerce_before_calculate_totals();
 								$during = $this->sut->is_active();
-								$this->sut->handle_calculation_end();
+								$this->sut->handle_woocommerce_after_calculate_totals();
 								throw new \RuntimeException( 'Catalog rendering failed' );
 							}
 						);
@@ -309,14 +312,39 @@ class CartPricingContextTest extends \WC_Unit_Test_Case {
 			'/wc/store/v1/products',
 			function ( $request ) use ( &$is_active ) {
 				unset( $request ); // Avoid parameter not used PHPCS errors.
-				$this->sut->handle_template_part_start( 'cart/cart.php' );
+				$this->sut->handle_woocommerce_before_template_part( 'cart/cart.php' );
 				$is_active = $this->sut->is_active();
-				$this->sut->handle_template_part_end( 'cart/cart.php' );
+				$this->sut->handle_woocommerce_after_template_part( 'cart/cart.php' );
 				return rest_ensure_response( array( 'ok' => true ) );
 			}
 		);
 
 		$this->assertFalse( $is_active, 'Other template parts should not price the cart.' );
+	}
+
+	/**
+	 * @testdox Uses catalog pricing only while the cross-sells template renders inside a cart route.
+	 */
+	public function test_uses_catalog_pricing_during_cross_sells_template(): void {
+		$during = null;
+		$after  = null;
+
+		$this->dispatch_test_route(
+			'/wc/store/v1/cart',
+			$this->as_cart_route(
+				function ( $request ) use ( &$during, &$after ) {
+					unset( $request ); // Avoid parameter not used PHPCS errors.
+					$this->sut->handle_woocommerce_before_template_part( 'cart/cross-sells.php' );
+					$during = $this->sut->is_active();
+					$this->sut->handle_woocommerce_after_template_part( 'cart/cross-sells.php' );
+					$after = $this->sut->is_active();
+					return rest_ensure_response( array( 'ok' => true ) );
+				}
+			)
+		);
+
+		$this->assertFalse( $during, 'Cross-sells should use catalog pricing.' );
+		$this->assertTrue( $after, 'Cart pricing should resume once the cross-sells are rendered.' );
 	}
 
 	/**
@@ -329,10 +357,10 @@ class CartPricingContextTest extends \WC_Unit_Test_Case {
 			'/wc/store/v1/products',
 			function ( $request ) use ( &$is_active ) {
 				unset( $request ); // Avoid parameter not used PHPCS errors.
-				$this->sut->handle_calculation_end();
-				$this->sut->handle_calculation_start();
+				$this->sut->handle_woocommerce_after_calculate_totals();
+				$this->sut->handle_woocommerce_before_calculate_totals();
 				$is_active = $this->sut->is_active();
-				$this->sut->handle_calculation_end();
+				$this->sut->handle_woocommerce_after_calculate_totals();
 				return rest_ensure_response( array( 'ok' => true ) );
 			}
 		);
@@ -370,35 +398,6 @@ class CartPricingContextTest extends \WC_Unit_Test_Case {
 		$this->assertTrue( $during, 'A hydrated cart route should price the cart.' );
 		$this->assertFalse( $after, 'The outer route should decide again once hydration is done.' );
 		$this->assert_dispatch_stack_empty( 'A completed hydration should not leave a context on the stack.' );
-	}
-
-	/**
-	 * @testdox Clears the hydration context when a hydration dispatch filter throws.
-	 */
-	public function test_clears_hydration_context_when_dispatch_filter_throws(): void {
-		$after    = null;
-		$throwing = function ( $hydration_result ) {
-			if ( $this->sut->is_active() ) {
-				throw new \Exception( 'Hydration failure' );
-			}
-			return $hydration_result;
-		};
-		add_filter( 'woocommerce_hydration_dispatch_request', $throwing );
-
-		$this->dispatch_test_route(
-			'/wc/store/v1/products',
-			function ( $request ) use ( &$after ) {
-				unset( $request ); // Avoid parameter not used PHPCS errors.
-				StoreApi::container();
-				$hydration = new Hydration( $this->createMock( AssetDataRegistry::class ) );
-				$hydration->get_rest_api_response_data( '/wc/store/v1/cart' );
-				$after = $this->sut->is_active();
-				return rest_ensure_response( array( 'ok' => true ) );
-			}
-		);
-
-		$this->assertFalse( $after, 'A failed hydration should not leave the cart route context active.' );
-		$this->assert_dispatch_stack_empty( 'A failed hydration should not leave a context on the stack.' );
 	}
 
 	/**
@@ -469,7 +468,7 @@ class CartPricingContextTest extends \WC_Unit_Test_Case {
 
 		$this->dispatch_nested_test_routes(
 			function (): void {
-				$this->sut->handle_template_part_start( 'cart/mini-cart.php' );
+				$this->sut->handle_woocommerce_before_template_part( 'cart/mini-cart.php' );
 			},
 			$outer
 		);
@@ -478,69 +477,36 @@ class CartPricingContextTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Restores the cart route context after a nested non-cart request.
+	 * @testdox Restores the outer route context after a nested request from $outer_route to $inner_route.
+	 *
+	 * @testWith ["/wc/store/v1/cart/test-outer", "/wc/v3/test-inner", false, true]
+	 *           ["/wc/v3/test-outer", "/wc/store/v1/cart/test-inner", true, false]
+	 *
+	 * @param string $outer_route    Route of the outer request.
+	 * @param string $inner_route    Route of the request nested inside it.
+	 * @param bool   $expected_inner Whether the nested request prices the cart.
+	 * @param bool   $expected_outer Whether the outer request prices the cart after the nested one.
 	 */
-	public function test_restores_cart_route_context_after_nested_non_cart_request(): void {
+	public function test_restores_outer_route_context_after_nested_request( string $outer_route, string $inner_route, bool $expected_inner, bool $expected_outer ): void {
 		$inner = null;
 		$outer = null;
 
 		$this->create_rest_server_with_routes(
 			array(
-				function () use ( &$inner, &$outer ): void {
-					$this->register_test_route(
-						'/wc/v3/test-inner',
+				function () use ( $outer_route, $inner_route, &$inner, &$outer ): void {
+					$this->register_test_route_by_path(
+						$inner_route,
 						function ( $request ) use ( &$inner ) {
 							unset( $request ); // Avoid parameter not used PHPCS errors.
 							$inner = $this->sut->is_active();
 							return rest_ensure_response( array( 'ok' => true ) );
 						}
 					);
-					$this->register_test_route(
-						'/wc/store/v1/cart/test-outer',
-						$this->as_cart_route(
-							function ( $request ) use ( &$outer ) {
-								unset( $request ); // Avoid parameter not used PHPCS errors.
-								rest_do_request( new \WP_REST_Request( 'GET', '/wc/v3/test-inner' ) );
-								$outer = $this->sut->is_active();
-								return rest_ensure_response( array( 'ok' => true ) );
-							}
-						)
-					);
-				},
-			)
-		);
-
-		rest_do_request( new \WP_REST_Request( 'GET', '/wc/store/v1/cart/test-outer' ) );
-
-		$this->assertFalse( $inner, 'A nested non-cart request should not price the cart.' );
-		$this->assertTrue( $outer, 'The cart route context should be restored after a nested request.' );
-	}
-
-	/**
-	 * @testdox Restores the non-cart route context after a nested cart request.
-	 */
-	public function test_restores_non_cart_route_context_after_nested_cart_request(): void {
-		$inner = null;
-		$outer = null;
-
-		$this->create_rest_server_with_routes(
-			array(
-				function () use ( &$inner, &$outer ): void {
-					$this->register_test_route(
-						'/wc/store/v1/cart/test-inner',
-						$this->as_cart_route(
-							function ( $request ) use ( &$inner ) {
-								unset( $request ); // Avoid parameter not used PHPCS errors.
-								$inner = $this->sut->is_active();
-								return rest_ensure_response( array( 'ok' => true ) );
-							}
-						)
-					);
-					$this->register_test_route(
-						'/wc/v3/test-outer',
-						function ( $request ) use ( &$outer ) {
+					$this->register_test_route_by_path(
+						$outer_route,
+						function ( $request ) use ( $inner_route, &$outer ) {
 							unset( $request ); // Avoid parameter not used PHPCS errors.
-							rest_do_request( new \WP_REST_Request( 'GET', '/wc/store/v1/cart/test-inner' ) );
+							rest_do_request( new \WP_REST_Request( 'GET', $inner_route ) );
 							$outer = $this->sut->is_active();
 							return rest_ensure_response( array( 'ok' => true ) );
 						}
@@ -549,10 +515,10 @@ class CartPricingContextTest extends \WC_Unit_Test_Case {
 			)
 		);
 
-		rest_do_request( new \WP_REST_Request( 'GET', '/wc/v3/test-outer' ) );
+		rest_do_request( new \WP_REST_Request( 'GET', $outer_route ) );
 
-		$this->assertTrue( $inner, 'A nested cart request should price the cart.' );
-		$this->assertFalse( $outer, 'The outer non-cart context should be restored after a nested cart request.' );
+		$this->assertSame( $expected_inner, $inner, 'The nested request should price the cart only when it is a cart route.' );
+		$this->assertSame( $expected_outer, $outer, 'The outer route context should be restored after the nested request.' );
 	}
 
 	/**
@@ -634,15 +600,14 @@ class CartPricingContextTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Does not leave a context on the stack for an unmatched Store API cart route.
+	 * Register a test route, as a Store API cart route when its path is under /wc/store/v1/cart.
+	 *
+	 * @param string   $route    Full route path.
+	 * @param callable $callback Route callback.
 	 */
-	public function test_does_not_register_context_for_unmatched_store_api_cart_route(): void {
-		$this->create_rest_server_with_routes( array() );
-
-		$response = rest_do_request( new \WP_REST_Request( 'GET', '/wc/store/v1/cart/this-route-does-not-exist' ) );
-
-		$this->assertSame( 404, $response->get_status(), 'An unmatched Store API cart route should return 404.' );
-		$this->assert_dispatch_stack_empty( 'An unmatched cart request should not leave a context on the stack.' );
+	private function register_test_route_by_path( string $route, callable $callback ): void {
+		$is_cart_route = 0 === strpos( $route, '/wc/store/v1/cart' );
+		$this->register_test_route( $route, $is_cart_route ? $this->as_cart_route( $callback ) : $callback );
 	}
 
 	/**

@@ -32,6 +32,7 @@ class CartWithoutShipping {
 	 * Set up the cart pricing context.
 	 *
 	 * @since 11.3.0
+	 *
 	 * @internal
 	 *
 	 * @param CartPricingContext $cart_pricing_context Tracks whether the cart is being priced.

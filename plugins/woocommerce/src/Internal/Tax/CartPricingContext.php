@@ -23,9 +23,14 @@ class CartPricingContext {
 	private const MINI_CART_TEMPLATE = 'cart/mini-cart.php';
 
 	/**
+	 * Template name of the classic cart cross-sells.
+	 */
+	private const CROSS_SELLS_TEMPLATE = 'cart/cross-sells.php';
+
+	/**
 	 * Stack of Store API and hydrated route dispatches, with whether each is a cart or checkout route and the calculation depth when it started.
 	 *
-	 * @var array<int, array{id: int, is_cart_or_checkout: bool, calculation_depth: int}>
+	 * @var array<int, array{request: object, is_cart_or_checkout: bool, calculation_depth: int}>
 	 */
 	private $dispatch_stack = array();
 
@@ -47,23 +52,21 @@ class CartPricingContext {
 	 * Register hooks.
 	 *
 	 * @since 11.3.0
+	 *
 	 * @internal
 	 */
 	final public function init(): void {
-		$this->dispatch_stack         = array();
-		$this->calculation_depth      = 0;
-		$this->catalog_pricing_scopes = array();
 		// Register the route context only after a route matches, and clear it right after the callback.
 		// Blocks hydration calls route callbacks directly, so it starts and ends its dispatches itself.
 		add_filter( 'rest_request_before_callbacks', array( $this, 'handle_rest_request_before_callbacks' ), 10, 3 );
 		add_filter( 'rest_request_after_callbacks', array( $this, 'handle_rest_request_after_callbacks' ), 10, 3 );
 		// Cart totals are saved in the session and mini-cart line prices are calculated on render,
 		// so both can happen outside the cart and checkout pages.
-		add_action( 'woocommerce_before_calculate_totals', array( $this, 'handle_calculation_start' ), PHP_INT_MIN, 0 );
-		add_action( 'woocommerce_after_calculate_totals', array( $this, 'handle_calculation_end' ), PHP_INT_MAX, 0 );
-		// The template part hooks fire around the mini-cart even when a theme override drops the mini-cart hooks.
-		add_action( 'woocommerce_before_template_part', array( $this, 'handle_template_part_start' ), PHP_INT_MIN, 1 );
-		add_action( 'woocommerce_after_template_part', array( $this, 'handle_template_part_end' ), PHP_INT_MAX, 1 );
+		add_action( 'woocommerce_before_calculate_totals', array( $this, 'handle_woocommerce_before_calculate_totals' ), PHP_INT_MIN, 0 );
+		add_action( 'woocommerce_after_calculate_totals', array( $this, 'handle_woocommerce_after_calculate_totals' ), PHP_INT_MAX, 0 );
+		// The template part hooks fire around the mini-cart and cross-sells even when a theme override drops their own hooks.
+		add_action( 'woocommerce_before_template_part', array( $this, 'handle_woocommerce_before_template_part' ), PHP_INT_MIN, 1 );
+		add_action( 'woocommerce_after_template_part', array( $this, 'handle_woocommerce_after_template_part' ), PHP_INT_MAX, 1 );
 	}
 
 	/**
@@ -73,6 +76,7 @@ class CartPricingContext {
 	 * Outside any dispatch, a running cart calculation or the cart and checkout pages count.
 	 *
 	 * @since 11.3.0
+	 *
 	 * @internal
 	 *
 	 * @return bool True when the cart is being priced.
@@ -98,75 +102,72 @@ class CartPricingContext {
 	 * Cart calculations started inside the callback still use the cart pricing context.
 	 *
 	 * @since 11.3.0
+	 *
 	 * @internal
 	 *
 	 * @param callable $callback Renders or prepares catalog products.
 	 * @return mixed Callback result.
 	 */
 	public function with_catalog_pricing( callable $callback ) {
-		$this->catalog_pricing_scopes[] = array(
-			'calculation_depth' => $this->calculation_depth,
-			'dispatch_depth'    => count( $this->dispatch_stack ),
-		);
+		$this->begin_catalog_pricing();
 		try {
 			return $callback();
 		} finally {
-			array_pop( $this->catalog_pricing_scopes );
+			$this->end_catalog_pricing();
 		}
 	}
 
 	/**
 	 * Start a cart totals calculation.
 	 *
-	 * @since 11.3.0
 	 * @internal
 	 */
-	public function handle_calculation_start(): void {
-		++$this->calculation_depth;
+	public function handle_woocommerce_before_calculate_totals(): void {
+		$this->begin_calculation();
 	}
 
 	/**
-	 * End a calculation started by handle_calculation_start().
+	 * End a cart totals calculation.
 	 *
-	 * @since 11.3.0
 	 * @internal
 	 */
-	public function handle_calculation_end(): void {
-		$this->calculation_depth = max( 0, $this->calculation_depth - 1 );
+	public function handle_woocommerce_after_calculate_totals(): void {
+		$this->end_calculation();
 	}
 
 	/**
-	 * Start a mini-cart render, which prices the cart like a calculation.
+	 * Start pricing the cart for a mini-cart render, or catalog pricing for a cross-sells render.
 	 *
-	 * @since 11.3.0
 	 * @internal
 	 *
 	 * @param mixed $template_name Template name.
 	 */
-	public function handle_template_part_start( $template_name ): void {
+	public function handle_woocommerce_before_template_part( $template_name ): void {
 		if ( self::MINI_CART_TEMPLATE === $template_name ) {
-			$this->handle_calculation_start();
+			$this->begin_calculation();
+		} elseif ( self::CROSS_SELLS_TEMPLATE === $template_name ) {
+			$this->begin_catalog_pricing();
 		}
 	}
 
 	/**
-	 * End a mini-cart render.
+	 * End a mini-cart or cross-sells render.
 	 *
-	 * @since 11.3.0
 	 * @internal
 	 *
 	 * @param mixed $template_name Template name.
 	 */
-	public function handle_template_part_end( $template_name ): void {
+	public function handle_woocommerce_after_template_part( $template_name ): void {
 		if ( self::MINI_CART_TEMPLATE === $template_name ) {
-			$this->handle_calculation_end();
+			$this->end_calculation();
+		} elseif ( self::CROSS_SELLS_TEMPLATE === $template_name ) {
+			$this->end_catalog_pricing();
 		}
 	}
 
 	/**
 	 * Start the Store API route dispatch after a route matches, before its callback runs.
 	 *
-	 * @since 11.3.0
 	 * @internal
 	 *
 	 * @param mixed $response Result to send to the client.
@@ -188,7 +189,6 @@ class CartPricingContext {
 	 * Paired with rest_request_before_callbacks inside WP_REST_Server::respond_to_request(),
 	 * so the stack stays balanced for both external and internal (rest_do_request) dispatches.
 	 *
-	 * @since 11.3.0
 	 * @internal
 	 *
 	 * @param mixed $response Result to send to the client.
@@ -210,6 +210,7 @@ class CartPricingContext {
 	 * Every call must be paired with end_dispatch() for the same request.
 	 *
 	 * @since 11.3.0
+	 *
 	 * @internal
 	 *
 	 * @param \WP_REST_Request $request Request being dispatched.
@@ -219,20 +220,21 @@ class CartPricingContext {
 	 */
 	public function start_dispatch( \WP_REST_Request $request, $handler ): void {
 		$this->dispatch_stack[] = array(
-			'id'                  => spl_object_id( $request ),
+			'request'             => $request,
 			'is_cart_or_checkout' => self::is_cart_route_handler( $handler ),
 			'calculation_depth'   => $this->calculation_depth,
 		);
 	}
 
 	/**
-	 * End a dispatch, dropping it and any inner dispatches left on the stack above it.
+	 * End a dispatch, dropping it and anything left unfinished inside it.
 	 *
-	 * The calculation depth goes back to its value from when the dispatch started, so an exception
-	 * caught inside the dispatch cannot leave the cart priced for the rest of the request.
+	 * Inner dispatches, catalog pricing scopes, and the calculation depth go back to their state from when
+	 * the dispatch started, so an exception caught inside it cannot change pricing for the rest of the request.
 	 * Calling it again for a dispatch that already ended does nothing.
 	 *
 	 * @since 11.3.0
+	 *
 	 * @internal
 	 *
 	 * @param \WP_REST_Request $request Request whose dispatch should end.
@@ -240,16 +242,50 @@ class CartPricingContext {
 	 * @phpstan-param \WP_REST_Request<T> $request
 	 */
 	public function end_dispatch( \WP_REST_Request $request ): void {
-		$dispatch_id = spl_object_id( $request );
-
-		// Search from the top, in case a leaked dispatch reused the same object ID.
 		for ( $index = count( $this->dispatch_stack ) - 1; $index >= 0; $index-- ) {
-			if ( $dispatch_id === $this->dispatch_stack[ $index ]['id'] ) {
-				$this->calculation_depth = $this->dispatch_stack[ $index ]['calculation_depth'];
+			if ( $request === $this->dispatch_stack[ $index ]['request'] ) {
+				$this->calculation_depth      = $this->dispatch_stack[ $index ]['calculation_depth'];
+				$this->catalog_pricing_scopes = array_values(
+					array_filter(
+						$this->catalog_pricing_scopes,
+						static fn( array $scope ): bool => $scope['dispatch_depth'] <= $index
+					)
+				);
 				array_splice( $this->dispatch_stack, $index );
 				return;
 			}
 		}
+	}
+
+	/**
+	 * Start a cart totals calculation or mini-cart render.
+	 */
+	private function begin_calculation(): void {
+		++$this->calculation_depth;
+	}
+
+	/**
+	 * End a calculation started by begin_calculation().
+	 */
+	private function end_calculation(): void {
+		$this->calculation_depth = max( 0, $this->calculation_depth - 1 );
+	}
+
+	/**
+	 * Start a catalog pricing scope at the current calculation and dispatch depths.
+	 */
+	private function begin_catalog_pricing(): void {
+		$this->catalog_pricing_scopes[] = array(
+			'calculation_depth' => $this->calculation_depth,
+			'dispatch_depth'    => count( $this->dispatch_stack ),
+		);
+	}
+
+	/**
+	 * End the innermost catalog pricing scope.
+	 */
+	private function end_catalog_pricing(): void {
+		array_pop( $this->catalog_pricing_scopes );
 	}
 
 	/**
