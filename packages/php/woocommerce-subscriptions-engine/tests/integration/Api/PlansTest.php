@@ -23,12 +23,15 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\InvalidInputExceptio
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ValidationErrorCode;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanRepository;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller;
+use Automattic\WooCommerce\SubscriptionsEngine\Tests\Integration\AssertsValidationErrors;
 
 /**
  * @covers \Automattic\WooCommerce\SubscriptionsEngine\Api\Plans
  * @covers \Automattic\WooCommerce\SubscriptionsEngine\Api\ValidationException
  */
 class PlansTest extends EngineIntegrationTestCase {
+
+	use AssertsValidationErrors;
 
 	private const OWNER = 'acme-subs';
 
@@ -80,23 +83,6 @@ class PlansTest extends EngineIntegrationTestCase {
 	 */
 	private function plan_count(): int {
 		return ( new PlanRepository() )->count();
-	}
-
-	/**
-	 * Assert an engine validation error: one error with the code, the field data and a
-	 * translated message, and the Core error chained as the previous exception.
-	 *
-	 * @param ValidationException $e     Caught exception.
-	 * @param string              $code  Expected error code.
-	 * @param string              $field Expected field.
-	 */
-	private function assert_engine_error( ValidationException $e, string $code, string $field ): void {
-		$this->assertInstanceOf( InvalidInputException::class, $e->getPrevious() );
-		$this->assertSame( array( $code ), $e->get_errors()->get_error_codes() );
-
-		$data = $e->get_errors()->get_error_data( $code );
-		$this->assertIsArray( $data );
-		$this->assertSame( $field, $data['field'] );
 	}
 
 	/**
@@ -190,12 +176,12 @@ class PlansTest extends EngineIntegrationTestCase {
 	public function test_create_rejects_invalid_args_and_stores_nothing( array $overrides, string $code, string $field ): void {
 		$before = $this->plan_count();
 
-		try {
-			$this->create( $overrides );
-			$this->fail( 'Expected ValidationException.' );
-		} catch ( ValidationException $e ) {
-			$this->assert_engine_error( $e, $code, $field );
-		}
+		$this->assert_validation_errors(
+			function () use ( $overrides ): void {
+				$this->create( $overrides );
+			},
+			array( array( $code, $field ) )
+		);
 
 		$this->assertSame( $before, $this->plan_count() );
 	}
@@ -204,42 +190,42 @@ class PlansTest extends EngineIntegrationTestCase {
 	 * @testdox an entity invariant failure is reported as invalid input, on create and on update.
 	 */
 	public function test_an_entity_invariant_failure_is_reported_as_invalid_input(): void {
-		try {
-			$this->create( array( 'status' => 'nonsense' ) );
-			$this->fail( 'Expected a ValidationException.' );
-		} catch ( ValidationException $e ) {
-			$this->assert_engine_error( $e, ValidationErrorCode::NOT_REGISTERED, 'status' );
-			$this->assertSame( '"nonsense" is not registered.', $e->get_errors()->get_error_message( ValidationErrorCode::NOT_REGISTERED ) );
-			$previous = $e->getPrevious();
-			$this->assertInstanceOf( InvalidInputException::class, $previous );
-			$this->assertSame( esc_html( $previous->getMessage() ), $e->getMessage(), 'The exception message stays the English Core message.' );
-		}
+		$e = $this->assert_validation_errors(
+			function (): void {
+				$this->create( array( 'status' => 'nonsense' ) );
+			},
+			array( array( ValidationErrorCode::NOT_REGISTERED, 'status' ) )
+		);
+		$this->assertSame( '"nonsense" is not registered.', $e->get_errors()->get_error_message( ValidationErrorCode::NOT_REGISTERED ) );
+		$previous = $e->getPrevious();
+		$this->assertInstanceOf( InvalidInputException::class, $previous );
+		$this->assertSame( esc_html( $previous->getMessage() ), $e->getMessage(), 'The exception message stays the English Core message.' );
 
-		try {
-			Plans::update(
-				$this->create(),
-				array(
-					'extension_slug' => self::OWNER,
-					'name'           => ' ',
-				)
-			);
-			$this->fail( 'Expected a ValidationException.' );
-		} catch ( ValidationException $e ) {
-			$this->assert_engine_error( $e, ValidationErrorCode::REQUIRED, 'name' );
-			$this->assertSame( 'This field is required.', $e->get_errors()->get_error_message( ValidationErrorCode::REQUIRED ) );
-		}
+		$e = $this->assert_validation_errors(
+			function (): void {
+				Plans::update(
+					$this->create(),
+					array(
+						'extension_slug' => self::OWNER,
+						'name'           => ' ',
+					)
+				);
+			},
+			array( array( ValidationErrorCode::REQUIRED, 'name' ) )
+		);
+		$this->assertSame( 'This field is required.', $e->get_errors()->get_error_message( ValidationErrorCode::REQUIRED ) );
 	}
 
 	/**
 	 * @testdox create requires a name.
 	 */
 	public function test_create_requires_a_name(): void {
-		try {
-			Plans::create( array( 'extension_slug' => self::OWNER ) );
-			$this->fail( 'Expected a ValidationException.' );
-		} catch ( ValidationException $e ) {
-			$this->assert_engine_error( $e, ValidationErrorCode::REQUIRED, 'name' );
-		}
+		$this->assert_validation_errors(
+			static function (): void {
+				Plans::create( array( 'extension_slug' => self::OWNER ) );
+			},
+			array( array( ValidationErrorCode::REQUIRED, 'name' ) )
+		);
 	}
 
 	/**
@@ -526,12 +512,12 @@ class PlansTest extends EngineIntegrationTestCase {
 		$id     = $this->create();
 		$before = $this->stored( $id )->to_storage();
 
-		try {
-			Plans::update( $id, $args );
-			$this->fail( 'Expected ValidationException.' );
-		} catch ( ValidationException $e ) {
-			$this->assert_engine_error( $e, $code, 'extension_slug' );
-		}
+		$this->assert_validation_errors(
+			static function () use ( $args, $id ): void {
+				Plans::update( $id, $args );
+			},
+			array( array( $code, 'extension_slug' ) )
+		);
 
 		$this->assertSame( $before, $this->stored( $id )->to_storage() );
 	}
@@ -620,12 +606,12 @@ class PlansTest extends EngineIntegrationTestCase {
 		$id     = $this->create();
 		$before = $this->stored( $id )->to_storage();
 
-		try {
-			Plans::update( $id, array( 'extension_slug' => self::OWNER ) + $args );
-			$this->fail( 'Expected ValidationException.' );
-		} catch ( ValidationException $e ) {
-			$this->assert_engine_error( $e, $code, $field );
-		}
+		$this->assert_validation_errors(
+			static function () use ( $args, $id ): void {
+				Plans::update( $id, array( 'extension_slug' => self::OWNER ) + $args );
+			},
+			array( array( $code, $field ) )
+		);
 
 		$this->assertSame( $before, $this->stored( $id )->to_storage() );
 	}
@@ -1128,12 +1114,12 @@ class PlansTest extends EngineIntegrationTestCase {
 	 * @param string               $field Expected field.
 	 */
 	public function test_list_rejects_an_invalid_value( array $args, string $code, string $field ): void {
-		try {
-			Plans::list( $args );
-			$this->fail( 'Expected ValidationException.' );
-		} catch ( ValidationException $e ) {
-			$this->assert_engine_error( $e, $code, $field );
-		}
+		$this->assert_validation_errors(
+			static function () use ( $args ): void {
+				Plans::list( $args );
+			},
+			array( array( $code, $field ) )
+		);
 	}
 
 	/**

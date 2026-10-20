@@ -52,22 +52,24 @@ final class ValidationException extends InvalidArgumentException {
 	}
 
 	/**
-	 * Convert a Core validation error into one translated error with the engine code,
-	 * `field` and `params` data. The Core exception is chained as the previous one.
+	 * Convert a Core validation error into translated errors, one entry per Core error, each
+	 * with the engine code, a field-free message and `field` / `params` data. The Core
+	 * exception is chained as the previous one.
 	 *
 	 * @param InvalidInputException $e Core validation error.
 	 */
 	public static function from_core( InvalidInputException $e ): self {
-		$field  = $e->get_field();
-		$params = $e->get_params();
-		$errors = new WP_Error(
-			$e->get_error_code(),
-			self::get_translated_message( $e->get_error_code(), $params ),
-			array(
-				'field'  => $field,
-				'params' => $params,
-			)
-		);
+		$errors = new WP_Error();
+		foreach ( $e->get_errors() as $error ) {
+			$errors->add(
+				$error->get_error_code(),
+				self::get_translated_message( $error->get_error_code(), $error->get_params() ),
+				array(
+					'field'  => $error->get_field(),
+					'params' => $error->get_params(),
+				)
+			);
+		}
 
 		return new self( $errors, esc_html( $e->getMessage() ), $e );
 	}

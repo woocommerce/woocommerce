@@ -162,6 +162,50 @@ class ValidationExceptionTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox from_core adds one entry per Core error, each with its own field and params.
+	 */
+	public function test_from_core_adds_one_entry_per_core_error(): void {
+		$core = InvalidInputException::from_errors(
+			array(
+				new InvalidInputException( ValidationErrorCode::OUT_OF_BOUNDS, 'interval', 'Interval.', array( 'min' => 1 ) ),
+				new InvalidInputException( ValidationErrorCode::REQUIRED, 'name', 'Name.' ),
+				new InvalidInputException( ValidationErrorCode::OUT_OF_BOUNDS, 'min_cycles', 'Min cycles.', array( 'max' => 2 ) ),
+			)
+		);
+
+		$e      = ValidationException::from_core( $core );
+		$errors = $e->get_errors();
+
+		$this->assertSame( $core, $e->getPrevious() );
+		$this->assertSame( 'Interval. Name. Min cycles.', $e->getMessage() );
+		$this->assertSame( array( ValidationErrorCode::OUT_OF_BOUNDS, ValidationErrorCode::REQUIRED ), $errors->get_error_codes() );
+		$this->assertSame(
+			array( 'Must be greater than or equal to 1.', 'Must be less than or equal to 2.' ),
+			$errors->get_error_messages( ValidationErrorCode::OUT_OF_BOUNDS )
+		);
+		$this->assertSame(
+			array(
+				array(
+					'field'  => 'interval',
+					'params' => array( 'min' => 1 ),
+				),
+				array(
+					'field'  => 'min_cycles',
+					'params' => array( 'max' => 2 ),
+				),
+			),
+			$errors->get_all_error_data( ValidationErrorCode::OUT_OF_BOUNDS )
+		);
+		$this->assertSame(
+			array(
+				'field'  => 'name',
+				'params' => array(),
+			),
+			$errors->get_error_data( ValidationErrorCode::REQUIRED )
+		);
+	}
+
+	/**
 	 * @testdox The message is translated in the woocommerce text domain.
 	 */
 	public function test_the_message_is_translated(): void {

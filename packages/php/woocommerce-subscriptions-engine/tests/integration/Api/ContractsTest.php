@@ -28,11 +28,14 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\InvalidInputExceptio
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ValidationErrorCode;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller;
+use Automattic\WooCommerce\SubscriptionsEngine\Tests\Integration\AssertsValidationErrors;
 
 /**
  * @covers \Automattic\WooCommerce\SubscriptionsEngine\Api\Contracts
  */
 class ContractsTest extends EngineIntegrationTestCase {
+
+	use AssertsValidationErrors;
 
 	private const EXTENSION_SLUG = 'acme-subs';
 
@@ -330,30 +333,10 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * Run an operation and assert it is refused with an engine validation error.
-	 *
-	 * @param callable $operation Operation expected to be refused.
-	 * @param string   $code      Expected error code.
-	 * @param string   $field     Expected field.
-	 */
-	private function assert_refused( callable $operation, string $code, string $field ): void {
-		try {
-			$operation();
-			$this->fail( sprintf( 'Expected a ValidationException with "%s" on "%s".', $code, $field ) );
-		} catch ( ValidationException $e ) {
-			$this->assertSame( array( $code ), $e->get_errors()->get_error_codes() );
-
-			$data = $e->get_errors()->get_error_data( $code );
-			$this->assertIsArray( $data );
-			$this->assertSame( $field, $data['field'] );
-		}
-	}
-
-	/**
 	 * @testdox Contract writes report the error code and field.
 	 */
 	public function test_contract_writes_report_the_error_code_and_field(): void {
-		$this->assert_refused(
+		$this->assert_validation_errors(
 			static function (): void {
 				Contracts::create(
 					array(
@@ -362,10 +345,9 @@ class ContractsTest extends EngineIntegrationTestCase {
 					)
 				);
 			},
-			ValidationErrorCode::INVALID_VALUE,
-			'currency'
+			array( array( ValidationErrorCode::INVALID_VALUE, 'currency' ) )
 		);
-		$this->assert_refused(
+		$this->assert_validation_errors(
 			static function (): void {
 				Contracts::create(
 					array(
@@ -374,10 +356,9 @@ class ContractsTest extends EngineIntegrationTestCase {
 					)
 				);
 			},
-			ValidationErrorCode::REQUIRED,
-			'currency'
+			array( array( ValidationErrorCode::REQUIRED, 'currency' ) )
 		);
-		$this->assert_refused(
+		$this->assert_validation_errors(
 			static function (): void {
 				Contracts::create(
 					array(
@@ -386,17 +367,15 @@ class ContractsTest extends EngineIntegrationTestCase {
 					)
 				);
 			},
-			ValidationErrorCode::INVALID_VALUE,
-			'schedule_source'
+			array( array( ValidationErrorCode::INVALID_VALUE, 'schedule_source' ) )
 		);
 
 		$id = $this->contract_with_currency();
-		$this->assert_refused(
+		$this->assert_validation_errors(
 			static function () use ( $id ): void {
 				Contracts::update( $id, array( 'addresses' => array( 'home' => array( 'first_name' => 'Ada' ) ) ) );
 			},
-			ValidationErrorCode::NOT_IN_ENUM,
-			'addresses.home'
+			array( array( ValidationErrorCode::NOT_IN_ENUM, 'addresses.home' ) )
 		);
 	}
 
@@ -407,33 +386,29 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$id    = $this->contract_with_currency();
 		$cycle = $this->add_cycle( $id, $this->cycle_args( array( 'status' => CycleStatus::PENDING ) ) );
 
-		$this->assert_refused(
+		$this->assert_validation_errors(
 			static function () use ( $id ): void {
 				Contracts::add_cycle( $id, array( 'currency' => 'USD' ) );
 			},
-			ValidationErrorCode::REQUIRED,
-			'starts_at_gmt'
+			array( array( ValidationErrorCode::REQUIRED, 'starts_at_gmt' ) )
 		);
-		$this->assert_refused(
+		$this->assert_validation_errors(
 			static function () use ( $cycle ): void {
 				Contracts::claim_cycle( $cycle->get_id(), CycleStatus::PENDING, 0 );
 			},
-			ValidationErrorCode::OUT_OF_BOUNDS,
-			'claim_seconds'
+			array( array( ValidationErrorCode::OUT_OF_BOUNDS, 'claim_seconds' ) )
 		);
-		$this->assert_refused(
+		$this->assert_validation_errors(
 			static function () use ( $cycle ): void {
 				Contracts::transition_cycle( $cycle->get_id(), CycleStatus::PENDING, 'never-registered' );
 			},
-			ValidationErrorCode::NOT_REGISTERED,
-			'to_status'
+			array( array( ValidationErrorCode::NOT_REGISTERED, 'to_status' ) )
 		);
-		$this->assert_refused(
+		$this->assert_validation_errors(
 			static function () use ( $id ): void {
 				Contracts::get_cycles( $id, -1 );
 			},
-			ValidationErrorCode::OUT_OF_BOUNDS,
-			'limit'
+			array( array( ValidationErrorCode::OUT_OF_BOUNDS, 'limit' ) )
 		);
 	}
 
