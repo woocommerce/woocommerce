@@ -393,7 +393,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * Get a column value of the row currently being parsed.
 	 *
 	 * @param string $key Mapped column key, such as 'sku' or 'type'.
-	 * @return string Raw cell value, or an empty string when the file has no such column.
+	 * @return string Cell value sanitized as wc_clean() does for parsed fields, or an empty string when the file has no such column.
 	 */
 	private function get_row_value( string $key ): string {
 		$column_index = array_search( $key, $this->get_mapped_keys(), true );
@@ -402,7 +402,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			return '';
 		}
 
-		return (string) ( $this->raw_data[ $this->parsing_raw_data_index ][ $column_index ] ?? '' );
+		return sanitize_text_field( (string) ( $this->raw_data[ $this->parsing_raw_data_index ][ $column_index ] ?? '' ) );
 	}
 
 	/**

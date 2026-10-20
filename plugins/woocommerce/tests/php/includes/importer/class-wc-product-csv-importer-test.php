@@ -2209,4 +2209,30 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$this->assertCount( 1, $data['imported'] );
 		$this->assertSame( '', wc_get_product( $data['imported'][0] )->get_sku() );
 	}
+
+	/**
+	 * @testdox Should match by SKU when the SKU cell has surrounding spaces, as the saved SKU is trimmed too.
+	 */
+	public function test_import_sku_fallback_trims_the_row_sku_40274(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_sku( 'IMPORT-40274-TRIM' );
+		$product->save();
+
+		$missing_id = $product->get_id() + 1000;
+		$csv_file   = trailingslashit( get_temp_dir() ) . 'import-40274-trim.csv';
+		file_put_contents( $csv_file, "ID,Type,SKU,Name\n{$missing_id},simple,\" IMPORT-40274-TRIM \",Updated by trimmed SKU\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
+
+		$data = $this->import_for_update(
+			$csv_file,
+			array(
+				'ID'   => 'id',
+				'Type' => 'type',
+				'SKU'  => 'sku',
+				'Name' => 'name',
+			)
+		);
+
+		$this->assertSame( array( $product->get_id() ), $data['updated'] );
+		$this->assertSame( 'Updated by trimmed SKU', wc_get_product( $product->get_id() )->get_name() );
+	}
 }
