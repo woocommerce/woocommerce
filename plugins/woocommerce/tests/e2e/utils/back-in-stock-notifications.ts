@@ -272,7 +272,7 @@ export async function createOutOfStockVariableProduct(
 						{ name: BIS_VARIATION_ATTRIBUTE, option: '' },
 					],
 				},
-		  ]
+			]
 		: [
 				{
 					regular_price: '9.99',
@@ -290,7 +290,7 @@ export async function createOutOfStockVariableProduct(
 						{ name: BIS_VARIATION_ATTRIBUTE, option: 'White' },
 					],
 				},
-		  ];
+			];
 
 	const { data: batch } = await restApi.post< {
 		create: Array< { id: number; stock_status: string } >;
@@ -325,7 +325,7 @@ export async function createOutOfStockVariableProduct(
 				id: created[ 0 ].id,
 				option: 'Blue',
 				notificationName: notificationName( 'Blue' ),
-		  };
+			};
 
 	return {
 		id: product.id,
@@ -882,6 +882,28 @@ export const bisNotice = {
 				productName
 			) }" becomes available\\.`
 		),
+	/**
+	 * Printed on the shop page after an unsubscribe link is followed for a
+	 * notification that was already sent.
+	 */
+	alreadySent:
+		'This notification has already been sent, so there is nothing to unsubscribe from.',
+	/**
+	 * Printed on the shop page after a verify link whose key does not match
+	 * the stored one (tampered, or superseded by a resend) is followed.
+	 */
+	verifyLinkInvalid:
+		'This verification link is no longer valid. Please use the link in the most recent verification email.',
+	/**
+	 * Printed on the shop page after an expired verify link is followed.
+	 */
+	verifyLinkExpired:
+		'This verification link has expired. Sign up again to request a new one.',
+	/**
+	 * Printed on the shop page after an unsubscribe link with a rejected key
+	 * is followed.
+	 */
+	unsubscribeLinkInvalid: 'This unsubscribe link is no longer valid.',
 	errors: {
 		invalidEmail: /Invalid email address\./,
 		invalidProduct: /Invalid product\./,

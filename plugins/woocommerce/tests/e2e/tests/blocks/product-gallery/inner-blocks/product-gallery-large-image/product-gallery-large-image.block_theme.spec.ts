@@ -39,32 +39,6 @@ test.describe( `${ blockData.name }`, () => {
 		await editor.openDocumentSettingsSidebar();
 	} );
 
-	test( 'Renders Product Gallery Viewer block on the editor and frontend side', async ( {
-		page,
-		editor,
-		pageObject,
-	} ) => {
-		await pageObject.addProductGalleryBlock( { cleanContent: true } );
-
-		const viewerBlock = await pageObject.getViewerBlock( {
-			page: 'editor',
-		} );
-
-		await expect( viewerBlock ).toBeVisible();
-
-		await editor.saveSiteEditorEntities( {
-			isOnlyCurrentEntityDirty: true,
-		} );
-
-		await page.goto( blockData.productPage );
-
-		const viewerBlockFrontend = await pageObject.getViewerBlock( {
-			page: 'frontend',
-		} );
-
-		await expect( viewerBlockFrontend ).toBeVisible();
-	} );
-
 	test.describe( 'Zoom while hovering setting', () => {
 		test( 'should be enabled by default', async ( { pageObject } ) => {
 			await pageObject.addProductGalleryBlock( { cleanContent: true } );

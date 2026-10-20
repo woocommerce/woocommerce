@@ -33,6 +33,10 @@ import {
 	SponsoredProductPlacementType,
 } from './constants';
 import { TrackedLink } from '~/components/tracked-link/tracked-link';
+import {
+	ProductRecommendations,
+	ProductRecommendation,
+} from './product-recommendations';
 
 const getOnboardingProductType = (): string[] => {
 	const onboardingData = getAdminSetting( 'onboarding' );
@@ -85,6 +89,11 @@ export const Products = () => {
 		surfacedProductTypeKeys
 	);
 	const { recordCompletionTime } = useRecordCompletionTime( 'products' );
+
+	const recommendations: ProductRecommendation[] = getAdminSetting(
+		'productsListEmptySuggestions',
+		[]
+	);
 
 	const productTypesWithTimeRecord = useMemo(
 		() =>
@@ -188,21 +197,26 @@ export const Products = () => {
 					showOtherOptions={ false }
 					isTaskListItemClicked={ isRequesting }
 				/>
-				<TrackedLink
-					textProps={ {
-						className: 'woocommerce-products-marketplace-link',
-					} }
-					message={ __(
-						// translators: {{Link}} is a placeholder for a html element.
-						'Visit {{Link}}the WooCommerce Marketplace{{/Link}} to enhance your store with additional options such as Subscriptions, Gift Cards, and more.',
-						'woocommerce'
-					) }
-					eventName="tasklist_add_product_visit_marketplace_click"
-					targetUrl={ getAdminLink(
-						'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=merchandising'
-					) }
-					linkType="wc-admin"
-				/>
+				{ Array.isArray( recommendations ) &&
+				recommendations.length > 0 ? (
+					<ProductRecommendations items={ recommendations } />
+				) : (
+					<TrackedLink
+						textProps={ {
+							className: 'woocommerce-products-marketplace-link',
+						} }
+						message={ __(
+							// translators: {{Link}} is a placeholder for a html element.
+							'Visit {{Link}}the WooCommerce Marketplace{{/Link}} to enhance your store with additional options such as Subscriptions, Gift Cards, and more.',
+							'woocommerce'
+						) }
+						eventName="tasklist_add_product_visit_marketplace_click"
+						targetUrl={ getAdminLink(
+							'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=merchandising'
+						) }
+						linkType="wc-admin"
+					/>
+				) }
 			</div>
 			{ isLoadingSampleProducts ? (
 				<LoadSampleProductModal />

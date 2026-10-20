@@ -1462,6 +1462,11 @@ body.woocommerce_page_wc-customer-stock-notifications {
 	.wrap {
 		margin-inline-start: 0;
 	}
+
+	// Show the variation attributes on their own line below the product title.
+	.column-product .description {
+		display: block;
+	}
 }
 
 body.post-type-shop_order,

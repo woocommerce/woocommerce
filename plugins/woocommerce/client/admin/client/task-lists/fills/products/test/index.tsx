@@ -82,11 +82,37 @@ describe( 'Products', () => {
 		} ) );
 		const { queryByText } = render( <Products /> );
 
-		productTypes.forEach( ( { key, title } ) => {
-			if ( defaultSurfacedProductTypes.includes( key ) ) {
-				expect( queryByText( title ) ).toBeInTheDocument();
-			}
-		} );
+		productTypes
+			.filter( ( { key } ) =>
+				defaultSurfacedProductTypes.includes( key )
+			)
+			.forEach( ( { title } ) =>
+				expect( queryByText( title ) ).toBeInTheDocument()
+			);
+	} );
+
+	it( 'should replace the marketplace link with recommendations when the setting has items', () => {
+		( getAdminSetting as jest.Mock ).mockImplementation( ( key ) =>
+			key === 'productsListEmptySuggestions'
+				? [
+						{
+							slug: 'products-list-empty-body-bookings',
+							product: 'woocommerce-bookings',
+							title: 'Bookings',
+							copy: 'Take bookings.',
+							icon: '',
+							url: 'https://woocommerce.com/products/woocommerce-bookings/',
+							promoted: '',
+						},
+					]
+				: { profile: { product_types: null } }
+		);
+		const { queryByText } = render( <Products /> );
+
+		expect( queryByText( 'Bookings' ) ).toBeInTheDocument();
+		expect(
+			queryByText( /to enhance your store with additional options/ )
+		).not.toBeInTheDocument();
 	} );
 
 	it( 'should render digital products type with view more button', () => {

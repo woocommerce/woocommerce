@@ -11,6 +11,20 @@ use WC_Order;
 class Meta {
 
 	/**
+	 * The meta line shown above the heading, parts joined by the separator.
+	 *
+	 * @param WC_Order $order Order being reviewed.
+	 * @return string
+	 */
+	public static function line_for_order( WC_Order $order ): string {
+		// Spaces inside the string: a locale that needs a full-width
+		// separator has to be able to drop them.
+		$separator = _x( ' · ', 'Review Order meta-line separator', 'woocommerce' );
+
+		return implode( $separator, self::parts_for_order( $order ) );
+	}
+
+	/**
 	 * Build the meta-line parts shown above the heading on both the form and
 	 * empty-state views (customer name, billing email, order #/date).
 	 *

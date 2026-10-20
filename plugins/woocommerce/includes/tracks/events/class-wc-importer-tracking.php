@@ -24,7 +24,7 @@ class WC_Importer_Tracking {
 	 * @return void
 	 */
 	public function track_product_importer() {
-		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Each step callback verifies the importer nonce.
 		if ( ! isset( $_REQUEST['step'] ) ) {
 			return;
 		}
@@ -45,8 +45,8 @@ class WC_Importer_Tracking {
 	 * @return void
 	 */
 	public function track_product_importer_start() {
-		// phpcs:disable WordPress.Security.NonceVerification.Recommended
-		if ( ! isset( $_REQUEST['file'] ) || ! isset( $_REQUEST['_wpnonce'] ) ) {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Nonce verified in has_valid_nonce().
+		if ( ! isset( $_REQUEST['file'] ) || ! $this->has_valid_nonce() ) {
 			return;
 		}
 
@@ -65,11 +65,11 @@ class WC_Importer_Tracking {
 	 * @return void
 	 */
 	public function track_product_importer_complete() {
-		// phpcs:disable WordPress.Security.NonceVerification.Recommended
-		if ( ! isset( $_REQUEST['_wpnonce'] ) ) {
+		if ( ! $this->has_valid_nonce() ) {
 			return;
 		}
 
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended -- Nonce verified in has_valid_nonce().
 		$properties = array(
 			'imported'            => isset( $_GET['products-imported'] ) ? absint( $_GET['products-imported'] ) : 0,
 			'imported_variations' => isset( $_GET['products-imported-variations'] ) ? absint( $_GET['products-imported-variations'] ) : 0,
@@ -80,5 +80,16 @@ class WC_Importer_Tracking {
 		// phpcs:enable
 
 		WC_Tracks::record_event( 'product_import_complete', $properties );
+	}
+
+	/**
+	 * Check that the request carries a valid product importer nonce.
+	 *
+	 * @return bool
+	 */
+	private function has_valid_nonce(): bool {
+		$nonce = isset( $_REQUEST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) ) : '';
+
+		return (bool) wp_verify_nonce( $nonce, 'woocommerce-csv-importer' );
 	}
 }

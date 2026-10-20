@@ -1,0 +1,4 @@
+Significance: patch
+Type: fixed
+
+Send nested arrays and objects from the event properties filter as JSON instead of breaking the tracking request.

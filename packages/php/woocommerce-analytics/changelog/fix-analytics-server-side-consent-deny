@@ -1,0 +1,4 @@
+Significance: patch
+Type: fixed
+
+Stop recording server-side events for shoppers who denied statistics consent with a consent plugin that works in the browser.

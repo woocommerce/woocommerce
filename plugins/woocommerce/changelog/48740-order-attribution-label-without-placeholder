@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show the custom origin label an extension sets for an order's attribution source instead of "Unknown".
