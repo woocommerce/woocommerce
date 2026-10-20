@@ -38,4 +38,3 @@ To change the example, edit the files in this directory, not the generated copy,
 ## Examples in this directory
 
 - `simple-inbox-note` adds a note to the inbox on **WooCommerce > Home**.
-- `add-abbreviated-notification` fills a slot in the Activity panel's Inbox drawer, which WooCommerce 11.2 removed. It still builds, but it no longer shows anything.
