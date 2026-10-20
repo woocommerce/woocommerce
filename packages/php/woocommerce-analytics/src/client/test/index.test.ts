@@ -1,7 +1,14 @@
 /**
  * External dependencies
  */
-import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
+import {
+	afterEach,
+	beforeEach,
+	describe,
+	expect,
+	it,
+	jest,
+} from '@jest/globals';
 
 const TRACKING_SCRIPT_URL = 'https://stats.wp.com/s-202642.js';
 
@@ -13,15 +20,20 @@ jest.mock( '../init', () => {
 	return {};
 } );
 
-const addedListeners: Array< [ string, EventListenerOrEventListenerObject ] > = [];
+const addedListeners: Array< [ string, EventListenerOrEventListenerObject ] > =
+	[];
 
 const getTrackingScripts = () =>
-	Array.from( document.querySelectorAll< HTMLScriptElement >( 'script' ) ).filter(
-		script => script.getAttribute( 'src' ) === TRACKING_SCRIPT_URL
+	Array.from(
+		document.querySelectorAll< HTMLScriptElement >( 'script' )
+	).filter(
+		( script ) => script.getAttribute( 'src' ) === TRACKING_SCRIPT_URL
 	);
 
 const isTrackingScriptLoaded = () =>
-	getTrackingScripts().some( script => script.getAttribute( 'type' ) !== 'text/plain' );
+	getTrackingScripts().some(
+		( script ) => script.getAttribute( 'type' ) !== 'text/plain'
+	);
 
 /**
  * Print the s.js tag the way PHP does, then run the entry point as a fresh page load and let its dynamic import settle.
@@ -63,8 +75,11 @@ const flushPromises = () => jest.advanceTimersByTimeAsync( 0 );
  *
  * @param hasConsent - What `wp_has_consent()` answers.
  */
-async function loadDelayedConsentApi( hasConsent: boolean | ( () => boolean ) ) {
-	window.wp_has_consent = typeof hasConsent === 'function' ? hasConsent : () => hasConsent;
+async function loadDelayedConsentApi(
+	hasConsent: boolean | ( () => boolean )
+) {
+	window.wp_has_consent =
+		typeof hasConsent === 'function' ? hasConsent : () => hasConsent;
 	await jest.runOnlyPendingTimersAsync();
 }
 
@@ -78,8 +93,9 @@ function changeConsent( value: 'allow' | 'deny' ) {
 
 describe( 'client entry point', () => {
 	beforeEach( () => {
-		( window as unknown as { jQuery: ( callback: () => void ) => void } ).jQuery = callback =>
-			callback();
+		(
+			window as unknown as { jQuery: ( callback: () => void ) => void }
+		 ).jQuery = ( callback ) => callback();
 
 		jest.useFakeTimers();
 
@@ -107,7 +123,8 @@ describe( 'client entry point', () => {
 		delete window.waitfor_consent_hook;
 		delete window.wp_consent_type;
 		delete window._wca;
-		document.cookie = 'tk_or=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+		document.cookie =
+			'tk_or=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
 	} );
 
 	it( 'loads s.js and analytics when statistics consent is given', async () => {
@@ -199,7 +216,9 @@ describe( 'client entry point', () => {
 
 		// The script sets the hook from the page, and reports consent until a consent type is set.
 		window.waitfor_consent_hook = '1';
-		await loadDelayedConsentApi( () => window.wp_consent_type === undefined );
+		await loadDelayedConsentApi(
+			() => window.wp_consent_type === undefined
+		);
 		expect( isTrackingScriptLoaded() ).toBe( false );
 		expect( mockInitAnalytics ).not.toHaveBeenCalled();
 
@@ -276,7 +295,9 @@ describe( 'client entry point', () => {
 	it( 'drops the events waiting for s.js when statistics consent is withdrawn before it loads', async () => {
 		window.wp_has_consent = () => true;
 		await loadPage();
-		window._wca = [ { _en: 'woocommerceanalytics_page_view' } ] as unknown as typeof window._wca;
+		window._wca = [
+			{ _en: 'woocommerceanalytics_page_view' },
+		] as unknown as typeof window._wca;
 
 		changeConsent( 'deny' );
 
@@ -288,6 +309,17 @@ describe( 'client entry point', () => {
 		document.cookie = 'tk_or=1; path=/';
 
 		await loadPage();
+
+		expect( document.cookie ).not.toContain( 'tk_or=' );
+	} );
+
+	it( 'clears tracking cookies from an earlier visit once a delayed WP Consent API script reports no consent', async () => {
+		document.cookie = 'tk_or=1; path=/';
+		await loadPage();
+
+		expect( document.cookie ).toContain( 'tk_or=1' );
+
+		await loadDelayedConsentApi( false );
 
 		expect( document.cookie ).not.toContain( 'tk_or=' );
 	} );
