@@ -660,7 +660,6 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 		}
 	}
 
-	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- This method also throws WC_REST_Exception through get_product_id().
 	/**
 	 * Create or update a line item.
 	 *
@@ -693,8 +692,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 			&& 0 === (int) $posted['variation_id'];
 
 		// Only new items must resolve, so orders whose products were deleted later stay editable.
-		// A deleted variation can still load as an empty object, so its post must exist too.
-		if ( 'create' === $action && ( ! $product instanceof WC_Product || ! get_post_type( $product->get_id() ) ) ) {
+		if ( 'create' === $action && ( ! $product || ! $product->exists() ) ) {
 			throw new WC_REST_Exception( 'woocommerce_rest_invalid_product_id', esc_html__( 'Invalid product ID.', 'woocommerce' ), 400 );
 		}
 
@@ -742,8 +740,6 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 
 		return $item;
 	}
-
-	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 
 	/**
 	 * Create or update an order shipping method.

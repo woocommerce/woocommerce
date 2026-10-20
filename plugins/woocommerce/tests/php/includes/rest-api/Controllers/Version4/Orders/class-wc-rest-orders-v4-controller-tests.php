@@ -592,6 +592,47 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox PUT /orders with a deleted product leaves earlier new items and their stock unchanged.
+	 */
+	public function test_update_order_with_deleted_product_saves_no_earlier_items(): void {
+		$order   = wc_create_order();
+		$item_id = $order->add_product( WC_Helper_Product::create_simple_product() );
+		$order->set_status( OrderStatus::PROCESSING );
+		$order->save();
+		$stocked = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'manage_stock'   => true,
+				'stock_quantity' => 10,
+			)
+		);
+
+		$deleted    = WC_Helper_Product::create_simple_product();
+		$deleted_id = $deleted->get_id();
+		$deleted->delete( true );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/orders/' . $order->get_id() );
+		$request->set_body_params(
+			array(
+				'line_items' => array(
+					array( 'id' => $item_id ),
+					array(
+						'product_id' => $stocked->get_id(),
+						'quantity'   => 2,
+					),
+					array( 'product_id' => $deleted_id ),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 400, $response->get_status(), 'The request should be rejected.' );
+		$this->assertSame( 'woocommerce_rest_invalid_product_id', $response->get_data()['code'], 'The error should name the invalid product.' );
+		$this->assertCount( 1, wc_get_order( $order->get_id() )->get_items(), 'The order should keep only its original line item.' );
+		$this->assertSame( 10, wc_get_product( $stocked->get_id() )->get_stock_quantity(), 'The stock should not change.' );
+	}
+
+	/**
 	 * Test comprehensive value validation for all line types.
 	 */
 	public function test_comprehensive_value_validation(): void {

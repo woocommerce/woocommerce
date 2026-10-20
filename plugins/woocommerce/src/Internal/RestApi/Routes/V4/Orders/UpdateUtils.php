@@ -22,7 +22,6 @@ use Automattic\WooCommerce\Utilities\StringUtil;
 use Automattic\WooCommerce\Internal\Utilities\Users;
 use WC_REST_Exception;
 use WC_Order;
-use WC_Product;
 use WP_REST_Request;
 use WP_Http;
 use WC_Order_Item_Product;
@@ -65,6 +64,8 @@ class UpdateUtils {
 		// Get data that can be edited from schema.
 		$ignore_keys = array( 'created_via', 'status', 'customer_id' );
 		$data_keys   = array_diff( array_keys( $this->order_schema->get_writable_item_schema_properties() ), $ignore_keys );
+
+		$this->check_new_line_item_products( $request['line_items'] );
 
 		// Make sure gateways are loaded so hooks from gateways fire on save/create.
 		WC()->payment_gateways();
@@ -349,6 +350,31 @@ class UpdateUtils {
 	}
 
 	/**
+	 * Checks that every new line item points to an existing product, before any item is saved.
+	 * Otherwise a bad item fails the request after earlier items, and their stock, were already saved.
+	 *
+	 * @throws WC_REST_Exception When a new line item has no product reference, or its product doesn't exist.
+	 * @param mixed $line_items Line items from the request.
+	 * @return void
+	 */
+	protected function check_new_line_item_products( $line_items ) {
+		if ( ! is_array( $line_items ) ) {
+			return;
+		}
+
+		foreach ( $line_items as $line_item_data ) {
+			if ( ! is_array( $line_item_data ) || ! empty( $line_item_data['id'] ) || $this->item_is_null_or_zero( $line_item_data ) ) {
+				continue;
+			}
+
+			$product = wc_get_product( $this->get_product_id_from_line_item( $line_item_data ) );
+			if ( ! $product || ! $product->exists() ) {
+				throw new WC_REST_Exception( 'woocommerce_rest_invalid_product_id', esc_html__( 'Invalid product ID.', 'woocommerce' ), (int) WP_Http::BAD_REQUEST );
+			}
+		}
+	}
+
+	/**
 	 * Create or update a line item, overridden to add COGS data as needed.
 	 *
 	 * @param array  $request_data Line item data.
@@ -362,8 +388,7 @@ class UpdateUtils {
 		$product = wc_get_product( $this->get_product_id_from_line_item( $request_data, $action ) );
 
 		// Only new items must resolve, so orders whose products were deleted later stay editable.
-		// A deleted variation can still load as an empty object, so its post must exist too.
-		if ( 'create' === $action && ( ! $product instanceof WC_Product || ! get_post_type( $product->get_id() ) ) ) {
+		if ( 'create' === $action && ( ! $product || ! $product->exists() ) ) {
 			throw new WC_REST_Exception( 'woocommerce_rest_invalid_product_id', esc_html__( 'Invalid product ID.', 'woocommerce' ), (int) WP_Http::BAD_REQUEST );
 		}
 

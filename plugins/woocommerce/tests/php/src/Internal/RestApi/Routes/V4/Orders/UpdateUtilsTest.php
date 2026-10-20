@@ -112,7 +112,7 @@ class UpdateUtilsTest extends WC_Unit_Test_Case {
 }
 
 /**
- * Testable subclass that exposes the protected update_meta_data method.
+ * Testable subclass that exposes protected UpdateUtils methods.
  *
  * phpcs:disable Generic.Files.OneObjectStructurePerFile.MultipleFound
  * phpcs:disable Squiz.Classes.ClassFileName.NoMatch

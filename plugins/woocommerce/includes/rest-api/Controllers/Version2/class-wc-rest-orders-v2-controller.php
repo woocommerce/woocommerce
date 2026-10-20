@@ -719,6 +719,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	/**
 	 * Prepare a single order for create or update.
 	 *
+	 * @throws WC_REST_Exception When a new line item's product doesn't exist.
 	 * @param  WP_REST_Request $request Request object.
 	 * @param  bool            $creating If is creating a new object.
 	 * @return WP_Error|WC_Data
@@ -728,6 +729,8 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		$order     = new WC_Order( $id );
 		$schema    = $this->get_item_schema();
 		$data_keys = array_keys( array_filter( $schema['properties'], array( $this, 'filter_writable_props' ) ) );
+
+		$this->check_new_line_item_products( $request['line_items'] );
 
 		// Handle all writable props.
 		foreach ( $data_keys as $key ) {
@@ -894,6 +897,31 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	}
 
 	/**
+	 * Checks that every new line item points to an existing product, before any item is saved.
+	 * Otherwise a bad item fails the request after earlier items, and their stock, were already saved.
+	 *
+	 * @throws WC_REST_Exception When a new line item has no product reference, or its product doesn't exist.
+	 * @param mixed $line_items Line items from the request.
+	 * @return void
+	 */
+	protected function check_new_line_item_products( $line_items ) {
+		if ( ! is_array( $line_items ) ) {
+			return;
+		}
+
+		foreach ( $line_items as $posted ) {
+			if ( ! is_array( $posted ) || ! empty( $posted['id'] ) || $this->item_is_null( $posted ) || ( isset( $posted['quantity'] ) && 0 === $posted['quantity'] ) ) {
+				continue;
+			}
+
+			$product = wc_get_product( $this->get_product_id( $posted ) );
+			if ( ! $product || ! $product->exists() ) {
+				throw new WC_REST_Exception( 'woocommerce_rest_invalid_product_id', esc_html__( 'Invalid product ID.', 'woocommerce' ), 400 );
+			}
+		}
+	}
+
+	/**
 	 * Maybe set an item prop if the value was posted.
 	 *
 	 * @param WC_Order_Item $item   Order item.
@@ -929,7 +957,6 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		MetaDataUtil::update( $posted['meta_data'] ?? null, $item );
 	}
 
-	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- This method also throws WC_REST_Exception through get_product_id().
 	/**
 	 * Create or update a line item.
 	 *
@@ -963,8 +990,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 			&& 0 === (int) $posted['variation_id'];
 
 		// Only new items must resolve, so orders whose products were deleted later stay editable.
-		// A deleted variation can still load as an empty object, so its post must exist too.
-		if ( 'create' === $action && ( ! $product instanceof WC_Product || ! get_post_type( $product->get_id() ) ) ) {
+		if ( 'create' === $action && ( ! $product || ! $product->exists() ) ) {
 			throw new WC_REST_Exception( 'woocommerce_rest_invalid_product_id', esc_html__( 'Invalid product ID.', 'woocommerce' ), 400 );
 		}
 
@@ -1018,8 +1044,6 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 
 		return $item;
 	}
-
-	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 
 	/**
 	 * Create or update an order shipping method.
