@@ -39,7 +39,11 @@ import {
  */
 import { useEmailStyles, setImmutably } from '../../../hooks';
 import { storeName } from '../../../store';
-import { getElementStyles, getFontFamilyFaces } from '../utils';
+import {
+	getElementStyles,
+	getFontAppearanceValue,
+	getFontFamilyFaces,
+} from '../utils';
 import { useHasTextColorInTypographyPanel } from '../hooks';
 import { ColorDropdownItem } from './color-dropdown-item';
 import { recordEvent, debouncedRecordEvent } from '../../../events';
@@ -388,10 +392,10 @@ export function TypographyElementPanel( {
 				isShownByDefault={ defaultControls.fontAppearance }
 			>
 				<FontAppearanceControl
-					value={ {
+					value={ getFontAppearanceValue( {
 						fontStyle,
 						fontWeight,
-					} }
+					} ) }
 					onChange={ setFontAppearance }
 					fontFamilyFaces={ getFontFamilyFaces(
 						allFontFamilies,

@@ -4,6 +4,7 @@
 import { EmailStyles } from '../../../store';
 import {
 	getElementStyles,
+	getFontAppearanceValue,
 	getFontFamilyFaces,
 	getHeadingElementStyles,
 } from '../utils';
@@ -80,6 +81,20 @@ describe( 'getHeadingElementStyles', () => {
 			fontWeight: '700',
 			fontSize: '32px',
 		} );
+	} );
+} );
+
+describe( 'getFontAppearanceValue', () => {
+	it.each( [
+		[ {}, { fontStyle: undefined, fontWeight: undefined } ],
+		[ { fontWeight: 700 }, { fontStyle: 'normal', fontWeight: '700' } ],
+		[ { fontStyle: 'italic' }, { fontStyle: 'italic', fontWeight: '400' } ],
+		[
+			{ fontStyle: 'italic', fontWeight: '300' },
+			{ fontStyle: 'italic', fontWeight: '300' },
+		],
+	] )( 'turns %j into %j', ( current, expected ) => {
+		expect( getFontAppearanceValue( current ) ).toEqual( expected );
 	} );
 } );
 

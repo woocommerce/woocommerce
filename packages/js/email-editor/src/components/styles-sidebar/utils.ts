@@ -110,6 +110,29 @@ const getFontFamilySlug = ( fontFamily: string | undefined ) => {
 };
 
 /**
+ * Fills in the missing half of a saved font style and weight.
+ *
+ * The Appearance control only shows an option when both values match it exactly.
+ *
+ * @param current            The saved font style and weight.
+ * @param current.fontStyle  The saved font style.
+ * @param current.fontWeight The saved font weight.
+ * @return The style and weight to show, or both undefined when nothing is saved.
+ */
+export const getFontAppearanceValue = ( {
+	fontStyle,
+	fontWeight,
+}: FontFace ): { fontStyle?: string; fontWeight?: string } => {
+	if ( ! fontStyle && ! fontWeight ) {
+		return { fontStyle: undefined, fontWeight: undefined };
+	}
+	return {
+		fontStyle: fontStyle ?? 'normal',
+		fontWeight: String( fontWeight ?? '400' ),
+	};
+};
+
+/**
  * Gets the font faces the Appearance control should offer for a font.
  *
  * Email fonts have no font faces, so core would offer every weight. The email theme lists the
@@ -149,12 +172,11 @@ export const getFontFamilyFaces = (
 		return undefined;
 	}
 
-	if ( ! current.fontStyle && ! current.fontWeight ) {
+	const { fontStyle, fontWeight } = getFontAppearanceValue( current );
+	if ( ! fontStyle || ! fontWeight ) {
 		return faces;
 	}
 
-	const fontStyle = current.fontStyle ?? 'normal';
-	const fontWeight = String( current.fontWeight ?? '400' );
 	const isOffered = faces.some(
 		( face ) =>
 			( face.fontStyle ?? 'normal' ) === fontStyle &&

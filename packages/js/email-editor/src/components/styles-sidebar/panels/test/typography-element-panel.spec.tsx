@@ -82,6 +82,8 @@ jest.mock( '../../utils', () => ( {
 		color: {},
 	} ) ),
 	getFontFamilyFaces: jest.requireActual( '../../utils' ).getFontFamilyFaces,
+	getFontAppearanceValue:
+		jest.requireActual( '../../utils' ).getFontAppearanceValue,
 } ) );
 
 jest.mock( '../../hooks', () => ( {
@@ -307,5 +309,18 @@ describe( 'TypographyElementPanel', () => {
 		expect(
 			fontAppearanceControlMock.mock.calls[ 0 ][ 0 ].fontFamilyFaces
 		).toEqual( fontFace );
+	} );
+
+	it( 'shows a saved weight that has no saved style', () => {
+		getElementStylesMock.mockReturnValue( {
+			typography: { fontWeight: 700 },
+			color: {},
+		} );
+
+		render( <TypographyElementPanel element="text" headingLevel="" /> );
+
+		expect( fontAppearanceControlMock.mock.calls[ 0 ][ 0 ].value ).toEqual(
+			{ fontStyle: 'normal', fontWeight: '700' }
+		);
 	} );
 } );
