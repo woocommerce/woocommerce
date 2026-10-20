@@ -88,6 +88,8 @@ module.exports = {
 			npmDependencies: [
 				...defaultDependencies,
 				'@woocommerce/onboarding',
+				// The add-task template imports these directly; declare them to satisfy
+				// import/no-extraneous-dependencies without relying on transitive dependencies.
 				'@woocommerce/data',
 				'@wordpress/data',
 				'@wordpress/plugins',
