@@ -710,7 +710,7 @@ class WC_Checkout {
 	 *
 	 * @param WC_Order_Item[] $line_items    The order's line items.
 	 * @param WC_Cart         $cart          The cart.
-	 * @param bool            $compare_taxes Whether to compare tax amounts too, for orders whose totals weren't recalculated.
+	 * @param bool            $compare_taxes Whether to compare each tax rate's amounts too, for orders whose totals weren't recalculated.
 	 * @return bool
 	 */
 	private function line_items_match_cart( array $line_items, WC_Cart $cart, bool $compare_taxes = false ): bool {
@@ -719,20 +719,14 @@ class WC_Checkout {
 			if ( ! $item instanceof WC_Order_Item_Product ) {
 				return false;
 			}
-			$values = array( $item->get_product_id(), $item->get_variation_id(), $item->get_quantity(), $item->get_subtotal(), $item->get_total() );
-			if ( $compare_taxes ) {
-				array_push( $values, $item->get_subtotal_tax( 'edit' ), $item->get_total_tax( 'edit' ) );
-			}
-			$order_values[] = $this->get_compared_values( ...$values ) . ( $compare_taxes ? $this->get_compared_rate_taxes( $item->get_taxes( 'edit' ) ) : '' );
+			$order_values[] = $this->get_compared_values( $item->get_product_id(), $item->get_variation_id(), $item->get_quantity(), $item->get_subtotal(), $item->get_total() )
+				. ( $compare_taxes ? $this->get_compared_rate_taxes( $item->get_taxes( 'edit' ) ) : '' );
 		}
 
 		$cart_values = array();
 		foreach ( $cart->get_cart() as $cart_item ) {
-			$values = array( $cart_item['product_id'] ?? 0, $cart_item['variation_id'] ?? 0, $cart_item['quantity'] ?? 0, $cart_item['line_subtotal'] ?? 0, $cart_item['line_total'] ?? 0 );
-			if ( $compare_taxes ) {
-				array_push( $values, $cart_item['line_subtotal_tax'] ?? 0, $cart_item['line_tax'] ?? 0 );
-			}
-			$cart_values[] = $this->get_compared_values( ...$values ) . ( $compare_taxes ? $this->get_compared_rate_taxes( (array) ( $cart_item['line_tax_data'] ?? array() ) ) : '' );
+			$cart_values[] = $this->get_compared_values( $cart_item['product_id'] ?? 0, $cart_item['variation_id'] ?? 0, $cart_item['quantity'] ?? 0, $cart_item['line_subtotal'] ?? 0, $cart_item['line_total'] ?? 0 )
+				. ( $compare_taxes ? $this->get_compared_rate_taxes( (array) ( $cart_item['line_tax_data'] ?? array() ) ) : '' );
 		}
 
 		sort( $order_values );
@@ -809,8 +803,8 @@ class WC_Checkout {
 	}
 
 	/**
-	 * Joins a line item's subtotal and total tax for each rate into one string, so a change in how tax is split between
-	 * rates is found even when the sums stay the same.
+	 * Joins a line item's subtotal and total tax for each rate into one string. The rates are compared instead of the sums,
+	 * since the cart rounds its line tax once while the order item adds up each rate's rounded tax, so the sums can differ.
 	 *
 	 * @param array $taxes Taxes by rate ID, under 'subtotal' and 'total' keys.
 	 * @return string

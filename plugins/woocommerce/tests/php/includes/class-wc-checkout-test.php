@@ -1126,6 +1126,43 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Resuming a pending order keeps line items taxed at two rates when prices include tax and tax is rounded at subtotal.
+	 * @testWith ["23.45"]
+	 *           ["74.21"]
+	 *
+	 * @param string $price The product price, including tax. At these prices, the item's taxes for each rate add up to slightly less than the cart's rounded line tax.
+	 */
+	public function test_create_order_resume_keeps_line_items_taxed_at_two_rates_rounded_at_subtotal( string $price ): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_tax_round_at_subtotal', 'yes' );
+		foreach ( array( '7.2500', '1.5000' ) as $index => $rate ) {
+			WC_Tax::_insert_tax_rate(
+				array(
+					'tax_rate_country'  => '',
+					'tax_rate'          => $rate,
+					'tax_rate_name'     => "Tax {$index}",
+					'tax_rate_priority' => (string) ( $index + 1 ),
+					'tax_rate_compound' => '0',
+					'tax_rate_shipping' => '1',
+					'tax_rate_order'    => (string) $index,
+					'tax_rate_class'    => '',
+				)
+			);
+		}
+		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => $price ) );
+		WC()->cart->add_to_cart( $product->get_id() );
+		WC()->cart->calculate_totals();
+		$order_id = $this->sut->create_order( array( 'payment_method' => WC_Gateway_BACS::ID ) );
+		$this->assertIsInt( $order_id );
+		$before = $this->get_order_item_ids_by_type( $order_id );
+
+		$this->resume_order( $order_id );
+
+		$this->assertSame( $before, $this->get_order_item_ids_by_type( $order_id ), 'Every item should keep its ID.' );
+	}
+
+	/**
 	 * @testdox Resuming a pending order replaces the items whose amounts a merchant edited, and keeps items edited without changing amounts.
 	 * @testWith ["none", ""]
 	 *           ["line_item_name", ""]
