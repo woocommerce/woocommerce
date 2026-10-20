@@ -276,4 +276,36 @@ describe( 'TypographyElementPanel', () => {
 			fontAppearanceControlMock.mock.calls[ 0 ][ 0 ].fontFamilyFaces
 		).toHaveLength( 4 );
 	} );
+
+	it( 'prefers a theme font over a default font with the same slug', () => {
+		const fontFace = [
+			{ fontFamily: 'Inter', fontStyle: 'normal', fontWeight: '600' },
+		];
+		useSettingsMock.mockImplementation( ( ...paths: string[] ) => {
+			if ( paths[ 0 ] === 'custom.fontWeights' ) {
+				return [ { inter: '300, 700' } ];
+			}
+			return [
+				[],
+				{
+					default: [
+						{ slug: 'inter', fontFamily: 'Inter, sans-serif' },
+					],
+					theme: [
+						{
+							slug: 'inter',
+							fontFamily: 'Inter, sans-serif',
+							fontFace,
+						},
+					],
+				},
+			];
+		} );
+
+		render( <TypographyElementPanel element="text" headingLevel="" /> );
+
+		expect(
+			fontAppearanceControlMock.mock.calls[ 0 ][ 0 ].fontFamilyFaces
+		).toEqual( fontFace );
+	} );
 } );

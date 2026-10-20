@@ -77,7 +77,7 @@ export function TypographyElementPanel( {
 
 	// Ref: https://github.com/WordPress/gutenberg/issues/59778
 	const fontFamilies = blockLevelFontFamilies?.default || [];
-	const allFontFamilies = [ 'default', 'theme', 'custom' ].flatMap(
+	const allFontFamilies = [ 'custom', 'theme', 'default' ].flatMap(
 		( origin ) => blockLevelFontFamilies?.[ origin ] ?? []
 	);
 	const theme = useSelect( ( select ) => select( storeName ).getTheme(), [] );
