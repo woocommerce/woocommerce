@@ -75,6 +75,7 @@ final class PaymentSettingsScreen {
 		add_action( 'admin_menu', array( $this, 'handle_admin_menu' ) );
 		add_action( 'admin_head', array( $this, 'handle_admin_head' ) );
 		add_filter( 'submenu_file', array( $this, 'handle_submenu_file' ) );
+		add_action( 'in_admin_header', array( $this, 'handle_in_admin_header' ), PHP_INT_MAX );
 	}
 
 	/**
@@ -144,6 +145,23 @@ final class PaymentSettingsScreen {
 	 */
 	public function handle_submenu_file( $submenu_file ) {
 		return $this->is_current_page() ? 'wc-settings' : $submenu_file;
+	}
+
+	/**
+	 * Remove admin notices from the screen before they print.
+	 *
+	 * The page's CSS hides them, but notices that set their own inline display still flash before
+	 * the app covers them.
+	 *
+	 * @internal
+	 *
+	 * @since 11.4.0
+	 */
+	public function handle_in_admin_header(): void {
+		if ( $this->is_current_page() ) {
+			remove_all_actions( 'admin_notices' );
+			remove_all_actions( 'all_admin_notices' );
+		}
 	}
 
 	/**
