@@ -268,7 +268,7 @@ final class SchemaInstaller {
 		// `creation` makes an extension's optional `creation_key` unique (NULL keys never
 		// collide); 64 + 100 characters stay within the 767-byte key limit of older InnoDB
 		// row formats. The key is opaque, so it compares binary: keys differing only in case
-		// or accents are distinct.
+		// or accents are distinct. The collation ignores trailing spaces, so the entity trims keys.
 		$creation_key_collate = '' === $charset ? '' : " COLLATE {$charset}_bin";
 		$contracts_sql        = "CREATE TABLE {$contracts} (
   id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,

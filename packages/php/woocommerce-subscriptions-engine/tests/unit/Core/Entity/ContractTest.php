@@ -694,6 +694,20 @@ class ContractTest extends TestCase {
 	}
 
 	/**
+	 * @testdox create() trims surrounding whitespace from a creation key.
+	 */
+	public function test_create_trims_the_creation_key(): void {
+		$contract = Contract::create(
+			array(
+				'extension_slug' => 'acme-subs',
+				'creation_key'   => " order:42 \n",
+			)
+		);
+
+		$this->assertSame( 'order:42', $contract->to_storage()['creation_key'] );
+	}
+
+	/**
 	 * @testdox create() rejects an empty, over-long or non-string creation key.
 	 * @dataProvider invalid_creation_keys
 	 *
@@ -718,6 +732,7 @@ class ContractTest extends TestCase {
 	public function invalid_creation_keys(): array {
 		return array(
 			'empty'      => array( '' ),
+			'only space' => array( "  \t" ),
 			'192 chars'  => array( str_repeat( 'k', 192 ) ),
 			'101 chars'  => array( str_repeat( 'k', 101 ) ),
 			'non-string' => array( 42 ),

@@ -1371,6 +1371,60 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	/**
+	 * @testdox A creation key differing only in surrounding whitespace is the same key.
+	 */
+	public function test_a_whitespace_padded_creation_key_is_the_same_key(): void {
+		$this->assertNotNull(
+			Contracts::create(
+				array(
+					'extension_slug' => self::EXTENSION_SLUG,
+					'creation_key'   => 'order:1',
+				)
+			)
+		);
+
+		$this->assertNull(
+			Contracts::create(
+				array(
+					'extension_slug' => self::EXTENSION_SLUG,
+					'creation_key'   => 'order:1 ',
+				)
+			)
+		);
+		$this->assertNull(
+			Contracts::create(
+				array(
+					'extension_slug' => self::EXTENSION_SLUG,
+					'creation_key'   => ' order:1',
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox A failed create whose key is already stored is a taken key, whatever the database message says.
+	 */
+	public function test_a_taken_creation_key_is_recognised_without_the_error_text(): void {
+		$args = array(
+			'extension_slug' => self::EXTENSION_SLUG,
+			'creation_key'   => 'order:12',
+		);
+		$this->assertNotNull( Contracts::create( $args ) );
+
+		$this->fail_next_query( '/^\s*INSERT INTO `\S*subscription_contracts`/' );
+		$this->assertNull( Contracts::create( $args ) );
+
+		$this->fail_next_query( '/^\s*INSERT INTO `\S*subscription_contracts`/' );
+		$this->expectException( \RuntimeException::class );
+		Contracts::create(
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'creation_key'   => 'order:13',
+			)
+		);
+	}
+
+	/**
 	 * @testdox Without a creation key every create makes a new contract.
 	 */
 	public function test_keyless_creates_never_collide(): void {

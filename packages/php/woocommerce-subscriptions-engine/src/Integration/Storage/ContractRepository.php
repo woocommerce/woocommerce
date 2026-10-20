@@ -198,8 +198,8 @@ final class ContractRepository {
 
 		if ( false === $inserted ) {
 			$db_error = $wpdb->last_error;
-			// Only the `creation` UNIQUE index can reject a new row as a duplicate.
-			if ( false !== stripos( $db_error, 'Duplicate entry' ) && false !== stripos( $db_error, "creation'" ) ) {
+			// A taken key is recognised by reading it back: the server's error text is localized.
+			if ( null !== $columns['creation_key'] && $this->has_creation_key( (string) $columns['extension_slug'], (string) $columns['creation_key'] ) ) {
 				return false;
 			}
 			throw new \RuntimeException( esc_html( 'Failed to insert contract. ' . $db_error ) );
@@ -208,6 +208,24 @@ final class ContractRepository {
 		$contract->set_id( (int) $wpdb->insert_id );
 
 		return true;
+	}
+
+	/**
+	 * Whether the extension already holds a contract with this creation key. A failed read
+	 * reads as false, so the caller reports its own insert failure.
+	 *
+	 * @param string $extension_slug Owning extension.
+	 * @param string $creation_key   Creation key.
+	 */
+	private function has_creation_key( string $extension_slug, string $creation_key ): bool {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$found = $wpdb->get_var( $wpdb->prepare( "SELECT 1 FROM `{$table}` WHERE extension_slug = %s AND creation_key = %s LIMIT 1", $extension_slug, $creation_key ) );
+
+		return null !== $found;
 	}
 
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.

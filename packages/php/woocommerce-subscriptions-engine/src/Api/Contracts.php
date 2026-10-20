@@ -138,7 +138,7 @@ final class Contracts {
 
 	/**
 	 * Create a contract locked from birth: finish building it (cycles, status) with the returned
-	 * lock, then release it. A `creation_key` (1-100 characters) makes the create idempotent per
+	 * lock, then release it. A `creation_key` (1-100 characters, trimmed) makes the create idempotent per
 	 * extension; without one every call creates a contract. Unknown keys and options, also inside
 	 * items and addresses, get `_doing_it_wrong()` and are ignored.
 	 *

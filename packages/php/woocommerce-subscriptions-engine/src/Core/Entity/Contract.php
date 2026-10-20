@@ -306,7 +306,7 @@ final class Contract {
 
 	/**
 	 * Build a new, unsaved contract. `extension_slug` is required; `creation_key` is an
-	 * optional idempotency key of 1-100 characters.
+	 * optional idempotency key of 1-100 characters, trimmed of surrounding whitespace.
 	 *
 	 * @param array<string, mixed> $args Contract attributes.
 	 * @throws DomainException If the contract attributes are not valid.
@@ -314,6 +314,11 @@ final class Contract {
 	public static function create( array $args ): self {
 		// A new contract is always unsaved and unlocked; never adopt a caller-supplied id or lock.
 		unset( $args['id'], $args['lock_live'], $args['locked_until_gmt'], $args['lock_operation'] );
+
+		// The key column ignores trailing spaces when comparing, so they never tell keys apart.
+		if ( isset( $args['creation_key'] ) && is_string( $args['creation_key'] ) ) {
+			$args['creation_key'] = trim( $args['creation_key'] );
+		}
 
 		self::assert_creation_key( $args['creation_key'] ?? null );
 
