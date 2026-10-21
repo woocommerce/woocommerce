@@ -193,7 +193,12 @@ final class Contracts {
 		$filtered_args = ArgumentValidator::filter_known_keys( __METHOD__, $args, self::CONTRACT_KEYS );
 		$repository    = new ContractRepository();
 
-		if ( null !== $lock || array() === $filtered_args ) {
+		if ( array() === $filtered_args ) {
+			$contract = $repository->find( $contract_id );
+			return null === $contract ? null : ContractView::from_contract( $contract, true );
+		}
+
+		if ( null !== $lock ) {
 			$contract = self::update_contract( $repository, $contract_id, $filtered_args, $lock );
 			return null === $contract ? null : ContractView::from_contract( $contract, true );
 		}
@@ -226,11 +231,11 @@ final class Contracts {
 	 * @param ContractRepository   $repository    Repository.
 	 * @param int                  $contract_id   Contract id.
 	 * @param array<string, mixed> $filtered_args Known fields to write.
-	 * @param ContractLock|null    $lock          The held lock, or null when there is nothing to write.
+	 * @param ContractLock         $lock          The held lock.
 	 * @return Contract|null The contract with the written fields; null when it does not exist.
 	 * @throws InvalidArgumentException If a value is invalid.
 	 */
-	private static function update_contract( ContractRepository $repository, int $contract_id, array $filtered_args, ?ContractLock $lock ): ?Contract {
+	private static function update_contract( ContractRepository $repository, int $contract_id, array $filtered_args, ContractLock $lock ): ?Contract {
 		$contract = $repository->find( $contract_id );
 		if ( null === $contract ) {
 			return null;
@@ -242,12 +247,7 @@ final class Contracts {
 			throw new InvalidArgumentException( $e->getMessage(), 0, $e ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the entity message is not output.
 		}
 
-		$fields = array_keys( $filtered_args );
-		if ( null === $lock || array() === $fields ) {
-			return $contract;
-		}
-
-		$updated = $repository->update_fields( $contract, $fields, $lock );
+		$updated = $repository->update_fields( $contract, array_keys( $filtered_args ), $lock );
 		if ( ! $updated ) {
 			return null;
 		}

@@ -247,27 +247,24 @@ final class ContractRepository {
 
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
 	/**
-	 * Write the named contract columns from the entity in one statement, and replace items /
-	 * addresses when named, all under `$lock`, or without one under an internal lock taken and
-	 * released here (refused while another operation holds the lock).
+	 * Write the named contract columns from the entity in one statement under `$lock`, then
+	 * replace items / addresses when named.
 	 *
 	 * @param Contract           $contract Contract carrying the values. Must have an id.
 	 * @param array<int, string> $fields   Contract column names, plus `items` / `addresses`.
-	 * @param ContractLock|null  $lock     The caller's lock on this contract, or null.
+	 * @param ContractLock       $lock     The held lock on this contract.
 	 * @return bool False when the contract row no longer exists (nothing is written).
 	 * @throws \InvalidArgumentException If a field is not a writable contract column, or the lock is for another contract.
-	 * @throws ContractLockedException If another operation holds the lock, or `$lock` was lost.
+	 * @throws ContractLockedException If `$lock` was lost.
 	 * @throws \RuntimeException If the contract has no id or the write fails.
 	 */
-	public function update_fields( Contract $contract, array $fields, ?ContractLock $lock = null ): bool {
+	public function update_fields( Contract $contract, array $fields, ContractLock $lock ): bool {
 		$contract_id = $contract->get_id();
 		if ( null === $contract_id ) {
 			throw new \RuntimeException( 'Cannot update a contract that has no id. Use ContractRepository::insert() for a new contract.' );
 		}
 
-		if ( null !== $lock ) {
-			self::assert_lock_for( $lock, $contract_id );
-		}
+		self::assert_lock_for( $lock, $contract_id );
 
 		$storage = $contract->to_storage();
 		foreach ( $fields as $field ) {
@@ -279,35 +276,8 @@ final class ContractRepository {
 			}
 		}
 
-		if ( null !== $lock ) {
-			return $this->write_fields( $contract, $fields, $lock );
-		}
-
-		$internal_lock = $this->acquire_internal_lock( $contract_id );
-		if ( null === $internal_lock ) {
-			return false;
-		}
-		try {
-			return $this->write_fields( $contract, $fields, $internal_lock );
-		} finally {
-			$this->release_internal_lock( $internal_lock );
-		}
-	}
-	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
-
-	/**
-	 * The fenced row write plus the named child replacements behind {@see self::update_fields()}.
-	 *
-	 * @param Contract           $contract Contract carrying its id and the values.
-	 * @param array<int, string> $fields   Requested fields (validated).
-	 * @param ContractLock       $lock     The caller's or the internal lock.
-	 * @return bool False when the contract row no longer exists.
-	 * @throws ContractLockedException If the fence refuses the write.
-	 */
-	private function write_fields( Contract $contract, array $fields, ContractLock $lock ): bool {
-		$contract_id = (int) $contract->get_id();
-		$columns     = array_intersect_key( $contract->to_storage(), array_flip( $fields ) );
-		$updated     = $this->write_contract_row( $contract_id, $columns, $lock );
+		$columns = array_intersect_key( $storage, array_flip( $fields ) );
+		$updated = $this->write_contract_row( $contract_id, $columns, $lock );
 
 		// Every row write bumps `write_seq`, so zero rows means the fence refused the write or the row is gone.
 		if ( 0 === $updated ) {
@@ -328,6 +298,7 @@ final class ContractRepository {
 
 		return true;
 	}
+	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 
 	/**
 	 * Fetch a contract by id with its items, addresses and frozen plan terms
@@ -1023,6 +994,8 @@ final class ContractRepository {
 	/**
 	 * Take the internal lock for a write made without one: null when the contract does not exist.
 	 *
+	 * @internal Public for {@see \Automattic\WooCommerce\SubscriptionsEngine\Api\Contracts::update()}, which holds it across its read and write.
+	 *
 	 * @param int $contract_id Contract id.
 	 * @throws ContractLockedException If another operation holds the lock.
 	 * @throws \RuntimeException If the lock write or the holder read fails.
@@ -1044,6 +1017,8 @@ final class ContractRepository {
 	/**
 	 * Release the internal lock. A failed release is logged, not thrown, so it cannot replace the
 	 * write's result or exception; the lock expires on its own.
+	 *
+	 * @internal Public for {@see \Automattic\WooCommerce\SubscriptionsEngine\Api\Contracts::update()}.
 	 *
 	 * @param ContractLock $lock The internal lock.
 	 */

@@ -15,6 +15,7 @@ use RuntimeException;
 use ReflectionProperty;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\ContractLock;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\ContractLockedException;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\Contracts;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
@@ -497,15 +498,11 @@ class ContractLockTest extends EngineIntegrationTestCase {
 	 * @testdox An unlocked row write the fence refuses throws, naming the internal lock that is held while the write is classified.
 	 */
 	public function test_a_refused_unlocked_update_throws(): void {
-		$id       = $this->insert_contract();
-		$contract = $this->sut->find( $id );
-		$this->assertInstanceOf( Contract::class, $contract );
-		$contract->set_status( ContractStatus::ON_HOLD );
-
+		$id = $this->insert_contract();
 		$this->refuse_next_write( 'UPDATE `' . SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS ) . '` SET' );
 
 		try {
-			$this->sut->update_fields( $contract, array( 'status' ) );
+			Contracts::update( $id, array( 'status' => ContractStatus::ON_HOLD ) );
 			$this->fail( 'Expected the refused write to throw.' );
 		} catch ( ContractLockedException $e ) {
 			$this->assertSame( 'engine_contract_update', $e->get_operation() );
