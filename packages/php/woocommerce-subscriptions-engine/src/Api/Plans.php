@@ -343,7 +343,8 @@ final class Plans {
 
 	/**
 	 * Check the shape of the present plan fields with the collector and return them
-	 * normalized (a refused field is left out; the collector holds its error).
+	 * normalized (a refused field is left out, or null for a policy; the collector holds
+	 * its error).
 	 *
 	 * @param ArgumentValidator    $validator Argument collector.
 	 * @param array<string, mixed> $args      Caller fields (known keys only).
@@ -510,6 +511,7 @@ final class Plans {
 		$all_errors->merge_from( $errors );
 		$messages = array_merge( array( $engine_errors->getMessage() ), array_map( 'esc_html', $errors->get_error_messages() ) );
 
+		// The refusal is chained: it tells the REST controller which errors are the engine's.
 		throw new ValidationException( $all_errors, implode( ' ', $messages ), $refusal ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Both parts are escaped.
 	}
 }

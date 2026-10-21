@@ -22,7 +22,8 @@ trait AssertsValidationErrors {
 	 * expected errors, in `WP_Error` order (codes in first-seen order, then each code's
 	 * errors in addition order). Each expected entry is `array( code, field )`, or
 	 * `array( code, field, params )` to compare the params too; a fieldless error has a
-	 * null field.
+	 * null field. Every error must carry data: `WP_Error` skips empty data, so a data-less
+	 * error cannot be paired and fails the assertion.
 	 *
 	 * @param callable          $operation Operation expected to throw.
 	 * @param array<int, mixed> $expected  Expected errors.
@@ -49,11 +50,14 @@ trait AssertsValidationErrors {
 	private static function describe_validation_errors( WP_Error $errors, array $expected ): array {
 		$actual = array();
 		foreach ( $errors->get_error_codes() as $code ) {
-			$all_data = $errors->get_all_error_data( $code );
-			foreach ( $errors->get_error_messages( $code ) as $index => $message ) {
+			$all_data = array_values( $errors->get_all_error_data( $code ) );
+			$messages = array_values( $errors->get_error_messages( $code ) );
+			self::assertCount( count( $messages ), $all_data, sprintf( 'Every "%s" error must carry data to be paired with it.', $code ) );
+
+			foreach ( $messages as $index => $message ) {
 				self::assertNotSame( '', $message, sprintf( 'An error "%s" has no message.', $code ) );
 
-				$data  = $all_data[ $index ] ?? null;
+				$data  = $all_data[ $index ];
 				$entry = array( $code, is_array( $data ) && isset( $data['field'] ) ? $data['field'] : null );
 				$slot  = $expected[ count( $actual ) ] ?? null;
 				if ( is_array( $slot ) && array_key_exists( 2, $slot ) ) {

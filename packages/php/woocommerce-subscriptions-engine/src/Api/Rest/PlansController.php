@@ -305,7 +305,7 @@ final class PlansController extends WP_REST_Controller {
 		try {
 			$plan = Plans::create( $args );
 		} catch ( ValidationException $e ) {
-			return $this->get_validation_error( $e->get_errors() );
+			return $this->get_validation_error( $e );
 		} catch ( RuntimeException $e ) {
 			return $this->write_failed_error( $e, 'woocommerce_subscriptions_engine_plan_create_failed' );
 		}
@@ -336,7 +336,7 @@ final class PlansController extends WP_REST_Controller {
 			// A plan of another extension reads as missing: the facade scopes the update to the request's extension slug.
 			$plan = Plans::update( Coercion::coerce_int( $request->get_param( 'id' ) ), $args );
 		} catch ( ValidationException $e ) {
-			return $this->get_validation_error( $e->get_errors() );
+			return $this->get_validation_error( $e );
 		} catch ( RuntimeException $e ) {
 			return $this->write_failed_error( $e, 'woocommerce_subscriptions_engine_plan_update_failed' );
 		}
@@ -586,12 +586,12 @@ final class PlansController extends WP_REST_Controller {
 	 * errors without one are added to it. With no `field` on any error, the errors return
 	 * as a plain 400.
 	 *
-	 * @param WP_Error $errors Validation errors.
+	 * @param ValidationException $e The facade's refusal.
 	 */
-	private function get_validation_error( WP_Error $errors ): WP_Error {
-		$paired = $this->get_paired_errors( $errors );
+	private function get_validation_error( ValidationException $e ): WP_Error {
+		$paired = $this->get_paired_errors( $e );
 		if ( array() === $paired['fielded'] ) {
-			return $this->as_bad_request( $errors );
+			return $this->as_bad_request( $paired['fieldless'] );
 		}
 
 		$error = $this->get_invalid_param_error( $paired['fielded'] );
@@ -601,26 +601,37 @@ final class PlansController extends WP_REST_Controller {
 	}
 
 	/**
-	 * Pair each error message with its own data, in `WP_Error` order (codes in first-seen
-	 * order, then each code's errors in addition order). `WP_Error` keeps a code's data as a
-	 * list and skips empty data, so the list is paired with the code's messages from the
-	 * first: a message past the end of the list, or whose data has no `field`, is fieldless
-	 * on its own and the rest of its code stays fielded. Engine errors come first in their
-	 * code and always carry data, so they always pair.
+	 * Pair each error message with its own data, in `WP_Error` order. The engine's errors
+	 * always pair. An extension's error pairs only when every extension message of its code
+	 * carries data; otherwise that code's extension messages are fieldless, so a field never
+	 * lands on the wrong message.
 	 *
-	 * @param WP_Error $errors Validation errors.
+	 * @param ValidationException $e The facade's refusal.
 	 * @return array{fielded: list<array{code: string, message: string, field: string, data: array<mixed>}>, fieldless: WP_Error}
 	 */
-	private function get_paired_errors( WP_Error $errors ): array {
+	private function get_paired_errors( ValidationException $e ): array {
+		$errors    = $e->get_errors();
 		$fielded   = array();
 		$fieldless = new WP_Error();
 
+		// The chained Core refusal holds the engine's errors, which come first in their code and always carry data.
+		$engine_counts = array();
+		$refusal       = $e->getPrevious();
+		if ( $refusal instanceof InvalidInputException ) {
+			foreach ( $refusal->get_errors() as $error ) {
+				$engine_counts[ $error->get_error_code() ] = ( $engine_counts[ $error->get_error_code() ] ?? 0 ) + 1;
+			}
+		}
+
 		foreach ( $errors->get_error_codes() as $code ) {
 			$code     = (string) $code;
+			$messages = array_values( $errors->get_error_messages( $code ) );
 			$all_data = array_values( $errors->get_all_error_data( $code ) );
+			// `WP_Error` skips empty data, so when the counts differ the extension's data cannot be placed.
+			$pairs = count( $messages ) === count( $all_data );
 
-			foreach ( array_values( $errors->get_error_messages( $code ) ) as $index => $message ) {
-				$data = $all_data[ $index ] ?? null;
+			foreach ( $messages as $index => $message ) {
+				$data = ( $pairs || $index < ( $engine_counts[ $code ] ?? 0 ) ) ? $all_data[ $index ] : null;
 				if ( is_array( $data ) && isset( $data['field'] ) && is_string( $data['field'] ) && '' !== $data['field'] ) {
 					$fielded[] = array(
 						'code'    => $code,
@@ -775,7 +786,7 @@ final class PlansController extends WP_REST_Controller {
 
 		$exception = ValidationException::from_core( $error );
 
-		return $this->get_validation_error( $exception->get_errors() );
+		return $this->get_validation_error( $exception );
 	}
 
 	/**
@@ -847,7 +858,7 @@ final class PlansController extends WP_REST_Controller {
 	private function get_extension_slug_error( string $code, string $message, array $params = array() ): WP_Error {
 		$exception = ValidationException::from_core( new InvalidInputException( $code, 'extension_slug', $message, $params ) );
 
-		return $this->get_validation_error( $exception->get_errors() );
+		return $this->get_validation_error( $exception );
 	}
 
 	/**

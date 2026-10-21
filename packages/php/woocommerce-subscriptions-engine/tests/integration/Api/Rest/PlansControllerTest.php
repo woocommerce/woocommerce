@@ -852,6 +852,81 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		);
 	}
 
+	public function test_a_data_less_extension_error_before_a_fielded_one_makes_its_code_fieldless(): void {
+		wp_set_current_user( $this->admin_id );
+		add_action(
+			'woocommerce_subscriptions_engine_validate_plan',
+			static function ( WP_Error $errors ): void {
+				$errors->add( 'acme_invalid', 'A general problem.' );
+				$errors->add( 'acme_invalid', 'Bad interval.', array( 'field' => 'billing_policy.interval' ) );
+			}
+		);
+
+		$response = $this->request(
+			'POST',
+			self::BASE,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'name'           => 'Ambiguous',
+			)
+		);
+
+		$this->assertSame( 400, $response->get_status() );
+		$data = $this->response_data( $response );
+		$this->assertSame( 'acme_invalid', $data['code'] );
+		$this->assertSame( 'A general problem.', $data['message'] );
+		$this->assertSame( array( 'status' => 400 ), $data['data'], 'The field is not put on the wrong message.' );
+		$this->assertSame(
+			array(
+				array(
+					'code'    => 'acme_invalid',
+					'message' => 'Bad interval.',
+					'data'    => array( 'status' => 400 ),
+				),
+			),
+			$data['additional_errors']
+		);
+	}
+
+	public function test_a_data_less_extension_error_before_a_fielded_one_under_an_engine_code_keeps_the_engine_field(): void {
+		wp_set_current_user( $this->admin_id );
+		add_action(
+			'woocommerce_subscriptions_engine_validate_plan',
+			static function ( WP_Error $errors ): void {
+				$errors->add( 'required', 'Something is missing.' );
+				$errors->add( 'required', 'The interval is missing.', array( 'field' => 'billing_policy.interval' ) );
+			}
+		);
+
+		$response = $this->request(
+			'POST',
+			self::BASE,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'name'           => '',
+			)
+		);
+		$data     = $this->assert_invalid_param( $response, 'name', 'required' );
+
+		$this->assertSame( array( 'name' => 'name: This field is required.' ), $this->nested( $data, array( 'data', 'params' ) ) );
+		$this->assertSame( array( 'name' ), array_keys( $this->array_value( $this->array_value( $data, 'data' ), 'errors' ) ) );
+		$this->assertSame(
+			array(
+				array(
+					'code'    => 'required',
+					'message' => 'Something is missing.',
+					'data'    => array( 'status' => 400 ),
+				),
+				array(
+					'code'    => 'required',
+					'message' => 'The interval is missing.',
+					'data'    => array( 'status' => 400 ),
+				),
+			),
+			$data['additional_errors']
+		);
+	}
+
 	public function test_validate_action_receives_errors_a_plan_view_and_slug(): void {
 		wp_set_current_user( $this->admin_id );
 
