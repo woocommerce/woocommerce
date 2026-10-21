@@ -378,6 +378,11 @@ abstract class AbstractBlock {
 		$filtered_metadata = apply_filters( 'block_type_metadata', $metadata ); // phpcs:ignore WooCommerce.Commenting.CommentHooks
 		$metadata          = is_array( $filtered_metadata ) ? $filtered_metadata : $metadata;
 
+		// If the filter injected features we don't handle on the fast-path, delegate to the upstream function.
+		if ( ! empty( $metadata['render'] ) || ! empty( $metadata['variations'] ) || ! empty( $metadata['blockHooks'] ) ) {
+			return \register_block_type_from_metadata( $manifest_file, $block_settings );
+		}
+
 		// Step 3: Property mapping (99.4% of blocks) + i18n (98.9% of blocks as per v11.4) + merge caller-provided settings.
 		$settings          = array();
 		$property_mappings = array(
