@@ -18,7 +18,7 @@ import { useState } from 'react';
 /**
  * Internal dependencies
  */
-import type { SettingsRecord } from '../../entity-fields/src/types';
+import type { SettingsRecord } from '../../entity-fields/types';
 import { ENTITY_KIND } from './entities';
 import type { SettingsEntityConfig } from './entities';
 import { getEntityFields } from './entity-fields';

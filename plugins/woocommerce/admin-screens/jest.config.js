@@ -23,8 +23,8 @@ module.exports = {
 				'babel-jest',
 			] )
 		),
-		// The shared preset does not transform wp-build routes.
-		'routes/.*\\.[jt]sx?$': [
+		// The shared preset does not transform wp-build routes or entity fields.
+		'(?:routes|entity-fields)/.*\\.[jt]sx?$': [
 			'ts-jest',
 			{
 				tsconfig: `<rootDir>/${ presetDir }/tsconfig-jest.json`,

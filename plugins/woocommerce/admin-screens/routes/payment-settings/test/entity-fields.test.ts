@@ -7,7 +7,7 @@ import { store as editorStore } from '@wordpress/editor';
 /**
  * Internal dependencies
  */
-import chequeFields from '../../../entity-fields/src/cheque';
+import chequeFields from '../../../entity-fields/cheque';
 import { ENTITY_KIND } from '../entities';
 import { getEntityFields, registerEntityFields } from '../entity-fields';
 

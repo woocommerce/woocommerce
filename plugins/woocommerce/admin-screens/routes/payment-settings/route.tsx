@@ -8,7 +8,7 @@ import { notFound } from '@wordpress/route';
 /**
  * Internal dependencies
  */
-import chequeFields from '../../entity-fields/src/cheque';
+import chequeFields from '../../entity-fields/cheque';
 import { ENTITY_KIND, getCoreEntities } from './entities';
 import { registerEntityFields } from './entity-fields';
 

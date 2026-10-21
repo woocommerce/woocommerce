@@ -8,7 +8,7 @@ import { __dangerousOptInToUnstableAPIsOnlyForCoreModules } from '@wordpress/pri
 /**
  * Internal dependencies
  */
-import type { SettingsField } from '../../entity-fields/src/types';
+import type { SettingsField } from '../../entity-fields/types';
 
 // The editor's entity field registry is private until the server-side Entity Fields API lands.
 const { unlock } = __dangerousOptInToUnstableAPIsOnlyForCoreModules(
