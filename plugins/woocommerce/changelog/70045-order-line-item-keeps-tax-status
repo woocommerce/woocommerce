@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Store the tax status on order line items when the product is added, as the tax class already is, so changing a product's tax status later no longer changes the tax of existing orders.

@@ -555,6 +555,7 @@ class WC_Tests_API_Orders_V2 extends WC_REST_Unit_Test_Case {
 			'variation_id'     => 0,
 			'quantity'         => 10,
 			'tax_class'        => '',
+			'tax_status'       => 'taxable',
 			'subtotal'         => '40.00',
 			'subtotal_tax'     => '0.00',
 			'total'            => '40.00',
@@ -809,7 +810,7 @@ class WC_Tests_API_Orders_V2 extends WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 
 		$line_item_properties = $data['schema']['properties']['line_items']['items']['properties'];
-		$this->assertEquals( 17, count( $line_item_properties ) );
+		$this->assertEquals( 18, count( $line_item_properties ) );
 		$this->assertArrayHasKey( 'id', $line_item_properties );
 		$this->assertArrayHasKey( 'meta_data', $line_item_properties );
 		$this->assertArrayHasKey( 'parent_name', $line_item_properties );

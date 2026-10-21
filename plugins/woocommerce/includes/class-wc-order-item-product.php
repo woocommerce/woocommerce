@@ -46,6 +46,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		'variation_id' => 0,
 		'quantity'     => 1,
 		'tax_class'    => '',
+		'tax_status'   => '',
 		'subtotal'     => 0,
 		'subtotal_tax' => 0,
 		'total'        => 0,
@@ -81,6 +82,23 @@ class WC_Order_Item_Product extends WC_Order_Item {
 			$this->error( 'order_item_product_invalid_tax_class', __( 'Invalid tax class', 'woocommerce' ) );
 		}
 		$this->set_prop( 'tax_class', $value );
+	}
+
+	/**
+	 * Set tax status.
+	 *
+	 * The status the product had when it was added to the order. An empty value means the
+	 * line was saved before the status was stored, and the product's current status is used.
+	 *
+	 * @since 11.4.0
+	 * @param string $value Tax status: 'taxable', 'shipping', 'none', or '' to read the product.
+	 */
+	public function set_tax_status( $value ): void {
+		$valid = array( ProductTaxStatus::TAXABLE, ProductTaxStatus::SHIPPING, ProductTaxStatus::NONE, '' );
+		if ( ! in_array( $value, $valid, true ) ) {
+			$this->error( 'order_item_product_invalid_tax_status', __( 'Invalid tax status', 'woocommerce' ) );
+		}
+		$this->set_prop( 'tax_status', $value );
 	}
 
 	/**
@@ -267,6 +285,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		}
 		$this->set_name( $product->get_name() );
 		$this->set_tax_class( $product->get_tax_class() );
+		$this->set_tax_status( $product->get_tax_status() );
 	}
 
 	/**
@@ -507,9 +526,21 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Get tax status.
 	 *
+	 * Returns the status stored on the line, so a later change to the product's tax status
+	 * does not change the tax of an existing order. A line saved before the status was stored
+	 * has no value and keeps reading its product, as before; a line whose product is gone and
+	 * that stored nothing is taxable.
+	 *
+	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 *                        In 'edit' context an unset status is returned as '' so it is
+	 *                        saved as such, not as the product's current value.
 	 * @return string
 	 */
-	public function get_tax_status() {
+	public function get_tax_status( $context = 'view' ) {
+		$tax_status = $this->get_prop( 'tax_status', $context );
+		if ( '' !== $tax_status || 'edit' === $context ) {
+			return $tax_status;
+		}
 		$product = $this->get_product();
 		return $product ? $product->get_tax_status() : ProductTaxStatus::TAXABLE;
 	}
