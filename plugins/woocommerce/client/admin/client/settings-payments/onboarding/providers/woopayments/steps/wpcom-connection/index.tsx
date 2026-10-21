@@ -6,6 +6,7 @@ import { __ } from '@wordpress/i18n';
 import { Button, Notice } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
+import { decodeEntities } from '@wordpress/html-entities';
 
 /**
  * Internal dependencies
@@ -114,11 +115,13 @@ export const JetpackStep: React.FC = () => {
 								} )
 								.catch( ( error ) => {
 									setAuthorizeError(
-										error?.message ||
-											__(
-												'Something went wrong. Please try again.',
-												'woocommerce'
-											)
+										decodeEntities(
+											error?.message ||
+												__(
+													'Something went wrong. Please try again.',
+													'woocommerce'
+												)
+										)
 									);
 									setIsConnectButtonLoading( false );
 								} );
