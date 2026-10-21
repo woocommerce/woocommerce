@@ -185,6 +185,7 @@ class PrivacyEraserTests extends \WC_Unit_Test_Case {
 		$user_notification->set_user_id( $user_id );
 		$user_notification->set_user_email( 'old@doe.com' );
 		$user_notification->set_product_id( $product->get_id() );
+		$user_notification->set_date_created( 1690000000 );
 		$user_notification_id = $user_notification->save();
 
 		$guest_notification = new Notification();
@@ -234,10 +235,10 @@ class PrivacyEraserTests extends \WC_Unit_Test_Case {
 		$this->assertSame( $product->get_permalink(), $values['Product URL'] );
 		$this->assertSame( 'old@doe.com', $values['Email'] );
 		$this->assertSame( 'Pending', $values['Status'] );
-		$this->assertNotSame( '', $values['Date signed up'] );
+		$date_format = wc_date_format() . ', ' . wc_time_format();
+		$this->assertSame( wc_format_datetime( new \WC_DateTime( '@1690000000' ), $date_format ), $values['Date signed up'] );
 		$this->assertSame( '', $values['Date notified'] );
 
-		$date_format = get_option( 'date_format' ) . ', ' . get_option( 'time_format' );
 		$sent_values = array_column( $response['data'][2]['data'], 'value', 'name' );
 		$this->assertSame( 'Sent', $sent_values['Status'] );
 		$this->assertSame( wc_format_datetime( new \WC_DateTime( '@1700000000' ), $date_format ), $sent_values['Date signed up'] );
@@ -343,6 +344,28 @@ class PrivacyEraserTests extends \WC_Unit_Test_Case {
 		$this->assertTrue( $second_page['done'] );
 
 		$this->assertEmpty( array_intersect( array_column( $first_page['data'], 'item_id' ), array_column( $second_page['data'], 'item_id' ) ) );
+
+		$notification_ids = array( (int) $notification->get_id() );
+		for ( $i = 12; $i <= 20; $i++ ) {
+			$notification = new Notification();
+			$notification->set_user_email( 'jon@doe.com' );
+			$notification->set_product_id( $i );
+			$notification_ids[] = $notification->save();
+		}
+
+		$first_page = PrivacyEraser::export_notification_data( 'jon@doe.com', 1 );
+		$this->assertCount( 10, $first_page['data'] );
+		$this->assertFalse( $first_page['done'] );
+
+		$second_page = PrivacyEraser::export_notification_data( 'jon@doe.com', 2 );
+		$this->assertTrue( $second_page['done'] );
+		$this->assertSame(
+			array_map(
+				static fn( $id ) => 'stock-notification-' . $id,
+				$notification_ids
+			),
+			array_column( $second_page['data'], 'item_id' )
+		);
 	}
 
 	/**

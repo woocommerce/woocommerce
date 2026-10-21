@@ -471,8 +471,8 @@ CREATE TABLE $meta_table_name (
 			$customer_ids    = array();
 			$customer_emails = array();
 			foreach ( (array) $args['customer'] as $customer ) {
-				if ( is_numeric( $customer ) ) {
-					$customer_ids[] = absint( $customer );
+				if ( is_int( $customer ) || ( is_string( $customer ) && ctype_digit( $customer ) ) ) {
+					$customer_ids[] = (int) $customer;
 				} elseif ( is_string( $customer ) && '' !== EmailNormalizer::normalize( $customer ) ) {
 					$customer_emails[] = EmailNormalizer::normalize( $customer );
 				}

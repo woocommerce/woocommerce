@@ -507,6 +507,8 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 			)
 		);
 		$this->assertSame( array(), $this->data_store->query( array( 'customer' => array( '', 0 ) ) ) );
+		$this->assertSame( array( $by_id_id ), $this->data_store->query( array( 'customer' => array( '1' ) ) ) );
+		$this->assertSame( array(), $this->data_store->query( array( 'customer' => array( '-1', '1.9', '1e0' ) ) ) );
 	}
 
 	/**

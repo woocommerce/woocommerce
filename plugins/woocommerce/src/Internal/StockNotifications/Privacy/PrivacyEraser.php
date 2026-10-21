@@ -127,7 +127,7 @@ class PrivacyEraser extends \WC_Abstract_Privacy {
 			NotificationStatus::CANCELLED => _x( 'Cancelled', 'stock notification status', 'woocommerce' ),
 		);
 		$status        = (string) $notification->get_status();
-		$date_format   = get_option( 'date_format' ) . ', ' . get_option( 'time_format' );
+		$date_format   = wc_date_format() . ', ' . wc_time_format();
 		$date_created  = $notification->get_date_created();
 		$date_notified = $notification->get_date_notified();
 
