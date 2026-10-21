@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Show serif and monospace site fonts in emails as Georgia and Courier New instead of Arial, and fix the Tahoma, Verdana and Arvo fonts.
+Show serif and monospace site fonts in emails as Georgia and Courier New instead of Arial, and stop the Tahoma, Verdana and Arvo fonts falling back to the mail app's default font.
