@@ -6,6 +6,7 @@ import { Spinner } from '@wordpress/components';
 import { useViewportMatch } from '@wordpress/compose';
 import { store as coreStore, useEntityRecord } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
+import { store as editorStore } from '@wordpress/editor';
 import { DataForm, useFormValidity } from '@wordpress/dataviews';
 import type { Form } from '@wordpress/dataviews';
 import { __ } from '@wordpress/i18n';
@@ -17,8 +18,10 @@ import { useState } from 'react';
 /**
  * Internal dependencies
  */
+import type { SettingsRecord } from '../../entity-fields/src/types';
 import { ENTITY_KIND } from './entities';
-import type { SettingsEntityConfig, SettingsRecord } from './entities';
+import type { SettingsEntityConfig } from './entities';
+import { getEntityFields } from './entity-fields';
 import './style.scss';
 
 const EMPTY_FORM: Form = { fields: [] };
@@ -40,7 +43,7 @@ function getErrorMessage( error: unknown, fallback: string ): string {
  * Render and save one settings entity using WordPress entity and form APIs.
  */
 function SettingsForm( { config }: { config: SettingsEntityConfig } ) {
-	const { kind, name, label, fields } = config;
+	const { kind, name, label } = config;
 	const { record, editedRecord, hasEdits, edit, save } =
 		useEntityRecord< SettingsRecord >( kind, name, name );
 	const isNarrow = useViewportMatch( 'medium', '<' );
@@ -49,10 +52,11 @@ function SettingsForm( { config }: { config: SettingsEntityConfig } ) {
 		status: 'success' | 'error';
 		message: string;
 	} >();
-	const { isSaving, loadError } = useSelect(
+	const { fields, isSaving, loadError } = useSelect(
 		( select ) => {
 			const core = select( coreStore );
 			return {
+				fields: getEntityFields( select( editorStore ), kind, name ),
 				isSaving: core.isSavingEntityRecord( kind, name, name ),
 				loadError: core.getResolutionError( 'getEntityRecord', [
 					kind,

@@ -2779,9 +2779,15 @@ importers:
       '@wordpress/dataviews':
         specifier: catalog:wp-bundled
         version: 20.0.0(@emotion/is-prop-valid@1.4.0)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(esbuild@0.27.7)(postcss@8.5.26)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))
+      '@wordpress/editor':
+        specifier: catalog:wp-min
+        version: 14.33.11(@date-fns/tz@1.5.0)(@emotion/is-prop-valid@1.4.0)(@types/react-dom@18.3.7(@types/react@18.3.28))(@types/react@18.3.28)(esbuild@0.27.7)(postcss@8.5.26)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))
       '@wordpress/i18n':
         specifier: catalog:wp-min
         version: 6.6.1
+      '@wordpress/private-apis':
+        specifier: ^1.33.1
+        version: 1.48.1
       '@wordpress/route':
         specifier: catalog:wp-min
         version: 0.6.1(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
