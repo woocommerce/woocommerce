@@ -12,6 +12,8 @@ import {
 	PanelBody,
 	ToggleControl,
 	Notice,
+	// `Link` from `@wordpress/ui` isn't available to this package yet.
+	// eslint-disable-next-line @wordpress/use-recommended-components
 	ExternalLink,
 } from '@wordpress/components';
 import { PRIVACY_URL, TERMS_URL } from '@woocommerce/block-settings';
