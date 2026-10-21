@@ -633,6 +633,42 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox POST /orders adds a custom line item that has a name and total but no product.
+	 */
+	public function test_create_order_with_custom_line_item(): void {
+		$request = new WP_REST_Request( 'POST', '/wc/v4/orders' );
+		$request->set_body_params(
+			array(
+				'line_items' => array(
+					array(
+						'name'  => 'Gift wrap',
+						'total' => '5.00',
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 201, $response->get_status(), 'The order should be created.' );
+		$item = current( wc_get_order( $response->get_data()['id'] )->get_items() );
+		$this->assertSame( 0, $item->get_product_id(), 'The item should have no product.' );
+		$this->assertSame( 'Gift wrap', $item->get_name(), 'The item should keep its name.' );
+		$this->assertSame( 5.0, (float) $item->get_total(), 'The item should keep its total.' );
+	}
+
+	/**
+	 * @testdox POST /orders rejects a custom line item that has no total.
+	 */
+	public function test_create_order_rejects_custom_line_item_without_total(): void {
+		$request = new WP_REST_Request( 'POST', '/wc/v4/orders' );
+		$request->set_body_params( array( 'line_items' => array( array( 'name' => 'Gift wrap' ) ) ) );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 400, $response->get_status(), 'The request should be rejected.' );
+		$this->assertSame( 'woocommerce_rest_required_product_reference', $response->get_data()['code'], 'The error should ask for a product.' );
+	}
+
+	/**
 	 * Test comprehensive value validation for all line types.
 	 */
 	public function test_comprehensive_value_validation(): void {

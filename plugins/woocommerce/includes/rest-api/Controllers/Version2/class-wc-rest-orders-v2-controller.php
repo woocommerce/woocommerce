@@ -888,16 +888,30 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 			$product_id = (int) $posted['product_id'];
 		} elseif ( ! empty( $posted['variation_id'] ) ) {
 			$product_id = (int) $posted['variation_id'];
-		} elseif ( 'update' === $action ) {
+		} elseif ( 'update' === $action || $this->is_custom_line_item( $posted ) ) {
 			$product_id = 0;
 		} else {
-			throw new WC_REST_Exception( 'woocommerce_rest_required_product_reference', __( 'Product ID or SKU is required.', 'woocommerce' ), 400 );
+			throw new WC_REST_Exception( 'woocommerce_rest_required_product_reference', esc_html__( 'Product ID or SKU is required. For a custom item, send a name and total instead.', 'woocommerce' ), 400 );
 		}
 		return $product_id;
 	}
 
 	/**
-	 * Checks that every new line item points to an existing product, before any item is saved.
+	 * Checks whether a line item is a custom item: one with no product, but a name and a total.
+	 *
+	 * @param array $posted Line item data.
+	 * @return bool
+	 */
+	protected function is_custom_line_item( $posted ) {
+		$has_product_reference = ! empty( $posted['product_id'] ) || ! empty( $posted['variation_id'] ) || ! empty( $posted['sku'] );
+		$has_name              = isset( $posted['name'] ) && is_string( $posted['name'] ) && '' !== trim( $posted['name'] );
+		$has_total             = isset( $posted['total'] ) && is_numeric( wc_format_decimal( $posted['total'] ) );
+
+		return ! $has_product_reference && $has_name && $has_total;
+	}
+
+	/**
+	 * Checks that every new line item, other than custom items, points to an existing product, before any item is saved.
 	 * Otherwise a bad item fails the request after earlier items, and their stock, were already saved.
 	 *
 	 * @throws WC_REST_Exception When a new line item has no product reference, or its product doesn't exist.
@@ -910,7 +924,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		}
 
 		foreach ( $line_items as $posted ) {
-			if ( ! is_array( $posted ) || ! empty( $posted['id'] ) || $this->item_is_null( $posted ) || ( isset( $posted['quantity'] ) && 0 === $posted['quantity'] ) ) {
+			if ( ! is_array( $posted ) || ! empty( $posted['id'] ) || $this->item_is_null( $posted ) || ( isset( $posted['quantity'] ) && 0 === $posted['quantity'] ) || $this->is_custom_line_item( $posted ) ) {
 				continue;
 			}
 
@@ -989,8 +1003,8 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 			&& array_key_exists( 'variation_id', $posted )
 			&& 0 === (int) $posted['variation_id'];
 
-		// Only new items must resolve, so orders whose products were deleted later stay editable.
-		if ( 'create' === $action && ( ! $product || ! $product->exists() ) ) {
+		// New items must resolve unless they are custom items. Existing items need not, so orders whose products were deleted later stay editable.
+		if ( 'create' === $action && ( ! $product || ! $product->exists() ) && ! $this->is_custom_line_item( $posted ) ) {
 			throw new WC_REST_Exception( 'woocommerce_rest_invalid_product_id', esc_html__( 'Invalid product ID.', 'woocommerce' ), 400 );
 		}
 

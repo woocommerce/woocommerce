@@ -1587,7 +1587,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 */
 	public function provide_line_items_with_missing_product(): array {
 		return array(
-			'deleted product'   => array(
+			'deleted product'                     => array(
 				static function (): array {
 					$product    = WC_Helper_Product::create_simple_product();
 					$product_id = $product->get_id();
@@ -1596,7 +1596,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 					return array( 'product_id' => $product_id );
 				},
 			),
-			'deleted variation' => array(
+			'deleted variation'                   => array(
 				static function (): array {
 					$variable  = WC_Helper_Product::create_variation_product();
 					$variation = wc_get_product( $variable->get_children()[0] );
@@ -1609,9 +1609,31 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 					return $line_item;
 				},
 			),
-			'unknown SKU'       => array(
+			'unknown SKU'                         => array(
 				static function (): array {
 					return array( 'sku' => 'missing-sku' );
+				},
+			),
+			'deleted product with name and total' => array(
+				static function (): array {
+					$product    = WC_Helper_Product::create_simple_product();
+					$product_id = $product->get_id();
+					$product->delete( true );
+
+					return array(
+						'product_id' => $product_id,
+						'name'       => 'Gone',
+						'total'      => '25.00',
+					);
+				},
+			),
+			'unknown SKU with name and total'     => array(
+				static function (): array {
+					return array(
+						'sku'   => 'missing-sku',
+						'name'  => 'Gone',
+						'total' => '25.00',
+					);
 				},
 			),
 		);
@@ -1639,6 +1661,54 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 400, $response->get_status(), 'The request should be rejected.' );
 		$this->assertSame( 'woocommerce_rest_invalid_product_id', $response->get_data()['code'], 'The error should name the invalid product.' );
 		$this->assertCount( $order_count, wc_get_orders( $query_args ), 'No order should be created.' );
+	}
+
+	/**
+	 * @testdox POST /orders adds a custom line item that has a name and total but no product.
+	 */
+	public function test_create_order_with_custom_line_item(): void {
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders' );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'line_items' => array(
+						array(
+							'name'     => 'Gift wrap',
+							'quantity' => 2,
+							'total'    => '5.00',
+						),
+					),
+				)
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 201, $response->get_status(), 'The order should be created.' );
+		$item = current( wc_get_order( $response->get_data()['id'] )->get_items() );
+		$this->assertSame( 0, $item->get_product_id(), 'The item should have no product.' );
+		$this->assertSame( 'Gift wrap', $item->get_name(), 'The item should keep its name.' );
+		$this->assertSame( 2, $item->get_quantity(), 'The item should keep its quantity.' );
+		$this->assertSame( 5.0, (float) $item->get_total(), 'The item should keep its total.' );
+	}
+
+	/**
+	 * @testdox POST /orders rejects a line item with no product and no name or total.
+	 * @testWith [{"name": "Gift wrap"}]
+	 *           [{"total": "5.00"}]
+	 *           [{"name": " ", "total": "5.00"}]
+	 *           [{"product_id": 0, "name": "Gift wrap", "total": ""}]
+	 *
+	 * @param array<string, int|string> $line_item Line item payload.
+	 */
+	public function test_create_order_rejects_incomplete_custom_line_item( array $line_item ): void {
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders' );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body( wp_json_encode( array( 'line_items' => array( $line_item ) ) ) );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 400, $response->get_status(), 'The request should be rejected.' );
+		$this->assertSame( 'woocommerce_rest_required_product_reference', $response->get_data()['code'], 'The error should ask for a product.' );
 	}
 
 	/**
