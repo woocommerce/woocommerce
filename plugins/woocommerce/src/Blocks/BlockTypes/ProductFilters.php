@@ -233,17 +233,17 @@ CSS;
 		}
 
 		$wrapper_attributes = array(
-			'class'                         => implode( ' ', $wrapper_classes ),
-			'data-wp-router-region'         => $this->generate_navigation_id( $block ),
-			'data-wp-interactive'           => $this->get_full_block_name(),
-			'data-wp-init--colors'          => 'callbacks.initColors',
-			'data-wp-watch--active-filters' => 'callbacks.syncActiveFiltersWithServer',
-			'data-wp-context'               => (string) wp_json_encode( $interactivity_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
-			'style'                         => $this->get_css_variables( $attributes ),
+			'class'                          => implode( ' ', $wrapper_classes ),
+			'data-wp-router-region'          => $this->generate_navigation_id( $block ),
+			'data-wp-interactive'            => $this->get_full_block_name(),
+			'data-wp-init---colors'          => 'callbacks.initColors',
+			'data-wp-watch---active-filters' => 'callbacks.syncActiveFiltersWithServer',
+			'data-wp-context'                => (string) wp_json_encode( $interactivity_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
+			'style'                          => $this->get_css_variables( $attributes ),
 		);
 
 		if ( $has_overlay ) {
-			$wrapper_attributes['data-wp-watch--scrolling']         = 'callbacks.scrollLimit';
+			$wrapper_attributes['data-wp-watch---scrolling']        = 'callbacks.scrollLimit';
 			$wrapper_attributes['data-wp-on--keyup']                = 'actions.closeOverlayOnEscape';
 			$wrapper_attributes['data-wp-class--is-overlay-opened'] = 'context.isOverlayOpened';
 		}
