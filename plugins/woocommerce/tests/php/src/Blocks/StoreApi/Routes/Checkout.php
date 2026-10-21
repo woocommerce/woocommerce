@@ -2614,6 +2614,66 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * @testdox Rejecting payment because the new billing email cannot use the coupon releases the row this order added, not another order's row.
+	 */
+	public function test_checkout_order_with_changed_email_releases_own_coupon_row() {
+		$coupon = new \WC_Coupon();
+		$coupon->set_code( 'route-changed-email' );
+		$coupon->set_amount( 2 );
+		$coupon->set_usage_limit_per_user( 1 );
+		$coupon->save();
+
+		$buyer_order = \WC_Helper_Order::create_order( 0 );
+		$buyer_order->set_billing_email( 'buyer@example.com' );
+		$buyer_order->set_status( OrderStatus::PENDING );
+		$buyer_order->save();
+		$buyer_order->apply_coupon( $coupon->get_code() );
+
+		$order = \WC_Helper_Order::create_order( 0 );
+		$order->set_billing_email( 'reserve@example.com' );
+		$order->set_status( OrderStatus::PENDING );
+		$order->save();
+		$order->apply_coupon( $coupon->get_code() );
+
+		$address = array(
+			'first_name' => 'Test',
+			'last_name'  => 'User',
+			'company'    => '',
+			'address_1'  => '123 Test St',
+			'address_2'  => '',
+			'city'       => 'Test City',
+			'state'      => 'CA',
+			'postcode'   => '90210',
+			'country'    => 'US',
+			'phone'      => '555-32123',
+		);
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout/' . $order->get_id() );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_query_params(
+			array(
+				'key'           => $order->get_order_key(),
+				'billing_email' => 'reserve@example.com',
+			)
+		);
+		$request->set_body_params(
+			array(
+				'billing_address'  => array_merge( $address, array( 'email' => 'buyer@example.com' ) ),
+				'shipping_address' => $address,
+				'payment_method'   => WC_Gateway_BACS::ID,
+			)
+		);
+
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 409, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertSame( 'woocommerce_rest_order_coupon_errors', $response->get_data()['code'] );
+
+		$coupon = new \WC_Coupon( 'route-changed-email' );
+		$this->assertSame( array( 'buyer@example.com' ), array_values( $coupon->get_used_by() ) );
+		$this->assertEquals( 1, $coupon->get_usage_count() );
+	}
+
+	/**
 	 * @testdox Checkout refuses to complete a cancelled unpaid non-zero order.
 	 */
 	public function test_checkout_rejects_cancelled_unpaid_non_zero_order(): void {
