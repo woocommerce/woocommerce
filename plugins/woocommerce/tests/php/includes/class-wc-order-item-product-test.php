@@ -65,6 +65,153 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * set_product() stores the product's tax status on the line, as it stores the tax class.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/70045
+	 */
+	public function test_set_product_stores_tax_status(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_tax_status( 'none' );
+		$product->save();
+
+		$item = new WC_Order_Item_Product();
+		$item->set_product( $product );
+		$this->assertEquals( 'none', $item->get_tax_status( 'edit' ) );
+
+		$item->set_order_id( $this->order->get_id() );
+		$item->save();
+		$this->assertEquals( 'none', get_metadata( 'order_item', $item->get_id(), '_tax_status', true ) );
+	}
+
+	/**
+	 * A line keeps the tax status it was sold with: changing the product afterwards does not
+	 * change it, and neither does deleting the product.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/70045
+	 */
+	public function test_tax_status_survives_product_changes(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_tax_status( 'taxable' );
+		$product->save();
+
+		$order = WC_Helper_Order::create_order( 1, $product );
+		$item  = current( $order->get_items() );
+		$this->assertEquals( 'taxable', $item->get_tax_status() );
+
+		$product->set_tax_status( 'none' );
+		$product->save();
+		$item = current( wc_get_order( $order->get_id() )->get_items() );
+		$this->assertEquals( 'taxable', $item->get_tax_status() );
+
+		$product->delete( true );
+		$item = current( wc_get_order( $order->get_id() )->get_items() );
+		$this->assertEquals( 'taxable', $item->get_tax_status() );
+	}
+
+	/**
+	 * A line saved before the status was stored has no value and keeps reading its product;
+	 * without a product it is taxable, as before. In 'edit' context the unset value stays
+	 * empty, so saving the line does not freeze the product's current status onto it.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/70045
+	 */
+	public function test_tax_status_falls_back_to_product_for_lines_without_one(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_tax_status( 'shipping' );
+		$product->save();
+
+		$order = WC_Helper_Order::create_order( 1, $product );
+		$item  = current( $order->get_items() );
+		delete_metadata( 'order_item', $item->get_id(), '_tax_status' );
+
+		$item = current( wc_get_order( $order->get_id() )->get_items() );
+		$this->assertEquals( '', $item->get_tax_status( 'edit' ) );
+		$this->assertEquals( 'shipping', $item->get_tax_status() );
+
+		$item->set_name( 'Renamed' );
+		$item->save();
+		$this->assertEquals( '', get_metadata( 'order_item', $item->get_id(), '_tax_status', true ) );
+
+		$product->delete( true );
+		$item = current( wc_get_order( $order->get_id() )->get_items() );
+		$this->assertEquals( 'taxable', $item->get_tax_status() );
+	}
+
+	/**
+	 * Recalculating an order's taxes uses the status stored on the line, not the product's.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/70045
+	 */
+	public function test_calculate_taxes_uses_stored_tax_status(): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'TAX',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '0',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+		$location = array(
+			'country'  => 'US',
+			'state'    => 'OR',
+			'postcode' => '97266',
+			'city'     => 'Portland',
+		);
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100 );
+		$product->set_tax_status( 'taxable' );
+		$product->save();
+
+		$order = new WC_Order();
+		$order->add_product( $product, 1 );
+		$order->save();
+		$item = current( $order->get_items() );
+		$item->calculate_taxes( $location );
+		$this->assertEquals( '10', $item->get_total_tax() );
+
+		// The merchant makes the product tax-free: the line sold as taxable stays taxed.
+		$product->set_tax_status( 'none' );
+		$product->save();
+		$item = current( wc_get_order( $order->get_id() )->get_items() );
+		$item->calculate_taxes( $location );
+		$this->assertEquals( '10', $item->get_total_tax() );
+
+		// A line sold as tax-free stays tax-free when the product becomes taxable.
+		$order = new WC_Order();
+		$order->add_product( $product, 1 );
+		$order->save();
+		$product->set_tax_status( 'taxable' );
+		$product->save();
+		$item = current( wc_get_order( $order->get_id() )->get_items() );
+		$item->calculate_taxes( $location );
+		$this->assertEquals( '0', $item->get_total_tax() );
+	}
+
+	/**
+	 * set_tax_status() accepts the product statuses and the unset value, nothing else.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/70045
+	 */
+	public function test_set_tax_status_validation(): void {
+		$item = new WC_Order_Item_Product();
+		foreach ( array( 'taxable', 'shipping', 'none', '' ) as $status ) {
+			$item->set_tax_status( $status );
+			$this->assertEquals( $status, $item->get_tax_status( 'edit' ) );
+		}
+
+		$this->expectException( WC_Data_Exception::class );
+		$this->expectExceptionMessage( 'Invalid tax status' );
+		$item->set_tax_status( 'exempt' );
+	}
+
+	/**
 	 * Test that backorder meta is excluded from formatted meta data
 	 * for completed orders.
 	 */

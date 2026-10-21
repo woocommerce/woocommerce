@@ -92,8 +92,9 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 *
 	 * @since 11.4.0
 	 * @param string $value Tax status: 'taxable', 'shipping', 'none', or '' to read the product.
+	 * @return void
 	 */
-	public function set_tax_status( $value ): void {
+	public function set_tax_status( $value ) {
 		$valid = array( ProductTaxStatus::TAXABLE, ProductTaxStatus::SHIPPING, ProductTaxStatus::NONE, '' );
 		if ( ! in_array( $value, $valid, true ) ) {
 			$this->error( 'order_item_product_invalid_tax_status', __( 'Invalid tax status', 'woocommerce' ) );
