@@ -406,6 +406,11 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 		$this->assertNotContains( $refund_id, $ids, 'The LIKE condition excludes refunds in the prepared page query.' );
 		$this->assertTrue( OrdersScheduler::is_excluded_from_import( $refund_id ), 'The LIKE condition excludes refunds in the prepared probe.' );
 		$this->assertFalse( OrdersScheduler::is_excluded_from_import( $parent_id ) );
+
+		OrdersScheduler::process_pending_batch( '2000-01-01 00:00:00', 0 );
+		$imported = $this->get_imported_order_ids();
+		$this->assertContains( $parent_id, $imported, 'The prepared cursor query keeps the parent.' );
+		$this->assertNotContains( $refund_id, $imported, 'The prepared cursor query applies the LIKE condition.' );
 	}
 
 	/**
