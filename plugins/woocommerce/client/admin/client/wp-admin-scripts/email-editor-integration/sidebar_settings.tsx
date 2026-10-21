@@ -8,9 +8,9 @@ import {
 	PanelRow,
 	TextControl,
 	ToggleControl,
-	__experimentalText as Text,
 } from '@wordpress/components';
 import { addFilter } from '@wordpress/hooks';
+import { Text } from '@wordpress/ui';
 import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
 import { useState } from '@wordpress/element';
