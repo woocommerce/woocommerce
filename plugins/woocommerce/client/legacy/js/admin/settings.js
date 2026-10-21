@@ -144,15 +144,7 @@
 			);
 		}
 
-		// The Settings UI page owns its dirty state and unsaved-changes prompt,
-		// so the classic tracking must leave its Save button alone.
-		const isSettingsUIPage = document.body.classList.contains(
-			'woocommerce-settings-ui-page'
-		);
-
-		if ( ! isSettingsUIPage ) {
-			$( editPrompt );
-		}
+		$( editPrompt );
 
 		const nodeListContainsFormElements = ( nodes ) => {
 			if ( ! nodes.length	) {
@@ -177,9 +169,7 @@
 			}
 		} );
 
-		if ( ! isSettingsUIPage ) {
-			observer.observe( form, { childList: true, subtree: true } );
-		}
+		observer.observe( form, { childList: true, subtree: true } );
 
 		// Sorting
 		$( 'table.wc_gateways tbody, table.wc_shipping tbody' ).sortable( {

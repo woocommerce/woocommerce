@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Deprecate the experimental Settings UI classes and its section registration hook; they no longer do anything.

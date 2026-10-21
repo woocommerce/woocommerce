@@ -13,6 +13,7 @@ defined( 'ABSPATH' ) || exit;
  * Optional contract for registered sections that provide a native Settings UI page.
  *
  * @since 11.0.0
+ * @deprecated 11.4.0 The Settings UI was removed. Settings pages use the classic renderer.
  */
 interface SettingsSectionUIPageProviderInterface {
 

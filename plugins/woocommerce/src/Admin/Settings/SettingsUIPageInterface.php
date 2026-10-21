@@ -13,6 +13,7 @@ defined( 'ABSPATH' ) || exit;
  * Contract for settings pages that opt into the settings UI renderer.
  *
  * @since 10.9.0
+ * @deprecated 11.4.0 The Settings UI was removed. Settings pages use the classic renderer.
  */
 interface SettingsUIPageInterface {
 
