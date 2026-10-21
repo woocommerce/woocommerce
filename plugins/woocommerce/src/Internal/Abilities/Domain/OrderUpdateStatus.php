@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\ActionableAbility;
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
+use Automattic\WooCommerce\Internal\Abilities\StagedMethod;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\DomainAbilityHelpers;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderAbilityTrait;
 use Automattic\WooCommerce\Utilities\OrderUtil;
@@ -136,11 +137,11 @@ class OrderUpdateStatus extends ActionableAbility {
 			return null;
 		}
 
-		if ( ! self::can_stage_status( $subject ) ) {
-			return new \WP_Error(
+		$staged = new StagedMethod( 'update_status', 'stage_status' );
+		if ( ! $staged->supports( $subject ) ) {
+			return $staged->unsupported_error(
 				'woocommerce_order_status_staging_unsupported',
-				__( 'This order type does not support this change yet.', 'woocommerce' ),
-				array( 'status' => 400 )
+				__( 'This order type does not support this change yet.', 'woocommerce' )
 			);
 		}
 
@@ -202,21 +203,6 @@ class OrderUpdateStatus extends ActionableAbility {
 		return array(
 			'order' => self::format_order_for_response( $subject, false ),
 		);
-	}
-
-	/**
-	 * Whether the order class can stage a status change. It cannot when a class
-	 * below the one that declares WC_Order::stage_status() overrides
-	 * WC_Order::update_status(), because staging would skip that override.
-	 *
-	 * @param \WC_Order $order Order.
-	 * @return bool
-	 */
-	private static function can_stage_status( \WC_Order $order ): bool {
-		$update_status = ( new \ReflectionMethod( $order, 'update_status' ) )->getDeclaringClass()->getName();
-		$stage_status  = ( new \ReflectionMethod( $order, 'stage_status' ) )->getDeclaringClass()->getName();
-
-		return ! is_subclass_of( $update_status, $stage_status );
 	}
 
 	/**
