@@ -17,7 +17,8 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\InvalidInputExceptio
 trait AssertsInvalidInput {
 
 	/**
-	 * Run the operation and assert it throws an InvalidInputException with the given code, field and params.
+	 * Run the operation and assert it throws an InvalidInputException carrying exactly one
+	 * error, with the given code, field and params.
 	 *
 	 * @param callable             $operation Operation expected to throw.
 	 * @param string               $code      Expected error code.
@@ -26,16 +27,7 @@ trait AssertsInvalidInput {
 	 * @return InvalidInputException The caught exception, for further assertions.
 	 */
 	protected function assert_invalid_input( callable $operation, string $code, string $field, array $params = array() ): InvalidInputException {
-		try {
-			$operation();
-		} catch ( InvalidInputException $e ) {
-			$this->assertSame( $code, $e->get_error_code(), 'Error code' );
-			$this->assertSame( $field, $e->get_field(), 'Field' );
-			$this->assertSame( $params, $e->get_params(), 'Params' );
-			return $e;
-		}
-
-		$this->fail( sprintf( 'Expected an InvalidInputException with code "%s" on "%s".', $code, $field ) );
+		return $this->assert_invalid_inputs( $operation, array( array( $code, $field, $params ) ) );
 	}
 
 	/**
