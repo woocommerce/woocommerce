@@ -12,10 +12,11 @@ use Automattic\WooCommerce\Proxies\LegacyProxy;
  * It is encouraged to use the following methods in place of their native Action Scheduler equivalents:
  *
  *        ActionSchedulerUtil::enqueue_async() ↔ as_enqueue_async_action()
- *      ActionSchedulerUtil::schedule_single() ↔ as_schedule_single_action(),
+ *      ActionSchedulerUtil::schedule_single() ↔ as_schedule_single_action()
  *   ActionSchedulerUtil::schedule_recurring() ↔ as_schedule_recurring_action()
  *        ActionSchedulerUtil::schedule_cron() ↔ as_schedule_cron_action()
  * ActionSchedulerUtil::has_scheduled_action() ↔ as_has_scheduled_action()
+ *             ActionSchedulerUtil::supports() ↔ as_supports()
  *
  * This aims to reduce problems when an unexpectedly old version of Action Scheduler is loaded instead of
  * the version actually bundled with WooCommerce (though unusual, it is known to happen). Additionally, this
@@ -51,7 +52,7 @@ class ActionSchedulerUtil {
 	);
 
 	/**
-	 * List of supported features.
+	 * Feature probe results, keyed by feature.
 	 *
 	 * @var array<string, bool>
 	 */
@@ -72,7 +73,7 @@ class ActionSchedulerUtil {
 	private static ?string $bundled_version = null;
 
 	/**
-	 * Source path of the loaded version of Action Scheduler.
+	 * The plugin, mu-plugin or theme that owns the loaded copy.
 	 *
 	 * @var array|null
 	 */
