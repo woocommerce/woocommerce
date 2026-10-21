@@ -432,6 +432,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'city',
 			'state',
 			'postcode',
+			'username',
 		);
 
 		if ( ! empty( $query_args['filter_empty'] ) ) {

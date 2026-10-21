@@ -10,6 +10,11 @@
 
 declare(strict_types=1);
 
+// Only requests from specs that enable this plugin send the cookie.
+if ( ! isset( $_COOKIE['woocommerce-blocks-test-item-data-display-hidden'] ) ) {
+	return;
+}
+
 final class Item_Data_Display_Hidden_Test_Fixture {
 	/**
 	 * Register fixture hooks.
