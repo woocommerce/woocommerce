@@ -332,8 +332,8 @@ class WC_Webhook extends WC_Legacy_Webhook {
 
 			$order = wc_get_order( absint( $arg ) );
 
-			// Ignore standard drafts for orders.
-			if ( in_array( $order->get_status(), array( OrderStatus::DRAFT, OrderStatus::AUTO_DRAFT, 'new' ), true ) ) {
+			// Ignore drafts for orders, matching the statuses for which the data stores skip woocommerce_new_order.
+			if ( in_array( $order->get_status(), array( OrderStatus::DRAFT, OrderStatus::AUTO_DRAFT, OrderStatus::CHECKOUT_DRAFT, OrderStatus::NEW ), true ) ) {
 				return false;
 			}
 		}
