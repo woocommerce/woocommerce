@@ -191,6 +191,37 @@ class WC_REST_Orders_V1_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Updating an order with a deleted product leaves its existing items unchanged.
+	 */
+	public function test_update_order_with_deleted_product_leaves_existing_items_unchanged(): void {
+		$order   = wc_create_order();
+		$item_id = $order->add_product( WC_Helper_Product::create_simple_product() );
+		$order->save();
+
+		$deleted    = WC_Helper_Product::create_simple_product();
+		$deleted_id = $deleted->get_id();
+		$deleted->delete( true );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v1/orders/' . $order->get_id() );
+		$request->set_body_params(
+			array(
+				'line_items' => array(
+					array(
+						'id'       => $item_id,
+						'quantity' => 5,
+					),
+					array( 'product_id' => $deleted_id ),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 400, $response->get_status(), 'The request should be rejected.' );
+		$this->assertSame( 'woocommerce_rest_invalid_product_id', $response->get_data()['code'], 'The error should name the invalid product.' );
+		$this->assertSame( 1, ( new WC_Order_Item_Product( $item_id ) )->get_quantity(), 'The existing item should keep its quantity.' );
+	}
+
+	/**
 	 * @testdox Updating with the unchanged parent preserves the variation while ignoring view-context product ID filters.
 	 */
 	public function test_update_line_item_with_unchanged_parent_preserves_variation_id(): void {

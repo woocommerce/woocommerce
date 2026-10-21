@@ -453,7 +453,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Prepare a single order for create.
 	 *
-	 * @throws WC_REST_Exception If the customer ID is invalid.
+	 * @throws WC_REST_Exception If the customer ID, or a new line item's product, is invalid.
 	 *
 	 * @param  WP_REST_Request $request Request object.
 	 * @return WP_Error|WC_Order $data Object.
@@ -463,6 +463,8 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 		$order     = new WC_Order( $id );
 		$schema    = $this->get_item_schema();
 		$data_keys = array_keys( array_filter( $schema['properties'], array( $this, 'filter_writable_props' ) ) );
+
+		$this->check_new_line_item_products( $request['line_items'] );
 
 		if ( ! is_null( $request['customer_id'] ) && 0 !== $request['customer_id'] ) {
 			if ( is_wp_error( Users::get_user_in_current_site( $request['customer_id'] ) ) ) {
@@ -634,6 +636,31 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 			throw new WC_REST_Exception( 'woocommerce_rest_required_product_reference', __( 'Product ID or SKU is required.', 'woocommerce' ), 400 );
 		}
 		return $product_id;
+	}
+
+	/**
+	 * Checks that every new line item points to an existing product, before any item is saved.
+	 * Otherwise a bad item fails the request after earlier items were already saved.
+	 *
+	 * @throws WC_REST_Exception When a new line item has no product reference, or its product doesn't exist.
+	 * @param mixed $line_items Line items from the request.
+	 * @return void
+	 */
+	protected function check_new_line_item_products( $line_items ) {
+		if ( ! is_array( $line_items ) ) {
+			return;
+		}
+
+		foreach ( $line_items as $posted ) {
+			if ( ! is_array( $posted ) || ! empty( $posted['id'] ) || $this->item_is_null( $posted ) || ( isset( $posted['quantity'] ) && 0 === $posted['quantity'] ) ) {
+				continue;
+			}
+
+			$product = wc_get_product( $this->get_product_id( $posted ) );
+			if ( ! $product || ! $product->exists() ) {
+				throw new WC_REST_Exception( 'woocommerce_rest_invalid_product_id', esc_html__( 'Invalid product ID.', 'woocommerce' ), 400 );
+			}
+		}
 	}
 
 	/**
