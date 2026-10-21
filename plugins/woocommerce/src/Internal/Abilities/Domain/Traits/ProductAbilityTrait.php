@@ -191,6 +191,35 @@ trait ProductAbilityTrait {
 					'minimum' => 1,
 				),
 			),
+			'weight'            => array(
+				'type'        => 'string',
+				'description' => sprintf(
+					/* translators: %s: store weight unit, such as kg or lbs. */
+					__( 'Product weight in %s (the store weight unit), as a decimal string. An empty string removes it.', 'woocommerce' ),
+					get_option( 'woocommerce_weight_unit' )
+				),
+				'pattern'     => self::get_product_measurement_input_pattern(),
+			),
+			'length'            => self::get_product_dimension_schema(),
+			'width'             => self::get_product_dimension_schema(),
+			'height'            => self::get_product_dimension_schema(),
+		);
+	}
+
+	/**
+	 * Get the input schema for one product dimension.
+	 *
+	 * @return array
+	 */
+	private static function get_product_dimension_schema(): array {
+		return array(
+			'type'        => 'string',
+			'description' => sprintf(
+				/* translators: %s: store dimension unit, such as cm or in. */
+				__( 'Product dimension in %s (the store dimension unit), as a decimal string. An empty string removes it.', 'woocommerce' ),
+				get_option( 'woocommerce_dimension_unit' )
+			),
+			'pattern'     => self::get_product_measurement_input_pattern(),
 		);
 	}
 
@@ -346,7 +375,7 @@ trait ProductAbilityTrait {
 		return array(
 			'physical'  => array(
 				'wc_type'       => ProductType::SIMPLE,
-				'fields'        => $simple_fields,
+				'fields'        => array_merge( $simple_fields, array( 'weight', 'length', 'width', 'height' ) ),
 				'product_props' => array(
 					'virtual'      => false,
 					'downloadable' => false,
@@ -513,6 +542,10 @@ trait ProductAbilityTrait {
 			'external_url'      => 'set_product_url',
 			'button_text'       => 'set_button_text',
 			'grouped_products'  => 'set_children',
+			'weight'            => 'set_weight',
+			'length'            => 'set_length',
+			'width'             => 'set_width',
+			'height'            => 'set_height',
 		);
 
 		foreach ( $setters as $field => $setter ) {
@@ -610,6 +643,10 @@ trait ProductAbilityTrait {
 			return self::prepare_product_price_value( $value );
 		}
 
+		if ( in_array( $field, array( 'weight', 'length', 'width', 'height' ), true ) ) {
+			return self::prepare_product_measurement_value( $value );
+		}
+
 		if ( 'grouped_products' === $field ) {
 			if ( ! is_array( $value ) ) {
 				return new \WP_Error(
@@ -664,11 +701,62 @@ trait ProductAbilityTrait {
 	}
 
 	/**
+	 * Prepare a product weight or dimension before passing it to the product setter.
+	 *
+	 * @param mixed $value Measurement value.
+	 * @return string|\WP_Error
+	 */
+	private static function prepare_product_measurement_value( $value ) {
+		if ( ! is_scalar( $value ) || is_bool( $value ) ) {
+			return self::get_invalid_product_measurement_error();
+		}
+
+		$value = trim( (string) $value );
+
+		if ( 1 !== preg_match( '/' . self::get_product_measurement_input_pattern() . '/', $value ) ) {
+			return self::get_invalid_product_measurement_error();
+		}
+
+		return wc_format_decimal( $value );
+	}
+
+	/**
+	 * Get the error for an invalid product weight or dimension.
+	 *
+	 * @return \WP_Error
+	 */
+	private static function get_invalid_product_measurement_error(): \WP_Error {
+		return new \WP_Error(
+			'woocommerce_product_measurement_invalid',
+			__( 'Product weights and dimensions must be non-negative decimal strings without units.', 'woocommerce' ),
+			array( 'status' => 400 )
+		);
+	}
+
+	/**
 	 * Get a schema-compatible pattern for product price inputs.
 	 *
 	 * @return string
 	 */
 	private static function get_product_price_input_pattern(): string {
+		return '^(?:-?' . self::get_product_decimal_number_pattern() . '|)$';
+	}
+
+	/**
+	 * Get a schema-compatible pattern for product weight and dimension inputs.
+	 *
+	 * @return string
+	 */
+	private static function get_product_measurement_input_pattern(): string {
+		return '^(?:' . self::get_product_decimal_number_pattern() . '|)$';
+	}
+
+	/**
+	 * Get a pattern for an unsigned decimal number with any decimal separator that WooCommerce accepts.
+	 *
+	 * @return string
+	 */
+	private static function get_product_decimal_number_pattern(): string {
 		$decimal_separators        = array_map(
 			static function ( string $separator ): string {
 				return preg_quote( $separator, '/' );
@@ -677,7 +765,7 @@ trait ProductAbilityTrait {
 		);
 		$decimal_separator_pattern = implode( '', $decimal_separators );
 
-		return '^(?:-?(?:[0-9]+(?:[' . $decimal_separator_pattern . '][0-9]+)?|[' . $decimal_separator_pattern . '][0-9]+)|)$';
+		return '(?:[0-9]+(?:[' . $decimal_separator_pattern . '][0-9]+)?|[' . $decimal_separator_pattern . '][0-9]+)';
 	}
 
 	/**
@@ -809,6 +897,12 @@ trait ProductAbilityTrait {
 			'external_url'      => $product instanceof \WC_Product_External ? $product->get_product_url() : null,
 			'button_text'       => $product instanceof \WC_Product_External ? $product->get_button_text() : null,
 			'grouped_products'  => $product instanceof \WC_Product_Grouped ? array_map( 'absint', $product->get_children( 'edit' ) ) : array(),
+			'weight'            => $product->get_weight(),
+			'length'            => $product->get_length(),
+			'width'             => $product->get_width(),
+			'height'            => $product->get_height(),
+			'weight_unit'       => get_option( 'woocommerce_weight_unit' ),
+			'dimension_unit'    => get_option( 'woocommerce_dimension_unit' ),
 			'date_created'      => wc_rest_prepare_date_response( $product->get_date_created(), false ),
 			'date_created_gmt'  => wc_rest_prepare_date_response( $product->get_date_created() ),
 			'date_modified'     => wc_rest_prepare_date_response( $product->get_date_modified(), false ),
@@ -887,6 +981,30 @@ trait ProductAbilityTrait {
 						'type'        => 'array',
 						'description' => __( 'Product IDs included as children of a grouped product.', 'woocommerce' ),
 						'items'       => array( 'type' => 'integer' ),
+					),
+					'weight'            => array(
+						'type'        => 'string',
+						'description' => __( 'Product weight in weight_unit, or an empty string when it is not set.', 'woocommerce' ),
+					),
+					'length'            => array(
+						'type'        => 'string',
+						'description' => __( 'Product length in dimension_unit, or an empty string when it is not set.', 'woocommerce' ),
+					),
+					'width'             => array(
+						'type'        => 'string',
+						'description' => __( 'Product width in dimension_unit, or an empty string when it is not set.', 'woocommerce' ),
+					),
+					'height'            => array(
+						'type'        => 'string',
+						'description' => __( 'Product height in dimension_unit, or an empty string when it is not set.', 'woocommerce' ),
+					),
+					'weight_unit'       => array(
+						'type'        => 'string',
+						'description' => __( 'Store weight unit, such as kg or lbs.', 'woocommerce' ),
+					),
+					'dimension_unit'    => array(
+						'type'        => 'string',
+						'description' => __( 'Store dimension unit, such as cm or in.', 'woocommerce' ),
 					),
 					'date_created'      => array(
 						'type'   => array( 'string', 'null' ),

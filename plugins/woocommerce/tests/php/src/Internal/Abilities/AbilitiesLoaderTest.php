@@ -37,6 +37,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		'woocommerce/product-update',
 		'woocommerce/product-delete',
 		'woocommerce/orders-query',
+		'woocommerce/order-update',
 		'woocommerce/order-update-status',
 		'woocommerce/order-add-note',
 		'woocommerce/order-notes-query',
@@ -234,6 +235,11 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				'readonly'    => true,
 				'idempotent'  => true,
 				'destructive' => false,
+			),
+			'woocommerce/order-update'        => array(
+				'readonly'    => false,
+				'idempotent'  => false,
+				'destructive' => true,
 			),
 			'woocommerce/order-update-status' => array(
 				'readonly'    => false,
@@ -902,6 +908,13 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 					'id' => 1,
 				),
 			),
+			'order-update'        => array(
+				'woocommerce/order-update',
+				array(
+					'id'       => 1,
+					'shipping' => array( 'city' => 'Denied' ),
+				),
+			),
 			'order-update-status' => array(
 				'woocommerce/order-update-status',
 				array(
@@ -976,6 +989,10 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		wp_set_current_user( $limited_order_manager_id );
 
 		$cases = array(
+			'woocommerce/order-update'        => array(
+				'id'       => $order->get_id(),
+				'shipping' => array( 'city' => 'Unauthorized city' ),
+			),
 			'woocommerce/order-update-status' => array(
 				'id'     => $order->get_id(),
 				'status' => 'processing',
@@ -1276,6 +1293,13 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			'orders-query'        => array(
 				'woocommerce/orders-query',
 				array( 'id' => -123 ),
+			),
+			'order-update'        => array(
+				'woocommerce/order-update',
+				array(
+					'id'       => -123,
+					'shipping' => array( 'city' => 'Invalid' ),
+				),
 			),
 			'order-update-status' => array(
 				'woocommerce/order-update-status',
@@ -1849,6 +1873,206 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 'simple', $result['product']['type'] );
 		$this->assertTrue( $result['product']['virtual'] );
 		$this->assertTrue( $result['product']['downloadable'] );
+	}
+
+	/**
+	 * @testdox Should set the weight and dimensions of a physical product and return them with the store units.
+	 */
+	public function test_product_update_sets_weight_and_dimensions(): void {
+		update_option( 'woocommerce_weight_unit', 'kg' );
+		update_option( 'woocommerce_dimension_unit', 'cm' );
+		$product                     = \WC_Helper_Product::create_simple_product();
+		$this->created_product_ids[] = $product->get_id();
+
+		$result = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'                 => $product->get_id(),
+				'product_type_alias' => 'physical',
+				'weight'             => '1.5',
+				'length'             => '20',
+				'width'              => '10',
+				'height'             => '',
+			)
+		);
+
+		$this->assertNotWPError( $result );
+		$this->assertSame( '1.5', $result['product']['weight'] );
+		$this->assertSame( '20', $result['product']['length'] );
+		$this->assertSame( '10', $result['product']['width'] );
+		$this->assertSame( '', $result['product']['height'] );
+		$this->assertSame( 'kg', $result['product']['weight_unit'] );
+		$this->assertSame( 'cm', $result['product']['dimension_unit'] );
+		$this->assertSame( '1.5', wc_get_product( $product->get_id() )->get_weight() );
+	}
+
+	/**
+	 * @testdox Should reject a negative or non-numeric product weight.
+	 *
+	 * @dataProvider provider_invalid_product_measurements
+	 *
+	 * @param string $weight Weight input.
+	 */
+	public function test_product_update_rejects_invalid_weight( string $weight ): void {
+		$product                     = \WC_Helper_Product::create_simple_product();
+		$this->created_product_ids[] = $product->get_id();
+		$original_weight             = $product->get_weight();
+
+		$result = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'                 => $product->get_id(),
+				'product_type_alias' => 'physical',
+				'weight'             => $weight,
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( $original_weight, wc_get_product( $product->get_id() )->get_weight() );
+	}
+
+	/**
+	 * Provides invalid product weight inputs.
+	 *
+	 * @return array<string, array{0: string}>
+	 */
+	public function provider_invalid_product_measurements(): array {
+		return array(
+			'negative' => array( '-1' ),
+			'unit'     => array( '2kg' ),
+			'text'     => array( 'heavy' ),
+		);
+	}
+
+	/**
+	 * @testdox Should not accept a weight or dimensions for products that do not ship.
+	 */
+	public function test_product_weight_is_only_a_physical_product_field(): void {
+		$create_schema = wp_get_ability( 'woocommerce/product-create' )->get_input_schema();
+
+		$this->assertArrayHasKey( 'weight', $this->get_product_type_alias_schema_branch( $create_schema, 'physical' )['properties'] );
+		$this->assertArrayHasKey( 'height', $this->get_product_type_alias_schema_branch( $create_schema, 'physical' )['properties'] );
+		$this->assertArrayNotHasKey( 'weight', $this->get_product_type_alias_schema_branch( $create_schema, 'virtual' )['properties'] );
+		$this->assertArrayNotHasKey( 'weight', $this->get_product_type_alias_schema_branch( $create_schema, 'digital' )['properties'] );
+	}
+
+	/**
+	 * @testdox Should change only the sent shipping address fields and return the shipping address.
+	 */
+	public function test_order_update_changes_shipping_address(): void {
+		$order = \WC_Helper_Order::create_order();
+		$order->set_shipping_country( 'US' );
+		$order->set_shipping_state( 'CA' );
+		$order->set_shipping_city( 'Los Angeles' );
+		$order->set_shipping_postcode( '00000' );
+		$order->save();
+		$this->created_order_ids[] = $order->get_id();
+
+		$result = wp_get_ability( 'woocommerce/order-update' )->execute(
+			array(
+				'id'       => $order->get_id(),
+				'shipping' => array(
+					'address_1' => '1 Main St',
+					'postcode'  => '90210',
+				),
+			)
+		);
+
+		$this->assertNotWPError( $result );
+		$this->assertSame( '1 Main St', $result['order']['shipping']['address_1'] );
+		$this->assertSame( '90210', $result['order']['shipping']['postcode'] );
+		$this->assertSame( 'Los Angeles', $result['order']['shipping']['city'] );
+		$this->assertSame( '90210', wc_get_order( $order->get_id() )->get_shipping_postcode() );
+	}
+
+	/**
+	 * @testdox Should return the shipping address of each order from orders-query.
+	 */
+	public function test_orders_query_returns_shipping_address(): void {
+		$order = \WC_Helper_Order::create_order();
+		$order->set_shipping_city( 'Lisbon' );
+		$order->set_shipping_country( 'PT' );
+		$order->save();
+		$this->created_order_ids[] = $order->get_id();
+
+		$result = wp_get_ability( 'woocommerce/orders-query' )->execute( array( 'id' => $order->get_id() ) );
+
+		$this->assertNotWPError( $result );
+		$this->assertSame( 'Lisbon', $result['orders'][0]['shipping']['city'] );
+		$this->assertSame( 'PT', $result['orders'][0]['shipping']['country'] );
+	}
+
+	/**
+	 * @testdox Should refuse a shipping address that is not valid for its country and save nothing.
+	 *
+	 * @dataProvider provider_invalid_order_shipping_addresses
+	 *
+	 * @param array  $shipping   Shipping input.
+	 * @param string $error_code Expected error code.
+	 */
+	public function test_order_update_rejects_invalid_shipping_address( array $shipping, string $error_code ): void {
+		$order = \WC_Helper_Order::create_order();
+		$order->set_shipping_country( 'US' );
+		$order->set_shipping_city( 'Los Angeles' );
+		$order->save();
+		$this->created_order_ids[] = $order->get_id();
+
+		$result = wp_get_ability( 'woocommerce/order-update' )->execute(
+			array(
+				'id'       => $order->get_id(),
+				'shipping' => $shipping,
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( $error_code, $result->get_error_code() );
+		$this->assertSame( 'Los Angeles', wc_get_order( $order->get_id() )->get_shipping_city() );
+	}
+
+	/**
+	 * Provides invalid shipping addresses.
+	 *
+	 * @return array<string, array{0: array, 1: string}>
+	 */
+	public function provider_invalid_order_shipping_addresses(): array {
+		return array(
+			'unknown country'  => array(
+				array(
+					'city'    => 'Nowhere',
+					'country' => 'XX',
+				),
+				'woocommerce_order_shipping_country_invalid',
+			),
+			'unknown state'    => array(
+				array(
+					'city'  => 'Nowhere',
+					'state' => 'ZZ',
+				),
+				'woocommerce_order_shipping_state_invalid',
+			),
+			'invalid postcode' => array(
+				array(
+					'city'     => 'Nowhere',
+					'postcode' => 'ABC',
+				),
+				'woocommerce_order_shipping_postcode_invalid',
+			),
+		);
+	}
+
+	/**
+	 * @testdox Should reject order updates that include no changed fields.
+	 */
+	public function test_order_update_requires_at_least_one_field(): void {
+		$order                     = \WC_Helper_Order::create_order();
+		$this->created_order_ids[] = $order->get_id();
+
+		$result = wp_get_ability( 'woocommerce/order-update' )->execute(
+			array(
+				'id' => $order->get_id(),
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_order_update_no_fields', $result->get_error_code() );
 	}
 
 	/**

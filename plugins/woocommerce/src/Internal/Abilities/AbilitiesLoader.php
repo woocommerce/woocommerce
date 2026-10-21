@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Abilities\ActionableAbility;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderAddNote;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderNotesQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\OrderUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderUpdateStatus;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrdersQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductCreate;
@@ -42,6 +43,7 @@ class AbilitiesLoader {
 		OrdersQuery::class,
 		OrderAddNote::class,
 		OrderNotesQuery::class,
+		OrderUpdate::class,
 		OrderUpdateStatus::class,
 		ProductsQuery::class,
 		ProductCreate::class,
@@ -182,7 +184,7 @@ class AbilitiesLoader {
 				continue;
 			}
 
-			// Core's product write abilities extend ActionableAbility, so WordPress builds them from their own class.
+			// Core's product and order write abilities extend ActionableAbility, so WordPress builds them from their own class.
 			$is_actionable = is_a( $class_name, ActionableAbility::class, true ) && self::is_core_ability_definition_class( $class_name );
 
 			if ( ! $is_actionable && ! is_a( $class_name, AbilityDefinition::class, true ) ) {

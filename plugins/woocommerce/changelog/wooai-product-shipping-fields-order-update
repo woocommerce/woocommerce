@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add weight and dimensions to the product abilities, add the woocommerce/order-update ability for the order shipping address, and return the shipping address in order responses.
