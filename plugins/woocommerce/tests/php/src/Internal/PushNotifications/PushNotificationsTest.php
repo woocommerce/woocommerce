@@ -252,6 +252,61 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Tests that on_init records when push notifications were first enabled, as an autoloaded option.
+	 */
+	public function test_on_init_records_enabled_at_when_enabled() {
+		global $wpdb;
+
+		$this->set_up_jetpack_connection_manager_mock( array( 'is_connected' ) );
+		$this->jetpack_connection_manager_mock->method( 'is_connected' )->willReturn( true );
+
+		$push_notifications = new PushNotifications();
+
+		$before = time();
+		$push_notifications->on_init();
+		$after = time();
+
+		$enabled_at = $push_notifications->get_enabled_at();
+		$this->assertNotNull( $enabled_at, 'The enablement time should be recorded' );
+		$this->assertGreaterThanOrEqual( $before, $enabled_at, 'The enablement time should not predate on_init' );
+		$this->assertLessThanOrEqual( $after, $enabled_at, 'The enablement time should not postdate on_init' );
+
+		$autoload = $wpdb->get_var(
+			$wpdb->prepare( "SELECT autoload FROM {$wpdb->options} WHERE option_name = %s", PushNotifications::ENABLED_AT_OPTION )
+		);
+		$this->assertSame( 'on', $autoload, 'The option should be autoloaded' );
+	}
+
+	/**
+	 * @testdox Tests that on_init keeps the first recorded enablement time.
+	 */
+	public function test_on_init_does_not_overwrite_enabled_at() {
+		$this->set_up_jetpack_connection_manager_mock( array( 'is_connected' ) );
+		$this->jetpack_connection_manager_mock->method( 'is_connected' )->willReturn( true );
+
+		update_option( PushNotifications::ENABLED_AT_OPTION, 1000 );
+		$push_notifications = new PushNotifications();
+
+		$push_notifications->on_init();
+
+		$this->assertSame( 1000, $push_notifications->get_enabled_at(), 'The first recorded enablement time should be kept' );
+	}
+
+	/**
+	 * @testdox Tests that on_init does not record an enablement time when Jetpack is not connected.
+	 */
+	public function test_on_init_does_not_record_enabled_at_when_jetpack_is_not_connected() {
+		$this->set_up_jetpack_connection_manager_mock( array( 'is_connected' ) );
+		$this->jetpack_connection_manager_mock->method( 'is_connected' )->willReturn( false );
+
+		$push_notifications = new PushNotifications();
+
+		$push_notifications->on_init();
+
+		$this->assertNull( $push_notifications->get_enabled_at(), 'No enablement time should be recorded while disabled' );
+	}
+
+	/**
 	 * @testdox Tests that on_init registers the status and token controllers, but not the send
 	 * or preferences controllers, when Jetpack is not connected.
 	 */

@@ -4,7 +4,10 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\PushNotifications\Triggers;
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewOrderNotification;
+use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
+use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationStepLogger;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\PendingNotificationStore;
 use WC_Order;
 
@@ -98,8 +101,35 @@ class NewOrderNotificationTrigger {
 			return;
 		}
 
-		wc_get_container()->get( PendingNotificationStore::class )->add(
-			new NewOrderNotification( $order_id )
-		);
+		$notification = new NewOrderNotification( $order_id );
+
+		if ( $this->predates_push_notifications( $previous_status, $order ) ) {
+			wc_get_container()->get( NotificationStepLogger::class )->log_notification_step( $notification, 'triggered', 'predates_push_notifications' );
+			return;
+		}
+
+		wc_get_container()->get( PendingNotificationStore::class )->add( $notification );
+	}
+
+	/**
+	 * Whether the order was created before push notifications were enabled.
+	 *
+	 * Such an order was never marked as notified, so moving it out of a custom
+	 * status into a notifiable one would otherwise announce an old order as new.
+	 * Moves out of the unpaid statuses are a payment arriving, so they still notify.
+	 *
+	 * @param string   $previous_status The previous order status.
+	 * @param WC_Order $order           The order object.
+	 * @return bool
+	 */
+	private function predates_push_notifications( string $previous_status, WC_Order $order ): bool {
+		if ( in_array( $previous_status, array( OrderStatus::PENDING, OrderStatus::FAILED, OrderStatus::CHECKOUT_DRAFT ), true ) ) {
+			return false;
+		}
+
+		$enabled_at   = wc_get_container()->get( PushNotifications::class )->get_enabled_at();
+		$date_created = $order->get_date_created();
+
+		return null !== $enabled_at && null !== $date_created && $date_created->getTimestamp() < $enabled_at;
 	}
 }
