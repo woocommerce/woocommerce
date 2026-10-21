@@ -140,6 +140,7 @@ final class Contracts {
 		return ( new ContractRepository() )->acquire_lock( $contract_id, $operation );
 	}
 
+	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
 	/**
 	 * Create a contract locked from birth: finish building it (cycles, status) with the returned
 	 * lock, then release it. A `creation_key` (1-100 characters, trimmed) makes the create
@@ -155,8 +156,9 @@ final class Contracts {
 	 * @param array<string, mixed> $options `operation`: the lock's label (1-64 of `[a-z0-9_-]`, default `create`).
 	 * @return array{contract: ContractView, lock: ContractLock}|null The contract as written (no re-read) and its
 	 *                                                                lock; null when `creation_key` is taken.
-	 * @throws ValidationException If `extension_slug` is missing, or a value or the operation label is invalid, with
-	 *                             every invalid value reported.
+	 * @throws ValidationException If `extension_slug` is missing, a value is invalid or the operation label is not a
+	 *                             string, with every invalid value reported.
+	 * @throws InvalidArgumentException If the operation label is not 1-64 of `[a-z0-9_-]`: the lock refuses it, alone.
 	 */
 	public static function create( array $args, array $options = array() ): ?array {
 		$filtered_options = ArgumentFilter::filter_known_keys( __METHOD__, $options, self::CREATE_OPTION_KEYS, 'option' );
@@ -189,6 +191,7 @@ final class Contracts {
 			'lock'     => $lock,
 		);
 	}
+	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
 	/**
@@ -629,7 +632,7 @@ final class Contracts {
 	 * out or null; the collector holds its error).
 	 *
 	 * @param ArgumentValidator    $validator Argument collector.
-	 * @param array<string, mixed> $args      Caller fields (known keys only, no `extension_slug`).
+	 * @param array<string, mixed> $args      Caller fields (known keys only; `extension_slug` and `creation_key` are ignored).
 	 * @return array<string, mixed>
 	 * @phpstan-return ContractFields
 	 */

@@ -1729,11 +1729,17 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$this->assertNotNull( $created );
 		$this->assertSame( 'create', $created['lock']->get_operation() );
 
-		foreach ( array( 'Checkout', 5 ) as $operation ) {
+		// A non-string label is an invalid argument; a malformed string is refused by the lock.
+		$labels = array(
+			ValidationException::class      => 5,
+			InvalidArgumentException::class => 'Checkout',
+		);
+		foreach ( $labels as $expected => $operation ) {
 			try {
 				Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ), array( 'operation' => $operation ) );
 				$this->fail( 'Expected an invalid operation label to throw.' );
 			} catch ( InvalidArgumentException $e ) {
+				$this->assertSame( $expected, get_class( $e ) );
 				$this->assertStringContainsString( 'operation', $e->getMessage() );
 			}
 		}
