@@ -100,6 +100,211 @@ class DataSynchronizerTests extends \HposTestCase {
 	}
 
 	/**
+	 * @testdox Should preserve exact full pending counts and their cache under either authority.
+	 * @dataProvider data_provider_test_full_pending_count
+	 * @param bool   $hpos              Whether HPOS is authoritative.
+	 * @param string $shape             The pending-order fixture.
+	 * @param int    $expected          The exact pending count.
+	 * @param bool   $string_keyed_type Whether the added order type has a string key.
+	 */
+	public function test_full_pending_count( bool $hpos, string $shape, int $expected, bool $string_keyed_type = false ): void {
+		global $wpdb;
+
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, $hpos ? 'yes' : 'no' );
+		update_option( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION, 'no' );
+		$this->assertSame( 0, $this->sut->get_current_orders_pending_sync_count(), 'The fixture should start without pending orders.' );
+
+		if ( 'deletion' === $shape ) {
+			$meta_table = OrdersTableDataStore::get_meta_table_name();
+			$authority  = $hpos ? DataSynchronizer::DELETED_FROM_ORDERS_META_VALUE : DataSynchronizer::DELETED_FROM_POSTS_META_VALUE;
+			foreach ( array( $authority, $authority, $hpos ? DataSynchronizer::DELETED_FROM_POSTS_META_VALUE : DataSynchronizer::DELETED_FROM_ORDERS_META_VALUE ) as $deleted_from ) {
+				$wpdb->query(
+					$wpdb->prepare(
+						// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Trusted table name from the order data store.
+						"INSERT INTO $meta_table (order_id, meta_key, meta_value) VALUES (%d, %s, %s)",
+						987654,
+						DataSynchronizer::DELETED_RECORD_META_KEY,
+						$deleted_from
+					)
+				);
+			}
+		} elseif ( 'empty' !== $shape ) {
+			$post_type = 'overlap' === $shape || ( $hpos && 'missing' === $shape ) ? DataSynchronizer::PLACEHOLDER_ORDER_POST_TYPE : 'shop_order';
+			if ( 'custom' === $shape || 'overlap' === $shape ) {
+				$post_type = 'custom' === $shape ? 'custom_order' : $post_type;
+				add_filter(
+					'wc_order_types',
+					static function ( $types, $context ) use ( $post_type, $string_keyed_type ) {
+						if ( 'cot-migration' === $context ) {
+							if ( $string_keyed_type ) {
+								$types[ $post_type ] = $post_type;
+							} else {
+								$types[] = $post_type;
+							}
+						}
+						return $types;
+					},
+					10,
+					2
+				);
+			}
+			$post_id = $this->factory->post->create(
+				array(
+					'post_type'   => $post_type,
+					'post_status' => OrderInternalStatus::COMPLETED,
+				)
+			);
+			$wpdb->update( $wpdb->posts, array( 'post_modified_gmt' => $hpos ? '2024-01-01 00:00:00' : '2024-01-02 00:00:00' ), array( 'ID' => $post_id ) );
+			if ( $hpos || 'changed' === $shape ) {
+				$wpdb->insert(
+					OrdersTableDataStore::get_orders_table_name(),
+					array(
+						'id'               => $post_id,
+						'type'             => 'custom' === $shape ? $post_type : 'shop_order',
+						'status'           => 'changed' === $shape ? OrderStatus::AUTO_DRAFT : OrderInternalStatus::COMPLETED,
+						'date_updated_gmt' => $hpos ? '2024-01-02 00:00:00' : '2024-01-01 00:00:00',
+					)
+				);
+			}
+		}
+
+		$this->assertSame( $expected, $this->sut->get_current_orders_pending_sync_count(), $shape . ' should have the exact pending count.' );
+		$this->assertSame( $expected, wp_cache_get( 'woocommerce_hpos_pending_sync_count', 'counts' ), 'The counts cache should hold the exact integer.' );
+	}
+
+	/**
+	 * @testdox Should not count an order whose authoritative record is older than its backup.
+	 * @testWith [true]
+	 *           [false]
+	 * @param bool $hpos Whether HPOS is authoritative.
+	 */
+	public function test_older_authoritative_orders_are_not_pending_sync( bool $hpos ): void {
+		global $wpdb;
+
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, $hpos ? 'yes' : 'no' );
+		update_option( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION, 'no' );
+		$post_id = $this->factory->post->create(
+			array(
+				'post_type'   => 'shop_order',
+				'post_status' => OrderInternalStatus::COMPLETED,
+			)
+		);
+		$wpdb->update( $wpdb->posts, array( 'post_modified_gmt' => $hpos ? '2024-01-02 00:00:00' : '2024-01-01 00:00:00' ), array( 'ID' => $post_id ) );
+		$wpdb->insert(
+			OrdersTableDataStore::get_orders_table_name(),
+			array(
+				'id'               => $post_id,
+				'type'             => 'shop_order',
+				'status'           => OrderInternalStatus::COMPLETED,
+				'date_updated_gmt' => $hpos ? '2024-01-01 00:00:00' : '2024-01-02 00:00:00',
+			)
+		);
+
+		$this->assertSame( 0, $this->sut->get_current_orders_pending_sync_count(), 'A newer backup must not make the authoritative order pending sync.' );
+	}
+
+	/**
+	 * @testdox Should exclude missing auto-draft orders from the pending sync count.
+	 * @testWith [true]
+	 *           [false]
+	 * @param bool $hpos Whether HPOS is authoritative.
+	 */
+	public function test_missing_auto_drafts_are_not_pending_sync( bool $hpos ): void {
+		global $wpdb;
+
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, $hpos ? 'yes' : 'no' );
+		update_option( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION, 'no' );
+		$post_id = $this->factory->post->create(
+			array(
+				'post_type'   => $hpos ? DataSynchronizer::PLACEHOLDER_ORDER_POST_TYPE : 'shop_order',
+				'post_status' => OrderStatus::AUTO_DRAFT,
+			)
+		);
+		if ( $hpos ) {
+			$wpdb->insert(
+				OrdersTableDataStore::get_orders_table_name(),
+				array(
+					'id'     => $post_id,
+					'type'   => 'shop_order',
+					'status' => OrderStatus::AUTO_DRAFT,
+				)
+			);
+		}
+
+		$this->assertSame( 0, $this->sut->get_current_orders_pending_sync_count(), 'An auto-draft must not be pending sync just because its backup is missing.' );
+	}
+
+	/**
+	 * @testdox Should count only registered missing HPOS orders with absent or placeholder posts.
+	 * @testWith ["shop_order", false]
+	 *           ["custom_order", false]
+	 *           ["custom_order", true]
+	 *           ["unregistered_order", false, 0]
+	 *           ["unregistered_order", true, 0]
+	 * @param string $order_type      The order type to store.
+	 * @param bool   $has_placeholder Whether a placeholder post exists.
+	 * @param int    $expected        The expected pending count.
+	 */
+	public function test_missing_hpos_orders_are_pending_sync( string $order_type, bool $has_placeholder, int $expected = 1 ): void {
+		global $wpdb;
+
+		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'yes' );
+		update_option( DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION, 'no' );
+		if ( 'custom_order' === $order_type ) {
+			add_filter(
+				'wc_order_types',
+				static function ( $types, $context ) use ( $order_type ) {
+					if ( 'cot-migration' === $context ) {
+						$types[] = $order_type;
+					}
+					return $types;
+				},
+				10,
+				2
+			);
+		}
+		$post_id = $this->factory->post->create( array( 'post_type' => DataSynchronizer::PLACEHOLDER_ORDER_POST_TYPE ) );
+		$wpdb->insert(
+			OrdersTableDataStore::get_orders_table_name(),
+			array(
+				'id'     => $post_id,
+				'type'   => $order_type,
+				'status' => OrderInternalStatus::COMPLETED,
+			)
+		);
+		if ( ! $has_placeholder ) {
+			// Remove only the backup row without triggering order deletion hooks.
+			$wpdb->delete( $wpdb->posts, array( 'ID' => $post_id ) );
+		}
+
+		$this->assertSame( $expected, $this->sut->get_current_orders_pending_sync_count(), 'Only registered HPOS order types without a real backup post should be pending sync.' );
+	}
+
+	/**
+	 * Provide full-count fixtures for each authority and overlapping predicates.
+	 *
+	 * @return array
+	 */
+	public function data_provider_test_full_pending_count(): array {
+		return array(
+			'hpos missing'       => array( true, 'missing', 1 ),
+			'posts missing'      => array( false, 'missing', 1 ),
+			'hpos changed'       => array( true, 'changed', 1 ),
+			'posts changed'      => array( false, 'changed', 1 ),
+			'hpos deletion'      => array( true, 'deletion', 2 ),
+			'posts deletion'     => array( false, 'deletion', 2 ),
+			'overlap'            => array( true, 'overlap', 2 ),
+			'hpos custom'        => array( true, 'custom', 1 ),
+			'posts custom'       => array( false, 'custom', 1 ),
+			'hpos empty'         => array( true, 'empty', 0 ),
+			'posts empty'        => array( false, 'empty', 0 ),
+			'hpos keyed custom'  => array( true, 'custom', 1, true ),
+			'posts keyed custom' => array( false, 'custom', 1, true ),
+			'keyed overlap'      => array( true, 'overlap', 2, true ),
+		);
+	}
+
+	/**
 	 * Test that orders are synced properly where there are orders to migrate from posts table.
 	 */
 	public function test_get_ids_orders_pending_sync_migration() {
