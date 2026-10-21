@@ -103,6 +103,8 @@ class ProductTemplateTest extends WC_Unit_Test_Case {
 
 			$this->assertStringContainsString( 'wc-block-components-product-image', $markup, 'Product image should render using product context.' );
 			$this->assertStringContainsString( 'wc-block-components-product-price', $markup, 'Product price should render using product context.' );
+			$state = wp_interactivity_state( 'woocommerce/products' );
+			$this->assertArrayNotHasKey( 'images', $state['products'][ $product->get_id() ] );
 		} finally {
 			WC_Helper_Product::delete_product( $product->get_id() );
 		}

@@ -86,8 +86,11 @@ class ProductsStore extends \WC_Unit_Test_Case {
 	 */
 	public function test_load_product_populates_state(): void {
 		$product = WC_Helper_Product::create_simple_product();
+		$product->set_description( 'Product description remains available.' );
+		$product->save();
 
 		$result = TestedProductsStore::load_product( $this->consent, $product->get_id() );
+		$cached = TestedProductsStore::load_product( $this->consent, $product->get_id() );
 
 		$state = wp_interactivity_state( $this->store_namespace );
 
@@ -95,6 +98,10 @@ class ProductsStore extends \WC_Unit_Test_Case {
 		$this->assertArrayHasKey( $product->get_id(), $state['products'] );
 		$this->assertSame( $product->get_name(), $state['products'][ $product->get_id() ]['name'] );
 		$this->assertSame( $product->get_name(), $result['name'], 'Return value should contain the product data.' );
+		$this->assertStringContainsString( 'Product description remains available.', $state['products'][ $product->get_id() ]['description'] );
+		$this->assertArrayNotHasKey( 'images', $state['products'][ $product->get_id() ] );
+		$this->assertArrayHasKey( 'images', $result, 'Only client state should omit images, not the loader return value.' );
+		$this->assertArrayHasKey( 'images', $cached, 'The full response should remain cached.' );
 
 		$product->delete( true );
 	}
@@ -131,6 +138,7 @@ class ProductsStore extends \WC_Unit_Test_Case {
 		$variation_ids = $product->get_children();
 
 		$result = TestedProductsStore::load_variations( $this->consent, $product->get_id() );
+		$cached = TestedProductsStore::load_variations( $this->consent, $product->get_id() );
 
 		$state = wp_interactivity_state( $this->store_namespace );
 
@@ -143,6 +151,9 @@ class ProductsStore extends \WC_Unit_Test_Case {
 				$state['productVariations'],
 				"Variation {$variation_id} should be in state."
 			);
+			$this->assertArrayNotHasKey( 'images', $state['productVariations'][ $variation_id ] );
+			$this->assertArrayHasKey( 'images', $result[ $variation_id ] );
+			$this->assertArrayHasKey( 'images', $cached[ $variation_id ] );
 		}
 
 		$product->delete( true );
@@ -289,6 +300,7 @@ class ProductsStore extends \WC_Unit_Test_Case {
 						'id'             => $purchasable->get_id(),
 						'name'           => 'Purchasable',
 						'is_purchasable' => true,
+						'images'         => array( array( 'id' => 123 ) ),
 					),
 					array(
 						'id'             => $non_purchasable->get_id(),
@@ -305,6 +317,11 @@ class ProductsStore extends \WC_Unit_Test_Case {
 		$this->assertCount( 1, $result, 'Only purchasable children should be returned.' );
 		$this->assertArrayHasKey( $purchasable->get_id(), $result );
 		$this->assertArrayNotHasKey( $non_purchasable->get_id(), $result );
+		$this->assertArrayHasKey( 'images', $result[ $purchasable->get_id() ] );
+		$state = wp_interactivity_state( $this->store_namespace );
+		$this->assertArrayNotHasKey( 'images', $state['products'][ $purchasable->get_id() ] );
+		$cached = TestedProductsStore::load_product( $this->consent, $purchasable->get_id() );
+		$this->assertSame( 123, $cached['images'][0]['id'], 'Grouped product hydration should retain full cached responses.' );
 
 		$grouped->delete( true );
 		$purchasable->delete( true );
