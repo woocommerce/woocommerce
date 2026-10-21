@@ -696,6 +696,39 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		$this->assertSame( array( 'name', 'pricing_policy.policies.0.value' ), array_keys( $this->array_value( $this->array_value( $data, 'data' ), 'errors' ) ) );
 	}
 
+	public function test_an_extension_error_without_data_under_an_engine_code_keeps_the_engine_field(): void {
+		wp_set_current_user( $this->admin_id );
+		add_action(
+			'woocommerce_subscriptions_engine_validate_plan',
+			static function ( WP_Error $errors ): void {
+				$errors->add( 'required', 'Something is missing.' );
+			}
+		);
+
+		$response = $this->request(
+			'POST',
+			self::BASE,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'name'           => '',
+			)
+		);
+		$data     = $this->assert_invalid_param( $response, 'name', 'required' );
+
+		$this->assertSame( array( 'name' => 'name: This field is required.' ), $this->nested( $data, array( 'data', 'params' ) ) );
+		$this->assertSame( array( 'name' ), array_keys( $this->array_value( $this->array_value( $data, 'data' ), 'errors' ) ) );
+		$this->assertSame(
+			array(
+				array(
+					'code'    => 'required',
+					'message' => 'Something is missing.',
+					'data'    => array( 'status' => 400 ),
+				),
+			),
+			$data['additional_errors']
+		);
+	}
+
 	public function test_validate_action_receives_errors_a_plan_view_and_slug(): void {
 		wp_set_current_user( $this->admin_id );
 

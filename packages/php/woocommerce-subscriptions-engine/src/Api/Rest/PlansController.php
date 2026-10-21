@@ -605,8 +605,11 @@ final class PlansController extends WP_REST_Controller {
 
 	/**
 	 * Pair each error message with its own data, in `WP_Error` order (codes in first-seen
-	 * order, then each code's errors in addition order). A code's errors are fielded only
-	 * when each message has its own data with a `field`; otherwise they stay fieldless.
+	 * order, then each code's errors in addition order). `WP_Error` keeps a code's data as a
+	 * list and skips empty data, so the list is paired with the code's messages from the
+	 * first: a message past the end of the list, or whose data has no `field`, is fieldless
+	 * on its own and the rest of its code stays fielded. Engine errors come first in their
+	 * code and always carry data, so they always pair.
 	 *
 	 * @param WP_Error $errors Validation errors.
 	 * @return array{fielded: list<array{code: string, message: string, field: string, data: array<mixed>}>, fieldless: WP_Error}
@@ -617,35 +620,21 @@ final class PlansController extends WP_REST_Controller {
 
 		foreach ( $errors->get_error_codes() as $code ) {
 			$code     = (string) $code;
-			$messages = $errors->get_error_messages( $code );
-			$all_data = $errors->get_all_error_data( $code );
+			$all_data = array_values( $errors->get_all_error_data( $code ) );
 
-			$pairs = array();
-			foreach ( $messages as $index => $message ) {
+			foreach ( array_values( $errors->get_error_messages( $code ) ) as $index => $message ) {
 				$data = $all_data[ $index ] ?? null;
-				if ( count( $messages ) !== count( $all_data ) || ! is_array( $data ) || ! isset( $data['field'] ) || ! is_string( $data['field'] ) || '' === $data['field'] ) {
-					$pairs = null;
-					break;
+				if ( is_array( $data ) && isset( $data['field'] ) && is_string( $data['field'] ) && '' !== $data['field'] ) {
+					$fielded[] = array(
+						'code'    => $code,
+						'message' => $message,
+						'field'   => $data['field'],
+						'data'    => $data,
+					);
+					continue;
 				}
-				$pairs[] = array(
-					'code'    => $code,
-					'message' => $message,
-					'field'   => $data['field'],
-					'data'    => $data,
-				);
-			}
 
-			if ( null !== $pairs ) {
-				$fielded = array_merge( $fielded, $pairs );
-				continue;
-			}
-
-			// WP_Error keeps the data per code, not per message: without a pairing, keep the code's errors as they are.
-			foreach ( $messages as $message ) {
-				$fieldless->add( $code, $message );
-			}
-			foreach ( $all_data as $data ) {
-				$fieldless->add_data( $data, $code );
+				$fieldless->add( $code, $message, $data );
 			}
 		}
 
