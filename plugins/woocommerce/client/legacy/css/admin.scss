@@ -9273,13 +9273,6 @@ body.woocommerce_page_wc-settings {
 			color: #505050;
 			padding: 0 0 10px 0;
 			text-decoration: none;
-
-			&:focus,
-			&:hover,
-			&:active {
-				outline: none;
-				box-shadow: none;
-			}
 		}
 		margin: 0;
 		// Tab strip inherits the wp-admin body bg so it reads as one

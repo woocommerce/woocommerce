@@ -9,27 +9,23 @@ use Automattic\WooCommerce\Proxies\LegacyProxy;
 /**
  * Compatibility layer over whichever copy of Action Scheduler is loaded.
  *
- * Many plugins bundle Action Scheduler, and the copy that gets loaded is not always the newest one
- * registered, nor the one WooCommerce bundles. The functions answering our calls can therefore be older
- * than expected and lack features core relies on, such as the `unique` and `priority` arguments.
+ * It is encouraged to use the following methods in place of their native Action Scheduler equivalents:
  *
- * In essence this class replaces as_enqueue_async_action(), as_schedule_single_action(),
- * as_schedule_recurring_action(), as_schedule_cron_action() and as_has_scheduled_action(). The wrappers
- * emulate or drop what the loaded copy cannot do. Scheduling calls that pass neither `unique` nor
- * `priority` can still go to Action Scheduler directly. The class also reports what is loaded, probes
- * the features core relies on ({@see ActionSchedulerFeature}) and says when the loaded copy is ready.
+ *        ActionSchedulerUtil::enqueue_async() ↔ as_enqueue_async_action()
+ *      ActionSchedulerUtil::schedule_single() ↔ as_schedule_single_action()
+ *   ActionSchedulerUtil::schedule_recurring() ↔ as_schedule_recurring_action()
+ *        ActionSchedulerUtil::schedule_cron() ↔ as_schedule_cron_action()
+ * ActionSchedulerUtil::has_scheduled_action() ↔ as_has_scheduled_action()
+ *             ActionSchedulerUtil::supports() ↔ as_supports()
  *
- * The rest of the API has kept the same signature since Action Scheduler 2.1.0 and can be called
- * directly: as_unschedule_action(), as_unschedule_all_actions(), as_next_scheduled_action(),
- * as_get_scheduled_actions() and as_get_datetime_object(). The exception is as_supports(), which only
- * exists from 3.9.3. Use {@see ActionSchedulerUtil::supports()} instead.
- *
- * Every probe and call goes through {@see LegacyProxy}, so tests can simulate an older loaded copy.
+ * This aims to reduce problems when an unexpectedly old version of Action Scheduler is loaded instead of
+ * the version actually bundled with WooCommerce (though unusual, it is known to happen). Additionally, this
+ * class can report on which version and feature set from Action Scheduler is actually available.
  */
 class ActionSchedulerUtil {
 
 	/**
-	 * The priority Action Scheduler assigns when none is given.
+	 * The default priority for scheduled actions.
 	 *
 	 * @var int
 	 */
@@ -43,8 +39,7 @@ class ActionSchedulerUtil {
 	private const BUNDLED_PLUGIN_FILE = 'packages/action-scheduler/action-scheduler.php';
 
 	/**
-	 * The features {@see self::is_risky()} probes, in order. Kept here rather than in the enum
-	 * because the list changes as core comes to rely on more of Action Scheduler.
+	 * The features {@see self::is_risky()} probes, in order.
 	 *
 	 * @var string[]
 	 */
@@ -57,46 +52,43 @@ class ActionSchedulerUtil {
 	);
 
 	/**
-	 * Per-request memo of feature probes, keyed by ActionSchedulerFeature value.
+	 * Feature probe results, keyed by feature.
 	 *
 	 * @var array<string, bool>
 	 */
 	private static array $supports = array();
 
 	/**
-	 * Per-request memo of the loaded copy's version, or null while unknown.
+	 * The currently loaded Action Scheduler version (null if/while unknown).
 	 *
 	 * @var string|null
 	 */
 	private static ?string $loaded_version = null;
 
 	/**
-	 * Per-request memo of the bundled copy's version, or null while unread.
+	 * The version of Action Scheduler actually bundled with WooCommerce.
 	 *
 	 * @var string|null
 	 */
 	private static ?string $bundled_version = null;
 
 	/**
-	 * Per-request memo of the loaded copy's source, or null while unresolved.
+	 * The plugin, mu-plugin or theme that owns the loaded copy.
 	 *
 	 * @var array|null
 	 */
 	private static ?array $loaded_source = null;
 
 	/**
-	 * Hooks for which a dropped priority has already been logged in this request.
+	 * If a priority cannot be assigned, we track the relevant hooks here.
 	 *
 	 * @var array<string, true>
 	 */
 	private static array $logged_priority_drops = array();
 
 	/**
-	 * Is the Action Scheduler procedural API loaded?
-	 *
-	 * True once a copy has initialized and defined the `as_*()` functions, which exist since 2.1.0.
-	 * Before that, every other method reports "unknown" or "unsupported", and the wrappers refuse
-	 * to schedule.
+	 * Is the Action Scheduler procedural API loaded? This does not imply that Action Scheduler has
+	 * actually initialized.
 	 *
 	 * @since 11.3.0
 	 *
@@ -128,11 +120,8 @@ class ActionSchedulerUtil {
 	}
 
 	/**
-	 * The highest Action Scheduler version registered with the version registry.
-	 *
-	 * The registry only knows which copies registered, not which one initialized, so this is for
-	 * display next to {@see self::get_loaded_version()}, not for feature detection. When the two
-	 * differ, a newer copy is installed but not the one answering calls.
+	 * The highest Action Scheduler version registered with the version registry. This may not be
+	 * the loaded version.
 	 *
 	 * @since 11.3.0
 	 *
@@ -180,9 +169,6 @@ class ActionSchedulerUtil {
 	/**
 	 * Which plugin, mu-plugin or theme the loaded Action Scheduler copy belongs to.
 	 *
-	 * Resolves the loaded directory against WooCommerce's own package, the mu-plugins directory, the
-	 * plugins directory (reading that one plugin's headers) and the active theme, in that order.
-	 *
 	 * @since 11.3.0
 	 *
 	 * @return array {
@@ -224,10 +210,7 @@ class ActionSchedulerUtil {
 	}
 
 	/**
-	 * Does the loaded copy lack a feature core relies on?
-	 *
-	 * True as well when no copy is loaded, since then every feature is missing. Which feature is
-	 * missing is answered by {@see self::supports()}.
+	 * Does the loaded copy lack a feature core relies on? Also true if no copy is loaded.
 	 *
 	 * @since 11.3.0
 	 *
@@ -244,17 +227,8 @@ class ActionSchedulerUtil {
 	}
 
 	/**
-	 * Does the loaded copy support a feature?
-	 *
-	 * Presence is probed on the loaded symbols. `unique` and `priority` are probed by reflecting the
-	 * parameters of the loaded `as_schedule_single_action()`, which is the only way to see the loaded
-	 * copy rather than the registry. Answers are memoized per request once a copy is loaded.
-	 *
-	 * Most callers should use the wrappers and accept how they degrade. Ask this directly only when
-	 * the degraded behaviour is not acceptable. For example, the deferred tracking of partial downloads
-	 * in `WC_Download_Handler::track_download()` schedules a unique action with args from concurrent
-	 * range requests, where the emulated check could double-count, so it should refuse to track when
-	 * `UNIQUE` or `UNIQUE_ARGS` is unavailable instead of emulating.
+	 * Ascertains if a given Action Scheduler feature is available and fully supported by the loaded
+	 * version of the library.
 	 *
 	 * @since 11.3.0
 	 *
@@ -276,12 +250,6 @@ class ActionSchedulerUtil {
 
 	/**
 	 * Can the loaded copy accept scheduling calls right now?
-	 *
-	 * Every copy initializes its data store on `init` at priority 1 (or at once, when it loads after
-	 * `init` has fired), and calls before that return 0 or hit the wrong store. Copies from 3.6.0
-	 * fire `action_scheduler_init` at that point. Older copies cannot say, so for them ready means
-	 * `init` has passed priority 1. `ActionScheduler::is_initialized()` is no help: before 3.6.0 it
-	 * is set when `ActionScheduler::init()` runs on `plugins_loaded`, not when the store is ready.
 	 *
 	 * @since 11.3.0
 	 *
@@ -305,12 +273,6 @@ class ActionSchedulerUtil {
 
 	/**
 	 * Run a callback now if the loaded copy is ready, otherwise once it becomes ready.
-	 *
-	 * Deferred callbacks run on `action_scheduler_init` (copies from 3.6.0) or on `init` at priority
-	 * 2 (older copies finish initializing at priority 1), whichever comes first, and only once. The
-	 * `init` fallback is also registered while `init` is running at priority 0 or 1, which WP_Hook
-	 * honours by re-sorting the running iteration. A copy older than 3.6.0 that loads after `init`
-	 * has finished never triggers either, and the callback is lost.
 	 *
 	 * @since 11.3.0
 	 *
@@ -342,10 +304,6 @@ class ActionSchedulerUtil {
 	/**
 	 * Enqueue an action to run as soon as possible, like `as_enqueue_async_action()`.
 	 *
-	 * On a loaded copy without `as_enqueue_async_action()` (before 3.0.0), the action is scheduled
-	 * for now with `as_schedule_single_action()` instead, which runs it slightly later.
-	 * See {@see self::schedule_single()} for how `$unique` and `$priority` degrade.
-	 *
 	 * @since 11.3.0
 	 *
 	 * @param string $hook     The hook to trigger.
@@ -367,21 +325,8 @@ class ActionSchedulerUtil {
 	/**
 	 * Schedule an action to run once at some time in the future, like `as_schedule_single_action()`.
 	 *
-	 * Same arguments and return value as the Action Scheduler function, with these degradations on
-	 * an older loaded copy:
-	 *
-	 * - `$unique` on a copy without it (before 3.5.0), or with non-empty `$args` on a copy that
-	 *   checks uniqueness by hook alone (before 4.0.0): emulated by checking
-	 *   {@see self::has_scheduled_action()} first, which returns 0 without scheduling when a match
-	 *   exists. The check is not atomic, so two concurrent requests can both schedule; on copies
-	 *   before 3.0.0 it sees pending actions only, so an action can be scheduled again while a
-	 *   previous run is in progress; and with an empty `$group` it matches a pending action in any
-	 *   group, where native unique matches only ungrouped actions.
-	 * - `$priority` on a copy without it (before 3.6.0): dropped, so the action takes the default
-	 *   priority, with a debug-level log entry (source `action-scheduler`) once per request per hook.
-	 *
-	 * When no copy is loaded, nothing is scheduled: returns 0 and raises a doing-it-wrong notice.
-	 * When a copy is loaded but not ready yet, the call is not deferred; see {@see self::when_ready()}.
+	 * In unusual cases where an older version of Action Scheduler has loaded, uniqueness may be emulated
+	 * and priorities may be dropped (only if necessary).
 	 *
 	 * @since 11.3.0
 	 *
@@ -401,7 +346,7 @@ class ActionSchedulerUtil {
 	/**
 	 * Schedule a recurring action, like `as_schedule_recurring_action()`.
 	 *
-	 * See {@see self::schedule_single()} for how `$unique` and `$priority` degrade on an older loaded copy.
+	 * See notes for {@see self::schedule_single()} regarding `$unique` and `$priority` handling.
 	 *
 	 * @since 11.3.0
 	 *
@@ -422,7 +367,7 @@ class ActionSchedulerUtil {
 	/**
 	 * Schedule an action that recurs on a cron-like schedule, like `as_schedule_cron_action()`.
 	 *
-	 * See {@see self::schedule_single()} for how `$unique` and `$priority` degrade on an older loaded copy.
+	 * See notes for {@see self::schedule_single()} regarding `$unique` and `$priority` handling.
 	 *
 	 * @since 11.3.0
 	 *
@@ -442,15 +387,6 @@ class ActionSchedulerUtil {
 
 	/**
 	 * Is a matching action currently scheduled (pending or in-progress)?
-	 *
-	 * Prefers `as_has_scheduled_action`, which only exists since Action Scheduler 3.3.0. Falls back
-	 * to the much older `as_next_scheduled_action`, which also reports in-progress actions from 3.0.0;
-	 * copies before that see pending actions only - an accepted trade.
-	 *
-	 * Reports false when Action Scheduler is not loaded at all, indistinguishable from "nothing is
-	 * scheduled", and raises a doing-it-wrong notice so the condition is visible under debugging.
-	 * A caller that treats a negative answer as licence to discard state should check
-	 * {@see self::can_check_scheduled_actions()} first.
 	 *
 	 * @since 11.2.0
 	 *
@@ -533,7 +469,7 @@ class ActionSchedulerUtil {
 			return 0;
 		}
 
-		$native_unique = $unique && self::supports( ActionSchedulerFeature::UNIQUE ) && ( empty( $args ) || self::supports( ActionSchedulerFeature::UNIQUE_ARGS ) );
+		$native_unique = $unique && self::supports( ActionSchedulerFeature::UNIQUE_ARGS );
 
 		if ( $unique && ! $native_unique && self::has_scheduled_action( $hook, $args, $group ) ) {
 			return 0;

@@ -75,7 +75,6 @@ class ActionSchedulerUtilTest extends WC_Unit_Test_Case {
 
 		$this->assertMatchesRegularExpression( '/^\d+\.\d+\.\d+/', (string) ActionSchedulerUtil::get_bundled_version() );
 		$this->assertSame( ActionSchedulerUtil::get_bundled_version(), ActionSchedulerUtil::get_loaded_version() );
-		$this->assertSame( trailingslashit( wp_normalize_path( \ActionScheduler::plugin_path( '' ) ) ), ActionSchedulerUtil::get_loaded_path() );
 		$this->assertSame(
 			array(
 				'type'     => 'woocommerce',
@@ -375,9 +374,9 @@ class ActionSchedulerUtilTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox On a copy that checks uniqueness by hook alone, unique with args is emulated.
+	 * @testdox On a copy whose unique check ignores args, unique is emulated with and without args.
 	 */
-	public function test_emulates_unique_with_args_on_a_copy_that_checks_uniqueness_by_hook_alone(): void {
+	public function test_emulates_unique_on_a_copy_whose_unique_check_ignores_args(): void {
 		$this->simulate_loaded_copy( '3.9.3' );
 		$calls = $this->capture_scheduling_calls();
 
@@ -388,10 +387,11 @@ class ActionSchedulerUtilTest extends WC_Unit_Test_Case {
 			array(
 				array( 'as_has_scheduled_action', self::HOOK, array( 'a' ), self::GROUP ),
 				array( 'as_schedule_single_action', 1000, self::HOOK, array( 'a' ), self::GROUP, false, 5 ),
-				array( 'as_schedule_single_action', 1000, self::HOOK, array(), self::GROUP, true, 10 ),
+				array( 'as_has_scheduled_action', self::HOOK, array(), self::GROUP ),
+				array( 'as_schedule_single_action', 1000, self::HOOK, array(), self::GROUP, false, 10 ),
 			),
 			$calls(),
-			'Unique should be emulated (checked, then passed as false) with args, and passed natively without args'
+			'Unique should be emulated (checked, then passed as false) with and without args'
 		);
 	}
 

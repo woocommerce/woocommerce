@@ -397,7 +397,7 @@ class OnboardingSetupWizard {
 			return $viewport_meta;
 		}
 
-		return 'width=device-width, initial-scale=1.0, maximum-scale=1.0';
+		return 'width=device-width, initial-scale=1.0';
 	}
 
 	/**

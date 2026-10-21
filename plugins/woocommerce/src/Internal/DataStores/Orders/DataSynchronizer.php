@@ -979,7 +979,7 @@ ORDER BY orders.id ASC
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
 	public function maybe_prevent_deletion_of_post( $delete, $post ) {
-		if ( self::PLACEHOLDER_ORDER_POST_TYPE !== $post->post_type && $this->custom_orders_table_is_authoritative() && $this->data_store->order_exists( $post->ID ) ) {
+		if ( $this->custom_orders_table_is_authoritative() && $this->data_store->order_exists( $post->ID ) ) {
 			$delete = false;
 		}
 

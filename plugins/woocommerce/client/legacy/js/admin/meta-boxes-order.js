@@ -34,6 +34,78 @@ jQuery( function ( $ ) {
 			$( 'a.load_customer_billing' ).on( 'click', this.load_billing );
 			$( 'a.load_customer_shipping' ).on( 'click', this.load_shipping );
 			$( '#customer_user' ).on( 'change', this.change_customer_user );
+			// The order edit form is form#order with HPOS and form#post with posts storage.
+			$( document.body ).on(
+				'submit',
+				'form#order, form#post',
+				this.prevent_double_submit
+			);
+			$( window ).on( 'pageshow', this.reset_double_submit );
+		},
+
+		/**
+		 * Ignore repeat submissions of the order form, e.g. from a double-click on Update. The server
+		 * runs the selected order action on every submission it receives, so only the first may go through.
+		 *
+		 * Bound to the body so handlers on the form itself run first and can still cancel the submission.
+		 */
+		prevent_double_submit: function ( e ) {
+			var $form = $( this ),
+				$buttons;
+
+			if ( $form.data( 'wc-order-submitting' ) ) {
+				e.preventDefault();
+				return;
+			}
+
+			if ( e.isDefaultPrevented() ) {
+				return;
+			}
+
+			// Skip buttons that are already disabled, so unlocking leaves them as they were.
+			$buttons = $form
+				.find( '#woocommerce-order-actions :submit' )
+				.not( '.disabled, [aria-disabled="true"]' )
+				.addClass( 'disabled' )
+				.attr( 'aria-disabled', 'true' );
+			$form.data( 'wc-order-submitting', $buttons );
+
+			// Handlers further up the page run after this one and can still cancel the submission.
+			setTimeout( function () {
+				if (
+					e.isDefaultPrevented() ||
+					( e.originalEvent && e.originalEvent.defaultPrevented )
+				) {
+					wc_meta_boxes_order.unlock_order_form( $form );
+				}
+			} );
+		},
+
+		/**
+		 * Unlock the order form when the browser restores the page from its back/forward cache.
+		 */
+		reset_double_submit: function ( e ) {
+			if ( ! e.originalEvent.persisted ) {
+				return;
+			}
+
+			$( 'form#order, form#post' ).each( function () {
+				wc_meta_boxes_order.unlock_order_form( $( this ) );
+			} );
+		},
+
+		/**
+		 * Restore the Order actions buttons that were disabled when the form was locked, and clear the lock.
+		 */
+		unlock_order_form: function ( $form ) {
+			var $buttons = $form.data( 'wc-order-submitting' );
+
+			if ( $buttons ) {
+				$buttons
+					.removeClass( 'disabled' )
+					.removeAttr( 'aria-disabled' );
+				$form.removeData( 'wc-order-submitting' );
+			}
 		},
 
 		change_country: function( e, stickValue ) {

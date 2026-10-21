@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Restore the deprecated Products block and its editor settings on WordPress 7.2.

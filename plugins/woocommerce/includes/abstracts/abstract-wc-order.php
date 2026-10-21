@@ -24,6 +24,7 @@ use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
+use Automattic\WooCommerce\Utilities\StringUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -814,6 +815,18 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	protected function get_valid_statuses() {
 		return array_keys( wc_get_order_statuses() );
+	}
+
+	/**
+	 * Whether the order can have a status.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param string $status Status slug, with or without the `wc-` prefix.
+	 * @return bool
+	 */
+	public function is_valid_status( string $status ): bool {
+		return in_array( 'wc-' . OrderUtil::remove_status_prefix( $status ), $this->get_valid_statuses(), true );
 	}
 
 	/**
@@ -1874,13 +1887,37 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	public function remove_coupon( $code ) {
 		$coupons = $this->get_items( 'coupon' );
+		/**
+		 * Data store wrapper.
+		 *
+		 * @var WC_Data_Store $order_data_store
+		 */
+		$order_data_store = $this->get_data_store();
+		// @phpstan-ignore-next-line method.notFound (Guarded by has_callable() and called via __call() on the underlying order data store instance.)
+		$has_recorded = $order_data_store->has_callable( 'get_recorded_coupon_usage_counts' ) && $order_data_store->get_recorded_coupon_usage_counts( $this );
+
+		$used_by = $this->get_user_id();
+		if ( ! $used_by && is_callable( array( $this, 'get_billing_email' ) ) ) {
+			$used_by = $this->get_billing_email();
+		}
 
 		// Remove the coupon line.
 		foreach ( $coupons as $item_id => $coupon ) {
 			if ( wc_is_same_coupon( $coupon->get_code(), $code ) ) {
 				$this->remove_item( $item_id );
 				$coupon_object = new WC_Coupon( $code );
-				$coupon_object->decrease_usage_count( $this->get_user_id() );
+
+				if ( $has_recorded ) {
+					// Mirror the stored flag into this instance so clearing it below is tracked as a change and saved.
+					$this->set_recorded_coupon_usage_counts( true );
+					$coupon_object->decrease_usage_count( $used_by );
+
+					$remaining_codes = array_filter( $this->get_coupon_codes(), fn( $remaining_code ) => ! StringUtil::is_null_or_whitespace( $remaining_code ) );
+					if ( ! $remaining_codes ) {
+						$this->set_recorded_coupon_usage_counts( false );
+					}
+				}
+
 				$this->recalculate_coupons();
 
 				/**

@@ -3,12 +3,44 @@
  * Tests for WC_Webhook class.
  */
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
  * Tests for WC_Webhook class.
  */
 class WC_Webhook_Test extends WC_Unit_Test_Case {
+	use HPOSToggleTrait;
+
+	/**
+	 * Ensure permanent HPOS tables exist before per-test transactions start.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		self::setup_cot_tables();
+	}
+
+	/**
+	 * Whether HPOS was in use before a test changed the order storage, or null if it did not.
+	 *
+	 * @var bool|null
+	 */
+	private $prev_hpos_enabled = null;
+
+	/**
+	 * Restore the order storage a test switched with use_order_storage().
+	 */
+	public function tearDown(): void {
+		try {
+			if ( null !== $this->prev_hpos_enabled ) {
+				$this->toggle_cot_authoritative( $this->prev_hpos_enabled );
+				$this->prev_hpos_enabled = null;
+			}
+		} finally {
+			parent::tearDown();
+		}
+	}
 
 	/**
 	 * @testdox Check that post-action validation uses the affected post ID.
@@ -406,6 +438,70 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Order updated webhooks are not delivered while the order is a checkout draft.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $hpos_enabled Whether orders are stored in the HPOS tables.
+	 */
+	public function test_order_updated_webhook_skips_checkout_draft_orders( bool $hpos_enabled ): void {
+		$this->use_order_storage( $hpos_enabled );
+		$order = new WC_Order();
+		$order->set_status( OrderStatus::CHECKOUT_DRAFT );
+		$order->save();
+		$updated_ids = array();
+		$created_ids = array();
+		$this->record_deliveries( $this->create_active_webhook( 'order.updated' ), $updated_ids );
+		$this->record_deliveries( $this->create_active_webhook( 'order.created' ), $created_ids );
+
+		$order->set_billing_email( 'customer@example.com' );
+		$order->save();
+		$order->update_status( OrderStatus::PENDING );
+
+		$this->assertSame( array(), $updated_ids, 'Saving a checkout draft should not deliver order.updated' );
+		$this->assertSame( array( $order->get_id() ), $created_ids, 'Leaving checkout draft should deliver order.created' );
+	}
+
+	/**
+	 * @testdox Order updated webhooks skipped for a checkout draft are still delivered once the order leaves draft.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $hpos_enabled Whether orders are stored in the HPOS tables.
+	 */
+	public function test_order_updated_webhook_delivers_after_checkout_draft( bool $hpos_enabled ): void {
+		$this->use_order_storage( $hpos_enabled );
+		$order = new WC_Order();
+		$order->set_status( OrderStatus::CHECKOUT_DRAFT );
+		$order->save();
+		$updated_ids = array();
+		$this->record_deliveries( $this->create_active_webhook( 'order.updated' ), $updated_ids );
+
+		$order->set_billing_email( 'draft@example.com' );
+		$order->save();
+		$order->update_status( OrderStatus::PENDING );
+		$order->set_billing_email( 'customer@example.com' );
+		$order->save();
+
+		$this->assertSame( array( $order->get_id() ), $updated_ids, 'The first save after leaving draft should deliver order.updated once' );
+	}
+
+	/**
+	 * Store orders in the HPOS tables or in posts for the current test.
+	 *
+	 * @param bool $hpos_enabled Whether orders are stored in the HPOS tables.
+	 */
+	private function use_order_storage( bool $hpos_enabled ): void {
+		if ( null === $this->prev_hpos_enabled ) {
+			$this->prev_hpos_enabled = OrderUtil::custom_orders_table_usage_is_enabled();
+		}
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		$this->toggle_cot_authoritative( $hpos_enabled );
+	}
+
+	/**
 	 * Enqueue a webhook and record the resource IDs it would deliver, without sending them.
 	 *
 	 * @param WC_Webhook   $webhook       Webhook to enqueue.
@@ -424,6 +520,58 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 			2
 		);
 		$webhook->enqueue();
+	}
+
+	/**
+	 * @testdox Deleting a refund delivers an order.updated webhook with the parent order payload.
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $hpos_on_or_off True to test with HPOS on, false to test with HPOS off.
+	 */
+	public function test_refund_deletion_delivers_order_updated_webhook( bool $hpos_on_or_off ): void {
+		// Remove the Test Suite’s use of temporary tables https://wordpress.stackexchange.com/a/220308.
+		remove_filter( 'query', array( $this, '_create_temporary_tables' ) );
+		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
+		$this->toggle_cot_authoritative( $hpos_on_or_off );
+
+		$order  = WC_Helper_Order::create_order();
+		$refund = wc_create_refund(
+			array(
+				'order_id'       => $order->get_id(),
+				'amount'         => 1,
+				'refund_payment' => false,
+			)
+		);
+
+		$this->assertInstanceOf( WC_Order_Refund::class, $refund, 'The refund fixture should be created.' );
+		$refund_id = $refund->get_id();
+
+		$payloads = array();
+		$webhook  = $this->create_active_webhook( 'order.updated' );
+		$webhook->set_user_id( 1 );
+
+		remove_action( 'woocommerce_webhook_process_delivery', 'wc_webhook_process_delivery', 10 );
+		add_action(
+			'woocommerce_webhook_process_delivery',
+			function ( $delivering_webhook, $arg ) use ( $webhook, &$payloads ) {
+				if ( $webhook === $delivering_webhook ) {
+					$payloads[] = $delivering_webhook->build_payload( $arg );
+				}
+			},
+			10,
+			2
+		);
+		$webhook->enqueue();
+
+		$refund->delete( true );
+
+		$this->assertCount( 1, $payloads, 'The refund deletion should queue one webhook payload.' );
+		$this->assertArrayNotHasKey( 'code', $payloads[0], 'The payload should not contain a REST API error.' );
+		$this->assertArrayHasKey( 'id', $payloads[0] );
+		$this->assertSame( $order->get_id(), $payloads[0]['id'], 'The payload should represent the parent order.' );
+		$this->assertArrayHasKey( 'refunds', $payloads[0] );
+		$this->assertNotContains( $refund_id, wp_list_pluck( $payloads[0]['refunds'], 'id' ), 'The payload should not contain the deleted refund.' );
 	}
 
 	/**
