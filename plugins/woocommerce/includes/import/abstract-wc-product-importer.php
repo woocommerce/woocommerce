@@ -335,7 +335,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 					$current_parent = 'product_variation' === $post_type ? wp_get_post_parent_id( absint( $data['id'] ) ) : 0;
 					$parent         = $current_parent ? $this->get_variation_parent( $current_parent ) : null;
 				} else {
-					// Check the parent before get_product_object() turns the post into a variation, so a failing row changes nothing.
+					// Check the parent before get_product_object() turns the post into a variation, so a row with an unusable parent changes nothing.
 					$parent = $this->get_variation_parent( $data['parent_id'] ?? null );
 				}
 

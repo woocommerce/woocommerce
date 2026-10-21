@@ -2206,7 +2206,6 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$this->assertEmpty( $data['updated'], 'A row with a missing parent updates nothing' );
 		$this->assertCount( 1, $data['failed'], 'A row with a missing parent fails' );
 		$this->assertStringContainsString( 'parent does not exist', $data['failed'][0]->get_error_message(), 'The failure names the missing parent' );
-		$this->assertStringContainsString( "ID {$missing_id}", $data['failed'][0]->get_error_data()['row'], 'The row label must show the ID from the file, not the matched variation' );
 		$unchanged = wc_get_product( $variation->get_id() );
 		$this->assertSame( $parent->get_id(), $unchanged->get_parent_id(), 'A failed row must not change the parent' );
 		$this->assertSame( $original_name, $unchanged->get_name(), 'A failed row must not change the name' );
@@ -2227,7 +2226,6 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 
 		$this->assertEmpty( $data['updated'], 'A variation row must not update a simple product' );
 		$this->assertCount( 1, $data['failed'], 'A variation row for a simple product fails' );
-		$this->assertStringContainsString( 'different product type', $data['failed'][0]->get_error_message(), 'The failure explains why the SKU did not match' );
 		$this->assertSame( 'product', get_post_type( $simple->get_id() ), 'The simple product must not be converted to a variation' );
 	}
 
@@ -2251,8 +2249,6 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 
 		$this->assertEmpty( $data['updated'], 'Neither row may update the product matched by SKU' );
 		$this->assertCount( 2, $data['failed'], 'Both rows fail' );
-		$this->assertStringContainsString( 'different product type', $data['failed'][0]->get_error_message(), 'The failure explains why the SKU did not match' );
-		$this->assertStringContainsString( 'different product type', $data['failed'][1]->get_error_message(), 'The failure explains why the SKU did not match' );
 		$this->assertSame( 'product_variation', get_post_type( $variation->get_id() ), 'The variation must not be converted to a simple product' );
 		$this->assertSame( ProductType::VARIABLE, WC_Product_Factory::get_product_type( $parent->get_id() ), 'The variable product must not be converted to a simple product' );
 	}
@@ -2322,7 +2318,6 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$this->assertCount( 1, $data['skipped'], 'The repeated ID with an unknown SKU is skipped' );
 		$this->assertSame( 'No matching product exists to update.', $data['skipped'][0]->get_error_message(), 'The unknown SKU matches nothing' );
 		$this->assertCount( 1, $data['failed'], 'The repeated ID with a variation type is refused' );
-		$this->assertStringContainsString( 'different product type', $data['failed'][0]->get_error_message(), 'The variation row is refused for its type' );
 		$updated_a = wc_get_product( $product_a->get_id() );
 		$this->assertSame( 'Title A', $updated_a->get_name(), 'Product A keeps the first row\'s name' );
 		$this->assertSame( 'IMPORT-40274-REPEAT-A', $updated_a->get_sku(), 'Product A keeps its SKU' );
@@ -2560,7 +2555,6 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 
 		$this->assertEmpty( $data['updated'], 'The row must not update the variation matched by SKU' );
 		$this->assertCount( 1, $data['failed'], 'The row fails' );
-		$this->assertStringContainsString( 'refers to other products by ID', $data['failed'][0]->get_error_message(), 'The failure explains why the SKU did not match' );
 		$this->assertSame( $parent->get_id(), wc_get_product( $variation->get_id() )->get_parent_id(), 'The variation keeps its parent' );
 	}
 
@@ -2657,7 +2651,6 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$data = $this->import_csv_rows( "ID,Type,SKU,Name\n" . ( $product->get_id() + 1000 ) . ",simple,IMPORT-40274-UNREGISTERED,Renamed\n" );
 
 		$this->assertEmpty( $data['updated'], 'The row must not update the product' );
-		$this->assertStringContainsString( 'different product type', $data['failed'][0]->get_error_message(), 'The failure explains why the SKU did not match' );
 		$this->assertTrue( has_term( 'import-40274-unregistered', 'product_type', $product->get_id() ), 'The stored type is kept' );
 	}
 
