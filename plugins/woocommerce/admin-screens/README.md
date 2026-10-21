@@ -11,7 +11,7 @@ The build writes to `plugins/woocommerce/assets/client/routes`.
 
 ## Payment settings
 
-`routes/payment-settings` serves `/settings/$page`. A page exists when a core-data entity of kind `woo_settings_payments` is registered with `addEntities()` under that name. The page loads the entity's record with the same ID, its form layout from View Config, and the `label` and `fields` from the entity config. Save and Discard work on that one record.
+`routes/payment-settings` serves `/settings/$page`. A page exists when a core-data entity of kind `woo_settings_payments` is registered with `addEntities()` under that name. The page loads the entity's record with the same ID, its form layout from View Config, and its `label` from the entity config. Its fields live in `entity-fields/src/<entity name>/` and are registered in the editor's field registry. Save and Discard work on that one record.
 
 Cheque is the Core example. It uses the existing `/wc/v3/payment_gateways/cheque` endpoint and doesn't replace the classic settings page or its links.
 
