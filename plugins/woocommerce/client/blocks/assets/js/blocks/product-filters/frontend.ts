@@ -15,6 +15,7 @@ import type {
 	ProductFiltersContext,
 } from './types';
 import { getClosestColor } from './utils/get-closest-color';
+import { prepareFocusRestoration } from './utils/focus';
 import { getFocusableElements } from '../../utils/get-focusable-elements';
 import { reload } from '../../utils/navigation';
 import { PRODUCT_FILTERS_STORE_NAME } from './constants';
@@ -323,10 +324,18 @@ const productFiltersStore = {
 				return;
 			}
 
-			const routerModule: typeof import( '@wordpress/interactivity-router' ) =
-				yield import( '@wordpress/interactivity-router' );
+			const focusRestoration = prepareFocusRestoration(
+				getElement().ref
+			);
+			try {
+				const routerModule: typeof import( '@wordpress/interactivity-router' ) =
+					yield import( '@wordpress/interactivity-router' );
 
-			yield routerModule.actions.navigate( url.href );
+				yield routerModule.actions.navigate( url.href );
+				focusRestoration?.restore();
+			} finally {
+				focusRestoration?.cleanup();
+			}
 		},
 	},
 	callbacks: {
@@ -355,7 +364,11 @@ const productFiltersStore = {
 
 			// Wait for the open class to make the drawer visible before focusing.
 			const frame = requestAnimationFrame( () => {
-				if ( context.isOverlayOpened ) {
+				if (
+					context.isOverlayOpened &&
+					dialog &&
+					! dialog.contains( dialog.ownerDocument.activeElement )
+				) {
 					getFocusableElements( dialog )[ 0 ]?.focus();
 				}
 			} );
