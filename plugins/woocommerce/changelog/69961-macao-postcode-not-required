@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Hide the postcode field for Macao at checkout, since Macao has no postal codes.
