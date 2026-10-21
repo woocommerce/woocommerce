@@ -9273,18 +9273,6 @@ body.woocommerce_page_wc-settings {
 			color: #505050;
 			padding: 0 0 10px 0;
 			text-decoration: none;
-
-			&:hover,
-			&:active {
-				outline: none;
-				box-shadow: none;
-			}
-
-			// After the reset above so a focused tab keeps its outline on hover.
-			&:focus {
-				outline: 2px solid var(--wp-admin-theme-color, #3858e9);
-				outline-offset: -2px;
-			}
 		}
 		margin: 0;
 		// Tab strip inherits the wp-admin body bg so it reads as one
