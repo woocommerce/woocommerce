@@ -1832,6 +1832,187 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Create an unsaved order item of the given type.
+	 *
+	 * @param string $type Order item type.
+	 * @param string $name Item name (the code for coupons).
+	 * @return WC_Order_Item
+	 */
+	private function create_unsaved_order_item( string $type, string $name = 'Unsaved item' ): WC_Order_Item {
+		$classes = array(
+			'line_item' => WC_Order_Item_Product::class,
+			'fee'       => WC_Order_Item_Fee::class,
+			'shipping'  => WC_Order_Item_Shipping::class,
+			'coupon'    => WC_Order_Item_Coupon::class,
+			'tax'       => WC_Order_Item_Tax::class,
+		);
+
+		$item = new $classes[ $type ]();
+		$item->set_name( $name );
+		return $item;
+	}
+
+	/**
+	 * Provides order item types.
+	 *
+	 * @return array<string, array{string}>
+	 */
+	public static function provide_order_item_types(): array {
+		return array(
+			'line item' => array( 'line_item' ),
+			'fee'       => array( 'fee' ),
+			'shipping'  => array( 'shipping' ),
+			'coupon'    => array( 'coupon' ),
+			'tax'       => array( 'tax' ),
+		);
+	}
+
+	/**
+	 * @testdox remove_item() should remove an unsaved item by its temporary key, so it is not saved with the order.
+	 * @dataProvider provide_order_item_types
+	 *
+	 * @param string $type Order item type.
+	 */
+	public function test_remove_item_removes_unsaved_item( string $type ): void {
+		$order = new WC_Order();
+		$order->add_item( $this->create_unsaved_order_item( $type ) );
+		$item_key = array_key_first( $order->get_items( $type ) );
+
+		$order->remove_item( $item_key );
+
+		$this->assertEmpty( $order->get_items( $type ), 'The unsaved item should be removed from the order straight away.' );
+
+		$order->save();
+
+		$this->assertEmpty( wc_get_order( $order->get_id() )->get_items( $type ), 'The removed item should not be saved.' );
+	}
+
+	/**
+	 * @testdox remove_item() should remove an unsaved item from a woocommerce_before_order_object_save callback.
+	 */
+	public function test_remove_item_removes_unsaved_item_during_before_save_hook(): void {
+		$order = new WC_Order();
+		$order->add_item( $this->create_unsaved_order_item( 'line_item', 'Original' ) );
+
+		add_action(
+			'woocommerce_before_order_object_save',
+			function ( $order ) {
+				foreach ( $order->get_items() as $item_id => $item ) {
+					if ( 'Original' === $item->get_name() ) {
+						$order->remove_item( $item_id );
+						$order->add_item( $this->create_unsaved_order_item( 'line_item', 'Replacement' ) );
+					}
+				}
+			}
+		);
+
+		$order->save();
+
+		$names = array_map( fn( $item ) => $item->get_name(), wc_get_order( $order->get_id() )->get_items() );
+		$this->assertSame( array( 'Replacement' ), array_values( $names ), 'Only the replacement item should be saved.' );
+	}
+
+	/**
+	 * @testdox remove_item() should still defer deleting a saved item until the order is saved.
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $id_as_string Whether to pass the item ID as a numeric string.
+	 */
+	public function test_remove_item_defers_deleting_saved_item_until_save( bool $id_as_string ): void {
+		$order = new WC_Order();
+		$order->add_item( $this->create_unsaved_order_item( 'fee' ) );
+		$order->save();
+		$item_id = array_key_first( $order->get_items( 'fee' ) );
+
+		$order->remove_item( $id_as_string ? (string) $item_id : $item_id );
+
+		$this->assertEmpty( $order->get_items( 'fee' ), 'The saved item should be removed from the order straight away.' );
+		$this->assertInstanceOf( WC_Order_Item_Fee::class, WC_Order_Factory::get_order_item( $item_id ), 'The saved item should stay in the database until the order is saved.' );
+
+		$order->save();
+
+		$this->assertFalse( WC_Order_Factory::get_order_item( $item_id ), 'The saved item should be deleted when the order is saved.' );
+	}
+
+	/**
+	 * @testdox remove_item() should remove the item it resolves when a woocommerce_order_get_items filter changes the keys.
+	 */
+	public function test_remove_item_removes_resolved_item_when_filter_swaps_keys(): void {
+		$order = new WC_Order();
+		$order->add_item( $this->create_unsaved_order_item( 'fee', 'First' ) );
+		$order->add_item( $this->create_unsaved_order_item( 'fee', 'Second' ) );
+		$order->save();
+		list( $first_id, $second_id ) = array_keys( $order->get_items( 'fee' ) );
+
+		add_filter(
+			'woocommerce_order_get_items',
+			function ( $items ) use ( $first_id, $second_id ) {
+				if ( isset( $items[ $first_id ], $items[ $second_id ] ) ) {
+					list( $items[ $first_id ], $items[ $second_id ] ) = array( $items[ $second_id ], $items[ $first_id ] );
+				}
+				return $items;
+			}
+		);
+
+		// A freshly loaded order resolves the key through the filtered list, so the first key returns the second fee.
+		wp_cache_flush();
+		$reloaded = wc_get_order( $order->get_id() );
+		$reloaded->remove_item( $first_id );
+		$remaining_ids = array_map( fn( $item ) => $item->get_id(), $reloaded->get_items( 'fee' ) );
+		$reloaded->save();
+
+		$this->assertSame( array( $first_id ), array_values( $remaining_ids ), 'The resolved item should be removed from the order.' );
+		$this->assertFalse( WC_Order_Factory::get_order_item( $second_id ), 'The resolved item should be deleted.' );
+		$this->assertInstanceOf( WC_Order_Item_Fee::class, WC_Order_Factory::get_order_item( $first_id ), 'The other item should be kept.' );
+	}
+
+	/**
+	 * @testdox remove_coupon() should remove an unsaved coupon line.
+	 */
+	public function test_remove_coupon_removes_unsaved_coupon_line(): void {
+		$order = new WC_Order();
+		$order->add_item( $this->create_unsaved_order_item( 'coupon', 'unsaved-coupon' ) );
+
+		$this->assertTrue( $order->remove_coupon( 'unsaved-coupon' ) );
+		$this->assertEmpty( $order->get_coupon_codes(), 'The coupon line should be removed from the order straight away.' );
+
+		$order->save();
+
+		$this->assertEmpty( wc_get_order( $order->get_id() )->get_coupon_codes(), 'The removed coupon line should not be saved.' );
+	}
+
+	/**
+	 * @testdox remove_coupon() should remove only the matching coupon when a woocommerce_order_get_items filter renumbers the keys.
+	 */
+	public function test_remove_coupon_removes_matching_coupon_when_filter_renumbers_keys(): void {
+		$order = new WC_Order();
+		$order->add_item( $this->create_unsaved_order_item( 'coupon', 'first-coupon' ) );
+		$order->add_item( $this->create_unsaved_order_item( 'coupon', 'second-coupon' ) );
+		$order->save();
+
+		add_filter( 'woocommerce_order_get_items', 'array_values' );
+
+		$order->remove_coupon( 'second-coupon' );
+		$order->save();
+
+		$this->assertSame( array( 'first-coupon' ), wc_get_order( $order->get_id() )->get_coupon_codes() );
+	}
+
+	/**
+	 * @testdox update_taxes() should remove an unsaved tax line whose rate is no longer used by the order.
+	 */
+	public function test_update_taxes_removes_obsolete_unsaved_tax_line(): void {
+		$order = new WC_Order();
+		$order->add_item( $this->create_unsaved_order_item( 'tax' ) );
+
+		$order->update_taxes();
+
+		$this->assertEmpty( $order->get_taxes(), 'The obsolete tax line should be removed from the order.' );
+		$this->assertEmpty( wc_get_order( $order->get_id() )->get_taxes(), 'The obsolete tax line should not be saved.' );
+	}
+
+	/**
 	 * Create a product item for deferred deletion tests.
 	 *
 	 * @param WC_Product $product Product object.
