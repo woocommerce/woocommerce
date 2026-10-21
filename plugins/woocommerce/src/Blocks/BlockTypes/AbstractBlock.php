@@ -373,9 +373,10 @@ abstract class AbstractBlock {
 		}
 
 		// Step 2: Resolve file path and apply the block_type_metadata filter for backward compatibility with register_block_type_from_metadata workflows.
-		$real_path        = realpath( $manifest_file );
-		$metadata['file'] = wp_normalize_path( $real_path ? $real_path : $manifest_file );
-		$metadata         = apply_filters( 'block_type_metadata', $metadata ); // phpcs:ignore WooCommerce.Commenting.CommentHooks
+		$real_path         = realpath( $manifest_file );
+		$metadata['file']  = wp_normalize_path( $real_path ? $real_path : $manifest_file );
+		$filtered_metadata = apply_filters( 'block_type_metadata', $metadata ); // phpcs:ignore WooCommerce.Commenting.CommentHooks
+		$metadata          = is_array( $filtered_metadata ) ? $filtered_metadata : $metadata;
 
 		// Step 3: Property mapping (99.4% of blocks) + i18n (98.9% of blocks as per v11.4) + merge caller-provided settings.
 		$settings          = array();
@@ -441,7 +442,8 @@ abstract class AbstractBlock {
 		}
 
 		// Step 5: Apply the block_type_metadata_settings filter for backward compatibility with register_block_type_from_metadata workflows.
-		$settings = apply_filters( 'block_type_metadata_settings', $settings, $metadata ); // phpcs:ignore WooCommerce.Commenting.CommentHooks
+		$filtered_settings = apply_filters( 'block_type_metadata_settings', $settings, $metadata ); // phpcs:ignore WooCommerce.Commenting.CommentHooks
+		$settings          = is_array( $filtered_settings ) ? $filtered_settings : $settings;
 
 		// Step 6: Register the block and pass result back to the higher-level workflow.
 		return \WP_Block_Type_Registry::get_instance()->register(
