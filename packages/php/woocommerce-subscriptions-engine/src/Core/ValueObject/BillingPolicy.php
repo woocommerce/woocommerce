@@ -4,8 +4,8 @@
  *
  * An extension may use {@see self::from_array()} to parse its plan billing arrays and
  * compute due moments from them. The engine stores plan policies opaquely and does not
- * read them itself. A policy always has a usable cadence: construction refuses an unknown
- * period or a non-positive interval. The array shape it parses:
+ * read them itself. A policy always has a usable cadence and trial: construction refuses an
+ * unknown period or trial unit and a non-positive interval or trial length. The array shape it parses:
  *   {
  *     period:         'day' | 'week' | 'month' | 'year',
  *     interval:       int,
@@ -26,8 +26,9 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject;
 
 use DateTimeImmutable;
 use DateTimeZone;
-use DomainException;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\Coercion;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\InvalidInputException;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ValidationErrorCode;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -75,69 +76,77 @@ final class BillingPolicy {
 	private $trial_duration;
 
 	/**
-	 * Build a billing policy.
+	 * Build a billing policy. Every invalid value is reported in one exception.
 	 *
 	 * @param string                                $period         One of 'day' | 'week' | 'month' | 'year'.
 	 * @param int                                   $interval       Period count.
 	 * @param int|null                              $min_cycles     Minimum cycles before cancellation is allowed.
 	 * @param int|null                              $max_cycles     Total cycles before the contract ends.
 	 * @param array{length: int, unit: string}|null $trial_duration Native trial; null if none.
-	 * @throws DomainException If the period is unknown, the interval is not positive, or the cycle bounds are invalid.
+	 * @throws InvalidInputException If the period is unknown, the interval is not positive, the cycle bounds or the trial are invalid.
 	 */
 	public function __construct( string $period, int $interval, ?int $min_cycles, ?int $max_cycles, ?array $trial_duration ) {
-		if ( $interval <= 0 ) {
-			throw new DomainException(
-				sprintf( 'BillingPolicy: interval must be positive, got %d.', $interval )
-			);
-		}
-		$this->normalize_unit( $period, 'period' );
-		$this->validate_min_max_cycles( $min_cycles, $max_cycles );
+		self::throw_found_errors(
+			array_merge(
+				array(
+					self::get_period_error( $period ),
+					self::get_interval_error( $interval ),
+				),
+				self::get_cycle_errors( $min_cycles, $max_cycles ),
+				self::get_trial_errors( $trial_duration )
+			)
+		);
 
 		$this->period         = $period;
 		$this->interval       = $interval;
 		$this->min_cycles     = $min_cycles;
 		$this->max_cycles     = $max_cycles;
-		$this->trial_duration = self::normalize_trial_duration( $trial_duration );
+		$this->trial_duration = null === $trial_duration ? null : array(
+			'length' => (int) $trial_duration['length'],
+			'unit'   => (string) $trial_duration['unit'],
+		);
 	}
 
 	/**
 	 * Hydrate from the JSON-decoded `billing_policy` column shape.
 	 *
 	 * Missing nullable keys default to null. `period` and `interval` are required, and
-	 * must form a usable cadence (see the constructor).
+	 * must form a usable cadence (see the constructor). Every invalid value is reported
+	 * in one exception.
 	 *
 	 * @param array<string, mixed> $data Decoded billing_policy row.
-	 * @throws DomainException If the data is not valid.
+	 * @throws InvalidInputException If the data is not valid.
 	 */
 	public static function from_array( array $data ): self {
-		if ( ! array_key_exists( 'period', $data ) ) {
-			throw new DomainException( 'BillingPolicy: period is required, but not supplied.' );
-		}
-		if ( ! array_key_exists( 'interval', $data ) ) {
-			throw new DomainException( 'BillingPolicy: interval is required, but not supplied.' );
-		}
-		if ( ! is_string( $data['period'] ) ) {
-			throw new DomainException( 'BillingPolicy: period must be a string, got ' . gettype( $data['period'] ) . '.' );
-		}
-		if ( ! is_int( $data['interval'] ) ) {
-			throw new DomainException( 'BillingPolicy: interval must be an integer, got ' . gettype( $data['interval'] ) . '.' );
-		}
+		$min_cycles = Coercion::coerce_nullable_int( $data['min_cycles'] ?? null );
+		$max_cycles = Coercion::coerce_nullable_int( $data['max_cycles'] ?? null );
+		$trial      = $data['trial_duration'] ?? null;
 
-		$trial = $data['trial_duration'] ?? null;
-		if ( null !== $trial && ! is_array( $trial ) ) {
-			throw new DomainException(
-				sprintf( 'BillingPolicy: trial_duration must be null or an array, got %s.', gettype( $trial ) )
-			);
-		}
-
-		$trial = self::normalize_trial_duration( $trial );
+		self::throw_found_errors(
+			array_merge(
+				array(
+					array_key_exists( 'period', $data )
+						? self::get_period_error( $data['period'] )
+						: new InvalidInputException( ValidationErrorCode::REQUIRED, 'period', 'BillingPolicy: period is required, but not supplied.' ),
+					array_key_exists( 'interval', $data )
+						? self::get_interval_error( $data['interval'] )
+						: new InvalidInputException( ValidationErrorCode::REQUIRED, 'interval', 'BillingPolicy: interval is required, but not supplied.' ),
+				),
+				self::get_cycle_errors( $min_cycles, $max_cycles ),
+				array( self::get_trial_duration_error( $trial ) ),
+				is_array( $trial ) ? self::get_trial_errors( $trial ) : array()
+			)
+		);
 
 		return new self(
-			(string) $data['period'],
-			(int) $data['interval'],
-			Coercion::coerce_nullable_int( $data['min_cycles'] ?? null ),
-			Coercion::coerce_nullable_int( $data['max_cycles'] ?? null ),
-			$trial
+			Coercion::coerce_string( $data['period'] ),
+			Coercion::coerce_int( $data['interval'] ),
+			$min_cycles,
+			$max_cycles,
+			is_array( $trial ) ? array(
+				'length' => Coercion::coerce_int( $trial['length'] ?? null ),
+				'unit'   => Coercion::coerce_string( $trial['unit'] ?? null ),
+			) : null
 		);
 	}
 
@@ -203,27 +212,15 @@ final class BillingPolicy {
 	 *
 	 * @param DateTimeImmutable $contract_start Moment the contract was created.
 	 * @return DateTimeImmutable The first renewal moment in UTC.
-	 * @throws DomainException If the trial length is not positive or the trial unit is unknown.
 	 */
 	public function compute_first_renewal_from( DateTimeImmutable $contract_start ): DateTimeImmutable {
 		if ( null === $this->trial_duration ) {
 			return $this->compute_next_renewal_from( $contract_start );
 		}
 
-		$length = (int) $this->trial_duration['length'];
-		$unit   = (string) $this->trial_duration['unit'];
-
-		if ( $length <= 0 ) {
-			throw new DomainException(
-				sprintf( 'BillingPolicy::compute_first_renewal_from(): trial length must be positive, got %d.', $length )
-			);
-		}
-
-		$normalized_unit = $this->normalize_unit( $unit, 'trial unit' );
-
 		return $contract_start
 			->setTimezone( new DateTimeZone( 'UTC' ) )
-			->modify( sprintf( '+%d %s', $length, $normalized_unit ) );
+			->modify( sprintf( '+%d %s', $this->trial_duration['length'], $this->trial_duration['unit'] ) );
 	}
 
 	/**
@@ -242,81 +239,234 @@ final class BillingPolicy {
 	}
 
 	/**
-	 * Validate and pass through a period/trial unit.
+	 * The error for a unit that is not one of day/week/month/year, or null.
 	 *
 	 * @param string $unit  The raw unit.
-	 * @param string $label Where the unit came from, for the error message.
-	 * @throws DomainException If the unit is not one of day/week/month/year.
+	 * @param string $field Field the unit came from, in dot notation.
 	 */
-	private function normalize_unit( string $unit, string $label ): string {
-		if ( ! in_array( $unit, array( 'day', 'week', 'month', 'year' ), true ) ) {
-			throw new DomainException(
-				sprintf( 'BillingPolicy: invalid %s "%s".', $label, $unit )
+	private static function get_unit_error( string $unit, string $field ): ?InvalidInputException {
+		$allowed = array( 'day', 'week', 'month', 'year' );
+		if ( ! in_array( $unit, $allowed, true ) ) {
+			return new InvalidInputException(
+				ValidationErrorCode::NOT_IN_ENUM,
+				$field,
+				sprintf( 'BillingPolicy: invalid %s "%s".', $field, $unit ),
+				array( 'allowed' => $allowed )
 			);
 		}
 
-		return $unit;
+		return null;
 	}
 
 	/**
-	 * Validate the min_cycles and max_cycles fields.
+	 * Throw the non-null errors at once; do nothing when there are none.
+	 *
+	 * @param array<int, InvalidInputException|null> $errors Errors, null where a check passed.
+	 * @throws InvalidInputException If an error is present.
+	 */
+	private static function throw_found_errors( array $errors ): void {
+		$errors = array_values( array_filter( $errors ) );
+		if ( array() !== $errors ) {
+			throw InvalidInputException::from_errors( $errors );
+		}
+	}
+
+	/**
+	 * The error for a period that is not a string or not a known unit, or null.
+	 *
+	 * @param mixed $period Candidate period.
+	 */
+	private static function get_period_error( $period ): ?InvalidInputException {
+		if ( ! is_string( $period ) ) {
+			return new InvalidInputException(
+				ValidationErrorCode::INVALID_TYPE,
+				'period',
+				'BillingPolicy: period must be a string, got ' . gettype( $period ) . '.',
+				array( 'type' => 'string' )
+			);
+		}
+
+		return self::get_unit_error( $period, 'period' );
+	}
+
+	/**
+	 * The error for an interval that is not a positive integer, or null.
+	 *
+	 * @param mixed $interval Candidate interval.
+	 */
+	private static function get_interval_error( $interval ): ?InvalidInputException {
+		if ( ! is_int( $interval ) ) {
+			return new InvalidInputException(
+				ValidationErrorCode::INVALID_TYPE,
+				'interval',
+				'BillingPolicy: interval must be an integer, got ' . gettype( $interval ) . '.',
+				array( 'type' => 'integer' )
+			);
+		}
+		if ( $interval <= 0 ) {
+			return new InvalidInputException(
+				ValidationErrorCode::OUT_OF_BOUNDS,
+				'interval',
+				sprintf( 'BillingPolicy: interval must be positive, got %d.', $interval ),
+				array( 'min' => 1 )
+			);
+		}
+
+		return null;
+	}
+
+	/**
+	 * The cycle bound errors: each bound's own, then `min_cycles` above `max_cycles` only
+	 * when both passed theirs.
 	 *
 	 * @param int|null $min_cycles Minimum cycles before cancellation is allowed.
 	 * @param int|null $max_cycles Total cycles before the contract ends.
-	 * @throws DomainException If min_cycles or max_cycles are not valid.
+	 * @return array<int, InvalidInputException|null>
 	 */
-	private function validate_min_max_cycles( ?int $min_cycles, ?int $max_cycles ): void {
-		if ( null !== $min_cycles && $min_cycles < 0 ) {
-			throw new DomainException(
-				sprintf( 'BillingPolicy: min_cycles must be 0 or greater, got %d.', $min_cycles )
-			);
+	private static function get_cycle_errors( ?int $min_cycles, ?int $max_cycles ): array {
+		$min_error = self::get_min_cycles_error( $min_cycles );
+		$max_error = self::get_max_cycles_error( $max_cycles );
+		if ( null !== $min_error || null !== $max_error ) {
+			return array( $min_error, $max_error );
 		}
 
-		if ( null !== $max_cycles && $max_cycles < 0 ) {
-			throw new DomainException(
-				sprintf( 'BillingPolicy: max_cycles must be 0 or greater, got %d.', $max_cycles )
-			);
-		}
-
-		if ( null !== $min_cycles && null !== $max_cycles && $min_cycles > $max_cycles ) {
-			throw new DomainException(
-				sprintf( 'BillingPolicy: min_cycles cannot exceed max_cycles, got %d and %d.', $min_cycles, $max_cycles )
-			);
-		}
+		return array( self::get_cycle_bounds_error( $min_cycles, $max_cycles ) );
 	}
 
 	/**
-	 * Normalize the trial duration.
+	 * The error for a negative `min_cycles`, or null.
 	 *
-	 * @param array<array-key, mixed>|null $trial_duration The trial duration.
-	 * @return array{length: int, unit: string}|null The normalized trial duration.
-	 * @throws DomainException If the trial duration is not valid.
+	 * @param int|null $min_cycles Minimum cycles before cancellation is allowed.
 	 */
-	private static function normalize_trial_duration( ?array $trial_duration ): ?array {
-		if ( null === $trial_duration ) {
-			return null;
+	private static function get_min_cycles_error( ?int $min_cycles ): ?InvalidInputException {
+		if ( null !== $min_cycles && $min_cycles < 0 ) {
+			return new InvalidInputException(
+				ValidationErrorCode::OUT_OF_BOUNDS,
+				'min_cycles',
+				sprintf( 'BillingPolicy: min_cycles must be 0 or greater, got %d.', $min_cycles ),
+				array( 'min' => 0 )
+			);
 		}
 
-		if ( ! array_key_exists( 'length', $trial_duration ) ) {
-			throw new DomainException( "BillingPolicy: trial_duration['length'] is required." );
+		return null;
+	}
+
+	/**
+	 * The error for a negative `max_cycles`, or null.
+	 *
+	 * @param int|null $max_cycles Total cycles before the contract ends.
+	 */
+	private static function get_max_cycles_error( ?int $max_cycles ): ?InvalidInputException {
+		if ( null !== $max_cycles && $max_cycles < 0 ) {
+			return new InvalidInputException(
+				ValidationErrorCode::OUT_OF_BOUNDS,
+				'max_cycles',
+				sprintf( 'BillingPolicy: max_cycles must be 0 or greater, got %d.', $max_cycles ),
+				array( 'min' => 0 )
+			);
 		}
-		if ( ! array_key_exists( 'unit', $trial_duration ) ) {
-			throw new DomainException( "BillingPolicy: trial_duration['unit'] is required." );
+
+		return null;
+	}
+
+	/**
+	 * The error for `min_cycles` above `max_cycles`, or null.
+	 *
+	 * @param int|null $min_cycles Minimum cycles before cancellation is allowed.
+	 * @param int|null $max_cycles Total cycles before the contract ends.
+	 */
+	private static function get_cycle_bounds_error( ?int $min_cycles, ?int $max_cycles ): ?InvalidInputException {
+		if ( null !== $min_cycles && null !== $max_cycles && $min_cycles > $max_cycles ) {
+			return new InvalidInputException(
+				ValidationErrorCode::OUT_OF_BOUNDS,
+				'min_cycles',
+				sprintf( 'BillingPolicy: min_cycles cannot exceed max_cycles, got %d and %d.', $min_cycles, $max_cycles ),
+				array( 'max' => $max_cycles )
+			);
+		}
+
+		return null;
+	}
+
+	/**
+	 * The error for a trial duration that is neither null nor an array, or null.
+	 *
+	 * @param mixed $trial_duration Candidate trial duration.
+	 */
+	private static function get_trial_duration_error( $trial_duration ): ?InvalidInputException {
+		if ( null !== $trial_duration && ! is_array( $trial_duration ) ) {
+			return new InvalidInputException(
+				ValidationErrorCode::INVALID_TYPE,
+				'trial_duration',
+				sprintf( 'BillingPolicy: trial_duration must be null or an array, got %s.', gettype( $trial_duration ) ),
+				array( 'type' => 'object' )
+			);
+		}
+
+		return null;
+	}
+
+	/**
+	 * The trial errors: the length's, then the unit's. None for no trial.
+	 *
+	 * @param array<array-key, mixed>|null $trial_duration Trial duration.
+	 * @return array<int, InvalidInputException|null>
+	 */
+	private static function get_trial_errors( ?array $trial_duration ): array {
+		if ( null === $trial_duration ) {
+			return array();
+		}
+
+		return array( self::get_trial_length_error( $trial_duration ), self::get_trial_unit_error( $trial_duration ) );
+	}
+
+	/**
+	 * The error for a missing, non-integer or non-positive trial length, or null.
+	 *
+	 * @param array<array-key, mixed> $trial_duration Trial duration.
+	 */
+	private static function get_trial_length_error( array $trial_duration ): ?InvalidInputException {
+		if ( ! array_key_exists( 'length', $trial_duration ) ) {
+			return new InvalidInputException( ValidationErrorCode::REQUIRED, 'trial_duration.length', 'BillingPolicy: trial_duration.length is required.' );
 		}
 		if ( ! is_int( $trial_duration['length'] ) ) {
-			throw new DomainException(
-				sprintf( "BillingPolicy: trial_duration['length'] must be an integer, got %s.", gettype( $trial_duration['length'] ) )
+			return new InvalidInputException(
+				ValidationErrorCode::INVALID_TYPE,
+				'trial_duration.length',
+				sprintf( 'BillingPolicy: trial_duration.length must be an integer, got %s.', gettype( $trial_duration['length'] ) ),
+				array( 'type' => 'integer' )
 			);
 		}
-		if ( ! is_string( $trial_duration['unit'] ) ) {
-			throw new DomainException(
-				sprintf( "BillingPolicy: trial_duration['unit'] must be a string, got %s.", gettype( $trial_duration['unit'] ) )
+		if ( $trial_duration['length'] <= 0 ) {
+			return new InvalidInputException(
+				ValidationErrorCode::OUT_OF_BOUNDS,
+				'trial_duration.length',
+				sprintf( 'BillingPolicy: trial_duration.length must be positive, got %d.', $trial_duration['length'] ),
+				array( 'min' => 1 )
 			);
 		}
 
-		return array(
-			'length' => (int) $trial_duration['length'],
-			'unit'   => (string) $trial_duration['unit'],
-		);
+		return null;
+	}
+
+	/**
+	 * The error for a missing, non-string or unknown trial unit, or null.
+	 *
+	 * @param array<array-key, mixed> $trial_duration Trial duration.
+	 */
+	private static function get_trial_unit_error( array $trial_duration ): ?InvalidInputException {
+		if ( ! array_key_exists( 'unit', $trial_duration ) ) {
+			return new InvalidInputException( ValidationErrorCode::REQUIRED, 'trial_duration.unit', 'BillingPolicy: trial_duration.unit is required.' );
+		}
+		if ( ! is_string( $trial_duration['unit'] ) ) {
+			return new InvalidInputException(
+				ValidationErrorCode::INVALID_TYPE,
+				'trial_duration.unit',
+				sprintf( 'BillingPolicy: trial_duration.unit must be a string, got %s.', gettype( $trial_duration['unit'] ) ),
+				array( 'type' => 'string' )
+			);
+		}
+
+		return self::get_unit_error( $trial_duration['unit'], 'trial_duration.unit' );
 	}
 }

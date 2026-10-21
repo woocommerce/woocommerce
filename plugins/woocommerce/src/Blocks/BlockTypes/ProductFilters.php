@@ -110,6 +110,7 @@ class ProductFilters extends AbstractBlock {
 	:where(.wc-block-product-filters).is-mobile-overlay .wc-block-product-filters__overlay {
 		position: relative;
 		pointer-events: auto;
+		visibility: visible;
 		inset: 0;
 		z-index: auto;
 		background: inherit;
@@ -263,10 +264,10 @@ CSS;
 				</button>
 				<div class="wc-block-product-filters__overlay">
 					<div class="wc-block-product-filters__overlay-wrapper" data-wp-on--click="actions.closeOverlayOnBackdrop">
-						<div
+						<section
 							class="wc-block-product-filters__overlay-dialog"
 							role="dialog"
-							aria-label="<?php echo esc_html__( 'Product Filters', 'woocommerce' ); ?>"
+							aria-label="<?php echo esc_attr__( 'Product Filters', 'woocommerce' ); ?>"
 						>
 							<header class="wc-block-product-filters__overlay-header">
 								<button
@@ -295,7 +296,7 @@ CSS;
 									<span><?php echo esc_html__( 'Apply', 'woocommerce' ); ?></span>
 								</button>
 							</footer>
-						</div>
+						</section>
 					</div>
 				</div>
 			<?php else : ?>

@@ -50,10 +50,12 @@ test.describe( 'woocommerce/product-filters - Frontend', () => {
 			const openOverlayButton = page.getByRole( 'button', {
 				name: 'Filter products',
 			} );
-			const overlay = page.getByRole( 'dialog' );
+			const overlay = page.getByRole( 'dialog', {
+				name: 'Product Filters',
+			} );
 
 			await expect( openOverlayButton ).toBeVisible();
-			await expect( overlay ).not.toBeInViewport();
+			await expect( overlay ).toHaveCount( 0 );
 
 			await openOverlayButton.click();
 
@@ -68,7 +70,7 @@ test.describe( 'woocommerce/product-filters - Frontend', () => {
 
 			await closeOverlayButton.click();
 
-			await expect( overlay ).not.toBeInViewport();
+			await expect( overlay ).toHaveCount( 0 );
 
 			// Close overlay by hitting Esc.
 			await openOverlayButton.click();
@@ -77,7 +79,7 @@ test.describe( 'woocommerce/product-filters - Frontend', () => {
 
 			await page.keyboard.press( 'Escape' );
 
-			await expect( overlay ).not.toBeInViewport();
+			await expect( overlay ).toHaveCount( 0 );
 
 			// Close overlay by clicking Apply button.
 			await openOverlayButton.click();
@@ -92,7 +94,7 @@ test.describe( 'woocommerce/product-filters - Frontend', () => {
 
 			await applyButton.click();
 
-			await expect( overlay ).not.toBeInViewport();
+			await expect( overlay ).toHaveCount( 0 );
 		} );
 
 		// Skipping these tests until we can move this block to @wordpress/interactivity.
