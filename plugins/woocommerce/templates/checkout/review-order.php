@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 11.3.0
+ * @version 11.4.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -61,7 +61,7 @@ defined( 'ABSPATH' ) || exit;
 						/**
 						 * Fires after the cart item data is rendered in the checkout review order table.
 						 *
-						 * @since 11.3.0
+						 * @since 11.4.0
 						 * @param array  $cart_item     The cart item data.
 						 * @param string $cart_item_key The cart item key.
 						 */
