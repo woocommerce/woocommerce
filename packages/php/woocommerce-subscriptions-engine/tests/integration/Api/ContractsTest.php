@@ -387,8 +387,8 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$cycle = $this->add_cycle( $id, $this->cycle_args( array( 'status' => CycleStatus::PENDING ) ) );
 
 		$this->assert_validation_errors(
-			static function () use ( $id ): void {
-				Contracts::add_cycle( $id, array( 'currency' => 'USD' ) );
+			function () use ( $id ): void {
+				$this->add_cycle_locked( $id, array( 'currency' => 'USD' ) );
 			},
 			array(
 				array( ValidationErrorCode::REQUIRED, 'starts_at_gmt' ),
@@ -396,14 +396,14 @@ class ContractsTest extends EngineIntegrationTestCase {
 			)
 		);
 		$this->assert_validation_errors(
-			static function () use ( $cycle ): void {
-				Contracts::claim_cycle( $cycle->get_id(), CycleStatus::PENDING, 0 );
-			},
-			array( array( ValidationErrorCode::OUT_OF_BOUNDS, 'claim_seconds' ) )
-		);
-		$this->assert_validation_errors(
-			static function () use ( $cycle ): void {
-				Contracts::transition_cycle( $cycle->get_id(), CycleStatus::PENDING, 'never-registered' );
+			function () use ( $cycle ): void {
+				$this->transition_cycle_locked(
+					$cycle->get_id(),
+					array(
+						'from_status' => CycleStatus::PENDING,
+						'to_status'   => 'never-registered',
+					)
+				);
 			},
 			array( array( ValidationErrorCode::NOT_REGISTERED, 'to_status' ) )
 		);
@@ -450,6 +450,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 				Contracts::create(
 					array(
 						'extension_slug'  => self::EXTENSION_SLUG,
+						'creation_key'    => str_repeat( 'k', 101 ),
 						'status'          => 'never-registered',
 						'schedule_source' => 'Not a slug',
 						'billing_total'   => '10',
@@ -457,8 +458,10 @@ class ContractsTest extends EngineIntegrationTestCase {
 				);
 			},
 			array(
-				array( ValidationErrorCode::NOT_REGISTERED, 'status' ),
+				// The facade error groups messages by code, so both `invalid_value` errors come first.
+				array( ValidationErrorCode::INVALID_VALUE, 'creation_key' ),
 				array( ValidationErrorCode::INVALID_VALUE, 'schedule_source' ),
+				array( ValidationErrorCode::NOT_REGISTERED, 'status' ),
 				array( ValidationErrorCode::REQUIRED, 'currency' ),
 			)
 		);
@@ -509,8 +512,8 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$id = $this->contract_with_currency();
 
 		$this->assert_validation_errors(
-			static function () use ( $id ): void {
-				Contracts::add_cycle( $id, array( 'kind' => '' ) );
+			function () use ( $id ): void {
+				$this->add_cycle_locked( $id, array( 'kind' => '' ) );
 			},
 			array(
 				array( ValidationErrorCode::REQUIRED, 'kind' ),
@@ -520,8 +523,8 @@ class ContractsTest extends EngineIntegrationTestCase {
 			)
 		);
 		$this->assert_validation_errors(
-			static function () use ( $id ): void {
-				Contracts::add_cycle(
+			function () use ( $id ): void {
+				$this->add_cycle_locked(
 					$id,
 					array(
 						'count'         => 0,
@@ -547,20 +550,21 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$cycle = $this->add_cycle( $id, $this->cycle_args( array( 'status' => CycleStatus::PENDING ) ) );
 
 		$this->assert_validation_errors(
-			static function () use ( $cycle ): void {
-				Contracts::transition_cycle(
+			function () use ( $cycle ): void {
+				$this->transition_cycle_locked(
 					$cycle->get_id(),
-					CycleStatus::PENDING,
-					CycleStatus::BILLED,
 					array(
-						'order_id'      => 'x',
-						'claim_seconds' => 0,
+						'from_status' => '',
+						'to_status'   => CycleStatus::BILLED,
+						'order_id'    => 'x',
+						'reason'      => 5,
 					)
 				);
 			},
 			array(
+				array( ValidationErrorCode::REQUIRED, 'from_status' ),
 				array( ValidationErrorCode::INVALID_TYPE, 'order_id' ),
-				array( ValidationErrorCode::OUT_OF_BOUNDS, 'claim_seconds' ),
+				array( ValidationErrorCode::INVALID_TYPE, 'reason' ),
 			)
 		);
 		$this->assert_validation_errors(

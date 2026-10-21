@@ -1743,14 +1743,13 @@ final class ContractRepository {
 		global $wpdb;
 
 		if ( ! CycleStatus::is_registered( $to_status ) ) {
-			// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the message is not output; the facade escapes it.
-			throw new InvalidInputException(
+			$error = new InvalidInputException(
 				ValidationErrorCode::NOT_REGISTERED,
 				'to_status',
 				sprintf( 'ContractRepository::transition_cycle(): cycle status "%s" is not registered.', $to_status ),
 				array( 'value' => $to_status )
 			);
-			// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
+			throw $error; // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the message is not output; the facade escapes it.
 		}
 
 		// The contract match is in the UPDATE's WHERE clause: this method knows only the cycle id.

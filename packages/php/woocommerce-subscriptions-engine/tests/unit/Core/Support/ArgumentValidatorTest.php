@@ -58,8 +58,8 @@ class ArgumentValidatorTest extends TestCase {
 			'money'                 => array( 'validate_money', array( 'tax_total', '1.5' ), '1.50000000' ),
 			'money null is zero'    => array( 'validate_money', array( 'tax_total', null ), '0.00000000' ),
 			'list of arrays'        => array( 'validate_list_of_arrays', array( 'items', array( array( 'name' => 'a' ) ) ), array( array( 'name' => 'a' ) ) ),
-			'positive int'          => array( 'validate_positive_int', array( 'claim_seconds', 900 ), 900 ),
-			'positive int digits'   => array( 'validate_positive_int', array( 'claim_seconds', '60' ), 60 ),
+			'positive int'          => array( 'validate_positive_int', array( 'quantity', 900 ), 900 ),
+			'positive int digits'   => array( 'validate_positive_int', array( 'quantity', '60' ), 60 ),
 			'non-negative int zero' => array( 'validate_non_negative_int', array( 'offset', 0 ), 0 ),
 			'non-negative digits'   => array( 'validate_non_negative_int', array( 'offset', '7' ), 7 ),
 			'id list'               => array( 'validate_id_list', array( 'ids', array( 3, '4' ) ), array( 3, 4 ) ),
@@ -103,13 +103,13 @@ class ArgumentValidatorTest extends TestCase {
 	public function test_the_english_message_quotes_the_field(): void {
 		$e = $this->assert_invalid_input(
 			static function (): void {
-				ArgumentValidator::validate_positive_int( 'claim_seconds', 0 );
+				ArgumentValidator::validate_positive_int( 'quantity', 0 );
 			},
 			ValidationErrorCode::OUT_OF_BOUNDS,
-			'claim_seconds',
+			'quantity',
 			array( 'min' => 1 )
 		);
-		$this->assertSame( '"claim_seconds" must be a positive integer.', $e->getMessage() );
+		$this->assertSame( '"quantity" must be a positive integer.', $e->getMessage() );
 
 		$e = $this->assert_invalid_input(
 			static function (): void {
@@ -140,8 +140,8 @@ class ArgumentValidatorTest extends TestCase {
 			'non-empty not string'  => array( 'validate_non_empty_string', array( 'extension_slug', 5 ), ValidationErrorCode::INVALID_TYPE, 'extension_slug', $type_string ),
 			'non-empty null'        => array( 'validate_non_empty_string', array( 'extension_slug', null ), ValidationErrorCode::REQUIRED, 'extension_slug', array() ),
 			'non-empty empty'       => array( 'validate_non_empty_string', array( 'extension_slug', '' ), ValidationErrorCode::REQUIRED, 'extension_slug', array() ),
-			'positive int type'     => array( 'validate_positive_int', array( 'claim_seconds', null ), ValidationErrorCode::INVALID_TYPE, 'claim_seconds', $type_integer ),
-			'positive int zero'     => array( 'validate_positive_int', array( 'claim_seconds', 0 ), ValidationErrorCode::OUT_OF_BOUNDS, 'claim_seconds', $min_one ),
+			'positive int type'     => array( 'validate_positive_int', array( 'quantity', null ), ValidationErrorCode::INVALID_TYPE, 'quantity', $type_integer ),
+			'positive int zero'     => array( 'validate_positive_int', array( 'quantity', 0 ), ValidationErrorCode::OUT_OF_BOUNDS, 'quantity', $min_one ),
 			'nullable id type'      => array( 'validate_nullable_id', array( 'order_id', "5\n" ), ValidationErrorCode::INVALID_TYPE, 'order_id', $type_integer ),
 			'nullable id zero'      => array( 'validate_nullable_id', array( 'order_id', 0 ), ValidationErrorCode::OUT_OF_BOUNDS, 'order_id', $min_one ),
 			'non-negative type'     => array( 'validate_non_negative_int', array( 'offset', 1.5 ), ValidationErrorCode::INVALID_TYPE, 'offset', $type_integer ),

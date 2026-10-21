@@ -771,31 +771,38 @@ class ContractTest extends TestCase {
 	 * @testdox create() rejects an empty, over-long or non-string creation key.
 	 * @dataProvider invalid_creation_keys
 	 *
-	 * @param mixed $creation_key Invalid creation key.
+	 * @param mixed                $creation_key Invalid creation key.
+	 * @param string               $code         Expected error code.
+	 * @param array<string, mixed> $params       Expected error params.
 	 */
-	public function test_create_rejects_an_invalid_creation_key( $creation_key ): void {
-		$this->expectException( DomainException::class );
-
-		Contract::create(
-			array(
-				'extension_slug' => 'acme-subs',
-				'creation_key'   => $creation_key,
-			)
+	public function test_create_rejects_an_invalid_creation_key( $creation_key, string $code, array $params ): void {
+		$this->assert_invalid_input(
+			static function () use ( $creation_key ): void {
+				Contract::create(
+					array(
+						'extension_slug' => 'acme-subs',
+						'creation_key'   => $creation_key,
+					)
+				);
+			},
+			$code,
+			'creation_key',
+			$params
 		);
 	}
 
 	/**
 	 * Invalid creation keys.
 	 *
-	 * @return array<string, array{0: mixed}>
+	 * @return array<string, array{0: mixed, 1: string, 2: array<string, mixed>}>
 	 */
 	public function invalid_creation_keys(): array {
 		return array(
-			'empty'      => array( '' ),
-			'only space' => array( "  \t" ),
-			'192 chars'  => array( str_repeat( 'k', 192 ) ),
-			'101 chars'  => array( str_repeat( 'k', 101 ) ),
-			'non-string' => array( 42 ),
+			'empty'      => array( '', ValidationErrorCode::INVALID_VALUE, array() ),
+			'only space' => array( "  \t", ValidationErrorCode::INVALID_VALUE, array() ),
+			'192 chars'  => array( str_repeat( 'k', 192 ), ValidationErrorCode::INVALID_VALUE, array() ),
+			'101 chars'  => array( str_repeat( 'k', 101 ), ValidationErrorCode::INVALID_VALUE, array() ),
+			'non-string' => array( 42, ValidationErrorCode::INVALID_TYPE, array( 'type' => 'string' ) ),
 		);
 	}
 
