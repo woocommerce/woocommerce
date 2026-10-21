@@ -329,7 +329,7 @@ abstract class AbstractBlock {
 		}
 
 		// Prefer to register with metadata if the path is set in the block's class.
-		$is_registered = (bool) $this->register_block_type_from_metadata(
+		$is_registered = (bool) $this->express_register_block_type_from_metadata(
 			$this->asset_api->generate_block_metadata_path( $this->block_name ),
 			$block_settings
 		);
@@ -364,7 +364,7 @@ abstract class AbstractBlock {
 	 * @param array  $block_settings Settings to merge into the block type (render_callback, styles, etc).
 	 * @return \WP_Block_Type|false
 	 */
-	final protected function register_block_type_from_metadata( string $manifest_file, array $block_settings = array() ) {
+	final protected function express_register_block_type_from_metadata( string $manifest_file, array $block_settings = array() ) {
 		// Step 1: Optimistic metadata resolution with early fallback to the upstream function for blocks
 		// that use rarely needed features. As per v11.4, 99.4% of WooCommerce blocks follow the fast path.
 		$metadata = 'woocommerce' === $this->namespace ? \WP_Block_Metadata_Registry::get_metadata( $manifest_file ) : null;

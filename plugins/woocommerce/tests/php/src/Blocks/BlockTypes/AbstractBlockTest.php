@@ -116,8 +116,8 @@ class AbstractBlockTest extends WC_Unit_Test_Case {
 
 			protected function register_block_type() {} // phpcs:ignore Squiz.Commenting.FunctionComment.Missing
 
-			public function proxy_register_block_type_from_metadata( string $manifest_file, array $block_settings = array() ) { // phpcs:ignore Squiz.Commenting.FunctionComment.Missing
-				return $this->register_block_type_from_metadata( $manifest_file, $block_settings );
+			public function proxy_express_register_block_type_from_metadata( string $manifest_file, array $block_settings = array() ) { // phpcs:ignore Squiz.Commenting.FunctionComment.Missing
+				return $this->express_register_block_type_from_metadata( $manifest_file, $block_settings );
 			}
 		};
 	}
@@ -148,7 +148,7 @@ class AbstractBlockTest extends WC_Unit_Test_Case {
 		add_filter( 'block_type_metadata', $metadata_filter );
 		add_filter( 'block_type_metadata_settings', $settings_filter );
 		try {
-			$result = $this->create_registrable_block()->proxy_register_block_type_from_metadata(
+			$result = $this->create_registrable_block()->proxy_express_register_block_type_from_metadata(
 				Package::container()->get( Api::class )->generate_block_metadata_path( 'mini-cart' ),
 				array( 'render_callback' => '__return_empty_string' )
 			);
@@ -174,7 +174,7 @@ class AbstractBlockTest extends WC_Unit_Test_Case {
 	 * @testdox Fast path should fall back to the upstream function when metadata is not in the registry.
 	 */
 	public function test_fast_path_falls_back_for_missing_metadata(): void {
-		$result = $this->create_registrable_block()->proxy_register_block_type_from_metadata(
+		$result = $this->create_registrable_block()->proxy_express_register_block_type_from_metadata(
 			'/nonexistent/path/block.json',
 			array( 'render_callback' => '__return_empty_string' )
 		);
