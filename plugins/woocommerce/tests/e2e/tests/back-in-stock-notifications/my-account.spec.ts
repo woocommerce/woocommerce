@@ -10,6 +10,8 @@ import { expect, request, tags, locks } from '../../fixtures/fixtures';
 import {
 	BIS_FEATURE_OPTION,
 	createOutOfStockProduct,
+	escapeRegExp,
+	quotedPattern,
 	resetBISOptions,
 	setBISOptions,
 	signUpOnProductPage,
@@ -233,7 +235,7 @@ test.describe(
 					);
 					await expect(
 						page.getByText(
-							"You haven't signed up for any back-in-stock notifications yet."
+							/You haven['’]t signed up for any back-in-stock notifications yet\./
 						)
 					).toHaveCount( 0 );
 
@@ -329,7 +331,11 @@ test.describe(
 					// And a notice confirms the cancellation.
 					await expect(
 						page.getByText(
-							`Back in stock notification for "${ product.name }" cancelled.`
+							new RegExp(
+								`Back in stock notification for ${ quotedPattern(
+									escapeRegExp( product.name )
+								) } cancelled\\.`
+							)
 						)
 					).toBeVisible();
 				} finally {
@@ -368,7 +374,7 @@ test.describe(
 
 					await expect(
 						page.getByText(
-							"You haven't signed up for any back-in-stock notifications yet."
+							/You haven['’]t signed up for any back-in-stock notifications yet\./
 						)
 					).toBeVisible();
 

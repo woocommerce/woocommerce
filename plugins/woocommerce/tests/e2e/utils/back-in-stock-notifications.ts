@@ -832,6 +832,18 @@ export function escapeRegExp( value: string ): string {
 }
 
 /**
+ * Wrap a regular expression pattern in straight or curly double quotes.
+ *
+ * Since WordPress 7.2, kses decodes `&quot;` in notice text, so `wptexturize`
+ * curls the quotes when a block template renders the notice.
+ *
+ * @param {string} pattern The regular expression pattern to wrap.
+ */
+export function quotedPattern( pattern: string ): string {
+	return `["“]${ pattern }["”]`;
+}
+
+/**
  * Sign-up notices core prints on the PDP after the form posts.
  *
  * Success notices are bound to the product name where core interpolates it,
@@ -849,9 +861,9 @@ export const bisNotice = {
 	 */
 	success: ( productName: string ): RegExp =>
 		new RegExp(
-			`You have successfully signed up! You will be notified when "${ escapeRegExp(
-				productName
-			) }" is back in stock\\.`
+			`You have successfully signed up! You will be notified when ${ quotedPattern(
+				escapeRegExp( productName )
+			) } is back in stock\\.`
 		),
 	doubleOptIn:
 		/Thanks for signing up! Please complete the sign-up process by following the verification link sent to your e-mail\./,
@@ -864,9 +876,9 @@ export const bisNotice = {
 	 */
 	verified: ( productName: string ): RegExp =>
 		new RegExp(
-			`Successfully verified stock notifications for "${ escapeRegExp(
-				productName
-			) }"\\.`
+			`Successfully verified stock notifications for ${ quotedPattern(
+				escapeRegExp( productName )
+			) }\\.`
 		),
 	/**
 	 * Printed on the shop page after an unsubscribe link is followed.
@@ -878,9 +890,9 @@ export const bisNotice = {
 		new RegExp(
 			`Successfully unsubscribed ${ escapeRegExp(
 				email
-			) }\\. You will not receive a notification when "${ escapeRegExp(
-				productName
-			) }" becomes available\\.`
+			) }\\. You will not receive a notification when ${ quotedPattern(
+				escapeRegExp( productName )
+			) } becomes available\\.`
 		),
 	/**
 	 * Printed on the shop page after an unsubscribe link is followed for a

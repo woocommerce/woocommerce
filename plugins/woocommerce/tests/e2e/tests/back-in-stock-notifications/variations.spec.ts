@@ -14,6 +14,7 @@ import {
 	escapeRegExp,
 	getEmailLinkById,
 	openEmailInMailLog,
+	quotedPattern,
 	resetBISOptions,
 	restockVariation,
 	selectVariation,
@@ -130,11 +131,13 @@ test.describe(
 				await expect(
 					guestPage.getByText(
 						new RegExp(
-							`You have successfully signed up! You will be notified when "${ escapeRegExp(
-								variableProduct.name
-							) } [-–] ${ escapeRegExp(
-								outOfStockVariation.option
-							) }" is back in stock\\.`
+							`You have successfully signed up! You will be notified when ${ quotedPattern(
+								`${ escapeRegExp(
+									variableProduct.name
+								) } [-–] ${ escapeRegExp(
+									outOfStockVariation.option
+								) }`
+							) } is back in stock\\.`
 						)
 					)
 				).toBeVisible();
