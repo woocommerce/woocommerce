@@ -27,20 +27,20 @@ trait ProductAbilityTrait {
 	protected static function get_product_create_input_schema(): array {
 		return array(
 			'type'  => 'object',
-			'oneOf' => self::get_product_alias_input_schema_branches( array( 'name' ), false ),
+			'oneOf' => self::get_product_type_input_schema_branches( array( 'name' ), false ),
 		);
 	}
 
 	/**
 	 * Get the product update input schema.
 	 *
-	 * Updates without a product type alias can mutate fields shared by all
-	 * supported product aliases. Type-specific fields require an explicit alias.
+	 * Updates without a product type can mutate fields shared by all
+	 * supported product types. Type-specific fields require an explicit type.
 	 *
 	 * @return array
 	 */
 	protected static function get_product_update_input_schema(): array {
-		$branches          = self::get_product_alias_input_schema_branches( array( 'id' ), true );
+		$branches          = self::get_product_type_input_schema_branches( array( 'id' ), true );
 		$mutation_schemas  = self::get_product_mutation_field_schemas();
 		$common_properties = array(
 			'id' => array(
@@ -70,20 +70,25 @@ trait ProductAbilityTrait {
 	}
 
 	/**
-	 * Get alias-specific product input schema branches.
+	 * Get product input schema branches, one for each supported product type.
 	 *
 	 * @param array<int, string> $base_required Required fields for every branch.
-	 * @param bool               $require_alias  Whether every branch must include product_type_alias.
+	 * @param bool               $require_type  Whether every branch must include type.
 	 * @return array<int, array>
 	 */
-	private static function get_product_alias_input_schema_branches( array $base_required, bool $require_alias ): array {
+	private static function get_product_type_input_schema_branches( array $base_required, bool $require_type ): array {
 		$branches = array();
 
-		foreach ( self::get_product_type_alias_configs() as $product_type_alias => $product_config ) {
+		foreach ( self::get_supported_product_types() as $product_type ) {
+			$product_config = self::get_product_type_config( $product_type );
+			if ( is_wp_error( $product_config ) ) {
+				continue;
+			}
+
 			$required = $base_required;
 
-			if ( $require_alias || 'physical' !== $product_type_alias ) {
-				$required[] = 'product_type_alias';
+			if ( $require_type || ProductType::SIMPLE !== $product_type ) {
+				$required[] = 'type';
 			}
 
 			$properties = array();
@@ -95,10 +100,10 @@ trait ProductAbilityTrait {
 				);
 			}
 
-			$properties['product_type_alias'] = self::get_product_type_alias_schema( $product_type_alias );
+			$properties['type'] = self::get_product_type_schema( array( $product_type ) );
 
-			if ( 'physical' === $product_type_alias && ! $require_alias ) {
-				$properties['product_type_alias']['default'] = 'physical';
+			if ( ProductType::SIMPLE === $product_type && ! $require_type ) {
+				$properties['type']['default'] = ProductType::SIMPLE;
 			}
 
 			$properties = array_merge(
@@ -118,19 +123,16 @@ trait ProductAbilityTrait {
 	}
 
 	/**
-	 * Get the product type alias schema.
+	 * Get the product type schema.
 	 *
-	 * @param string|null $product_type_alias Product type alias to restrict to, or null for all aliases.
+	 * @param array<int, string> $product_types Product types to allow.
 	 * @return array
 	 */
-	private static function get_product_type_alias_schema( ?string $product_type_alias = null ): array {
+	protected static function get_product_type_schema( array $product_types ): array {
 		return array(
 			'type'        => 'string',
-			'description' => __(
-				'Supported agent-facing product type alias. physical maps to a simple shippable, non-downloadable product; virtual maps to a simple non-shipping, non-downloadable product; digital maps to a simple virtual/downloadable product; affiliate maps to the external product type; grouped maps to grouped.',
-				'woocommerce'
-			),
-			'enum'        => null === $product_type_alias ? self::get_supported_product_type_aliases() : array( $product_type_alias ),
+			'description' => __( 'Product type, from the product types that WooCommerce and extensions register.', 'woocommerce' ),
+			'enum'        => $product_types,
 		);
 	}
 
@@ -165,6 +167,14 @@ trait ProductAbilityTrait {
 				'type' => 'string',
 				'enum' => self::get_product_mutation_status_slugs(),
 			),
+			'virtual'           => array(
+				'type'        => 'boolean',
+				'description' => __( 'Whether the product is not shipped.', 'woocommerce' ),
+			),
+			'downloadable'      => array(
+				'type'        => 'boolean',
+				'description' => __( 'Whether the product gives the customer files to download.', 'woocommerce' ),
+			),
 			'manage_stock'      => array( 'type' => 'boolean' ),
 			'stock_quantity'    => array(
 				'type'        => self::get_product_stock_quantity_schema_type(),
@@ -176,12 +186,12 @@ trait ProductAbilityTrait {
 			),
 			'external_url'      => array(
 				'type'        => 'string',
-				'description' => __( 'External destination URL for affiliate products.', 'woocommerce' ),
+				'description' => __( 'External destination URL for external products.', 'woocommerce' ),
 				'format'      => 'uri',
 			),
 			'button_text'       => array(
 				'type'        => 'string',
-				'description' => __( 'Button text for affiliate products.', 'woocommerce' ),
+				'description' => __( 'Button text for external products.', 'woocommerce' ),
 			),
 			'grouped_products'  => array(
 				'type'        => 'array',
@@ -214,25 +224,32 @@ trait ProductAbilityTrait {
 	}
 
 	/**
-	 * Supported agent-facing product type aliases.
+	 * Product types that the mutation abilities support.
 	 *
 	 * @return array<int, string>
 	 */
-	protected static function get_supported_product_type_aliases(): array {
-		return array_keys( self::get_product_type_alias_configs() );
+	protected static function get_supported_product_types(): array {
+		return array_values(
+			array_filter(
+				array_map( 'strval', array_keys( wc_get_product_types() ) ),
+				static function ( string $product_type ): bool {
+					return ! is_a( \WC_Product_Factory::get_product_classname( 0, $product_type ), \WC_Product_Variable::class, true );
+				}
+			)
+		);
 	}
 
 	/**
-	 * Get product configuration by agent-facing product type alias.
+	 * Get the configuration of a product type.
 	 *
-	 * @param string $product_type_alias Agent-facing product type alias.
-	 * @return array|\WP_Error
+	 * The product class decides which Core fields apply. A type whose class
+	 * extends a Core class gets the fields of that class.
+	 *
+	 * @param string $product_type Product type.
+	 * @return array{fields: array<int, string>, product_props: array<string, mixed>}|\WP_Error
 	 */
-	protected static function get_product_config_for_alias( string $product_type_alias ) {
-		$product_type_alias = sanitize_key( $product_type_alias );
-		$configs            = self::get_product_type_alias_configs();
-
-		if ( ! isset( $configs[ $product_type_alias ] ) ) {
+	protected static function get_product_type_config( string $product_type ) {
+		if ( ! in_array( $product_type, self::get_supported_product_types(), true ) ) {
 			return new \WP_Error(
 				'woocommerce_product_type_unsupported',
 				__( 'Product type is not supported by this ability.', 'woocommerce' ),
@@ -240,152 +257,13 @@ trait ProductAbilityTrait {
 			);
 		}
 
-		return $configs[ $product_type_alias ];
-	}
-
-	/**
-	 * Get product query arguments for an agent-facing product type alias.
-	 *
-	 * @param string $product_type_alias Agent-facing product type alias.
-	 * @return array|\WP_Error
-	 */
-	protected static function get_product_query_args_for_alias( string $product_type_alias ) {
-		$product_config = self::get_product_config_for_alias( $product_type_alias );
-
-		if ( is_wp_error( $product_config ) ) {
-			return $product_config;
-		}
-
-		$query_args = array(
-			'type' => $product_config['wc_type'],
-		);
-
-		if ( isset( $product_config['query_props'] ) ) {
-			foreach ( $product_config['query_props'] as $field => $value ) {
-				$query_args[ $field ] = (bool) $value;
-			}
-		}
-
-		return $query_args;
-	}
-
-	/**
-	 * Get product configuration for an existing product.
-	 *
-	 * @param \WC_Product $product Product object.
-	 * @return array|\WP_Error
-	 */
-	protected static function get_product_config_for_product( \WC_Product $product ) {
-		$product_type_alias = self::get_product_type_alias_for_product( $product );
-
-		if ( is_wp_error( $product_type_alias ) ) {
-			return $product_type_alias;
-		}
-
-		return self::get_product_config_for_alias( $product_type_alias );
-	}
-
-	/**
-	 * Get the supported agent-facing product type alias for a product.
-	 *
-	 * @param \WC_Product $product Product object.
-	 * @return string|\WP_Error
-	 */
-	protected static function get_product_type_alias_for_product( \WC_Product $product ) {
-		if ( $product->is_type( ProductType::SIMPLE ) ) {
-			if ( $product->get_virtual() && $product->get_downloadable() ) {
-				return 'digital';
-			}
-
-			if ( $product->get_virtual() ) {
-				return 'virtual';
-			}
-
-			return 'physical';
-		}
-
-		if ( $product->is_type( ProductType::EXTERNAL ) ) {
-			return 'affiliate';
-		}
-
-		if ( $product->is_type( ProductType::GROUPED ) ) {
-			return 'grouped';
-		}
-
-		return new \WP_Error(
-			'woocommerce_product_type_unsupported',
-			__( 'Product type is not supported by this ability.', 'woocommerce' ),
-			array( 'status' => 400 )
-		);
-	}
-
-	/**
-	 * Get fields shared by all supported product mutation aliases.
-	 *
-	 * @return array<int, string>
-	 */
-	private static function get_common_product_mutation_fields(): array {
-		return array( 'name', 'sku', 'description', 'short_description', 'status' );
-	}
-
-	/**
-	 * Get product type alias configuration.
-	 *
-	 * The keys are agent-facing product type aliases. Each config maps the alias to a
-	 * WooCommerce product class plus the fields that can be applied to it.
-	 *
-	 * @return array<string, array{wc_type: string, fields: array<int, string>, product_props: array<string, mixed>, query_props?: array<string, mixed>}>
-	 */
-	private static function get_product_type_alias_configs(): array {
+		$classname     = \WC_Product_Factory::get_product_classname( 0, $product_type );
 		$common_fields = self::get_common_product_mutation_fields();
-		$simple_fields = array_merge(
-			$common_fields,
-			array( 'regular_price', 'sale_price', 'manage_stock', 'stock_quantity', 'stock_status' )
-		);
+		$price_fields  = array( 'regular_price', 'sale_price' );
 
-		return array(
-			'physical'  => array(
-				'wc_type'       => ProductType::SIMPLE,
-				'fields'        => $simple_fields,
-				'product_props' => array(
-					'virtual'      => false,
-					'downloadable' => false,
-				),
-				'query_props'   => array(
-					'virtual'      => false,
-					'downloadable' => false,
-				),
-			),
-			'virtual'   => array(
-				'wc_type'       => ProductType::SIMPLE,
-				'fields'        => $simple_fields,
-				'product_props' => array(
-					'virtual'      => true,
-					'downloadable' => false,
-				),
-				'query_props'   => array(
-					'virtual'      => true,
-					'downloadable' => false,
-				),
-			),
-			'digital'   => array(
-				'wc_type'       => ProductType::SIMPLE,
-				'fields'        => $simple_fields,
-				'product_props' => array(
-					'virtual'      => true,
-					'downloadable' => true,
-				),
-				'query_props'   => array(
-					'virtual'      => true,
-					'downloadable' => true,
-				),
-			),
-			'affiliate' => array(
-				'wc_type'       => ProductType::EXTERNAL,
-				'fields'        => array_merge(
-					$common_fields,
-					array( 'regular_price', 'sale_price', 'external_url', 'button_text' )
-				),
+		if ( is_a( $classname, \WC_Product_External::class, true ) ) {
+			return array(
+				'fields'        => array_merge( $common_fields, $price_fields, array( 'external_url', 'button_text' ) ),
 				'product_props' => array(
 					'virtual'        => false,
 					'downloadable'   => false,
@@ -393,16 +271,69 @@ trait ProductAbilityTrait {
 					'stock_quantity' => '',
 					'stock_status'   => ProductStockStatus::IN_STOCK,
 				),
-			),
-			'grouped'   => array(
-				'wc_type'       => ProductType::GROUPED,
+			);
+		}
+
+		if ( is_a( $classname, \WC_Product_Grouped::class, true ) ) {
+			return array(
 				'fields'        => array_merge( $common_fields, array( 'grouped_products' ) ),
 				'product_props' => array(
 					'manage_stock'   => false,
 					'stock_quantity' => '',
 				),
-			),
+			);
+		}
+
+		$fields = array_merge( $common_fields, array( 'virtual', 'downloadable' ) );
+
+		if ( is_a( $classname, \WC_Product_Simple::class, true ) ) {
+			$fields = array_merge( $fields, $price_fields, array( 'manage_stock', 'stock_quantity', 'stock_status' ) );
+		}
+
+		return array(
+			'fields'        => $fields,
+			'product_props' => array(),
 		);
+	}
+
+	/**
+	 * Get the product object of a product type.
+	 *
+	 * @param string $product_type Product type.
+	 * @param int    $product_id   Product ID, or 0 for a new product.
+	 * @return \WC_Product|\WP_Error
+	 */
+	protected static function get_product_object_for_type( string $product_type, int $product_id = 0 ) {
+		$product = wc_get_product_object( $product_type, $product_id );
+
+		if ( ! $product || $product->get_type() !== $product_type ) {
+			return new \WP_Error(
+				'woocommerce_invalid_product_type',
+				__( 'Invalid product type.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		return $product;
+	}
+
+	/**
+	 * Get the configuration for an existing product.
+	 *
+	 * @param \WC_Product $product Product object.
+	 * @return array|\WP_Error
+	 */
+	protected static function get_product_config_for_product( \WC_Product $product ) {
+		return self::get_product_type_config( $product->get_type() );
+	}
+
+	/**
+	 * Get fields shared by all supported product types.
+	 *
+	 * @return array<int, string>
+	 */
+	private static function get_common_product_mutation_fields(): array {
+		return array( 'name', 'sku', 'description', 'short_description', 'status' );
 	}
 
 	/**
@@ -507,6 +438,8 @@ trait ProductAbilityTrait {
 			'description'       => 'set_description',
 			'short_description' => 'set_short_description',
 			'status'            => 'set_status',
+			'virtual'           => 'set_virtual',
+			'downloadable'      => 'set_downloadable',
 			'manage_stock'      => 'set_manage_stock',
 			'stock_quantity'    => 'set_stock_quantity',
 			'stock_status'      => 'set_stock_status',
@@ -567,7 +500,7 @@ trait ProductAbilityTrait {
 	 * @return null|\WP_Error
 	 */
 	private static function validate_product_fields_for_config( array $input, array $product_config ) {
-		$shared_fields          = array( 'id', 'product_type_alias', 'extensions' );
+		$shared_fields          = array( 'id', 'type', 'extensions' );
 		$supported_fields       = array_merge( $shared_fields, $product_config['fields'] );
 		$unsupported_field_keys = array_diff( array_keys( $input ), $supported_fields );
 

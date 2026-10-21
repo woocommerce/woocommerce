@@ -351,8 +351,8 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$output = $this->run_ability(
 			'woocommerce/products-query',
 			array(
-				'product_type_alias' => 'affiliate',
-				'filters'            => array( 'extensions' => array( 'test-ext' => array( 'category' => 'gifts' ) ) ),
+				'type'    => 'external',
+				'filters' => array( 'extensions' => array( 'test-ext' => array( 'category' => 'gifts' ) ) ),
 			)
 		);
 

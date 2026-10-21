@@ -113,22 +113,14 @@ class ProductUpdate extends ActionableAbility {
 			);
 		}
 
-		if ( isset( $input['product_type_alias'] ) ) {
-			$product_config = self::get_product_config_for_alias( $input['product_type_alias'] );
+		if ( isset( $input['type'] ) ) {
+			$product_config = self::get_product_type_config( (string) $input['type'] );
 
 			if ( is_wp_error( $product_config ) ) {
 				return $product_config;
 			}
 
-			$product = wc_get_product_object( $product_config['wc_type'], $product->get_id() );
-
-			if ( ! $product ) {
-				return new \WP_Error(
-					'woocommerce_invalid_product_type',
-					__( 'Invalid product type.', 'woocommerce' ),
-					array( 'status' => 400 )
-				);
-			}
+			$product = self::get_product_object_for_type( (string) $input['type'], $product->get_id() );
 		}
 
 		return $product;
@@ -142,16 +134,14 @@ class ProductUpdate extends ActionableAbility {
 	 * @return null|\WP_Error
 	 */
 	public function change( $subject, array $input ) {
-		$product_config = isset( $input['product_type_alias'] )
-			? self::get_product_config_for_alias( $input['product_type_alias'] )
-			: self::get_product_config_for_product( $subject );
+		$product_config = self::get_product_config_for_product( $subject );
 
 		if ( is_wp_error( $product_config ) ) {
 			return $product_config;
 		}
 
 		try {
-			if ( isset( $input['product_type_alias'] ) ) {
+			if ( isset( $input['type'] ) ) {
 				self::apply_product_type_config( $subject, $product_config );
 			}
 

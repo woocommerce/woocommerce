@@ -127,6 +127,9 @@ class ExtensibleAbilities {
 	 *     @type array    $schema       JSON schema of the value. It needs a `type`. Its `title` is the label clients show.
 	 *                                  It cannot set `required`, because a value that fails its schema is
 	 *                                  left out. For a field that is always present, allow null and return null.
+	 *                                  For a field that applies only to some objects, such as products of one type,
+	 *                                  do not allow null and return null for the other objects. The field is then
+	 *                                  left out of them, with no error.
 	 *     @type callable $get_callback Receives the object and returns the value. A value that the schema
 	 *                                  does not allow is left out, so return null when the object has no
 	 *                                  value. A schema that allows null, such as `array( 'integer', 'null' )`,
