@@ -716,13 +716,13 @@ final class Contracts {
 		if ( array_key_exists( 'items', $args ) ) {
 			$items = $validator->get_list_of_arrays( 'items', $args['items'] );
 			if ( null !== $items ) {
-				$fields['items'] = ArgumentFilter::filter_contract_items( self::class, $items );
+				$fields['items'] = ArgumentFilter::filter_known_keys_in_rows( self::class, $items, array_fill_keys( Contract::ITEM_FIELDS, true ), 'item key' );
 			}
 		}
 		if ( array_key_exists( 'addresses', $args ) ) {
 			$addresses = $validator->get_contract_addresses( $args['addresses'] );
 			if ( null !== $addresses ) {
-				$fields['addresses'] = ArgumentFilter::filter_contract_addresses( self::class, $addresses );
+				$fields['addresses'] = ArgumentFilter::filter_known_keys_in_rows( self::class, $addresses, array_fill_keys( Contract::ADDRESS_FIELDS, true ), 'address key' );
 			}
 		}
 

@@ -9,8 +9,6 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Integration\Support;
 
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
-
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -54,34 +52,19 @@ final class ArgumentFilter {
 	}
 
 	/**
-	 * Drop unknown keys from contract item rows, with a notice per key.
+	 * Apply {@see self::filter_known_keys()} to each row of a collection, keeping the row keys.
 	 *
-	 * @param string                           $function_name Function named in the notice.
-	 * @param array<int, array<string, mixed>> $rows          Item rows, shape already checked.
-	 * @return array<int, array<string, mixed>>
+	 * @template TKey of array-key
+	 * @param string                                $method  Public facade method, for the notice.
+	 * @param array<TKey, array<int|string, mixed>> $rows    Rows, shape already checked.
+	 * @param array<string, true>                   $allowed Accepted row keys, as a key map.
+	 * @param string                                $what    What the keys belong to, for the notice.
+	 * @return array<TKey, array<string, mixed>>
 	 */
-	public static function filter_contract_items( string $function_name, array $rows ): array {
-		$allowed  = array_fill_keys( Contract::ITEM_FIELDS, true );
+	public static function filter_known_keys_in_rows( string $method, array $rows, array $allowed, string $what = 'key' ): array {
 		$filtered = array();
-		foreach ( $rows as $row ) {
-			$filtered[] = self::filter_known_keys( $function_name, $row, $allowed, 'item key' );
-		}
-
-		return $filtered;
-	}
-
-	/**
-	 * Drop unknown keys from contract addresses, with a notice per key.
-	 *
-	 * @param string                                  $function_name Function named in the notice.
-	 * @param array<string, array<int|string, mixed>> $addresses     Addresses by type, shape already checked.
-	 * @return array<string, array<string, mixed>>
-	 */
-	public static function filter_contract_addresses( string $function_name, array $addresses ): array {
-		$allowed  = array_fill_keys( Contract::ADDRESS_FIELDS, true );
-		$filtered = array();
-		foreach ( $addresses as $type => $address ) {
-			$filtered[ $type ] = self::filter_known_keys( $function_name, $address, $allowed, 'address key' );
+		foreach ( $rows as $index => $row ) {
+			$filtered[ $index ] = self::filter_known_keys( $method, $row, $allowed, $what );
 		}
 
 		return $filtered;

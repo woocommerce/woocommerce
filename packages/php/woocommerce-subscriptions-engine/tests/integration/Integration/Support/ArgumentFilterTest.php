@@ -43,35 +43,28 @@ class ArgumentFilterTest extends EngineIntegrationTestCase {
 		$this->assertSame( array( 'Unknown item key "other" ignored.' ), $messages );
 	}
 
-	public function test_contract_items_keep_item_fields_and_drop_unknown_keys_with_a_notice(): void {
+	public function test_rows_keep_their_keys_and_drop_unknown_keys_with_a_notice(): void {
 		$this->setExpectedIncorrectUsage( 'facade' );
 
-		$rows = ArgumentFilter::filter_contract_items(
+		$rows = ArgumentFilter::filter_known_keys_in_rows(
 			'facade',
 			array(
-				array(
-					'item_name' => 'Coffee',
-					'price'     => '1',
-				),
-			)
-		);
-
-		$this->assertSame( array( array( 'item_name' => 'Coffee' ) ), $rows );
-	}
-
-	public function test_contract_addresses_keep_address_fields_and_drop_unknown_keys_with_a_notice(): void {
-		$this->setExpectedIncorrectUsage( 'facade' );
-
-		$addresses = ArgumentFilter::filter_contract_addresses(
-			'facade',
-			array(
-				'billing' => array(
+				'billing'  => array(
 					'first_name' => 'Ada',
 					'zip'        => '1',
 				),
-			)
+				'shipping' => array( 'first_name' => 'Grace' ),
+			),
+			array( 'first_name' => true ),
+			'address key'
 		);
 
-		$this->assertSame( array( 'billing' => array( 'first_name' => 'Ada' ) ), $addresses );
+		$this->assertSame(
+			array(
+				'billing'  => array( 'first_name' => 'Ada' ),
+				'shipping' => array( 'first_name' => 'Grace' ),
+			),
+			$rows
+		);
 	}
 }
