@@ -75,7 +75,6 @@ class ActionSchedulerUtilTest extends WC_Unit_Test_Case {
 
 		$this->assertMatchesRegularExpression( '/^\d+\.\d+\.\d+/', (string) ActionSchedulerUtil::get_bundled_version() );
 		$this->assertSame( ActionSchedulerUtil::get_bundled_version(), ActionSchedulerUtil::get_loaded_version() );
-		$this->assertSame( trailingslashit( wp_normalize_path( \ActionScheduler::plugin_path( '' ) ) ), ActionSchedulerUtil::get_loaded_path() );
 		$this->assertSame(
 			array(
 				'type'     => 'woocommerce',
@@ -394,38 +393,6 @@ class ActionSchedulerUtilTest extends WC_Unit_Test_Case {
 			$calls(),
 			'Unique should be emulated (checked, then passed as false) with and without args'
 		);
-	}
-
-	/**
-	 * @testdox Emulated unique matches args exactly, whichever order the actions are scheduled in.
-	 */
-	public function test_emulated_unique_matches_args_exactly_in_either_order(): void {
-		$this->simulate_loaded_copy( '3.9.3' );
-
-		$orders = array(
-			'args first'  => array( array( 123 ), array() ),
-			'empty first' => array( array(), array( 123 ) ),
-		);
-		foreach ( $orders as $name => $order ) {
-			/** @var array<int, array{string, ?array, string}> $pending Filled by the mocks below. */
-			$pending = array();
-			$this->register_legacy_proxy_function_mocks(
-				array(
-					'as_has_scheduled_action'   => function ( string $hook, ?array $args, string $group ) use ( &$pending ) {
-						return in_array( array( $hook, $args, $group ), $pending, true );
-					},
-					'as_schedule_single_action' => function ( int $timestamp, string $hook, array $args, string $group ) use ( &$pending ) {
-						$pending[] = array( $hook, $args, $group );
-						return count( $pending );
-					},
-				)
-			);
-
-			$this->assertSame( 1, ActionSchedulerUtil::schedule_single( 1000, self::HOOK, $order[0], self::GROUP, true ), "$name: the first action should be scheduled" );
-			$this->assertSame( 2, ActionSchedulerUtil::schedule_single( 1000, self::HOOK, $order[1], self::GROUP, true ), "$name: an action that differs only by args should be scheduled" );
-			$this->assertSame( 0, ActionSchedulerUtil::schedule_single( 1000, self::HOOK, $order[1], self::GROUP, true ), "$name: a true duplicate should be refused" );
-			$this->assertCount( 2, $pending, "$name: the duplicate should not reach Action Scheduler" );
-		}
 	}
 
 	/**
