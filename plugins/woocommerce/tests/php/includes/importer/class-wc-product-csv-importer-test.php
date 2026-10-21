@@ -2547,6 +2547,26 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should fail a variation row for an existing product when the file has no Parent column.
+	 */
+	public function test_import_variation_row_without_parent_column_does_not_convert_a_product_40274(): void {
+		$simple = WC_Helper_Product::create_simple_product();
+
+		$data = $this->import_csv_rows(
+			"ID,Type,Name\n{$simple->get_id()},variation,Should stay simple\n",
+			array(
+				'ID'   => 'id',
+				'Type' => 'type',
+				'Name' => 'name',
+			)
+		);
+
+		$this->assertCount( 1, $data['failed'], 'The row fails' );
+		$this->assertSame( 'woocommerce_product_importer_missing_variation_parent_id', $data['failed'][0]->get_error_code(), 'The row fails on its missing parent' );
+		$this->assertSame( 'product', get_post_type( $simple->get_id() ), 'The product must not be converted to a variation' );
+	}
+
+	/**
 	 * @testdox Should not match by SKU a product whose stored type is not registered, so the type is not rewritten.
 	 */
 	public function test_import_sku_fallback_keeps_unregistered_stored_types_40274(): void {

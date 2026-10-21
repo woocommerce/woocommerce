@@ -324,14 +324,15 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 					);
 				}
 
-				// A blank Parent cell keeps an existing variation's parent, but a product turning into a variation needs one.
-				if ( isset( $data['parent_id'] ) && '' === $data['parent_id'] && 'product' !== $post_type ) {
-					unset( $data['parent_id'] );
-				}
+				// A blank or missing Parent keeps an existing variation's parent, as it does for a new or placeholder row,
+				// but an existing product turning into a variation needs one.
+				$converts_product = 'product' === $post_type && 'importing' !== get_post_status( absint( $data['id'] ) );
 
-				// Check a named parent before get_product_object() turns the post into a variation, so a failing row changes nothing.
-				if ( isset( $data['parent_id'] ) ) {
-					$parent = $this->get_variation_parent( $data['parent_id'] );
+				if ( ! $converts_product && '' === ( $data['parent_id'] ?? '' ) ) {
+					unset( $data['parent_id'] );
+				} else {
+					// Check the parent before get_product_object() turns the post into a variation, so a failing row changes nothing.
+					$parent = $this->get_variation_parent( $data['parent_id'] ?? null );
 
 					if ( is_wp_error( $parent ) ) {
 						return $parent;
@@ -560,7 +561,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 *
 	 * An update import never fills in a placeholder parent, so there the parent must be an existing variable product.
 	 *
-	 * @param mixed $parent_id Parsed parent ID, or null when the row names none.
+	 * @param mixed $parent_id Parent ID from the row or the variation's current parent, or null when neither exists.
 	 * @return WC_Product|WP_Error The parent, or an error when it cannot hold the variation.
 	 */
 	private function get_variation_parent( $parent_id ) {
