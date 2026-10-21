@@ -10,12 +10,20 @@
 
 declare( strict_types=1 );
 
+use Automattic\WooCommerce\SubscriptionsEngine\Api\ContractLock;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\Contracts;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\Plans;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\View\ContractView;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\View\CycleView;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\View\PlanView;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractLockState;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller;
 
 /**
  * Engine integration test case.
@@ -28,11 +36,22 @@ abstract class EngineIntegrationTestCase extends WP_UnitTestCase {
 	protected const PLAN_OWNER = 'engine-tests';
 
 	/**
+	 * The `$wpdb` error suppression to restore after {@see self::fail_next_query()}.
+	 *
+	 * @var bool|null
+	 */
+	private $suppressed_errors = null;
+
+	/**
 	 * Return the session's database clock to the server clock after each test.
 	 */
 	public function tear_down(): void {
 		global $wpdb;
 
+		if ( null !== $this->suppressed_errors ) {
+			$wpdb->suppress_errors( $this->suppressed_errors );
+			$this->suppressed_errors = null;
+		}
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->query( 'SET timestamp = DEFAULT' );
 		parent::tear_down();
@@ -40,7 +59,7 @@ abstract class EngineIntegrationTestCase extends WP_UnitTestCase {
 
 	/**
 	 * Pin the session's database clock: `UTC_TIMESTAMP()` returns `$utc` until the next pin
-	 * or the end of the test. Dispatch claims and cycle claims are measured on this clock.
+	 * or the end of the test. Contract lock expiry is measured on this clock.
 	 *
 	 * @param string $utc Moment (UTC, `Y-m-d H:i:s`).
 	 */
@@ -51,6 +70,272 @@ abstract class EngineIntegrationTestCase extends WP_UnitTestCase {
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->query( $wpdb->prepare( 'SET timestamp = %d', $timestamp ) );
+	}
+
+	/**
+	 * Take a contract's lock through the facade, failing the test when the race is lost.
+	 *
+	 * @param int    $contract_id Contract id.
+	 * @param string $operation   Operation label.
+	 */
+	protected function take_lock( int $contract_id, string $operation ): ContractLock {
+		$lock = Contracts::lock( $contract_id, $operation );
+		$this->assertNotNull( $lock, 'Expected to take the lock.' );
+
+		return $lock;
+	}
+
+	/**
+	 * A lock's private state, read through reflection (tests only).
+	 *
+	 * @param ContractLock $lock The lock.
+	 */
+	protected function lock_state( ContractLock $lock ): ContractLockState {
+		$property = new ReflectionProperty( ContractLock::class, 'state' );
+		$property->setAccessible( true );
+		$state = $property->getValue( $lock );
+		$this->assertInstanceOf( ContractLockState::class, $state );
+
+		return $state;
+	}
+
+	/**
+	 * End a lock's trust window without waiting (the trust clock is monotonic real time).
+	 *
+	 * @param ContractLock $lock The lock.
+	 */
+	protected function age_lock_trust( ContractLock $lock ): void {
+		$property = new ReflectionProperty( ContractLockState::class, 'trusted_until' );
+		$property->setAccessible( true );
+		$property->setValue( $this->lock_state( $lock ), 0.0 );
+	}
+
+	/**
+	 * Create a contract through the facade and release its creation lock, for fixtures that
+	 * write to it without a lock.
+	 *
+	 * @param array<string, mixed> $args `Contracts::create()` fields.
+	 */
+	protected function create_released( array $args ): ContractView {
+		$created = Contracts::create( $args );
+		$this->assertIsArray( $created );
+		$created['lock']->release();
+
+		return $created['contract'];
+	}
+
+	/**
+	 * Insert a contract through the repository and release its creation lock.
+	 *
+	 * @param Contract $contract Contract to insert.
+	 * @return int The new contract id.
+	 */
+	protected function insert_released( Contract $contract ): int {
+		$lock = ( new ContractRepository() )->insert( $contract, 'create' );
+		$this->assertInstanceOf( ContractLock::class, $lock );
+		$lock->release();
+
+		return $lock->get_contract_id();
+	}
+
+	/**
+	 * `Contracts::add_cycle()` under a lock taken for the call and released after it.
+	 *
+	 * @param int                  $contract_id Contract id.
+	 * @param array<string, mixed> $args        Cycle fields.
+	 */
+	protected function add_cycle_locked( int $contract_id, array $args ): ?CycleView {
+		$lock = $this->take_lock( $contract_id, 'test' );
+		try {
+			return Contracts::add_cycle( $contract_id, $args, $lock );
+		} finally {
+			$lock->release();
+		}
+	}
+
+	/**
+	 * `Contracts::transition_cycle()` under a lock on the cycle's contract, taken for the call and released after it.
+	 *
+	 * @param int                  $cycle_id Cycle id.
+	 * @param array<string, mixed> $args     Transition fields.
+	 */
+	protected function transition_cycle_locked( int $cycle_id, array $args ): bool {
+		$lock = $this->take_lock( $this->get_cycle_contract_id( $cycle_id ), 'test' );
+		try {
+			return Contracts::transition_cycle( $cycle_id, $args, $lock );
+		} finally {
+			$lock->release();
+		}
+	}
+
+	/**
+	 * `ContractRepository::append_cycle()` under a lock taken for the call and released after it.
+	 *
+	 * @param Cycle $cycle Cycle to append.
+	 */
+	protected function append_cycle_locked( Cycle $cycle ): void {
+		$lock = $this->take_lock( $cycle->get_contract_id(), 'test' );
+		try {
+			( new ContractRepository() )->append_cycle( $cycle, $lock );
+		} finally {
+			$lock->release();
+		}
+	}
+
+	/**
+	 * `ContractRepository::transition_cycle()` under a lock on the cycle's contract, taken for the call and released after it.
+	 *
+	 * @param int                  $cycle_id    Cycle id.
+	 * @param string               $from_status Status the caller read.
+	 * @param string               $to_status   Status to write.
+	 * @param array<string, mixed> $changes     `order_id` / `reason` changes.
+	 */
+	protected function transition_cycle_row_locked( int $cycle_id, string $from_status, string $to_status, array $changes = array() ): bool {
+		$lock = $this->take_lock( $this->get_cycle_contract_id( $cycle_id ), 'test' );
+		try {
+			return ( new ContractRepository() )->transition_cycle( $cycle_id, $from_status, $to_status, $changes, $lock );
+		} finally {
+			$lock->release();
+		}
+	}
+
+	/**
+	 * The contract id a stored cycle belongs to.
+	 *
+	 * @param int $cycle_id Cycle id.
+	 */
+	protected function get_cycle_contract_id( int $cycle_id ): int {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$contract_id = $wpdb->get_var( $wpdb->prepare( "SELECT contract_id FROM {$table} WHERE id = %d", $cycle_id ) );
+		$this->assertIsNumeric( $contract_id, "Cycle {$cycle_id} exists." );
+
+		return (int) $contract_id;
+	}
+
+	/**
+	 * The statements `$run` sends to the database, in order.
+	 *
+	 * @param callable $run Code under test.
+	 * @return array<int, string>
+	 */
+	protected function statements_during( callable $run ): array {
+		$statements = array();
+		$record     = static function ( $query ) use ( &$statements ) {
+			$statements[] = (string) $query;
+			return $query;
+		};
+		add_filter( 'query', $record );
+		try {
+			$run();
+		} finally {
+			remove_filter( 'query', $record );
+		}
+
+		return $statements;
+	}
+
+	/**
+	 * Assert that no statement inserts into `$table` while reading it, and that no read takes
+	 * a lock: the shapes that gap-lock the index and deadlock concurrent inserts.
+	 *
+	 * @param array<int, string> $statements Statements sent.
+	 * @param string             $table      Table name.
+	 */
+	protected function assert_no_self_table_insert_select( array $statements, string $table ): void {
+		$name = preg_quote( $table, '/' );
+		foreach ( $statements as $statement ) {
+			if ( 1 === preg_match( '/^\s*INSERT\s+INTO\s+`?' . $name . '`?\s/i', $statement ) ) {
+				$this->assertSame( 0, preg_match( '/\bFROM\s+`?' . $name . '`?[\s)]/i', $statement ), "An insert into {$table} reads the same table." );
+			}
+			$this->assertSame( 0, preg_match( '/\bFOR\s+UPDATE\b|\bLOCK\s+IN\s+SHARE\s+MODE\b/i', $statement ), 'A read takes a lock.' );
+		}
+	}
+
+	/**
+	 * Call a private method, for engine internals no public path reaches in the case a test needs.
+	 *
+	 * @param object $instance The object.
+	 * @param string $method   Method name.
+	 * @param mixed  ...$args  Arguments.
+	 * @return mixed
+	 */
+	protected function call_private( object $instance, string $method, ...$args ) {
+		$reflection = new ReflectionMethod( $instance, $method );
+		$reflection->setAccessible( true );
+
+		return $reflection->invoke( $instance, ...$args );
+	}
+
+	/**
+	 * Whether the contract exists and who holds its lock (the repository's private holder read).
+	 *
+	 * @param int $contract_id Contract id.
+	 * @return array{exists: bool, operation: ?string}
+	 */
+	protected function get_lock_holder( int $contract_id ): array {
+		$holder = $this->call_private( new ContractRepository(), 'get_lock_holder', $contract_id );
+		$this->assertIsArray( $holder );
+
+		return array(
+			'exists'    => (bool) ( $holder['exists'] ?? false ),
+			'operation' => is_string( $holder['operation'] ?? null ) ? $holder['operation'] : null,
+		);
+	}
+
+	/**
+	 * Run the repository's private child-write fence on `$lock`.
+	 *
+	 * @param ContractLock $lock The lock.
+	 */
+	protected function fence_children( ContractLock $lock ): void {
+		$this->call_private( new ContractRepository(), 'fence_children', $lock );
+	}
+
+	/**
+	 * Make the next `$times` statements starting with `$prefix` match no row, as if their fence
+	 * refused them.
+	 *
+	 * @param string $prefix Start of the statement to refuse.
+	 * @param int    $times  How many matching statements to refuse.
+	 */
+	protected function refuse_next_write( string $prefix, int $times = 1 ): void {
+		$refuse = static function ( $query ) use ( $prefix, &$times, &$refuse ) {
+			if ( is_string( $query ) && 0 === strpos( ltrim( $query ), $prefix ) ) {
+				if ( --$times < 1 ) {
+					remove_filter( 'query', $refuse );
+				}
+				return $query . ' AND 0 = 1';
+			}
+			return $query;
+		};
+		add_filter( 'query', $refuse );
+	}
+
+	/**
+	 * Replace the next statement matching `$pattern` (after `$skip` matches) with invalid SQL, so
+	 * it fails with a database error. Error output is suppressed until the test ends.
+	 *
+	 * @param string $pattern Regex the statement to break must match.
+	 * @param int    $skip    Matching statements to let through first.
+	 */
+	protected function fail_next_query( string $pattern, int $skip = 0 ): void {
+		global $wpdb;
+
+		$break = static function ( $query ) use ( $pattern, &$skip, &$break ) {
+			if ( is_string( $query ) && 1 === preg_match( $pattern, $query ) && 0 === $skip-- ) {
+				remove_filter( 'query', $break );
+				return 'SELECT * FROM table_that_does_not_exist_for_tests';
+			}
+			return $query;
+		};
+		add_filter( 'query', $break );
+
+		if ( null === $this->suppressed_errors ) {
+			$this->suppressed_errors = $wpdb->suppress_errors( true );
+		}
 	}
 
 	/**
@@ -197,7 +482,10 @@ abstract class EngineIntegrationTestCase extends WP_UnitTestCase {
 		$status         = $args['status'] ?? ContractStatus::ACTIVE;
 		$args['status'] = ContractStatus::DRAFT;
 
-		$view = Contracts::create( $args );
+		$created = Contracts::create( $args );
+		$this->assertIsArray( $created );
+		$view = $created['contract'];
+		$lock = $created['lock'];
 		$id   = $view->get_id();
 
 		Contracts::add_cycle(
@@ -210,9 +498,11 @@ abstract class EngineIntegrationTestCase extends WP_UnitTestCase {
 				'ends_at_gmt'    => (string) $view->get_next_payment_gmt(),
 				'expected_total' => $view->get_billing_total(),
 				'currency'       => $view->get_currency(),
-			)
+			),
+			$lock
 		);
-		Contracts::update( $id, array( 'status' => $status ) );
+		Contracts::update( $id, array( 'status' => $status ), $lock );
+		$lock->release();
 
 		return $id;
 	}
