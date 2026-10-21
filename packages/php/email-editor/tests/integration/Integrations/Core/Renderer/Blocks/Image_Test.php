@@ -492,7 +492,7 @@ class Image_Test extends \Email_Editor_Integration_Test_Case {
 	 * Test a shrunk image sized only by HTML attributes keeps its proportions.
 	 */
 	public function testItScalesHeightAttributeWhenShrinkingImage(): void {
-		$content                     = '<figure class="wp-block-image size-full"><img src="https://test.com/wp-content/uploads/2023/05/image.jpg" alt="" width="400" height="200"/></figure>';
+		$content                     = '<figure class="wp-block-image size-full"><img src="https://test.com/wp-content/uploads/2023/05/image.jpg" alt="" width="400" height="200" style="height:auto"/></figure>';
 		$parsed_image                = $this->parsed_image;
 		$parsed_image['attrs']       = array(
 			'width'    => '400px',

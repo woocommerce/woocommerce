@@ -111,11 +111,28 @@ class Spacing_Preprocessor implements Context_Aware_Preprocessor {
 	private const CONTAINER_BLOCKS = array( 'core/group', 'core/post-content' );
 
 	/**
-	 * Blocks that can't be sized to a grid cell, so a grid holding one keeps stacking. Gallery, Query
-	 * Loop and product collection renderers size their content from the full email width. Synced
-	 * patterns are parsed and sized separately, outside the grid.
+	 * Blocks whose email output is known to fit the width it is given, so a two-column grid made only
+	 * of these can be laid out side by side. Any other block keeps the grid stacked: some renderers
+	 * (gallery, Query Loop, site logo, product collection) size their content from the full email
+	 * width, and synced patterns or post content are parsed and sized outside the grid.
 	 */
-	private const FULL_WIDTH_BLOCKS = array( 'core/gallery', 'core/query', 'core/post-template', 'woocommerce/product-collection', 'core/block', 'core/pattern' );
+	private const GRID_CELL_BLOCKS = array(
+		'core/button',
+		'core/buttons',
+		'core/group',
+		'core/heading',
+		'core/image',
+		'core/list',
+		'core/list-item',
+		'core/paragraph',
+		'core/post-title',
+		'core/quote',
+		'core/separator',
+		'core/site-title',
+		'core/social-link',
+		'core/social-links',
+		'core/spacer',
+	);
 
 	/**
 	 * Adds spacing to blocks: margin-top for vertical gaps, horizontal padding for
@@ -266,7 +283,7 @@ class Spacing_Preprocessor implements Context_Aware_Preprocessor {
 			return false;
 		}
 
-		if ( $this->contains_block( $block, array_merge( self::FULL_WIDTH_BLOCKS, $this->get_post_content_block_names() ) ) ) {
+		if ( ! $this->only_contains_blocks( $block, self::GRID_CELL_BLOCKS ) ) {
 			return false;
 		}
 
@@ -289,19 +306,19 @@ class Spacing_Preprocessor implements Context_Aware_Preprocessor {
 	}
 
 	/**
-	 * Checks whether any descendant of a block is one of the given block types.
+	 * Checks whether every descendant of a block is one of the given block types.
 	 *
 	 * @param array    $block The block to search.
-	 * @param string[] $block_names Block names to look for.
+	 * @param string[] $block_names Allowed block names.
 	 * @return bool
 	 */
-	private function contains_block( array $block, array $block_names ): bool {
+	private function only_contains_blocks( array $block, array $block_names ): bool {
 		foreach ( $block['innerBlocks'] ?? array() as $inner_block ) {
-			if ( in_array( $inner_block['blockName'] ?? '', $block_names, true ) || $this->contains_block( $inner_block, $block_names ) ) {
-				return true;
+			if ( ! in_array( $inner_block['blockName'] ?? '', $block_names, true ) || ! $this->only_contains_blocks( $inner_block, $block_names ) ) {
+				return false;
 			}
 		}
-		return false;
+		return true;
 	}
 
 	/**

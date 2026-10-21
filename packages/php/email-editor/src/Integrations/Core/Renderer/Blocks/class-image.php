@@ -354,7 +354,7 @@ class Image extends Abstract_Block_Renderer {
 			$styles = $html->get_attribute( 'style' ) ?? '';
 			$styles = Styles_Helper::parse_styles_to_array( $styles );
 			$height = $styles['height'] ?? null;
-			if ( ! $height && isset( $parsed_block['email_attrs']['image-scale'] ) ) {
+			if ( ( ! $height || 'auto' === $height ) && isset( $parsed_block['email_attrs']['image-scale'] ) ) {
 				// A shrunk image sized only by its height attribute needs that height scaled too.
 				$height_attribute = $html->get_attribute( 'height' );
 				$height           = is_string( $height_attribute ) && is_numeric( $height_attribute ) ? $height_attribute : null;

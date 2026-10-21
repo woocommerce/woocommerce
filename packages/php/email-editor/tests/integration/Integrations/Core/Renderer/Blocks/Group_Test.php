@@ -217,7 +217,7 @@ class Group_Test extends \Email_Editor_Integration_Test_Case {
 			array(
 				'post_content' => '<!-- wp:group {"layout":{"type":"grid","columnCount":2}} --><div class="wp-block-group">'
 					. '<!-- wp:image {"width":"1000px","sizeSlug":"large"} --><figure class="wp-block-image size-large is-resized"><img src="https://example.com/photo.jpg" alt="" style="width:1000px"/></figure><!-- /wp:image -->'
-					. '<!-- wp:test/two-paragraphs /-->'
+					. '<!-- wp:paragraph --><p></p><!-- /wp:paragraph -->'
 					. '<!-- wp:paragraph --><p>Second row</p><!-- /wp:paragraph -->'
 					. '</div><!-- /wp:group -->',
 			)
@@ -226,26 +226,16 @@ class Group_Test extends \Email_Editor_Integration_Test_Case {
 		$post = get_post( $post_id );
 		$this->assertInstanceOf( \WP_Post::class, $post );
 
-		// A block whose email renderer returns two elements must still fill a single cell.
-		register_block_type(
-			'test/two-paragraphs',
-			array(
-				'render_email_callback' => function () {
-					return '<p>Part A</p><p>Part B</p>';
-				},
-			)
-		);
-
 		$template          = new \WP_Block_Template();
 		$template->id      = 'template-id';
 		$template->content = '<!-- wp:post-content /-->';
 
 		$rendered = $this->di_container->get( Content_Renderer::class )->render( $post, $template );
-		\WP_Block_Type_Registry::get_instance()->unregister( 'test/two-paragraphs' );
 
 		$this->assertSame( 2, substr_count( $rendered, 'class="email-block-grid-row"' ) );
+		// The empty paragraph renders nothing but still takes its cell, as it does on the web.
 		$this->assertSame( 4, substr_count( $rendered, 'class="email-block-grid-cell"' ) );
-		$this->assertMatchesRegularExpression( '/photo\.jpg.*Part A.*Part B.*email-block-grid-row.*Second row/s', $rendered );
+		$this->assertMatchesRegularExpression( '/photo\.jpg.*email-block-grid-row.*Second row/s', $rendered );
 
 		// The image, saved at 1000px, is capped to one cell (half the content width, less the gap).
 		$this->assertSame( 1, preg_match( '/<img[^>]*width="(\d+)"/', $rendered, $matches ) );

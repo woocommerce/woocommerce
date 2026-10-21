@@ -1362,12 +1362,14 @@ class Spacing_Preprocessor_Test extends \Email_Editor_Unit_Test {
 	}
 
 	/**
-	 * Test a two-column grid stays stacked when it holds a block that can't be sized to a cell.
+	 * Test a two-column grid stays stacked when it holds a block not known to fit a cell.
 	 *
 	 * @testWith ["core/gallery"]
 	 *           ["core/post-content"]
 	 *           ["woocommerce/product-collection"]
 	 *           ["core/block"]
+	 *           ["core/site-logo"]
+	 *           ["acme/custom-block"]
 	 * @param string $block_name Block nested inside a grid item.
 	 */
 	public function testItStacksTwoColumnGridsHoldingFullWidthBlocks( string $block_name ): void {
