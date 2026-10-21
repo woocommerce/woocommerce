@@ -29,6 +29,14 @@
 	.components-notice__content {
 		margin: 4px 0;
 	}
+	// Core makes the arrow inline-block, which lets it wrap onto its own line.
+	.components-external-link__icon {
+		display: inline;
+	}
+	// The Actions block shows these notices inside its settings panel.
+	.components-panel__body & {
+		margin-bottom: $gap;
+	}
 	.components-notice__actions {
 		button {
 			margin-left: 0;
