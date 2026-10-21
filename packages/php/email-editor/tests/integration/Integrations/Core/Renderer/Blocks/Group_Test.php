@@ -130,6 +130,7 @@ class Group_Test extends \Email_Editor_Integration_Test_Case {
 
 		// The gap is split between the two cells, and rows after the first are spaced by the row gap.
 		$cells = $this->get_cell_declarations( $rendered );
+		$this->assertCount( 4, $cells );
 		$this->assertEqualsCanonicalizing( array( 'width:50%', 'vertical-align:top', 'padding-right:10px' ), $cells[0] );
 		$this->assertEqualsCanonicalizing( array( 'width:50%', 'vertical-align:top', 'padding-left:10px' ), $cells[1] );
 		$this->assertEqualsCanonicalizing( array( 'width:50%', 'vertical-align:top', 'padding-right:10px', 'padding-top:24px' ), $cells[2] );
@@ -190,10 +191,11 @@ class Group_Test extends \Email_Editor_Integration_Test_Case {
 		);
 
 		// In RTL the first cell is on the right, so its gap is on its left side.
-		$this->assertMatchesRegularExpression( '/Item 1.*Item 2/s', $rendered );
 		$cells = $this->get_cell_declarations( $rendered );
+		$this->assertCount( 2, $cells );
 		$this->assertContains( 'padding-left:10px', $cells[0] );
 		$this->assertContains( 'padding-right:10px', $cells[1] );
+		$this->assertMatchesRegularExpression( '/padding-left:10px;"[^>]*>.*?Item 1.*?padding-right:10px;"[^>]*>.*?Item 2/s', $rendered );
 	}
 
 	/**
@@ -250,8 +252,10 @@ class Group_Test extends \Email_Editor_Integration_Test_Case {
 
 		// The image, saved at 1000px, is capped to one cell (half the content width, less the gap).
 		$this->assertSame( 1, preg_match( '/<img[^>]*width="(\d+)"/', $rendered, $matches ) );
+		// The column gap is read back from the cells, half on each side, as the renderer resolved it.
 		$content_width = Styles_Helper::parse_value( $this->rendering_context->get_layout_width_without_padding() );
-		$gap           = Styles_Helper::parse_value( $this->rendering_context->get_theme_styles()['spacing']['blockGap'] ?? '0px' );
+		$this->assertSame( 1, preg_match( '/padding-(?:left|right):\s*([\d.]+)px/', implode( ';', $this->get_cell_declarations( $rendered )[0] ), $gap_match ) );
+		$gap = 2 * (float) $gap_match[1];
 		$this->assertEqualsWithDelta( floor( ( $content_width - $gap ) / 2 ), (int) $matches[1], 1 );
 	}
 
@@ -262,7 +266,7 @@ class Group_Test extends \Email_Editor_Integration_Test_Case {
 	 * @return array<int, string[]>
 	 */
 	private function get_cell_declarations( string $rendered ): array {
-		preg_match_all( '/<td class="email-block-grid-cell" style="([^"]*)"/', $rendered, $matches );
+		preg_match_all( '/<td[^>]*\bclass="[^"]*\bemail-block-grid-cell\b[^"]*"[^>]*\bstyle="([^"]*)"/', $rendered, $matches );
 		return array_map(
 			static function ( string $style ): array {
 				return array_values( array_filter( array_map( 'trim', explode( ';', $style ) ) ) );
