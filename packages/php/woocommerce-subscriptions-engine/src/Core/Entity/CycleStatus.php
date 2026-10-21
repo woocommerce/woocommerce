@@ -16,7 +16,8 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Core\Entity;
 
-use DomainException;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\InvalidInputException;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ValidationErrorCode;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -47,11 +48,13 @@ final class CycleStatus {
 	 * Wrap a status slug.
 	 *
 	 * @param string $value Status slug.
-	 * @throws DomainException If `$value` is not a well-formed status slug.
+	 * @throws InvalidInputException If `$value` is not a well-formed status slug.
 	 */
 	public function __construct( string $value ) {
 		if ( ! self::is_valid( $value ) ) {
-			throw new DomainException(
+			throw new InvalidInputException(
+				ValidationErrorCode::INVALID_VALUE,
+				'status',
 				sprintf( 'CycleStatus: "%s" is not a valid status slug.', $value )
 			);
 		}

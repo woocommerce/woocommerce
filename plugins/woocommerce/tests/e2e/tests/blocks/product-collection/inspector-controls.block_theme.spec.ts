@@ -143,7 +143,7 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 	} ) => {
 		await pageObject.createNewPostAndInsertBlock();
 
-		await pageObject.addFilter( 'Show Hand-picked' );
+		await pageObject.addFilter( 'Hand-Picked' );
 
 		const filterName = 'Hand-picked';
 		await pageObject.setFilterComboboxValue( filterName, [ 'Album' ] );
@@ -181,7 +181,7 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 	} ) => {
 		await pageObject.createNewPostAndInsertBlock();
 
-		await pageObject.addFilter( 'Show product categories' );
+		await pageObject.addFilter( 'Product Categories' );
 		await pageObject.checkTaxonomyTerm( 'categories', 'Clothing' );
 		await expect( pageObject.products ).toHaveCount( 9 );
 
@@ -218,7 +218,7 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 	} ) => {
 		await pageObject.createNewPostAndInsertBlock();
 
-		await pageObject.addFilter( 'Show product tags' );
+		await pageObject.addFilter( 'Product Tags' );
 		await pageObject.checkTaxonomyTerm( 'tags', 'Recommended' );
 		await expect( pageObject.productTitles ).toHaveText( [
 			'Beanie',
@@ -237,7 +237,7 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 	} ) => {
 		await pageObject.createNewPostAndInsertBlock();
 
-		await pageObject.addFilter( 'Show Product Brands' );
+		await pageObject.addFilter( 'Product Brands' );
 		await pageObject.checkTaxonomyTerm( 'brands', 'WooCommerce' );
 		await expect( pageObject.productTitles ).toHaveText( [
 			'Album',
@@ -258,7 +258,7 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 	} ) => {
 		await pageObject.createNewPostAndInsertBlock();
 
-		await pageObject.addFilter( 'Show Product Attributes' );
+		await pageObject.addFilter( 'Product Attributes' );
 		await pageObject.setProductAttribute( 'Color', 'Green' );
 
 		await expect( pageObject.products ).toHaveCount( 3 );
@@ -700,7 +700,7 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 
 			await expect( pageObject.products ).toHaveCount( 9 );
 
-			await pageObject.addFilter( 'Show product categories' );
+			await pageObject.addFilter( 'Product Categories' );
 			await pageObject.checkTaxonomyTerm( 'categories', 'Music' );
 
 			const productCollectionBlock = await editor.getBlockByName(

@@ -88,7 +88,7 @@ class ContractCapabilitiesTest extends EngineIntegrationTestCase {
 	 * @param int|null $customer_id Customer id.
 	 */
 	private function create_contract( ?int $customer_id ): ContractView {
-		return Contracts::create(
+		return $this->create_released(
 			array(
 				'extension_slug' => 'test-extension',
 				'status'         => 'active',

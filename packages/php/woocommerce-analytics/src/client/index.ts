@@ -5,6 +5,7 @@
  */
 import './public-path';
 import { consentManager } from './consent';
+import { clearTrackingCookies } from './tracking-cookies';
 import { activateTrackingScript } from './tracking-script';
 
 /**
@@ -24,6 +25,12 @@ jQuery( () => {
 	consentManager.addConsentChangeListener( ( hasConsent: boolean ) => {
 		if ( hasConsent ) {
 			startTracking();
+		} else {
+			clearTrackingCookies();
+			// Until s.js loads, events wait in this array, and s.js sends them when it arrives.
+			if ( Array.isArray( window._wca ) ) {
+				window._wca.length = 0;
+			}
 		}
 	} );
 
@@ -31,6 +38,9 @@ jQuery( () => {
 		consentManager.waitForConsentType( () => {
 			if ( consentManager.hasAnalyticsConsent() ) {
 				startTracking();
+			} else {
+				// Consent may have been withdrawn on a page without analytics, after an earlier visit set these.
+				clearTrackingCookies();
 			}
 		} )
 	);

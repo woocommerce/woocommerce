@@ -26,6 +26,19 @@ const getScripts = () => Array.from( document.querySelectorAll( 'script' ) );
 describe( 'activateTrackingScript', () => {
 	afterEach( () => {
 		document.head.replaceChildren();
+		delete window.wp_has_consent;
+		document.cookie = 'tk_or=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+	} );
+
+	it( 'clears the cookies s.js set when consent was withdrawn while it was downloading', () => {
+		window.wp_has_consent = () => false;
+		printHeldTag();
+		activateTrackingScript();
+		document.cookie = 'tk_or=1; path=/';
+
+		getScripts()[ 0 ].dispatchEvent( new Event( 'load' ) );
+
+		expect( document.cookie ).not.toContain( 'tk_or=' );
 	} );
 
 	it( 'replaces the held s.js tag with one that runs, keeping its attributes', () => {
