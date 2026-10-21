@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Keep an order on the Analytics import retry list when its stats fail to save, instead of treating it as imported.

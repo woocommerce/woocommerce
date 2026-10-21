@@ -383,8 +383,8 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 
 	/**
 	 * Imports a single order or refund to update lookup tables for.
-	 * An order whose stats or tax lookup rows could not be written, or whose exclusion check fails,
-	 * stays on the failed imports list.
+	 * An order whose tax lookup rows could not be written, or whose exclusion check fails, stays on
+	 * the failed imports list.
 	 *
 	 * @internal
 	 * @param int $order_id Order or refund ID.
@@ -440,7 +440,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 			return;
 		}
 
-		$stats_synced = OrdersStatsDataStore::sync_order( $order_id );
+		OrdersStatsDataStore::sync_order( $order_id );
 		ProductsDataStore::sync_order_products( $order_id );
 		CouponsDataStore::sync_order_coupons( $order_id );
 		$taxes_synced = TaxesDataStore::sync_order_taxes( $order_id );
@@ -456,14 +456,12 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 
 		ReportsCache::invalidate();
 
-		// A stats or tax sync that did not land means the import did not finish, so the order stays on
-		// the list Analytics settings retries over. Only these two syncs are read: the other stores return
-		// false for writes that changed no rows as well, so their return value does not tell a failure
-		// from an order that was already up to date.
-		if ( false === $stats_synced ) {
-			wc_get_logger()->error( sprintf( 'Could not save the Analytics stats of record #%d.', $order_id ), array( 'source' => 'wc-analytics-order-import' ) );
-		}
-		if ( false === $stats_synced || false === $taxes_synced ) {
+		// A tax sync that did not land leaves the order holding the lookup rows it came in with,
+		// so the import did not finish and the order stays on the list Analytics settings retries
+		// over. Only this sync is read: the other stores return false for writes that changed no
+		// rows as well, so their return value does not tell a failure from an order that was
+		// already up to date.
+		if ( false === $taxes_synced ) {
 			self::record_failed_order_import( $order_id );
 		} else {
 			self::clear_failed_order_import( $order_id );
