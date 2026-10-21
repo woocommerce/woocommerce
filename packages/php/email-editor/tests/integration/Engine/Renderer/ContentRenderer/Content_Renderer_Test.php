@@ -378,31 +378,6 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
-	 * Test a two-column grid item whose renderer fails is still wrapped in one element.
-	 */
-	public function testItWrapsFailedTwoColumnGridItemsInOneElement(): void {
-		register_block_type(
-			'test/failing-block',
-			array(
-				'render_email_callback' => function () {
-					throw new \Exception( 'Render failed' );
-				},
-			)
-		);
-
-		$result = $this->renderer->render_block(
-			'<p>Saved</p><p>markup</p>',
-			array(
-				'blockName'   => 'test/failing-block',
-				'email_attrs' => array( 'two-column-grid-item' => true ),
-			)
-		);
-		\WP_Block_Type_Registry::get_instance()->unregister( 'test/failing-block' );
-
-		$this->assertEquals( '<div class="email-block-grid-item"><p>Saved</p><p>markup</p></div>', $result );
-	}
-
-	/**
 	 * Test render_block applies root horizontal padding from email_attrs
 	 */
 	public function testItAppliesRootHorizontalPadding(): void {

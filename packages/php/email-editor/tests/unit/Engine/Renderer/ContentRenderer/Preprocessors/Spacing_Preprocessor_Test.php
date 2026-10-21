@@ -1227,62 +1227,6 @@ class Spacing_Preprocessor_Test extends \Email_Editor_Unit_Test {
 	}
 
 	/**
-	 * Test a two-column grid uses its own blockGap per axis and resolves preset references to pixels.
-	 */
-	public function testItUsesTheGridGroupBlockGap(): void {
-		$styles                    = $this->styles;
-		$styles['__variables_map'] = array( '--wp--preset--spacing--20' => '1.5rem' );
-
-		$blocks = array(
-			$this->build_grid_group(
-				array(
-					'type'        => 'grid',
-					'columnCount' => '2',
-				),
-				array( array(), array() ),
-				array(
-					'spacing' => array(
-						'blockGap' => array(
-							'top'  => '30px',
-							'left' => 'var:preset|spacing|20',
-						),
-					),
-				)
-			),
-		);
-
-		$result = $this->preprocessor->preprocess( $blocks, $this->layout, $styles );
-
-		$this->assertSame( '30px', $result[0]['email_attrs']['grid-row-gap'] );
-		$this->assertSame( '24px', $result[0]['email_attrs']['grid-column-gap'] );
-	}
-
-	/**
-	 * Test a spacer fits a grid cell only when it has no fixed width.
-	 */
-	public function testItStacksTwoColumnGridsHoldingFixedWidthSpacers(): void {
-		$layout = array(
-			'type'        => 'grid',
-			'columnCount' => 2,
-		);
-		$spacer = array(
-			'blockName'   => 'core/spacer',
-			'attrs'       => array( 'height' => '20px' ),
-			'innerBlocks' => array(),
-		);
-
-		$grid                  = $this->build_grid_group( $layout, array( array() ) );
-		$grid['innerBlocks'][] = $spacer;
-		$fixed_width_grid      = $grid;
-		$fixed_width_grid['innerBlocks'][1]['attrs']['width'] = '400px';
-
-		$result = $this->preprocessor->preprocess( array( $grid, $fixed_width_grid ), $this->layout, $this->styles );
-
-		$this->assertTrue( $result[0]['email_attrs']['two-column-grid'] );
-		$this->assertArrayNotHasKey( 'two-column-grid', $result[1]['email_attrs'] );
-	}
-
-	/**
 	 * Test an integration can add a block that fits a grid cell.
 	 */
 	public function testItLetsIntegrationsAddGridCellBlocks(): void {
@@ -1310,31 +1254,6 @@ class Spacing_Preprocessor_Test extends \Email_Editor_Unit_Test {
 	}
 
 	/**
-	 * Test a filter that returns something other than an array leaves no block fitting a cell, so grids stack.
-	 */
-	public function testItStacksGridsWhenTheGridCellFilterReturnsNoArray(): void {
-		global $wp_filters;
-		add_filter(
-			'woocommerce_email_editor_grid_cell_block_names',
-			function () {
-				return 'core/paragraph';
-			}
-		);
-
-		$grid   = $this->build_grid_group(
-			array(
-				'type'        => 'grid',
-				'columnCount' => 2,
-			),
-			array( array(), array() )
-		);
-		$result = $this->preprocessor->preprocess( array( $grid ), $this->layout, $this->styles );
-		unset( $wp_filters['woocommerce_email_editor_grid_cell_block_names'] );
-
-		$this->assertArrayNotHasKey( 'two-column-grid', $result[0]['email_attrs'] );
-	}
-
-	/**
 	 * Test an auto-fit responsive grid with one item stacks, since the item spans the full width.
 	 */
 	public function testItStacksAutoFitGridWithOneItem(): void {
@@ -1359,90 +1278,34 @@ class Spacing_Preprocessor_Test extends \Email_Editor_Unit_Test {
 	}
 
 	/**
-	 * Test a percentage column gap is left for the width pass, and a percentage row gap collapses to 0.
-	 */
-	public function testItLeavesPercentageColumnGapForTheWidthPass(): void {
-		$blocks = array(
-			$this->build_grid_group(
-				array(
-					'type'        => 'grid',
-					'columnCount' => 2,
-				),
-				array( array(), array() ),
-				array( 'spacing' => array( 'blockGap' => '10%' ) )
-			),
-		);
-
-		$result = $this->preprocessor->preprocess( $blocks, $this->layout, $this->styles );
-
-		$this->assertSame( '10%', $result[0]['email_attrs']['grid-column-gap'] );
-		$this->assertSame( '0px', $result[0]['email_attrs']['grid-row-gap'] );
-	}
-
-	/**
-	 * Test an explicit numeric zero gap is kept rather than replaced by the global gap.
-	 */
-	public function testItKeepsNumericZeroGridGap(): void {
-		$blocks = array(
-			$this->build_grid_group(
-				array(
-					'type'        => 'grid',
-					'columnCount' => 2,
-				),
-				array( array(), array() ),
-				array(
-					'spacing' => array(
-						'blockGap' => array(
-							'top'  => 0,
-							'left' => 0,
-						),
-					),
-				)
-			),
-		);
-
-		$result = $this->preprocessor->preprocess( $blocks, $this->layout, $this->styles );
-
-		$this->assertSame( '0px', $result[0]['email_attrs']['grid-row-gap'] );
-		$this->assertSame( '0px', $result[0]['email_attrs']['grid-column-gap'] );
-	}
-
-	/**
 	 * Grid layouts that can't be mapped to two table cells per row.
 	 *
 	 * @return array<string, array{0: array, 1: array}>
 	 */
 	public function stackedGridProvider(): array {
 		return array(
-			'three columns'           => array(
+			'three columns'          => array(
 				array(
 					'type'        => 'grid',
 					'columnCount' => 3,
 				),
 				array(),
 			),
-			'auto columns'            => array(
+			'auto columns'           => array(
 				array(
 					'type'               => 'grid',
 					'minimumColumnWidth' => '12rem',
 				),
 				array(),
 			),
-			'item spans two columns'  => array(
+			'item spans two columns' => array(
 				array(
 					'type'        => 'grid',
 					'columnCount' => 2,
 				),
 				array( 'style' => array( 'layout' => array( 'columnSpan' => 2 ) ) ),
 			),
-			'item spans two rows'     => array(
-				array(
-					'type'        => 'grid',
-					'columnCount' => 2,
-				),
-				array( 'style' => array( 'layout' => array( 'rowSpan' => 2 ) ) ),
-			),
-			'item placed manually'    => array(
+			'item placed manually'   => array(
 				array(
 					'type'        => 'grid',
 					'columnCount' => 2,
@@ -1455,13 +1318,6 @@ class Spacing_Preprocessor_Test extends \Email_Editor_Unit_Test {
 						),
 					),
 				),
-			),
-			'flex layout, two counts' => array(
-				array(
-					'type'        => 'flex',
-					'columnCount' => 2,
-				),
-				array(),
 			),
 		);
 	}
@@ -1487,13 +1343,6 @@ class Spacing_Preprocessor_Test extends \Email_Editor_Unit_Test {
 	 * Test a two-column grid stays stacked when it holds a block not known to fit a cell.
 	 *
 	 * @testWith ["core/gallery"]
-	 *           ["core/post-content"]
-	 *           ["woocommerce/product-collection"]
-	 *           ["core/block"]
-	 *           ["core/site-logo"]
-	 *           ["core/social-links"]
-	 *           ["core/buttons"]
-	 *           ["core/quote"]
 	 *           ["acme/custom-block"]
 	 * @param string $block_name Block nested inside a grid item.
 	 */

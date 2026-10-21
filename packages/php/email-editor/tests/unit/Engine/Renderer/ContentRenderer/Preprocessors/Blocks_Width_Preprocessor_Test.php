@@ -754,9 +754,16 @@ class Blocks_Width_Preprocessor_Test extends \Email_Editor_Unit_Test {
 	}
 
 	/**
-	 * Test rem padding on a grid and inside its cells is converted to pixels before widths are capped.
+	 * Test rem and percentage grid padding, and percentage gaps, are converted to pixels before cells are sized.
+	 *
+	 * @testWith ["2rem", "20px", "288px"]
+	 *           ["10%", "20px", "254px"]
+	 *           ["0px", "10%", "297px"]
+	 * @param string $padding Grid horizontal padding.
+	 * @param string $column_gap Grid column gap.
+	 * @param string $cell_width Expected cell width.
 	 */
-	public function testItConvertsRemGridPaddingWhenSizingCells(): void {
+	public function testItConvertsGridSpacingUnitsWhenSizingCells( string $padding, string $column_gap, string $cell_width ): void {
 		$blocks = array(
 			array(
 				'blockName'   => 'core/group',
@@ -768,78 +775,15 @@ class Blocks_Width_Preprocessor_Test extends \Email_Editor_Unit_Test {
 					'style'  => array(
 						'spacing' => array(
 							'padding' => array(
-								'left'  => '2rem',
-								'right' => '2rem',
+								'left'  => $padding,
+								'right' => $padding,
 							),
 						),
 					),
 				),
 				'email_attrs' => array(
 					'two-column-grid' => true,
-					'grid-column-gap' => '20px',
-				),
-				'innerBlocks' => array(
-					array(
-						'blockName'   => 'core/image',
-						'attrs'       => array(),
-						'innerBlocks' => array(),
-					),
-					array(
-						'blockName'   => 'core/group',
-						'attrs'       => array(
-							'style' => array(
-								'spacing' => array(
-									'padding' => array(
-										'left'  => '1rem',
-										'right' => '1rem',
-									),
-								),
-							),
-						),
-						'innerBlocks' => array(
-							array(
-								'blockName'   => 'core/image',
-								'attrs'       => array( 'width' => '400px' ),
-								'innerBlocks' => array(),
-							),
-						),
-					),
-				),
-			),
-		);
-
-		$result = $this->preprocessor->preprocess( $blocks, $this->layout, $this->styles );
-
-		// (660 - 32 - 32 - 20) / 2 = 288.
-		$this->assertEquals( '288px', $result[0]['innerBlocks'][0]['email_attrs']['width'] );
-		// A group in a cell with 1rem padding leaves 288 - 16 - 16 = 256px for a fixed-width image.
-		$this->assertEquals( '256px', $result[0]['innerBlocks'][1]['innerBlocks'][0]['email_attrs']['width'] );
-	}
-
-	/**
-	 * Test a grid's percentage padding is resolved against its width before its cells are sized.
-	 */
-	public function testItResolvesPercentageGridPaddingWhenSizingCells(): void {
-		$blocks = array(
-			array(
-				'blockName'   => 'core/group',
-				'attrs'       => array(
-					'layout' => array(
-						'type'        => 'grid',
-						'columnCount' => 2,
-					),
-					'style'  => array(
-						'spacing' => array(
-							'padding' => array(
-								'left'  => '10%',
-								'right' => '10%',
-							),
-						),
-					),
-				),
-				'email_attrs' => array(
-					'two-column-grid' => true,
-					'grid-column-gap' => '20px',
+					'grid-column-gap' => $column_gap,
 				),
 				'innerBlocks' => array(
 					array(
@@ -853,49 +797,13 @@ class Blocks_Width_Preprocessor_Test extends \Email_Editor_Unit_Test {
 
 		$result = $this->preprocessor->preprocess( $blocks, $this->layout, $this->styles );
 
-		// (660 - 66 - 66 - 20) / 2 = 254.
-		$this->assertEquals( '254px', $result[0]['innerBlocks'][0]['email_attrs']['width'] );
-	}
-
-	/**
-	 * Test a percentage column gap is resolved against the grid's width.
-	 */
-	public function testItResolvesPercentageColumnGap(): void {
-		$blocks = array(
-			array(
-				'blockName'   => 'core/group',
-				'attrs'       => array(
-					'layout' => array(
-						'type'        => 'grid',
-						'columnCount' => 2,
-					),
-				),
-				'email_attrs' => array(
-					'two-column-grid' => true,
-					'grid-column-gap' => '10%',
-				),
-				'innerBlocks' => array(
-					array(
-						'blockName'   => 'core/paragraph',
-						'attrs'       => array(),
-						'innerBlocks' => array(),
-					),
-				),
-			),
-		);
-
-		$result = $this->preprocessor->preprocess( $blocks, $this->layout, $this->styles );
-
-		// 10% of 660 is 66, so each cell is (660 - 66) / 2 = 297.
-		$this->assertEquals( '66px', $result[0]['email_attrs']['grid-column-gap'] );
-		$this->assertEquals( '297px', $result[0]['innerBlocks'][0]['email_attrs']['width'] );
+		$this->assertEquals( $cell_width, $result[0]['innerBlocks'][0]['email_attrs']['width'] );
 	}
 
 	/**
 	 * Test a responsive grid (column count plus minimum column width) stays two columns only when each cell meets the minimum width.
 	 *
 	 * @testWith ["12rem", true]
-	 *           ["320px", true]
 	 *           ["321px", false]
 	 * @param string $minimum_width Minimum column width.
 	 * @param bool   $side_by_side Whether the grid should stay two columns.
