@@ -1174,7 +1174,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	 * @param string[]                   $rates              Tax rate percentages, applied in order. A "c" suffix makes the rate compound.
 	 * @param string                     $price              The product price.
 	 * @param int                        $quantity           How many of the product the cart has.
-	 * @param array{string, string}|null $coupon             The coupon's discount type and amount, added with a second cart line, or null for neither.
+	 * @param array{string, string}|null $coupon             The coupon's discount type and amount, added with a second cart line and a negative fee, or null for none of them.
 	 */
 	public function test_resume_keeps_items_and_matches_fresh_order_across_tax_setups( string $checkout, bool $prices_include_tax, bool $round_at_subtotal, array $rates, string $price, int $quantity, ?array $coupon ): void {
 		update_option( 'woocommerce_calc_taxes', 'yes' );
@@ -1201,8 +1201,12 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		WC_Helper_Shipping::create_simple_flat_rate( 10 );
 		add_action(
 			'woocommerce_cart_calculate_fees',
-			function ( WC_Cart $cart ) {
+			function ( WC_Cart $cart ) use ( $coupon ) {
 				$cart->add_fee( 'Handling', 5, true );
+				if ( $coupon ) {
+					// A negative taxable fee splits its tax by each item's share of the cart, so with a zero-rate item each rate's tax has more decimals to round.
+					$cart->add_fee( 'Discount', -1.37, true );
+				}
 			}
 		);
 
@@ -1210,7 +1214,13 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 			$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => $price ) );
 			WC()->cart->add_to_cart( $product->get_id(), $quantity );
 			if ( $coupon ) {
-				$second_product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => '3.33' ) );
+				$second_product = WC_Helper_Product::create_simple_product(
+					true,
+					array(
+						'regular_price' => '3.33',
+						'tax_class'     => 'zero-rate',
+					)
+				);
 				WC()->cart->add_to_cart( $second_product->get_id(), 2 );
 				$sweep_coupon = WC_Helper_Coupon::create_coupon(
 					'resume-sweep',
@@ -1303,8 +1313,11 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	 *           ["line_item_tax_split", "line_item"]
 	 *           ["shipping_total", "shipping"]
 	 *           ["shipping_tax", "shipping"]
+	 *           ["shipping_tax_split", "shipping"]
 	 *           ["tax_line", "tax"]
 	 *           ["fee_total", "fee"]
+	 *           ["fee_tax", "fee"]
+	 *           ["fee_tax_split", "fee"]
 	 *           ["coupon_discount", "coupon"]
 	 *
 	 * @param string $edit          The merchant edit to make to the order.
@@ -1318,8 +1331,9 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 			'is_vat_exempt'    => $customer->get_is_vat_exempt(),
 		);
 		try {
-			$order_id = $this->create_order_with_shipping_taxes_and_coupon();
-			$before   = $this->get_order_item_ids_by_type( $order_id );
+			$order_id         = $this->create_order_with_shipping_taxes_and_coupon();
+			$before           = $this->get_order_item_ids_by_type( $order_id );
+			$expected_amounts = $this->get_order_item_amounts_by_type( $order_id );
 			$this->edit_order_item_amounts( wc_get_order( $order_id ), $edit );
 
 			$this->resume_order( $order_id );
@@ -1346,6 +1360,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( (float) WC()->cart->get_total( 'edit' ), (float) $order->get_total(), 'The order total should match the cart.' );
 		$this->assertEqualsWithDelta( $cart_tax, (float) $order->get_total_tax(), 0.001, 'The order tax total should match the cart.' );
 		$this->assertEqualsWithDelta( $cart_ship, (float) $order->get_shipping_total(), 0.001, 'The order shipping total should match the cart.' );
+		$this->assertSame( $expected_amounts, $this->get_order_item_amounts_by_type( $order_id ), 'The resumed items should have their original amounts and tax allocations.' );
 	}
 
 	/**
@@ -1594,16 +1609,23 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 				$line_item->save();
 				break;
 			case 'line_item_tax_split':
+			case 'shipping_tax_split':
+			case 'fee_tax_split':
 				// Moves tax from one rate to the other, so the item's tax sums don't change.
-				$taxes       = $line_item->get_taxes();
+				$item        = array(
+					'line_item_tax_split' => $line_item,
+					'shipping_tax_split'  => $shipping,
+					'fee_tax_split'       => $fee,
+				)[ $edit ];
+				$taxes       = $item->get_taxes();
 				$first_rate  = array_key_first( $taxes['total'] );
 				$second_rate = array_key_last( $taxes['total'] );
-				foreach ( array( 'total', 'subtotal' ) as $tax_type ) {
-					$taxes[ $tax_type ][ $first_rate ]  = (float) $taxes[ $tax_type ][ $first_rate ] + 1;
-					$taxes[ $tax_type ][ $second_rate ] = (float) $taxes[ $tax_type ][ $second_rate ] - 1;
+				foreach ( array_keys( $taxes ) as $tax_type ) {
+					$taxes[ $tax_type ][ $first_rate ]  = (float) $taxes[ $tax_type ][ $first_rate ] + 0.1;
+					$taxes[ $tax_type ][ $second_rate ] = (float) $taxes[ $tax_type ][ $second_rate ] - 0.1;
 				}
-				$line_item->set_taxes( $taxes );
-				$line_item->save();
+				$item->set_taxes( $taxes );
+				$item->save();
 				break;
 			case 'shipping_total':
 				$shipping->set_total( (float) $shipping->get_total() + 5 );
@@ -1619,6 +1641,10 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 				break;
 			case 'fee_total':
 				$fee->set_total( (float) $fee->get_total() + 1 );
+				$fee->save();
+				break;
+			case 'fee_tax':
+				$fee->set_taxes( array( 'total' => array( $rate_id => (float) $fee->get_total_tax() + 1 ) ) );
 				$fee->save();
 				break;
 			case 'coupon_discount':

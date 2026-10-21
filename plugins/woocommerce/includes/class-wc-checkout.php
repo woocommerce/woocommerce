@@ -754,10 +754,10 @@ class WC_Checkout {
 		$cart_values  = $order_values;
 
 		foreach ( $order->get_fees() as $fee ) {
-			$order_values[ OrderItemType::FEE ][] = $this->get_compared_values( $fee->get_total( 'edit' ), $fee->get_total_tax( 'edit' ) );
+			$order_values[ OrderItemType::FEE ][] = $this->get_compared_values( $fee->get_total( 'edit' ) ) . $this->get_compared_rate_taxes( $fee->get_taxes( 'edit' ) );
 		}
 		foreach ( $cart->get_fees() as $fee ) {
-			$cart_values[ OrderItemType::FEE ][] = $this->get_compared_values( $fee->total, $fee->tax );
+			$cart_values[ OrderItemType::FEE ][] = $this->get_compared_values( $fee->total ) . $this->get_compared_rate_taxes( array( 'total' => $fee->tax_data ) );
 		}
 
 		foreach ( $order->get_coupons() as $coupon ) {
@@ -806,8 +806,8 @@ class WC_Checkout {
 	}
 
 	/**
-	 * Joins a line item's subtotal and total tax for each rate into one string. The rates are compared instead of the sums,
-	 * since the cart rounds its line tax once while the order item adds up each rate's rounded tax, so the sums can differ.
+	 * Joins an item's tax amounts for each rate into one string, so an edited allocation is found even when the sums match.
+	 * Comparing rates also avoids differences between the cart's rounded line tax and the sum of each rate's rounded tax.
 	 *
 	 * @param array $taxes Taxes by rate ID, under 'subtotal' and 'total' keys.
 	 * @return string
