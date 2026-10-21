@@ -1891,23 +1891,6 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox CPT order queries ignore whitespace around comma-separated statuses.
-	 */
-	public function test_cpt_order_queries_trim_comma_separated_statuses(): void {
-		$order_ids = $this->create_orders_with_interleaved_statuses( 3 );
-
-		$queried_order_ids = wc_get_orders(
-			array(
-				'status' => 'foobar, ' . OrderStatus::COMPLETED,
-				'limit'  => -1,
-				'return' => 'ids',
-			)
-		);
-
-		$this->assertSame( array( $order_ids[2] ), $queried_order_ids, 'A status preceded by a space in a comma-separated list should still be matched.' );
-	}
-
-	/**
 	 * Creates orders cycling through pending, processing and completed statuses, with strictly decreasing creation dates.
 	 *
 	 * @param int $count Number of orders to create.

@@ -846,10 +846,10 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	 * @testdox wc_get_orders supports the "$status" special status.
 	 *
 	 * @dataProvider special_status_provider
-	 * @param bool   $hpos_enabled Whether HPOS is enabled.
-	 * @param string $status       Special status value.
+	 * @param bool         $hpos_enabled Whether HPOS is enabled.
+	 * @param string|array $status       Special status value.
 	 */
-	public function test_wc_get_orders_supports_special_status_values( bool $hpos_enabled, string $status ): void {
+	public function test_wc_get_orders_supports_special_status_values( bool $hpos_enabled, $status ): void {
 		$this->toggle_cot_feature_and_usage( $hpos_enabled );
 		$order_ids = $this->create_orders_with_interleaved_statuses( 3 );
 
@@ -867,14 +867,20 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	/**
 	 * Provides special status values supported by order queries, for both order storages.
 	 *
-	 * @return array<string, array{bool, string}>
+	 * @return array<string, array{bool, string|array}>
 	 */
 	public function special_status_provider(): array {
 		return array(
-			'HPOS, any'       => array( true, 'any' ),
-			'HPOS, all'       => array( true, 'all' ),
-			'legacy CPT, any' => array( false, 'any' ),
-			'legacy CPT, all' => array( false, 'all' ),
+			'HPOS, any'                    => array( true, 'any' ),
+			'HPOS, all'                    => array( true, 'all' ),
+			'HPOS, uppercase any'          => array( true, 'ANY' ),
+			'HPOS, padded all'             => array( true, ' all ' ),
+			'HPOS, all with unknown'       => array( true, array( 'all', 'foobar' ) ),
+			'legacy CPT, any'              => array( false, 'any' ),
+			'legacy CPT, all'              => array( false, 'all' ),
+			'legacy CPT, uppercase any'    => array( false, 'ANY' ),
+			'legacy CPT, padded all'       => array( false, ' all ' ),
+			'legacy CPT, all with unknown' => array( false, array( 'all', 'foobar' ) ),
 		);
 	}
 
@@ -933,6 +939,27 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertSame( array( $order_ids[2] ), $queried_order_ids, 'Whitespace around a known status should be ignored on both order storages.' );
+	}
+
+	/**
+	 * @testdox wc_get_orders splits a comma-separated status string and ignores whitespace around each status.
+	 *
+	 * @dataProvider order_storage_provider
+	 * @param bool $hpos_enabled Whether HPOS is enabled.
+	 */
+	public function test_wc_get_orders_splits_comma_separated_statuses( bool $hpos_enabled ): void {
+		$this->toggle_cot_feature_and_usage( $hpos_enabled );
+		$order_ids = $this->create_orders_with_interleaved_statuses( 3 );
+
+		$queried_order_ids = wc_get_orders(
+			array(
+				'status' => 'foobar, ' . OrderStatus::PROCESSING . ',' . OrderStatus::COMPLETED,
+				'limit'  => -1,
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertSame( array( $order_ids[1], $order_ids[2] ), $queried_order_ids, 'Each status in a comma-separated list should be matched on both order storages.' );
 	}
 
 	/**

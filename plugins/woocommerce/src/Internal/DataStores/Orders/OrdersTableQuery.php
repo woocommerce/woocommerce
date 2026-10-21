@@ -689,7 +689,9 @@ class OrdersTableQuery {
 			$this->args['status'] = array();
 		}
 
-		if ( ! is_array( $this->args['status'] ) ) {
+		if ( is_string( $this->args['status'] ) ) {
+			$this->args['status'] = explode( ',', $this->args['status'] );
+		} elseif ( ! is_array( $this->args['status'] ) ) {
 			$this->args['status'] = array( $this->args['status'] );
 		}
 
