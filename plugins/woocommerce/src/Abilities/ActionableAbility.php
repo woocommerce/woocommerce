@@ -81,11 +81,13 @@ abstract class ActionableAbility extends \WP_Ability {
 	 * response.
 	 *
 	 * @since 11.3.0
+	 * @since 11.4.0 Receives the ability input.
 	 *
 	 * @param \WC_Data $subject Changed object.
+	 * @param array    $input   Ability input.
 	 * @return null|\WP_Error Null when the object was saved, a WP_Error when it was not.
 	 */
-	public function save( $subject ) {
+	public function save( $subject, array $input = array() ) {
 		try {
 			$subject->save();
 		} catch ( \Exception $e ) {
@@ -136,7 +138,7 @@ abstract class ActionableAbility extends \WP_Ability {
 			return $rejected;
 		}
 
-		$saved = $this->save( $subject );
+		$saved = $this->save( $subject, $input );
 		if ( is_wp_error( $saved ) ) {
 			return $saved;
 		}

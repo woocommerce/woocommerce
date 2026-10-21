@@ -165,9 +165,10 @@ class ProductUpdate extends ActionableAbility {
 	 * Save the product.
 	 *
 	 * @param \WC_Product $subject Changed product.
+	 * @param array       $input   Ability input.
 	 * @return null|\WP_Error
 	 */
-	public function save( $subject ) {
+	public function save( $subject, array $input = array() ) {
 		return self::save_product( $subject, 'woocommerce_product_update_failed' );
 	}
 

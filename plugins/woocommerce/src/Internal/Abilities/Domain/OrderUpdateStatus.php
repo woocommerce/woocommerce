@@ -7,29 +7,29 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
-use Automattic\WooCommerce\Abilities\AbilityDefinition;
+use Automattic\WooCommerce\Abilities\ActionableAbility;
+use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
+use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\DomainAbilityHelpers;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderAbilityTrait;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Registers the WooCommerce order update status ability.
+ * The WooCommerce order update status ability. It runs the steps of
+ * ActionableAbility. With the feature on, change() stages the status with
+ * WC_Order::stage_status(), so validators see the new status before the save.
+ * With the feature off, save() calls WC_Order::update_status() as before.
  */
-class OrderUpdateStatus extends AbstractDomainAbility implements AbilityDefinition {
+class OrderUpdateStatus extends ActionableAbility {
 
+	use DomainAbilityHelpers;
 	use OrderAbilityTrait;
 
 	/**
-	 * Get the ability name.
-	 *
-	 * @return string
-	 *
-	 * @since 10.9.0
+	 * Ability name.
 	 */
-	public static function get_name(): string {
-		return 'woocommerce/order-update-status';
-	}
+	public const ABILITY_NAME = 'woocommerce/order-update-status';
 
 	/**
 	 * Get the ability registration arguments.
@@ -46,9 +46,8 @@ class OrderUpdateStatus extends AbstractDomainAbility implements AbilityDefiniti
 				'woocommerce'
 			),
 			'category'            => 'woocommerce',
-			'input_schema'        => self::get_input_schema(),
+			'input_schema'        => self::build_input_schema(),
 			'output_schema'       => self::get_entity_output_schema( 'order', self::get_order_output_schema() ),
-			'execute_callback'    => array( __CLASS__, 'execute' ),
 			'permission_callback' => array( __CLASS__, 'can_edit_order' ),
 			'meta'                => array(
 				'show_in_rest' => true,
@@ -66,20 +65,35 @@ class OrderUpdateStatus extends AbstractDomainAbility implements AbilityDefiniti
 	}
 
 	/**
-	 * Update an order status.
+	 * Resource that the ability changes.
+	 *
+	 * @return string
+	 */
+	public function get_resource(): string {
+		return 'order';
+	}
+
+	/**
+	 * Load the order to change.
 	 *
 	 * @param array $input Ability input.
-	 * @return array|\WP_Error
-	 *
-	 * @since 10.9.0
+	 * @return \WC_Order|\WP_Error
 	 */
-	public static function execute( array $input ) {
-		$order = self::get_order_from_input( $input );
+	public function load( array $input ) {
+		return self::get_order_from_input( $input );
+	}
 
-		if ( is_wp_error( $order ) ) {
-			return $order;
-		}
-
+	/**
+	 * Check the new status. With the feature on, stage it with
+	 * WC_Order::stage_status(), or refuse the change when the order class cannot
+	 * stage it. With the feature off, change nothing: save() calls
+	 * WC_Order::update_status().
+	 *
+	 * @param \WC_Order $subject Order.
+	 * @param array     $input   Ability input.
+	 * @return null|\WP_Error
+	 */
+	public function change( $subject, array $input ) {
 		if ( empty( $input['status'] ) ) {
 			return new \WP_Error(
 				'woocommerce_order_status_required',
@@ -88,7 +102,7 @@ class OrderUpdateStatus extends AbstractDomainAbility implements AbilityDefiniti
 			);
 		}
 
-		$status = OrderUtil::remove_status_prefix( sanitize_key( $input['status'] ) );
+		$status = self::get_new_status( $input );
 
 		if ( ! in_array( $status, self::get_query_order_status_slugs(), true ) ) {
 			return new \WP_Error(
@@ -98,7 +112,7 @@ class OrderUpdateStatus extends AbstractDomainAbility implements AbilityDefiniti
 			);
 		}
 
-		if ( $status === $order->get_status() ) {
+		if ( $status === $subject->get_status() ) {
 			return new \WP_Error(
 				'woocommerce_order_status_unchanged',
 				__(
@@ -109,7 +123,7 @@ class OrderUpdateStatus extends AbstractDomainAbility implements AbilityDefiniti
 			);
 		}
 
-		if ( ! $order->is_valid_status( $status ) ) {
+		if ( ! $subject->is_valid_status( $status ) ) {
 			return new \WP_Error(
 				'woocommerce_order_status_invalid',
 				/* translators: %s: order status slug. */
@@ -118,12 +132,47 @@ class OrderUpdateStatus extends AbstractDomainAbility implements AbilityDefiniti
 			);
 		}
 
-		try {
-			$updated = $order->update_status(
-				$status,
-				isset( $input['note'] ) ? wp_kses_post( $input['note'] ) : '',
-				true
+		if ( ! ExtensibleAbilities::is_enabled() ) {
+			return null;
+		}
+
+		if ( ! self::can_stage_status( $subject ) ) {
+			return new \WP_Error(
+				'woocommerce_order_status_staging_unsupported',
+				__( 'This order type does not support this change yet.', 'woocommerce' ),
+				array( 'status' => 400 )
 			);
+		}
+
+		try {
+			$subject->stage_status( $status, self::get_note( $input ), true );
+		} catch ( \Exception $e ) {
+			return new \WP_Error(
+				'woocommerce_order_status_update_failed',
+				$e->getMessage(),
+				array( 'status' => 400 )
+			);
+		}
+
+		return null;
+	}
+
+	/**
+	 * Save the order. With the feature on, the status is already staged, so the
+	 * default save writes it with the extension fields. With the feature off,
+	 * change the status with WC_Order::update_status(), as a manual change.
+	 *
+	 * @param \WC_Order $subject Order.
+	 * @param array     $input   Ability input.
+	 * @return null|\WP_Error
+	 */
+	public function save( $subject, array $input = array() ) {
+		if ( ExtensibleAbilities::is_enabled() ) {
+			return parent::save( $subject, $input );
+		}
+
+		try {
+			$updated = $subject->update_status( self::get_new_status( $input ), self::get_note( $input ), true );
 		} catch ( \Exception $e ) {
 			return new \WP_Error(
 				'woocommerce_order_status_update_failed',
@@ -140,9 +189,54 @@ class OrderUpdateStatus extends AbstractDomainAbility implements AbilityDefiniti
 			);
 		}
 
+		return null;
+	}
+
+	/**
+	 * The ability output for the saved order.
+	 *
+	 * @param \WC_Order $subject Saved order.
+	 * @return array
+	 */
+	public function prepare_response( $subject ): array {
 		return array(
-			'order' => self::format_order_for_response( $order, false ),
+			'order' => self::format_order_for_response( $subject, false ),
 		);
+	}
+
+	/**
+	 * Whether the order class can stage a status change. It cannot when a class
+	 * below the one that declares WC_Order::stage_status() overrides
+	 * WC_Order::update_status(), because staging would skip that override.
+	 *
+	 * @param \WC_Order $order Order.
+	 * @return bool
+	 */
+	private static function can_stage_status( \WC_Order $order ): bool {
+		$update_status = ( new \ReflectionMethod( $order, 'update_status' ) )->getDeclaringClass()->getName();
+		$stage_status  = ( new \ReflectionMethod( $order, 'stage_status' ) )->getDeclaringClass()->getName();
+
+		return ! is_subclass_of( $update_status, $stage_status );
+	}
+
+	/**
+	 * Get the new status from the input, without the wc- prefix.
+	 *
+	 * @param array $input Ability input.
+	 * @return string
+	 */
+	private static function get_new_status( array $input ): string {
+		return OrderUtil::remove_status_prefix( sanitize_key( $input['status'] ?? '' ) );
+	}
+
+	/**
+	 * Get the status change note from the input.
+	 *
+	 * @param array $input Ability input.
+	 * @return string
+	 */
+	private static function get_note( array $input ): string {
+		return isset( $input['note'] ) ? wp_kses_post( $input['note'] ) : '';
 	}
 
 	/**
@@ -150,7 +244,7 @@ class OrderUpdateStatus extends AbstractDomainAbility implements AbilityDefiniti
 	 *
 	 * @return array
 	 */
-	private static function get_input_schema(): array {
+	private static function build_input_schema(): array {
 		return array(
 			'type'                 => 'object',
 			'properties'           => array(
