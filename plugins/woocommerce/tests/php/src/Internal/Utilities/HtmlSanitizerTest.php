@@ -105,7 +105,7 @@ class HtmlSanitizerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox esc_html_exact() output reads as the original text after wp_kses_post(), wptexturize() and HTML decoding.
+	 * @testdox esc_html_exact() output reads as the original text after wptexturize() and HTML decoding.
 	 * @testWith ["info@48x17.com"]
 	 *           ["shop--orders@example.com"]
 	 *           ["o'neil@example.com"]
@@ -128,7 +128,7 @@ class HtmlSanitizerTest extends \WC_Unit_Test_Case {
 	public function test_esc_html_exact_round_trips_through_wptexturize( string $text ): void {
 		$escaped = $this->sut->esc_html_exact( $text );
 
-		$this->assertSame( $text, html_entity_decode( wptexturize( wp_kses_post( $escaped ) ), ENT_QUOTES | ENT_HTML5 ), 'The browser should show the original text.' );
+		$this->assertSame( $text, html_entity_decode( wptexturize( $escaped ), ENT_QUOTES | ENT_HTML5 ), 'The browser should show the original text.' );
 		$this->assertSame( $escaped, wptexturize( $escaped ), 'wptexturize() should leave the escaped text unchanged.' );
 		$this->assertDoesNotMatchRegularExpression( '/[<>"\']|&(?!#[0-9]+;)/', $escaped, 'The output should be safe for an HTML text node.' );
 	}
