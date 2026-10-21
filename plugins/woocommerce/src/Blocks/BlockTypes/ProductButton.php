@@ -200,6 +200,15 @@ class ProductButton extends AbstractBlock {
 			)
 		);
 
+		$button_attributes = array(
+			'data-product_id'  => $product->get_id(),
+			'data-product_sku' => $product->get_sku(),
+		);
+
+		if ( ! $is_descendant_of_add_to_cart_form ) {
+			$button_attributes['aria-label'] = $product->add_to_cart_description();
+		}
+
 		/**
 		 * Allow filtering of the add to cart button arguments.
 		 *
@@ -214,18 +223,16 @@ class ProductButton extends AbstractBlock {
 				'class'      => $html_classes,
 				'attributes' => array_merge(
 					$attributes,
-					array(
-						'data-product_id'  => $product->get_id(),
-						'data-product_sku' => $product->get_sku(),
-						'aria-label'       => ! $is_descendant_of_add_to_cart_form || 'simple' === $product->get_type() ? $product->add_to_cart_description() : null,
-					),
+					$button_attributes
 				),
 			),
 			$product
 		);
 
-		if ( isset( $args['attributes']['aria-label'] ) ) {
+		if ( ! empty( $args['attributes']['aria-label'] ) ) {
 			$args['attributes']['aria-label'] = wp_strip_all_tags( $args['attributes']['aria-label'] );
+		} else {
+			unset( $args['attributes']['aria-label'] );
 		}
 
 		$div_directives = '

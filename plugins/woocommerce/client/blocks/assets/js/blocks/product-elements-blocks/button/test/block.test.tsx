@@ -56,6 +56,22 @@ const product: AddToCartButtonAttributes[ 'product' ] = {
 	button_text: 'Select options',
 };
 
+const simpleProduct: AddToCartButtonAttributes[ 'product' ] = {
+	id: 2,
+	type: 'simple',
+	permalink: '/product/simple-product/',
+	add_to_cart: {
+		url: '/product/simple-product/?add-to-cart=2',
+		description: 'Add to cart: “Simple Product”',
+		text: 'Add to cart',
+		single_text: 'Add to cart',
+	},
+	has_options: false,
+	is_purchasable: true,
+	is_in_stock: true,
+	button_text: 'Add to cart',
+};
+
 const renderButton = ( overrides: Partial< AddToCartButtonAttributes > = {} ) =>
 	render(
 		<AddToCartButton
@@ -101,6 +117,29 @@ describe( 'AddToCartButton', () => {
 		renderButton( { noticeContext: 'wc/cart' } );
 
 		expect( useStoreAddToCart ).toHaveBeenCalledWith( 1, 'wc/cart' );
+	} );
+
+	it( 'renders aria-label when not inside Add to Cart with Options', () => {
+		renderButton( {
+			product: simpleProduct,
+			isDescendantOfAddToCartWithOptions: false,
+		} );
+
+		const button = screen.getByRole( 'button' );
+		expect( button ).toHaveAttribute(
+			'aria-label',
+			'Add to cart: “Simple Product”'
+		);
+	} );
+
+	it( 'does not render aria-label when inside Add to Cart with Options', () => {
+		renderButton( {
+			product: simpleProduct,
+			isDescendantOfAddToCartWithOptions: true,
+		} );
+
+		const button = screen.getByRole( 'button' );
+		expect( button ).not.toHaveAttribute( 'aria-label' );
 	} );
 } );
 

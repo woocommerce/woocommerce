@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsMocks;
 use WC_Helper_Product;
 
 /**
@@ -23,6 +24,8 @@ class ProductButton extends \WP_UnitTestCase {
 	 */
 	protected function setUp(): void {
 		parent::setUp();
+
+		AddToCartWithOptionsMocks::register_all();
 
 		foreach ( array( 'woocommerce_cart_redirect_after_add', 'woocommerce_enable_ajax_add_to_cart' ) as $option_name ) {
 			$this->previous_options[ $option_name ] = get_option( $option_name, null );
@@ -92,6 +95,18 @@ class ProductButton extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Render the Product Button block inside an Add to Cart with Options block.
+	 *
+	 * @param \WC_Product $product Product to render.
+	 * @return string Rendered block markup.
+	 */
+	private function render_product_button_in_add_to_cart_form( \WC_Product $product ): string {
+		return do_blocks(
+			'<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} --><!-- wp:woocommerce/add-to-cart-with-options --><!-- wp:woocommerce/product-button /--><!-- /wp:woocommerce/add-to-cart-with-options --><!-- /wp:woocommerce/single-product -->'
+		);
+	}
+
+	/**
 	 * @testdox Direct add-to-cart links retain nofollow.
 	 */
 	public function test_direct_add_to_cart_link_retains_nofollow(): void {
@@ -109,5 +124,27 @@ class ProductButton extends \WP_UnitTestCase {
 		$markup  = $this->render_product_button( $product );
 
 		$this->assertStringContainsString( 'rel="nofollow noopener noreferrer"', $markup );
+	}
+
+	/**
+	 * @testdox Standalone / Loop Product Button includes aria-label with product description.
+	 */
+	public function test_standalone_product_button_includes_aria_label(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$markup  = $this->render_product_button( $product );
+
+		$this->assertStringContainsString( 'aria-label="' . esc_attr( $product->add_to_cart_description() ) . '"', $markup );
+	}
+
+	/**
+	 * @testdox Product Button inside Add to Cart with Options block does not include aria-label for simple products.
+	 */
+	public function test_product_button_in_add_to_cart_form_omits_aria_label_for_simple_product(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$markup  = $this->render_product_button_in_add_to_cart_form( $product );
+
+		preg_match( '/<button[^>]*class="[^"]*wc-block-components-product-button__button[^"]*"[^>]*>/', $markup, $matches );
+		$this->assertNotEmpty( $matches, 'Product button was not rendered.' );
+		$this->assertStringNotContainsString( 'aria-label', $matches[0] );
 	}
 }

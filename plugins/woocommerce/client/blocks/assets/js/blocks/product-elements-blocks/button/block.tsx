@@ -140,9 +140,9 @@ export const AddToCartButton = ( {
 		collection === 'woocommerce/product-collection/cart-contents';
 
 	const allowAddToCart = ! hasOptions && isPurchasable && isInStock;
-	const buttonAriaLabel = decodeEntities(
-		productCartDetails?.description || ''
-	);
+	const buttonAriaLabel = ! isDescendantOfAddToCartWithOptions
+		? decodeEntities( productCartDetails?.description || '' )
+		: undefined;
 	const buttonText = isCartContents
 		? __( 'Finish checkout', 'woocommerce' )
 		: getButtonText( {

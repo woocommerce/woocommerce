@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Omit redundant aria-label on Product Button inside Add to Cart with Options block to prevent accessible name mismatch when button text updates to "X in cart" (WCAG 2.5.3).
