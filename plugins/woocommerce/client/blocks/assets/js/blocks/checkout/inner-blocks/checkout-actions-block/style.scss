@@ -3,59 +3,62 @@
 
 	// Checkbox terms sit above the row.
 	> .wc-block-checkout__terms {
-		margin: 0 0 $gap;
+		margin: 0 0 $gap-small;
+		padding-block: 0;
 	}
 
 	.wc-block-checkout__actions_row {
 		@include font-small-locked;
-		display: grid;
-		grid-template-columns: minmax(0, 1fr);
-		grid-template-areas:
-			"button"
-			"terms";
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-between;
 		align-items: center;
+		gap: $gap-small;
 
-		.wc-block-components-checkout-place-order-button {
-			grid-area: button;
+		.wc-block-components-checkout-place-order-button--full-width {
 			width: 100%;
 		}
 
-		// Text-only terms sit below the button, in the same column.
+		// Text-only terms take a whole line, so they wrap below the button.
 		> .wc-block-checkout__terms {
-			grid-area: terms;
+			box-sizing: border-box;
+			flex: 0 0 100%;
 			justify-content: center;
-			margin: $gap 0 0;
+			margin: 0;
+			padding-block: 0;
 			text-align: center;
 		}
 
-		.wc-block-components-checkout-return-to-cart-button {
-			grid-area: back;
-			justify-self: start;
-		}
-
 		&--with-return-to-cart {
-			grid-template-columns: minmax(0, 1fr) max(50%, 260px);
-			grid-template-areas:
-				"back button"
-				". terms";
-			column-gap: $gap;
+			.wc-block-components-checkout-place-order-button {
+				flex: 0 0 max(50%, 260px);
+			}
+
+			// Line the terms up under the button.
+			> .wc-block-checkout__terms {
+				padding-inline-start: calc(100% - max(50%, 260px));
+			}
 		}
 	}
 }
 
-// On narrow checkouts the button is full width, with Return to Cart below the terms.
+// On narrow checkouts everything is full width, with Return to Cart below the terms.
 @include cart-checkout-below-medium-container {
 	.wc-block-checkout__actions
 		.wc-block-checkout__actions_row--with-return-to-cart {
-		grid-template-columns: minmax(0, 1fr);
-		grid-template-areas:
-			"button"
-			"terms"
-			"back";
+		.wc-block-components-checkout-place-order-button {
+			flex-basis: 100%;
+			order: 1;
+		}
+
+		> .wc-block-checkout__terms {
+			order: 2;
+			padding-inline-start: 0;
+		}
 
 		.wc-block-components-checkout-return-to-cart-button {
-			justify-self: center;
-			margin-top: $gap;
+			order: 3;
+			margin-inline: auto;
 		}
 	}
 }
