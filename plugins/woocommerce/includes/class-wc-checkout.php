@@ -432,6 +432,13 @@ class WC_Checkout {
 				 */
 				do_action( 'woocommerce_resume_order', $order_id );
 
+				// A woocommerce_resume_order callback may have changed the order in the database, so read it
+				// back before touching the status; otherwise saving this stale object would overwrite that change.
+				$resumed_order = wc_get_order( $order_id );
+				if ( $resumed_order ) {
+					$order = $resumed_order;
+				}
+
 				// Stock holds only count for pending and draft orders, so a failed order has to be pending again
 				// before woocommerce_checkout_order_created renews its hold for this payment attempt.
 				if ( $order->has_status( OrderStatus::FAILED ) ) {
