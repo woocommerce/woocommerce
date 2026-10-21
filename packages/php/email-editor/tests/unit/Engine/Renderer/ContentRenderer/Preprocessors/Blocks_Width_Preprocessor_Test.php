@@ -681,4 +681,60 @@ class Blocks_Width_Preprocessor_Test extends \Email_Editor_Unit_Test {
 		$result = $this->preprocessor->preprocess( $blocks, $this->layout, $styles );
 		$this->assertEquals( '660px', $result[0]['email_attrs']['width'] ); // 100% of 660
 	}
+
+	/**
+	 * Test children of a two-column grid are sized to one cell, so images don't overflow it.
+	 */
+	public function testItSizesTwoColumnGridChildrenToOneCell(): void {
+		$blocks = array(
+			array(
+				'blockName'   => 'core/group',
+				'attrs'       => array(
+					'layout' => array(
+						'type'        => 'grid',
+						'columnCount' => 2,
+					),
+					'style'  => array(
+						'spacing' => array(
+							'padding' => array(
+								'left'  => '15px',
+								'right' => '15px',
+							),
+						),
+					),
+				),
+				'email_attrs' => array(
+					'two-column-grid' => true,
+					'grid-column-gap' => '20px',
+				),
+				'innerBlocks' => array(
+					array(
+						'blockName'   => 'core/image',
+						'attrs'       => array(),
+						'innerBlocks' => array(),
+					),
+					array(
+						'blockName'   => 'core/group',
+						'attrs'       => array(),
+						'innerBlocks' => array(
+							array(
+								'blockName'   => 'core/image',
+								'attrs'       => array(),
+								'innerBlocks' => array(),
+							),
+						),
+					),
+				),
+			),
+		);
+
+		$result = $this->preprocessor->preprocess( $blocks, $this->layout, $this->styles );
+		$grid   = $result[0];
+
+		$this->assertEquals( '660px', $grid['email_attrs']['width'] );
+		// (660 - 15 - 15 - 20) / 2 = 305.
+		$this->assertEquals( '305px', $grid['innerBlocks'][0]['email_attrs']['width'] );
+		$this->assertEquals( '305px', $grid['innerBlocks'][1]['email_attrs']['width'] );
+		$this->assertEquals( '305px', $grid['innerBlocks'][1]['innerBlocks'][0]['email_attrs']['width'] );
+	}
 }

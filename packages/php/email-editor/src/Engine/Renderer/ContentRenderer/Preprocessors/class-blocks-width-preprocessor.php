@@ -112,6 +112,20 @@ class Blocks_Width_Preprocessor implements Preprocessor {
 			$modified_styles['spacing']['padding']['left']  = $block_padding_left;
 			$modified_styles['spacing']['padding']['right'] = $block_padding_right;
 
+			// Children of a two-column grid each get one cell: half the content area minus the
+			// column gap. Without this, fixed-width children such as images are sized to the full
+			// group width and overflow their cell.
+			if ( ! empty( $block['email_attrs']['two-column-grid'] ) ) {
+				$grid_content_width                             = $inner_content_width
+					- $this->parse_number_from_string_with_pixels( $block_padding_left )
+					- $this->parse_number_from_string_with_pixels( $block_padding_right )
+					- $this->parse_number_from_string_with_pixels( $block['email_attrs']['grid-column-gap'] ?? '0px' );
+				$cell_width                                     = max( 0, floor( $grid_content_width / 2 ) );
+				$modified_layout['contentSize']                 = "{$cell_width}px";
+				$modified_styles['spacing']['padding']['left']  = '0px';
+				$modified_styles['spacing']['padding']['right'] = '0px';
+			}
+
 			$block['email_attrs']['width'] = "{$width}px";
 			$block['innerBlocks']          = $this->calculate_widths( $block['innerBlocks'], $modified_layout, $modified_styles, $variables_map );
 			$parsed_blocks[ $key ]         = $block;

@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Pre
 
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preset_Variable_Resolver;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
 
 /**
  * This preprocessor is responsible for setting default spacing values for blocks.
@@ -146,8 +147,9 @@ class Spacing_Preprocessor implements Context_Aware_Preprocessor {
 			 * Do not add a gap to:
 			 * - first child
 			 * - parent block is a buttons block (where buttons are side by side).
+			 * - parent block is a two-column grid, whose renderer spaces the rows itself.
 			 */
-			if ( 0 !== $key && $gap && 'core/buttons' !== $parent_block_name ) {
+			if ( 0 !== $key && $gap && 'core/buttons' !== $parent_block_name && empty( $parent_block['email_attrs']['two-column-grid'] ) ) {
 				$block['email_attrs']['margin-top'] = $gap;
 			}
 
@@ -181,9 +183,18 @@ class Spacing_Preprocessor implements Context_Aware_Preprocessor {
 			$wraps_post_content       = $is_container && $this->contains_post_content( $block );
 			$is_box                   = $wraps_post_content && $has_own_padding && ! $has_zero_padding;
 
+			// A two-column grid lays its children out side by side, so it takes the root
+			// padding as one inset instead of padding every cell on both sides.
+			$is_two_column_grid = $this->is_two_column_grid( $block );
+			if ( $is_two_column_grid ) {
+				$block['email_attrs']['two-column-grid'] = true;
+				$block['email_attrs']['grid-row-gap']    = $this->get_grid_gap( $block, 'top', $gap, $variables_map );
+				$block['email_attrs']['grid-column-gap'] = $this->get_grid_gap( $block, 'left', $gap, $variables_map );
+			}
+
 			// A delegator passes padding down to its children instead of taking it,
 			// so each child is inset on its own and full-width children can break out.
-			$delegates = ! $is_box && (
+			$delegates = ! $is_box && ! $is_two_column_grid && (
 				( $is_root_level && $is_container && ! $has_own_padding )
 				|| ( $apply_root_padding && $is_post_content )
 				|| $wraps_post_content
@@ -221,6 +232,68 @@ class Spacing_Preprocessor implements Context_Aware_Preprocessor {
 		}
 
 		return $parsed_blocks;
+	}
+
+	/**
+	 * Checks whether a block is a group with a two-column grid layout that can be rendered as table rows.
+	 *
+	 * Email clients don't support CSS grid, and full grid placement (spans, explicit positions, more
+	 * columns) can't be mapped to tables reliably. So only the common case is laid out side by side:
+	 * a manual two-column grid whose items all occupy a single cell. Every other grid stacks.
+	 *
+	 * @param array $block The block to check.
+	 * @return bool
+	 */
+	private function is_two_column_grid( array $block ): bool {
+		$layout = $block['attrs']['layout'] ?? null;
+		if ( 'core/group' !== ( $block['blockName'] ?? '' ) || ! is_array( $layout ) || 'grid' !== ( $layout['type'] ?? '' ) ) {
+			return false;
+		}
+
+		if ( ! isset( $layout['columnCount'] ) || ! is_numeric( $layout['columnCount'] ) || 2 !== (int) $layout['columnCount'] ) {
+			return false;
+		}
+
+		foreach ( $block['innerBlocks'] ?? array() as $inner_block ) {
+			$child_layout = $inner_block['attrs']['style']['layout'] ?? array();
+			if ( ! is_array( $child_layout ) ) {
+				continue;
+			}
+			foreach ( array( 'columnSpan', 'rowSpan' ) as $span ) {
+				if ( isset( $child_layout[ $span ] ) && is_numeric( $child_layout[ $span ] ) && (int) $child_layout[ $span ] > 1 ) {
+					return false;
+				}
+			}
+			if ( ! empty( $child_layout['columnStart'] ) || ! empty( $child_layout['rowStart'] ) ) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Resolves one axis of a grid group's gap to a pixel value.
+	 *
+	 * Mirrors how WordPress lays out the grid: the group's own blockGap (a string for both axes, or
+	 * `top` for rows and `left` for columns) wins, and the global block gap applies when it is unset.
+	 *
+	 * @param array  $block The grid group block.
+	 * @param string $axis 'top' for the row gap, 'left' for the column gap.
+	 * @param string $default_gap The global block gap.
+	 * @param array  $variables_map Map of CSS variable names to resolved values for preset resolution.
+	 * @return string Gap in pixels, e.g. "16px".
+	 */
+	private function get_grid_gap( array $block, string $axis, string $default_gap, array $variables_map ): string {
+		$block_gap = $block['attrs']['style']['spacing']['blockGap'] ?? null;
+		$value     = is_array( $block_gap ) ? ( $block_gap[ $axis ] ?? null ) : $block_gap;
+		$value     = is_string( $value ) && '' !== trim( $value ) ? $value : $default_gap;
+
+		$value = Preset_Variable_Resolver::resolve( $value, $variables_map );
+		$value = (string) Styles_Helper::clamp_to_static_px( $value );
+		$px    = Styles_Helper::convert_to_px( $value, false );
+
+		return max( 0.0, Styles_Helper::parse_value( $px ?? '0' ) ) . 'px';
 	}
 
 	/**

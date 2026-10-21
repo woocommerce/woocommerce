@@ -1165,4 +1165,170 @@ class Spacing_Preprocessor_Test extends \Email_Editor_Unit_Test {
 		$this->assertEquals( '24px', $paragraph['email_attrs']['container-padding-left'] );
 		$this->assertEquals( '24px', $paragraph['email_attrs']['container-padding-right'] );
 	}
+
+	/**
+	 * Builds a grid group block with the given layout and paragraph children.
+	 *
+	 * @param array $layout Group layout attribute.
+	 * @param array $children_attrs Attributes for each paragraph child.
+	 * @param array $group_style Group style attribute.
+	 * @return array
+	 */
+	private function build_grid_group( array $layout, array $children_attrs, array $group_style = array() ): array {
+		$children = array();
+		foreach ( $children_attrs as $attrs ) {
+			$children[] = array(
+				'blockName'   => 'core/paragraph',
+				'attrs'       => $attrs,
+				'innerBlocks' => array(),
+			);
+		}
+
+		return array(
+			'blockName'   => 'core/group',
+			'attrs'       => array_filter(
+				array(
+					'layout' => $layout,
+					'style'  => $group_style,
+				)
+			),
+			'innerBlocks' => $children,
+		);
+	}
+
+	/**
+	 * Test a two-column grid is flagged for table rendering, takes the root padding itself, and its items get no margin-top.
+	 */
+	public function testItFlagsTwoColumnGridAndLetsItSpaceItsOwnRows(): void {
+		$blocks = array(
+			$this->build_grid_group(
+				array(
+					'type'        => 'grid',
+					'columnCount' => 2,
+				),
+				array( array(), array(), array() )
+			),
+		);
+
+		$result = $this->preprocessor->preprocess( $blocks, $this->layout, $this->styles );
+		$grid   = $result[0];
+
+		$this->assertTrue( $grid['email_attrs']['two-column-grid'] );
+		$this->assertSame( '10px', $grid['email_attrs']['grid-row-gap'], 'Row gap should fall back to the global block gap.' );
+		$this->assertSame( '10px', $grid['email_attrs']['grid-column-gap'], 'Column gap should fall back to the global block gap.' );
+		$this->assertSame( '10px', $grid['email_attrs']['root-padding-left'], 'The grid should take the root padding as one inset.' );
+		$this->assertSame( '10px', $grid['email_attrs']['root-padding-right'] );
+
+		foreach ( $grid['innerBlocks'] as $item ) {
+			$this->assertArrayNotHasKey( 'margin-top', $item['email_attrs'], 'Grid items must not get margin-top, or cells in a row would not line up.' );
+			$this->assertArrayNotHasKey( 'root-padding-left', $item['email_attrs'], 'Grid items must not each get the root padding.' );
+		}
+	}
+
+	/**
+	 * Test a two-column grid uses its own blockGap per axis and resolves preset references to pixels.
+	 */
+	public function testItUsesTheGridGroupBlockGap(): void {
+		$styles                    = $this->styles;
+		$styles['__variables_map'] = array( '--wp--preset--spacing--20' => '1.5rem' );
+
+		$blocks = array(
+			$this->build_grid_group(
+				array(
+					'type'        => 'grid',
+					'columnCount' => '2',
+				),
+				array( array(), array() ),
+				array(
+					'spacing' => array(
+						'blockGap' => array(
+							'top'  => '30px',
+							'left' => 'var:preset|spacing|20',
+						),
+					),
+				)
+			),
+		);
+
+		$result = $this->preprocessor->preprocess( $blocks, $this->layout, $styles );
+
+		$this->assertSame( '30px', $result[0]['email_attrs']['grid-row-gap'] );
+		$this->assertSame( '24px', $result[0]['email_attrs']['grid-column-gap'] );
+	}
+
+	/**
+	 * Grid layouts that can't be mapped to two table cells per row.
+	 *
+	 * @return array<string, array{0: array, 1: array}>
+	 */
+	public function stackedGridProvider(): array {
+		return array(
+			'three columns'           => array(
+				array(
+					'type'        => 'grid',
+					'columnCount' => 3,
+				),
+				array(),
+			),
+			'auto columns'            => array(
+				array(
+					'type'               => 'grid',
+					'minimumColumnWidth' => '12rem',
+				),
+				array(),
+			),
+			'item spans two columns'  => array(
+				array(
+					'type'        => 'grid',
+					'columnCount' => 2,
+				),
+				array( 'style' => array( 'layout' => array( 'columnSpan' => 2 ) ) ),
+			),
+			'item spans two rows'     => array(
+				array(
+					'type'        => 'grid',
+					'columnCount' => 2,
+				),
+				array( 'style' => array( 'layout' => array( 'rowSpan' => 2 ) ) ),
+			),
+			'item placed manually'    => array(
+				array(
+					'type'        => 'grid',
+					'columnCount' => 2,
+				),
+				array(
+					'style' => array(
+						'layout' => array(
+							'columnStart' => 2,
+							'rowStart'    => 1,
+						),
+					),
+				),
+			),
+			'flex layout, two counts' => array(
+				array(
+					'type'        => 'flex',
+					'columnCount' => 2,
+				),
+				array(),
+			),
+		);
+	}
+
+	/**
+	 * Test grids that can't be laid out as two cells per row keep the stacked spacing.
+	 *
+	 * @dataProvider stackedGridProvider
+	 * @param array $layout Group layout attribute.
+	 * @param array $first_child_attrs Attributes of the first grid item.
+	 */
+	public function testItLeavesOtherGridsStacked( array $layout, array $first_child_attrs ): void {
+		$blocks = array( $this->build_grid_group( $layout, array( $first_child_attrs, array(), array() ) ) );
+
+		$result = $this->preprocessor->preprocess( $blocks, $this->layout, $this->styles );
+
+		$this->assertArrayNotHasKey( 'two-column-grid', $result[0]['email_attrs'] );
+		$this->assertSame( '10px', $result[0]['innerBlocks'][1]['email_attrs']['margin-top'] );
+		$this->assertSame( '10px', $result[0]['innerBlocks'][2]['email_attrs']['margin-top'] );
+	}
 }
