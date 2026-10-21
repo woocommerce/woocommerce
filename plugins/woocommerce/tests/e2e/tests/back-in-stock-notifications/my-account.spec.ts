@@ -11,12 +11,12 @@ import {
 	BIS_FEATURE_OPTION,
 	createOutOfStockProduct,
 	escapeRegExp,
-	quotedPattern,
 	resetBISOptions,
 	setBISOptions,
 	signUpOnProductPage,
 	test,
 } from '../../utils/back-in-stock-notifications';
+import { quotedPattern } from '../../utils/helpers';
 import { logInFromMyAccount } from '../../utils/login';
 import { setOption } from '../../utils/options';
 

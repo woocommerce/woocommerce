@@ -14,7 +14,6 @@ import {
 	escapeRegExp,
 	getEmailLinkById,
 	openEmailInMailLog,
-	quotedPattern,
 	resetBISOptions,
 	restockVariation,
 	selectVariation,
@@ -26,6 +25,7 @@ import {
 	triggerStockNotificationsBatch,
 	uniqueGuestEmail,
 } from '../../utils/back-in-stock-notifications';
+import { quotedPattern } from '../../utils/helpers';
 import { setOption } from '../../utils/options';
 
 test.describe(

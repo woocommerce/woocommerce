@@ -14,6 +14,7 @@ import {
 import { deleteOption, setOption } from './options';
 import { expectEmail } from './email';
 import { setFilterValue } from './filters';
+import { quotedPattern } from './helpers';
 import { wpCLI } from './cli';
 import { expect, test as baseTest } from '../fixtures/fixtures';
 import { admin } from '../test-data/data';
@@ -829,19 +830,6 @@ export function bisEmailBody( page: Page ) {
  */
 export function escapeRegExp( value: string ): string {
 	return value.replace( /[.*+?^${}()|[\]\\]/g, '\\$&' );
-}
-
-/**
- * Wrap a regular expression pattern in a matching pair of straight or curly
- * double quotes.
- *
- * Since WordPress 7.2, kses decodes `&quot;` in notice text, so `wptexturize`
- * curls the quotes when a block template renders the notice.
- *
- * @param {string} pattern The regular expression pattern to wrap.
- */
-export function quotedPattern( pattern: string ): string {
-	return `(?:"(?:${ pattern })"|“(?:${ pattern })”)`;
 }
 
 /**
