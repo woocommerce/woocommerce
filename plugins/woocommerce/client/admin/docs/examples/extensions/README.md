@@ -42,8 +42,6 @@ Edit the files in `simple-inbox-note/` under this directory, not the generated c
 
 The former `add-report` and `add-task` examples now live in [`@woocommerce/create-woo-extension`](../../../../../../../packages/js/create-woo-extension/README.md), alongside other [variants](../../../../../../../packages/js/create-woo-extension/README.md#variants). The scaffold generates a standalone plugin with its own build and wp-env setup.
 
-**Known limitation:** the published scaffold version 2.0.1 currently fails dependency installation with npm `ERESOLVE` because of a React version conflict. The command below is affected; use the inbox-note walkthrough above to try a working example while the scaffold fix is pending.
-
 The report variant is selected with:
 
 ```bash
