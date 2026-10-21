@@ -819,11 +819,11 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 				FROM {$orders_table} AS orders
 				WHERE type IN ('shop_order', 'shop_order_refund')
 				AND status NOT IN ('wc-auto-draft', 'auto-draft')
-				{$import_where}
 				AND (
 					date_updated_gmt > %s
 					OR (date_updated_gmt = %s AND id > %d)
 				)
+				{$import_where}
 				ORDER BY date_updated_gmt ASC, id ASC
 				LIMIT %d",
 				$cursor_date,
@@ -858,11 +858,11 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 				FROM {$wpdb->posts}
 				WHERE post_type IN ('shop_order', 'shop_order_refund')
 				AND post_status NOT IN ('wc-auto-draft', 'auto-draft')
-				{$import_where}
 				AND (
 					post_modified_gmt > %s
 					OR (post_modified_gmt = %s AND ID > %d)
 				)
+				{$import_where}
 				ORDER BY post_modified_gmt ASC, ID ASC
 				LIMIT %d",
 				$cursor_date,
