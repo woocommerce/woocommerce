@@ -222,7 +222,7 @@ The `from=woocommerce-core-profiler` parameter is what the WordPress.com side (C
 
 ## Terms of Service acceptance notice
 
-Some of the extensions require the merchant to agree to the WordPress.com [Terms of Service](https://wordpress.com/tos/). When one of these extensions is selected, the Extensions page renders a notice below the list: "By installing _{plugin names}_ plugin(s) for free you agree to our Terms of Service."
+Some of the extensions require the merchant to agree to the WordPress.com [Terms of Service](https://automattic.com/tos/). When one of these extensions is selected, the Extensions page renders a notice below the list: "By installing _{plugin names}_ plugin(s) for free you agree to our Terms of Service."
 
 This notice is rendered by the `PluginsTermsOfService` component in [`client/core-profiler/pages/Plugins/components/plugin-terms-of-service/PluginsTermsOfService.tsx`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/admin/client/core-profiler/pages/Plugins/components/plugin-terms-of-service/PluginsTermsOfService.tsx).
 
