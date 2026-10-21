@@ -116,7 +116,7 @@ test.describe( 'Checkout Link Endpoint', () => {
 				// Assert error notice is shown for invalid coupon
 				await expect(
 					page.getByText(
-						'Coupon "INVALID_COUPON" cannot be applied because it does not exist.'
+						/Coupon ["“]INVALID_COUPON["”] cannot be applied because it does not exist\./i
 					)
 				).toBeVisible();
 			}
@@ -136,7 +136,7 @@ test.describe( 'Checkout Link Endpoint', () => {
 				// Assert error notice is shown for invalid product
 				await expect(
 					page.getByText(
-						'Product with ID "999999" was not found and cannot be added to the cart.'
+						/Product with ID ["“]999999["”] was not found and cannot be added to the cart\./
 					)
 				).toBeVisible();
 			}
@@ -156,7 +156,7 @@ test.describe( 'Checkout Link Endpoint', () => {
 				// Assert error notice is shown for invalid product
 				await expect(
 					page.getByText(
-						'Product with ID "999999" was not found and cannot be added to the cart.'
+						/Product with ID ["“]999999["”] was not found and cannot be added to the cart\./
 					)
 				).toBeVisible();
 
