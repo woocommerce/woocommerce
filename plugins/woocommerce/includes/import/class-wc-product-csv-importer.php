@@ -399,7 +399,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 */
 	private function get_product_id_by_row_sku(): int {
 		$raw_sku   = $this->unescape_data( $this->get_row_value( 'sku' ) );
-		$clean_sku = $this->parse_sku_field( $raw_sku );
+		$clean_sku = sanitize_text_field( $raw_sku );
 
 		if ( '' === $clean_sku ) {
 			return 0;
@@ -510,6 +510,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * Parse a SKU cell, removing the apostrophe the exporter puts before a leading =, +, - or @.
 	 *
 	 * @since 11.4.0
+	 *
 	 * @param string $value Field value.
 	 * @return string
 	 */

@@ -589,6 +589,8 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	/**
 	 * Set variation data.
 	 *
+	 * The parent is checked by process_item() before this runs, so the error is only returned to other callers.
+	 *
 	 * @param WC_Product $variation Product instance.
 	 * @param array      $data    Item data.
 	 * @return WP_Error|null Error when the parent cannot hold the variation.

@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Match product CSV rows by SKU when their ID does not exist on the site during an update import, and explain ID and SKU conflicts.
+Update the product matching a row's SKU when the row's ID is not on the site, and explain ID and SKU conflicts.

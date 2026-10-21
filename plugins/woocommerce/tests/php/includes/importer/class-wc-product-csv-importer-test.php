@@ -2115,7 +2115,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$this->assertEmpty( $data['failed'], 'A row whose ID is missing but whose SKU exists must not fail' );
 		$this->assertEmpty( $data['imported'], 'An update import never creates products' );
 		$this->assertCount( 1, $data['skipped'], 'A row matching neither ID nor SKU is still skipped' );
-		$this->assertSame( 'No matching product exists to update.', $data['skipped'][0]->get_error_message() );
+		$this->assertSame( 'No matching product exists to update.', $data['skipped'][0]->get_error_message(), 'The skipped row says nothing matched' );
 		$this->assertSame( 'Updated by SKU', wc_get_product( $product->get_id() )->get_name(), 'The matched product gets the row\'s data' );
 		$this->assertSame( 0, wc_get_product_id_by_sku( 'IMPORT-40274-NONE' ), 'The unmatched row creates no product' );
 	}
@@ -2139,9 +2139,9 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$this->assertEmpty( $data['updated'], 'A conflicting row updates nothing' );
 		$this->assertCount( 1, $data['failed'], 'A conflicting row fails' );
 		$message = $data['failed'][0]->get_error_message();
-		$this->assertStringContainsString( 'Invalid or duplicated SKU.', $message );
-		$this->assertStringContainsString( sprintf( 'matches product #%d', $matched_by_id->get_id() ), $message );
-		$this->assertStringContainsString( sprintf( 'belongs to product #%d', $owns_sku->get_id() ), $message );
+		$this->assertStringContainsString( 'Invalid or duplicated SKU.', $message, 'The original error is kept' );
+		$this->assertStringContainsString( sprintf( 'matches product #%d', $matched_by_id->get_id() ), $message, 'The hint names the product matched by ID' );
+		$this->assertStringContainsString( sprintf( 'belongs to product #%d', $owns_sku->get_id() ), $message, 'The hint names the product that owns the SKU' );
 		$this->assertSame( 'IMPORT-40274-B', wc_get_product( $matched_by_id->get_id() )->get_sku(), 'The product matched by ID keeps its own SKU' );
 	}
 
@@ -2226,6 +2226,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 
 		$this->assertEmpty( $data['updated'], 'A variation row must not update a simple product' );
 		$this->assertCount( 1, $data['failed'], 'A variation row for a simple product fails' );
+		$this->assertStringContainsString( 'Invalid or duplicated SKU.', $data['failed'][0]->get_error_message(), 'The row fails on the SKU the simple product owns' );
 		$this->assertSame( 'product', get_post_type( $simple->get_id() ), 'The simple product must not be converted to a variation' );
 	}
 
@@ -2249,6 +2250,8 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 
 		$this->assertEmpty( $data['updated'], 'Neither row may update the product matched by SKU' );
 		$this->assertCount( 2, $data['failed'], 'Both rows fail' );
+		$this->assertSame( 'Invalid product.', $data['failed'][0]->get_error_message(), 'The empty-type row fails on its missing ID' );
+		$this->assertSame( 'Invalid product.', $data['failed'][1]->get_error_message(), 'The simple row fails on its missing ID' );
 		$this->assertSame( 'product_variation', get_post_type( $variation->get_id() ), 'The variation must not be converted to a simple product' );
 		$this->assertSame( ProductType::VARIABLE, WC_Product_Factory::get_product_type( $parent->get_id() ), 'The variable product must not be converted to a simple product' );
 	}
@@ -2404,7 +2407,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 
 		$this->assertEmpty( $data['updated'], 'No variation may be moved' );
 		$this->assertCount( 3, $data['failed'], 'Each row fails' );
-		$this->assertSame( 'woocommerce_product_importer_variation_parent_not_variable', $data['failed'][0]->get_error_code(), 'A placeholder parent is refused' );
+		$this->assertSame( 'woocommerce_product_importer_variation_parent_not_variable', $data['failed'][0]->get_error_code(), 'An unknown parent SKU, resolved to a placeholder, is refused' );
 		$this->assertSame( 'woocommerce_product_importer_variation_parent_not_variable', $data['failed'][1]->get_error_code(), 'A simple parent is refused' );
 		$this->assertSame( 'woocommerce_product_importer_variation_parent_not_variable', $data['failed'][2]->get_error_code(), 'A variable parent still being imported is refused' );
 		$this->assertSame( $parent->get_id(), wc_get_product( $first->get_id() )->get_parent_id(), 'The first variation keeps its parent' );
