@@ -1584,6 +1584,10 @@ class WC_Countries {
 								'required' => false,
 								'hidden'   => true,
 							),
+							'state'    => array(
+								'required' => false,
+								'hidden'   => true,
+							),
 						),
 						'MQ' => array(
 							'state' => array(

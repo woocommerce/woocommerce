@@ -993,17 +993,19 @@ class WC_Countries_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Macao has no postal codes, so the postcode field is hidden and optional.
+	 * Macao has no postal codes or subdivisions, so the postcode and state fields are hidden and optional.
 	 *
-	 * @testdox 'get_address_fields' hides the postcode for Macao, which has no postal codes.
+	 * @testdox 'get_address_fields' hides the postcode and state for Macao, which uses neither.
 	 *
 	 * @return void
 	 */
-	public function test_get_address_fields_hides_postcode_for_macao() {
+	public function test_get_address_fields_hides_postcode_and_state_for_macao() {
 		$fields = ( new WC_Countries() )->get_address_fields( 'MO', 'billing_' );
 
 		$this->assertTrue( $fields['billing_postcode']['hidden'] ?? false, 'Macao has no postal codes, so the field should be hidden.' );
 		$this->assertFalse( $fields['billing_postcode']['required'], 'Macao has no postal codes, so the field should not be required.' );
+		$this->assertTrue( $fields['billing_state']['hidden'] ?? false, 'Macao has no subdivisions, so the state should be hidden.' );
+		$this->assertFalse( $fields['billing_state']['required'], 'Macao has no subdivisions, so the state should not be required.' );
 	}
 
 	/**
