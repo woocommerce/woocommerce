@@ -160,7 +160,9 @@ class OpenGraph {
 				if ( in_array( $property, array( 'og:image', 'og:image:url' ), true ) ) {
 					$has_image = true;
 				}
-				unset( $tags[ $property ] );
+				if ( ! in_array( $property, array( 'og:image:width', 'og:image:height' ), true ) ) {
+					unset( $tags[ $property ] );
+				}
 			}
 		}
 
@@ -205,7 +207,9 @@ class OpenGraph {
 			}
 		};
 
-		$template_depth = 0;
+		$replace_image_dimensions = isset( $tags['og:image'] );
+		$image_dimensions         = array_intersect_key( $tags, array_flip( array( 'og:image:width', 'og:image:height' ) ) );
+		$template_depth           = 0;
 		while ( $inserter->next_tag( array( 'tag_closers' => 'visit' ) ) ) {
 			if ( 'TEMPLATE' === $inserter->get_tag() ) {
 				$template_depth = max( 0, $template_depth + ( $inserter->is_tag_closer() ? -1 : 1 ) );
@@ -218,12 +222,13 @@ class OpenGraph {
 				return $inserter->get_updated_html();
 			}
 			$content = $inserter->get_attribute( 'content' );
-			if ( ! is_string( $content ) || '' === trim( $content ) ) {
-				foreach ( self::get_meta_properties( $inserter ) as $property ) {
-					if ( isset( $tags[ $property ] ) ) {
-						$inserter->set_attribute( 'content', $tags[ $property ] );
-						unset( $tags[ $property ] );
-					}
+			foreach ( self::get_meta_properties( $inserter ) as $property ) {
+				if ( $replace_image_dimensions && in_array( $property, array( 'og:image:width', 'og:image:height' ), true ) ) {
+					$inserter->set_attribute( 'content', $image_dimensions[ $property ] ?? '' );
+					unset( $tags[ $property ] );
+				} elseif ( isset( $tags[ $property ] ) && ( ! is_string( $content ) || '' === trim( $content ) ) ) {
+					$inserter->set_attribute( 'content', $tags[ $property ] );
+					unset( $tags[ $property ] );
 				}
 			}
 			if ( 'BODY' === $inserter->get_tag() ) {
