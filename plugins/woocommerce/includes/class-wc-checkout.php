@@ -775,14 +775,17 @@ class WC_Checkout {
 		}
 
 		if ( $this->cart_has_evaluated_shipping( $cart ) ) {
-			$shipping_total = 0;
-			$shipping_tax   = 0;
+			// Compare each line with the chosen rate create_order_shipping_lines() copied, since the cart's shipping tax total can round a half cent the other way.
+			$order_values[ OrderItemType::SHIPPING ] = array();
+			$cart_values[ OrderItemType::SHIPPING ]  = array();
 			foreach ( $order->get_shipping_methods() as $shipping ) {
-				$shipping_total += (float) $shipping->get_total( 'edit' );
-				$shipping_tax   += (float) $shipping->get_total_tax( 'edit' );
+				$order_values[ OrderItemType::SHIPPING ][] = $this->get_compared_values( $shipping->get_total( 'edit' ) ) . $this->get_compared_rate_taxes( $shipping->get_taxes( 'edit' ) );
 			}
-			$order_values[ OrderItemType::SHIPPING ] = array( $this->get_compared_values( $shipping_total, $shipping_tax ) );
-			$cart_values[ OrderItemType::SHIPPING ]  = array( $this->get_compared_values( $cart->get_shipping_total(), $cart->get_shipping_tax() ) );
+			foreach ( (array) $cart->get_shipping_methods() as $rate ) {
+				if ( $rate instanceof WC_Shipping_Rate ) {
+					$cart_values[ OrderItemType::SHIPPING ][] = $this->get_compared_values( $rate->get_cost() ) . $this->get_compared_rate_taxes( array( 'total' => $rate->get_taxes() ) );
+				}
+			}
 		}
 
 		$changed_types = array();
@@ -824,12 +827,14 @@ class WC_Checkout {
 
 	/**
 	 * Joins IDs, quantities and amounts into one string, rounded so order and cart values compare equal.
+	 * Values are formatted as the order item setters store them before rounding, since rounding a raw cart value once
+	 * can differ from rounding the stored one when the 7th decimal is a 5.
 	 *
 	 * @param int|float|string ...$values The values to compare.
 	 * @return string
 	 */
 	private function get_compared_values( ...$values ): string {
-		return implode( '|', array_map( fn( $value ) => wc_format_decimal( $value, wc_get_rounding_precision() ), $values ) );
+		return implode( '|', array_map( fn( $value ) => wc_format_decimal( wc_format_decimal( $value ), wc_get_rounding_precision() ), $values ) );
 	}
 
 	/**
