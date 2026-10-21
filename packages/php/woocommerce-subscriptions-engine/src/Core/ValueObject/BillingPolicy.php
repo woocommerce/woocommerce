@@ -86,7 +86,7 @@ final class BillingPolicy {
 	 * @throws InvalidInputException If the period is unknown, the interval is not positive, the cycle bounds or the trial are invalid.
 	 */
 	public function __construct( string $period, int $interval, ?int $min_cycles, ?int $max_cycles, ?array $trial_duration ) {
-		self::throw_errors(
+		self::throw_found_errors(
 			array_merge(
 				array(
 					self::get_period_error( $period ),
@@ -122,7 +122,7 @@ final class BillingPolicy {
 		$max_cycles = Coercion::coerce_nullable_int( $data['max_cycles'] ?? null );
 		$trial      = $data['trial_duration'] ?? null;
 
-		self::throw_errors(
+		self::throw_found_errors(
 			array_merge(
 				array(
 					array_key_exists( 'period', $data )
@@ -264,7 +264,7 @@ final class BillingPolicy {
 	 * @param array<int, InvalidInputException|null> $errors Errors, null where a check passed.
 	 * @throws InvalidInputException If an error is present.
 	 */
-	private static function throw_errors( array $errors ): void {
+	private static function throw_found_errors( array $errors ): void {
 		$errors = array_values( array_filter( $errors ) );
 		if ( array() !== $errors ) {
 			throw InvalidInputException::from_errors( $errors );
