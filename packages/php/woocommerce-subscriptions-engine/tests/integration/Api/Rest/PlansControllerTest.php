@@ -402,6 +402,50 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		}
 	}
 
+	public function test_create_reports_an_unregistered_status_with_every_other_error(): void {
+		wp_set_current_user( $this->admin_id );
+
+		$created = $this->request(
+			'POST',
+			self::BASE,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'name'           => '',
+				'status'         => 'never-registered',
+			)
+		);
+
+		$data = $this->assert_invalid_param( $created, 'status', 'not_registered' );
+		$this->assertSame( 'required', $this->nested( $data, array( 'data', 'details', 'name', 'code' ) ) );
+		$this->assertSame(
+			array(
+				'name'   => 'name: This field is required.',
+				'status' => 'status: "never-registered" is not registered.',
+			),
+			$this->nested( $data, array( 'data', 'params' ) )
+		);
+		$this->assertSame( array( 'name', 'status' ), array_keys( $this->array_value( $this->array_value( $data, 'data' ), 'errors' ) ) );
+		$this->assertSame( 'required', $this->nested( $data, array( 'data', 'errors', 'name', 0, 'code' ) ) );
+		$this->assertSame( 'not_registered', $this->nested( $data, array( 'data', 'errors', 'status', 0, 'code' ) ) );
+	}
+
+	public function test_create_reports_a_non_string_status_through_the_facade(): void {
+		wp_set_current_user( $this->admin_id );
+
+		$created = $this->request(
+			'POST',
+			self::BASE,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'name'           => 'Typed',
+				'status'         => 5,
+			)
+		);
+
+		$data = $this->assert_invalid_param( $created, 'status', 'invalid_type' );
+		$this->assertSame( array( 'type' => 'string' ), $this->nested( $data, array( 'data', 'errors', 'status', 0, 'params' ) ) );
+	}
+
 	public function test_the_per_field_message_is_translated(): void {
 		wp_set_current_user( $this->admin_id );
 		add_filter(
@@ -1196,7 +1240,32 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 				'status'         => 'never-registered',
 			)
 		);
-		$this->assert_invalid_param( $unknown, 'status', 'not_registered' );
+		$data    = $this->assert_invalid_param( $unknown, 'status', 'not_registered' );
+		$this->assertSame( 'status: "never-registered" is not registered.', $this->nested( $data, array( 'data', 'params', 'status' ) ) );
+		$this->assertSame(
+			array(
+				'status' => array(
+					array(
+						'code'    => 'not_registered',
+						'message' => '"never-registered" is not registered.',
+						'params'  => array( 'value' => 'never-registered' ),
+					),
+				),
+			),
+			$this->nested( $data, array( 'data', 'errors' ) )
+		);
+
+		$not_a_string = $this->request(
+			'GET',
+			self::BASE,
+			array(),
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'status'         => array( 'seasonal' ),
+			)
+		);
+		$data         = $this->assert_invalid_param( $not_a_string, 'status', 'invalid_type' );
+		$this->assertSame( array( 'status' ), array_keys( $this->array_value( $this->array_value( $data, 'data' ), 'errors' ) ) );
 
 		$bad_patch = $this->request(
 			'PATCH',
@@ -1206,7 +1275,9 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 				'status'         => 'never-registered',
 			)
 		);
-		$this->assertSame( 400, $bad_patch->get_status() );
+		$data      = $this->assert_invalid_param( $bad_patch, 'status', 'not_registered' );
+		$this->assertSame( 'not_registered', $this->nested( $data, array( 'data', 'errors', 'status', 0, 'code' ) ) );
+		$this->assertSame( array( 'value' => 'never-registered' ), $this->nested( $data, array( 'data', 'errors', 'status', 0, 'params' ) ) );
 	}
 
 	public function test_single_plan_routes_reject_wildcard_and_list_extension_slugs(): void {

@@ -139,7 +139,8 @@ final class PlansController extends WP_REST_Controller {
 							'description'       => __( 'Status of the plans to query (any registered plan status).', 'woocommerce-subscriptions-engine' ),
 							'type'              => 'string',
 							'required'          => false,
-							'validate_callback' => array( $this, 'validate_status_param' ),
+							// get_items() checks it, so its refusal carries the `errors` map.
+							'sanitize_callback' => null,
 						),
 						'orderby'        => array(
 							'description' => __( 'Order by field for the plan query.', 'woocommerce-subscriptions-engine' ),
@@ -203,30 +204,6 @@ final class PlansController extends WP_REST_Controller {
 	}
 
 	/**
-	 * Validate a status param: any registered plan status. WordPress reports the returned
-	 * error under `params.status` / `details.status` of its `rest_invalid_param` error.
-	 *
-	 * @param mixed $value Param value.
-	 * @return true|WP_Error
-	 */
-	public function validate_status_param( $value ) {
-		if ( ! is_string( $value ) ) {
-			$error = new InvalidInputException( ValidationErrorCode::INVALID_TYPE, 'status', 'status must be a string.', array( 'type' => 'string' ) );
-		} elseif ( ! PlanStatus::is_registered( $value ) ) {
-			$error = new InvalidInputException( ValidationErrorCode::NOT_REGISTERED, 'status', 'status must be a registered plan status.', array( 'value' => $value ) );
-		} else {
-			return true;
-		}
-
-		$exception = ValidationException::from_core( $error );
-		$errors    = $exception->get_errors();
-		$code      = (string) $errors->get_error_code();
-
-		// WordPress copies this message into `params.status` as is, so it names the field itself.
-		return new WP_Error( $code, $this->get_field_message( 'status', $errors->get_error_message( $code ) ), $errors->get_error_data( $code ) );
-	}
-
-	/**
 	 * Get a paginated plan list.
 	 *
 	 * @param WP_REST_Request $request Request.
@@ -236,6 +213,11 @@ final class PlansController extends WP_REST_Controller {
 		$extension_slugs = $this->get_multiple_extension_slugs( $request );
 		if ( $extension_slugs instanceof WP_Error ) {
 			return $extension_slugs;
+		}
+
+		$status_error = $this->get_status_filter_error( $request->get_param( 'status' ) );
+		if ( null !== $status_error ) {
+			return $status_error;
 		}
 
 		$page     = max( 1, Coercion::coerce_int( $request->get_param( 'page' ), 1 ) );
@@ -415,7 +397,7 @@ final class PlansController extends WP_REST_Controller {
 			'status'   => array(
 				'description'       => __( 'Limit result set to plans with a registered plan status.', 'woocommerce-subscriptions-engine' ),
 				'type'              => 'string',
-				'validate_callback' => array( $this, 'validate_status_param' ),
+				'sanitize_callback' => null,
 			),
 			'orderby'  => array(
 				'description'       => __( 'Sort collection by object attribute.', 'woocommerce-subscriptions-engine' ),
@@ -465,8 +447,10 @@ final class PlansController extends WP_REST_Controller {
 					'description' => __( 'Plan status (any registered plan status).', 'woocommerce-subscriptions-engine' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
+					// The facade checks it, so its refusal is reported with every other field's.
 					'arg_options' => array(
-						'validate_callback' => array( $this, 'validate_status_param' ),
+						'validate_callback' => null,
+						'sanitize_callback' => null,
 					),
 				),
 				'name'             => array(
@@ -752,6 +736,30 @@ final class PlansController extends WP_REST_Controller {
 		}
 
 		return $errors;
+	}
+
+	/**
+	 * The list filter's `status` error, in the validation error shape: null when the
+	 * filter is absent or a registered plan status.
+	 *
+	 * @param mixed $value Param value.
+	 */
+	private function get_status_filter_error( $value ): ?WP_Error {
+		if ( null === $value ) {
+			return null;
+		}
+
+		if ( ! is_string( $value ) ) {
+			$error = new InvalidInputException( ValidationErrorCode::INVALID_TYPE, 'status', 'status must be a string.', array( 'type' => 'string' ) );
+		} elseif ( ! PlanStatus::is_registered( $value ) ) {
+			$error = new InvalidInputException( ValidationErrorCode::NOT_REGISTERED, 'status', 'status must be a registered plan status.', array( 'value' => $value ) );
+		} else {
+			return null;
+		}
+
+		$exception = ValidationException::from_core( $error );
+
+		return $this->get_validation_error( $exception->get_errors() );
 	}
 
 	/**
