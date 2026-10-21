@@ -432,7 +432,15 @@ class Content_Renderer {
 			$result = $this->fallback_renderer->render( $block_content, $parsed_block, $context );
 		}
 
-		return $this->add_root_horizontal_padding( $result, $parsed_block['email_attrs'] ?? array() );
+		$result = $this->add_root_horizontal_padding( $result, $parsed_block['email_attrs'] ?? array() );
+
+		// A two-column grid puts each child in one table cell, so each child needs exactly one root
+		// element, even when its renderer returns several elements or bare text.
+		if ( ! empty( $parsed_block['email_attrs']['two-column-grid-item'] ) ) {
+			$result = '<div class="email-block-grid-item">' . $result . '</div>';
+		}
+
+		return $result;
 	}
 
 	/**

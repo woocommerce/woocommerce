@@ -465,4 +465,36 @@ class Image_Test extends \Email_Editor_Integration_Test_Case {
 		// Note: esc_attr() encodes single quotes as &#039;.
 		$this->assertStringContainsString( 'data-link-href="[trackable-link url=&#039;test&#039;]"', $rendered );
 	}
+
+	/**
+	 * Test a fixed-width image wider than the width it was given (a grid cell) shrinks to fit, keeping its proportions.
+	 */
+	public function testItShrinksFixedWidthImageToTheAvailableWidth(): void {
+		$content                     = '<figure class="wp-block-image size-full is-resized"><img src="https://test.com/wp-content/uploads/2023/05/image.jpg" alt="" style="width:400px;height:200px"/></figure>';
+		$parsed_image                = $this->parsed_image;
+		$parsed_image['attrs']       = array(
+			'width'    => '400px',
+			'sizeSlug' => 'full',
+		);
+		$parsed_image['email_attrs'] = array( 'width' => '290px' );
+
+		$rendered = $this->image_renderer->render( $content, $parsed_image, $this->rendering_context );
+
+		$this->assertStringContainsString( 'width="290"', $rendered );
+		$this->assertStringContainsString( 'height="145"', $rendered );
+		$this->assertStringContainsString( 'width="290px"', $rendered, 'The image wrapper table should shrink too.' );
+		$this->assertStringNotContainsString( 'width="400"', $rendered );
+	}
+
+	/**
+	 * Test a fixed-width image that fits the width it was given keeps its size.
+	 */
+	public function testItKeepsFixedWidthImageThatFits(): void {
+		$parsed_image                = $this->parsed_image;
+		$parsed_image['email_attrs'] = array( 'width' => '640px' );
+
+		$rendered = $this->image_renderer->render( $this->image_content, $parsed_image, $this->rendering_context );
+
+		$this->assertStringContainsString( 'width="640"', $rendered );
+	}
 }

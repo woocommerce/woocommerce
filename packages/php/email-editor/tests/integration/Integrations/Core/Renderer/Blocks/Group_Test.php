@@ -186,7 +186,7 @@ class Group_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
-	 * Test the full pipeline: a saved two-column grid renders side by side with images sized to their cell.
+	 * Test the full pipeline: a saved two-column grid renders side by side, one cell per child, with images capped to their cell.
 	 */
 	public function testItRendersSavedTwoColumnGridEndToEnd(): void {
 		$initializer = $this->di_container->get( Initializer::class );
@@ -216,8 +216,8 @@ class Group_Test extends \Email_Editor_Integration_Test_Case {
 		$post_id = $this->factory->post->create(
 			array(
 				'post_content' => '<!-- wp:group {"layout":{"type":"grid","columnCount":2}} --><div class="wp-block-group">'
-					. '<!-- wp:image {"sizeSlug":"large"} --><figure class="wp-block-image size-large"><img src="https://example.com/photo.jpg" alt=""/></figure><!-- /wp:image -->'
-					. '<!-- wp:paragraph --><p>Beside the image</p><!-- /wp:paragraph -->'
+					. '<!-- wp:image {"width":"1000px","sizeSlug":"large"} --><figure class="wp-block-image size-large is-resized"><img src="https://example.com/photo.jpg" alt="" style="width:1000px"/></figure><!-- /wp:image -->'
+					. '<!-- wp:test/two-paragraphs /-->'
 					. '<!-- wp:paragraph --><p>Second row</p><!-- /wp:paragraph -->'
 					. '</div><!-- /wp:group -->',
 			)
@@ -226,16 +226,28 @@ class Group_Test extends \Email_Editor_Integration_Test_Case {
 		$post = get_post( $post_id );
 		$this->assertInstanceOf( \WP_Post::class, $post );
 
+		// A block whose email renderer returns two elements must still fill a single cell.
+		register_block_type(
+			'test/two-paragraphs',
+			array(
+				'render_email_callback' => function () {
+					return '<p>Part A</p><p>Part B</p>';
+				},
+			)
+		);
+
 		$template          = new \WP_Block_Template();
 		$template->id      = 'template-id';
 		$template->content = '<!-- wp:post-content /-->';
 
 		$rendered = $this->di_container->get( Content_Renderer::class )->render( $post, $template );
+		\WP_Block_Type_Registry::get_instance()->unregister( 'test/two-paragraphs' );
 
 		$this->assertSame( 2, substr_count( $rendered, 'class="email-block-grid-row"' ) );
-		$this->assertMatchesRegularExpression( '/photo\.jpg.*Beside the image.*email-block-grid-row.*Second row/s', $rendered );
+		$this->assertSame( 4, substr_count( $rendered, 'class="email-block-grid-cell"' ) );
+		$this->assertMatchesRegularExpression( '/photo\.jpg.*Part A.*Part B.*email-block-grid-row.*Second row/s', $rendered );
 
-		// The image is sized to one cell (half the content width, less the gap), not the whole email.
+		// The image, saved at 1000px, is capped to one cell (half the content width, less the gap).
 		$this->assertSame( 1, preg_match( '/<img[^>]*width="(\d+)"/', $rendered, $matches ) );
 		$content_width = (int) $this->rendering_context->get_layout_width_without_padding();
 		$this->assertLessThan( $content_width / 2, (int) $matches[1] );

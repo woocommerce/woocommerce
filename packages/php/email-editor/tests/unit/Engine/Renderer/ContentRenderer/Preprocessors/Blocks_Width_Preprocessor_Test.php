@@ -719,12 +719,17 @@ class Blocks_Width_Preprocessor_Test extends \Email_Editor_Unit_Test {
 						'innerBlocks' => array(
 							array(
 								'blockName'   => 'core/image',
-								'attrs'       => array(),
+								'attrs'       => array( 'width' => '400px' ),
 								'innerBlocks' => array(),
 							),
 						),
 					),
 				),
+			),
+			array(
+				'blockName'   => 'core/image',
+				'attrs'       => array( 'width' => '800px' ),
+				'innerBlocks' => array(),
 			),
 		);
 
@@ -735,6 +740,7 @@ class Blocks_Width_Preprocessor_Test extends \Email_Editor_Unit_Test {
 		// (660 - 15 - 15 - 20) / 2 = 305.
 		$this->assertEquals( '305px', $grid['innerBlocks'][0]['email_attrs']['width'] );
 		$this->assertEquals( '305px', $grid['innerBlocks'][1]['email_attrs']['width'] );
-		$this->assertEquals( '305px', $grid['innerBlocks'][1]['innerBlocks'][0]['email_attrs']['width'] );
+		$this->assertEquals( '305px', $grid['innerBlocks'][1]['innerBlocks'][0]['email_attrs']['width'], 'A fixed width wider than the cell should be capped to the cell.' );
+		$this->assertEquals( '800px', $result[1]['email_attrs']['width'], 'Fixed widths outside a grid are left as they are.' );
 	}
 }

@@ -149,8 +149,12 @@ class Spacing_Preprocessor implements Context_Aware_Preprocessor {
 			 * - parent block is a buttons block (where buttons are side by side).
 			 * - parent block is a two-column grid, whose renderer spaces the rows itself.
 			 */
-			if ( 0 !== $key && $gap && 'core/buttons' !== $parent_block_name && empty( $parent_block['email_attrs']['two-column-grid'] ) ) {
+			$is_two_column_grid_item = ! empty( $parent_block['email_attrs']['two-column-grid'] );
+			if ( 0 !== $key && $gap && 'core/buttons' !== $parent_block_name && ! $is_two_column_grid_item ) {
 				$block['email_attrs']['margin-top'] = $gap;
+			}
+			if ( $is_two_column_grid_item ) {
+				$block['email_attrs']['two-column-grid-item'] = true;
 			}
 
 			// Handle horizontal gap for columns: apply physical padding to column children (except the first).

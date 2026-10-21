@@ -58,8 +58,8 @@ class Group extends Abstract_Block_Renderer {
 			return $block_content;
 		}
 
-		// Each child block renders as one top-level element. Comments (the children's Outlook
-		// wrappers) and whitespace between them are dropped, since the cell is the wrapper now.
+		// Content_Renderer wraps each child's output in one element (see `two-column-grid-item`),
+		// so every top-level element is one cell. Whitespace between them is dropped.
 		$items = array();
 		foreach ( $wrapper->childNodes as $node ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 			if ( $node instanceof \DOMElement ) {

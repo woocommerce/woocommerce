@@ -94,7 +94,7 @@ class Image extends Abstract_Block_Renderer {
 	 */
 	private function add_image_size_when_missing( array $parsed_block, string $image_url ): array {
 		if ( isset( $parsed_block['attrs']['width'] ) ) {
-			return $parsed_block;
+			return $this->fit_width_to_available_space( $parsed_block );
 		}
 		// Can't determine any width let's go with 100%.
 		if ( ! isset( $parsed_block['email_attrs']['width'] ) ) {
@@ -322,6 +322,25 @@ class Image extends Abstract_Block_Renderer {
 	}
 
 	/**
+	 * Shrink an explicitly sized image to the width the Blocks_Width_Preprocessor gave it.
+	 *
+	 * The preprocessor only gives a fixed-width block less than its own width inside a two-column
+	 * grid cell, so elsewhere this is a no-op. The scale is kept so a fixed height shrinks with it.
+	 *
+	 * @param array $parsed_block Parsed block.
+	 * @return array
+	 */
+	private function fit_width_to_available_space( array $parsed_block ): array {
+		$width     = Styles_Helper::parse_value( $parsed_block['attrs']['width'] );
+		$available = Styles_Helper::parse_value( $parsed_block['email_attrs']['width'] ?? 0 );
+		if ( $available > 0 && $width > $available ) {
+			$parsed_block['attrs']['width']             = "{$available}px";
+			$parsed_block['email_attrs']['image-scale'] = $available / $width;
+		}
+		return $parsed_block;
+	}
+
+	/**
 	 * Settings width and height attributes for images is important for MS Outlook.
 	 *
 	 * @param string $block_content Block content.
@@ -336,7 +355,7 @@ class Image extends Abstract_Block_Renderer {
 			$styles = Styles_Helper::parse_styles_to_array( $styles );
 			$height = $styles['height'] ?? null;
 			if ( $height && 'auto' !== $height ) {
-				$height = Styles_Helper::parse_value( $height );
+				$height = round( Styles_Helper::parse_value( $height ) * ( $parsed_block['email_attrs']['image-scale'] ?? 1 ) );
 				/* @phpstan-ignore-next-line Wrong annotation for parameter in WP. */
 				$html->set_attribute( 'height', esc_attr( $height ) );
 			}

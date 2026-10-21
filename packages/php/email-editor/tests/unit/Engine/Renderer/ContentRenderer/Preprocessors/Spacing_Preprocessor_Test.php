@@ -1222,6 +1222,7 @@ class Spacing_Preprocessor_Test extends \Email_Editor_Unit_Test {
 		foreach ( $grid['innerBlocks'] as $item ) {
 			$this->assertArrayNotHasKey( 'margin-top', $item['email_attrs'], 'Grid items must not get margin-top, or cells in a row would not line up.' );
 			$this->assertArrayNotHasKey( 'root-padding-left', $item['email_attrs'], 'Grid items must not each get the root padding.' );
+			$this->assertTrue( $item['email_attrs']['two-column-grid-item'] );
 		}
 	}
 

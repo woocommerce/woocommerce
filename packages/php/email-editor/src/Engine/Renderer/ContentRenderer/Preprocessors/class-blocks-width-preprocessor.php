@@ -46,9 +46,10 @@ class Blocks_Width_Preprocessor implements Preprocessor {
 	 * @param array $layout Layout settings.
 	 * @param array $styles Styles with padding from parent context.
 	 * @param array $variables_map CSS variable names to resolved pixel values.
+	 * @param bool  $in_grid_cell Whether the blocks sit inside a two-column grid cell.
 	 * @return array
 	 */
-	private function calculate_widths( array $parsed_blocks, array $layout, array $styles, array $variables_map = array() ): array {
+	private function calculate_widths( array $parsed_blocks, array $layout, array $styles, array $variables_map = array(), bool $in_grid_cell = false ): array {
 		foreach ( $parsed_blocks as $key => $block ) {
 			$layout_width = $this->parse_number_from_string_with_pixels( $layout['contentSize'] );
 			$alignment    = $block['attrs']['align'] ?? null;
@@ -89,6 +90,11 @@ class Blocks_Width_Preprocessor implements Preprocessor {
 			$width_input = is_numeric( $width_input ) ? "$width_input%" : $width_input;
 			$width_input = is_string( $width_input ) ? $width_input : '100%';
 			$width       = $this->convert_width_to_pixels( $width_input, $layout_width );
+			// A fixed width wider than a grid cell (e.g. a 400px image in a 290px cell) would push into
+			// the neighboring cell, so cap it to the cell.
+			if ( $in_grid_cell ) {
+				$width = min( $width, $layout_width );
+			}
 
 			if ( 'core/columns' === $block['blockName'] ) {
 				// Calculate width of the columns based on the layout width and padding.
@@ -127,7 +133,7 @@ class Blocks_Width_Preprocessor implements Preprocessor {
 			}
 
 			$block['email_attrs']['width'] = "{$width}px";
-			$block['innerBlocks']          = $this->calculate_widths( $block['innerBlocks'], $modified_layout, $modified_styles, $variables_map );
+			$block['innerBlocks']          = $this->calculate_widths( $block['innerBlocks'], $modified_layout, $modified_styles, $variables_map, $in_grid_cell || ! empty( $block['email_attrs']['two-column-grid'] ) );
 			$parsed_blocks[ $key ]         = $block;
 		}
 		return $parsed_blocks;
