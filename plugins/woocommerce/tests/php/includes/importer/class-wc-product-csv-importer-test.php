@@ -2603,4 +2603,34 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$this->assertCount( 1, $data['imported'], 'The row is imported' );
 		$this->assertSame( '-IMPORT-40274-WRAPPED', wc_get_product( $data['imported'][0] )->get_sku(), 'The SKU callback ran' );
 	}
+
+	/**
+	 * @testdox Should fail a variation row with a blank Parent cell when the variation's current parent can no longer hold it.
+	 */
+	public function test_import_blank_parent_checks_the_current_parent_40274(): void {
+		$parent       = WC_Helper_Product::create_variation_product();
+		$variation_id = $parent->get_children()[0];
+		wp_update_post(
+			array(
+				'ID'          => $parent->get_id(),
+				'post_status' => 'trash',
+			)
+		);
+
+		$data = $this->import_csv_rows(
+			"ID,Name,Parent,Attribute 1 name,Attribute 1 value(s),Attribute 1 global\n{$variation_id},Trashed parent,,size,large,1\n",
+			array(
+				'ID'                   => 'id',
+				'Name'                 => 'name',
+				'Parent'               => 'parent_id',
+				'Attribute 1 name'     => 'attributes:name1',
+				'Attribute 1 value(s)' => 'attributes:value1',
+				'Attribute 1 global'   => 'attributes:taxonomy1',
+			)
+		);
+
+		$this->assertEmpty( $data['updated'], 'The row must not be reported as updated' );
+		$this->assertSame( 'woocommerce_product_importer_variation_parent_not_variable', $data['failed'][0]->get_error_code(), 'The row fails on its trashed parent' );
+		$this->assertSame( 'small', wc_get_product( $variation_id )->get_attribute( 'pa_size' ), 'The attributes are unchanged' );
+	}
 }

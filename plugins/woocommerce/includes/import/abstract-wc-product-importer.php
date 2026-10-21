@@ -330,13 +330,17 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 
 				if ( ! $converts_product && '' === ( $data['parent_id'] ?? '' ) ) {
 					unset( $data['parent_id'] );
+
+					// The kept parent still has to hold the variation, or set_variation_data() would skip the row's attributes.
+					$current_parent = 'product_variation' === $post_type ? wp_get_post_parent_id( absint( $data['id'] ) ) : 0;
+					$parent         = $current_parent ? $this->get_variation_parent( $current_parent ) : null;
 				} else {
 					// Check the parent before get_product_object() turns the post into a variation, so a failing row changes nothing.
 					$parent = $this->get_variation_parent( $data['parent_id'] ?? null );
+				}
 
-					if ( is_wp_error( $parent ) ) {
-						return $parent;
-					}
+				if ( is_wp_error( $parent ) ) {
+					return $parent;
 				}
 			}
 
