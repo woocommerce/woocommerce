@@ -3374,42 +3374,53 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
-	 * @testdox A retried checkout removes a fee a merchant added to the failed order and charges the cart total.
+	 * @testdox A retried checkout undoes a merchant's edit to the failed order and charges the cart total.
+	 *
+	 * @testWith ["fee_added"]
+	 *           ["shipping_edited"]
+	 *           ["coupon_removed"]
+	 *
+	 * @param string $edit The merchant edit to make to the order before the shopper retries.
 	 */
-	public function test_retry_removes_fee_a_merchant_added_to_the_failed_order(): void {
-		$order         = $this->place_order_with_failed_payment();
-		$line_item_ids = array_keys( $order->get_items() );
-		$cart_total    = $order->get_total();
-		$merchant_fee  = new \WC_Order_Item_Fee();
-		$merchant_fee->set_name( 'Merchant fee' );
-		$merchant_fee->set_total( '7' );
-		$order->add_item( $merchant_fee );
-		$order->calculate_totals();
-
-		$retry_response = rest_get_server()->dispatch( $this->build_valid_post_request() );
-
-		$this->assertEquals( 200, $retry_response->get_status(), print_r( $retry_response->get_data(), true ) );
-		$order = wc_get_order( (int) $retry_response->get_data()['order_id'] );
-		$this->assertEmpty( $order->get_fees(), 'The fee the merchant added should be removed.' );
-		$this->assertSame( $line_item_ids, array_keys( $order->get_items() ), 'The line items should keep their IDs.' );
-		$this->assertSame( $cart_total, $order->get_total(), 'The order total should be the cart total.' );
-	}
-
-	/**
-	 * @testdox A retried checkout adds back a coupon a merchant removed from the failed order.
-	 */
-	public function test_retry_adds_back_a_coupon_a_merchant_removed(): void {
+	public function test_retry_undoes_a_merchant_edit_to_the_failed_order( string $edit ): void {
 		WC()->cart->apply_coupon( self::TEST_COUPON_CODE );
-		$order = $this->place_order_with_failed_payment();
-		$order->remove_coupon( self::TEST_COUPON_CODE );
-		$order->save();
-		$this->assertEmpty( $order->get_coupon_codes(), 'Removing the coupon should remove its line.' );
+		$order          = $this->place_order_with_failed_payment();
+		$cart_total     = $order->get_total();
+		$shipping_total = $order->get_shipping_total();
+		$line_item_ids  = array_keys( $order->get_items() );
+		$this->assertCount( 1, $order->get_shipping_methods(), 'The order should have a shipping line.' );
+
+		switch ( $edit ) {
+			case 'fee_added':
+				$fee = new \WC_Order_Item_Fee();
+				$fee->set_name( 'Merchant fee' );
+				$fee->set_total( '7' );
+				$order->add_item( $fee );
+				break;
+			case 'shipping_edited':
+				$shipping = current( $order->get_shipping_methods() );
+				$shipping->set_total( (float) $shipping->get_total() + 5 );
+				$shipping->save();
+				break;
+			case 'coupon_removed':
+				$order->remove_coupon( self::TEST_COUPON_CODE );
+				break;
+		}
+		$order->calculate_totals();
+		$this->assertNotSame( $cart_total, $order->get_total(), 'The edit should change the order total.' );
 
 		$retry_response = rest_get_server()->dispatch( $this->build_valid_post_request() );
 
 		$this->assertEquals( 200, $retry_response->get_status(), print_r( $retry_response->get_data(), true ) );
 		$order = wc_get_order( (int) $retry_response->get_data()['order_id'] );
-		$this->assertSame( array( self::TEST_COUPON_CODE ), $order->get_coupon_codes(), 'The coupon line should be added back.' );
+		$this->assertSame( $cart_total, $order->get_total(), 'The order total should be the cart total.' );
+		$this->assertEmpty( $order->get_fees(), 'The order should have no fee.' );
+		$this->assertCount( 1, $order->get_shipping_methods(), 'The order should have one shipping line.' );
+		$this->assertSame( $shipping_total, $order->get_shipping_total(), 'The shipping total should be the cart one.' );
+		$this->assertSame( array( self::TEST_COUPON_CODE ), $order->get_coupon_codes(), 'The order should have the cart coupon.' );
+		if ( 'coupon_removed' !== $edit ) {
+			$this->assertSame( $line_item_ids, array_keys( $order->get_items() ), 'The line items should keep their IDs.' );
+		}
 	}
 
 	/**
