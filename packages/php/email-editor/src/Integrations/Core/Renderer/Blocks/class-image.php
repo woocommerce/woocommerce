@@ -324,8 +324,9 @@ class Image extends Abstract_Block_Renderer {
 	/**
 	 * Shrink an explicitly sized image to the width the Blocks_Width_Preprocessor gave it.
 	 *
-	 * The preprocessor only gives a fixed-width block less than its own width inside a two-column
-	 * grid cell, so elsewhere this is a no-op. The scale is kept so a fixed height shrinks with it.
+	 * That width is narrower than the image's own inside a two-column grid cell, and for a rem or em
+	 * width (which the preprocessor can't convert, so it uses the container width) in a container
+	 * narrower than the image. The scale is kept so a fixed height shrinks with it.
 	 *
 	 * @param array $parsed_block Parsed block.
 	 * @return array

@@ -25,6 +25,13 @@ class Spacing_Preprocessor implements Context_Aware_Preprocessor {
 	private ?array $post_content_block_names = null;
 
 	/**
+	 * Cached names of blocks that fit a two-column grid cell.
+	 *
+	 * @var string[]|null
+	 */
+	private ?array $grid_cell_block_names = null;
+
+	/**
 	 * Preprocesses the parsed blocks.
 	 *
 	 * @param array $parsed_blocks Parsed blocks.
@@ -280,7 +287,7 @@ class Spacing_Preprocessor implements Context_Aware_Preprocessor {
 			return false;
 		}
 
-		if ( ! $this->only_contains_blocks( $block, self::GRID_CELL_BLOCKS ) ) {
+		if ( ! $this->only_contains_blocks( $block, $this->get_grid_cell_block_names() ) ) {
 			return false;
 		}
 
@@ -345,6 +352,27 @@ class Spacing_Preprocessor implements Context_Aware_Preprocessor {
 		$px    = Styles_Helper::convert_to_px( $value, false );
 
 		return max( 0.0, Styles_Helper::parse_value( $px ?? '0' ) ) . 'px';
+	}
+
+	/**
+	 * Returns the names of blocks whose email output fits a two-column grid cell.
+	 *
+	 * @return string[]
+	 */
+	private function get_grid_cell_block_names(): array {
+		if ( null === $this->grid_cell_block_names ) {
+			/**
+			 * Filters the blocks a two-column grid can hold and still render side by side in email.
+			 *
+			 * Only add a block whose email output fits the width it is given (its `email_attrs`
+			 * width). A grid holding any other block stacks its items instead.
+			 *
+			 * @param string[] $block_names Block names.
+			 */
+			$block_names                 = apply_filters( 'woocommerce_email_editor_grid_cell_block_names', self::GRID_CELL_BLOCKS );
+			$this->grid_cell_block_names = array_values( array_filter( is_array( $block_names ) ? $block_names : array(), 'is_string' ) );
+		}
+		return $this->grid_cell_block_names;
 	}
 
 	/**

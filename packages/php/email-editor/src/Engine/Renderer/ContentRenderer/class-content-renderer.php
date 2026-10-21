@@ -425,22 +425,34 @@ class Content_Renderer {
 				)
 			);
 			// Returning the original content.
-			return $block_content;
+			return $this->wrap_grid_item( $block_content, $parsed_block );
 		}
 
 		if ( null === $result ) {
 			$result = $this->fallback_renderer->render( $block_content, $parsed_block, $context );
 		}
 
-		$result = $this->add_root_horizontal_padding( $result, $parsed_block['email_attrs'] ?? array() );
+		return $this->wrap_grid_item(
+			$this->add_root_horizontal_padding( $result, $parsed_block['email_attrs'] ?? array() ),
+			$parsed_block
+		);
+	}
 
-		// A two-column grid puts each child in one table cell, so each child needs exactly one root
-		// element, even when its renderer returns several elements or bare text.
-		if ( ! empty( $parsed_block['email_attrs']['two-column-grid-item'] ) ) {
-			$result = '<div class="email-block-grid-item">' . $result . '</div>';
+	/**
+	 * Wrap the output of a two-column grid item in one element.
+	 *
+	 * The grid puts each child in one table cell, so each child needs exactly one root element, even
+	 * when its renderer returns several elements or bare text, or fails and returns its saved markup.
+	 *
+	 * @param string $content The rendered block content.
+	 * @param array  $parsed_block The parsed block.
+	 * @return string
+	 */
+	private function wrap_grid_item( string $content, array $parsed_block ): string {
+		if ( empty( $parsed_block['email_attrs']['two-column-grid-item'] ) ) {
+			return $content;
 		}
-
-		return $result;
+		return '<div class="email-block-grid-item">' . $content . '</div>';
 	}
 
 	/**

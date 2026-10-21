@@ -1283,6 +1283,33 @@ class Spacing_Preprocessor_Test extends \Email_Editor_Unit_Test {
 	}
 
 	/**
+	 * Test an integration can add a block that fits a grid cell, and non-string values are ignored.
+	 */
+	public function testItLetsIntegrationsAddGridCellBlocks(): void {
+		global $wp_filters;
+		add_filter(
+			'woocommerce_email_editor_grid_cell_block_names',
+			function ( $block_names ) {
+				return array_merge( $block_names, array( 'acme/fitting-block', 42 ) );
+			}
+		);
+
+		$grid                                = $this->build_grid_group(
+			array(
+				'type'        => 'grid',
+				'columnCount' => 2,
+			),
+			array( array(), array() )
+		);
+		$grid['innerBlocks'][1]['blockName'] = 'acme/fitting-block';
+
+		$result = $this->preprocessor->preprocess( array( $grid ), $this->layout, $this->styles );
+		unset( $wp_filters['woocommerce_email_editor_grid_cell_block_names'] );
+
+		$this->assertTrue( $result[0]['email_attrs']['two-column-grid'] );
+	}
+
+	/**
 	 * Test an explicit numeric zero gap is kept rather than replaced by the global gap.
 	 */
 	public function testItKeepsNumericZeroGridGap(): void {
