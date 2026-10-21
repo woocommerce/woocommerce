@@ -1257,7 +1257,7 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 	}
 
 	/**
-	 * Data provider for fonts that only the stack's generic family can place.
+	 * Data provider for fonts that only a later name in their stack can place.
 	 *
 	 * @return array Test cases with input font family and expected output.
 	 */
@@ -1265,18 +1265,22 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 		$arial       = "Arial, 'Helvetica Neue', Helvetica, sans-serif";
 		$georgia     = "Georgia, Times, 'Times New Roman', serif";
 		$courier_new = "'Courier New', Courier, 'Lucida Sans Typewriter', 'Lucida Typewriter', monospace";
+		$comic_sans  = "'Comic Sans MS', 'Marker Felt-Thin', Arial, sans-serif";
 		return array(
-			'unknown serif font'           => array( '"Gentium Plus", serif', $georgia ),
-			'unknown ui-serif font'        => array( "'Newsreader', ui-serif, serif", $georgia ),
-			'unknown monospace font'       => array( "'IBM Plex Mono', monospace", $courier_new ),
-			'unknown ui-monospace font'    => array( 'Fira Code, ui-monospace', $courier_new ),
-			'unknown sans-serif font'      => array( "'Figtree', sans-serif", $arial ),
-			'unknown font with no generic' => array( 'CustomWebFont', $arial ),
-			'stack that starts with serif' => array( 'serif', $georgia ),
-			'stack that starts with mono'  => array( 'monospace', $courier_new ),
-			'sans-serif before serif'      => array( 'CustomFont, sans-serif, serif', $arial ),
-			'system-ui before monospace'   => array( 'CustomFont, system-ui, monospace', $arial ),
-			'serif before sans-serif'      => array( 'CustomFont, serif, sans-serif', $georgia ),
+			'unknown font before a safe font' => array( "'Cardo', Georgia", $georgia ),
+			'unknown cursive font'            => array( '"Dancing Script", cursive', $comic_sans ),
+			'unknown fantasy font'            => array( 'Papyrus, fantasy', $arial ),
+			'unknown serif font'              => array( '"Gentium Plus", serif', $georgia ),
+			'unknown ui-serif font'           => array( "'Newsreader', ui-serif, serif", $georgia ),
+			'unknown monospace font'          => array( "'IBM Plex Mono', monospace", $courier_new ),
+			'unknown ui-monospace font'       => array( 'Fira Code, ui-monospace', $courier_new ),
+			'unknown sans-serif font'         => array( "'Figtree', sans-serif", $arial ),
+			'unknown font with no generic'    => array( 'CustomWebFont', $arial ),
+			'stack that starts with serif'    => array( 'serif', $georgia ),
+			'stack that starts with mono'     => array( 'monospace', $courier_new ),
+			'sans-serif before serif'         => array( 'CustomFont, sans-serif, serif', $arial ),
+			'system-ui before monospace'      => array( 'CustomFont, system-ui, monospace', $arial ),
+			'serif before sans-serif'         => array( 'CustomFont, serif, sans-serif', $georgia ),
 		);
 	}
 

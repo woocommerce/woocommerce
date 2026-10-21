@@ -460,27 +460,26 @@ class Site_Style_Sync_Controller {
 			return null;
 		};
 
-		// Check if it's already an email-safe font.
-		$font_names       = $this->get_font_names( $font_family );
-		$safe_font_family = $get_font_family( $font_names[0] ?? '' );
-		if ( $safe_font_family ) {
-			return $safe_font_family;
-		}
-
-		// Keep the first generic family the stack falls back to, as CSS would,
-		// so serif and monospace fonts don't all turn into Arial.
+		// Walk the stack as CSS would: the first email-safe font or generic family wins,
+		// so serif and monospace fonts don't all turn into Arial. `fantasy` has no
+		// email-safe match, so it falls through to Arial.
 		$generic_fallbacks = array(
 			'serif'         => 'georgia',
 			'ui-serif'      => 'georgia',
 			'monospace'     => 'courier-new',
 			'ui-monospace'  => 'courier-new',
+			'cursive'       => 'comic-sans-ms',
 			'sans-serif'    => 'arial',
 			'ui-sans-serif' => 'arial',
 			'system-ui'     => 'arial',
 		);
-		foreach ( $font_names as $font_name ) {
+		foreach ( $this->get_font_names( $font_family ) as $font_name ) {
 			if ( isset( $generic_fallbacks[ $font_name ] ) ) {
 				return $email_safe_fonts[ $generic_fallbacks[ $font_name ] ];
+			}
+			$safe_font_family = $get_font_family( $font_name );
+			if ( $safe_font_family ) {
+				return $safe_font_family;
 			}
 		}
 
