@@ -432,6 +432,12 @@ class WC_Checkout {
 				 */
 				do_action( 'woocommerce_resume_order', $order_id );
 
+				// Stock holds only count for pending and draft orders, so a failed order has to be pending again
+				// before woocommerce_checkout_order_created renews its hold for this payment attempt.
+				if ( $order->has_status( OrderStatus::FAILED ) ) {
+					$order->set_status( OrderStatus::PENDING );
+				}
+
 				// Remove all items - we will re-add them later.
 				$order->remove_order_items();
 			} else {
