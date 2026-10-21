@@ -45,7 +45,7 @@ test.describe( 'Test the checkout template', () => {
 		).toBeVisible();
 
 		await editor.openDocumentSettingsSidebar();
-		// eslint-disable-next-line playwright/no-conditional-in-test -- WordPress 7.2 moved template editing from the menu to a separate panel.
+		// eslint-disable-next-line playwright/no-conditional-in-test
 		if ( wpCoreVersion >= 7.2 ) {
 			await page
 				.getByRole( 'button', {
