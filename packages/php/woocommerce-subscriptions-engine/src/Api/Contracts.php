@@ -260,8 +260,9 @@ final class Contracts {
 	/**
 	 * Append a cycle to a contract's chain `(contract_id, kind)`, append-if-absent on the chain's
 	 * unique positions: a taken position or count is a lost race and returns null. A storage
-	 * failure throws a `RuntimeException` and writes nothing. Unknown keys raise a
-	 * `_doing_it_wrong()` notice.
+	 * failure throws a `RuntimeException` and writes nothing. The lock is the contract's
+	 * existence check: the engine deletes a contract only to discard a failed create, before its
+	 * lock is handed out. Unknown keys raise a `_doing_it_wrong()` notice.
 	 *
 	 * @param int                  $contract_id Contract id.
 	 * @param array<string, mixed> $args        Cycle fields: `starts_at_gmt`, `ends_at_gmt` and

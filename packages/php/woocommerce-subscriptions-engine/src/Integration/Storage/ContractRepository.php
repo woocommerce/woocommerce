@@ -1333,43 +1333,38 @@ final class ContractRepository {
 	 * @return int|null The new meta row id, or null when `$unique` and the key exists.
 	 */
 	private function add_meta_row( int $contract_id, string $key, $value, bool $unique, ContractLock $lock ): ?int {
-		$meta_id = $this->insert_meta_row( $contract_id, $key, $value, $unique, $lock );
-		if ( null !== $meta_id ) {
-			return $meta_id;
-		}
-
+		// A plain read under the lock, as `add_metadata()` does: every meta writer holds the lock.
 		if ( $unique && $this->has_meta_key( $contract_id, $key ) ) {
 			return null;
 		}
 
-		$this->throw_for_empty_child_insert( $contract_id );
+		$meta_id = $this->insert_meta_row( $contract_id, $key, $value, $lock );
+		if ( null === $meta_id ) {
+			$this->throw_for_empty_meta_insert( $contract_id );
+		}
+
+		return $meta_id;
 	}
 	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
 	/**
 	 * Insert one meta row as `INSERT ... SELECT` from the contract row, so a missing contract
-	 * inserts nothing; with `$if_absent` only when a plain read finds no row for the key. Every
-	 * meta write holds the contract's lock, so that read cannot race another add.
+	 * inserts nothing. Callers that add only an absent key read it first, under the lock.
 	 *
 	 * @param int          $contract_id Contract id.
 	 * @param string       $key         Meta key.
 	 * @param mixed        $value       Meta value; serialized when not scalar.
-	 * @param bool         $if_absent   Whether to insert only when the key has no row.
 	 * @param ContractLock $lock        The held lock.
 	 * @return int|null The new meta row id, or null when nothing was inserted.
 	 * @throws \InvalidArgumentException If the lock is for another contract.
 	 * @throws ContractLockedException If the lock was lost.
 	 * @throws \RuntimeException If the insert fails.
 	 */
-	private function insert_meta_row( int $contract_id, string $key, $value, bool $if_absent, ContractLock $lock ): ?int {
+	private function insert_meta_row( int $contract_id, string $key, $value, ContractLock $lock ): ?int {
 		global $wpdb;
 
 		$this->fence_child_write( $lock, $contract_id );
-
-		if ( $if_absent && $this->has_meta_key( $contract_id, $key ) ) {
-			return null;
-		}
 
 		$meta      = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_META );
 		$contracts = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
@@ -1464,15 +1459,16 @@ final class ContractRepository {
 		if ( $updated > 0 ) {
 			return true;
 		}
-		$meta_id = $this->insert_meta_row( $contract_id, $key, $value, true, $lock );
-		if ( null !== $meta_id ) {
-			return true;
-		}
-		if ( ! $this->has_meta_key( $contract_id, $key ) ) {
-			$this->throw_for_empty_child_insert( $contract_id );
+		if ( $this->has_meta_key( $contract_id, $key ) ) {
+			return false;
 		}
 
-		return false;
+		$meta_id = $this->insert_meta_row( $contract_id, $key, $value, $lock );
+		if ( null === $meta_id ) {
+			$this->throw_for_empty_meta_insert( $contract_id );
+		}
+
+		return true;
 	}
 	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 
@@ -1650,28 +1646,15 @@ final class ContractRepository {
 		$columns['date_created_gmt'] = $now;
 		$columns['date_updated_gmt'] = $now;
 
-		$names        = array();
-		$placeholders = array();
-		$values       = array();
+		// Checked first so an over-long value is refused with its column named.
 		foreach ( $columns as $column => $value ) {
-			$names[] = "`{$column}`";
-			if ( null === $value ) {
-				$placeholders[] = 'NULL';
-				continue;
-			}
 			if ( is_string( $value ) ) {
 				self::assert_fits_column( $table, $column, $value );
 			}
-			$placeholders[] = '%s';
-			$values[]       = (string) $value;
 		}
 
-		$name_list        = implode( ', ', $names );
-		$placeholder_list = implode( ', ', $placeholders );
-
-		// Column names come from the entity's storage keys, never from input; every value is a placeholder.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared,WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
-		$inserted = $wpdb->query( $wpdb->prepare( "INSERT INTO `{$table}` ( {$name_list} ) VALUES ( {$placeholder_list} )", $values ) );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+		$inserted = $wpdb->insert( $table, $columns );
 
 		if ( false === $inserted ) {
 			$db_error  = $wpdb->last_error;
@@ -1960,20 +1943,14 @@ final class ContractRepository {
 
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
 	/**
-	 * Explain a meta add that wrote no row and found no key: the contract is missing, or the key
-	 * vanished between the two reads, which only a writer that took the lock over can cause.
+	 * A meta insert that selected no contract row: the contract does not exist.
 	 *
 	 * @param int $contract_id Contract id.
 	 * @return never
-	 * @throws \InvalidArgumentException If the contract does not exist.
-	 * @throws ContractLockedException Otherwise: the caller's lock was lost.
+	 * @throws \InvalidArgumentException Always.
 	 */
-	private function throw_for_empty_child_insert( int $contract_id ): void {
-		$holder = $this->get_lock_holder( $contract_id );
-		if ( ! $holder['exists'] ) {
-			throw new \InvalidArgumentException( esc_html( sprintf( 'Contract %d does not exist.', $contract_id ) ) );
-		}
-		throw self::locked_exception( $contract_id, $holder ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the exception message is not output.
+	private function throw_for_empty_meta_insert( int $contract_id ): void {
+		throw new \InvalidArgumentException( esc_html( sprintf( 'Contract %d does not exist.', $contract_id ) ) );
 	}
 	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 
