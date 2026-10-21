@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Admin\RemoteInboxNotifications;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Admin\Notes\DataStore;
 use Automattic\WooCommerce\Admin\Notes\Notes;
 use Automattic\WooCommerce\Admin\PluginsProvider\PluginsProvider;
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
@@ -22,6 +23,12 @@ use Automattic\WooCommerce\Admin\RemoteSpecs\RuleProcessors\StoredStateSetupForP
 class RemoteInboxNotificationsEngine extends RemoteSpecsEngine {
 	const STORED_STATE_OPTION_NAME = 'wc_remote_inbox_notifications_stored_state';
 	const WCA_UPDATED_OPTION_NAME  = 'wc_remote_inbox_notifications_wca_updated';
+
+	/**
+	 * How long before a complete feed read an alert must have last changed status for that read to hide it.
+	 * Allows for feed responses served from a cache.
+	 */
+	private const WITHDRAWN_ALERT_GRACE_PERIOD = HOUR_IN_SECONDS;
 
 	/**
 	 * Initialize the engine.
@@ -141,24 +148,91 @@ class RemoteInboxNotificationsEngine extends RemoteSpecsEngine {
 	 * Go through the specs and run them.
 	 */
 	public static function run() {
-		$specs = RemoteInboxNotificationsDataSourcePoller::get_instance()->get_specs_from_data_sources();
+		$data_source_poller = RemoteInboxNotificationsDataSourcePoller::get_instance();
+		$specs              = $data_source_poller->get_specs_from_data_sources();
 
-		if ( false === $specs || ! is_countable( $specs ) || count( $specs ) === 0 ) {
+		if ( false === $specs || ! is_countable( $specs ) ) {
 			return;
 		}
 
-		$stored_state = self::get_stored_state();
-		$errors       = array();
+		$stored_state    = self::get_stored_state();
+		$errors          = array();
+		$processed_slugs = array();
 
 		foreach ( $specs as $spec ) {
 			$error = SpecRunner::run_spec( $spec, $stored_state );
 			if ( isset( $error ) ) {
 				$errors[] = $error;
 			}
+			if ( isset( $spec->slug ) && is_scalar( $spec->slug ) ) {
+				$processed_slugs[] = (string) $spec->slug;
+			}
 		}
+
+		self::hide_withdrawn_alerts( $processed_slugs, $data_source_poller->get_published_snapshot() );
 
 		if ( count( $errors ) > 0 ) {
 			self::log_errors( $errors );
+		}
+	}
+
+	/**
+	 * Move unactioned WooCommerce.com-owned alerts to pending when the canonical feed no longer lists them.
+	 *
+	 * Only alerts that last changed status well before that read are hidden, so an older read (for example, one
+	 * cached for another locale) cannot hide an alert that newer specs made visible.
+	 *
+	 * @param string[]                                     $processed_slugs Slugs of the specs this run processed, after filtering.
+	 * @param array{fetched_at: int, slugs: string[]}|null $snapshot        The latest complete read, if any.
+	 */
+	private static function hide_withdrawn_alerts( array $processed_slugs, ?array $snapshot ): void {
+		if ( null === $snapshot ) {
+			return;
+		}
+
+		/**
+		 * Note data store.
+		 *
+		 * @var DataStore $data_store
+		 */
+		$data_store = Notes::load_data_store();
+		$alerts     = $data_store->lookup_notes(
+			array(
+				'source' => array( 'woocommerce.com' ),
+				'type'   => array( Note::E_WC_ADMIN_NOTE_ERROR, Note::E_WC_ADMIN_NOTE_UPDATE ),
+				'status' => array( Note::E_WC_ADMIN_NOTE_UNACTIONED ),
+			)
+		);
+		if ( empty( $alerts ) ) {
+			return;
+		}
+
+		$published_slugs = array_fill_keys( array_merge( $snapshot['slugs'], $processed_slugs ), true );
+		$changed_before  = $snapshot['fetched_at'] - self::WITHDRAWN_ALERT_GRACE_PERIOD;
+
+		foreach ( $alerts as $alert ) {
+			// Stored dates are GMT; the creation date moves forward whenever a spec changes the note's status.
+			$changed_at = wc_string_to_timestamp( $alert->date_created );
+			if ( isset( $published_slugs[ $alert->name ] ) || (int) $changed_at <= 0 || $changed_at >= $changed_before ) {
+				continue;
+			}
+
+			$note = Notes::get_note( $alert->note_id );
+			if ( ! $note instanceof Note ) {
+				continue;
+			}
+
+			$note->set_status( Note::E_WC_ADMIN_NOTE_PENDING );
+			$note->save();
+			wc_get_logger()->info(
+				'Changed an unactioned Store Alert to pending because it is no longer published by WooCommerce.com.',
+				array(
+					'source'     => 'remote-inbox-notifications',
+					'note_id'    => $note->get_id(),
+					'slug'       => $note->get_name(),
+					'fetched_at' => $snapshot['fetched_at'],
+				)
+			);
 		}
 	}
 

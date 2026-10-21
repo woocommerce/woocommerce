@@ -417,13 +417,10 @@ add_action( 'template_redirect', 'wc_product_canonical_redirect', 5 );
  * @return string
  */
 function wc_placeholder_img_src( $size = 'woocommerce_thumbnail' ) {
-	$src               = WC()->plugin_url() . '/assets/images/placeholder.webp';
 	$placeholder_image = get_option( 'woocommerce_placeholder_image', 0 );
-
 	if ( ! empty( $placeholder_image ) ) {
 		if ( is_numeric( $placeholder_image ) ) {
 			$image = wp_get_attachment_image_src( $placeholder_image, $size );
-
 			if ( ! empty( $image[0] ) ) {
 				$src = $image[0];
 			}
@@ -432,7 +429,15 @@ function wc_placeholder_img_src( $size = 'woocommerce_thumbnail' ) {
 		}
 	}
 
-	return apply_filters( 'woocommerce_placeholder_img_src', $src );
+	/**
+	 * Filters the placeholder image source URL.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $src Placeholder image URL.
+	 * @return string
+	 */
+	return apply_filters( 'woocommerce_placeholder_img_src', $src ?? ( WC()->plugin_url() . '/assets/images/placeholder.webp' ) );
 }
 
 /**
@@ -2135,6 +2140,40 @@ function wc_products_array_orderby_price( $a, $b ) {
 		return 0;
 	}
 	return ( $a->get_price() < $b->get_price() ) ? -1 : 1;
+}
+
+/**
+ * Get min/max price meta query args for the `_price` meta key.
+ *
+ * Deprecated in 3.6.0 and restored in 11.3.0, because the REST API products and
+ * variations controllers still use it for the min_price and max_price filters.
+ *
+ * @since 3.0.0
+ * @param array|WP_REST_Request<array<string, mixed>> $args Min price and max price arguments.
+ * @return array
+ */
+function wc_get_min_max_price_meta_query( $args ) {
+	$current_min_price = isset( $args['min_price'] ) ? floatval( $args['min_price'] ) : 0;
+	$current_max_price = isset( $args['max_price'] ) ? floatval( $args['max_price'] ) : PHP_INT_MAX;
+
+	/**
+	 * Filters the meta query used to match products by price.
+	 *
+	 * @since 3.0.0
+	 *
+	 * @param array                                       $meta_query Meta query args for the `_price` meta key.
+	 * @param array|WP_REST_Request<array<string, mixed>> $args       Min price and max price arguments.
+	 */
+	return apply_filters(
+		'woocommerce_get_min_max_price_meta_query',
+		array(
+			'key'     => '_price',
+			'value'   => array( $current_min_price, $current_max_price ),
+			'compare' => 'BETWEEN',
+			'type'    => 'DECIMAL(10,' . wc_get_price_decimals() . ')',
+		),
+		$args
+	);
 }
 
 /**
