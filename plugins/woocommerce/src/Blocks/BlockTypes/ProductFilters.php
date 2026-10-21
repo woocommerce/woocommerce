@@ -243,7 +243,7 @@ CSS;
 		);
 
 		if ( $has_overlay ) {
-			$wrapper_attributes['data-wp-watch---scrolling']         = 'callbacks.scrollLimit';
+			$wrapper_attributes['data-wp-watch---scrolling']        = 'callbacks.scrollLimit';
 			$wrapper_attributes['data-wp-class--is-overlay-opened'] = 'context.isOverlayOpened';
 		}
 
