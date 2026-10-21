@@ -1283,14 +1283,14 @@ class Spacing_Preprocessor_Test extends \Email_Editor_Unit_Test {
 	}
 
 	/**
-	 * Test an integration can add a block that fits a grid cell, and non-string values are ignored.
+	 * Test an integration can add a block that fits a grid cell.
 	 */
 	public function testItLetsIntegrationsAddGridCellBlocks(): void {
 		global $wp_filters;
 		add_filter(
 			'woocommerce_email_editor_grid_cell_block_names',
 			function ( $block_names ) {
-				return array_merge( $block_names, array( 'acme/fitting-block', 42 ) );
+				return array_merge( $block_names, array( 'acme/fitting-block' ) );
 			}
 		);
 
@@ -1307,6 +1307,31 @@ class Spacing_Preprocessor_Test extends \Email_Editor_Unit_Test {
 		unset( $wp_filters['woocommerce_email_editor_grid_cell_block_names'] );
 
 		$this->assertTrue( $result[0]['email_attrs']['two-column-grid'] );
+	}
+
+	/**
+	 * Test a filter that returns something other than an array leaves no block fitting a cell, so grids stack.
+	 */
+	public function testItStacksGridsWhenTheGridCellFilterReturnsNoArray(): void {
+		global $wp_filters;
+		add_filter(
+			'woocommerce_email_editor_grid_cell_block_names',
+			function () {
+				return 'core/paragraph';
+			}
+		);
+
+		$grid   = $this->build_grid_group(
+			array(
+				'type'        => 'grid',
+				'columnCount' => 2,
+			),
+			array( array(), array() )
+		);
+		$result = $this->preprocessor->preprocess( array( $grid ), $this->layout, $this->styles );
+		unset( $wp_filters['woocommerce_email_editor_grid_cell_block_names'] );
+
+		$this->assertArrayNotHasKey( 'two-column-grid', $result[0]['email_attrs'] );
 	}
 
 	/**
