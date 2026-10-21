@@ -565,6 +565,71 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox update_order_from_cart() keeps every item of an unedited retried order taxed at two rates, with prices including tax.
+	 *
+	 * @testWith ["12.34", "yes"]
+	 *           ["23.45", "yes"]
+	 *           ["19.99", "yes"]
+	 *           ["23.45", "no"]
+	 *           ["19.99", "no"]
+	 *
+	 * @param string $price             The product price, including tax.
+	 * @param string $round_at_subtotal Whether tax is rounded at subtotal.
+	 */
+	public function test_update_order_from_cart_keeps_items_of_a_retried_order_taxed_at_two_rates( string $price, string $round_at_subtotal ): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_tax_round_at_subtotal', $round_at_subtotal );
+		foreach ( array( '7.2500', '1.5000' ) as $priority => $tax_rate ) {
+			\WC_Tax::_insert_tax_rate(
+				array(
+					'tax_rate_country'  => '',
+					'tax_rate'          => $tax_rate,
+					'tax_rate_name'     => "Rate {$priority}",
+					'tax_rate_priority' => (string) ( $priority + 1 ),
+					'tax_rate_compound' => '0',
+					'tax_rate_shipping' => '1',
+					'tax_rate_order'    => (string) ( $priority + 1 ),
+					'tax_rate_class'    => '',
+				)
+			);
+		}
+		$coupon = \WC_Helper_Coupon::create_coupon(
+			'retry-two-rates',
+			array(
+				'discount_type' => 'percent',
+				'coupon_amount' => '15',
+			)
+		);
+		add_action(
+			'woocommerce_cart_calculate_fees',
+			function ( \WC_Cart $cart ) {
+				$cart->add_fee( 'Handling', 3.33, true );
+			}
+		);
+		\WC_Helper_Shipping::create_simple_flat_rate( 7.77 );
+		try {
+			$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => $price ) );
+			WC()->cart->empty_cart();
+			WC()->cart->add_to_cart( $product->get_id(), 2 );
+			WC()->cart->apply_coupon( $coupon->get_code() );
+			WC()->cart->calculate_totals();
+			$order = $this->sut->create_order_from_cart();
+			$this->place_order( $order );
+			$before = $this->get_item_ids_by_type( $order );
+
+			$this->sut->update_order_from_cart( $order );
+			$cart_total = (float) WC()->cart->get_total( 'edit' );
+		} finally {
+			\WC_Helper_Shipping::delete_simple_flat_rate();
+		}
+
+		$this->assertNotEmpty( $before['coupon'], 'The order should have a coupon line.' );
+		$this->assertSame( $before, $this->get_item_ids_by_type( $order ), 'Every item should keep its ID.' );
+		$this->assertSame( $cart_total, (float) $order->get_total(), 'The order total should match the cart.' );
+	}
+
+	/**
 	 * @testdox update_order_from_cart() replaces shipping and fee lines whose amounts a merchant edited, so the order total matches the cart.
 	 *
 	 * @testWith ["none", "", false]
@@ -753,7 +818,7 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 	 */
 	private function get_item_ids_by_type( \WC_Order $order ): array {
 		$ids_by_type = array();
-		foreach ( array( 'line_item', 'shipping', 'fee' ) as $type ) {
+		foreach ( array( 'line_item', 'shipping', 'fee', 'coupon' ) as $type ) {
 			$ids_by_type[ $type ] = array_keys( $order->get_items( $type ) );
 		}
 

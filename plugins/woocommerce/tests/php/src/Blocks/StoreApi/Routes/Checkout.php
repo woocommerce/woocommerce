@@ -3377,24 +3377,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 	 * @testdox A retried checkout removes a fee a merchant added to the failed order and charges the cart total.
 	 */
 	public function test_retry_removes_fee_a_merchant_added_to_the_failed_order(): void {
-		$fail_hook = function () {
-			throw new \Automattic\WooCommerce\StoreApi\Exceptions\RouteException( 'woocommerce_rest_checkout_payment_failed', 'Payment declined.', 400 );
-		};
-		add_action( 'woocommerce_store_api_checkout_order_processed', $fail_hook, 999 );
-		try {
-			$first_response = rest_get_server()->dispatch( $this->build_valid_post_request() );
-		} finally {
-			remove_action( 'woocommerce_store_api_checkout_order_processed', $fail_hook, 999 );
-		}
-		$this->assertEquals( 400, $first_response->get_status(), 'The first POST should fail.' );
-
-		// The registered route keeps its order between dispatches, while a real retry is a new request that loads it again.
-		$route          = rest_get_server()->get_routes()['/wc/store/v1/checkout'][0]['callback'][0];
-		$order_property = new \ReflectionProperty( CheckoutRoute::class, 'order' );
-		$order_property->setAccessible( true );
-		$order_property->setValue( $route, null );
-
-		$order         = wc_get_order( (int) WC()->session->get( 'store_api_draft_order' ) );
+		$order         = $this->place_order_with_failed_payment();
 		$line_item_ids = array_keys( $order->get_items() );
 		$cart_total    = $order->get_total();
 		$merchant_fee  = new \WC_Order_Item_Fee();
@@ -3410,6 +3393,49 @@ class Checkout extends \WP_Test_REST_TestCase {
 		$this->assertEmpty( $order->get_fees(), 'The fee the merchant added should be removed.' );
 		$this->assertSame( $line_item_ids, array_keys( $order->get_items() ), 'The line items should keep their IDs.' );
 		$this->assertSame( $cart_total, $order->get_total(), 'The order total should be the cart total.' );
+	}
+
+	/**
+	 * @testdox A retried checkout adds back a coupon a merchant removed from the failed order.
+	 */
+	public function test_retry_adds_back_a_coupon_a_merchant_removed(): void {
+		WC()->cart->apply_coupon( self::TEST_COUPON_CODE );
+		$order = $this->place_order_with_failed_payment();
+		$order->remove_coupon( self::TEST_COUPON_CODE );
+		$order->save();
+		$this->assertEmpty( $order->get_coupon_codes(), 'Removing the coupon should remove its line.' );
+
+		$retry_response = rest_get_server()->dispatch( $this->build_valid_post_request() );
+
+		$this->assertEquals( 200, $retry_response->get_status(), print_r( $retry_response->get_data(), true ) );
+		$order = wc_get_order( (int) $retry_response->get_data()['order_id'] );
+		$this->assertSame( array( self::TEST_COUPON_CODE ), $order->get_coupon_codes(), 'The coupon line should be added back.' );
+	}
+
+	/**
+	 * Places an order through the checkout route with a payment that fails, so the shopper can retry it, and returns it.
+	 *
+	 * @return \WC_Order
+	 */
+	private function place_order_with_failed_payment(): \WC_Order {
+		$fail_hook = function () {
+			throw new \Automattic\WooCommerce\StoreApi\Exceptions\RouteException( 'woocommerce_rest_checkout_payment_failed', 'Payment declined.', 400 );
+		};
+		add_action( 'woocommerce_store_api_checkout_order_processed', $fail_hook, 999 );
+		try {
+			$response = rest_get_server()->dispatch( $this->build_valid_post_request() );
+		} finally {
+			remove_action( 'woocommerce_store_api_checkout_order_processed', $fail_hook, 999 );
+		}
+		$this->assertEquals( 400, $response->get_status(), 'The first POST should fail.' );
+
+		// The registered route keeps its order between dispatches, while a real retry is a new request that loads it again.
+		$route          = rest_get_server()->get_routes()['/wc/store/v1/checkout'][0]['callback'][0];
+		$order_property = new \ReflectionProperty( CheckoutRoute::class, 'order' );
+		$order_property->setAccessible( true );
+		$order_property->setValue( $route, null );
+
+		return wc_get_order( (int) WC()->session->get( 'store_api_draft_order' ) );
 	}
 
 	/**
