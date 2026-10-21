@@ -2252,13 +2252,20 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should fail a variation row with an unusable parent before converting the product its ID points at.
+	 * @testdox Should fail a variation row with an unusable parent, or an ID that is not a product, before converting the post its ID points at.
 	 */
 	public function test_import_checks_variation_parent_before_converting_the_product_40274(): void {
 		$simple = WC_Helper_Product::create_simple_product();
+		$simple->set_sku( 'IMPORT-40274-PARENT-CHECK' );
+		$simple->save();
 		wp_set_object_terms( $simple->get_id(), 'import-40274-parent-check-tag', 'product_tag' );
+		$blank_parent = WC_Helper_Product::create_simple_product();
+		$page         = self::factory()->post->create( array( 'post_type' => 'page' ) );
 
-		$csv = "ID,Type,Name,Parent\n{$simple->get_id()},variation,Should stay simple,id:" . ( $simple->get_id() + 1000 ) . "\n";
+		$csv = "ID,Type,SKU,Name,Parent\n" .
+			"{$simple->get_id()},variation,,Should stay simple,id:" . ( $simple->get_id() + 1000 ) . "\n" .
+			"{$blank_parent->get_id()},variation,,Should stay simple too,\n" .
+			"{$page},variation,IMPORT-40274-PARENT-CHECK,Should stay a page,\n";
 
 		$data = $this->import_csv_rows(
 			$csv,
@@ -2271,9 +2278,13 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertCount( 1, $data['failed'], 'A variation row with a missing parent fails' );
-		$this->assertSame( 'woocommerce_product_importer_missing_variation_parent_id', $data['failed'][0]->get_error_code(), 'The row fails on its parent' );
+		$this->assertCount( 3, $data['failed'], 'Each variation row fails' );
+		$this->assertSame( 'woocommerce_product_importer_missing_variation_parent_id', $data['failed'][0]->get_error_code(), 'The row fails on its missing parent' );
+		$this->assertSame( 'woocommerce_product_importer_missing_variation_parent_id', $data['failed'][1]->get_error_code(), 'A product turning into a variation needs a parent' );
+		$this->assertSame( 'woocommerce_product_csv_importer_invalid_id', $data['failed'][2]->get_error_code(), 'A post that is not a product is refused' );
 		$this->assertSame( 'product', get_post_type( $simple->get_id() ), 'The product must not be converted to a variation' );
+		$this->assertSame( 'product', get_post_type( $blank_parent->get_id() ), 'The product with a blank Parent cell must not be converted' );
+		$this->assertSame( 'page', get_post_type( $page ), 'The page must not be converted to a variation' );
 		$this->assertTrue( has_term( 'import-40274-parent-check-tag', 'product_tag', $simple->get_id() ), 'The product keeps its tags' );
 	}
 
@@ -2290,11 +2301,21 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$simple->set_sku( 'IMPORT-40274-SIMPLE-PARENT' );
 		$simple->save();
 
+		$placeholder = WC_Helper_Product::create_variation_product();
+		wp_update_post(
+			array(
+				'ID'          => $placeholder->get_id(),
+				'post_status' => 'importing',
+			)
+		);
+
 		$first  = wc_get_product( $children[0] );
 		$second = wc_get_product( $children[1] );
+		$third  = wc_get_product( $children[2] );
 		$csv    = "ID,Type,SKU,Name,Parent\n" .
 			"{$first->get_id()},variation,{$first->get_sku()},Unknown parent,IMPORT-40274-NO-SUCH-PARENT\n" .
-			"{$second->get_id()},variation,{$second->get_sku()},Simple parent,IMPORT-40274-SIMPLE-PARENT\n";
+			"{$second->get_id()},variation,{$second->get_sku()},Simple parent,IMPORT-40274-SIMPLE-PARENT\n" .
+			"{$third->get_id()},variation,{$third->get_sku()},Importing parent,id:{$placeholder->get_id()}\n";
 
 		$data = $this->import_csv_rows(
 			$csv,
@@ -2307,35 +2328,41 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertEmpty( $data['updated'], 'Neither variation may be moved' );
-		$this->assertCount( 2, $data['failed'], 'Both rows fail' );
+		$this->assertEmpty( $data['updated'], 'No variation may be moved' );
+		$this->assertCount( 3, $data['failed'], 'Each row fails' );
 		$this->assertSame( 'woocommerce_product_importer_variation_parent_not_variable', $data['failed'][0]->get_error_code(), 'A placeholder parent is refused' );
 		$this->assertSame( 'woocommerce_product_importer_variation_parent_not_variable', $data['failed'][1]->get_error_code(), 'A simple parent is refused' );
+		$this->assertSame( 'woocommerce_product_importer_variation_parent_not_variable', $data['failed'][2]->get_error_code(), 'A variable parent still being imported is refused' );
 		$this->assertSame( $parent->get_id(), wc_get_product( $first->get_id() )->get_parent_id(), 'The first variation keeps its parent' );
 		$this->assertSame( $parent->get_id(), wc_get_product( $second->get_id() )->get_parent_id(), 'The second variation keeps its parent' );
+		$this->assertSame( $parent->get_id(), wc_get_product( $third->get_id() )->get_parent_id(), 'The third variation keeps its parent' );
 	}
 
 	/**
-	 * @testdox Should keep a variation's parent when its Parent cell is blank, and check the parent of rows without a Type column.
+	 * @testdox Should keep a variation's parent and apply its attributes when its Parent cell is blank, and check the parent of rows without a Type column.
 	 */
 	public function test_import_blank_parent_keeps_parent_and_untyped_rows_are_checked_40274(): void {
 		$parent   = WC_Helper_Product::create_variation_product();
 		$children = $parent->get_children();
-		$csv      = "ID,Name,Parent\n" .
-			"{$children[0]},Blank parent,\n" .
-			"{$children[1]},Missing parent,id:" . ( max( $children ) + 1000 ) . "\n";
+		$csv      = "ID,Name,Parent,Attribute 1 name,Attribute 1 value(s),Attribute 1 global\n" .
+			"{$children[0]},Blank parent,,size,large,1\n" .
+			"{$children[1]},Missing parent,id:" . ( max( $children ) + 1000 ) . ",size,large,1\n";
 
 		$data = $this->import_csv_rows(
 			$csv,
 			array(
-				'ID'     => 'id',
-				'Name'   => 'name',
-				'Parent' => 'parent_id',
+				'ID'                   => 'id',
+				'Name'                 => 'name',
+				'Parent'               => 'parent_id',
+				'Attribute 1 name'     => 'attributes:name1',
+				'Attribute 1 value(s)' => 'attributes:value1',
+				'Attribute 1 global'   => 'attributes:taxonomy1',
 			)
 		);
 
 		$this->assertSame( array( $children[0] ), $data['updated'], 'The row with a blank Parent cell is updated' );
 		$this->assertSame( $parent->get_id(), wc_get_product( $children[0] )->get_parent_id(), 'A blank Parent cell keeps the parent' );
+		$this->assertSame( 'large', wc_get_product( $children[0] )->get_attribute( 'pa_size' ), 'The row\'s attributes still apply' );
 		$this->assertCount( 1, $data['failed'], 'The row naming a missing parent fails' );
 		$this->assertSame( 'woocommerce_product_importer_missing_variation_parent_id', $data['failed'][0]->get_error_code(), 'The untyped row fails on its parent' );
 		$this->assertSame( $parent->get_id(), wc_get_product( $children[1] )->get_parent_id(), 'The failed row keeps the parent' );
