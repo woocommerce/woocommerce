@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Fix incorrect conditional that could cause filenames to be rewritten for non-downloadable product uploads.
+Keep regular upload filenames unchanged when files are sent to the WooCommerce download folder.
