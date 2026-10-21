@@ -27,6 +27,7 @@ test.describe( 'Test the checkout template', () => {
 		admin,
 		editor,
 		page,
+		wpCoreVersion,
 	} ) => {
 		await admin.visitSiteEditor( {
 			postType: 'page',
@@ -44,8 +45,31 @@ test.describe( 'Test the checkout template', () => {
 		).toBeVisible();
 
 		await editor.openDocumentSettingsSidebar();
-		await page.getByLabel( 'Template options' ).click();
-		await page.getByRole( 'menuitem', { name: 'Edit template' } ).click();
+		// eslint-disable-next-line playwright/no-conditional-in-test -- WordPress 7.2 moved template editing from the menu to a separate panel.
+		if ( wpCoreVersion >= 7.2 ) {
+			await page
+				.getByRole( 'button', {
+					name: 'Template: Page: Checkout',
+					exact: true,
+				} )
+				.click();
+			await page
+				.getByRole( 'button', { name: 'Edit', exact: true } )
+				.click();
+		} else {
+			await page.getByLabel( 'Template options' ).click();
+			await page
+				.getByRole( 'menuitem', { name: 'Edit template' } )
+				.click();
+		}
+
+		await expect
+			.poll( () =>
+				page.evaluate( () =>
+					window.wp.data.select( 'core/editor' ).getCurrentPostId()
+				)
+			)
+			.toBe( templatePath );
 
 		await expect(
 			editor.canvas.getByRole( 'button', {
