@@ -524,17 +524,17 @@ final class PlansController extends WP_REST_Controller {
 	}
 
 	/**
-	 * Present a stored policy as a JSON object: an empty payload serializes as `{}`.
+	 * Present a map (a stored policy, error params) as a JSON object: an empty one serializes as `{}`.
 	 *
-	 * @param array<string, mixed>|null $policy Policy payload.
-	 * @return array<string, mixed>|object|null
+	 * @param array<array-key, mixed>|null $map Map.
+	 * @return array<array-key, mixed>|object|null
 	 */
-	private static function as_json_object( ?array $policy ) {
-		if ( array() === $policy ) {
+	private static function as_json_object( ?array $map ) {
+		if ( array() === $map ) {
 			return (object) array();
 		}
 
-		return $policy;
+		return $map;
 	}
 
 	/**
@@ -651,11 +651,14 @@ final class PlansController extends WP_REST_Controller {
 					'message' => $message,
 					'data'    => $error['data'],
 				);
+				if ( isset( $error['data']['params'] ) && is_array( $error['data']['params'] ) ) {
+					$details[ $arg ]['data']['params'] = self::as_json_object( $error['data']['params'] );
+				}
 			}
 			$field_errors[ $error['field'] ][] = array(
 				'code'    => $error['code'],
 				'message' => $error['message'],
-				'params'  => isset( $error['data']['params'] ) && is_array( $error['data']['params'] ) ? $error['data']['params'] : array(),
+				'params'  => self::as_json_object( isset( $error['data']['params'] ) && is_array( $error['data']['params'] ) ? $error['data']['params'] : array() ),
 			);
 		}
 

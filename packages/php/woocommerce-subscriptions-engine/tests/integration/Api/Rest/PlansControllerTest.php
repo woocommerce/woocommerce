@@ -374,32 +374,50 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 			$data = $this->assert_invalid_param( $response, 'name', 'required' );
 			$this->assertSame( 'Invalid parameter(s): name', $data['message'] );
 			$this->assertSame( array( 'name' => 'name: This field is required.' ), $this->nested( $data, array( 'data', 'params' ) ) );
-			$this->assertSame(
+			$this->assertEquals(
 				array(
 					'name' => array(
 						'code'    => 'required',
 						'message' => 'name: This field is required.',
 						'data'    => array(
 							'field'  => 'name',
-							'params' => array(),
+							'params' => (object) array(),
 						),
 					),
 				),
 				$this->nested( $data, array( 'data', 'details' ) )
 			);
-			$this->assertSame(
+			$this->assertEquals(
 				array(
 					'name' => array(
 						array(
 							'code'    => 'required',
 							'message' => 'This field is required.',
-							'params'  => array(),
+							'params'  => (object) array(),
 						),
 					),
 				),
 				$this->nested( $data, array( 'data', 'errors' ) )
 			);
 		}
+	}
+
+	public function test_empty_error_params_serialize_as_a_json_object(): void {
+		wp_set_current_user( $this->admin_id );
+
+		$created = $this->request(
+			'POST',
+			self::BASE,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'name'           => '',
+			)
+		);
+		$json    = (string) wp_json_encode( rest_get_server()->response_to_data( $created, false ) );
+
+		$this->assertStringContainsString( '"data":{"field":"name","params":{}}', $json );
+		$this->assertStringContainsString( '"errors":{"name":[{"code":"required","message":"This field is required.","params":{}}]}', $json );
+		$this->assertStringNotContainsString( '"params":[]', $json );
 	}
 
 	public function test_create_reports_an_unregistered_status_with_every_other_error(): void {
