@@ -334,6 +334,17 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox get_email_data() reports the unpaid timeout toggle as enabled when no option is saved.
+	 */
+	public function test_get_email_data_send_on_unpaid_timeout_defaults_to_true(): void {
+		$controller = $this->create_controller_with_email( $this->create_email_with_unpaid_timeout_field() );
+
+		$result = $controller->get_email_data( array( 'id' => $this->email_post->ID ) );
+
+		$this->assertTrue( $result['send_on_unpaid_timeout'] );
+	}
+
+	/**
 	 * @testdox save_email_data() stores the unpaid timeout toggle as yes/no.
 	 */
 	public function test_save_email_data_stores_send_on_unpaid_timeout(): void {
@@ -411,7 +422,7 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 			 * @return array
 			 */
 			public function get_form_fields(): array {
-				return array_merge( parent::get_form_fields(), array( 'send_on_unpaid_timeout' => array( 'default' => 'yes' ) ) );
+				return array_merge( parent::get_form_fields(), array( 'send_on_unpaid_timeout' => array( 'default' => '' ) ) );
 			}
 		};
 	}
