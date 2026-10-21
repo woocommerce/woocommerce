@@ -82,7 +82,7 @@ final class Plans {
 	 */
 	private const LOG_SOURCE = 'woocommerce-subscriptions-engine';
 
-	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- create() and update() also throw ValidationException and RuntimeException indirectly, through validate_with_extension() and the repository.
+	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- create() and update() also throw ValidationException and RuntimeException indirectly, through throw_refusals() and the repository.
 	/**
 	 * Create a plan.
 	 *
@@ -124,7 +124,7 @@ final class Plans {
 			$plan    = Plan::draft( $fields );
 		}
 
-		self::validate_with_extension( $plan, $refusal );
+		self::throw_refusals( $plan, $refusal );
 
 		( new PlanRepository() )->insert( $plan );
 
@@ -190,7 +190,7 @@ final class Plans {
 			$plan    = self::get_would_be_plan( $plan, $changes );
 		}
 
-		self::validate_with_extension( $plan, $refusal );
+		self::throw_refusals( $plan, $refusal );
 
 		$updated = $repository->update_fields( $plan, array_keys( $changes ) );
 		if ( ! $updated ) {
@@ -444,8 +444,9 @@ final class Plans {
 	}
 
 	/**
-	 * Let the plan's extension validate the would-be plan before it is written, also when the
-	 * plan itself was refused, and report both refusals together: the plan's errors first.
+	 * Ask the plan's extension to validate the would-be plan before it is written, also when the
+	 * plan itself was refused, then throw both refusals together: the plan's errors first.
+	 * Returns only when neither refused.
 	 *
 	 * @param Plan                       $plan    The would-be plan (unsaved on create; unchecked when refused).
 	 * @param InvalidInputException|null $refusal The plan's own refusal, or null.
@@ -453,7 +454,7 @@ final class Plans {
 	 * @throws RuntimeException If a callback threw, with the callback's throwable as the previous
 	 *                          exception. The REST controller relies on that to tell it from a failed write.
 	 */
-	private static function validate_with_extension( Plan $plan, ?InvalidInputException $refusal ): void {
+	private static function throw_refusals( Plan $plan, ?InvalidInputException $refusal ): void {
 		$errors         = new WP_Error();
 		$extension_slug = (string) $plan->get_extension_slug();
 
