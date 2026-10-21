@@ -65,6 +65,13 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	protected $request = array();
 
 	/**
+	 * Order whose item set_item() is preparing, so new line items are priced at the order's tax location.
+	 *
+	 * @var WC_Order|null
+	 */
+	private $order_for_item = null;
+
+	/**
 	 * Register the routes for orders.
 	 */
 	public function register_routes() {
@@ -727,7 +734,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		$id        = isset( $request['id'] ) ? absint( $request['id'] ) : 0;
 		$order     = new WC_Order( $id );
 		$schema    = $this->get_item_schema();
-		$data_keys = array_keys( array_filter( $schema['properties'], array( $this, 'filter_writable_props' ) ) );
+		$data_keys = $this->move_shipping_lines_before_line_items( array_keys( array_filter( $schema['properties'], array( $this, 'filter_writable_props' ) ) ) );
 
 		// Handle all writable props.
 		foreach ( $data_keys as $key ) {
@@ -787,6 +794,24 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		 * @since 4.5.0.
 		 */
 		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}_object", $order, $request, $creating );
+	}
+
+	/**
+	 * Move shipping lines ahead of line items, so new items are priced at the order's tax location (the base address for local pickup).
+	 *
+	 * @since 11.4.0
+	 * @param string[] $data_keys Writable order props in schema order.
+	 * @return string[]
+	 */
+	protected function move_shipping_lines_before_line_items( array $data_keys ): array {
+		if ( ! in_array( 'shipping_lines', $data_keys, true ) || ! in_array( 'line_items', $data_keys, true ) ) {
+			return $data_keys;
+		}
+
+		$data_keys = array_values( array_diff( $data_keys, array( 'shipping_lines' ) ) );
+		array_splice( $data_keys, (int) array_search( 'line_items', $data_keys, true ), 0, 'shipping_lines' );
+
+		return $data_keys;
 	}
 
 	/**
@@ -996,7 +1021,15 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 
 			if ( 'create' === $action ) {
 				$quantity = isset( $posted['quantity'] ) ? $posted['quantity'] : 1;
-				$total    = wc_get_price_excluding_tax( $product, array( 'qty' => $quantity ) );
+				$order    = $this->order_for_item;
+				$total    = wc_get_price_excluding_tax(
+					$product,
+					array(
+						'qty'          => $quantity,
+						'order'        => $order,
+						'tax_location' => $order ? $order->get_taxable_location() : array(),
+					)
+				);
 				$item->set_total( $total );
 				$item->set_subtotal( $total );
 			}
@@ -1124,7 +1157,12 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		}
 
 		// Prepare item data.
-		$item = $this->$method( $posted, $action, $item );
+		$this->order_for_item = $order;
+		try {
+			$item = $this->$method( $posted, $action, $item );
+		} finally {
+			$this->order_for_item = null;
+		}
 
 		/**
 		 * Allow extensions be notified before the item is saved.
