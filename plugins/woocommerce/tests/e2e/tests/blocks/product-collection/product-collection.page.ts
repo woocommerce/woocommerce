@@ -438,7 +438,10 @@ class ProductCollectionPage {
 			.click();
 		await this.page
 			.getByRole( 'menuitemcheckbox', {
-				name,
+				name: new RegExp(
+					`^(?:Show )?${ name.replace( /^Show /, '' ) }(?:, show)?$`,
+					'i'
+				),
 			} )
 			.click();
 		await this.page
