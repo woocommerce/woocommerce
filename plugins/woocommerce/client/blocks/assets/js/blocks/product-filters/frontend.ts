@@ -15,10 +15,18 @@ import type {
 	ProductFiltersContext,
 } from './types';
 import { getClosestColor } from './utils/get-closest-color';
+import { getFocusableElements } from '../../utils/get-focusable-elements';
 import { reload } from '../../utils/navigation';
 import { PRODUCT_FILTERS_STORE_NAME } from './constants';
 
-const { getContext, getElement, store, getServerContext, getConfig } = iAPI;
+const {
+	getContext,
+	getElement,
+	store,
+	getServerContext,
+	getConfig,
+	withSyncEvent,
+} = iAPI;
 
 const BLOCK_NAME = PRODUCT_FILTERS_STORE_NAME;
 
@@ -171,6 +179,7 @@ const productFiltersStore = {
 	actions: {
 		openOverlay: () => {
 			const context = getContext< ProductFiltersContext >();
+			context.openButtonRef = getElement().ref;
 			context.isOverlayOpened = true;
 			if ( document.getElementById( 'wpadminbar' ) ) {
 				const scrollTop = (
@@ -187,18 +196,56 @@ const productFiltersStore = {
 		closeOverlay: () => {
 			const context = getContext< ProductFiltersContext >();
 			context.isOverlayOpened = false;
+			context.openButtonRef?.focus();
+			context.openButtonRef = null;
 		},
 		closeOverlayOnBackdrop: ( event: MouseEvent ) => {
 			if ( event.target === event.currentTarget ) {
 				actions.closeOverlay();
 			}
 		},
-		closeOverlayOnEscape: ( event: KeyboardEvent ) => {
+		handleOverlayKeydown: withSyncEvent( ( event: KeyboardEvent ) => {
 			const context = getContext< ProductFiltersContext >();
-			if ( context.isOverlayOpened && event.key === 'Escape' ) {
-				actions.closeOverlay();
+			if ( ! context.isOverlayOpened ) {
+				return;
 			}
-		},
+
+			if ( event.key === 'Escape' ) {
+				event.preventDefault();
+				actions.closeOverlay();
+				return;
+			}
+
+			if ( event.key !== 'Tab' ) {
+				return;
+			}
+
+			const { ref: dialog } = getElement();
+			if ( ! dialog ) {
+				return;
+			}
+
+			const focusableElements = getFocusableElements( dialog );
+			const first = focusableElements[ 0 ];
+			const last = focusableElements[ focusableElements.length - 1 ];
+			if ( ! first || ! last ) {
+				return;
+			}
+
+			const active = dialog.ownerDocument.activeElement;
+			const focusIsOutside = ! dialog.contains( active );
+
+			if ( event.shiftKey && ( active === first || focusIsOutside ) ) {
+				event.preventDefault();
+				last.focus();
+				return;
+			}
+
+			if ( ! event.shiftKey && ( active === last || focusIsOutside ) ) {
+				event.preventDefault();
+				first.focus();
+			}
+		} ),
 		removeActiveFiltersBy: (
 			callback: ( item: ActiveFilterItem ) => boolean
 		) => {
@@ -283,6 +330,37 @@ const productFiltersStore = {
 		},
 	},
 	callbacks: {
+		initOverlay: () => {
+			const { ref: openButton } = getElement();
+			if ( ! openButton ) {
+				return;
+			}
+			const context = getContext< ProductFiltersContext >();
+			const observer = new ResizeObserver( () => {
+				// Responsive CSS hides the opener when filters become inline.
+				if ( getComputedStyle( openButton ).display === 'none' ) {
+					context.isOverlayOpened = false;
+					context.openButtonRef = null;
+				}
+			} );
+			observer.observe( openButton );
+			return () => observer.disconnect();
+		},
+		focusOverlay: () => {
+			const context = getContext< ProductFiltersContext >();
+			if ( ! context.isOverlayOpened ) {
+				return;
+			}
+			const { ref: dialog } = getElement();
+
+			// Wait for the open class to make the drawer visible before focusing.
+			const frame = requestAnimationFrame( () => {
+				if ( context.isOverlayOpened ) {
+					getFocusableElements( dialog )[ 0 ]?.focus();
+				}
+			} );
+			return () => cancelAnimationFrame( frame );
+		},
 		initColors: () => {
 			const el = getElement();
 			if ( ! el.ref ) {

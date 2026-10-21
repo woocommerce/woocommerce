@@ -208,7 +208,7 @@ class ProductGalleryUtils {
 
 		if ( 'dialog' === $video_location ) {
 			unset( $attrs['autoplay'] );
-			$attrs['data-wp-init--dialog-video-playback'] = 'callbacks.initDialogVideoPlayback';
+			$attrs['data-wp-init---dialog-video-playback'] = 'callbacks.initDialogVideoPlayback';
 		}
 
 		if ( ! empty( $media['poster_id'] ) && ! empty( $media['poster_src'] ) ) {

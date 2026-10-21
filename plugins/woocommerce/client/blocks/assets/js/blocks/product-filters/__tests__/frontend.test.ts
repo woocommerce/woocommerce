@@ -10,6 +10,7 @@ import type { ProductFiltersStore } from '../frontend';
 const mockGetContext = jest.fn();
 const mockGetServerContext = jest.fn();
 const mockGetConfig = jest.fn();
+const mockGetElement = jest.fn();
 const mockReload = jest.fn();
 
 jest.mock( '../../../utils/navigation', () => ( {
@@ -19,6 +20,7 @@ jest.mock( '../../../utils/navigation', () => ( {
 let mockRegisteredStore: {
 	state: ProductFiltersStore[ 'state' ];
 	actions: ProductFiltersStore[ 'actions' ];
+	callbacks: ProductFiltersStore[ 'callbacks' ];
 } | null = null;
 
 jest.mock(
@@ -27,10 +29,13 @@ jest.mock(
 		getContext: mockGetContext,
 		getServerContext: mockGetServerContext,
 		getConfig: mockGetConfig,
+		getElement: mockGetElement,
+		withSyncEvent: ( callback: unknown ) => callback,
 		store: jest.fn( ( _name, definition ) => {
 			mockRegisteredStore = {
 				state: definition.state,
 				actions: definition.actions,
+				callbacks: definition.callbacks,
 			};
 			return mockRegisteredStore;
 		} ),
@@ -57,11 +62,13 @@ describe( 'product filters interactivity store', () => {
 		mockGetContext.mockReset();
 		mockGetServerContext.mockReset();
 		mockGetConfig.mockReset();
+		mockGetElement.mockReset();
+		mockGetElement.mockReturnValue( { ref: null } );
 		mockReload.mockReset();
 		mockRegisteredStore = null;
 
 		jest.isolateModules( () => {
-			require( '../frontend' );
+			jest.requireActual( '../frontend' );
 		} );
 	} );
 
@@ -204,6 +211,54 @@ describe( 'product filters interactivity store', () => {
 			currentTarget: wrapper,
 		} as unknown as MouseEvent );
 		expect( context.isOverlayOpened ).toBe( false );
+	} );
+
+	it( 'focuses the dialog after the overlay is shown', () => {
+		if ( ! mockRegisteredStore ) {
+			throw new Error( 'Product filters store was not registered.' );
+		}
+
+		const root = document.createElement( 'div' );
+		const openButton = document.createElement( 'button' );
+		const dialog = document.createElement( 'div' );
+		const closeButton = document.createElement( 'button' );
+		Object.defineProperty( closeButton, 'offsetParent', {
+			get: () => document.body,
+		} );
+		dialog.append( closeButton );
+		root.append( openButton, dialog );
+		document.body.append( root );
+
+		const context = { isOverlayOpened: false };
+		mockGetContext.mockReturnValue( context );
+		mockGetElement.mockReturnValue( { ref: openButton } );
+
+		let frame: ( ( time: number ) => void ) | undefined;
+		const requestAnimationFrameSpy = jest
+			.spyOn( window, 'requestAnimationFrame' )
+			.mockImplementation( ( callback ) => {
+				frame = callback;
+				return 1;
+			} );
+
+		try {
+			mockRegisteredStore.actions.openOverlay();
+			mockGetElement.mockReturnValue( { ref: dialog } );
+			mockRegisteredStore.callbacks.focusOverlay();
+
+			expect( context.isOverlayOpened ).toBe( true );
+			expect( root.ownerDocument.activeElement ).not.toBe( closeButton );
+
+			frame?.( 0 );
+
+			expect( root.ownerDocument.activeElement ).toBe( closeButton );
+
+			mockRegisteredStore.actions.closeOverlay();
+			expect( root.ownerDocument.activeElement ).toBe( openButton );
+		} finally {
+			root.remove();
+			requestAnimationFrameSpy.mockRestore();
+		}
 	} );
 
 	it( 'does not add child-owned index metadata to selectable items', () => {

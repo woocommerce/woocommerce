@@ -372,6 +372,9 @@ class WC_Install {
 			'wc_update_1130_delete_stock_notification_sync_notice_option',
 			'wc_update_1130_backfill_order_stats_payment_method',
 		),
+		'11.4.0'   => array(
+			'wc_update_1140_re_enable_autoload_options',
+		),
 	);
 
 	/**
