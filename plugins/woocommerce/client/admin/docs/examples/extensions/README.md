@@ -1,6 +1,9 @@
 # WooCommerce Admin Extension Examples
 
-Use `simple-inbox-note` to try an example from this directory. It adds a note to the inbox on **WooCommerce > Home**.
+Choose the workflow that matches the example you want to try:
+
+- **Inbox note:** [Build an example from this directory](#build-an-example-from-this-directory) using the WooCommerce monorepo. The `simple-inbox-note` example adds a note to **WooCommerce > Home**.
+- **Analytics report or onboarding task:** [Scaffold a standalone extension](#scaffold-a-standalone-extension). The former `add-report` and `add-task` examples now use this workflow and do not require a WooCommerce checkout.
 
 ## Build an example from this directory
 
@@ -42,8 +45,23 @@ Edit the files in `simple-inbox-note/` under this directory, not the generated c
 
 The former `add-report` and `add-task` examples now live in [`@woocommerce/create-woo-extension`](../../../../../../../packages/js/create-woo-extension/README.md), alongside other [variants](../../../../../../../packages/js/create-woo-extension/README.md#variants). The scaffold generates a standalone plugin with its own build and wp-env setup.
 
-The report variant is selected with:
+For this walkthrough, use Node.js 24.15.0 or a newer 24.x release, npm, PHP, and Composer, and have Docker running. From a directory outside the WooCommerce checkout, generate the report example:
 
 ```bash
 npx @wordpress/create-block -t @woocommerce/create-woo-extension --variant=add-report my-extension-name
 ```
+
+Wait for dependency installation and the production build to finish. Then start the generated plugin's WordPress environment:
+
+```bash
+cd my-extension-name
+npx @wordpress/env start
+```
+
+The included configuration installs and activates WooCommerce and the generated plugin. Open `/wp-admin/` at the site URL printed by wp-env and sign in with username `admin` and password `password`.
+
+If WooCommerce opens the setup wizard, select **Skip guided setup**, choose your store's country or region, and select **Go to my store**.
+
+Open **Analytics > My Extension Name**. You should see an **Example Data** table containing four sample apple varieties; no products or orders are needed. The report's admin URL is `/wp-admin/admin.php?page=wc-admin&path=%2Fanalytics%2Fmy-extension-name`.
+
+When finished, run `npx @wordpress/env stop` from the generated plugin directory.
