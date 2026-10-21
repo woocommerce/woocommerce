@@ -206,16 +206,26 @@ class ProductFilters extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Empty state is scoped independently for multiple Product Filters wrappers.
+	 * @testdox Empty state is scoped independently for identical and different Product Filters wrappers.
 	 *
 	 * @return void
 	 */
 	public function test_empty_state_is_scoped_per_wrapper(): void {
-		$empty_output   = $this->render_with_filter_states( array( true ) );
-		$visible_output = $this->render_with_filter_states( array( false ) );
+		$previous_states        = wp_interactivity_state( 'woocommerce/product-filters' )['filterEmptyStates'] ?? array();
+		$empty_output           = $this->render_with_filter_states( array( true ) );
+		$duplicate_empty_output = $this->render_with_filter_states( array( true ) );
+		$visible_output         = $this->render_with_filter_states( array( false ) );
 
 		$this->assertStringContainsString( 'wc-block-product-filters--empty', $empty_output );
+		$this->assertStringContainsString( 'wc-block-product-filters--empty', $duplicate_empty_output );
 		$this->assertStringNotContainsString( 'wc-block-product-filters--empty', $visible_output );
+
+		$current_states = wp_interactivity_state( 'woocommerce/product-filters' )['filterEmptyStates'];
+		$wrapper_states = array_diff_key( $current_states, $previous_states );
+		$this->assertCount( 3, $wrapper_states );
+		foreach ( $wrapper_states as $empty_states ) {
+			$this->assertCount( 1, $empty_states );
+		}
 	}
 
 	/**

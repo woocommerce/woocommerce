@@ -195,8 +195,9 @@ CSS;
 			}
 		);
 
-		$product_filters_key = wp_unique_prefixed_id( 'wc-product-filters-' );
-		$block_context       = array_merge(
+		$navigation_id         = $this->generate_navigation_id( $block );
+		$product_filters_key   = wp_unique_prefixed_id( $navigation_id . '-' );
+		$block_context         = array_merge(
 			$block->context,
 			array(
 				'filterParams'      => $filter_params,
@@ -242,7 +243,7 @@ CSS;
 
 		$wrapper_attributes = array(
 			'class'                         => implode( ' ', $wrapper_classes ),
-			'data-wp-router-region'         => $this->generate_navigation_id( $block ),
+			'data-wp-router-region'         => $navigation_id,
 			'data-wp-interactive'           => $this->get_full_block_name(),
 			'data-wp-init--colors'          => 'callbacks.initColors',
 			'data-wp-watch--active-filters' => 'callbacks.syncActiveFiltersWithServer',
