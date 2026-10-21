@@ -80,7 +80,7 @@ class PageControllerTest extends WC_Unit_Test_Case {
 		$this->current_screen_backup = $GLOBALS['current_screen'] ?? null;
 		$GLOBALS['current_screen']   = $this->get_screen_mock(); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		if ( ! did_action( 'current_screen' ) ) {
-			do_action( 'current_screen', $GLOBALS['current_screen'] ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+			do_action( 'current_screen', $GLOBALS['current_screen'] );
 		}
 
 		parent::setUp();
@@ -94,7 +94,7 @@ class PageControllerTest extends WC_Unit_Test_Case {
 
 		// Start watching for redirects.
 		$this->redirected_to = '';
-		add_filter( 'wp_redirect', array( $this, 'watch_and_anull_redirects' ) );
+		add_filter( 'wp_redirect', array( $this, 'watch_and_annul_redirects' ) );
 	}
 
 	/**
@@ -104,7 +104,7 @@ class PageControllerTest extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		// Remove redirect listener.
-		remove_filter( 'wp_redirect', array( $this, 'watch_and_anull_redirects' ) );
+		remove_filter( 'wp_redirect', array( $this, 'watch_and_annul_redirects' ) );
 
 		// Clean up users.
 		wp_delete_user( $this->admin_user_id );
@@ -148,7 +148,7 @@ class PageControllerTest extends WC_Unit_Test_Case {
 	 * @throws \WPAjaxDieContinueException To prevent exit() from being called after redirect.
 	 * @return void
 	 */
-	public function watch_and_anull_redirects( string $url ) {
+	public function watch_and_annul_redirects( string $url ) {
 		$this->redirected_to = $url;
 		// Throw exception to prevent exit() from being called after wp_safe_redirect().
 		throw new \WPAjaxDieContinueException();

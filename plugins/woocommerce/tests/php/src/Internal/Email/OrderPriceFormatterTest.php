@@ -57,7 +57,7 @@ class OrderPriceFormatterTest extends WC_Unit_Test_Case {
 			OrderPriceFormatter::get_formatted_item_subtotal( $order, $item, 'incl' )
 		);
 
-		// Enable tax as a requirement of the "exlucding tax" label to be shown in `wc_price`.
+		// Enable tax as a requirement of the "excluding tax" label to be shown in `wc_price`.
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 
 		// Test with prices including tax and 20% tax rate.

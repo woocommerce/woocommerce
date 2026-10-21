@@ -262,7 +262,8 @@ class DataUtils {
 			if ( $refund_total_missing && isset( $line_item['refund_tax'] ) ) {
 				return new WP_Error(
 					'invalid_line_item',
-					__( 'refund_tax cannot be combined with an auto-computed refund_total. Provide refund_total explicitly when supplying refund_tax.', 'woocommerce' )
+					__( 'refund_tax cannot be combined with an auto-computed refund_total. Provide refund_total explicitly when supplying refund_tax.', 'woocommerce' ),
+					array( 'status' => WP_Http::BAD_REQUEST )
 				);
 			}
 
@@ -299,7 +300,8 @@ class DataUtils {
 						/* translators: %d: line item id */
 						__( 'Cannot auto-compute refund for line item %d: source quantity is zero. Provide an explicit refund_total.', 'woocommerce' ),
 						(int) $line_item_id
-					)
+					),
+					array( 'status' => WP_Http::BAD_REQUEST )
 				);
 			}
 
@@ -396,48 +398,10 @@ class DataUtils {
 					);
 				}
 
-				$item_total_with_tax = abs( $signed_line_total );
-				$abs_refund_total    = abs( $line_refund_gross );
-
-				// Mirror the preview path's three distinct over-refund errors (same
-				// codes, messages, and 422 status) so create and preview reject the
-				// same input identically. An over-refund is a well-formed but
-				// unprocessable request, so 422 — not 400 — is the correct status,
-				// matching the order-level cap the controller already returns.
-				if ( $abs_refund_total > NumberUtil::round( $item_total_with_tax, $price_decimals ) ) {
-					return new WP_Error(
-						'refund_total_exceeds_line',
-						sprintf(
-							/* translators: %s: line item total including tax */
-							__( 'refund_total cannot exceed the line item total including tax (%s).', 'woocommerce' ),
-							wc_format_decimal( $item_total_with_tax, $price_decimals )
-						),
-						array( 'status' => WP_Http::UNPROCESSABLE_ENTITY )
-					);
-				}
-
-				// Remaining is rounded to currency precision before both checks, so a
-				// sub-cent residue left by rounding drift counts as fully refunded
-				// rather than producing a "cannot exceed 0.00" rejection.
-				$refunded_total  = abs( (float) ( $refund_data['totals'][ $line_item_id ] ?? 0.0 ) );
-				$remaining_total = NumberUtil::round( $item_total_with_tax - $refunded_total, $price_decimals );
-				if ( $remaining_total <= 0 ) {
-					return new WP_Error(
-						'line_item_already_refunded',
-						__( 'This line item has already been fully refunded.', 'woocommerce' ),
-						array( 'status' => WP_Http::UNPROCESSABLE_ENTITY )
-					);
-				}
-				if ( $abs_refund_total > $remaining_total ) {
-					return new WP_Error(
-						'refund_total_exceeds_remaining',
-						sprintf(
-							/* translators: %s: remaining refundable amount */
-							__( 'refund_total cannot exceed the remaining refundable amount for this line item (%s).', 'woocommerce' ),
-							wc_format_decimal( $remaining_total, $price_decimals )
-						),
-						array( 'status' => WP_Http::UNPROCESSABLE_ENTITY )
-					);
+				$refunded_total   = (float) ( $refund_data['totals'][ $line_item_id ] ?? 0.0 );
+				$validation_error = $this->validate_refund_line_total( $item, $line_refund_gross, $refunded_total );
+				if ( is_wp_error( $validation_error ) ) {
+					return $validation_error;
 				}
 			}
 
@@ -449,7 +413,7 @@ class DataUtils {
 
 					foreach ( $line_item['refund_tax'] as $refund_tax ) {
 						if ( ! isset( $refund_tax['id'], $refund_tax['refund_total'] ) ) {
-							return new WP_Error( 'invalid_line_item', __( 'Tax id and refund_total are required.', 'woocommerce' ) );
+							return new WP_Error( 'invalid_line_item', __( 'Tax id and refund_total are required.', 'woocommerce' ), array( 'status' => WP_Http::BAD_REQUEST ) );
 						}
 						$tax_id           = $refund_tax['id'];
 						$tax_refund_total = $refund_tax['refund_total'];
@@ -461,7 +425,8 @@ class DataUtils {
 								/* translators: %s: tax IDs */
 									__( 'Line item tax not found. Must be: %s.', 'woocommerce' ),
 									implode( ', ', $allowed_tax_ids )
-								)
+								),
+								array( 'status' => WP_Http::BAD_REQUEST )
 							);
 						}
 
@@ -495,18 +460,96 @@ class DataUtils {
 						$already_refunded_tax = (float) ( $refund_data['tax_totals'][ $line_item_id ][ $tax_id ] ?? 0.0 );
 						$remaining_tax        = abs( $stored_tax ) - $already_refunded_tax;
 						if ( abs( $requested_tax ) > NumberUtil::round( $remaining_tax, $price_decimals ) ) {
+							// 400, not the 422 the over-refund caps above use: this is the
+							// status the released wc/v4 envelope already backfills for this
+							// error, so anything else would change a shipped response. It
+							// also keeps the code-to-status mapping one-to-one across this
+							// file — invalid_refund_amount is 400 at every site, sharing the
+							// code with the wrong-sign guard above, which is malformed
+							// input, while each 422 carries its own over-refund code.
 							return new WP_Error(
 								'invalid_refund_amount',
 								sprintf(
 								/* translators: %s: remaining refundable tax total */
 									__( 'Refund tax total cannot be greater than the remaining refundable tax for this line item (%s).', 'woocommerce' ),
 									wc_format_decimal( $remaining_tax, $price_decimals )
-								)
+								),
+								array( 'status' => WP_Http::BAD_REQUEST )
 							);
 						}
 					}
 				}
 			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Check a line refund against the original line and previous refunds.
+	 *
+	 * Both refund paths use this limit. The computed path passes a tax-inclusive
+	 * amount; the explicit wc/v3 path passes its tax-inclusive gross amount.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param WC_Order_Item_Product|WC_Order_Item_Fee|WC_Order_Item_Shipping $item                  Original order item.
+	 * @param float                                                          $refund_total          Requested line item refund amount.
+	 * @param float                                                          $already_refunded_total Prior refunds for this item, including tax.
+	 * @return true|WP_Error Validation result.
+	 */
+	public function validate_refund_line_total( $item, float $refund_total, float $already_refunded_total ) {
+		$price_decimals      = wc_get_price_decimals();
+		$signed_line_total   = (float) $item->get_total() + (float) $item->get_total_tax();
+		$item_total_with_tax = abs( $signed_line_total );
+		$abs_refund_total    = NumberUtil::round( abs( $refund_total ), $price_decimals );
+
+		if ( $refund_total * $signed_line_total < 0 ) {
+			return new WP_Error(
+				'invalid_refund_total',
+				__( 'Refund total has the wrong sign for this line item.', 'woocommerce' ),
+				array( 'status' => WP_Http::BAD_REQUEST )
+			);
+		}
+
+		// Mirror the preview path's three distinct over-refund errors (same
+		// codes, messages, and 422 status) so create and preview reject the
+		// same input identically. An over-refund is a well-formed but
+		// unprocessable request, so 422 — not 400 — is the correct status,
+		// matching the order-level cap the controller already returns.
+		if ( $abs_refund_total > NumberUtil::round( $item_total_with_tax, $price_decimals ) ) {
+			return new WP_Error(
+				'refund_total_exceeds_line',
+				sprintf(
+					/* translators: %s: line item total including tax */
+					__( 'refund_total cannot exceed the line item total including tax (%s).', 'woocommerce' ),
+					wc_format_decimal( $item_total_with_tax, $price_decimals )
+				),
+				array( 'status' => WP_Http::UNPROCESSABLE_ENTITY )
+			);
+		}
+
+		// Remaining is rounded to currency precision before both checks, so a
+		// sub-cent residue left by rounding drift counts as fully refunded
+		// rather than producing a "cannot exceed 0.00" rejection.
+		$remaining_total = NumberUtil::round( $item_total_with_tax - abs( $already_refunded_total ), $price_decimals );
+		if ( $remaining_total <= 0 ) {
+			return new WP_Error(
+				'line_item_already_refunded',
+				__( 'This line item has already been fully refunded.', 'woocommerce' ),
+				array( 'status' => WP_Http::UNPROCESSABLE_ENTITY )
+			);
+		}
+		if ( $abs_refund_total > $remaining_total ) {
+			return new WP_Error(
+				'refund_total_exceeds_remaining',
+				sprintf(
+					/* translators: %s: remaining refundable amount */
+					__( 'refund_total cannot exceed the remaining refundable amount for this line item (%s).', 'woocommerce' ),
+					wc_format_decimal( $remaining_total, $price_decimals )
+				),
+				array( 'status' => WP_Http::UNPROCESSABLE_ENTITY )
+			);
 		}
 
 		return true;
@@ -1134,7 +1177,7 @@ class DataUtils {
 				}
 
 				$item_total_with_tax = abs( $signed_line_total );
-				$abs_refund_total    = abs( $refund_total );
+				$abs_refund_total    = NumberUtil::round( abs( $refund_total ), $price_decimals );
 				if ( $abs_refund_total > NumberUtil::round( $item_total_with_tax, $price_decimals ) ) {
 					return new WP_Error(
 						'refund_total_exceeds_line',

@@ -4,8 +4,8 @@
  * `(contract_id, kind)` with counters derived from its rows (not a stored entity).
  *
  * An immutable billing record frozen at billing (snapshot references, period
- * boundaries, `expected_total`); only `status`, `order_id`, and `reason` may change
- * afterwards. The `count` is the chargeable number and idempotency anchor, nullable
+ * boundaries, `expected_total`). Only the repository's compare-and-set tools change a
+ * stored cycle's `status`, `order_id`, `reason` and claim afterwards. The `count` is the chargeable number and idempotency anchor, nullable
  * for non-counting cycles (e.g. a future trial). Money is a decimal-safe string;
  * timestamps are GMT strings (`Y-m-d H:i:s`).
  *
@@ -17,8 +17,9 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\SubscriptionsEngine\Core\Entity;
 
 use DomainException;
+use LogicException;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\MoneyScale;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ScalarCoercion;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\Coercion;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\ItemsSnapshot;
 
@@ -49,9 +50,9 @@ final class Cycle {
 	private $contract_id;
 
 	/**
-	 * Position within the chain, monotonic from 1.
+	 * Position within the chain, monotonic from 1, or null until the append assigns it.
 	 *
-	 * @var int
+	 * @var int|null
 	 */
 	private $sequence_no;
 
@@ -142,9 +143,9 @@ final class Cycle {
 	private $extension_slug;
 
 	/**
-	 * Crash-recovery lease expiry (GMT string), or null. Set when a `pending` cycle is
-	 * claimed; a stuck pending cycle past this moment is reclaimable. The create-as-claim
-	 * UNIQUE index is the primary concurrency guard - this only recovers a crashed charge.
+	 * Claim expiry (GMT string), or null. Set when a caller appends a cycle claimed, claims
+	 * it, or transitions it with a claim; once it passes, another caller may claim the
+	 * cycle. The chain's UNIQUE positions remain the primary guard against a duplicate cycle.
 	 *
 	 * @var string|null
 	 */
@@ -159,14 +160,14 @@ final class Cycle {
 	private $retry_at_gmt;
 
 	/**
-	 * Typed plan snapshot held in memory, or null.
+	 * Typed plan snapshot attached on read from `plan_snapshot_id`, or null.
 	 *
 	 * @var PlanSnapshot|null
 	 */
 	private $plan_snapshot;
 
 	/**
-	 * Typed items snapshot held in memory, or null.
+	 * Typed items snapshot attached on read from `items_snapshot_id`, or null.
 	 *
 	 * @var ItemsSnapshot|null
 	 */
@@ -179,55 +180,55 @@ final class Cycle {
 	 * @param array<string, mixed> $data Raw attributes keyed by property name.
 	 */
 	private function __construct( array $data ) {
-		$this->id                = ScalarCoercion::coerce_nullable_int( $data['id'] ?? null );
-		$this->contract_id       = ScalarCoercion::coerce_int( $data['contract_id'] ?? null );
-		$this->sequence_no       = ScalarCoercion::coerce_int( $data['sequence_no'] ?? null );
-		$this->count             = isset( $data['count'] ) ? ScalarCoercion::coerce_int( $data['count'] ) : null;
-		$this->kind              = ScalarCoercion::coerce_string( $data['kind'] ?? null, self::KIND_BILLING );
+		$this->id                = Coercion::coerce_nullable_int( $data['id'] ?? null );
+		$this->contract_id       = Coercion::coerce_int( $data['contract_id'] ?? null );
+		$this->sequence_no       = isset( $data['sequence_no'] ) ? Coercion::coerce_int( $data['sequence_no'] ) : null;
+		$this->count             = isset( $data['count'] ) ? Coercion::coerce_int( $data['count'] ) : null;
+		$this->kind              = Coercion::coerce_string( $data['kind'] ?? null, self::KIND_BILLING );
 		$this->status            = self::coerce_status( $data['status'] ?? null );
-		$this->reason            = ScalarCoercion::coerce_nullable_string( $data['reason'] ?? null );
-		$this->starts_at_gmt     = ScalarCoercion::coerce_string( $data['starts_at_gmt'] ?? null );
-		$this->ends_at_gmt       = ScalarCoercion::coerce_string( $data['ends_at_gmt'] ?? null );
+		$this->reason            = Coercion::coerce_nullable_string( $data['reason'] ?? null );
+		$this->starts_at_gmt     = Coercion::coerce_string( $data['starts_at_gmt'] ?? null );
+		$this->ends_at_gmt       = Coercion::coerce_string( $data['ends_at_gmt'] ?? null );
 		$this->expected_total    = MoneyScale::normalize_money( $data['expected_total'] ?? '0' );
-		$this->currency          = ScalarCoercion::coerce_string( $data['currency'] ?? null );
-		$this->plan_snapshot_id  = ScalarCoercion::coerce_nullable_int( $data['plan_snapshot_id'] ?? null );
-		$this->items_snapshot_id = ScalarCoercion::coerce_nullable_int( $data['items_snapshot_id'] ?? null );
-		$this->order_id          = ScalarCoercion::coerce_nullable_int( $data['order_id'] ?? null );
-		$this->extension_slug    = ScalarCoercion::coerce_nullable_string( $data['extension_slug'] ?? null );
-		$this->claimed_until_gmt = ScalarCoercion::coerce_nullable_string( $data['claimed_until'] ?? null );
-		$this->retry_at_gmt      = ScalarCoercion::coerce_nullable_string( $data['retry_at'] ?? null );
-		$this->plan_snapshot     = ( $data['plan_snapshot'] ?? null ) instanceof PlanSnapshot ? $data['plan_snapshot'] : null;
-		$this->items_snapshot    = ( $data['items_snapshot'] ?? null ) instanceof ItemsSnapshot ? $data['items_snapshot'] : null;
+		$this->currency          = Coercion::coerce_string( $data['currency'] ?? null );
+		$this->plan_snapshot_id  = Coercion::coerce_nullable_int( $data['plan_snapshot_id'] ?? null );
+		$this->items_snapshot_id = Coercion::coerce_nullable_int( $data['items_snapshot_id'] ?? null );
+		$this->order_id          = Coercion::coerce_nullable_int( $data['order_id'] ?? null );
+		$this->extension_slug    = Coercion::coerce_nullable_string( $data['extension_slug'] ?? null );
+		$this->claimed_until_gmt = Coercion::coerce_nullable_string( $data['claimed_until'] ?? null );
+		$this->retry_at_gmt      = Coercion::coerce_nullable_string( $data['retry_at'] ?? null );
 	}
 
 	/**
 	 * Build a new, unsaved cycle.
 	 *
-	 * Required keys: `contract_id`, `sequence_no`, `starts_at_gmt`, `ends_at_gmt`,
-	 * `expected_total`, `currency`. Optional: `count` (defaults to 1; pass null for
-	 * a non-counting cycle), `status` (defaults to `pending`; a checkout signup
-	 * cycle is created directly `billed`), `kind` (defaults to billing), `reason`,
-	 * `order_id`, `extension_slug`, `plan_snapshot_id`, `items_snapshot_id`,
-	 * `plan_snapshot`, `items_snapshot`.
+	 * Required keys: `contract_id`, `starts_at_gmt`, `ends_at_gmt`, `expected_total`,
+	 * `currency`. Optional: `sequence_no` (absent or null: the append assigns the chain's
+	 * next position), `count` (absent or null for a non-counting cycle; the caller owns
+	 * the numbering), `status` (defaults to `pending`), `kind` (defaults to billing), `reason`,
+	 * `order_id`, `extension_slug`, `plan_snapshot_id`, `items_snapshot_id`. Snapshot value
+	 * objects are attached only when a stored cycle is read.
 	 *
 	 * @param array<string, mixed> $args Cycle attributes.
 	 * @throws DomainException If the attributes are not valid.
 	 */
 	public static function create( array $args ): self {
-		if ( ! isset( $args['contract_id'] ) ) {
-			throw new DomainException( 'Cycle: contract_id is required.' );
-		}
-
-		// A new cycle is always unsaved; never adopt a caller-supplied id.
-		unset( $args['id'] );
-
-		// Absent count defaults to 1 (counting); explicit null means non-counting. `?? 1` would conflate them.
-		$args['count'] = self::normalize_count( array_key_exists( 'count', $args ) ? $args['count'] : 1 );
+		// A new cycle is always unsaved; never adopt a caller-supplied id. A claim is
+		// stamped by the database when the cycle is appended, never carried in.
+		unset( $args['id'], $args['claimed_until'] );
 
 		$cycle = new self( $args );
 
-		self::assert_valid_kind( $cycle->kind );
-		self::assert_valid_sequence_no( $cycle->sequence_no );
+		self::assert_contract_id( $cycle->contract_id );
+		self::assert_kind( $cycle->kind );
+		// Null is allowed here for auto-assign sequence_no during append operation.
+		if ( null !== $cycle->sequence_no ) {
+			self::assert_sequence_no( $cycle->sequence_no );
+		}
+		self::assert_period( $cycle->starts_at_gmt, $cycle->ends_at_gmt );
+		self::assert_currency( $cycle->currency );
+		self::assert_count( $cycle->count );
+		self::assert_status( $cycle->status );
 
 		return $cycle;
 	}
@@ -235,21 +236,13 @@ final class Cycle {
 	/**
 	 * Hydrate from a stored row.
 	 *
+	 * Stored values are not validated (invariants are checked only where a value is
+	 * written), so a value written by a since-deactivated extension round-trips unchanged.
+	 *
 	 * @param array<string, mixed> $row Cycle row.
-	 * @throws DomainException If the stored status, kind, or sequence_no is invalid.
+	 * @throws DomainException If the stored status is not a well-formed status slug.
 	 */
 	public static function from_storage( array $row ): self {
-		$kind = ScalarCoercion::coerce_string( $row['kind'] ?? null, self::KIND_BILLING );
-		self::assert_valid_kind( $kind );
-
-		$sequence_no = ScalarCoercion::coerce_int( $row['sequence_no'] ?? null );
-		self::assert_valid_sequence_no( $sequence_no );
-
-		// The typed snapshot value objects are attached on load, never hydrated here.
-		unset( $row['plan_snapshot'], $row['items_snapshot'] );
-
-		$row['count'] = array_key_exists( 'count', $row ) ? self::normalize_count( $row['count'] ) : null;
-
 		return new self( $row );
 	}
 
@@ -277,30 +270,40 @@ final class Cycle {
 	}
 
 	/**
-	 * Set the owning contract id. A cycle may be built with a placeholder id (0)
-	 * before its contract is persisted; the repository stamps the real id later.
-	 *
-	 * @param int $contract_id Owning contract id.
-	 */
-	public function set_contract_id( int $contract_id ): void {
-		$this->contract_id = $contract_id;
-	}
-
-	/**
 	 * Position within the chain.
+	 *
+	 * @throws LogicException If the position is not assigned yet (a new cycle before its append).
 	 */
 	public function get_sequence_no(): int {
+		if ( null === $this->sequence_no ) {
+			throw new LogicException( 'Cycle: sequence_no is assigned on append.' );
+		}
+
 		return $this->sequence_no;
 	}
 
 	/**
-	 * Set the position within the chain (assigned by the append path).
+	 * Whether the append still has to assign the position within the chain.
+	 *
+	 * @internal Used by the repository's append.
+	 */
+	public function awaits_sequence_no(): bool {
+		return null === $this->sequence_no;
+	}
+
+	/**
+	 * Assign the position within the chain. Only while it is unassigned.
+	 *
+	 * @internal Used by the repository's append.
 	 *
 	 * @param int $sequence_no Position, monotonic from 1.
-	 * @throws DomainException If `$sequence_no` is not positive.
+	 * @throws DomainException If the position is already assigned or `$sequence_no` is not positive.
 	 */
-	public function set_sequence_no( int $sequence_no ): void {
-		self::assert_valid_sequence_no( $sequence_no );
+	public function assign_sequence_no( int $sequence_no ): void {
+		if ( null !== $this->sequence_no ) {
+			throw new DomainException( 'Cycle: sequence_no is already assigned.' );
+		}
+		self::assert_sequence_no( $sequence_no );
 
 		$this->sequence_no = $sequence_no;
 	}
@@ -327,33 +330,10 @@ final class Cycle {
 	}
 
 	/**
-	 * Transition the cycle to a new status.
-	 *
-	 * @param CycleStatus $status Target status.
-	 * @throws DomainException If the transition is not allowed by CycleStatus.
-	 */
-	public function set_status( CycleStatus $status ): void {
-		if ( $this->status->equals( $status ) ) {
-			return;
-		}
-
-		$this->status = $this->status->transition_to( $status );
-	}
-
-	/**
 	 * Open-ended annotation, or null.
 	 */
 	public function get_reason(): ?string {
 		return $this->reason;
-	}
-
-	/**
-	 * Annotate the cycle with an open-ended reason. Always writable.
-	 *
-	 * @param string|null $reason Reason text, or null to clear.
-	 */
-	public function set_reason( ?string $reason ): void {
-		$this->reason = $reason;
 	}
 
 	/**
@@ -392,34 +372,10 @@ final class Cycle {
 	}
 
 	/**
-	 * Record the plan snapshot row id once it is stored. Write-once: only fills an
-	 * unset id, never re-points the frozen reference.
-	 *
-	 * @param int $plan_snapshot_id Snapshot row id.
-	 * @throws DomainException If a plan snapshot id is already recorded.
-	 */
-	public function set_plan_snapshot_id( int $plan_snapshot_id ): void {
-		$this->assert_snapshot_ref_unset( 'plan_snapshot_id', $this->plan_snapshot_id );
-		$this->plan_snapshot_id = $plan_snapshot_id;
-	}
-
-	/**
 	 * Items snapshot row id, or null.
 	 */
 	public function get_items_snapshot_id(): ?int {
 		return $this->items_snapshot_id;
-	}
-
-	/**
-	 * Record the items snapshot row id once it is stored. Write-once companion to
-	 * {@see self::set_plan_snapshot_id()}.
-	 *
-	 * @param int $items_snapshot_id Snapshot row id.
-	 * @throws DomainException If an items snapshot id is already recorded.
-	 */
-	public function set_items_snapshot_id( int $items_snapshot_id ): void {
-		$this->assert_snapshot_ref_unset( 'items_snapshot_id', $this->items_snapshot_id );
-		$this->items_snapshot_id = $items_snapshot_id;
 	}
 
 	/**
@@ -430,16 +386,6 @@ final class Cycle {
 	}
 
 	/**
-	 * Link the cycle to its order. One of the few post-freeze-mutable fields (with
-	 * `status` and `reason`): the order id is stamped once the charge order exists.
-	 *
-	 * @param int $order_id Linked order id.
-	 */
-	public function set_order_id( int $order_id ): void {
-		$this->order_id = $order_id;
-	}
-
-	/**
 	 * Owning extension slug, or null.
 	 */
 	public function get_extension_slug(): ?string {
@@ -447,20 +393,10 @@ final class Cycle {
 	}
 
 	/**
-	 * Crash-recovery lease expiry (GMT string), or null.
+	 * Crash-recovery claim expiry (GMT string), or null.
 	 */
 	public function get_claimed_until_gmt(): ?string {
 		return $this->claimed_until_gmt;
-	}
-
-	/**
-	 * Set (or clear) the crash-recovery lease expiry. Post-freeze-mutable (with `status`,
-	 * `order_id`, `reason`): a claim stamps it, and a reclaim/resolve may re-stamp or clear it.
-	 *
-	 * @param string|null $claimed_until_gmt Lease expiry GMT string, or null to clear.
-	 */
-	public function set_claimed_until_gmt( ?string $claimed_until_gmt ): void {
-		$this->claimed_until_gmt = $claimed_until_gmt;
 	}
 
 	/**
@@ -468,15 +404,6 @@ final class Cycle {
 	 */
 	public function get_retry_at_gmt(): ?string {
 		return $this->retry_at_gmt;
-	}
-
-	/**
-	 * Set (or clear) the reserved retry moment. Reserved for a later retry/dunning pass.
-	 *
-	 * @param string|null $retry_at_gmt Retry moment GMT string, or null to clear.
-	 */
-	public function set_retry_at_gmt( ?string $retry_at_gmt ): void {
-		$this->retry_at_gmt = $retry_at_gmt;
 	}
 
 	/**
@@ -525,7 +452,7 @@ final class Cycle {
 	 * Serialize the cycle row (excluding the generated id/timestamps). Status is
 	 * stored as its plain string value.
 	 *
-	 * @return array<string, mixed>
+	 * @return array<string, int|string|null>
 	 */
 	public function to_storage(): array {
 		return array(
@@ -549,18 +476,14 @@ final class Cycle {
 	}
 
 	/**
-	 * Guard a snapshot row-id stamp so it is write-once; a second stamp would
-	 * re-point a frozen reference.
+	 * Refuse a missing (non-positive) owning contract id.
 	 *
-	 * @param string   $field   Field being stamped, for the error message.
-	 * @param int|null $current The currently recorded id (must be null to stamp).
-	 * @throws DomainException If the id is already recorded.
+	 * @param int $contract_id Contract id to check.
+	 * @throws DomainException If `$contract_id` is not positive.
 	 */
-	private function assert_snapshot_ref_unset( string $field, ?int $current ): void {
-		if ( null !== $current ) {
-			throw new DomainException(
-				sprintf( 'Cycle: "%s" is frozen and cannot be re-pointed.', $field )
-			);
+	private static function assert_contract_id( int $contract_id ): void {
+		if ( $contract_id < 1 ) {
+			throw new DomainException( 'Cycle: contract_id is required.' );
 		}
 	}
 
@@ -571,9 +494,34 @@ final class Cycle {
 	 * @param string $kind Kind to validate.
 	 * @throws DomainException If `$kind` is empty.
 	 */
-	private static function assert_valid_kind( string $kind ): void {
+	private static function assert_kind( string $kind ): void {
 		if ( '' === $kind ) {
 			throw new DomainException( 'Cycle: kind must not be empty.' );
+		}
+	}
+
+	/**
+	 * Refuse a cycle without a start or end moment.
+	 *
+	 * @param string $starts_at_gmt Start (GMT).
+	 * @param string $ends_at_gmt   End (GMT).
+	 * @throws DomainException If either moment is missing.
+	 */
+	private static function assert_period( string $starts_at_gmt, string $ends_at_gmt ): void {
+		if ( '' === $starts_at_gmt || '' === $ends_at_gmt ) {
+			throw new DomainException( 'Cycle: starts_at_gmt and ends_at_gmt are required.' );
+		}
+	}
+
+	/**
+	 * Refuse a cycle without a currency.
+	 *
+	 * @param string $currency Currency code.
+	 * @throws DomainException If the currency is missing.
+	 */
+	private static function assert_currency( string $currency ): void {
+		if ( '' === $currency ) {
+			throw new DomainException( 'Cycle: currency is required.' );
 		}
 	}
 
@@ -583,7 +531,7 @@ final class Cycle {
 	 * @param int $sequence_no Sequence number to validate.
 	 * @throws DomainException If `$sequence_no` is not positive.
 	 */
-	private static function assert_valid_sequence_no( int $sequence_no ): void {
+	private static function assert_sequence_no( int $sequence_no ): void {
 		if ( $sequence_no < 1 ) {
 			throw new DomainException(
 				sprintf( 'Cycle: sequence_no must be 1 or greater, got %d.', $sequence_no )
@@ -592,13 +540,29 @@ final class Cycle {
 	}
 
 	/**
+	 * Reject a status value that is not registered. Write path only
+	 * ({@see self::create()}); storage hydration keeps an
+	 * unregistered stored value verbatim.
+	 *
+	 * @param CycleStatus $status Status to check.
+	 * @throws DomainException If the status is not registered.
+	 */
+	private static function assert_status( CycleStatus $status ): void {
+		if ( ! CycleStatus::is_registered( $status->get_value() ) ) {
+			throw new DomainException(
+				sprintf( 'Cycle: status "%s" is not registered.', $status->get_value() )
+			);
+		}
+	}
+
+	/**
 	 * Resolve a status input into a typed {@see CycleStatus}. A `CycleStatus` passes
-	 * through; null defaults to `pending`; a string is validated via
-	 * {@see CycleStatus::from()}.
+	 * through; null defaults to `pending`; a string is wrapped (slug format checked).
+	 * Registration is checked by {@see self::create()}, not here, so storage hydration keeps an unregistered stored value.
 	 *
 	 * @param mixed $status Raw status value (a CycleStatus, null, or a status string).
 	 * @return CycleStatus
-	 * @throws DomainException If a status string is not a known status.
+	 * @throws DomainException If a status string is not a well-formed status slug.
 	 */
 	private static function coerce_status( $status ): CycleStatus {
 		if ( $status instanceof CycleStatus ) {
@@ -606,34 +570,23 @@ final class Cycle {
 		}
 
 		if ( null === $status ) {
-			return CycleStatus::pending();
+			return new CycleStatus( CycleStatus::PENDING );
 		}
 
-		return CycleStatus::from( ScalarCoercion::coerce_string( $status ) );
+		return new CycleStatus( Coercion::coerce_string( $status ) );
 	}
 
 	/**
-	 * Normalize and validate a chargeable count.
+	 * Validate a chargeable count: null (a non-counting cycle) or a positive integer.
 	 *
-	 * Null passes through (a non-counting cycle); a present value must be a
-	 * positive integer.
-	 *
-	 * @param mixed $count Raw count value (null, or coercible to int).
-	 * @return int|null
+	 * @param int|null $count Count to validate.
 	 * @throws DomainException If a present count is not positive.
 	 */
-	private static function normalize_count( $count ): ?int {
-		if ( null === $count ) {
-			return null;
-		}
-
-		$count = ScalarCoercion::coerce_int( $count );
-		if ( $count < 1 ) {
+	private static function assert_count( ?int $count ): void {
+		if ( null !== $count && $count < 1 ) {
 			throw new DomainException(
 				sprintf( 'Cycle: count must be 1 or greater when set, got %d.', $count )
 			);
 		}
-
-		return $count;
 	}
 }

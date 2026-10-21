@@ -8,6 +8,7 @@ import type { Currency } from '@woocommerce/types';
  * Internal dependencies
  */
 import TotalsItem from '../index';
+import { textContentMatcher } from '../../../../../../tests/utils/find-by-text';
 
 const mockCurrency: Currency = {
 	code: 'USD',
@@ -30,7 +31,9 @@ describe( 'TotalsItem', () => {
 		);
 
 		expect( screen.getByText( 'Subtotal' ) ).toBeInTheDocument();
-		expect( screen.getByText( '$25.99' ) ).toBeInTheDocument();
+		expect(
+			screen.getByText( textContentMatcher( '$25.99' ) )
+		).toBeInTheDocument();
 	} );
 
 	it( 'renders value of 0 correctly', () => {
@@ -43,7 +46,9 @@ describe( 'TotalsItem', () => {
 		);
 
 		expect( screen.getByText( 'Discount' ) ).toBeInTheDocument();
-		expect( screen.getByText( '$0.00' ) ).toBeInTheDocument();
+		expect(
+			screen.getByText( textContentMatcher( '$0.00' ) )
+		).toBeInTheDocument();
 	} );
 
 	it( 'renders ReactNode value correctly', () => {
@@ -68,7 +73,9 @@ describe( 'TotalsItem', () => {
 		);
 
 		expect( screen.getByText( 'Tax' ) ).toBeInTheDocument();
-		expect( screen.getByText( '$5.99' ) ).toBeInTheDocument();
+		expect(
+			screen.getByText( textContentMatcher( '$5.99' ) )
+		).toBeInTheDocument();
 		expect( screen.getByText( 'Including VAT' ) ).toBeInTheDocument();
 	} );
 
@@ -83,7 +90,9 @@ describe( 'TotalsItem', () => {
 		);
 
 		expect( screen.getByLabelText( 'Loading price…' ) ).toBeInTheDocument();
-		expect( screen.queryByText( '$1.00' ) ).not.toBeInTheDocument();
+		expect(
+			screen.queryByText( textContentMatcher( '$1.00' ) )
+		).not.toBeInTheDocument();
 	} );
 
 	it( 'does not show skeleton when showSkeleton is false', () => {
@@ -97,7 +106,9 @@ describe( 'TotalsItem', () => {
 		);
 
 		expect( screen.getByText( 'Loaded' ) ).toBeInTheDocument();
-		expect( screen.getByText( '$1.55' ) ).toBeInTheDocument();
+		expect(
+			screen.getByText( textContentMatcher( '$1.55' ) )
+		).toBeInTheDocument();
 		expect(
 			screen.queryByLabelText( 'Loading price…' )
 		).not.toBeInTheDocument();
@@ -118,7 +129,9 @@ describe( 'TotalsItem', () => {
 		);
 
 		expect( screen.getByText( 'Total' ) ).toBeInTheDocument();
-		expect( screen.getByText( '¥1,000' ) ).toBeInTheDocument();
+		expect(
+			screen.getByText( textContentMatcher( '¥1,000' ) )
+		).toBeInTheDocument();
 	} );
 
 	it( 'renders without currency when not provided', () => {
@@ -126,6 +139,8 @@ describe( 'TotalsItem', () => {
 
 		expect( screen.getByText( 'Amount' ) ).toBeInTheDocument();
 		// When no currency is provided, the value should still render
-		expect( screen.getByText( '$0.42' ) ).toBeInTheDocument();
+		expect(
+			screen.getByText( textContentMatcher( '$0.42' ) )
+		).toBeInTheDocument();
 	} );
 } );

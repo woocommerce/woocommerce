@@ -87,6 +87,76 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Product searches return a partial title match.
+	 */
+	public function test_product_search_returns_partial_title_match(): void {
+		$target_token = wp_generate_password( 16, false );
+		$search_term  = substr( $target_token, 4, 8 );
+		$target_name  = 'Search target ' . $target_token;
+		$control_name = 'Unrelated fixture';
+		$target       = null;
+		$control      = null;
+
+		$this->assertFalse(
+			false !== stripos( $control_name, $search_term ),
+			'The control title must not contain the target search substring.'
+		);
+
+		try {
+			$target = WC_Helper_Product::create_simple_product();
+			$target->set_name( $target_name );
+			$target->set_status( 'publish' );
+			$target->set_date_created( '2024-01-02 00:00:00' );
+			$target->save();
+
+			$control = WC_Helper_Product::create_simple_product();
+			$control->set_name( $control_name );
+			$control->set_status( 'publish' );
+			$control->set_date_created( '2024-01-01 00:00:00' );
+			$control->save();
+
+			$this->assertSame(
+				array( $target->get_id() ),
+				$this->get_search_results( $search_term ),
+				'A strict interior title substring should return only its matching product.'
+			);
+		} finally {
+			if ( $control instanceof WC_Product ) {
+				$control->delete( true );
+			}
+
+			if ( $target instanceof WC_Product ) {
+				$target->delete( true );
+			}
+		}
+	}
+
+	/**
+	 * @testdox Product searches return no results for a missing term.
+	 */
+	public function test_product_search_returns_no_results_for_missing_term(): void {
+		$control = null;
+
+		try {
+			$control = WC_Helper_Product::create_simple_product();
+			$control->set_name( 'Product Search Control ' . wp_generate_password( 8, false ) );
+			$control->set_status( 'publish' );
+			$control->set_date_created( '2024-01-01 00:00:00' );
+			$control->save();
+
+			$this->assertSame(
+				array(),
+				$this->get_search_results( 'Missing Product Search ' . wp_generate_password( 8, false ) ),
+				'A missing product search term should not admit unrelated published products.'
+			);
+		} finally {
+			if ( $control instanceof WC_Product ) {
+				$control->delete( true );
+			}
+		}
+	}
+
+	/**
 	 * @testdox Product searches prioritize titles that match parsed search terms.
 	 * @dataProvider parsed_search_term_provider
 	 *
@@ -643,6 +713,166 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Products list shipping-class filter lists a variable product whose variation uses the class.
+	 */
+	public function test_shipping_class_filter_includes_variable_product_with_matching_variation(): void {
+		list( $term_id, $slug ) = $this->create_shipping_class();
+
+		$simple_in_class = WC_Helper_Product::create_simple_product();
+		wp_set_object_terms( $simple_in_class->get_id(), array( $term_id ), 'product_shipping_class' );
+
+		$variable = new WC_Product_Variable();
+		$variable->save();
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $variable->get_id() );
+		$variation->set_status( 'publish' );
+		$variation->set_regular_price( '10' );
+		$variation->save();
+		wp_set_object_terms( $variation->get_id(), array( $term_id ), 'product_shipping_class' );
+
+		$unrelated = WC_Helper_Product::create_simple_product();
+
+		$results = $this->query_product_ids_for_shipping_class( $slug );
+
+		$this->assertContains( $simple_in_class->get_id(), $results, 'A product directly in the shipping class should be listed.' );
+		$this->assertContains( $variable->get_id(), $results, 'A variable product whose variation uses the class should be listed via its parent.' );
+		$this->assertNotContains( $unrelated->get_id(), $results, 'A product not in the class should not be listed.' );
+		$this->assertNotContains( $variation->get_id(), $results, 'The variation itself is never a row in the products list.' );
+	}
+
+	/**
+	 * @testdox Products list shipping-class filter does not surface the parent of a non-published variation.
+	 */
+	public function test_shipping_class_filter_ignores_non_published_variation_parent(): void {
+		list( $term_id, $slug ) = $this->create_shipping_class();
+
+		$variable = new WC_Product_Variable();
+		$variable->save();
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $variable->get_id() );
+		$variation->set_status( 'private' );
+		$variation->set_regular_price( '10' );
+		$variation->save();
+		wp_set_object_terms( $variation->get_id(), array( $term_id ), 'product_shipping_class' );
+
+		$results = $this->query_product_ids_for_shipping_class( $slug );
+
+		$this->assertNotContains( $variable->get_id(), $results, 'A class used only by a non-published variation should not surface its parent.' );
+	}
+
+	/**
+	 * @testdox Products list shipping-class filter returns no products for an unused class.
+	 */
+	public function test_shipping_class_filter_returns_nothing_for_unused_class(): void {
+		list( , $slug ) = $this->create_shipping_class();
+
+		$product = WC_Helper_Product::create_simple_product();
+
+		$results = $this->query_product_ids_for_shipping_class( $slug );
+
+		$this->assertNotContains( $product->get_id(), $results, 'A class with no products assigned should match nothing.' );
+		$this->assertSame( array(), $results, 'An unused shipping class should return an empty list, not every product.' );
+	}
+
+	/**
+	 * @testdox Products list shipping-class filter matches nothing for an array-shaped request instead of fataling or listing everything.
+	 * @testWith ["heavy"]
+	 *           ["!!!"]
+	 *
+	 * @param string $value Single value supplied as an array-shaped request ("!!!" sanitizes to an empty slug).
+	 */
+	public function test_shipping_class_filter_handles_array_shaped_request( string $value ): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$request = array( $value );
+
+		$original_get                   = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Test cleanup restores the raw original request data.
+		$_GET['product_shipping_class'] = $request;
+
+		try {
+			$query_vars = $this->sut->request_query(
+				array(
+					'post_type'              => 'product',
+					'post_status'            => 'any',
+					'posts_per_page'         => -1,
+					'fields'                 => 'ids',
+					'product_shipping_class' => $request,
+				)
+			);
+			$results    = array_map( 'intval', ( new WP_Query( $query_vars ) )->get_posts() );
+		} finally {
+			$_GET = $original_get; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			remove_filter( 'posts_clauses', array( $this->sut, 'filter_shipping_class_post_clauses' ) );
+		}
+
+		$this->assertNotContains( $product->get_id(), $results, 'An array-shaped request with no real class should not list unrelated products.' );
+		$this->assertSame( array(), $results, 'An invalid shipping-class request should match nothing, not the whole catalog.' );
+	}
+
+	/**
+	 * @testdox Products list shipping-class filter drops the core taxonomy query var.
+	 */
+	public function test_shipping_class_filter_removes_core_taxonomy_query_var(): void {
+		list( , $slug ) = $this->create_shipping_class();
+
+		$original_get                   = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Test cleanup restores the raw original request data.
+		$_GET['product_shipping_class'] = $slug;
+
+		try {
+			$query_vars = $this->sut->request_query(
+				array(
+					'post_type'              => 'product',
+					'product_shipping_class' => $slug,
+				)
+			);
+		} finally {
+			$_GET = $original_get; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			remove_filter( 'posts_clauses', array( $this->sut, 'filter_shipping_class_post_clauses' ) );
+		}
+
+		$this->assertArrayNotHasKey( 'product_shipping_class', $query_vars, 'The direct-product taxonomy query var must be removed so core does not exclude variation parents.' );
+	}
+
+	/**
+	 * @testdox Products list shipping-class filter combined with a non-matching search returns no products.
+	 */
+	public function test_shipping_class_filter_with_non_matching_search_returns_nothing(): void {
+		list( $term_id, $slug ) = $this->create_shipping_class();
+
+		$in_class = WC_Helper_Product::create_simple_product();
+		$in_class->set_name( 'Bulky lamp ' . wp_generate_password( 8, false ) );
+		$in_class->save();
+		wp_set_object_terms( $in_class->get_id(), array( $term_id ), 'product_shipping_class' );
+
+		$out_of_class = WC_Helper_Product::create_simple_product();
+		$search_token = wp_generate_password( 12, false );
+		$out_of_class->set_name( 'Unrelated ' . $search_token );
+		$out_of_class->save();
+
+		$original_get                   = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Test cleanup restores the raw original request data.
+		$_GET['product_shipping_class'] = $slug;
+
+		try {
+			$query_vars = $this->sut->request_query(
+				array(
+					'post_type'              => 'product',
+					'post_status'            => 'any',
+					'posts_per_page'         => -1,
+					'fields'                 => 'ids',
+					'product_shipping_class' => $slug,
+					's'                      => $search_token,
+				)
+			);
+			$results    = array_map( 'intval', ( new WP_Query( $query_vars ) )->get_posts() );
+		} finally {
+			$_GET = $original_get; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			remove_filter( 'posts_clauses', array( $this->sut, 'filter_shipping_class_post_clauses' ) );
+		}
+
+		$this->assertNotContains( $out_of_class->get_id(), $results, 'A search match outside the shipping class must not appear.' );
+		$this->assertSame( array(), $results, 'A search with no product in the shipping class should return nothing, not the whole catalog.' );
+	}
+
+	/**
 	 * Products list out-of-stock filter includes variable products with out-of-stock variations.
 	 *
 	 * @testdox Products list out-of-stock filter includes variable products with out-of-stock variations.
@@ -714,6 +944,338 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 			array( $simple_out_of_stock->get_id() ),
 			array_values( array_intersect( $this->query_product_ids_for_stock_status( ProductStockStatus::OUT_OF_STOCK, 'filter_virtual_post_clauses' ), $fixture_ids ) )
 		);
+	}
+
+	/**
+	 * Every stock status leaves the lookup table joined for later posts_clauses callbacks.
+	 *
+	 * The out-of-stock branch builds a self-contained subquery and does not read the alias itself, but
+	 * callbacks registered after this one have always been able to rely on it being joined whenever a
+	 * stock filter is active. Dropping it for one status only breaks those callbacks asymmetrically.
+	 *
+	 * @testdox Every stock status leaves the lookup table joined for later posts_clauses callbacks.
+	 *
+	 * @dataProvider stock_status_provider
+	 *
+	 * @param string $stock_status Stock status the products list is filtered by.
+	 */
+	public function test_stock_status_filter_always_joins_the_product_meta_lookup_table( string $stock_status ): void {
+		global $wpdb;
+
+		$args = $this->filter_clauses_for_stock_status( $stock_status );
+
+		$this->assertStringContainsString(
+			"LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup",
+			$args['join'],
+			"The {$stock_status} filter must leave the wc_product_meta_lookup alias joined so later posts_clauses callbacks can reference it."
+		);
+	}
+
+	/**
+	 * A join an earlier callback already added is left alone.
+	 *
+	 * Joining unconditionally is only safe because of this: extensions that append their own join must
+	 * not end up with a duplicate, which the database rejects outright.
+	 *
+	 * @testdox A lookup table join added by an earlier callback is not duplicated.
+	 *
+	 * @dataProvider stock_status_provider
+	 *
+	 * @param string $stock_status Stock status the products list is filtered by.
+	 */
+	public function test_stock_status_filter_does_not_duplicate_an_existing_lookup_join( string $stock_status ): void {
+		global $wpdb;
+
+		$existing_join = " LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON {$wpdb->posts}.ID = wc_product_meta_lookup.product_id ";
+
+		$args = $this->filter_clauses_for_stock_status(
+			$stock_status,
+			array(
+				'join'  => $existing_join,
+				'where' => '',
+			)
+		);
+
+		$this->assertSame(
+			1,
+			substr_count( $args['join'], 'wc_product_meta_lookup ON' ),
+			"The {$stock_status} filter must not join wc_product_meta_lookup a second time; a duplicate alias is a hard SQL error."
+		);
+	}
+
+	/**
+	 * An array-shaped stock_status request still selects the matching branch.
+	 *
+	 * @testdox An array-shaped stock_status request still uses the variation-aware out-of-stock branch.
+	 */
+	public function test_array_shaped_stock_status_uses_the_matching_branch(): void {
+		$args = $this->filter_clauses_for_stock_status( array( ProductStockStatus::OUT_OF_STOCK ) );
+
+		$this->assertStringContainsString(
+			'stock_status_products',
+			$args['where'],
+			'An array-shaped out-of-stock request should take the same branch as the scalar form.'
+		);
+	}
+
+	/**
+	 * Values that normalise to nothing still join the lookup table.
+	 *
+	 * The filter is registered on a non-empty raw request value, so anything that survives that check
+	 * but empties out during sanitisation still reaches the filter. Those requests have always been
+	 * joined and have always matched no product; deciding the join after normalising would silently
+	 * drop it for exactly them.
+	 *
+	 * @testdox A stock_status that normalises to nothing still joins the lookup table and matches no product.
+	 *
+	 * @dataProvider degenerate_stock_status_provider
+	 *
+	 * @param string|array $stock_status Value of the stock_status request parameter.
+	 */
+	public function test_degenerate_stock_status_still_joins_the_lookup_table( $stock_status ): void {
+		global $wpdb;
+
+		$args = $this->filter_clauses_for_stock_status( $stock_status );
+
+		$this->assertStringContainsString(
+			"LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup",
+			$args['join'],
+			'A stock_status that sanitises away must still leave the lookup table joined for later callbacks.'
+		);
+		$this->assertStringContainsString(
+			"wc_product_meta_lookup.stock_status=''",
+			$args['where'],
+			'A stock_status that sanitises away should keep matching no product rather than dropping the filter.'
+		);
+	}
+
+	/**
+	 * A multi-value stock_status honours the first value.
+	 *
+	 * @testdox A multi-value stock_status request filters on the first value.
+	 */
+	public function test_multi_value_stock_status_uses_the_first_value(): void {
+		$args = $this->filter_clauses_for_stock_status(
+			array( ProductStockStatus::OUT_OF_STOCK, ProductStockStatus::IN_STOCK )
+		);
+
+		$this->assertStringContainsString(
+			'stock_status_products',
+			$args['where'],
+			'A multi-value request should filter on its first value rather than matching the whole catalogue.'
+		);
+	}
+
+	/**
+	 * Request values that survive the non-empty check but sanitise away.
+	 *
+	 * @return array<string, array<mixed>>
+	 */
+	public function degenerate_stock_status_provider(): array {
+		return array(
+			'whitespace only'       => array( ' ' ),
+			'markup only'           => array( '<b>' ),
+			'array with empty item' => array( array( '' ) ),
+			'nested array'          => array( array( array( 'x' ) ) ),
+		);
+	}
+
+	/**
+	 * Clauses arriving without a usable join string are tolerated.
+	 *
+	 * @testdox Clauses arriving without a join string do not break the stock filter.
+	 */
+	public function test_stock_status_filter_tolerates_missing_join_clause(): void {
+		global $wpdb;
+
+		$args = $this->filter_clauses_for_stock_status( ProductStockStatus::OUT_OF_STOCK, array( 'where' => '' ) );
+
+		$this->assertStringContainsString(
+			"LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup",
+			$args['join'],
+			'A callback that drops the join clause should not stop the filter from joining the lookup table.'
+		);
+	}
+
+	/**
+	 * Later callbacks can read the lookup alias without joining it themselves.
+	 *
+	 * This is the behaviour the join exists for. Asserting the join string alone cannot catch a change
+	 * that leaves the alias unusable in the assembled query, so drive a real query through it.
+	 *
+	 * @testdox Out-of-stock filtering works for callbacks that read the lookup alias without joining it.
+	 */
+	public function test_out_of_stock_filter_supports_callbacks_relying_on_the_lookup_join(): void {
+		update_option( 'woocommerce_manage_stock', 'no' );
+
+		$out_of_stock = WC_Helper_Product::create_simple_product();
+		$out_of_stock->set_manage_stock( false );
+		$out_of_stock->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
+		$out_of_stock->save();
+
+		// Stands in for an extension: reads the alias, appends no join of its own.
+		$consumer = static function ( $clauses ) {
+			$clauses['where'] .= ' AND wc_product_meta_lookup.virtual = 0 ';
+			return $clauses;
+		};
+
+		$ids = $this->query_product_ids_for_stock_status( ProductStockStatus::OUT_OF_STOCK, $consumer );
+
+		$this->assertContains(
+			$out_of_stock->get_id(),
+			$ids,
+			'A posts_clauses callback that references wc_product_meta_lookup without joining it should still produce a valid query.'
+		);
+	}
+
+	/**
+	 * @testdox An extension join to the lookup table under another alias does not suppress WooCommerce's aliased join.
+	 */
+	public function test_stock_status_filter_joins_despite_a_foreign_alias_lookup_join(): void {
+		global $wpdb;
+
+		$args = $this->filter_clauses_for_stock_status(
+			ProductStockStatus::IN_STOCK,
+			array(
+				'join'  => " LEFT JOIN {$wpdb->wc_product_meta_lookup} extension_lookup ON {$wpdb->posts}.ID = extension_lookup.product_id ",
+				'where' => '',
+			)
+		);
+
+		$this->assertStringContainsString(
+			"LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup",
+			$args['join'],
+			'A join to the lookup table under another alias must not suppress the wc_product_meta_lookup alias the filter references.'
+		);
+	}
+
+	/**
+	 * @testdox In-stock filtering still lists products when an earlier callback joins the lookup table under its own alias.
+	 */
+	public function test_stock_status_filter_survives_an_extension_join_under_another_alias(): void {
+		global $wpdb;
+
+		update_option( 'woocommerce_manage_stock', 'no' );
+
+		$in_stock = WC_Helper_Product::create_simple_product();
+		$in_stock->set_manage_stock( false );
+		$in_stock->set_stock_status( ProductStockStatus::IN_STOCK );
+		$in_stock->save();
+
+		// The callback stands in for an extension that joins the lookup table under its own alias before WooCommerce's callback runs.
+		$extension_join = static function ( $clauses ) use ( $wpdb ) {
+			$clauses['join'] .= " LEFT JOIN {$wpdb->wc_product_meta_lookup} extension_lookup ON {$wpdb->posts}.ID = extension_lookup.product_id ";
+			return $clauses;
+		};
+		add_filter( 'posts_clauses', $extension_join, 5 );
+
+		try {
+			$ids = $this->query_product_ids_for_stock_status( ProductStockStatus::IN_STOCK );
+		} finally {
+			remove_filter( 'posts_clauses', $extension_join, 5 );
+		}
+
+		$this->assertContains(
+			$in_stock->get_id(),
+			$ids,
+			'The in-stock filter should keep producing a valid query when an extension has already joined the lookup table under a different alias.'
+		);
+	}
+
+	/**
+	 * Stock statuses offered by the products list filter.
+	 *
+	 * @return array<string, array<string>>
+	 */
+	public function stock_status_provider(): array {
+		return array(
+			'in stock'     => array( ProductStockStatus::IN_STOCK ),
+			'out of stock' => array( ProductStockStatus::OUT_OF_STOCK ),
+			'on backorder' => array( ProductStockStatus::ON_BACKORDER ),
+		);
+	}
+
+	/**
+	 * Run the stock status clause filter for a given request value.
+	 *
+	 * @param string|array $stock_status Value of the stock_status request parameter.
+	 * @param array|null   $clauses      Clause array to filter; defaults to an empty join and where.
+	 * @return array
+	 */
+	private function filter_clauses_for_stock_status( $stock_status, ?array $clauses = null ): array {
+		$clauses = $clauses ?? array(
+			'join'  => '',
+			'where' => '',
+		);
+
+		return $this->with_stock_status(
+			$stock_status,
+			function () use ( $clauses ) {
+				return $this->sut->filter_stock_status_post_clauses( $clauses );
+			}
+		);
+	}
+
+	/**
+	 * Run a callback with the stock_status request parameter set, restoring $_GET afterwards.
+	 *
+	 * @param string|array $stock_status Value of the stock_status request parameter.
+	 * @param callable     $callback     Callback to run.
+	 * @return mixed
+	 */
+	private function with_stock_status( $stock_status, callable $callback ) {
+		$original_get = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Test cleanup restores the raw original request data.
+
+		$_GET['stock_status'] = $stock_status;
+
+		try {
+			return $callback();
+		} finally {
+			$_GET = $original_get;
+		}
+	}
+
+	/**
+	 * Create a product shipping class term with a unique slug.
+	 *
+	 * @return array{int, string} The term ID and its slug.
+	 */
+	private function create_shipping_class(): array {
+		$slug = sanitize_title( 'ship ' . wp_generate_password( 8, false, false ) );
+		$term = wp_insert_term( 'Shipping ' . $slug, 'product_shipping_class', array( 'slug' => $slug ) );
+
+		return array( (int) $term['term_id'], $slug );
+	}
+
+	/**
+	 * Query the products list filtered by a shipping class slug.
+	 *
+	 * @param string $shipping_class Shipping class slug.
+	 * @return int[]
+	 */
+	private function query_product_ids_for_shipping_class( string $shipping_class ): array {
+		$original_get                   = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Test cleanup restores the raw original request data.
+		$_GET['product_shipping_class'] = $shipping_class;
+
+		try {
+			// Pass the query var too, mirroring the admin request where the taxonomy query var is active.
+			$query_vars = $this->sut->request_query(
+				array(
+					'post_type'              => 'product',
+					'post_status'            => 'any',
+					'posts_per_page'         => -1,
+					'fields'                 => 'ids',
+					'product_shipping_class' => $shipping_class,
+				)
+			);
+
+			$query = new WP_Query( $query_vars );
+
+			return array_map( 'intval', $query->get_posts() );
+		} finally {
+			$_GET = $original_get; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			remove_filter( 'posts_clauses', array( $this->sut, 'filter_shipping_class_post_clauses' ) );
+		}
 	}
 
 	/**
@@ -797,39 +1359,44 @@ class WC_Admin_List_Table_Products_Test extends WC_Unit_Test_Case {
 	/**
 	 * Query product IDs through the products list table stock-status filter.
 	 *
-	 * @param string      $stock_status      Stock status to query.
-	 * @param string|null $additional_filter Optional clause filter to register after the stock filter.
+	 * @param string               $stock_status      Stock status to query.
+	 * @param string|callable|null $additional_filter Optional clause filter to register after the stock
+	 *                                                filter: a method name on the list table, or any callable.
 	 * @return array
 	 */
 	private function query_product_ids_for_stock_status( $stock_status, $additional_filter = null ) {
-		$sut          = ( new ReflectionClass( WC_Admin_List_Table_Products::class ) )->newInstanceWithoutConstructor();
-		$original_get = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Test cleanup restores the raw original request data.
+		$sut = ( new ReflectionClass( WC_Admin_List_Table_Products::class ) )->newInstanceWithoutConstructor();
 
-		$_GET['stock_status'] = $stock_status;
-		add_filter( 'posts_clauses', array( $sut, 'filter_stock_status_post_clauses' ) );
-		if ( $additional_filter ) {
-			add_filter( 'posts_clauses', array( $sut, $additional_filter ) );
-		}
+		return $this->with_stock_status(
+			$stock_status,
+			function () use ( $sut, $additional_filter ) {
+				$extra = is_string( $additional_filter ) ? array( $sut, $additional_filter ) : $additional_filter;
 
-		try {
-			$query = new WP_Query(
-				array(
-					'fields'         => 'ids',
-					'orderby'        => 'ID',
-					'order'          => 'ASC',
-					'post_status'    => 'publish',
-					'post_type'      => 'product',
-					'posts_per_page' => -1,
-				)
-			);
+				add_filter( 'posts_clauses', array( $sut, 'filter_stock_status_post_clauses' ) );
+				if ( $extra ) {
+					add_filter( 'posts_clauses', $extra );
+				}
 
-			return array_map( 'intval', $query->posts );
-		} finally {
-			remove_filter( 'posts_clauses', array( $sut, 'filter_stock_status_post_clauses' ) );
-			if ( $additional_filter ) {
-				remove_filter( 'posts_clauses', array( $sut, $additional_filter ) );
+				try {
+					$query = new WP_Query(
+						array(
+							'fields'         => 'ids',
+							'orderby'        => 'ID',
+							'order'          => 'ASC',
+							'post_status'    => 'publish',
+							'post_type'      => 'product',
+							'posts_per_page' => -1,
+						)
+					);
+
+					return array_map( 'intval', $query->posts );
+				} finally {
+					remove_filter( 'posts_clauses', array( $sut, 'filter_stock_status_post_clauses' ) );
+					if ( $extra ) {
+						remove_filter( 'posts_clauses', $extra );
+					}
+				}
 			}
-			$_GET = $original_get;
-		}
+		);
 	}
 }

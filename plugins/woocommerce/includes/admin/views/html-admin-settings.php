@@ -53,7 +53,7 @@ try {
 		$is_rendering_settings_ui_drill_down = $settings_ui_context->is_rendering_enabled()
 			&& $settings_ui_context->is_drill_down()
 			&& ! $settings_ui_context->has_schema_failed()
-			&& ! $settings_ui_context->has_script_handles_failed();
+			&& ! $settings_ui_context->has_script_handle_loading_failed();
 	}
 } catch ( \Throwable $e ) {
 	$settings_ui_context                 = null;

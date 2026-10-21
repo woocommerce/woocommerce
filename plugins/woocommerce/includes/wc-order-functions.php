@@ -27,7 +27,7 @@ defined( 'ABSPATH' ) || exit;
  * This function should be used for order retrieval so that when we move to
  * custom tables, functions still work.
  *
- * Args and usage: https://developer.woocommerce.com/docs/extensions/core-concepts/wc-get-orders/
+ * Args and usage: https://developer.woocommerce.com/docs/features/orders/wc-get-orders/
  *
  * @since  2.6.0
  * @param  array $args Array of args (above).
@@ -588,7 +588,9 @@ function wc_create_refund( $args = array() ) {
 		$refund->set_currency( $order->get_currency() );
 		$refund->set_amount( $args['amount'] );
 		$refund->set_parent_id( absint( $args['order_id'] ) );
-		$refund->set_refunded_by( get_current_user_id() ? get_current_user_id() : 1 );
+		// A refund can be created with nobody logged in (gateway webhook, REST, WP-CLI, cron). Record no
+		// user in that case; falling back to user 1 attributes the refund to whoever that happens to be.
+		$refund->set_refunded_by( get_current_user_id() );
 		$refund->set_prices_include_tax( $order->get_prices_include_tax() );
 
 		if ( ! is_null( $args['reason'] ) ) {
@@ -1018,7 +1020,20 @@ add_action( 'woocommerce_before_delete_order', 'wc_update_total_sales_counts' );
 function wc_update_coupon_usage_counts( $order_id ) {
 	$order = wc_get_order( $order_id );
 
-	if ( ! $order ) {
+	// Refunds never consume coupon usage.
+	if ( ! $order || $order instanceof WC_Order_Refund ) {
+		return;
+	}
+
+	/**
+	 * Data store wrapper.
+	 *
+	 * @var WC_Data_Store $data_store
+	 */
+	$data_store = $order->get_data_store();
+
+	// Only order data stores can record coupon usage.
+	if ( ! $data_store->has_callable( 'get_recorded_coupon_usage_counts' ) ) {
 		return;
 	}
 
@@ -1059,7 +1074,7 @@ function wc_update_coupon_usage_counts( $order_id ) {
 			$coupon  = new WC_Coupon( $code );
 			$used_by = $order->get_user_id();
 
-			if ( ! $used_by ) {
+			if ( ! $used_by && is_callable( array( $order, 'get_billing_email' ) ) ) {
 				$used_by = $order->get_billing_email();
 			}
 
@@ -1190,7 +1205,8 @@ function wc_get_order_note( $data ) {
 		'woocommerce_get_order_note',
 		array(
 			'id'            => (int) $data->comment_ID,
-			'date_created'  => wc_string_to_datetime( $data->comment_date ),
+			// comment_date is frozen in the timezone the site had when the note was saved, so use the GMT date.
+			'date_created'  => wc_string_to_datetime( mysql_to_rfc3339( $data->comment_date_gmt ) . 'Z' ),
 			'content'       => $data->comment_content,
 			'customer_note' => (bool) get_comment_meta( $data->comment_ID, 'is_customer_note', true ),
 			'added_by'      => __( 'WooCommerce', 'woocommerce' ) === $data->comment_author ? 'system' : $data->comment_author,
@@ -1253,7 +1269,7 @@ function wc_get_order_notes( $args ) {
 
 	// Set WooCommerce order type.
 	if ( isset( $args['type'] ) && 'customer' === $args['type'] ) {
-		$args['meta_query'] = array( // WPCS: slow query ok.
+		$args['meta_query'] = array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Order notes live in wp_comments under both HPOS and legacy storage; the customer flag exists only as commentmeta, so a meta join is the only way to filter on it.
 			array(
 				'key'     => 'is_customer_note',
 				'value'   => 1,
@@ -1261,7 +1277,7 @@ function wc_get_order_notes( $args ) {
 			),
 		);
 	} elseif ( isset( $args['type'] ) && 'internal' === $args['type'] ) {
-		$args['meta_query'] = array( // WPCS: slow query ok.
+		$args['meta_query'] = array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Order notes live in wp_comments under both HPOS and legacy storage; internal notes are identified by the absence of the is_customer_note meta, so NOT EXISTS is the only way to filter on them.
 			array(
 				'key'     => 'is_customer_note',
 				'compare' => 'NOT EXISTS',

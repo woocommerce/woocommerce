@@ -22,6 +22,7 @@ jobs:
   check-conflicts-label:
     name: Check for conflicts label
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     if: |
       startsWith(github.head_ref, 'cherry-pick-') &&
       contains(github.event.pull_request.labels.*.name, 'cherry pick has conflicts')

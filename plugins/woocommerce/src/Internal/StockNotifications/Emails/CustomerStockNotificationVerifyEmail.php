@@ -19,8 +19,9 @@ class CustomerStockNotificationVerifyEmail extends WC_Email {
 	 * Constructor.
 	 */
 	public function __construct() {
-		$this->id             = 'customer_stock_notification_verify';
-		$this->customer_email = true;
+		$this->id              = 'customer_stock_notification_verify';
+		$this->customer_email  = true;
+		$this->supports_cc_bcc = false;
 
 		$this->title       = __( 'Back in stock sign-up verification', 'woocommerce' );
 		$this->description = __( 'Verification e-mail sent to customers, as part of the double opt-in sign-up process.', 'woocommerce' );
@@ -179,7 +180,7 @@ class CustomerStockNotificationVerifyEmail extends WC_Email {
 						'email_link_action_key' => $verification_key,
 						'notification_id'       => $notification->get_id(),
 					),
-					get_option( 'siteurl' )
+					home_url( '/' )
 				)
 			),
 		);

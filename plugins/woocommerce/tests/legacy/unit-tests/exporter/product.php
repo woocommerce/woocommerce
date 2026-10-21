@@ -138,7 +138,7 @@ class WC_Tests_Product_CSV_Exporter extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Verify one product for test_perpare_data_to_export.
+	 * Verify one product for test_prepare_data_to_export.
 	 * @since 3.1.0
 	 */
 	public function verify_exported_data( $row, $product ) {

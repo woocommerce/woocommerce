@@ -26,9 +26,7 @@ const NullComponent = () => {
 	return null;
 };
 
-export default class PaymentMethodConfig
-	implements PaymentMethodConfigInstance
-{
+export default class PaymentMethodConfig implements PaymentMethodConfigInstance {
 	public name: string;
 	public content: ReactNode;
 	public edit: ReactNode;

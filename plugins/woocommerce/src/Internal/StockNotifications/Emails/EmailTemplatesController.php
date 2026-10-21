@@ -46,7 +46,7 @@ class EmailTemplatesController {
 			return;
 		}
 
-		$image     = wp_get_attachment_image_src( $product->get_image_id(), 'woocommerce_thumbnail' );
+		$image     = wp_get_attachment_image_src( (int) $product->get_image_id(), 'woocommerce_thumbnail' );
 		$image_src = is_array( $image ) && isset( $image[0] ) ? $image[0] : '';
 
 		ob_start();
@@ -63,7 +63,7 @@ class EmailTemplatesController {
 	/**
 	 * Email product title.
 	 *
-	 * @param WC_Product   $product The product object.
+	 * @param \WC_Product  $product The product object.
 	 * @param Notification $notification The notification object.
 	 * @param bool         $plain_text Whether the email is plain text.
 	 */

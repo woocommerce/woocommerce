@@ -10,6 +10,7 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Admin\API;
 use Automattic\WooCommerce\Admin\Notes\Notes;
 use Automattic\WooCommerce\Internal\Admin\Notes\OrderMilestones;
+use Automattic\WooCommerce\Internal\Admin\Notes\ExtensionsWithoutSubscription;
 use Automattic\WooCommerce\Internal\Admin\Notes\WooSubscriptionsNotes;
 use Automattic\WooCommerce\Internal\Admin\Notes\TrackingOptIn;
 use Automattic\WooCommerce\Internal\Admin\Notes\WooCommercePayments;
@@ -179,11 +180,15 @@ class FeaturePlugin {
 			CategoryLookup::instance()->init();
 			// Initialize Reports exporter.
 			ReportExporter::init();
+		} else {
+			// Already generated exports still need serving and expiring.
+			ReportExporter::init_export_files();
 		}
 
 		// Admin note providers.
 		// @todo These should be bundled in the features/ folder, but loading them from there currently has a load order issue.
 		new WooSubscriptionsNotes();
+		new ExtensionsWithoutSubscription();
 		new OrderMilestones();
 		new TrackingOptIn();
 		new WooCommercePayments();

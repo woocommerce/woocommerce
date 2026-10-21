@@ -105,10 +105,11 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 				array( 'subject_partial', null, null ),
 				array( 'preheader', null, 'Test Preheader' ),
 				array( 'recipient', get_option( 'admin_email' ), 'admin@example.com' ),
-				array( 'cc', null, null ),
-				array( 'bcc', null, null ),
+				array( 'cc', null, 'cc@example.com' ),
+				array( 'bcc', null, 'bcc@example.com' ),
 			)
 		);
+		$mock_email->method( 'supports_cc_bcc' )->willReturn( true );
 		$mock_email->method( 'get_default_subject' )->willReturn( 'Default Subject' );
 		$mock_email->method( 'get_form_fields' )->willReturn(
 			array(
@@ -131,6 +132,8 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 		$this->assertEquals( 'Test Preheader', $result['preheader'] );
 		$this->assertEquals( $this->email_type, $result['email_type'] );
 		$this->assertEquals( 'admin@example.com', $result['recipient'] );
+		$this->assertEquals( 'cc@example.com', $result['cc'] );
+		$this->assertEquals( 'bcc@example.com', $result['bcc'] );
 	}
 
 	/**
@@ -162,6 +165,79 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 		$this->assertEquals( 'recipient@example.com', $option['recipient'] );
 		$this->assertEquals( 'cc@example.com', $option['cc'] );
 		$this->assertEquals( 'bcc@example.com', $option['bcc'] );
+	}
+
+	/**
+	 * @testdox get_email_data() returns null for Cc/Bcc when the email does not support them.
+	 */
+	public function test_get_email_data_returns_null_cc_bcc_when_unsupported(): void {
+		update_option(
+			'woocommerce_' . $this->email_type . '_settings',
+			array(
+				'cc'  => 'cc@example.com',
+				'bcc' => 'bcc@example.com',
+			)
+		);
+		$controller = $this->create_controller_with_email( $this->create_email_without_cc_bcc_support() );
+
+		$result = $controller->get_email_data( array( 'id' => $this->email_post->ID ) );
+
+		$this->assertNull( $result['cc'] );
+		$this->assertNull( $result['bcc'] );
+	}
+
+	/**
+	 * @testdox save_email_data() ignores Cc/Bcc when the email does not support them.
+	 */
+	public function test_save_email_data_ignores_cc_bcc_when_unsupported(): void {
+		$controller = $this->create_controller_with_email( $this->create_email_without_cc_bcc_support() );
+
+		$controller->save_email_data(
+			array(
+				'subject' => 'Updated Subject',
+				'cc'      => 'cc@example.com',
+				'bcc'     => 'bcc@example.com',
+			),
+			$this->email_post
+		);
+
+		$option = get_option( 'woocommerce_' . $this->email_type . '_settings' );
+		$this->assertEquals( 'Updated Subject', $option['subject'] );
+		$this->assertArrayNotHasKey( 'cc', $option );
+		$this->assertArrayNotHasKey( 'bcc', $option );
+	}
+
+	/**
+	 * Create a controller whose email registry contains only the given email.
+	 *
+	 * @param \WC_Email $email The email to register.
+	 * @return EmailApiController
+	 */
+	private function create_controller_with_email( \WC_Email $email ): EmailApiController {
+		$controller = $this->getMockBuilder( EmailApiController::class )
+			->onlyMethods( array( 'get_emails' ) )
+			->getMock();
+		$controller->method( 'get_emails' )
+			->willReturn( array( $email ) );
+		$controller->init();
+		return $controller;
+	}
+
+	/**
+	 * Create a test email that opts out of Cc/Bcc support.
+	 *
+	 * @return EmailStub
+	 */
+	private function create_email_without_cc_bcc_support(): EmailStub {
+		return new class() extends EmailStub {
+			/**
+			 * Constructor.
+			 */
+			public function __construct() {
+				$this->supports_cc_bcc = false;
+				parent::__construct();
+			}
+		};
 	}
 
 	/**
@@ -229,6 +305,7 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 				array( 'bcc', null, null ),
 			)
 		);
+		$mock_email->method( 'supports_cc_bcc' )->willReturn( true );
 		$mock_email->method( 'get_default_subject' )->willReturn( 'Default Subject' );
 		$mock_email->method( 'get_form_fields' )->willReturn(
 			array(
@@ -414,6 +491,67 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true ),
 			'Persisted status meta must be set to in_sync.'
 		);
+	}
+
+	/**
+	 * @testdox Should dispatch the registered reset route for a capable user and persist canonical sync state.
+	 */
+	public function test_reset_route_dispatches_registered_callback_and_persists_sync_state(): void {
+		$email_type = 'customer_new_account';
+
+		WCEmailTemplateSyncRegistry::reset_cache();
+
+		$post_id = $this->create_published_email_post( $email_type );
+		wp_update_post(
+			array(
+				'ID'           => $post_id,
+				'post_content' => '<!-- wp:paragraph --><p>Customized before REST reset</p><!-- /wp:paragraph -->',
+			)
+		);
+		update_post_meta(
+			$post_id,
+			WCEmailTemplateDivergenceDetector::STATUS_META_KEY,
+			WCEmailTemplateDivergenceDetector::STATUS_CORE_UPDATED_CUSTOMIZED
+		);
+
+		$email = $this->resolve_wc_email( $email_type );
+		$this->assertNotNull( $email );
+		$expected_canonical = WCTransactionalEmailPostsGenerator::compute_canonical_post_content( $email );
+
+		global $wp_rest_server;
+
+		$previous_rest_server = $wp_rest_server;
+		$wp_rest_server       = new \WP_REST_Server();
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'shop_manager' ) ) );
+
+		try {
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- This test invokes the production route-registration action.
+			do_action( 'rest_api_init', $wp_rest_server );
+			$this->email_api_controller->register_routes();
+			$request  = new \WP_REST_Request( 'POST', '/woocommerce-email-editor/v1/emails/' . $post_id . '/reset' );
+			$response = $wp_rest_server->dispatch( $request );
+		} finally {
+			// tear_down() resets the current user; $wp_rest_server it does not touch.
+			$wp_rest_server = $previous_rest_server;
+		}
+
+		$this->assertSame( 200, $response->get_status(), 'The registered route must authorize a manage_woocommerce user.' );
+
+		$response_data = $response->get_data();
+		$this->assertSame( $expected_canonical, $response_data['content'], 'The route response must contain the canonical render.' );
+		$this->assertSame( sha1( $expected_canonical ), $response_data['source_hash'], 'The route response must contain the canonical source hash.' );
+		$this->assertSame( WCEmailTemplateDivergenceDetector::STATUS_IN_SYNC, $response_data['status'], 'The route response must report in_sync.' );
+		$this->assertNotEmpty( $response_data['version'], 'The route response must contain a template version.' );
+		$this->assertNotEmpty( $response_data['synced_at'], 'The route response must contain a sync timestamp.' );
+
+		$persisted_post = get_post( $post_id );
+		$this->assertInstanceOf( \WP_Post::class, $persisted_post );
+		$this->assertSame( $expected_canonical, $persisted_post->post_content, 'The route callback must persist the canonical content.' );
+		$this->assertSame( $response_data['version'], (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::VERSION_META_KEY, true ), 'Persisted version meta must match the REST response.' );
+		$this->assertSame( $response_data['source_hash'], (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, true ), 'Persisted source hash meta must match the REST response.' );
+		$this->assertSame( $response_data['synced_at'], (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_SYNCED_AT_META_KEY, true ), 'Persisted sync timestamp must match the REST response.' );
+		$this->assertSame( WCEmailTemplateDivergenceDetector::STATUS_IN_SYNC, (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true ), 'Persisted status meta must be in_sync.' );
+		$this->assertSame( $expected_canonical, (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY, true ), 'Persisted base render meta must match canonical content.' );
 	}
 
 	/**

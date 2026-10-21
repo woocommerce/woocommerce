@@ -224,8 +224,8 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 						printf(
 							/* translators: %s: net sales */
 							esc_html__( 'Net sales this month %s', 'woocommerce' ),
-							'<strong>' . wc_price( $report_data->net_sales ) . '</strong>'
-						); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+							'<strong>' . wc_price( $report_data->net_sales ) . '</strong>' // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wc_price() returns filterable price markup for the dashboard.
+						);
 					?>
 					</a>
 				</li>
@@ -244,9 +244,9 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 						printf(
 							/* translators: 1: top seller product title 2: top seller quantity sold */
 							esc_html( _n( 'Top seller this month %1$s (%2$d sale)', 'Top seller this month %1$s (%2$d sales)', $top_seller->qty, 'woocommerce' ) ),
-							'<strong>' . get_the_title( $top_seller->product_id ) . '</strong>',
-							$top_seller->qty
-						); // phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped
+							'<strong>' . esc_html( get_the_title( $top_seller->product_id ) ) . '</strong>',
+							(int) $top_seller->qty
+						);
 					?>
 					</a>
 				</li>
@@ -269,7 +269,48 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			 */
 			$reports = apply_filters( 'woocommerce_after_dashboard_status_widget_parameter', null );
 			do_action( 'woocommerce_after_dashboard_status_widget', $reports );
+			$this->status_widget_extensions_without_subscription_row();
 			echo '</ul>';
+		}
+
+		/**
+		 * Show a row for installed WooCommerce.com extensions without a subscription.
+		 */
+		private function status_widget_extensions_without_subscription_row(): void {
+			if ( ! class_exists( 'WC_Helper_Updater' ) ) {
+				return;
+			}
+
+			$count = count( WC_Helper_Updater::get_plugins_without_subscription() ?? array() );
+			if ( 0 === $count ) {
+				return;
+			}
+
+			$my_subscriptions_url = add_query_arg(
+				array(
+					'page'         => 'wc-admin',
+					'tab'          => 'my-subscriptions',
+					'path'         => rawurlencode( '/extensions' ),
+					'utm_source'   => 'pu',
+					'utm_campaign' => 'pu_dashboard_widget_purchase',
+				),
+				admin_url( 'admin.php' )
+			);
+			?>
+			<li class="extensions-without-subscription">
+				<a href="<?php echo esc_url( $my_subscriptions_url ); ?>">
+				<?php
+					echo wp_kses_post(
+						sprintf(
+							/* translators: %s: number of extensions */
+							_n( '<strong>%s extension</strong> without a WooCommerce.com subscription', '<strong>%s extensions</strong> without a WooCommerce.com subscription', $count, 'woocommerce' ),
+							$count
+						)
+					);
+				?>
+				</a>
+			</li>
+			<?php
 		}
 
 		/**

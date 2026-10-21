@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add CatalogSortOrder enum class for woocommerce_default_catalog_orderby option values and adopt it in the Product Collection block query builder.

@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Fix fatal in Featured Product block when rendered in classic themes
+
+

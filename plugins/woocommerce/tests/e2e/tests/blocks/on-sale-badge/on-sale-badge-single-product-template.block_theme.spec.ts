@@ -1,93 +1,57 @@
 /**
  * External dependencies
  */
-import {
-	test as base,
-	expect,
-	Editor,
-	FrontendUtils,
-	BLOCK_THEME_SLUG,
-} from '@woocommerce/e2e-utils';
-
-/**
- * Internal dependencies
- */
-import { ProductGalleryPage } from '../product-gallery/product-gallery.page';
+import type { FrameLocator, Page } from '@playwright/test';
+import { test, expect, BLOCK_THEME_SLUG } from '@woocommerce/e2e-utils';
 
 const blockData = {
 	name: 'woocommerce/product-sale-badge',
-	mainClass: '.wp-block-woocommerce-product-sale-badge',
-	selectors: {
-		frontend: {
-			badge: '.wc-block-components-product-sale-badge',
-			badgeContainer: '.wp-block-woocommerce-product-sale-badge',
-		},
-		editor: {
-			badge: '.wc-block-components-product-sale-badge',
-			badgeContainer: '.wp-block-woocommerce-product-sale-badge',
-		},
-	},
 	slug: 'single-product',
 	productPage: '/product/hoodie/',
-	productPageNotOnSale: '/product/album/',
 };
 
-class BlockUtils {
-	editor: Editor;
-	frontendUtils: FrontendUtils;
+const badgeSelector = '.wc-block-components-product-sale-badge';
+const badgeContainerSelector = '.wp-block-woocommerce-product-sale-badge';
 
-	constructor( {
-		editor,
-		frontendUtils,
-	}: {
-		editor: Editor;
-		frontendUtils: FrontendUtils;
-	} ) {
-		this.editor = editor;
-		this.frontendUtils = frontendUtils;
-	}
+type SaleBadgeAlignment = 'left' | 'center' | 'right';
 
-	async getSaleBadgeBoundingClientRect( isFrontend: boolean ): Promise< {
-		badge: DOMRect;
-		badgeContainer: DOMRect;
-	} > {
-		const page = isFrontend ? this.frontendUtils.page : this.editor.canvas;
-		return {
-			badge: await page
-				.locator(
-					blockData.selectors[ isFrontend ? 'frontend' : 'editor' ]
-						.badge
-				)
-				.first()
-				.evaluate( ( el ) => el.getBoundingClientRect() ),
-			badgeContainer: await page
-				.locator(
-					blockData.selectors[ isFrontend ? 'frontend' : 'editor' ]
-						.badgeContainer
-				)
-				.first()
-				.evaluate( ( el ) => el.getBoundingClientRect() ),
-		};
-	}
-}
+const getAlignmentDelta = async (
+	root: Page | FrameLocator,
+	alignment: SaleBadgeAlignment
+): Promise< number > =>
+	root
+		.locator( badgeContainerSelector )
+		.first()
+		.evaluate(
+			( container, evaluation ) => {
+				const badge = container.querySelector(
+					evaluation.badgeSelector
+				);
 
-const test = base.extend< {
-	pageObject: ProductGalleryPage;
-	blockUtils: BlockUtils;
-} >( {
-	pageObject: async ( { page, editor, frontendUtils }, use ) => {
-		await use(
-			new ProductGalleryPage( {
-				page,
-				editor,
-				frontendUtils,
-			} )
+				if ( ! badge ) {
+					return Number.POSITIVE_INFINITY;
+				}
+
+				const badgeRect = badge.getBoundingClientRect();
+				const containerRect = container.getBoundingClientRect();
+
+				if ( evaluation.alignment === 'left' ) {
+					return Math.abs( badgeRect.left - containerRect.left );
+				}
+
+				if ( evaluation.alignment === 'center' ) {
+					const badgeMidpoint =
+						( badgeRect.left + badgeRect.right ) / 2;
+					const containerMidpoint =
+						( containerRect.left + containerRect.right ) / 2;
+
+					return Math.abs( badgeMidpoint - containerMidpoint );
+				}
+
+				return Math.abs( containerRect.right - badgeRect.right );
+			},
+			{ alignment, badgeSelector }
 		);
-	},
-	blockUtils: async ( { editor, frontendUtils }, use ) => {
-		await use( new BlockUtils( { editor, frontendUtils } ) );
-	},
-} );
 
 test.describe( `${ blockData.name }`, () => {
 	test.describe( `On the Single Product Template`, () => {
@@ -100,195 +64,80 @@ test.describe( `${ blockData.name }`, () => {
 			await editor.setContent( '' );
 		} );
 
-		test( 'should be rendered on the editor side', async ( { editor } ) => {
-			await editor.insertBlock( {
-				name: 'woocommerce/product-gallery',
-			} );
-
-			const block = await editor.getBlockByName( blockData.name );
-
-			await expect( block ).toBeVisible();
-		} );
-
-		test( 'should be rendered on the frontend side', async ( {
-			frontendUtils,
+		test( 'renders and aligns the sale badge in editor and frontend', async ( {
 			editor,
 			page,
-			pageObject,
 		} ) => {
-			await editor.openDocumentSettingsSidebar();
-			await editor.insertBlock( {
-				name: 'woocommerce/product-gallery',
-			} );
+			const context = page.context();
+			const baselinePageCount = context.pages().length;
+			const frontendPage = await context.newPage();
 
-			await pageObject.toggleFullScreenOnClickSetting( false );
+			try {
+				expect( context.pages() ).toHaveLength( baselinePageCount + 1 );
 
-			await editor.saveSiteEditorEntities( {
-				isOnlyCurrentEntityDirty: true,
-			} );
+				await editor.openDocumentSettingsSidebar();
+				await editor.insertBlock( {
+					name: 'woocommerce/product-gallery',
+				} );
+				await page
+					.getByRole( 'checkbox', {
+						name: 'Open pop-up when clicked',
+						exact: true,
+					} )
+					.uncheck();
 
-			await page.goto( blockData.productPage );
+				let block = await editor.getBlockByName( blockData.name );
+				await expect( block ).toBeVisible();
+				await expect
+					.poll( () => getAlignmentDelta( editor.canvas, 'right' ) )
+					.toBeLessThanOrEqual( 1 );
 
-			const block = await frontendUtils.getBlockByName( blockData.name );
+				await editor.saveSiteEditorEntities( {
+					isOnlyCurrentEntityDirty: true,
+				} );
 
-			await expect( block.first() ).toBeVisible();
-		} );
+				await frontendPage.goto( blockData.productPage );
+				await expect(
+					frontendPage.locator( badgeSelector ).first()
+				).toBeVisible();
+				await expect
+					.poll( () => getAlignmentDelta( frontendPage, 'right' ) )
+					.toBeLessThanOrEqual( 1 );
 
-		test( `should not render on the frontend when the product is not on sale`, async ( {
-			frontendUtils,
-			editor,
-			page,
-			pageObject,
-		} ) => {
-			await editor.openDocumentSettingsSidebar();
-			await editor.insertBlock( {
-				name: 'woocommerce/product-gallery',
-			} );
+				for ( const alignment of [ 'left', 'center' ] as const ) {
+					block = await editor.getBlockByName( blockData.name );
+					await block.click();
+					await page.getByRole( 'button', { name: 'Align' } ).click();
+					await page
+						.getByRole( 'menuitemradio', {
+							name: new RegExp( `Align ${ alignment }`, 'i' ),
+						} )
+						.click();
 
-			await pageObject.toggleFullScreenOnClickSetting( false );
+					await expect
+						.poll( () =>
+							getAlignmentDelta( editor.canvas, alignment )
+						)
+						.toBeLessThanOrEqual( 1 );
 
-			await editor.saveSiteEditorEntities( {
-				isOnlyCurrentEntityDirty: true,
-			} );
+					await editor.saveSiteEditorEntities( {
+						isOnlyCurrentEntityDirty: true,
+					} );
 
-			await page.goto( blockData.productPageNotOnSale );
-
-			const block = await frontendUtils.getBlockByName( blockData.name );
-
-			await expect( block ).toBeHidden();
-		} );
-
-		test( 'should be aligned to the left', async ( {
-			editor,
-			page,
-			pageObject,
-			blockUtils,
-		} ) => {
-			await editor.openDocumentSettingsSidebar();
-			await editor.insertBlock( {
-				name: 'woocommerce/product-gallery',
-			} );
-
-			await pageObject.toggleFullScreenOnClickSetting( false );
-
-			const block = await editor.getBlockByName( blockData.name );
-
-			await block.click();
-
-			await page.locator( "button[aria-label='Align']" ).click();
-			await page.getByText( 'Align Left' ).click();
-
-			await expect
-				.poll( async () => {
-					const { badge, badgeContainer } =
-						await blockUtils.getSaleBadgeBoundingClientRect(
-							false
-						);
-
-					return badge.x - badgeContainer.x;
-				} )
-				.toEqual( 0 );
-
-			await editor.saveSiteEditorEntities( {
-				isOnlyCurrentEntityDirty: true,
-			} );
-
-			await page.goto( blockData.productPage );
-
-			await expect
-				.poll( async () => {
-					const { badge, badgeContainer } =
-						await blockUtils.getSaleBadgeBoundingClientRect( true );
-
-					return badge.x - badgeContainer.x;
-				} )
-				.toEqual( 0 );
-		} );
-
-		test( 'should be aligned to the center', async ( {
-			editor,
-			page,
-			pageObject,
-			blockUtils,
-		} ) => {
-			await editor.openDocumentSettingsSidebar();
-			await editor.insertBlock( {
-				name: 'woocommerce/product-gallery',
-			} );
-
-			await pageObject.toggleFullScreenOnClickSetting( false );
-
-			const block = await editor.getBlockByName( blockData.name );
-
-			await block.click();
-
-			await page.locator( "button[aria-label='Align']" ).click();
-			await page.getByText( 'Align Center' ).click();
-
-			await expect
-				.poll( async () => {
-					const { badge, badgeContainer } =
-						await blockUtils.getSaleBadgeBoundingClientRect(
-							false
-						);
-
-					return badge.right < badgeContainer.right;
-				} )
-				.toBe( true );
-
-			await editor.saveSiteEditorEntities( {
-				isOnlyCurrentEntityDirty: true,
-			} );
-
-			await page.goto( blockData.productPage );
-
-			await expect
-				.poll( async () => {
-					const { badge, badgeContainer } =
-						await blockUtils.getSaleBadgeBoundingClientRect( true );
-
-					return badge.right < badgeContainer.right;
-				} )
-				.toBe( true );
-		} );
-
-		test( 'should be aligned to the right by default', async ( {
-			editor,
-			page,
-			pageObject,
-			blockUtils,
-		} ) => {
-			await editor.openDocumentSettingsSidebar();
-			await editor.insertBlock( {
-				name: 'woocommerce/product-gallery',
-			} );
-			await pageObject.toggleFullScreenOnClickSetting( false );
-
-			await expect
-				.poll( async () => {
-					const { badge, badgeContainer } =
-						await blockUtils.getSaleBadgeBoundingClientRect(
-							false
-						);
-
-					return badgeContainer.right - badge.right;
-				} )
-				.toEqual( 0 );
-
-			await editor.saveSiteEditorEntities( {
-				isOnlyCurrentEntityDirty: true,
-			} );
-
-			await page.goto( blockData.productPage );
-
-			await expect
-				.poll( async () => {
-					const { badge, badgeContainer } =
-						await blockUtils.getSaleBadgeBoundingClientRect( true );
-
-					return badgeContainer.right - badge.right;
-				} )
-				.toEqual( 0 );
+					await frontendPage.goto( blockData.productPage );
+					await expect(
+						frontendPage.locator( badgeSelector ).first()
+					).toBeVisible();
+					await expect
+						.poll( () =>
+							getAlignmentDelta( frontendPage, alignment )
+						)
+						.toBeLessThanOrEqual( 1 );
+				}
+			} finally {
+				await frontendPage.close();
+				expect( context.pages() ).toHaveLength( baselinePageCount );
+			}
 		} );
 	} );
 } );

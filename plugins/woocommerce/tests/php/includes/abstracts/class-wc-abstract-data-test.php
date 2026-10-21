@@ -72,4 +72,28 @@ class WC_Data_Test extends WC_Unit_Test_Case {
 		$this->assertEquals( [], $meta_data );
 		$data_object->read_meta_data();
 	}
+
+	/**
+	 * @testdox Should store a WC_DateTime object passed to a date setter as a date.
+	 */
+	public function test_set_date_prop_accepts_wc_datetime_object(): void {
+		$order    = new WC_Order();
+		$datetime = new WC_DateTime( '@1700000000', new DateTimeZone( 'UTC' ) );
+
+		$order->set_date_created( $datetime );
+
+		$this->assertInstanceOf( WC_DateTime::class, $order->get_date_created() );
+		$this->assertSame( 1700000000, $order->get_date_created()->getTimestamp() );
+	}
+
+	/**
+	 * @testdox Should not treat the WC_DateTime class name passed to a date setter as a date object.
+	 */
+	public function test_set_date_prop_does_not_treat_class_name_as_date_object(): void {
+		$order = new WC_Order();
+
+		$order->set_date_created( 'WC_DateTime' );
+
+		$this->assertNotSame( 'WC_DateTime', $order->get_date_created(), 'The class name string must not be stored as the date' );
+	}
 }

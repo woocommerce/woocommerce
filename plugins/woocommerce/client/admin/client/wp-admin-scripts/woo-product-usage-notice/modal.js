@@ -14,7 +14,6 @@ import {
 	FlexItem,
 	Icon,
 	Modal,
-	ResponsiveWrapper,
 } from '@wordpress/components';
 import { commentContent, people, reusableBlock } from '@wordpress/icons';
 import { Text } from '@woocommerce/experimental';
@@ -53,6 +52,7 @@ export default function ProductUsageNoticeModal( {
 	const isExpired = subscriptionState.expired;
 
 	const dismiss = () => {
+		setIsModalOpen( false );
 		dismissRequest(
 			{
 				dismissAction,
@@ -60,7 +60,6 @@ export default function ProductUsageNoticeModal( {
 				dismissNonce,
 			},
 			() => {
-				setIsModalOpen( false );
 				recordEvent( 'product_usage_notice_dismissed', {
 					product_id: productId,
 					screen_id: screenId,
@@ -69,6 +68,7 @@ export default function ProductUsageNoticeModal( {
 		);
 	};
 	const remindLater = () => {
+		setIsModalOpen( false );
 		remindLaterRequest(
 			{
 				remindLaterAction,
@@ -76,7 +76,6 @@ export default function ProductUsageNoticeModal( {
 				remindLaterNonce,
 			},
 			() => {
-				setIsModalOpen( false );
 				recordEvent( 'product_usage_notice_maybe_later_clicked', {
 					product_id: productId,
 					screen_id: screenId,
@@ -104,7 +103,7 @@ export default function ProductUsageNoticeModal( {
 			? __(
 					'Reactivate your subscription and benefit from:',
 					'woocommerce'
-			  )
+				)
 			: __( 'Purchase a subscription to benefit from:', 'woocommerce' );
 
 		const benefits = [
@@ -172,24 +171,24 @@ export default function ProductUsageNoticeModal( {
 					/* translators: %s is product name */
 					__( 'Renew %s', 'woocommerce' ),
 					productName
-			  )
+				)
 			: sprintf(
 					/* translators: %s is product name */
 					__( 'Subscribe to %s', 'woocommerce' ),
 					productName
-			  );
+				);
 
 		const buttonLabel = isExpired
 			? sprintf(
 					/* translators: %s is product price */
 					__( 'Renew for $%s', 'woocommerce' ),
 					productRegularPrice
-			  )
+				)
 			: sprintf(
 					/* translators: %s is product price */
 					__( 'Subscribe for $%s', 'woocommerce' ),
 					productRegularPrice
-			  );
+				);
 
 		return (
 			<Card className="primary">
@@ -224,12 +223,11 @@ export default function ProductUsageNoticeModal( {
 		return (
 			<Card className="secondary">
 				<CardMedia>
-					<ResponsiveWrapper
-						naturalWidth={ 240 }
-						naturalHeight={ 240 }
-					>
-						<img src={ extensionsSvg } alt="" />
-					</ResponsiveWrapper>
+					<div className="woocommerce-product-usage-notice__illustration">
+						<div>
+							<img src={ extensionsSvg } alt="" />
+						</div>
+					</div>
 				</CardMedia>
 			</Card>
 		);

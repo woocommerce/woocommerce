@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add support for an optional `labelDateEnd` on Chart data points so a tooltip and screen reader label can describe a point covering a range of dates.

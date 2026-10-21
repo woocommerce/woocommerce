@@ -221,7 +221,7 @@ describe( 'inbox_note_view event', () => {
 } );
 
 describe( 'inbox_action_click event', () => {
-	test( 'should fire tracks event when inboxNoteCard fires onBodyLinkClick', () => {
+	test( 'should fire tracks event when inboxNoteCard fires onBodyLinkClick', async () => {
 		useSelect.mockImplementation( () => ( {
 			notes: NOTES,
 			isError: false,
@@ -237,7 +237,7 @@ describe( 'inbox_action_click event', () => {
 		} );
 		const { getAllByText } = render( <InboxPanel /> );
 		const buttons = getAllByText( 'Trigger action' );
-		userEvent.click( buttons[ 0 ] );
+		await userEvent.click( buttons[ 0 ] );
 		expect( recordEvent ).toHaveBeenCalledWith( 'inbox_action_click', {
 			note_name: NOTES[ 0 ].name,
 			note_title: NOTES[ 0 ].title,

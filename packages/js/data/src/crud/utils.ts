@@ -207,7 +207,7 @@ export const getUrlParameters = (
 /**
  * Check to see if an argument is a valid type of ID query.
  *
- * @param arg       Unknow argument to check.
+ * @param arg       Unknown argument to check.
  * @param namespace The namespace string
  * @return boolean
  */

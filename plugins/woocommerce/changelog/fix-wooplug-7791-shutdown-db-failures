@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Skip background processing checks when nothing is queued, and avoid false failures when the database is unavailable.

@@ -76,7 +76,7 @@ export function initDomTracking() {
 					isOpened,
 				} );
 			},
-			// eslint-disable-next-line @wordpress/i18n-text-domain
+
 			selector: `.components-dropdown-menu__toggle[aria-label="${ __(
 				'Options'
 			) }"]`,
@@ -85,10 +85,8 @@ export function initDomTracking() {
 		{
 			track: ( target ) => {
 				if (
-					// eslint-disable-next-line @wordpress/i18n-text-domain
 					( target.textContent === __( 'Save' ) &&
 						target.getAttribute( 'aria-disabled' ) === 'false' ) ||
-					// eslint-disable-next-line @wordpress/i18n-text-domain
 					target.textContent === __( 'Saving…' )
 				) {
 					recordEvent( 'header_save_button_clicked' );

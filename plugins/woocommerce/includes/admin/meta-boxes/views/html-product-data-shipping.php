@@ -1,4 +1,5 @@
 <?php
+use Automattic\WooCommerce\Internal\ProductCustoms\ClassicEditorFields;
 use Automattic\WooCommerce\Utilities\I18nUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -74,6 +75,13 @@ if ( ! defined( 'ABSPATH' ) ) {
 		<?php
 
 		do_action( 'woocommerce_product_options_shipping' );
+		?>
+	</div>
+	<div class="options_group">
+		<?php
+		if ( isset( $product_object ) ) {
+			wc_get_container()->get( ClassicEditorFields::class )->render_fields( $product_object );
+		}
 		?>
 	</div>
 	<?php do_action( 'woocommerce_product_options_shipping_product_data' ); ?>

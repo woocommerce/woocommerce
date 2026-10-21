@@ -17,14 +17,16 @@ interface WithUpdateButtonAttributes< T > {
 	editMode?: boolean;
 }
 
-interface WithUpdateButtonCategoryProps< T >
-	extends WithUpdateButtonAttributes< T > {
+interface WithUpdateButtonCategoryProps<
+	T,
+> extends WithUpdateButtonAttributes< T > {
 	category: WP_REST_API_Category;
 	product: never;
 }
 
-interface WithUpdateButtonProductProps< T >
-	extends WithUpdateButtonAttributes< T > {
+interface WithUpdateButtonProductProps<
+	T,
+> extends WithUpdateButtonAttributes< T > {
 	category: never;
 	product: ProductResponseItem;
 }
@@ -52,14 +54,18 @@ export const withUpdateButtonAttributes =
 		const findFirstButton = (
 			node?: BlockInstance
 		): BlockInstance | undefined => {
-			if ( ! node ) return undefined;
+			if ( ! node ) {
+				return undefined;
+			}
 			if ( node.name === 'core/button' ) {
 				return node;
 			}
 			const children: BlockInstance[] = node.innerBlocks || [];
 			for ( const child of children ) {
 				const found = findFirstButton( child );
-				if ( found ) return found;
+				if ( found ) {
+					return found;
+				}
 			}
 			return undefined;
 		};

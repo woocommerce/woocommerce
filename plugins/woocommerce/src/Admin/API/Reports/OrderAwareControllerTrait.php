@@ -3,6 +3,8 @@ declare( strict_types = 1);
 
 namespace Automattic\WooCommerce\Admin\API\Reports;
 
+use Automattic\WooCommerce\Internal\Admin\Settings;
+
 // Exit if accessed directly.
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -93,12 +95,11 @@ trait OrderAwareControllerTrait {
 	public static function get_order_statuses() {
 		// Allow all statuses selected as "actionable" - this may include unregistered statuses.
 		// See: https://github.com/woocommerce/woocommerce-admin/issues/5592.
-		$actionable_statuses = get_option( 'woocommerce_actionable_order_statuses', array() );
+		$default_actionable_statuses = Settings::get_default_actionable_order_statuses();
+		$actionable_statuses         = get_option( 'woocommerce_actionable_order_statuses', $default_actionable_statuses );
 
 		// Prevent errors if the database entry is not the expected type (array).
-		if ( ! is_array( $actionable_statuses ) ) {
-			$actionable_statuses = array();
-		}
+		$actionable_statuses = Settings::get_valid_order_statuses_or_default( $actionable_statuses, $default_actionable_statuses );
 
 		// See WC_REST_Orders_V2_Controller::get_collection_params() re: any/trash statuses.
 		$registered_statuses = array_merge( array( 'any', 'trash' ), array_keys( self::get_order_status_labels() ) );

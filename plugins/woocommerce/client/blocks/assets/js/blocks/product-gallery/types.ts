@@ -29,8 +29,8 @@ export type ProductGalleryConfig = WooCommerceConfig & {
 };
 
 export type LegacyVariationPayload = {
-	variation_id?: number;
-	image_id?: number;
+	variation_id?: number | string;
+	image_id?: number | string;
 };
 
 export type LegacyJQueryInstance = {
@@ -58,9 +58,6 @@ export interface ProductGalleryContext {
 	isDialogOpen: boolean;
 	videoLocation?: 'dialog' | 'gallery';
 	productId: string;
-	touchStartX: number;
-	touchCurrentX: number;
-	isDragging: boolean;
 	imageData: number[];
 	thumbnailsOverflow: {
 		top: boolean;

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Serve minified admin scripts only when the minified file actually exists, preventing broken admin pages when the minified-js feature is force-enabled (e.g. via WooCommerce Beta Tester) on builds that do not ship minified JS files.

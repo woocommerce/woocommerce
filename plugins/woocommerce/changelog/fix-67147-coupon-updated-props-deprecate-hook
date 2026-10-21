@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Deprecate the woocommerce_coupon_object_updated_props action in favor of the new woocommerce_coupon_updated_props action, which reports only the properties changed by the current save. The deprecated action keeps firing with its historical payload (properties accumulated across saves through the same data store instance, with duplicates) whenever it has listeners. WC_Coupon_Data_Store_CPT::$updated_props is deprecated.

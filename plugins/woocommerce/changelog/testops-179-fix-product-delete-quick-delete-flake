@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Fix flaky product-delete list-table quick-delete E2E test by scrolling the product row into view before clicking the hover-revealed Trash / Delete Permanently row action.

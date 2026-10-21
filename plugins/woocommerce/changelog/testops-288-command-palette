@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Move command palette command registration below E2E: Jest owns each command's name, label, icon, tracking event and target URL, and the spec keeps two browser titles.
+

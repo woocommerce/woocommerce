@@ -26,9 +26,12 @@ import type {
 	LegacyVariationPayload,
 } from './types';
 
-/** A positive integer ID from the variation event payload. */
-const isValidId = ( id: unknown ): id is number =>
-	typeof id === 'number' && Number.isInteger( id ) && id > 0;
+/** Normalize an integer ID from the variation event payload. */
+const normalizeId = ( id: unknown ): number | undefined => {
+	const normalizedId = Number( id );
+
+	return Number.isInteger( normalizedId ) ? normalizedId : undefined;
+};
 
 /**
  * Subscribe to the legacy classic Add to Cart form's jQuery variation
@@ -48,14 +51,11 @@ export const subscribeLegacyJQueryFormVariations = (
 
 	const handleFound = withScope(
 		( _event?: unknown, variation?: LegacyVariationPayload ) => {
-			if (
-				isValidId( variation?.variation_id ) &&
-				isValidId( variation?.image_id )
-			) {
-				handlers.onVariationFound(
-					variation.variation_id,
-					variation.image_id
-				);
+			const variationId = normalizeId( variation?.variation_id );
+			const featuredImageId = normalizeId( variation?.image_id );
+
+			if ( variationId !== undefined && featuredImageId !== undefined ) {
+				handlers.onVariationFound( variationId, featuredImageId );
 				return;
 			}
 

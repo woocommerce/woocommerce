@@ -35,13 +35,13 @@ In all cases, point releases must remain backward compatible. No breaking change
 
 ## Evaluating whether to ship a point release
 
-Use your best judgement based on the urgency and severity of the outstanding issue. The release lead and the reporter should weigh:
+Use your best judgement based on the urgency and severity of the outstanding issue. These criteria align with the [release decision matrix](/docs/contribution/releases/decision-matrix), which maps impact classes to default verdicts. The release lead and the reporter should weigh:
 
 | Criterion | Guidance |
 | --- | --- |
 | **Scope of impact** | How many stores are already affected? Larger reach increases urgency. |
 | **Error commonality** | Does the problem stem from a widely-used core flow, plugin, or theme? Issues in common components usually merit faster action. |
-| **Workarounds** | Is there an easy, documented workaround (a filter, setting toggle, or temporary feature disable) that store owners can apply? Readily available workarounds lower the need for a point release. |
+| **Workarounds** | Is there an easy, documented workaround (a filter, setting toggle, or temporary feature disable) that store owners can apply? Readily available workarounds lower the need for a point release - except for checkout, data-loss, and site-down issues, where the matrix calls for a point release regardless. |
 | **Impact severity** | Does the bug block critical commerce functionality (checkout, payments, product visibility)? The more business-critical the failure, the higher the priority. |
 
 Some practical timing notes:

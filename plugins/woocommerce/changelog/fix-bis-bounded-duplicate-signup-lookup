@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Validate posted Back in Stock variation attributes against the values the store offers, look up an existing sign-up with a single exact query, and check the sign-up rate limit before it.

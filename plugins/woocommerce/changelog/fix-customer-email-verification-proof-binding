@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure customer email verification and guest order linking use the address confirmed during a password reset or key confirmation.

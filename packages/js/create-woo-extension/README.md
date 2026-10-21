@@ -22,7 +22,7 @@ npm run start # Watch the javascript for changes
 
 # Local development with wp-env (optional)
 npm -g i @wordpress/env # If you don't already have wp-env
-wp-env start # Start Wordpress environment
+wp-env start # Start WordPress environment
 ```
 
 See the new plugin activated from the WordPress plugins page and navigate to `wp-admin/admin.php?page=wc-admin&path=%2Fmy-extension-name` to check it out.

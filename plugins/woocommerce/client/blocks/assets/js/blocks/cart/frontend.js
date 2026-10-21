@@ -6,7 +6,7 @@ import { Children, cloneElement, isValidElement } from '@wordpress/element';
 import { useStoreCart } from '@woocommerce/base-context';
 import { getRegisteredBlockComponents } from '@woocommerce/blocks-registry';
 
-import { renderParentBlock } from '@woocommerce/atomic-utils';
+import { renderParentBlock } from '@woocommerce/utils/render-parent-block';
 
 /**
  * Internal dependencies
@@ -27,7 +27,7 @@ const getProps = ( el ) => {
 
 const Wrapper = ( { children } ) => {
 	// we need to pluck out receiveCart.
-	// eslint-disable-next-line no-unused-vars
+
 	const { extensions, receiveCart, ...cart } = useStoreCart();
 	return Children.map( children, ( child ) => {
 		if ( isValidElement( child ) ) {

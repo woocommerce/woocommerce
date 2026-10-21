@@ -1,0 +1,4 @@
+Significance: patch
+Type: fixed
+
+Hold the analytics tracking script until visitors consent to statistics when a consent plugin is active.

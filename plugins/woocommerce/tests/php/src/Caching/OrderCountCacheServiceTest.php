@@ -215,4 +215,28 @@ class OrderCountCacheServiceTest extends \WC_Unit_Test_Case {
 
 		$this->assertNull( $this->order_cache->get( 'shop_order', array( OrderInternalStatus::PENDING ) ) );
 	}
+
+	/**
+	 * Test that activating a plugin flushes the order count cache.
+	 */
+	public function test_activated_plugin_flushes_cache(): void {
+		OrderUtil::get_count_for_type( 'shop_order' );
+		$this->assertNotNull( $this->order_cache->get( 'shop_order' ) );
+
+		do_action( 'activated_plugin', 'custom-status-plugin/custom-status-plugin.php', false );
+
+		$this->assertNull( $this->order_cache->get( 'shop_order' ) );
+	}
+
+	/**
+	 * Test that deactivating a plugin flushes the order count cache.
+	 */
+	public function test_deactivated_plugin_flushes_cache(): void {
+		OrderUtil::get_count_for_type( 'shop_order' );
+		$this->assertNotNull( $this->order_cache->get( 'shop_order' ) );
+
+		do_action( 'deactivated_plugin', 'custom-status-plugin/custom-status-plugin.php', false );
+
+		$this->assertNull( $this->order_cache->get( 'shop_order' ) );
+	}
 }

@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareRestControllerTrait;
+use Automattic\WooCommerce\Internal\ProductCustoms\CustomsDataValidator;
 use Automattic\WooCommerce\Internal\VariationGallery\LegacyVariationGalleryCompatibility;
 use Automattic\WooCommerce\Internal\VariationGallery\Telemetry as VariationGalleryTelemetry;
 use Automattic\WooCommerce\Utilities\I18nUtil;
@@ -168,6 +169,12 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			'parent_id'             => $object->get_parent_id(),
 		);
 
+		if ( $object instanceof WC_Product ) {
+			$data['customs_commodity_code']    = $object->get_customs_commodity_code( $context );
+			$data['customs_country_of_origin'] = $object->get_customs_country_of_origin( $context );
+			$data['customs_description']       = $object->get_customs_description( $context );
+		}
+
 		$data = $this->add_additional_fields_to_object( $data, $request );
 		$data = $this->filter_response_by_context( $data, $context );
 
@@ -201,6 +208,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 	 * @throws \Throwable When setting gallery_image_ids fails.
 	 */
 	protected function prepare_object_for_database( $request, $creating = false ) {
+		$customs = CustomsDataValidator::normalize_fields( $request->get_params() );
 		if ( isset( $request['id'] ) ) {
 			$variation = wc_get_product( absint( $request['id'] ) );
 		} else {
@@ -208,6 +216,10 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 		}
 
 		$variation->set_parent_id( absint( $request['product_id'] ) );
+
+		foreach ( $customs as $property => $value ) {
+			$variation->{ 'set_' . $property }( $value );
+		}
 
 		// Status.
 		if ( isset( $request['status'] ) ) {
@@ -463,7 +475,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 		$image_size = $this->request['image_size'] ?? 'full';
 		$image_size = is_string( $image_size ) && '' !== $image_size ? sanitize_text_field( $image_size ) : 'full';
 
-		$attachment_id   = $variation->get_image_id();
+		$attachment_id   = (int) $variation->get_image_id();
 		$attachment_post = get_post( $attachment_id );
 		if ( is_null( $attachment_post ) ) {
 			return;
@@ -941,6 +953,24 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			$schema = $this->add_cogs_related_product_schema( $schema, true );
 		}
 
+		$schema['properties']['customs_commodity_code'] = array(
+			'description' => __( 'Customs commodity code containing 6 to 14 digits. Punctuation and spaces are removed. In view context, an empty value inherits the parent value; in edit context, only the stored value is returned (null when inherited).', 'woocommerce' ),
+			'type'        => array( 'string', 'null' ),
+			'context'     => array( 'view', 'edit' ),
+		);
+
+		$schema['properties']['customs_country_of_origin'] = array(
+			'description' => __( 'Two-letter country of origin code. In view context, an empty value inherits the parent value; in edit context, only the stored value is returned (null when inherited).', 'woocommerce' ),
+			'type'        => array( 'string', 'null' ),
+			'context'     => array( 'view', 'edit' ),
+		);
+
+		$schema['properties']['customs_description'] = array(
+			'description' => __( 'Plain-text customs description, up to 35 characters, without emoji or special symbols such as ™. In view context, an empty value inherits the parent value; in edit context, only the stored value is returned (null when inherited).', 'woocommerce' ),
+			'type'        => array( 'string', 'null' ),
+			'context'     => array( 'view', 'edit' ),
+		);
+
 		return $this->add_additional_fields_schema( $schema );
 	}
 
@@ -1033,7 +1063,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 				$skus[] = $request['sku'];
 			}
 
-			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
+			$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Bounded to one parent's variations by post_parent; wc_product_meta_lookup truncates SKUs to 100 chars.
 				$args,
 				array(
 					'key'     => '_sku',
@@ -1058,7 +1088,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 
 		// Filter by tax class.
 		if ( ! empty( $request['tax_class'] ) ) {
-			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
+			$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Bounded to one parent's variations by post_parent, so this resolves through the postmeta post_id index.
 				$args,
 				array(
 					'key'   => '_tax_class',
@@ -1069,13 +1099,13 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 
 		// Price filter.
 		if ( ! empty( $request['min_price'] ) || ! empty( $request['max_price'] ) ) {
-			$args['meta_query'] = $this->add_meta_query( $args, wc_get_min_max_price_meta_query( $request ) );  // WPCS: slow query ok.
+			$args['meta_query'] = $this->add_meta_query( $args, wc_get_min_max_price_meta_query( $request ) );  // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Bounded to one parent's variations by post_parent; wc_product_meta_lookup keeps only min/max and would match a wider range.
 		}
 
 		// Price filter.
 		if ( is_bool( $request['has_price'] ) ) {
 			if ( $request['has_price'] ) {
-				$args['meta_query'] = $this->add_meta_query( // phpcs:ignore Standard.Category.SniffName.ErrorCode slow query ok.
+				$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Bounded to one parent's variations by post_parent; wc_product_meta_lookup keeps only min/max and would match a wider range.
 					$args,
 					array(
 						'relation' => 'AND',
@@ -1091,7 +1121,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 					)
 				);
 			} else {
-				$args['meta_query'] = $this->add_meta_query( // phpcs:ignore Standard.Category.SniffName.ErrorCode slow query ok.
+				$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Bounded to one parent's variations by post_parent; wc_product_meta_lookup keeps only min/max and would match a wider range.
 					$args,
 					array(
 						'relation' => 'OR',
@@ -1111,7 +1141,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 
 		// Filter product based on stock_status.
 		if ( ! empty( $request['stock_status'] ) ) {
-			$args['meta_query'] = $this->add_meta_query( // WPCS: slow query ok.
+			$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- Bounded to one parent's variations by post_parent, so this resolves through the postmeta post_id index.
 				$args,
 				array(
 					'key'   => '_stock_status',
@@ -1122,13 +1152,26 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 
 		// Filter by on sale products.
 		if ( is_bool( $request['on_sale'] ) ) {
-			$on_sale_key = $request['on_sale'] ? 'post__in' : 'post__not_in';
 			$on_sale_ids = wc_get_product_ids_on_sale();
 
 			// Use 0 when there's no on sale products to avoid return all products.
 			$on_sale_ids = empty( $on_sale_ids ) ? array( 0 ) : $on_sale_ids;
 
-			$args[ $on_sale_key ] += $on_sale_ids;
+			if ( $request['on_sale'] || ! empty( $args['post__in'] ) ) {
+				$post_in = empty( $args['post__in'] ) ? $on_sale_ids : $args['post__in'];
+
+				// WP_Query ignores post__not_in when post__in is set, so the on_sale filter and exclude are applied to post__in.
+				if ( $request['on_sale'] ) {
+					$post_in = array_intersect( $post_in, $on_sale_ids );
+				} else {
+					$post_in = array_diff( $post_in, $on_sale_ids );
+				}
+				$post_in = array_diff( $post_in, (array) $args['post__not_in'] );
+
+				$args['post__in'] = empty( $post_in ) ? array( 0 ) : array_values( $post_in );
+			} else {
+				$args['post__not_in'] = array_merge( (array) $args['post__not_in'], $on_sale_ids );
+			}
 		}
 
 		// Force the post_type argument, since it's not a user input variable.
@@ -1351,12 +1394,20 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			return new WP_Error( 'woocommerce_rest_product_invalid_id', __( 'Invalid product ID.', 'woocommerce' ), array( 'status' => 404 ) );
 		}
 
+		$default_values = isset( $request['default_values'] ) ? $request['default_values'] : array();
+		if ( is_array( $default_values ) ) {
+			try {
+				$default_values = array_merge( $default_values, CustomsDataValidator::normalize_fields( $default_values ) );
+			} catch ( WC_Data_Exception $e ) {
+				return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => 400 ) );
+			}
+		}
+
 		wc_maybe_define_constant( 'WC_MAX_LINKED_VARIATIONS', 99 );
 		wc_set_time_limit( 0 );
 
 		$response          = array();
 		$product           = wc_get_product( $product_id );
-		$default_values    = isset( $request['default_values'] ) ? $request['default_values'] : array();
 		$meta_data         = isset( $request['meta_data'] ) ? $request['meta_data'] : array();
 		$data_store        = $product->get_data_store();
 		$response['count'] = $data_store->create_all_product_variations( $product, Constants::get_constant( 'WC_MAX_LINKED_VARIATIONS' ), $default_values, $meta_data );
