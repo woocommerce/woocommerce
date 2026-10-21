@@ -31,25 +31,15 @@ class WC_Meta_Box_Product_Data_Test extends WC_Unit_Test_Case {
 	private $original_globals = array();
 
 	/**
-	 * Approved download directory register.
-	 *
-	 * @var Download_Directories
-	 */
-	private $download_directories;
-
-	/**
 	 * Set up an isolated classic admin request.
 	 *
-	 * The base class already empties the request globals, rolls back every
-	 * database write and resets the current user, so only the two things it
-	 * does not own are captured here: the static meta-box error list and the
-	 * three product globals the classic save seam sets.
+	 * The base class restores request, database and user state. Capture the
+	 * additional globals and static errors used by the classic meta box.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 
 		$this->original_meta_box_errors = WC_Admin_Meta_Boxes::$meta_box_errors;
-		$this->download_directories     = wc_get_container()->get( Download_Directories::class );
 
 		foreach ( array( 'product', 'product_object', 'thepostid' ) as $global_name ) {
 			$this->original_globals[ $global_name ] = array(
@@ -59,7 +49,7 @@ class WC_Meta_Box_Product_Data_Test extends WC_Unit_Test_Case {
 		}
 
 		WC_Admin_Meta_Boxes::$meta_box_errors = array();
-		$this->download_directories->set_mode( Download_Directories::MODE_DISABLED );
+		wc_get_container()->get( Download_Directories::class )->set_mode( Download_Directories::MODE_DISABLED );
 		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
 	}
 
@@ -106,7 +96,7 @@ class WC_Meta_Box_Product_Data_Test extends WC_Unit_Test_Case {
 			'file' => 'https://downloads.example.com/field-matrix/product.pdf',
 		);
 
-		$this->save_product_data( $product, $sku, $virtual, $downloadable, array( $download ) );
+		$this->save_product_data( $product, $sku, $virtual, $downloadable, $download );
 
 		$fresh_product = wc_get_product( $product->get_id() );
 		$this->assertInstanceOf( WC_Product::class, $fresh_product, 'The saved product should reload from the data store.' );
@@ -160,147 +150,250 @@ class WC_Meta_Box_Product_Data_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The classic editor tracks the URL rendered for product and variation downloads.
+	 * @testdox Each download row submits the same URL in its visible field and hidden baseline.
+	 * @testWith ["html-product-download.php", 0, "_wc_file_urls[]", "_wc_file_rendered_urls[]"]
+	 *           ["html-product-variation-download.php", 123, "_wc_variation_file_urls[123][]", "_wc_variation_file_rendered_urls[123][]"]
+	 *
+	 * @param string $template Download row template.
+	 * @param int    $variation_id Variation ID used by the variation template.
+	 * @param string $visible_field Visible URL field name.
+	 * @param string $hidden_field Hidden baseline field name.
 	 */
-	public function test_download_rows_track_the_rendered_url(): void {
-		$product_download_row   = $this->render_download_row( 'html-product-download.php' );
-		$variation_download_row = $this->render_download_row( 'html-product-variation-download.php', 123 );
-
-		$this->assertStringContainsString(
-			'name="_wc_file_rendered_urls[]" value="https://temporary.example.com/file.zip"',
-			$product_download_row,
-			'The product download row should retain the URL shown to the user.'
+	public function test_download_rows_track_the_rendered_url( string $template, int $variation_id, string $visible_field, string $hidden_field ): void {
+		$file              = array(
+			'name' => 'Filtered download',
+			'file' => 'https://temporary.example.com/file.zip?signature=abc&expires=123',
 		);
-		$this->assertStringContainsString(
-			'name="_wc_variation_file_rendered_urls[123][]" value="https://temporary.example.com/file.zip"',
-			$variation_download_row,
-			'The variation download row should retain the URL shown to the user.'
+		$key               = 'download-id';
+		$disabled_download = false;
+
+		ob_start();
+		include WC_ABSPATH . 'includes/admin/meta-boxes/views/' . $template;
+		$processor = new WP_HTML_Tag_Processor( (string) ob_get_clean() );
+		$fields    = array();
+		while ( $processor->next_tag( 'input' ) ) {
+			$fields[ $processor->get_attribute( 'name' ) ] = array(
+				'type'  => $processor->get_attribute( 'type' ),
+				'value' => $processor->get_attribute( 'value' ),
+			);
+		}
+
+		$this->assertSame(
+			array(
+				'type'  => 'text',
+				'value' => $file['file'],
+			),
+			$fields[ $visible_field ] ?? null,
+			'The visible field should contain the filtered URL.'
+		);
+		$this->assertSame(
+			array(
+				'type'  => 'hidden',
+				'value' => $file['file'],
+			),
+			$fields[ $hidden_field ] ?? null,
+			'The hidden field should retain the same URL, including query parameters.'
 		);
 	}
 
 	/**
-	 * @testdox The classic product save only persists a filtered download URL when it was deliberately edited.
-	 * @testWith [false, "https://license.example.com/download/file.zip"]
-	 *           [true, "https://downloads.example.com/replacement/file.zip"]
+	 * @testdox Saves retain untouched URLs while allowing URL and name edits in the same form.
+	 * @testWith [false, null, "https://license.example.com/first.zip"]
+	 *           [true, null, "https://license.example.com/first.zip"]
+	 *           [false, "https://downloads.example.com/replacement.zip", "https://downloads.example.com/replacement.zip"]
+	 *           [true, "https://downloads.example.com/replacement.zip", "https://downloads.example.com/replacement.zip"]
 	 *
-	 * @param bool   $edit_url Whether to edit the rendered URL before saving.
-	 * @param string $expected_stored_url Expected stored URL after saving.
+	 * @param bool        $is_variation Whether to save a variation.
+	 * @param string|null $edited_url Replacement URL, or null to leave the field untouched.
+	 * @param string      $expected_url Expected stored URL for the first download.
 	 */
-	public function test_save_only_persists_deliberately_edited_filtered_download_url( bool $edit_url, string $expected_stored_url ): void {
-		$original_file_url = 'https://license.example.com/download/file.zip';
-		$edited_file_url   = 'https://downloads.example.com/replacement/file.zip';
-		$download_id       = 'download-id';
-		$product           = $this->create_downloadable_product( $download_id, $original_file_url );
+	public function test_save_distinguishes_untouched_urls_from_edits( bool $is_variation, ?string $edited_url, string $expected_url ): void {
+		list( $product, $rows ) = $this->create_download_editor( $is_variation );
+		$product_class          = get_class( $product );
+		$next_downloads         = ( new $product_class( $product->get_id() ) )->get_downloads( 'edit' );
+		$this->assertNotSame( $rows[0]['rendered_url'], $next_downloads['first-download']->get_file(), 'The filter must change between reads so a fresh read cannot replace the rendered baseline.' );
 
-		$filter_calls = 0;
-		$this->add_incrementing_download_path_filter( 'https://temporary.example.com/file.zip', $filter_calls );
-		$editor_downloads   = ( new WC_Product_Simple( $product->get_id() ) )->get_downloads( 'edit' );
-		$rendered_file_url  = $editor_downloads[ $download_id ]->get_file();
-		$submitted_file_url = $edit_url ? $edited_file_url : $rendered_file_url;
+		if ( null !== $edited_url ) {
+			$rows[0]['file'] = $edited_url;
+		}
+		$this->save_download_rows( $product, $rows );
 
-		$this->save_product_data(
-			$product,
-			'sku-' . wp_generate_uuid4(),
-			false,
-			true,
+		$this->assertSame(
 			array(
-				array(
-					'id'   => $download_id,
-					'name' => 'Updated download name',
-					'file' => $submitted_file_url,
+				'first-download'  => array(
+					'name' => 'First renamed',
+					'file' => $expected_url,
+				),
+				'second-download' => array(
+					'name' => 'Second renamed',
+					'file' => 'https://license.example.com/second.zip',
 				),
 			),
-			array( $rendered_file_url )
+			$this->get_stored_downloads( $product ),
+			'Only a deliberately edited URL should replace its stored path; both name edits should persist.'
 		);
-
-		$stored_downloads = get_post_meta( $product->get_id(), '_downloadable_files', true );
-		$this->assertGreaterThanOrEqual( 2, $filter_calls, 'The filter should produce a different URL while handling the save request.' );
-		$this->assertSame( $expected_stored_url, $stored_downloads[ $download_id ]['file'], 'The save should distinguish an untouched filtered URL from a deliberate edit.' );
-		$this->assertSame( 'Updated download name', $stored_downloads[ $download_id ]['name'], 'A name-only edit should still be saved.' );
 	}
 
 	/**
-	 * @testdox The classic variation save distinguishes an untouched filtered URL from a deliberate edit.
-	 * @testWith [false, "https://license.example.com/download/variation.zip"]
-	 *           [true, "https://downloads.example.com/replacement/variation.zip"]
-	 *
-	 * @param bool   $edit_url Whether to edit the rendered URL before saving.
-	 * @param string $expected_stored_url Expected stored URL after saving.
-	 */
-	public function test_variation_save_only_persists_deliberately_edited_filtered_download_url( bool $edit_url, string $expected_stored_url ): void {
-		$download_id                = 'variation-download-id';
-		list( $parent, $variation ) = $this->create_downloadable_variation( $download_id, 'https://license.example.com/download/variation.zip' );
-
-		$filter_calls = 0;
-		$this->add_incrementing_download_path_filter( 'https://temporary.example.com/variation.zip', $filter_calls );
-		$editor_downloads  = ( new WC_Product_Variation( $variation->get_id() ) )->get_downloads( 'edit' );
-		$rendered_file_url = $editor_downloads[ $download_id ]->get_file();
-		$this->save_variation_downloads(
-			$variation,
-			array(
-				array(
-					'id'   => $download_id,
-					'name' => 'Updated variation download',
-					'file' => $edit_url ? 'https://downloads.example.com/replacement/variation.zip' : $rendered_file_url,
-				),
-			),
-			array( $rendered_file_url )
-		);
-
-		$stored_downloads = get_post_meta( $variation->get_id(), '_downloadable_files', true );
-		$this->assertGreaterThanOrEqual( 2, $filter_calls, 'The filter should produce a different URL while handling the variation save request.' );
-		$this->assertSame( $expected_stored_url, $stored_downloads[ $download_id ]['file'], 'The variation save should distinguish an untouched filtered URL from a deliberate edit.' );
-		$this->assertSame( 'Updated variation download', $stored_downloads[ $download_id ]['name'], 'The variation should still save a name-only edit.' );
-	}
-
-	/**
-	 * @testdox Product and variation forms without a baseline retain the submitted URL.
+	 * @testdox Forms without the new baseline retain the previous behavior of saving submitted URLs.
 	 * @testWith [false]
 	 *           [true]
 	 *
 	 * @param bool $is_variation Whether to save a variation.
 	 */
 	public function test_save_without_rendered_url_baseline( bool $is_variation ): void {
-		$product      = $this->create_downloadable_save_fixture( $is_variation );
-		$filter_calls = 0;
-		$this->add_incrementing_download_path_filter( 'https://temporary.example.com/file.zip', $filter_calls );
-		$editor_downloads = wc_get_product( $product->get_id() )->get_downloads( 'edit' );
-		$submitted_url    = $editor_downloads['first-download']->get_file();
+		list( $product, $rows ) = $this->create_download_editor( $is_variation );
 
-		$this->save_download_rows(
-			$product,
-			array(
-				array(
-					'id'   => 'first-download',
-					'name' => 'Updated name',
-					'file' => $submitted_url,
-				),
-			)
-		);
+		$this->save_download_rows( $product, $rows, false );
 
-		$stored_downloads = get_post_meta( $product->get_id(), '_downloadable_files', true );
-		$this->assertSame( $submitted_url, $stored_downloads['first-download']['file'], 'A form without the new baseline should keep its previous save behavior.' );
-		$this->assertSame( array(), WC_Admin_Meta_Boxes::$meta_box_errors, 'The legacy form should save without meta-box errors.' );
+		$this->assertSame( array_column( $rows, 'file' ), array_column( $this->get_stored_downloads( $product ), 'file' ), 'A form without the baseline should keep its previous save behavior.' );
 	}
 
 	/**
-	 * @testdox Product and variation saves preserve download identity while rows change.
-	 * @testWith [false, "add"]
-	 *           [true, "add"]
-	 *           [false, "remove"]
-	 *           [true, "remove"]
-	 *           [false, "clear"]
-	 *           [true, "clear"]
-	 *           [false, "reorder"]
-	 *           [true, "reorder"]
-	 *           [false, "remove_all"]
-	 *           [true, "remove_all"]
+	 * @testdox Adding a row with an empty ID creates a new download and preserves the existing files.
+	 * @testWith [false]
+	 *           [true]
 	 *
-	 * @param bool   $is_variation Whether to save a variation.
-	 * @param string $operation Change to the rendered download rows.
+	 * @param bool $is_variation Whether to save a variation.
 	 */
-	public function test_save_download_row_changes( bool $is_variation, string $operation ): void {
-		$product = $this->create_downloadable_save_fixture( $is_variation );
+	public function test_save_adds_a_download( bool $is_variation ): void {
+		list( $product, $rows ) = $this->create_download_editor( $is_variation );
+		array_unshift(
+			$rows,
+			array(
+				'id'           => '',
+				'name'         => 'New',
+				'file'         => 'https://downloads.example.com/new.zip',
+				'rendered_url' => '',
+			)
+		);
+
+		$this->save_download_rows( $product, $rows );
+
+		$stored_downloads = $this->get_stored_downloads( $product );
+		$this->assertSame(
+			array(
+				'New'            => 'https://downloads.example.com/new.zip',
+				'First renamed'  => 'https://license.example.com/first.zip',
+				'Second renamed' => 'https://license.example.com/second.zip',
+			),
+			array_column( $stored_downloads, 'file', 'name' ),
+			'Adding a file should retain all three names, paths and their submitted order.'
+		);
+		$download_ids = array_keys( $stored_downloads );
+		$this->assertNotEmpty( $download_ids[0], 'The new file needs a generated download ID.' );
+		$this->assertSame( array( 'first-download', 'second-download' ), array_slice( $download_ids, 1 ), 'Adding a row must not change existing download IDs.' );
+	}
+
+	/**
+	 * @testdox Removing a row or clearing its URL removes that file and preserves the remaining file.
+	 * @testWith [false, false]
+	 *           [true, false]
+	 *           [false, true]
+	 *           [true, true]
+	 *
+	 * @param bool $is_variation Whether to save a variation.
+	 * @param bool $clear_url Whether to clear the URL instead of removing the row.
+	 */
+	public function test_save_removes_a_download( bool $is_variation, bool $clear_url ): void {
+		list( $product, $rows ) = $this->create_download_editor( $is_variation );
+		if ( $clear_url ) {
+			$rows[0]['file'] = '';
+		} else {
+			array_shift( $rows );
+		}
+
+		$this->save_download_rows( $product, $rows );
+
+		$this->assertSame(
+			array(
+				'second-download' => array(
+					'name' => 'Second renamed',
+					'file' => 'https://license.example.com/second.zip',
+				),
+			),
+			$this->get_stored_downloads( $product ),
+			'Removing the first file must retain the second file under its original ID.'
+		);
+	}
+
+	/**
+	 * @testdox Reordering rows preserves the correct stored URL for each download ID.
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $is_variation Whether to save a variation.
+	 */
+	public function test_save_reorders_downloads( bool $is_variation ): void {
+		list( $product, $rows ) = $this->create_download_editor( $is_variation );
+
+		$this->save_download_rows( $product, array_reverse( $rows ) );
+
+		$this->assertSame(
+			array(
+				'second-download' => array(
+					'name' => 'Second renamed',
+					'file' => 'https://license.example.com/second.zip',
+				),
+				'first-download'  => array(
+					'name' => 'First renamed',
+					'file' => 'https://license.example.com/first.zip',
+				),
+			),
+			$this->get_stored_downloads( $product ),
+			'Reordering rows should change their order without swapping or replacing stored URLs.'
+		);
+	}
+
+	/**
+	 * @testdox Removing every row removes every stored download.
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $is_variation Whether to save a variation.
+	 */
+	public function test_save_removes_all_downloads( bool $is_variation ): void {
+		list( $product ) = $this->create_download_editor( $is_variation );
+
+		$this->save_download_rows( $product, array() );
+
+		$this->assertSame( array(), $this->get_stored_downloads( $product ), 'An empty download list must not restore old files.' );
+	}
+
+	/**
+	 * @testdox A malformed download ID is skipped without losing the other download.
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $is_variation Whether to save a variation.
+	 */
+	public function test_save_skips_an_array_download_id( bool $is_variation ): void {
+		list( $product, $rows ) = $this->create_download_editor( $is_variation );
+		$rows[0]['id']          = array( 'invalid' );
+
+		$this->save_download_rows( $product, $rows );
+
+		$this->assertSame( array( 'second-download' ), array_keys( $this->get_stored_downloads( $product ) ), 'A malformed ID must not be used as a stored-download lookup key.' );
+	}
+
+	/**
+	 * Create two stored downloads and the rows shown by a changing URL filter.
+	 *
+	 * @param bool $is_variation Whether to create a variation.
+	 * @return array{WC_Product, array}
+	 */
+	private function create_download_editor( bool $is_variation ): array {
+		if ( $is_variation ) {
+			$parent = new WC_Product_Variable();
+			$parent->save();
+			$product = new WC_Product_Variation();
+			$product->set_parent_id( $parent->get_id() );
+			$product->set_status( ProductStatus::PUBLISH );
+			$product->set_regular_price( '10' );
+		} else {
+			$product = WC_Helper_Product::create_simple_product( false );
+		}
+		$product->set_downloadable( true );
 		$product->set_downloads(
 			array(
 				array(
@@ -317,235 +410,86 @@ class WC_Meta_Box_Product_Data_Test extends WC_Unit_Test_Case {
 		);
 		$product->save();
 
-		$filter_calls = 0;
-		$this->add_incrementing_download_path_filter( 'https://temporary.example.com/file.zip', $filter_calls );
-		$editor_downloads = wc_get_product( $product->get_id() )->get_downloads( 'edit' );
-		$rows             = array(
-			array(
-				'id'   => 'first-download',
-				'name' => 'First renamed',
-				'file' => $editor_downloads['first-download']->get_file(),
-			),
-			array(
-				'id'   => 'second-download',
-				'name' => 'Second renamed',
-				'file' => $editor_downloads['second-download']->get_file(),
-			),
+		add_filter(
+			'woocommerce_file_download_path',
+			static function ( $file ) {
+				static $signature = 0;
+				return $file . '?signature=' . ( ++$signature );
+			}
 		);
-		$baselines        = array_column( $rows, 'file' );
-		$expected         = array(
-			'first-download'  => array(
-				'name' => 'First renamed',
-				'file' => 'https://license.example.com/first.zip',
-			),
-			'second-download' => array(
-				'name' => 'Second renamed',
-				'file' => 'https://license.example.com/second.zip',
-			),
-		);
-
-		switch ( $operation ) {
-			case 'add':
-				array_unshift(
-					$rows,
-					array(
-						'id'   => 'new-download',
-						'name' => 'New',
-						'file' => 'https://downloads.example.com/new.zip',
-					)
-				);
-				array_unshift( $baselines, '' );
-				$expected = array(
-					'new-download' => array(
-						'name' => 'New',
-						'file' => 'https://downloads.example.com/new.zip',
-					),
-				) + $expected;
-				break;
-			case 'remove':
-				array_shift( $rows );
-				array_shift( $baselines );
-				unset( $expected['first-download'] );
-				break;
-			case 'clear':
-				$rows[0]['file'] = '';
-				unset( $expected['first-download'] );
-				break;
-			case 'reorder':
-				$rows      = array_reverse( $rows );
-				$baselines = array_reverse( $baselines );
-				$expected  = array_reverse( $expected, true );
-				break;
-			case 'remove_all':
-				$rows      = array();
-				$baselines = array();
-				$expected  = array();
-				break;
+		$product_class  = get_class( $product );
+		$editor_product = new $product_class( $product->get_id() );
+		$rows           = array();
+		foreach ( $editor_product->get_downloads( 'edit' ) as $download ) {
+			$rows[] = array(
+				'id'           => $download->get_id(),
+				'name'         => $download->get_name() . ' renamed',
+				'file'         => $download->get_file(),
+				'rendered_url' => $download->get_file(),
+			);
 		}
 
-		$this->save_download_rows( $product, $rows, $baselines );
+		return array( $product, $rows );
+	}
 
+	/**
+	 * Read saved names and URLs directly, without applying the download URL filter.
+	 *
+	 * @param WC_Product $product Product or variation to read.
+	 * @return array<string, array{name: string, file: string}>
+	 */
+	private function get_stored_downloads( WC_Product $product ): array {
 		$stored_downloads = get_post_meta( $product->get_id(), '_downloadable_files', true );
-		$stored_downloads = '' === $stored_downloads ? array() : $stored_downloads;
-		$saved            = array_map(
+		return array_map(
 			static function ( $download ) {
 				return array(
 					'name' => $download['name'],
 					'file' => $download['file'],
 				);
 			},
-			$stored_downloads
+			is_array( $stored_downloads ) ? $stored_downloads : array()
 		);
-		$this->assertSame( $expected, $saved, 'The save should retain the submitted IDs, names and order without storing untouched filtered URLs.' );
-		$this->assertSame( array(), WC_Admin_Meta_Boxes::$meta_box_errors, 'Changing download rows should not add meta-box errors.' );
 	}
 
 	/**
-	 * Create a downloadable product or variation for save tests.
-	 *
-	 * @param bool $is_variation Whether to create a variation.
-	 * @return WC_Product
-	 */
-	private function create_downloadable_save_fixture( bool $is_variation ): WC_Product {
-		if ( $is_variation ) {
-			list( , $variation ) = $this->create_downloadable_variation( 'first-download', 'https://license.example.com/first.zip' );
-			return $variation;
-		}
-
-		return $this->create_downloadable_product( 'first-download', 'https://license.example.com/first.zip' );
-	}
-
-	/**
-	 * Save download rows through the matching public meta-box method.
+	 * Save rows through the public product or variation meta-box method.
 	 *
 	 * @param WC_Product $product Product or variation to save.
-	 * @param array      $downloads Submitted download rows.
-	 * @param array|null $rendered_file_urls Rendered URL baselines, or null for an older form.
+	 * @param array      $rows Submitted rows, each with its original rendered URL.
+	 * @param bool       $include_baseline Whether to include the new hidden fields.
 	 */
-	private function save_download_rows( WC_Product $product, array $downloads, ?array $rendered_file_urls = null ): void {
+	private function save_download_rows( WC_Product $product, array $rows, bool $include_baseline = true ): void {
+		$rendered_file_urls = $include_baseline ? array_column( $rows, 'rendered_url' ) : null;
 		if ( $product instanceof WC_Product_Variation ) {
-			$this->save_variation_downloads( $product, $downloads, $rendered_file_urls );
-			return;
-		}
-
-		$this->save_product_data( $product, 'sku-' . wp_generate_uuid4(), false, true, $downloads, $rendered_file_urls );
-	}
-
-	/**
-	 * Render a product download row.
-	 *
-	 * @param string $template Download row template.
-	 * @param int    $variation_id Variation ID used by the variation template.
-	 * @return string
-	 */
-	private function render_download_row( string $template, int $variation_id = 0 ): string {
-		$file              = array(
-			'name' => 'Filtered download',
-			'file' => 'https://temporary.example.com/file.zip',
-		);
-		$key               = 'download-id';
-		$disabled_download = false;
-
-		ob_start();
-		include WC_ABSPATH . 'includes/admin/meta-boxes/views/' . $template;
-		return (string) ob_get_clean();
-	}
-
-	/**
-	 * Create a downloadable product fixture.
-	 *
-	 * @param string $download_id Download ID.
-	 * @param string $file_url Stored file URL.
-	 * @return WC_Product_Simple
-	 */
-	private function create_downloadable_product( string $download_id, string $file_url ): WC_Product_Simple {
-		$product = WC_Helper_Product::create_simple_product();
-		$product->set_downloadable( true );
-		$product->set_downloads(
-			array(
-				array(
-					'download_id' => $download_id,
-					'name'        => 'Original download',
-					'file'        => $file_url,
-				),
-			)
-		);
-		$product->save();
-
-		return $product;
-	}
-
-	/**
-	 * Create a downloadable variation fixture.
-	 *
-	 * @param string $download_id Download ID.
-	 * @param string $file_url Stored file URL.
-	 * @return array{WC_Product_Variable, WC_Product_Variation}
-	 */
-	private function create_downloadable_variation( string $download_id, string $file_url ): array {
-		$parent = new WC_Product_Variable();
-		$parent->set_name( 'Downloadable variable product' );
-		$parent->save();
-
-		$variation = new WC_Product_Variation();
-		$variation->set_parent_id( $parent->get_id() );
-		$variation->set_status( ProductStatus::PUBLISH );
-		$variation->set_regular_price( '10' );
-		$variation->set_downloadable( true );
-		$variation->set_downloads(
-			array(
-				array(
-					'download_id' => $download_id,
-					'name'        => 'Variation download',
-					'file'        => $file_url,
-				),
-			)
-		);
-		$variation->save();
-
-		return array( $parent, $variation );
-	}
-
-	/**
-	 * Add a download path filter that returns a different URL on each call.
-	 *
-	 * @param string $file_url Filtered file URL.
-	 * @param int    $filter_calls Number of filter calls.
-	 */
-	private function add_incrementing_download_path_filter( string $file_url, int &$filter_calls ): void {
-		add_filter(
-			'woocommerce_file_download_path',
-			static function () use ( $file_url, &$filter_calls ): string {
-				++$filter_calls;
-				return $file_url . '?signature=' . $filter_calls;
+			$variation_id = $product->get_id();
+			$_POST        = array( // phpcs:ignore WordPress.Security.NonceVerification.Missing -- The test intentionally supplies the classic variation request.
+				'variable_post_id'          => array( 0 => $variation_id ),
+				'variable_enabled'          => array( 0 => '1' ),
+				'variable_regular_price'    => array( 0 => '10' ),
+				'variable_is_downloadable'  => array( 0 => 'yes' ),
+				'_wc_variation_file_names'  => array( $variation_id => array_column( $rows, 'name' ) ),
+				'_wc_variation_file_urls'   => array( $variation_id => array_column( $rows, 'file' ) ),
+				'_wc_variation_file_hashes' => array( $variation_id => array_column( $rows, 'id' ) ),
+			);
+			if ( $include_baseline ) {
+				$_POST['_wc_variation_file_rendered_urls'] = array( $variation_id => $rendered_file_urls ); // phpcs:ignore WordPress.Security.NonceVerification.Missing -- The test supplies the URLs rendered by the editor.
 			}
-		);
-	}
-
-	/**
-	 * Save variation downloads through the classic meta box.
-	 *
-	 * @param WC_Product_Variation $variation Variation fixture.
-	 * @param array                $downloads Submitted download rows.
-	 * @param array|null           $rendered_file_urls Rendered URL baselines, or null for an older form.
-	 */
-	private function save_variation_downloads( WC_Product_Variation $variation, array $downloads, ?array $rendered_file_urls = null ): void {
-		$variation_id = $variation->get_id();
-		$_POST        = array( // phpcs:ignore WordPress.Security.NonceVerification.Missing -- The test intentionally supplies the classic variation request.
-			'variable_post_id'          => array( 0 => $variation_id ),
-			'variable_enabled'          => array( 0 => '1' ),
-			'variable_regular_price'    => array( 0 => '10' ),
-			'variable_is_downloadable'  => array( 0 => 'yes' ),
-			'_wc_variation_file_names'  => array( $variation_id => array_column( $downloads, 'name' ) ),
-			'_wc_variation_file_urls'   => array( $variation_id => array_column( $downloads, 'file' ) ),
-			'_wc_variation_file_hashes' => array( $variation_id => array_column( $downloads, 'id' ) ),
-		);
-
-		if ( null !== $rendered_file_urls ) {
-			$_POST['_wc_variation_file_rendered_urls'] = array( $variation_id => $rendered_file_urls ); // phpcs:ignore WordPress.Security.NonceVerification.Missing -- The test supplies the URLs rendered by the editor.
+			WC_Meta_Box_Product_Data::save_variations( $product->get_parent_id(), get_post( $product->get_parent_id() ) );
+		} else {
+			$_POST = array( // phpcs:ignore WordPress.Security.NonceVerification.Missing -- The test intentionally supplies the classic product request.
+				'product-type'    => ProductType::SIMPLE,
+				'_downloadable'   => 'yes',
+				'_wc_file_names'  => array_column( $rows, 'name' ),
+				'_wc_file_urls'   => array_column( $rows, 'file' ),
+				'_wc_file_hashes' => array_column( $rows, 'id' ),
+			);
+			if ( $include_baseline ) {
+				$_POST['_wc_file_rendered_urls'] = $rendered_file_urls; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- The test supplies the URLs rendered by the editor.
+			}
+			WC_Meta_Box_Product_Data::save( $product->get_id(), get_post( $product->get_id() ) );
 		}
 
-		WC_Meta_Box_Product_Data::save_variations( $variation->get_parent_id(), get_post( $variation->get_parent_id() ) );
+		$this->assertSame( array(), WC_Admin_Meta_Boxes::$meta_box_errors, 'Saving the download rows should not add meta-box errors.' );
 	}
 
 	/**
@@ -555,10 +499,9 @@ class WC_Meta_Box_Product_Data_Test extends WC_Unit_Test_Case {
 	 * @param string     $sku Unique SKU to submit.
 	 * @param bool       $virtual Whether to submit the virtual flag.
 	 * @param bool       $downloadable Whether to submit the downloadable flag.
-	 * @param array      $downloads Submitted download rows.
-	 * @param array|null $rendered_file_urls Rendered URL baselines, or null for an older form.
+	 * @param array      $download Submitted download row.
 	 */
-	private function save_product_data( WC_Product $product, string $sku, bool $virtual, bool $downloadable, array $downloads, ?array $rendered_file_urls = null ): void {
+	private function save_product_data( WC_Product $product, string $sku, bool $virtual, bool $downloadable, array $download ): void {
 		$_POST = array( // phpcs:ignore WordPress.Security.NonceVerification.Missing -- The test intentionally supplies the complete classic admin request.
 			'product-type'           => ProductType::SIMPLE,
 			'_sku'                   => $sku,
@@ -585,9 +528,9 @@ class WC_Meta_Box_Product_Data_Test extends WC_Unit_Test_Case {
 			'_stock_status'          => 'instock',
 			'_download_limit'        => '',
 			'_download_expiry'       => $downloadable ? '365' : '',
-			'_wc_file_names'         => $downloadable ? array_column( $downloads, 'name' ) : array(),
-			'_wc_file_urls'          => $downloadable ? array_column( $downloads, 'file' ) : array(),
-			'_wc_file_hashes'        => $downloadable ? array_column( $downloads, 'id' ) : array(),
+			'_wc_file_names'         => $downloadable ? array( $download['name'] ) : array(),
+			'_wc_file_urls'          => $downloadable ? array( $download['file'] ) : array(),
+			'_wc_file_hashes'        => $downloadable ? array( $download['id'] ) : array(),
 			'_product_url'           => '',
 			'_button_text'           => '',
 			'comment_status'         => 'open',
@@ -604,10 +547,6 @@ class WC_Meta_Box_Product_Data_Test extends WC_Unit_Test_Case {
 
 		if ( $downloadable ) {
 			$_POST['_downloadable'] = 'yes'; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- The test intentionally supplies the classic admin request.
-
-			if ( null !== $rendered_file_urls ) {
-				$_POST['_wc_file_rendered_urls'] = $rendered_file_urls; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- The test intentionally supplies the classic admin request.
-			}
 		}
 
 		$post = get_post( $product->get_id() );

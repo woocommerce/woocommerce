@@ -191,43 +191,55 @@ class WC_Meta_Box_Product_Data {
 	 * Prepare downloads for save.
 	 *
 	 * @param array $file_names File names.
-	 * @param array $file_urls File urls.
-	 * @param array $file_hashes File hashes.
+	 * @param array $file_urls File URLs submitted by the editor.
+	 * @param array $download_ids Download IDs.
 	 * @param array $rendered_file_urls File URLs rendered in the editor.
 	 * @param int   $product_id Product ID.
 	 *
 	 * @return array
 	 */
-	private static function prepare_downloads( $file_names, $file_urls, $file_hashes, $rendered_file_urls, $product_id ) {
-		$downloads        = array();
-		$stored_downloads = $product_id && $rendered_file_urls ? (array) get_post_meta( $product_id, '_downloadable_files', true ) : array();
+	private static function prepare_downloads( $file_names, $file_urls, $download_ids, $rendered_file_urls, $product_id ) {
+		$downloads = array();
+		if ( empty( $file_urls ) ) {
+			return $downloads;
+		}
 
-		if ( ! empty( $file_urls ) ) {
-			$file_url_size = count( $file_urls );
+		$stored_downloads = array();
+		if ( $product_id && $rendered_file_urls ) {
+			$stored_downloads = (array) get_post_meta( $product_id, '_downloadable_files', true );
+		}
 
-			for ( $i = 0; $i < $file_url_size; $i++ ) {
-				$download_id = wc_clean( $file_hashes[ $i ] );
-				if ( ! is_string( $download_id ) ) {
-					continue;
-				}
-
-				$file_url          = wp_unslash( trim( $file_urls[ $i ] ) );
-				$rendered_file_url = isset( $rendered_file_urls[ $i ] ) ? wp_unslash( trim( $rendered_file_urls[ $i ] ) ) : null;
-				$stored_file_url   = $stored_downloads[ $download_id ]['file'] ?? null;
-				$file_url_edited   = null === $rendered_file_url || $rendered_file_url !== $file_url;
-
-				if ( is_string( $stored_file_url ) && ! $file_url_edited ) {
-					$file_url = $stored_file_url;
-				}
-
-				if ( ! empty( $file_url ) ) {
-					$downloads[] = array(
-						'name'        => wc_clean( $file_names[ $i ] ),
-						'file'        => $file_url,
-						'download_id' => $download_id,
-					);
-				}
+		foreach ( $file_urls as $i => $file_url ) {
+			$download_id = wc_clean( $download_ids[ $i ] );
+			if ( ! is_string( $download_id ) ) {
+				continue;
 			}
+
+			$file_url = trim( $file_url );
+			$file_url = wp_unslash( $file_url );
+
+			$rendered_file_url = $rendered_file_urls[ $i ] ?? null;
+			if ( null !== $rendered_file_url ) {
+				$rendered_file_url = trim( $rendered_file_url );
+				$rendered_file_url = wp_unslash( $rendered_file_url );
+			}
+
+			$stored_file_url    = $stored_downloads[ $download_id ]['file'] ?? null;
+			$file_url_unchanged = null !== $rendered_file_url && $rendered_file_url === $file_url;
+
+			if ( $file_url_unchanged && is_string( $stored_file_url ) ) {
+				$file_url = $stored_file_url;
+			}
+
+			if ( empty( $file_url ) ) {
+				continue;
+			}
+
+			$downloads[] = array(
+				'name'        => wc_clean( $file_names[ $i ] ),
+				'file'        => $file_url,
+				'download_id' => $download_id,
+			);
 		}
 		return $downloads;
 	}
