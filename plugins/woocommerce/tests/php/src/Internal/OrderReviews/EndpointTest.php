@@ -667,7 +667,7 @@ class EndpointTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The wc-order-review script is localized with the four submission-outcome strings the frontend renders.
+	 * @testdox The wc-order-review script is localized with the five strings the frontend renders.
 	 */
 	public function test_enqueued_script_localizes_the_submission_outcome_strings(): void {
 		$page_id = (int) wc_get_page_id( Endpoint::PAGE_KEY );
@@ -702,6 +702,7 @@ class EndpointTest extends WC_Unit_Test_Case {
 				'pending_moderation' => 'Thanks, your review is pending approval.',
 				'error'              => 'Something went wrong, please try again.',
 				'rating_required'    => 'Please rate this product before submitting your review.',
+				'submit_hint'        => 'Add or change a rating or review to submit.',
 			),
 			$payload['i18n'] ?? null,
 			'The frontend renders these strings verbatim, so the page must ship them unchanged.'

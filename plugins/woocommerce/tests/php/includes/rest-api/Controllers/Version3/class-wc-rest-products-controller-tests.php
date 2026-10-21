@@ -386,6 +386,53 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The min_price and max_price parameters filter products by price without a deprecation notice.
+	 *
+	 * @testWith [{"min_price": "30"}, ["expensive"]]
+	 *           [{"max_price": "30"}, ["cheap"]]
+	 *           [{"min_price": "15", "max_price": "25"}, ["cheap"]]
+	 *           [{"min_price": "60"}, []]
+	 *
+	 * @param array    $params   Price filter query params.
+	 * @param string[] $expected Keys of the products expected in the response.
+	 */
+	public function test_products_filter_by_min_and_max_price( array $params, array $expected ): void {
+		$products = array(
+			'cheap'     => WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 20 ) ),
+			'expensive' => WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 50 ) ),
+		);
+
+		$product_ids = array_map(
+			static function ( WC_Product $product ): int {
+				return $product->get_id();
+			},
+			$products
+		);
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_query_params(
+			array_merge(
+				$params,
+				array(
+					'include' => array_values( $product_ids ),
+					'orderby' => 'id',
+					'order'   => 'asc',
+				)
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$expected_ids = array_map(
+			static function ( string $key ) use ( $product_ids ): int {
+				return $product_ids[ $key ];
+			},
+			$expected
+		);
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( $expected_ids, wp_list_pluck( $response->get_data(), 'id' ), 'Price filter returned the wrong products' );
+	}
+
+	/**
 	 * Test that the `search_sku` parameter does partial matching in the product SKU, but not the name.
 	 *
 	 * @return void
