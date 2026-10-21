@@ -34,8 +34,8 @@ class WC_Checkout {
 	);
 
 	/**
-	 * Shipping address fields that WC_AJAX::update_order_review() overwrites with the billing address while
-	 * "Ship to a different address?" is unticked.
+	 * Shipping address fields that checkout.js fills with the billing address while "Ship to a different address?" is
+	 * unticked. WC_AJAX::update_order_review() stores them on the session customer.
 	 *
 	 * @var string[]
 	 */
@@ -70,7 +70,7 @@ class WC_Checkout {
 	private $logged_in_customer = null;
 
 	/**
-	 * Caches the logged-in customer as saved to their account, without session changes. @see get_value.
+	 * Caches the logged-in customer as saved to their account, without session changes. @see get_saved_customer_for_shipping_field.
 	 *
 	 * @var WC_Customer|null
 	 */
@@ -1512,6 +1512,7 @@ class WC_Checkout {
 		if ( is_user_logged_in() ) {
 			// Load customer object, but keep it cached to avoid reloading it multiple times.
 			if ( is_null( $this->logged_in_customer ) ) {
+				// Read through the session, so changes made earlier in the session and defaults such as the billing email prefill the form.
 				$this->logged_in_customer = new WC_Customer( get_current_user_id(), true );
 			}
 			$customer_object = $this->get_saved_customer_for_shipping_field( $input ) ?? $this->logged_in_customer;
@@ -1535,17 +1536,17 @@ class WC_Checkout {
 	}
 
 	/**
-	 * Get the saved customer to prefill a shipping address field from, when the session only holds the billing copy.
+	 * Get the saved customer to prefill a shipping field from, when the session's shipping address is the billing copy.
 	 *
-	 * Checkout copies the billing address into the session's shipping address while "Ship to a different address?" is
-	 * unticked, so rates and taxes match where the order goes. Prefilling from that copy hides the shipping address the
-	 * customer saved to their account (issue #30258). A session address that differs from billing still wins.
+	 * Prefilling from that copy would hide the shipping address saved to the account (issue #30258). Once the copy is
+	 * detected, every shipping field comes from the saved record, so the name and address shown belong together. A session
+	 * address that differs from billing still wins; one the customer typed to match billing looks the same as the copy.
 	 *
 	 * @param string $input Name of the input we want to grab data for, e.g. shipping_city.
 	 * @return WC_Customer|null The customer as saved to their account, or null to read the session.
 	 */
-	private function get_saved_customer_for_shipping_field( string $input ): ?WC_Customer {
-		if ( 0 !== strpos( $input, 'shipping_' ) || ! in_array( substr( $input, 9 ), self::SHIPPING_FIELDS_COPIED_FROM_BILLING, true ) ) {
+	private function get_saved_customer_for_shipping_field( $input ): ?WC_Customer {
+		if ( 0 !== strpos( $input, 'shipping_' ) ) {
 			return null;
 		}
 
@@ -1559,6 +1560,7 @@ class WC_Checkout {
 			$this->saved_customer = new WC_Customer( get_current_user_id() );
 		}
 
-		return $this->saved_customer->has_shipping_address() ? $this->saved_customer : null;
+		// A record without a country is not an address the customer can ship to, e.g. one holding only a name.
+		return '' !== $this->saved_customer->get_shipping_country( 'edit' ) ? $this->saved_customer : null;
 	}
 }

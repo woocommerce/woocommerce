@@ -13,6 +13,24 @@ use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
 class WC_Checkout_Test extends \WC_Unit_Test_Case {
 
 	/**
+	 * Shipping fields the get_value tests copy from billing and read back, without the 'shipping_' prefix.
+	 */
+	private const PREFILLED_SHIPPING_FIELDS = array( 'first_name', 'country', 'state', 'postcode', 'city', 'address_1', 'address_2' );
+
+	/**
+	 * A shipping address in New York for Jane, saved to the account.
+	 */
+	private const SAVED_SHIPPING_ADDRESS = array(
+		'shipping_first_name' => 'Jane',
+		'shipping_country'    => 'US',
+		'shipping_state'      => 'NY',
+		'shipping_postcode'   => '11201',
+		'shipping_city'       => 'Brooklyn',
+		'shipping_address_1'  => '2 Shipping Avenue',
+		'shipping_address_2'  => 'Apt 2',
+	);
+
+	/**
 	 * @var object The system under test.
 	 */
 	private $sut;
@@ -657,36 +675,23 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Log in a customer with a saved billing address in California and, optionally, a saved shipping address in New York.
+	 * Log in a customer named John with a billing address in California, and make them the session customer.
 	 *
-	 * @param bool $with_shipping_address Whether to save a shipping address to the account.
+	 * @param array $saved_shipping Shipping props to save to the account.
 	 */
-	private function log_in_customer_with_saved_addresses( bool $with_shipping_address ): void {
+	private function log_in_customer( array $saved_shipping ): void {
 		$customer = new WC_Customer( $this->factory->user->create( array( 'role' => 'customer' ) ) );
 		$customer->set_props(
 			array(
-				'billing_country'   => 'US',
-				'billing_state'     => 'CA',
-				'billing_postcode'  => '94103',
-				'billing_city'      => 'San Francisco',
-				'billing_address_1' => '1 Billing Street',
-				'billing_address_2' => 'Apt 1',
-			)
+				'billing_first_name' => 'John',
+				'billing_country'    => 'US',
+				'billing_state'      => 'CA',
+				'billing_postcode'   => '94103',
+				'billing_city'       => 'San Francisco',
+				'billing_address_1'  => '1 Billing Street',
+				'billing_address_2'  => 'Apt 1',
+			) + $saved_shipping
 		);
-
-		if ( $with_shipping_address ) {
-			$customer->set_props(
-				array(
-					'shipping_country'   => 'US',
-					'shipping_state'     => 'NY',
-					'shipping_postcode'  => '11201',
-					'shipping_city'      => 'Brooklyn',
-					'shipping_address_1' => '2 Shipping Avenue',
-					'shipping_address_2' => 'Apt 2',
-				)
-			);
-		}
-
 		$customer->save();
 
 		wp_set_current_user( $customer->get_id() );
@@ -694,11 +699,12 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Copy the billing address over the session's shipping address, as WC_AJAX::update_order_review() does while
-	 * "Ship to a different address?" is unticked.
+	 * Copy the billing details over the session's shipping ones, as checkout does while "Ship to a different address?"
+	 * is unticked: checkout.js posts the billing address as the shipping one on every update, and placing an order
+	 * copies the name too.
 	 */
-	private function copy_billing_address_to_shipping_in_session(): void {
-		foreach ( array( 'country', 'state', 'postcode', 'city', 'address_1', 'address_2' ) as $field ) {
+	private function copy_billing_to_shipping_in_session(): void {
+		foreach ( self::PREFILLED_SHIPPING_FIELDS as $field ) {
 			WC()->customer->{"set_shipping_$field"}( WC()->customer->{"get_billing_$field"}( 'edit' ) );
 		}
 
@@ -706,14 +712,14 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Get the values checkout prefills the shipping address fields with.
+	 * Get the values checkout prefills the shipping fields with.
 	 *
 	 * @return array Values keyed by field name without the 'shipping_' prefix.
 	 */
-	private function get_shipping_address_prefill(): array {
+	private function get_shipping_prefill(): array {
 		$prefill = array();
 
-		foreach ( array( 'country', 'state', 'postcode', 'city', 'address_1', 'address_2' ) as $field ) {
+		foreach ( self::PREFILLED_SHIPPING_FIELDS as $field ) {
 			$prefill[ $field ] = $this->sut->get_value( "shipping_$field" );
 		}
 
@@ -724,20 +730,21 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	 * @testdox 'get_value' prefills the saved shipping address when the session only holds the billing copy.
 	 */
 	public function test_get_value_prefills_saved_shipping_address_over_billing_copy(): void {
-		$this->log_in_customer_with_saved_addresses( true );
+		$this->log_in_customer( self::SAVED_SHIPPING_ADDRESS );
 		WC()->customer->set_billing_company( 'Session Company' );
-		$this->copy_billing_address_to_shipping_in_session();
+		$this->copy_billing_to_shipping_in_session();
 
 		$this->assertSame(
 			array(
-				'country'   => 'US',
-				'state'     => 'NY',
-				'postcode'  => '11201',
-				'city'      => 'Brooklyn',
-				'address_1' => '2 Shipping Avenue',
-				'address_2' => 'Apt 2',
+				'first_name' => 'Jane',
+				'country'    => 'US',
+				'state'      => 'NY',
+				'postcode'   => '11201',
+				'city'       => 'Brooklyn',
+				'address_1'  => '2 Shipping Avenue',
+				'address_2'  => 'Apt 2',
 			),
-			$this->get_shipping_address_prefill()
+			$this->get_shipping_prefill()
 		);
 		$this->assertSame( 'Session Company', $this->sut->get_value( 'billing_company' ), 'Billing fields should still come from the session.' );
 	}
@@ -746,21 +753,22 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	 * @testdox 'get_value' keeps a shipping address the customer entered during the session.
 	 */
 	public function test_get_value_keeps_shipping_address_entered_in_session(): void {
-		$this->log_in_customer_with_saved_addresses( true );
-		// What the cart shipping calculator stores. It clears the street lines.
+		$this->log_in_customer( self::SAVED_SHIPPING_ADDRESS );
+		// What the cart shipping calculator stores for a customer with a billing name. It clears the street lines.
 		WC()->customer->set_shipping_location( 'US', 'WA', '98101', 'Seattle' );
 		WC()->customer->save();
 
 		$this->assertSame(
 			array(
-				'country'   => 'US',
-				'state'     => 'WA',
-				'postcode'  => '98101',
-				'city'      => 'Seattle',
-				'address_1' => null,
-				'address_2' => null,
+				'first_name' => 'Jane',
+				'country'    => 'US',
+				'state'      => 'WA',
+				'postcode'   => '98101',
+				'city'       => 'Seattle',
+				'address_1'  => null,
+				'address_2'  => null,
 			),
-			$this->get_shipping_address_prefill()
+			$this->get_shipping_prefill()
 		);
 	}
 
@@ -768,19 +776,20 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	 * @testdox 'get_value' keeps the billing copy when the customer has no saved shipping address.
 	 */
 	public function test_get_value_keeps_billing_copy_without_saved_shipping_address(): void {
-		$this->log_in_customer_with_saved_addresses( false );
-		$this->copy_billing_address_to_shipping_in_session();
+		$this->log_in_customer( array( 'shipping_first_name' => 'Jane' ) );
+		$this->copy_billing_to_shipping_in_session();
 
 		$this->assertSame(
 			array(
-				'country'   => 'US',
-				'state'     => 'CA',
-				'postcode'  => '94103',
-				'city'      => 'San Francisco',
-				'address_1' => '1 Billing Street',
-				'address_2' => 'Apt 1',
+				'first_name' => 'John',
+				'country'    => 'US',
+				'state'      => 'CA',
+				'postcode'   => '94103',
+				'city'       => 'San Francisco',
+				'address_1'  => '1 Billing Street',
+				'address_2'  => 'Apt 1',
 			),
-			$this->get_shipping_address_prefill()
+			$this->get_shipping_prefill()
 		);
 	}
 
