@@ -975,7 +975,7 @@ class ContractsTest extends EngineIntegrationTestCase {
 			$this->add_cycle_locked( $id, $this->cycle_args() );
 			$this->fail( 'Expected the failed read to throw.' );
 		} catch ( \RuntimeException $e ) {
-			$this->assertStringContainsString( 'next cycle position', $e->getMessage() );
+			$this->assertNotInstanceOf( ContractLockedException::class, $e, 'A failed read, not a lock conflict.' );
 		}
 		$this->assertCount( 1, Contracts::get_cycles( $id ), 'Nothing is appended.' );
 	}
@@ -1538,7 +1538,23 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox An unlocked update takes the internal lock before it reads the contract and releases it on every exit; it is refused while another operation holds the lock and reads as missing for an unknown contract.
+	 * @testdox An unlocked update refused by validation releases the internal lock.
+	 */
+	public function test_a_refused_unlocked_update_releases_the_internal_lock(): void {
+		$id = $this->contract_with_currency();
+		Contracts::update( $id, array( 'billing_total' => '10' ) );
+
+		try {
+			Contracts::update( $id, array( 'currency' => null ) );
+			$this->fail( 'Expected totals without a currency to be refused.' );
+		} catch ( InvalidArgumentException $e ) {
+			$this->assertNull( $this->view( $id )->get_lock_state(), 'The internal lock is released.' );
+		}
+		$this->assertSame( 'USD', $this->view( $id )->get_currency() );
+	}
+
+	/**
+	 * @testdox An unlocked update takes the internal lock before it reads the contract and releases it after the write; it is refused while another operation holds the lock and reads as missing for an unknown contract.
 	 */
 	public function test_an_unlocked_row_update_uses_the_internal_lock(): void {
 		$id = $this->contract_with_currency();
@@ -1554,20 +1570,17 @@ class ContractsTest extends EngineIntegrationTestCase {
 		} finally {
 			remove_filter( 'query', $record );
 		}
-		$acquires = preg_grep( "/SET lock_token = '[0-9a-f]{32}'/", $statements );
-		$this->assertIsArray( $acquires );
-		$this->assertSame( array( 0 ), array_keys( $acquires ), 'The internal lock is taken once, before the contract is read.' );
-		$this->assertStringContainsString( 'SET lock_token = NULL', (string) end( $statements ), 'The release is the last statement.' );
+		$acquires = array_keys( (array) preg_grep( "/SET lock_token = '[0-9a-f]{32}'/", $statements ) );
+		$reads    = array_keys( (array) preg_grep( '/^\s*SELECT .* FROM \S*subscription_contracts\b/', $statements ) );
+		$writes   = array_keys( (array) preg_grep( '/SET `write_seq` = `write_seq` \+ 1/', $statements ) );
+		$releases = array_keys( (array) preg_grep( '/SET lock_token = NULL/', $statements ) );
+		$this->assertCount( 1, $acquires, 'The internal lock is taken once.' );
+		$this->assertCount( 1, $releases, 'It is released once.' );
+		$this->assertNotSame( array(), $reads );
+		$this->assertCount( 1, $writes );
+		$this->assertLessThan( $reads[0], $acquires[0], 'The lock is taken before the contract is read.' );
+		$this->assertGreaterThan( $writes[0], $releases[0], 'It is released after the write.' );
 		$this->assertNull( $this->view( $id )->get_lock_state(), 'The internal lock is released.' );
-
-		Contracts::update( $id, array( 'billing_total' => '10' ) );
-		try {
-			Contracts::update( $id, array( 'currency' => null ) );
-			$this->fail( 'Expected totals without a currency to be refused.' );
-		} catch ( InvalidArgumentException $e ) {
-			$this->assertNull( $this->view( $id )->get_lock_state(), 'A refused update releases the internal lock.' );
-		}
-		$this->assertSame( ContractStatus::ON_HOLD, $this->view( $id )->get_status() );
 
 		$this->take_lock( $id, 'renewal' );
 		try {

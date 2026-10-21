@@ -81,10 +81,15 @@ class ContractMetaTest extends EngineIntegrationTestCase {
 		$this->assertIsInt( $this->sut->add_meta( $this->id, 'single', 'x', true ) );
 		$this->assertSame( 4, $wpdb->num_queries - $queries, 'Unlocked: the internal lock acquire, the key read, the insert, the release.' );
 
-		$lock    = $this->lock();
-		$queries = $wpdb->num_queries;
-		$this->assertIsInt( $this->sut->add_meta( $this->id, 'single-locked', 'x', true, $lock ) );
+		$lock       = $this->lock();
+		$queries    = $wpdb->num_queries;
+		$statements = $this->statements_during(
+			function () use ( $lock ): void {
+				$this->assertIsInt( $this->sut->add_meta( $this->id, 'single-locked', 'x', true, $lock ) );
+			}
+		);
 		$this->assertSame( 2, $wpdb->num_queries - $queries, 'With a trusted lock: the key read, then the insert.' );
+		$this->assert_no_self_table_insert_select( $statements, SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_META ) );
 		$lock->release();
 
 		$this->assertSame( array( 'one' ), $this->sut->get_meta( $this->id, 'note' ) );

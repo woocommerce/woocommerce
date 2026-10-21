@@ -216,15 +216,67 @@ abstract class EngineIntegrationTestCase extends WP_UnitTestCase {
 	}
 
 	/**
+	 * The statements `$run` sends to the database, in order.
+	 *
+	 * @param callable $run Code under test.
+	 * @return array<int, string>
+	 */
+	protected function statements_during( callable $run ): array {
+		$statements = array();
+		$record     = static function ( $query ) use ( &$statements ) {
+			$statements[] = (string) $query;
+			return $query;
+		};
+		add_filter( 'query', $record );
+		try {
+			$run();
+		} finally {
+			remove_filter( 'query', $record );
+		}
+
+		return $statements;
+	}
+
+	/**
+	 * Assert that no statement inserts into `$table` while reading it, and that no read takes
+	 * a lock: the shapes that gap-lock the index and deadlock concurrent inserts.
+	 *
+	 * @param array<int, string> $statements Statements sent.
+	 * @param string             $table      Table name.
+	 */
+	protected function assert_no_self_table_insert_select( array $statements, string $table ): void {
+		$name = preg_quote( $table, '/' );
+		foreach ( $statements as $statement ) {
+			if ( 1 === preg_match( '/^\s*INSERT\s+INTO\s+`?' . $name . '`?\s/i', $statement ) ) {
+				$this->assertSame( 0, preg_match( '/\bFROM\s+`?' . $name . '`?[\s)]/i', $statement ), "An insert into {$table} reads the same table." );
+			}
+			$this->assertSame( 0, preg_match( '/\bFOR\s+UPDATE\b|\bLOCK\s+IN\s+SHARE\s+MODE\b/i', $statement ), 'A read takes a lock.' );
+		}
+	}
+
+	/**
+	 * Call a private method, for engine internals no public path reaches in the case a test needs.
+	 *
+	 * @param object $instance The object.
+	 * @param string $method   Method name.
+	 * @param mixed  ...$args  Arguments.
+	 * @return mixed
+	 */
+	protected function call_private( object $instance, string $method, ...$args ) {
+		$reflection = new ReflectionMethod( $instance, $method );
+		$reflection->setAccessible( true );
+
+		return $reflection->invoke( $instance, ...$args );
+	}
+
+	/**
 	 * Whether the contract exists and who holds its lock (the repository's private holder read).
 	 *
 	 * @param int $contract_id Contract id.
 	 * @return array{exists: bool, operation: ?string}
 	 */
 	protected function get_lock_holder( int $contract_id ): array {
-		$method = new ReflectionMethod( ContractRepository::class, 'get_lock_holder' );
-		$method->setAccessible( true );
-		$holder = $method->invoke( new ContractRepository(), $contract_id );
+		$holder = $this->call_private( new ContractRepository(), 'get_lock_holder', $contract_id );
 		$this->assertIsArray( $holder );
 
 		return array(
@@ -239,9 +291,7 @@ abstract class EngineIntegrationTestCase extends WP_UnitTestCase {
 	 * @param ContractLock $lock The lock.
 	 */
 	protected function fence_children( ContractLock $lock ): void {
-		$method = new ReflectionMethod( ContractRepository::class, 'fence_children' );
-		$method->setAccessible( true );
-		$method->invoke( new ContractRepository(), $lock );
+		$this->call_private( new ContractRepository(), 'fence_children', $lock );
 	}
 
 	/**

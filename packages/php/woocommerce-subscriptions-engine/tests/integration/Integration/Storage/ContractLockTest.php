@@ -19,7 +19,6 @@ use Automattic\WooCommerce\SubscriptionsEngine\Api\Contracts;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractLockState;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller;
@@ -570,9 +569,9 @@ class ContractLockTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox Every child write fences its lock itself: a lock lost past the trust window is refused by meta, cycle, item and address writes, which then change nothing.
+	 * @testdox Every child write fences its lock: a lock lost past the trust window is refused by meta, cycle, item and address writes, which then change nothing.
 	 */
-	public function test_child_writes_check_a_lost_lock(): void {
+	public function test_child_writes_refuse_a_lost_lock(): void {
 		$id = $this->insert_contract();
 		$this->pin_db_clock( '2035-01-01 00:00:00' );
 		$lock = $this->acquire( $id );
@@ -588,10 +587,10 @@ class ContractLockTest extends EngineIntegrationTestCase {
 				$this->sut->delete_meta( $id, '_note', null, $lock );
 			},
 			'replace_items'     => function () use ( $id, $lock ): void {
-				$this->call_repository( 'replace_items', $id, array( array( 'item_name' => 'Changed' ) ), $lock );
+				$this->call_private( $this->sut, 'replace_items', $id, array( array( 'item_name' => 'Changed' ) ), $lock );
 			},
 			'replace_addresses' => function () use ( $id, $lock ): void {
-				$this->call_repository( 'replace_addresses', $id, array( 'billing' => array( 'first_name' => 'Changed' ) ), $lock );
+				$this->call_private( $this->sut, 'replace_addresses', $id, array( 'billing' => array( 'first_name' => 'Changed' ) ), $lock );
 			},
 			'append_cycle'      => function () use ( $id, $lock ): void {
 				$this->sut->append_cycle(
@@ -621,20 +620,6 @@ class ContractLockTest extends EngineIntegrationTestCase {
 		$this->assertSame( array(), $stored->get_items(), 'No item row is written.' );
 		$this->assertSame( array(), $stored->get_addresses(), 'No address row is written.' );
 		$this->assertSame( array(), $this->sut->find_cycle_history( $id ), 'No cycle row is written.' );
-	}
-
-	/**
-	 * Call a private repository method, for a helper no public path reaches with a lost lock.
-	 *
-	 * @param string $method  Method name.
-	 * @param mixed  ...$args Arguments.
-	 * @return mixed
-	 */
-	private function call_repository( string $method, ...$args ) {
-		$reflection = new \ReflectionMethod( ContractRepository::class, $method );
-		$reflection->setAccessible( true );
-
-		return $reflection->invoke( $this->sut, ...$args );
 	}
 
 	/**

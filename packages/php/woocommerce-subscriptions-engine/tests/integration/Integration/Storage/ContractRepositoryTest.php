@@ -1445,19 +1445,40 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox A same-status transition that writes nothing returns false while the cycle does not hold the values.
+	 * @testdox A same-status transition that writes nothing is a no-op win only while the cycle holds every value: $label.
+	 * @dataProvider provide_same_status_values
+	 *
+	 * @param array<string, mixed> $stored  Values the cycle holds.
+	 * @param array<string, mixed> $changes Values the transition passes.
+	 * @param bool                 $holds   Whether the stored values already hold.
+	 * @param string               $label   Case label.
 	 */
-	public function test_a_same_status_transition_that_writes_nothing_returns_false_for_other_values(): void {
+	public function test_a_same_status_transition_that_writes_nothing_compares_the_values( array $stored, array $changes, bool $holds, string $label ): void {
 		$cycle_id = $this->pending_cycle_id();
-		$this->assertTrue( $this->transition_cycle_row_locked( $cycle_id, CycleStatus::PENDING, CycleStatus::PENDING, array( 'order_id' => 4242 ) ) );
+		$this->assertTrue( $this->transition_cycle_row_locked( $cycle_id, CycleStatus::PENDING, CycleStatus::PENDING, $stored ) );
 
 		$cycles = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
 		$this->refuse_next_write( "UPDATE {$cycles} SET" );
-		$this->assertFalse( $this->transition_cycle_row_locked( $cycle_id, CycleStatus::PENDING, CycleStatus::PENDING, array( 'order_id' => 5151 ) ), 'Another order_id is not stored.' );
+		$this->assertSame( $holds, $this->transition_cycle_row_locked( $cycle_id, CycleStatus::PENDING, CycleStatus::PENDING, $changes ), $label );
+	}
 
-		$this->refuse_next_write( "UPDATE {$cycles} SET" );
-		$this->assertTrue( $this->transition_cycle_row_locked( $cycle_id, CycleStatus::PENDING, CycleStatus::PENDING, array( 'order_id' => 4242 ) ), 'The stored order_id already holds.' );
-		$this->assertSame( 4242, $this->find_cycle( $cycle_id )->get_order_id() );
+	/**
+	 * @return array<string, array{0: array<string, mixed>, 1: array<string, mixed>, 2: bool, 3: string}>
+	 */
+	public function provide_same_status_values(): array {
+		$order  = array( 'order_id' => 4242 );
+		$reason = array( 'reason' => 'payment-failed' );
+
+		return array(
+			'other order_id'        => array( $order, array( 'order_id' => 5151 ), false, 'another order_id' ),
+			'stored order_id'       => array( $order, $order, true, 'the stored order_id' ),
+			'other reason'          => array( $reason, array( 'reason' => 'card-expired' ), false, 'another reason' ),
+			'stored reason'         => array( $reason, $reason, true, 'the stored reason' ),
+			'null against an order' => array( $order, array( 'order_id' => null ), false, 'null against a stored order_id' ),
+			'null against null'     => array( array( 'order_id' => null ), array( 'order_id' => null ), true, 'null against a cleared order_id' ),
+			'null against a reason' => array( $reason, array( 'reason' => null ), false, 'null against a stored reason' ),
+			'omitted keys'          => array( $order + $reason, array(), true, 'no values passed' ),
+		);
 	}
 
 	/**
@@ -1865,11 +1886,16 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		$second = $this->make_unpositioned_cycle( $id );
 		$this->sut->append_cycle( $second, $lock );
 
-		$third   = $this->make_unpositioned_cycle( $id );
-		$queries = $wpdb->num_queries;
-		$this->sut->append_cycle( $third, $lock );
+		$third          = $this->make_unpositioned_cycle( $id );
+		$queries        = $wpdb->num_queries;
+		$statements     = $this->statements_during(
+			function () use ( $third, $lock ): void {
+				$this->sut->append_cycle( $third, $lock );
+			}
+		);
 		$append_queries = $wpdb->num_queries - $queries;
 		$lock->release();
+		$this->assert_no_self_table_insert_select( $statements, SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES ) );
 
 		$this->assertSame( array( 1, 2, 3 ), array( $first->get_sequence_no(), $second->get_sequence_no(), $third->get_sequence_no() ) );
 		$this->assertSame( 2, $append_queries, 'Under a trusted lock: the position read, then the insert.' );
@@ -2144,6 +2170,38 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 		} catch ( ContractLockedException $e ) {
 			$this->assertSame( CycleStatus::FAILED, $this->find_cycle( $cycle_id )->get_status()->get_value() );
 		}
+	}
+
+	/**
+	 * @testdox A cycle appended with a lock whose contract row was deleted still lands: the lock is the existence check, and only the create discard deletes a contract.
+	 */
+	public function test_an_append_under_a_lock_on_a_deleted_contract_lands(): void {
+		$id   = $this->insert_released( $this->make_contract() );
+		$lock = $this->lock( $id );
+		$this->sut->delete( $id );
+
+		$cycle = $this->make_cycle( $id, 1, 1, '2026-07-15 00:00:00', '2026-08-15 00:00:00' );
+		$this->sut->append_cycle( $cycle, $lock );
+
+		$this->assertNotNull( $cycle->get_id() );
+		$this->assertCount( 1, $this->sut->find_cycle_history( $id ) );
+	}
+
+	/**
+	 * @testdox A unique meta add under a lock whose contract row was deleted throws, writing nothing.
+	 */
+	public function test_a_unique_meta_add_on_a_deleted_contract_throws(): void {
+		$id   = $this->insert_released( $this->make_contract() );
+		$lock = $this->lock( $id );
+		$this->sut->delete( $id );
+
+		try {
+			$this->sut->add_meta( $id, 'note', 'x', true, $lock );
+			$this->fail( 'Expected the add to a missing contract to throw.' );
+		} catch ( \InvalidArgumentException $e ) {
+			$this->assertStringContainsString( (string) $id, $e->getMessage() );
+		}
+		$this->assertSame( array(), $this->sut->get_meta( $id, 'note' ) );
 	}
 
 	/**
@@ -2468,9 +2526,9 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox A locked insert creates the contract locked from birth.
+	 * @testdox insert() creates the contract locked from birth.
 	 */
-	public function test_a_locked_insert_is_locked_from_birth(): void {
+	public function test_insert_is_locked_from_birth(): void {
 		$contract = $this->make_contract();
 		$lock     = $this->sut->insert( $contract, 'checkout' );
 		$id       = (int) $contract->get_id();
@@ -2492,9 +2550,9 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox A locked insert with a taken creation key returns null and locks nothing.
+	 * @testdox insert() with a taken creation key returns null and locks nothing.
 	 */
-	public function test_a_locked_insert_with_a_duplicate_key_returns_null(): void {
+	public function test_insert_with_a_duplicate_key_returns_null(): void {
 		$first = $this->insert_released( $this->keyed_contract( 'lite', 'order:7' ) );
 
 		$this->assertNull( $this->sut->insert( $this->keyed_contract( 'lite', 'order:7' ), 'checkout' ) );
