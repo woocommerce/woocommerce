@@ -450,9 +450,10 @@ class Site_Style_Sync_Controller {
 				return $email_safe_fonts[ $font_name_lower ];
 			}
 
-			// If no match in the slug, check for match in the font family name.
-			foreach ( $email_safe_fonts as $safe_font_slug => $safe_font ) {
-				if ( stripos( $safe_font, $font_name_lower ) !== false ) {
+			// If no match in the slug, look for the same family name in a stack.
+			// Whole names only: a substring match finds "serif" inside Arial's "sans-serif".
+			foreach ( $email_safe_fonts as $safe_font ) {
+				if ( in_array( $font_name_lower, $this->get_font_names( $safe_font ), true ) ) {
 					return $safe_font;
 				}
 			}
@@ -460,16 +461,48 @@ class Site_Style_Sync_Controller {
 		};
 
 		// Check if it's already an email-safe font.
-		$font_family_array = explode( ',', $font_family );
-		$first_font        = trim( $font_family_array[0] );
-		$first_font        = trim( $first_font, "\"'" );
-		$safe_font_family  = $get_font_family( $first_font );
+		$font_names       = $this->get_font_names( $font_family );
+		$safe_font_family = $get_font_family( $font_names[0] ?? '' );
 		if ( $safe_font_family ) {
 			return $safe_font_family;
 		}
 
+		// Keep the first generic family the stack falls back to, as CSS would,
+		// so serif and monospace fonts don't all turn into Arial.
+		$generic_fallbacks = array(
+			'serif'         => 'georgia',
+			'ui-serif'      => 'georgia',
+			'monospace'     => 'courier-new',
+			'ui-monospace'  => 'courier-new',
+			'sans-serif'    => 'arial',
+			'ui-sans-serif' => 'arial',
+			'system-ui'     => 'arial',
+		);
+		foreach ( $font_names as $font_name ) {
+			if ( isset( $generic_fallbacks[ $font_name ] ) ) {
+				return $email_safe_fonts[ $generic_fallbacks[ $font_name ] ];
+			}
+		}
+
 		// Default to arial font if no match found.
 		return $email_safe_fonts['arial'];
+	}
+
+	/**
+	 * Split a CSS font-family stack into lowercase family names without quotes.
+	 *
+	 * @param string $font_family CSS font-family value.
+	 * @return string[] Family names in stack order.
+	 */
+	private function get_font_names( string $font_family ): array {
+		$names = array();
+		foreach ( explode( ',', $font_family ) as $name ) {
+			$name = strtolower( trim( trim( $name ), "\"'" ) );
+			if ( '' !== $name ) {
+				$names[] = $name;
+			}
+		}
+		return $names;
 	}
 
 	/**
