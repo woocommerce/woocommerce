@@ -84,7 +84,7 @@ class HtmlSanitizer {
 	 *
 	 * @since 11.4.0
 	 *
-	 * @param string $text Plain text, such as an email address or phone number.
+	 * @param string $text Plain text, such as an email address.
 	 * @return string Text escaped for an HTML text node.
 	 */
 	public function esc_html_exact( string $text ): string {

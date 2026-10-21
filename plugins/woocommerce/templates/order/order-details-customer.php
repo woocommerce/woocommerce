@@ -37,7 +37,7 @@ $html_sanitizer = wc_get_container()->get( HtmlSanitizer::class );
 		<?php echo wp_kses_post( $order->get_formatted_billing_address( esc_html__( 'N/A', 'woocommerce' ) ) ); ?>
 
 		<?php if ( $order->get_billing_phone() ) : ?>
-			<p class="woocommerce-customer-details--phone"><?php echo $html_sanitizer->esc_html_exact( $order->get_billing_phone() ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_html_exact() escapes for HTML. ?></p>
+			<p class="woocommerce-customer-details--phone"><?php echo esc_html( $order->get_billing_phone() ); ?></p>
 		<?php endif; ?>
 
 		<?php if ( $order->get_billing_email() ) : ?>
@@ -66,7 +66,7 @@ $html_sanitizer = wc_get_container()->get( HtmlSanitizer::class );
 				<?php echo wp_kses_post( $order->get_formatted_shipping_address( esc_html__( 'N/A', 'woocommerce' ) ) ); ?>
 
 				<?php if ( $order->get_shipping_phone() ) : ?>
-					<p class="woocommerce-customer-details--phone"><?php echo $html_sanitizer->esc_html_exact( $order->get_shipping_phone() ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_html_exact() escapes for HTML. ?></p>
+					<p class="woocommerce-customer-details--phone"><?php echo esc_html( $order->get_shipping_phone() ); ?></p>
 				<?php endif; ?>
 
 				<?php
