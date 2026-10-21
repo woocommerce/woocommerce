@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show two-column Grid blocks side by side in emails instead of stacking them into one column.
