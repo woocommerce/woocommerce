@@ -244,12 +244,12 @@ class OrdersTableRefundDataStoreTests extends \WC_Unit_Test_Case {
 		foreach ( $test_key3_data as $test_key3_datum ) {
 			$test_key3_values[] = $test_key3_datum->value;
 		}
-		$this->assertEquals( array( 'test_value3_1', 'test_value3_2' ), $test_key3_values );
+		$this->assertEqualsCanonicalizing( array( 'test_value3_1', 'test_value3_2' ), $test_key3_values );
 
 		if ( $sync_status ) {
 			$this->assertEquals( 'test_value1', get_post_meta( $refund->get_id(), 'test_key1', true ) );
 			$this->assertEquals( 'test_value2', get_post_meta( $refund->get_id(), 'test_key2', true ) );
-			$this->assertEquals( array( 'test_value3_1', 'test_value3_2' ), get_post_meta( $refund->get_id(), 'test_key3' ) );
+			$this->assertEqualsCanonicalizing( array( 'test_value3_1', 'test_value3_2' ), get_post_meta( $refund->get_id(), 'test_key3' ) );
 		}
 
 		$refund->update_meta_data( 'test_key1', 'test_value1_updated' );
