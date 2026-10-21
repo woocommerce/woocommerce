@@ -192,7 +192,8 @@ final class Plans {
 
 		self::validate_with_extension( $plan, $refusal );
 
-		if ( ! $repository->update_fields( $plan, array_keys( $changes ) ) ) {
+		$updated = $repository->update_fields( $plan, array_keys( $changes ) );
+		if ( ! $updated ) {
 			return null;
 		}
 
