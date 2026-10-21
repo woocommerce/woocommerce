@@ -51,6 +51,17 @@ final class PlansController extends WP_REST_Controller {
 	private const WRITE_FIELDS = array( 'name', 'status', 'billing_policy', 'pricing_policy', 'delivery_policy' );
 
 	/**
+	 * Arg options of a writable schema field: WordPress neither checks nor casts it, so
+	 * the facade (or the `extension_slug` check) reports it with every other refusal.
+	 *
+	 * @var array<string, null>
+	 */
+	private const UNCHECKED_ARG_OPTIONS = array(
+		'validate_callback' => null,
+		'sanitize_callback' => null,
+	);
+
+	/**
 	 * Logger source.
 	 */
 	private const LOG_SOURCE = 'woocommerce-subscriptions-engine';
@@ -442,36 +453,37 @@ final class PlansController extends WP_REST_Controller {
 					'description' => __( 'Owning extension slug.', 'woocommerce-subscriptions-engine' ),
 					'type'        => array( 'string', 'null' ),
 					'context'     => array( 'view', 'edit' ),
+					'arg_options' => self::UNCHECKED_ARG_OPTIONS,
 				),
 				'status'           => array(
 					'description' => __( 'Plan status (any registered plan status).', 'woocommerce-subscriptions-engine' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
-					// The facade checks it, so its refusal is reported with every other field's.
-					'arg_options' => array(
-						'validate_callback' => null,
-						'sanitize_callback' => null,
-					),
+					'arg_options' => self::UNCHECKED_ARG_OPTIONS,
 				),
 				'name'             => array(
 					'description' => __( 'Display name.', 'woocommerce-subscriptions-engine' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
+					'arg_options' => self::UNCHECKED_ARG_OPTIONS,
 				),
 				'billing_policy'   => array(
 					'description' => __( 'Billing payload of the owning extension.', 'woocommerce-subscriptions-engine' ),
 					'type'        => array( 'object', 'null' ),
 					'context'     => array( 'view', 'edit' ),
+					'arg_options' => self::UNCHECKED_ARG_OPTIONS,
 				),
 				'pricing_policy'   => array(
 					'description' => __( 'Pricing payload of the owning extension.', 'woocommerce-subscriptions-engine' ),
 					'type'        => array( 'object', 'null' ),
 					'context'     => array( 'view', 'edit' ),
+					'arg_options' => self::UNCHECKED_ARG_OPTIONS,
 				),
 				'delivery_policy'  => array(
 					'description' => __( 'Delivery payload of the owning extension.', 'woocommerce-subscriptions-engine' ),
 					'type'        => array( 'object', 'null' ),
 					'context'     => array( 'view', 'edit' ),
+					'arg_options' => self::UNCHECKED_ARG_OPTIONS,
 				),
 				'date_created_gmt' => array(
 					'description' => __( 'Creation time (GMT).', 'woocommerce-subscriptions-engine' ),
@@ -507,7 +519,7 @@ final class PlansController extends WP_REST_Controller {
 
 	/**
 	 * Collect the present writable params as facade args, passed through as given
-	 * (the name is sanitized); the facade validates them.
+	 * (a string name is sanitized); the facade validates them.
 	 *
 	 * @param WP_REST_Request $request Request.
 	 * @return array<string, mixed>
@@ -516,7 +528,8 @@ final class PlansController extends WP_REST_Controller {
 		$args = array();
 		foreach ( self::WRITE_FIELDS as $field ) {
 			if ( $request->has_param( $field ) ) {
-				$args[ $field ] = 'name' === $field ? $this->get_string_param( $request, 'name' ) : $request->get_param( $field );
+				$value          = $request->get_param( $field );
+				$args[ $field ] = 'name' === $field && is_string( $value ) ? sanitize_text_field( $value ) : $value;
 			}
 		}
 
@@ -809,7 +822,10 @@ final class PlansController extends WP_REST_Controller {
 		if ( null === $raw ) {
 			return $this->get_extension_slug_error( ValidationErrorCode::REQUIRED, 'extension_slug is required.' );
 		}
-		$raw_string = trim( Coercion::coerce_string( $raw ) );
+		if ( ! is_string( $raw ) ) {
+			return $this->get_extension_slug_error( ValidationErrorCode::INVALID_TYPE, 'extension_slug must be a string.', array( 'type' => 'string' ) );
+		}
+		$raw_string = trim( $raw );
 		if ( '' === $raw_string ) {
 			return $this->get_extension_slug_error( ValidationErrorCode::REQUIRED, 'extension_slug is required.' );
 		}
@@ -824,11 +840,12 @@ final class PlansController extends WP_REST_Controller {
 	/**
 	 * The `extension_slug` param error, in the validation error shape.
 	 *
-	 * @param string $code    Error code.
-	 * @param string $message English developer message.
+	 * @param string               $code    Error code.
+	 * @param string               $message English developer message.
+	 * @param array<string, mixed> $params  Error params.
 	 */
-	private function get_extension_slug_error( string $code, string $message ): WP_Error {
-		$exception = ValidationException::from_core( new InvalidInputException( $code, 'extension_slug', $message ) );
+	private function get_extension_slug_error( string $code, string $message, array $params = array() ): WP_Error {
+		$exception = ValidationException::from_core( new InvalidInputException( $code, 'extension_slug', $message, $params ) );
 
 		return $this->get_validation_error( $exception->get_errors() );
 	}
@@ -840,17 +857,6 @@ final class PlansController extends WP_REST_Controller {
 	 */
 	private function is_valid_extension_slug( string $slug ): bool {
 		return '' !== $slug && sanitize_key( $slug ) === $slug;
-	}
-
-	/**
-	 * A sanitized string param.
-	 *
-	 * @param WP_REST_Request $request  Request.
-	 * @param string          $key      Param key.
-	 * @param string          $fallback Fallback.
-	 */
-	private function get_string_param( WP_REST_Request $request, string $key, string $fallback = '' ): string {
-		return sanitize_text_field( Coercion::coerce_string( $request->get_param( $key ), $fallback ) );
 	}
 
 	/**

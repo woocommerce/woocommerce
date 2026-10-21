@@ -295,10 +295,9 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 	/**
 	 * @dataProvider provide_non_object_pricing_policies
 	 *
-	 * @param mixed  $invalid     Non-object pricing payload.
-	 * @param string $create_code Create detail code: core schema validation rejects a scalar first.
+	 * @param mixed $invalid Non-object pricing payload.
 	 */
-	public function test_non_object_pricing_policy_is_rejected( $invalid, string $create_code ): void {
+	public function test_non_object_pricing_policy_is_rejected( $invalid ): void {
 		wp_set_current_user( $this->admin_id );
 
 		$id = $this->create_plan( 'Patch target' );
@@ -316,9 +315,9 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 				'pricing_policy' => $invalid,
 			)
 		);
-		$this->assert_invalid_param( $created, 'pricing_policy', $create_code );
+		$this->assert_invalid_param( $created, 'pricing_policy', 'invalid_type' );
 
-		$patched = $this->request(
+		$patched      = $this->request(
 			'PATCH',
 			self::BASE . '/' . $id,
 			array(
@@ -326,7 +325,6 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 				'pricing_policy' => $invalid,
 			)
 		);
-		// The PATCH route has no arg schema, so the facade rejects.
 		$patched_data = $this->assert_invalid_param( $patched, 'pricing_policy', 'invalid_type' );
 		$this->assertSame( 'pricing_policy: Must be of type object.', $this->nested( $patched_data, array( 'data', 'params', 'pricing_policy' ) ) );
 
@@ -340,12 +338,13 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @return array<string, array{0: mixed, 1: string}>
+	 * @return array<string, array{0: mixed}>
 	 */
 	public function provide_non_object_pricing_policies(): array {
 		return array(
-			'list'   => array( array( array( 'type' => 'bogo' ) ), 'invalid_type' ),
-			'string' => array( 'bogo', 'rest_invalid_type' ),
+			'list'         => array( array( array( 'type' => 'bogo' ) ) ),
+			'string'       => array( 'bogo' ),
+			'empty string' => array( '' ),
 		);
 	}
 
@@ -445,6 +444,68 @@ class PlansControllerTest extends EngineIntegrationTestCase {
 		$this->assertSame( array( 'name', 'status' ), array_keys( $this->array_value( $this->array_value( $data, 'data' ), 'errors' ) ) );
 		$this->assertSame( 'required', $this->nested( $data, array( 'data', 'errors', 'name', 0, 'code' ) ) );
 		$this->assertSame( 'not_registered', $this->nested( $data, array( 'data', 'errors', 'status', 0, 'code' ) ) );
+	}
+
+	public function test_create_reports_every_field_type_error_together(): void {
+		wp_set_current_user( $this->admin_id );
+
+		$created = $this->request(
+			'POST',
+			self::BASE,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'name'           => 5,
+				'status'         => 5,
+				'billing_policy' => 'x',
+			)
+		);
+
+		$data = $this->assert_invalid_param( $created, 'billing_policy', 'invalid_type' );
+		foreach ( array( 'name', 'status', 'billing_policy' ) as $field ) {
+			$this->assertIsString( $this->nested( $data, array( 'data', 'params', $field ) ) );
+			$this->assertSame( 'invalid_type', $this->nested( $data, array( 'data', 'details', $field, 'code' ) ) );
+			$this->assertSame( 'invalid_type', $this->nested( $data, array( 'data', 'errors', $field, 0, 'code' ) ) );
+		}
+		$this->assertEqualsCanonicalizing( array( 'name', 'status', 'billing_policy' ), array_keys( $this->array_value( $this->array_value( $data, 'data' ), 'errors' ) ) );
+		$this->assertSame( '0', $this->request( 'GET', self::BASE, array(), array( 'extension_slug' => self::EXTENSION_SLUG ) )->get_headers()['X-WP-Total'] );
+	}
+
+	public function test_create_reports_every_field_invariant_error_together(): void {
+		wp_set_current_user( $this->admin_id );
+
+		$created = $this->request(
+			'POST',
+			self::BASE,
+			array(
+				'extension_slug' => self::EXTENSION_SLUG,
+				'name'           => '',
+				'status'         => 'never-registered',
+				'billing_policy' => array( 'x' ),
+			)
+		);
+
+		// A list passes the argument type check; the plan refuses it as a non-object policy.
+		$data = $this->assert_invalid_param( $created, 'billing_policy', 'invalid_type' );
+		$this->assertEqualsCanonicalizing( array( 'name', 'status', 'billing_policy' ), array_keys( $this->array_value( $this->array_value( $data, 'data' ), 'params' ) ) );
+		$this->assertSame( 'required', $this->nested( $data, array( 'data', 'details', 'name', 'code' ) ) );
+		$this->assertSame( 'not_registered', $this->nested( $data, array( 'data', 'details', 'status', 'code' ) ) );
+		$this->assertEqualsCanonicalizing( array( 'name', 'status', 'billing_policy' ), array_keys( $this->array_value( $this->array_value( $data, 'data' ), 'errors' ) ) );
+	}
+
+	public function test_a_non_string_extension_slug_is_reported_in_the_validation_shape(): void {
+		wp_set_current_user( $this->admin_id );
+
+		$created = $this->request(
+			'POST',
+			self::BASE,
+			array(
+				'extension_slug' => 5,
+				'name'           => 'Typed slug',
+			)
+		);
+
+		$data = $this->assert_invalid_param( $created, 'extension_slug', 'invalid_type' );
+		$this->assertSame( array( 'type' => 'string' ), $this->nested( $data, array( 'data', 'errors', 'extension_slug', 0, 'params' ) ) );
 	}
 
 	public function test_create_reports_a_non_string_status_through_the_facade(): void {
