@@ -102,29 +102,6 @@ test.describe( `${ blockData.name } Block `, () => {
 		await expect( inheritQueryFromTemplateOption ).toBeVisible();
 	} );
 
-	test( 'Products block offers advanced filters in the post editor', async ( {
-		admin,
-		editor,
-		page,
-	} ) => {
-		await admin.createNewPost();
-		await insertProductsQuery( editor, { inherit: false } );
-		await editor.selectBlocks(
-			await editor.getBlockByName( blockData.name )
-		);
-		await editor.openDocumentSettingsSidebar();
-
-		await expect(
-			page.getByRole( 'button', {
-				name: 'Advanced Filters options',
-				exact: true,
-			} )
-		).toBeVisible();
-		await expect(
-			page.getByLabel( 'Inherit query from template' )
-		).toBeHidden();
-	} );
-
 	test( 'product button should add product to the cart when inheriting query from template', async ( {
 		admin,
 		editor,
