@@ -2382,4 +2382,52 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( '=IMPORT-40274-DASH-VAR', $updated->get_sku(), 'The SKU is saved without the apostrophe' );
 		$this->assertSame( $parent->get_id(), $updated->get_parent_id(), 'The escaped parent SKU resolves to the parent' );
 	}
+
+	/**
+	 * @testdox Should match by SKU a variation whose class reports an extension's variation subtype.
+	 */
+	public function test_import_sku_fallback_matches_extension_variation_subtypes_40274(): void {
+		$subtype_class = get_class(
+			new class() extends WC_Product_Variation {
+				/**
+				 * Get the extension's variation subtype.
+				 *
+				 * @return string
+				 */
+				public function get_type() {
+					return 'import-40274-sub-variation';
+				}
+			}
+		);
+
+		$parent       = WC_Helper_Product::create_variation_product();
+		$variation_id = $parent->get_children()[0];
+		$variation    = wc_get_product( $variation_id );
+		$variation->set_sku( 'IMPORT-40274-SUBTYPE' );
+		$variation->save();
+
+		$use_subtype = function ( $classname, $product_type, $context, $product_id ) use ( $subtype_class, $variation_id ) {
+			return 'import-40274-sub-variation' === $product_type || $variation_id === (int) $product_id ? $subtype_class : $classname;
+		};
+		$export_type = function ( $types ) {
+			return $types + array( 'import-40274-sub-variation' => 'Subtype variations' );
+		};
+		$data_store  = function ( $stores ) {
+			return $stores + array( 'product-import-40274-sub-variation' => 'WC_Product_Variation_Data_Store_CPT' );
+		};
+		add_filter( 'woocommerce_product_class', $use_subtype, 10, 4 );
+		add_filter( 'woocommerce_exporter_product_types', $export_type );
+		add_filter( 'woocommerce_data_stores', $data_store );
+
+		try {
+			$data = $this->import_csv_rows( "ID,Type,SKU,Name\n" . ( $variation_id + 1000 ) . ",import-40274-sub-variation,IMPORT-40274-SUBTYPE,Subtype row\n" );
+		} finally {
+			remove_filter( 'woocommerce_product_class', $use_subtype, 10 );
+			remove_filter( 'woocommerce_exporter_product_types', $export_type );
+			remove_filter( 'woocommerce_data_stores', $data_store );
+		}
+
+		$this->assertSame( array( $variation_id ), $data['updated'], 'The subtype row updates the variation matched by SKU' );
+		$this->assertSame( 'product_variation', get_post_type( $variation_id ), 'The variation stays a variation' );
+	}
 }

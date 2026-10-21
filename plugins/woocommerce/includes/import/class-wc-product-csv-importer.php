@@ -452,7 +452,9 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 		$row_type = self::get_type_from_values( array_map( 'strtolower', $this->parse_comma_field( $this->get_row_value( 'type' ) ) ) );
 
-		return WC_Product_Factory::get_product_type( $product_id ) === $row_type;
+		$product = wc_get_product( $product_id );
+
+		return $product && $product->get_type() === $row_type;
 	}
 
 	/**
