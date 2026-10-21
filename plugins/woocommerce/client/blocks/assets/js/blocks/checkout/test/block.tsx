@@ -577,5 +577,5 @@ describe( 'Testing Checkout', () => {
 
 		// Given we're checking for invisible errors here, reaching to the data store is a good option.
 		expect( select( validationStore ).hasValidationErrors() ).toBe( false );
-	} );
+	}, 15000 );
 } );

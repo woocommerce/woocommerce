@@ -1,0 +1,3 @@
+Significance: patch
+Type: dev
+Comment: Increase the per-test timeout for the hidden postcode checkout test to prevent flaky 5 s Jest timeouts in CI; no production change.
