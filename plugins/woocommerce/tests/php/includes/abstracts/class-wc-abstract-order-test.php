@@ -1913,26 +1913,51 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox remove_item() should still defer deleting a saved item until the order is saved.
-	 * @testWith [false]
-	 *           [true]
+	 * @testdox remove_item() should still defer deleting saved items, removed by int or numeric string ID, until the order is saved.
+	 * @dataProvider provide_order_item_types
 	 *
-	 * @param bool $id_as_string Whether to pass the item ID as a numeric string.
+	 * @param string $type Order item type.
 	 */
-	public function test_remove_item_defers_deleting_saved_item_until_save( bool $id_as_string ): void {
+	public function test_remove_item_defers_deleting_saved_items_until_save( string $type ): void {
+		$order = new WC_Order();
+		$order->add_item( $this->create_unsaved_order_item( $type, 'first' ) );
+		$order->add_item( $this->create_unsaved_order_item( $type, 'second' ) );
+		$order->save();
+		list( $first_id, $second_id ) = array_keys( $order->get_items( $type ) );
+
+		$order->remove_item( $first_id );
+		$order->remove_item( (string) $second_id );
+
+		$this->assertEmpty( $order->get_items( $type ), 'The saved items should be removed from the order straight away.' );
+		$this->assertInstanceOf( WC_Order_Item::class, WC_Order_Factory::get_order_item( $first_id ), 'The item removed by int ID should stay in the database until the order is saved.' );
+		$this->assertInstanceOf( WC_Order_Item::class, WC_Order_Factory::get_order_item( $second_id ), 'The item removed by string ID should stay in the database until the order is saved.' );
+
+		$order->save();
+
+		$this->assertFalse( WC_Order_Factory::get_order_item( $first_id ), 'The item removed by int ID should be deleted when the order is saved.' );
+		$this->assertFalse( WC_Order_Factory::get_order_item( $second_id ), 'The item removed by string ID should be deleted when the order is saved.' );
+	}
+
+	/**
+	 * @testdox remove_item() should not remove a saved item when given its ID with a leading zero, a decimal or an exponent.
+	 * @testWith ["0%d"]
+	 *           ["%d.5"]
+	 *           ["%de0"]
+	 *
+	 * @param string $format sprintf() format that turns the item ID into the string to pass.
+	 */
+	public function test_remove_item_ignores_non_canonical_numeric_string_ids( string $format ): void {
 		$order = new WC_Order();
 		$order->add_item( $this->create_unsaved_order_item( 'fee' ) );
 		$order->save();
 		$item_id = array_key_first( $order->get_items( 'fee' ) );
 
-		$order->remove_item( $id_as_string ? (string) $item_id : $item_id );
-
-		$this->assertEmpty( $order->get_items( 'fee' ), 'The saved item should be removed from the order straight away.' );
-		$this->assertInstanceOf( WC_Order_Item_Fee::class, WC_Order_Factory::get_order_item( $item_id ), 'The saved item should stay in the database until the order is saved.' );
+		$this->assertFalse( $order->remove_item( sprintf( $format, $item_id ) ) );
+		$this->assertArrayHasKey( $item_id, $order->get_items( 'fee' ), 'The item should stay on the order.' );
 
 		$order->save();
 
-		$this->assertFalse( WC_Order_Factory::get_order_item( $item_id ), 'The saved item should be deleted when the order is saved.' );
+		$this->assertArrayHasKey( $item_id, wc_get_order( $order->get_id() )->get_items( 'fee' ), 'The item should stay in the database.' );
 	}
 
 	/**
@@ -1997,6 +2022,36 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$order->save();
 
 		$this->assertSame( array( 'first-coupon' ), wc_get_order( $order->get_id() )->get_coupon_codes() );
+	}
+
+	/**
+	 * @testdox update_taxes() should remove an unsaved tax line that duplicates the rate of a saved one.
+	 */
+	public function test_update_taxes_removes_unsaved_duplicate_tax_line(): void {
+		$tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'Tax',
+				'tax_rate_priority' => '1',
+				'tax_rate_order'    => '1',
+			)
+		);
+		$fee         = $this->create_unsaved_order_item( 'fee' );
+		$fee->set_taxes( array( 'total' => array( $tax_rate_id => '1' ) ) );
+
+		$order = new WC_Order();
+		$order->add_item( $fee );
+		$order->update_taxes();
+		$saved_tax_id = array_key_first( $order->get_taxes() );
+
+		$duplicate = new WC_Order_Item_Tax();
+		$duplicate->set_rate_id( $tax_rate_id );
+		$order->add_item( $duplicate );
+		$order->update_taxes();
+
+		$this->assertSame( array( $saved_tax_id ), array_keys( $order->get_taxes() ), 'Only the saved tax line should remain on the order.' );
+		$this->assertSame( array( $saved_tax_id ), array_keys( wc_get_order( $order->get_id() )->get_taxes() ), 'The duplicate tax line should not be saved.' );
 	}
 
 	/**
