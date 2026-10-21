@@ -1010,6 +1010,10 @@ class ContractsTest extends EngineIntegrationTestCase {
 		);
 
 		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+		// Rows an aborted earlier run committed would make these inserts fail; tear_down() removes them otherwise.
+		foreach ( $this->committed_cleanup['statements'] as $statement ) {
+			$other->query( $statement );
+		}
 		$other->query( sprintf( "INSERT INTO `%s` ( contract_id, kind, sequence_no, count, status, starts_at_gmt, ends_at_gmt, currency, date_created_gmt, date_updated_gmt ) VALUES ( %d, 'billing', 2, 2, 'billed', '2026-02-01 00:00:00', '2026-03-01 00:00:00', 'USD', UTC_TIMESTAMP(), UTC_TIMESTAMP() )", $cycles, $id ) );
 		$other->query( sprintf( "INSERT INTO `%s` ( status, extension_slug, creation_key, date_created_gmt, date_updated_gmt ) VALUES ( 'draft', '%s', 'order:12', UTC_TIMESTAMP(), UTC_TIMESTAMP() )", $contracts, $slug ) );
 		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
