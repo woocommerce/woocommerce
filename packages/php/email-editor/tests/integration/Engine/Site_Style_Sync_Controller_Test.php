@@ -1261,7 +1261,7 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 	 *
 	 * @return array Test cases with input font family and expected output.
 	 */
-	public function generic_family_fallback_data_provider(): array {
+	public function font_stack_fallback_data_provider(): array {
 		$arial       = "Arial, 'Helvetica Neue', Helvetica, sans-serif";
 		$georgia     = "Georgia, Times, 'Times New Roman', serif";
 		$courier_new = "'Courier New', Courier, 'Lucida Sans Typewriter', 'Lucida Typewriter', monospace";
@@ -1285,15 +1285,15 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 	}
 
 	/**
-	 * Test that an unknown font keeps its stack's generic family.
+	 * Test that an unknown font falls back to the next usable name in its stack.
 	 *
-	 * @testdox Should fall back to an email-safe font of the same generic family.
-	 * @dataProvider generic_family_fallback_data_provider
+	 * @testdox Should use the first email-safe font or generic family in the stack.
+	 * @dataProvider font_stack_fallback_data_provider
 	 *
 	 * @param string $input_font    The input font family stack.
 	 * @param string $expected_font The expected email-safe font family output.
 	 */
-	public function test_convert_to_email_safe_font_keeps_generic_family( string $input_font, string $expected_font ): void {
+	public function test_convert_to_email_safe_font_walks_the_stack( string $input_font, string $expected_font ): void {
 		$reflection = new \ReflectionClass( $this->controller );
 		$method     = $reflection->getMethod( 'convert_to_email_safe_font' );
 		$method->setAccessible( true );
