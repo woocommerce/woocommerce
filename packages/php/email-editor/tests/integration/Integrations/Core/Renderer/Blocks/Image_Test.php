@@ -489,10 +489,10 @@ class Image_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
-	 * Test a shrunk image sized only by HTML attributes keeps its proportions.
+	 * Test a shrunk image with an automatic height keeps the proportions of its width and height attributes.
 	 */
 	public function testItScalesHeightAttributeWhenShrinkingImage(): void {
-		$content                     = '<figure class="wp-block-image size-full"><img src="https://test.com/wp-content/uploads/2023/05/image.jpg" alt="" width="400" height="200" style="height:auto"/></figure>';
+		$content                     = '<figure class="wp-block-image size-full"><img src="https://test.com/wp-content/uploads/2023/05/image.jpg" alt="" width="1000" height="500" style="width:400px;height:auto"/></figure>';
 		$parsed_image                = $this->parsed_image;
 		$parsed_image['attrs']       = array(
 			'width'    => '400px',
@@ -504,6 +504,7 @@ class Image_Test extends \Email_Editor_Integration_Test_Case {
 
 		$this->assertStringContainsString( 'width="290"', $rendered );
 		$this->assertStringContainsString( 'height="145"', $rendered );
+		$this->assertStringContainsString( 'height:auto', $rendered, 'An automatic height should stay automatic.' );
 	}
 
 	/**

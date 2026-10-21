@@ -1369,6 +1369,7 @@ class Spacing_Preprocessor_Test extends \Email_Editor_Unit_Test {
 	 *           ["woocommerce/product-collection"]
 	 *           ["core/block"]
 	 *           ["core/site-logo"]
+	 *           ["core/social-links"]
 	 *           ["acme/custom-block"]
 	 * @param string $block_name Block nested inside a grid item.
 	 */

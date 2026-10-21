@@ -354,15 +354,24 @@ class Image extends Abstract_Block_Renderer {
 			$styles = $html->get_attribute( 'style' ) ?? '';
 			$styles = Styles_Helper::parse_styles_to_array( $styles );
 			$height = $styles['height'] ?? null;
-			if ( ( ! $height || 'auto' === $height ) && isset( $parsed_block['email_attrs']['image-scale'] ) ) {
-				// A shrunk image sized only by its height attribute needs that height scaled too.
-				$height_attribute = $html->get_attribute( 'height' );
-				$height           = is_string( $height_attribute ) && is_numeric( $height_attribute ) ? $height_attribute : null;
-			}
+			$scale  = $parsed_block['email_attrs']['image-scale'] ?? null;
 			if ( $height && 'auto' !== $height ) {
-				$height = round( Styles_Helper::parse_value( $height ) * ( $parsed_block['email_attrs']['image-scale'] ?? 1 ) );
+				$height = round( Styles_Helper::parse_value( $height ) * ( $scale ?? 1 ) );
 				/* @phpstan-ignore-next-line Wrong annotation for parameter in WP. */
 				$html->set_attribute( 'height', esc_attr( $height ) );
+				if ( $scale ) {
+					$styles['height'] = $height . 'px';
+				}
+			} elseif ( $scale ) {
+				// A shrunk image with an automatic height keeps the aspect ratio of its width and height
+				// attributes, which Outlook reads.
+				$width_attribute  = $html->get_attribute( 'width' );
+				$height_attribute = $html->get_attribute( 'height' );
+				if ( is_numeric( $width_attribute ) && is_numeric( $height_attribute ) && (float) $width_attribute > 0 ) {
+					$height = round( Styles_Helper::parse_value( $parsed_block['attrs']['width'] ) * (float) $height_attribute / (float) $width_attribute );
+					/* @phpstan-ignore-next-line Wrong annotation for parameter in WP. */
+					$html->set_attribute( 'height', esc_attr( $height ) );
+				}
 			}
 
 			if ( isset( $parsed_block['attrs']['width'] ) ) {
@@ -372,11 +381,8 @@ class Image extends Abstract_Block_Renderer {
 			}
 
 			// Inline dimensions override the attributes, so a shrunk image needs them updated too.
-			if ( isset( $parsed_block['email_attrs']['image-scale'] ) ) {
+			if ( $scale ) {
 				$styles['width'] = $parsed_block['attrs']['width'];
-				if ( is_numeric( $height ) ) {
-					$styles['height'] = $height . 'px';
-				}
 				$html->set_attribute( 'style', esc_attr( $this->compile_css( $styles ) ) );
 			}
 			$block_content = $html->get_updated_html();

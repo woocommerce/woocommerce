@@ -113,8 +113,9 @@ class Spacing_Preprocessor implements Context_Aware_Preprocessor {
 	/**
 	 * Blocks whose email output is known to fit the width it is given, so a two-column grid made only
 	 * of these can be laid out side by side. Any other block keeps the grid stacked: some renderers
-	 * (gallery, Query Loop, site logo, product collection) size their content from the full email
-	 * width, and synced patterns or post content are parsed and sized outside the grid.
+	 * (gallery, Query Loop, site logo, social icons, product collection) size their content from the
+	 * full email width or a fixed row, and synced patterns or post content are parsed and sized
+	 * outside the grid.
 	 */
 	private const GRID_CELL_BLOCKS = array(
 		'core/button',
@@ -129,8 +130,6 @@ class Spacing_Preprocessor implements Context_Aware_Preprocessor {
 		'core/quote',
 		'core/separator',
 		'core/site-title',
-		'core/social-link',
-		'core/social-links',
 		'core/spacer',
 	);
 
