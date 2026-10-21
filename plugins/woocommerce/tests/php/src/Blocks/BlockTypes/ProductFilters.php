@@ -88,16 +88,9 @@ class ProductFilters extends \WP_UnitTestCase {
 				'render_callback' => static function ( $attributes, $content, $block ) {
 					$product_filters_key = $block->context['productFiltersKey'] ?? '';
 					if ( is_string( $product_filters_key ) && '' !== $product_filters_key ) {
-						wp_interactivity_state(
-							'woocommerce/product-filters',
-							array(
-								'filterEmptyStates' => array(
-									$product_filters_key => array(
-										wp_unique_prefixed_id( 'product-filter-test-' ) => (bool) $attributes['empty'],
-									),
-								),
-							)
-						);
+						$state = wp_interactivity_state( 'woocommerce/product-filters' );
+						$state['filterEmptyStates'][ $product_filters_key ][] = (bool) $attributes['empty'];
+						wp_interactivity_state( 'woocommerce/product-filters', $state );
 					}
 
 					return '<div class="test-product-filter"></div>';
@@ -198,12 +191,16 @@ class ProductFilters extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * One visible filter keeps the wrapper out of the empty state.
+	 * @testdox One visible filter keeps the wrapper out of the empty state in either order.
 	 *
+	 * @param bool[] $empty_states Empty-state value for each test filter.
 	 * @return void
+	 *
+	 * @testWith [[true, false]]
+	 *           [[false, true]]
 	 */
-	public function test_wrapper_has_no_empty_class_when_one_filter_has_options(): void {
-		$output = $this->render_with_filter_states( array( true, false ) );
+	public function test_wrapper_has_no_empty_class_when_one_filter_has_options( array $empty_states ): void {
+		$output = $this->render_with_filter_states( $empty_states );
 
 		$this->assertStringNotContainsString( 'wc-block-product-filters--empty', $output );
 	}
