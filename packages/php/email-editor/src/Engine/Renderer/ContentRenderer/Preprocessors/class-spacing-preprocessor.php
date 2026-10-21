@@ -25,13 +25,6 @@ class Spacing_Preprocessor implements Context_Aware_Preprocessor {
 	private ?array $post_content_block_names = null;
 
 	/**
-	 * Cached names of blocks that fit a two-column grid cell.
-	 *
-	 * @var string[]|null
-	 */
-	private ?array $grid_cell_block_names = null;
-
-	/**
 	 * Preprocesses the parsed blocks.
 	 *
 	 * @param array $parsed_blocks Parsed blocks.
@@ -118,12 +111,8 @@ class Spacing_Preprocessor implements Context_Aware_Preprocessor {
 	private const CONTAINER_BLOCKS = array( 'core/group', 'core/post-content' );
 
 	/**
-	 * Blocks whose email output is known to fit the width it is given, so a two-column grid made only
-	 * of these can be laid out side by side. Any other block keeps the grid stacked: some renderers
-	 * (gallery, Query Loop, site logo, social icons, buttons, product collection) size their content
-	 * from the full email width or lay out a row that can be wider than a cell, quotes get padding
-	 * from the theme that widths don't account for, and synced patterns or post content are parsed and
-	 * sized outside the grid. A spacer fits only without a fixed width.
+	 * Blocks whose email output fits the width it is given, so a two-column grid made only of these
+	 * can be laid out side by side. A grid holding any other block stacks.
 	 */
 	private const GRID_CELL_BLOCKS = array(
 		'core/group',
@@ -267,67 +256,39 @@ class Spacing_Preprocessor implements Context_Aware_Preprocessor {
 	}
 
 	/**
-	 * Checks whether a block is a group with a two-column grid layout that can be rendered as table rows.
+	 * Checks whether a block is a two-column grid that can be rendered as table rows.
 	 *
-	 * Email clients don't support CSS grid, and full grid placement (spans, explicit positions, more
-	 * columns) can't be mapped to tables reliably. So only the common case is laid out side by side:
-	 * a manual two-column grid whose items all occupy a single cell and can be sized to it. Every
-	 * other grid stacks.
+	 * Email clients don't support CSS grid, so only the common case is laid out side by side: two
+	 * columns, each item in one cell, and only blocks that fit a cell. Every other grid stacks.
 	 *
 	 * @param array $block The block to check.
 	 * @return bool
 	 */
 	private function is_two_column_grid( array $block ): bool {
-		$layout = $block['attrs']['layout'] ?? null;
-		if ( 'core/group' !== ( $block['blockName'] ?? '' ) || ! is_array( $layout ) || 'grid' !== ( $layout['type'] ?? '' ) ) {
-			return false;
-		}
-
-		if ( ! isset( $layout['columnCount'] ) || ! is_numeric( $layout['columnCount'] ) || 2 !== (int) $layout['columnCount'] ) {
-			return false;
-		}
-
-		// An auto-fit responsive grid collapses unused columns, so a single item spans the full width.
-		if ( ! empty( $layout['autoFit'] ) && ! empty( $layout['minimumColumnWidth'] ) && count( $block['innerBlocks'] ?? array() ) < 2 ) {
-			return false;
-		}
-
-		if ( ! $this->only_contains_blocks( $block, $this->get_grid_cell_block_names() ) ) {
+		$layout = $block['attrs']['layout'] ?? array();
+		if ( 'core/group' !== ( $block['blockName'] ?? '' ) || 'grid' !== ( $layout['type'] ?? '' ) || 2 !== (int) ( $layout['columnCount'] ?? 0 ) ) {
 			return false;
 		}
 
 		foreach ( $block['innerBlocks'] ?? array() as $inner_block ) {
 			$child_layout = $inner_block['attrs']['style']['layout'] ?? array();
-			if ( ! is_array( $child_layout ) ) {
-				continue;
-			}
-			foreach ( array( 'columnSpan', 'rowSpan' ) as $span ) {
-				if ( isset( $child_layout[ $span ] ) && is_numeric( $child_layout[ $span ] ) && (int) $child_layout[ $span ] > 1 ) {
-					return false;
-				}
-			}
-			if ( ! empty( $child_layout['columnStart'] ) || ! empty( $child_layout['rowStart'] ) ) {
+			if ( (int) ( $child_layout['columnSpan'] ?? 1 ) > 1 || (int) ( $child_layout['rowSpan'] ?? 1 ) > 1 || ! empty( $child_layout['columnStart'] ) || ! empty( $child_layout['rowStart'] ) ) {
 				return false;
 			}
 		}
 
-		return true;
+		return $this->only_contains_grid_cell_blocks( $block );
 	}
 
 	/**
-	 * Checks whether every descendant of a block is one of the given block types.
+	 * Checks whether every descendant of a block is one of the GRID_CELL_BLOCKS.
 	 *
-	 * @param array    $block The block to search.
-	 * @param string[] $block_names Allowed block names.
+	 * @param array $block The block to search.
 	 * @return bool
 	 */
-	private function only_contains_blocks( array $block, array $block_names ): bool {
+	private function only_contains_grid_cell_blocks( array $block ): bool {
 		foreach ( $block['innerBlocks'] ?? array() as $inner_block ) {
-			$name = $inner_block['blockName'] ?? '';
-			if ( ! in_array( $name, $block_names, true ) || ( 'core/spacer' === $name && ! empty( $inner_block['attrs']['width'] ) ) ) {
-				return false;
-			}
-			if ( ! $this->only_contains_blocks( $inner_block, $block_names ) ) {
+			if ( ! in_array( $inner_block['blockName'] ?? '', self::GRID_CELL_BLOCKS, true ) || ! $this->only_contains_grid_cell_blocks( $inner_block ) ) {
 				return false;
 			}
 		}
@@ -335,54 +296,20 @@ class Spacing_Preprocessor implements Context_Aware_Preprocessor {
 	}
 
 	/**
-	 * Resolves one axis of a grid group's gap to a pixel value.
-	 *
-	 * Mirrors how WordPress lays out the grid: the group's own blockGap (a string for both axes, or
-	 * `top` for rows and `left` for columns) wins, and the global block gap applies when it is unset.
+	 * Resolves one axis of a grid group's gap to pixels: the group's own blockGap (a string for both
+	 * axes, or `top` for rows and `left` for columns), or the global block gap when it is unset.
 	 *
 	 * @param array  $block The grid group block.
 	 * @param string $axis 'top' for the row gap, 'left' for the column gap.
 	 * @param string $default_gap The global block gap.
 	 * @param array  $variables_map Map of CSS variable names to resolved values for preset resolution.
-	 * @return string Gap in pixels, e.g. "16px". A percentage column gap is returned as is, for
-	 *                Blocks_Width_Preprocessor to resolve against the grid's width.
+	 * @return string Gap in pixels, e.g. "16px".
 	 */
 	private function get_grid_gap( array $block, string $axis, string $default_gap, array $variables_map ): string {
 		$block_gap = $block['attrs']['style']['spacing']['blockGap'] ?? null;
 		$value     = is_array( $block_gap ) ? ( $block_gap[ $axis ] ?? null ) : $block_gap;
-		$value     = is_numeric( $value ) ? (string) $value : $value;
-		$value     = is_string( $value ) && '' !== trim( $value ) ? $value : $default_gap;
-
-		$value = Preset_Variable_Resolver::resolve( $value, $variables_map );
-		if ( str_ends_with( trim( $value ), '%' ) ) {
-			// A percentage row gap has no definite height to resolve against, so it collapses to 0.
-			return 'left' === $axis ? max( 0.0, Styles_Helper::parse_value( $value ) ) . '%' : '0px';
-		}
-		$value = (string) Styles_Helper::clamp_to_static_px( $value );
-		$px    = Styles_Helper::convert_to_px( $value, false );
-
-		return max( 0.0, Styles_Helper::parse_value( $px ?? '0' ) ) . 'px';
-	}
-
-	/**
-	 * Returns the names of blocks whose email output fits a two-column grid cell.
-	 *
-	 * @return string[]
-	 */
-	private function get_grid_cell_block_names(): array {
-		if ( null === $this->grid_cell_block_names ) {
-			/**
-			 * Filters the blocks a two-column grid can hold and still render side by side in email.
-			 *
-			 * Only add a block whose email output fits the width it is given (its `email_attrs`
-			 * width). A grid holding any other block stacks its items instead.
-			 *
-			 * @param string[] $block_names Block names.
-			 */
-			$block_names                 = apply_filters( 'woocommerce_email_editor_grid_cell_block_names', self::GRID_CELL_BLOCKS );
-			$this->grid_cell_block_names = array_values( array_filter( is_array( $block_names ) ? $block_names : array(), 'is_string' ) );
-		}
-		return $this->grid_cell_block_names;
+		$value     = is_string( $value ) && '' !== $value ? $value : $default_gap;
+		return Styles_Helper::parse_value( Preset_Variable_Resolver::resolve( $value, $variables_map ) ) . 'px';
 	}
 
 	/**

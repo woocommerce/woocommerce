@@ -9,7 +9,6 @@ declare(strict_types = 1);
 namespace Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preset_Variable_Resolver;
-use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
 /**
  * This class sets the width of the blocks based on the layout width or column count.
  * The final width in pixels is stored in the email_attrs array because we would like to avoid changing the original attributes.
@@ -56,14 +55,8 @@ class Blocks_Width_Preprocessor implements Preprocessor {
 			$alignment    = $block['attrs']['align'] ?? null;
 			// Subtract parent padding from block width if not full-width.
 			if ( 'full' !== $alignment ) {
-				foreach ( array( 'left', 'right' ) as $side ) {
-					$parent_padding = $styles['spacing']['padding'][ $side ] ?? '0px';
-					// Inside a grid cell a rem or em padding read as px would leave fixed-width blocks
-					// too wide for the cell, so convert it.
-					$layout_width -= $in_grid_cell
-						? $this->convert_padding_to_pixels( $parent_padding, $this->parse_number_from_string_with_pixels( $layout['contentSize'] ) )
-						: $this->parse_number_from_string_with_pixels( $parent_padding );
-				}
+				$layout_width -= $this->parse_number_from_string_with_pixels( $styles['spacing']['padding']['left'] ?? '0px' );
+				$layout_width -= $this->parse_number_from_string_with_pixels( $styles['spacing']['padding']['right'] ?? '0px' );
 			}
 
 			// Subtract root padding and container padding for blocks that will
@@ -98,9 +91,9 @@ class Blocks_Width_Preprocessor implements Preprocessor {
 			$width_input = is_string( $width_input ) ? $width_input : '100%';
 			$width       = $this->convert_width_to_pixels( $width_input, $layout_width );
 			// A fixed width wider than a grid cell (e.g. a 400px image in a 290px cell) would push into
-			// the neighboring cell, so cap it to the cell. An image's border is drawn outside its width.
+			// the neighboring cell, so cap it to the cell.
 			if ( $in_grid_cell ) {
-				$width = min( $width, 'core/image' === $block['blockName'] ? $layout_width - $block_border_horizontal : $layout_width );
+				$width = min( $width, $layout_width );
 			}
 
 			if ( 'core/columns' === $block['blockName'] ) {
@@ -125,90 +118,26 @@ class Blocks_Width_Preprocessor implements Preprocessor {
 			$modified_styles['spacing']['padding']['left']  = $block_padding_left;
 			$modified_styles['spacing']['padding']['right'] = $block_padding_right;
 
-			// Children of a two-column grid each get one cell: half the content area minus the
-			// column gap. Without this, fixed-width children such as images are sized to the full
-			// group width and overflow their cell.
-			if ( ! empty( $block['email_attrs']['two-column-grid'] ) ) {
-				$grid_content_width = $inner_content_width
-					- $this->convert_padding_to_pixels( $block_padding_left, $inner_content_width )
-					- $this->convert_padding_to_pixels( $block_padding_right, $inner_content_width );
-				$column_gap         = $block['email_attrs']['grid-column-gap'] ?? '0px';
-				if ( str_ends_with( $column_gap, '%' ) ) {
-					// The Spacing_Preprocessor leaves a percentage gap for this pass, which knows the grid's width.
-					$column_gap                              = round( $grid_content_width * Styles_Helper::parse_value( $column_gap ) / 100, 2 ) . 'px';
-					$block['email_attrs']['grid-column-gap'] = $column_gap;
-				}
-				$cell_width = max( 0, floor( ( $grid_content_width - $this->parse_number_from_string_with_pixels( $column_gap ) ) / 2 ) );
+			// Children of a two-column grid each get one cell: half the grid's content width, less
+			// the column gap. Without this, fixed-width children such as images overflow their cell.
+			$is_two_column_grid = ! empty( $block['email_attrs']['two-column-grid'] );
+			if ( $is_two_column_grid ) {
+				$grid_width = $inner_content_width
+					- $this->parse_number_from_string_with_pixels( $block_padding_left )
+					- $this->parse_number_from_string_with_pixels( $block_padding_right )
+					- $this->parse_number_from_string_with_pixels( $block['email_attrs']['grid-column-gap'] ?? '0px' );
+				$cell_width = max( 0, floor( $grid_width / 2 ) );
 
-				if ( $this->fits_minimum_column_width( $block, $cell_width ) ) {
-					$modified_layout['contentSize']                 = "{$cell_width}px";
-					$modified_styles['spacing']['padding']['left']  = '0px';
-					$modified_styles['spacing']['padding']['right'] = '0px';
-				} else {
-					$block = $this->stack_grid( $block );
-				}
+				$modified_layout['contentSize']                 = "{$cell_width}px";
+				$modified_styles['spacing']['padding']['left']  = '0px';
+				$modified_styles['spacing']['padding']['right'] = '0px';
 			}
 
 			$block['email_attrs']['width'] = "{$width}px";
-			$block['innerBlocks']          = $this->calculate_widths( $block['innerBlocks'], $modified_layout, $modified_styles, $variables_map, $in_grid_cell || ! empty( $block['email_attrs']['two-column-grid'] ) );
+			$block['innerBlocks']          = $this->calculate_widths( $block['innerBlocks'], $modified_layout, $modified_styles, $variables_map, $in_grid_cell || $is_two_column_grid );
 			$parsed_blocks[ $key ]         = $block;
 		}
 		return $parsed_blocks;
-	}
-
-	/**
-	 * Convert a padding value to pixels, including rem, em and percentages, which the group still
-	 * renders in those units. Other values are read as pixels.
-	 *
-	 * @param string $value Padding value.
-	 * @param float  $containing_width Width a percentage is relative to, in px.
-	 * @return float
-	 */
-	private function convert_padding_to_pixels( string $value, float $containing_width ): float {
-		if ( str_ends_with( trim( $value ), '%' ) ) {
-			return $containing_width * Styles_Helper::parse_value( $value ) / 100;
-		}
-		$px = Styles_Helper::convert_to_px( (string) Styles_Helper::clamp_to_static_px( $value ), false );
-		return null !== $px ? Styles_Helper::parse_value( $px ) : $this->parse_number_from_string_with_pixels( $value );
-	}
-
-	/**
-	 * Checks whether a grid's cells meet its minimum column width.
-	 *
-	 * In auto mode the editor saves both a column count and a minimum column width, and the grid shows
-	 * up to that many columns of at least that width, so narrower cells mean the grid stacks.
-	 *
-	 * @param array $block The grid group block.
-	 * @param float $cell_width Width of one cell in px.
-	 * @return bool
-	 */
-	private function fits_minimum_column_width( array $block, float $cell_width ): bool {
-		$minimum_width = $block['attrs']['layout']['minimumColumnWidth'] ?? null;
-		if ( ! is_string( $minimum_width ) || '' === trim( $minimum_width ) ) {
-			return true;
-		}
-
-		$minimum_px = Styles_Helper::convert_to_px( (string) Styles_Helper::clamp_to_static_px( $minimum_width ), false );
-		return null !== $minimum_px && Styles_Helper::parse_value( $minimum_px ) <= $cell_width;
-	}
-
-	/**
-	 * Turn a grid flagged by the Spacing_Preprocessor back into the stacked layout, spacing its items
-	 * with the grid's row gap as WordPress does when a grid wraps to one column.
-	 *
-	 * @param array $block The grid group block.
-	 * @return array
-	 */
-	private function stack_grid( array $block ): array {
-		unset( $block['email_attrs']['two-column-grid'] );
-		foreach ( $block['innerBlocks'] as $key => $inner_block ) {
-			unset( $inner_block['email_attrs']['two-column-grid-item'] );
-			if ( 0 !== $key ) {
-				$inner_block['email_attrs']['margin-top'] = $block['email_attrs']['grid-row-gap'] ?? '0px';
-			}
-			$block['innerBlocks'][ $key ] = $inner_block;
-		}
-		return $block;
 	}
 
 	// TODO: We could add support for other units like em, rem, etc.

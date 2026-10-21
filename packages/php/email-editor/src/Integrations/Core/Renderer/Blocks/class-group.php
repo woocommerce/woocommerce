@@ -38,13 +38,8 @@ class Group extends Abstract_Block_Renderer {
 	}
 
 	/**
-	 * Lays out the children of a two-column grid as table rows of two cells.
-	 *
-	 * Email clients don't support CSS grid, so the Spacing_Preprocessor flags the grids that map
-	 * cleanly to a table (see `two-column-grid`); every other grid keeps the stacked layout. Each rendered
-	 * child is one cell, cells share the column gap equally so both keep the width the
-	 * Blocks_Width_Preprocessor sized their content to, and an odd last item keeps its column width
-	 * next to an empty cell.
+	 * Lays out a two-column grid's children as table rows of two cells, since email clients don't
+	 * support CSS grid. See `two-column-grid` in Spacing_Preprocessor.
 	 *
 	 * @param string            $block_content Block content.
 	 * @param array             $parsed_block Parsed block.
@@ -55,7 +50,7 @@ class Group extends Abstract_Block_Renderer {
 		$dom_helper = new Dom_Document_Helper( $block_content );
 		$wrapper    = $dom_helper->find_element( 'div' );
 		if ( ! $wrapper ) {
-			return $block_content;
+			return $this->get_inner_content( $block_content );
 		}
 
 		// Content_Renderer wraps each child's output in one element (see `two-column-grid-item`),

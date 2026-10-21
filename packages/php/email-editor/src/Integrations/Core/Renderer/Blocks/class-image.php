@@ -322,20 +322,16 @@ class Image extends Abstract_Block_Renderer {
 	}
 
 	/**
-	 * Shrink an explicitly sized image to the width the Blocks_Width_Preprocessor gave it.
-	 *
-	 * That width is narrower than the image's own inside a two-column grid cell, and for a rem or em
-	 * width (which the preprocessor can't convert, so it uses the container width) in a container
-	 * narrower than the image. The scale is kept so a fixed height shrinks with it.
+	 * Shrink an explicitly sized image to the width the Blocks_Width_Preprocessor gave it, which is
+	 * narrower than the image's own when it is capped to a two-column grid cell. The scale is kept so
+	 * a fixed height shrinks with it.
 	 *
 	 * @param array $parsed_block Parsed block.
 	 * @return array
 	 */
 	private function fit_width_to_available_space( array $parsed_block ): array {
-		$width_input = is_scalar( $parsed_block['attrs']['width'] ) ? (string) $parsed_block['attrs']['width'] : '';
-		$width_px    = str_ends_with( trim( $width_input ), '%' ) ? null : Styles_Helper::convert_to_px( $width_input, false );
-		$width       = Styles_Helper::parse_value( $width_px ?? '0' );
-		$available   = Styles_Helper::parse_value( $parsed_block['email_attrs']['width'] ?? 0 );
+		$width     = Styles_Helper::parse_value( $parsed_block['attrs']['width'] );
+		$available = Styles_Helper::parse_value( $parsed_block['email_attrs']['width'] ?? 0 );
 		if ( $available > 0 && $width > $available ) {
 			$parsed_block['attrs']['width']             = "{$available}px";
 			$parsed_block['email_attrs']['image-scale'] = $available / $width;
@@ -359,24 +355,13 @@ class Image extends Abstract_Block_Renderer {
 			$height = $styles['height'] ?? null;
 			$scale  = $parsed_block['email_attrs']['image-scale'] ?? null;
 			if ( $height && 'auto' !== $height ) {
-				// Scaling needs pixels, so a rem or em height is converted first.
-				$height = $scale ? Styles_Helper::convert_to_px( $height, false ) ?? $height : $height;
-				$height = round( Styles_Helper::parse_value( $height ) * ( $scale ?? 1 ) );
-				/* @phpstan-ignore-next-line Wrong annotation for parameter in WP. */
-				$html->set_attribute( 'height', esc_attr( $height ) );
+				$height = Styles_Helper::parse_value( $height );
 				if ( $scale ) {
+					$height           = round( $height * $scale );
 					$styles['height'] = $height . 'px';
 				}
-			} elseif ( $scale ) {
-				// A shrunk image with an automatic height keeps the aspect ratio of its width and height
-				// attributes, which Outlook reads.
-				$width_attribute  = $html->get_attribute( 'width' );
-				$height_attribute = $html->get_attribute( 'height' );
-				if ( is_numeric( $width_attribute ) && is_numeric( $height_attribute ) && (float) $width_attribute > 0 ) {
-					$height = round( Styles_Helper::parse_value( $parsed_block['attrs']['width'] ) * (float) $height_attribute / (float) $width_attribute );
-					/* @phpstan-ignore-next-line Wrong annotation for parameter in WP. */
-					$html->set_attribute( 'height', esc_attr( $height ) );
-				}
+				/* @phpstan-ignore-next-line Wrong annotation for parameter in WP. */
+				$html->set_attribute( 'height', esc_attr( $height ) );
 			}
 
 			if ( isset( $parsed_block['attrs']['width'] ) ) {

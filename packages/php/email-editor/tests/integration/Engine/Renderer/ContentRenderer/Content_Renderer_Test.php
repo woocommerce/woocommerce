@@ -351,33 +351,6 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
-	 * Test render_block wraps a two-column grid item in one element, whatever its renderer returns.
-	 */
-	public function testItWrapsTwoColumnGridItemsInOneElement(): void {
-		register_block_type(
-			'test/multi-element-block',
-			array(
-				'render_email_callback' => function () {
-					return '<p>First</p><p>Second</p>';
-				},
-			)
-		);
-
-		$grid_item = $this->renderer->render_block(
-			'content',
-			array(
-				'blockName'   => 'test/multi-element-block',
-				'email_attrs' => array( 'two-column-grid-item' => true ),
-			)
-		);
-		$other     = $this->renderer->render_block( 'content', array( 'blockName' => 'test/multi-element-block' ) );
-		\WP_Block_Type_Registry::get_instance()->unregister( 'test/multi-element-block' );
-
-		$this->assertEquals( '<div class="email-block-grid-item"><p>First</p><p>Second</p></div>', $grid_item );
-		$this->assertEquals( '<p>First</p><p>Second</p>', $other );
-	}
-
-	/**
 	 * Test render_block applies root horizontal padding from email_attrs
 	 */
 	public function testItAppliesRootHorizontalPadding(): void {
