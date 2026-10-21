@@ -39,6 +39,9 @@ class WC_Post_Data {
 	public static function init() {
 		add_action( 'clean_post_cache', array( __CLASS__, 'invalidate_products_last_modified' ), 10, 2 );
 		add_action( 'clean_post_cache', array( __CLASS__, 'invalidate_db_block_templates_cache' ), 10, 2 );
+		add_action( 'clean_post_cache', array( __CLASS__, 'invalidate_product_sale_cache' ), 10, 2 );
+		add_action( 'post_updated', array( __CLASS__, 'invalidate_product_sale_cache' ), 10, 3 );
+		add_action( 'clean_term_cache', array( __CLASS__, 'delete_product_query_transients' ) );
 		add_filter( 'post_type_link', array( __CLASS__, 'variation_post_link' ), 10, 2 );
 		add_action( 'shutdown', array( __CLASS__, 'do_deferred_product_sync' ), 10 );
 		add_action( 'set_object_terms', array( __CLASS__, 'force_default_term' ), 10, 5 );
@@ -59,6 +62,7 @@ class WC_Post_Data {
 		// Status transitions.
 		add_action( 'transition_post_status', array( __CLASS__, 'transition_post_status' ), 10, 3 );
 		add_action( 'delete_post', array( __CLASS__, 'delete_post_data' ) );
+		add_action( 'deleted_post', array( __CLASS__, 'invalidate_product_sale_cache' ), 10, 2 );
 		add_action( 'wp_trash_post', array( __CLASS__, 'trash_post' ) );
 		add_action( 'untrashed_post', array( __CLASS__, 'untrash_post' ) );
 		add_action( 'before_delete_post', array( __CLASS__, 'before_delete_order' ) );
@@ -174,6 +178,24 @@ class WC_Post_Data {
 	 */
 	public static function delete_product_query_transients() {
 		WC_Cache_Helper::get_transient_version( 'product_query', true );
+	}
+
+	/**
+	 * Evict sale IDs after product post changes, including completed deletion and post-type conversion.
+	 *
+	 * @since 11.3.0
+	 * @param int          $post_id Changed post ID.
+	 * @param WP_Post      $post Changed or deleted post.
+	 * @param WP_Post|null $previous_post Previous post, when available.
+	 */
+	public static function invalidate_product_sale_cache( $post_id, $post, $previous_post = null ): void {
+		foreach ( array( $post, $previous_post ) as $source ) {
+			if ( $source instanceof WP_Post && in_array( $source->post_type, array( 'product', 'product_variation' ), true ) ) {
+				delete_transient( 'wc_products_onsale' );
+				self::delete_product_query_transients();
+				break;
+			}
+		}
 	}
 
 	/**
@@ -653,6 +675,10 @@ class WC_Post_Data {
 	 */
 	public static function flush_object_meta_cache( $meta_id, $object_id, $meta_key, $meta_value ) {
 		WC_Cache_Helper::invalidate_cache_group( 'object_' . $object_id );
+		if ( in_array( $meta_key, array( '_children', '_price', '_regular_price', '_sale_price', '_sale_price_dates_from', '_sale_price_dates_to' ), true )
+			&& in_array( get_post_type( $object_id ), array( 'product', 'product_variation' ), true ) ) {
+			self::delete_product_query_transients();
+		}
 	}
 
 	/**

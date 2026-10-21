@@ -198,17 +198,24 @@ function wc_delete_related_product_transients( $post_id ) {
 function wc_get_product_ids_on_sale() {
 	// Load from cache.
 	$product_ids_on_sale = get_transient( 'wc_products_onsale' );
+	$data_store          = WC_Data_Store::load( 'product' );
 
-	// Valid cache found.
-	if ( false !== $product_ids_on_sale ) {
+	if ( false === $product_ids_on_sale ) {
+		$on_sale_products    = $data_store->get_on_sale_products();
+		$product_ids_on_sale = wp_parse_id_list( array_merge( wp_list_pluck( $on_sale_products, 'id' ), array_diff( wp_list_pluck( $on_sale_products, 'parent_id' ), array( 0 ) ) ) );
+
+		set_transient( 'wc_products_onsale', $product_ids_on_sale, DAY_IN_SECONDS * 30 );
+	}
+
+	// Replacement product stores retain ownership of their sale selection, including custom CPT subclasses.
+	if ( WC_Product_Data_Store_CPT::class !== $data_store->get_current_class_name() ) {
 		return $product_ids_on_sale;
 	}
 
-	$data_store          = WC_Data_Store::load( 'product' );
-	$on_sale_products    = $data_store->get_on_sale_products();
-	$product_ids_on_sale = wp_parse_id_list( array_merge( wp_list_pluck( $on_sale_products, 'id' ), array_diff( wp_list_pluck( $on_sale_products, 'parent_id' ), array( 0 ) ) ) );
-
-	set_transient( 'wc_products_onsale', $product_ids_on_sale, DAY_IN_SECONDS * 30 );
+	$grouped_data_store = WC_Data_Store::load( 'product-grouped' );
+	if ( $grouped_data_store->has_callable( 'get_product_ids_on_sale' ) ) {
+		return $grouped_data_store->get_product_ids_on_sale( $product_ids_on_sale );
+	}
 
 	return $product_ids_on_sale;
 }

@@ -11,6 +11,8 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Data store class.
+ *
+ * @method int[] get_product_ids_on_sale(array $product_ids) Reconcile grouped sale IDs, if supported by the underlying store.
  */
 class WC_Data_Store {
 
