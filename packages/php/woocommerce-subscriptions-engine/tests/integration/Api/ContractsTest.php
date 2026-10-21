@@ -11,12 +11,12 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Integration\Api;
 
 use DateTimeImmutable;
 use DateTimeZone;
-use DomainException;
 use EngineIntegrationTestCase;
 use InvalidArgumentException;
 use WC_Order;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\ContractLockedException;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\Contracts;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\ValidationException;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\View\ContractView;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\View\CycleView;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
@@ -24,13 +24,18 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\StatusRegistry;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\InvalidInputException;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ValidationErrorCode;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller;
+use Automattic\WooCommerce\SubscriptionsEngine\Tests\Integration\AssertsValidationErrors;
 
 /**
  * @covers \Automattic\WooCommerce\SubscriptionsEngine\Api\Contracts
  */
 class ContractsTest extends EngineIntegrationTestCase {
+
+	use AssertsValidationErrors;
 
 	private const EXTENSION_SLUG = 'acme-subs';
 
@@ -319,11 +324,258 @@ class ContractsTest extends EngineIntegrationTestCase {
 					'status'         => 'nonsense',
 				)
 			);
-			$this->fail( 'Expected an InvalidArgumentException.' );
-		} catch ( InvalidArgumentException $e ) {
-			$this->assertInstanceOf( DomainException::class, $e->getPrevious() );
-			$this->assertSame( $e->getPrevious()->getMessage(), $e->getMessage() );
+			$this->fail( 'Expected a ValidationException.' );
+		} catch ( ValidationException $e ) {
+			$this->assertInstanceOf( InvalidInputException::class, $e->getPrevious() );
+			$this->assertSame( esc_html( $e->getPrevious()->getMessage() ), $e->getMessage() );
+			$this->assertSame( array( ValidationErrorCode::NOT_REGISTERED ), $e->get_errors()->get_error_codes() );
 		}
+	}
+
+	/**
+	 * @testdox Contract writes report the error code and field.
+	 */
+	public function test_contract_writes_report_the_error_code_and_field(): void {
+		$this->assert_validation_errors(
+			static function (): void {
+				Contracts::create(
+					array(
+						'extension_slug' => self::EXTENSION_SLUG,
+						'currency'       => 'usd',
+					)
+				);
+			},
+			array( array( ValidationErrorCode::INVALID_VALUE, 'currency' ) )
+		);
+		$this->assert_validation_errors(
+			static function (): void {
+				Contracts::create(
+					array(
+						'extension_slug' => self::EXTENSION_SLUG,
+						'billing_total'  => '10',
+					)
+				);
+			},
+			array( array( ValidationErrorCode::REQUIRED, 'currency' ) )
+		);
+		$this->assert_validation_errors(
+			static function (): void {
+				Contracts::create(
+					array(
+						'extension_slug'  => self::EXTENSION_SLUG,
+						'schedule_source' => 'Not a slug',
+					)
+				);
+			},
+			array( array( ValidationErrorCode::INVALID_VALUE, 'schedule_source' ) )
+		);
+
+		$id = $this->contract_with_currency();
+		$this->assert_validation_errors(
+			static function () use ( $id ): void {
+				Contracts::update( $id, array( 'addresses' => array( 'home' => array( 'first_name' => 'Ada' ) ) ) );
+			},
+			array( array( ValidationErrorCode::NOT_IN_ENUM, 'addresses.home' ) )
+		);
+	}
+
+	/**
+	 * @testdox Cycle writes and reads report the error code and field.
+	 */
+	public function test_cycle_writes_report_the_error_code_and_field(): void {
+		$id    = $this->contract_with_currency();
+		$cycle = $this->add_cycle( $id, $this->cycle_args( array( 'status' => CycleStatus::PENDING ) ) );
+
+		$this->assert_validation_errors(
+			function () use ( $id ): void {
+				$this->add_cycle_locked( $id, array( 'currency' => 'USD' ) );
+			},
+			array(
+				array( ValidationErrorCode::REQUIRED, 'starts_at_gmt' ),
+				array( ValidationErrorCode::REQUIRED, 'ends_at_gmt' ),
+			)
+		);
+		$this->assert_validation_errors(
+			function () use ( $cycle ): void {
+				$this->transition_cycle_locked(
+					$cycle->get_id(),
+					array(
+						'from_status' => CycleStatus::PENDING,
+						'to_status'   => 'never-registered',
+					)
+				);
+			},
+			array( array( ValidationErrorCode::NOT_REGISTERED, 'to_status' ) )
+		);
+		$this->assert_validation_errors(
+			static function () use ( $id ): void {
+				Contracts::get_cycles( $id, -1 );
+			},
+			array( array( ValidationErrorCode::OUT_OF_BOUNDS, 'limit' ) )
+		);
+	}
+
+	/**
+	 * @testdox create reports every ill-typed argument at once and writes nothing.
+	 */
+	public function test_create_reports_every_ill_typed_argument(): void {
+		$before = Contracts::count();
+
+		$this->assert_validation_errors(
+			static function (): void {
+				Contracts::create(
+					array(
+						'extension_slug' => self::EXTENSION_SLUG,
+						'currency'       => 'usd',
+						'customer_id'    => 'x',
+						'addresses'      => array( 'home' => array( 'first_name' => 'Ada' ) ),
+					)
+				);
+			},
+			array(
+				array( ValidationErrorCode::INVALID_TYPE, 'customer_id', array( 'type' => 'integer' ) ),
+				array( ValidationErrorCode::INVALID_VALUE, 'currency', array() ),
+				array( ValidationErrorCode::NOT_IN_ENUM, 'addresses.home', array( 'allowed' => array( 'billing', 'shipping' ) ) ),
+			)
+		);
+		$this->assertSame( $before, Contracts::count() );
+	}
+
+	/**
+	 * @testdox create reports every contract refusal at once.
+	 */
+	public function test_create_reports_every_contract_refusal(): void {
+		$this->assert_validation_errors(
+			static function (): void {
+				Contracts::create(
+					array(
+						'extension_slug'  => self::EXTENSION_SLUG,
+						'creation_key'    => str_repeat( 'k', 101 ),
+						'status'          => 'never-registered',
+						'schedule_source' => 'Not a slug',
+						'billing_total'   => '10',
+					)
+				);
+			},
+			array(
+				// The facade error groups messages by code, so both `invalid_value` errors come first.
+				array( ValidationErrorCode::INVALID_VALUE, 'creation_key' ),
+				array( ValidationErrorCode::INVALID_VALUE, 'schedule_source' ),
+				array( ValidationErrorCode::NOT_REGISTERED, 'status' ),
+				array( ValidationErrorCode::REQUIRED, 'currency' ),
+			)
+		);
+	}
+
+	/**
+	 * @testdox update reports every contract refusal at once and writes nothing.
+	 */
+	public function test_update_reports_every_contract_refusal(): void {
+		$id     = $this->contract_with_currency();
+		$before = $this->entity( $id )->to_storage();
+
+		$this->assert_validation_errors(
+			static function () use ( $id ): void {
+				Contracts::update(
+					$id,
+					array(
+						'status'          => 'never-registered',
+						'schedule_source' => 'Not a slug',
+					)
+				);
+			},
+			array(
+				array( ValidationErrorCode::NOT_REGISTERED, 'status' ),
+				array( ValidationErrorCode::INVALID_VALUE, 'schedule_source' ),
+			)
+		);
+		$this->assertSame( $before, $this->entity( $id )->to_storage() );
+	}
+
+	/**
+	 * @testdox update checks its arguments before reading, so invalid arguments throw for a missing contract.
+	 */
+	public function test_update_checks_its_arguments_before_reading(): void {
+		$this->assert_validation_errors(
+			static function (): void {
+				Contracts::update( 999999, array( 'customer_id' => 0 ) );
+			},
+			array( array( ValidationErrorCode::OUT_OF_BOUNDS, 'customer_id' ) )
+		);
+		$this->assertNull( Contracts::update( 999999, array( 'customer_id' => 5 ) ) );
+	}
+
+	/**
+	 * @testdox add_cycle reports every refusal at once: ill-typed arguments before the cycle is built.
+	 */
+	public function test_add_cycle_reports_every_refusal(): void {
+		$id = $this->contract_with_currency();
+
+		$this->assert_validation_errors(
+			function () use ( $id ): void {
+				$this->add_cycle_locked( $id, array( 'kind' => '' ) );
+			},
+			array(
+				array( ValidationErrorCode::REQUIRED, 'kind' ),
+				array( ValidationErrorCode::REQUIRED, 'starts_at_gmt' ),
+				array( ValidationErrorCode::REQUIRED, 'ends_at_gmt' ),
+				array( ValidationErrorCode::REQUIRED, 'currency' ),
+			)
+		);
+		$this->assert_validation_errors(
+			function () use ( $id ): void {
+				$this->add_cycle_locked(
+					$id,
+					array(
+						'count'         => 0,
+						'starts_at_gmt' => 'soon',
+						'ends_at_gmt'   => 'later',
+					)
+				);
+			},
+			array(
+				array( ValidationErrorCode::OUT_OF_BOUNDS, 'count' ),
+				array( ValidationErrorCode::INVALID_VALUE, 'starts_at_gmt' ),
+				array( ValidationErrorCode::INVALID_VALUE, 'ends_at_gmt' ),
+			)
+		);
+		$this->assertSame( 0, $this->stored_cycle_count( $id ) );
+	}
+
+	/**
+	 * @testdox transition_cycle and get_cycles report every invalid value at once.
+	 */
+	public function test_cycle_tools_report_every_invalid_value(): void {
+		$id    = $this->contract_with_currency();
+		$cycle = $this->add_cycle( $id, $this->cycle_args( array( 'status' => CycleStatus::PENDING ) ) );
+
+		$this->assert_validation_errors(
+			function () use ( $cycle ): void {
+				$this->transition_cycle_locked(
+					$cycle->get_id(),
+					array(
+						'from_status' => '',
+						'to_status'   => CycleStatus::BILLED,
+						'order_id'    => 'x',
+						'reason'      => 5,
+					)
+				);
+			},
+			array(
+				array( ValidationErrorCode::REQUIRED, 'from_status' ),
+				array( ValidationErrorCode::INVALID_TYPE, 'order_id' ),
+				array( ValidationErrorCode::INVALID_TYPE, 'reason' ),
+			)
+		);
+		$this->assert_validation_errors(
+			static function () use ( $id ): void {
+				Contracts::get_cycles( $id, -1, -2 );
+			},
+			array(
+				array( ValidationErrorCode::OUT_OF_BOUNDS, 'limit', array( 'min' => 0 ) ),
+				array( ValidationErrorCode::OUT_OF_BOUNDS, 'offset', array( 'min' => 0 ) ),
+			)
+		);
 	}
 
 	/**
@@ -1477,11 +1729,17 @@ class ContractsTest extends EngineIntegrationTestCase {
 		$this->assertNotNull( $created );
 		$this->assertSame( 'create', $created['lock']->get_operation() );
 
-		foreach ( array( 'Checkout', 5 ) as $operation ) {
+		// A non-string label is an invalid argument; a malformed string is refused by the lock.
+		$labels = array(
+			ValidationException::class      => 5,
+			InvalidArgumentException::class => 'Checkout',
+		);
+		foreach ( $labels as $expected => $operation ) {
 			try {
 				Contracts::create( array( 'extension_slug' => self::EXTENSION_SLUG ), array( 'operation' => $operation ) );
 				$this->fail( 'Expected an invalid operation label to throw.' );
 			} catch ( InvalidArgumentException $e ) {
+				$this->assertSame( $expected, get_class( $e ) );
 				$this->assertStringContainsString( 'operation', $e->getMessage() );
 			}
 		}

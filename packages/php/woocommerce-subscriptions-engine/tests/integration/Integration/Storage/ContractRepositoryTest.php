@@ -18,6 +18,8 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\StatusRegistry;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\InvalidInputException;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ValidationErrorCode;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\ItemsSnapshot;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PaymentInstrumentRef;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
@@ -1517,8 +1519,11 @@ class ContractRepositoryTest extends EngineIntegrationTestCase {
 
 		try {
 			$this->transition_cycle_row_locked( $cycle_id, CycleStatus::PENDING, 'never-registered', array( 'order_id' => 4242 ) );
-			$this->fail( 'Expected a DomainException for an unregistered target status.' );
-		} catch ( \DomainException $e ) {
+			$this->fail( 'Expected an InvalidInputException for an unregistered target status.' );
+		} catch ( InvalidInputException $e ) {
+			$this->assertSame( ValidationErrorCode::NOT_REGISTERED, $e->get_error_code() );
+			$this->assertSame( 'to_status', $e->get_field() );
+			$this->assertSame( array( 'value' => 'never-registered' ), $e->get_params() );
 			$this->assertSame( CycleStatus::PENDING, $this->find_cycle( $cycle_id )->get_status()->get_value() );
 		}
 	}

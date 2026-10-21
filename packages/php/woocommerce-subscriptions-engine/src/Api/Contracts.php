@@ -19,16 +19,17 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Api;
 
-use DomainException;
 use InvalidArgumentException;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\View\ContractView;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\View\CycleView;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ArgumentValidator;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\InvalidInputException;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PaymentInstrumentRef;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\DuplicateCycleException;
-use Automattic\WooCommerce\SubscriptionsEngine\Integration\Support\ArgumentValidator;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Support\ArgumentFilter;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -36,6 +37,8 @@ defined( 'ABSPATH' ) || exit;
  * Public contract facade: reads and writes.
  *
  * Final and static-only: a stateless entry point, not an extension seam.
+ *
+ * @phpstan-type ContractFields array{customer_id?: int|null, currency?: string|null, selling_plan_id?: int|null, origin_order_id?: int|null, status?: string, payment_method?: string|null, payment_method_title?: string|null, payment_token_id?: int|null, start_gmt?: string|null, next_payment_gmt?: string|null, last_payment_gmt?: string|null, last_attempt_gmt?: string|null, trial_end_gmt?: string|null, end_gmt?: string|null, schedule_source?: string, billing_total?: string, discount_total?: string, shipping_total?: string, tax_total?: string, items?: array<int, array<string, mixed>>, addresses?: array<string, array<string, mixed>>}
  */
 final class Contracts {
 
@@ -137,6 +140,7 @@ final class Contracts {
 		return ( new ContractRepository() )->acquire_lock( $contract_id, $operation );
 	}
 
+	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
 	/**
 	 * Create a contract locked from birth: finish building it (cycles, status) with the returned
 	 * lock, then release it. A `creation_key` (1-100 characters, trimmed) makes the create
@@ -152,14 +156,32 @@ final class Contracts {
 	 * @param array<string, mixed> $options `operation`: the lock's label (1-64 of `[a-z0-9_-]`, default `create`).
 	 * @return array{contract: ContractView, lock: ContractLock}|null The contract as written (no re-read) and its
 	 *                                                                lock; null when `creation_key` is taken.
-	 * @throws InvalidArgumentException If `extension_slug` is missing, or a value or the operation label is invalid.
+	 * @throws ValidationException If `extension_slug` is missing, a value is invalid or the operation label is not a
+	 *                             string, with every invalid value reported.
+	 * @throws InvalidArgumentException If the operation label is not 1-64 of `[a-z0-9_-]`: the lock refuses it, alone.
 	 */
 	public static function create( array $args, array $options = array() ): ?array {
-		$filtered_options = ArgumentValidator::filter_known_keys( __METHOD__, $options, self::CREATE_OPTION_KEYS, 'option' );
-		$operation        = ArgumentValidator::validate_string( 'operation', $filtered_options['operation'] ?? self::CREATE_OPERATION );
-		$contract         = self::build( $args );
+		$filtered_options = ArgumentFilter::filter_known_keys( __METHOD__, $options, self::CREATE_OPTION_KEYS, 'option' );
+		$filtered_args    = ArgumentFilter::filter_known_keys( __METHOD__, $args, self::CREATE_KEYS );
 
-		$lock = ( new ContractRepository() )->insert( $contract, $operation );
+		$validator      = new ArgumentValidator();
+		$operation      = $validator->get_string( 'operation', $filtered_options['operation'] ?? self::CREATE_OPERATION );
+		$extension_slug = $validator->get_nullable_string( 'extension_slug', $filtered_args['extension_slug'] ?? null );
+		$creation_key   = $validator->get_nullable_string( 'creation_key', $filtered_args['creation_key'] ?? null );
+		$fields         = self::get_contract_fields( $validator, $filtered_args );
+		try {
+			$validator->throw_errors();
+			$contract = Contract::create(
+				array(
+					'extension_slug' => $extension_slug,
+					'creation_key'   => $creation_key,
+				) + $fields
+			);
+		} catch ( InvalidInputException $e ) {
+			throw ValidationException::from_core( $e ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- from_core() escapes the message.
+		}
+
+		$lock = ( new ContractRepository() )->insert( $contract, (string) $operation );
 		if ( null === $lock ) {
 			return null;
 		}
@@ -169,20 +191,23 @@ final class Contracts {
 			'lock'     => $lock,
 		);
 	}
+	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
 	/**
 	 * Write the given fields (the keys of {@see self::create()} except `extension_slug`) to an
 	 * existing contract. Only the present keys are written; `items` and `addresses` replace the
 	 * whole set; `null` clears a nullable field (a money field to 0). Unknown keys raise a
-	 * `_doing_it_wrong()` notice and are ignored.
+	 * `_doing_it_wrong()` notice and are ignored. The arguments are checked before the contract is
+	 * read, so invalid arguments throw even for a missing contract.
 	 *
 	 * @param int                  $contract_id Contract id.
 	 * @param array<string, mixed> $args        Fields to write.
 	 * @param ContractLock|null    $lock        The caller's lock on this contract, or null for an internal one.
 	 * @return ContractView|null The row as read before the write plus the written fields; null
 	 *                           when the contract does not exist (also when it is deleted before the write).
-	 * @throws InvalidArgumentException If a value is invalid, or the lock is for another contract.
+	 * @throws ValidationException If a value is invalid, with every invalid value reported.
+	 * @throws InvalidArgumentException If the lock is for another contract.
 	 * @throws ContractLockedException If another operation holds the lock, or `$lock` was lost.
 	 */
 	public static function update( int $contract_id, array $args, ?ContractLock $lock = null ): ?ContractView {
@@ -190,16 +215,25 @@ final class Contracts {
 			ContractRepository::assert_lock_for( $lock, $contract_id );
 		}
 
-		$filtered_args = ArgumentValidator::filter_known_keys( __METHOD__, $args, self::CONTRACT_KEYS );
-		$repository    = new ContractRepository();
+		$filtered_args = ArgumentFilter::filter_known_keys( __METHOD__, $args, self::CONTRACT_KEYS );
 
-		if ( array() === $filtered_args ) {
+		$validator = new ArgumentValidator();
+		$changes   = self::get_contract_fields( $validator, $filtered_args );
+		try {
+			$validator->throw_errors();
+		} catch ( InvalidInputException $e ) {
+			throw ValidationException::from_core( $e ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- from_core() escapes the message.
+		}
+
+		$repository = new ContractRepository();
+
+		if ( array() === $changes ) {
 			$contract = $repository->find( $contract_id );
 			return null === $contract ? null : ContractView::from_contract( $contract, true );
 		}
 
 		if ( null !== $lock ) {
-			$contract = self::update_contract( $repository, $contract_id, $filtered_args, $lock );
+			$contract = self::update_contract( $repository, $contract_id, $changes, $lock );
 			return null === $contract ? null : ContractView::from_contract( $contract, true );
 		}
 
@@ -209,7 +243,7 @@ final class Contracts {
 			return null;
 		}
 		try {
-			$contract = self::update_contract( $repository, $contract_id, $filtered_args, $internal_lock );
+			$contract = self::update_contract( $repository, $contract_id, $changes, $internal_lock );
 		} finally {
 			$repository->release_internal_lock( $internal_lock );
 		}
@@ -226,28 +260,29 @@ final class Contracts {
 
 	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- @throws also lists exceptions raised by the methods called.
 	/**
-	 * Read the contract, apply and validate the fields, and write them behind {@see self::update()}.
+	 * Read the contract, apply the checked fields, and write them behind {@see self::update()}.
 	 *
-	 * @param ContractRepository   $repository    Repository.
-	 * @param int                  $contract_id   Contract id.
-	 * @param array<string, mixed> $filtered_args Known fields to write.
-	 * @param ContractLock         $lock          The held lock.
+	 * @param ContractRepository   $repository  Repository.
+	 * @param int                  $contract_id Contract id.
+	 * @param array<string, mixed> $changes     Normalized fields from {@see self::get_contract_fields()}.
+	 * @phpstan-param ContractFields $changes
+	 * @param ContractLock         $lock        The held lock.
 	 * @return Contract|null The contract with the written fields; null when it does not exist.
-	 * @throws InvalidArgumentException If a value is invalid.
+	 * @throws ValidationException If a value breaks an entity invariant.
 	 */
-	private static function update_contract( ContractRepository $repository, int $contract_id, array $filtered_args, ContractLock $lock ): ?Contract {
+	private static function update_contract( ContractRepository $repository, int $contract_id, array $changes, ContractLock $lock ): ?Contract {
 		$contract = $repository->find( $contract_id );
 		if ( null === $contract ) {
 			return null;
 		}
 
 		try {
-			self::apply( $contract, $filtered_args );
-		} catch ( DomainException $e ) {
-			throw new InvalidArgumentException( $e->getMessage(), 0, $e ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the entity message is not output.
+			self::apply( $contract, $changes );
+		} catch ( InvalidInputException $e ) {
+			throw ValidationException::from_core( $e ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- from_core() escapes the message.
 		}
 
-		$updated = $repository->update_fields( $contract, array_keys( $filtered_args ), $lock );
+		$updated = $repository->update_fields( $contract, array_keys( $changes ), $lock );
 		if ( ! $updated ) {
 			return null;
 		}
@@ -274,30 +309,37 @@ final class Contracts {
 	 * @param ContractLock         $lock        The caller's lock on this contract, from {@see self::lock()},
 	 *                                          {@see self::create()} or the due handler's context.
 	 * @return CycleView|null The appended cycle, or null when the position or count is already taken.
-	 * @throws InvalidArgumentException If a required key is missing, a value is invalid, or the lock
-	 *                                  is for another contract.
+	 * @throws ValidationException If a required key is missing or a value is invalid, with every
+	 *                             invalid value reported (ill-typed arguments before the cycle is built).
+	 * @throws InvalidArgumentException If the lock is for another contract.
 	 * @throws ContractLockedException If `$lock` was lost.
 	 */
 	public static function add_cycle( int $contract_id, array $args, ContractLock $lock ): ?CycleView {
-		$filtered_args = ArgumentValidator::filter_known_keys( __METHOD__, $args, self::CYCLE_KEYS );
+		$filtered_args = ArgumentFilter::filter_known_keys( __METHOD__, $args, self::CYCLE_KEYS );
 
+		$validator  = new ArgumentValidator();
 		$cycle_args = array(
 			'contract_id'    => $contract_id,
 			'kind'           => $filtered_args['kind'] ?? null,
-			'sequence_no'    => ArgumentValidator::validate_nullable_id( 'sequence_no', $filtered_args['sequence_no'] ?? null ),
-			'count'          => ArgumentValidator::validate_nullable_id( 'count', $filtered_args['count'] ?? null ),
+			'sequence_no'    => $validator->get_nullable_id( 'sequence_no', $filtered_args['sequence_no'] ?? null ),
+			'count'          => $validator->get_nullable_id( 'count', $filtered_args['count'] ?? null ),
 			'status'         => $filtered_args['status'] ?? null,
-			'starts_at_gmt'  => ArgumentValidator::validate_nullable_date( 'starts_at_gmt', $filtered_args['starts_at_gmt'] ?? null ),
-			'ends_at_gmt'    => ArgumentValidator::validate_nullable_date( 'ends_at_gmt', $filtered_args['ends_at_gmt'] ?? null ),
-			'expected_total' => ArgumentValidator::validate_money( 'expected_total', $filtered_args['expected_total'] ?? null ),
-			'currency'       => ArgumentValidator::validate_currency( $filtered_args['currency'] ?? null ),
-			'order_id'       => ArgumentValidator::validate_nullable_id( 'order_id', $filtered_args['order_id'] ?? null ),
+			'starts_at_gmt'  => $validator->get_nullable_date( 'starts_at_gmt', $filtered_args['starts_at_gmt'] ?? null ),
+			'ends_at_gmt'    => $validator->get_nullable_date( 'ends_at_gmt', $filtered_args['ends_at_gmt'] ?? null ),
+			'expected_total' => $validator->get_money( 'expected_total', $filtered_args['expected_total'] ?? null ),
+			'currency'       => $validator->get_currency( $filtered_args['currency'] ?? null ),
+			'order_id'       => $validator->get_nullable_id( 'order_id', $filtered_args['order_id'] ?? null ),
 		);
+		try {
+			$validator->throw_errors();
+		} catch ( InvalidInputException $e ) {
+			throw ValidationException::from_core( $e ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- from_core() escapes the message.
+		}
 
 		try {
 			$cycle = Cycle::create( $cycle_args );
-		} catch ( DomainException $e ) {
-			throw new InvalidArgumentException( $e->getMessage(), 0, $e ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the entity message is not output.
+		} catch ( InvalidInputException $e ) {
+			throw ValidationException::from_core( $e ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- from_core() escapes the message.
 		}
 
 		try {
@@ -325,27 +367,31 @@ final class Contracts {
 	 *                                       {@see self::create()} or the due handler's context.
 	 * @return bool True when this call made the transition, or for a same-status call when the
 	 *              cycle carries the status and the values.
-	 * @throws InvalidArgumentException If a status is missing or unregistered, a value is invalid,
-	 *                                  the cycle does not exist, or it belongs to another contract than the lock.
+	 * @throws ValidationException If a status is missing or unregistered (field `to_status`), or a value is
+	 *                             invalid, with every invalid value reported.
+	 * @throws InvalidArgumentException If the cycle does not exist, or it belongs to another contract than the lock.
 	 * @throws ContractLockedException If `$lock` was lost.
 	 */
 	public static function transition_cycle( int $cycle_id, array $args, ContractLock $lock ): bool {
-		$filtered_args = ArgumentValidator::filter_known_keys( __METHOD__, $args, self::TRANSITION_KEYS );
-		$from_status   = ArgumentValidator::validate_non_empty_string( 'from_status', $filtered_args['from_status'] ?? null );
-		$to_status     = ArgumentValidator::validate_non_empty_string( 'to_status', $filtered_args['to_status'] ?? null );
-		$changes       = array();
+		$filtered_args = ArgumentFilter::filter_known_keys( __METHOD__, $args, self::TRANSITION_KEYS );
 
+		$validator   = new ArgumentValidator();
+		$from_status = $validator->get_non_empty_string( 'from_status', $filtered_args['from_status'] ?? null );
+		$to_status   = $validator->get_non_empty_string( 'to_status', $filtered_args['to_status'] ?? null );
+		$changes     = array();
 		if ( array_key_exists( 'order_id', $filtered_args ) ) {
-			$changes['order_id'] = ArgumentValidator::validate_nullable_id( 'order_id', $filtered_args['order_id'] );
+			$changes['order_id'] = $validator->get_nullable_id( 'order_id', $filtered_args['order_id'] );
 		}
 		if ( array_key_exists( 'reason', $filtered_args ) ) {
-			$changes['reason'] = ArgumentValidator::validate_nullable_string( 'reason', $filtered_args['reason'] );
+			$changes['reason'] = $validator->get_nullable_string( 'reason', $filtered_args['reason'] );
 		}
 
 		try {
-			return ( new ContractRepository() )->transition_cycle( $cycle_id, $from_status, $to_status, $changes, $lock );
-		} catch ( DomainException $e ) {
-			throw new InvalidArgumentException( $e->getMessage(), 0, $e ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the repository message is not output.
+			$validator->throw_errors();
+
+			return ( new ContractRepository() )->transition_cycle( $cycle_id, (string) $from_status, (string) $to_status, $changes, $lock );
+		} catch ( InvalidInputException $e ) {
+			throw ValidationException::from_core( $e ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- from_core() escapes the message.
 		}
 	}
 	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
@@ -559,136 +605,222 @@ final class Contracts {
 
 	/**
 	 * Fetch a window of the contract's billing cycles, newest first. A negative `$limit` or
-	 * `$offset` throws an InvalidArgumentException.
+	 * `$offset` throws a {@see ValidationException}.
 	 *
 	 * @param int $contract_id Contract id.
 	 * @param int $limit       Maximum cycles to return.
 	 * @param int $offset      Cycles to skip (for paging).
 	 * @return array<int, CycleView> Cycles newest first.
+	 * @throws ValidationException If `$limit` or `$offset` is negative, with both reported.
 	 */
 	public static function get_cycles( int $contract_id, int $limit = 20, int $offset = 0 ): array {
-		$limit  = ArgumentValidator::validate_non_negative_int( 'limit', $limit );
-		$offset = ArgumentValidator::validate_non_negative_int( 'offset', $offset );
+		$validator = new ArgumentValidator();
+		$limit     = (int) $validator->get_non_negative_int( 'limit', $limit );
+		$offset    = (int) $validator->get_non_negative_int( 'offset', $offset );
+		try {
+			$validator->throw_errors();
+		} catch ( InvalidInputException $e ) {
+			throw ValidationException::from_core( $e ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- from_core() escapes the message.
+		}
 
 		return self::cycle_views( ( new ContractRepository() )->find_cycle_history( $contract_id, Cycle::KIND_BILLING, $limit, $offset ) );
 	}
 
 	/**
-	 * Validate create arguments into a new, unsaved contract.
+	 * Check the shape of the present contract fields with the collector and return them
+	 * normalized, `items` and `addresses` without unknown keys (a refused field is left
+	 * out or null; the collector holds its error).
 	 *
-	 * @param array<string, mixed> $args Caller fields.
-	 * @throws InvalidArgumentException If `extension_slug` is missing or a value is invalid.
+	 * @param ArgumentValidator    $validator Argument collector.
+	 * @param array<string, mixed> $args      Caller fields (known keys only; `extension_slug` and `creation_key` are ignored).
+	 * @return array<string, mixed>
+	 * @phpstan-return ContractFields
 	 */
-	private static function build( array $args ): Contract {
-		$filtered_args  = ArgumentValidator::filter_known_keys( self::class . '::create', $args, self::CREATE_KEYS );
-		$extension_slug = ArgumentValidator::validate_nullable_string( 'extension_slug', $filtered_args['extension_slug'] ?? null );
-		$creation_key   = ArgumentValidator::validate_nullable_string( 'creation_key', $filtered_args['creation_key'] ?? null );
-		unset( $filtered_args['extension_slug'], $filtered_args['creation_key'] );
-
-		try {
-			$contract = Contract::create(
-				array(
-					'extension_slug' => $extension_slug,
-					'creation_key'   => $creation_key,
-				)
-			);
-			self::apply( $contract, $filtered_args );
-		} catch ( DomainException $e ) {
-			throw new InvalidArgumentException( $e->getMessage(), 0, $e ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- the entity message is not output.
+	private static function get_contract_fields( ArgumentValidator $validator, array $args ): array {
+		$fields = array();
+		if ( array_key_exists( 'customer_id', $args ) ) {
+			$fields['customer_id'] = $validator->get_nullable_id( 'customer_id', $args['customer_id'] );
 		}
-
-		return $contract;
-	}
-
-	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- the DomainException comes from the entity setters, not a throw in this method.
-	/**
-	 * Validate the caller's field shapes and apply them to a contract through its setters,
-	 * which enforce the entity invariants. Nothing is written to storage; an invalid value
-	 * throws before any write.
-	 *
-	 * @param Contract             $contract Contract to change.
-	 * @param array<string, mixed> $args     Caller fields (known keys only, no `extension_slug`).
-	 * @throws InvalidArgumentException If a value has the wrong shape.
-	 * @throws DomainException If a value breaks an entity invariant (from the entity setters).
-	 */
-	private static function apply( Contract $contract, array $args ): void {
-		$instrument = $contract->get_payment_instrument();
-		$token_id   = $instrument->get_token_id();
-		$gateway    = $instrument->get_gateway();
-		$title      = $instrument->get_title();
-
-		foreach ( $args as $key => $value ) {
-			switch ( $key ) {
-				case 'customer_id':
-					$contract->set_customer_id( ArgumentValidator::validate_nullable_id( $key, $value ) );
-					break;
-				case 'selling_plan_id':
-					$contract->set_selling_plan_id( ArgumentValidator::validate_nullable_id( $key, $value ) );
-					break;
-				case 'origin_order_id':
-					$contract->set_origin_order_id( ArgumentValidator::validate_nullable_id( $key, $value ) );
-					break;
-				case 'currency':
-					$contract->set_currency( ArgumentValidator::validate_currency( $value ) );
-					break;
-				case 'status':
-					$contract->set_status( ArgumentValidator::validate_string( $key, $value ) );
-					break;
-				case 'schedule_source':
-					$contract->set_schedule_source( ArgumentValidator::validate_string( $key, $value ) );
-					break;
-				case 'start_gmt':
-					$contract->set_start_gmt( ArgumentValidator::validate_nullable_date( $key, $value ) );
-					break;
-				case 'next_payment_gmt':
-					$contract->set_next_payment_gmt( ArgumentValidator::validate_nullable_date( $key, $value ) );
-					break;
-				case 'last_payment_gmt':
-					$contract->set_last_payment_gmt( ArgumentValidator::validate_nullable_date( $key, $value ) );
-					break;
-				case 'last_attempt_gmt':
-					$contract->set_last_attempt_gmt( ArgumentValidator::validate_nullable_date( $key, $value ) );
-					break;
-				case 'trial_end_gmt':
-					$contract->set_trial_end_gmt( ArgumentValidator::validate_nullable_date( $key, $value ) );
-					break;
-				case 'end_gmt':
-					$contract->set_end_gmt( ArgumentValidator::validate_nullable_date( $key, $value ) );
-					break;
-				case 'billing_total':
-					$contract->set_billing_total( ArgumentValidator::validate_money( $key, $value ) );
-					break;
-				case 'discount_total':
-					$contract->set_discount_total( ArgumentValidator::validate_money( $key, $value ) );
-					break;
-				case 'shipping_total':
-					$contract->set_shipping_total( ArgumentValidator::validate_money( $key, $value ) );
-					break;
-				case 'tax_total':
-					$contract->set_tax_total( ArgumentValidator::validate_money( $key, $value ) );
-					break;
-				case 'items':
-					$contract->set_items( ArgumentValidator::validate_contract_items( $value, self::class ) );
-					break;
-				case 'addresses':
-					$contract->set_addresses( ArgumentValidator::validate_contract_addresses( $value, self::class ) );
-					break;
-				case 'payment_token_id':
-					$token_id = ArgumentValidator::validate_nullable_id( $key, $value );
-					break;
-				case 'payment_method':
-					$gateway = ArgumentValidator::validate_nullable_string( $key, $value );
-					break;
-				case 'payment_method_title':
-					$title = ArgumentValidator::validate_nullable_string( $key, $value );
-					break;
+		if ( array_key_exists( 'currency', $args ) ) {
+			$fields['currency'] = $validator->get_currency( $args['currency'] );
+		}
+		if ( array_key_exists( 'selling_plan_id', $args ) ) {
+			$fields['selling_plan_id'] = $validator->get_nullable_id( 'selling_plan_id', $args['selling_plan_id'] );
+		}
+		if ( array_key_exists( 'origin_order_id', $args ) ) {
+			$fields['origin_order_id'] = $validator->get_nullable_id( 'origin_order_id', $args['origin_order_id'] );
+		}
+		if ( array_key_exists( 'status', $args ) ) {
+			$value = $validator->get_string( 'status', $args['status'] );
+			if ( null !== $value ) {
+				$fields['status'] = $value;
+			}
+		}
+		if ( array_key_exists( 'payment_method', $args ) ) {
+			$fields['payment_method'] = $validator->get_nullable_string( 'payment_method', $args['payment_method'] );
+		}
+		if ( array_key_exists( 'payment_method_title', $args ) ) {
+			$fields['payment_method_title'] = $validator->get_nullable_string( 'payment_method_title', $args['payment_method_title'] );
+		}
+		if ( array_key_exists( 'payment_token_id', $args ) ) {
+			$fields['payment_token_id'] = $validator->get_nullable_id( 'payment_token_id', $args['payment_token_id'] );
+		}
+		if ( array_key_exists( 'start_gmt', $args ) ) {
+			$fields['start_gmt'] = $validator->get_nullable_date( 'start_gmt', $args['start_gmt'] );
+		}
+		if ( array_key_exists( 'next_payment_gmt', $args ) ) {
+			$fields['next_payment_gmt'] = $validator->get_nullable_date( 'next_payment_gmt', $args['next_payment_gmt'] );
+		}
+		if ( array_key_exists( 'last_payment_gmt', $args ) ) {
+			$fields['last_payment_gmt'] = $validator->get_nullable_date( 'last_payment_gmt', $args['last_payment_gmt'] );
+		}
+		if ( array_key_exists( 'last_attempt_gmt', $args ) ) {
+			$fields['last_attempt_gmt'] = $validator->get_nullable_date( 'last_attempt_gmt', $args['last_attempt_gmt'] );
+		}
+		if ( array_key_exists( 'trial_end_gmt', $args ) ) {
+			$fields['trial_end_gmt'] = $validator->get_nullable_date( 'trial_end_gmt', $args['trial_end_gmt'] );
+		}
+		if ( array_key_exists( 'end_gmt', $args ) ) {
+			$fields['end_gmt'] = $validator->get_nullable_date( 'end_gmt', $args['end_gmt'] );
+		}
+		if ( array_key_exists( 'schedule_source', $args ) ) {
+			$value = $validator->get_string( 'schedule_source', $args['schedule_source'] );
+			if ( null !== $value ) {
+				$fields['schedule_source'] = $value;
+			}
+		}
+		if ( array_key_exists( 'billing_total', $args ) ) {
+			$value = $validator->get_money( 'billing_total', $args['billing_total'] );
+			if ( null !== $value ) {
+				$fields['billing_total'] = $value;
+			}
+		}
+		if ( array_key_exists( 'discount_total', $args ) ) {
+			$value = $validator->get_money( 'discount_total', $args['discount_total'] );
+			if ( null !== $value ) {
+				$fields['discount_total'] = $value;
+			}
+		}
+		if ( array_key_exists( 'shipping_total', $args ) ) {
+			$value = $validator->get_money( 'shipping_total', $args['shipping_total'] );
+			if ( null !== $value ) {
+				$fields['shipping_total'] = $value;
+			}
+		}
+		if ( array_key_exists( 'tax_total', $args ) ) {
+			$value = $validator->get_money( 'tax_total', $args['tax_total'] );
+			if ( null !== $value ) {
+				$fields['tax_total'] = $value;
+			}
+		}
+		if ( array_key_exists( 'items', $args ) ) {
+			$items = $validator->get_list_of_arrays( 'items', $args['items'] );
+			if ( null !== $items ) {
+				$fields['items'] = ArgumentFilter::filter_known_keys_in_rows( self::class, $items, array_fill_keys( Contract::ITEM_FIELDS, true ), 'item key' );
+			}
+		}
+		if ( array_key_exists( 'addresses', $args ) ) {
+			$addresses = $validator->get_contract_addresses( $args['addresses'] );
+			if ( null !== $addresses ) {
+				$fields['addresses'] = ArgumentFilter::filter_known_keys_in_rows( self::class, $addresses, array_fill_keys( Contract::ADDRESS_FIELDS, true ), 'address key' );
 			}
 		}
 
-		$contract->set_payment_instrument( new PaymentInstrumentRef( $token_id, $gateway, $title ) );
-		$contract->assert_money_has_currency();
+		return $fields;
 	}
-	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
+
+	/**
+	 * Apply normalized changes to a contract through its setters, which enforce the entity
+	 * invariants, then check that money has a currency. Every refusal is thrown together.
+	 * Nothing is written to storage.
+	 *
+	 * @param Contract             $contract Contract to change.
+	 * @param array<string, mixed> $changes  Normalized fields from {@see self::get_contract_fields()}.
+	 * @phpstan-param ContractFields $changes
+	 * @throws InvalidInputException If a value breaks an entity invariant.
+	 */
+	private static function apply( Contract $contract, array $changes ): void {
+		$errors = array();
+		if ( array_key_exists( 'customer_id', $changes ) ) {
+			$contract->set_customer_id( $changes['customer_id'] );
+		}
+		if ( array_key_exists( 'currency', $changes ) ) {
+			$contract->set_currency( $changes['currency'] );
+		}
+		if ( array_key_exists( 'selling_plan_id', $changes ) ) {
+			$contract->set_selling_plan_id( $changes['selling_plan_id'] );
+		}
+		if ( array_key_exists( 'origin_order_id', $changes ) ) {
+			$contract->set_origin_order_id( $changes['origin_order_id'] );
+		}
+		if ( array_key_exists( 'status', $changes ) ) {
+			try {
+				$contract->set_status( $changes['status'] );
+			} catch ( InvalidInputException $e ) {
+				$errors[] = $e;
+			}
+		}
+		if ( array_key_exists( 'schedule_source', $changes ) ) {
+			try {
+				$contract->set_schedule_source( $changes['schedule_source'] );
+			} catch ( InvalidInputException $e ) {
+				$errors[] = $e;
+			}
+		}
+		if ( array_key_exists( 'start_gmt', $changes ) ) {
+			$contract->set_start_gmt( $changes['start_gmt'] );
+		}
+		if ( array_key_exists( 'next_payment_gmt', $changes ) ) {
+			$contract->set_next_payment_gmt( $changes['next_payment_gmt'] );
+		}
+		if ( array_key_exists( 'last_payment_gmt', $changes ) ) {
+			$contract->set_last_payment_gmt( $changes['last_payment_gmt'] );
+		}
+		if ( array_key_exists( 'last_attempt_gmt', $changes ) ) {
+			$contract->set_last_attempt_gmt( $changes['last_attempt_gmt'] );
+		}
+		if ( array_key_exists( 'trial_end_gmt', $changes ) ) {
+			$contract->set_trial_end_gmt( $changes['trial_end_gmt'] );
+		}
+		if ( array_key_exists( 'end_gmt', $changes ) ) {
+			$contract->set_end_gmt( $changes['end_gmt'] );
+		}
+		if ( array_key_exists( 'billing_total', $changes ) ) {
+			$contract->set_billing_total( $changes['billing_total'] );
+		}
+		if ( array_key_exists( 'discount_total', $changes ) ) {
+			$contract->set_discount_total( $changes['discount_total'] );
+		}
+		if ( array_key_exists( 'shipping_total', $changes ) ) {
+			$contract->set_shipping_total( $changes['shipping_total'] );
+		}
+		if ( array_key_exists( 'tax_total', $changes ) ) {
+			$contract->set_tax_total( $changes['tax_total'] );
+		}
+		if ( array_key_exists( 'items', $changes ) ) {
+			$contract->set_items( $changes['items'] );
+		}
+		if ( array_key_exists( 'addresses', $changes ) ) {
+			$contract->set_addresses( $changes['addresses'] );
+		}
+
+		$instrument = $contract->get_payment_instrument();
+		$contract->set_payment_instrument(
+			new PaymentInstrumentRef(
+				array_key_exists( 'payment_token_id', $changes ) ? $changes['payment_token_id'] : $instrument->get_token_id(),
+				array_key_exists( 'payment_method', $changes ) ? $changes['payment_method'] : $instrument->get_gateway(),
+				array_key_exists( 'payment_method_title', $changes ) ? $changes['payment_method_title'] : $instrument->get_title()
+			)
+		);
+
+		$money_error = $contract->get_money_currency_error();
+		if ( null !== $money_error ) {
+			$errors[] = $money_error;
+		}
+		if ( array() !== $errors ) {
+			throw InvalidInputException::from_errors( $errors ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- The caller converts it with ValidationException::from_core(), which escapes the message.
+		}
+	}
 
 	/**
 	 * A view of `$contract`, or null.
