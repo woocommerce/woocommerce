@@ -13,6 +13,7 @@ import { useSelect } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
 import { useCollectionData } from '@woocommerce/base-context/hooks';
 import { objectHasProp } from '@woocommerce/types';
+import type { SelectableItemsContext } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -23,7 +24,6 @@ import { EditProps } from './types';
 import { getAllowedBlocks } from '../../utils/get-allowed-blocks';
 import { EXCLUDED_BLOCKS } from '../../constants';
 import type { FilterOptionItem, FilterItemFields } from '../../types';
-import type { SelectableItemsContext } from '../../../../types/type-defs/selectable-items';
 import { InitialDisabled } from '../../components/initial-disabled';
 import { Notice } from '../../components/notice';
 import { getTaxonomyLabel } from './utils';
@@ -117,9 +117,8 @@ const Edit = ( props: EditProps ) => {
 			? sortFilterOptions( [ ...termOptionsPreview ], sortOrder )
 			: []
 	);
-	const [ isOptionsLoading, setIsOptionsLoading ] = useState< boolean >(
-		! isPreview
-	);
+	const [ isOptionsLoading, setIsOptionsLoading ] =
+		useState< boolean >( ! isPreview );
 
 	// Fetch taxonomy terms using WordPress core data
 	const { taxonomyTerms, isTermsLoading } = useSelect(
@@ -140,8 +139,7 @@ const Edit = ( props: EditProps ) => {
 			return {
 				taxonomyTerms:
 					( getEntityRecords( 'taxonomy', taxonomy, selectArgs ) as
-						| WPTaxonomyTerm[]
-						| null ) || EMPTY_TAXONOMY_TERMS,
+						WPTaxonomyTerm[] | null ) || EMPTY_TAXONOMY_TERMS,
 				isTermsLoading: ! hasFinishedResolution( 'getEntityRecords', [
 					'taxonomy',
 					taxonomy,
@@ -270,7 +268,7 @@ const Edit = ( props: EditProps ) => {
 		? false
 		: isTermsLoading || isFilterCountsLoading || isOptionsLoading;
 
-	if ( ! taxonomy )
+	if ( ! taxonomy ) {
 		return (
 			<div { ...innerBlocksProps }>
 				<TaxonomyFilterInspectorControls { ...props } />
@@ -284,8 +282,9 @@ const Edit = ( props: EditProps ) => {
 				</Notice>
 			</div>
 		);
+	}
 
-	if ( ! isLoading && ! isPreview && taxonomyTerms.length === 0 )
+	if ( ! isLoading && ! isPreview && taxonomyTerms.length === 0 ) {
 		return (
 			<div { ...innerBlocksProps }>
 				<TaxonomyFilterInspectorControls { ...props } />
@@ -303,6 +302,7 @@ const Edit = ( props: EditProps ) => {
 				</Notice>
 			</div>
 		);
+	}
 
 	return (
 		<div { ...innerBlocksProps }>

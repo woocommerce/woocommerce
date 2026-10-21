@@ -7,10 +7,11 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Internal\ProductFilters;
 
+use Automattic\WooCommerce\Enums\TaxDisplayMode;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductFilters\Interfaces\QueryClausesGenerator;
 use Automattic\WooCommerce\Internal\ProductFilters\Interfaces\MainQueryClausesGenerator;
-use Automattic\WooCommerce\Internal\ProductFilters\CacheController;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use WC_Tax;
 use WC_Cache_Helper;
 
@@ -167,7 +168,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 		$args['join']     = $this->append_product_sorting_table_join( $args['join'] );
 
 		if ( isset( $price_range['min_price'] ) ) {
-			$min_price_filter = intval( $price_range['min_price'] );
+			$min_price_filter = (float) wc_format_decimal( $price_range['min_price'] );
 
 			if ( $adjust_for_taxes ) {
 				$args['where'] .= $this->get_price_filter_query_for_displayed_taxes( $min_price_filter, 'max_price', '>=' );
@@ -177,7 +178,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 		}
 
 		if ( isset( $price_range['max_price'] ) ) {
-			$max_price_filter = intval( $price_range['max_price'] );
+			$max_price_filter = (float) wc_format_decimal( $price_range['max_price'] );
 
 			if ( $adjust_for_taxes ) {
 				$args['where'] .= $this->get_price_filter_query_for_displayed_taxes( $max_price_filter, 'min_price', '<=' );
@@ -209,6 +210,21 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 			return $args;
 		}
 
+		if ( 'yes' !== get_option( 'woocommerce_attribute_lookup_enabled' ) ) {
+			return $this->add_attribute_taxonomy_clauses( $args, $chosen_attributes );
+		}
+
+		return $this->add_attribute_lookup_table_clauses( $args, $chosen_attributes );
+	}
+
+	/**
+	 * Add attribute clauses using the product attributes lookup table.
+	 *
+	 * @param array $args              Query args.
+	 * @param array $chosen_attributes Chosen attributes.
+	 * @return array
+	 */
+	private function add_attribute_lookup_table_clauses( array $args, array $chosen_attributes ): array {
 		global $wpdb;
 
 		// The extra derived table ("SELECT product_or_parent_id FROM") is needed for performance
@@ -220,8 +236,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 			$in_stock_clause = '';
 		}
 
-		$attribute_ids_for_and_filtering = array();
-		$clauses                         = array();
+		$clauses = array();
 
 		// Get all terms for all attribute taxonomies in one query for better performance.
 		$all_terms_slugs = array();
@@ -261,7 +276,24 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 
 			if ( 0 !== $count ) {
 				if ( $is_and_query && $count > 1 ) {
-					$attribute_ids_for_and_filtering = array_merge( $attribute_ids_for_and_filtering, $term_ids_to_filter_by );
+					$clauses[] = "
+						{$clause_root}
+						SELECT product_or_parent_id
+						FROM {$this->get_lookup_table_name()} lt
+						WHERE is_variation_attribute=0
+						{$in_stock_clause}
+						AND term_id in {$term_ids_to_filter_by_list}
+						GROUP BY product_id
+						HAVING COUNT(product_id)={$count}
+						UNION
+						SELECT product_or_parent_id
+						FROM {$this->get_lookup_table_name()} lt
+						WHERE is_variation_attribute=1
+						{$in_stock_clause}
+						AND term_id in {$term_ids_to_filter_by_list}
+						GROUP BY product_or_parent_id
+						HAVING COUNT(DISTINCT term_id)={$count}
+					)";
 				} else {
 					$clauses[] = "
 							{$clause_root}
@@ -274,33 +306,99 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 			}
 		}
 
-		if ( ! empty( $attribute_ids_for_and_filtering ) ) {
-			$count                      = count( $attribute_ids_for_and_filtering );
-			$term_ids_to_filter_by_list = '(' . join( ',', $attribute_ids_for_and_filtering ) . ')';
-			$clauses[]                  = "
-				{$clause_root}
-				SELECT product_or_parent_id
-				FROM {$this->get_lookup_table_name()} lt
-				WHERE is_variation_attribute=0
-				{$in_stock_clause}
-				AND term_id in {$term_ids_to_filter_by_list}
-				GROUP BY product_id
-				HAVING COUNT(product_id)={$count}
-				UNION
-				SELECT product_or_parent_id
-				FROM {$this->get_lookup_table_name()} lt
-				WHERE is_variation_attribute=1
-				{$in_stock_clause}
-				AND term_id in {$term_ids_to_filter_by_list}
-			)";
-		}
-
 		if ( ! empty( $clauses ) ) {
 			// "temp" is needed because the extra derived tables require an alias.
 			$args['where'] .= ' AND (' . join( ' temp ) AND ', $clauses ) . ' temp ))';
 		} elseif ( ! empty( $chosen_attributes ) ) {
 			$args['where'] .= ' AND 1=0';
 		}
+
+		return $args;
+	}
+
+	/**
+	 * Add attribute clauses using WordPress taxonomy queries.
+	 *
+	 * @param array $args              Query args.
+	 * @param array $chosen_attributes Chosen attributes.
+	 * @return array
+	 */
+	private function add_attribute_taxonomy_clauses( array $args, array $chosen_attributes ): array {
+		global $wpdb;
+
+		$all_term_slugs = array();
+		foreach ( $chosen_attributes as $data ) {
+			if ( ! empty( $data['terms'] ) && is_array( $data['terms'] ) ) {
+				$all_term_slugs = array_merge( $all_term_slugs, $data['terms'] );
+			}
+		}
+
+		if ( empty( $all_term_slugs ) ) {
+			$args['where'] .= ' AND 1=0';
+			return $args;
+		}
+
+		$all_terms = get_terms(
+			array(
+				'taxonomy'   => array_keys( $chosen_attributes ),
+				'slug'       => $all_term_slugs,
+				'hide_empty' => false,
+			)
+		);
+
+		if ( is_wp_error( $all_terms ) ) {
+			$args['where'] .= ' AND 1=0';
+			return $args;
+		}
+
+		$term_ids_by_taxonomy = array();
+		foreach ( $all_terms as $term ) {
+			$term_ids_by_taxonomy[ $term->taxonomy ][ $term->slug ] = (int) $term->term_id;
+		}
+
+		$clauses = array();
+		foreach ( $chosen_attributes as $taxonomy => $data ) {
+			$term_ids     = array_values( array_intersect_key( $term_ids_by_taxonomy[ $taxonomy ] ?? array(), array_flip( $data['terms'] ) ) );
+			$is_and       = 'and' === strtolower( $data['query_type'] );
+			$unique_terms = array_unique( $data['terms'] );
+
+			if ( empty( $term_ids ) || ( $is_and && count( $term_ids ) !== count( $unique_terms ) ) ) {
+				$args['where'] .= ' AND 1=0';
+				return $args;
+			}
+
+			$term_ids_list = '(' . implode( ',', array_map( 'absint', $term_ids ) ) . ')';
+
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
+			if ( $is_and && count( $term_ids ) > 1 ) {
+				$clauses[] = $wpdb->prepare(
+					"{$wpdb->posts}.ID IN (
+						SELECT tr.object_id FROM {$wpdb->term_relationships} tr
+						INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
+						WHERE tt.taxonomy = %s
+						AND tt.term_id IN {$term_ids_list}
+						GROUP BY tr.object_id
+						HAVING COUNT(DISTINCT tt.term_id) = %d
+					)",
+					$taxonomy,
+					count( $term_ids )
+				);
+			} else {
+				$clauses[] = $wpdb->prepare(
+					"EXISTS (
+						SELECT 1 FROM {$wpdb->term_relationships} tr
+						INNER JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
+						WHERE tr.object_id = {$wpdb->posts}.ID
+						AND tt.taxonomy = %s
+						AND tt.term_id IN {$term_ids_list}
+					)",
+					$taxonomy
+				);
+			}
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared
+		}
+
+		$args['where'] .= ' AND (' . implode( ' AND ', $clauses ) . ')';
 
 		return $args;
 	}
@@ -352,39 +450,28 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 			$term_ids_by_taxonomy[ $term->taxonomy ][] = $term->term_id;
 		}
 
-		foreach ( $term_ids_by_taxonomy as $taxonomy => $term_ids ) {
+		foreach ( array_keys( $chosen_taxonomies ) as $taxonomy ) {
+			$term_ids = $term_ids_by_taxonomy[ $taxonomy ] ?? array();
+
 			if ( empty( $term_ids ) ) {
+				$tax_queries[] = '0=1';
 				continue;
 			}
 
 			if ( is_taxonomy_hierarchical( $taxonomy ) ) {
-				$expanded_term_ids = $term_ids;
+				// Expand chosen terms to include descendants. get_term_children()
+				// resolves from the precomputed {$taxonomy}_children option, so it
+				// adds no per-term query.
+				$descendant_sets = array( $term_ids );
 
 				foreach ( $term_ids as $term_id ) {
-					$cache_key = WC_Cache_Helper::get_cache_prefix( CacheController::CACHE_GROUP ) . 'child_terms_' . $taxonomy . '_' . $term_id;
-					$children  = wp_cache_get( $cache_key );
-
-					if ( false === $children ) {
-						$children = get_terms(
-							array(
-								'taxonomy'   => $taxonomy,
-								'child_of'   => $term_id,
-								'fields'     => 'ids',
-								'hide_empty' => false,
-							)
-						);
-
-						if ( ! is_wp_error( $children ) ) {
-							wp_cache_set( $cache_key, $children, '', HOUR_IN_SECONDS );
-						} else {
-							$children = array();
-						}
+					$children = get_term_children( (int) $term_id, $taxonomy );
+					if ( ! is_wp_error( $children ) ) {
+						$descendant_sets[] = $children;
 					}
-
-					$expanded_term_ids = array_merge( $expanded_term_ids, $children );
 				}
 
-				$term_ids = array_unique( $expanded_term_ids );
+				$term_ids = array_unique( array_merge( ...$descendant_sets ) );
 			}
 
 			$term_ids_list = '(' . implode( ',', array_map( 'absint', $term_ids ) ) . ')';
@@ -417,11 +504,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 			);
 		}
 
-		if ( ! empty( $tax_queries ) ) {
-			$args['where'] .= ' AND (' . implode( ' AND ', $tax_queries ) . ')';
-		} else {
-			$args['where'] .= ' AND 1=0';
-		}
+		$args['where'] .= ' AND (' . implode( ' AND ', $tax_queries ) . ')';
 
 		return $args;
 	}
@@ -433,12 +516,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 	 * @return string
 	 */
 	private function append_product_sorting_table_join( string $sql ): string {
-		global $wpdb;
-
-		if ( ! strstr( $sql, 'wc_product_meta_lookup' ) ) {
-			$sql .= " LEFT JOIN {$wpdb->wc_product_meta_lookup} wc_product_meta_lookup ON $wpdb->posts.ID = wc_product_meta_lookup.product_id ";
-		}
-		return $sql;
+		return wc_get_container()->get( ProductUtil::class )->append_product_sorting_table_join( $sql );
 	}
 
 	/**
@@ -451,7 +529,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 	 */
 	private function should_adjust_price_filters_for_displayed_taxes(): bool {
 		$display  = get_option( 'woocommerce_tax_display_shop' );
-		$database = wc_prices_include_tax() ? 'incl' : 'excl';
+		$database = wc_prices_include_tax() ? TaxDisplayMode::INCLUSIVE : TaxDisplayMode::EXCLUSIVE;
 
 		return $display !== $database;
 	}
@@ -488,6 +566,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 
 		// We need to adjust the filter for each possible tax class and combine the queries into one.
 		foreach ( $product_tax_classes as $tax_class ) {
+			$tax_class             = (string) $tax_class;
 			$adjusted_price_filter = $this->adjust_price_filter_for_tax_class( $price_filter, $tax_class );
 			$or_queries[]          = $wpdb->prepare(
 				'( wc_product_meta_lookup.tax_class = %s AND wc_product_meta_lookup.`' . esc_sql( $column ) . '` ' . esc_sql( $operator ) . ' %f )',
@@ -522,7 +601,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 		$base_tax_rates = WC_Tax::get_base_tax_rates( $tax_class );
 
 		// If prices are shown incl. tax, we want to remove the taxes from the filter amount to match prices stored excl. tax.
-		if ( 'incl' === $tax_display ) {
+		if ( TaxDisplayMode::INCLUSIVE === $tax_display ) {
 			/**
 			 * Filters if taxes should be removed from locations outside the store base location.
 			 *
@@ -593,7 +672,7 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 		}
 
 		foreach ( $this->params->get_param( 'taxonomy' ) as $taxonomy => $param ) {
-			if ( isset( $query_vars[ $param ] ) && ! empty( trim( $query_vars[ $param ] ) ) ) {
+			if ( isset( $query_vars[ $param ] ) && is_string( $query_vars[ $param ] ) && ! empty( trim( $query_vars[ $param ] ) ) ) {
 				$chosen_taxonomies[ $taxonomy ] = array_filter( array_map( 'sanitize_title', explode( ',', $query_vars[ $param ] ) ) );
 			}
 		}

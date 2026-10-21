@@ -4,6 +4,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\PushNotifications\Notifications;
 
+use Automattic\WooCommerce\Internal\PushNotifications\Enums\SuppressionReason;
+use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
 use InvalidArgumentException;
 
 defined( 'ABSPATH' ) || exit;
@@ -35,6 +37,18 @@ abstract class Notification {
 	 * @var int
 	 */
 	private int $resource_id;
+
+	/**
+	 * Unix timestamp of the moment the store event fired, when known.
+	 *
+	 * Set by {@see PendingNotificationStore::add()} at trigger time and read by
+	 * {@see PendingNotificationStore::dispatch_all()}, which persists it on
+	 * shutdown. Null on any instance rebuilt in a later request (loopback,
+	 * safety net, retry); those read the persisted value instead.
+	 *
+	 * @var int|null
+	 */
+	private ?int $triggered_at = null;
 
 	/**
 	 * Creates a new Notification instance.
@@ -88,12 +102,26 @@ abstract class Notification {
 	/**
 	 * Writes a meta key with a timestamp to this notification's resource.
 	 *
-	 * @param string $key The meta key.
+	 * @param string   $key       The meta key.
+	 * @param int|null $timestamp Unix timestamp to record. Defaults to the current time.
 	 * @return void
 	 *
 	 * @since 10.7.0
 	 */
-	abstract public function write_meta( string $key ): void;
+	abstract public function write_meta( string $key, ?int $timestamp = null ): void;
+
+	/**
+	 * Reads a meta value from this notification's resource.
+	 *
+	 * Returns an empty string when the key is absent or the resource no longer
+	 * exists.
+	 *
+	 * @param string $key The meta key.
+	 * @return string
+	 *
+	 * @since 11.2.0
+	 */
+	abstract public function read_meta( string $key ): string;
 
 	/**
 	 * Deletes a meta key from this notification's resource.
@@ -104,6 +132,55 @@ abstract class Notification {
 	 * @since 10.8.0
 	 */
 	abstract public function delete_meta( string $key ): void;
+
+	/**
+	 * Clears the in-progress delivery state from this notification's resource.
+	 *
+	 * Call this on every terminal path (success, no recipients, and each of the
+	 * retry handler's give-up branches) so a notification that has finished
+	 * leaves nothing behind. The sent marker is deliberately not cleared: it is
+	 * the idempotency guard that stops {@see NotificationProcessor::process()}
+	 * sending the same notification twice, and only
+	 * {@see StockNotificationRecoveryHandler} clears it, to re-arm a stock
+	 * notification after a restock.
+	 *
+	 * Leaving the claimed marker behind is not only a storage cost. A stock
+	 * notification that exhausted its retries would keep it forever, and
+	 * {@see NotificationProcessor::process()} returns early when it is present,
+	 * so that product could never send that notification again.
+	 *
+	 * @return void
+	 *
+	 * @since 11.2.0
+	 */
+	public function reset_processing_meta(): void {
+		$this->delete_meta( NotificationProcessor::CLAIMED_META_KEY );
+		$this->delete_meta( NotificationProcessor::TRIGGERED_META_KEY );
+	}
+
+	/**
+	 * Records the moment the store event fired.
+	 *
+	 * @param int $timestamp Unix timestamp.
+	 * @return void
+	 *
+	 * @since 11.2.0
+	 */
+	public function set_triggered_at( int $timestamp ): void {
+		$this->triggered_at = $timestamp;
+	}
+
+	/**
+	 * Returns the trigger time captured in this request, or null when this
+	 * instance was rebuilt in a later one.
+	 *
+	 * @return int|null
+	 *
+	 * @since 11.2.0
+	 */
+	public function get_triggered_at(): ?int {
+		return $this->triggered_at;
+	}
 
 	/**
 	 * Returns the notification data as an array.
@@ -122,7 +199,11 @@ abstract class Notification {
 	/**
 	 * Reconstructs a Notification subclass from a serialized array.
 	 *
-	 * @param array{type: string, resource_id: int} $data The notification data.
+	 * `type` and `resource_id` are required. Any further keys are passed to the
+	 * subclass's `hydrate()` method, which decides what it recognises; see
+	 * {@see StockNotification::hydrate()}.
+	 *
+	 * @param array<string, mixed> $data The notification data.
 	 * @return self
 	 *
 	 * @throws InvalidArgumentException If the type is unknown.
@@ -150,6 +231,47 @@ abstract class Notification {
 	}
 
 	/**
+	 * Returns the ISO 8601 timestamp of the moment this notification was
+	 * triggered, for the payload's `timestamp` field.
+	 *
+	 * Reads the trigger time recorded on the resource when the store event
+	 * fired (see {@see NotificationProcessor::TRIGGERED_META_KEY}). Previously
+	 * the payload was stamped with the current time at send, so any delay
+	 * between the event and the send (safety net, retries) was invisible to
+	 * delivery-age monitoring. Falls back to the current time when no trigger
+	 * time was recorded (e.g. notifications already in flight when this shipped).
+	 *
+	 * @return string
+	 *
+	 * @since 11.2.0
+	 */
+	public function get_triggered_timestamp(): string {
+		return $this->format_triggered_timestamp( $this->read_meta( NotificationProcessor::TRIGGERED_META_KEY ) );
+	}
+
+	/**
+	 * Formats a recorded trigger time for the payload's `timestamp` field.
+	 *
+	 * Subclasses call this directly from `to_payload()` when they already hold
+	 * the loaded resource, which avoids {@see self::get_triggered_timestamp()}
+	 * fetching it a second time.
+	 *
+	 * @param string $recorded_at The raw meta value, or an empty string when absent.
+	 * @return string
+	 *
+	 * @since 11.2.0
+	 */
+	protected function format_triggered_timestamp( string $recorded_at ): string {
+		$triggered_at = $this->triggered_at ?? (int) $recorded_at;
+
+		if ( $triggered_at <= 0 ) {
+			$triggered_at = time();
+		}
+
+		return gmdate( 'c', $triggered_at );
+	}
+
+	/**
 	 * Returns a unique identifier for this notification, used for
 	 * deduplication.
 	 *
@@ -173,8 +295,53 @@ abstract class Notification {
 	}
 
 	/**
-	 * Decide whether this notification should be delivered to a user given
-	 * their stored preference value for {@see static::get_type()}.
+	 * Extra fields that identify this notification beyond its type and resource
+	 * ID, in the form {@see self::from_array()} accepts.
+	 *
+	 * Identity only, for the reasons {@see self::get_safety_net_args()} gives.
+	 *
+	 * @return array<string, mixed>
+	 *
+	 * @since 11.2.0
+	 */
+	public function get_identity_data(): array {
+		return array();
+	}
+
+	/**
+	 * Canonical positional ActionScheduler arguments for the safety-net job.
+	 *
+	 * Single source of truth shared by the scheduler (and its dedupe guard) and
+	 * the cancel path so the serialized args always match. Action Scheduler
+	 * matches the stored args by exact equality, so any divergence between the
+	 * schedule-side and cancel-side shapes silently breaks cancellation.
+	 *
+	 * The args are keyed on the notification's *identity* — the minimal data
+	 * needed to uniquely identify and reconstruct the notification — mirroring
+	 * {@see self::get_identifier()}. Volatile payload fields (e.g. a stock
+	 * snapshot captured at trigger time) must not be included: they are not part
+	 * of the identity and may differ between schedule and cancel.
+	 *
+	 * @return array<int, mixed>
+	 *
+	 * @since 10.9.0
+	 */
+	public function get_safety_net_args(): array {
+		$args          = array( $this->get_type(), $this->get_resource_id() );
+		$identity_data = $this->get_identity_data();
+
+		// Skipped when empty so an in-flight safety net for a type without
+		// identity data still cancels.
+		if ( ! empty( $identity_data ) ) {
+			$args[] = $identity_data;
+		}
+
+		return $args;
+	}
+
+	/**
+	 * Returns which preference stops this notification reaching a user, or null
+	 * where it should reach them.
 	 *
 	 * `$pref_value` is whatever the user has stored under this notification
 	 * type's preference key, or `null` if they have nothing stored. The
@@ -186,29 +353,48 @@ abstract class Notification {
 	 *
 	 * Default: read the universal `enabled` sub-field, defaulting to `true`
 	 * when the value is missing or has no `enabled` key (so newly-added
-	 * notification types are opt-in by default). Subclasses override to
-	 * read richer sub-fields and to consult their own resource (e.g.
-	 * compare an order total to the user's `min_value`).
+	 * notification types are opt-in by default). Subclasses override to read
+	 * richer sub-fields and to consult their own resource, returning the first
+	 * reason that applies.
 	 *
-	 * Subclasses must keep this side-effect-free — the {@see NotificationProcessor}
-	 * may call it once per recipient user per notification.
+	 * Subclasses must keep this side-effect-free, since the
+	 * {@see NotificationProcessor} may call it once per recipient user per
+	 * notification.
 	 *
 	 * @param mixed $pref_value The user's stored preference value, or null.
-	 * @return bool True if this notification should be sent to that user.
+	 * @return string|null One of the SuppressionReason constants, or null to send.
 	 *
-	 * @since 10.9.0
+	 * @since 11.3.0
 	 */
-	public function should_send_to_user( $pref_value ): bool {
+	public function get_suppression_reason( $pref_value ): ?string {
 		if ( null === $pref_value ) {
-			return true;
+			return null;
 		}
 
 		if ( is_array( $pref_value ) ) {
-			return (bool) ( $pref_value['enabled'] ?? true );
+			return ( $pref_value['enabled'] ?? true ) ? null : SuppressionReason::NOTIFICATIONS_OFF;
 		}
 
 		// Defensive fallback for unexpected scalar values; the service
 		// always normalises stored prefs to the array shape above.
-		return (bool) $pref_value;
+		return $pref_value ? null : SuppressionReason::NOTIFICATIONS_OFF;
+	}
+
+	/**
+	 * Whether this notification should be delivered to a user.
+	 *
+	 * Kept so a request that loaded older code during a plugin update does not
+	 * fatal on a call that has moved. Nothing in the plugin calls it; use
+	 * {@see get_suppression_reason()}, which also names why not.
+	 *
+	 * @deprecated 11.3.0 Use get_suppression_reason() instead.
+	 *
+	 * @param mixed $pref_value The user's stored preference value, or null.
+	 * @return bool
+	 *
+	 * @since 10.9.0
+	 */
+	public function should_send_to_user( $pref_value ): bool {
+		return null === $this->get_suppression_reason( $pref_value );
 	}
 }

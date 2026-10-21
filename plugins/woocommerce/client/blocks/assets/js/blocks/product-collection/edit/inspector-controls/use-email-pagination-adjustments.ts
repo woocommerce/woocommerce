@@ -64,7 +64,7 @@ const useEmailPaginationAdjustments = (
 			paginationBlocks.forEach( ( paginationBlock: Block ) => {
 				if ( paginationBlock && paginationBlock.clientId ) {
 					try {
-						actions.removeBlock( paginationBlock.clientId );
+						void actions.removeBlock( paginationBlock.clientId );
 					} catch ( error ) {
 						// Silently handle cases where block might already be removed
 						// or in an inconsistent state during block editor operations

@@ -246,6 +246,8 @@ TaskLists::add_task(
 - `$task->get_additional_data(): mixed|null`: Returns additional data associated with the task. It can be any type of data, such as arrays, objects, or simple values.
 - `$task->get_action_label(): string`: Returns the label for the action button of the task.
 - `$task->get_action_url(): string|null`: Returns the URL associated with the task's action.
+- `$task->get_image_url(): string`: Returns the contextual image URL for the task.
+- `$task->get_image_alt(): string`: Returns the alt text for the contextual image.
 - `$task->is_dismissable(): bool`: Checks if the task is dismissable.
 - `$task->is_dismissed(): bool`: Checks if the task is dismissed.
 - `$task->dismiss(): bool`: Dismisses the task.
@@ -271,6 +273,8 @@ TaskLists::add_task(
     - `additionalInfo` (object) - Additional extensible information about the task.
     - `actionLabel` (string) - The label used for the action button.
     - `actionUrl` (string) - The URL used when clicking the task if no task card is required.
+    - `imageUrl` (string) - The contextual image URL for the task.
+    - `imageAlt` (string) - The alt text for the contextual image.
     - `isComplete` (bool) - If the task has been completed or not.
     - `time` (string) - Length of time to complete the task.
     - `level` (integer) - A priority for task list sorting.
@@ -323,7 +327,7 @@ The following REST endpoints are available to interact with tasks. For ease of u
 
 ### SlotFills
 
-The task UI can be supplemented by registering plugins that fill the provided task slots. Learn more about slot fills in the [SlotFill documentation](https://developer.wordpress.org/block-editor/reference-guides/slotfills/) and [here](https://developer.wordpress.org/block-editor/reference-guides/components/slot-fill/).
+The task UI can be supplemented by registering plugins that fill the provided task slots. Learn more about slot fills in the [SlotFill documentation](https://developer.wordpress.org/block-editor/reference-guides/slotfills/) and the [SlotFill component reference](https://developer.wordpress.org/block-editor/reference-guides/components/slot-fill/).
 
 ### Task content
 

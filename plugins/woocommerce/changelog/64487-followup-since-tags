@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Correct @since tags on push notification preference filtering methods introduced in 10.9.0.

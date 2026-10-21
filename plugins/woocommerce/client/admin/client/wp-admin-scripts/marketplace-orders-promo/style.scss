@@ -1,0 +1,52 @@
+// Full-width promo banner above the orders table. Reshapes the marketplace PromoCard
+// (whose default layout stacks vertically for the marketplace grid) into a horizontal banner.
+.woocommerce-marketplace-orders-promo {
+	clear: both;
+	margin: 16px 0;
+
+	.promo-card {
+		// Flat card chrome consistent with other order-screen banners.
+		box-shadow: none;
+		border: 1px solid #e0e0e0;
+		border-radius: 8px;
+
+		.promo-card__body {
+			display: flex;
+			flex-direction: row;
+			align-items: center;
+			justify-content: space-between;
+			gap: 24px;
+			padding: 16px 20px;
+		}
+
+		.promo-content-image {
+			flex: 1 1 auto;
+			align-items: center;
+		}
+
+		.promo-content {
+			gap: 4px;
+		}
+
+		.promo-title {
+			font-weight: 600;
+		}
+
+		.promo-links {
+			flex: 0 0 auto;
+			margin: 0;
+		}
+	}
+
+	@media (max-width: 782px) {
+		.promo-card .promo-card__body {
+			flex-direction: column;
+			align-items: flex-start;
+			gap: 12px;
+		}
+
+		.promo-card .promo-links {
+			align-self: flex-start;
+		}
+	}
+}

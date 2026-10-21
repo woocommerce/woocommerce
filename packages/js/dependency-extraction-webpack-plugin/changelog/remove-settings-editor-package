@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Remove the settings editor package from dependency extraction.

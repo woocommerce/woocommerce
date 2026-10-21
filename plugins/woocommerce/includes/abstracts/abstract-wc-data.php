@@ -669,6 +669,26 @@ abstract class WC_Data {
 	}
 
 	/**
+	 * Delete this object's cached raw meta data entry, if a cache group is set.
+	 *
+	 * Counterpart to prime_raw_meta_data_cache(): it removes the entry stored under this object's
+	 * own cache group (for example 'orders' for WC_Abstract_Order), so the next read_meta_data()
+	 * misses the cache and re-reads from the database. Used to recover from a corrupt persistent
+	 * object cache entry.
+	 *
+	 * @since 11.0.0
+	 *
+	 * @return void
+	 */
+	public function delete_meta_cache(): void {
+		if ( empty( $this->cache_group ) || ! $this->get_id() ) {
+			return;
+		}
+		$cache_key = self::generate_meta_cache_key( $this->get_id(), $this->cache_group );
+		wp_cache_delete( $cache_key, $this->cache_group );
+	}
+
+	/**
 	 * Read Meta Data from the database. Ignore any internal properties.
 	 * Uses it's own caches because get_metadata does not provide meta_ids.
 	 *
@@ -720,7 +740,8 @@ abstract class WC_Data {
 		foreach ( $filtered_meta_data as $meta ) {
 			$this->meta_data[] = new WC_Meta_Data(
 				array(
-					'id'    => (int) $meta->meta_id,
+					// Virtual meta injected by data-store read filters can omit meta_id; default it to 0 rather than emitting an undefined-property warning.
+					'id'    => (int) ( $meta->meta_id ?? 0 ),
 					'key'   => $meta->meta_key,
 					'value' => maybe_unserialize( $meta->meta_value ),
 				)
@@ -957,7 +978,7 @@ abstract class WC_Data {
 				return;
 			}
 
-			if ( is_a( $value, 'WC_DateTime' ) ) {
+			if ( $value instanceof WC_DateTime ) {
 				$datetime = $value;
 			} elseif ( is_numeric( $value ) ) {
 				// Timestamps are handled as UTC timestamps in all cases.

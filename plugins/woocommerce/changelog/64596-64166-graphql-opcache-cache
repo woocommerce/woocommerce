@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add OPcache-backed caching for parsed GraphQL queries, with fallback to the WP object cache.

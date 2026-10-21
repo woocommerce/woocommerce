@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Shopper Collection: drop the redundant editor stylesheet and rely on the frontend one for both the editor and the frontend.

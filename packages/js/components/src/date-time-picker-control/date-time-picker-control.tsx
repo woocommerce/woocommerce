@@ -261,8 +261,9 @@ export const DateTimePickerControl = forwardRef(
 
 		const maybeForceTime = useCallback(
 			( momentDate: Moment ) => {
-				if ( ! isDateOnlyPicker || ! momentDate.isValid() )
+				if ( ! isDateOnlyPicker || ! momentDate.isValid() ) {
 					return momentDate;
+				}
 
 				// We want to set to the start/end of the local time, so
 				// we need to put our Moment instance into "local" mode
@@ -486,7 +487,7 @@ export const DateTimePickerControl = forwardRef(
 									'Date input describing a selected date in format %s',
 									'woocommerce'
 								),
-								dateTimeFormat
+								dateTimeFormat ?? ''
 							) }
 							onFocus={ () => {
 								if ( isOpen ) {

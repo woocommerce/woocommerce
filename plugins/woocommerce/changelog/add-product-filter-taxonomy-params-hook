@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Allow extensions to customize taxonomy URL parameter names with the woocommerce_product_filter_params filter.

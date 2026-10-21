@@ -77,8 +77,8 @@ class Tags extends Component< Props > {
 							/* translators: %1$s: tag label, %2$s: tag number, %3$s: total number of tags */
 							__( '%1$s (%2$s of %3$s)', 'woocommerce' ),
 							item.label,
-							i + 1,
-							selected.length
+							( i + 1 ).toString(),
+							selected.length.toString()
 						);
 						return (
 							<Tag

@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Remove the task list reminder bar from WooCommerce admin. The Finish setup entry in the activity panel remains as a quieter, non-obstructive alternative. The `woocommerce_task_list_reminder_bar_hidden` option is removed from the wc-admin REST options allowlist, and a one-time migration cleans it up from existing stores. `TaskList::possibly_remove_reminder_bar()` and `TaskList::REMINDER_BAR_HIDDEN_OPTION` are retained as deprecation stubs.

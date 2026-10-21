@@ -4,6 +4,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\PushNotifications\Notifications;
 
+use Automattic\WooCommerce\Internal\PushNotifications\Enums\SuppressionReason;
+use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
 use InvalidArgumentException;
 use WC_Product;
 
@@ -155,6 +157,21 @@ class StockNotification extends Notification {
 	/**
 	 * {@inheritDoc}
 	 *
+	 * Without the event type, a rebuilt stock notification falls back to the
+	 * constructor's low_stock default and reads and writes another event's
+	 * delivery state.
+	 *
+	 * @return array{event_type: string}
+	 *
+	 * @since 11.2.0
+	 */
+	public function get_identity_data(): array {
+		return array( 'event_type' => $this->event_type );
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
 	 * Extends the parent array with `event_type` and the trigger-time stock
 	 * snapshot so both fields survive serialization through the safety-net
 	 * scheduler and the internal-REST round-trip.
@@ -200,7 +217,7 @@ class StockNotification extends Notification {
 
 		return array(
 			'type'        => $this->get_type(),
-			'timestamp'   => gmdate( 'c' ),
+			'timestamp'   => $this->format_triggered_timestamp( (string) $product->get_meta( $this->meta_key( NotificationProcessor::TRIGGERED_META_KEY ) ) ),
 			'resource_id' => $this->get_resource_id(),
 			'title'       => $this->build_title( $product_name ),
 			'message'     => $this->build_message( $product_name, $site_title, $product ),
@@ -217,20 +234,22 @@ class StockNotification extends Notification {
 	 * Extends the base enabled-toggle check with per-event sub-flag filtering.
 	 *
 	 * @param mixed $pref_value The user's stored preference value, or null.
-	 * @return bool
+	 * @return string|null One of the SuppressionReason constants, or null to send.
 	 *
-	 * @since 10.9.0
+	 * @since 11.3.0
 	 */
-	public function should_send_to_user( $pref_value ): bool {
-		if ( ! parent::should_send_to_user( $pref_value ) ) {
-			return false;
+	public function get_suppression_reason( $pref_value ): ?string {
+		$reason = parent::get_suppression_reason( $pref_value );
+
+		if ( null !== $reason ) {
+			return $reason;
 		}
 
 		if ( ! is_array( $pref_value ) || ! array_key_exists( $this->event_type, $pref_value ) ) {
-			return true;
+			return null;
 		}
 
-		return (bool) $pref_value[ $this->event_type ];
+		return $pref_value[ $this->event_type ] ? null : SuppressionReason::STOCK_ALERT_OFF;
 	}
 
 	/**
@@ -240,7 +259,7 @@ class StockNotification extends Notification {
 	 */
 	public function has_meta( string $key ): bool {
 		$product = WC()->call_function( 'wc_get_product', $this->get_resource_id() );
-		return $product instanceof WC_Product && $product->meta_exists( $key . '_' . $this->event_type );
+		return $product instanceof WC_Product && $product->meta_exists( $this->meta_key( $key ) );
 	}
 
 	/**
@@ -248,11 +267,23 @@ class StockNotification extends Notification {
 	 *
 	 * @param string $key The meta key.
 	 */
-	public function write_meta( string $key ): void {
+	public function read_meta( string $key ): string {
+		$product = WC()->call_function( 'wc_get_product', $this->get_resource_id() );
+
+		return $product instanceof WC_Product ? (string) $product->get_meta( $this->meta_key( $key ) ) : '';
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @param string   $key       The meta key.
+	 * @param int|null $timestamp Unix timestamp to record. Defaults to the current time.
+	 */
+	public function write_meta( string $key, ?int $timestamp = null ): void {
 		$product = WC()->call_function( 'wc_get_product', $this->get_resource_id() );
 
 		if ( $product instanceof WC_Product ) {
-			$product->update_meta_data( $key . '_' . $this->event_type, (string) time() );
+			$product->update_meta_data( $this->meta_key( $key ), (string) ( $timestamp ?? time() ) );
 			$product->save_meta_data();
 		}
 	}
@@ -266,9 +297,25 @@ class StockNotification extends Notification {
 		$product = WC()->call_function( 'wc_get_product', $this->get_resource_id() );
 
 		if ( $product instanceof WC_Product ) {
-			$product->delete_meta_data( $key . '_' . $this->event_type );
+			$product->delete_meta_data( $this->meta_key( $key ) );
 			$product->save_meta_data();
 		}
+	}
+
+	/**
+	 * Scopes a delivery state meta key to this notification's stock event.
+	 *
+	 * The same product can have low_stock, out_of_stock and on_backorder
+	 * notifications in flight at once, so each event type needs its own
+	 * claimed, sent and triggered markers.
+	 *
+	 * @param string $key The unscoped meta key.
+	 * @return string
+	 *
+	 * @since 11.2.0
+	 */
+	private function meta_key( string $key ): string {
+		return $key . '_' . $this->event_type;
 	}
 
 	/**

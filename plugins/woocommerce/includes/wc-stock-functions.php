@@ -127,7 +127,8 @@ add_action( 'woocommerce_order_status_processing', 'wc_maybe_reduce_stock_levels
 add_action( 'woocommerce_order_status_on-hold', 'wc_maybe_reduce_stock_levels' );
 
 /**
- * When a payment is cancelled, restore stock.
+ * Restore stock for an order that reduced it, when it moves to a status that releases stock
+ * (cancelled, pending, or failed).
  *
  * @since 3.0.0
  * @param int $order_id Order ID.
@@ -154,6 +155,11 @@ function wc_maybe_increase_stock_levels( $order_id ) {
 }
 add_action( 'woocommerce_order_status_cancelled', 'wc_maybe_increase_stock_levels' );
 add_action( 'woocommerce_order_status_pending', 'wc_maybe_increase_stock_levels' );
+// Restore stock when a stock-reduced order fails. wc_maybe_increase_stock_levels() only acts when
+// the order carries the `_order_stock_reduced` flag, so it restores an order that reduced stock
+// (in practice one left on-hold by an async payment such as SEPA/ACH) and does nothing for a
+// pending -> failed decline that never reduced. Added in 11.0.0.
+add_action( 'woocommerce_order_status_failed', 'wc_maybe_increase_stock_levels' );
 
 /**
  * Reduce stock levels for items within an order, if stock has not already been reduced for the items.
@@ -453,7 +459,7 @@ function wc_reserve_stock_for_order( $order ) {
 
 	if ( $order ) {
 		$reserve_stock = new ReserveStock();
-		$reserve_stock->reserve_stock_for_order( $order );
+		$reserve_stock->reserve_stock_for_order( $order, (int) get_option( 'woocommerce_hold_stock_minutes', 60 ) );
 	}
 }
 add_action( 'woocommerce_checkout_order_created', 'wc_reserve_stock_for_order' );
@@ -521,8 +527,10 @@ function wc_get_low_stock_amount( WC_Product $product ) {
 	$low_stock_amount = $product->get_low_stock_amount();
 
 	if ( '' === $low_stock_amount && $product->is_type( ProductType::VARIATION ) ) {
-		$product          = wc_get_product( $product->get_parent_id() );
-		$low_stock_amount = $product->get_low_stock_amount();
+		$parent = wc_get_product( $product->get_parent_id() );
+		if ( $parent ) {
+			$low_stock_amount = $parent->get_low_stock_amount();
+		}
 	}
 
 	if ( '' === $low_stock_amount ) {

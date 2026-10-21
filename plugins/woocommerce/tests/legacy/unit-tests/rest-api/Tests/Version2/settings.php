@@ -20,6 +20,7 @@ class Settings_V2 extends WC_REST_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		$this->initialize_rest_api_routes();
 		$this->endpoint = new WC_REST_Setting_Options_Controller();
 		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\SettingsHelper::register();
 		$this->user = $this->factory->user->create(
@@ -809,7 +810,7 @@ class Settings_V2 extends WC_REST_Unit_Test_Case {
 		$setting  = $response->get_data();
 		$this->assertEquals( 'text', $setting['type'] );
 
-		// Repalce the old value with something uniquely new.
+		// Replace the old value with something uniquely new.
 		$old_value = $setting['value'];
 		$new_value = $old_value . ' ' . rand( 1000, 9999 );
 		$request   = new WP_REST_Request( 'PUT', '/wc/v2/settings/general/woocommerce_store_address' );
@@ -847,7 +848,7 @@ class Settings_V2 extends WC_REST_Unit_Test_Case {
 		$setting  = $response->get_data();
 		$this->assertEquals( 'text', $setting['type'] );
 
-		// Repalce the old value with something uniquely new.
+		// Replace the old value with something uniquely new.
 		$old_value = $setting['value'];
 		$new_value = $old_value . ' ' . rand( 1000, 9999 );
 		$request   = new WP_REST_Request( 'PUT', '/wc/v2/settings/general/woocommerce_store_address_2' );
@@ -885,7 +886,7 @@ class Settings_V2 extends WC_REST_Unit_Test_Case {
 		$setting  = $response->get_data();
 		$this->assertEquals( 'text', $setting['type'] );
 
-		// Repalce the old value with something uniquely new.
+		// Replace the old value with something uniquely new.
 		$old_value = $setting['value'];
 		$new_value = $old_value . ' ' . rand( 1000, 9999 );
 		$request   = new WP_REST_Request( 'PUT', '/wc/v2/settings/general/woocommerce_store_city' );
@@ -923,7 +924,7 @@ class Settings_V2 extends WC_REST_Unit_Test_Case {
 		$setting  = $response->get_data();
 		$this->assertEquals( 'text', $setting['type'] );
 
-		// Repalce the old value with something uniquely new.
+		// Replace the old value with something uniquely new.
 		$old_value = $setting['value'];
 		$new_value = $old_value . ' ' . rand( 1000, 9999 );
 		$request   = new WP_REST_Request( 'PUT', '/wc/v2/settings/general/woocommerce_store_postcode' );

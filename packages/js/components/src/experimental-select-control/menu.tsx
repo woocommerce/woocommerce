@@ -66,7 +66,7 @@ export const Menu = ( {
 		}
 	}, [ isOpen, scrollIntoViewOnOpen ] );
 
-	/* eslint-disable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events */
+	/* eslint-disable jsx-a11y/no-noninteractive-element-interactions */
 	/* Disabled because of the onmouseup on the ul element below. */
 	return (
 		<div
@@ -106,13 +106,12 @@ export const Menu = ( {
 			</div>
 		</div>
 	);
-	/* eslint-enable jsx-a11y/no-noninteractive-element-interactions, jsx-a11y/click-events-have-key-events */
+	/* eslint-enable jsx-a11y/no-noninteractive-element-interactions */
 };
 
 export const MenuSlot = () =>
 	createPortal(
 		<div aria-live="off">
-			{ /* @ts-expect-error name does exist on PopoverSlot see: https://github.com/WordPress/gutenberg/blob/trunk/packages/components/src/popover/index.tsx#L555 */ }
 			<Popover.Slot name="woocommerce-select-control-menu" />
 		</div>,
 		document.body

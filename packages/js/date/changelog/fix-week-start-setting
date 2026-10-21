@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Respect the WordPress "Week Starts On" setting in Analytics week date ranges and calendars.

@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add `subtitle` and `badges` fields to the settings UI shell, forwarded to the admin-ui Page header.

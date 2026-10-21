@@ -98,7 +98,7 @@ export function useApplyUpdate(
 			if ( ! current ) {
 				return;
 			}
-			receiveEntityRecords(
+			void receiveEntityRecords(
 				'postType',
 				'woo_email',
 				[
@@ -130,15 +130,18 @@ export function useApplyUpdate(
 
 				syncEditorState( res.restored_content );
 
-				createSuccessNotice( __( 'Update reverted.', 'woocommerce' ), {
-					type: 'snackbar',
-				} );
+				void createSuccessNotice(
+					__( 'Update reverted.', 'woocommerce' ),
+					{
+						type: 'snackbar',
+					}
+				);
 			} catch ( err: unknown ) {
 				const message =
 					err && typeof err === 'object' && 'message' in err
 						? String( err.message )
 						: __( 'Could not revert the update.', 'woocommerce' );
-				createErrorNotice( message, { type: 'snackbar' } );
+				void createErrorNotice( message, { type: 'snackbar' } );
 			}
 		},
 		[ postId, createSuccessNotice, createErrorNotice, syncEditorState ]
@@ -160,10 +163,10 @@ export function useApplyUpdate(
 				syncEditorState( res.merged_content );
 
 				// Snackbar wording follows what the merchant actually chose.
-				// Smart Apply (`choices: []`) defaults every conflict to
-				// `keep_yours`, so customizations are preserved. If the
-				// drawer-driven path picked `use_core` for everything, the
-				// merchant explicitly chose to overwrite — say so plainly.
+				// Smart Apply (`choices: []`) keeps every block the merchant
+				// edited; only blocks they never touched take core's version.
+				// If the drawer-driven path picked `use_core` for everything,
+				// the merchant explicitly chose to overwrite — say so plainly.
 				const allUseCore =
 					choices.length > 0 &&
 					choices.every( ( c ) => c.decision === 'use_core' );
@@ -172,8 +175,8 @@ export function useApplyUpdate(
 					: __(
 							'Update applied · customizations preserved',
 							'woocommerce'
-					  );
-				createSuccessNotice( successMessage, {
+						);
+				void createSuccessNotice( successMessage, {
 					type: 'snackbar',
 					actions: [
 						{
@@ -192,7 +195,7 @@ export function useApplyUpdate(
 						? String( err.message )
 						: __( 'Could not apply the update.', 'woocommerce' );
 				if ( ! options.suppressSnackbarOnError ) {
-					createErrorNotice( message, { type: 'snackbar' } );
+					void createErrorNotice( message, { type: 'snackbar' } );
 				}
 				return null;
 			} finally {

@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Register a settings entity in the WooCommerce Blocks entities module so admin clients can read store settings via core-data.

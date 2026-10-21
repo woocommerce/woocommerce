@@ -27,12 +27,17 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	const ORDERS_STATUSES_ALL_CACHE_KEY = 'woocommerce_analytics_orders_statuses_all';
 
 	/**
+	 * The cache key for payment methods.
+	 */
+	const ORDERS_PAYMENT_METHODS_ALL_CACHE_KEY = 'woocommerce_analytics_orders_payment_methods_all';
+
+	/**
 	 * Dynamically sets the date column name based on configuration
 	 *
 	 * @override ReportsDataStore::__construct()
 	 */
 	public function __construct() {
-		$this->date_column_name = get_option( 'woocommerce_date_type', 'date_paid' );
+		$this->date_column_name = $this->sanitize_date_column_name( get_option( 'woocommerce_date_type' ), 'date_paid' );
 		parent::__construct();
 	}
 
@@ -43,6 +48,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 */
 	final public static function init() {
 		add_action( 'woocommerce_analytics_update_order_stats', array( __CLASS__, 'maybe_update_order_statuses_cache' ) );
+		add_action( 'woocommerce_analytics_update_order_stats', array( __CLASS__, 'maybe_update_payment_methods_cache' ) );
 	}
 
 	/**
@@ -81,6 +87,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		'total_sales'      => 'floatval',
 		'num_items_sold'   => 'intval',
 		'customer_type'    => 'strval',
+		'payment_method'   => 'strval',
 	);
 
 	/**
@@ -99,6 +106,17 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 */
 	protected function assign_report_columns() {
 		$table_name = self::get_db_table_name();
+
+		/*
+		 * Refunds are stored with a NULL returning_customer, as they should not count towards
+		 * returning customer counts, so fall back to the value of the refunded (parent) order.
+		 *
+		 * This is a subquery rather than a join, so that the query keeps a single order stats table
+		 * in scope. Joining a second copy of it would make every one of its columns ambiguous for
+		 * the unqualified column names that callbacks on the woocommerce_analytics_clauses_*_orders_subquery
+		 * filters may use.
+		 */
+		$returning_customer = "COALESCE( {$table_name}.returning_customer, ( SELECT customer_type_parent_stats.returning_customer FROM {$table_name} customer_type_parent_stats WHERE customer_type_parent_stats.order_id = {$table_name}.parent_id ) )";
 		// Avoid ambiguous columns in SQL query.
 		$this->report_columns = array(
 			'order_id'         => "DISTINCT {$table_name}.order_id",
@@ -112,7 +130,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'net_total'        => "{$table_name}.net_total",
 			'total_sales'      => "{$table_name}.total_sales",
 			'num_items_sold'   => "{$table_name}.num_items_sold",
-			'customer_type'    => "(CASE WHEN {$table_name}.returning_customer = 0 THEN 'new' ELSE 'returning' END) as customer_type",
+			'customer_type'    => "(CASE WHEN {$returning_customer} = 0 THEN 'new' ELSE 'returning' END) as customer_type",
+			'payment_method'   => "{$table_name}.payment_method",
 		);
 	}
 
@@ -157,6 +176,11 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		if ( $query_args['customer_type'] ) {
 			$returning_customer = 'returning' === $query_args['customer_type'] ? 1 : 0;
 			$where_subquery[]   = "{$order_stats_lookup_table}.returning_customer = {$returning_customer}";
+		}
+
+		$payment_method_subquery = $this->get_payment_method_subquery( $query_args );
+		if ( $payment_method_subquery ) {
+			$where_subquery[] = $payment_method_subquery;
 		}
 
 		$refund_subquery = $this->get_refund_subquery( $query_args );
@@ -248,19 +272,21 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$defaults = array_merge(
 			parent::get_default_query_vars(),
 			array(
-				'orderby'           => $this->date_column_name,
-				'product_includes'  => array(),
-				'product_excludes'  => array(),
-				'coupon_includes'   => array(),
-				'coupon_excludes'   => array(),
-				'tax_rate_includes' => array(),
-				'tax_rate_excludes' => array(),
-				'customer_type'     => null,
-				'status_is'         => array(),
-				'extended_info'     => false,
-				'refunds'           => null,
-				'order_includes'    => array(),
-				'order_excludes'    => array(),
+				'orderby'               => $this->date_column_name,
+				'product_includes'      => array(),
+				'product_excludes'      => array(),
+				'coupon_includes'       => array(),
+				'coupon_excludes'       => array(),
+				'tax_rate_includes'     => array(),
+				'tax_rate_excludes'     => array(),
+				'customer_type'         => null,
+				'payment_method_is'     => array(),
+				'payment_method_is_not' => array(),
+				'status_is'             => array(),
+				'extended_info'         => false,
+				'refunds'               => null,
+				'order_includes'        => array(),
+				'order_excludes'        => array(),
 			)
 		);
 
@@ -375,6 +401,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$order_attributions = $this->get_order_attributions_by_order_ids( array_keys( $mapped_orders ) );
 		$customers          = $this->get_customers_by_orders( $orders_data );
 		$mapped_customers   = $this->map_array_by_key( $customers, 'customer_id' );
+		$customer_details   = $this->map_array_by_key(
+			$this->get_order_customer_details_by_order_ids( $order_ids ),
+			'order_id'
+		);
 
 		$mapped_data = array();
 		foreach ( $products as $product ) {
@@ -435,6 +465,20 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$orders_data[ $key ]['extended_info'] = isset( $mapped_data[ $order_id ] ) ? array_merge( $defaults, $mapped_data[ $order_id ] ) : $defaults;
 			if ( $order_data['customer_id'] && isset( $mapped_customers[ $order_data['customer_id'] ] ) ) {
 				$orders_data[ $key ]['extended_info']['customer'] = $mapped_customers[ $order_data['customer_id'] ];
+			}
+
+			$name_order_id = $order_id;
+			if (
+				isset( $customer_details[ $order_id ] )
+				&& 'shop_order_refund' === $customer_details[ $order_id ]['order_type']
+				&& $order_data['parent_id']
+			) {
+				$name_order_id = $order_data['parent_id'];
+			}
+
+			if ( isset( $customer_details[ $name_order_id ] ) && 0 === (int) $customer_details[ $name_order_id ]['customer_id'] ) {
+				$orders_data[ $key ]['extended_info']['customer']['first_name'] = (string) $customer_details[ $name_order_id ]['first_name'];
+				$orders_data[ $key ]['extended_info']['customer']['last_name']  = (string) $customer_details[ $name_order_id ]['last_name'];
 			}
 
 			$source_type = $order_attributions[ $order_id ]['_wc_order_attribution_source_type'] ?? '';
@@ -543,6 +587,76 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		/* phpcs:enable */
 
 		return $customers;
+	}
+
+	/**
+	 * Get the customer ID and customer name stored on each order.
+	 *
+	 * The name falls back from billing to shipping per field, matching how
+	 * Automattic\WooCommerce\Admin\Overrides\Order builds the customer lookup row. Without that
+	 * fallback an order that only has a shipping name would lose the name it used to display.
+	 *
+	 * @param int[] $order_ids Order IDs.
+	 * @return array
+	 */
+	private function get_order_customer_details_by_order_ids( $order_ids ) {
+		global $wpdb;
+
+		$order_ids = array_values( array_unique( array_filter( array_map( 'absint', $order_ids ) ) ) );
+		if ( empty( $order_ids ) ) {
+			return array();
+		}
+
+		$included_order_ids = implode( ',', $order_ids );
+
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$orders_table    = OrdersTableDataStore::get_orders_table_name();
+			$addresses_table = OrdersTableDataStore::get_addresses_table_name();
+
+			/* phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
+			return $wpdb->get_results(
+				"SELECT orders.id AS order_id,
+					orders.type AS order_type,
+					orders.customer_id,
+					COALESCE( NULLIF( billing.first_name, '' ), shipping.first_name, '' ) AS first_name,
+					COALESCE( NULLIF( billing.last_name, '' ), shipping.last_name, '' ) AS last_name
+				FROM {$orders_table} orders
+				LEFT JOIN {$addresses_table} billing
+					ON orders.id = billing.order_id
+					AND billing.address_type = 'billing'
+				LEFT JOIN {$addresses_table} shipping
+					ON orders.id = shipping.order_id
+					AND shipping.address_type = 'shipping'
+				WHERE orders.id IN ({$included_order_ids})",
+				ARRAY_A
+			);
+			/* phpcs:enable */
+		}
+
+		/* phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared */
+		return $wpdb->get_results(
+			"SELECT orders.ID AS order_id,
+				orders.post_type AS order_type,
+				MAX( CASE WHEN order_meta.meta_key = '_customer_user' THEN order_meta.meta_value END ) AS customer_id,
+				COALESCE(
+					NULLIF( MAX( CASE WHEN order_meta.meta_key = '_billing_first_name' THEN order_meta.meta_value END ), '' ),
+					MAX( CASE WHEN order_meta.meta_key = '_shipping_first_name' THEN order_meta.meta_value END ),
+					''
+				) AS first_name,
+				COALESCE(
+					NULLIF( MAX( CASE WHEN order_meta.meta_key = '_billing_last_name' THEN order_meta.meta_value END ), '' ),
+					MAX( CASE WHEN order_meta.meta_key = '_shipping_last_name' THEN order_meta.meta_value END ),
+					''
+				) AS last_name
+			FROM {$wpdb->posts} orders
+			LEFT JOIN {$wpdb->postmeta} order_meta
+				ON orders.ID = order_meta.post_id
+				AND order_meta.meta_key IN ( '_customer_user', '_billing_first_name', '_billing_last_name', '_shipping_first_name', '_shipping_last_name' )
+			WHERE orders.ID IN ({$included_order_ids})
+			GROUP BY orders.ID, orders.post_type",
+			ARRAY_A
+		);
+		/* phpcs:enable */
 	}
 
 	/**
@@ -664,6 +778,51 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	public static function maybe_update_order_statuses_transient( $order_id ) {
 		wc_deprecated_function( __METHOD__, '10.3.0', __CLASS__ . '::maybe_update_order_statuses_cache()' );
 		self::maybe_update_order_statuses_cache( $order_id );
+	}
+
+	/**
+	 * Get all payment methods that have been synced.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @return string[] Unique payment method ids.
+	 */
+	public static function get_all_payment_methods() {
+		global $wpdb;
+
+		$payment_methods = wp_cache_get( self::ORDERS_PAYMENT_METHODS_ALL_CACHE_KEY, 'woocommerce_analytics' );
+		if ( false === $payment_methods ) {
+			$table_name      = self::get_db_table_name();
+			$payment_methods = $wpdb->get_col(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name cannot be prepared.
+				"SELECT DISTINCT payment_method FROM {$table_name} WHERE payment_method != '' ORDER BY payment_method"
+			);
+			wp_cache_set( self::ORDERS_PAYMENT_METHODS_ALL_CACHE_KEY, $payment_methods, 'woocommerce_analytics', YEAR_IN_SECONDS );
+		}
+
+		return $payment_methods;
+	}
+
+	/**
+	 * Ensure the order payment method is present in the `get_all_payment_methods` call result.
+	 *
+	 * A refund has no payment method of its own. The order it refunds adds it.
+	 *
+	 * @internal
+	 *
+	 * @param int $order_id Order ID.
+	 * @return void
+	 */
+	public static function maybe_update_payment_methods_cache( $order_id ) {
+		$order          = wc_get_order( $order_id );
+		$payment_method = $order instanceof \WC_Order ? $order->get_payment_method() : '';
+		if ( $payment_method ) {
+			$payment_methods = self::get_all_payment_methods();
+			if ( ! in_array( $payment_method, $payment_methods, true ) ) {
+				$payment_methods[] = $payment_method;
+				wp_cache_set( self::ORDERS_PAYMENT_METHODS_ALL_CACHE_KEY, $payment_methods, 'woocommerce_analytics', YEAR_IN_SECONDS );
+			}
+		}
 	}
 
 	/**

@@ -92,8 +92,7 @@ class Filterer {
 			$in_stock_clause = '';
 		}
 
-		$attribute_ids_for_and_filtering = array();
-		$clauses                         = array();
+		$clauses = array();
 		foreach ( $attributes_to_filter_by as $taxonomy => $data ) {
 			$all_terms                  = get_terms( $taxonomy, array( 'hide_empty' => false ) );
 			$term_ids_by_slug           = wp_list_pluck( $all_terms, 'term_id', 'slug' );
@@ -106,7 +105,24 @@ class Filterer {
 
 			if ( 0 !== $count ) {
 				if ( $is_and_query && $count > 1 ) {
-					$attribute_ids_for_and_filtering = array_merge( $attribute_ids_for_and_filtering, $term_ids_to_filter_by );
+					$clauses[] = "
+						{$clause_root}
+						SELECT product_or_parent_id
+						FROM {$this->lookup_table_name} lt
+						WHERE is_variation_attribute=0
+						{$in_stock_clause}
+						AND term_id in {$term_ids_to_filter_by_list}
+						GROUP BY product_id
+						HAVING COUNT(product_id)={$count}
+						UNION
+						SELECT product_or_parent_id
+						FROM {$this->lookup_table_name} lt
+						WHERE is_variation_attribute=1
+						{$in_stock_clause}
+						AND term_id in {$term_ids_to_filter_by_list}
+						GROUP BY product_or_parent_id
+						HAVING COUNT(DISTINCT term_id)={$count}
+					)";
 				} else {
 					$clauses[] = "
 							{$clause_root}
@@ -117,29 +133,6 @@ class Filterer {
 						)";
 				}
 			}
-		}
-
-		if ( ! empty( $attribute_ids_for_and_filtering ) ) {
-			$count                      = count( $attribute_ids_for_and_filtering );
-			$term_ids_to_filter_by_list = '(' . join( ',', $attribute_ids_for_and_filtering ) . ')';
-			$clauses[]                  = "
-				{$clause_root}
-				SELECT product_or_parent_id
-				FROM {$this->lookup_table_name} lt
-				WHERE is_variation_attribute=0
-				{$in_stock_clause}
-				AND term_id in {$term_ids_to_filter_by_list}
-				GROUP BY product_id
-				HAVING COUNT(product_id)={$count}
-				UNION
-				SELECT product_or_parent_id
-				FROM {$this->lookup_table_name} lt
-				WHERE is_variation_attribute=1
-				{$in_stock_clause}
-				AND term_id in {$term_ids_to_filter_by_list}
-				GROUP BY product_or_parent_id
-				HAVING COUNT(DISTINCT term_id)={$count}
-			)";
 		}
 
 		if ( ! empty( $clauses ) ) {
@@ -211,10 +204,50 @@ class Filterer {
 			$counts                       = array_map( 'absint', wp_list_pluck( $results, 'term_count', 'term_count_id' ) );
 			$cached_counts[ $query_hash ] = $counts;
 			if ( true === $cache ) {
+				$cached_counts = self::limit_layered_nav_count_cache_entries( $cached_counts, $query_hash );
 				set_transient( 'wc_layered_nav_counts_' . sanitize_title( $taxonomy ), $cached_counts, DAY_IN_SECONDS );
 			}
 		}
 		return array_map( 'absint', (array) $cached_counts[ $query_hash ] );
+	}
+
+	/**
+	 * Limit the number of query result entries stored in a layered nav count transient.
+	 *
+	 * The layered nav count cache stores many query hashes inside a single transient per taxonomy.
+	 * Without a cap, bot or faceted-search enumeration can grow that single option without bound.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @param array  $cached_counts Cached count entries keyed by query hash.
+	 * @param string $current_hash  Hash for the query that was just added or read.
+	 * @return array Bounded cached count entries.
+	 */
+	public static function limit_layered_nav_count_cache_entries( array $cached_counts, string $current_hash ): array {
+		/**
+		 * Maximum number of query result entries to store in each layered nav count transient.
+		 *
+		 * Set to 0 to disable the cap.
+		 *
+		 * @hook woocommerce_layered_nav_count_cache_max_entries
+		 * @since 10.9.0
+		 *
+		 * @param int $max_entries Maximum number of cached query result entries. Default 1000.
+		 * @return int
+		 */
+		$max_entries = (int) apply_filters( 'woocommerce_layered_nav_count_cache_max_entries', 1000 );
+
+		if ( $max_entries < 1 || count( $cached_counts ) <= $max_entries ) {
+			return $cached_counts;
+		}
+
+		if ( isset( $cached_counts[ $current_hash ] ) ) {
+			$current_counts = $cached_counts[ $current_hash ];
+			unset( $cached_counts[ $current_hash ] );
+			$cached_counts[ $current_hash ] = $current_counts;
+		}
+
+		return array_slice( $cached_counts, -$max_entries, null, true );
 	}
 
 	/**
@@ -264,19 +297,22 @@ class Filterer {
 			$attributes_to_filter_by = \WC_Query::get_layered_nav_chosen_attributes();
 
 			if ( ! empty( $attributes_to_filter_by ) ) {
-				$and_term_ids = array();
-
 				foreach ( $attributes_to_filter_by as $taxonomy => $data ) {
 					if ( 'and' !== $data['query_type'] ) {
 						continue;
 					}
-					$all_terms             = get_terms( $taxonomy, array( 'hide_empty' => false ) );
-					$term_ids_by_slug      = wp_list_pluck( $all_terms, 'term_id', 'slug' );
-					$term_ids_to_filter_by = array_values( array_intersect_key( $term_ids_by_slug, array_flip( $data['terms'] ) ) );
-					$and_term_ids          = array_merge( $and_term_ids, $term_ids_to_filter_by );
-				}
+					$all_terms        = get_terms(
+						array(
+							'taxonomy'   => $taxonomy,
+							'hide_empty' => false,
+						)
+					);
+					$term_ids_by_slug = wp_list_pluck( $all_terms, 'term_id', 'slug' );
+					$and_term_ids     = array_values( array_intersect_key( $term_ids_by_slug, array_flip( $data['terms'] ) ) );
 
-				if ( ! empty( $and_term_ids ) ) {
+					if ( empty( $and_term_ids ) ) {
+						continue;
+					}
 					$terms_count   = count( $and_term_ids );
 					$term_ids_list = '(' . join( ',', $and_term_ids ) . ')';
 					// The extra derived table ("SELECT product_or_parent_id FROM") is needed for performance

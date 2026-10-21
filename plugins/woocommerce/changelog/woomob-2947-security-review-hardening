@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Address security review findings on the Task 7 QR login flow: add a database-backed atomic claim to /qr-login-scan to prevent two concurrent scans from both writing a fresh challenge (the loser's session_id was silently orphaned), bind /qr-login-session-status grant delivery to proof of token knowledge via a required token_hash parameter, and clear the plaintext token from React state once the scan is in.

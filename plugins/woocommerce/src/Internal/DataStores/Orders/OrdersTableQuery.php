@@ -32,13 +32,6 @@ class OrdersTableQuery {
 	public const REGEX_SHORTHAND_DATES = '/([^.<>]*)(>=|<=|>|<|\.\.\.)([^.<>]+)/';
 
 	/**
-	 * Highest possible unsigned bigint value (unsigned bigints being the type of the `id` column).
-	 *
-	 * This is deliberately held as a string, rather than a numeric type, for inclusion within queries.
-	 */
-	private const MYSQL_MAX_UNSIGNED_BIGINT = '18446744073709551615';
-
-	/**
 	 * Names of all COT tables (orders, addresses, operational_data, meta) in the form 'table_id' => 'table name'.
 	 *
 	 * @var array
@@ -359,7 +352,7 @@ class OrdersTableQuery {
 			$date      = new \WC_DateTime( "@{$date}", new \DateTimeZone( 'UTC' ) );
 			$precision = 'second';
 		} elseif ( ! is_a( $date, 'WC_DateTime' ) ) {
-			// For backwards compat (see https://developer.woocommerce.com/docs/extensions/core-concepts/wc-get-orders/#date)
+			// For backwards compat (see https://developer.woocommerce.com/docs/features/orders/wc-get-orders/#date)
 			// only YYYY-MM-DD is considered for date values. Timestamps do support second precision.
 			$date      = wc_string_to_datetime( date( 'Y-m-d', strtotime( $date ) ) );
 			$precision = 'day';
@@ -392,7 +385,7 @@ class OrdersTableQuery {
 	private function local_time_to_gmt_date_query( $dates_raw, $operator ) {
 		$result = array();
 
-		// Convert YYYY-MM-DD to UTC timestamp. Per https://developer.woocommerce.com/docs/extensions/core-concepts/wc-get-orders/#date only date is relevant (time is ignored).
+		// Convert YYYY-MM-DD to UTC timestamp. Per https://developer.woocommerce.com/docs/features/orders/wc-get-orders/#date only date is relevant (time is ignored).
 		foreach ( $dates_raw as &$raw_date ) {
 			$raw_date = is_numeric( $raw_date ) ? $raw_date : strtotime( get_gmt_from_date( date( 'Y-m-d', strtotime( $raw_date ) ) ) );
 		}
@@ -508,7 +501,7 @@ class OrdersTableQuery {
 				$date_key = $local_to_gmt_date_keys[ $date_key ];
 
 				if ( ! is_numeric( $dates_raw[0] ) && ( ! isset( $dates_raw[1] ) || ! is_numeric( $dates_raw[1] ) ) ) {
-					// Only non-numeric args can be considered local time. Timestamps are assumed to be UTC per https://developer.woocommerce.com/docs/extensions/core-concepts/wc-get-orders/#date.
+					// Only non-numeric args can be considered local time. Timestamps are assumed to be UTC per https://developer.woocommerce.com/docs/features/orders/wc-get-orders/#date.
 					$date_queries[] = array_merge(
 						array(
 							'column' => $date_key,
@@ -544,7 +537,7 @@ class OrdersTableQuery {
 
 		// Add top-level date parameters to the date_query.
 		$tl_query = array();
-		foreach ( array( 'hour', 'minute', 'second', 'year', 'monthnum', 'week', 'day', 'year' ) as $tl_key ) {
+		foreach ( array( 'hour', 'minute', 'second', 'year', 'monthnum', 'week', 'day' ) as $tl_key ) {
 			if ( $this->arg_isset( $tl_key ) ) {
 				$tl_query[ $tl_key ] = $this->args[ $tl_key ];
 				unset( $this->args[ $tl_key ] );
@@ -621,8 +614,10 @@ class OrdersTableQuery {
 			$query['column']  = $local_to_gmt_date_keys[ $query['column'] ];
 			$op               = isset( $query['after'] ) ? 'after' : 'before';
 			$date_value_local = $query[ $op ];
-			$date_value_gmt   = wc_string_to_timestamp( get_gmt_from_date( wc_string_to_datetime( $date_value_local ) ) );
-			$query[ $op ]     = $this->date_to_date_query_arg( $date_value_gmt );
+			// date_create() honors an offset in the string; wc_string_to_datetime() re-applies the site offset to formats like "10:00:00.500Z" or "+02".
+			$parsed_date    = is_string( $date_value_local ) && ! is_numeric( $date_value_local ) ? date_create( $date_value_local, wp_timezone() ) : false;
+			$date_value_gmt = $parsed_date ? $parsed_date->getTimestamp() : wc_string_to_timestamp( get_gmt_from_date( wc_string_to_datetime( $date_value_local ) ) );
+			$query[ $op ]   = $this->date_to_date_query_arg( $date_value_gmt );
 		}
 
 		return $query;
@@ -856,9 +851,20 @@ class OrdersTableQuery {
 		$limits = '';
 
 		if ( ! empty( $this->limits ) && count( $this->limits ) === 2 ) {
-			list( $offset, $row_count ) = $this->limits;
-			$row_count                  = -1 === $row_count ? self::MYSQL_MAX_UNSIGNED_BIGINT : (int) $row_count;
-			$limits                     = 'LIMIT ' . (int) $offset . ', ' . $row_count;
+			$offset    = (int) ( $this->limits[0] ?? 0 );
+			$row_count = (int) ( $this->limits[1] ?? 0 );
+
+			if ( -1 === $row_count ) {
+				// For "unlimited" (-1) queries, mirror WP_Query's nopaging behavior and
+				// omit the LIMIT clause. When an offset is specified, MySQL requires a
+				// row count, so emit PHP_INT_MAX — portable across MySQL (well below
+				// its unsigned bigint max) and SQLite (its signed 64-bit max).
+				if ( $offset > 0 ) {
+					$limits = 'LIMIT ' . $offset . ', ' . PHP_INT_MAX;
+				}
+			} else {
+				$limits = 'LIMIT ' . $offset . ', ' . $row_count;
+			}
 		}
 
 		// GROUP BY.
@@ -904,15 +910,17 @@ class OrdersTableQuery {
 		if ( '' === $join && "{$orders_table}.id" === $fields ) {
 			$groupby = '';
 		}
-		if ( 'LIMIT 0, ' . self::MYSQL_MAX_UNSIGNED_BIGINT === $limits ) {
-			$limits = '';
-		}
 
 		$this->sql = "SELECT $fields FROM $orders_table $join WHERE $where $groupby $orderby $limits";
 
+		$filtered_sql = $this->sql;
 		if ( ! $this->suppress_filters ) {
 			/**
 			 * Filters the completed SQL query.
+			 *
+			 * Note: queries left unmodified by this filter may later be rewritten for performance (see
+			 * OrdersTableStatusUnionQuery), in which case the SQL received here is not the SQL that ends up
+			 * being executed. Returning a modified query from this filter disables any such rewrite.
 			 *
 			 * @since 7.9.0
 			 *
@@ -920,8 +928,22 @@ class OrdersTableQuery {
 			 * @param OrdersTableQuery $query The OrdersTableQuery instance (passed by reference).
 			 * @param array            $args  Query args.
 			 */
-			$this->sql = apply_filters_ref_array( 'woocommerce_orders_table_query_sql', array( $this->sql, &$this, $this->args ) );
+			$filtered_sql = apply_filters_ref_array( 'woocommerce_orders_table_query_sql', array( $this->sql, &$this, $this->args ) );
 		}
+
+		if ( $filtered_sql === $this->sql ) {
+			// On large HPOS stores this multi-status, date-ordered query can get a slow plan (scanning millions of
+			// rows); rewriting it as a UNION of single-status queries lets the type_status_date index serve each
+			// branch. Only attempted when no 'woocommerce_orders_table_query_sql' callback changed the query. See
+			// OrdersTableStatusUnionQuery.
+			$status_union_sql = ( new OrdersTableStatusUnionQuery( $this ) )->get_sql(
+				compact( 'fields', 'join', 'where', 'groupby', 'orderby', 'limits' ),
+				$this->suppress_filters
+			);
+			$filtered_sql     = $status_union_sql ?? $this->sql;
+		}
+
+		$this->sql = $filtered_sql;
 
 		$this->build_count_query( $fields, $join, $where, $groupby );
 	}
@@ -1440,9 +1462,14 @@ class OrdersTableQuery {
 			return;
 		}
 
-		if ( $this->limits ) {
+		$offset    = (int) ( $this->limits[0] ?? 0 );
+		$row_count = (int) ( $this->limits[1] ?? 0 );
+
+		if ( $row_count > 0 || $offset > 0 ) {
 			$this->found_orders  = absint( $wpdb->get_var( $this->count_sql ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-			$this->max_num_pages = (int) ceil( $this->found_orders / $this->args['limit'] );
+			$this->max_num_pages = $row_count > 0
+				? (int) ceil( $this->found_orders / $row_count )
+				: 0;
 		} else {
 			$this->found_orders = count( $this->orders );
 		}

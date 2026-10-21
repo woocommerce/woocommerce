@@ -24,11 +24,11 @@ const ExpandableSearchListItem = ( {
 			<SearchListItem
 				{ ...rest }
 				key={ item.id }
-				className={ className }
+				{ ...( className && { className } ) }
 				isSelected={ isSelected }
 				item={ item }
 				onSelect={ onSelect }
-				disabled={ disabled }
+				{ ...( disabled && { disabled } ) }
 			/>
 			{ isSelected && isLoading && (
 				<div

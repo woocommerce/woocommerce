@@ -99,7 +99,10 @@
 	.site-visibility-settings-slotfill-section {
 		max-width: 650px;
 
-		&:last-child {
+		// Separate consecutive sections rather than relying on the last child,
+		// so adding a new section (e.g. the site-visibility-badge toggle) does
+		// not remove the spacing between the sections above it.
+		+ .site-visibility-settings-slotfill-section {
 			margin-top: 16px;
 		}
 
@@ -127,6 +130,12 @@
 					margin-bottom: 0;
 				}
 			}
+		}
+
+		// The badge toggle is its own top-level section, so drop the left indent
+		// that nested sub-option toggles use.
+		.site-visibility-settings-slotfill-section-visibility-badge {
+			margin-left: 0;
 		}
 	}
 }

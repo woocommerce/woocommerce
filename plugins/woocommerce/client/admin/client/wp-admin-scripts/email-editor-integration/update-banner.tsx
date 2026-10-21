@@ -310,7 +310,7 @@ export function UpdateBanner( {
 											'woocommerce'
 										),
 										expandableLines.length
-								  ) }
+									) }
 						</button>
 						{ expanded && (
 							<ul

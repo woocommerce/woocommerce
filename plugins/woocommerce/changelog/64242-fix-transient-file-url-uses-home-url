@@ -1,3 +1,0 @@
-Significance: patch
-Type: fix
-Comment: Fix transient file public URL to use home_url() instead of get_site_url(), resolving 404s on subdirectory WordPress installs

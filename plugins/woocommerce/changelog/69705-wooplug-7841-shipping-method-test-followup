@@ -1,0 +1,5 @@
+Significance: patch
+Type: dev
+Comment: Refine the checkout shipping-method block JS test (use the real cart store, pin the pickup-only address prompt); no production change.
+
+

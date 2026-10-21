@@ -19,6 +19,8 @@ class Container extends TestCase {
 	private $container;
 
 	protected function setUp(): void {
+		parent::setUp();
+
 		$this->container = new ContainerTest;
 	}
 

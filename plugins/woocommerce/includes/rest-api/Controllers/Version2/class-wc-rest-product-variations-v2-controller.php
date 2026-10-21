@@ -11,6 +11,7 @@
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
+use Automattic\WooCommerce\Internal\Caches\ProductTransientsDeferrer;
 use Automattic\WooCommerce\Utilities\I18nUtil;
 use Automattic\WooCommerce\Utilities\MetaDataUtil;
 
@@ -147,10 +148,17 @@ class WC_REST_Product_Variations_V2_Controller extends WC_REST_Products_V2_Contr
 					),
 					'permission_callback' => array( $this, 'get_item_permissions_check' ),
 					'args'                => array(
-						'context' => $this->get_context_param(
+						'context'    => $this->get_context_param(
 							array(
 								'default' => 'view',
 							)
+						),
+						'image_size' => array(
+							'description'       => __( 'Image size to return. Accepts any registered WordPress image size.', 'woocommerce' ),
+							'type'              => 'string',
+							'default'           => 'full',
+							'sanitize_callback' => 'sanitize_text_field',
+							'validate_callback' => 'rest_validate_request_arg',
 						),
 					),
 				),
@@ -288,6 +296,9 @@ class WC_REST_Product_Variations_V2_Controller extends WC_REST_Products_V2_Contr
 	 * @return WP_REST_Response
 	 */
 	public function prepare_object_for_response( $object, $request ) {
+		// @phpstan-ignore-next-line property.notFound (Deliberately dynamic to avoid adding inherited state that can fatal subclasses.)
+		$this->request = $request;
+
 		$data = array(
 			'id'                    => $object->get_id(),
 			'date_created'          => wc_rest_prepare_date_response( $object->get_date_created(), false ),
@@ -738,7 +749,14 @@ class WC_REST_Product_Variations_V2_Controller extends WC_REST_Products_V2_Contr
 		$request->set_body_params( $body_params );
 		$request->set_query_params( $query );
 
-		return parent::batch_items( $request );
+		$transients_deferrer = wc_get_container()->get( ProductTransientsDeferrer::class );
+
+		$transients_deferrer->start_deferring();
+		try {
+			return parent::batch_items( $request );
+		} finally {
+			$transients_deferrer->stop_deferring();
+		}
 	}
 
 	/**

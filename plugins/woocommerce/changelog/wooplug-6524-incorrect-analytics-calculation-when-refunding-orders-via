@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Re-add the analytics full refund fix tool to Status > Tools, shown only for stores with old refund data.

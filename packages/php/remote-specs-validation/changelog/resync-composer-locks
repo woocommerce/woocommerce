@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Update Composer dependencies and pin platform PHP to 7.4 for reproducible resolution.

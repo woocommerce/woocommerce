@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Remove the avatar from the WooCommerce.com account button in the Marketplace header when the account email is shown.

@@ -60,6 +60,14 @@ jQuery( function( $ ) {
 					ui.item.find( '.check-column input' ).show().siblings( 'img' ).remove();
 					$( 'table.widefat tbody th, table.widefat tbody td' ).css( 'cursor', 'move' );
 					$( 'table.widefat tbody' ).sortable( 'enable' );
+					if (
+						response &&
+						'object' === typeof response &&
+						window.wcTracks &&
+						window.wcTracks.recordEvent
+					) {
+						window.wcTracks.recordEvent( 'products_sorting_reordered' );
+					}
 				}
 			);
 

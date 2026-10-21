@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix report transient cache key instability caused by DateTime serialization with microseconds in get_cache_key

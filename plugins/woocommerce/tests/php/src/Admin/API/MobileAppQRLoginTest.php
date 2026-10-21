@@ -11,16 +11,53 @@ namespace Automattic\WooCommerce\Tests\Admin\API;
 
 use Automattic\WooCommerce\Admin\API\MobileAppQRLogin;
 use Automattic\WooCommerce\Admin\API\RateLimits\QRLoginRateLimits;
-use WC_REST_Unit_Test_Case;
+use WC_Unit_Test_Case;
 use WP_Application_Passwords;
 use WP_REST_Request;
+use WP_REST_Server;
+use WP_UnitTest_Factory;
 
 /**
  * MobileAppQRLogin API controller test.
  *
  * @class MobileAppQRLoginTest.
  */
-class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
+class MobileAppQRLoginTest extends WC_Unit_Test_Case {
+
+	/**
+	 * REST server used to dispatch QR login requests.
+	 *
+	 * @var WP_REST_Server
+	 */
+	private $server;
+
+	/**
+	 * QR login controller registered on the test server.
+	 *
+	 * @var MobileAppQRLogin
+	 */
+	private $controller;
+
+	/**
+	 * Administrator fixture user ID.
+	 *
+	 * @var int
+	 */
+	private static $fixture_admin_id;
+
+	/**
+	 * Shop manager fixture user ID.
+	 *
+	 * @var int
+	 */
+	private static $fixture_shop_manager_id;
+
+	/**
+	 * Subscriber fixture user ID.
+	 *
+	 * @var int
+	 */
+	private static $fixture_subscriber_id;
 
 	/**
 	 * Token generation endpoint.
@@ -141,14 +178,31 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	private $site_url_filters = array();
 
 	/**
+	 * Create immutable users shared by the test class.
+	 *
+	 * @param WP_UnitTest_Factory $factory WordPress unit test factory.
+	 */
+	public static function wpSetUpBeforeClass( $factory ): void {
+		self::$fixture_admin_id        = $factory->user->create( array( 'role' => 'administrator' ) );
+		self::$fixture_shop_manager_id = $factory->user->create( array( 'role' => 'shop_manager' ) );
+		self::$fixture_subscriber_id   = $factory->user->create( array( 'role' => 'subscriber' ) );
+	}
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->admin_id        = $this->factory->user->create( array( 'role' => 'administrator' ) );
-		$this->shop_manager_id = $this->factory->user->create( array( 'role' => 'shop_manager' ) );
-		$this->subscriber_id   = $this->factory->user->create( array( 'role' => 'subscriber' ) );
+		$this->controller = new MobileAppQRLogin();
+		$this->server     = $this->create_rest_server_with_routes(
+			array( array( $this->controller, 'register_routes' ) ),
+			true
+		);
+
+		$this->admin_id        = self::$fixture_admin_id;
+		$this->shop_manager_id = self::$fixture_shop_manager_id;
+		$this->subscriber_id   = self::$fixture_subscriber_id;
 
 		// Remember existing $_SERVER values so we can restore them in tearDown.
 		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Unit-test fixture: values are captured for restoration only, never used for processing.
@@ -170,6 +224,9 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 
 		// Default REMOTE_ADDR for exchange IP bucketing tests.
 		$_SERVER['REMOTE_ADDR'] = '203.0.113.10';
+
+		// Start each test without a logged-in cookie; helpers set one when needed.
+		unset( $_COOKIE[ LOGGED_IN_COOKIE ] );
 	}
 
 	/**
@@ -177,10 +234,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		wp_set_current_user( 0 );
-
-		wp_delete_user( $this->admin_id );
-		wp_delete_user( $this->shop_manager_id );
-		wp_delete_user( $this->subscriber_id );
+		unset( $_COOKIE[ LOGGED_IN_COOKIE ] );
 
 		// Clear any QR login data the tests may have written.
 		$this->delete_all_qr_login_data();
@@ -217,6 +271,8 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 			remove_filter( 'pre_option_siteurl', $filter, $priority );
 		}
 		$this->site_url_filters = array();
+		$this->clear_rest_server();
+		unset( $this->server, $this->controller );
 
 		parent::tearDown();
 	}
@@ -411,12 +467,43 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Attach a valid `wp_rest` nonce for the current user, mirroring the
+	 * `X-WP-Nonce` header the wc-admin React client sends on every apiFetch
+	 * request. The QR login browser endpoints require it to prove an
+	 * interactive session.
+	 *
+	 * @param WP_REST_Request $request Request to authenticate.
+	 * @return void
+	 */
+	private function add_rest_nonce( WP_REST_Request $request ): void {
+		$this->set_logged_in_cookie();
+		$request->set_header( 'X-WP-Nonce', wp_create_nonce( 'wp_rest' ) );
+	}
+
+	/**
+	 * Set a valid `logged_in` cookie for the current user, so the endpoints'
+	 * interactive-session check passes. No-op for logged-out requests.
+	 *
+	 * @return void
+	 */
+	private function set_logged_in_cookie(): void {
+		$user_id = get_current_user_id();
+		if ( ! $user_id ) {
+			return;
+		}
+		$expiration                  = time() + DAY_IN_SECONDS;
+		$token                       = \WP_Session_Tokens::get_instance( $user_id )->create( $expiration );
+		$_COOKIE[ LOGGED_IN_COOKIE ] = wp_generate_auth_cookie( $user_id, $expiration, 'logged_in', $token );
+	}
+
+	/**
 	 * Issue a POST to the token-generation endpoint.
 	 *
 	 * @return \WP_REST_Response
 	 */
 	private function dispatch_generate(): \WP_REST_Response {
 		$request = new WP_REST_Request( 'POST', self::TOKEN_ENDPOINT );
+		$this->add_rest_nonce( $request );
 		return $this->server->dispatch( $request );
 	}
 
@@ -477,6 +564,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	 */
 	private function dispatch_approve( ?string $token, ?string $choice ): \WP_REST_Response {
 		$request = new WP_REST_Request( 'POST', self::APPROVE_ENDPOINT );
+		$this->add_rest_nonce( $request );
 		if ( null !== $token ) {
 			$request->set_param( 'token', $token );
 		}
@@ -567,6 +655,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	 */
 	private function dispatch_status( ?string $token ): \WP_REST_Response {
 		$request = new WP_REST_Request( 'POST', self::STATUS_ENDPOINT );
+		$this->add_rest_nonce( $request );
 		if ( null !== $token ) {
 			$request->set_param( 'token', $token );
 		}
@@ -581,6 +670,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	 */
 	private function dispatch_revoke( ?string $uuid ): \WP_REST_Response {
 		$request = new WP_REST_Request( 'DELETE', self::REVOKE_ENDPOINT );
+		$this->add_rest_nonce( $request );
 		if ( null !== $uuid ) {
 			$request->set_param( 'uuid', $uuid );
 		}
@@ -630,7 +720,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 		$response = $this->dispatch_generate();
 
 		$this->assertSame( rest_authorization_required_code(), $response->get_status() );
-		$this->assertSame( 'woocommerce_rest_cannot_view', $response->get_data()['code'] );
+		$this->assertSame( 'woocommerce_rest_qr_login_missing_session', $response->get_data()['code'] );
 	}
 
 	/**
@@ -643,6 +733,49 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 
 		$this->assertSame( rest_authorization_required_code(), $response->get_status() );
 		$this->assertSame( 'woocommerce_rest_cannot_view', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Token generation rejects an administrator session that carries no REST nonce.
+	 */
+	public function test_generate_token_rejects_missing_nonce(): void {
+		wp_set_current_user( $this->admin_id );
+		$this->set_logged_in_cookie();
+
+		$request  = new WP_REST_Request( 'POST', self::TOKEN_ENDPOINT );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( rest_authorization_required_code(), $response->get_status(), 'A cookie session without a wp_rest nonce must be rejected even for an administrator.' );
+		$this->assertSame( 'woocommerce_rest_qr_login_missing_session', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Token generation rejects an administrator session carrying an invalid REST nonce.
+	 */
+	public function test_generate_token_rejects_invalid_nonce(): void {
+		wp_set_current_user( $this->admin_id );
+		$this->set_logged_in_cookie();
+
+		$request = new WP_REST_Request( 'POST', self::TOKEN_ENDPOINT );
+		$request->set_header( 'X-WP-Nonce', 'not-a-valid-nonce' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( rest_authorization_required_code(), $response->get_status(), 'A cookie session with an invalid wp_rest nonce must be rejected.' );
+		$this->assertSame( 'woocommerce_rest_qr_login_missing_session', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Token generation rejects an administrator with a valid nonce but no logged-in cookie.
+	 */
+	public function test_generate_token_rejects_valid_nonce_without_cookie(): void {
+		wp_set_current_user( $this->admin_id );
+
+		$request = new WP_REST_Request( 'POST', self::TOKEN_ENDPOINT );
+		$request->set_header( 'X-WP-Nonce', wp_create_nonce( 'wp_rest' ) );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( rest_authorization_required_code(), $response->get_status(), 'A valid nonce without a logged-in cookie must be rejected.' );
+		$this->assertSame( 'woocommerce_rest_qr_login_missing_session', $response->get_data()['code'] );
 	}
 
 	// -----------------------------------------------------------------------
@@ -2340,6 +2473,50 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 		$this->assertNotEmpty( $post->get_data()['exchange_grant'] );
 	}
 
+	/**
+	 * @testdox Session-status is scoped to the session recorded on the token.
+	 */
+	public function test_session_status_is_scoped_to_the_recorded_session(): void {
+		$plaintext = $this->generate_token_as_admin();
+
+		wp_set_current_user( 0 );
+		$scan_data        = $this->dispatch_scan( $plaintext )->get_data();
+		$recorded_session = $scan_data['session_id'];
+
+		// A second session id can also resolve to the same token record, while
+		// the record itself still names the scanned session above.
+		$other_session = wp_generate_uuid4();
+		set_transient(
+			MobileAppQRLogin::SESSION_TRANSIENT_PREFIX . hash( 'sha256', $other_session ),
+			$this->token_hash( $plaintext ),
+			MobileAppQRLogin::TOKEN_TTL
+		);
+
+		wp_set_current_user( $this->admin_id );
+		$this->assertSame( 200, $this->dispatch_approve( $plaintext, $scan_data['real_number'] )->get_status() );
+		wp_set_current_user( 0 );
+
+		$other = $this->dispatch_session_status( $other_session, $plaintext );
+		$this->assertSame( 200, $other->get_status() );
+		$this->assertSame(
+			MobileAppQRLogin::STATE_EXPIRED,
+			$other->get_data()['state'],
+			'State is only returned for the session recorded on the token.'
+		);
+		$this->assertArrayNotHasKey(
+			'exchange_grant',
+			$other->get_data(),
+			'The exchange grant is only returned for the session recorded on the token.'
+		);
+
+		$recorded = $this->dispatch_session_status( $recorded_session, $plaintext );
+		$this->assertSame( MobileAppQRLogin::STATE_APPROVED, $recorded->get_data()['state'] );
+		$this->assertNotEmpty(
+			$recorded->get_data()['exchange_grant'],
+			'The recorded session receives its grant.'
+		);
+	}
+
 	// -----------------------------------------------------------------------
 	// Availability endpoint (`/qr-login-availability`).
 	// -----------------------------------------------------------------------
@@ -2351,6 +2528,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	 */
 	private function dispatch_availability(): \WP_REST_Response {
 		$request = new WP_REST_Request( 'GET', self::AVAILABILITY_ENDPOINT );
+		$this->add_rest_nonce( $request );
 		return $this->server->dispatch( $request );
 	}
 

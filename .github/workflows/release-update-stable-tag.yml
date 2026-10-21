@@ -24,9 +24,13 @@ permissions:
 concurrency:
   group: release-wporg-svn
 
+env:
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
+
 jobs:
   validate-release:
-    runs-on: ubuntu-latest
+    runs-on: ${{ github.repository == 'woocommerce/woocommerce' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
+    timeout-minutes: 10
     outputs:
       version: ${{ steps.extract-version.outputs.version }}
       branch: ${{ steps.extract-version.outputs.branch }}
@@ -47,7 +51,7 @@ jobs:
 
       - name: Validate release version
         id: extract-version
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           script: |
             const versionInput = '${{ github.event.inputs.version }}';
@@ -72,7 +76,7 @@ jobs:
             }
 
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 0
 
@@ -85,7 +89,7 @@ jobs:
 
       - name: Get target branches for stable tag update
         id: get-branches
-        uses: actions/github-script@v7
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           script: |
             function getNextVersion(version) {
@@ -190,7 +194,8 @@ jobs:
           fi
 
   update-wporg-stable-tag:
-    runs-on: ubuntu-latest
+    runs-on: ${{ github.repository == 'woocommerce/woocommerce' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
+    timeout-minutes: 5
     needs: validate-release
     steps:
       - name: Install SVN
@@ -229,7 +234,8 @@ jobs:
           fi
 
   update-gh-stable-tag:
-    runs-on: ubuntu-latest
+    runs-on: ${{ github.repository == 'woocommerce/woocommerce' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
+    timeout-minutes: 10
     needs: [validate-release, update-wporg-stable-tag]
     strategy:
       fail-fast: false
@@ -237,12 +243,12 @@ jobs:
         branch: ${{ fromJSON(needs.validate-release.outputs.target-branches) }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 0
           sparse-checkout: |
             plugins/woocommerce/readme.txt
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.WC_BOT_PR_CREATE_TOKEN || secrets.GITHUB_TOKEN }}
 
       - name: Configure Git
         run: |
@@ -303,7 +309,8 @@ jobs:
           fi
 
   notify-release:
-    runs-on: ubuntu-latest
+    runs-on: ${{ github.repository == 'woocommerce/woocommerce' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
+    timeout-minutes: 5
     needs: [validate-release, update-wporg-stable-tag, update-gh-stable-tag]
     if: ${{ github.event.inputs.allow-revert != 'true' }}
     steps:

@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Factory;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\NotificationQuery;
+use Automattic\WooCommerce\Internal\StockNotifications\Utilities\EmailNormalizer;
 
 /**
  * Privacy eraser for WooCommerce Customer Stock Notifications.
@@ -39,9 +40,10 @@ class PrivacyEraser extends \WC_Abstract_Privacy {
 	}
 
 	/**
-	 * Erase customer stock notification data for a given email address.
+	 * Erase customer stock notification data for a given email address and the account it belongs to.
 	 *
-	 * This method anonymizes the user email and sets the status of the notifications to 'cancelled'.
+	 * This method anonymizes the user email and cancels Active and Pending notifications with the
+	 * 'privacy' cancellation source. Sent and already Cancelled notifications keep their status.
 	 *
 	 * @param string $email_address The email address to erase data for.
 	 *
@@ -55,11 +57,30 @@ class PrivacyEraser extends \WC_Abstract_Privacy {
 			'done'           => true,
 		);
 
+		// Look up the account with the letter case as entered: `wp_users.user_email` is never
+		// normalized, so on a case-sensitive collation the lowercased form would miss it.
+		$user          = get_user_by( 'email', $email_address );
+		$email_address = EmailNormalizer::normalize( $email_address );
+
 		$notifications = NotificationQuery::get_notifications(
 			array(
 				'user_email' => $email_address,
 			)
 		);
+
+		// Sign-ups made before an account email change keep the old email, so also match by user ID.
+		if ( $user instanceof \WP_User ) {
+			$notifications = array_unique(
+				array_merge(
+					$notifications,
+					NotificationQuery::get_notifications(
+						array(
+							'user_id' => $user->ID,
+						)
+					)
+				)
+			);
+		}
 
 		foreach ( $notifications as $notification_id ) {
 			$notification = Factory::get_notification( $notification_id );
@@ -70,9 +91,11 @@ class PrivacyEraser extends \WC_Abstract_Privacy {
 			$anonymous_email = wp_privacy_anonymize_data( 'email', $email_address );
 			$notification->set_user_email( $anonymous_email );
 			$notification->set_user_id( 0 );
-			$notification->set_status( NotificationStatus::CANCELLED );
-			$notification->set_cancellation_source( NotificationCancellationSource::USER );
-			$notification->set_date_cancelled( time() );
+			if ( in_array( $notification->get_status(), array( NotificationStatus::ACTIVE, NotificationStatus::PENDING ), true ) ) {
+				$notification->set_status( NotificationStatus::CANCELLED );
+				$notification->set_cancellation_source( NotificationCancellationSource::PRIVACY );
+				$notification->set_date_cancelled( time() );
+			}
 			$notification->update_meta_data( '_anonymized', 'yes' );
 			$notification->update_meta_data( 'verification_action_key', '' );
 			$notification->update_meta_data( 'unsubscribe_action_key', '' );

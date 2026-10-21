@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Add product type guard to VariationSelectorAttribute block to prevent fatal error when rendered for non-variable products.

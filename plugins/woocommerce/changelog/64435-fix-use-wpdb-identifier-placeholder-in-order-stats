@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Use %i placeholder for table name in set_customer_first_order() SQL query.

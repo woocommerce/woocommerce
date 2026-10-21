@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix calculateDelta returning the wrong sign when the baseline is negative by dividing by the absolute value of the baseline (#54303).

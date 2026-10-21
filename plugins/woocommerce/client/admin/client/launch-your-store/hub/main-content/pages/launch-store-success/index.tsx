@@ -56,7 +56,7 @@ export const LaunchYourStoreSuccess = ( {
 	className,
 }: MainContentComponentProps ) => {
 	const copyLink = __( 'Copy link', 'woocommerce' );
-	const copied = __( 'Copied!', 'woocommerce' );
+	const copied = __< string >( 'Copied!', 'woocommerce' );
 	const homeUrl: string = getSetting( 'homeUrl', '' );
 	const urlObject = new URL( homeUrl );
 	let hostname: string = urlObject?.hostname;
@@ -64,7 +64,7 @@ export const LaunchYourStoreSuccess = ( {
 		hostname += ':' + urlObject.port;
 	}
 
-	const [ copyLinkText, setCopyLinkText ] = useState( copyLink );
+	const [ copyLinkText, setCopyLinkText ] = useState< string >( copyLink );
 
 	const copyClipboardRef = useCopyToClipboard< HTMLAnchorElement >(
 		homeUrl,
@@ -119,11 +119,11 @@ export const LaunchYourStoreSuccess = ( {
 							? __(
 									'Congratulations! Your store will launch soon',
 									'woocommerce'
-							  )
+								)
 							: __(
 									'Congratulations! Your store is now live',
 									'woocommerce'
-							  ) }
+								) }
 					</h1>
 					<h2 className="woocommerce-launch-store__congrats-subheading">
 						{ siteIsShowingCachedContent
@@ -146,11 +146,11 @@ export const LaunchYourStoreSuccess = ( {
 											</a>
 										),
 									}
-							  )
+								)
 							: __(
 									'You’ve successfully launched your store and are ready to start selling! We can’t wait to see your business grow.',
 									'woocommerce'
-							  ) }
+								) }
 					</h2>
 					<div className="woocommerce-launch-store__congrats-midsection-container">
 						<div className="woocommerce-launch-store__congrats-visit-store">

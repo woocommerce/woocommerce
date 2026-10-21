@@ -45,12 +45,14 @@ function Editor( {
 	isPreview = false,
 	contentRef = null,
 	customSavePanel,
+	customSaveButton,
 }: {
 	postId: number | string;
 	postType: string;
 	isPreview?: boolean;
 	contentRef?: React.Ref< HTMLDivElement > | null;
 	customSavePanel?: React.ReactElement;
+	customSaveButton?: React.ReactElement;
 } ) {
 	const [ isInitialized, setIsInitialized ] = useState( false );
 	const { settings } = useSelect(
@@ -66,7 +68,7 @@ function Editor( {
 
 	const { setEmailPost } = useDispatch( storeName );
 	useEffect( () => {
-		setEmailPost( postId, postType );
+		void setEmailPost( postId, postType );
 		setIsInitialized( true );
 	}, [ postId, postType, setEmailPost ] );
 
@@ -79,6 +81,9 @@ function Editor( {
 			...settings,
 			allowedBlockTypes: getAllowedBlockNames(),
 			isPreviewMode: isPreview,
+			// WordPress 7.1 responsive styles produce media-query-based styles
+			// that the email renderer cannot inline, so keep the feature off.
+			responsiveEditingEnabled: false,
 		} ),
 		[ settings, isPreview ]
 	);
@@ -95,6 +100,7 @@ function Editor( {
 				settings={ editorSettings }
 				contentRef={ mergedContentRef }
 				customSavePanel={ customSavePanel }
+				customSaveButton={ customSaveButton }
 			/>
 		</StrictMode>
 	);
@@ -161,7 +167,7 @@ export function initialize( elementId: string ) {
 
 	// Set configuration to store from window object for backward compatibility
 	const editorConfig = getEditorConfigFromWindow();
-	dispatch( storeName ).setEditorConfig( editorConfig );
+	void dispatch( storeName ).setEditorConfig( editorConfig );
 
 	const root = createRoot( container );
 	root.render(
@@ -179,6 +185,7 @@ export function ExperimentalEmailEditor( {
 	contentRef = null,
 	config,
 	customSavePanel,
+	customSaveButton,
 }: {
 	postId: string;
 	postType: string;
@@ -186,6 +193,7 @@ export function ExperimentalEmailEditor( {
 	contentRef?: React.Ref< HTMLDivElement > | null;
 	config?: EmailEditorConfig;
 	customSavePanel?: React.ReactElement;
+	customSaveButton?: React.ReactElement;
 } ) {
 	const [ isInitialized, setIsInitialized ] = useState( false );
 
@@ -195,14 +203,14 @@ export function ExperimentalEmailEditor( {
 		const editorConfig = config || getEditorConfigFromWindow();
 		onInit();
 
-		dispatch( storeName ).setEditorConfig( editorConfig );
+		void dispatch( storeName ).setEditorConfig( editorConfig );
 		setIsInitialized( true );
 		// Cleanup global editor settings
 		return () => {
 			try {
 				cleanupConfigurationChanges();
 			} finally {
-				dispatch( editorStore ).updateEditorSettings(
+				void dispatch( editorStore ).updateEditorSettings(
 					backupEditorSettings
 				);
 			}
@@ -225,6 +233,7 @@ export function ExperimentalEmailEditor( {
 			isPreview={ isPreview }
 			contentRef={ contentRef }
 			customSavePanel={ customSavePanel }
+			customSaveButton={ customSaveButton }
 		/>
 	);
 }

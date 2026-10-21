@@ -3,7 +3,6 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\ShopperLists;
 
-use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 
 /**
@@ -130,11 +129,11 @@ class ShopperListItem {
 	 * @param int   $product_or_variation_id Product or variation ID.
 	 * @param array $variation               Variation attributes keyed by attribute name.
 	 * @param int   $quantity                Saved quantity. Coerced to a minimum of 1.
-	 * @return self|null Null if the underlying product can't be resolved.
+	 * @return self|null Null if the underlying product can't be resolved or isn't published.
 	 */
 	public static function from_product( int $product_or_variation_id, array $variation = array(), int $quantity = 1 ): ?self {
 		$product = wc_get_product( absint( $product_or_variation_id ) );
-		if ( ! $product ) {
+		if ( ! $product || ! $product->is_publicly_viewable() ) {
 			return null;
 		}
 
@@ -313,20 +312,7 @@ class ShopperListItem {
 	 */
 	public function is_live(): bool {
 		$product = $this->get_product();
-		if ( ! $product instanceof \WC_Product || ProductStatus::PUBLISH !== $product->get_status() ) {
-			return false;
-		}
-
-		$parent_id = $product->get_parent_id();
-		if ( $parent_id > 0 ) {
-			$parent = wc_get_product( $parent_id );
-
-			if ( ! $parent instanceof \WC_Product || ProductStatus::PUBLISH !== $parent->get_status() ) {
-				return false;
-			}
-		}
-
-		return true;
+		return $product instanceof \WC_Product && $product->is_publicly_viewable();
 	}
 
 	/**

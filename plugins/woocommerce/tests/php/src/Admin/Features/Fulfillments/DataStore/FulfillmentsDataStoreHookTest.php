@@ -56,21 +56,6 @@ class FulfillmentsDataStoreHookTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tear down test case.
-	 *
-	 * This method is called after each test method is executed.
-	 * It is used to clean up any data created during the tests.
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-
-		// Remove any fulfillments added during the tests.
-		global $wpdb;
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_order_fulfillments;" );
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_order_fulfillment_meta;" );
-	}
-
-	/**
 	 * Test that the fulfillment before create hook is called when creating a fulfillment.
 	 */
 	public function test_fulfillment_before_create_hook_is_called() {

@@ -74,8 +74,8 @@ export const PaymentsMobileHeader = ( props: SidebarComponentProps ) => {
 				{ sprintf(
 					/* translators: %1$s: current step number, %2$s: total number of steps */
 					__( 'Step %1$s of %2$s', 'woocommerce' ),
-					currentStepIndex,
-					totalSteps
+					currentStepIndex.toString(),
+					totalSteps.toString()
 				) }
 			</div>
 		</div>

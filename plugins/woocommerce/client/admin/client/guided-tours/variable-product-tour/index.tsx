@@ -63,7 +63,9 @@ export const VariableProductTour = () => {
 			},
 		},
 		closeHandler: ( steps, currentStepIndex ) => {
-			updateUserPreferences( { variable_product_tour_shown: 'yes' } );
+			void updateUserPreferences( {
+				variable_product_tour_shown: 'yes',
+			} );
 			setIsTourOpen( false );
 
 			if ( currentStepIndex === steps.length - 1 ) {

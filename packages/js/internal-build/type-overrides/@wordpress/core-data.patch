@@ -221,8 +221,8 @@ diff -ruN a/type-overrides/@wordpress/core-data/index.d.ts b/type-overrides/@wor
 +	    }) => (thunkArgs: any) => Promise<import("@wordpress/core-data/build-types/entity-types").WidgetType<"edit"> | false | undefined>;
  	}, {
  	    getAuthors(state: selectors.State, query?: selectors.GetRecordsHttpQuery): import("@wordpress/core-data/build-types/entity-types").User[];
- 	    getCurrentUser(state: selectors.State): import("@wordpress/core-data/build-types/entity-types").User<"edit">;
-@@ -316,12 +316,12 @@
+ 	    getCurrentUser(state: selectors.State): import("@wordpress/core-data/build-types/entity-types").User<"view">;
+@@ -317,12 +317,12 @@
  	    getPlugin: (state: selectors.State, id: number | string, query?: selectors.GetRecordsHttpQuery) => import("@wordpress/core-data/build-types/entity-types").Plugin<"edit"> | undefined;
  	    getPostType: (state: selectors.State, id: number | string, query?: selectors.GetRecordsHttpQuery) => import("@wordpress/core-data/build-types/entity-types").Type<"edit"> | undefined;
  	    getSidebar: (state: selectors.State, id: number | string, query?: selectors.GetRecordsHttpQuery) => import("@wordpress/core-data/build-types/entity-types").Sidebar<"edit"> | undefined;
@@ -237,13 +237,13 @@ diff -ruN a/type-overrides/@wordpress/core-data/index.d.ts b/type-overrides/@wor
  	    getUser: (state: selectors.State, id: number | string, query?: selectors.GetRecordsHttpQuery) => import("@wordpress/core-data/build-types/entity-types").User<"edit"> | undefined;
  	    getWidget: (state: selectors.State, id: number | string, query?: selectors.GetRecordsHttpQuery) => import("@wordpress/core-data/build-types/entity-types").Widget<"edit"> | undefined;
  	    getWidgetType: (state: selectors.State, id: number | string, query?: selectors.GetRecordsHttpQuery) => import("@wordpress/core-data/build-types/entity-types").WidgetType<"edit"> | undefined;
-@@ -350,4 +350,10 @@
+@@ -351,4 +351,10 @@
  	export * from "@wordpress/core-data/build-types/hooks";
  	export * from "@wordpress/core-data/build-types/private-apis";
  	import * as selectors from '@wordpress/core-data/build-types/selectors';
 +}
 +
-+declare module '@wordpress/data' {
++declare module '@wordpress/data/build-types/types' {
 +	interface StoreRegistry {
 +		'core': typeof import("@wordpress/core-data").store;
 +	}

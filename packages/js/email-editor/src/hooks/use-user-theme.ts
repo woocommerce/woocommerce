@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { useCallback } from '@wordpress/element';
+import { useCallback, useMemo } from '@wordpress/element';
 import { useSelect, dispatch } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
 
@@ -17,6 +17,18 @@ export function useUserTheme() {
 			globalStylePost: post,
 		};
 	}, [] );
+
+	// Consumers use this as a dependency for expensive work such as regenerating
+	// the global styles stylesheet, so the identity must only change when the
+	// styles or settings actually change. Editing styles goes through
+	// `editEntityRecord`, which replaces both values, so the memo still updates.
+	const userTheme = useMemo(
+		() => ( {
+			settings: globalStylePost?.settings,
+			styles: globalStylePost?.styles,
+		} ),
+		[ globalStylePost?.settings, globalStylePost?.styles ]
+	);
 
 	const updateGlobalStylesPost = useCallback(
 		( newTheme: EmailTheme ) => {
@@ -37,10 +49,7 @@ export function useUserTheme() {
 	);
 
 	return {
-		userTheme: {
-			settings: globalStylePost?.settings,
-			styles: globalStylePost?.styles,
-		},
+		userTheme,
 		updateUserTheme: updateGlobalStylesPost,
 	};
 }

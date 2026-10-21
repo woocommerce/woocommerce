@@ -10,9 +10,7 @@ import { Icon, payment } from '@wordpress/icons';
 import { Edit, Save } from './edit';
 import metadata from './block.json';
 
-registerBlockType( 'woocommerce/cart-accepted-payment-methods-block', {
-	apiVersion: metadata.apiVersion,
-	title: metadata.title,
+registerBlockType( metadata, {
 	icon: {
 		src: (
 			<Icon

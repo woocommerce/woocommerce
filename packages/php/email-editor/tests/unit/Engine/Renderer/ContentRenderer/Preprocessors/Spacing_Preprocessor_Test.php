@@ -223,9 +223,13 @@ class Spacing_Preprocessor_Test extends \Email_Editor_Unit_Test {
 	}
 
 	/**
-	 * Test it adds default padding-left when columns has no blockGap.left
+	 * Test it does not add a horizontal column gap when blockGap.left is not explicitly set.
+	 *
+	 * The global (vertical) block spacing must not leak in as a horizontal column
+	 * gap, since that spacing is not shown between columns in the editor and would
+	 * widen the rendered email.
 	 */
-	public function testItAddsDefaultPaddingLeftWithoutBlockGapLeft(): void {
+	public function testItDoesNotAddPaddingLeftWithoutBlockGapLeft(): void {
 		$blocks = array(
 			array(
 				'blockName'   => 'core/columns',
@@ -257,9 +261,8 @@ class Spacing_Preprocessor_Test extends \Email_Editor_Unit_Test {
 		$result        = $this->preprocessor->preprocess( $blocks, $this->layout, $this->styles );
 		$second_column = $result[0]['innerBlocks'][1];
 
-		// Should have padding-left with default gap value since blockGap.left is not set.
-		$this->assertArrayHasKey( 'padding-left', $second_column['email_attrs'] );
-		$this->assertEquals( '10px', $second_column['email_attrs']['padding-left'] );
+		// Without an explicit blockGap.left, no horizontal gap should be applied.
+		$this->assertArrayNotHasKey( 'padding-left', $second_column['email_attrs'] );
 	}
 
 	/**
@@ -720,7 +723,9 @@ class Spacing_Preprocessor_Test extends \Email_Editor_Unit_Test {
 	}
 
 	/**
-	 * Test root-level group with own padding wrapping post-content distributes container padding
+	 * Test a root-level group with its own padding wrapping post-content is a box:
+	 * it takes the root inset itself and distributes its own padding to descendants
+	 * as container padding (so the two paddings nest instead of stacking).
 	 */
 	public function testItDistributesContainerPaddingFromRootGroupWrappingPostContent(): void {
 		$blocks = array(
@@ -765,28 +770,131 @@ class Spacing_Preprocessor_Test extends \Email_Editor_Unit_Test {
 		$paragraph    = $post_content['innerBlocks'][0];
 		$alignfull    = $post_content['innerBlocks'][1];
 
-		// Root group should have suppress-horizontal-padding flag.
+		// The box suppresses its own padding and takes the root inset itself.
 		$this->assertTrue( $root_group['email_attrs']['suppress-horizontal-padding'] );
+		$this->assertEquals( '10px', $root_group['email_attrs']['root-padding-left'] );
+		$this->assertEquals( '10px', $root_group['email_attrs']['root-padding-right'] );
 
-		// Root group should NOT have root padding (delegates everything).
-		$this->assertArrayNotHasKey( 'root-padding-left', $root_group['email_attrs'] );
-		$this->assertArrayNotHasKey( 'root-padding-right', $root_group['email_attrs'] );
-
-		// Post-content should not get container padding (it's a pass-through).
+		// Post-content is a pass-through and gets no container padding of its own.
 		$this->assertArrayNotHasKey( 'container-padding-left', $post_content['email_attrs'] );
 		$this->assertArrayNotHasKey( 'container-padding-right', $post_content['email_attrs'] );
 
-		// Normal paragraph should get both root and container padding.
-		$this->assertEquals( '10px', $paragraph['email_attrs']['root-padding-left'] );
-		$this->assertEquals( '10px', $paragraph['email_attrs']['root-padding-right'] );
+		// Normal paragraph gets only the container padding (the box carries the root
+		// inset), so the two paddings nest instead of stacking to 30px on the block.
+		$this->assertArrayNotHasKey( 'root-padding-left', $paragraph['email_attrs'] );
 		$this->assertEquals( '20px', $paragraph['email_attrs']['container-padding-left'] );
 		$this->assertEquals( '20px', $paragraph['email_attrs']['container-padding-right'] );
 
-		// Alignfull block should skip BOTH root and container padding.
+		// Alignfull block skips container padding and spans the box width.
 		$this->assertArrayNotHasKey( 'root-padding-left', $alignfull['email_attrs'] );
-		$this->assertArrayNotHasKey( 'root-padding-right', $alignfull['email_attrs'] );
 		$this->assertArrayNotHasKey( 'container-padding-left', $alignfull['email_attrs'] );
 		$this->assertArrayNotHasKey( 'container-padding-right', $alignfull['email_attrs'] );
+	}
+
+	/**
+	 * Test the box behavior is driven by the group's own padding, not its
+	 * background: a backgrounded group with padding wrapping post-content still
+	 * takes the root inset and distributes its own padding as container padding.
+	 */
+	public function testItTreatsBackgroundedGroupWithPaddingAsBox(): void {
+		$blocks = array(
+			array(
+				'blockName'   => 'core/group',
+				'attrs'       => array(
+					'backgroundColor' => 'white',
+					'style'           => array(
+						'spacing' => array(
+							'padding' => array(
+								'left'   => '20px',
+								'right'  => '20px',
+								'top'    => '15px',
+								'bottom' => '15px',
+							),
+						),
+					),
+				),
+				'innerBlocks' => array(
+					array(
+						'blockName'   => 'core/post-content',
+						'attrs'       => array(),
+						'innerBlocks' => array(
+							array(
+								'blockName'   => 'core/paragraph',
+								'attrs'       => array(),
+								'innerBlocks' => array(),
+							),
+						),
+					),
+				),
+			),
+		);
+
+		$result    = $this->preprocessor->preprocess( $blocks, $this->layout, $this->styles );
+		$box_group = $result[0];
+		$paragraph = $box_group['innerBlocks'][0]['innerBlocks'][0];
+
+		// The box suppresses its own padding and takes the root inset itself.
+		$this->assertTrue( $box_group['email_attrs']['suppress-horizontal-padding'] );
+		$this->assertEquals( '10px', $box_group['email_attrs']['root-padding-left'] );
+
+		// The paragraph gets only the distributed container padding, not root padding.
+		$this->assertArrayNotHasKey( 'root-padding-left', $paragraph['email_attrs'] );
+		$this->assertEquals( '20px', $paragraph['email_attrs']['container-padding-left'] );
+	}
+
+	/**
+	 * Test a box (group with padding) nested inside a transparent root group that
+	 * delegates: the box takes the root inset and distributes its own padding to
+	 * descendants as container padding.
+	 */
+	public function testItInsetsBoxNestedInTransparentRootGroup(): void {
+		$blocks = array(
+			array(
+				'blockName'   => 'core/group',
+				'attrs'       => array(),
+				'innerBlocks' => array(
+					array(
+						'blockName'   => 'core/group',
+						'attrs'       => array(
+							'backgroundColor' => 'white',
+							'style'           => array(
+								'spacing' => array(
+									'padding' => array(
+										'left'  => '20px',
+										'right' => '20px',
+									),
+								),
+							),
+						),
+						'innerBlocks' => array(
+							array(
+								'blockName'   => 'core/post-content',
+								'attrs'       => array(),
+								'innerBlocks' => array(
+									array(
+										'blockName'   => 'core/paragraph',
+										'attrs'       => array(),
+										'innerBlocks' => array(),
+									),
+								),
+							),
+						),
+					),
+				),
+			),
+		);
+
+		$result    = $this->preprocessor->preprocess( $blocks, $this->layout, $this->styles );
+		$box_group = $result[0]['innerBlocks'][0];
+		$paragraph = $box_group['innerBlocks'][0]['innerBlocks'][0];
+
+		// The box suppresses its own padding and is inset by root padding.
+		$this->assertTrue( $box_group['email_attrs']['suppress-horizontal-padding'] );
+		$this->assertEquals( '10px', $box_group['email_attrs']['root-padding-left'] );
+
+		// Descendants get the distributed container padding but not root padding.
+		$this->assertArrayNotHasKey( 'root-padding-left', $paragraph['email_attrs'] );
+		$this->assertEquals( '20px', $paragraph['email_attrs']['container-padding-left'] );
 	}
 
 	/**
@@ -876,6 +984,62 @@ class Spacing_Preprocessor_Test extends \Email_Editor_Unit_Test {
 		// Alignfull block skips container padding.
 		$this->assertArrayNotHasKey( 'container-padding-left', $alignfull['email_attrs'] );
 		$this->assertArrayNotHasKey( 'container-padding-right', $alignfull['email_attrs'] );
+	}
+
+	/**
+	 * Test container padding is applied once at the outermost block and not
+	 * propagated to nested descendants: a columns block gets it, but the image
+	 * inside a padded column does not receive it again.
+	 */
+	public function testItDoesNotPropagateContainerPaddingToNestedBlocks(): void {
+		$styles                        = $this->styles;
+		$styles['__container_padding'] = array(
+			'left'  => '24px',
+			'right' => '24px',
+		);
+
+		$blocks = array(
+			array(
+				'blockName'   => 'core/columns',
+				'attrs'       => array(),
+				'innerBlocks' => array(
+					array(
+						'blockName'   => 'core/column',
+						'attrs'       => array(
+							'style' => array(
+								'spacing' => array(
+									'padding' => array(
+										'left'  => '20px',
+										'right' => '20px',
+									),
+								),
+							),
+						),
+						'innerBlocks' => array(
+							array(
+								'blockName'   => 'core/image',
+								'attrs'       => array(),
+								'innerBlocks' => array(),
+							),
+						),
+					),
+				),
+			),
+		);
+
+		$result  = $this->preprocessor->preprocess( $blocks, $this->layout, $styles );
+		$columns = $result[0];
+		$column  = $columns['innerBlocks'][0];
+		$image   = $column['innerBlocks'][0];
+
+		// The outermost columns block receives the container padding.
+		$this->assertEquals( '24px', $columns['email_attrs']['container-padding-left'] );
+		$this->assertEquals( '24px', $columns['email_attrs']['container-padding-right'] );
+
+		// Nested blocks must not receive it again.
+		$this->assertArrayNotHasKey( 'container-padding-left', $column['email_attrs'] );
+		$this->assertArrayNotHasKey( 'container-padding-left', $image['email_attrs'] );
+		$this->assertArrayNotHasKey( 'container-padding-right', $image['email_attrs'] );
 	}
 
 	/**

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep shipping method costs that have more decimals than the store precision intact in the shipping zone method modal, both when the modal opens and when the merchant leaves the cost field, so saving no longer rounds the stored rate.

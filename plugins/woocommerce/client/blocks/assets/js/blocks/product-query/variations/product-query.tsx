@@ -45,7 +45,7 @@ const registerProductsBlock = ( attributes: QueryBlockAttributes ) => {
 		),
 		name: PRODUCT_QUERY_VARIATION_NAME,
 		/* translators: "Products" is the name of the block. */
-		title: __( 'Products (Beta)', 'woocommerce' ),
+		title: __( 'Products (Deprecated)', 'woocommerce' ),
 		isActive: ( blockAttributes ) =>
 			blockAttributes.namespace === PRODUCT_QUERY_VARIATION_NAME,
 		icon: (
@@ -107,12 +107,12 @@ subscribe( () => {
 
 		registerProductsBlock( queryAttributes );
 	}
-}, 'core/edit-site' );
+}, CORE_EDITOR_STORE );
 
 let isBlockRegistered = false;
 subscribe( () => {
-	if ( ! isBlockRegistered ) {
+	if ( ! isBlockRegistered && ! isSiteEditorPage() ) {
 		isBlockRegistered = true;
 		registerProductsBlock( QUERY_DEFAULT_ATTRIBUTES );
 	}
-}, 'core/edit-post' );
+}, CORE_EDITOR_STORE );

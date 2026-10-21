@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\StockNotifications\Emails;
 
+use Automattic\WooCommerce\Enums\TaxDisplayMode;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\Factory;
 use Automattic\WooCommerce\Internal\StockNotifications\Emails\CustomerStockNotificationEmail;
@@ -103,7 +104,7 @@ class EmailManager {
 	public function maybe_restore_customer_tax_location_data( $notification ) {
 
 		// No need if stores displaying price excluding tax.
-		if ( 'incl' !== get_option( 'woocommerce_tax_display_shop' ) ) {
+		if ( TaxDisplayMode::INCLUSIVE !== get_option( 'woocommerce_tax_display_shop' ) ) {
 			return;
 		}
 
@@ -282,9 +283,12 @@ class EmailManager {
 		$emails = WC()->mailer()->get_emails();
 		$email  = $emails['WC_Email_Customer_Stock_Notification'] ?? null;
 
-		if ( $email instanceof CustomerStockNotificationEmail ) {
-			$email->trigger( $notification );
+		if ( ! $email instanceof CustomerStockNotificationEmail ) {
+			$this->log_missing_email( 'WC_Email_Customer_Stock_Notification', $notification );
+			return;
 		}
+
+		$email->trigger( $notification );
 	}
 
 	/**
@@ -297,9 +301,12 @@ class EmailManager {
 		$emails = WC()->mailer()->get_emails();
 		$email  = $emails['WC_Email_Customer_Stock_Notification_Verify'] ?? null;
 
-		if ( $email instanceof CustomerStockNotificationVerifyEmail ) {
-			$email->trigger( $notification );
+		if ( ! $email instanceof CustomerStockNotificationVerifyEmail ) {
+			$this->log_missing_email( 'WC_Email_Customer_Stock_Notification_Verify', $notification );
+			return;
 		}
+
+		$email->trigger( $notification );
 	}
 
 	/**
@@ -312,8 +319,28 @@ class EmailManager {
 		$emails = WC()->mailer()->get_emails();
 		$email  = $emails['WC_Email_Customer_Stock_Notification_Verified'] ?? null;
 
-		if ( $email instanceof CustomerStockNotificationVerifiedEmail ) {
-			$email->trigger( $notification );
+		if ( ! $email instanceof CustomerStockNotificationVerifiedEmail ) {
+			$this->log_missing_email( 'WC_Email_Customer_Stock_Notification_Verified', $notification );
+			return;
 		}
+
+		$email->trigger( $notification );
+	}
+
+	/**
+	 * Log that an email could not be sent because its class is not registered with the mailer.
+	 *
+	 * @param string       $email_key    The key the email is registered under in `WC_Emails`.
+	 * @param Notification $notification The notification object.
+	 * @return void
+	 */
+	private function log_missing_email( string $email_key, Notification $notification ): void {
+		wc_get_logger()->warning(
+			sprintf( 'Email %s is not registered with the mailer; nothing was sent for notification %d.', $email_key, $notification->get_id() ),
+			array(
+				'source'          => 'wc-customer-stock-notifications',
+				'notification_id' => $notification->get_id(),
+			)
+		);
 	}
 }

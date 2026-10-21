@@ -6,6 +6,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { dispatch } from '@wordpress/data';
 import { store as coreNoticesStore } from '@wordpress/notices';
 import { Icon } from '@wordpress/components';
+import { decodeEntities } from '@wordpress/html-entities';
 
 /**
  * Internal dependencies
@@ -17,7 +18,7 @@ import {
 	MARKETPLACE_CATEGORY_API_PATH,
 	MARKETPLACE_HOST,
 	MARKETPLACE_SEARCH_API_PATH,
-	MARKETPLACE_RENEW_SUBSCRIPTON_PATH,
+	MARKETPLACE_RENEW_SUBSCRIPTION_PATH,
 } from '../components/constants';
 import { Subscription } from '../components/my-subscriptions/types';
 import {
@@ -27,7 +28,7 @@ import {
 	SearchAPIJSONType,
 	SearchAPIProductType,
 } from '../components/product-list/types';
-import { NoticeOptions, NoticeStatus } from '../contexts/types';
+import { NoticeAction, NoticeOptions, NoticeStatus } from '../contexts/types';
 import { noticeStore } from '../contexts/notice-store';
 
 interface ProductGroup {
@@ -176,6 +177,7 @@ async function fetchSearchResults(
 							billingPeriodInterval:
 								product.billing_period_interval,
 							currency: product.currency,
+							hasQualityBadge: product.has_quality_badge ?? false,
 						};
 					}
 				);
@@ -308,6 +310,30 @@ function activateProductPlugin( subscription: Subscription ): Promise< void > {
 	} );
 }
 
+/**
+ * Turn auto-updates on or off for the plugin or theme backing a subscription.
+ *
+ * Writes the same `auto_update_plugins` / `auto_update_themes` option the
+ * WordPress Plugins and Themes screens write.
+ */
+function setProductAutoUpdate(
+	subscription: Subscription,
+	enabled: boolean
+): Promise< void > {
+	const data = new URLSearchParams();
+	data.append( 'product_key', subscription.product_key );
+	data.append( 'enabled', enabled ? '1' : '0' );
+
+	return apiFetch( {
+		path: '/wc/v3/marketplace/subscriptions/auto-update',
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/x-www-form-urlencoded',
+		},
+		body: data,
+	} );
+}
+
 function disconnectProduct( subscription: Subscription ): Promise< void > {
 	if ( subscription.active === false ) {
 		return Promise.resolve();
@@ -325,15 +351,35 @@ function disconnectProduct( subscription: Subscription ): Promise< void > {
 	} );
 }
 
-type WpAjaxReponse = {
+type WpAjaxResponse = {
 	success: boolean;
 	data: WpAjaxResponseData;
 };
 
 type WpAjaxResponseData = {
+	errorCode?: string;
 	errorMessage?: string;
 	activateUrl?: string;
 };
+
+type WpAjaxError = {
+	success: false;
+	data: { message?: string; code?: string };
+};
+
+/** The message and error code of a rejected wpAjax() call, keeping only string values. */
+const getWpAjaxErrorData = ( error: unknown ): WpAjaxError[ 'data' ] => {
+	const data = ( error as { data?: { message?: unknown; code?: unknown } } )
+		?.data;
+
+	return {
+		message: typeof data?.message === 'string' ? data.message : undefined,
+		code: typeof data?.code === 'string' ? data.code : undefined,
+	};
+};
+
+/** Core's error code for a package that needs a newer PHP than the site runs. */
+const PHP_REQUIREMENT_ERROR_CODE = 'incompatible_php_required_version';
 
 function wpAjax(
 	action: string,
@@ -343,7 +389,7 @@ function wpAjax(
 		theme?: string;
 		success?: boolean;
 	}
-): Promise< WpAjaxReponse > {
+): Promise< WpAjaxResponse > {
 	return new Promise( ( resolve, reject ) => {
 		if ( ! window.wp.updates ) {
 			reject( __( 'Please reload and try again', 'woocommerce' ) );
@@ -359,12 +405,14 @@ function wpAjax(
 				} );
 			},
 			error: ( error: WpAjaxResponseData ) => {
-				reject( {
+				const rejection: WpAjaxError = {
 					success: false,
 					data: {
 						message: error.errorMessage,
+						code: error.errorCode,
 					},
-				} );
+				};
+				reject( rejection );
 			},
 		} );
 	} );
@@ -438,7 +486,9 @@ function installProduct( subscription: Subscription ): Promise< void > {
 	} );
 }
 
-function updateProduct( subscription: Subscription ): Promise< WpAjaxReponse > {
+function updateProduct(
+	subscription: Subscription
+): Promise< WpAjaxResponse > {
 	return wpAjax( 'update-' + subscription.product_type, {
 		slug: subscription.local.slug,
 		[ subscription.product_type ]: subscription.local.path,
@@ -452,7 +502,7 @@ function addNotice(
 	options?: Partial< NoticeOptions >
 ) {
 	if ( status === NoticeStatus.Error ) {
-		dispatch( noticeStore ).addNotice(
+		void dispatch( noticeStore ).addNotice(
 			productKey,
 			message,
 			status,
@@ -466,12 +516,114 @@ function addNotice(
 			};
 		}
 
-		dispatch( coreNoticesStore ).createSuccessNotice( message, options );
+		void dispatch( coreNoticesStore ).createSuccessNotice(
+			message,
+			options
+		);
 	}
 }
 
+/**
+ * Pull the human-readable message out of a rejected subscriptions request.
+ *
+ * `/wc/v3/marketplace/refresh` answers failures with `wp_send_json_error()`,
+ * which nests the message under `data`, while transport failures and generic
+ * REST errors put it at the top level. Reading only one shape renders
+ * "undefined" to the merchant.
+ *
+ * Both candidates are typed `unknown` and checked rather than asserted: they
+ * come off the wire, and a `message` that wasn't a string would be handed
+ * straight to sprintf and reach the merchant as "[object Object]".
+ *
+ * @param error The rejection value from apiFetch.
+ * @return The best available message.
+ */
+const getRefreshErrorMessage = ( error: unknown ): string => {
+	const candidate = error as
+		{ data?: { message?: unknown }; message?: unknown } | undefined;
+
+	const message = [ candidate?.data?.message, candidate?.message ].find(
+		( value ): value is string => typeof value === 'string' && value !== ''
+	);
+
+	return message ?? __( 'Unexpected error.', 'woocommerce' );
+};
+
+/**
+ * Build the notice for a failed My Subscriptions update, explaining WordPress and PHP requirement failures by error code.
+ */
+const getUpdateErrorNotice = (
+	productName: string,
+	error: unknown,
+	onRetry: () => void
+): { message: string; actions: NoticeAction[] } => {
+	const { message: wpMessage, code } = getWpAjaxErrorData( error );
+	const wccomSettings = getAdminSetting( 'wccomHelper', {} );
+
+	switch ( code ) {
+		case 'incompatible_wp_required_version':
+			return {
+				message: sprintf(
+					// translators: %s is the product name.
+					__(
+						'%s couldn’t be updated. This version requires a newer version of WordPress.',
+						'woocommerce'
+					),
+					productName
+				),
+				actions: wccomSettings.updateCoreUrl
+					? [
+							{
+								label: __( 'Update WordPress', 'woocommerce' ),
+								url: wccomSettings.updateCoreUrl,
+							},
+						]
+					: [],
+			};
+		case PHP_REQUIREMENT_ERROR_CODE:
+			return {
+				message: sprintf(
+					// translators: %s is the product name.
+					__(
+						'%s couldn’t be updated. This version requires a newer version of PHP.',
+						'woocommerce'
+					),
+					productName
+				),
+				actions: wccomSettings.updatePhpUrl
+					? [
+							{
+								label: __( 'Learn more', 'woocommerce' ),
+								url: wccomSettings.updatePhpUrl,
+								openInNewTab: true,
+							},
+						]
+					: [],
+			};
+	}
+
+	let message = sprintf(
+		// translators: %s is the product name.
+		__( '%s couldn’t be updated.', 'woocommerce' ),
+		productName
+	);
+	if ( wpMessage ) {
+		message += ' ' + decodeEntities( wpMessage );
+	}
+
+	return {
+		message,
+		actions: [
+			{
+				label: __( 'Try again', 'woocommerce' ),
+				onClick: onRetry,
+			},
+		],
+	};
+};
+
 const removeNotice = ( productKey: string ) => {
-	dispatch( noticeStore ).removeNotice( productKey );
+	void dispatch( noticeStore ).removeNotice( productKey );
 };
 
 const subscriptionToProduct = ( subscription: Subscription ): Product => {
@@ -517,9 +669,9 @@ const appendURLParams = (
 const enableAutorenewalUrl = ( subscription: Subscription ): string => {
 	if ( ! subscription.product_key ) {
 		// review subscriptions on the Marketplace
-		return MARKETPLACE_RENEW_SUBSCRIPTON_PATH;
+		return MARKETPLACE_RENEW_SUBSCRIPTION_PATH;
 	}
-	return appendURLParams( MARKETPLACE_RENEW_SUBSCRIPTON_PATH, [
+	return appendURLParams( MARKETPLACE_RENEW_SUBSCRIPTION_PATH, [
 		[ 'key', subscription.product_key.toString() ],
 	] );
 };
@@ -569,6 +721,7 @@ export {
 	appendURLParams,
 	connectProduct,
 	activateProductPlugin,
+	setProductAutoUpdate,
 	enableAutorenewalUrl,
 	fetchCategories,
 	fetchDiscoverPageData,
@@ -583,6 +736,10 @@ export {
 	installProduct,
 	updateProduct,
 	addNotice,
+	getRefreshErrorMessage,
+	getUpdateErrorNotice,
+	getWpAjaxErrorData,
+	PHP_REQUIREMENT_ERROR_CODE,
 	removeNotice,
 	renewUrl,
 	subscribeUrl,

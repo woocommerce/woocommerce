@@ -18,6 +18,11 @@
 		"automattic/jetpack-changelogger": "3.3.0",
 		"phpunit/phpunit": "^9"
 	},
+	"config": {
+		"platform": {
+			"php": "7.4"
+		}
+	},
 	"extra": {
 		"changelogger": {
 			"formatter": {

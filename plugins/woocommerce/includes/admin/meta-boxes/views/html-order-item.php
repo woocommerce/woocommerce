@@ -9,6 +9,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\Admin\Orders\ItemQuantityLimits;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 
 $product      = $item->get_product();
@@ -116,13 +117,18 @@ $item_name = apply_filters( 'woocommerce_order_item_name', $item->get_name(), $i
 			/**
 			* Filter to change the product quantity minimum in the order editor of the admin area.
 			*
+			* In the 'edit' context the default is 0, floored at the item's current
+			* quantity when that is already negative (so orders created with negative
+			* quantities via the API remain editable). Since 11.2.0 the filter also
+			* runs with the 'add' context when products are added to an order.
+			*
 			* @since   5.8.0
-			* @param   string      $step    The current minimum amount to be used in the quantity editor.
+			* @param   string      $min     The current minimum amount to be used in the quantity editor.
 			* @param   WC_Product  $product The product that is being edited.
-			* @param   string      $context The context in which the quantity editor is shown, 'edit' or 'refund'.
+			* @param   string      $context The context in which the quantity editor is shown, 'edit', 'refund' or 'add'.
 			*/
-			$min_edit   = apply_filters( 'woocommerce_quantity_input_min_admin', '0', $product, 'edit' );
 			$min_refund = apply_filters( 'woocommerce_quantity_input_min_admin', '0', $product, 'refund' );
+			$min_edit   = wc_get_container()->get( ItemQuantityLimits::class )->get_quantity_input_min( $item, $product );
 		?>
 		<div class="edit" style="display: none;">
 			<input type="number" step="<?php echo esc_attr( $step_edit ); ?>" min="<?php echo esc_attr( $min_edit ); ?>" autocomplete="off" name="order_item_qty[<?php echo absint( $item_id ); ?>]" placeholder="0" value="<?php echo esc_attr( $item->get_quantity() ); ?>" data-qty="<?php echo esc_attr( $item->get_quantity() ); ?>" size="4" class="quantity" />

@@ -66,7 +66,7 @@ export const paymentTitle = ( location: string ) => {
 	);
 };
 
-function FooterContent(): JSX.Element {
+function FooterContent(): React.JSX.Element {
 	return (
 		<div className="woocommerce-marketplace__footer-content">
 			<h2 className="woocommerce-marketplace__footer-title">
@@ -113,7 +113,7 @@ function FooterContent(): JSX.Element {
 	);
 }
 
-export default function Footer(): JSX.Element {
+export default function Footer(): React.JSX.Element {
 	return (
 		<div className="woocommerce-marketplace__footer">
 			<FooterContent />

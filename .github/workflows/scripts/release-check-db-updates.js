@@ -196,15 +196,17 @@ const run = async ( currentRef, { github, context } ) => {
   if ( key1 === key2 ) {
     const updates1 = previousDbUpdates.get( key1 );
     const updates2 = currentDbUpdates.get( key2 )
-    const [ base1, suffix1 ] = key1.split( '-' );
 
-    updates2.forEach(
-      ( e ) => {
-        if ( ! updates1.includes( e ) ) {
-          throw new Error( `A new db update callback was added under key '${ key1 }' in version '${ version }'. Add them under a new key instead (e.g. '${ base1 }-${ Number( suffix1 || 0 ) + 1 }').` );
-        }
-      }
-    );
+    const newCallbacks = updates2.filter( ( e ) => ! updates1.includes( e ) );
+
+    if ( newCallbacks.length > 0 ) {
+      const callbackList = newCallbacks.map( ( c ) => `  - ${ c }` ).join( '\n' );
+      // Suggest the version itself when it's above the last key's base; a suffix bump would sort below patch releases shipped in between.
+      const [ base1, suffix1 ] = key1.split( '-' );
+      const versionBase = version.replace( /-.*$/, '' );
+      const suggestedKey = dbUpdateKeyGreaterThan( versionBase, base1 ) ? versionBase : `${ base1 }-${ Number( suffix1 || 0 ) + 1 }`;
+      throw new Error( `${ newCallbacks.length } new db update callback(s) were added under key '${ key1 }' in version '${ version }':\n${ callbackList }\nAdd them under a new key instead (e.g. '${ suggestedKey }').` );
+    }
 
     return;
   }

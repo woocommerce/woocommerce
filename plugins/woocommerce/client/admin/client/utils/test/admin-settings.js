@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { getAdminSetting } from '../admin-settings'; // Adjust the import path
+import { deprecatedAdminProperties, getAdminSetting } from '../admin-settings';
 
 describe( 'getAdminSetting', () => {
 	let consoleWarnSpy;
@@ -78,5 +78,18 @@ describe( 'getAdminSetting', () => {
 		expect( consoleWarnSpy ).not.toHaveBeenCalled();
 
 		process.env.NODE_ENV = _originalNodeEnv; // Restore ENV
+	} );
+
+	it( 'should not treat admin features as deprecated settings', () => {
+		const features = getAdminSetting( 'features', {
+			'launch-your-store': {
+				is_enabled: true,
+			},
+		} );
+
+		void features[ 'launch-your-store' ];
+
+		expect( deprecatedAdminProperties.features ).toBeUndefined();
+		expect( consoleWarnSpy ).not.toHaveBeenCalled();
 	} );
 } );

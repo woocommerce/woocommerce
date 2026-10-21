@@ -1,3 +1,5 @@
+const { getAutoAssignMilestoneSelection } = require('./milestone-selection');
+
 /**
  * Validates that a PR has either a milestone set or the auto-assign checkbox selected.
  *
@@ -21,21 +23,14 @@ module.exports = async ({ github, context, core }) => {
 
     const body = pr.body || '';
 
-    if (!body.includes('<!-- milestone-target-selection -->')) {
-        core.setFailed('Milestone selection section not found in PR description. Please use the PR template and select the milestone option, or manually assign a milestone.');
+    const nextVersionSelection = getAutoAssignMilestoneSelection(body);
+
+    if (!nextVersionSelection.found) {
+        core.setFailed('Auto-assign milestone checkbox not found. Please add the milestone checkbox from the PR template, or manually assign a milestone.');
         return;
     }
 
-    const nextVersionMatch = body.match(/- \[([ xX])\].*\*\*.*next WooCommerce version.*\*\*/);
-
-    if (!nextVersionMatch) {
-        core.setFailed('Milestone selection checkbox not found or modified. Please restore the original checkbox format from the PR template.');
-        return;
-    }
-
-    const nextVersionChecked = nextVersionMatch[1].toLowerCase() === 'x';
-
-    if (!nextVersionChecked) {
+    if (!nextVersionSelection.checked) {
         core.setFailed('No milestone option selected. Please check the auto-assign checkbox or manually assign a milestone.');
         return;
     }

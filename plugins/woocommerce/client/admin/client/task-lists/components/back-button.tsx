@@ -4,7 +4,7 @@
 import { __ } from '@wordpress/i18n';
 import { Tooltip } from '@wordpress/components';
 import { Icon, chevronLeft } from '@wordpress/icons';
-import { getHistory, updateQueryString } from '@woocommerce/navigation';
+import { updateQueryString } from '@woocommerce/navigation';
 import { ENTER, SPACE } from '@wordpress/keycodes';
 import { recordEvent } from '@woocommerce/tracks';
 
@@ -24,7 +24,7 @@ export const BackButton = ( { title }: BackButtonProps ) => {
 		recordEvent( 'topbar_back_button', {
 			page_name: title,
 		} );
-		updateQueryString( {}, getHistory().location.pathname, {} );
+		updateQueryString( {}, '/', {} );
 	};
 
 	// if it's a task list page, render a back button to the homescreen

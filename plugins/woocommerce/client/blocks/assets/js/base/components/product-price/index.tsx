@@ -135,42 +135,38 @@ const SalePrice = ( {
 			<span className="screen-reader-text">
 				{ __( 'Previous price:', 'woocommerce' ) }
 			</span>
-			<FormattedMonetaryAmount
-				currency={ currency }
-				renderText={ ( value ) => (
-					<del
-						className={ clsx(
-							'wc-block-components-product-price__regular',
-							regularPriceClassName
-						) }
-						style={ regularPriceStyle }
-						translate="no"
-					>
-						{ value }
-					</del>
+			{ /* The price is nested rather than rendered through renderText so it
+			     keeps the markup that isolates the currency symbol. */ }
+			<del
+				className={ clsx(
+					'wc-block-components-product-price__regular',
+					regularPriceClassName
 				) }
-				value={ regularPrice }
-			/>
+				style={ regularPriceStyle }
+				translate="no"
+			>
+				<FormattedMonetaryAmount
+					currency={ currency }
+					value={ regularPrice }
+				/>
+			</del>
 			<span className="screen-reader-text">
 				{ __( 'Discounted price:', 'woocommerce' ) }
 			</span>
-			<FormattedMonetaryAmount
-				currency={ currency }
-				renderText={ ( value ) => (
-					<ins
-						className={ clsx(
-							'wc-block-components-product-price__value',
-							'is-discounted',
-							priceClassName
-						) }
-						style={ priceStyle }
-						translate="no"
-					>
-						{ value }
-					</ins>
+			<ins
+				className={ clsx(
+					'wc-block-components-product-price__value',
+					'is-discounted',
+					priceClassName
 				) }
-				value={ price }
-			/>
+				style={ priceStyle }
+				translate="no"
+			>
+				<FormattedMonetaryAmount
+					currency={ currency }
+					value={ price }
+				/>
+			</ins>
 		</>
 	);
 };
@@ -239,14 +235,9 @@ export interface ProductPriceProps {
 	 */
 	regularPriceStyle?: React.CSSProperties | undefined;
 	/**
-	 * Custom margin to apply to the price wrapper.
+	 * Custom styles to apply to the price wrapper.
 	 */
-	style?:
-		| Pick<
-				React.CSSProperties,
-				'marginTop' | 'marginRight' | 'marginBottom' | 'marginLeft'
-		  >
-		| undefined;
+	style?: React.CSSProperties | undefined;
 }
 
 const ProductPrice = ( {

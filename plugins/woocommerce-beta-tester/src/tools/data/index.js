@@ -1,4 +1,3 @@
-/* eslint-disable @woocommerce/dependency-group */
 /**
  * External dependencies
  */
@@ -13,11 +12,11 @@ import * as selectors from './selectors';
 // @ts-expect-error These files are not TypeScript files.
 import reducer from './reducer';
 import { STORE_KEY } from './constants';
-export const store = createReduxStore(STORE_KEY, {
-    reducer,
-    actions,
-    controls,
-    selectors,
-    resolvers,
-});
-register(store);
+export const store = createReduxStore( STORE_KEY, {
+	reducer,
+	actions,
+	controls,
+	selectors,
+	resolvers,
+} );
+register( store );

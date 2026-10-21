@@ -1,1 +1,0 @@
-wp language core install nl_NL

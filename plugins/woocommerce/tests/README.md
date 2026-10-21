@@ -1,6 +1,6 @@
 # WooCommerce Tests
 
-This document discusses unit tests. See [the e2e-pw README](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/e2e-pw/README.md) to learn how to setup testing environment for running e2e tests and run them.
+This document discusses unit tests. See [the e2e README](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/tests/e2e/README.md) to learn how to setup testing environment for running e2e tests and run them.
 
 ## Table of contents
 
@@ -12,6 +12,7 @@ This document discusses unit tests. See [the e2e-pw README](https://github.com/w
     - [Running Unit Tests](#running-unit-tests)
         - [Troubleshooting](#troubleshooting)
     - [Guide for Writing Unit Tests](#guide-for-writing-unit-tests)
+        - [Performance and isolation principles](#performance-and-isolation-principles)
     - [Automated Tests](#automated-tests)
     - [Code Coverage](#code-coverage)
 
@@ -174,8 +175,29 @@ General guidelines for all the unit tests:
 - In addition to covering each line of a method/function, make sure to test common input and edge cases.
 - Prefer `assertSame()` where possible as it tests both type and value
 - Remember that only methods prefixed with `test` will be run so use helper methods liberally to keep test methods small and reduce code duplication. If there is a common helper method used in multiple test files, consider adding it to the `WC_Unit_Test_Case` class so it can be shared by all test cases
-- Filters persist between test cases so be sure to remove them in your test method or in the `tearDown()` method.
-- Use data providers where possible. Be sure that their name is like `data_provider_function_to_test` (i.e. the data provider for `test_is_postcode` would be `data_provider_test_is_postcode`). Read more about data providers [here](https://phpunit.de/manual/current/en/writing-tests-for-phpunit.html#writing-tests-for-phpunit.data-providers).
+- For `WP_UnitTestCase` descendants, parent teardown restores the hook snapshot. Remove a filter earlier only when later work in the same test must not run it; other base classes must manage their own hooks.
+- Use data providers where possible. Be sure that their name is like `data_provider_function_to_test` (i.e. the data provider for `test_is_postcode` would be `data_provider_test_is_postcode`). Read more about data providers in the [PHPUnit manual](https://phpunit.de/manual/current/en/writing-tests-for-phpunit.html#writing-tests-for-phpunit.data-providers).
+
+### Performance and isolation principles
+
+The full suite runs in a few minutes because every test pays only for what it asserts. Please keep new tests on that budget:
+
+- **Size fixtures to the assertions, not to realism.** Derive the fixture from the production branches under test; if two variations cover the algorithm, don't create twenty-seven. When scale itself is the contract (pagination boundaries, batch limits), keep the boundary — and prefer strengthening assertions (exact values, per-branch checks) over enlarging fixtures.
+- **Climb down the fixture ladder.** Create each fixture on the cheapest rung that still exercises the production branches under test, using orders as the canonical example:
+    1. `WC_Helper_Order::create_order()` (or `OrderHelper::create_order()`) when line items, addresses, shipping, or totals are part of the contract — it builds a complete commerce order (~29 writes plus hook cascades).
+    2. `wc_create_order( array( 'customer_id' => ... ) )` when the test only needs orders to exist with basic properties (counts, collections, permissions, status transitions) — one write through the real production API. Note it only honors the documented argument keys; properties like `payment_method` must be set on the object and saved.
+    3. Direct row inserts when the code under test only reads persisted rows (see "Seed at the boundary the code reads" below).
+
+    The same ladder applies to products and other entities: full helper → minimal production API call → boundary seeding.
+- **Respect the selected base class.** Tests that extend `WP_UnitTestCase` directly or indirectly and call the parent lifecycle run each test in a `$wpdb` transaction. Rollback covers writes through that connection to transactional tables; it does not cover writes made before the parent setup starts the transaction, class fixtures, explicit commits or DDL, non-transactional tables, other connections, files, external services, or process state. An override must call the parent setup — `parent::setUp()` or `parent::set_up()`, matching the method it overrides — before any write the rollback must cover. Plain PHPUnit does not provide this rollback; inspect other custom bases for their own lifecycle. Never use `TRUNCATE TABLE`: its implicit commit breaks isolation; use `DELETE FROM` when deletion is required.
+- **Share immutable fixtures at class level.** For these WordPress base classes, catalogs that no test mutates belong in `wpSetUpBeforeClass()`, reloaded per test with fresh object instances (`wc_get_product()` etc.). Per-test mutations are contained by the transaction rollback and the per-test object-cache flush. Clean up class-created data in `wpTearDownAfterClass()`.
+- **Clean only state the base class does not own.** WordPress parent teardown restores its hook snapshot and the globals it manages; `WC_Unit_Test_Case` also resets its documented WooCommerce singleton state. Inspect other bases before relying on or duplicating cleanup. Resetting preloaded state during test arrangement is not teardown cleanup.
+- **Seed at the boundary the code reads.** If the code under test only reads persisted rows (aggregate SQL, lookup tables, migration sources), fixtures may insert those rows directly — with exactly the columns production writes and collision-safe IDs. Keep at least one real write-path (CRUD) test per area so the sync path stays covered.
+- **Register only the REST surface you exercise.** `WC_REST_Unit_Test_Case` registers routes lazily per namespace; scoped tests can use `WC_Unit_Test_Case::create_rest_server_with_routes()`. Avoid re-firing the full `rest_api_init` per test.
+- **Never sleep, never fetch.** Control timestamps through the object setters instead of `sleep()`, and mock HTTP through the framework's interception layer (`$this->http_responder`, local fixture files) so the suite is deterministic and passes without network access.
+- **Use the shared helpers instead of re-rolling them**, e.g. `WC_Unit_Test_Case::with_direct_product_attribute_lookup_updates()` for fixture work that would otherwise leave scheduled lookup actions behind.
+
+The `SpeedTrapListener` reports tests slower than one second at the end of each run — treat an entry there as a review flag.
 
 ## Automated Tests
 

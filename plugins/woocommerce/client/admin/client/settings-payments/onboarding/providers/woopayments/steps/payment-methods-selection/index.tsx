@@ -255,7 +255,7 @@ export default function PaymentMethodsSelection() {
 											paymentMethodsState
 										) }
 										setPaymentMethodsState={ ( state ) => {
-											savePaymentMethodsState(
+											void savePaymentMethodsState(
 												state,
 												method.id
 											);
@@ -263,9 +263,9 @@ export default function PaymentMethodsSelection() {
 										// Pass down the calculated initial visibility for this specific method from state
 										initialVisibilityStatus={
 											initialVisibilityMap
-												? initialVisibilityMap[
+												? ( initialVisibilityMap[
 														method.id
-												  ] ?? null
+													] ?? null )
 												: null
 										}
 										isExpanded={ isExpanded }
@@ -305,7 +305,7 @@ export default function PaymentMethodsSelection() {
 									{ sprintf(
 										/* translators: %s: number of hidden payment methods */
 										__( 'Show more (%s)', 'woocommerce' ),
-										hiddenCount
+										hiddenCount.toString()
 									) }
 								</Button>
 							</div>

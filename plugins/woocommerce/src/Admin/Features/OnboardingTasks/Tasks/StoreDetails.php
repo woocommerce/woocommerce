@@ -19,6 +19,24 @@ class StoreDetails extends Task {
 	}
 
 	/**
+	 * Contextual image URL.
+	 *
+	 * @return string
+	 */
+	public function get_image_url() {
+		return WC()->plugin_url() . '/assets/images/task_list/store-details-illustration.png';
+	}
+
+	/**
+	 * Alt text for the contextual image.
+	 *
+	 * @return string
+	 */
+	public function get_image_alt() {
+		return __( 'Store location illustration', 'woocommerce' );
+	}
+
+	/**
 	 * Title.
 	 *
 	 * @return string

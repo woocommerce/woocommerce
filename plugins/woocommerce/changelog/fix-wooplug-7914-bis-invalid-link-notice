@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show a notice when a back-in-stock verification or unsubscribe link is expired, already used, or no longer valid.

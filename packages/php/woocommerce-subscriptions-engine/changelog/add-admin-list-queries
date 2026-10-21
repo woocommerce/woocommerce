@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add status filtering, sorting, search, per-status counts, and a batched line-item count to the subscriptions list query, exposed on the Subscriptions facade.

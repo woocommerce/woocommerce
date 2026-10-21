@@ -1,5 +1,4 @@
-Timeline
-===
+# Timeline
 
 This is a timeline for displaying data, such as events, in chronological order.
 It accepts `items` for the timeline content and will order the data for you.
@@ -52,7 +51,11 @@ Name | Type | Default | Description
 `groupBy` | String | `'day'` | How the items should be grouped, one of `'day'`, `'week'`, or `'month'`
 `dateFormat` | String | `'F j, Y'` | PHP date format string used to format dates, see php.net/date
 `clockFormat` | String | `'g:ia'` | PHP clock format string used to format times, see php.net/date
+`timezone` | String | `'browser'` | Timezone mode used to group and render dates and times. Dates are localized using WordPress date settings. Use `'browser'` to use the user's browser timezone, or `'site'` to use the WordPress site timezone.
 
+### Date formatting
+
+Timeline localizes rendered dates and times using WordPress date settings. Use the `timezone` prop to choose whether dates are grouped and rendered in the user's browser timezone or the WordPress site timezone. When the browser timezone cannot be detected, `browser` mode uses non-localized browser formatting.
 
 ### `items` structure
 
@@ -67,4 +70,5 @@ Name | Type | Default | Description
 `hideTimestamp` | Bool | `false` | Allows the user to hide the timestamp associated with this event
 
 Icon color can be customized by adding 1 of 3 classes to the icon element: `is-success` (green), `is-warning` (yellow), and `is-error` (red)
-  - If no class is provided the icon will be gray
+
+- If no class is provided the icon will be gray

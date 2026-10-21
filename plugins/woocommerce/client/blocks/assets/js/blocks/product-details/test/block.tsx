@@ -3,7 +3,8 @@
  */
 import '@testing-library/jest-dom';
 import { screen, waitFor, within } from '@testing-library/react';
-import { createBlock, type BlockAttributes } from '@wordpress/blocks';
+import { createBlock, getBlockType, serialize } from '@wordpress/blocks';
+import type { BlockAttributes } from '@wordpress/blocks';
 import { http, HttpResponse } from 'msw';
 import { setupServer } from 'msw/node';
 import { useSelect } from '@wordpress/data';
@@ -60,7 +61,75 @@ jest.mock( '@woocommerce/settings', () => ( {
 } ) );
 
 describe( 'Product Details block', () => {
-	describe( 'Single Product block', () => {
+	test( 'registers only the approved style supports', () => {
+		expect(
+			getBlockType( 'woocommerce/product-details' )?.supports
+		).toEqual( {
+			interactivity: { clientNavigation: true },
+			align: [ 'wide', 'full' ],
+			color: { background: true, text: false },
+			spacing: { margin: true, padding: true },
+			__experimentalBorder: {
+				color: true,
+				radius: true,
+				style: true,
+				width: true,
+			},
+		} );
+	} );
+
+	test( 'preserves unstyled serialization', () => {
+		expect(
+			serialize( createBlock( 'woocommerce/product-details' ) )
+		).toBe(
+			'<!-- wp:woocommerce/product-details -->\n<div class="wp-block-woocommerce-product-details alignwide"></div>\n<!-- /wp:woocommerce/product-details -->'
+		);
+	} );
+
+	test( 'serializes preset and custom styles without text color', () => {
+		const content = serialize(
+			createBlock( 'woocommerce/product-details', {
+				backgroundColor: 'contrast',
+				borderColor: 'accent-1',
+				style: {
+					border: { radius: '4px', style: 'solid', width: '2px' },
+					spacing: {
+						margin: { top: 'var:preset|spacing|20', right: '0' },
+						padding: { bottom: '1rem', left: '1rem' },
+					},
+				},
+			} )
+		);
+
+		expect( content ).toContain(
+			'has-accent-1-border-color has-contrast-background-color has-background'
+		);
+		expect( content ).toContain(
+			'border-style:solid;border-width:2px;border-radius:4px;margin-top:var(--wp--preset--spacing--20);margin-right:0;padding-bottom:1rem;padding-left:1rem'
+		);
+		expect( content ).not.toContain( 'has-text-color' );
+	} );
+
+	test( 'distinguishes explicit zero styles from reset styles', () => {
+		const zero = serialize(
+			createBlock( 'woocommerce/product-details', {
+				style: {
+					border: { radius: '0', width: '0' },
+					spacing: { margin: { top: '0' }, padding: { bottom: '0' } },
+				},
+			} )
+		);
+		expect( zero ).toContain(
+			'style="border-width:0;border-radius:0;margin-top:0;padding-bottom:0"'
+		);
+		expect(
+			serialize(
+				createBlock( 'woocommerce/product-details', { style: {} } )
+			)
+		).not.toContain( 'style=' );
+	} );
+
+	describe( 'editor integration', () => {
 		const server = setupServer(
 			http.get( '/wc-admin/options', ( { request } ) => {
 				const url = new URL( request.url );
@@ -123,6 +192,20 @@ describe( 'Product Details block', () => {
 			jest.restoreAllMocks();
 		} );
 
+		test( 'should populate a freshly inserted block with the Product Description placeholder', async () => {
+			await initializeEditor( {
+				name: 'woocommerce/product-details',
+				attributes: {},
+			} );
+
+			expect(
+				await screen.findByText(
+					'This block displays the product description. When viewing a product page, the description content will automatically appear here.',
+					{ exact: true }
+				)
+			).toBeVisible();
+		} );
+
 		test( 'should render product specifications when product is selected', async () => {
 			await setupWithSingleProduct( {}, 2 );
 
@@ -158,10 +241,6 @@ describe( 'Product Details block', () => {
 			expect(
 				within( table ).getByText( /Medium, Large/i )
 			).toBeVisible();
-
-			// wp-6.8: upstream @wordpress/* deprecation warnings that we cannot
-			// opt out of without changing the visual output.
-			expect( console ).toHaveWarned();
 		} );
 
 		test( 'should auto-remove block when product has no specifications', async () => {
