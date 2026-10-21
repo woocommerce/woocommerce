@@ -11,6 +11,7 @@
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
+use Automattic\WooCommerce\Internal\VariationGallery\GalleryImageResolver;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -453,23 +454,20 @@ class WC_Product_Variable extends WC_Product {
 		);
 		$variation_gallery_html      = '';
 
-		if ( $variation_featured_valid ) {
-			$selected_image_id = $variation_featured_id;
-		} elseif ( ! empty( $variation_gallery_image_ids ) ) {
-			$selected_image_id = $variation_gallery_image_ids[0];
-		} elseif ( $parent_featured_valid ) {
-			$selected_image_id = $parent_featured_id;
-		} else {
-			$selected_image_id = 0;
+		$parent_gallery_ids = array_map( 'intval', $this->get_gallery_image_ids() );
+		if ( $parent_gallery_ids ) {
+			_prime_post_caches( $parent_gallery_ids );
 		}
+		$parent_gallery_ids = array_values( array_filter( $parent_gallery_ids, 'wp_attachment_is_image' ) );
+		$gallery_html_ids   = GalleryImageResolver::resolve(
+			$variation_featured_valid ? $variation_featured_id : 0,
+			$variation_gallery_image_ids,
+			$parent_featured_valid ? $parent_featured_id : 0,
+			array_values( array_diff( $parent_gallery_ids, array( $parent_featured_id ) ) )
+		);
+		$selected_image_id  = $gallery_html_ids[0];
 
-		if ( ! empty( $variation_gallery_image_ids ) ) {
-			$gallery_html_ids = $variation_gallery_image_ids;
-
-			if ( $selected_image_id && ! in_array( $selected_image_id, $gallery_html_ids, true ) ) {
-				array_unshift( $gallery_html_ids, $selected_image_id );
-			}
-
+		if ( ! empty( $variation_gallery_image_ids ) || ( $variation_featured_valid && in_array( $variation_featured_id, $parent_gallery_ids, true ) ) ) {
 			$variation_gallery_html = wc_get_product_gallery_html( $this, $gallery_html_ids );
 		}
 
