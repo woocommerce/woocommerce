@@ -1888,8 +1888,8 @@ jQuery( function ( $ ) {
 
 			var pagination = panel.querySelector( '.order-notes-pagination' );
 			var activeElement = document.activeElement;
-			var restoreFocus = pagination.contains( activeElement );
-			var pageAction = activeElement.dataset.pageAction;
+			var restoreFocus = !! activeElement && pagination.contains( activeElement );
+			var pageAction = activeElement && activeElement.dataset ? activeElement.dataset.pageAction : undefined;
 			var error = panel.querySelector( '.order-notes-error' );
 			var requestedPage = page || Number( pagination.dataset.page );
 			var show_error = function() {
