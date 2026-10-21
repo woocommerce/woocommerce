@@ -365,10 +365,10 @@ abstract class AbstractBlock {
 	 * @return \WP_Block_Type|false
 	 */
 	final protected function express_register_block_type_from_metadata( string $manifest_file, array $block_settings = array() ) {
-		// Step 1: Optimistic metadata resolution with early fallback to the upstream function for blocks
-		// that use rarely needed features. As per v11.4, 99.4% of WooCommerce blocks follow the fast path.
+		// Step 1: Resolve metadata from the pre-loaded registry. Fall back to the upstream function
+		// when metadata is unavailable (non-WooCommerce namespace or missing manifest).
 		$metadata = 'woocommerce' === $this->namespace ? \WP_Block_Metadata_Registry::get_metadata( $manifest_file ) : null;
-		if ( empty( $metadata ) || ! empty( $metadata['render'] ) || ! empty( $metadata['variations'] ) || ! empty( $metadata['blockHooks'] ) ) {
+		if ( empty( $metadata ) ) {
 			return \register_block_type_from_metadata( $manifest_file, $block_settings );
 		}
 
@@ -378,13 +378,6 @@ abstract class AbstractBlock {
 		$filtered_metadata = apply_filters( 'block_type_metadata', $metadata ); // phpcs:ignore WooCommerce.Commenting.CommentHooks
 		$metadata          = is_array( $filtered_metadata ) ? $filtered_metadata : $metadata;
 
-		// If the filter injected features we don't handle on the fast-path, delegate to the upstream function.
-		if ( ! empty( $metadata['render'] ) || ! empty( $metadata['variations'] ) || ! empty( $metadata['blockHooks'] ) ) {
-			return \register_block_type_from_metadata( $manifest_file, $block_settings );
-		}
-
-		// Step 3: Property mapping (99.4% of blocks) + i18n (98.9% of blocks as per v11.4) + merge caller-provided settings.
-		$settings          = array();
 		$property_mappings = array(
 			'apiVersion'      => 'api_version',
 			'name'            => 'name',
@@ -405,19 +398,7 @@ abstract class AbstractBlock {
 			'example'         => 'example',
 			'allowedBlocks'   => 'allowed_blocks',
 		);
-		$i18n_schema       = get_block_metadata_i18n_schema();
-		foreach ( $property_mappings as $key => $mapped_key ) {
-			if ( ! isset( $block_settings[ $mapped_key ] ) && isset( $metadata[ $key ] ) ) {
-				$settings[ $mapped_key ] = $metadata[ $key ];
-				if ( isset( $i18n_schema->$key ) ) {
-					$settings[ $mapped_key ] = translate_settings_using_i18n_schema( $i18n_schema->$key, $settings[ $mapped_key ], $metadata['textdomain'] ?? 'woocommerce' );
-				}
-			}
-		}
-		$settings = array_merge( $settings, $block_settings );
-
-		// Step 4: Asset handle and module registration (20.8% of blocks as per v11.4).
-		$asset_fields = array(
+		$asset_fields      = array(
 			// Scripts.
 			'editorScript'     => array( 'editor_script_handles', 'register_block_script_handle' ),
 			'script'           => array( 'script_handles', 'register_block_script_handle' ),
@@ -429,6 +410,28 @@ abstract class AbstractBlock {
 			// Script modules.
 			'viewScriptModule' => array( 'view_script_module_ids', 'register_block_script_module_id' ),
 		);
+
+		// If any metadata property isn't on the whitelist, delegate to the upstream function: not intended for the fast path or new property.
+		// AI-AGENT: new block.json properties must be added to $property_mappings or $asset_fields, otherwise the block falls back to slower upstream registration.
+		$supported_properties = array( '$schema', 'file', 'textdomain', ...array_keys( $property_mappings ), ...array_keys( $asset_fields ) );
+		if ( ! empty( array_diff( array_keys( $metadata ), $supported_properties ) ) ) {
+			return \register_block_type_from_metadata( $manifest_file, $block_settings );
+		}
+
+		// Step 3: Property mapping (99.4% of blocks) + i18n (98.9% of blocks as per v11.4) + merge caller-provided settings.
+		$settings    = array();
+		$i18n_schema = get_block_metadata_i18n_schema();
+		foreach ( $property_mappings as $key => $mapped_key ) {
+			if ( ! isset( $block_settings[ $mapped_key ] ) && isset( $metadata[ $key ] ) ) {
+				$settings[ $mapped_key ] = $metadata[ $key ];
+				if ( isset( $i18n_schema->$key ) ) {
+					$settings[ $mapped_key ] = translate_settings_using_i18n_schema( $i18n_schema->$key, $settings[ $mapped_key ], $metadata['textdomain'] ?? 'woocommerce' );
+				}
+			}
+		}
+		$settings = array_merge( $settings, $block_settings );
+
+		// Step 4: Asset handle and module registration (20.8% of blocks as per v11.4).
 		foreach ( $asset_fields as $metadata_field => list( $settings_field, $register ) ) {
 			if ( ! empty( $settings[ $metadata_field ] ) ) {
 				$metadata[ $metadata_field ] = $settings[ $metadata_field ];
