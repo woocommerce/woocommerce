@@ -147,4 +147,24 @@ class ProductButton extends \WP_UnitTestCase {
 		$this->assertNotEmpty( $matches, 'Product button was not rendered.' );
 		$this->assertStringNotContainsString( 'aria-label', $matches[0] );
 	}
+
+	/**
+	 * @testdox Labels that become empty after sanitization are omitted.
+	 */
+	public function test_product_button_omits_aria_label_when_sanitization_results_in_empty(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$filter  = static function ( array $args ): array {
+			$args['attributes']['aria-label'] = '<em></em>';
+			return $args;
+		};
+
+		add_filter( 'woocommerce_loop_add_to_cart_args', $filter );
+		try {
+			$markup = $this->render_product_button( $product );
+		} finally {
+			remove_filter( 'woocommerce_loop_add_to_cart_args', $filter );
+		}
+
+		$this->assertStringNotContainsString( 'aria-label', $markup );
+	}
 }

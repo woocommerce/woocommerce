@@ -231,7 +231,9 @@ class ProductButton extends AbstractBlock {
 
 		if ( ! empty( $args['attributes']['aria-label'] ) ) {
 			$args['attributes']['aria-label'] = wp_strip_all_tags( $args['attributes']['aria-label'] );
-		} else {
+		}
+
+		if ( empty( $args['attributes']['aria-label'] ) ) {
 			unset( $args['attributes']['aria-label'] );
 		}
 
