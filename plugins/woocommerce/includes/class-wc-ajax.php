@@ -187,6 +187,7 @@ class WC_AJAX {
 			'save_order_items',
 			'load_order_items',
 			'add_order_note',
+			'get_order_notes',
 			'delete_order_note',
 			'json_search_order_metakeys',
 			'json_search_tax_rates',
@@ -1880,6 +1881,16 @@ class WC_AJAX {
 			<?php
 		}
 		wp_die();
+	}
+
+	/**
+	 * Get a rendered page of order notes via AJAX.
+	 *
+	 * @since 11.3.0
+	 * @return void
+	 */
+	public static function get_order_notes() {
+		WC_Meta_Box_Order_Notes::get_order_notes();
 	}
 
 	/**

@@ -700,6 +700,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'grant_access_nonce'                              => wp_create_nonce( 'grant-access' ),
 					'revoke_access_nonce'                             => wp_create_nonce( 'revoke-access' ),
 					'add_order_note_nonce'                            => wp_create_nonce( 'add-order-note' ),
+					'get_order_notes_nonce'                           => wp_create_nonce( 'get-order-notes' ),
 					'delete_order_note_nonce'                         => wp_create_nonce( 'delete-order-note' ),
 					'calendar_image'                                  => WC()->plugin_url() . '/assets/images/calendar.png',
 					'post_id'                                         => $this->is_order_meta_box_screen( $screen_id ) && isset( $order_or_post_object ) ? \Automattic\WooCommerce\Utilities\OrderUtil::get_post_or_order_id( $order_or_post_object ) : $post_id,

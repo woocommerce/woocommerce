@@ -37,6 +37,58 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Should return a rendered page of notes with pagination for an order editor.
+	 */
+	public function test_get_order_notes_page(): void {
+		$this->_setRole( 'administrator' );
+		$order = wc_create_order();
+		for ( $i = 1; $i <= 11; $i++ ) {
+			$order->add_order_note( 'Pagination note ' . $i );
+		}
+
+		$_POST['security'] = wp_create_nonce( 'get-order-notes' );
+		$_POST['order_id'] = $order->get_id();
+		$_POST['page']     = 2;
+
+		$response = $this->do_ajax( 'woocommerce_get_order_notes' );
+
+		$this->assertTrue( $response['success'], 'An order editor should be able to load notes.' );
+		$this->assertStringContainsString( 'Pagination note 1</p>', $response['data']['html'], 'The second page should contain the oldest note.' );
+		$this->assertStringNotContainsString( 'Pagination note 2</p>', $response['data']['html'], 'The response should not contain notes from the first page.' );
+		$this->assertStringContainsString( '1 of 11 notes', $response['data']['html'], 'The count should reflect the current page.' );
+		$this->assertStringContainsString( 'data-page="2"', $response['data']['html'], 'The response should identify the current page.' );
+	}
+
+	/**
+	 * @testdox Should deny access to order notes to a customer with a valid nonce.
+	 */
+	public function test_get_order_notes_denies_customer(): void {
+		$this->_setRole( 'customer' );
+		$order = wc_create_order();
+		$order->add_order_note( 'Private order note' );
+		$_POST['security'] = wp_create_nonce( 'get-order-notes' );
+		$_POST['order_id'] = $order->get_id();
+
+		$response = $this->do_ajax( 'woocommerce_get_order_notes' );
+
+		$this->assertFalse( $response['success'], 'Customers must not be able to read private notes.' );
+		$this->assertEmpty( $response['data'], 'An unauthorized response must not disclose note content.' );
+	}
+
+	/**
+	 * @testdox Should reject a request for order notes without a valid nonce.
+	 */
+	public function test_get_order_notes_requires_nonce(): void {
+		$this->_setRole( 'administrator' );
+		$_POST['order_id'] = wc_create_order()->get_id();
+		$_POST['security'] = 'invalid';
+
+		$response = $this->do_ajax( 'woocommerce_get_order_notes' );
+
+		$this->assertNotTrue( $response['success'] ?? false, 'A request with an invalid nonce must not succeed.' );
+	}
+
+	/**
 	 * Stock should not be reduced from AJAX when an item is added to an order.
 	 */
 	public function test_add_item_to_pending_payment_order() {
