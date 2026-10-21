@@ -713,7 +713,11 @@ class WooPaymentsRestController extends RestApiControllerBase {
 		try {
 			$result = $this->woopayments->onboarding_wpcom_connection_authorize( $request->get_param( 'source' ) );
 		} catch ( ApiException $e ) {
-			return new WP_Error( $e->getErrorCode(), $e->getMessage(), array( 'status' => $e->getCode() ) );
+			return new WP_Error(
+				$e->getErrorCode(),
+				$e->getMessage(),
+				array_merge( $e->getAdditionalData(), array( 'status' => $e->getCode() ) )
+			);
 		}
 
 		return rest_ensure_response(

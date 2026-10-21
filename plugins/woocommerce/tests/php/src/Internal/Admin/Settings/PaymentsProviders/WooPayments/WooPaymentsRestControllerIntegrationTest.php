@@ -1368,6 +1368,39 @@ class WooPaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Returns the original registration error code and data without changing the HTTP error status.
+	 * @testWith ["siteurl_private_ip"]
+	 *           ["wpcom_5??"]
+	 *
+	 * @param string $registration_error_code The Jetpack registration error code.
+	 */
+	public function test_handle_onboarding_wpcom_connection_authorize_registration_error_code( string $registration_error_code ): void {
+		$this->mock_wpcom_connection_manager->method( 'is_connected' )->willReturn( false );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->once() )
+			->method( 'try_registration' )
+			->willReturn(
+				new \WP_Error(
+					$registration_error_code,
+					'Registration failed.',
+					array(
+						'detail' => 'Diagnostic data',
+						'status' => 400,
+					)
+				)
+			);
+
+		$request  = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/step/' . WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION . '/authorize' );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( \WP_Http::INTERNAL_SERVER_ERROR, $response->get_status() );
+		$this->assertSame( 'woocommerce_woopayments_onboarding_action_error', $data['code'] );
+		$this->assertSame( $registration_error_code, $data['data']['registration_error_code'] ?? null );
+		$this->assertSame( 'Diagnostic data', $data['data']['detail'] ?? null );
+	}
+
+	/**
 	 * Test onboarding reset.
 	 */
 	public function test_onboarding_reset() {

@@ -1722,11 +1722,14 @@ class WooPaymentsService {
 		// Jetpack connection package versions without the `$force` parameter ignore the extra argument.
 		$result = $this->wpcom_connection_manager->try_registration( true, $force );
 		if ( is_wp_error( $result ) ) {
+			$data                            = map_deep( (array) $result->get_error_data(), 'esc_html' );
+			$data['registration_error_code'] = (string) $result->get_error_code();
+
 			throw new ApiException(
 				'woocommerce_woopayments_onboarding_action_error',
 				esc_html( $result->get_error_message() ),
 				(int) WP_Http::INTERNAL_SERVER_ERROR,
-				map_deep( (array) $result->get_error_data(), 'esc_html' )
+				$data // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Error details are escaped above; the registration code is a JSON lookup key.
 			);
 		}
 
