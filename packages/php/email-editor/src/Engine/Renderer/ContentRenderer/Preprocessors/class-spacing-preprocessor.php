@@ -287,6 +287,11 @@ class Spacing_Preprocessor implements Context_Aware_Preprocessor {
 			return false;
 		}
 
+		// An auto-fit responsive grid collapses unused columns, so a single item spans the full width.
+		if ( ! empty( $layout['autoFit'] ) && ! empty( $layout['minimumColumnWidth'] ) && count( $block['innerBlocks'] ?? array() ) < 2 ) {
+			return false;
+		}
+
 		if ( ! $this->only_contains_blocks( $block, $this->get_grid_cell_block_names() ) ) {
 			return false;
 		}

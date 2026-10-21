@@ -56,8 +56,12 @@ class Blocks_Width_Preprocessor implements Preprocessor {
 			$alignment    = $block['attrs']['align'] ?? null;
 			// Subtract parent padding from block width if not full-width.
 			if ( 'full' !== $alignment ) {
-				$layout_width -= $this->parse_number_from_string_with_pixels( $styles['spacing']['padding']['left'] ?? '0px' );
-				$layout_width -= $this->parse_number_from_string_with_pixels( $styles['spacing']['padding']['right'] ?? '0px' );
+				foreach ( array( 'left', 'right' ) as $side ) {
+					$parent_padding = $styles['spacing']['padding'][ $side ] ?? '0px';
+					// Inside a grid cell a rem or em padding read as px would leave fixed-width blocks
+					// too wide for the cell, so convert it.
+					$layout_width -= $in_grid_cell ? $this->convert_padding_to_pixels( $parent_padding ) : $this->parse_number_from_string_with_pixels( $parent_padding );
+				}
 			}
 
 			// Subtract root padding and container padding for blocks that will

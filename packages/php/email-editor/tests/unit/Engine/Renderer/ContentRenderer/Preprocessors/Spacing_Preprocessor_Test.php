@@ -1335,6 +1335,30 @@ class Spacing_Preprocessor_Test extends \Email_Editor_Unit_Test {
 	}
 
 	/**
+	 * Test an auto-fit responsive grid with one item stacks, since the item spans the full width.
+	 */
+	public function testItStacksAutoFitGridWithOneItem(): void {
+		$layout = array(
+			'type'               => 'grid',
+			'columnCount'        => 2,
+			'minimumColumnWidth' => '12rem',
+			'autoFit'            => true,
+		);
+
+		$result = $this->preprocessor->preprocess(
+			array(
+				$this->build_grid_group( $layout, array( array() ) ),
+				$this->build_grid_group( $layout, array( array(), array() ) ),
+			),
+			$this->layout,
+			$this->styles
+		);
+
+		$this->assertArrayNotHasKey( 'two-column-grid', $result[0]['email_attrs'] );
+		$this->assertTrue( $result[1]['email_attrs']['two-column-grid'] );
+	}
+
+	/**
 	 * Test an explicit numeric zero gap is kept rather than replaced by the global gap.
 	 */
 	public function testItKeepsNumericZeroGridGap(): void {

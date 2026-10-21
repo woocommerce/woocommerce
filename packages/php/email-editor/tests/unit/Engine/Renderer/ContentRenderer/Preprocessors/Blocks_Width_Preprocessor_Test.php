@@ -754,7 +754,7 @@ class Blocks_Width_Preprocessor_Test extends \Email_Editor_Unit_Test {
 	}
 
 	/**
-	 * Test a grid's rem padding is converted to pixels before its cells are sized.
+	 * Test rem padding on a grid and inside its cells is converted to pixels before widths are capped.
 	 */
 	public function testItConvertsRemGridPaddingWhenSizingCells(): void {
 		$blocks = array(
@@ -784,6 +784,26 @@ class Blocks_Width_Preprocessor_Test extends \Email_Editor_Unit_Test {
 						'attrs'       => array(),
 						'innerBlocks' => array(),
 					),
+					array(
+						'blockName'   => 'core/group',
+						'attrs'       => array(
+							'style' => array(
+								'spacing' => array(
+									'padding' => array(
+										'left'  => '1rem',
+										'right' => '1rem',
+									),
+								),
+							),
+						),
+						'innerBlocks' => array(
+							array(
+								'blockName'   => 'core/image',
+								'attrs'       => array( 'width' => '400px' ),
+								'innerBlocks' => array(),
+							),
+						),
+					),
 				),
 			),
 		);
@@ -792,6 +812,8 @@ class Blocks_Width_Preprocessor_Test extends \Email_Editor_Unit_Test {
 
 		// (660 - 32 - 32 - 20) / 2 = 288.
 		$this->assertEquals( '288px', $result[0]['innerBlocks'][0]['email_attrs']['width'] );
+		// A group in a cell with 1rem padding leaves 288 - 16 - 16 = 256px for a fixed-width image.
+		$this->assertEquals( '256px', $result[0]['innerBlocks'][1]['innerBlocks'][0]['email_attrs']['width'] );
 	}
 
 	/**
