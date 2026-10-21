@@ -7,14 +7,13 @@ import { test, expect, guestFile } from '@woocommerce/e2e-utils';
  * Internal dependencies
  */
 import { REGULAR_PRICED_PRODUCT_NAME } from '../checkout/constants';
+import { setFilterValue } from '../../../utils/filters';
 
 test.describe( 'Cart Store', () => {
 	test.use( { storageState: guestFile } );
 
-	test.beforeEach( async ( { requestUtils } ) => {
-		await requestUtils.activatePlugin(
-			'woocommerce-blocks-test-short-nonce-life'
-		);
+	test.beforeEach( async ( { page } ) => {
+		await setFilterValue( page, 'nonce_life', 2 );
 	} );
 
 	test( 'should refresh nonce from Store API and use it for cart mutations', async ( {
