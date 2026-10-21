@@ -7,6 +7,7 @@ import { Button, Notice } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
 import { decodeEntities } from '@wordpress/html-entities';
+import { speak } from '@wordpress/a11y';
 
 /**
  * Internal dependencies
@@ -65,6 +66,7 @@ export const JetpackStep: React.FC = () => {
 						className="settings-payments-onboarding-modal__step--content-jetpack-button"
 						isBusy={ isConnectButtonLoading }
 						disabled={ isConnectButtonLoading }
+						accessibleWhenDisabled
 						onClick={ () => {
 							setIsConnectButtonLoading( true );
 
@@ -103,6 +105,13 @@ export const JetpackStep: React.FC = () => {
 							// The store is not registered with WordPress.com yet: register it,
 							// then redirect to the authorization URL the backend returns.
 							setAuthorizeError( null );
+							speak(
+								__(
+									'Connecting to WordPress.com. Please wait.',
+									'woocommerce'
+								),
+								'polite'
+							);
 							apiFetch< { url: string } >( {
 								url: authorizeUrl,
 								method: 'POST',

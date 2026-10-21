@@ -1,9 +1,16 @@
 /**
  * External dependencies
  */
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import {
+	act,
+	fireEvent,
+	render,
+	screen,
+	waitFor,
+} from '@testing-library/react';
 import React from 'react';
 import apiFetch from '@wordpress/api-fetch';
+import { speak } from '@wordpress/a11y';
 
 /**
  * Internal dependencies
@@ -12,6 +19,7 @@ import { useOnboardingContext } from '../../../data/onboarding-context';
 import JetpackStep from '../index';
 
 jest.mock( '@wordpress/api-fetch', () => jest.fn() );
+jest.mock( '@wordpress/a11y', () => ( { speak: jest.fn() } ) );
 jest.mock( '../../../data/onboarding-context', () => ( {
 	useOnboardingContext: jest.fn(),
 } ) );
@@ -42,6 +50,7 @@ const renderStep = () => {
 describe( 'JetpackStep', () => {
 	beforeEach( () => {
 		jest.clearAllMocks();
+		mockApiFetch.mockReset();
 	} );
 
 	it( 'decodes registration errors and lets the merchant retry', async () => {
@@ -71,6 +80,42 @@ describe( 'JetpackStep', () => {
 			data: { source: 'settings_payments' },
 		} );
 		await waitFor( () => expect( connect ).not.toBeDisabled() );
+	} );
+
+	it( 'keeps Connect focused and announces progress while blocking repeated clicks', async () => {
+		let rejectRegistration: ( error: Error ) => void;
+		mockApiFetch.mockImplementation(
+			() =>
+				new Promise( ( resolve, reject ) => {
+					rejectRegistration = reject;
+				} )
+		);
+		renderStep();
+		const connect = screen.getByRole( 'button', { name: 'Connect' } );
+		connect.focus();
+
+		fireEvent.click( connect );
+
+		expect( connect ).toHaveFocus();
+		expect( connect ).toHaveAttribute( 'aria-disabled', 'true' );
+		expect( connect ).not.toBeDisabled();
+		expect( speak ).toHaveBeenCalledWith(
+			'Connecting to WordPress.com. Please wait.',
+			'polite'
+		);
+
+		fireEvent.click( connect );
+		expect( mockApiFetch ).toHaveBeenCalledTimes( 1 );
+
+		await act( async () => {
+			rejectRegistration( new Error( 'Registration failed.' ) );
+		} );
+
+		expect( connect ).toHaveFocus();
+		expect( connect ).not.toHaveAttribute( 'aria-disabled', 'true' );
+		expect(
+			screen.getByText( 'Registration failed.', { selector: 'p' } )
+		).toBeInTheDocument();
 	} );
 
 	it( 'shows the fallback message when authorization fails without a message', async () => {
