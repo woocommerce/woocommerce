@@ -799,6 +799,7 @@ class Blocks_Width_Preprocessor_Test extends \Email_Editor_Unit_Test {
 		}
 
 		$this->assertArrayNotHasKey( 'two-column-grid', $grid['email_attrs'] );
+		$this->assertArrayNotHasKey( 'two-column-grid-item', $grid['innerBlocks'][0]['email_attrs'] );
 		$this->assertArrayNotHasKey( 'two-column-grid-item', $grid['innerBlocks'][1]['email_attrs'] );
 		$this->assertArrayNotHasKey( 'margin-top', $grid['innerBlocks'][0]['email_attrs'] );
 		$this->assertEquals( '24px', $grid['innerBlocks'][1]['email_attrs']['margin-top'], 'Stacked items are spaced by the row gap.' );

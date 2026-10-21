@@ -13,6 +13,7 @@ use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Content_R
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
 use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Initializer;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
 
 /**
  * Integration test for the Group renderer's grid layouts.
@@ -64,17 +65,20 @@ class Group_Test extends \Email_Editor_Integration_Test_Case {
 
 	/**
 	 * Build a grid group's content the way the content renderer hands it over: the group wrapper
-	 * holding each child's rendered output, including the Outlook conditional wrappers.
+	 * holding each child's rendered output, including the Outlook conditional wrappers. Items of a
+	 * two-column grid also get the single-element wrapper Content_Renderer adds.
 	 *
-	 * @param int $count Number of grid items.
+	 * @param int  $count Number of grid items.
+	 * @param bool $two_column Whether the items belong to a two-column grid.
 	 * @return string
 	 */
-	private function build_grid_content( int $count ): string {
+	private function build_grid_content( int $count, bool $two_column = true ): string {
 		$items = '';
 		for ( $i = 1; $i <= $count; $i++ ) {
-			$items .= '<!--[if mso | IE]><table role="presentation"><tr><td><![endif]-->'
+			$item   = '<!--[if mso | IE]><table role="presentation"><tr><td><![endif]-->'
 				. '<div class="email-block-layout"><p>Item ' . $i . '</p></div>'
 				. '<!--[if mso | IE]></td></tr></table><![endif]-->';
+			$items .= $two_column ? '<div class="email-block-grid-item">' . $item . '</div>' : $item;
 		}
 
 		return '<div class="wp-block-group is-layout-grid wp-container-core-group-is-layout-1a2b3c4d wp-block-group-is-layout-grid">' . $items . '</div>';
@@ -125,10 +129,14 @@ class Group_Test extends \Email_Editor_Integration_Test_Case {
 		$this->assertMatchesRegularExpression( '/Item 1.*Item 2.*email-block-grid-row.*Item 3/s', $rendered );
 
 		// The gap is split between the two cells, and rows after the first are spaced by the row gap.
-		$this->assertStringContainsString( 'style="width:50%;vertical-align:top;padding-right:10px;"', $rendered );
-		$this->assertStringContainsString( 'style="width:50%;vertical-align:top;padding-left:10px;"', $rendered );
-		$this->assertStringContainsString( 'padding-right:10px;padding-top:24px;', $rendered );
-		$this->assertStringContainsString( 'padding-left:10px;padding-top:24px;', $rendered );
+		$cells = $this->get_cell_declarations( $rendered );
+		$this->assertEqualsCanonicalizing( array( 'width:50%', 'vertical-align:top', 'padding-right:10px' ), $cells[0] );
+		$this->assertEqualsCanonicalizing( array( 'width:50%', 'vertical-align:top', 'padding-left:10px' ), $cells[1] );
+		$this->assertEqualsCanonicalizing( array( 'width:50%', 'vertical-align:top', 'padding-right:10px', 'padding-top:24px' ), $cells[2] );
+		$this->assertEqualsCanonicalizing( array( 'width:50%', 'vertical-align:top', 'padding-left:10px', 'padding-top:24px' ), $cells[3] );
+
+		// Each child's Outlook wrapper stays inside its cell.
+		$this->assertSame( 3, preg_match_all( '/<td class="email-block-grid-cell"[^>]*><div class="email-block-grid-item"><!--\[if mso \| IE\]>/', $rendered ) );
 
 		$this->assertGridLayoutClassesDropped( $rendered );
 
@@ -141,7 +149,7 @@ class Group_Test extends \Email_Editor_Integration_Test_Case {
 	 */
 	public function testItStacksOtherGrids(): void {
 		$rendered = $this->group_renderer->render(
-			$this->build_grid_content( 3 ),
+			$this->build_grid_content( 3, false ),
 			$this->build_grid_block( array(), 3 ),
 			$this->rendering_context
 		);
@@ -182,7 +190,10 @@ class Group_Test extends \Email_Editor_Integration_Test_Case {
 		);
 
 		// In RTL the first cell is on the right, so its gap is on its left side.
-		$this->assertMatchesRegularExpression( '/padding-left:10px;"[^>]*>[^<]*<div[^>]*><p>Item 1.*padding-right:10px;"[^>]*>[^<]*<div[^>]*><p>Item 2/s', $rendered );
+		$this->assertMatchesRegularExpression( '/Item 1.*Item 2/s', $rendered );
+		$cells = $this->get_cell_declarations( $rendered );
+		$this->assertContains( 'padding-left:10px', $cells[0] );
+		$this->assertContains( 'padding-right:10px', $cells[1] );
 	}
 
 	/**
@@ -239,8 +250,24 @@ class Group_Test extends \Email_Editor_Integration_Test_Case {
 
 		// The image, saved at 1000px, is capped to one cell (half the content width, less the gap).
 		$this->assertSame( 1, preg_match( '/<img[^>]*width="(\d+)"/', $rendered, $matches ) );
-		$content_width = (int) $this->rendering_context->get_layout_width_without_padding();
-		$this->assertLessThan( $content_width / 2, (int) $matches[1] );
-		$this->assertGreaterThan( $content_width / 2 - 50, (int) $matches[1] );
+		$content_width = Styles_Helper::parse_value( $this->rendering_context->get_layout_width_without_padding() );
+		$gap           = Styles_Helper::parse_value( $this->rendering_context->get_theme_styles()['spacing']['blockGap'] ?? '0px' );
+		$this->assertEqualsWithDelta( floor( ( $content_width - $gap ) / 2 ), (int) $matches[1], 1 );
+	}
+
+	/**
+	 * Read each grid cell's style declarations, in document order.
+	 *
+	 * @param string $rendered Rendered HTML.
+	 * @return array<int, string[]>
+	 */
+	private function get_cell_declarations( string $rendered ): array {
+		preg_match_all( '/<td class="email-block-grid-cell" style="([^"]*)"/', $rendered, $matches );
+		return array_map(
+			static function ( string $style ): array {
+				return array_values( array_filter( array_map( 'trim', explode( ';', $style ) ) ) );
+			},
+			$matches[1]
+		);
 	}
 }
