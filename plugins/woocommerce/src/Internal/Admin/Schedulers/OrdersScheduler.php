@@ -979,10 +979,11 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 		/**
 		 * Filters the SQL conditions that decide which orders and refunds Analytics imports.
 		 *
-		 * Conditions are raw SQL, so bind any values with $wpdb->prepare(), and prefix columns with $table_alias.
-		 * Refund rows are checked too, so guard order-only conditions with the type column. The filter runs again
-		 * with the alias `parent_order`, because a refund inherits the exclusion of its parent order. Records
-		 * imported before a condition excluded them keep syncing until historical data is deleted and re-imported.
+		 * Each condition is a complete raw SQL expression: bind values with $wpdb->prepare() and prefix columns with
+		 * $table_alias. Refund rows are checked too, so guard order-only conditions with the type column. The filter
+		 * runs again with the alias `parent_order`, because a refund inherits the exclusion of its parent order.
+		 * Records imported before a condition excluded them keep syncing until historical data is deleted and
+		 * re-imported, and records a removed condition excluded come back only through a historical import.
 		 *
 		 * @since 11.4.0
 		 *
