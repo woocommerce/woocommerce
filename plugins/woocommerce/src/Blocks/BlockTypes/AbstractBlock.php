@@ -411,7 +411,7 @@ abstract class AbstractBlock {
 		);
 
 		// If any metadata property isn't on the whitelist, delegate to the upstream function: not intended for the fast path or new property.
-		// AI-AGENT: new block.json properties must be added to $property_mappings or $asset_fields, otherwise the block falls back to slower upstream registration.
+		// AI-AGENT: new block.json properties must be added to the whitelist, otherwise the block falls back to slower upstream registration.
 		$supported_properties = array( '$schema', 'version', '__experimental', 'file', 'textdomain', ...array_keys( $property_mappings ), ...array_keys( $asset_fields ) );
 		if ( ! empty( array_diff( array_keys( $metadata ), $supported_properties ) ) ) {
 			return \register_block_type_from_metadata( $manifest_file, $block_settings );
