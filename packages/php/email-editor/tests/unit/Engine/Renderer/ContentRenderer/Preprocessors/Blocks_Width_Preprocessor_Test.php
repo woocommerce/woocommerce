@@ -858,6 +858,40 @@ class Blocks_Width_Preprocessor_Test extends \Email_Editor_Unit_Test {
 	}
 
 	/**
+	 * Test a percentage column gap is resolved against the grid's width.
+	 */
+	public function testItResolvesPercentageColumnGap(): void {
+		$blocks = array(
+			array(
+				'blockName'   => 'core/group',
+				'attrs'       => array(
+					'layout' => array(
+						'type'        => 'grid',
+						'columnCount' => 2,
+					),
+				),
+				'email_attrs' => array(
+					'two-column-grid' => true,
+					'grid-column-gap' => '10%',
+				),
+				'innerBlocks' => array(
+					array(
+						'blockName'   => 'core/paragraph',
+						'attrs'       => array(),
+						'innerBlocks' => array(),
+					),
+				),
+			),
+		);
+
+		$result = $this->preprocessor->preprocess( $blocks, $this->layout, $this->styles );
+
+		// 10% of 660 is 66, so each cell is (660 - 66) / 2 = 297.
+		$this->assertEquals( '66px', $result[0]['email_attrs']['grid-column-gap'] );
+		$this->assertEquals( '297px', $result[0]['innerBlocks'][0]['email_attrs']['width'] );
+	}
+
+	/**
 	 * Test a responsive grid (column count plus minimum column width) stays two columns only when each cell meets the minimum width.
 	 *
 	 * @testWith ["12rem", true]

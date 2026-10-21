@@ -1359,6 +1359,27 @@ class Spacing_Preprocessor_Test extends \Email_Editor_Unit_Test {
 	}
 
 	/**
+	 * Test a percentage column gap is left for the width pass, and a percentage row gap collapses to 0.
+	 */
+	public function testItLeavesPercentageColumnGapForTheWidthPass(): void {
+		$blocks = array(
+			$this->build_grid_group(
+				array(
+					'type'        => 'grid',
+					'columnCount' => 2,
+				),
+				array( array(), array() ),
+				array( 'spacing' => array( 'blockGap' => '10%' ) )
+			),
+		);
+
+		$result = $this->preprocessor->preprocess( $blocks, $this->layout, $this->styles );
+
+		$this->assertSame( '10%', $result[0]['email_attrs']['grid-column-gap'] );
+		$this->assertSame( '0px', $result[0]['email_attrs']['grid-row-gap'] );
+	}
+
+	/**
 	 * Test an explicit numeric zero gap is kept rather than replaced by the global gap.
 	 */
 	public function testItKeepsNumericZeroGridGap(): void {

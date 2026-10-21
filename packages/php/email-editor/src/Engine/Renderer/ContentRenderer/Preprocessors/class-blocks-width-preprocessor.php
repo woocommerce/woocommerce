@@ -131,9 +131,14 @@ class Blocks_Width_Preprocessor implements Preprocessor {
 			if ( ! empty( $block['email_attrs']['two-column-grid'] ) ) {
 				$grid_content_width = $inner_content_width
 					- $this->convert_padding_to_pixels( $block_padding_left, $inner_content_width )
-					- $this->convert_padding_to_pixels( $block_padding_right, $inner_content_width )
-					- $this->parse_number_from_string_with_pixels( $block['email_attrs']['grid-column-gap'] ?? '0px' );
-				$cell_width         = max( 0, floor( $grid_content_width / 2 ) );
+					- $this->convert_padding_to_pixels( $block_padding_right, $inner_content_width );
+				$column_gap         = $block['email_attrs']['grid-column-gap'] ?? '0px';
+				if ( str_ends_with( $column_gap, '%' ) ) {
+					// The Spacing_Preprocessor leaves a percentage gap for this pass, which knows the grid's width.
+					$column_gap                              = round( $grid_content_width * Styles_Helper::parse_value( $column_gap ) / 100, 2 ) . 'px';
+					$block['email_attrs']['grid-column-gap'] = $column_gap;
+				}
+				$cell_width = max( 0, floor( ( $grid_content_width - $this->parse_number_from_string_with_pixels( $column_gap ) ) / 2 ) );
 
 				if ( $this->fits_minimum_column_width( $block, $cell_width ) ) {
 					$modified_layout['contentSize']                 = "{$cell_width}px";

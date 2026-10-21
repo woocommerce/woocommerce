@@ -344,7 +344,8 @@ class Spacing_Preprocessor implements Context_Aware_Preprocessor {
 	 * @param string $axis 'top' for the row gap, 'left' for the column gap.
 	 * @param string $default_gap The global block gap.
 	 * @param array  $variables_map Map of CSS variable names to resolved values for preset resolution.
-	 * @return string Gap in pixels, e.g. "16px".
+	 * @return string Gap in pixels, e.g. "16px". A percentage column gap is returned as is, for
+	 *                Blocks_Width_Preprocessor to resolve against the grid's width.
 	 */
 	private function get_grid_gap( array $block, string $axis, string $default_gap, array $variables_map ): string {
 		$block_gap = $block['attrs']['style']['spacing']['blockGap'] ?? null;
@@ -353,6 +354,10 @@ class Spacing_Preprocessor implements Context_Aware_Preprocessor {
 		$value     = is_string( $value ) && '' !== trim( $value ) ? $value : $default_gap;
 
 		$value = Preset_Variable_Resolver::resolve( $value, $variables_map );
+		if ( str_ends_with( trim( $value ), '%' ) ) {
+			// A percentage row gap has no definite height to resolve against, so it collapses to 0.
+			return 'left' === $axis ? max( 0.0, Styles_Helper::parse_value( $value ) ) . '%' : '0px';
+		}
 		$value = (string) Styles_Helper::clamp_to_static_px( $value );
 		$px    = Styles_Helper::convert_to_px( $value, false );
 
