@@ -244,7 +244,6 @@ CSS;
 
 		if ( $has_overlay ) {
 			$wrapper_attributes['data-wp-watch---scrolling']        = 'callbacks.scrollLimit';
-			$wrapper_attributes['data-wp-on--keyup']                = 'actions.closeOverlayOnEscape';
 			$wrapper_attributes['data-wp-class--is-overlay-opened'] = 'context.isOverlayOpened';
 		}
 
@@ -255,6 +254,7 @@ CSS;
 				<button
 					type="button"
 					class="wc-block-product-filters__open-overlay"
+					data-wp-init="callbacks.initOverlay"
 					data-wp-on--click="actions.openOverlay"
 				>
 					<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -268,6 +268,9 @@ CSS;
 							class="wc-block-product-filters__overlay-dialog"
 							role="dialog"
 							aria-label="<?php echo esc_attr__( 'Product Filters', 'woocommerce' ); ?>"
+							data-wp-bind--aria-modal="context.isOverlayOpened"
+							data-wp-on-document--keydown="actions.handleOverlayKeydown"
+							data-wp-watch="callbacks.focusOverlay"
 						>
 							<header class="wc-block-product-filters__overlay-header">
 								<button
