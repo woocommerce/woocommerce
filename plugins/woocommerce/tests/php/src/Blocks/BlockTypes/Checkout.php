@@ -139,6 +139,23 @@ class Checkout extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Checkout is told whether woocommerce_checkout_show_terms hides the terms.
+	 */
+	public function test_enqueue_data_exposes_checkout_show_terms(): void {
+		$checkout = new CheckoutMock( $this->asset_api, $this->registry, $this->integration_registry, 'checkout-mock' );
+
+		$checkout->mock_enqueue_data();
+		$this->assertTrue( $this->registry->get()['checkoutShowTerms'], 'Terms are shown by default' );
+
+		add_filter( 'woocommerce_checkout_show_terms', '__return_false' );
+		\WP_Block_Type_Registry::get_instance()->unregister( 'woocommerce/checkout-mock' );
+		$registry = new AssetDataRegistryMock( $this->asset_api );
+		$checkout = new CheckoutMock( $this->asset_api, $registry, $this->integration_registry, 'checkout-mock' );
+		$checkout->mock_enqueue_data();
+		$this->assertFalse( $registry->get()['checkoutShowTerms'], 'The filter should hide terms' );
+	}
+
+	/**
 	 * Overrides the WC logger.
 	 *
 	 * @return mixed
