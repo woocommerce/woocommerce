@@ -56,18 +56,35 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	private $original_id_map = array();
 
 	/**
-	 * ID cells from the file, keyed by parsed row, so result labels show the ID the merchant can find in the CSV.
+	 * ID cell from the file and SKU fallback refusal of each parsed row, keyed like the parsed data.
 	 *
-	 * @var array<int, int>
+	 * @var array<int, array{csv_id: int, refusal: string}>
 	 */
-	private $parsed_row_csv_ids = array();
+	private $parsed_row_info = array();
 
 	/**
-	 * ID cell from the file for the row being imported.
+	 * Entry of $parsed_row_info for the row being imported.
 	 *
-	 * @var int
+	 * @var array{csv_id?: int, refusal?: string}
 	 */
-	private $importing_row_csv_id = 0;
+	private $importing_row_info = array();
+
+	/**
+	 * Why the SKU fallback declined the row being parsed, as a SKU_FALLBACK_REFUSED_* value, or an empty string.
+	 *
+	 * @var string
+	 */
+	private $sku_fallback_refusal = '';
+
+	/**
+	 * The product matched by SKU has another type than the row would save.
+	 */
+	private const SKU_FALLBACK_REFUSED_TYPE = 'type';
+
+	/**
+	 * The row refers to other products by IDs that likely come from the same other site as its own ID.
+	 */
+	private const SKU_FALLBACK_REFUSED_ID_REFERENCE = 'id_reference';
 
 	/**
 	 * Initialize importer.
@@ -278,11 +295,11 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	public function parse_relative_field( $value ) {
 		global $wpdb;
 
-		$value = empty( $value ) ? '' : sanitize_text_field( $this->unescape_data( (string) $value ) );
-
-		if ( '' === $value ) {
+		if ( empty( $value ) ) {
 			return '';
 		}
+
+		$value = $this->unescape_data( $value );
 
 		// IDs are prefixed with id:.
 		if ( preg_match( '/^id:(\d+)$/', $value, $matches ) ) {
@@ -345,7 +362,8 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 *
 	 * If we're not doing an update, create a placeholder product so mapping works
 	 * for rows following this one. When updating, an ID that does not exist on
-	 * this site falls back to the product matching the row's SKU.
+	 * this site falls back to the product matching the row's SKU, if the row can
+	 * safely update it.
 	 *
 	 * @param string $value Field value.
 	 *
@@ -367,7 +385,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 		// Not updating? Make sure we have a new placeholder for this ID.
 		if ( ! $this->params['update_existing'] ) {
-			$row_sku     = $this->get_row_value( 'sku' );
+			$row_sku     = $this->parse_sku_field( $this->get_row_value( 'sku' ) );
 			$id_from_sku = $row_sku ? wc_get_product_id_by_sku( $row_sku ) : 0;
 
 			// If row has a SKU, make sure placeholder was not made already.
@@ -393,11 +411,15 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		// An ID exported from another site may not exist here. Fall back to the row's SKU so the
 		// row updates the matching product instead of failing later with an invalid product error.
 		if ( ! in_array( get_post_type( $id ), array( 'product', 'product_variation' ), true ) ) {
-			$row_sku     = $this->get_row_value( 'sku' );
+			$row_sku     = $this->parse_sku_field( $this->get_row_value( 'sku' ) );
 			$id_from_sku = $row_sku ? wc_get_product_id_by_sku( $row_sku ) : 0;
 
-			if ( $id_from_sku && $this->row_type_matches_product( $id_from_sku ) ) {
-				return $id_from_sku;
+			if ( $id_from_sku ) {
+				$this->sku_fallback_refusal = $this->get_sku_fallback_refusal( $id_from_sku );
+
+				if ( '' === $this->sku_fallback_refusal ) {
+					return $id_from_sku;
+				}
 			}
 		}
 
@@ -408,7 +430,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * Get a column value of the row currently being parsed.
 	 *
 	 * @param string $key Mapped column key, such as 'sku' or 'type'.
-	 * @return string Cell value unescaped and sanitized as parsed fields are, or an empty string when the file has no such column.
+	 * @return string Cell value converted to UTF-8, or an empty string when the file has no such column.
 	 */
 	private function get_row_value( string $key ): string {
 		$column_index = array_search( $key, $this->get_mapped_keys(), true );
@@ -417,7 +439,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			return '';
 		}
 
-		return sanitize_text_field( $this->unescape_data( self::convert_to_utf8( (string) ( $this->raw_data[ $this->parsing_raw_data_index ][ $column_index ] ?? '' ) ) ) );
+		return self::convert_to_utf8( (string) ( $this->raw_data[ $this->parsing_raw_data_index ][ $column_index ] ?? '' ) );
 	}
 
 	/**
@@ -437,10 +459,32 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	}
 
 	/**
+	 * Get why the row cannot update the product its SKU matched, or an empty string when it can.
+	 *
+	 * Another type would make get_product_object() convert the product. An `id:` reference in a row whose own ID
+	 * comes from another site most likely points at a product of that site as well.
+	 *
+	 * @param int $product_id Existing product ID matched by SKU.
+	 * @return string A SKU_FALLBACK_REFUSED_* value, or an empty string.
+	 */
+	private function get_sku_fallback_refusal( int $product_id ): string {
+		if ( ! $this->row_type_matches_product( $product_id ) ) {
+			return self::SKU_FALLBACK_REFUSED_TYPE;
+		}
+
+		foreach ( array( 'parent_id', 'grouped_products', 'upsell_ids', 'cross_sell_ids' ) as $key ) {
+			if ( preg_match( '/(^|,)\s*id:\d/', $this->get_row_value( $key ) ) ) {
+				return self::SKU_FALLBACK_REFUSED_ID_REFERENCE;
+			}
+		}
+
+		return '';
+	}
+
+	/**
 	 * Whether the row would save the product matched by SKU as the type it already has.
 	 *
-	 * Any other type would make get_product_object() convert the product, so the fallback declines the
-	 * match and the row fails with a hint naming the product. A file without a Type column cannot convert anything.
+	 * A file without a Type column cannot convert anything.
 	 *
 	 * @param int $product_id Existing product ID matched by SKU.
 	 * @return bool
@@ -450,11 +494,16 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			return true;
 		}
 
-		$row_type = self::get_type_from_values( array_map( 'strtolower', $this->parse_comma_field( $this->get_row_value( 'type' ) ) ) );
+		$row_type     = self::get_type_from_values( array_map( 'strtolower', $this->parse_comma_field( $this->get_row_value( 'type' ) ) ) );
+		$product_type = WC_Product_Factory::get_product_type( $product_id );
 
-		$product = wc_get_product( $product_id );
+		// Variations of extension types, such as subscription variations, report their own type.
+		if ( ProductType::VARIATION === $product_type && $row_type !== $product_type ) {
+			$product      = wc_get_product( $product_id );
+			$product_type = $product ? $product->get_type() : $product_type;
+		}
 
-		return $product && $product->get_type() === $row_type;
+		return $product_type === $row_type;
 	}
 
 	/**
@@ -474,10 +523,11 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	/**
 	 * Parse a SKU cell, removing the apostrophe the exporter puts before a leading =, +, - or @.
 	 *
+	 * @since 11.4.0
 	 * @param string $value Field value.
 	 * @return string
 	 */
-	private function parse_sku_field( $value ): string {
+	public function parse_sku_field( $value ) {
 		return sanitize_text_field( $this->unescape_data( $value ) );
 	}
 
@@ -1278,6 +1328,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			}
 
 			$this->parsing_raw_data_index = $row_index;
+			$this->sku_fallback_refusal   = '';
 
 			$data = array();
 
@@ -1292,7 +1343,10 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 				$data[ $mapped_keys[ $id ] ] = call_user_func( $parse_functions[ $id ], self::convert_to_utf8( $value ) );
 			}
 
-			$this->parsed_row_csv_ids[ count( $this->parsed_data ) ] = absint( $this->get_row_value( 'id' ) );
+			$this->parsed_row_info[ count( $this->parsed_data ) ] = array(
+				'csv_id'  => absint( $this->get_row_value( 'id' ) ),
+				'refusal' => $this->sku_fallback_refusal,
+			);
 
 			/**
 			 * Filter product importer parsed data.
@@ -1317,7 +1371,8 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * @return string
 	 */
 	protected function get_row_id( $parsed_data ) {
-		$id               = $this->importing_row_csv_id ? $this->importing_row_csv_id : ( isset( $parsed_data['id'] ) ? absint( $parsed_data['id'] ) : 0 );
+		$csv_id           = $this->importing_row_info['csv_id'] ?? 0;
+		$id               = $csv_id ? $csv_id : ( isset( $parsed_data['id'] ) ? absint( $parsed_data['id'] ) : 0 );
 		$sku              = isset( $parsed_data['sku'] ) ? esc_attr( $parsed_data['sku'] ) : '';
 		$global_unique_id = isset( $parsed_data['global_unique_id'] ) ? esc_attr( $parsed_data['global_unique_id'] ) : '';
 		$name             = isset( $parsed_data['name'] ) ? esc_attr( $parsed_data['name'] ) : '';
@@ -1504,7 +1559,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		);
 
 		foreach ( $this->parsed_data as $parsed_data_key => $parsed_data ) {
-			$this->importing_row_csv_id = $this->parsed_row_csv_ids[ $parsed_data_key ] ?? 0;
+			$this->importing_row_info = $this->parsed_row_info[ $parsed_data_key ] ?? array();
 
 			do_action( 'woocommerce_product_import_before_import', $parsed_data );
 
@@ -1613,8 +1668,10 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			$result = $this->process_item( $parsed_data );
 
 			if ( is_wp_error( $result ) ) {
-				if ( $sku_exists && $id !== $id_from_sku && ( $id_exists || ( $update_existing && $id ) ) ) {
-					$result = $this->add_sku_match_hint( $result, $id, $id_exists, (string) $sku, $id_from_sku );
+				$refusal = $this->importing_row_info['refusal'] ?? '';
+
+				if ( $sku_exists && $id !== $id_from_sku && ( $id_exists || '' !== $refusal ) ) {
+					$result = $this->add_sku_match_hint( $result, $id_exists ? $id : 0, $refusal, (string) $sku, $id_from_sku );
 				}
 				$result->add_data( array( 'row' => $this->get_row_id( $parsed_data ) ) );
 				$data['failed'][] = $result;
@@ -1634,7 +1691,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			}
 		}
 
-		$this->importing_row_csv_id = 0;
+		$this->importing_row_info = array();
 
 		return $data;
 	}
@@ -1642,22 +1699,22 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	/**
 	 * Explain a failed row whose SKU belongs to another product than the one its ID points at.
 	 *
-	 * Either the ID matches a different product, or it matches none and the SKU fallback declined a product of
-	 * another type. A failure about the row's own type is left as it is.
+	 * Either the ID matches a different product, or it matches none and the SKU fallback declined the
+	 * product for the given reason. A failure about the row's own type is left as it is.
 	 *
 	 * @param WP_Error $error       Error returned when processing the row.
-	 * @param int      $id          Product ID the row's ID column resolved to.
-	 * @param bool     $id_exists   Whether that ID is an existing product.
+	 * @param int      $id          Existing product ID the row's ID column matched, or 0.
+	 * @param string   $refusal     SKU_FALLBACK_REFUSED_* value when the ID matched no product.
 	 * @param string   $sku         SKU column value of the row.
 	 * @param int      $id_from_sku Product ID that already uses the row's SKU.
 	 * @return WP_Error
 	 */
-	private function add_sku_match_hint( WP_Error $error, int $id, bool $id_exists, string $sku, int $id_from_sku ): WP_Error {
+	private function add_sku_match_hint( WP_Error $error, int $id, string $refusal, string $sku, int $id_from_sku ): WP_Error {
 		if ( 'woocommerce_product_importer_invalid_type' === $error->get_error_code() ) {
 			return $error;
 		}
 
-		if ( $id_exists ) {
+		if ( $id ) {
 			$message = sprintf(
 				/* translators: 1: original error message, 2: product ID matched by the row's ID, 3: SKU, 4: product ID that already uses the SKU */
 				__( '%1$s The ID of this row matches product #%2$d, but its SKU "%3$s" already belongs to product #%4$d. Point the ID and SKU at the same product, or remove one of them.', 'woocommerce' ),
@@ -1666,10 +1723,18 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 				$sku,
 				$id_from_sku
 			);
-		} else {
+		} elseif ( self::SKU_FALLBACK_REFUSED_TYPE === $refusal ) {
 			$message = sprintf(
 				/* translators: 1: original error message, 2: SKU, 3: product ID that uses the SKU */
 				__( '%1$s The ID of this row does not exist on this site, and its SKU "%2$s" belongs to product #%3$d, which has a different product type than the row. Use the same type in the row, or remove the SKU.', 'woocommerce' ),
+				$error->get_error_message(),
+				$sku,
+				$id_from_sku
+			);
+		} else {
+			$message = sprintf(
+				/* translators: 1: original error message, 2: SKU, 3: product ID that uses the SKU */
+				__( '%1$s The ID of this row does not exist on this site, and its SKU "%2$s" belongs to product #%3$d, but the row also refers to other products by ID, which may be IDs from the site the file came from. Refer to those products by SKU instead.', 'woocommerce' ),
 				$error->get_error_message(),
 				$sku,
 				$id_from_sku

@@ -1994,7 +1994,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	 * @return array Import results.
 	 */
 	private function import_csv_rows( string $csv, ?array $mapping = null, bool $update_existing = true ): array {
-		$file = get_temp_dir() . 'import-40274-' . wp_generate_uuid4() . '.csv';
+		$file = get_temp_dir() . 'product-import-' . wp_generate_uuid4() . '.csv';
 		file_put_contents( $file, $csv ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Temporary CSV fixture.
 
 		try {
@@ -2173,6 +2173,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$this->assertEmpty( $data['updated'], 'Neither row may update the product matched by SKU' );
 		$this->assertCount( 2, $data['failed'], 'Both rows fail' );
 		$this->assertStringContainsString( 'different product type', $data['failed'][0]->get_error_message(), 'The failure explains why the SKU did not match' );
+		$this->assertStringContainsString( 'different product type', $data['failed'][1]->get_error_message(), 'The failure explains why the SKU did not match' );
 		$this->assertSame( 'product_variation', get_post_type( $variation->get_id() ), 'The variation must not be converted to a simple product' );
 		$this->assertSame( ProductType::VARIABLE, WC_Product_Factory::get_product_type( $parent->get_id() ), 'The variable product must not be converted to a simple product' );
 	}
@@ -2240,7 +2241,9 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 
 		$this->assertSame( array( $product_a->get_id(), $product_c->get_id() ), $data['updated'], 'Only the rows whose own SKU matches update a product' );
 		$this->assertCount( 1, $data['skipped'], 'The repeated ID with an unknown SKU is skipped' );
+		$this->assertSame( 'No matching product exists to update.', $data['skipped'][0]->get_error_message(), 'The unknown SKU matches nothing' );
 		$this->assertCount( 1, $data['failed'], 'The repeated ID with a variation type is refused' );
+		$this->assertStringContainsString( 'different product type', $data['failed'][0]->get_error_message(), 'The variation row is refused for its type' );
 		$updated_a = wc_get_product( $product_a->get_id() );
 		$this->assertSame( 'Title A', $updated_a->get_name(), 'Product A keeps the first row\'s name' );
 		$this->assertSame( 'IMPORT-40274-REPEAT-A', $updated_a->get_sku(), 'Product A keeps its SKU' );
@@ -2262,6 +2265,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 			array(
 				'ID'     => 'id',
 				'Type'   => 'type',
+				'SKU'    => 'sku',
 				'Name'   => 'name',
 				'Parent' => 'parent_id',
 			)
@@ -2407,7 +2411,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$variation->save();
 
 		$use_subtype = function ( $classname, $product_type, $context, $product_id ) use ( $subtype_class, $variation_id ) {
-			return 'import-40274-sub-variation' === $product_type || $variation_id === (int) $product_id ? $subtype_class : $classname;
+			return ( 'import-40274-sub-variation' === $product_type || $variation_id === (int) $product_id ) ? $subtype_class : $classname;
 		};
 		$export_type = function ( $types ) {
 			return $types + array( 'import-40274-sub-variation' => 'Subtype variations' );
@@ -2419,15 +2423,84 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		add_filter( 'woocommerce_exporter_product_types', $export_type );
 		add_filter( 'woocommerce_data_stores', $data_store );
 
-		try {
-			$data = $this->import_csv_rows( "ID,Type,SKU,Name\n" . ( $variation_id + 1000 ) . ",import-40274-sub-variation,IMPORT-40274-SUBTYPE,Subtype row\n" );
-		} finally {
-			remove_filter( 'woocommerce_product_class', $use_subtype, 10 );
-			remove_filter( 'woocommerce_exporter_product_types', $export_type );
-			remove_filter( 'woocommerce_data_stores', $data_store );
-		}
+		$data = $this->import_csv_rows( "ID,Type,SKU,Name\n" . ( $variation_id + 1000 ) . ",import-40274-sub-variation,IMPORT-40274-SUBTYPE,Subtype row\n" );
 
 		$this->assertSame( array( $variation_id ), $data['updated'], 'The subtype row updates the variation matched by SKU' );
 		$this->assertSame( 'product_variation', get_post_type( $variation_id ), 'The variation stays a variation' );
+	}
+
+	/**
+	 * @testdox Should not match by SKU a row that refers to other products by IDs from the site its own ID came from.
+	 */
+	public function test_import_sku_fallback_refuses_rows_with_id_references_40274(): void {
+		$parent    = WC_Helper_Product::create_variation_product();
+		$variation = wc_get_product( $parent->get_children()[0] );
+		$variation->set_sku( 'IMPORT-40274-ID-REF' );
+		$variation->save();
+		$unrelated = WC_Helper_Product::create_variation_product();
+
+		$csv = "ID,Type,SKU,Name,Parent\n" . ( $unrelated->get_id() + 1000 ) . ",variation,IMPORT-40274-ID-REF,From another site,id:{$unrelated->get_id()}\n";
+
+		$data = $this->import_csv_rows(
+			$csv,
+			array(
+				'ID'     => 'id',
+				'Type'   => 'type',
+				'SKU'    => 'sku',
+				'Name'   => 'name',
+				'Parent' => 'parent_id',
+			)
+		);
+
+		$this->assertEmpty( $data['updated'], 'The row must not update the variation matched by SKU' );
+		$this->assertCount( 1, $data['failed'], 'The row fails' );
+		$this->assertStringContainsString( 'refers to other products by ID', $data['failed'][0]->get_error_message(), 'The failure explains why the SKU did not match' );
+		$this->assertSame( $parent->get_id(), wc_get_product( $variation->get_id() )->get_parent_id(), 'The variation keeps its parent' );
+	}
+
+	/**
+	 * @testdox Should match a variation by SKU when the file has no Type column.
+	 */
+	public function test_import_sku_fallback_without_type_column_40274(): void {
+		$parent    = WC_Helper_Product::create_variation_product();
+		$variation = wc_get_product( $parent->get_children()[0] );
+		$variation->set_sku( 'IMPORT-40274-NO-TYPE' );
+		$variation->save();
+
+		$data = $this->import_csv_rows(
+			"ID,SKU,Regular price\n" . ( $variation->get_id() + 1000 ) . ",IMPORT-40274-NO-TYPE,31\n",
+			array(
+				'ID'            => 'id',
+				'SKU'           => 'sku',
+				'Regular price' => 'regular_price',
+			)
+		);
+
+		$this->assertSame( array( $variation->get_id() ), $data['updated'], 'The row updates the variation matched by SKU' );
+		$this->assertSame( '31', wc_get_product( $variation->get_id() )->get_regular_price(), 'The variation gets the row\'s price' );
+		$this->assertSame( $parent->get_id(), wc_get_product( $variation->get_id() )->get_parent_id(), 'The variation keeps its parent' );
+	}
+
+	/**
+	 * @testdox Should resolve a SKU reference to a product whose stored SKU keeps characters the import would clean.
+	 */
+	public function test_import_resolves_references_to_raw_stored_skus_40274(): void {
+		$parent = WC_Helper_Product::create_variation_product();
+		$parent->set_sku( 'IMPORT-40274  RAW' );
+		$parent->save();
+		$variation_id = $parent->get_children()[0];
+
+		$data = $this->import_csv_rows(
+			"ID,Type,Parent,Regular price\n{$variation_id},variation,IMPORT-40274  RAW,29\n",
+			array(
+				'ID'            => 'id',
+				'Type'          => 'type',
+				'Parent'        => 'parent_id',
+				'Regular price' => 'regular_price',
+			)
+		);
+
+		$this->assertSame( array( $variation_id ), $data['updated'], 'The row with the raw parent SKU is updated' );
+		$this->assertSame( $parent->get_id(), wc_get_product( $variation_id )->get_parent_id(), 'The reference resolves to the parent' );
 	}
 }
