@@ -11,14 +11,233 @@ namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Unit\Core\ValueObject
 
 use DateTimeImmutable;
 use DateTimeZone;
-use DomainException;
 use PHPUnit\Framework\TestCase;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\InvalidInputException;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ValidationErrorCode;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
+use Automattic\WooCommerce\SubscriptionsEngine\Tests\Unit\AssertsInvalidInput;
 
 /**
  * @covers \Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy
  */
 class BillingPolicyTest extends TestCase {
+
+	use AssertsInvalidInput;
+
+	/**
+	 * @testdox Each refusal reports its code, field and params.
+	 * @dataProvider provide_refusals
+	 *
+	 * @param callable             $operation Operation expected to be refused.
+	 * @param string               $code      Expected error code.
+	 * @param string               $field     Expected field.
+	 * @param array<string, mixed> $params    Expected params.
+	 */
+	public function test_each_refusal_reports_its_code_field_and_params( callable $operation, string $code, string $field, array $params ): void {
+		$this->assert_invalid_input( $operation, $code, $field, $params );
+	}
+
+	/**
+	 * @return array<string, array{0: callable, 1: string, 2: string, 3: array<string, mixed>}>
+	 */
+	public function provide_refusals(): array {
+		$units = array( 'allowed' => array( 'day', 'week', 'month', 'year' ) );
+
+		return array(
+			'interval not positive'     => array(
+				static function (): void {
+					new BillingPolicy( 'month', 0, null, null, null );
+				},
+				ValidationErrorCode::OUT_OF_BOUNDS,
+				'interval',
+				array( 'min' => 1 ),
+			),
+			'unknown period'            => array(
+				static function (): void {
+					new BillingPolicy( 'fortnight', 1, null, null, null );
+				},
+				ValidationErrorCode::NOT_IN_ENUM,
+				'period',
+				$units,
+			),
+			'period missing'            => array(
+				static function (): void {
+					BillingPolicy::from_array( array( 'interval' => 1 ) );
+				},
+				ValidationErrorCode::REQUIRED,
+				'period',
+				array(),
+			),
+			'interval missing'          => array(
+				static function (): void {
+					BillingPolicy::from_array( array( 'period' => 'month' ) );
+				},
+				ValidationErrorCode::REQUIRED,
+				'interval',
+				array(),
+			),
+			'period not a string'       => array(
+				static function (): void {
+					BillingPolicy::from_array(
+						array(
+							'period'   => 1,
+							'interval' => 1,
+						)
+					);
+				},
+				ValidationErrorCode::INVALID_TYPE,
+				'period',
+				array( 'type' => 'string' ),
+			),
+			'interval not an integer'   => array(
+				static function (): void {
+					BillingPolicy::from_array(
+						array(
+							'period'   => 'month',
+							'interval' => '2',
+						)
+					);
+				},
+				ValidationErrorCode::INVALID_TYPE,
+				'interval',
+				array( 'type' => 'integer' ),
+			),
+			'trial not an object'       => array(
+				static function (): void {
+					BillingPolicy::from_array(
+						array(
+							'period'         => 'month',
+							'interval'       => 1,
+							'trial_duration' => 'P7D',
+						)
+					);
+				},
+				ValidationErrorCode::INVALID_TYPE,
+				'trial_duration',
+				array( 'type' => 'object' ),
+			),
+			'min_cycles negative'       => array(
+				static function (): void {
+					new BillingPolicy( 'month', 1, -1, null, null );
+				},
+				ValidationErrorCode::OUT_OF_BOUNDS,
+				'min_cycles',
+				array( 'min' => 0 ),
+			),
+			'max_cycles negative'       => array(
+				static function (): void {
+					new BillingPolicy( 'month', 1, null, -1, null );
+				},
+				ValidationErrorCode::OUT_OF_BOUNDS,
+				'max_cycles',
+				array( 'min' => 0 ),
+			),
+			'min_cycles above max'      => array(
+				static function (): void {
+					new BillingPolicy( 'month', 1, 5, 2, null );
+				},
+				ValidationErrorCode::OUT_OF_BOUNDS,
+				'min_cycles',
+				array( 'max' => 2 ),
+			),
+			'trial length missing'      => array(
+				static function (): void {
+					BillingPolicy::from_array(
+						array(
+							'period'         => 'month',
+							'interval'       => 1,
+							'trial_duration' => array( 'unit' => 'day' ),
+						)
+					);
+				},
+				ValidationErrorCode::REQUIRED,
+				'trial_duration.length',
+				array(),
+			),
+			'trial unit missing'        => array(
+				static function (): void {
+					BillingPolicy::from_array(
+						array(
+							'period'         => 'month',
+							'interval'       => 1,
+							'trial_duration' => array( 'length' => 7 ),
+						)
+					);
+				},
+				ValidationErrorCode::REQUIRED,
+				'trial_duration.unit',
+				array(),
+			),
+			'trial length not integer'  => array(
+				static function (): void {
+					BillingPolicy::from_array(
+						array(
+							'period'         => 'month',
+							'interval'       => 1,
+							'trial_duration' => array(
+								'length' => '7',
+								'unit'   => 'day',
+							),
+						)
+					);
+				},
+				ValidationErrorCode::INVALID_TYPE,
+				'trial_duration.length',
+				array( 'type' => 'integer' ),
+			),
+			'trial unit not a string'   => array(
+				static function (): void {
+					BillingPolicy::from_array(
+						array(
+							'period'         => 'month',
+							'interval'       => 1,
+							'trial_duration' => array(
+								'length' => 7,
+								'unit'   => 1,
+							),
+						)
+					);
+				},
+				ValidationErrorCode::INVALID_TYPE,
+				'trial_duration.unit',
+				array( 'type' => 'string' ),
+			),
+			'trial length not positive' => array(
+				static function (): void {
+					new BillingPolicy(
+						'month',
+						1,
+						null,
+						null,
+						array(
+							'length' => 0,
+							'unit'   => 'day',
+						)
+					);
+				},
+				ValidationErrorCode::OUT_OF_BOUNDS,
+				'trial_duration.length',
+				array( 'min' => 1 ),
+			),
+			'unknown trial unit'        => array(
+				static function (): void {
+					new BillingPolicy(
+						'month',
+						1,
+						null,
+						null,
+						array(
+							'length' => 7,
+							'unit'   => 'fortnight',
+						)
+					);
+				},
+				ValidationErrorCode::NOT_IN_ENUM,
+				'trial_duration.unit',
+				$units,
+			),
+		);
+	}
 
 	/**
 	 * @testdox from_array refuses an unusable cadence.
@@ -36,7 +255,7 @@ class BillingPolicyTest extends TestCase {
 			'interval' => $interval,
 		);
 
-		$this->expectException( DomainException::class );
+		$this->expectException( InvalidInputException::class );
 		$this->expectExceptionMessage( $message );
 
 		BillingPolicy::from_array( $data );
@@ -142,25 +361,90 @@ class BillingPolicyTest extends TestCase {
 	}
 
 	/**
-	 * @testdox construction refuses an unknown period.
+	 * @testdox from_array reports every invalid value in one exception.
 	 */
-	public function test_construction_refuses_an_unknown_period(): void {
-		$this->expectException( DomainException::class );
-
-		new BillingPolicy( 'fortnight', 1, null, null, null );
+	public function test_from_array_reports_every_invalid_value(): void {
+		$this->assert_invalid_inputs(
+			static function (): void {
+				BillingPolicy::from_array(
+					array(
+						'interval'       => 0,
+						'min_cycles'     => -1,
+						'trial_duration' => array( 'length' => 'x' ),
+					)
+				);
+			},
+			array(
+				array( ValidationErrorCode::REQUIRED, 'period', array() ),
+				array( ValidationErrorCode::OUT_OF_BOUNDS, 'interval', array( 'min' => 1 ) ),
+				array( ValidationErrorCode::OUT_OF_BOUNDS, 'min_cycles', array( 'min' => 0 ) ),
+				array( ValidationErrorCode::INVALID_TYPE, 'trial_duration.length', array( 'type' => 'integer' ) ),
+				array( ValidationErrorCode::REQUIRED, 'trial_duration.unit', array() ),
+			)
+		);
 	}
 
 	/**
-	 * @testdox construction refuses a non-positive interval.
+	 * @testdox from_array reports a bad period, trial length and trial unit together.
 	 */
-	public function test_construction_refuses_a_non_positive_interval(): void {
-		$this->expectException( DomainException::class );
+	public function test_from_array_reports_the_trial_values_with_the_other_fields(): void {
+		$this->assert_invalid_inputs(
+			static function (): void {
+				BillingPolicy::from_array(
+					array(
+						'period'         => 'fortnight',
+						'interval'       => 1,
+						'trial_duration' => array(
+							'length' => 0,
+							'unit'   => 'fortnight',
+						),
+					)
+				);
+			},
+			array(
+				array( ValidationErrorCode::NOT_IN_ENUM, 'period', array( 'allowed' => array( 'day', 'week', 'month', 'year' ) ) ),
+				array( ValidationErrorCode::OUT_OF_BOUNDS, 'trial_duration.length', array( 'min' => 1 ) ),
+				array( ValidationErrorCode::NOT_IN_ENUM, 'trial_duration.unit', array( 'allowed' => array( 'day', 'week', 'month', 'year' ) ) ),
+			)
+		);
+	}
 
-		new BillingPolicy( 'month', 0, null, null, null );
+	/**
+	 * @testdox The construction reports every invalid value in one exception.
+	 */
+	public function test_construction_reports_every_invalid_value(): void {
+		$this->assert_invalid_inputs(
+			static function (): void {
+				new BillingPolicy( 'fortnight', 0, null, -2, null );
+			},
+			array(
+				array( ValidationErrorCode::NOT_IN_ENUM, 'period', array( 'allowed' => array( 'day', 'week', 'month', 'year' ) ) ),
+				array( ValidationErrorCode::OUT_OF_BOUNDS, 'interval', array( 'min' => 1 ) ),
+				array( ValidationErrorCode::OUT_OF_BOUNDS, 'max_cycles', array( 'min' => 0 ) ),
+			)
+		);
+	}
+
+	/**
+	 * @testdox min_cycles above max_cycles is checked only when both bounds pass their own checks.
+	 */
+	public function test_the_cycle_bounds_check_runs_only_on_valid_bounds(): void {
+		$this->assert_invalid_inputs(
+			static function (): void {
+				new BillingPolicy( 'month', 1, 5, 2, null );
+			},
+			array( array( ValidationErrorCode::OUT_OF_BOUNDS, 'min_cycles', array( 'max' => 2 ) ) )
+		);
+		$this->assert_invalid_inputs(
+			static function (): void {
+				new BillingPolicy( 'month', 1, -1, 2, null );
+			},
+			array( array( ValidationErrorCode::OUT_OF_BOUNDS, 'min_cycles', array( 'min' => 0 ) ) )
+		);
 	}
 
 	public function test_non_array_trial_duration_throws(): void {
-		$this->expectException( DomainException::class );
+		$this->expectException( InvalidInputException::class );
 		$this->expectExceptionMessage( 'BillingPolicy: trial_duration must be null or an array, got string.' );
 
 		BillingPolicy::from_array(
@@ -180,7 +464,7 @@ class BillingPolicyTest extends TestCase {
 	 */
 	public function test_min_and_max_cycles_validation( ?string $expected_exception_message, ?int $min_cycles, ?int $max_cycles ): void {
 		if ( null !== $expected_exception_message ) {
-			$this->expectException( DomainException::class );
+			$this->expectException( InvalidInputException::class );
 			$this->expectExceptionMessage( $expected_exception_message );
 		}
 

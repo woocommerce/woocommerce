@@ -9,15 +9,18 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Unit\Core\ValueObject;
 
-use DomainException;
 use PHPUnit\Framework\TestCase;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\InvalidInputException;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
+use Automattic\WooCommerce\SubscriptionsEngine\Tests\Unit\AssertsInternalInvariant;
 
 /**
  * @covers \Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot
  */
 class PlanSnapshotTest extends TestCase {
+
+	use AssertsInternalInvariant;
 
 	public function test_schema_version_defaults_to_one(): void {
 		$snapshot = PlanSnapshot::from_array( array( 'selling_plan_id' => 7 ) );
@@ -91,9 +94,11 @@ class PlanSnapshotTest extends TestCase {
 	}
 
 	public function test_negative_schema_version_throws(): void {
-		$this->expectException( DomainException::class );
-
-		PlanSnapshot::from_array( array( 'selling_plan_id' => 7 ), 0 );
+		$this->assert_internal_invariant(
+			static function (): void {
+				PlanSnapshot::from_array( array( 'selling_plan_id' => 7 ), 0 );
+			}
+		);
 	}
 
 	/**
@@ -133,7 +138,7 @@ class PlanSnapshotTest extends TestCase {
 			)
 		);
 
-		$this->expectException( DomainException::class );
+		$this->expectException( InvalidInputException::class );
 		$snapshot->read_billing_policy();
 	}
 
@@ -159,7 +164,7 @@ class PlanSnapshotTest extends TestCase {
 			)
 		);
 
-		$this->expectException( DomainException::class );
+		$this->expectException( InvalidInputException::class );
 		$snapshot->read_billing_policy();
 	}
 

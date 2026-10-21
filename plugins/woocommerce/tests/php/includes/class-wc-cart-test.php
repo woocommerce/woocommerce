@@ -673,6 +673,40 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The cart template passes the cart item and its key to the backorder notification filter, so callbacks can tell variations apart.
+	 */
+	public function test_cart_template_passes_cart_item_to_backorder_notification_filter(): void {
+		list( $product, $variation ) = WC_Helper_Product::create_variation_product_with_global_attributes(
+			'Backorder Variation Product',
+			array(
+				'pa_size'   => 'huge',
+				'pa_number' => '',
+			)
+		);
+		$variation->set_manage_stock( true );
+		$variation->set_stock_quantity( 0 );
+		$variation->set_backorders( 'notify' );
+		$variation->save();
+
+		$received = array();
+		$capture  = function ( $notification, $product_id, $cart_item = null, $cart_item_key = null ) use ( &$received ) {
+			$received = array( $product_id, $cart_item, $cart_item_key );
+			return '<p class="backorder_notification">Variation ' . ( $cart_item['variation_id'] ?? 'unknown' ) . ' ships later</p>';
+		};
+		add_filter( 'woocommerce_cart_item_backorder_notification', $capture, 10, 4 );
+
+		list( $cart_item_key ) = $this->add_variation_to_cart( $product, $variation );
+
+		$html = wc_get_template_html( 'cart/cart.php' );
+
+		$this->assertSame( $product->get_id(), $received[0], 'The product ID argument stays the parent ID for backward compatibility.' );
+		$this->assertIsArray( $received[1], 'The cart item should be passed to the filter.' );
+		$this->assertSame( $variation->get_id(), $received[1]['variation_id'] );
+		$this->assertSame( $cart_item_key, $received[2] );
+		$this->assertStringContainsString( 'Variation ' . $variation->get_id() . ' ships later', $html );
+	}
+
+	/**
 	 * @testdox Cart item metadata dedup keys on the template-provided name regardless of name filters.
 	 */
 	public function test_formatted_cart_item_data_dedupes_against_the_provided_name_regardless_of_name_filters(): void {
@@ -1359,6 +1393,50 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$this->add_product_for_a_us_address_missing( $field );
 
 		$this->assertFalse( WC()->cart->show_shipping(), "The classic checkout only treats hidden => true as hidden, so the {$field} stays required." );
+	}
+
+	/**
+	 * The classic cart asks for the fields the shopper's own country requires, and GB asks for no
+	 * state. Away from it the question is `has_full_shipping_address()`, which also wants a town,
+	 * so the same half-typed address reads differently on the two sides.
+	 *
+	 * @testdox show_shipping() away from the classic cart wants the whole address, not the fields the country requires.
+	 */
+	public function test_show_shipping_away_from_the_classic_cart_wants_the_whole_address(): void {
+		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$customer                        = WC()->cart->get_customer();
+		$this->original_shipping_address = array(
+			'shipping_country'  => $customer->get_shipping_country(),
+			'shipping_state'    => $customer->get_shipping_state(),
+			'shipping_city'     => $customer->get_shipping_city(),
+			'shipping_postcode' => $customer->get_shipping_postcode(),
+		);
+		$customer->set_shipping_country( 'GB' );
+		$customer->set_shipping_state( '' );
+		$customer->set_shipping_city( '' );
+		$customer->set_shipping_postcode( 'PR1 4SS' );
+
+		$this->assertFalse(
+			$customer->has_full_shipping_address(),
+			'The fixture turns on GB requiring a town, so this should be an incomplete address.'
+		);
+
+		WC()->cart->cart_context = 'shortcode';
+
+		$this->assertTrue(
+			WC()->cart->show_shipping(),
+			'Field by field this is enough for GB, which requires no state and does not ask about the town.'
+		);
+
+		WC()->cart->cart_context = 'store-api';
+
+		$this->assertFalse(
+			WC()->cart->show_shipping(),
+			'Asked as a whole, the same address is still missing a town.'
+		);
 	}
 
 	/**
