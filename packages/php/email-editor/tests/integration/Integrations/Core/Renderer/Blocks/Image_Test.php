@@ -525,6 +525,24 @@ class Image_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test a shrunk image with a rem height is scaled in pixels.
+	 */
+	public function testItScalesRemHeightWhenShrinkingImage(): void {
+		$content                     = '<figure class="wp-block-image size-full is-resized"><img src="https://test.com/wp-content/uploads/2023/05/image.jpg" alt="" style="width:400px;height:12.5rem"/></figure>';
+		$parsed_image                = $this->parsed_image;
+		$parsed_image['attrs']       = array(
+			'width'    => '400px',
+			'sizeSlug' => 'full',
+		);
+		$parsed_image['email_attrs'] = array( 'width' => '290px' );
+
+		$rendered = $this->image_renderer->render( $content, $parsed_image, $this->rendering_context );
+
+		$this->assertStringContainsString( 'height="145"', $rendered );
+		$this->assertStringContainsString( 'height:145px;', $rendered );
+	}
+
+	/**
 	 * Test a fixed-width image that fits the width it was given keeps its size.
 	 */
 	public function testItKeepsFixedWidthImageThatFits(): void {

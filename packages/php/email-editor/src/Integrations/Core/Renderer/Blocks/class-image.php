@@ -358,6 +358,8 @@ class Image extends Abstract_Block_Renderer {
 			$height = $styles['height'] ?? null;
 			$scale  = $parsed_block['email_attrs']['image-scale'] ?? null;
 			if ( $height && 'auto' !== $height ) {
+				// Scaling needs pixels, so a rem or em height is converted first.
+				$height = $scale ? Styles_Helper::convert_to_px( $height, false ) ?? $height : $height;
 				$height = round( Styles_Helper::parse_value( $height ) * ( $scale ?? 1 ) );
 				/* @phpstan-ignore-next-line Wrong annotation for parameter in WP. */
 				$html->set_attribute( 'height', esc_attr( $height ) );
