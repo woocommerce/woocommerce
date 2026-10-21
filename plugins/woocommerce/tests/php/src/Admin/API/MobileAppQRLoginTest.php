@@ -1703,6 +1703,9 @@ class MobileAppQRLoginTest extends WC_Unit_Test_Case {
 	private function capture_wp_mail( bool $send_result = true ): array {
 		$captures = array();
 
+		// Isolate WooCommerce's notification from the application-password email added in WordPress 7.2.
+		add_filter( 'wp_send_application_password_created_email', '__return_false' );
+
 		$capture = static function ( $short_circuit, $atts ) use ( &$captures, $send_result ) {
 			unset( $short_circuit );
 			$captures[] = is_array( $atts ) ? $atts : array();
