@@ -1336,37 +1336,7 @@ class WC_AJAX {
 					$order->calculate_taxes();
 				}
 
-				// recalculate_coupons() resets every line total, so find the amount each existing line was edited by hand, to keep it.
-				// Apply the coupons to the existing lines only: the gap between the saved total and that total is the hand edit.
-				$hand_edits     = array();
-				$existing_items = array_filter( array_diff_key( $order->get_items(), $added_items ), fn( $item ) => $item instanceof WC_Order_Item_Product );
-				if ( $existing_items ) {
-					$saved_totals     = array_map( fn( $item ) => (float) $item->get_total(), $existing_items );
-					$hide_added_items = function ( $items, $items_order ) use ( $order, $added_items ) {
-						return $items_order === $order ? array_diff_key( $items, $added_items ) : $items;
-					};
-					add_filter( 'woocommerce_order_get_items', $hide_added_items, PHP_INT_MAX, 2 );
-					$order->recalculate_coupons();
-					remove_filter( 'woocommerce_order_get_items', $hide_added_items, PHP_INT_MAX );
-
-					foreach ( $existing_items as $item_id => $item ) {
-						$hand_edit = $saved_totals[ $item_id ] - (float) $item->get_total();
-						// Gaps smaller than the price precision come from rounding, not from a hand edit.
-						if ( 0.0 !== (float) NumberUtil::round( $hand_edit, wc_get_price_decimals() ) ) {
-							$hand_edits[ $item_id ] = $hand_edit;
-						}
-					}
-				}
-
 				$order->recalculate_coupons();
-
-				if ( $hand_edits ) {
-					foreach ( $hand_edits as $item_id => $hand_edit ) {
-						$item = $existing_items[ $item_id ];
-						$item->set_total( wc_format_decimal( max( 0, (float) $item->get_total() + $hand_edit ) ) );
-					}
-					$order->calculate_totals();
-				}
 
 				if ( $use_editor_tax_location ) {
 					remove_filter( 'woocommerce_order_get_tax_location', $use_editor_tax_location, PHP_INT_MAX );
