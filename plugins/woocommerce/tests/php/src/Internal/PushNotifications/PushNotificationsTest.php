@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Tests\Internal\PushNotifications;
 
 use Automattic\Jetpack\Connection\Manager as JetpackConnectionManager;
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\PushNotifications\Controllers\NotificationPreferencesRestController;
 use Automattic\WooCommerce\Internal\PushNotifications\Controllers\PushNotificationRestController;
 use Automattic\WooCommerce\Internal\PushNotifications\Controllers\PushNotificationStatusRestController;
@@ -12,6 +13,7 @@ use Automattic\WooCommerce\Internal\PushNotifications\Controllers\PushTokenRestC
 use Automattic\WooCommerce\Internal\PushNotifications\DataStores\PushTokensDataStore;
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
+use Automattic\WooCommerce\Internal\PushNotifications\Triggers\NewOrderNotificationTrigger;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Exception;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -304,6 +306,31 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 		$push_notifications->on_init();
 
 		$this->assertNull( $push_notifications->get_enabled_at(), 'No enablement time should be recorded while disabled' );
+	}
+
+	/**
+	 * @testdox Tests that on_init keeps marking orders while disabled only on a site that has used push notifications.
+	 * @testWith [1000, true]
+	 *           [null, false]
+	 *
+	 * @param int|null $enabled_at    The recorded enablement time, or null when never enabled.
+	 * @param bool     $expect_marked Whether the order should be marked.
+	 */
+	public function test_on_init_marks_orders_while_disabled_only_after_first_enablement( ?int $enabled_at, bool $expect_marked ) {
+		if ( null !== $enabled_at ) {
+			update_option( PushNotifications::ENABLED_AT_OPTION, $enabled_at );
+		}
+		$this->set_up_jetpack_connection_manager_mock( array( 'is_connected' ) );
+		$this->jetpack_connection_manager_mock->method( 'is_connected' )->willReturn( false );
+
+		( new PushNotifications() )->on_init();
+		$order = wc_create_order( array( 'status' => OrderStatus::PROCESSING ) );
+
+		$this->assertSame(
+			$expect_marked,
+			wc_get_order( $order->get_id() )->meta_exists( NewOrderNotificationTrigger::NOTIFIABLE_META_KEY ),
+			'Orders should only be marked while disabled once push notifications have been enabled'
+		);
 	}
 
 	/**
