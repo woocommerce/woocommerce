@@ -1258,6 +1258,34 @@ class Spacing_Preprocessor_Test extends \Email_Editor_Unit_Test {
 	}
 
 	/**
+	 * Test an explicit numeric zero gap is kept rather than replaced by the global gap.
+	 */
+	public function testItKeepsNumericZeroGridGap(): void {
+		$blocks = array(
+			$this->build_grid_group(
+				array(
+					'type'        => 'grid',
+					'columnCount' => 2,
+				),
+				array( array(), array() ),
+				array(
+					'spacing' => array(
+						'blockGap' => array(
+							'top'  => 0,
+							'left' => 0,
+						),
+					),
+				)
+			),
+		);
+
+		$result = $this->preprocessor->preprocess( $blocks, $this->layout, $this->styles );
+
+		$this->assertSame( '0px', $result[0]['email_attrs']['grid-row-gap'] );
+		$this->assertSame( '0px', $result[0]['email_attrs']['grid-column-gap'] );
+	}
+
+	/**
 	 * Grid layouts that can't be mapped to two table cells per row.
 	 *
 	 * @return array<string, array{0: array, 1: array}>
@@ -1339,6 +1367,7 @@ class Spacing_Preprocessor_Test extends \Email_Editor_Unit_Test {
 	 * @testWith ["core/gallery"]
 	 *           ["core/post-content"]
 	 *           ["woocommerce/product-collection"]
+	 *           ["core/block"]
 	 * @param string $block_name Block nested inside a grid item.
 	 */
 	public function testItStacksTwoColumnGridsHoldingFullWidthBlocks( string $block_name ): void {

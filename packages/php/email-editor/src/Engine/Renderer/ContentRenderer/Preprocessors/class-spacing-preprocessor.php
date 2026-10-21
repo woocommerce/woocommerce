@@ -111,10 +111,11 @@ class Spacing_Preprocessor implements Context_Aware_Preprocessor {
 	private const CONTAINER_BLOCKS = array( 'core/group', 'core/post-content' );
 
 	/**
-	 * Blocks whose email renderers size their content from the full email width rather than the
-	 * width they are given, so they would overflow a grid cell. A grid holding one keeps stacking.
+	 * Blocks that can't be sized to a grid cell, so a grid holding one keeps stacking. Gallery, Query
+	 * Loop and product collection renderers size their content from the full email width. Synced
+	 * patterns are parsed and sized separately, outside the grid.
 	 */
-	private const FULL_WIDTH_BLOCKS = array( 'core/gallery', 'core/query', 'core/post-template', 'woocommerce/product-collection' );
+	private const FULL_WIDTH_BLOCKS = array( 'core/gallery', 'core/query', 'core/post-template', 'woocommerce/product-collection', 'core/block', 'core/pattern' );
 
 	/**
 	 * Adds spacing to blocks: margin-top for vertical gaps, horizontal padding for
@@ -318,6 +319,7 @@ class Spacing_Preprocessor implements Context_Aware_Preprocessor {
 	private function get_grid_gap( array $block, string $axis, string $default_gap, array $variables_map ): string {
 		$block_gap = $block['attrs']['style']['spacing']['blockGap'] ?? null;
 		$value     = is_array( $block_gap ) ? ( $block_gap[ $axis ] ?? null ) : $block_gap;
+		$value     = is_numeric( $value ) ? (string) $value : $value;
 		$value     = is_string( $value ) && '' !== trim( $value ) ? $value : $default_gap;
 
 		$value = Preset_Variable_Resolver::resolve( $value, $variables_map );
