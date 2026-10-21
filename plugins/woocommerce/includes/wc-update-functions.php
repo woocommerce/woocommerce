@@ -4219,3 +4219,22 @@ function wc_update_1130_backfill_order_stats_payment_method() {
 
 	return false;
 }
+
+/**
+ * Re-enable autoloading for options whose settings definitions reverted it on save after the 10.5.0 migration.
+ *
+ * @since 11.4.0
+ */
+function wc_update_1140_re_enable_autoload_options(): void {
+	wp_set_option_autoload_values(
+		array(
+			'woocommerce_cart_page_id'                    => true,
+			'woocommerce_checkout_page_id'                => true,
+			'woocommerce_myaccount_page_id'               => true,
+			'woocommerce_terms_page_id'                   => true,
+			'woocommerce_show_marketplace_suggestions'    => true,
+			'woocommerce_enable_delayed_account_creation' => true,
+			'woocommerce_logs_logging_enabled'            => true,
+		)
+	);
+}
