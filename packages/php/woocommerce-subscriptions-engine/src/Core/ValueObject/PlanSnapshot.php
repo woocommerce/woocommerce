@@ -16,7 +16,8 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject;
 
-use DomainException;
+use LogicException;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\InvalidInputException;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\Coercion;
 
 defined( 'ABSPATH' ) || exit;
@@ -49,11 +50,11 @@ final class PlanSnapshot {
 	 *
 	 * @param array<string, mixed> $data           Plan terms payload.
 	 * @param int                  $schema_version Payload-format version.
-	 * @throws DomainException If the schema version is not positive.
+	 * @throws LogicException If the schema version is not positive.
 	 */
 	private function __construct( array $data, int $schema_version ) {
 		if ( $schema_version < 1 ) {
-			throw new DomainException(
+			throw new LogicException(
 				sprintf( 'PlanSnapshot: schema_version must be 1 or greater, got %d.', $schema_version )
 			);
 		}
@@ -67,7 +68,7 @@ final class PlanSnapshot {
 	 *
 	 * @param array<string, mixed> $data           Plan terms payload.
 	 * @param int                  $schema_version Payload-format version. Defaults to 1.
-	 * @throws DomainException If the schema version is not positive.
+	 * @throws LogicException If the schema version is not positive.
 	 */
 	public static function from_array( array $data, int $schema_version = 1 ): self {
 		return new self( $data, $schema_version );
@@ -79,7 +80,7 @@ final class PlanSnapshot {
 	 *
 	 * @param array<string, mixed> $payload        Serialized plan terms payload.
 	 * @param int                  $schema_version Payload-format version the payload was written in.
-	 * @throws DomainException If the schema version is not positive.
+	 * @throws LogicException If the schema version is not positive.
 	 */
 	public static function from_payload( array $payload, int $schema_version = 1 ): self {
 		return new self( $payload, $schema_version );
@@ -106,7 +107,7 @@ final class PlanSnapshot {
 	 * policy array; throws when one is present but unusable, so a caller can log why
 	 * before falling back.
 	 *
-	 * @throws DomainException If the stored policy does not parse or has no usable cadence.
+	 * @throws InvalidInputException If the stored policy does not parse or has no usable cadence.
 	 */
 	public function read_billing_policy(): ?BillingPolicy {
 		$policy = $this->data['billing_policy'] ?? null;
