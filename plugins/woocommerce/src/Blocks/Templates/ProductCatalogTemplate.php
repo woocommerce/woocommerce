@@ -2,13 +2,7 @@
 
 namespace Automattic\WooCommerce\Blocks\Templates;
 
-<<<<<<< HEAD
 use Automattic\WooCommerce\Blocks\Templates\ArchiveProductTemplatesCompatibility;
-use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
-=======
-use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
-use Automattic\WooCommerce\Blocks\Package;
->>>>>>> e3a91de345 (Associate the Shop page with the Product Catalog template (#68506))
 
 /**
  * ProductCatalogTemplate class.
