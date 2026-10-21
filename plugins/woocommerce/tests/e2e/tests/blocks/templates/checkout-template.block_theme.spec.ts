@@ -45,6 +45,7 @@ test.describe( 'Test the checkout template', () => {
 		).toBeVisible();
 
 		await editor.openDocumentSettingsSidebar();
+		// On 7.2 and above, the selectors for editing the template have changed: https://make.wordpress.org/core/2026/09/17/call-for-testing-dataform-editor-inspector/
 		// eslint-disable-next-line playwright/no-conditional-in-test
 		if ( wpCoreVersion >= 7.2 ) {
 			await page
