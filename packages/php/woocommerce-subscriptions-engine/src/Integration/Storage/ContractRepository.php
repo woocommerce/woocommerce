@@ -209,9 +209,13 @@ final class ContractRepository {
 		}
 
 		if ( false === $inserted ) {
-			$db_error = $wpdb->last_error;
-			// A taken key is recognised by reading it back: the server's error text is localized.
-			if ( null !== $columns['creation_key'] && $this->has_creation_key( (string) $columns['extension_slug'], (string) $columns['creation_key'] ) ) {
+			$db_error  = $wpdb->last_error;
+			$duplicate = self::get_duplicate_key_result();
+			if ( null === $duplicate && null !== $columns['creation_key'] ) {
+				$duplicate = $this->has_creation_key( (string) $columns['extension_slug'], (string) $columns['creation_key'] );
+			}
+			// The only UNIQUE index a new contract row can hit is `creation`, and only with a key.
+			if ( true === $duplicate && null !== $columns['creation_key'] ) {
 				return false;
 			}
 			throw new \RuntimeException( esc_html( 'Failed to insert contract. ' . $db_error ) );
@@ -223,8 +227,9 @@ final class ContractRepository {
 	}
 
 	/**
-	 * Whether the extension already holds a contract with this creation key. A failed read
-	 * reads as false, so the caller reports its own insert failure.
+	 * Whether the extension already holds a contract with this creation key: the fallback when
+	 * the driver gives no error number. A failed read reads as false, so the caller reports its
+	 * own insert failure.
 	 *
 	 * @param string $extension_slug Owning extension.
 	 * @param string $creation_key   Creation key.
@@ -1120,6 +1125,22 @@ final class ContractRepository {
 	}
 
 	/**
+	 * Whether the last statement failed on a UNIQUE index (MySQL error 1062), read from the
+	 * driver; null when the connection is not mysqli, so the caller reads the row back instead.
+	 * The error number does not depend on the server's message language or on a read snapshot.
+	 */
+	private static function get_duplicate_key_result(): ?bool {
+		global $wpdb;
+
+		$dbh = $wpdb->dbh;
+		if ( ! $dbh instanceof \mysqli ) {
+			return null;
+		}
+
+		return 1062 === $dbh->errno;
+	}
+
+	/**
 	 * A new lock token: 32 hex characters, the `lock_token` column width.
 	 */
 	private static function new_token(): string {
@@ -1678,9 +1699,12 @@ final class ContractRepository {
 		$inserted = $wpdb->query( $wpdb->prepare( "INSERT INTO `{$table}` ( {$name_list} ) VALUES ( {$placeholder_list} )", $values ) );
 
 		if ( false === $inserted ) {
-			$db_error = $wpdb->last_error;
-			// A taken position is recognised by reading it back: the server's error text is localized.
-			if ( $this->has_cycle_position( $cycle ) ) {
+			$db_error  = $wpdb->last_error;
+			$duplicate = self::get_duplicate_key_result();
+			if ( null === $duplicate ) {
+				$duplicate = $this->is_chain_slot_taken( $cycle );
+			}
+			if ( $duplicate ) {
 				throw new DuplicateCycleException( esc_html( 'Cycle position already exists: ' . $db_error ) );
 			}
 			$this->throw_if_lock_lost( $lock );
@@ -1692,12 +1716,13 @@ final class ContractRepository {
 	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 
 	/**
-	 * Whether the cycle's chain already holds its position or its count. A failed read reads as
-	 * false, so the caller reports its own insert failure.
+	 * Whether the cycle's chain already holds its position or its count: the fallback when the
+	 * driver gives no error number. A failed read reads as false, so the caller reports its own
+	 * insert failure.
 	 *
 	 * @param Cycle $cycle Cycle that failed to insert, with its position assigned.
 	 */
-	private function has_cycle_position( Cycle $cycle ): bool {
+	private function is_chain_slot_taken( Cycle $cycle ): bool {
 		global $wpdb;
 
 		$table  = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
@@ -1716,8 +1741,8 @@ final class ContractRepository {
 
 	/**
 	 * The next position in a chain: its highest `sequence_no` plus one. A plain read under the
-	 * caller's lock; a locking read here would gap-lock the chain index and deadlock concurrent
-	 * first appends under REPEATABLE READ.
+	 * caller's lock; inside a caller's REPEATABLE READ transaction a locking read here would
+	 * gap-lock the chain index and could deadlock concurrent first appends.
 	 *
 	 * @param int    $contract_id Contract id.
 	 * @param string $kind        Chain kind.

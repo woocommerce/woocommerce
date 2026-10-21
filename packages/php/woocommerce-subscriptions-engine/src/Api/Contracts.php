@@ -125,7 +125,8 @@ final class Contracts {
 	/**
 	 * Take the contract's lock for `$operation`, for the synchronous section of this request.
 	 * Pass the lock to every write of the operation and release it when done; an unreleased
-	 * lock expires after {@see ContractLock::TTL_SECONDS}. An expired lock is taken over.
+	 * lock expires after {@see ContractLock::TTL_SECONDS}. An expired lock is taken over. A lock
+	 * gives no fresh read snapshot: inside the caller's own transaction, read after taking it.
 	 *
 	 * @param int    $contract_id Contract id.
 	 * @param string $operation   Operation label (1-64 of `[a-z0-9_-]`), shown to callers that conflict.
@@ -138,9 +139,10 @@ final class Contracts {
 
 	/**
 	 * Create a contract locked from birth: finish building it (cycles, status) with the returned
-	 * lock, then release it. A `creation_key` (1-100 characters, trimmed) makes the create idempotent per
-	 * extension; without one every call creates a contract. Unknown keys and options, also inside
-	 * items and addresses, get `_doing_it_wrong()` and are ignored.
+	 * lock, then release it. A `creation_key` (1-100 characters, trimmed) makes the create
+	 * idempotent per extension, also inside a caller's transaction (there is no lock to take
+	 * first, so a taken key is recognised by its error number, not a read). Without a key every
+	 * call creates a contract. Unknown keys and options get `_doing_it_wrong()` and are ignored.
 	 *
 	 * @param array<string, mixed> $args    `extension_slug` (required, the owner), `status` (default
 	 *                                      `draft`), `creation_key`, and any of {@see self::CONTRACT_KEYS}.

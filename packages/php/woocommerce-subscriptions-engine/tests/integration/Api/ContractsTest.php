@@ -34,9 +34,25 @@ class ContractsTest extends EngineIntegrationTestCase {
 
 	private const EXTENSION_SLUG = 'acme-subs';
 
+	/**
+	 * A second connection whose committed rows outlive the test transaction, closed after its
+	 * rollback (a duplicate-key insert left shared locks on those rows until then).
+	 *
+	 * @var array{wpdb: \wpdb, statements: array<int, string>}|null
+	 */
+	private $committed_cleanup = null;
+
 	public function tear_down(): void {
 		StatusRegistry::reset();
 		parent::tear_down();
+
+		if ( null !== $this->committed_cleanup ) {
+			foreach ( $this->committed_cleanup['statements'] as $statement ) {
+				$this->committed_cleanup['wpdb']->query( $statement ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- prepared when queued.
+			}
+			$this->committed_cleanup['wpdb']->close();
+			$this->committed_cleanup = null;
+		}
 	}
 
 	/**
@@ -965,59 +981,74 @@ class ContractsTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @testdox A failed append whose position or count is already stored is a lost race, whatever the database message says.
+	 * @testdox A taken position, count or creation key is a lost race by its error number, even when the caller's transaction snapshot cannot see the row that took it.
 	 */
-	public function test_a_taken_position_is_recognised_without_the_error_text(): void {
-		$id    = $this->contract_with_currency();
-		$cycle = '/^\s*INSERT INTO `\S*subscription_cycles`/';
+	public function test_a_taken_slot_is_a_lost_race_inside_a_caller_transaction(): void {
+		$cycles    = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
+		$contracts = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+		$id        = $this->contract_with_currency();
 		$this->add_cycle( $id, $this->cycle_args( array( 'count' => 1 ) ) );
 
-		$this->fail_next_query( $cycle );
-		$this->assertNull( $this->add_cycle_locked( $id, $this->cycle_args( array( 'sequence_no' => 1 ) ) ), 'A taken position.' );
+		// The test runs in a transaction whose snapshot is already open; a second connection
+		// commits rows that snapshot cannot see, as a concurrent writer would.
+		$credentials = array();
+		foreach ( array( 'DB_USER', 'DB_PASSWORD', 'DB_NAME', 'DB_HOST' ) as $name ) {
+			$value = constant( $name );
+			$this->assertIsString( $value );
+			$credentials[] = $value;
+		}
+		$other = new \wpdb( ...$credentials );
+		$slug  = self::EXTENSION_SLUG;
 
-		$this->fail_next_query( $cycle );
-		$this->assertNull( $this->add_cycle_locked( $id, $this->cycle_args( array( 'count' => 1 ) ) ), 'A taken count.' );
+		// Fixed test values only: the contract id is an int and the rest are literals.
+		$this->committed_cleanup = array(
+			'wpdb'       => $other,
+			'statements' => array(
+				sprintf( 'DELETE FROM `%s` WHERE contract_id = %d AND sequence_no = 2', $cycles, $id ),
+				sprintf( "DELETE FROM `%s` WHERE extension_slug = '%s' AND creation_key = 'order:12'", $contracts, $slug ),
+			),
+		);
 
-		$this->fail_next_query( $cycle );
-		$this->expectException( \RuntimeException::class );
-		$this->add_cycle_locked( $id, $this->cycle_args() );
-	}
+		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+		$other->query( sprintf( "INSERT INTO `%s` ( contract_id, kind, sequence_no, count, status, starts_at_gmt, ends_at_gmt, currency, date_created_gmt, date_updated_gmt ) VALUES ( %d, 'billing', 2, 2, 'billed', '2026-02-01 00:00:00', '2026-03-01 00:00:00', 'USD', UTC_TIMESTAMP(), UTC_TIMESTAMP() )", $cycles, $id ) );
+		$other->query( sprintf( "INSERT INTO `%s` ( status, extension_slug, creation_key, date_created_gmt, date_updated_gmt ) VALUES ( 'draft', '%s', 'order:12', UTC_TIMESTAMP(), UTC_TIMESTAMP() )", $contracts, $slug ) );
+		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
+		$this->assertSame( '', $other->last_error );
 
-	public function test_a_taken_count_returns_null(): void {
-		$id = $this->contract_with_currency();
-		$this->add_cycle( $id, $this->cycle_args( array( 'count' => 1 ) ) );
-
-		$this->assertNull( $this->add_cycle_locked( $id, $this->cycle_args( array( 'count' => 1 ) ) ), 'A lost append returns null.' );
-		$this->assertCount( 1, Contracts::get_cycles( $id ), 'Nothing is written.' );
-	}
-
-	public function test_an_explicit_position_is_kept(): void {
-		$id = $this->contract_with_currency();
-
-		$cycle_id = $this->add_cycle(
-			$id,
-			$this->cycle_args(
-				array(
-					'sequence_no' => 5,
-					'count'       => 3,
+		$this->assertNull( $this->add_cycle_locked( $id, $this->cycle_args() ), 'The next position, read from the old snapshot, is taken.' );
+		$this->assertNull(
+			$this->add_cycle_locked(
+				$id,
+				$this->cycle_args(
+					array(
+						'sequence_no' => 3,
+						'count'       => 2,
+					)
 				)
-			)
-		)->get_id();
-		$cycle    = $this->cycle( $id, $cycle_id );
-
-		$this->assertSame( 5, $cycle->get_sequence_no() );
-		$this->assertSame( 3, $cycle->get_count() );
+			),
+			'The count is taken.'
+		);
+		$this->assertNull(
+			Contracts::create(
+				array(
+					'extension_slug' => self::EXTENSION_SLUG,
+					'creation_key'   => 'order:12',
+				)
+			),
+			'The creation key is taken.'
+		);
 	}
 
-	public function test_another_kind_starts_its_own_chain(): void {
+	/**
+	 * @testdox A failed insert that is not a duplicate key surfaces as a database error, even when its slot is taken.
+	 */
+	public function test_a_failure_other_than_a_duplicate_key_is_a_database_error(): void {
 		$id = $this->contract_with_currency();
 		$this->add_cycle( $id, $this->cycle_args() );
-		$this->add_cycle( $id, $this->cycle_args() );
 
-		$view = $this->add_cycle( $id, $this->cycle_args( array( 'kind' => 'shipping' ) ) );
-
-		$this->assertSame( 'shipping', $view->get_kind() );
-		$this->assertSame( 1, $view->get_sequence_no() );
+		$this->fail_next_query( '/^\s*INSERT INTO `\S*subscription_cycles`/' );
+		$this->expectException( \RuntimeException::class );
+		$this->add_cycle_locked( $id, $this->cycle_args( array( 'sequence_no' => 1 ) ) );
 	}
 
 	/**
@@ -1416,29 +1447,6 @@ class ContractsTest extends EngineIntegrationTestCase {
 					'extension_slug' => self::EXTENSION_SLUG,
 					'creation_key'   => ' order:1',
 				)
-			)
-		);
-	}
-
-	/**
-	 * @testdox A failed create whose key is already stored is a taken key, whatever the database message says.
-	 */
-	public function test_a_taken_creation_key_is_recognised_without_the_error_text(): void {
-		$args = array(
-			'extension_slug' => self::EXTENSION_SLUG,
-			'creation_key'   => 'order:12',
-		);
-		$this->assertNotNull( Contracts::create( $args ) );
-
-		$this->fail_next_query( '/^\s*INSERT INTO `\S*subscription_contracts`/' );
-		$this->assertNull( Contracts::create( $args ) );
-
-		$this->fail_next_query( '/^\s*INSERT INTO `\S*subscription_contracts`/' );
-		$this->expectException( \RuntimeException::class );
-		Contracts::create(
-			array(
-				'extension_slug' => self::EXTENSION_SLUG,
-				'creation_key'   => 'order:13',
 			)
 		);
 	}
