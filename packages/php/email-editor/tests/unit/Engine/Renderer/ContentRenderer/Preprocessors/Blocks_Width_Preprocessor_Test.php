@@ -817,6 +817,47 @@ class Blocks_Width_Preprocessor_Test extends \Email_Editor_Unit_Test {
 	}
 
 	/**
+	 * Test a grid's percentage padding is resolved against its width before its cells are sized.
+	 */
+	public function testItResolvesPercentageGridPaddingWhenSizingCells(): void {
+		$blocks = array(
+			array(
+				'blockName'   => 'core/group',
+				'attrs'       => array(
+					'layout' => array(
+						'type'        => 'grid',
+						'columnCount' => 2,
+					),
+					'style'  => array(
+						'spacing' => array(
+							'padding' => array(
+								'left'  => '10%',
+								'right' => '10%',
+							),
+						),
+					),
+				),
+				'email_attrs' => array(
+					'two-column-grid' => true,
+					'grid-column-gap' => '20px',
+				),
+				'innerBlocks' => array(
+					array(
+						'blockName'   => 'core/image',
+						'attrs'       => array( 'width' => '400px' ),
+						'innerBlocks' => array(),
+					),
+				),
+			),
+		);
+
+		$result = $this->preprocessor->preprocess( $blocks, $this->layout, $this->styles );
+
+		// (660 - 66 - 66 - 20) / 2 = 254.
+		$this->assertEquals( '254px', $result[0]['innerBlocks'][0]['email_attrs']['width'] );
+	}
+
+	/**
 	 * Test a responsive grid (column count plus minimum column width) stays two columns only when each cell meets the minimum width.
 	 *
 	 * @testWith ["12rem", true]

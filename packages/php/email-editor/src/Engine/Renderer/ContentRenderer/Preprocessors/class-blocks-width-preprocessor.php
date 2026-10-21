@@ -60,7 +60,9 @@ class Blocks_Width_Preprocessor implements Preprocessor {
 					$parent_padding = $styles['spacing']['padding'][ $side ] ?? '0px';
 					// Inside a grid cell a rem or em padding read as px would leave fixed-width blocks
 					// too wide for the cell, so convert it.
-					$layout_width -= $in_grid_cell ? $this->convert_padding_to_pixels( $parent_padding ) : $this->parse_number_from_string_with_pixels( $parent_padding );
+					$layout_width -= $in_grid_cell
+						? $this->convert_padding_to_pixels( $parent_padding, $this->parse_number_from_string_with_pixels( $layout['contentSize'] ) )
+						: $this->parse_number_from_string_with_pixels( $parent_padding );
 				}
 			}
 
@@ -128,8 +130,8 @@ class Blocks_Width_Preprocessor implements Preprocessor {
 			// group width and overflow their cell.
 			if ( ! empty( $block['email_attrs']['two-column-grid'] ) ) {
 				$grid_content_width = $inner_content_width
-					- $this->convert_padding_to_pixels( $block_padding_left )
-					- $this->convert_padding_to_pixels( $block_padding_right )
+					- $this->convert_padding_to_pixels( $block_padding_left, $inner_content_width )
+					- $this->convert_padding_to_pixels( $block_padding_right, $inner_content_width )
 					- $this->parse_number_from_string_with_pixels( $block['email_attrs']['grid-column-gap'] ?? '0px' );
 				$cell_width         = max( 0, floor( $grid_content_width / 2 ) );
 
@@ -150,14 +152,18 @@ class Blocks_Width_Preprocessor implements Preprocessor {
 	}
 
 	/**
-	 * Convert a padding value to pixels, including rem and em, which the group still renders in
-	 * those units. Values that can't be converted (e.g. percentages) are read as pixels.
+	 * Convert a padding value to pixels, including rem, em and percentages, which the group still
+	 * renders in those units. Other values are read as pixels.
 	 *
 	 * @param string $value Padding value.
+	 * @param float  $containing_width Width a percentage is relative to, in px.
 	 * @return float
 	 */
-	private function convert_padding_to_pixels( string $value ): float {
-		$px = str_ends_with( trim( $value ), '%' ) ? null : Styles_Helper::convert_to_px( (string) Styles_Helper::clamp_to_static_px( $value ), false );
+	private function convert_padding_to_pixels( string $value, float $containing_width ): float {
+		if ( str_ends_with( trim( $value ), '%' ) ) {
+			return $containing_width * Styles_Helper::parse_value( $value ) / 100;
+		}
+		$px = Styles_Helper::convert_to_px( (string) Styles_Helper::clamp_to_static_px( $value ), false );
 		return null !== $px ? Styles_Helper::parse_value( $px ) : $this->parse_number_from_string_with_pixels( $value );
 	}
 
