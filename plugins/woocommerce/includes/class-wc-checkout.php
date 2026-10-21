@@ -828,10 +828,10 @@ class WC_Checkout {
 		$cart_values  = $order_values;
 
 		foreach ( $order->get_fees() as $fee ) {
-			$order_values[ OrderItemType::FEE ][] = $this->get_compared_values( $fee->get_total( 'edit' ), $compare_taxes ? $fee->get_total_tax( 'edit' ) : 0 );
+			$order_values[ OrderItemType::FEE ][] = $this->get_compared_values( $fee->get_total( 'edit' ) ) . ( $compare_taxes ? $this->get_compared_rate_taxes( $fee->get_taxes( 'edit' ) ) : '' );
 		}
 		foreach ( $cart->get_fees() as $fee ) {
-			$cart_values[ OrderItemType::FEE ][] = $this->get_compared_values( $fee->total, $compare_taxes ? $fee->tax : 0 );
+			$cart_values[ OrderItemType::FEE ][] = $this->get_compared_values( $fee->total ) . ( $compare_taxes ? $this->get_compared_rate_taxes( array( 'total' => $fee->tax_data ) ) : '' );
 		}
 
 		foreach ( $order->get_coupons() as $coupon ) {
@@ -853,14 +853,17 @@ class WC_Checkout {
 		}
 
 		if ( $this->cart_has_evaluated_shipping( $cart ) ) {
-			$shipping_total = 0;
-			$shipping_tax   = 0;
+			// Compare each line with the chosen rate create_order_shipping_lines() copied, since the cart's shipping tax total can round a half cent the other way.
+			$order_values[ OrderItemType::SHIPPING ] = array();
+			$cart_values[ OrderItemType::SHIPPING ]  = array();
 			foreach ( $order->get_shipping_methods() as $shipping ) {
-				$shipping_total += (float) $shipping->get_total( 'edit' );
-				$shipping_tax   += $compare_taxes ? (float) $shipping->get_total_tax( 'edit' ) : 0;
+				$order_values[ OrderItemType::SHIPPING ][] = $this->get_compared_values( $shipping->get_total( 'edit' ) ) . ( $compare_taxes ? $this->get_compared_rate_taxes( $shipping->get_taxes( 'edit' ) ) : '' );
 			}
-			$order_values[ OrderItemType::SHIPPING ] = array( $this->get_compared_values( $shipping_total, $shipping_tax ) );
-			$cart_values[ OrderItemType::SHIPPING ]  = array( $this->get_compared_values( $cart->get_shipping_total(), $compare_taxes ? $cart->get_shipping_tax() : 0 ) );
+			foreach ( (array) $cart->get_shipping_methods() as $rate ) {
+				if ( $rate instanceof WC_Shipping_Rate ) {
+					$cart_values[ OrderItemType::SHIPPING ][] = $this->get_compared_values( $rate->get_cost() ) . ( $compare_taxes ? $this->get_compared_rate_taxes( array( 'total' => $rate->get_taxes() ) ) : '' );
+				}
+			}
 		}
 
 		$changed_types = array();
@@ -881,8 +884,8 @@ class WC_Checkout {
 	}
 
 	/**
-	 * Joins a line item's subtotal and total tax for each rate into one string. The rates are compared instead of the sums,
-	 * since the cart rounds its line tax once while the order item adds up each rate's rounded tax, so the sums can differ.
+	 * Joins an item's tax amounts for each rate into one string, so an edited allocation is found even when the sums match.
+	 * Comparing rates also avoids differences between the cart's rounded line tax and the sum of each rate's rounded tax.
 	 *
 	 * @param array $taxes Taxes by rate ID, under 'subtotal' and 'total' keys.
 	 * @return string
@@ -902,12 +905,14 @@ class WC_Checkout {
 
 	/**
 	 * Joins IDs, quantities and amounts into one string, rounded so order and cart values compare equal.
+	 * Values are formatted as the order item setters store them before rounding, since rounding a raw cart value once
+	 * can differ from rounding the stored one when the 7th decimal is a 5.
 	 *
 	 * @param int|float|string ...$values The values to compare.
 	 * @return string
 	 */
 	private function get_compared_values( ...$values ): string {
-		return implode( '|', array_map( fn( $value ) => wc_format_decimal( $value, wc_get_rounding_precision() ), $values ) );
+		return implode( '|', array_map( fn( $value ) => wc_format_decimal( wc_format_decimal( $value ), wc_get_rounding_precision() ), $values ) );
 	}
 
 	/**

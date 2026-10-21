@@ -1126,6 +1126,149 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tax settings, rates, prices and carts for the resume sweep, for the classic checkout and the Store API.
+	 * Each rate is paired with the prices that round a half cent or a 7th decimal differently in the cart and the order,
+	 * and each pair runs with every tax setting and cart.
+	 *
+	 * @return array<string, array{string, bool, bool, string[], string, int, array{string, string}|null}>
+	 */
+	public function provider_resume_tax_setups(): array {
+		$rates_and_prices = array(
+			'7.25%, 12.34'             => array( array( '7.2500' ), '12.34' ),
+			'7.25% + 1.5%, 23.45'      => array( array( '7.2500', '1.5000' ), '23.45' ),
+			'7.25% + 1.5%, 74.21'      => array( array( '7.2500', '1.5000' ), '74.21' ),
+			'8.875%, 19.99'            => array( array( '8.8750' ), '19.99' ),
+			'21%, 2.69'                => array( array( '21.0000' ), '2.69' ),
+			'10% + 5% compound, 19.99' => array( array( '10.0000', '5.0000c' ), '19.99' ),
+		);
+		$carts            = array(
+			'one item'                      => array( 1, null ),
+			'x3'                            => array( 3, null ),
+			'two lines, fixed cart coupon'  => array( 1, array( 'fixed_cart', '7.33' ) ),
+			'two lines, percent coupon, x3' => array( 3, array( 'percent', '15' ) ),
+		);
+		$cases            = array();
+		foreach ( array( 'classic', 'store_api' ) as $checkout ) {
+			foreach ( array( true, false ) as $prices_include_tax ) {
+				foreach ( array( true, false ) as $round_at_subtotal ) {
+					foreach ( $rates_and_prices as $rates_and_price_name => list( $rates, $price ) ) {
+						foreach ( $carts as $cart_name => list( $quantity, $coupon ) ) {
+							$name           = sprintf( '%s, prices %s tax, %s, %s, %s', $checkout, $prices_include_tax ? 'including' : 'excluding', $round_at_subtotal ? 'rounded at subtotal' : 'rounded per line', $rates_and_price_name, $cart_name );
+							$cases[ $name ] = array( $checkout, $prices_include_tax, $round_at_subtotal, $rates, $price, $quantity, $coupon );
+						}
+					}
+				}
+			}
+		}
+
+		return $cases;
+	}
+
+	/**
+	 * @testdox Resuming an unchanged order keeps every item ID and the same totals as a fresh order, with $checkout, prices including tax: $prices_include_tax, rounding at subtotal: $round_at_subtotal, price $price, quantity $quantity.
+	 * @dataProvider provider_resume_tax_setups
+	 *
+	 * @param string                     $checkout           'classic' resumes through WC_Checkout::create_order(), 'store_api' through OrderController::update_order_from_cart().
+	 * @param bool                       $prices_include_tax Whether prices include tax.
+	 * @param bool                       $round_at_subtotal  Whether tax is rounded at subtotal.
+	 * @param string[]                   $rates              Tax rate percentages, applied in order. A "c" suffix makes the rate compound.
+	 * @param string                     $price              The product price.
+	 * @param int                        $quantity           How many of the product the cart has.
+	 * @param array{string, string}|null $coupon             The coupon's discount type and amount, added with a second cart line and a negative fee, or null for none of them.
+	 */
+	public function test_resume_keeps_items_and_matches_fresh_order_across_tax_setups( string $checkout, bool $prices_include_tax, bool $round_at_subtotal, array $rates, string $price, int $quantity, ?array $coupon ): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', $prices_include_tax ? 'yes' : 'no' );
+		update_option( 'woocommerce_tax_round_at_subtotal', $round_at_subtotal ? 'yes' : 'no' );
+		foreach ( $rates as $index => $rate ) {
+			WC_Tax::_insert_tax_rate(
+				array(
+					'tax_rate_country'  => '',
+					'tax_rate'          => rtrim( $rate, 'c' ),
+					'tax_rate_name'     => "Tax {$index}",
+					'tax_rate_priority' => (string) ( $index + 1 ),
+					'tax_rate_compound' => 'c' === substr( $rate, -1 ) ? '1' : '0',
+					'tax_rate_shipping' => '1',
+					'tax_rate_order'    => (string) $index,
+					'tax_rate_class'    => '',
+				)
+			);
+		}
+		$customer          = WC()->customer;
+		$original_location = array( $customer->get_shipping_country(), $customer->get_shipping_state(), $customer->get_billing_country(), $customer->get_billing_state() );
+		$customer->set_shipping_location( 'US', 'CA' );
+		$customer->set_billing_location( 'US', 'CA' );
+		WC_Helper_Shipping::create_simple_flat_rate( 10 );
+		add_action(
+			'woocommerce_cart_calculate_fees',
+			function ( WC_Cart $cart ) use ( $coupon ) {
+				$cart->add_fee( 'Handling', 5, true );
+				if ( $coupon ) {
+					// A negative taxable fee splits its tax by each item's share of the cart, so with a zero-rate item each rate's tax has more decimals to round.
+					$cart->add_fee( 'Discount', -1.37, true );
+				}
+			}
+		);
+
+		try {
+			$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => $price ) );
+			WC()->cart->add_to_cart( $product->get_id(), $quantity );
+			if ( $coupon ) {
+				$second_product = WC_Helper_Product::create_simple_product(
+					true,
+					array(
+						'regular_price' => '3.33',
+						'tax_class'     => 'zero-rate',
+					)
+				);
+				WC()->cart->add_to_cart( $second_product->get_id(), 2 );
+				$sweep_coupon = WC_Helper_Coupon::create_coupon(
+					'resume-sweep',
+					array(
+						'discount_type' => $coupon[0],
+						'coupon_amount' => $coupon[1],
+					)
+				);
+				WC()->cart->apply_coupon( $sweep_coupon->get_code() );
+			}
+			WC()->cart->calculate_totals();
+			$this->assertTrue( WC()->cart->has_calculated_shipping(), 'The cart should have calculated shipping.' );
+
+			if ( 'classic' === $checkout ) {
+				$order_id = $this->sut->create_order( array( 'payment_method' => WC_Gateway_BACS::ID ) );
+				$this->assertIsInt( $order_id );
+				$before = $this->get_order_item_ids_by_type( $order_id );
+				$this->resume_order( $order_id );
+				$fresh_id = $this->sut->create_order( array( 'payment_method' => WC_Gateway_BACS::ID ) );
+				$this->assertIsInt( $fresh_id );
+			} else {
+				$controller = new \Automattic\WooCommerce\StoreApi\Utilities\OrderController();
+				$order_id   = $controller->create_order_from_cart()->get_id();
+				$before     = $this->get_order_item_ids_by_type( $order_id );
+				$controller->update_order_from_cart( wc_get_order( $order_id ) );
+				$fresh_id = $controller->create_order_from_cart()->get_id();
+			}
+			$after = $this->get_order_item_ids_by_type( $order_id );
+		} finally {
+			$customer->set_shipping_location( $original_location[0], $original_location[1] );
+			$customer->set_billing_location( $original_location[2], $original_location[3] );
+			WC_Helper_Shipping::delete_simple_flat_rate();
+		}
+
+		$expected_types = $coupon ? array( 'coupon', 'fee', 'line_item', 'shipping', 'tax' ) : array( 'fee', 'line_item', 'shipping', 'tax' );
+		$this->assertSame( $expected_types, array_keys( $before ), 'The order should have every cart item type.' );
+		$this->assertSame( $before, $after, 'Every item should keep its ID.' );
+		$this->assertNotSame( $order_id, $fresh_id, 'The fresh order should be a new order.' );
+
+		$resumed = wc_get_order( $order_id );
+		$fresh   = wc_get_order( $fresh_id );
+		foreach ( array( 'total', 'total_tax', 'cart_tax', 'shipping_total', 'shipping_tax', 'discount_total', 'discount_tax' ) as $prop ) {
+			$this->assertSame( $fresh->{"get_{$prop}"}(), $resumed->{"get_{$prop}"}(), "The resumed order's {$prop} should match a fresh order's." );
+		}
+		$this->assertSame( $this->get_order_item_amounts_by_type( $fresh_id ), $this->get_order_item_amounts_by_type( $order_id ), "The resumed order's items should have the same amounts as a fresh order's." );
+	}
+
+	/**
 	 * @testdox Resuming a pending order keeps line items taxed at two rates when prices include tax and tax is rounded at subtotal.
 	 * @testWith ["23.45"]
 	 *           ["74.21"]
@@ -1170,8 +1313,11 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	 *           ["line_item_tax_split", "line_item"]
 	 *           ["shipping_total", "shipping"]
 	 *           ["shipping_tax", "shipping"]
+	 *           ["shipping_tax_split", "shipping"]
 	 *           ["tax_line", "tax"]
 	 *           ["fee_total", "fee"]
+	 *           ["fee_tax", "fee"]
+	 *           ["fee_tax_split", "fee"]
 	 *           ["coupon_discount", "coupon"]
 	 *
 	 * @param string $edit          The merchant edit to make to the order.
@@ -1185,8 +1331,9 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 			'is_vat_exempt'    => $customer->get_is_vat_exempt(),
 		);
 		try {
-			$order_id = $this->create_order_with_shipping_taxes_and_coupon();
-			$before   = $this->get_order_item_ids_by_type( $order_id );
+			$order_id         = $this->create_order_with_shipping_taxes_and_coupon();
+			$before           = $this->get_order_item_ids_by_type( $order_id );
+			$expected_amounts = $this->get_order_item_amounts_by_type( $order_id );
 			$this->edit_order_item_amounts( wc_get_order( $order_id ), $edit );
 
 			$this->resume_order( $order_id );
@@ -1213,6 +1360,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( (float) WC()->cart->get_total( 'edit' ), (float) $order->get_total(), 'The order total should match the cart.' );
 		$this->assertEqualsWithDelta( $cart_tax, (float) $order->get_total_tax(), 0.001, 'The order tax total should match the cart.' );
 		$this->assertEqualsWithDelta( $cart_ship, (float) $order->get_shipping_total(), 0.001, 'The order shipping total should match the cart.' );
+		$this->assertSame( $expected_amounts, $this->get_order_item_amounts_by_type( $order_id ), 'The resumed items should have their original amounts and tax allocations.' );
 	}
 
 	/**
@@ -1461,16 +1609,23 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 				$line_item->save();
 				break;
 			case 'line_item_tax_split':
+			case 'shipping_tax_split':
+			case 'fee_tax_split':
 				// Moves tax from one rate to the other, so the item's tax sums don't change.
-				$taxes       = $line_item->get_taxes();
+				$item        = array(
+					'line_item_tax_split' => $line_item,
+					'shipping_tax_split'  => $shipping,
+					'fee_tax_split'       => $fee,
+				)[ $edit ];
+				$taxes       = $item->get_taxes();
 				$first_rate  = array_key_first( $taxes['total'] );
 				$second_rate = array_key_last( $taxes['total'] );
-				foreach ( array( 'total', 'subtotal' ) as $tax_type ) {
-					$taxes[ $tax_type ][ $first_rate ]  = (float) $taxes[ $tax_type ][ $first_rate ] + 1;
-					$taxes[ $tax_type ][ $second_rate ] = (float) $taxes[ $tax_type ][ $second_rate ] - 1;
+				foreach ( array_keys( $taxes ) as $tax_type ) {
+					$taxes[ $tax_type ][ $first_rate ]  = (float) $taxes[ $tax_type ][ $first_rate ] + 0.1;
+					$taxes[ $tax_type ][ $second_rate ] = (float) $taxes[ $tax_type ][ $second_rate ] - 0.1;
 				}
-				$line_item->set_taxes( $taxes );
-				$line_item->save();
+				$item->set_taxes( $taxes );
+				$item->save();
 				break;
 			case 'shipping_total':
 				$shipping->set_total( (float) $shipping->get_total() + 5 );
@@ -1486,6 +1641,10 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 				break;
 			case 'fee_total':
 				$fee->set_total( (float) $fee->get_total() + 1 );
+				$fee->save();
+				break;
+			case 'fee_tax':
+				$fee->set_taxes( array( 'total' => array( $rate_id => (float) $fee->get_total_tax() + 1 ) ) );
 				$fee->save();
 				break;
 			case 'coupon_discount':
@@ -1534,6 +1693,48 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		ksort( $ids_by_type );
 
 		return $ids_by_type;
+	}
+
+	/**
+	 * Reads the amounts of an order's items, grouped by item type and sorted, so two orders built from the same cart compare equal.
+	 *
+	 * @param int $order_id The order ID.
+	 * @return array<string, string[]>
+	 */
+	private function get_order_item_amounts_by_type( int $order_id ): array {
+		$order           = wc_get_order( $order_id );
+		$amounts_by_type = array();
+		foreach ( $order instanceof WC_Order ? $order->get_items( array( 'line_item', 'shipping', 'fee', 'coupon', 'tax' ) ) : array() as $item ) {
+			if ( $item instanceof WC_Order_Item_Product ) {
+				$values = array( $item->get_product_id(), $item->get_quantity(), $item->get_subtotal(), $item->get_total(), $item->get_subtotal_tax(), $item->get_total_tax(), $item->get_taxes() );
+			} elseif ( $item instanceof WC_Order_Item_Shipping ) {
+				$values = array( $item->get_method_id(), $item->get_total(), $item->get_total_tax(), $item->get_taxes() );
+			} elseif ( $item instanceof WC_Order_Item_Fee ) {
+				$values = array( $item->get_name(), $item->get_total(), $item->get_total_tax(), $item->get_taxes() );
+			} elseif ( $item instanceof WC_Order_Item_Coupon ) {
+				$values = array( $item->get_code(), $item->get_discount(), $item->get_discount_tax() );
+			} elseif ( $item instanceof WC_Order_Item_Tax ) {
+				$values = array( $item->get_rate_id(), $item->get_tax_total(), $item->get_shipping_tax_total() );
+			} else {
+				continue;
+			}
+			array_walk_recursive(
+				$values,
+				function ( &$value ) {
+					$value = is_numeric( $value ) ? (string) wc_format_decimal( $value ) : (string) $value;
+				}
+			);
+			$amounts_by_type[ $item->get_type() ][] = (string) wp_json_encode( $values );
+		}
+		ksort( $amounts_by_type );
+
+		return array_map(
+			function ( array $amounts ): array {
+				sort( $amounts );
+				return $amounts;
+			},
+			$amounts_by_type
+		);
 	}
 
 	/**
@@ -1614,6 +1815,96 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 
 		// Assert that the login form is present.
 		$this->assertStringContainsString( 'woocommerce-form-login', $output );
+	}
+
+	/**
+	 * @testdox The woocommerce_checkout_after_cart_item_meta action fires for visible cart items in the review order template.
+	 */
+	public function test_checkout_after_cart_item_meta_action_fires_for_visible_items() {
+		$product       = WC_Helper_Product::create_simple_product();
+		$cart_item_key = WC()->cart->add_to_cart(
+			$product->get_id(),
+			1,
+			'',
+			'',
+			array(
+				'test_meta' => 'TEST_ITEM_META_DATA',
+			)
+		);
+
+		$fired    = array();
+		$callback = static function ( $cart_item, $cart_item_key ) use ( &$fired ) {
+			$fired[ $cart_item_key ] = $cart_item;
+			echo 'TEST_CHECKOUT_AFTER_CART_ITEM_META';
+		};
+		add_action( 'woocommerce_checkout_after_cart_item_meta', $callback, 10, 2 );
+
+		$get_item_data = static function () {
+			return array(
+				array(
+					'key'     => 'test_meta',
+					'display' => 'TEST_ITEM_META_DATA',
+				),
+			);
+		};
+		add_filter( 'woocommerce_get_item_data', $get_item_data );
+
+		$output = wc_get_template_html( 'checkout/review-order.php' );
+
+		remove_action( 'woocommerce_checkout_after_cart_item_meta', $callback, 10 );
+		remove_filter( 'woocommerce_get_item_data', $get_item_data );
+
+		$this->assertCount( 1, $fired, 'The action should fire once for the visible cart item.' );
+		$this->assertArrayHasKey( $cart_item_key, $fired, 'The action should receive the cart item key.' );
+		$this->assertSame( $product->get_id(), $fired[ $cart_item_key ]['product_id'], 'The action should receive the cart item.' );
+		$this->assertStringContainsString( 'TEST_ITEM_META_DATA', $output, 'The cart item data should be rendered for the test to be meaningful.' );
+		$this->assertStringContainsString( 'TEST_CHECKOUT_AFTER_CART_ITEM_META', $output );
+
+		$cell_start = strpos( $output, '<td class="product-name">' );
+		$cell_end   = strpos( $output, '</td>', $cell_start );
+		$marker_pos = strpos( $output, 'TEST_CHECKOUT_AFTER_CART_ITEM_META' );
+		$meta_pos   = strpos( $output, 'TEST_ITEM_META_DATA' );
+
+		$this->assertGreaterThan(
+			$cell_start,
+			$marker_pos,
+			'The action output should be rendered inside the product name cell.'
+		);
+		$this->assertLessThan(
+			$cell_end,
+			$marker_pos,
+			'The action output should be rendered inside the product name cell.'
+		);
+		$this->assertGreaterThan(
+			$meta_pos,
+			$marker_pos,
+			'The action output should be rendered after the cart item data.'
+		);
+	}
+
+	/**
+	 * @testdox The woocommerce_checkout_after_cart_item_meta action does not fire for items hidden by woocommerce_checkout_cart_item_visible.
+	 */
+	public function test_checkout_after_cart_item_meta_action_does_not_fire_for_hidden_items() {
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id() );
+
+		add_filter( 'woocommerce_checkout_cart_item_visible', '__return_false' );
+
+		$fired    = 0;
+		$callback = static function () use ( &$fired ) {
+			++$fired;
+			echo 'TEST_CHECKOUT_AFTER_CART_ITEM_META';
+		};
+		add_action( 'woocommerce_checkout_after_cart_item_meta', $callback );
+
+		$output = wc_get_template_html( 'checkout/review-order.php' );
+
+		remove_filter( 'woocommerce_checkout_cart_item_visible', '__return_false' );
+		remove_action( 'woocommerce_checkout_after_cart_item_meta', $callback );
+
+		$this->assertSame( 0, $fired, 'The action should not fire for hidden cart items.' );
+		$this->assertStringNotContainsString( 'TEST_CHECKOUT_AFTER_CART_ITEM_META', $output );
 	}
 
 	/**
