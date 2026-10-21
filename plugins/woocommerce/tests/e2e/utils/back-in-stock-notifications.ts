@@ -832,7 +832,8 @@ export function escapeRegExp( value: string ): string {
 }
 
 /**
- * Wrap a regular expression pattern in straight or curly double quotes.
+ * Wrap a regular expression pattern in a matching pair of straight or curly
+ * double quotes.
  *
  * Since WordPress 7.2, kses decodes `&quot;` in notice text, so `wptexturize`
  * curls the quotes when a block template renders the notice.
@@ -840,7 +841,7 @@ export function escapeRegExp( value: string ): string {
  * @param {string} pattern The regular expression pattern to wrap.
  */
 export function quotedPattern( pattern: string ): string {
-	return `["“]${ pattern }["”]`;
+	return `(?:"(?:${ pattern })"|“(?:${ pattern })”)`;
 }
 
 /**
