@@ -1258,6 +1258,31 @@ class Spacing_Preprocessor_Test extends \Email_Editor_Unit_Test {
 	}
 
 	/**
+	 * Test a spacer fits a grid cell only when it has no fixed width.
+	 */
+	public function testItStacksTwoColumnGridsHoldingFixedWidthSpacers(): void {
+		$layout = array(
+			'type'        => 'grid',
+			'columnCount' => 2,
+		);
+		$spacer = array(
+			'blockName'   => 'core/spacer',
+			'attrs'       => array( 'height' => '20px' ),
+			'innerBlocks' => array(),
+		);
+
+		$grid                  = $this->build_grid_group( $layout, array( array() ) );
+		$grid['innerBlocks'][] = $spacer;
+		$fixed_width_grid      = $grid;
+		$fixed_width_grid['innerBlocks'][1]['attrs']['width'] = '400px';
+
+		$result = $this->preprocessor->preprocess( array( $grid, $fixed_width_grid ), $this->layout, $this->styles );
+
+		$this->assertTrue( $result[0]['email_attrs']['two-column-grid'] );
+		$this->assertArrayNotHasKey( 'two-column-grid', $result[1]['email_attrs'] );
+	}
+
+	/**
 	 * Test an explicit numeric zero gap is kept rather than replaced by the global gap.
 	 */
 	public function testItKeepsNumericZeroGridGap(): void {
@@ -1370,6 +1395,7 @@ class Spacing_Preprocessor_Test extends \Email_Editor_Unit_Test {
 	 *           ["core/block"]
 	 *           ["core/site-logo"]
 	 *           ["core/social-links"]
+	 *           ["core/buttons"]
 	 *           ["acme/custom-block"]
 	 * @param string $block_name Block nested inside a grid item.
 	 */

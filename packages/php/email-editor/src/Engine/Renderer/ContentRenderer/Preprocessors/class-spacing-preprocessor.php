@@ -113,13 +113,11 @@ class Spacing_Preprocessor implements Context_Aware_Preprocessor {
 	/**
 	 * Blocks whose email output is known to fit the width it is given, so a two-column grid made only
 	 * of these can be laid out side by side. Any other block keeps the grid stacked: some renderers
-	 * (gallery, Query Loop, site logo, social icons, product collection) size their content from the
-	 * full email width or a fixed row, and synced patterns or post content are parsed and sized
-	 * outside the grid.
+	 * (gallery, Query Loop, site logo, social icons, buttons, product collection) size their content
+	 * from the full email width or lay out a row that can be wider than a cell, and synced patterns or
+	 * post content are parsed and sized outside the grid. A spacer fits only without a fixed width.
 	 */
 	private const GRID_CELL_BLOCKS = array(
-		'core/button',
-		'core/buttons',
 		'core/group',
 		'core/heading',
 		'core/image',
@@ -313,7 +311,11 @@ class Spacing_Preprocessor implements Context_Aware_Preprocessor {
 	 */
 	private function only_contains_blocks( array $block, array $block_names ): bool {
 		foreach ( $block['innerBlocks'] ?? array() as $inner_block ) {
-			if ( ! in_array( $inner_block['blockName'] ?? '', $block_names, true ) || ! $this->only_contains_blocks( $inner_block, $block_names ) ) {
+			$name = $inner_block['blockName'] ?? '';
+			if ( ! in_array( $name, $block_names, true ) || ( 'core/spacer' === $name && ! empty( $inner_block['attrs']['width'] ) ) ) {
+				return false;
+			}
+			if ( ! $this->only_contains_blocks( $inner_block, $block_names ) ) {
 				return false;
 			}
 		}
