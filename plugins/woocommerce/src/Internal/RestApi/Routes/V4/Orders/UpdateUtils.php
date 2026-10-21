@@ -352,6 +352,8 @@ class UpdateUtils {
 	/**
 	 * Checks whether a line item is a custom item: one with no product, but a name and a total.
 	 *
+	 * @since 11.4.0
+	 *
 	 * @param array $request_data Line item data.
 	 * @return bool
 	 */
@@ -366,6 +368,8 @@ class UpdateUtils {
 	/**
 	 * Checks that every new line item, other than custom items, points to an existing product, before any item is saved.
 	 * Otherwise a bad item fails the request after earlier items, and their stock, were already saved.
+	 *
+	 * @since 11.4.0
 	 *
 	 * @throws WC_REST_Exception When a new line item has no product reference, or its product doesn't exist.
 	 * @param mixed $line_items Line items from the request.
