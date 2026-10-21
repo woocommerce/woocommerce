@@ -4,8 +4,8 @@
  *
  * An extension may use {@see self::from_array()} to parse its plan billing arrays and
  * compute due moments from them. The engine stores plan policies opaquely and does not
- * read them itself. A policy always has a usable cadence: construction refuses an unknown
- * period or a non-positive interval. The array shape it parses:
+ * read them itself. A policy always has a usable cadence and trial: construction refuses an
+ * unknown period or trial unit and a non-positive interval or trial length. The array shape it parses:
  *   {
  *     period:         'day' | 'week' | 'month' | 'year',
  *     interval:       int,
@@ -83,7 +83,7 @@ final class BillingPolicy {
 	 * @param int|null                              $min_cycles     Minimum cycles before cancellation is allowed.
 	 * @param int|null                              $max_cycles     Total cycles before the contract ends.
 	 * @param array{length: int, unit: string}|null $trial_duration Native trial; null if none.
-	 * @throws InvalidInputException If the period is unknown, the interval is not positive, the cycle bounds or the trial shape are invalid.
+	 * @throws InvalidInputException If the period is unknown, the interval is not positive, the cycle bounds or the trial are invalid.
 	 */
 	public function __construct( string $period, int $interval, ?int $min_cycles, ?int $max_cycles, ?array $trial_duration ) {
 		self::throw_errors(
@@ -212,33 +212,15 @@ final class BillingPolicy {
 	 *
 	 * @param DateTimeImmutable $contract_start Moment the contract was created.
 	 * @return DateTimeImmutable The first renewal moment in UTC.
-	 * @throws InvalidInputException If the trial length is not positive or the trial unit is unknown.
 	 */
 	public function compute_first_renewal_from( DateTimeImmutable $contract_start ): DateTimeImmutable {
 		if ( null === $this->trial_duration ) {
 			return $this->compute_next_renewal_from( $contract_start );
 		}
 
-		$length = (int) $this->trial_duration['length'];
-		$unit   = (string) $this->trial_duration['unit'];
-
-		if ( $length <= 0 ) {
-			throw new InvalidInputException(
-				ValidationErrorCode::OUT_OF_BOUNDS,
-				'trial_duration.length',
-				sprintf( 'BillingPolicy::compute_first_renewal_from(): trial length must be positive, got %d.', $length ),
-				array( 'min' => 1 )
-			);
-		}
-
-		$unit_error = self::get_unit_error( $unit, 'trial_duration.unit' );
-		if ( null !== $unit_error ) {
-			throw $unit_error;
-		}
-
 		return $contract_start
 			->setTimezone( new DateTimeZone( 'UTC' ) )
-			->modify( sprintf( '+%d %s', $length, $unit ) );
+			->modify( sprintf( '+%d %s', $this->trial_duration['length'], $this->trial_duration['unit'] ) );
 	}
 
 	/**
@@ -425,7 +407,7 @@ final class BillingPolicy {
 	}
 
 	/**
-	 * The trial shape errors: the length's, then the unit's. None for no trial.
+	 * The trial errors: the length's, then the unit's. None for no trial.
 	 *
 	 * @param array<array-key, mixed>|null $trial_duration Trial duration.
 	 * @return array<int, InvalidInputException|null>
@@ -439,7 +421,7 @@ final class BillingPolicy {
 	}
 
 	/**
-	 * The error for a missing or non-integer trial length, or null.
+	 * The error for a missing, non-integer or non-positive trial length, or null.
 	 *
 	 * @param array<array-key, mixed> $trial_duration Trial duration.
 	 */
@@ -455,12 +437,20 @@ final class BillingPolicy {
 				array( 'type' => 'integer' )
 			);
 		}
+		if ( $trial_duration['length'] <= 0 ) {
+			return new InvalidInputException(
+				ValidationErrorCode::OUT_OF_BOUNDS,
+				'trial_duration.length',
+				sprintf( 'BillingPolicy: trial_duration.length must be positive, got %d.', $trial_duration['length'] ),
+				array( 'min' => 1 )
+			);
+		}
 
 		return null;
 	}
 
 	/**
-	 * The error for a missing or non-string trial unit, or null.
+	 * The error for a missing, non-string or unknown trial unit, or null.
 	 *
 	 * @param array<array-key, mixed> $trial_duration Trial duration.
 	 */
@@ -477,6 +467,6 @@ final class BillingPolicy {
 			);
 		}
 
-		return null;
+		return self::get_unit_error( $trial_duration['unit'], 'trial_duration.unit' );
 	}
 }

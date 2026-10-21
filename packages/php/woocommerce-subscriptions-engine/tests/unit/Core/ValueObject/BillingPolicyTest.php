@@ -42,7 +42,6 @@ class BillingPolicyTest extends TestCase {
 	 */
 	public function provide_refusals(): array {
 		$units = array( 'allowed' => array( 'day', 'week', 'month', 'year' ) );
-		$start = new DateTimeImmutable( '2026-01-01 00:00:00', new DateTimeZone( 'UTC' ) );
 
 		return array(
 			'interval not positive'     => array(
@@ -204,8 +203,8 @@ class BillingPolicyTest extends TestCase {
 				array( 'type' => 'string' ),
 			),
 			'trial length not positive' => array(
-				static function () use ( $start ): void {
-					$policy = new BillingPolicy(
+				static function (): void {
+					new BillingPolicy(
 						'month',
 						1,
 						null,
@@ -215,15 +214,14 @@ class BillingPolicyTest extends TestCase {
 							'unit'   => 'day',
 						)
 					);
-					$policy->compute_first_renewal_from( $start );
 				},
 				ValidationErrorCode::OUT_OF_BOUNDS,
 				'trial_duration.length',
 				array( 'min' => 1 ),
 			),
 			'unknown trial unit'        => array(
-				static function () use ( $start ): void {
-					$policy = new BillingPolicy(
+				static function (): void {
+					new BillingPolicy(
 						'month',
 						1,
 						null,
@@ -233,7 +231,6 @@ class BillingPolicyTest extends TestCase {
 							'unit'   => 'fortnight',
 						)
 					);
-					$policy->compute_first_renewal_from( $start );
 				},
 				ValidationErrorCode::NOT_IN_ENUM,
 				'trial_duration.unit',
@@ -383,6 +380,31 @@ class BillingPolicyTest extends TestCase {
 				array( ValidationErrorCode::OUT_OF_BOUNDS, 'min_cycles', array( 'min' => 0 ) ),
 				array( ValidationErrorCode::INVALID_TYPE, 'trial_duration.length', array( 'type' => 'integer' ) ),
 				array( ValidationErrorCode::REQUIRED, 'trial_duration.unit', array() ),
+			)
+		);
+	}
+
+	/**
+	 * @testdox from_array reports a bad period, trial length and trial unit together.
+	 */
+	public function test_from_array_reports_the_trial_values_with_the_other_fields(): void {
+		$this->assert_invalid_inputs(
+			static function (): void {
+				BillingPolicy::from_array(
+					array(
+						'period'         => 'fortnight',
+						'interval'       => 1,
+						'trial_duration' => array(
+							'length' => 0,
+							'unit'   => 'fortnight',
+						),
+					)
+				);
+			},
+			array(
+				array( ValidationErrorCode::NOT_IN_ENUM, 'period', array( 'allowed' => array( 'day', 'week', 'month', 'year' ) ) ),
+				array( ValidationErrorCode::OUT_OF_BOUNDS, 'trial_duration.length', array( 'min' => 1 ) ),
+				array( ValidationErrorCode::NOT_IN_ENUM, 'trial_duration.unit', array( 'allowed' => array( 'day', 'week', 'month', 'year' ) ) ),
 			)
 		);
 	}
