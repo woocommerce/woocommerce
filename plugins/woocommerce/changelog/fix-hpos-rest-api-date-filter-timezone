@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix order date filters on non-UTC stores for dates with fractional seconds or hour-only time zone offsets.

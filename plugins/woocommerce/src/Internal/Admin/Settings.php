@@ -84,6 +84,25 @@ class Settings {
 	}
 
 	/**
+	 * Get the payment gateways for the Orders report payment method filter and column: the installed
+	 * ones by title, then any other gateway the stored orders were paid with, by id.
+	 *
+	 * @return array Payment gateway titles, keyed by gateway id.
+	 */
+	private function get_payment_gateway_titles() {
+		$titles = array();
+		foreach ( WC()->payment_gateways()->payment_gateways() as $gateway ) {
+			$titles[ $gateway->id ] = $gateway->get_method_title();
+		}
+
+		// A gateway that is no longer installed still has orders, so it stays in the filter under its id.
+		$stored  = OrdersDataStore::get_all_payment_methods();
+		$titles += array_combine( $stored, $stored );
+
+		return $titles;
+	}
+
+	/**
 	 * Validate a filtered list of default order statuses for display in the Settings UI.
 	 *
 	 * Drops slugs that are not registered or synced (they cannot be shown as checkboxes).
@@ -382,6 +401,7 @@ class Settings {
 			$settings['unregisteredOrderStatuses'] = $this->get_unregistered_order_statuses();
 			$settings['usesNewFullRefundData']     = OrderUtil::uses_new_full_refund_data();
 			$settings['couponTypes']               = wc_get_coupon_types();
+			$settings['paymentGateways']           = $this->get_payment_gateway_titles();
 		}
 
 		// The separator used for attributes found in Variation titles.

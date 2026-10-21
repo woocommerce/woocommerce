@@ -5,13 +5,21 @@
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductStatus;
-use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
  * Tests for WC_Webhook class.
  */
 class WC_Webhook_Test extends WC_Unit_Test_Case {
+	use HPOSToggleTrait;
+
+	/**
+	 * Ensure permanent HPOS tables exist before per-test transactions start.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		self::setup_cot_tables();
+	}
 
 	/**
 	 * Whether HPOS was in use before a test changed the order storage, or null if it did not.
@@ -26,7 +34,7 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		try {
 			if ( null !== $this->prev_hpos_enabled ) {
-				OrderHelper::toggle_cot_feature_and_usage( $this->prev_hpos_enabled );
+				$this->toggle_cot_authoritative( $this->prev_hpos_enabled );
 				$this->prev_hpos_enabled = null;
 			}
 		} finally {
@@ -490,7 +498,7 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 			$this->prev_hpos_enabled = OrderUtil::custom_orders_table_usage_is_enabled();
 		}
 		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
-		OrderHelper::toggle_cot_feature_and_usage( $hpos_enabled );
+		$this->toggle_cot_authoritative( $hpos_enabled );
 	}
 
 	/**
@@ -512,6 +520,58 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 			2
 		);
 		$webhook->enqueue();
+	}
+
+	/**
+	 * @testdox Deleting a refund delivers an order.updated webhook with the parent order payload.
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $hpos_on_or_off True to test with HPOS on, false to test with HPOS off.
+	 */
+	public function test_refund_deletion_delivers_order_updated_webhook( bool $hpos_on_or_off ): void {
+		// Remove the Test Suite’s use of temporary tables https://wordpress.stackexchange.com/a/220308.
+		remove_filter( 'query', array( $this, '_create_temporary_tables' ) );
+		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
+		$this->toggle_cot_authoritative( $hpos_on_or_off );
+
+		$order  = WC_Helper_Order::create_order();
+		$refund = wc_create_refund(
+			array(
+				'order_id'       => $order->get_id(),
+				'amount'         => 1,
+				'refund_payment' => false,
+			)
+		);
+
+		$this->assertInstanceOf( WC_Order_Refund::class, $refund, 'The refund fixture should be created.' );
+		$refund_id = $refund->get_id();
+
+		$payloads = array();
+		$webhook  = $this->create_active_webhook( 'order.updated' );
+		$webhook->set_user_id( 1 );
+
+		remove_action( 'woocommerce_webhook_process_delivery', 'wc_webhook_process_delivery', 10 );
+		add_action(
+			'woocommerce_webhook_process_delivery',
+			function ( $delivering_webhook, $arg ) use ( $webhook, &$payloads ) {
+				if ( $webhook === $delivering_webhook ) {
+					$payloads[] = $delivering_webhook->build_payload( $arg );
+				}
+			},
+			10,
+			2
+		);
+		$webhook->enqueue();
+
+		$refund->delete( true );
+
+		$this->assertCount( 1, $payloads, 'The refund deletion should queue one webhook payload.' );
+		$this->assertArrayNotHasKey( 'code', $payloads[0], 'The payload should not contain a REST API error.' );
+		$this->assertArrayHasKey( 'id', $payloads[0] );
+		$this->assertSame( $order->get_id(), $payloads[0]['id'], 'The payload should represent the parent order.' );
+		$this->assertArrayHasKey( 'refunds', $payloads[0] );
+		$this->assertNotContains( $refund_id, wp_list_pluck( $payloads[0]['refunds'], 'id' ), 'The payload should not contain the deleted refund.' );
 	}
 
 	/**
