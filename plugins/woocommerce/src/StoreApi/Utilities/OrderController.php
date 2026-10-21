@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Internal\Customers\SearchService as CustomerSearchSer
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Enums\OrderItemType;
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Utilities\DiscountsUtil;
 use Automattic\WooCommerce\Utilities\ShippingUtil;
 use Exception;
@@ -839,7 +840,16 @@ class OrderController {
 		$cart            = $cart_controller->get_cart_instance();
 		$cart_hashes     = $cart_controller->get_cart_hashes();
 		$checkout        = WC()->checkout();
-		$kept_types      = $checkout->remove_order_items_not_matching_cart( $order, $cart, $cart_hashes );
+		$kept_types      = null;
+
+		// A retried order keeps only the items the cart created, so lines a merchant added aren't charged. Taxes are
+		// recalculated below, so their amounts aren't compared.
+		if ( $order->has_status( array( OrderStatus::PENDING, OrderStatus::FAILED ) ) ) {
+			$kept_types = $checkout->remove_resumed_order_items_not_matching_cart( $order, $cart, $cart_hashes, false );
+		}
+		if ( null === $kept_types ) {
+			$kept_types = $checkout->remove_order_items_not_matching_cart( $order, $cart, $cart_hashes );
+		}
 
 		if ( ! in_array( OrderItemType::LINE_ITEM, $kept_types, true ) ) {
 			$order->set_cart_hash( $cart_hashes['line_items'] );

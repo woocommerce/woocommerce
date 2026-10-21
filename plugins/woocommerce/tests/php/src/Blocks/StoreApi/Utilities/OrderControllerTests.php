@@ -567,16 +567,23 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox update_order_from_cart() replaces shipping and fee lines whose amounts a merchant edited, so the order total matches the cart.
 	 *
-	 * @testWith ["none", ""]
-	 *           ["shipping_total", "shipping"]
-	 *           ["fee_total", "fee"]
+	 * @testWith ["none", "", false]
+	 *           ["shipping_total", "shipping", false]
+	 *           ["fee_total", "fee", false]
+	 *           ["none", "", true]
+	 *           ["shipping_total", "shipping", true]
+	 *           ["fee_total", "fee", true]
 	 *
 	 * @param string $edit          The merchant edit to make to the order.
 	 * @param string $replaced_type The item type that should be replaced, or an empty string when none should be.
+	 * @param bool   $retried       Whether the order is a retried one with a record of its cart items, or a draft.
 	 */
-	public function test_update_order_from_cart_replaces_shipping_and_fees_with_edited_amounts( string $edit, string $replaced_type ): void {
+	public function test_update_order_from_cart_replaces_shipping_and_fees_with_edited_amounts( string $edit, string $replaced_type, bool $retried ): void {
 		try {
-			$order  = $this->create_order_with_shipping_and_fee();
+			$order = $this->create_order_with_shipping_and_fee();
+			if ( $retried ) {
+				$this->place_order( $order );
+			}
 			$before = $this->get_item_ids_by_type( $order );
 			if ( 'shipping_total' === $edit ) {
 				$shipping = array_values( $order->get_shipping_methods() )[0];
@@ -607,11 +614,19 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox update_order_from_cart() keeps shipping and fee lines added outside the cart, along with the cart's own lines.
+	 * @testdox update_order_from_cart() keeps shipping and fee lines added outside the cart to a draft, or to a retried order with no record of its cart items.
+	 *
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $retried Whether the order is a pending one placed before its cart items were recorded, or a draft.
 	 */
-	public function test_update_order_from_cart_keeps_shipping_and_fees_added_outside_the_cart(): void {
+	public function test_update_order_from_cart_keeps_shipping_and_fees_added_outside_the_cart( bool $retried ): void {
 		try {
-			$order     = $this->create_order_with_shipping_and_fee();
+			$order = $this->create_order_with_shipping_and_fee();
+			if ( $retried ) {
+				$order->update_status( OrderStatus::PENDING );
+			}
 			$extra_fee = new \WC_Order_Item_Fee();
 			$extra_fee->set_name( 'Extension surcharge' );
 			$extra_fee->set_total( '2' );
@@ -631,6 +646,76 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 		$after = $this->get_item_ids_by_type( $order );
 		$this->assertSame( $before['fee'], $after['fee'], 'The cart fee and the extension fee should keep their IDs.' );
 		$this->assertSame( $before['shipping'], $after['shipping'], 'The cart shipping line and the extension shipping line should keep their IDs.' );
+	}
+
+	/**
+	 * @testdox update_order_from_cart() removes shipping and fee lines a merchant added to a retried order, so the order total matches the cart.
+	 */
+	public function test_update_order_from_cart_removes_shipping_and_fees_added_to_a_retried_order(): void {
+		try {
+			$order = $this->create_order_with_shipping_and_fee();
+			$this->place_order( $order );
+			$cart_item_ids = $this->get_item_ids_by_type( $order );
+
+			// The added fee has the same amount as the cart's fee, which then gets edited, so matching by amount isn't enough.
+			$added_fee = new \WC_Order_Item_Fee();
+			$added_fee->set_name( 'Merchant fee' );
+			$added_fee->set_total( '5' );
+			$added_shipping = new \WC_Order_Item_Shipping();
+			$added_shipping->set_method_title( 'Merchant shipping' );
+			$added_shipping->set_total( '3' );
+			$order->add_item( $added_fee );
+			$order->add_item( $added_shipping );
+			$cart_fee = array_values( $order->get_fees() )[0];
+			$cart_fee->set_total( '15' );
+			$order->save();
+
+			$this->sut->update_order_from_cart( $order );
+			$cart_total = (float) WC()->cart->get_total( 'edit' );
+		} finally {
+			\WC_Helper_Shipping::delete_simple_flat_rate();
+		}
+
+		$after = $this->get_item_ids_by_type( $order );
+		$this->assertCount( 1, $after['fee'], 'Only the cart fee should be on the order.' );
+		$this->assertEmpty( array_intersect( array( $added_fee->get_id(), $cart_fee->get_id() ), $after['fee'] ), 'The added fee and the edited cart fee should be removed.' );
+		$this->assertSame( $cart_item_ids['shipping'], $after['shipping'], 'Only the cart shipping line should be on the order, with the same ID.' );
+		$this->assertSame( $cart_item_ids['line_item'], $after['line_item'], 'The line items should keep their IDs.' );
+		$this->assertSame( $cart_total, (float) $order->get_total(), 'The order total should match the cart.' );
+	}
+
+	/**
+	 * @testdox update_order_from_cart() adds back the coupon line of a retried order a merchant removed the coupon from.
+	 */
+	public function test_update_order_from_cart_adds_back_a_coupon_removed_from_a_retried_order(): void {
+		$coupon  = \WC_Helper_Coupon::create_coupon( 'retry10', array( 'coupon_amount' => 10 ) );
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id() );
+		WC()->cart->apply_coupon( $coupon->get_code() );
+		WC()->cart->calculate_totals();
+		$order = $this->sut->create_order_from_cart();
+		$this->place_order( $order );
+
+		$order->remove_coupon( $coupon->get_code() );
+		$order->save();
+		$this->assertEmpty( $order->get_coupons(), 'Removing the coupon should remove its line.' );
+
+		$this->sut->update_order_from_cart( $order );
+
+		$this->assertSame( array( $coupon->get_code() ), $order->get_coupon_codes(), 'The coupon line should be added back.' );
+		$this->assertSame( (float) WC()->cart->get_total( 'edit' ), (float) $order->get_total(), 'The order total should match the cart.' );
+	}
+
+	/**
+	 * Saves an order as pending and records its cart items, as the Store API checkout does when it places the order.
+	 *
+	 * @param \WC_Order $order The order.
+	 */
+	private function place_order( \WC_Order $order ): void {
+		$cart_order_items = WC()->checkout()->get_cart_order_items( $order );
+		$order->update_status( OrderStatus::PENDING );
+		WC()->checkout()->save_cart_order_item_ids( $order, $cart_order_items );
 	}
 
 	/**

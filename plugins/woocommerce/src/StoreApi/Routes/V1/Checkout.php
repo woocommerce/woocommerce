@@ -41,6 +41,14 @@ class Checkout extends AbstractCartRoute {
 	private $order = null;
 
 	/**
+	 * The order items created from the cart, read before extensions add their own. Their IDs are stored once the order
+	 * is saved, so a retried order keeps only these.
+	 *
+	 * @var \WC_Order_Item[]
+	 */
+	private $cart_order_items = array();
+
+	/**
 	 * Get the path of this REST route.
 	 *
 	 * @return string
@@ -685,6 +693,7 @@ class Checkout extends AbstractCartRoute {
 		// Custom statuses are preserved when no payment is needed; payment gateway statuses take precedence otherwise.
 		$this->order->update_status( 'pending' );
 		// Order save-point: 2.
+		WC()->checkout()->save_cart_order_item_ids( $this->order, $this->cart_order_items );
 
 		/**
 		 * Fires after the Checkout Block/Store API request has populated and validated the order.
@@ -805,7 +814,8 @@ class Checkout extends AbstractCartRoute {
 		$this->order = $this->order ?? $this->get_draft_order();
 
 		if ( ! $this->order ) {
-			$this->order = $this->order_controller->create_order_from_cart();
+			$this->order            = $this->order_controller->create_order_from_cart();
+			$this->cart_order_items = WC()->checkout()->get_cart_order_items( $this->order );
 			wc_log_order_step( '[Store API #4::create_or_update_draft_order] Created order from cart', array( 'order_object' => $this->order ) );
 
 			/**
@@ -824,6 +834,7 @@ class Checkout extends AbstractCartRoute {
 			do_action( 'woocommerce_store_api_checkout_order_created', $this->order );
 		} else {
 			$this->order_controller->update_order_from_cart( $this->order, true );
+			$this->cart_order_items = WC()->checkout()->get_cart_order_items( $this->order );
 			wc_log_order_step( '[Store API #4::create_or_update_draft_order] Updated order from cart', array( 'order_object' => $this->order ) );
 		}
 

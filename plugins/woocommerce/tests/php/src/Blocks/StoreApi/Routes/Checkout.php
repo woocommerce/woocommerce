@@ -3374,6 +3374,45 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * @testdox A retried checkout removes a fee a merchant added to the failed order and charges the cart total.
+	 */
+	public function test_retry_removes_fee_a_merchant_added_to_the_failed_order(): void {
+		$fail_hook = function () {
+			throw new \Automattic\WooCommerce\StoreApi\Exceptions\RouteException( 'woocommerce_rest_checkout_payment_failed', 'Payment declined.', 400 );
+		};
+		add_action( 'woocommerce_store_api_checkout_order_processed', $fail_hook, 999 );
+		try {
+			$first_response = rest_get_server()->dispatch( $this->build_valid_post_request() );
+		} finally {
+			remove_action( 'woocommerce_store_api_checkout_order_processed', $fail_hook, 999 );
+		}
+		$this->assertEquals( 400, $first_response->get_status(), 'The first POST should fail.' );
+
+		// The registered route keeps its order between dispatches, while a real retry is a new request that loads it again.
+		$route          = rest_get_server()->get_routes()['/wc/store/v1/checkout'][0]['callback'][0];
+		$order_property = new \ReflectionProperty( CheckoutRoute::class, 'order' );
+		$order_property->setAccessible( true );
+		$order_property->setValue( $route, null );
+
+		$order         = wc_get_order( (int) WC()->session->get( 'store_api_draft_order' ) );
+		$line_item_ids = array_keys( $order->get_items() );
+		$cart_total    = $order->get_total();
+		$merchant_fee  = new \WC_Order_Item_Fee();
+		$merchant_fee->set_name( 'Merchant fee' );
+		$merchant_fee->set_total( '7' );
+		$order->add_item( $merchant_fee );
+		$order->calculate_totals();
+
+		$retry_response = rest_get_server()->dispatch( $this->build_valid_post_request() );
+
+		$this->assertEquals( 200, $retry_response->get_status(), print_r( $retry_response->get_data(), true ) );
+		$order = wc_get_order( (int) $retry_response->get_data()['order_id'] );
+		$this->assertEmpty( $order->get_fees(), 'The fee the merchant added should be removed.' );
+		$this->assertSame( $line_item_ids, array_keys( $order->get_items() ), 'The line items should keep their IDs.' );
+		$this->assertSame( $cart_total, $order->get_total(), 'The order total should be the cart total.' );
+	}
+
+	/**
 	 * @testdox Store API checkout stores the order awaiting payment before invoking the payment gateway.
 	 */
 	public function test_post_sets_order_awaiting_payment_before_processing_payment(): void {
