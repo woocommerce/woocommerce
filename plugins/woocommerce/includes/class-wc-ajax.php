@@ -1377,13 +1377,15 @@ class WC_AJAX {
 				$percent          = floatval( trim( $amount, '%' ) );
 
 				// The percentage applies to the line items after discounts, excluding tax, shipping and
-				// other fees. Read their stored totals so a filtered order subtotal can't change the fee.
-				$base = 0.0;
+				// other fees. Read their stored totals so a filtered order subtotal can't change the fee,
+				// and round them as the order subtotal does.
+				$line_totals = array();
 				foreach ( $order->get_items() as $item ) {
 					if ( $item instanceof WC_Order_Item_Product ) {
-						$base += (float) $item->get_total( 'edit' );
+						$line_totals[] = wc_add_number_precision( (float) $item->get_total( 'edit' ), false );
 					}
 				}
+				$base   = wc_remove_number_precision( $order::get_rounded_items_total( $line_totals ) );
 				$amount = NumberUtil::round( $base * ( $percent / 100 ), wc_get_price_decimals() );
 			} else {
 				$amount           = floatval( $amount );

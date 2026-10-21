@@ -3039,6 +3039,54 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Percentage order fees ignore a filtered line item total.
+	 */
+	public function test_add_order_fee_percentage_ignores_filtered_item_total(): void {
+		$order = $this->create_order_with_20_percent_tax();
+		add_filter( 'woocommerce_order_item_get_total', '__return_zero' );
+
+		$fee = $this->add_order_fee_via_ajax( $order, '10%' );
+
+		// The stored line total is 100, so the fee stays 10. The filter also zeroes the fee when read in view context.
+		$this->assertEquals( 10.0, (float) $fee->get_total( 'edit' ), 'Percentage fee should ignore a filtered line item total.' );
+	}
+
+	/**
+	 * @testdox Percentage order fees round the line items the same way as the order subtotal.
+	 *
+	 * @testWith ["no", 24.99, 14.99]
+	 *           ["yes", 25.0, 15.0]
+	 *
+	 * @param string $round_at_subtotal Value of the "Round tax at subtotal level" option.
+	 * @param float  $expected_subtotal Expected order items subtotal.
+	 * @param float  $expected_fee      Expected fee line total.
+	 */
+	public function test_add_order_fee_percentage_rounds_line_items_like_the_subtotal( string $round_at_subtotal, float $expected_subtotal, float $expected_fee ): void {
+		update_option( 'woocommerce_tax_round_at_subtotal', $round_at_subtotal );
+		$product = WC_Helper_Product::create_simple_product();
+		$order   = new WC_Order();
+		for ( $i = 0; $i < 3; $i++ ) {
+			// 8.333333 is the net line total stored for a 10.00 price that includes 20% tax.
+			$order->add_product(
+				$product,
+				1,
+				array(
+					'subtotal' => 8.333333,
+					'total'    => 8.333333,
+				)
+			);
+		}
+		$order->calculate_totals( false );
+		$order->save();
+		$this->assertEquals( $expected_subtotal, (float) $order->get_subtotal(), 'Fixture order should show the expected items subtotal.' );
+
+		$fee = $this->add_order_fee_via_ajax( $order, '60%' );
+
+		// Rounding each line gives 8.33 × 3 = 24.99, so 60% is 14.99; without it the base is 24.999999 and 60% is 15.00.
+		$this->assertEquals( $expected_fee, (float) $fee->get_total(), 'Percentage fee should be taken from the items subtotal the order shows.' );
+	}
+
+	/**
 	 * @testdox Percentage order fees use the items excluding tax when prices are entered including tax.
 	 */
 	public function test_add_order_fee_percentage_with_prices_including_tax(): void {
