@@ -217,7 +217,7 @@ class Products extends ControllerTestCase {
 	/**
 	 * @testdox Should return a bad request response for invalid price filter values.
 	 * @testWith ["min_price", "true"]
-	 *           ["max_price", "10.99"]
+	 *           ["max_price", "10.99invalid"]
 	 *           ["min_price", "-1"]
 	 *
 	 * @param string $param Price filter parameter.
@@ -232,6 +232,23 @@ class Products extends ControllerTestCase {
 
 		$this->assertSame( 400, $response->get_status(), 'Invalid price filters should return HTTP 400.' );
 		$this->assertSame( 'rest_invalid_param', $data['code'], 'The response should identify an invalid request parameter.' );
+	}
+
+	/**
+	 * @testdox Should allow decimal price filter values produced by product filter blocks.
+	 * @testWith ["min_price", "110.00000000000001"]
+	 *           ["max_price", "10.99"]
+	 *
+	 * @param string $param Price filter parameter.
+	 * @param string $value Price filter value.
+	 */
+	public function test_allows_decimal_price_filter_values( string $param, string $value ): void {
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$request->set_param( $param, $value );
+
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status(), 'Decimal price filters should be accepted.' );
 	}
 
 	/**
