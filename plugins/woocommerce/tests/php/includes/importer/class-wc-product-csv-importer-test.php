@@ -2530,4 +2530,57 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( array( $variation_id ), $data['updated'], 'The row with the raw parent SKU is updated' );
 		$this->assertSame( $parent->get_id(), wc_get_product( $variation_id )->get_parent_id(), 'The reference resolves to the parent' );
 	}
+
+	/**
+	 * @testdox Should find a product by its stored SKU when creating products, even if the import would clean that SKU.
+	 */
+	public function test_import_create_finds_products_by_raw_stored_sku_40274(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_sku( 'IMPORT-40274  STORED' );
+		$product->save();
+
+		$data = $this->import_csv_rows( "ID,Type,SKU,Name\n" . ( $product->get_id() + 1000 ) . ",simple,IMPORT-40274  STORED,Not a duplicate\n", null, false );
+
+		$this->assertEmpty( $data['imported'], 'No duplicate product is created' );
+		$this->assertCount( 1, $data['skipped'], 'The row is skipped' );
+		$this->assertSame( 'A product with this ID already exists.', $data['skipped'][0]->get_error_message(), 'The row resolves to the existing product' );
+	}
+
+	/**
+	 * @testdox Should not match by SKU a product whose stored type is not registered, so the type is not rewritten.
+	 */
+	public function test_import_sku_fallback_keeps_unregistered_stored_types_40274(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_sku( 'IMPORT-40274-UNREGISTERED' );
+		$product->save();
+		wp_set_object_terms( $product->get_id(), 'import-40274-unregistered', 'product_type' );
+
+		$data = $this->import_csv_rows( "ID,Type,SKU,Name\n" . ( $product->get_id() + 1000 ) . ",simple,IMPORT-40274-UNREGISTERED,Renamed\n" );
+
+		$this->assertEmpty( $data['updated'], 'The row must not update the product' );
+		$this->assertStringContainsString( 'different product type', $data['failed'][0]->get_error_message(), 'The failure explains why the SKU did not match' );
+		$this->assertTrue( has_term( 'import-40274-unregistered', 'product_type', $product->get_id() ), 'The stored type is kept' );
+	}
+
+	/**
+	 * @testdox Should let code outside the importer call the SKU formatting callback.
+	 */
+	public function test_import_sku_callback_is_callable_from_outside_the_importer_40274(): void {
+		$wrap_callbacks = function ( $callbacks ) {
+			return array_map(
+				function ( $callback ) {
+					return function ( $value ) use ( $callback ) {
+						return call_user_func( $callback, $value );
+					};
+				},
+				$callbacks
+			);
+		};
+		add_filter( 'woocommerce_product_importer_formatting_callbacks', $wrap_callbacks );
+
+		$data = $this->import_csv_rows( "Type,SKU,Name\nsimple,'-IMPORT-40274-WRAPPED,Wrapped callbacks\n", null, false );
+
+		$this->assertCount( 1, $data['imported'], 'The row is imported' );
+		$this->assertSame( '-IMPORT-40274-WRAPPED', wc_get_product( $data['imported'][0] )->get_sku(), 'The SKU callback ran' );
+	}
 }

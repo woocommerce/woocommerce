@@ -386,7 +386,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		// Not updating? Make sure we have a new placeholder for this ID.
 		if ( ! $this->params['update_existing'] ) {
 			$row_sku     = $this->parse_sku_field( $this->get_row_value( 'sku' ) );
-			$id_from_sku = $row_sku ? wc_get_product_id_by_sku( $row_sku ) : 0;
+			$id_from_sku = $this->get_product_id_by_row_sku();
 
 			// If row has a SKU, make sure placeholder was not made already.
 			if ( $id_from_sku ) {
@@ -411,8 +411,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		// An ID exported from another site may not exist here. Fall back to the row's SKU so the
 		// row updates the matching product instead of failing later with an invalid product error.
 		if ( ! in_array( get_post_type( $id ), array( 'product', 'product_variation' ), true ) ) {
-			$row_sku     = $this->parse_sku_field( $this->get_row_value( 'sku' ) );
-			$id_from_sku = $row_sku ? wc_get_product_id_by_sku( $row_sku ) : 0;
+			$id_from_sku = $this->get_product_id_by_row_sku();
 
 			if ( $id_from_sku ) {
 				$this->sku_fallback_refusal = $this->get_sku_fallback_refusal( $id_from_sku );
@@ -424,6 +423,26 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		}
 
 		return $id;
+	}
+
+	/**
+	 * Find the product with the SKU of the row being parsed, as stored or as the import cleans it.
+	 *
+	 * SKUs saved through code can keep characters the import would clean, so the stored form is tried first.
+	 *
+	 * @return int Product ID, or 0 when no product has the SKU.
+	 */
+	private function get_product_id_by_row_sku(): int {
+		$raw_sku   = $this->unescape_data( $this->get_row_value( 'sku' ) );
+		$clean_sku = $this->parse_sku_field( $raw_sku );
+
+		if ( '' === $clean_sku ) {
+			return 0;
+		}
+
+		$id = $raw_sku !== $clean_sku ? wc_get_product_id_by_sku( $raw_sku ) : 0;
+
+		return $id ? $id : wc_get_product_id_by_sku( $clean_sku );
 	}
 
 	/**
@@ -1668,10 +1687,10 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			$result = $this->process_item( $parsed_data );
 
 			if ( is_wp_error( $result ) ) {
-				$refusal = $this->importing_row_info['refusal'] ?? '';
+				$sku_refusal = $this->importing_row_info['refusal'] ?? '';
 
-				if ( $sku_exists && $id !== $id_from_sku && ( $id_exists || '' !== $refusal ) ) {
-					$result = $this->add_sku_match_hint( $result, $id_exists ? $id : 0, $refusal, (string) $sku, $id_from_sku );
+				if ( $sku_exists && $id !== $id_from_sku && ( $id_exists || '' !== $sku_refusal ) ) {
+					$result = $this->add_sku_match_hint( $result, $id_exists ? $id : 0, $sku_refusal, (string) $sku, $id_from_sku );
 				}
 				$result->add_data( array( 'row' => $this->get_row_id( $parsed_data ) ) );
 				$data['failed'][] = $result;
