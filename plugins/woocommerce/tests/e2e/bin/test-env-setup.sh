@@ -28,7 +28,7 @@ echo -e 'Activate WooCommerce \n'
 $WP_CLI_PREFIX wp plugin activate woocommerce
 
 echo -e 'Activate default theme \n'
-$WP_CLI_PREFIX wp theme activate twentytwentythree
+$WP_CLI_PREFIX wp theme activate twentytwentyfour
 
 # Provision wp-cli.yml in-container instead of mapping it. Single-file Docker
 # mounts can surface as empty files under gRPC FUSE, which would silently drop

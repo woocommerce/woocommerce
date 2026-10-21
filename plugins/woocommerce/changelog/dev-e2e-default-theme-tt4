@@ -1,0 +1,3 @@
+Significance: patch
+Type: dev
+Comment: Use Twenty Twenty-Four instead of Twenty Twenty-Three as the default theme in core E2E tests; no production change.

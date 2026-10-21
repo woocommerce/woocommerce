@@ -272,8 +272,8 @@ function wc_cleanup_reset_site() {
 			wp_delete_post( $page->ID, true );
 		}
 
-		// Set the active theme to Twenty Twenty-Three.
-		switch_theme( 'twentytwentythree' );
+		// Set the active theme to Twenty Twenty-Four.
+		switch_theme( 'twentytwentyfour' );
 	}
 
 	// Clean up the WooCommerce analytics tables.

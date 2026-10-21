@@ -17,8 +17,8 @@ printf "\n\n\n"
 echo "--------------------------------------------------------"
 echo -e "Set default theme"
 echo "--------------------------------------------------------"
-wp theme install twentytwentythree
-wp theme activate twentytwentythree
+wp theme install twentytwentyfour
+wp theme activate twentytwentyfour
 
 printf "\n\n\n"
 
