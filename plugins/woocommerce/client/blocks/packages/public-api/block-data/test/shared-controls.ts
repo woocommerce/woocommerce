@@ -348,4 +348,80 @@ describe( 'apiFetchWithHeaders session writes', () => {
 			method: 'GET',
 		} );
 	} );
+
+	it( 'keeps sending writes after a request rejects without an error', async () => {
+		const first = updateDraftOrder( 'cod' );
+		await tick();
+		const second = updateItem( 'item-1', 2 );
+
+		fetches[ 0 ].reject( undefined );
+		await settle();
+		await expect( first ).rejects.toBeUndefined();
+
+		expect( fetches ).toHaveLength( 2 );
+		await respondToBatch( 1, [ batchItem( { cart: 'ok' } ) ] );
+		await expect( second ).resolves.toMatchObject( {
+			response: { cart: 'ok' },
+		} );
+	} );
+
+	it( 'keeps sending writes after a batch request rejects without an error', async () => {
+		const first = updateItem( 'item-1', 2 );
+		await tick();
+		const second = updateItem( 'item-2', 3 );
+
+		fetches[ 0 ].reject( null );
+		await settle();
+		await expect( first ).rejects.toBeNull();
+
+		expect( fetches ).toHaveLength( 2 );
+		await respondToBatch( 1, [ batchItem( { cart: 'ok' } ) ] );
+		await expect( second ).resolves.toMatchObject( {
+			response: { cart: 'ok' },
+		} );
+	} );
+
+	it( 'rejects a write whose request fails before it is sent, and keeps sending writes', async () => {
+		const { default: triggerFetch } =
+			await import( '@wordpress/api-fetch' );
+		const middlewareError = new Error( 'Middleware failed' );
+		jest.mocked( triggerFetch )
+			.mockImplementationOnce( () => {
+				throw middlewareError;
+			} )
+			.mockImplementationOnce( () => {
+				throw middlewareError;
+			} );
+
+		const checkoutUpdate = updateDraftOrder( 'cod' );
+		const cartUpdate = updateItem( 'item-1', 2 );
+		await tick();
+		await expect( checkoutUpdate ).rejects.toBe( middlewareError );
+		await tick();
+		await expect( cartUpdate ).rejects.toBe( middlewareError );
+
+		const next = updateItem( 'item-2', 3 );
+		await tick();
+		expect( fetches ).toHaveLength( 1 );
+		await respondToBatch( 0, [ batchItem( { cart: 'ok' } ) ] );
+		await expect( next ).resolves.toMatchObject( {
+			response: { cart: 'ok' },
+		} );
+	} );
+
+	it( 'does not queue writes to routes that only start with the same text', async () => {
+		void updateItem( 'item-1', 2 );
+		await tick();
+		void apiFetchWithHeaders( {
+			path: '/wc/store/v1/cartography',
+			method: 'POST',
+			data: {},
+		} );
+		await tick( 300 );
+
+		expect( fetches ).toHaveLength( 2 );
+		expect( batchRequests( 1 ) ).toEqual( [
+			{ path: '/wc/store/v1/cartography', body: {} },
+		] );
+	} );
 } );
