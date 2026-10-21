@@ -714,6 +714,14 @@ class Blocks_Width_Preprocessor_Test extends \Email_Editor_Unit_Test {
 						'innerBlocks' => array(),
 					),
 					array(
+						'blockName'   => 'core/image',
+						'attrs'       => array(
+							'width' => '400px',
+							'style' => array( 'border' => array( 'width' => '10px' ) ),
+						),
+						'innerBlocks' => array(),
+					),
+					array(
 						'blockName'   => 'core/group',
 						'attrs'       => array(),
 						'innerBlocks' => array(
@@ -739,8 +747,9 @@ class Blocks_Width_Preprocessor_Test extends \Email_Editor_Unit_Test {
 		$this->assertEquals( '660px', $grid['email_attrs']['width'] );
 		// (660 - 15 - 15 - 20) / 2 = 305.
 		$this->assertEquals( '305px', $grid['innerBlocks'][0]['email_attrs']['width'] );
-		$this->assertEquals( '305px', $grid['innerBlocks'][1]['email_attrs']['width'] );
-		$this->assertEquals( '305px', $grid['innerBlocks'][1]['innerBlocks'][0]['email_attrs']['width'], 'A fixed width wider than the cell should be capped to the cell.' );
+		$this->assertEquals( '285px', $grid['innerBlocks'][1]['email_attrs']['width'], 'A bordered image should leave room for its border, which is drawn outside it.' );
+		$this->assertEquals( '305px', $grid['innerBlocks'][2]['email_attrs']['width'] );
+		$this->assertEquals( '305px', $grid['innerBlocks'][2]['innerBlocks'][0]['email_attrs']['width'], 'A fixed width wider than the cell should be capped to the cell.' );
 		$this->assertEquals( '800px', $result[1]['email_attrs']['width'], 'Fixed widths outside a grid are left as they are.' );
 	}
 }

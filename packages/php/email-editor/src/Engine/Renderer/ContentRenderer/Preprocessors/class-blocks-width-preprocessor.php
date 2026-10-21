@@ -91,9 +91,9 @@ class Blocks_Width_Preprocessor implements Preprocessor {
 			$width_input = is_string( $width_input ) ? $width_input : '100%';
 			$width       = $this->convert_width_to_pixels( $width_input, $layout_width );
 			// A fixed width wider than a grid cell (e.g. a 400px image in a 290px cell) would push into
-			// the neighboring cell, so cap it to the cell.
+			// the neighboring cell, so cap it to the cell. An image's border is drawn outside its width.
 			if ( $in_grid_cell ) {
-				$width = min( $width, $layout_width );
+				$width = min( $width, 'core/image' === $block['blockName'] ? $layout_width - $block_border_horizontal : $layout_width );
 			}
 
 			if ( 'core/columns' === $block['blockName'] ) {
