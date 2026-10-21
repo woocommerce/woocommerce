@@ -2351,4 +2351,35 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$this->assertCount( 1, $data['failed'], 'A row with an unknown type fails' );
 		$this->assertSame( 'Invalid product type.', $data['failed'][0]->get_error_message(), 'The type error is shown on its own' );
 	}
+
+	/**
+	 * @testdox Should match SKUs and SKU references that the exporter escaped with a leading apostrophe.
+	 */
+	public function test_import_unescapes_exported_skus_40274(): void {
+		$parent = WC_Helper_Product::create_variation_product();
+		$parent->set_sku( '-IMPORT-40274-DASH-PARENT' );
+		$parent->save();
+		$variation = wc_get_product( $parent->get_children()[0] );
+		$variation->set_sku( '=IMPORT-40274-DASH-VAR' );
+		$variation->save();
+
+		$missing_id = $variation->get_id() + 1000;
+		$csv        = "ID,Type,SKU,Regular price,Parent\n{$missing_id},variation,'=IMPORT-40274-DASH-VAR,42,'-IMPORT-40274-DASH-PARENT\n";
+
+		$data = $this->import_csv_rows(
+			$csv,
+			array(
+				'ID'            => 'id',
+				'Type'          => 'type',
+				'SKU'           => 'sku',
+				'Regular price' => 'regular_price',
+				'Parent'        => 'parent_id',
+			)
+		);
+
+		$this->assertSame( array( $variation->get_id() ), $data['updated'], 'The escaped SKU matches the variation' );
+		$updated = wc_get_product( $variation->get_id() );
+		$this->assertSame( '=IMPORT-40274-DASH-VAR', $updated->get_sku(), 'The SKU is saved without the apostrophe' );
+		$this->assertSame( $parent->get_id(), $updated->get_parent_id(), 'The escaped parent SKU resolves to the parent' );
+	}
 }

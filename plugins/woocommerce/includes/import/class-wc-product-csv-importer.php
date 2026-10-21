@@ -278,7 +278,9 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	public function parse_relative_field( $value ) {
 		global $wpdb;
 
-		if ( empty( $value ) ) {
+		$value = empty( $value ) ? '' : sanitize_text_field( $this->unescape_data( (string) $value ) );
+
+		if ( '' === $value ) {
 			return '';
 		}
 
@@ -406,7 +408,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * Get a column value of the row currently being parsed.
 	 *
 	 * @param string $key Mapped column key, such as 'sku' or 'type'.
-	 * @return string Cell value sanitized as wc_clean() does for parsed fields, or an empty string when the file has no such column.
+	 * @return string Cell value unescaped and sanitized as parsed fields are, or an empty string when the file has no such column.
 	 */
 	private function get_row_value( string $key ): string {
 		$column_index = array_search( $key, $this->get_mapped_keys(), true );
@@ -415,7 +417,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			return '';
 		}
 
-		return sanitize_text_field( self::convert_to_utf8( (string) ( $this->raw_data[ $this->parsing_raw_data_index ][ $column_index ] ?? '' ) ) );
+		return sanitize_text_field( $this->unescape_data( self::convert_to_utf8( (string) ( $this->raw_data[ $this->parsing_raw_data_index ][ $column_index ] ?? '' ) ) ) );
 	}
 
 	/**
@@ -465,6 +467,16 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		$type = current( array_diff( $values, array( 'virtual', 'downloadable' ) ) );
 
 		return $type ? $type : ProductType::SIMPLE;
+	}
+
+	/**
+	 * Parse a SKU cell, removing the apostrophe the exporter puts before a leading =, +, - or @.
+	 *
+	 * @param string $value Field value.
+	 * @return string
+	 */
+	private function parse_sku_field( $value ): string {
+		return sanitize_text_field( $this->unescape_data( $value ) );
 	}
 
 	/**
@@ -988,6 +1000,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			'tag_ids_spaces'    => array( $this, 'parse_tags_spaces_field' ),
 			'shipping_class_id' => array( $this, 'parse_shipping_class_field' ),
 			'images'            => array( $this, 'parse_images_field' ),
+			'sku'               => array( $this, 'parse_sku_field' ),
 			'parent_id'         => array( $this, 'parse_relative_field' ),
 			'grouped_products'  => array( $this, 'parse_relative_comma_field' ),
 			'upsell_ids'        => array( $this, 'parse_relative_comma_field' ),
