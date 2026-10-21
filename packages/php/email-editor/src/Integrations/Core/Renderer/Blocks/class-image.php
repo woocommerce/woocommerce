@@ -365,6 +365,15 @@ class Image extends Abstract_Block_Renderer {
 				/* @phpstan-ignore-next-line Wrong annotation for parameter in WP. */
 				$html->set_attribute( 'width', esc_attr( $width ) );
 			}
+
+			// Inline dimensions override the attributes, so a shrunk image needs them updated too.
+			if ( isset( $parsed_block['email_attrs']['image-scale'] ) ) {
+				$styles['width'] = $parsed_block['attrs']['width'];
+				if ( is_numeric( $height ) ) {
+					$styles['height'] = $height . 'px';
+				}
+				$html->set_attribute( 'style', esc_attr( $this->compile_css( $styles ) ) );
+			}
 			$block_content = $html->get_updated_html();
 		}
 

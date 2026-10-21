@@ -1332,4 +1332,35 @@ class Spacing_Preprocessor_Test extends \Email_Editor_Unit_Test {
 		$this->assertSame( '10px', $result[0]['innerBlocks'][1]['email_attrs']['margin-top'] );
 		$this->assertSame( '10px', $result[0]['innerBlocks'][2]['email_attrs']['margin-top'] );
 	}
+
+	/**
+	 * Test a two-column grid stays stacked when it holds a block that can't be sized to a cell.
+	 *
+	 * @testWith ["core/gallery"]
+	 *           ["core/post-content"]
+	 *           ["woocommerce/product-collection"]
+	 * @param string $block_name Block nested inside a grid item.
+	 */
+	public function testItStacksTwoColumnGridsHoldingFullWidthBlocks( string $block_name ): void {
+		$grid                                  = $this->build_grid_group(
+			array(
+				'type'        => 'grid',
+				'columnCount' => 2,
+			),
+			array( array(), array() )
+		);
+		$grid['innerBlocks'][1]['blockName']   = 'core/group';
+		$grid['innerBlocks'][1]['innerBlocks'] = array(
+			array(
+				'blockName'   => $block_name,
+				'attrs'       => array(),
+				'innerBlocks' => array(),
+			),
+		);
+
+		$result = $this->preprocessor->preprocess( array( $grid ), $this->layout, $this->styles );
+
+		$this->assertArrayNotHasKey( 'two-column-grid', $result[0]['email_attrs'] );
+		$this->assertSame( '10px', $result[0]['innerBlocks'][1]['email_attrs']['margin-top'] );
+	}
 }

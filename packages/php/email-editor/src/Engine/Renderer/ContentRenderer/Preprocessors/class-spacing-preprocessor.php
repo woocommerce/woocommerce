@@ -111,6 +111,12 @@ class Spacing_Preprocessor implements Context_Aware_Preprocessor {
 	private const CONTAINER_BLOCKS = array( 'core/group', 'core/post-content' );
 
 	/**
+	 * Blocks whose email renderers size their content from the full email width rather than the
+	 * width they are given, so they would overflow a grid cell. A grid holding one keeps stacking.
+	 */
+	private const FULL_WIDTH_BLOCKS = array( 'core/gallery', 'core/query', 'core/post-template', 'woocommerce/product-collection' );
+
+	/**
 	 * Adds spacing to blocks: margin-top for vertical gaps, horizontal padding for
 	 * column gaps, and root padding for children of root-level containers.
 	 *
@@ -243,7 +249,8 @@ class Spacing_Preprocessor implements Context_Aware_Preprocessor {
 	 *
 	 * Email clients don't support CSS grid, and full grid placement (spans, explicit positions, more
 	 * columns) can't be mapped to tables reliably. So only the common case is laid out side by side:
-	 * a manual two-column grid whose items all occupy a single cell. Every other grid stacks.
+	 * a manual two-column grid whose items all occupy a single cell and can be sized to it. Every
+	 * other grid stacks.
 	 *
 	 * @param array $block The block to check.
 	 * @return bool
@@ -255,6 +262,10 @@ class Spacing_Preprocessor implements Context_Aware_Preprocessor {
 		}
 
 		if ( ! isset( $layout['columnCount'] ) || ! is_numeric( $layout['columnCount'] ) || 2 !== (int) $layout['columnCount'] ) {
+			return false;
+		}
+
+		if ( $this->contains_block( $block, array_merge( self::FULL_WIDTH_BLOCKS, $this->get_post_content_block_names() ) ) ) {
 			return false;
 		}
 
@@ -274,6 +285,22 @@ class Spacing_Preprocessor implements Context_Aware_Preprocessor {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Checks whether any descendant of a block is one of the given block types.
+	 *
+	 * @param array    $block The block to search.
+	 * @param string[] $block_names Block names to look for.
+	 * @return bool
+	 */
+	private function contains_block( array $block, array $block_names ): bool {
+		foreach ( $block['innerBlocks'] ?? array() as $inner_block ) {
+			if ( in_array( $inner_block['blockName'] ?? '', $block_names, true ) || $this->contains_block( $inner_block, $block_names ) ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**

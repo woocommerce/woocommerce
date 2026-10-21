@@ -483,6 +483,8 @@ class Image_Test extends \Email_Editor_Integration_Test_Case {
 		$this->assertStringContainsString( 'width="290"', $rendered );
 		$this->assertStringContainsString( 'height="145"', $rendered );
 		$this->assertStringContainsString( 'width="290px"', $rendered, 'The image wrapper table should shrink too.' );
+		$this->assertStringContainsString( 'width:290px;', $rendered, 'Inline dimensions override the attributes, so they must shrink too.' );
+		$this->assertStringContainsString( 'height:145px;', $rendered );
 		$this->assertStringNotContainsString( 'width="400"', $rendered );
 	}
 
