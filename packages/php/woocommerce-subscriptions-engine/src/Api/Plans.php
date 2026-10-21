@@ -10,8 +10,7 @@
  * reaches a plan of another one (authorization is the caller's concern). Reads return
  * read-only {@see PlanView}s. The engine opens no transaction and keeps no cache.
  *
- * Plan policies are stored as given; the engine does not read them. An extension may
- * parse a `billing_policy` with {@see \Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy::from_array()}.
+ * Plan policies are stored as given; the engine does not read them.
  *
  * @package Automattic\WooCommerce\SubscriptionsEngine\Api
  */
