@@ -278,9 +278,9 @@ class WC_REST_Orders_V4_Can_Be_Refunded_Test extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Line item with product_id 0 has can_be_refunded false.
+	 * @testdox Line item with product_id 0 has can_be_refunded true.
 	 */
-	public function test_line_item_without_product_not_refundable(): void {
+	public function test_line_item_without_product_is_refundable(): void {
 		$order = wc_create_order( array( 'customer_id' => self::$user_id ) );
 
 		$item = new WC_Order_Item_Product();
@@ -299,7 +299,35 @@ class WC_REST_Orders_V4_Can_Be_Refunded_Test extends WC_REST_Unit_Test_Case {
 
 		$data = $this->get_order_response( $order->get_id() );
 
-		$this->assertFalse( $data['line_items'][0]['can_be_refunded'], 'Line item with product_id=0 should not be refundable' );
+		$this->assertTrue( $data['line_items'][0]['can_be_refunded'], 'Line item with product_id=0 should be refundable' );
+	}
+
+	/**
+	 * @testdox Custom line item created through the API has can_be_refunded true.
+	 */
+	public function test_custom_line_item_created_through_api_is_refundable(): void {
+		$request = new WP_REST_Request( 'POST', '/wc/v4/orders' );
+		$request->set_body_params(
+			array(
+				'line_items' => array(
+					array(
+						'name'  => 'Gift wrap',
+						'total' => '5.00',
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertSame( 201, $response->get_status(), 'The order should be created.' );
+
+		$order = wc_get_order( $response->get_data()['id'] );
+		$order->set_status( OrderStatus::PROCESSING );
+		$order->save();
+
+		$data = $this->get_order_response( $order->get_id() );
+
+		$this->assertTrue( $data['can_be_refunded'], 'The order should be refundable.' );
+		$this->assertTrue( $data['line_items'][0]['can_be_refunded'], 'The custom item should be refundable.' );
 	}
 
 	/**
