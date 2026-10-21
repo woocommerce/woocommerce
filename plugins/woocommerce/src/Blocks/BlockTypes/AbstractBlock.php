@@ -394,7 +394,6 @@ abstract class AbstractBlock {
 			'selectors'       => 'selectors',
 			'supports'        => 'supports',
 			'styles'          => 'styles',
-			'variations'      => 'variations',
 			'example'         => 'example',
 			'allowedBlocks'   => 'allowed_blocks',
 		);
