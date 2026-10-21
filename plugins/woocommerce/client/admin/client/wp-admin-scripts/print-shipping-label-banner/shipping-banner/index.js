@@ -488,7 +488,7 @@ export class ShippingBanner extends Component {
 									components: {
 										tosLink: (
 											<ExternalLink
-												href="https://wordpress.com/tos"
+												href="https://automattic.com/tos"
 												target="_blank"
 												type="external"
 											/>
