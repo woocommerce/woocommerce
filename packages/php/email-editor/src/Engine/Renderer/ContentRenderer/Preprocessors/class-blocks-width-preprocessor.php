@@ -124,8 +124,8 @@ class Blocks_Width_Preprocessor implements Preprocessor {
 			// group width and overflow their cell.
 			if ( ! empty( $block['email_attrs']['two-column-grid'] ) ) {
 				$grid_content_width = $inner_content_width
-					- $this->parse_number_from_string_with_pixels( $block_padding_left )
-					- $this->parse_number_from_string_with_pixels( $block_padding_right )
+					- $this->convert_padding_to_pixels( $block_padding_left )
+					- $this->convert_padding_to_pixels( $block_padding_right )
 					- $this->parse_number_from_string_with_pixels( $block['email_attrs']['grid-column-gap'] ?? '0px' );
 				$cell_width         = max( 0, floor( $grid_content_width / 2 ) );
 
@@ -143,6 +143,18 @@ class Blocks_Width_Preprocessor implements Preprocessor {
 			$parsed_blocks[ $key ]         = $block;
 		}
 		return $parsed_blocks;
+	}
+
+	/**
+	 * Convert a padding value to pixels, including rem and em, which the group still renders in
+	 * those units. Values that can't be converted (e.g. percentages) are read as pixels.
+	 *
+	 * @param string $value Padding value.
+	 * @return float
+	 */
+	private function convert_padding_to_pixels( string $value ): float {
+		$px = str_ends_with( trim( $value ), '%' ) ? null : Styles_Helper::convert_to_px( (string) Styles_Helper::clamp_to_static_px( $value ), false );
+		return null !== $px ? Styles_Helper::parse_value( $px ) : $this->parse_number_from_string_with_pixels( $value );
 	}
 
 	/**

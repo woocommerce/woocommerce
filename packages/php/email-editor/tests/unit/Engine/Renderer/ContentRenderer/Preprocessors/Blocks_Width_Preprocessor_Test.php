@@ -754,6 +754,47 @@ class Blocks_Width_Preprocessor_Test extends \Email_Editor_Unit_Test {
 	}
 
 	/**
+	 * Test a grid's rem padding is converted to pixels before its cells are sized.
+	 */
+	public function testItConvertsRemGridPaddingWhenSizingCells(): void {
+		$blocks = array(
+			array(
+				'blockName'   => 'core/group',
+				'attrs'       => array(
+					'layout' => array(
+						'type'        => 'grid',
+						'columnCount' => 2,
+					),
+					'style'  => array(
+						'spacing' => array(
+							'padding' => array(
+								'left'  => '2rem',
+								'right' => '2rem',
+							),
+						),
+					),
+				),
+				'email_attrs' => array(
+					'two-column-grid' => true,
+					'grid-column-gap' => '20px',
+				),
+				'innerBlocks' => array(
+					array(
+						'blockName'   => 'core/image',
+						'attrs'       => array(),
+						'innerBlocks' => array(),
+					),
+				),
+			),
+		);
+
+		$result = $this->preprocessor->preprocess( $blocks, $this->layout, $this->styles );
+
+		// (660 - 32 - 32 - 20) / 2 = 288.
+		$this->assertEquals( '288px', $result[0]['innerBlocks'][0]['email_attrs']['width'] );
+	}
+
+	/**
 	 * Test a responsive grid (column count plus minimum column width) stays two columns only when each cell meets the minimum width.
 	 *
 	 * @testWith ["12rem", true]
