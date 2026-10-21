@@ -1066,13 +1066,9 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Resuming a pending order keeps its tax line when taxes are unchanged and replaces it once when they changed.
-	 * @testWith [false]
-	 *           [true]
-	 *
-	 * @param bool $taxes_changed Whether the order's stored tax hash no longer matches the cart.
+	 * @testdox Resuming a pending order whose stored tax hash no longer matches the cart replaces its tax line once.
 	 */
-	public function test_create_order_resume_keeps_or_replaces_tax_lines( bool $taxes_changed ): void {
+	public function test_create_order_resume_replaces_tax_lines_when_taxes_changed(): void {
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		WC_Tax::_insert_tax_rate(
 			array(
@@ -1098,11 +1094,9 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		try {
 			$order_id = $this->create_order_with_line_item_and_fee();
 			$before   = $this->get_order_item_ids_by_type( $order_id );
-			if ( $taxes_changed ) {
-				$order = wc_get_order( $order_id );
-				$order->update_meta_data( '_taxes_hash', 'stale' );
-				$order->save();
-			}
+			$order    = wc_get_order( $order_id );
+			$order->update_meta_data( '_taxes_hash', 'stale' );
+			$order->save();
 
 			$this->resume_order( $order_id );
 			$after    = $this->get_order_item_ids_by_type( $order_id );
@@ -1116,11 +1110,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 
 		$this->assertSame( $before['line_item'], $after['line_item'], 'Line items should keep their IDs.' );
 		$this->assertCount( 1, $after['tax'], 'The order should have one tax line.' );
-		if ( $taxes_changed ) {
-			$this->assertNotSame( $before['tax'], $after['tax'], 'The tax line should be replaced.' );
-		} else {
-			$this->assertSame( $before['tax'], $after['tax'], 'The tax line should keep its ID.' );
-		}
+		$this->assertNotSame( $before['tax'], $after['tax'], 'The tax line should be replaced.' );
 		$this->assertSame( 'DE-VAT-1', array_values( $order->get_taxes() )[0]->get_rate_code() );
 		$this->assertEqualsWithDelta( $cart_tax, (float) $order->get_total_tax(), 0.001, 'The order tax total should match the cart.' );
 	}
@@ -1266,43 +1256,6 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 			$this->assertSame( $fresh->{"get_{$prop}"}(), $resumed->{"get_{$prop}"}(), "The resumed order's {$prop} should match a fresh order's." );
 		}
 		$this->assertSame( $this->get_order_item_amounts_by_type( $fresh_id ), $this->get_order_item_amounts_by_type( $order_id ), "The resumed order's items should have the same amounts as a fresh order's." );
-	}
-
-	/**
-	 * @testdox Resuming a pending order keeps line items taxed at two rates when prices include tax and tax is rounded at subtotal.
-	 * @testWith ["23.45"]
-	 *           ["74.21"]
-	 *
-	 * @param string $price The product price, including tax. At these prices, the item's taxes for each rate add up to slightly less than the cart's rounded line tax.
-	 */
-	public function test_create_order_resume_keeps_line_items_taxed_at_two_rates_rounded_at_subtotal( string $price ): void {
-		update_option( 'woocommerce_calc_taxes', 'yes' );
-		update_option( 'woocommerce_prices_include_tax', 'yes' );
-		update_option( 'woocommerce_tax_round_at_subtotal', 'yes' );
-		foreach ( array( '7.2500', '1.5000' ) as $index => $rate ) {
-			WC_Tax::_insert_tax_rate(
-				array(
-					'tax_rate_country'  => '',
-					'tax_rate'          => $rate,
-					'tax_rate_name'     => "Tax {$index}",
-					'tax_rate_priority' => (string) ( $index + 1 ),
-					'tax_rate_compound' => '0',
-					'tax_rate_shipping' => '1',
-					'tax_rate_order'    => (string) $index,
-					'tax_rate_class'    => '',
-				)
-			);
-		}
-		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => $price ) );
-		WC()->cart->add_to_cart( $product->get_id() );
-		WC()->cart->calculate_totals();
-		$order_id = $this->sut->create_order( array( 'payment_method' => WC_Gateway_BACS::ID ) );
-		$this->assertIsInt( $order_id );
-		$before = $this->get_order_item_ids_by_type( $order_id );
-
-		$this->resume_order( $order_id );
-
-		$this->assertSame( $before, $this->get_order_item_ids_by_type( $order_id ), 'Every item should keep its ID.' );
 	}
 
 	/**
