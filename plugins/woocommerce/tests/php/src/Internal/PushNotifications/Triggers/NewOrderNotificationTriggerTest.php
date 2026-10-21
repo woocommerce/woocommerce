@@ -12,6 +12,8 @@ use Automattic\WooCommerce\Internal\PushNotifications\Services\PendingNotificati
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationStepLogger;
 use Automattic\WooCommerce\Internal\PushNotifications\Triggers\NewOrderNotificationTrigger;
 use Automattic\WooCommerce\Tests\Internal\PushNotifications\Helpers\PushNotificationsTestTrait;
+use Exception;
+use WC_Logger;
 use WC_Order;
 use WC_Unit_Test_Case;
 
@@ -209,6 +211,79 @@ class NewOrderNotificationTriggerTest extends WC_Unit_Test_Case {
 		$this->trigger->on_order_status_changed( 1, self::CUSTOM_STATUS, OrderStatus::COMPLETED, $order );
 
 		$this->assertSame( 1, $this->store->count(), 'An order without a creation date cannot be shown to predate enablement' );
+	}
+
+	/**
+	 * @testdox Should mark an order the first time it reaches a notifiable status.
+	 */
+	public function test_status_change_to_notifiable_status_marks_order(): void {
+		$order = wc_create_order( array( 'status' => OrderStatus::PENDING ) );
+
+		$order->set_status( OrderStatus::PROCESSING );
+		$order->save();
+
+		$this->assertTrue( wc_get_order( $order->get_id() )->meta_exists( NewOrderNotificationTrigger::NOTIFIABLE_META_KEY ), 'The order should be marked as notifiable' );
+	}
+
+	/**
+	 * @testdox Should not notify about an order that already reached a notifiable status, and should log why.
+	 */
+	public function test_status_change_on_previously_notifiable_order_is_ignored(): void {
+		$step_logger = $this->createMock( NotificationStepLogger::class );
+		wc_get_container()->replace( NotificationStepLogger::class, $step_logger );
+
+		$order = $this->create_order_in_custom_status();
+		$order->update_meta_data( NewOrderNotificationTrigger::NOTIFIABLE_META_KEY, '1000' );
+		$order->save_meta_data();
+		update_option( PushNotifications::ENABLED_AT_OPTION, $order->get_date_created()->getTimestamp() - 60 );
+
+		$step_logger->expects( $this->once() )
+			->method( 'log_notification_step' )
+			->with( $this->isInstanceOf( NewOrderNotification::class ), 'triggered', 'previously_notifiable' );
+
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		$this->assertSame( 0, $this->store->count(), 'An order marked while push notifications were off should not be announced as new' );
+	}
+
+	/**
+	 * @testdox Should mark an order reaching a notifiable status while push notifications are off, without queuing a notification.
+	 */
+	public function test_status_change_while_disabled_marks_order_without_notifying(): void {
+		$order = $this->create_order_in_custom_status();
+
+		$this->trigger->on_order_status_changed_while_disabled( $order->get_id(), self::CUSTOM_STATUS, OrderStatus::COMPLETED, $order );
+
+		$this->assertTrue( wc_get_order( $order->get_id() )->meta_exists( NewOrderNotificationTrigger::NOTIFIABLE_META_KEY ), 'The order should be marked as notifiable' );
+		$this->assertSame( 0, $this->store->count(), 'Nothing should be queued while push notifications are off' );
+	}
+
+	/**
+	 * @testdox Should not mark an order moving to a non-notifiable status while push notifications are off.
+	 */
+	public function test_status_change_while_disabled_ignores_non_notifiable_status(): void {
+		$order = wc_create_order( array( 'status' => OrderStatus::PENDING ) );
+
+		$this->trigger->on_order_status_changed_while_disabled( $order->get_id(), OrderStatus::PENDING, OrderStatus::CANCELLED, $order );
+
+		$this->assertFalse( wc_get_order( $order->get_id() )->meta_exists( NewOrderNotificationTrigger::NOTIFIABLE_META_KEY ), 'A cancelled order should not be marked' );
+	}
+
+	/**
+	 * @testdox Should log, not throw, when the order cannot be marked.
+	 */
+	public function test_marking_failure_is_logged_not_thrown(): void {
+		$logger = $this->createMock( WC_Logger::class );
+		$logger->expects( $this->once() )
+			->method( 'error' )
+			->with( $this->stringContains( 'Could not mark order' ), array( 'source' => PushNotifications::FEATURE_NAME ) );
+		$this->register_legacy_proxy_function_mocks( array( 'wc_get_logger' => fn () => $logger ) );
+
+		$order = $this->createMock( WC_Order::class );
+		$order->method( 'save_meta_data' )->willThrowException( new Exception( 'Database unavailable' ) );
+
+		$this->trigger->on_order_status_changed_while_disabled( 1, self::CUSTOM_STATUS, OrderStatus::COMPLETED, $order );
 	}
 
 	/**
