@@ -147,6 +147,66 @@ class QueryClausesTest extends AbstractProductFiltersTest {
 	}
 
 	/**
+	 * @testdox Catalog and Product Collection queries ignore malformed price bounds without changing valid bounds.
+	 *
+	 * @testWith [{"min_price":"1..5","max_price":"2"}, ["0","1","1.5"]]
+	 *           [{"min_price":"1,,5","max_price":"2"}, ["0","1","1.5"]]
+	 *           [{"min_price":"1.5abc","max_price":"2"}, ["0","1","1.5"]]
+	 *           [{"min_price":["1.5"],"max_price":"2"}, ["0","1","1.5"]]
+	 *           [{"min_price":"1.5","max_price":"2.0.1"}, ["1.5","2.01"]]
+	 *           [{"min_price":"2","max_price":"1"}, ["0","1","1.5","2.01"]]
+	 *           [{"min_price":"1.5","max_price":"2.01"}, ["1.5","2.01"]]
+	 *           [{"min_price":"1","max_price":"2"}, ["1","1.5"]]
+	 *           [{"max_price":"0"}, ["0"]]
+	 *
+	 * @param array $price_range Price query parameters.
+	 * @param array $expected_prices Exact prices that should match.
+	 */
+	public function test_price_boundaries_validate_complete_values( array $price_range, array $expected_prices ): void {
+		$products = array();
+		foreach ( array( '0', '1', '1.5', '2.01' ) as $price ) {
+			$products[ $price ] = $this->fixture_data->get_simple_product( array( 'regular_price' => $price ) )->get_id();
+		}
+		$expected_ids = array_map(
+			function ( $price ) use ( $products ) {
+				return $products[ $price ];
+			},
+			$expected_prices
+		);
+		// This is a simulated catalog request, not form submission.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$previous_get = $_GET;
+		$_GET         = $price_range;
+		add_filter( 'woocommerce_enable_post_clause_filtering', '__return_true' );
+
+		try {
+			foreach ( array( false, true ) as $archive ) {
+				$callback = function ( $args, $query ) use ( $price_range, $archive ) {
+					return $archive
+						? WC()->query->price_filter_post_clauses( $args, $query )
+						: $this->sut->add_price_clauses( $args, $price_range );
+				};
+				add_filter( 'posts_clauses', $callback, 10, 2 );
+				try {
+					$actual_ids = wc_get_products(
+						array(
+							'include' => array_values( $products ),
+							'return'  => 'ids',
+							'limit'   => -1,
+						)
+					);
+				} finally {
+					remove_filter( 'posts_clauses', $callback );
+				}
+				$this->assertEqualsCanonicalizing( $expected_ids, $actual_ids, $archive ? 'Catalog archive' : 'Product Collection' );
+			}
+		} finally {
+			$_GET = $previous_get;
+			remove_filter( 'woocommerce_enable_post_clause_filtering', '__return_true' );
+		}
+	}
+
+	/**
 	 * @testdox Test the product query with post clauses containing stock clauses.
 	 *
 	 * @testWith [["instock"]]

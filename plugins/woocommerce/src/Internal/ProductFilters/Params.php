@@ -77,6 +77,34 @@ class Params implements FilterUrlParam {
 	}
 
 	/**
+	 * Parse nonnegative, dot-decimal price bounds without guessing malformed values.
+	 *
+	 * @since 11.4.0
+	 * @param array $params Query parameters or numeric price bounds.
+	 * @return array Valid price bounds. A reversed range is ignored entirely.
+	 */
+	public static function get_price_range( array $params ): array {
+		$range = array();
+		foreach ( array( 'min_price', 'max_price' ) as $key ) {
+			$value = $params[ $key ] ?? null;
+			if ( ! is_int( $value ) && ! is_float( $value ) && ( ! is_string( $value ) || ! preg_match( '/^[0-9]+(?:\.[0-9]+)?$/D', $value ) ) ) {
+				continue;
+			}
+
+			$value = (float) $value;
+			if ( is_finite( $value ) && $value >= 0 ) {
+				$range[ $key ] = $value;
+			}
+		}
+
+		if ( isset( $range['min_price'], $range['max_price'] ) && $range['min_price'] > $range['max_price'] ) {
+			return array();
+		}
+
+		return $range;
+	}
+
+	/**
 	 * Initialize the params.
 	 *
 	 * @return void

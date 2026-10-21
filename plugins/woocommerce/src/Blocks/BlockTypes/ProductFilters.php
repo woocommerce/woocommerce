@@ -377,6 +377,9 @@ CSS;
 		parse_str( $parsed_url['query'], $url_query_params );
 
 		$filter_param_keys = wc_get_container()->get( Params::class )->get_param_keys();
+		$price_range       = Params::get_price_range( $url_query_params );
+		unset( $url_query_params['min_price'], $url_query_params['max_price'] );
+		$url_query_params = array_merge( $url_query_params, $price_range );
 
 		return array_filter(
 			$url_query_params,

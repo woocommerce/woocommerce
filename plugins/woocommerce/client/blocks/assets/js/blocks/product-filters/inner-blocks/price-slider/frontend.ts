@@ -36,20 +36,53 @@ function debounceWithScope< Args extends unknown[] >(
 
 const productFilterPriceSliderStore = {
 	state: {
+		// Keep native whole-unit slider steps separate from exact text/URL bounds.
+		get minSliderPrice(): number {
+			return Math.floor( state.minPrice );
+		},
+		get maxSliderPrice(): number {
+			return Math.floor( state.maxPrice );
+		},
 		rangeStyle: () => {
 			const { minRange, maxRange } = getServerContext
 				? getServerContext< ProductFilterPriceContext >()
 				: getContext< ProductFilterPriceContext >();
 			return `--low: ${
-				( 100 * ( state.minPrice - minRange ) ) /
+				( 100 * ( state.minSliderPrice - minRange ) ) /
 				( maxRange - minRange )
 			}%; --high: ${
-				( 100 * ( state.maxPrice - minRange ) ) /
+				( 100 * ( state.maxSliderPrice - minRange ) ) /
 				( maxRange - minRange )
 			}%;`;
 		},
 	},
 	actions: {
+		onPriceInput: ( e: HTMLElementEvent< HTMLInputElement > ) => {
+			if ( e.target.getAttribute( 'aria-invalid' ) === 'true' ) {
+				getContext< { priceInputError: string } >().priceInputError =
+					'';
+			}
+			e.target.setCustomValidity( '' );
+			e.target.removeAttribute( 'aria-invalid' );
+			if ( e.target.classList.contains( 'min' ) ) {
+				actions.debounceSetMinPrice( e );
+			} else {
+				actions.debounceSetMaxPrice( e );
+			}
+		},
+		validatePriceInput: ( e: HTMLElementEvent< HTMLInputElement > ) => {
+			if ( e.target.classList.contains( 'min' ) ) {
+				actions.setMin( e );
+			} else {
+				actions.setMax( e );
+			}
+			getContext< { priceInputError: string } >().priceInputError =
+				e.target.validationMessage;
+			e.target.setAttribute(
+				'aria-invalid',
+				String( ! e.target.validity.valid )
+			);
+		},
 		selectInputContent: () => {
 			const element = getElement();
 			if ( element?.ref instanceof HTMLInputElement ) {
@@ -59,17 +92,36 @@ const productFilterPriceSliderStore = {
 		debounceSetMinPrice: debounceWithScope(
 			( e: HTMLElementEvent< HTMLInputElement > ) => {
 				actions.setMin( e );
-				void actions.navigate();
+				if ( e.target.validity.valid ) {
+					void actions.navigate();
+				}
 			},
 			1000
 		),
 		debounceSetMaxPrice: debounceWithScope(
 			( e: HTMLElementEvent< HTMLInputElement > ) => {
 				actions.setMax( e );
-				void actions.navigate();
+				if ( e.target.validity.valid ) {
+					void actions.navigate();
+				}
 			},
 			1000
 		),
+	},
+	callbacks: {
+		updatePriceInput: () => {
+			const element = getElement();
+			if ( element?.ref instanceof HTMLInputElement ) {
+				const input = element.ref;
+				input.value = input.classList.contains( 'min' )
+					? state.formattedMinPrice
+					: state.formattedMaxPrice;
+				input.setCustomValidity( '' );
+				input.removeAttribute( 'aria-invalid' );
+				getContext< { priceInputError: string } >().priceInputError =
+					'';
+			}
+		},
 	},
 };
 const { state, actions } = store<

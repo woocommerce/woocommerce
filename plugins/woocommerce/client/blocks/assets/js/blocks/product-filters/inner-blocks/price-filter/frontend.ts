@@ -10,7 +10,11 @@ import type { RangeInputParentStore } from '@woocommerce/types';
  */
 import type { ProductFiltersContext } from '../../types';
 import type { ProductFiltersStore } from '../../frontend';
-import { formatPrice, getCurrency } from '../../utils/price-currency';
+import {
+	formatPrice,
+	getCurrency,
+	parsePriceInput,
+} from '../../utils/price-currency';
 import { PRODUCT_FILTERS_STORE_NAME } from '../../constants';
 
 const { store, getContext, getServerContext, getConfig } = iAPI;
@@ -35,7 +39,7 @@ const productFilterPriceStore = {
 			);
 			if ( priceFilter ) {
 				const [ min ] = priceFilter.value.split( '|' );
-				return min ? parseInt( min, 10 ) : minRange;
+				return min ? parseFloat( min ) : minRange;
 			}
 			return minRange;
 		},
@@ -48,7 +52,7 @@ const productFilterPriceStore = {
 			);
 			if ( priceFilter ) {
 				const [ , max ] = priceFilter.value.split( '|' );
-				return max ? parseInt( max, 10 ) : maxRange;
+				return max ? parseFloat( max ) : maxRange;
 			}
 			return maxRange;
 		},
@@ -112,34 +116,29 @@ const productFilterPriceStore = {
 			};
 		},
 		setPrice: ( type: 'min' | 'max', value: number ) => {
-			const context = getContext<
-				ProductFilterPriceContext & ProductFiltersContext
-			>();
+			if (
+				value === ( type === 'min' ? state.minPrice : state.maxPrice )
+			) {
+				return true;
+			}
+
 			const { minRange, maxRange } = getServerContext
 				? getServerContext< ProductFilterPriceContext >()
 				: getContext< ProductFilterPriceContext >();
+			if (
+				! Number.isFinite( value ) ||
+				! inRange( value, minRange, maxRange ) ||
+				( type === 'min' && value >= state.maxPrice ) ||
+				( type === 'max' && value <= state.minPrice )
+			) {
+				return false;
+			}
+
 			const price: Record< string, number > = {
 				min: state.minPrice,
 				max: state.maxPrice,
 			};
-
-			if (
-				type === 'min' &&
-				value &&
-				inRange( value, minRange, maxRange ) &&
-				value < state.maxPrice
-			) {
-				price.min = value;
-			}
-
-			if (
-				type === 'max' &&
-				value &&
-				inRange( value, minRange, maxRange ) &&
-				value > state.minPrice
-			) {
-				price.max = value;
-			}
+			price[ type ] = value;
 
 			if ( price.min === minRange ) {
 				price.min = 0;
@@ -148,6 +147,9 @@ const productFilterPriceStore = {
 				price.max = 0;
 			}
 
+			const context = getContext<
+				ProductFilterPriceContext & ProductFiltersContext
+			>();
 			context.activeFilters = context.activeFilters.filter(
 				( item ) => item.type !== 'price'
 			);
@@ -165,14 +167,34 @@ const productFilterPriceStore = {
 
 				context.activeFilters.push( newActivePriceFilter );
 			}
+			return true;
+		},
+		setInputPrice: (
+			e: HTMLElementEvent< HTMLInputElement >,
+			type: 'min' | 'max'
+		) => {
+			const input = e.target;
+			const price =
+				input.type === 'range'
+					? Number( input.value )
+					: parsePriceInput( input.value );
+			const valid = price !== null && actions.setPrice( type, price );
+			if ( input.type === 'text' ) {
+				const { priceInputErrorMessages } = getConfig();
+				input.setCustomValidity(
+					valid
+						? ''
+						: priceInputErrorMessages[
+								price === null ? 'format' : 'range'
+							]
+				);
+			}
 		},
 		setMin: ( e: HTMLElementEvent< HTMLInputElement > ) => {
-			const price = parseInt( e.target.value, 10 );
-			actions.setPrice( 'min', price );
+			actions.setInputPrice( e, 'min' );
 		},
 		setMax: ( e: HTMLElementEvent< HTMLInputElement > ) => {
-			const price = parseInt( e.target.value, 10 );
-			actions.setPrice( 'max', price );
+			actions.setInputPrice( e, 'max' );
 		},
 	},
 };

@@ -86,6 +86,49 @@ export const getCurrency = (
 	};
 };
 
+/**
+ * Parse a complete price in the store's format, including its optional currency affixes.
+ * Returns major units, or null for an incomplete or malformed value.
+ */
+export const parsePriceInput = (
+	input: string,
+	currency: Currency = getCurrency()
+): number | null => {
+	const { prefix, suffix, decimalSeparator, thousandSeparator } = currency;
+	let value = input.trim();
+	if ( prefix && value.startsWith( prefix.trim() ) ) {
+		value = value.slice( prefix.trim().length ).trim();
+	}
+	if ( suffix && value.endsWith( suffix.trim() ) ) {
+		value = value.slice( 0, -suffix.trim().length ).trim();
+	}
+
+	const parts = decimalSeparator
+		? value.split( decimalSeparator )
+		: [ value ];
+	if (
+		parts.length > 2 ||
+		( parts.length === 2 && ! /^[0-9]+$/.test( parts[ 1 ] ) )
+	) {
+		return null;
+	}
+
+	const groups = thousandSeparator
+		? parts[ 0 ].split( thousandSeparator )
+		: [ parts[ 0 ] ];
+	if (
+		groups.some( ( group ) => ! /^[0-9]+$/.test( group ) ) ||
+		( groups.length > 1 &&
+			( groups[ 0 ].length > 3 ||
+				groups.slice( 1 ).some( ( group ) => group.length !== 3 ) ) )
+	) {
+		return null;
+	}
+
+	const price = Number( `${ groups.join( '' ) }.${ parts[ 1 ] || '0' }` );
+	return Number.isFinite( price ) ? price : null;
+};
+
 const applyThousandSeparator = (
 	numberString: string,
 	thousandSeparator: string

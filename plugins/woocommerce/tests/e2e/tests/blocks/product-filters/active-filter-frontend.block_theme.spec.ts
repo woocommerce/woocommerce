@@ -84,13 +84,36 @@ test.describe( 'woocommerce/product-filter-active - Frontend', () => {
 		await expect( page.getByText( 'Color: Gray' ).first() ).toBeVisible();
 	} );
 
-	test( 'With price filters applied it shows the correct active filters', async ( {
-		page,
-	} ) => {
-		await page.goto( `${ '/shop' }?min_price=17&max_price=71` );
+	for ( const [ min, max ] of [
+		[ '17', '71' ],
+		[ '17.5', '71.25' ],
+	] ) {
+		test( `Preserves price bounds ${ min } - ${ max } when removing another filter`, async ( {
+			page,
+		} ) => {
+			await page.goto(
+				`/shop?min_price=${ min }&max_price=${ max }&filter_stock_status=instock`
+			);
 
-		await expect(
-			page.getByText( 'Price: $17 - $71' ).first()
-		).toBeVisible();
-	} );
+			const priceChip = page.getByText( `Price: $${ min } - $${ max }`, {
+				exact: true,
+			} );
+			await expect( priceChip ).toBeVisible();
+
+			await page
+				.getByRole( 'button', {
+					name: 'Remove filter: Availability: In stock',
+				} )
+				.click();
+
+			await expect( page ).toHaveURL( ( url ) => {
+				return (
+					url.searchParams.get( 'min_price' ) === min &&
+					url.searchParams.get( 'max_price' ) === max &&
+					! url.searchParams.has( 'filter_stock_status' )
+				);
+			} );
+			await expect( priceChip ).toBeVisible();
+		} );
+	}
 } );

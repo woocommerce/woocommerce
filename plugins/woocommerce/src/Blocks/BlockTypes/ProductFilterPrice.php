@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection\Utils as ProductCollectionUtils;
 use Automattic\WooCommerce\Internal\ProductFilters\FilterDataProvider;
+use Automattic\WooCommerce\Internal\ProductFilters\Params;
 use Automattic\WooCommerce\Internal\ProductFilters\QueryClauses;
 
 /**
@@ -45,17 +46,19 @@ final class ProductFilterPrice extends AbstractBlock {
 	 * @return array Active filters items.
 	 */
 	public function prepare_selected_filters( $items, $params ) {
-		$min_price           = intval( $params[ self::MIN_PRICE_QUERY_VAR ] ?? 0 );
-		$max_price           = intval( $params[ self::MAX_PRICE_QUERY_VAR ] ?? 0 );
-		$formatted_min_price = $min_price ? html_entity_decode( wp_strip_all_tags( wc_price( $min_price, array( 'decimals' => 0 ) ) ) ) : null;
-		$formatted_max_price = $max_price ? html_entity_decode( wp_strip_all_tags( wc_price( $max_price, array( 'decimals' => 0 ) ) ) ) : null;
+		$params              = Params::get_price_range( is_array( $params ) ? $params : array() );
+		$min_price           = $params[ self::MIN_PRICE_QUERY_VAR ] ?? null;
+		$max_price           = $params[ self::MAX_PRICE_QUERY_VAR ] ?? null;
+		$formatted_min_price = null !== $min_price ? $this->format_price( $min_price ) : null;
+		$formatted_max_price = null !== $max_price ? $this->format_price( $max_price ) : null;
 
 		if ( ! $formatted_min_price && ! $formatted_max_price ) {
 			return $items;
 		}
 
 		$item = array(
-			'type' => 'price',
+			'type'  => 'price',
+			'value' => wc_format_decimal( $min_price ) . '|' . wc_format_decimal( $max_price ),
 		);
 
 		if ( $formatted_min_price && $formatted_max_price ) {
@@ -65,19 +68,16 @@ final class ProductFilterPrice extends AbstractBlock {
 				$formatted_min_price,
 				$formatted_max_price
 			);
-			$item['value'] = "{$min_price}|{$max_price}";
 		}
 
 		if ( ! $formatted_min_price ) {
 			/* translators: %s is the formatted maximum price. */
 			$item['activeLabel'] = sprintf( __( 'Price: Up to %s', 'woocommerce' ), $formatted_max_price );
-			$item['value']       = "|{$max_price}";
 		}
 
 		if ( ! $formatted_max_price ) {
 			/* translators: %s is the formatted minimum price. */
 			$item['activeLabel'] = sprintf( __( 'Price: From %s', 'woocommerce' ), $formatted_min_price );
-			$item['value']       = "{$min_price}|";
 		}
 
 		$items[] = $item;
@@ -104,12 +104,12 @@ final class ProductFilterPrice extends AbstractBlock {
 		$price_range   = $this->get_filtered_price( $block );
 		$min_range     = $price_range['min_price'] ?? 0;
 		$max_range     = $price_range['max_price'] ?? 0;
-		$filter_params = $block->context['filterParams'] ?? array();
-		$min_price     = intval( $filter_params[ self::MIN_PRICE_QUERY_VAR ] ?? $min_range );
-		$max_price     = intval( $filter_params[ self::MAX_PRICE_QUERY_VAR ] ?? $max_range );
+		$filter_params = Params::get_price_range( $block->context['filterParams'] ?? array() );
+		$min_price     = $filter_params[ self::MIN_PRICE_QUERY_VAR ] ?? $min_range;
+		$max_price     = $filter_params[ self::MAX_PRICE_QUERY_VAR ] ?? $max_range;
 
-		$formatted_min_price = html_entity_decode( wp_strip_all_tags( wc_price( $min_price, array( 'decimals' => 0 ) ) ) );
-		$formatted_max_price = html_entity_decode( wp_strip_all_tags( wc_price( $max_price, array( 'decimals' => 0 ) ) ) );
+		$formatted_min_price = $this->format_price( $min_price );
+		$formatted_max_price = $this->format_price( $max_price );
 
 		$filter_context = array(
 			'currentMin' => $min_price,
@@ -141,6 +141,10 @@ final class ProductFilterPrice extends AbstractBlock {
 					'maxOnly'   => __( 'Price: Up to {{max}}', 'woocommerce' ),
 					/* translators: {{min}} is the formatted minimum price. */
 					'minOnly'   => __( 'Price: From {{min}}', 'woocommerce' ),
+				),
+				'priceInputErrorMessages'   => array(
+					'format' => __( 'Enter a valid price using the store’s number format.', 'woocommerce' ),
+					'range'  => __( 'Enter a price within the available range, with the minimum below the maximum.', 'woocommerce' ),
 				),
 			)
 		);
@@ -184,6 +188,17 @@ final class ProductFilterPrice extends AbstractBlock {
 				''
 			)
 		);
+	}
+
+	/**
+	 * Format a bound without rounding away its fractional part or padding integers.
+	 *
+	 * @param float $price Price bound.
+	 * @return string
+	 */
+	private function format_price( float $price ): string {
+		$decimals = strlen( explode( '.', wc_format_decimal( $price ) )[1] ?? '' );
+		return html_entity_decode( wp_strip_all_tags( wc_price( $price, array( 'decimals' => $decimals ) ) ), ENT_QUOTES );
 	}
 
 	/**

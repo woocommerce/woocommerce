@@ -39,8 +39,8 @@ class ProductFilterPriceSlider extends AbstractBlock {
 		$range_data = $block->context['woocommerce/rangeInput'];
 		$min_range  = $range_data['min'] ?? 0;
 		$max_range  = $range_data['max'] ?? 0;
-		$min_price  = $range_data['currentMin'] ?? $min_range;
-		$max_price  = $range_data['currentMax'] ?? $max_range;
+		$min_price  = floor( $range_data['currentMin'] ?? $min_range );
+		$max_price  = floor( $range_data['currentMax'] ?? $max_range );
 
 		if ( $min_range === $max_range ) {
 			return '';
@@ -57,11 +57,13 @@ class ProductFilterPriceSlider extends AbstractBlock {
 
 		$show_input_fields = isset( $attributes['showInputFields'] ) ? $attributes['showInputFields'] : false;
 		$inline_input      = isset( $attributes['inlineInput'] ) ? $attributes['inlineInput'] : false;
+		$error_id          = wp_unique_prefixed_id( 'price-input-error-' );
 
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
 				'data-wp-interactive' => 'woocommerce/product-filters',
 				'data-wp-key'         => wp_unique_prefixed_id( $this->get_full_block_name() ),
+				'data-wp-context'     => (string) wp_json_encode( array( 'priceInputError' => '' ) ),
 				'class'               => esc_attr( $classes ),
 				'style'               => esc_attr( $style ),
 			)
@@ -97,8 +99,11 @@ class ProductFilterPriceSlider extends AbstractBlock {
 					class="min"
 					type="text"
 					data-wp-bind--value="state.formattedMinPrice"
+					data-wp-watch="callbacks.updatePriceInput"
 					data-wp-on--focus="actions.selectInputContent"
-					data-wp-on--input="actions.debounceSetMinPrice"
+					data-wp-on--input="actions.onPriceInput"
+					data-wp-on--blur="actions.validatePriceInput"
+					aria-describedby="<?php echo esc_attr( $error_id ); ?>"
 					aria-label="<?php esc_attr_e( 'Filter products by minimum price', 'woocommerce' ); ?>"
 				/>
 			<?php else : ?>
@@ -125,7 +130,7 @@ class ProductFilterPriceSlider extends AbstractBlock {
 						class="min"
 						min="<?php echo esc_attr( $min_range ); ?>"
 						max="<?php echo esc_attr( $max_range ); ?>"
-						data-wp-bind--value="state.minPrice"
+						data-wp-bind--value="state.minSliderPrice"
 						data-wp-on--input="actions.setMin"
 						data-wp-on--mouseup="actions.navigate"
 						data-wp-on--keyup="actions.navigate"
@@ -137,7 +142,7 @@ class ProductFilterPriceSlider extends AbstractBlock {
 						class="max"
 						min="<?php echo esc_attr( $min_range ); ?>"
 						max="<?php echo esc_attr( $max_range ); ?>"
-						data-wp-bind--value="state.maxPrice"
+						data-wp-bind--value="state.maxSliderPrice"
 						data-wp-on--input="actions.setMax"
 						data-wp-on--mouseup="actions.navigate"
 						data-wp-on--keyup="actions.navigate"
@@ -154,8 +159,11 @@ class ProductFilterPriceSlider extends AbstractBlock {
 							class="max"
 							type="text"
 							data-wp-bind--value="state.formattedMaxPrice"
+							data-wp-watch="callbacks.updatePriceInput"
 							data-wp-on--focus="actions.selectInputContent"
-							data-wp-on--input="actions.debounceSetMaxPrice"
+							data-wp-on--input="actions.onPriceInput"
+							data-wp-on--blur="actions.validatePriceInput"
+							aria-describedby="<?php echo esc_attr( $error_id ); ?>"
 							aria-label="<?php esc_attr_e( 'Filter products by maximum price', 'woocommerce' ); ?>"
 						/>
 					<?php else : ?>
@@ -163,6 +171,9 @@ class ProductFilterPriceSlider extends AbstractBlock {
 					<?php endif; ?>
 				</div>
 			</div>
+			<?php if ( $show_input_fields ) : ?>
+				<p id="<?php echo esc_attr( $error_id ); ?>" role="alert" data-wp-text="context.priceInputError" data-wp-bind--hidden="!context.priceInputError" hidden></p>
+			<?php endif; ?>
 		</div>
 		<?php
 		return ob_get_clean();

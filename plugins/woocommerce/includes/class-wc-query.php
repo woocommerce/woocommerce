@@ -844,15 +844,19 @@ class WC_Query {
 		 */
 		$enable_filtering = apply_filters( 'woocommerce_enable_post_clause_filtering', $wp_query->is_main_query(), $wp_query );
 
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		if ( ! $enable_filtering || ( ! isset( $_GET['max_price'] ) && ! isset( $_GET['min_price'] ) ) ) {
+		if ( ! $enable_filtering ) {
 			return $args;
 		}
 
-		// phpcs:disable WordPress.Security.NonceVerification.Recommended
-		$current_min_price = isset( $_GET['min_price'] ) ? floatval( wp_unslash( $_GET['min_price'] ) ) : 0;
-		$current_max_price = isset( $_GET['max_price'] ) ? floatval( wp_unslash( $_GET['max_price'] ) ) : PHP_INT_MAX;
-		// phpcs:enable WordPress.Security.NonceVerification.Recommended
+		// Public catalog filters do not require a nonce; the parser validates both bounds.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$price_range = Params::get_price_range( wp_unslash( $_GET ) );
+		if ( empty( $price_range ) ) {
+			return $args;
+		}
+
+		$current_min_price = $price_range['min_price'] ?? 0;
+		$current_max_price = $price_range['max_price'] ?? PHP_INT_MAX;
 
 		/**
 		 * Adjust if the store taxes are not displayed how they are stored.
