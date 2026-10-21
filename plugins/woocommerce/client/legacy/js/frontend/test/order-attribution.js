@@ -94,3 +94,36 @@ describe( 'Order attribution input deduplication', () => {
 		expect( document.getElementById( 'second' ) ).toBeNull();
 	} );
 } );
+
+describe( 'Order attribution sourcebuster.js init', () => {
+	afterEach( () => {
+		delete window.wc_order_attribution;
+		delete window.sbjs;
+		jest.restoreAllMocks();
+	} );
+
+	test( 'passes the cookie fields to sbjs.init', () => {
+		window.sbjs = { init: jest.fn(), get: {} };
+		window.wc_order_attribution = {
+			fields: {
+				source_type: 'current.typ',
+			},
+			params: {
+				allowTracking: false,
+				prefix: 'wc_order_attribution_',
+				cookieFields: [ 'current.typ', 'first.src' ],
+			},
+		};
+		// The first suite already defined the custom element.
+		jest.spyOn( window.customElements, 'define' ).mockImplementation( () => {} );
+		jest.isolateModules( () => require( '../order-attribution' ) );
+
+		window.wc_order_attribution.setOrderTracking( true );
+
+		expect( window.sbjs.init ).toHaveBeenCalledWith(
+			expect.objectContaining( {
+				fields: [ 'current.typ', 'first.src' ],
+			} )
+		);
+	} );
+} );

@@ -340,4 +340,120 @@ class OrderAttributionControllerTest extends WP_UnitTestCase {
 
 		remove_filter( 'wc_order_attribution_allow_multiple_elements', '__return_false' );
 	}
+
+	/**
+	 * @testdox Should pass the tracking field paths to sourcebuster.js as cookie fields by default.
+	 */
+	public function test_cookie_fields_default_to_tracking_field_paths(): void {
+		$cookie_fields = $this->get_localized_script_data()['params']['cookieFields'];
+
+		$this->assertSame(
+			array(
+				'current.typ',
+				'current_add.rf',
+				'current.cmp',
+				'current.src',
+				'current.mdm',
+				'current.cnt',
+				'current.id',
+				'current.trm',
+				'current.plt',
+				'current.fmt',
+				'current.tct',
+				'current_add.ep',
+				'current_add.fd',
+				'session.pgs',
+				'udata.vst',
+				'udata.uag',
+			),
+			$cookie_fields,
+			'Cookie fields should match the paths of the default tracking fields.'
+		);
+	}
+
+	/**
+	 * @testdox Should derive the cookie fields from the filtered tracking fields.
+	 */
+	public function test_cookie_fields_follow_filtered_tracking_fields(): void {
+		$filter = function ( $fields ) {
+			unset( $fields['utm_content'] );
+			$fields['first_source'] = 'first.src';
+			return $fields;
+		};
+		add_filter( 'wc_order_attribution_tracking_fields', $filter );
+		$set_fields = new \ReflectionMethod( OrderAttributionController::class, 'set_fields_and_prefix' );
+		$set_fields->setAccessible( true );
+		$set_fields->invoke( $this->attribution_class );
+
+		$data = $this->get_localized_script_data();
+
+		$this->assertNotContains( 'current.cnt', $data['params']['cookieFields'], 'A removed tracking field should not be a cookie field.' );
+		$this->assertContains( 'first.src', $data['params']['cookieFields'], 'An added tracking field should be a cookie field.' );
+		$this->assertSame( 'first.src', $data['fields']['first_source'], 'The tracking fields should still be passed to the script.' );
+	}
+
+	/**
+	 * Data provider for test_cookie_fields_filter.
+	 *
+	 * @return array[]
+	 */
+	public function provider_cookie_fields_filter(): array {
+		return array(
+			'added first.* paths'        => array( array( 'current.typ', 'first.typ', 'first.src', 'first.mdm' ), array( 'current.typ', 'first.typ', 'first.src', 'first.mdm' ) ),
+			'empty array'                => array( array(), array() ),
+			'duplicates and non-strings' => array( array( 'current.typ', 42, 'current.typ', null, 'session.pgs' ), array( 'current.typ', 'session.pgs' ) ),
+		);
+	}
+
+	/**
+	 * @testdox Should pass the filtered cookie fields to sourcebuster.js.
+	 *
+	 * @dataProvider provider_cookie_fields_filter
+	 *
+	 * @param array $filtered The value returned by the filter.
+	 * @param array $expected The expected cookie fields.
+	 */
+	public function test_cookie_fields_filter( array $filtered, array $expected ): void {
+		add_filter(
+			'wc_order_attribution_cookie_fields',
+			function () use ( $filtered ) {
+				return $filtered;
+			}
+		);
+
+		$this->assertSame( $expected, $this->get_localized_script_data()['params']['cookieFields'] );
+	}
+
+	/**
+	 * @testdox Should fall back to the default cookie fields when the filter does not return an array.
+	 */
+	public function test_cookie_fields_filter_ignores_non_array(): void {
+		$default = $this->get_localized_script_data()['params']['cookieFields'];
+		add_filter( 'wc_order_attribution_cookie_fields', '__return_false' );
+
+		$this->assertSame( $default, $this->get_localized_script_data()['params']['cookieFields'] );
+	}
+
+	/**
+	 * Enqueue the frontend scripts and return the data localized for `wc-order-attribution`.
+	 *
+	 * @return array
+	 */
+	private function get_localized_script_data(): array {
+		wp_deregister_script( 'wc-order-attribution' );
+		wp_deregister_script( 'sourcebuster-js' );
+
+		$method = new \ReflectionMethod( OrderAttributionController::class, 'enqueue_scripts_and_styles' );
+		$method->setAccessible( true );
+		$method->invoke( $this->attribution_class );
+
+		$data = wp_scripts()->get_data( 'wc-order-attribution', 'data' );
+		wp_deregister_script( 'wc-order-attribution' );
+		wp_deregister_script( 'sourcebuster-js' );
+
+		$this->assertIsString( $data, 'The script should have localized data.' );
+		preg_match( '/var wc_order_attribution = (.*);/', $data, $matches );
+
+		return json_decode( $matches[1], true );
+	}
 }
