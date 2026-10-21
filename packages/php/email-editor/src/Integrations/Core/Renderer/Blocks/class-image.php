@@ -331,8 +331,10 @@ class Image extends Abstract_Block_Renderer {
 	 * @return array
 	 */
 	private function fit_width_to_available_space( array $parsed_block ): array {
-		$width     = Styles_Helper::parse_value( $parsed_block['attrs']['width'] );
-		$available = Styles_Helper::parse_value( $parsed_block['email_attrs']['width'] ?? 0 );
+		$width_input = is_scalar( $parsed_block['attrs']['width'] ) ? (string) $parsed_block['attrs']['width'] : '';
+		$width_px    = str_ends_with( trim( $width_input ), '%' ) ? null : Styles_Helper::convert_to_px( $width_input, false );
+		$width       = Styles_Helper::parse_value( $width_px ?? '0' );
+		$available   = Styles_Helper::parse_value( $parsed_block['email_attrs']['width'] ?? 0 );
 		if ( $available > 0 && $width > $available ) {
 			$parsed_block['attrs']['width']             = "{$available}px";
 			$parsed_block['email_attrs']['image-scale'] = $available / $width;

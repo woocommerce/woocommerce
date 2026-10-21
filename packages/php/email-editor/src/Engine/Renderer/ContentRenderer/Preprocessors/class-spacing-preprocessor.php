@@ -25,14 +25,6 @@ class Spacing_Preprocessor implements Context_Aware_Preprocessor {
 	private ?array $post_content_block_names = null;
 
 	/**
-	 * Email content width inside the root padding, in px, used to tell whether a responsive grid
-	 * fits two columns. Zero when unknown.
-	 *
-	 * @var float
-	 */
-	private float $content_width = 0.0;
-
-	/**
 	 * Preprocesses the parsed blocks.
 	 *
 	 * @param array $parsed_blocks Parsed blocks.
@@ -58,12 +50,7 @@ class Spacing_Preprocessor implements Context_Aware_Preprocessor {
 		$container_padding = $styles['__container_padding'] ?? array();
 		$variables_map     = $styles['__variables_map'] ?? array();
 		$gap_padding_side  = $rendering_context && $rendering_context->is_rtl() ? 'padding-right' : 'padding-left';
-
-		$this->content_width = Styles_Helper::parse_value( $layout['contentSize'] ?? 0 )
-			- Styles_Helper::parse_value( $root_padding['left'] ?? 0 )
-			- Styles_Helper::parse_value( $root_padding['right'] ?? 0 );
-
-		$parsed_blocks = $this->add_block_gaps(
+		$parsed_blocks     = $this->add_block_gaps(
 			$parsed_blocks,
 			$styles['spacing']['blockGap'] ?? '',
 			null,
@@ -223,12 +210,11 @@ class Spacing_Preprocessor implements Context_Aware_Preprocessor {
 
 			// A two-column grid lays its children out side by side, so it takes the root
 			// padding as one inset instead of padding every cell on both sides.
-			$column_gap         = $this->is_two_column_grid( $block ) ? $this->get_grid_gap( $block, 'left', $gap, $variables_map ) : null;
-			$is_two_column_grid = null !== $column_gap && $this->fits_minimum_column_width( $block, $column_gap );
+			$is_two_column_grid = $this->is_two_column_grid( $block );
 			if ( $is_two_column_grid ) {
 				$block['email_attrs']['two-column-grid'] = true;
 				$block['email_attrs']['grid-row-gap']    = $this->get_grid_gap( $block, 'top', $gap, $variables_map );
-				$block['email_attrs']['grid-column-gap'] = $column_gap;
+				$block['email_attrs']['grid-column-gap'] = $this->get_grid_gap( $block, 'left', $gap, $variables_map );
 			}
 
 			// A delegator passes padding down to its children instead of taking it,
@@ -314,31 +300,6 @@ class Spacing_Preprocessor implements Context_Aware_Preprocessor {
 		}
 
 		return true;
-	}
-
-	/**
-	 * Checks whether a grid's cells would be at least its minimum column width.
-	 *
-	 * In auto mode the editor saves both a column count and a minimum column width, and the grid shows
-	 * up to that many columns of at least that width. A grid whose two cells would be narrower keeps
-	 * stacking, as it would on a screen this narrow.
-	 *
-	 * @param array  $block The grid group block.
-	 * @param string $column_gap Column gap in px.
-	 * @return bool
-	 */
-	private function fits_minimum_column_width( array $block, string $column_gap ): bool {
-		$minimum_width = $block['attrs']['layout']['minimumColumnWidth'] ?? null;
-		if ( ! is_string( $minimum_width ) || '' === trim( $minimum_width ) || $this->content_width <= 0 ) {
-			return true;
-		}
-
-		$minimum_px = Styles_Helper::convert_to_px( (string) Styles_Helper::clamp_to_static_px( $minimum_width ), false );
-		if ( null === $minimum_px ) {
-			return false;
-		}
-
-		return Styles_Helper::parse_value( $minimum_px ) <= ( $this->content_width - Styles_Helper::parse_value( $column_gap ) ) / 2;
 	}
 
 	/**

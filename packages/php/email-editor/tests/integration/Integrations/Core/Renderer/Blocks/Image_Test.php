@@ -508,6 +508,23 @@ class Image_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test an image sized in rem is converted to pixels before it is fitted.
+	 */
+	public function testItShrinksRemSizedImageToTheAvailableWidth(): void {
+		$parsed_image                = $this->parsed_image;
+		$parsed_image['attrs']       = array(
+			'width'    => '30rem',
+			'sizeSlug' => 'full',
+		);
+		$parsed_image['email_attrs'] = array( 'width' => '315px' );
+
+		$rendered = $this->image_renderer->render( $this->image_content, $parsed_image, $this->rendering_context );
+
+		$this->assertStringContainsString( 'width="315"', $rendered );
+		$this->assertStringNotContainsString( '30rem', $rendered );
+	}
+
+	/**
 	 * Test a fixed-width image that fits the width it was given keeps its size.
 	 */
 	public function testItKeepsFixedWidthImageThatFits(): void {

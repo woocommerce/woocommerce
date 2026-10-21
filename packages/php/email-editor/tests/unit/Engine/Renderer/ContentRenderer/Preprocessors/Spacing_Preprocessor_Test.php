@@ -1283,34 +1283,6 @@ class Spacing_Preprocessor_Test extends \Email_Editor_Unit_Test {
 	}
 
 	/**
-	 * Test a responsive grid (column count plus minimum column width) is laid out side by side only when both cells meet the minimum width.
-	 *
-	 * @testWith ["12rem", true]
-	 *           ["315px", true]
-	 *           ["316px", false]
-	 *           ["400px", false]
-	 * @param string $minimum_width Minimum column width.
-	 * @param bool   $side_by_side Whether the grid should render as two columns.
-	 */
-	public function testItChecksResponsiveGridMinimumColumnWidth( string $minimum_width, bool $side_by_side ): void {
-		$blocks = array(
-			$this->build_grid_group(
-				array(
-					'type'               => 'grid',
-					'columnCount'        => 2,
-					'minimumColumnWidth' => $minimum_width,
-				),
-				array( array(), array() )
-			),
-		);
-
-		// Content is 660px less 10px root padding per side, so each cell gets (640 - 10px gap) / 2 = 315px.
-		$result = $this->preprocessor->preprocess( $blocks, $this->layout, $this->styles );
-
-		$this->assertSame( $side_by_side, ! empty( $result[0]['email_attrs']['two-column-grid'] ) );
-	}
-
-	/**
 	 * Test an explicit numeric zero gap is kept rather than replaced by the global gap.
 	 */
 	public function testItKeepsNumericZeroGridGap(): void {

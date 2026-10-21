@@ -752,4 +752,56 @@ class Blocks_Width_Preprocessor_Test extends \Email_Editor_Unit_Test {
 		$this->assertEquals( '305px', $grid['innerBlocks'][2]['innerBlocks'][0]['email_attrs']['width'], 'A fixed width wider than the cell should be capped to the cell.' );
 		$this->assertEquals( '800px', $result[1]['email_attrs']['width'], 'Fixed widths outside a grid are left as they are.' );
 	}
+
+	/**
+	 * Test a responsive grid (column count plus minimum column width) stays two columns only when each cell meets the minimum width.
+	 *
+	 * @testWith ["12rem", true]
+	 *           ["320px", true]
+	 *           ["321px", false]
+	 * @param string $minimum_width Minimum column width.
+	 * @param bool   $side_by_side Whether the grid should stay two columns.
+	 */
+	public function testItStacksResponsiveGridNarrowerThanItsMinimumColumnWidth( string $minimum_width, bool $side_by_side ): void {
+		$paragraph = array(
+			'blockName'   => 'core/paragraph',
+			'attrs'       => array(),
+			'email_attrs' => array( 'two-column-grid-item' => true ),
+			'innerBlocks' => array(),
+		);
+		$blocks    = array(
+			array(
+				'blockName'   => 'core/group',
+				'attrs'       => array(
+					'layout' => array(
+						'type'               => 'grid',
+						'columnCount'        => 2,
+						'minimumColumnWidth' => $minimum_width,
+					),
+				),
+				'email_attrs' => array(
+					'two-column-grid' => true,
+					'grid-row-gap'    => '24px',
+					'grid-column-gap' => '20px',
+				),
+				'innerBlocks' => array( $paragraph, $paragraph ),
+			),
+		);
+
+		// Each cell is (660 - 20px gap) / 2 = 320px.
+		$result = $this->preprocessor->preprocess( $blocks, $this->layout, $this->styles );
+		$grid   = $result[0];
+
+		if ( $side_by_side ) {
+			$this->assertTrue( $grid['email_attrs']['two-column-grid'] );
+			$this->assertEquals( '320px', $grid['innerBlocks'][0]['email_attrs']['width'] );
+			return;
+		}
+
+		$this->assertArrayNotHasKey( 'two-column-grid', $grid['email_attrs'] );
+		$this->assertArrayNotHasKey( 'two-column-grid-item', $grid['innerBlocks'][1]['email_attrs'] );
+		$this->assertArrayNotHasKey( 'margin-top', $grid['innerBlocks'][0]['email_attrs'] );
+		$this->assertEquals( '24px', $grid['innerBlocks'][1]['email_attrs']['margin-top'], 'Stacked items are spaced by the row gap.' );
+		$this->assertEquals( '660px', $grid['innerBlocks'][1]['email_attrs']['width'] );
+	}
 }

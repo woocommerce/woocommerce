@@ -9,6 +9,7 @@ declare(strict_types = 1);
 namespace Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preset_Variable_Resolver;
+use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
 /**
  * This class sets the width of the blocks based on the layout width or column count.
  * The final width in pixels is stored in the email_attrs array because we would like to avoid changing the original attributes.
@@ -122,14 +123,19 @@ class Blocks_Width_Preprocessor implements Preprocessor {
 			// column gap. Without this, fixed-width children such as images are sized to the full
 			// group width and overflow their cell.
 			if ( ! empty( $block['email_attrs']['two-column-grid'] ) ) {
-				$grid_content_width                             = $inner_content_width
+				$grid_content_width = $inner_content_width
 					- $this->parse_number_from_string_with_pixels( $block_padding_left )
 					- $this->parse_number_from_string_with_pixels( $block_padding_right )
 					- $this->parse_number_from_string_with_pixels( $block['email_attrs']['grid-column-gap'] ?? '0px' );
-				$cell_width                                     = max( 0, floor( $grid_content_width / 2 ) );
-				$modified_layout['contentSize']                 = "{$cell_width}px";
-				$modified_styles['spacing']['padding']['left']  = '0px';
-				$modified_styles['spacing']['padding']['right'] = '0px';
+				$cell_width         = max( 0, floor( $grid_content_width / 2 ) );
+
+				if ( $this->fits_minimum_column_width( $block, $cell_width ) ) {
+					$modified_layout['contentSize']                 = "{$cell_width}px";
+					$modified_styles['spacing']['padding']['left']  = '0px';
+					$modified_styles['spacing']['padding']['right'] = '0px';
+				} else {
+					$block = $this->stack_grid( $block );
+				}
 			}
 
 			$block['email_attrs']['width'] = "{$width}px";
@@ -137,6 +143,45 @@ class Blocks_Width_Preprocessor implements Preprocessor {
 			$parsed_blocks[ $key ]         = $block;
 		}
 		return $parsed_blocks;
+	}
+
+	/**
+	 * Checks whether a grid's cells meet its minimum column width.
+	 *
+	 * In auto mode the editor saves both a column count and a minimum column width, and the grid shows
+	 * up to that many columns of at least that width, so narrower cells mean the grid stacks.
+	 *
+	 * @param array $block The grid group block.
+	 * @param float $cell_width Width of one cell in px.
+	 * @return bool
+	 */
+	private function fits_minimum_column_width( array $block, float $cell_width ): bool {
+		$minimum_width = $block['attrs']['layout']['minimumColumnWidth'] ?? null;
+		if ( ! is_string( $minimum_width ) || '' === trim( $minimum_width ) ) {
+			return true;
+		}
+
+		$minimum_px = Styles_Helper::convert_to_px( (string) Styles_Helper::clamp_to_static_px( $minimum_width ), false );
+		return null !== $minimum_px && Styles_Helper::parse_value( $minimum_px ) <= $cell_width;
+	}
+
+	/**
+	 * Turn a grid flagged by the Spacing_Preprocessor back into the stacked layout, spacing its items
+	 * with the grid's row gap as WordPress does when a grid wraps to one column.
+	 *
+	 * @param array $block The grid group block.
+	 * @return array
+	 */
+	private function stack_grid( array $block ): array {
+		unset( $block['email_attrs']['two-column-grid'] );
+		foreach ( $block['innerBlocks'] as $key => $inner_block ) {
+			unset( $inner_block['email_attrs']['two-column-grid-item'] );
+			if ( 0 !== $key ) {
+				$inner_block['email_attrs']['margin-top'] = $block['email_attrs']['grid-row-gap'] ?? '0px';
+			}
+			$block['innerBlocks'][ $key ] = $inner_block;
+		}
+		return $block;
 	}
 
 	// TODO: We could add support for other units like em, rem, etc.
