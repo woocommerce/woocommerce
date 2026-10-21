@@ -3012,7 +3012,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
-	 * @testdox Percentage order fees use the stored discount total, not a filtered one.
+	 * @testdox Percentage order fees ignore a filtered discount total.
 	 */
 	public function test_add_order_fee_percentage_ignores_filtered_discount_total(): void {
 		$order = $this->create_order_with_20_percent_tax();
@@ -3021,8 +3021,21 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 
 		$fee = $this->add_order_fee_via_ajax( $order, '10%' );
 
-		// The stored discount is 10, so the base stays 90 even though the filter reports 0.
-		$this->assertEquals( 9.0, (float) $fee->get_total(), 'Percentage fee should use the stored discount total.' );
+		// The line items total 90 after the coupon, so the base stays 90 even though the filter reports no discount.
+		$this->assertEquals( 9.0, (float) $fee->get_total(), 'Percentage fee should ignore a filtered discount total.' );
+	}
+
+	/**
+	 * @testdox Percentage order fees ignore a filtered order subtotal.
+	 */
+	public function test_add_order_fee_percentage_ignores_filtered_subtotal(): void {
+		$order = $this->create_order_with_20_percent_tax();
+		add_filter( 'woocommerce_order_get_subtotal', '__return_zero' );
+
+		$fee = $this->add_order_fee_via_ajax( $order, '10%' );
+
+		// The line items total 100, so the fee stays 10 even though the filter reports a subtotal of 0.
+		$this->assertEquals( 10.0, (float) $fee->get_total(), 'Percentage fee should ignore a filtered subtotal.' );
 	}
 
 	/**
