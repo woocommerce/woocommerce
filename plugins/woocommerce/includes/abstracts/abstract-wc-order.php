@@ -1762,6 +1762,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		// @phpstan-ignore-next-line method.notFound (Guarded by has_callable() and called via __call() on the underlying order data store instance.)
 		if ( $order_data_store->has_callable( 'get_recorded_coupon_usage_counts' ) && $order_data_store->get_recorded_coupon_usage_counts( $this ) ) {
 			$coupon->increase_usage_count( $used_by );
+			if ( $coupon->get_id() ) {
+				$this->save_coupon_usage_identities( array( $coupon->get_id() => $used_by ) + $this->get_coupon_usage_identities() );
+			}
 		}
 
 		wc_update_coupon_usage_counts( $this->get_id() );
@@ -1911,7 +1914,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				if ( $has_recorded ) {
 					// Mirror the stored flag into this instance so clearing it below is tracked as a change and saved.
 					$this->set_recorded_coupon_usage_counts( true );
-					$coupon_object->decrease_usage_count( $used_by );
+
+					$identities = $this->get_coupon_usage_identities();
+					$coupon_object->decrease_usage_count( $identities[ $coupon_object->get_id() ] ?? $used_by );
+					unset( $identities[ $coupon_object->get_id() ] );
+					$this->save_coupon_usage_identities( $identities );
 
 					$remaining_codes = array_filter( $this->get_coupon_codes(), fn( $remaining_code ) => ! StringUtil::is_null_or_whitespace( $remaining_code ) );
 					if ( ! $remaining_codes ) {
@@ -1936,6 +1943,41 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Get the identity each coupon was counted under, keyed by coupon ID.
+	 *
+	 * Reads and writes go through a fresh order instance, like wc_update_coupon_usage_counts(), so this
+	 * instance never holds a stale copy of the key.
+	 *
+	 * @return array
+	 */
+	private function get_coupon_usage_identities() {
+		$order      = wc_get_order( $this->get_id() );
+		$identities = $order ? $order->get_meta( '_coupon_usage_identities' ) : array();
+
+		return is_array( $identities ) ? $identities : array();
+	}
+
+	/**
+	 * Store the identity each coupon was counted under, or clear it when there are none.
+	 *
+	 * @param array $identities Identities keyed by coupon ID.
+	 * @return void
+	 */
+	private function save_coupon_usage_identities( array $identities ) {
+		$order = wc_get_order( $this->get_id() );
+		if ( ! $order ) {
+			return;
+		}
+
+		if ( $identities ) {
+			$order->update_meta_data( '_coupon_usage_identities', $identities );
+		} else {
+			$order->delete_meta_data( '_coupon_usage_identities' );
+		}
+		$order->save_meta_data();
 	}
 
 	/**
