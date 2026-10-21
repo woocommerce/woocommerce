@@ -1095,6 +1095,59 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test: woocommerce_order_edit_status fires once for a manual change. set_status fires it right away, stage_status on the next save.
+	 */
+	public function test_edit_status_action_fires_once_for_a_manual_change() {
+		$object = new WC_Order();
+		$object->save();
+		$fired = did_action( 'woocommerce_order_edit_status' );
+
+		$this->assertTrue( $object->update_status( OrderStatus::ON_HOLD, '', true ) );
+		$this->assertSame( 1, did_action( 'woocommerce_order_edit_status' ) - $fired );
+		$this->assertSame( OrderStatus::ON_HOLD, wc_get_order( $object->get_id() )->get_status() );
+
+		$object->set_status( OrderStatus::PROCESSING, '', true );
+		$this->assertSame( 2, did_action( 'woocommerce_order_edit_status' ) - $fired );
+		$object->save();
+
+		$object->stage_status( OrderStatus::COMPLETED, '', true );
+		$this->assertSame( 2, did_action( 'woocommerce_order_edit_status' ) - $fired );
+		$object->save();
+		$this->assertSame( 3, did_action( 'woocommerce_order_edit_status' ) - $fired );
+		$this->assertSame( OrderStatus::COMPLETED, wc_get_order( $object->get_id() )->get_status() );
+	}
+
+	/**
+	 * Test: update_status fires woocommerce_order_edit_status before it writes, and set_status fires it before the paid and completed dates are set.
+	 */
+	public function test_edit_status_action_fires_before_the_write() {
+		$events   = array();
+		$object   = null;
+		$listener = static function ( $order_id ) use ( &$events, &$object ) {
+			$events[] = array(
+				wc_get_order( $order_id )->get_status(),
+				null === $object->get_date_paid( 'edit' ),
+				null === $object->get_date_completed( 'edit' ),
+			);
+		};
+		add_action( 'woocommerce_order_edit_status', $listener );
+
+		$object = new WC_Order();
+		$object->save();
+		$object->update_status( OrderStatus::COMPLETED, '', true );
+
+		$object = new WC_Order();
+		$object->save();
+		$object->set_status( OrderStatus::COMPLETED, '', true );
+		$set = array( null !== $object->get_date_paid( 'edit' ), null !== $object->get_date_completed( 'edit' ) );
+
+		remove_action( 'woocommerce_order_edit_status', $listener );
+		$this->assertSame( OrderStatus::PENDING, $events[0][0] );
+		$this->assertSame( array( OrderStatus::PENDING, true, true ), $events[1] );
+		$this->assertSame( array( true, true ), $set );
+	}
+
+	/**
 	 * Test that exceptions thrown during update_status are handled.
 	 * Note: This can't actually test the transaction rollbacks since WC transactions are disabled in unit tests.
 	 *
