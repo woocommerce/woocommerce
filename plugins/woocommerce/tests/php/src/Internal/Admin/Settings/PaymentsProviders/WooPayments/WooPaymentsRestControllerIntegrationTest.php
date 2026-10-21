@@ -1304,6 +1304,47 @@ class WooPaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Preserves valid sources and defaults missing or unknown authorization sources.
+	 * @testWith [null, "settings_payments"]
+	 *           ["", "settings_payments"]
+	 *           ["unknown", "settings_payments"]
+	 *           ["settings_payments", "settings_payments"]
+	 *           ["lys", "lys"]
+	 *
+	 * @param string|null $source The requested onboarding source.
+	 * @param string      $expected_source The source included in the return URL.
+	 */
+	public function test_handle_onboarding_wpcom_connection_authorize_source( ?string $source, string $expected_source ): void {
+		$this->mock_wpcom_connection_manager->method( 'is_connected' )->willReturn( true );
+		$this->mock_wpcom_connection_manager->expects( $this->never() )->method( 'try_registration' );
+
+		$return_url = '';
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'get_wpcom_connection_authorization' => function ( string $url ) use ( &$return_url ) {
+						$return_url = $url;
+						return array(
+							'success' => true,
+							'url'     => 'https://wordpress.com/auth',
+						);
+					},
+				),
+			)
+		);
+
+		$request = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/step/' . WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION . '/authorize' );
+		if ( null !== $source ) {
+			$request->set_param( 'source', $source );
+		}
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( \WP_Http::OK, $response->get_status() );
+		wp_parse_str( (string) wp_parse_url( $return_url, PHP_URL_QUERY ), $query );
+		$this->assertSame( $expected_source, $query['source'] ?? null );
+	}
+
+	/**
 	 * Test that the WPCOM connection authorize action reports a failed registration.
 	 */
 	public function test_handle_onboarding_wpcom_connection_authorize_registration_error() {

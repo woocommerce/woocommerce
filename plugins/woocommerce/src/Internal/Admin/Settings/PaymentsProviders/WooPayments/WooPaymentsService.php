@@ -1693,6 +1693,7 @@ class WooPaymentsService {
 			);
 		}
 
+		$source           = $this->validate_onboarding_source( $source );
 		$wpcom_connection = $this->get_wpcom_connection_authorization( $this->get_wpcom_connection_return_url( $source ) );
 		if ( empty( $wpcom_connection['success'] ) || empty( $wpcom_connection['url'] ) ) {
 			$errors = array_values( (array) ( $wpcom_connection['errors'] ?? array() ) );
