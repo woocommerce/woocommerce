@@ -110,6 +110,7 @@ class ProductFilters extends AbstractBlock {
 	:where(.wc-block-product-filters).is-mobile-overlay .wc-block-product-filters__overlay {
 		position: relative;
 		pointer-events: auto;
+		visibility: visible;
 		inset: 0;
 		z-index: auto;
 		background: inherit;
@@ -232,23 +233,18 @@ CSS;
 		}
 
 		$wrapper_attributes = array(
-			'class'                         => implode( ' ', $wrapper_classes ),
-			'data-wp-interactive'           => $this->get_full_block_name(),
-			'data-wp-init--colors'          => 'callbacks.initColors',
-			'data-wp-watch--active-filters' => 'callbacks.syncActiveFiltersWithServer',
-			'data-wp-context'               => (string) wp_json_encode( $interactivity_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
-			'style'                         => $this->get_css_variables( $attributes ),
+			'class'                          => implode( ' ', $wrapper_classes ),
+			'data-wp-router-region'          => $this->generate_navigation_id( $block ),
+			'data-wp-interactive'            => $this->get_full_block_name(),
+			'data-wp-init---colors'          => 'callbacks.initColors',
+			'data-wp-watch---active-filters' => 'callbacks.syncActiveFiltersWithServer',
+			'data-wp-context'                => (string) wp_json_encode( $interactivity_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
+			'style'                          => $this->get_css_variables( $attributes ),
 		);
 
 		if ( $has_overlay ) {
-			$wrapper_attributes['data-wp-watch--scrolling']         = 'callbacks.scrollLimit';
-			$wrapper_attributes['data-wp-on--keyup']                = 'actions.closeOverlayOnEscape';
+			$wrapper_attributes['data-wp-watch---scrolling']        = 'callbacks.scrollLimit';
 			$wrapper_attributes['data-wp-class--is-overlay-opened'] = 'context.isOverlayOpened';
-		}
-
-		// Remove this conditional once the fix is released in WP. https://github.com/woocommerce/gutenberg/pull/4.
-		if ( ! isset( $block->context['productCollectionLocation'] ) ) {
-			$wrapper_attributes['data-wp-router-region'] = $this->generate_navigation_id( $block );
 		}
 
 		ob_start();
@@ -258,6 +254,7 @@ CSS;
 				<button
 					type="button"
 					class="wc-block-product-filters__open-overlay"
+					data-wp-init="callbacks.initOverlay"
 					data-wp-on--click="actions.openOverlay"
 				>
 					<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -267,10 +264,13 @@ CSS;
 				</button>
 				<div class="wc-block-product-filters__overlay">
 					<div class="wc-block-product-filters__overlay-wrapper" data-wp-on--click="actions.closeOverlayOnBackdrop">
-						<div
+						<section
 							class="wc-block-product-filters__overlay-dialog"
 							role="dialog"
-							aria-label="<?php echo esc_html__( 'Product Filters', 'woocommerce' ); ?>"
+							aria-label="<?php echo esc_attr__( 'Product Filters', 'woocommerce' ); ?>"
+							data-wp-bind--aria-modal="context.isOverlayOpened"
+							data-wp-on-document--keydown="actions.handleOverlayKeydown"
+							data-wp-watch="callbacks.focusOverlay"
 						>
 							<header class="wc-block-product-filters__overlay-header">
 								<button
@@ -299,7 +299,7 @@ CSS;
 									<span><?php echo esc_html__( 'Apply', 'woocommerce' ); ?></span>
 								</button>
 							</footer>
-						</div>
+						</section>
 					</div>
 				</div>
 			<?php else : ?>

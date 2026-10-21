@@ -490,6 +490,57 @@ class WC_Admin_List_Table_Orders_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Order previews pass refund totals to wc_price as negative amounts.
+	 */
+	public function test_order_preview_passes_negative_refund_total_to_wc_price(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$order   = wc_create_order();
+		$item_id = $order->add_product( $product, 1 );
+		$order->calculate_totals();
+		$order->save();
+
+		wc_create_refund(
+			array(
+				'amount'        => 5,
+				'order_id'      => $order->get_id(),
+				'line_items'    => array(
+					$item_id => array(
+						'qty'          => 1,
+						'refund_total' => 5,
+						'refund_tax'   => array(),
+					),
+				),
+				'restock_items' => false,
+			)
+		);
+
+		$price_filter = static function ( $price_html, $formatted_price, $args, $unformatted_price, $original_price ) {
+			return (float) $original_price < 0 ? 'signed-price:' . $original_price . ':' . $unformatted_price : $price_html;
+		};
+		add_filter( 'wc_price', $price_filter, 10, 5 );
+
+		$preview_html = WC_Admin_List_Table_Orders::get_order_preview_item_html( $order );
+
+		remove_filter( 'wc_price', $price_filter );
+		$order->delete( true );
+		$product->delete( true );
+
+		$document       = new DOMDocument();
+		$previous_state = libxml_use_internal_errors( true );
+		$loaded         = $document->loadHTML( '<!DOCTYPE html><html><body>' . $preview_html . '</body></html>' );
+		libxml_clear_errors();
+		libxml_use_internal_errors( $previous_state );
+
+		$this->assertTrue( $loaded, 'The order preview output should be valid enough for DOM parsing.' );
+
+		$xpath          = new DOMXPath( $document );
+		$refunded_nodes = $xpath->query( "//small[contains(concat(' ', normalize-space(@class), ' '), ' refunded ') and normalize-space(.) = 'signed-price:-5:-5']" );
+
+		$this->assertNotFalse( $refunded_nodes, 'The refunded price XPath query should be valid.' );
+		$this->assertSame( 1, $refunded_nodes->length, 'The preview should pass the refund total to the wc_price filter as a negative amount.' );
+	}
+
+	/**
 	 * @testdox Should not warn or drop orders when the m parameter is not a string.
 	 */
 	public function test_date_filter_with_non_string_m_does_not_trigger_warning(): void {

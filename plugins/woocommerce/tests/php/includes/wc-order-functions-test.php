@@ -5,6 +5,7 @@
  * @package WooCommerce\Tests\Order.
  */
 
+use Automattic\WooCommerce\Caches\OrderCache;
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Utilities\Users;
@@ -176,6 +177,188 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 		$order->untrash();
 		$this->assertEquals( 1, $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
 		$this->assertEquals( 1, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox wc_update_coupon_usage_counts() does not count coupon usage for a refund.
+	 */
+	public function test_wc_update_coupon_usage_counts_ignores_refunds() {
+		$coupon = WC_Helper_Coupon::create_coupon( 'test_usage_on_refund' );
+		$refund = wc_create_refund(
+			array(
+				'order_id' => WC_Helper_Order::create_order( 0 )->get_id(),
+				'amount'   => 1,
+			)
+		);
+		$item   = new WC_Order_Item_Coupon();
+		$item->set_code( $coupon->get_code() );
+		$refund->add_item( $item );
+		$refund->save();
+
+		wc_update_coupon_usage_counts( $refund->get_id() );
+
+		$coupon = new WC_Coupon( $coupon->get_code() );
+		$this->assertSame( 0, $coupon->get_usage_count() );
+		$this->assertSame( array(), $coupon->get_used_by() );
+	}
+
+	/**
+	 * @testdox wc_update_coupon_usage_counts() does not count coupon usage for an order whose data store cannot record it.
+	 */
+	public function test_wc_update_coupon_usage_counts_skips_orders_whose_data_store_cannot_record_usage() {
+		$coupon = WC_Helper_Coupon::create_coupon( 'test_usage_without_recording_support' );
+		$order  = WC_Helper_Order::create_order();
+		$item   = new WC_Order_Item_Coupon();
+		$item->set_code( $coupon->get_code() );
+		$order->add_item( $item );
+		$order->save();
+
+		// Load the order with a data store that lacks the coupon usage methods of WC_Order_Data_Store_Interface.
+		add_filter(
+			'woocommerce_data_stores',
+			function ( $stores ) {
+				$stores['test-basic-order'] = new class() extends Abstract_WC_Order_Data_Store_CPT {
+				};
+				return $stores;
+			}
+		);
+		$order_class = get_class(
+			new class() extends WC_Order {
+				/**
+				 * Get a data store without the coupon usage methods.
+				 *
+				 * @return WC_Data_Store
+				 */
+				public function get_data_store() {
+					return WC_Data_Store::load( 'test-basic-order' );
+				}
+			}
+		);
+		add_filter(
+			'woocommerce_order_class',
+			function () use ( $order_class ) {
+				return $order_class;
+			}
+		);
+		wc_get_container()->get( OrderCache::class )->remove( $order->get_id() );
+
+		wc_update_coupon_usage_counts( $order->get_id() );
+		wc_update_coupon_usage_counts( $order->get_id() );
+
+		$this->assertSame( 0, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+	}
+
+	/**
+	 * Add a raw coupon item to an order and save it, bypassing apply_coupon().
+	 *
+	 * @param WC_Order $order Order.
+	 * @param string   $code  Coupon code.
+	 */
+	private function add_raw_coupon_item( WC_Order $order, string $code ): void {
+		$item = new WC_Order_Item_Coupon();
+		$item->set_code( $code );
+		$item->set_discount( 1 );
+		$order->add_item( $item );
+		$order->save();
+	}
+
+	/**
+	 * @testdox Coupon usage is not marked as recorded while the order has no coupons, so coupons added later are counted.
+	 */
+	public function test_wc_update_coupon_usage_counts_counts_coupons_added_after_first_status_change() {
+		$coupon = WC_Helper_Coupon::create_coupon( 'late-coupon' );
+		$order  = WC_Helper_Order::create_order();
+		$store  = $order->get_data_store();
+
+		$this->assertFalse( $store->get_recorded_coupon_usage_counts( $order ) );
+		$this->assertEquals( 0, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+
+		$order->update_status( OrderStatus::ON_HOLD );
+		$this->assertFalse( $store->get_recorded_coupon_usage_counts( $order ) );
+
+		$this->add_raw_coupon_item( $order, $coupon->get_code() );
+		$this->assertEquals( 0, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+
+		$order->update_status( OrderStatus::PROCESSING );
+		$this->assertTrue( $store->get_recorded_coupon_usage_counts( $order ) );
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+
+		$order->update_status( OrderStatus::CANCELLED );
+		$this->assertEquals( 0, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+
+		$order->update_status( OrderStatus::PROCESSING );
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+
+		$order->update_status( OrderStatus::PROCESSING );
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox An order without coupons never gets the recorded flag through valid status changes.
+	 */
+	public function test_wc_update_coupon_usage_counts_does_not_flag_orders_without_coupons() {
+		$order = WC_Helper_Order::create_order();
+		$store = $order->get_data_store();
+
+		foreach ( array( OrderStatus::PENDING, OrderStatus::ON_HOLD, OrderStatus::PROCESSING, OrderStatus::COMPLETED ) as $status ) {
+			$order->update_status( $status );
+			$this->assertFalse( $store->get_recorded_coupon_usage_counts( $order ), "Flag set for status {$status}." );
+		}
+	}
+
+	/**
+	 * @testdox Removing coupon lines without lowering usage and re-adding them later does not count the coupon twice.
+	 */
+	public function test_wc_update_coupon_usage_counts_does_not_double_count_coupons_removed_and_re_added() {
+		$coupon = WC_Helper_Coupon::create_coupon( 'removed-coupon' );
+		$order  = WC_Helper_Order::create_order();
+		$store  = $order->get_data_store();
+
+		$this->add_raw_coupon_item( $order, $coupon->get_code() );
+		$order->update_status( OrderStatus::PROCESSING );
+		$this->assertTrue( $store->get_recorded_coupon_usage_counts( $order ) );
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+
+		$order->remove_order_items( 'coupon' );
+		$order->save();
+		$order->update_status( OrderStatus::ON_HOLD );
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+
+		$this->add_raw_coupon_item( $order, $coupon->get_code() );
+		$order->update_status( OrderStatus::PROCESSING );
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox Pinning: a coupon applied to an auto-draft order is counted once when the order is later paid.
+	 */
+	public function test_wc_update_coupon_usage_counts_admin_applied_coupon_paid_later_counts_once() {
+		$coupon = WC_Helper_Coupon::create_coupon( 'admin-coupon' );
+		$order  = WC_Helper_Order::create_order();
+		$order->set_status( OrderStatus::AUTO_DRAFT );
+		$order->save();
+
+		$result = $order->apply_coupon_using_edited_totals( $coupon->get_code() );
+		$this->assertTrue( $result );
+
+		$order->update_status( OrderStatus::PENDING );
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+
+		$order->payment_complete();
+		$order = wc_get_order( $order->get_id() );
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+		$this->assertTrue( $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
+
+		\Automattic\WooCommerce\Admin\API\Reports\Coupons\DataStore::sync_order_coupons( $order->get_id() );
+		global $wpdb;
+		$rows = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->prefix}wc_order_coupon_lookup WHERE order_id = %d AND coupon_id = %d",
+				$order->get_id(),
+				$coupon->get_id()
+			)
+		);
+		$this->assertEquals( 1, (int) $rows );
 	}
 
 	/**
@@ -605,5 +788,30 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 			wc_get_order( $refund->get_id() )->get_refunded_by(),
 			'An unattributed refund should stay unattributed after a round trip through the data store.'
 		);
+	}
+
+	/**
+	 * @testdox Should show an order note's time in the current site timezone after the timezone changes.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/48953
+	 */
+	public function test_wc_get_order_note_uses_current_site_timezone(): void {
+		update_option( 'timezone_string', 'America/New_York' );
+		$note_id = wp_insert_comment(
+			array(
+				'comment_post_ID'  => WC_Helper_Order::create_order()->get_id(),
+				'comment_type'     => 'order_note',
+				'comment_content'  => 'Order status changed from Pending payment to Completed.',
+				'comment_approved' => 1,
+				'comment_date'     => '2024-06-28 11:34:05',
+				'comment_date_gmt' => '2024-06-28 15:34:05',
+			)
+		);
+
+		update_option( 'timezone_string', 'Asia/Tokyo' );
+		$note = wc_get_order_note( $note_id );
+
+		$this->assertSame( strtotime( '2024-06-28 15:34:05 UTC' ), $note->date_created->getTimestamp(), 'The note should keep the moment it was created.' );
+		$this->assertSame( '2024-06-29 00:34:05', $note->date_created->date( 'Y-m-d H:i:s' ), 'The note should be shown in the new site timezone.' );
 	}
 }

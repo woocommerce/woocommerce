@@ -3,7 +3,7 @@
  */
 import { button } from '@wordpress/icons';
 import { getPlugin, registerPlugin } from '@wordpress/plugins';
-import { registerProductBlockType } from '@woocommerce/atomic-utils';
+import { registerProductBlockType } from '@woocommerce/utils/register-product-block-type';
 import type { BlockConfiguration } from '@wordpress/blocks';
 
 /**

@@ -105,10 +105,11 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 				array( 'subject_partial', null, null ),
 				array( 'preheader', null, 'Test Preheader' ),
 				array( 'recipient', get_option( 'admin_email' ), 'admin@example.com' ),
-				array( 'cc', null, null ),
-				array( 'bcc', null, null ),
+				array( 'cc', null, 'cc@example.com' ),
+				array( 'bcc', null, 'bcc@example.com' ),
 			)
 		);
+		$mock_email->method( 'supports_cc_bcc' )->willReturn( true );
 		$mock_email->method( 'get_default_subject' )->willReturn( 'Default Subject' );
 		$mock_email->method( 'get_form_fields' )->willReturn(
 			array(
@@ -131,6 +132,8 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 		$this->assertEquals( 'Test Preheader', $result['preheader'] );
 		$this->assertEquals( $this->email_type, $result['email_type'] );
 		$this->assertEquals( 'admin@example.com', $result['recipient'] );
+		$this->assertEquals( 'cc@example.com', $result['cc'] );
+		$this->assertEquals( 'bcc@example.com', $result['bcc'] );
 	}
 
 	/**
@@ -162,6 +165,79 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 		$this->assertEquals( 'recipient@example.com', $option['recipient'] );
 		$this->assertEquals( 'cc@example.com', $option['cc'] );
 		$this->assertEquals( 'bcc@example.com', $option['bcc'] );
+	}
+
+	/**
+	 * @testdox get_email_data() returns null for Cc/Bcc when the email does not support them.
+	 */
+	public function test_get_email_data_returns_null_cc_bcc_when_unsupported(): void {
+		update_option(
+			'woocommerce_' . $this->email_type . '_settings',
+			array(
+				'cc'  => 'cc@example.com',
+				'bcc' => 'bcc@example.com',
+			)
+		);
+		$controller = $this->create_controller_with_email( $this->create_email_without_cc_bcc_support() );
+
+		$result = $controller->get_email_data( array( 'id' => $this->email_post->ID ) );
+
+		$this->assertNull( $result['cc'] );
+		$this->assertNull( $result['bcc'] );
+	}
+
+	/**
+	 * @testdox save_email_data() ignores Cc/Bcc when the email does not support them.
+	 */
+	public function test_save_email_data_ignores_cc_bcc_when_unsupported(): void {
+		$controller = $this->create_controller_with_email( $this->create_email_without_cc_bcc_support() );
+
+		$controller->save_email_data(
+			array(
+				'subject' => 'Updated Subject',
+				'cc'      => 'cc@example.com',
+				'bcc'     => 'bcc@example.com',
+			),
+			$this->email_post
+		);
+
+		$option = get_option( 'woocommerce_' . $this->email_type . '_settings' );
+		$this->assertEquals( 'Updated Subject', $option['subject'] );
+		$this->assertArrayNotHasKey( 'cc', $option );
+		$this->assertArrayNotHasKey( 'bcc', $option );
+	}
+
+	/**
+	 * Create a controller whose email registry contains only the given email.
+	 *
+	 * @param \WC_Email $email The email to register.
+	 * @return EmailApiController
+	 */
+	private function create_controller_with_email( \WC_Email $email ): EmailApiController {
+		$controller = $this->getMockBuilder( EmailApiController::class )
+			->onlyMethods( array( 'get_emails' ) )
+			->getMock();
+		$controller->method( 'get_emails' )
+			->willReturn( array( $email ) );
+		$controller->init();
+		return $controller;
+	}
+
+	/**
+	 * Create a test email that opts out of Cc/Bcc support.
+	 *
+	 * @return EmailStub
+	 */
+	private function create_email_without_cc_bcc_support(): EmailStub {
+		return new class() extends EmailStub {
+			/**
+			 * Constructor.
+			 */
+			public function __construct() {
+				$this->supports_cc_bcc = false;
+				parent::__construct();
+			}
+		};
 	}
 
 	/**
@@ -229,6 +305,7 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 				array( 'bcc', null, null ),
 			)
 		);
+		$mock_email->method( 'supports_cc_bcc' )->willReturn( true );
 		$mock_email->method( 'get_default_subject' )->willReturn( 'Default Subject' );
 		$mock_email->method( 'get_form_fields' )->willReturn(
 			array(

@@ -5,6 +5,7 @@
  * @package WooCommerce\Tests\Checkout.
  */
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
 
 /**
@@ -36,6 +37,18 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 
 			public function validate_checkout( &$data, &$errors ) {
 				return parent::validate_checkout( $data, $errors );
+			}
+
+			public function process_order_without_payment( $order_id ) {
+				return parent::process_order_without_payment( $order_id );
+			}
+
+			public function process_customer( $data ) {
+				parent::process_customer( $data );
+			}
+
+			public function update_session( $data ) {
+				return parent::update_session( $data );
 			}
 		};
 		// phpcs:enable Generic.CodeAnalysis, Squiz.Commenting
@@ -142,6 +155,91 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		$this->assertStringNotContainsString( '<a href="http://attackerpage.com/csrf.html">', $content );
 		$this->assertStringNotContainsString( '<script>', $content );
 		$this->assertStringContainsString( 'This text should not save inside an anchor.', $content );
+	}
+
+	/**
+	 * @testdox Checkout refuses to complete a cancelled unpaid non-zero order without payment.
+	 */
+	public function test_process_order_without_payment_rejects_cancelled_unpaid_non_zero_order(): void {
+		$order = wc_create_order();
+		$order->set_total( 10 );
+		$order->set_status( OrderStatus::CANCELLED );
+		$order->save();
+
+		try {
+			$this->sut->process_order_without_payment( $order->get_id() );
+			$this->fail( 'Checkout should not complete a cancelled unpaid non-zero order without payment.' );
+		} catch ( Exception $exception ) {
+			$this->assertSame( 'This order cannot be completed without payment. Please try again.', $exception->getMessage() );
+		}
+
+		$reloaded_order = wc_get_order( $order->get_id() );
+		$this->assertSame( OrderStatus::CANCELLED, $reloaded_order->get_status(), 'The order status should not change.' );
+		$this->assertNull( $reloaded_order->get_date_paid(), 'The order should not be marked paid.' );
+	}
+
+	/**
+	 * @testdox Checkout allows extensions to complete a pending non-zero order without payment.
+	 */
+	public function test_process_order_without_payment_allows_pending_non_zero_order(): void {
+		$order = wc_create_order();
+		$order->set_total( 10 );
+		$order->set_status( OrderStatus::PENDING );
+		$order->save();
+
+		add_filter(
+			'woocommerce_checkout_no_payment_needed_redirect',
+			function () {
+				throw new RuntimeException( 'Stop the test before checkout sends its redirect.' );
+			}
+		);
+
+		try {
+			$this->sut->process_order_without_payment( $order->get_id() );
+			$this->fail( 'Checkout should reach its no-payment redirect.' );
+		} catch ( RuntimeException $exception ) {
+			$this->assertSame( 'Stop the test before checkout sends its redirect.', $exception->getMessage() );
+		}
+
+		$reloaded_order = wc_get_order( $order->get_id() );
+		$this->assertTrue( $reloaded_order->is_paid(), 'The intentionally payment-free order should be completed.' );
+		$this->assertNotNull( $reloaded_order->get_date_paid(), 'The intentionally payment-free order should have a paid date.' );
+	}
+
+	/**
+	 * @testdox A logged in customer's VAT exemption should survive checkout saving their account.
+	 */
+	public function test_process_customer_keeps_logged_in_customer_vat_exemption(): void {
+		$customer_id = WC_Helper_Customer::create_customer( 'classic_vat_exempt', 'password', 'classic-vat-exempt@example.com' )->get_id();
+		// Backdate the account so checkout's save gives it a newer timestamp than the session.
+		update_user_meta( $customer_id, 'last_update', time() - MINUTE_IN_SECONDS );
+		wp_set_current_user( $customer_id );
+		WC()->session->init();
+
+		$original_customer = WC()->customer;
+		WC()->customer     = new WC_Customer( $customer_id, true );
+
+		try {
+			WC()->customer->set_is_vat_exempt( true );
+			WC()->customer->save();
+
+			$this->sut->process_customer(
+				array(
+					'billing_first_name' => 'Classic',
+					'billing_address_1'  => '456 Classic Road',
+					'billing_email'      => 'classic-vat-exempt@example.com',
+				)
+			);
+
+			// The session customer is saved on shutdown in a real request.
+			WC()->customer->save();
+
+			$reloaded_customer = new WC_Customer( $customer_id, true );
+			$this->assertTrue( $reloaded_customer->get_is_vat_exempt(), 'VAT exemption should survive the account save so a retry is not charged tax.' );
+			$this->assertSame( '456 Classic Road', $reloaded_customer->get_billing_address_1(), 'The address should come from the saved account.' );
+		} finally {
+			WC()->customer = $original_customer;
+		}
 	}
 
 	/**
@@ -635,6 +733,90 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 			$errors->get_error_message( 'shipping' )
 		);
 		remove_all_filters( 'woocommerce_countries_allowed_countries' );
+	}
+
+	/**
+	 * @testdox 'validate_checkout' refuses a shippable order when hidden shipping costs leave the cart without a shipping package.
+	 */
+	public function test_validate_checkout_refuses_order_without_shipping_package_when_costs_need_an_address(): void {
+		$remove_billing_address = static function ( $fields ) {
+			unset( $fields['billing']['billing_city'], $fields['billing']['billing_address_1'], $fields['billing']['billing_postcode'] );
+			return $fields;
+		};
+		add_filter( 'woocommerce_checkout_fields', $remove_billing_address );
+		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
+		WC_Helper_Shipping::create_simple_flat_rate( 8 );
+
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		WC()->customer->set_shipping_location( 'US', 'NY', '10001', "O'Fallon" );
+		WC()->cart->calculate_totals();
+		$this->assertTrue( WC()->cart->has_calculated_shipping(), 'The order review should show a shipping rate once the cart calculator address is set.' );
+
+		$original_post = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Restored in the finally block.
+		$_POST         = array(
+			'billing_first_name' => 'Test',
+			'billing_last_name'  => 'Shopper',
+			'billing_phone'      => '5555555555',
+			'billing_email'      => 'shopper@example.com',
+			'billing_country'    => 'US',
+			'billing_state'      => 'NY',
+			'payment_method'     => 'cod',
+		);
+
+		try {
+			$data = $this->sut->get_posted_data();
+			$this->sut->update_session( $data );
+
+			$errors = new WP_Error();
+			$this->sut->validate_checkout( $data, $errors );
+		} finally {
+			$_POST = $original_post;
+			remove_filter( 'woocommerce_checkout_fields', $remove_billing_address );
+			delete_option( 'woocommerce_shipping_cost_requires_address' );
+			WC_Helper_Shipping::delete_simple_flat_rate();
+		}
+
+		$this->assertFalse( WC()->cart->has_calculated_shipping(), 'Placing the order blanks the shipping address, so shipping is no longer calculated.' );
+		$this->assertSame(
+			'Please enter an address to continue.',
+			$errors->get_error_message( 'shipping' ),
+			'Checkout must not accept a shippable order that has no shipping package.'
+		);
+	}
+
+	/**
+	 * @testdox 'validate_checkout' still accepts an order when a plugin deliberately turns off shipping calculation.
+	 */
+	public function test_validate_checkout_accepts_order_when_shipping_calculation_is_turned_off_by_filter(): void {
+		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
+		add_filter( 'woocommerce_cart_ready_to_calc_shipping', '__return_false' );
+		WC_Helper_Shipping::create_simple_flat_rate( 8 );
+
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->customer->set_shipping_location( 'US', 'NY', '10001', 'New York' );
+
+		try {
+			WC()->cart->calculate_totals();
+
+			$data   = array(
+				'ship_to_different_address' => false,
+				'billing_country'           => 'US',
+				'shipping_country'          => 'US',
+				'payment_method'            => 'cod',
+			);
+			$errors = new WP_Error();
+			$this->sut->validate_checkout( $data, $errors );
+		} finally {
+			remove_filter( 'woocommerce_cart_ready_to_calc_shipping', '__return_false' );
+			delete_option( 'woocommerce_shipping_cost_requires_address' );
+			WC_Helper_Shipping::delete_simple_flat_rate();
+		}
+
+		$this->assertFalse( WC()->cart->has_calculated_shipping(), 'The filter should stop shipping from being calculated.' );
+		$this->assertSame( '', $errors->get_error_message( 'shipping' ), 'Stores that turn off shipping calculation on purpose must still be able to take orders.' );
 	}
 
 	/**

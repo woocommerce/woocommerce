@@ -6,6 +6,7 @@
  */
 
 use Automattic\WooCommerce\EmailEditor\Engine\Personalizer;
+use Automattic\WooCommerce\Internal\Email\EmailHeaders;
 use Automattic\WooCommerce\Internal\EmailEditor\BlockEmailRenderer;
 use Automattic\WooCommerce\Internal\EmailEditor\TransactionalEmailPersonalizer;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -288,6 +289,18 @@ class WC_Email extends WC_Settings_API {
 	 */
 	public $block_email_editor_enabled;
 
+	/**
+	 * Whether Cc/Bcc recipients can be configured for this email.
+	 *
+	 * False for emails that carry a credential such as a password reset key.
+	 * The Cc/Bcc settings are then hidden and stored values are ignored.
+	 * The Cc/Bcc recipient filters still apply.
+	 *
+	 * @since 11.2.0
+	 * @var bool
+	 */
+	protected $supports_cc_bcc = true;
+
 
 
 	/**
@@ -333,7 +346,7 @@ class WC_Email extends WC_Settings_API {
 
 		$this->email_type = $this->get_option( 'email_type' );
 		$this->enabled    = $this->get_option( 'enabled' );
-		if ( FeaturesUtil::feature_is_enabled( 'email_improvements' ) ) {
+		if ( FeaturesUtil::feature_is_enabled( 'email_improvements' ) && $this->supports_cc_bcc() ) {
 			$this->cc  = $this->get_option( 'cc', '' );
 			$this->bcc = $this->get_option( 'bcc', '' );
 		}
@@ -636,6 +649,17 @@ class WC_Email extends WC_Settings_API {
 	}
 
 	/**
+	 * Whether Cc/Bcc recipients can be configured for this email.
+	 *
+	 * @since 11.2.0
+	 *
+	 * @return bool
+	 */
+	public function supports_cc_bcc() {
+		return $this->supports_cc_bcc;
+	}
+
+	/**
 	 * Get valid Cc recipients.
 	 *
 	 * @return string
@@ -645,11 +669,12 @@ class WC_Email extends WC_Settings_API {
 		 * Filter the Cc recipient for the email.
 		 *
 		 * @since 9.8.0
+		 * @since 11.2.0 The base value is empty when the email does not support Cc/Bcc.
 		 * @param string   $cc     Cc recipient.
 		 * @param object   $object The object (ie, product or order) this email relates to, if any.
 		 * @param WC_Email $email  WC_Email instance managing the email.
 		 */
-		$cc  = apply_filters( 'woocommerce_email_cc_recipient_' . $this->id, $this->cc, $this->object, $this );
+		$cc  = apply_filters( 'woocommerce_email_cc_recipient_' . $this->id, $this->supports_cc_bcc() ? $this->cc : '', $this->object, $this );
 		$ccs = array_map( 'trim', explode( ',', $cc ?? '' ) );
 		$ccs = array_filter( $ccs, 'is_email' );
 		$ccs = array_map( 'sanitize_email', $ccs );
@@ -666,11 +691,12 @@ class WC_Email extends WC_Settings_API {
 		 * Filter the Bcc recipient for the email.
 		 *
 		 * @since 9.8.0
+		 * @since 11.2.0 The base value is empty when the email does not support Cc/Bcc.
 		 * @param string   $bcc    Bcc recipient.
 		 * @param object   $object The object (ie, product or order) this email relates to, if any.
 		 * @param WC_Email $email  WC_Email instance managing the email.
 		 */
-		$bcc  = apply_filters( 'woocommerce_email_bcc_recipient_' . $this->id, $this->bcc, $this->object, $this );
+		$bcc  = apply_filters( 'woocommerce_email_bcc_recipient_' . $this->id, $this->supports_cc_bcc() ? $this->bcc : '', $this->object, $this );
 		$bccs = array_map( 'trim', explode( ',', $bcc ?? '' ) );
 		$bccs = array_filter( $bccs, 'is_email' );
 		$bccs = array_map( 'sanitize_email', $bccs );
@@ -687,8 +713,13 @@ class WC_Email extends WC_Settings_API {
 
 		// For order notification emails sent to admin, always use customer's billing email as reply-to.
 		if ( in_array( $this->id, array( 'new_order', 'cancelled_order', 'failed_order' ), true ) ) {
-			if ( $this->object && $this->object->get_billing_email() && ( $this->object->get_billing_first_name() || $this->object->get_billing_last_name() ) ) {
-				$header .= 'Reply-to: ' . $this->object->get_billing_first_name() . ' ' . $this->object->get_billing_last_name() . ' <' . $this->object->get_billing_email() . ">\r\n";
+			if ( $this->object instanceof WC_Order ) {
+				$reply_to_name  = EmailHeaders::sanitize_reply_to_name( $this->object->get_billing_first_name() . ' ' . $this->object->get_billing_last_name() );
+				$reply_to_email = sanitize_email( $this->object->get_billing_email() );
+
+				if ( '' !== $reply_to_name && is_email( $reply_to_email ) ) {
+					$header .= 'Reply-to: ' . $reply_to_name . ' <' . $reply_to_email . ">\r\n";
+				}
 			}
 		} else {
 			// Check if custom reply-to is enabled and configured for non-admin notification emails.
@@ -697,10 +728,20 @@ class WC_Email extends WC_Settings_API {
 			$reply_to_name    = $this->get_reply_to_name();
 
 			if ( $reply_to_enabled && ! empty( $reply_to_address ) && is_email( $reply_to_address ) ) {
-				$reply_to_name = ! empty( $reply_to_name ) ? $reply_to_name : $this->get_from_name();
-				$header       .= 'Reply-to: ' . $reply_to_name . ' <' . $reply_to_address . ">\r\n";
-			} elseif ( $this->get_from_address() && $this->get_from_name() ) {
-				$header .= 'Reply-to: ' . $this->get_from_name() . ' <' . $this->get_from_address() . ">\r\n";
+				$reply_to_name = EmailHeaders::sanitize_reply_to_name( $reply_to_name );
+
+				if ( '' === $reply_to_name ) {
+					$reply_to_name = EmailHeaders::sanitize_reply_to_name( $this->get_from_name() );
+				}
+
+				$header .= 'Reply-to: ' . $reply_to_name . ' <' . $reply_to_address . ">\r\n";
+			} else {
+				$from_address = $this->get_from_address();
+				$from_name    = EmailHeaders::sanitize_reply_to_name( $this->get_from_name() );
+
+				if ( $from_address && '' !== $from_name ) {
+					$header .= 'Reply-to: ' . $from_name . ' <' . $from_address . ">\r\n";
+				}
 			}
 		}
 
@@ -1318,7 +1359,7 @@ class WC_Email extends WC_Settings_API {
 				'desc_tip'    => true,
 			),
 		);
-		if ( FeaturesUtil::feature_is_enabled( 'email_improvements' ) ) {
+		if ( FeaturesUtil::feature_is_enabled( 'email_improvements' ) && $this->supports_cc_bcc() ) {
 			$this->form_fields['cc']  = $this->get_cc_field();
 			$this->form_fields['bcc'] = $this->get_bcc_field();
 		}

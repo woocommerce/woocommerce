@@ -122,9 +122,9 @@ class EligibilityService {
 	/**
 	 * Get the product IDs that need to be checked for stock notifications.
 	 *
-	 * For simple products, this returns just the product ID. For variable products,
-	 * it returns both the parent product ID and the IDs of all variations whose stock
-	 * is managed by the parent product.
+	 * For simple products, this returns just the product ID. For variable products that
+	 * manage stock, it also returns the IDs of the variations that share the parent's stock.
+	 * Variations of a parent that does not manage stock keep their own stock status.
 	 *
 	 * This is used in two key scenarios:
 	 * 1. Checking if a product has any active notifications
@@ -137,7 +137,7 @@ class EligibilityService {
 	 */
 	public function get_target_product_ids( WC_Product $product ): array {
 		$lookup_ids = array( $product->get_id() );
-		if ( $product->is_type( ProductType::VARIABLE ) ) {
+		if ( $product->is_type( ProductType::VARIABLE ) && $product->get_manage_stock() ) {
 			$children_ids = $this->stock_management_helper->get_managed_variations( $product );
 			$lookup_ids   = array_merge( $lookup_ids, $children_ids );
 		}

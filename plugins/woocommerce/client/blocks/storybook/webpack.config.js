@@ -42,15 +42,12 @@ module.exports = ( { config: storybookConfig } ) => {
 	storybookConfig.resolve.alias = {
 		...storybookConfig.resolve.alias,
 		...aliases,
-		'@woocommerce/block-settings': require.resolve(
-			'./__mocks__/woocommerce-block-settings.js'
-		),
-		'@woocommerce/base-hooks': require.resolve(
-			'./__mocks__/woocommerce-base-hooks.js'
-		),
-		'wordpress-components': require.resolve(
-			'../node_modules/wordpress-components'
-		),
+		'@woocommerce/block-settings':
+			require.resolve( './__mocks__/woocommerce-block-settings.js' ),
+		'@woocommerce/base-hooks':
+			require.resolve( './__mocks__/woocommerce-base-hooks.js' ),
+		'wordpress-components':
+			require.resolve( '../node_modules/wordpress-components' ),
 	};
 
 	// Resolve `@woocommerce/*` monorepo packages from source via the `wc-source`

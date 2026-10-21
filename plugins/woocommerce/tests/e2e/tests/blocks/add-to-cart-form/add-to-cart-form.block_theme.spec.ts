@@ -236,8 +236,17 @@ test.describe( `${ blockData.name } Block`, () => {
 			const input = page.getByLabel( 'Product quantity' );
 
 			await expect( input ).toHaveValue( '1' );
+			await input.evaluate( ( element ) => {
+				element.addEventListener( 'change', () => {
+					element.dataset.changeFired = 'true';
+				} );
+			} );
 			await plusButton.click();
 			await expect( input ).toHaveValue( '2' );
+			await expect( input ).toHaveAttribute(
+				'data-change-fired',
+				'true'
+			);
 			await minusButton.click();
 			await expect( input ).toHaveValue( '1' );
 			// Ensure the quantity doesn't go below 1.

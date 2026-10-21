@@ -113,7 +113,7 @@ const StepNavigation = ( {
 							__( 'Step %1$d of %2$d', 'woocommerce' ),
 							currentStepIndex + 1,
 							steps.length
-					  )
+						)
 					: null }
 			</div>
 			{ renderButtons() }

@@ -9,6 +9,7 @@
  * @var array $variation_data array of variation data @deprecated 4.4.0.
  */
 
+use Automattic\WooCommerce\Internal\ProductCustoms\ClassicEditorFields;
 use Automattic\WooCommerce\Utilities\I18nUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -431,6 +432,10 @@ defined( 'ABSPATH' ) || exit;
 				</p>
 
 				<?php
+				if ( isset( $product_object, $loop ) ) {
+					wc_get_container()->get( ClassicEditorFields::class )->render_fields( $variation_object, $product_object, $loop );
+				}
+
 				if ( wc_tax_enabled() ) {
 					woocommerce_wp_select(
 						array(

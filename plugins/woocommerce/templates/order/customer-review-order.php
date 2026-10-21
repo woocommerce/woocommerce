@@ -6,7 +6,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 10.8.0
+ * @version 11.3.0
  *
  * @var WC_Order $order Order being reviewed.
  */
@@ -17,7 +17,7 @@ if ( ! $order instanceof WC_Order ) {
 	return;
 }
 
-$meta_parts = \Automattic\WooCommerce\Internal\OrderReviews\Meta::parts_for_order( $order );
+$meta_line = \Automattic\WooCommerce\Internal\OrderReviews\Meta::line_for_order( $order );
 
 /**
  * Filter the eligible items rendered on the Review Order page.
@@ -31,6 +31,10 @@ $meta_parts = \Automattic\WooCommerce\Internal\OrderReviews\Meta::parts_for_orde
  * @param WC_Order        $order The order being reviewed.
  */
 $items = (array) apply_filters( 'woocommerce_review_order_eligible_items', $order->get_items(), $order );
+
+// The same product can appear on several line items; reviews are stored per
+// product/variation, so collapse to one row per review slot.
+$items = \Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility::unique_slot_items( $items );
 
 // Batched lookup; without this each decide() call would issue its own query.
 \Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility::preload_for_items( $items, $order );
@@ -89,19 +93,16 @@ $wp_button_class = wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_
 ?>
 <div class="woocommerce-review-order">
 	<p class="woocommerce-breadcrumb woocommerce-review-order__meta">
-		<?php echo esc_html( implode( ' · ', $meta_parts ) ); ?>
+		<?php echo esc_html( $meta_line ); ?>
 	</p>
 
-	<h1 class="woocommerce-review-order__title">
+	<?php // Focusable so dismissing the notice can hand focus back. ?>
+	<h1 class="woocommerce-review-order__title" tabindex="-1">
 		<?php esc_html_e( 'Review your order', 'woocommerce' ); ?>
 	</h1>
 
 	<p class="woocommerce-review-order__intro">
 		<?php esc_html_e( 'Loved something? Not so much? Share a quick review for what you bought. Feel free to skip any product.', 'woocommerce' ); ?>
-	</p>
-
-	<p class="woocommerce-review-order__legend">
-		<?php esc_html_e( '* Mandatory fields', 'woocommerce' ); ?>
 	</p>
 
 	<?php if ( $skipped_count > 0 ) : ?>
@@ -175,8 +176,9 @@ $wp_button_class = wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_
 		</div>
 	</form>
 
+	<?php // Focusable so the script can move focus here once the form is hidden. ?>
 	<div class="woocommerce-review-order__success" hidden>
-		<h1 class="woocommerce-review-order__empty-title">
+		<h1 class="woocommerce-review-order__empty-title" tabindex="-1">
 			<?php esc_html_e( 'Thank you for your reviews', 'woocommerce' ); ?>
 		</h1>
 		<p class="woocommerce-review-order__empty-body">

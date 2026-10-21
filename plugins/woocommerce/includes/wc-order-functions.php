@@ -27,7 +27,7 @@ defined( 'ABSPATH' ) || exit;
  * This function should be used for order retrieval so that when we move to
  * custom tables, functions still work.
  *
- * Args and usage: https://developer.woocommerce.com/docs/extensions/core-concepts/wc-get-orders/
+ * Args and usage: https://developer.woocommerce.com/docs/features/orders/wc-get-orders/
  *
  * @since  2.6.0
  * @param  array $args Array of args (above).
@@ -1020,10 +1020,24 @@ add_action( 'woocommerce_before_delete_order', 'wc_update_total_sales_counts' );
 function wc_update_coupon_usage_counts( $order_id ) {
 	$order = wc_get_order( $order_id );
 
-	if ( ! $order ) {
+	// Refunds never consume coupon usage.
+	if ( ! $order || $order instanceof WC_Order_Refund ) {
 		return;
 	}
 
+	/**
+	 * Data store wrapper.
+	 *
+	 * @var WC_Data_Store $data_store
+	 */
+	$data_store = $order->get_data_store();
+
+	// Only order data stores can record coupon usage.
+	if ( ! $data_store->has_callable( 'get_recorded_coupon_usage_counts' ) ) {
+		return;
+	}
+
+	$coupon_codes     = array_filter( $order->get_coupon_codes(), fn( $code ) => ! StringUtil::is_null_or_whitespace( $code ) );
 	$has_recorded     = $order->get_data_store()->get_recorded_coupon_usage_counts( $order );
 	$invalid_statuses = array( OrderStatus::CANCELLED, OrderStatus::FAILED, OrderStatus::TRASH );
 
@@ -1039,29 +1053,27 @@ function wc_update_coupon_usage_counts( $order_id ) {
 		$invalid_statuses
 	);
 
-	if ( $order->has_status( $invalid_statuses ) && $has_recorded ) {
+	$is_invalid = $order->has_status( $invalid_statuses );
+
+	if ( $is_invalid && $has_recorded ) {
 		$action = 'reduce';
 		$order->get_data_store()->set_recorded_coupon_usage_counts( $order, false );
-	} elseif ( ! $order->has_status( $invalid_statuses ) && ! $has_recorded ) {
+	} elseif ( ! $is_invalid && $coupon_codes && ! $has_recorded ) {
 		$action = 'increase';
 		$order->get_data_store()->set_recorded_coupon_usage_counts( $order, true );
-	} elseif ( $order->has_status( $invalid_statuses ) ) {
+	} elseif ( $is_invalid ) {
 		wc_release_coupons_for_order( $order );
 		return;
 	} else {
 		return;
 	}
 
-	if ( count( $order->get_coupon_codes() ) > 0 ) {
-		foreach ( $order->get_coupon_codes() as $code ) {
-			if ( StringUtil::is_null_or_whitespace( $code ) ) {
-				continue;
-			}
-
+	if ( count( $coupon_codes ) > 0 ) {
+		foreach ( $coupon_codes as $code ) {
 			$coupon  = new WC_Coupon( $code );
 			$used_by = $order->get_user_id();
 
-			if ( ! $used_by ) {
+			if ( ! $used_by && is_callable( array( $order, 'get_billing_email' ) ) ) {
 				$used_by = $order->get_billing_email();
 			}
 
@@ -1192,7 +1204,8 @@ function wc_get_order_note( $data ) {
 		'woocommerce_get_order_note',
 		array(
 			'id'            => (int) $data->comment_ID,
-			'date_created'  => wc_string_to_datetime( $data->comment_date ),
+			// comment_date is frozen in the timezone the site had when the note was saved, so use the GMT date.
+			'date_created'  => wc_string_to_datetime( mysql_to_rfc3339( $data->comment_date_gmt ) . 'Z' ),
 			'content'       => $data->comment_content,
 			'customer_note' => (bool) get_comment_meta( $data->comment_ID, 'is_customer_note', true ),
 			'added_by'      => __( 'WooCommerce', 'woocommerce' ) === $data->comment_author ? 'system' : $data->comment_author,

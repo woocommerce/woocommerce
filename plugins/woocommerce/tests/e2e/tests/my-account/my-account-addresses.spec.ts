@@ -55,6 +55,15 @@ test.describe( 'Customer can manage addresses in My Account > Addresses page', (
 			.locator( '#billing_address_1' )
 			.fill( '123 Evergreen Terrace' );
 		await page.locator( '#billing_city' ).fill( 'Frisco' );
+
+		// State comes back after leaving a country whose locale hides it.
+		const stateRow = page.locator( '#billing_state_field' );
+		await page.locator( '#billing_country' ).selectOption( 'CY' );
+		await expect( stateRow ).toBeHidden();
+		await page.locator( '#billing_country' ).selectOption( 'LT' );
+		await expect( stateRow ).toBeVisible();
+		await expect( stateRow ).toContainClass( 'validate-required' );
+
 		await page.locator( '#billing_country' ).selectOption( 'US' );
 		await page.locator( '#billing_state' ).selectOption( 'CA' );
 		await page.locator( '#billing_postcode' ).fill( '97403' );

@@ -43,6 +43,9 @@ class WC_Admin_Tests_API_Product_Attributes extends WC_REST_Unit_Test_Case {
 			parent::tearDownAfterClass();
 			global $wpdb;
 			$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_attribute_taxonomies" );
+			// wc_get_attribute_taxonomies() caches the list, so drop the copy that still names the deleted rows.
+			delete_transient( 'wc_attribute_taxonomies' );
+			WC_Cache_Helper::invalidate_cache_group( 'woocommerce-attributes' );
 			$wpdb->query( 'commit' );
 		} finally {
 			self::disable_direct_product_attribute_lookup_updates();

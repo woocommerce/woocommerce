@@ -107,12 +107,12 @@ subscribe( () => {
 
 		registerProductsBlock( queryAttributes );
 	}
-}, 'core/edit-site' );
+}, CORE_EDITOR_STORE );
 
 let isBlockRegistered = false;
 subscribe( () => {
-	if ( ! isBlockRegistered ) {
+	if ( ! isBlockRegistered && ! isSiteEditorPage() ) {
 		isBlockRegistered = true;
 		registerProductsBlock( QUERY_DEFAULT_ATTRIBUTES );
 	}
-}, 'core/edit-post' );
+}, CORE_EDITOR_STORE );

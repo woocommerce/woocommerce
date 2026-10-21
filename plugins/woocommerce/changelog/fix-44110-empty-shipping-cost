@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Save a cleared shipping cost as 0 when editing an order.

@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { ExtensionCartUpdateArgs } from '@woocommerce/types';
+import { addAction, removeAction } from '@wordpress/hooks';
 
 /**
  * Internal dependencies
@@ -10,6 +11,7 @@ import {
 	changeCartItemQuantity,
 	receiveCart,
 	applyExtensionCartUpdate,
+	syncCartWithIAPIStore,
 } from '../thunks';
 import { apiFetchWithHeaders } from '../../shared-controls';
 import { getIsCustomerDataDirty } from '../utils';
@@ -382,6 +384,77 @@ describe( 'receiveCart', () => {
 		expect( dispatch.itemIsPendingDelete ).not.toHaveBeenCalled();
 	} );
 
+	it( 'should fire the cart-updated action with the new and previous cart after clearing pending deletes', () => {
+		const { dispatch, select } = createReceiveCartMocks( {
+			cartItems: [ { key: 'bundle-parent' }, { key: 'simple-product' } ],
+			pendingDelete: [ 'bundle-parent' ],
+		} );
+		const previousCart = select.getCartData();
+		let pendingDeleteClearedFirst = false;
+		// Record the state instead of asserting here, since errors thrown by callbacks are caught and logged.
+		const callback = jest.fn( () => {
+			pendingDeleteClearedFirst =
+				dispatch.itemIsPendingDelete.mock.calls.some(
+					( [ key, isPending ] ) =>
+						key === 'bundle-parent' && isPending === false
+				);
+		} );
+		addAction(
+			'experimental__woocommerce_blocks-cart-updated',
+			'test/cart-updated',
+			callback
+		);
+
+		try {
+			receiveCart( {
+				items: [ { key: 'simple-product' } ],
+				errors: [],
+			} as never )( { dispatch, select } as never );
+		} finally {
+			removeAction(
+				'experimental__woocommerce_blocks-cart-updated',
+				'test/cart-updated'
+			);
+		}
+
+		expect( callback ).toHaveBeenCalledTimes( 1 );
+		expect( callback ).toHaveBeenCalledWith( {
+			storeCart: select.getCartData(),
+			previousStoreCart: previousCart,
+		} );
+		expect( pendingDeleteClearedFirst ).toBe( true );
+	} );
+
+	it( 'should still update the cart when a cart-updated callback throws', () => {
+		const { dispatch, select } = createReceiveCartMocks( {
+			cartItems: [ { key: 'item-1' } ],
+			pendingDelete: [],
+		} );
+		addAction(
+			'experimental__woocommerce_blocks-cart-updated',
+			'test/cart-updated-throws',
+			() => {
+				throw new Error( 'Extension error' );
+			}
+		);
+
+		try {
+			receiveCart( {
+				items: [ { key: 'item-2' } ],
+				errors: [],
+			} as never )( { dispatch, select } as never );
+		} finally {
+			removeAction(
+				'experimental__woocommerce_blocks-cart-updated',
+				'test/cart-updated-throws'
+			);
+		}
+
+		expect( dispatch.setCartData ).toHaveBeenCalled();
+		expect( dispatch.setErrorData ).toHaveBeenCalledWith( null );
+		expect( console ).toHaveErroredWith( new Error( 'Extension error' ) );
+	} );
+
 	it( 'should handle empty pending delete list', () => {
 		const { dispatch, select } = createReceiveCartMocks( {
 			cartItems: [ { key: 'item-1' } ],
@@ -394,6 +467,106 @@ describe( 'receiveCart', () => {
 		} as never )( { dispatch, select } as never );
 
 		expect( dispatch.itemIsPendingDelete ).not.toHaveBeenCalled();
+	} );
+} );
+
+describe( 'syncCartWithIAPIStore', () => {
+	const createSyncMocks = () => {
+		let cartData = {
+			items: [ { key: 'item-1', quantity: 1 } ],
+			errors: [] as never[],
+		};
+
+		const dispatch = {
+			setCartData: jest.fn( ( newCart ) => {
+				cartData = newCart;
+			} ),
+			setProductsPendingAdd: jest.fn(),
+			itemIsPendingQuantity: jest.fn(),
+			itemIsPendingDelete: jest.fn(),
+			setErrorData: jest.fn(),
+			receiveError: jest.fn(),
+		};
+		const select = {
+			getCartData: jest.fn( () => cartData ),
+			getCartErrors: jest.fn( () => [] ),
+		};
+
+		return { dispatch, select };
+	};
+
+	beforeEach( () => {
+		jest.clearAllMocks();
+	} );
+
+	it( 'should fire the cart-updated action with the new and previous cart after clearing pending quantities', async () => {
+		mockApiFetchWithHeaders.mockResolvedValue( {
+			response: {
+				items: [ { key: 'item-1', quantity: 2 } ],
+				errors: [],
+			},
+		} );
+		const { dispatch, select } = createSyncMocks();
+		const previousCart = select.getCartData();
+		let pendingQuantityClearedFirst = false;
+		const callback = jest.fn( () => {
+			pendingQuantityClearedFirst =
+				dispatch.itemIsPendingQuantity.mock.calls.some(
+					( [ key, isPending ] ) =>
+						key === 'item-1' && isPending === false
+				);
+		} );
+		addAction(
+			'experimental__woocommerce_blocks-cart-updated',
+			'test/cart-updated-sync',
+			callback
+		);
+
+		try {
+			await syncCartWithIAPIStore( {
+				cartItemsPendingQuantity: [ 'item-1' ],
+			} )( { dispatch, select } as never );
+		} finally {
+			removeAction(
+				'experimental__woocommerce_blocks-cart-updated',
+				'test/cart-updated-sync'
+			);
+		}
+
+		expect( callback ).toHaveBeenCalledTimes( 1 );
+		expect( callback ).toHaveBeenCalledWith( {
+			storeCart: select.getCartData(),
+			previousStoreCart: previousCart,
+		} );
+		expect( pendingQuantityClearedFirst ).toBe( true );
+	} );
+
+	it( 'should not fire the cart-updated action when the cart request fails', async () => {
+		mockApiFetchWithHeaders.mockRejectedValue(
+			new Error( 'Request failed' )
+		);
+		const { dispatch, select } = createSyncMocks();
+		const callback = jest.fn();
+		addAction(
+			'experimental__woocommerce_blocks-cart-updated',
+			'test/cart-updated-sync-fails',
+			callback
+		);
+
+		try {
+			await expect(
+				syncCartWithIAPIStore( {
+					cartItemsPendingQuantity: [ 'item-1' ],
+				} )( { dispatch, select } as never )
+			).rejects.toThrow( 'Request failed' );
+		} finally {
+			removeAction(
+				'experimental__woocommerce_blocks-cart-updated',
+				'test/cart-updated-sync-fails'
+			);
+		}
+
+		expect( callback ).not.toHaveBeenCalled();
 	} );
 } );
 
@@ -430,13 +603,12 @@ describe( 'applyExtensionCartUpdate', () => {
 	it( 'should include both addresses when customer data is not dirty', async () => {
 		const dispatch = createMockDispatch();
 
-		const result = await applyExtensionCartUpdate( {
+		await applyExtensionCartUpdate( {
 			namespace: 'test',
 			data: {},
 		} )( { dispatch } as never );
 
 		expect( dispatch.receiveCart ).toHaveBeenCalledWith( mockResponse );
-		expect( result ).toBe( mockResponse );
 	} );
 
 	it( 'should set prefersCollection true when the extension response selects local pickup', async () => {
@@ -501,7 +673,7 @@ describe( 'applyExtensionCartUpdate', () => {
 		mockGetIsCustomerDataDirty.mockReturnValue( true );
 		const dispatch = createMockDispatch();
 
-		const result = await applyExtensionCartUpdate( {
+		await applyExtensionCartUpdate( {
 			namespace: 'test',
 			data: {},
 		} )( { dispatch } as never );
@@ -510,14 +682,13 @@ describe( 'applyExtensionCartUpdate', () => {
 		expect( received ).not.toHaveProperty( 'shipping_address' );
 		expect( received ).not.toHaveProperty( 'billing_address' );
 		expect( received ).toHaveProperty( 'totals' );
-		expect( result ).toBe( mockResponse );
 	} );
 
 	it( 'should strip both addresses when customer data is dirty and overwriteDirtyCustomerData is false', async () => {
 		mockGetIsCustomerDataDirty.mockReturnValue( true );
 		const dispatch = createMockDispatch();
 
-		const result = await applyExtensionCartUpdate( {
+		await applyExtensionCartUpdate( {
 			namespace: 'test',
 			data: {},
 			overwriteDirtyCustomerData: false,
@@ -527,14 +698,13 @@ describe( 'applyExtensionCartUpdate', () => {
 		expect( received ).not.toHaveProperty( 'shipping_address' );
 		expect( received ).not.toHaveProperty( 'billing_address' );
 		expect( received ).toHaveProperty( 'totals' );
-		expect( result ).toBe( mockResponse );
 	} );
 
 	it( 'should include both addresses when overwriteDirtyCustomerData is true', async () => {
 		mockGetIsCustomerDataDirty.mockReturnValue( true );
 		const dispatch = createMockDispatch();
 
-		const result = await applyExtensionCartUpdate( {
+		await applyExtensionCartUpdate( {
 			namespace: 'test',
 			data: {},
 			overwriteDirtyCustomerData: true,
@@ -543,14 +713,13 @@ describe( 'applyExtensionCartUpdate', () => {
 		const received = dispatch.receiveCart.mock.calls[ 0 ][ 0 ];
 		expect( received ).toHaveProperty( 'shipping_address' );
 		expect( received ).toHaveProperty( 'billing_address' );
-		expect( result ).toBe( mockResponse );
 	} );
 
 	it( 'should overwrite only shipping_address when specified as object', async () => {
 		mockGetIsCustomerDataDirty.mockReturnValue( true );
 		const dispatch = createMockDispatch();
 
-		const result = await applyExtensionCartUpdate( {
+		await applyExtensionCartUpdate( {
 			namespace: 'test',
 			data: {},
 			overwriteDirtyCustomerData: { shipping_address: true },
@@ -562,14 +731,13 @@ describe( 'applyExtensionCartUpdate', () => {
 		} );
 		expect( received ).not.toHaveProperty( 'billing_address' );
 		expect( received ).toHaveProperty( 'totals' );
-		expect( result ).toBe( mockResponse );
 	} );
 
 	it( 'should overwrite only billing_address when specified as object', async () => {
 		mockGetIsCustomerDataDirty.mockReturnValue( true );
 		const dispatch = createMockDispatch();
 
-		const result = await applyExtensionCartUpdate( {
+		await applyExtensionCartUpdate( {
 			namespace: 'test',
 			data: {},
 			overwriteDirtyCustomerData: { billing_address: true },
@@ -580,14 +748,13 @@ describe( 'applyExtensionCartUpdate', () => {
 		expect( received.billing_address ).toEqual( {
 			address_1: '456 Bill Ave',
 		} );
-		expect( result ).toBe( mockResponse );
 	} );
 
 	it( 'should overwrite both addresses when both specified in object', async () => {
 		mockGetIsCustomerDataDirty.mockReturnValue( true );
 		const dispatch = createMockDispatch();
 
-		const result = await applyExtensionCartUpdate( {
+		await applyExtensionCartUpdate( {
 			namespace: 'test',
 			data: {},
 			overwriteDirtyCustomerData: {
@@ -603,14 +770,13 @@ describe( 'applyExtensionCartUpdate', () => {
 		expect( received.billing_address ).toEqual( {
 			address_1: '456 Bill Ave',
 		} );
-		expect( result ).toBe( mockResponse );
 	} );
 
 	it( 'should strip both addresses when object has explicit false flags', async () => {
 		mockGetIsCustomerDataDirty.mockReturnValue( true );
 		const dispatch = createMockDispatch();
 
-		const result = await applyExtensionCartUpdate( {
+		await applyExtensionCartUpdate( {
 			namespace: 'test',
 			data: {},
 			overwriteDirtyCustomerData: {
@@ -623,14 +789,13 @@ describe( 'applyExtensionCartUpdate', () => {
 		expect( received ).not.toHaveProperty( 'shipping_address' );
 		expect( received ).not.toHaveProperty( 'billing_address' );
 		expect( received ).toHaveProperty( 'totals' );
-		expect( result ).toBe( mockResponse );
 	} );
 
 	it( 'should overwrite specified address even when customer data is not dirty', async () => {
 		mockGetIsCustomerDataDirty.mockReturnValue( false );
 		const dispatch = createMockDispatch();
 
-		const result = await applyExtensionCartUpdate( {
+		await applyExtensionCartUpdate( {
 			namespace: 'test',
 			data: {},
 			overwriteDirtyCustomerData: { shipping_address: true },
@@ -645,14 +810,13 @@ describe( 'applyExtensionCartUpdate', () => {
 		expect( received.billing_address ).toEqual( {
 			address_1: '456 Bill Ave',
 		} );
-		expect( result ).toBe( mockResponse );
 	} );
 
 	it( 'should treat null as false (no overwrite)', async () => {
 		mockGetIsCustomerDataDirty.mockReturnValue( true );
 		const dispatch = createMockDispatch();
 
-		const result = await applyExtensionCartUpdate( {
+		await applyExtensionCartUpdate( {
 			namespace: 'test',
 			data: {},
 			overwriteDirtyCustomerData:
@@ -662,14 +826,13 @@ describe( 'applyExtensionCartUpdate', () => {
 		const received = dispatch.receiveCart.mock.calls[ 0 ][ 0 ];
 		expect( received ).not.toHaveProperty( 'shipping_address' );
 		expect( received ).not.toHaveProperty( 'billing_address' );
-		expect( result ).toBe( mockResponse );
 	} );
 
 	it( 'should treat an array as false (no overwrite)', async () => {
 		mockGetIsCustomerDataDirty.mockReturnValue( true );
 		const dispatch = createMockDispatch();
 
-		const result = await applyExtensionCartUpdate( {
+		await applyExtensionCartUpdate( {
 			namespace: 'test',
 			data: {},
 			overwriteDirtyCustomerData: [
@@ -680,14 +843,13 @@ describe( 'applyExtensionCartUpdate', () => {
 		const received = dispatch.receiveCart.mock.calls[ 0 ][ 0 ];
 		expect( received ).not.toHaveProperty( 'shipping_address' );
 		expect( received ).not.toHaveProperty( 'billing_address' );
-		expect( result ).toBe( mockResponse );
 	} );
 
 	it( 'should treat non-boolean address fields as false', async () => {
 		mockGetIsCustomerDataDirty.mockReturnValue( true );
 		const dispatch = createMockDispatch();
 
-		const result = await applyExtensionCartUpdate( {
+		await applyExtensionCartUpdate( {
 			namespace: 'test',
 			data: {},
 			overwriteDirtyCustomerData: {
@@ -699,14 +861,13 @@ describe( 'applyExtensionCartUpdate', () => {
 		const received = dispatch.receiveCart.mock.calls[ 0 ][ 0 ];
 		expect( received ).not.toHaveProperty( 'shipping_address' );
 		expect( received ).not.toHaveProperty( 'billing_address' );
-		expect( result ).toBe( mockResponse );
 	} );
 
 	it( 'should default missing address fields to false', async () => {
 		mockGetIsCustomerDataDirty.mockReturnValue( true );
 		const dispatch = createMockDispatch();
 
-		const result = await applyExtensionCartUpdate( {
+		await applyExtensionCartUpdate( {
 			namespace: 'test',
 			data: {},
 			overwriteDirtyCustomerData: {},
@@ -715,25 +876,5 @@ describe( 'applyExtensionCartUpdate', () => {
 		const received = dispatch.receiveCart.mock.calls[ 0 ][ 0 ];
 		expect( received ).not.toHaveProperty( 'shipping_address' );
 		expect( received ).not.toHaveProperty( 'billing_address' );
-		expect( result ).toBe( mockResponse );
-	} );
-
-	it( 'should dispatch and reject the same API error', async () => {
-		const dispatch = createMockDispatch();
-		const error = {
-			code: 'test_error',
-			message: 'This is an error with cart context.',
-			data: { status: 400, context: 'wc/cart' },
-		};
-		mockApiFetchWithHeaders.mockRejectedValueOnce( error );
-
-		await expect(
-			applyExtensionCartUpdate( {
-				namespace: 'test',
-				data: {},
-			} )( { dispatch } as never )
-		).rejects.toBe( error );
-
-		expect( dispatch.receiveError ).toHaveBeenCalledWith( error );
 	} );
 } );

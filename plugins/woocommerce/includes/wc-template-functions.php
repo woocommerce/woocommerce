@@ -398,16 +398,16 @@ function wc_body_class( $classes ) {
  * @return void
  */
 function wc_no_js() {
-	$type_attr = current_theme_supports( 'html5', 'script' ) ? '' : " type='text/javascript'";
-	?>
-	<script<?php echo $type_attr; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
+	wp_print_inline_script_tag(
+		"
 		(function () {
 			var c = document.body.className;
 			c = c.replace(/woocommerce-no-js/, 'woocommerce-js');
 			document.body.className = c;
 		})();
-	</script>
-	<?php
+		",
+		array( 'id' => 'wc-no-js' )
+	);
 }
 
 /**
@@ -1965,19 +1965,29 @@ function wc_render_product_image_template_for( WC_Product $product ): string {
  *
  * @param WC_Product $product   Product being rendered.
  * @param mixed      $image_ids Image IDs to substitute. Will be normalized.
- * @return string
+ * @return string Rendered gallery HTML, or an empty string for a re-entrant render of the same product.
  */
 function wc_render_product_image_template_for_image_ids( WC_Product $product, $image_ids ): string {
+	static $rendering_product_galleries = array();
+
+	$product_id = $product->get_id();
+	if ( isset( $rendering_product_galleries[ $product_id ] ) ) {
+		return '';
+	}
+
 	$normalized  = array_values( array_unique( array_map( 'intval', array_filter( (array) $image_ids ) ) ) );
 	$featured_id = $normalized[0] ?? 0;
 	$gallery_ids = array_slice( $normalized, 1 );
 
 	$remove_overrides = wc_apply_product_image_overrides( $product, $featured_id, $gallery_ids );
 
+	$rendering_product_galleries[ $product_id ] = true;
+
 	try {
 		return wc_render_product_image_template_for( $product );
 	} finally {
 		$remove_overrides();
+		unset( $rendering_product_galleries[ $product_id ] );
 	}
 }
 
@@ -2843,6 +2853,16 @@ if ( ! function_exists( 'woocommerce_checkout_login_form' ) ) {
 	 * @return void
 	 */
 	function woocommerce_checkout_login_form() {
+		if ( ! function_exists( 'wc_print_notice' ) ) {
+			// The template calls wc_print_notice(), which is only loaded for frontend requests.
+			wc_doing_it_wrong(
+				__FUNCTION__,
+				'Function should only be used during frontend requests.',
+				'11.4.0'
+			);
+			return;
+		}
+
 		wc_get_template(
 			'checkout/form-login.php',
 			array(
@@ -2956,6 +2976,16 @@ if ( ! function_exists( 'woocommerce_checkout_coupon_form' ) ) {
 	 * @return void
 	 */
 	function woocommerce_checkout_coupon_form() {
+		if ( ! function_exists( 'wc_print_notice' ) ) {
+			// The template calls wc_print_notice(), which is only loaded for frontend requests.
+			wc_doing_it_wrong(
+				__FUNCTION__,
+				'Function should only be used during frontend requests.',
+				'11.4.0'
+			);
+			return;
+		}
+
 		if ( is_user_logged_in() || WC()->checkout()->is_registration_enabled() || ! WC()->checkout()->is_registration_required() ) {
 			wc_get_template(
 				'checkout/form-coupon.php',
@@ -4282,7 +4312,8 @@ function wc_display_product_attributes( $product ) {
 				$value_name = esc_html( $attribute_value->name );
 
 				if ( $attribute_taxonomy && $attribute_taxonomy->attribute_public ) {
-					$values[] = '<a href="' . esc_url( get_term_link( $attribute_value->term_id, $attribute->get_name() ) ) . '" rel="tag">' . $value_name . '</a>';
+					$term_link = get_term_link( $attribute_value->term_id, $attribute->get_name() );
+					$values[]  = is_wp_error( $term_link ) ? $value_name : '<a href="' . esc_url( $term_link ) . '" rel="tag">' . $value_name . '</a>';
 				} else {
 					$values[] = $value_name;
 				}
@@ -4566,7 +4597,7 @@ function wc_get_formatted_cart_item_data( $cart_item, $flat = false, $product_na
 			$value = rawurldecode( (string) $value );
 
 			// Check the display value against the title.
-			if ( wc_is_attribute_in_product_name( wp_specialchars_decode( $value, ENT_QUOTES ), $product_name ) ) {
+			if ( wc_is_attribute_in_product_name( wp_specialchars_decode( $value, ENT_QUOTES ), $product_name, $cart_item['data'] ) ) {
 				continue;
 			}
 

@@ -87,13 +87,14 @@ respective feature tickets:
   suites, `'no'` for `feature-disabled.spec.ts`), and the enabled suites reset
   it to `'no'` in `afterAll`, through `setOption()` (never `deleteOption()` —
   that skips the `updated_option` hook the feature's teardown relies on). That
-  toggling is safe only because these specs run serially, single worker — see
-  below.
+  toggling is safe only because these specs take test locks — see below.
 - The tests assume the WP Mail Logging plugin is installed and active (it is,
   via the `.wp-env.e2e.json` plugins list).
 - `woocommerce-e2e-test-helper` zeroes
   `woocommerce_customer_stock_notifications_first_batch_delay`, so a restock
   dispatches its batch immediately instead of a minute later. Without it the
   back-in-stock specs time out with no email.
-- Run these under `core-serial` (`--project=core-serial`). They set global
-  options, so `playwright.config.ts` excludes them from `core-parallel`.
+- These specs run in `core-parallel`. They set global options, so each one
+  takes the `locks.STOCK_NOTIFICATIONS` lock (and the enabled suites also
+  `locks.EMAIL_FEATURE_FLAGS`) from `fixtures/fixtures.ts`. Specs that share a
+  lock never run at the same time.

@@ -51,7 +51,7 @@ const getDefaultPaymentStateWithMocks = ( {
 		} ) );
 
 		// Get a fresh copy of the state
-		// eslint-disable-next-line @typescript-eslint/no-var-requires -- Cloning using structuredClone is not supported in jsdom and Object.assign won't work as the state contains objects that need to be reset too. This is a clean way to get a fresh copy of the state.
+
 		state = require( '../default-state' ).defaultPaymentState;
 	} );
 
@@ -197,6 +197,69 @@ describe( 'defaultPaymentState', () => {
 					token: '123',
 					payment_method: 'stripe',
 					'wc-stripe-payment-token': '123',
+				} );
+			} );
+
+			it( 'selects the default saved token for the active gateway, even when it is not first', () => {
+				const first = {
+					method: { gateway: 'stripe', brand: 'visa', last4: '1111' },
+					tokenId: 1,
+					is_default: false,
+					expires: '10/99',
+					actions: {},
+				};
+				const defaultToken = {
+					...first,
+					tokenId: 2,
+					is_default: true,
+				};
+				const state = getDefaultPaymentStateWithMocks( {
+					checkoutData: { payment_method: 'stripe' },
+					customerPaymentMethods: {
+						cc: [ first, defaultToken ],
+					},
+				} );
+
+				expect( state.paymentMethodData ).toEqual( {
+					token: '2',
+					payment_method: 'stripe',
+					'wc-stripe-payment-token': '2',
+				} );
+			} );
+
+			it( 'keeps the first token for the active gateway when its tokens have no default', () => {
+				const first = {
+					method: { gateway: 'stripe', brand: 'visa', last4: '1111' },
+					tokenId: 1,
+					is_default: false,
+					expires: '10/99',
+					actions: {},
+				};
+				const state = getDefaultPaymentStateWithMocks( {
+					checkoutData: { payment_method: 'stripe' },
+					customerPaymentMethods: {
+						cc: [
+							first,
+							{ ...first, tokenId: 3 },
+							{
+								method: {
+									gateway: 'other',
+									brand: 'visa',
+									last4: '2222',
+								},
+								tokenId: 2,
+								is_default: true,
+								expires: '10/99',
+								actions: {},
+							},
+						],
+					},
+				} );
+
+				expect( state.paymentMethodData ).toEqual( {
+					token: '1',
+					payment_method: 'stripe',
+					'wc-stripe-payment-token': '1',
 				} );
 			} );
 		} );

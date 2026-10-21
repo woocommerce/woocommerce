@@ -205,6 +205,16 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 						);
 						return;
 					}
+					// Classic emails have no block template to edit; their
+					// settings live on the per-email section page.
+					if ( ! email.block_editor_supported ) {
+						window.location.href = getAdminLink(
+							`admin.php?page=wc-settings&tab=email&section=${ encodeURIComponent(
+								email.email_key
+							) }`
+						);
+						return;
+					}
 					// Lazily create the post (a draft with the file
 					// template content) and open it in the editor.
 					const response = await recreateEmailPost( email.id );
