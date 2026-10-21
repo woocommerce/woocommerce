@@ -177,14 +177,14 @@ const fetchUnbatched = (
 		} )
 		.catch( ( errorResponse ) => {
 			// Propagate AbortError directly so callers can detect cancelled requests.
-			if ( errorResponse.name === 'AbortError' ) {
+			if ( errorResponse?.name === 'AbortError' ) {
 				reject( errorResponse );
 				return;
 			}
-			if ( errorResponse.headers ) {
+			if ( errorResponse?.headers ) {
 				processHeadersOnFetch( errorResponse.headers );
 			}
-			if ( typeof errorResponse.json === 'function' ) {
+			if ( typeof errorResponse?.json === 'function' ) {
 				// Parse error response before rejecting it.
 				errorResponse
 					.json()
@@ -195,7 +195,7 @@ const fetchUnbatched = (
 						reject( invalidJsonError );
 					} );
 			} else {
-				reject( errorResponse.message );
+				reject( errorResponse?.message );
 			}
 		} );
 };
@@ -223,16 +223,32 @@ const settleBatchedRequest = (
 			// Status code indicates error.
 			throw response;
 		} )
-		.catch( ( errorResponse: ApiResponse< unknown > ) => {
-			if ( errorResponse.headers ) {
-				processHeadersOnFetch( errorResponse.headers );
+		.catch(
+			( errorResponse: ApiResponse< unknown > | null | undefined ) => {
+				if ( errorResponse?.headers ) {
+					processHeadersOnFetch( errorResponse.headers );
+				}
+				if ( errorResponse?.body ) {
+					reject( errorResponse.body );
+				} else {
+					reject( errorResponse );
+				}
 			}
-			if ( errorResponse.body ) {
-				reject( errorResponse.body );
-			} else {
-				reject( errorResponse );
-			}
-		} );
+		);
+};
+
+/**
+ * Returns true when the path is the route or one of its sub-routes, with or without query arguments.
+ * For example, '/wc/store/v1/cart' matches '/wc/store/v1/cart/update-item' but not '/wc/store/v1/carts'.
+ */
+const isRoute = ( path: string, route: string ) => {
+	if ( ! path.startsWith( route ) ) {
+		return false;
+	}
+	const nextCharacter = path.charAt( route.length );
+	return (
+		nextCharacter === '' || nextCharacter === '/' || nextCharacter === '?'
+	);
 };
 
 /**
@@ -244,13 +260,14 @@ const settleBatchedRequest = (
 const isSessionWrite = ( options: APIFetchOptions ) =>
 	!! options.method &&
 	options.method !== 'GET' &&
-	/^\/wc\/store\/v1\/(cart|checkout)([/?]|$)/.test( options.path || '' );
+	( isRoute( options.path || '', '/wc/store/v1/cart' ) ||
+		isRoute( options.path || '', '/wc/store/v1/checkout' ) );
 
 /**
  * Returns true for session writes that the batch endpoint can run. Checkout routes do not allow batching.
  */
 const isBatchableSessionWrite = ( options: APIFetchOptions ) =>
-	/^\/wc\/store\/v1\/cart([/?]|$)/.test( options.path || '' );
+	isRoute( options.path || '', '/wc/store/v1/cart' );
 
 type SessionWrite = {
 	options: APIFetchOptions;
@@ -280,17 +297,23 @@ const createAbortError = () =>
  */
 const sendSessionWrite = ( write: SessionWrite ) =>
 	new Promise< void >( ( done ) => {
-		fetchUnbatched(
-			write.options,
-			( value ) => {
-				write.resolve( value );
-				done();
-			},
-			( reason ) => {
-				write.reject( reason );
-				done();
-			}
-		);
+		try {
+			fetchUnbatched(
+				write.options,
+				( value ) => {
+					write.resolve( value );
+					done();
+				},
+				( reason ) => {
+					write.reject( reason );
+					done();
+				}
+			);
+		} catch ( error ) {
+			// The request failed before it was sent, for example in an apiFetch middleware.
+			write.reject( error );
+			done();
+		}
 	} );
 
 /**
@@ -298,9 +321,15 @@ const sendSessionWrite = ( write: SessionWrite ) =>
  * The server runs them one after the other and saves the session once.
  */
 const sendSessionWriteBatch = ( writes: SessionWrite[] ) => {
-	const batchResponse = triggerBatchFetch(
-		writes.map( ( write ) => write.options )
-	);
+	let batchResponse: ReturnType< typeof triggerBatchFetch >;
+	try {
+		batchResponse = triggerBatchFetch(
+			writes.map( ( write ) => write.options )
+		);
+	} catch ( error ) {
+		// The request failed before it was sent, for example in an apiFetch middleware.
+		batchResponse = Promise.reject( error );
+	}
 	return Promise.all(
 		writes.map(
 			( write, index ) =>
