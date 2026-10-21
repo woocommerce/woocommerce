@@ -1579,6 +1579,12 @@ class WC_Countries {
 								'hidden'   => true,
 							),
 						),
+						'MO' => array(
+							'postcode' => array(
+								'required' => false,
+								'hidden'   => true,
+							),
+						),
 						'MQ' => array(
 							'state' => array(
 								'required' => false,
