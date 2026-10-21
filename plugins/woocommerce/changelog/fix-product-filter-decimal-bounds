@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep decimal price filters consistent and prevent malformed input from applying unintended price bounds.
