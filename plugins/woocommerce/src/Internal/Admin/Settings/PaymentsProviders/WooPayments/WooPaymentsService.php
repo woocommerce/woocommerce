@@ -1677,6 +1677,14 @@ class WooPaymentsService {
 	 * @throws ApiException If the site could not be registered or the authorization URL could not be generated.
 	 */
 	public function onboarding_wpcom_connection_authorize( ?string $source = null ): array {
+		if ( $this->is_onboarding_locked() ) {
+			throw new ApiException(
+				'woocommerce_woopayments_onboarding_locked',
+				esc_html__( 'Another onboarding action is already in progress. Please wait for it to finish.', 'woocommerce' ),
+				(int) WP_Http::CONFLICT
+			);
+		}
+
 		if ( ! $this->is_store_registered_with_wpcom() && ! $this->register_site_with_wpcom( true ) ) {
 			throw new ApiException(
 				'woocommerce_woopayments_onboarding_action_error',

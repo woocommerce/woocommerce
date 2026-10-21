@@ -1288,6 +1288,22 @@ class WooPaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Rejects authorization without registering the store while onboarding is locked.
+	 */
+	public function test_handle_onboarding_wpcom_connection_authorize_when_locked(): void {
+		update_option( WooPaymentsService::NOX_ONBOARDING_LOCKED_KEY, $this->current_time );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->never() )
+			->method( 'try_registration' );
+
+		$request  = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/step/' . WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION . '/authorize' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( \WP_Http::CONFLICT, $response->get_status() );
+		$this->assertSame( 'woocommerce_woopayments_onboarding_locked', $response->get_data()['code'] );
+	}
+
+	/**
 	 * Test that the WPCOM connection authorize action reports a failed registration.
 	 */
 	public function test_handle_onboarding_wpcom_connection_authorize_registration_error() {
