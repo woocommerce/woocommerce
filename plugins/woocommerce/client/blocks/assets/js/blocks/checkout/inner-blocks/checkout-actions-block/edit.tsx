@@ -9,20 +9,32 @@ import {
 	RichText,
 	useBlockProps,
 } from '@wordpress/block-editor';
+import {
+	Notice,
+	PanelBody,
+	TextControl,
+	ToggleControl,
+} from '@wordpress/components';
 import PageSelector from '@woocommerce/editor-components/page-selector';
-import { PanelBody, ToggleControl, TextControl } from '@wordpress/components';
 import { CHECKOUT_PAGE_ID } from '@woocommerce/block-settings';
 import {
 	PlaceOrderButton,
 	ReturnToCartButton,
 } from '@woocommerce/base-components/cart-checkout';
 import clsx from 'clsx';
+import { CheckboxControl } from '@woocommerce/blocks-components';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
  */
 import { BlockAttributes } from './block';
 import { defaultReturnToCartButtonLabel } from './constants';
+import { TermsNotices } from '../checkout-terms-block/edit';
+import {
+	termsConsentDefaultText,
+	termsCheckboxDefaultText,
+} from '../checkout-terms-block/constants';
 
 export const Edit = ( {
 	attributes,
@@ -30,13 +42,16 @@ export const Edit = ( {
 }: {
 	attributes: BlockAttributes;
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
-} ): JSX.Element => {
+} ) => {
 	const blockProps = useBlockProps();
 	const {
 		cartPageId = 0,
 		showReturnToCart = false,
 		placeOrderButtonLabel,
 		returnToCartButtonLabel,
+		showTerms = false,
+		termsCheckbox = false,
+		termsText = '',
 	} = attributes;
 	const { current: savedCartPageId } = useRef( cartPageId );
 	const currentPostId = useSelect(
@@ -51,6 +66,39 @@ export const Edit = ( {
 	);
 
 	const showPrice = blockProps.className.includes( 'is-style-with-price' );
+
+	const isTermsDisabledByExtension = ! getSetting(
+		'checkoutShowTerms',
+		true
+	);
+
+	// Mirrors the frontend: a required checkbox goes above the button, consent text below it.
+	const terms =
+		showTerms && ! isTermsDisabledByExtension ? (
+			<div className="wc-block-checkout__terms">
+				{ termsCheckbox && (
+					<div className="wc-block-checkout__terms-checkbox-wrapper">
+						<CheckboxControl
+							id="terms-and-conditions"
+							checked={ false }
+							onChange={ () => undefined }
+						/>
+					</div>
+				) }
+				<RichText
+					tagName="span"
+					value={
+						termsText ||
+						( termsCheckbox
+							? termsCheckboxDefaultText
+							: termsConsentDefaultText )
+					}
+					onChange={ ( value ) =>
+						setAttributes( { termsText: value } )
+					}
+				/>
+			</div>
+		) : null;
 
 	return (
 		<div { ...blockProps }>
@@ -90,6 +138,55 @@ export const Edit = ( {
 					) }
 				</PanelBody>
 
+				<PanelBody
+					title={ __( 'Terms and conditions', 'woocommerce' ) }
+				>
+					{ isTermsDisabledByExtension && (
+						<Notice
+							className="wc-block-checkout__terms_notice"
+							status="warning"
+							isDismissible={ false }
+						>
+							{ __(
+								'Terms are hidden by an extension on your store.',
+								'woocommerce'
+							) }
+						</Notice>
+					) }
+					{ showTerms && (
+						<TermsNotices
+							text={ termsText }
+							checkbox={ termsCheckbox }
+							setText={ ( value ) =>
+								setAttributes( { termsText: value } )
+							}
+						/>
+					) }
+					<ToggleControl
+						__nextHasNoMarginBottom
+						label={ __(
+							'Show terms and conditions',
+							'woocommerce'
+						) }
+						checked={ showTerms }
+						onChange={ () =>
+							setAttributes( { showTerms: ! showTerms } )
+						}
+					/>
+					{ showTerms && (
+						<ToggleControl
+							__nextHasNoMarginBottom
+							label={ __( 'Require checkbox', 'woocommerce' ) }
+							checked={ termsCheckbox }
+							onChange={ () =>
+								setAttributes( {
+									termsCheckbox: ! termsCheckbox,
+								} )
+							}
+						/>
+					) }
+				</PanelBody>
+
 				{ showReturnToCart &&
 					! (
 						currentPostId === CHECKOUT_PAGE_ID &&
@@ -114,10 +211,13 @@ export const Edit = ( {
 					) }
 			</InspectorControls>
 			<div className="wc-block-checkout__actions">
+				{ termsCheckbox && terms }
 				<div
 					className={ clsx( 'wc-block-checkout__actions_row', {
 						'wc-block-checkout__actions_row--justify-flex-end':
 							! showReturnToCart,
+						'wc-block-checkout__actions_row--with-return-to-cart':
+							showReturnToCart,
 					} ) }
 				>
 					{ showReturnToCart && (
@@ -148,10 +248,11 @@ export const Edit = ( {
 								} }
 							/>
 						}
-						fullWidth={ ! showReturnToCart }
+						fullWidth
 						showPrice={ showPrice }
 						priceSeparator={ attributes.priceSeparator }
 					/>
+					{ ! termsCheckbox && terms }
 				</div>
 			</div>
 		</div>

@@ -434,7 +434,7 @@ Allow customers to place their order.
 - **Category:** woocommerce
 - **Parent:** woocommerce/checkout-fields-block
 - **Supports:** ~~align~~, ~~html~~, ~~inserter~~, ~~lock~~, ~~multiple~~, ~~reusable~~
-- **Attributes:** cartPageId, className, lock, priceSeparator, showReturnToCart
+- **Attributes:** cartPageId, className, lock, priceSeparator, showReturnToCart, showTerms, termsCheckbox, termsText
 
 ## Additional information - woocommerce/checkout-additional-information-block
 

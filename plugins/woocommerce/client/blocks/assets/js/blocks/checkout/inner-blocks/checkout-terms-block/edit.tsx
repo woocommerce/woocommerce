@@ -26,6 +26,101 @@ import { termsConsentDefaultText, termsCheckboxDefaultText } from './constants';
 
 const noop = () => undefined;
 
+/**
+ * Warns when the policy pages are missing, or when the terms text doesn't link to them. Also used by the Actions block.
+ */
+export const TermsNotices = ( {
+	text,
+	checkbox,
+	setText,
+}: {
+	text: string;
+	checkbox: boolean;
+	setText: ( text: string ) => void;
+} ) => {
+	const currentText =
+		text ||
+		( checkbox ? termsCheckboxDefaultText : termsConsentDefaultText );
+
+	return (
+		<>
+			{ /* Show this notice if a terms page or a privacy page is not setup. */ }
+			{ ( ! TERMS_URL || ! PRIVACY_URL ) && (
+				<Notice
+					className="wc-block-checkout__terms_notice"
+					status="warning"
+					isDismissible={ false }
+				>
+					{ __(
+						"Link to your store's Terms and Conditions and Privacy Policy pages by creating pages for them.",
+						'woocommerce'
+					) }
+					<br />
+					{ ! TERMS_URL && (
+						<>
+							<br />
+							<ExternalLink
+								href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=advanced` }
+							>
+								{ __(
+									'Set up a Terms and Conditions page',
+									'woocommerce'
+								) }
+							</ExternalLink>
+						</>
+					) }
+					{ ! PRIVACY_URL && (
+						<>
+							<br />
+							<ExternalLink
+								href={ `${ ADMIN_URL }options-privacy.php` }
+							>
+								{ __(
+									'Set up a Privacy Policy page',
+									'woocommerce'
+								) }
+							</ExternalLink>
+						</>
+					) }
+				</Notice>
+			) }
+			{ /* Show this notice if we have both a terms and privacy pages, but they're not present in the text. */ }
+			{ TERMS_URL &&
+				PRIVACY_URL &&
+				! (
+					currentText.includes( TERMS_URL ) &&
+					currentText.includes( PRIVACY_URL )
+				) && (
+					<Notice
+						className="wc-block-checkout__terms_notice"
+						status="warning"
+						isDismissible={ false }
+						actions={
+							termsConsentDefaultText !== text
+								? [
+										{
+											label: __(
+												'Restore default text',
+												'woocommerce'
+											),
+											onClick: () => setText( '' ),
+										},
+									]
+								: []
+						}
+					>
+						<p>
+							{ __(
+								'Ensure you add links to your policy pages in this section.',
+								'woocommerce'
+							) }
+						</p>
+					</Notice>
+				) }
+		</>
+	);
+};
+
 export const Edit = ( {
 	attributes: { checkbox, text, showSeparator },
 	setAttributes,
@@ -43,82 +138,11 @@ export const Edit = ( {
 	return (
 		<div { ...blockProps }>
 			<InspectorControls>
-				{ /* Show this notice if a terms page or a privacy page is not setup. */ }
-				{ ( ! TERMS_URL || ! PRIVACY_URL ) && (
-					<Notice
-						className="wc-block-checkout__terms_notice"
-						status="warning"
-						isDismissible={ false }
-					>
-						{ __(
-							"Link to your store's Terms and Conditions and Privacy Policy pages by creating pages for them.",
-							'woocommerce'
-						) }
-						<br />
-						{ ! TERMS_URL && (
-							<>
-								<br />
-								<ExternalLink
-									href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=advanced` }
-								>
-									{ __(
-										'Set up a Terms and Conditions page',
-										'woocommerce'
-									) }
-								</ExternalLink>
-							</>
-						) }
-						{ ! PRIVACY_URL && (
-							<>
-								<br />
-								<ExternalLink
-									href={ `${ ADMIN_URL }options-privacy.php` }
-								>
-									{ __(
-										'Set up a Privacy Policy page',
-										'woocommerce'
-									) }
-								</ExternalLink>
-							</>
-						) }
-					</Notice>
-				) }
-				{ /* Show this notice if we have both a terms and privacy pages, but they're not present in the text. */ }
-				{ TERMS_URL &&
-					PRIVACY_URL &&
-					! (
-						currentText.includes( TERMS_URL ) &&
-						currentText.includes( PRIVACY_URL )
-					) && (
-						<Notice
-							className="wc-block-checkout__terms_notice"
-							status="warning"
-							isDismissible={ false }
-							actions={
-								termsConsentDefaultText !== text
-									? [
-											{
-												label: __(
-													'Restore default text',
-													'woocommerce'
-												),
-												onClick: () =>
-													setAttributes( {
-														text: '',
-													} ),
-											},
-										]
-									: []
-							}
-						>
-							<p>
-								{ __(
-									'Ensure you add links to your policy pages in this section.',
-									'woocommerce'
-								) }
-							</p>
-						</Notice>
-					) }
+				<TermsNotices
+					text={ text }
+					checkbox={ checkbox }
+					setText={ ( value ) => setAttributes( { text: value } ) }
+				/>
 				<PanelBody title={ __( 'Display options', 'woocommerce' ) }>
 					<ToggleControl
 						__nextHasNoMarginBottom

@@ -537,6 +537,31 @@ test.describe( 'Merchant → Checkout', () => {
 			await editor.selectBlocks( blockSelectorInEditor );
 		} );
 
+		test( 'Terms and conditions can be toggled from the Actions block', async ( {
+			editor,
+		} ) => {
+			await editor.selectBlocks(
+				`${ blockSelectorInEditor } .wp-block-woocommerce-checkout-actions-block`
+			);
+
+			const showTermsToggle = editor.page.getByLabel(
+				'Show terms and conditions',
+				{ exact: true }
+			);
+			const actionsBlock = await editor.getBlockByName(
+				'woocommerce/checkout-actions-block'
+			);
+			const terms = actionsBlock.locator( '.wc-block-checkout__terms' );
+
+			await expect( terms ).toBeHidden();
+
+			await showTermsToggle.check();
+			await expect( terms ).toBeVisible();
+
+			await showTermsToggle.uncheck();
+			await expect( terms ).toBeHidden();
+		} );
+
 		test( 'Return to cart link is visible and can be toggled', async ( {
 			editor,
 		} ) => {

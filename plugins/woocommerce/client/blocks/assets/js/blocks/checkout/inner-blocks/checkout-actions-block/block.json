@@ -34,6 +34,15 @@
 		"priceSeparator": {
 			"type": "string",
 			"default": "·"
+		},
+		"showTerms": {
+			"type": "boolean"
+		},
+		"termsCheckbox": {
+			"type": "boolean"
+		},
+		"termsText": {
+			"type": "string"
 		}
 	},
 	"parent": [ "woocommerce/checkout-fields-block" ],

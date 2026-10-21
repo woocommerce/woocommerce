@@ -1,33 +1,61 @@
 .wc-block-checkout__actions {
 	margin-bottom: $gap-larger;
 
+	// Checkbox terms sit above the row.
+	> .wc-block-checkout__terms {
+		margin: 0 0 $gap;
+	}
+
 	.wc-block-checkout__actions_row {
 		@include font-small-locked;
-		display: flex;
-		justify-content: space-between;
+		display: grid;
+		grid-template-columns: minmax(0, 1fr);
+		grid-template-areas:
+			"button"
+			"terms";
 		align-items: center;
-		gap: $gap-smaller;
 
-		&--justify-flex-end {
-			justify-content: flex-end;
+		.wc-block-components-checkout-place-order-button {
+			grid-area: button;
+			width: 100%;
 		}
 
-		.wc-block-components-checkout-place-order-button--full-width {
-			width: 100%;
+		// Text-only terms sit below the button, in the same column.
+		> .wc-block-checkout__terms {
+			grid-area: terms;
+			justify-content: center;
+			margin: $gap 0 0;
+			text-align: center;
+		}
+
+		.wc-block-components-checkout-return-to-cart-button {
+			grid-area: back;
+			justify-self: start;
+		}
+
+		&--with-return-to-cart {
+			grid-template-columns: minmax(0, 1fr) max(50%, 260px);
+			grid-template-areas:
+				"back button"
+				". terms";
+			column-gap: $gap;
 		}
 	}
 }
 
-@include cart-checkout-mobile-container {
-	.wc-block-checkout__actions {
-		.wc-block-checkout__actions_row {
-			flex-direction: column-reverse;
-			justify-content: center;
-			gap: $gap;
-		}
+// On narrow checkouts the button is full width, with Return to Cart below the terms.
+@include cart-checkout-below-medium-container {
+	.wc-block-checkout__actions
+		.wc-block-checkout__actions_row--with-return-to-cart {
+		grid-template-columns: minmax(0, 1fr);
+		grid-template-areas:
+			"button"
+			"terms"
+			"back";
 
-		.wc-block-components-checkout-place-order-button {
-			width: 100%;
+		.wc-block-components-checkout-return-to-cart-button {
+			justify-self: center;
+			margin-top: $gap;
 		}
 	}
 }
