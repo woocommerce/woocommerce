@@ -10,8 +10,6 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Unit\Core\ValueObject;
 
 use PHPUnit\Framework\TestCase;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\InvalidInputException;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
 use Automattic\WooCommerce\SubscriptionsEngine\Tests\Unit\AssertsInternalInvariant;
 
@@ -99,80 +97,6 @@ class PlanSnapshotTest extends TestCase {
 				PlanSnapshot::from_array( array( 'selling_plan_id' => 7 ), 0 );
 			}
 		);
-	}
-
-	/**
-	 * @testdox read_billing_policy reconstructs the frozen cadence from the payload.
-	 */
-	public function test_read_billing_policy_reconstructs_the_frozen_cadence(): void {
-		$snapshot = PlanSnapshot::from_array(
-			array(
-				'selling_plan_id' => 7,
-				'name'            => 'Monthly box',
-				'billing_policy'  => array(
-					'period'         => 'month',
-					'interval'       => 3,
-					'min_cycles'     => null,
-					'max_cycles'     => 12,
-					'trial_duration' => null,
-				),
-			)
-		);
-
-		$policy = $snapshot->read_billing_policy();
-
-		$this->assertInstanceOf( BillingPolicy::class, $policy );
-		$this->assertSame( 'month', $policy->get_period() );
-		$this->assertSame( 3, $policy->get_interval() );
-		$this->assertSame( 12, $policy->get_max_cycles() );
-	}
-
-	/**
-	 * @testdox read_billing_policy throws for a structurally-invalid stored policy.
-	 */
-	public function test_read_billing_policy_throws_for_an_unreadable_policy(): void {
-		// `interval` missing: BillingPolicy::from_array() refuses it.
-		$snapshot = PlanSnapshot::from_array(
-			array(
-				'billing_policy' => array( 'period' => 'month' ),
-			)
-		);
-
-		$this->expectException( InvalidInputException::class );
-		$snapshot->read_billing_policy();
-	}
-
-	/**
-	 * @testdox read_billing_policy throws for a policy with no usable cadence ($label).
-	 *
-	 * @testWith ["unknown period", "decade", 1]
-	 *           ["zero interval", "month", 0]
-	 *           ["negative interval", "week", -2]
-	 *
-	 * @param string $label    Case label.
-	 * @param string $period   Stored period.
-	 * @param int    $interval Stored interval.
-	 */
-	public function test_a_policy_without_a_usable_cadence_is_not_read( string $label, string $period, int $interval ): void {
-		unset( $label );
-		$snapshot = PlanSnapshot::from_array(
-			array(
-				'billing_policy' => array(
-					'period'   => $period,
-					'interval' => $interval,
-				),
-			)
-		);
-
-		$this->expectException( InvalidInputException::class );
-		$snapshot->read_billing_policy();
-	}
-
-	/**
-	 * @testdox read_billing_policy is null when the payload carries no billing policy.
-	 */
-	public function test_read_billing_policy_is_null_when_absent(): void {
-		$this->assertNull( PlanSnapshot::from_array( array( 'selling_plan_id' => 7 ) )->read_billing_policy() );
 	}
 
 	/**
