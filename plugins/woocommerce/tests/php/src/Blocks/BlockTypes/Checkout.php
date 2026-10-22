@@ -156,6 +156,43 @@ class Checkout extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Returns the inner block names of a parsed block.
+	 *
+	 * @param array $block Parsed block.
+	 * @return array
+	 */
+	private function get_inner_block_names( array $block ): array {
+		return array_column( $block['innerBlocks'], 'blockName' );
+	}
+
+	/**
+	 * Returns the Actions block attributes from a parsed Checkout Fields block.
+	 *
+	 * @param array $block Parsed block.
+	 * @return array
+	 */
+	private function get_actions_attrs( array $block ): array {
+		foreach ( $block['innerBlocks'] as $inner_block ) {
+			if ( 'woocommerce/checkout-actions-block' === $inner_block['blockName'] ) {
+				return $inner_block['attrs'];
+			}
+		}
+		return array();
+	}
+
+	/**
+	 * @testdox New Checkout pages put terms on the Actions block instead of a Terms block.
+	 */
+	public function test_default_checkout_page_content_uses_actions_terms(): void {
+		$method = new \ReflectionMethod( \WC_Install::class, 'get_checkout_block_content' );
+		$method->setAccessible( true );
+		$fields = parse_blocks( $method->invoke( null ) )[0]['innerBlocks'][0];
+
+		$this->assertNotContains( 'woocommerce/checkout-terms-block', $this->get_inner_block_names( $fields ), 'No Terms block' );
+		$this->assertTrue( $this->get_actions_attrs( $fields )['showTerms'] ?? null, 'Actions block shows terms' );
+	}
+
+	/**
 	 * Overrides the WC logger.
 	 *
 	 * @return mixed
