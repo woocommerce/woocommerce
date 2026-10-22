@@ -309,6 +309,31 @@ describe( 'Product Results Count announcement', () => {
 		);
 	} );
 
+	it( 'does not speak a count replaced while @wordpress/a11y is loading', async () => {
+		announce( 'Showing 1–16 of 28 results' );
+		announce( 'Showing 17–28 of 28 results' );
+		// The timer fires and starts the import; the next navigation lands before it resolves.
+		jest.advanceTimersByTime( announcementDelayMs );
+		announce( 'Showing all 2 results' );
+		await settle();
+
+		expect( mockSpeak ).toHaveBeenCalledTimes( 1 );
+		expect( mockSpeak ).toHaveBeenCalledWith(
+			'Showing all 2 results',
+			'polite'
+		);
+	} );
+
+	it( 'does not speak a count after the block leaves the page while @wordpress/a11y is loading', async () => {
+		announce( 'Showing 1–16 of 28 results' );
+		announce( 'Showing the single result' );
+		jest.advanceTimersByTime( announcementDelayMs );
+		removeBlock();
+		await settle();
+
+		expect( mockSpeak ).not.toHaveBeenCalled();
+	} );
+
 	it( 'drops a pending count when the block is removed from the page', async () => {
 		announce( 'Showing 1–16 of 28 results' );
 		announce( 'Showing the single result' );

@@ -23,9 +23,10 @@ const pageLoadBlocks = new WeakSet< Element >(
 	Array.from( document.querySelectorAll( '.wc-block-product-results-count' ) )
 );
 
+// The queued count. It stays set until @wordpress/a11y has loaded, so a later navigation can still cancel it.
 let pendingAnnouncement:
 	| {
-			timer: ReturnType< typeof setTimeout >;
+			timer?: ReturnType< typeof setTimeout >;
 			isChanged: boolean;
 			block: HTMLElement | null;
 	  }
@@ -81,20 +82,27 @@ const productResultsCountStore = {
 			}
 
 			clearTimeout( pendingAnnouncement?.timer );
-			pendingAnnouncement = {
+			const queued: NonNullable< typeof pendingAnnouncement > = {
 				isChanged,
 				block: ref,
-				timer: setTimeout( () => {
-					pendingAnnouncement = undefined;
-					import( '@wordpress/a11y' )
-						.then( ( { speak } ) =>
-							speak( announcement, 'polite' )
-						)
-						.catch( () => {
-							// A failed chunk load leaves the router's message as the only feedback.
-						} );
-				}, ANNOUNCEMENT_DELAY_MS ),
 			};
+			queued.timer = setTimeout( () => {
+				import( '@wordpress/a11y' )
+					.then( ( { speak } ) => {
+						if ( pendingAnnouncement === queued ) {
+							speak( announcement, 'polite' );
+						}
+					} )
+					.catch( () => {
+						// A failed chunk load leaves the router's message as the only feedback.
+					} )
+					.finally( () => {
+						if ( pendingAnnouncement === queued ) {
+							pendingAnnouncement = undefined;
+						}
+					} );
+			}, ANNOUNCEMENT_DELAY_MS );
+			pendingAnnouncement = queued;
 
 			return cancelOwnAnnouncement;
 		},
