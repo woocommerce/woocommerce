@@ -4,7 +4,6 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 
-use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsMocks;
 use WC_Helper_Product;
 
 /**
@@ -25,8 +24,6 @@ class ProductButton extends \WP_UnitTestCase {
 	protected function setUp(): void {
 		parent::setUp();
 
-		AddToCartWithOptionsMocks::register_all();
-
 		foreach ( array( 'woocommerce_cart_redirect_after_add', 'woocommerce_enable_ajax_add_to_cart' ) as $option_name ) {
 			$this->previous_options[ $option_name ] = get_option( $option_name, null );
 			update_option( $option_name, 'no' );
@@ -34,18 +31,27 @@ class ProductButton extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Restore test options.
+	 * Restore test options and remove the published `woocommerce` state, which the base class does not reset.
 	 */
 	protected function tearDown(): void {
-		foreach ( $this->previous_options as $option_name => $value ) {
-			if ( null === $value ) {
-				delete_option( $option_name );
-			} else {
-				update_option( $option_name, $value );
+		try {
+			foreach ( $this->previous_options as $option_name => $value ) {
+				if ( null === $value ) {
+					delete_option( $option_name );
+				} else {
+					update_option( $option_name, $value );
+				}
 			}
-		}
 
-		parent::tearDown();
+			$interactivity = wp_interactivity();
+			$property      = new \ReflectionProperty( $interactivity, 'state_data' );
+			$property->setAccessible( true );
+			$state_data = $property->getValue( $interactivity );
+			unset( $state_data['woocommerce'] );
+			$property->setValue( $interactivity, $state_data );
+		} finally {
+			parent::tearDown();
+		}
 	}
 
 	/**
@@ -56,7 +62,7 @@ class ProductButton extends \WP_UnitTestCase {
 	 */
 	private function render_product_button( \WC_Product $product ): string {
 		return do_blocks(
-			'<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} --><!-- wp:woocommerce/product-button /--><!-- /wp:woocommerce/single-product -->'
+			'<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} --><div class="wp-block-woocommerce-single-product"><!-- wp:woocommerce/product-button /--></div><!-- /wp:woocommerce/single-product -->'
 		);
 	}
 
@@ -95,18 +101,6 @@ class ProductButton extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Render the Product Button block inside an Add to Cart with Options block.
-	 *
-	 * @param \WC_Product $product Product to render.
-	 * @return string Rendered block markup.
-	 */
-	private function render_product_button_in_add_to_cart_form( \WC_Product $product ): string {
-		return do_blocks(
-			'<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} --><!-- wp:woocommerce/add-to-cart-with-options --><!-- wp:woocommerce/product-button /--><!-- /wp:woocommerce/add-to-cart-with-options --><!-- /wp:woocommerce/single-product -->'
-		);
-	}
-
-	/**
 	 * @testdox Direct add-to-cart links retain nofollow.
 	 */
 	public function test_direct_add_to_cart_link_retains_nofollow(): void {
@@ -127,25 +121,33 @@ class ProductButton extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * @testdox Standalone / Loop Product Button includes aria-label with product description.
+	 * @testdox AJAX button aria-label starts with the visible button text when $quantity are in the cart.
+	 * @testWith [0, "Add to cart: “Beanie”"]
+	 *           [2, "2 in cart, Add to cart: “Beanie”"]
+	 *
+	 * @param int    $quantity Quantity of the product in the cart.
+	 * @param string $expected Expected aria-label.
 	 */
-	public function test_standalone_product_button_includes_aria_label(): void {
-		$product = WC_Helper_Product::create_simple_product();
-		$markup  = $this->render_product_button( $product );
+	public function test_ajax_button_aria_label_starts_with_button_text( int $quantity, string $expected ): void {
+		update_option( 'woocommerce_enable_ajax_add_to_cart', 'yes' );
+		$product = WC_Helper_Product::create_simple_product( true, array( 'name' => 'Beanie' ) );
+		wp_interactivity_state(
+			'woocommerce',
+			array(
+				'cart' => array(
+					'items' => array(
+						array(
+							'id'       => $product->get_id(),
+							'quantity' => $quantity,
+						),
+					),
+				),
+			)
+		);
 
-		$this->assertStringContainsString( 'aria-label="' . esc_attr( $product->add_to_cart_description() ) . '"', $markup );
-	}
+		$aria_label = $this->get_button_aria_label( $this->render_product_button( $product ) );
 
-	/**
-	 * @testdox Product Button inside Add to Cart with Options block does not include aria-label for simple products.
-	 */
-	public function test_product_button_in_add_to_cart_form_omits_aria_label_for_simple_product(): void {
-		$product = WC_Helper_Product::create_simple_product();
-		$markup  = $this->render_product_button_in_add_to_cart_form( $product );
-
-		preg_match( '/<button[^>]*class="[^"]*wc-block-components-product-button__button[^"]*"[^>]*>/', $markup, $matches );
-		$this->assertNotEmpty( $matches, 'Product button was not rendered.' );
-		$this->assertStringNotContainsString( 'aria-label', $matches[0] );
+		$this->assertSame( $expected, $aria_label, 'The aria-label should start with the text shown on the button' );
 	}
 
 	/**
@@ -165,6 +167,19 @@ class ProductButton extends \WP_UnitTestCase {
 			remove_filter( 'woocommerce_loop_add_to_cart_args', $filter );
 		}
 
-		$this->assertStringNotContainsString( 'aria-label', $markup );
+		$this->assertNull( $this->get_button_aria_label( $markup ) );
+	}
+
+	/**
+	 * Get the aria-label of the rendered button.
+	 *
+	 * @param string $markup Rendered block markup.
+	 * @return string|null The aria-label, decoded.
+	 */
+	private function get_button_aria_label( string $markup ): ?string {
+		$processor = new \WP_HTML_Tag_Processor( $markup );
+		$processor->next_tag( 'button' );
+
+		return $processor->get_attribute( 'aria-label' );
 	}
 }
