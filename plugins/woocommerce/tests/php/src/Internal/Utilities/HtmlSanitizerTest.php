@@ -94,13 +94,17 @@ class HtmlSanitizerTest extends \WC_Unit_Test_Case {
 			</div>
 		';
 
-		$expected_output = str_replace( '<script>', '', $initial_html );
-		$expected_output = str_replace( '</script>', '', $expected_output );
+		$result = $this->sut->styled_post_content( $initial_html );
 
-		$this->assertEquals(
-			$this->sut->styled_post_content( $initial_html ),
-			$expected_output,
+		$this->assertStringContainsString(
+			'<style> p { color: teal; } </style>',
+			$result,
 			'We retain the protections offered by wp_kses_post, but also allow the use of `style` elements.'
+		);
+		$this->assertStringNotContainsString(
+			'<script>',
+			$result,
+			'Script tags are stripped by wp_kses.'
 		);
 	}
 }

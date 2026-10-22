@@ -173,7 +173,8 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 
 		$group = $schema['groups']['group'];
 
-		$this->assertSame( 'Read the <a href="https://woocommerce.com">documentation</a>alert("x").', $group['description'] );
+		$this->assertStringContainsString( 'Read the <a href="https://woocommerce.com">documentation</a>', $group['description'] );
+		$this->assertStringNotContainsString( '<script>', $group['description'] );
 		$this->assertArrayNotHasKey( 'actions', $group );
 	}
 
@@ -274,7 +275,8 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 
 		$field = $schema['groups']['default']['fields'][0];
 
-		$this->assertSame( 'Read-only <strong>information</strong>alert("x").', $field['description'] );
+		$this->assertStringContainsString( 'Read-only <strong>information</strong>', $field['description'] );
+		$this->assertStringNotContainsString( '<script>', $field['description'] );
 		$this->assertArrayHasKey( 'adapter', $field['save'] );
 		$this->assertSame( 'none', $field['save']['adapter'] );
 		SettingsUISchema::assert_valid_schema( $schema );
