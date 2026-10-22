@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableQuery;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
+use Automattic\WooCommerce\Tests\Helpers\InterleavedStatusOrdersTrait;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Helper_Product;
 use WC_Order;
@@ -19,6 +20,7 @@ use WC_Order;
  */
 class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	use HPOSToggleTrait;
+	use InterleavedStatusOrdersTrait;
 
 	/**
 	 * Ensure permanent HPOS tables exist before per-test transactions start.
@@ -876,11 +878,13 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 			'HPOS, uppercase any'          => array( true, 'ANY' ),
 			'HPOS, padded all'             => array( true, ' all ' ),
 			'HPOS, all with unknown'       => array( true, array( 'all', 'foobar' ) ),
+			'HPOS, any with unknown'       => array( true, array( 'any', 'foobar' ) ),
 			'legacy CPT, any'              => array( false, 'any' ),
 			'legacy CPT, all'              => array( false, 'all' ),
 			'legacy CPT, uppercase any'    => array( false, 'ANY' ),
 			'legacy CPT, padded all'       => array( false, ' all ' ),
 			'legacy CPT, all with unknown' => array( false, array( 'all', 'foobar' ) ),
+			'legacy CPT, any with unknown' => array( false, array( 'any', 'foobar' ) ),
 		);
 	}
 
@@ -939,6 +943,27 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertSame( array( $order_ids[2] ), $queried_order_ids, 'Whitespace around a known status should be ignored on both order storages.' );
+	}
+
+	/**
+	 * @testdox wc_get_orders returns no orders for an unknown status that already has the "wc-" prefix.
+	 *
+	 * @dataProvider order_storage_provider
+	 * @param bool $hpos_enabled Whether HPOS is enabled.
+	 */
+	public function test_wc_get_orders_returns_empty_for_prefixed_unknown_status( bool $hpos_enabled ): void {
+		$this->toggle_cot_feature_and_usage( $hpos_enabled );
+		$this->create_orders_with_interleaved_statuses( 3 );
+
+		$queried_order_ids = wc_get_orders(
+			array(
+				'status' => 'wc-foobar',
+				'limit'  => -1,
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertSame( array(), $queried_order_ids, 'A prefixed unknown status should not make the query return every order.' );
 	}
 
 	/**
@@ -1080,27 +1105,6 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 		$order->save();
 		remove_filter( 'wc_order_statuses', $register_custom_status );
 		unset( $wp_post_statuses['wc-foobar'] );
-	}
-
-	/**
-	 * Helper function to create orders with interleaved statuses and strictly decreasing creation dates.
-	 *
-	 * @param int $count Number of orders to create.
-	 * @return int[] Order IDs, ordered by creation date descending.
-	 */
-	private function create_orders_with_interleaved_statuses( int $count ): array {
-		$statuses = array( OrderStatus::PENDING, OrderStatus::PROCESSING, OrderStatus::COMPLETED );
-		$ids      = array();
-
-		for ( $i = 0; $i < $count; $i++ ) {
-			$order = new \WC_Order();
-			$order->set_status( $statuses[ $i % count( $statuses ) ] );
-			$order->set_date_created( strtotime( '2023-06-01 12:00:00' ) - ( $i * HOUR_IN_SECONDS ) );
-			$order->save();
-			$ids[] = $order->get_id();
-		}
-
-		return $ids;
 	}
 
 	/**

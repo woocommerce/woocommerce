@@ -5,6 +5,7 @@ use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
+use Automattic\WooCommerce\Tests\Helpers\InterleavedStatusOrdersTrait;
 
 //phpcs:disable Squiz.Classes.ClassFileName.NoMatch, Squiz.Classes.ValidClassName.NotCamelCaps -- Legacy class name.
 /**
@@ -14,6 +15,7 @@ use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
  */
 class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	use CogsAwareUnitTestSuiteTrait;
+	use InterleavedStatusOrdersTrait;
 
 	/**
 	 * Store the COT state before the test class.
@@ -1852,6 +1854,87 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox CPT order queries for an unknown status return no orders even before order statuses are registered.
+	 */
+	public function test_cpt_order_queries_return_empty_for_unknown_status_before_order_statuses_are_registered(): void {
+		global $wp_post_statuses;
+
+		$this->create_orders_with_interleaved_statuses( 3 );
+
+		$registered_statuses = $wp_post_statuses;
+		foreach ( array_keys( wc_get_order_statuses() ) as $status ) {
+			unset( $wp_post_statuses[ $status ] );
+		}
+
+		try {
+			$queried_order_ids = wc_get_orders(
+				array(
+					'status' => 'foobar',
+					'limit'  => -1,
+					'return' => 'ids',
+				)
+			);
+		} finally {
+			// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restoring the global changed above.
+			$wp_post_statuses = $registered_statuses;
+		}
+
+		$this->assertSame( array(), $queried_order_ids, 'The early-query fallback should only make order statuses known, not unknown ones.' );
+	}
+
+	/**
+	 * @testdox CPT order queries return every order when the "$filter" filter replaces the status with "any".
+	 *
+	 * @dataProvider cpt_query_args_filter_provider
+	 * @param string $filter Filter that receives the WP_Query args.
+	 */
+	public function test_cpt_order_queries_respect_filter_replacing_status_with_any( string $filter ): void {
+		$order_ids = $this->create_orders_with_interleaved_statuses( 3 );
+
+		add_filter(
+			$filter,
+			function ( $wp_query_args ) {
+				$wp_query_args['post_status'] = 'any';
+				return $wp_query_args;
+			}
+		);
+
+		$queried_order_ids = wc_get_orders(
+			array(
+				'status' => 'foobar',
+				'limit'  => -1,
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertSame( $order_ids, $queried_order_ids, 'A special status set by the filter should not be treated as unknown.' );
+	}
+
+	/**
+	 * @testdox CPT order queries do not fail when the woocommerce_order_data_store_cpt_get_orders_query filter returns a query string.
+	 */
+	public function test_cpt_order_queries_accept_query_string_from_filter(): void {
+		$order_ids = $this->create_orders_with_interleaved_statuses( 3 );
+
+		add_filter(
+			'woocommerce_order_data_store_cpt_get_orders_query',
+			function () {
+				return 'post_type=shop_order&post_status=' . OrderInternalStatus::COMPLETED . '&fields=ids';
+			}
+		);
+
+		$queried_order_ids = wc_get_orders(
+			array(
+				'status' => OrderStatus::COMPLETED,
+				'limit'  => -1,
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertSame( array( $order_ids[2] ), $queried_order_ids, 'A query string returned by the filter should still reach WP_Query.' );
+	}
+
+	/**
 	 * @testdox CPT order queries return no orders for an order status that was left out of the post status registration.
 	 */
 	public function test_cpt_order_queries_return_empty_for_order_status_left_out_of_registration(): void {
@@ -1888,26 +1971,5 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			'woocommerce_get_wp_query_args' => array( 'woocommerce_get_wp_query_args' ),
 			'woocommerce_order_data_store_cpt_get_orders_query' => array( 'woocommerce_order_data_store_cpt_get_orders_query' ),
 		);
-	}
-
-	/**
-	 * Creates orders cycling through pending, processing and completed statuses, with strictly decreasing creation dates.
-	 *
-	 * @param int $count Number of orders to create.
-	 * @return int[] IDs of the created orders, newest first.
-	 */
-	private function create_orders_with_interleaved_statuses( int $count ): array {
-		$statuses = array( OrderStatus::PENDING, OrderStatus::PROCESSING, OrderStatus::COMPLETED );
-		$ids      = array();
-
-		for ( $i = 0; $i < $count; $i++ ) {
-			$order = new WC_Order();
-			$order->set_status( $statuses[ $i % count( $statuses ) ] );
-			$order->set_date_created( strtotime( '2023-06-01 12:00:00' ) - ( $i * HOUR_IN_SECONDS ) );
-			$order->save();
-			$ids[] = $order->get_id();
-		}
-
-		return $ids;
 	}
 }

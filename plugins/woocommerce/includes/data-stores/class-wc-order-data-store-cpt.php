@@ -1105,7 +1105,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 
 		$args = $this->get_wp_query_args( $query_vars );
 
-		if ( ! empty( $args['errors'] ) || $this->has_only_unknown_statuses( $args ) ) {
+		if ( ! empty( $args['errors'] ) || ( is_array( $args ) && $this->has_only_unknown_statuses( $args ) ) ) {
 			$query = (object) array(
 				'posts'         => array(),
 				'found_posts'   => 0,
