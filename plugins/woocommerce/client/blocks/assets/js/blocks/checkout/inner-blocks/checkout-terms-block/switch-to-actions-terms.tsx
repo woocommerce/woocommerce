@@ -3,7 +3,8 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Notice } from '@wordpress/components';
-import { useDispatch, useSelect } from '@wordpress/data';
+import { useDispatch, useRegistry, useSelect } from '@wordpress/data';
+import type { BlockInstance } from '@wordpress/blocks';
 import { store as blockEditorStore } from '@wordpress/block-editor';
 
 const TERMS_BLOCK = 'woocommerce/checkout-terms-block';
@@ -51,20 +52,35 @@ export const SwitchToActionsTermsNotice = ( {
 } ) => {
 	const { termsClientId, termsAttributes, actionsClientId } =
 		useCheckoutTermsBlocks( clientId );
-	const { updateBlockAttributes, removeBlock, selectBlock } =
-		useDispatch( blockEditorStore );
+	const registry = useRegistry();
+	const { replaceInnerBlocks, selectBlock } = useDispatch( blockEditorStore );
 
 	if ( ! termsClientId || ! actionsClientId ) {
 		return null;
 	}
 
+	// Replace the inner blocks in one change, so a single undo restores the Terms block.
 	const switchTerms = () => {
-		updateBlockAttributes( actionsClientId, {
-			showTerms: true,
-			termsCheckbox: !! termsAttributes?.checkbox,
-			termsText: termsAttributes?.text || '',
-		} );
-		removeBlock( termsClientId, false );
+		const { getBlockRootClientId, getBlocks } =
+			registry.select( blockEditorStore );
+		const rootClientId = getBlockRootClientId( termsClientId );
+		const innerBlocks = ( getBlocks( rootClientId ) as BlockInstance[] )
+			.filter( ( block ) => block.clientId !== termsClientId )
+			.map( ( block ) =>
+				block.clientId === actionsClientId
+					? {
+							...block,
+							attributes: {
+								...block.attributes,
+								showTerms: true,
+								termsCheckbox: !! termsAttributes?.checkbox,
+								termsText: termsAttributes?.text || '',
+							},
+						}
+					: block
+			);
+
+		replaceInnerBlocks( rootClientId, innerBlocks, false );
 		selectBlock( actionsClientId );
 	};
 
