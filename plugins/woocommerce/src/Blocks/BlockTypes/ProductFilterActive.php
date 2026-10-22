@@ -4,6 +4,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use WP_Block;
+
 /**
  * Product Filter: Active Block.
  */

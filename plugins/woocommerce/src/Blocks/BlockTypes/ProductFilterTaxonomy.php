@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection\Utils as ProductC
 use Automattic\WooCommerce\Internal\ProductFilters\FilterDataProvider;
 use Automattic\WooCommerce\Internal\ProductFilters\QueryClauses;
 use Automattic\WooCommerce\Internal\ProductFilters\TaxonomyHierarchyData;
+use WP_Block;
 
 /**
  * Product Filter: Taxonomy Block.
