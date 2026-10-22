@@ -377,17 +377,9 @@ function wc_format_coupon_code( $value ) {
 /**
  * Sanitize a coupon code.
  *
- * Coupon codes are stored as post titles with `&`, `<` and `>` encoded. Entered codes are decoded, then encoded the
- * same way for every user, so the code a customer enters matches the code a merchant saved.
- *
- * The encoding repeats the steps wp_kses() applied to codes, so codes saved by earlier versions still match.
- * wp_kses_no_null() removes control characters (keeping a literal `\0`, as wp_kses() did), and
- * wp_kses_normalize_entities() encodes `&` unless it starts a valid entity such as `&amp;` or `&#039;`. Both are plain
- * string functions that don't use the kses HTML parser, so changes to wp_kses() don't affect the result. Tags aren't
- * parsed, so `<` and `>` are encoded rather than stripped.
- *
- * Coupon codes are plain text, not HTML, so the post title filters (title_save_pre, pre_post_title) intentionally don't
- * apply to them, on save or lookup. Use the woocommerce_coupon_code filter to change how codes are formatted.
+ * Coupon codes are plain text, but are stored as post titles with `&`, `<` and `>` encoded the same way wp_kses() did,
+ * so codes saved by earlier versions still match. Kses and the post title filters aren't used, so the result doesn't
+ * depend on the current user or on how wp_kses() parses HTML. Use the woocommerce_coupon_code filter to change codes.
  *
  * @see WC_Formatting_Functions_Test::test_wc_sanitize_coupon_code
  * @see WC_Cart_Test::test_coupon_codes_with_special_characters
@@ -399,7 +391,11 @@ function wc_format_coupon_code( $value ) {
  * @return string
  */
 function wc_sanitize_coupon_code( $value ) {
-	$value = html_entity_decode( $value ?? '', ENT_COMPAT, get_bloginfo( 'charset' ) );
+	if ( null === $value ) {
+		return '';
+	}
+
+	$value = html_entity_decode( $value, ENT_COMPAT, get_bloginfo( 'charset' ) );
 	$value = trim( wp_kses_no_null( $value, array( 'slash_zero' => 'keep' ) ) );
 	return str_replace( array( '<', '>' ), array( '&lt;', '&gt;' ), wp_kses_normalize_entities( $value ) );
 }

@@ -380,9 +380,7 @@ class WC_Post_Data {
 	/**
 	 * Sanitize coupon codes with wc_sanitize_coupon_code() when coupons are saved, so they're stored the same way for every user.
 	 *
-	 * By now WordPress has run kses and the post title filters on `$data`, so the title passed to wp_insert_post() is used
-	 * instead. Those filters intentionally don't apply to coupon codes (see wc_sanitize_coupon_code()). The data is slashed,
-	 * and wp_insert_post() unslashes the result of this filter, so the title is unslashed to sanitize it and slashed again.
+	 * Uses the title passed to wp_insert_post(), because WordPress has already run kses on `$data` for some users.
 	 *
 	 * @since 11.3.0
 	 * @internal
@@ -399,8 +397,7 @@ class WC_Post_Data {
 			return $data;
 		}
 
-		$title = is_array( $unsanitized_postarr ) && is_scalar( $unsanitized_postarr['post_title'] ?? null ) ? $unsanitized_postarr['post_title'] : $data['post_title'];
-		$title = wc_sanitize_coupon_code( wp_unslash( (string) $title ) );
+		$title = wc_sanitize_coupon_code( wp_unslash( $unsanitized_postarr['post_title'] ?? $data['post_title'] ) );
 
 		// Like wp_insert_post(), encode emoji when the column can't store them.
 		if ( in_array( $wpdb->get_col_charset( $wpdb->posts, 'post_title' ), array( 'utf8', 'utf8mb3' ), true ) ) {
@@ -415,8 +412,7 @@ class WC_Post_Data {
 	/**
 	 * Decode coupon codes for the title field on the coupon edit screen.
 	 *
-	 * Coupon codes are stored with `&`, `<` and `>` encoded, and WordPress encodes titles again for editing, so the field
-	 * would show `&amp;` instead of `&`. Saving the decoded code stores it in the same format as before.
+	 * WordPress encodes titles again for editing, so the field would otherwise show `&amp;` instead of `&`.
 	 *
 	 * @since 11.3.0
 	 * @internal
