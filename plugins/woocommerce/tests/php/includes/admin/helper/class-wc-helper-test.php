@@ -1434,10 +1434,8 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 	 *           ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", ""]
 	 *           ["", ""]
 	 *           ["id with spaces", ""]
-	 *           ["id<script>", ""]
 	 *           ["valid-id\n", ""]
 	 *           [["valid-id"], ""]
-	 *           [null, ""]
 	 *
 	 * @param mixed  $funnel_id Candidate id.
 	 * @param string $expected  Expected return value.

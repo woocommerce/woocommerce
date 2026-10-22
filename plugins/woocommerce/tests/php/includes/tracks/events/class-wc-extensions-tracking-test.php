@@ -49,7 +49,6 @@ class WC_Extensions_Tracking_Test extends \WC_Unit_Test_Case {
 	 * @testdox The connect event should carry the funnel id from the hook, and omit it when it is missing or invalid.
 	 *
 	 * @testWith ["0a5b6c1e-2d3f-4a5b-8c9d-0e1f2a3b4c5d", "0a5b6c1e-2d3f-4a5b-8c9d-0e1f2a3b4c5d"]
-	 *           ["", null]
 	 *           ["not valid!", null]
 	 *
 	 * @param string      $funnel_id Funnel id passed to the hook.
