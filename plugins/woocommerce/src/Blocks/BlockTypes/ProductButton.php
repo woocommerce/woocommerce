@@ -146,13 +146,9 @@ class ProductButton extends AbstractBlock {
 		}
 
 		/**
-		 * Allow filtering of the add to cart button arguments.
+		 * This filter is documented in includes/wc-template-functions.php.
 		 *
-		 * @since 9.7.0
-		 * @since 11.4.0 Added the `quantity` argument.
-		 *
-		 * @param array       $args    Button arguments. Includes `quantity`, `class`, and `attributes`.
-		 * @param \WC_Product $product Product the button is rendered for.
+		 * @since 2.4.11
 		 */
 		$args = apply_filters(
 			'woocommerce_loop_add_to_cart_args',
