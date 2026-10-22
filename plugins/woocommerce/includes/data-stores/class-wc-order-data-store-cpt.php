@@ -943,7 +943,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		if ( ! empty( $query_vars['post_status'] ) ) {
 			$statuses = is_string( $query_vars['post_status'] )
 				? explode( ',', $query_vars['post_status'] )
-				: (array) $query_vars['post_status'];
+				: ( is_array( $query_vars['post_status'] ) ? $query_vars['post_status'] : array( $query_vars['post_status'] ) );
 
 			$order_statuses            = array_keys( wc_get_order_statuses() );
 			$query_vars['post_status'] = array();
@@ -951,6 +951,11 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 				// Lowercase here, so an uppercase status still gets the 'wc-' prefix.
 				$status                      = strtolower( trim( $status ) );
 				$query_vars['post_status'][] = in_array( 'wc-' . $status, $order_statuses, true ) ? 'wc-' . $status : $status;
+			}
+
+			// WP_Query ignores 'all' and keeps the other statuses, while HPOS drops the status filter. Match HPOS.
+			if ( in_array( 'all', $query_vars['post_status'], true ) && ! in_array( 'any', $query_vars['post_status'], true ) ) {
+				$query_vars['post_status'] = array( 'all' );
 			}
 		}
 

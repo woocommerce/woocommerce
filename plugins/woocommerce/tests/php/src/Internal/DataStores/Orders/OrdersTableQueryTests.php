@@ -873,18 +873,22 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	 */
 	public function special_status_provider(): array {
 		return array(
-			'HPOS, any'                    => array( true, 'any' ),
-			'HPOS, all'                    => array( true, 'all' ),
-			'HPOS, uppercase any'          => array( true, 'ANY' ),
-			'HPOS, padded all'             => array( true, ' all ' ),
-			'HPOS, all with unknown'       => array( true, array( 'all', 'foobar' ) ),
-			'HPOS, any with unknown'       => array( true, array( 'any', 'foobar' ) ),
-			'legacy CPT, any'              => array( false, 'any' ),
-			'legacy CPT, all'              => array( false, 'all' ),
-			'legacy CPT, uppercase any'    => array( false, 'ANY' ),
-			'legacy CPT, padded all'       => array( false, ' all ' ),
-			'legacy CPT, all with unknown' => array( false, array( 'all', 'foobar' ) ),
-			'legacy CPT, any with unknown' => array( false, array( 'any', 'foobar' ) ),
+			'HPOS, any'                       => array( true, 'any' ),
+			'HPOS, all'                       => array( true, 'all' ),
+			'HPOS, uppercase any'             => array( true, 'ANY' ),
+			'HPOS, padded all'                => array( true, ' all ' ),
+			'HPOS, all with unknown'          => array( true, array( 'all', 'foobar' ) ),
+			'HPOS, any with unknown'          => array( true, array( 'any', 'foobar' ) ),
+			'HPOS, all with known'            => array( true, array( 'all', OrderStatus::PROCESSING ) ),
+			'HPOS, all in comma string'       => array( true, 'all,' . OrderStatus::PROCESSING ),
+			'legacy CPT, any'                 => array( false, 'any' ),
+			'legacy CPT, all'                 => array( false, 'all' ),
+			'legacy CPT, uppercase any'       => array( false, 'ANY' ),
+			'legacy CPT, padded all'          => array( false, ' all ' ),
+			'legacy CPT, all with unknown'    => array( false, array( 'all', 'foobar' ) ),
+			'legacy CPT, any with unknown'    => array( false, array( 'any', 'foobar' ) ),
+			'legacy CPT, all with known'      => array( false, array( 'all', OrderStatus::PROCESSING ) ),
+			'legacy CPT, all in comma string' => array( false, 'all,' . OrderStatus::PROCESSING ),
 		);
 	}
 
@@ -967,6 +971,29 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox wc_get_orders matches orders stored with an unregistered "wc-" prefixed status on HPOS only.
+	 *
+	 * @dataProvider order_storage_provider
+	 * @param bool $hpos_enabled Whether HPOS is enabled.
+	 */
+	public function test_wc_get_orders_prefixed_unregistered_custom_status_matches_orphaned_orders_only_on_hpos( bool $hpos_enabled ): void {
+		$this->toggle_cot_feature_and_usage( $hpos_enabled );
+		$orphaned_order_id = $this->create_order_with_unregistered_custom_status();
+		$this->create_orders_with_interleaved_statuses( 3 );
+
+		$queried_order_ids = wc_get_orders(
+			array(
+				'status' => 'wc-foobar',
+				'limit'  => -1,
+				'return' => 'ids',
+			)
+		);
+
+		$expected = $hpos_enabled ? array( $orphaned_order_id ) : array();
+		$this->assertSame( $expected, $queried_order_ids, 'HPOS matches the stored status literally, while CPT treats the unregistered status as unknown.' );
+	}
+
+	/**
 	 * @testdox wc_get_orders splits a comma-separated status string and ignores whitespace around each status.
 	 *
 	 * @dataProvider order_storage_provider
@@ -1030,6 +1057,27 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox wc_get_orders does not use the properties of an object passed as the status.
+	 *
+	 * @dataProvider order_storage_provider
+	 * @param bool $hpos_enabled Whether HPOS is enabled.
+	 */
+	public function test_wc_get_orders_ignores_object_status( bool $hpos_enabled ): void {
+		$this->toggle_cot_feature_and_usage( $hpos_enabled );
+		$this->create_orders_with_interleaved_statuses( 3 );
+
+		$queried_order_ids = wc_get_orders(
+			array(
+				'status' => (object) array( 'status' => OrderStatus::COMPLETED ),
+				'limit'  => -1,
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertSame( array(), $queried_order_ids, 'Only strings are accepted as statuses, so an object should not be read as a list of statuses.' );
+	}
+
+	/**
 	 * @testdox wc_get_orders returns no orders when every status value is an empty-like string.
 	 *
 	 * @dataProvider empty_like_status_provider
@@ -1083,8 +1131,10 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 
 	/**
 	 * Creates an order with a custom status, then unregisters the status.
+	 *
+	 * @return int ID of the created order.
 	 */
-	private function create_order_with_unregistered_custom_status(): void {
+	private function create_order_with_unregistered_custom_status(): int {
 		global $wp_post_statuses;
 
 		$register_custom_status = function ( array $statuses ): array {
@@ -1105,6 +1155,8 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 		$order->save();
 		remove_filter( 'wc_order_statuses', $register_custom_status );
 		unset( $wp_post_statuses['wc-foobar'] );
+
+		return $order->get_id();
 	}
 
 	/**

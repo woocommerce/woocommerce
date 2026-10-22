@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Return no orders, instead of all of them, when filtering by an order status that no longer exists.
+Return no orders, instead of all of them, when filtering by an order status that no longer exists, and match statuses typed in uppercase, with spaces, or as a comma-separated list.
