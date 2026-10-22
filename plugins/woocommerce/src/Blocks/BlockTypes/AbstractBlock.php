@@ -329,7 +329,7 @@ abstract class AbstractBlock {
 		}
 
 		// Prefer to register with metadata if the path is set in the block's class.
-		$is_registered = (bool) register_block_type_from_metadata(
+		$is_registered = (bool) $this->express_register_block_type_from_metadata(
 			$this->asset_api->generate_block_metadata_path( $this->block_name ),
 			$block_settings
 		);
@@ -349,6 +349,113 @@ abstract class AbstractBlock {
 		register_block_type(
 			$this->get_full_block_name(),
 			$block_settings
+		);
+	}
+
+	/**
+	 * Tailored version of register_block_type_from_metadata: optimistic loading for WooCommerce blocks.
+	 *
+	 * Introduced as an optimization for blocks registration to skip irrelevant and heavy chunks of logic.
+	 * Optimizing upstream does not make sense as it would require fast-path guidance specific to WooCommerce.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param string $manifest_file Path to the block.json metadata file.
+	 * @param array  $block_settings Settings to merge into the block type (render_callback, styles, etc).
+	 * @return \WP_Block_Type|false
+	 */
+	final protected function express_register_block_type_from_metadata( string $manifest_file, array $block_settings = array() ) {
+		// Step 1: Resolve metadata from the pre-loaded registry. Fall back to the upstream function
+		// when metadata is unavailable (non-WooCommerce namespace or missing manifest).
+		$metadata = 'woocommerce' === $this->namespace ? \WP_Block_Metadata_Registry::get_metadata( $manifest_file ) : null;
+		if ( empty( $metadata ) ) {
+			return \register_block_type_from_metadata( $manifest_file, $block_settings );
+		}
+
+		// Step 2: Resolve file path and apply the block_type_metadata filter for backward compatibility with register_block_type_from_metadata workflows.
+		$real_path         = realpath( $manifest_file );
+		$metadata['file']  = wp_normalize_path( $real_path ? $real_path : $manifest_file );
+		$filtered_metadata = apply_filters( 'block_type_metadata', $metadata ); // phpcs:ignore WooCommerce.Commenting.CommentHooks
+		$metadata          = is_array( $filtered_metadata ) ? $filtered_metadata : $metadata;
+
+		$property_mappings = array(
+			'apiVersion'      => 'api_version',
+			'name'            => 'name',
+			'title'           => 'title',
+			'category'        => 'category',
+			'parent'          => 'parent',
+			'ancestor'        => 'ancestor',
+			'icon'            => 'icon',
+			'description'     => 'description',
+			'keywords'        => 'keywords',
+			'attributes'      => 'attributes',
+			'providesContext' => 'provides_context',
+			'usesContext'     => 'uses_context',
+			'selectors'       => 'selectors',
+			'supports'        => 'supports',
+			'styles'          => 'styles',
+			'example'         => 'example',
+			'allowedBlocks'   => 'allowed_blocks',
+		);
+		$asset_fields      = array(
+			// Scripts.
+			'editorScript'     => array( 'editor_script_handles', 'register_block_script_handle' ),
+			'script'           => array( 'script_handles', 'register_block_script_handle' ),
+			'viewScript'       => array( 'view_script_handles', 'register_block_script_handle' ),
+			// Styles.
+			'editorStyle'      => array( 'editor_style_handles', 'register_block_style_handle' ),
+			'style'            => array( 'style_handles', 'register_block_style_handle' ),
+			'viewStyle'        => array( 'view_style_handles', 'register_block_style_handle' ),
+			// Script modules.
+			'viewScriptModule' => array( 'view_script_module_ids', 'register_block_script_module_id' ),
+		);
+
+		// If any metadata property isn't on the whitelist, delegate to the upstream function: not intended for the fast path or new property.
+		// AI-AGENT: new block.json properties must be added to the whitelist, otherwise the block falls back to slower upstream registration.
+		$supported_properties = array( '$schema', 'version', '__experimental', 'file', 'textdomain', ...array_keys( $property_mappings ), ...array_keys( $asset_fields ) );
+		if ( ! empty( array_diff( array_keys( $metadata ), $supported_properties ) ) ) {
+			return \register_block_type_from_metadata( $manifest_file, $block_settings );
+		}
+
+		// Step 3: Property mapping (99.4% of blocks) + i18n (98.9% of blocks as per v11.4) + merge caller-provided settings.
+		$settings    = array();
+		$i18n_schema = get_block_metadata_i18n_schema();
+		foreach ( $property_mappings as $key => $mapped_key ) {
+			if ( ! isset( $block_settings[ $mapped_key ] ) && isset( $metadata[ $key ] ) ) {
+				$settings[ $mapped_key ] = $metadata[ $key ];
+				if ( isset( $i18n_schema->$key ) ) {
+					$settings[ $mapped_key ] = translate_settings_using_i18n_schema( $i18n_schema->$key, $settings[ $mapped_key ], $metadata['textdomain'] ?? 'woocommerce' );
+				}
+			}
+		}
+		$settings = array_merge( $settings, $block_settings );
+
+		// Step 4: Asset handle and module registration (20.8% of blocks as per v11.4).
+		foreach ( $asset_fields as $metadata_field => list( $settings_field, $register ) ) {
+			if ( ! empty( $settings[ $metadata_field ] ) ) {
+				$metadata[ $metadata_field ] = $settings[ $metadata_field ];
+			}
+			if ( ! empty( $metadata[ $metadata_field ] ) ) {
+				$is_array = is_array( $metadata[ $metadata_field ] );
+				$result   = array();
+				foreach ( (array) $metadata[ $metadata_field ] as $index => $handle ) {
+					$registered = $register( $metadata, $metadata_field, $is_array ? $index : false ); // @phpstan-ignore argument.type (false-positive)
+					if ( $registered ) {
+						$result[] = $registered;
+					}
+				}
+				$settings[ $settings_field ] = $result;
+			}
+		}
+
+		// Step 5: Apply the block_type_metadata_settings filter for backward compatibility with register_block_type_from_metadata workflows.
+		$filtered_settings = apply_filters( 'block_type_metadata_settings', $settings, $metadata ); // phpcs:ignore WooCommerce.Commenting.CommentHooks
+		$settings          = is_array( $filtered_settings ) ? $filtered_settings : $settings;
+
+		// Step 6: Register the block and pass result back to the higher-level workflow.
+		return \WP_Block_Type_Registry::get_instance()->register(
+			! empty( $settings['name'] ) ? $settings['name'] : $metadata['name'],
+			$settings
 		);
 	}
 
