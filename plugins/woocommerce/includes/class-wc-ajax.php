@@ -2896,7 +2896,12 @@ class WC_AJAX {
 		$response               = array();
 
 		try {
-			$order      = wc_get_order( $order_id );
+			$order = wc_get_order( $order_id );
+
+			if ( ! $order instanceof WC_Order ) {
+				throw new Exception( __( 'Invalid order ID.', 'woocommerce' ) );
+			}
+
 			$max_refund = wc_format_decimal( $order->get_total() - $order->get_total_refunded(), wc_get_price_decimals() );
 
 			if ( ( ! $refund_amount && ( wc_format_decimal( 0, wc_get_price_decimals() ) !== $refund_amount ) ) || $max_refund < $refund_amount || 0 > $refund_amount ) {
@@ -2918,8 +2923,26 @@ class WC_AJAX {
 					'refund_tax'   => array(),
 				);
 			}
+			$order_items = $order->get_items();
 			foreach ( $line_item_qtys as $item_id => $qty ) {
-				$line_items[ $item_id ]['qty'] = max( $qty, 0 );
+				$qty = max( $qty, 0 );
+
+				// Enforce the refund input's max here, because this AJAX request skips browser validation.
+				if ( $qty > 0 && isset( $order_items[ $item_id ] ) ) {
+					$remaining_qty = abs( $order_items[ $item_id ]->get_quantity() ) - abs( $order->get_qty_refunded_for_item( $item_id ) );
+
+					if ( $qty > $remaining_qty ) {
+						throw new Exception(
+							sprintf(
+								/* translators: %d: remaining refundable quantity */
+								__( 'Line item quantity cannot be greater than the remaining refundable quantity (%d).', 'woocommerce' ),
+								$remaining_qty
+							)
+						);
+					}
+				}
+
+				$line_items[ $item_id ]['qty'] = $qty;
 			}
 			foreach ( $line_item_totals as $item_id => $total ) {
 				$line_items[ $item_id ]['refund_total'] = wc_format_decimal( $total );
