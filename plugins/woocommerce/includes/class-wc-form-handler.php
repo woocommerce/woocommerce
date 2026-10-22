@@ -1268,7 +1268,7 @@ class WC_Form_Handler {
 	/**
 	 * Remove add-to-cart from WordPress's canonical redirect, since add_to_cart_action() has already added the product.
 	 *
-	 * Redirects to another host (www vs non-www) keep it, because the cart session may not carry across.
+	 * Redirects to another host (www vs non-www), or from HTTPS to HTTP, keep it, because the cart session cookie may not carry across.
 	 *
 	 * @since 11.4.0
 	 * @internal
@@ -1286,7 +1286,9 @@ class WC_Form_Handler {
 			return $redirect_url;
 		}
 
-		if ( wp_parse_url( $redirect_url, PHP_URL_HOST ) !== wp_parse_url( $requested_url, PHP_URL_HOST ) ) {
+		$is_https_downgrade = 'https' === strtolower( (string) wp_parse_url( $requested_url, PHP_URL_SCHEME ) ) && 'http' === strtolower( (string) wp_parse_url( $redirect_url, PHP_URL_SCHEME ) );
+
+		if ( $is_https_downgrade || wp_parse_url( $redirect_url, PHP_URL_HOST ) !== wp_parse_url( $requested_url, PHP_URL_HOST ) ) {
 			return $redirect_url;
 		}
 

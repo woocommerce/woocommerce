@@ -1036,12 +1036,14 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox remove_add_to_cart_from_canonical_redirect() only drops add-to-cart from same-host redirects of add-to-cart requests.
+	 * @testdox remove_add_to_cart_from_canonical_redirect() only drops add-to-cart from same-host redirects of add-to-cart requests that do not downgrade to HTTP.
 	 *
 	 * @testWith ["12", "http://example.org/shop/?add-to-cart=12&quantity=2", "http://example.org/shop?add-to-cart=12&quantity=2", "http://example.org/shop/?quantity=2"]
 	 *           [null, "http://example.org/shop/?add-to-cart=12", "http://example.org/shop?add-to-cart=12", "http://example.org/shop/?add-to-cart=12"]
 	 *           ["abc", "http://example.org/shop/?add-to-cart=abc", "http://example.org/shop?add-to-cart=abc", "http://example.org/shop/?add-to-cart=abc"]
 	 *           ["12", "http://www.example.org/shop/?add-to-cart=12", "http://example.org/shop?add-to-cart=12", "http://www.example.org/shop/?add-to-cart=12"]
+	 *           ["12", "http://example.org/shop/?add-to-cart=12", "https://example.org/shop?add-to-cart=12", "http://example.org/shop/?add-to-cart=12"]
+	 *           ["12", "https://example.org/shop/?add-to-cart=12", "http://example.org/shop?add-to-cart=12", "https://example.org/shop/"]
 	 *           ["12", false, "http://example.org/shop?add-to-cart=12", false]
 	 *
 	 * @covers WC_Form_Handler::remove_add_to_cart_from_canonical_redirect()
