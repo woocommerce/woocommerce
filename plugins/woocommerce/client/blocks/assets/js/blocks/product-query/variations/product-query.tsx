@@ -1,41 +1,22 @@
 /**
  * External dependencies
  */
-import {
-	registerBlockVariation,
-	unregisterBlockVariation,
-} from '@wordpress/blocks';
+import { QueryBlockAttributes } from '@woocommerce/blocks/product-query/types';
+import { stacks } from '@woocommerce/icons';
+import { registerBlockVariation } from '@wordpress/blocks';
 import { Icon } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { stacks } from '@woocommerce/icons';
-import { getSettingWithCoercion } from '@woocommerce/settings';
-import { select, subscribe } from '@wordpress/data';
-import {
-	QueryBlockAttributes,
-	ProductQueryBlockQuery,
-} from '@woocommerce/blocks/product-query/types';
-import { isSiteEditorPage, CORE_EDITOR_STORE } from '@woocommerce/utils';
-import { isNumber, isString } from '@woocommerce/types';
 
 /**
  * Internal dependencies
  */
 import {
-	PRODUCT_QUERY_VARIATION_NAME,
 	DEFAULT_ALLOWED_CONTROLS,
 	INNER_BLOCKS_TEMPLATE,
+	PRODUCT_QUERY_VARIATION_NAME,
 	QUERY_DEFAULT_ATTRIBUTES,
 	QUERY_LOOP_ID,
 } from '../constants';
-
-const ARCHIVE_PRODUCT_TEMPLATES = [
-	'archive-product',
-	'taxonomy-product_cat',
-	'taxonomy-product_tag',
-	'taxonomy-product_brand',
-	'taxonomy-product_attribute',
-	'product-search-results',
-];
 
 const registerProductsBlock = ( attributes: QueryBlockAttributes ) => {
 	registerBlockVariation( QUERY_LOOP_ID, {
@@ -68,51 +49,4 @@ const registerProductsBlock = ( attributes: QueryBlockAttributes ) => {
 	} );
 };
 
-let currentTemplateSlug: string | undefined;
-subscribe( () => {
-	const previousTemplateSlug = currentTemplateSlug;
-	currentTemplateSlug = select( CORE_EDITOR_STORE )?.getEditedPostSlug?.();
-	if ( previousTemplateSlug === currentTemplateSlug ) {
-		return;
-	}
-
-	if ( isSiteEditorPage() ) {
-		const inherit = ARCHIVE_PRODUCT_TEMPLATES.some( ( template ) =>
-			isString( currentTemplateSlug )
-				? currentTemplateSlug.includes( template )
-				: false
-		);
-
-		const inheritQuery: Partial< ProductQueryBlockQuery > = {
-			inherit,
-		};
-
-		if ( inherit ) {
-			inheritQuery.perPage = getSettingWithCoercion(
-				'loopShopPerPage',
-				12,
-				isNumber
-			);
-		}
-
-		const queryAttributes = {
-			...QUERY_DEFAULT_ATTRIBUTES,
-			query: {
-				...QUERY_DEFAULT_ATTRIBUTES.query,
-				...inheritQuery,
-			},
-		};
-
-		unregisterBlockVariation( QUERY_LOOP_ID, PRODUCT_QUERY_VARIATION_NAME );
-
-		registerProductsBlock( queryAttributes );
-	}
-}, CORE_EDITOR_STORE );
-
-let isBlockRegistered = false;
-subscribe( () => {
-	if ( ! isBlockRegistered && ! isSiteEditorPage() ) {
-		isBlockRegistered = true;
-		registerProductsBlock( QUERY_DEFAULT_ATTRIBUTES );
-	}
-}, CORE_EDITOR_STORE );
+registerProductsBlock( QUERY_DEFAULT_ATTRIBUTES );
