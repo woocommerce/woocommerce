@@ -1888,6 +1888,28 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox remove_item() should remove only the requested entry when the same unsaved item is added twice.
+	 * @dataProvider provide_order_item_types
+	 *
+	 * @param string $type Order item type.
+	 */
+	public function test_remove_item_preserves_other_entry_for_same_unsaved_object( string $type ): void {
+		$order = new WC_Order();
+		$item  = $this->create_unsaved_order_item( $type );
+		$order->add_item( $item );
+		$order->add_item( $item );
+		$item_keys = array_keys( $order->get_items( $type ) );
+
+		$order->remove_item( $item_keys[1] );
+
+		$this->assertSame( array( $item_keys[0] => $item ), $order->get_items( $type ), 'Only the entry at the requested key should be removed.' );
+
+		$order->save();
+
+		$this->assertCount( 1, wc_get_order( $order->get_id() )->get_items( $type ), 'The remaining entry should still be saved.' );
+	}
+
+	/**
 	 * @testdox remove_item() should remove an unsaved item from a woocommerce_before_order_object_save callback.
 	 */
 	public function test_remove_item_removes_unsaved_item_during_before_save_hook(): void {

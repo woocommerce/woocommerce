@@ -1512,9 +1512,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			return false;
 		}
 
+		if ( ( $this->items[ $items_key ][ $item_id ] ?? null ) !== $item ) {
+			$item_id = $this->get_stored_item_key( $item );
+		}
+
 		// Unset and remove later.
 		$this->items_to_delete[] = $item;
-		unset( $this->items[ $items_key ][ $this->get_stored_item_key( $item ) ] );
+		unset( $this->items[ $items_key ][ $item_id ] );
 	}
 
 	/**
