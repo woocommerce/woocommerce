@@ -3435,6 +3435,80 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * @testdox Retried checkout drops a fee added only at order creation and adds a fee from each request exactly once.
+	 *
+	 * @testWith ["woocommerce_store_api_checkout_order_created", false]
+	 *           ["woocommerce_store_api_checkout_update_order_from_request", true]
+	 *
+	 * @param string $hook              The hook that adds the extension fee.
+	 * @param bool   $readded_on_retry Whether the extension adds its fee again on retry.
+	 */
+	public function test_retry_handles_extension_fees_added_after_cart_items_are_recorded( string $hook, bool $readded_on_retry ): void {
+		$fee_ids = array();
+		add_action(
+			$hook,
+			static function ( $order ) use ( &$fee_ids ) {
+				$fee = new \WC_Order_Item_Fee();
+				$fee->set_name( 'Extension surcharge' );
+				$fee->set_total( '3' );
+				$order->add_item( $fee );
+				$order->calculate_totals();
+				$fee_ids[] = $fee->get_id();
+			}
+		);
+
+		$order       = $this->place_order_with_failed_payment();
+		$first_total = $order->get_total();
+		$cart_total  = WC()->cart->get_total( 'edit' );
+		$this->assertCount( 1, $order->get_fees(), 'The extension fee should be present on the first attempt.' );
+		$this->assertSame( (float) $cart_total + 3, (float) $first_total, 'The first attempt should include the extension fee.' );
+
+		$response = rest_get_server()->dispatch( $this->build_valid_post_request() );
+
+		$this->assertSame( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertSame( $order->get_id(), (int) $response->get_data()['order_id'], 'Retry should reuse the original order.' );
+		$order = wc_get_order( $order->get_id() );
+		if ( $readded_on_retry ) {
+			$this->assertCount( 2, $fee_ids, 'The request hook should add a fee on each attempt.' );
+			$this->assertSame( array( $fee_ids[1] ), array_keys( $order->get_fees() ), 'Only the fee added for the retry should remain.' );
+			$this->assertSame( $first_total, $order->get_total(), 'Retry should include one extension fee without duplication.' );
+		} else {
+			$this->assertCount( 1, $fee_ids, 'The creation hook should fire only once.' );
+			$this->assertEmpty( $order->get_fees(), 'The fee outside the cart should be removed without being added again.' );
+			$this->assertSame( $cart_total, $order->get_total(), 'Retry should charge the cart total.' );
+		}
+	}
+
+	/**
+	 * @testdox A legacy order keeps a merchant fee on its first retry and removes it on its next recorded retry.
+	 */
+	public function test_legacy_order_fee_is_removed_on_second_retry(): void {
+		$order      = $this->place_order_with_failed_payment();
+		$cart_total = WC()->cart->get_total( 'edit' );
+		$order->delete_meta_data( '_cart_order_item_ids' );
+		$fee = new \WC_Order_Item_Fee();
+		$fee->set_name( 'Merchant fee' );
+		$fee->set_total( '7' );
+		$order->add_item( $fee );
+		$order->save();
+
+		$first_retry = $this->place_order_with_failed_payment();
+
+		$this->assertSame( $order->get_id(), $first_retry->get_id(), 'The legacy retry should reuse the original order.' );
+		$this->assertSame( array( $fee->get_id() ), array_keys( $first_retry->get_fees() ), 'The first legacy retry should keep the merchant fee.' );
+		$this->assertSame( (float) $cart_total + 7, (float) $first_retry->get_total(), 'The first retry should attempt payment including the fee.' );
+		$this->assertContains( $fee->get_id(), $first_retry->get_meta( '_cart_order_item_ids' )['fee'], 'The first retry should record the retained fee.' );
+
+		$response = rest_get_server()->dispatch( $this->build_valid_post_request() );
+
+		$this->assertSame( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertSame( $order->get_id(), (int) $response->get_data()['order_id'], 'The second retry should reuse the original order.' );
+		$order = wc_get_order( $order->get_id() );
+		$this->assertEmpty( $order->get_fees(), 'The amount check should remove the recorded fee absent from the cart.' );
+		$this->assertSame( $cart_total, $order->get_total(), 'The second retry should charge the cart total.' );
+	}
+
+	/**
 	 * Places an order through the checkout route with a payment that fails, so the shopper can retry it, and returns it.
 	 *
 	 * @return \WC_Order
