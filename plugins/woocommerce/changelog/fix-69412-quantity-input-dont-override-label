@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Don't override quantity input aria-label with generic 'Product Quantity'
