@@ -929,9 +929,10 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				$new_status = OrderStatus::PENDING;
 			}
 
-			// If the old status is set but unknown (e.g. draft) assume its pending for action usage.
+			// If the status is changing from auto-draft or an unknown status (e.g. draft), assume it was pending for action usage.
 			if (
 				$old_status
+				&& $old_status !== $new_status
 				&& (
 					OrderStatus::AUTO_DRAFT === $old_status
 					|| (

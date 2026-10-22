@@ -397,6 +397,31 @@ class Products extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox The featured image is returned only once when it is also part of the product gallery.
+	 */
+	public function test_featured_image_in_gallery_is_not_duplicated(): void {
+		$fixtures    = new FixtureData();
+		$featured_id = $fixtures->create_image_attachment();
+		$gallery_id  = $fixtures->create_image_attachment();
+		$product     = $fixtures->get_simple_product(
+			array(
+				'name'              => 'Test Product 1',
+				'regular_price'     => 10,
+				'image_id'          => $featured_id,
+				'gallery_image_ids' => array( $featured_id, $gallery_id ),
+			)
+		);
+
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $product->get_id() ) );
+
+		$this->assertSame(
+			array( $featured_id, $gallery_id ),
+			wp_list_pluck( $response->get_data()['images'], 'id' ),
+			'The featured image should be listed first and only once.'
+		);
+	}
+
+	/**
 	 * Test product category image return types.
 	 */
 	public function test_product_category_image_return_types() {

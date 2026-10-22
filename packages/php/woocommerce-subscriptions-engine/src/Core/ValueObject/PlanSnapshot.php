@@ -17,7 +17,6 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject;
 
 use LogicException;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\InvalidInputException;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\Coercion;
 
 defined( 'ABSPATH' ) || exit;
@@ -99,23 +98,6 @@ final class PlanSnapshot {
 	 */
 	public function get_selling_plan_id(): ?int {
 		return isset( $this->data['selling_plan_id'] ) ? Coercion::coerce_int( $this->data['selling_plan_id'] ) : null;
-	}
-
-	/**
-	 * The frozen billing cadence captured at signup, parsed with
-	 * {@see BillingPolicy::from_array()}, so it holds after the source plan is edited or deleted. Null when the payload carries no billing
-	 * policy array; throws when one is present but unusable, so a caller can log why
-	 * before falling back.
-	 *
-	 * @throws InvalidInputException If the stored policy does not parse or has no usable cadence.
-	 */
-	public function read_billing_policy(): ?BillingPolicy {
-		$policy = $this->data['billing_policy'] ?? null;
-		if ( ! is_array( $policy ) ) {
-			return null;
-		}
-
-		return BillingPolicy::from_array( Coercion::coerce_string_keyed( $policy ) );
 	}
 
 	/**
