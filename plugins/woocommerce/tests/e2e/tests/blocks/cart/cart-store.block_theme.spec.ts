@@ -54,9 +54,10 @@ test.describe( 'Cart Store', () => {
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		expect( requestNonce ).toBe( refreshNonce );
 
-		// Wait for the nonce to expire.
+		// Wait for the nonce to expire. Wait 3s for a 2s nonce lifetime to
+		// provide a reliable margin against scheduling delays in parallel runs.
 		// eslint-disable-next-line playwright/no-wait-for-timeout, no-restricted-syntax
-		await page.waitForTimeout( 2000 );
+		await page.waitForTimeout( 3000 );
 
 		// Adding another product should fail because it is using an expired nonce.
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
