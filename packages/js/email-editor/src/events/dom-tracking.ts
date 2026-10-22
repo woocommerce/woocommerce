@@ -10,6 +10,39 @@ import { recordEvent, isEventTrackingEnabled } from '.';
 
 let EVENTS_TO_TRACK = [];
 
+const SIDEBAR_TABS = {
+	'edit-post/document': 'document',
+	'edit-post/block': 'block',
+};
+
+/**
+ * Whether a header menu toggle was open when it was clicked.
+ * WordPress 7.2 menus no longer set the `is-opened` class, only `aria-expanded`.
+ */
+function isMenuToggleOpened( target: Element ) {
+	return (
+		target.classList.contains( 'is-opened' ) ||
+		target.getAttribute( 'aria-expanded' ) === 'true'
+	);
+}
+
+/**
+ * Returns which editor sidebar tab was clicked: `document` or `block`.
+ * WordPress 7.2 tabs have no `data-tab-id`, so fall back to the tab order (Email, then Block).
+ */
+function getSidebarTab( target: Element ) {
+	const tabId = target.getAttribute( 'data-tab-id' );
+	if ( tabId ) {
+		return SIDEBAR_TABS[ tabId ];
+	}
+	const tabs = Array.from(
+		target
+			.closest( '[role="tablist"]' )
+			?.querySelectorAll( '[role="tab"]' ) ?? []
+	);
+	return Object.values( SIDEBAR_TABS )[ tabs.indexOf( target ) ];
+}
+
 /**
  * Filter events by selector and record the event.
  */
@@ -71,13 +104,11 @@ export function initDomTracking() {
 		// Header more menu toggle
 		{
 			track: ( target ) => {
-				const isOpened = target.classList.contains( 'is-opened' );
 				recordEvent( 'header_more_menu_dropdown_toggle', {
-					isOpened,
+					isOpened: isMenuToggleOpened( target ),
 				} );
 			},
-
-			selector: `.components-dropdown-menu__toggle[aria-label="${ __(
+			selector: `.editor-header__settings button[aria-label="${ __(
 				'Options'
 			) }"]`,
 		},
@@ -108,26 +139,23 @@ export function initDomTracking() {
 		// Preview dropdown toggle clicked
 		{
 			track: ( target ) => {
-				const isOpened = target.classList.contains( 'is-opened' );
 				recordEvent( 'header_preview_dropdown_clicked', {
-					isOpened,
+					isOpened: isMenuToggleOpened( target ),
 				} );
 			},
 			selector: '.editor-preview-dropdown__toggle',
 		},
-		// Email tab in the sidebar clicked
+		// Email or Block tab in the sidebar clicked
 		{
-			track: () => {
-				recordEvent( 'sidebar_tab_selected', { tab: 'document' } );
+			track: ( target ) => {
+				const tab = getSidebarTab( target );
+				if ( tab ) {
+					recordEvent( 'sidebar_tab_selected', { tab } );
+				}
 			},
-			selector: '[data-tab-id="edit-post/document"]',
-		},
-		// Block tab in the sidebar clicked
-		{
-			track: () => {
-				recordEvent( 'sidebar_tab_selected', { tab: 'block' } );
-			},
-			selector: '[data-tab-id="edit-post/block"]',
+			// WordPress 7.0 renders the tabs with role="button", but with `data-tab-id`.
+			selector:
+				'.editor-sidebar__panel-tabs [data-tab-id], .editor-sidebar__panel-tabs [role="tab"]',
 		},
 		// Header inserter sidebar toggle clicked
 		{
