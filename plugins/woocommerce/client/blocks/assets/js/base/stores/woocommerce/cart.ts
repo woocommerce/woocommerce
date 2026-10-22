@@ -146,6 +146,8 @@ type CartMutationMeta = {
 	 * announcement.
 	 */
 	origin: 'add' | 'remove';
+	/** The product and quantity added by an `'add'`-origin mutation. */
+	product?: { id: number; quantity: number };
 };
 
 // Guard to distinguish between optimistic and cart items.
@@ -549,7 +551,12 @@ async function sendCartRequest(
 				// Preserve today's relative order: the legacy event fires
 				// before the sync event.
 				if ( anyAdd ) {
-					triggerAddedToCartEvent( { preserveCartData: true } );
+					triggerAddedToCartEvent( {
+						preserveCartData: true,
+						products: successful.flatMap( ( entry ) =>
+							entry.meta.product ? [ entry.meta.product ] : []
+						),
+					} );
 				}
 
 				emitSyncEvent( {
@@ -737,6 +744,10 @@ const { actions } = store< Store >(
 				const isUpdate = !! key;
 				const endpoint = isUpdate ? 'update-item' : 'add-item';
 
+				// Read before the optimistic update bumps `existingItem.quantity`.
+				const addedQuantity =
+					targetQuantity - ( existingItem?.quantity ?? 0 );
+
 				// Track what changes we're making for notice comparison.
 				const quantityChanges: QuantityChanges = isUpdate
 					? {
@@ -867,7 +878,11 @@ const { actions } = store< Store >(
 								JSON.stringify( state.cart )
 							);
 						},
-						meta: { quantityChanges, origin: 'add' },
+						meta: {
+							quantityChanges,
+							origin: 'add',
+							product: { id, quantity: addedQuantity },
+						},
 					} ) ) as TypeYield< typeof sendCartRequest >;
 
 					// The request settled successfully. Capture the outcome
@@ -1100,7 +1115,15 @@ const { actions } = store< Store >(
 									state.cart.items.push( itemToSend );
 								}
 							},
-							meta: itemMeta,
+							meta: {
+								...itemMeta,
+								product: {
+									id: item.id,
+									quantity:
+										quantity -
+										( existingItem?.quantity ?? 0 ),
+								},
+							},
 						} );
 					} );
 

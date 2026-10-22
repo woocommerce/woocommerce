@@ -489,7 +489,7 @@ export const addItemToCart =
 				cache: 'no-store',
 			} );
 			dispatch.receiveCart( response );
-			dispatch.finishAddingToCart( productId );
+			dispatch.finishAddingToCart( productId, true, quantity );
 			return response;
 		} catch ( error ) {
 			dispatch.receiveError( isApiErrorResponse( error ) ? error : null );
@@ -512,11 +512,22 @@ export function startAddingToCart( productId: number ) {
 
 /**
  * Removes the metadata of an item ID that was added.
+ *
+ * @param {number}  productId       Product ID that was added to cart.
+ * @param {boolean} [dispatchEvent] Whether to dispatch the added to cart event.
+ * @param {number}  [quantity=1]    Quantity of the product that was added.
  */
-export function finishAddingToCart( productId: number, dispatchEvent = true ) {
+export function finishAddingToCart(
+	productId: number,
+	dispatchEvent = true,
+	quantity = 1
+) {
 	return async ( { dispatch }: CartThunkArgs ) => {
 		if ( dispatchEvent ) {
-			triggerAddedToCartEvent( { preserveCartData: true } );
+			triggerAddedToCartEvent( {
+				preserveCartData: true,
+				products: [ { id: productId, quantity } ],
+			} );
 		}
 		dispatch.setProductsPendingAdd( productId, false );
 	};

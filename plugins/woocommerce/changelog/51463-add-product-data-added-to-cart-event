@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Include the added product IDs and quantities in the `wc-blocks_added_to_cart` event so extensions can react to what was added.

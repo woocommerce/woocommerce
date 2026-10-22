@@ -1800,6 +1800,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			expect( triggerAddedToCartEvent ).toHaveBeenCalledTimes( 1 );
 			expect( triggerAddedToCartEvent ).toHaveBeenCalledWith( {
 				preserveCartData: true,
+				products: [ { id: 1, quantity: 1 } ],
 			} );
 			expect( speak ).toHaveBeenCalledTimes( 1 );
 			expect( speak ).toHaveBeenCalledWith(
@@ -1848,6 +1849,14 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			expect( captured ).toHaveLength( 3 );
 			expect( events ).toHaveLength( 1 );
 			expect( triggerAddedToCartEvent ).toHaveBeenCalledTimes( 1 );
+			expect( triggerAddedToCartEvent ).toHaveBeenCalledWith( {
+				preserveCartData: true,
+				products: [
+					{ id: 1, quantity: 1 },
+					{ id: 2, quantity: 1 },
+					{ id: 3, quantity: 1 },
+				],
+			} );
 			expect( speak ).toHaveBeenCalledTimes( 1 );
 
 			cleanup();
