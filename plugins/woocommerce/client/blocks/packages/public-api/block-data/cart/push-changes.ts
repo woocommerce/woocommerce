@@ -13,8 +13,8 @@ import isShallowEqual from '@wordpress/is-shallow-equal';
 /**
  * Internal dependencies
  */
-import { store as cartStore } from './index';
 import { processErrorResponse } from '../utils';
+import { STORE_KEY as CART_STORE_KEY } from './constants';
 import { getDirtyKeys, validateDirtyProps, BaseAddressKey } from './utils';
 
 // This is used to track and cache the local state of push changes.
@@ -41,7 +41,7 @@ const localState = {
  * Initializes the customer data cache on the first run.
  */
 const initialize = () => {
-	localState.customerData = select( cartStore ).getCustomerData();
+	localState.customerData = select( CART_STORE_KEY ).getCustomerData();
 	localState.customerDataIsInitialized = true;
 };
 
@@ -50,7 +50,7 @@ const initialize = () => {
  */
 const updateDirtyProps = () => {
 	// Returns all current customer data from the store.
-	const newCustomerData = select( cartStore ).getCustomerData();
+	const newCustomerData = select( CART_STORE_KEY ).getCustomerData();
 
 	localState.dirtyProps.billingAddress = [
 		...localState.dirtyProps.billingAddress,
@@ -142,14 +142,14 @@ const hasStateList = ( country: string ): boolean =>
 	Object.keys( STATES[ country ] ?? {} ).length > 0;
 
 const isShippingRatesUpdateQueued = () =>
-	!! select( cartStore ).getCartMeta().isShippingRatesUpdateQueued;
+	!! select( CART_STORE_KEY ).getCartMeta().isShippingRatesUpdateQueued;
 
 /**
  * Updates the queued shipping rates flag, skipping the dispatch when it is unchanged.
  */
 const setShippingRatesUpdateQueued = ( isQueued: boolean ) => {
 	if ( isShippingRatesUpdateQueued() !== isQueued ) {
-		dispatch( cartStore ).__internalSetShippingRatesUpdateQueued(
+		dispatch( CART_STORE_KEY ).__internalSetShippingRatesUpdateQueued(
 			isQueued
 		);
 	}
@@ -215,7 +215,7 @@ const updateCustomerData = (): void => {
 		}
 	};
 
-	dispatch( cartStore )
+	dispatch( CART_STORE_KEY )
 		.updateCustomerData(
 			{
 				...( isBillingAddressDirty && {
@@ -275,7 +275,7 @@ export const flushChanges = (): void => {
  * schedule a push.
  */
 export const pushChanges = ( debounced = true ): void => {
-	if ( ! select( cartStore ).hasFinishedResolution( 'getCartData' ) ) {
+	if ( ! select( CART_STORE_KEY ).hasFinishedResolution( 'getCartData' ) ) {
 		return;
 	}
 
@@ -284,7 +284,7 @@ export const pushChanges = ( debounced = true ): void => {
 		return;
 	}
 
-	const customerData = select( cartStore ).getCustomerData();
+	const customerData = select( CART_STORE_KEY ).getCustomerData();
 
 	if ( isShallowEqual( localState.customerData, customerData ) ) {
 		return;

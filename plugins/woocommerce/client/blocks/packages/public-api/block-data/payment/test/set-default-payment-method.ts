@@ -58,7 +58,10 @@ describe( 'setDefaultPaymentMethod', () => {
 		const setActivePaymentMethodMock = jest.fn();
 		( select as jest.Mock ).mockImplementation( ( storeName ) => {
 			const originalStore = originalSelect( storeName );
-			if ( storeName === paymentStore ) {
+			if (
+				storeName === paymentStore ||
+				storeName === paymentStore.name
+			) {
 				return {
 					...originalStore,
 					getActivePaymentMethod: () => activePaymentMethod,
@@ -70,7 +73,10 @@ describe( 'setDefaultPaymentMethod', () => {
 		} );
 		( dispatch as jest.Mock ).mockImplementation( ( storeName ) => {
 			const originalStore = originalDispatch( storeName );
-			if ( storeName === paymentStore ) {
+			if (
+				storeName === paymentStore ||
+				storeName === paymentStore.name
+			) {
 				return {
 					...originalStore,
 					__internalSetActivePaymentMethod:
@@ -150,7 +156,10 @@ describe( 'setDefaultPaymentMethod', () => {
 		const setActivePaymentMethodMock = jest.fn();
 		( select as jest.Mock ).mockImplementation( ( storeName ) => {
 			const originalStore = originalSelect( storeName );
-			if ( storeName === paymentStore ) {
+			if (
+				storeName === paymentStore ||
+				storeName === paymentStore.name
+			) {
 				return {
 					...originalStore,
 					getAvailableExpressPaymentMethods: () => ( {
@@ -165,7 +174,10 @@ describe( 'setDefaultPaymentMethod', () => {
 		} );
 		( dispatch as jest.Mock ).mockImplementation( ( storeName ) => {
 			const originalStore = originalDispatch( storeName );
-			if ( storeName === paymentStore ) {
+			if (
+				storeName === paymentStore ||
+				storeName === paymentStore.name
+			) {
 				return {
 					...originalStore,
 					__internalSetActivePaymentMethod:
@@ -183,7 +195,10 @@ describe( 'setDefaultPaymentMethod', () => {
 	it( 'correctly sets the saved payment method if one is available', async () => {
 		( select as jest.Mock ).mockImplementation( ( storeName ) => {
 			const originalStore = originalSelect( storeName );
-			if ( storeName === paymentStore ) {
+			if (
+				storeName === paymentStore ||
+				storeName === paymentStore.name
+			) {
 				return {
 					...originalStore,
 					getAvailableExpressPaymentMethods: () => {
@@ -223,7 +238,10 @@ describe( 'setDefaultPaymentMethod', () => {
 		const setActivePaymentMethodMock = jest.fn();
 		( dispatch as jest.Mock ).mockImplementation( ( storeName ) => {
 			const originalStore = originalDispatch( storeName );
-			if ( storeName === paymentStore ) {
+			if (
+				storeName === paymentStore ||
+				storeName === paymentStore.name
+			) {
 				return {
 					...originalStore,
 					__internalSetActivePaymentMethod:

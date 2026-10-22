@@ -7,7 +7,7 @@ import { PlainPaymentMethods } from '@woocommerce/types';
 /**
  * Internal dependencies
  */
-import { store as paymentStore } from '../index';
+import { STORE_KEY as PAYMENT_STORE_KEY } from '../constants';
 import { checkoutData } from '../../checkout/constants';
 
 export const setDefaultPaymentMethod = async (
@@ -15,14 +15,15 @@ export const setDefaultPaymentMethod = async (
 ) => {
 	const paymentMethodKeys = Object.keys( paymentMethods );
 	const expressPaymentMethodKeys = Object.keys(
-		select( paymentStore ).getAvailableExpressPaymentMethods()
+		select( PAYMENT_STORE_KEY ).getAvailableExpressPaymentMethods()
 	);
 	const allPaymentMethodKeys = [
 		...paymentMethodKeys,
 		...expressPaymentMethodKeys,
 	];
 
-	const activePaymentMethod = select( paymentStore ).getActivePaymentMethod();
+	const activePaymentMethod =
+		select( PAYMENT_STORE_KEY ).getActivePaymentMethod();
 	// Return if current method is valid.
 	if (
 		activePaymentMethod &&
@@ -36,15 +37,16 @@ export const setDefaultPaymentMethod = async (
 	// another. Without a server answer, as in the editor, the fallback below runs.
 	if ( checkoutData.payment_method === '' ) {
 		if ( activePaymentMethod ) {
-			void dispatch( paymentStore ).__internalSetPaymentIdle();
-			void dispatch( paymentStore ).__internalSetActivePaymentMethod(
+			void dispatch( PAYMENT_STORE_KEY ).__internalSetPaymentIdle();
+			void dispatch( PAYMENT_STORE_KEY ).__internalSetActivePaymentMethod(
 				''
 			);
 		}
 		return;
 	}
 
-	const savedPaymentMethods = select( paymentStore ).getSavedPaymentMethods();
+	const savedPaymentMethods =
+		select( PAYMENT_STORE_KEY ).getSavedPaymentMethods();
 	const flatSavedPaymentMethods = Object.keys( savedPaymentMethods ).flatMap(
 		( type ) => savedPaymentMethods[ type ]
 	);
@@ -57,7 +59,7 @@ export const setDefaultPaymentMethod = async (
 		const paymentMethodSlug = savedPaymentMethod.method.gateway;
 		const savedTokenKey = `wc-${ paymentMethodSlug }-payment-token`;
 
-		void dispatch( paymentStore ).__internalSetActivePaymentMethod(
+		void dispatch( PAYMENT_STORE_KEY ).__internalSetActivePaymentMethod(
 			paymentMethodSlug,
 			{
 				token,
@@ -69,8 +71,8 @@ export const setDefaultPaymentMethod = async (
 		return;
 	}
 
-	void dispatch( paymentStore ).__internalSetPaymentIdle();
-	void dispatch( paymentStore ).__internalSetActivePaymentMethod(
+	void dispatch( PAYMENT_STORE_KEY ).__internalSetPaymentIdle();
+	void dispatch( PAYMENT_STORE_KEY ).__internalSetActivePaymentMethod(
 		paymentMethodKeys[ 0 ]
 	);
 };
