@@ -975,7 +975,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			}
 		}
 
-		$props_in_lookup_table = array( 'sku', 'global_unique_id', 'regular_price', 'sale_price', 'date_on_sale_from', 'date_on_sale_to', 'total_sales', 'average_rating', 'stock_quantity', 'stock_status', 'manage_stock', 'downloadable', 'virtual', 'tax_status', 'tax_class' );
+		$props_in_lookup_table = array( 'sku', 'global_unique_id', 'regular_price', 'sale_price', 'date_on_sale_from', 'date_on_sale_to', 'product_type', 'total_sales', 'average_rating', 'stock_quantity', 'stock_status', 'manage_stock', 'downloadable', 'virtual', 'tax_status', 'tax_class' );
 		if ( $this->cogs_feature_is_enabled() ) {
 			$props_in_lookup_table[] = 'cogs_value';
 		}
@@ -999,6 +999,25 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 */
 	public function refresh_product_lookup_table( int $product_id ): void {
 		$this->update_lookup_table( $product_id, 'wc_product_meta_lookup' );
+	}
+
+	/**
+	 * Preserve grouped sale classification after any CPT lookup row writer, including generic-store refreshes.
+	 *
+	 * @since 11.3.0
+	 * @param int    $id Product ID.
+	 * @param string $table Lookup table name.
+	 * @return null
+	 */
+	protected function update_lookup_table( $id, $table ) {
+		$result = parent::update_lookup_table( $id, $table );
+		if ( 'wc_product_meta_lookup' === $table && $id > 0 ) {
+			$store = WC_Data_Store::load( 'product-grouped' );
+			if ( $store->has_callable( 'sync_sale_row' ) ) {
+				$store->sync_sale_row( (int) $id );
+			}
+		}
+		return $result;
 	}
 
 	/**

@@ -4117,3 +4117,29 @@ function wc_update_1130_delete_unpublished_variation_lookup_rows() {
 
 	return false;
 }
+
+/**
+ * Backfill grouped product sale flags without rebuilding unrelated lookup columns.
+ *
+ * @since 11.3.0
+ * @return bool Whether another batch remains.
+ */
+function wc_update_1130_grouped_product_sales() {
+	$store  = WC_Data_Store::load( 'product-grouped' );
+	$option = 'woocommerce_update_1130_grouped_sales_cursor';
+	if ( ! $store->has_callable( 'rebuild_sale_rows' ) ) {
+		return false;
+	}
+	$cursor = $store->rebuild_sale_rows( (int) get_option( $option, 0 ) );
+	if ( null === $cursor ) {
+		return true;
+	}
+	if ( $cursor > 0 ) {
+		if ( ! update_option( $option, $cursor, false ) && (int) get_option( $option, 0 ) < $cursor ) {
+			wc_get_logger()->error( 'Retrying the grouped sale backfill because its progress could not be saved.', array( 'source' => 'grouped-product-sales' ) );
+		}
+		return true;
+	}
+	delete_option( $option );
+	return false;
+}

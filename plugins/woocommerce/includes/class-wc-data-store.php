@@ -11,6 +11,10 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Data store class.
+ *
+ * @method bool sync_sale_row(int $product_id) Reconcile a grouped sale row, if supported by the underlying store.
+ * @method void sync_sale_rows(int $product_id, bool $include_children = false) Refresh groups containing a changed product, if supported.
+ * @method int|null rebuild_sale_rows(int $after_id) Refresh a batch of grouped sale rows, if supported.
  */
 class WC_Data_Store {
 

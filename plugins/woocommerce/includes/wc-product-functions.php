@@ -2387,6 +2387,17 @@ function wc_update_product_lookup_tables_column( $column ) {
 				)
 			);
 			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$store = WC_Data_Store::load( 'product-grouped' );
+			if ( $store->has_callable( 'rebuild_sale_rows' ) ) {
+				$cursor = 0;
+				do {
+					$cursor = $store->rebuild_sale_rows( $cursor );
+					if ( null === $cursor ) {
+						WC()->queue()->add( 'wc_update_product_lookup_tables_column', array( 'column' => 'onsale' ), 'woocommerce-db-updates' );
+						break;
+					}
+				} while ( $cursor > 0 );
+			}
 			break;
 	}
 

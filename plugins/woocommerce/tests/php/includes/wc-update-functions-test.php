@@ -1159,4 +1159,50 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 
 		delete_option( 'woocommerce_use_legacy_get_variations_price_hash' );
 	}
+
+	/**
+	 * @testdox Grouped sale backfill resumes in bounded batches, evicts old sale IDs, and preserves other lookup columns.
+	 */
+	public function test_wc_update_1130_grouped_product_sales(): void {
+		global $wpdb;
+
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+		$child = new WC_Product_Simple();
+		$child->set_regular_price( '37' );
+		$child->set_sale_price( '19' );
+		$child->save();
+		$group_ids = array();
+		for ( $i = 0; $i < 201; ++$i ) {
+			$group = new WC_Product_Grouped();
+			$group->set_children( array( $child->get_id() ) );
+			$group->save();
+			$group_ids[] = $group->get_id();
+			$wpdb->update(
+				$wpdb->wc_product_meta_lookup,
+				array(
+					'onsale'    => 0,
+					'min_price' => '93',
+				),
+				array( 'product_id' => $group->get_id() )
+			);
+		}
+		set_transient( 'wc_products_onsale', array( $child->get_id() ), DAY_IN_SECONDS );
+		$option = 'woocommerce_update_1130_grouped_sales_cursor';
+		add_filter( 'pre_update_option_' . $option, '__return_false' );
+		try {
+			$this->assertTrue( wc_update_1130_grouped_product_sales(), 'A failed cursor write must request another run.' );
+		} finally {
+			remove_filter( 'pre_update_option_' . $option, '__return_false' );
+		}
+		$this->assertFalse( get_option( $option ) );
+		$this->assertContains( $group_ids[199], wc_get_product_ids_on_sale() );
+		$this->assertNotContains( $group_ids[200], wc_get_product_ids_on_sale(), 'The first batch must stop after 200 groups.' );
+		$this->assertTrue( wc_update_1130_grouped_product_sales() );
+		$this->assertNotContains( $group_ids[200], wc_get_product_ids_on_sale(), 'Retrying an unsaved cursor must safely repeat its batch.' );
+		$this->assertTrue( wc_update_1130_grouped_product_sales() );
+		$this->assertContains( $group_ids[200], wc_get_product_ids_on_sale() );
+		$this->assertFalse( wc_update_1130_grouped_product_sales() );
+		$this->assertFalse( get_option( 'woocommerce_update_1130_grouped_sales_cursor' ) );
+		$this->assertSame( '93.0000', $wpdb->get_var( $wpdb->prepare( "SELECT min_price FROM {$wpdb->wc_product_meta_lookup} WHERE product_id = %d", $group_ids[0] ) ) );
+	}
 }

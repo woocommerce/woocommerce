@@ -39,6 +39,8 @@ class WC_Post_Data {
 	public static function init() {
 		add_action( 'clean_post_cache', array( __CLASS__, 'invalidate_products_last_modified' ), 10, 2 );
 		add_action( 'clean_post_cache', array( __CLASS__, 'invalidate_db_block_templates_cache' ), 10, 2 );
+		add_action( 'woocommerce_delete_product_transients', array( __CLASS__, 'sync_grouped_product_sales' ) );
+		add_action( 'woocommerce_refresh_grouped_product_sale', array( __CLASS__, 'refresh_grouped_product_sale' ), 10, 2 );
 		add_filter( 'post_type_link', array( __CLASS__, 'variation_post_link' ), 10, 2 );
 		add_action( 'shutdown', array( __CLASS__, 'do_deferred_product_sync' ), 10 );
 		add_action( 'set_object_terms', array( __CLASS__, 'force_default_term' ), 10, 5 );
@@ -59,6 +61,7 @@ class WC_Post_Data {
 		// Status transitions.
 		add_action( 'transition_post_status', array( __CLASS__, 'transition_post_status' ), 10, 3 );
 		add_action( 'delete_post', array( __CLASS__, 'delete_post_data' ) );
+		add_action( 'deleted_post', array( __CLASS__, 'invalidate_product_sale_cache' ), 10, 2 );
 		add_action( 'wp_trash_post', array( __CLASS__, 'trash_post' ) );
 		add_action( 'untrashed_post', array( __CLASS__, 'untrash_post' ) );
 		add_action( 'before_delete_post', array( __CLASS__, 'before_delete_order' ) );
@@ -154,6 +157,10 @@ class WC_Post_Data {
 	public static function transition_post_status( $new_status, $old_status, $post ) {
 		if ( ( ProductStatus::PUBLISH === $new_status || ProductStatus::PUBLISH === $old_status ) && in_array( $post->post_type, array( 'product', 'product_variation' ), true ) ) {
 			self::delete_product_query_transients();
+			if ( $new_status !== $old_status ) {
+				self::sync_grouped_product_sales( $post->ID, true );
+				delete_transient( 'wc_products_onsale' );
+			}
 		}
 
 		if ( ProductStatus::PUBLISH === $new_status && ProductStatus::PUBLISH !== $old_status && in_array( $post->post_type, array( 'product', 'product_variation' ), true ) ) {
@@ -174,6 +181,67 @@ class WC_Post_Data {
 	 */
 	public static function delete_product_query_transients() {
 		WC_Cache_Helper::get_transient_version( 'product_query', true );
+	}
+
+	/**
+	 * Refresh sale rows after completed product saves and scheduled price changes.
+	 *
+	 * @since 11.3.0
+	 * @param int  $product_id Changed product ID.
+	 * @param bool $include_children Whether a parent's eligibility changed for its children.
+	 */
+	public static function sync_grouped_product_sales( $product_id, $include_children = false ): void {
+		if ( ! is_numeric( $product_id ) || $product_id <= 0 ) {
+			return;
+		}
+		$store = WC_Data_Store::load( 'product-grouped' );
+		if ( $store->has_callable( 'sync_sale_rows' ) ) {
+			$store->sync_sale_rows( (int) $product_id, true === $include_children );
+		}
+	}
+
+	/**
+	 * Retry a failed sale refresh, including a missing lookup row or conversion away from grouped.
+	 *
+	 * @since 11.3.0
+	 * @param int  $product_id Product ID.
+	 * @param bool $include_children Whether a parent's eligibility changed for its children.
+	 */
+	public static function refresh_grouped_product_sale( $product_id, $include_children = false ): void {
+		if ( ! is_numeric( $product_id ) || $product_id <= 0 ) {
+			return;
+		}
+		if ( WC_Product_Grouped_Data_Store_CPT::class !== WC_Data_Store::load( 'product-grouped' )->get_current_class_name() ) {
+			return;
+		}
+		if ( WC_Product_Data_Store_CPT::class !== WC_Data_Store::load( 'product' )->get_current_class_name() ) {
+			return;
+		}
+		$product = wc_get_product( (int) $product_id );
+		if ( $product ) {
+			$store = $product->get_data_store();
+			if ( $store instanceof WC_Data_Store && $store->has_callable( 'refresh_product_lookup_table' ) ) {
+				wp_cache_delete( 'lookup_table', 'object_' . (int) $product_id );
+				$store->refresh_product_lookup_table( (int) $product_id ); // @phpstan-ignore method.notFound (Guarded by has_callable() on the product's own store.)
+			}
+		}
+		self::sync_grouped_product_sales( $product_id, $include_children );
+		delete_transient( 'wc_products_onsale' );
+	}
+
+	/**
+	 * Refresh containing groups and evict sale IDs after a product has been deleted.
+	 *
+	 * @since 11.3.0
+	 * @param int     $post_id Deleted post ID.
+	 * @param WP_Post $post Deleted post.
+	 */
+	public static function invalidate_product_sale_cache( $post_id, $post ): void {
+		if ( $post instanceof WP_Post && in_array( $post->post_type, array( 'product', 'product_variation' ), true ) ) {
+			self::sync_grouped_product_sales( $post_id, 'product' === $post->post_type );
+			delete_transient( 'wc_products_onsale' );
+			self::delete_product_query_transients();
+		}
 	}
 
 	/**
