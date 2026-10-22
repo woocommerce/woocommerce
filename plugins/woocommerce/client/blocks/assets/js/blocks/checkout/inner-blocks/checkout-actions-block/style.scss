@@ -1,3 +1,6 @@
+// The Place order button's width when it shares the row with Return to Cart.
+$place-order-column-width: max(50%, 260px);
+
 .wc-block-checkout__actions {
 	margin-bottom: $gap-larger;
 
@@ -31,12 +34,12 @@
 
 		&--with-return-to-cart {
 			.wc-block-components-checkout-place-order-button {
-				flex: 0 0 max(50%, 260px);
+				flex: 0 0 $place-order-column-width;
 			}
 
 			// Line the terms up under the button.
 			> .wc-block-checkout__terms {
-				padding-inline-start: calc(100% - max(50%, 260px));
+				padding-inline-start: calc(100% - #{$place-order-column-width});
 			}
 		}
 	}

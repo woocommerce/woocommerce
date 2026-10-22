@@ -555,9 +555,19 @@ test.describe( 'Merchant → Checkout', () => {
 
 			// While the Terms block is in the checkout, it owns the terms.
 			await expect( showTermsToggle ).toHaveCount( 0 );
+			await expect(
+				editor.page.getByRole( 'button', {
+					name: 'Switch',
+					exact: true,
+				} )
+			).toHaveCount( 0 );
+
+			await editor.selectBlocks(
+				`${ blockSelectorInEditor } .wp-block-woocommerce-checkout-terms-block`
+			);
 
 			await editor.page
-				.getByRole( 'button', { name: 'Switch to Place order terms' } )
+				.getByRole( 'button', { name: 'Switch', exact: true } )
 				.click();
 
 			await expect(

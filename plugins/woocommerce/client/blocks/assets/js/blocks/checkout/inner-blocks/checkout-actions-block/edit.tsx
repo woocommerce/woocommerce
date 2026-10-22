@@ -31,10 +31,7 @@ import { getSetting } from '@woocommerce/settings';
 import { BlockAttributes } from './block';
 import { defaultReturnToCartButtonLabel } from './constants';
 import { TermsNotices } from '../checkout-terms-block/edit';
-import {
-	SwitchToActionsTermsNotice,
-	useCheckoutTermsBlocks,
-} from '../checkout-terms-block/switch-to-actions-terms';
+import { useCheckoutTermsBlocks } from '../checkout-terms-block/switch-to-actions-terms';
 import {
 	termsConsentDefaultText,
 	termsCheckboxDefaultText,
@@ -147,63 +144,59 @@ export const Edit = ( {
 					) }
 				</PanelBody>
 
-				<PanelBody
-					title={ __( 'Terms and conditions', 'woocommerce' ) }
-				>
-					{ isTermsDisabledByExtension && (
-						<Notice
-							className="wc-block-checkout__terms_notice"
-							status="warning"
-							isDismissible={ false }
-						>
-							{ __(
-								'Terms are hidden by an extension on your store.',
+				{ ! termsClientId && (
+					<PanelBody
+						title={ __( 'Terms and conditions', 'woocommerce' ) }
+					>
+						{ isTermsDisabledByExtension && (
+							<Notice
+								className="wc-block-checkout__terms_notice"
+								status="warning"
+								isDismissible={ false }
+							>
+								{ __(
+									'Terms are hidden by an extension on your store.',
+									'woocommerce'
+								) }
+							</Notice>
+						) }
+						{ showTerms && (
+							<TermsNotices
+								text={ termsText }
+								checkbox={ termsCheckbox }
+								setText={ ( value ) =>
+									setAttributes( { termsText: value } )
+								}
+							/>
+						) }
+						<ToggleControl
+							__nextHasNoMarginBottom
+							label={ __(
+								'Show terms and conditions',
 								'woocommerce'
 							) }
-						</Notice>
-					) }
-					{ termsClientId ? (
-						<SwitchToActionsTermsNotice clientId={ clientId } />
-					) : (
-						<>
-							{ showTerms && (
-								<TermsNotices
-									text={ termsText }
-									checkbox={ termsCheckbox }
-									setText={ ( value ) =>
-										setAttributes( { termsText: value } )
-									}
-								/>
-							) }
+							checked={ showTerms }
+							onChange={ () =>
+								setAttributes( { showTerms: ! showTerms } )
+							}
+						/>
+						{ showTerms && (
 							<ToggleControl
 								__nextHasNoMarginBottom
 								label={ __(
-									'Show terms and conditions',
+									'Require checkbox',
 									'woocommerce'
 								) }
-								checked={ showTerms }
+								checked={ termsCheckbox }
 								onChange={ () =>
-									setAttributes( { showTerms: ! showTerms } )
+									setAttributes( {
+										termsCheckbox: ! termsCheckbox,
+									} )
 								}
 							/>
-							{ showTerms && (
-								<ToggleControl
-									__nextHasNoMarginBottom
-									label={ __(
-										'Require checkbox',
-										'woocommerce'
-									) }
-									checked={ termsCheckbox }
-									onChange={ () =>
-										setAttributes( {
-											termsCheckbox: ! termsCheckbox,
-										} )
-									}
-								/>
-							) }
-						</>
-					) }
-				</PanelBody>
+						) }
+					</PanelBody>
+				) }
 
 				{ showReturnToCart &&
 					! (

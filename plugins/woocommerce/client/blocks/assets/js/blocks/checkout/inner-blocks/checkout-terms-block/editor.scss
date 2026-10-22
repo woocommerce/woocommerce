@@ -25,7 +25,7 @@
 }
 
 .wc-block-checkout__terms_notice {
-	margin: 0;
+	margin: $gap;
 	.components-notice__content {
 		margin: 4px 0;
 	}
@@ -35,7 +35,7 @@
 	}
 	// The Actions block shows these notices inside its settings panel.
 	.components-panel__body & {
-		margin-bottom: $gap;
+		margin: 0 0 $gap;
 	}
 	.components-notice__actions {
 		button {
