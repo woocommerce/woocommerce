@@ -88,13 +88,16 @@ class HtmlSanitizer {
 	 * @return string Text escaped for an HTML text node.
 	 */
 	public function esc_html_exact( string $text ): string {
-		return (string) preg_replace_callback(
-			'/[\x20-\x7E]/',
-			static function ( array $matches ): string {
-				return '&#' . ord( $matches[0] ) . ';';
-			},
-			wp_check_invalid_utf8( $text )
-		);
+		$text    = wp_check_invalid_utf8( $text );
+		$escaped = '';
+		$length  = strlen( $text );
+
+		for ( $i = 0; $i < $length; $i++ ) {
+			$code     = ord( $text[ $i ] );
+			$escaped .= ( $code >= 0x20 && $code <= 0x7E ) ? '&#' . $code . ';' : $text[ $i ];
+		}
+
+		return $escaped;
 	}
 
 	/**
