@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Let stores keep customer emails out of WooCommerce abilities used by AI agents.
