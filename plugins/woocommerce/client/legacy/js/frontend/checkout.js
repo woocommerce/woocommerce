@@ -260,8 +260,15 @@ jQuery( function ( $ ) {
 				);
 			}
 
-			// If there are none selected, select the first.
-			if ( 0 === $payment_methods.filter( ':checked' ).length ) {
+			// If there are none selected, select the first, unless the server left the list
+			// without a selection on purpose (a woocommerce_default_payment_method callback).
+			if (
+				0 === $payment_methods.filter( ':checked' ).length &&
+				'no' !==
+					$payment_methods
+						.closest( 'ul.wc_payment_methods' )
+						.attr( 'data-preselected' )
+			) {
 				$payment_methods.eq( 0 ).prop( 'checked', true );
 			}
 

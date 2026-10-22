@@ -12,7 +12,7 @@
  *
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 10.9.0
+ * @version 11.4.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -20,10 +20,13 @@ defined( 'ABSPATH' ) || exit;
 if ( ! wp_doing_ajax() ) {
 	do_action( 'woocommerce_review_order_before_payment' );
 }
+
+// Tells checkout.js whether the server selected a method, so it leaves the list alone when none was selected on purpose.
+$has_preselected_gateway = ! empty( wp_list_filter( (array) $available_gateways, array( 'chosen' => true ) ) );
 ?>
 <div id="payment" class="woocommerce-checkout-payment">
 	<?php if ( WC()->cart && WC()->cart->needs_payment() ) : ?>
-		<ul class="wc_payment_methods payment_methods methods" aria-label="<?php esc_attr_e( 'Payment methods', 'woocommerce' ); ?>">
+		<ul class="wc_payment_methods payment_methods methods" aria-label="<?php esc_attr_e( 'Payment methods', 'woocommerce' ); ?>" data-preselected="<?php echo esc_attr( $has_preselected_gateway ? 'yes' : 'no' ); ?>">
 			<?php
 			if ( ! empty( $available_gateways ) ) {
 				foreach ( $available_gateways as $gateway ) {
