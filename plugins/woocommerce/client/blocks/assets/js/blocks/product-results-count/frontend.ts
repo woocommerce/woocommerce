@@ -15,8 +15,13 @@ type ProductResultsCountContext = {
 	announcement: string;
 };
 
-// Each block's last count. A block without an entry has not run its first watch, which is the page load.
+// Each block's last count. A block without an entry has not run its first watch yet.
 const lastAnnouncements = new WeakMap< HTMLElement, string >();
+
+// Blocks rendered with the page. A block that mounts later came from a navigation, such as clearing filters on a page with no results.
+const pageLoadBlocks = new WeakSet< Element >(
+	Array.from( document.querySelectorAll( '.wc-block-product-results-count' ) )
+);
 
 let pendingAnnouncement:
 	| {
@@ -40,12 +45,21 @@ const productResultsCountStore = {
 		 *
 		 * Every block's watch re-runs on each navigation, so a block whose count did not
 		 * change must not replace an announcement from a block whose count did.
+		 *
+		 * @return Cleanup the watch runs before the next run and when the block leaves the page.
 		 */
 		announceResultsCount: () => {
 			// Read on every run, including the first, so the watch re-runs on every navigation.
 			const { announcement } =
 				getServerContext< ProductResultsCountContext >();
 			const { ref } = getElement();
+			// A page with no results drops the block, so its queued count must not be spoken.
+			const cancelOwnAnnouncement = () => {
+				if ( ref && pendingAnnouncement?.block === ref ) {
+					clearTimeout( pendingAnnouncement.timer );
+					pendingAnnouncement = undefined;
+				}
+			};
 			const previousAnnouncement = ref
 				? lastAnnouncements.get( ref )
 				: undefined;
@@ -53,23 +67,17 @@ const productResultsCountStore = {
 				lastAnnouncements.set( ref, announcement );
 			}
 
-			if ( ! announcement ) {
-				// This block now shows no results, so its own queued count is out of date.
-				if ( ref && pendingAnnouncement?.block === ref ) {
-					clearTimeout( pendingAnnouncement.timer );
-					pendingAnnouncement = undefined;
-				}
-				return;
-			}
-
 			const isFirstRun = previousAnnouncement === undefined;
+			const isPageLoad =
+				isFirstRun && ( ! ref || pageLoadBlocks.has( ref ) );
 			const isChanged =
 				! isFirstRun && announcement !== previousAnnouncement;
 			if (
-				( isFirstRun && ! shouldAnnounceOnPageLoad() ) ||
+				( isPageLoad && ! shouldAnnounceOnPageLoad() ) ||
+				! announcement ||
 				( ! isChanged && pendingAnnouncement?.isChanged )
 			) {
-				return;
+				return cancelOwnAnnouncement;
 			}
 
 			clearTimeout( pendingAnnouncement?.timer );
@@ -87,6 +95,8 @@ const productResultsCountStore = {
 						} );
 				}, ANNOUNCEMENT_DELAY_MS ),
 			};
+
+			return cancelOwnAnnouncement;
 		},
 	},
 };

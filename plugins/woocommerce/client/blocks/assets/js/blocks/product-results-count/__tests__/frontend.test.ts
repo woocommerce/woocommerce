@@ -1,8 +1,12 @@
 const mockGetServerContext = jest.fn();
 const mockGetElement = jest.fn();
 const mockSpeak = jest.fn();
-let mockCallbacks: { announceResultsCount: () => void } | null = null;
+let mockCallbacks: {
+	announceResultsCount: () => ( () => void ) | void;
+} | null = null;
 let announcementDelayMs: number;
+// Cleanups returned by each block's last watch run, as the watch effect keeps them.
+let cleanups = new Map< HTMLElement, () => void >();
 
 jest.mock(
 	'@wordpress/interactivity',
@@ -21,15 +25,35 @@ jest.mock( '@wordpress/a11y', () => ( { speak: mockSpeak } ), {
 	virtual: true,
 } );
 
-const firstBlock = document.createElement( 'div' );
+// Blocks the server rendered with the page; tests add them before the module loads.
+let firstBlock: HTMLElement;
+let secondBlock: HTMLElement;
+
+const pageBlock = () => {
+	const block = document.createElement( 'div' );
+	block.className = 'wc-block-product-results-count';
+	document.body.append( block );
+	return block;
+};
 
 const announce = ( text: string, block: HTMLElement = firstBlock ) => {
 	if ( ! mockCallbacks ) {
 		throw new Error( 'Product Results Count store was not registered.' );
 	}
+	// Like the watch effect, run the previous cleanup before re-running the callback.
+	cleanups.get( block )?.();
 	mockGetElement.mockReturnValue( { ref: block } );
 	mockGetServerContext.mockReturnValue( { announcement: text } );
-	mockCallbacks.announceResultsCount();
+	const cleanup = mockCallbacks.announceResultsCount();
+	if ( cleanup ) {
+		cleanups.set( block, cleanup );
+	}
+};
+
+// The router removed the block, for example on a page with no results.
+const removeBlock = ( block: HTMLElement = firstBlock ) => {
+	cleanups.get( block )?.();
+	cleanups.delete( block );
 };
 
 const settle = async () => {
@@ -46,6 +70,10 @@ describe( 'Product Results Count announcement', () => {
 		mockGetElement.mockReset();
 		mockSpeak.mockReset();
 		mockCallbacks = null;
+		cleanups = new Map();
+		document.body.innerHTML = '';
+		firstBlock = pageBlock();
+		secondBlock = pageBlock();
 		await jest.isolateModulesAsync( async () => {
 			( { ANNOUNCEMENT_DELAY_MS: announcementDelayMs } =
 				await import( '../frontend' ) );
@@ -65,10 +93,7 @@ describe( 'Product Results Count announcement', () => {
 
 	it( 'does not announce on the initial render of several blocks', async () => {
 		announce( 'Showing 1–16 of 28 results' );
-		announce(
-			'Showing 1–16 of 28 results',
-			document.createElement( 'div' )
-		);
+		announce( 'Showing 1–16 of 28 results', secondBlock );
 		await settle();
 
 		expect( mockSpeak ).not.toHaveBeenCalled();
@@ -126,7 +151,6 @@ describe( 'Product Results Count announcement', () => {
 	} );
 
 	it( 'announces once when two blocks show the same new count', async () => {
-		const secondBlock = document.createElement( 'div' );
 		announce( 'Showing 1–16 of 28 results' );
 		announce( 'Showing 1–16 of 28 results', secondBlock );
 
@@ -142,7 +166,7 @@ describe( 'Product Results Count announcement', () => {
 	} );
 
 	it( 'announces the changed count when a later block is unchanged', async () => {
-		const otherQueryBlock = document.createElement( 'div' );
+		const otherQueryBlock = secondBlock;
 		announce( 'Showing 1–16 of 28 results' );
 		announce( 'Showing 1–4 of 12 results', otherQueryBlock );
 
@@ -158,7 +182,7 @@ describe( 'Product Results Count announcement', () => {
 	} );
 
 	it( 'announces the changed count when an earlier block is unchanged', async () => {
-		const otherQueryBlock = document.createElement( 'div' );
+		const otherQueryBlock = secondBlock;
 		announce( 'Showing 1–4 of 12 results', otherQueryBlock );
 		announce( 'Showing 1–16 of 28 results' );
 
@@ -218,7 +242,7 @@ describe( 'Product Results Count announcement', () => {
 			);
 			announce(
 				'Showing 1–16 of 28 results Sorted by price: low to high',
-				document.createElement( 'div' )
+				secondBlock
 			);
 			await settle();
 
@@ -267,8 +291,52 @@ describe( 'Product Results Count announcement', () => {
 		expect( mockSpeak ).not.toHaveBeenCalled();
 	} );
 
+	it( 'announces a block that mounts after a navigation, such as clearing filters with no results', async () => {
+		announce( 'Showing 1–16 of 28 results' );
+		removeBlock();
+		await settle();
+
+		announce(
+			'Showing 1–16 of 28 results',
+			document.createElement( 'div' )
+		);
+		await settle();
+
+		expect( mockSpeak ).toHaveBeenCalledTimes( 1 );
+		expect( mockSpeak ).toHaveBeenCalledWith(
+			'Showing 1–16 of 28 results',
+			'polite'
+		);
+	} );
+
+	it( 'drops a pending count when the block is removed from the page', async () => {
+		announce( 'Showing 1–16 of 28 results' );
+		announce( 'Showing the single result' );
+		jest.advanceTimersByTime( 300 );
+		removeBlock();
+		await settle();
+
+		expect( mockSpeak ).not.toHaveBeenCalled();
+	} );
+
+	it( "keeps another block's pending count when a block is removed", async () => {
+		const otherQueryBlock = secondBlock;
+		announce( 'Showing 1–16 of 28 results' );
+		announce( 'Showing 1–4 of 12 results', otherQueryBlock );
+
+		announce( 'Showing 17–28 of 28 results' );
+		removeBlock( otherQueryBlock );
+		await settle();
+
+		expect( mockSpeak ).toHaveBeenCalledTimes( 1 );
+		expect( mockSpeak ).toHaveBeenCalledWith(
+			'Showing 17–28 of 28 results',
+			'polite'
+		);
+	} );
+
 	it( "keeps another block's pending count when a block shows no results", async () => {
-		const otherQueryBlock = document.createElement( 'div' );
+		const otherQueryBlock = secondBlock;
 		announce( 'Showing 1–16 of 28 results' );
 		announce( 'Showing 1–4 of 12 results', otherQueryBlock );
 
