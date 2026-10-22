@@ -8,9 +8,9 @@ import {
 	PanelRow,
 	TextControl,
 	ToggleControl,
-	__experimentalText as Text,
 } from '@wordpress/components';
 import { addFilter } from '@wordpress/hooks';
+import { Text } from '@wordpress/ui';
 import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
 import { useState } from '@wordpress/element';
@@ -207,6 +207,34 @@ const SidebarSettings = ( {
 					) }
 				</BaseControl>
 			</PanelRow>
+			{ typeof woocommerce_email_data.send_on_unpaid_timeout ===
+				'boolean' && (
+				<PanelRow>
+					<BaseControl __nextHasNoMarginBottom>
+						<ToggleControl
+							__nextHasNoMarginBottom
+							name="send_on_unpaid_timeout"
+							checked={
+								woocommerce_email_data.send_on_unpaid_timeout
+							}
+							label={ __(
+								'Send this email when an unpaid order is cancelled automatically',
+								'woocommerce'
+							) }
+							help={ __(
+								'Unpaid orders are cancelled automatically when the “Hold stock (minutes)” limit in Settings › Products › Inventory is reached.',
+								'woocommerce'
+							) }
+							onChange={ ( value ) => {
+								updateWooMailProperty(
+									'send_on_unpaid_timeout',
+									value
+								);
+							} }
+						/>
+					</BaseControl>
+				</PanelRow>
+			) }
 			{ supportsCcBcc && (
 				<>
 					<PanelRow>

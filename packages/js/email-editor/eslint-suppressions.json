@@ -1,0 +1,47 @@
+{
+  "src/components/header/trash-email-post.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 3
+    }
+  },
+  "src/components/personalization-tags/personalization-tags-modal.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "src/components/sidebar/reset-email-template.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 3
+    }
+  },
+  "src/components/styles-sidebar/panels/color-dropdown-item.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "src/components/styles-sidebar/panels/typography-panel.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 5
+    }
+  },
+  "src/components/styles-sidebar/screens/preview.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 2
+    }
+  },
+  "src/components/styles-sidebar/screens/screen-header.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 3
+    }
+  },
+  "src/components/styles-sidebar/screens/screen-root.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 5
+    }
+  },
+  "src/components/template-select/template-list.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  }
+}

@@ -215,6 +215,56 @@ class Products extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox Should return a bad request response for invalid price filter values.
+	 * @testWith ["min_price", "true"]
+	 *           ["max_price", "10.99invalid"]
+	 *           ["min_price", "-1"]
+	 *
+	 * @param string $param Price filter parameter.
+	 * @param string $value Price filter value.
+	 */
+	public function test_rejects_invalid_price_filter_values( string $param, string $value ): void {
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$request->set_param( $param, $value );
+
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 400, $response->get_status(), 'Invalid price filters should return HTTP 400.' );
+		$this->assertSame( 'rest_invalid_param', $data['code'], 'The response should identify an invalid request parameter.' );
+	}
+
+	/**
+	 * @testdox Should allow decimal price filter values produced by product filter blocks.
+	 * @testWith ["min_price", "110.00000000000001"]
+	 *           ["max_price", "10.99"]
+	 *
+	 * @param string $param Price filter parameter.
+	 * @param string $value Price filter value.
+	 */
+	public function test_allows_decimal_price_filter_values( string $param, string $value ): void {
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$request->set_param( $param, $value );
+
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status(), 'Decimal price filters should be accepted.' );
+	}
+
+	/**
+	 * @testdox Should allow empty price filter values used by product filter blocks.
+	 */
+	public function test_allows_empty_price_filter_values(): void {
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$request->set_param( 'min_price', '' );
+		$request->set_param( 'max_price', '' );
+
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status(), 'Empty price filters should be ignored.' );
+	}
+
+	/**
 	 * Test conversion of product to rest response.
 	 */
 	public function test_prepare_item() {
@@ -344,6 +394,31 @@ class Products extends ControllerTestCase {
 
 		$this->assertIsArray( $data['images'] );
 		$this->assertCount( 0, $data['images'] );
+	}
+
+	/**
+	 * @testdox The featured image is returned only once when it is also part of the product gallery.
+	 */
+	public function test_featured_image_in_gallery_is_not_duplicated(): void {
+		$fixtures    = new FixtureData();
+		$featured_id = $fixtures->create_image_attachment();
+		$gallery_id  = $fixtures->create_image_attachment();
+		$product     = $fixtures->get_simple_product(
+			array(
+				'name'              => 'Test Product 1',
+				'regular_price'     => 10,
+				'image_id'          => $featured_id,
+				'gallery_image_ids' => array( $featured_id, $gallery_id ),
+			)
+		);
+
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $product->get_id() ) );
+
+		$this->assertSame(
+			array( $featured_id, $gallery_id ),
+			wp_list_pluck( $response->get_data()['images'], 'id' ),
+			'The featured image should be listed first and only once.'
+		);
 	}
 
 	/**
