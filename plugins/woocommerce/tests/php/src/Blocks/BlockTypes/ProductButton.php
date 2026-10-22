@@ -52,8 +52,10 @@ class ProductButton extends \WP_UnitTestCase {
 	 * @return string Rendered block markup.
 	 */
 	private function render_product_button( \WC_Product $product ): string {
+		// The extra wrapper keeps Single Product from replacing the button's own
+		// data-wp-context, which it writes onto the first inner div.
 		return do_blocks(
-			'<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} --><!-- wp:woocommerce/product-button /--><!-- /wp:woocommerce/single-product -->'
+			'<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} --><div class="product-button-test-wrapper"><!-- wp:woocommerce/product-button /--></div><!-- /wp:woocommerce/single-product -->'
 		);
 	}
 
@@ -109,5 +111,76 @@ class ProductButton extends \WP_UnitTestCase {
 		$markup  = $this->render_product_button( $product );
 
 		$this->assertStringContainsString( 'rel="nofollow noopener noreferrer"', $markup );
+	}
+
+	/**
+	 * @testdox Product Button starts with a quantity of 1.
+	 */
+	public function test_product_button_defaults_quantity_to_one(): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		$this->assertSame( 1, $this->get_quantity_to_add( $this->render_product_button( $product ) ) );
+	}
+
+	/**
+	 * @testdox woocommerce_loop_add_to_cart_args sets the Product Button quantity.
+	 */
+	public function test_loop_add_to_cart_args_sets_initial_quantity(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$filter  = static function ( array $args ): array {
+			$args['quantity'] = 4;
+			return $args;
+		};
+
+		add_filter( 'woocommerce_loop_add_to_cart_args', $filter );
+		try {
+			$markup = $this->render_product_button( $product );
+		} finally {
+			remove_filter( 'woocommerce_loop_add_to_cart_args', $filter );
+		}
+
+		$this->assertSame( 4, $this->get_quantity_to_add( $markup ) );
+	}
+
+	/**
+	 * @testdox Rendering the Product Button does not apply woocommerce_add_to_cart_quantity.
+	 */
+	public function test_render_does_not_apply_add_to_cart_quantity_filter(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$called  = false;
+		$filter  = static function ( $quantity, $product_id, $variation_id ) use ( &$called ) {
+			unset( $quantity, $product_id, $variation_id );
+			$called = true;
+			return 1;
+		};
+
+		add_filter( 'woocommerce_add_to_cart_quantity', $filter, 10, 3 );
+		try {
+			$this->render_product_button( $product );
+		} finally {
+			remove_filter( 'woocommerce_add_to_cart_quantity', $filter, 10 );
+		}
+
+		$this->assertFalse( $called, 'woocommerce_add_to_cart_quantity should run when the product is added, not while the button renders.' );
+	}
+
+	/**
+	 * Read quantityToAdd from the rendered Product Button context.
+	 *
+	 * @param string $markup Rendered block markup.
+	 * @return int
+	 */
+	private function get_quantity_to_add( string $markup ) {
+		$processor = new \WP_HTML_Tag_Processor( $markup );
+		$this->assertTrue(
+			$processor->next_tag( array( 'class_name' => 'wc-block-components-product-button' ) ),
+			'Product Button wrapper was not rendered.'
+		);
+
+		$context = json_decode( (string) $processor->get_attribute( 'data-wp-context' ), true );
+		$this->assertIsArray( $context );
+		$this->assertArrayHasKey( 'quantityToAdd', $context );
+
+		return $context['quantityToAdd'];
 	}
 }
