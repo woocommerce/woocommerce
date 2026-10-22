@@ -893,6 +893,39 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Repeated checkout retries keep equal-priced fees and their metadata without firing creation hooks again.
+	 */
+	public function test_create_order_resume_keeps_equal_priced_fees(): void {
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		add_action(
+			'woocommerce_cart_calculate_fees',
+			static function ( $cart ) {
+				$cart->add_fee( 'Packaging', 5, false );
+			}
+		);
+		$order_id = $this->create_order_with_line_item_and_fee();
+		$order    = wc_get_order( $order_id );
+		$before   = $this->get_order_item_ids_by_type( $order_id );
+		$this->assertCount( 2, $before['fee'] );
+		foreach ( $order->get_fees() as $fee ) {
+			$fee->add_meta_data( 'extension_reference', 'keep-me' );
+			$fee->save();
+		}
+		$fee_item_calls = did_action( 'woocommerce_checkout_create_order_fee_item' );
+
+		for ( $retry = 1; $retry <= 3; $retry++ ) {
+			$this->assertSame( $order_id, $this->resume_order( $order_id ) );
+			$this->assertSame( $before, $this->get_order_item_ids_by_type( $order_id ), "Retry {$retry} should keep unchanged item IDs." );
+			$this->assertSame( $fee_item_calls, did_action( 'woocommerce_checkout_create_order_fee_item' ), "Retry {$retry} should not recreate fees." );
+			$order = wc_get_order( $order_id );
+			foreach ( $order->get_fees() as $fee ) {
+				$this->assertSame( 'keep-me', $fee->get_meta( 'extension_reference' ), "Retry {$retry} should keep fee metadata." );
+			}
+			$this->assertSame( (float) WC()->cart->get_total( 'edit' ), (float) $order->get_total() );
+		}
+	}
+
+	/**
 	 * @testdox Resuming a pending order replaces the items whose cart section changed and keeps the line items.
 	 */
 	public function test_create_order_resume_replaces_changed_items_only(): void {
