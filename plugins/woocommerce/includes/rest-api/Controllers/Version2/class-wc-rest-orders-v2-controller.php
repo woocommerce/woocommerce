@@ -734,10 +734,12 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		$id        = isset( $request['id'] ) ? absint( $request['id'] ) : 0;
 		$order     = new WC_Order( $id );
 		$schema    = $this->get_item_schema();
-		$data_keys = $this->move_shipping_lines_before_line_items( array_keys( array_filter( $schema['properties'], array( $this, 'filter_writable_props' ) ) ) );
+		$data_keys = array_keys( array_filter( $schema['properties'], array( $this, 'filter_writable_props' ) ) );
+
+		$item_types = array( 'shipping_lines', 'line_items', 'fee_lines', 'coupon_lines' );
 
 		// Handle all writable props.
-		foreach ( $data_keys as $key ) {
+		foreach ( array_diff( $data_keys, $item_types ) as $key ) {
 			$value = $request[ $key ];
 
 			if ( ! is_null( $value ) ) {
@@ -748,22 +750,6 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 					case 'billing':
 					case 'shipping':
 						$this->update_address( $order, $value, $key );
-						break;
-					case 'line_items':
-					case 'shipping_lines':
-					case 'fee_lines':
-					case 'coupon_lines':
-						if ( is_array( $value ) ) {
-							foreach ( $value as $item ) {
-								if ( is_array( $item ) ) {
-									if ( $this->item_is_null( $item ) || ( isset( $item['quantity'] ) && 0 === $item['quantity'] ) ) {
-										$order->remove_item( $item['id'] );
-									} else {
-										$this->set_item( $order, $key, $item );
-									}
-								}
-							}
-						}
 						break;
 					case 'meta_data':
 						if ( is_array( $value ) ) {
@@ -781,6 +767,23 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 			}
 		}
 
+		// Set items once the address is known, shipping lines first, so new line items are priced at the order's tax location (the base address for local pickup).
+		foreach ( array_intersect( $item_types, $data_keys ) as $key ) {
+			if ( ! is_array( $request[ $key ] ) ) {
+				continue;
+			}
+
+			foreach ( $request[ $key ] as $item ) {
+				if ( is_array( $item ) ) {
+					if ( $this->item_is_null( $item ) || ( isset( $item['quantity'] ) && 0 === $item['quantity'] ) ) {
+						$order->remove_item( $item['id'] );
+					} else {
+						$this->set_item( $order, $key, $item );
+					}
+				}
+			}
+		}
+
 		/**
 		 * Filters an object before it is inserted via the REST API.
 		 *
@@ -794,24 +797,6 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		 * @since 4.5.0.
 		 */
 		return apply_filters( "woocommerce_rest_pre_insert_{$this->post_type}_object", $order, $request, $creating );
-	}
-
-	/**
-	 * Move shipping lines ahead of line items, so new items are priced at the order's tax location (the base address for local pickup).
-	 *
-	 * @since 11.4.0
-	 * @param string[] $data_keys Writable order props in schema order.
-	 * @return string[]
-	 */
-	protected function move_shipping_lines_before_line_items( array $data_keys ): array {
-		if ( ! in_array( 'shipping_lines', $data_keys, true ) || ! in_array( 'line_items', $data_keys, true ) ) {
-			return $data_keys;
-		}
-
-		$data_keys = array_values( array_diff( $data_keys, array( 'shipping_lines' ) ) );
-		array_splice( $data_keys, (int) array_search( 'line_items', $data_keys, true ), 0, 'shipping_lines' );
-
-		return $data_keys;
 	}
 
 	/**
