@@ -372,23 +372,26 @@ apply_filters( 'woocommerce_add_to_cart_form_action', string $action_url )
 ## woocommerce_add_to_cart_quantity
 
 
-Filters the change the quantity to add to cart.
+Filters the quantity being added to the cart.
 
 ```php
-apply_filters( 'woocommerce_add_to_cart_quantity', int|float $default_quantity, int $product_id, int $variation_id )
+apply_filters( 'woocommerce_add_to_cart_quantity', int|float $quantity, int $product_id, int $variation_id )
 ```
+
+
+**Note:** Matches filter name in WooCommerce core.
 
 ### Parameters
 
 | Argument | Type | Description |
 | -------- | ---- | ----------- |
-| $default_quantity | int, float | The default quantity. |
-| $product_id | int | The product id. |
-| $variation_id | int | The variation ID. Always 0 in this context. |
+| $quantity | int, float | Quantity of the item added to the cart. |
+| $product_id | int | ID of the product added to the cart. |
+| $variation_id | int | Variation ID of the product added to the cart. |
 
 ### Source
 
-- [Blocks/BlockTypes/ProductButton.php](../../../../../../src/Blocks/BlockTypes/ProductButton.php)
+- [StoreApi/Utilities/CartController.php](../../../../../../src/StoreApi/Utilities/CartController.php)
 
 ---
 
@@ -1229,7 +1232,7 @@ apply_filters( 'woocommerce_loop_add_to_cart_args', array $args, \WC_Product $pr
 
 | Argument | Type | Description |
 | -------- | ---- | ----------- |
-| $args | array | Button arguments, with a `class` string and an `attributes` array. |
+| $args | array | Button arguments. Includes `quantity`, `class`, and `attributes`. |
 | $product | \WC_Product | Product the button is rendered for. |
 
 ### Source
