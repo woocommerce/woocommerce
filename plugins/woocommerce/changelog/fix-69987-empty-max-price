@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Treat an empty max_price in shop URLs and the products REST API as no limit, instead of hiding every product.
