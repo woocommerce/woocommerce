@@ -122,6 +122,8 @@ class CartController {
 
 		/**
 		 * This filter is documented in includes/class-wc-cart.php.
+		 *
+		 * @since 3.1.0
 		 */
 		$request['quantity'] = apply_filters(
 			'woocommerce_add_to_cart_quantity',
