@@ -74,6 +74,8 @@ class WC_Extensions_Tracking {
 	/**
 	 * Send a Tracks even when a Helper connection process is initiated.
 	 *
+	 * @since 11.4.0 Added the `$funnel_id` parameter.
+	 *
 	 * @param string $funnel_id Id of the connect attempt.
 	 */
 	public function track_helper_connection_start( $funnel_id = '' ) {

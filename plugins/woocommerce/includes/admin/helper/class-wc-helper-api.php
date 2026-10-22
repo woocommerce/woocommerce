@@ -38,6 +38,7 @@ class WC_Helper_API {
 	 *
 	 * The id ties the events of one connect attempt together for analytics; it never authorizes anything.
 	 *
+	 * @internal
 	 * @since 11.4.0
 	 *
 	 * @param mixed $funnel_id Candidate id.

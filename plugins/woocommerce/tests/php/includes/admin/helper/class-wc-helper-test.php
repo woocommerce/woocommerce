@@ -9,10 +9,18 @@ use Automattic\Jetpack\Constants;
 class WC_Helper_Test extends \WC_Unit_Test_Case {
 
 	/**
+	 * $_GET as it was before the test, since the WordPress test case doesn't restore it.
+	 *
+	 * @var array
+	 */
+	private $original_get = array();
+
+	/**
 	 * Set up before each test.
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		$this->original_get = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$this->cleanup_helper_transients();
 		WC_Helper::flush_local_woo_products_cache();
 	}
@@ -23,7 +31,7 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 	public function tearDown(): void {
 		$this->cleanup_helper_transients();
 		$this->cleanup_auto_update_state();
-		unset( $_GET['page'] );
+		$_GET = $this->original_get;
 		parent::tearDown();
 	}
 

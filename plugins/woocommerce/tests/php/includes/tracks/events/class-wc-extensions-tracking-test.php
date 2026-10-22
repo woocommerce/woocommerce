@@ -21,10 +21,18 @@ class WC_Extensions_Tracking_Test extends \WC_Unit_Test_Case {
 	private $recorded = array();
 
 	/**
+	 * $_GET as it was before the test, since the WordPress test case doesn't restore it.
+	 *
+	 * @var array
+	 */
+	private $original_get = array();
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		$this->original_get = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 		include_once WC_ABSPATH . 'includes/tracks/events/class-wc-extensions-tracking.php';
 		$this->sut = new WC_Extensions_Tracking();
@@ -43,6 +51,14 @@ class WC_Extensions_Tracking_Test extends \WC_Unit_Test_Case {
 			10,
 			2
 		);
+	}
+
+	/**
+	 * Tear down test fixtures.
+	 */
+	public function tearDown(): void {
+		$_GET = $this->original_get;
+		parent::tearDown();
 	}
 
 	/**
