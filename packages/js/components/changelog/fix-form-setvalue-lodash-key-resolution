@@ -1,0 +1,3 @@
+Significance: patch
+Type: fix
+Comment: Follow-up to #68050 and #68224, both unreleased. Form setValue again resolves a name as one literal key or a path the way lodash set() does, which is what the last release did, so no shipped behavior changes.

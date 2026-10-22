@@ -60,6 +60,10 @@ class DataStoreRefundFiltersTest extends OrdersStatsTestCase {
 			$order->set_shipping_total( 0 );
 			$order->set_cart_tax( 0 );
 			$order->save();
+
+			// The refunded order's save creates a refund of its own, via
+			// wc_order_fully_refunded(); it needs the fixture's date like any other.
+			$this->pin_refund_dates( $order, $time );
 		}
 
 		// Add a partial refund on the first item of the last order.
@@ -76,6 +80,8 @@ class DataStoreRefundFiltersTest extends OrdersStatsTestCase {
 				),
 			)
 		);
+
+		$this->pin_refund_dates( $order, $time );
 
 		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
 

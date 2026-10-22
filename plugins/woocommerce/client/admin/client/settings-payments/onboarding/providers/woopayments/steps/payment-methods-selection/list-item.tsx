@@ -76,8 +76,8 @@ export const PaymentMethodListItem = ( {
 	// Prioritize the prop if provided, otherwise use the internal ref state.
 	const baseVisibility =
 		initialVisibilityStatus !== undefined
-			? initialVisibilityStatus ?? false
-			: shouldRenderInMainListRef.current ?? false;
+			? ( initialVisibilityStatus ?? false )
+			: ( shouldRenderInMainListRef.current ?? false );
 
 	const shouldRender = isExpanded || baseVisibility;
 
@@ -115,7 +115,7 @@ export const PaymentMethodListItem = ( {
 							</span>
 							<span
 								className="woocommerce-list__item-content"
-								// eslint-disable-next-line react/no-danger -- This string is sanitized by the PaymentGateway class.
+
 								dangerouslySetInnerHTML={ sanitizeHTML(
 									decodeEntities( method.description )
 								) }
@@ -147,7 +147,7 @@ export const PaymentMethodListItem = ( {
 								</span>
 								<span
 									className="woocommerce-list__item-content"
-									// eslint-disable-next-line react/no-danger -- This string is sanitized by the PaymentGateway class.
+
 									dangerouslySetInnerHTML={ sanitizeHTML(
 										decodeEntities( method.description )
 									) }
@@ -167,7 +167,7 @@ export const PaymentMethodListItem = ( {
 								</span>
 								<span
 									className="woocommerce-list__item-content"
-									// eslint-disable-next-line react/no-danger -- This string is sanitized by the PaymentGateway class.
+
 									dangerouslySetInnerHTML={ sanitizeHTML(
 										decodeEntities(
 											method.extraDescription ?? ''

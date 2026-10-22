@@ -82,7 +82,8 @@ class Universal {
 		?>
 		<script type="text/javascript">
 			(function() {
-				window.wcAnalytics = window.wcAnalytics || {};
+				// Always start from a fresh object: a `||` fallback would keep a same-named DOM element alive.
+				window.wcAnalytics = {};
 				const wcAnalytics = window.wcAnalytics;
 
 				// Set the assets URL for webpack to find the split assets.
@@ -112,6 +113,9 @@ class Universal {
 					sessionTracking: <?php echo $is_clickhouse_enabled ? 'true' : 'false'; ?>,
 					proxy: <?php echo $is_proxy_tracking_enabled ? 'true' : 'false'; ?>,
 				};
+
+				// A delay-JS plugin can hold back the consent API script, so the client cannot rely on its functions to know it has to wait.
+				wcAnalytics.consentManaged = <?php echo Consent_Manager::is_consent_managed() ? 'true' : 'false'; ?>;
 
 				wcAnalytics.breadcrumbs = <?php echo wp_json_encode( $this->get_breadcrumb_titles(), JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_AMP ); ?>;
 
@@ -547,7 +551,7 @@ class Universal {
 		if ( is_search() ) {
 			global $wp_query;
 			$this->enqueue_event(
-				'search',
+				'search_performed',
 				array(
 					'search_query' => $this->cap_page_string( $wp_query->get( 's' ) ),
 					'qty'          => $wp_query->found_posts,

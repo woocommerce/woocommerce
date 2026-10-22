@@ -1,0 +1,17 @@
+/*
+ * Personalization tags are rich-text comments. Core renders them with
+ * currentColor and an inverted filter; we use the admin accent so they read
+ * as UI chips. Loaded into both the editor iframe and the admin document,
+ * after core's block-editor content styles.
+ *
+ * Keep the rules flat: the editor prefixes every selector and does not
+ * handle nested CSS.
+ */
+[data-rich-text-comment] {
+	background-color: var(--wp-components-color-accent, var(--wp-admin-theme-color, #3858e9));
+}
+
+[data-rich-text-comment] span {
+	color: var(--wp-components-color-accent-inverted, #fff);
+	filter: none;
+}

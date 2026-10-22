@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Add an admin notice about the upcoming PHP 8.1 requirement in WooCommerce 11.6 for stores running an older PHP version.

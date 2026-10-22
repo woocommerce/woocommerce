@@ -37,6 +37,23 @@ class BlockTypesController extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Remove the block types test_block_should_have_data_attributes() registers, since the
+	 * block type registry outlives a test.
+	 */
+	public function tearDown(): void {
+		try {
+			$registry = \WP_Block_Type_Registry::get_instance();
+			foreach ( array( 'unrelated-namespace/unrelated-block-name', 'namespace/allowed-block-name', 'allowed-namespace/block-name', 'child-of-woo/block-name' ) as $block_name ) {
+				if ( $registry->is_registered( $block_name ) ) {
+					$registry->unregister( $block_name );
+				}
+			}
+		} finally {
+			parent::tearDown();
+		}
+	}
+
+	/**
 	 * @testdox Should identify blocks that should have data attributes.
 	 */
 	public function test_block_should_have_data_attributes(): void {
@@ -95,7 +112,7 @@ class BlockTypesController extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox register_block_patterns() registers the empty cart message patterns referenced by the installed Cart page.
+	 * @testdox register_block_patterns() registers the patterns referenced by the installed Cart page.
 	 */
 	public function test_register_block_patterns_registers_installed_cart_page_patterns(): void {
 		$registry = \WP_Block_Patterns_Registry::get_instance();
@@ -104,7 +121,7 @@ class BlockTypesController extends WC_Unit_Test_Case {
 		// (see WC_Install::get_cart_block_content()). Registering them here rather than
 		// in the Cart block type means the page can still resolve the references when
 		// the Cart block itself is not registered.
-		$slugs = array( 'woocommerce/cart-empty-message', 'woocommerce/cart-new-in-store-message' );
+		$slugs = array( 'woocommerce/cart-empty-message', 'woocommerce/cart-new-in-store-message', 'woocommerce/cart-cross-sells-message' );
 
 		foreach ( $slugs as $slug ) {
 			if ( $registry->is_registered( $slug ) ) {
@@ -120,5 +137,100 @@ class BlockTypesController extends WC_Unit_Test_Case {
 				"BlockTypesController::register_block_patterns() should register {$slug}; the installed Cart page depends on it."
 			);
 		}
+	}
+
+	/**
+	 * @testdox Should use the WooCommerce version when a bundled block.json omits one.
+	 */
+	public function test_block_json_style_without_version_uses_woocommerce_version(): void {
+		$metadata = array(
+			'name' => 'woocommerce/product-filter-chips',
+			'file' => WC_ABSPATH . 'assets/client/blocks/product-filter-chips/block.json',
+		);
+
+		$result = $this->block_types_controller->handle_block_type_metadata( $metadata );
+
+		$this->assertSame( 'wc-' . WC_VERSION, $result['version'] );
+	}
+
+	/**
+	 * @testdox Should keep a version a bundled block.json already declares.
+	 */
+	public function test_block_json_keeps_explicit_version(): void {
+		$metadata = array(
+			'name'    => 'woocommerce/mini-cart',
+			'file'    => WC_ABSPATH . 'assets/client/blocks/mini-cart/block.json',
+			'version' => '1.0.0',
+		);
+
+		$result = $this->block_types_controller->handle_block_type_metadata( $metadata );
+
+		$this->assertSame( '1.0.0', $result['version'] );
+	}
+
+	/**
+	 * @testdox Should leave block metadata from outside WooCommerce unchanged.
+	 */
+	public function test_block_json_outside_woocommerce_keeps_omitted_version(): void {
+		$metadata = array(
+			'name' => 'example/block',
+			'file' => '/tmp/example/block.json',
+		);
+
+		$result = $this->block_types_controller->handle_block_type_metadata( $metadata );
+
+		$this->assertArrayNotHasKey( 'version', $result );
+	}
+
+	/**
+	 * @testdox Should output a hidden redirect field on the login and registration forms when redirect_to is set.
+	 *
+	 * @dataProvider redirect_to_form_hooks_provider
+	 *
+	 * @param string $hook The form hook to fire.
+	 */
+	public function test_redirect_to_field_outputs_hidden_input( string $hook ): void {
+		$_GET['redirect_to'] = 'https://example.com/product/?a=1&b=2';
+
+		try {
+			ob_start();
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Firing the form hook under test.
+			do_action( $hook );
+			$output = ob_get_clean();
+		} finally {
+			unset( $_GET['redirect_to'] );
+		}
+
+		$this->assertStringContainsString( '<input type="hidden" name="redirect" value="https://example.com/product/?a=1&amp;b=2" />', $output );
+	}
+
+	/**
+	 * @testdox Should output nothing on the login and registration forms when redirect_to is empty.
+	 *
+	 * @dataProvider redirect_to_form_hooks_provider
+	 *
+	 * @param string $hook The form hook to fire.
+	 */
+	public function test_redirect_to_field_outputs_nothing_without_redirect_to( string $hook ): void {
+		unset( $_GET['redirect_to'] );
+
+		ob_start();
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Firing the form hook under test.
+		do_action( $hook );
+		$output = ob_get_clean();
+
+		$this->assertSame( '', $output );
+	}
+
+	/**
+	 * Form hooks that should receive the hidden redirect field.
+	 *
+	 * @return array<string, array{string}>
+	 */
+	public function redirect_to_form_hooks_provider(): array {
+		return array(
+			'login form'        => array( 'woocommerce_login_form_end' ),
+			'registration form' => array( 'woocommerce_register_form_end' ),
+		);
 	}
 }

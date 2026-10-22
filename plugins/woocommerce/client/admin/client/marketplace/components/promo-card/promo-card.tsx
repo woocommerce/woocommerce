@@ -59,7 +59,9 @@ const PromoCard = ( {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [ isVisible ] );
 
-	if ( ! isVisible ) return null;
+	if ( ! isVisible ) {
+		return null;
+	}
 
 	const handleDismiss = () => {
 		setIsVisible( false );

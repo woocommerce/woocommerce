@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Analytics: typed custom dates now follow the format shown in the field hint, so day-first locales get the right dates.

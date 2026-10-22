@@ -108,7 +108,7 @@ class WC_Admin_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 		$order = WC_Helper_Order::create_order( 1, $product );
 		$order->set_status( OrderStatus::COMPLETED );
 		$order->set_total( 100 ); // $25 x 4.
-		// Make sure the order is paid at least a minute ago to avoid issues with the same timestamp - undeterministic order.
+		// Make sure the order is paid at least a minute ago to avoid issues with the same timestamp - indeterministic order.
 		$order->set_date_paid( $order->get_date_paid()->modify( '-1 minute' ) );
 		$order->save();
 
@@ -168,7 +168,7 @@ class WC_Admin_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertEquals( 11, count( $properties ) );
+		$this->assertEquals( 12, count( $properties ) );
 		$this->assertArrayHasKey( 'date_created_gmt', $properties );
 		$this->assertArrayHasKey( 'order_id', $properties );
 		$this->assertArrayHasKey( 'order_number', $properties );
@@ -179,6 +179,7 @@ class WC_Admin_Tests_API_Reports_Orders extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'num_items_sold', $properties );
 		$this->assertArrayHasKey( 'total_formatted', $properties );
 		$this->assertArrayHasKey( 'customer_type', $properties );
+		$this->assertArrayHasKey( 'payment_method', $properties );
 		$this->assertArrayHasKey( 'extended_info', $properties );
 	}
 

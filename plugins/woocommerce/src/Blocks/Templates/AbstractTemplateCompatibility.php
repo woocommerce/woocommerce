@@ -1,7 +1,8 @@
-<?php
+<?php // phpcs:ignore Generic.PHP.RequireStrictTypes.MissingDeclaration -- Preserve scalar coercion for compatibility with extension-provided data.
 namespace Automattic\WooCommerce\Blocks\Templates;
 
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
+use WP_Block;
 
 /**
  * AbstractTemplateCompatibility class.
@@ -25,62 +26,78 @@ abstract class AbstractTemplateCompatibility {
 	public function init() {
 		$this->set_hook_data();
 
-		add_filter(
-			'template_include',
-			function ( $template ) {
-				$this->set_compatibility_layer_flag();
+		add_filter( 'template_include', array( $this, 'handle_template_include' ) );
+	}
 
-				add_filter(
-					'render_block_data',
-					function ( $parsed_block, $source_block, $parent_block ) {
-						/**
-						* Filter to disable the compatibility layer for the blockified templates.
-						*
-						* This hook allows to disable the compatibility layer for the blockified templates.
-						*
-						* @since 7.6.0
-						* @param bool $is_disabled_compatibility_layer Whether the compatibility layer should be disabled.
-						*/
-						$is_disabled_compatibility_layer = apply_filters( 'woocommerce_disable_compatibility_layer', false );
+	/**
+	 * Register rendering callbacks once the template has been selected.
+	 *
+	 * @internal
+	 *
+	 * @param string $template Selected template path.
+	 * @return string
+	 */
+	public function handle_template_include( $template ) {
+		$this->set_compatibility_layer_flag();
+		add_filter( 'render_block_data', array( $this, 'handle_render_block_data' ), 10, 3 );
+		add_filter( 'render_block', array( $this, 'handle_render_block' ), 10, 2 );
 
-						if ( $is_disabled_compatibility_layer ) {
-							return $parsed_block;
-						}
+		return $template;
+	}
 
-						return $this->update_render_block_data( $parsed_block, $source_block, $parent_block );
-					},
-					10,
-					3
-				);
+	/**
+	 * Mark blocks for hook compatibility unless the layer is disabled.
+	 *
+	 * @internal
+	 *
+	 * @param array          $parsed_block Parsed block data.
+	 * @param array          $source_block Original block data.
+	 * @param \WP_Block|null $parent_block Parent block, if any.
+	 * @return array
+	 */
+	public function handle_render_block_data( $parsed_block, $source_block, $parent_block ) {
+		/**
+		* Filter to disable the compatibility layer for the blockified templates.
+		*
+		* This hook allows to disable the compatibility layer for the blockified templates.
+		*
+		* @since 7.6.0
+		* @param bool $is_disabled_compatibility_layer Whether the compatibility layer should be disabled.
+		*/
+		$is_disabled_compatibility_layer = apply_filters( 'woocommerce_disable_compatibility_layer', false );
 
-				add_filter(
-					'render_block',
-					function ( $block_content, $block ) {
-						/**
-						* Filter to disable the compatibility layer for the blockified templates.
-						*
-						* This hook allows to disable the compatibility layer for the blockified.
-						*
-						* @since 7.6.0
-						* @param bool $is_disabled_compatibility_layer Whether the compatibility layer should be disabled.
-						*/
-						$is_disabled_compatibility_layer = apply_filters( 'woocommerce_disable_compatibility_layer', false );
+		if ( $is_disabled_compatibility_layer ) {
+			return $parsed_block;
+		}
 
-						if ( $is_disabled_compatibility_layer ) {
-							return $block_content;
-						}
+		return $this->update_render_block_data( $parsed_block, $source_block, $parent_block );
+	}
 
-						return $this->inject_hooks( $block_content, $block );
-					},
-					10,
-					2
-				);
+	/**
+	 * Inject hook output unless the compatibility layer is disabled.
+	 *
+	 * @internal
+	 *
+	 * @param string $block_content Rendered block content.
+	 * @param array  $block         Parsed block data.
+	 * @return string
+	 */
+	public function handle_render_block( $block_content, $block ) {
+		/**
+		* Filter to disable the compatibility layer for the blockified templates.
+		*
+		* This hook allows to disable the compatibility layer for the blockified.
+		*
+		* @since 7.6.0
+		* @param bool $is_disabled_compatibility_layer Whether the compatibility layer should be disabled.
+		*/
+		$is_disabled_compatibility_layer = apply_filters( 'woocommerce_disable_compatibility_layer', false );
 
-				return $template;
-			},
-			10,
-			1
-		);
+		if ( $is_disabled_compatibility_layer ) {
+			return $block_content;
+		}
+
+		return $this->inject_hooks( $block_content, $block );
 	}
 
 	/**
@@ -110,11 +127,11 @@ abstract class AbstractTemplateCompatibility {
 	 *
 	 * The array format:
 	 * [
-	 *   `<hook-name>` => [
-	 *     block_names => [ `<block-name>`, ... ],
+	 *   <hook-name> => [
+	 *     block_names => [ <block-name>, ... ],
 	 *     position => before|after,
 	 *     hooked => [
-	 *       `<function-name>` => `<priority>`,
+	 *       <function-name> => <priority>,
 	 *        ...
 	 *     ],
 	 *  ],
@@ -154,14 +171,18 @@ abstract class AbstractTemplateCompatibility {
 		 *
 		 * Accepts an array of hooked data. The array should be in the following
 		 * format:
+		 *
+		 * ```text
 		 * [
 		 *   [
-		 *     hook => `<hook-name>`,
-		 *     function => `<function-name>`,
-		 *     priority => `<priority>`,
+		 *     hook => <hook-name>,
+		 *     function => <function-name>,
+		 *     priority => <priority>,
 		 *  ],
 		 *  ...
 		 * ]
+		 * ```
+		 *
 		 * Where:
 		 * - hook-name is the name of the hook that have the functions hooked to.
 		 * - function-name is the hooked function name.

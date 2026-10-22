@@ -167,12 +167,18 @@ class WC_Auth {
 		);
 
 		foreach ( $params as $param ) {
-			if ( empty( $_REQUEST[ $param ] ) ) { // WPCS: input var ok, CSRF ok.
+			if ( empty( $_REQUEST[ $param ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Values are required for handshake validation; key creation verifies capability and nonce.
 				/* translators: %s: parameter */
 				throw new Exception( sprintf( __( 'Missing parameter %s', 'woocommerce' ), $param ) );
 			}
 
-			$data[ $param ] = wp_unslash( $_REQUEST[ $param ] ); // WPCS: input var ok, CSRF ok, sanitization ok.
+			// Every handshake parameter is a single string; anything else, an array in particular, is rejected here so that it cannot reach the string-only functions used below.
+			if ( ! is_string( $_REQUEST[ $param ] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Values are required for handshake validation; key creation verifies capability and nonce.
+				/* translators: %s: parameter */
+				throw new Exception( sprintf( __( 'Invalid parameter %s', 'woocommerce' ), $param ) ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- The caught message is escaped by esc_html() where it is rendered; escaping here would double-encode translated text.
+			}
+
+			$data[ $param ] = wp_unslash( $_REQUEST[ $param ] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Raw values are needed to validate the submitted URLs and scope; each value is sanitized or escaped where it is used, and key creation verifies capability and nonce.
 		}
 
 		if ( ! in_array( $data['scope'], array( 'read', 'write', 'read_write' ), true ) ) {
@@ -320,7 +326,8 @@ class WC_Auth {
 			$route = strtolower( wc_clean( $route ) );
 			$this->make_validation();
 
-			$data = wp_unslash( $_REQUEST ); // WPCS: input var ok, CSRF ok.
+			// Validated by make_validation() above. Values are cleaned or escaped where they are rendered or stored; create_keys() sanitizes what it persists.
+			$data = wp_unslash( $_REQUEST );
 
 			// Login endpoint.
 			if ( 'login' === $route && ! is_user_logged_in() ) {

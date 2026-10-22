@@ -12,6 +12,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin\Settings;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Internal\Admin\Settings;
 use Automattic\WooCommerce\Internal\Admin\Settings\SettingsUIRequestContext;
+use Automattic\WooCommerce\Internal\Admin\Settings\SettingsUISchema;
 use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 use Automattic\WooCommerce\RestApi\UnitTests\LoggerSpyTrait;
 use WC_Unit_Test_Case;
@@ -331,6 +332,59 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should render classic settings without saving when value canonicalization fails.
+	 */
+	public function test_invalid_value_canonicalization_uses_classic_fallback_without_saving(): void {
+		global $current_section, $current_tab, $wpdb;
+
+		add_filter( 'woocommerce_admin_features', array( $this, 'enable_settings_ui_feature' ) );
+		add_filter( 'doing_it_wrong_trigger_error', '__return_false' );
+		$this->setExpectedIncorrectUsage( 'WC_Settings_Page::output' );
+
+		update_option( 'woocommerce_settings_ui_flag_test', '9007199254740992' );
+		$stored_before = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT option_value FROM {$wpdb->options} WHERE option_name = %s",
+				'woocommerce_settings_ui_flag_test'
+			)
+		);
+
+		$current_section = '';
+		$current_tab     = 'settings_ui_flag_test';
+		$page            = $this->get_settings_ui_test_page_with_invalid_canonical_value();
+		$context         = SettingsUIRequestContext::for_settings_page( $page, '' );
+		$save_calls      = 0;
+		$save_listener   = static function ( $value ) use ( &$save_calls ) {
+			++$save_calls;
+			return $value;
+		};
+		add_filter( 'woocommerce_admin_settings_sanitize_option', $save_listener );
+
+		try {
+			$output = $this->render_settings_view( $page );
+		} finally {
+			remove_filter( 'woocommerce_admin_settings_sanitize_option', $save_listener );
+			remove_filter( 'doing_it_wrong_trigger_error', '__return_false' );
+		}
+
+		$stored_after = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT option_value FROM {$wpdb->options} WHERE option_name = %s",
+				'woocommerce_settings_ui_flag_test'
+			)
+		);
+
+		$this->assertNull( $context->get_schema() );
+		$this->assertTrue( $context->has_schema_failed() );
+		$this->assertStringContainsString( 'outside the JavaScript safe integer range', $context->get_schema_failure_reason() );
+		$this->assertStringContainsString( 'name="woocommerce_settings_ui_flag_test"', $output );
+		$this->assertStringContainsString( 'class="woocommerce-save-button', $output );
+		$this->assertStringNotContainsString( 'data-wc-settings-ui="1"', $output );
+		$this->assertSame( 0, $save_calls, 'Rendering classic fallback must not invoke the settings save pipeline.' );
+		$this->assertSame( $stored_before, $stored_after );
+	}
+
+	/**
 	 * @testdox Should fall back to classic settings when a declared script handle is not registered.
 	 */
 	public function test_unregistered_script_handle_uses_classic_fallback_with_precise_reason(): void {
@@ -552,15 +606,20 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should override a schema-provided shell header for top-level pages.
+	 * @testdox Should canonicalize and override a schema from a public legacy adapter subclass.
 	 */
 	public function test_request_context_overrides_a_schema_provided_shell_header(): void {
+		$this->setExpectedIncorrectUsage( SettingsUISchema::class . '::canonicalize_schema_values' );
+
 		$page    = $this->get_settings_ui_test_page_with_visible_shell_header();
 		$context = SettingsUIRequestContext::for_settings_page( $page, '' );
 
 		$schema = $context->get_schema();
+		$field  = $schema['groups']['default']['fields'][1];
 
 		$this->assertSame( 'hidden', $schema['shell']['header'], 'Top-level pages cannot opt into the shell header.' );
+		$this->assertSame( 2, $field['value'] );
+		$this->assertSame( '02', $field['save']['initialValue'] );
 	}
 
 	/**
@@ -1023,8 +1082,15 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 					 * @return array
 					 */
 					public function get_schema( string $section ): array {
-						$schema                    = parent::get_schema( $section );
-						$schema['shell']['header'] = 'visible';
+						$schema                                  = parent::get_schema( $section );
+						$schema['shell']['header']               = 'visible';
+						$schema['groups']['default']['fields'][] = array(
+							'id'    => 'extended_quantity',
+							'label' => 'Extended quantity',
+							'type'  => 'number',
+							'value' => '02',
+							'save'  => array( 'adapter' => 'form_post' ),
+						);
 
 						return $schema;
 					}
@@ -1345,6 +1411,48 @@ class SettingsUIFeatureFlagTest extends WC_Unit_Test_Case {
 						'id'    => 'woocommerce_settings_ui_flag_test',
 						'type'  => 'text',
 						'title' => 'Settings UI flag test',
+					),
+				);
+			}
+		};
+	}
+
+	/**
+	 * Build a settings page whose numeric value cannot cross the JavaScript boundary safely.
+	 *
+	 * @return \WC_Settings_Page
+	 */
+	private function get_settings_ui_test_page_with_invalid_canonical_value(): \WC_Settings_Page {
+		return new class() extends \WC_Settings_Page {
+			/**
+			 * Constructor.
+			 */
+			public function __construct() {
+				$this->id    = 'settings_ui_flag_test';
+				$this->label = 'Settings UI flag test';
+			}
+
+			/**
+			 * Get the settings UI page adapter.
+			 *
+			 * @return \Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface|null
+			 */
+			public function get_settings_ui_page(): ?\Automattic\WooCommerce\Admin\Settings\SettingsUIPageInterface {
+				return new \Automattic\WooCommerce\Admin\Settings\LegacySettingsPageAdapter( $this );
+			}
+
+			/**
+			 * Get settings for the default section.
+			 *
+			 * @return array
+			 */
+			protected function get_settings_for_default_section() {
+				return array(
+					array(
+						'id'                => 'woocommerce_settings_ui_flag_test',
+						'type'              => 'number',
+						'title'             => 'Settings UI flag test',
+						'custom_attributes' => array( 'step' => 1 ),
 					),
 				);
 			}

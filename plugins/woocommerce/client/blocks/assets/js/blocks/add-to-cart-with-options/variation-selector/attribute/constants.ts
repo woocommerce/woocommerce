@@ -46,6 +46,11 @@ export const ATTRIBUTE_ITEM_TEMPLATE: TemplateArray = [
 	],
 ] as const;
 
+/**
+ * Placeholder attributes rendered in the editor when no variable product is in
+ * context. None of these exist in the database, so term IDs are negative: the
+ * term ID filter in `edit.tsx` relies on that to skip the Store API request.
+ */
 export const DEFAULT_ATTRIBUTES = [
 	{
 		id: 1,
@@ -64,9 +69,9 @@ export const DEFAULT_ATTRIBUTES = [
 		name: __( 'Size', 'woocommerce' ),
 		has_variations: true,
 		terms: [
-			{ id: 1, slug: 'sm', name: __( 'Small', 'woocommerce' ) },
-			{ id: 2, slug: 'md', name: __( 'Medium', 'woocommerce' ) },
-			{ id: 3, slug: 'lg', name: __( 'Large', 'woocommerce' ) },
+			{ id: -4, slug: 'sm', name: __( 'Small', 'woocommerce' ) },
+			{ id: -5, slug: 'md', name: __( 'Medium', 'woocommerce' ) },
+			{ id: -6, slug: 'lg', name: __( 'Large', 'woocommerce' ) },
 		],
 	},
 ] as const;

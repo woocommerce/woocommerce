@@ -223,6 +223,16 @@ jobs:
       error_message: ${{ steps.aggregate-status.outputs.error_message }}
       cherry_pick_pr_number: ${{ steps.aggregate-status.outputs.cherry_pick_pr_number }}
     steps:
+      # Use Ubuntu's patched Git instead of the preinstalled build: actions/runner-images#15014.
+      - name: Install patched Git
+        run: |
+          . /etc/os-release
+          sudo apt-get update
+          sudo apt-get install --yes --allow-downgrades \
+            "git/${VERSION_CODENAME}-security" \
+            "git-man/${VERSION_CODENAME}-security"
+          dpkg-query --show git
+
       - name: Checkout target branch
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:

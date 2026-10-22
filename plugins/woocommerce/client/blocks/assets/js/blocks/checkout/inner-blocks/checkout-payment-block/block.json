@@ -1,6 +1,5 @@
 {
 	"name": "woocommerce/checkout-payment-block",
-	"version": "1.0.0",
 	"title": "Payment Options",
 	"description": "Payment options for your store.",
 	"category": "woocommerce",

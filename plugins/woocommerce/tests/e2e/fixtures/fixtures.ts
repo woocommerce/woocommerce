@@ -105,3 +105,27 @@ export const tags = {
 	WP_CORE: '@wp-core',
 	PAYPAL: '@paypal',
 } as const;
+
+/**
+ * Playwright test locks for specs that write the same global options.
+ * Specs that share a lock never run at the same time, in any worker or project.
+ */
+export const locks = {
+	// `woocommerce_analytics_scheduled_import`.
+	ANALYTICS_IMPORT_MODE: 'analytics-import-mode',
+	// `woocommerce_feature_block_email_editor_enabled` and
+	// `woocommerce_feature_email_improvements_enabled`. One file's afterAll
+	// turns a flag off while another file still needs it. Specs that assert
+	// sent emails or the Email settings page also take it, since the flags
+	// change both.
+	EMAIL_FEATURE_FLAGS: 'email-feature-flags',
+	// `woocommerce_pickup_location_settings` and `pickup_location_pickup_locations`.
+	LOCAL_PICKUP: 'local-pickup',
+	// The Back in Stock feature flag and `woocommerce_customer_stock_notifications_*`.
+	// Concurrent writes of the same value make `e2e-options/update` return 400.
+	STOCK_NOTIFICATIONS: 'stock-notifications',
+	// The `taxonomy-product_cat`, `taxonomy-product_tag` and
+	// `taxonomy-product_brand` templates. The Site Editor offers to add one only
+	// while it does not exist.
+	TAXONOMY_TEMPLATES: 'taxonomy-templates',
+} as const;

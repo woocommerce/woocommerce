@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Identify current navigation links and preserve independently registered unload handlers in the Settings UI.

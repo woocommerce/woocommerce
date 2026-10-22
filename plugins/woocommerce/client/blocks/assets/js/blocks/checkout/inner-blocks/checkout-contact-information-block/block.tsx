@@ -42,7 +42,7 @@ const CreateAccountUI = (): React.ReactElement | null => {
 	const showCreateAccountPassword = generatePassword
 		? false
 		: ( showCreateAccountCheckbox && shouldCreateAccount ) ||
-		  ! allowGuestCheckout;
+			! allowGuestCheckout;
 
 	if (
 		! allowGuestCheckout &&

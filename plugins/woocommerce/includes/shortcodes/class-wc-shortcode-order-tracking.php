@@ -45,9 +45,9 @@ class WC_Shortcode_Order_Tracking {
 			$order_email = empty( $_REQUEST['order_email'] ) ? '' : sanitize_email( wp_unslash( $_REQUEST['order_email'] ) );
 
 			if ( ! $order_id ) {
-				wc_print_notice( __( 'Please enter a valid order ID', 'woocommerce' ), 'error' );
+				$notice = wc_print_notice( __( 'Please enter a valid order ID', 'woocommerce' ), 'error', array(), true );
 			} elseif ( ! $order_email ) {
-				wc_print_notice( __( 'Please enter a valid email address', 'woocommerce' ), 'error' );
+				$notice = wc_print_notice( __( 'Please enter a valid email address', 'woocommerce' ), 'error', array(), true );
 			} else {
 				$order = wc_get_order( apply_filters( 'woocommerce_shortcode_order_tracking_order_id', $order_id ) );
 
@@ -61,9 +61,13 @@ class WC_Shortcode_Order_Tracking {
 					);
 					return;
 				} else {
-					wc_print_notice( __( 'Sorry, the order could not be found. Please contact us if you are having difficulty finding your order details.', 'woocommerce' ), 'error' );
+					$notice = wc_print_notice( __( 'Sorry, the order could not be found. Please contact us if you are having difficulty finding your order details.', 'woocommerce' ), 'error', array(), true );
 				}
 			}
+		}
+
+		if ( ! empty( $notice ) ) {
+			echo '<div class="woocommerce-notices-wrapper">' . $notice . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wc_print_notice() returns kses-filtered markup.
 		}
 
 		wc_get_template( 'order/form-tracking.php' );

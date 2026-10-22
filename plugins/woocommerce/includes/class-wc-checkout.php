@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
+use Automattic\WooCommerce\Internal\ProductVariations\SelectedVariationName;
 use Automattic\WooCommerce\Internal\Tax\TaxRateDataStore;
 
 defined( 'ABSPATH' ) || exit;
@@ -283,18 +284,27 @@ class WC_Checkout {
 				'shipping_'
 			),
 			'account'  => array(),
-			'order'    => array(
-				'order_comments' => array(
-					'type'        => 'textarea',
-					'class'       => array( 'notes' ),
-					'label'       => __( 'Order notes', 'woocommerce' ),
-					'placeholder' => esc_attr__(
-						'Notes about your order, e.g. special notes for delivery.',
-						'woocommerce'
-					),
-				),
-			),
+			'order'    => array(),
 		);
+
+		/**
+		 * Controls whether the order notes field is added to the checkout.
+		 *
+		 * @since 2.1.0
+		 *
+		 * @param bool $enabled Whether the order notes field is enabled.
+		 */
+		if ( apply_filters( 'woocommerce_enable_order_notes_field', 'yes' === get_option( 'woocommerce_enable_order_comments', 'yes' ) ) ) {
+			$this->fields['order']['order_comments'] = array(
+				'type'        => 'textarea',
+				'class'       => array( 'notes' ),
+				'label'       => __( 'Order notes', 'woocommerce' ),
+				'placeholder' => esc_attr__(
+					'Notes about your order, e.g. special notes for delivery.',
+					'woocommerce'
+				),
+			);
+		}
 
 		if ( 'no' === get_option( 'woocommerce_registration_generate_username' ) ) {
 			$this->fields['account']['account_username'] = array(
@@ -473,7 +483,7 @@ class WC_Checkout {
 			 */
 			$order->set_customer_id( apply_filters( 'woocommerce_checkout_customer_id', get_current_user_id() ) );
 			$order->set_currency( get_woocommerce_currency() );
-			$order->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
+			$order->set_prices_include_tax( wc_prices_include_tax() );
 			$order->set_customer_ip_address( WC_Geolocation::get_ip_address() );
 			$order->set_customer_user_agent( wc_get_user_agent() );
 			$order->set_customer_note( isset( $data['order_comments'] ) ? $data['order_comments'] : '' );
@@ -570,6 +580,8 @@ class WC_Checkout {
 	 */
 	public function create_order_line_items( &$order, $cart ) {
 		foreach ( $cart->get_cart() as $cart_item_key => $values ) {
+			$variation = is_array( $values['variation'] ?? null ) ? $values['variation'] : array();
+
 			/**
 			 * Filter hook to get initial item object.
 			 *
@@ -582,7 +594,7 @@ class WC_Checkout {
 			$item->set_props(
 				array(
 					'quantity'     => $values['quantity'],
-					'variation'    => $values['variation'],
+					'variation'    => $variation,
 					'subtotal'     => $values['line_subtotal'],
 					'total'        => $values['line_total'],
 					'subtotal_tax' => $values['line_subtotal_tax'],
@@ -596,7 +608,7 @@ class WC_Checkout {
 			if ( $product ) {
 				$item->set_props(
 					array(
-						'name'         => $product->get_name(),
+						'name'         => wc_get_container()->get( SelectedVariationName::class )->get_product_name( $product, $variation ),
 						'tax_class'    => $product->get_tax_class(),
 						'product_id'   => $product->is_type( ProductType::VARIATION ) ? $product->get_parent_id() : $product->get_id(),
 						'variation_id' => $product->is_type( ProductType::VARIATION ) ? $product->get_id() : 0,
@@ -1049,6 +1061,8 @@ class WC_Checkout {
 						)
 					);
 				}
+			} elseif ( $this->is_shipping_withheld_for_missing_address() ) {
+				$errors->add( 'shipping', __( 'Please enter an address to continue.', 'woocommerce' ) );
 			} else {
 				$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
 
@@ -1071,6 +1085,28 @@ class WC_Checkout {
 		}
 
 		do_action( 'woocommerce_after_checkout_validation', $data, $errors );
+	}
+
+	/**
+	 * Check whether shipping was left out because "Hide shipping costs until an address is entered" found the address incomplete.
+	 *
+	 * Without this check an order could be saved with no shipping line, for example when a store removes billing
+	 * address fields and the empty values are copied over the shipping address. Stores that turn off shipping
+	 * calculation through the woocommerce_cart_ready_to_calc_shipping filter are left alone.
+	 *
+	 * @return bool
+	 */
+	private function is_shipping_withheld_for_missing_address(): bool {
+		if ( 'yes' !== get_option( 'woocommerce_shipping_cost_requires_address' ) || WC()->cart->has_calculated_shipping() ) {
+			return false;
+		}
+
+		/**
+		 * This filter is documented in includes/class-wc-cart.php.
+		 *
+		 * @since 2.7.0
+		 */
+		return (bool) apply_filters( 'woocommerce_cart_ready_to_calc_shipping', true );
 	}
 
 	/**
@@ -1204,10 +1240,21 @@ class WC_Checkout {
 	 * Process an order that doesn't require payment.
 	 *
 	 * @since 3.0.0
+	 * @throws Exception If the order is missing or a cancelled unpaid order would be marked paid.
 	 * @param int $order_id Order ID.
 	 */
 	protected function process_order_without_payment( $order_id ) {
 		$order = wc_get_order( $order_id );
+
+		if ( ! $order instanceof WC_Order ) {
+			throw new Exception( esc_html__( 'Unable to process this order. Please try again.', 'woocommerce' ) );
+		}
+
+		// A cancelled order can reach this path after a stale cache read; never revive it without payment.
+		if ( 0 < $order->get_total() && ! $order->is_paid() && $order->has_status( OrderStatus::CANCELLED ) ) {
+			throw new Exception( esc_html__( 'This order cannot be completed without payment. Please try again.', 'woocommerce' ) );
+		}
+
 		$order->payment_complete();
 		wc_empty_cart();
 
@@ -1441,6 +1488,18 @@ class WC_Checkout {
 					array( 'order_object' => $order )
 				);
 
+				/**
+				 * Fires after the checkout creates the order, but before payment is processed.
+				 *
+				 * Do not use this action for payment-completion logic or to call WC_Order::payment_complete().
+				 * Use woocommerce_payment_complete or woocommerce_order_status_completed instead.
+				 *
+				 * @since 1.1.0
+				 *
+				 * @param int                      $order_id    Order ID.
+				 * @param array                    $posted_data Posted checkout data.
+				 * @param WC_Order|WC_Order_Refund $order       Order object.
+				 */
 				do_action( 'woocommerce_checkout_order_processed', $order_id, $posted_data, $order );
 
 				wc_log_order_step(

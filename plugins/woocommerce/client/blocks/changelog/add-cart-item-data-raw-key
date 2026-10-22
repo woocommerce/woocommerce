@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Store API: add `raw_key` to cart item `item_data` so extensions can identify their own entries without matching a translated label.

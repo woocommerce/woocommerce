@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Return a Store API error response instead of a fatal error when the cart cannot be loaded from the session.

@@ -514,12 +514,15 @@ class CartController {
 		 * Fires when cart items are being validated.
 		 *
 		 * Allow 3rd parties to validate cart items. This is a legacy hook from Woo core.
-		 * This filter will be deprecated because it encourages usage of wc_add_notice. For the API we need to capture
-		 * notices and convert to wp errors instead.
+		 *
+		 * This action will be deprecated in the Store API because it encourages wc_add_notice:
+		 * the API has to capture those notices and convert them to WP_Error objects. Prefer
+		 * `woocommerce_store_api_cart_errors`, which passes a WP_Error to callbacks directly.
+		 * Core keeps firing this action from the classic cart and checkout, so it is not
+		 * deprecated there.
 		 *
 		 * @since 7.2.0
 		 *
-		 * @deprecated
 		 * @internal Matches action name in WooCommerce core.
 		 */
 		do_action( 'woocommerce_check_cart_items' );
@@ -1399,6 +1402,7 @@ class CartController {
 	 * Format and sanitize variation data posted to the API.
 	 *
 	 * Labels are converted to names (e.g. Size to pa_size), and values are cleaned.
+	 * Custom (non-taxonomy) values are stripped of HTML tags but keep percent sequences (e.g. `%20`), which `wc_clean()` would destroy, breaking validation against the stored options.
 	 *
 	 * @throws RouteException Exception if variation cannot be found.
 	 *
@@ -1422,10 +1426,12 @@ class CartController {
 						?
 						sanitize_title( $variation_data[ $variation_attribute_name ] )
 						:
-						html_entity_decode(
-							wc_clean( $variation_data[ $variation_attribute_name ] ),
-							ENT_QUOTES,
-							get_bloginfo( 'charset' )
+						wp_strip_all_tags(
+							html_entity_decode(
+								$variation_data[ $variation_attribute_name ],
+								ENT_QUOTES,
+								get_bloginfo( 'charset' )
+							)
 						);
 				continue;
 			}
@@ -1443,10 +1449,12 @@ class CartController {
 						?
 						sanitize_title( $variation_data[ $attribute_label ] )
 						:
-						html_entity_decode(
-							wc_clean( $variation_data[ $attribute_label ] ),
-							ENT_QUOTES,
-							get_bloginfo( 'charset' )
+						wp_strip_all_tags(
+							html_entity_decode(
+								$variation_data[ $attribute_label ],
+								ENT_QUOTES,
+								get_bloginfo( 'charset' )
+							)
 						);
 				continue;
 			}
@@ -1458,10 +1466,12 @@ class CartController {
 						?
 						sanitize_title( $variation_data[ $attribute['name'] ] )
 						:
-						html_entity_decode(
-							wc_clean( $variation_data[ $attribute['name'] ] ),
-							ENT_QUOTES,
-							get_bloginfo( 'charset' )
+						wp_strip_all_tags(
+							html_entity_decode(
+								$variation_data[ $attribute['name'] ],
+								ENT_QUOTES,
+								get_bloginfo( 'charset' )
+							)
 						);
 			}
 		}

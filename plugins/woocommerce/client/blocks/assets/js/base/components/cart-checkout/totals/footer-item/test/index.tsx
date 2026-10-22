@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import { allSettings } from '@woocommerce/settings';
 import { CurrencyCode } from '@woocommerce/types';
 import * as baseContextHooks from '@woocommerce/base-context/hooks';
@@ -12,6 +12,7 @@ import { previewCart as mockPreviewCart } from '@woocommerce/resource-previews';
  * Internal dependencies
  */
 import TotalsFooterItem from '../index';
+import { textContentMatcher } from '../../../../../../../../tests/utils/find-by-text';
 
 jest.mock( '@wordpress/data', () => ( {
 	__esModule: true,
@@ -174,7 +175,9 @@ describe( 'TotalsFooterItem', () => {
 		render( <TotalsFooterItem currency={ currency } values={ values } /> );
 
 		// Check that the total price is displayed
-		expect( screen.getByText( /£85\.00/ ) ).toBeInTheDocument();
+		expect(
+			screen.getByText( textContentMatcher( '£85.00' ) )
+		).toBeInTheDocument();
 
 		// Check that no tax information is displayed
 		expect(
@@ -195,7 +198,9 @@ describe( 'TotalsFooterItem', () => {
 		);
 
 		// Check that the total price is displayed
-		expect( screen.getByText( /£85\.00/ ) ).toBeInTheDocument();
+		expect(
+			screen.getByText( textContentMatcher( '£85.00' ) )
+		).toBeInTheDocument();
 
 		// Check that no tax information is displayed when taxes are disabled
 		expect(
@@ -214,7 +219,9 @@ describe( 'TotalsFooterItem', () => {
 		);
 
 		// Check that the total price is displayed
-		expect( screen.getByText( /£85\.00/ ) ).toBeInTheDocument();
+		expect(
+			screen.getByText( textContentMatcher( '£85.00' ) )
+		).toBeInTheDocument();
 
 		// Check that tax information is displayed
 		const taxInfo = screen.getByText( /including.*tax/i );
@@ -236,7 +243,9 @@ describe( 'TotalsFooterItem', () => {
 		);
 
 		// Check that the total price is displayed
-		expect( screen.getByText( /£85\.00/ ) ).toBeInTheDocument();
+		expect(
+			screen.getByText( textContentMatcher( '£85.00' ) )
+		).toBeInTheDocument();
 
 		// Check that tax information with label is displayed
 		const taxInfo = screen.getByText( /including.*10% VAT/i );
@@ -261,7 +270,9 @@ describe( 'TotalsFooterItem', () => {
 		);
 
 		// Check that the total price is displayed
-		expect( screen.getByText( /£85\.00/ ) ).toBeInTheDocument();
+		expect(
+			screen.getByText( textContentMatcher( '£85.00' ) )
+		).toBeInTheDocument();
 
 		// Check that tax information with multiple labels is displayed
 		const taxInfo = screen.getByText( /including.*10% VAT.*5% VAT/i );
@@ -269,5 +280,34 @@ describe( 'TotalsFooterItem', () => {
 		expect( taxInfo ).toHaveClass(
 			'wc-block-components-totals-footer-item-tax'
 		);
+	} );
+
+	it( 'Renders each itemised tax amount as its own price element', async () => {
+		const valuesWithTax = {
+			...values,
+			total_tax: '100',
+			total_items_tax: '100',
+			tax_lines: [
+				{ name: '10% VAT', price: '50', rate: '10.000' },
+				{ name: '5% VAT', price: '50', rate: '5.000' },
+			],
+		};
+		render(
+			<TotalsFooterItem currency={ currency } values={ valuesWithTax } />
+		);
+
+		// The line reads the same as it did when it was one flat string.
+		const taxInfo = screen.getByText(
+			textContentMatcher( 'Including £0.50 10% VAT, £0.50 5% VAT' )
+		);
+		expect( taxInfo ).toHaveClass(
+			'wc-block-components-totals-footer-item-tax'
+		);
+
+		// Each amount is its own price element rather than part of the flat
+		// string, so the currency symbol keeps its isolation.
+		expect(
+			within( taxInfo ).getAllByText( textContentMatcher( '£0.50' ) )
+		).toHaveLength( 2 );
 	} );
 } );
