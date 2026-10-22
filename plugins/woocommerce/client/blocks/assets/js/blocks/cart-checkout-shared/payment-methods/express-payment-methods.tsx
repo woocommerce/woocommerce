@@ -42,7 +42,7 @@ const ExpressPaymentMethods = () => {
 		? {
 				height: buttonHeight,
 				borderRadius: buttonBorderRadius,
-		  }
+			}
 		: undefined;
 
 	const { activePaymentMethod, paymentMethodData } = useSelect(
@@ -141,7 +141,6 @@ const ExpressPaymentMethods = () => {
 				'Express Payment Methods should use the provided onError handler instead.',
 				{
 					alternative: 'onError',
-					plugin: 'woocommerce-gutenberg-products-block',
 					link: 'https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/4228',
 				}
 			);

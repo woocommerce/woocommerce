@@ -37,8 +37,9 @@ interface OperatorConfig {
 	value: string;
 }
 
-interface ProductTaxonomyControlProps< T extends object = object >
-	extends SearchListControlProps< T > {
+interface ProductTaxonomyControlProps<
+	T extends object = object,
+> extends SearchListControlProps< T > {
 	countType?: 'product' | 'review';
 	error?: ErrorObject | null;
 	itemClassName?: string;
@@ -57,8 +58,8 @@ const getItemCount = (
 	const details = item.details as CountDetails | undefined;
 
 	return countType === 'review'
-		? details?.review_count ?? 0
-		: details?.count ?? item.count ?? 0;
+		? ( details?.review_count ?? 0 )
+		: ( details?.count ?? item.count ?? 0 );
 };
 
 const getCountLabel = ( count: number, countType: 'product' | 'review' ) =>
@@ -67,12 +68,12 @@ const getCountLabel = ( count: number, countType: 'product' | 'review' ) =>
 				/* translators: %d is the count of reviews. */
 				_n( '%d review', '%d reviews', count, 'woocommerce' ),
 				count
-		  )
+			)
 		: sprintf(
 				/* translators: %d is the count of products. */
 				_n( '%d product', '%d products', count, 'woocommerce' ),
 				count
-		  );
+			);
 
 const getAriaLabel = (
 	item: SearchListItemProps,
@@ -94,7 +95,7 @@ const getAriaLabel = (
 				),
 				name,
 				count
-		  )
+			)
 		: sprintf(
 				/* translators: %1$s is the item name, %2$d is the count of products for the item. */
 				_n(
@@ -105,7 +106,7 @@ const getAriaLabel = (
 				),
 				name,
 				count
-		  );
+			);
 };
 
 const ProductTaxonomyControl = < T extends object = object >( {

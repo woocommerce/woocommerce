@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Make the Analytics settings "Reset defaults" button restore the filtered default order statuses instead of a hardcoded list.

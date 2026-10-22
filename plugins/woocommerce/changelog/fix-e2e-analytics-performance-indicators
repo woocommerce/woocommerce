@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Isolate the analytics overview E2E spec's dashboard layout to fix a flaky test; no production change.
+

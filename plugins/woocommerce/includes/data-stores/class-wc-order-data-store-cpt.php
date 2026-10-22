@@ -1041,7 +1041,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			}
 		}
 
-		// Handle custom orderby paramers.
+		// Handle custom orderby parameters.
 		if ( 'total' === $wp_query_args['orderby'] ) {
 			$wp_query_args['orderby']   = 'meta_value_num';
 			$wp_query_args['meta_key']  = '_order_total'; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key

@@ -6,6 +6,7 @@
 		display: flex;
 		flex-flow: row wrap;
 		align-items: flex-start;
+		column-gap: $gap-largest;
 	}
 	.wc-block-components-main,
 	.wc-block-components-sidebar,

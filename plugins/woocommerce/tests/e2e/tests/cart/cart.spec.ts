@@ -78,80 +78,102 @@ const test = baseTest.extend( {
 /* endregion */
 
 /* region tests */
-test(
-	'can undo product removal in classic cart',
-	{ tag: [ tags.PAYMENTS, tags.SERVICES, tags.HPOS ] },
-	async ( { page, products, tax } ) => {
-		const slug = CLASSIC_CART_PAGE.slug;
+for ( const referrerPolicy of [
+	'strict-origin-when-cross-origin',
+	'no-referrer',
+] ) {
+	test(
+		`can undo product removal in classic cart (${ referrerPolicy })`,
+		{ tag: [ tags.PAYMENTS, tags.SERVICES, tags.HPOS ] },
+		async ( { page, products, tax } ) => {
+			const slug = CLASSIC_CART_PAGE.slug;
 
-		await test.step( 'add product to cart', async () => {
-			await addAProductToCart( page, products[ 0 ].id, 1 );
-			await page.goto( slug );
-			await checkCartContent(
-				true,
-				page,
-				[ { data: products[ 0 ], qty: 1 } ],
-				tax
-			);
-		} );
+			await page.addInitScript( ( policy ) => {
+				document.addEventListener( 'DOMContentLoaded', () => {
+					const meta = document.createElement( 'meta' );
+					meta.name = 'referrer';
+					meta.content = policy;
+					document.head.appendChild( meta );
+				} );
+			}, referrerPolicy );
 
-		await test.step( 'remove product and verify undo link appears', async () => {
-			await page
-				.getByLabel( /Remove .* from cart/ )
-				.first()
-				.click();
+			await test.step( 'add product to cart', async () => {
+				await addAProductToCart( page, products[ 0 ].id, 1 );
+				await page.goto( slug );
+				await checkCartContent(
+					true,
+					page,
+					[ { data: products[ 0 ], qty: 1 } ],
+					tax
+				);
+			} );
 
-			// Verify the product was removed
-			await checkCartContent( true, page, [], tax );
+			await test.step( 'remove product and verify undo link appears', async () => {
+				const removalRequest = page.waitForRequest( ( request ) =>
+					new URL( request.url() ).searchParams.has( 'remove_item' )
+				);
+				await page
+					.getByLabel( /Remove .* from cart/ )
+					.first()
+					.click();
 
-			// Verify the undo link appears
-			await expect(
-				page.getByRole( 'link', { name: 'Undo?' } )
-			).toBeVisible();
-		} );
+				const request = await removalRequest;
+				expect( Boolean( request.headers().referer ) ).toBe(
+					referrerPolicy !== 'no-referrer'
+				);
 
-		await test.step( 'click undo to restore product', async () => {
-			await page.getByRole( 'link', { name: 'Undo?' } ).click();
+				// Verify the product was removed
+				await checkCartContent( true, page, [], tax );
 
-			// Verify the product is back in the cart
-			await checkCartContent(
-				true,
-				page,
-				[ { data: products[ 0 ], qty: 1 } ],
-				tax
-			);
-		} );
+				// Verify the undo link appears
+				await expect(
+					page.getByRole( 'link', { name: 'Undo?' } )
+				).toBeVisible();
+			} );
 
-		await test.step( 'remove product again after undo', async () => {
-			await page
-				.getByLabel( /Remove .* from cart/ )
-				.first()
-				.click();
+			await test.step( 'click undo to restore product', async () => {
+				await page.getByRole( 'link', { name: 'Undo?' } ).click();
 
-			// Verify the product was removed again
-			await checkCartContent( true, page, [], tax );
+				// Verify the product is back in the cart
+				await checkCartContent(
+					true,
+					page,
+					[ { data: products[ 0 ], qty: 1 } ],
+					tax
+				);
+			} );
 
-			// Verify undo link is visible
-			await expect(
-				page.getByRole( 'link', { name: 'Undo?' } )
-			).toBeVisible();
-		} );
+			await test.step( 'remove product again after undo', async () => {
+				await page
+					.getByLabel( /Remove .* from cart/ )
+					.first()
+					.click();
 
-		await test.step( 'verify undo link disappears after navigation', async () => {
-			// Navigate to shop page and return to cart
-			await page.goto( 'shop' );
-			await page.goto( slug );
+				// Verify the product was removed again
+				await checkCartContent( true, page, [], tax );
 
-			// Verify cart is still empty
-			await checkCartContent( true, page, [], tax );
+				// Verify undo link is visible
+				await expect(
+					page.getByRole( 'link', { name: 'Undo?' } )
+				).toBeVisible();
+			} );
 
-			// Verify undo link is no longer visible (cleanup occurred)
-			await expect(
-				page.getByRole( 'link', { name: 'Undo?' } )
-			).toBeHidden();
-		} );
-	}
-);
+			await test.step( 'verify undo link disappears after navigation', async () => {
+				// Navigate to shop page and return to cart
+				await page.goto( 'shop' );
+				await page.goto( slug );
+
+				// Verify cart is still empty
+				await checkCartContent( true, page, [], tax );
+
+				// Verify undo link is no longer visible (cleanup occurred)
+				await expect(
+					page.getByRole( 'link', { name: 'Undo?' } )
+				).toBeHidden();
+			} );
+		}
+	);
+}
 
 cartPages.forEach( ( { name, slug } ) => {
 	test(
@@ -159,7 +181,7 @@ cartPages.forEach( ( { name, slug } ) => {
 		{ tag: [ tags.PAYMENTS, tags.SERVICES, tags.HPOS ] },
 		async ( { page, products, tax } ) => {
 			await test.step( 'empty cart is displayed', async () => {
-				page.goto( slug );
+				await page.goto( slug );
 				await checkCartContent( isClassicCart( page ), page, [], tax );
 			} );
 

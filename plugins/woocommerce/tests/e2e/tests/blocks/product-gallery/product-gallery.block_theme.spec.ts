@@ -86,7 +86,7 @@ test.describe( `${ blockData.name }`, () => {
 	} );
 
 	test.describe( 'with thumbnails', () => {
-		test( 'should have as first thumbnail, the same image that it is visible in the product block', async ( {
+		test( 'selects thumbnails and keeps the active viewer in sync', async ( {
 			page,
 			editor,
 			pageObject,
@@ -99,55 +99,39 @@ test.describe( `${ blockData.name }`, () => {
 
 			await page.goto( blockData.productPage );
 
-			const viewerImageId = await pageObject.getViewerImageId();
-
+			const thumbnailsBlock = await pageObject.getThumbnailsBlock( {
+				page: 'frontend',
+			} );
+			const initialViewerImageId = await pageObject.getViewerImageId();
 			const firstImageThumbnailId = await getThumbnailImageIdByNth(
 				0,
-				await pageObject.getThumbnailsBlock( {
-					page: 'frontend',
-				} )
+				thumbnailsBlock
 			);
-
-			expect( viewerImageId ).toBe( firstImageThumbnailId );
-		} );
-
-		test( 'should change the image when the user click on a thumbnail image', async ( {
-			page,
-			editor,
-			pageObject,
-		} ) => {
-			await pageObject.addProductGalleryBlock( { cleanContent: true } );
-
-			await editor.saveSiteEditorEntities( {
-				isOnlyCurrentEntityDirty: true,
-			} );
-
-			await page.goto( blockData.productPage );
-
-			const viewerImageId = await pageObject.getViewerImageId();
+			const initialActiveThumbnailId =
+				await pageObject.getActiveThumbnailImageId();
 
 			const secondImageThumbnailId = await getThumbnailImageIdByNth(
 				1,
-				await pageObject.getThumbnailsBlock( {
-					page: 'frontend',
-				} )
+				thumbnailsBlock
 			);
 
-			expect( viewerImageId ).not.toBe( secondImageThumbnailId );
+			expect( initialViewerImageId ).not.toBeNull();
+			expect( firstImageThumbnailId ).not.toBeNull();
+			expect( initialActiveThumbnailId ).not.toBeNull();
+			expect( initialViewerImageId ).toBe( firstImageThumbnailId );
+			expect( initialActiveThumbnailId ).toBe( firstImageThumbnailId );
+			expect( secondImageThumbnailId ).not.toBeNull();
+			expect( initialViewerImageId ).not.toBe( secondImageThumbnailId );
 
-			await (
-				await pageObject.getThumbnailsBlock( {
-					page: 'frontend',
-				} )
-			)
-				.locator( 'img' )
-				.nth( 1 )
-				.click();
+			await thumbnailsBlock.locator( 'img' ).nth( 1 ).click();
 
 			await expect( async () => {
 				const newViewerImageId = await pageObject.getViewerImageId();
+				const newActiveThumbnailId =
+					await pageObject.getActiveThumbnailImageId();
 
 				expect( newViewerImageId ).toBe( secondImageThumbnailId );
+				expect( newActiveThumbnailId ).toBe( secondImageThumbnailId );
 			} ).toPass( { timeout: 1_000 } );
 		} );
 	} );
@@ -175,19 +159,34 @@ test.describe( `${ blockData.name }`, () => {
 				} )
 			);
 
+			expect( initialViewerImageId ).not.toBeNull();
+			expect( secondImageThumbnailId ).not.toBeNull();
 			expect( initialViewerImageId ).not.toBe( secondImageThumbnailId );
+			expect( await pageObject.getActiveThumbnailImageId() ).toBe(
+				initialViewerImageId
+			);
 
 			await pageObject.clickNextButton();
 
-			const nextImageId = await pageObject.getViewerImageId();
-
-			expect( nextImageId ).toBe( secondImageThumbnailId );
+			await expect( async () => {
+				expect( await pageObject.getViewerImageId() ).toBe(
+					secondImageThumbnailId
+				);
+				expect( await pageObject.getActiveThumbnailImageId() ).toBe(
+					secondImageThumbnailId
+				);
+			} ).toPass( { timeout: 1_000 } );
 
 			await pageObject.clickPreviousButton();
 
-			const previousImageId = await pageObject.getViewerImageId();
-
-			expect( previousImageId ).toBe( initialViewerImageId );
+			await expect( async () => {
+				expect( await pageObject.getViewerImageId() ).toBe(
+					initialViewerImageId
+				);
+				expect( await pageObject.getActiveThumbnailImageId() ).toBe(
+					initialViewerImageId
+				);
+			} ).toPass( { timeout: 1_000 } );
 		} );
 	} );
 
@@ -216,13 +215,20 @@ test.describe( `${ blockData.name }`, () => {
 				} )
 			);
 
+			expect( initialViewerImageId ).not.toBeNull();
+			expect( secondImageThumbnailId ).not.toBeNull();
 			expect( initialViewerImageId ).not.toBe( secondImageThumbnailId );
 
 			await pageObject.clickNextButton();
 
-			const nextImageId = await pageObject.getViewerImageId();
-
-			expect( nextImageId ).toBe( secondImageThumbnailId );
+			await expect( async () => {
+				expect( await pageObject.getViewerImageId() ).toBe(
+					secondImageThumbnailId
+				);
+				expect( await pageObject.getActiveThumbnailImageId() ).toBe(
+					secondImageThumbnailId
+				);
+			} ).toPass( { timeout: 1_000 } );
 
 			const viewerBlock = await pageObject.getViewerBlock( {
 				page: 'frontend',
@@ -231,40 +237,35 @@ test.describe( `${ blockData.name }`, () => {
 
 			const dialogImage = page
 				.getByRole( 'dialog' )
-				.locator( `img[data-image-id='${ nextImageId }']` );
+				.locator( `img[data-image-id='${ secondImageThumbnailId }']` );
 
 			// The image should be in the viewport but it simply doesn't fit fully.
 			await expect( dialogImage ).toBeInViewport( { ratio: 0.7 } );
 
-			const closePopUpButton = page.locator(
-				'.wc-block-product-gallery-dialog__close-button'
-			);
-			await closePopUpButton.click();
+			await page.getByRole( 'button', { name: 'Close dialog' } ).click();
 
-			const singleProductImageId = await pageObject.getViewerImageId();
-
-			expect( singleProductImageId ).toBe( nextImageId );
+			await expect( async () => {
+				expect( await pageObject.getViewerImageId() ).toBe(
+					secondImageThumbnailId
+				);
+				expect( await pageObject.getActiveThumbnailImageId() ).toBe(
+					secondImageThumbnailId
+				);
+			} ).toPass( { timeout: 1_000 } );
 		} );
 	} );
 
 	test.describe( 'open pop-up when clicked option', () => {
-		test( 'should be enabled by default', async ( {
-			pageObject,
-			editor,
-		} ) => {
-			await pageObject.addProductGalleryBlock( { cleanContent: true } );
-			await editor.openDocumentSettingsSidebar();
-			const fullScreenOption = pageObject.getFullScreenOnClickSetting();
-
-			await expect( fullScreenOption ).toBeChecked();
-		} );
-
-		test( 'should open dialog on the frontend', async ( {
+		test( 'enables pop-up by default and opens it on the frontend', async ( {
 			pageObject,
 			page,
 			editor,
 		} ) => {
 			await pageObject.addProductGalleryBlock( { cleanContent: true } );
+			await editor.openDocumentSettingsSidebar();
+			await expect(
+				pageObject.getFullScreenOnClickSetting()
+			).toBeChecked();
 			await editor.saveSiteEditorEntities( {
 				isOnlyCurrentEntityDirty: true,
 			} );
@@ -309,38 +310,27 @@ test.describe( `${ blockData.name }`, () => {
 	} );
 
 	test.describe( 'block availability', () => {
-		test( 'should be available on the Single Product Template', async ( {
+		test( 'is available only in supported Single Product contexts', async ( {
+			admin,
 			page,
 			editor,
 		} ) => {
 			await editor.openGlobalBlockInserter();
 			await page.getByRole( 'tab', { name: 'Blocks' } ).click();
-			const productGalleryBlockOption = page
+			let productGalleryBlockOption = page
 				.getByRole( 'listbox', { name: 'WooCommerce' } )
 				.getByRole( 'option', { name: blockData.title } );
 
 			await expect( productGalleryBlockOption ).toBeVisible();
-		} );
 
-		test( 'should be hidden on the post editor globally', async ( {
-			admin,
-			page,
-			editor,
-		} ) => {
 			await admin.createNewPost();
 			await editor.openGlobalBlockInserter();
-			const productGalleryBlockOption = page
+			productGalleryBlockOption = page
 				.getByRole( 'listbox', { name: 'WooCommerce' } )
 				.getByRole( 'option', { name: blockData.title } );
 
 			await expect( productGalleryBlockOption ).toBeHidden();
-		} );
 
-		test( 'on the post editor, block should be in Single Product by default and is visible in inserter', async ( {
-			admin,
-			editor,
-		} ) => {
-			await admin.createNewPost();
 			await editor.insertBlockUsingGlobalInserter( 'Product' );
 			await editor.canvas.getByText( 'Album' ).click();
 			await editor.canvas.getByText( 'Done' ).click();

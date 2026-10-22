@@ -99,6 +99,8 @@ class WC_Helper_Admin {
 			$settings['wccomHelper']['wooUpdateCount']          = WC_Helper_Updater::get_updates_count_based_on_site_status();
 			$settings['wccomHelper']['connected_notice']        = PluginsHelper::get_wccom_connected_notice( $auth_user_email );
 			$settings['wccomHelper']['woocomConnectNoticeType'] = WC_Helper_Updater::get_woo_connect_notice_type();
+			$settings['wccomHelper']['updateCoreUrl']           = current_user_can( 'update_core' ) ? network_admin_url( 'update-core.php' ) : '';
+			$settings['wccomHelper']['updatePhpUrl']            = esc_url_raw( wp_get_update_php_url() );
 
 			if ( WC_Helper::is_site_connected() ) {
 				$settings['wccomHelper']['subscription_expired_notice']  = PluginsHelper::get_expired_subscription_notice( false );
@@ -107,6 +109,15 @@ class WC_Helper_Admin {
 				$settings['wccomHelper']['connection_url_notice']        = WC_Woo_Helper_Connection::get_connection_url_notice();
 				$settings['wccomHelper']['has_host_plan_orders']         = WC_Woo_Helper_Connection::has_host_plan_orders();
 				$settings['wccomHelper']['maybe_deleted_connection']     = WC_Woo_Helper_Connection::get_deleted_connection_notice();
+
+				// The "Connected to <email>" banner on My Subscriptions stays hidden once dismissed.
+				$settings['wccomHelper']['show_connected_account_notice'] = PluginsHelper::should_show_notice( PluginsHelper::DISMISS_CONNECTED_ACCOUNT_NOTICE, false );
+
+				// Read last: the notices above already trigger a subscriptions fetch,
+				// so by this point any failure from it has been recorded.
+				$api_error = WC_Helper::get_api_error();
+
+				$settings['wccomHelper']['api_error_notice'] = null !== $api_error ? $api_error['message'] : '';
 			} else {
 				$settings['wccomHelper']['disconnected_notice'] = PluginsHelper::get_wccom_disconnected_notice();
 			}

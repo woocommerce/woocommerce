@@ -4,7 +4,6 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails;
 
-use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\EmailEditor\Integration;
 use Automattic\WooCommerce\Internal\EmailEditor\EmailTemplates\WooEmailTemplate;
 use Automattic\WooCommerce\Utilities\StringUtil;
@@ -19,94 +18,6 @@ use Automattic\WooCommerce\Utilities\StringUtil;
  * @package Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails
  */
 class WCTransactionalEmailPostsGenerator {
-	/**
-	 * WooCommerce Email Template Manager instance.
-	 *
-	 * @var WCTransactionalEmailPostsManager
-	 */
-	private $template_manager;
-
-	/**
-	 * Default templates.
-	 *
-	 * @var array<string, \WC_Email>
-	 */
-	private $default_templates = array();
-
-	/**
-	 * Transient name.
-	 *
-	 * @var string
-	 */
-	private $transient_name = 'wc_email_editor_initial_templates_generated';
-
-	/**
-	 * Constructor.
-	 *
-	 * Initializes the WCTransactionalEmailPostsGenerator by setting up the template manager.
-	 */
-	public function __construct() {
-		$this->template_manager = WCTransactionalEmailPostsManager::get_instance();
-	}
-
-	/**
-	 * Initialize the email template generator.
-	 *
-	 * This function initializes the email template generator by loading the default templates
-	 * and generating initial email templates if needed.
-	 *
-	 * @internal
-	 */
-	public function initialize() {
-		if ( Constants::get_constant( 'WC_VERSION' ) === get_transient( $this->transient_name ) ) {
-			// if templates are already generated, we don't need to run this function again.
-			return true;
-		}
-
-		$this->init_default_transactional_emails();
-		$this->generate_initial_email_templates();
-	}
-
-	/**
-	 * Initialize the default WooCommerce Transactional Emails.
-	 *
-	 * This function initializes the default templates for the core transactional emails.
-	 * It fetches all the emails from WooCommerce and filters them to include only the core transactional emails.
-	 */
-	public function init_default_transactional_emails() {
-		if ( ! empty( $this->default_templates ) ) {
-			// If the default templates are already initialized, we don't need to run this function again.
-			return;
-		}
-
-		$core_transactional_emails = WCTransactionalEmails::get_transactional_emails();
-
-		$wc_emails = \WC_Emails::instance();
-		/**
-		 * WooCommerce Transactional Emails instance.
-		 *
-		 * @var \WC_Email[]
-		 */
-		$email_types = $wc_emails->get_emails();
-
-		// Filter the emails to include only the core transactional emails.
-		$email_types = array_filter(
-			$email_types,
-			function ( $email ) use ( $core_transactional_emails ) {
-				return in_array( $email->id, $core_transactional_emails, true );
-			}
-		);
-
-		$this->default_templates = array_reduce(
-			$email_types,
-			function ( $acc, $email ) {
-				$acc[ $email->id ] = $email;
-				return $acc;
-			},
-			array()
-		);
-	}
-
 	/**
 	 * Resolve the block template name for the given email.
 	 *
@@ -218,6 +129,11 @@ class WCTransactionalEmailPostsGenerator {
 		/**
 		 * Filter the email template HTML.
 		 *
+		 * Runs wherever the file template is rendered: in admin (post creation,
+		 * divergence detection) and on the email send path (file-first
+		 * rendering) — including front-end, cron, and CLI requests. Callbacks
+		 * must not assume admin context.
+		 *
 		 * @param string    $template_html The email template HTML.
 		 * @param \WC_Email $email The email object.
 		 * @since 10.7.0
@@ -228,107 +144,17 @@ class WCTransactionalEmailPostsGenerator {
 	}
 
 	/**
-	 * Generate initial email templates.
-	 *
-	 * This function generates the initial email templates for the core transactional emails.
-	 * It checks if the templates are already generated and if not, it generates them.
-	 *
-	 * @return bool True if the templates are generated, false otherwise.
-	 */
-	public function generate_initial_email_templates() {
-		$core_transactional_emails = WCTransactionalEmails::get_transactional_emails();
-
-		$templates_to_generate = array();
-		foreach ( $core_transactional_emails as $email_type ) {
-			if ( empty( $this->template_manager->get_email_template_post_id( $email_type ) ) ) {
-				$templates_to_generate[] = $email_type;
-			}
-		}
-
-		if ( empty( $templates_to_generate ) ) {
-			return;
-		}
-
-		$result = $this->generate_email_templates( $templates_to_generate );
-
-		if ( is_wp_error( $result ) ) {
-			return false;
-		}
-
-		set_transient( $this->transient_name, Constants::get_constant( 'WC_VERSION' ), WEEK_IN_SECONDS );
-
-		// Flush rewrite rules to ensure the new templates are loaded.
-		flush_rewrite_rules();
-
-		return true;
-	}
-
-	/**
-	 * Generate email template if it doesn't exist.
-	 *
-	 * This function generates an email template if it doesn't exist.
-	 *
-	 * @param string $email_type The email type.
-	 * @return int The post ID of the generated template.
-	 * @throws \Exception When post creation fails.
-	 */
-	public function generate_email_template_if_not_exists( $email_type ) {
-		$email_data = $this->default_templates[ $email_type ];
-
-		if ( $this->template_manager->get_email_template_post_id( $email_type ) || empty( $email_data ) ) {
-			return $this->template_manager->get_email_template_post_id( $email_type );
-		}
-
-		return $this->generate_single_template( $email_type, $email_data );
-	}
-
-	/**
-	 * Generate email templates.
-	 *
-	 * This function generates the email templates for the given email types.
-	 *
-	 * @param array $templates_to_generate The email types to generate.
-	 */
-	public function generate_email_templates( $templates_to_generate ) {
-		global $wpdb;
-
-		$core_emails = array_filter(
-			$this->default_templates,
-			function ( $email_id ) use ( $templates_to_generate ) {
-				return in_array( $email_id, $templates_to_generate, true );
-			},
-			ARRAY_FILTER_USE_KEY
-		);
-
-		if ( empty( $core_emails ) ) {
-			return false;
-		}
-
-		// Start transaction.
-		$wpdb->query( 'START TRANSACTION' );
-
-		try {
-			foreach ( $core_emails as $email_type => $email_data ) {
-				$this->generate_single_template( $email_type, $email_data );
-			}
-
-			$wpdb->query( 'COMMIT' );
-			return true;
-
-		} catch ( \Exception $e ) {
-			$wpdb->query( 'ROLLBACK' );
-			return new \WP_Error( 'email_generation_failed', $e->getMessage() );
-		}
-	}
-
-	/**
 	 * Build the `wp_insert_post()` payload for a given email and apply the
 	 * `woocommerce_email_content_post_data` filter.
 	 *
 	 * Extracted so the generator and the divergence detector observe the exact
 	 * same pre-insert post payload, guaranteeing by construction that the hash
-	 * stamped in {@see self::generate_single_template()} and the hash recomputed
+	 * stamped in {@see self::create_draft()} and the hash recomputed
 	 * in `WCEmailTemplateDivergenceDetector` hash identical input.
+	 *
+	 * Note: a `post_status` returned by the filter is not honored on the
+	 * creation path — {@see self::create_draft()} forces `draft`
+	 * because the status is system-owned (only published posts are rendered).
 	 *
 	 * @param string    $email_type The email type identifier (e.g. `customer_processing_order`).
 	 * @param \WC_Email $email      The transactional email instance.
@@ -354,6 +180,12 @@ class WCTransactionalEmailPostsGenerator {
 		 *
 		 * Allows third-party integrators to modify the post data (title, content, meta, etc.)
 		 * before the email content post is created.
+		 *
+		 * Besides post creation, this also runs whenever the canonical file
+		 * template content is computed — including the email send path
+		 * (front-end, cron, CLI), where only `post_content` from the filtered
+		 * array is used. On the creation path `post_status` is system-owned
+		 * and not honored. Callbacks must not assume admin context.
 		 *
 		 * @since 10.5.0
 		 * @param array     $post_data  The post data array to be used for wp_insert_post().
@@ -386,28 +218,43 @@ class WCTransactionalEmailPostsGenerator {
 	}
 
 	/**
-	 * Generate a single email template.
+	 * Create a draft email post for the given email.
 	 *
-	 * This function generates a single email template post and sets its postmeta association.
+	 * The draft is the editing scratchpad created when a user opens the
+	 * email editor for an email type that has no saved post yet. It stays
+	 * invisible to rendering (only published posts are used) and links to its
+	 * email type solely via the `_wc_email_type` meta — the option mapping is
+	 * written when the post is published, see
+	 * `Integration::save_email_mapping_on_publish()`.
 	 *
-	 * @param string    $email_type    The email type.
-	 * @param \WC_Email $email_data The transactional email data.
-	 * @return int The post ID of the generated template.
+	 * @param \WC_Email $email The transactional email instance.
+	 * @return int The post ID of the created draft.
 	 * @throws \Exception When post creation fails.
+	 *
+	 * @since 11.1.0
 	 */
-	private function generate_single_template( $email_type, $email_data ) {
-		$post_data = self::build_filtered_post_data( (string) $email_type, $email_data );
+	public function create_draft( \WC_Email $email ): int {
+		$email_type = (string) $email->id;
+		$post_data  = self::build_filtered_post_data( $email_type, $email );
 
-		// Sync meta stamp for emails participating in template update propagation.
-		// VERSION + LAST_SYNCED_AT are filter-independent and can ride on `meta_input`
-		// during the insert. SOURCE_HASH must reflect the post_content WordPress
-		// actually persisted (post-`content_save_pre` filter chain), so we stamp it
-		// after the insert returns and re-fetch the post to hash its saved content.
-		$sync_config = WCEmailTemplateSyncRegistry::get_email_sync_config( (string) $email_data->id );
+		// The status is system-owned: it must stay `draft` so the post is
+		// ignored by rendering until published, regardless of what the
+		// `woocommerce_email_content_post_data` filter returns. A regular draft
+		// is used instead of an auto-draft because the editor treats auto-draft
+		// titles as placeholders and blanks them.
+		$post_data['post_status'] = 'draft';
+
+		if ( ! isset( $post_data['meta_input'] ) || ! is_array( $post_data['meta_input'] ) ) {
+			$post_data['meta_input'] = array();
+		}
+		$post_data['meta_input'][ WCTransactionalEmailPostsManager::EMAIL_TYPE_META_KEY ] = $email_type;
+
+		// Version + last-synced meta only apply to emails participating in
+		// template update propagation. Their values don't depend on what
+		// WordPress persists, so they can be written as part of the insert
+		// (unlike the source hash below, which must match the saved content).
+		$sync_config = WCEmailTemplateSyncRegistry::get_email_sync_config( $email_type );
 		if ( null !== $sync_config ) {
-			if ( ! isset( $post_data['meta_input'] ) || ! is_array( $post_data['meta_input'] ) ) {
-				$post_data['meta_input'] = array();
-			}
 			$post_data['meta_input'][ WCEmailTemplateDivergenceDetector::VERSION_META_KEY ]          = (string) $sync_config['version'];
 			$post_data['meta_input'][ WCEmailTemplateDivergenceDetector::LAST_SYNCED_AT_META_KEY ]   = gmdate( 'Y-m-d H:i:s' );
 			$post_data['meta_input'][ WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY ] = (string) ( $post_data['post_content'] ?? '' );
@@ -419,23 +266,129 @@ class WCTransactionalEmailPostsGenerator {
 			throw new \Exception( esc_html( $post_id->get_error_message() ) );
 		}
 
-		if ( null !== $sync_config ) {
-			$saved_post = get_post( $post_id );
-			$saved_body = $saved_post instanceof \WP_Post ? (string) $saved_post->post_content : (string) ( $post_data['post_content'] ?? '' );
-			update_post_meta(
-				(int) $post_id,
-				WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY,
-				sha1( $saved_body )
-			);
-			// Freshly generated posts match canonical core by construction.
-			update_post_meta(
-				(int) $post_id,
-				WCEmailTemplateDivergenceDetector::STATUS_META_KEY,
-				WCEmailTemplateDivergenceDetector::STATUS_IN_SYNC
-			);
+		// The source hash is stamped for every draft — also for emails outside
+		// the sync registry — because `was_never_edited()` checks rely on it;
+		// the timestamp fallback breaks once a refresh or autosave touches
+		// `post_modified`. It must reflect the post_content WordPress actually
+		// persisted (post-`content_save_pre` filter chain), so it is stamped
+		// after the insert returns, hashing the saved content.
+		$saved_post = get_post( $post_id );
+		$saved_body = $saved_post instanceof \WP_Post ? (string) $saved_post->post_content : (string) ( $post_data['post_content'] ?? '' );
+		update_post_meta(
+			(int) $post_id,
+			WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY,
+			sha1( $saved_body )
+		);
+		// Freshly created posts match canonical core by construction.
+		update_post_meta(
+			(int) $post_id,
+			WCEmailTemplateDivergenceDetector::STATUS_META_KEY,
+			WCEmailTemplateDivergenceDetector::STATUS_IN_SYNC
+		);
+
+		return (int) $post_id;
+	}
+
+	/**
+	 * Initialize the email template generator.
+	 *
+	 * @deprecated 11.1.0 Email posts are created lazily when the user opens the editor; there is no initialization step anymore. No-op, will be removed in a future version.
+	 * @return void
+	 */
+	public function initialize() {
+		wc_deprecated_function( __METHOD__, '11.1.0' );
+	}
+
+	/**
+	 * Initialize the default WooCommerce Transactional Emails.
+	 *
+	 * @deprecated 11.1.0 Email posts are created lazily when the user opens the editor; default templates are no longer pre-loaded. No-op, will be removed in a future version.
+	 * @return void
+	 */
+	public function init_default_transactional_emails() {
+		wc_deprecated_function( __METHOD__, '11.1.0' );
+	}
+
+	/**
+	 * Generate initial email templates.
+	 *
+	 * @deprecated 11.1.0 Email posts are no longer bulk-generated; file templates are the rendering source until an email is customized and saved. No-op, will be removed in a future version.
+	 * @return bool Always false.
+	 */
+	public function generate_initial_email_templates() {
+		wc_deprecated_function( __METHOD__, '11.1.0' );
+		return false;
+	}
+
+	/**
+	 * Generate email templates.
+	 *
+	 * @deprecated 11.1.0 Email posts are no longer bulk-generated; file templates are the rendering source until an email is customized and saved. No-op, will be removed in a future version.
+	 * @param array $templates_to_generate The email types to generate.
+	 * @return bool Always false.
+	 */
+	public function generate_email_templates( $templates_to_generate ) {
+		unset( $templates_to_generate );
+		wc_deprecated_function( __METHOD__, '11.1.0' );
+		return false;
+	}
+
+	/**
+	 * Generate email template if it doesn't exist.
+	 *
+	 * @deprecated 11.1.0 Email posts are created lazily as drafts when the user opens the editor and become the rendering source when published. This method now creates a published post directly and will be removed in a future version.
+	 * @param string $email_type The email type.
+	 * @return int|false The post ID, or false when the email type is not registered or the post could not be created or published.
+	 */
+	public function generate_email_template_if_not_exists( $email_type ) {
+		wc_deprecated_function( __METHOD__, '11.1.0' );
+
+		$post_manager = WCTransactionalEmailPostsManager::get_instance();
+
+		// Reuse the mapped post only when it still exists and isn't trashed —
+		// a stale mapping (post deleted or trashed out-of-band) must fall
+		// through to creating a fresh post, mirroring the recreate endpoint.
+		$existing_post = $post_manager->get_email_post( $email_type );
+		if ( $existing_post && 'trash' !== $existing_post->post_status ) {
+			return $existing_post->ID;
 		}
 
-		$this->template_manager->save_email_template_post_id( $email_type, $post_id );
+		$email = $post_manager->get_email_by_id( (string) $email_type );
+		if ( ! $email ) {
+			return false;
+		}
+
+		// Preserve the method's original int|false contract: it never threw,
+		// so a post-creation failure must surface as false, not an exception.
+		try {
+			$post_id = $this->create_draft( $email );
+		} catch ( \Exception $e ) {
+			return false;
+		}
+
+		$updated = wp_update_post(
+			array(
+				'ID'            => $post_id,
+				'post_status'   => 'publish',
+				// An empty value makes core skip page template handling,
+				// leaving the meta as created. Omitting the key would not
+				// help: wp_update_post() fills it from the stored meta and
+				// then fails validation when the email template is not
+				// registered in the current request.
+				'page_template' => '',
+			),
+			true
+		);
+
+		// Callers expect a published, mapped, render-ready post. When
+		// publishing fails, don't map the leftover draft (the renderer
+		// ignores unpublished posts); the editor flow reuses it as the
+		// scratchpad for this email type when the user opens the editor.
+		if ( is_wp_error( $updated ) || 0 === $updated ) {
+			return false;
+		}
+
+		$post_manager->save_email_template_post_id( $email_type, $post_id );
 
 		return $post_id;
 	}

@@ -12,6 +12,7 @@ import { RawHTML } from '@wordpress/element';
  * Internal dependencies
  */
 import { PAYMENT_METHOD_NAME } from './constants';
+import { canMakePaymentForShippingMethods } from '../utils/shipping-method-restrictions';
 
 const settings = getPaymentMethodData( 'cod', {} );
 const defaultLabel = __( 'Cash on delivery', 'woocommerce' );
@@ -35,44 +36,6 @@ const Label = ( props ) => {
 };
 
 /**
- * Determine whether COD is available for this cart/order.
- *
- * @param {Object}  props                         Incoming props for the component.
- * @param {boolean} props.cartNeedsShipping       True if the cart contains any physical/shippable products.
- * @param {boolean} props.selectedShippingMethods
- *
- * @return {boolean}  True if COD payment method should be displayed as a payment option.
- */
-const canMakePayment = ( { cartNeedsShipping, selectedShippingMethods } ) => {
-	if ( settings.enableForVirtual && ! cartNeedsShipping ) {
-		// Store allows COD for virtual orders.
-		return true;
-	}
-
-	if ( ! settings.enableForShippingMethods.length ) {
-		// Store does not limit COD to specific shipping methods.
-		return true;
-	}
-
-	// Look for a supported shipping method in the user's selected
-	// shipping methods. If one is found, then COD is allowed.
-	const selectedMethods = Object.values( selectedShippingMethods );
-
-	// Enable until proven unavailable.
-	if ( selectedMethods.length === 0 ) {
-		return true;
-	}
-
-	// supported shipping methods might be global (eg. "Any flat rate"), hence
-	// this is doing a `String.prototype.includes` match vs a `Array.prototype.includes` match.
-	return settings.enableForShippingMethods.some( ( shippingMethodId ) => {
-		return selectedMethods.some( ( selectedMethod ) => {
-			return selectedMethod.includes( shippingMethodId );
-		} );
-	} );
-};
-
-/**
  * Cash on Delivery (COD) payment method config object.
  */
 const cashOnDeliveryPaymentMethod = {
@@ -80,7 +43,7 @@ const cashOnDeliveryPaymentMethod = {
 	label: <Label />,
 	content: <Content />,
 	edit: <Content />,
-	canMakePayment,
+	canMakePayment: canMakePaymentForShippingMethods( settings ),
 	ariaLabel: label,
 	supports: {
 		features: settings?.supports ?? [],

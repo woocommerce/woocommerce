@@ -18,6 +18,8 @@ const baseEmail: EmailType = {
 	templateVersion: null,
 	currentVersion: null,
 	wasBackfilled: false,
+	block_editor_supported: true,
+	file_template_preview_url: null,
 };
 
 export const CoreUpdatedCustomized = () => (

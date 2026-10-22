@@ -212,12 +212,12 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 	 * @param  string $input_id Input ID.
 	 */
 	public function search_box( $text, $input_id ) {
-		if ( empty( $_REQUEST['s'] ) && ! $this->has_items() ) { // WPCS: input var okay, CSRF ok.
+		if ( empty( $_REQUEST['s'] ) && ! $this->has_items() ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only search; input is unslashed, sanitized, and SQL-escaped.
 			return;
 		}
 
 		$input_id     = $input_id . '-search-input';
-		$search_query = isset( $_REQUEST['s'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['s'] ) ) : ''; // WPCS: input var okay, CSRF ok.
+		$search_query = isset( $_REQUEST['s'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['s'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only search; input is unslashed, sanitized, and SQL-escaped.
 
 		echo '<p class="search-box">';
 		echo '<label class="screen-reader-text" for="' . esc_attr( $input_id ) . '">' . esc_html( $text ) . ':</label>';
@@ -251,8 +251,8 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 
 		$search = '';
 
-		if ( ! empty( $_REQUEST['s'] ) ) { // WPCS: input var okay, CSRF ok.
-			$search = "AND description LIKE '%" . esc_sql( $wpdb->esc_like( wc_clean( wp_unslash( $_REQUEST['s'] ) ) ) ) . "%' "; // WPCS: input var okay, CSRF ok.
+		if ( ! empty( $_REQUEST['s'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only search; input is unslashed, sanitized, and SQL-escaped.
+			$search = "AND description LIKE '%" . esc_sql( $wpdb->esc_like( wc_clean( wp_unslash( $_REQUEST['s'] ) ) ) ) . "%' "; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only search; input is unslashed, sanitized, and SQL-escaped.
 		}
 
 		// Get the API keys.
@@ -260,9 +260,9 @@ class WC_Admin_API_Keys_Table_List extends WP_List_Table {
 			"SELECT key_id, user_id, description, permissions, truncated_key, last_access FROM {$wpdb->prefix}woocommerce_api_keys WHERE 1 = 1 {$search}" .
 			$wpdb->prepare( 'ORDER BY key_id DESC LIMIT %d OFFSET %d;', $per_page, $offset ),
 			ARRAY_A
-		); // WPCS: unprepared SQL ok.
+		); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- The search fragment is escaped, pagination values are prepared, and the table name is trusted.
 
-		$count = $wpdb->get_var( "SELECT COUNT(key_id) FROM {$wpdb->prefix}woocommerce_api_keys WHERE 1 = 1 {$search};" ); // WPCS: unprepared SQL ok.
+		$count = $wpdb->get_var( "SELECT COUNT(key_id) FROM {$wpdb->prefix}woocommerce_api_keys WHERE 1 = 1 {$search};" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- The search fragment is escaped and the table name is trusted.
 
 		$this->items = $keys;
 

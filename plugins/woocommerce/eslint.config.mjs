@@ -35,6 +35,7 @@ export default [
 		'client/blocks/**',
 		'client/legacy/**',
 		'includes/gateways/**',
+		'admin-screens/**',
 	] ),
 	/*
 	 * The eslintrc this replaces declared neither `extends` nor `root`: it
@@ -147,7 +148,14 @@ export default [
 		languageOptions: {
 			parserOptions: {
 				tsconfigRootDir: path.join( __dirname, 'tests/e2e' ),
-				project: './tsconfig.blocks.json',
+				project: './tsconfig.json',
+			},
+		},
+		settings: {
+			'import/resolver': {
+				typescript: {
+					project: path.join( __dirname, 'tests/e2e/tsconfig.json' ),
+				},
 			},
 		},
 		plugins: {

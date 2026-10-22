@@ -378,7 +378,12 @@ class PageController {
 
 		$this->verify_create_permission();
 
-		$order_class_name = wc_get_order_type( $this->order_type )['class_name'];
+		/**
+		 * Registered order class.
+		 *
+		 * @var class-string<\WC_Order>|'' $order_class_name
+		 */
+		$order_class_name = wc_get_order_type( $this->order_type )['class_name'] ?? '';
 		if ( ! $order_class_name || ! class_exists( $order_class_name ) ) {
 			wp_die();
 		}

@@ -109,7 +109,7 @@ const ProductCategoryControl = ( {
 							onChange: onOperatorChange,
 							selectedCount: selected.length,
 							value: operator,
-					  }
+						}
 					: undefined
 			}
 			selected={ list.filter( ( { id } ) =>

@@ -50,7 +50,9 @@ export const guessCountryKey = (
 	// Match each digit against countryCodes until a match is found
 	for ( let i = number.length; i > 0; i-- ) {
 		const match = countryCodes[ number.substring( 0, i ) ];
-		if ( match ) return match[ 0 ];
+		if ( match ) {
+			return match[ 0 ];
+		}
 	}
 	return 'US';
 };
@@ -72,7 +74,7 @@ const countryNames: Record< string, string > = mapValues(
 	{
 		AC: 'Ascension Island',
 		XK: 'Kosovo',
-		...( window.wcSettings?.countries || [] ),
+		...( window.wcSettings?.countries || {} ),
 	},
 	( name ) => decodeHtmlEntities( name )
 );
@@ -100,7 +102,9 @@ const pushOrAdd = (
 	value: string
 ) => {
 	if ( acc[ key ] ) {
-		if ( ! acc[ key ].includes( value ) ) acc[ key ].push( value );
+		if ( ! acc[ key ].includes( value ) ) {
+			acc[ key ].push( value );
+		}
 	} else {
 		acc[ key ] = [ value ];
 	}

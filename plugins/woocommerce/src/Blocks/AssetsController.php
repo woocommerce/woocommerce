@@ -60,9 +60,10 @@ final class AssetsController {
 			$this->api->get_block_asset_build_path( 'interactivity-blocks-frontend-assets', 'php' )
 		);
 
+		$base_path = plugins_url( '/', dirname( __DIR__ ) );
 		foreach ( $asset_data as $handle => $data ) {
 			$handle_without_js = str_replace( '.js', '', $handle );
-			wp_register_script_module( $handle_without_js, plugins_url( $this->api->get_block_asset_build_path( $handle_without_js ), dirname( __DIR__ ) ), $data['dependencies'], $data['version'] );
+			wp_register_script_module( $handle_without_js, $base_path . $this->api->get_block_asset_build_path( $handle_without_js ), $data['dependencies'], $data['version'] );
 		}
 	}
 
@@ -137,10 +138,7 @@ final class AssetsController {
 			true
 		);
 
-		if ( is_admin() ) {
-			// Register deprecated script handles for backward compatibility in the admin context.
-			$this->register_deprecated_script_handles();
-		}
+		$this->register_deprecated_script_handles();
 	}
 
 	/**
@@ -151,32 +149,36 @@ final class AssetsController {
 			'wc-blocks-vendors' => array(),
 			'wc-blocks'         => array( 'wc-blocks-vendors', 'wc-block-library' ),
 		);
-		$build_path          = WC_ABSPATH . 'assets/client/blocks/';
-		$asset_files         = glob( $build_path . '*.asset.php' );
 
-		foreach ( false === $asset_files ? array() : $asset_files as $asset_file ) {
-			$script_name = basename( $asset_file, '.asset.php' );
+		if ( is_admin() ) {
+			// Discovering legacy block assets requires expensive filesystem checks, so only run this in admin requests.
+			$build_path  = WC_ABSPATH . 'assets/client/blocks/';
+			$asset_files = glob( $build_path . '*.asset.php' );
 
-			if (
-				in_array( $script_name, array( 'wc-block-library', 'wc-blocks' ), true ) ||
-				! file_exists( $build_path . $script_name . '.js' )
-			) {
-				continue;
+			foreach ( false === $asset_files ? array() : $asset_files as $asset_file ) {
+				$script_name = basename( $asset_file, '.asset.php' );
+
+				if (
+					in_array( $script_name, array( 'wc-block-library', 'wc-blocks' ), true ) ||
+					! file_exists( $build_path . $script_name . '.js' )
+				) {
+					continue;
+				}
+
+				// The file comes from WooCommerce's generated assets directory, not user input.
+				// nosemgrep audit.php.lang.security.file.inclusion-arg.
+				$asset_data = require $asset_file;
+
+				if (
+					! is_array( $asset_data ) ||
+					! in_array( 'wp-blocks', (array) ( $asset_data['dependencies'] ?? array() ), true )
+				) {
+					continue;
+				}
+
+				$legacy_handle                         = 'wc-' . $script_name . '-block';
+				$script_dependencies[ $legacy_handle ] = array( 'wc-blocks' );
 			}
-
-			// The file comes from WooCommerce's generated assets directory, not user input.
-			// nosemgrep audit.php.lang.security.file.inclusion-arg.
-			$asset_data = require $asset_file;
-
-			if (
-				! is_array( $asset_data ) ||
-				! in_array( 'wp-blocks', (array) ( $asset_data['dependencies'] ?? array() ), true )
-			) {
-				continue;
-			}
-
-			$legacy_handle                         = 'wc-' . $script_name . '-block';
-			$script_dependencies[ $legacy_handle ] = array( 'wc-blocks' );
 		}
 
 		foreach ( $script_dependencies as $handle => $dependencies ) {

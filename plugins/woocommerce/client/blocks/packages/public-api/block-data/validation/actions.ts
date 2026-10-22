@@ -28,9 +28,8 @@ export const clearValidationErrors = ( errors?: string[] | undefined ) => ( {
 
 export const clearAllValidationErrors = () => {
 	deprecated( 'clearAllValidationErrors', {
-		version: '9.0.0',
+		version: '7.3.0',
 		alternative: 'clearValidationErrors',
-		plugin: 'WooCommerce Blocks',
 		link: 'https://github.com/woocommerce/woocommerce-blocks/pull/7601',
 		hint: 'Calling `clearValidationErrors` with no arguments will clear all validation errors.',
 	} );

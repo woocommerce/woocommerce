@@ -440,14 +440,46 @@ function wc_attributes_array_filter_variation( $attribute ) {
 /**
  * Check if an attribute is included in the attributes area of a variation name.
  *
+ * A variation name is the parent product name followed by an optional attribute
+ * list ("Parent - Red, Large"). When the variation is given, only that attribute
+ * list is searched, so a parent name that ends with an attribute value
+ * ("Vienna Black") does not hide the "Black" attribute.
+ *
  * @since  3.0.2
- * @param  string $attribute Attribute value to check for.
- * @param  string $name      Product name to check in.
+ * @param  string          $attribute Attribute value to check for.
+ * @param  string          $name      Product name to check in.
+ * @param  WC_Product|null $product   Variation the name belongs to, when known. Since 11.3.0.
  * @return bool
  */
-function wc_is_attribute_in_product_name( $attribute, $name ) {
-	$is_in_name = stristr( $name, ' ' . $attribute . ',' ) || 0 === stripos( strrev( $name ), strrev( ' ' . $attribute ) );
-	return apply_filters( 'woocommerce_is_attribute_in_product_name', $is_in_name, $attribute, $name );
+function wc_is_attribute_in_product_name( $attribute, $name, $product = null ) {
+	$attributes_area = $name;
+
+	if ( $product instanceof WC_Product_Variation && $product->is_type( ProductType::VARIATION ) ) {
+		// The raw parent title, as the name is built from it without the `woocommerce_product_title` filter.
+		$parent_name = $product->get_parent_data()['title'] ?? '';
+
+		// Callers may pass the name raw or entity-decoded, so try both forms of the parent name.
+		foreach ( array_unique( array( $parent_name, wp_specialchars_decode( $parent_name, ENT_QUOTES ) ) ) as $prefix ) {
+			if ( '' !== $prefix && 0 === stripos( $name, $prefix ) ) {
+				$attributes_area = substr( $name, strlen( $prefix ) );
+				break;
+			}
+		}
+	}
+
+	$is_in_name = stristr( $attributes_area, ' ' . $attribute . ',' ) || 0 === stripos( strrev( $attributes_area ), strrev( ' ' . $attribute ) );
+
+	/**
+	 * Filters whether an attribute value is already shown in the attributes area of a variation name.
+	 *
+	 * @since 3.0.2
+	 * @since 11.3.0 Added the `$product` parameter.
+	 * @param bool            $is_in_name Whether the attribute value was found in the name.
+	 * @param string          $attribute  Attribute value checked for.
+	 * @param string          $name       Product name checked in.
+	 * @param WC_Product|null $product    Variation the name belongs to, when known.
+	 */
+	return apply_filters( 'woocommerce_is_attribute_in_product_name', $is_in_name, $attribute, $name, $product );
 }
 
 /**
@@ -626,7 +658,7 @@ function wc_create_attribute( $args ) {
 			$wpdb->update(
 				$wpdb->termmeta,
 				array( 'meta_key' => 'order' ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
-				array( 'meta_key' => 'order_pa_' . sanitize_title( $old_slug ) ) // WPCS: slow query ok.
+				array( 'meta_key' => 'order_pa_' . sanitize_title( $old_slug ) ) // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- This one-time attribute migration updates an indexed termmeta key.
 			);
 
 			// Update product attributes which use this taxonomy.
@@ -658,8 +690,8 @@ function wc_create_attribute( $args ) {
 			// Update variations which use this taxonomy.
 			$wpdb->update(
 				$wpdb->postmeta,
-				array( 'meta_key' => 'attribute_pa_' . sanitize_title( $data['attribute_name'] ) ), // WPCS: slow query ok.
-				array( 'meta_key' => 'attribute_pa_' . sanitize_title( $old_slug ) ) // WPCS: slow query ok.
+				array( 'meta_key' => 'attribute_pa_' . sanitize_title( $data['attribute_name'] ) ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- This array key is update data, not a query meta_key argument.
+				array( 'meta_key' => 'attribute_pa_' . sanitize_title( $old_slug ) ) // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- This one-time attribute migration matches an indexed postmeta key.
 			);
 
 			// Update global vars to reflect migration. This ensures any functions dealing with terms later in this request
@@ -736,7 +768,7 @@ function wc_update_attribute( $id, $args ) {
  * @return bool
  */
 function wc_delete_attribute( $id ) {
-	global $wpdb;
+	global $wpdb, $wc_product_attributes;
 
 	$name = $wpdb->get_var(
 		$wpdb->prepare(
@@ -776,6 +808,20 @@ function wc_delete_attribute( $id ) {
 		 * @param string $taxonomy Attribute taxonomy name.
 		 */
 		do_action( 'woocommerce_attribute_deleted', $id, $name, $taxonomy );
+
+		if ( taxonomy_exists( $taxonomy ) ) {
+			// When the caller defers term counting, any count queued for this taxonomy (by the
+			// deletions above or by the caller itself) resolves the taxonomy by name later, once
+			// it is gone. Flush while it still exists. WordPress drains its whole queue at once.
+			if ( wp_defer_term_counting() ) {
+				wp_update_term_count( array(), '', true );
+			}
+
+			unregister_taxonomy( $taxonomy );
+		}
+
+		unset( $wc_product_attributes[ $taxonomy ] );
+
 		wp_schedule_single_event( time(), 'woocommerce_flush_rewrite_rules' );
 		delete_transient( 'wc_attribute_taxonomies' );
 		WC_Cache_Helper::invalidate_cache_group( 'woocommerce-attributes' );

@@ -57,11 +57,11 @@ class GroupedProductItemSelector extends AbstractBlock {
 				'min_value'   => 0,
 				'max_value'   => $max_value,
 				/**
-				 * Filter the placeholder value allowed for the product.
+				 * Filter the placeholder shown in the quantity input.
 				 *
-				 * @since 3.10.0
-				 * @param int        $max_value Maximum quantity value.
-				 * @param WC_Product $product   Product object.
+				 * @since 4.0.0
+				 * @param int         $placeholder Placeholder for the quantity input.
+				 * @param \WC_Product $product     Product object.
 				 */
 				'placeholder' => apply_filters( 'woocommerce_quantity_input_placeholder', 0, $product ),
 			)

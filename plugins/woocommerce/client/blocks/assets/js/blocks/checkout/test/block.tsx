@@ -558,11 +558,14 @@ describe( 'Testing Checkout', () => {
 			}
 		} );
 
-		// wait for form to be ready
-		await waitFor( () =>
-			expect(
-				screen.getByRole( 'button', { name: /Place order/i } )
-			).toBeVisible()
+		// Wait for the form to be ready. Changing the country recalculates the cart, which
+		// disables the button until the push settles, so allow for the 1.5s push debounce.
+		await waitFor(
+			() =>
+				expect(
+					screen.getByRole( 'button', { name: /Place order/i } )
+				).toBeEnabled(),
+			{ timeout: 5000 }
 		);
 
 		// Submit the form
@@ -574,5 +577,5 @@ describe( 'Testing Checkout', () => {
 
 		// Given we're checking for invisible errors here, reaching to the data store is a good option.
 		expect( select( validationStore ).hasValidationErrors() ).toBe( false );
-	} );
+	}, 10000 );
 } );

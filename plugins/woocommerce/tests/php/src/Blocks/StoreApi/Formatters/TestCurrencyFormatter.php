@@ -36,4 +36,17 @@ class TestCurrencyFormatter extends \WP_UnitTestCase {
 		$this->assertArrayHasKey( 'currency_prefix', $value );
 		$this->assertArrayHasKey( 'currency_suffix', $value );
 	}
+
+	/**
+	 * @testdox Formatted currency data decodes HTML entities in the price separators.
+	 */
+	public function test_format_decodes_separator_entities() {
+		update_option( 'woocommerce_price_thousand_sep', '&nbsp;' );
+		update_option( 'woocommerce_price_decimal_sep', '&#44;' );
+
+		$value = $this->mock_formatter->format( [] );
+
+		$this->assertSame( "\u{00A0}", $value['currency_thousand_separator'] );
+		$this->assertSame( ',', $value['currency_decimal_separator'] );
+	}
 }

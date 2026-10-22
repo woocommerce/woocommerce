@@ -27,7 +27,10 @@ describe( 'ImageUpload', () => {
 			};
 			const { getByRole } = render( <ImageUpload image={ image } /> );
 
-			expect( getByRole( 'img' ) ).toHaveAttribute( 'src', image.url );
+			expect( getByRole( 'presentation' ) ).toHaveAttribute(
+				'src',
+				image.url
+			);
 			expect(
 				getByRole( 'button', { name: 'Remove image' } )
 			).toBeInTheDocument();

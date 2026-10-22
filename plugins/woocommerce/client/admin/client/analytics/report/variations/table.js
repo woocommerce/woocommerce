@@ -79,14 +79,14 @@ class VariationsReportTable extends Component {
 				? {
 						label: __( 'Status', 'woocommerce' ),
 						key: 'stock_status',
-				  }
+					}
 				: null,
 			manageStock === 'yes'
 				? {
 						label: __( 'Stock', 'woocommerce' ),
 						key: 'stock',
 						isNumeric: true,
-				  }
+					}
 				: null,
 		].filter( Boolean );
 	}
@@ -182,13 +182,13 @@ class VariationsReportTable extends Component {
 								stockStatuses[ stockStatus ]
 							),
 							value: stockStatuses[ stockStatus ],
-					  }
+						}
 					: null,
 				manageStock === 'yes'
 					? {
 							display: stockQuantity,
 							value: stockQuantity,
-					  }
+						}
 					: null,
 			].filter( Boolean );
 		} );
@@ -242,7 +242,7 @@ class VariationsReportTable extends Component {
 				value: formatAmount( netRevenue ),
 			},
 			{
-				label: _n( 'orders', 'orders', ordersCount, 'woocommerce' ),
+				label: _n( 'order', 'orders', ordersCount, 'woocommerce' ),
 				value: formatValue( currency, 'number', ordersCount ),
 			},
 		];

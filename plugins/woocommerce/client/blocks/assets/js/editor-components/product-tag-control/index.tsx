@@ -103,7 +103,7 @@ const ProductTagControl = ( {
 							onChange: onOperatorChange,
 							selectedCount: selected.length,
 							value: operator,
-					  }
+						}
 					: undefined
 			}
 			selected={ selectedTags }

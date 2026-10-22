@@ -56,6 +56,15 @@ interface BaseJobConfig {
 	changes: RegExp[];
 
 	/**
+	 * Changed files matching these patterns are invisible to this job: they do
+	 * not trigger it through its own changes and do not mark a dependency as
+	 * changed when deciding whether the job should run for a dependency change.
+	 * The parser always sets this; it is optional so that consumers treat a
+	 * missing value as an empty list.
+	 */
+	ignore?: RegExp[];
+
+	/**
 	 * The command to run for the job.
 	 */
 	command: string;
@@ -140,6 +149,57 @@ function parseChangesConfig(
 }
 
 /**
+ * Parses and validates a raw ignore config entry.
+ *
+ * Unlike `changes` globs these compile with `dot: true`: an ignore list is a
+ * policy that must also reach files inside dot directories (for example
+ * markdown under `.ai/`), where minimatch's default refuses to let a globstar
+ * descend.
+ *
+ * @param {string|string[]} raw The raw config to parse.
+ */
+function parseIgnoreConfig( raw: unknown ): RegExp[] {
+	if ( raw === undefined ) {
+		return [];
+	}
+
+	const entries = typeof raw === 'string' ? [ raw ] : raw;
+	if ( ! Array.isArray( entries ) ) {
+		throw new ConfigError(
+			'Ignore configuration must be a string or array of strings.'
+		);
+	}
+
+	const ignore: RegExp[] = [];
+	for ( const entry of entries ) {
+		if ( typeof entry !== 'string' ) {
+			throw new ConfigError(
+				'Ignore configuration must be a string or array of strings.'
+			);
+		}
+
+		// minimatch silently compiles a leading `!` into a match-everything-else
+		// negative lookahead, which under "any match hides the file" semantics
+		// would hide nearly every file. Extglob negation `!(...)` is fine.
+		if ( entry.startsWith( '!' ) && ! entry.startsWith( '!(' ) ) {
+			throw new ConfigError(
+				'Ignore configuration does not support negated glob patterns.'
+			);
+		}
+
+		const regex = makeRe( entry, { dot: true } );
+		if ( ! regex ) {
+			throw new ConfigError(
+				'Ignore configuration is an invalid glob pattern.'
+			);
+		}
+
+		ignore.push( regex );
+	}
+	return ignore;
+}
+
+/**
  * The configuration of the lint job.
  */
 export interface LintJobConfig extends BaseJobConfig {
@@ -179,9 +239,14 @@ function validateCommandVars( command: string ) {
 /**
  * Parses the base job configuration.
  *
- * @param {Object} raw The raw config to parse.
+ * @param {Object}         raw           The raw config to parse.
+ * @param {Array.<RegExp>} defaultIgnore The project-level ignore patterns jobs inherit
+ *                                       when they declare no "ignore" of their own.
  */
-function parseBaseJobConfig( raw: any ): BaseJobConfig {
+function parseBaseJobConfig(
+	raw: any,
+	defaultIgnore: RegExp[] = []
+): BaseJobConfig {
 	if ( ! raw.changes ) {
 		throw new ConfigError( 'A "changes" option is required for the job.' );
 	}
@@ -207,6 +272,12 @@ function parseBaseJobConfig( raw: any ): BaseJobConfig {
 	return {
 		type: null,
 		changes: parseChangesConfig( raw.changes, [ 'package.json' ] ),
+		// A job's own "ignore" replaces the project default, so declaring an
+		// empty list opts the job out of the project-level policy entirely.
+		ignore:
+			raw.ignore === undefined
+				? defaultIgnore
+				: parseIgnoreConfig( raw.ignore ),
 		command: raw.command,
 		events: raw.events || [],
 		optional,
@@ -216,10 +287,14 @@ function parseBaseJobConfig( raw: any ): BaseJobConfig {
 /**
  * Parses the lint job configuration.
  *
- * @param {Object} raw The raw config to parse.
+ * @param {Object}         raw           The raw config to parse.
+ * @param {Array.<RegExp>} defaultIgnore The project-level ignore patterns to inherit.
  */
-function parseLintJobConfig( raw: any ): LintJobConfig {
-	const baseJob = parseBaseJobConfig( raw );
+function parseLintJobConfig(
+	raw: any,
+	defaultIgnore: RegExp[] = []
+): LintJobConfig {
+	const baseJob = parseBaseJobConfig( raw, defaultIgnore );
 	return {
 		...baseJob,
 		type: JobType.Lint,
@@ -357,10 +432,14 @@ export interface TestJobConfig extends BaseJobConfig {
 /**
  * Parses the test job config.
  *
- * @param {Object} raw The raw config to parse.
+ * @param {Object}         raw           The raw config to parse.
+ * @param {Array.<RegExp>} defaultIgnore The project-level ignore patterns to inherit.
  */
-function parseTestJobConfig( raw: any ): TestJobConfig {
-	const baseJob = parseBaseJobConfig( raw );
+function parseTestJobConfig(
+	raw: any,
+	defaultIgnore: RegExp[] = []
+): TestJobConfig {
+	const baseJob = parseBaseJobConfig( raw, defaultIgnore );
 
 	if ( ! raw.name || typeof raw.name !== 'string' ) {
 		throw new ConfigError(
@@ -499,12 +578,15 @@ export function parseCIConfig( raw: PackageJSON ): CIConfig {
 		return config;
 	}
 
+	// Jobs inherit the project-level ignore list unless they declare their own.
+	const defaultIgnore = parseIgnoreConfig( ciConfig.ignore );
+
 	if ( ciConfig.lint ) {
 		if ( typeof ciConfig.lint !== 'object' ) {
 			throw new ConfigError( 'The "lint" option must be an object.' );
 		}
 
-		config.jobs.push( parseLintJobConfig( ciConfig.lint ) );
+		config.jobs.push( parseLintJobConfig( ciConfig.lint, defaultIgnore ) );
 	}
 
 	if ( ciConfig.tests ) {
@@ -513,7 +595,9 @@ export function parseCIConfig( raw: PackageJSON ): CIConfig {
 		}
 
 		for ( const rawTestConfig of ciConfig.tests ) {
-			config.jobs.push( parseTestJobConfig( rawTestConfig ) );
+			config.jobs.push(
+				parseTestJobConfig( rawTestConfig, defaultIgnore )
+			);
 		}
 	}
 

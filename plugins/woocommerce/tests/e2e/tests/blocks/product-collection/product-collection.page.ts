@@ -227,9 +227,8 @@ class ProductCollectionPage {
 	}
 
 	async chooseCollectionInTemplate( collection?: Collections ) {
-		const collectionButton = await this.locateCollectionButtonInEditor(
-			collection
-		);
+		const collectionButton =
+			await this.locateCollectionButtonInEditor( collection );
 
 		await collectionButton.click();
 	}
@@ -424,12 +423,12 @@ class ProductCollectionPage {
 
 	async addFilter(
 		name:
-			| 'Show Hand-picked'
+			| 'Hand-Picked'
 			| 'Keyword'
-			| 'Show product categories'
-			| 'Show product tags'
-			| 'Show Brands'
-			| 'Show Product Attributes'
+			| 'Product Categories'
+			| 'Product Tags'
+			| 'Product Brands'
+			| 'Product Attributes'
 			| 'Featured'
 			| 'Created'
 			| 'Price Range'
@@ -439,7 +438,7 @@ class ProductCollectionPage {
 			.click();
 		await this.page
 			.getByRole( 'menuitemcheckbox', {
-				name,
+				name: new RegExp( name, 'i' ),
 			} )
 			.click();
 		await this.page

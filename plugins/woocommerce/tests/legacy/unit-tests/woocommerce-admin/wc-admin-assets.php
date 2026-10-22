@@ -19,25 +19,25 @@ class WC_Admin_Tests_WCAdminAssets extends WP_UnitTestCase {
 	public function setUp(): void {
 		parent::setUp();
 
-		add_filter( 'woocommerce_admin_features', array( $this, 'turn_on_unminified_js_feature' ), 20, 1 );
+		add_filter( 'woocommerce_admin_features', array( $this, 'turn_on_minified_js_feature' ), 20, 1 );
 	}
 
 	/**
 	 * Tear Down
 	 */
 	public function tearDown(): void {
-		remove_filter( 'woocommerce_admin_features', array( $this, 'turn_on_unminified_js_feature' ), 20 );
+		remove_filter( 'woocommerce_admin_features', array( $this, 'turn_on_minified_js_feature' ), 20 );
 
 		parent::tearDown();
 	}
 
 	/**
-	 * Filter to enable unminified-js feature.
+	 * Filter to enable the minified-js feature.
 	 *
 	 * @param  array $features Array of active features.
 	 */
-	public static function turn_on_unminified_js_feature( $features ) {
-		return array_merge( $features, array( 'unminified-js' ) );
+	public static function turn_on_minified_js_feature( $features ) {
+		return array_merge( $features, array( 'minified-js' ) );
 	}
 
 	/**
@@ -50,13 +50,11 @@ class WC_Admin_Tests_WCAdminAssets extends WP_UnitTestCase {
 		$parts           = explode( '/', $result );
 		$final_file_name = array_pop( $parts );
 
-		// Since this can vary depending on the env the tests are running in, we will make this assertion based upon the SCRIPT_DEBUG value.
-		$expected_value = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? 'flavortown.js' : 'flavortown.min.js';
-
+		// No minified build of this file exists, so the unminified file name should be served regardless of SCRIPT_DEBUG.
 		$this->assertEquals(
-			$expected_value,
+			'flavortown.js',
 			$final_file_name,
-			'the anticipated js file name should use .min when SCRIPT_DEBUG is off, and have no .min when SCRIPT_DEBUG is on.'
+			'the anticipated js file name should not use .min when no minified file exists.'
 		);
 	}
 

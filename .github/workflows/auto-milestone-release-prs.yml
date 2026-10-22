@@ -10,6 +10,7 @@ jobs:
   add-milestone:
     name: Add milestone to release branch PRs
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     # Only run if PR has no milestone and targets a branch starting with 'release/'
     if: |
       github.event.pull_request.milestone == null && 

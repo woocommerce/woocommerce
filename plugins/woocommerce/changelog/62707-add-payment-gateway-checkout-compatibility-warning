@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Show a "Limited compatibility" badge on the Payments settings page when an enabled payment gateway has no Checkout block integration.

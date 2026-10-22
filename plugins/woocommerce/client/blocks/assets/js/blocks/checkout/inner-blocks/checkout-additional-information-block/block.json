@@ -1,6 +1,5 @@
 {
 	"name": "woocommerce/checkout-additional-information-block",
-	"version": "1.0.0",
 	"title": "Additional information",
 	"description": "Render additional fields in the 'Additional information' location.",
 	"category": "woocommerce",

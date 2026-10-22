@@ -129,20 +129,26 @@ export class Editor extends CoreEditor {
 	 * Search for a template or template part in the Site Editor.
 	 */
 	async searchTemplate( { templateName }: { templateName: string } ) {
+		const templateCards = this.page.locator(
+			'.dataviews-view-grid .dataviews-view-grid__card'
+		);
+
+		await expect( templateCards.first() ).toBeVisible();
+		const templatesBeforeSearch = await templateCards.count();
+
 		await this.page.getByPlaceholder( 'Search' ).fill( templateName );
 
 		await expect(
 			this.page.getByRole( 'button', { name: 'Reset Search' } )
 		).toBeVisible();
 		await expect( this.page.getByLabel( 'No results' ) ).toBeHidden();
-		await expect(
-			this.page
-				.getByRole( 'button', {
-					name: templateName,
-					exact: true,
-				} )
-				.first()
-		).toBeVisible();
+
+		// Wait for the grid to update with fewer items than before.
+		// Using expect.poll() for a retrying assertion since toHaveCount
+		// requires an exact number.
+		await expect
+			.poll( () => templateCards.count(), { timeout: 5000 } )
+			.toBeLessThan( templatesBeforeSearch );
 	}
 
 	/**
@@ -171,8 +177,14 @@ export class Editor extends CoreEditor {
 		await this.searchTemplate( { templateName } );
 
 		await this.page
+			.locator( '.dataviews-view-grid .dataviews-view-grid__card' )
+			.filter( {
+				has: this.page.getByRole( 'button', {
+					name: templateName,
+					exact: true,
+				} ),
+			} )
 			.getByRole( 'button', { name: 'Actions' } )
-			.first()
 			.click();
 		await this.page
 			.getByRole( 'menuitem', { name: /Reset|Delete/ } )

@@ -19,41 +19,103 @@ export type WPTemplateType = 'wp_template' | 'wp_template_part';
 export interface WPTemplate {
 	wp_id: number;
 	id: string;
+	slug: string;
 	type: WPTemplateType;
+	origin: 'plugin' | 'theme' | null;
+	content: {
+		raw: string;
+	};
 }
 
 export interface TemplateCompiler {
 	compile: ( data?: unknown ) => Promise< WPTemplate >;
 }
 
+function getTemplateRestPath(
+	templateType: WPTemplateType,
+	templateId?: string
+) {
+	const endpoint =
+		templateType === 'wp_template' ? 'templates' : 'template-parts';
+
+	return `/wp/v2/${ endpoint }${ templateId ? `/${ templateId }` : '' }`;
+}
+
 /**
  * Retrieves all available templates.
  */
-export async function getTemplates( this: RequestUtils ) {
+export async function getTemplates(
+	this: RequestUtils,
+	templateType: WPTemplateType = 'wp_template'
+) {
 	const templates = await this.rest< WPTemplate[] >( {
 		method: 'GET',
-		path: '/wp/v2/templates',
+		path: getTemplateRestPath( templateType ),
 	} );
 
 	return templates;
 }
 
 /**
+ * Retrieves a template or template part.
+ */
+export async function getTemplate(
+	this: RequestUtils,
+	templateType: WPTemplateType,
+	templateId: string
+) {
+	return await this.rest< WPTemplate >( {
+		method: 'GET',
+		path: getTemplateRestPath( templateType, templateId ),
+	} );
+}
+
+/**
+ * Updates the content of a template or template part.
+ */
+export async function updateTemplateContent(
+	this: RequestUtils,
+	templateType: WPTemplateType,
+	templateId: string,
+	content: string
+) {
+	return await this.rest< WPTemplate >( {
+		method: 'POST',
+		path: getTemplateRestPath( templateType, templateId ),
+		data: {
+			id: templateId,
+			content,
+		},
+	} );
+}
+
+/**
  * Reverts a template to its original state.
  */
-export async function revertTemplate( this: RequestUtils, slug: string ) {
-	const restPath = `/wp/v2/templates/${ slug }`;
+export async function revertTemplate(
+	this: RequestUtils,
+	templateType: WPTemplateType,
+	templateId: string
+) {
+	const restPath = getTemplateRestPath( templateType, templateId );
+	const template = await this.getTemplate( templateType, templateId );
 
-	const template = await this.rest( {
-		method: 'GET',
-		path: restPath,
-	} );
+	// User-created templates have no underlying theme or plugin template to
+	// restore, so remove the custom template instead of resetting its source.
+	if ( template.origin === null ) {
+		await this.rest( {
+			method: 'DELETE',
+			path: restPath,
+			params: { force: true },
+		} );
+		return;
+	}
 
 	await this.rest( {
 		method: 'POST',
 		path: restPath,
 		data: {
-			id: slug,
+			id: templateId,
 			content: template.content.raw,
 			source: 'theme',
 		},
