@@ -180,7 +180,7 @@ class ProductFilters extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * All participating filters being empty marks the wrapper as empty.
+	 * @testdox All participating filters being empty marks the wrapper as empty.
 	 *
 	 * @return void
 	 */
@@ -229,7 +229,7 @@ class ProductFilters extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * A wrapper with no participating filters is not marked empty.
+	 * @testdox A wrapper with no participating filters is not marked empty.
 	 *
 	 * @return void
 	 */
