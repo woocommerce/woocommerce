@@ -121,15 +121,7 @@ class CartController {
 		$variation_id = $this->get_variation_id( $product );
 
 		/**
-		 * Filters the quantity being added to the cart.
-		 *
-		 * @since 11.4.0
-		 *
-		 * @internal Matches filter name in WooCommerce core.
-		 *
-		 * @param int|float $quantity     Quantity of the item added to the cart.
-		 * @param int       $product_id   ID of the product added to the cart.
-		 * @param int       $variation_id Variation ID of the product added to the cart.
+		 * This filter is documented in includes/class-wc-cart.php.
 		 */
 		$request['quantity'] = apply_filters(
 			'woocommerce_add_to_cart_quantity',

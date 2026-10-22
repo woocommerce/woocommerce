@@ -372,22 +372,11 @@ apply_filters( 'woocommerce_add_to_cart_form_action', string $action_url )
 ## woocommerce_add_to_cart_quantity
 
 
-Filters the quantity being added to the cart.
+This filter is documented in includes/class-wc-cart.php.
 
 ```php
-apply_filters( 'woocommerce_add_to_cart_quantity', int|float $quantity, int $product_id, int $variation_id )
+apply_filters( 'woocommerce_add_to_cart_quantity' )
 ```
-
-
-**Note:** Matches filter name in WooCommerce core.
-
-### Parameters
-
-| Argument | Type | Description |
-| -------- | ---- | ----------- |
-| $quantity | int, float | Quantity of the item added to the cart. |
-| $product_id | int | ID of the product added to the cart. |
-| $variation_id | int | Variation ID of the product added to the cart. |
 
 ### Source
 
