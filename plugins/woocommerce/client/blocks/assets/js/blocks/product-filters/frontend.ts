@@ -30,6 +30,12 @@ const {
 
 const BLOCK_NAME = PRODUCT_FILTERS_STORE_NAME;
 
+let pendingNavigation: { source: string; destination: string } | undefined;
+
+window.addEventListener( 'popstate', () => {
+	pendingNavigation = undefined;
+} );
+
 type ValidFilterOptionItem = FilterOptionItem & {
 	type: string;
 	value: string;
@@ -204,6 +210,15 @@ const productFiltersStore = {
 				actions.closeOverlay();
 			}
 		},
+		/**
+		 * @deprecated Since 11.4.0.
+		 */
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		closeOverlayOnEscape: ( event?: KeyboardEvent ) => {
+			console.warn(
+				'actions.closeOverlayOnEscape is deprecated since WooCommerce 11.4.0.'
+			);
+		},
 		handleOverlayKeydown: withSyncEvent( ( event: KeyboardEvent ) => {
 			const context = getContext< ProductFiltersContext >();
 			if ( ! context.isOverlayOpened ) {
@@ -279,11 +294,28 @@ const productFiltersStore = {
 				: getContext< ProductFiltersContext >();
 
 			const config = getConfig( BLOCK_NAME );
-			const url = new URL( config.canonicalUrl );
+			const { queryId } = context;
+			const prefix = queryId === undefined ? '' : `wcp-${ queryId }-`;
+			const currentUrl =
+				pendingNavigation?.source === window.location.href
+					? pendingNavigation.destination
+					: window.location.href;
+			const url = new URL(
+				queryId === undefined ? config.canonicalUrl : currentUrl
+			);
+			url.search = new URL( currentUrl ).search;
 			const { searchParams } = url;
 
-			for ( const key in context.params ) {
-				searchParams.delete( key );
+			if ( queryId === undefined ) {
+				searchParams.delete( 'paged' );
+				searchParams.delete( 'product-page' );
+			} else {
+				searchParams.delete( `query-${ queryId }-page` );
+			}
+
+			for ( const key of config.filterParamKeys ??
+				Object.keys( context.params ) ) {
+				searchParams.delete( `${ prefix }${ key }` );
 			}
 
 			for ( const key in state.params ) {
@@ -303,10 +335,10 @@ const productFiltersStore = {
 					}
 				}
 
-				searchParams.set( key, decodedValue );
+				searchParams.set( `${ prefix }${ key }`, decodedValue );
 			}
 
-			if ( window.location.href === url.href ) {
+			if ( currentUrl === url.href ) {
 				return;
 			}
 
@@ -323,10 +355,23 @@ const productFiltersStore = {
 				return;
 			}
 
-			const routerModule: typeof import( '@wordpress/interactivity-router' ) =
-				yield import( '@wordpress/interactivity-router' );
+			const navigation = {
+				source: window.location.href,
+				destination: url.href,
+			};
+			pendingNavigation = navigation;
+			try {
+				const routerModule: typeof import( '@wordpress/interactivity-router' ) =
+					yield import( '@wordpress/interactivity-router' );
 
-			yield routerModule.actions.navigate( url.href );
+				if ( pendingNavigation === navigation ) {
+					yield routerModule.actions.navigate( url.href );
+				}
+			} finally {
+				if ( pendingNavigation === navigation ) {
+					pendingNavigation = undefined;
+				}
+			}
 		},
 	},
 	callbacks: {
