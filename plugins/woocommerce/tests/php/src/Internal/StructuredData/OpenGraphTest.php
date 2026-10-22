@@ -46,8 +46,6 @@ class OpenGraphTest extends WC_Unit_Test_Case {
 
 		update_option( 'woocommerce_coming_soon', 'no' );
 		update_option( 'blogname', 'Test store' );
-		update_option( 'woocommerce_currency', 'USD' );
-		update_option( 'woocommerce_price_num_decimals', 2 );
 
 		$image_id = self::factory()->attachment->create(
 			array(
@@ -110,8 +108,6 @@ class OpenGraphTest extends WC_Unit_Test_Case {
 		$this->assertSame( array( 'Product photo' ), $tags['og:image:alt'], 'Image alternative text should be added.' );
 		$this->assertSame( array( 'image/jpeg' ), $tags['og:image:type'], 'Image MIME type should be added.' );
 		$this->assertSame( array( 'summary_large_image' ), $tags['twitter:card'], 'Products with an image should use a large image card.' );
-		$this->assertSame( array( '10.00' ), $tags['product:price:amount'], 'The product price should be added.' );
-		$this->assertSame( array( 'USD' ), $tags['product:price:currency'], 'The store currency should be added.' );
 	}
 
 	/**
@@ -132,9 +128,7 @@ class OpenGraphTest extends WC_Unit_Test_Case {
 			<meta property="og:description" content="SEO description">
 			<meta property="og:image" content="https://example.org/seo.jpg">
 			<meta property="og:image:width" content="600">
-			<meta name="twitter:card" content="summary">
-			<meta property="product:price:amount" content="25.00">
-			<meta property="product:price:currency" content="EUR">'
+			<meta name="twitter:card" content="summary">'
 		);
 
 		$this->assertSame( array( 'SEO title' ), $tags['og:title'], 'An existing title should be preserved without duplication.' );
@@ -146,8 +140,6 @@ class OpenGraphTest extends WC_Unit_Test_Case {
 		$this->assertArrayNotHasKey( 'og:image:type', $tags, 'The featured image MIME type should not describe another provider\'s image.' );
 		$this->assertSame( array( 'summary' ), $tags['twitter:card'], 'An existing Twitter card should be preserved.' );
 		$this->assertSame( array( 'product' ), $tags['og:type'], 'Missing metadata should still be added alongside existing tags.' );
-		$this->assertSame( array( '25.00' ), $tags['product:price:amount'], 'An existing price should be preserved without duplication.' );
-		$this->assertSame( array( 'EUR' ), $tags['product:price:currency'], 'An existing currency should be preserved without duplication.' );
 	}
 
 	/**

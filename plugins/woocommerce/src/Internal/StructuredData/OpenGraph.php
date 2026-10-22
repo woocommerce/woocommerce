@@ -10,7 +10,6 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\StructuredData;
 
 use Automattic\WooCommerce\Enums\ProductStatus;
-use Automattic\WooCommerce\Enums\ProductType;
 use WC_Product;
 use WP_HTML_Tag_Processor;
 use WP_HTML_Text_Replacement;
@@ -161,10 +160,6 @@ class OpenGraph {
 				} elseif ( ! is_string( $content ) || '' === trim( $content ) ) {
 					continue;
 				}
-				// Don't use the fallback product price if the existing tag's currency doesn't match the fallback currency.
-				if ( 'product:price:currency' === $property && is_string( $content ) && isset( $this->tags['product:price:currency'] ) && strtoupper( trim( $content ) ) !== $this->tags['product:price:currency'] ) {
-					unset( $tags['product:price:amount'] );
-				}
 				if ( in_array( $property, array( 'og:image', 'og:image:url' ), true ) ) {
 					$has_image = true;
 				}
@@ -309,11 +304,6 @@ class OpenGraph {
 		$tags                += $this->get_site_tags();
 		$tags                += $this->get_image_tags( (int) $product->get_image_id(), $product->get_name() );
 		$tags['twitter:card'] = isset( $tags['og:image'] ) ? 'summary_large_image' : 'summary';
-
-		if ( $product->is_type( array( ProductType::SIMPLE, ProductType::EXTERNAL ) ) && '' !== $product->get_price() ) {
-			$tags['product:price:amount']   = wc_format_decimal( wc_get_price_to_display( $product ), wc_get_price_decimals() );
-			$tags['product:price:currency'] = get_woocommerce_currency();
-		}
 
 		return $tags;
 	}
