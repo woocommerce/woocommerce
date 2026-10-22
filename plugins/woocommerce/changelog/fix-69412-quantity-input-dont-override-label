@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Don't override quantity input aria-label with generic 'Product Quantity'
+In the add-to-cart form, label each quantity input after its product, instead of "Product quantity"
