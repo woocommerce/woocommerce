@@ -53,16 +53,15 @@ test.describe( 'woocommerce/product-filters - Frontend', () => {
 			const overlay = page.getByLabel( 'Product Filters', {
 				exact: true,
 			} );
-			const dialog = page.getByRole( 'dialog', {
-				name: 'Product Filters',
-			} );
 
 			await expect( openOverlayButton ).toBeVisible();
-			await expect( dialog ).toHaveCount( 0 );
+			await expect( overlay ).toBeHidden();
 
 			await openOverlayButton.click();
 
-			await expect( dialog ).toBeInViewport();
+			await expect( overlay ).toBeInViewport();
+			await expect( overlay ).toHaveAttribute( 'role', 'dialog' );
+			await expect( overlay ).toHaveAttribute( 'aria-modal', 'true' );
 
 			// Close overlay by clicking close button.
 			const closeOverlayButton = page.getByRole( 'button', {
@@ -74,23 +73,23 @@ test.describe( 'woocommerce/product-filters - Frontend', () => {
 			await closeOverlayButton.click();
 
 			await expect( openOverlayButton ).toBeFocused();
-			await expect( dialog ).toHaveCount( 0 );
+			await expect( overlay ).toBeHidden();
 
 			// Close overlay by hitting Esc.
 			await openOverlayButton.click();
 
-			await expect( dialog ).toBeInViewport();
+			await expect( overlay ).toBeInViewport();
 			await expect( closeOverlayButton ).toBeFocused();
 
 			await page.keyboard.press( 'Escape' );
 
 			await expect( openOverlayButton ).toBeFocused();
-			await expect( dialog ).toHaveCount( 0 );
+			await expect( overlay ).toBeHidden();
 
 			// Close overlay by clicking Apply button.
 			await openOverlayButton.click();
 
-			await expect( dialog ).toBeInViewport();
+			await expect( overlay ).toBeInViewport();
 			await expect( closeOverlayButton ).toBeFocused();
 
 			const applyButton = page.getByRole( 'button', {
@@ -104,7 +103,7 @@ test.describe( 'woocommerce/product-filters - Frontend', () => {
 			await applyButton.click();
 
 			await expect( openOverlayButton ).toBeFocused();
-			await expect( dialog ).toHaveCount( 0 );
+			await expect( overlay ).toBeHidden();
 
 			await openOverlayButton.click();
 			await expect( closeOverlayButton ).toBeFocused();
@@ -115,7 +114,6 @@ test.describe( 'woocommerce/product-filters - Frontend', () => {
 			await expect( openOverlayButton ).toBeHidden();
 			await expect( overlay ).toBeVisible();
 			await expect( overlay ).not.toHaveAttribute( 'role', 'dialog' );
-			await expect( dialog ).toHaveCount( 0 );
 			await expect( overlay ).not.toHaveAttribute( 'aria-modal', 'true' );
 			await expect( lastFilter ).toBeFocused();
 			await page.keyboard.press( 'Tab' );
@@ -128,7 +126,7 @@ test.describe( 'woocommerce/product-filters - Frontend', () => {
 				.toBe( false );
 
 			await page.setViewportSize( { width: 400, height: 600 } );
-			await expect( dialog ).toHaveCount( 0 );
+			await expect( overlay ).toBeHidden();
 			await openOverlayButton.click();
 			await expect( closeOverlayButton ).toBeFocused();
 			await page.keyboard.press( 'Escape' );
