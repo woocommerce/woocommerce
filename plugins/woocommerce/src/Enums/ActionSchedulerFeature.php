@@ -47,5 +47,5 @@ final class ActionSchedulerFeature {
 	 *
 	 * @var string
 	 */
-	public const ASYNC = 'async';
+	public const ENQUEUE_ASYNC_ACTION = 'enqueue_async_action';
 }

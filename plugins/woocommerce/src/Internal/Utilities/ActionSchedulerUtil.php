@@ -48,7 +48,7 @@ final class ActionSchedulerUtil {
 		ActionSchedulerFeature::PRIORITY,
 		ActionSchedulerFeature::UNIQUE_ARGS,
 		ActionSchedulerFeature::HAS_SCHEDULED_ACTION,
-		ActionSchedulerFeature::ASYNC,
+		ActionSchedulerFeature::ENQUEUE_ASYNC_ACTION,
 	);
 
 	/**
@@ -315,7 +315,7 @@ final class ActionSchedulerUtil {
 	 * @return int The action ID. Zero if the action was not scheduled, including when a unique action already exists.
 	 */
 	public static function enqueue_async( string $hook, array $args = array(), string $group = '', bool $unique = false, int $priority = self::DEFAULT_PRIORITY ): int {
-		if ( self::supports( ActionSchedulerFeature::ASYNC ) ) {
+		if ( self::supports( ActionSchedulerFeature::ENQUEUE_ASYNC_ACTION ) ) {
 			return self::schedule( __FUNCTION__, 'as_enqueue_async_action', array(), $hook, $args, $group, $unique, $priority );
 		}
 
@@ -533,7 +533,7 @@ final class ActionSchedulerUtil {
 				return self::supports( ActionSchedulerFeature::UNIQUE ) && null !== $version && version_compare( $version, '4.0.0', '>=' );
 			case ActionSchedulerFeature::HAS_SCHEDULED_ACTION:
 				return self::function_exists( 'as_has_scheduled_action' );
-			case ActionSchedulerFeature::ASYNC:
+			case ActionSchedulerFeature::ENQUEUE_ASYNC_ACTION:
 				return self::function_exists( 'as_enqueue_async_action' );
 		}
 

@@ -26,7 +26,7 @@ class ActionSchedulerUtilTest extends WC_Unit_Test_Case {
 		ActionSchedulerFeature::PRIORITY,
 		ActionSchedulerFeature::UNIQUE_ARGS,
 		ActionSchedulerFeature::HAS_SCHEDULED_ACTION,
-		ActionSchedulerFeature::ASYNC,
+		ActionSchedulerFeature::ENQUEUE_ASYNC_ACTION,
 	);
 
 	private const HOOK  = 'woocommerce_action_scheduler_util_test';
@@ -174,7 +174,7 @@ class ActionSchedulerUtilTest extends WC_Unit_Test_Case {
 		$this->assertNull( ActionSchedulerUtil::get_loaded_path() );
 		$this->assertSame( 'other', ActionSchedulerUtil::get_loaded_source()['type'] );
 		$this->assertTrue( ActionSchedulerUtil::is_risky() );
-		$this->assertFalse( ActionSchedulerUtil::supports( ActionSchedulerFeature::ASYNC ) );
+		$this->assertFalse( ActionSchedulerUtil::supports( ActionSchedulerFeature::ENQUEUE_ASYNC_ACTION ) );
 		$this->assertFalse( ActionSchedulerUtil::has_scheduled_action( self::HOOK ) );
 		$this->assertSame( 0, ActionSchedulerUtil::schedule_single( time() + HOUR_IN_SECONDS, self::HOOK, array(), self::GROUP, true, 5 ) );
 	}
