@@ -147,6 +147,7 @@ class PageControllerTest extends WC_Unit_Test_Case {
 
 		$this->assertStringNotContainsString( 'has-context', $formatted );
 		$this->assertStringNotContainsString( '<details>', $formatted );
-		$this->assertStringContainsString( 'CONTEXT: {&quot;unclosed&quot;:', $formatted );
+		// Quote encoding varies by WP version; decode entities to assert on the text content.
+		$this->assertStringContainsString( 'CONTEXT: {"unclosed":', html_entity_decode( $formatted, ENT_QUOTES | ENT_HTML401 ) );
 	}
 }
