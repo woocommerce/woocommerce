@@ -54,9 +54,9 @@ class PrivacyEraserTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should fire woocommerce_stock_notification_erased with the original email before anonymizing.
+	 * @testdox Should fire woocommerce_privacy_before_remove_stock_notification_personal_data with the original email before anonymizing.
 	 */
-	public function test_privacy_eraser_fires_erased_action_before_anonymizing(): void {
+	public function test_privacy_eraser_fires_before_remove_action_before_anonymizing(): void {
 		$notification = new Notification();
 		$notification->set_user_email( 'jon@doe.com' );
 		$notification->set_user_id( 5 );
@@ -66,7 +66,7 @@ class PrivacyEraserTests extends \WC_Unit_Test_Case {
 
 		$erased = array();
 		add_action(
-			'woocommerce_stock_notification_erased',
+			'woocommerce_privacy_before_remove_stock_notification_personal_data',
 			function ( $id, $original_email, $notification ) use ( &$erased ) {
 				$erased[] = array( $id, $original_email, $notification->get_user_email(), $notification->get_user_id(), $notification->get_status() );
 			},
