@@ -1,4 +1,8 @@
 <?php // phpcs:ignore Generic.PHP.RequireStrictTypes.MissingDeclaration -- Preserve scalar coercion for compatibility with extension-provided data.
+/**
+ * See plugins/woocommerce/client/blocks/assets/js/base/stores/woocommerce/README.md for productInContext and shared store usage.
+ */
+
 namespace Automattic\WooCommerce\Blocks\Templates;
 
 use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
