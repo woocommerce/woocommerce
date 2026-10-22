@@ -124,7 +124,8 @@ class ExtensibleAbilities {
 	 *     @type string   $resource     Resource that an ability formats, for example `product`, `order` or `order_item`.
 	 *     @type string   $namespace    Slug of the extension that owns the field, such as `subscriptions`.
 	 *     @type string   $field        Field name inside the namespace, such as `trial_length`.
-	 *     @type array    $schema       JSON schema of the value. It needs a `type`. Its `title` is the label clients show.
+	 *     @type array    $schema       JSON schema of the value. It needs a `type` and a `title`, the label clients
+	 *                                  show. Each nested property that holds a value has its own `title` too.
 	 *                                  It cannot set `required`, because a value that fails its schema is
 	 *                                  left out. For a field that is always present, allow null and return null.
 	 *     @type callable $get_callback Receives the object and returns the value. A value that the schema
@@ -139,6 +140,8 @@ class ExtensibleAbilities {
 	 *                                        or make HTTP requests.
 	 *                                     2. It receives the value already cast to the field schema.
 	 *                                     3. A null value deletes the value of the field.
+	 *     @type string[] $side_effects    Optional. Slugs of what saving the field triggers beyond the object,
+	 *                                     such as `stock_cascades`. A declaration, not a prediction. Default empty.
 	 * }
 	 */
 	public static function register_field( array $args ): void {
@@ -206,6 +209,13 @@ class ExtensibleAbilities {
 			);
 			return;
 		}
+
+		$side_effects = $args['side_effects'] ?? array();
+		if ( ! is_array( $side_effects ) || count( array_filter( $side_effects, static fn( $slug ) => is_string( $slug ) && '' !== $slug && sanitize_key( $slug ) === $slug ) ) !== count( $side_effects ) ) {
+			wc_doing_it_wrong( __METHOD__, __( 'The "side_effects" argument must be a list of slugs.', 'woocommerce' ), '11.5.0' );
+			return;
+		}
+		$args['side_effects'] = array_values( $side_effects );
 
 		self::$fields[ $args['resource'] ][ $args['namespace'] ][ $args['field'] ] = $args;
 	}

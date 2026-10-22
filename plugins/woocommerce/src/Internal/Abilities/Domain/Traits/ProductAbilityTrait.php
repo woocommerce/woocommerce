@@ -147,11 +147,13 @@ trait ProductAbilityTrait {
 				'type'        => 'string',
 				'description' => __( 'Decimal price as a string, without a currency symbol or thousand separators.', 'woocommerce' ),
 				'pattern'     => self::get_product_price_input_pattern(),
+				'x-side-effects' => array(),
 			),
 			'sale_price'        => array(
 				'type'        => 'string',
 				'description' => __( 'Decimal price as a string, without a currency symbol or thousand separators.', 'woocommerce' ),
 				'pattern'     => self::get_product_price_input_pattern(),
+				'x-side-effects' => array(),
 			),
 			'description'       => array(
 				'type'        => 'string',
@@ -169,6 +171,7 @@ trait ProductAbilityTrait {
 			'stock_quantity'    => array(
 				'type'        => self::get_product_stock_quantity_schema_type(),
 				'description' => __( 'Available stock quantity when product-level stock management is used.', 'woocommerce' ),
+				'x-side-effects' => array( 'stock_cascades' ),
 			),
 			'stock_status'      => array(
 				'type' => 'string',
