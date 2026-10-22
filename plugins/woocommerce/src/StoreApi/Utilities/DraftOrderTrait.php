@@ -78,8 +78,6 @@ trait DraftOrderTrait {
 	/**
 	 * Whether a zero-total order is still awaiting payment, such as a fully discounted renewal order.
 	 *
-	 * WC_Order::needs_payment() is false for these because of the total alone, but they can still be resumed.
-	 *
 	 * @param \WC_Order $order_object Order object to check.
 	 * @return bool
 	 */
@@ -98,7 +96,7 @@ trait DraftOrderTrait {
 		 * @param array     $valid_order_statuses Array of valid order statuses for payment.
 		 * @param \WC_Order $order                Order object.
 		 */
-		$payable_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( OrderStatus::PENDING, OrderStatus::FAILED ), $order_object );
+		$payable_statuses = array_filter( (array) apply_filters( 'woocommerce_valid_order_statuses_for_payment', array( OrderStatus::PENDING, OrderStatus::FAILED ), $order_object ) );
 
 		return $order_object->has_status( $payable_statuses );
 	}

@@ -3384,13 +3384,18 @@ class Checkout extends \WP_Test_REST_TestCase {
 	public function test_post_reuses_zero_total_order_from_session( string $status ): void {
 		$this->apply_full_discount_coupon();
 		$order = $this->create_session_order_from_cart( $status );
+		$order->update_meta_data( '_subscription_renewal', 123 );
+		$order->save();
 		$this->assertSame( 0.0, (float) $order->get_total(), 'The coupon must take the order to a zero total, which is the case this test covers.' );
 
 		$response = rest_get_server()->dispatch( $this->build_valid_post_request() );
 
 		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
 		$this->assertSame( $order->get_id(), (int) $response->get_data()['order_id'], 'Checkout must place the zero-total order from the session, not a new one without its data.' );
-		$this->assertTrue( wc_get_order( $order->get_id() )->is_paid(), 'The zero-total order from the session should be completed by checkout.' );
+
+		$placed_order = wc_get_order( $order->get_id() );
+		$this->assertTrue( $placed_order->is_paid(), 'The zero-total order from the session should be completed by checkout.' );
+		$this->assertSame( '123', (string) $placed_order->get_meta( '_subscription_renewal' ), 'Renewal metadata on the order from the session should be kept.' );
 	}
 
 	/**
