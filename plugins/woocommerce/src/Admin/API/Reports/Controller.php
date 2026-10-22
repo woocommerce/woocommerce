@@ -146,7 +146,7 @@ class Controller extends GenericController {
 	/**
 	 * Prepare a report object for serialization.
 	 *
-	 * @param stdClass        $report  Report data.
+	 * @param \stdClass       $report  Report data.
 	 * @param WP_REST_Request $request Request object.
 	 * @return WP_REST_Response
 	 */

@@ -286,7 +286,7 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 	 *
 	 * @see get_data
 	 * @param array $query_args Query parameters.
-	 * @return stdClass|WP_Error Data object `{ totals: *, intervals: array, total: int, pages: int, page_no: int }`, or error.
+	 * @return \stdClass|\WP_Error Data object `{ totals: *, intervals: array, total: int, pages: int, page_no: int }`, or error.
 	 */
 	public function get_noncached_data( $query_args ) {
 		/* translators: %s: Method name */
@@ -490,9 +490,9 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 	 *
 	 * They are pre-sorted in SQL, but after adding gaps, they need to be sorted including the added ones.
 	 *
-	 * @param stdClass $data      Data object, must contain an array under $data->intervals.
-	 * @param string   $sort_by   Ordering property.
-	 * @param string   $direction DESC/ASC.
+	 * @param \stdClass $data      Data object, must contain an array under $data->intervals.
+	 * @param string    $sort_by   Ordering property.
+	 * @param string    $direction DESC/ASC.
 	 */
 	protected function sort_intervals( &$data, $sort_by, $direction ) {
 		$this->sort_array( $data->intervals, $sort_by, $direction );
@@ -514,12 +514,12 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 	/**
 	 * Fills in interval gaps from DB with 0-filled objects.
 	 *
-	 * @param array    $db_intervals   Array of all intervals present in the db.
-	 * @param DateTime $start_datetime Start date.
-	 * @param DateTime $end_datetime   End date.
-	 * @param string   $time_interval  Time interval, e.g. day, week, month.
-	 * @param stdClass $data           Data with SQL extracted intervals.
-	 * @return stdClass
+	 * @param array     $db_intervals   Array of all intervals present in the db.
+	 * @param DateTime  $start_datetime Start date.
+	 * @param DateTime  $end_datetime   End date.
+	 * @param string    $time_interval  Time interval, e.g. day, week, month.
+	 * @param \stdClass $data           Data with SQL extracted intervals.
+	 * @return \stdClass
 	 */
 	protected function fill_in_missing_intervals( $db_intervals, $start_datetime, $end_datetime, $time_interval, &$data ) {
 		// @todo This is ugly and messy.
@@ -594,13 +594,13 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 	/**
 	 * Removes extra records from intervals so that only requested number of records get returned.
 	 *
-	 * @param stdClass $data           Data from whose intervals the records get removed.
-	 * @param int      $page_no        Offset requested by the user.
-	 * @param int      $items_per_page Number of records requested by the user.
-	 * @param int      $db_interval_count Database interval count.
-	 * @param int      $expected_interval_count Expected interval count on the output.
-	 * @param string   $order_by Order by field.
-	 * @param string   $order ASC or DESC.
+	 * @param \stdClass $data           Data from whose intervals the records get removed.
+	 * @param int       $page_no        Offset requested by the user.
+	 * @param int       $items_per_page Number of records requested by the user.
+	 * @param int       $db_interval_count Database interval count.
+	 * @param int       $expected_interval_count Expected interval count on the output.
+	 * @param string    $order_by Order by field.
+	 * @param string    $order ASC or DESC.
 	 */
 	protected function remove_extra_records( &$data, $page_no, $items_per_page, $db_interval_count, $expected_interval_count, $order_by, $order ) {
 		if ( 'date' === strtolower( $order_by ) ) {
