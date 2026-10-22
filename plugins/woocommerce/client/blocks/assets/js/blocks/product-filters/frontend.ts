@@ -185,6 +185,10 @@ const productFiltersStore = {
 			const { isOverlayOpened } = getContext< ProductFiltersContext >();
 			return isOverlayOpened ? 'dialog' : null;
 		},
+		get overlayDialogAriaModal() {
+			const { isOverlayOpened } = getContext< ProductFiltersContext >();
+			return isOverlayOpened ? true : null;
+		},
 	},
 	actions: {
 		openOverlay: () => {

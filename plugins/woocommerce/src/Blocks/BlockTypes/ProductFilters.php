@@ -287,7 +287,7 @@ CSS;
 							class="wc-block-product-filters__overlay-dialog"
 							data-wp-bind--role="state.overlayDialogRole"
 							aria-label="<?php echo esc_attr__( 'Product Filters', 'woocommerce' ); ?>"
-							data-wp-bind--aria-modal="context.isOverlayOpened"
+							data-wp-bind--aria-modal="state.overlayDialogAriaModal"
 							data-wp-on-document--keydown="actions.handleOverlayKeydown"
 							data-wp-watch="callbacks.focusOverlay"
 						>
