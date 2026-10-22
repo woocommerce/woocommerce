@@ -11,7 +11,6 @@ namespace Automattic\WooCommerce\Internal\StructuredData;
 
 use Automattic\WooCommerce\Enums\ProductStatus;
 use WC_Product;
-use WP_HTML_Processor;
 use WP_HTML_Tag_Processor;
 use WP_HTML_Text_Replacement;
 
@@ -130,23 +129,26 @@ class OpenGraph {
 			return $html;
 		}
 
-		$processor     = WP_HTML_Processor::create_full_parser( $html );
-		$tags          = $this->tags;
-		$has_image     = false;
-		$head_complete = false;
-		if ( null === $processor ) {
-			return $html;
-		}
+		$processor      = new WP_HTML_Tag_Processor( $html );
+		$tags           = $this->tags;
+		$has_image      = false;
+		$head_complete  = false;
+		$template_depth = 0;
 
 		while ( $processor->next_tag( array( 'tag_closers' => 'visit' ) ) ) {
+			if ( 'TEMPLATE' === $processor->get_tag() ) {
+				$template_depth = max( 0, $template_depth + ( $processor->is_tag_closer() ? -1 : 1 ) );
+			}
+			if ( $template_depth > 0 ) {
+				continue;
+			}
 			// The HTML spec allows the closing head tag to be omitted, so we also check for the body tag to determine head completion.
-			if ( ( 'HEAD' === $processor->get_tag() && $processor->is_tag_closer() ) || 'BODY' === $processor->get_tag() ) {
+			if ( ( 'HEAD' === $processor->get_tag() && $processor->is_tag_closer() ) || ( 'BODY' === $processor->get_tag() && ! $processor->is_tag_closer() ) ) {
 				$head_complete = true;
 				break;
 			}
 
-			$breadcrumbs = $processor->get_breadcrumbs();
-			if ( 'META' !== $processor->get_tag() || ! in_array( 'HEAD', $breadcrumbs, true ) || in_array( 'TEMPLATE', $breadcrumbs, true ) ) {
+			if ( 'META' !== $processor->get_tag() ) {
 				continue;
 			}
 
