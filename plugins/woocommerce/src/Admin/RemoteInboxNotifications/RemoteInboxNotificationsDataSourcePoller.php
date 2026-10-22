@@ -20,6 +20,18 @@ class RemoteInboxNotificationsDataSourcePoller extends DataSourcePoller {
 	const ID = 'remote_inbox_notifications';
 
 	/**
+	 * Transient holding the latest read's fetch time and published slugs, or null slugs for an inconclusive read.
+	 */
+	private const PUBLISHED_SNAPSHOT_TRANSIENT = 'woocommerce_admin_remote_inbox_notifications_published_snapshot';
+
+	/**
+	 * Published identities from this read's canonical response, or null when it is not authoritative.
+	 *
+	 * @var string[]|null
+	 */
+	private $published_slugs = null;
+
+	/**
 	 * Default data sources array.
 	 *
 	 * @deprecated since 9.5.0. Use get_data_sources() instead.
@@ -51,6 +63,113 @@ class RemoteInboxNotificationsDataSourcePoller extends DataSourcePoller {
 	}
 
 	/**
+	 * Read the data sources and record the identities published by the canonical WooCommerce.com feed.
+	 *
+	 * Invalid specs with usable slugs still count as published. An inconclusive response retains only its timestamp to reject older reads.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @return bool Whether any specs were read.
+	 */
+	public function read_specs_from_data_sources() {
+		$fetched_at            = time();
+		$this->published_slugs = null;
+
+		$result = parent::read_specs_from_data_sources();
+
+		$this->save_published_snapshot( $fetched_at, $this->published_slugs );
+
+		return $result;
+	}
+
+	/**
+	 * Get the published identities from the latest complete canonical response.
+	 *
+	 * Inconclusive reads store their fetch time with null slugs to reject older reads, but this method returns null for them.
+	 *
+	 * @internal
+	 * @since 11.3.0
+	 *
+	 * @return array{fetched_at: int, slugs: string[]}|null The snapshot, or null when the latest read is inconclusive or absent.
+	 */
+	public function get_published_snapshot(): ?array {
+		$snapshot = get_transient( self::PUBLISHED_SNAPSHOT_TRANSIENT );
+
+		if ( ! is_array( $snapshot ) || ! is_int( $snapshot['fetched_at'] ?? null ) || ! is_array( $snapshot['slugs'] ?? null ) ) {
+			return null;
+		}
+
+		return array(
+			'fetched_at' => $snapshot['fetched_at'],
+			'slugs'      => array_map( 'strval', array_values( array_filter( $snapshot['slugs'], 'is_scalar' ) ) ),
+		);
+	}
+
+	/**
+	 * Merge runnable specs and track canonical publication identities independently of validation.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param array  $specs_to_merge_in The specs to merge in to $specs.
+	 * @param array  $specs             The list of specs being merged into.
+	 * @param string $url               The url of the feed being merged in.
+	 * @return void
+	 */
+	protected function merge_specs( $specs_to_merge_in, &$specs, $url ) {
+		parent::merge_specs( $specs_to_merge_in, $specs, $url );
+
+		if ( ! in_array( $url, self::get_data_sources(), true ) ) {
+			return;
+		}
+
+		$this->published_slugs = null;
+		$slugs                 = array();
+		foreach ( $specs_to_merge_in as $spec ) {
+			if ( ! isset( $spec->slug ) || ! is_scalar( $spec->slug ) || '' === (string) $spec->slug ) {
+				return;
+			}
+			$slug = (string) $spec->slug;
+			if ( isset( $slugs[ $slug ] ) ) {
+				wc_get_logger()->warning(
+					'Skipping Store Alert withdrawal cleanup because the canonical feed contains a duplicate slug.',
+					array(
+						'source' => $url,
+						'slug'   => $slug,
+					)
+				);
+				return;
+			}
+			$slugs[ $slug ] = $slug;
+		}
+		// An empty list is inconclusive: WooCommerce.com also serves one when its own notifications query fails.
+		if ( ! empty( $slugs ) ) {
+			$this->published_slugs = array_values( $slugs );
+		}
+	}
+
+	/**
+	 * Store a read's publication evidence unless a newer read is already stored.
+	 *
+	 * @param int           $fetched_at When the read started.
+	 * @param string[]|null $slugs      Published slugs, or null for an inconclusive read.
+	 */
+	private function save_published_snapshot( int $fetched_at, ?array $slugs ): void {
+		$stored = get_transient( self::PUBLISHED_SNAPSHOT_TRANSIENT );
+		if ( is_array( $stored ) && is_int( $stored['fetched_at'] ?? null ) && $stored['fetched_at'] > $fetched_at ) {
+			return;
+		}
+
+		set_transient(
+			self::PUBLISHED_SNAPSHOT_TRANSIENT,
+			array(
+				'fetched_at' => $fetched_at,
+				'slugs'      => $slugs,
+			),
+			$this->args['transient_expiry']
+		);
+	}
+
+	/**
 	 * Validate the spec.
 	 *
 	 * @param object $spec The spec to validate.
@@ -62,9 +181,9 @@ class RemoteInboxNotificationsDataSourcePoller extends DataSourcePoller {
 		$logger         = self::get_logger();
 		$logger_context = array( 'source' => $url );
 
-		if ( ! isset( $spec->slug ) ) {
+		if ( ! isset( $spec->slug ) || ! is_scalar( $spec->slug ) || '' === (string) $spec->slug ) {
 			$logger->error(
-				'Spec is invalid because the slug is missing in feed',
+				'Spec is invalid because the slug is missing or invalid in feed',
 				$logger_context
 			);
 			// phpcs:ignore

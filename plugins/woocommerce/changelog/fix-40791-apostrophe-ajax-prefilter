@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Send classic cart and checkout requests encoded like a browser form post, so security rules that block apostrophes or parentheses no longer stop them.

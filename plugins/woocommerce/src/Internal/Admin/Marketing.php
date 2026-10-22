@@ -233,6 +233,7 @@ class Marketing {
 		}
 
 		$settings['marketing']['installedExtensions'] = InstalledExtensions::get_data();
+		$settings['marketing']['canInstallPlugins']   = current_user_can( 'install_plugins' );
 
 		return $settings;
 	}
