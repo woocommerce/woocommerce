@@ -665,7 +665,7 @@ final class ActionSchedulerUtil {
 		arsort( $plugin_paths );
 		foreach ( $plugin_paths as $dir => $real_dir ) {
 			$real_dir = trailingslashit( wp_normalize_path( (string) $real_dir ) );
-			if ( 0 === strpos( $path, $real_dir ) ) {
+			if ( str_starts_with( $path, $real_dir ) ) {
 				return trailingslashit( wp_normalize_path( (string) $dir ) ) . substr( $path, strlen( $real_dir ) );
 			}
 		}
@@ -697,7 +697,7 @@ final class ActionSchedulerUtil {
 	private static function relative_to( string $path, string $directory ): ?string {
 		$directory = trailingslashit( wp_normalize_path( $directory ) );
 
-		return 0 === strpos( $path, $directory ) ? (string) substr( $path, strlen( $directory ) ) : null;
+		return str_starts_with( $path, $directory ) ? (string) substr( $path, strlen( $directory ) ) : null;
 	}
 
 	/**
