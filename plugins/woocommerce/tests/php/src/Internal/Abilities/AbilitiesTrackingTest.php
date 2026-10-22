@@ -710,6 +710,10 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 		$this->sut->handle_shutdown();
 		$this->assertSame( 1, $this->sut->pixel_sends, 'Sent once' );
 		$this->assertCount( 1, $this->sut->recorded );
+
+		$this->sut->handle_shutdown();
+		$this->assertSame( 1, $this->sut->pixel_sends, 'A flushed queue is not sent again' );
+		$this->assertCount( 1, $this->sut->recorded );
 	}
 
 	/**
