@@ -7,6 +7,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Abilities;
 
+use Automattic\WooCommerce\Internal\Abilities\PersonalData;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -139,6 +140,9 @@ class ExtensibleAbilities {
 	 *                                        or make HTTP requests.
 	 *                                     2. It receives the value already cast to the field schema.
 	 *                                     3. A null value deletes the value of the field.
+	 *     @type bool     $personal_data   Optional. Whether the value is personal data, such as a phone number.
+	 *                                     The value is left out when the store does not share personal data
+	 *                                     with abilities. Default false.
 	 * }
 	 */
 	public static function register_field( array $args ): void {
@@ -188,6 +192,10 @@ class ExtensibleAbilities {
 		}
 		if ( isset( $args['update_callback'] ) && ! is_callable( $args['update_callback'] ) ) {
 			wc_doing_it_wrong( __METHOD__, 'The "update_callback" argument must be callable.', '11.3.0' );
+			return;
+		}
+		if ( isset( $args['personal_data'] ) && ! is_bool( $args['personal_data'] ) ) {
+			wc_doing_it_wrong( __METHOD__, 'The "personal_data" argument must be a boolean.', '11.4.0' );
 			return;
 		}
 		if ( isset( self::$fields[ $args['resource'] ][ $args['namespace'] ][ $args['field'] ] ) ) {
@@ -527,7 +535,9 @@ class ExtensibleAbilities {
 	 * `'12'` becomes `12` for an integer field. A field that throws or returns a
 	 * value that its schema does not allow is left out. A namespace with no
 	 * values is left out, and `extensions` is left out when no namespace has
-	 * values or the feature is off.
+	 * values or the feature is off. When the store does not share personal data,
+	 * Core's personal data fields are null and extension fields flagged as
+	 * personal data are left out, also while the feature is off.
 	 *
 	 * @since 11.3.0
 	 *
@@ -537,6 +547,7 @@ class ExtensibleAbilities {
 	 * @return array<string, mixed>
 	 */
 	public static function add_fields_to_object( array $output, string $resource_name, $subject ): array {
+		$output = PersonalData::withhold_fields( $output, $resource_name );
 		if ( empty( self::$fields[ $resource_name ] ) || ! self::is_enabled() ) {
 			return $output;
 		}
@@ -544,6 +555,9 @@ class ExtensibleAbilities {
 		$extensions = array();
 		foreach ( self::$fields[ $resource_name ] as $namespace => $fields ) {
 			foreach ( $fields as $field => $args ) {
+				if ( ! empty( $args['personal_data'] ) && ! PersonalData::is_shared( $resource_name ) ) {
+					continue;
+				}
 				try {
 					$value = call_user_func( $args['get_callback'], $subject );
 				} catch ( \Throwable $e ) {
