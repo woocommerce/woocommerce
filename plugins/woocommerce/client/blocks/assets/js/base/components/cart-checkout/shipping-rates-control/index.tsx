@@ -160,7 +160,7 @@ const ShippingRatesControl = ( {
 
 	// Prepare props to pass to the ExperimentalOrderShippingPackages slot fill.
 	// We need to pluck out receiveCart.
-	// eslint-disable-next-line no-unused-vars
+
 	const { extensions, receiveCart, ...cart } = useStoreCart();
 	const slotFillProps = {
 		className,
@@ -186,8 +186,9 @@ const ShippingRatesControl = ( {
 		return rate === selectedRateIds[ 0 ];
 	} );
 
+	// Match the rates on screen so the layout does not jump while they reload.
 	if ( isLoadingRates ) {
-		return <CheckoutShippingSkeleton />;
+		return <CheckoutShippingSkeleton rows={ shippingRatesRateCount } />;
 	}
 
 	return (

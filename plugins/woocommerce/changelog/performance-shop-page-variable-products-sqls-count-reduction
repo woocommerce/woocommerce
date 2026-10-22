@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Bulk-prime variable products transients on shop and category pages to reduce the number of SQL queries.

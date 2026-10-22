@@ -48,6 +48,39 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox wc_get_formatted_variation() lists an attribute whose value only appears in the parent product name.
+	 */
+	public function test_wc_get_formatted_variation_keeps_attribute_that_matches_the_parent_name(): void {
+		// Three attributes keep the attribute list out of the variation title, so it is just "Vienna Black"
+		// and the "black" colour must not be treated as already shown.
+		list( $product, $variation ) = WC_Helper_Product::create_variation_product_with_global_attributes(
+			'Vienna Black',
+			array(
+				'pa_size'   => 'huge',
+				'pa_number' => '1',
+				'pa_colour' => 'black',
+			),
+			array(
+				'size'   => array( 'small', 'huge' ),
+				'number' => array( '0', '1' ),
+				'colour' => array( 'black', 'white' ),
+			)
+		);
+
+		try {
+			$this->assertSame( 'Vienna Black', $variation->get_name() );
+			$this->assertSame(
+				'size: huge, number: 1, colour: black',
+				wc_get_formatted_variation( $variation, true, true, true ),
+				'Every attribute is listed when the variation name shows none of them.'
+			);
+		} finally {
+			$variation->delete( true );
+			$product->delete( true );
+		}
+	}
+
+	/**
 	 * @testdox If 'wc_get_price_excluding_tax' gets an order as argument, it passes the order customer to 'WC_Tax::get_rates'.
 	 *
 	 * @testWith [true, 1, true]
@@ -952,6 +985,83 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Stock lookup regeneration copies managed stock quantities and leaves unmanaged products alone.
+	 */
+	public function test_stock_lookup_regeneration_sets_quantities_from_managed_stock_meta(): void {
+		global $wpdb;
+
+		$stock_meta  = array(
+			'positive'                => array( '7.5' ),
+			'missing'                 => array(),
+			'unmanaged'               => array( '4' ),
+			'no_manage_meta'          => array( '5' ),
+			'duplicate_stock'         => array( '2', '9' ),
+			'duplicate_stock_reverse' => array( '9', '2' ),
+			'duplicate_manage'        => array( '-3' ),
+			'malformed'               => array( 'not-a-number' ),
+			'variation'               => array( '0.25' ),
+		);
+		$manage_meta = array(
+			'unmanaged'        => array( 'no' ),
+			'no_manage_meta'   => array(),
+			'duplicate_manage' => array( 'yes', 'no', 'yes' ),
+		);
+		$fixtures    = array();
+		foreach ( array_keys( $stock_meta ) as $case ) {
+			$fixtures[ $case ] = 'variation' === $case
+				? WC_Helper_Product::create_variation_product()->get_children()[0]
+				: WC_Helper_Product::create_simple_product()->get_id();
+		}
+
+		foreach ( $fixtures as $case => $product_id ) {
+			delete_post_meta( $product_id, '_manage_stock' );
+			delete_post_meta( $product_id, '_stock' );
+			foreach ( $manage_meta[ $case ] ?? array( 'yes' ) as $value ) {
+				add_post_meta( $product_id, '_manage_stock', $value );
+			}
+			foreach ( $stock_meta[ $case ] as $value ) {
+				add_post_meta( $product_id, '_stock', $value );
+			}
+			$this->assertNotFalse( $wpdb->update( $wpdb->wc_product_meta_lookup, array( 'stock_quantity' => 99 ), array( 'product_id' => $product_id ) ), "Failed to seed lookup row for {$case}." );
+		}
+
+		update_post_meta( $fixtures['unmanaged'], '_sold_individually', 'yes' );
+		update_post_meta( $fixtures['no_manage_meta'], '_sold_individually', 'yes' );
+
+		wc_update_product_lookup_tables_column( 'stock_quantity' );
+		$this->assertSame( '', $wpdb->last_error, 'Regeneration must complete without a database error.' );
+
+		$values = $this->read_stock_lookup_values( $fixtures );
+		$this->assertSame( 7.5, $values['positive'] );
+		$this->assertNull( $values['missing'], 'A managed product without stock meta gets NULL.' );
+		$this->assertSame( 99.0, $values['unmanaged'], 'A product with manage_stock set to no is left alone.' );
+		$this->assertSame( 99.0, $values['no_manage_meta'], 'A product without manage_stock meta is left alone.' );
+		$this->assertContains( $values['duplicate_stock'], array( 2.0, 9.0 ) );
+		$this->assertContains( $values['duplicate_stock_reverse'], array( 2.0, 9.0 ) );
+		$this->assertSame( -3.0, $values['duplicate_manage'] );
+		$this->assertNotSame( 99.0, $values['malformed'], 'A malformed stock value must not abort the statement.' );
+		$this->assertSame( 0.25, $values['variation'] );
+	}
+
+	/**
+	 * Read stock lookup values for a named product fixture.
+	 *
+	 * @param array<string, int> $fixtures Named product IDs.
+	 * @return array<string, float|null>
+	 */
+	private function read_stock_lookup_values( array $fixtures ): array {
+		global $wpdb;
+
+		$values = array();
+		foreach ( $fixtures as $case => $product_id ) {
+			$row = $wpdb->get_row( $wpdb->prepare( "SELECT stock_quantity FROM {$wpdb->wc_product_meta_lookup} WHERE product_id = %d", $product_id ), ARRAY_A );
+			$this->assertIsArray( $row, "Missing lookup row for {$case}." );
+			$values[ $case ] = null === $row['stock_quantity'] ? null : (float) $row['stock_quantity'];
+		}
+		return $values;
+	}
+
+	/**
 	 * @testdox Queued rating count batches do not run when reviews are disabled.
 	 * @testWith ["yes", 3, true]
 	 *           ["no", 1, false]
@@ -1435,6 +1545,80 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		update_option( 'woocommerce_default_country', $original_base_country );
 		if ( ! $wc_tax_enabled ) {
 			update_option( 'woocommerce_calc_taxes', 'no' );
+		}
+	}
+
+	/**
+	 * @testdox Assigned-customer orders apply matched rates for the editor tax location and pass the order customer to the filter.
+	 */
+	public function test_wc_get_price_excluding_tax_editor_location_filters_customer_rates(): void {
+		$original_calc_taxes         = get_option( 'woocommerce_calc_taxes' );
+		$original_prices_include_tax = get_option( 'woocommerce_prices_include_tax' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+
+		$customer = WC_Helper_Customer::create_customer();
+		$order    = wc_create_order();
+		$order->set_customer_id( $customer->get_id() );
+		$order->set_billing_country( 'DE' );
+		$order->save();
+
+		$product = new WC_Product_Simple();
+		$product->set_price( 100 );
+		$product->set_tax_status( 'taxable' );
+
+		$french_tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'FR',
+				'tax_rate'          => '20.0000',
+				'tax_rate_name'     => 'French VAT',
+				'tax_rate_priority' => 1,
+				'tax_rate_compound' => 0,
+				'tax_rate_shipping' => 1,
+				'tax_rate_order'    => 1,
+				'tax_rate_class'    => '',
+			)
+		);
+
+		$filter_calls = array();
+		$filter       = function ( $rates, $tax_class, $filtered_customer ) use ( &$filter_calls ) {
+			$filter_calls[] = array( $rates, $tax_class, $filtered_customer );
+			foreach ( $rates as &$rate ) {
+				$rate['rate'] = 25.0;
+			}
+			return $rates;
+		};
+		add_filter( 'woocommerce_adjust_non_base_location_prices', '__return_false' );
+		add_filter( 'woocommerce_matched_rates', $filter, 10, 3 );
+
+		try {
+			$net_price = wc_get_price_excluding_tax(
+				$product,
+				array(
+					'order'        => $order,
+					'tax_location' => array(
+						'country'  => 'FR',
+						'state'    => '',
+						'postcode' => '75001',
+						'city'     => 'Paris',
+					),
+				)
+			);
+
+			$this->assertCount( 1, $filter_calls, 'The matched rates filter should run for an assigned-customer order.' );
+			$this->assertSame( '', $filter_calls[0][1], 'The filter should receive the product tax class.' );
+			$this->assertInstanceOf( WC_Customer::class, $filter_calls[0][2] );
+			$this->assertSame( $customer->get_id(), $filter_calls[0][2]->get_id(), 'The filter should receive the order customer.' );
+			$this->assertArrayHasKey( $french_tax_rate_id, $filter_calls[0][0], 'The editor location should determine the matched rate.' );
+			$this->assertEquals( 80, $net_price, 'The filtered 25% rate should determine the net price.' );
+		} finally {
+			remove_filter( 'woocommerce_matched_rates', $filter );
+			remove_filter( 'woocommerce_adjust_non_base_location_prices', '__return_false' );
+			WC_Tax::_delete_tax_rate( $french_tax_rate_id );
+			$order->delete( true );
+			wp_delete_user( $customer->get_id() );
+			update_option( 'woocommerce_calc_taxes', $original_calc_taxes );
+			update_option( 'woocommerce_prices_include_tax', $original_prices_include_tax );
 		}
 	}
 

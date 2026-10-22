@@ -10,28 +10,28 @@ import {
 } from '@wordpress/global-styles-engine';
 import {
 	FontSizePicker,
-	__experimentalToolsPanel as ToolsPanel, // eslint-disable-line
-	__experimentalToolsPanelItem as ToolsPanelItem, // eslint-disable-line
+	__experimentalToolsPanel as ToolsPanel,
+	__experimentalToolsPanelItem as ToolsPanelItem,
 } from '@wordpress/components';
-// eslint-disable-next-line
+
 import {
 	useSettings,
 	// We can remove the ts-expect-error comments once the types are available.
 	// @see packages/block-editor/src/components/index.js
 	// @ts-expect-error TS7016: Could not find a declaration file for module '@wordpress/block-editor'.
-	__experimentalFontAppearanceControl as FontAppearanceControl, // eslint-disable-line
+	__experimentalFontAppearanceControl as FontAppearanceControl,
 	// @ts-expect-error TS7016: Could not find a declaration file for module '@wordpress/block-editor'.
-	__experimentalLetterSpacingControl as LetterSpacingControl, // eslint-disable-line
+	__experimentalLetterSpacingControl as LetterSpacingControl,
 	// @ts-expect-error TS7016: Could not find a declaration file for module '@wordpress/block-editor'.
-	__experimentalFontFamilyControl as FontFamilyControl, // eslint-disable-line
+	__experimentalFontFamilyControl as FontFamilyControl,
 	// @ts-expect-error TS7016: Could not find a declaration file for module '@wordpress/block-editor'.
 	LineHeightControl,
 	// @ts-expect-error TS7016: Could not find a declaration file for module '@wordpress/block-editor'.
-	__experimentalTextDecorationControl as TextDecorationControl, // eslint-disable-line
+	__experimentalTextDecorationControl as TextDecorationControl,
 	// @ts-expect-error TS7016: Could not find a declaration file for module '@wordpress/block-editor'.
-	__experimentalTextTransformControl as TextTransformControl, // eslint-disable-line
+	__experimentalTextTransformControl as TextTransformControl,
 	// @ts-expect-error TS7016: Could not find a declaration file for module '@wordpress/block-editor'.
-	__experimentalUseMultipleOriginColorsAndGradients as useMultipleOriginColorsAndGradients, // eslint-disable-line
+	__experimentalUseMultipleOriginColorsAndGradients as useMultipleOriginColorsAndGradients,
 } from '@wordpress/block-editor';
 
 /**
@@ -124,7 +124,7 @@ export function TypographyElementPanel( {
 				{ settings: theme?.settings },
 				'',
 				userTextColor
-		  )
+			)
 		: undefined;
 
 	const hasTextColor = () => !! userTextColor;
@@ -139,20 +139,26 @@ export function TypographyElementPanel( {
 	const showToolFontSize =
 		element !== 'heading' || headingLevel !== 'heading';
 
+	// Text styles live at the root of the styles object, every other element
+	// under `elements`, and headings under their level.
+	const getElementStylePath = useCallback(
+		( path ) => {
+			if ( element === 'heading' ) {
+				return [ 'elements', headingLevel, ...path ];
+			}
+			if ( element === 'text' ) {
+				return [ ...path ];
+			}
+			return [ 'elements', element, ...path ];
+		},
+		[ element, headingLevel ]
+	);
+
 	const updateElementStyleProp = useCallback(
 		( path, newValue ) => {
-			if ( element === 'heading' ) {
-				updateStyleProp(
-					[ 'elements', headingLevel, ...path ],
-					newValue
-				);
-			} else if ( element === 'text' ) {
-				updateStyleProp( [ ...path ], newValue );
-			} else {
-				updateStyleProp( [ 'elements', element, ...path ], newValue );
-			}
+			updateStyleProp( getElementStylePath( path ), newValue );
 		},
-		[ element, updateStyleProp, headingLevel ]
+		[ getElementStylePath, updateStyleProp ]
 	);
 
 	const setTextColor = ( newValue ) => {
@@ -166,7 +172,7 @@ export function TypographyElementPanel( {
 						undefined,
 						'color.text',
 						newValue
-				  );
+					);
 		updateElementStyleProp( [ 'color', 'text' ], encodedValue );
 		debouncedRecordEvent(
 			'styles_sidebar_screen_typography_element_panel_set_text_color',
@@ -256,8 +262,20 @@ export function TypographyElementPanel( {
 		fontStyle: newFontStyle,
 		fontWeight: newFontWeight,
 	} ) => {
-		updateElementStyleProp( [ 'typography', 'fontStyle' ], newFontStyle );
-		updateElementStyleProp( [ 'typography', 'fontWeight' ], newFontWeight );
+		// Single update — a second updateStyleProp call in the same handler
+		// would work from a stale userTheme and clobber this edit, dropping
+		// fontStyle.
+		updateStyles(
+			setImmutably(
+				setImmutably(
+					userStyles ?? {},
+					getElementStylePath( [ 'typography', 'fontStyle' ] ),
+					newFontStyle
+				),
+				getElementStylePath( [ 'typography', 'fontWeight' ] ),
+				newFontWeight
+			)
+		);
 		debouncedRecordEvent(
 			'styles_sidebar_screen_typography_element_panel_set_font_appearance',
 			{

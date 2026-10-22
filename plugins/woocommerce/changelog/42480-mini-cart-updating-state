@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Disable the Mini-Cart checkout button and show a loading subtotal while a quantity change or other cart update is in progress.

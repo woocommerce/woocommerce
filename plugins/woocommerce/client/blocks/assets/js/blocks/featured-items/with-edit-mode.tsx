@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import type { useBlockProps } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
 import { usePreviewMode } from '@woocommerce/base-hooks';
 import type { ComponentType } from 'react';
@@ -43,6 +44,7 @@ type EditModeRequiredAttributes = {
 };
 
 interface EditModeRequiredProps< T > {
+	blockProps: ReturnType< typeof useBlockProps >;
 	attributes: EditModeRequiredAttributes & EditorBlock< T >[ 'attributes' ];
 	clientId: string;
 	effectiveCategoryId?: number;
@@ -90,9 +92,8 @@ export const withEditMode =
 		);
 
 		// Only show edit mode for newly inserted blocks without existing selection
-		const [ editMode, setEditMode ] = useState< boolean >(
-			! hasFeaturedItemId
-		);
+		const [ editMode, setEditMode ] =
+			useState< boolean >( ! hasFeaturedItemId );
 
 		const onDone = () => {
 			if ( selectedOptions ) {
@@ -138,74 +139,80 @@ export const withEditMode =
 
 		if ( editMode && canEditItem ) {
 			return (
-				<Placeholder
-					icon={ <Icon icon={ icon } /> }
-					label={ label }
-					className={ className }
-				>
-					<HStack alignment="center">
-						{ isDeleted ? (
-							<Icon
-								icon={ info }
-								className="wc-blocks-featured-items__orange-info-icon"
-							/>
-						) : (
-							<Icon icon={ info } />
-						) }
-						<Text>
-							{ isDeleted
-								? getInvalidItemDescription( name )
-								: description }
-						</Text>
-					</HStack>
-					<div className={ `${ className }__selection` }>
-						{ name === BLOCK_NAMES.featuredCategory && (
-							<ProductCategoryControl
-								selected={
-									selectedOptions?.categoryId
-										? [ selectedOptions.categoryId ]
-										: []
-								}
-								onChange={ (
-									value: ProductCategoryResponseItem[] = []
-								) => {
-									const id = value[ 0 ] ? value[ 0 ].id : 0;
-									setSelectedOptions( {
-										categoryId: id,
-										mediaId: 0,
-										mediaSrc: '',
-									} );
-									triggerUrlUpdate();
-								} }
-								isSingle
-							/>
-						) }
-						{ name === BLOCK_NAMES.featuredProduct && (
-							<ProductControl
-								selected={
-									selectedOptions?.productId
-										? [ selectedOptions.productId ]
-										: []
-								}
-								showVariations
-								onChange={ (
-									value: ProductResponseItem[] = []
-								) => {
-									const id = value[ 0 ] ? value[ 0 ].id : 0;
-									setSelectedOptions( {
-										productId: id,
-										mediaId: 0,
-										mediaSrc: '',
-									} );
-									triggerUrlUpdate();
-								} }
-							/>
-						) }
-						<Button variant="primary" onClick={ onDone }>
-							{ __( 'Done', 'woocommerce' ) }
-						</Button>
-					</div>
-				</Placeholder>
+				<div { ...props.blockProps }>
+					<Placeholder
+						icon={ <Icon icon={ icon } /> }
+						label={ label }
+						className={ className }
+					>
+						<HStack alignment="center">
+							{ isDeleted ? (
+								<Icon
+									icon={ info }
+									className="wc-blocks-featured-items__orange-info-icon"
+								/>
+							) : (
+								<Icon icon={ info } />
+							) }
+							<Text>
+								{ isDeleted
+									? getInvalidItemDescription( name )
+									: description }
+							</Text>
+						</HStack>
+						<div className={ `${ className }__selection` }>
+							{ name === BLOCK_NAMES.featuredCategory && (
+								<ProductCategoryControl
+									selected={
+										selectedOptions?.categoryId
+											? [ selectedOptions.categoryId ]
+											: []
+									}
+									onChange={ (
+										value: ProductCategoryResponseItem[] = []
+									) => {
+										const id = value[ 0 ]
+											? value[ 0 ].id
+											: 0;
+										setSelectedOptions( {
+											categoryId: id,
+											mediaId: 0,
+											mediaSrc: '',
+										} );
+										triggerUrlUpdate();
+									} }
+									isSingle
+								/>
+							) }
+							{ name === BLOCK_NAMES.featuredProduct && (
+								<ProductControl
+									selected={
+										selectedOptions?.productId
+											? [ selectedOptions.productId ]
+											: []
+									}
+									showVariations
+									onChange={ (
+										value: ProductResponseItem[] = []
+									) => {
+										const id = value[ 0 ]
+											? value[ 0 ].id
+											: 0;
+										setSelectedOptions( {
+											productId: id,
+											mediaId: 0,
+											mediaSrc: '',
+										} );
+										triggerUrlUpdate();
+									} }
+								/>
+							) }
+							<Button variant="primary" onClick={ onDone }>
+								{ __( 'Done', 'woocommerce' ) }
+							</Button>
+						</div>
+					</Placeholder>
+				</div>
 			);
 		}
 

@@ -11,14 +11,20 @@ import ListOrdered from 'gridicons/dist/list-ordered';
 /**
  * Internal dependencies
  */
-const LazyDashboardCharts = lazy( () =>
-	import( /* webpackChunkName: "dashboard-charts" */ './dashboard-charts' )
+const LazyDashboardCharts = lazy(
+	() =>
+		import(
+			/* webpackChunkName: "dashboard-charts" */ './dashboard-charts'
+		)
 );
-const LazyLeaderboards = lazy( () =>
-	import( /* webpackChunkName: "leaderboards" */ './leaderboards' )
+const LazyLeaderboards = lazy(
+	() => import( /* webpackChunkName: "leaderboards" */ './leaderboards' )
 );
-const LazyStorePerformance = lazy( () =>
-	import( /* webpackChunkName: "store-performance" */ './store-performance' )
+const LazyStorePerformance = lazy(
+	() =>
+		import(
+			/* webpackChunkName: "store-performance" */ './store-performance'
+		)
 );
 
 const DashboardCharts = ( props ) => (
@@ -68,15 +74,10 @@ export default applyFilters( DEFAULT_SECTIONS_FILTER, [
 		icon: arrowRight,
 		hiddenBlocks: [
 			'coupons/amount',
-			'coupons/orders_count',
 			'downloads/download_count',
 			'taxes/order_tax',
 			'taxes/total_tax',
 			'taxes/shipping_tax',
-			'revenue/shipping',
-			'orders/avg_order_value',
-			'revenue/refunds',
-			'revenue/gross_sales',
 		],
 	},
 	{

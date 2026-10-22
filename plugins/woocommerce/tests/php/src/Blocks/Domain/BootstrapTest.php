@@ -530,9 +530,9 @@ HTML;
 	}
 
 	/**
-	 * @testdox A render whose end action never reaches the restore is repaired by the next render.
+	 * @testdox The data attributes filter is put back even when another render end callback throws.
 	 */
-	public function test_data_attributes_filter_is_restored_by_a_later_render(): void {
+	public function test_data_attributes_filter_is_restored_when_another_end_callback_throws(): void {
 		$throwing_callback = function () {
 			throw new \RuntimeException( 'Another plugin failed to clean up' );
 		};
@@ -541,11 +541,56 @@ HTML;
 		do_action( 'woocommerce_email_editor_render_start' );
 		try {
 			do_action( 'woocommerce_email_editor_render_end' );
+			$this->fail( 'The throwing callback should have stopped the action.' );
 		} catch ( \RuntimeException $e ) {
 			$this->assertSame( 'Another plugin failed to clean up', $e->getMessage() );
 		} finally {
 			remove_action( 'woocommerce_email_editor_render_end', $throwing_callback, 5 );
 		}
+
+		$this->assertSame(
+			10,
+			$this->data_attributes_filter_priority(),
+			'A third-party callback that throws must not leave the filter suspended for the rest of the request.'
+		);
+	}
+
+	/**
+	 * @testdox The data attributes filter is put back even when a callback hooked at load time throws.
+	 */
+	public function test_data_attributes_filter_is_restored_when_an_earlier_hooked_callback_throws(): void {
+		$throwing_callback = function () {
+			throw new \RuntimeException( 'A plugin hooked at load time failed' );
+		};
+
+		// The common case: default priority, hooked before the render starts. Registration order alone used to
+		// decide whether the restore ran, since it is hooked during the render.
+		add_action( 'woocommerce_email_editor_render_end', $throwing_callback );
+		do_action( 'woocommerce_email_editor_render_start' );
+		try {
+			do_action( 'woocommerce_email_editor_render_end' );
+			$this->fail( 'The throwing callback should have stopped the action.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertSame( 'A plugin hooked at load time failed', $e->getMessage() );
+		} finally {
+			remove_action( 'woocommerce_email_editor_render_end', $throwing_callback );
+		}
+
+		$this->assertSame(
+			10,
+			$this->data_attributes_filter_priority(),
+			'The restore must run before a callback a plugin hooked at the default priority.'
+		);
+	}
+
+	/**
+	 * @testdox A render that never fires the end action is repaired by the next render.
+	 */
+	public function test_data_attributes_filter_is_restored_by_a_later_render(): void {
+		// An integration that fires the start action on its own, for example around its own rendering, and never
+		// fires the end action.
+		do_action( 'woocommerce_email_editor_render_start' );
+		$this->assertFalse( $this->data_attributes_filter_priority(), 'The filter should be suspended for the render.' );
 
 		do_action( 'woocommerce_email_editor_render_start' );
 		do_action( 'woocommerce_email_editor_render_end' );

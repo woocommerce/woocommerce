@@ -38,12 +38,30 @@ class OrderItemSchemaTest extends \WC_Unit_Test_Case {
 	private $schema_controller;
 
 	/**
+	 * Whether the pa_size taxonomy was registered when the test started.
+	 *
+	 * @var bool
+	 */
+	private $size_taxonomy_existed_at_setup;
+
+	/**
+	 * The $wc_product_attributes global when the test started.
+	 *
+	 * @var array<string, object>
+	 */
+	private $product_attributes_at_setup;
+
+	/**
 	 * Set up before test.
 	 *
 	 * @return void
 	 */
 	public function setUp(): void {
 		parent::setUp();
+
+		// create_attribute() registers a taxonomy and rebuilds this global, and the rollback undoes neither.
+		$this->size_taxonomy_existed_at_setup = taxonomy_exists( 'pa_size' );
+		$this->product_attributes_at_setup    = $GLOBALS['wc_product_attributes'] ?? array();
 
 		// Set up formatters and extend schema.
 		$formatters = new Formatters();
@@ -63,7 +81,14 @@ class OrderItemSchemaTest extends \WC_Unit_Test_Case {
 		$this->schema_controller = null;
 		$this->mock_extend       = null;
 
-		parent::tearDown();
+		try {
+			if ( ! $this->size_taxonomy_existed_at_setup && taxonomy_exists( 'pa_size' ) ) {
+				unregister_taxonomy( 'pa_size' );
+			}
+			$GLOBALS['wc_product_attributes'] = $this->product_attributes_at_setup; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restores the value from setUp().
+		} finally {
+			parent::tearDown();
+		}
 	}
 
 	/**
@@ -245,6 +270,9 @@ class OrderItemSchemaTest extends \WC_Unit_Test_Case {
 	 * Test that variations with "Any" attributes return user-selected values.
 	 */
 	public function test_get_item_response_any_variation_returns_user_selected_values(): void {
+		// Register the pa_size taxonomy so the attribute label resolves the same way in any test order.
+		\WC_Helper_Product::create_attribute( 'size', array() );
+
 		$variable_product = new \WC_Product_Variable();
 		$variable_product->set_name( 'Test Variable Product' );
 
@@ -305,6 +333,9 @@ class OrderItemSchemaTest extends \WC_Unit_Test_Case {
 	 * Test variations with mixed global and custom "Any" attributes.
 	 */
 	public function test_get_item_response_any_variation_with_mixed_attributes(): void {
+		// Register the pa_size taxonomy so the attribute label resolves the same way in any test order.
+		\WC_Helper_Product::create_attribute( 'size', array() );
+
 		$variable_product = new \WC_Product_Variable();
 		$variable_product->set_name( 'Test Variable Product with Mixed Attributes' );
 

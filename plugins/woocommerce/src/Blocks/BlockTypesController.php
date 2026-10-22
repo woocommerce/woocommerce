@@ -26,6 +26,13 @@ final class BlockTypesController {
 	private const DATA_ATTRIBUTES_PRIORITY = 10;
 
 	/**
+	 * Priority of the callback that ends the data attributes suspension. The lowest possible priority puts it ahead
+	 * of other callbacks on the render end action, so one of those throwing cannot leave the filter suspended for
+	 * the rest of the request.
+	 */
+	private const RESTORE_DATA_ATTRIBUTES_PRIORITY = PHP_INT_MIN;
+
+	/**
 	 * Instance of the asset API.
 	 *
 	 * @var AssetApi
@@ -79,6 +86,7 @@ final class BlockTypesController {
 		add_filter( 'block_categories_all', array( $this, 'register_block_categories' ), 10, 2 );
 		add_filter( 'render_block', array( $this, 'add_data_attributes' ), self::DATA_ATTRIBUTES_PRIORITY, 2 );
 		add_action( 'woocommerce_login_form_end', array( $this, 'redirect_to_field' ) );
+		add_action( 'woocommerce_register_form_end', array( $this, 'redirect_to_field' ) );
 		add_filter( 'widget_types_to_hide_from_legacy_widget_block', array( $this, 'hide_legacy_widgets_with_block_equivalent' ) );
 		add_filter( 'block_type_metadata', array( $this, 'handle_block_type_metadata' ) );
 		add_filter( 'block_type_metadata_settings', array( $this, 'use_single_block_editor_style' ), 10, 2 );
@@ -180,19 +188,19 @@ final class BlockTypesController {
 		}
 
 		remove_filter( 'render_block', $data_attributes_callback, self::DATA_ATTRIBUTES_PRIORITY );
-		add_action( 'woocommerce_email_editor_render_end', array( $this, 'restore_data_attributes_after_email_render' ) );
+		add_action( 'woocommerce_email_editor_render_end', array( $this, 'restore_data_attributes_after_email_render' ), self::RESTORE_DATA_ATTRIBUTES_PRIORITY );
 	}
 
 	/**
 	 * Add the data- attributes filter back once the email render has ended.
 	 *
-	 * Only a suspension hooks this, so a render whose end action never reached it is repaired by the next one.
+	 * Only a suspension hooks this, and a render that never fired the end action is repaired by the next one.
 	 *
 	 * @internal
 	 */
 	public function restore_data_attributes_after_email_render(): void {
 		add_filter( 'render_block', array( $this, 'add_data_attributes' ), self::DATA_ATTRIBUTES_PRIORITY, 2 );
-		remove_action( 'woocommerce_email_editor_render_end', array( $this, 'restore_data_attributes_after_email_render' ) );
+		remove_action( 'woocommerce_email_editor_render_end', array( $this, 'restore_data_attributes_after_email_render' ), self::RESTORE_DATA_ATTRIBUTES_PRIORITY );
 	}
 
 	/**
@@ -223,12 +231,9 @@ final class BlockTypesController {
 	 */
 	public function register_block_metadata() {
 		$meta_file_path = WC_ABSPATH . 'assets/client/blocks/blocks-json.php';
-		if ( function_exists( 'wp_register_block_metadata_collection' ) && file_exists( $meta_file_path ) ) {
+		if ( file_exists( $meta_file_path ) ) {
 			add_filter( 'doing_it_wrong_trigger_error', array( __CLASS__, 'bypass_block_metadata_doing_it_wrong' ), 10, 4 );
-			wp_register_block_metadata_collection(
-				WC_ABSPATH . 'assets/client/blocks/',
-				$meta_file_path
-			);
+			wp_register_block_metadata_collection( WC_ABSPATH . 'assets/client/blocks/', $meta_file_path );
 			remove_filter( 'doing_it_wrong_trigger_error', array( __CLASS__, 'bypass_block_metadata_doing_it_wrong' ), 10 );
 		}
 	}
@@ -266,7 +271,7 @@ final class BlockTypesController {
 			array(
 				'title'    => '',
 				'inserter' => false,
-				'content'  => '<!-- wp:heading {"level":2,"style":{"typography":{"fontSize":"24px"}}} --><h2 class="wp-block-heading" style="font-size:24px">' . esc_html__( 'Order details', 'woocommerce' ) . '</h2><!-- /wp:heading -->',
+				'content'  => '<!-- wp:heading {"level":2} --><h2 class="wp-block-heading">' . esc_html__( 'Order details', 'woocommerce' ) . '</h2><!-- /wp:heading -->',
 			)
 		);
 		register_block_pattern(
@@ -274,7 +279,7 @@ final class BlockTypesController {
 			array(
 				'title'    => '',
 				'inserter' => false,
-				'content'  => '<!-- wp:heading {"level":2,"style":{"typography":{"fontSize":"24px"}}} --><h2 class="wp-block-heading" style="font-size:24px">' . esc_html__( 'Downloads', 'woocommerce' ) . '</h2><!-- /wp:heading -->',
+				'content'  => '<!-- wp:heading {"level":2} --><h2 class="wp-block-heading">' . esc_html__( 'Downloads', 'woocommerce' ) . '</h2><!-- /wp:heading -->',
 			)
 		);
 		register_block_pattern(
@@ -282,7 +287,7 @@ final class BlockTypesController {
 			array(
 				'title'    => '',
 				'inserter' => false,
-				'content'  => '<!-- wp:heading {"level":2,"style":{"typography":{"fontSize":"24px"}}} --><h2 class="wp-block-heading" style="font-size:24px">' . esc_html__( 'Shipping address', 'woocommerce' ) . '</h2><!-- /wp:heading -->',
+				'content'  => '<!-- wp:heading {"level":2} --><h2 class="wp-block-heading">' . esc_html__( 'Shipping address', 'woocommerce' ) . '</h2><!-- /wp:heading -->',
 			)
 		);
 		register_block_pattern(
@@ -290,7 +295,7 @@ final class BlockTypesController {
 			array(
 				'title'    => '',
 				'inserter' => false,
-				'content'  => '<!-- wp:heading {"level":2,"style":{"typography":{"fontSize":"24px"}}} --><h2 class="wp-block-heading" style="font-size:24px">' . esc_html__( 'Billing address', 'woocommerce' ) . '</h2><!-- /wp:heading -->',
+				'content'  => '<!-- wp:heading {"level":2} --><h2 class="wp-block-heading">' . esc_html__( 'Billing address', 'woocommerce' ) . '</h2><!-- /wp:heading -->',
 			)
 		);
 		register_block_pattern(
@@ -298,7 +303,7 @@ final class BlockTypesController {
 			array(
 				'title'    => '',
 				'inserter' => false,
-				'content'  => '<!-- wp:heading {"level":2,"style":{"typography":{"fontSize":"24px"}}} --><h2 class="wp-block-heading" style="font-size:24px">' . esc_html__( 'Additional information', 'woocommerce' ) . '</h2><!-- /wp:heading -->',
+				'content'  => '<!-- wp:heading {"level":2} --><h2 class="wp-block-heading">' . esc_html__( 'Additional information', 'woocommerce' ) . '</h2><!-- /wp:heading -->',
 			)
 		);
 		// Referenced from the default Cart page content created at install; registration must not depend on the Cart block type being enabled, or the page renders nothing for the reference.
@@ -451,7 +456,7 @@ final class BlockTypesController {
 	}
 
 	/**
-	 * Adds a redirect field to the login form so blocks can redirect users after login.
+	 * Adds a redirect field to the login and registration forms so blocks can redirect users after they log in or register.
 	 */
 	public function redirect_to_field() {
 		// phpcs:ignore WordPress.Security.NonceVerification

@@ -23,8 +23,7 @@ type CreateOrderErrorResponse = {
 };
 
 type CreateOrderResponse =
-	| CreateOrderSuccessResponse
-	| CreateOrderErrorResponse;
+	CreateOrderSuccessResponse | CreateOrderErrorResponse;
 
 function createOrder( productId: number ): Promise< CreateOrderResponse > {
 	return apiFetch( {

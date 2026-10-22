@@ -248,7 +248,7 @@ describe( 'CountrySelector', () => {
 			await new Promise( ( resolve ) => setTimeout( resolve, 10 ) );
 
 			// Tab should not be prevented by onSearchKeyDown, allowing focus to move to Apply button.
-			userEvent.tab();
+			await userEvent.tab();
 
 			// Dropdown should still be open.
 			expect( screen.getByRole( 'listbox' ) ).toBeInTheDocument();

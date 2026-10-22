@@ -1533,10 +1533,11 @@ class SettingsUISchema {
 	 */
 	private static function normalize_type( string $type ): string {
 		$type_map = array(
-			'multiselect'            => 'array',
-			'multi_select_countries' => 'array',
-			'single_select_country'  => 'select',
-			'single_select_page'     => 'select',
+			'multiselect'                    => 'array',
+			'multi_select_countries'         => 'array',
+			'single_select_country'          => 'select',
+			'single_select_page'             => 'select',
+			'single_select_page_with_search' => 'select',
 		);
 
 		return $type_map[ $type ] ?? $type;
@@ -1641,7 +1642,7 @@ class SettingsUISchema {
 	private static function get_options( array $setting ): array {
 		$type = isset( $setting['type'] ) && is_string( $setting['type'] ) ? $setting['type'] : '';
 
-		if ( 'single_select_page' === $type ) {
+		if ( in_array( $type, array( 'single_select_page', 'single_select_page_with_search' ), true ) ) {
 			return self::get_page_options( $setting );
 		}
 
