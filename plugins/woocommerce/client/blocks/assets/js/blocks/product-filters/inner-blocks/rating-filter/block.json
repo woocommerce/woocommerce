@@ -12,7 +12,14 @@
 		}
 	},
 	"ancestor": [ "woocommerce/product-filters" ],
-	"usesContext": [ "query", "filterParams" ],
+	"usesContext": [
+		"query",
+		"queryId",
+		"collection",
+		"productCollectionLocation",
+		"filterParams",
+		"productFiltersKey"
+	],
 	"attributes": {
 		"className": {
 			"type": "string",

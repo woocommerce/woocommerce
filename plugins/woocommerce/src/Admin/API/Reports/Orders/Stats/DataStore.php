@@ -338,7 +338,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @param array    $params                  Query limit parameters.
 	 * @param stdClass $data                    Reference to the data object to fill.
 	 * @param int      $expected_interval_count Number of expected intervals.
-	 * @return stdClass|WP_Error Data object `{ totals: *, intervals: array, total: int, pages: int, page_no: int }`, or error.
+	 * @return stdClass|\WP_Error Data object `{ totals: *, intervals: array, total: int, pages: int, page_no: int }`, or error.
 	 */
 	public function get_noncached_stats_data( $query_args, $params, &$data, $expected_interval_count ) {
 		global $wpdb;
