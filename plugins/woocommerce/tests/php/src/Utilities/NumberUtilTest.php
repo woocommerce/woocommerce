@@ -356,8 +356,15 @@ class NumberUtilTest extends \WC_Unit_Test_Case {
 		update_option( 'woocommerce_price_thousand_sep', ',' );
 		update_option( 'woocommerce_price_decimal_sep', '.' );
 
-		$this->expectExceptionMessage( '1,234.56&nbsp; is not a valid numeric value. Allowed characters are numbers, the thousand (,), and decimal (.) separators.' );
-		NumberUtil::sanitize_cost_in_current_locale( '&#36;1,234.56&nbsp;' );
+		// WordPress 7.2+ decodes &nbsp; to a literal non-breaking space; older versions keep it as &nbsp;.
+		// Assert on the stable parts of the message rather than the exact entity form.
+		try {
+			NumberUtil::sanitize_cost_in_current_locale( '&#36;1,234.56&nbsp;' );
+			$this->fail( 'Expected InvalidArgumentException was not thrown.' );
+		} catch ( \InvalidArgumentException $e ) {
+			$this->assertStringContainsString( '1,234.56', $e->getMessage() );
+			$this->assertStringContainsString( 'is not a valid numeric value. Allowed characters are numbers, the thousand (,), and decimal (.) separators.', $e->getMessage() );
+		}
 	}
 
 	/**
@@ -369,8 +376,15 @@ class NumberUtilTest extends \WC_Unit_Test_Case {
 		update_option( 'woocommerce_price_thousand_sep', ',' );
 		update_option( 'woocommerce_price_decimal_sep', '.' );
 
-		$this->expectExceptionMessage( '&lt;b&gt;1,234.56&lt;/b&gt;alert(&quot;bad&quot;) is not a valid numeric value. Allowed characters are numbers, the thousand (,), and decimal (.) separators.' );
-		NumberUtil::sanitize_cost_in_current_locale( '<b>1,234.56</b><script>alert("bad")</script>' );
+		// WordPress 7.2+ strips <script> tag content entirely; older versions preserve it as plain text.
+		// Assert on the stable parts of the message: the HTML-escaped bold tag and the error text.
+		try {
+			NumberUtil::sanitize_cost_in_current_locale( '<b>1,234.56</b><script>alert("bad")</script>' );
+			$this->fail( 'Expected InvalidArgumentException was not thrown.' );
+		} catch ( \InvalidArgumentException $e ) {
+			$this->assertStringContainsString( '&lt;b&gt;1,234.56&lt;/b&gt;', $e->getMessage() );
+			$this->assertStringContainsString( 'is not a valid numeric value. Allowed characters are numbers, the thousand (,), and decimal (.) separators.', $e->getMessage() );
+		}
 	}
 
 	/**
