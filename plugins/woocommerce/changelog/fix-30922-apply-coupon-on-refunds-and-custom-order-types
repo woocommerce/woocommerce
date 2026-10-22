@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix a fatal error when applying a coupon to a refund or to a custom order type that has no customer ID or billing email.

@@ -65,12 +65,12 @@ export const RemovableChip = ( {
 		ariaLabel =
 			typeof ariaLabelText !== 'string'
 				? /* translators: Remove chip. */
-				  __( 'Remove', 'woocommerce' )
+					__( 'Remove', 'woocommerce' )
 				: sprintf(
 						/* translators: %s text of the chip to remove. */
 						__( 'Remove "%s"', 'woocommerce' ),
 						ariaLabelText
-				  );
+					);
 	}
 
 	const clickableElementProps = {

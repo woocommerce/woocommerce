@@ -26,6 +26,89 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	private $registered_order_statuses = array();
 
 	/**
+	 * @testdox Order coupon amounts and totals respect the filtered VAT exemption when applied and recalculated.
+	 * @testWith ["yes", "yes", null, true]
+	 *           ["no", "yes", null, true]
+	 *           ["yes", "no", true, true]
+	 *           ["no", "no", true, true]
+	 *           ["yes", "yes", false, false]
+	 *           ["no", "yes", false, false]
+	 *           ["yes", "no", null, false]
+	 *           ["no", "no", null, false]
+	 *
+	 * @param string    $prices_include_tax Whether store prices include tax.
+	 * @param string    $exemption_meta     Stored order VAT exemption.
+	 * @param bool|null $filtered_exemption Optional filter override.
+	 * @param bool      $is_exempt          Expected effective exemption.
+	 */
+	public function test_coupon_amounts_respect_order_vat_exemption( string $prices_include_tax, string $exemption_meta, ?bool $filtered_exemption, bool $is_exempt ): void {
+		update_option( 'woocommerce_prices_include_tax', $prices_include_tax );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_tax_based_on', 'base' );
+
+		WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '20.0000',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		$product = WC_Helper_Product::create_simple_product();
+		$order   = wc_create_order();
+		$order->update_meta_data( 'is_vat_exempt', $exemption_meta );
+		$order->add_product(
+			$product,
+			1,
+			array(
+				'subtotal' => 100,
+				'total'    => 100,
+			)
+		);
+
+		if ( null !== $filtered_exemption ) {
+			add_filter(
+				'woocommerce_order_is_vat_exempt',
+				static function ( $exempt, $filtered_order ) use ( $order, $filtered_exemption ) {
+					return $filtered_order->get_id() === $order->get_id() ? $filtered_exemption : $exempt;
+				},
+				10,
+				2
+			);
+		}
+
+		$order->calculate_totals();
+		$coupon = new WC_Coupon();
+		$coupon->set_code( 'vat-exemption-coupon' );
+		$coupon->set_discount_type( 'percent' );
+		$coupon->set_amount( 20 );
+		$coupon->save();
+
+		$this->assertTrue( $order->apply_coupon( $coupon ), 'The percentage coupon should apply successfully.' );
+
+		foreach ( array( 'applied', 'recalculated' ) as $operation ) {
+			if ( 'recalculated' === $operation ) {
+				$order = wc_get_order( $order->get_id() );
+				$order->recalculate_coupons();
+			}
+
+			$coupon_items = $order->get_items( 'coupon' );
+			$coupon_item  = reset( $coupon_items );
+			$this->assertEquals( 20, $coupon_item->get_discount(), "The $operation coupon should discount the net subtotal by 20%." );
+			$this->assertEquals( $is_exempt ? 0 : 4, $coupon_item->get_discount_tax(), "The $operation coupon tax should respect the effective exemption." );
+			$this->assertEquals( 20, $order->get_discount_total(), "The $operation order should retain the complete discount." );
+			$this->assertEquals( $is_exempt ? 0 : 4, $order->get_discount_tax(), "The $operation order discount tax should match the coupon." );
+			$this->assertEquals( $is_exempt ? 80 : 96, $order->get_total(), "The $operation order should have the correct discounted total." );
+		}
+	}
+
+	/**
 	 * @testdox Order and refund defaults capture the store tax mode without pending changes.
 	 * @dataProvider provide_order_tax_defaults
 	 *
@@ -38,6 +121,7 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
 
 		try {
+			update_option( 'woocommerce_calc_taxes', 'yes' );
 			update_option( 'woocommerce_prices_include_tax', $tax_mode );
 			$sut = new $order_class();
 
@@ -78,6 +162,7 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$sut               = null;
 
 		try {
+			update_option( 'woocommerce_calc_taxes', 'yes' );
 			update_option( 'woocommerce_prices_include_tax', $tax_mode );
 			$sut = new WC_Order();
 			if ( null !== $override ) {
@@ -128,6 +213,7 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		add_filter( 'woocommerce_email_log_enabled', '__return_false' );
 
 		try {
+			update_option( 'woocommerce_calc_taxes', 'yes' );
 			update_option( 'woocommerce_prices_include_tax', $tax_mode );
 			$order = new WC_Order();
 			if ( null !== $override ) {
@@ -455,6 +541,175 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Data provider for refund coupon tests.
+	 *
+	 * @return array
+	 */
+	public function provide_refund_parent_customer_ids(): array {
+		return array(
+			'guest parent order'      => array( 0 ),
+			'registered parent order' => array( 1 ),
+		);
+	}
+
+	/**
+	 * Create a refund for one line item of a new order.
+	 *
+	 * @param int $customer_id Customer ID of the parent order.
+	 * @return WC_Order_Refund
+	 */
+	private function create_line_item_refund( int $customer_id ): WC_Order_Refund {
+		$order = WC_Helper_Order::create_order( $customer_id );
+		$item  = current( $order->get_items() );
+
+		return wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => $item->get_total(),
+				'line_items' => array(
+					$item->get_id() => array(
+						'qty'          => $item->get_quantity(),
+						'refund_total' => $item->get_total(),
+					),
+				),
+			)
+		);
+	}
+
+	/**
+	 * @testdox Applying a coupon to a refund returns an error and records no coupon usage.
+	 * @dataProvider provide_refund_parent_customer_ids
+	 *
+	 * @param int $customer_id Customer ID of the parent order.
+	 */
+	public function test_apply_coupon_on_refund_returns_error( int $customer_id ) {
+		$coupon_code = 'coupon_test_refund_' . $customer_id;
+		WC_Helper_Coupon::create_coupon( $coupon_code );
+		$refund = $this->create_line_item_refund( $customer_id );
+
+		$result = $refund->apply_coupon( $coupon_code );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'invalid_coupon', $result->get_error_code() );
+		$this->assertCount( 0, $refund->get_items( 'coupon' ) );
+		$this->assertSame( 0, ( new WC_Coupon( $coupon_code ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox A refund uses the tax location of its parent order.
+	 */
+	public function test_refund_get_taxable_location_returns_parent_tax_location() {
+		$refund       = $this->create_line_item_refund( 1 );
+		$parent_order = wc_get_order( $refund->get_parent_id() );
+
+		$this->assertSame( 'US', $parent_order->get_taxable_location()['country'] );
+		$this->assertSame( $parent_order->get_taxable_location(), $refund->get_taxable_location() );
+	}
+
+	/**
+	 * @testdox A refund without a parent order uses the store base address as its tax location.
+	 */
+	public function test_refund_get_taxable_location_without_parent_returns_base_address() {
+		update_option( 'woocommerce_default_country', 'US:CA' );
+		update_option( 'woocommerce_store_city', 'San Francisco' );
+		update_option( 'woocommerce_store_postcode', '94110' );
+
+		$refund = new WC_Order_Refund();
+
+		$this->assertSame(
+			array(
+				'country'  => 'US',
+				'state'    => 'CA',
+				'postcode' => '94110',
+				'city'     => 'San Francisco',
+			),
+			$refund->get_taxable_location()
+		);
+	}
+
+	/**
+	 * @testdox A coupon can be applied to a custom order type that has no customer ID or billing email.
+	 */
+	public function test_apply_coupon_on_custom_order_type_without_customer() {
+		$coupon_code = 'coupon_test_custom_order_type';
+		WC_Helper_Coupon::create_coupon( $coupon_code );
+		$order = $this->create_custom_order();
+
+		$this->assertFalse( is_callable( array( $order, 'get_customer_id' ) ) );
+		$this->assertFalse( is_callable( array( $order, 'get_billing_email' ) ) );
+
+		$result = $order->apply_coupon( $coupon_code );
+
+		$this->assertTrue( $result );
+		$this->assertCount( 1, $order->get_items( 'coupon' ) );
+	}
+
+	/**
+	 * Create and save a CustomerlessTestOrder with one line item.
+	 *
+	 * @param string|null $billing_email When set, the order type also has get_billing_email() returning this.
+	 * @return CustomerlessTestOrder
+	 */
+	private function create_custom_order( ?string $billing_email = null ): CustomerlessTestOrder {
+		// A custom order type registers its own data store, as WC_Order's store expects WC_Order methods.
+		$data_store = new class() extends Abstract_WC_Order_Data_Store_CPT {
+		};
+		add_filter(
+			'woocommerce_data_stores',
+			function ( $stores ) use ( $data_store ) {
+				$stores['test-custom-order'] = $data_store;
+				return $stores;
+			}
+		);
+
+		if ( null === $billing_email ) {
+			$order = new CustomerlessTestOrder();
+		} else {
+			$order = new class() extends CustomerlessTestOrder {
+				/**
+				 * Billing email returned by get_billing_email().
+				 *
+				 * @var string
+				 */
+				public $test_billing_email = '';
+
+				/**
+				 * Get the billing email.
+				 *
+				 * @return string
+				 */
+				public function get_billing_email() {
+					return $this->test_billing_email;
+				}
+			};
+
+			$order->test_billing_email = $billing_email;
+		}
+		$order->add_product( WC_Helper_Product::create_simple_product(), 1 );
+		$order->save();
+
+		return $order;
+	}
+
+	/**
+	 * @testdox The per-email coupon usage limit applies to a custom order type that has a billing email but no customer ID.
+	 */
+	public function test_apply_coupon_enforces_email_usage_limit_on_custom_order_type_without_customer_id() {
+		$coupon_code = 'coupon_test_custom_order_type_email_limit';
+		$coupon      = WC_Helper_Coupon::create_coupon( $coupon_code, array( 'usage_limit_per_user' => '1' ) );
+		$coupon->increase_usage_count( 'guest@example.com' );
+		$order = $this->create_custom_order( 'guest@example.com' );
+
+		$this->assertFalse( is_callable( array( $order, 'get_customer_id' ) ) );
+
+		$result = $order->apply_coupon( $coupon_code );
+
+		$this->assertWPError( $result );
+		$this->assertSame( $coupon->get_coupon_error( 106 ), $result->get_error_message() );
+		$this->assertCount( 0, $order->get_items( 'coupon' ) );
+	}
+
+	/**
 	 * Test remove_coupon fires woocommerce_order_removed_coupon hook with WC_Coupon object.
 	 */
 	public function test_remove_coupon_fires_order_removed_coupon_hook() {
@@ -494,6 +749,114 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		} finally {
 			remove_all_actions( 'woocommerce_order_removed_coupon' );
 		}
+	}
+
+	/**
+	 * @testdox Removing a coupon from an order that never recorded usage leaves the coupon usage count alone.
+	 */
+	public function test_remove_coupon_keeps_usage_count_when_order_did_not_record_it() {
+		$coupon_code = 'remove_unrecorded_test';
+		WC_Helper_Coupon::create_coupon( $coupon_code );
+
+		$counted_order = WC_Helper_Order::create_order();
+		$counted_order->set_status( OrderStatus::PENDING );
+		$counted_order->save();
+		$counted_order->apply_coupon( $coupon_code );
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon_code ) )->get_usage_count() );
+
+		$order = WC_Helper_Order::create_order();
+		$order->set_status( OrderStatus::PENDING );
+		$order->save();
+		$item = new WC_Order_Item_Coupon();
+		$item->set_code( $coupon_code );
+		$order->add_item( $item );
+		$order->save();
+		$this->assertFalse( $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
+
+		$this->assertTrue( $order->remove_coupon( $coupon_code ) );
+
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon_code ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox Removing the last coupon from a recorded order releases its usage, clears the flag, and lets a later coupon be counted.
+	 */
+	public function test_remove_coupon_from_recorded_order_releases_usage_and_clears_flag() {
+		$coupon_code = 'remove_recorded_test';
+		WC_Helper_Coupon::create_coupon( $coupon_code );
+
+		$order = WC_Helper_Order::create_order();
+		$order->set_status( OrderStatus::PENDING );
+		$order->save();
+		$order->apply_coupon( $coupon_code );
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon_code ) )->get_usage_count() );
+		$order = wc_get_order( $order->get_id() );
+		$this->assertTrue( $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
+
+		$this->assertTrue( $order->remove_coupon( $coupon_code ) );
+
+		$reloaded = wc_get_order( $order->get_id() );
+		$this->assertCount( 0, $reloaded->get_items( 'coupon' ) );
+		$this->assertFalse( $reloaded->get_data_store()->get_recorded_coupon_usage_counts( $reloaded ) );
+		$this->assertEquals( 0, ( new WC_Coupon( $coupon_code ) )->get_usage_count() );
+
+		$item = new WC_Order_Item_Coupon();
+		$item->set_code( $coupon_code );
+		$reloaded->add_item( $item );
+		$reloaded->save();
+		$reloaded->set_status( OrderStatus::ON_HOLD );
+		$reloaded->save();
+
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon_code ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox Removing a coupon right after applying it on the same order instance clears the stored flag.
+	 */
+	public function test_remove_coupon_after_apply_on_same_instance_clears_stored_flag() {
+		$coupon_code = 'remove_same_instance_test';
+		WC_Helper_Coupon::create_coupon( $coupon_code );
+
+		$order = WC_Helper_Order::create_order();
+		$order->set_status( OrderStatus::PENDING );
+		$order->save();
+		$order->apply_coupon( $coupon_code );
+		$this->assertTrue( $order->remove_coupon( $coupon_code ) );
+
+		$reloaded = wc_get_order( $order->get_id() );
+		$this->assertFalse( $reloaded->get_data_store()->get_recorded_coupon_usage_counts( $reloaded ) );
+		$this->assertEquals( 0, ( new WC_Coupon( $coupon_code ) )->get_usage_count() );
+
+		$item = new WC_Order_Item_Coupon();
+		$item->set_code( $coupon_code );
+		$reloaded->add_item( $item );
+		$reloaded->save();
+		$reloaded->set_status( OrderStatus::ON_HOLD );
+		$reloaded->save();
+
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon_code ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox Removing a coupon from a recorded guest order removes the billing email that was recorded as a user.
+	 */
+	public function test_remove_coupon_from_recorded_guest_order_removes_billing_email() {
+		$coupon_code = 'remove_guest_test';
+		$email       = 'guest-remove-coupon@example.com';
+		WC_Helper_Coupon::create_coupon( $coupon_code );
+
+		$order = WC_Helper_Order::create_order( 0 );
+		$order->set_billing_email( $email );
+		$order->set_status( OrderStatus::PENDING );
+		$order->save();
+		$order->apply_coupon( $coupon_code );
+
+		$this->assertContains( $email, ( new WC_Coupon( $coupon_code ) )->get_used_by() );
+
+		$order->remove_coupon( $coupon_code );
+
+		$this->assertNotContains( $email, ( new WC_Coupon( $coupon_code ) )->get_used_by() );
+		$this->assertEquals( 0, ( new WC_Coupon( $coupon_code ) )->get_usage_count() );
 	}
 
 	/**

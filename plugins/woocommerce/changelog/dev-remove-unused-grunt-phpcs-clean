@@ -1,3 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Remove the unused grunt-phpcs and grunt-contrib-clean packages from the classic-assets Grunt setup; no registered task ever ran them.

@@ -83,7 +83,9 @@ const Edit = ( props: EditProps ) => {
 		} );
 
 	useEffect( () => {
-		if ( isTermsLoading || isFilterCountsLoading ) return;
+		if ( isTermsLoading || isFilterCountsLoading ) {
+			return;
+		}
 
 		const termIdHasProducts =
 			objectHasProp( filteredCounts, 'attribute_counts' ) &&
@@ -96,8 +98,9 @@ const Edit = ( props: EditProps ) => {
 		} else {
 			const filteredOptions = attributeTerms
 				.filter( ( term ) => {
-					if ( hideEmpty )
+					if ( hideEmpty ) {
 						return termIdHasProducts.includes( term.id );
+					}
 					return true;
 				} )
 				.map( ( term, index ) => ( {
@@ -158,7 +161,7 @@ const Edit = ( props: EditProps ) => {
 	const isLoading =
 		isTermsLoading || isFilterCountsLoading || isOptionsLoading;
 
-	if ( Object.keys( ATTRIBUTES ).length === 0 )
+	if ( Object.keys( ATTRIBUTES ).length === 0 ) {
 		return (
 			<div { ...innerBlocksProps }>
 				<Inspector { ...props } />
@@ -172,8 +175,9 @@ const Edit = ( props: EditProps ) => {
 				</Notice>
 			</div>
 		);
+	}
 
-	if ( ! attributeId || ! attributeObject )
+	if ( ! attributeId || ! attributeObject ) {
 		return (
 			<div { ...innerBlocksProps }>
 				<Inspector { ...props } />
@@ -187,8 +191,9 @@ const Edit = ( props: EditProps ) => {
 				</Notice>
 			</div>
 		);
+	}
 
-	if ( ! isLoading && attributeTerms.length === 0 )
+	if ( ! isLoading && attributeTerms.length === 0 ) {
 		return (
 			<div { ...innerBlocksProps }>
 				<Inspector { ...props } />
@@ -202,6 +207,7 @@ const Edit = ( props: EditProps ) => {
 				</Notice>
 			</div>
 		);
+	}
 
 	return (
 		<div { ...innerBlocksProps }>

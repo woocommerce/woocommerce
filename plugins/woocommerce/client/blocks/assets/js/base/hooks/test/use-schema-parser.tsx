@@ -33,7 +33,7 @@ const mockSchemaParser = {
 type DeepPartial< T > = T extends object
 	? {
 			[ P in keyof T ]?: DeepPartial< T[ P ] >;
-	  }
+		}
 	: T;
 
 const getCurrentData = < T extends FormType | 'global' >( result: {

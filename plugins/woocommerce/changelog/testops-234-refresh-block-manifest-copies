@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Refresh generated block.json copies deterministically so PHP test metadata matches the source manifests.
-

@@ -88,14 +88,14 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		$product->set_attributes( wc_get_product_variation_attributes( $product->get_id() ) );
 
 		$updates = array();
-		/**
-		 * If a variation title is not in sync with the parent e.g. saved prior to 3.0, or if the parent title has changed, detect here and update.
-		 */
-		$new_title = $this->generate_product_title( $product );
 
+		// If a variation title is not in sync with the parent e.g. saved prior to 3.0, or if the parent title has changed, detect here and update.
+		// This also covers edge-cases such as term name changes, or extensions bypassing product APIs and manipulating product data directly.
+		// Originally introduced in v2.7, this workaround still holds for v11.2 - with all filters added over years we are hardlocked now to keep it.
+		$new_title = $this->generate_product_title( $product );
 		if ( $post_object->post_title !== $new_title ) {
 			$product->set_name( $new_title );
-			$updates = array_merge( $updates, array( 'post_title' => $new_title ) );
+			$updates['post_title'] = $new_title;
 		}
 
 		if ( ! empty( $updates ) ) {
@@ -413,30 +413,33 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		$post_meta_values = get_post_meta( $id );
 
 		$meta_key_to_props = array(
-			'_variation_description'  => 'description',
-			'_regular_price'          => 'regular_price',
-			'_sale_price'             => 'sale_price',
-			'_sale_price_dates_from'  => 'date_on_sale_from',
-			'_sale_price_dates_to'    => 'date_on_sale_to',
-			'_manage_stock'           => 'manage_stock',
-			'_stock_status'           => 'stock_status',
-			'_virtual'                => 'virtual',
-			'_product_image_gallery'  => 'gallery_image_ids',
-			'_download_limit'         => 'download_limit',
-			'_download_expiry'        => 'download_expiry',
-			'_downloadable'           => 'downloadable',
-			'_sku'                    => 'sku',
-			'_global_unique_id'       => 'global_unique_id',
-			'_stock'                  => 'stock_quantity',
-			'_weight'                 => 'weight',
-			'_length'                 => 'length',
-			'_width'                  => 'width',
-			'_height'                 => 'height',
-			'_low_stock_amount'       => 'low_stock_amount',
-			'_backorders'             => 'backorders',
-			'_cogs_total_value'       => 'cogs_total_value',
-			'_cogs_value_is_additive' => 'cogs_value_is_additive',
-			'_tax_class'              => 'tax_class',
+			'_variation_description'     => 'description',
+			'_regular_price'             => 'regular_price',
+			'_sale_price'                => 'sale_price',
+			'_sale_price_dates_from'     => 'date_on_sale_from',
+			'_sale_price_dates_to'       => 'date_on_sale_to',
+			'_manage_stock'              => 'manage_stock',
+			'_stock_status'              => 'stock_status',
+			'_virtual'                   => 'virtual',
+			'_product_image_gallery'     => 'gallery_image_ids',
+			'_download_limit'            => 'download_limit',
+			'_download_expiry'           => 'download_expiry',
+			'_downloadable'              => 'downloadable',
+			'_sku'                       => 'sku',
+			'_global_unique_id'          => 'global_unique_id',
+			'_stock'                     => 'stock_quantity',
+			'_weight'                    => 'weight',
+			'_length'                    => 'length',
+			'_width'                     => 'width',
+			'_height'                    => 'height',
+			'_low_stock_amount'          => 'low_stock_amount',
+			'_backorders'                => 'backorders',
+			'_cogs_total_value'          => 'cogs_total_value',
+			'_cogs_value_is_additive'    => 'cogs_value_is_additive',
+			'_tax_class'                 => 'tax_class',
+			'_customs_commodity_code'    => 'customs_commodity_code',
+			'_customs_country_of_origin' => 'customs_country_of_origin',
+			'_customs_description'       => 'customs_description',
 		);
 
 		$variation_data = array();
@@ -491,20 +494,23 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		$parent_post_meta_values = get_post_meta( $parent_id );
 
 		$parent_meta_key_to_props = array(
-			'_sku'               => 'sku',
-			'_global_unique_id'  => 'global_unique_id',
-			'_manage_stock'      => 'manage_stock',
-			'_backorders'        => 'backorders',
-			'_stock'             => 'stock_quantity',
-			'_weight'            => 'weight',
-			'_length'            => 'length',
-			'_width'             => 'width',
-			'_height'            => 'height',
-			'_tax_class'         => 'tax_class',
-			'_purchase_note'     => 'purchase_note',
-			'_sold_individually' => 'sold_individually',
-			'_tax_status'        => 'tax_status',
-			'_crosssell_ids'     => '_crosssell_ids',
+			'_sku'                       => 'sku',
+			'_global_unique_id'          => 'global_unique_id',
+			'_manage_stock'              => 'manage_stock',
+			'_backorders'                => 'backorders',
+			'_stock'                     => 'stock_quantity',
+			'_weight'                    => 'weight',
+			'_length'                    => 'length',
+			'_width'                     => 'width',
+			'_height'                    => 'height',
+			'_tax_class'                 => 'tax_class',
+			'_purchase_note'             => 'purchase_note',
+			'_sold_individually'         => 'sold_individually',
+			'_tax_status'                => 'tax_status',
+			'_crosssell_ids'             => '_crosssell_ids',
+			'_customs_commodity_code'    => 'customs_commodity_code',
+			'_customs_country_of_origin' => 'customs_country_of_origin',
+			'_customs_description'       => 'customs_description',
 		);
 
 		$parent_data = array();

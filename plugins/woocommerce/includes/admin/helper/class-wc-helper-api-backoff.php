@@ -16,7 +16,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * Records and enforces a per-request-type backoff window when a WooCommerce.com
  * Helper API endpoint responds with a rate-limit status (HTTP 429), so the site
- * refrains from calling that endpoint again until the limit resets.
+ * refrains from calling that endpoint again until the limit resets. Callers can
+ * also record a fixed window after other failed requests with record().
  *
  * The window is taken from the response's `Retry-After` header (delta seconds)
  * and honored as-is, capped only at a per-type maximum. This covers both the
@@ -148,7 +149,6 @@ class WC_Helper_API_Backoff {
 	 * @return void
 	 */
 	public static function record_from_response( string $request_type, array $response ): void {
-		$now    = time();
 		$bounds = self::get_bounds( $request_type );
 
 		$retry_after = self::get_retry_after_from_headers( $response );
@@ -162,7 +162,24 @@ class WC_Helper_API_Backoff {
 			$retry_after = min( $retry_after, $bounds['max'] );
 		}
 
-		set_transient( self::get_transient_key( $request_type ), $now + $retry_after, $retry_after );
+		self::record( $request_type, $retry_after );
+	}
+
+	/**
+	 * Record a backoff window of a fixed length for a request type, e.g. after a failed request.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param string $request_type The Helper API request type (e.g. 'update-check').
+	 * @param int    $seconds      Length of the window, in seconds.
+	 * @return void
+	 */
+	public static function record( string $request_type, int $seconds ): void {
+		if ( $seconds <= 0 ) {
+			return;
+		}
+
+		set_transient( self::get_transient_key( $request_type ), time() + $seconds, $seconds );
 	}
 
 	/**

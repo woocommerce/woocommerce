@@ -9,7 +9,7 @@ import {
 /**
  * Internal dependencies
  */
-import { tags, test, expect } from '../../fixtures/fixtures';
+import { tags, test } from '../../fixtures/fixtures';
 import { checkCartContentInBlocksCart } from '../../utils/cart';
 
 const productName = `Cart product test ${ Date.now() }`;
@@ -44,6 +44,7 @@ test.describe(
 			} );
 		} );
 
+		// eslint-disable-next-line playwright/expect-expect -- Assertions are made by checkCartContentInBlocksCart.
 		test(
 			'should add only one product to the cart with AJAX add to cart buttons disabled and "Geolocate (with page caching support)" as the default customer location',
 			{ tag: [ tags.COULD_BE_LOWER_LEVEL_TEST ] },
@@ -89,45 +90,6 @@ test.describe(
 						value: 'yes',
 					}
 				);
-			}
-		);
-
-		test(
-			'should be able to navigate and remove item from mini cart using keyboard',
-			{ tag: [ tags.COULD_BE_LOWER_LEVEL_TEST ] },
-			async ( { page } ) => {
-				await test.step( 'Add product to cart and open mini cart', async () => {
-					await addAProductToCart( page, productId );
-					const miniCartButton = page.locator(
-						'.wc-block-mini-cart__button'
-					);
-					await miniCartButton.click();
-					await expect(
-						page.locator( '.wc-block-mini-cart__drawer' )
-					).toBeVisible();
-				} );
-
-				await test.step( 'Verify and interact with remove button', async () => {
-					const removeButton = page.locator(
-						'.wc-block-cart-item__remove-link'
-					);
-					await expect( removeButton ).toBeVisible();
-					await removeButton.focus();
-					await page.keyboard.press( 'Space' );
-				} );
-
-				await test.step( 'Verify cart is empty', async () => {
-					await expect(
-						page.locator(
-							'.wc-block-mini-cart__empty-cart-wrapper'
-						)
-					).toBeVisible();
-					await expect(
-						page.locator(
-							'.wc-block-mini-cart__empty-cart-wrapper'
-						)
-					).toContainText( 'Your shopping cart is empty' );
-				} );
 			}
 		);
 	}

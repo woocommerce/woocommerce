@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Customer Account: fall back to 'mystery' if WP default avatar is 'blank'
+
+

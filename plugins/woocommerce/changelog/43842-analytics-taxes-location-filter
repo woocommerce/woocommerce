@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add a location filter to the Analytics Taxes report, narrowing the report, its summary and its export to a country or a state.

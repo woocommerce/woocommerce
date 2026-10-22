@@ -1,6 +1,5 @@
 {
 	"name": "woocommerce/order-confirmation-create-account",
-	"version": "1.0.0",
 	"title": "Account Creation",
 	"description": "Allow customers to create an account after their purchase.",
 	"category": "woocommerce",

@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Split Blocks e2e tests into serial and parallel Playwright projects; no production change.
+

@@ -445,6 +445,70 @@ class WC_Post_Types_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Saving the shop page queues a rewrite flush.
+	 */
+	public function test_saving_the_shop_page_queues_a_rewrite_flush(): void {
+		$shop_page_id = $this->prepare_shop_page();
+
+		wp_update_post(
+			array(
+				'ID'         => $shop_page_id,
+				'post_title' => 'Shop, renamed',
+			)
+		);
+
+		$this->assertSame(
+			'yes',
+			get_option( 'woocommerce_queue_flush_rewrite_rules' ),
+			'Saving the shop page should queue a rewrite flush.'
+		);
+	}
+
+	/**
+	 * @testdox Trashing the shop page does not queue a rewrite flush.
+	 */
+	public function test_trashing_the_shop_page_does_not_queue_a_rewrite_flush(): void {
+		$previous_shop_page_id = get_option( 'woocommerce_shop_page_id' );
+		$shop_page_id          = $this->prepare_shop_page();
+
+		try {
+			wp_trash_post( $shop_page_id );
+
+			$this->assertSame(
+				'no',
+				get_option( 'woocommerce_queue_flush_rewrite_rules' ),
+				'A trashed shop page keeps serving the product archive at its previous URL, so it must not queue a flush.'
+			);
+		} finally {
+			// Trashing renames the page to `shop__trashed`, and `tearDown()` re-registers the
+			// product post type before the transaction rolls back. The base class only resets
+			// post types for core's own suite, so a theme that supports WooCommerce would hand
+			// that name to `has_archive` and leave it there for the rest of the process.
+			update_option( 'woocommerce_shop_page_id', $previous_shop_page_id );
+		}
+	}
+
+	/**
+	 * Publish a page, make it the shop page, and empty the rewrite flush queue.
+	 *
+	 * @return int The shop page ID.
+	 */
+	private function prepare_shop_page(): int {
+		$shop_page_id = self::factory()->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+				'post_title'  => 'Shop',
+			)
+		);
+
+		update_option( 'woocommerce_shop_page_id', $shop_page_id );
+		update_option( 'woocommerce_queue_flush_rewrite_rules', 'no' );
+
+		return $shop_page_id;
+	}
+
+	/**
 	 * Register a public post type standing in for one owned by a third-party plugin.
 	 */
 	private function register_third_party_post_type(): void {

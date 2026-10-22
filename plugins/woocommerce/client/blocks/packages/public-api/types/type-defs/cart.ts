@@ -129,6 +129,8 @@ export type CatalogVisibility = 'catalog' | 'hidden' | 'search' | 'visible';
 
 export interface CartItem {
 	key: string;
+	/** Parent cart item's key, or null when this item has no parent. */
+	parent_item_key?: string | null;
 	id: number;
 	type: string;
 	quantity: number;
@@ -211,6 +213,7 @@ export interface Cart extends Record< string, unknown > {
 export interface CartMeta {
 	updatingCustomerData: boolean;
 	updatingAddressFieldsForShippingRates: boolean;
+	isShippingRatesUpdateQueued?: boolean;
 	updatingSelectedRate: boolean;
 	isCartDataStale: boolean;
 	applyingCoupon: string;

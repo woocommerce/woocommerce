@@ -1,23 +1,29 @@
 /**
  * External dependencies
  */
-import { TemplateCompiler, test as base, expect } from '@woocommerce/e2e-utils';
+import {
+	TemplateCompiler,
+	getProductAttributeIds,
+	test as base,
+	expect,
+} from '@woocommerce/e2e-utils';
 
 const test = base.extend< { templateCompiler: TemplateCompiler } >( {
-	templateCompiler: async ( { requestUtils }, use ) => {
+	templateCompiler: async ( { requestUtils }, provideTemplate ) => {
 		const compiler = await requestUtils.createTemplateFromFile(
 			'archive-product_attribute-filter'
 		);
-		await use( compiler );
+		await provideTemplate( compiler );
 	},
 } );
 
 test.describe( 'woocommerce/product-filters - Frontend', () => {
 	test.describe( 'Overlay', () => {
 		test.beforeEach( async ( { templateCompiler, page } ) => {
+			const { colorAttributeId } = await getProductAttributeIds();
 			await templateCompiler.compile( {
 				attributes: {
-					attributeId: 1,
+					attributeId: colorAttributeId,
 				},
 			} );
 
@@ -44,10 +50,12 @@ test.describe( 'woocommerce/product-filters - Frontend', () => {
 			const openOverlayButton = page.getByRole( 'button', {
 				name: 'Filter products',
 			} );
-			const overlay = page.getByRole( 'dialog' );
+			const overlay = page.getByRole( 'dialog', {
+				name: 'Product Filters',
+			} );
 
 			await expect( openOverlayButton ).toBeVisible();
-			await expect( overlay ).not.toBeInViewport();
+			await expect( overlay ).toHaveCount( 0 );
 
 			await openOverlayButton.click();
 
@@ -58,39 +66,71 @@ test.describe( 'woocommerce/product-filters - Frontend', () => {
 				name: 'Close',
 			} );
 
-			await expect( closeOverlayButton ).toBeVisible();
+			await expect( closeOverlayButton ).toBeFocused();
 
 			await closeOverlayButton.click();
 
-			await expect( overlay ).not.toBeInViewport();
+			await expect( openOverlayButton ).toBeFocused();
+			await expect( overlay ).toHaveCount( 0 );
 
 			// Close overlay by hitting Esc.
 			await openOverlayButton.click();
 
 			await expect( overlay ).toBeInViewport();
+			await expect( closeOverlayButton ).toBeFocused();
 
 			await page.keyboard.press( 'Escape' );
 
-			await expect( overlay ).not.toBeInViewport();
+			await expect( openOverlayButton ).toBeFocused();
+			await expect( overlay ).toHaveCount( 0 );
 
 			// Close overlay by clicking Apply button.
 			await openOverlayButton.click();
 
 			await expect( overlay ).toBeInViewport();
+			await expect( closeOverlayButton ).toBeFocused();
 
 			const applyButton = page.getByRole( 'button', {
 				name: 'Apply',
 			} );
 
-			await expect( applyButton ).toBeVisible();
+			await applyButton.focus();
+			await page.keyboard.press( 'Tab' );
+			await expect( closeOverlayButton ).toBeFocused();
 
 			await applyButton.click();
 
-			await expect( overlay ).not.toBeInViewport();
+			await expect( openOverlayButton ).toBeFocused();
+			await expect( overlay ).toHaveCount( 0 );
+
+			await openOverlayButton.click();
+			await expect( closeOverlayButton ).toBeFocused();
+			const lastFilter = overlay.getByRole( 'checkbox' ).last();
+			await lastFilter.focus();
+
+			await page.setViewportSize( { width: 1280, height: 800 } );
+			await expect( openOverlayButton ).toBeHidden();
+			await expect( overlay ).not.toHaveAttribute( 'aria-modal', 'true' );
+			await expect( lastFilter ).toBeFocused();
+			await page.keyboard.press( 'Tab' );
+			await expect
+				.poll( () =>
+					overlay.evaluate( ( element ) =>
+						element.contains( element.ownerDocument.activeElement )
+					)
+				)
+				.toBe( false );
+
+			await page.setViewportSize( { width: 400, height: 600 } );
+			await expect( overlay ).toHaveCount( 0 );
+			await openOverlayButton.click();
+			await expect( closeOverlayButton ).toBeFocused();
+			await page.keyboard.press( 'Escape' );
+			await expect( openOverlayButton ).toBeFocused();
 		} );
 
 		// Skipping these tests until we can move this block to @wordpress/interactivity.
-		// eslint-disable-next-line playwright/no-skipped-test
+
 		test.skip( 'filter is working inside overlay', async ( { page } ) => {
 			await page.setViewportSize( { width: 400, height: 600 } );
 			await page.goto( '/shop' );
@@ -139,10 +179,11 @@ test.describe( 'woocommerce/product-filters - Frontend', () => {
 			const templateCompiler = await requestUtils.createTemplateFromFile(
 				'archive-product_multiple-product-filters'
 			);
+			const { colorAttributeId } = await getProductAttributeIds();
 
 			await templateCompiler.compile( {
 				attributes: {
-					attributeId: 1,
+					attributeId: colorAttributeId,
 				},
 			} );
 

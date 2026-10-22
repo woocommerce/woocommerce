@@ -1,15 +1,25 @@
 {
-	"extends": "@wordpress/stylelint-config/scss",
+	"extends": "@wordpress/stylelint-config/scss-stylistic",
+	"plugins": [
+		"@wordpress/theme/stylelint-plugins/no-token-fallback-values"
+	],
+	"reportNeedlessDisables": true,
 	"rules": {
+		"plugin-wpds/no-token-fallback-values": true,
+		"no-descending-specificity": null,
+		"no-duplicate-selectors": null,
+		"selector-class-pattern": null,
 		"at-rule-empty-line-before": null,
 		"at-rule-no-unknown": null,
 		"comment-empty-line-before": null,
 		"font-weight-notation": null,
-		"no-descending-specificity": null,
-		"no-duplicate-selectors": null,
 		"rule-empty-line-before": null,
-		"selector-class-pattern": null,
 		"value-keyword-case": null,
+		"@stylistic/declaration-colon-newline-after": null,
+		"@stylistic/function-parentheses-space-inside": null,
+		"@stylistic/function-comma-space-after": null,
+		"@stylistic/indentation": null,
+		"@stylistic/max-line-length": null,
 		"length-zero-no-unit": [
 			true,
 			{ "ignoreFunctions": [ "calc", "var" ] }

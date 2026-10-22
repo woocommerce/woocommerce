@@ -133,6 +133,7 @@
 				<element key="15" value="manage_woocommerce"/>
 				<element key="16" value="manage_product_terms"/>
 				<element key="17" value="view_woocommerce_reports"/>
+				<element key="18" value="read_private_products"/>
 			</property>
 		</properties>
 	</rule>

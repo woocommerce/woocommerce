@@ -419,19 +419,36 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	}
 
 	/**
-	 * Check whether the current user can generate a QR login token.
+	 * Check whether the current user can access the QR login browser endpoints.
 	 *
-	 * Requires the `manage_woocommerce` capability, which covers administrators and
-	 * shop managers out of the box. The check is deliberately explicit (not routed
-	 * through `wc_rest_check_manager_permissions()`) so it cannot be loosened by the
+	 * These endpoints back an interactive wp-admin flow, so they require a real
+	 * logged-in browser session — a valid `logged_in` cookie for the current user
+	 * plus a matching `wp_rest` nonce — as well as the `manage_woocommerce`
+	 * capability. The capability check is deliberately explicit (not routed through
+	 * `wc_rest_check_manager_permissions()`) so it cannot be loosened by the
 	 * `woocommerce_rest_check_permissions` filter that other Admin API endpoints share.
 	 *
-	 * @param \WP_REST_Request<array<string, mixed>> $request The REST request (unused).
-	 * @return \WP_Error|bool True if the user has the required capability, WP_Error otherwise.
+	 * @param \WP_REST_Request<array<string, mixed>> $request The REST request.
+	 * @return \WP_Error|bool True if the user is allowed, WP_Error otherwise.
 	 */
 	public function get_items_permissions_check( $request ) {
-		unset( $request );
-		// Parameter required by WP REST contract but unused here.
+		$user_id = get_current_user_id();
+		if ( ! $user_id || (int) wp_validate_auth_cookie( '', 'logged_in' ) !== $user_id ) {
+			return new \WP_Error(
+				'woocommerce_rest_qr_login_missing_session',
+				__( 'This action requires an interactive admin session.', 'woocommerce' ),
+				array( 'status' => rest_authorization_required_code() )
+			);
+		}
+
+		$nonce = $request->get_header( 'X-WP-Nonce' );
+		if ( ! $nonce || ! wp_verify_nonce( $nonce, 'wp_rest' ) ) {
+			return new \WP_Error(
+				'woocommerce_rest_qr_login_missing_session',
+				__( 'This action requires an interactive admin session.', 'woocommerce' ),
+				array( 'status' => rest_authorization_required_code() )
+			);
+		}
 
 		if ( ! current_user_can( 'manage_woocommerce' ) ) {
 			return new \WP_Error(

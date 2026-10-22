@@ -83,7 +83,9 @@ const CommentsForm = ( {
 	);
 
 	const setReviewsAllowed = ( allowed: boolean ) => {
-		if ( ! postId ) return;
+		if ( ! postId ) {
+			return;
+		}
 		void updateProduct( Number( postId ), {
 			reviews_allowed: allowed,
 		} );

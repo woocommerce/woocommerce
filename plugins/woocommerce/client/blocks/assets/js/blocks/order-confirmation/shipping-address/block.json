@@ -1,6 +1,5 @@
 {
 	"name": "woocommerce/order-confirmation-shipping-address",
-	"version": "1.0.0",
 	"title": "Shipping Address",
 	"description": "Display the order confirmation shipping address.",
 	"category": "woocommerce",

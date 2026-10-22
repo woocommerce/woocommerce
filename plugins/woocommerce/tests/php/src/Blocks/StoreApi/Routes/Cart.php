@@ -34,13 +34,6 @@ class Cart extends ControllerTestCase {
 	private static $coupon_id;
 
 	/**
-	 * Cart instance removed to mimic a REST request, restored on teardown.
-	 *
-	 * @var \WC_Cart|null
-	 */
-	private $cart_backup = null;
-
-	/**
 	 * Create immutable catalog rows shared by all test methods.
 	 */
 	public static function wpSetUpBeforeClass(): void {
@@ -251,6 +244,45 @@ class Cart extends ControllerTestCase {
 				'code' => 'woocommerce_rest_cart_invalid_key',
 			)
 		);
+	}
+
+	/**
+	 * @testdox A child keeps its parent key while the parent is in the cart and becomes standalone after removal.
+	 */
+	public function test_parent_item_key_is_null_after_removing_parent_item() {
+		$parent_item_key_filter = function ( $parent_item_key, $cart_item, $cart_item_key ) {
+			unset( $cart_item );
+
+			return $this->keys[1] === $cart_item_key ? $this->keys[0] : $parent_item_key;
+		};
+		add_filter( 'woocommerce_store_api_cart_item_parent_item_key', $parent_item_key_filter, 10, 3 );
+
+		try {
+			$cart_response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/cart' ) );
+			$this->assertSame( 200, $cart_response->get_status() );
+			$cart_items = array_column( $cart_response->get_data()['items'], null, 'key' );
+			$this->assertSame( $this->keys[0], $cart_items[ $this->keys[1] ]['parent_item_key'] );
+			$this->assertNull( $cart_items[ $this->keys[0] ]['parent_item_key'] );
+
+			$remove_request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/remove-item' );
+			$remove_request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+			$remove_request->set_body_params( array( 'key' => $this->keys[0] ) );
+			$remove_response = rest_get_server()->dispatch( $remove_request );
+
+			$this->assertSame( 200, $remove_response->get_status() );
+			$remaining_items = array_column( $remove_response->get_data()['items'], null, 'key' );
+			$this->assertArrayNotHasKey( $this->keys[0], $remaining_items );
+			$this->assertArrayHasKey( $this->keys[1], $remaining_items );
+			$this->assertNull( $remaining_items[ $this->keys[1] ]['parent_item_key'] );
+			$this->assertSame( 1, $remaining_items[ $this->keys[1] ]['quantity'] );
+
+			$this->assertSame( $this->keys[0], wc()->cart->add_to_cart( $this->products[0]->get_id(), 2 ) );
+			$restored_response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/cart' ) );
+			$restored_items    = array_column( $restored_response->get_data()['items'], null, 'key' );
+			$this->assertSame( $this->keys[0], $restored_items[ $this->keys[1] ]['parent_item_key'] );
+		} finally {
+			remove_filter( 'woocommerce_store_api_cart_item_parent_item_key', $parent_item_key_filter, 10 );
+		}
 	}
 
 	/**
@@ -816,6 +848,72 @@ class Cart extends ControllerTestCase {
 
 		$this->assertArrayHasKey( 'Cache-Control', $server->sent_headers );
 		$this->assertStringContainsString( 'no-store', $server->sent_headers['Cache-Control'] );
+	}
+
+	/**
+	 * @testdox Adding custom variations preserves percent escapes in cart storage and decodes them in the API display value.
+	 * @testWith ["attribute_finish", "Black%20White"]
+	 *           ["Finish", "Black%20White"]
+	 *           ["finish", "Black%20White"]
+	 *           ["attribute_finish", ""]
+	 *           ["Finish", ""]
+	 *           ["finish", ""]
+	 *           ["Finish", "Black%20White", true]
+	 *           ["Finish", "", true]
+	 * @param string $attribute_name Posted attribute name.
+	 * @param string $variation_value Fixed value or an Any variation.
+	 * @param bool   $filter_label Whether the display label differs from the stored name.
+	 */
+	public function test_add_item_preserves_custom_attribute_percent_escapes( string $attribute_name, string $variation_value, bool $filter_label = false ): void {
+		wc_empty_cart();
+
+		if ( $filter_label ) {
+			add_filter(
+				'woocommerce_attribute_label',
+				static function () {
+					return 'Surface';
+				}
+			);
+		}
+
+		$product   = new \WC_Product_Variable();
+		$attribute = new \WC_Product_Attribute();
+		$attribute->set_name( 'Finish' );
+		$attribute->set_options( array( 'Black%20White', 'Gloss' ) );
+		$attribute->set_variation( true );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$variation = new \WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_attributes( array( 'finish' => $variation_value ) );
+		$variation->set_regular_price( '10' );
+		$variation->save();
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/add-item' );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_body_params(
+			array(
+				'id'        => $variation->get_id(),
+				'quantity'  => 1,
+				'variation' => array(
+					array(
+						'attribute' => $attribute_name,
+						'value'     => 'Black%20White',
+					),
+				),
+			)
+		);
+
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertSame( 201, $response->get_status(), 'A matching custom attribute must be accepted.' );
+		$data = $response->get_data();
+		$this->assertCount( 1, $data['items'], 'The response should contain the added variation.' );
+		$this->assertSame( 'Black White', $data['items'][0]['variation'][0]['value'], 'The display value must be decoded so Blocks matches the classic cart.' );
+		$cart = WC()->cart->get_cart();
+		$item = reset( $cart );
+		$this->assertSame( $variation->get_id(), $item['variation_id'], 'The cart must contain the selected variation.' );
+		$this->assertSame( 'Black%20White', $item['variation']['attribute_finish'], 'The cart must preserve the selected custom value.' );
 	}
 
 	/**
@@ -1566,19 +1664,33 @@ class Cart extends ControllerTestCase {
 
 		// The route restores the cart only when this action has not run yet, so reset
 		// the counter to put the process back into the state a REST request starts in.
+		$load_action_count = $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] ?? null;
 		unset( $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] );
 
-		add_filter(
-			'woocommerce_get_cart_item_from_session',
-			static function () {
-				throw new \RuntimeException( 'Synthetic Store API cart-session failure.' );
-			}
-		);
+		$cart_backup = WC()->cart;
+		$callback    = static function () {
+			throw new \RuntimeException( 'Synthetic Store API cart-session failure.' );
+		};
+		add_filter( 'woocommerce_get_cart_item_from_session', $callback );
 
-		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/cart' ) );
+		try {
+			$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/cart' ) );
+		} finally {
+			remove_filter( 'woocommerce_get_cart_item_from_session', $callback );
+			\WC_Cart_Session::set_updates_enabled_for_cart( $cart_backup, true );
+			WC()->cart = $cart_backup;
+			if ( null === $load_action_count ) {
+				unset( $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] );
+			} else {
+				// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the action count changed by the test.
+				$GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] = $load_action_count;
+			}
+		}
 
 		$this->assertSame( 500, $response->get_status(), 'A cart session failure should return a Store API error response.' );
 		$this->assertSame( 'woocommerce_rest_unknown_server_error', $response->get_data()['code'] );
+		$this->assertArrayNotHasKey( 'Cart-Token', $response->get_headers(), 'A failed cart response should not include a cart token.' );
+		$this->assertArrayNotHasKey( 'Cart-Hash', $response->get_headers(), 'A failed cart response should not include a cart hash.' );
 	}
 
 	/**
@@ -1587,34 +1699,33 @@ class Cart extends ControllerTestCase {
 	public function test_cart_session_failure_before_restore_returns_error_response() {
 		// This filter runs before `get_cart_from_session()` fires its action, so nothing
 		// stops the response headers attempting a second load of the failed cart.
+		$load_action_count = $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] ?? null;
 		unset( $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] );
 
 		// A REST request never runs `initialize_cart()`, so the route starts with no
 		// cart at all. The test bootstrap leaves one behind.
-		$this->cart_backup = WC()->cart;
-		WC()->cart         = null;
+		$cart_backup = WC()->cart;
+		WC()->cart   = null;
 
-		add_filter(
-			'woocommerce_session_handler',
-			static function () {
-				throw new \RuntimeException( 'Synthetic session handler failure.' );
+		$callback = static function () {
+			throw new \RuntimeException( 'Synthetic session handler failure.' );
+		};
+		add_filter( 'woocommerce_session_handler', $callback );
+
+		try {
+			$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/cart' ) );
+		} finally {
+			remove_filter( 'woocommerce_session_handler', $callback );
+			\WC_Cart_Session::set_updates_enabled_for_cart( $cart_backup, true );
+			WC()->cart = $cart_backup;
+			if ( null === $load_action_count ) {
+				unset( $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] );
+			} else {
+				// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the action count changed by the test.
+				$GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] = $load_action_count;
 			}
-		);
-
-		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/cart' ) );
-
-		$this->assertSame( 500, $response->get_status(), 'A cart session failure should return a Store API error response.' );
-	}
-
-	/**
-	 * Restore the cart instance removed by the cart session failure tests.
-	 */
-	public function tearDown(): void {
-		if ( $this->cart_backup instanceof \WC_Cart ) {
-			WC()->cart         = $this->cart_backup;
-			$this->cart_backup = null;
 		}
 
-		parent::tearDown();
+		$this->assertSame( 500, $response->get_status(), 'A cart session failure should return a Store API error response.' );
 	}
 }

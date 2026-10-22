@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix the oversized gap between the two buttons on the core profiler welcome screen at mobile widths.

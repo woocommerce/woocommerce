@@ -232,6 +232,35 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox get_structured_data() returns every node when no types are requested.
+	 *
+	 * @testWith [null]
+	 *           [false]
+	 *           [""]
+	 *           [0]
+	 *
+	 * @param mixed $requested_types Falsy value standing in for "no type filtering".
+	 */
+	public function test_get_structured_data_returns_array_type_when_no_types_requested( $requested_types ): void {
+		$this->structured_data->set_data(
+			array(
+				'@type' => array( 'Car', 'Product' ),
+				'name'  => 'Multi-type product',
+			)
+		);
+
+		$this->assertSame(
+			array(
+				'@context' => 'https://schema.org/',
+				'@type'    => array( 'Car', 'Product' ),
+				'name'     => 'Multi-type product',
+			),
+			$this->structured_data->get_structured_data( $requested_types ),
+			'A falsy $types means "return everything", the same as it does for scalar @type nodes.'
+		);
+	}
+
+	/**
 	 * @testdox Order structured data looks up the product image with an integer attachment ID.
 	 */
 	public function test_order_data_passes_an_integer_attachment_id_to_wordpress(): void {
@@ -684,5 +713,116 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 		} finally {
 			unset( $_GET['attribute_pa_size'], $_GET['attribute_pa_colour'], $_GET['attribute_pa_number'] );
 		}
+	}
+
+	/**
+	 * @testdox A selected public return-policy page emits only a link, not inferred policy facts.
+	 */
+	public function test_online_store_links_to_selected_public_return_policy_page(): void {
+		$page_id = self::factory()->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+			)
+		);
+		update_option( 'woocommerce_refund_returns_page_id', $page_id );
+		$this->go_to( get_permalink( $page_id ) );
+
+		$this->assertSame( 9, has_action( 'wp_footer', array( $this->structured_data, 'generate_online_store_data' ) ), 'Policy data must be generated before the footer output at priority 10.' );
+		$this->assertSame( array(), $this->structured_data->get_structured_data( array( 'onlinestore' ) ), 'Policy data should not be generated before the footer (including in emails).' );
+		$this->structured_data->generate_online_store_data();
+		$this->assertSame(
+			array(
+				'@context'                => 'https://schema.org/',
+				'@type'                   => 'OnlineStore',
+				'name'                    => get_bloginfo( 'name' ),
+				'url'                     => home_url(),
+				'hasMerchantReturnPolicy' => array(
+					'@type'              => 'MerchantReturnPolicy',
+					'merchantReturnLink' => get_permalink( $page_id ),
+				),
+			),
+			$this->structured_data->get_structured_data( array( 'onlinestore' ) ),
+			'The policy page should expose a link-only OnlineStore node.'
+		);
+
+		ob_start();
+		$this->structured_data->output_structured_data();
+		$output = ob_get_clean();
+		$this->assertStringContainsString( '"merchantReturnLink":"' . get_permalink( $page_id ) . '"', $output, 'The footer should output the policy link.' );
+
+		remove_all_actions( 'woocommerce_email_order_details' );
+		add_action( 'woocommerce_email_order_details', array( $this->structured_data, 'output_email_structured_data' ), 30, 3 );
+		ob_start();
+		do_action( 'woocommerce_email_order_details', null, false, false );
+		$email = ob_get_clean();
+		$this->assertStringNotContainsString( 'OnlineStore', $email, 'The policy node must not appear in an order email, even after the footer.' );
+	}
+
+	/**
+	 * @testdox No return-policy data is generated on another page or for an unpublished, private, or password-protected page.
+	 */
+	public function test_online_store_requires_a_public_selected_page(): void {
+		$page_id  = self::factory()->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+			)
+		);
+		$other_id = self::factory()->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+			)
+		);
+		update_option( 'woocommerce_refund_returns_page_id', $page_id );
+		$this->go_to( get_permalink( $other_id ) );
+		$this->structured_data->generate_online_store_data();
+		$this->assertSame( array(), $this->structured_data->get_data(), 'Other pages must not advertise the policy.' );
+
+		$this->go_to( get_permalink( $page_id ) );
+		foreach ( array( 'draft', 'private' ) as $status ) {
+			wp_update_post(
+				array(
+					'ID'          => $page_id,
+					'post_status' => $status,
+				)
+			);
+			$this->structured_data->generate_online_store_data();
+			$this->assertSame( array(), $this->structured_data->get_data(), "{$status} pages must not be advertised." );
+		}
+
+		wp_update_post(
+			array(
+				'ID'            => $page_id,
+				'post_status'   => 'publish',
+				'post_password' => 'secret',
+			)
+		);
+		$this->structured_data->generate_online_store_data();
+		$this->assertSame( array(), $this->structured_data->get_data(), 'Password-protected pages must not be advertised.' );
+	}
+
+	/**
+	 * @testdox Invalid permalink filters cannot advertise a missing or unsafe URL.
+	 */
+	public function test_online_store_rejects_invalid_permalink(): void {
+		$page_id = self::factory()->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+			)
+		);
+		update_option( 'woocommerce_refund_returns_page_id', $page_id );
+		add_filter(
+			'woocommerce_get_refund_returns_page_permalink',
+			static function () {
+				return 'javascript:alert(1)';
+			}
+		);
+		$this->go_to( get_permalink( $page_id ) );
+
+		$this->structured_data->generate_online_store_data();
+		$this->assertSame( array(), $this->structured_data->get_data(), 'Invalid URL must not produce policy markup.' );
 	}
 }

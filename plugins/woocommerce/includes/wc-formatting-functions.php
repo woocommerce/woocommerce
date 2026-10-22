@@ -377,24 +377,27 @@ function wc_format_coupon_code( $value ) {
 /**
  * Sanitize a coupon code.
  *
- * Uses sanitize_post_field since coupon codes are stored as post_titles - the sanitization and escaping must match.
+ * Coupon codes are plain text, but are stored as post titles with `&`, `<` and `>` encoded the same way wp_kses() did,
+ * so codes saved by earlier versions still match. Kses and the post title filters aren't used, so the result doesn't
+ * depend on the current user or on how wp_kses() parses HTML. Use the woocommerce_coupon_code filter to change codes.
  *
- * Due to the unfiltered_html capability that some (admin) users have, we need to account for slashes.
- *
- * The html_entity_decode() call handles coupon codes that contain special characters like ampersands (&), quotes ("),
- * and other HTML entities. Without this decoding step, coupon codes with special characters would fail to match
- * during application, causing legitimate coupons to be rejected.
- *
+ * @see WC_Formatting_Functions_Test::test_wc_sanitize_coupon_code
  * @see WC_Cart_Test::test_coupon_codes_with_special_characters
  *
  * @since  3.6.0
  * @since  10.0.0 Decode HTML entities here instead of via woocommerce_coupon_code filter.
- * @param  string $value Coupon code to format.
+ * @since  11.3.0 Encode special characters without kses or the post title filters, so the result no longer depends on the current user.
+ * @param  string|null $value Coupon code to format.
  * @return string
  */
 function wc_sanitize_coupon_code( $value ) {
-	$value = wp_kses( sanitize_post_field( 'post_title', html_entity_decode( $value ?? '', ENT_COMPAT, get_bloginfo( 'charset' ) ), 0, 'db' ), 'entities' );
-	return current_user_can( 'unfiltered_html' ) ? $value : stripslashes( $value );
+	if ( null === $value ) {
+		return '';
+	}
+
+	$value = html_entity_decode( $value, ENT_COMPAT, get_bloginfo( 'charset' ) );
+	$value = trim( wp_kses_no_null( $value, array( 'slash_zero' => 'keep' ) ) );
+	return str_replace( array( '<', '>' ), array( '&lt;', '&gt;' ), wp_kses_normalize_entities( $value ) );
 }
 
 /**
@@ -1206,12 +1209,12 @@ function wc_format_product_short_description( $content ) {
  * Validates and sanitizes currency separators when saved in settings.
  *
  * @param  mixed $value     Option value passed through earlier filters.
- * @param  array $option    Option data including 'id' and 'default'.
+ * @param  array $option    Option data including 'id'.
  * @param  mixed $raw_value Raw request value, null when the field was not submitted.
- * @return mixed
+ * @return string
  */
 function wc_format_option_price_separators( $value, $option, $raw_value ) {
-	return wc_get_container()->get( OptionSanitizer::class )->sanitize_price_separator_setting( $value, $raw_value );
+	return wc_get_container()->get( OptionSanitizer::class )->sanitize_price_separator_setting( $option['id'], $raw_value );
 }
 add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_price_decimal_sep', 'wc_format_option_price_separators', 10, 3 );
 add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_price_thousand_sep', 'wc_format_option_price_separators', 10, 3 );
@@ -1233,7 +1236,6 @@ add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_price_num_de
 /**
  * Formats hold stock option and sets cron event up.
  *
- * @codeCoverageIgnore
  * @param  string $value     Option value.
  * @param  array  $option    Option name.
  * @param  string $raw_value Raw value.
@@ -1242,14 +1244,19 @@ add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_price_num_de
 function wc_format_option_hold_stock_minutes( $value, $option, $raw_value ) {
 	$value = ! empty( $raw_value ) ? absint( $raw_value ) : ''; // Allow > 0 or set to ''.
 
+	$value_changed         = (string) get_option( 'woocommerce_hold_stock_minutes', '60' ) !== (string) $value;
+	$next_scheduled_action = function_exists( 'as_next_scheduled_action' )
+		? as_next_scheduled_action( 'woocommerce_cancel_unpaid_orders', array(), 'woocommerce' )
+		: wp_next_scheduled( 'woocommerce_cancel_unpaid_orders' );
+
 	// Clear existing scheduled events.
-	if ( function_exists( 'as_unschedule_all_actions' ) ) {
+	if ( $value_changed && function_exists( 'as_unschedule_all_actions' ) ) {
 		as_unschedule_all_actions( 'woocommerce_cancel_unpaid_orders' );
-	} else {
+	} elseif ( $value_changed ) {
 		wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
 	}
 
-	if ( '' !== $value ) {
+	if ( '' !== $value && ( $value_changed || false === $next_scheduled_action ) ) {
 		/**
 		 * Filters the interval at which to cancel unpaid orders in minutes.
 		 *

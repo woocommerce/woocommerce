@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix the Analytics date range label showing a garbled date in languages whose month names contain digits, such as Japanese.

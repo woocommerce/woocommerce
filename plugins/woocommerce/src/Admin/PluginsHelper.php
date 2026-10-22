@@ -860,6 +860,7 @@ class PluginsHelper {
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'woo-plugin-update-connect-notice' );
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'woo-enable-autorenew' );
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'woo-renew-subscription' );
+		WCAdminAssets::register_script( 'wp-admin-scripts', 'woo-purchase-subscription' );
 		wp_enqueue_script( 'woo-plugin-update-connect-notice' );
 		wp_enqueue_script( 'woo-enable-autorenew' );
 		wp_enqueue_script( 'woo-renew-subscription' );
@@ -1004,7 +1005,7 @@ class PluginsHelper {
 			/* translators: 1: Product price */
 			$renew_string = sprintf( __( 'Renew for %1$s', 'woocommerce' ), $subscription['product_regular_price'] );
 		}
-		$expiry_date   = date_i18n( 'F jS', $subscription['expires'] );
+		$expiry_date   = (string) wp_date( get_option( 'date_format' ), (int) $subscription['expires'] );
 		$hyperlink_url = add_query_arg(
 			array(
 				'product_id'   => $product_id,

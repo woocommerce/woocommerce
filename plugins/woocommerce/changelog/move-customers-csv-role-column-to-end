@@ -1,5 +1,0 @@
-Significance: patch
-Type: tweak
-Comment: Amends unreleased #67653 (CSV Role column order); its changelog entry already describes the shipped behavior.
-
-

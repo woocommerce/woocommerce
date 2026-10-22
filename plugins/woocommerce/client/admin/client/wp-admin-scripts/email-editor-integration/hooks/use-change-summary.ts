@@ -45,7 +45,7 @@ export interface ChangeSummaryCopyChange {
  * Shape of a single structural-change entry.
  */
 export interface ChangeSummaryStructuralChange {
-	/** `nest` or `reorder`. */
+	/** `nest`, `reorder`, or `merchant_removed`. */
 	kind: string;
 	/** Pre-localized one-line description. */
 	description: string;
