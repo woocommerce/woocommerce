@@ -182,10 +182,20 @@ test.describe( 'Compatibility Layer in Single Product template', () => {
 		page,
 		admin,
 		editor,
+		requestUtils,
+		createProductTemplate,
 	} ) => {
+		const singleProductTemplate = await requestUtils.getTemplate(
+			'wp_template',
+			`${ BLOCK_THEME_SLUG }//single-product`
+		);
+		const capTemplate = await createProductTemplate( 'cap', {
+			content: singleProductTemplate.content.raw,
+		} );
+
 		/* Switch to the blockified Add to Cart + Options block to be able to test all hooks */
 		await admin.visitSiteEditor( {
-			postId: `${ BLOCK_THEME_SLUG }//single-product`,
+			postId: capTemplate.template.id,
 			postType: 'wp_template',
 			canvas: 'edit',
 		} );
@@ -207,7 +217,15 @@ test.describe( 'Compatibility Layer in Single Product template', () => {
 			isOnlyCurrentEntityDirty: true,
 		} );
 
-		await page.goto( '/product/cap/' );
+		const { content } = await requestUtils.getTemplate(
+			'wp_template',
+			capTemplate.template.id
+		);
+		const hoodieTemplate = await createProductTemplate( 'hoodie', {
+			content: content.raw,
+		} );
+
+		await page.goto( capTemplate.productUrl );
 
 		for ( const scenario of simpleProductAddToCartWithOptionsBlockHooks ) {
 			const hooks = page.getByTestId( scenario.dataTestId );
@@ -222,7 +240,7 @@ test.describe( 'Compatibility Layer in Single Product template', () => {
 			).toHaveText( scenario.content );
 		}
 
-		await page.goto( '/product/hoodie/' );
+		await page.goto( hoodieTemplate.productUrl );
 
 		for ( const scenario of variableProductAddToCartWithOptionsBlockHooks ) {
 			const hooks = page.getByTestId( scenario.dataTestId );
