@@ -155,15 +155,15 @@ class OpenGraph {
 
 			foreach ( self::get_meta_properties( $processor ) as $property ) {
 				$content = $processor->get_attribute( 'content' );
-				if ( 'og:type' === $property && isset( $tags['og:type'] ) ) {
-					$processor->set_attribute( 'content', html_entity_decode( $tags['og:type'], ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
+				if ( 'og:type' === $property && isset( $this->tags['og:type'] ) ) {
+					$processor->set_attribute( 'content', html_entity_decode( $this->tags['og:type'], ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
 				} elseif ( ! is_string( $content ) || '' === trim( $content ) ) {
 					continue;
 				}
 				if ( in_array( $property, array( 'og:image', 'og:image:url' ), true ) ) {
 					$has_image = true;
 				}
-				if ( ! in_array( $property, array( 'og:image:width', 'og:image:height' ), true ) ) {
+				if ( ! isset( $tags['og:image'] ) || 0 !== strpos( $property, 'og:image:' ) ) {
 					unset( $tags[ $property ] );
 				}
 			}
@@ -210,9 +210,15 @@ class OpenGraph {
 			}
 		};
 
-		$replace_image_dimensions = isset( $tags['og:image'] );
-		$image_dimensions         = array_intersect_key( $tags, array_flip( array( 'og:image:width', 'og:image:height' ) ) );
-		$template_depth           = 0;
+		$replace_image_details = isset( $tags['og:image'] );
+		$image_details         = array_filter(
+			$tags,
+			static function ( string $property ): bool {
+				return 0 === strpos( $property, 'og:image:' );
+			},
+			ARRAY_FILTER_USE_KEY
+		);
+		$template_depth        = 0;
 		while ( $inserter->next_tag( array( 'tag_closers' => 'visit' ) ) ) {
 			if ( 'TEMPLATE' === $inserter->get_tag() ) {
 				$template_depth = max( 0, $template_depth + ( $inserter->is_tag_closer() ? -1 : 1 ) );
@@ -226,8 +232,8 @@ class OpenGraph {
 			}
 			$content = $inserter->get_attribute( 'content' );
 			foreach ( self::get_meta_properties( $inserter ) as $property ) {
-				if ( $replace_image_dimensions && in_array( $property, array( 'og:image:width', 'og:image:height' ), true ) ) {
-					$inserter->set_attribute( 'content', html_entity_decode( $image_dimensions[ $property ] ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
+				if ( $replace_image_details && 0 === strpos( $property, 'og:image:' ) ) {
+					$inserter->set_attribute( 'content', html_entity_decode( $image_details[ $property ] ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
 					unset( $tags[ $property ] );
 				} elseif ( isset( $tags[ $property ] ) && ( ! is_string( $content ) || '' === trim( $content ) ) ) {
 					// Decode existing entities because set_attribute() always encodes ampersands.
