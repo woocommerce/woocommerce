@@ -34,7 +34,6 @@ class WC_Report_Customer_List_Test extends WC_Unit_Test_Case {
 		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 		remove_filter( 'query', array( $this, '_create_temporary_tables' ) );
 		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
-		set_current_screen( 'users' );
 		$this->previous_hpos_state = OrderUtil::custom_orders_table_usage_is_enabled();
 	}
 
@@ -42,8 +41,11 @@ class WC_Report_Customer_List_Test extends WC_Unit_Test_Case {
 	 * Restore the order storage.
 	 */
 	public function tearDown(): void {
-		$this->toggle_cot_feature_and_usage( $this->previous_hpos_state );
-		parent::tearDown();
+		try {
+			$this->toggle_cot_feature_and_usage( $this->previous_hpos_state );
+		} finally {
+			parent::tearDown();
+		}
 	}
 
 	/**
