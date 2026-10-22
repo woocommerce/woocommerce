@@ -537,7 +537,7 @@ test.describe( 'Merchant → Checkout', () => {
 			await editor.selectBlocks( blockSelectorInEditor );
 		} );
 
-		test( 'Terms and conditions can be toggled from the Actions block', async ( {
+		test( 'Merchant can switch from the Terms block to the Actions block terms', async ( {
 			editor,
 		} ) => {
 			await editor.selectBlocks(
@@ -553,9 +553,19 @@ test.describe( 'Merchant → Checkout', () => {
 			);
 			const terms = actionsBlock.locator( '.wc-block-checkout__terms' );
 
-			await expect( terms ).toBeHidden();
+			// While the Terms block is in the checkout, it owns the terms.
+			await expect( showTermsToggle ).toHaveCount( 0 );
 
-			await showTermsToggle.check();
+			await editor.page
+				.getByRole( 'button', { name: 'Switch to Place order terms' } )
+				.click();
+
+			await expect(
+				editor.canvas.locator(
+					'[data-type="woocommerce/checkout-terms-block"]'
+				)
+			).toHaveCount( 0 );
+			await expect( showTermsToggle ).toBeChecked();
 			await expect( terms ).toBeVisible();
 
 			await showTermsToggle.uncheck();
