@@ -113,7 +113,8 @@ class PaymentUtils {
 		$available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
 
 		/**
-		 * Filters the payment method the Checkout block starts with.
+		 * Filters the payment method the checkout starts with: the Checkout block, the classic checkout
+		 * shortcode and the pay-for-order page all ask it.
 		 *
 		 * Return a gateway id from `$available_gateways` to preselect it, or an empty string to select nothing;
 		 * any other value selects nothing. Attach the callback by `init` at the latest.
