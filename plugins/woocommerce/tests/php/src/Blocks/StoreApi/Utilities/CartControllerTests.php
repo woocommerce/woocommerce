@@ -24,6 +24,23 @@ class CartControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Fee hashes stay unchanged across repeated reads of equal-priced fees, but change when a fee is added.
+	 */
+	public function test_get_cart_hashes_with_equal_priced_fees(): void {
+		$sut = new CartController();
+		WC()->cart->add_fee( 'Handling', 5, true );
+		WC()->cart->add_fee( 'Packaging', 5, false );
+		$hash = $sut->get_cart_hashes()['fees'];
+
+		for ( $read = 0; $read < 3; $read++ ) {
+			$this->assertSame( $hash, $sut->get_cart_hashes()['fees'], 'Reading unchanged fees should not change their hash.' );
+		}
+
+		WC()->cart->add_fee( 'Insurance', 5, false );
+		$this->assertNotSame( $hash, $sut->get_cart_hashes()['fees'], 'Adding a fee should change the hash.' );
+	}
+
+	/**
 	 * Test the normalize_cart method.
 	 */
 	public function test_normalize_cart() {

@@ -850,10 +850,14 @@ class CartController {
 	 */
 	public function get_cart_hashes() {
 		$cart = $this->get_cart_instance();
+		$fees = $cart->get_fees();
+		// Equal-priced fees can change order when read. Hash them by ID instead of display order.
+		ksort( $fees );
+
 		return [
 			'line_items' => $cart->get_cart_hash(),
 			'shipping'   => md5( wp_json_encode( [ $cart->get_shipping_methods(), wc()->session->get( 'chosen_shipping_methods' ) ] ) ),
-			'fees'       => md5( wp_json_encode( $cart->get_fees() ) ),
+			'fees'       => md5( wp_json_encode( $fees ) ),
 			'coupons'    => md5( wp_json_encode( $cart->get_applied_coupons() ) ),
 			'taxes'      => md5( wp_json_encode( $cart->get_taxes() ) ),
 		];

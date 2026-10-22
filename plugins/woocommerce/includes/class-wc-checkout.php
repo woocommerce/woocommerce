@@ -519,7 +519,7 @@ class WC_Checkout {
 			$order->set_customer_note( isset( $data['order_comments'] ) ? $data['order_comments'] : '' );
 			$order->set_payment_method( isset( $available_gateways[ $data['payment_method'] ] ) ? $available_gateways[ $data['payment_method'] ] : $data['payment_method'] );
 			$this->set_data_from_cart( $order );
-			$cart_order_items = $order->get_items( $this->get_cart_order_item_types() );
+			$cart_order_items = $this->get_cart_order_items( $order );
 
 			foreach ( array_keys( self::CART_HASHED_ORDER_ITEM_TYPES ) as $hash_name ) {
 				// Unevaluated shipping keeps its previous hash, so it's replaced once the cart evaluates it.
@@ -542,13 +542,7 @@ class WC_Checkout {
 
 			// Save the order.
 			$order_id = $order->save();
-
-			$cart_order_item_ids = array();
-			foreach ( $cart_order_items as $item ) {
-				$cart_order_item_ids[ $item->get_type() ][] = $item->get_id();
-			}
-			$order->update_meta_data( self::CART_ORDER_ITEM_IDS_META_KEY, $cart_order_item_ids );
-			$order->save_meta_data();
+			$this->save_cart_order_item_ids( $order, $cart_order_items );
 
 			// Defense-in-depth: if the cart still has items but the persisted order has none,
 			// the save silently dropped every line item (e.g. a $wpdb->insert() returning false
@@ -652,11 +646,47 @@ class WC_Checkout {
 	}
 
 	/**
+	 * The order's items of the types that set_data_from_cart() creates from the cart. Read them right after the cart's
+	 * items are added, before extensions add their own.
+	 *
+	 * @internal
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param WC_Abstract_Order $order The order.
+	 * @return WC_Order_Item[]
+	 */
+	public function get_cart_order_items( WC_Abstract_Order $order ): array {
+		return $order->get_items( $this->get_cart_order_item_types() );
+	}
+
+	/**
+	 * Stores the IDs of the items the cart created, so a resumed order keeps only these and rebuilds a type that's missing
+	 * one. Call it after saving the order, since new items only get their IDs then.
+	 *
+	 * @internal
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param WC_Abstract_Order $order            The saved order.
+	 * @param WC_Order_Item[]   $cart_order_items Items from get_cart_order_items().
+	 */
+	public function save_cart_order_item_ids( WC_Abstract_Order $order, array $cart_order_items ): void {
+		$cart_order_item_ids = array();
+		foreach ( $cart_order_items as $item ) {
+			$cart_order_item_ids[ $item->get_type() ][] = $item->get_id();
+		}
+		$order->update_meta_data( self::CART_ORDER_ITEM_IDS_META_KEY, $cart_order_item_ids );
+		$order->save_meta_data();
+	}
+
+	/**
 	 * Removes the order items that no longer match the cart, and returns the item types it kept. The classic checkout and
 	 * the Store API both use it, so a resumed order keeps the same items whichever checkout updates it.
 	 *
 	 * Line items are kept while the order's cart hash matches and they still match the cart's items. Other types are
-	 * kept while their section hash matches, and shipping is also kept until the cart has evaluated it.
+	 * kept while their section hash matches and, for shipping and fees, the cart's amounts are still on the order.
+	 * Shipping is also kept until the cart has evaluated it.
 	 *
 	 * @internal
 	 *
@@ -677,7 +707,7 @@ class WC_Checkout {
 		}
 
 		foreach ( self::CART_HASHED_ORDER_ITEM_TYPES as $hash_name => $item_type ) {
-			$is_unchanged = $order->get_meta( "_{$hash_name}_hash" ) === $cart_hashes[ $hash_name ];
+			$is_unchanged = $order->get_meta( "_{$hash_name}_hash" ) === $cart_hashes[ $hash_name ] && $this->order_has_cart_amounts( $order, $cart, $item_type );
 			// Shipping isn't replaced before the cart evaluates it, so the order doesn't lose its shipping lines.
 			$is_unevaluated_shipping = OrderItemType::SHIPPING === $item_type && ! $this->cart_has_evaluated_shipping( $cart );
 
@@ -689,6 +719,49 @@ class WC_Checkout {
 		}
 
 		return $kept_types;
+	}
+
+	/**
+	 * Whether every shipping rate or fee in the cart is still on the order with the same amount, for example after a
+	 * merchant edits the order. Other lines on the order, such as ones extensions add, are allowed. Taxes aren't compared,
+	 * since recalculating the order's totals recalculates them.
+	 *
+	 * @param WC_Order $order     The order.
+	 * @param WC_Cart  $cart      The cart.
+	 * @param string   $item_type Order item type. Types other than shipping and fees always match.
+	 * @return bool
+	 */
+	private function order_has_cart_amounts( WC_Order $order, WC_Cart $cart, string $item_type ): bool {
+		$order_values = array();
+		$cart_values  = array();
+
+		if ( OrderItemType::SHIPPING === $item_type ) {
+			foreach ( $order->get_shipping_methods() as $shipping ) {
+				$order_values[] = $shipping->get_method_id( 'edit' ) . ':' . $shipping->get_instance_id( 'edit' ) . '|' . $this->get_compared_values( $shipping->get_total( 'edit' ) );
+			}
+			foreach ( (array) $cart->get_shipping_methods() as $rate ) {
+				if ( $rate instanceof WC_Shipping_Rate ) {
+					$cart_values[] = $rate->get_method_id() . ':' . $rate->get_instance_id() . '|' . $this->get_compared_values( $rate->get_cost() );
+				}
+			}
+		} elseif ( OrderItemType::FEE === $item_type ) {
+			foreach ( $order->get_fees() as $fee ) {
+				$order_values[] = $this->get_compared_values( $fee->get_total( 'edit' ) );
+			}
+			foreach ( $cart->get_fees() as $fee ) {
+				$cart_values[] = $this->get_compared_values( $fee->total );
+			}
+		}
+
+		foreach ( $cart_values as $cart_value ) {
+			$key = array_search( $cart_value, $order_values, true );
+			if ( false === $key ) {
+				return false;
+			}
+			unset( $order_values[ $key ] );
+		}
+
+		return true;
 	}
 
 	/**
@@ -738,40 +811,45 @@ class WC_Checkout {
 	/**
 	 * The order item types whose amounts no longer add up to the cart's, for example after a merchant edits the order.
 	 *
-	 * Only for the classic checkout: it copies amounts from the cart without recalculating them, so unchanged items
-	 * match the cart exactly, tax amounts included. Shipping is only compared once the cart has evaluated it.
+	 * The classic checkout copies amounts from the cart without recalculating them, so it compares tax amounts too. The
+	 * Store API recalculates taxes, which can round differently from the cart, so it leaves them out. Shipping is only
+	 * compared once the cart has evaluated it.
 	 *
-	 * @param WC_Order $order The resumed order.
-	 * @param WC_Cart  $cart  The cart.
+	 * @param WC_Order $order         The resumed order.
+	 * @param WC_Cart  $cart          The cart.
+	 * @param bool     $compare_taxes Whether to compare tax amounts and tax lines too.
 	 * @return string[]
 	 */
-	private function get_order_item_types_not_matching_cart_amounts( WC_Order $order, WC_Cart $cart ): array {
+	private function get_order_item_types_not_matching_cart_amounts( WC_Order $order, WC_Cart $cart, bool $compare_taxes ): array {
 		$order_values = array(
 			OrderItemType::FEE    => array(),
 			OrderItemType::COUPON => array(),
-			OrderItemType::TAX    => array(),
 		);
 		$cart_values  = $order_values;
 
 		foreach ( $order->get_fees() as $fee ) {
-			$order_values[ OrderItemType::FEE ][] = $this->get_compared_values( $fee->get_total( 'edit' ) ) . $this->get_compared_rate_taxes( $fee->get_taxes( 'edit' ) );
+			$order_values[ OrderItemType::FEE ][] = $this->get_compared_values( $fee->get_total( 'edit' ) ) . ( $compare_taxes ? $this->get_compared_rate_taxes( $fee->get_taxes( 'edit' ) ) : '' );
 		}
 		foreach ( $cart->get_fees() as $fee ) {
-			$cart_values[ OrderItemType::FEE ][] = $this->get_compared_values( $fee->total ) . $this->get_compared_rate_taxes( array( 'total' => $fee->tax_data ) );
+			$cart_values[ OrderItemType::FEE ][] = $this->get_compared_values( $fee->total ) . ( $compare_taxes ? $this->get_compared_rate_taxes( array( 'total' => $fee->tax_data ) ) : '' );
 		}
 
 		foreach ( $order->get_coupons() as $coupon ) {
-			$order_values[ OrderItemType::COUPON ][] = $coupon->get_code( 'edit' ) . '|' . $this->get_compared_values( $coupon->get_discount( 'edit' ), $coupon->get_discount_tax( 'edit' ) );
+			$order_values[ OrderItemType::COUPON ][] = $coupon->get_code( 'edit' ) . '|' . $this->get_compared_values( $coupon->get_discount( 'edit' ), $compare_taxes ? $coupon->get_discount_tax( 'edit' ) : 0 );
 		}
 		foreach ( array_keys( $cart->get_coupons() ) as $code ) {
-			$cart_values[ OrderItemType::COUPON ][] = $code . '|' . $this->get_compared_values( $cart->get_coupon_discount_amount( $code ), $cart->get_coupon_discount_tax_amount( $code ) );
+			$cart_values[ OrderItemType::COUPON ][] = $code . '|' . $this->get_compared_values( $cart->get_coupon_discount_amount( $code ), $compare_taxes ? $cart->get_coupon_discount_tax_amount( $code ) : 0 );
 		}
 
-		foreach ( $order->get_taxes() as $tax ) {
-			$order_values[ OrderItemType::TAX ][] = $this->get_compared_values( $tax->get_rate_id( 'edit' ), $tax->get_tax_total( 'edit' ), $tax->get_shipping_tax_total( 'edit' ) );
-		}
-		foreach ( array_keys( $cart->get_cart_contents_taxes() + $cart->get_shipping_taxes() + $cart->get_fee_taxes() ) as $rate_id ) {
-			$cart_values[ OrderItemType::TAX ][] = $this->get_compared_values( $rate_id, $cart->get_tax_amount( $rate_id ), $cart->get_shipping_tax_amount( $rate_id ) );
+		if ( $compare_taxes ) {
+			$order_values[ OrderItemType::TAX ] = array();
+			$cart_values[ OrderItemType::TAX ]  = array();
+			foreach ( $order->get_taxes() as $tax ) {
+				$order_values[ OrderItemType::TAX ][] = $this->get_compared_values( $tax->get_rate_id( 'edit' ), $tax->get_tax_total( 'edit' ), $tax->get_shipping_tax_total( 'edit' ) );
+			}
+			foreach ( array_keys( $cart->get_cart_contents_taxes() + $cart->get_shipping_taxes() + $cart->get_fee_taxes() ) as $rate_id ) {
+				$cart_values[ OrderItemType::TAX ][] = $this->get_compared_values( $rate_id, $cart->get_tax_amount( $rate_id ), $cart->get_shipping_tax_amount( $rate_id ) );
+			}
 		}
 
 		if ( $this->cart_has_evaluated_shipping( $cart ) ) {
@@ -779,11 +857,11 @@ class WC_Checkout {
 			$order_values[ OrderItemType::SHIPPING ] = array();
 			$cart_values[ OrderItemType::SHIPPING ]  = array();
 			foreach ( $order->get_shipping_methods() as $shipping ) {
-				$order_values[ OrderItemType::SHIPPING ][] = $this->get_compared_values( $shipping->get_total( 'edit' ) ) . $this->get_compared_rate_taxes( $shipping->get_taxes( 'edit' ) );
+				$order_values[ OrderItemType::SHIPPING ][] = $this->get_compared_values( $shipping->get_total( 'edit' ) ) . ( $compare_taxes ? $this->get_compared_rate_taxes( $shipping->get_taxes( 'edit' ) ) : '' );
 			}
 			foreach ( (array) $cart->get_shipping_methods() as $rate ) {
 				if ( $rate instanceof WC_Shipping_Rate ) {
-					$cart_values[ OrderItemType::SHIPPING ][] = $this->get_compared_values( $rate->get_cost() ) . $this->get_compared_rate_taxes( array( 'total' => $rate->get_taxes() ) );
+					$cart_values[ OrderItemType::SHIPPING ][] = $this->get_compared_values( $rate->get_cost() ) . ( $compare_taxes ? $this->get_compared_rate_taxes( array( 'total' => $rate->get_taxes() ) ) : '' );
 				}
 			}
 		}
@@ -798,7 +876,7 @@ class WC_Checkout {
 			}
 		}
 
-		if ( ! $this->line_items_match_cart( $order->get_items( OrderItemType::LINE_ITEM ), $cart, true ) ) {
+		if ( ! $this->line_items_match_cart( $order->get_items( OrderItemType::LINE_ITEM ), $cart, $compare_taxes ) ) {
 			$changed_types[] = OrderItemType::LINE_ITEM;
 		}
 
@@ -838,25 +916,27 @@ class WC_Checkout {
 	}
 
 	/**
-	 * Removes the items of a resumed order that no longer match the cart, and returns the item types it kept.
+	 * Removes the items of a resumed order that the cart didn't create or that no longer match the cart, and returns the
+	 * item types it kept. The classic checkout and the Store API both use it for pending and failed orders.
 	 *
-	 * Only cart-created items of unchanged types are kept: line items, whose cart hash already matches, and types whose
-	 * section hash matches. A type with a missing cart item, or whose amounts no longer match the cart, is rebuilt, as is
-	 * every type when the order has no record of its cart items. Other items, such as ones extensions add at checkout, are
-	 * removed so they aren't duplicated.
+	 * Only cart-created items of unchanged types are kept. A type with a missing cart item, for example one a merchant
+	 * removed, or whose amounts no longer match the cart is rebuilt. Other items of these types, such as ones a merchant or
+	 * an extension added, are removed, so they're neither charged nor duplicated.
 	 *
-	 * @param WC_Abstract_Order     $order       The resumed order.
-	 * @param array<string, string> $cart_hashes Cart hashes from CartController::get_cart_hashes().
-	 * @return string[] The kept item types.
+	 * @internal
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param WC_Order              $order         The resumed order.
+	 * @param WC_Cart               $cart          The cart.
+	 * @param array<string, string> $cart_hashes   Cart hashes from CartController::get_cart_hashes().
+	 * @param bool                  $compare_taxes Whether to compare tax amounts too, for orders whose totals aren't recalculated.
+	 * @return string[]|null The kept item types, or null when the order has no record of its cart items.
 	 */
-	private function remove_changed_order_items( WC_Abstract_Order $order, array $cart_hashes ): array {
-		global $wpdb;
-
+	public function remove_resumed_order_items_not_matching_cart( WC_Order $order, WC_Cart $cart, array $cart_hashes, bool $compare_taxes ): ?array {
 		$cart_order_item_ids = $order->get_meta( self::CART_ORDER_ITEM_IDS_META_KEY );
-		if ( ! $order instanceof WC_Order || ! is_array( $cart_order_item_ids ) ) {
-			// Without a record of the cart's items, they can't be told apart from items added by extensions.
-			$order->remove_order_items();
-			return array();
+		if ( ! is_array( $cart_order_item_ids ) ) {
+			return null;
 		}
 
 		// Keep only the items the cart created. A type that's missing one of them is added again from the cart.
@@ -876,14 +956,35 @@ class WC_Checkout {
 		}
 
 		// Kept items have to add up to the cart's amounts, since the order's totals are set from the cart.
-		$changed_types = array_unique( array_merge( $changed_types, $this->get_order_item_types_not_matching_cart_amounts( $order, WC()->cart ) ) );
+		$changed_types = array_unique( array_merge( $changed_types, $this->get_order_item_types_not_matching_cart_amounts( $order, $cart, $compare_taxes ) ) );
 
 		// Changed types still have to be removed when the cart check kept them; types it removed aren't removed again.
-		$matching_types = $this->remove_order_items_not_matching_cart( $order, WC()->cart, $cart_hashes );
+		$matching_types = $this->remove_order_items_not_matching_cart( $order, $cart, $cart_hashes );
 		foreach ( array_intersect( $matching_types, $changed_types ) as $item_type ) {
 			$order->remove_order_items( $item_type );
 		}
-		$kept_types = array_values( array_diff( $matching_types, $changed_types ) );
+
+		return array_values( array_diff( $matching_types, $changed_types ) );
+	}
+
+	/**
+	 * Removes the items of a resumed classic checkout order that no longer match the cart, and returns the item types it
+	 * kept. Every item is removed when the order has no record of its cart items, and extension item types are removed
+	 * too, so the checkout adds them again without duplicates.
+	 *
+	 * @param WC_Abstract_Order     $order       The resumed order.
+	 * @param array<string, string> $cart_hashes Cart hashes from CartController::get_cart_hashes().
+	 * @return string[] The kept item types.
+	 */
+	private function remove_changed_order_items( WC_Abstract_Order $order, array $cart_hashes ): array {
+		global $wpdb;
+
+		$kept_types = $order instanceof WC_Order ? $this->remove_resumed_order_items_not_matching_cart( $order, WC()->cart, $cart_hashes, true ) : null;
+		if ( null === $kept_types ) {
+			// Without a record of the cart's items, they can't be told apart from items added by extensions.
+			$order->remove_order_items();
+			return array();
+		}
 
 		// Read the types directly: get_items() only finds types registered with woocommerce_order_type_to_group, so it would miss some extension items.
 		$persisted_types = $wpdb->get_col(
