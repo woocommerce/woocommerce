@@ -369,7 +369,9 @@ class NumberUtilTest extends \WC_Unit_Test_Case {
 		update_option( 'woocommerce_price_thousand_sep', ',' );
 		update_option( 'woocommerce_price_decimal_sep', '.' );
 
-		$this->expectExceptionMessage( '&lt;b&gt;1,234.56&lt;/b&gt;alert(&quot;bad&quot;) is not a valid numeric value. Allowed characters are numbers, the thousand (,), and decimal (.) separators.' );
+		// WordPress 7.2 rewrote wp_kses() using the HTML API and now strips <script> content entirely,
+		// whereas older versions stripped only the tags. Accept either sanitization outcome.
+		$this->expectExceptionMessageMatches( '/&lt;b&gt;1,234\.56&lt;\/b&gt;.*is not a valid numeric value/' );
 		NumberUtil::sanitize_cost_in_current_locale( '<b>1,234.56</b><script>alert("bad")</script>' );
 	}
 
