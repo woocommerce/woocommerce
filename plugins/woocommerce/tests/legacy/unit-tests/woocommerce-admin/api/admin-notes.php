@@ -339,7 +339,13 @@ class WC_Admin_Tests_API_Admin_Notes extends WC_REST_Unit_Test_Case {
 		$note->save();
 
 		$request = new WP_REST_Request( 'GET', $this->endpoint );
-		$request->set_query_params( array( 'source' => 'source-1,source-2' ) );
+		$request->set_query_params(
+			array(
+				'source'  => 'source-1,source-2',
+				'orderby' => 'note_id',
+				'order'   => 'asc',
+			)
+		);
 		$response = $this->server->dispatch( $request );
 		$notes    = $response->get_data();
 
