@@ -349,12 +349,12 @@ class CartControllerTests extends \WC_Unit_Test_Case {
 		$captured = array();
 		$filter   = static function ( $quantity, $product_id, $variation_id ) use ( &$captured ) {
 			$captured = array( $quantity, $product_id, $variation_id );
-			return $quantity;
+			return 4;
 		};
 
 		add_filter( 'woocommerce_add_to_cart_quantity', $filter, 10, 3 );
 		try {
-			( new CartController() )->add_to_cart(
+			$cart_id = ( new CartController() )->add_to_cart(
 				array(
 					'id'        => $variation['variation_id'],
 					'quantity'  => 1,
@@ -366,5 +366,6 @@ class CartControllerTests extends \WC_Unit_Test_Case {
 		}
 
 		$this->assertSame( array( 1, $product->get_id(), (int) $variation['variation_id'] ), $captured );
+		$this->assertSame( 4, wc()->cart->get_cart_item( $cart_id )['quantity'] );
 	}
 }
