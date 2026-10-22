@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableControlle
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\CouponHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
 use Automattic\WooCommerce\Tests\Helpers\MetaDataAssertionTrait;
@@ -625,6 +626,12 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$fee_item->set_taxes( array( 'total' => array( 1 => '0.5678' ) ) );
 		$order->add_item( $fee_item );
 
+		$coupon_item = new WC_Order_Item_Coupon();
+		$coupon_item->set_code( 'precision-coupon' );
+		$coupon_item->set_discount( '1.2345' );
+		$coupon_item->set_discount_tax( '0.2345' );
+		$order->add_item( $coupon_item );
+
 		$order_id = $order->save();
 		$refund   = wc_create_refund(
 			array(
@@ -637,7 +644,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		);
 		$this->assertInstanceOf( WC_Order_Refund::class, $refund, 'The refund fixture should be created.' );
 
-		foreach ( array( 0, 1, 3, wc_get_price_decimals() ) as $precision ) {
+		foreach ( array( 0, 1, 3, 5, wc_get_price_decimals() ) as $precision ) {
 			$request = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order_id );
 			if ( wc_get_price_decimals() !== $precision ) {
 				$request->set_param( 'dp', $precision );
@@ -663,6 +670,8 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 				'shipping_lines.tax'     => $data['shipping_lines'][0]['total_tax'],
 				'fee_lines.total'        => $data['fee_lines'][0]['total'],
 				'fee_lines.total_tax'    => $data['fee_lines'][0]['total_tax'],
+				'coupon_lines.discount'  => $data['coupon_lines'][0]['discount'],
+				'coupon_lines.tax'       => $data['coupon_lines'][0]['discount_tax'],
 				'refunds.total'          => $data['refunds'][0]['total'],
 			);
 			foreach ( $monetary_values as $field => $value ) {
@@ -2409,5 +2418,40 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 				),
 			),
 		);
+	}
+
+	/**
+	 * Sending the coupons an order already counts must not change their usage counts.
+	 */
+	public function test_update_order_with_same_coupons_keeps_usage_counts() {
+		wp_set_current_user( $this->user );
+
+		$order = OrderHelper::create_order();
+		$order->set_status( OrderStatus::PENDING );
+		$order->save();
+		CouponHelper::create_coupon( 'usage-coupon-a' );
+		CouponHelper::create_coupon( 'usage-coupon-b' );
+		$order->apply_coupon( 'usage-coupon-a' );
+		$order->apply_coupon( 'usage-coupon-b' );
+		$this->assertEquals( 1, ( new WC_Coupon( 'usage-coupon-a' ) )->get_usage_count() );
+		$this->assertEquals( 1, ( new WC_Coupon( 'usage-coupon-b' ) )->get_usage_count() );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
+		$request->set_body_params(
+			array(
+				'coupon_lines' => array(
+					array( 'code' => 'usage-coupon-a' ),
+					array( 'code' => 'usage-coupon-b' ),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$order = wc_get_order( $order->get_id() );
+		$this->assertCount( 2, $order->get_items( 'coupon' ) );
+		$this->assertTrue( $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
+		$this->assertEquals( 1, ( new WC_Coupon( 'usage-coupon-a' ) )->get_usage_count() );
+		$this->assertEquals( 1, ( new WC_Coupon( 'usage-coupon-b' ) )->get_usage_count() );
 	}
 }
