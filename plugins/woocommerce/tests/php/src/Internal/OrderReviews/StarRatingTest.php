@@ -33,7 +33,9 @@ class StarRatingTest extends WC_Unit_Test_Case {
 
 		$this->assertStringContainsString( 'role="radiogroup"', $html );
 		$this->assertStringContainsString( 'aria-labelledby="review-rating-label-42"', $html );
-		$this->assertStringContainsString( 'aria-describedby="review-rating-42-caption"', $html );
+		// The caption is visual only; describing the group with it repeats
+		// what each radio's own label already announces.
+		$this->assertStringNotContainsString( 'aria-describedby', $html );
 
 		// Five inputs, each with a unique id.
 		foreach ( range( 1, 5 ) as $value ) {
@@ -42,7 +44,10 @@ class StarRatingTest extends WC_Unit_Test_Case {
 		}
 
 		$this->assertStringContainsString( 'name="reviews[42][rating]"', $html );
-		$this->assertStringContainsString( 'aria-live="polite"', $html );
+
+		// Each radio's own label carries the caption text, so announcing the
+		// caption again on selection would duplicate it.
+		$this->assertStringNotContainsString( 'aria-live', $html );
 	}
 
 	/**

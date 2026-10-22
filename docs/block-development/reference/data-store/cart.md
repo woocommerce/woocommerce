@@ -660,6 +660,8 @@ Returns the cart meta from state.
 
 -   `object`: The current cart meta with the following keys:
     -   _updatingCustomerData_ `boolean`: If the customer data (billing and/or shipping address) is being updated.
+    -   _updatingAddressFieldsForShippingRates_ `boolean`: If shipping address fields impacting the shipping rates are being updated.
+    -   _isShippingRatesUpdateQueued_ `boolean`: If shipping address fields impacting the shipping rates have changed but have not been sent to the server yet. Use `isShippingRatesStale()` to check whether the shipping rates are out of date.
     -   _updatingSelectedRate_ `boolean`: If the selected rate is being updated.
     -   _isCartDataStale_ `boolean`: If the cart data is stale.
     -   _applyingCoupon_ `string`: The coupon code being applied.
@@ -892,6 +894,21 @@ By default, Store API considers the following shipping fields as essential for s
 ```js
 const store = select( cartStore );
 const isAddressFieldsForShippingRatesUpdating = store.isAddressFieldsForShippingRatesUpdating();
+```
+
+### isShippingRatesStale
+
+Queries whether the shipping rates in the store are out of date because shipping address fields that affect them have changed. This is true from the moment the address changes, including while the change is waiting to be sent to the server, until the server has returned rates for the new address.
+
+#### _Returns_ 
+
+-   `boolean`: True if the shipping rates do not reflect the current shipping address yet.
+
+#### _Example_ 
+
+```js
+const store = select( cartStore );
+const isShippingRatesStale = store.isShippingRatesStale();
 ```
 
 ### hasPendingItemsOperations

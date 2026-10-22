@@ -1,3 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Update wp-env through the tooling catalog and remove its old patch; no production change.

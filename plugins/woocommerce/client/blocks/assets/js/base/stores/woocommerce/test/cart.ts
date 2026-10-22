@@ -768,6 +768,38 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 		} );
 	} );
 
+	describe( 'isCartUpdating', () => {
+		it( 'is true while a cart update request is in progress and false once it settles', async () => {
+			mockBatchFetch();
+			const batchFetch = global.fetch;
+			const duringRequest: Array< boolean | undefined > = [];
+			global.fetch = jest.fn(
+				async ( url: RequestInfo | URL, init?: RequestInit ) => {
+					if ( init?.body ) {
+						duringRequest.push( mockState.isCartUpdating );
+					}
+					return batchFetch( url, init );
+				}
+			) as typeof fetch;
+			const actions = await loadCartStore();
+			seedCart( [
+				makeKeyedLine( { id: 42, quantity: 3, key: 'server-key-abc' } ),
+			] );
+
+			await runAction(
+				actions.addCartItem( {
+					id: 42,
+					key: 'server-key-abc',
+					quantity: 5,
+					type: 'simple',
+				} )
+			);
+
+			expect( duringRequest ).toEqual( [ true ] );
+			expect( mockState.isCartUpdating ).toBe( false );
+		} );
+	} );
+
 	describe( 'addCartItem keyless-requires-delta invariant guard', () => {
 		it( 'throws when called keyless with an absolute quantity (no quantityToAdd)', async () => {
 			mockBatchFetch();

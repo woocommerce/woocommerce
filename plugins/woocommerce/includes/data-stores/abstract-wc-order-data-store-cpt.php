@@ -31,6 +31,13 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	protected $meta_type = 'post';
 
 	/**
+	 * IDs of orders currently being permanently deleted, keyed by order ID.
+	 *
+	 * @var array<int, true>
+	 */
+	protected static $orders_being_deleted = array();
+
+	/**
 	 * Data stored in meta keys, but not considered "meta" for an order.
 	 *
 	 * @since 3.0.0
@@ -284,30 +291,35 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		$do_filters = ! $args['suppress_filters'];
 
 		if ( $args['force_delete'] ) {
-			if ( $do_filters ) {
-				/**
-				 * Fires immediately before an order is deleted from the database.
-				 *
-				 * @since 8.0.0
-				 *
-				 * @param int      $order_id ID of the order about to be deleted.
-				 * @param WC_Order $order    Instance of the order that is about to be deleted.
-				 */
-				do_action( 'woocommerce_before_delete_order', $id, $order );
-			}
+			self::$orders_being_deleted[ $id ] = true;
+			try {
+				if ( $do_filters ) {
+					/**
+					 * Fires immediately before an order is deleted from the database.
+					 *
+					 * @since 8.0.0
+					 *
+					 * @param int      $order_id ID of the order about to be deleted.
+					 * @param WC_Order $order    Instance of the order that is about to be deleted.
+					 */
+					do_action( 'woocommerce_before_delete_order', $id, $order );
+				}
 
-			wp_delete_post( $id );
-			$order->set_id( 0 );
+				wp_delete_post( $id );
+				$order->set_id( 0 );
 
-			if ( $do_filters ) {
-				/**
-				 * Fires immediately after an order is deleted.
-				 *
-				 * @since 2.7.0
-				 *
-				 * @param int $order_id ID of the order that has been deleted.
-				 */
-				do_action( 'woocommerce_delete_order', $id );
+				if ( $do_filters ) {
+					/**
+					 * Fires immediately after an order is deleted.
+					 *
+					 * @since 2.7.0
+					 *
+					 * @param int $order_id ID of the order that has been deleted.
+					 */
+					do_action( 'woocommerce_delete_order', $id );
+				}
+			} finally {
+				unset( self::$orders_being_deleted[ $id ] );
 			}
 		} else {
 			if ( $do_filters ) {

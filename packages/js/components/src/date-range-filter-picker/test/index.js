@@ -46,6 +46,8 @@ describe( 'DateRangeFilterPicker', () => {
 		[ 'untranslated', undefined, 'MM/DD/YYYY', '09/25/2024', '10/04/2024' ],
 		[ 'day-first', 'DD/MM/YYYY', 'DD/MM/YYYY', '25/09/2024', '04/10/2024' ],
 		[ 'dotted', 'DD.MM.YYYY', 'DD.MM.YYYY', '25.09.2024', '04.10.2024' ],
+		// Croatian uses single tokens, which strict parsing rejects padded input for.
+		[ 'hr', 'D/M/YYYY', 'DD/MM/YYYY', '25/09/2024', '04/10/2024' ],
 		// Translations from real language packs that aren't Moment.js formats.
 		// The French one is why #61028 stopped parsing with the translation.
 		[ 'fr_FR', 'JJ/MM/AAAA', 'MM/DD/YYYY', '09/25/2024', '10/04/2024' ],
