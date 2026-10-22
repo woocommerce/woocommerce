@@ -208,7 +208,6 @@ const blocksSerialSpecs = [
 	// archive, header, cart, checkout), or the
 	// `wc_blocks_use_blockified_product_grid_block_as_template` option. Every
 	// spec that visits those pages reads them.
-	'**/tests/blocks/add-to-cart-form/add-to-cart-form.block_theme.spec.ts',
 	'**/tests/blocks/add-to-cart-with-options/add-to-cart-with-options.block_theme.spec.ts',
 	'**/tests/blocks/all-products/all-products.block_theme.spec.ts',
 	'**/tests/blocks/attributes-filter/attribute-filter.block_theme.spec.ts',
@@ -217,19 +216,14 @@ const blocksSerialSpecs = [
 	'**/tests/blocks/classic-template/classic-template.block_theme.spec.ts',
 	'**/tests/blocks/mini-cart/mini-cart-block.shopper.block_theme.spec.ts',
 	'**/tests/blocks/mini-cart/mini-cart.block_theme.spec.ts',
-	'**/tests/blocks/on-sale-badge/on-sale-badge-single-product-template.block_theme.spec.ts',
 	'**/tests/blocks/page-content-wrapper/page-content-wrapper.block_theme.spec.ts',
 	'**/tests/blocks/price-filter/price-filter.block_theme.spec.ts',
 	'**/tests/blocks/product-collection/product-collection.block_theme.spec.ts',
 	'**/tests/blocks/product-filters/active-filter-frontend.block_theme.spec.ts',
 	'**/tests/blocks/product-filters/attribute-filter-frontend.block_theme.spec.ts',
 	'**/tests/blocks/product-filters/product-filters-frontend.block_theme.spec.ts',
-	'**/tests/blocks/product-gallery/inner-blocks/product-gallery-large-image/product-gallery-large-image.block_theme.spec.ts',
-	'**/tests/blocks/product-gallery/inner-blocks/product-gallery-thumbnails/product-gallery-thumbnails.block_theme.spec.ts',
-	'**/tests/blocks/product-gallery/product-gallery.block_theme.spec.ts',
 	'**/tests/blocks/products/products.block_theme.spec.ts',
 	'**/tests/blocks/rating-filter/rating-filter.block_theme.spec.ts',
-	'**/tests/blocks/single-product-template/single-product-template-compatibility-layer.spec.ts',
 	'**/tests/blocks/stock-filter/stock-filter.block_theme.spec.ts',
 	'**/tests/blocks/templates/legacy-templates.block_theme.spec.ts',
 
