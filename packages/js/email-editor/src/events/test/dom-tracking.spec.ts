@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import { select } from '@wordpress/data';
+
+/**
  * Internal dependencies
  */
 import { initDomTracking } from '../dom-tracking';
@@ -8,6 +13,17 @@ jest.mock( '..', () => ( {
 	recordEvent: jest.fn(),
 	isEventTrackingEnabled: () => true,
 } ) );
+
+jest.mock( '@wordpress/data', () => ( {
+	select: jest.fn(),
+} ) );
+
+// The editor switches its sidebar before the click reaches the document.
+function setActiveSidebar( sidebar: string | null ) {
+	jest.mocked( select ).mockReturnValue( {
+		getActiveComplementaryArea: () => sidebar,
+	} );
+}
 
 // Sidebar tabs as rendered by WordPress 7.0 and 7.1 (components Tabs) and 7.2 (Base UI Tabs).
 const SIDEBAR_TABS_WP70 = `
@@ -73,24 +89,29 @@ describe( 'initDomTracking', () => {
 		[ 'WordPress 7.1', SIDEBAR_TABS_WP71 ],
 		[ 'WordPress 7.2', SIDEBAR_TABS_WP72 ],
 	] )( 'sidebar tabs (%s)', ( _version, markup ) => {
-		it( 'records the document tab selection', () => {
-			document.body.innerHTML = markup;
-			click( '[role="tablist"] > :first-child' );
-			expect( recordEvent ).toHaveBeenCalledTimes( 1 );
-			expect( recordEvent ).toHaveBeenCalledWith(
-				'sidebar_tab_selected',
-				{ tab: 'document' }
-			);
-		} );
+		it.each( [
+			[ ':first-child', 'edit-post/document', 'document' ],
+			[ ':last-child', 'edit-post/block', 'block' ],
+		] )(
+			'records the tab the editor switched to (%s)',
+			( tabSelector, sidebar, tab ) => {
+				document.body.innerHTML = markup;
+				setActiveSidebar( sidebar );
+				click( `[role="tablist"] > ${ tabSelector }` );
+				expect( select ).toHaveBeenCalledWith( 'core/interface' );
+				expect( recordEvent ).toHaveBeenCalledTimes( 1 );
+				expect( recordEvent ).toHaveBeenCalledWith(
+					'sidebar_tab_selected',
+					{ tab }
+				);
+			}
+		);
 
-		it( 'records the block tab selection', () => {
+		it( 'records nothing when another sidebar is active', () => {
 			document.body.innerHTML = markup;
-			click( '[role="tablist"] > :last-child' );
-			expect( recordEvent ).toHaveBeenCalledTimes( 1 );
-			expect( recordEvent ).toHaveBeenCalledWith(
-				'sidebar_tab_selected',
-				{ tab: 'block' }
-			);
+			setActiveSidebar( 'woocommerce/email-editor-styles' );
+			click( '[role="tablist"] > :first-child' );
+			expect( recordEvent ).not.toHaveBeenCalled();
 		} );
 	} );
 

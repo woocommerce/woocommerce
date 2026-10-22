@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { select } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -24,23 +25,6 @@ function isMenuToggleOpened( target: Element ) {
 		target.classList.contains( 'is-opened' ) ||
 		target.getAttribute( 'aria-expanded' ) === 'true'
 	);
-}
-
-/**
- * Returns which editor sidebar tab was clicked: `document` or `block`.
- * WordPress 7.2 tabs have no `data-tab-id`, so fall back to the tab order (Email, then Block).
- */
-function getSidebarTab( target: Element ) {
-	const tabId = target.getAttribute( 'data-tab-id' );
-	if ( tabId ) {
-		return SIDEBAR_TABS[ tabId ];
-	}
-	const tabs = Array.from(
-		target
-			.closest( '[role="tablist"]' )
-			?.querySelectorAll( '[role="tab"]' ) ?? []
-	);
-	return Object.values( SIDEBAR_TABS )[ tabs.indexOf( target ) ];
 }
 
 /**
@@ -147,8 +131,14 @@ export function initDomTracking() {
 		},
 		// Email or Block tab in the sidebar clicked
 		{
-			track: ( target ) => {
-				const tab = getSidebarTab( target );
+			// The editor has already switched the sidebar when the click reaches the document.
+			track: () => {
+				const tab =
+					SIDEBAR_TABS[
+						select( 'core/interface' ).getActiveComplementaryArea(
+							'core'
+						)
+					];
 				if ( tab ) {
 					recordEvent( 'sidebar_tab_selected', { tab } );
 				}
