@@ -32,14 +32,20 @@ import { BlockAttributes } from './block';
 import { defaultReturnToCartButtonLabel } from './constants';
 import { TermsNotices } from '../checkout-terms-block/edit';
 import {
+	SwitchToActionsTermsNotice,
+	useCheckoutTermsBlocks,
+} from '../checkout-terms-block/switch-to-actions-terms';
+import {
 	termsConsentDefaultText,
 	termsCheckboxDefaultText,
 } from '../checkout-terms-block/constants';
 
 export const Edit = ( {
+	clientId,
 	attributes,
 	setAttributes,
 }: {
+	clientId: string;
 	attributes: BlockAttributes;
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
 } ) => {
@@ -66,6 +72,9 @@ export const Edit = ( {
 	);
 
 	const showPrice = blockProps.className.includes( 'is-style-with-price' );
+
+	// While the deprecated Terms block is in the checkout, it owns the terms.
+	const { termsClientId } = useCheckoutTermsBlocks( clientId );
 
 	const isTermsDisabledByExtension = ! getSetting(
 		'checkoutShowTerms',
@@ -153,37 +162,46 @@ export const Edit = ( {
 							) }
 						</Notice>
 					) }
-					{ showTerms && (
-						<TermsNotices
-							text={ termsText }
-							checkbox={ termsCheckbox }
-							setText={ ( value ) =>
-								setAttributes( { termsText: value } )
-							}
-						/>
-					) }
-					<ToggleControl
-						__nextHasNoMarginBottom
-						label={ __(
-							'Show terms and conditions',
-							'woocommerce'
-						) }
-						checked={ showTerms }
-						onChange={ () =>
-							setAttributes( { showTerms: ! showTerms } )
-						}
-					/>
-					{ showTerms && (
-						<ToggleControl
-							__nextHasNoMarginBottom
-							label={ __( 'Require checkbox', 'woocommerce' ) }
-							checked={ termsCheckbox }
-							onChange={ () =>
-								setAttributes( {
-									termsCheckbox: ! termsCheckbox,
-								} )
-							}
-						/>
+					{ termsClientId ? (
+						<SwitchToActionsTermsNotice clientId={ clientId } />
+					) : (
+						<>
+							{ showTerms && (
+								<TermsNotices
+									text={ termsText }
+									checkbox={ termsCheckbox }
+									setText={ ( value ) =>
+										setAttributes( { termsText: value } )
+									}
+								/>
+							) }
+							<ToggleControl
+								__nextHasNoMarginBottom
+								label={ __(
+									'Show terms and conditions',
+									'woocommerce'
+								) }
+								checked={ showTerms }
+								onChange={ () =>
+									setAttributes( { showTerms: ! showTerms } )
+								}
+							/>
+							{ showTerms && (
+								<ToggleControl
+									__nextHasNoMarginBottom
+									label={ __(
+										'Require checkbox',
+										'woocommerce'
+									) }
+									checked={ termsCheckbox }
+									onChange={ () =>
+										setAttributes( {
+											termsCheckbox: ! termsCheckbox,
+										} )
+									}
+								/>
+							) }
+						</>
 					) }
 				</PanelBody>
 
