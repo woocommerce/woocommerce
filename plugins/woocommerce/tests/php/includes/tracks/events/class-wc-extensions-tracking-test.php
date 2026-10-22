@@ -42,15 +42,19 @@ class WC_Extensions_Tracking_Test extends \WC_Unit_Test_Case {
 		wp_set_current_user( 0 );
 
 		$this->recorded = array();
-		add_filter(
-			'woocommerce_tracks_event_properties',
-			function ( $properties, $event_name ) {
-				$this->recorded[ $event_name ] = $properties;
-				return $properties;
-			},
-			10,
-			2
-		);
+		add_filter( 'woocommerce_tracks_event_properties', array( $this, 'record_event_properties' ), 10, 2 );
+	}
+
+	/**
+	 * Capture the properties of each recorded event.
+	 *
+	 * @param array  $properties Event properties.
+	 * @param string $event_name Event name.
+	 * @return array
+	 */
+	public function record_event_properties( $properties, $event_name ) {
+		$this->recorded[ $event_name ] = $properties;
+		return $properties;
 	}
 
 	/**
@@ -58,6 +62,7 @@ class WC_Extensions_Tracking_Test extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		$_GET = $this->original_get;
+		remove_filter( 'woocommerce_tracks_event_properties', array( $this, 'record_event_properties' ), 10 );
 		parent::tearDown();
 	}
 

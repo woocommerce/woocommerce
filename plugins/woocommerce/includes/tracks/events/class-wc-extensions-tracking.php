@@ -72,7 +72,7 @@ class WC_Extensions_Tracking {
 	}
 
 	/**
-	 * Send a Tracks even when a Helper connection process is initiated.
+	 * Send a Tracks event when a Helper connection process is initiated.
 	 *
 	 * @since 11.4.0 Added the `$funnel_id` parameter.
 	 *
@@ -83,14 +83,14 @@ class WC_Extensions_Tracking {
 	}
 
 	/**
-	 * Send a Tracks even when a Helper connection process is cancelled.
+	 * Send a Tracks event when a Helper connection process is cancelled.
 	 */
 	public function track_helper_connection_cancelled() {
 		WC_Tracks::record_event( 'extensions_subscriptions_cancelled', $this->get_funnel_id_properties() );
 	}
 
 	/**
-	 * Send a Tracks even when a Helper connection process completed successfully.
+	 * Send a Tracks event when a Helper connection process completed successfully.
 	 */
 	public function track_helper_connection_complete() {
 		$properties = $this->get_funnel_id_properties();
@@ -123,14 +123,14 @@ class WC_Extensions_Tracking {
 	}
 
 	/**
-	 * Send a Tracks even when a Helper has been disconnected.
+	 * Send a Tracks event when a Helper has been disconnected.
 	 */
 	public function track_helper_disconnected() {
 		WC_Tracks::record_event( 'extensions_subscriptions_disconnect' );
 	}
 
 	/**
-	 * Send a Tracks even when Helper subscriptions are refreshed.
+	 * Send a Tracks event when Helper subscriptions are refreshed.
 	 */
 	public function track_helper_subscriptions_refresh() {
 		WC_Tracks::record_event( 'extensions_subscriptions_update' );

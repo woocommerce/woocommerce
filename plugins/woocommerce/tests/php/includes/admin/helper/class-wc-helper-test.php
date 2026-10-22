@@ -1476,25 +1476,25 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 		add_filter( 'pre_http_request', $http_mock, 10, 3 );
 
 		$hook_funnel_id = null;
-		add_action(
-			'woocommerce_helper_connect_start',
-			static function ( $funnel_id ) use ( &$hook_funnel_id ) {
-				$hook_funnel_id = $funnel_id;
-			}
-		);
+		$hook_spy       = static function ( $funnel_id ) use ( &$hook_funnel_id ) {
+			$hook_funnel_id = $funnel_id;
+		};
+		add_action( 'woocommerce_helper_connect_start', $hook_spy );
 
 		$authorize_url = null;
-		add_filter(
-			'wp_redirect',
-			static function ( $location ) {
-				throw new \RuntimeException( $location ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
-			}
-		);
+		$redirect_stop = static function ( $location ) {
+			throw new \RuntimeException( $location ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+		};
+		add_filter( 'wp_redirect', $redirect_stop );
 
 		try {
 			WC_Helper::current_screen( (object) array( 'id' => 'woocommerce_page_wc-addons' ) );
 		} catch ( \RuntimeException $e ) {
 			$authorize_url = $e->getMessage();
+		} finally {
+			remove_filter( 'pre_http_request', $http_mock, 10 );
+			remove_action( 'woocommerce_helper_connect_start', $hook_spy );
+			remove_filter( 'wp_redirect', $redirect_stop );
 		}
 
 		$this->assertTrue( wp_is_uuid( (string) $hook_funnel_id, 4 ), 'The hook should receive a UUID v4 funnel id' );
@@ -1541,6 +1541,8 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 		} catch ( WPDieException $e ) {
 			$this->assertIsArray( $access_token_body, 'The access token request should have been sent' );
 			$this->assertSame( $expected, $access_token_body['funnel_id'] ?? null );
+		} finally {
+			remove_filter( 'pre_http_request', $http_mock, 10 );
 		}
 	}
 }
