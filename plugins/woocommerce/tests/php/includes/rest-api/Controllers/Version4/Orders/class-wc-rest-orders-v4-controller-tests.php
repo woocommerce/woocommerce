@@ -1098,6 +1098,33 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox GMT date filters should pass dates without an offset, and offset dates that can't be parsed, to the query unchanged.
+	 *
+	 * @testWith ["2026-09-24T14:39:52"]
+	 *           ["2026-09-24T14:39:52.123"]
+	 *           ["not a dateZ"]
+	 *
+	 * @param string $value The date filter value.
+	 */
+	public function test_get_query_args_keeps_other_dates_for_gmt_filters( string $value ): void {
+		update_option( 'timezone_string', 'Europe/Athens' );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v4/orders' );
+		$request->set_param( 'dates_are_gmt', true );
+		$request->set_param( 'after', $value );
+
+		$date_query = ( new CollectionQuery() )->get_query_args( $request )['date_query'];
+
+		$this->assertContains(
+			array(
+				'column' => 'post_date_gmt',
+				'after'  => $value,
+			),
+			$date_query
+		);
+	}
+
+	/**
 	 * @testdox Local date filters should pass dates with an explicit offset to the query unchanged.
 	 */
 	public function test_get_query_args_keeps_offset_dates_for_local_filters(): void {

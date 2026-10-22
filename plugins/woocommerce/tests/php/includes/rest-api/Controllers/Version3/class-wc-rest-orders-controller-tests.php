@@ -329,6 +329,49 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox GMT date filters should pass offset dates to the object query filter as UTC, and other dates unchanged.
+	 *
+	 * @testWith ["2026-09-24T14:39:52Z", "2026-09-24 14:39:52"]
+	 *           ["2026-09-24T16:39:52+02:00", "2026-09-24 14:39:52"]
+	 *           ["2026-09-24T16:39:52+02", "2026-09-24 14:39:52"]
+	 *           ["2026-09-24T09:09:52-05:30", "2026-09-24 14:39:52"]
+	 *           ["2026-09-24T14:39:52.750Z", "2026-09-24 14:39:52"]
+	 *           ["2026-09-25T00:30:00+03:00", "2026-09-24 21:30:00"]
+	 *           ["2026-09-24T14:39:52", "2026-09-24T14:39:52"]
+	 *           ["2026-09-24 14:39:52", "2026-09-24 14:39:52"]
+	 *           ["2026-09-24T14:39:52.123", "2026-09-24T14:39:52.123"]
+	 *
+	 * @param string $value    The date filter value.
+	 * @param string $expected The value expected in the object query.
+	 */
+	public function test_orders_gmt_date_filters_pass_utc_values_to_object_query( string $value, string $expected ): void {
+		update_option( 'timezone_string', 'Europe/Athens' );
+
+		$date_query = null;
+		add_filter(
+			'woocommerce_rest_shop_order_object_query',
+			function ( $args ) use ( &$date_query ) {
+				$date_query = $args['date_query'] ?? null;
+				return $args;
+			}
+		);
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/orders' );
+		$request->set_param( 'dates_are_gmt', true );
+		$request->set_param( 'after', $value );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertContains(
+			array(
+				'column' => 'post_date_gmt',
+				'after'  => $expected,
+			),
+			$date_query
+		);
+	}
+
+	/**
 	 * Tests creating an order.
 	 */
 	public function test_orders_create(): void {

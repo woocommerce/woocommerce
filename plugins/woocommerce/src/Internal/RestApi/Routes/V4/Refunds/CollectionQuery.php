@@ -14,7 +14,6 @@ defined( 'ABSPATH' ) || exit;
 
 use WP_REST_Request;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\AbstractCollectionQuery;
-use Automattic\WooCommerce\Internal\Utilities\DateQueryUtil;
 use WC_Order_Query;
 
 /**
@@ -120,14 +119,14 @@ class CollectionQuery extends AbstractCollectionQuery {
 		if ( isset( $request['before'] ) ) {
 			$date_query[] = array(
 				'column' => $use_gmt ? 'post_date_gmt' : 'post_date',
-				'before' => $use_gmt ? DateQueryUtil::to_gmt_date_query_value( $request['before'] ) : $request['before'],
+				'before' => $use_gmt ? self::to_gmt_date_query_value( $request['before'] ) : $request['before'],
 			);
 		}
 
 		if ( isset( $request['after'] ) ) {
 			$date_query[] = array(
 				'column' => $use_gmt ? 'post_date_gmt' : 'post_date',
-				'after'  => $use_gmt ? DateQueryUtil::to_gmt_date_query_value( $request['after'] ) : $request['after'],
+				'after'  => $use_gmt ? self::to_gmt_date_query_value( $request['after'] ) : $request['after'],
 			);
 		}
 
