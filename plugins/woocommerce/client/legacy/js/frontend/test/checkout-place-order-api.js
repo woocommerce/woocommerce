@@ -446,9 +446,15 @@ describe( 'createCheckoutPlaceOrderApi', () => {
 				removeAttr: jest.fn().mockReturnThis(),
 			};
 			const originalJQuery = jQueryMock.getMockImplementation();
-			jQueryMock.mockImplementation( ( selector ) =>
-				selector === $field ? $field : originalJQuery( selector )
-			);
+			jQueryMock.mockImplementation( ( selector ) => {
+				if ( selector === $field ) {
+					return $field;
+				}
+				if ( selector === '#billing_country' ) {
+					return { val: () => 'US' };
+				}
+				return originalJQuery( selector );
+			} );
 			const [ , , validateField ] = $form.on.mock.calls.find(
 				( [ events ] ) => events === 'input validate change focusout'
 			);
