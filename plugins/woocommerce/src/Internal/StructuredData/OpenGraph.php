@@ -89,10 +89,11 @@ class OpenGraph {
 		/**
 		 * Filters Open Graph metadata before output. Currently applied only to product pages.
 		 * Other page types may be supported later; callbacks must check the object type.
+		 * Removing og:type from $tags also preserves an existing provider's type.
 		 *
 		 * @since 11.4.0
 		 *
-		 * @param array<string, string> $tags Metadata keyed by property name. Remove a key to omit a tag.
+		 * @param array<string, string> $tags Metadata keyed by og:, twitter:, or product: property name. Remove a key to omit a tag.
 		 * @param WC_Product|\WP_Post|\WP_Term|\WP_Post_Type|null $context Product or queried object; null when no object is available.
 		 */
 		$tags = apply_filters( 'woocommerce_open_graph_tags', $tags, $context );
@@ -101,7 +102,7 @@ class OpenGraph {
 		}
 
 		foreach ( $tags as $property => $value ) {
-			if ( ! is_string( $property ) || ! is_string( $value ) || '' === trim( $value ) || ! preg_match( '/^(og|twitter):[a-z_:]+$/', $property ) ) {
+			if ( ! is_string( $property ) || ! is_string( $value ) || '' === trim( $value ) || ! preg_match( '/^(og|twitter|product):[a-z_:]+$/', $property ) ) {
 				unset( $tags[ $property ] );
 				continue;
 			}

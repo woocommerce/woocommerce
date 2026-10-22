@@ -185,6 +185,26 @@ class OpenGraphTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should render product metadata supplied through the tags filter.
+	 */
+	public function test_tags_filter_adds_product_metadata(): void {
+		add_filter(
+			'woocommerce_open_graph_tags',
+			static function ( $tags ) {
+				$tags['product:price:amount']   = '19.99';
+				$tags['product:price:currency'] = 'USD';
+
+				return $tags;
+			}
+		);
+
+		$tags = $this->render_meta_tags( '' );
+
+		$this->assertSame( array( '19.99' ), $tags['product:price:amount'] ?? array(), 'The filtered product price should be rendered once.' );
+		$this->assertSame( array( 'USD' ), $tags['product:price:currency'] ?? array(), 'The filtered product currency should be rendered once.' );
+	}
+
+	/**
 	 * Process a product document through the output filter and collect its metadata.
 	 *
 	 * @param string $head Existing head markup.
