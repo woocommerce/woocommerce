@@ -108,21 +108,43 @@ class CartController {
 			]
 		);
 
-		$request = $this->filter_request_data( $this->parse_variation_data( $request ) );
-		$product = $this->get_product_for_cart( $request );
-		$cart_id = $cart->generate_cart_id(
-			$this->get_product_id( $product ),
-			$this->get_variation_id( $product ),
-			$request['variation'],
-			$request['cart_item_data']
-		);
-
+		$request         = $this->parse_variation_data( $request );
+		$product         = $this->get_product_for_cart( $request );
 		$quantity_limits = new QuantityLimits();
 
 		// If quantity was not passed, it should default to the minimum allowed quantity.
 		if ( null === $request['quantity'] ) {
 			$request['quantity'] = $quantity_limits->get_add_to_cart_limits( $product )['minimum'];
 		}
+
+		$product_id   = $this->get_product_id( $product );
+		$variation_id = $this->get_variation_id( $product );
+
+		/**
+		 * Filters the quantity being added to the cart.
+		 *
+		 * @since 11.4.0
+		 *
+		 * @internal Matches filter name in WooCommerce core.
+		 *
+		 * @param int|float $quantity     Quantity of the item added to the cart.
+		 * @param int       $product_id   ID of the product added to the cart.
+		 * @param int       $variation_id Variation ID of the product added to the cart.
+		 */
+		$request['quantity'] = apply_filters(
+			'woocommerce_add_to_cart_quantity',
+			$request['quantity'],
+			$product_id,
+			$variation_id
+		);
+
+		$request = $this->filter_request_data( $request );
+		$cart_id = $cart->generate_cart_id(
+			$product_id,
+			$variation_id,
+			$request['variation'],
+			$request['cart_item_data']
+		);
 
 		$this->validate_add_to_cart( $product, $request );
 		$existing_cart_id = $cart->find_product_in_cart( $cart_id );
