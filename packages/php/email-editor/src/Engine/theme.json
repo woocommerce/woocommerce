@@ -98,7 +98,7 @@
         {
           "name": "Tahoma",
           "slug": "tahoma",
-          "fontFamily": "'Tahoma, Verdana, Segoe, sans-serif'"
+          "fontFamily": "Tahoma, Verdana, Segoe, sans-serif"
         },
         {
           "name": "Times New Roman",
@@ -113,12 +113,12 @@
         {
           "name": "Verdana",
           "slug": "verdana",
-          "fontFamily": "'Verdana, Geneva, sans-serif'"
+          "fontFamily": "Verdana, Geneva, sans-serif"
         },
         {
           "name": "Arvo",
           "slug": "arvo",
-          "fontFamily": "'arvo, courier, georgia, serif'"
+          "fontFamily": "arvo, courier, georgia, serif"
         },
         {
           "name": "Lato",
