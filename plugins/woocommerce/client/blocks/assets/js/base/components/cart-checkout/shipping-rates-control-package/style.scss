@@ -135,8 +135,7 @@
 	}
 }
 
-.wc-block-components-shipping-rates-control__package-item:not(:last-child)
-	> div::after {
+.wc-block-components-shipping-rates-control__package-item:not(:last-child) > div::after {
 	// Usage of RawHTML component from WordPress always adds a div wrapper.
 	content: ", ";
 	white-space: pre;

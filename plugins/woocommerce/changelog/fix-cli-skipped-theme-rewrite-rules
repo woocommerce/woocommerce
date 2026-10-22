@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Preserve product archive rewrite rules when WP-CLI skips the active theme and another plugin flushes permalinks.

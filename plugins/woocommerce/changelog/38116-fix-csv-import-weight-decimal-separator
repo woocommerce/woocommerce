@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Product CSV importer: respect the store's decimal separator setting when parsing weight and dimensions, so comma-separated values (e.g. "1,5") are no longer discarded.

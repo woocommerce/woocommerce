@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Move email template update propagation coverage below E2E; eighteen browser titles become one installed journey.
+

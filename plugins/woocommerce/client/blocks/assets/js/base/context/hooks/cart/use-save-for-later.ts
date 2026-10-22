@@ -47,7 +47,7 @@ export const useSaveForLater = (): {
 						: __(
 								'There was a problem saving this item for later.',
 								'woocommerce'
-						  );
+							);
 				dispatch( noticesStore ).createNotice( 'error', message, {
 					context: 'wc/cart',
 					isDismissible: true,

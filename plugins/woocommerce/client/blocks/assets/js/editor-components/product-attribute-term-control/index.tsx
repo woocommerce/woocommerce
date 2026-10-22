@@ -25,8 +25,10 @@ import type { AttributeObject, AttributeTerm } from '@woocommerce/types';
  */
 import './style.scss';
 
-interface Props
-	extends Omit< SearchListControlProps, 'isSingle' | 'list' | 'selected' > {
+interface Props extends Omit<
+	SearchListControlProps,
+	'isSingle' | 'list' | 'selected'
+> {
 	instanceId?: string;
 	/**
 	 * Callback to update the category operator. If not passed in, setting is not used.

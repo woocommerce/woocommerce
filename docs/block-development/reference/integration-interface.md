@@ -193,6 +193,14 @@ Now, when we load a page containing either block, we should see the scripts we r
 
 We associated some data with the extension in the `get_script_data` method of our interface, we need to know how to get this!
 
-In the `@woocommerce/settings` package there is a method you can import called `getSetting`. This method accepts a string. The name of the setting containing the data added in `get_script_data` is the name of your integration (i.e. the value returned by `get_name`) suffixed with `_data`. In our example it would be: `woocommerce-example-plugin_data`.
+On the client, read it with `getSetting` from the `wc.wcSettings` global, which the `wc-settings` script provides. Make sure your script lists `wc-settings` as a dependency and loads in the footer, as the example above does with the last `wp_register_script` argument; WooCommerce moves header scripts that depend on `wc-settings` to the footer and logs a console warning. The name of the setting containing the data added in `get_script_data` is the name of your integration (i.e. the value returned by `get_name`) suffixed with `_data`. In our example it would be: `woocommerce-example-plugin_data`.
 
-The value returned here is a plain old JavaScript object, keyed by the keys of the array returned by `get_script_data`, the values will serialized.
+```js
+const { getSetting } = window.wc.wcSettings;
+
+const data = getSetting( 'woocommerce-example-plugin_data', {} );
+```
+
+If you build with [`@woocommerce/dependency-extraction-webpack-plugin`](https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/dependency-extraction-webpack-plugin), you can write `import { getSetting } from '@woocommerce/settings';` instead. The build maps that import to the same global and adds `wc-settings` to your script dependencies for you. `@woocommerce/settings` is an alias handled by the build, not the npm package of that name, which is deprecated.
+
+The value returned here is a plain old JavaScript object, keyed by the keys of the array returned by `get_script_data`, the values will be serialized.

@@ -4,7 +4,6 @@
 import { render, act, cleanup, waitFor } from '@testing-library/react';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { recordEvent } from '@woocommerce/tracks';
-import { getHistory, getNewPath } from '@woocommerce/navigation';
 import userEvent from '@testing-library/user-event';
 
 /**
@@ -29,11 +28,6 @@ jest.mock( '@wordpress/data', () => {
 
 jest.mock( '@woocommerce/explat' );
 jest.mock( '@woocommerce/tracks' );
-jest.mock( '@woocommerce/navigation', () => ( {
-	...jest.requireActual( '@woocommerce/navigation' ),
-	getHistory: jest.fn(),
-	getNewPath: jest.fn().mockReturnValue( 'home-path' ),
-} ) );
 
 jest.mock( '../components/task-list', () => ( {
 	TaskList: ( { id }: TaskListProps ) => <div>task-list:{ id }</div>,
@@ -62,12 +56,8 @@ jest.mock( '~/activity-panel/display-options', () => ( {
 describe( 'Task', () => {
 	const hideTaskList = jest.fn();
 	const updateOptions = jest.fn();
-	const historyReplace = jest.fn();
 	beforeEach( () => {
 		jest.clearAllMocks();
-		( getHistory as jest.Mock ).mockReturnValue( {
-			replace: historyReplace,
-		} );
 		( useDispatch as jest.Mock ).mockImplementation( () => ( {
 			hideTaskList,
 			updateOptions,
@@ -90,13 +80,13 @@ describe( 'Task', () => {
 		cleanup();
 	} );
 
-	it( 'should render if no current task and finished resolving', () => {
+	it( 'should render if no current task and finished resolving', async () => {
 		const { queryByText } = render(
 			<div>
 				<TaskLists query={ {} } />
 			</div>
 		);
-		waitFor( () => {
+		await waitFor( () => {
 			expect( queryByText( 'task-list:main' ) ).toBeInTheDocument();
 			expect( queryByText( 'task-list:extended' ) ).toBeInTheDocument();
 			expect(
@@ -112,10 +102,9 @@ describe( 'Task', () => {
 			</div>
 		);
 		expect( queryByText( 'task:main-task-1' ) ).toBeInTheDocument();
-		expect( historyReplace ).not.toHaveBeenCalled();
 	} );
 
-	it( 'should redirect home if query has task, but task does not exist', async () => {
+	it( 'should not render anything if query has task, but task does not exist', () => {
 		const { queryByText } = render(
 			<div>
 				<TaskLists query={ { task: 'main-task-random' } } />
@@ -125,23 +114,6 @@ describe( 'Task', () => {
 			queryByText( 'task:main-task-random' )
 		).not.toBeInTheDocument();
 		expect( queryByText( 'task-list:main' ) ).not.toBeInTheDocument();
-		await waitFor( () => {
-			expect( historyReplace ).toHaveBeenCalledWith( 'home-path' );
-		} );
-		expect( getNewPath ).toHaveBeenCalledWith( {}, '/', {} );
-	} );
-
-	it( 'should not redirect if task lists are still resolving', () => {
-		( useSelect as jest.Mock ).mockImplementation( () => ( {
-			isResolving: true,
-			taskLists: [],
-		} ) );
-		render(
-			<div>
-				<TaskLists query={ { task: 'main-task-random' } } />
-			</div>
-		);
-		expect( historyReplace ).not.toHaveBeenCalled();
 	} );
 
 	it( 'should render the placeholder if isResolving is true', () => {
@@ -179,7 +151,7 @@ describe( 'Task', () => {
 	} );
 
 	describe( 'toggle list', () => {
-		it( 'should trigger hide track when clicking Show things to do next button', () => {
+		it( 'should trigger hide track when clicking Show things to do next button', async () => {
 			( useSelect as jest.Mock ).mockImplementation( () => ( {
 				isResolving: false,
 				taskLists: [
@@ -198,8 +170,8 @@ describe( 'Task', () => {
 					<TaskLists query={ {} } />
 				</div>
 			);
-			act( () => {
-				userEvent.click( getByText( 'Show things to do next' ) );
+			await act( async () => {
+				await userEvent.click( getByText( 'Show things to do next' ) );
 			} );
 			expect( recordEvent ).toHaveBeenCalledWith(
 				'main_tasklist_hide',
@@ -208,7 +180,7 @@ describe( 'Task', () => {
 			expect( hideTaskList ).toHaveBeenCalledWith( 'main' );
 		} );
 
-		it( 'should trigger show track when toggling task list when isHidden was true', () => {
+		it( 'should trigger show track when toggling task list when isHidden was true', async () => {
 			( useSelect as jest.Mock ).mockImplementation( () => ( {
 				isResolving: false,
 				taskLists: [
@@ -227,8 +199,8 @@ describe( 'Task', () => {
 					<TaskLists query={ {} } />
 				</div>
 			);
-			act( () => {
-				userEvent.click( getByText( 'Show things to do next' ) );
+			await act( async () => {
+				await userEvent.click( getByText( 'Show things to do next' ) );
 			} );
 			expect( recordEvent ).toHaveBeenCalledWith(
 				'main_tasklist_show',

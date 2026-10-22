@@ -13,7 +13,7 @@ This is a general flow of the main functionality of the blocks without going too
 
 -   [ ] Create pages with Cart and Checkout blocks.
 -   [ ] Set the continue to checkout link your Cart settings to the Checkout page you created.
--   [ ] In Woocommerce -> Settings -> Advanced, set the new pages to your default Cart and Checkout.
+-   [ ] In WooCommerce -> Settings -> Advanced, set the new pages to your default Cart and Checkout.
 -   [ ] Add some products to your cart.
 -   [ ] Mix in a limited stock product or a coupon.
 -   [ ] Continue to checkout.

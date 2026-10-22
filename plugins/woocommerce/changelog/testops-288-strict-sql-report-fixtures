@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Build the long-custom-status fixture in two Analytics report data-store tests by writing the truncated status directly, instead of depending on the database to truncate it; test-only change, no production code touched.
+

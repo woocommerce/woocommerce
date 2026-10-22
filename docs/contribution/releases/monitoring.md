@@ -8,7 +8,7 @@ sidebar_position: 7
 
 After the release, the release lead should continue to monitor the following for any bugs directly related to the latest version.  Monitoring should continue for 3 days after a major release and 1 day for a point release.
 
-If there are questions whether a specific issue is critical enough to warrant a new point release, please start a discussion in the `#woo-core-releases` Slack channel.
+If there are questions whether a specific issue is critical enough to warrant a new point release, check the [release decision matrix](/docs/contribution/releases/decision-matrix) first; for genuine ties, start a discussion in the `#woo-core-releases` Slack channel.
 
 ## WordPress.org Forums
 
@@ -28,10 +28,6 @@ An old extension version can point to a compatibility issue, but it does not pro
 
 ## Handling Critical Issues
 
-If monitoring uncovers a bug that **cannot wait** for the next scheduled release, plan a point release. Before doing so, confirm that the issue:
+If monitoring uncovers a bug that **cannot wait** for the next scheduled release, plan a point release. The [release decision matrix](/docs/contribution/releases/decision-matrix) is the criteria set for that call: look up the finding's impact class and apply the modifiers from there. Checkout, data-loss, and site-down issues warrant a point release even when a workaround exists; below that floor, limited scope, low commonality, and a documented workaround can support a lower verdict, subject to the matrix's one-level modifier cap.
 
-1. **Impacts core store functionality** (e.g., checkout, orders, taxes).
-2. **Affects a significant number of sites** or stems from a widely-used extension or theme.
-3. **Lacks a reasonable workaround** that merchants can apply themselves.
-
-If these conditions are met, follow the [Point Releases guide](/docs/contribution/releases/point-releases) to create a tracking issue, prepare the fix, and ship the patch.
+If the verdict is a point release, follow the [Point Releases guide](/docs/contribution/releases/point-releases) to create a tracking issue, prepare the fix, and ship the patch.

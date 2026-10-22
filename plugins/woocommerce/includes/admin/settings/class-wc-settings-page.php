@@ -146,9 +146,12 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 					return $classes;
 				}
 
+				// Preflight and cache adapter failures before this body class can hide the classic Save button.
+				$context->get_page_id();
+
 				// The legacy fallback renderer needs the classic styling: the settings UI
 				// body class hides the legacy Save button via CSS.
-				if ( $context->has_schema_failed() || $context->has_script_handles_failed() ) {
+				if ( $context->has_schema_failed() || $context->has_script_handle_loading_failed() ) {
 					return $classes;
 				}
 
@@ -179,17 +182,17 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		 *
 		 * @since 10.9.0
 		 *
-		 * @param SettingsUIPageInterface $settings_ui_page Settings UI page adapter.
-		 * @param string                  $section_id Section id.
-		 * @param string                  $reason Fallback reason.
+		 * @param string $page_id Settings UI page id.
+		 * @param string $section_id Section id.
+		 * @param string $reason Fallback reason.
 		 */
-		private function log_settings_ui_fallback( SettingsUIPageInterface $settings_ui_page, string $section_id, string $reason ): void {
+		private function log_settings_ui_fallback( string $page_id, string $section_id, string $reason ): void {
 			wc_doing_it_wrong(
 				'WC_Settings_Page::output',
 				sprintf(
 					/* translators: 1: settings page id, 2: settings section id, 3: fallback reason. */
 					__( 'Settings UI rendering for page "%1$s" section "%2$s" fell back to the legacy settings renderer. Reason: %3$s', 'woocommerce' ),
-					$settings_ui_page->get_page_id(),
+					$page_id,
 					'' === $section_id ? 'default' : $section_id,
 					$reason
 				),
@@ -410,39 +413,66 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		public function output() {
 			global $current_section;
 
-			$section = is_string( $current_section ) ? $current_section : '';
-			$context = $this->get_settings_ui_request_context( $section );
+			$section                     = is_string( $current_section ) ? $current_section : '';
+			$context                     = $this->get_settings_ui_request_context( $section );
+			$hide_save_button_overridden = false;
+			$hide_save_button_existed    = array_key_exists( 'hide_save_button', $GLOBALS );
+			$previous_hide_save_button   = $hide_save_button_existed ? $GLOBALS['hide_save_button'] : null;
 
-			if ( $context && $context->is_rendering_enabled() ) {
-				$settings_ui_page = $context->get_settings_ui_page();
-				assert( $settings_ui_page instanceof SettingsUIPageInterface );
+			try {
+				if ( $context && $context->is_rendering_enabled() ) {
+					$page_id = $context->get_page_id();
 
-				if ( $context->has_schema_failed() ) {
-					$this->log_settings_ui_fallback(
-						$settings_ui_page,
-						$section,
-						__( 'Settings UI schema generation failed.', 'woocommerce' )
-					);
-				} else {
-					$script_handles = $context->get_script_handles();
+					if ( $context->has_schema_failed() ) {
+						$schema_failure_reason = method_exists( $context, 'get_schema_failure_reason' )
+							? $context->get_schema_failure_reason()
+							: __( 'Settings UI schema generation failed.', 'woocommerce' );
 
-					if ( $context->has_script_handles_failed() ) {
-						$this->log_settings_ui_fallback( $settings_ui_page, $section, $context->get_script_handles_failure_reason() );
+						$this->log_settings_ui_fallback( $page_id, $section, $schema_failure_reason );
 					} else {
-						foreach ( $script_handles as $script_handle ) {
-							wp_enqueue_script( $script_handle );
+						$mount_id = 'wc_settings_ui_' . sanitize_html_class( $this->id ) . '_' . sanitize_html_class( '' === $section ? 'default' : $section );
+
+						$context->enqueue_script_handles();
+
+						if ( $context->has_script_handle_loading_failed() ) {
+							$this->log_settings_ui_fallback( $page_id, $section, $context->get_script_handles_failure_reason() );
+						} else {
+							$GLOBALS['hide_save_button'] = true;
+							$hide_save_button_overridden = true;
+
+							printf(
+								'<div id="%1$s" data-wc-settings-ui="1" data-wc-settings-page="%2$s" data-wc-settings-section="%3$s"></div>',
+								esc_attr( $mount_id ),
+								esc_attr( $page_id ),
+								esc_attr( $section )
+							);
+							return;
 						}
-
-						$GLOBALS['hide_save_button'] = true;
-
-						printf(
-							'<div id="%1$s" data-wc-settings-ui="1" data-wc-settings-page="%2$s" data-wc-settings-section="%3$s"></div>',
-							esc_attr( 'wc_settings_ui_' . sanitize_html_class( $this->id ) . '_' . sanitize_html_class( '' === $section ? 'default' : $section ) ),
-							esc_attr( $context->get_page_id() ),
-							esc_attr( $section )
-						);
-						return;
 					}
+				}
+			} catch ( \Throwable $e ) {
+				// A stale or unavailable Settings UI class must keep the classic renderer usable during updates.
+				if ( $hide_save_button_overridden ) {
+					if ( $hide_save_button_existed ) {
+						$GLOBALS['hide_save_button'] = $previous_hide_save_button;
+					} else {
+						unset( $GLOBALS['hide_save_button'] );
+					}
+				}
+
+				wc_get_logger()->error(
+					sprintf(
+						'Settings UI rendering failed for page "%1$s" section "%2$s": %3$s: %4$s',
+						$this->id,
+						'' === $section ? 'default' : $section,
+						get_class( $e ),
+						$e->getMessage()
+					),
+					array( 'source' => 'settings-ui' )
+				);
+
+				if ( $e instanceof \Exception ) {
+					wc_caught_exception( $e, __METHOD__ );
 				}
 			}
 

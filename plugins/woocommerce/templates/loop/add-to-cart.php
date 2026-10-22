@@ -23,8 +23,17 @@ global $product;
 
 $aria_describedby = isset( $args['aria-describedby_text'] ) ? sprintf( 'aria-describedby="woocommerce_loop_add_to_cart_link_describedby_%s"', esc_attr( $product->get_id() ) ) : '';
 
-echo apply_filters(
-	'woocommerce_loop_add_to_cart_link', // WPCS: XSS ok.
+/**
+ * Filters the loop add-to-cart link HTML.
+ *
+ * @param string     $link    The add-to-cart link HTML.
+ * @param WC_Product $product The product object.
+ * @param array      $args    Arguments used to build the link.
+ *
+ * @since 2.0.0
+ */
+echo apply_filters( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- The public filter intentionally allows extensions to return link markup.
+	'woocommerce_loop_add_to_cart_link',
 	sprintf(
 		'<a href="%s" %s data-quantity="%s" class="%s" %s>%s</a>',
 		esc_url( $product->add_to_cart_url() ),

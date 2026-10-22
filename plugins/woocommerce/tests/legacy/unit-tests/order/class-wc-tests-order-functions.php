@@ -1920,7 +1920,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	/**
 	 * @testdox wc_order_search() respects configured, filtered, unlimited, and invalid result limits.
 	 *
-	 * @since 11.1.0
+	 * @since 11.4.0
 	 */
 	public function test_wc_order_search_limit() {
 		$orders = array(
@@ -1981,7 +1981,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	/**
 	 * @testdox wc_order_search() excludes newer non-order posts before applying the CPT candidate limit.
 	 *
-	 * @since 11.1.0
+	 * @since 11.4.0
 	 */
 	public function test_wc_order_search_limit_excludes_non_order_posts() {
 		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {

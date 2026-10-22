@@ -5,6 +5,7 @@
  * @package WooCommerce\Tests\Checkout.
  */
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
 
 /**
@@ -37,6 +38,18 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 			public function validate_checkout( &$data, &$errors ) {
 				return parent::validate_checkout( $data, $errors );
 			}
+
+			public function process_order_without_payment( $order_id ) {
+				return parent::process_order_without_payment( $order_id );
+			}
+
+			public function process_customer( $data ) {
+				parent::process_customer( $data );
+			}
+
+			public function update_session( $data ) {
+				return parent::update_session( $data );
+			}
 		};
 		// phpcs:enable Generic.CodeAnalysis, Squiz.Commenting
 
@@ -51,6 +64,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	public function tearDown(): void {
 		remove_filter( 'woocommerce_checkout_registration_enabled', '__return_true' );
 		delete_option( 'woocommerce_calc_taxes' );
+		WC()->countries->locale = array();
 
 		foreach ( $this->extra_field_filters as $extra_field_filter ) {
 			remove_filter( 'woocommerce_checkout_fields', $extra_field_filter );
@@ -144,6 +158,91 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Checkout refuses to complete a cancelled unpaid non-zero order without payment.
+	 */
+	public function test_process_order_without_payment_rejects_cancelled_unpaid_non_zero_order(): void {
+		$order = wc_create_order();
+		$order->set_total( 10 );
+		$order->set_status( OrderStatus::CANCELLED );
+		$order->save();
+
+		try {
+			$this->sut->process_order_without_payment( $order->get_id() );
+			$this->fail( 'Checkout should not complete a cancelled unpaid non-zero order without payment.' );
+		} catch ( Exception $exception ) {
+			$this->assertSame( 'This order cannot be completed without payment. Please try again.', $exception->getMessage() );
+		}
+
+		$reloaded_order = wc_get_order( $order->get_id() );
+		$this->assertSame( OrderStatus::CANCELLED, $reloaded_order->get_status(), 'The order status should not change.' );
+		$this->assertNull( $reloaded_order->get_date_paid(), 'The order should not be marked paid.' );
+	}
+
+	/**
+	 * @testdox Checkout allows extensions to complete a pending non-zero order without payment.
+	 */
+	public function test_process_order_without_payment_allows_pending_non_zero_order(): void {
+		$order = wc_create_order();
+		$order->set_total( 10 );
+		$order->set_status( OrderStatus::PENDING );
+		$order->save();
+
+		add_filter(
+			'woocommerce_checkout_no_payment_needed_redirect',
+			function () {
+				throw new RuntimeException( 'Stop the test before checkout sends its redirect.' );
+			}
+		);
+
+		try {
+			$this->sut->process_order_without_payment( $order->get_id() );
+			$this->fail( 'Checkout should reach its no-payment redirect.' );
+		} catch ( RuntimeException $exception ) {
+			$this->assertSame( 'Stop the test before checkout sends its redirect.', $exception->getMessage() );
+		}
+
+		$reloaded_order = wc_get_order( $order->get_id() );
+		$this->assertTrue( $reloaded_order->is_paid(), 'The intentionally payment-free order should be completed.' );
+		$this->assertNotNull( $reloaded_order->get_date_paid(), 'The intentionally payment-free order should have a paid date.' );
+	}
+
+	/**
+	 * @testdox A logged in customer's VAT exemption should survive checkout saving their account.
+	 */
+	public function test_process_customer_keeps_logged_in_customer_vat_exemption(): void {
+		$customer_id = WC_Helper_Customer::create_customer( 'classic_vat_exempt', 'password', 'classic-vat-exempt@example.com' )->get_id();
+		// Backdate the account so checkout's save gives it a newer timestamp than the session.
+		update_user_meta( $customer_id, 'last_update', time() - MINUTE_IN_SECONDS );
+		wp_set_current_user( $customer_id );
+		WC()->session->init();
+
+		$original_customer = WC()->customer;
+		WC()->customer     = new WC_Customer( $customer_id, true );
+
+		try {
+			WC()->customer->set_is_vat_exempt( true );
+			WC()->customer->save();
+
+			$this->sut->process_customer(
+				array(
+					'billing_first_name' => 'Classic',
+					'billing_address_1'  => '456 Classic Road',
+					'billing_email'      => 'classic-vat-exempt@example.com',
+				)
+			);
+
+			// The session customer is saved on shutdown in a real request.
+			WC()->customer->save();
+
+			$reloaded_customer = new WC_Customer( $customer_id, true );
+			$this->assertTrue( $reloaded_customer->get_is_vat_exempt(), 'VAT exemption should survive the account save so a retry is not charged tax.' );
+			$this->assertSame( '456 Classic Road', $reloaded_customer->get_billing_address_1(), 'The address should come from the saved account.' );
+		} finally {
+			WC()->customer = $original_customer;
+		}
+	}
+
+	/**
 	 * @testdox the customer notes can have linebreaks.
 	 */
 	public function test_order_notes_linebreaks() {
@@ -166,7 +265,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 			)
 		);
 		// The preg_replace is necessary because the template outputs a lot of whitespace, we can just make sure the <br /> tags are there as the other whitespace doesn't matter.
-		$this->assertStringContainsString( 'A string<br />with linebreaks<br />in it.', preg_replace( '/[\t\n\r]+/', '', $content ) );
+		$this->assertMatchesRegularExpression( '~A string<br\s*/?>with linebreaks<br\s*/?>in it\.~', preg_replace( '/[\t\n\r]+/', '', $content ) );
 	}
 
 	/**
@@ -213,6 +312,43 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 
 		$this->assertEmpty( $errors->get_error_message( 'billing_country_validation' ) );
 		$this->assertEmpty( $errors->get_error_message( 'shipping_country_validation' ) );
+	}
+
+	/**
+	 * @testdox 'validate_posted_data' skips the required check only for fields whose locale hidden flag is exactly true.
+	 *
+	 * @testWith [true, false]
+	 *           [false, true]
+	 *           ["yes", true]
+	 *           [1, true]
+	 *
+	 * @param mixed $hidden                Value of the locale's hidden flag for the postcode field.
+	 * @param bool  $expect_required_error Whether a required-field error is expected.
+	 */
+	public function test_validate_posted_data_skips_required_check_for_hidden_fields( $hidden, $expect_required_error ) {
+		$locale_filter = function ( $locale ) use ( $hidden ) {
+			$locale['ES']['postcode']['hidden'] = $hidden;
+			return $locale;
+		};
+		add_filter( 'woocommerce_get_country_locale', $locale_filter );
+		WC()->countries->locale   = array();
+		$_POST['billing_country'] = 'ES';
+
+		$data   = array(
+			'billing_country'           => 'ES',
+			'billing_postcode'          => '',
+			'ship_to_different_address' => false,
+		);
+		$errors = new WP_Error();
+
+		$this->sut->validate_posted_data( $data, $errors );
+
+		$required_error = $errors->get_error_message( 'billing_postcode_required' );
+		if ( $expect_required_error ) {
+			$this->assertNotEmpty( $required_error, 'Fields not hidden with exactly true should still trigger a required-field error.' );
+		} else {
+			$this->assertEmpty( $required_error, 'Hidden fields should not trigger a required-field error.' );
+		}
 	}
 
 	/**
@@ -600,6 +736,143 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox 'validate_checkout' refuses a shippable order when hidden shipping costs leave the cart without a shipping package.
+	 */
+	public function test_validate_checkout_refuses_order_without_shipping_package_when_costs_need_an_address(): void {
+		$remove_billing_address = static function ( $fields ) {
+			unset( $fields['billing']['billing_city'], $fields['billing']['billing_address_1'], $fields['billing']['billing_postcode'] );
+			return $fields;
+		};
+		add_filter( 'woocommerce_checkout_fields', $remove_billing_address );
+		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
+		WC_Helper_Shipping::create_simple_flat_rate( 8 );
+
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		WC()->customer->set_shipping_location( 'US', 'NY', '10001', "O'Fallon" );
+		WC()->cart->calculate_totals();
+		$this->assertTrue( WC()->cart->has_calculated_shipping(), 'The order review should show a shipping rate once the cart calculator address is set.' );
+
+		$original_post = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Restored in the finally block.
+		$_POST         = array(
+			'billing_first_name' => 'Test',
+			'billing_last_name'  => 'Shopper',
+			'billing_phone'      => '5555555555',
+			'billing_email'      => 'shopper@example.com',
+			'billing_country'    => 'US',
+			'billing_state'      => 'NY',
+			'payment_method'     => 'cod',
+		);
+
+		try {
+			$data = $this->sut->get_posted_data();
+			$this->sut->update_session( $data );
+
+			$errors = new WP_Error();
+			$this->sut->validate_checkout( $data, $errors );
+		} finally {
+			$_POST = $original_post;
+			remove_filter( 'woocommerce_checkout_fields', $remove_billing_address );
+			delete_option( 'woocommerce_shipping_cost_requires_address' );
+			WC_Helper_Shipping::delete_simple_flat_rate();
+		}
+
+		$this->assertFalse( WC()->cart->has_calculated_shipping(), 'Placing the order blanks the shipping address, so shipping is no longer calculated.' );
+		$this->assertSame(
+			'Please enter an address to continue.',
+			$errors->get_error_message( 'shipping' ),
+			'Checkout must not accept a shippable order that has no shipping package.'
+		);
+	}
+
+	/**
+	 * @testdox 'validate_checkout' charges shipping when shipping is forced to billing and the removed billing fields are the only missing address parts.
+	 *
+	 * @testWith [ "10001", "O'Fallon" ]
+	 *           [ "", "" ]
+	 *
+	 * @param string $calculator_postcode Postcode entered in the cart shipping calculator, or empty when the shopper went straight to checkout.
+	 * @param string $calculator_city     City entered in the cart shipping calculator.
+	 */
+	public function test_validate_checkout_accepts_forced_billing_order_when_removed_billing_fields_are_missing( string $calculator_postcode, string $calculator_city ): void {
+		$remove_billing_address = static function ( $fields ) {
+			unset( $fields['billing']['billing_city'], $fields['billing']['billing_address_1'], $fields['billing']['billing_postcode'] );
+			return $fields;
+		};
+		add_filter( 'woocommerce_checkout_fields', $remove_billing_address );
+		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
+		update_option( 'woocommerce_ship_to_destination', 'billing_only' );
+		WC_Helper_Shipping::create_simple_flat_rate( 8 );
+
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->customer->set_shipping_location( 'US', 'NY', $calculator_postcode, $calculator_city );
+		WC()->cart->calculate_totals();
+
+		$original_post = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Restored in the finally block.
+		$_POST         = array(
+			'billing_first_name' => 'Test',
+			'billing_last_name'  => 'Shopper',
+			'billing_phone'      => '5555555555',
+			'billing_email'      => 'shopper@example.com',
+			'billing_country'    => 'US',
+			'billing_state'      => 'NY',
+			'shipping_method'    => array( 'flat_rate' ),
+			'payment_method'     => 'cod',
+		);
+
+		try {
+			$data = $this->sut->get_posted_data();
+			$this->sut->update_session( $data );
+
+			$errors = new WP_Error();
+			$this->sut->validate_checkout( $data, $errors );
+		} finally {
+			$_POST = $original_post;
+			remove_filter( 'woocommerce_checkout_fields', $remove_billing_address );
+			WC_Helper_Shipping::delete_simple_flat_rate();
+		}
+
+		$this->assertTrue( WC()->cart->has_calculated_shipping(), 'Shipping should be calculated from the country and state the shopper was asked for.' );
+		$this->assertSame( '', $errors->get_error_message( 'shipping' ), 'The order must not be blocked for an address field the store does not show.' );
+		$this->assertSame( 8.0, (float) WC()->cart->get_shipping_total(), 'The order must be charged the shipping rate.' );
+	}
+
+	/**
+	 * @testdox 'validate_checkout' still accepts an order when a plugin deliberately turns off shipping calculation.
+	 */
+	public function test_validate_checkout_accepts_order_when_shipping_calculation_is_turned_off_by_filter(): void {
+		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
+		add_filter( 'woocommerce_cart_ready_to_calc_shipping', '__return_false' );
+		WC_Helper_Shipping::create_simple_flat_rate( 8 );
+
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->customer->set_shipping_location( 'US', 'NY', '10001', 'New York' );
+
+		try {
+			WC()->cart->calculate_totals();
+
+			$data   = array(
+				'ship_to_different_address' => false,
+				'billing_country'           => 'US',
+				'shipping_country'          => 'US',
+				'payment_method'            => 'cod',
+			);
+			$errors = new WP_Error();
+			$this->sut->validate_checkout( $data, $errors );
+		} finally {
+			remove_filter( 'woocommerce_cart_ready_to_calc_shipping', '__return_false' );
+			delete_option( 'woocommerce_shipping_cost_requires_address' );
+			WC_Helper_Shipping::delete_simple_flat_rate();
+		}
+
+		$this->assertFalse( WC()->cart->has_calculated_shipping(), 'The filter should stop shipping from being calculated.' );
+		$this->assertSame( '', $errors->get_error_message( 'shipping' ), 'Stores that turn off shipping calculation on purpose must still be able to take orders.' );
+	}
+
+	/**
 	 * @testdox If the WooCommerce class's customer object is null (like if WC has not been fully initialized yet),
 	 *          calling WC_Checkout::get_value should not throw an error.
 	 */
@@ -655,6 +928,42 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox create_order_fee_lines sets tax status to 'none' for non-taxable cart fees and 'taxable' for taxable ones.
+	 *
+	 * @testWith [true, "taxable", ""]
+	 *           [false, "none", ""]
+	 *
+	 * @param bool   $taxable Whether the cart fee is taxable.
+	 * @param string $expected_tax_status The expected tax status for the created fee order item.
+	 * @param string $expected_tax_class The expected tax class for the created fee order item.
+	 */
+	public function test_create_order_fee_lines_sets_correct_tax_status( $taxable, $expected_tax_status, $expected_tax_class ): void {
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$add_fee = static function ( $cart ) use ( $taxable ) {
+			$cart->add_fee( 'Test fee', 10, $taxable );
+		};
+		add_action( 'woocommerce_cart_calculate_fees', $add_fee );
+
+		try {
+			WC()->cart->calculate_totals();
+			$order = wc_get_order( $this->sut->create_order( array( 'payment_method' => WC_Gateway_BACS::ID ) ) );
+		} finally {
+			remove_action( 'woocommerce_cart_calculate_fees', $add_fee );
+		}
+
+		$fee_items = $order->get_fees();
+
+		$this->assertCount( 1, $fee_items );
+
+		/** @var WC_Order_Item_Fee $fee_item */
+		$fee_item = array_values( $fee_items )[0];
+		$this->assertSame( $expected_tax_status, $fee_item->get_tax_status() );
+		$this->assertSame( $expected_tax_class, $fee_item->get_tax_class() );
+	}
+
+	/**
 	 * @testdox Checkout page contains login form for guests.
 	 */
 	public function test_checkout_page_contains_login_form_for_guests() {
@@ -672,6 +981,96 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 
 		// Assert that the login form is present.
 		$this->assertStringContainsString( 'woocommerce-form-login', $output );
+	}
+
+	/**
+	 * @testdox The woocommerce_checkout_after_cart_item_meta action fires for visible cart items in the review order template.
+	 */
+	public function test_checkout_after_cart_item_meta_action_fires_for_visible_items() {
+		$product       = WC_Helper_Product::create_simple_product();
+		$cart_item_key = WC()->cart->add_to_cart(
+			$product->get_id(),
+			1,
+			'',
+			'',
+			array(
+				'test_meta' => 'TEST_ITEM_META_DATA',
+			)
+		);
+
+		$fired    = array();
+		$callback = static function ( $cart_item, $cart_item_key ) use ( &$fired ) {
+			$fired[ $cart_item_key ] = $cart_item;
+			echo 'TEST_CHECKOUT_AFTER_CART_ITEM_META';
+		};
+		add_action( 'woocommerce_checkout_after_cart_item_meta', $callback, 10, 2 );
+
+		$get_item_data = static function () {
+			return array(
+				array(
+					'key'     => 'test_meta',
+					'display' => 'TEST_ITEM_META_DATA',
+				),
+			);
+		};
+		add_filter( 'woocommerce_get_item_data', $get_item_data );
+
+		$output = wc_get_template_html( 'checkout/review-order.php' );
+
+		remove_action( 'woocommerce_checkout_after_cart_item_meta', $callback, 10 );
+		remove_filter( 'woocommerce_get_item_data', $get_item_data );
+
+		$this->assertCount( 1, $fired, 'The action should fire once for the visible cart item.' );
+		$this->assertArrayHasKey( $cart_item_key, $fired, 'The action should receive the cart item key.' );
+		$this->assertSame( $product->get_id(), $fired[ $cart_item_key ]['product_id'], 'The action should receive the cart item.' );
+		$this->assertStringContainsString( 'TEST_ITEM_META_DATA', $output, 'The cart item data should be rendered for the test to be meaningful.' );
+		$this->assertStringContainsString( 'TEST_CHECKOUT_AFTER_CART_ITEM_META', $output );
+
+		$cell_start = strpos( $output, '<td class="product-name">' );
+		$cell_end   = strpos( $output, '</td>', $cell_start );
+		$marker_pos = strpos( $output, 'TEST_CHECKOUT_AFTER_CART_ITEM_META' );
+		$meta_pos   = strpos( $output, 'TEST_ITEM_META_DATA' );
+
+		$this->assertGreaterThan(
+			$cell_start,
+			$marker_pos,
+			'The action output should be rendered inside the product name cell.'
+		);
+		$this->assertLessThan(
+			$cell_end,
+			$marker_pos,
+			'The action output should be rendered inside the product name cell.'
+		);
+		$this->assertGreaterThan(
+			$meta_pos,
+			$marker_pos,
+			'The action output should be rendered after the cart item data.'
+		);
+	}
+
+	/**
+	 * @testdox The woocommerce_checkout_after_cart_item_meta action does not fire for items hidden by woocommerce_checkout_cart_item_visible.
+	 */
+	public function test_checkout_after_cart_item_meta_action_does_not_fire_for_hidden_items() {
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id() );
+
+		add_filter( 'woocommerce_checkout_cart_item_visible', '__return_false' );
+
+		$fired    = 0;
+		$callback = static function () use ( &$fired ) {
+			++$fired;
+			echo 'TEST_CHECKOUT_AFTER_CART_ITEM_META';
+		};
+		add_action( 'woocommerce_checkout_after_cart_item_meta', $callback );
+
+		$output = wc_get_template_html( 'checkout/review-order.php' );
+
+		remove_filter( 'woocommerce_checkout_cart_item_visible', '__return_false' );
+		remove_action( 'woocommerce_checkout_after_cart_item_meta', $callback );
+
+		$this->assertSame( 0, $fired, 'The action should not fire for hidden cart items.' );
+		$this->assertStringNotContainsString( 'TEST_CHECKOUT_AFTER_CART_ITEM_META', $output );
 	}
 
 	/**
@@ -708,5 +1107,158 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		$this->assertInstanceOf( WP_Error::class, $result, 'create_order() should return a WP_Error when line items were not persisted.' );
 		$this->assertSame( 'checkout-error', $result->get_error_code(), 'Error code should come from the checkout try/catch path.' );
 		$this->assertStringContainsString( 'Order items could not be saved', $result->get_error_message(), 'Error message should surface the defense-in-depth guard message.' );
+	}
+
+	/**
+	 * @testdox Checkout tolerates non-array cart variation data when building contextual item names.
+	 */
+	public function test_create_order_line_items_tolerates_malformed_variation_data(): void {
+		list( $product, $variation ) = WC_Helper_Product::create_variation_product_with_global_attributes(
+			'Checkout Malformed Variation Product',
+			array(
+				'pa_size'   => 'huge',
+				'pa_number' => '',
+			)
+		);
+
+		$order = wc_create_order();
+
+		$malformed_variation_filter = function ( $cart_contents ) {
+			foreach ( $cart_contents as &$cart_item ) {
+				$cart_item['variation'] = 'malformed variation data';
+			}
+			unset( $cart_item );
+
+			return $cart_contents;
+		};
+
+		try {
+			$this->add_variation_to_cart( $product, $variation );
+			add_filter( 'woocommerce_get_cart_contents', $malformed_variation_filter );
+
+			$this->sut->create_order_line_items( $order, WC()->cart );
+			$order->save();
+
+			$items = array_values( wc_get_order( $order->get_id() )->get_items() );
+			$this->assertCount( 1, $items );
+			$this->assertSame( $variation->get_name(), $items[0]->get_name() );
+			$this->assertCount( 0, $items[0]->get_meta_data(), 'Malformed variation data should not be stored as item meta.' );
+		} finally {
+			WC()->cart->empty_cart();
+			$order->delete( true );
+			$variation->delete( true );
+			$product->delete( true );
+		}
+	}
+
+	/**
+	 * @testdox Checkout merges selected taxonomy Any attributes into the item name without duplicating them as metadata.
+	 */
+	public function test_create_order_line_items_merges_taxonomy_any_attributes_and_dedupes_meta(): void {
+		list( $product, $variation ) = WC_Helper_Product::create_variation_product_with_global_attributes(
+			'Checkout Taxonomy Any Product',
+			array(
+				'pa_size'   => 'huge',
+				'pa_number' => '',
+			)
+		);
+
+		$order = wc_create_order();
+
+		try {
+			$this->add_variation_to_cart( $product, $variation );
+			$this->sut->create_order_line_items( $order, WC()->cart );
+			$order->save();
+
+			$items = array_values( $order->get_items() );
+			$this->assertCount( 1, $items );
+			$this->assertSame( 'Checkout Taxonomy Any Product - huge, 1', $items[0]->get_name() );
+			$this->assertSame( '1', $items[0]->get_meta( 'pa_number' ), 'The selected Any value should remain stored as item meta.' );
+			$this->assertCount( 0, $items[0]->get_formatted_meta_data(), 'Selected Any values included in the item name should not be duplicated as metadata.' );
+		} finally {
+			WC()->cart->empty_cart();
+			$order->delete( true );
+			$variation->delete( true );
+			$product->delete( true );
+		}
+	}
+
+	/**
+	 * @testdox Persisted order item names use raw custom Any values so order meta dedup keeps working.
+	 *
+	 * @dataProvider custom_any_value_provider
+	 *
+	 * @param string $selected_value Selected custom attribute value.
+	 * @param string $expected_name  Expected persisted order item name.
+	 */
+	public function test_create_order_line_items_persists_raw_custom_any_values( string $selected_value, string $expected_name ): void {
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_id( 0 );
+		$attribute->set_name( 'finish' );
+		$attribute->set_options( array( 'gloss', 'matte', 'Black & White' ) );
+		$attribute->set_visible( true );
+		$attribute->set_variation( true );
+
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Canonical Name Product' );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_attributes( array( 'finish' => '' ) );
+		$variation->set_regular_price( '10' );
+		$variation->save();
+
+		$filter_option_name = static function ( $value ) {
+			return 'gloss' === $value ? 'Polished' : $value;
+		};
+		add_filter( 'woocommerce_variation_option_name', $filter_option_name );
+
+		$order = wc_create_order();
+
+		try {
+			$this->add_variation_to_cart( $product, $variation, array( 'attribute_finish' => $selected_value ) );
+			$this->sut->create_order_line_items( $order, WC()->cart );
+			$order->save();
+
+			$items = array_values( $order->get_items() );
+			$this->assertCount( 1, $items );
+			$this->assertSame( $expected_name, $items[0]->get_name(), 'Persisted names must use raw values, not woocommerce_variation_option_name output.' );
+			$this->assertCount( 0, $items[0]->get_formatted_meta_data(), 'The raw value in the name must keep order meta dedup working.' );
+		} finally {
+			WC()->cart->empty_cart();
+			$order->delete( true );
+			$variation->delete( true );
+			$product->delete( true );
+		}
+	}
+
+	/**
+	 * Provides selected custom Any values and their expected persisted names.
+	 *
+	 * @return array<string, array{string, string}>
+	 */
+	public static function custom_any_value_provider(): array {
+		return array(
+			'raw value wins over filtered label' => array( 'gloss', 'Canonical Name Product - gloss' ),
+			'entity-bearing value dedupes'       => array( 'Black & White', 'Canonical Name Product - Black & White' ),
+		);
+	}
+
+	/**
+	 * Adds a variation to the cart, asserting success, and calculates totals.
+	 *
+	 * @param WC_Product $product    Variable product.
+	 * @param WC_Product $variation  Variation to add.
+	 * @param array      $attributes Selected variation attributes.
+	 */
+	private function add_variation_to_cart( $product, $variation, array $attributes = array(
+		'attribute_pa_size'   => 'huge',
+		'attribute_pa_number' => '1',
+	) ): void {
+		$cart_item_key = WC()->cart->add_to_cart( $product->get_id(), 1, $variation->get_id(), $attributes );
+		$this->assertNotFalse( $cart_item_key, 'The variation should be added to the cart.' );
+		WC()->cart->calculate_totals();
 	}
 }

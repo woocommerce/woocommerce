@@ -95,7 +95,7 @@ type InstallAndActivateSuccessResponse = {
 	data: {
 		installed: PluginNames[];
 		results: Record< PluginNames, boolean >;
-		install_time: Record< PluginNames, number >;
+		install_time: Partial< Record< string, number > >;
 	};
 };
 
@@ -245,7 +245,9 @@ export const pluginInstallerMachine = createMachine(
 							installTime:
 								(
 									event as DoneActorEvent< InstallAndActivateSuccessResponse >
-								 ).output.data.install_time[ plugin ] || 0,
+								 ).output.data.install_time[
+									getPluginSlug( plugin )
+								] || 0,
 						},
 					];
 				},

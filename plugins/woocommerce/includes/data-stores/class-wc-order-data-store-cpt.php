@@ -582,7 +582,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 		/**
 		 * Filters the maximum number of order IDs returned by an order search.
 		 *
-		 * @since 11.1.0
+		 * @since 11.4.0
 		 *
 		 * @param int    $limit Maximum number of order IDs to return. Use -1 for no limit.
 		 * @param string $term  Search term.
@@ -1116,7 +1116,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			}
 		}
 
-		// Handle custom orderby paramers.
+		// Handle custom orderby parameters.
 		if ( 'total' === $wp_query_args['orderby'] ) {
 			$wp_query_args['orderby']   = 'meta_value_num';
 			$wp_query_args['meta_key']  = '_order_total'; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key

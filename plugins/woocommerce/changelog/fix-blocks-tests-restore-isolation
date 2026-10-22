@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Run the Blocks test classes that touch WordPress state on a WordPress test case, so their database writes are rolled back and their filters no longer leak into the rest of the suite.

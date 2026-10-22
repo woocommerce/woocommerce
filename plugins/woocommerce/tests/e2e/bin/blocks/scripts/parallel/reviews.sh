@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
 # Add reviews to Hoodie. Order matters: specs treat the last created review as most recent.
 # Include three distinct ratings so latest / highest / lowest are different reviews.
 hoodie_post_id=$(wp post list --post_type=product --field=ID --name="Hoodie" --format=ids)

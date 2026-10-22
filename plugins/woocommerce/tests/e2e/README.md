@@ -43,6 +43,8 @@ To re-create the environment for a fresh state:
 
 `pnpm env:e2e:restart` (resets and restarts the E2E test environment)
 
+Core and Blocks tests share the same E2E `wp-env` database but expect different fixture profiles. `pnpm env:start:blocks` seeds the Blocks profile on top of whatever the database already holds, and `pnpm test:e2e:*` runs against the environment's current state. The Blocks seed resets the shipping zones, tax classes, and tax settings it relies on, so running it after Core tests is safe for those. Other state a Core run leaves behind can still leak into the Blocks profile. If Blocks tests fail after Core tests ran on the same environment, run `pnpm env:e2e:restart` and then `pnpm env:start:blocks`. To go back to Core tests after Blocks, run `pnpm env:e2e:restart`.
+
 You can refer to the pnpm scripts in the `package.json` file for more commands. Check out the `env:some-command` scripts
 for managing the `wp-env` environment.
 
@@ -72,6 +74,14 @@ run `pnpm playwright test --help`
 
 The e2e test environment configuration can be found in the `.wp-env.e2e.json` file in the `plugins/woocommerce`
 folder (the `.wp-env.json` file configures the separate dev environment, and `.wp-env.test.json` the lean PHP-unit environment).
+
+### PHP coverage in CI
+
+See the [PHP version guidelines](https://github.com/woocommerce/woocommerce/blob/trunk/docs/contribution/testing/php-version-coverage.md) for how to choose PHP versions and where they are covered by E2E and PHP unit tests.
+
+The policy lives in `config.ci.tests` in `plugins/woocommerce/package.json`, using each job's `events` and `testEnv.config.phpVersion`. PHP 7.4 and 8.5 have separate nightly entries and report names; the existing report names represent PHP 8.3. When updating the policy, keep the routine version aligned with store usage and update the latest nightly version as WooCommerce adopts a newer PHP release.
+
+Custom on-demand triggers run their selected jobs with the configured PHP version; `core-e2e-php-8.5` remains available for PHP 8.5. Tests against existing hosted sites also keep the host's PHP version. Local E2E environments continue to use `.wp-env.e2e.json`; set `WP_ENV_PHP_VERSION=8.3` when starting the environment to reproduce routine CI coverage.
 
 For more information on how to configure the test environment for `wp-env`, please check out
 the official [documentation](https://github.com/WordPress/gutenberg/tree/trunk/packages/env).
@@ -167,6 +177,44 @@ Still, here's a few tips to get you started:
 Playwright's Best Practices guide is a good
 read: [Playwright Best Practices](https://playwright.dev/docs/best-practices).
 
+### Parallel, locked, and serial specs
+
+Core and Blocks specs each run in two Playwright projects on one shared site. The parallel project runs specs in several workers at the same time. The serial project runs them one at a time, in one worker.
+
+| Project | Specs | Workers | After each test | Command |
+| --- | --- | --- | --- | --- |
+| `core-parallel` | Core specs not in `serialRunSpecs` | Several | Nothing | `pnpm test:e2e:core-parallel` |
+| `core-serial` | Core specs in `serialRunSpecs` | 1 | Nothing | `pnpm test:e2e:core-serial` |
+| `blocks-parallel` | Blocks specs not in `blocksSerialSpecs` | Several | Nothing | `pnpm test:e2e:blocks:parallel` |
+| `blocks-serial` | Blocks specs in `blocksSerialSpecs` | 1 | Database reset | `pnpm test:e2e:blocks:serial` |
+
+Both lists are in `playwright.config.ts`. A spec that is not on a list runs in the parallel project.
+
+Run one project at a time, as CI does: each project runs in its own CI jobs. A serial spec changes state that parallel specs read, and the `blocks-serial` database reset deletes the data of the tests that run in parallel. `pnpm test:e2e:blocks` runs `blocks-parallel` first, then `blocks-serial`.
+
+Put each new spec in the first of these three types that works for it:
+
+1. **Parallel.** The spec does not change site-wide state. It makes its own products, orders, customers, pages, and templates, with unique names, and does not change shared settings. It cleans up what it makes, because `core-parallel` and `blocks-parallel` do not reset the database.
+2. **Parallel with a lock.** The spec changes a site-wide option, but only specs that change the same option read it. Give all those specs the same [test lock](https://playwright.dev/docs/test-parallel#test-locks) from `locks` in `fixtures/fixtures.ts`. Specs that share a lock never run at the same time, in any worker or project. Add a new entry to `locks` if none fits. Set the option back in `afterEach` or `afterAll`.
+
+    ```ts
+    import { test, locks } from '../../fixtures/fixtures';
+
+    test.describe( 'Email settings', { lock: locks.EMAIL_FEATURE_FLAGS }, () => {
+    	// ...
+    } );
+    ```
+
+    The projects do not use `fullyParallel`, so one worker runs a whole spec file. A lock on one test holds for the whole file, including `beforeAll` and `afterAll`. Blocks specs import `locks` from the same file.
+
+3. **Serial.** Use this type only when the first two cannot work: the spec changes a setting that many other specs read, such as tax, store address, permalinks, the active theme, or a site-wide template. A lock cannot help here, because the specs that read the setting do not take the lock. Add the spec to `serialRunSpecs` or `blocksSerialSpecs`, under the comment that gives the reason.
+
+A spec that changes a setting only for itself can often use its own data instead, for example its own tax class, customer, product, or template. Each serial spec makes the serial project slower and adds to the CI time of every pull request.
+
+### Gotchas
+
+- **Never run two wp-env commands at once.** Await each `wpCLI` call (or any other helper that shells out to `wp-env`, such as `getInstalledWordPressVersion`) before starting the next, and keep them out of `Promise.all`. Every wp-env command rewrites `wp-env-cache.json` in the environment's work directory without locking, so two overlapping commands can drop its `runtime` key. From then on every wp-env command, `run` and `destroy` included, fails with "Environment not initialized. Run `wp-env start` first." until the environment starts again, so one overlap breaks every later spec in the CI job. Overlapping a single `wpCLI` call with browser work such as `page.goto` is fine, since that doesn't start wp-env.
+
 ## Test helper plugins
 
 Some E2E suites need fixture mechanisms that can't be expressed cleanly with REST or WP-CLI alone — for example, filter-driven content overrides, server-side event mirroring, or synchronous triggers for normally-scheduled jobs. These ship as small PHP plugins under `tests/e2e/test-plugins/`.
@@ -180,12 +228,15 @@ Keep `Requires PHP` at the **lowest PHP version any E2E environment runs** (curr
 How a helper is wired up depends on when it needs to be active:
 
 - **Always-on helpers** are listed in `.wp-env.e2e.json`'s `plugins` array, which mounts the folder **and auto-activates** it. Do not add a manual `wp plugin activate …` line for these. Current always-on helpers:
-    - `woocommerce-e2e-test-helper` — the general-purpose helper bundle, covering three concerns in one plugin:
+    - `woocommerce-e2e-test-helper` — the general-purpose helper bundle, covering four concerns in one plugin:
         - **Filter setter** — registers WordPress filters from an `e2e-filters` cookie so tests can override filtered values on the fly.
         - **Process waiting actions** — runs the Action Scheduler queue synchronously when a request carries the `?process-waiting-actions` query param (used by the analytics suite so order data lands in reports immediately).
         - **Test helper REST API** — endpoints (`e2e-feature-flags`, `e2e-options`, `e2e-environment`, `e2e-theme`) for toggling feature flags, setting/deleting options, reading environment info and switching themes during a test.
+        - **Timing overrides** — fixed filters removing production delays and throttles that only slow tests down or make them flaky: WordPress' comment flood protection, and the 1-minute wait before the first Back in Stock Notifications batch. Unconditional rather than cookie-driven, because they must also apply to REST requests made outside the browser.
     - `wc-email-template-sync-test-helper` — see below (email template sync fixtures for RSM-146).
-- **Per-test block plugins** live in `tests/e2e/test-plugins/blocks/`, mounted (not auto-activated) via the `woocommerce-blocks-test-plugins` mapping. Each is activated and deactivated by the spec that needs it (e.g. `wp plugin activate woocommerce-blocks-test-plugins/<file>.php`), because they change store behavior globally and must not be on for every test.
+- **Per-test block plugins** live in `tests/e2e/test-plugins/blocks/`, mounted (not auto-activated) via the `woocommerce-blocks-test-plugins` mapping. They change store behavior, so they must not act for every test.
+    - The plugins in `COOKIE_GATED_TEST_PLUGINS` (`utils/blocks/test-plugins.ts`) are activated once by `blocks setup`. Each one acts only on requests that send a cookie named after its slug. A spec turns one on for its own browser context with `enableTestPlugin( context, '<plugin>' )`, so the spec can run in `blocks-parallel`.
+    - The other plugins are activated and deactivated by the spec that needs them (e.g. `wp plugin activate woocommerce-blocks-test-plugins/<file>.php`). Specs that do this are serial, because the plugin acts for all workers and `activatePlugin` races other specs on the `active_plugins` option.
 
 `woocommerce-cleanup` also lives under `test-plugins/`, but it is **not** in the wp-env `plugins` array — it's an on-demand site-reset tool installed only by the external (non-wp-env) setup path, `bin/test-env-setup-external.sh`.
 
@@ -193,14 +244,12 @@ How a helper is wired up depends on when it needs to be active:
 
 Powers the `tests/email-editor/update-propagation/` suite (RSM-146). Exposes:
 
-- Option-driven filter overrides for `woocommerce_email_block_template_html`, `woocommerce_email_template_sync_opted_in_emails`, and `woocommerce_transactional_emails_for_block_editor`.
-- A server-side Tracks event recorder, controlled by option `wc_test_tracks_enabled`.
-- A fake `WC_Email` subclass (`fake_thirdparty`) gated by option `wc_test_fake_third_party_email_enabled` for third-party-email scope tests.
-- REST endpoints under `/wp-json/wc-email-test-helper/v1/` for seeding posts, triggering sweeps and backfill synchronously, draining the Tracks log, and writing typed option values.
+- An option-driven filter override for `woocommerce_email_block_template_html`.
+- REST endpoints under `/wp-json/wc-email-test-helper/v1/` for seeding posts, triggering sweeps synchronously, reading post content and canonical hashes, and writing typed option values.
 
 The plugin is dormant when its driving options are empty. It has a `WP_DEBUG` plus `X-Playwright` header safety rail to prevent accidental activation outside test contexts.
 
-If a test fails with `404` on `/wp-json/wc-email-test-helper/v1/health`, the plugin isn't loaded — run `pnpm env:e2e:restart`.
+If a test fails with `404` on a `/wp-json/wc-email-test-helper/v1/` route, the plugin isn't loaded — run `pnpm env:e2e:restart`.
 
 The PR-tier subset of these tests can be run locally with:
 

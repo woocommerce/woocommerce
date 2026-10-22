@@ -264,6 +264,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		}
 
 		$where_filters[] = $this->get_customer_subquery( $query_args );
+		$where_filters[] = $this->get_payment_method_subquery( $query_args );
 		$refund_subquery = $this->get_refund_subquery( $query_args );
 		$from_clause    .= $refund_subquery['from_clause'];
 		if ( $refund_subquery['where_clause'] ) {
@@ -303,20 +304,22 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$defaults = array_merge(
 			parent::get_default_query_vars(),
 			array(
-				'interval'          => 'week',
-				'segmentby'         => '',
+				'interval'              => 'week',
+				'segmentby'             => '',
 
-				'match'             => 'all',
-				'status_is'         => array(),
-				'status_is_not'     => array(),
-				'product_includes'  => array(),
-				'product_excludes'  => array(),
-				'coupon_includes'   => array(),
-				'coupon_excludes'   => array(),
-				'tax_rate_includes' => array(),
-				'tax_rate_excludes' => array(),
-				'customer_type'     => '',
-				'category_includes' => array(),
+				'match'                 => 'all',
+				'status_is'             => array(),
+				'status_is_not'         => array(),
+				'product_includes'      => array(),
+				'product_excludes'      => array(),
+				'coupon_includes'       => array(),
+				'coupon_excludes'       => array(),
+				'tax_rate_includes'     => array(),
+				'tax_rate_excludes'     => array(),
+				'customer_type'         => '',
+				'payment_method_is'     => array(),
+				'payment_method_is_not' => array(),
+				'category_includes'     => array(),
 			)
 		);
 
@@ -335,7 +338,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @param array    $params                  Query limit parameters.
 	 * @param stdClass $data                    Reference to the data object to fill.
 	 * @param int      $expected_interval_count Number of expected intervals.
-	 * @return stdClass|WP_Error Data object `{ totals: *, intervals: array, total: int, pages: int, page_no: int }`, or error.
+	 * @return stdClass|\WP_Error Data object `{ totals: *, intervals: array, total: int, pages: int, page_no: int }`, or error.
 	 */
 	public function get_noncached_stats_data( $query_args, $params, &$data, $expected_interval_count ) {
 		global $wpdb;
@@ -579,6 +582,13 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'returning_customer' => $order->is_returning_customer(),
 		);
 
+		if ( self::has_payment_method_column() ) {
+			// An order without a gateway is stored as NULL, the same as the backfill leaves it. A refund
+			// carries no payment method of its own; the refund branch below takes the parent's.
+			$data['payment_method'] = $order instanceof WC_Order && $order->get_payment_method() ? $order->get_payment_method() : null;
+			$format[]               = '%s';
+		}
+
 		$order_fulfillment_status = '';
 		if ( FeaturesUtil::feature_is_enabled( 'fulfillments' ) && true === self::has_fulfillment_status_column() && $order instanceof WC_Order ) {
 			$order_fulfillment_status   = FulfillmentUtils::get_order_fulfillment_status( $order );
@@ -602,6 +612,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			if ( $parent_order && ! $parent_order instanceof WC_Order_Refund ) {
 				$data['parent_id'] = $parent_order->get_id();
 				$data['status']    = self::normalize_order_status( $parent_order->get_status() );
+
+				if ( $parent_order instanceof WC_Order && array_key_exists( 'payment_method', $data ) ) {
+					$data['payment_method'] = $parent_order->get_payment_method() ? $parent_order->get_payment_method() : null;
+				}
 
 				$refund_type               = $order->get_meta( '_refund_type' );
 				$uses_new_full_refund_data = OrderUtil::uses_new_full_refund_data();
@@ -633,11 +647,16 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 				}
 			}
 			/**
-			 * Set date_completed and date_paid the same as date_created to avoid problems
-			 * when they are being used to sort the data, as refunds don't have them filled
-			*/
-			$data['date_completed'] = $data['date_created'];
-			$data['date_paid']      = $data['date_created'];
+			 * Refunds don't have date_completed and date_paid filled, so backfill each from
+			 * date_created for sorting — but only when the parent order has that date itself.
+			 * A refund of a never-paid order (e.g. a failed order manually set to "refunded")
+			 * moves no money; backfilling its dates would include the refund row in reports
+			 * filtered by that date while the parent row (NULL date) stays excluded, counting
+			 * a one-sided negative. Mirroring the parent keeps the pair excluded together.
+			 */
+			$parent_is_order        = $parent_order instanceof WC_Order;
+			$data['date_completed'] = $parent_is_order && ! $parent_order->get_date_completed() ? null : $data['date_created'];
+			$data['date_paid']      = $parent_is_order && ! $parent_order->get_date_paid() ? null : $data['date_created'];
 		}
 
 		// Update or add the information to the DB.
@@ -798,6 +817,47 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	}
 
 	/**
+	 * Whether the wc_order_stats table has the payment_method column, read once per request and keyed by blog id.
+	 *
+	 * @var array<int, bool>
+	 */
+	private static $has_payment_method_column = array();
+
+	/**
+	 * Forget whether the payment_method column exists, so the next check asks the schema again.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 * @since 11.3.0
+	 *
+	 * @return void
+	 */
+	public static function flush_payment_method_column_cache() {
+		self::$has_payment_method_column = array();
+	}
+
+	/**
+	 * Check if the wc_order_stats table has the payment_method column.
+	 *
+	 * An order synced after an update and before dbDelta adds the column would otherwise lose its whole row.
+	 *
+	 * @return bool
+	 */
+	private static function has_payment_method_column(): bool {
+		global $wpdb;
+
+		$blog_id = get_current_blog_id();
+
+		if ( ! isset( self::$has_payment_method_column[ $blog_id ] ) ) {
+			$table_name = self::get_db_table_name();
+
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name cannot be prepared.
+			self::$has_payment_method_column[ $blog_id ] = (bool) $wpdb->get_var( "SHOW COLUMNS FROM `{$table_name}` LIKE 'payment_method'" );
+		}
+
+		return self::$has_payment_method_column[ $blog_id ];
+	}
+
+	/**
 	 * Check if the wc_order_stats table has the fulfillment_status column.
 	 *
 	 * @return boolean
@@ -869,7 +929,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		$first_order       = $oldest_orders[0];
 		$second_order      = isset( $oldest_orders[1] ) ? $oldest_orders[1] : false;
-		$excluded_statuses = self::get_excluded_report_order_statuses();
+		$excluded_statuses = array_map( array( __CLASS__, 'normalize_order_status' ), self::get_excluded_report_order_statuses() );
+		$order_status      = self::normalize_order_status( $order->get_status() );
 
 		// Order is older than previous first order. Stats dates only have second resolution, so
 		// orders placed within the same second are ranked by ID, the tie breaker
@@ -883,7 +944,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			(int) $order->get_id() < (int) $first_order->order_id
 		);
 
-		if ( $is_older && ! in_array( $order->get_status(), $excluded_statuses, true ) ) {
+		if ( $is_older && ! in_array( $order_status, $excluded_statuses, true ) ) {
 			self::set_customer_first_order( $customer_id, $order->get_id() );
 			return false;
 		}
@@ -896,7 +957,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			wc_string_to_datetime( $second_order->date_created ) < $order->get_date_created();
 		// Status has changed to an excluded status and next oldest order is now the first order.
 		$status_change = $second_order &&
-			in_array( $order->get_status(), $excluded_statuses, true );
+			in_array( $order_status, $excluded_statuses, true );
 		if ( $is_first_order && ( $date_change || $status_change ) ) {
 			self::set_customer_first_order( $customer_id, $second_order->order_id );
 			return true;

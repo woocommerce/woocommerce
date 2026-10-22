@@ -177,7 +177,7 @@ const Block = () => {
 			selectShippingRate( selectedOption );
 		}
 		// We want this to run on mount only, beware of updating it as it may cause
-		// shipping rate selection to end up in inifite loop
+		// shipping rate selection to end up in infinite loop
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [] );
 
@@ -196,7 +196,7 @@ const Block = () => {
 
 	// Prepare props to pass to the ExperimentalOrderLocalPickupPackages slot fill.
 	// We need to pluck out receiveCart.
-	// eslint-disable-next-line no-unused-vars
+
 	const { extensions, receiveCart, ...cart } = useStoreCart();
 	const slotFillProps = {
 		extensions,

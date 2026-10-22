@@ -774,19 +774,21 @@ class WC_Admin_Report {
 	 * @return string
 	 */
 	public function get_currency_tooltip() {
+		$currency_symbol = get_woocommerce_currency_symbol();
+
 		switch ( get_option( 'woocommerce_currency_pos' ) ) {
 			case 'right':
-				$currency_tooltip = 'append_tooltip: "' . get_woocommerce_currency_symbol() . '"';
+				$currency_tooltip = 'append_tooltip: ' . wp_json_encode( $currency_symbol, JSON_UNESCAPED_UNICODE );
 				break;
 			case 'right_space':
-				$currency_tooltip = 'append_tooltip: "&nbsp;' . get_woocommerce_currency_symbol() . '"';
+				$currency_tooltip = 'append_tooltip: ' . wp_json_encode( '&nbsp;' . $currency_symbol, JSON_UNESCAPED_UNICODE );
 				break;
 			case 'left':
-				$currency_tooltip = 'prepend_tooltip: "' . get_woocommerce_currency_symbol() . '"';
+				$currency_tooltip = 'prepend_tooltip: ' . wp_json_encode( $currency_symbol, JSON_UNESCAPED_UNICODE );
 				break;
 			case 'left_space':
 			default:
-				$currency_tooltip = 'prepend_tooltip: "' . get_woocommerce_currency_symbol() . '&nbsp;"';
+				$currency_tooltip = 'prepend_tooltip: ' . wp_json_encode( $currency_symbol . '&nbsp;', JSON_UNESCAPED_UNICODE );
 				break;
 		}
 

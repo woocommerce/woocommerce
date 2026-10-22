@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add unit test coverage for the Product Categories List block attributes: display style, product count, category images, hierarchy, and empty categories.

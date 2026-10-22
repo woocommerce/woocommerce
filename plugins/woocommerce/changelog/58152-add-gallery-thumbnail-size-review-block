@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Let browsers choose an appropriate product thumbnail in review blocks.

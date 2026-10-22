@@ -67,6 +67,101 @@ class Styles_Helper {
 	}
 
 	/**
+	 * Whether a value is a literal color rather than a palette slug.
+	 *
+	 * Only a value a slug could never be counts: a complete hex value, or functional notation of any
+	 * name, since a slug contains neither `#` nor a bracket. A bare word is a slug, including one
+	 * that names a CSS color -- classic themes register those, and the email cannot see their color.
+	 *
+	 * @param string $value Value of a color block attribute.
+	 * @return bool
+	 */
+	public static function is_color_literal( string $value ): bool {
+		$value = strtolower( trim( $value ) );
+
+		// #rgb, #rgba, #rrggbb, #rrggbbaa. A bare `#` or a stray `#zz` is not a color.
+		if ( 1 === preg_match( '/^#([0-9a-f]{3,4}|[0-9a-f]{6}|[0-9a-f]{8})$/', $value ) ) {
+			return true;
+		}
+
+		// Any function name, so CSS color functions need no list here. The bracket has to close:
+		// `rgb(` is not a color either.
+		return 1 === preg_match( '/^[a-z][a-z0-9-]*\(.*\)$/', $value );
+	}
+
+	/**
+	 * Every color the palette defines, one entry per slug, highest priority origin first.
+	 *
+	 * `WP_Theme_JSON` layers origins so a later one wins, so they are read in reverse of that order.
+	 * One entry per slug matters because a lookup reads the first and the stylesheet's cascade reads
+	 * the last, which would give a block a different color by route. An entry needs a usable slug
+	 * and color to be kept, and an incomplete one does not claim its slug.
+	 *
+	 * @param array $settings Theme settings array, as `WP_Theme_JSON::get_settings()` returns it.
+	 * @return array Flat list of color definitions, one per slug, each with a usable slug and color.
+	 */
+	public static function palette_definitions( array $settings ): array {
+		$palette = $settings['color']['palette'] ?? array();
+
+		// The palette arrives through a filter, and a non-array origin is a TypeError in
+		// array_merge() rather than a warning.
+		$definitions = array();
+		foreach ( array( 'custom', 'theme', 'blocks', 'default' ) as $origin ) {
+			if ( isset( $palette[ $origin ] ) && is_array( $palette[ $origin ] ) ) {
+				$definitions = array_merge( $definitions, $palette[ $origin ] );
+			}
+		}
+
+		$by_slug = array();
+		foreach ( $definitions as $definition ) {
+			if ( ! is_array( $definition ) ) {
+				continue;
+			}
+
+			$slug  = $definition['slug'] ?? null;
+			$color = $definition['color'] ?? null;
+
+			// An entry has to be usable to claim the slug, or it shuts out an origin that defines
+			// the same slug properly.
+			if ( ! is_string( $slug ) || '' === $slug || ! is_string( $color ) || '' === trim( $color ) ) {
+				continue;
+			}
+
+			// First origin wins, so a slug already seen is a lower-priority duplicate.
+			if ( ! array_key_exists( $slug, $by_slug ) ) {
+				$by_slug[ $slug ] = $definition;
+			}
+		}
+
+		return array_values( $by_slug );
+	}
+
+	/**
+	 * Resolve a color slug against the palette.
+	 *
+	 * Searches every origin, highest priority first: a slug the user defined in the email's own
+	 * global styles (`custom`) beats the theme's, which beats core's.
+	 *
+	 * A slug no origin defines returns an empty string, so callers omit the declaration and the
+	 * block keeps the surrounding color. A literal color passes through.
+	 *
+	 * @param array  $settings   Theme settings array, as `WP_Theme_JSON::get_settings()` returns it.
+	 * @param string $color_slug Color slug, or a literal color.
+	 * @return string The color value, or an empty string for a slug the palette does not define.
+	 */
+	public static function resolve_color_from_palette( array $settings, string $color_slug ): string {
+		foreach ( self::palette_definitions( $settings ) as $color_definition ) {
+			if ( $color_definition['slug'] === $color_slug ) {
+				return strtolower( (string) $color_definition['color'] );
+			}
+		}
+
+		// Not lowercased the way a palette color is: a custom property name inside `var()` is
+		// case-sensitive.
+		return self::is_color_literal( $color_slug ) ? trim( $color_slug ) : '';
+	}
+
+	/**
 	 * Get normalized block styles by translating color slugs to actual color values.
 	 *
 	 * This method handles the normalization of color-related attributes like backgroundColor,

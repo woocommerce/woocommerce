@@ -25,7 +25,27 @@ class CartItemSchema extends ItemSchema {
 	const IDENTIFIER = 'cart-item';
 
 	/**
-	 * Convert a WooCommerce cart item to an object suitable for the response.
+	 * Get the cart item schema properties.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @return array
+	 */
+	public function get_properties() {
+		$properties                    = parent::get_properties();
+		$properties['parent_item_key'] = [
+			'description' => __( 'Key of the parent cart item, or null if this item is standalone.', 'woocommerce' ),
+			'type'        => [ 'string', 'null' ],
+			'context'     => [ 'view', 'edit' ],
+			'readonly'    => true,
+			'default'     => null,
+		];
+
+		return $properties;
+	}
+
+	/**
+	 * Convert a WooCommerce cart item to a response object with its declared parent item key.
 	 *
 	 * @param array $cart_item Cart item array.
 	 * @return array
@@ -54,6 +74,7 @@ class CartItemSchema extends ItemSchema {
 
 		return [
 			'key'                  => $cart_item['key'],
+			'parent_item_key'      => $this->get_parent_item_key( $cart_item ),
 			'id'                   => $product->get_id(),
 			'type'                 => $product->get_type(),
 			'quantity'             => wc_stock_amount( $cart_item['quantity'] ),
@@ -82,6 +103,45 @@ class CartItemSchema extends ItemSchema {
 			'catalog_visibility'   => $product->get_catalog_visibility(),
 			self::EXTENDING_KEY    => $this->get_extended_data( self::IDENTIFIER, $cart_item ),
 		];
+	}
+
+	/**
+	 * Get a cart line's declared parent key.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param array $cart_item Cart item array.
+	 * @return string|null Parent cart item key, or null when no parent is declared or it is not in the cart.
+	 */
+	protected function get_parent_item_key( $cart_item ) {
+		/**
+		 * Filter to declare the parent cart item of a cart line.
+		 *
+		 * Only a non-empty string is kept; empty strings and other values become null. A key that names no line in the
+		 * current cart, or the line's own key, also becomes null. A line with no declared parent counts as a standalone
+		 * line. Callbacks that declare no parent for a line should return the value unchanged.
+		 *
+		 * @since 11.3.0
+		 * @see https://github.com/woocommerce/woocommerce/blob/trunk/docs/apis/store-api/extending-store-api/extend-store-api-parent-item.md
+		 *
+		 * @param string|null $parent_item_key Initially null; may be a value returned by an earlier callback.
+		 * @param array       $cart_item       The raw cart item.
+		 * @param string      $cart_item_key   The cart item key.
+		 * @return string|null The parent item key, or null when no parent is declared or it is not in the cart.
+		 */
+		$parent_item_key = apply_filters( 'woocommerce_store_api_cart_item_parent_item_key', null, $cart_item, $cart_item['key'] );
+
+		if ( ! is_string( $parent_item_key ) || '' === $parent_item_key || $cart_item['key'] === $parent_item_key ) {
+			return null;
+		}
+
+		$cart = wc()->cart;
+
+		if ( ! ( $cart instanceof \WC_Cart ) || empty( $cart->get_cart_item( $parent_item_key ) ) ) {
+			return null;
+		}
+
+		return $parent_item_key;
 	}
 
 	/**
@@ -157,7 +217,11 @@ class CartItemSchema extends ItemSchema {
 		/**
 		 * Filters cart item data.
 		 *
-		 * Filters the variation option name for custom option slugs.
+		 * Allows extensions to attach their own name/value pairs to a cart item, which the Store
+		 * API returns in the item's `item_data` field.
+		 *
+		 * Set `raw_key` so clients can find your entry without matching a translated label.
+		 * Data you do not intend to display belongs in your `extensions` namespace.
 		 *
 		 * @since 4.3.0
 		 *
@@ -170,9 +234,7 @@ class CartItemSchema extends ItemSchema {
 		$item_data       = apply_filters( 'woocommerce_get_item_data', array(), $cart_item );
 		$clean_item_data = [];
 		foreach ( $item_data as $data ) {
-			// We will check each piece of data in the item data element to ensure it is scalar. Extensions could add arrays
-			// to this, which would cause a fatal in wp_strip_all_tags. If it is not scalar, we will return an empty array,
-			// which will be filtered out in get_item_data (after this function has run).
+			// A non-scalar value would fatal in wp_strip_all_tags, so drop the whole entry.
 			foreach ( $data as $data_value ) {
 				if ( ! is_scalar( $data_value ) ) {
 					continue 2;

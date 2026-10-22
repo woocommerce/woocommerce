@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix the Revenue report double-counting returns when an order has a partial refund followed by a full refund.

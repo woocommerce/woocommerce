@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Pass the plain-text rendering context when personalizing transactional email subjects and preheaders so personalization tag values are not HTML-escaped in plain-text output.

@@ -10,6 +10,7 @@ namespace Automattic;
 
 use Automattic\Jetpack\Assets;
 use Automattic\Jetpack\Connection\Manager as Jetpack_Connection;
+use Automattic\Woocommerce_Analytics\Consent_Manager;
 use Automattic\Woocommerce_Analytics\My_Account;
 use Automattic\Woocommerce_Analytics\Universal;
 use Automattic\Woocommerce_Analytics\WC_Analytics_Tracking_Proxy;
@@ -20,9 +21,11 @@ use Composer\InstalledVersions;
  */
 class Woocommerce_Analytics {
 	/**
-	 * Package version.
+	 * Package version, also the key that triggers the proxy speed module refresh. Rewritten from
+	 * composer.json by tasks/build-package.sh when the package is published, so bumping it here
+	 * does not refresh published copies. Bump the version in composer.json instead.
 	 */
-	const PACKAGE_VERSION = '0.16.3';
+	const PACKAGE_VERSION = '0.18.0';
 
 	/**
 	 * Proxy speed module version option.
@@ -37,6 +40,37 @@ class Woocommerce_Analytics {
 	 * @var string
 	 */
 	const PROXY_SPEED_MODULE_VERSION_CHECK_TRANSIENT = 'woocommerce_analytics_proxy_speed_module_version_check';
+
+	/**
+	 * Whether the MU-plugin speed module may serve requests.
+	 *
+	 * It reads this option because filters are unavailable before plugins load.
+	 * It tracks installation eligibility, so removal cannot reauthorize the module.
+	 *
+	 * @since 0.18.0
+	 *
+	 * @var string
+	 */
+	const PROXY_SPEED_MODULE_AUTHORIZED_OPTION = 'woocommerce_analytics_proxy_speed_module_authorized';
+
+	/**
+	 * Whether proxy tracking has ever been enabled on this site.
+	 *
+	 * Keeps the REST route registered to return 403 to cached pages after the
+	 * feature is disabled. Clear it only after those cached pages have expired.
+	 *
+	 * @since 0.18.0
+	 *
+	 * @var string
+	 */
+	const PROXY_TRACKING_EVER_ENABLED_OPTION = 'woocommerce_analytics_proxy_tracking_ever_enabled';
+
+	/**
+	 * Script handle for s.js, registered with no src when proxy tracking is enabled. WordPress prints its tag with the id `{handle}-js`.
+	 *
+	 * @var string
+	 */
+	private const TRACKING_SCRIPT_HANDLE = 'woocommerce-analytics';
 
 	/**
 	 * Initializer.
@@ -80,6 +114,9 @@ class Woocommerce_Analytics {
 	 * @return bool
 	 */
 	public static function should_track_store() {
+		// Register before early returns so the MU-plugin does not keep stale state.
+		add_action( 'init', array( __CLASS__, 'sync_proxy_tracking_state' ), 20 );
+
 		// Ensure this is available, even with mu-plugins.
 		if ( ! function_exists( 'is_plugin_active' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/plugin.php';
@@ -136,16 +173,28 @@ class Woocommerce_Analytics {
 	}
 
 	/**
-	 * Place script to call s.js, Store Analytics.
+	 * Place script to call s.js, Store Analytics, or only its handle when proxy tracking is enabled.
 	 */
 	public static function enqueue_tracking_script() {
+		// Proxy tracking sends events without s.js, which would only set referrer cookies.
+		if ( \Automattic\Woocommerce_Analytics\Features::is_proxy_tracking_enabled() ) {
+			wp_register_script( self::TRACKING_SCRIPT_HANDLE, false, array(), null, false ); // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion -- There is no src to version.
+			wp_enqueue_script( self::TRACKING_SCRIPT_HANDLE );
+			return;
+		}
+
 		$url = sprintf(
 			'https://stats.wp.com/s-%d.js',
 			gmdate( 'YW' )
 		);
 
+		// s.js sets referrer cookies as soon as it runs, so with a consent plugin it prints inert for the client to run after consent.
+		if ( Consent_Manager::is_consent_api_active() ) {
+			add_filter( 'wp_script_attributes', array( __CLASS__, 'hold_tracking_script_until_consent' ) );
+		}
+
 		wp_enqueue_script(
-			'woocommerce-analytics',
+			self::TRACKING_SCRIPT_HANDLE,
 			$url,
 			array(),
 			null, // phpcs:ignore WordPress.WP.EnqueuedResourceParameters.MissingVersion -- The version is set in the URL.
@@ -154,6 +203,25 @@ class Woocommerce_Analytics {
 				'strategy'  => 'defer',
 			)
 		);
+	}
+
+	/**
+	 * Print the s.js tag as `type="text/plain"` so it does not run until the client activates it after statistics consent.
+	 *
+	 * @since 0.18.1
+	 *
+	 * @param mixed $attributes The script tag attributes.
+	 * @return mixed
+	 */
+	public static function hold_tracking_script_until_consent( $attributes ) {
+		if ( ! is_array( $attributes ) || ( $attributes['id'] ?? '' ) !== self::TRACKING_SCRIPT_HANDLE . '-js' ) {
+			return $attributes;
+		}
+
+		$attributes['type']                      = 'text/plain';
+		$attributes['data-wc-analytics-consent'] = Consent_Manager::WP_CONSENT_API_STATISTICS_TYPE;
+
+		return $attributes;
 	}
 
 	/**
@@ -174,14 +242,67 @@ class Woocommerce_Analytics {
 
 	/**
 	 * Register REST API routes.
+	 *
+	 * A site that has never used proxy tracking does not get the endpoint. It stays
+	 * registered after being disabled, so cached pages receive a visible 403.
 	 */
 	public static function register_rest_routes() {
+		if ( 'yes' !== get_option( self::PROXY_TRACKING_EVER_ENABLED_OPTION ) ) {
+			return;
+		}
+
 		$controller = new WC_Analytics_Tracking_Proxy();
 		$controller->register_routes();
 	}
 
 	/**
-	 * Maybe update proxy speed module.
+	 * Sync proxy tracking state for the REST route and MU-plugin speed module.
+	 *
+	 * @since 0.18.0
+	 *
+	 * @return void
+	 */
+	public static function sync_proxy_tracking_state() {
+		if ( \Automattic\Woocommerce_Analytics\Features::is_proxy_tracking_enabled()
+			&& 'yes' !== get_option( self::PROXY_TRACKING_EVER_ENABLED_OPTION ) ) {
+			update_option( self::PROXY_TRACKING_EVER_ENABLED_OPTION, 'yes' );
+		}
+
+		// Track module eligibility so a removed module cannot be reauthorized.
+		$authorized = self::should_install_proxy_speed_module() ? 'yes' : 'no';
+		$current    = get_option( self::PROXY_SPEED_MODULE_AUTHORIZED_OPTION );
+
+		if ( $current === $authorized ) {
+			return;
+		}
+
+		// An absent option already means unauthorized, so most sites installing this
+		// package never need a row saying so.
+		if ( false === $current && 'no' === $authorized ) {
+			return;
+		}
+
+		update_option( self::PROXY_SPEED_MODULE_AUTHORIZED_OPTION, $authorized );
+	}
+
+	/**
+	 * Forget that proxy tracking was enabled, so the REST route is unregistered.
+	 *
+	 * This is separate from removing the speed module because cached pages may remain.
+	 *
+	 * @since 0.18.0
+	 *
+	 * @return void
+	 */
+	public static function reset_proxy_tracking_state() {
+		delete_option( self::PROXY_TRACKING_EVER_ENABLED_OPTION );
+		delete_option( self::PROXY_SPEED_MODULE_AUTHORIZED_OPTION );
+	}
+
+	/**
+	 * Update the proxy speed module.
+	 *
+	 * The module must refuse itself because this periodic check can be delayed.
 	 */
 	public static function maybe_update_proxy_speed_module() {
 		// Skip if we've already checked recently.
@@ -191,7 +312,7 @@ class Woocommerce_Analytics {
 
 		$version = get_option( self::PROXY_SPEED_MODULE_VERSION_OPTION, false );
 
-		if ( \Automattic\Woocommerce_Analytics\Features::is_proxy_speed_module_enabled() ) {
+		if ( self::should_install_proxy_speed_module() ) {
 			if ( $version !== self::PACKAGE_VERSION ) {
 				self::maybe_add_proxy_speed_module();
 			}
@@ -205,14 +326,35 @@ class Woocommerce_Analytics {
 	}
 
 	/**
+	 * Whether the proxy speed module belongs on this site.
+	 *
+	 * It requires its own opt-in and proxy tracking, so it cannot serve when
+	 * tracking is disabled.
+	 *
+	 * @since 0.18.0
+	 *
+	 * @return bool
+	 */
+	private static function should_install_proxy_speed_module() {
+		return \Automattic\Woocommerce_Analytics\Features::is_proxy_speed_module_enabled()
+			&& \Automattic\Woocommerce_Analytics\Features::is_proxy_tracking_enabled();
+	}
+
+	/**
 	 * Maybe add proxy speed module.
 	 */
 	public static function maybe_add_proxy_speed_module() {
-		if ( ! \Automattic\Woocommerce_Analytics\Features::is_proxy_speed_module_enabled() ) {
+		if ( ! self::should_install_proxy_speed_module() ) {
 			return;
 		}
 
+		// Write before the module file exists because it fails closed on this option.
+		self::sync_proxy_tracking_state();
+
 		if ( ! self::init_filesystem() ) {
+			if ( function_exists( 'wc_get_logger' ) ) {
+				wc_get_logger()->error( 'WooCommerce Analytics proxy speed module not installed: filesystem unavailable.', array( 'source' => 'woocommerce-analytics' ) );
+			}
 			return;
 		}
 
@@ -225,6 +367,9 @@ class Woocommerce_Analytics {
 
 		// If the mu-plugin directory doesn't exist, we can't copy the files.
 		if ( ! is_dir( WPMU_PLUGIN_DIR ) ) {
+			if ( function_exists( 'wc_get_logger' ) ) {
+				wc_get_logger()->error( 'WooCommerce Analytics proxy speed module not installed: mu-plugins directory could not be created.', array( 'source' => 'woocommerce-analytics' ) );
+			}
 			return;
 		}
 
@@ -287,9 +432,16 @@ class Woocommerce_Analytics {
 	}
 
 	/**
-	 * Maybe removes the proxy speed module. This should be invoked when the plugin is deactivated.
+	 * Remove the proxy speed module when the plugin is deactivated.
+	 *
+	 * Clear its authorization because an undeletable MU-plugin can still load.
 	 */
 	public static function maybe_remove_proxy_speed_module() {
+		// Revoked before anything can fail: WP_Filesystem() returns false outright on
+		// hosts that ask for credentials, and that is exactly the case where the file
+		// survives and keeps loading.
+		delete_option( self::PROXY_SPEED_MODULE_AUTHORIZED_OPTION );
+
 		if ( ! self::init_filesystem() ) {
 			return;
 		}

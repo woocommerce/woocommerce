@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 const WooLogo = () => {
 	return (
 		<svg
@@ -24,6 +23,5 @@ const WooLogo = () => {
 		</svg>
 	);
 };
-/* eslint-enable max-len */
 
 export default WooLogo;
