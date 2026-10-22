@@ -216,9 +216,10 @@ class ProductFilters extends \WP_UnitTestCase {
 	 * Render Product Filters with test filter states.
 	 *
 	 * @param bool[] $empty_states Empty-state value for each test filter.
+	 * @param array  $attributes   Block attributes.
 	 * @return string Rendered Product Filters markup.
 	 */
-	private function render_with_filter_states( array $empty_states ): string {
+	private function render_with_filter_states( array $empty_states, array $attributes = array() ): string {
 		$inner_blocks = array_map(
 			static function ( $is_empty ) {
 				return array(
@@ -234,14 +235,37 @@ class ProductFilters extends \WP_UnitTestCase {
 
 		$parsed_block = array(
 			'blockName'    => 'woocommerce/product-filters',
-			'attrs'        => array(),
+			'attrs'        => $attributes,
 			'innerBlocks'  => $inner_blocks,
 			'innerHTML'    => '',
 			'innerContent' => array(),
 		);
 		$block        = new \WP_Block( $parsed_block, array() );
 
-		return (string) $this->render_method->invoke( $this->product_filters, array(), '', $block );
+		return (string) $this->render_method->invoke( $this->product_filters, $attributes, '', $block );
+	}
+
+	/**
+	 * @testdox The overlay button keeps existing blocks compact and supports the optional full-width layout.
+	 *
+	 * @return void
+	 */
+	public function test_overlay_button_full_width_setting(): void {
+		$default_output    = $this->render_with_filter_states( array() );
+		$full_width_output = $this->render_with_filter_states( array(), array( 'overlayButtonFullWidth' => true ) );
+		$no_overlay_output = $this->render_with_filter_states(
+			array(),
+			array(
+				'overlayButtonFullWidth' => true,
+				'overlayMode'            => 'off',
+			)
+		);
+
+		$this->assertStringContainsString( 'wc-block-product-filters__open-overlay wp-element-button', $default_output );
+		$this->assertStringNotContainsString( 'is-full-width-overlay-button', $default_output );
+		$this->assertStringContainsString( 'is-full-width-overlay-button', $full_width_output );
+		$this->assertStringNotContainsString( 'is-full-width-overlay-button', $no_overlay_output );
+		$this->assertStringNotContainsString( 'wc-block-product-filters__open-overlay', $no_overlay_output );
 	}
 
 	/**

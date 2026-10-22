@@ -10,6 +10,7 @@ import { BlockEditProps, InnerBlockTemplate } from '@wordpress/blocks';
 import type { HTMLAttributes } from 'react';
 import {
 	PanelBody,
+	ToggleControl,
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToggleGroupControl as ToggleGroupControl,
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
@@ -78,6 +79,8 @@ export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 			'is-overlay-opened': isOpen,
 			'is-filter-drawer-disabled': ! hasOverlay,
 			'is-mobile-overlay': overlayMode === 'mobile',
+			'is-full-width-overlay-button':
+				hasOverlay && attributes.overlayButtonFullWidth,
 			'is-overlay-right': hasOverlay && overlayPosition === 'right',
 		} ),
 		style: {
@@ -103,7 +106,7 @@ export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 		filtersContent = (
 			<>
 				<button
-					className="wc-block-product-filters__open-overlay"
+					className="wc-block-product-filters__open-overlay wp-element-button"
 					onClick={ () => setIsOpen( ! isOpen ) }
 				>
 					<Icon icon={ filterThreeLines } />
@@ -186,6 +189,20 @@ export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 							label={ __( 'Always', 'woocommerce' ) }
 						/>
 					</ToggleGroupControl>
+					{ overlayMode !== 'off' && (
+						<ToggleControl
+							label={ __(
+								'Full width on mobile',
+								'woocommerce'
+							) }
+							checked={ !! attributes.overlayButtonFullWidth }
+							onChange={ ( value ) =>
+								setAttributes( {
+									overlayButtonFullWidth: value,
+								} )
+							}
+						/>
+					) }
 					{ overlayMode !== 'off' && (
 						<ToggleGroupControl
 							__nextHasNoMarginBottom

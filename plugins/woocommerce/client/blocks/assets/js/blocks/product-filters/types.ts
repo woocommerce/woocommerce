@@ -60,6 +60,7 @@ export type BlockAttributes = {
 	isPreview: boolean;
 	overlayMode?: OverlayMode;
 	overlayPosition?: 'left' | 'right';
+	overlayButtonFullWidth?: boolean;
 };
 
 export type EditProps = BlockEditProps< BlockAttributes >;
