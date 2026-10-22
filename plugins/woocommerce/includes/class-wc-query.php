@@ -844,14 +844,17 @@ class WC_Query {
 		 */
 		$enable_filtering = apply_filters( 'woocommerce_enable_post_clause_filtering', $wp_query->is_main_query(), $wp_query );
 
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		if ( ! $enable_filtering || ( ! isset( $_GET['max_price'] ) && ! isset( $_GET['min_price'] ) ) ) {
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		// An empty value, as sent by a blank form field, means no limit.
+		$has_min_price = isset( $_GET['min_price'] ) && '' !== $_GET['min_price'];
+		$has_max_price = isset( $_GET['max_price'] ) && '' !== $_GET['max_price'];
+
+		if ( ! $enable_filtering || ( ! $has_min_price && ! $has_max_price ) ) {
 			return $args;
 		}
 
-		// phpcs:disable WordPress.Security.NonceVerification.Recommended
-		$current_min_price = isset( $_GET['min_price'] ) ? floatval( wp_unslash( $_GET['min_price'] ) ) : 0;
-		$current_max_price = isset( $_GET['max_price'] ) ? floatval( wp_unslash( $_GET['max_price'] ) ) : PHP_INT_MAX;
+		$current_min_price = $has_min_price ? floatval( wp_unslash( $_GET['min_price'] ) ) : 0;
+		$current_max_price = $has_max_price ? floatval( wp_unslash( $_GET['max_price'] ) ) : PHP_INT_MAX;
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 		/**

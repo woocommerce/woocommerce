@@ -36,6 +36,37 @@ class WC_Query_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox 'price_filter_post_clauses' treats an empty 'min_price' or 'max_price' as if it were not in the query.
+	 *
+	 * @testWith [{"min_price": "100", "max_price": ""}]
+	 *           [{"min_price": "", "max_price": "200"}]
+	 *           [{"min_price": "", "max_price": ""}]
+	 *
+	 * @param array $params The price filter query string parameters.
+	 */
+	public function test_price_filter_post_clauses_ignores_empty_prices( array $params ) {
+		// phpcs:disable Squiz.Commenting
+		$wp_query = new class() {
+			public function is_main_query() {
+				return true;
+			}
+		};
+		// phpcs:enable Squiz.Commenting
+
+		$sut  = new WC_Query();
+		$args = array(
+			'join'  => '(JOIN CLAUSE)',
+			'where' => '(WHERE CLAUSE)',
+		);
+
+		$_GET     = array_filter( $params, 'strlen' );
+		$expected = $sut->price_filter_post_clauses( $args, $wp_query );
+
+		$_GET = $params;
+		$this->assertSame( $expected, $sut->price_filter_post_clauses( $args, $wp_query ) );
+	}
+
+	/**
 	 * @testdox Shop page can be set as the homepage on block themes.
 	 */
 	public function test_shop_page_in_home_displays_correctly() {
