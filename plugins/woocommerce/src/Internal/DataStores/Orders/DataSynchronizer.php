@@ -602,9 +602,9 @@ $limit_clause",
 		// phpcs:enable
 
 		// MySQL cannot reference the same temporary table twice in one query.
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Query prepared above.
 		$pending_count = (int) $wpdb->get_var( $missing_orders_count_sql );
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Query prepared above.
 		$pending_count += (int) $wpdb->get_var( $changed_orders_count_sql );
 
 		$deleted_from_table = $this->get_current_deletion_record_meta_value();
