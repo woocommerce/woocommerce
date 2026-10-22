@@ -16,24 +16,16 @@ const ACTIONS_BLOCK = 'woocommerce/checkout-actions-block';
 export const useCheckoutTermsBlocks = ( clientId: string ) =>
 	useSelect(
 		( select ) => {
-			const {
-				getBlockRootClientId,
-				getBlockOrder,
-				getBlockName,
-				getBlockAttributes,
-			} = select( blockEditorStore );
+			const { getBlockRootClientId, getBlockOrder, getBlockName } =
+				select( blockEditorStore );
 			const siblings: string[] = getBlockOrder(
 				getBlockRootClientId( clientId )
 			);
-			const termsClientId = siblings.find(
-				( id ) => getBlockName( id ) === TERMS_BLOCK
-			);
 
 			return {
-				termsClientId,
-				termsAttributes: termsClientId
-					? getBlockAttributes( termsClientId )
-					: undefined,
+				termsClientId: siblings.find(
+					( id ) => getBlockName( id ) === TERMS_BLOCK
+				),
 				actionsClientId: siblings.find(
 					( id ) => getBlockName( id ) === ACTIONS_BLOCK
 				),
@@ -50,7 +42,7 @@ export const SwitchToActionsTermsNotice = ( {
 }: {
 	clientId: string;
 } ) => {
-	const { termsClientId, termsAttributes, actionsClientId } =
+	const { termsClientId, actionsClientId } =
 		useCheckoutTermsBlocks( clientId );
 	const registry = useRegistry();
 	const { replaceInnerBlocks, selectBlock } = useDispatch( blockEditorStore );
@@ -64,7 +56,11 @@ export const SwitchToActionsTermsNotice = ( {
 		const { getBlockRootClientId, getBlocks } =
 			registry.select( blockEditorStore );
 		const rootClientId = getBlockRootClientId( termsClientId );
-		const innerBlocks = ( getBlocks( rootClientId ) as BlockInstance[] )
+		const blocks = getBlocks( rootClientId ) as BlockInstance[];
+		const termsAttributes = blocks.find(
+			( block ) => block.clientId === termsClientId
+		)?.attributes;
+		const innerBlocks = blocks
 			.filter( ( block ) => block.clientId !== termsClientId )
 			.map( ( block ) =>
 				block.clientId === actionsClientId
@@ -91,18 +87,16 @@ export const SwitchToActionsTermsNotice = ( {
 			isDismissible={ false }
 			actions={ [
 				{
-					label: __( 'Switch to Place order terms', 'woocommerce' ),
+					label: __( 'Switch', 'woocommerce' ),
 					onClick: switchTerms,
 					variant: 'primary',
 				},
 			] }
 		>
-			<p>
-				{ __(
-					'The Terms and Conditions block is deprecated. We recommend switching to the terms settings on the Place order button, which keep the terms next to the button.',
-					'woocommerce'
-				) }
-			</p>
+			{ __(
+				'This block is deprecated. Terms and Conditions can now be shown next to the Place Order button in the Actions block.',
+				'woocommerce'
+			) }
 		</Notice>
 	);
 };

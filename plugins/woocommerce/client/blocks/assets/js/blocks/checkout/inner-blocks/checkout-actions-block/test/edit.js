@@ -219,42 +219,6 @@ describe( 'Checkout Actions Block Edit', () => {
 				queryByText( container, 'Set up a Privacy Policy page' )
 			).toBeInTheDocument();
 		} );
-
-		it( 'reminds merchants to link their policy pages in custom text', () => {
-			blockSettingsMock.TERMS_URL = '/terms';
-			blockSettingsMock.PRIVACY_URL = '/privacy';
-			const { container } = renderEdit( {
-				showTerms: true,
-				termsText: 'I agree to the terms and conditions',
-			} );
-
-			expect(
-				queryByText(
-					container,
-					'Ensure you add links to your policy pages in this section.'
-				)
-			).toBeInTheDocument();
-			expect(
-				screen.getByRole( 'button', { name: 'Restore default text' } )
-			).toBeInTheDocument();
-		} );
-
-		it( 'shows no policy notices when both links are in the text', () => {
-			blockSettingsMock.TERMS_URL = '/terms';
-			blockSettingsMock.PRIVACY_URL = '/privacy';
-			const { container } = renderEdit( {
-				showTerms: true,
-				termsText:
-					'I agree to the <a href="/terms">terms</a> and <a href="/privacy">privacy</a>',
-			} );
-
-			expect(
-				queryByText(
-					container,
-					'Ensure you add links to your policy pages in this section.'
-				)
-			).not.toBeInTheDocument();
-		} );
 	} );
 
 	describe( 'Return to Cart', () => {
@@ -338,49 +302,20 @@ describe( 'Checkout Actions Block Edit', () => {
 			mockCheckoutBlocks = [];
 		} );
 
-		it( 'replaces the terms settings with a switch notice while the Terms block is in the checkout', () => {
+		it( 'hides terms settings and the switch notice while the Terms block is in the checkout', () => {
 			renderEdit();
 
 			expect(
-				screen.getByText(
-					/The Terms and Conditions block is deprecated/,
-					{
-						selector: 'p',
-					}
-				)
-			).toBeInTheDocument();
+				screen.queryByText( /This block is deprecated/ )
+			).not.toBeInTheDocument();
+			expect(
+				screen.queryByRole( 'button', { name: 'Switch' } )
+			).not.toBeInTheDocument();
 			expect(
 				screen.queryByRole( 'checkbox', {
 					name: 'Show terms and conditions',
 				} )
 			).not.toBeInTheDocument();
-		} );
-
-		it( 'moves the Terms block settings onto the Actions block and removes the Terms block', () => {
-			renderEdit();
-
-			screen
-				.getByRole( 'button', { name: 'Switch to Place order terms' } )
-				.click();
-
-			// One change, so a single undo restores the Terms block.
-			expect( mockReplaceInnerBlocks ).toHaveBeenCalledTimes( 1 );
-			expect( mockReplaceInnerBlocks ).toHaveBeenCalledWith(
-				'fields-1',
-				[
-					{
-						clientId: 'actions-1',
-						name: 'woocommerce/checkout-actions-block',
-						attributes: {
-							showTerms: true,
-							termsCheckbox: true,
-							termsText: 'Custom terms',
-						},
-					},
-				],
-				false
-			);
-			expect( mockSelectBlock ).toHaveBeenCalledWith( 'actions-1' );
 		} );
 	} );
 } );
