@@ -32,7 +32,9 @@ const {
 	getResolve,
 } = require( './webpack-helpers' );
 const AddSplitChunkDependencies = require( './add-split-chunk-dependencies' );
-const { sharedOptimizationConfig } = require( './webpack-shared-config' );
+const {
+	sharedOptimizationConfig,
+} = require( '@woocommerce/internal-build/webpack-optimization' );
 
 const ROOT_DIR = path.resolve( __dirname, '../../../../../' );
 // Blocks' webpack writes directly to the WooCommerce plugin's
