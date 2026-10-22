@@ -5,10 +5,11 @@ import { use, select } from '@wordpress/data';
 import { store as preferencesStore } from '@wordpress/preferences';
 import { store as editorStore } from '@wordpress/editor';
 import { __ } from '@wordpress/i18n';
+
 /**
  * Internal dependencies
  */
-import { recordEvent, isEventTrackingEnabled } from '.';
+import { recordEvent, isEventTrackingEnabled } from './event-pipeline';
 
 /**
  * Handler functions for tracking individual events recorder by the listening to store actions.
