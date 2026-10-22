@@ -83,4 +83,16 @@ class SchemaController {
 
 		return new $schema( $this->extend, $this );
 	}
+
+	/**
+	 * Sets the Store API request being responded to, so extension data callbacks can receive it.
+	 *
+	 * @internal
+	 *
+	 * @param \WP_REST_Request<array<string, mixed>>|null $request Request object, or null when no request is being responded to.
+	 * @return \WP_REST_Request<array<string, mixed>>|null The previously set request.
+	 */
+	public function set_request( ?\WP_REST_Request $request ) {
+		return $this->extend->set_request( $request );
+	}
 }
