@@ -3325,11 +3325,7 @@ EOT;
 <div class="wp-block-woocommerce-checkout-order-note-block"></div>
 <!-- /wp:woocommerce/checkout-order-note-block -->
 
-<!-- wp:woocommerce/checkout-terms-block -->
-<div class="wp-block-woocommerce-checkout-terms-block"></div>
-<!-- /wp:woocommerce/checkout-terms-block -->
-
-<!-- wp:woocommerce/checkout-actions-block -->
+<!-- wp:woocommerce/checkout-actions-block {"showTerms":true} -->
 <div class="wp-block-woocommerce-checkout-actions-block"></div>
 <!-- /wp:woocommerce/checkout-actions-block --></div>
 <!-- /wp:woocommerce/checkout-fields-block -->
