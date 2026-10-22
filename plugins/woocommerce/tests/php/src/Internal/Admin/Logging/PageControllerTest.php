@@ -142,11 +142,16 @@ class PageControllerTest extends WC_Unit_Test_Case {
 	 * @testdox A log entry whose context is not valid JSON renders as a plain, escaped line without a collapsible context block.
 	 */
 	public function test_format_line_malformed_context_renders_as_plain_line(): void {
-		$line      = gmdate( 'Y-m-d\TH:i:sP' ) . ' DEBUG Test log entry. CONTEXT: {unclosed:';
+		$line      = gmdate( 'Y-m-d\TH:i:sP' ) . ' DEBUG Test log entry. CONTEXT: {"unclosed":';
 		$formatted = $this->format_line( $line, 1 );
 
 		$this->assertStringNotContainsString( 'has-context', $formatted );
 		$this->assertStringNotContainsString( '<details>', $formatted );
-		$this->assertStringContainsString( 'CONTEXT: {unclosed:', $formatted );
+		// WordPress 7.2's HTML API-based KSES parser can serialize text-node quotes literally instead of as &quot;.
+		// Decode entities so the assertion checks that the malformed context is preserved with either parser.
+		$this->assertStringContainsString(
+			'CONTEXT: {"unclosed":',
+			html_entity_decode( $formatted, ENT_QUOTES | ENT_HTML401 )
+		);
 	}
 }
