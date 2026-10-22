@@ -54,6 +54,19 @@
 			"expect": {
 				"outcome": "quiet"
 			}
+		},
+		{
+			"id": "G29D-v4",
+			"path": "plugins/woocommerce/client/legacy/js/frontend/checkout.js",
+			"before": {
+				"code": "/* Classic cart notification. */\nfunction notifyAddedToCart( fragments, cartHash, button ) { jQuery( document.body ).trigger( 'added_to_cart', [ fragments, cartHash, button ] ); }\n"
+			},
+			"after": {
+				"code": "/* Classic cart notification. */\nfunction notifyAddedToCart( fragments, cartHash, button ) { const event = jQuery.Event( 'added_to_cart' ); event.wcSource = 'classic'; jQuery( document.body ).trigger( event, [ fragments, cartHash, button ] ); }\n"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
 		}
 	]
 }

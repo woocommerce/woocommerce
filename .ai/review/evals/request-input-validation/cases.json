@@ -54,6 +54,19 @@
 			"expect": {
 				"outcome": "quiet"
 			}
+		},
+		{
+			"id": "G07D-v4",
+			"path": "plugins/woocommerce/includes/class-wc-request-input-validation.php",
+			"before": {
+				"code": "<?php\n/* REST search endpoint; the callback is local to this route registration. */\nadd_action( 'rest_api_init', static function () {\n    register_rest_route( 'wc-export/v1', '/search', array(\n        'methods' => 'GET',\n        'callback' => static function ( $request ) {\n            $term = $request->get_param( 'search' );\n            if ( ! is_string( $term ) ) { return ''; }\n            return urldecode( $term );\n        },\n        'permission_callback' => static function () { return current_user_can( 'manage_woocommerce' ); },\n        'args' => array( 'search' => array( 'type' => 'string', 'required' => true ) ),\n    ) );\n} );\n"
+			},
+			"after": {
+				"code": "<?php\n/* REST search endpoint; the callback is local to this route registration. */\nadd_action( 'rest_api_init', static function () {\n    register_rest_route( 'wc-export/v1', '/search', array(\n        'methods' => 'GET',\n        'callback' => static function ( $request ) {\n            $term = $request->get_param( 'search' );\n            return urldecode( $term );\n        },\n        'permission_callback' => static function () { return current_user_can( 'manage_woocommerce' ); },\n        'args' => array( 'search' => array( 'type' => 'string', 'required' => true ) ),\n    ) );\n} );\n"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
 		}
 	]
 }

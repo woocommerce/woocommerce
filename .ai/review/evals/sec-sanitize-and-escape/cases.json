@@ -54,6 +54,29 @@
 			"expect": {
 				"outcome": "quiet"
 			}
+		},
+		{
+			"id": "G39A-v6",
+			"path": "plugins/woocommerce/includes/class-wc-search-label.php",
+			"before": {
+				"code": "<?php\n/* Shortcode rendered on a public page. */\nadd_shortcode( 'wc_search_label', static function() {\n    $query = isset( $_GET['q'] ) && is_string( $_GET['q'] ) ? wp_unslash( $_GET['q'] ) : '';\n    return '<span class=\"wc-search-label\">' . esc_html( $query ) . '</span>';\n} );\n"
+			},
+			"after": {
+				"code": "<?php\n/* Shortcode rendered on a public page. */\nadd_shortcode( 'wc_search_label', static function() {\n    $query = isset( $_GET['q'] ) && is_string( $_GET['q'] ) ? wp_unslash( $_GET['q'] ) : '';\n    return '<span class=\"wc-search-label\">' . $query . '</span>';\n} );\n"
+			},
+			"expect": {
+				"outcome": "finding",
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-search-label.php",
+						"lines": [
+							5,
+							5
+						],
+						"anchor": "    return '<span class=\"wc-search-label\">' . $query . '</span>';"
+					}
+				]
+			}
 		}
 	]
 }

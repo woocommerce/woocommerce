@@ -54,6 +54,19 @@
 			"expect": {
 				"outcome": "quiet"
 			}
+		},
+		{
+			"id": "G28D-v4",
+			"path": "plugins/woocommerce/includes/class-wc-eval-28.php",
+			"before": {
+				"code": "<?php\n/* Tokenization asset registration and an installed gateway’s frontend dependency. */\nfunction wc_register_checkout_assets() {\n    wp_register_script( 'woocommerce-tokenization-form', plugins_url( 'assets/js/frontend/tokenization-form.js', WC_PLUGIN_FILE ), array( 'jquery' ), WC()->version, false );\n    wp_localize_script( 'woocommerce-tokenization-form', 'wc_tokenization_form_params', array( 'is_registration_required' => WC()->checkout()->is_registration_required(), 'is_logged_in' => is_user_logged_in() ) );\n}\nadd_action( 'wp_enqueue_scripts', 'wc_register_checkout_assets' );\n\nadd_action( 'wp_enqueue_scripts', static function() { wp_enqueue_script( 'gateway-ui', plugins_url( 'gateway-ui.js', __FILE__ ), array( 'jquery', 'woocommerce-tokenization-form' ), '1.0', false ); }, 20 );\n"
+			},
+			"after": {
+				"code": "<?php\n/* Tokenization asset registration and an installed gateway’s frontend dependency. */\nfunction wc_register_checkout_assets() {\n    wp_register_script( 'woocommerce-tokenization-form', plugins_url( 'assets/js/frontend/tokenization-form.js', WC_PLUGIN_FILE ), array( 'jquery' ), WC()->version, false );\n    wp_register_script( 'wc-tokenization-ui', false, array( 'woocommerce-tokenization-form' ), WC()->version, false );\n    wp_localize_script( 'woocommerce-tokenization-form', 'wc_tokenization_form_params', array( 'is_registration_required' => WC()->checkout()->is_registration_required(), 'is_logged_in' => is_user_logged_in() ) );\n}\nadd_action( 'wp_enqueue_scripts', 'wc_register_checkout_assets' );\n\nadd_action( 'wp_enqueue_scripts', static function() { wp_enqueue_script( 'gateway-ui', plugins_url( 'gateway-ui.js', __FILE__ ), array( 'jquery', 'woocommerce-tokenization-form' ), '1.0', false ); }, 20 );\n"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
 		}
 	]
 }
