@@ -97,6 +97,7 @@ describe( 'Checkout Actions Block', () => {
 	beforeEach( () => {
 		jest.clearAllMocks();
 		mockPlaceOrderButton.mockClear();
+		mockCheckoutShowTerms = true;
 		mockUseCheckoutSubmit.mockReturnValue( {
 			paymentMethodButtonLabel: '',
 			paymentMethodPlaceOrderButton: undefined,
@@ -239,7 +240,6 @@ describe( 'Checkout Actions Block', () => {
 					termsCheckbox={ true }
 				/>
 			);
-			mockCheckoutShowTerms = true;
 
 			expect( screen.queryByTestId( 'terms' ) ).not.toBeInTheDocument();
 		} );
