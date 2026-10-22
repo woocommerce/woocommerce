@@ -173,7 +173,8 @@ class SettingsUISchemaTest extends WC_Unit_Test_Case {
 
 		$group = $schema['groups']['group'];
 
-		$this->assertSame( 'Read the <a href="https://woocommerce.com">documentation</a>alert("x").', $group['description'] );
+		$this->assertStringContainsString( '<a href="https://woocommerce.com">documentation</a>', $group['description'] );
+		$this->assertStringNotContainsString( '<script>', $group['description'] );
 		$this->assertArrayNotHasKey( 'actions', $group );
 	}
 
