@@ -22,7 +22,7 @@ use Automattic\WooCommerce\Proxies\LegacyProxy;
  * the version actually bundled with WooCommerce (though unusual, it is known to happen). Additionally, this
  * class can report on which version and feature set from Action Scheduler is actually available.
  */
-class ActionSchedulerUtil {
+final class ActionSchedulerUtil {
 
 	/**
 	 * The default priority for scheduled actions.
