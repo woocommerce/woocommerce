@@ -114,7 +114,7 @@ test.describe( 'woocommerce/product-filters - Frontend', () => {
 			await expect( openOverlayButton ).toBeHidden();
 			await expect( overlay ).toBeVisible();
 			await expect( overlay ).not.toHaveAttribute( 'role', 'dialog' );
-			await expect( overlay ).not.toHaveAttribute( 'aria-modal', 'true' );
+			await expect( overlay ).not.toHaveAttribute( 'aria-modal' );
 			await expect( lastFilter ).toBeFocused();
 			await page.keyboard.press( 'Tab' );
 			await expect
