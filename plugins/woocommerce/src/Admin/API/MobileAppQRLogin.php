@@ -1157,6 +1157,16 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 			: array();
 		$device        = $this->sanitize_device_payload( $device_source );
 
+		// WordPress 7.2+ emails the user when an application password is
+		// created. Skip that email for this password only: the sign-in email
+		// sent below replaces it, or, when a site turns the sign-in email off,
+		// maybe_send_sign_in_notification_email() sends WordPress's instead.
+		$skip_core_email = static function ( $send, $user, $new_item ) {
+			unset( $user );
+			return self::APP_ID === ( $new_item['app_id'] ?? null ) ? false : $send;
+		};
+		add_filter( 'wp_send_application_password_created_email', $skip_core_email, PHP_INT_MAX, 3 );
+
 		// Create an Application Password for the mobile app. The name is
 		// descriptive (e.g. "Woo Mobile · iPhone 15 · 2026-04-28") so the user
 		// can identify it later in Users → Profile → Application Passwords.
@@ -1167,6 +1177,7 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 				'app_id' => self::APP_ID,
 			)
 		);
+		remove_filter( 'wp_send_application_password_created_email', $skip_core_email, PHP_INT_MAX );
 
 		if ( is_wp_error( $app_password_result ) ) {
 			wc_get_logger()->error(
@@ -1215,7 +1226,7 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 		// even when they aren't currently looking at wc-admin. Wrapped in a
 		// try/catch + filter to keep the exchange path uninterrupted if the
 		// site's mailer is misconfigured.
-		$this->maybe_send_sign_in_notification_email( $user, $consumed_record );
+		$this->maybe_send_sign_in_notification_email( $user, $consumed_record, $item );
 
 		return rest_ensure_response(
 			array(
@@ -1994,19 +2005,19 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	}
 
 	/**
-	 * Send the merchant a transactional email summarizing a successful QR
-	 * sign-in, unless they (or a site owner) opt out via the
-	 * `woocommerce_qr_login_should_send_signin_email` filter.
+	 * Send a sign-in notification email, or fall back to WordPress's application
+	 * password email when the WooCommerce email is disabled.
 	 *
 	 * Wrapped so a misconfigured mailer cannot break the exchange path. Mailer
-	 * false returns and exceptions are logged, but delivery never blocks the API
-	 * response.
+	 * exceptions, and a false return for the WooCommerce email, are logged, but
+	 * delivery never blocks the API response.
 	 *
-	 * @param \WP_User             $user            The user who minted the token (recipient).
-	 * @param array<string, mixed> $consumed_record The record persisted to the consumed transient (keys: consumed_at, user_id, ap_uuid, ap_name, device).
+	 * @param \WP_User             $user                 The user who minted the token (recipient).
+	 * @param array<string, mixed> $consumed_record      The record persisted to the consumed transient (keys: consumed_at, user_id, ap_uuid, ap_name, device).
+	 * @param array<string, mixed> $application_password The created application password's details, as returned by WP_Application_Passwords::create_new_application_password().
 	 * @return void
 	 */
-	private function maybe_send_sign_in_notification_email( \WP_User $user, array $consumed_record ): void {
+	private function maybe_send_sign_in_notification_email( \WP_User $user, array $consumed_record, array $application_password ): void {
 		/**
 		 * Filter whether to send the QR sign-in notification email.
 		 *
@@ -2014,6 +2025,7 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 		 * user, environment (e.g. staging), or test run.
 		 *
 		 * @since 10.9.0
+		 * @since 11.4.0 On WordPress 7.2+, returning false sends WordPress's application password email instead, unless the site has turned it off.
 		 *
 		 * @param bool                 $should_send     Whether to send the email.
 		 * @param \WP_User             $user            The user who minted the QR token.
@@ -2026,11 +2038,16 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 			$consumed_record
 		);
 
-		if ( ! $should_send ) {
-			return;
-		}
-
 		try {
+			if ( ! $should_send ) {
+				// WordPress's email was skipped during password creation to prevent a duplicate. Send it now when ours is off.
+				if ( function_exists( 'wp_application_password_created_notification' )
+					&& false !== has_action( 'wp_create_application_password', 'wp_application_password_created_notification' ) ) {
+					wp_application_password_created_notification( $user->ID, $application_password );
+				}
+				return;
+			}
+
 			if ( ! $this->send_sign_in_notification_email( $user, $consumed_record ) ) {
 				wc_get_logger()->warning(
 					sprintf(
