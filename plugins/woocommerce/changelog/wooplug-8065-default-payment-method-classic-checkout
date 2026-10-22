@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Apply the default payment method filter to the classic checkout and the pay-for-order page, so a store can start them with no method selected.

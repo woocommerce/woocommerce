@@ -893,7 +893,7 @@ apply_filters( 'woocommerce_checkout_must_be_logged_in_message', string $message
 ## woocommerce_default_payment_method
 
 
-Filters the payment method the Checkout block starts with.
+Filters the payment method the checkout starts with: the Checkout block, the classic checkout shortcode and the pay-for-order page all ask it.
 
 ```php
 apply_filters( 'woocommerce_default_payment_method', string $payment_method, array $available_gateways )
