@@ -124,15 +124,23 @@ describe( 'initDomTracking', () => {
 		expect( recordEvent ).not.toHaveBeenCalled();
 	} );
 
-	describe.each( [
-		[ 'WordPress 7.1', optionsToggleWp71 ],
-		[ 'WordPress 7.2', optionsToggleWp72 ],
-	] )( 'header options toggle (%s)', ( _version, markup ) => {
+	// WordPress 7.1 menus are open or closed by the time the click reaches the document.
+	// WordPress 7.2 menus update `aria-expanded` after the click event.
+	describe( 'header menu toggles', () => {
+		beforeEach( () => {
+			jest.useFakeTimers();
+		} );
+
+		afterEach( () => {
+			jest.useRealTimers();
+		} );
+
 		it.each( [ false, true ] )(
-			'records the toggle with isOpened %s',
+			'records the WordPress 7.1 options toggle with isOpened %s',
 			( isOpened ) => {
-				document.body.innerHTML = markup( isOpened );
+				document.body.innerHTML = optionsToggleWp71( isOpened );
 				click( '[aria-label="Options"] svg' );
+				jest.runAllTimers();
 				expect( recordEvent ).toHaveBeenCalledTimes( 1 );
 				expect( recordEvent ).toHaveBeenCalledWith(
 					'header_more_menu_dropdown_toggle',
@@ -140,26 +148,46 @@ describe( 'initDomTracking', () => {
 				);
 			}
 		);
-	} );
 
-	it( 'does not record the block toolbar options toggle as the header menu', () => {
-		document.body.innerHTML = `
-			<div class="block-editor-block-toolbar">
-				<button type="button" class="components-button components-dropdown-menu__toggle" aria-label="Options"></button>
-			</div>`;
-		click( '[aria-label="Options"]' );
-		expect( recordEvent ).not.toHaveBeenCalled();
-	} );
-
-	it.each( [ false, true ] )(
-		'records the WordPress 7.2 preview toggle with isOpened %s',
-		( isOpened ) => {
-			document.body.innerHTML = previewToggleWp72( isOpened );
-			click( '.editor-preview-dropdown__toggle' );
-			expect( recordEvent ).toHaveBeenCalledWith(
+		it.each( [
+			[
+				'options',
+				optionsToggleWp72,
+				'[aria-label="Options"]',
+				'header_more_menu_dropdown_toggle',
+			],
+			[
+				'preview',
+				previewToggleWp72,
+				'.editor-preview-dropdown__toggle',
 				'header_preview_dropdown_clicked',
-				{ isOpened }
-			);
-		}
-	);
+			],
+		] )(
+			'records the WordPress 7.2 %s toggle state after the click',
+			( _toggle, markup, selector, eventName ) => {
+				for ( const isOpened of [ true, false ] ) {
+					document.body.innerHTML = markup( ! isOpened );
+					click( selector );
+					document
+						.querySelector( selector )
+						?.setAttribute( 'aria-expanded', String( isOpened ) );
+					jest.runAllTimers();
+					expect( recordEvent ).toHaveBeenLastCalledWith( eventName, {
+						isOpened,
+					} );
+				}
+				expect( recordEvent ).toHaveBeenCalledTimes( 2 );
+			}
+		);
+
+		it( 'does not record the block toolbar options toggle as the header menu', () => {
+			document.body.innerHTML = `
+				<div class="block-editor-block-toolbar">
+					<button type="button" class="components-button components-dropdown-menu__toggle" aria-label="Options"></button>
+				</div>`;
+			click( '[aria-label="Options"]' );
+			jest.runAllTimers();
+			expect( recordEvent ).not.toHaveBeenCalled();
+		} );
+	} );
 } );

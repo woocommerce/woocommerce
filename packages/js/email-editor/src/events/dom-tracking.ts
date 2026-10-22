@@ -17,14 +17,18 @@ const SIDEBAR_TABS = {
 };
 
 /**
- * Whether a header menu toggle was open when it was clicked.
- * WordPress 7.2 menus no longer set the `is-opened` class, only `aria-expanded`.
+ * Records whether a header menu is open after the click on its toggle.
+ * WordPress 7.2 menus set only `aria-expanded` (no `is-opened` class), and only after the
+ * click event, so the state is read once the click has been handled.
  */
-function isMenuToggleOpened( target: Element ) {
-	return (
-		target.classList.contains( 'is-opened' ) ||
-		target.getAttribute( 'aria-expanded' ) === 'true'
-	);
+function recordMenuToggle( eventName: string, target: Element ) {
+	setTimeout( () => {
+		recordEvent( eventName, {
+			isOpened:
+				target.classList.contains( 'is-opened' ) ||
+				target.getAttribute( 'aria-expanded' ) === 'true',
+		} );
+	} );
 }
 
 /**
@@ -87,11 +91,8 @@ export function initDomTracking() {
 		},
 		// Header more menu toggle
 		{
-			track: ( target ) => {
-				recordEvent( 'header_more_menu_dropdown_toggle', {
-					isOpened: isMenuToggleOpened( target ),
-				} );
-			},
+			track: ( target ) =>
+				recordMenuToggle( 'header_more_menu_dropdown_toggle', target ),
 			selector: `.editor-header__settings button[aria-label="${ __(
 				'Options'
 			) }"]`,
@@ -122,11 +123,8 @@ export function initDomTracking() {
 		},
 		// Preview dropdown toggle clicked
 		{
-			track: ( target ) => {
-				recordEvent( 'header_preview_dropdown_clicked', {
-					isOpened: isMenuToggleOpened( target ),
-				} );
-			},
+			track: ( target ) =>
+				recordMenuToggle( 'header_preview_dropdown_clicked', target ),
 			selector: '.editor-preview-dropdown__toggle',
 		},
 		// Email or Block tab in the sidebar clicked
