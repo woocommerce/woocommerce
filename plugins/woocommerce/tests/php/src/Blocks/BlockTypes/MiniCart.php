@@ -547,7 +547,11 @@ class MiniCart extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Cart/checkout constants defined by other tests cannot be reset in this process.
+	 *
 	 * @testdox Should keep the closed drawer out of the tab order and the accessibility tree.
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
 	 */
 	public function test_closed_drawer_is_inert_and_hidden(): void {
 		$processor = new \WP_HTML_Tag_Processor( $this->render_overlay() );
