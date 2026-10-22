@@ -12,17 +12,21 @@ import {
 	termsConsentDefaultText,
 } from '../../checkout-terms-block/constants';
 
-const mockUpdateBlockAttributes = jest.fn();
-const mockRemoveBlock = jest.fn();
+const mockReplaceInnerBlocks = jest.fn();
 const mockSelectBlock = jest.fn();
 let mockCheckoutBlocks = [];
 
 jest.mock( '@wordpress/data', () => ( {
 	...jest.requireActual( '@wordpress/data' ),
 	useDispatch: () => ( {
-		updateBlockAttributes: mockUpdateBlockAttributes,
-		removeBlock: mockRemoveBlock,
+		replaceInnerBlocks: mockReplaceInnerBlocks,
 		selectBlock: mockSelectBlock,
+	} ),
+	useRegistry: () => ( {
+		select: () => ( {
+			getBlockRootClientId: () => 'fields-1',
+			getBlocks: () => mockCheckoutBlocks,
+		} ),
 	} ),
 	useSelect: jest.fn().mockImplementation( ( fn ) => {
 		const select = () => {
@@ -359,15 +363,23 @@ describe( 'Checkout Actions Block Edit', () => {
 				.getByRole( 'button', { name: 'Switch to Place order terms' } )
 				.click();
 
-			expect( mockUpdateBlockAttributes ).toHaveBeenCalledWith(
-				'actions-1',
-				{
-					showTerms: true,
-					termsCheckbox: true,
-					termsText: 'Custom terms',
-				}
+			// One change, so a single undo restores the Terms block.
+			expect( mockReplaceInnerBlocks ).toHaveBeenCalledTimes( 1 );
+			expect( mockReplaceInnerBlocks ).toHaveBeenCalledWith(
+				'fields-1',
+				[
+					{
+						clientId: 'actions-1',
+						name: 'woocommerce/checkout-actions-block',
+						attributes: {
+							showTerms: true,
+							termsCheckbox: true,
+							termsText: 'Custom terms',
+						},
+					},
+				],
+				false
 			);
-			expect( mockRemoveBlock ).toHaveBeenCalledWith( 'terms-1', false );
 			expect( mockSelectBlock ).toHaveBeenCalledWith( 'actions-1' );
 		} );
 	} );

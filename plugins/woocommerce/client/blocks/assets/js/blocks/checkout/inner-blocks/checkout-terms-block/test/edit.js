@@ -8,17 +8,21 @@ import { render, queryByText } from '@testing-library/react';
  */
 import { Edit } from '../edit';
 
-const mockUpdateBlockAttributes = jest.fn();
-const mockRemoveBlock = jest.fn();
+const mockReplaceInnerBlocks = jest.fn();
 const mockSelectBlock = jest.fn();
 let mockCheckoutBlocks = [];
 
 jest.mock( '@wordpress/data', () => ( {
 	...jest.requireActual( '@wordpress/data' ),
 	useDispatch: () => ( {
-		updateBlockAttributes: mockUpdateBlockAttributes,
-		removeBlock: mockRemoveBlock,
+		replaceInnerBlocks: mockReplaceInnerBlocks,
 		selectBlock: mockSelectBlock,
+	} ),
+	useRegistry: () => ( {
+		select: () => ( {
+			getBlockRootClientId: () => 'fields-1',
+			getBlocks: () => mockCheckoutBlocks,
+		} ),
 	} ),
 	useSelect: jest.fn().mockImplementation( ( fn ) => {
 		const select = () => {
