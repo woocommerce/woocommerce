@@ -91,6 +91,11 @@ class OrderController {
 		$order->set_payment_method( PaymentUtils::get_checkout_payment_method() );
 		$order->update_meta_data( 'is_vat_exempt', wc_bool_to_string( wc()->cart->get_customer()->get_is_vat_exempt() ) );
 		$order->calculate_totals();
+
+		// GET, PATCH and cart updates can rebuild items before the next checkout POST records their IDs.
+		if ( $order->has_status( array( OrderStatus::PENDING, OrderStatus::FAILED ) ) && is_array( $order->get_meta( '_cart_order_item_ids' ) ) ) {
+			WC()->checkout()->save_cart_order_item_ids( $order, WC()->checkout()->get_cart_order_items( $order ) );
+		}
 	}
 
 	/**

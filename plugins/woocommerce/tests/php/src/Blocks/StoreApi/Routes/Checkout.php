@@ -3409,6 +3409,16 @@ class Checkout extends \WP_Test_REST_TestCase {
 		$order->calculate_totals();
 		$this->assertNotSame( $cart_total, $order->get_total(), 'The edit should change the order total.' );
 
+		$get_request = new \WP_REST_Request( 'GET', '/wc/store/v1/checkout' );
+		$get_request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$get_response = rest_get_server()->dispatch( $get_request );
+		$this->assertSame( 200, $get_response->get_status(), 'Reloading checkout should synchronize the edited order.' );
+		$synced_item_ids = array_keys( WC()->checkout()->get_cart_order_items( wc_get_order( $order->get_id() ) ) );
+
+		$get_response = rest_get_server()->dispatch( $get_request );
+		$this->assertSame( 200, $get_response->get_status(), 'A second checkout reload should succeed.' );
+		$this->assertSame( $synced_item_ids, array_keys( WC()->checkout()->get_cart_order_items( wc_get_order( $order->get_id() ) ) ), 'Reloading unchanged checkout should keep the repaired items.' );
+
 		$retry_response = rest_get_server()->dispatch( $this->build_valid_post_request() );
 
 		$this->assertEquals( 200, $retry_response->get_status(), print_r( $retry_response->get_data(), true ) );
@@ -3418,6 +3428,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 		$this->assertCount( 1, $order->get_shipping_methods(), 'The order should have one shipping line.' );
 		$this->assertSame( $shipping_total, $order->get_shipping_total(), 'The shipping total should be the cart one.' );
 		$this->assertSame( array( self::TEST_COUPON_CODE ), $order->get_coupon_codes(), 'The order should have the cart coupon.' );
+		$this->assertSame( $synced_item_ids, array_keys( WC()->checkout()->get_cart_order_items( $order ) ), 'Submitting payment should keep the items repaired during reload.' );
 		if ( 'coupon_removed' !== $edit ) {
 			$this->assertSame( $line_item_ids, array_keys( $order->get_items() ), 'The line items should keep their IDs.' );
 		}

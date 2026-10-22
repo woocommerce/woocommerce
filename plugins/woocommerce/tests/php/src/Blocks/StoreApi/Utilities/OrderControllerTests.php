@@ -679,6 +679,52 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox update_order_from_cart() keeps repaired shipping and fee lines on the next unchanged synchronization.
+	 *
+	 * @testWith ["shipping", "pending"]
+	 *           ["shipping", "failed"]
+	 *           ["fee", "pending"]
+	 *           ["fee", "failed"]
+	 *
+	 * @param string $item_type The item type to edit.
+	 * @param string $status    The retried order status.
+	 */
+	public function test_update_order_from_cart_keeps_repaired_items_on_consecutive_updates( string $item_type, string $status ): void {
+		try {
+			$order = $this->create_order_with_shipping_and_fee();
+			$this->place_order( $order );
+			$order->update_status( $status );
+			$item = current( $order->get_items( $item_type ) );
+			$item->set_total( (float) $item->get_total() + 5 );
+			$item->save();
+
+			$this->sut->update_order_from_cart( $order );
+			$repaired_ids = $this->get_item_ids_by_type( $order );
+			$this->assertNotContains( $item->get_id(), $repaired_ids[ $item_type ], 'The edited item should be replaced on the first update.' );
+			$repaired_item = current( $order->get_items( $item_type ) );
+			$repaired_item->update_meta_data( 'extension_reference', 'preserved' );
+			$repaired_item->save();
+			$creation_calls = did_action( "woocommerce_checkout_create_order_{$item_type}_item" );
+
+			$extra_fee = new \WC_Order_Item_Fee();
+			$extra_fee->set_name( 'Extension surcharge' );
+			$extra_fee->set_total( '2' );
+			$order->add_item( $extra_fee );
+			$order->save();
+
+			$order = wc_get_order( $order->get_id() );
+			$this->sut->update_order_from_cart( $order );
+
+			$this->assertSame( $repaired_ids, $this->get_item_ids_by_type( $order ), 'Repaired cart items should keep their IDs, and the added fee should be removed.' );
+			$this->assertSame( 'preserved', current( $order->get_items( $item_type ) )->get_meta( 'extension_reference' ), 'Metadata on the repaired item should survive unchanged updates.' );
+			$this->assertSame( $creation_calls, did_action( "woocommerce_checkout_create_order_{$item_type}_item" ), 'Unchanged items should not fire their creation hook again.' );
+			$this->assertSame( (float) WC()->cart->get_total( 'edit' ), (float) $order->get_total(), 'The order total should match the cart.' );
+		} finally {
+			\WC_Helper_Shipping::delete_simple_flat_rate();
+		}
+	}
+
+	/**
 	 * @testdox update_order_from_cart() keeps shipping and fee lines added outside the cart to a draft, or to a retried order with no record of its cart items.
 	 *
 	 * @testWith [false]
@@ -703,6 +749,7 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 			$order->save();
 			$before = $this->get_item_ids_by_type( $order );
 
+			$this->sut->update_order_from_cart( $order );
 			$this->sut->update_order_from_cart( $order );
 		} finally {
 			\WC_Helper_Shipping::delete_simple_flat_rate();
