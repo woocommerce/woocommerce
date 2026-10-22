@@ -62,6 +62,7 @@ function selectFilter( item: ValidFilterOptionItem ) {
 	const newActiveFilter: ActiveFilterItem = {
 		value: item.value,
 		type: item.type,
+		label: getFilterLabel( item ),
 		activeLabel: context.activeLabelTemplate.replace(
 			'{{label}}',
 			getFilterLabel( item )
@@ -159,6 +160,23 @@ const productFiltersStore = {
 					...item,
 					activeLabel: decodeHtmlEntities( item.activeLabel ),
 					uid: `${ item.type }/${ item.value }`,
+				} ) );
+		},
+		get selectedItems(): FilterOptionItem[] {
+			const { filterType } = getContext< ProductFiltersContext >();
+			return state.activeFilters
+				.filter( ( item ) => item.type === filterType )
+				.map( ( item ) => ( {
+					...item,
+					id: `${ item.type }-${ item.value }`,
+					label: decodeHtmlEntities(
+						item.label ??
+							state.selectableItems.find(
+								( option ) => option.value === item.value
+							)?.label ??
+							item.activeLabel
+					),
+					selected: true,
 				} ) );
 		},
 		get selectableItems() {
