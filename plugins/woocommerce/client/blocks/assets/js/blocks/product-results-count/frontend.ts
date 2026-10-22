@@ -27,8 +27,9 @@ let pendingAnnouncement:
 	| undefined;
 
 /**
- * Whether a full page load should announce the count. Matches the legacy script, which
- * announced it whenever the URL had a query string (for example after a sort that reloads the page).
+ * Whether a full page load should announce the count: when the URL has a query string, such as a
+ * sorted or filtered link or a page reload after either. Unlike the legacy script, this includes
+ * pages with Product Filters, which it only skipped to avoid overwriting the count (#63969).
  */
 const shouldAnnounceOnPageLoad = (): boolean => window.location.search !== '';
 
