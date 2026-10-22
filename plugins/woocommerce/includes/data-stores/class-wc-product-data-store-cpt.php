@@ -2154,14 +2154,16 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			);
 
 			foreach ( $rank_phrases as $rank_phrase ) {
-				$phrase_like = $wpdb->esc_like( $rank_phrase );
+				$phrase_like  = $wpdb->esc_like( $rank_phrase );
+				$exact_value  = $wpdb->prepare( '%s', $phrase_like );
+				$prefix_value = $wpdb->prepare( '%s', $phrase_like . '%' );
 
 				foreach ( $identifier_columns as $column ) {
-					$rank_tiers['identifier_exact'][]  = $wpdb->prepare( "{$column} LIKE %s", $phrase_like ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-					$rank_tiers['identifier_prefix'][] = $wpdb->prepare( "{$column} LIKE %s", $phrase_like . '%' ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+					$rank_tiers['identifier_exact'][]  = "{$column} LIKE {$exact_value}";
+					$rank_tiers['identifier_prefix'][] = "{$column} LIKE {$prefix_value}";
 				}
 
-				$rank_tiers['title_prefix'][] = $wpdb->prepare( 'posts.post_title LIKE %s', $phrase_like . '%' );
+				$rank_tiers['title_prefix'][] = "posts.post_title LIKE {$prefix_value}";
 			}
 
 			foreach ( $search_terms as $search_term ) {
