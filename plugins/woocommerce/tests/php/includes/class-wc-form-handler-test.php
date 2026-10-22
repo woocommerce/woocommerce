@@ -996,6 +996,71 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox An add-to-cart link that WordPress redirects to its canonical URL adds the product once.
+	 *
+	 * @covers WC_Form_Handler::remove_add_to_cart_from_canonical_redirect()
+	 */
+	public function test_add_to_cart_link_with_canonical_redirect_adds_product_once(): void {
+		global $wp_rewrite;
+
+		$original_permalink_structure = (string) $wp_rewrite->permalink_structure;
+		$this->set_permalink_structure( '/%postname%/' );
+
+		try {
+			$product = WC_Helper_Product::create_simple_product();
+			self::factory()->post->create(
+				array(
+					'post_type'   => 'page',
+					'post_name'   => 'add-to-cart-landing',
+					'post_status' => 'publish',
+				)
+			);
+			$requested_url = home_url( '/add-to-cart-landing?add-to-cart=' . $product->get_id() );
+
+			$this->go_to( $requested_url );
+			$_REQUEST = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Mirrors PHP building the request from the query string.
+			WC_Form_Handler::add_to_cart_action();
+
+			$redirect_url = redirect_canonical( $requested_url, false );
+			$this->assertIsString( $redirect_url, 'WordPress should redirect to the trailing-slash URL.' );
+
+			$this->go_to( $redirect_url );
+			$_REQUEST = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Mirrors PHP building the request from the query string.
+			WC_Form_Handler::add_to_cart_action();
+		} finally {
+			$this->set_permalink_structure( $original_permalink_structure );
+		}
+
+		$this->assertSame( 1, WC()->cart->get_cart_contents_count(), 'The redirected request should not add the product again.' );
+		$this->assertSame( home_url( '/add-to-cart-landing/' ), $redirect_url, 'The canonical redirect should drop add-to-cart.' );
+	}
+
+	/**
+	 * @testdox remove_add_to_cart_from_canonical_redirect() only drops add-to-cart from same-host redirects of add-to-cart requests.
+	 *
+	 * @testWith ["12", "http://example.org/shop/?add-to-cart=12&quantity=2", "http://example.org/shop?add-to-cart=12&quantity=2", "http://example.org/shop/?quantity=2"]
+	 *           [null, "http://example.org/shop/?add-to-cart=12", "http://example.org/shop?add-to-cart=12", "http://example.org/shop/?add-to-cart=12"]
+	 *           ["abc", "http://example.org/shop/?add-to-cart=abc", "http://example.org/shop?add-to-cart=abc", "http://example.org/shop/?add-to-cart=abc"]
+	 *           ["12", "http://www.example.org/shop/?add-to-cart=12", "http://example.org/shop?add-to-cart=12", "http://www.example.org/shop/?add-to-cart=12"]
+	 *           ["12", false, "http://example.org/shop?add-to-cart=12", false]
+	 *
+	 * @covers WC_Form_Handler::remove_add_to_cart_from_canonical_redirect()
+	 *
+	 * @param string|null  $add_to_cart   The request's add-to-cart value, or null when absent.
+	 * @param string|false $redirect_url  Canonical redirect URL.
+	 * @param string       $requested_url Requested URL.
+	 * @param string|false $expected      Expected redirect URL.
+	 */
+	public function test_remove_add_to_cart_from_canonical_redirect( ?string $add_to_cart, $redirect_url, string $requested_url, $expected ): void {
+		unset( $_REQUEST['add-to-cart'] );
+		if ( null !== $add_to_cart ) {
+			$_REQUEST['add-to-cart'] = $add_to_cart;
+		}
+
+		$this->assertSame( $expected, WC_Form_Handler::remove_add_to_cart_from_canonical_redirect( $redirect_url, $requested_url ) );
+	}
+
+	/**
 	 * Prepares request globals for the account details handler.
 	 *
 	 * @param array<string,string> $fields Account detail fields.
