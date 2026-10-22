@@ -1425,4 +1425,116 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 			'Connecting should clear the update-check backoff'
 		);
 	}
+
+	/**
+	 * @testdox validate_funnel_id should keep 1 to 64 letters, digits, dashes and underscores, and drop anything else.
+	 *
+	 * @testWith ["0a5b6c1e-2d3f-4a5b-8c9d-0e1f2a3b4c5d", "0a5b6c1e-2d3f-4a5b-8c9d-0e1f2a3b4c5d"]
+	 *           ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"]
+	 *           ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", ""]
+	 *           ["", ""]
+	 *           ["id with spaces", ""]
+	 *           ["id<script>", ""]
+	 *           ["valid-id\n", ""]
+	 *           [["valid-id"], ""]
+	 *           [null, ""]
+	 *
+	 * @param mixed  $funnel_id Candidate id.
+	 * @param string $expected  Expected return value.
+	 */
+	public function test_validate_funnel_id( $funnel_id, string $expected ): void {
+		$this->assertSame( $expected, WC_Helper_API::validate_funnel_id( $funnel_id ) );
+	}
+
+	/**
+	 * @testdox Starting a connection should put one new funnel id in the redirect URI and pass the same id to the connect start hook.
+	 */
+	public function test_connect_puts_funnel_id_in_redirect_uri_and_hook(): void {
+		$_GET = array(
+			'page'              => 'wc-addons',
+			'section'           => 'helper',
+			'wc-helper-connect' => '1',
+			'wc-helper-nonce'   => wp_create_nonce( 'connect' ),
+		);
+
+		$request_token_redirect_uri = null;
+		$http_mock                  = static function ( $preempt, $args, $url ) use ( &$request_token_redirect_uri ) {
+			if ( false !== strpos( $url, 'oauth/request_token' ) ) {
+				$request_token_redirect_uri = $args['body']['redirect_uri'];
+			}
+			return array(
+				'response' => array( 'code' => 200 ),
+				'body'     => wp_json_encode( 'test-secret' ),
+			);
+		};
+		add_filter( 'pre_http_request', $http_mock, 10, 3 );
+
+		$hook_funnel_id = null;
+		add_action(
+			'woocommerce_helper_connect_start',
+			static function ( $funnel_id ) use ( &$hook_funnel_id ) {
+				$hook_funnel_id = $funnel_id;
+			}
+		);
+
+		$authorize_url = null;
+		add_filter(
+			'wp_redirect',
+			static function ( $location ) {
+				throw new \RuntimeException( $location ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+			}
+		);
+
+		try {
+			WC_Helper::current_screen( (object) array( 'id' => 'woocommerce_page_wc-addons' ) );
+		} catch ( \RuntimeException $e ) {
+			$authorize_url = $e->getMessage();
+		}
+
+		$this->assertTrue( wp_is_uuid( (string) $hook_funnel_id, 4 ), 'The hook should receive a UUID v4 funnel id' );
+
+		wp_parse_str( (string) wp_parse_url( (string) $request_token_redirect_uri, PHP_URL_QUERY ), $request_token_args );
+		$this->assertSame( $hook_funnel_id, $request_token_args['funnel_id'] ?? null, 'The redirect URI sent to request_token should carry the funnel id' );
+
+		wp_parse_str( (string) wp_parse_url( (string) $authorize_url, PHP_URL_QUERY ), $authorize_args );
+		$this->assertSame( $request_token_redirect_uri, $authorize_args['redirect_uri'] ?? null, 'The authorize URL should carry the same redirect URI' );
+		$this->assertArrayNotHasKey( 'funnel_id', $authorize_args, 'The funnel id should travel only inside the redirect URI' );
+	}
+
+	/**
+	 * @testdox Returning from WooCommerce.com should send a valid funnel id in the access token request and drop an invalid one.
+	 *
+	 * @testWith ["0a5b6c1e-2d3f-4a5b-8c9d-0e1f2a3b4c5d", "0a5b6c1e-2d3f-4a5b-8c9d-0e1f2a3b4c5d"]
+	 *           ["not valid!", null]
+	 *
+	 * @param string      $funnel_id Funnel id in the return URL.
+	 * @param string|null $expected  Funnel id expected in the request body, null when absent.
+	 */
+	public function test_return_sends_funnel_id_in_access_token_request( string $funnel_id, ?string $expected ): void {
+		$_GET = array(
+			'page'             => 'wc-addons',
+			'section'          => 'helper',
+			'wc-helper-return' => '1',
+			'wc-helper-nonce'  => wp_create_nonce( 'connect' ),
+			'request_token'    => 'test-request-token',
+			'funnel_id'        => $funnel_id,
+		);
+
+		$access_token_body = null;
+		$http_mock         = static function ( $preempt, $args, $url ) use ( &$access_token_body ) {
+			if ( false !== strpos( $url, 'oauth/access_token' ) ) {
+				$access_token_body = $args['body'];
+			}
+			return array( 'response' => array( 'code' => 500 ) );
+		};
+		add_filter( 'pre_http_request', $http_mock, 10, 3 );
+
+		try {
+			WC_Helper::current_screen( (object) array( 'id' => 'woocommerce_page_wc-addons' ) );
+			$this->fail( 'A failed access token request should stop the return handler' );
+		} catch ( WPDieException $e ) {
+			$this->assertIsArray( $access_token_body, 'The access token request should have been sent' );
+			$this->assertSame( $expected, $access_token_body['funnel_id'] ?? null );
+		}
+	}
 }

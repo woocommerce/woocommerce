@@ -73,23 +73,25 @@ class WC_Extensions_Tracking {
 
 	/**
 	 * Send a Tracks even when a Helper connection process is initiated.
+	 *
+	 * @param string $funnel_id Id of the connect attempt.
 	 */
-	public function track_helper_connection_start() {
-		WC_Tracks::record_event( 'extensions_subscriptions_connect' );
+	public function track_helper_connection_start( $funnel_id = '' ) {
+		WC_Tracks::record_event( 'extensions_subscriptions_connect', $this->get_funnel_id_properties( $funnel_id ) );
 	}
 
 	/**
 	 * Send a Tracks even when a Helper connection process is cancelled.
 	 */
 	public function track_helper_connection_cancelled() {
-		WC_Tracks::record_event( 'extensions_subscriptions_cancelled' );
+		WC_Tracks::record_event( 'extensions_subscriptions_cancelled', $this->get_funnel_id_properties( wp_unslash( $_GET['funnel_id'] ?? '' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 	}
 
 	/**
 	 * Send a Tracks even when a Helper connection process completed successfully.
 	 */
 	public function track_helper_connection_complete() {
-		$properties = array();
+		$properties = $this->get_funnel_id_properties( wp_unslash( $_GET['funnel_id'] ?? '' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 		if ( ! empty( $_GET['utm_source'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$properties['utm_source'] = wc_clean( wp_unslash( $_GET['utm_source'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -100,6 +102,18 @@ class WC_Extensions_Tracking {
 		}
 
 		WC_Tracks::record_event( 'extensions_subscriptions_connected', $properties );
+	}
+
+	/**
+	 * Build the funnel_id event property, omitted when the id is missing or invalid.
+	 *
+	 * @param mixed $funnel_id Candidate id.
+	 * @return array
+	 */
+	private function get_funnel_id_properties( $funnel_id ): array {
+		$funnel_id = class_exists( 'WC_Helper_API' ) ? WC_Helper_API::validate_funnel_id( $funnel_id ) : '';
+
+		return '' === $funnel_id ? array() : array( 'funnel_id' => $funnel_id );
 	}
 
 	/**
