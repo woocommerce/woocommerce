@@ -108,8 +108,8 @@ function userCanAccessPage( capability ) {
  * before NoMatch ever renders, so the only way to tell the two situations
  * apart is to check the full, unfiltered page list directly.
  *
- * @param {string} path  The current path.
- * @param {Array}  pages The full list of registered pages, unfiltered by capability.
+ * @param {string} [path] The current path.
+ * @param {Array}  pages  The full list of registered pages, unfiltered by capability.
  * @return {boolean} True if the path matches a page the user can't access.
  */
 export function isPermissionDeniedPath( path, pages ) {

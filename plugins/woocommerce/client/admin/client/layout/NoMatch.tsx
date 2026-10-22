@@ -15,18 +15,23 @@ import { WooHeaderPageTitle } from '@woocommerce/admin-layout';
 /**
  * Internal dependencies
  */
-import { usePages, isPermissionDeniedPath } from './controller';
+import { getPages, isPermissionDeniedPath } from './controller';
 import { Page } from './hooks/use-page-classes';
 
 const NoMatch = ( { path }: { path?: string } ) => {
 	const [ isDelaying, setIsDelaying ] = useState( true );
-	const pages = usePages() as Page[];
 
 	// Same check the breadcrumb uses, so the page title and this card never
-	// disagree about why the page couldn't be shown.
+	// disagree about why the page couldn't be shown. Pages are read with
+	// getPages() rather than usePages(): useFilterHook shares one listener
+	// namespace per filter, so unmounting this component would also remove
+	// the layout's listener. Recomputing once the delay ends picks up pages
+	// registered in the meantime.
 	const isPermissionDenied = useMemo(
-		() => isPermissionDeniedPath( path, pages ),
-		[ path, pages ]
+		() =>
+			! isDelaying &&
+			isPermissionDeniedPath( path, getPages() as Page[] ),
+		[ path, isDelaying ]
 	);
 
 	/*
@@ -61,9 +66,6 @@ const NoMatch = ( { path }: { path?: string } ) => {
 		<div className="woocommerce-layout__no-match">
 			<Card>
 				<CardBody>
-					{ /* The page title (driven by the breadcrumb) already says
-					 * "Access denied" or "Page not found" - repeating it here
-					 * as its own heading would just echo the title above. */ }
 					<Text>
 						{ isPermissionDenied
 							? __(
@@ -71,7 +73,7 @@ const NoMatch = ( { path }: { path?: string } ) => {
 									'woocommerce'
 							  )
 							: __(
-									'We couldn’t find that page. Check the address for a typo, or return to WooCommerce Home.',
+									'We couldn’t find that page. Check the address for a typo.',
 									'woocommerce'
 							  ) }
 					</Text>

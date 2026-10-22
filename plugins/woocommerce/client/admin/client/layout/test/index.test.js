@@ -11,6 +11,7 @@ import * as navigation from '@woocommerce/navigation';
  */
 import { PAGES_FILTER } from '../controller';
 import { _Layout as Layout } from '../index';
+import { NoMatch } from '../NoMatch';
 
 // Backs both useSelect's getCurrentUser (used around the app) and the plain
 // select().getCurrentUser() that controller.js's permission check reads
@@ -120,7 +121,7 @@ describe( 'Layout', () => {
 
 	describe( 'NoMatch', () => {
 		const message =
-			'We couldn’t find that page. Check the address for a typo, or return to WooCommerce Home.';
+			'We couldn’t find that page. Check the address for a typo.';
 
 		it( 'should render a loading spinner first and then the error message after the delay', () => {
 			mockPath( '/incorrect-path' );
@@ -221,6 +222,42 @@ describe( 'Layout', () => {
 			).toBeInTheDocument();
 
 			// Clean up the filter as filters are working globally.
+			removeFilter( PAGES_FILTER, namespace );
+		} );
+
+		it( 'should still render pages registered after a NoMatch screen unmounts', () => {
+			const namespace = `woocommerce/woocommerce/test_${ PAGES_FILTER }`;
+			const path = '/test/late-greeting';
+
+			mockPath( path );
+			const { rerender } = render(
+				<>
+					<Layout />
+					<NoMatch path="/incorrect-path" />
+				</>
+			);
+
+			// Unmounting NoMatch must not tear down the layout's listener
+			// for pages registered later.
+			rerender( <Layout /> );
+
+			act( () => {
+				addFilter( PAGES_FILTER, namespace, ( pages ) => {
+					return [
+						...pages,
+						{
+							breadcrumbs: [ 'Late greeting' ],
+							container: () => <button>Greet late</button>,
+							path,
+						},
+					];
+				} );
+			} );
+
+			expect(
+				screen.getByRole( 'button', { name: 'Greet late' } )
+			).toBeInTheDocument();
+
 			removeFilter( PAGES_FILTER, namespace );
 		} );
 	} );
