@@ -40462,18 +40462,6 @@ parameters:
 			path: src/Admin/API/Reports/DataStore.php
 
 		-
-			message: '#^Call to method format\(\) on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 12
-			path: src/Admin/API/Reports/DataStore.php
-
-		-
-			message: '#^Call to method setTimestamp\(\) on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Admin/API/Reports/DataStore.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\DataStore\:\:add_intervals_sql_params\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -40624,18 +40612,6 @@ parameters:
 			path: src/Admin/API/Reports/DataStore.php
 
 		-
-			message: '#^Parameter \#1 \$datetime of static method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:iterate\(\) expects Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime, DateTime given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Admin/API/Reports/DataStore.php
-
-		-
-			message: '#^Parameter \#1 \$datetime of static method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:iterate\(\) expects Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime, object given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Admin/API/Reports/DataStore.php
-
-		-
 			message: '#^Parameter \#1 \$order_by of method Automattic\\WooCommerce\\Admin\\API\\Reports\\DataStore\:\:normalize_order_by\(\) expects string, array\|string given\.$#'
 			identifier: argument.type
 			count: 2
@@ -40679,30 +40655,6 @@ parameters:
 
 		-
 			message: '#^Parameter \$b of method Automattic\\WooCommerce\\Admin\\API\\Reports\\DataStore\:\:interval_cmp\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/DataStore.php
-
-		-
-			message: '#^Parameter \$end_datetime of method Automattic\\WooCommerce\\Admin\\API\\Reports\\DataStore\:\:fill_in_missing_intervals\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/DataStore.php
-
-		-
-			message: '#^Parameter \$end_datetime of method Automattic\\WooCommerce\\Admin\\API\\Reports\\DataStore\:\:update_interval_boundary_dates\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/DataStore.php
-
-		-
-			message: '#^Parameter \$start_datetime of method Automattic\\WooCommerce\\Admin\\API\\Reports\\DataStore\:\:fill_in_missing_intervals\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/DataStore.php
-
-		-
-			message: '#^Parameter \$start_datetime of method Automattic\\WooCommerce\\Admin\\API\\Reports\\DataStore\:\:update_interval_boundary_dates\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
 			identifier: class.notFound
 			count: 1
 			path: src/Admin/API/Reports/DataStore.php
@@ -42724,48 +42676,6 @@ parameters:
 			path: src/Admin/API/Reports/TimeInterval.php
 
 		-
-			message: '#^Call to method add\(\) on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Call to method diff\(\) on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Call to method format\(\) on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 35
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Call to method getTimezone\(\) on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Call to method setTime\(\) on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Call to method setTimestamp\(\) on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Call to method sub\(\) on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
 			message: '#^Cannot call method add\(\) on DateTime\|false\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -42778,115 +42688,7 @@ parameters:
 			path: src/Admin/API/Reports/TimeInterval.php
 
 		-
-			message: '#^Cloning object of an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:convert_local_datetime_to_gmt\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:convert_local_datetime_to_gmt\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime but returns DateTime\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:default_after\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:default_after\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime but returns WC_DateTime\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:default_before\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:default_before\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime but returns WC_DateTime\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:iterate\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:next_day_start\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:next_hour_start\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:next_hour_start\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime but returns DateTime\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:next_month_start\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:next_month_start\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime but returns Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\|DateTime\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:next_quarter_start\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:next_quarter_start\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime but returns DateTime\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:next_week_start\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:next_week_start\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime but returns DateTime\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:next_year_start\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:next_year_start\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime but returns DateTime\.$#'
+			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:next_week_start\(\) should return DateTime but returns DateTime\|false\.$#'
 			identifier: return.type
 			count: 1
 			path: src/Admin/API/Reports/TimeInterval.php
@@ -42940,78 +42742,6 @@ parameters:
 			path: src/Admin/API/Reports/TimeInterval.php
 
 		-
-			message: '#^Parameter \$datetime of method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:iterate\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Parameter \$datetime of method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:next_day_start\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Parameter \$datetime of method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:next_hour_start\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Parameter \$datetime of method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:next_month_start\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Parameter \$datetime of method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:next_quarter_start\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Parameter \$datetime of method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:next_week_start\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Parameter \$datetime of method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:next_year_start\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Parameter \$datetime of method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:quarter\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Parameter \$datetime of method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:simple_week_number\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Parameter \$datetime of method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:time_interval_id\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Parameter \$datetime of method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:week_number\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Parameter \$end_datetime of method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:intervals_between\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
 			message: '#^Parameter \$request of method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:rest_validate_between_date_arg\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\WP_REST_Request\.$#'
 			identifier: class.notFound
 			count: 1
@@ -43019,12 +42749,6 @@ parameters:
 
 		-
 			message: '#^Parameter \$request of method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:rest_validate_between_numeric_arg\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\WP_REST_Request\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Parameter \$start_datetime of method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:intervals_between\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
 			identifier: class.notFound
 			count: 1
 			path: src/Admin/API/Reports/TimeInterval.php

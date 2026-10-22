@@ -515,8 +515,8 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 	 * Fills in interval gaps from DB with 0-filled objects.
 	 *
 	 * @param array     $db_intervals   Array of all intervals present in the db.
-	 * @param DateTime  $start_datetime Start date.
-	 * @param DateTime  $end_datetime   End date.
+	 * @param \DateTime $start_datetime Start date.
+	 * @param \DateTime $end_datetime   End date.
 	 * @param string    $time_interval  Time interval, e.g. day, week, month.
 	 * @param \stdClass $data           Data with SQL extracted intervals.
 	 * @return \stdClass
@@ -698,9 +698,11 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 			$end_iteration   = 0;
 			if ( 'asc' === strtolower( $query_args['order'] ) ) {
 				// ORDER BY date ASC.
+				/** @var \DateTime $new_start_date */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
 				$new_start_date    = $query_args['after'];
 				$intervals_to_skip = ( $query_args['page'] - 1 ) * $params['per_page'];
-				$latest_end_date   = $query_args['before'];
+				/** @var \DateTime $latest_end_date */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
+				$latest_end_date = $query_args['before'];
 				for ( $i = 0; $i < $intervals_to_skip; $i++ ) {
 					if ( $new_start_date > $latest_end_date ) {
 						$new_start_date  = $latest_end_date;
@@ -729,8 +731,10 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 				}
 			} else {
 				// ORDER BY date DESC.
-				$new_end_date        = $query_args['before'];
-				$intervals_to_skip   = ( $query_args['page'] - 1 ) * $params['per_page'];
+				/** @var \DateTime $new_end_date */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
+				$new_end_date      = $query_args['before'];
+				$intervals_to_skip = ( $query_args['page'] - 1 ) * $params['per_page'];
+				/** @var \DateTime $earliest_start_date */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
 				$earliest_start_date = $query_args['after'];
 				for ( $i = 0; $i < $intervals_to_skip; $i++ ) {
 					if ( $new_end_date < $earliest_start_date ) {
@@ -898,10 +902,10 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 	 *
 	 * E.g. if there are db records for only Tuesday and Thursday this week, the actual week interval is [Mon, Sun], not [Tue, Thu].
 	 *
-	 * @param DateTime $start_datetime Start date.
-	 * @param DateTime $end_datetime End date.
-	 * @param string   $time_interval Time interval, e.g. day, week, month.
-	 * @param array    $intervals Array of intervals extracted from SQL db.
+	 * @param \DateTime $start_datetime Start date.
+	 * @param \DateTime $end_datetime End date.
+	 * @param string    $time_interval Time interval, e.g. day, week, month.
+	 * @param array     $intervals Array of intervals extracted from SQL db.
 	 */
 	protected function update_interval_boundary_dates( $start_datetime, $end_datetime, $time_interval, &$intervals ) {
 		$local_tz = new \DateTimeZone( wc_timezone_string() );
