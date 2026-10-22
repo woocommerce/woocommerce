@@ -1009,7 +1009,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 
 		OrderLineMetaValidator::assert_no_serialized_meta_value( (array) ( $posted['meta_data'] ?? array() ) );
 
-		$this->maybe_set_item_props( $item, array( 'name', 'quantity', 'total', 'subtotal', 'tax_class', 'tax_status' ), $posted );
+		$this->maybe_set_item_props( $item, array( 'name', 'quantity', 'total', 'subtotal', 'tax_class' ), $posted );
 		$this->maybe_set_item_meta_data( $item, $posted );
 
 		return $item;
@@ -1600,6 +1600,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
 								'enum'        => array( 'taxable', 'shipping', 'none' ),
+								'readonly'    => true,
 							),
 							'subtotal'         => array(
 								'description' => __( 'Line subtotal, excluding tax (before discounts).', 'woocommerce' ),

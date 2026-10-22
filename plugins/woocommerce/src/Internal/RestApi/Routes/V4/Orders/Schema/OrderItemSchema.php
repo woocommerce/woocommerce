@@ -91,6 +91,7 @@ class OrderItemSchema extends AbstractLineItemSchema {
 				'type'        => 'string',
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 				'enum'        => array( 'taxable', 'shipping', 'none' ),
+				'readonly'    => true,
 			),
 			'subtotal'        => array(
 				'description' => __( 'Line subtotal (before discounts).', 'woocommerce' ),
