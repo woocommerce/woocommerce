@@ -66,7 +66,9 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 		await test.step( 'allows interacting with the form in the frontend', async () => {
 			await page.goto( `/?p=${ customProductId }` );
-			const quantityInput = page.getByLabel( 'Product quantity' );
+			const quantityInput = page.getByLabel( 'Custom Product quantity', {
+				exact: true,
+			} );
 
 			await expect( quantityInput ).toHaveValue( '1' );
 			await page
@@ -119,7 +121,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 		await expect( addToCartButton ).toHaveText( '3 in cart' );
 
-		await page.getByLabel( 'Product quantity' ).fill( '1' );
+		await page.getByLabel( 'Beanie quantity', { exact: true } ).fill( '1' );
 		await addToCartButton.click();
 
 		await expect( addToCartButton ).toHaveText( '4 in cart' );
@@ -234,7 +236,9 @@ test.describe( 'Add to Cart + Options Block', () => {
 			);
 			await increaseQuantityButton.click();
 
-			const quantityInput = page.getByLabel( 'Product quantity' );
+			const quantityInput = page.getByLabel( 'Hoodie quantity', {
+				exact: true,
+			} );
 
 			await expect( quantityInput ).toHaveValue( '2' );
 
@@ -269,7 +273,9 @@ test.describe( 'Add to Cart + Options Block', () => {
 		const productPrice = page
 			.locator( '.wp-block-woocommerce-product-price' )
 			.first();
-		const quantitySelector = page.getByLabel( 'Product quantity' );
+		const quantitySelector = page.getByLabel( 'Hoodie quantity', {
+			exact: true,
+		} );
 
 		const additionalInfoPanel =
 			wpCoreVersion >= 6.9
@@ -900,7 +906,9 @@ test.describe( 'Add to Cart + Options Block', () => {
 		await test.step( 'in simple products', async () => {
 			await page.goto( '/product/t-shirt/' );
 
-			const quantityInput = page.getByLabel( 'Product quantity' );
+			const quantityInput = page.getByLabel( 'T-Shirt quantity', {
+				exact: true,
+			} );
 
 			await expect( quantityInput ).toHaveValue( '4' );
 
@@ -984,7 +992,8 @@ test.describe( 'Add to Cart + Options Block', () => {
 			await page.goto( '/product/hoodie/' );
 
 			const quantityInput = page.getByRole( 'spinbutton', {
-				name: 'Product quantity',
+				name: 'Hoodie quantity',
+				exact: true,
 			} );
 
 			await expect( quantityInput ).toHaveValue( '1' );
