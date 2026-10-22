@@ -1,4 +1,3 @@
 Significance: patch
-Type: tweak
-
-Add block.json for cart block
+Type: dev
+Comment: Register the Cart block from block.json so extensions can filter its metadata.
