@@ -25,6 +25,7 @@ import clsx from 'clsx';
  */
 import './editor.scss';
 import { termsConsentDefaultText, termsCheckboxDefaultText } from './constants';
+import { SwitchToActionsTermsNotice } from './switch-to-actions-terms';
 
 const noop = () => undefined;
 
@@ -124,9 +125,11 @@ export const TermsNotices = ( {
 };
 
 export const Edit = ( {
+	clientId,
 	attributes: { checkbox, text, showSeparator },
 	setAttributes,
 }: {
+	clientId: string;
 	attributes: { text: string; checkbox: boolean; showSeparator: boolean };
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
 } ) => {
@@ -140,6 +143,7 @@ export const Edit = ( {
 	return (
 		<div { ...blockProps }>
 			<InspectorControls>
+				<SwitchToActionsTermsNotice clientId={ clientId } />
 				<TermsNotices
 					text={ text }
 					checkbox={ checkbox }
