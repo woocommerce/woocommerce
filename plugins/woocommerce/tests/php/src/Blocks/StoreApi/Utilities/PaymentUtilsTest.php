@@ -275,6 +275,27 @@ class PaymentUtilsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should fall back to the default without a session, as in WP-CLI or cron, instead of failing.
+	 */
+	public function test_checkout_payment_method_falls_back_to_the_default_without_a_session(): void {
+		$session = WC()->session;
+		add_filter(
+			self::FILTER,
+			function ( $payment_method ) {
+				return 'bacs' === $payment_method ? 'cod' : $payment_method;
+			}
+		);
+
+		try {
+			WC()->session = null;
+
+			$this->assertSame( 'cod', PaymentUtils::get_checkout_payment_method() );
+		} finally {
+			WC()->session = $session;
+		}
+	}
+
+	/**
 	 * Hide COD from the available gateways, as a shipping restriction would, while it stays enabled.
 	 *
 	 * @param array $gateways Available gateways keyed by id.
