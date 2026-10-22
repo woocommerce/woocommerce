@@ -19,7 +19,12 @@ type ProductResultsCountContext = {
 const lastAnnouncements = new WeakMap< HTMLElement, string >();
 
 let pendingAnnouncement:
-	{ timer: ReturnType< typeof setTimeout >; isChanged: boolean } | undefined;
+	| {
+			timer: ReturnType< typeof setTimeout >;
+			isChanged: boolean;
+			block: HTMLElement | null;
+	  }
+	| undefined;
 
 /**
  * Whether a full page load should announce the count. Matches the legacy script, which
@@ -47,12 +52,20 @@ const productResultsCountStore = {
 				lastAnnouncements.set( ref, announcement );
 			}
 
+			if ( ! announcement ) {
+				// This block now shows no results, so its own queued count is out of date.
+				if ( ref && pendingAnnouncement?.block === ref ) {
+					clearTimeout( pendingAnnouncement.timer );
+					pendingAnnouncement = undefined;
+				}
+				return;
+			}
+
 			const isFirstRun = previousAnnouncement === undefined;
 			const isChanged =
 				! isFirstRun && announcement !== previousAnnouncement;
 			if (
 				( isFirstRun && ! shouldAnnounceOnPageLoad() ) ||
-				! announcement ||
 				( ! isChanged && pendingAnnouncement?.isChanged )
 			) {
 				return;
@@ -61,6 +74,7 @@ const productResultsCountStore = {
 			clearTimeout( pendingAnnouncement?.timer );
 			pendingAnnouncement = {
 				isChanged,
+				block: ref,
 				timer: setTimeout( () => {
 					pendingAnnouncement = undefined;
 					import( '@wordpress/a11y' )

@@ -256,4 +256,30 @@ describe( 'Product Results Count announcement', () => {
 
 		expect( mockSpeak ).not.toHaveBeenCalled();
 	} );
+
+	it( 'drops a pending count when the same block then shows no results', async () => {
+		announce( 'Showing 1–16 of 28 results' );
+		announce( 'Showing the single result' );
+		jest.advanceTimersByTime( 300 );
+		announce( '' );
+		await settle();
+
+		expect( mockSpeak ).not.toHaveBeenCalled();
+	} );
+
+	it( "keeps another block's pending count when a block shows no results", async () => {
+		const otherQueryBlock = document.createElement( 'div' );
+		announce( 'Showing 1–16 of 28 results' );
+		announce( 'Showing 1–4 of 12 results', otherQueryBlock );
+
+		announce( 'Showing 17–28 of 28 results' );
+		announce( '', otherQueryBlock );
+		await settle();
+
+		expect( mockSpeak ).toHaveBeenCalledTimes( 1 );
+		expect( mockSpeak ).toHaveBeenCalledWith(
+			'Showing 17–28 of 28 results',
+			'polite'
+		);
+	} );
 } );
