@@ -156,7 +156,7 @@ class OpenGraph {
 			foreach ( self::get_meta_properties( $processor ) as $property ) {
 				$content = $processor->get_attribute( 'content' );
 				if ( 'og:type' === $property && isset( $tags['og:type'] ) ) {
-					$processor->set_attribute( 'content', $tags['og:type'] );
+					$processor->set_attribute( 'content', html_entity_decode( $tags['og:type'], ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
 				} elseif ( ! is_string( $content ) || '' === trim( $content ) ) {
 					continue;
 				}
@@ -227,10 +227,11 @@ class OpenGraph {
 			$content = $inserter->get_attribute( 'content' );
 			foreach ( self::get_meta_properties( $inserter ) as $property ) {
 				if ( $replace_image_dimensions && in_array( $property, array( 'og:image:width', 'og:image:height' ), true ) ) {
-					$inserter->set_attribute( 'content', $image_dimensions[ $property ] ?? '' );
+					$inserter->set_attribute( 'content', html_entity_decode( $image_dimensions[ $property ] ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
 					unset( $tags[ $property ] );
 				} elseif ( isset( $tags[ $property ] ) && ( ! is_string( $content ) || '' === trim( $content ) ) ) {
-					$inserter->set_attribute( 'content', $tags[ $property ] );
+					// Decode existing entities because set_attribute() always encodes ampersands.
+					$inserter->set_attribute( 'content', html_entity_decode( $tags[ $property ], ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
 					unset( $tags[ $property ] );
 				}
 			}
