@@ -1255,4 +1255,69 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 		$this->assertArrayHasKey( 'typography', $synced_data['styles'] );
 		$this->assertEquals( '24px', $synced_data['styles']['typography']['fontSize'] );
 	}
+
+	/**
+	 * Data provider for fonts that only a later name in their stack can place.
+	 *
+	 * @return array Test cases with input font family and expected output.
+	 */
+	public function font_stack_fallback_data_provider(): array {
+		$arial       = "Arial, 'Helvetica Neue', Helvetica, sans-serif";
+		$georgia     = "Georgia, Times, 'Times New Roman', serif";
+		$courier_new = "'Courier New', Courier, 'Lucida Sans Typewriter', 'Lucida Typewriter', monospace";
+		$comic_sans  = "'Comic Sans MS', 'Marker Felt-Thin', Arial, sans-serif";
+		return array(
+			'unknown font before a safe font' => array( "'Cardo', Georgia", $georgia ),
+			'unknown cursive font'            => array( '"Dancing Script", cursive', $comic_sans ),
+			'unknown fantasy font'            => array( 'Papyrus, fantasy', $arial ),
+			'unknown serif font'              => array( '"Gentium Plus", serif', $georgia ),
+			'unknown ui-serif font'           => array( "'Newsreader', ui-serif, serif", $georgia ),
+			'unknown monospace font'          => array( "'IBM Plex Mono', monospace", $courier_new ),
+			'unknown ui-monospace font'       => array( 'Fira Code, ui-monospace', $courier_new ),
+			'unknown sans-serif font'         => array( "'Figtree', sans-serif", $arial ),
+			'unknown font with no generic'    => array( 'CustomWebFont', $arial ),
+			'stack that starts with serif'    => array( 'serif', $georgia ),
+			'stack that starts with mono'     => array( 'monospace', $courier_new ),
+			'sans-serif before serif'         => array( 'CustomFont, sans-serif, serif', $arial ),
+			'system-ui before monospace'      => array( 'CustomFont, system-ui, monospace', $arial ),
+			'serif before sans-serif'         => array( 'CustomFont, serif, sans-serif', $georgia ),
+		);
+	}
+
+	/**
+	 * Test that an unknown font falls back to the next usable name in its stack.
+	 *
+	 * @testdox Should use the first email-safe font or generic family in the stack.
+	 * @dataProvider font_stack_fallback_data_provider
+	 *
+	 * @param string $input_font    The input font family stack.
+	 * @param string $expected_font The expected email-safe font family output.
+	 */
+	public function test_convert_to_email_safe_font_walks_the_stack( string $input_font, string $expected_font ): void {
+		$reflection = new \ReflectionClass( $this->controller );
+		$method     = $reflection->getMethod( 'convert_to_email_safe_font' );
+		$method->setAccessible( true );
+
+		$this->assertEquals( $expected_font, $method->invoke( $this->controller, $input_font ) );
+	}
+
+	/**
+	 * Test that every email-safe font stack is a list of families, not one quoted name.
+	 *
+	 * @testdox Should not wrap a whole email-safe font stack in quotes.
+	 */
+	public function test_email_safe_font_stacks_are_not_quoted_as_one_family(): void {
+		foreach ( $this->controller->get_email_safe_fonts() as $slug => $font_family ) {
+			foreach ( explode( ',', $font_family ) as $name ) {
+				$name = trim( $name );
+				// Each name is bare or wrapped in its own quotes; a stray quote means
+				// the quotes span several names, which CSS reads as one family.
+				$this->assertMatchesRegularExpression(
+					'/^([^\'"]+|\'[^\']+\'|"[^"]+")$/',
+					$name,
+					"The $slug stack quotes a name that isn't a single family: $name"
+				);
+			}
+		}
+	}
 }

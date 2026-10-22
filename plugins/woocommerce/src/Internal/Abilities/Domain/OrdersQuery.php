@@ -8,6 +8,8 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
+use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
+use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderAbilityTrait;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
@@ -76,6 +78,14 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 	public static function execute( array $input ) {
 		$include_line_items = (bool) ( $input['include_line_items'] ?? false );
 
+		if ( ! empty( $input['id'] ) && ! empty( $input['filters'] ) ) {
+			return new \WP_Error(
+				'woocommerce_ability_filters_with_id',
+				__( 'Send either an id or filters, not both.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
+		}
+
 		if ( ! empty( $input['id'] ) ) {
 			$order = self::get_order_from_input( $input );
 
@@ -98,18 +108,27 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 			'page'     => $page,
 			'paginate' => true,
 			'return'   => 'objects',
-			'type'     => 'shop_order',
+			'type'     => self::get_order_type_from_input( $input ),
 		);
 
-		foreach ( array( 'status', 'billing_email', 'order' ) as $field ) {
+		foreach ( array( 'billing_email', 'order' ) as $field ) {
 			if ( ! empty( $input[ $field ] ) && is_scalar( $input[ $field ] ) ) {
 				$args[ $field ] = wc_clean( (string) $input[ $field ] );
 			}
 		}
 
-		if ( empty( $args['status'] ) ) {
-			$args['status'] = self::get_allowed_order_status_slugs();
+		$status = $input['status'] ?? array();
+		if ( is_string( $status ) && '' !== $status ) {
+			$args['status'] = array( wc_clean( $status ) );
+		} elseif ( is_array( $status ) && ! empty( $status ) ) {
+			$args['status'] = array_map( 'wc_clean', array_filter( array_map( 'strval', $status ), static fn ( string $slug ): bool => '' !== $slug ) );
 		}
+
+		if ( empty( $args['status'] ) ) {
+			$args['status'] = 'shop_order' === $args['type'] ? self::get_allowed_order_status_slugs() : self::get_query_order_status_slugs();
+		}
+
+		$args['status'] = array_map( array( __CLASS__, 'prepare_status_arg' ), (array) $args['status'] );
 
 		if ( ! empty( $input['orderby'] ) && is_scalar( $input['orderby'] ) ) {
 			$orderby         = sanitize_text_field( (string) $input['orderby'] );
@@ -135,6 +154,26 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 		$modified_date_query = self::build_modified_date_query_arg( $input );
 		if ( null !== $modified_date_query ) {
 			$args['date_query'][] = $modified_date_query;
+		}
+
+		$extension_args = ExtensibleAbilities::get_query_args( 'order', $input );
+		if ( is_wp_error( $extension_args ) ) {
+			return $extension_args;
+		}
+
+		if ( isset( $extension_args['post__not_in'] ) ) {
+			$args['exclude'] = array_merge( (array) ( $args['exclude'] ?? array() ), $extension_args['post__not_in'] );
+			unset( $extension_args['post__not_in'] );
+		}
+		if ( isset( $extension_args['post__in'] ) && ! empty( $args['exclude'] ) ) {
+			$include                    = array_values( array_diff( $extension_args['post__in'], (array) $args['exclude'] ) );
+			$extension_args['post__in'] = empty( $include ) ? array( 0 ) : $include;
+		}
+
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$args = array_merge_recursive( $args, $extension_args );
+		} else {
+			$args[ AbilitiesLoader::EXTENSION_QUERY_VAR ] = $extension_args;
 		}
 
 		$results = wc_get_orders( $args );
@@ -173,7 +212,25 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 	public static function can_query_orders( $input = array() ): bool {
 		$order_id = self::get_id_from_input( $input );
 
-		return wc_rest_check_post_permissions( 'shop_order', 'read', $order_id );
+		if ( $order_id > 0 ) {
+			return self::check_order_permission( $order_id, 'read' );
+		}
+
+		$type = is_array( $input ) ? self::get_order_type_from_input( $input ) : 'shop_order';
+
+		return wc_rest_check_post_permissions( $type, 'read' );
+	}
+
+	/**
+	 * Order type from the input, or `shop_order` when the input has no known type.
+	 *
+	 * @param array $input Ability input.
+	 * @return string
+	 */
+	private static function get_order_type_from_input( array $input ): string {
+		$type = $input['type'] ?? 'shop_order';
+
+		return is_string( $type ) && in_array( $type, self::get_order_type_slugs(), true ) ? $type : 'shop_order';
 	}
 
 	/**
@@ -182,17 +239,34 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 	 * @return array
 	 */
 	private static function get_input_schema(): array {
-		return array(
+		$schema = array(
 			'type'                 => 'object',
 			'properties'           => array(
 				'id'                 => array(
 					'type'    => 'integer',
 					'minimum' => 1,
 				),
-				'status'             => array(
+				'type'               => array(
 					'type'        => 'string',
-					'description' => __( 'Filter by order status slug without the wc- prefix.', 'woocommerce' ),
-					'enum'        => self::get_allowed_order_status_slugs(),
+					'description' => __( 'Order type to list. Extensions can register more order types. Defaults to shop_order.', 'woocommerce' ),
+					'enum'        => self::get_order_type_slugs(),
+					'default'     => 'shop_order',
+				),
+				'status'             => array(
+					'description' => __( 'Filter by one order status slug, or a list of slugs, without the wc- prefix. Custom order types may add their own statuses.', 'woocommerce' ),
+					'anyOf'       => array(
+						array(
+							'type' => 'string',
+							'enum' => self::get_query_order_status_slugs(),
+						),
+						array(
+							'type'  => 'array',
+							'items' => array(
+								'type' => 'string',
+								'enum' => self::get_query_order_status_slugs(),
+							),
+						),
+					),
 				),
 				'customer_id'        => array(
 					'type'        => 'integer',
@@ -267,6 +341,7 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 			'additionalProperties' => false,
 			'default'              => array(),
 		);
+		return ExtensibleAbilities::add_query_filters_schema( $schema, 'order' );
 	}
 
 	/**
@@ -331,6 +406,20 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 	 */
 	private static function format_timestamp_for_date_query( int $timestamp ): string {
 		return gmdate( 'Y-m-d H:i:s', $timestamp );
+	}
+
+	/**
+	 * Add the `wc-` prefix to a status of another order type that is registered
+	 * with it. The order query adds the prefix to order statuses itself, so those
+	 * stay without it, as `woocommerce_order_query_args` callbacks expect.
+	 *
+	 * @param string $status Status slug without the `wc-` prefix.
+	 * @return string
+	 */
+	private static function prepare_status_arg( string $status ): string {
+		$prefixed = 'wc-' . $status;
+
+		return ! wc_is_order_status( $prefixed ) && in_array( $prefixed, get_post_stati(), true ) ? $prefixed : $status;
 	}
 
 	/**

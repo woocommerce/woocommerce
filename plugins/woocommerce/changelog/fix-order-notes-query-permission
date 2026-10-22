@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Check the order notes query ability permission against the actual order type.
