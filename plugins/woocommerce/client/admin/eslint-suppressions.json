@@ -349,11 +349,6 @@
       "count": 3
     }
   },
-  "client/wp-admin-scripts/email-editor-integration/sidebar_settings.tsx": {
-    "@wordpress/use-recommended-components": {
-      "count": 1
-    }
-  },
   "client/wp-admin-scripts/email-editor-integration/update-banner.tsx": {
     "@wordpress/use-recommended-components": {
       "count": 1
