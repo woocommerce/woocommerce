@@ -551,10 +551,26 @@ async function sendCartRequest(
 				// Preserve today's relative order: the legacy event fires
 				// before the sync event.
 				if ( anyAdd ) {
+					// Sum the quantity added per product. Keyed quantity
+					// steppers also use `'add'` origin, so skip lines whose
+					// quantity didn't go up.
+					const addedQuantities = new Map< number, number >();
+					for ( const { meta } of successful ) {
+						const { product } = meta;
+						if ( product && product.quantity > 0 ) {
+							const total =
+								addedQuantities.get( product.id ) ?? 0;
+							addedQuantities.set(
+								product.id,
+								total + product.quantity
+							);
+						}
+					}
 					triggerAddedToCartEvent( {
 						preserveCartData: true,
-						products: successful.flatMap( ( entry ) =>
-							entry.meta.product ? [ entry.meta.product ] : []
+						products: Array.from(
+							addedQuantities,
+							( [ id, quantity ] ) => ( { id, quantity } )
 						),
 					} );
 				}
