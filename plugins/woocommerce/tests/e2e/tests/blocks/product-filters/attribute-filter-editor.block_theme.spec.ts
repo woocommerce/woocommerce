@@ -19,10 +19,16 @@ const blockData = {
 	slug: 'archive-product',
 };
 
-const getExpectedStyleControls = ( wpCoreVersion: number ) =>
-	wpCoreVersion >= 7.1
-		? [ 'Typography', 'Dimensions', 'Border' ]
-		: [ 'Color', 'Typography', 'Dimensions' ];
+const getExpectedStyleControls = ( wpCoreVersion: number ) => {
+	if ( wpCoreVersion >= 7.1 ) {
+		return [
+			'Typography',
+			'Dimensions',
+			wpCoreVersion >= 7.2 ? 'Borders' : 'Border',
+		];
+	}
+	return [ 'Color', 'Typography', 'Dimensions' ];
+};
 
 const test = base.extend< { pageObject: ProductFiltersPage } >( {
 	pageObject: async ( { page, editor, frontendUtils }, use ) => {
