@@ -1462,6 +1462,11 @@ body.woocommerce_page_wc-customer-stock-notifications {
 	.wrap {
 		margin-inline-start: 0;
 	}
+
+	// Show the variation attributes on their own line below the product title.
+	.column-product .description {
+		display: block;
+	}
 }
 
 body.post-type-shop_order,
@@ -9268,13 +9273,6 @@ body.woocommerce_page_wc-settings {
 			color: #505050;
 			padding: 0 0 10px 0;
 			text-decoration: none;
-
-			&:focus,
-			&:hover,
-			&:active {
-				outline: none;
-				box-shadow: none;
-			}
 		}
 		margin: 0;
 		// Tab strip inherits the wp-admin body bg so it reads as one

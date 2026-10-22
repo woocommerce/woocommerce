@@ -398,16 +398,16 @@ function wc_body_class( $classes ) {
  * @return void
  */
 function wc_no_js() {
-	$type_attr = current_theme_supports( 'html5', 'script' ) ? '' : " type='text/javascript'";
-	?>
-	<script<?php echo $type_attr; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
+	wp_print_inline_script_tag(
+		"
 		(function () {
 			var c = document.body.className;
 			c = c.replace(/woocommerce-no-js/, 'woocommerce-js');
 			document.body.className = c;
 		})();
-	</script>
-	<?php
+		",
+		array( 'id' => 'wc-no-js' )
+	);
 }
 
 /**
@@ -2853,6 +2853,16 @@ if ( ! function_exists( 'woocommerce_checkout_login_form' ) ) {
 	 * @return void
 	 */
 	function woocommerce_checkout_login_form() {
+		if ( ! function_exists( 'wc_print_notice' ) ) {
+			// The template calls wc_print_notice(), which is only loaded for frontend requests.
+			wc_doing_it_wrong(
+				__FUNCTION__,
+				'Function should only be used during frontend requests.',
+				'11.4.0'
+			);
+			return;
+		}
+
 		wc_get_template(
 			'checkout/form-login.php',
 			array(
@@ -2966,6 +2976,16 @@ if ( ! function_exists( 'woocommerce_checkout_coupon_form' ) ) {
 	 * @return void
 	 */
 	function woocommerce_checkout_coupon_form() {
+		if ( ! function_exists( 'wc_print_notice' ) ) {
+			// The template calls wc_print_notice(), which is only loaded for frontend requests.
+			wc_doing_it_wrong(
+				__FUNCTION__,
+				'Function should only be used during frontend requests.',
+				'11.4.0'
+			);
+			return;
+		}
+
 		if ( is_user_logged_in() || WC()->checkout()->is_registration_enabled() || ! WC()->checkout()->is_registration_required() ) {
 			wc_get_template(
 				'checkout/form-coupon.php',

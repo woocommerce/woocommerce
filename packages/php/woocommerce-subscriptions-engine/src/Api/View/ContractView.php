@@ -14,6 +14,8 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Api\View;
 
+use DateTimeImmutable;
+use DateTimeZone;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 
 defined( 'ABSPATH' ) || exit;
@@ -45,6 +47,13 @@ final class ContractView {
 	private $addresses;
 
 	/**
+	 * The live lock's expiry and operation label as of the read, or null.
+	 *
+	 * @var array{locked_until: DateTimeImmutable, operation: string}|null
+	 */
+	private $lock_state;
+
+	/**
 	 * Use {@see self::from_contract()}.
 	 */
 	private function __construct() {
@@ -53,7 +62,7 @@ final class ContractView {
 	/**
 	 * Build a view of a stored contract.
 	 *
-	 * @internal Built by the engine `Api\` facades only.
+	 * @internal Built by the engine only (the `Api\` facades and the due dispatcher).
 	 *
 	 * @param Contract $contract      Stored contract.
 	 * @param bool     $with_children Whether the read loaded items and addresses.
@@ -88,6 +97,12 @@ final class ContractView {
 
 		$view->items     = $with_children ? array_map( array( self::class, 'item' ), $contract->get_items() ) : null;
 		$view->addresses = $with_children ? array_map( array( self::class, 'address' ), $contract->get_addresses() ) : null;
+
+		$lock_state       = $contract->get_lock_state();
+		$view->lock_state = null === $lock_state ? null : array(
+			'locked_until' => new DateTimeImmutable( $lock_state['locked_until_gmt'], new DateTimeZone( 'UTC' ) ),
+			'operation'    => $lock_state['operation'],
+		);
 
 		return $view;
 	}
@@ -270,7 +285,8 @@ final class ContractView {
 	}
 
 	/**
-	 * Who runs renewals: `primitive` or `gateway`.
+	 * Who keeps the payment schedule: `subscriptions_engine` (the engine dispatches the
+	 * contract when it is due) or the slug of the gateway or extension that keeps its own.
 	 */
 	public function get_schedule_source(): string {
 		return $this->fields['schedule_source'];
@@ -292,5 +308,16 @@ final class ContractView {
 	 */
 	public function get_addresses(): ?array {
 		return $this->addresses;
+	}
+
+	/**
+	 * The contract's live lock as of the read, whoever holds it (the caller included): its
+	 * expiry (UTC) and operation label, or null when it was not locked or the view was built from
+	 * written fields (as from `create()`). Never carries the lock token.
+	 *
+	 * @return array{locked_until: DateTimeImmutable, operation: string}|null
+	 */
+	public function get_lock_state(): ?array {
+		return $this->lock_state;
 	}
 }

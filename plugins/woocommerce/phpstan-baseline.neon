@@ -241,12 +241,6 @@ parameters:
 			path: includes/abstracts/abstract-wc-data.php
 
 		-
-			message: '#^Parameter \#1 \$object_or_string of function is_a expects object, int\<min, \-1\>\|int\<1, max\>\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/abstracts/abstract-wc-data.php
-
-		-
 			message: '#^Parameter \#1 \$offset of method WC_DateTime\:\:set_utc_offset\(\) expects int, float given\.$#'
 			identifier: argument.type
 			count: 1
@@ -11726,18 +11720,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$value of method WC_Customer\:\:set_billing_last_name\(\) expects string, array\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-form-handler.php
-
-		-
-			message: '#^Parameter \#2 \$country of function wc_format_postcode expects string, array\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-form-handler.php
-
-		-
-			message: '#^Parameter \#2 \$country of static method WC_Validation\:\:is_postcode\(\) expects string, array\|string given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/class-wc-form-handler.php
@@ -26569,12 +26551,6 @@ parameters:
 			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
 
 		-
-			message: '#^Parameter \#1 \$args of function wc_get_min_max_price_meta_query expects array, WP_REST_Request given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
-
-		-
 			message: '#^Parameter \#1 \$date of function wc_rest_prepare_date_response expects string\|WC_DateTime\|null, int\<1, max\> given\.$#'
 			identifier: argument.type
 			count: 2
@@ -29272,12 +29248,6 @@ parameters:
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-variations-controller.php
 
 		-
-			message: '#^Parameter \#1 \$args of function wc_get_min_max_price_meta_query expects array, WP_REST_Request given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-variations-controller.php
-
-		-
 			message: '#^Parameter \#1 \$date of function wc_rest_prepare_date_response expects string\|WC_DateTime\|null, int\|false given\.$#'
 			identifier: argument.type
 			count: 2
@@ -29561,12 +29531,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$amount of method WC_Product\:\:set_low_stock_amount\(\) expects int\|string, float\|int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-products-controller.php
-
-		-
-			message: '#^Parameter \#1 \$args of function wc_get_min_max_price_meta_query expects array, WP_REST_Request given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-products-controller.php
@@ -48376,12 +48340,6 @@ parameters:
 			path: src/Blocks/BlockTemplatesController.php
 
 		-
-			message: '#^Callback expects 1 parameter, \$accepted_args is set to 3\.$#'
-			identifier: arguments.count
-			count: 1
-			path: src/Blocks/BlockTemplatesController.php
-
-		-
 			message: '#^Default value of the parameter \#2 \$template_type \(string\) of method Automattic\\WooCommerce\\Blocks\\BlockTemplatesController\:\:block_template_is_available\(\) is incompatible with type array\.$#'
 			identifier: parameter.defaultValue
 			count: 1
@@ -48402,12 +48360,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTemplatesController\:\:add_block_template_details\(\) should return Automattic\\WooCommerce\\Blocks\\WP_Block_Template\|null but returns Automattic\\WooCommerce\\Blocks\\Utils\\WP_Block_Template\.$#'
 			identifier: return.type
-			count: 1
-			path: src/Blocks/BlockTemplatesController.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTemplatesController\:\:add_plugin_templates_parts_support\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: src/Blocks/BlockTemplatesController.php
 
@@ -48486,12 +48438,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTemplatesRegistry\:\:init\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockTemplatesRegistry.php
-
-		-
-			message: '#^Parameter \#2 \$args of function register_block_template expects array\{title\?\: string, description\?\: string, content\?\: string, post_types\?\: array\<string\>, plugin\?\: string\}, array\{title\: string, description\: string, content\: string\|false\} given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTemplatesRegistry.php
 
@@ -49570,12 +49516,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ComingSoon.php
 
 		-
-			message: '#^Call to function is_null\(\) with mixed will always evaluate to false\.$#'
-			identifier: function.impossibleType
-			count: 1
-			path: src/Blocks/BlockTypes/CustomerAccount.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\CustomerAccount\:\:initialize\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -49608,12 +49548,6 @@ parameters:
 		-
 			message: '#^Parameter \$context of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\CustomerAccount\:\:modify_hooked_block_attributes\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Post\.$#'
 			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/CustomerAccount.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\Blocks\\BlockTypes\\CustomerAccount\:\:\$hooked_block_placements \(array\) in isset\(\) is not nullable\.$#'
-			identifier: isset.property
 			count: 1
 			path: src/Blocks/BlockTypes/CustomerAccount.php
 
@@ -49720,12 +49654,6 @@ parameters:
 			path: src/Blocks/BlockTypes/HandpickedProducts.php
 
 		-
-			message: '#^Call to function is_null\(\) with mixed will always evaluate to false\.$#'
-			identifier: function.impossibleType
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCart.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCart\:\:enqueue_data\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -49822,21 +49750,9 @@ parameters:
 			path: src/Blocks/BlockTypes/MiniCart.php
 
 		-
-			message: '#^Property Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCart\:\:\$hooked_block_placements \(array\) in isset\(\) is not nullable\.$#'
-			identifier: isset.property
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCart.php
-
-		-
 			message: '#^Result of && is always false\.$#'
 			identifier: booleanAnd.alwaysFalse
 			count: 1
-			path: src/Blocks/BlockTypes/MiniCart.php
-
-		-
-			message: '#^Ternary operator condition is always true\.$#'
-			identifier: ternary.alwaysTrue
-			count: 2
 			path: src/Blocks/BlockTypes/MiniCart.php
 
 		-
@@ -50446,12 +50362,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductCollection/NoResults.php
 
 		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\NoResults\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductCollection/NoResults.php
-
-		-
 			message: '#^Call to function is_array\(\) with array\<array\<int\>\> will always evaluate to true\.$#'
 			identifier: function.alreadyNarrowedType
 			count: 1
@@ -50578,12 +50488,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductCollection/Renderer.php
 
 		-
-			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 6
-			path: src/Blocks/BlockTypes/ProductCollection/Utils.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\Utils\:\:prepare_and_execute_query\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -50596,12 +50500,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductCollection/Utils.php
 
 		-
-			message: '#^Parameter \#1 \$block of function build_query_vars_from_query_block expects WP_Block, Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\WP_Block given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Blocks/BlockTypes/ProductCollection/Utils.php
-
-		-
 			message: '#^Parameter \#1 \$object_or_string of function is_a expects object, WP_Post\|WP_Post_Type\|WP_Term\|WP_User\|null given\.$#'
 			identifier: argument.type
 			count: 2
@@ -50611,18 +50509,6 @@ parameters:
 			message: '#^Parameter \#1 \$page of static method WC_Blocks_Utils\:\:has_block_in_page\(\) expects int\|WP_Post, WP_Post\|WP_Post_Type\|WP_Term\|WP_User given\.$#'
 			identifier: argument.type
 			count: 2
-			path: src/Blocks/BlockTypes/ProductCollection/Utils.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\Utils\:\:get_query_vars\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductCollection/Utils.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\Utils\:\:prepare_and_execute_query\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
 			path: src/Blocks/BlockTypes/ProductCollection/Utils.php
 
 		-
@@ -50686,26 +50572,8 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductDetails.php
 
 		-
-			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterActive.php
-
-		-
-			message: '#^Access to property \$parsed_block on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterActive.php
-
-		-
 			message: '#^Parameter \#1 \$extra_attributes of function get_block_wrapper_attributes expects array\<string, string\>, array\<string, string\|false\> given\.$#'
 			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterActive.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilterActive\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Blocks/BlockTypes/ProductFilterActive.php
 
@@ -50718,18 +50586,6 @@ parameters:
 		-
 			message: '#^Access to an undefined property object\:\:\$attribute_label\.$#'
 			identifier: property.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterAttribute.php
-
-		-
-			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Blocks/BlockTypes/ProductFilterAttribute.php
-
-		-
-			message: '#^Access to property \$parsed_block on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Blocks/BlockTypes/ProductFilterAttribute.php
 
@@ -50770,12 +50626,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductFilterAttribute.php
 
 		-
-			message: '#^Parameter \#1 \$block of static method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\Utils\:\:get_query_vars\(\) expects Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\WP_Block, Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterAttribute.php
-
-		-
 			message: '#^Parameter \#1 \$extra_attributes of function get_block_wrapper_attributes expects array\<string, string\>, array\<string, bool\|string\> given\.$#'
 			identifier: argument.type
 			count: 1
@@ -50784,18 +50634,6 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$var of function intval expects array\|bool\|float\|int\|resource\|string\|null, string\|WP_Error given\.$#'
 			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterAttribute.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilterAttribute\:\:get_attribute_counts\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterAttribute.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilterAttribute\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Blocks/BlockTypes/ProductFilterAttribute.php
 
@@ -50848,18 +50686,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductFilterClearButton.php
 
 		-
-			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Blocks/BlockTypes/ProductFilterPrice.php
-
-		-
-			message: '#^Access to property \$parsed_block on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Blocks/BlockTypes/ProductFilterPrice.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilterPrice\:\:get_filtered_price\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -50872,12 +50698,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductFilterPrice.php
 
 		-
-			message: '#^Parameter \#1 \$block of static method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\Utils\:\:get_query_vars\(\) expects Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\WP_Block, Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterPrice.php
-
-		-
 			message: '#^Parameter \#1 \$extra_attributes of function get_block_wrapper_attributes expects array\<string, string\>, array\<string, bool\|string\> given\.$#'
 			identifier: argument.type
 			count: 1
@@ -50886,18 +50706,6 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$extra_attributes of function get_block_wrapper_attributes expects array\<string, string\>, array\<string, string\|false\> given\.$#'
 			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterPrice.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilterPrice\:\:get_filtered_price\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterPrice.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilterPrice\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Blocks/BlockTypes/ProductFilterPrice.php
 
@@ -50926,18 +50734,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductFilterPriceSlider.php
 
 		-
-			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Blocks/BlockTypes/ProductFilterRating.php
-
-		-
-			message: '#^Access to property \$parsed_block on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterRating.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilterRating\:\:get_rating_counts\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -50950,12 +50746,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductFilterRating.php
 
 		-
-			message: '#^Parameter \#1 \$block of static method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\Utils\:\:get_query_vars\(\) expects Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\WP_Block, Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterRating.php
-
-		-
 			message: '#^Parameter \#1 \$extra_attributes of function get_block_wrapper_attributes expects array\<string, string\>, array\<string, bool\|string\> given\.$#'
 			identifier: argument.type
 			count: 1
@@ -50964,18 +50754,6 @@ parameters:
 		-
 			message: '#^Parameter \#2 \$callback of function array_filter expects \(callable\(mixed\)\: bool\)\|null, Closure\(mixed\)\: \(0\|1\) given\.$#'
 			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterRating.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilterRating\:\:get_rating_counts\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterRating.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilterRating\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Blocks/BlockTypes/ProductFilterRating.php
 
@@ -51010,18 +50788,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductFilterRemovableChips.php
 
 		-
-			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Blocks/BlockTypes/ProductFilterStatus.php
-
-		-
-			message: '#^Access to property \$parsed_block on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterStatus.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilterStatus\:\:enqueue_data\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -51040,40 +50806,10 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductFilterStatus.php
 
 		-
-			message: '#^Parameter \#1 \$block of static method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\Utils\:\:get_query_vars\(\) expects Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\WP_Block, Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterStatus.php
-
-		-
 			message: '#^Parameter \#1 \$extra_attributes of function get_block_wrapper_attributes expects array\<string, string\>, array\<string, bool\|string\> given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/ProductFilterStatus.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilterStatus\:\:get_stock_status_counts\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterStatus.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilterStatus\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterStatus.php
-
-		-
-			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Blocks/BlockTypes/ProductFilterTaxonomy.php
-
-		-
-			message: '#^Access to property \$parsed_block on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterTaxonomy.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilterTaxonomy\:\:enqueue_data\(\) has no return type specified\.$#'
@@ -51106,26 +50842,8 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductFilterTaxonomy.php
 
 		-
-			message: '#^Parameter \#1 \$block of static method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\Utils\:\:get_query_vars\(\) expects Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\WP_Block, Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterTaxonomy.php
-
-		-
 			message: '#^Parameter \#1 \$extra_attributes of function get_block_wrapper_attributes expects array\<string, string\>, array\<string, bool\|string\> given\.$#'
 			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterTaxonomy.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilterTaxonomy\:\:get_taxonomy_term_counts\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterTaxonomy.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilterTaxonomy\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Blocks/BlockTypes/ProductFilterTaxonomy.php
 
@@ -51720,12 +51438,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductTemplate\:\:initialize\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockTypes/ProductTemplate.php
-
-		-
-			message: '#^Parameter \#1 \$block of static method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\Utils\:\:prepare_and_execute_query\(\) expects Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\WP_Block, WP_Block given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/ProductTemplate.php
 
@@ -52866,12 +52578,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\Templates\\AbstractTemplateCompatibility\:\:set_hook_data\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Blocks/Templates/AbstractTemplateCompatibility.php
-
-		-
-			message: '#^Parameter \$parent_block of method Automattic\\WooCommerce\\Blocks\\Templates\\AbstractTemplateCompatibility\:\:update_render_block_data\(\) has invalid type Automattic\\WooCommerce\\Blocks\\Templates\\WP_Block\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Blocks/Templates/AbstractTemplateCompatibility.php
 
@@ -59514,7 +59220,7 @@ parameters:
 		-
 			message: '#^Access to property \$post_type on an unknown class Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\WP_Post\.$#'
 			identifier: class.notFound
-			count: 2
+			count: 1
 			path: src/Internal/DataStores/Orders/DataSynchronizer.php
 
 		-
@@ -60853,12 +60559,6 @@ parameters:
 			path: src/Internal/Features/FeaturesController.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Features\\FeaturesController\:\:init_compatibility_info_by_feature\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Features/FeaturesController.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Features\\FeaturesController\:\:process_added_option\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -61067,30 +60767,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/Internal/Logging/SafeGlobalFunctionProxy.php
-
-		-
-			message: '#^Call to an undefined method object\:\:create_server\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/MCP/MCPAdapterProvider.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\MCP\\Transport\\WooCommerceRestTransport\:\:check_permission\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
-			identifier: missingType.generics
-			count: 1
-			path: src/Internal/MCP/Transport/WooCommerceRestTransport.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\MCP\\Transport\\WooCommerceRestTransport\:\:validate_request\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
-			identifier: missingType.generics
-			count: 1
-			path: src/Internal/MCP/Transport/WooCommerceRestTransport.php
-
-		-
-			message: '#^Parameter \#1 \$request of method Automattic\\WooCommerce\\Internal\\MCP\\Transport\\WooCommerceRestTransport\:\:validate_request\(\) expects WP_REST_Request, WP_REST_Request\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/MCP/Transport/WooCommerceRestTransport.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\OrderCouponDataMigrator\:\:convert_item\(\) has no return type specified\.$#'
@@ -63835,12 +63511,6 @@ parameters:
 			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
 
 		-
-			message: '#^Parameter \#1 \$args of function wc_get_min_max_price_meta_query expects array, WP_REST_Request given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
-
-		-
 			message: '#^Parameter \#1 \$array_arg of function current expects array\|object, list\<bool\|int\|string\>\|false given\.$#'
 			identifier: argument.type
 			count: 1
@@ -65347,12 +65017,6 @@ parameters:
 			path: src/Internal/StockNotifications/Admin/ListTable.php
 
 		-
-			message: '#^Call to an undefined method Automattic\\WooCommerce\\Internal\\StockNotifications\\Admin\\ListTable\:\:get_product_formatted_variation_list\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/StockNotifications/Admin/ListTable.php
-
-		-
 			message: '#^Call to an undefined method WC_Data_Store\:\:query\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -65623,24 +65287,6 @@ parameters:
 			path: src/Internal/StockNotifications/AsyncTasks/CycleStateService.php
 
 		-
-			message: '#^Call to method error\(\) on an unknown class Automattic\\WooCommerce\\Internal\\StockNotifications\\AsyncTasks\\Logger\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Internal/StockNotifications/AsyncTasks/NotificationsProcessor.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\Internal\\StockNotifications\\AsyncTasks\\NotificationsProcessor\:\:\$logger \(Automattic\\WooCommerce\\Internal\\StockNotifications\\AsyncTasks\\Logger\) does not accept WC_Logger_Interface\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/Internal/StockNotifications/AsyncTasks/NotificationsProcessor.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\Internal\\StockNotifications\\AsyncTasks\\NotificationsProcessor\:\:\$logger has unknown class Automattic\\WooCommerce\\Internal\\StockNotifications\\AsyncTasks\\Logger as its type\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/StockNotifications/AsyncTasks/NotificationsProcessor.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\StockNotifications\\DataRetentionController\:\:clear_daily_task\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -65803,12 +65449,6 @@ parameters:
 			path: src/Internal/StockNotifications/Emails/CustomerStockNotificationVerifyEmail.php
 
 		-
-			message: '#^@param string \$url does not accept actual type of parameter\: string\|false\.$#'
-			identifier: parameter.phpDocType
-			count: 2
-			path: src/Internal/StockNotifications/Emails/EmailActionController.php
-
-		-
 			message: '#^Cannot call method get_name\(\) on WC_Product\|false\|null\.$#'
 			identifier: method.nonObject
 			count: 2
@@ -65846,12 +65486,6 @@ parameters:
 
 		-
 			message: '#^Call to method get_image_id\(\) on an unknown class Automattic\\WooCommerce\\Internal\\StockNotifications\\Emails\\WC_Product\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/StockNotifications/Emails/EmailTemplatesController.php
-
-		-
-			message: '#^Call to method get_name\(\) on an unknown class Automattic\\WooCommerce\\Internal\\StockNotifications\\Emails\\WC_Product\.$#'
 			identifier: class.notFound
 			count: 1
 			path: src/Internal/StockNotifications/Emails/EmailTemplatesController.php
@@ -65918,12 +65552,6 @@ parameters:
 
 		-
 			message: '#^Parameter \$product of method Automattic\\WooCommerce\\Internal\\StockNotifications\\Emails\\EmailTemplatesController\:\:email_product_price\(\) has invalid type Automattic\\WooCommerce\\Internal\\StockNotifications\\Emails\\WC_Product\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/StockNotifications/Emails/EmailTemplatesController.php
-
-		-
-			message: '#^Parameter \$product of method Automattic\\WooCommerce\\Internal\\StockNotifications\\Emails\\EmailTemplatesController\:\:email_product_title\(\) has invalid type Automattic\\WooCommerce\\Internal\\StockNotifications\\Emails\\WC_Product\.$#'
 			identifier: class.notFound
 			count: 1
 			path: src/Internal/StockNotifications/Emails/EmailTemplatesController.php
