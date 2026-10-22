@@ -286,7 +286,8 @@ final class ProductFilterAttribute extends AbstractBlock {
 	 * @param string   $query_type Query type, accept 'and' or 'or'.
 	 */
 	private function get_attribute_counts( $block, $slug, $query_type ) {
-		if ( ! isset( $block->context['filterParams'] ) ) {
+		$context = $block->context;
+		if ( ! isset( $context['filterParams'] ) ) {
 			return array();
 		}
 
@@ -303,7 +304,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 			);
 		}
 
-		if ( ! empty( $query_vars['tax_query'] ) ) {
+		if ( ! isset( $context['queryId'] ) && ! empty( $query_vars['tax_query'] ) ) {
 			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 			$query_vars['tax_query'] = ProductCollectionUtils::remove_query_array( $query_vars['tax_query'], 'taxonomy', $slug );
 		}
