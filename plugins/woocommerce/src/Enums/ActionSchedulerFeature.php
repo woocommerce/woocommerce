@@ -13,6 +13,9 @@ final class ActionSchedulerFeature {
 	/**
 	 * The `$unique` argument of the scheduling functions. Added in Action Scheduler 3.5.0.
 	 *
+	 * A unique action is only stored when no pending or in-progress action has the same hook and group.
+	 * Copies before 4.0.0 do not compare the args ({@see self::UNIQUE_ARGS}).
+	 *
 	 * @var string
 	 */
 	public const UNIQUE = 'unique';
