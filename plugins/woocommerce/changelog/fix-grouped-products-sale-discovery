@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Include grouped products in sale listings when an eligible child product is on sale.
