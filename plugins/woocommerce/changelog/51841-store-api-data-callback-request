@@ -1,4 +1,4 @@
 Significance: minor
 Type: add
 
-Store API: pass the current request to extension data callbacks registered with `woocommerce_store_api_register_endpoint_data()`.
+Pass the current request to Store API endpoint data callbacks, so extensions can tailor their data to it.
