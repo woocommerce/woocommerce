@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Admin\API;
 
 use AllowDynamicProperties;
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -186,6 +187,11 @@ class Init {
 				'Automattic\WooCommerce\Admin\API\Reports\Customers\Stats\Controller',
 			);
 
+			if ( FeaturesUtil::feature_is_enabled( StockNotifications::FEATURE_NAME ) ) {
+				$analytics_controllers[] = 'Automattic\WooCommerce\Admin\API\Reports\StockNotifications\Controller';
+				$analytics_controllers[] = 'Automattic\WooCommerce\Admin\API\Reports\StockNotifications\Stats\Controller';
+			}
+
 			// Registered whenever analytics is enabled (not gated on the
 			// scheduled-import feature): the status endpoint reports failed
 			// order imports in both immediate and scheduled modes.
@@ -230,7 +236,7 @@ class Init {
 	 * @return array
 	 */
 	public static function add_data_stores( $data_stores ) {
-		return array_merge(
+		$data_stores = array_merge(
 			$data_stores,
 			array(
 				'report-revenue-stats'    => 'Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore',
@@ -253,6 +259,14 @@ class Init {
 				'report-stock-stats'      => 'Automattic\WooCommerce\Admin\API\Reports\Stock\Stats\DataStore',
 			)
 		);
+
+		// This filter can run before `init`, so check the feature without the features controller.
+		if ( StockNotifications::is_enabled_before_init() ) {
+			$data_stores['report-stock-notifications']       = 'Automattic\WooCommerce\Admin\API\Reports\StockNotifications\DataStore';
+			$data_stores['report-stock-notifications-stats'] = 'Automattic\WooCommerce\Admin\API\Reports\StockNotifications\Stats\DataStore';
+		}
+
+		return $data_stores;
 	}
 
 	/**

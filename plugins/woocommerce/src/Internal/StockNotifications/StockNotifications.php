@@ -175,10 +175,8 @@ class StockNotifications implements RegisterHooksInterface {
 	public function register_data_stores( $data_stores ) {
 		// WC_Data_Store::__construct() re-applies this filter on every data store load,
 		// so re-check the feature: it can be switched off after this callback was
-		// attached at `init`. Read the option directly rather than through
-		// feature_is_enabled(): a data store can be loaded before `init`, and building
-		// the translated feature definitions that early is not safe.
-		if ( 'yes' !== get_option( self::ENABLE_OPTION_NAME, 'no' ) && ! self::is_alpha_enabled() ) {
+		// attached at `init`.
+		if ( ! self::is_enabled_before_init() ) {
 			return $data_stores;
 		}
 
@@ -200,6 +198,20 @@ class StockNotifications implements RegisterHooksInterface {
 	 */
 	private static function is_enabled(): bool {
 		return FeaturesUtil::feature_is_enabled( self::FEATURE_NAME ) || self::is_alpha_enabled();
+	}
+
+	/**
+	 * Check whether the feature is enabled, without going through the features controller.
+	 *
+	 * Reads the feature option directly, so it is safe in callbacks that can run before
+	 * `init`, such as `woocommerce_data_stores`: feature_is_enabled() would build the
+	 * translated feature definitions too early. Prefer is_enabled() everywhere else.
+	 *
+	 * @internal
+	 * @return bool
+	 */
+	public static function is_enabled_before_init(): bool {
+		return 'yes' === get_option( self::ENABLE_OPTION_NAME, 'no' ) || self::is_alpha_enabled();
 	}
 
 	/**
