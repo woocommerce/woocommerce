@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix dependency installation for generated extensions by matching WooCommerce's React peer requirements.
