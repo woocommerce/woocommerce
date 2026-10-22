@@ -12,8 +12,18 @@ import {
 	termsConsentDefaultText,
 } from '../../checkout-terms-block/constants';
 
+const mockUpdateBlockAttributes = jest.fn();
+const mockRemoveBlock = jest.fn();
+const mockSelectBlock = jest.fn();
+let mockCheckoutBlocks = [];
+
 jest.mock( '@wordpress/data', () => ( {
 	...jest.requireActual( '@wordpress/data' ),
+	useDispatch: () => ( {
+		updateBlockAttributes: mockUpdateBlockAttributes,
+		removeBlock: mockRemoveBlock,
+		selectBlock: mockSelectBlock,
+	} ),
 	useSelect: jest.fn().mockImplementation( ( fn ) => {
 		const select = () => {
 			return {
@@ -25,6 +35,17 @@ jest.mock( '@wordpress/data', () => ( {
 				} ),
 				getFormatTypes: () => [],
 				getCurrentPostId: () => 1,
+				getBlockRootClientId: () => 'fields-1',
+				getBlockOrder: () =>
+					mockCheckoutBlocks.map( ( block ) => block.clientId ),
+				getBlockName: ( clientId ) =>
+					mockCheckoutBlocks.find(
+						( block ) => block.clientId === clientId
+					)?.name,
+				getBlockAttributes: ( clientId ) =>
+					mockCheckoutBlocks.find(
+						( block ) => block.clientId === clientId
+					)?.attributes,
 			};
 		};
 
@@ -84,6 +105,7 @@ const defaultAttributes = {
 const renderEdit = ( attributes = {} ) =>
 	render(
 		<Edit
+			clientId="actions-1"
 			attributes={ { ...defaultAttributes, ...attributes } }
 			setAttributes={ () => void 0 }
 		/>
@@ -289,6 +311,64 @@ describe( 'Checkout Actions Block Edit', () => {
 					'Terms are hidden by an extension on your store.'
 				)
 			).not.toBeInTheDocument();
+		} );
+	} );
+
+	describe( 'switching from the Terms and Conditions block', () => {
+		beforeEach( () => {
+			mockCheckoutBlocks = [
+				{
+					clientId: 'terms-1',
+					name: 'woocommerce/checkout-terms-block',
+					attributes: { checkbox: true, text: 'Custom terms' },
+				},
+				{
+					clientId: 'actions-1',
+					name: 'woocommerce/checkout-actions-block',
+					attributes: {},
+				},
+			];
+		} );
+
+		afterEach( () => {
+			mockCheckoutBlocks = [];
+		} );
+
+		it( 'replaces the terms settings with a switch notice while the Terms block is in the checkout', () => {
+			renderEdit();
+
+			expect(
+				screen.getByText(
+					/The Terms and Conditions block is deprecated/,
+					{
+						selector: 'p',
+					}
+				)
+			).toBeInTheDocument();
+			expect(
+				screen.queryByRole( 'checkbox', {
+					name: 'Show terms and conditions',
+				} )
+			).not.toBeInTheDocument();
+		} );
+
+		it( 'moves the Terms block settings onto the Actions block and removes the Terms block', () => {
+			renderEdit();
+
+			screen
+				.getByRole( 'button', { name: 'Switch to Place order terms' } )
+				.click();
+
+			expect( mockUpdateBlockAttributes ).toHaveBeenCalledWith(
+				'actions-1',
+				{
+					showTerms: true,
+					termsCheckbox: true,
+					termsText: 'Custom terms',
+				}
+			);
+			expect( mockRemoveBlock ).toHaveBeenCalledWith( 'terms-1', false );
+			expect( mockSelectBlock ).toHaveBeenCalledWith( 'actions-1' );
 		} );
 	} );
 } );

@@ -8,8 +8,18 @@ import { render, queryByText } from '@testing-library/react';
  */
 import { Edit } from '../edit';
 
+const mockUpdateBlockAttributes = jest.fn();
+const mockRemoveBlock = jest.fn();
+const mockSelectBlock = jest.fn();
+let mockCheckoutBlocks = [];
+
 jest.mock( '@wordpress/data', () => ( {
 	...jest.requireActual( '@wordpress/data' ),
+	useDispatch: () => ( {
+		updateBlockAttributes: mockUpdateBlockAttributes,
+		removeBlock: mockRemoveBlock,
+		selectBlock: mockSelectBlock,
+	} ),
 	useSelect: jest.fn().mockImplementation( ( fn ) => {
 		const select = () => {
 			return {
@@ -20,6 +30,17 @@ jest.mock( '@wordpress/data', () => ( {
 					clientId: null,
 				} ),
 				getFormatTypes: () => [],
+				getBlockRootClientId: () => 'fields-1',
+				getBlockOrder: () =>
+					mockCheckoutBlocks.map( ( block ) => block.clientId ),
+				getBlockName: ( clientId ) =>
+					mockCheckoutBlocks.find(
+						( block ) => block.clientId === clientId
+					)?.name,
+				getBlockAttributes: ( clientId ) =>
+					mockCheckoutBlocks.find(
+						( block ) => block.clientId === clientId
+					)?.attributes,
 			};
 		};
 
@@ -133,5 +154,35 @@ describe( 'Edit', () => {
 				'Ensure you add links to your policy pages in this section'
 			)
 		).not.toBeInTheDocument();
+	} );
+
+	it( 'recommends switching to the Place order terms', () => {
+		mockCheckoutBlocks = [
+			{
+				clientId: 'terms-1',
+				name: 'woocommerce/checkout-terms-block',
+				attributes: { checkbox: false, text: '' },
+			},
+			{
+				clientId: 'actions-1',
+				name: 'woocommerce/checkout-actions-block',
+				attributes: {},
+			},
+		];
+		const { container } = render(
+			<Edit
+				clientId="terms-1"
+				attributes={ { text: '', checkbox: false } }
+				setAttributes={ () => void 0 }
+			/>
+		);
+		mockCheckoutBlocks = [];
+
+		expect(
+			queryByText( container, /We recommend switching/ )
+		).toBeInTheDocument();
+		expect(
+			queryByText( container, 'Switch to Place order terms' )
+		).toBeInTheDocument();
 	} );
 } );
