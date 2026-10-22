@@ -8,14 +8,12 @@ import { useCallback, useEffect, useMemo, useState } from '@wordpress/element';
 import { useShippingData, useStoreCart } from '@woocommerce/base-context/hooks';
 import { sanitizeHTML } from '@woocommerce/sanitize';
 import { CartShippingPackageShippingRate } from '@woocommerce/types';
-import {
-	PackageItems,
-	ShippingPackageItemIcon,
-} from '@woocommerce/base-components/cart-checkout';
 
 /**
  * Internal dependencies
  */
+import PackageItems from '../package-items';
+import ShippingPackageItemIcon from '../shipping-package-item-icon';
 import PackageRates from './package-rates';
 import type { PackageProps } from './types';
 import './style.scss';
