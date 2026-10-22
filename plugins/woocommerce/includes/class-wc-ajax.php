@@ -1372,6 +1372,8 @@ class WC_AJAX {
 			);
 
 			if ( strstr( $amount, '%' ) ) {
+				// Not needed for the base, which reads stored line totals. Kept so callbacks on the order
+				// totals hooks still run before the fee is added.
 				$order->calculate_totals( false );
 				$formatted_amount = $amount;
 				$percent          = floatval( trim( $amount, '%' ) );
