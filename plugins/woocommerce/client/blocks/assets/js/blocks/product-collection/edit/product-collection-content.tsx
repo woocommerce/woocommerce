@@ -24,11 +24,7 @@ import {
 	WidthOptions,
 } from '../types';
 import { DEFAULT_ATTRIBUTES, INNER_BLOCKS_TEMPLATE } from '../constants';
-import {
-	getDefaultValueOfInherit,
-	getDefaultValueOfFilterable,
-	useSetPreviewState,
-} from '../utils';
+import { getDefaultValueOfInherit, useSetPreviewState } from '../utils';
 import InspectorControls from './inspector-controls';
 import InspectorAdvancedControls from './inspector-advanced-controls';
 import ToolbarControls from './toolbar-controls';
@@ -116,7 +112,6 @@ const ProductCollectionContent = ( {
 		query: {
 			...( DEFAULT_ATTRIBUTES.query as ProductCollectionQuery ),
 			inherit: getDefaultValueOfInherit(),
-			filterable: getDefaultValueOfFilterable(),
 		},
 		...( attributes as Partial< ProductCollectionAttributes > ),
 		queryId,

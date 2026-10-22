@@ -8,6 +8,7 @@ import { RequestUtils } from '@wordpress/e2e-test-utils-playwright';
 import {
 	adminFile,
 	wpCLI,
+	saveBlocksCliContainerId,
 	customerFile,
 	BLOCK_THEME_SLUG,
 	DB_EXPORT_FILE,
@@ -65,6 +66,8 @@ const prepareAttributes = async () => {
 setup( 'blocks setup', async () => {
 	console.log( 'Running global setup:' );
 	console.time( '└ Total time' );
+
+	await saveBlocksCliContainerId();
 
 	let databaseImported = false;
 
