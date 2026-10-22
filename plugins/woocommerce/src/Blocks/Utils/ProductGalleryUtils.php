@@ -440,12 +440,6 @@ class ProductGalleryUtils {
 	 * Build the gallery payload for a single variation, or null when the
 	 * post isn't a real variation.
 	 *
-	 * Decision tree (variation chosen):
-	 * - no variation images → parent featured + parent gallery
-	 * - own featured only → variation featured + parent gallery extras
-	 * - own featured + gallery → variation images only
-	 * - gallery only → treat the first gallery photo as featured, as on editor save
-	 *
 	 * @param int   $variation_id          Variation post ID.
 	 * @param int   $parent_featured_id    Parent product's featured image ID (0 if missing/invalid).
 	 * @param int[] $parent_gallery_extras Parent gallery image IDs, with the featured filtered out.
@@ -458,16 +452,14 @@ class ProductGalleryUtils {
 			return null;
 		}
 
-		$featured_id           = (int) $variation->get_image_id();
-		$featured_is_inherited = ! $variation->get_image_id( 'edit' ) && (int) ( $variation->get_parent_data()['image_id'] ?? 0 ) === $featured_id;
-		$featured_valid        = ! $featured_is_inherited && $featured_id && wp_attachment_is_image( $featured_id );
+		$featured_id = GalleryImageResolver::get_variation_featured_image_id( $variation );
 
 		$variation_gallery_ids = array_map( 'intval', $variation->get_gallery_image_ids() );
 		$variation_gallery_ids = array_filter( $variation_gallery_ids, 'wp_attachment_is_image' );
 		$variation_gallery_ids = array_values( $variation_gallery_ids );
 
 		$image_ids = GalleryImageResolver::resolve(
-			$featured_valid ? $featured_id : 0,
+			$featured_id,
 			$variation_gallery_ids,
 			$parent_featured_id,
 			$parent_gallery_extras

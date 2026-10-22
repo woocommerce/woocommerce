@@ -3,6 +3,8 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\VariationGallery;
 
+use Automattic\WooCommerce\Utilities\ArrayUtil;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -20,7 +22,7 @@ final class OrphanedGalleryMigration {
 	public const COMPLETED_OPTION = 'woocommerce_orphaned_variation_gallery_completed_at';
 
 	/**
-	 * Run a batch through the database updater's callable-string contract.
+	 * Process one batch of variations with gallery photos but no featured image.
 	 *
 	 * @internal
 	 * @since 11.4.0
@@ -68,39 +70,10 @@ final class OrphanedGalleryMigration {
 
 		$has_more      = count( $variation_ids ) > self::BATCH_SIZE;
 		$variation_ids = array_map( 'intval', array_slice( $variation_ids, 0, self::BATCH_SIZE ) );
-		if ( $variation_ids ) {
-			_prime_post_caches( $variation_ids );
-			$related_post_ids = array();
-			foreach ( $variation_ids as $variation_id ) {
-				$related_post_ids[] = wp_get_post_parent_id( $variation_id );
-				$related_post_ids   = array_merge( $related_post_ids, wp_parse_id_list( get_post_meta( $variation_id, '_product_image_gallery', true ) ) );
-			}
-			$related_post_ids = array_values( array_filter( array_unique( $related_post_ids ) ) );
-			if ( $related_post_ids ) {
-				_prime_post_caches( $related_post_ids );
-			}
-		}
+		self::prime_batch_caches( $variation_ids );
 
 		foreach ( $variation_ids as $variation_id ) {
-			$variation = wc_get_product( $variation_id );
-			if ( ! $variation instanceof \WC_Product_Variation || $variation->get_image_id( 'edit' ) ) {
-				continue;
-			}
-
-			$gallery_ids = $variation->get_gallery_image_ids( 'edit' );
-			$valid_ids   = array_values( array_filter( $gallery_ids, 'wp_attachment_is_image' ) );
-			if ( ! $valid_ids ) {
-				continue;
-			}
-
-			if ( get_post_meta( $variation_id, '_thumbnail_id', true ) ) {
-				continue;
-			}
-
-			$variation->set_image_id( $valid_ids[0] );
-			$variation->set_gallery_image_ids( array_values( array_diff( $gallery_ids, array( $valid_ids[0] ) ) ) );
-			LegacyVariationGalleryCompatibility::mark_core_managed( $variation );
-			$variation->save();
+			self::promote_first_gallery_image( $variation_id );
 		}
 
 		if ( $has_more ) {
@@ -111,5 +84,54 @@ final class OrphanedGalleryMigration {
 		}
 
 		return $has_more;
+	}
+
+	/**
+	 * Load variations, their parents, and gallery attachments into the object cache.
+	 *
+	 * @param int[] $variation_ids Variation IDs in this batch.
+	 */
+	private static function prime_batch_caches( array $variation_ids ): void {
+		if ( ! $variation_ids ) {
+			return;
+		}
+
+		_prime_post_caches( $variation_ids );
+		$related_post_ids = array();
+		foreach ( $variation_ids as $variation_id ) {
+			$related_post_ids[] = wp_get_post_parent_id( $variation_id );
+			$related_post_ids   = array_merge( $related_post_ids, wp_parse_id_list( get_post_meta( $variation_id, '_product_image_gallery', true ) ) );
+		}
+		$related_post_ids = ArrayUtil::unique_truthy_values( $related_post_ids );
+		if ( $related_post_ids ) {
+			_prime_post_caches( $related_post_ids );
+		}
+	}
+
+	/**
+	 * Use the first valid gallery photo as the variation's featured image.
+	 *
+	 * @param int $variation_id Variation to update.
+	 */
+	private static function promote_first_gallery_image( int $variation_id ): void {
+		$variation = wc_get_product( $variation_id );
+		if ( ! $variation instanceof \WC_Product_Variation || $variation->get_image_id( 'edit' ) ) {
+			return;
+		}
+
+		$gallery_ids = $variation->get_gallery_image_ids( 'edit' );
+		$valid_ids   = array_values( array_filter( $gallery_ids, 'wp_attachment_is_image' ) );
+		if ( ! $valid_ids ) {
+			return;
+		}
+
+		if ( get_post_meta( $variation_id, '_thumbnail_id', true ) ) {
+			return;
+		}
+
+		$variation->set_image_id( $valid_ids[0] );
+		$variation->set_gallery_image_ids( array_values( array_diff( $gallery_ids, array( $valid_ids[0] ) ) ) );
+		LegacyVariationGalleryCompatibility::mark_core_managed( $variation );
+		$variation->save();
 	}
 }

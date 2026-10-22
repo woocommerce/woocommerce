@@ -11,85 +11,174 @@ use Automattic\WooCommerce\Blocks\Utils\ProductGalleryUtils;
 class GalleryImageResolverTest extends \WC_Unit_Test_Case {
 
 	/**
-	 * @testdox Should resolve both storefronts consistently without rewriting stored variation fields.
+	 * Attachment IDs keyed by the photo names used in each test.
 	 *
-	 * @dataProvider gallery_cases
-	 *
-	 * @param string      $featured Variation featured image name.
-	 * @param string[]    $gallery Variation gallery image names.
-	 * @param string[]    $expected Expected storefront image names.
-	 * @param string|null $filtered Image name supplied by an extension filter.
+	 * @var array<string, int>
 	 */
-	public function test_storefront_rules( string $featured, array $gallery, array $expected, ?string $filtered = null ): void {
-		$images = array(
+	private $images;
+
+	/**
+	 * Parent product with a main photo and a size guide.
+	 *
+	 * @var \WC_Product_Variable
+	 */
+	private $parent;
+
+	/**
+	 * Create the shared product and photo fixtures.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+
+		$this->images = array(
 			'none'    => 0,
 			'invalid' => 999999999,
 		);
 		foreach ( array( 'parent', 'size', 'front', 'back' ) as $name ) {
-			$images[ $name ] = wp_insert_attachment( array( 'post_mime_type' => 'image/jpeg' ) );
-			update_post_meta( $images[ $name ], '_wp_attached_file', 'orphaned-' . $name . '.jpg' );
-		}
-		$parent = new \WC_Product_Variable();
-		$parent->set_image_id( $images['parent'] );
-		$parent->set_gallery_image_ids( array( $images['size'] ) );
-		$parent->save();
-
-		$variation = new \WC_Product_Variation();
-		$variation->set_parent_id( $parent->get_id() );
-		$variation->set_regular_price( '10' );
-		$variation->set_image_id( $images[ $featured ] );
-		$gallery_ids = array_map( static fn( $name ) => $images[ $name ], $gallery );
-		$variation->set_gallery_image_ids( $gallery_ids );
-		$variation->save();
-		$parent->set_children( array( $variation->get_id() ) );
-		$variation = wc_get_product( $variation->get_id() );
-
-		$expected_ids = array_map( static fn( $name ) => $images[ $name ], $expected );
-		$filter       = static fn() => $images[ $filtered ];
-		if ( null !== $filtered ) {
-			add_filter( 'woocommerce_product_variation_get_image_id', $filter );
-		}
-		try {
-			$classic = $parent->get_available_variation( $variation );
-			$block   = ProductGalleryUtils::get_product_variation_gallery_data( $parent )[ $variation->get_id() ];
-		} finally {
-			remove_filter( 'woocommerce_product_variation_get_image_id', $filter );
+			$this->images[ $name ] = wp_insert_attachment( array( 'post_mime_type' => 'image/jpeg' ) );
+			update_post_meta( $this->images[ $name ], '_wp_attached_file', 'orphaned-' . $name . '.jpg' );
 		}
 
-		$this->assertSame( $expected_ids[0], $classic['image_id'], 'Classic should open on the expected photo.' );
-		$this->assertSame( $expected_ids, $block['image_ids'], 'The new block should use the same ordered photo set.' );
-		if ( 'size' === $featured ) {
-			$this->assertNotEmpty( $classic['gallery_images_html'], 'An own featured image that overlaps the parent gallery must use the resolved gallery markup.' );
-		}
-		if ( $classic['gallery_images_html'] ) {
-			preg_match_all( '/data-thumb="[^"]*\/orphaned-([a-z]+)\.jpg"/', $classic['gallery_images_html'], $matches );
-			$this->assertSame( $expected, $matches[1], 'Classic replacement markup should match the block photo order.' );
-		}
-
-		$stored = wc_get_product( $variation->get_id() );
-		$this->assertSame( $images[ $featured ], (int) $stored->get_image_id( 'edit' ), 'Rendering must not persist the selected fallback.' );
-		$this->assertSame( $gallery_ids, $stored->get_gallery_image_ids( 'edit' ), 'Rendering must leave import/API gallery fields unchanged.' );
+		$this->parent = new \WC_Product_Variable();
+		$this->parent->set_image_id( $this->images['parent'] );
+		$this->parent->set_gallery_image_ids( array( $this->images['size'] ) );
+		$this->parent->save();
 	}
 
 	/**
-	 * Photo combinations with literal expected results.
+	 * @testdox Should use the parent gallery when the variation has no valid gallery of its own.
+	 * @testWith ["none", [], ["parent", "size"]]
+	 *           ["front", [], ["front", "size"]]
+	 *           ["none", ["invalid"], ["parent", "size"]]
 	 *
-	 * @return array<string, array>
+	 * @param string   $featured Featured photo name, or none.
+	 * @param string[] $gallery Variation gallery photo names.
+	 * @param string[] $expected Photos to display, in order.
 	 */
-	public function gallery_cases(): array {
+	public function test_parent_gallery_fallback( string $featured, array $gallery, array $expected ): void {
+		$variation               = $this->create_variation( $featured, $gallery );
+		list( $classic, $block ) = $this->get_storefront_data( $variation );
+
+		$this->assertSame( $this->images[ $expected[0] ], $classic['image_id'], 'Classic should open on the expected photo.' );
+		$this->assertSame( $this->image_ids_for( $expected ), $block['image_ids'], 'The block should retain the parent gallery extras.' );
+		$this->assertSame( '', $classic['gallery_images_html'], 'Classic should keep its existing parent gallery markup.' );
+	}
+
+	/**
+	 * @testdox Should replace the classic gallery with the same ordered photos shown by the block.
+	 * @testWith ["none", ["front"], ["front", "size"]]
+	 *           ["none", ["front", "back"], ["front", "back"]]
+	 *           ["front", ["back"], ["front", "back"]]
+	 *           ["parent", ["back"], ["parent", "back"]]
+	 *           ["invalid", ["front"], ["front", "size"]]
+	 *           ["none", ["size"], ["size"]]
+	 *           ["size", [], ["size"]]
+	 *
+	 * @param string   $featured Featured photo name, or none.
+	 * @param string[] $gallery Variation gallery photo names.
+	 * @param string[] $expected Photos to display, in order.
+	 */
+	public function test_replacement_gallery( string $featured, array $gallery, array $expected ): void {
+		$variation               = $this->create_variation( $featured, $gallery );
+		list( $classic, $block ) = $this->get_storefront_data( $variation );
+
+		$this->assertSame( $this->images[ $expected[0] ], $classic['image_id'], 'Classic should open on the expected photo.' );
+		$this->assertSame( $this->image_ids_for( $expected ), $block['image_ids'], 'The block should display the expected photo order.' );
+		$this->assertSame( $expected, $this->photo_names_from_html( $classic['gallery_images_html'] ), 'Classic replacement markup should match the block photo order.' );
+	}
+
+	/**
+	 * @testdox Should accept a filter-supplied variation photo while excluding the inherited parent photo.
+	 * @testWith ["front", ["back"], ["front", "back"]]
+	 *           ["parent", ["front"], ["front", "size"]]
+	 *
+	 * @param string   $filtered Featured photo supplied by the filter.
+	 * @param string[] $gallery Variation gallery photo names.
+	 * @param string[] $expected Photos to display, in order.
+	 */
+	public function test_filtered_featured_image( string $filtered, array $gallery, array $expected ): void {
+		$variation = $this->create_variation( 'none', $gallery );
+		$image_id  = $this->images[ $filtered ];
+		add_filter( 'woocommerce_product_variation_get_image_id', static fn() => $image_id );
+
+		list( $classic, $block ) = $this->get_storefront_data( $variation );
+
+		$this->assertSame( $this->images[ $expected[0] ], $classic['image_id'], 'Classic should distinguish a filtered variation photo from the parent fallback.' );
+		$this->assertSame( $this->image_ids_for( $expected ), $block['image_ids'], 'The block should apply the same featured-image rule.' );
+		$this->assertSame( $expected, $this->photo_names_from_html( $classic['gallery_images_html'] ), 'Classic replacement markup should include the expected photos.' );
+	}
+
+	/**
+	 * @testdox Should leave saved featured and gallery fields unchanged when rendering either storefront.
+	 * @testWith ["none", ["front"]]
+	 *           ["none", ["front", "back"]]
+	 *           ["parent", ["back"]]
+	 *           ["invalid", ["front"]]
+	 *
+	 * @param string   $featured Saved featured photo name, or none.
+	 * @param string[] $gallery Saved gallery photo names.
+	 */
+	public function test_storefront_reads_leave_saved_images_unchanged( string $featured, array $gallery ): void {
+		$variation = $this->create_variation( $featured, $gallery );
+
+		$this->get_storefront_data( $variation );
+
+		$stored = new \WC_Product_Variation( $variation->get_id() );
+		$this->assertSame( $this->images[ $featured ], (int) $stored->get_image_id( 'edit' ), 'Rendering must not change the saved featured image.' );
+		$this->assertSame( $this->image_ids_for( $gallery ), $stored->get_gallery_image_ids( 'edit' ), 'Rendering must not change the saved gallery.' );
+	}
+
+	/**
+	 * Create a variation and reload it so inherited parent data is available.
+	 *
+	 * @param string   $featured Featured photo name, or none.
+	 * @param string[] $gallery Gallery photo names.
+	 * @return \WC_Product_Variation The saved variation.
+	 */
+	private function create_variation( string $featured, array $gallery ): \WC_Product_Variation {
+		$variation = new \WC_Product_Variation();
+		$variation->set_parent_id( $this->parent->get_id() );
+		$variation->set_regular_price( '10' );
+		$variation->set_image_id( $this->images[ $featured ] );
+		$variation->set_gallery_image_ids( $this->image_ids_for( $gallery ) );
+		$variation->save();
+		$this->parent->set_children( array( $variation->get_id() ) );
+
+		return new \WC_Product_Variation( $variation->get_id() );
+	}
+
+	/**
+	 * Read the classic and block gallery responses for the variation.
+	 *
+	 * @param \WC_Product_Variation $variation The variation to render.
+	 * @return array{0: array, 1: array} Classic response followed by the block response.
+	 */
+	private function get_storefront_data( \WC_Product_Variation $variation ): array {
 		return array(
-			'no own photos'                         => array( 'none', array(), array( 'parent', 'size' ) ),
-			'one gallery-only photo'                => array( 'none', array( 'front' ), array( 'front', 'size' ) ),
-			'two gallery-only photos'               => array( 'none', array( 'front', 'back' ), array( 'front', 'back' ) ),
-			'featured only'                         => array( 'front', array(), array( 'front', 'size' ) ),
-			'featured and gallery'                  => array( 'front', array( 'back' ), array( 'front', 'back' ) ),
-			'intentional parent pin'                => array( 'parent', array( 'back' ), array( 'parent', 'back' ) ),
-			'invalid featured'                      => array( 'invalid', array( 'front' ), array( 'front', 'size' ) ),
-			'invalid gallery'                       => array( 'none', array( 'invalid' ), array( 'parent', 'size' ) ),
-			'gallery photo also in parent gallery'  => array( 'none', array( 'size' ), array( 'size' ) ),
-			'featured photo also in parent gallery' => array( 'size', array(), array( 'size' ) ),
-			'filtered own featured'                 => array( 'none', array( 'back' ), array( 'front', 'back' ), 'front' ),
-			'filtered parent image'                 => array( 'none', array( 'front' ), array( 'front', 'size' ), 'parent' ),
+			$this->parent->get_available_variation( $variation ),
+			ProductGalleryUtils::get_product_variation_gallery_data( $this->parent )[ $variation->get_id() ],
 		);
+	}
+
+	/**
+	 * Convert fixture photo names to attachment IDs, preserving order.
+	 *
+	 * @param string[] $names Photo names.
+	 * @return int[] Attachment IDs.
+	 */
+	private function image_ids_for( array $names ): array {
+		return array_map( fn( $name ) => $this->images[ $name ], $names );
+	}
+
+	/**
+	 * Read the fixture photo order from classic gallery thumbnails.
+	 *
+	 * @param string $html Classic gallery markup.
+	 * @return string[] Photo names in thumbnail order.
+	 */
+	private function photo_names_from_html( string $html ): array {
+		preg_match_all( '/data-thumb="[^"]*\/orphaned-([a-z]+)\.jpg"/', $html, $matches );
+
+		return $matches[1];
 	}
 }
