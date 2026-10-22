@@ -2,6 +2,9 @@
  * External dependencies
  */
 import clsx from 'clsx';
+import { __ } from '@wordpress/i18n';
+import { cart } from '@woocommerce/icons';
+import { Icon } from '@wordpress/icons';
 import { InnerBlocks } from '@wordpress/block-editor';
 import { registerBlockType, createBlock } from '@wordpress/blocks';
 /**
@@ -10,16 +13,28 @@ import { registerBlockType, createBlock } from '@wordpress/blocks';
 import metadata from './block.json';
 import { Edit, Save } from './edit';
 import './style.scss';
-import { blockAttributes as attrs } from './attributes';
+import { blockAttributes } from './attributes';
 import './inner-blocks';
 
-const blockAttributes  = { ...metadata.attributes, ...attrs };
+const registeredAttributes = { ...metadata.attributes, ...blockAttributes };
 
 /**
  * Register and run the Cart block.
  */
 export const settings = {
-	attributes: blockAttributes,
+	// Keep the existing gettext context until translation packs include the block.json context.
+	title: __( 'Cart', 'woocommerce' ),
+	description: __( 'Shopping cart.', 'woocommerce' ),
+	keywords: [ __( 'WooCommerce', 'woocommerce' ) ],
+	icon: {
+		src: (
+			<Icon
+				icon={ cart }
+				className="wc-block-editor-components-block-icon"
+			/>
+		),
+	},
+	attributes: registeredAttributes,
 	edit: Edit,
 	save: Save,
 	transforms: {
@@ -43,7 +58,7 @@ export const settings = {
 	// Migrates v1 to v2 checkout.
 	deprecated: [
 		{
-			attributes: blockAttributes,
+			attributes: registeredAttributes,
 			save: ( { attributes } ) => {
 				return (
 					<div
@@ -102,4 +117,4 @@ export const settings = {
 	],
 };
 
-registerBlockType( metadata.name, settings );
+registerBlockType( metadata, settings );
