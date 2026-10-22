@@ -48,7 +48,7 @@ flagged and allowed cases. Run the sniff over it directly:
 
 ```sh
 cd plugins/woocommerce
-bin/composer/phpcs/vendor/bin/phpcs -s \
+vendor/bin/phpcs -s \
   --standard=tests/Tools/phpcs/WooCommerceInternal/ruleset.xml \
   tests/Tools/phpcs/WooCommerceInternal/Tests/DB/IdentifierPlaceholderUnitTest.inc
 ```
