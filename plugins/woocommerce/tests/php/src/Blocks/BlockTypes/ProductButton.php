@@ -53,7 +53,7 @@ class ProductButton extends \WP_UnitTestCase {
 	 */
 	private function render_product_button( \WC_Product $product ): string {
 		return do_blocks(
-			'<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} --><!-- wp:woocommerce/product-button /--><!-- /wp:woocommerce/single-product -->'
+			'<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} --><div class="product-button-test-wrapper"><!-- wp:woocommerce/product-button /--></div><!-- /wp:woocommerce/single-product -->'
 		);
 	}
 
