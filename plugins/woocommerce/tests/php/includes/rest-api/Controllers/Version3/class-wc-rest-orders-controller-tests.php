@@ -1372,11 +1372,73 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 			);
 			$response = $this->server->dispatch( $request );
 			$this->assertEquals( 400, $response->get_status(), $key );
-			$this->assertEquals( 'woocommerce_rest_invalid_order_item_meta_key', $response->get_data()['code'], $key );
+			// Request argument validation wraps the failure in `rest_invalid_param`, under `details`.
+			$this->assertSame( 'rest_invalid_param', $response->get_data()['code'], $key );
+			$this->assertSame( 'woocommerce_rest_invalid_order_item_meta_key', $response->get_data()['data']['details']['line_items']['code'], $key );
 		}
 
 		$item = current( wc_get_order( $data['id'] )->get_items() );
 		$this->assertEquals( 'none', $item->get_tax_status( 'edit' ) );
+	}
+
+	/**
+	 * @testdox A request refused for `_tax_status` on one line leaves the other lines unchanged, because
+	 *          the line items argument is validated before any line is saved (#70045).
+	 */
+	public function test_refused_tax_status_meta_leaves_other_lines_unchanged(): void {
+		$first  = WC_Helper_Product::create_simple_product();
+		$second = WC_Helper_Product::create_simple_product();
+		$second->set_tax_status( 'none' );
+		$second->save();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders' );
+		$request->set_body_params(
+			array(
+				'line_items' => array(
+					array(
+						'product_id' => $first->get_id(),
+						'quantity'   => 1,
+					),
+					array(
+						'product_id' => $second->get_id(),
+						'quantity'   => 1,
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 201, $response->get_status() );
+		$order_id = $response->get_data()['id'];
+		$lines    = $response->get_data()['line_items'];
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order_id );
+		$request->set_body_params(
+			array(
+				'line_items' => array(
+					array(
+						'id'       => $lines[0]['id'],
+						'quantity' => 5,
+					),
+					array(
+						'id'        => $lines[1]['id'],
+						'meta_data' => array(
+							array(
+								'key'   => '_tax_status',
+								'value' => 'taxable',
+							),
+						),
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertSame( 'rest_invalid_param', $response->get_data()['code'] );
+		$this->assertSame( 'woocommerce_rest_invalid_order_item_meta_key', $response->get_data()['data']['details']['line_items']['code'] );
+
+		$items = wc_get_order( $order_id )->get_items();
+		$this->assertEquals( 1, $items[ $lines[0]['id'] ]->get_quantity() );
+		$this->assertEquals( 'none', $items[ $lines[1]['id'] ]->get_tax_status( 'edit' ) );
 	}
 
 	/**
