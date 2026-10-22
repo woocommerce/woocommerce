@@ -210,15 +210,16 @@ class OpenGraph {
 			}
 		};
 
-		$replace_image_details = isset( $tags['og:image'] );
-		$image_details         = array_filter(
+		$replace_image_details         = isset( $tags['og:image'] );
+		$image_details                 = array_filter(
 			$tags,
 			static function ( string $property ): bool {
 				return 0 === strpos( $property, 'og:image:' );
 			},
 			ARRAY_FILTER_USE_KEY
 		);
-		$template_depth        = 0;
+		$image_details['og:image:url'] = $image_details['og:image:url'] ?? $tags['og:image'] ?? '';
+		$template_depth                = 0;
 		while ( $inserter->next_tag( array( 'tag_closers' => 'visit' ) ) ) {
 			if ( 'TEMPLATE' === $inserter->get_tag() ) {
 				$template_depth = max( 0, $template_depth + ( $inserter->is_tag_closer() ? -1 : 1 ) );
