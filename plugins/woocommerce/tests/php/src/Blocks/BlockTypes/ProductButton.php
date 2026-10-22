@@ -151,9 +151,35 @@ class ProductButton extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox AJAX button aria-label replaces only the first placeholder when product name contains placeholder characters.
+	 */
+	public function test_ajax_button_aria_label_replaces_only_first_placeholder(): void {
+		update_option( 'woocommerce_enable_ajax_add_to_cart', 'yes' );
+		$product = WC_Helper_Product::create_simple_product( true, array( 'name' => 'Box ### Special' ) );
+		wp_interactivity_state(
+			'woocommerce',
+			array(
+				'cart' => array(
+					'items' => array(
+						array(
+							'id'       => $product->get_id(),
+							'quantity' => 1,
+						),
+					),
+				),
+			)
+		);
+
+		$aria_label = $this->get_button_aria_label( $this->render_product_button( $product ) );
+
+		$this->assertSame( '1 in cart, Add to cart: “Box ### Special”', $aria_label );
+	}
+
+	/**
 	 * @testdox Labels that become empty after sanitization are omitted.
 	 */
 	public function test_product_button_omits_aria_label_when_sanitization_results_in_empty(): void {
+		update_option( 'woocommerce_enable_ajax_add_to_cart', 'yes' );
 		$product = WC_Helper_Product::create_simple_product();
 		$filter  = static function ( array $args ): array {
 			$args['attributes']['aria-label'] = '<em></em>';
@@ -167,7 +193,9 @@ class ProductButton extends \WP_UnitTestCase {
 			remove_filter( 'woocommerce_loop_add_to_cart_args', $filter );
 		}
 
-		$this->assertNull( $this->get_button_aria_label( $markup ) );
+		$processor = new \WP_HTML_Tag_Processor( $markup );
+		$this->assertTrue( $processor->next_tag( 'button' ), 'Button element should exist in rendered markup.' );
+		$this->assertNull( $processor->get_attribute( 'aria-label' ), 'Empty aria-label attribute should be omitted.' );
 	}
 
 	/**

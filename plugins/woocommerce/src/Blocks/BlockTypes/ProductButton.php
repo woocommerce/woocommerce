@@ -203,7 +203,15 @@ class ProductButton extends AbstractBlock {
 					$context = wp_interactivity_get_context();
 					$text    = $get_add_to_cart_text();
 
-					return $text === $context['addToCartText'] ? $context['addToCartAriaLabel'] : str_replace( '###', $text, $context['inTheCartAriaLabel'] );
+					if ( $text === $context['addToCartText'] ) {
+						return $context['addToCartAriaLabel'];
+					}
+
+					$pos = strpos( $context['inTheCartAriaLabel'], '###' );
+
+					return false !== $pos
+						? substr_replace( $context['inTheCartAriaLabel'], $text, $pos, 3 )
+						: $context['inTheCartAriaLabel'];
 				},
 			)
 		);
@@ -243,7 +251,7 @@ class ProductButton extends AbstractBlock {
 				$context['addToCartAriaLabel'] = html_entity_decode( $args['attributes']['aria-label'], ENT_QUOTES, get_bloginfo( 'charset' ) );
 				$context['inTheCartAriaLabel'] = sprintf(
 					/* translators: 1: Button text, such as "2 in cart". 2: Button description, such as "Add to cart: “Beanie”". */
-					__( '%1$s, %2$s', 'woocommerce' ),
+					_x( '%1$s, %2$s', 'Product button screen reader label: 1: button text, 2: product description', 'woocommerce' ),
 					'###',
 					$context['addToCartAriaLabel']
 				);

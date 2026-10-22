@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Make the Product Button's screen reader aria-label dynamically include its "N in cart" text when items are in the cart (WCAG 2.5.3).
+Make the Add to Cart button's screen reader label match its "N in cart" text once a product is in the cart.
