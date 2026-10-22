@@ -1352,6 +1352,29 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 'none', $response->get_data()['line_items'][0]['tax_status'] );
 
+		// The internal meta key would reach set_tax_status() through update_meta_data(); it is refused.
+		foreach ( array( '_tax_status', 'tax_status' ) as $key ) {
+			$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $data['id'] );
+			$request->set_body_params(
+				array(
+					'line_items' => array(
+						array(
+							'id'        => $data['line_items'][0]['id'],
+							'meta_data' => array(
+								array(
+									'key'   => $key,
+									'value' => 'taxable',
+								),
+							),
+						),
+					),
+				)
+			);
+			$response = $this->server->dispatch( $request );
+			$this->assertEquals( 400, $response->get_status(), $key );
+			$this->assertEquals( 'woocommerce_rest_invalid_order_item_meta_key', $response->get_data()['code'], $key );
+		}
+
 		$item = current( wc_get_order( $data['id'] )->get_items() );
 		$this->assertEquals( 'none', $item->get_tax_status( 'edit' ) );
 	}

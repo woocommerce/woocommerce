@@ -1008,6 +1008,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		}
 
 		OrderLineMetaValidator::assert_no_serialized_meta_value( (array) ( $posted['meta_data'] ?? array() ) );
+		OrderLineMetaValidator::assert_no_tax_status_meta_key( (array) ( $posted['meta_data'] ?? array() ) );
 
 		$this->maybe_set_item_props( $item, array( 'name', 'quantity', 'total', 'subtotal', 'tax_class' ), $posted );
 		$this->maybe_set_item_meta_data( $item, $posted );
