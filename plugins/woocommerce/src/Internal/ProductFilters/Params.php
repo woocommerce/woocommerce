@@ -51,7 +51,7 @@ class Params implements FilterUrlParam {
 	/**
 	 * Read one collection's filter selections from the request URL.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 *
 	 * @param int|null $query_id Collection ID, or null for global filters.
 	 * @return array<string, string> Selections keyed by effective filter name.

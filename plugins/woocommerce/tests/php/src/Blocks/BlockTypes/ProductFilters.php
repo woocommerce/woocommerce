@@ -49,7 +49,7 @@ class ProductFilters extends \WP_UnitTestCase {
 	private $render_method;
 
 	/**
-	 * Local counts retain merchant criteria, even when a shopper selection leaves no products.
+	 * @testdox Local filter counts preserve saved taxonomy restrictions, including empty collections.
 	 */
 	public function test_nested_local_filters_preserve_saved_taxonomy_and_empty_collection(): void {
 		$red  = self::factory()->term->create(
