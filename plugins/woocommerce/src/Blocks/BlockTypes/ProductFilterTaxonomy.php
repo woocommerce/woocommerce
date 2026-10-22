@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection\Utils as ProductC
 use Automattic\WooCommerce\Internal\ProductFilters\FilterDataProvider;
 use Automattic\WooCommerce\Internal\ProductFilters\QueryClauses;
 use Automattic\WooCommerce\Internal\ProductFilters\TaxonomyHierarchyData;
+use WP_Block;
 
 /**
  * Product Filter: Taxonomy Block.
@@ -292,7 +293,15 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 			),
 		);
 
-		if ( empty( $filter_context['items'] ) ) {
+		$is_empty            = empty( $filter_context['items'] );
+		$product_filters_key = $block->context['productFiltersKey'] ?? '';
+		if ( is_string( $product_filters_key ) && '' !== $product_filters_key ) {
+			$state = wp_interactivity_state( 'woocommerce/product-filters' );
+			$state['filterEmptyStates'][ $product_filters_key ][] = $is_empty;
+			wp_interactivity_state( 'woocommerce/product-filters', $state );
+		}
+
+		if ( $is_empty ) {
 			$wrapper_attributes['hidden'] = true;
 			$wrapper_attributes['class']  = 'wc-block-product-filter--hidden';
 		}
