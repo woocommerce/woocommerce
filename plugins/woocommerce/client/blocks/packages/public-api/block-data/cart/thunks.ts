@@ -25,7 +25,7 @@ import {
 } from '@wordpress/data/build-types/types';
 import { __ } from '@wordpress/i18n';
 import { doAction } from '@wordpress/hooks';
-import { cartStore } from '@woocommerce/block-data';
+import type { cartStore } from '@woocommerce/block-data';
 
 /**
  * Internal dependencies
@@ -42,8 +42,8 @@ import {
 	setIsCustomerDataDirty,
 	setTriggerStoreSyncEvent,
 } from './utils';
+import { STORE_KEY as CHECKOUT_STORE_KEY } from '../checkout/constants';
 import { isEditor } from '../utils';
-import { store as checkoutStore } from '../checkout';
 
 interface CartThunkArgs {
 	select: CurriedSelectorsOf< typeof cartStore >;
@@ -180,7 +180,7 @@ const syncPrefersCollectionFromSelectedShippingRates = (
 
 	if ( selectedMethodIds?.length ) {
 		void registry
-			.dispatch( checkoutStore )
+			.dispatch( CHECKOUT_STORE_KEY )
 			.setPrefersCollection( hasCollectableRate( selectedMethodIds ) );
 	}
 };

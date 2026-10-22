@@ -20,7 +20,7 @@ import type {
 	DispatchFunction,
 	SelectFunction,
 } from '@wordpress/data/build-types/types';
-import { paymentStore } from '@woocommerce/block-data';
+import type { paymentStore } from '@woocommerce/block-data';
 
 /**
  * Internal dependencies
@@ -31,7 +31,7 @@ import {
 } from '../../../../assets/js/base/context/event-emit';
 import { EMIT_TYPES } from '../../../../assets/js/base/context/providers/cart-checkout/payment-events/event-emit';
 import type { emitProcessingEventType } from './types';
-import { store as cartStore } from '../cart';
+import { STORE_KEY as CART_STORE_KEY } from '../cart/constants';
 import {
 	isBillingAddress,
 	isShippingAddress,
@@ -147,7 +147,7 @@ export const __internalEmitPaymentProcessingEvent: emitProcessingEventType = (
 			} );
 
 			const { setBillingAddress, setShippingAddress } =
-				registry.dispatch( cartStore );
+				registry.dispatch( CART_STORE_KEY );
 
 			// Observer returned success, we sync the payment method data and billing address.
 			if ( isObserverResponse( successResponse ) && ! errorResponse ) {

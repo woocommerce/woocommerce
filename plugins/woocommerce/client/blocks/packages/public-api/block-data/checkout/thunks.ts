@@ -24,7 +24,7 @@ import {
  * Internal dependencies
  */
 import { removeNoticesByStatus } from '../../../../assets/js/utils/notices';
-import { store as paymentStore } from '../payment';
+import { STORE_KEY as PAYMENT_STORE_KEY } from '../payment/constants';
 import type { CheckoutStoreDescriptor } from './index';
 import {
 	getPaymentResultFromCheckoutResponse,
@@ -38,7 +38,7 @@ import type {
 } from './types';
 import { apiFetchWithHeaders } from '../shared-controls';
 import { CheckoutPutAbortController } from '../utils/clear-put-requests';
-import { CART_STORE_KEY } from '../cart';
+import { STORE_KEY as CART_STORE_KEY } from '../cart/constants';
 
 export interface CheckoutThunkArgs {
 	select: CurriedSelectorsOf< CheckoutStoreDescriptor >;
@@ -61,7 +61,7 @@ export const __internalProcessCheckoutResponse = (
 		);
 		// The local `dispatch` here is bound  to the actions of the data store. We need to use the global dispatch here
 		// to dispatch an action on a different store.
-		void wpDispatch( paymentStore ).__internalSetPaymentResult(
+		void wpDispatch( PAYMENT_STORE_KEY ).__internalSetPaymentResult(
 			paymentResult
 		);
 		void dispatch.__internalSetAfterProcessing();
@@ -136,7 +136,8 @@ export const __internalEmitAfterProcessingEvents: emitAfterProcessingEventsType 
 				orderId: select.getOrderId(),
 				customerId: select.getCustomerId(),
 				orderNotes: select.getOrderNotes(),
-				processingResponse: wpSelect( paymentStore ).getPaymentResult(),
+				processingResponse:
+					wpSelect( PAYMENT_STORE_KEY ).getPaymentResult(),
 			};
 			if ( select.hasError() ) {
 				// allow payment methods or other things to customize the error
