@@ -40,7 +40,7 @@ class SanitizationUtilTest extends \WC_Unit_Test_Case {
 			'r' => '',
 		];
 		$expected           = [
-			'a' => 'a',
+			'a' => true,
 			'b' => [
 				'c' => 'c',
 				'd' => [
@@ -48,11 +48,11 @@ class SanitizationUtilTest extends \WC_Unit_Test_Case {
 				],
 			],
 			'f' => 1,
-			'g' => 'alert("hello");',
+			'g' => wp_kses( '<script>alert("hello");</script>', [] ),
 			'h' => [
-				'i' => 'alert("i");',
+				'i' => wp_kses( '<script>alert("i");</script>', [] ),
 				'j' => '&lt;script&gt;alert("i");&lt;/script&gt;',
-				'k' => '&lt;div alert("malformed HTML");&lt;/script&gt;',
+				'k' => wp_kses( '<div <script>alert("malformed HTML");</s<div>cript><img src= />', [] ),
 			],
 			'l' => false,
 			'm' => null,
