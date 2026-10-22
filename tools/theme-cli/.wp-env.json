@@ -4,7 +4,10 @@
 	"port": 8890,
 	"testsPort": 8891,
 	"testsEnvironment": false,
-	"plugins": [ "https://downloads.wordpress.org/plugin/woocommerce.zip" ],
+	"plugins": [
+		"https://downloads.wordpress.org/plugin/woocommerce.zip",
+		"https://downloads.wordpress.org/plugin/theme-check.zip"
+	],
 	"themes": [],
 	"config": {
 		"JETPACK_AUTOLOAD_DEV": true,
