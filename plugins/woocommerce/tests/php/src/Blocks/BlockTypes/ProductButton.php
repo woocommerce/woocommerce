@@ -139,4 +139,24 @@ class ProductButton extends \WP_UnitTestCase {
 
 		$this->assertSame( 4, $this->get_quantity_to_add( $markup ) );
 	}
+
+	/**
+	 * Read quantityToAdd from the rendered Product Button context.
+	 *
+	 * @param string $markup Rendered block markup.
+	 * @return int
+	 */
+	private function get_quantity_to_add( string $markup ) {
+		$processor = new \WP_HTML_Tag_Processor( $markup );
+		$this->assertTrue(
+			$processor->next_tag( array( 'class_name' => 'wc-block-components-product-button' ) ),
+			'Product Button wrapper was not rendered.'
+		);
+
+		$context = json_decode( (string) $processor->get_attribute( 'data-wp-context' ), true );
+		$this->assertIsArray( $context );
+		$this->assertArrayHasKey( 'quantityToAdd', $context );
+
+		return $context['quantityToAdd'];
+	}
 }
