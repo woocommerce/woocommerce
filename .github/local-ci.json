@@ -39,8 +39,8 @@
   ],
 
   "docker": {
-    "$comment": "For run --docker. Built locally from .github/local-ci.Dockerfile (the build command is at its top); the tag names the Node and pnpm versions it pins, so bump it with .nvmrc and packageManager. The pnpm store lives on the per-clone HOME volume, so no mounts are needed.",
-    "image": "woocommerce-local-ci:node24.15.0-pnpm10.33.0"
+    "$comment": "For run --docker. gh local-ci builds the image from .github/local-ci/Dockerfile as committed, and rebuilds it only when that directory changes. The pnpm store lives on the per-clone HOME volume, so no mounts are needed.",
+    "build": { "context": ".github/local-ci" }
   },
 
   "lockfile": "pnpm-lock.yaml"

@@ -1,10 +1,7 @@
-# The image `gh local-ci run --docker` cuts its containers from.
-#
-# Build it before the first docker run, and again whenever .nvmrc or the
-# packageManager field in package.json changes (bump the tag in
-# .github/local-ci.json to match):
-#
-#   docker build -t woocommerce-local-ci:node24.15.0-pnpm10.33.0 -f .github/local-ci.Dockerfile .github
+# The image `gh local-ci run --docker` cuts its containers from. The tool
+# builds it from this file as committed, with this directory as the context,
+# and rebuilds it only when something here changes. Keep the Node and pnpm
+# versions in step with .nvmrc and the packageManager field in package.json.
 #
 # Every job gets a fresh container and only named volumes survive between
 # them, so pnpm must be in the image itself: a setup step that installs it
