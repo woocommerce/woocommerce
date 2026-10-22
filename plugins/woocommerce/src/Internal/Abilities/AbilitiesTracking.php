@@ -467,7 +467,7 @@ class AbilitiesTracking {
 	}
 
 	/**
-	 * Send the pixels queued in the batched Tracks client now, instead of on shutdown.
+	 * Send the pixels queued in the batched Tracks client now.
 	 */
 	protected function send_queued_pixels(): void {
 		\WC_Tracks_Client::send_batched_pixels();
