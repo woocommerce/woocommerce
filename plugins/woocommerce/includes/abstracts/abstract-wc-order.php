@@ -24,6 +24,7 @@ use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
+use Automattic\WooCommerce\Utilities\StringUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -187,7 +188,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$this->data['cogs_total_value'] = 0;
 		}
 
-		$this->data['prices_include_tax'] = 'yes' === get_option( 'woocommerce_prices_include_tax' );
+		$this->data['prices_include_tax'] = wc_prices_include_tax();
 
 		parent::__construct( $order );
 
@@ -928,9 +929,10 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				$new_status = OrderStatus::PENDING;
 			}
 
-			// If the old status is set but unknown (e.g. draft) assume its pending for action usage.
+			// If the status is changing from auto-draft or an unknown status (e.g. draft), assume it was pending for action usage.
 			if (
 				$old_status
+				&& $old_status !== $new_status
 				&& (
 					OrderStatus::AUTO_DRAFT === $old_status
 					|| (
@@ -1886,13 +1888,37 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	public function remove_coupon( $code ) {
 		$coupons = $this->get_items( 'coupon' );
+		/**
+		 * Data store wrapper.
+		 *
+		 * @var WC_Data_Store $order_data_store
+		 */
+		$order_data_store = $this->get_data_store();
+		// @phpstan-ignore-next-line method.notFound (Guarded by has_callable() and called via __call() on the underlying order data store instance.)
+		$has_recorded = $order_data_store->has_callable( 'get_recorded_coupon_usage_counts' ) && $order_data_store->get_recorded_coupon_usage_counts( $this );
+
+		$used_by = $this->get_user_id();
+		if ( ! $used_by && is_callable( array( $this, 'get_billing_email' ) ) ) {
+			$used_by = $this->get_billing_email();
+		}
 
 		// Remove the coupon line.
 		foreach ( $coupons as $item_id => $coupon ) {
 			if ( wc_is_same_coupon( $coupon->get_code(), $code ) ) {
 				$this->remove_item( $item_id );
 				$coupon_object = new WC_Coupon( $code );
-				$coupon_object->decrease_usage_count( $this->get_user_id() );
+
+				if ( $has_recorded ) {
+					// Mirror the stored flag into this instance so clearing it below is tracked as a change and saved.
+					$this->set_recorded_coupon_usage_counts( true );
+					$coupon_object->decrease_usage_count( $used_by );
+
+					$remaining_codes = array_filter( $this->get_coupon_codes(), fn( $remaining_code ) => ! StringUtil::is_null_or_whitespace( $remaining_code ) );
+					if ( ! $remaining_codes ) {
+						$this->set_recorded_coupon_usage_counts( false );
+					}
+				}
+
 				$this->recalculate_coupons();
 
 				/**

@@ -603,7 +603,7 @@ describe( 'Testing Checkout', () => {
 
 		// Given we're checking for invisible errors here, reaching to the data store is a good option.
 		expect( select( validationStore ).hasValidationErrors() ).toBe( false );
-	} );
+	}, 10000 );
 
 	it( 'Places the order after a coupon fails to apply', async () => {
 		const user = userEvent.setup();

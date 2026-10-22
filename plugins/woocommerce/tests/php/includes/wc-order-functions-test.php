@@ -8,7 +8,10 @@
 use Automattic\WooCommerce\Caches\OrderCache;
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
+use Automattic\WooCommerce\Internal\Orders\UnpaidOrderTimeoutMarker;
 use Automattic\WooCommerce\Internal\Utilities\Users;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
  * Class WC_Order_Functions_Test
@@ -246,6 +249,119 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 		wc_update_coupon_usage_counts( $order->get_id() );
 
 		$this->assertSame( 0, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+	}
+
+	/**
+	 * Add a raw coupon item to an order and save it, bypassing apply_coupon().
+	 *
+	 * @param WC_Order $order Order.
+	 * @param string   $code  Coupon code.
+	 */
+	private function add_raw_coupon_item( WC_Order $order, string $code ): void {
+		$item = new WC_Order_Item_Coupon();
+		$item->set_code( $code );
+		$item->set_discount( 1 );
+		$order->add_item( $item );
+		$order->save();
+	}
+
+	/**
+	 * @testdox Coupon usage is not marked as recorded while the order has no coupons, so coupons added later are counted.
+	 */
+	public function test_wc_update_coupon_usage_counts_counts_coupons_added_after_first_status_change() {
+		$coupon = WC_Helper_Coupon::create_coupon( 'late-coupon' );
+		$order  = WC_Helper_Order::create_order();
+		$store  = $order->get_data_store();
+
+		$this->assertFalse( $store->get_recorded_coupon_usage_counts( $order ) );
+		$this->assertEquals( 0, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+
+		$order->update_status( OrderStatus::ON_HOLD );
+		$this->assertFalse( $store->get_recorded_coupon_usage_counts( $order ) );
+
+		$this->add_raw_coupon_item( $order, $coupon->get_code() );
+		$this->assertEquals( 0, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+
+		$order->update_status( OrderStatus::PROCESSING );
+		$this->assertTrue( $store->get_recorded_coupon_usage_counts( $order ) );
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+
+		$order->update_status( OrderStatus::CANCELLED );
+		$this->assertEquals( 0, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+
+		$order->update_status( OrderStatus::PROCESSING );
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+
+		$order->update_status( OrderStatus::PROCESSING );
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox An order without coupons never gets the recorded flag through valid status changes.
+	 */
+	public function test_wc_update_coupon_usage_counts_does_not_flag_orders_without_coupons() {
+		$order = WC_Helper_Order::create_order();
+		$store = $order->get_data_store();
+
+		foreach ( array( OrderStatus::PENDING, OrderStatus::ON_HOLD, OrderStatus::PROCESSING, OrderStatus::COMPLETED ) as $status ) {
+			$order->update_status( $status );
+			$this->assertFalse( $store->get_recorded_coupon_usage_counts( $order ), "Flag set for status {$status}." );
+		}
+	}
+
+	/**
+	 * @testdox Removing coupon lines without lowering usage and re-adding them later does not count the coupon twice.
+	 */
+	public function test_wc_update_coupon_usage_counts_does_not_double_count_coupons_removed_and_re_added() {
+		$coupon = WC_Helper_Coupon::create_coupon( 'removed-coupon' );
+		$order  = WC_Helper_Order::create_order();
+		$store  = $order->get_data_store();
+
+		$this->add_raw_coupon_item( $order, $coupon->get_code() );
+		$order->update_status( OrderStatus::PROCESSING );
+		$this->assertTrue( $store->get_recorded_coupon_usage_counts( $order ) );
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+
+		$order->remove_order_items( 'coupon' );
+		$order->save();
+		$order->update_status( OrderStatus::ON_HOLD );
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+
+		$this->add_raw_coupon_item( $order, $coupon->get_code() );
+		$order->update_status( OrderStatus::PROCESSING );
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+	}
+
+	/**
+	 * @testdox Pinning: a coupon applied to an auto-draft order is counted once when the order is later paid.
+	 */
+	public function test_wc_update_coupon_usage_counts_admin_applied_coupon_paid_later_counts_once() {
+		$coupon = WC_Helper_Coupon::create_coupon( 'admin-coupon' );
+		$order  = WC_Helper_Order::create_order();
+		$order->set_status( OrderStatus::AUTO_DRAFT );
+		$order->save();
+
+		$result = $order->apply_coupon_using_edited_totals( $coupon->get_code() );
+		$this->assertTrue( $result );
+
+		$order->update_status( OrderStatus::PENDING );
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+
+		$order->payment_complete();
+		$order = wc_get_order( $order->get_id() );
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon ) )->get_usage_count() );
+		$this->assertTrue( $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
+
+		\Automattic\WooCommerce\Admin\API\Reports\Coupons\DataStore::sync_order_coupons( $order->get_id() );
+		global $wpdb;
+		$rows = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->prefix}wc_order_coupon_lookup WHERE order_id = %d AND coupon_id = %d",
+				$order->get_id(),
+				$coupon->get_id()
+			)
+		);
+		$this->assertEquals( 1, (int) $rows );
 	}
 
 	/**
@@ -700,5 +816,69 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 
 		$this->assertSame( strtotime( '2024-06-28 15:34:05 UTC' ), $note->date_created->getTimestamp(), 'The note should keep the moment it was created.' );
 		$this->assertSame( '2024-06-29 00:34:05', $note->date_created->date( 'Y-m-d H:i:s' ), 'The note should be shown in the new site timezone.' );
+	}
+
+	/**
+	 * @testdox wc_cancel_unpaid_orders() marks the orders it cancels before the status hooks run.
+	 */
+	public function test_wc_cancel_unpaid_orders_marks_orders_cancelled_by_timeout(): void {
+		global $wpdb;
+
+		$original_manage_stock = get_option( 'woocommerce_manage_stock' );
+		$original_hold_minutes = get_option( 'woocommerce_hold_stock_minutes' );
+		update_option( 'woocommerce_manage_stock', 'yes' );
+		update_option( 'woocommerce_hold_stock_minutes', '60' );
+
+		$order_cache = wc_get_container()->get( OrderCache::class );
+		$expired     = time() - 3 * HOUR_IN_SECONDS;
+		$orders      = array();
+		foreach ( array( 'checkout', 'admin' ) as $created_via ) {
+			$order = WC_Helper_Order::create_order();
+			$order->set_created_via( $created_via );
+			$order->save();
+			$orders[ $created_via ] = $order->get_id();
+
+			if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+				$wpdb->update( OrdersTableDataStore::get_orders_table_name(), array( 'date_updated_gmt' => gmdate( 'Y-m-d H:i:s', $expired ) ), array( 'id' => $order->get_id() ) );
+			} else {
+				$wpdb->update(
+					$wpdb->posts,
+					array(
+						'post_modified'     => get_date_from_gmt( gmdate( 'Y-m-d H:i:s', $expired ) ),
+						'post_modified_gmt' => gmdate( 'Y-m-d H:i:s', $expired ),
+					),
+					array( 'ID' => $order->get_id() )
+				);
+				clean_post_cache( $order->get_id() );
+			}
+			$order_cache->remove( $order->get_id() );
+		}
+
+		$marked_in_hook = null;
+		$callback       = function ( $order_id ) use ( $order_cache, &$marked_in_hook ) {
+			$order_cache->remove( $order_id );
+			$marked_in_hook = UnpaidOrderTimeoutMarker::is_marked( wc_get_order( $order_id ) );
+		};
+		add_action( 'woocommerce_order_status_pending_to_cancelled', $callback );
+
+		wc_cancel_unpaid_orders();
+
+		remove_action( 'woocommerce_order_status_pending_to_cancelled', $callback );
+		as_unschedule_all_actions( 'woocommerce_cancel_unpaid_orders' );
+		update_option( 'woocommerce_manage_stock', $original_manage_stock );
+		update_option( 'woocommerce_hold_stock_minutes', $original_hold_minutes );
+
+		$order_cache->remove( $orders['checkout'] );
+		$order_cache->remove( $orders['admin'] );
+		$cancelled = wc_get_order( $orders['checkout'] );
+		$untouched = wc_get_order( $orders['admin'] );
+		$notes     = implode( ' ', wp_list_pluck( wc_get_order_notes( array( 'order_id' => $orders['checkout'] ) ), 'content' ) );
+
+		$this->assertSame( OrderStatus::CANCELLED, $cancelled->get_status() );
+		$this->assertTrue( $marked_in_hook, 'The marker should be saved before the status hooks run.' );
+		$this->assertTrue( UnpaidOrderTimeoutMarker::is_marked( $cancelled ) );
+		$this->assertStringContainsString( 'Unpaid order cancelled', $notes );
+		$this->assertSame( OrderStatus::PENDING, $untouched->get_status() );
+		$this->assertFalse( UnpaidOrderTimeoutMarker::is_marked( $untouched ) );
 	}
 }
