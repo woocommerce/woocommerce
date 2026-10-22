@@ -2983,14 +2983,15 @@ class WC_AJAX {
 				$qty = max( $qty, 0 );
 
 				// Enforce the refund input's max here, because this AJAX request skips browser validation.
+				// Rounding drops float noise when the woocommerce_stock_amount filter allows fractional quantities.
 				if ( $qty > 0 && isset( $order_items[ $item_id ] ) ) {
-					$remaining_qty = abs( $order_items[ $item_id ]->get_quantity() ) - abs( $order->get_qty_refunded_for_item( $item_id ) );
+					$remaining_qty = NumberUtil::round( abs( $order_items[ $item_id ]->get_quantity() ) - abs( $order->get_qty_refunded_for_item( $item_id ) ), WC_ROUNDING_PRECISION );
 
 					if ( $qty > $remaining_qty ) {
 						throw new Exception(
 							sprintf(
-								/* translators: %d: remaining refundable quantity */
-								__( 'Line item quantity cannot be greater than the remaining refundable quantity (%d).', 'woocommerce' ),
+								/* translators: %s: remaining refundable quantity */
+								__( 'Line item quantity cannot be greater than the remaining refundable quantity (%s).', 'woocommerce' ),
 								$remaining_qty
 							)
 						);
