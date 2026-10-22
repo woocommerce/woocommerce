@@ -112,14 +112,7 @@ export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 
 				<div className="wc-block-product-filters__overlay">
 					<div className="wc-block-product-filters__overlay-wrapper">
-						<section
-							className="wc-block-product-filters__overlay-dialog"
-							role={ isOpen ? 'dialog' : undefined }
-							aria-label={ __(
-								'Product Filters',
-								'woocommerce'
-							) }
-						>
+						<section className="wc-block-product-filters__overlay-dialog">
 							<header className="wc-block-product-filters__overlay-header">
 								<button
 									className="wc-block-product-filters__close-overlay"
