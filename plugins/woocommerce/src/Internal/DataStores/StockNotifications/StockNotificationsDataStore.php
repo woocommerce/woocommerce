@@ -323,6 +323,7 @@ CREATE TABLE $meta_table_name (
 		 *
 		 * Fires after a stock notification is updated, whatever updated it (shopper, admin, processor,
 		 * retention cleanup or privacy eraser), whether or not anything changed.
+		 * Also fires inside the back-in-stock send batch, so defer remote calls to Action Scheduler.
 		 *
 		 * @since 11.3.0
 		 *
