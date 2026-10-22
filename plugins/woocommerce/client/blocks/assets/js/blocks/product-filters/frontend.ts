@@ -15,12 +15,26 @@ import type {
 	ProductFiltersContext,
 } from './types';
 import { getClosestColor } from './utils/get-closest-color';
+import { getFocusableElements } from '../../utils/get-focusable-elements';
 import { reload } from '../../utils/navigation';
 import { PRODUCT_FILTERS_STORE_NAME } from './constants';
 
-const { getContext, getElement, store, getServerContext, getConfig } = iAPI;
+const {
+	getContext,
+	getElement,
+	store,
+	getServerContext,
+	getConfig,
+	withSyncEvent,
+} = iAPI;
 
 const BLOCK_NAME = PRODUCT_FILTERS_STORE_NAME;
+
+let pendingNavigation: { source: string; destination: string } | undefined;
+
+window.addEventListener( 'popstate', () => {
+	pendingNavigation = undefined;
+} );
 
 type ValidFilterOptionItem = FilterOptionItem & {
 	type: string;
@@ -171,6 +185,7 @@ const productFiltersStore = {
 	actions: {
 		openOverlay: () => {
 			const context = getContext< ProductFiltersContext >();
+			context.openButtonRef = getElement().ref;
 			context.isOverlayOpened = true;
 			if ( document.getElementById( 'wpadminbar' ) ) {
 				const scrollTop = (
@@ -187,18 +202,65 @@ const productFiltersStore = {
 		closeOverlay: () => {
 			const context = getContext< ProductFiltersContext >();
 			context.isOverlayOpened = false;
+			context.openButtonRef?.focus();
+			context.openButtonRef = null;
 		},
 		closeOverlayOnBackdrop: ( event: MouseEvent ) => {
 			if ( event.target === event.currentTarget ) {
 				actions.closeOverlay();
 			}
 		},
-		closeOverlayOnEscape: ( event: KeyboardEvent ) => {
-			const context = getContext< ProductFiltersContext >();
-			if ( context.isOverlayOpened && event.key === 'Escape' ) {
-				actions.closeOverlay();
-			}
+		/**
+		 * @deprecated Since 11.4.0.
+		 */
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		closeOverlayOnEscape: ( event?: KeyboardEvent ) => {
+			console.warn(
+				'actions.closeOverlayOnEscape is deprecated since WooCommerce 11.4.0.'
+			);
 		},
+		handleOverlayKeydown: withSyncEvent( ( event: KeyboardEvent ) => {
+			const context = getContext< ProductFiltersContext >();
+			if ( ! context.isOverlayOpened ) {
+				return;
+			}
+
+			if ( event.key === 'Escape' ) {
+				event.preventDefault();
+				actions.closeOverlay();
+				return;
+			}
+
+			if ( event.key !== 'Tab' ) {
+				return;
+			}
+
+			const { ref: dialog } = getElement();
+			if ( ! dialog ) {
+				return;
+			}
+
+			const focusableElements = getFocusableElements( dialog );
+			const first = focusableElements[ 0 ];
+			const last = focusableElements[ focusableElements.length - 1 ];
+			if ( ! first || ! last ) {
+				return;
+			}
+
+			const active = dialog.ownerDocument.activeElement;
+			const focusIsOutside = ! dialog.contains( active );
+
+			if ( event.shiftKey && ( active === first || focusIsOutside ) ) {
+				event.preventDefault();
+				last.focus();
+				return;
+			}
+
+			if ( ! event.shiftKey && ( active === last || focusIsOutside ) ) {
+				event.preventDefault();
+				first.focus();
+			}
+		} ),
 		removeActiveFiltersBy: (
 			callback: ( item: ActiveFilterItem ) => boolean
 		) => {
@@ -232,11 +294,28 @@ const productFiltersStore = {
 				: getContext< ProductFiltersContext >();
 
 			const config = getConfig( BLOCK_NAME );
-			const url = new URL( config.canonicalUrl );
+			const { queryId } = context;
+			const prefix = queryId === undefined ? '' : `wcp-${ queryId }-`;
+			const currentUrl =
+				pendingNavigation?.source === window.location.href
+					? pendingNavigation.destination
+					: window.location.href;
+			const url = new URL(
+				queryId === undefined ? config.canonicalUrl : currentUrl
+			);
+			url.search = new URL( currentUrl ).search;
 			const { searchParams } = url;
 
-			for ( const key in context.params ) {
-				searchParams.delete( key );
+			if ( queryId === undefined ) {
+				searchParams.delete( 'paged' );
+				searchParams.delete( 'product-page' );
+			} else {
+				searchParams.delete( `query-${ queryId }-page` );
+			}
+
+			for ( const key of config.filterParamKeys ??
+				Object.keys( context.params ) ) {
+				searchParams.delete( `${ prefix }${ key }` );
 			}
 
 			for ( const key in state.params ) {
@@ -256,10 +335,10 @@ const productFiltersStore = {
 					}
 				}
 
-				searchParams.set( key, decodedValue );
+				searchParams.set( `${ prefix }${ key }`, decodedValue );
 			}
 
-			if ( window.location.href === url.href ) {
+			if ( currentUrl === url.href ) {
 				return;
 			}
 
@@ -276,13 +355,57 @@ const productFiltersStore = {
 				return;
 			}
 
-			const routerModule: typeof import( '@wordpress/interactivity-router' ) =
-				yield import( '@wordpress/interactivity-router' );
+			const navigation = {
+				source: window.location.href,
+				destination: url.href,
+			};
+			pendingNavigation = navigation;
+			try {
+				const routerModule: typeof import( '@wordpress/interactivity-router' ) =
+					yield import( '@wordpress/interactivity-router' );
 
-			yield routerModule.actions.navigate( url.href );
+				if ( pendingNavigation === navigation ) {
+					yield routerModule.actions.navigate( url.href );
+				}
+			} finally {
+				if ( pendingNavigation === navigation ) {
+					pendingNavigation = undefined;
+				}
+			}
 		},
 	},
 	callbacks: {
+		initOverlay: () => {
+			const { ref: openButton } = getElement();
+			if ( ! openButton ) {
+				return;
+			}
+			const context = getContext< ProductFiltersContext >();
+			const observer = new ResizeObserver( () => {
+				// Responsive CSS hides the opener when filters become inline.
+				if ( getComputedStyle( openButton ).display === 'none' ) {
+					context.isOverlayOpened = false;
+					context.openButtonRef = null;
+				}
+			} );
+			observer.observe( openButton );
+			return () => observer.disconnect();
+		},
+		focusOverlay: () => {
+			const context = getContext< ProductFiltersContext >();
+			if ( ! context.isOverlayOpened ) {
+				return;
+			}
+			const { ref: dialog } = getElement();
+
+			// Wait for the open class to make the drawer visible before focusing.
+			const frame = requestAnimationFrame( () => {
+				if ( context.isOverlayOpened ) {
+					getFocusableElements( dialog )[ 0 ]?.focus();
+				}
+			} );
+			return () => cancelAnimationFrame( frame );
+		},
 		initColors: () => {
 			const el = getElement();
 			if ( ! el.ref ) {
