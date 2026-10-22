@@ -2848,4 +2848,27 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 		$this->assertSame( 'rest_invalid_param', $response->get_data()['code'], 'Schema validation should reject the non-string value.' );
 		$this->assertFalse( metadata_exists( 'post', $product->get_id(), '_customs_commodity_code' ), 'A rejected commodity code should not be stored.' );
 	}
+
+	/**
+	 * @testdox The featured image is returned only once when it is also part of the product gallery.
+	 */
+	public function test_get_product_does_not_duplicate_featured_image_in_gallery(): void {
+		$image_file  = WC_Unit_Tests_Bootstrap::instance()->tests_dir . '/data/Dr1Bczxq4q.png';
+		$featured_id = self::factory()->attachment->create_upload_object( $image_file );
+		$gallery_id  = self::factory()->attachment->create_upload_object( $image_file );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_image_id( $featured_id );
+		$product->set_gallery_image_ids( array( $featured_id, $gallery_id ) );
+		$product->save();
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() ) );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame(
+			array( $featured_id, $gallery_id ),
+			wp_list_pluck( $response->get_data()['images'], 'id' ),
+			'The featured image should be listed first and only once.'
+		);
+	}
 }
