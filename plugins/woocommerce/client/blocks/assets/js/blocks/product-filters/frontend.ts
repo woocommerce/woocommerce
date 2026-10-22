@@ -210,6 +210,15 @@ const productFiltersStore = {
 				actions.closeOverlay();
 			}
 		},
+		/**
+		 * @deprecated Since 11.4.0.
+		 */
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		closeOverlayOnEscape: ( event?: KeyboardEvent ) => {
+			console.warn(
+				'actions.closeOverlayOnEscape is deprecated since WooCommerce 11.4.0.'
+			);
+		},
 		handleOverlayKeydown: withSyncEvent( ( event: KeyboardEvent ) => {
 			const context = getContext< ProductFiltersContext >();
 			if ( ! context.isOverlayOpened ) {
