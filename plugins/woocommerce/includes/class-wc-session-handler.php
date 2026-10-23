@@ -558,12 +558,14 @@ class WC_Session_Handler extends WC_Session {
 	public function save_data( $old_session_key = '' ) {
 		// Dirty if something changed - prevents saving nothing new.
 		if ( $this->_dirty && $this->has_session() ) {
-			$writer = wc_get_container()->get( SessionDataWriter::class );
+			$writer      = wc_get_container()->get( SessionDataWriter::class );
+			$customer_id = (string) $this->get_customer_id();
+			$expiry      = (int) $this->_session_expiration;
 
 			// Merging writes only the keys this request changed, so changes other requests saved since it loaded are kept.
 			$saved_data = $this->should_replace_session_on_save()
-				? $writer->replace( $this->_table, $this->get_customer_id(), $this->_session_expiration, $this->_data )
-				: $writer->merge( $this->_table, $this->get_customer_id(), $this->_session_expiration, $this->_data, $this->get_loaded_session_snapshot() );
+				? $writer->replace( $this->_table, $customer_id, $expiry, $this->_data )
+				: $writer->merge( $this->_table, $customer_id, $expiry, $this->_data, $this->get_loaded_session_snapshot() );
 
 			wp_cache_set( $this->get_cache_prefix() . $this->get_customer_id(), $saved_data, WC_SESSION_CACHE_GROUP, $this->_session_expiration - time() );
 
