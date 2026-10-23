@@ -964,12 +964,13 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 
 	/**
 	 * Whether a trimmed segment is a complete double-quoted value on its own, such as `"Large"`.
+	 * A segment with more quotes, such as `"Pro" or "Max"`, is ambiguous and is left as it is.
 	 *
 	 * @param string $segment Trimmed segment.
 	 * @return bool
 	 */
 	private function is_self_closed_quoted_value( string $segment ): bool {
-		return strlen( $segment ) > 1 && '"' === substr( $segment, 0, 1 ) && '"' === substr( $segment, -1 );
+		return strlen( $segment ) > 1 && '"' === substr( $segment, 0, 1 ) && '"' === substr( $segment, -1 ) && 2 === substr_count( $segment, '"' );
 	}
 
 	/**

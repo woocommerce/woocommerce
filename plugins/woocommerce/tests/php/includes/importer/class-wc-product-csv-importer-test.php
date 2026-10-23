@@ -2014,6 +2014,8 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 			'closed quote then inch mark' => array( '"Large" size, 15"', array( '"Large" size', '15"' ) ),
 			'balanced quotes in both'     => array( '"Pro" edition, Small "S"', array( '"Pro" edition', 'Small "S"' ) ),
 			'quotes inside a group'       => array( '"a, "b", c"', array( 'a, "b", c' ) ),
+			'quoted words in one value'   => array( '"Pro" or "Max", Small', array( '"Pro" or "Max"', 'Small' ) ),
+			'nested quotes in one value'  => array( '"Pro "P" edition"', array( '"Pro "P" edition"' ) ),
 			'empty quoted value'          => array( '""', array( '' ) ),
 			'unterminated quote'          => array( 'Red, "Blue', array( 'Red', '"Blue' ) ),
 			'plain list'                  => array( 'Red, Green', array( 'Red', 'Green' ) ),
