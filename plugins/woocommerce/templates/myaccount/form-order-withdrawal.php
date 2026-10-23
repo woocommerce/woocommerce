@@ -12,8 +12,10 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 11.3.0
+ * @version 11.4.0
  */
+
+use Automattic\WooCommerce\Utilities\HtmlUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -56,7 +58,7 @@ $secondary_button_class = implode( ' ', array_merge( $button_classes, array( 'wo
 			printf(
 				/* translators: %s: Email address. */
 				esc_html__( 'We\'ve emailed an acknowledgment to %s with your details and the date and time of submission. Keep it as proof of your withdrawal.', 'woocommerce' ),
-				esc_html( $data['email'] ?? '' )
+				HtmlUtil::esc_html_exact( $data['email'] ?? '' ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_html_exact() escapes for HTML.
 			);
 			?>
 		</p>
@@ -75,7 +77,7 @@ $secondary_button_class = implode( ' ', array_merge( $button_classes, array( 'wo
 			<?php foreach ( $review_rows as $review_row ) : ?>
 				<div class="woocommerce-order-withdrawal-content__review-row">
 					<dt><?php echo esc_html( $review_row['label'] ?? '' ); ?></dt>
-					<dd><?php echo nl2br( esc_html( $review_row['value'] ?? '' ) ); ?></dd>
+					<dd><?php echo nl2br( HtmlUtil::esc_html_exact( $review_row['value'] ?? '' ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_html_exact() escapes for HTML. ?></dd>
 				</div>
 			<?php endforeach; ?>
 		</dl>
@@ -85,7 +87,7 @@ $secondary_button_class = implode( ' ', array_merge( $button_classes, array( 'wo
 			printf(
 				/* translators: %s: Email address. */
 				esc_html__( 'After you confirm, we\'ll email an acknowledgment to %s with these details and the date and time of submission. Keep it as proof of your withdrawal.', 'woocommerce' ),
-				esc_html( $data['email'] ?? '' )
+				HtmlUtil::esc_html_exact( $data['email'] ?? '' ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_html_exact() escapes for HTML.
 			);
 			?>
 		</p>
