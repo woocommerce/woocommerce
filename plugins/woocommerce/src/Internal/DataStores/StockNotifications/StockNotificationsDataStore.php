@@ -201,9 +201,12 @@ CREATE TABLE $meta_table_name (
 		/**
 		 * Action: woocommerce_new_stock_notification
 		 *
-		 * Fires after a stock notification is created, whatever created it (shopper sign-up or admin).
+		 * Fires after a stock notification is created, from any code path.
+		 * With double opt-in the new notification is `pending` until the shopper verifies it, so
+		 * integrations that only want confirmed sign-ups can wait for
+		 * `woocommerce_stock_notification_status_changed` to `active` instead.
 		 *
-		 * @since 11.3.0
+		 * @since 11.4.0
 		 *
 		 * @param int          $notification_id The notification ID.
 		 * @param Notification $notification    The notification.
@@ -320,10 +323,10 @@ CREATE TABLE $meta_table_name (
 		/**
 		 * Action: woocommerce_update_stock_notification
 		 *
-		 * Fires after a stock notification is updated, whatever updated it (shopper, admin, processor,
-		 * retention cleanup or privacy eraser), whether or not anything changed.
+		 * Fires after a stock notification is updated, from any code path, whether or not anything changed.
+		 * Also fires inside the back-in-stock send batch, so defer remote calls to Action Scheduler.
 		 *
-		 * @since 11.3.0
+		 * @since 11.4.0
 		 *
 		 * @param int          $notification_id The notification ID.
 		 * @param Notification $notification    The notification.
@@ -334,11 +337,9 @@ CREATE TABLE $meta_table_name (
 			/**
 			 * Action: woocommerce_stock_notification_status_changed
 			 *
-			 * Fires after a stock notification's status is persisted with a different value, whatever
-			 * changed it: verification, unsubscribe, My Account or admin cancel, admin activate, a sent
-			 * or failed email, retention cleanup or privacy erasure.
+			 * Fires after a stock notification's status is persisted with a different value, from any code path.
 			 *
-			 * @since 11.3.0
+			 * @since 11.4.0
 			 *
 			 * @param int          $notification_id The notification ID.
 			 * @param string       $status_from     The previous status.
@@ -370,10 +371,9 @@ CREATE TABLE $meta_table_name (
 			/**
 			 * Action: woocommerce_delete_stock_notification
 			 *
-			 * Fires after a stock notification is deleted, whatever deleted it (admin delete, bulk delete
-			 * or retention cleanup).
+			 * Fires after a stock notification is deleted, from any code path.
 			 *
-			 * @since 11.3.0
+			 * @since 11.4.0
 			 *
 			 * @param int          $notification_id The deleted notification ID.
 			 * @param Notification $notification    The notification, as it was before deletion.

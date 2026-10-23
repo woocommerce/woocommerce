@@ -73,6 +73,16 @@
       - any-glob-to-any-file:
           - packages/js/tracks/**/*
 
+'theme: purple':
+  - changed-files:
+      - any-glob-to-any-file:
+          - themes/purple/**/*
+
+'Themes':
+  - changed-files:
+      - any-glob-to-any-file:
+          - themes/**/*
+
 'plugin: woocommerce':
   - changed-files:
       - any-glob-to-any-file:

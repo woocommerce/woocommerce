@@ -48,6 +48,8 @@ Each hack below represents functionality that should ideally be supported throug
 
 **Upstream solution needed:** A filter or configuration option to customize built-in entity actions without needing to unregister and re-register them.
 
+**WordPress 7.2+:** Entity actions are registered on the server (`wp_entity_actions_api_init`) and `core.registerPostTypeSchema` no longer fires in the email editor, so this hack has no effect. Core's trash action is shown instead; the editor sends the user back to the email list after it (`onActionPerformed` in [editor.tsx](../components/block-editor/editor.tsx)).
+
 ---
 
 ### 4. Template Actions Modification ([modify-template-actions.tsx](modify-template-actions.tsx))
@@ -60,6 +62,8 @@ Each hack below represents functionality that should ideally be supported throug
 - Removes the default Gutenberg "Reset" action
 - Registers a custom reset template action that maintains previous behavior
 - Applies modifications only to `wp_template` post type
+
+**WordPress 7.2+:** Like the trash hack, this has no effect. Core's "Reset" action resets email templates correctly, and core no longer offers "Duplicate" for templates.
 
 **Solution needed:** We need to find out how to align the email editor with the Active Templates feature. We should aim to integrate with the Site editor to add support for email templates and that way we could support the template management and new actions introduced in the Active Templates feature.
 
