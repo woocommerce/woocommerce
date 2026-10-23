@@ -252,18 +252,18 @@ final class WC_Cart_Totals {
 	 * @return array
 	 */
 	protected function get_tax_class_costs() {
-		$item_tax_classes     = wp_list_pluck( $this->items, 'tax_class' );
-		$shipping_tax_classes = wp_list_pluck( $this->shipping, 'tax_class' );
-		$fee_tax_classes      = wp_list_pluck( $this->fees, 'tax_class' );
-		$costs                = array_fill_keys( $item_tax_classes + $shipping_tax_classes + $fee_tax_classes, 0 );
-		$costs['non-taxable'] = 0;
+		$item_tax_classes                       = wp_list_pluck( $this->items, 'tax_class' );
+		$shipping_tax_classes                   = wp_list_pluck( $this->shipping, 'tax_class' );
+		$fee_tax_classes                        = wp_list_pluck( $this->fees, 'tax_class' );
+		$costs                                  = array_fill_keys( $item_tax_classes + $shipping_tax_classes + $fee_tax_classes, 0 );
+		$costs[ ShippingTaxSplit::NON_TAXABLE ] = 0;
 
 		foreach ( $this->items + $this->fees + $this->shipping as $item ) {
 			if ( 0 > $item->total ) {
 				continue;
 			}
 			if ( ! $item->taxable ) {
-				$costs['non-taxable'] += $item->total;
+				$costs[ ShippingTaxSplit::NON_TAXABLE ] += $item->total;
 			} elseif ( ShippingTaxSplit::is_based_on_items( $item->tax_class ) ) {
 				$split_values = null;
 
@@ -276,7 +276,6 @@ final class WC_Cart_Totals {
 				$item_costs = null === $split_values ? array( reset( $item_tax_classes ) => $item->total ) : ShippingTaxSplit::split_cost( (float) $item->total, $split_values );
 
 				foreach ( $item_costs as $tax_class => $cost ) {
-					$tax_class           = ShippingTaxSplit::NON_TAXABLE === $tax_class ? 'non-taxable' : $tax_class;
 					$costs[ $tax_class ] = ( $costs[ $tax_class ] ?? 0 ) + $cost;
 				}
 			} else {
@@ -324,7 +323,7 @@ final class WC_Cart_Totals {
 
 					if ( $total_cost ) {
 						foreach ( $tax_class_costs as $tax_class => $tax_class_cost ) {
-							if ( 'non-taxable' === $tax_class ) {
+							if ( ShippingTaxSplit::NON_TAXABLE === $tax_class ) {
 								continue;
 							}
 							$proportion               = $tax_class_cost / $total_cost;

@@ -283,9 +283,61 @@ class ShippingTaxSplitTest extends WC_Unit_Test_Case {
 	 */
 	public function test_class_slugged_non_taxable_is_taxed(): void {
 		update_option( 'woocommerce_shipping_tax_class', ShippingTaxClass::SPLIT_BY_ITEM_VALUE );
+		$slug = $this->create_class_slugged_non_taxable();
+
+		$this->fill_cart( $this->create_products( array( array( $slug, ProductTaxStatus::TAXABLE, 10, false ), array( '', ProductTaxStatus::TAXABLE, 10, false ) ) ) );
+		WC()->cart->calculate_totals();
+
+		// Both halves of the 10.00 are taxed at 20%.
+		$this->assertEqualsWithDelta( 2.0, (float) WC()->cart->get_shipping_tax(), 0.001 );
+		$this->assertEqualsWithDelta( 2.0, (float) $this->create_order_from_cart()->get_shipping_tax(), 0.001 );
+	}
+
+	/**
+	 * @testdox A negative fee is taxed on the share of a taxable class slugged non-taxable.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $in_cart Whether to check the cart or an order.
+	 */
+	public function test_negative_fee_tax_with_a_class_slugged_non_taxable( bool $in_cart ): void {
+		update_option( 'woocommerce_shipping_tax_class', ShippingTaxClass::SPLIT_BY_ITEM_VALUE );
+		$products = $this->create_products( array( array( $this->create_class_slugged_non_taxable(), ProductTaxStatus::TAXABLE, 10, false ), array( 'zero-rate', ProductTaxStatus::TAXABLE, 90, false ) ) );
+
+		if ( $in_cart ) {
+			add_action(
+				'woocommerce_cart_calculate_fees',
+				function ( $cart ) {
+					$cart->add_fee( 'Discount', -10, true );
+				}
+			);
+			$this->fill_cart( $products );
+			WC()->cart->calculate_totals();
+			$fees    = WC()->cart->get_fees();
+			$fee_tax = reset( $fees )->tax;
+		} else {
+			$order = $this->create_order( $products );
+			$fee   = new WC_Order_Item_Fee();
+			$fee->set_total( '-10' );
+			$order->add_item( $fee );
+			$order->calculate_totals();
+			$fee_tax = $fee->get_total_tax();
+		}
+
+		// The class's items and their 1.00 of shipping are 11 of the 110 total: 20% of -1.00.
+		$this->assertEqualsWithDelta( -0.2, (float) $fee_tax, 0.001 );
+	}
+
+	/**
+	 * Create a taxable class named Non-taxable, so slugged non-taxable, with a 20% rate.
+	 *
+	 * @return string The class slug.
+	 */
+	private function create_class_slugged_non_taxable(): string {
 		$tax_class = WC_Tax::create_tax_class( 'Non-taxable' );
 		$this->assertIsArray( $tax_class );
-		$slug = $tax_class['slug'];
+		$this->assertSame( 'non-taxable', $tax_class['slug'] );
 		WC_Tax::_insert_tax_rate(
 			array(
 				'tax_rate_country'  => '',
@@ -293,17 +345,11 @@ class ShippingTaxSplitTest extends WC_Unit_Test_Case {
 				'tax_rate_name'     => 'VAT',
 				'tax_rate_priority' => '1',
 				'tax_rate_shipping' => '1',
-				'tax_rate_class'    => $slug,
+				'tax_rate_class'    => $tax_class['slug'],
 			)
 		);
 
-		$this->fill_cart( $this->create_products( array( array( $slug, ProductTaxStatus::TAXABLE, 10, false ), array( '', ProductTaxStatus::TAXABLE, 10, false ) ) ) );
-		WC()->cart->calculate_totals();
-
-		// Both halves of the 10.00 are taxed at 20%.
-		$this->assertSame( 'non-taxable', $slug );
-		$this->assertEqualsWithDelta( 2.0, (float) WC()->cart->get_shipping_tax(), 0.001 );
-		$this->assertEqualsWithDelta( 2.0, (float) $this->create_order_from_cart()->get_shipping_tax(), 0.001 );
+		return $tax_class['slug'];
 	}
 
 	/**
