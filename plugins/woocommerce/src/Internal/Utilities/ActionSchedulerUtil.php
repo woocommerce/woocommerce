@@ -87,6 +87,13 @@ final class ActionSchedulerUtil {
 	private static array $logged_priority_drops = array();
 
 	/**
+	 * How many parameters the loaded `as_schedule_single_action()` declares (null until probed).
+	 *
+	 * @var int|null
+	 */
+	private static ?int $scheduling_parameter_count = null;
+
+	/**
 	 * Is the Action Scheduler procedural API loaded? This does not imply that Action Scheduler has
 	 * actually initialized.
 	 *
@@ -437,11 +444,12 @@ final class ActionSchedulerUtil {
 	 * @return void
 	 */
 	public static function reset_cache(): void {
-		self::$supports              = array();
-		self::$loaded_version        = null;
-		self::$bundled_version       = null;
-		self::$loaded_source         = null;
-		self::$logged_priority_drops = array();
+		self::$supports                   = array();
+		self::$loaded_version             = null;
+		self::$bundled_version            = null;
+		self::$loaded_source              = null;
+		self::$logged_priority_drops      = array();
+		self::$scheduling_parameter_count = null;
 	}
 
 	/**
@@ -546,7 +554,11 @@ final class ActionSchedulerUtil {
 	 * @return int
 	 */
 	private static function count_scheduling_parameters(): int {
-		return self::proxy()->get_instance_of( \ReflectionFunction::class, 'as_schedule_single_action' )->getNumberOfParameters();
+		if ( null === self::$scheduling_parameter_count ) {
+			self::$scheduling_parameter_count = self::proxy()->get_instance_of( \ReflectionFunction::class, 'as_schedule_single_action' )->getNumberOfParameters();
+		}
+
+		return self::$scheduling_parameter_count;
 	}
 
 	/**
