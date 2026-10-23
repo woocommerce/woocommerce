@@ -49,6 +49,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		'exclude_sale_items'          => false,
 		'minimum_amount'              => '',
 		'maximum_amount'              => '',
+		'maximum_discount'            => '',
 		'email_restrictions'          => array(),
 		'used_by'                     => null,
 		'virtual'                     => false,
@@ -161,6 +162,9 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		}
 		if ( '' === $data['maximum_amount'] ) {
 			$data['maximum_amount'] = '0';
+		}
+		if ( '' === $data['maximum_discount'] ) {
+			$data['maximum_discount'] = '0';
 		}
 		return $data;
 	}
@@ -442,6 +446,21 @@ class WC_Coupon extends WC_Legacy_Coupon {
 			return wc_format_decimal( 0 );
 		}
 		return wc_format_decimal( $this->get_prop( 'maximum_amount', $context ) );
+	}
+
+	/**
+	 * Get the maximum discount a percentage coupon can give. 0 means no cap.
+	 *
+	 * @since  11.3.0
+	 * @param  string $context What the value is for. Valid values are 'view' and 'edit'.
+	 * @return string
+	 */
+	public function get_maximum_discount( $context = 'view' ) {
+		$maximum_discount = $this->get_prop( 'maximum_discount', $context );
+		if ( 'edit' !== $context && '' === $maximum_discount ) {
+			return wc_format_decimal( 0 );
+		}
+		return wc_format_decimal( $maximum_discount );
 	}
 
 	/**
@@ -824,6 +843,21 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		}
 
 		$this->set_prop( 'maximum_amount', $amount );
+	}
+
+	/**
+	 * Set the maximum discount a percentage coupon can give. Empty or 0 means no cap.
+	 *
+	 * @since 11.3.0
+	 * @param float|string $amount Maximum discount.
+	 * @return void
+	 */
+	public function set_maximum_discount( $amount ) {
+		$amount = wc_format_decimal( $amount );
+		if ( (float) $amount < 0 ) {
+			$this->error( 'coupon_invalid_maximum_discount', __( 'Invalid maximum discount value.', 'woocommerce' ) );
+		}
+		$this->set_prop( 'maximum_discount', $amount );
 	}
 
 	/**
@@ -1433,7 +1467,42 @@ class WC_Coupon extends WC_Legacy_Coupon {
 		$coupon->set_discount_type_core( $data['discount_type'], false );
 		$coupon->set_prop( 'amount', $data['amount'] );
 		$coupon->set_free_shipping( $data['free_shipping'] );
+		$coupon->set_maximum_discount_from_order_item( $order_item );
 		return $coupon;
+	}
+
+	/**
+	 * Store the coupon's maximum discount on an order's coupon line item, so it can be reapplied if the coupon is deleted.
+	 * It is kept out of 'coupon_info' because that tuple is a fixed format.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 * @since 11.3.0
+	 *
+	 * @param \WC_Order_Item_Coupon $order_item The coupon line item.
+	 * @return void
+	 */
+	public function add_maximum_discount_to_order_item( \WC_Order_Item_Coupon $order_item ) {
+		$maximum_discount = $this->get_maximum_discount();
+		if ( (float) $maximum_discount > 0 ) {
+			$order_item->add_meta_data( 'maximum_discount', $maximum_discount );
+		}
+	}
+
+	/**
+	 * Set the maximum discount from an order's coupon line item, as stored by add_maximum_discount_to_order_item().
+	 * Missing or invalid values leave the coupon without a cap.
+	 *
+	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+	 * @since 11.3.0
+	 *
+	 * @param \WC_Order_Item_Coupon $order_item The coupon line item.
+	 * @return void
+	 */
+	public function set_maximum_discount_from_order_item( \WC_Order_Item_Coupon $order_item ) {
+		$maximum_discount = $order_item->get_meta( 'maximum_discount', true );
+		if ( is_numeric( $maximum_discount ) && (float) $maximum_discount > 0 ) {
+			$this->set_prop( 'maximum_discount', wc_format_decimal( $maximum_discount ) );
+		}
 	}
 
 	/**

@@ -101,6 +101,7 @@ class WC_Tests_API_Coupons_V2 extends WC_REST_Unit_Test_Case {
 				'exclude_sale_items'          => false,
 				'minimum_amount'              => '0.00',
 				'maximum_amount'              => '0.00',
+				'maximum_discount'            => '0.00',
 				'email_restrictions'          => array(),
 				'used_by'                     => array(),
 				'meta_data'                   => array(),
@@ -170,6 +171,7 @@ class WC_Tests_API_Coupons_V2 extends WC_REST_Unit_Test_Case {
 				'exclude_sale_items'          => false,
 				'minimum_amount'              => '0.00',
 				'maximum_amount'              => '0.00',
+				'maximum_discount'            => '0.00',
 				'email_restrictions'          => array(),
 				'used_by'                     => array(),
 				'meta_data'                   => array(),
@@ -246,6 +248,7 @@ class WC_Tests_API_Coupons_V2 extends WC_REST_Unit_Test_Case {
 				'exclude_sale_items'          => false,
 				'minimum_amount'              => '0.00',
 				'maximum_amount'              => '0.00',
+				'maximum_discount'            => '0.00',
 				'email_restrictions'          => array(),
 				'used_by'                     => array(),
 				'meta_data'                   => array(),
@@ -468,7 +471,7 @@ class WC_Tests_API_Coupons_V2 extends WC_REST_Unit_Test_Case {
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertEquals( 28, count( $properties ) );
+		$this->assertEquals( 29, count( $properties ) );
 		$this->assertArrayHasKey( 'id', $properties );
 		$this->assertArrayHasKey( 'code', $properties );
 		$this->assertArrayHasKey( 'status', $properties );
@@ -494,6 +497,7 @@ class WC_Tests_API_Coupons_V2 extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'exclude_sale_items', $properties );
 		$this->assertArrayHasKey( 'minimum_amount', $properties );
 		$this->assertArrayHasKey( 'maximum_amount', $properties );
+		$this->assertArrayHasKey( 'maximum_discount', $properties );
 		$this->assertArrayHasKey( 'email_restrictions', $properties );
 		$this->assertArrayHasKey( 'used_by', $properties );
 	}
