@@ -903,7 +903,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	/**
 	 * Re-join exploded segments that were wrapped in double quotes, so a quoted value
 	 * can contain the separator, as in `Red, "Blue, navy", Green`. Quotes that are
-	 * balanced inside a segment (`"Large" size`, `15"`) never open or close a value.
+	 * balanced inside a segment (`"Large" size`) never open or close a value.
 	 *
 	 * @since 11.4.0
 	 *
