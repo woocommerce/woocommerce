@@ -696,7 +696,18 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 			$product = wc_get_product( $current_product_id );
 		}
 
-		if ( $product && $product !== $item->get_product() ) {
+		// An update that names the line's own product (its variation, or the parent alone) has nothing
+		// to copy from it: set_product() would replace the line's name, tax class and variation with the
+		// product's current values, on paid orders too (#70046). The object comparison below never spots
+		// that case, since both sides are loaded afresh. A variation that no longer exists still demotes
+		// the line to its parent, through the restore path below.
+		$current_product = $item->get_product();
+		$keeps_product   = 'update' === $action
+			&& $product instanceof WC_Product
+			&& ( $restore_variation_id || $product->get_id() === ( $current_variation_id ? $current_variation_id : $current_product_id ) )
+			&& ( ! $current_variation_id || 'product_variation' === get_post_type( $current_variation_id ) );
+
+		if ( $product && ! $keeps_product && $product !== $current_product ) {
 			$item->set_product( $product );
 			if ( $restore_variation_id ) {
 				try {

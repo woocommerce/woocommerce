@@ -1815,8 +1815,100 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertSame( $variation->get_id(), $reloaded->get_product()->get_id(), 'get_product() should continue to resolve to the variation.' );
 		$this->assertSame( $parent->get_id(), $response_item['product_id'], 'The response should retain the variable parent product ID.' );
 		$this->assertSame( $variation->get_id(), $response_item['variation_id'], 'The response should retain the variation ID.' );
-		$this->assertSame( $parent->get_name(), $reloaded->get_name(), 'The line-item name should retain its pre-regression resynchronization behavior.' );
-		$this->assertSame( $parent->get_tax_class(), $reloaded->get_tax_class(), 'The line-item tax class should retain its pre-regression resynchronization behavior.' );
+		$this->assertSame( 'Historical line item name', $reloaded->get_name(), 'Naming the line\'s own parent should leave the name it was sold under alone.' );
+		$this->assertSame( '', $reloaded->get_tax_class(), 'Naming the line\'s own parent should leave the tax class it was sold under alone.' );
+	}
+
+	/**
+	 * @testdox PUT /orders naming a line's own product keeps the name and tax class it was sold with, on a completed order too.
+	 */
+	public function test_update_line_item_with_unchanged_product_keeps_name_and_tax_class(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$order   = WC_Helper_Order::create_order( 1, $product );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		$item           = current( $order->get_items() );
+		$sold_name      = $item->get_name();
+		$sold_tax_class = $item->get_tax_class();
+
+		$product->set_name( 'Renamed after the sale' );
+		$product->set_tax_class( 'reduced-rate' );
+		$product->save();
+		$this->assertSame( 'reduced-rate', $product->get_tax_class(), 'Precondition: the product moved to another tax class.' );
+
+		$response = $this->dispatch_line_item_update(
+			$order->get_id(),
+			array(
+				'id'         => $item->get_id(),
+				'product_id' => $product->get_id(),
+				'quantity'   => 3,
+			)
+		);
+		$this->assertSame( 200, $response->get_status(), 'An update naming the line\'s own product should succeed.' );
+
+		$reloaded = new WC_Order_Item_Product( $item->get_id() );
+		$this->assertSame( 3, $reloaded->get_quantity(), 'The posted quantity should be applied.' );
+		$this->assertSame( $sold_name, $reloaded->get_name(), 'The line should keep the name it was sold under.' );
+		$this->assertSame( $sold_tax_class, $reloaded->get_tax_class(), 'The line should keep the tax class it was sold under.' );
+		$this->assertSame( $sold_tax_class, $response->get_data()['line_items'][0]['tax_class'], 'The response should report the stored tax class.' );
+	}
+
+	/**
+	 * @testdox PUT /orders switching a line to another product takes that product's name and tax class.
+	 */
+	public function test_update_line_item_with_another_product_takes_its_name_and_tax_class(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$order   = WC_Helper_Order::create_order( 1, $product );
+		$item    = current( $order->get_items() );
+		$other   = WC_Helper_Product::create_simple_product();
+		$other->set_name( 'The other product' );
+		$other->set_tax_class( 'reduced-rate' );
+		$other->save();
+
+		$response = $this->dispatch_line_item_update(
+			$order->get_id(),
+			array(
+				'id'         => $item->get_id(),
+				'product_id' => $other->get_id(),
+			)
+		);
+		$this->assertSame( 200, $response->get_status(), 'Switching the line to another product should succeed.' );
+
+		$reloaded = new WC_Order_Item_Product( $item->get_id() );
+		$this->assertSame( $other->get_id(), $reloaded->get_product_id(), 'The line should point at the other product.' );
+		$this->assertSame( 'The other product', $reloaded->get_name(), 'The line should take the other product\'s name.' );
+		$this->assertSame( 'reduced-rate', $reloaded->get_tax_class(), 'The line should take the other product\'s tax class.' );
+	}
+
+	/**
+	 * @testdox PUT /orders echoing a line's variation keeps the name and tax class it was sold with.
+	 */
+	public function test_update_line_item_with_echoed_variation_keeps_name_and_tax_class(): void {
+		list( $parent, $variation ) = $this->create_variable_product_with_color_variation();
+		list( $order, $item_id )    = $this->create_order_with_variation_line_item( $variation );
+		$item                       = new WC_Order_Item_Product( $item_id );
+		$item->set_name( 'Historical line item name' );
+		$item->set_tax_class( '' );
+		$item->save();
+		$variation->set_tax_class( 'reduced-rate' );
+		$variation->save();
+
+		$response = $this->dispatch_line_item_update(
+			$order->get_id(),
+			array(
+				'id'           => $item_id,
+				'product_id'   => $parent->get_id(),
+				'variation_id' => $variation->get_id(),
+				'quantity'     => 2,
+			)
+		);
+		$this->assertSame( 200, $response->get_status(), 'Echoing the line\'s own variation should succeed.' );
+
+		$reloaded = new WC_Order_Item_Product( $item_id );
+		$this->assertSame( 2, $reloaded->get_quantity(), 'The posted quantity should be applied.' );
+		$this->assertSame( $variation->get_id(), $reloaded->get_variation_id(), 'The variation should be kept.' );
+		$this->assertSame( 'Historical line item name', $reloaded->get_name(), 'The line should keep the name it was sold under.' );
+		$this->assertSame( '', $reloaded->get_tax_class(), 'The line should keep the tax class it was sold under.' );
 	}
 
 	/**
@@ -1845,9 +1937,9 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox PUT /orders rethrows extension validation errors while the existing variation is still valid.
+	 * @testdox PUT /orders with an unchanged parent leaves an existing variation alone, so an extension veto on restoring it is never consulted.
 	 */
-	public function test_update_line_item_rethrows_extension_validation_error_for_existing_variation(): void {
+	public function test_update_line_item_with_unchanged_parent_does_not_restore_an_existing_variation(): void {
 		list( $parent, $variation ) = $this->create_variable_product_with_color_variation();
 		list( $order, $item_id )    = $this->create_order_with_variation_line_item( $variation );
 		$extension_validation_armed = false;
@@ -1886,9 +1978,8 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$this->assertSame( 'product_variation', get_post_type( $variation->get_id() ), 'Precondition: the stored variation still exists.' );
 		$this->assertTrue( $extension_validation_armed, 'Precondition: the filtered order item subclass handled the update.' );
-		$this->assertSame( 400, $response->get_status(), 'Extension validation should reject the update.' );
-		$this->assertSame( 'order_item_product_invalid_variation_id', $response->get_data()['code'], 'The extension validation error should be preserved.' );
-		$this->assertSame( $variation->get_id(), (int) wc_get_order_item_meta( $item_id, '_variation_id' ), 'The failed update should not demote the line item.' );
+		$this->assertSame( 200, $response->get_status(), 'Nothing is restored, so the extension veto has nothing to reject.' );
+		$this->assertSame( $variation->get_id(), (int) wc_get_order_item_meta( $item_id, '_variation_id' ), 'The line item should keep its variation.' );
 	}
 
 	/**
