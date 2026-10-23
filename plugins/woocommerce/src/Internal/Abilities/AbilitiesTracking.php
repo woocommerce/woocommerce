@@ -189,7 +189,7 @@ class AbilitiesTracking {
 		add_filter( 'mcp_adapter_pre_tool_call', array( $this, 'handle_mcp_adapter_pre_tool_call' ) );
 		add_filter( 'rest_request_before_callbacks', array( $this, 'handle_rest_request_before_callbacks' ), 10, 3 );
 		add_filter( 'rest_request_after_callbacks', array( $this, 'handle_rest_request_after_callbacks' ), 10, 3 );
-		// Last, so every other shutdown handler still finishes before the response does.
+		// Last, so ability calls made by other shutdown handlers are recorded too.
 		add_action( 'shutdown', array( $this, 'handle_shutdown' ), PHP_INT_MAX );
 	}
 
@@ -443,22 +443,6 @@ class AbilitiesTracking {
 			return;
 		}
 
-		try {
-			/**
-			 * Filters whether the response is sent to the client before the ability events go to Tracks, on servers that
-			 * support it (PHP-FPM, LiteSpeed). Return false to keep the client waiting for the send.
-			 *
-			 * @since 11.3.0
-			 *
-			 * @param bool $finish_response Whether to finish the response first. Default true.
-			 */
-			if ( ! $this->is_long_running_process() && apply_filters( 'woocommerce_ability_tracking_finish_response', true ) ) {
-				$this->finish_response();
-			}
-		} catch ( \Throwable $e ) {
-			unset( $e );
-		}
-
 		$this->flush_events();
 		// This runs after WC_Tracks_Client's own send at priority 20, so the queued pixels are sent here.
 		try {
@@ -483,23 +467,7 @@ class AbilitiesTracking {
 	}
 
 	/**
-	 * Send the response to the client and keep running, where the server supports it (PHP-FPM, LiteSpeed), as
-	 * wp-cron.php and WC_Background_Emailer do. Elsewhere the client keeps waiting for the send, as before.
-	 */
-	protected function finish_response(): void {
-		// Only one request can hold a PHP session; release it so the client's next request doesn't wait.
-		if ( session_id() ) {
-			session_write_close();
-		}
-		if ( function_exists( 'fastcgi_finish_request' ) ) {
-			fastcgi_finish_request();
-		} elseif ( function_exists( 'litespeed_finish_request' ) ) {
-			litespeed_finish_request();
-		}
-	}
-
-	/**
-	 * Send the pixels queued in the batched Tracks client now, instead of on shutdown.
+	 * Send the pixels queued in the batched Tracks client now.
 	 */
 	protected function send_queued_pixels(): void {
 		\WC_Tracks_Client::send_batched_pixels();
