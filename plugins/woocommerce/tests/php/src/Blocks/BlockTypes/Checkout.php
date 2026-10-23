@@ -57,7 +57,7 @@ class Checkout extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Checks the local pickup title is updated when the Checkout block is saved.
+	 * @testdox The local pickup title is updated when the Checkout block is saved.
 	 * @return void
 	 */
 	public function test_local_pickup_title_change() {
@@ -122,7 +122,6 @@ class Checkout extends \WC_Unit_Test_Case {
 
 		$data_from_registry = $this->registry->get();
 		$this->assertEquals( 'Changed pickup', $data_from_registry['localPickupText'] );
-		wp_delete_post( $page_id );
 	}
 
 	/**

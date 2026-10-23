@@ -523,6 +523,35 @@ class MiniCart extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Cart/checkout constants defined by other tests cannot be reset in this process.
+	 *
+	 * @testdox Should keep the closed drawer out of the tab order and the accessibility tree.
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
+	 */
+	public function test_closed_drawer_is_inert_and_hidden(): void {
+		$processor = new \WP_HTML_Tag_Processor( $this->render_overlay() );
+
+		$this->assertTrue( $processor->next_tag( array( 'class_name' => 'wc-block-mini-cart__drawer' ) ), 'The drawer should be rendered.' );
+		$this->assertTrue( $processor->get_attribute( 'inert' ), 'The closed drawer should be inert so its contents are not focusable.' );
+		$this->assertSame( 'true', $processor->get_attribute( 'aria-hidden' ), 'The closed drawer should be hidden from assistive technologies.' );
+	}
+
+	/**
+	 * Render the Mini-Cart block and return the overlay markup it prints in the footer.
+	 *
+	 * @return string
+	 */
+	private function render_overlay(): string {
+		$block = parse_blocks( '<!-- wp:woocommerce/mini-cart /-->' );
+		render_block( $block[0] );
+
+		ob_start();
+		$this->mock->render_mini_cart_overlay();
+		return (string) ob_get_clean();
+	}
+
+	/**
 	 * Return the identifiers of the currently enqueued script modules.
 	 *
 	 * @return string[]

@@ -443,6 +443,85 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A new product row whose GTIN belongs to another product fails without creating a product.
+	 */
+	public function test_import_fails_new_product_rows_with_a_duplicated_global_unique_id() {
+		$existing = WC_Helper_Product::create_simple_product();
+		$existing->set_global_unique_id( '0012345678905' );
+		$existing->save();
+
+		$csv_file = trailingslashit( get_temp_dir() ) . 'import-duplicated-global-unique-id-new.csv';
+		file_put_contents( $csv_file, "SKU,\"GTIN, UPC, EAN, or ISBN\",Name\nnew-sku,0012345678905,Copied product\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
+
+		$importer = new WC_Product_CSV_Importer(
+			$csv_file,
+			array(
+				'parse'   => true,
+				'mapping' => array(
+					'SKU'                     => 'sku',
+					'GTIN, UPC, EAN, or ISBN' => 'global_unique_id',
+					'Name'                    => 'name',
+				),
+			)
+		);
+		$data     = $importer->import();
+
+		wp_delete_file( $csv_file );
+
+		$this->assertEmpty( $data['imported'], 'A row with a duplicated GTIN should not create a product.' );
+		$this->assertCount( 1, $data['failed'] );
+		$this->assertSame( 'Invalid or duplicated GTIN, UPC, EAN or ISBN.', $data['failed'][0]->get_error_message() );
+		$this->assertSame( 0, wc_get_product_id_by_sku( 'new-sku' ), 'No product should be saved for the failed row.' );
+		$this->assertSame( $existing->get_id(), wc_get_product_id_by_global_unique_id( '0012345678905' ), 'The GTIN should stay with the original product.' );
+
+		WC_Helper_Product::delete_product( $existing->get_id() );
+	}
+
+	/**
+	 * @testdox Updating a product with another product's GTIN fails the row and leaves the product unchanged.
+	 */
+	public function test_import_fails_update_rows_with_a_duplicated_global_unique_id() {
+		$owner = WC_Helper_Product::create_simple_product();
+		$owner->set_global_unique_id( '0012345678905' );
+		$owner->save();
+
+		$target = WC_Helper_Product::create_simple_product();
+		$target->set_name( 'Original name' );
+		$target->save();
+
+		$csv_file = trailingslashit( get_temp_dir() ) . 'import-duplicated-global-unique-id-update.csv';
+		file_put_contents( $csv_file, sprintf( "ID,\"GTIN, UPC, EAN, or ISBN\",Name\n%d,0012345678905,Updated name\n", $target->get_id() ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
+
+		$importer = new WC_Product_CSV_Importer(
+			$csv_file,
+			array(
+				'parse'           => true,
+				'update_existing' => true,
+				'mapping'         => array(
+					'ID'                      => 'id',
+					'GTIN, UPC, EAN, or ISBN' => 'global_unique_id',
+					'Name'                    => 'name',
+				),
+			)
+		);
+		$data     = $importer->import();
+
+		wp_delete_file( $csv_file );
+
+		$this->assertEmpty( $data['updated'] );
+		$this->assertCount( 1, $data['failed'] );
+		$this->assertSame( 'Invalid or duplicated GTIN, UPC, EAN or ISBN.', $data['failed'][0]->get_error_message() );
+
+		$target = wc_get_product( $target->get_id() );
+		$this->assertSame( 'Original name', $target->get_name(), 'Other fields in the failed row should not be saved.' );
+		$this->assertSame( '', $target->get_global_unique_id() );
+		$this->assertSame( $owner->get_id(), wc_get_product_id_by_global_unique_id( '0012345678905' ) );
+
+		WC_Helper_Product::delete_product( $owner->get_id() );
+		WC_Helper_Product::delete_product( $target->get_id() );
+	}
+
+	/**
 	 * @testdox A Global Unique ID that matches a variable product fails a row whose blank Type defaults to simple.
 	 */
 	public function test_import_fails_global_unique_id_rows_that_would_change_the_product_type() {

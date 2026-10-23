@@ -34,7 +34,7 @@ export function getQuery() {
  * Return a URL with set query parameters.
  *
  * @param {Object} query        object of params to be updated.
- * @param {string} path         Relative path (defaults to current path).
+ * @param {string} path         Admin page path, e.g. `/analytics/orders` (defaults to the current path). Used as-is for the `path` query arg; `./` and `../` segments are not resolved against the current path.
  * @param {Object} currentQuery object of current query params (defaults to current querystring).
  * @param {string} page         Page key (defaults to "wc-admin")
  * @return {string}  Updated URL merging query params into existing params.

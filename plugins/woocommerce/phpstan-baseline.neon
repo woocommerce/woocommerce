@@ -5719,12 +5719,6 @@ parameters:
 			path: includes/admin/meta-boxes/views/html-order-fee.php
 
 		-
-			message: '#^Call to an undefined method object\:\:get_all_formatted_meta_data\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: includes/admin/meta-boxes/views/html-order-item-meta.php
-
-		-
 			message: '#^Parameter \#1 \$text of function esc_attr expects string, int given\.$#'
 			identifier: argument.type
 			count: 2
@@ -9631,12 +9625,6 @@ parameters:
 			path: includes/class-wc-cart-session.php
 
 		-
-			message: '#^Parameter \#1 \$string of function html_entity_decode expects string, array\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-cart-session.php
-
-		-
 			message: '#^Parameter \#2 \$value of function wc_setcookie expects string, int given\.$#'
 			identifier: argument.type
 			count: 1
@@ -10132,12 +10120,6 @@ parameters:
 			message: '#^Parameter \#1 \$stock_quantity of function wc_format_stock_quantity_for_display expects int, int\|null given\.$#'
 			identifier: argument.type
 			count: 3
-			path: includes/class-wc-cart.php
-
-		-
-			message: '#^Parameter \#1 \$string of function html_entity_decode expects string, array\|string given\.$#'
-			identifier: argument.type
-			count: 1
 			path: includes/class-wc-cart.php
 
 		-
@@ -11725,18 +11707,6 @@ parameters:
 			path: includes/class-wc-form-handler.php
 
 		-
-			message: '#^Parameter \#2 \$country of function wc_format_postcode expects string, array\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-form-handler.php
-
-		-
-			message: '#^Parameter \#2 \$country of static method WC_Validation\:\:is_postcode\(\) expects string, array\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-form-handler.php
-
-		-
 			message: '#^Parameter \#2 \$quantity of method WC_Cart\:\:add_to_cart\(\) expects int, float\|int given\.$#'
 			identifier: argument.type
 			count: 2
@@ -12593,18 +12563,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: includes/class-wc-order-item-tax.php
-
-		-
-			message: '#^Access to an undefined property object\:\:\$key\.$#'
-			identifier: property.notFound
-			count: 3
-			path: includes/class-wc-order-item.php
-
-		-
-			message: '#^Access to an undefined property object\:\:\$value\.$#'
-			identifier: property.notFound
-			count: 1
-			path: includes/class-wc-order-item.php
 
 		-
 			message: '#^Argument of an invalid type array\<WC_Meta_Data\>\|null supplied for foreach, only iterables are supported\.$#'
@@ -25243,12 +25201,6 @@ parameters:
 			path: includes/rest-api/Controllers/Version2/class-wc-rest-network-orders-v2-controller.php
 
 		-
-			message: '#^Argument of an invalid type array\<int\|WP_Comment\>\|int supplied for foreach, only iterables are supported\.$#'
-			identifier: foreach.nonIterable
-			count: 1
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-order-notes-v2-controller.php
-
-		-
 			message: '#^Function remove_filter invoked with 4 parameters, 2\-3 required\.$#'
 			identifier: arguments.count
 			count: 1
@@ -25280,12 +25232,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$comment_id of function get_comment_meta expects int, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-order-notes-v2-controller.php
-
-		-
-			message: '#^Parameter \#1 \$note of method WC_REST_Order_Notes_V2_Controller\:\:prepare_item_for_response\(\) expects WP_Comment, int\|WP_Comment given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/rest-api/Controllers/Version2/class-wc-rest-order-notes-v2-controller.php
@@ -26558,12 +26504,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$amount of function wc_stock_amount expects float\|int, int\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
-
-		-
-			message: '#^Parameter \#1 \$args of function wc_get_min_max_price_meta_query expects array, WP_REST_Request given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
@@ -29266,12 +29206,6 @@ parameters:
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-variations-controller.php
 
 		-
-			message: '#^Parameter \#1 \$args of function wc_get_min_max_price_meta_query expects array, WP_REST_Request given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-variations-controller.php
-
-		-
 			message: '#^Parameter \#1 \$date of function wc_rest_prepare_date_response expects string\|WC_DateTime\|null, int\|false given\.$#'
 			identifier: argument.type
 			count: 2
@@ -29555,12 +29489,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$amount of method WC_Product\:\:set_low_stock_amount\(\) expects int\|string, float\|int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-products-controller.php
-
-		-
-			message: '#^Parameter \#1 \$args of function wc_get_min_max_price_meta_query expects array, WP_REST_Request given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-products-controller.php
@@ -39844,36 +39772,6 @@ parameters:
 			path: src/Admin/API/Reports/Categories/DataStore.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Categories\\DataStore\:\:get_noncached_data\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\Categories\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Categories/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Categories\\DataStore\:\:get_noncached_data\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\Categories\\stdClass\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Categories/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Categories\\DataStore\:\:get_noncached_data\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\Categories\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\Categories\\WP_Error but returns WP_Error\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/Reports/Categories/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Categories\\DataStore\:\:get_noncached_data\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\Categories\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\Categories\\WP_Error but returns object\{data\: array, total\: int, pages\: int, page_no\: int\}&stdClass\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/Reports/Categories/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Categories\\DataStore\:\:get_noncached_data\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\Categories\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\Categories\\WP_Error but returns object\{data\: array\<array\|Automattic\\WooCommerce\\Admin\\API\\Reports\\WP_Error\>, total\: int, pages\: int, page_no\: int\}&stdClass\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/Reports/Categories/DataStore.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Categories\\DataStore\:\:include_extended_info\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -39906,30 +39804,6 @@ parameters:
 		-
 			message: '#^@param Automattic\\WooCommerce\\Admin\\API\\Reports\\WP_REST_Response \$response does not accept actual type of parameter\: WP_REST_Response\.$#'
 			identifier: parameter.phpDocType
-			count: 1
-			path: src/Admin/API/Reports/Controller.php
-
-		-
-			message: '#^Access to property \$description on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Controller.php
-
-		-
-			message: '#^Access to property \$path on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Admin/API/Reports/Controller.php
-
-		-
-			message: '#^Access to property \$slug on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Controller.php
-
-		-
-			message: '#^Access to property \$url on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Admin/API/Reports/Controller.php
 
@@ -40000,12 +39874,6 @@ parameters:
 			path: src/Admin/API/Reports/Controller.php
 
 		-
-			message: '#^Parameter \#1 \$report of method Automattic\\WooCommerce\\Admin\\API\\Reports\\Controller\:\:prepare_item_for_response\(\) expects Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass, stdClass given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/API/Reports/Controller.php
-
-		-
 			message: '#^Parameter \#1 \$response of method WP_REST_Controller\:\:prepare_response_for_collection\(\) expects WP_REST_Response, Automattic\\WooCommerce\\Admin\\API\\Reports\\WP_REST_Response given\.$#'
 			identifier: argument.type
 			count: 1
@@ -40025,12 +39893,6 @@ parameters:
 
 		-
 			message: '#^Parameter \$order of method Automattic\\WooCommerce\\Admin\\API\\Reports\\Controller\:\:is_valid_order\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\WC_Order_Refund\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Controller.php
-
-		-
-			message: '#^Parameter \$report of method Automattic\\WooCommerce\\Admin\\API\\Reports\\Controller\:\:prepare_item_for_response\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\.$#'
 			identifier: class.notFound
 			count: 1
 			path: src/Admin/API/Reports/Controller.php
@@ -40120,30 +39982,6 @@ parameters:
 			path: src/Admin/API/Reports/Coupons/DataStore.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Coupons\\DataStore\:\:get_noncached_data\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\Coupons\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Coupons/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Coupons\\DataStore\:\:get_noncached_data\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\Coupons\\stdClass\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Coupons/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Coupons\\DataStore\:\:get_noncached_data\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\Coupons\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\Coupons\\WP_Error but returns object\{data\: array, total\: int, pages\: int, page_no\: int\}&stdClass\.$#'
-			identifier: return.type
-			count: 2
-			path: src/Admin/API/Reports/Coupons/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Coupons\\DataStore\:\:get_noncached_data\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\Coupons\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\Coupons\\WP_Error but returns object\{data\: array\<array\|Automattic\\WooCommerce\\Admin\\API\\Reports\\WP_Error\>, total\: int, pages\: int, page_no\: int\}&stdClass\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/Reports/Coupons/DataStore.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Coupons\\DataStore\:\:include_extended_info\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -40204,68 +40042,8 @@ parameters:
 			path: src/Admin/API/Reports/Coupons/Stats/Controller.php
 
 		-
-			message: '#^$#'
-			identifier: class.notFound
-			count: 4
-			path: src/Admin/API/Reports/Coupons/Stats/DataStore.php
-
-		-
-			message: '#^Access to property \$intervals on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\Coupons\\Stats\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 3
-			path: src/Admin/API/Reports/Coupons/Stats/DataStore.php
-
-		-
-			message: '#^Access to property \$intervals on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\Coupons\\Stats\\stdClass\.$#'
-			identifier: class.notFound
-			count: 7
-			path: src/Admin/API/Reports/Coupons/Stats/DataStore.php
-
-		-
-			message: '#^Access to property \$totals on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\Coupons\\Stats\\stdClass\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Admin/API/Reports/Coupons/Stats/DataStore.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Coupons\\Stats\\DataStore\:\:assign_report_columns\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Admin/API/Reports/Coupons/Stats/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Coupons\\Stats\\DataStore\:\:get_noncached_data\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Coupons/Stats/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Coupons\\Stats\\DataStore\:\:get_noncached_data\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Coupons/Stats/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Coupons\\Stats\\DataStore\:\:get_noncached_data\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\WP_Error but returns Automattic\\WooCommerce\\Admin\\API\\Reports\\Coupons\\Stats\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\Coupons\\Stats\\WP_Error\|\(object\{totals\: null, intervals\: array, total\: int, pages\: int, page_no\: int\}&stdClass\)\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/Reports/Coupons/Stats/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Coupons\\Stats\\DataStore\:\:get_noncached_stats_data\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\Coupons\\Stats\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Coupons/Stats/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Coupons\\Stats\\DataStore\:\:get_noncached_stats_data\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\Coupons\\Stats\\stdClass\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Coupons/Stats/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Coupons\\Stats\\DataStore\:\:get_noncached_stats_data\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\Coupons\\Stats\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\Coupons\\Stats\\WP_Error but returns Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\.$#'
-			identifier: return.type
 			count: 1
 			path: src/Admin/API/Reports/Coupons/Stats/DataStore.php
 
@@ -40284,30 +40062,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Coupons\\Stats\\DataStore\:\:update_sql_query_params\(\) invoked with 3 parameters, 1 required\.$#'
 			identifier: arguments.count
-			count: 1
-			path: src/Admin/API/Reports/Coupons/Stats/DataStore.php
-
-		-
-			message: '#^Parameter \#1 \$data of method Automattic\\WooCommerce\\Admin\\API\\Reports\\Segmenter\:\:add_intervals_segments\(\) expects Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass, Automattic\\WooCommerce\\Admin\\API\\Reports\\Coupons\\Stats\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/API/Reports/Coupons/Stats/DataStore.php
-
-		-
-			message: '#^Parameter \#3 \$data of method Automattic\\WooCommerce\\Admin\\API\\Reports\\Coupons\\Stats\\DataStore\:\:get_noncached_stats_data\(\) expects Automattic\\WooCommerce\\Admin\\API\\Reports\\Coupons\\Stats\\stdClass, object\{totals\: null, intervals\: array, total\: int, pages\: int, page_no\: int\}&stdClass given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/API/Reports/Coupons/Stats/DataStore.php
-
-		-
-			message: '#^Parameter \#5 \$data of method Automattic\\WooCommerce\\Admin\\API\\Reports\\DataStore\:\:fill_in_missing_intervals\(\) expects Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass, Automattic\\WooCommerce\\Admin\\API\\Reports\\Coupons\\Stats\\stdClass given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/API/Reports/Coupons/Stats/DataStore.php
-
-		-
-			message: '#^Parameter \$data of method Automattic\\WooCommerce\\Admin\\API\\Reports\\Coupons\\Stats\\DataStore\:\:get_noncached_stats_data\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\Coupons\\Stats\\stdClass\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Admin/API/Reports/Coupons/Stats/DataStore.php
 
@@ -40498,30 +40252,6 @@ parameters:
 			path: src/Admin/API/Reports/Customers/DataStore.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Customers\\DataStore\:\:get_noncached_data\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\Customers\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Customers/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Customers\\DataStore\:\:get_noncached_data\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\Customers\\stdClass\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Customers/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Customers\\DataStore\:\:get_noncached_data\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\Customers\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\Customers\\WP_Error but returns object\{data\: array, total\: int, pages\: int, page_no\: int\}&stdClass\.$#'
-			identifier: return.type
-			count: 2
-			path: src/Admin/API/Reports/Customers/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Customers\\DataStore\:\:get_noncached_data\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\Customers\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\Customers\\WP_Error but returns object\{data\: array\<array\|Automattic\\WooCommerce\\Admin\\API\\Reports\\WP_Error\>, total\: int, pages\: int, page_no\: int\}&stdClass\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/Reports/Customers/DataStore.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Customers\\DataStore\:\:init\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -40690,30 +40420,6 @@ parameters:
 			path: src/Admin/API/Reports/DataStore.php
 
 		-
-			message: '#^Access to property \$intervals on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\.$#'
-			identifier: class.notFound
-			count: 9
-			path: src/Admin/API/Reports/DataStore.php
-
-		-
-			message: '#^Access to property \$totals on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/DataStore.php
-
-		-
-			message: '#^Call to method format\(\) on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 12
-			path: src/Admin/API/Reports/DataStore.php
-
-		-
-			message: '#^Call to method setTimestamp\(\) on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Admin/API/Reports/DataStore.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\DataStore\:\:add_intervals_sql_params\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -40762,12 +40468,6 @@ parameters:
 			path: src/Admin/API/Reports/DataStore.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\DataStore\:\:fill_in_missing_intervals\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/DataStore.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\DataStore\:\:get_data\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\WP_Error\.$#'
 			identifier: class.notFound
 			count: 1
@@ -40793,24 +40493,6 @@ parameters:
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\DataStore\:\:get_included_products_array\(\) should return array but returns array\|Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/Reports/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\DataStore\:\:get_noncached_data\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\DataStore\:\:get_noncached_data\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\DataStore\:\:get_noncached_data\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\WP_Error but returns WP_Error\.$#'
 			identifier: return.type
 			count: 1
 			path: src/Admin/API/Reports/DataStore.php
@@ -40888,18 +40570,6 @@ parameters:
 			path: src/Admin/API/Reports/DataStore.php
 
 		-
-			message: '#^Parameter \#1 \$datetime of static method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:iterate\(\) expects Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime, DateTime given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Admin/API/Reports/DataStore.php
-
-		-
-			message: '#^Parameter \#1 \$datetime of static method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:iterate\(\) expects Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime, object given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Admin/API/Reports/DataStore.php
-
-		-
 			message: '#^Parameter \#1 \$order_by of method Automattic\\WooCommerce\\Admin\\API\\Reports\\DataStore\:\:normalize_order_by\(\) expects string, array\|string given\.$#'
 			identifier: argument.type
 			count: 2
@@ -40943,48 +40613,6 @@ parameters:
 
 		-
 			message: '#^Parameter \$b of method Automattic\\WooCommerce\\Admin\\API\\Reports\\DataStore\:\:interval_cmp\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/DataStore.php
-
-		-
-			message: '#^Parameter \$data of method Automattic\\WooCommerce\\Admin\\API\\Reports\\DataStore\:\:fill_in_missing_intervals\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/DataStore.php
-
-		-
-			message: '#^Parameter \$data of method Automattic\\WooCommerce\\Admin\\API\\Reports\\DataStore\:\:remove_extra_records\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/DataStore.php
-
-		-
-			message: '#^Parameter \$data of method Automattic\\WooCommerce\\Admin\\API\\Reports\\DataStore\:\:sort_intervals\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/DataStore.php
-
-		-
-			message: '#^Parameter \$end_datetime of method Automattic\\WooCommerce\\Admin\\API\\Reports\\DataStore\:\:fill_in_missing_intervals\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/DataStore.php
-
-		-
-			message: '#^Parameter \$end_datetime of method Automattic\\WooCommerce\\Admin\\API\\Reports\\DataStore\:\:update_interval_boundary_dates\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/DataStore.php
-
-		-
-			message: '#^Parameter \$start_datetime of method Automattic\\WooCommerce\\Admin\\API\\Reports\\DataStore\:\:fill_in_missing_intervals\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/DataStore.php
-
-		-
-			message: '#^Parameter \$start_datetime of method Automattic\\WooCommerce\\Admin\\API\\Reports\\DataStore\:\:update_interval_boundary_dates\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
 			identifier: class.notFound
 			count: 1
 			path: src/Admin/API/Reports/DataStore.php
@@ -41128,30 +40756,6 @@ parameters:
 			path: src/Admin/API/Reports/Downloads/DataStore.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Downloads\\DataStore\:\:get_noncached_data\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\Downloads\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Downloads/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Downloads\\DataStore\:\:get_noncached_data\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\Downloads\\stdClass\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Downloads/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Downloads\\DataStore\:\:get_noncached_data\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\Downloads\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\Downloads\\WP_Error but returns object\{data\: array, total\: int, pages\: int, page_no\: int\}&stdClass\.$#'
-			identifier: return.type
-			count: 2
-			path: src/Admin/API/Reports/Downloads/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Downloads\\DataStore\:\:get_noncached_data\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\Downloads\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\Downloads\\WP_Error but returns object\{data\: array\<array\|Automattic\\WooCommerce\\Admin\\API\\Reports\\WP_Error\>, total\: int, pages\: int, page_no\: int\}&stdClass\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/Reports/Downloads/DataStore.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Downloads\\DataStore\:\:initialize_queries\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -41206,98 +40810,14 @@ parameters:
 			path: src/Admin/API/Reports/Downloads/Stats/Controller.php
 
 		-
-			message: '#^$#'
-			identifier: class.notFound
-			count: 3
-			path: src/Admin/API/Reports/Downloads/Stats/DataStore.php
-
-		-
-			message: '#^Access to property \$intervals on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\Downloads\\Stats\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 3
-			path: src/Admin/API/Reports/Downloads/Stats/DataStore.php
-
-		-
-			message: '#^Access to property \$intervals on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\Downloads\\Stats\\stdClass\.$#'
-			identifier: class.notFound
-			count: 7
-			path: src/Admin/API/Reports/Downloads/Stats/DataStore.php
-
-		-
-			message: '#^Access to property \$totals on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\Downloads\\Stats\\stdClass\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Admin/API/Reports/Downloads/Stats/DataStore.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Downloads\\Stats\\DataStore\:\:assign_report_columns\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: src/Admin/API/Reports/Downloads/Stats/DataStore.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Downloads\\Stats\\DataStore\:\:get_noncached_data\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Downloads/Stats/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Downloads\\Stats\\DataStore\:\:get_noncached_data\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Downloads/Stats/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Downloads\\Stats\\DataStore\:\:get_noncached_data\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\WP_Error but returns Automattic\\WooCommerce\\Admin\\API\\Reports\\Downloads\\Stats\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\Downloads\\Stats\\WP_Error\|\(object\{totals\: null, intervals\: array, total\: int, pages\: int, page_no\: int\}&stdClass\)\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/Reports/Downloads/Stats/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Downloads\\Stats\\DataStore\:\:get_noncached_stats_data\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\Downloads\\Stats\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Downloads/Stats/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Downloads\\Stats\\DataStore\:\:get_noncached_stats_data\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\Downloads\\Stats\\stdClass\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Downloads/Stats/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Downloads\\Stats\\DataStore\:\:get_noncached_stats_data\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\Downloads\\Stats\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\Downloads\\Stats\\WP_Error but returns Automattic\\WooCommerce\\Admin\\API\\Reports\\Downloads\\Stats\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/Reports/Downloads/Stats/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Downloads\\Stats\\DataStore\:\:get_noncached_stats_data\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\Downloads\\Stats\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\Downloads\\Stats\\WP_Error but returns WP_Error\.$#'
-			identifier: return.type
-			count: 2
-			path: src/Admin/API/Reports/Downloads/Stats/DataStore.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Downloads\\Stats\\DataStore\:\:initialize_queries\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Admin/API/Reports/Downloads/Stats/DataStore.php
-
-		-
-			message: '#^Parameter \#3 \$data of method Automattic\\WooCommerce\\Admin\\API\\Reports\\Downloads\\Stats\\DataStore\:\:get_noncached_stats_data\(\) expects Automattic\\WooCommerce\\Admin\\API\\Reports\\Downloads\\Stats\\stdClass, object\{totals\: null, intervals\: array, total\: int, pages\: int, page_no\: int\}&stdClass given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/API/Reports/Downloads/Stats/DataStore.php
-
-		-
-			message: '#^Parameter \#5 \$data of method Automattic\\WooCommerce\\Admin\\API\\Reports\\DataStore\:\:fill_in_missing_intervals\(\) expects Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass, Automattic\\WooCommerce\\Admin\\API\\Reports\\Downloads\\Stats\\stdClass given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/API/Reports/Downloads/Stats/DataStore.php
-
-		-
-			message: '#^Parameter \$data of method Automattic\\WooCommerce\\Admin\\API\\Reports\\Downloads\\Stats\\DataStore\:\:get_noncached_stats_data\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\Downloads\\Stats\\stdClass\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Admin/API/Reports/Downloads/Stats/DataStore.php
 
@@ -41872,30 +41392,6 @@ parameters:
 			path: src/Admin/API/Reports/Orders/DataStore.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\DataStore\:\:get_noncached_data\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Orders/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\DataStore\:\:get_noncached_data\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\stdClass\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Orders/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\DataStore\:\:get_noncached_data\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\WP_Error but returns object\{data\: array, total\: int, pages\: int, page_no\: int\}&stdClass\.$#'
-			identifier: return.type
-			count: 2
-			path: src/Admin/API/Reports/Orders/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\DataStore\:\:get_noncached_data\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\WP_Error but returns object\{data\: array\<array\|Automattic\\WooCommerce\\Admin\\API\\Reports\\WP_Error\>, total\: int, pages\: int, page_no\: int\}&stdClass\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/Reports/Orders/DataStore.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\DataStore\:\:include_extended_info\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -42022,18 +41518,6 @@ parameters:
 			path: src/Admin/API/Reports/Orders/Stats/Controller.php
 
 		-
-			message: '#^$#'
-			identifier: class.notFound
-			count: 4
-			path: src/Admin/API/Reports/Orders/Stats/DataStore.php
-
-		-
-			message: '#^Access to property \$intervals on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\Stats\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 3
-			path: src/Admin/API/Reports/Orders/Stats/DataStore.php
-
-		-
 			message: '#^Binary operation "\*" between \-1 and string results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
@@ -42049,42 +41533,6 @@ parameters:
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\Stats\\DataStore\:\:delete_order\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
-			path: src/Admin/API/Reports/Orders/Stats/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\Stats\\DataStore\:\:get_noncached_data\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Orders/Stats/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\Stats\\DataStore\:\:get_noncached_data\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Orders/Stats/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\Stats\\DataStore\:\:get_noncached_data\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\WP_Error but returns Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\Stats\\WP_Error\|stdClass\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/Reports/Orders/Stats/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\Stats\\DataStore\:\:get_noncached_stats_data\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\Stats\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Orders/Stats/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\Stats\\DataStore\:\:get_noncached_stats_data\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\Stats\\WP_Error\|stdClass but returns Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/Reports/Orders/Stats/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\Stats\\DataStore\:\:get_noncached_stats_data\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\Stats\\WP_Error\|stdClass but returns WP_Error\.$#'
-			identifier: return.type
-			count: 2
 			path: src/Admin/API/Reports/Orders/Stats/DataStore.php
 
 		-
@@ -42130,19 +41578,7 @@ parameters:
 			path: src/Admin/API/Reports/Orders/Stats/DataStore.php
 
 		-
-			message: '#^Parameter \#1 \$data of method Automattic\\WooCommerce\\Admin\\API\\Reports\\Segmenter\:\:add_intervals_segments\(\) expects Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass, Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\|stdClass given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/API/Reports/Orders/Stats/DataStore.php
-
-		-
 			message: '#^Parameter \#1 \$order of static method Automattic\\WooCommerce\\Admin\\API\\Reports\\Customers\\DataStore\:\:get_existing_customer_id_from_order\(\) expects object, WC_Order\|WC_Order_Refund\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/API/Reports/Orders/Stats/DataStore.php
-
-		-
-			message: '#^Parameter \#5 \$data of method Automattic\\WooCommerce\\Admin\\API\\Reports\\DataStore\:\:fill_in_missing_intervals\(\) expects Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass, stdClass given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Admin/API/Reports/Orders/Stats/DataStore.php
@@ -42574,30 +42010,6 @@ parameters:
 			path: src/Admin/API/Reports/Products/DataStore.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Products\\DataStore\:\:get_noncached_data\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\Products\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Products/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Products\\DataStore\:\:get_noncached_data\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\Products\\stdClass\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Products/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Products\\DataStore\:\:get_noncached_data\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\Products\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\Products\\WP_Error but returns object\{data\: array, total\: int, pages\: int, page_no\: int\}&stdClass\.$#'
-			identifier: return.type
-			count: 2
-			path: src/Admin/API/Reports/Products/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Products\\DataStore\:\:get_noncached_data\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\Products\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\Products\\WP_Error but returns object\{data\: array\<array\|Automattic\\WooCommerce\\Admin\\API\\Reports\\WP_Error\>, total\: int, pages\: int, page_no\: int\}&stdClass\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/Reports/Products/DataStore.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Products\\DataStore\:\:include_extended_info\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -42664,30 +42076,6 @@ parameters:
 			path: src/Admin/API/Reports/Products/Stats/Controller.php
 
 		-
-			message: '#^$#'
-			identifier: class.notFound
-			count: 4
-			path: src/Admin/API/Reports/Products/Stats/DataStore.php
-
-		-
-			message: '#^Access to property \$intervals on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\Products\\Stats\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 3
-			path: src/Admin/API/Reports/Products/Stats/DataStore.php
-
-		-
-			message: '#^Access to property \$intervals on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\Products\\Stats\\stdClass\.$#'
-			identifier: class.notFound
-			count: 7
-			path: src/Admin/API/Reports/Products/Stats/DataStore.php
-
-		-
-			message: '#^Access to property \$totals on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\Products\\Stats\\stdClass\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Admin/API/Reports/Products/Stats/DataStore.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Products\\Stats\\DataStore\:\:assign_report_columns\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -42712,48 +42100,6 @@ parameters:
 			path: src/Admin/API/Reports/Products/Stats/DataStore.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Products\\Stats\\DataStore\:\:get_noncached_data\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Products/Stats/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Products\\Stats\\DataStore\:\:get_noncached_data\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Products/Stats/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Products\\Stats\\DataStore\:\:get_noncached_data\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\WP_Error but returns Automattic\\WooCommerce\\Admin\\API\\Reports\\Products\\Stats\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\Products\\Stats\\WP_Error\|\(object\{totals\: null, intervals\: array, total\: int, pages\: int, page_no\: int\}&stdClass\)\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/Reports/Products/Stats/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Products\\Stats\\DataStore\:\:get_noncached_stats_data\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\Products\\Stats\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Products/Stats/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Products\\Stats\\DataStore\:\:get_noncached_stats_data\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\Products\\Stats\\stdClass\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Products/Stats/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Products\\Stats\\DataStore\:\:get_noncached_stats_data\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\Products\\Stats\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\Products\\Stats\\WP_Error but returns Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/Reports/Products/Stats/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Products\\Stats\\DataStore\:\:get_noncached_stats_data\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\Products\\Stats\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\Products\\Stats\\WP_Error but returns WP_Error\.$#'
-			identifier: return.type
-			count: 2
-			path: src/Admin/API/Reports/Products/Stats/DataStore.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Products\\Stats\\DataStore\:\:initialize_queries\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -42762,30 +42108,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Products\\Stats\\DataStore\:\:update_sql_query_params\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Admin/API/Reports/Products/Stats/DataStore.php
-
-		-
-			message: '#^Parameter \#1 \$data of method Automattic\\WooCommerce\\Admin\\API\\Reports\\Segmenter\:\:add_intervals_segments\(\) expects Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass, Automattic\\WooCommerce\\Admin\\API\\Reports\\Products\\Stats\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/API/Reports/Products/Stats/DataStore.php
-
-		-
-			message: '#^Parameter \#3 \$data of method Automattic\\WooCommerce\\Admin\\API\\Reports\\Products\\Stats\\DataStore\:\:get_noncached_stats_data\(\) expects Automattic\\WooCommerce\\Admin\\API\\Reports\\Products\\Stats\\stdClass, object\{totals\: null, intervals\: array, total\: int, pages\: int, page_no\: int\}&stdClass given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/API/Reports/Products/Stats/DataStore.php
-
-		-
-			message: '#^Parameter \#5 \$data of method Automattic\\WooCommerce\\Admin\\API\\Reports\\DataStore\:\:fill_in_missing_intervals\(\) expects Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass, Automattic\\WooCommerce\\Admin\\API\\Reports\\Products\\Stats\\stdClass given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/API/Reports/Products/Stats/DataStore.php
-
-		-
-			message: '#^Parameter \$data of method Automattic\\WooCommerce\\Admin\\API\\Reports\\Products\\Stats\\DataStore\:\:get_noncached_stats_data\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\Products\\Stats\\stdClass\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Admin/API/Reports/Products/Stats/DataStore.php
 
@@ -42862,19 +42184,7 @@ parameters:
 			path: src/Admin/API/Reports/Revenue/Stats/Controller.php
 
 		-
-			message: '#^$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Segmenter.php
-
-		-
 			message: '#^Access to offset ''segment_id'' on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\.$#'
-			identifier: class.notFound
-			count: 6
-			path: src/Admin/API/Reports/Segmenter.php
-
-		-
-			message: '#^Access to property \$intervals on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\.$#'
 			identifier: class.notFound
 			count: 6
 			path: src/Admin/API/Reports/Segmenter.php
@@ -42959,18 +42269,6 @@ parameters:
 
 		-
 			message: '#^Parameter \$b of method Automattic\\WooCommerce\\Admin\\API\\Reports\\Segmenter\:\:segment_cmp\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Segmenter.php
-
-		-
-			message: '#^Parameter \$data of method Automattic\\WooCommerce\\Admin\\API\\Reports\\Segmenter\:\:add_intervals_segments\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Segmenter.php
-
-		-
-			message: '#^Parameter \$data of method Automattic\\WooCommerce\\Admin\\API\\Reports\\Segmenter\:\:fill_in_missing_interval_segments\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\.$#'
 			identifier: class.notFound
 			count: 1
 			path: src/Admin/API/Reports/Segmenter.php
@@ -43264,30 +42562,6 @@ parameters:
 			path: src/Admin/API/Reports/Taxes/DataStore.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Taxes\\DataStore\:\:get_noncached_data\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\Taxes\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Taxes/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Taxes\\DataStore\:\:get_noncached_data\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\Taxes\\stdClass\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Taxes/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Taxes\\DataStore\:\:get_noncached_data\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\Taxes\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\Taxes\\WP_Error but returns object\{data\: array, total\: int, pages\: int, page_no\: int\}&stdClass\.$#'
-			identifier: return.type
-			count: 2
-			path: src/Admin/API/Reports/Taxes/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Taxes\\DataStore\:\:get_noncached_data\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\Taxes\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\Taxes\\WP_Error but returns object\{data\: array\<array\|Automattic\\WooCommerce\\Admin\\API\\Reports\\WP_Error\>, total\: int, pages\: int, page_no\: int\}&stdClass\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/Reports/Taxes/DataStore.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Taxes\\DataStore\:\:init\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -43330,75 +42604,9 @@ parameters:
 			path: src/Admin/API/Reports/Taxes/Stats/Controller.php
 
 		-
-			message: '#^$#'
-			identifier: class.notFound
-			count: 4
-			path: src/Admin/API/Reports/Taxes/Stats/DataStore.php
-
-		-
-			message: '#^Access to property \$intervals on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\Taxes\\Stats\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 3
-			path: src/Admin/API/Reports/Taxes/Stats/DataStore.php
-
-		-
-			message: '#^Access to property \$intervals on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\Taxes\\Stats\\stdClass\.$#'
-			identifier: class.notFound
-			count: 7
-			path: src/Admin/API/Reports/Taxes/Stats/DataStore.php
-
-		-
-			message: '#^Access to property \$totals on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\Taxes\\Stats\\stdClass\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Admin/API/Reports/Taxes/Stats/DataStore.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Taxes\\Stats\\DataStore\:\:assign_report_columns\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
-			path: src/Admin/API/Reports/Taxes/Stats/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Taxes\\Stats\\DataStore\:\:get_noncached_data\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Taxes/Stats/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Taxes\\Stats\\DataStore\:\:get_noncached_data\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Taxes/Stats/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Taxes\\Stats\\DataStore\:\:get_noncached_data\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\WP_Error but returns Automattic\\WooCommerce\\Admin\\API\\Reports\\Taxes\\Stats\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\Taxes\\Stats\\WP_Error\|\(object\{totals\: null, intervals\: array, total\: int, pages\: int, page_no\: int\}&stdClass\)\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/Reports/Taxes/Stats/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Taxes\\Stats\\DataStore\:\:get_noncached_stats_data\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\Taxes\\Stats\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Taxes/Stats/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Taxes\\Stats\\DataStore\:\:get_noncached_stats_data\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\Taxes\\Stats\\stdClass\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Taxes/Stats/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Taxes\\Stats\\DataStore\:\:get_noncached_stats_data\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\Taxes\\Stats\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\Taxes\\Stats\\WP_Error but returns Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/Reports/Taxes/Stats/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Taxes\\Stats\\DataStore\:\:get_noncached_stats_data\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\Taxes\\Stats\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\Taxes\\Stats\\WP_Error but returns WP_Error\.$#'
-			identifier: return.type
-			count: 2
 			path: src/Admin/API/Reports/Taxes/Stats/DataStore.php
 
 		-
@@ -43410,30 +42618,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Taxes\\Stats\\DataStore\:\:update_sql_query_params\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Admin/API/Reports/Taxes/Stats/DataStore.php
-
-		-
-			message: '#^Parameter \#1 \$data of method Automattic\\WooCommerce\\Admin\\API\\Reports\\Segmenter\:\:add_intervals_segments\(\) expects Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass, Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\Taxes\\Stats\\stdClass given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/API/Reports/Taxes/Stats/DataStore.php
-
-		-
-			message: '#^Parameter \#3 \$data of method Automattic\\WooCommerce\\Admin\\API\\Reports\\Taxes\\Stats\\DataStore\:\:get_noncached_stats_data\(\) expects Automattic\\WooCommerce\\Admin\\API\\Reports\\Taxes\\Stats\\stdClass, object\{totals\: null, intervals\: array, total\: int, pages\: int, page_no\: int\}&stdClass given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/API/Reports/Taxes/Stats/DataStore.php
-
-		-
-			message: '#^Parameter \#5 \$data of method Automattic\\WooCommerce\\Admin\\API\\Reports\\DataStore\:\:fill_in_missing_intervals\(\) expects Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass, Automattic\\WooCommerce\\Admin\\API\\Reports\\Taxes\\Stats\\stdClass given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/API/Reports/Taxes/Stats/DataStore.php
-
-		-
-			message: '#^Parameter \$data of method Automattic\\WooCommerce\\Admin\\API\\Reports\\Taxes\\Stats\\DataStore\:\:get_noncached_stats_data\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\Taxes\\Stats\\stdClass\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Admin/API/Reports/Taxes/Stats/DataStore.php
 
@@ -43450,48 +42634,6 @@ parameters:
 			path: src/Admin/API/Reports/TimeInterval.php
 
 		-
-			message: '#^Call to method add\(\) on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Call to method diff\(\) on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Call to method format\(\) on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 35
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Call to method getTimezone\(\) on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Call to method setTime\(\) on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Call to method setTimestamp\(\) on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Call to method sub\(\) on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
 			message: '#^Cannot call method add\(\) on DateTime\|false\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -43504,115 +42646,7 @@ parameters:
 			path: src/Admin/API/Reports/TimeInterval.php
 
 		-
-			message: '#^Cloning object of an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:convert_local_datetime_to_gmt\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:convert_local_datetime_to_gmt\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime but returns DateTime\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:default_after\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:default_after\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime but returns WC_DateTime\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:default_before\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:default_before\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime but returns WC_DateTime\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:iterate\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:next_day_start\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:next_hour_start\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:next_hour_start\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime but returns DateTime\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:next_month_start\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:next_month_start\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime but returns Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\|DateTime\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:next_quarter_start\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:next_quarter_start\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime but returns DateTime\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:next_week_start\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:next_week_start\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime but returns DateTime\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:next_year_start\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:next_year_start\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime but returns DateTime\.$#'
+			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:next_week_start\(\) should return DateTime but returns DateTime\|false\.$#'
 			identifier: return.type
 			count: 1
 			path: src/Admin/API/Reports/TimeInterval.php
@@ -43666,78 +42700,6 @@ parameters:
 			path: src/Admin/API/Reports/TimeInterval.php
 
 		-
-			message: '#^Parameter \$datetime of method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:iterate\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Parameter \$datetime of method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:next_day_start\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Parameter \$datetime of method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:next_hour_start\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Parameter \$datetime of method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:next_month_start\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Parameter \$datetime of method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:next_quarter_start\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Parameter \$datetime of method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:next_week_start\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Parameter \$datetime of method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:next_year_start\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Parameter \$datetime of method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:quarter\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Parameter \$datetime of method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:simple_week_number\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Parameter \$datetime of method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:time_interval_id\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Parameter \$datetime of method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:week_number\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Parameter \$end_datetime of method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:intervals_between\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
 			message: '#^Parameter \$request of method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:rest_validate_between_date_arg\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\WP_REST_Request\.$#'
 			identifier: class.notFound
 			count: 1
@@ -43745,12 +42707,6 @@ parameters:
 
 		-
 			message: '#^Parameter \$request of method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:rest_validate_between_numeric_arg\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\WP_REST_Request\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/TimeInterval.php
-
-		-
-			message: '#^Parameter \$start_datetime of method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:intervals_between\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\DateTime\.$#'
 			identifier: class.notFound
 			count: 1
 			path: src/Admin/API/Reports/TimeInterval.php
@@ -43906,30 +42862,6 @@ parameters:
 			path: src/Admin/API/Reports/Variations/DataStore.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Variations\\DataStore\:\:get_noncached_data\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\Variations\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Variations/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Variations\\DataStore\:\:get_noncached_data\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\Variations\\stdClass\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Variations/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Variations\\DataStore\:\:get_noncached_data\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\Variations\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\Variations\\WP_Error but returns object\{data\: array, total\: int, pages\: int, page_no\: int\}&stdClass\.$#'
-			identifier: return.type
-			count: 2
-			path: src/Admin/API/Reports/Variations/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Variations\\DataStore\:\:get_noncached_data\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\Variations\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\Variations\\WP_Error but returns object\{data\: array\<array\|Automattic\\WooCommerce\\Admin\\API\\Reports\\WP_Error\>, total\: int, pages\: int, page_no\: int\}&stdClass\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/Reports/Variations/DataStore.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Variations\\DataStore\:\:get_order_item_by_attribute_subquery\(\) should return string but returns false\.$#'
 			identifier: return.type
 			count: 1
@@ -43990,75 +42922,9 @@ parameters:
 			path: src/Admin/API/Reports/Variations/Stats/Controller.php
 
 		-
-			message: '#^$#'
-			identifier: class.notFound
-			count: 4
-			path: src/Admin/API/Reports/Variations/Stats/DataStore.php
-
-		-
-			message: '#^Access to property \$intervals on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\Variations\\Stats\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 3
-			path: src/Admin/API/Reports/Variations/Stats/DataStore.php
-
-		-
-			message: '#^Access to property \$intervals on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\Variations\\Stats\\stdClass\.$#'
-			identifier: class.notFound
-			count: 7
-			path: src/Admin/API/Reports/Variations/Stats/DataStore.php
-
-		-
-			message: '#^Access to property \$totals on an unknown class Automattic\\WooCommerce\\Admin\\API\\Reports\\Variations\\Stats\\stdClass\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Admin/API/Reports/Variations/Stats/DataStore.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Variations\\Stats\\DataStore\:\:assign_report_columns\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
-			path: src/Admin/API/Reports/Variations/Stats/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Variations\\Stats\\DataStore\:\:get_noncached_data\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Variations/Stats/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Variations\\Stats\\DataStore\:\:get_noncached_data\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Variations/Stats/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Variations\\Stats\\DataStore\:\:get_noncached_data\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\WP_Error but returns Automattic\\WooCommerce\\Admin\\API\\Reports\\Variations\\Stats\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\Variations\\Stats\\WP_Error\|\(object\{totals\: null, intervals\: array, total\: int, pages\: int, page_no\: int\}&stdClass\)\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/Reports/Variations/Stats/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Variations\\Stats\\DataStore\:\:get_noncached_stats_data\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\Variations\\Stats\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Variations/Stats/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Variations\\Stats\\DataStore\:\:get_noncached_stats_data\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\Reports\\Variations\\Stats\\stdClass\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Reports/Variations/Stats/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Variations\\Stats\\DataStore\:\:get_noncached_stats_data\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\Variations\\Stats\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\Variations\\Stats\\WP_Error but returns Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/Reports/Variations/Stats/DataStore.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Variations\\Stats\\DataStore\:\:get_noncached_stats_data\(\) should return Automattic\\WooCommerce\\Admin\\API\\Reports\\Variations\\Stats\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\Variations\\Stats\\WP_Error but returns WP_Error\.$#'
-			identifier: return.type
-			count: 2
 			path: src/Admin/API/Reports/Variations/Stats/DataStore.php
 
 		-
@@ -44070,30 +42936,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Variations\\Stats\\DataStore\:\:update_sql_query_params\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Admin/API/Reports/Variations/Stats/DataStore.php
-
-		-
-			message: '#^Parameter \#1 \$data of method Automattic\\WooCommerce\\Admin\\API\\Reports\\Segmenter\:\:add_intervals_segments\(\) expects Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass, Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass\|Automattic\\WooCommerce\\Admin\\API\\Reports\\Variations\\Stats\\stdClass given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/API/Reports/Variations/Stats/DataStore.php
-
-		-
-			message: '#^Parameter \#3 \$data of method Automattic\\WooCommerce\\Admin\\API\\Reports\\Variations\\Stats\\DataStore\:\:get_noncached_stats_data\(\) expects Automattic\\WooCommerce\\Admin\\API\\Reports\\Variations\\Stats\\stdClass, object\{totals\: null, intervals\: array, total\: int, pages\: int, page_no\: int\}&stdClass given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/API/Reports/Variations/Stats/DataStore.php
-
-		-
-			message: '#^Parameter \#5 \$data of method Automattic\\WooCommerce\\Admin\\API\\Reports\\DataStore\:\:fill_in_missing_intervals\(\) expects Automattic\\WooCommerce\\Admin\\API\\Reports\\stdClass, Automattic\\WooCommerce\\Admin\\API\\Reports\\Variations\\Stats\\stdClass given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Admin/API/Reports/Variations/Stats/DataStore.php
-
-		-
-			message: '#^Parameter \$data of method Automattic\\WooCommerce\\Admin\\API\\Reports\\Variations\\Stats\\DataStore\:\:get_noncached_stats_data\(\) has invalid type Automattic\\WooCommerce\\Admin\\API\\Reports\\Variations\\Stats\\stdClass\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Admin/API/Reports/Variations/Stats/DataStore.php
 
@@ -48370,12 +47212,6 @@ parameters:
 			path: src/Blocks/BlockTemplatesController.php
 
 		-
-			message: '#^Callback expects 1 parameter, \$accepted_args is set to 3\.$#'
-			identifier: arguments.count
-			count: 1
-			path: src/Blocks/BlockTemplatesController.php
-
-		-
 			message: '#^Default value of the parameter \#2 \$template_type \(string\) of method Automattic\\WooCommerce\\Blocks\\BlockTemplatesController\:\:block_template_is_available\(\) is incompatible with type array\.$#'
 			identifier: parameter.defaultValue
 			count: 1
@@ -48396,12 +47232,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTemplatesController\:\:add_block_template_details\(\) should return Automattic\\WooCommerce\\Blocks\\WP_Block_Template\|null but returns Automattic\\WooCommerce\\Blocks\\Utils\\WP_Block_Template\.$#'
 			identifier: return.type
-			count: 1
-			path: src/Blocks/BlockTemplatesController.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTemplatesController\:\:add_plugin_templates_parts_support\(\) has no return type specified\.$#'
-			identifier: missingType.return
 			count: 1
 			path: src/Blocks/BlockTemplatesController.php
 
@@ -48480,12 +47310,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTemplatesRegistry\:\:init\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockTemplatesRegistry.php
-
-		-
-			message: '#^Parameter \#2 \$args of function register_block_template expects array\{title\?\: string, description\?\: string, content\?\: string, post_types\?\: array\<string\>, plugin\?\: string\}, array\{title\: string, description\: string, content\: string\|false\} given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTemplatesRegistry.php
 
@@ -49564,12 +48388,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ComingSoon.php
 
 		-
-			message: '#^Call to function is_null\(\) with mixed will always evaluate to false\.$#'
-			identifier: function.impossibleType
-			count: 1
-			path: src/Blocks/BlockTypes/CustomerAccount.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\CustomerAccount\:\:initialize\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -49602,12 +48420,6 @@ parameters:
 		-
 			message: '#^Parameter \$context of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\CustomerAccount\:\:modify_hooked_block_attributes\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Post\.$#'
 			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/CustomerAccount.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\Blocks\\BlockTypes\\CustomerAccount\:\:\$hooked_block_placements \(array\) in isset\(\) is not nullable\.$#'
-			identifier: isset.property
 			count: 1
 			path: src/Blocks/BlockTypes/CustomerAccount.php
 
@@ -49714,12 +48526,6 @@ parameters:
 			path: src/Blocks/BlockTypes/HandpickedProducts.php
 
 		-
-			message: '#^Call to function is_null\(\) with mixed will always evaluate to false\.$#'
-			identifier: function.impossibleType
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCart.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCart\:\:enqueue_data\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -49816,21 +48622,9 @@ parameters:
 			path: src/Blocks/BlockTypes/MiniCart.php
 
 		-
-			message: '#^Property Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCart\:\:\$hooked_block_placements \(array\) in isset\(\) is not nullable\.$#'
-			identifier: isset.property
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCart.php
-
-		-
 			message: '#^Result of && is always false\.$#'
 			identifier: booleanAnd.alwaysFalse
 			count: 1
-			path: src/Blocks/BlockTypes/MiniCart.php
-
-		-
-			message: '#^Ternary operator condition is always true\.$#'
-			identifier: ternary.alwaysTrue
-			count: 2
 			path: src/Blocks/BlockTypes/MiniCart.php
 
 		-
@@ -50440,12 +49234,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductCollection/NoResults.php
 
 		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\NoResults\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductCollection/NoResults.php
-
-		-
 			message: '#^Call to function is_array\(\) with array\<array\<int\>\> will always evaluate to true\.$#'
 			identifier: function.alreadyNarrowedType
 			count: 1
@@ -50572,12 +49360,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductCollection/Renderer.php
 
 		-
-			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 6
-			path: src/Blocks/BlockTypes/ProductCollection/Utils.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\Utils\:\:prepare_and_execute_query\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -50590,12 +49372,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductCollection/Utils.php
 
 		-
-			message: '#^Parameter \#1 \$block of function build_query_vars_from_query_block expects WP_Block, Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\WP_Block given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Blocks/BlockTypes/ProductCollection/Utils.php
-
-		-
 			message: '#^Parameter \#1 \$object_or_string of function is_a expects object, WP_Post\|WP_Post_Type\|WP_Term\|WP_User\|null given\.$#'
 			identifier: argument.type
 			count: 2
@@ -50605,18 +49381,6 @@ parameters:
 			message: '#^Parameter \#1 \$page of static method WC_Blocks_Utils\:\:has_block_in_page\(\) expects int\|WP_Post, WP_Post\|WP_Post_Type\|WP_Term\|WP_User given\.$#'
 			identifier: argument.type
 			count: 2
-			path: src/Blocks/BlockTypes/ProductCollection/Utils.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\Utils\:\:get_query_vars\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductCollection/Utils.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\Utils\:\:prepare_and_execute_query\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
 			path: src/Blocks/BlockTypes/ProductCollection/Utils.php
 
 		-
@@ -50680,26 +49444,8 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductDetails.php
 
 		-
-			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterActive.php
-
-		-
-			message: '#^Access to property \$parsed_block on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterActive.php
-
-		-
 			message: '#^Parameter \#1 \$extra_attributes of function get_block_wrapper_attributes expects array\<string, string\>, array\<string, string\|false\> given\.$#'
 			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterActive.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilterActive\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Blocks/BlockTypes/ProductFilterActive.php
 
@@ -50712,18 +49458,6 @@ parameters:
 		-
 			message: '#^Access to an undefined property object\:\:\$attribute_label\.$#'
 			identifier: property.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterAttribute.php
-
-		-
-			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Blocks/BlockTypes/ProductFilterAttribute.php
-
-		-
-			message: '#^Access to property \$parsed_block on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Blocks/BlockTypes/ProductFilterAttribute.php
 
@@ -50764,12 +49498,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductFilterAttribute.php
 
 		-
-			message: '#^Parameter \#1 \$block of static method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\Utils\:\:get_query_vars\(\) expects Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\WP_Block, Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterAttribute.php
-
-		-
 			message: '#^Parameter \#1 \$extra_attributes of function get_block_wrapper_attributes expects array\<string, string\>, array\<string, bool\|string\> given\.$#'
 			identifier: argument.type
 			count: 1
@@ -50778,18 +49506,6 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$var of function intval expects array\|bool\|float\|int\|resource\|string\|null, string\|WP_Error given\.$#'
 			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterAttribute.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilterAttribute\:\:get_attribute_counts\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterAttribute.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilterAttribute\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Blocks/BlockTypes/ProductFilterAttribute.php
 
@@ -50842,18 +49558,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductFilterClearButton.php
 
 		-
-			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Blocks/BlockTypes/ProductFilterPrice.php
-
-		-
-			message: '#^Access to property \$parsed_block on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Blocks/BlockTypes/ProductFilterPrice.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilterPrice\:\:get_filtered_price\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -50866,12 +49570,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductFilterPrice.php
 
 		-
-			message: '#^Parameter \#1 \$block of static method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\Utils\:\:get_query_vars\(\) expects Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\WP_Block, Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterPrice.php
-
-		-
 			message: '#^Parameter \#1 \$extra_attributes of function get_block_wrapper_attributes expects array\<string, string\>, array\<string, bool\|string\> given\.$#'
 			identifier: argument.type
 			count: 1
@@ -50880,18 +49578,6 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$extra_attributes of function get_block_wrapper_attributes expects array\<string, string\>, array\<string, string\|false\> given\.$#'
 			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterPrice.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilterPrice\:\:get_filtered_price\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterPrice.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilterPrice\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Blocks/BlockTypes/ProductFilterPrice.php
 
@@ -50920,18 +49606,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductFilterPriceSlider.php
 
 		-
-			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Blocks/BlockTypes/ProductFilterRating.php
-
-		-
-			message: '#^Access to property \$parsed_block on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterRating.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilterRating\:\:get_rating_counts\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -50944,12 +49618,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductFilterRating.php
 
 		-
-			message: '#^Parameter \#1 \$block of static method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\Utils\:\:get_query_vars\(\) expects Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\WP_Block, Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterRating.php
-
-		-
 			message: '#^Parameter \#1 \$extra_attributes of function get_block_wrapper_attributes expects array\<string, string\>, array\<string, bool\|string\> given\.$#'
 			identifier: argument.type
 			count: 1
@@ -50958,18 +49626,6 @@ parameters:
 		-
 			message: '#^Parameter \#2 \$callback of function array_filter expects \(callable\(mixed\)\: bool\)\|null, Closure\(mixed\)\: \(0\|1\) given\.$#'
 			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterRating.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilterRating\:\:get_rating_counts\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterRating.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilterRating\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Blocks/BlockTypes/ProductFilterRating.php
 
@@ -51004,18 +49660,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductFilterRemovableChips.php
 
 		-
-			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Blocks/BlockTypes/ProductFilterStatus.php
-
-		-
-			message: '#^Access to property \$parsed_block on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterStatus.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilterStatus\:\:enqueue_data\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -51034,40 +49678,10 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductFilterStatus.php
 
 		-
-			message: '#^Parameter \#1 \$block of static method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\Utils\:\:get_query_vars\(\) expects Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\WP_Block, Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterStatus.php
-
-		-
 			message: '#^Parameter \#1 \$extra_attributes of function get_block_wrapper_attributes expects array\<string, string\>, array\<string, bool\|string\> given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/ProductFilterStatus.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilterStatus\:\:get_stock_status_counts\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterStatus.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilterStatus\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterStatus.php
-
-		-
-			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Blocks/BlockTypes/ProductFilterTaxonomy.php
-
-		-
-			message: '#^Access to property \$parsed_block on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterTaxonomy.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilterTaxonomy\:\:enqueue_data\(\) has no return type specified\.$#'
@@ -51100,26 +49714,8 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductFilterTaxonomy.php
 
 		-
-			message: '#^Parameter \#1 \$block of static method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\Utils\:\:get_query_vars\(\) expects Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\WP_Block, Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterTaxonomy.php
-
-		-
 			message: '#^Parameter \#1 \$extra_attributes of function get_block_wrapper_attributes expects array\<string, string\>, array\<string, bool\|string\> given\.$#'
 			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterTaxonomy.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilterTaxonomy\:\:get_taxonomy_term_counts\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterTaxonomy.php
-
-		-
-			message: '#^Parameter \$block of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilterTaxonomy\:\:render\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Blocks/BlockTypes/ProductFilterTaxonomy.php
 
@@ -51714,12 +50310,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductTemplate\:\:initialize\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockTypes/ProductTemplate.php
-
-		-
-			message: '#^Parameter \#1 \$block of static method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\Utils\:\:prepare_and_execute_query\(\) expects Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\WP_Block, WP_Block given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/ProductTemplate.php
 
@@ -52860,12 +51450,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\Templates\\AbstractTemplateCompatibility\:\:set_hook_data\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Blocks/Templates/AbstractTemplateCompatibility.php
-
-		-
-			message: '#^Parameter \$parent_block of method Automattic\\WooCommerce\\Blocks\\Templates\\AbstractTemplateCompatibility\:\:update_render_block_data\(\) has invalid type Automattic\\WooCommerce\\Blocks\\Templates\\WP_Block\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Blocks/Templates/AbstractTemplateCompatibility.php
 
@@ -59508,7 +58092,7 @@ parameters:
 		-
 			message: '#^Access to property \$post_type on an unknown class Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\WP_Post\.$#'
 			identifier: class.notFound
-			count: 2
+			count: 1
 			path: src/Internal/DataStores/Orders/DataSynchronizer.php
 
 		-
@@ -60847,12 +59431,6 @@ parameters:
 			path: src/Internal/Features/FeaturesController.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\Features\\FeaturesController\:\:init_compatibility_info_by_feature\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/Features/FeaturesController.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Features\\FeaturesController\:\:process_added_option\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -61061,30 +59639,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/Internal/Logging/SafeGlobalFunctionProxy.php
-
-		-
-			message: '#^Call to an undefined method object\:\:create_server\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/MCP/MCPAdapterProvider.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\MCP\\Transport\\WooCommerceRestTransport\:\:check_permission\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
-			identifier: missingType.generics
-			count: 1
-			path: src/Internal/MCP/Transport/WooCommerceRestTransport.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\MCP\\Transport\\WooCommerceRestTransport\:\:validate_request\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
-			identifier: missingType.generics
-			count: 1
-			path: src/Internal/MCP/Transport/WooCommerceRestTransport.php
-
-		-
-			message: '#^Parameter \#1 \$request of method Automattic\\WooCommerce\\Internal\\MCP\\Transport\\WooCommerceRestTransport\:\:validate_request\(\) expects WP_REST_Request, WP_REST_Request\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/MCP/Transport/WooCommerceRestTransport.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\OrderCouponDataMigrator\:\:convert_item\(\) has no return type specified\.$#'
@@ -63829,12 +62383,6 @@ parameters:
 			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
 
 		-
-			message: '#^Parameter \#1 \$args of function wc_get_min_max_price_meta_query expects array, WP_REST_Request given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
-
-		-
 			message: '#^Parameter \#1 \$array_arg of function current expects array\|object, list\<bool\|int\|string\>\|false given\.$#'
 			identifier: argument.type
 			count: 1
@@ -65341,12 +63889,6 @@ parameters:
 			path: src/Internal/StockNotifications/Admin/ListTable.php
 
 		-
-			message: '#^Call to an undefined method Automattic\\WooCommerce\\Internal\\StockNotifications\\Admin\\ListTable\:\:get_product_formatted_variation_list\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/StockNotifications/Admin/ListTable.php
-
-		-
 			message: '#^Call to an undefined method WC_Data_Store\:\:query\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -65617,24 +64159,6 @@ parameters:
 			path: src/Internal/StockNotifications/AsyncTasks/CycleStateService.php
 
 		-
-			message: '#^Call to method error\(\) on an unknown class Automattic\\WooCommerce\\Internal\\StockNotifications\\AsyncTasks\\Logger\.$#'
-			identifier: class.notFound
-			count: 2
-			path: src/Internal/StockNotifications/AsyncTasks/NotificationsProcessor.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\Internal\\StockNotifications\\AsyncTasks\\NotificationsProcessor\:\:\$logger \(Automattic\\WooCommerce\\Internal\\StockNotifications\\AsyncTasks\\Logger\) does not accept WC_Logger_Interface\.$#'
-			identifier: assign.propertyType
-			count: 1
-			path: src/Internal/StockNotifications/AsyncTasks/NotificationsProcessor.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\Internal\\StockNotifications\\AsyncTasks\\NotificationsProcessor\:\:\$logger has unknown class Automattic\\WooCommerce\\Internal\\StockNotifications\\AsyncTasks\\Logger as its type\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/StockNotifications/AsyncTasks/NotificationsProcessor.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\StockNotifications\\DataRetentionController\:\:clear_daily_task\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -65797,12 +64321,6 @@ parameters:
 			path: src/Internal/StockNotifications/Emails/CustomerStockNotificationVerifyEmail.php
 
 		-
-			message: '#^@param string \$url does not accept actual type of parameter\: string\|false\.$#'
-			identifier: parameter.phpDocType
-			count: 2
-			path: src/Internal/StockNotifications/Emails/EmailActionController.php
-
-		-
 			message: '#^Cannot call method get_name\(\) on WC_Product\|false\|null\.$#'
 			identifier: method.nonObject
 			count: 2
@@ -65840,12 +64358,6 @@ parameters:
 
 		-
 			message: '#^Call to method get_image_id\(\) on an unknown class Automattic\\WooCommerce\\Internal\\StockNotifications\\Emails\\WC_Product\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/StockNotifications/Emails/EmailTemplatesController.php
-
-		-
-			message: '#^Call to method get_name\(\) on an unknown class Automattic\\WooCommerce\\Internal\\StockNotifications\\Emails\\WC_Product\.$#'
 			identifier: class.notFound
 			count: 1
 			path: src/Internal/StockNotifications/Emails/EmailTemplatesController.php
@@ -65912,12 +64424,6 @@ parameters:
 
 		-
 			message: '#^Parameter \$product of method Automattic\\WooCommerce\\Internal\\StockNotifications\\Emails\\EmailTemplatesController\:\:email_product_price\(\) has invalid type Automattic\\WooCommerce\\Internal\\StockNotifications\\Emails\\WC_Product\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Internal/StockNotifications/Emails/EmailTemplatesController.php
-
-		-
-			message: '#^Parameter \$product of method Automattic\\WooCommerce\\Internal\\StockNotifications\\Emails\\EmailTemplatesController\:\:email_product_title\(\) has invalid type Automattic\\WooCommerce\\Internal\\StockNotifications\\Emails\\WC_Product\.$#'
 			identifier: class.notFound
 			count: 1
 			path: src/Internal/StockNotifications/Emails/EmailTemplatesController.php
@@ -68824,12 +67330,6 @@ parameters:
 			message: '#^Parameter \#1 \$str of function md5 expects string, string\|false given\.$#'
 			identifier: argument.type
 			count: 4
-			path: src/StoreApi/Utilities/CartController.php
-
-		-
-			message: '#^Parameter \#1 \$string of function html_entity_decode expects string, array\|string given\.$#'
-			identifier: argument.type
-			count: 3
 			path: src/StoreApi/Utilities/CartController.php
 
 		-
