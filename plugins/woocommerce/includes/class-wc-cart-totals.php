@@ -14,6 +14,7 @@
  */
 
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
+use Automattic\WooCommerce\Enums\ShippingTaxClass;
 use Automattic\WooCommerce\Internal\Tax\ShippingTaxSplit;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 
@@ -264,7 +265,7 @@ final class WC_Cart_Totals {
 			}
 			if ( ! $item->taxable ) {
 				$costs[ ShippingTaxSplit::NON_TAXABLE ] += $item->total;
-			} elseif ( ShippingTaxSplit::is_based_on_items( $item->tax_class ) ) {
+			} elseif ( ShippingTaxClass::INHERIT === $item->tax_class || ( $item->object instanceof WC_Shipping_Rate && ShippingTaxSplit::is_based_on_items( $item->tax_class ) ) ) {
 				$split_values = null;
 
 				if ( $item->object instanceof WC_Shipping_Rate ) {
