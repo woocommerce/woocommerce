@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Caching\WPCacheEngine;
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Internal\Admin\Orders\EditLock;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
+use Automattic\WooCommerce\Internal\Orders\PaymentModeMarker;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
@@ -125,6 +126,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 		'_wp_trash_meta_comments_status',
 		'_debug_log_source',
 		'_debug_log_source_pending_deletion',
+		PaymentModeMarker::META_KEY,
 	);
 
 	/**
