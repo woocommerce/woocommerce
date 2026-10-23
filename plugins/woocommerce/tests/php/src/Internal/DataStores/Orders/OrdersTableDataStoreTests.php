@@ -3834,6 +3834,51 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	}
 
 	/**
+	 * @testdox An empty 'date_query' boundary on a local date column is ignored, as WP_Date_Query does.
+	 * @testWith ["after"]
+	 *           ["before"]
+	 *
+	 * @param string $operator The date query operator, 'after' or 'before'.
+	 */
+	public function test_local_date_query_ignores_empty_boundary( string $operator ): void {
+		$past_id   = $this->create_order_created_at( '2024-05-01T11:00:00Z' );
+		$future_id = $this->create_order_created_at( time() + DAY_IN_SECONDS );
+
+		$query = new OrdersTableQuery(
+			array(
+				'date_query' => array(
+					array(
+						'column'  => 'post_date',
+						$operator => '',
+					),
+				),
+			)
+		);
+
+		$this->assertContains( $past_id, $query->orders, "A past order should match an empty '{$operator}' boundary." );
+		$this->assertContains( $future_id, $query->orders, "A future order should match an empty '{$operator}' boundary." );
+	}
+
+	/**
+	 * @testdox A 'date_query' on a local date column with no 'after' or 'before' boundary still matches orders.
+	 */
+	public function test_local_date_query_without_boundary_matches_orders(): void {
+		$order_id = $this->create_order_created_at( '2024-05-01T11:00:00Z' );
+
+		$query = new OrdersTableQuery(
+			array(
+				'date_query' => array(
+					array(
+						'column' => 'post_date',
+						'year'   => 2024,
+					),
+				),
+			)
+		);
+		$this->assertContains( $order_id, $query->orders, 'A year-only query should match an order from that year.' );
+	}
+
+	/**
 	 * @testdox A WC_DateTime 'date_query' value on a local date column keeps its existing behavior.
 	 */
 	public function test_local_date_query_keeps_existing_behavior_for_wc_datetime_values(): void {
