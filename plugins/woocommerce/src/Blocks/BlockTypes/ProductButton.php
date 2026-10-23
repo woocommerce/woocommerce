@@ -200,22 +200,56 @@ class ProductButton extends AbstractBlock {
 			)
 		);
 
+		$get_add_to_cart_text = function () {
+			$context          = wp_interactivity_get_context();
+			$quantity         = $context['tempQuantity'];
+			$add_to_cart_text = $context['addToCartText'];
+
+			return $quantity > 0 ? sprintf(
+				/* translators: %s: product number. */
+				__( '%s in cart', 'woocommerce' ),
+				$quantity
+			) : $add_to_cart_text;
+		};
+
 		wp_interactivity_state(
 			'woocommerce/product-button',
 			array(
-				'addToCartText' => function () {
+				'addToCartText'      => $get_add_to_cart_text,
+				'addToCartAriaLabel' => function () use ( $get_add_to_cart_text ) {
 					$context = wp_interactivity_get_context();
-					$quantity = $context['tempQuantity'];
-					$add_to_cart_text = $context['addToCartText'];
+					$text    = $get_add_to_cart_text();
 
-					return $quantity > 0 ? sprintf(
-						/* translators: %s: product number. */
-						__( '%s in cart', 'woocommerce' ),
-						$quantity
-					) : $add_to_cart_text;
+					if ( $text === $context['addToCartText'] ) {
+						return $context['addToCartAriaLabel'];
+					}
+
+					$pos = strpos( $context['inTheCartAriaLabel'], '###' );
+
+					return false !== $pos
+						? substr_replace( $context['inTheCartAriaLabel'], $text, $pos, 3 )
+						: $context['inTheCartAriaLabel'];
 				},
 			)
 		);
+
+		// The accessible name must keep containing the visible text once it changes to "N in cart" (WCAG 2.5.3).
+		if ( isset( $args['attributes']['aria-label'] ) ) {
+			$args['attributes']['aria-label'] = wp_strip_all_tags( $args['attributes']['aria-label'] );
+
+			if ( empty( $args['attributes']['aria-label'] ) ) {
+				unset( $args['attributes']['aria-label'] );
+			} else {
+				// Decode so the browser doesn't read entities such as &ldquo; as literal text when it sets the label.
+				$context['addToCartAriaLabel'] = html_entity_decode( $args['attributes']['aria-label'], ENT_QUOTES, get_bloginfo( 'charset' ) );
+				$context['inTheCartAriaLabel'] = sprintf(
+					/* translators: 1: Button text, such as "2 in cart". 2: Button description, such as "Add to cart: “Beanie”". */
+					_x( '%1$s, %2$s', 'Product button screen reader label: 1: button text, 2: product description', 'woocommerce' ),
+					'###',
+					$context['addToCartAriaLabel']
+				);
+			}
+		}
 
 		$div_directives = '
 			data-wp-interactive="woocommerce/product-button"
@@ -229,6 +263,10 @@ class ProductButton extends AbstractBlock {
 			data-wp-on--click="actions.handlePressedState"' :
 			'data-wp-on--click="actions.addCartItem"';
 		$anchor_directive  = $is_descendant_of_add_to_cart_form ? '' : 'data-wp-on--click="woocommerce/product-collection::actions.viewProduct"';
+
+		if ( isset( $context['addToCartAriaLabel'] ) ) {
+			$button_directives .= ' data-wp-bind--aria-label="state.addToCartAriaLabel"';
+		}
 
 		$span_button_directives = '
 			data-wp-text="state.addToCartText"
