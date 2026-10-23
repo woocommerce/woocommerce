@@ -17,7 +17,7 @@ defined( 'ABSPATH' ) || exit;
  * customer address, or affect shipping-rate selection, since it filters the taxable address
  * alone. Once the shopper enters a postcode or city, the estimate steps aside.
  *
- * @since 11.3.0
+ * @since 11.4.0
  */
 class BaseLocationTaxEstimate implements RegisterHooksInterface {
 

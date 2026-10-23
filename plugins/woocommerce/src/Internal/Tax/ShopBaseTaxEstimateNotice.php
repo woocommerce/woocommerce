@@ -16,7 +16,7 @@ defined( 'ABSPATH' ) || exit;
  * address, and warnings when no rate matches. This is display only; it never changes how tax is
  * calculated (see BaseLocationTaxEstimate for the lookup behavior).
  *
- * @since 11.3.0
+ * @since 11.4.0
  */
 class ShopBaseTaxEstimateNotice {
 
@@ -88,7 +88,7 @@ class ShopBaseTaxEstimateNotice {
 		 *
 		 * Automated tax extensions that calculate tax themselves can return false to hide the manual-rate estimate.
 		 *
-		 * @since 11.3.0
+		 * @since 11.4.0
 		 * @param bool $show Whether to show the estimate. Defaults to false when automated taxes are enabled.
 		 */
 		return (bool) apply_filters( 'woocommerce_show_shop_base_tax_estimate', ! $automated_taxes_enabled );
