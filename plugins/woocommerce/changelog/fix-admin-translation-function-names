@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Reserve translation function names and preserve translator comments when minifying admin scripts.

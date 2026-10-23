@@ -16,6 +16,9 @@ const {
 	webpackConfig: styleConfig,
 } = require( '@woocommerce/internal-build/style-build' );
 const WooCommerceDependencyExtractionWebpackPlugin = require( '@woocommerce/dependency-extraction-webpack-plugin/src/index' );
+const {
+	sharedOptimizationConfig,
+} = require( '@woocommerce/internal-build/webpack-optimization' );
 const CustomTemplatedPathPlugin = require( './bin/custom-templated-path-webpack-plugin' );
 const UnminifyWebpackPlugin = require( './bin/unminify-webpack-plugin.js' );
 
@@ -192,15 +195,11 @@ const jsConfig = {
 								__dirname,
 								'../../../../pnpm-lock.yaml'
 							),
-							require.resolve(
-								'@woocommerce/dependency-extraction-webpack-plugin'
-							),
-							require.resolve(
-								'@woocommerce/internal-build/style-build'
-							),
+							require.resolve( '@woocommerce/dependency-extraction-webpack-plugin' ),
+							require.resolve( '@woocommerce/internal-build/style-build' ),
 						],
 					},
-			  },
+				},
 	entry: getEntryPoints(),
 	output: {
 		filename: ( data ) => {
@@ -267,9 +266,7 @@ const jsConfig = {
 								isHot &&
 								require.resolve( 'react-refresh/babel' ),
 							isProduction &&
-								require.resolve(
-									'babel-plugin-transform-react-remove-prop-types'
-								),
+								require.resolve( 'babel-plugin-transform-react-remove-prop-types' ),
 						].filter( Boolean ),
 						cacheDirectory: path.resolve(
 							__dirname,
@@ -422,6 +419,7 @@ const jsConfig = {
 	].filter( Boolean ),
 	optimization: {
 		minimize: NODE_ENV !== 'development',
+		minimizer: sharedOptimizationConfig.minimizer,
 		splitChunks: {
 			// Not to generate chunk names because it caused a stressful workflow when deploying the plugin to WP.org
 			// See https://github.com/woocommerce/woocommerce-admin/pull/5229
