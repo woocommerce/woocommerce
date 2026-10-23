@@ -107,14 +107,13 @@ class ProductTemplate extends AbstractBlock {
 
 			// Use an early priority so that other 'render_block_context' filters have access to the values.
 			add_filter( 'render_block_context', $filter_block_context, 1 );
-			// Render the inner blocks of the Post Template block with `dynamic` set to `false` to prevent calling
-			// `render_callback` and ensure that no wrapper markup is included.
-			$block_content = (
-				new WP_Block(
-					$block_instance,
-					$block->context
-				)
-			)->render( array( 'dynamic' => false ) );
+
+			$inner_block = new WP_Block( $block_instance, $block->context );
+			// core/null has no uses_context, so preserve the collection marker for descendant checks.
+			$inner_block->context['isProductCollectionInnerBlock'] = $block->context['isProductCollectionInnerBlock'] ?? false;
+
+			// Render only the inner blocks, without the Product Template callback or wrapper.
+			$block_content = $inner_block->render( array( 'dynamic' => false ) );
 			remove_filter( 'render_block_context', $filter_block_context, 1 );
 
 			// Load product into the shared products store.

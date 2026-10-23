@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Write the extensions input schema of the product abilities one time, so its size does not grow with the number of product types.
