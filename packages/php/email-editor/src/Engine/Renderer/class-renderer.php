@@ -331,9 +331,9 @@ class Renderer {
 		if ( empty( $this->personalization_tag_placeholders ) ) {
 			return $text;
 		}
-		foreach ( $this->personalization_tag_placeholders as $placeholder => $html_comment ) {
-			$text = str_replace( $placeholder, $html_comment, $text );
-		}
-		return $text;
+		// Placeholders are numbered, so PERSONALIZATION_TAG_PLACEHOLDER_1 is a prefix of _10, _11 and
+		// so on. strtr() matches the longest key at each position and never re-scans text it has
+		// already replaced, so a short placeholder cannot match inside a longer one.
+		return strtr( $text, $this->personalization_tag_placeholders );
 	}
 }

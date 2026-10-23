@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix date filtering of the HPOS orders list via links from Analytics reports (order_date_type and day-granularity date params were ignored).

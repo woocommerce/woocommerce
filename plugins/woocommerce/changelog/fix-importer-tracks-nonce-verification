@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Verify the nonce in the product importer Tracks handlers; telemetry only, no merchant-facing change.
+

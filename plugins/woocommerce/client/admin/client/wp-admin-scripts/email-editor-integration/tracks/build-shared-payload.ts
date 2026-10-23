@@ -23,8 +23,7 @@ export type AppliedFrom =
 	| typeof APPLIED_FROM_SELECTIVE_REST;
 
 export type ViewedFrom =
-	| typeof VIEWED_FROM_EDITOR_BANNER
-	| typeof VIEWED_FROM_EMAIL_LIST;
+	typeof VIEWED_FROM_EDITOR_BANNER | typeof VIEWED_FROM_EMAIL_LIST;
 
 /**
  * Shape of the base payload shared by every block-email update Tracks event

@@ -43,7 +43,7 @@ const example = ( hookDoc ) => {
 	return exampleContent
 		? {
 				html: exampleContent,
-		  }
+			}
 		: null;
 };
 

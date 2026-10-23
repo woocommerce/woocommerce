@@ -657,7 +657,10 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 		$response   = $this->server->dispatch( $request );
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
-		$this->assertEquals( 72, count( $properties ) );
+		$this->assertEquals( 75, count( $properties ) );
+		$this->assertArrayHasKey( 'customs_commodity_code', $properties );
+		$this->assertArrayHasKey( 'customs_country_of_origin', $properties );
+		$this->assertArrayHasKey( 'customs_description', $properties );
 	}
 
 	/**

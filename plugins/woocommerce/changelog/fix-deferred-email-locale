@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Send deferred admin emails in the language they were triggered in, not the language of the admin whose session runs the queue.

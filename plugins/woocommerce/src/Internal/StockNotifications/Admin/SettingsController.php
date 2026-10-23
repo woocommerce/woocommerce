@@ -26,6 +26,8 @@ class SettingsController {
 		// Add the My Account endpoint setting to the Advanced tab.
 		add_filter( 'woocommerce_get_settings_advanced', array( $this, 'add_my_account_endpoint_setting' ), 100, 2 );
 
+		add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_customer_stock_notifications_unverified_deletions_days_threshold', array( $this, 'sanitize_unverified_deletion_days_threshold' ) );
+
 		// The product edit hooks stay admin-only: process_product_object() reads $_POST and
 		// checks an admin nonce, so it must not run for cron or CLI code that fires the hook.
 		if ( ! is_admin() ) {
@@ -174,32 +176,25 @@ class SettingsController {
 				),
 
 				array(
-					'title'   => __( 'Delete unverified notification sign-ups after (in days)', 'woocommerce' ),
-					'desc'    => __( 'Controls how long the plugin will store unverified notification sign-ups in the database. Enter zero, or leave this field empty if you would like to store expired sign-up requests indefinitey.', 'woocommerce' ),
-					'id'      => 'woocommerce_customer_stock_notifications_unverified_deletions_days_threshold',
-					'default' => Config::get_unverified_deletion_days_threshold(),
-					'type'    => 'number',
+					'title'             => __( 'Delete unverified notification sign-ups after (in days)', 'woocommerce' ),
+					'desc'              => __( 'Controls how long unverified notification sign-ups are stored in the database. Enter zero, or leave this field empty, to store unverified sign-up requests indefinitely.', 'woocommerce' ),
+					'id'                => 'woocommerce_customer_stock_notifications_unverified_deletions_days_threshold',
+					'default'           => Config::get_unverified_deletion_days_threshold(),
+					'value'             => Config::get_unverified_deletion_days_threshold(),
+					'type'              => 'number',
+					'custom_attributes' => array(
+						'min'  => 0,
+						'step' => 1,
+					),
 				),
 
 				array(
-					'title'           => __( 'Guest sign-up', 'woocommerce' ),
-					'desc'            => __( 'Customers must be logged in to sign up for stock notifications.', 'woocommerce' ),
-					'id'              => 'woocommerce_customer_stock_notifications_require_account',
-					'default'         => 'no',
-					'type'            => 'checkbox',
-					'desc_tip'        => __( 'When enabled, guests will be redirected to a login page to complete the sign-up process.', 'woocommerce' ),
-					'checkboxgroup'   => 'start',
-					'hide_if_checked' => 'option',
-				),
-
-				array(
-					'desc'            => __( 'Create an account when guests sign up for stock notifications.', 'woocommerce' ),
-					'id'              => 'woocommerce_customer_stock_notifications_create_account_on_signup',
-					'default'         => 'no',
-					'type'            => 'checkbox',
-					'checkboxgroup'   => 'end',
-					'hide_if_checked' => 'yes',
-					'autoload'        => true,
+					'title'    => __( 'Require login', 'woocommerce' ),
+					'desc'     => __( 'Customers must be logged in to sign up for stock notifications.', 'woocommerce' ),
+					'id'       => 'woocommerce_customer_stock_notifications_require_account',
+					'default'  => 'no',
+					'type'     => 'checkbox',
+					'desc_tip' => __( 'When enabled, guests see a login prompt instead of the sign-up form.', 'woocommerce' ),
 				),
 
 				array(
@@ -215,6 +210,26 @@ class SettingsController {
 	}
 
 	/**
+	 * Store negative values of the unverified sign-up deletion threshold as 0, which turns the cleanup off.
+	 *
+	 * An empty value is kept as is, since it also means off.
+	 *
+	 * @internal
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param mixed $value The value about to be saved.
+	 * @return mixed
+	 */
+	public function sanitize_unverified_deletion_days_threshold( $value ) {
+		if ( null === $value || '' === $value ) {
+			return $value;
+		}
+
+		return max( 0, (int) $value );
+	}
+
+	/**
 	 * Display admin notices about incompatible settings combinations.
 	 *
 	 * @return void
@@ -224,21 +239,6 @@ class SettingsController {
 		$screen = get_current_screen();
 		if ( ! $screen || 'woocommerce_page_wc-settings' !== $screen->id || ! isset( $_GET['section'] ) || 'customer_stock_notifications' !== $_GET['section'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			return;
-		}
-
-		if ( 'no' === get_option( 'woocommerce_registration_generate_password', 'no' ) && 'yes' === get_option( 'woocommerce_customer_stock_notifications_create_account_on_signup', 'no' ) ) {
-			wp_admin_notice(
-				sprintf(
-					/* translators: %s settings page link */
-					__( 'WooCommerce is currently <a href="%s">configured</a> to create new accounts without generating passwords automatically. Guests who sign up to receive stock notifications will need to reset their password before they can log into their new account.', 'woocommerce' ),
-					esc_url( admin_url( 'admin.php?page=wc-settings&tab=account' ) )
-				),
-				array(
-					'id'          => 'message',
-					'type'        => 'warning',
-					'dismissible' => false,
-				)
-			);
 		}
 
 		if ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) && Config::allows_signups() ) {
@@ -303,6 +303,11 @@ class SettingsController {
 	 */
 	public static function process_product_object( $product ) {
 
+		// Without the nonce field the checkbox was not rendered, so there is nothing to save.
+		if ( ! isset( $_POST['customer_stock_notifications_edit_product_security'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Only checks presence; the nonce is verified before saving.
+			return;
+		}
+
 		if ( ! Config::allows_signups() ) {
 			return;
 		}
@@ -316,8 +321,8 @@ class SettingsController {
 		}
 
 		$posted_is_enabled = isset( $_POST[ Config::get_product_signups_meta_key() ] );
-		$current_value     = $product->get_meta( Config::get_product_signups_meta_key() );
-		if ( ( $posted_is_enabled && 'no' === $current_value ) || ( ! $posted_is_enabled && 'yes' === $current_value ) ) {
+		$current_enabled   = 'no' !== $product->get_meta( Config::get_product_signups_meta_key() );
+		if ( $posted_is_enabled !== $current_enabled ) {
 			check_admin_referer( 'woocommerce-customer-stock-notifications-edit-product', 'customer_stock_notifications_edit_product_security' );
 
 			$product->update_meta_data( Config::get_product_signups_meta_key(), $posted_is_enabled ? 'yes' : 'no' );

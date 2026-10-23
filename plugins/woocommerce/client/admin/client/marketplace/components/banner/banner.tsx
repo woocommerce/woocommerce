@@ -92,7 +92,9 @@ export default function ProductFeaturedBanner() {
 		}
 	};
 
-	if ( isDismissed ) return null;
+	if ( isDismissed ) {
+		return null;
+	}
 
 	return (
 		<div

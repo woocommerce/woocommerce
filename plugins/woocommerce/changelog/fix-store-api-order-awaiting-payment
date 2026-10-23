@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Ensure Store API checkout carts clear after redirect payments.

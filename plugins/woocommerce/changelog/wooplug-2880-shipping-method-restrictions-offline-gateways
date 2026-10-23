@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add the "Enable for shipping methods" and "Accept for virtual orders" settings to the Direct bank transfer and Check payments gateways, sharing the Cash on delivery implementation through the new ShippingMethodRestrictionsTrait that custom gateways can also use.

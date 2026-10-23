@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { expect, request, tags } from '../../fixtures/fixtures';
+import { expect, request, tags, locks } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 import { customer } from '../../test-data/data';
 import {
@@ -29,7 +29,10 @@ import { setOption } from '../../utils/options';
 
 test.describe(
 	'Back in Stock Notifications — receiving confirmations',
-	{ tag: [ tags.SKIP_ON_EXTERNAL_ENV ] },
+	{
+		tag: [ tags.SKIP_ON_EXTERNAL_ENV ],
+		lock: [ locks.STOCK_NOTIFICATIONS, locks.EMAIL_FEATURE_FLAGS ],
+	},
 	() => {
 		test.use( { storageState: ADMIN_STATE_PATH } );
 
@@ -39,7 +42,6 @@ test.describe(
 				allowSignups: true,
 				doubleOptIn: true,
 				requireAccount: false,
-				createAccountOnSignup: false,
 			} );
 		} );
 
@@ -259,8 +261,10 @@ test.describe(
 
 			await page.goto( corruptEmailLinkKey( verifyLink ) );
 
-			// A rejected key is a no-op: no redirect to the shop, no notice.
-			await expect( page ).toHaveURL( /notification_id=/ );
+			// A rejected key changes nothing, but the shopper is told why.
+			await expect(
+				page.getByText( bisNotice.verifyLinkInvalid, { exact: true } )
+			).toBeVisible();
 			await expect(
 				page.getByText( bisNotice.verified( product.name ) )
 			).toHaveCount( 0 );
@@ -299,7 +303,9 @@ test.describe(
 			await expireVerificationLinks( page );
 			await page.goto( verifyLink );
 
-			await expect( page ).toHaveURL( /notification_id=/ );
+			await expect(
+				page.getByText( bisNotice.verifyLinkExpired, { exact: true } )
+			).toBeVisible();
 			await expect(
 				page.getByText( bisNotice.verified( product.name ) )
 			).toHaveCount( 0 );

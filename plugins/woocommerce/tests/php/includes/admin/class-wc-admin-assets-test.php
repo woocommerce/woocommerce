@@ -181,6 +181,21 @@ class WC_Admin_Assets_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should localize the Analytics reports as an array when stock management is off and the Stock report is left out.
+	 */
+	public function test_enqueue_command_palette_assets_localizes_reports_as_array_without_stock_report(): void {
+		$this->ensure_wp_admin_script_asset_registry( 'command-palette' );
+		$this->ensure_wp_admin_script_asset_registry( 'command-palette-analytics' );
+		update_option( 'woocommerce_manage_stock', 'no' );
+
+		$this->sut->enqueue_command_palette_assets();
+
+		$localized = $this->get_localized_object( 'wc-admin-command-palette-analytics', 'wcCommandPaletteAnalytics' );
+		$this->assertIsArray( $localized->reports ?? null, 'Reports should stay an array once the missing Stock report is dropped, or the command palette registers none of them' );
+		$this->assertNotContains( '/analytics/stock', array_column( $localized->reports, 'path' ), 'The Stock report should not be offered when stock management is off' );
+	}
+
+	/**
 	 * Writes a stub asset registry for a wp-admin-scripts bundle that is not built, as in the CI PHPUnit jobs.
 	 * tearDown() removes every directory and file this creates.
 	 *

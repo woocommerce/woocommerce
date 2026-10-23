@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Variation gallery: stop persisting the inherited parent image on variation save, prefer variation-owned galleries on the storefront, and clean up previously frozen variation thumbnails.

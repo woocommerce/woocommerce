@@ -54,7 +54,7 @@ class ProductRatingTest extends WC_Unit_Test_Case {
 
 			$markup = do_blocks(
 				'<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} -->' .
-				'<!-- wp:woocommerce/product-rating {"isDescendentOfSingleProductBlock":true} /-->' .
+				'<!-- wp:woocommerce/product-rating /-->' .
 				'<!-- /wp:woocommerce/single-product -->'
 			);
 
@@ -177,5 +177,110 @@ class ProductRatingTest extends WC_Unit_Test_Case {
 			'product reviews disabled' => array( false, 'yes', false ),
 			'global reviews disabled'  => array( true, 'no', false ),
 		);
+	}
+
+	/**
+	 * @testdox Single Product block review links follow the current page and ignore $GLOBALS['product'].
+	 *
+	 * @testWith ["woocommerce/product-rating", false, false]
+	 *           ["woocommerce/product-rating", true, false]
+	 *           ["woocommerce/product-rating", false, true]
+	 *           ["woocommerce/product-rating", true, true]
+	 *           ["woocommerce/product-rating-counter", false, false]
+	 *           ["woocommerce/product-rating-counter", true, false]
+	 *           ["woocommerce/product-rating-counter", false, true]
+	 *           ["woocommerce/product-rating-counter", true, true]
+	 *
+	 * @param string $inner_block_name       Inner rating block to render.
+	 * @param bool   $global_product_matches Whether to set $GLOBALS['product'] to the block product.
+	 * @param bool   $on_product_page        Whether to render on the product permalink.
+	 */
+	public function test_single_product_block_review_link_ignores_matching_global_product( string $inner_block_name, bool $global_product_matches, bool $on_product_page ): void {
+		$had_global_product      = array_key_exists( 'product', $GLOBALS );
+		$previous_global_product = $GLOBALS['product'] ?? null;
+		$products_store_state    = $this->snapshot_products_store_static_state();
+		$interactivity_state     = $this->snapshot_interactivity_state();
+
+		try {
+			$product        = $this->create_rated_product();
+			$permalink_href = 'href="' . esc_url( get_permalink( $product->get_id() ) ) . '#reviews"';
+
+			if ( $on_product_page ) {
+				$this->go_to( get_permalink( $product->get_id() ) );
+			}
+
+			if ( $global_product_matches ) {
+				// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+				$GLOBALS['product'] = $product;
+			} else {
+				unset( $GLOBALS['product'] );
+			}
+
+			$markup = do_blocks(
+				'<!-- wp:woocommerce/single-product {"productId":' . $product->get_id() . '} -->' .
+				'<!-- wp:' . $inner_block_name . ' /-->' .
+				'<!-- /wp:woocommerce/single-product -->'
+			);
+
+			$context = ( $on_product_page ? 'on the product page' : 'off the product page' ) . ' ' . ( $global_product_matches ? 'when the global product matches' : 'when the global product is not set' );
+
+			if ( $on_product_page ) {
+				$this->assertStringContainsString(
+					'href="#reviews"',
+					$markup,
+					$inner_block_name . ' inside a Single Product block should emit a same-page #reviews anchor ' . $context . '.'
+				);
+				$this->assertStringNotContainsString(
+					$permalink_href,
+					$markup,
+					$inner_block_name . ' inside a Single Product block should not link to the product permalink ' . $context . '.'
+				);
+			} else {
+				$this->assertStringContainsString(
+					$permalink_href,
+					$markup,
+					$inner_block_name . ' inside a Single Product block should link to the product permalink plus #reviews ' . $context . '.'
+				);
+				$this->assertStringNotContainsString(
+					'href="#reviews"',
+					$markup,
+					$inner_block_name . ' inside a Single Product block should not emit a bare #reviews anchor ' . $context . '.'
+				);
+			}
+		} finally {
+			try {
+				if ( $had_global_product ) {
+					$GLOBALS['product'] = $previous_global_product;
+				} else {
+					unset( $GLOBALS['product'] );
+				}
+			} finally {
+				try {
+					$this->restore_products_store_static_state( $products_store_state );
+				} finally {
+					$this->restore_interactivity_state( $interactivity_state );
+				}
+			}
+		}
+	}
+
+	/**
+	 * Create a published product that has one approved review.
+	 *
+	 * @return \WC_Product
+	 */
+	private function create_rated_product(): \WC_Product {
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_simple_product(
+			array(
+				'name'            => 'Rated product',
+				'regular_price'   => '10',
+				'status'          => 'publish',
+				'reviews_allowed' => true,
+			)
+		);
+		$fixtures->add_product_review( $product->get_id(), 5 );
+
+		return $product;
 	}
 }

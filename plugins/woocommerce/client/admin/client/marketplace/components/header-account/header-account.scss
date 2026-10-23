@@ -86,6 +86,10 @@
 	&__header-account-trigger {
 		display: contents;
 
+		&__avatar {
+			display: contents;
+		}
+
 		&__email,
 		&__expand-icon {
 			display: none;
@@ -102,6 +106,12 @@
 			padding-right: $grid-unit-10;
 			max-width: 280px;
 
+			// The email already identifies the account, so the avatar is
+			// only kept on narrow screens where it is the sole content.
+			&__avatar {
+				display: none;
+			}
+
 			&__email {
 				display: block;
 				white-space: nowrap;
@@ -109,12 +119,8 @@
 				overflow: hidden;
 			}
 
-			&__expand-icon,
-			svg,
-			img {
+			&__expand-icon {
 				display: block;
-				width: $grid-unit-30;
-				height: $grid-unit-30;
 				flex-shrink: 0;
 			}
 		}

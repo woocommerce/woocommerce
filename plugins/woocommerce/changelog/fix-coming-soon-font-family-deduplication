@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Avoid a duplicate Inter or Cardo font in the editor font picker in Coming Soon mode when the theme already provides that font.

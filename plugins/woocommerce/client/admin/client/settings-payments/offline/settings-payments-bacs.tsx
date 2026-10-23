@@ -27,6 +27,11 @@ import {
 	TextareaEdit,
 	type OfflineFormValues,
 } from './dataform-controls';
+import {
+	getShippingRestrictionFields,
+	getShippingRestrictionSettings,
+	getShippingRestrictionValues,
+} from './shipping-restriction-fields';
 
 /**
  * Reads a country code out of a location setting.
@@ -105,6 +110,7 @@ export const SettingsPaymentsBacs = () => {
 				title: bacsSettings.settings.title.value,
 				description: bacsSettings.description,
 				instructions: bacsSettings.settings.instructions.value,
+				...getShippingRestrictionValues( bacsSettings ),
 			} );
 			setHasChanges( false );
 		}
@@ -159,8 +165,12 @@ export const SettingsPaymentsBacs = () => {
 				),
 				Edit: TextareaEdit,
 			},
+			...getShippingRestrictionFields(
+				bacsSettings,
+				__( 'direct bank transfer', 'woocommerce' )
+			),
 		],
-		[]
+		[ bacsSettings ]
 	);
 
 	const saveSettings = async () => {
@@ -172,6 +182,7 @@ export const SettingsPaymentsBacs = () => {
 		const settings: Record< string, string | string[] > = {
 			title: String( formValues.title ),
 			instructions: String( formValues.instructions ),
+			...getShippingRestrictionSettings( formValues ),
 		};
 
 		try {
@@ -242,6 +253,8 @@ export const SettingsPaymentsBacs = () => {
 								<FieldPlaceholder size="medium" />
 								<FieldPlaceholder size="large" />
 								<FieldPlaceholder size="large" />
+								<FieldPlaceholder size="medium" />
+								<FieldPlaceholder size="small" />
 							</>
 						) : (
 							<DataForm
@@ -254,6 +267,8 @@ export const SettingsPaymentsBacs = () => {
 										'title',
 										'description',
 										'instructions',
+										'enable_for_methods',
+										'enable_for_virtual',
 									],
 								} }
 								onChange={ ( edits: OfflineFormValues ) => {

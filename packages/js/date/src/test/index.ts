@@ -39,6 +39,7 @@ import {
 	dayTicksThreshold,
 	isLeapYear,
 	containsLeapYear,
+	getShortDateFormat,
 } from '..';
 declare global {
 	interface Window {
@@ -88,7 +89,9 @@ describe( 'toMoment', () => {
 
 	it( 'should handle isoFormat dates', () => {
 		const myMoment = toMoment( 'YYYY', '2018-04-15' );
-		if ( myMoment === null ) fail( 'myMoment should not be null' );
+		if ( myMoment === null ) {
+			fail( 'myMoment should not be null' );
+		}
 
 		expect( moment.isMoment( myMoment ) ).toBe( true );
 		expect( myMoment.isValid() ).toBe( true );
@@ -96,7 +99,9 @@ describe( 'toMoment', () => {
 
 	it( 'should handle local formats', () => {
 		const longDate = toMoment( 'MMMM D, YYYY', 'April 15, 2018' );
-		if ( longDate === null ) fail( 'longDate should not be null' );
+		if ( longDate === null ) {
+			fail( 'longDate should not be null' );
+		}
 
 		expect( moment.isMoment( longDate ) ).toBe( true );
 		expect( longDate.isValid() ).toBe( true );
@@ -105,7 +110,9 @@ describe( 'toMoment', () => {
 		expect( longDate.year() ).toBe( 2018 );
 
 		const shortDate = toMoment( 'DD/MM/YYYY', '15/04/2018' );
-		if ( shortDate === null ) fail( 'shortDate should not be null' );
+		if ( shortDate === null ) {
+			fail( 'shortDate should not be null' );
+		}
 
 		expect( moment.isMoment( shortDate ) ).toBe( true );
 		expect( shortDate.isValid() ).toBe( true );
@@ -795,6 +802,112 @@ describe( 'start of week setting', () => {
 	} );
 } );
 
+describe( 'weekday names', () => {
+	const HEBREW_WEEKDAYS_SHORT = [ 'א', 'ב', 'ג', 'ד', 'ה', 'ו', 'ש' ];
+	const ENGLISH_WEEKDAYS_SHORT = [
+		'Sun',
+		'Mon',
+		'Tue',
+		'Wed',
+		'Thu',
+		'Fri',
+		'Sat',
+	];
+	const ENGLISH_WEEKDAYS_MIN = [ 'Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa' ];
+	const GERMAN_WEEKDAYS_SHORT = [
+		'So.',
+		'Mo.',
+		'Di.',
+		'Mi.',
+		'Do.',
+		'Fr.',
+		'Sa.',
+	];
+	const GERMAN_WEEKDAYS_MIN = [ 'So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa' ];
+	const RUSSIAN_WEEKDAYS_SHORT = [ 'вс', 'пн', 'вт', 'ср', 'чт', 'пт', 'сб' ];
+
+	/**
+	 * Defines a locale and loads the package against it, on a moment of their
+	 * own so the surrounding tests keep theirs. Without a `weekdaysMin` this is
+	 * the shape WordPress leaves behind, and moment falls back to the English
+	 * names.
+	 *
+	 * @param {Object} config - Locale configuration.
+	 * @return {Object} - The locale data moment holds once the package loaded.
+	 */
+	function loadWithLocale( config: moment.LocaleSpecification ) {
+		let localeData = moment.localeData();
+
+		jest.isolateModules( () => {
+			/* eslint-disable @typescript-eslint/no-require-imports -- isolateModules only tracks synchronous requires. */
+			const momentLib = require( 'moment' );
+
+			momentLib.defineLocale( 'test_locale', config );
+			require( '../index' );
+			/* eslint-enable @typescript-eslint/no-require-imports */
+
+			localeData = momentLib.localeData();
+		} );
+
+		return localeData;
+	}
+
+	it( 'should fill in the missing weekdaysMin from the translated short names', () => {
+		const localeData = loadWithLocale( {
+			weekdaysShort: HEBREW_WEEKDAYS_SHORT,
+		} );
+
+		expect( localeData.weekdaysMin() ).toEqual( HEBREW_WEEKDAYS_SHORT );
+	} );
+
+	it( 'should keep the rest of the locale data untouched', () => {
+		const localeData = loadWithLocale( {
+			weekdaysShort: HEBREW_WEEKDAYS_SHORT,
+			longDateFormat: {
+				L: 'DD/MM/YYYY',
+				LL: 'D [ב]MMMM YYYY',
+				LLL: 'D [ב]MMMM YYYY HH:mm',
+				LLLL: 'dddd, D [ב]MMMM YYYY HH:mm',
+				LT: 'HH:mm',
+				LTS: 'HH:mm:ss',
+			},
+		} );
+
+		expect( localeData.weekdaysMin() ).toEqual( HEBREW_WEEKDAYS_SHORT );
+		expect( localeData.longDateFormat( 'L' ) ).toBe( 'DD/MM/YYYY' );
+		expect( localeData.longDateFormat( 'LL' ) ).toBe( 'D [ב]MMMM YYYY' );
+		expect( localeData.weekdaysShort() ).toEqual( HEBREW_WEEKDAYS_SHORT );
+	} );
+
+	it( 'should leave an English locale on the moment fallback', () => {
+		const localeData = loadWithLocale( {
+			weekdaysShort: ENGLISH_WEEKDAYS_SHORT,
+		} );
+
+		expect( localeData.weekdaysMin() ).toEqual( ENGLISH_WEEKDAYS_MIN );
+	} );
+
+	it( 'should keep the weekdaysMin something else already supplied', () => {
+		const localeData = loadWithLocale( {
+			weekdaysShort: GERMAN_WEEKDAYS_SHORT,
+			weekdaysMin: GERMAN_WEEKDAYS_MIN,
+		} );
+
+		expect( localeData.weekdaysMin() ).toEqual( GERMAN_WEEKDAYS_MIN );
+	} );
+
+	it( 'should leave a locale that holds its short names in another shape alone', () => {
+		const localeData = loadWithLocale( {
+			weekdaysShort: {
+				format: RUSSIAN_WEEKDAYS_SHORT,
+				standalone: RUSSIAN_WEEKDAYS_SHORT,
+			} as unknown as string[],
+		} );
+
+		expect( localeData.weekdaysMin() ).toEqual( ENGLISH_WEEKDAYS_MIN );
+	} );
+} );
+
 describe( 'getRangeLabel', () => {
 	it( 'should return correct string for dates on the same day', () => {
 		const label = getRangeLabel(
@@ -1334,6 +1447,78 @@ describe( 'getRangeLabel', () => {
 	} );
 } );
 
+describe( 'getShortDateFormat', () => {
+	const translateShortDateFormat = ( translation: string ) =>
+		( __ as jest.Mock ).mockImplementation( ( text: string ) =>
+			text === 'MM/DD/YYYY' ? translation : text
+		);
+
+	afterEach( () => {
+		( __ as jest.Mock ).mockImplementation( ( text: string ) => text );
+	} );
+
+	it.each( [
+		[ 'MM/DD/YYYY', 'MM/DD/YYYY' ],
+		[ 'DD/MM/YYYY', 'DD/MM/YYYY' ],
+		[ 'DD.MM.YYYY', 'DD.MM.YYYY' ],
+		[ 'YYYY-MM-DD', 'YYYY-MM-DD' ],
+		// Strict parsing rejects "09" for "M", so single tokens are padded.
+		[ 'D/M/YYYY', 'DD/MM/YYYY' ],
+		[ 'D. M. YYYY', 'DD. MM. YYYY' ],
+		[ '[D] D/M/YYYY', '[D] DD/MM/YYYY' ],
+		[ 'D/M/YYYY \\D', 'DD/MM/YYYY \\D' ],
+		[ 'Do MMM YYYY', 'Do MMM YYYY' ],
+		// Translations from real language packs that aren't Moment.js formats.
+		[ 'MM/DD/RRRR', 'MM/DD/YYYY' ],
+		[ 'JJ/MM/AAAA', 'MM/DD/YYYY' ],
+		[ 'KK/PP/AAAA', 'MM/DD/YYYY' ],
+		[ 'MM/DD/AAAA', 'MM/DD/YYYY' ],
+		[ 'MM/DD/VVVV', 'MM/DD/YYYY' ],
+		[ 'dd/mm/aaaa', 'MM/DD/YYYY' ],
+		[ 'મમ/દદ/વવવવ', 'MM/DD/YYYY' ],
+		[ 'DD/MM', 'MM/DD/YYYY' ],
+		[ 'DD/YYYY', 'MM/DD/YYYY' ],
+		[ 'MM/YYYY', 'MM/DD/YYYY' ],
+		// Localized tokens would make loadLocaleData() define "L" as itself.
+		[ 'L', 'MM/DD/YYYY' ],
+		[ 'l', 'MM/DD/YYYY' ],
+		[ 'LL', 'MM/DD/YYYY' ],
+		[ 'DD/MM/YYYY LT', 'MM/DD/YYYY' ],
+		[ 'DD/MM/YYYY [L]', 'DD/MM/YYYY [L]' ],
+	] )( 'returns %s as %s', ( translation, expected ) => {
+		translateShortDateFormat( translation );
+		expect( getShortDateFormat() ).toBe( expected );
+	} );
+
+	it( 'validates month names with the current locale', () => {
+		const originalLocale = moment.locale();
+		moment.defineLocale( 'xx-short-date', {
+			monthsShort:
+				'sij_velj_ožu_tra_svi_lip_srp_kol_ruj_lis_stu_pro'.split( '_' ),
+		} );
+		translateShortDateFormat( 'D MMM YYYY' );
+
+		const format = getShortDateFormat();
+		moment.locale( originalLocale );
+		moment.updateLocale( 'xx-short-date', null );
+
+		expect( format ).toBe( 'DD MMM YYYY' );
+	} );
+
+	it( 'parses padded and formats padded dates for a single-token translation', () => {
+		translateShortDateFormat( 'D/M/YYYY' );
+		const format = getShortDateFormat();
+
+		expect(
+			toMoment( format, '25/09/2026' )?.format( isoDateFormat )
+		).toBe( '2026-09-25' );
+		expect(
+			toMoment( format, '05/10/2026' )?.format( isoDateFormat )
+		).toBe( '2026-10-05' );
+		expect( moment( '2026-10-05' ).format( format ) ).toBe( '05/10/2026' );
+	} );
+} );
+
 describe( 'loadLocaleData', () => {
 	const originalLocale = {
 		siteLocale: 'en_US',
@@ -1363,6 +1548,20 @@ describe( 'loadLocaleData', () => {
 			weekdaysShort,
 		} );
 		expect( moment.localeData().weekdaysMin() ).toEqual( weekdaysShort );
+	} );
+
+	it( 'falls back to MM/DD/YYYY for "L" when the translation is not a Moment.js format', () => {
+		moment.locale( 'cs_CZ', {} );
+		( __ as jest.Mock ).mockImplementation( ( text: string ) =>
+			text === 'MM/DD/YYYY' ? 'MM/DD/RRRR' : text
+		);
+
+		loadLocaleData( { userLocale: 'cs_CZ' } );
+
+		( __ as jest.Mock ).mockImplementation( ( text: string ) => text );
+		expect( moment.localeData().longDateFormat( 'L' ) ).toBe(
+			'MM/DD/YYYY'
+		);
 	} );
 } );
 
@@ -1516,7 +1715,158 @@ describe( 'getDateDifferenceInDays', () => {
 	} );
 } );
 
+describe( 'secondary range shift', () => {
+	afterEach( () => {
+		jest.useRealTimers();
+	} );
+
+	it( 'is a year shift for previous year and for the year presets, an offset otherwise', () => {
+		jest.useFakeTimers().setSystemTime( new Date( '2025-03-15T12:00:00' ) );
+
+		expect( getLastPeriod( 'month', 'previous_year' ).secondaryShift ).toBe(
+			'year'
+		);
+		expect(
+			getCurrentPeriod( 'week', 'previous_year' ).secondaryShift
+		).toBe( 'year' );
+		expect(
+			getLastPeriod( 'year', 'previous_period' ).secondaryShift
+		).toBe( 'year' );
+		expect(
+			getCurrentPeriod( 'year', 'previous_period' ).secondaryShift
+		).toBe( 'year' );
+		expect(
+			getLastPeriod( 'month', 'previous_period' ).secondaryShift
+		).toBe( 'offset' );
+		expect(
+			getCurrentPeriod( 'quarter', 'previous_period' ).secondaryShift
+		).toBe( 'offset' );
+	} );
+
+	it( 'ends a year shifted current period on the same calendar day a year earlier', () => {
+		jest.useFakeTimers().setSystemTime( new Date( '2025-06-15T12:00:00' ) );
+		const { secondaryStart, secondaryEnd } = getCurrentPeriod(
+			'year',
+			'previous_year'
+		);
+		expect( secondaryStart.format( isoDateFormat ) ).toBe( '2024-01-01' );
+		expect( secondaryEnd.format( 'YYYY-MM-DD HH:mm:ss' ) ).toBe(
+			'2024-06-15 23:59:59'
+		);
+	} );
+
+	it( 'keeps the previous period of the last year on the store clock around New Year', () => {
+		// 09:30 UTC on 1st January: every browser zone east of -09:30 is
+		// already in 2027 while a Honolulu store is still on 31st December.
+		jest.useFakeTimers().setSystemTime(
+			new Date( '2027-01-01T09:30:00Z' )
+		);
+		const previousWcSettings = global.window.wcSettings;
+		global.window.wcSettings = {
+			...previousWcSettings,
+			timeZone: 'Pacific/Honolulu',
+		};
+
+		try {
+			const { primaryStart, secondaryStart, secondaryEnd } =
+				getLastPeriod( 'year', 'previous_period' );
+			expect( primaryStart.format( isoDateFormat ) ).toBe( '2025-01-01' );
+			expect( secondaryStart.format( isoDateFormat ) ).toBe(
+				'2024-01-01'
+			);
+			expect( secondaryEnd.format( 'YYYY-MM-DD HH:mm:ss' ) ).toBe(
+				'2024-12-31 23:59:59'
+			);
+		} finally {
+			global.window.wcSettings = previousWcSettings;
+		}
+	} );
+
+	it( 'is exposed on the secondary date picker options', () => {
+		jest.useFakeTimers().setSystemTime( new Date( '2026-09-09T12:00:00' ) );
+		expect(
+			getCurrentDates( {
+				period: 'last_year',
+				compare: 'previous_period',
+			} ).secondary.shift
+		).toBe( 'year' );
+
+		const custom = {
+			period: 'custom',
+			after: '2024-12-01',
+			before: '2025-12-01',
+		};
+
+		expect(
+			getCurrentDates( { ...custom, compare: 'previous_year' } ).secondary
+				.shift
+		).toBe( 'year' );
+		expect(
+			getCurrentDates( { ...custom, compare: 'previous_period' } )
+				.secondary.shift
+		).toBe( 'offset' );
+	} );
+} );
+
 describe( 'getPreviousDate', () => {
+	it( 'should use the shift over the compare value when given', () => {
+		const yearShifted = getPreviousDate(
+			'2024-03-01',
+			'2024-01-01',
+			'2023-01-01',
+			'previous_period',
+			'day',
+			'year'
+		);
+		expect( yearShifted.format( isoDateFormat ) ).toBe( '2023-03-01' );
+
+		const offset = getPreviousDate(
+			'2025-03-01',
+			'2024-12-01',
+			'2023-12-01',
+			'previous_year',
+			'day',
+			'offset'
+		);
+		expect( offset.format( isoDateFormat ) ).toBe( '2024-02-29' );
+	} );
+	it( 'should shift by calendar dates when the range starts sit on different sides of a DST change', () => {
+		// Last quarter (Q2) against the previous period on a New York store:
+		// April starts in EDT, the last day of December in EST.
+		const primaryStart = moment.parseZone( '2026-04-01T00:00:00-04:00' );
+		const secondaryStart = moment.parseZone( '2025-12-31T00:00:00-05:00' );
+
+		expect(
+			getPreviousDate(
+				'2026-04-01 00:00:00',
+				primaryStart,
+				secondaryStart,
+				'previous_period',
+				'day',
+				'offset'
+			).format( isoDateFormat )
+		).toBe( '2025-12-31' );
+		expect(
+			getPreviousDate(
+				'2026-04-01 00:00:00',
+				primaryStart,
+				secondaryStart,
+				'previous_period',
+				'week'
+			).format( isoDateFormat )
+		).toBe( '2025-12-31' );
+
+		// Quarter to date against the previous period: April against January.
+		expect(
+			getPreviousDate(
+				'2026-05-01 00:00:00',
+				primaryStart,
+				moment.parseZone( '2026-01-01T00:00:00-05:00' ),
+				'previous_period',
+				'month'
+			).format( isoDateFormat )
+		).toBe( '2026-02-01' );
+	} );
 	it( 'should return valid date for previous period by days', () => {
 		const date = '2018-08-21';
 		const primaryStart = '2018-08-25';

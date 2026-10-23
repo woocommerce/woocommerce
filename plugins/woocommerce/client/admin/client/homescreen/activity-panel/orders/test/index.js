@@ -50,7 +50,7 @@ describe( 'OrdersPanel', () => {
 		).toBeInTheDocument();
 	} );
 
-	it( 'should record activity_panel_orders_orders_begin_fulfillment Tracks event when order is clicked', () => {
+	it( 'should record activity_panel_orders_orders_begin_fulfillment Tracks event when order is clicked', async () => {
 		useSelect.mockReturnValue( {
 			orders: [
 				{
@@ -65,7 +65,7 @@ describe( 'OrdersPanel', () => {
 		const { getByText } = render(
 			<OrdersPanel orderStatuses={ [] } unreadOrdersCount={ 1 } />
 		);
-		userEvent.click( getByText( '0 products' ) );
+		await userEvent.click( getByText( '0 products' ) );
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'activity_panel_orders_orders_begin_fulfillment',
 			{}

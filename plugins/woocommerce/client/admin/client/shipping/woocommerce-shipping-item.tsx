@@ -67,7 +67,7 @@ const WooCommerceShippingItem = ( {
 						: __(
 								'WooCommerce Shipping is installed!',
 								'woocommerce'
-						  ),
+							),
 					{}
 				);
 			},

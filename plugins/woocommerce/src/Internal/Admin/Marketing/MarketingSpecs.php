@@ -11,7 +11,7 @@ namespace Automattic\WooCommerce\Internal\Admin\Marketing;
  * Marketing Specifications Class.
  *
  * @internal
- * @since x.x.x
+ * @since 7.4.0
  */
 class MarketingSpecs {
 	/**

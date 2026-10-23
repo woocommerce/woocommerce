@@ -24,6 +24,7 @@ use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
+use Automattic\WooCommerce\Utilities\StringUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -187,7 +188,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$this->data['cogs_total_value'] = 0;
 		}
 
-		$this->data['prices_include_tax'] = 'yes' === get_option( 'woocommerce_prices_include_tax' );
+		$this->data['prices_include_tax'] = wc_prices_include_tax();
 
 		parent::__construct( $order );
 
@@ -817,6 +818,18 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
+	 * Whether the order can have a status.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param string $status Status slug, with or without the `wc-` prefix.
+	 * @return bool
+	 */
+	public function is_valid_status( string $status ): bool {
+		return in_array( 'wc-' . OrderUtil::remove_status_prefix( $status ), $this->get_valid_statuses(), true );
+	}
+
+	/**
 	 * Get user ID. Used by orders, not other order types like refunds.
 	 *
 	 * @param  string $context View or edit context.
@@ -916,9 +929,10 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				$new_status = OrderStatus::PENDING;
 			}
 
-			// If the old status is set but unknown (e.g. draft) assume its pending for action usage.
+			// If the status is changing from auto-draft or an unknown status (e.g. draft), assume it was pending for action usage.
 			if (
 				$old_status
+				&& $old_status !== $new_status
 				&& (
 					OrderStatus::AUTO_DRAFT === $old_status
 					|| (
@@ -1416,8 +1430,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Get an order item object, based on its type.
 	 *
 	 * @since  3.0.0
-	 * @param  int  $item_id ID of item to get.
-	 * @param  bool $load_from_db Prior to 3.2 this item was loaded direct from WC_Order_Factory, not this object. This param is here for backwards compatibility with that. If false, uses the local items variable instead.
+	 * @param  int|string $item_id ID of item to get, or the temporary key of an unsaved item when $load_from_db is false.
+	 * @param  bool       $load_from_db Prior to 3.2 this item was loaded direct from WC_Order_Factory, not this object. This param is here for backwards compatibility with that. If false, uses the local items variable instead.
 	 * @return WC_Order_Item|false
 	 */
 	public function get_item( $item_id, $load_from_db = true ) {
@@ -1469,9 +1483,25 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
+	 * Get the key an item is stored under in this order's items list.
+	 *
+	 * Unsaved items are stored under a temporary key such as 'new:fee_lines0' rather than their ID.
+	 * Falls back to the item ID when the item isn't in the list, e.g. a filtered copy of a saved item.
+	 *
+	 * @param WC_Order_Item $item Order item.
+	 * @return int|string
+	 */
+	private function get_stored_item_key( $item ) {
+		$items_key = $this->get_items_key( $item );
+		$item_key  = $items_key && isset( $this->items[ $items_key ] ) ? array_search( $item, $this->items[ $items_key ], true ) : false;
+
+		return false === $item_key ? $item->get_id() : $item_key;
+	}
+
+	/**
 	 * Remove item from the order.
 	 *
-	 * @param int $item_id Item ID to delete.
+	 * @param int|string $item_id Item ID, or the temporary key of an unsaved item, to delete.
 	 * @return false|void
 	 */
 	public function remove_item( $item_id ) {
@@ -1482,9 +1512,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			return false;
 		}
 
+		if ( ( $this->items[ $items_key ][ $item_id ] ?? null ) !== $item ) {
+			$item_id = $this->get_stored_item_key( $item );
+		}
+
 		// Unset and remove later.
 		$this->items_to_delete[] = $item;
-		unset( $this->items[ $items_key ][ $item->get_id() ] );
+		unset( $this->items[ $items_key ][ $item_id ] );
 	}
 
 	/**
@@ -1701,7 +1735,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$data_store = $coupon->get_data_store();
 
 		// Check specific for guest checkouts here as well since WC_Cart handles that separately in check_customer_coupons.
-		if ( $data_store && 0 === $this->get_customer_id() ) {
+		// Order types without a customer ID are treated as guests.
+		$customer_id = is_callable( array( $this, 'get_customer_id' ) ) ? $this->get_customer_id() : 0;
+		if ( $data_store && 0 === $customer_id && is_callable( array( $this, 'get_billing_email' ) ) ) {
 			$usage_count = $data_store->get_usage_by_email( $coupon, $this->get_billing_email() );
 			if ( 0 < $coupon->get_usage_limit_per_user() && $usage_count >= $coupon->get_usage_limit_per_user() ) {
 				return new WP_Error(
@@ -1733,12 +1769,18 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		// Record usage so counts and validation is correct.
 		$used_by = $this->get_user_id();
 
-		if ( ! $used_by ) {
+		if ( ! $used_by && is_callable( array( $this, 'get_billing_email' ) ) ) {
 			$used_by = $this->get_billing_email();
 		}
 
+		/**
+		 * Data store wrapper.
+		 *
+		 * @var WC_Data_Store $order_data_store
+		 */
 		$order_data_store = $this->get_data_store();
-		if ( $order_data_store->get_recorded_coupon_usage_counts( $this ) ) {
+		// @phpstan-ignore-next-line method.notFound (Guarded by has_callable() and called via __call() on the underlying order data store instance.)
+		if ( $order_data_store->has_callable( 'get_recorded_coupon_usage_counts' ) && $order_data_store->get_recorded_coupon_usage_counts( $this ) ) {
 			$coupon->increase_usage_count( $used_by );
 		}
 
@@ -1866,13 +1908,37 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	public function remove_coupon( $code ) {
 		$coupons = $this->get_items( 'coupon' );
+		/**
+		 * Data store wrapper.
+		 *
+		 * @var WC_Data_Store $order_data_store
+		 */
+		$order_data_store = $this->get_data_store();
+		// @phpstan-ignore-next-line method.notFound (Guarded by has_callable() and called via __call() on the underlying order data store instance.)
+		$has_recorded = $order_data_store->has_callable( 'get_recorded_coupon_usage_counts' ) && $order_data_store->get_recorded_coupon_usage_counts( $this );
+
+		$used_by = $this->get_user_id();
+		if ( ! $used_by && is_callable( array( $this, 'get_billing_email' ) ) ) {
+			$used_by = $this->get_billing_email();
+		}
 
 		// Remove the coupon line.
-		foreach ( $coupons as $item_id => $coupon ) {
+		foreach ( $coupons as $coupon ) {
 			if ( wc_is_same_coupon( $coupon->get_code(), $code ) ) {
-				$this->remove_item( $item_id );
+				$this->remove_item( $this->get_stored_item_key( $coupon ) );
 				$coupon_object = new WC_Coupon( $code );
-				$coupon_object->decrease_usage_count( $this->get_user_id() );
+
+				if ( $has_recorded ) {
+					// Mirror the stored flag into this instance so clearing it below is tracked as a change and saved.
+					$this->set_recorded_coupon_usage_counts( true );
+					$coupon_object->decrease_usage_count( $used_by );
+
+					$remaining_codes = array_filter( $this->get_coupon_codes(), fn( $remaining_code ) => ! StringUtil::is_null_or_whitespace( $remaining_code ) );
+					if ( ! $remaining_codes ) {
+						$this->set_recorded_coupon_usage_counts( false );
+					}
+				}
+
 				$this->recalculate_coupons();
 
 				/**
@@ -1993,15 +2059,17 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	protected function set_item_discount_amounts( $discounts ) {
 		$item_discounts = $discounts->get_discounts_by_item();
-		$tax_location   = $this->get_tax_location();
-		$tax_location   = array( $tax_location['country'], $tax_location['state'], $tax_location['postcode'], $tax_location['city'] );
+		$is_vat_exempt  = $this->is_vat_exempt();
+
+		$tax_location = $this->get_tax_location();
+		$tax_location = array( $tax_location['country'], $tax_location['state'], $tax_location['postcode'], $tax_location['city'] );
 
 		if ( $item_discounts ) {
 			foreach ( $item_discounts as $item_id => $amount ) {
 				$item = $this->get_item( $item_id, false );
 
 				// If the prices include tax, discounts should be taken off the tax inclusive prices like in the cart.
-				if ( $this->get_prices_include_tax() && wc_tax_enabled() && ProductTaxStatus::TAXABLE === $item->get_tax_status() ) {
+				if ( ! $is_vat_exempt && $this->get_prices_include_tax() && wc_tax_enabled() && ProductTaxStatus::TAXABLE === $item->get_tax_status() ) {
 					$taxes = WC_Tax::calc_tax( $amount, $this->get_tax_rates( $item->get_tax_class(), $tax_location ), true );
 
 					// Use unrounded taxes so totals will be re-calculated accurately, like in cart.
@@ -2025,8 +2093,10 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$coupon_code_to_id = wc_list_pluck( $coupons, 'get_id', 'get_code' );
 		$all_discounts     = $discounts->get_discounts();
 		$coupon_discounts  = $discounts->get_discounts_by_coupon();
-		$tax_location      = $this->get_tax_location();
-		$tax_location      = array(
+		$is_vat_exempt     = $this->is_vat_exempt();
+
+		$tax_location = $this->get_tax_location();
+		$tax_location = array(
 			$tax_location['country'],
 			$tax_location['state'],
 			$tax_location['postcode'],
@@ -2057,7 +2127,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				foreach ( $all_discounts[ $coupon_code ] as $item_id => $item_discount_amount ) {
 					$item = $this->get_item( $item_id, false );
 
-					if ( ProductTaxStatus::TAXABLE !== $item->get_tax_status() || ! wc_tax_enabled() ) {
+					if ( $is_vat_exempt || ProductTaxStatus::TAXABLE !== $item->get_tax_status() || ! wc_tax_enabled() ) {
 						continue;
 					}
 
@@ -2087,7 +2157,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 *
 	 * @param  WC_Product $product Product object.
 	 * @param  int        $qty Quantity to add.
-	 * @param  array      $args Args for the added product.
+	 * @param  array      $args Args for the added product, including an optional tax location for its price.
 	 * @return int
 	 */
 	public function add_product( $product, $qty = 1, $args = array() ) {
@@ -2096,8 +2166,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$total = wc_get_price_excluding_tax(
 				$product,
 				array(
-					'qty'   => $qty,
-					'order' => $order,
+					'qty'          => $qty,
+					'order'        => $order,
+					'tax_location' => ArrayUtil::get_value_or_default( $args, 'tax_location' ),
 				)
 			);
 
@@ -2313,6 +2384,24 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
+	 * Get the filtered VAT exemption for this order.
+	 *
+	 * @return bool Whether the order is exempt from VAT.
+	 */
+	private function is_vat_exempt(): bool {
+		/**
+		 * Filters whether the order is exempt from VAT.
+		 *
+		 * @since 3.3.0
+		 * @since 11.3.0 Also applied to discounts.
+		 *
+		 * @param bool              $is_vat_exempt Whether the order is exempt from VAT.
+		 * @param WC_Abstract_Order $order         Order instance.
+		 */
+		return (bool) apply_filters( 'woocommerce_order_is_vat_exempt', 'yes' === $this->get_meta( 'is_vat_exempt' ), $this );
+	}
+
+	/**
 	 * Calculate taxes for all line items and shipping, and store the totals and tax rows.
 	 *
 	 * If by default the taxes are based on the shipping address and the current order doesn't
@@ -2339,7 +2428,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			}
 		}
 
-		$is_vat_exempt = apply_filters( 'woocommerce_order_is_vat_exempt', 'yes' === $this->get_meta( 'is_vat_exempt' ), $this );
+		$is_vat_exempt = $this->is_vat_exempt();
 
 		// Trigger tax recalculation for all items.
 		foreach ( $this->get_items( array( 'line_item', 'fee' ) ) as $item_id => $item ) {
@@ -2415,7 +2504,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$tax_rate_id = $tax->get_rate_id();
 			// Remove taxes which no longer exist for cart/shipping.
 			if ( ( ! array_key_exists( $tax_rate_id, $cart_taxes ) && ! array_key_exists( $tax_rate_id, $shipping_taxes ) ) || in_array( $tax_rate_id, $saved_rate_ids, true ) ) {
-				$this->remove_item( $tax->get_id() );
+				$this->remove_item( $this->get_stored_item_key( $tax ) );
 				continue;
 			}
 

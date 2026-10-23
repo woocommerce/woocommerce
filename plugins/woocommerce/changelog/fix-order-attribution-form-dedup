@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Preserve classic checkout order attribution when duplicate input groups exist outside the checkout form.

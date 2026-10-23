@@ -425,6 +425,11 @@ function wc_save_order_items( $order_id, $items ) {
 				$item_data[ $key ] = isset( $items[ $key ][ $item_id ] ) ? wc_clean( wp_unslash( $items[ $key ][ $item_id ] ) ) : $default;
 			}
 
+			// A cleared cost field shows a 0 placeholder, so store 0 rather than an empty string.
+			if ( is_string( $item_data['shipping_cost'] ) && '' === wc_format_decimal( $item_data['shipping_cost'] ) ) {
+				$item_data['shipping_cost'] = 0;
+			}
+
 			$item_data['shipping_method']       = is_string( $item_data['shipping_method'] ) ? $item_data['shipping_method'] : '';
 			$item_data['shipping_method_title'] = is_string( $item_data['shipping_method_title'] ) ? $item_data['shipping_method_title'] : '';
 

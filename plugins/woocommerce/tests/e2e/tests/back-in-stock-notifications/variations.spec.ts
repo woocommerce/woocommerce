@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { expect, request, tags } from '../../fixtures/fixtures';
+import { expect, request, tags, locks } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 import {
 	BIS_EMAIL_ELEMENTS,
@@ -25,11 +25,15 @@ import {
 	triggerStockNotificationsBatch,
 	uniqueGuestEmail,
 } from '../../utils/back-in-stock-notifications';
+import { quotedPattern } from '../../utils/helpers';
 import { setOption } from '../../utils/options';
 
 test.describe(
 	'Back in Stock Notifications — variable products and variations',
-	{ tag: [ tags.SKIP_ON_EXTERNAL_ENV ] },
+	{
+		tag: [ tags.SKIP_ON_EXTERNAL_ENV ],
+		lock: [ locks.STOCK_NOTIFICATIONS, locks.EMAIL_FEATURE_FLAGS ],
+	},
 	() => {
 		test.use( { storageState: ADMIN_STATE_PATH } );
 
@@ -65,12 +69,7 @@ test.describe(
 
 				// Before a variation is picked the form is rendered but
 				// hidden, and still points at the parent product.
-				//
-				// Asserted on the `hidden` class rather than on visibility:
-				// that class is the contract `back-in-stock-form.js` drives,
-				// while whether it actually hides the form depends on the
-				// theme's stylesheet.
-				await expect( form ).toContainClass( 'hidden' );
+				await expect( form ).toBeHidden();
 				await expect( targetProduct ).toHaveValue(
 					String( variableProduct.id )
 				);
@@ -81,7 +80,7 @@ test.describe(
 					variableProduct.outOfStockVariation
 				);
 
-				await expect( form ).not.toContainClass( 'hidden' );
+				await expect( form ).toBeVisible();
 				await expect(
 					form.getByRole( 'button', { name: /Notify me/i } )
 				).toBeVisible();
@@ -98,7 +97,7 @@ test.describe(
 					variableProduct.inStockVariation!
 				);
 
-				await expect( form ).toContainClass( 'hidden' );
+				await expect( form ).toBeHidden();
 			} );
 
 			test( 'signing up for an out-of-stock variation confirms the variation by name', async ( {
@@ -132,11 +131,13 @@ test.describe(
 				await expect(
 					guestPage.getByText(
 						new RegExp(
-							`You have successfully signed up! You will be notified when "${ escapeRegExp(
-								variableProduct.name
-							) } [-–] ${ escapeRegExp(
-								outOfStockVariation.option
-							) }" is back in stock\\.`
+							`You have successfully signed up! You will be notified when ${ quotedPattern(
+								`${ escapeRegExp(
+									variableProduct.name
+								) } [-–] ${ escapeRegExp(
+									outOfStockVariation.option
+								) }`
+							) } is back in stock\\.`
 						)
 					)
 				).toBeVisible();

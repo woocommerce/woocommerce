@@ -72,6 +72,24 @@ class WC_Helper_Product {
 	}
 
 	/**
+	 * Create a product whose sale has ended while its stored price is still the sale price.
+	 *
+	 * @return WC_Product
+	 */
+	public static function create_missed_sale_end_product() {
+		$product = self::create_simple_product();
+		$product->set_regular_price( '100' );
+		$product->set_sale_price( '50' );
+		$product->save();
+
+		update_post_meta( $product->get_id(), '_price', 50 );
+		update_post_meta( $product->get_id(), '_sale_price_dates_from', time() - 300 );
+		update_post_meta( $product->get_id(), '_sale_price_dates_to', time() - 100 );
+
+		return $product;
+	}
+
+	/**
 	 * Create a downloadable product.
 	 *
 	 * @since 6.4.0

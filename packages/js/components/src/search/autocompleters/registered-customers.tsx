@@ -47,8 +47,8 @@ const getSuggestion = ( customer: Customer, query: string ) => {
 		return name;
 	}
 
-	const matched = [ customer.username, customer.email ].find(
-		( field ) => field?.toLocaleLowerCase().includes( search )
+	const matched = [ customer.username, customer.email ].find( ( field ) =>
+		field?.toLocaleLowerCase().includes( search )
 	);
 
 	if ( ! matched ) {
@@ -78,7 +78,7 @@ const completer: AutoCompleter = {
 					searchby: 'all',
 					user_type: 'registered',
 					per_page: 10,
-			  }
+				}
 			: { user_type: 'registered' };
 		return apiFetch( {
 			path: addQueryArgs( '/wc-analytics/customers', query ),

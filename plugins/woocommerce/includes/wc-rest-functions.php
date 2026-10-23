@@ -275,10 +275,10 @@ function wc_rest_check_user_permissions( $context = 'read', $object_id = 0 ) {
 		$shop_manager_editable_roles = apply_filters( 'woocommerce_shop_manager_editable_roles', array( 'customer' ) );
 
 		if ( isset( $user_data->roles ) ) {
-			$can_manage_users = array_intersect( $user_data->roles, array_unique( $shop_manager_editable_roles ) );
+			$can_manage_user = ! empty( $user_data->roles ) && empty( array_diff( $user_data->roles, array_unique( $shop_manager_editable_roles ) ) );
 
-			// Check if Shop Manager can edit customer or with the is same shop manager.
-			if ( 0 < count( $can_manage_users ) || intval( $object_id ) === intval( get_current_user_id() ) ) {
+			// Check if the Shop Manager can edit the user or is editing themselves.
+			if ( $can_manage_user || intval( $object_id ) === intval( get_current_user_id() ) ) {
 				$permission = current_user_can( $contexts[ $context ], $object_id );
 			}
 		}

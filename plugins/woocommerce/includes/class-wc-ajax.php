@@ -187,6 +187,7 @@ class WC_AJAX {
 			'save_order_items',
 			'load_order_items',
 			'add_order_note',
+			'get_order_notes',
 			'delete_order_note',
 			'json_search_order_metakeys',
 			'json_search_tax_rates',
@@ -322,7 +323,7 @@ class WC_AJAX {
 			wc_add_notice( __( 'Sorry there was a problem removing this coupon.', 'woocommerce' ), 'error' );
 		} else {
 			WC()->cart->remove_coupon( $coupon );
-			wc_add_notice( __( 'Coupon has been removed.', 'woocommerce' ) );
+			( new WC_Coupon( $coupon ) )->add_coupon_message( WC_Coupon::WC_COUPON_REMOVED );
 		}
 
 		wc_print_notices();
@@ -379,12 +380,12 @@ class WC_AJAX {
 				'fragments' => apply_filters(
 					'woocommerce_update_order_review_fragments',
 					array(
-						'form.woocommerce-checkout' => wc_print_notice(
+						'form.woocommerce-checkout' => '<div class="woocommerce-notices-wrapper">' . wc_print_notice(
 							esc_html__( 'Sorry, your session has expired.', 'woocommerce' ) . ' <a href="' . esc_url( wc_get_page_permalink( 'shop' ) ) . '" class="wc-backward">' . esc_html__( 'Return to shop', 'woocommerce' ) . '</a>',
 							'error',
 							array(),
 							true
-						),
+						) . '</div>',
 					)
 				),
 			)
@@ -397,7 +398,22 @@ class WC_AJAX {
 	 * @return void
 	 */
 	public static function update_order_review() {
-		check_ajax_referer( 'update-order-review', 'security' );
+		// A rejected nonce usually means the browser restored a checkout rendered for an earlier session,
+		// e.g. going back after logging in. Reload it once; if the fresh page is rejected too, show the expired notice.
+		// Without a session cookie the reload flag can't persist, so skip the reload to avoid an endless loop.
+		if ( ! check_ajax_referer( 'update-order-review', 'security', false ) ) {
+			$can_remember_reload = ! ( WC()->session instanceof WC_Session_Handler ) || WC()->session->has_session();
+
+			if ( ! $can_remember_reload || WC()->session->get( 'reload_checkout_for_nonce' ) ) {
+				unset( WC()->session->reload_checkout_for_nonce );
+				self::update_order_review_expired();
+			}
+
+			WC()->session->set( 'reload_checkout_for_nonce', true );
+			wp_send_json( array( 'reload' => true ) );
+		}
+
+		unset( WC()->session->reload_checkout_for_nonce );
 
 		wc_maybe_define_constant( 'WOOCOMMERCE_CHECKOUT', true );
 
@@ -483,10 +499,19 @@ class WC_AJAX {
 		if ( ! $reload_checkout ) {
 			// Capture the error count before printing, because wc_print_notices() clears the queue.
 			// A filter on `woocommerce_notice_types` can keep queued errors off the page, so the
-			// flag only reports errors that were rendered.
+			// flag only reports errors that were rendered. Record the types that filter settles on
+			// rather than applying it a second time; a non-array iterable can't be inspected after
+			// wc_print_notices() consumes it, so it falls back to trusting the rendered output.
 			$error_notice_count = wc_notice_count( 'error' );
-			$messages           = wc_print_notices( true );
-			$has_error_notices  = 0 < $error_notice_count && '' !== $messages;
+			$rendered_types     = array();
+			$record_types       = static function ( $types ) use ( &$rendered_types ) {
+				$rendered_types = $types;
+				return $types;
+			};
+			add_filter( 'woocommerce_notice_types', $record_types, PHP_INT_MAX );
+			$messages = wc_print_notices( true );
+			remove_filter( 'woocommerce_notice_types', $record_types, PHP_INT_MAX );
+			$has_error_notices = 0 < $error_notice_count && ( ! is_array( $rendered_types ) || in_array( 'error', $rendered_types, true ) ) && '' !== $messages;
 		} else {
 			$has_error_notices = false;
 			$messages          = '';
@@ -1191,9 +1216,13 @@ class WC_AJAX {
 		$items = ( ! empty( $_POST['items'] ) ) ? wp_unslash( $_POST['items'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 		$items_to_add = isset( $_POST['data'] ) ? array_filter( wp_unslash( (array) $_POST['data'] ) ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$tax_location = array();
+		foreach ( array( 'country', 'state', 'postcode', 'city' ) as $key ) {
+			$tax_location[ $key ] = isset( $_POST[ $key ] ) && is_string( $_POST[ $key ] ) ? wc_strtoupper( sanitize_text_field( wp_unslash( $_POST[ $key ] ) ) ) : '';
+		}
 
 		try {
-			$response = self::maybe_add_order_item( $order_id, $items, $items_to_add );
+			$response = self::maybe_add_order_item( $order_id, $items, $items_to_add, $tax_location );
 		} catch ( Exception $e ) {
 			wp_send_json_error( array( 'error' => $e->getMessage() ) );
 		}
@@ -1206,11 +1235,12 @@ class WC_AJAX {
 	 * @param int          $order_id     ID of order to add items to.
 	 * @param string|array $items        Existing items in order. Empty string if no items to add.
 	 * @param array        $items_to_add Array of items to add.
+	 * @param array        $tax_location Tax location entered in the order editor, if available.
 	 *
 	 * @return array     Fragments to render and notes HTML.
 	 * @throws Exception When unable to add item.
 	 */
-	private static function maybe_add_order_item( $order_id, $items, $items_to_add ) {
+	private static function maybe_add_order_item( $order_id, $items, $items_to_add, $tax_location = array() ) {
 		try {
 			$order = wc_get_order( $order_id );
 
@@ -1263,7 +1293,14 @@ class WC_AJAX {
 					// The message is shown in a JS alert, not rendered as HTML.
 					throw new Exception( wp_strip_all_tags( html_entity_decode( $message, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401 ) ) );
 				}
-				$item_id                 = $order->add_product( $product, $qty, array( 'order' => $order ) );
+				$item_id                 = $order->add_product(
+					$product,
+					$qty,
+					array(
+						'order'        => $order,
+						'tax_location' => $tax_location,
+					)
+				);
 				$item                    = apply_filters( 'woocommerce_ajax_order_item', $order->get_item( $item_id ), $item_id, $order, $product );
 				$added_items[ $item_id ] = $item;
 				$order_notes[ $item_id ] = $product->get_formatted_name();
@@ -1282,13 +1319,42 @@ class WC_AJAX {
 
 			$order = wc_get_order( $order_id );
 
+			// Coupons already on the order were applied before these items existed, so apply them again to include the new items.
+			if ( ! empty( $added_items ) && $order instanceof WC_Order && $order->get_items( 'coupon' ) ) {
+				// recalculate_coupons() uses the saved address for discounts and taxes, so give it the address typed in the editor without saving it.
+				$use_editor_tax_location = null;
+				if ( ! empty( $tax_location['country'] ) ) {
+					$editor_tax_location     = $order->get_taxable_location( $tax_location );
+					$use_editor_tax_location = function ( $location, $location_order ) use ( $order, $editor_tax_location ) {
+						return $location_order->get_id() === $order->get_id() ? $editor_tax_location : $location;
+					};
+					add_filter( 'woocommerce_order_get_tax_location', $use_editor_tax_location, PHP_INT_MAX, 2 );
+				}
+
+				// When prices include tax, the discount is taken from the price with tax, so the new items need their tax first.
+				if ( $order->get_prices_include_tax() ) {
+					$order->calculate_taxes();
+				}
+
+				$order->recalculate_coupons();
+
+				if ( $use_editor_tax_location ) {
+					remove_filter( 'woocommerce_order_get_tax_location', $use_editor_tax_location, PHP_INT_MAX );
+				}
+			}
+
 			// Get HTML to return.
 			ob_start();
 			include __DIR__ . '/admin/meta-boxes/views/html-order-items.php';
 			$items_html = ob_get_clean();
 
 			ob_start();
-			$notes = wc_get_order_notes( array( 'order_id' => $order_id ) );
+			if ( isset( $_POST['paginate_notes'] ) ) {
+				$pagination = WC_Meta_Box_Order_Notes::get_page( (int) $order_id );
+				$notes      = $pagination['notes'];
+			} else {
+				$notes = wc_get_order_notes( array( 'order_id' => $order_id ) );
+			}
 			include __DIR__ . '/admin/meta-boxes/views/html-order-notes.php';
 			$notes_html = ob_get_clean();
 
@@ -1336,11 +1402,13 @@ class WC_AJAX {
 			);
 
 			if ( strstr( $amount, '%' ) ) {
-				// We need to calculate totals first, so that $order->get_total() is correct.
+				// Refresh totals so the discount total is current. The percentage applies to
+				// the items after discounts, excluding tax, shipping and other fees.
 				$order->calculate_totals( false );
 				$formatted_amount = $amount;
 				$percent          = floatval( trim( $amount, '%' ) );
-				$amount           = $order->get_total() * ( $percent / 100 );
+				$base             = (float) $order->get_subtotal() - (float) $order->get_discount_total( 'edit' );
+				$amount           = NumberUtil::round( $base * ( $percent / 100 ), wc_get_price_decimals() );
 			} else {
 				$amount           = floatval( $amount );
 				$formatted_amount = wc_price( $amount, array( 'currency' => $order->get_currency() ) );
@@ -1521,7 +1589,12 @@ class WC_AJAX {
 			$response['html'] = ob_get_clean();
 
 			ob_start();
-			$notes = wc_get_order_notes( array( 'order_id' => $order_id ) );
+			if ( isset( $_POST['paginate_notes'] ) ) {
+				$pagination = WC_Meta_Box_Order_Notes::get_page( (int) $order_id );
+				$notes      = $pagination['notes'];
+			} else {
+				$notes = wc_get_order_notes( array( 'order_id' => $order_id ) );
+			}
 			include __DIR__ . '/admin/meta-boxes/views/html-order-notes.php';
 			$response['notes_html'] = ob_get_clean();
 
@@ -1631,7 +1704,12 @@ class WC_AJAX {
 			$items_html = ob_get_clean();
 
 			ob_start();
-			$notes = wc_get_order_notes( array( 'order_id' => $order_id ) );
+			if ( isset( $_POST['paginate_notes'] ) ) {
+				$pagination = WC_Meta_Box_Order_Notes::get_page( (int) $order_id );
+				$notes      = $pagination['notes'];
+			} else {
+				$notes = wc_get_order_notes( array( 'order_id' => $order_id ) );
+			}
 			include __DIR__ . '/admin/meta-boxes/views/html-order-notes.php';
 			$notes_html = ob_get_clean();
 
@@ -1741,7 +1819,12 @@ class WC_AJAX {
 			$items_html = ob_get_clean();
 
 			ob_start();
-			$notes = wc_get_order_notes( array( 'order_id' => $order_id ) );
+			if ( isset( $_POST['paginate_notes'] ) ) {
+				$pagination = WC_Meta_Box_Order_Notes::get_page( (int) $order_id );
+				$notes      = $pagination['notes'];
+			} else {
+				$notes = wc_get_order_notes( array( 'order_id' => $order_id ) );
+			}
 			include __DIR__ . '/admin/meta-boxes/views/html-order-notes.php';
 			$notes_html = ob_get_clean();
 
@@ -1844,6 +1927,16 @@ class WC_AJAX {
 			<?php
 		}
 		wp_die();
+	}
+
+	/**
+	 * Get a rendered page of order notes via AJAX.
+	 *
+	 * @since 11.3.0
+	 * @return void
+	 */
+	public static function get_order_notes() {
+		WC_Meta_Box_Order_Notes::get_order_notes();
 	}
 
 	/**
