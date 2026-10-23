@@ -1,6 +1,8 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Utils;
 
+use Automattic\WooCommerce\Utilities\ArrayUtil;
+
 /**
  * StyleAttributesUtils class used for getting class and style from attributes.
  *
@@ -788,5 +790,34 @@ class StyleAttributesUtils {
 			'classes' => implode( ' ', $classes ),
 			'styles'  => implode( ' ', $styles ),
 		);
+	}
+
+	/**
+	 * Request-level caching wrapper for wp_get_global_styles, which is pretty expensive in runtime.
+	 *
+	 * @since 10.4.0
+	 *
+	 * @param string[] $path        Path to the desired global styles value.
+	 * @param bool     $reset_cache Whether to reset the cache.
+	 * @return mixed The resolved global styles value.
+	 */
+	public static function get_global_styles( array $path = array(), bool $reset_cache = false ) {
+		static $resolved_styles = array();
+
+		// To keep the caching self-contained, we also keep the cache reset trackers encapsulated here.
+		static $cache_reset_callback = null;
+		if ( null === $cache_reset_callback ) {
+			$cache_reset_callback = static function () use ( &$resolved_styles ) {
+				$resolved_styles = array();
+			};
+			add_action( 'switch_theme', $cache_reset_callback );
+			add_action( 'start_previewing_theme', $cache_reset_callback );
+		}
+
+		// The wp_get_global_styles downstream workflows has some caching, but merging routines are heavy.
+		$cache_key                     = get_stylesheet() . '-' . get_current_blog_id();
+		$resolved_styles[ $cache_key ] = $reset_cache ? wp_get_global_styles() : ( $resolved_styles[ $cache_key ] ?? wp_get_global_styles() );
+
+		return ArrayUtil::get_nested_value( $resolved_styles[ $cache_key ], implode( '::', $path ), $resolved_styles[ $cache_key ] );
 	}
 }
