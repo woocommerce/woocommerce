@@ -8,6 +8,7 @@ import { addAction, removeAction } from '@wordpress/hooks';
  * Internal dependencies
  */
 import {
+	addItemToCart,
 	changeCartItemQuantity,
 	receiveCart,
 	applyExtensionCartUpdate,
@@ -287,6 +288,39 @@ describe( 'changeCartItemQuantity', () => {
 		expect( dispatch.itemIsPendingQuantity ).toHaveBeenCalledWith(
 			'item-1',
 			false
+		);
+	} );
+} );
+
+describe( 'addItemToCart', () => {
+	it( 'should pass the quantity committed by the server to finishAddingToCart', async () => {
+		const mockDispatch = {
+			startAddingToCart: jest.fn(),
+			receiveCart: jest.fn(),
+			finishAddingToCart: jest.fn(),
+		};
+		const mockSelect = {
+			getCartData: jest.fn( () => ( {
+				items: [ { key: 'line-5', id: 5, quantity: 1 } ],
+			} ) ),
+		};
+		// 3 units were requested, but the server only added 1.
+		mockApiFetchWithHeaders.mockResolvedValueOnce( {
+			response: {
+				items: [ { key: 'line-5', id: 5, quantity: 2 } ],
+			},
+		} );
+
+		await addItemToCart(
+			5,
+			3,
+			[]
+		)( { dispatch: mockDispatch, select: mockSelect } as never );
+
+		expect( mockDispatch.finishAddingToCart ).toHaveBeenCalledWith(
+			5,
+			true,
+			[ { id: 5, quantity: 1 } ]
 		);
 	} );
 } );
