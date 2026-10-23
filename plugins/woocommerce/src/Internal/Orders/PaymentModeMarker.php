@@ -52,6 +52,8 @@ class PaymentModeMarker implements RegisterHooksInterface {
 
 	/**
 	 * Register hooks and filters.
+	 *
+	 * @since 11.4.0
 	 */
 	public function register(): void {
 		add_action( 'woocommerce_payment_complete', array( $this, 'handle_woocommerce_payment_complete' ) );
