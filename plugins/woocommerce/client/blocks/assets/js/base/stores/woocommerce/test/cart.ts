@@ -1977,6 +1977,48 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			cleanup();
 		} );
 
+		it( 'reports the quantity committed by the server in the legacy event payload', async () => {
+			( getConfig as jest.Mock ).mockReturnValue( {} );
+			// The server caps the line at 1 even though 2 were requested.
+			global.fetch = jest.fn( async ( _url, init?: RequestInit ) => {
+				const serverCart = {
+					items: init?.body
+						? [ makeKeyedLine( { key: 'k1', id: 5, quantity: 1 } ) ]
+						: [],
+					totals: {},
+					errors: [],
+				};
+				return new Response(
+					JSON.stringify(
+						init?.body
+							? {
+									responses: [
+										{ status: 200, body: serverCart },
+									],
+								}
+							: serverCart
+					),
+					{ headers: { Nonce: 'test-nonce-123' } }
+				);
+			} ) as unknown as typeof fetch;
+			const actions = await loadCartStore();
+			seedCart( [] );
+
+			await runAction(
+				actions.addCartItem( {
+					id: 5,
+					quantityToAdd: 2,
+					type: 'simple',
+				} )
+			);
+			await flushMicrotasks();
+
+			expect( triggerAddedToCartEvent ).toHaveBeenCalledWith( {
+				preserveCartData: true,
+				products: [ { id: 5, quantity: 1 } ],
+			} );
+		} );
+
 		it( 'only lists products whose quantity went up in the legacy event payload', async () => {
 			( getConfig as jest.Mock ).mockReturnValue( {} );
 			mockBatchFetch();

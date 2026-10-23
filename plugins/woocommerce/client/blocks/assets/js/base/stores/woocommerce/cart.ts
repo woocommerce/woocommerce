@@ -28,6 +28,7 @@ import {
 	type MutationResult,
 } from './mutation-batcher';
 import { doesCartItemMatchAttributes } from '../../utils/variations/does-cart-item-match-attributes';
+import { getAddedProducts } from '../../utils/get-added-products';
 
 export type WooCommerceConfig = {
 	messages?: {
@@ -146,8 +147,6 @@ type CartMutationMeta = {
 	 * announcement.
 	 */
 	origin: 'add' | 'remove';
-	/** The product and quantity added by an `'add'`-origin mutation. */
-	product?: { id: number; quantity: number };
 };
 
 // Guard to distinguish between optimistic and cart items.
@@ -493,6 +492,9 @@ function preloadA11y(): void {
  */
 let cartQueue: MutationQueue< Cart, CartMutationMeta > | null = null;
 
+// The cart as it was when the current mutation cycle started.
+let cartBeforeCycle: Cart | null = null;
+
 /**
  * Send a cart request through the queue.
  *
@@ -510,7 +512,10 @@ async function sendCartRequest(
 			getHeaders: () => ( {
 				Nonce: stateRef.nonce,
 			} ),
-			takeSnapshot: () => JSON.parse( JSON.stringify( stateRef.cart ) ),
+			takeSnapshot: () => {
+				cartBeforeCycle = JSON.parse( JSON.stringify( stateRef.cart ) );
+				return cartBeforeCycle as Cart;
+			},
 			rollback: ( snapshot ) => {
 				stateRef.cart = snapshot;
 			},
@@ -551,26 +556,11 @@ async function sendCartRequest(
 				// Preserve today's relative order: the legacy event fires
 				// before the sync event.
 				if ( anyAdd ) {
-					// Sum the quantity added per product. Keyed quantity
-					// steppers also use `'add'` origin, so skip lines whose
-					// quantity didn't go up.
-					const addedQuantities = new Map< number, number >();
-					for ( const { meta } of successful ) {
-						const { product } = meta;
-						if ( product && product.quantity > 0 ) {
-							const total =
-								addedQuantities.get( product.id ) ?? 0;
-							addedQuantities.set(
-								product.id,
-								total + product.quantity
-							);
-						}
-					}
 					triggerAddedToCartEvent( {
 						preserveCartData: true,
-						products: Array.from(
-							addedQuantities,
-							( [ id, quantity ] ) => ( { id, quantity } )
+						products: getAddedProducts(
+							cartBeforeCycle?.items ?? [],
+							stateRef.cart.items
 						),
 					} );
 				}
@@ -760,10 +750,6 @@ const { actions } = store< Store >(
 				const isUpdate = !! key;
 				const endpoint = isUpdate ? 'update-item' : 'add-item';
 
-				// Read before the optimistic update bumps `existingItem.quantity`.
-				const addedQuantity =
-					targetQuantity - ( existingItem?.quantity ?? 0 );
-
 				// Track what changes we're making for notice comparison.
 				const quantityChanges: QuantityChanges = isUpdate
 					? {
@@ -894,11 +880,7 @@ const { actions } = store< Store >(
 								JSON.stringify( state.cart )
 							);
 						},
-						meta: {
-							quantityChanges,
-							origin: 'add',
-							product: { id, quantity: addedQuantity },
-						},
+						meta: { quantityChanges, origin: 'add' },
 					} ) ) as TypeYield< typeof sendCartRequest >;
 
 					// The request settled successfully. Capture the outcome
@@ -1131,15 +1113,7 @@ const { actions } = store< Store >(
 									state.cart.items.push( itemToSend );
 								}
 							},
-							meta: {
-								...itemMeta,
-								product: {
-									id: item.id,
-									quantity:
-										quantity -
-										( existingItem?.quantity ?? 0 ),
-								},
-							},
+							meta: itemMeta,
 						} );
 					} );
 
