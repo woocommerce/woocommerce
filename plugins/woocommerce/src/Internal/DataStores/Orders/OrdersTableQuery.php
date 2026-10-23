@@ -179,6 +179,13 @@ class OrdersTableQuery {
 	private $suppress_filters = false;
 
 	/**
+	 * Whether a short first page of results can supply the total without running the count query.
+	 *
+	 * @var bool
+	 */
+	private $can_infer_first_page_total = false;
+
+	/**
 	 * Sets up and runs the query after processing arguments.
 	 *
 	 * @param array $args Array of query vars.
@@ -870,7 +877,8 @@ class OrdersTableQuery {
 		// GROUP BY.
 		$groupby = $this->groupby ? implode( ', ', (array) $this->groupby ) : '';
 
-		$pieces = compact( 'fields', 'join', 'where', 'groupby', 'orderby', 'limits' );
+		$pieces  = compact( 'fields', 'join', 'where', 'groupby', 'orderby', 'limits' );
+		$clauses = $pieces;
 
 		if ( ! $this->suppress_filters ) {
 			/**
@@ -943,6 +951,11 @@ class OrdersTableQuery {
 			$filtered_sql     = $status_union_sql ?? $this->sql;
 		}
 
+		// A short first page of a plain search already holds every match, so the count query, which repeats the
+		// search's expensive WHERE, can be skipped. Conservatively keep the count for joined queries, including
+		// full-text searches, and for queries changed by filters.
+		$this->can_infer_first_page_total = ! empty( $this->args['s'] ) && '' === $join && $clauses === $pieces && $filtered_sql === $this->sql;
+
 		$this->sql = $filtered_sql;
 
 		$this->build_count_query( $fields, $join, $where, $groupby );
@@ -966,7 +979,8 @@ class OrdersTableQuery {
 			// DISTINCT adds performance overhead, exclude the DISTINCT function when confident it is not needed.
 			$count_fields = 'COUNT(*)';
 		}
-		$this->count_sql = "SELECT $count_fields FROM $orders_table $join WHERE $where";
+		$this->count_sql      = "SELECT $count_fields FROM $orders_table $join WHERE $where";
+		$unfiltered_count_sql = $this->count_sql;
 
 		if ( ! $this->suppress_filters ) {
 			/**
@@ -984,6 +998,8 @@ class OrdersTableQuery {
 			 */
 			$this->count_sql = apply_filters_ref_array( 'woocommerce_orders_table_query_count_sql', array( $this->count_sql, &$this, $this->args, $fields, $join, $where, $groupby ) );
 		}
+
+		$this->can_infer_first_page_total = $this->can_infer_first_page_total && $this->count_sql === $unfiltered_count_sql;
 	}
 
 	/**
@@ -1466,7 +1482,13 @@ class OrdersTableQuery {
 		$row_count = (int) ( $this->limits[1] ?? 0 );
 
 		if ( $row_count > 0 || $offset > 0 ) {
-			$this->found_orders  = absint( $wpdb->get_var( $this->count_sql ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			// Compare after WordPress's normal placeholder removal to detect SQL changed during execution.
+			$first_page_holds_all = $this->can_infer_first_page_total
+				&& 0 === $offset
+				&& count( $this->orders ) < $row_count
+				&& $wpdb->last_query === $wpdb->remove_placeholder_escape( $this->sql );
+
+			$this->found_orders  = $first_page_holds_all ? count( $this->orders ) : absint( $wpdb->get_var( $this->count_sql ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 			$this->max_num_pages = $row_count > 0
 				? (int) ceil( $this->found_orders / $row_count )
 				: 0;
