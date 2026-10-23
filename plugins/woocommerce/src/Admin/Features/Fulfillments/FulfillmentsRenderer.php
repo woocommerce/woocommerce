@@ -643,7 +643,7 @@ class FulfillmentsRenderer {
 	 * Restricts the orders to those with a matching fulfillment via an `IN ( subquery )`
 	 * condition, instead of a materialized `post__in` id list.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 *
 	 * @param array  $clauses The query clauses (fields, join, where, etc).
 	 * @param object $query   The OrdersTableQuery instance.
@@ -709,7 +709,7 @@ class FulfillmentsRenderer {
 	/**
 	 * Inject the shipping provider filter into the legacy orders query clauses.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 *
 	 * @param array     $clauses The query clauses (join, where, etc).
 	 * @param \WP_Query $query   The WP_Query being filtered.
@@ -736,7 +736,7 @@ class FulfillmentsRenderer {
 	 *
 	 * Only used when the orders query can be answered without the SQL the clause filters build.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 *
 	 * @param array  $existing_restrictions The id restrictions the query already carries, if any.
 	 * @param string $shipping_provider     The shipping provider key, or the `__other__` sentinel.
@@ -767,7 +767,7 @@ class FulfillmentsRenderer {
 	 *
 	 * The returned SQL is fully prepared and safe to embed as an `IN ( ... )` subquery.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 *
 	 * @param string $shipping_provider The shipping provider key, or the `__other__` sentinel.
 	 * @return string The prepared SELECT statement returning matching order ids.
