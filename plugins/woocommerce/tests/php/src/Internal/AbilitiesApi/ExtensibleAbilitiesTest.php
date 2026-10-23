@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\Tests\Internal\AbilitiesApi;
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Abilities\ActionableAbility;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
+use Automattic\WooCommerce\Internal\Abilities\AbilityResources;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
@@ -991,7 +992,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 		ExtensibleAbilities::register_resource( 'late_resource' );
 
-		$resources = new \ReflectionProperty( ExtensibleAbilities::class, 'resources' );
+		$resources = new \ReflectionProperty( AbilityResources::class, 'resources' );
 		$resources->setAccessible( true );
 		$this->assertSame( array( 'product', 'order', 'order_item' ), array_keys( $resources->getValue() ) );
 	}
@@ -1004,7 +1005,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 		ExtensibleAbilities::register_resource( '42' );
 
-		$resources = new \ReflectionProperty( ExtensibleAbilities::class, 'resources' );
+		$resources = new \ReflectionProperty( AbilityResources::class, 'resources' );
 		$resources->setAccessible( true );
 		$this->assertSame( array(), $resources->getValue() );
 	}
@@ -1868,6 +1869,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			}
 		);
 		$this->reset_registries();
+		AbilitiesLoader::register_core_resources();
 		AbilitiesLoader::init_extensions();
 		$this->set_feature( false );
 		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
@@ -1913,6 +1915,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			}
 		);
 		$this->reset_registries();
+		AbilitiesLoader::register_core_resources();
 		AbilitiesLoader::init_extensions();
 
 		$this->assertEmpty( ExtensibleAbilities::get_validators( 'order' ) );
@@ -1925,6 +1928,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	public function test_a_late_validator_is_refused(): void {
 		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_validator' );
 		$this->reset_registries();
+		AbilitiesLoader::register_core_resources();
 		AbilitiesLoader::init_extensions();
 
 		ExtensibleAbilities::register_validator(
@@ -2114,9 +2118,11 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			$reflection->setValue( null, array() );
 		}
 
-		$reflection = new \ReflectionProperty( ExtensibleAbilities::class, 'resources' );
-		$reflection->setAccessible( true );
-		$reflection->setValue( null, array() );
+		foreach ( array( 'resources', 'fields', 'groups', 'extension_fields' ) as $property ) {
+			$reflection = new \ReflectionProperty( AbilityResources::class, $property );
+			$reflection->setAccessible( true );
+			$reflection->setValue( null, array() );
+		}
 
 		foreach ( array( 'WP_Abilities_Registry', 'WP_Ability_Categories_Registry' ) as $registry ) {
 			if ( class_exists( $registry ) ) {
