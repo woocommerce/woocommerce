@@ -638,6 +638,39 @@ class IntegrationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox On WordPress 7.2+ WooCommerce emails get the reset content and permanent delete actions from the email editor script module.
+	 */
+	public function test_registers_email_entity_actions_for_woo_email(): void {
+		if ( ! function_exists( 'wp_register_entity_actions' ) ) {
+			$this->markTestSkipped( 'The entity actions API requires WordPress 7.2.' );
+		}
+		$this->skip_if_unsupported_environment();
+		$this->bootstrap_email_editor();
+
+		$registry = new \ReflectionProperty( \WP_Entity_Actions_Registry::class, 'instance' );
+		$registry->setAccessible( true );
+		$registry->setValue( null, null );
+
+		try {
+			$email_ids = array_column( wp_get_registered_entity_actions( 'postType', Integration::EMAIL_POST_TYPE ), 'id' );
+			$modules   = wp_get_registered_entity_action_modules( 'postType', Integration::EMAIL_POST_TYPE );
+			$post_ids  = array_column( wp_get_registered_entity_actions( 'postType', 'post' ), 'id' );
+		} finally {
+			$registry->setValue( null, null );
+		}
+
+		$this->assertContains( 'reset-notification-email-content', $email_ids, 'WooCommerce emails must have the reset action' );
+		$this->assertContains( 'trash-email-post', $email_ids, 'WooCommerce emails must have the email editor\'s delete action' );
+		$this->assertNotContains( 'move-to-trash', $email_ids, 'Core\'s trash action must be replaced for WooCommerce emails' );
+		$this->assertEqualsCanonicalizing(
+			array( 'trash-email-post', 'reset-notification-email-content' ),
+			$modules[ \Automattic\WooCommerce\EmailEditor\Engine\Email_Editor::ENTITY_ACTIONS_SCRIPT_MODULE_ID ] ?? array(),
+			'Both actions must take their JavaScript parts from the email editor script module'
+		);
+		$this->assertNotContains( 'reset-notification-email-content', $post_ids, 'Other post types must not get the reset action' );
+	}
+
+	/**
 	 * @testdox Initializing the integration does not build the WC_Emails mailer, so emails registered later on init are still listed.
 	 */
 	public function test_initialize_does_not_build_the_mailer(): void {
