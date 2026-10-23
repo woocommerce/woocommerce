@@ -10,6 +10,7 @@ declare(strict_types=1);
 use Automattic\WooCommerce\Caches\OrderCountCache;
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Enums\PaymentMode;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\Orders\PaymentModeMarker;
@@ -595,9 +596,9 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 	 */
 	public function test_get_tracking_data_test_orders_by_gateway(): void {
 		$orders = array(
-			array( WC_Gateway_BACS::ID, OrderStatus::PROCESSING, 10, PaymentModeMarker::MODE_TEST ),
-			array( WC_Gateway_BACS::ID, OrderStatus::COMPLETED, 20, PaymentModeMarker::MODE_LIVE ),
-			array( WC_Gateway_BACS::ID, OrderStatus::PENDING, 40, PaymentModeMarker::MODE_TEST ),
+			array( WC_Gateway_BACS::ID, OrderStatus::PROCESSING, 10, PaymentMode::TEST ),
+			array( WC_Gateway_BACS::ID, OrderStatus::COMPLETED, 20, PaymentMode::LIVE ),
+			array( WC_Gateway_BACS::ID, OrderStatus::PENDING, 40, PaymentMode::TEST ),
 			array( WC_Gateway_COD::ID, OrderStatus::COMPLETED, 80, null ),
 		);
 		foreach ( $orders as list( $payment_method, $status, $total, $mode ) ) {

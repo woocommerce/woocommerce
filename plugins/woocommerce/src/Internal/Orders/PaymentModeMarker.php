@@ -7,6 +7,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\Orders;
 
+use Automattic\WooCommerce\Enums\PaymentMode;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 use Automattic\WooCommerce\Internal\Logging\SafeGlobalFunctionProxy;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
@@ -29,16 +30,6 @@ class PaymentModeMarker implements RegisterHooksInterface {
 	public const META_KEY = '_wc_payment_mode';
 
 	/**
-	 * Payment mode of an order paid in test mode.
-	 */
-	public const MODE_TEST = 'test';
-
-	/**
-	 * Payment mode of an order paid in live mode.
-	 */
-	public const MODE_LIVE = 'live';
-
-	/**
 	 * Order meta keys where gateways save their own mode, by gateway ID prefix.
 	 *
 	 * Matching on the prefix ignores a mode left by another gateway during an earlier payment attempt.
@@ -52,11 +43,11 @@ class PaymentModeMarker implements RegisterHooksInterface {
 	 * Values gateways save in their own mode meta, mapped to a payment mode.
 	 */
 	private const GATEWAY_MODE_VALUES = array(
-		'test'       => self::MODE_TEST,
-		'sandbox'    => self::MODE_TEST,
-		'live'       => self::MODE_LIVE,
-		'prod'       => self::MODE_LIVE,
-		'production' => self::MODE_LIVE,
+		'test'       => PaymentMode::TEST,
+		'sandbox'    => PaymentMode::TEST,
+		'live'       => PaymentMode::LIVE,
+		'prod'       => PaymentMode::LIVE,
+		'production' => PaymentMode::LIVE,
 	);
 
 	/**
@@ -105,7 +96,7 @@ class PaymentModeMarker implements RegisterHooksInterface {
 	 *
 	 * @param WC_Order           $order   The paid order.
 	 * @param WC_Payment_Gateway $gateway The order's payment gateway.
-	 * @return string One of the MODE_* constants.
+	 * @return string One of the PaymentMode constants.
 	 */
 	private function get_payment_mode( WC_Order $order, WC_Payment_Gateway $gateway ): string {
 		// Gateways built on the SkyVerge framework save `_wc_{gateway_id}_environment`.
@@ -129,6 +120,6 @@ class PaymentModeMarker implements RegisterHooksInterface {
 
 		$provider = wc_get_container()->get( PaymentsProviders::class )->get_payment_gateway_provider_instance( $gateway->id );
 
-		return $provider->is_in_test_mode( $gateway ) ? self::MODE_TEST : self::MODE_LIVE;
+		return $provider->is_in_test_mode( $gateway ) ? PaymentMode::TEST : PaymentMode::LIVE;
 	}
 }

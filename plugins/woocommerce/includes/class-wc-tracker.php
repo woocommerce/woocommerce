@@ -13,6 +13,7 @@
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Enums\PaymentMode;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\Admin\EmailImprovements\EmailImprovements;
 use Automattic\WooCommerce\Internal\CLI\Migrator\Core\MigratorTracker;
@@ -898,7 +899,7 @@ class WC_Tracker {
 			$test_orders_clause = $test_orders_only ? $wpdb->prepare(
 				"AND id IN ( SELECT order_id FROM $meta_table WHERE meta_key = %s AND meta_value = %s )",
 				PaymentModeMarker::META_KEY,
-				PaymentModeMarker::MODE_TEST
+				PaymentMode::TEST
 			) : '';
 
 			$orders_and_gateway_details = $wpdb->get_results(
@@ -916,7 +917,7 @@ class WC_Tracker {
 			$test_orders_clause = $test_orders_only ? $wpdb->prepare(
 				"AND orders.id IN ( SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = %s AND meta_value = %s )",
 				PaymentModeMarker::META_KEY,
-				PaymentModeMarker::MODE_TEST
+				PaymentMode::TEST
 			) : '';
 
 			$orders_and_gateway_details = $wpdb->get_results(

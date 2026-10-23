@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Orders;
 
 use Automattic\WooCommerce\Caches\OrderCache;
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Enums\PaymentMode;
 use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders;
 use Automattic\WooCommerce\Internal\Orders\PaymentModeMarker;
 use WC_Helper_Order;
@@ -42,6 +43,7 @@ class PaymentModeMarkerTest extends WC_Unit_Test_Case {
 			parent::tearDown();
 		} finally {
 			WC()->payment_gateways()->payment_gateways = $this->payment_gateways_before_test;
+			$this->reset_container_replacements();
 		}
 	}
 
@@ -61,7 +63,7 @@ class PaymentModeMarkerTest extends WC_Unit_Test_Case {
 	 * @param bool   $is_payment_plugins_stripe Whether the gateway comes from Payment Plugins for Stripe.
 	 */
 	public function test_prefers_mode_saved_by_gateway( string $gateway_id, string $meta_key, string $meta_value, string $expected_mode, bool $is_payment_plugins_stripe = false ): void {
-		$this->register_gateway( $gateway_id, PaymentModeMarker::MODE_LIVE === $expected_mode, $is_payment_plugins_stripe );
+		$this->register_gateway( $gateway_id, PaymentMode::LIVE === $expected_mode, $is_payment_plugins_stripe );
 		$order = $this->create_order( $gateway_id );
 		$order->update_meta_data( $meta_key, $meta_value );
 		$order->save();
@@ -87,6 +89,8 @@ class PaymentModeMarkerTest extends WC_Unit_Test_Case {
 		// Modes other gateways saved during earlier payment attempts.
 		$order->update_meta_data( '_wcpay_mode', $gateway_test_mode ? 'prod' : 'test' );
 		$order->update_meta_data( '_wc_stripe_mode', $gateway_test_mode ? 'live' : 'test' );
+		// A mode value the marker doesn't recognise.
+		$order->update_meta_data( '_wc_stripe_ideal_environment', 'staging' );
 		$order->save();
 
 		$order->payment_complete();
@@ -106,13 +110,41 @@ class PaymentModeMarkerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should complete the payment when the mode can't be determined.
+	 * @testdox Should save the mode without saving the whole order again, so order update hooks fire once.
 	 */
-	public function test_failure_does_not_break_payment_complete(): void {
+	public function test_saves_mode_without_another_order_update(): void {
+		$this->register_gateway( 'fake_gateway', true );
+		$order = $this->create_order( 'fake_gateway' );
+		// A later second than the order's last save, which would otherwise trigger a full save after a meta change.
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'current_time' => function ( $type, $gmt = 0 ) {
+					unset( $type, $gmt ); // Avoid parameter not used PHPCS errors.
+					return gmdate( 'Y-m-d H:i:s', time() + MINUTE_IN_SECONDS );
+				},
+			)
+		);
+		$update_count = did_action( 'woocommerce_update_order' );
+
+		$order->payment_complete();
+
+		$this->assertSame( PaymentMode::TEST, $this->get_saved_mode( $order ), 'The mode should be saved' );
+		$this->assertSame( 1, did_action( 'woocommerce_update_order' ) - $update_count, 'Only payment_complete() should update the order' );
+	}
+
+	/**
+	 * @testdox Should complete the payment when the mode can't be determined.
+	 *
+	 * @testWith ["RuntimeException"]
+	 *           ["TypeError"]
+	 *
+	 * @param string $exception_class Class of the error the provider throws.
+	 */
+	public function test_failure_does_not_break_payment_complete( string $exception_class ): void {
 		$this->register_gateway( 'fake_gateway', true );
 		$order     = $this->create_order( 'fake_gateway' );
 		$providers = $this->createMock( PaymentsProviders::class );
-		$providers->method( 'get_payment_gateway_provider_instance' )->willThrowException( new \RuntimeException( 'Provider failure' ) );
+		$providers->method( 'get_payment_gateway_provider_instance' )->willThrowException( new $exception_class( 'Provider failure' ) );
 		wc_get_container()->replace( PaymentsProviders::class, $providers );
 
 		$result = $order->payment_complete();
