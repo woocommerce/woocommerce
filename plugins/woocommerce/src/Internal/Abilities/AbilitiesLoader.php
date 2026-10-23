@@ -87,7 +87,8 @@ class AbilitiesLoader {
 		 * Support both old (pre-6.9) and new (6.9+) action names.
 		 */
 		AbilitiesCategories::init();
-		add_action( 'woocommerce_extensible_abilities_resources_init', array( __CLASS__, 'register_core_resources' ), 0 );
+		add_action( 'abilities_api_init', array( __CLASS__, 'register_core_resources' ), 0 );
+		add_action( 'wp_abilities_api_init', array( __CLASS__, 'register_core_resources' ), 0 );
 		add_action( 'abilities_api_init', array( __CLASS__, 'init_extensions' ), 0 );
 		add_action( 'wp_abilities_api_init', array( __CLASS__, 'init_extensions' ), 0 );
 		add_action( 'abilities_api_init', array( __CLASS__, 'register_abilities' ) );
@@ -99,7 +100,7 @@ class AbilitiesLoader {
 	}
 
 	/**
-	 * Register the resources that Core's abilities format, so extensions can register fields on them.
+	 * Register the resources that Core's abilities format and their fields, also while the extensible abilities feature is off.
 	 *
 	 * @internal
 	 *
@@ -107,8 +108,10 @@ class AbilitiesLoader {
 	 */
 	public static function register_core_resources(): void {
 		foreach ( array( 'product', 'order', 'order_item' ) as $resource_name ) {
-			ExtensibleAbilities::register_resource( $resource_name );
+			AbilityResources::register( $resource_name );
 		}
+
+		AbilityResources::register_field( 'order', 'billing_email', array( 'personal_data' => true ) );
 	}
 
 	/**
