@@ -246,11 +246,14 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				throw new Exception( esc_html( sprintf( __( 'The product with SKU (%1$s) you are trying to insert is already present in the lookup table', 'woocommerce' ), $sku ) ) );
 			}
 
-			// get the post object so that we can set the status
-			// to the correct value; it is possible that the status was
-			// changed by the woocommerce_new_product_data filter above.
+			// Sync the values generated on insert (status, slug, modified date). Text fields stay as set: WordPress
+			// unslashes them (see #69755) and they come from view-context getters, so syncing them would corrupt later saves.
 			$post_object = get_post( $product->get_id() );
-			$product->set_status( $post_object->post_status );
+			if ( $post_object instanceof WP_Post ) {
+				$product->set_status( $post_object->post_status );
+				$product->set_slug( $post_object->post_name );
+				$this->sync_date_modified( $product, $post_object->post_modified_gmt );
+			}
 
 			$this->update_post_meta( $product, true );
 			$this->update_terms( $product, true );
@@ -318,6 +321,22 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	}
 
 	/**
+	 * Put the stored modified date on the product, only when it differs, so an unchanged date is not reported as a change.
+	 *
+	 * @param WC_Product $product           Product object.
+	 * @param string     $post_modified_gmt Stored modified date in GMT, in MySQL format.
+	 * @return void
+	 */
+	private function sync_date_modified( WC_Product $product, string $post_modified_gmt ): void {
+		$timestamp     = $this->string_to_timestamp( $post_modified_gmt );
+		$date_modified = $product->get_date_modified( 'edit' );
+
+		if ( ! $date_modified || $date_modified->getTimestamp() !== $timestamp ) {
+			$product->set_date_modified( $timestamp );
+		}
+	}
+
+	/**
 	 * Method to update a product in the database.
 	 *
 	 * @param WC_Product $product Product object.
@@ -364,23 +383,33 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			if ( doing_action( 'save_post' ) ) {
 				$GLOBALS['wpdb']->update( $GLOBALS['wpdb']->posts, $post_data, array( 'ID' => $product->get_id() ) );
 				clean_post_cache( $product->get_id() );
+				$this->sync_date_modified( $product, $post_data['post_modified_gmt'] );
 			} else {
 				wp_update_post( array_merge( array( 'ID' => $product->get_id() ), $post_data ) );
+
+				// WordPress generates the slug on publish and makes it unique, so sync it back with the modified date.
+				$post_object = get_post( $product->get_id() );
+				if ( $post_object instanceof WP_Post ) {
+					$product->set_slug( $post_object->post_name );
+					$this->sync_date_modified( $product, $post_object->post_modified_gmt );
+				}
 			}
 			$product->read_meta_data( true ); // Refresh internal meta data, in case things were hooked into `save_post` or another WP hook.
 
 		} else { // Only update post modified time to record this save event.
+			$post_modified_gmt = current_time( 'mysql', 1 );
 			$GLOBALS['wpdb']->update(
 				$GLOBALS['wpdb']->posts,
 				array(
 					'post_modified'     => current_time( 'mysql' ),
-					'post_modified_gmt' => current_time( 'mysql', 1 ),
+					'post_modified_gmt' => $post_modified_gmt,
 				),
 				array(
 					'ID' => $product->get_id(),
 				)
 			);
 			clean_post_cache( $product->get_id() );
+			$this->sync_date_modified( $product, $post_modified_gmt );
 		}
 
 		$this->update_post_meta( $product );
@@ -1017,6 +1046,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 			if ( empty( $categories ) && get_option( 'default_product_cat', 0 ) ) {
 				$categories = array( get_option( 'default_product_cat', 0 ) );
+				$product->set_category_ids( $categories );
 			}
 
 			wp_set_post_terms( $product->get_id(), $categories, 'product_cat', false );
