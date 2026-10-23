@@ -77,6 +77,7 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 				$item_costs   = null === $split_values ? array( reset( $order_item_tax_classes ) => $item_total ) : ShippingTaxSplit::split_cost( $item_total, $split_values );
 
 				foreach ( $item_costs as $tax_class => $cost ) {
+					$tax_class           = ShippingTaxSplit::NON_TAXABLE === $tax_class ? 'non-taxable' : $tax_class;
 					$costs[ $tax_class ] = ( $costs[ $tax_class ] ?? 0 ) + $cost;
 				}
 			} else {

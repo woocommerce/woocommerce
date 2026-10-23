@@ -16,9 +16,11 @@ use Automattic\WooCommerce\Utilities\NumberUtil;
 class ShippingTaxSplit {
 
 	/**
-	 * Key for the value of items whose shipping is not taxed, as in the negative fee proration.
+	 * Key for the value of items whose shipping is not taxed.
+	 *
+	 * The colon keeps it apart from tax class slugs, which sanitize_title() strips colons from, so a class slugged 'non-taxable' is still taxed.
 	 */
-	const NON_TAXABLE = 'non-taxable';
+	const NON_TAXABLE = ':non-taxable';
 
 	/**
 	 * Meta key on a shipping rate, and the order line made from it, for its cost before tax per tax class.

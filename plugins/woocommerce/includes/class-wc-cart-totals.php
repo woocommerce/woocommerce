@@ -265,10 +265,18 @@ final class WC_Cart_Totals {
 			if ( ! $item->taxable ) {
 				$costs['non-taxable'] += $item->total;
 			} elseif ( ShippingTaxSplit::is_based_on_items( $item->tax_class ) ) {
-				$split_values = $item->object instanceof WC_Shipping_Rate ? wc_get_container()->get( ShippingTaxSplit::class )->get_rate_values( $item->object ) : null;
-				$item_costs   = null === $split_values ? array( reset( $item_tax_classes ) => $item->total ) : ShippingTaxSplit::split_cost( (float) $item->total, $split_values );
+				$split_values = null;
+
+				if ( $item->object instanceof WC_Shipping_Rate ) {
+					// A rate with no split of its own, such as one taxed per item, is split by the cart, as the order line made from it is.
+					$shipping_tax_split = wc_get_container()->get( ShippingTaxSplit::class );
+					$split_values       = $shipping_tax_split->get_rate_values( $item->object ) ?? $shipping_tax_split->get_package_values( false );
+				}
+
+				$item_costs = null === $split_values ? array( reset( $item_tax_classes ) => $item->total ) : ShippingTaxSplit::split_cost( (float) $item->total, $split_values );
 
 				foreach ( $item_costs as $tax_class => $cost ) {
+					$tax_class           = ShippingTaxSplit::NON_TAXABLE === $tax_class ? 'non-taxable' : $tax_class;
 					$costs[ $tax_class ] = ( $costs[ $tax_class ] ?? 0 ) + $cost;
 				}
 			} else {

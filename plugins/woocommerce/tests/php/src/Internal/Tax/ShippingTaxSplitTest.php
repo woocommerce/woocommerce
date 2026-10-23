@@ -64,7 +64,7 @@ class ShippingTaxSplitTest extends WC_Unit_Test_Case {
 	 * @testdox The cost is split in proportion to the values, with the rounding remainder on the largest part.
 	 *
 	 * @testWith [10.0, {"": 10, "zero-rate": 90}, {"": 1.0, "zero-rate": 9.0}]
-	 *           [10.0, {"": 1, "zero-rate": 1, "non-taxable": 1}, {"": 3.34, "zero-rate": 3.33, "non-taxable": 3.33}]
+	 *           [10.0, {"": 1, "zero-rate": 1, ":non-taxable": 1}, {"": 3.34, "zero-rate": 3.33, ":non-taxable": 3.33}]
 	 *           [10.0, {"": 1, "zero-rate": 1, "reduced-rate": 1.5}, {"": 2.86, "zero-rate": 2.86, "reduced-rate": 4.28}]
 	 *
 	 * @param float $cost     Cost to split.
@@ -243,6 +243,67 @@ class ShippingTaxSplitTest extends WC_Unit_Test_Case {
 
 		// Standard rate items and their 1.00 of shipping are 11 of the 110 total: 20% of -1.00.
 		$this->assertEqualsWithDelta( -0.2, (float) $fee_tax, 0.001 );
+	}
+
+	/**
+	 * @testdox A negative fee gets the same tax in the cart and the order when the rate was taxed per item and has no split of its own.
+	 */
+	public function test_negative_fee_tax_with_a_rate_taxed_per_item(): void {
+		update_option( 'woocommerce_shipping_tax_class', ShippingTaxClass::SPLIT_BY_ITEM_VALUE );
+		add_filter(
+			'woocommerce_shipping_method_add_rate_args',
+			function ( $args ) {
+				return array_merge( $args, array( 'calc_tax' => 'per_item' ) );
+			}
+		);
+		add_action(
+			'woocommerce_cart_calculate_fees',
+			function ( $cart ) {
+				$cart->add_fee( 'Discount', -10, true );
+			}
+		);
+
+		$this->fill_cart( $this->create_products( array( array( '', ProductTaxStatus::TAXABLE, 10, false ), array( 'zero-rate', ProductTaxStatus::TAXABLE, 90, false ) ) ) );
+		WC()->cart->calculate_totals();
+		$fees  = WC()->cart->get_fees();
+		$order = $this->create_order_from_cart();
+		WC()->checkout()->create_order_fee_lines( $order, WC()->cart );
+		$order->calculate_totals();
+		$order_fees = $order->get_fees();
+		$order_fee  = reset( $order_fees );
+		$this->assertInstanceOf( WC_Order_Item_Fee::class, $order_fee );
+
+		// Shipping is split by the items on both sides: standard rate items and their 1.00 of shipping are 11 of the 110 total.
+		$this->assertEqualsWithDelta( -0.2, (float) reset( $fees )->tax, 0.001 );
+		$this->assertEqualsWithDelta( -0.2, (float) $order_fee->get_total_tax(), 0.001 );
+	}
+
+	/**
+	 * @testdox Items in a taxable class slugged non-taxable are still taxed on their share of shipping.
+	 */
+	public function test_class_slugged_non_taxable_is_taxed(): void {
+		update_option( 'woocommerce_shipping_tax_class', ShippingTaxClass::SPLIT_BY_ITEM_VALUE );
+		$tax_class = WC_Tax::create_tax_class( 'Non-taxable' );
+		$this->assertIsArray( $tax_class );
+		$slug = $tax_class['slug'];
+		WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate'          => '20.0000',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_shipping' => '1',
+				'tax_rate_class'    => $slug,
+			)
+		);
+
+		$this->fill_cart( $this->create_products( array( array( $slug, ProductTaxStatus::TAXABLE, 10, false ), array( '', ProductTaxStatus::TAXABLE, 10, false ) ) ) );
+		WC()->cart->calculate_totals();
+
+		// Both halves of the 10.00 are taxed at 20%.
+		$this->assertSame( 'non-taxable', $slug );
+		$this->assertEqualsWithDelta( 2.0, (float) WC()->cart->get_shipping_tax(), 0.001 );
+		$this->assertEqualsWithDelta( 2.0, (float) $this->create_order_from_cart()->get_shipping_tax(), 0.001 );
 	}
 
 	/**
