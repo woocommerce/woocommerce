@@ -58446,7 +58446,7 @@ parameters:
 		-
 			message: '#^Instanceof between WC_Abstract_Order and WC_Abstract_Order will always evaluate to true\.$#'
 			identifier: instanceof.alwaysTrue
-			count: 3
+			count: 2
 			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
 
 		-
