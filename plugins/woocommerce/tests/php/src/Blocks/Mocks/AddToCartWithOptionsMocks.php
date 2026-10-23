@@ -23,6 +23,20 @@ class AddToCartWithOptionsMocks {
 	);
 
 	/**
+	 * Get mock classes keyed by full block name, for per-test registry replacement.
+	 *
+	 * @param string ...$block_names Block names without the namespace; omit to get all mocks.
+	 * @return array<string, string>
+	 */
+	public static function get_mock_classes( string ...$block_names ): array {
+		$mock_classes = array();
+		foreach ( $block_names ? $block_names : array_keys( self::MOCKS ) as $block_name ) {
+			$mock_classes[ 'woocommerce/' . $block_name ] = self::MOCKS[ $block_name ];
+		}
+		return $mock_classes;
+	}
+
+	/**
 	 * Register the given mock blocks, skipping any already registered, since the registry outlives a test.
 	 *
 	 * @param string ...$block_names Block names without the `woocommerce/` namespace.
