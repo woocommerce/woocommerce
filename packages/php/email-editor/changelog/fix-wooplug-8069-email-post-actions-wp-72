@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Show the email editor's delete action instead of core's "Trash…" on WordPress 7.2 for email post types that opt in with the woocommerce_email_editor_replace_trash_action filter.

@@ -25201,12 +25201,6 @@ parameters:
 			path: includes/rest-api/Controllers/Version2/class-wc-rest-network-orders-v2-controller.php
 
 		-
-			message: '#^Argument of an invalid type array\<int\|WP_Comment\>\|int supplied for foreach, only iterables are supported\.$#'
-			identifier: foreach.nonIterable
-			count: 1
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-order-notes-v2-controller.php
-
-		-
 			message: '#^Function remove_filter invoked with 4 parameters, 2\-3 required\.$#'
 			identifier: arguments.count
 			count: 1
@@ -25238,12 +25232,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$comment_id of function get_comment_meta expects int, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-order-notes-v2-controller.php
-
-		-
-			message: '#^Parameter \#1 \$note of method WC_REST_Order_Notes_V2_Controller\:\:prepare_item_for_response\(\) expects WP_Comment, int\|WP_Comment given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/rest-api/Controllers/Version2/class-wc-rest-order-notes-v2-controller.php

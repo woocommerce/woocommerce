@@ -593,10 +593,7 @@ jQuery( function ( $ ) {
 							$( '#woocommerce-order-items' ).find( '.inside' ).append( response.data.html );
 
 							// Update notes.
-							const notesEl = document.querySelector( '#woocommerce-order-notes ul.order_notes' );
-							if ( notesEl && response.data && typeof response.data.notes_html === 'string' ) {
-								notesEl.outerHTML = response.data.notes_html;
-							}
+							wc_meta_boxes_order_notes.load_notes( 1 );
 
 							wc_meta_boxes_order_items.reloaded_items();
 							wc_meta_boxes_order_items.unblock();
@@ -622,6 +619,7 @@ jQuery( function ( $ ) {
 
 			var data = $.extend( {}, wc_meta_boxes_order_items.get_taxable_address(), {
 				action : 'woocommerce_remove_order_coupon',
+				paginate_notes: true,
 				dataType : 'json',
 				order_id : woocommerce_admin_meta_boxes.post_id,
 				security : woocommerce_admin_meta_boxes.order_item_nonce,
@@ -637,8 +635,7 @@ jQuery( function ( $ ) {
 
 					// Update notes.
 					if ( response.data.notes_html ) {
-						$( 'ul.order_notes' ).empty();
-						$( 'ul.order_notes' ).append( $( response.data.notes_html ).find( 'li' ) );
+						wc_meta_boxes_order_notes.load_notes( 1 );
 					}
 
 					wc_meta_boxes_order_items.reloaded_items();
@@ -855,6 +852,7 @@ jQuery( function ( $ ) {
 					order_id      : woocommerce_admin_meta_boxes.post_id,
 					order_item_ids: order_item_id,
 					action        : 'woocommerce_remove_order_item',
+					paginate_notes: true,
 					security      : woocommerce_admin_meta_boxes.order_item_nonce
 				} );
 
@@ -875,10 +873,7 @@ jQuery( function ( $ ) {
 							$( '#woocommerce-order-items' ).find( '.inside' ).append( response.data.html );
 
 							// Update notes.
-							const notesEl = document.querySelector( '#woocommerce-order-notes ul.order_notes' );
-							if ( notesEl && response.data && typeof response.data.notes_html === 'string' ) {
-								notesEl.outerHTML = response.data.notes_html;
-							}
+							wc_meta_boxes_order_notes.load_notes( 1 );
 
 							wc_meta_boxes_order_items.reloaded_items();
 							wc_meta_boxes_order_items.unblock();
@@ -1027,6 +1022,7 @@ jQuery( function ( $ ) {
 				order_id: woocommerce_admin_meta_boxes.post_id,
 				items:    $( 'table.woocommerce_order_items :input[name], .wc-order-totals-items :input[name]' ).serialize(),
 				action:   'woocommerce_save_order_items',
+				paginate_notes: true,
 				security: woocommerce_admin_meta_boxes.order_item_nonce
 			};
 
@@ -1045,8 +1041,7 @@ jQuery( function ( $ ) {
 
 						// Update notes.
 						if ( response.data.notes_html ) {
-							$( 'ul.order_notes' ).empty();
-							$( 'ul.order_notes' ).append( $( response.data.notes_html ).find( 'li' ) );
+							wc_meta_boxes_order_notes.load_notes( 1 );
 						}
 
 						wc_meta_boxes_order_items.reloaded_items();
@@ -1776,6 +1771,7 @@ jQuery( function ( $ ) {
 
 				var data = $.extend( {}, wc_meta_boxes_order_items.get_taxable_address(), {
 					action   : 'woocommerce_add_order_item',
+					paginate_notes: true,
 					order_id : woocommerce_admin_meta_boxes.post_id,
 					security : woocommerce_admin_meta_boxes.order_item_nonce,
 					data     : add_items
@@ -1798,10 +1794,7 @@ jQuery( function ( $ ) {
 							$( '#woocommerce-order-items' ).find( '.inside' ).append( response.data.html );
 
 							// Update notes.
-							const notesEl = document.querySelector( '#woocommerce-order-notes ul.order_notes' );
-							if ( notesEl && response.data && typeof response.data.notes_html === 'string' ) {
-								notesEl.outerHTML = response.data.notes_html;
-							}
+							wc_meta_boxes_order_notes.load_notes( 1 );
 
 							wc_meta_boxes_order_items.reloaded_items();
 							wc_meta_boxes_order_items.unblock();
@@ -1894,6 +1887,9 @@ jQuery( function ( $ ) {
 	 * Order Notes Panel
 	 */
 	var wc_meta_boxes_order_notes = {
+		loading: false,
+		pending_page: null,
+
 		init: function() {
 			$( '#woocommerce-order-notes' )
 				.on( 'click', 'button.add_note', this.add_order_note )
@@ -1902,6 +1898,128 @@ jQuery( function ( $ ) {
 
 			// Sync the CTA + helper link to reflect the current select state on load.
 			$( 'select#order_note_type' ).trigger( 'change' );
+
+			var panel = document.getElementById( 'woocommerce-order-notes' );
+			if ( ! panel || panel.dataset.paginationInitialized ) {
+				return;
+			}
+			panel.dataset.paginationInitialized = 'true';
+
+			panel.addEventListener( 'click', function( event ) {
+				if ( event.target.closest( '.order-notes-retry' ) ) {
+					wc_meta_boxes_order_notes.load_notes( Number( panel.querySelector( '.order-notes-error' ).dataset.page ) );
+					return;
+				}
+				var button = event.target.closest( '[data-page-action]' );
+				if ( ! button || button.disabled ) {
+					return;
+				}
+				var pagination = button.closest( '.order-notes-pagination' );
+				var currentPage = Number( pagination.dataset.page );
+				var pages = {
+					first: 1,
+					previous: currentPage - 1,
+					next: currentPage + 1,
+					last: Number( pagination.dataset.totalPages )
+				};
+				wc_meta_boxes_order_notes.load_notes( pages[ button.dataset.pageAction ] );
+			} );
+
+			panel.addEventListener( 'change', function( event ) {
+				if ( event.target.id === 'order-notes-page' ) {
+					wc_meta_boxes_order_notes.change_page( event.target );
+				}
+			} );
+			panel.addEventListener( 'keydown', function( event ) {
+				if ( event.target.id === 'order-notes-page' && event.key === 'Enter' ) {
+					event.preventDefault();
+					wc_meta_boxes_order_notes.change_page( event.target );
+				}
+			} );
+		},
+
+		change_page: function( input ) {
+			var pagination = input.closest( '.order-notes-pagination' );
+			var currentPage = Number( pagination.dataset.page );
+			var requestedPage = Number( input.value );
+			var page = Number.isFinite( requestedPage )
+				? Math.max( 1, Math.min( Math.trunc( requestedPage ), Number( input.max ) ) )
+				: currentPage;
+			input.value = page;
+			if ( page !== currentPage ) {
+				wc_meta_boxes_order_notes.load_notes( page );
+			}
+		},
+
+		load_notes: function( page ) {
+			var panel = document.getElementById( 'woocommerce-order-notes' );
+			var list = panel && panel.querySelector( '.order-notes-list' );
+			if ( ! list ) {
+				return;
+			}
+			if ( wc_meta_boxes_order_notes.loading ) {
+				wc_meta_boxes_order_notes.pending_page = page || Number( panel.querySelector( '.order-notes-pagination' ).dataset.page );
+				return;
+			}
+
+			var pagination = panel.querySelector( '.order-notes-pagination' );
+			var activeElement = document.activeElement;
+			var restoreFocus = !! activeElement && pagination.contains( activeElement );
+			var pageAction = activeElement && activeElement.dataset ? activeElement.dataset.pageAction : undefined;
+			var error = panel.querySelector( '.order-notes-error' );
+			var requestedPage = page || Number( pagination.dataset.page );
+			var show_error = function() {
+				error.dataset.page = requestedPage;
+				error.hidden = false;
+				panel.querySelector( '#order-notes-page' ).value = pagination.dataset.page;
+			};
+			error.hidden = true;
+			list.setAttribute( 'aria-busy', 'true' );
+			wc_meta_boxes_order_notes.loading = true;
+			$( panel ).block( {
+				message: null,
+				overlayCSS: { background: '#fff', opacity: 0.6 }
+			} );
+
+			$.ajax( {
+				url: woocommerce_admin_meta_boxes.ajax_url,
+				type: 'POST',
+				dataType: 'json',
+				data: {
+					action: 'woocommerce_get_order_notes',
+					order_id: woocommerce_admin_meta_boxes.post_id,
+					page: requestedPage,
+					security: woocommerce_admin_meta_boxes.get_order_notes_nonce
+				},
+				success: function( response ) {
+					if ( ! response || ! response.success || ! response.data || typeof response.data.html !== 'string' ) {
+						show_error();
+						return;
+					}
+					list.innerHTML = response.data.html;
+					if ( window.wp && window.wp.a11y && typeof window.wp.a11y.speak === 'function' ) {
+						var announcement = list.querySelector( '.order-notes-page-announcement' ).textContent.trim();
+						var count = list.querySelector( '.order-notes-count' ).textContent.trim();
+						window.wp.a11y.speak( announcement + ' ' + count, 'polite' );
+					}
+				},
+				error: show_error,
+				complete: function() {
+					wc_meta_boxes_order_notes.loading = false;
+					list.removeAttribute( 'aria-busy' );
+					$( panel ).unblock();
+					if ( restoreFocus && ( document.activeElement === document.body || document.activeElement === activeElement ) ) {
+						var button = pageAction && list.querySelector( '[data-page-action="' + pageAction + '"]' );
+						var target = button && ! button.disabled ? button : list.querySelector( '#order-notes-page' );
+						target.focus();
+					}
+					if ( wc_meta_boxes_order_notes.pending_page !== null ) {
+						var nextPage = wc_meta_boxes_order_notes.pending_page;
+						wc_meta_boxes_order_notes.pending_page = null;
+						wc_meta_boxes_order_notes.load_notes( nextPage );
+					}
+				}
+			} );
 		},
 
 		update_note_type_ui: function() {
@@ -1939,9 +2057,11 @@ jQuery( function ( $ ) {
 			};
 
 			$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
-				$( 'ul.order_notes .no-items' ).remove();
-				$( 'ul.order_notes' ).prepend( response );
-				$( '#woocommerce-order-notes' ).unblock();
+				if ( ! response || '-1' === response.trim() ) {
+					$( '#woocommerce-order-notes' ).unblock();
+					return;
+				}
+				wc_meta_boxes_order_notes.load_notes( 1 );
 				$( '#add_order_note' ).val( '' );
 
 				// Announce the result to screen readers (WCAG 4.1.3).
@@ -1959,7 +2079,9 @@ jQuery( function ( $ ) {
 					note_type: data.note_type || 'private',
 					status: $( '#order_status' ).val()
 				} );
-			});
+			}).fail( function() {
+				$( '#woocommerce-order-notes' ).unblock();
+			} );
 
 			return false;
 		},
@@ -1986,7 +2108,11 @@ jQuery( function ( $ ) {
 					security: woocommerce_admin_meta_boxes.delete_order_note_nonce
 				};
 
-				$.post( woocommerce_admin_meta_boxes.ajax_url, data, function() {
+				$.post( woocommerce_admin_meta_boxes.ajax_url, data, function( response ) {
+					$( note ).unblock();
+					if ( '-1' === String( response ).trim() ) {
+						return;
+					}
 					if ( window.wcTracks && window.wcTracks.recordEvent ) {
 						var noteType = note.hasClass( 'customer-note' ) ? 'customer' : 'private';
 						var dateStr  = note.find( '.exact-date' ).attr( 'title' );
@@ -2001,12 +2127,10 @@ jQuery( function ( $ ) {
 							seconds_since_added: seconds
 						} );
 					}
-					$( note ).remove();
-					var $list = $( 'ul.order_notes' );
-					if ( 0 === $list.find( 'li.note' ).length ) {
-						$list.append( $( '<li class="no-items"></li>' ).text( woocommerce_admin_meta_boxes.i18n_no_notes_yet ) );
-					}
-				});
+					wc_meta_boxes_order_notes.load_notes();
+				}).fail( function() {
+					$( note ).unblock();
+				} );
 			}
 
 			return false;
