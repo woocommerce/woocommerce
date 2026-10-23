@@ -1,0 +1,286 @@
+// Prototype styles for Purple in "Customize your store" (behind the purple-cys-prototype flag).
+
+.purple-cys-task-page {
+	display: flex;
+	flex-direction: column;
+	gap: var(--wpds-dimension-gap-lg);
+	max-width: 1040px;
+	margin: var(--wpds-dimension-gap-2xl) auto;
+
+	h1 {
+		margin: 0;
+	}
+}
+
+.purple-cys-options {
+	display: flex;
+	flex-direction: column;
+	gap: var(--wpds-dimension-gap-lg);
+}
+
+.purple-cys-theme-card {
+	// A visible outline, like the other task pages' cards (for example, Collect sales tax).
+	border-color: var(--wpds-color-stroke-surface-neutral);
+
+	h2,
+	p {
+		margin: 0;
+	}
+
+	&__content {
+		display: flex;
+		gap: var(--wpds-dimension-gap-2xl);
+		align-items: stretch;
+	}
+
+	// The text column sets the card height, so the image is positioned out of the flow.
+	&__media {
+		position: relative;
+		flex: 0 0 360px;
+		border: 1px solid var(--wpds-color-stroke-surface-neutral);
+		border-radius: var(--wpds-border-radius-md);
+		overflow: hidden;
+		background: var(--wpds-color-background-track-neutral-weak);
+
+		> img {
+			position: absolute;
+			inset: 0;
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+			object-position: top left;
+		}
+	}
+
+	&__body {
+		flex: 1;
+		min-width: 0;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: flex-start;
+		gap: var(--wpds-dimension-gap-md);
+	}
+
+	&__description,
+	&__helper {
+		color: var(--wpds-color-foreground-content-neutral-weak);
+	}
+
+	&__actions {
+		display: flex;
+		align-items: center;
+		gap: var(--wpds-dimension-gap-md);
+	}
+
+	&--purple &__actions {
+		margin-block-start: var(--wpds-dimension-gap-md);
+	}
+
+	&--purple &__helper {
+		&.is-error {
+			color: var(--wpds-color-foreground-content-error);
+
+			svg {
+				fill: currentColor;
+				vertical-align: top;
+				margin-inline-end: var(--wpds-dimension-gap-xs);
+			}
+		}
+	}
+
+
+	&--marketplace &__content,
+	&--current-theme &__content {
+		min-height: 240px;
+	}
+
+
+	&__thumbnails {
+		position: absolute;
+		inset: var(--wpds-dimension-padding-lg);
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		grid-template-rows: repeat(2, minmax(0, 1fr));
+		gap: var(--wpds-dimension-gap-sm);
+
+		img {
+			width: 100%;
+			height: 100%;
+			object-fit: cover;
+			object-position: top left;
+			border-radius: var(--wpds-border-radius-sm);
+		}
+	}
+
+
+	@media (max-width: 782px) {
+		&__content {
+			flex-direction: column;
+		}
+
+		&__media {
+			flex-basis: auto;
+			aspect-ratio: 3 / 2;
+		}
+	}
+}
+
+.purple-cys-success {
+	border-color: var(--wpds-color-stroke-surface-neutral);
+
+	h2,
+	p {
+		margin: 0;
+	}
+
+	&__content {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: var(--wpds-dimension-gap-md);
+		padding-block: var(--wpds-dimension-padding-3xl) 48px;
+		text-align: center;
+	}
+
+	&__image {
+		display: block;
+		width: 100%;
+		max-width: 560px;
+		margin-block-end: var(--wpds-dimension-gap-md);
+		border: 1px solid var(--wpds-color-stroke-surface-neutral);
+		border-radius: var(--wpds-border-radius-md);
+	}
+
+	&__description {
+		max-width: 480px;
+		color: var(--wpds-color-foreground-content-neutral-weak);
+	}
+
+	// The link sits under the main button.
+	&__actions {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: var(--wpds-dimension-gap-md);
+		margin-block-start: var(--wpds-dimension-gap-md);
+	}
+}
+
+// The `@wordpress/ui` button icon has no fill rule here, so it would fall back to black.
+.purple-cys-link-button svg {
+	fill: currentColor;
+}
+
+// wp-admin's unlayered link styles beat the `@wordpress/ui` button styles, which live in a cascade layer.
+a.purple-cys-link-button {
+	&,
+	&:hover,
+	&:active,
+	&:focus {
+		color: revert-layer;
+		box-shadow: revert-layer;
+		outline: revert-layer;
+		text-decoration: revert-layer;
+	}
+}
+
+.purple-cys-benefits {
+	display: flex;
+	flex-direction: column;
+	gap: var(--wpds-dimension-gap-sm);
+	margin: 0;
+	padding: 0;
+	list-style: none;
+
+	li {
+		display: flex;
+		align-items: flex-start;
+		gap: var(--wpds-dimension-gap-md);
+		margin: 0;
+	}
+
+	svg {
+		flex-shrink: 0;
+		fill: currentColor;
+	}
+}
+
+.purple-cys-modal {
+	h1,
+	h2,
+	p {
+		margin: 0;
+	}
+
+	&__sidebar {
+		gap: var(--wpds-dimension-gap-lg);
+		padding: 42px var(--wpds-dimension-padding-2xl) 0;
+		box-sizing: border-box;
+	}
+
+	&__sidebar-description,
+	&__subtitle {
+		color: var(--wpds-color-foreground-content-neutral-weak);
+	}
+
+	&__header {
+		display: flex;
+		align-items: flex-start;
+		justify-content: space-between;
+		gap: var(--wpds-dimension-gap-lg);
+		padding: var(--wpds-dimension-padding-3xl) var(--wpds-dimension-padding-3xl) var(--wpds-dimension-padding-2xl);
+		border-bottom: 1px solid var(--wpds-color-stroke-surface-neutral);
+		flex-shrink: 0;
+	}
+
+	&__title {
+		display: flex;
+		flex-direction: column;
+		gap: var(--wpds-dimension-gap-sm);
+	}
+
+	// The three sections are taller than the Payments panel, so the body scrolls.
+	&__body {
+		flex: 1;
+		min-height: 0;
+		overflow-y: auto;
+		display: flex;
+		flex-direction: column;
+
+		> .purple-cys-notice {
+			margin: var(--wpds-dimension-padding-2xl) var(--wpds-dimension-padding-3xl) 0;
+		}
+	}
+
+	// In the modal the cards are full-width sections split by dividers, without their own border.
+	.purple-cys-options {
+		gap: 0;
+	}
+
+	.purple-cys-theme-card {
+		border: 0;
+		border-radius: 0;
+		background: transparent;
+
+		+ .purple-cys-theme-card {
+			border-top: 1px solid var(--wpds-color-stroke-surface-neutral);
+		}
+	}
+
+	.purple-cys-theme-card__content {
+		padding: var(--wpds-dimension-padding-2xl) var(--wpds-dimension-padding-3xl);
+	}
+
+	.purple-cys-success {
+		border: 0;
+		border-radius: 0;
+		background: transparent;
+	}
+
+}
+
+// Keep the "Purple prototype" admin bar menu usable while the modal is open.
+body:has(.purple-cys-modal) #wpadminbar {
+	z-index: 100001;
+}
