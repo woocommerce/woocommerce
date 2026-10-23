@@ -167,10 +167,6 @@ class ProductButton extends AbstractBlock {
 			$product
 		);
 
-		if ( isset( $args['attributes']['aria-label'] ) ) {
-			$args['attributes']['aria-label'] = wp_strip_all_tags( $args['attributes']['aria-label'] );
-		}
-
 		// Single-product forms take their quantity from the quantity input.
 		$default_quantity = 1;
 		if ( ! $is_descendant_of_add_to_cart_form && isset( $args['quantity'] ) && is_numeric( $args['quantity'] ) ) {
