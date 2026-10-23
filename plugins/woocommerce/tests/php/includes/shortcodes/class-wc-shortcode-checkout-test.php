@@ -303,6 +303,54 @@ class WC_Shortcode_Checkout_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The pay page should prefer the merchant-assigned method over a default payment method callback that returns nothing.
+	 */
+	public function test_order_pay_prefers_merchant_assigned_gateway_over_the_default_payment_method_callback(): void {
+		$this->enable_gateways( array( WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID ) );
+		$order = $this->create_pending_order( 'admin', WC_Gateway_Cheque::ID );
+		add_filter( 'woocommerce_default_payment_method', '__return_empty_string' );
+
+		$output = $this->render_pay_page( $order );
+
+		$this->assertSame( array( WC_Gateway_Cheque::ID ), $this->get_checked_gateways( $output ) );
+		$this->assertStringContainsString( 'data-preselected="yes"', $output, 'The list should tell checkout.js a method is selected.' );
+	}
+
+	/**
+	 * @testdox The pay page should leave nothing selected for an order the shopper placed when the default payment method callback returns nothing.
+	 */
+	public function test_order_pay_leaves_nothing_selected_when_the_default_payment_method_callback_returns_nothing(): void {
+		$this->enable_gateways( array( WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID ) );
+		$order = $this->create_pending_order( 'checkout', WC_Gateway_Cheque::ID );
+		add_filter( 'woocommerce_default_payment_method', '__return_empty_string' );
+
+		$output = $this->render_pay_page( $order );
+
+		$this->assertSame( array(), $this->get_checked_gateways( $output ) );
+		$this->assertStringContainsString( 'data-preselected="no"', $output, 'The list should tell checkout.js not to select the first method.' );
+		$this->assertStringContainsString( 'id="payment_method_' . WC_Gateway_BACS::ID . '"', $output, 'The gateways should still be offered.' );
+	}
+
+	/**
+	 * @testdox The pay page should pre-select the method the default payment method callback picks for an order the shopper placed.
+	 */
+	public function test_order_pay_preselects_the_gateway_the_default_payment_method_callback_picks(): void {
+		$this->enable_gateways( array( WC_Gateway_BACS::ID, WC_Gateway_Cheque::ID ) );
+		$order = $this->create_pending_order( 'checkout', WC_Gateway_Cheque::ID );
+		$this->put_gateway_first( WC_Gateway_Cheque::ID );
+		add_filter(
+			'woocommerce_default_payment_method',
+			function () {
+				return WC_Gateway_BACS::ID;
+			}
+		);
+
+		$output = $this->render_pay_page( $order );
+
+		$this->assertSame( array( WC_Gateway_BACS::ID ), $this->get_checked_gateways( $output ) );
+	}
+
+	/**
 	 * @testdox The pay page should fall back to the default selection when the assigned method is no longer available.
 	 */
 	public function test_order_pay_falls_back_when_assigned_gateway_is_unavailable(): void {
