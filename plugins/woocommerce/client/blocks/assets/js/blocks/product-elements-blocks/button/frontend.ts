@@ -13,6 +13,7 @@ import type {
 	Context as AddToCartWithOptionsContext,
 	AddToCartWithOptionsStore,
 } from '../../add-to-cart-with-options/frontend';
+import { getInCartQuantity } from './utils';
 
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
@@ -27,6 +28,8 @@ interface Context {
 	animationStatus: AnimationStatus;
 	hasPressedButton: boolean;
 	inTheCartText: string;
+	addToCartAriaLabel: string;
+	inTheCartAriaLabel: string;
 }
 
 enum AnimationStatus {
@@ -63,6 +66,7 @@ const { state: productsState } = store< ProductsStore >(
 
 const productButtonStore = {
 	state: {
+		/** Get the quantity of the current product in the cart. */
 		get quantity(): number {
 			const product = productsState.productInContext;
 
@@ -74,12 +78,16 @@ const productButtonStore = {
 				'woocommerce/add-to-cart-with-options'
 			);
 
-			const item = wooState.findItemInCart( {
-				id: product.id,
-				variation: formContext?.selectedAttributes,
-			} );
+			const selectedAttributes = productsState.productVariationInContext
+				? ( formContext?.selectedAttributes ?? [] )
+				: undefined;
 
-			return item?.quantity ?? 0;
+			return getInCartQuantity( wooState.cart?.items ?? [], {
+				id: product.id,
+				...( selectedAttributes !== undefined && {
+					selectedAttributes,
+				} ),
+			} );
 		},
 		get slideInAnimation() {
 			const { animationStatus } = getContext< Context >();
@@ -131,6 +139,15 @@ const productButtonStore = {
 			}
 
 			return addToCartText;
+		},
+		get addToCartAriaLabel(): string {
+			const { addToCartText, addToCartAriaLabel, inTheCartAriaLabel } =
+				getContext< Context >();
+			const text = state.addToCartText;
+
+			return text === addToCartText
+				? addToCartAriaLabel
+				: inTheCartAriaLabel.replace( '###', text );
 		},
 		get displayViewCart(): boolean {
 			const { displayViewCart } = getContext< Context >();

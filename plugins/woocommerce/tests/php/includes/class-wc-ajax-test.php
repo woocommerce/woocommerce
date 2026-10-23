@@ -147,6 +147,71 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Removing a coupon via AJAX shows the coupon-removed message from WC_Coupon::get_coupon_message().
+	 */
+	public function test_remove_coupon_uses_coupon_removed_message(): void {
+		$coupon = WC_Helper_Coupon::create_coupon( 'ajaxremove' );
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( WC_Helper_Product::create_simple_product()->get_id() );
+		WC()->cart->apply_coupon( $coupon->get_code() );
+		wc_clear_notices();
+
+		$response = $this->do_remove_coupon_request( $coupon->get_code() );
+
+		$this->assertStringContainsString( 'Coupon code removed successfully.', $response, 'The default coupon-removed message should be shown.' );
+		$this->assertStringNotContainsString( 'Coupon has been removed.', $response, 'The old hardcoded message should no longer be shown.' );
+		$this->assertNotContains( $coupon->get_code(), WC()->cart->get_applied_coupons(), 'The coupon should be removed from the cart.' );
+	}
+
+	/**
+	 * @testdox Removing a coupon via AJAX respects the woocommerce_coupon_message filter.
+	 */
+	public function test_remove_coupon_message_is_filterable(): void {
+		$coupon = WC_Helper_Coupon::create_coupon( 'ajaxremovefiltered' );
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( WC_Helper_Product::create_simple_product()->get_id() );
+		WC()->cart->apply_coupon( $coupon->get_code() );
+		wc_clear_notices();
+
+		$filter_args = array();
+		$filter      = function ( $msg, $msg_code, $filtered_coupon ) use ( &$filter_args ) {
+			$filter_args = array( $msg_code, $filtered_coupon->get_code() );
+			return WC_Coupon::WC_COUPON_REMOVED === $msg_code ? 'Custom coupon removed message.' : $msg;
+		};
+		add_filter( 'woocommerce_coupon_message', $filter, 10, 3 );
+
+		try {
+			$response = $this->do_remove_coupon_request( $coupon->get_code() );
+		} finally {
+			remove_filter( 'woocommerce_coupon_message', $filter, 10 );
+		}
+
+		$this->assertStringContainsString( 'Custom coupon removed message.', $response, 'The filtered message should be shown.' );
+		$this->assertSame( array( WC_Coupon::WC_COUPON_REMOVED, $coupon->get_code() ), $filter_args, 'The filter should receive the removed code and the removed coupon.' );
+	}
+
+	/**
+	 * Runs the woocommerce_remove_coupon AJAX action and returns its output.
+	 *
+	 * @param string $coupon_code Coupon code to remove.
+	 * @return string
+	 */
+	private function do_remove_coupon_request( string $coupon_code ): string {
+		$_POST['security'] = wp_create_nonce( 'remove-coupon' );
+		$_POST['coupon']   = $coupon_code;
+
+		try {
+			$this->_handleAjax( 'woocommerce_remove_coupon' );
+		} catch ( WPAjaxDieContinueException $e ) {
+			unset( $e );
+		} finally {
+			unset( $_POST['security'], $_POST['coupon'] );
+		}
+
+		return (string) $this->_last_response;
+	}
+
+	/**
 	 * @testdox Saving a new shipping class with a blank slug generates and returns its persisted slug.
 	 */
 	public function test_shipping_classes_save_changes_generates_slug(): void {
@@ -2876,6 +2941,212 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		$fresh_item = \WC_Order_Factory::get_order_item( $item_id );
 		$this->assertInstanceOf( \WC_Order_Item_Product::class, $fresh_item, 'The item should not have been deleted.' );
 		$this->assertEquals( $original_qty, $fresh_item->get_quantity() );
+	}
+
+	/**
+	 * @testdox Percentage order fees added via AJAX are calculated on the order items excluding tax.
+	 *
+	 * @testWith ["25%", 25.0, 5.0, 150.0]
+	 *           ["-25%", -25.0, -5.0, 90.0]
+	 *
+	 * @param string $amount          Fee amount posted to the AJAX handler.
+	 * @param float  $expected_fee    Expected fee line total (ex tax).
+	 * @param float  $expected_fee_tax Expected fee tax.
+	 * @param float  $expected_total  Expected order grand total.
+	 */
+	public function test_add_order_fee_percentage_uses_items_excluding_tax( string $amount, float $expected_fee, float $expected_fee_tax, float $expected_total ): void {
+		$order = $this->create_order_with_20_percent_tax();
+
+		$fee = $this->add_order_fee_via_ajax( $order, $amount );
+
+		$this->assertEquals( $expected_fee, (float) $fee->get_total(), 'Fee total should be a percentage of the items excluding tax.' );
+		$this->assertEquals( $expected_fee_tax, (float) $fee->get_total_tax(), 'Fee tax should be calculated on the fee amount.' );
+		$this->assertEquals( $expected_total, (float) $fee->get_order()->get_total(), 'Order total should include the fee and its tax.' );
+	}
+
+	/**
+	 * @testdox Percentage order fees leave shipping out of their base.
+	 */
+	public function test_add_order_fee_percentage_excludes_shipping_from_base(): void {
+		$order = $this->create_order_with_20_percent_tax();
+
+		$shipping = new WC_Order_Item_Shipping();
+		$shipping->set_method_title( 'Flat rate' );
+		$shipping->set_method_id( 'flat_rate' );
+		$shipping->set_total( 10 );
+		$order->add_item( $shipping );
+		$order->calculate_totals( true );
+		$order->save();
+
+		$fee = $this->add_order_fee_via_ajax( $order, '10%' );
+
+		// The base is the items (100), not items plus shipping (110), so 10% is 10, not 11.
+		$this->assertEquals( 10.0, (float) $fee->get_total(), 'Percentage fee should leave shipping out of its base.' );
+	}
+
+	/**
+	 * @testdox Percentage order fees leave existing fees out of their base.
+	 */
+	public function test_add_order_fee_percentage_excludes_existing_fees_from_base(): void {
+		$order = $this->create_order_with_20_percent_tax();
+		$this->add_order_fee_via_ajax( $order, '10%' );
+
+		$fee = $this->add_order_fee_via_ajax( $order, '10%' );
+
+		// The first fee (10) is not part of the base, so the second 10% is 10 again, not 11.
+		$this->assertEquals( 10.0, (float) $fee->get_total(), 'Percentage fee should leave existing fees out of its base.' );
+		$this->assertEquals( 144.0, (float) $fee->get_order()->get_total(), 'Order total should include both fees and their tax.' );
+	}
+
+	/**
+	 * @testdox Percentage order fees are calculated on the items after coupon discounts.
+	 */
+	public function test_add_order_fee_percentage_uses_items_after_discounts(): void {
+		$order = $this->create_order_with_20_percent_tax();
+		$this->apply_10_percent_coupon( $order );
+
+		$fee = $this->add_order_fee_via_ajax( $order, '10%' );
+
+		// The coupon brings the items to 90, so 10% is 9.
+		$this->assertEquals( 9.0, (float) $fee->get_total(), 'Percentage fee should use the items after discounts.' );
+	}
+
+	/**
+	 * @testdox Percentage order fees use the stored discount total, not a filtered one.
+	 */
+	public function test_add_order_fee_percentage_ignores_filtered_discount_total(): void {
+		$order = $this->create_order_with_20_percent_tax();
+		$this->apply_10_percent_coupon( $order );
+		add_filter( 'woocommerce_order_get_discount_total', '__return_zero' );
+
+		$fee = $this->add_order_fee_via_ajax( $order, '10%' );
+
+		// The stored discount is 10, so the base stays 90 even though the filter reports 0.
+		$this->assertEquals( 9.0, (float) $fee->get_total(), 'Percentage fee should use the stored discount total.' );
+	}
+
+	/**
+	 * @testdox Percentage order fees use the items excluding tax when prices are entered including tax.
+	 */
+	public function test_add_order_fee_percentage_with_prices_including_tax(): void {
+		$order = $this->create_order_with_20_percent_tax( true );
+
+		$fee = $this->add_order_fee_via_ajax( $order, '10%' );
+
+		// The $100 price includes 16.67 tax, so the items are 83.33 and 10% is 8.33 plus 1.67 tax.
+		$this->assertEquals( 8.33, (float) $fee->get_total(), 'Fee total should be a percentage of the items excluding tax.' );
+		$this->assertEquals( 1.67, (float) $fee->get_total_tax(), 'Fee tax should be calculated on the fee amount.' );
+		$this->assertEquals( 110.0, (float) $fee->get_order()->get_total(), 'Order total should include the fee and its tax.' );
+	}
+
+	/**
+	 * @testdox Percentage order fees are rounded to the store's price decimals.
+	 */
+	public function test_add_order_fee_percentage_is_rounded_to_price_decimals(): void {
+		$order = $this->create_order_with_20_percent_tax();
+
+		$fee = $this->add_order_fee_via_ajax( $order, '12.345%' );
+
+		// 12.345% of the net 100 is 12.345, which rounds half up to 12.35. Before
+		// rounding was applied the full 12.345 reached the fee line.
+		$this->assertEquals( 12.35, (float) $fee->get_total(), 'Percentage fee should be rounded to the price decimals.' );
+	}
+
+	/**
+	 * @testdox Fixed-amount order fees added via AJAX are stored as posted and taxed.
+	 */
+	public function test_add_order_fee_fixed_amount_is_stored_as_posted(): void {
+		$order = $this->create_order_with_20_percent_tax();
+
+		$fee = $this->add_order_fee_via_ajax( $order, '12.5' );
+
+		$this->assertEquals( 12.5, (float) $fee->get_total(), 'Fixed fee amount should be stored as posted.' );
+		$this->assertEquals( 2.5, (float) $fee->get_total_tax(), 'Fixed fee tax should remain 20% of the fee.' );
+		$this->assertEquals( 135.0, (float) $fee->get_order()->get_total(), 'Order total should include the fixed fee and its tax.' );
+	}
+
+	/**
+	 * Create an order for one $100 product with a 20% tax rate for order fee AJAX tests.
+	 *
+	 * @param bool $prices_include_tax Whether the $100 price includes tax.
+	 * @return WC_Order
+	 */
+	private function create_order_with_20_percent_tax( bool $prices_include_tax = false ): WC_Order {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', $prices_include_tax ? 'yes' : 'no' );
+
+		WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '20.0000',
+				'tax_rate_name'     => 'Tax',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100 );
+		$product->save();
+
+		$order = new WC_Order();
+		$order->add_product( $product, 1 );
+		$order->calculate_totals( true );
+		$order->save();
+
+		$this->assertEquals( $prices_include_tax ? 16.67 : 20.0, (float) $order->get_total_tax(), 'Fixture order should have a 20% tax line.' );
+		$this->assertEquals( $prices_include_tax ? 100.0 : 120.0, (float) $order->get_total(), 'Fixture order should have the expected gross total.' );
+
+		return $order;
+	}
+
+	/**
+	 * Apply a 10% percentage coupon to an order for order fee AJAX tests.
+	 *
+	 * @param WC_Order $order Order to apply the coupon to.
+	 */
+	private function apply_10_percent_coupon( WC_Order $order ): void {
+		WC_Helper_Coupon::create_coupon(
+			'tenpercent',
+			array(
+				'discount_type' => 'percent',
+				'coupon_amount' => '10',
+			)
+		);
+		$this->assertTrue( $order->apply_coupon( 'tenpercent' ), 'Fixture coupon should apply.' );
+	}
+
+	/**
+	 * Add a fee to an order through the admin AJAX handler and return the new fee line.
+	 *
+	 * Asserts that the request succeeds and adds exactly one fee to the order.
+	 *
+	 * @param WC_Order $order  Order to add the fee to.
+	 * @param string   $amount Fee amount as typed in the admin prompt, fixed or with a trailing "%".
+	 * @return WC_Order_Item_Fee
+	 */
+	private function add_order_fee_via_ajax( WC_Order $order, string $amount ): WC_Order_Item_Fee {
+		$fee_count = count( wc_get_order( $order->get_id() )->get_fees() );
+
+		$this->_setRole( 'administrator' );
+		$_POST['security'] = wp_create_nonce( 'order-item' );
+		$_POST['order_id'] = $order->get_id();
+		$_POST['amount']   = $amount;
+
+		$response = $this->do_ajax( 'woocommerce_add_order_fee' );
+
+		unset( $_POST['security'], $_POST['order_id'], $_POST['amount'] );
+
+		$this->assertTrue( $response['success'] ?? false, 'Adding a fee via AJAX should succeed.' );
+
+		$fees = wc_get_order( $order->get_id() )->get_fees();
+		$this->assertCount( $fee_count + 1, $fees, 'Exactly one fee should be added to the order.' );
+
+		return end( $fees );
 	}
 
 	/**

@@ -36,6 +36,7 @@
 - [woocommerce_cart_contents_changed](#woocommerce_cart_contents_changed)
 - [woocommerce_cart_item_permalink](#woocommerce_cart_item_permalink)
 - [woocommerce_checkout_must_be_logged_in_message](#woocommerce_checkout_must_be_logged_in_message)
+- [woocommerce_default_payment_method](#woocommerce_default_payment_method)
 - [woocommerce_delete_expired_draft_orders_batch_size](#woocommerce_delete_expired_draft_orders_batch_size)
 - [woocommerce_disable_compatibility_layer](#woocommerce_disable_compatibility_layer)
 - [woocommerce_filter_fields_for_order_confirmation](#woocommerce_filter_fields_for_order_confirmation)
@@ -70,6 +71,7 @@
 - [woocommerce_sortable_taxonomies](#woocommerce_sortable_taxonomies)
 - [woocommerce_store_api_add_to_cart_data](#woocommerce_store_api_add_to_cart_data)
 - [woocommerce_store_api_cart_item_images](#woocommerce_store_api_cart_item_images)
+- [woocommerce_store_api_cart_item_parent_item_key](#woocommerce_store_api_cart_item_parent_item_key)
 - [woocommerce_store_api_cart_item_quantity_validation](#woocommerce_store_api_cart_item_quantity_validation)
 - [woocommerce_store_api_disable_nonce_check](#woocommerce_store_api_disable_nonce_check)
 - [woocommerce_store_api_expose_error_details](#woocommerce_store_api_expose_error_details)
@@ -885,6 +887,32 @@ apply_filters( 'woocommerce_checkout_must_be_logged_in_message', string $message
 ### Source
 
 - [StoreApi/Routes/V1/Checkout.php](../../../../../../src/StoreApi/Routes/V1/Checkout.php)
+
+---
+
+## woocommerce_default_payment_method
+
+
+Filters the payment method the Checkout block starts with.
+
+```php
+apply_filters( 'woocommerce_default_payment_method', string $payment_method, array $available_gateways )
+```
+
+### Description
+
+Return a gateway id from `$available_gateways` to preselect it, or an empty string to select nothing; any other value selects nothing. Attach the callback by `init` at the latest.
+
+### Parameters
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| $payment_method | string | Gateway id WooCommerce would preselect: the customer's default saved card's gateway, the method remembered in the session, or the first enabled gateway; '' when there is none. |
+| $available_gateways | array | Gateways available for this cart, keyed by id. |
+
+### Source
+
+- [StoreApi/Utilities/PaymentUtils.php](../../../../../../src/StoreApi/Utilities/PaymentUtils.php)
 
 ---
 
@@ -1730,6 +1758,42 @@ This hook allows the cart item images to be changed. This is specific to the car
 | $product_images | array | Array of image objects, as defined in ImageAttachmentSchema. |
 | $cart_item | array | Cart item array. |
 | $cart_item_key | string | Cart item key. |
+
+### Source
+
+- [StoreApi/Schemas/V1/CartItemSchema.php](../../../../../../src/StoreApi/Schemas/V1/CartItemSchema.php)
+
+---
+
+## woocommerce_store_api_cart_item_parent_item_key
+
+
+Filter to declare the parent cart item of a cart line.
+
+```php
+apply_filters( 'woocommerce_store_api_cart_item_parent_item_key', string|null $parent_item_key, array $cart_item, string $cart_item_key )
+```
+
+### Description
+
+Only a non-empty string is kept; empty strings and other values become null. A key that names no line in the current cart, or the line's own key, also becomes null. A line with no declared parent counts as a standalone line. Callbacks that declare no parent for a line should return the value unchanged.
+
+### Parameters
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| $parent_item_key | string, null | Initially null; may be a value returned by an earlier callback. |
+| $cart_item | array | The raw cart item. |
+| $cart_item_key | string | The cart item key. |
+
+### Returns
+
+
+`string, null` The parent item key, or null when no parent is declared or it is not in the cart.
+
+### See
+
+- <https://github.com/woocommerce/woocommerce/blob/trunk/docs/apis/store-api/extending-store-api/extend-store-api-parent-item.md>
 
 ### Source
 

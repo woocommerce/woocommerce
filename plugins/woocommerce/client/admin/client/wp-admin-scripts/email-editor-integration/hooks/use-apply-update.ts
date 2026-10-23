@@ -163,10 +163,10 @@ export function useApplyUpdate(
 				syncEditorState( res.merged_content );
 
 				// Snackbar wording follows what the merchant actually chose.
-				// Smart Apply (`choices: []`) defaults every conflict to
-				// `keep_yours`, so customizations are preserved. If the
-				// drawer-driven path picked `use_core` for everything, the
-				// merchant explicitly chose to overwrite — say so plainly.
+				// Smart Apply (`choices: []`) keeps every block the merchant
+				// edited; only blocks they never touched take core's version.
+				// If the drawer-driven path picked `use_core` for everything,
+				// the merchant explicitly chose to overwrite — say so plainly.
 				const allUseCore =
 					choices.length > 0 &&
 					choices.every( ( c ) => c.decision === 'use_core' );

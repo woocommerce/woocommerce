@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Make bundled pattern names available for translation in the editor.

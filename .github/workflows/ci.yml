@@ -14,6 +14,7 @@ on:
       - '!CODEOWNERS'
       - '!.github/**'
       - '.github/workflows/ci.yml'
+      - '.github/workflows/phpstan.yml'
     branches:
       - 'trunk'
       - 'release/*'
@@ -74,6 +75,7 @@ jobs:
     timeout-minutes: 5
     outputs:
       needs-code-validation: ${{ steps.target-changes.outputs.needs-code-validation }}
+      needs-phpstan-validation: ${{ steps.target-changes.outputs.needs-phpstan-validation }}
       needs-changelog-validation: ${{ steps.target-changes.outputs.needs-changelog-validation }}
       needs-markdown-validation:  ${{ steps.target-changes.outputs.needs-markdown-validation }}
       needs-syncpack-validation:  ${{ steps.target-changes.outputs.needs-syncpack-validation }}
@@ -87,6 +89,14 @@ jobs:
           filters: |
             needs-code-validation:
               - "!((${{ join( fromJSON( env.NON_CODE_PATHS ), ')|(' ) }}))"
+            needs-phpstan-validation:
+              - 'plugins/woocommerce/**/*.php'
+              - 'plugins/woocommerce/composer.json'
+              - 'plugins/woocommerce/composer.lock'
+              - 'plugins/woocommerce/phpstan.neon'
+              - 'plugins/woocommerce/phpstan-baseline.neon'
+              - '.github/workflows/ci.yml'
+              - '.github/workflows/phpstan.yml'
             needs-changelog-validation:
               - '{packages,plugins}/*/!((changelog/*)|(readme.txt))'
             needs-markdown-validation:
@@ -98,6 +108,13 @@ jobs:
               - '.github/workflows/scripts/install-lychee.sh'
             needs-syncpack-validation:
               - '(.syncpackrc)|(pnpm-lock.yaml)|(pnpm-workspace.yaml)|(.nvmrc)'
+
+  phpstan:
+    needs: 'identify-jobs-to-run'
+    if: ${{ !cancelled() && ( github.event_name != 'pull_request' || needs.identify-jobs-to-run.outputs.needs-phpstan-validation == 'true' ) }}
+    uses: ./.github/workflows/phpstan.yml
+    with:
+      refName: ${{ inputs.refName }}
 
   project-jobs:
     # Since this is a monorepo, not every pull request or change is going to impact every project.
@@ -136,9 +153,20 @@ jobs:
             // - PRs: run CI jobs aiming PRs and filter out jobs based on the content changes
             // - Pushes: run CI jobs aiming pushes without filtering based on the content changes
 
+            // The base ref fills the `<baseRef>` placeholder in project commands, so a PR
+            // targeting a release/* branch is linted against that branch, not trunk.
+            // It ends up in shell commands here and in the Lint step, so a branch name with
+            // anything other than letters, digits, `.`, `_`, `/` or `-` falls back to trunk.
             let prNumberFilter   = '';
+            let baseRefFilter    = '';
             if ( '${{ github.event_name }}' === 'pull_request' ) {
               prNumberFilter = `--pr-number ${{ github.event.pull_request.number }}`;
+              const baseRef  = process.env.GITHUB_BASE_REF;
+              if ( /^[A-Za-z0-9._\/-]+$/.test( baseRef ) ) {
+                baseRefFilter = `--base-ref origin/${ baseRef }`;
+              } else {
+                core.warning( `Linting against trunk because the base branch name is not safe to pass to a shell: ${ baseRef }` );
+              }
             }
 
             let githubEvent = ${{ toJson( github.event_name ) }};
@@ -155,7 +183,7 @@ jobs:
             }
 
             const child_process = require( 'node:child_process' );
-            child_process.execSync( `pnpm utils ci-jobs ${ prNumberFilter } --event ${ githubEvent }` );
+            child_process.execSync( `pnpm utils ci-jobs ${ prNumberFilter } ${ baseRefFilter } --event ${ githubEvent }` );
 
   project-lint-jobs:
     name: "Lint - ${{ matrix.projectName }} ${{ ( matrix.optional && ' (optional)' ) || '' }}"
@@ -495,7 +523,7 @@ jobs:
     name: 'Evaluate Project Job Statuses'
     runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || 'ubuntu-latest' }}
     timeout-minutes: 5
-    needs: [ 'project-jobs', 'woocommerce-plugin-build-artifact', 'project-lint-jobs', 'project-test-jobs', 'validate-changelog', 'validate-markdown', 'validate-syncpack' ]
+    needs: [ 'project-jobs', 'woocommerce-plugin-build-artifact', 'project-lint-jobs', 'project-test-jobs', 'validate-changelog', 'validate-markdown', 'validate-syncpack', 'phpstan' ]
     # This job must run for all trigger types (not just PRs) so that alert-on-failure can access its outputs
     if: ${{ !cancelled() }}
     outputs:

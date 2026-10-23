@@ -5,19 +5,6 @@ jQuery( function ( $ ) {
 		return false;
 	}
 
-	/**
-	 * Percent-encode literal apostrophes in an already URL-encoded request body.
-	 *
-	 * `encodeURIComponent()` leaves `'` alone, so serialized bodies can reach the
-	 * server with literal apostrophes that some WAF rules reject.
-	 *
-	 * @param {string} data URL-encoded request body.
-	 * @return {string} Body with apostrophes encoded as %27.
-	 */
-	function encodeApostrophes( data ) {
-		return data.split( "'" ).join( '%27' );
-	}
-
 	$.blockUI.defaults.overlayCSS.cursor = 'default';
 
 	// A paste can carry characters that render as nothing. The server strips them
@@ -752,7 +739,8 @@ jQuery( function ( $ ) {
 				url: wc_checkout_params.wc_ajax_url
 					.toString()
 					.replace( '%%endpoint%%', 'update_order_review' ),
-				data: encodeApostrophes( $.param( data ) ),
+				data: data,
+				wc_form_encoding: true,
 				success: function ( data ) {
 					// Reload the page if requested
 					if ( data && true === data.reload ) {
@@ -1030,7 +1018,8 @@ jQuery( function ( $ ) {
 				$.ajax( {
 					type: 'POST',
 					url: wc_checkout_params.checkout_url,
-					data: encodeApostrophes( $form.serialize() ),
+					data: $form.serialize(),
+					wc_form_encoding: true,
 					dataType: 'json',
 					success: function ( result ) {
 						// Detach the unload handler that prevents a reload / redirect
@@ -1336,7 +1325,8 @@ jQuery( function ( $ ) {
 				url: wc_checkout_params.wc_ajax_url
 					.toString()
 					.replace( '%%endpoint%%', 'apply_coupon' ),
-				data: encodeApostrophes( $.param( data ) ),
+				data: data,
+				wc_form_encoding: true,
 				success: function ( response ) {
 					$(
 						'.woocommerce-error, .woocommerce-message, .is-error, .is-success, .checkout-inline-error-message'
@@ -1410,7 +1400,8 @@ jQuery( function ( $ ) {
 				url: wc_checkout_params.wc_ajax_url
 					.toString()
 					.replace( '%%endpoint%%', 'remove_coupon' ),
-				data: encodeApostrophes( $.param( data ) ),
+				data: data,
+				wc_form_encoding: true,
 				success: function ( code ) {
 					$(
 						'.woocommerce-error, .woocommerce-message, .is-error, .is-success'
