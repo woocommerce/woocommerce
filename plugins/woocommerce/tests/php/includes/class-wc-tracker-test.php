@@ -9,8 +9,10 @@ declare(strict_types=1);
 
 use Automattic\WooCommerce\Caches\OrderCountCache;
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\Internal\Orders\PaymentModeMarker;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Utilities\PluginUtil;
 
@@ -586,6 +588,41 @@ class WC_Tracker_Test extends \WC_Unit_Test_Case {
 		foreach ( $created_via_entries as $created_via_entry ) {
 			$this->assertEquals( ( $order_count / count( $created_via_entries ) ), $order_data['created_via'][ $created_via_entry ] );
 		}
+	}
+
+	/**
+	 * @testDox Test orders by gateway count only orders marked as paid in test mode, and the gateway totals still count all orders.
+	 */
+	public function test_get_tracking_data_test_orders_by_gateway(): void {
+		$orders = array(
+			array( WC_Gateway_BACS::ID, OrderStatus::PROCESSING, 10, PaymentModeMarker::MODE_TEST ),
+			array( WC_Gateway_BACS::ID, OrderStatus::COMPLETED, 20, PaymentModeMarker::MODE_LIVE ),
+			array( WC_Gateway_BACS::ID, OrderStatus::PENDING, 40, PaymentModeMarker::MODE_TEST ),
+			array( WC_Gateway_COD::ID, OrderStatus::COMPLETED, 80, null ),
+		);
+		foreach ( $orders as list( $payment_method, $status, $total, $mode ) ) {
+			$order = wc_create_order( array( 'status' => $status ) );
+			$order->set_payment_method( $payment_method );
+			$order->set_total( $total );
+			if ( $mode ) {
+				$order->update_meta_data( PaymentModeMarker::META_KEY, $mode );
+			}
+			$order->save();
+		}
+
+		$tracking_data = WC_Tracker::get_tracking_data();
+
+		$this->assertEquals(
+			array(
+				'gateway_bacs_USD_count' => 1,
+				'gateway_bacs_USD_total' => 10,
+			),
+			$tracking_data['test_orders_by_gateway'],
+			'Only paid orders marked as test should be counted'
+		);
+		$this->assertEquals( 2, $tracking_data['orders']['gateway_bacs_USD_count'], 'Gateway counts should include test orders' );
+		$this->assertEquals( 30, $tracking_data['orders']['gateway_bacs_USD_total'], 'Gateway totals should include test orders' );
+		$this->assertEquals( 1, $tracking_data['orders']['gateway_cod_USD_count'], 'Unmarked orders should keep counting' );
 	}
 
 	/**

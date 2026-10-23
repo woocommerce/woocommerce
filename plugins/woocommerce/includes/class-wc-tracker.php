@@ -17,6 +17,7 @@ use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\Admin\EmailImprovements\EmailImprovements;
 use Automattic\WooCommerce\Internal\CLI\Migrator\Core\MigratorTracker;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
+use Automattic\WooCommerce\Internal\Orders\PaymentModeMarker;
 use Automattic\WooCommerce\Internal\Utilities\BlocksUtil;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
@@ -319,6 +320,9 @@ class WC_Tracker {
 		$data['reviews']    = self::get_review_counts();
 		$data['categories'] = self::get_category_counts();
 		$data['brands']     = self::get_brands_counts();
+
+		// Kept apart from the gateway totals in `orders`, which include test orders.
+		$data['test_orders_by_gateway'] = self::get_orders_by_gateway( true );
 
 		// Migrator CLI statistics.
 		$data['migrator'] = self::get_migrator_data();
@@ -881,24 +885,40 @@ class WC_Tracker {
 	/**
 	 * Get order details by gateway.
 	 *
+	 * @param bool $test_orders_only Whether to count only orders marked as paid in test mode.
 	 * @return array
 	 */
-	private static function get_orders_by_gateway() {
+	private static function get_orders_by_gateway( bool $test_orders_only = false ) {
 		global $wpdb;
 
 		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
 			$orders_table = OrdersTableDataStore::get_orders_table_name();
+			$meta_table   = OrdersTableDataStore::get_meta_table_name();
 			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$test_orders_clause = $test_orders_only ? $wpdb->prepare(
+				"AND id IN ( SELECT order_id FROM $meta_table WHERE meta_key = %s AND meta_value = %s )",
+				PaymentModeMarker::META_KEY,
+				PaymentModeMarker::MODE_TEST
+			) : '';
+
 			$orders_and_gateway_details = $wpdb->get_results(
 				"
 				SELECT IFNULL(payment_method, '') AS gateway, currency AS currency, SUM( total_amount ) AS totals, count( id ) AS counts
 				FROM $orders_table
 				WHERE status IN ( 'wc-completed', 'wc-processing', 'wc-refunded' )
+					$test_orders_clause
 				GROUP BY gateway, currency;
 				"
 			);
 			// phpcs:enable
 		} else {
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$test_orders_clause = $test_orders_only ? $wpdb->prepare(
+				"AND orders.id IN ( SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = %s AND meta_value = %s )",
+				PaymentModeMarker::META_KEY,
+				PaymentModeMarker::MODE_TEST
+			) : '';
+
 			$orders_and_gateway_details = $wpdb->get_results(
 				"
 				SELECT
@@ -916,11 +936,13 @@ class WC_Tracker {
 					WHERE orders.post_type = 'shop_order'
 						AND orders.post_status in ( 'wc-completed', 'wc-processing', 'wc-refunded' )
 						AND meta_key in( '_payment_method','_order_total','_order_currency')
+						$test_orders_clause
 					GROUP BY orders.id
 				) order_gateways
 				GROUP BY gateway, currency
 				"
 			);
+			// phpcs:enable
 		}
 
 		$orders_by_gateway_currency = array();
