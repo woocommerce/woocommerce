@@ -31,7 +31,7 @@ test.describe(
 		test.afterAll( async ( { baseURL } ) => {
 			try {
 				if ( emailPostId ) {
-					// Up to WP 7.1 the test already deleted the post permanently.
+					// The test already deleted the post when it passed.
 					await deleteEmailPost( baseURL, emailPostId ).catch(
 						( error ) => {
 							if ( error.response?.status !== 404 ) {
@@ -65,14 +65,20 @@ test.describe(
 				.getByRole( 'button', { name: 'Actions' } )
 				.first()
 				.click();
-			// Up to WP 7.1 the email editor's own action permanently deletes the
-			// email. From WP 7.2 core's "Trash…" action moves it to the trash.
+			// WooCommerce replaces core's "Trash…" with an action that deletes
+			// the email permanently, and adds "Reset" for the email content.
+			await expect(
+				page.getByRole( 'menuitem', { name: 'Reset' } )
+			).toBeVisible();
+			await expect(
+				page.getByRole( 'menuitem', { name: /trash/i } )
+			).toHaveCount( 0 );
 			await page
-				.getByRole( 'menuitem', { name: /permanently delete|trash/i } )
+				.getByRole( 'menuitem', { name: 'Permanently delete' } )
 				.click();
 			await page
 				.getByRole( 'dialog' )
-				.getByRole( 'button', { name: /delete permanently|trash/i } )
+				.getByRole( 'button', { name: 'Delete permanently' } )
 				.click();
 
 			await expect( page ).toHaveURL( /page=wc-settings&tab=email/ );
@@ -88,7 +94,7 @@ test.describe(
 				)
 				.then( ( response ) => response.data.status )
 				.catch( ( error ) => error.response?.status );
-			expect( [ 'trash', 404 ] ).toContain( postState );
+			expect( postState ).toBe( 404 );
 		} );
 	}
 );
