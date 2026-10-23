@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Hide Product Filters overlay contents from tab navigation when the overlay is closed

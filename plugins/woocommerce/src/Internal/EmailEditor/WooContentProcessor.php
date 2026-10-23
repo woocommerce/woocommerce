@@ -56,12 +56,24 @@ class WooContentProcessor {
 	 * because the email editor theme controls all typography via theme.json. Leaving these in
 	 * the WooCommerce CSS would override the editor's heading sizes and weights.
 	 *
+	 * Text alignment is stripped from the plain heading rules so headings keep the alignment
+	 * set in the editor instead of being forced to the left.
+	 *
 	 * @since 10.8.0
 	 * @param string $css CSS.
 	 * @return string
 	 */
 	public function prepare_css( string $css ): string {
 		remove_filter( 'woocommerce_email_styles', array( $this, 'prepare_css' ) );
+
+		// Remove text-align from the plain h1-h6 rules. They force headings to the left (right in RTL),
+		// which overrides the alignment set in the editor.
+		$css = (string) preg_replace_callback(
+			'/(^|[{}])(\s*h[1-6]\s*\{)([^}]*)/',
+			fn( array $matches ): string => $matches[1] . $matches[2] . preg_replace( '/text-align\s*:\s*[^;]+;/', '', $matches[3] ),
+			$css
+		);
+
 		// Remove typography declarations from WooCommerce CSS.
 		// The email editor theme.json controls all typography; WC CSS would override it.
 		return (string) preg_replace(

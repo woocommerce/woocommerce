@@ -5,6 +5,8 @@
  * @package WooCommerce\Classes\
  */
 
+use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
+use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
 use Automattic\WooCommerce\Enums\ProductType;
@@ -48,6 +50,7 @@ class WC_Form_Handler {
 		add_action( 'template_redirect', array( __CLASS__, 'redirect_reset_password_link' ) );
 		add_action( 'template_redirect', array( __CLASS__, 'resend_set_password' ) );
 		add_action( 'template_redirect', array( __CLASS__, 'save_address' ) );
+		add_action( 'template_redirect', array( __CLASS__, 'copy_address' ) );
 		add_action( 'template_redirect', array( __CLASS__, 'save_account_details' ) );
 		add_action( 'wp_loaded', array( __CLASS__, 'checkout_action' ), 20 );
 		add_action( 'wp_loaded', array( __CLASS__, 'process_login' ), 20 );
@@ -258,48 +261,7 @@ class WC_Form_Handler {
 			}
 
 			if ( ! empty( $value ) ) {
-				// Validation and formatting rules.
-				if ( ! empty( $field['validate'] ) && is_array( $field['validate'] ) ) {
-					foreach ( $field['validate'] as $rule ) {
-						switch ( $rule ) {
-							case 'postcode':
-								$country = wc_clean( wp_unslash( $_POST[ $address_type . '_country' ] ) );
-								$value   = wc_format_postcode( $value, $country );
-
-								if ( '' !== $value && ! WC_Validation::is_postcode( $value, $country ) ) {
-									switch ( $country ) {
-										case 'IE':
-											$postcode_validation_notice = __( 'Please enter a valid Eircode.', 'woocommerce' );
-											break;
-										default:
-											$postcode_validation_notice = __( 'Please enter a valid postcode / ZIP.', 'woocommerce' );
-									}
-									wc_add_notice( $postcode_validation_notice, 'error' );
-								}
-								break;
-							case 'phone':
-								$country = wc_clean( wp_unslash( $_POST[ $address_type . '_country' ] ) );
-								$country = is_string( $country ) ? $country : '';
-								// Strip before validating, so a customer is not rejected over
-								// characters they cannot see. A value that is nothing but those
-								// characters is not a phone number.
-								$value = wc_remove_non_displayable_chars( (string) $value );
-								if ( '' === $value || ! WC_Validation::is_phone( $value, $country ) ) {
-									/* translators: %s: Phone number. */
-									wc_add_notice( sprintf( __( '%s is not a valid phone number.', 'woocommerce' ), '<strong>' . $field['label'] . '</strong>' ), 'error' );
-								}
-								break;
-							case 'email':
-								$value = strtolower( $value );
-
-								if ( ! is_email( $value ) ) {
-									/* translators: %s: Email address. */
-									wc_add_notice( sprintf( __( '%s is not a valid email address.', 'woocommerce' ), '<strong>' . $field['label'] . '</strong>' ), 'error' );
-								}
-								break;
-						}
-					}
-				}
+				$value = self::validate_address_field_value( $value, $field, wc_clean( wp_unslash( $_POST[ $address_type . '_country' ] ) ) );
 			}
 
 			try {
@@ -355,6 +317,237 @@ class WC_Form_Handler {
 
 		wc_add_notice( __( 'Address changed successfully.', 'woocommerce' ) );
 		wp_safe_redirect( wc_get_endpoint_url( 'edit-address', '', wc_get_page_permalink( 'myaccount' ) ) );
+		exit;
+	}
+
+	/**
+	 * Apply an address field's validation rules to a value, adding an error notice for each rule it fails.
+	 *
+	 * @param mixed $value   Field value.
+	 * @param array $field   Field definition from WC_Countries::get_address_fields().
+	 * @param mixed $country Country code of the address.
+	 * @return mixed The value, formatted by the postcode, phone and email rules.
+	 */
+	private static function validate_address_field_value( $value, $field, $country ) {
+		if ( empty( $field['validate'] ) || ! is_array( $field['validate'] ) ) {
+			return $value;
+		}
+
+		foreach ( $field['validate'] as $rule ) {
+			switch ( $rule ) {
+				case 'postcode':
+					$value = wc_format_postcode( $value, $country );
+
+					if ( '' !== $value && ! WC_Validation::is_postcode( $value, $country ) ) {
+						switch ( $country ) {
+							case 'IE':
+								$postcode_validation_notice = __( 'Please enter a valid Eircode.', 'woocommerce' );
+								break;
+							default:
+								$postcode_validation_notice = __( 'Please enter a valid postcode / ZIP.', 'woocommerce' );
+						}
+						wc_add_notice( $postcode_validation_notice, 'error' );
+					}
+					break;
+				case 'phone':
+					// Strip before validating, so a customer is not rejected over
+					// characters they cannot see. A value that is nothing but those
+					// characters is not a phone number.
+					$value = wc_remove_non_displayable_chars( (string) $value );
+					if ( '' === $value || ! WC_Validation::is_phone( $value, is_string( $country ) ? $country : '' ) ) {
+						/* translators: %s: Phone number. */
+						wc_add_notice( sprintf( __( '%s is not a valid phone number.', 'woocommerce' ), '<strong>' . $field['label'] . '</strong>' ), 'error' );
+					}
+					break;
+				case 'email':
+					$value = strtolower( $value );
+
+					if ( ! is_email( $value ) ) {
+						/* translators: %s: Email address. */
+						wc_add_notice( sprintf( __( '%s is not a valid email address.', 'woocommerce' ), '<strong>' . $field['label'] . '</strong>' ), 'error' );
+					}
+					break;
+			}
+		}
+
+		return $value;
+	}
+
+	/**
+	 * Get the URL that copies the customer's other saved address into an empty address type.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param string $address_type Address type to copy into; 'billing' or 'shipping'.
+	 * @return string
+	 */
+	public static function get_copy_address_url( $address_type ) {
+		$address_type = sanitize_key( $address_type );
+
+		return wp_nonce_url(
+			add_query_arg( 'copy-address', $address_type, wc_get_endpoint_url( 'edit-address', '', wc_get_page_permalink( 'myaccount' ) ) ),
+			'woocommerce-copy-address-' . $address_type
+		);
+	}
+
+	/**
+	 * Copy the saved billing address into an empty shipping address, or vice versa, from the My Account addresses page.
+	 *
+	 * The target address is only written when it has not been set up yet, so a stale link cannot overwrite an address.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @return void
+	 */
+	public static function copy_address() {
+		if ( ! isset( $_GET['copy-address'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- The nonce is verified below.
+			return;
+		}
+
+		$user_id = get_current_user_id();
+
+		if ( $user_id <= 0 ) {
+			return;
+		}
+
+		wc_nocache_headers();
+
+		// Browsers and link preloaders mark prefetch requests with these headers. A non-2xx response makes them discard it.
+		$purpose = wc_clean( wp_unslash( $_SERVER['HTTP_SEC_PURPOSE'] ?? $_SERVER['HTTP_PURPOSE'] ?? $_SERVER['HTTP_X_PURPOSE'] ?? $_SERVER['HTTP_X_MOZ'] ?? '' ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitized with wc_clean().
+
+		if ( is_string( $purpose ) && false !== stripos( $purpose, 'prefetch' ) ) {
+			wp_die( esc_html__( 'The address could not be copied. Please try again.', 'woocommerce' ), '', array( 'response' => 503 ) );
+		}
+
+		$target_type  = sanitize_key( wp_unslash( $_GET['copy-address'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- The nonce is verified below.
+		$source_types = array(
+			'billing'  => 'shipping',
+			'shipping' => 'billing',
+		);
+		$redirect_url = wc_get_endpoint_url( 'edit-address', '', wc_get_page_permalink( 'myaccount' ) );
+		$nonce_value  = isset( $_REQUEST['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_REQUEST['_wpnonce'] ) ) : '';
+
+		if ( ! isset( $source_types[ $target_type ] ) ) {
+			wc_add_notice( __( 'The address could not be copied. Please try again.', 'woocommerce' ), 'error' );
+			wp_safe_redirect( $redirect_url );
+			exit;
+		}
+
+		if ( ! wp_verify_nonce( $nonce_value, 'woocommerce-copy-address-' . $target_type ) ) {
+			wc_add_notice( __( 'The address could not be copied because the link you followed may have expired. Please try again.', 'woocommerce' ), 'error' );
+			wp_safe_redirect( $redirect_url );
+			exit;
+		}
+
+		$source_type = $source_types[ $target_type ];
+
+		if ( wc_get_account_formatted_address( $target_type, $user_id ) || ! wc_get_account_formatted_address( $source_type, $user_id ) ) {
+			wp_safe_redirect( $redirect_url );
+			exit;
+		}
+
+		$customer         = new WC_Customer( $user_id );
+		$source_country   = 'billing' === $source_type ? $customer->get_billing_country( 'edit' ) : $customer->get_shipping_country( 'edit' );
+		$target_countries = 'shipping' === $target_type ? WC()->countries->get_shipping_countries() : WC()->countries->get_allowed_countries();
+
+		if ( ! array_key_exists( $source_country, $target_countries ) ) {
+			wc_add_notice( __( 'This address uses a country that is not available for the other address type. Please add the address manually.', 'woocommerce' ), 'error' );
+			wp_safe_redirect( $redirect_url );
+			exit;
+		}
+
+		$address = WC()->countries->get_address_fields( $source_country, $target_type . '_' );
+
+		foreach ( $address as $target_key => $field ) {
+			$source_key = $source_type . substr( $target_key, strlen( $target_type ) );
+			$getter     = "get_{$source_key}";
+			$setter     = "set_{$target_key}";
+			// Read stored values, so getter filters are not saved into the other address.
+			$value = is_callable( array( $customer, $getter ) ) ? $customer->{$getter}( 'edit' ) : $customer->get_meta( $source_key, true, 'edit' );
+
+			// Shipping has no email field, so fall back to the account email like the edit address form does.
+			if ( 'billing_email' === $target_key && ! $value ) {
+				$value = $customer->get_email( 'edit' );
+			}
+
+			// The other address type can require fields the copied address doesn't have, such as a billing phone.
+			if ( ! empty( $field['required'] ) && true !== ( $field['hidden'] ?? false ) && empty( $value ) ) {
+				/* translators: %s: Field name. */
+				wc_add_notice( sprintf( __( '%s is a required field.', 'woocommerce' ), $field['label'] ), 'error', array( 'id' => $target_key ) );
+			}
+
+			if ( ! empty( $value ) ) {
+				$value = self::validate_address_field_value( $value, $field, $source_country );
+			}
+
+			try {
+				if ( is_callable( array( $customer, $setter ) ) ) {
+					$customer->{$setter}( $value );
+				} else {
+					$customer->update_meta_data( $target_key, $value );
+				}
+			} catch ( WC_Data_Exception $e ) {
+				wc_add_notice( $e->getMessage(), 'error' );
+			}
+		}
+
+		$checkout_fields = Package::container()->get( CheckoutFields::class );
+		$field_values    = array();
+
+		foreach ( array_keys( $checkout_fields->get_fields_for_location( 'address' ) ) as $field_key ) {
+			$field_values[ $field_key ] = $checkout_fields->get_field_from_object( $field_key, $customer, $source_type, false );
+		}
+
+		// Validate the additional fields against the target address, like the edit address form does.
+		$errors         = new WP_Error();
+		$persist_fields = $checkout_fields->get_valid_customer_field_values( $customer, $field_values, $field_values, 'address', $target_type, $errors );
+		$errors->merge_from( $checkout_fields->validate_fields_for_location( $field_values, 'address', $target_type ) );
+
+		foreach ( $errors->get_error_messages() as $error_message ) {
+			wc_add_notice( $error_message, 'error' );
+		}
+
+		// Set the additional fields before the action below, so it sees the whole copied address. Nothing is saved on errors.
+		foreach ( $persist_fields as $field_key => $value ) {
+			$checkout_fields->persist_field_for_customer( $field_key, $value, $customer, $target_type );
+		}
+
+		/**
+		 * Fires before a customer's copied address is saved, so extensions can reject it by adding an error notice.
+		 *
+		 * Unlike woocommerce_after_save_address_validation, there's no submitted form, so read the copied values from
+		 * the customer instead of the request.
+		 *
+		 * @since 11.4.0
+		 *
+		 * @param int         $user_id     User ID being saved.
+		 * @param string      $target_type Address type being written; 'billing' or 'shipping'.
+		 * @param string      $source_type Address type being copied; 'billing' or 'shipping'.
+		 * @param WC_Customer $customer    The customer, with the copied address set but not saved.
+		 */
+		do_action( 'woocommerce_before_copy_address_save', $user_id, $target_type, $source_type, $customer );
+
+		if ( 0 < wc_notice_count( 'error' ) ) {
+			wp_safe_redirect( $redirect_url );
+			exit;
+		}
+
+		$customer->save();
+
+		/**
+		 * Fires after a customer copies one of their saved addresses into the other address type from My Account.
+		 *
+		 * @since 11.4.0
+		 *
+		 * @param int         $user_id     User ID being saved.
+		 * @param string      $target_type Address type that was written; 'billing' or 'shipping'.
+		 * @param string      $source_type Address type that was copied from; 'billing' or 'shipping'.
+		 * @param WC_Customer $customer    The customer object that was saved.
+		 */
+		do_action( 'woocommerce_customer_copy_address', $user_id, $target_type, $source_type, $customer );
+
+		wc_add_notice( __( 'Address copied successfully.', 'woocommerce' ) );
+		wp_safe_redirect( $redirect_url );
 		exit;
 	}
 

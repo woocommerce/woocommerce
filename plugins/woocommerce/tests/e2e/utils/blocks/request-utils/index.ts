@@ -14,6 +14,7 @@ import {
 	revertTemplate,
 	createTemplateFromFile,
 	TemplateCompiler,
+	WPTemplate,
 } from './templates';
 import { resetFeatureFlag, setFeatureFlag } from './feature-flag';
 
@@ -39,4 +40,4 @@ export class RequestUtils extends CoreRequestUtils {
 	resetFeatureFlag: typeof resetFeatureFlag = resetFeatureFlag.bind( this );
 }
 
-export { TemplateCompiler, PostCompiler };
+export { TemplateCompiler, PostCompiler, WPTemplate };

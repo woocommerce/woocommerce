@@ -352,7 +352,7 @@ class ExtensibleAbilities {
 	 *
 	 * @param string               $resource_name Resource.
 	 * @param array<string, mixed> $input         Ability input.
-	 * @return array<string, array>|\WP_Error The error of a filter that refused its value or failed.
+	 * @return array<string, array>|\WP_Error The error of a value that fails its schema, or of a filter that refused its value or failed.
 	 */
 	public static function get_query_args( string $resource_name, array $input ) {
 		$query_args = array();
@@ -369,6 +369,10 @@ class ExtensibleAbilities {
 				}
 
 				$value = rest_sanitize_value_from_schema( $input['filters']['extensions'][ $namespace ][ $filter ], $args['schema'], $filter );
+				if ( is_wp_error( $value ) ) {
+					$value->add_data( array( 'status' => 400 ) );
+					return $value;
+				}
 				try {
 					$clauses = call_user_func( $args['callback'], $value );
 				} catch ( \Throwable $e ) {
