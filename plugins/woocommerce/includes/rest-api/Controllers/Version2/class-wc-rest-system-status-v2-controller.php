@@ -17,6 +17,7 @@ use Automattic\WooCommerce\Utilities\{ LoggingUtil, OrderUtil, PluginUtil };
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Enums\{ DefaultCustomerAddress, TaxBasedOn, TaxDisplayMode };
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 
 /**
@@ -166,6 +167,51 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 							'type'        => 'string',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
+						),
+						'action_scheduler'          => array(
+							'description' => __( 'The Action Scheduler copy that is loaded. It can be older than the newest copy installed.', 'woocommerce' ),
+							'type'        => 'object',
+							'context'     => array( 'view' ),
+							'readonly'    => true,
+							'properties'  => array(
+								'version'            => array(
+									'description' => __( 'Version of the loaded copy, or null when none is loaded.', 'woocommerce' ),
+									'type'        => array( 'string', 'null' ),
+									'context'     => array( 'view' ),
+									'readonly'    => true,
+								),
+								'registered_version' => array(
+									'description' => __( 'Newest version installed, which may differ from the loaded one.', 'woocommerce' ),
+									'type'        => array( 'string', 'null' ),
+									'context'     => array( 'view' ),
+									'readonly'    => true,
+								),
+								'source_type'        => array(
+									'description' => __( 'What loads the copy: woocommerce, plugin, mu-plugin, theme or other.', 'woocommerce' ),
+									'type'        => array( 'string', 'null' ),
+									'enum'        => array( 'woocommerce', 'plugin', 'mu-plugin', 'theme', 'other', null ),
+									'context'     => array( 'view' ),
+									'readonly'    => true,
+								),
+								'source_name'        => array(
+									'description' => __( 'Name of the plugin or theme that loads the copy. Empty when unknown.', 'woocommerce' ),
+									'type'        => array( 'string', 'null' ),
+									'context'     => array( 'view' ),
+									'readonly'    => true,
+								),
+								'source_path'        => array(
+									'description' => __( 'Directory of the loaded copy.', 'woocommerce' ),
+									'type'        => array( 'string', 'null' ),
+									'context'     => array( 'view' ),
+									'readonly'    => true,
+								),
+								'is_risky'           => array(
+									'description' => __( 'Does the loaded copy lack features WooCommerce relies on?', 'woocommerce' ),
+									'type'        => 'boolean',
+									'context'     => array( 'view' ),
+									'readonly'    => true,
+								),
+							),
 						),
 						'log_directory'             => array(
 							'description' => __( 'Log directory.', 'woocommerce' ),
@@ -1092,12 +1138,25 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 		$database_version = wc_get_server_database_version();
 		$log_directory    = LoggingUtil::get_log_directory( false );
 
+		// The copy answering calls can be older than the newest registered one, so report both.
+		$action_scheduler_path   = ActionSchedulerUtil::get_loaded_path();
+		$action_scheduler_source = null === $action_scheduler_path ? null : ActionSchedulerUtil::get_loaded_source();
+		$action_scheduler        = array(
+			'version'            => ActionSchedulerUtil::get_loaded_version(),
+			'registered_version' => ActionSchedulerUtil::get_highest_registered_version(),
+			'source_type'        => $action_scheduler_source['type'] ?? null,
+			'source_name'        => $action_scheduler_source['name'] ?? null,
+			'source_path'        => $action_scheduler_path,
+			'is_risky'           => ActionSchedulerUtil::is_risky(),
+		);
+
 		// Return all environment info. Described by JSON Schema.
 		return array(
 			'home_url'                  => get_option( 'home' ),
 			'site_url'                  => get_option( 'siteurl' ),
 			'store_id'                  => get_option( \WC_Install::STORE_ID_OPTION, null ),
 			'version'                   => WC()->version,
+			'action_scheduler'          => $action_scheduler,
 			'log_directory'             => $log_directory,
 			'log_directory_writable'    => wp_is_writable( $log_directory ),
 			'wp_version'                => get_bloginfo( 'version' ),
