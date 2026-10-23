@@ -57,20 +57,6 @@ class Checkout extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tear down after test.
-	 *
-	 * @return void
-	 */
-	public function tearDown(): void {
-		parent::tearDown();
-
-		// A test registers a CheckoutMock block type, and the block type registry outlives a test.
-		if ( \WP_Block_Type_Registry::get_instance()->is_registered( 'woocommerce/checkout-mock' ) ) {
-			\WP_Block_Type_Registry::get_instance()->unregister( 'woocommerce/checkout-mock' );
-		}
-	}
-
-	/**
 	 * @testdox The local pickup title is updated when the Checkout block is saved.
 	 * @return void
 	 */

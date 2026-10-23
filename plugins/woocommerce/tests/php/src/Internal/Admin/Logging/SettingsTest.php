@@ -204,8 +204,6 @@ class SettingsTest extends WC_Unit_Test_Case {
 		Constants::set_constant( 'WC_LOG_HANDLER', 'Fluffernutter' );
 		$handler = $this->sut->get_default_handler();
 		$this->assertEquals( LogHandlerFileV2::class, $handler );
-
-		Constants::clear_single_constant( 'WC_LOG_HANDLER' );
 	}
 
 	/**
@@ -300,8 +298,6 @@ class SettingsTest extends WC_Unit_Test_Case {
 		Constants::set_constant( 'WC_LOG_THRESHOLD', 'mascarpone' );
 		$level = $this->sut->get_level_threshold();
 		$this->assertEquals( 'none', $level );
-
-		Constants::clear_single_constant( 'WC_LOG_THRESHOLD' );
 	}
 
 	/**
@@ -362,8 +358,6 @@ class SettingsTest extends WC_Unit_Test_Case {
 			'This setting cannot be changed here because it is defined in the <code>WC_LOG_HANDLER</code> constant',
 			$content
 		);
-
-		Constants::clear_single_constant( 'WC_LOG_HANDLER' );
 	}
 
 	/**
@@ -407,8 +401,6 @@ class SettingsTest extends WC_Unit_Test_Case {
 			'This setting cannot be changed here because it is defined in the <code>WC_LOG_THRESHOLD</code> constant',
 			$content
 		);
-
-		Constants::clear_single_constant( 'WC_LOG_THRESHOLD' );
 	}
 
 	/**

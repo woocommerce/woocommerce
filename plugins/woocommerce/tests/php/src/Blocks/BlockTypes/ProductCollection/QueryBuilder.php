@@ -19,7 +19,7 @@ use WP_Query;
  *
  * @group query-building
  */
-class QueryBuilder extends \WP_UnitTestCase {
+class QueryBuilder extends \WC_Unit_Test_Case {
 	/**
 	 * This variable holds our Product Query object.
 	 *
@@ -35,9 +35,7 @@ class QueryBuilder extends \WP_UnitTestCase {
 	 * @param bool $legacy_filterable Previously saved filterable value.
 	 */
 	public function test_local_filter_products( int $query_id, bool $legacy_filterable ): void {
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- Restore the original request verbatim after the test.
-		$original_uri = $_SERVER['REQUEST_URI'] ?? null;
-		$products     = array();
+		$products = array();
 		foreach ( array( '10.25', '15.28', '5' ) as $price ) {
 			$product = WC_Helper_Product::create_simple_product();
 			$product->set_regular_price( $price );
@@ -64,18 +62,13 @@ class QueryBuilder extends \WP_UnitTestCase {
 			$this->assertEqualsCanonicalizing( array_slice( $products, 0, 2 ), wp_list_pluck( ( new WP_Query( $query ) )->posts, 'ID' ) );
 		} finally {
 			set_query_var( 'min_price', '' );
-			if ( null === $original_uri ) {
-				unset( $_SERVER['REQUEST_URI'] );
-			} else {
-				$_SERVER['REQUEST_URI'] = $original_uri;
-			}
 		}
 	}
 
 	/**
 	 * Initiate the mock object.
 	 */
-	protected function setUp(): void {
+	public function setUp(): void {
 		parent::setUp();
 		$this->block_instance = new ProductCollectionMock();
 	}

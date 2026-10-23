@@ -704,8 +704,6 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 			$this->fail( 'Expected copy_address() to stop a prefetch request.' );
 		} catch ( WPDieException $e ) {
 			$this->assertSame( '', ( new WC_Customer( $customer->get_id() ) )->get_shipping_address_1(), 'A prefetch request should not copy the address.' );
-		} finally {
-			unset( $_SERVER[ $header ] );
 		}
 	}
 
