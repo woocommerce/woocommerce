@@ -2041,7 +2041,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 					actions.addCartItem( {
 						id: 42,
 						key: 'key-up',
-						quantity: 5,
+						quantity: 7,
 						type: 'simple',
 					} )
 				),
@@ -2051,7 +2051,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			expect( triggerAddedToCartEvent ).toHaveBeenCalledTimes( 1 );
 			expect( triggerAddedToCartEvent ).toHaveBeenCalledWith( {
 				preserveCartData: true,
-				products: [ { id: 42, quantity: 2 } ],
+				products: [ { id: 42, quantity: 4 } ],
 			} );
 		} );
 
