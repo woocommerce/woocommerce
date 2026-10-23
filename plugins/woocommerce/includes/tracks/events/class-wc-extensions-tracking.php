@@ -84,16 +84,24 @@ class WC_Extensions_Tracking {
 
 	/**
 	 * Send a Tracks event when a Helper connection process is cancelled.
+	 *
+	 * @since 11.4.0 Added the `$funnel_id` parameter.
+	 *
+	 * @param string $funnel_id Id of the connect attempt.
 	 */
-	public function track_helper_connection_cancelled() {
-		WC_Tracks::record_event( 'extensions_subscriptions_cancelled', $this->get_funnel_id_properties() );
+	public function track_helper_connection_cancelled( $funnel_id = '' ) {
+		WC_Tracks::record_event( 'extensions_subscriptions_cancelled', $this->get_funnel_id_properties( $funnel_id ) );
 	}
 
 	/**
 	 * Send a Tracks event when a Helper connection process completed successfully.
+	 *
+	 * @since 11.4.0 Added the `$funnel_id` parameter.
+	 *
+	 * @param string $funnel_id Id of the connect attempt.
 	 */
-	public function track_helper_connection_complete() {
-		$properties = $this->get_funnel_id_properties();
+	public function track_helper_connection_complete( $funnel_id = '' ) {
+		$properties = $this->get_funnel_id_properties( $funnel_id );
 
 		if ( ! empty( $_GET['utm_source'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			$properties['utm_source'] = wc_clean( wp_unslash( $_GET['utm_source'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -109,15 +117,11 @@ class WC_Extensions_Tracking {
 	/**
 	 * Build the funnel_id event property, omitted when the id is missing or invalid.
 	 *
-	 * @param mixed $funnel_id Candidate id; read from the request's funnel_id query arg when null.
+	 * @param mixed $funnel_id Candidate id passed by the hook.
 	 * @return array
 	 */
-	private function get_funnel_id_properties( $funnel_id = null ): array {
-		if ( null === $funnel_id ) {
-			$funnel_id = wp_unslash( $_GET['funnel_id'] ?? '' ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		}
-
-		$funnel_id = class_exists( 'WC_Helper_API' ) ? WC_Helper_API::validate_funnel_id( $funnel_id ) : '';
+	private function get_funnel_id_properties( $funnel_id ): array {
+		$funnel_id = empty( $funnel_id ) ? '' : WC_Helper_API::validate_funnel_id( $funnel_id );
 
 		return '' === $funnel_id ? array() : array( 'funnel_id' => $funnel_id );
 	}

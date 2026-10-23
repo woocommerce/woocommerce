@@ -1508,23 +1508,26 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Returning from WooCommerce.com should send a valid funnel id in the access token request and drop an invalid one.
+	 * @testdox Returning from WooCommerce.com should send a valid funnel id in the access token request, and none when it is invalid or missing.
 	 *
 	 * @testWith ["0a5b6c1e-2d3f-4a5b-8c9d-0e1f2a3b4c5d", "0a5b6c1e-2d3f-4a5b-8c9d-0e1f2a3b4c5d"]
 	 *           ["not valid!", null]
+	 *           [null, null]
 	 *
-	 * @param string      $funnel_id Funnel id in the return URL.
+	 * @param string|null $funnel_id Funnel id in the return URL, null when the URL has none.
 	 * @param string|null $expected  Funnel id expected in the request body, null when absent.
 	 */
-	public function test_return_sends_funnel_id_in_access_token_request( string $funnel_id, ?string $expected ): void {
+	public function test_return_sends_funnel_id_in_access_token_request( ?string $funnel_id, ?string $expected ): void {
 		$_GET = array(
 			'page'             => 'wc-addons',
 			'section'          => 'helper',
 			'wc-helper-return' => '1',
 			'wc-helper-nonce'  => wp_create_nonce( 'connect' ),
 			'request_token'    => 'test-request-token',
-			'funnel_id'        => $funnel_id,
 		);
+		if ( null !== $funnel_id ) {
+			$_GET['funnel_id'] = $funnel_id;
+		}
 
 		$access_token_body = null;
 		$http_mock         = static function ( $preempt, $args, $url ) use ( &$access_token_body ) {

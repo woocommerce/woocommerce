@@ -67,36 +67,35 @@ class WC_Extensions_Tracking_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The connect event should carry the funnel id from the hook, and omit it when it is missing or invalid.
+	 * @testdox The connect, connected and cancelled events should carry a valid funnel id from the hook, and omit a missing or malformed one.
 	 *
 	 * @testWith ["0a5b6c1e-2d3f-4a5b-8c9d-0e1f2a3b4c5d", "0a5b6c1e-2d3f-4a5b-8c9d-0e1f2a3b4c5d"]
+	 *           ["", null]
 	 *           ["not valid!", null]
 	 *
 	 * @param string      $funnel_id Funnel id passed to the hook.
 	 * @param string|null $expected  Recorded funnel_id property, null when absent.
 	 */
-	public function test_connect_event_records_funnel_id_from_hook( string $funnel_id, ?string $expected ): void {
+	public function test_events_record_funnel_id_from_hook( string $funnel_id, ?string $expected ): void {
 		$this->sut->track_helper_connection_start( $funnel_id );
+		$this->sut->track_helper_connection_complete( $funnel_id );
+		$this->sut->track_helper_connection_cancelled( $funnel_id );
 
-		$this->assertArrayHasKey( 'wcadmin_extensions_subscriptions_connect', $this->recorded, 'The connect event should be recorded' );
-		$this->assertSame( $expected, $this->recorded['wcadmin_extensions_subscriptions_connect']['funnel_id'] ?? null );
+		foreach ( array( 'connect', 'connected', 'cancelled' ) as $event ) {
+			$event_name = 'wcadmin_extensions_subscriptions_' . $event;
+			$this->assertArrayHasKey( $event_name, $this->recorded, "The $event event should be recorded" );
+			$this->assertSame( $expected, $this->recorded[ $event_name ]['funnel_id'] ?? null, "Unexpected funnel_id on the $event event" );
+		}
 	}
 
 	/**
-	 * @testdox The connected and cancelled events should carry a valid funnel id from the return URL.
+	 * @testdox The connected event should keep its utm properties next to the funnel id.
 	 */
-	public function test_return_events_record_funnel_id_from_request(): void {
-		$_GET = array(
-			'funnel_id'  => '0a5b6c1e-2d3f-4a5b-8c9d-0e1f2a3b4c5d',
-			'utm_source' => 'pu',
-		);
+	public function test_connected_event_keeps_utm_properties(): void {
+		$_GET = array( 'utm_source' => 'pu' );
 
-		$this->sut->track_helper_connection_complete();
-		$this->sut->track_helper_connection_cancelled();
+		$this->sut->track_helper_connection_complete( '0a5b6c1e-2d3f-4a5b-8c9d-0e1f2a3b4c5d' );
 
-		$connected = $this->recorded['wcadmin_extensions_subscriptions_connected'] ?? array();
-		$this->assertSame( '0a5b6c1e-2d3f-4a5b-8c9d-0e1f2a3b4c5d', $connected['funnel_id'] ?? null, 'The connected event should carry the funnel id' );
-		$this->assertSame( 'pu', $connected['utm_source'] ?? null, 'The connected event should keep its utm properties' );
-		$this->assertSame( '0a5b6c1e-2d3f-4a5b-8c9d-0e1f2a3b4c5d', $this->recorded['wcadmin_extensions_subscriptions_cancelled']['funnel_id'] ?? null, 'The cancelled event should carry the funnel id' );
+		$this->assertSame( 'pu', $this->recorded['wcadmin_extensions_subscriptions_connected']['utm_source'] ?? null );
 	}
 }

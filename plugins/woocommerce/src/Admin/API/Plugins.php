@@ -465,8 +465,7 @@ class Plugins extends \WC_REST_Data_Controller {
 			return new \WP_Error( 'woocommerce_rest_helper_not_active', __( 'There was an error loading the WooCommerce.com Helper API.', 'woocommerce' ), 404 );
 		}
 
-		$funnel_id    = wp_generate_uuid4();
-		$redirect_uri = add_query_arg( 'funnel_id', $funnel_id, wc_admin_url( '&task=connect&wccom-connected=1' ) );
+		$redirect_uri = wc_admin_url( '&task=connect&wccom-connected=1' );
 
 		$request = \WC_Helper_API::post(
 			'oauth/request_token',
@@ -488,14 +487,7 @@ class Plugins extends \WC_REST_Data_Controller {
 			return new \WP_Error( 'woocommerce_rest_helper_connect', __( 'There was an error connecting to WooCommerce.com. Please try again.', 'woocommerce' ), 500 );
 		}
 
-		/**
-		 * Fires when the Helper connection process is initiated.
-		 *
-		 * @since 11.4.0 Added the `$funnel_id` parameter.
-		 *
-		 * @param string $funnel_id Id of this connect attempt, carried through WooCommerce.com in the redirect URI.
-		 */
-		do_action( 'woocommerce_helper_connect_start', $funnel_id );
+		do_action( 'woocommerce_helper_connect_start' );
 
 		$connect_url = add_query_arg(
 			array(

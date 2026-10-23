@@ -1142,12 +1142,18 @@ class WC_Helper {
 			wp_die( 'Something went wrong' );
 		}
 
+		$funnel_id = WC_Helper_API::validate_funnel_id( wp_unslash( $_GET['funnel_id'] ?? '' ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+
 		// Bail if the user clicked deny.
 		if ( ! empty( $_GET['deny'] ) ) {
 			/**
 			 * Fires when the Helper connection process is denied/cancelled.
+			 *
+			 * @since 11.4.0 Added the `$funnel_id` parameter.
+			 *
+			 * @param string $funnel_id Id of this connect attempt, empty when the return URL has no valid one.
 			 */
-			do_action( 'woocommerce_helper_denied' );
+			do_action( 'woocommerce_helper_denied', $funnel_id );
 
 			wp_safe_redirect(
 				self::get_helper_redirect_url(
@@ -1171,7 +1177,6 @@ class WC_Helper {
 			'home_url'      => home_url(),
 		);
 
-		$funnel_id = WC_Helper_API::validate_funnel_id( wp_unslash( $_GET['funnel_id'] ?? '' ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		if ( '' !== $funnel_id ) {
 			$access_token_body['funnel_id'] = $funnel_id;
 		}
@@ -1202,8 +1207,12 @@ class WC_Helper {
 
 		/**
 		 * Fires when the Helper connection process has completed successfully.
+		 *
+		 * @since 11.4.0 Added the `$funnel_id` parameter.
+		 *
+		 * @param string $funnel_id Id of this connect attempt, empty when the return URL has no valid one.
 		 */
-		do_action( 'woocommerce_helper_connected' );
+		do_action( 'woocommerce_helper_connected', $funnel_id );
 
 		// Enable tracking when connected.
 		if ( class_exists( 'WC_Tracker' ) ) {
