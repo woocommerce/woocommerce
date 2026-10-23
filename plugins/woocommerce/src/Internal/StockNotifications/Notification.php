@@ -546,4 +546,28 @@ class Notification extends \WC_Data {
 
 		return $key;
 	}
+
+	/**
+	 * Whether any meta changes are pending a save.
+	 *
+	 * Mirrors the checks in `save_meta_data()`, so meta marked for deletion counts,
+	 * unlike `get_meta_data()`.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @return bool
+	 */
+	public function has_meta_changes(): bool {
+		if ( is_null( $this->meta_data ) ) {
+			return false;
+		}
+
+		foreach ( $this->meta_data as $meta ) {
+			if ( is_null( $meta->value ) ? ! empty( $meta->id ) : ( empty( $meta->id ) || $meta->get_changes() ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
 }

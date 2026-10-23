@@ -279,7 +279,9 @@ CREATE TABLE $meta_table_name (
 		$result      = 0;
 		$status_from = $notification->get_data()['status'];
 
-		if ( array_intersect( array( 'product_id', 'user_id', 'user_email', 'status', 'date_modified', 'date_confirmed', 'date_last_attempt', 'date_notified', 'date_cancelled', 'cancellation_source' ), array_keys( $changes ) ) ) {
+		$has_prop_changes = (bool) array_intersect( array( 'product_id', 'user_id', 'user_email', 'status', 'date_modified', 'date_confirmed', 'date_last_attempt', 'date_notified', 'date_cancelled', 'cancellation_source' ), array_keys( $changes ) );
+
+		if ( $has_prop_changes || $notification->has_meta_changes() ) {
 
 			if ( ! array_key_exists( 'date_modified', $changes ) ) {
 				$notification->set_date_modified( time() );
@@ -311,10 +313,7 @@ CREATE TABLE $meta_table_name (
 		}
 
 		$notification->save_meta_data();
-
-		if ( $changes ) {
-			$notification->apply_changes();
-		}
+		$notification->apply_changes();
 
 		$status_to = $notification->get_status( 'edit' );
 
@@ -392,7 +391,6 @@ CREATE TABLE $meta_table_name (
 	 */
 	public function add_meta( &$notification, $meta ) {
 		$add_meta = $this->data_store_meta->add_meta( $notification, $meta );
-		$this->after_meta_change( $notification );
 		return $add_meta ? $add_meta : false;
 	}
 
@@ -415,9 +413,7 @@ CREATE TABLE $meta_table_name (
 	 * @return bool
 	 */
 	public function update_meta( &$notification, $meta ): bool {
-		$update_meta = $this->data_store_meta->update_meta( $notification, $meta );
-		$this->after_meta_change( $notification );
-		return $update_meta;
+		return $this->data_store_meta->update_meta( $notification, $meta );
 	}
 
 	/**
@@ -428,35 +424,7 @@ CREATE TABLE $meta_table_name (
 	 * @return bool
 	 */
 	public function delete_meta( &$notification, $meta ): bool {
-		$delete_meta = $this->data_store_meta->delete_meta( $notification, $meta );
-
-		$this->after_meta_change( $notification );
-		return $delete_meta;
-	}
-
-	/**
-	 * Perform after meta change operations.
-	 *
-	 * @param Notification $notification The notification object.
-	 * @return bool True if changes were applied, false otherwise.
-	 */
-	private function after_meta_change( &$notification ): bool {
-
-		$current_time      = time();
-		$current_date_time = new \WC_DateTime( "@$current_time", new \DateTimeZone( 'UTC' ) );
-
-		$should_save =
-			$notification->get_id() > 0
-			&& $notification->get_date_modified( 'edit' ) < $current_date_time
-			&& empty( $notification->get_changes() );
-
-		if ( $should_save ) {
-			$notification->set_date_modified( $current_time );
-			$saved = $notification->save();
-			return ! is_wp_error( $saved );
-		}
-
-		return false;
+		return $this->data_store_meta->delete_meta( $notification, $meta );
 	}
 
 	/**
