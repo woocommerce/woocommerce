@@ -14,6 +14,7 @@ import {
 import { deleteOption, setOption } from './options';
 import { expectEmail } from './email';
 import { setFilterValue } from './filters';
+import { quotedPattern } from './helpers';
 import { wpCLI } from './cli';
 import { expect, test as baseTest } from '../fixtures/fixtures';
 import { admin } from '../test-data/data';
@@ -849,9 +850,9 @@ export const bisNotice = {
 	 */
 	success: ( productName: string ): RegExp =>
 		new RegExp(
-			`You have successfully signed up! You will be notified when "${ escapeRegExp(
-				productName
-			) }" is back in stock\\.`
+			`You have successfully signed up! You will be notified when ${ quotedPattern(
+				escapeRegExp( productName )
+			) } is back in stock\\.`
 		),
 	doubleOptIn:
 		/Thanks for signing up! Please complete the sign-up process by following the verification link sent to your e-mail\./,
@@ -864,9 +865,9 @@ export const bisNotice = {
 	 */
 	verified: ( productName: string ): RegExp =>
 		new RegExp(
-			`Successfully verified stock notifications for "${ escapeRegExp(
-				productName
-			) }"\\.`
+			`Successfully verified stock notifications for ${ quotedPattern(
+				escapeRegExp( productName )
+			) }\\.`
 		),
 	/**
 	 * Printed on the shop page after an unsubscribe link is followed.
@@ -878,9 +879,9 @@ export const bisNotice = {
 		new RegExp(
 			`Successfully unsubscribed ${ escapeRegExp(
 				email
-			) }\\. You will not receive a notification when "${ escapeRegExp(
-				productName
-			) }" becomes available\\.`
+			) }\\. You will not receive a notification when ${ quotedPattern(
+				escapeRegExp( productName )
+			) } becomes available\\.`
 		),
 	/**
 	 * Printed on the shop page after an unsubscribe link is followed for a
