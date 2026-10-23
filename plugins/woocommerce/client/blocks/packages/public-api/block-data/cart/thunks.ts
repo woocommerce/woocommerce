@@ -2,6 +2,7 @@
  * External dependencies
  */
 import {
+	AddToCartEventProduct,
 	Cart,
 	CartResponse,
 	ApiErrorResponse,
@@ -13,6 +14,7 @@ import {
 } from '@woocommerce/types';
 import {
 	camelCaseKeys,
+	getAddedProducts,
 	hasCollectableRate,
 	triggerAddedToCartEvent,
 	triggerAddingToCartEvent,
@@ -472,9 +474,10 @@ export const addItemToCart =
 		variation: Variation[],
 		additionalData: Record< string, unknown > = {}
 	) =>
-	async ( { dispatch }: CartThunkArgs ) => {
+	async ( { dispatch, select }: CartThunkArgs ) => {
 		try {
 			dispatch.startAddingToCart( productId );
+			const previousItems = select.getCartData().items;
 			const { response } = await apiFetchWithHeaders< {
 				response: CartResponse;
 			} >( {
@@ -489,7 +492,11 @@ export const addItemToCart =
 				cache: 'no-store',
 			} );
 			dispatch.receiveCart( response );
-			dispatch.finishAddingToCart( productId, true, quantity );
+			dispatch.finishAddingToCart(
+				productId,
+				true,
+				getAddedProducts( previousItems, response.items )
+			);
 			return response;
 		} catch ( error ) {
 			dispatch.receiveError( isApiErrorResponse( error ) ? error : null );
@@ -515,18 +522,18 @@ export function startAddingToCart( productId: number ) {
  *
  * @param {number}  productId       Product ID that was added to cart.
  * @param {boolean} [dispatchEvent] Whether to dispatch the added to cart event.
- * @param {number}  [quantity=1]    Quantity of the product that was added.
+ * @param {Array}   [products]      Products added to the cart, with the quantity added for each one.
  */
 export function finishAddingToCart(
 	productId: number,
 	dispatchEvent = true,
-	quantity = 1
+	products?: AddToCartEventProduct[]
 ) {
 	return async ( { dispatch }: CartThunkArgs ) => {
 		if ( dispatchEvent ) {
 			triggerAddedToCartEvent( {
 				preserveCartData: true,
-				products: [ { id: productId, quantity } ],
+				...( products && { products } ),
 			} );
 		}
 		dispatch.setProductsPendingAdd( productId, false );
