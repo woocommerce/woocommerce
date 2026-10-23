@@ -66,7 +66,8 @@ class Product_Variations_API extends WC_REST_Unit_Test_Case {
 		$variations = $response->get_data();
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertEquals( 2, count( $variations ) );
-		$this->assertEquals( 'DUMMY SKU VARIABLE SMALL', $variations[0]['sku'] );
+		// Both variations have menu_order 0, so the newer one (LARGE) comes first, as in the admin variations list.
+		$this->assertEquals( 'DUMMY SKU VARIABLE LARGE', $variations[0]['sku'] );
 		$this->assertEquals( 'size', $variations[0]['attributes'][0]['name'] );
 	}
 

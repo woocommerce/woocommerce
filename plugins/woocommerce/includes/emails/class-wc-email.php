@@ -42,6 +42,13 @@ class WC_Email extends WC_Settings_API {
 	public const SKIP_REASON_NO_RECIPIENT = 'no_recipient';
 
 	/**
+	 * Skip-reason identifier used when the unpaid order timer cancelled the order and the email is set not to send for those.
+	 *
+	 * @since 11.4.0
+	 */
+	public const SKIP_REASON_UNPAID_TIMEOUT = 'unpaid_timeout_notifications_disabled';
+
+	/**
 	 * Email method ID.
 	 *
 	 * @var string
@@ -1201,6 +1208,7 @@ class WC_Email extends WC_Settings_API {
 			 *
 			 * The $reason parameter identifies why the email was not sent:
 			 * - WC_Email::SKIP_REASON_NO_RECIPIENT: No recipient address was available at send time.
+			 * - WC_Email::SKIP_REASON_UNPAID_TIMEOUT: The unpaid order timer cancelled the order and the email is set not to send for those.
 			 *
 			 * @since 10.9.0
 			 *
