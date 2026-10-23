@@ -101,6 +101,41 @@ class SessionDataWriterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox When another request only changed the case of a value, that change is kept.
+	 */
+	public function test_keeps_case_only_change_saved_by_another_request(): void {
+		$this->store(
+			array(
+				'coupon' => 'save10',
+				'other'  => 'old',
+			)
+		);
+		$loaded = array(
+			'coupon' => 'SAVE10',
+			'other'  => 'old',
+		);
+
+		$this->sut->merge(
+			$this->table,
+			self::SESSION_KEY,
+			time() + 100,
+			array(
+				'coupon' => 'SAVE10',
+				'other'  => 'mine',
+			),
+			$loaded
+		);
+
+		$this->assertSame(
+			array(
+				'coupon' => 'save10',
+				'other'  => 'mine',
+			),
+			$this->get_stored()
+		);
+	}
+
+	/**
 	 * @testdox When the stored row cannot be read, saves this request's whole session instead of only its changes.
 	 */
 	public function test_saves_whole_session_when_stored_row_cannot_be_read(): void {

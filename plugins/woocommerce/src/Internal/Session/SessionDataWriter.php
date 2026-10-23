@@ -111,10 +111,11 @@ class SessionDataWriter {
 			);
 		}
 
+		// Compare as binary, since the column's case-insensitive collation would match a row whose values only changed case.
 		return (bool) $wpdb->query(
 			$wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- trusted table name.
-				"UPDATE {$table} SET `session_value` = %s, `session_expiry` = %d WHERE `session_key` = %s AND `session_value` = %s",
+				"UPDATE {$table} SET `session_value` = %s, `session_expiry` = %d WHERE `session_key` = %s AND CAST(`session_value` AS BINARY) = %s",
 				maybe_serialize( $data ),
 				$expiry,
 				$session_key,
