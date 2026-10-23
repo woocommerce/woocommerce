@@ -516,4 +516,20 @@ class ListTableTest extends \WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'data-tip="Paid&quot; onmouseover=&quot;alert(1)"', $output );
 		$this->assertStringNotContainsString( 'onmouseover="', $output );
 	}
+
+	/**
+	 * @testdox Ordering by date also orders by ID, so orders created at the same time keep a stable order.
+	 * @testWith [{}]
+	 *           [{"orderby": "date"}]
+	 * @param array $get_params $_GET values to simulate.
+	 */
+	public function test_ordering_by_date_also_orders_by_id( array $get_params ): void {
+		foreach ( $get_params as $key => $value ) {
+			$_GET[ $key ] = $value;
+		}
+
+		$this->sut->prepare_items();
+
+		$this->assertSame( 'date ID', $this->get_order_query_args()['orderby'] );
+	}
 }
