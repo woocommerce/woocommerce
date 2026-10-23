@@ -41,7 +41,7 @@ class WC_Meta_Box_Product_Data_Test extends WC_Unit_Test_Case {
 	 * The base class already empties the request globals, rolls back every
 	 * database write and resets the current user, so only the two things it
 	 * does not own are captured here: the static meta-box error list and the
-	 * three product globals the classic save seam sets.
+	 * post and product globals the classic save and render seams set.
 	 */
 	public function setUp(): void {
 		parent::setUp();
@@ -49,7 +49,7 @@ class WC_Meta_Box_Product_Data_Test extends WC_Unit_Test_Case {
 		$this->original_meta_box_errors = WC_Admin_Meta_Boxes::$meta_box_errors;
 		$this->download_directories     = wc_get_container()->get( Download_Directories::class );
 
-		foreach ( array( 'product', 'product_object', 'thepostid' ) as $global_name ) {
+		foreach ( array( 'post', 'product', 'product_object', 'thepostid' ) as $global_name ) {
 			$this->original_globals[ $global_name ] = array(
 				'present' => array_key_exists( $global_name, $GLOBALS ),
 				'value'   => $GLOBALS[ $global_name ] ?? null,
@@ -62,7 +62,7 @@ class WC_Meta_Box_Product_Data_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Restore the meta-box error list and the product globals.
+	 * Restore the meta-box error list and the post and product globals.
 	 */
 	public function tearDown(): void {
 		try {
@@ -155,6 +155,97 @@ class WC_Meta_Box_Product_Data_Test extends WC_Unit_Test_Case {
 			'virtual'      => array( true, false ),
 			'downloadable' => array( false, true ),
 		);
+	}
+
+	/**
+	 * @testdox The product data panel renders the Virtual and Downloadable checkboxes with the stored product state.
+	 * @dataProvider product_type_option_provider
+	 *
+	 * @param bool $virtual Whether the rendered product is virtual.
+	 * @param bool $downloadable Whether the rendered product is downloadable.
+	 */
+	public function test_output_renders_the_virtual_and_downloadable_checkboxes( bool $virtual, bool $downloadable ): void {
+		$product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'name'         => 'Product Type Option Product',
+				'status'       => 'publish',
+				'virtual'      => $virtual,
+				'downloadable' => $downloadable,
+			)
+		);
+
+		$panel = $this->render_product_data_panel( $product );
+
+		$this->assert_product_type_checkbox( $panel, '_virtual', $virtual );
+		$this->assert_product_type_checkbox( $panel, '_downloadable', $downloadable );
+	}
+
+	/**
+	 * Provide named product type option rows.
+	 *
+	 * @return array<string, array{bool, bool}>
+	 */
+	public static function product_type_option_provider(): array {
+		return array(
+			'virtual only'      => array( true, false ),
+			'downloadable only' => array( false, true ),
+		);
+	}
+
+	/**
+	 * Render the classic product data panel for a product.
+	 *
+	 * @param WC_Product $product Product to render.
+	 * @return string
+	 */
+	private function render_product_data_panel( WC_Product $product ): string {
+		$post = get_post( $product->get_id() );
+		$this->assertInstanceOf( WP_Post::class, $post, 'The product fixture should have a persisted post.' );
+
+		$GLOBALS['post'] = $post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- The panel views read the edited post from the global; tearDown restores it.
+
+		ob_start();
+		try {
+			WC_Meta_Box_Product_Data::output( $post );
+		} finally {
+			$panel = (string) ob_get_clean();
+		}
+
+		return $panel;
+	}
+
+	/**
+	 * Assert one product type option checkbox and its checked state.
+	 *
+	 * @param string $panel Rendered product data panel.
+	 * @param string $checkbox_id Value of the checkbox `id` and `name` attributes.
+	 * @param bool   $expected_checked Whether the checkbox should carry the `checked` attribute.
+	 */
+	private function assert_product_type_checkbox( string $panel, string $checkbox_id, bool $expected_checked ): void {
+		$tags       = new WP_HTML_Tag_Processor( $panel );
+		$attributes = null;
+
+		while ( $tags->next_tag( array( 'tag_name' => 'INPUT' ) ) ) {
+			if ( $checkbox_id === $tags->get_attribute( 'id' ) ) {
+				$attributes = array(
+					'type'    => $tags->get_attribute( 'type' ),
+					'name'    => $tags->get_attribute( 'name' ),
+					'checked' => $tags->get_attribute( 'checked' ),
+				);
+				break;
+			}
+		}
+
+		$this->assertIsArray( $attributes, "The product data panel should render the {$checkbox_id} checkbox." );
+		$this->assertSame( 'checkbox', $attributes['type'], "The {$checkbox_id} field should render as a checkbox." );
+		$this->assertSame( $checkbox_id, $attributes['name'], "The {$checkbox_id} checkbox should post under its own name." );
+
+		if ( $expected_checked ) {
+			$this->assertSame( 'checked', $attributes['checked'], "The {$checkbox_id} checkbox should be checked." );
+		} else {
+			$this->assertNull( $attributes['checked'], "The {$checkbox_id} checkbox should not be checked." );
+		}
 	}
 
 	/**
