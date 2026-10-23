@@ -10,9 +10,9 @@
 		margin-top: $gap-small;
 	}
 
-	// No need for this margin in default country select, which sits at the top
-	// of the form
-	.wc-block-components-address-form__country {
+	// No need for this margin when the country select is the first field,
+	// which is its default position
+	.wc-block-components-address-form__country:first-child {
 		.wc-blocks-components-select {
 			margin-top: 0;
 		}

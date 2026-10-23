@@ -23,6 +23,11 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 
 	private const NO_SCHEMA_ABILITY_ID = 'woocommerce/tracking-test-no-schema';
 
+	/**
+	 * The MCP Adapter's discovery abilities. The tests register stand-ins when the Adapter isn't loaded.
+	 */
+	private const ADAPTER_DISCOVERY_IDS = array( 'mcp-adapter/get-ability-info', 'mcp-adapter/discover-abilities' );
+
 	private const SERVER_KEYS = array( 'REQUEST_SCHEME', 'HTTP_HOST', 'REQUEST_URI', 'HTTP_REFERER', 'HTTP_MCP_PROTOCOL_VERSION', 'HTTP_MCP_SESSION_ID', 'A8C_PROXIED_REQUEST' );
 
 	/**
@@ -90,6 +95,13 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	private array $original_server = array();
 
 	/**
+	 * Adapter discovery stand-ins this test registered, so real MCP Adapter abilities are left alone.
+	 *
+	 * @var string[]
+	 */
+	private array $registered_adapter_ids = array();
+
+	/**
 	 * Create shared fixtures.
 	 *
 	 * @param \WP_UnitTest_Factory $factory Factory.
@@ -141,7 +153,7 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 			}
 
 			// The abilities registry is a singleton that outlives the test.
-			foreach ( array( self::ABILITY_ID, self::INNER_ABILITY_ID, self::UNTRACKED_ABILITY_ID, self::LONG_ABILITY_ID, self::NO_SCHEMA_ABILITY_ID ) as $ability_id ) {
+			foreach ( array_merge( array( self::ABILITY_ID, self::INNER_ABILITY_ID, self::UNTRACKED_ABILITY_ID, self::LONG_ABILITY_ID, self::NO_SCHEMA_ABILITY_ID ), $this->registered_adapter_ids ) as $ability_id ) {
 				if ( function_exists( 'wp_has_ability' ) && wp_has_ability( $ability_id ) ) {
 					wp_unregister_ability( $ability_id );
 				}
@@ -407,6 +419,41 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should record MCP Adapter discovery of WooCommerce abilities as a separate event.
+	 * @testWith ["mcp-adapter/get-ability-info", "woocommerce/tracking-test", true, "info", "woocommerce__tracking-test"]
+	 *           ["mcp-adapter/discover-abilities", "", true, "list", "none"]
+	 *           ["mcp-adapter/get-ability-info", "tracking-test/other", true, "", ""]
+	 *           ["mcp-adapter/get-ability-info", "woocommerce/not-registered", true, "", ""]
+	 *           ["mcp-adapter/get-ability-info", "woocommerce/tracking-test", false, "", ""]
+	 *
+	 * @param string $adapter_ability   Adapter ability the agent calls.
+	 * @param string $looked_up         Ability it asks about, or '' for none.
+	 * @param bool   $over_mcp          Whether the call comes through MCP rather than a direct PHP call.
+	 * @param string $discovery         Expected discovery property, or '' when nothing is recorded.
+	 * @param string $recorded_ability  Expected ability_name.
+	 */
+	public function test_records_adapter_discovery( string $adapter_ability, string $looked_up, bool $over_mcp, string $discovery, string $recorded_ability ): void {
+		if ( $over_mcp ) {
+			$this->start_mcp_tool_call();
+		}
+
+		wp_get_ability( $adapter_ability )->execute( '' === $looked_up ? array() : array( 'ability_name' => $looked_up ) );
+		$this->sut->handle_shutdown();
+
+		if ( '' === $discovery ) {
+			$this->assertSame( array(), $this->sut->recorded, 'Unregistered names, other plugins, and direct PHP calls are not recorded' );
+			return;
+		}
+		$this->assertCount( 1, $this->sut->recorded, 'Only the discovery event; the adapter ability itself is not an ability call' );
+		$event = $this->sut->recorded[0];
+		$this->assertSame( 'wcadmin_ability_discovered', $event['_en'] );
+		$this->assertSame( $discovery, $event['discovery'] );
+		$this->assertSame( $recorded_ability, $event['ability_name'] );
+		$this->assertSame( 'mcp', $event['channel'] );
+		$this->assertSame( 'none', $event['external_client'], 'No MCP session, so the client is unknown' );
+	}
+
+	/**
 	 * @testdox Should not report Jetpack authentication for signature arguments Jetpack didn't verify.
 	 */
 	public function test_does_not_trust_unverified_jetpack_signature_arguments(): void {
@@ -652,33 +699,21 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should finish the response before sending events, unless there are none, it runs under WP-CLI, or a filter says not to.
+	 * @testdox Should send the queued events on shutdown, and only when there are some.
 	 */
-	public function test_finishes_the_response_before_sending_events(): void {
+	public function test_sends_queued_events_on_shutdown(): void {
 		$this->start_mcp_tool_call();
 		$this->sut->handle_shutdown();
-		$this->assertSame( array(), $this->sut->finished_after, 'There was nothing to send' );
-		$this->assertSame( array(), $this->sut->pixels_sent_after, 'Nothing to send' );
+		$this->assertSame( 0, $this->sut->pixel_sends, 'There was nothing to send' );
 
 		wp_get_ability( self::ABILITY_ID )->execute();
 		$this->sut->handle_shutdown();
-		$this->assertSame( array( 0 ), $this->sut->finished_after, 'Once, before the event was sent' );
-		$this->assertSame( array( 1 ), $this->sut->pixels_sent_after, 'The pixels go out after the response is finished' );
+		$this->assertSame( 1, $this->sut->pixel_sends, 'Sent once' );
+		$this->assertCount( 1, $this->sut->recorded );
 
-		add_filter( 'woocommerce_ability_tracking_finish_response', '__return_false' );
-		try {
-			wp_get_ability( self::ABILITY_ID )->execute();
-			$this->sut->handle_shutdown();
-		} finally {
-			remove_filter( 'woocommerce_ability_tracking_finish_response', '__return_false' );
-		}
-		$this->assertSame( array( 0 ), $this->sut->finished_after, 'The filter keeps the response open' );
-		$this->assertSame( array( 1, 1 ), $this->sut->pixels_sent_after, 'The events are still sent' );
-
-		$this->sut->long_running = true;
-		wp_get_ability( self::ABILITY_ID )->execute();
 		$this->sut->handle_shutdown();
-		$this->assertSame( array( 0 ), $this->sut->finished_after, 'No client waits under WP-CLI' );
+		$this->assertSame( 1, $this->sut->pixel_sends, 'A flushed queue is not sent again' );
+		$this->assertCount( 1, $this->sut->recorded );
 	}
 
 	/**
@@ -1072,32 +1107,18 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 			}
 
 			/**
-			 * Never send real pixels from tests; note when they would be sent.
+			 * How many times the queued pixels would have been sent.
+			 *
+			 * @var int
+			 */
+			public int $pixel_sends = 0;
+
+			/**
+			 * Never send real pixels from tests; count the sends instead.
 			 */
 			protected function send_queued_pixels(): void {
-				$this->pixels_sent_after[] = count( $this->finished_after );
+				++$this->pixel_sends;
 			}
-
-			/**
-			 * How many events had been sent each time the response was finished.
-			 *
-			 * @var int[]
-			 */
-			public array $finished_after = array();
-
-			/**
-			 * Note when the response would be finished.
-			 */
-			protected function finish_response(): void {
-				$this->finished_after[] = count( $this->recorded );
-			}
-
-			/**
-			 * How many times the response had been finished each time the queued pixels were sent.
-			 *
-			 * @var int[]
-			 */
-			public array $pixels_sent_after = array();
 		};
 	}
 
@@ -1240,6 +1261,26 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 					);
 				}
 				wp_register_ability( $ability_id, $args );
+			}
+			foreach ( self::ADAPTER_DISCOVERY_IDS as $ability_id ) {
+				if ( wp_has_ability( $ability_id ) ) {
+					continue;
+				}
+				$this->registered_adapter_ids[] = $ability_id;
+				wp_register_ability(
+					$ability_id,
+					array(
+						'label'               => 'Adapter discovery',
+						'description'         => 'Stand-in for an MCP Adapter discovery ability.',
+						'category'            => 'woocommerce',
+						'input_schema'        => array(
+							'type'    => 'object',
+							'default' => array(),
+						),
+						'execute_callback'    => static fn() => array( 'ok' => true ),
+						'permission_callback' => '__return_true',
+					)
+				);
 			}
 		};
 		add_action( 'wp_abilities_api_init', $register_abilities );

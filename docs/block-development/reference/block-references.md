@@ -184,6 +184,15 @@ Enable customers to keep track of their location within the store and navigate b
 - **Supports:** align (full, wide), color (link, text, ~~background~~), interactivity (clientNavigation), typography (fontSize, lineHeight), ~~html~~
 - **Attributes:** align, contentJustification, fontSize
 
+## Cart - woocommerce/cart
+
+Shopping cart.
+
+- **Name:** woocommerce/cart
+- **Category:** woocommerce
+- **Supports:** align (wide), ~~html~~, ~~multiple~~
+- **Attributes:** align, checkoutPageId, hasDarkControls, showRateAfterTaxName
+
 ## Accepted Payment Methods - woocommerce/cart-accepted-payment-methods-block
 
 Display accepted payment methods.
