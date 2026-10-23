@@ -9,6 +9,8 @@ current wccom url: https://woocommerce.com/document/digital-downloadable-product
 
 WooCommerce adds an `.htaccess` file to the `woocommerce_uploads` directory to stop downloadable product files from being fetched directly by URL. NGINX ignores `.htaccess` files, so stores running on NGINX need to add their own rule.
 
+The rule depends on your store's download method. To check it, go to **WooCommerce > Settings > Products > Downloadable products** and look at **File download method**. **Force downloads** is the default.
+
 ## X-Accel-Redirect/X-Sendfile or Force Downloads
 
 If your store uses the **X-Accel-Redirect/X-Sendfile** or **Force Downloads** download method, add this to your NGINX `server` block:
@@ -24,6 +26,8 @@ location ~* /woocommerce_uploads/ {
 Place it **before** any other `location` block that uses a regular expression, such as a rule for static files like `location ~* \.(pdf|zip|jpg)$`. NGINX uses the first regular expression location that matches a request, so a static file rule placed earlier would serve downloadable files directly.
 
 The rule matches the `woocommerce_uploads` directory wherever your uploads are stored, including multisite subsites (for example `/wp-content/uploads/sites/2/woocommerce_uploads/`) and sites that move the `wp-content` or uploads directory.
+
+If **Allow using redirect mode (insecure) as a last resort** is turned on under the same settings, WooCommerce sends customers straight to the file when the selected method fails. This rule blocks those direct requests, so the fallback download fails instead.
 
 ## Redirect only
 
