@@ -368,12 +368,14 @@ class UpdateUtils {
 		// product's current values, on paid orders too (#70046). The object comparison below never spots
 		// that case, since both sides are loaded afresh. A variation that no longer exists, or an explicit
 		// variation_id of 0, still demotes the line to its parent.
+		// A variation line reads back with the variation in `product_id` and the parent's SKU when it
+		// inherits one, and that SKU resolves to the parent: echoing the line names its own parent too.
 		$names_own_parent = $current_variation_id
 			&& $product instanceof WC_Product
 			&& $product->get_id() === $current_product_id
 			&& array_key_exists( 'product_id', $request_data )
-			&& (int) $request_data['product_id'] === $current_product_id
-			&& ! array_key_exists( 'variation_id', $request_data );
+			&& in_array( (int) $request_data['product_id'], array( $current_product_id, $current_variation_id ), true )
+			&& ( ! array_key_exists( 'variation_id', $request_data ) || (int) $request_data['variation_id'] === $current_variation_id );
 		$current_product  = $item->get_product();
 		$keeps_product    = 'update' === $action
 			&& $product instanceof WC_Product

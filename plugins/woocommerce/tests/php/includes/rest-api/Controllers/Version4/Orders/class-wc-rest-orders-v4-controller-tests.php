@@ -2087,4 +2087,86 @@ class WC_REST_Orders_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 'Historical line item name', $reloaded->get_name(), 'The line should keep the name it was sold under.' );
 		$this->assertSame( '', $reloaded->get_tax_class(), 'The line should keep the tax class it was sold under.' );
 	}
+
+	/**
+	 * @testdox PUT /orders echoing a variation line as it reads back, the variation in product_id and the parent's SKU from product_data, keeps the line as sold.
+	 */
+	public function test_update_line_item_echoed_from_the_response_keeps_variation_name_and_tax_class(): void {
+		$parent = WC_Helper_Product::create_variation_product();
+		$parent->set_sku( 'REST-V4-PARENT-' . wp_generate_uuid4() );
+		$parent->save();
+		$variation = wc_get_product( $parent->get_children()[0] );
+		$variation->set_sku( '' );
+		$variation->save();
+		$order = new WC_Order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_product( $variation );
+		$item->set_quantity( 1 );
+		$item->set_total( 10 );
+		$item->set_name( 'Historical line item name' );
+		$item->set_tax_class( '' );
+		$order->add_item( $item );
+		$order->save();
+		$parent->set_name( 'Updated parent name' );
+		$parent->set_tax_class( 'reduced-rate' );
+		$parent->save();
+
+		$get_response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/orders/' . $order->get_id() ) );
+		$this->assertSame( 200, $get_response->get_status(), 'Fetching the order should succeed.' );
+		$read_back = $get_response->get_data()['line_items'][0];
+		$this->assertSame( $variation->get_id(), $read_back['product_id'], 'Precondition: the response names the variation in product_id.' );
+		$this->assertSame( $parent->get_sku(), $read_back['product_data']['sku'], 'Precondition: the response carries the SKU inherited from the parent.' );
+
+		$response = $this->dispatch_v4_line_item_update(
+			$order->get_id(),
+			array(
+				'id'           => $read_back['id'],
+				'product_id'   => $read_back['product_id'],
+				'variation_id' => $variation->get_id(),
+				'sku'          => $read_back['product_data']['sku'],
+				'quantity'     => 2,
+			)
+		);
+		$this->assertSame( 200, $response->get_status(), 'Echoing the line as it reads back should succeed.' );
+
+		$reloaded = new WC_Order_Item_Product( $item->get_id() );
+		$this->assertSame( 2, $reloaded->get_quantity(), 'The posted quantity should be applied.' );
+		$this->assertSame( $variation->get_id(), $reloaded->get_variation_id(), 'The variation should be kept.' );
+		$this->assertSame( 'Historical line item name', $reloaded->get_name(), 'The line should keep the name it was sold under.' );
+		$this->assertSame( '', $reloaded->get_tax_class(), 'The line should keep the tax class it was sold under.' );
+	}
+
+	/**
+	 * @testdox PUT /orders with an explicit zero variation_id still demotes a variation line to its parent.
+	 */
+	public function test_update_line_item_with_zero_variation_id_demotes_to_the_parent(): void {
+		$parent    = WC_Helper_Product::create_variation_product();
+		$variation = wc_get_product( $parent->get_children()[0] );
+		$order     = new WC_Order();
+		$item      = new WC_Order_Item_Product();
+		$item->set_product( $variation );
+		$item->set_quantity( 1 );
+		$item->set_total( 10 );
+		$order->add_item( $item );
+		$order->save();
+		$parent->set_name( 'Updated parent name' );
+		$parent->set_tax_class( 'reduced-rate' );
+		$parent->save();
+
+		$response = $this->dispatch_v4_line_item_update(
+			$order->get_id(),
+			array(
+				'id'           => $item->get_id(),
+				'product_id'   => $parent->get_id(),
+				'variation_id' => 0,
+			)
+		);
+		$this->assertSame( 200, $response->get_status(), 'Explicitly demoting the line should succeed.' );
+
+		$reloaded = new WC_Order_Item_Product( $item->get_id() );
+		$this->assertSame( 0, $reloaded->get_variation_id(), 'An explicit zero variation_id should clear the variation.' );
+		$this->assertSame( $parent->get_id(), $reloaded->get_product()->get_id(), 'The line should resolve to the parent.' );
+		$this->assertSame( 'Updated parent name', $reloaded->get_name(), 'The line should take the parent\'s name.' );
+		$this->assertSame( 'reduced-rate', $reloaded->get_tax_class(), 'The line should take the parent\'s tax class.' );
+	}
 }
