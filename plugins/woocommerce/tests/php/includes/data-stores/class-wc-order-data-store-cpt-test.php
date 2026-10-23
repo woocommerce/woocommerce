@@ -573,6 +573,9 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$this->assertFalse( $r_order->get_item( $fee_item_2->get_id() ) );
 		$this->assertTrue( $r_order->get_item( $product_item->get_id() )->get_id() === $product_item->get_id() );
 		$this->assertTrue( $r_order->get_item( $shipping_item->get_id() )->get_id() === $shipping_item->get_id() );
+		$this->assertSame( 0, $this->get_item_meta_count( $fee_item_1->get_id() ), 'Deleted items should not leave metadata behind.' );
+		$this->assertSame( 0, $this->get_item_meta_count( $fee_item_2->get_id() ), 'Deleted items should not leave metadata behind.' );
+		$this->assertGreaterThan( 0, $this->get_item_meta_count( $product_item->get_id() ), 'Metadata of items of other types should remain.' );
 
 		// Deleting all items should all items.
 		$r_order->get_data_store()->delete_items( $r_order );
@@ -580,6 +583,8 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$this->assertFalse( $r_order->get_item( $fee_item_2->get_id() ) );
 		$this->assertFalse( $r_order->get_item( $product_item->get_id() ) );
 		$this->assertFalse( $r_order->get_item( $shipping_item->get_id() ) );
+		$this->assertSame( 0, $this->get_item_meta_count( $product_item->get_id() ), 'Deleted items should not leave metadata behind.' );
+		$this->assertSame( 0, $this->get_item_meta_count( $shipping_item->get_id() ), 'Deleted items should not leave metadata behind.' );
 	}
 
 	/**
@@ -600,6 +605,20 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		$this->assertFalse( WC_Order_Factory::get_order_item( $order_1_item_id ), 'A valid item belonging to the target order should be deleted.' );
 		$this->assertInstanceOf( WC_Order_Item::class, WC_Order_Factory::get_order_item( $order_2_item_id ), 'An item belonging to another order should remain.' );
+
+		$this->assertSame( 0, $this->get_item_meta_count( $order_1_item_id ), 'The deleted item should not leave metadata behind.' );
+		$this->assertGreaterThan( 0, $this->get_item_meta_count( $order_2_item_id ), 'Metadata of an item belonging to another order should remain.' );
+	}
+
+	/**
+	 * Count the metadata rows stored for an order item.
+	 *
+	 * @param int $item_id Order item ID.
+	 * @return int
+	 */
+	private function get_item_meta_count( int $item_id ): int {
+		global $wpdb;
+		return (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id = %d", $item_id ) );
 	}
 
 	/**
@@ -631,6 +650,7 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		$this->assertFalse( $order_1->get_item( $product_item_1->get_id() ) );
 		$this->assertTrue( $order_2->get_item( $product_item_2->get_id() )->get_id() === $product_item_2->get_id() );
+		$this->assertGreaterThan( 0, $this->get_item_meta_count( $product_item_2->get_id() ), 'Metadata of items belonging to another order should remain.' );
 	}
 
 	/**
