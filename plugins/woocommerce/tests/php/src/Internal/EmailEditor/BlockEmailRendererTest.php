@@ -318,6 +318,51 @@ class BlockEmailRendererTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should render the email with the site language and text direction.
+	 * @dataProvider provide_render_sources
+	 *
+	 * @param string $email_id Email ID that selects the rendering source.
+	 */
+	public function testItRendersWithSiteLanguageAndDirection( string $email_id ): void {
+		$this->skip_if_unsupported_environment();
+
+		$wc_mail_mock = $this->create_wc_email_mock( $email_id, 'Test Woo Content' );
+
+		$this->personalizer->set_context(
+			array(
+				'wc_email'        => $wc_mail_mock,
+				'recipient_email' => $wc_mail_mock->get_recipient(),
+			)
+		);
+
+		$locale_filter = function () {
+			return 'ar';
+		};
+		add_filter( 'pre_determine_locale', $locale_filter );
+		try {
+			$rendered_email = $this->block_email_renderer->maybe_render_block_email( $wc_mail_mock );
+		} finally {
+			remove_filter( 'pre_determine_locale', $locale_filter );
+		}
+
+		$this->assertNotNull( $rendered_email );
+		$this->assertStringContainsString( 'lang="ar"', $rendered_email );
+		$this->assertStringContainsString( 'dir="rtl"', $rendered_email );
+	}
+
+	/**
+	 * Email IDs that render from the saved post and from the file template.
+	 *
+	 * @return array<string, array{0: string}>
+	 */
+	public function provide_render_sources(): array {
+		return array(
+			'saved post'    => array( 'test_email' ),
+			'file template' => array( 'email_without_mapping' ),
+		);
+	}
+
+	/**
 	 * Build a WC_Email mock whose block template resolves to the default block content file.
 	 *
 	 * @param string $email_id    The email ID assigned to the mock.
