@@ -1,9 +1,6 @@
 <?php
 namespace Automattic\WooCommerce\Internal\ComingSoon;
 
-use Automattic\WooCommerce\Blocks\BlockTemplatesController;
-use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
-use Automattic\WooCommerce\Blocks\Package as BlocksPackage;
 use Automattic\Jetpack\Constants;
 
 /**
@@ -20,11 +17,16 @@ class ComingSoonRequestHandler {
 	private $coming_soon_helper = null;
 
 	/**
-	 * Whether the coming soon screen should be shown. Cache the result to avoid multiple calls to the helper.
-	 *
-	 * @var bool
+	 * Priority of the classic-theme guard: just below WordPress's default, so lower-priority callbacks still run first.
 	 */
-	private static $show_coming_soon = false;
+	private const CLASSIC_GUARD_PRIORITY = 9;
+
+	/**
+	 * Whether the coming soon screen should be shown, cached once decided for the request. Null until then.
+	 *
+	 * @var bool|null
+	 */
+	private static $show_coming_soon = null;
 
 	/**
 	 * Sets up the hook.
@@ -45,25 +47,21 @@ class ComingSoonRequestHandler {
 				}
 
 				add_filter( 'template_include', array( $this, 'handle_template_include' ) );
+				add_filter( 'template_include', array( $this, 'remove_other_template_include_callbacks' ), self::CLASSIC_GUARD_PRIORITY );
+				add_filter( 'template_include', array( $this, 'handle_classic_template_include' ), PHP_INT_MAX );
 				add_filter( 'wp_theme_json_data_theme', array( $this, 'experimental_filter_theme_json_theme' ) );
 				add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_styles' ) );
-				add_action( 'after_setup_theme', array( $this, 'possibly_init_block_templates' ), 999 );
 			}
 		);
 	}
 
 	/**
-	 * Initializes block templates so we can show coming soon page in non-FSE themes.
+	 * Formerly initialized block templates so classic themes could show the block Coming Soon page.
+	 *
+	 * @deprecated 11.3.0 Classic themes now use PHP templates, and block themes initialize block templates in the Blocks bootstrap.
 	 */
 	public function possibly_init_block_templates() {
-		// No need to initialize block templates since we've already initialized them in the Block Bootstrap.
-		if ( wp_is_block_theme() || current_theme_supports( 'block-template-parts' ) ) {
-			return;
-		}
-
-		$container = BlocksPackage::container();
-		$container->get( BlockTemplatesRegistry::class )->init();
-		$container->get( BlockTemplatesController::class )->init();
+		wc_deprecated_function( __METHOD__, '11.3.0' );
 	}
 
 	/**
@@ -72,54 +70,130 @@ class ComingSoonRequestHandler {
 	 * @internal
 	 *
 	 * @param string $template The path to the previously determined template.
-	 * @return string The path to the 'coming soon' template or any empty string to prevent further template loading in FSE themes.
+	 * @return string An empty string once the block 'coming soon' template is rendered, or the original path otherwise.
 	 */
 	public function handle_template_include( $template ) {
-		if ( ! $this->should_show_coming_soon() ) {
+		if ( $this->should_use_classic_templates() || ! $this->should_show_coming_soon() ) {
 			return $template;
 		}
 
 		// A coming soon page needs to be displayed. Set a short cache duration to prevents ddos attacks.
 		header( 'Cache-Control: max-age=60' );
 
-		$is_fse_theme         = wp_is_block_theme();
-		$is_store_coming_soon = $this->coming_soon_helper->is_store_coming_soon();
 		add_theme_support( 'block-templates' );
 
 		$coming_soon_template = get_query_template( 'coming-soon' );
 
-		if ( ! $is_fse_theme && $is_store_coming_soon ) {
-			get_header();
+		$this->add_coming_soon_meta();
+
+		if ( ! empty( $coming_soon_template ) && file_exists( $coming_soon_template ) ) {
+			include $coming_soon_template;
 		}
 
+		// Since we've already rendered a template, return empty string to ensure no other template is rendered.
+		return '';
+	}
+
+	/**
+	 * Unhooks every other template_include callback on classic Coming Soon requests, keeping only the PHP template selector.
+	 * Callbacks from the default priority up can then neither print, exit, nor replace the page. Lower priorities have already run.
+	 *
+	 * @internal
+	 *
+	 * @param string $template The previously selected template path.
+	 * @return string The unchanged template path.
+	 */
+	public function remove_other_template_include_callbacks( $template ) {
+		global $wp_filter;
+
+		$selector = array( $this, 'handle_classic_template_include' );
+
+		// Without the selector, removing the other callbacks would leave WordPress's default template, showing the protected page.
+		if ( false === has_filter( 'template_include', $selector ) || ! $this->should_use_classic_templates() || ! $this->should_show_coming_soon() ) {
+			return $template;
+		}
+
+		foreach ( $wp_filter['template_include']->callbacks as $priority => $callbacks ) {
+			foreach ( $callbacks as $callback ) {
+				if ( $selector !== $callback['function'] ) {
+					remove_filter( 'template_include', $callback['function'], $priority );
+				}
+			}
+		}
+
+		return $template;
+	}
+
+	/**
+	 * Selects a PHP Coming Soon template, as the last template_include callback left on classic Coming Soon requests.
+	 *
+	 * @internal
+	 *
+	 * @param string $template The previously selected template path.
+	 * @return string The Coming Soon PHP path, an empty path on lookup failure, or the original path on bypass requests.
+	 */
+	public function handle_classic_template_include( $template ) {
+		if ( ! $this->should_use_classic_templates() || ! $this->should_show_coming_soon() ) {
+			return $template;
+		}
+
+		if ( ! headers_sent() ) {
+			header( 'Cache-Control: max-age=60' );
+		}
+
+		/*
+		 * A theme's root coming-soon.php is deliberately not looked up: some classic themes ship a page template
+		 * with that name that prints the current post, which would expose the protected page.
+		 */
+		$template_name = $this->coming_soon_helper->is_store_coming_soon() ? 'coming-soon-store-only.php' : 'coming-soon-entire-site.php';
+		$selected      = wc_locate_template( 'coming-soon/' . $template_name );
+
+		/*
+		 * Fire core's coming-soon_template filter so callbacks can replace the page on either renderer.
+		 * The candidate list is empty because WordPress's template hierarchy is not searched here.
+		 */
+		/** This filter is documented in wp-includes/template.php */
+		$selected = apply_filters( 'coming-soon_template', $selected, 'coming-soon', array() ); // phpcs:ignore WordPress.NamingConventions.ValidHookName.UseUnderscores, WooCommerce.Commenting.CommentHooks.MissingSinceComment -- WordPress names and documents this hook.
+		if ( ! is_string( $selected ) || ! is_file( $selected ) || ! is_readable( $selected ) ) {
+			// Never fall back to protected content when a template override cannot be loaded.
+			return '';
+		}
+
+		wp_enqueue_style(
+			'woocommerce-coming-soon-classic',
+			WC()->plugin_url() . '/assets/css/coming-soon-classic.css',
+			array(),
+			Constants::get_constant( 'WC_VERSION' )
+		);
+		wp_style_add_data( 'woocommerce-coming-soon-classic', 'rtl', 'replace' );
+		$this->add_coming_soon_meta();
+
+		// WordPress copies the product query var, a slug, into $product. Theme code expects a WC_Product or nothing.
+		unset( $GLOBALS['product'] );
+
+		return $selected;
+	}
+
+	/**
+	 * Marks the page as Coming Soon for caches and other integrations.
+	 */
+	private function add_coming_soon_meta(): void {
 		add_action(
 			'wp_head',
 			function () {
 				echo "<meta name='woo-coming-soon-page' content='yes'>";
 			}
 		);
+	}
 
-		if ( ! empty( $coming_soon_template ) && file_exists( $coming_soon_template ) ) {
-			if ( ! $is_fse_theme && $is_store_coming_soon && function_exists( 'get_the_block_template_html' ) ) {
-				// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-				echo get_the_block_template_html();
-			} else {
-				include $coming_soon_template;
-			}
-		}
-
-		if ( ! $is_fse_theme && $is_store_coming_soon ) {
-			get_footer();
-		}
-
-		if ( $is_fse_theme ) {
-			// Since we've already rendered a template, return empty string to ensure no other template is rendered.
-			return '';
-		} else {
-			// In non-FSE themes, other templates will still be rendered.
-			// We need to exit to prevent further processing.
-			exit();
-		}
+	/**
+	 * Uses the PHP templates on every classic theme, including those with block template part support.
+	 * Only block themes let merchants edit the block Coming Soon template, so only they get the block page.
+	 *
+	 * @return bool Whether the PHP templates should be used.
+	 */
+	private function should_use_classic_templates() {
+		return ! wp_is_block_theme();
 	}
 
 	/**
@@ -128,11 +202,20 @@ class ComingSoonRequestHandler {
 	 * @return bool
 	 */
 	private function should_show_coming_soon() {
-		// Early exit if already determined that the coming soon screen should be shown.
-		if ( self::$show_coming_soon ) {
-			return true;
+		// The guard and the selector both ask, so decide once per request: the exclusion filter fires and the share cookie is set only once.
+		if ( null === self::$show_coming_soon ) {
+			self::$show_coming_soon = $this->decide_show_coming_soon();
 		}
 
+		return self::$show_coming_soon;
+	}
+
+	/**
+	 * Decides whether the coming soon screen should be shown for the current request.
+	 *
+	 * @return bool
+	 */
+	private function decide_show_coming_soon() {
 		// Early exit if the user is logged in as administrator / shop manager.
 		if ( current_user_can( 'manage_woocommerce' ) ) {
 			return false;
@@ -172,7 +255,6 @@ class ComingSoonRequestHandler {
 			}
 		}
 
-		self::$show_coming_soon = true;
 		return true;
 	}
 
