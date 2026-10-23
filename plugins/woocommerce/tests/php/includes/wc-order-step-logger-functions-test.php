@@ -7,6 +7,10 @@
 
 declare(strict_types=1);
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+use Automattic\WooCommerce\Utilities\OrderUtil;
+
 /**
  * Class WC_Order_Step_Logger_Functions_Test
  */
@@ -18,6 +22,13 @@ class WC_Order_Step_Logger_Functions_Test extends \WC_Unit_Test_Case {
 	 * @var string|null
 	 */
 	private $original_request_method;
+
+	/**
+	 * Whether HPOS was in use before a test changed the order storage, or null if it did not.
+	 *
+	 * @var bool|null
+	 */
+	private $prev_hpos_enabled = null;
 
 	/**
 	 * Runs before each test.
@@ -38,6 +49,11 @@ class WC_Order_Step_Logger_Functions_Test extends \WC_Unit_Test_Case {
 	 * Runs after each test.
 	 */
 	public function tearDown(): void {
+		if ( null !== $this->prev_hpos_enabled ) {
+			OrderHelper::toggle_cot_feature_and_usage( $this->prev_hpos_enabled );
+			$this->prev_hpos_enabled = null;
+		}
+
 		// Clean up log files.
 		$this->clean_up_log_files();
 
@@ -346,5 +362,83 @@ class WC_Order_Step_Logger_Functions_Test extends \WC_Unit_Test_Case {
 		);
 
 		$order->delete( true );
+	}
+
+	/**
+	 * @testdox Order step logging stores its meta without a full order save, so woocommerce_update_order does not fire.
+	 *
+	 * @testWith [true, false]
+	 *           [true, true]
+	 *           [false, false]
+	 *           [false, true]
+	 *
+	 * @param bool $hpos_enabled Whether orders are stored in the HPOS tables.
+	 * @param bool $sync_enabled Whether HPOS and posts data sync is on.
+	 */
+	public function test_wc_log_order_step_does_not_fire_update_order_hook( bool $hpos_enabled, bool $sync_enabled ): void {
+		Constants::set_constant( 'WC_LOG_THRESHOLD', WC_Log_Levels::DEBUG );
+		$this->use_order_storage( $hpos_enabled, $sync_enabled );
+		$order = WC_Helper_Order::create_order();
+		// HPOS saves the whole order after a meta change unless the order was modified in the current second.
+		$order->set_date_modified( time() - HOUR_IN_SECONDS );
+		$order->save();
+		$update_order_count = 0;
+		add_action(
+			'woocommerce_update_order',
+			function () use ( &$update_order_count ) {
+				++$update_order_count;
+			}
+		);
+
+		wc_log_order_step( 'Step 1', array( 'order_object' => $order ), false, true );
+		wc_log_order_step( 'Step 2', array( 'order_object' => $order ) );
+
+		$log_source = wc_get_order( $order->get_id() )->get_meta( '_debug_log_source' );
+		$this->assertStringStartsWith( 'place-order-debug-', $log_source, 'Each logged step should store the log source on the order' );
+
+		wc_log_order_step( 'Step 3 - Final', array( 'order_object' => $order ), true );
+
+		$this->assertSame( 0, $update_order_count, 'Logging checkout steps should not fire woocommerce_update_order' );
+		$saved_order = wc_get_order( $order->get_id() );
+		$this->assertSame( '', $saved_order->get_meta( '_debug_log_source' ), 'The final step should remove the log source meta' );
+		$this->assertSame( $log_source, $saved_order->get_meta( '_debug_log_source_pending_deletion' ), 'The final step should mark the log for deletion' );
+		if ( $hpos_enabled && $sync_enabled ) {
+			$this->assertSame( $log_source, get_post_meta( $order->get_id(), '_debug_log_source_pending_deletion', true ), 'The pending-deletion meta should be backfilled to the posts table when sync is on' );
+			$this->assertSame( '', get_post_meta( $order->get_id(), '_debug_log_source', true ), 'The log source meta should be removed from the posts table when sync is on' );
+		}
+	}
+
+	/**
+	 * @testdox Order step logging does not store meta for an order that has not been saved yet.
+	 */
+	public function test_wc_log_order_step_skips_meta_for_unsaved_order(): void {
+		Constants::set_constant( 'WC_LOG_THRESHOLD', WC_Log_Levels::DEBUG );
+		$order = new WC_Order();
+
+		wc_log_order_step( 'Step 1', array( 'order_object' => $order ), false, true );
+		wc_log_order_step( 'Step 2 - Final', array( 'order_object' => $order ), true );
+
+		$this->assertSame( 0, $order->get_id(), 'Logging should not save the order' );
+		$this->assertSame( '', $order->get_meta( '_debug_log_source' ), 'Logging should not add meta to an unsaved order' );
+	}
+
+	/**
+	 * Store orders in the HPOS tables or in posts for the current test.
+	 *
+	 * @param bool $hpos_enabled Whether orders are stored in the HPOS tables.
+	 * @param bool $sync_enabled Whether HPOS and posts data sync is on.
+	 */
+	private function use_order_storage( bool $hpos_enabled, bool $sync_enabled ): void {
+		if ( null === $this->prev_hpos_enabled ) {
+			$this->prev_hpos_enabled = OrderUtil::custom_orders_table_usage_is_enabled();
+		}
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		add_filter(
+			'pre_option_' . DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION,
+			function () use ( $sync_enabled ) {
+				return wc_bool_to_string( $sync_enabled );
+			}
+		);
+		OrderHelper::toggle_cot_feature_and_usage( $hpos_enabled );
 	}
 }
