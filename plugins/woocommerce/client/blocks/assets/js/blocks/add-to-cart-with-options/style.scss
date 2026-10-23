@@ -21,10 +21,12 @@
 // Default radius lives on the block wrapper so user/theme border-radius
 // styles (inline or global) override it, then inner elements inherit.
 :where(.wc-block-add-to-cart-with-options__quantity-selector) {
+	border: 1px solid $universal-translucent-border-color;
 	border-radius: $universal-border-radius;
 }
 
-.wc-block-add-to-cart-with-options__quantity-selector .wc-block-components-quantity-selector {
+.wc-block-add-to-cart-with-options__quantity-selector .wc-block-components-quantity-selector:where(:has(input:not([type="hidden"]))) {
+	border-width: 0;
 	border-radius: inherit;
 }
 

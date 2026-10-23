@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Reduce Product Filters E2E tests from 9 to 3; PHPUnit owns the attribute filter's options and counts, and Jest owns the store's attribute toggle.
+

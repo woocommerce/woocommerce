@@ -1,30 +1,43 @@
 /**
  * Internal dependencies
  */
-import { expect, request, tags } from '../../fixtures/fixtures';
+import { expect, request, tags, locks } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
+import { customer } from '../../test-data/data';
 import {
+	BIS_EMAIL_FOOTER,
 	BIS_EMAIL_LINKS,
+	BIS_FEATURE_OPTION,
 	bisAdminListUrl,
+	bisEmailBody,
 	bisEmailSubject,
+	bisNotice,
+	corruptEmailLinkKey,
 	getEmailLinkById,
+	openEmailInMailLog,
 	resetBISOptions,
 	restockProduct,
 	setBISOptions,
+	signUpAsCustomer,
 	signUpAsGuest,
 	test,
 	triggerStockNotificationsBatch,
 	uniqueGuestEmail,
 } from '../../utils/back-in-stock-notifications';
 import { expectEmail } from '../../utils/email';
+import { setOption } from '../../utils/options';
 
 test.describe(
 	'Back in Stock Notifications — receiving back-in-stock emails',
-	{ tag: [ tags.SERVICES ] },
+	{
+		tag: [ tags.SKIP_ON_EXTERNAL_ENV ],
+		lock: [ locks.STOCK_NOTIFICATIONS, locks.EMAIL_FEATURE_FLAGS ],
+	},
 	() => {
 		test.use( { storageState: ADMIN_STATE_PATH } );
 
 		test.beforeAll( async ( { baseURL } ) => {
+			await setOption( request, baseURL!, BIS_FEATURE_OPTION, 'yes' );
 			// Single opt-in so the notification becomes ACTIVE immediately
 			// (no verify step), which is what the back-in-stock dispatch needs.
 			await setBISOptions( request, baseURL!, {
@@ -35,7 +48,11 @@ test.describe(
 		} );
 
 		test.afterAll( async ( { baseURL } ) => {
-			await resetBISOptions( request, baseURL! );
+			try {
+				await resetBISOptions( request, baseURL! );
+			} finally {
+				await setOption( request, baseURL!, BIS_FEATURE_OPTION, 'no' );
+			}
 		} );
 
 		test( 'restocking a product dispatches the back-in-stock email with UTM params', async ( {
@@ -82,9 +99,51 @@ test.describe(
 			expect( linkUrl.toString() ).toBe(
 				new URL( product.permalink ).toString()
 			);
+
+			// A guest signup gets the unsubscribe wording in the footer.
+			await openEmailInMailLog(
+				page,
+				email,
+				bisEmailSubject.backInStock( product.name )
+			);
+			await expect(
+				bisEmailBody( page ).locator( 'body' )
+			).toContainText( BIS_EMAIL_FOOTER.guest );
 		} );
 
-		test( 'unsubscribe link in the back-in-stock email cancels the notification', async ( {
+		test( "a logged-in customer's back-in-stock email offers account management instead of unsubscribing", async ( {
+			page,
+			product,
+			restApi,
+			browser,
+		} ) => {
+			await signUpAsCustomer( browser, product.permalink );
+
+			await restockProduct( restApi, product.id );
+			await triggerStockNotificationsBatch( page );
+
+			await openEmailInMailLog(
+				page,
+				customer.email,
+				bisEmailSubject.backInStock( product.name )
+			);
+
+			const body = bisEmailBody( page ).locator( 'body' );
+
+			// The template forks on whether the signup belongs to an account;
+			// the guest fork is what every other email test exercises.
+			await expect( body ).toContainText( BIS_EMAIL_FOOTER.loggedIn );
+			await expect( body ).not.toContainText( BIS_EMAIL_FOOTER.guest );
+
+			// The wording changes; the link it wraps still has to be there.
+			await expect(
+				bisEmailBody( page ).locator(
+					`a${ BIS_EMAIL_LINKS.unsubscribe }`
+				)
+			).toHaveAttribute( 'href', /email_link_action=unsubscribe/ );
+		} );
+
+		test( 'unsubscribe link in the back-in-stock email leaves the sent notification unchanged', async ( {
 			page,
 			product,
 			restApi,
@@ -111,11 +170,67 @@ test.describe(
 			);
 			await page.goto( unsubscribeLink );
 
+			// The shopper sees the outcome on the shop page they are sent to.
+			await expect(
+				page.getByText( bisNotice.alreadySent, { exact: true } )
+			).toBeVisible();
+
 			await page.goto( bisAdminListUrl( product.id ) );
 			const row = page
 				.getByRole( 'row' )
 				.filter( { has: page.getByText( email, { exact: true } ) } );
-			await expect( row.getByText( /Cancelled/i ) ).toBeVisible();
+			await expect(
+				row.getByText( 'Sent', { exact: true } )
+			).toBeVisible();
+			await expect( row.getByText( /Cancelled/i ) ).toHaveCount( 0 );
+		} );
+
+		test( 'an unsubscribe link with a tampered key changes nothing', async ( {
+			page,
+			product,
+			restApi,
+			browser,
+		} ) => {
+			const email = uniqueGuestEmail( 'bis-restock-bad-key' );
+
+			await signUpAsGuest( browser, product.permalink, email );
+
+			await restockProduct( restApi, product.id );
+			await triggerStockNotificationsBatch( page );
+
+			const unsubscribeLink = await getEmailLinkById(
+				page,
+				email,
+				bisEmailSubject.backInStock( product.name ),
+				BIS_EMAIL_LINKS.unsubscribe
+			);
+
+			await page.goto( corruptEmailLinkKey( unsubscribeLink ) );
+
+			// A rejected key changes nothing, but the shopper is told why.
+			await expect(
+				page.getByText( bisNotice.unsubscribeLinkInvalid, {
+					exact: true,
+				} )
+			).toBeVisible();
+			await expect(
+				page.getByText( bisNotice.alreadySent, { exact: true } )
+			).toHaveCount( 0 );
+
+			await page.goto( bisAdminListUrl( product.id ) );
+			const row = page
+				.getByRole( 'row' )
+				.filter( { has: page.getByText( email, { exact: true } ) } );
+			await expect( row ).toHaveCount( 1 );
+			await expect( row.getByText( /Cancelled/i ) ).toHaveCount( 0 );
+
+			// Positive control: the untouched link is accepted, so the page
+			// above rejected the link because of the key and not because the
+			// link is broken.
+			await page.goto( unsubscribeLink );
+			await expect(
+				page.getByText( bisNotice.alreadySent, { exact: true } )
+			).toBeVisible();
 		} );
 	}
 );

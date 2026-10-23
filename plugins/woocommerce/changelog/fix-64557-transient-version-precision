@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix cache invalidation no-ops when transient versions refresh within the same second.

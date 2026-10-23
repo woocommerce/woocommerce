@@ -16,6 +16,8 @@ use Automattic\WooCommerce\Internal\StockNotifications\AsyncTasks\JobManager;
  */
 class StockSyncControllerTests extends \WC_Unit_Test_Case {
 
+	use StockNotificationsFeatureTrait;
+
 	/**
 	 * @var StockSyncController
 	 */
@@ -26,6 +28,7 @@ class StockSyncControllerTests extends \WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		$this->enable_stock_notifications_feature();
 		$this->sut           = new StockSyncController();
 		$eligibility_service = new EligibilityService();
 		$eligibility_service->init( new StockManagementHelper() );
@@ -37,6 +40,7 @@ class StockSyncControllerTests extends \WC_Unit_Test_Case {
 	 * Tear down the test.
 	 */
 	public function tearDown(): void {
+		$this->restore_stock_notifications_feature_option();
 		parent::tearDown();
 		unset( $this->sut );
 	}
@@ -203,6 +207,152 @@ class StockSyncControllerTests extends \WC_Unit_Test_Case {
 		$product->save();
 
 		$this->assertArrayNotHasKey( $variation_id, $this->get_private_property( $this->sut, 'queue' ) );
+	}
+
+	/**
+	 * Test that the admin notice names the restocked products, accumulating across requests and capping at three names.
+	 */
+	public function test_admin_notice_names_restocked_products() {
+		$user_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $user_id );
+		set_current_screen( 'dashboard' );
+
+		$products = array();
+		for ( $i = 1; $i <= 4; $i++ ) {
+			$product = \WC_Helper_Product::create_simple_product(
+				true,
+				array(
+					'name'         => 'Restocked product ' . $i,
+					'stock_status' => ProductStockStatus::OUT_OF_STOCK,
+				)
+			);
+
+			$notification = new Notification();
+			$notification->set_product_id( $product->get_id() );
+			$notification->set_user_id( 1 );
+			$notification->set_status( NotificationStatus::ACTIVE );
+			$notification->save();
+
+			$products[] = $product;
+		}
+
+		// First request restocks one product, second request (e.g. the next CSV import batch) restocks three.
+		$products[0]->set_stock_status( ProductStockStatus::IN_STOCK );
+		$products[0]->save();
+		$this->sut->process_queue();
+
+		foreach ( array_slice( $products, 1 ) as $product ) {
+			$product->set_stock_status( ProductStockStatus::IN_STOCK );
+			$product->save();
+		}
+		$this->sut->process_queue();
+
+		ob_start();
+		$this->sut->output_admin_notice();
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( 'Restocked product 1', $output );
+		$this->assertStringContainsString( 'Restocked product 2', $output );
+		$this->assertStringContainsString( 'Restocked product 3', $output );
+		$this->assertStringNotContainsString( 'Restocked product 4', $output );
+		$this->assertStringContainsString( '1 more product', $output );
+		$this->assertStringContainsString( 'page=wc-customer-stock-notifications', $output );
+		$this->assertStringNotContainsString( 'customer_stock_notifications_product_filter', $output );
+
+		// The notice is shown once.
+		ob_start();
+		$this->sut->output_admin_notice();
+		$this->assertSame( '', ob_get_clean() );
+
+		set_current_screen( 'front' );
+		wp_set_current_user( 0 );
+	}
+
+	/**
+	 * Test that the admin notice is only shown to the user who restocked the product.
+	 */
+	public function test_admin_notice_is_per_user() {
+		$user_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $user_id );
+		set_current_screen( 'dashboard' );
+
+		$product = \WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'stock_status' => ProductStockStatus::OUT_OF_STOCK,
+			)
+		);
+
+		$notification = new Notification();
+		$notification->set_product_id( $product->get_id() );
+		$notification->set_user_id( 1 );
+		$notification->set_status( NotificationStatus::ACTIVE );
+		$notification->save();
+
+		$product->set_stock_status( ProductStockStatus::IN_STOCK );
+		$product->save();
+		$this->sut->process_queue();
+
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
+		ob_start();
+		$this->sut->output_admin_notice();
+		$this->assertSame( '', ob_get_clean() );
+
+		wp_set_current_user( $user_id );
+		ob_start();
+		$this->sut->output_admin_notice();
+		$output = ob_get_clean();
+		$this->assertStringContainsString( $product->get_name(), $output );
+		$this->assertStringContainsString( 'customer_stock_notifications_product_filter=' . $product->get_id(), $output );
+
+		set_current_screen( 'front' );
+		wp_set_current_user( 0 );
+	}
+
+	/**
+	 * Test that no notice is stored for restocks made outside wp-admin, without a user, or by a user who cannot manage the store.
+	 *
+	 * @testWith [ "front", "administrator" ]
+	 *           [ "dashboard", null ]
+	 *           [ "dashboard", "customer" ]
+	 *
+	 * @param string      $screen The current screen during the restock.
+	 * @param string|null $role   The role of the user making the restock, or null for no user.
+	 */
+	public function test_admin_notice_is_not_stored_outside_manager_admin_requests( string $screen, ?string $role ) {
+		$admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+
+		$product = \WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'stock_status' => ProductStockStatus::OUT_OF_STOCK,
+			)
+		);
+
+		$notification = new Notification();
+		$notification->set_product_id( $product->get_id() );
+		$notification->set_user_id( 1 );
+		$notification->set_status( NotificationStatus::ACTIVE );
+		$notification->save();
+
+		$actor_id = null === $role ? 0 : ( 'administrator' === $role ? $admin_id : $this->factory->user->create( array( 'role' => $role ) ) );
+		wp_set_current_user( $actor_id );
+		set_current_screen( $screen );
+
+		$product->set_stock_status( ProductStockStatus::IN_STOCK );
+		$product->save();
+		$this->sut->process_queue();
+
+		$this->assertFalse( get_transient( 'wc_customer_stock_notifications_product_sync_notice_' . $actor_id ) );
+
+		wp_set_current_user( $admin_id );
+		set_current_screen( 'dashboard' );
+		ob_start();
+		$this->sut->output_admin_notice();
+		$this->assertSame( '', ob_get_clean() );
+
+		set_current_screen( 'front' );
+		wp_set_current_user( 0 );
 	}
 
 	/**

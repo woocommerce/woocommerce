@@ -79,5 +79,5 @@ Output the PR URL. If UI changes need screenshots, remind the user.
 
 - No Co-Authored-By lines or self-attribution
 - Never commit code — pushing is fine
-- Preserve the PR template section headings and HTML comments exactly
+- Preserve the PR template section headings and HTML comments exactly; the Milestone section is required in every PR body, ticked or not — its `<!-- milestone-target-selection -->` markers drive PR automation
 - Changelog checkboxes must match CI automation format

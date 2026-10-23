@@ -50,7 +50,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 			var(--wpds-color-stroke-surface-neutral-weak);
 		display: flex;
 		flex-direction: column;
-		gap: var(--wpds-dimension-gap-sm, 8px);
+		gap: var(--wpds-dimension-gap-sm);
 		padding: var(--wpds-dimension-padding-2xl) 48px;
 	}
 
@@ -73,7 +73,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 	.wc-settings-ui-shell__header-actions {
 		display: flex;
 		flex: 0 0 auto;
-		gap: var(--wpds-dimension-gap-sm, 8px);
+		gap: var(--wpds-dimension-gap-sm);
 		margin-inline-start: auto;
 	}
 
@@ -84,13 +84,13 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 
 	.wc-settings-ui-shell__badge {
 		align-items: center;
-		border-radius: var(--wpds-border-radius-lg, 8px);
+		border-radius: var(--wpds-border-radius-lg);
 		display: inline-flex;
-		font-size: var(--wpds-typography-font-size-sm, 12px);
-		font-weight: var(--wpds-typography-font-weight-regular, 400);
-		line-height: var(--wpds-typography-line-height-xs, 16px);
+		font-size: var(--wpds-typography-font-size-sm);
+		font-weight: var(--wpds-typography-font-weight-regular);
+		line-height: var(--wpds-typography-line-height-xs);
 		min-height: 24px;
-		padding: 0 var(--wpds-dimension-padding-sm, 8px);
+		padding: 0 var(--wpds-dimension-padding-sm);
 
 		&,
 		&--default {
@@ -160,7 +160,8 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		display: flex;
 		margin: 0 !important;
 		overflow-x: auto;
-		padding: 0 48px;
+		// Keep WordPress focus rings inside the scrolling tab bar.
+		padding: var(--wpds-dimension-padding-xs) 48px;
 		width: 100%;
 	}
 
@@ -180,9 +181,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		&:focus,
 		&:hover,
 		&:active {
-			box-shadow: none;
 			color: var(--wpds-color-foreground-interactive-brand);
-			outline: none;
 		}
 
 		&.is-active {
@@ -191,7 +190,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 			&::after {
 				background: var(--wpds-color-stroke-interactive-brand);
 				border-radius: 999px;
-				bottom: 0;
+				inset-block-end: calc(-1 * var(--wpds-dimension-padding-xs));
 				content: "";
 				height: var(--wpds-border-width-sm);
 				left: 0;
@@ -209,32 +208,9 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		box-sizing: border-box;
 		display: flex;
 		flex-direction: column;
-		gap: var(--wpds-dimension-gap-xl, 24px);
+		gap: var(--wpds-dimension-gap-xl);
 		margin: var(--wpds-dimension-gap-2xl) auto 48px;
 		max-width: var(--wpds-dimension-surface-width-xl);
-	}
-
-	.wc-settings-ui__unsaved-changes-modal {
-		.components-modal__header {
-			min-height: 72px;
-			padding: 24px 32px 8px;
-		}
-
-		.components-modal__header-heading {
-			font-size: 20px;
-			font-weight: 500;
-			line-height: 24px;
-		}
-
-		.components-modal__content {
-			padding: 4px 32px 32px;
-		}
-
-		p {
-			font-size: 13px;
-			line-height: 20px;
-			margin: 0;
-		}
 	}
 
 	.wc-settings-ui__unsaved-changes-actions {

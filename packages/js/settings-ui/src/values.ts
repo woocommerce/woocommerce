@@ -1,7 +1,14 @@
 /**
+ * External dependencies
+ */
+import { date } from '@wordpress/date';
+
+/**
  * Internal dependencies
  */
 import type { SettingsValue } from './types';
+
+const STORE_LOCAL_DATETIME_FORMAT = 'Y-m-d\\TH:i:s';
 
 export const areValuesEqual = ( a: SettingsValue, b: SettingsValue ) => {
 	if ( Array.isArray( a ) || Array.isArray( b ) ) {
@@ -22,9 +29,17 @@ export const valueMatchesVisibilityRule = (
 ) => {
 	const expectedValues = Array.isArray( expected )
 		? expected
-		: [ expected ?? true ];
+		: [ expected === undefined ? true : expected ];
 
 	return expectedValues.some( ( expectedValue ) =>
 		areValuesEqual( value, expectedValue )
 	);
+};
+
+export const toStoreLocalDateTime = ( value: SettingsValue ) => {
+	if ( typeof value !== 'string' || value === '' ) {
+		return '';
+	}
+
+	return date( STORE_LOCAL_DATETIME_FORMAT, value );
 };

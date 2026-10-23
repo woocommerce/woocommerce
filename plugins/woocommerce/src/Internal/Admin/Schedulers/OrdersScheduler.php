@@ -16,6 +16,7 @@ use Automattic\WooCommerce\Admin\API\Reports\Products\DataStore as ProductsDataS
 use Automattic\WooCommerce\Admin\API\Reports\Taxes\DataStore as TaxesDataStore;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
+use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
@@ -529,10 +530,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 		if ( null === $action_hook ) {
 			return;
 		}
-		// The most efficient way to check for an existing action is to use `as_has_scheduled_action`, but in unusual
-		// cases where another plugin has loaded a very old version of Action Scheduler, it may not be available to us.
-		$has_scheduled_action = function_exists( 'as_has_scheduled_action' ) ? 'as_has_scheduled_action' : 'as_next_scheduled_action';
-		if ( call_user_func( $has_scheduled_action, $action_hook ) ) {
+		if ( ActionSchedulerUtil::has_scheduled_action( $action_hook ) ) {
 			return;
 		}
 

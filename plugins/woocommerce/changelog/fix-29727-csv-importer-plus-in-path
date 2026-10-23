@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix product CSV importer failing between steps when the file path contains special characters such as '+', and show a clear error when the CSV file cannot be opened.

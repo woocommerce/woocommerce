@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent duplicate remote inbox update actions from accumulating while an existing action is running or waiting asynchronously.

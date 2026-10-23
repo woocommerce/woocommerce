@@ -8,6 +8,11 @@
  * @package woocommerce-blocks-test-single-product-template-compatibility-layer
  */
 
+// Only requests from specs that enable this plugin send the cookie.
+if ( ! isset( $_COOKIE['woocommerce-blocks-test-single-product-template-compatibility-layer'] ) ) {
+	return;
+}
+
 $hooks = array(
 	'woocommerce_before_main_content',
 	'woocommerce_sidebar',

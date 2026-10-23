@@ -231,10 +231,16 @@ export const AddressAutocomplete = ( {
 				inputElement.setAttribute( 'autocomplete', 'none' );
 			} else {
 				inputElement.removeAttribute( 'data-1p-ignore' );
-				inputElement.setAttribute(
-					'autocomplete',
-					props.autoComplete || ''
-				);
+				// An empty value is not valid autofill grammar; browsers
+				// guess as if the attribute were absent.
+				if ( props.autoComplete ) {
+					inputElement.setAttribute(
+						'autocomplete',
+						props.autoComplete
+					);
+				} else {
+					inputElement.removeAttribute( 'autocomplete' );
+				}
 			}
 
 			const parentElement = inputElement.parentElement;

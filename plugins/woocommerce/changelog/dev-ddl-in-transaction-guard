@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Fail PHPUnit tests that run schema-changing SQL inside their transaction; test tooling only.
+

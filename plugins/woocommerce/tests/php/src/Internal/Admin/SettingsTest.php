@@ -3,9 +3,12 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Admin;
 
+use Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler;
 use Automattic\WooCommerce\Internal\Admin\Settings;
+use WC_Helper_Order;
 use WC_REST_Setting_Options_Controller;
 use WC_Unit_Test_Case;
+use WP_REST_Request;
 
 /**
  * Tests for the Settings class.
@@ -13,12 +16,45 @@ use WC_Unit_Test_Case;
 class SettingsTest extends WC_Unit_Test_Case {
 
 	/**
+	 * The System Under Test.
+	 *
+	 * @var Settings
+	 */
+	private $sut;
+
+	/**
+	 * Filter hooks added during a test, as [ tag, callback ] pairs, removed again in tearDown().
+	 *
+	 * @var array[]
+	 */
+	private $added_filters = array();
+
+	/**
+	 * Set up test fixtures.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+		$this->sut = Settings::get_instance();
+	}
+
+	/**
+	 * Tear down test fixtures.
+	 */
+	public function tearDown(): void {
+		foreach ( $this->added_filters as $added_filter ) {
+			remove_filter( $added_filter[0], $added_filter[1] );
+		}
+		$this->added_filters = array();
+		parent::tearDown();
+	}
+
+	/**
 	 * @testdox Should register the date type setting with a 'date_paid' default, matching the reports data stores.
 	 */
 	public function test_date_type_setting_has_date_paid_default(): void {
 		$sut = new Settings();
 
-		$date_type = $this->get_setting_by_id( $sut->add_settings( array() ), 'woocommerce_date_type' );
+		$date_type = $this->find_setting( $sut->add_settings( array() ), 'woocommerce_date_type' );
 
 		$this->assertNotNull( $date_type, 'The woocommerce_date_type setting should be registered in the wc_admin group' );
 		$this->assertSame( 'date_paid', $date_type['default'] ?? null, 'The date type default should match the date_paid fallback used by the reports data stores' );
@@ -30,7 +66,7 @@ class SettingsTest extends WC_Unit_Test_Case {
 	public function test_date_type_value_falls_back_to_date_paid_when_option_is_unset(): void {
 		delete_option( 'woocommerce_date_type' );
 
-		$date_type = $this->get_setting_by_id( $this->get_wc_admin_group_settings(), 'woocommerce_date_type' );
+		$date_type = $this->find_setting( $this->get_wc_admin_group_settings(), 'woocommerce_date_type' );
 
 		$this->assertNotNull( $date_type, 'The woocommerce_date_type setting should be registered in the wc_admin group' );
 		$this->assertSame( 'date_paid', $date_type['value'], 'An unset date type option should resolve to the effective default, date_paid' );
@@ -42,7 +78,7 @@ class SettingsTest extends WC_Unit_Test_Case {
 	public function test_date_type_value_reflects_saved_option(): void {
 		update_option( 'woocommerce_date_type', 'date_completed' );
 
-		$date_type = $this->get_setting_by_id( $this->get_wc_admin_group_settings(), 'woocommerce_date_type' );
+		$date_type = $this->find_setting( $this->get_wc_admin_group_settings(), 'woocommerce_date_type' );
 
 		$this->assertNotNull( $date_type, 'The woocommerce_date_type setting should be registered in the wc_admin group' );
 		$this->assertSame( 'date_completed', $date_type['value'], 'A saved date type option should be reflected as the setting value' );
@@ -59,6 +95,375 @@ class SettingsTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( "\u{00A0}", $currency_settings['thousandSeparator'], 'A thousand separator stored as an HTML entity should be decoded to the real character' );
 		$this->assertSame( ',', $currency_settings['decimalSeparator'], 'A decimal separator stored as an HTML entity should be decoded to the real character' );
+	}
+
+	/**
+	 * @testdox Excluded report order statuses default to pending, cancelled, and failed when not filtered.
+	 */
+	public function test_default_excluded_order_statuses_without_filter(): void {
+		$settings = $this->sut->add_settings( array() );
+		$setting  = $this->find_setting( $settings, 'woocommerce_excluded_report_order_statuses' );
+
+		$this->assertSame( array( 'pending', 'cancelled', 'failed' ), $setting['default'] );
+	}
+
+	/**
+	 * @testdox Actionable order statuses default to processing and on-hold when not filtered.
+	 */
+	public function test_default_actionable_order_statuses_without_filter(): void {
+		$settings = $this->sut->add_settings( array() );
+		$setting  = $this->find_setting( $settings, 'woocommerce_actionable_order_statuses' );
+
+		$this->assertSame( array( 'processing', 'on-hold' ), $setting['default'] );
+	}
+
+	/**
+	 * @testdox woocommerce_analytics_settings_default_excluded_order_statuses lets a plugin activate a status by default.
+	 */
+	public function test_default_excluded_order_statuses_can_be_filtered(): void {
+		$this->add_default_status_filter( 'woocommerce_analytics_settings_default_excluded_order_statuses' );
+
+		$settings = $this->sut->add_settings( array() );
+		$setting  = $this->find_setting( $settings, 'woocommerce_excluded_report_order_statuses' );
+
+		$this->assertContains( 'refunded', $setting['default'] );
+	}
+
+	/**
+	 * @testdox woocommerce_analytics_settings_default_actionable_order_statuses lets a plugin activate a status by default.
+	 */
+	public function test_default_actionable_order_statuses_can_be_filtered(): void {
+		$this->add_default_status_filter( 'woocommerce_analytics_settings_default_actionable_order_statuses' );
+
+		$settings = $this->sut->add_settings( array() );
+		$setting  = $this->find_setting( $settings, 'woocommerce_actionable_order_statuses' );
+
+		$this->assertContains( 'refunded', $setting['default'] );
+	}
+
+	/**
+	 * @testdox A default order statuses filter returning an unknown status has that status dropped.
+	 */
+	public function test_default_order_statuses_filter_drops_unknown_status(): void {
+		$this->add_default_status_filter( 'woocommerce_analytics_settings_default_excluded_order_statuses' );
+
+		$settings = $this->sut->add_settings( array() );
+		$setting  = $this->find_setting( $settings, 'woocommerce_excluded_report_order_statuses' );
+
+		$this->assertNotContains( 'not-a-real-status', $setting['default'] );
+	}
+
+	/**
+	 * @testdox A default order statuses filter returning only unknown slugs falls back to the built-in default.
+	 */
+	public function test_default_order_statuses_filter_all_unknown_falls_back(): void {
+		add_filter( 'woocommerce_analytics_settings_default_excluded_order_statuses', array( $this, 'return_only_unknown_statuses' ) );
+		$this->added_filters[] = array( 'woocommerce_analytics_settings_default_excluded_order_statuses', array( $this, 'return_only_unknown_statuses' ) );
+
+		$settings = $this->sut->add_settings( array() );
+		$setting  = $this->find_setting( $settings, 'woocommerce_excluded_report_order_statuses' );
+
+		$this->assertSame( array( 'pending', 'cancelled', 'failed' ), $setting['default'] );
+	}
+
+	/**
+	 * Filter callback that returns only unregistered status slugs.
+	 *
+	 * @param array $statuses Default statuses.
+	 * @return array
+	 */
+	public function return_only_unknown_statuses( $statuses ) {
+		unset( $statuses );
+		return array( 'not-a-real-status', 'also-fake' );
+	}
+
+	/**
+	 * @testdox A default order statuses filter returning a non-array falls back to the built-in default.
+	 */
+	public function test_default_order_statuses_filter_invalid_type_falls_back(): void {
+		add_filter( 'woocommerce_analytics_settings_default_excluded_order_statuses', '__return_false' );
+		$this->added_filters[] = array( 'woocommerce_analytics_settings_default_excluded_order_statuses', '__return_false' );
+
+		$settings = $this->sut->add_settings( array() );
+		$setting  = $this->find_setting( $settings, 'woocommerce_excluded_report_order_statuses' );
+
+		$this->assertSame( array( 'pending', 'cancelled', 'failed' ), $setting['default'] );
+	}
+
+	/**
+	 * Hook the shared filter callback and track it for removal in tearDown().
+	 *
+	 * @param string $filter Filter tag to hook.
+	 */
+	private function add_default_status_filter( string $filter ): void {
+		$callback = array( $this, 'add_status_to_defaults' );
+		add_filter( $filter, $callback );
+		$this->added_filters[] = array( $filter, $callback );
+	}
+
+	/**
+	 * Filter callback that appends a known status and an unknown status to a default statuses array.
+	 *
+	 * @param array $statuses Default statuses.
+	 * @return array
+	 */
+	public function add_status_to_defaults( $statuses ) {
+		$statuses[] = 'refunded';
+		$statuses[] = 'not-a-real-status';
+		return $statuses;
+	}
+
+	/**
+	 * @testdox get_valid_order_statuses_or_default() keeps arrays as-is (dropping non-strings) and falls back only for unusable values.
+	 * @dataProvider provider_valid_order_statuses_or_default
+	 * @param mixed $value    Value to validate.
+	 * @param array $expected Expected result.
+	 */
+	public function test_get_valid_order_statuses_or_default( $value, array $expected ): void {
+		$result = Settings::get_valid_order_statuses_or_default( $value, array( 'processing', 'on-hold' ) );
+
+		$this->assertSame( $expected, $result );
+	}
+
+	/**
+	 * Data provider for test_get_valid_order_statuses_or_default.
+	 *
+	 * @return array<string, array<mixed>>
+	 */
+	public function provider_valid_order_statuses_or_default(): array {
+		return array(
+			'non-empty array passes through'              => array( array( 'refunded' ), array( 'refunded' ) ),
+			'non-array value falls back'                  => array( false, array( 'processing', 'on-hold' ) ),
+			'empty array passes through'                  => array( array(), array() ),
+			'nested array elements are dropped'           => array( array( 'refunded', array( 'nested' ) ), array( 'refunded' ) ),
+			'non-string elements are dropped'             => array( array( 'refunded', 42, null ), array( 'refunded' ) ),
+			'blank string elements are dropped'           => array( array( 'refunded', '' ), array( 'refunded' ) ),
+			'slugs are trimmed'                           => array( array( ' refunded ' ), array( 'refunded' ) ),
+			'all-blank array falls back as unusable'      => array( array( ' ', '' ), array( 'processing', 'on-hold' ) ),
+			'all-non-string array falls back as unusable' => array( array( 42, null ), array( 'processing', 'on-hold' ) ),
+		);
+	}
+
+	/**
+	 * @testdox A default order statuses filter is the source of truth for runtime consumers, not just the settings UI.
+	 */
+	public function test_default_excluded_order_statuses_accessor_applies_filter(): void {
+		$this->add_default_status_filter( 'woocommerce_analytics_settings_default_excluded_order_statuses' );
+
+		$statuses = Settings::get_default_excluded_order_statuses();
+
+		$this->assertContains( 'refunded', $statuses, 'The filtered status should reach runtime consumers.' );
+	}
+
+	/**
+	 * @testdox The actionable default accessor applies its filter.
+	 */
+	public function test_default_actionable_order_statuses_accessor_applies_filter(): void {
+		$this->add_default_status_filter( 'woocommerce_analytics_settings_default_actionable_order_statuses' );
+
+		$statuses = Settings::get_default_actionable_order_statuses();
+
+		$this->assertContains( 'refunded', $statuses, 'The filtered status should reach runtime consumers.' );
+	}
+
+	/**
+	 * @testdox A saved empty selection is respected, so unchecking every status does not restore the defaults.
+	 */
+	public function test_saved_empty_selection_is_respected(): void {
+		$result = Settings::get_valid_order_statuses_or_default( array(), array( 'pending', 'cancelled', 'failed' ) );
+
+		$this->assertSame( array(), $result, 'An explicitly saved empty selection must not be replaced by the built-in default.' );
+	}
+
+	/**
+	 * @testdox A filter returning an empty array keeps the settings UI empty, agreeing with the runtime accessors.
+	 */
+	public function test_filter_returning_empty_array_keeps_ui_empty(): void {
+		$empty_filter = function () {
+			return array();
+		};
+		add_filter( 'woocommerce_analytics_settings_default_excluded_order_statuses', $empty_filter );
+		$this->added_filters[] = array( 'woocommerce_analytics_settings_default_excluded_order_statuses', $empty_filter );
+
+		$settings = $this->sut->add_settings( array() );
+		$setting  = $this->find_setting( $settings, 'woocommerce_excluded_report_order_statuses' );
+
+		$this->assertSame( array(), $setting['default'], 'An empty filtered default should stay empty in the UI.' );
+		$this->assertSame( array(), Settings::get_default_excluded_order_statuses(), 'The UI and runtime consumers should agree.' );
+	}
+
+	/**
+	 * @testdox The preloaded component settings expose the filtered defaults so "Reset defaults" can restore them.
+	 */
+	public function test_component_settings_expose_filtered_defaults(): void {
+		$this->add_default_status_filter( 'woocommerce_analytics_settings_default_actionable_order_statuses' );
+		// The settings are only injected in admin; the base tearDown unsets the current screen.
+		set_current_screen( 'dashboard' );
+
+		$settings = $this->sut->add_component_settings( array() );
+
+		$this->assertArrayHasKey( 'wcAdminSettingsDefaults', $settings, 'Defaults should be preloaded alongside wcAdminSettings.' );
+		$this->assertContains( 'refunded', $settings['wcAdminSettingsDefaults']['woocommerce_actionable_order_statuses'], 'The filtered default should reach the client.' );
+		$this->assertSame(
+			array( 'pending', 'cancelled', 'failed' ),
+			$settings['wcAdminSettingsDefaults']['woocommerce_excluded_report_order_statuses'],
+			'An unfiltered setting should keep its built-in default.'
+		);
+	}
+
+	/**
+	 * @testdox The preloaded component settings expose coupon discount types, including ones added by extensions.
+	 */
+	public function test_component_settings_expose_coupon_types(): void {
+		$add_type = function ( $types ) {
+			$types['custom_discount'] = 'Custom discount';
+			return $types;
+		};
+		add_filter( 'woocommerce_coupon_discount_types', $add_type );
+		$this->added_filters[] = array( 'woocommerce_coupon_discount_types', $add_type );
+		// Coupon types are only injected on wc-admin pages; the base tearDown unsets the current screen.
+		set_current_screen( 'dashboard' );
+		$_GET['page'] = 'wc-admin'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+		try {
+			$settings = $this->sut->add_component_settings( array() );
+		} finally {
+			unset( $_GET['page'] );
+		}
+
+		$this->assertSame( 'Custom discount', $settings['couponTypes']['custom_discount'] ?? null, 'A discount type added through the filter should reach the client.' );
+		$this->assertArrayHasKey( 'percent', $settings['couponTypes'], 'Core discount types should still be included.' );
+	}
+
+	/**
+	 * @testdox The preloaded component settings list the installed payment gateways by title, then any other gateway the stored orders were paid with, by id.
+	 */
+	public function test_component_settings_include_payment_gateways_that_are_no_longer_installed(): void {
+		foreach ( array( 'bacs', 'a_removed_gateway', '' ) as $payment_method ) {
+			$order = WC_Helper_Order::create_order();
+			$order->set_payment_method( $payment_method );
+			$order->save();
+			OrdersScheduler::import( $order->get_id() );
+		}
+		// Payment gateways are only injected on wc-admin pages; the base tearDown unsets the current screen.
+		set_current_screen( 'dashboard' );
+		$_GET['page'] = 'wc-admin'; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+		try {
+			$gateways = $this->sut->add_component_settings( array() )['paymentGateways'];
+		} finally {
+			unset( $_GET['page'] );
+		}
+
+		$installed = array_keys( WC()->payment_gateways()->payment_gateways() );
+		$this->assertSame( $installed, array_slice( array_keys( $gateways ), 0, count( $installed ) ), 'The installed gateways should stay first, in their order.' );
+		$this->assertSame( 'Direct bank transfer', $gateways['bacs'], 'An installed gateway should keep its title.' );
+		$this->assertSame( 'a_removed_gateway', $gateways['a_removed_gateway'], 'A gateway that is gone should be listed under its id.' );
+		$this->assertArrayNotHasKey( '', $gateways, 'An order placed without a gateway should not add an empty option.' );
+	}
+
+	/**
+	 * @testdox The preloaded component settings leave the payment gateways out outside the wc-admin app, which is the only place that reads them.
+	 */
+	public function test_component_settings_leave_payment_gateways_out_outside_wc_admin(): void {
+		set_current_screen( 'dashboard' );
+
+		$this->assertArrayNotHasKey( 'paymentGateways', $this->sut->add_component_settings( array() ) );
+	}
+
+	/**
+	 * @testdox Saving an order status list that matches the default deletes the option, so the default filter keeps applying.
+	 */
+	public function test_saving_default_order_statuses_keeps_default_filter_applying(): void {
+		$this->add_default_status_filter( 'woocommerce_analytics_settings_default_actionable_order_statuses' );
+		update_option( 'woocommerce_actionable_order_statuses', array( 'processing' ) );
+
+		// What "Reset defaults" sends: the filtered default, here in a different order.
+		$this->save_wc_admin_setting( 'woocommerce_actionable_order_statuses', array( 'refunded', 'on-hold', 'processing' ) );
+
+		$this->assertFalse( get_option( 'woocommerce_actionable_order_statuses' ), 'A list matching the default should not be stored.' );
+
+		remove_filter( 'woocommerce_analytics_settings_default_actionable_order_statuses', array( $this, 'add_status_to_defaults' ) );
+		$setting = $this->find_setting( $this->get_wc_admin_group_settings(), 'woocommerce_actionable_order_statuses' );
+
+		$this->assertSame( array( 'processing', 'on-hold' ), $setting['value'], 'A later change to the default should still reach the setting.' );
+	}
+
+	/**
+	 * @testdox Saving the built-in default shown when a filter returns only undisplayable statuses stores it, so reports keep excluding what the page showed.
+	 */
+	public function test_saving_fallback_default_stores_it_when_runtime_default_differs(): void {
+		$callback = function () {
+			return array( 'not-a-real-status' );
+		};
+		add_filter( 'woocommerce_analytics_settings_default_excluded_order_statuses', $callback );
+		$this->added_filters[] = array( 'woocommerce_analytics_settings_default_excluded_order_statuses', $callback );
+
+		$setting = $this->find_setting( $this->get_wc_admin_group_settings(), 'woocommerce_excluded_report_order_statuses' );
+		$this->assertSame( array( 'pending', 'cancelled', 'failed' ), $setting['default'], 'The page should fall back to the built-in default.' );
+
+		$this->save_wc_admin_setting( 'woocommerce_excluded_report_order_statuses', array( 'pending', 'cancelled', 'failed' ) );
+
+		$this->assertSame( array( 'pending', 'cancelled', 'failed' ), get_option( 'woocommerce_excluded_report_order_statuses' ), 'The shown list differs from the runtime default, so it must be stored.' );
+	}
+
+	/**
+	 * @testdox Saving the shown default when a filter adds an undisplayable status to the runtime default deletes the option, so the default filter keeps applying.
+	 */
+	public function test_saving_shown_default_deletes_option_when_runtime_default_is_superset(): void {
+		$callback = function ( $statuses ) {
+			return array_merge( $statuses, array( 'not-a-real-status' ) );
+		};
+		add_filter( 'woocommerce_analytics_settings_default_actionable_order_statuses', $callback );
+		$this->added_filters[] = array( 'woocommerce_analytics_settings_default_actionable_order_statuses', $callback );
+		update_option( 'woocommerce_actionable_order_statuses', array( 'processing' ) );
+
+		$setting = $this->find_setting( $this->get_wc_admin_group_settings(), 'woocommerce_actionable_order_statuses' );
+		$this->assertSame( array( 'processing', 'on-hold' ), $setting['default'], 'The page should drop the status it cannot display.' );
+		$this->assertContains( 'not-a-real-status', Settings::get_default_actionable_order_statuses(), 'The runtime default should keep the status the page drops.' );
+
+		$this->save_wc_admin_setting( 'woocommerce_actionable_order_statuses', array( 'processing', 'on-hold' ) );
+
+		$this->assertFalse( get_option( 'woocommerce_actionable_order_statuses' ), 'The shown list is a subset of the runtime default, so it must not be stored.' );
+	}
+
+	/**
+	 * @testdox Saving an order status list that differs from the default stores it.
+	 */
+	public function test_saving_non_default_order_statuses_stores_them(): void {
+		$this->save_wc_admin_setting( 'woocommerce_excluded_report_order_statuses', array( 'pending', 'failed' ) );
+
+		$this->assertSame( array( 'pending', 'failed' ), get_option( 'woocommerce_excluded_report_order_statuses' ) );
+	}
+
+	/**
+	 * @testdox Saving an empty order status list stores it, so clearing every status is not undone by the default.
+	 */
+	public function test_saving_empty_order_statuses_stores_them(): void {
+		$this->save_wc_admin_setting( 'woocommerce_excluded_report_order_statuses', array() );
+
+		$this->assertSame( array(), get_option( 'woocommerce_excluded_report_order_statuses' ) );
+	}
+
+	/**
+	 * Save a wc_admin setting through the REST settings controller, the path the Analytics settings page uses.
+	 *
+	 * @param string $id    Setting id.
+	 * @param mixed  $value Value to save.
+	 */
+	private function save_wc_admin_setting( string $id, $value ): void {
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/settings/wc_admin/' . $id );
+		$request->set_url_params(
+			array(
+				'group_id' => 'wc_admin',
+				'id'       => $id,
+			)
+		);
+		$request->set_param( 'value', $value );
+
+		$response = ( new WC_REST_Setting_Options_Controller() )->update_item( $request );
+
+		$this->assertNotWPError( $response, 'The setting should save without an error' );
 	}
 
 	/**
@@ -81,7 +486,7 @@ class SettingsTest extends WC_Unit_Test_Case {
 	 * @param string $id       Setting id to look for.
 	 * @return array|null The first matching setting, or null if none matches.
 	 */
-	private function get_setting_by_id( array $settings, string $id ): ?array {
+	private function find_setting( array $settings, string $id ): ?array {
 		foreach ( $settings as $setting ) {
 			if ( ( $setting['id'] ?? '' ) === $id ) {
 				return $setting;

@@ -1,3 +1,0 @@
-Significance: patch
-Type: fix
-Comment: Defer rewrite rule flushes raised during WordPress installing-mode requests, when themes and plugins may not be loaded, to the next normal request.

@@ -147,9 +147,6 @@ class ProductGalleryLargeImage extends AbstractBlock {
 		$p->set_attribute( 'draggable', 'false' );
 		$p->set_attribute( 'data-wp-watch', 'callbacks.toggleImageVisibility' );
 		$p->set_attribute( 'data-wp-on--click', 'actions.onViewerClick' );
-		$p->set_attribute( 'data-wp-on--touchstart', 'actions.onTouchStart' );
-		$p->set_attribute( 'data-wp-on--touchmove', 'actions.onTouchMove' );
-		$p->set_attribute( 'data-wp-on--touchend', 'actions.onTouchEnd' );
 
 		if ( 0 === $index ) {
 			$p->set_attribute( 'fetchpriority', 'high' );
@@ -195,6 +192,7 @@ class ProductGalleryLargeImage extends AbstractBlock {
 				class="wc-block-product-gallery-large-image__container"
 				data-wp-interactive="woocommerce/product-gallery"
 				data-wp-on--keydown="actions.onViewerImageKeyDown"
+				data-wp-watch="callbacks.watchViewerScroll"
 				aria-label="<?php esc_attr_e( 'Product gallery', 'woocommerce' ); ?>"
 				tabindex="0"
 				aria-roledescription="carousel"
@@ -300,12 +298,9 @@ class ProductGalleryLargeImage extends AbstractBlock {
 		$attrs = array_merge(
 			$attrs,
 			array(
-				'class'                  => $video_classes,
-				'data-wp-on--touchend'   => 'actions.onTouchEnd',
-				'data-wp-on--touchmove'  => 'actions.onTouchMove',
-				'data-wp-on--touchstart' => 'actions.onTouchStart',
-				'draggable'              => 'false',
-				'tabindex'               => '-1',
+				'class'     => $video_classes,
+				'draggable' => 'false',
+				'tabindex'  => '-1',
 			)
 		);
 

@@ -50,9 +50,7 @@ add_filter( 'woocommerce_attribute_label', 'wp_kses_post', 100 );
 /**
  * Short Description (excerpt).
  */
-if ( function_exists( 'do_blocks' ) ) {
-	add_filter( 'woocommerce_short_description', 'do_blocks', 9 );
-}
+add_filter( 'woocommerce_short_description', 'do_blocks', 9 );
 add_filter( 'woocommerce_short_description', 'wptexturize' );
 add_filter( 'woocommerce_short_description', 'convert_smilies' );
 add_filter( 'woocommerce_short_description', 'convert_chars' );
@@ -129,7 +127,7 @@ function wc_create_order( $args = array() ) {
 		// Set these fields when creating a new order but not when updating an existing order.
 		if ( ! $args['order_id'] ) {
 			$order->set_currency( get_woocommerce_currency() );
-			$order->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
+			$order->set_prices_include_tax( wc_prices_include_tax() );
 			$order->set_customer_ip_address( WC_Geolocation::get_ip_address() );
 			$order->set_customer_user_agent( wc_get_user_agent() );
 		}
@@ -563,6 +561,7 @@ function get_woocommerce_currency_symbols() {
 			'CAD' => '&#36;',
 			'CDF' => 'Fr',
 			'CHF' => '&#67;&#72;&#70;',
+			'CHW' => 'CHW',
 			'CLP' => '&#36;',
 			'CNY' => '&yen;',
 			'COP' => '&#36;',
@@ -1054,12 +1053,26 @@ function wc_fix_rewrite_rules( $rules ) {
 		}
 	}
 
-	// If the shop page is used as the base, we need to handle shop page subpages to avoid 404s.
-	if ( ! $permalinks['use_verbose_page_rules'] ) {
+	$shop_page_id      = wc_get_page_id( 'shop' );
+	$product_base      = trim( rawurldecode( $permalinks['product_base'] ), '/' );
+	$uses_shop_as_base = false;
+
+	// The product base is site-wide, while multilingual extensions can filter the Shop page for the current request.
+	$shop_page_ids = array_unique( array( absint( get_option( 'woocommerce_shop_page_id' ) ), $shop_page_id ) );
+	foreach ( $shop_page_ids as $candidate_shop_page_id ) {
+		$shop_page = $candidate_shop_page_id > 0 ? get_post( $candidate_shop_page_id ) : null;
+		$shop_base = $shop_page instanceof WP_Post && 'page' === $shop_page->post_type ? trim( rawurldecode( (string) get_page_uri( $candidate_shop_page_id ) ), '/' ) : '';
+
+		if ( '' !== $shop_base && ( $shop_base === $product_base || 0 === strpos( $product_base, $shop_base . '/' ) ) ) {
+			$uses_shop_as_base = true;
+			break;
+		}
+	}
+
+	if ( ! $uses_shop_as_base ) {
 		return $rules;
 	}
 
-	$shop_page_id = wc_get_page_id( 'shop' );
 	if ( $shop_page_id ) {
 		$page_rewrite_rules = array();
 		$subpages           = wc_get_page_children( $shop_page_id );
@@ -2136,6 +2149,10 @@ function wc_list_pluck( $list, $callback_or_field, $index_key = null ) {
  * times by negating the need to switch locales on each page load.
  *
  * This is more inline with WP core behavior which does not localize slugs.
+ *
+ * The `use_verbose_page_rules` key is kept for backward compatibility only. WooCommerce no longer
+ * writes or reads it - wc_fix_rewrite_rules() derives Shop subpage rules from the current product
+ * base and Shop page path instead - so its stored value is whatever the last save left behind.
  *
  * @since  3.0.0
  * @return array

@@ -8,13 +8,12 @@ export type SettingsUIOption = {
 };
 
 export type SettingsUISaveAdapter =
-	| 'form_post'
-	| 'none'
-	| ( string & NonNullable< unknown > );
+	'form_post' | 'none' | ( string & NonNullable< unknown > );
 
 export type SettingsUISaveSchema = {
 	adapter: SettingsUISaveAdapter;
 	name?: string;
+	initialValue?: string | string[];
 };
 
 export type SettingsUISaveStrategy =
@@ -39,6 +38,10 @@ export type SettingsUIField = {
 	placeholder?: string;
 	disabled?: boolean;
 	customAttributes?: Record< string, string | number | boolean >;
+	validation?: {
+		min?: number;
+		max?: number;
+	};
 	visibility?: SettingsUIVisibilityRule;
 	save?: SettingsUISaveSchema;
 };
@@ -69,11 +72,7 @@ export type SettingsUIShellNavigationItem = {
  * screen-reader and color-blind users.
  */
 export type SettingsUIShellBadgeIntent =
-	| 'default'
-	| 'info'
-	| 'success'
-	| 'warning'
-	| 'error';
+	'default' | 'info' | 'success' | 'warning' | 'error';
 
 export type SettingsUIShellBadge = {
 	label: string;
@@ -122,6 +121,7 @@ export type SettingsEditControlField = {
 	getValue: ( args: { item: SettingsValues } ) => SettingsValue;
 	// Method syntax keeps this assignable from DataForm's signature, which
 	// also receives the normalized field.
+	// eslint-disable-next-line @typescript-eslint/method-signature-style -- Preserve callback parameter bivariance.
 	isDisabled( args: { item: SettingsValues } ): boolean;
 };
 

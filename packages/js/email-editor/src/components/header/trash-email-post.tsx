@@ -52,7 +52,7 @@ function getModalTitle(
 						__i18n_text_domain__
 					),
 					items.length
-			  )
+				)
 			: sprintf(
 					// translators: %s: The post's title
 					__(
@@ -60,7 +60,7 @@ function getModalTitle(
 						__i18n_text_domain__
 					),
 					decodeEntities( getItemTitle( items[ 0 ] ) )
-			  );
+				);
 	}
 
 	return items.length > 1
@@ -73,7 +73,7 @@ function getModalTitle(
 					__i18n_text_domain__
 				),
 				items.length
-		  )
+			)
 		: sprintf(
 				// translators: %s: The item's title.
 				__(
@@ -81,7 +81,7 @@ function getModalTitle(
 					__i18n_text_domain__
 				),
 				getItemTitle( items[ 0 ] )
-		  );
+			);
 }
 
 const getTrashEmailPostAction = () => {
@@ -188,7 +188,7 @@ const getTrashEmailPostAction = () => {
 														__i18n_text_domain__
 													),
 													getItemTitle( items[ 0 ] )
-											  )
+												)
 											: sprintf(
 													/* translators: The item's title. */
 													__(
@@ -196,13 +196,13 @@ const getTrashEmailPostAction = () => {
 														__i18n_text_domain__
 													),
 													getItemTitle( items[ 0 ] )
-											  );
+												);
 									} else {
 										successMessage = shouldPermanentlyDelete
 											? __(
 													'The items were permanently deleted.',
 													__i18n_text_domain__
-											  )
+												)
 											: sprintf(
 													/* translators: The number of items. */
 													_n(
@@ -212,7 +212,7 @@ const getTrashEmailPostAction = () => {
 														__i18n_text_domain__
 													),
 													items.length
-											  );
+												);
 									}
 									void createSuccessNotice( successMessage, {
 										type: 'snackbar',
@@ -305,7 +305,7 @@ const getTrashEmailPostAction = () => {
 								? __(
 										'Delete permanently',
 										__i18n_text_domain__
-								  )
+									)
 								: __( 'Move to trash', __i18n_text_domain__ ) }
 						</Button>
 					</HStack>

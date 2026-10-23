@@ -322,7 +322,7 @@ class WC_AJAX {
 			wc_add_notice( __( 'Sorry there was a problem removing this coupon.', 'woocommerce' ), 'error' );
 		} else {
 			WC()->cart->remove_coupon( $coupon );
-			wc_add_notice( __( 'Coupon has been removed.', 'woocommerce' ) );
+			( new WC_Coupon( $coupon ) )->add_coupon_message( WC_Coupon::WC_COUPON_REMOVED );
 		}
 
 		wc_print_notices();
@@ -379,12 +379,12 @@ class WC_AJAX {
 				'fragments' => apply_filters(
 					'woocommerce_update_order_review_fragments',
 					array(
-						'form.woocommerce-checkout' => wc_print_notice(
+						'form.woocommerce-checkout' => '<div class="woocommerce-notices-wrapper">' . wc_print_notice(
 							esc_html__( 'Sorry, your session has expired.', 'woocommerce' ) . ' <a href="' . esc_url( wc_get_page_permalink( 'shop' ) ) . '" class="wc-backward">' . esc_html__( 'Return to shop', 'woocommerce' ) . '</a>',
 							'error',
 							array(),
 							true
-						),
+						) . '</div>',
 					)
 				),
 			)
@@ -397,7 +397,22 @@ class WC_AJAX {
 	 * @return void
 	 */
 	public static function update_order_review() {
-		check_ajax_referer( 'update-order-review', 'security' );
+		// A rejected nonce usually means the browser restored a checkout rendered for an earlier session,
+		// e.g. going back after logging in. Reload it once; if the fresh page is rejected too, show the expired notice.
+		// Without a session cookie the reload flag can't persist, so skip the reload to avoid an endless loop.
+		if ( ! check_ajax_referer( 'update-order-review', 'security', false ) ) {
+			$can_remember_reload = ! ( WC()->session instanceof WC_Session_Handler ) || WC()->session->has_session();
+
+			if ( ! $can_remember_reload || WC()->session->get( 'reload_checkout_for_nonce' ) ) {
+				unset( WC()->session->reload_checkout_for_nonce );
+				self::update_order_review_expired();
+			}
+
+			WC()->session->set( 'reload_checkout_for_nonce', true );
+			wp_send_json( array( 'reload' => true ) );
+		}
+
+		unset( WC()->session->reload_checkout_for_nonce );
 
 		wc_maybe_define_constant( 'WOOCOMMERCE_CHECKOUT', true );
 
@@ -481,25 +496,57 @@ class WC_AJAX {
 		// Get messages if reload checkout is not true.
 		$reload_checkout = isset( WC()->session->reload_checkout );
 		if ( ! $reload_checkout ) {
+			// Capture the error count before printing, because wc_print_notices() clears the queue.
+			// A filter on `woocommerce_notice_types` can keep queued errors off the page, so the
+			// flag only reports errors that were rendered. Record the types that filter settles on
+			// rather than applying it a second time; a non-array iterable can't be inspected after
+			// wc_print_notices() consumes it, so it falls back to trusting the rendered output.
+			$error_notice_count = wc_notice_count( 'error' );
+			$rendered_types     = array();
+			$record_types       = static function ( $types ) use ( &$rendered_types ) {
+				$rendered_types = $types;
+				return $types;
+			};
+			add_filter( 'woocommerce_notice_types', $record_types, PHP_INT_MAX );
 			$messages = wc_print_notices( true );
+			remove_filter( 'woocommerce_notice_types', $record_types, PHP_INT_MAX );
+			$has_error_notices = 0 < $error_notice_count && ( ! is_array( $rendered_types ) || in_array( 'error', $rendered_types, true ) ) && '' !== $messages;
 		} else {
-			$messages = '';
+			$has_error_notices = false;
+			$messages          = '';
 		}
 
 		unset( WC()->session->refresh_totals, WC()->session->reload_checkout );
 
+		/**
+		 * Filter the HTML fragments returned with a checkout update, keyed by the selector each one replaces.
+		 *
+		 * @since 2.3.0
+		 *
+		 * @param array $fragments Checkout fragments keyed by selector.
+		 */
+		$fragments = apply_filters(
+			'woocommerce_update_order_review_fragments',
+			array(
+				'.woocommerce-checkout-review-order-table' => $woocommerce_order_review,
+				'.woocommerce-checkout-payment'            => $woocommerce_checkout_payment,
+			)
+		);
+
+		/*
+		 * `result` is the legacy signal and only reports whether the response carries any rendered
+		 * notice, so a success or info notice still reads as `failure`. Third-party checkout scripts
+		 * and `updated_checkout` listeners have consumed it that way since 2014, so it keeps that
+		 * meaning. Use `has_errors` to tell a real failure apart from a notice that merely has
+		 * something to show.
+		 */
 		wp_send_json(
 			array(
-				'result'    => empty( $messages ) ? 'success' : 'failure',
-				'messages'  => $messages,
-				'reload'    => $reload_checkout,
-				'fragments' => apply_filters(
-					'woocommerce_update_order_review_fragments',
-					array(
-						'.woocommerce-checkout-review-order-table' => $woocommerce_order_review,
-						'.woocommerce-checkout-payment' => $woocommerce_checkout_payment,
-					)
-				),
+				'result'     => empty( $messages ) ? 'success' : 'failure',
+				'has_errors' => $has_error_notices,
+				'messages'   => $messages,
+				'reload'     => $reload_checkout,
+				'fragments'  => $fragments,
 			)
 		);
 	}
@@ -1168,9 +1215,13 @@ class WC_AJAX {
 		$items = ( ! empty( $_POST['items'] ) ) ? wp_unslash( $_POST['items'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 		$items_to_add = isset( $_POST['data'] ) ? array_filter( wp_unslash( (array) $_POST['data'] ) ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$tax_location = array();
+		foreach ( array( 'country', 'state', 'postcode', 'city' ) as $key ) {
+			$tax_location[ $key ] = isset( $_POST[ $key ] ) && is_string( $_POST[ $key ] ) ? wc_strtoupper( sanitize_text_field( wp_unslash( $_POST[ $key ] ) ) ) : '';
+		}
 
 		try {
-			$response = self::maybe_add_order_item( $order_id, $items, $items_to_add );
+			$response = self::maybe_add_order_item( $order_id, $items, $items_to_add, $tax_location );
 		} catch ( Exception $e ) {
 			wp_send_json_error( array( 'error' => $e->getMessage() ) );
 		}
@@ -1183,11 +1234,12 @@ class WC_AJAX {
 	 * @param int          $order_id     ID of order to add items to.
 	 * @param string|array $items        Existing items in order. Empty string if no items to add.
 	 * @param array        $items_to_add Array of items to add.
+	 * @param array        $tax_location Tax location entered in the order editor, if available.
 	 *
 	 * @return array     Fragments to render and notes HTML.
 	 * @throws Exception When unable to add item.
 	 */
-	private static function maybe_add_order_item( $order_id, $items, $items_to_add ) {
+	private static function maybe_add_order_item( $order_id, $items, $items_to_add, $tax_location = array() ) {
 		try {
 			$order = wc_get_order( $order_id );
 
@@ -1240,7 +1292,14 @@ class WC_AJAX {
 					// The message is shown in a JS alert, not rendered as HTML.
 					throw new Exception( wp_strip_all_tags( html_entity_decode( $message, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401 ) ) );
 				}
-				$item_id                 = $order->add_product( $product, $qty, array( 'order' => $order ) );
+				$item_id                 = $order->add_product(
+					$product,
+					$qty,
+					array(
+						'order'        => $order,
+						'tax_location' => $tax_location,
+					)
+				);
 				$item                    = apply_filters( 'woocommerce_ajax_order_item', $order->get_item( $item_id ), $item_id, $order, $product );
 				$added_items[ $item_id ] = $item;
 				$order_notes[ $item_id ] = $product->get_formatted_name();
@@ -1313,11 +1372,13 @@ class WC_AJAX {
 			);
 
 			if ( strstr( $amount, '%' ) ) {
-				// We need to calculate totals first, so that $order->get_total() is correct.
+				// Refresh totals so the discount total is current. The percentage applies to
+				// the items after discounts, excluding tax, shipping and other fees.
 				$order->calculate_totals( false );
 				$formatted_amount = $amount;
 				$percent          = floatval( trim( $amount, '%' ) );
-				$amount           = $order->get_total() * ( $percent / 100 );
+				$base             = (float) $order->get_subtotal() - (float) $order->get_discount_total( 'edit' );
+				$amount           = NumberUtil::round( $base * ( $percent / 100 ), wc_get_price_decimals() );
 			} else {
 				$amount           = floatval( $amount );
 				$formatted_amount = wc_price( $amount, array( 'currency' => $order->get_currency() ) );
@@ -2181,7 +2242,7 @@ class WC_AJAX {
 
 		$term       = isset( $_GET['term'] ) ? (string) wc_clean( wp_unslash( $_GET['term'] ) ) : '';
 		$data_store = WC_Data_Store::load( 'product' );
-		$ids        = $data_store->search_products( $term, 'downloadable', true, false, $limit );
+		$ids        = $data_store->search_products( $term, 'downloadable', true, false, $limit, $include_ids, $exclude_ids );
 
 		_prime_post_caches( $ids );
 		$product_objects = array_filter( array_map( 'wc_get_product', $ids ), 'wc_products_array_filter_readable' );
@@ -3221,6 +3282,49 @@ class WC_AJAX {
 	}
 
 	/**
+	 * Bulk action - Set Sale Prices from Regular Prices.
+	 *
+	 * @param array $variations List of variations.
+	 * @param array $data Data to set.
+	 *
+	 * @used-by bulk_edit_variations
+	 *
+	 * @return void
+	 */
+	private static function variation_bulk_action_variable_sale_price_from_regular_price( $variations, $data ) {
+		$value = $data['value'] ?? null;
+		if ( ! is_scalar( $value ) ) {
+			return;
+		}
+
+		$value         = (string) $value;
+		$is_percentage = '%' === substr( $value, -1 );
+		$adjustment    = $is_percentage ? substr( $value, 0, -1 ) : $value;
+		if ( ! is_numeric( $adjustment ) || 0 > (float) $adjustment ) {
+			return;
+		}
+		$adjustment = (float) $adjustment;
+
+		foreach ( $variations as $variation_id ) {
+			$variation = wc_get_product( $variation_id );
+			if ( ! $variation instanceof WC_Product_Variation ) {
+				continue;
+			}
+
+			$regular_price = $variation->get_regular_price( 'edit' );
+
+			if ( '' === $regular_price || null === $regular_price ) {
+				continue;
+			}
+
+			$reduction = $is_percentage ? ( (float) $regular_price / 100 ) * $adjustment : $adjustment;
+
+			$variation->set_sale_price( (string) NumberUtil::round( max( 0, (float) $regular_price - $reduction ), wc_get_price_decimals() ) );
+			$variation->save();
+		}
+	}
+
+	/**
 	 * Bulk action - Set Stock Status as In Stock.
 	 *
 	 * @param array $variations List of variations.
@@ -3609,6 +3713,7 @@ class WC_AJAX {
 	 *
 	 * @uses WC_AJAX::variation_bulk_set()
 	 * @uses WC_AJAX::variation_bulk_adjust_price()
+	 * @uses WC_AJAX::variation_bulk_action_variable_sale_price_from_regular_price()
 	 * @uses WC_AJAX::variation_bulk_action_variable_sale_price_decrease()
 	 * @uses WC_AJAX::variation_bulk_action_variable_sale_price_increase()
 	 * @uses WC_AJAX::variation_bulk_action_variable_regular_price_decrease()

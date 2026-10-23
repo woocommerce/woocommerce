@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Expose an empty-state class when all Product Filters have no options.

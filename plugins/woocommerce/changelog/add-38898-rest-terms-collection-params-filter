@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add `rest_{$taxonomy}_collection_params` filter to the REST terms controller.

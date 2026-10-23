@@ -137,7 +137,7 @@ class Email_Editor {
 			$request_uri = sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) );
 		}
 		if ( strstr( $request_uri, 'site-editor.php' ) === false ) {
-			$post_types = array_column( $this->get_post_types(), 'name' );
+			$post_types = array_column( self::get_post_types(), 'name' );
 			$this->templates->initialize( $post_types );
 		}
 	}
@@ -158,7 +158,7 @@ class Email_Editor {
 	 * @return void
 	 */
 	private function register_email_post_types(): void {
-		foreach ( $this->get_post_types() as $post_type ) {
+		foreach ( self::get_post_types() as $post_type ) {
 			register_post_type(
 				$post_type['name'],
 				array_merge( $this->get_default_email_post_args(), $post_type['args'] )
@@ -182,9 +182,15 @@ class Email_Editor {
 	 * @return array
 	 * @phpstan-return EmailPostType[]
 	 */
-	private function get_post_types(): array {
-		$post_types = array();
-		return apply_filters( 'woocommerce_email_editor_post_types', $post_types );
+	private static function get_post_types(): array {
+		$post_types = apply_filters( 'woocommerce_email_editor_post_types', array() );
+		/**
+		 * Non-array filter results mean no email post types.
+		 *
+		 * @var EmailPostType[] $post_types
+		 */
+		$post_types = is_array( $post_types ) ? $post_types : array();
+		return $post_types;
 	}
 
 	/**
@@ -240,7 +246,7 @@ class Email_Editor {
 	 * @return void
 	 */
 	public function extend_email_post_api() {
-		$email_post_types = array_column( $this->get_post_types(), 'name' );
+		$email_post_types = array_column( self::get_post_types(), 'name' );
 		register_rest_field(
 			$email_post_types,
 			'email_data',
@@ -270,7 +276,7 @@ class Email_Editor {
 					}
 					$post_id = $request->get_param( 'postId' );
 					if ( is_numeric( $post_id ) && (int) $post_id > 0 ) {
-						return current_user_can( 'edit_post', (int) $post_id );
+						return self::is_email_post_type( get_post_type( (int) $post_id ) ) && current_user_can( 'edit_post', (int) $post_id );
 					}
 
 					/**
@@ -355,17 +361,17 @@ class Email_Editor {
 	}
 
 	/**
-	 * Check if the current post type is an email post type.
+	 * Check if the post type is registered for the email editor.
 	 *
-	 * @param string $current_post_type The current post type.
+	 * @param string|false $post_type The post type to check.
 	 * @return bool
 	 */
-	private function current_post_is_email_post_type( $current_post_type ): bool {
-		if ( ! $current_post_type ) {
+	public static function is_email_post_type( $post_type ): bool {
+		if ( ! $post_type ) {
 			return false;
 		}
-		$email_post_types = array_column( $this->get_post_types(), 'name' );
-		return in_array( $current_post_type, $email_post_types, true );
+		$email_post_types = array_column( self::get_post_types(), 'name' );
+		return in_array( $post_type, $email_post_types, true );
 	}
 
 	/**
@@ -381,7 +387,7 @@ class Email_Editor {
 			return $template;
 		}
 
-		if ( ! $this->current_post_is_email_post_type( $post->post_type ) ) {
+		if ( ! self::is_email_post_type( $post->post_type ) ) {
 			return $template;
 		}
 
@@ -413,7 +419,7 @@ class Email_Editor {
 			return $preview_link;
 		}
 
-		if ( ! $this->current_post_is_email_post_type( $post->post_type ) ) {
+		if ( ! self::is_email_post_type( $post->post_type ) ) {
 			return $preview_link;
 		}
 

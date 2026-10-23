@@ -98,7 +98,7 @@ class CLIRunner {
 					sprintf(
 						// translators: %s - link to testing instructions webpage.
 						__( 'Custom order table usage is not enabled. If you are testing, you can enable it by following the testing instructions in %s', 'woocommerce' ),
-						'https://developer.woocommerce.com/docs/features/high-performance-order-storage/recipe-book/'
+						'https://developer.woocommerce.com/docs/features/orders/high-performance-order-storage/recipe-book/'
 					)
 				);
 			}

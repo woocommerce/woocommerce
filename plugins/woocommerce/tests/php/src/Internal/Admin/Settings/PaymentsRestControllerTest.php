@@ -251,7 +251,7 @@ class PaymentsRestControllerTest extends WC_Unit_Test_Case {
 		foreach ( $data['suggestions'] as $suggestion ) {
 			$this->assertArrayHasKey( 'id', $suggestion, 'Suggestion `id` entry is missing' );
 			$this->assertArrayHasKey( '_priority', $suggestion, 'Suggestion `_priority` entry is missing' );
-			$this->assertIsInteger( $suggestion['_priority'], 'Suggestion `_priority` entry is not an integer' );
+			$this->assertIsInt( $suggestion['_priority'], 'Suggestion `_priority` entry is not an integer' );
 			$this->assertArrayHasKey( '_type', $suggestion, 'Suggestion `_type` entry is missing' );
 			$this->assertArrayHasKey( 'title', $suggestion, 'Suggestion `title` entry is missing' );
 			$this->assertArrayHasKey( 'description', $suggestion, 'Suggestion `description` entry is missing' );
@@ -979,7 +979,7 @@ class PaymentsRestControllerTest extends WC_Unit_Test_Case {
 				'_order'      => $order++,
 				'_type'       => PaymentsProviders::TYPE_OFFLINE_PM,
 				'title'       => 'Direct bank transfer',
-				'description' => 'Take payments in person via BACS. More commonly known as direct bank/wire transfer.',
+				'description' => 'Accept offline bank-to-bank and wire transfer payments.',
 				'supports'    => array(
 					'products',
 				),

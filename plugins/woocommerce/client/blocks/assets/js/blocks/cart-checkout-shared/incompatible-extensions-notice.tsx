@@ -92,7 +92,7 @@ const IncompatibleExtensionsBanner = ( { block }: Props ) => {
 	const acknowledgedSlugs = Array.isArray( dismissedSlugs )
 		? dismissedSlugs.filter(
 				( slug ): slug is string => typeof slug === 'string'
-		  )
+			)
 		: [];
 
 	const { extensions, slugs, isKnown } = getIncompatibleExtensions();
@@ -150,7 +150,7 @@ const IncompatibleExtensionsBanner = ( { block }: Props ) => {
 					),
 					extensionNames[ 0 ],
 					blockLabel
-			  )
+				)
 			: sprintf(
 					/* translators: %s is block name */
 					__(
@@ -158,7 +158,7 @@ const IncompatibleExtensionsBanner = ( { block }: Props ) => {
 						'woocommerce'
 					),
 					blockLabel
-			  );
+				);
 
 	return (
 		<NoticeBanner

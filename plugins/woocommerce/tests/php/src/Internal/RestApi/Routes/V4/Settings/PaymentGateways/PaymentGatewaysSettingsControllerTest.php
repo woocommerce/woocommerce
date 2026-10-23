@@ -877,11 +877,27 @@ class PaymentGatewaysSettingsControllerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that COD gateway enable_for_methods field has options populated.
+	 * Data provider with the offline gateways that support shipping method restrictions.
+	 *
+	 * @return array
 	 */
-	public function test_cod_gateway_enable_for_methods_has_options() {
+	public function offline_gateway_ids(): array {
+		return array(
+			'cod'    => array( 'cod' ),
+			'bacs'   => array( 'bacs' ),
+			'cheque' => array( 'cheque' ),
+		);
+	}
+
+	/**
+	 * @testdox Should populate the enable_for_methods options for the offline gateways.
+	 * @dataProvider offline_gateway_ids
+	 *
+	 * @param string $gateway_id Gateway ID.
+	 */
+	public function test_offline_gateway_enable_for_methods_has_options( string $gateway_id ) {
 		// Act.
-		$request  = new WP_REST_Request( 'GET', self::ENDPOINT . '/cod' );
+		$request  = new WP_REST_Request( 'GET', self::ENDPOINT . '/' . $gateway_id );
 		$response = $this->server->dispatch( $request );
 
 		// Assert.
@@ -902,7 +918,7 @@ class PaymentGatewaysSettingsControllerTest extends WC_Unit_Test_Case {
 		}
 
 		// Verify the field exists.
-		$this->assertNotNull( $enable_for_methods_field, 'enable_for_methods field should exist in COD gateway fields' );
+		$this->assertNotNull( $enable_for_methods_field, "enable_for_methods field should exist in $gateway_id gateway fields" );
 
 		// Verify field metadata.
 		$this->assertSame( 'enable_for_methods', $enable_for_methods_field['id'] );

@@ -74,7 +74,7 @@ class WC_REST_Authentication {
 
 		$resolved_route = $this->resolved_route();
 		$is_wc_route    = $this->is_wc_namespace( $this->route_from_request_uri() )
-			|| ( null !== $resolved_route && $this->is_wc_namespace( $resolved_route ) );
+			|| ( wp_is_rest_endpoint() && null !== $resolved_route && $this->is_wc_namespace( $resolved_route ) );
 
 		/**
 		 * Filters whether the current request is a request to the WooCommerce REST API.
@@ -118,10 +118,9 @@ class WC_REST_Authentication {
 	/**
 	 * The REST route the request URI points to, normalized the way WordPress matches it.
 	 *
-	 * Returns the route without the REST prefix or surrounding slashes, e.g. 'wc/v3/products', or
-	 * an empty string when the URI is not a REST request. This reads the URI and nothing else, so the
-	 * route it returns is always the one the URI names. That is what is_resolved_route_in_scope()
-	 * compares the route WordPress ends up resolving against.
+	 * Returns the route without the REST prefix or surrounding slashes, e.g. 'wc/v3/products'. The
+	 * path is read unconditionally; a route named in the query string is only trusted once
+	 * wp_is_rest_endpoint() confirms genuine REST dispatch, and returns an empty string until then.
 	 *
 	 * @since 11.1.0
 	 *
@@ -157,8 +156,13 @@ class WC_REST_Authentication {
 			parse_str( $query_string, $query_params );
 		}
 
-		// Plain permalinks carry the route in the query string.
-		if ( isset( $query_params['rest_route'] ) && is_string( $query_params['rest_route'] ) ) {
+		// Plain permalinks can carry the route in the query string.
+		if ( isset( $query_params['rest_route'] ) ) {
+			// Only trust and read it once dispatch is confirmed and it's a single value.
+			if ( ! wp_is_rest_endpoint() || ! is_string( $query_params['rest_route'] ) ) {
+				return '';
+			}
+
 			return trim( $query_params['rest_route'], '/' );
 		}
 
@@ -680,19 +684,26 @@ class WC_REST_Authentication {
 
 		$used_nonces = maybe_unserialize( $user->nonces );
 
-		if ( empty( $used_nonces ) ) {
+		if ( empty( $used_nonces ) || ! is_array( $used_nonces ) ) {
 			$used_nonces = array();
 		}
 
-		if ( in_array( $nonce, $used_nonces, true ) ) {
-			return new WP_Error( 'woocommerce_rest_authentication_error', __( 'Invalid nonce - nonce has already been used.', 'woocommerce' ), array( 'status' => 401 ) );
+		foreach ( $used_nonces as $timestamp_nonces ) {
+			if ( in_array( $nonce, (array) $timestamp_nonces, true ) ) {
+				return new WP_Error( 'woocommerce_rest_authentication_error', __( 'Invalid nonce - nonce has already been used.', 'woocommerce' ), array( 'status' => 401 ) );
+			}
 		}
 
-		$used_nonces[ $timestamp ] = $nonce;
+		if ( isset( $used_nonces[ $timestamp ] ) ) {
+			$used_nonces[ $timestamp ]   = (array) $used_nonces[ $timestamp ];
+			$used_nonces[ $timestamp ][] = $nonce;
+		} else {
+			$used_nonces[ $timestamp ] = $nonce;
+		}
 
 		// Remove expired nonces.
-		foreach ( $used_nonces as $nonce_timestamp => $nonce ) {
-			if ( $nonce_timestamp < ( time() - $valid_window ) ) {
+		foreach ( array_keys( $used_nonces ) as $nonce_timestamp ) {
+			if ( ! is_numeric( $nonce_timestamp ) || $nonce_timestamp < ( time() - $valid_window ) ) {
 				unset( $used_nonces[ $nonce_timestamp ] );
 			}
 		}

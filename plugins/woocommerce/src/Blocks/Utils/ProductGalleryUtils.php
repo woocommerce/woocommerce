@@ -208,7 +208,7 @@ class ProductGalleryUtils {
 
 		if ( 'dialog' === $video_location ) {
 			unset( $attrs['autoplay'] );
-			$attrs['data-wp-init--dialog-video-playback'] = 'callbacks.initDialogVideoPlayback';
+			$attrs['data-wp-init---dialog-video-playback'] = 'callbacks.initDialogVideoPlayback';
 		}
 
 		if ( ! empty( $media['poster_id'] ) && ! empty( $media['poster_src'] ) ) {
@@ -422,6 +422,7 @@ class ProductGalleryUtils {
 		$parent_gallery_ids    = array_filter( $parent_gallery_ids, 'wp_attachment_is_image' );
 		$parent_gallery_extras = array_values( array_diff( $parent_gallery_ids, array( $parent_featured_id ) ) );
 
+		// Performance note: meta-based optimization (populating images from metas) was evaluated and dismissed due to impact to complexity ratio.
 		foreach ( $variations as $variation_id ) {
 			$variation_id = (int) $variation_id;
 			$entry        = self::build_variation_gallery_entry( $variation_id, $parent_featured_id, $parent_gallery_extras );

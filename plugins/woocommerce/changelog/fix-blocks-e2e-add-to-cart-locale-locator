@@ -1,0 +1,3 @@
+Significance: patch
+Type: dev
+Comment: Locate the Add to Cart control in the Blocks E2E helper by product title and class instead of its translated accessible name, so the cart and checkout translation specs pass on environments that have the WooCommerce language pack installed. E2E test utility only, no production change.

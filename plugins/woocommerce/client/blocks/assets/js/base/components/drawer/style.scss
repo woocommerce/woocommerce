@@ -113,7 +113,7 @@ $drawer-animation-duration: 0.3s;
 	background: transparent !important;
 	color: inherit !important;
 	position: absolute !important;
-	top: $gap-small;
+	top: $gap-small + $gap-smallest;
 	inset-inline-end: $gap-small;
 	opacity: 0.6;
 	z-index: 2;

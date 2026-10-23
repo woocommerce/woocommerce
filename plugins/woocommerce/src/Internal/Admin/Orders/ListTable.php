@@ -496,11 +496,15 @@ class ListTable extends WP_List_Table {
 		if ( ! in_array( $field, $sortable, true ) ) {
 			$this->order_query_args['orderby'] = 'date';
 			$this->order_query_args['order']   = 'DESC';
-			return;
+		} else {
+			$this->order_query_args['orderby'] = $field;
+			$this->order_query_args['order']   = in_array( $direction, array( 'ASC', 'DESC' ), true ) ? $direction : 'ASC';
 		}
 
-		$this->order_query_args['orderby'] = $field;
-		$this->order_query_args['order']   = in_array( $direction, array( 'ASC', 'DESC' ), true ) ? $direction : 'ASC';
+		// Order by ID as well to keep the ordering stable.
+		if ( 'date' === $this->order_query_args['orderby'] ) {
+			$this->order_query_args['orderby'] = 'date ID';
+		}
 	}
 
 	/**
@@ -1041,7 +1045,7 @@ class ListTable extends WP_List_Table {
 				'cb'               => '<input type="checkbox" />',
 				'order_number'     => esc_html__( 'Order', 'woocommerce' ),
 				'order_date'       => esc_html__( 'Date', 'woocommerce' ),
-				'order_status'     => esc_html__( 'Status', 'woocommerce' ),
+				'order_status'     => esc_html_x( 'Status', 'Order status', 'woocommerce' ),
 				'billing_address'  => esc_html__( 'Billing', 'woocommerce' ),
 				'shipping_address' => esc_html__( 'Ship to', 'woocommerce' ),
 				'order_total'      => esc_html__( 'Total', 'woocommerce' ),
