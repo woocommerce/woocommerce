@@ -2,7 +2,7 @@
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation;
 
-use Automattic\WooCommerce\Internal\Utilities\HtmlSanitizer;
+use Automattic\WooCommerce\Utilities\HtmlUtil;
 
 /**
  * Summary class.
@@ -36,7 +36,7 @@ class Summary extends AbstractOrderConfirmationBlock {
 		$content .= $this->render_summary_row( __( 'Order #:', 'woocommerce' ), $order->get_order_number() );
 		$content .= $this->render_summary_row( __( 'Date:', 'woocommerce' ), wc_format_datetime( $order->get_date_created() ) );
 		$content .= $this->render_summary_row( __( 'Total:', 'woocommerce' ), $order->get_formatted_order_total() );
-		$content .= $email ? $this->render_summary_row_html( __( 'Email:', 'woocommerce' ), wc_get_container()->get( HtmlSanitizer::class )->esc_html_exact( $email ) ) : '';
+		$content .= $email ? $this->render_summary_row_html( __( 'Email:', 'woocommerce' ), HtmlUtil::esc_html_exact( $email ) ) : '';
 		$content .= $this->render_summary_row( __( 'Payment:', 'woocommerce' ), $order->get_payment_method_title() );
 		$content .= '</ul>';
 

@@ -15,12 +15,11 @@
  * @version 11.4.0
  */
 
-use Automattic\WooCommerce\Internal\Utilities\HtmlSanitizer;
+use Automattic\WooCommerce\Utilities\HtmlUtil;
 
 defined( 'ABSPATH' ) || exit;
 
-$show_shipping  = ! wc_ship_to_billing_address_only() && $order->needs_shipping_address();
-$html_sanitizer = wc_get_container()->get( HtmlSanitizer::class );
+$show_shipping = ! wc_ship_to_billing_address_only() && $order->needs_shipping_address();
 ?>
 <section class="woocommerce-customer-details">
 
@@ -41,7 +40,7 @@ $html_sanitizer = wc_get_container()->get( HtmlSanitizer::class );
 		<?php endif; ?>
 
 		<?php if ( $order->get_billing_email() ) : ?>
-			<p class="woocommerce-customer-details--email"><?php echo $html_sanitizer->esc_html_exact( $order->get_billing_email() ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_html_exact() escapes for HTML. ?></p>
+			<p class="woocommerce-customer-details--email"><?php echo HtmlUtil::esc_html_exact( $order->get_billing_email() ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_html_exact() escapes for HTML. ?></p>
 		<?php endif; ?>
 
 		<?php
