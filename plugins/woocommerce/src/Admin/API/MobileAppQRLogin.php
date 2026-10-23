@@ -1170,14 +1170,17 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 		// Create an Application Password for the mobile app. The name is
 		// descriptive (e.g. "Woo Mobile · iPhone 15 · 2026-04-28") so the user
 		// can identify it later in Users → Profile → Application Passwords.
-		$app_password_result = \WP_Application_Passwords::create_new_application_password(
-			$user_id,
-			array(
-				'name'   => $this->format_application_password_name( $device ),
-				'app_id' => self::APP_ID,
-			)
-		);
-		remove_filter( 'wp_send_application_password_created_email', $skip_core_email, PHP_INT_MAX );
+		try {
+			$app_password_result = \WP_Application_Passwords::create_new_application_password(
+				$user_id,
+				array(
+					'name'   => $this->format_application_password_name( $device ),
+					'app_id' => self::APP_ID,
+				)
+			);
+		} finally {
+			remove_filter( 'wp_send_application_password_created_email', $skip_core_email, PHP_INT_MAX );
+		}
 
 		if ( is_wp_error( $app_password_result ) ) {
 			wc_get_logger()->error(
