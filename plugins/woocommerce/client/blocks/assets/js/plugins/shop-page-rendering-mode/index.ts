@@ -12,9 +12,9 @@ import { registerPlugin } from '@wordpress/plugins';
 import { store as preferencesStore } from '@wordpress/preferences';
 
 const ShopPageRenderingMode = () => {
-	const currentValue = useRef< boolean | null >( null );
+	const previousShouldPreviewTemplate = useRef< boolean | null >( null );
 
-	const defaultRenderingMode = useSelect( ( select ) => {
+	const renderingMode = useSelect( ( select ) => {
 		const defaultRenderingMode =
 			select( CORE_EDITOR_STORE ).getEditorSettings()
 				.defaultRenderingMode;
@@ -50,14 +50,14 @@ const ShopPageRenderingMode = () => {
 		// Set the initial preview without overriding subsequent user toggles.
 		if ( shouldPreviewTemplate ) {
 			setRenderingMode( 'template-locked' );
-			currentValue.current = true;
+			previousShouldPreviewTemplate.current = true;
 		}
 
-		if ( shouldPreviewTemplate !== currentValue.current ) {
-			setRenderingMode( defaultRenderingMode );
-			currentValue.current = false;
+		if ( shouldPreviewTemplate !== previousShouldPreviewTemplate.current ) {
+			setRenderingMode( renderingMode );
+			previousShouldPreviewTemplate.current = false;
 		}
-	}, [ shouldPreviewTemplate, setRenderingMode, defaultRenderingMode ] );
+	}, [ shouldPreviewTemplate, setRenderingMode, renderingMode ] );
 
 	return null;
 };
