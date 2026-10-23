@@ -69,7 +69,7 @@ class WooContentProcessor {
 		// Remove text-align from the plain h1-h6 rules. They force headings to the left (right in RTL),
 		// which overrides the alignment set in the editor.
 		$css = (string) preg_replace_callback(
-			'/(^|\})(\s*h[1-6]\s*\{)([^}]*)/',
+			'/(^|[{}])(\s*h[1-6]\s*\{)([^}]*)/',
 			fn( array $matches ): string => $matches[1] . $matches[2] . preg_replace( '/text-align\s*:\s*[^;]+;/', '', $matches[3] ),
 			$css
 		);

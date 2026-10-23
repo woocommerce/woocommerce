@@ -52,6 +52,13 @@ class WooContentProcessorTest extends \WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'margin: 0;', $result, 'Other heading properties should be preserved' );
 		$this->assertStringContainsString( '.text-align-right { text-align: right; }', $result, 'Alignment classes should be preserved' );
 		$this->assertStringContainsString( '#body_content_inner { text-align: left; }', $result, 'Other rules should be preserved' );
+
+		$media_css = '@media screen and (max-width: 600px) { h1 { text-align: left; margin: 0; } h2 { text-align: left; } }';
+
+		$result = $this->woo_content_processor->prepare_css( $media_css );
+
+		$this->assertStringNotContainsString( 'text-align', $result, 'Headings inside media queries should not have text-align' );
+		$this->assertStringContainsString( 'margin: 0;', $result, 'Other heading properties inside media queries should be preserved' );
 	}
 
 	/**
