@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add a read-only REST API endpoint, wc/v3/stock-notifications, to list and retrieve Back in Stock notifications.
