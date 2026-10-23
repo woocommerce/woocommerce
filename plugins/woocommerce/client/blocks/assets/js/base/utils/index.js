@@ -3,6 +3,7 @@ export * from './address';
 export * from './calculate-sale-amount';
 export * from './shipping-rates';
 export * from './legacy-events';
+export * from './get-added-products';
 export * from './render-frontend';
 export * from './get-valid-block-attributes';
 export * from './product-data';
