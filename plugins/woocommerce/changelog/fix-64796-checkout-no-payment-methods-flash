@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop the Checkout block from briefly showing "no payment methods available" while the cart loads.

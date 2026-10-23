@@ -102,7 +102,12 @@ export class ShippingBanner extends Component {
 
 	async installAndActivatePlugins( pluginSlug ) {
 		// Avoid double activating.
-		const { installPlugins, activatePlugins, isRequesting } = this.props;
+		const {
+			installPlugins,
+			activatePlugins,
+			isRequesting,
+			isWcstCompatible,
+		} = this.props;
 		if ( isRequesting ) {
 			this.setState( { isShippingLabelButtonBusy: false } );
 			return false;
@@ -148,6 +153,20 @@ export class ShippingBanner extends Component {
 				infoMessage: null,
 			} );
 			return;
+		}
+
+		if ( isWcstCompatible ) {
+			try {
+				await acceptWcsTos();
+			} catch {
+				this.setState( {
+					setupErrorReason: setupErrorTypes.SETUP,
+					wcsSetupError: true,
+					isShippingLabelButtonBusy: false,
+					infoMessage: null,
+				} );
+				return;
+			}
 		}
 
 		this.setState( {

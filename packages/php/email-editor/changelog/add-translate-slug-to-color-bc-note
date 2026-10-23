@@ -1,4 +1,0 @@
-Significance: minor
-Type: dev
-
-translate_slug_to_color() on Theme_Controller, Settings_Controller and Rendering_Context now returns an empty string for a palette slug no origin defines, rather than the slug itself. Callers should treat an empty string as "omit the declaration".

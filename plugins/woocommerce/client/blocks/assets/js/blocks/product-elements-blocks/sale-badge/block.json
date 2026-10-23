@@ -40,7 +40,8 @@
 			"__experimentalSkipSerialization": true
 		},
 		"spacing": {
-			"margin": true
+			"margin": true,
+			"__experimentalSkipSerialization": true
 		},
 		"email": true
 	},
