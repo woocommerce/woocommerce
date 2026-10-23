@@ -110,11 +110,12 @@ class ProductQuery implements QueryClausesGenerator {
 		// Gets all registered product taxonomies and prefixes them with `tax_`.
 		// This is needed to avoid situations where a user registers a new product taxonomy with the same name as default field.
 		// eg an `sku` taxonomy will be mapped to `tax_sku`.
+		// The `objects` output is used because it is keyed by taxonomy name, which the loop below relies on.
 		$all_product_taxonomies = array_map(
-			function ( $value ) {
-				return '_unstable_tax_' . $value;
+			function ( $taxonomy ) {
+				return '_unstable_tax_' . $taxonomy->name;
 			},
-			get_taxonomies( array( 'object_type' => array( 'product' ) ), 'names' )
+			get_object_taxonomies( 'product', 'objects' )
 		);
 
 		// Map between taxonomy name and arg key.
