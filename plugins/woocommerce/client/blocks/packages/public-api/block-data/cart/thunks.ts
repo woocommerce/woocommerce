@@ -495,7 +495,11 @@ export const addItemToCart =
 			dispatch.finishAddingToCart(
 				productId,
 				true,
-				getAddedProducts( previousItems, response.items )
+				// Concurrent adds are batched, so the response can include
+				// other products added at the same time.
+				getAddedProducts( previousItems, response.items ).filter(
+					( product ) => product.id === productId
+				)
 			);
 			return response;
 		} catch ( error ) {

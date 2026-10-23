@@ -304,10 +304,14 @@ describe( 'addItemToCart', () => {
 				items: [ { key: 'line-5', id: 5, quantity: 1 } ],
 			} ) ),
 		};
-		// 3 units were requested, but the server only added 1.
+		// 3 units were requested, but the server only added 1. Product 9 was
+		// added by a concurrent request batched with this one.
 		mockApiFetchWithHeaders.mockResolvedValueOnce( {
 			response: {
-				items: [ { key: 'line-5', id: 5, quantity: 2 } ],
+				items: [
+					{ key: 'line-5', id: 5, quantity: 2 },
+					{ key: 'line-9', id: 9, quantity: 1 },
+				],
 			},
 		} );
 
