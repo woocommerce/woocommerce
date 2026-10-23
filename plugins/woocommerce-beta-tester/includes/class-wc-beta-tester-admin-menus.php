@@ -181,9 +181,16 @@ Copy and paste the system status report from **WooCommerce > System Status** in 
 	/**
 	 * Constructs a WC System Status Report.
 	 *
+	 * The report is embedded in the admin bar markup of every wp-admin page, so it is only built for
+	 * users who may view the System Status page. Everyone else gets an empty string.
+	 *
 	 * @return string
 	 */
 	protected function construct_ssr() {
+		if ( ! current_user_can( 'manage_woocommerce' ) ) { // phpcs:ignore WordPress.WP.Capabilities.Unknown -- WooCommerce capability, the same gate core uses for the status page.
+			return '';
+		}
+
 		// This function depends on the WC core global being available. Sometimes, such as when we deactivate
 		// WC to install a live branches version, WC will not be available and cause a crash if we don't exit early
 		// here.
