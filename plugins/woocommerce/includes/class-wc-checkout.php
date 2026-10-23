@@ -463,7 +463,8 @@ class WC_Checkout {
 
 				/**
 				 * Filters whether a resumed classic checkout order keeps the items that haven't changed, so their IDs
-				 * stay the same. Return false to remove every item and add it again from the cart.
+				 * stay the same. Kept items don't run the woocommerce_checkout_create_order_*_item hooks again. Return false
+				 * to remove every item and add it again from the cart.
 				 *
 				 * @since 11.4.0
 				 *
