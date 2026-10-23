@@ -1,6 +1,9 @@
 <?php
 declare( strict_types = 1 );
 
+// WC_Admin_Assets reads the marketplace suggestions, and nothing in the bootstrap loads that class.
+require_once WC_ABSPATH . 'includes/admin/marketplace-suggestions/class-wc-marketplace-suggestions.php';
+
 /**
  * Tests for WC_Admin_Assets.
  *

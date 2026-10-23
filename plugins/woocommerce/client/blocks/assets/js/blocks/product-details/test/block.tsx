@@ -184,6 +184,7 @@ describe( 'Product Details block', () => {
 		} );
 
 		afterEach( () => {
+			server.resetHandlers();
 			( useSelect as jest.Mock ).mockClear();
 		} );
 
@@ -244,7 +245,6 @@ describe( 'Product Details block', () => {
 		} );
 
 		test( 'should auto-remove block when product has no specifications', async () => {
-			server.resetHandlers();
 			server.use(
 				http.get( '/wc/store/v1/products/*', () =>
 					HttpResponse.json( productWithoutSpecifications )
