@@ -1378,13 +1378,23 @@ class WC_AJAX {
 			);
 
 			if ( strstr( $amount, '%' ) ) {
-				// Refresh totals so the discount total is current. The percentage applies to
-				// the items after discounts, excluding tax, shipping and other fees.
+				// Not needed for the base, which reads stored line totals. Kept so callbacks on the order
+				// totals hooks still run before the fee is added.
 				$order->calculate_totals( false );
 				$formatted_amount = $amount;
 				$percent          = floatval( trim( $amount, '%' ) );
-				$base             = (float) $order->get_subtotal() - (float) $order->get_discount_total( 'edit' );
-				$amount           = NumberUtil::round( $base * ( $percent / 100 ), wc_get_price_decimals() );
+
+				// The percentage applies to the line items after discounts, excluding tax, shipping and
+				// other fees. Read their stored totals so a filtered order subtotal can't change the fee,
+				// and round them as the order subtotal does.
+				$line_totals = array();
+				foreach ( $order->get_items() as $item ) {
+					if ( is_callable( array( $item, 'get_total' ) ) ) {
+						$line_totals[] = wc_add_number_precision( (float) $item->get_total( 'edit' ), false );
+					}
+				}
+				$base   = wc_remove_number_precision( $order::get_rounded_items_total( $line_totals ) );
+				$amount = NumberUtil::round( $base * ( $percent / 100 ), wc_get_price_decimals() );
 			} else {
 				$amount           = floatval( $amount );
 				$formatted_amount = wc_price( $amount, array( 'currency' => $order->get_currency() ) );

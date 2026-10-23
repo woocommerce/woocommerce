@@ -1,0 +1,3 @@
+Significance: patch
+Type: dev
+Comment: Read the percentage fee base from order line items; refines an unreleased change.
