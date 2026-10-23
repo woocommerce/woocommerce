@@ -1110,6 +1110,86 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Resuming the session order through create_order() leaves it pending, so its stock hold is counted.
+	 *
+	 * @testWith ["failed"]
+	 *           ["pending"]
+	 *
+	 * @param string $status_before_retry Status the order has when the shopper submits the checkout again.
+	 */
+	public function test_create_order_resumes_session_order_as_pending_so_its_stock_hold_counts( string $status_before_retry ): void {
+		$product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'manage_stock'   => true,
+				'stock_quantity' => 1,
+			)
+		);
+		WC()->cart->add_to_cart( $product->get_id() );
+
+		$data = array(
+			'ship_to_different_address' => false,
+			'payment_method'            => WC_Gateway_BACS::ID,
+			'billing_email'             => 'customer@example.com',
+		);
+
+		try {
+			$order_id = $this->sut->create_order( $data );
+			$this->assertIsInt( $order_id, 'The first submit should create the order.' );
+
+			$order = wc_get_order( $order_id );
+			$order->update_status( $status_before_retry );
+			WC()->session->set( 'order_awaiting_payment', $order_id );
+			// Drop the first attempt's hold so the retry inserts a new one. Renewing a hold within the
+			// same second writes identical values, which the reservation query reports as a failed hold.
+			wc_release_stock_for_order( $order );
+
+			$resumed_order_id = $this->sut->create_order( $data );
+		} finally {
+			WC()->cart->empty_cart();
+		}
+
+		$this->assertSame( $order_id, $resumed_order_id, 'The second submit should resume the session order instead of creating a new one.' );
+		$this->assertSame( OrderStatus::PENDING, wc_get_order( $resumed_order_id )->get_status(), 'A resumed order should be pending payment again.' );
+		$this->assertSame( 1, wc_get_held_stock_quantity( $product ), 'The stock hold written for the resumed order should count for other shoppers.' );
+	}
+
+	/**
+	 * @testdox A woocommerce_resume_order callback's status change is not overwritten when the order is resumed.
+	 */
+	public function test_create_order_keeps_a_resume_hook_status_change(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id() );
+
+		$data = array(
+			'ship_to_different_address' => false,
+			'payment_method'            => WC_Gateway_BACS::ID,
+			'billing_email'             => 'customer@example.com',
+		);
+
+		// A callback parks the resumed order in a status the store treats as paid, so the checkout should
+		// leave it there instead of forcing it back to pending.
+		$park_on_hold = static function ( $order_id ) {
+			wc_get_order( $order_id )->update_status( OrderStatus::ON_HOLD );
+		};
+		add_action( 'woocommerce_resume_order', $park_on_hold );
+
+		try {
+			$order_id = $this->sut->create_order( $data );
+			wc_get_order( $order_id )->update_status( OrderStatus::FAILED );
+			WC()->session->set( 'order_awaiting_payment', $order_id );
+
+			$resumed_order_id = $this->sut->create_order( $data );
+		} finally {
+			remove_action( 'woocommerce_resume_order', $park_on_hold );
+			WC()->cart->empty_cart();
+		}
+
+		$this->assertSame( $order_id, $resumed_order_id, 'The second submit should resume the session order.' );
+		$this->assertSame( OrderStatus::ON_HOLD, wc_get_order( $resumed_order_id )->get_status(), 'The resume hook\'s status change should survive, not be overwritten with pending.' );
+	}
+
+	/**
 	 * @testdox Checkout tolerates non-array cart variation data when building contextual item names.
 	 */
 	public function test_create_order_line_items_tolerates_malformed_variation_data(): void {
