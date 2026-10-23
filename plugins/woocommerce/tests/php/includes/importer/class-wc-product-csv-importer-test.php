@@ -2016,6 +2016,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 			'quotes inside a group'       => array( '"a, "b", c"', array( 'a, "b", c' ) ),
 			'quoted words in one value'   => array( '"Pro" or "Max", Small', array( '"Pro" or "Max"', 'Small' ) ),
 			'nested quotes in one value'  => array( '"Pro "P" edition"', array( '"Pro "P" edition"' ) ),
+			'lone quote segments'         => array( 'a, ", b, "', array( 'a', '"', 'b', '"' ) ),
 			'empty quoted value'          => array( '""', array( '' ) ),
 			'unterminated quote'          => array( 'Red, "Blue', array( 'Red', '"Blue' ) ),
 			'plain list'                  => array( 'Red, Green', array( 'Red', 'Green' ) ),

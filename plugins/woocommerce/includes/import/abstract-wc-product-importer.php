@@ -954,12 +954,13 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	/**
 	 * Whether a trimmed segment starts a double-quoted value: it begins with a quote that the
 	 * segment either closes itself (`"Large"`) or leaves open (`"Blue`, an odd number of quotes).
+	 * A lone `"` is left as it is.
 	 *
 	 * @param string $segment Trimmed segment.
 	 * @return bool
 	 */
 	private function opens_quoted_value( string $segment ): bool {
-		return '"' === substr( $segment, 0, 1 ) && ( $this->is_self_closed_quoted_value( $segment ) || 1 === substr_count( $segment, '"' ) % 2 );
+		return strlen( $segment ) > 1 && '"' === substr( $segment, 0, 1 ) && ( $this->is_self_closed_quoted_value( $segment ) || 1 === substr_count( $segment, '"' ) % 2 );
 	}
 
 	/**
@@ -975,13 +976,13 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 
 	/**
 	 * Whether a trimmed segment ends a double-quoted value opened by an earlier segment: it ends
-	 * with a quote that is not balanced inside the segment, such as `navy"` but not `15" Wheel"`.
+	 * with a quote that is not balanced inside the segment, such as `navy"` but not `15" Wheel"` or a lone `"`.
 	 *
 	 * @param string $segment Trimmed segment.
 	 * @return bool
 	 */
 	private function closes_quoted_value( string $segment ): bool {
-		return '"' === substr( $segment, -1 ) && 1 === substr_count( $segment, '"' ) % 2;
+		return strlen( $segment ) > 1 && '"' === substr( $segment, -1 ) && 1 === substr_count( $segment, '"' ) % 2;
 	}
 
 	/**
