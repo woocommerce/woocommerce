@@ -206,7 +206,7 @@ class CheckoutOrder extends AbstractCartRoute {
 		// Billing address is a required field.
 		$billing = $request['billing_address'];
 
-		$this->order_controller->update_existing_order_addresses( $this->order, $billing, $request['shipping_address'] );
+		$shipping = $this->order_controller->update_existing_order_addresses( $this->order, $billing, $request['shipping_address'] );
 
 		// Update customer object with validated order addresses.
 		foreach ( $billing as $key => $value ) {
@@ -215,7 +215,8 @@ class CheckoutOrder extends AbstractCartRoute {
 			}
 		}
 
-		foreach ( $this->order->get_address( 'shipping' ) as $key => $value ) {
+		// When the order keeps its own shipping address, the customer's shipping follows billing.
+		foreach ( $shipping ?? $billing as $key => $value ) {
 			if ( is_callable( [ $customer, "set_shipping_$key" ] ) ) {
 				$customer->{"set_shipping_$key"}( $value );
 			}

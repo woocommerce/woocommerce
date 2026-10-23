@@ -2748,10 +2748,13 @@ class Checkout extends \WP_Test_REST_TestCase {
 
 		$order = $this->create_pay_for_order_with_shipping_address();
 
-		$response = $this->dispatch_pay_for_order_request( $order, array(), $this->get_different_destination() );
+		// A street change does not change the price, so the request passes and shows where shipping was copied from.
+		$response = $this->dispatch_pay_for_order_request( $order, array( 'address_1' => '1 New Street' ), $this->get_different_destination() );
 
 		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
-		$this->assertEquals( 'US', wc_get_order( $order->get_id() )->get_shipping_country() );
+		$order = wc_get_order( $order->get_id() );
+		$this->assertEquals( '1 New Street', $order->get_shipping_address_1() );
+		$this->assertEquals( 'US', $order->get_shipping_country() );
 	}
 
 	/**
