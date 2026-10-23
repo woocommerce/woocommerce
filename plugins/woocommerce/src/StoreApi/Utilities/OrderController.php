@@ -19,6 +19,17 @@ use Exception;
 class OrderController {
 
 	/**
+	 * Address fields that can change the price. Shipping zones match on country, state and postcode, and tax rates
+	 * also match on city. Other fields, like name or street, do not change the price.
+	 *
+	 * @see \WC_Shipping_Zones::get_zone_matching_package()
+	 * @see \WC_Tax::find_rates()
+	 *
+	 * @var string[]
+	 */
+	private const LOCATION_FIELDS = [ 'country', 'state', 'postcode', 'city' ];
+
+	/**
 	 * Checkout fields controller.
 	 *
 	 * @var CheckoutFields
@@ -184,6 +195,161 @@ class OrderController {
 	 */
 	public function validate_existing_order_before_update( \WC_Order $order ): void {
 		$this->validate_addresses( $order, $order->needs_shipping() );
+	}
+
+	/**
+	 * Sets new addresses on an existing order and validates them, without saving the order.
+	 *
+	 * Rejects a location change that would change the shipping cost or tax. The request recalculates
+	 * tax but not shipping, and the total should stay what the order was priced at.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @throws RouteException When an address is not valid or its location cannot change.
+	 * @param \WC_Order  $order    Existing order.
+	 * @param array      $billing  New billing address.
+	 * @param array|null $shipping New shipping address, or null to keep the order's.
+	 * @return array|null Shipping address set on the order, or null if the order kept its own.
+	 */
+	public function update_existing_order_addresses( \WC_Order $order, array $billing, ?array $shipping ): ?array {
+		$old_shipping_location = self::get_shipping_location( $order );
+		$old_tax_location      = $order->get_taxable_location();
+		$old_states            = [
+			'billing'  => $order->get_billing_state( 'edit' ),
+			// An order with no shipping address ships to billing, so its shipping starts from the billing state.
+			'shipping' => $order->get_shipping_country() ? $order->get_shipping_state( 'edit' ) : $order->get_billing_state( 'edit' ),
+		];
+
+		if ( wc_ship_to_billing_address_only() ) {
+			// Stores that ship to billing only ignore the request's shipping. An order that already ships somewhere
+			// else, e.g. one made in the admin, keeps its shipping, since copying billing over it would block payment.
+			$shipping = self::locations_differ( $old_shipping_location, $order->get_address( 'billing' ) ) ? null : $billing;
+		} elseif ( null === $shipping && ! $order->get_shipping_country() ) {
+			// An order with no shipping address to keep ships to billing.
+			$shipping = $billing;
+		}
+
+		$order->set_billing_address( $billing );
+		if ( null !== $shipping ) {
+			$order->set_shipping_address( $shipping );
+		}
+		$this->restore_state_names( $order, $old_states );
+
+		$needs_shipping = $order->needs_shipping();
+		$this->validate_addresses( $order, $needs_shipping );
+		$this->validate_location_change( $order, $old_shipping_location, $old_tax_location, $needs_shipping );
+
+		return $shipping;
+	}
+
+	/**
+	 * Gets the location an order ships to.
+	 *
+	 * An order with no shipping address, e.g. one created in the admin, ships to its billing address.
+	 * WC_Abstract_Order::get_tax_location() uses the same fallback.
+	 *
+	 * @param \WC_Order $order Order to read.
+	 * @return array
+	 */
+	private static function get_shipping_location( \WC_Order $order ): array {
+		return $order->get_address( $order->get_shipping_country() ? 'shipping' : 'billing' );
+	}
+
+	/**
+	 * Keeps a state the order stores as a name, e.g. "New York", when the request sends its code, e.g. "NY".
+	 *
+	 * This is because some edge cases would have an order with a state name (New York) instead of NY.
+	 * Switching from New York to NY might trigger new totals so we avoid that by keeping the full name.
+	 *
+	 * @param \WC_Order $order      Order with the new addresses set.
+	 * @param string[]  $old_states State per address type before the new addresses were set.
+	 */
+	private function restore_state_names( \WC_Order $order, array $old_states ): void {
+		$validation_utils = new ValidationUtils();
+
+		foreach ( $old_states as $address_type => $old_state ) {
+			$state   = (string) $order->{"get_{$address_type}_state"}( 'edit' );
+			$country = (string) $order->{"get_{$address_type}_country"}( 'edit' );
+
+			if ( $old_state !== $state && $validation_utils->format_state( $old_state, $country ) === $state ) {
+				$order->set_props( [ "{$address_type}_state" => $old_state ] );
+			}
+		}
+	}
+
+	/**
+	 * Rejects a location change that would change the order's shipping cost or tax.
+	 *
+	 * @throws RouteException When the shipping or tax location changed.
+	 * @param \WC_Order $order                 Order with the new addresses set.
+	 * @param array     $old_shipping_location Location the order shipped to before the change.
+	 * @param array     $old_tax_location      Location the order was taxed on before the change.
+	 * @param bool      $needs_shipping        Whether the order needs shipping.
+	 */
+	private function validate_location_change( \WC_Order $order, array $old_shipping_location, array $old_tax_location, bool $needs_shipping ): void {
+		// An order with no address, e.g. one a merchant made for the shopper to fill in, is taxed at the shop's
+		// base address and has no shipping zone yet, so its first address is allowed. Store API orders get
+		// their address at checkout, so they never need this.
+		if ( empty( $old_shipping_location['country'] ) && 'store-api' !== $order->get_created_via() ) {
+			return;
+		}
+
+		if ( $needs_shipping && self::locations_differ( $old_shipping_location, self::get_shipping_location( $order ) ) ) {
+			throw new RouteException(
+				'woocommerce_rest_checkout_order_address_change_not_allowed',
+				esc_html__( 'Sorry, the shipping address on this order cannot be changed because the shipping cost was calculated for the original address. Please use the original address, or contact us to have the order updated.', 'woocommerce' ),
+				400
+			);
+		}
+
+		// get_taxable_location() follows whichever address sets the tax, including the shop base for local
+		// pickup and anything the woocommerce_order_get_tax_location filter returns. A store that collects
+		// no tax has no tax location to protect.
+		if ( wc_tax_enabled() && self::locations_differ( $old_tax_location, $order->get_taxable_location() ) ) {
+			throw new RouteException(
+				'woocommerce_rest_checkout_order_address_change_not_allowed',
+				esc_html__( 'Sorry, the address on this order cannot be changed because the tax was calculated for the original address. Please use the original address, or contact us to have the order updated.', 'woocommerce' ),
+				400
+			);
+		}
+	}
+
+	/**
+	 * Checks whether two locations match a different shipping zone or tax rate.
+	 *
+	 * Shipping zones and tax rates ignore case and postcode spacing, so a change in only those does not count.
+	 *
+	 * @param array $old_location Location before the change.
+	 * @param array $new_location Location after the change.
+	 * @return bool
+	 */
+	private static function locations_differ( array $old_location, array $new_location ): bool {
+		foreach ( self::LOCATION_FIELDS as $field ) {
+			if ( self::normalize_location_field( $field, $old_location ) !== self::normalize_location_field( $field, $new_location ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Normalizes a location field the way shipping zones and tax rates match it.
+	 *
+	 * @param string $field    Field name.
+	 * @param array  $location Location the field belongs to.
+	 * @return string
+	 */
+	private static function normalize_location_field( string $field, array $location ): string {
+		$value = (string) ( $location[ $field ] ?? '' );
+
+		if ( 'postcode' === $field ) {
+			return wc_normalize_postcode( $value );
+		}
+
+		// Both lookups use strtoupper(), which leaves multibyte characters alone. Matching that keeps
+		// the check from treating two values as equal when the lookups would not.
+		return strtoupper( trim( $value ) );
 	}
 
 	/**
