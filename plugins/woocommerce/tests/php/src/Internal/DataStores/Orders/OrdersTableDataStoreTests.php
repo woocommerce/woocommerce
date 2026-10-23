@@ -3715,6 +3715,25 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	}
 
 	/**
+	 * @testdox Multi-value meta keeps its order in the posts table when a meta save triggers a full order save.
+	 */
+	public function test_multi_value_meta_order_is_synced_when_meta_save_triggers_order_save(): void {
+		$this->toggle_cot_authoritative( true );
+		$this->enable_cot_sync();
+
+		$order = WC_Helper_Order::create_order();
+		// An earlier modified date makes the first add_meta() call trigger a full order save.
+		$order->set_date_modified( gmdate( 'Y-m-d H:i:s', strtotime( '-2 day' ) ) );
+		$order->save();
+
+		$order->add_meta_data( 'test_key', 'test_value1' );
+		$order->add_meta_data( 'test_key', 'test_value2' );
+		$order->save_meta_data();
+
+		$this->assertSame( array( 'test_value1', 'test_value2' ), get_post_meta( $order->get_id(), 'test_key', false ) );
+	}
+
+	/**
 	 * @testDox Test that date queries correctly handle timezones.
 	 */
 	public function test_timezone_date_query_support() {
