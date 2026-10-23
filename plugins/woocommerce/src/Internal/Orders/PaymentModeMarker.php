@@ -46,7 +46,6 @@ class PaymentModeMarker implements RegisterHooksInterface {
 	private const GATEWAY_MODE_META_KEYS = array(
 		'woocommerce_payments' => '_wcpay_mode',
 		'ppcp-'                => '_ppcp_paypal_payment_mode',
-		'stripe_'              => '_wc_stripe_mode',
 	);
 
 	/**
@@ -115,6 +114,10 @@ class PaymentModeMarker implements RegisterHooksInterface {
 			if ( str_starts_with( $gateway->id, $gateway_id_prefix ) ) {
 				$meta_keys[] = $meta_key;
 			}
+		}
+		// Payment Plugins for Stripe shares the `stripe_` ID prefix with the official Stripe plugin, so match its base class.
+		if ( is_a( $gateway, 'WC_Payment_Gateway_Stripe' ) ) {
+			$meta_keys[] = '_wc_stripe_mode';
 		}
 
 		foreach ( $meta_keys as $meta_key ) {

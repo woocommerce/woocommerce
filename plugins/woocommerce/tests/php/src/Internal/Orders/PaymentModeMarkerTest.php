@@ -51,16 +51,17 @@ class PaymentModeMarkerTest extends WC_Unit_Test_Case {
 	 * @testWith ["woocommerce_payments_card", "_wcpay_mode", "test", "test"]
 	 *           ["woocommerce_payments", "_wcpay_mode", "prod", "live"]
 	 *           ["ppcp-gateway", "_ppcp_paypal_payment_mode", "sandbox", "test"]
-	 *           ["stripe_cc", "_wc_stripe_mode", "live", "live"]
+	 *           ["stripe_cc", "_wc_stripe_mode", "live", "live", true]
 	 *           ["skyverge_gateway", "_wc_skyverge_gateway_environment", "production", "live"]
 	 *
-	 * @param string $gateway_id    Gateway ID.
-	 * @param string $meta_key      Order meta key the gateway writes.
-	 * @param string $meta_value    Mode the gateway saved.
-	 * @param string $expected_mode Expected payment mode.
+	 * @param string $gateway_id                Gateway ID.
+	 * @param string $meta_key                  Order meta key the gateway writes.
+	 * @param string $meta_value                Mode the gateway saved.
+	 * @param string $expected_mode             Expected payment mode.
+	 * @param bool   $is_payment_plugins_stripe Whether the gateway comes from Payment Plugins for Stripe.
 	 */
-	public function test_prefers_mode_saved_by_gateway( string $gateway_id, string $meta_key, string $meta_value, string $expected_mode ): void {
-		$this->register_gateway( $gateway_id, PaymentModeMarker::MODE_LIVE === $expected_mode );
+	public function test_prefers_mode_saved_by_gateway( string $gateway_id, string $meta_key, string $meta_value, string $expected_mode, bool $is_payment_plugins_stripe = false ): void {
+		$this->register_gateway( $gateway_id, PaymentModeMarker::MODE_LIVE === $expected_mode, $is_payment_plugins_stripe );
 		$order = $this->create_order( $gateway_id );
 		$order->update_meta_data( $meta_key, $meta_value );
 		$order->save();
@@ -80,10 +81,12 @@ class PaymentModeMarkerTest extends WC_Unit_Test_Case {
 	 * @param string $expected_mode     Expected payment mode.
 	 */
 	public function test_falls_back_to_provider_test_mode( bool $gateway_test_mode, string $expected_mode ): void {
-		$this->register_gateway( 'fake_gateway', $gateway_test_mode );
-		$order = $this->create_order( 'fake_gateway' );
-		// A mode another gateway saved during an earlier payment attempt.
+		// An official Stripe plugin ID, which shares the `stripe_` prefix with Payment Plugins for Stripe.
+		$this->register_gateway( 'stripe_ideal', $gateway_test_mode );
+		$order = $this->create_order( 'stripe_ideal' );
+		// Modes other gateways saved during earlier payment attempts.
 		$order->update_meta_data( '_wcpay_mode', $gateway_test_mode ? 'prod' : 'test' );
+		$order->update_meta_data( '_wc_stripe_mode', $gateway_test_mode ? 'live' : 'test' );
 		$order->save();
 
 		$order->payment_complete();
@@ -120,31 +123,23 @@ class PaymentModeMarkerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Register a fake gateway that exposes its test mode the way many gateways do.
+	 * Register a fake gateway that stores its test mode in the `testmode` setting, like many gateways do.
 	 *
-	 * @param string $gateway_id Gateway ID.
-	 * @param bool   $test_mode  Whether the gateway is in test mode.
+	 * @param string $gateway_id                Gateway ID.
+	 * @param bool   $test_mode                 Whether the gateway is in test mode.
+	 * @param bool   $is_payment_plugins_stripe Whether to extend the Payment Plugins for Stripe base class.
 	 */
-	private function register_gateway( string $gateway_id, bool $test_mode ): void {
-		$gateway = new class( $gateway_id, $test_mode ) extends WC_Payment_Gateway {
-			/**
-			 * Whether the gateway is in test mode.
-			 *
-			 * @var bool
-			 */
-			public $testmode;
-
-			/**
-			 * Constructor.
-			 *
-			 * @param string $id       Gateway ID.
-			 * @param bool   $testmode Whether the gateway is in test mode.
-			 */
-			public function __construct( string $id, bool $testmode ) {
-				$this->id       = $id;
-				$this->testmode = $testmode;
+	private function register_gateway( string $gateway_id, bool $test_mode, bool $is_payment_plugins_stripe = false ): void {
+		if ( $is_payment_plugins_stripe ) {
+			if ( ! class_exists( 'WC_Payment_Gateway_Stripe' ) ) {
+				class_alias( get_class( new class() extends WC_Payment_Gateway {} ), 'WC_Payment_Gateway_Stripe' );
 			}
-		};
+			$gateway = new class() extends \WC_Payment_Gateway_Stripe {};
+		} else {
+			$gateway = new class() extends WC_Payment_Gateway {};
+		}
+		$gateway->id       = $gateway_id;
+		$gateway->settings = array( 'testmode' => $test_mode ? 'yes' : 'no' );
 
 		WC()->payment_gateways()->payment_gateways[] = $gateway;
 	}
