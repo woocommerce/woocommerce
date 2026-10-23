@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 use Automattic\WooCommerce\Internal\ProductVariations\SelectedVariationName;
 use Automattic\WooCommerce\Internal\Tax\TaxRateDataStore;
+use Automattic\WooCommerce\Internal\Utilities\PostcodeValidation;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -947,7 +948,7 @@ class WC_Checkout {
 					$country      = $this->get_fieldset_country( $fieldset_key, $data );
 					$data[ $key ] = wc_format_postcode( $data[ $key ], $country );
 
-					if ( $validate_fieldset && '' !== $data[ $key ] && ! WC_Validation::is_postcode( $data[ $key ], $country ) ) {
+					if ( $validate_fieldset && '' !== $data[ $key ] && ! PostcodeValidation::is_valid_for_shortcode_checkout( (string) $data[ $key ], (string) $country ) ) {
 						switch ( $country ) {
 							case 'IE':
 								/* translators: %1$s: field name, %2$s finder.eircode.ie URL */

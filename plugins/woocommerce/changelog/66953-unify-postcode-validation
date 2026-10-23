@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Check postcodes for every country, the same way in both checkouts; return false from woocommerce_experimental_extensive_postcode_rules to keep the old classic checkout rules.
