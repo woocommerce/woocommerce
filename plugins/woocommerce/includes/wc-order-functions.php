@@ -183,7 +183,7 @@ function wc_get_order_status_name( $status ) {
 	if ( ! is_string( $status ) ) {
 		wc_doing_it_wrong(
 			__FUNCTION__,
-			__( 'An invalid order status slug was supplied.', 'woocommerce' ),
+			'An invalid order status slug was supplied.',
 			'9.6'
 		);
 	}
@@ -1225,6 +1225,8 @@ function wc_get_order_note( $data ) {
  *
  *     @type string $limit         Maximum number of notes to retrieve.
  *                                 Default empty (no limit).
+ *     @type int    $page          Page of notes to retrieve (starting at 1). Use with limit.
+ *                                 Default 1.
  *     @type int    $order_id      Limit results to those affiliated with a given order ID.
  *                                 Default 0.
  *     @type array  $order__in     Array of order IDs to include affiliated notes for.
@@ -1246,6 +1248,7 @@ function wc_get_order_note( $data ) {
 function wc_get_order_notes( $args ) {
 	$key_mapping = array(
 		'limit'         => 'number',
+		'page'          => 'paged',
 		'order_id'      => 'post_id',
 		'order__in'     => 'post__in',
 		'order__not_in' => 'post__not_in',

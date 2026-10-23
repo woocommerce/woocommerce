@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Internal\EmailEditor;
 
 use Automattic\WooCommerce\EmailEditor\Email_Editor_Container;
 use Automattic\WooCommerce\EmailEditor\Engine\Dependency_Check;
+use Automattic\WooCommerce\EmailEditor\Engine\Email_Editor;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\Renderer;
 use Automattic\WooCommerce\EmailEditor\Engine\Send_Preview_Email;
 use Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreview;
@@ -171,6 +172,8 @@ class Integration {
 		add_action( 'admin_init', array( $this, 'render_block_email_preview_page' ) );
 		add_action( 'rest_api_init', array( $this->email_api_controller, 'register_routes' ) );
 		add_action( 'transition_post_status', array( $this, 'save_email_mapping_on_publish' ), 10, 3 );
+		add_action( 'wp_entity_actions_api_init', array( $this, 'register_entity_actions' ) );
+		add_filter( 'woocommerce_email_editor_replace_trash_action', array( $this, 'replace_trash_action' ), 10, 2 );
 		// Priority 11 ensures the email editor's `init` bootstrap (default priority 10)
 		// has registered the `woo_email` post type before we register meta against it.
 		add_action( 'init', array( WCEmailTemplateDivergenceDetector::class, 'register_meta' ), 11 );
@@ -187,6 +190,46 @@ class Integration {
 		// RSM-149 sync-meta backfill finalises. The backfill class itself is in the
 		// 10.8 feature freeze, so we hook the existing action it already publishes.
 		add_action( WCEmailTemplateSyncBackfill::BACKFILL_COMPLETE_ACTION, array( WCEmailTemplateSyncTracker::class, 'on_backfill_complete' ), 20 );
+	}
+
+	/**
+	 * Register the "Reset" email content action on WordPress 7.2+, where post actions come from a server-side registry.
+	 * Its JavaScript parts come from the email editor script module, see email-editor-integration/index.ts.
+	 *
+	 * @internal
+	 */
+	public function register_entity_actions(): void {
+		if ( ! function_exists( 'wp_register_entity_actions' ) ) {
+			return;
+		}
+		wp_register_entity_actions(
+			'woocommerce',
+			'postType',
+			self::EMAIL_POST_TYPE,
+			array(
+				array(
+					'id'                => 'reset-notification-email-content',
+					'label'             => __( 'Reset', 'woocommerce' ),
+					'supportsBulk'      => false,
+					'hideModalHeader'   => true,
+					'modalFocusOnMount' => 'firstContentElement',
+				),
+			),
+			Email_Editor::ENTITY_ACTIONS_SCRIPT_MODULE_ID
+		);
+	}
+
+	/**
+	 * Use the email editor's delete action instead of core's "Trash…" for WooCommerce emails on WordPress 7.2+.
+	 *
+	 * @internal
+	 *
+	 * @param bool|mixed $replace   Whether to replace core's action.
+	 * @param string     $post_type The email post type.
+	 * @return bool|mixed
+	 */
+	public function replace_trash_action( $replace, $post_type ) {
+		return self::EMAIL_POST_TYPE === $post_type ? true : $replace;
 	}
 
 	/**

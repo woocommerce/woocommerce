@@ -29,6 +29,7 @@ import {
 } from './events';
 import { initContentValidationMiddleware } from './middleware/content-validation';
 import { initHacks } from './hacks';
+import { initEntityActions } from './entity-actions';
 import {
 	useContentValidation,
 	useFilterEditorContentStylesheets,
@@ -138,6 +139,7 @@ function onInit() {
 	initContentValidationMiddleware();
 	initBlocks();
 	initHacks();
+	initEntityActions();
 	initTextHooks();
 	initializeLayout();
 }
