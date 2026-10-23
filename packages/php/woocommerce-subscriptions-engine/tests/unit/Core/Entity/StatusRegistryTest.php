@@ -13,6 +13,7 @@ use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\PlanStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\StatusRegistry;
 
 /**
@@ -27,12 +28,30 @@ class StatusRegistryTest extends TestCase {
 
 	public function test_all_returns_exactly_the_engine_defaults_with_nothing_registered(): void {
 		$this->assertSame(
-			array( 'active', 'on-hold', 'pending-cancellation', 'cancelled', 'expired' ),
+			array( 'draft', 'active', 'on-hold', 'pending-cancellation', 'cancelled', 'expired' ),
 			StatusRegistry::get_all( StatusRegistry::KIND_CONTRACT )
 		);
 		$this->assertSame(
 			array( 'pending', 'processing', 'billed', 'failed', 'cancelled' ),
 			StatusRegistry::get_all( StatusRegistry::KIND_CYCLE )
+		);
+		$this->assertSame(
+			array( 'active', 'archived' ),
+			StatusRegistry::get_all( StatusRegistry::KIND_PLAN )
+		);
+	}
+
+	public function test_plan_registrations_are_independent_of_contract_and_cycle(): void {
+		StatusRegistry::register( StatusRegistry::KIND_PLAN, 'seasonal' );
+		StatusRegistry::register( StatusRegistry::KIND_CONTRACT, 'paused-by-merchant' );
+
+		$this->assertTrue( StatusRegistry::is_registered( StatusRegistry::KIND_PLAN, 'seasonal' ) );
+		$this->assertFalse( StatusRegistry::is_registered( StatusRegistry::KIND_CONTRACT, 'seasonal' ) );
+		$this->assertFalse( StatusRegistry::is_registered( StatusRegistry::KIND_CYCLE, 'seasonal' ) );
+		$this->assertFalse( StatusRegistry::is_registered( StatusRegistry::KIND_PLAN, 'paused-by-merchant' ) );
+		$this->assertSame(
+			array_merge( PlanStatus::get_defaults(), array( 'seasonal' ) ),
+			StatusRegistry::get_all( StatusRegistry::KIND_PLAN )
 		);
 	}
 
@@ -138,29 +157,32 @@ class StatusRegistryTest extends TestCase {
 	public function test_register_rejects_an_unknown_kind(): void {
 		$this->expectException( InvalidArgumentException::class );
 
-		StatusRegistry::register( 'plan', 'draft' );
+		StatusRegistry::register( 'product', 'draft' );
 	}
 
 	public function test_all_rejects_an_unknown_kind(): void {
 		$this->expectException( InvalidArgumentException::class );
 
-		StatusRegistry::get_all( 'plan' );
+		StatusRegistry::get_all( 'product' );
 	}
 
 	public function test_is_registered_rejects_an_unknown_kind(): void {
 		$this->expectException( InvalidArgumentException::class );
 
-		StatusRegistry::is_registered( 'plan', 'draft' );
+		StatusRegistry::is_registered( 'product', 'draft' );
 	}
 
 	public function test_reset_clears_registrations_but_keeps_the_defaults(): void {
 		StatusRegistry::register( StatusRegistry::KIND_CONTRACT, 'paused-by-merchant' );
 		StatusRegistry::register( StatusRegistry::KIND_CYCLE, 'disputed' );
+		StatusRegistry::register( StatusRegistry::KIND_PLAN, 'seasonal' );
 
 		StatusRegistry::reset();
 
 		$this->assertSame( ContractStatus::get_defaults(), StatusRegistry::get_all( StatusRegistry::KIND_CONTRACT ) );
 		$this->assertSame( CycleStatus::get_defaults(), StatusRegistry::get_all( StatusRegistry::KIND_CYCLE ) );
+		$this->assertSame( PlanStatus::get_defaults(), StatusRegistry::get_all( StatusRegistry::KIND_PLAN ) );
 		$this->assertFalse( StatusRegistry::is_registered( StatusRegistry::KIND_CONTRACT, 'paused-by-merchant' ) );
+		$this->assertFalse( StatusRegistry::is_registered( StatusRegistry::KIND_PLAN, 'seasonal' ) );
 	}
 }

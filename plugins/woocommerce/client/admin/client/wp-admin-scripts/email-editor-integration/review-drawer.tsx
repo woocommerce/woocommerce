@@ -127,7 +127,7 @@ const ConflictsGroup = ( {
 								conflict.block,
 								conflict.occurrence,
 								conflict.total
-						  )
+							)
 						: conflict.block;
 
 				return (
@@ -275,7 +275,7 @@ const AutoResolvedGroup = ( {
 								entry.block,
 								entry.occurrence,
 								entry.total
-						  )
+							)
 						: entry.block;
 				return (
 					<AutoResolvedItem
@@ -313,16 +313,24 @@ const AutoResolvedGroup = ( {
 					tag="keep_yours"
 				/>
 			) ) }
+			{ /* The selective applier never applies structural changes, so every entry keeps the merchant's version. */ }
 			{ summary.structural_changes.map(
 				( change: ChangeSummaryStructuralChange, idx: number ) => (
 					<AutoResolvedItem
 						key={ `structural-${ idx }` }
 						title={ change.description }
-						sub={ __(
-							'Structural change applied automatically.',
-							'woocommerce'
-						) }
-						tag="apply_core"
+						sub={
+							change.kind === 'merchant_removed'
+								? __(
+										'Core still has this block. Your removal is kept.',
+										'woocommerce'
+									)
+								: __(
+										'The block structure differs from core here. This update does not apply structural changes.',
+										'woocommerce'
+									)
+						}
+						tag="keep_yours"
 					/>
 				)
 			) }
@@ -458,9 +466,9 @@ export const ReviewDrawer = ( {
 
 	const totalChanges = summary
 		? summary.copy_changes.length +
-		  summary.added_blocks.length +
-		  summary.removed_blocks.length +
-		  summary.structural_changes.length
+			summary.added_blocks.length +
+			summary.removed_blocks.length +
+			summary.structural_changes.length
 		: 0;
 
 	const subtitle = sprintf(

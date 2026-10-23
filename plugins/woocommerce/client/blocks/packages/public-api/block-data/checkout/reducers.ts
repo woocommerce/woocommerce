@@ -21,7 +21,7 @@ const reducer: Reducer< CheckoutState > = ( state = defaultState, action ) => {
 					? {
 							...state,
 							status: STATUS.IDLE,
-					  }
+						}
 					: state;
 			break;
 
@@ -32,7 +32,7 @@ const reducer: Reducer< CheckoutState > = ( state = defaultState, action ) => {
 					? {
 							...state,
 							redirectUrl: action.redirectUrl,
-					  }
+						}
 					: state;
 			break;
 
@@ -200,7 +200,7 @@ const reducer: Reducer< CheckoutState > = ( state = defaultState, action ) => {
 							: {
 									...state.extensionData[ action.namespace ],
 									...action.extensionData,
-							  },
+								},
 					},
 				};
 			}

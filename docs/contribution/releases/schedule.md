@@ -54,6 +54,7 @@ If anything is found at this stage, a fix is merged into the release branch (`re
 ### Final Release (+1 day)
 
 We make the stable release version available to everyone.
+The stable build waits until the RC has been on staging for at least 24 hours.
 At this point, the Developer Advocacy team publishes release highlights that are prepared in advance ([example](https://developer.woocommerce.com/2025/06/09/woocommerce-9-9-its-fast-period/)).
 
 ### Point/Patch Releases

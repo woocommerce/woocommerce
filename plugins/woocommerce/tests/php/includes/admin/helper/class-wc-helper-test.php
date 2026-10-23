@@ -84,10 +84,12 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 	 */
 	private function cleanup_helper_transients(): void {
 		delete_transient( '_woocommerce_helper_subscriptions' );
+		delete_transient( '_woocommerce_helper_updates' );
 		delete_transient( '_woocommerce_helper_product_usage_notice_rules' );
 		delete_transient( '_woocommerce_helper_notices' );
 		delete_transient( '_woocommerce_helper_connection_data' );
 		delete_transient( WC_Helper_API_Backoff::TRANSIENT_PREFIX . WC_Helper_API_Backoff::REQUEST_TYPE_SUBSCRIPTIONS );
+		delete_transient( WC_Helper_API_Backoff::TRANSIENT_PREFIX . WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK );
 		delete_transient( '_woocommerce_helper_subscriptions_api_error' );
 	}
 
@@ -165,6 +167,19 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 		$transient_value = get_transient( '_woocommerce_helper_subscriptions' );
 		$this->assertNotEquals( 'corrupted_string_data', $transient_value, 'Corrupted string transient should have been replaced' );
 		$this->assertIsArray( $transient_value, 'Transient should now be an array' );
+	}
+
+	/**
+	 * @testdox has_cached_subscriptions is true only while a subscription list is cached.
+	 */
+	public function test_has_cached_subscriptions_reflects_the_transient(): void {
+		$this->assertFalse( WC_Helper::has_cached_subscriptions(), 'No transient means no cached list.' );
+
+		set_transient( '_woocommerce_helper_subscriptions', 'corrupted_string_data', HOUR_IN_SECONDS );
+		$this->assertFalse( WC_Helper::has_cached_subscriptions(), 'A corrupted transient is not a usable list.' );
+
+		set_transient( '_woocommerce_helper_subscriptions', array(), HOUR_IN_SECONDS );
+		$this->assertTrue( WC_Helper::has_cached_subscriptions(), 'An empty list is still a cached list.' );
 	}
 
 	/**
@@ -345,6 +360,51 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 			get_transient( WC_Helper_API_Backoff::TRANSIENT_PREFIX . WC_Helper_API_Backoff::REQUEST_TYPE_SUBSCRIPTIONS ),
 			'Only a 429 should record a backoff window'
 		);
+	}
+
+	/**
+	 * @testdox get_subscriptions labels the request with the screen it comes from.
+	 * @testWith ["/wp-admin/admin-ajax.php", "woocommerce_load_status_widget", "dashboard-widget"]
+	 *           ["/wp-admin/admin-ajax.php", "heartbeat", "heartbeat-api"]
+	 *           ["/wp-admin/admin.php?page=wc-admin", "", "inbox-notes"]
+	 *
+	 * @param string $request_uri The request URI.
+	 * @param string $action      The ajax action, if any.
+	 * @param string $expected    The source label the request should carry.
+	 */
+	public function test_get_subscriptions_labels_the_request_source( string $request_uri, string $action, string $expected ): void {
+		$previous_uri           = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : null;
+		$_SERVER['REQUEST_URI'] = $request_uri;
+		if ( '' !== $action ) {
+			$_REQUEST['action'] = $action;
+		}
+		$requested_url = '';
+		$capture       = static function ( $preempt, $args, $url ) use ( &$requested_url ) {
+			$requested_url = $url;
+			return $preempt;
+		};
+		add_filter( 'pre_http_request', $capture, 9, 3 );
+
+		try {
+			$this->fetch_subscriptions_with_response(
+				array(
+					'response' => array( 'code' => 200 ),
+					'body'     => '[]',
+				)
+			);
+		} finally {
+			remove_filter( 'pre_http_request', $capture, 9 );
+			unset( $_REQUEST['action'] );
+			if ( null === $previous_uri ) {
+				unset( $_SERVER['REQUEST_URI'] );
+			} else {
+				$_SERVER['REQUEST_URI'] = $previous_uri;
+			}
+		}
+
+		parse_str( (string) wp_parse_url( $requested_url, PHP_URL_QUERY ), $query );
+
+		$this->assertSame( $expected, $query['source'] ?? '', 'The source label is what WooCommerce.com attributes the request to.' );
 	}
 
 	/**
@@ -1036,6 +1096,95 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Subscription list data reports whether the site's PHP meets the available update's requirement.
+	 */
+	public function test_subscription_list_data_reports_whether_update_requires_php_is_met(): void {
+		require_once ABSPATH . 'wp-admin/includes/plugin.php';
+		wp_cache_set(
+			'plugins',
+			array(
+				'' => array(
+					'needs-new-php/needs-new-php.php' => array(
+						'Name'    => 'Needs New PHP',
+						'Version' => '1.0.0',
+						'Woo'     => '900101:abc',
+					),
+					'any-php/any-php.php'             => array(
+						'Name'    => 'Any PHP',
+						'Version' => '1.0.0',
+						'Woo'     => '900102:def',
+					),
+				),
+			),
+			'plugins'
+		);
+		WC_Helper::flush_local_woo_products_cache();
+		delete_transient( '_woocommerce_helper_updates' );
+
+		$subscription = array(
+			'product_key'  => '',
+			'product_name' => '',
+			'connections'  => array(),
+			'expires'      => 0,
+			'expired'      => false,
+		);
+		set_transient(
+			'_woocommerce_helper_subscriptions',
+			array(
+				array_merge(
+					$subscription,
+					array(
+						'product_id' => 900101,
+						'zip_slug'   => 'needs-new-php',
+					)
+				),
+				array_merge(
+					$subscription,
+					array(
+						'product_id' => 900102,
+						'zip_slug'   => 'any-php',
+					)
+				),
+			),
+			HOUR_IN_SECONDS
+		);
+
+		$http_mock = static function ( $preempt, $args, $url ) {
+			if ( false === strpos( $url, 'update-check' ) ) {
+				return new WP_Error( 'test', 'Mocked error' );
+			}
+
+			return array(
+				'response' => array( 'code' => 200 ),
+				'body'     => wp_json_encode(
+					array(
+						900101 => array(
+							'version'      => '2.0.0',
+							'requires_php' => '99.0',
+						),
+						900102 => array(
+							'version'      => '2.0.0',
+							'requires_php' => array( '99.0' ),
+						),
+					)
+				),
+			);
+		};
+		add_filter( 'pre_http_request', $http_mock, 10, 3 );
+
+		try {
+			$result = array_column( WC_Helper::get_subscription_list_data(), null, 'product_id' );
+		} finally {
+			remove_filter( 'pre_http_request', $http_mock );
+		}
+
+		$this->assertTrue( $result[900101]['has_update'] );
+		$this->assertFalse( $result[900101]['update_requires_php_met'], 'An update needing a newer PHP than this site runs is not installable.' );
+		$this->assertTrue( $result[900102]['has_update'] );
+		$this->assertTrue( $result[900102]['update_requires_php_met'], 'A malformed PHP requirement does not block the update.' );
+	}
+
+	/**
 	 * @testdox Local data reports whether the installed copy carries a Woo header.
 	 */
 	public function test_local_data_reports_where_updates_come_from(): void {
@@ -1243,6 +1392,37 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 				),
 			),
 			HOUR_IN_SECONDS
+		);
+	}
+
+	/**
+	 * @testdox Connecting the site should clear an update-check backoff so the first authenticated check runs.
+	 */
+	public function test_update_auth_option_clears_update_check_backoff(): void {
+		$previous_auth = WC_Helper_Options::get( 'auth', array() );
+		WC_Helper_API_Backoff::record( WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK, 15 * MINUTE_IN_SECONDS );
+
+		$http_mock = static function () {
+			return array(
+				'response' => array(
+					'code'    => 200,
+					'message' => 'OK',
+				),
+				'body'     => '{"name":"Test","email":"test@example.com"}',
+			);
+		};
+		add_filter( 'pre_http_request', $http_mock );
+
+		try {
+			WC_Helper::update_auth_option( 'token', 'secret', 123, home_url() );
+		} finally {
+			WC_Helper_Options::update( 'auth', $previous_auth );
+			remove_filter( 'pre_http_request', $http_mock );
+		}
+
+		$this->assertFalse(
+			WC_Helper_API_Backoff::is_rate_limited( WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK ),
+			'Connecting should clear the update-check backoff'
 		);
 	}
 }

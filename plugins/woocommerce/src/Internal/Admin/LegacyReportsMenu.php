@@ -39,21 +39,14 @@ final class LegacyReportsMenu {
 	private const CORE_CALLBACK = array( 'WC_Admin_Reports', 'get_report' );
 
 	/**
-	 * Result of should_show(), cached for the request.
+	 * Hide the Reports menu item at the end of admin_menu.
 	 *
-	 * @var bool|null
-	 */
-	private ?bool $should_show = null;
-
-	/**
-	 * Hide the Reports menu item right before the admin menu is printed.
-	 *
-	 * Runs this late so that the initial installed version has been recorded and extensions
-	 * have had every chance to register their report filters.
+	 * Runs on admin_menu rather than admin_head, since requests that only build the menu, such as the Calypso
+	 * sidebar's /wpcom/v2/admin-menu endpoint, never reach admin_head.
 	 *
 	 * @internal
 	 */
-	public function handle_admin_head(): void {
+	public function handle_admin_menu(): void {
 		if ( ! current_user_can( 'view_woocommerce_reports' ) || $this->should_show() ) {
 			return;
 		}
@@ -85,10 +78,6 @@ final class LegacyReportsMenu {
 	 * @return bool
 	 */
 	private function should_show(): bool {
-		if ( null !== $this->should_show ) {
-			return $this->should_show;
-		}
-
 		$show = ! $this->is_new_store()
 			|| ! FeaturesUtil::feature_is_enabled( 'analytics' )
 			|| $this->has_extension_reports();
@@ -98,7 +87,7 @@ final class LegacyReportsMenu {
 		 *
 		 * The page stays reachable at admin.php?page=wc-reports either way. By default the item is hidden on
 		 * stores first installed on WooCommerce 11.3.0 or later, unless Analytics is disabled or an extension
-		 * adds legacy reports.
+		 * adds legacy reports. Runs at the end of admin_menu, so add callbacks before then.
 		 *
 		 * @since 11.3.0
 		 *
@@ -106,21 +95,25 @@ final class LegacyReportsMenu {
 		 */
 		$filtered = apply_filters( 'woocommerce_show_legacy_reports_menu', $show );
 
-		$filtered          = is_scalar( $filtered ) ? filter_var( $filtered, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) : null;
-		$this->should_show = $filtered ?? $show;
+		$filtered = is_scalar( $filtered ) ? filter_var( $filtered, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) : null;
 
-		return $this->should_show;
+		return $filtered ?? $show;
 	}
 
 	/**
 	 * Whether the store was first installed on the version that hides the menu, or later.
 	 *
-	 * A missing or malformed initial version (e.g. stores installed before 9.2.0) counts as an existing store.
+	 * Until admin_init records the initial version on a fresh install, the current version is used. A missing
+	 * or malformed initial version (e.g. stores installed before 9.2.0) counts as an existing store.
 	 *
 	 * @return bool
 	 */
 	private function is_new_store(): bool {
 		$initial_version = get_option( WC_Install::INITIAL_INSTALLED_VERSION );
+
+		if ( false === $initial_version && 'yes' === get_option( WC_Install::NEWLY_INSTALLED_OPTION ) ) {
+			$initial_version = WC()->version;
+		}
 
 		if ( ! is_string( $initial_version ) || ! preg_match( '/^\d+\.\d+\.\d+(-(dev|alpha|beta|rc)(\.?\d+)?)?$/i', $initial_version ) ) {
 			return false;

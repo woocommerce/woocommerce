@@ -120,6 +120,11 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 */
 	protected $ephemeral_meta_keys = array(
 		EditLock::META_KEY_NAME,
+		'_wp_trash_meta_status',
+		'_wp_trash_meta_time',
+		'_wp_trash_meta_comments_status',
+		'_debug_log_source',
+		'_debug_log_source_pending_deletion',
 	);
 
 	/**
@@ -2621,53 +2626,57 @@ FROM $order_meta_table
 		$do_filters = ! $args['suppress_filters'];
 
 		if ( $args['force_delete'] ) {
-
-			if ( $do_filters ) {
-				/**
-				 * Fires immediately before an order is deleted from the database.
-				 *
-				 * @since 7.1.0
-				 *
-				 * @param int      $order_id ID of the order about to be deleted.
-				 * @param WC_Order $order    Instance of the order that is about to be deleted.
-				 */
-				do_action( 'woocommerce_before_delete_order', $order_id, $order );
-			}
-
-			$this->upshift_or_delete_child_orders( $order );
-			$this->delete_order_data_from_custom_order_tables( $order_id );
-			$this->delete_items( $order );
-
-			$order->set_id( 0 );
-
-			/** We can delete the post data if:
-			 * 1. The HPOS table is authoritative and synchronization is enabled.
-			 * 2. The post record is of type `shop_order_placehold`, since this is created by the HPOS in the first place.
-			 *
-			 * In other words, we do not delete the post record when HPOS table is authoritative and synchronization is disabled but post record is a full record and not just a placeholder, because it implies that the order was created before HPOS was enabled.
-			 */
-			$orders_table_is_authoritative = $order->get_data_store()->get_current_class_name() === self::class;
-
-			if ( $orders_table_is_authoritative ) {
-				$data_synchronizer = wc_get_container()->get( DataSynchronizer::class );
-				if ( $data_synchronizer->data_sync_is_enabled() ) {
-					// Delete the associated post, which in turn deletes order items, etc. through {@see WC_Post_Data}.
-					// Once we stop creating posts for orders, we should do the cleanup here instead.
-					wp_delete_post( $order_id );
-				} else {
-					$this->handle_order_deletion_with_sync_disabled( $order_id );
+			self::$orders_being_deleted[ $order_id ] = true;
+			try {
+				if ( $do_filters ) {
+					/**
+					 * Fires immediately before an order is deleted from the database.
+					 *
+					 * @since 7.1.0
+					 *
+					 * @param int      $order_id ID of the order about to be deleted.
+					 * @param WC_Order $order    Instance of the order that is about to be deleted.
+					 */
+					do_action( 'woocommerce_before_delete_order', $order_id, $order );
 				}
-			}
 
-			if ( $do_filters ) {
-				/**
-				 * Fires immediately after an order is deleted.
+				$this->upshift_or_delete_child_orders( $order );
+				$this->delete_order_data_from_custom_order_tables( $order_id );
+				$this->delete_items( $order );
+
+				$order->set_id( 0 );
+
+				/** We can delete the post data if:
+				 * 1. The HPOS table is authoritative and synchronization is enabled.
+				 * 2. The post record is of type `shop_order_placehold`, since this is created by the HPOS in the first place.
 				 *
-				 * @since 2.7.0
-				 *
-				 * @param int $order_id ID of the order that has been deleted.
+				 * In other words, we do not delete the post record when HPOS table is authoritative and synchronization is disabled but post record is a full record and not just a placeholder, because it implies that the order was created before HPOS was enabled.
 				 */
-				do_action( 'woocommerce_delete_order', $order_id ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+				$orders_table_is_authoritative = $order->get_data_store()->get_current_class_name() === self::class;
+
+				if ( $orders_table_is_authoritative ) {
+					$data_synchronizer = wc_get_container()->get( DataSynchronizer::class );
+					if ( $data_synchronizer->data_sync_is_enabled() ) {
+						// Delete the associated post, which in turn deletes order items, etc. through {@see WC_Post_Data}.
+						// Once we stop creating posts for orders, we should do the cleanup here instead.
+						wp_delete_post( $order_id );
+					} else {
+						$this->handle_order_deletion_with_sync_disabled( $order_id );
+					}
+				}
+
+				if ( $do_filters ) {
+					/**
+					 * Fires immediately after an order is deleted.
+					 *
+					 * @since 2.7.0
+					 *
+					 * @param int $order_id ID of the order that has been deleted.
+					 */
+					do_action( 'woocommerce_delete_order', $order_id ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+				}
+			} finally {
+				unset( self::$orders_being_deleted[ $order_id ] );
 			}
 		} else {
 			if ( $do_filters ) {

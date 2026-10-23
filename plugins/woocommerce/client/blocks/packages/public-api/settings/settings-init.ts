@@ -121,8 +121,7 @@ const globalSharedSettings =
 	typeof window.wcSettings === 'object' ? window.wcSettings : {};
 
 interface AllSettings
-	extends WooCommerceSharedSettings,
-		Record< string, unknown > {
+	extends WooCommerceSharedSettings, Record< string, unknown > {
 	currency: WooCommerceSiteCurrency;
 }
 

@@ -269,7 +269,48 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 			 */
 			$reports = apply_filters( 'woocommerce_after_dashboard_status_widget_parameter', null );
 			do_action( 'woocommerce_after_dashboard_status_widget', $reports );
+			$this->status_widget_extensions_without_subscription_row();
 			echo '</ul>';
+		}
+
+		/**
+		 * Show a row for installed WooCommerce.com extensions without a subscription.
+		 */
+		private function status_widget_extensions_without_subscription_row(): void {
+			if ( ! class_exists( 'WC_Helper_Updater' ) ) {
+				return;
+			}
+
+			$count = count( WC_Helper_Updater::get_plugins_without_subscription() ?? array() );
+			if ( 0 === $count ) {
+				return;
+			}
+
+			$my_subscriptions_url = add_query_arg(
+				array(
+					'page'         => 'wc-admin',
+					'tab'          => 'my-subscriptions',
+					'path'         => rawurlencode( '/extensions' ),
+					'utm_source'   => 'pu',
+					'utm_campaign' => 'pu_dashboard_widget_purchase',
+				),
+				admin_url( 'admin.php' )
+			);
+			?>
+			<li class="extensions-without-subscription">
+				<a href="<?php echo esc_url( $my_subscriptions_url ); ?>">
+				<?php
+					echo wp_kses_post(
+						sprintf(
+							/* translators: %s: number of extensions */
+							_n( '<strong>%s extension</strong> without a WooCommerce.com subscription', '<strong>%s extensions</strong> without a WooCommerce.com subscription', $count, 'woocommerce' ),
+							$count
+						)
+					);
+				?>
+				</a>
+			</li>
+			<?php
 		}
 
 		/**

@@ -84,54 +84,6 @@ class WC_Shipping_Flat_Rate_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testDox Shipping cost with a thousand and decimal separator works as expected.
-	 */
-	public function test_evaluate_cost_sep_thou_dec() {
-		$this->markTestSkipped( 'This test currently fails because we dont support thousand separator in shipping price.' );
-		$val = $this->call_evaluate_cost->call(
-			$this->sut,
-			'12.345,67',
-			array(
-				'qty'  => 1,
-				'cost' => 1,
-			)
-		);
-		$this->assertEquals( 12345.67, $val );
-	}
-
-	/**
-	 * @testDox Shipping cost with two decimal separator works as expected.
-	 */
-	public function test_evaluate_cost_sep_dec_dec() {
-		$this->markTestSkipped( 'This test currently fails because we dont support thousand separator in shipping price.' );
-		$val = $this->call_evaluate_cost->call(
-			$this->sut,
-			'12,345,67',
-			array(
-				'qty'  => 1,
-				'cost' => 1,
-			)
-		);
-		$this->assertEquals( 12345.67, $val );
-	}
-
-	/**
-	 * @testDox Shipping cost with two thousand separator works as expected.
-	 */
-	public function test_evaluate_cost_sep_thou_thou() {
-		$this->markTestSkipped( 'This test currently fails because we dont support thousand separator in shipping price.' );
-		$val = $this->call_evaluate_cost->call(
-			$this->sut,
-			'12.345.67',
-			array(
-				'qty'  => 1,
-				'cost' => 1,
-			)
-		);
-		$this->assertEquals( 1234567, $val );
-	}
-
-	/**
 	 * Percent fee calculation works as expected.
 	 */
 	public function test_evaluate_cost_percent_fee() {
@@ -147,9 +99,19 @@ class WC_Shipping_Flat_Rate_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Percent fee calculation works as expected with comma as decimal separator. Value after the comma is ignored.
+	 * Percent fee calculation keeps the decimals when the store uses a comma as the decimal separator.
 	 */
 	public function test_evaluate_cost_percent_fee_comma() {
+		$val = $this->call_evaluate_cost->call(
+			$this->sut,
+			'[fee percent="10,1" min_fee="12,5"]',
+			array(
+				'qty'  => 1,
+				'cost' => 100,
+			)
+		);
+		$this->assertEquals( 12.5, $val, 'The minimum fee should apply, read with a comma decimal.' );
+
 		$val = $this->call_evaluate_cost->call(
 			$this->sut,
 			'[fee percent="10,1"]',
@@ -158,7 +120,82 @@ class WC_Shipping_Flat_Rate_Test extends WC_Unit_Test_Case {
 				'cost' => 100,
 			)
 		);
-		$this->assertEquals( 10, $val );
+		$this->assertEquals( 10.1, $val, 'The percentage should keep its decimals.' );
+	}
+
+	/**
+	 * A fee below a comma-decimal minimum is raised to that minimum.
+	 */
+	public function test_evaluate_cost_percent_fee_below_comma_min_fee() {
+		$val = $this->call_evaluate_cost->call(
+			$this->sut,
+			'[fee percent="5" min_fee="12,5"]',
+			array(
+				'qty'  => 1,
+				'cost' => 100,
+			)
+		);
+		$this->assertEquals( 12.5, $val, 'A fee below the minimum should be raised to it.' );
+
+		$val = $this->call_evaluate_cost->call(
+			$this->sut,
+			'[fee percent="12,25" min_fee="12,5"]',
+			array(
+				'qty'  => 1,
+				'cost' => 100,
+			)
+		);
+		$this->assertEquals( 12.5, $val, 'A fee just below the minimum should be raised to it.' );
+	}
+
+	/**
+	 * A fee below a comma-decimal maximum is not capped.
+	 */
+	public function test_evaluate_cost_percent_fee_below_comma_max_fee() {
+		$val = $this->call_evaluate_cost->call(
+			$this->sut,
+			'[fee percent="3" max_fee="20,5"]',
+			array(
+				'qty'  => 1,
+				'cost' => 100,
+			)
+		);
+		$this->assertEquals( 3, $val, 'A fee below the maximum should not be capped.' );
+
+		$val = $this->call_evaluate_cost->call(
+			$this->sut,
+			'[fee percent="20,25" max_fee="20,5"]',
+			array(
+				'qty'  => 1,
+				'cost' => 100,
+			)
+		);
+		$this->assertEquals( 20.25, $val, 'A fee just below the maximum should not be capped.' );
+
+		$val = $this->call_evaluate_cost->call(
+			$this->sut,
+			'[fee percent="30" max_fee="20,5"]',
+			array(
+				'qty'  => 1,
+				'cost' => 100,
+			)
+		);
+		$this->assertEquals( 20.5, $val, 'A fee above the maximum should be capped to it.' );
+	}
+
+	/**
+	 * A comma-decimal percent fee keeps its decimals inside a cost formula.
+	 */
+	public function test_evaluate_cost_comma_percent_fee_in_formula() {
+		$val = $this->call_evaluate_cost->call(
+			$this->sut,
+			'10,5 + [fee percent="2,5"]',
+			array(
+				'qty'  => 1,
+				'cost' => 100,
+			)
+		);
+		$this->assertEquals( 13.0, $val, 'The fee should keep its decimals when added to a base cost.' );
 	}
 
 	/**
@@ -434,5 +471,93 @@ class WC_Shipping_Flat_Rate_Test extends WC_Unit_Test_Case {
 		);
 
 		$this->assertFloatEquals( 12.0, (float) $val, null, 'The fee should be a percentage of cost, with the weight added on top.' );
+	}
+
+	/**
+	 * A plain amount is stored dot-decimal whichever separator the merchant typed, so the value
+	 * that reaches evaluate_cost() is the one PHP can read. setUp() puts the store on a comma
+	 * decimal separator and a dot thousand separator, which is where the forms differ.
+	 *
+	 * The three rows are three different routes through the sanitiser: a value that is already
+	 * dot-decimal is taken as it stands, one written in the store's own separators is converted,
+	 * and one carrying a thousand separator has that removed rather than read as a decimal point.
+	 *
+	 * @testdox sanitize_cost() stores a plain amount dot-decimal whichever separator was typed.
+	 *
+	 * @testWith ["10.5", "10.5"]
+	 *           ["10,5", "10.5"]
+	 *           ["1.000,50", "1000.50"]
+	 *
+	 * @param string $typed    What the merchant entered.
+	 * @param string $expected What should be stored.
+	 */
+	public function test_sanitize_cost_stores_a_plain_amount_dot_decimal( string $typed, string $expected ): void {
+		$result = $this->call_sanitize_cost->call( $this->sut, $typed );
+
+		$this->assertSame( $expected, trim( $result ), 'Entered as "' . $typed . '" on a comma-decimal store.' );
+	}
+
+	/**
+	 * @testdox sanitize_cost() delocalises a plain thousand-separated cost so it is never evaluated as free shipping.
+	 *
+	 * @dataProvider provider_thousand_separated_costs
+	 *
+	 * @param string $value        Raw cost as a merchant would enter it.
+	 * @param string $decimal_sep  Decimal separator for the locale.
+	 * @param string $thousand_sep Thousand separator for the locale.
+	 * @param string $expected     Delocalised cost sanitize_cost() should return.
+	 * @param float  $evaluated    Amount evaluate_cost() should yield for the sanitized cost.
+	 */
+	public function test_sanitize_cost_delocalises_thousand_separated_value( string $value, string $decimal_sep, string $thousand_sep, string $expected, float $evaluated ): void {
+		update_option( 'woocommerce_price_decimal_sep', $decimal_sep );
+		update_option( 'woocommerce_price_thousand_sep', $thousand_sep );
+
+		$sanitized = $this->call_sanitize_cost->call( $this->sut, $value );
+		$this->assertSame( $expected, $sanitized, 'sanitize_cost() should delocalise the thousand-separated value.' );
+
+		$result = $this->call_evaluate_cost->call(
+			$this->sut,
+			$sanitized,
+			array(
+				'qty'  => 1,
+				'cost' => 1,
+			)
+		);
+		$this->assertEqualsWithDelta( $evaluated, $result, 0.0001, 'evaluate_cost() should evaluate the sanitized cost to the expected amount.' );
+	}
+
+	/**
+	 * Plain thousand-separated costs across locales.
+	 *
+	 * Format: [ raw value, decimal separator, thousand separator, sanitized value, evaluated amount ].
+	 *
+	 * @return array
+	 */
+	public function provider_thousand_separated_costs(): array {
+		return array(
+			// period decimal, comma thousand (US).
+			'US thousand separator' => array( '1,234.56', '.', ',', '1234.56', 1234.56 ),
+
+			// comma decimal, period thousand (EU).
+			'EU thousand separator' => array( '1.234,56', ',', '.', '1234.56', 1234.56 ),
+		);
+	}
+
+	/**
+	 * @testdox sanitize_cost() rejects a cost with more than one decimal separator rather than saving a wrong amount.
+	 *
+	 * @testWith ["12.34.56", ".", ","]
+	 *           ["12,34,56", ",", "."]
+	 *
+	 * @param string $value        Cost written with two decimal separators.
+	 * @param string $decimal_sep  Decimal separator for the locale.
+	 * @param string $thousand_sep Thousand separator for the locale.
+	 */
+	public function test_sanitize_cost_rejects_two_decimal_separators( string $value, string $decimal_sep, string $thousand_sep ): void {
+		update_option( 'woocommerce_price_decimal_sep', $decimal_sep );
+		update_option( 'woocommerce_price_thousand_sep', $thousand_sep );
+
+		$this->expectException( InvalidArgumentException::class );
+		$this->call_sanitize_cost->call( $this->sut, $value );
 	}
 }

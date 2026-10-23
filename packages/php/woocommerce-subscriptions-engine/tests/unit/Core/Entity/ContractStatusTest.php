@@ -28,11 +28,15 @@ class ContractStatusTest extends TestCase {
 		$this->assertFalse( ContractStatus::is_registered( 'nonsense' ) );
 	}
 
-	public function test_defaults_lists_the_five_engine_slugs(): void {
+	public function test_defaults_lists_the_six_engine_slugs(): void {
 		$this->assertSame(
-			array( 'active', 'on-hold', 'pending-cancellation', 'cancelled', 'expired' ),
+			array( 'draft', 'active', 'on-hold', 'pending-cancellation', 'cancelled', 'expired' ),
 			ContractStatus::get_defaults()
 		);
+	}
+
+	public function test_draft_is_a_registered_default(): void {
+		$this->assertTrue( ContractStatus::is_registered( 'draft' ) );
 	}
 
 	public function test_all_equals_the_defaults_with_nothing_registered(): void {

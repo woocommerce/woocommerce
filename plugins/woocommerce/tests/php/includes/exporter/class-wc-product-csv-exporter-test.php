@@ -318,6 +318,44 @@ class WC_Product_CSV_Exporter_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Writing CSV data reports whether the data reached the export file.
+	 */
+	public function test_write_csv_data_reports_whether_the_data_was_written(): void {
+		$exporter = new WC_Product_CSV_Exporter();
+		$exporter->set_filename( 'wc-csv-exporter-failed-write-test' );
+		$exporter->get_file();
+
+		$reflected_exporter = new ReflectionClass( WC_Product_CSV_Exporter::class );
+		$write_csv_data     = $reflected_exporter->getMethod( 'write_csv_data' );
+		$write_csv_data->setAccessible( true );
+		$get_file_path = $reflected_exporter->getMethod( 'get_file_path' );
+		$get_file_path->setAccessible( true );
+
+		$read_only_mode = static function () {
+			return 'r';
+		};
+
+		try {
+			$this->assertTrue( $write_csv_data->invoke( $exporter, "sku,name\n" ) );
+
+			// fwrite() fails on a read-only handle, and raises a notice.
+			add_filter( 'woocommerce_csv_exporter_fopen_mode', $read_only_mode );
+			set_error_handler( '__return_true', E_NOTICE ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- Keeps the notice from failing the test.
+
+			try {
+				$written = $write_csv_data->invoke( $exporter, "sku,name\n" );
+			} finally {
+				restore_error_handler();
+			}
+
+			$this->assertFalse( $written, 'A failed write must be reported, so a caller can stop instead of serving an incomplete file.' );
+		} finally {
+			remove_filter( 'woocommerce_csv_exporter_fopen_mode', $read_only_mode );
+			wp_delete_file( $get_file_path->invoke( $exporter ) );
+		}
+	}
+
+	/**
 	 * @testdox Exporting a product loaded before its global attribute is deleted leaves the value empty without a warning.
 	 */
 	public function test_export_row_for_product_loaded_before_its_global_attribute_is_deleted(): void {
@@ -352,5 +390,39 @@ class WC_Product_CSV_Exporter_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( array(), $warnings, 'Exporting the product should not raise warnings.' );
 		$this->assertSame( '', $row['attributes:value1'] );
 		$this->assertSame( 1, $row['attributes:taxonomy1'] );
+	}
+
+	/**
+	 * @testdox Customs CSV exports use translated labels and only a variation's own overrides.
+	 */
+	public function test_customs_export_uses_labels_and_variation_overrides(): void {
+		$parent = WC_Helper_Product::create_variation_product();
+		$parent->set_props(
+			array(
+				'customs_commodity_code'    => '010121',
+				'customs_country_of_origin' => 'RO',
+				'customs_description'       => 'Cotton shirt',
+			)
+		);
+		$parent->save();
+		$children  = $parent->get_children();
+		$variation = wc_get_product( $children[0] );
+		$variation->set_customs_country_of_origin( 'US' );
+		$variation->save();
+
+		$sut = new WC_Product_CSV_Exporter();
+		$sut->set_product_ids_to_export( array( $parent->get_id() ) );
+		$sut->set_columns_to_export( array( 'id', 'type', 'name', 'customs_commodity_code', 'customs_country_of_origin', 'customs_description' ) );
+		$sut->prepare_data_to_export();
+		$rows    = array_column( $this->get_exported_data( $sut ), null, 'id' );
+		$columns = $sut->get_default_column_names();
+
+		$this->assertSame( 'Commodity code (HS code)', $columns['customs_commodity_code'], 'The commodity CSV header should use the translated label.' );
+		$this->assertSame( 'Country of origin', $columns['customs_country_of_origin'], 'The origin CSV header should use the translated label.' );
+		$this->assertSame( 'Customs description', $columns['customs_description'], 'The description CSV header should use the translated label.' );
+		$this->assertSame( '010121', $rows[ $parent->get_id() ]['customs_commodity_code'], 'Export must retain leading zeros.' );
+		$this->assertNull( $rows[ $variation->get_id() ]['customs_commodity_code'], 'An inherited commodity code must export as an empty override.' );
+		$this->assertSame( 'US', $rows[ $variation->get_id() ]['customs_country_of_origin'], 'A variation origin override should export its own value.' );
+		$this->assertNull( $rows[ $variation->get_id() ]['customs_description'], 'An inherited description must export as an empty override.' );
 	}
 }

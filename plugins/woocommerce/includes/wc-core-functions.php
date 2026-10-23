@@ -50,9 +50,7 @@ add_filter( 'woocommerce_attribute_label', 'wp_kses_post', 100 );
 /**
  * Short Description (excerpt).
  */
-if ( function_exists( 'do_blocks' ) ) {
-	add_filter( 'woocommerce_short_description', 'do_blocks', 9 );
-}
+add_filter( 'woocommerce_short_description', 'do_blocks', 9 );
 add_filter( 'woocommerce_short_description', 'wptexturize' );
 add_filter( 'woocommerce_short_description', 'convert_smilies' );
 add_filter( 'woocommerce_short_description', 'convert_chars' );
@@ -129,7 +127,7 @@ function wc_create_order( $args = array() ) {
 		// Set these fields when creating a new order but not when updating an existing order.
 		if ( ! $args['order_id'] ) {
 			$order->set_currency( get_woocommerce_currency() );
-			$order->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
+			$order->set_prices_include_tax( wc_prices_include_tax() );
 			$order->set_customer_ip_address( WC_Geolocation::get_ip_address() );
 			$order->set_customer_user_agent( wc_get_user_agent() );
 		}

@@ -1,0 +1,5 @@
+Significance: patch
+Type: dev
+Comment: Update email editor E2E tests for WordPress 7.2 editor changes; no production change.
+
+

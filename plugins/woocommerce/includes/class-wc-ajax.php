@@ -187,6 +187,7 @@ class WC_AJAX {
 			'save_order_items',
 			'load_order_items',
 			'add_order_note',
+			'get_order_notes',
 			'delete_order_note',
 			'json_search_order_metakeys',
 			'json_search_tax_rates',
@@ -322,7 +323,7 @@ class WC_AJAX {
 			wc_add_notice( __( 'Sorry there was a problem removing this coupon.', 'woocommerce' ), 'error' );
 		} else {
 			WC()->cart->remove_coupon( $coupon );
-			wc_add_notice( __( 'Coupon has been removed.', 'woocommerce' ) );
+			( new WC_Coupon( $coupon ) )->add_coupon_message( WC_Coupon::WC_COUPON_REMOVED );
 		}
 
 		wc_print_notices();
@@ -1215,9 +1216,13 @@ class WC_AJAX {
 		$items = ( ! empty( $_POST['items'] ) ) ? wp_unslash( $_POST['items'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 		$items_to_add = isset( $_POST['data'] ) ? array_filter( wp_unslash( (array) $_POST['data'] ) ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		$tax_location = array();
+		foreach ( array( 'country', 'state', 'postcode', 'city' ) as $key ) {
+			$tax_location[ $key ] = isset( $_POST[ $key ] ) && is_string( $_POST[ $key ] ) ? wc_strtoupper( sanitize_text_field( wp_unslash( $_POST[ $key ] ) ) ) : '';
+		}
 
 		try {
-			$response = self::maybe_add_order_item( $order_id, $items, $items_to_add );
+			$response = self::maybe_add_order_item( $order_id, $items, $items_to_add, $tax_location );
 		} catch ( Exception $e ) {
 			wp_send_json_error( array( 'error' => $e->getMessage() ) );
 		}
@@ -1230,11 +1235,12 @@ class WC_AJAX {
 	 * @param int          $order_id     ID of order to add items to.
 	 * @param string|array $items        Existing items in order. Empty string if no items to add.
 	 * @param array        $items_to_add Array of items to add.
+	 * @param array        $tax_location Tax location entered in the order editor, if available.
 	 *
 	 * @return array     Fragments to render and notes HTML.
 	 * @throws Exception When unable to add item.
 	 */
-	private static function maybe_add_order_item( $order_id, $items, $items_to_add ) {
+	private static function maybe_add_order_item( $order_id, $items, $items_to_add, $tax_location = array() ) {
 		try {
 			$order = wc_get_order( $order_id );
 
@@ -1287,7 +1293,14 @@ class WC_AJAX {
 					// The message is shown in a JS alert, not rendered as HTML.
 					throw new Exception( wp_strip_all_tags( html_entity_decode( $message, ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401 ) ) );
 				}
-				$item_id                 = $order->add_product( $product, $qty, array( 'order' => $order ) );
+				$item_id                 = $order->add_product(
+					$product,
+					$qty,
+					array(
+						'order'        => $order,
+						'tax_location' => $tax_location,
+					)
+				);
 				$item                    = apply_filters( 'woocommerce_ajax_order_item', $order->get_item( $item_id ), $item_id, $order, $product );
 				$added_items[ $item_id ] = $item;
 				$order_notes[ $item_id ] = $product->get_formatted_name();
@@ -1312,7 +1325,12 @@ class WC_AJAX {
 			$items_html = ob_get_clean();
 
 			ob_start();
-			$notes = wc_get_order_notes( array( 'order_id' => $order_id ) );
+			if ( isset( $_POST['paginate_notes'] ) ) {
+				$pagination = WC_Meta_Box_Order_Notes::get_page( (int) $order_id );
+				$notes      = $pagination['notes'];
+			} else {
+				$notes = wc_get_order_notes( array( 'order_id' => $order_id ) );
+			}
 			include __DIR__ . '/admin/meta-boxes/views/html-order-notes.php';
 			$notes_html = ob_get_clean();
 
@@ -1360,11 +1378,13 @@ class WC_AJAX {
 			);
 
 			if ( strstr( $amount, '%' ) ) {
-				// We need to calculate totals first, so that $order->get_total() is correct.
+				// Refresh totals so the discount total is current. The percentage applies to
+				// the items after discounts, excluding tax, shipping and other fees.
 				$order->calculate_totals( false );
 				$formatted_amount = $amount;
 				$percent          = floatval( trim( $amount, '%' ) );
-				$amount           = $order->get_total() * ( $percent / 100 );
+				$base             = (float) $order->get_subtotal() - (float) $order->get_discount_total( 'edit' );
+				$amount           = NumberUtil::round( $base * ( $percent / 100 ), wc_get_price_decimals() );
 			} else {
 				$amount           = floatval( $amount );
 				$formatted_amount = wc_price( $amount, array( 'currency' => $order->get_currency() ) );
@@ -1545,7 +1565,12 @@ class WC_AJAX {
 			$response['html'] = ob_get_clean();
 
 			ob_start();
-			$notes = wc_get_order_notes( array( 'order_id' => $order_id ) );
+			if ( isset( $_POST['paginate_notes'] ) ) {
+				$pagination = WC_Meta_Box_Order_Notes::get_page( (int) $order_id );
+				$notes      = $pagination['notes'];
+			} else {
+				$notes = wc_get_order_notes( array( 'order_id' => $order_id ) );
+			}
 			include __DIR__ . '/admin/meta-boxes/views/html-order-notes.php';
 			$response['notes_html'] = ob_get_clean();
 
@@ -1655,7 +1680,12 @@ class WC_AJAX {
 			$items_html = ob_get_clean();
 
 			ob_start();
-			$notes = wc_get_order_notes( array( 'order_id' => $order_id ) );
+			if ( isset( $_POST['paginate_notes'] ) ) {
+				$pagination = WC_Meta_Box_Order_Notes::get_page( (int) $order_id );
+				$notes      = $pagination['notes'];
+			} else {
+				$notes = wc_get_order_notes( array( 'order_id' => $order_id ) );
+			}
 			include __DIR__ . '/admin/meta-boxes/views/html-order-notes.php';
 			$notes_html = ob_get_clean();
 
@@ -1765,7 +1795,12 @@ class WC_AJAX {
 			$items_html = ob_get_clean();
 
 			ob_start();
-			$notes = wc_get_order_notes( array( 'order_id' => $order_id ) );
+			if ( isset( $_POST['paginate_notes'] ) ) {
+				$pagination = WC_Meta_Box_Order_Notes::get_page( (int) $order_id );
+				$notes      = $pagination['notes'];
+			} else {
+				$notes = wc_get_order_notes( array( 'order_id' => $order_id ) );
+			}
 			include __DIR__ . '/admin/meta-boxes/views/html-order-notes.php';
 			$notes_html = ob_get_clean();
 
@@ -1868,6 +1903,16 @@ class WC_AJAX {
 			<?php
 		}
 		wp_die();
+	}
+
+	/**
+	 * Get a rendered page of order notes via AJAX.
+	 *
+	 * @since 11.3.0
+	 * @return void
+	 */
+	public static function get_order_notes() {
+		WC_Meta_Box_Order_Notes::get_order_notes();
 	}
 
 	/**

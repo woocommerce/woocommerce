@@ -59,7 +59,7 @@ jest.mock( '@wordpress/components', () => {
 		React.InputHTMLAttributes< HTMLInputElement > & {
 			__next40pxDefaultSize?: boolean;
 			__nextHasNoMarginBottom?: boolean;
-			onChange?: ( value: string ) => void; // eslint-disable-line @typescript-eslint/no-unused-vars
+			onChange?: ( value: string ) => void;
 		}
 	>( ( props, ref ) => {
 		const {
