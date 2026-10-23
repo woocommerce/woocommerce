@@ -335,14 +335,15 @@ class BlockEmailRendererTest extends \WC_Unit_Test_Case {
 			)
 		);
 
-		$locale_filter = function () {
-			return 'ar';
+		// get_bloginfo( 'language' ) reads this translation, as on a real Arabic site.
+		$lang_filter = function ( $translation, $text, $domain ) {
+			return 'html_lang_attribute' === $text && 'default' === $domain ? 'ar' : $translation;
 		};
-		add_filter( 'pre_determine_locale', $locale_filter );
+		add_filter( 'gettext', $lang_filter, 10, 3 );
 		try {
 			$rendered_email = $this->block_email_renderer->maybe_render_block_email( $wc_mail_mock );
 		} finally {
-			remove_filter( 'pre_determine_locale', $locale_filter );
+			remove_filter( 'gettext', $lang_filter, 10 );
 		}
 
 		$this->assertNotNull( $rendered_email );
