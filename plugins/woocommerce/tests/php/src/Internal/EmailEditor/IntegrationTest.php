@@ -652,9 +652,9 @@ class IntegrationTest extends WC_Unit_Test_Case {
 		$registry->setValue( null, null );
 
 		try {
-			$email_ids = array_column( wp_get_registered_entity_actions( 'postType', Integration::EMAIL_POST_TYPE ), 'id' );
-			$modules   = wp_get_registered_entity_action_modules( 'postType', Integration::EMAIL_POST_TYPE );
-			$post_ids  = array_column( wp_get_registered_entity_actions( 'postType', 'post' ), 'id' );
+			$email_ids  = array_column( wp_get_registered_entity_actions( 'postType', Integration::EMAIL_POST_TYPE ), 'id' );
+			$module_ids = $this->get_script_module_action_ids( Integration::EMAIL_POST_TYPE );
+			$post_ids   = array_column( wp_get_registered_entity_actions( 'postType', 'post' ), 'id' );
 		} finally {
 			$registry->setValue( null, null );
 		}
@@ -664,10 +664,34 @@ class IntegrationTest extends WC_Unit_Test_Case {
 		$this->assertNotContains( 'move-to-trash', $email_ids, 'Core\'s trash action must be replaced for WooCommerce emails' );
 		$this->assertEqualsCanonicalizing(
 			array( 'trash-email-post', 'reset-notification-email-content' ),
-			$modules[ \Automattic\WooCommerce\EmailEditor\Engine\Email_Editor::ENTITY_ACTIONS_SCRIPT_MODULE_ID ] ?? array(),
+			$module_ids,
 			'Both actions must take their JavaScript parts from the email editor script module'
 		);
 		$this->assertNotContains( 'reset-notification-email-content', $post_ids, 'Other post types must not get the reset action' );
+	}
+
+	/**
+	 * Returns the ids of the actions the email editor's script module provides for a post type.
+	 * WordPress 7.2 Beta 1 keys the modules by id, later builds list them as `id` and `actions` entries.
+	 *
+	 * @param string $post_type The post type.
+	 * @return array The action ids.
+	 */
+	private function get_script_module_action_ids( string $post_type ): array {
+		if ( ! function_exists( 'wp_get_registered_entity_action_modules' ) ) {
+			return array();
+		}
+		$module_id = \Automattic\WooCommerce\EmailEditor\Engine\Email_Editor::ENTITY_ACTIONS_SCRIPT_MODULE_ID;
+		foreach ( wp_get_registered_entity_action_modules( 'postType', $post_type ) as $key => $module ) {
+			if ( isset( $module['id'], $module['actions'] ) ) {
+				if ( $module_id === $module['id'] ) {
+					return $module['actions'];
+				}
+			} elseif ( $module_id === (string) $key ) {
+				return $module;
+			}
+		}
+		return array();
 	}
 
 	/**

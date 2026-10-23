@@ -140,7 +140,7 @@ class Email_Editor_Test extends \Email_Editor_Integration_Test_Case {
 	 * On WordPress 7.2+ an email post type that opts in gets the email editor's trash action instead of core's.
 	 */
 	public function testItReplacesCoreMoveToTrashActionForEmailPostTypesThatOptIn(): void {
-		if ( ! function_exists( 'wp_get_registered_entity_actions' ) || ! function_exists( 'wp_get_registered_entity_action_modules' ) ) {
+		if ( ! function_exists( 'wp_get_registered_entity_actions' ) ) {
 			$this->markTestSkipped( 'The entity actions API requires WordPress 7.2.' );
 		}
 		$this->reset_entity_actions_registry();
@@ -153,12 +153,11 @@ class Email_Editor_Test extends \Email_Editor_Integration_Test_Case {
 			2
 		);
 
-		$ids     = array_column( wp_get_registered_entity_actions( 'postType', 'custom_email_type' ), 'id' );
-		$modules = wp_get_registered_entity_action_modules( 'postType', 'custom_email_type' );
+		$ids = array_column( wp_get_registered_entity_actions( 'postType', 'custom_email_type' ), 'id' );
 
 		$this->assertContains( 'trash-email-post', $ids );
 		$this->assertNotContains( 'move-to-trash', $ids );
-		$this->assertSame( array( 'trash-email-post' ), $modules[ Email_Editor::ENTITY_ACTIONS_SCRIPT_MODULE_ID ] ?? null );
+		$this->assertSame( array( 'trash-email-post' ), $this->get_script_module_action_ids( 'custom_email_type' ) );
 		$this->assertStringContainsString( Email_Editor::ENTITY_ACTIONS_SCRIPT_MODULE_ID, $this->get_import_map() );
 	}
 
@@ -190,6 +189,29 @@ class Email_Editor_Test extends \Email_Editor_Integration_Test_Case {
 
 		$this->assertContains( 'move-to-trash', $ids );
 		$this->assertNotContains( 'trash-email-post', $ids );
+	}
+
+	/**
+	 * Returns the ids of the actions the email editor's script module provides for a post type.
+	 * WordPress 7.2 Beta 1 keys the modules by id, later builds list them as `id` and `actions` entries.
+	 *
+	 * @param string $post_type The post type.
+	 * @return array The action ids.
+	 */
+	private function get_script_module_action_ids( string $post_type ): array {
+		if ( ! function_exists( 'wp_get_registered_entity_action_modules' ) ) {
+			return array();
+		}
+		foreach ( wp_get_registered_entity_action_modules( 'postType', $post_type ) as $key => $module ) {
+			if ( isset( $module['id'], $module['actions'] ) ) {
+				if ( Email_Editor::ENTITY_ACTIONS_SCRIPT_MODULE_ID === $module['id'] ) {
+					return $module['actions'];
+				}
+			} elseif ( Email_Editor::ENTITY_ACTIONS_SCRIPT_MODULE_ID === (string) $key ) {
+				return $module;
+			}
+		}
+		return array();
 	}
 
 	/**
