@@ -249,6 +249,207 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * Call the private `maybe_add_order_item` method.
+	 *
+	 * @param int   $order_id     Order ID.
+	 * @param array $items_to_add Items to add.
+	 * @param array $tax_location Tax location entered in the order editor.
+	 */
+	private function add_items_to_order( int $order_id, array $items_to_add, array $tax_location = array() ): void {
+		$maybe_add_order_item_func = function () use ( $order_id, $items_to_add, $tax_location ) {
+			return static::maybe_add_order_item( $order_id, '', $items_to_add, $tax_location );
+		};
+		$maybe_add_order_item_func->call( new WC_AJAX() );
+	}
+
+	/**
+	 * @testdox Should apply a coupon to products added after the coupon was applied to an empty order.
+	 */
+	public function test_add_item_after_coupon_on_empty_order_applies_discount(): void {
+		WC_Helper_Coupon::create_coupon(
+			'tenpercent',
+			array(
+				'discount_type' => 'percent',
+				'coupon_amount' => '10',
+			)
+		);
+		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 10 ) );
+		$order   = wc_create_order();
+
+		$result = $order->apply_coupon( 'tenpercent' );
+		$this->assertTrue( $result, 'The coupon should apply to the empty order' );
+
+		$this->add_items_to_order(
+			$order->get_id(),
+			array(
+				array(
+					'id'  => $product->get_id(),
+					'qty' => 2,
+				),
+			)
+		);
+
+		$order       = wc_get_order( $order->get_id() );
+		$coupon_item = current( $order->get_items( 'coupon' ) );
+		$line_item   = current( $order->get_items() );
+
+		$this->assertEquals( 2, $coupon_item->get_discount(), 'The coupon discount should include the added product' );
+		$this->assertEquals( 18, $line_item->get_total(), 'The added line item should be discounted' );
+		$this->assertEquals( 18, $order->get_total(), 'The order total should include the coupon discount' );
+	}
+
+	/**
+	 * @testdox Should apply an existing coupon to a product added to an order that already has items.
+	 */
+	public function test_add_item_after_coupon_on_order_with_items_applies_discount(): void {
+		WC_Helper_Coupon::create_coupon(
+			'tenpercent',
+			array(
+				'discount_type' => 'percent',
+				'coupon_amount' => '10',
+			)
+		);
+		$product_a = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 10 ) );
+		$product_b = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 10 ) );
+		$order     = wc_create_order();
+		$order->add_product( $product_a, 1 );
+		$order->calculate_totals();
+		$order->apply_coupon( 'tenpercent' );
+
+		$this->add_items_to_order(
+			$order->get_id(),
+			array(
+				array(
+					'id'  => $product_b->get_id(),
+					'qty' => 1,
+				),
+			)
+		);
+
+		$order       = wc_get_order( $order->get_id() );
+		$coupon_item = current( $order->get_items( 'coupon' ) );
+
+		foreach ( $order->get_items() as $line_item ) {
+			$this->assertEquals( 9, $line_item->get_total(), 'Every line item should be discounted' );
+		}
+		$this->assertEquals( 2, $coupon_item->get_discount(), 'The coupon discount should include both products' );
+		$this->assertEquals( 18, $order->get_total(), 'The order total should include the coupon discount' );
+	}
+
+	/**
+	 * @testdox Should use the editor tax location when coupons are applied again to an added product.
+	 */
+	public function test_add_item_after_coupon_uses_editor_tax_location(): void {
+		$order     = $this->add_item_to_coupon_order_with_editor_tax_location( false );
+		$line_item = current( $order->get_items() );
+
+		$this->assertEquals( 21.6, $line_item->get_total(), 'The added line item should be discounted' );
+		$this->assertEqualsWithDelta( 1.94, (float) $line_item->get_total_tax(), 0.01, 'The line tax should use the editor country rate' );
+		$this->assertEqualsWithDelta( 23.54, (float) $order->get_total(), 0.01, 'The order total should use the editor country tax' );
+		$this->assertSame( '', $order->get_billing_country(), 'The unsaved billing country must not be persisted' );
+	}
+
+	/**
+	 * @testdox Should use the editor tax location for the coupon discount when prices include tax.
+	 */
+	public function test_add_item_after_coupon_uses_editor_tax_location_with_prices_including_tax(): void {
+		$order     = $this->add_item_to_coupon_order_with_editor_tax_location( true );
+		$line_item = current( $order->get_items() );
+
+		$this->assertEqualsWithDelta( 22.21, (float) $order->get_total(), 0.01, 'The order total should be 10% off the price with the editor country tax' );
+		$this->assertEqualsWithDelta( 0.09, (float) $line_item->get_total_tax() / (float) $line_item->get_total(), 0.001, 'The line tax should use the editor country rate' );
+		$this->assertSame( '', $order->get_billing_country(), 'The unsaved billing country must not be persisted' );
+	}
+
+	/**
+	 * Create an order with a 10% coupon in a store based in BE (6% tax), then add a product priced 24 with NL (9% tax) typed in the editor.
+	 *
+	 * @param bool $prices_include_tax Whether prices are entered with tax.
+	 * @return WC_Order The order loaded again after the product was added.
+	 */
+	private function add_item_to_coupon_order_with_editor_tax_location( bool $prices_include_tax ): WC_Order {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', $prices_include_tax ? 'yes' : 'no' );
+		update_option( 'woocommerce_default_country', 'BE' );
+		update_option( 'woocommerce_tax_based_on', 'billing' );
+
+		WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'BE',
+				'tax_rate'          => '6.0000',
+				'tax_rate_name'     => 'Belgian VAT',
+				'tax_rate_priority' => 1,
+				'tax_rate_class'    => '',
+			)
+		);
+		WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'NL',
+				'tax_rate'          => '9.0000',
+				'tax_rate_name'     => 'Dutch VAT',
+				'tax_rate_priority' => 1,
+				'tax_rate_class'    => '',
+			)
+		);
+
+		WC_Helper_Coupon::create_coupon(
+			'tenpercent',
+			array(
+				'discount_type' => 'percent',
+				'coupon_amount' => '10',
+			)
+		);
+		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 24 ) );
+		$order   = wc_create_order();
+		$order->apply_coupon( 'tenpercent' );
+
+		$this->add_items_to_order(
+			$order->get_id(),
+			array(
+				array(
+					'id'  => $product->get_id(),
+					'qty' => 1,
+				),
+			),
+			array(
+				'country'  => 'NL',
+				'state'    => '',
+				'postcode' => '',
+				'city'     => '',
+			)
+		);
+
+		return wc_get_order( $order->get_id() );
+	}
+
+	/**
+	 * @testdox Should keep edited line totals when adding a product to an order without coupons.
+	 */
+	public function test_add_item_to_order_without_coupons_keeps_line_totals(): void {
+		$product_a = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 10 ) );
+		$product_b = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 10 ) );
+		$order     = wc_create_order();
+		$item_id   = $order->add_product( $product_a, 1 );
+		$item      = $order->get_item( $item_id );
+		$item->set_total( 5 );
+		$item->save();
+
+		$this->add_items_to_order(
+			$order->get_id(),
+			array(
+				array(
+					'id'  => $product_b->get_id(),
+					'qty' => 1,
+				),
+			)
+		);
+
+		$order = wc_get_order( $order->get_id() );
+
+		$this->assertEquals( 5, $order->get_item( $item_id )->get_total(), 'The edited line total should not be reset' );
+	}
+
+	/**
 	 * Creating an API Key with too long of a description should report failure.
 	 */
 	public function test_create_api_key_long_description_failure() {
