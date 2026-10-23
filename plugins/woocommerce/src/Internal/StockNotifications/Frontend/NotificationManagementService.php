@@ -144,8 +144,9 @@ class NotificationManagementService {
 			exit;
 		}
 
+		// <code> keeps wptexturize() from rewriting the email; entities would not survive the notice's kses pass on WordPress 7.2+.
 		/* translators: %s user email. */
-		wc_add_notice( sprintf( esc_html__( 'Verification email sent to %s.', 'woocommerce' ), $notification->get_user_email() ), 'success' );
+		wc_add_notice( sprintf( esc_html__( 'Verification email sent to %s.', 'woocommerce' ), '<code>' . esc_html( $notification->get_user_email() ) . '</code>' ), 'success' );
 		wp_safe_redirect( $redirect_url );
 		exit;
 	}
