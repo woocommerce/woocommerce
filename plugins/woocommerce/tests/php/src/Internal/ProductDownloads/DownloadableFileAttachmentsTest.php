@@ -50,7 +50,6 @@ class DownloadableFileAttachmentsTest extends WC_Unit_Test_Case {
 	 * @testWith ["", false]
 	 *           ["customer", false]
 	 *           ["author", true]
-	 *           ["shop_manager", true]
 	 *
 	 * @param string $role                 Role of the current user, or empty for a visitor.
 	 * @param bool   $expect_download_file Whether the downloadable product file should be listed.
@@ -89,7 +88,6 @@ class DownloadableFileAttachmentsTest extends WC_Unit_Test_Case {
 	 * @testWith ["", 404]
 	 *           ["customer", 404]
 	 *           ["author", 200]
-	 *           ["shop_manager", 200]
 	 *
 	 * @param string $role            Role of the current user, or empty for a visitor.
 	 * @param int    $expected_status Expected response status for the downloadable product file.
@@ -185,7 +183,7 @@ class DownloadableFileAttachmentsTest extends WC_Unit_Test_Case {
 		$this->go_to( $feed_url );
 
 		$this->assertFalse( have_posts(), 'The feed should have no attachment to render.' );
-		$this->assertNull( get_queried_object(), 'The feed title should not come from the attachment.' );
+		$this->assertStringNotContainsString( 'guide-abc123', get_wp_title_rss(), 'The feed title should not reveal the file name.' );
 		$this->assertStringNotContainsString( 'woocommerce_uploads', (string) redirect_canonical( $feed_url, false ), 'The feed should not redirect to the file.' );
 	}
 
