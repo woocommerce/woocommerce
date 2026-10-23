@@ -28,6 +28,7 @@ import {
 	type MutationResult,
 } from './mutation-batcher';
 import { doesCartItemMatchAttributes } from '../../utils/variations/does-cart-item-match-attributes';
+import { getAddedProducts } from '../../utils/get-added-products';
 
 export type WooCommerceConfig = {
 	messages?: {
@@ -491,6 +492,9 @@ function preloadA11y(): void {
  */
 let cartQueue: MutationQueue< Cart, CartMutationMeta > | null = null;
 
+// The cart as it was when the current mutation cycle started.
+let cartBeforeCycle: Cart | null = null;
+
 /**
  * Send a cart request through the queue.
  *
@@ -508,7 +512,10 @@ async function sendCartRequest(
 			getHeaders: () => ( {
 				Nonce: stateRef.nonce,
 			} ),
-			takeSnapshot: () => JSON.parse( JSON.stringify( stateRef.cart ) ),
+			takeSnapshot: () => {
+				cartBeforeCycle = JSON.parse( JSON.stringify( stateRef.cart ) );
+				return cartBeforeCycle as Cart;
+			},
 			rollback: ( snapshot ) => {
 				stateRef.cart = snapshot;
 			},
@@ -549,7 +556,13 @@ async function sendCartRequest(
 				// Preserve today's relative order: the legacy event fires
 				// before the sync event.
 				if ( anyAdd ) {
-					triggerAddedToCartEvent( { preserveCartData: true } );
+					triggerAddedToCartEvent( {
+						preserveCartData: true,
+						products: getAddedProducts(
+							cartBeforeCycle?.items ?? [],
+							stateRef.cart.items
+						),
+					} );
 				}
 
 				emitSyncEvent( {

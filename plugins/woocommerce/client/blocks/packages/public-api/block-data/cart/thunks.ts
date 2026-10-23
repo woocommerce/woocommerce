@@ -2,6 +2,7 @@
  * External dependencies
  */
 import {
+	AddToCartEventProduct,
 	Cart,
 	CartResponse,
 	ApiErrorResponse,
@@ -13,6 +14,7 @@ import {
 } from '@woocommerce/types';
 import {
 	camelCaseKeys,
+	getAddedProducts,
 	hasCollectableRate,
 	triggerAddedToCartEvent,
 	triggerAddingToCartEvent,
@@ -472,9 +474,10 @@ export const addItemToCart =
 		variation: Variation[],
 		additionalData: Record< string, unknown > = {}
 	) =>
-	async ( { dispatch }: CartThunkArgs ) => {
+	async ( { dispatch, select }: CartThunkArgs ) => {
 		try {
 			dispatch.startAddingToCart( productId );
+			const previousItems = select.getCartData().items;
 			const { response } = await apiFetchWithHeaders< {
 				response: CartResponse;
 			} >( {
@@ -489,7 +492,15 @@ export const addItemToCart =
 				cache: 'no-store',
 			} );
 			dispatch.receiveCart( response );
-			dispatch.finishAddingToCart( productId );
+			dispatch.finishAddingToCart(
+				productId,
+				true,
+				// Concurrent adds are batched, so the response can include
+				// other products added at the same time.
+				getAddedProducts( previousItems, response.items ).filter(
+					( product ) => product.id === productId
+				)
+			);
 			return response;
 		} catch ( error ) {
 			dispatch.receiveError( isApiErrorResponse( error ) ? error : null );
@@ -512,11 +523,22 @@ export function startAddingToCart( productId: number ) {
 
 /**
  * Removes the metadata of an item ID that was added.
+ *
+ * @param {number}  productId       Product ID that was added to cart.
+ * @param {boolean} [dispatchEvent] Whether to dispatch the added to cart event.
+ * @param {Array}   [products]      Products added to the cart, with the quantity added for each one.
  */
-export function finishAddingToCart( productId: number, dispatchEvent = true ) {
+export function finishAddingToCart(
+	productId: number,
+	dispatchEvent = true,
+	products?: AddToCartEventProduct[]
+) {
 	return async ( { dispatch }: CartThunkArgs ) => {
 		if ( dispatchEvent ) {
-			triggerAddedToCartEvent( { preserveCartData: true } );
+			triggerAddedToCartEvent( {
+				preserveCartData: true,
+				...( products && { products } ),
+			} );
 		}
 		dispatch.setProductsPendingAdd( productId, false );
 	};

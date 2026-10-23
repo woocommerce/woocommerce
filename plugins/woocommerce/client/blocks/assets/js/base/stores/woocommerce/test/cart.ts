@@ -1800,6 +1800,7 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			expect( triggerAddedToCartEvent ).toHaveBeenCalledTimes( 1 );
 			expect( triggerAddedToCartEvent ).toHaveBeenCalledWith( {
 				preserveCartData: true,
+				products: [ { id: 1, quantity: 1 } ],
 			} );
 			expect( speak ).toHaveBeenCalledTimes( 1 );
 			expect( speak ).toHaveBeenCalledWith(
@@ -1848,6 +1849,14 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			expect( captured ).toHaveLength( 3 );
 			expect( events ).toHaveLength( 1 );
 			expect( triggerAddedToCartEvent ).toHaveBeenCalledTimes( 1 );
+			expect( triggerAddedToCartEvent ).toHaveBeenCalledWith( {
+				preserveCartData: true,
+				products: [
+					{ id: 1, quantity: 1 },
+					{ id: 2, quantity: 1 },
+					{ id: 3, quantity: 1 },
+				],
+			} );
 			expect( speak ).toHaveBeenCalledTimes( 1 );
 
 			cleanup();
@@ -1968,6 +1977,84 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			cleanup();
 		} );
 
+		it( 'reports the quantity committed by the server in the legacy event payload', async () => {
+			( getConfig as jest.Mock ).mockReturnValue( {} );
+			// The server caps the line at 1 even though 2 were requested.
+			global.fetch = jest.fn( async ( _url, init?: RequestInit ) => {
+				const serverCart = {
+					items: init?.body
+						? [ makeKeyedLine( { key: 'k1', id: 5, quantity: 1 } ) ]
+						: [],
+					totals: {},
+					errors: [],
+				};
+				return new Response(
+					JSON.stringify(
+						init?.body
+							? {
+									responses: [
+										{ status: 200, body: serverCart },
+									],
+								}
+							: serverCart
+					),
+					{ headers: { Nonce: 'test-nonce-123' } }
+				);
+			} ) as unknown as typeof fetch;
+			const actions = await loadCartStore();
+			seedCart( [] );
+
+			await runAction(
+				actions.addCartItem( {
+					id: 5,
+					quantityToAdd: 2,
+					type: 'simple',
+				} )
+			);
+			await flushMicrotasks();
+
+			expect( triggerAddedToCartEvent ).toHaveBeenCalledWith( {
+				preserveCartData: true,
+				products: [ { id: 5, quantity: 1 } ],
+			} );
+		} );
+
+		it( 'only lists products whose quantity went up in the legacy event payload', async () => {
+			( getConfig as jest.Mock ).mockReturnValue( {} );
+			mockBatchFetch();
+			const actions = await loadCartStore();
+			seedCart( [
+				makeKeyedLine( { key: 'key-down', id: 7, quantity: 3 } ),
+				makeKeyedLine( { key: 'key-up', id: 42, quantity: 3 } ),
+			] );
+
+			await Promise.all( [
+				runAction(
+					actions.addCartItem( {
+						id: 7,
+						key: 'key-down',
+						quantity: 2,
+						type: 'simple',
+					} )
+				),
+				runAction(
+					actions.addCartItem( {
+						id: 42,
+						key: 'key-up',
+						quantity: 7,
+						type: 'simple',
+					} )
+				),
+			] );
+			await flushMicrotasks();
+
+			expect( triggerAddedToCartEvent ).toHaveBeenCalledTimes( 1 );
+			expect( triggerAddedToCartEvent ).toHaveBeenCalledWith( {
+				preserveCartData: true,
+				products: [ { id: 42, quantity: 4 } ],
+			} );
+		} );
+
 		it( 'dedupes a repeated product id in the sync event quantityChanges when the same product succeeds twice in one cycle', async () => {
 			( getConfig as jest.Mock ).mockReturnValue( {} );
 			mockBatchFetch();
@@ -1996,6 +2083,10 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			expect( events ).toHaveLength( 1 );
 			expect( events[ 0 ].quantityChanges ).toEqual( {
 				productsPendingAdd: [ 42 ],
+			} );
+			expect( triggerAddedToCartEvent ).toHaveBeenCalledWith( {
+				preserveCartData: true,
+				products: [ { id: 42, quantity: 2 } ],
 			} );
 
 			cleanup();
