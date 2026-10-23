@@ -2475,6 +2475,36 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should apply modified_before with a UTC offset in the store timezone.
+	 *
+	 * @dataProvider provider_order_storage_engines
+	 *
+	 * @param bool $hpos_enabled Whether HPOS/COT should be enabled for the test.
+	 */
+	public function test_orders_query_filters_modified_date_in_store_timezone( bool $hpos_enabled ): void {
+		$this->set_order_storage_for_test( $hpos_enabled );
+
+		update_option( 'timezone_string', 'Europe/Amsterdam' );
+
+		$email = wp_unique_id( 'abilities-order-modified-timezone-' ) . '@example.com';
+		$early = $this->create_order_for_query_sorting( $email, '2025-07-15T09:00:00', '2025-07-15T10:00:00' );
+		$late  = $this->create_order_for_query_sorting( $email, '2025-07-15T09:00:00', '2025-07-15T12:00:00' );
+
+		$result = wp_get_ability( 'woocommerce/orders-query' )->execute(
+			array(
+				'billing_email'   => $email,
+				'modified_before' => '2025-07-15T09:00:00.000Z',
+				'per_page'        => 2,
+			)
+		);
+
+		$this->assertNotWPError( $result );
+		$ids = array_column( $result['orders'], 'id' );
+		$this->assertContains( $early->get_id(), $ids, 'modified_before 09:00 UTC with fractional seconds should return the order modified at 10:00 store time (08:00 UTC).' );
+		$this->assertNotContains( $late->get_id(), $ids, 'modified_before 09:00 UTC with fractional seconds should exclude the order modified at 12:00 store time (10:00 UTC).' );
+	}
+
+	/**
 	 * @testdox Should change order status and surface failure when status update fails.
 	 */
 	public function test_order_update_status_changes_status(): void {
