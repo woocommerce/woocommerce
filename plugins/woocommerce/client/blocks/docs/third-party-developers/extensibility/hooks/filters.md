@@ -36,6 +36,7 @@
 - [woocommerce_cart_contents_changed](#woocommerce_cart_contents_changed)
 - [woocommerce_cart_item_permalink](#woocommerce_cart_item_permalink)
 - [woocommerce_checkout_must_be_logged_in_message](#woocommerce_checkout_must_be_logged_in_message)
+- [woocommerce_default_payment_method](#woocommerce_default_payment_method)
 - [woocommerce_delete_expired_draft_orders_batch_size](#woocommerce_delete_expired_draft_orders_batch_size)
 - [woocommerce_disable_compatibility_layer](#woocommerce_disable_compatibility_layer)
 - [woocommerce_filter_fields_for_order_confirmation](#woocommerce_filter_fields_for_order_confirmation)
@@ -886,6 +887,32 @@ apply_filters( 'woocommerce_checkout_must_be_logged_in_message', string $message
 ### Source
 
 - [StoreApi/Routes/V1/Checkout.php](../../../../../../src/StoreApi/Routes/V1/Checkout.php)
+
+---
+
+## woocommerce_default_payment_method
+
+
+Filters the payment method the Checkout block starts with.
+
+```php
+apply_filters( 'woocommerce_default_payment_method', string $payment_method, array $available_gateways )
+```
+
+### Description
+
+Return a gateway id from `$available_gateways` to preselect it, or an empty string to select nothing; any other value selects nothing. Attach the callback by `init` at the latest.
+
+### Parameters
+
+| Argument | Type | Description |
+| -------- | ---- | ----------- |
+| $payment_method | string | Gateway id WooCommerce would preselect: the customer's default saved card's gateway, the method remembered in the session, or the first enabled gateway; '' when there is none. |
+| $available_gateways | array | Gateways available for this cart, keyed by id. |
+
+### Source
+
+- [StoreApi/Utilities/PaymentUtils.php](../../../../../../src/StoreApi/Utilities/PaymentUtils.php)
 
 ---
 
@@ -2046,6 +2073,7 @@ The same filter WC_Order::needs_payment() applies. A status a site declares paya
 ### Source
 
 - [StoreApi/Utilities/CheckoutTrait.php](../../../../../../src/StoreApi/Utilities/CheckoutTrait.php)
+- [StoreApi/Utilities/DraftOrderTrait.php](../../../../../../src/StoreApi/Utilities/DraftOrderTrait.php)
 
 ---
 

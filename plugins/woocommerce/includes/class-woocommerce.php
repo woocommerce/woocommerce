@@ -23,6 +23,7 @@ use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\LegacyAssets\LegacySelect2UsageTracker;
 use Automattic\WooCommerce\Internal\MCP\McpEndpointRemoval;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesRegistry;
+use Automattic\WooCommerce\Internal\Abilities\AbilitiesTracking;
 use Automattic\WooCommerce\Internal\ProductAttributes\VisualAttributeTermAdmin;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
@@ -49,6 +50,7 @@ use Automattic\WooCommerce\Internal\Caches\ProductVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\Caches\OrdersVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\Caches\TaxRateVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\CustomerEmailVerification\CustomerEmailVerification;
+use Automattic\WooCommerce\Internal\StructuredData\OpenGraph;
 
 /**
  * Main WooCommerce Class.
@@ -62,7 +64,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '11.3.0-dev';
+	public $version = '11.4.0-dev';
 
 	/**
 	 * WooCommerce Schema version.
@@ -413,6 +415,8 @@ final class WooCommerce {
 		$container->get( CustomerEmailVerification::class );
 		$container->get( OrderLogsCleanupHelper::class );
 		$container->get( PaymentSettingsScreen::class );
+		$container->get( AbilitiesTracking::class );
+		$container->get( OpenGraph::class );
 
 		/**
 		 * These classes have a register method for attaching hooks.
@@ -435,6 +439,7 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\ProductFeed\ProductFeed::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\PushNotifications\PushNotifications::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Orders\PointOfSaleEmailHandler::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\Orders\UnpaidOrderTimeoutMarker::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\POS\POSController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ShopperLists\ShopperListsController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\StockNotifications\StockNotifications::class )->register();

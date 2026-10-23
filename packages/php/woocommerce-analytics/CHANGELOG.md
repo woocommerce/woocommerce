@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.18.1 - 2026-10-21
+### Changed
+- Stop loading the stats.wp.com tracking script and its referrer cookies when analytics proxy tracking is enabled. [#70010]
+- Update shared analytics URL utilities to version 1.1.0. [#69704]
+
+### Fixed
+- Add a content hash to lazy-loaded script URLs so a cached copy from an older release no longer breaks analytics after an update. [#69423]
+- Hold the analytics tracking script until visitors consent to statistics when a consent plugin is active. [#69748]
+- Remove non-allowlisted query parameters and fragments from analytics document location and referrer properties. [#69526]
+- Remove Tracks cookies and stop sending queued events as soon as a visitor withdraws statistics consent. [#69981]
+- Send nested arrays and objects from the event properties filter as JSON instead of breaking the tracking request. [#70009]
+- Stop recording server-side events for shoppers who denied statistics consent with a consent plugin that works in the browser. [#70008]
+- Wait for a consent plugin's delayed script before tracking, instead of tracking visitors who have not consented yet. [#69980]
+
 ## 0.18.0 - 2026-09-24
 ### Security
 - Always initialize the front-end `window.wcAnalytics` object from scratch and only accept a string as the webpack public path. [#68346]

@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { List, Link, Spinner } from '@woocommerce/components';
+import { List, Link } from '@woocommerce/components';
 import { Text } from '@woocommerce/experimental';
 import interpolateComponents from '@automattic/interpolate-components';
 import { getAdminLink } from '@woocommerce/settings';
@@ -25,31 +25,23 @@ type StackWithLoadSampleBlurb = {
 	items: StackItem[];
 	onClickLoadSampleProduct: () => void;
 	showOtherOptions?: boolean;
-	isTaskListItemClicked?: boolean;
 };
 
 type StackWithoutText = {
 	items: StackItem[];
 	showOtherOptions: false;
 	onClickLoadSampleProduct?: () => void;
-	isTaskListItemClicked?: boolean;
 };
 
 const Stack = ( {
 	items,
 	onClickLoadSampleProduct = () => {},
 	showOtherOptions = true,
-	isTaskListItemClicked = false,
 }: StackProps ) => {
 	const { recordCompletionTime } = useRecordCompletionTime( 'products' );
 
 	return (
 		<div className="woocommerce-products-stack">
-			{ isTaskListItemClicked && (
-				<div className="woocommerce-stack__overlay-spinner">
-					<Spinner className="list-overlay" />
-				</div>
-			) }
 			<List items={ items } />
 			{ showOtherOptions && (
 				<Text className="woocommerce-stack__other-options">

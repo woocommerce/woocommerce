@@ -6,6 +6,10 @@
 	"require-dev": {
 		"automattic/jetpack-changelogger": "3.3.0"
 	},
+	"scripts": {
+		"phpcs": "@php ../../tools/theme-cli/vendor/bin/phpcs",
+		"phpcbf": "@php ../../tools/theme-cli/vendor/bin/phpcbf"
+	},
 	"config": {
 		"platform": {
 			"php": "7.4"
