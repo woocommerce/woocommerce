@@ -72,9 +72,14 @@ class BaseLocationTaxEstimate implements RegisterHooksInterface {
 		// Reindex so the writes land on the postcode/city slots even if a callback returned string keys,
 		// while keeping any trailing fields (e.g. a tax provider's street at index 4). Normalize the
 		// postcode to the format an entered address uses, so other consumers of the filter see it consistently.
-		$taxable_address    = array_values( $taxable_address );
-		$taxable_address[2] = wc_format_postcode( $countries->get_base_postcode(), (string) $country );
-		$taxable_address[3] = $countries->get_base_city();
+		$taxable_address = array_values( $taxable_address );
+		$base_postcode   = (string) $countries->get_base_postcode();
+
+		// Formatting a postcode that normalizes to nothing leaves a bare separator in some countries
+		// ('-' for BR, PL, JP, PT), which consumers of this filter would read as the shopper's postcode.
+		$has_postcode       = '' !== wc_normalize_postcode( $base_postcode );
+		$taxable_address[2] = $has_postcode ? wc_format_postcode( $base_postcode, (string) $country ) : '';
+		$taxable_address[3] = (string) $countries->get_base_city();
 
 		return $taxable_address;
 	}

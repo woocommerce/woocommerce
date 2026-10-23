@@ -109,11 +109,13 @@ class ShopBaseTaxEstimateNotice {
 			);
 		}
 
-		$country      = $countries->get_base_country();
-		$state        = $countries->get_base_state();
-		$postcode     = $countries->get_base_postcode();
-		$city         = $countries->get_base_city();
-		$has_address  = '' !== $postcode || '' !== $city;
+		// These pass through filters, so coerce before handing them to strictly typed calls below.
+		$country      = (string) $countries->get_base_country();
+		$state        = (string) $countries->get_base_state();
+		$postcode     = (string) $countries->get_base_postcode();
+		$city         = (string) $countries->get_base_city();
+		$has_postcode = '' !== wc_normalize_postcode( $postcode );
+		$has_address  = $has_postcode || '' !== trim( $city );
 		$tax_based_on = TaxBasedOn::BASE === get_option( 'woocommerce_tax_based_on', TaxBasedOn::SHIPPING );
 		$base_args    = array(
 			'country'  => $country,
@@ -123,10 +125,12 @@ class ShopBaseTaxEstimateNotice {
 		);
 		// get_rates_from_location() applies the woocommerce_matched_rates filter, so the estimate reflects the rate the shopper is actually quoted.
 		$standard_rates = WC_Tax::get_rates_from_location( '', array( $country, $state, $postcode, $city ) );
+		$standard_rates = is_array( $standard_rates ) ? $standard_rates : array();
 
 		// Lead line: what is taxed, and where.
 		if ( $has_address ) {
-			$address_html = '<strong>' . esc_html( implode( ', ', array_filter( array( $city, $postcode ) ) ) ) . '</strong>';
+			$shown        = array_filter( array( trim( $city ), $has_postcode ? $postcode : '' ) );
+			$address_html = '<strong>' . esc_html( implode( ', ', $shown ) ) . '</strong>';
 			$lead         = $tax_based_on
 				? sprintf( /* translators: %s: store base address (bold). */ __( 'All orders are taxed at your store base address: %s.', 'woocommerce' ), $address_html )
 				: sprintf( /* translators: %s: store base address (bold). */ __( 'Until a customer enters their address, tax is estimated at your store base address: %s.', 'woocommerce' ), $address_html );
@@ -164,15 +168,16 @@ class ShopBaseTaxEstimateNotice {
 	 */
 	private function rate_summary( array $base_args ): string {
 		$classes = array( '' => __( 'Standard rate', 'woocommerce' ) );
-		foreach ( WC_Tax::get_tax_classes() as $class_name ) {
-			$classes[ sanitize_title( $class_name ) ] = $class_name;
+		// A tax class can be registered with a slug that is not derived from its name, and products store that slug.
+		foreach ( WC_Tax::get_tax_rate_classes() as $tax_class ) {
+			$classes[ $tax_class->slug ] = $tax_class->name;
 		}
 
 		$parts = array();
 		foreach ( $classes as $slug => $label ) {
 			$rates = WC_Tax::get_rates_from_location( $slug, array( $base_args['country'], $base_args['state'], $base_args['postcode'], $base_args['city'] ) );
 
-			if ( empty( $rates ) ) {
+			if ( ! is_array( $rates ) || empty( $rates ) ) {
 				$parts[] = esc_html( $label ) . ': &ndash;';
 				continue;
 			}
@@ -204,7 +209,7 @@ class ShopBaseTaxEstimateNotice {
 			return '';
 		}
 
-		if ( ! $has_address && $this->state_has_scoped_standard_rates( $country, $state ) ) {
+		if ( ! $has_address && $this->has_scoped_standard_rates( $country, $state ) ) {
 			return sprintf(
 				/* translators: 1: link to the General settings, 2: link to the standard tax rates. */
 				__( 'Your store has postcode- or city-scoped standard rates, but no store postcode or city is set, so they cannot be estimated. Add them in %1$s, or see %2$s.', 'woocommerce' ),
@@ -229,18 +234,22 @@ class ShopBaseTaxEstimateNotice {
 	}
 
 	/**
-	 * Whether the store's state has any postcode- or city-scoped standard rate.
+	 * Whether any postcode- or city-scoped standard rate applies to the store's location.
 	 *
 	 * @param string $country Store base country.
 	 * @param string $state   Store base state.
 	 * @return bool
 	 */
-	private function state_has_scoped_standard_rates( string $country, string $state ): bool {
+	private function has_scoped_standard_rates( string $country, string $state ): bool {
 		if ( '' === $country ) {
 			return false;
 		}
 
 		global $wpdb;
+
+		// Resolve the location the way WC_Tax::get_matched_tax_rates() does: uppercased, with '' as a wildcard.
+		$country = strtoupper( $country );
+		$state   = strtoupper( $state );
 
 		$cache_key = WC_Cache_Helper::get_cache_prefix( 'taxes' ) . 'shop_base_scoped_' . md5( $country . '|' . $state );
 		$cached    = wp_cache_get( $cache_key, 'taxes' );
@@ -253,7 +262,7 @@ class ShopBaseTaxEstimateNotice {
 			$wpdb->prepare(
 				"SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_tax_rate_locations locations
 				INNER JOIN {$wpdb->prefix}woocommerce_tax_rates rates ON locations.tax_rate_id = rates.tax_rate_id
-				WHERE rates.tax_rate_country = %s AND rates.tax_rate_state = %s AND rates.tax_rate_class = '' AND locations.location_type IN ( 'postcode', 'city' )",
+				WHERE rates.tax_rate_country IN ( %s, '' ) AND rates.tax_rate_state IN ( %s, '' ) AND rates.tax_rate_class = '' AND locations.location_type IN ( 'postcode', 'city' )",
 				$country,
 				$state
 			)

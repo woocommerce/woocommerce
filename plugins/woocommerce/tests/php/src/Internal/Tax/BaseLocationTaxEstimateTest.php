@@ -117,6 +117,42 @@ class BaseLocationTaxEstimateTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Treats a store postcode that normalizes to nothing as no postcode at all.
+	 * @testWith ["-"]
+	 *           ["  "]
+	 *           ["--"]
+	 *
+	 * @param string $stored Store postcode whose characters all normalize away.
+	 */
+	public function test_postcode_that_normalizes_to_nothing_is_not_formatted( string $stored ): void {
+		update_option( 'woocommerce_default_country', 'BR:SP' );
+		update_option( 'woocommerce_store_postcode', $stored );
+
+		$result = $this->sut->estimate_base_location_address( array( 'BR', 'SP', '', '' ), null );
+
+		$this->assertSame( array( 'BR', 'SP', '', 'San Francisco' ), $result );
+	}
+
+	/**
+	 * @testdox Leaves the postcode empty, not a bare separator, when a store has no postcode.
+	 * @testWith ["BR", "SP"]
+	 *           ["PL", ""]
+	 *           ["JP", ""]
+	 *           ["PT", ""]
+	 *
+	 * @param string $country Store base country whose postcode format uses a separator.
+	 * @param string $state   Store base state, where the country has them.
+	 */
+	public function test_no_postcode_never_becomes_a_separator( string $country, string $state ): void {
+		update_option( 'woocommerce_default_country', '' === $state ? $country : $country . ':' . $state );
+		update_option( 'woocommerce_store_postcode', '' );
+
+		$result = $this->sut->estimate_base_location_address( array( $country, $state, '', '' ), null );
+
+		$this->assertSame( array( $country, $state, '', 'San Francisco' ), $result );
+	}
+
+	/**
 	 * @testdox Returns a clean numeric 4-tuple even when the taxable address is keyed associatively.
 	 */
 	public function test_normalizes_non_numeric_taxable_address_when_filling(): void {

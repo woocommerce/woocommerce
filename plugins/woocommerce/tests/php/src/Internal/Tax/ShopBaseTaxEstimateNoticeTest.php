@@ -265,4 +265,88 @@ class ShopBaseTaxEstimateNoticeTest extends WC_Unit_Test_Case {
 
 		$this->assertStringContainsString( 'postcode- or city-scoped standard rates', $notice['warning'] );
 	}
+
+	/**
+	 * @testdox Treats a store postcode that normalizes to nothing as no postcode at all.
+	 * @testWith ["-"]
+	 *           ["  "]
+	 *
+	 * @param string $stored Store postcode whose characters all normalize away.
+	 */
+	public function test_separator_only_postcode_is_not_an_address( string $stored ): void {
+		$this->add_standard_rate( array(), array( '94110' ) );
+		update_option( 'woocommerce_store_postcode', $stored );
+		update_option( 'woocommerce_store_city', '' );
+
+		$notice = $this->sut->get_notice();
+
+		$this->assertStringNotContainsString( $stored . '</strong>', $notice['estimate'] );
+		$this->assertStringContainsString( 'postcode- or city-scoped standard rates', $notice['warning'] );
+	}
+
+	/**
+	 * @testdox Survives a matched-rates callback that returns a non-array.
+	 */
+	public function test_handles_non_array_matched_rates(): void {
+		$break_rates = function () {
+			return null;
+		};
+		add_filter( 'woocommerce_matched_rates', $break_rates );
+
+		try {
+			$notice = $this->sut->get_notice();
+
+			$this->assertStringContainsString( 'your store base address', $notice['estimate'] );
+			$this->assertStringContainsString( 'Standard rate: &ndash;', $notice['estimate'] );
+		} finally {
+			remove_filter( 'woocommerce_matched_rates', $break_rates );
+		}
+	}
+
+	/**
+	 * @testdox Reads each tax class's stored slug, which need not be derived from its name.
+	 */
+	public function test_rate_summary_uses_the_stored_tax_class_slug(): void {
+		$this->assertIsArray(
+			WC_Tax::create_tax_class( 'Digital goods', 'digital' ),
+			'The tax class fixture should have been created.'
+		);
+
+		$this->add_standard_rate(
+			array(
+				'tax_rate'       => '5.0000',
+				'tax_rate_class' => 'digital',
+				'tax_rate_name'  => 'Digital',
+			)
+		);
+
+		$notice = $this->sut->get_notice();
+
+		$this->assertStringContainsString( 'Digital goods: 5%', $notice['estimate'] );
+	}
+
+	/**
+	 * @testdox Warns about scoped rates when the scoped rate uses a wildcard country or state.
+	 * @testWith ["", "CA"]
+	 *           ["US", ""]
+	 *           ["", ""]
+	 *
+	 * @param string $country Rate country, blank for the wildcard that matches every country.
+	 * @param string $state   Rate state, blank for the wildcard that matches every state.
+	 */
+	public function test_warns_when_wildcard_scoped_rates_but_no_store_address( string $country, string $state ): void {
+		$this->add_standard_rate(
+			array(
+				'tax_rate_country' => $country,
+				'tax_rate_state'   => $state,
+			),
+			array( '94110' )
+		);
+		update_option( 'woocommerce_store_postcode', '' );
+		update_option( 'woocommerce_store_city', '' );
+
+		$notice = $this->sut->get_notice();
+
+		$this->assertStringContainsString( 'postcode- or city-scoped standard rates', $notice['warning'] );
+	}
 }
