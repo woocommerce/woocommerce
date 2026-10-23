@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Restore the available refund amount and update refunded totals after deleting a refund.
