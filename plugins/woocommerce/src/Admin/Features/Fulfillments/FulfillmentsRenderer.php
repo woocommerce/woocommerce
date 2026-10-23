@@ -614,10 +614,25 @@ class FulfillmentsRenderer {
 			return $args;
 		}
 
+		// phpcs:ignore WordPress.Security.NonceVerification
+		$shipping_provider = sanitize_text_field( wp_unslash( $_GET['shipping_provider'] ) );
+
+		// A `woocommerce_hpos_pre_query` callback may answer the query from its own source, and
+		// `suppress_filters` skips the clause filter, so fall back to an id list the query carries.
+		if ( has_filter( 'woocommerce_hpos_pre_query' ) || ! empty( $args['suppress_filters'] ) ) {
+			// `p` and `post__in` are both remapped onto `id`, so narrow every restriction the
+			// query already carries rather than overwriting any of them.
+			$args['post__in'] = $this->restrict_ids_to_shipping_provider(
+				array( $args['post__in'] ?? null, $args['id'] ?? null, $args['p'] ?? null ),
+				$shipping_provider
+			);
+
+			return $args;
+		}
+
 		// Carry the provider through as a marker; the subquery is injected later in the clause filter
 		// so high-volume stores never materialize every matching order id into PHP.
-		// phpcs:ignore WordPress.Security.NonceVerification
-		$args[ self::SHIPPING_PROVIDER_FILTER_ARG ] = sanitize_text_field( wp_unslash( $_GET['shipping_provider'] ) );
+		$args[ self::SHIPPING_PROVIDER_FILTER_ARG ] = $shipping_provider;
 
 		return $args;
 	}
@@ -648,7 +663,7 @@ class FulfillmentsRenderer {
 
 		// The table name comes from the data store and the subquery is already prepared.
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$clauses['where'] .= " AND {$orders_table}.id IN ( {$subquery} )";
+		$clauses['where'] = ( $clauses['where'] ?? '' ) . " AND {$orders_table}.id IN ( {$subquery} )";
 
 		return $clauses;
 	}
@@ -675,7 +690,20 @@ class FulfillmentsRenderer {
 		}
 
 		// phpcs:ignore WordPress.Security.NonceVerification
-		$query->set( self::SHIPPING_PROVIDER_FILTER_ARG, sanitize_text_field( wp_unslash( $_GET['shipping_provider'] ) ) );
+		$shipping_provider = sanitize_text_field( wp_unslash( $_GET['shipping_provider'] ) );
+
+		// A `posts_pre_query` callback may answer the query from its own source, and `suppress_filters`
+		// skips the clause filter, so fall back to an id list the query carries.
+		if ( has_filter( 'posts_pre_query' ) || $query->get( 'suppress_filters' ) ) {
+			$query->set(
+				'post__in',
+				$this->restrict_ids_to_shipping_provider( array( $query->get( 'post__in' ) ), $shipping_provider )
+			);
+
+			return;
+		}
+
+		$query->set( self::SHIPPING_PROVIDER_FILTER_ARG, $shipping_provider );
 	}
 
 	/**
@@ -698,9 +726,40 @@ class FulfillmentsRenderer {
 
 		// The subquery is already prepared and the table name comes from $wpdb.
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-		$clauses['where'] .= " AND {$wpdb->posts}.ID IN ( {$subquery} )";
+		$clauses['where'] = ( $clauses['where'] ?? '' ) . " AND {$wpdb->posts}.ID IN ( {$subquery} )";
 
 		return $clauses;
+	}
+
+	/**
+	 * Narrow a set of order ids to those whose fulfillments use a shipping provider.
+	 *
+	 * Only used when the orders query can be answered without the SQL the clause filters build.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param array  $existing_restrictions The id restrictions the query already carries, if any.
+	 * @param string $shipping_provider     The shipping provider key, or the `__other__` sentinel.
+	 * @return array<int> The ids to restrict the query to, or `array( 0 )` when nothing matches.
+	 */
+	private function restrict_ids_to_shipping_provider( array $existing_restrictions, string $shipping_provider ): array {
+		global $wpdb;
+
+		// The subquery is prepared by get_shipping_provider_order_ids_subquery().
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$results   = $wpdb->get_col( $this->get_shipping_provider_order_ids_subquery( $shipping_provider ) );
+		$order_ids = array_map( 'absint', $results );
+
+		foreach ( $existing_restrictions as $restriction ) {
+			if ( empty( $restriction ) ) {
+				continue;
+			}
+
+			$order_ids = array_intersect( array_map( 'absint', (array) $restriction ), $order_ids );
+		}
+
+		// An empty list drops the restriction instead of applying it, so use an id that cannot match.
+		return empty( $order_ids ) ? array( 0 ) : array_values( $order_ids );
 	}
 
 	/**

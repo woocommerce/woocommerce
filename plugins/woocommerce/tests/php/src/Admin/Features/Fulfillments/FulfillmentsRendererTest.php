@@ -737,6 +737,247 @@ class FulfillmentsRendererTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The HPOS id-list fallback narrows a single-order `p` restriction instead of widening it.
+	 */
+	public function test_filter_orders_fallback_intersects_existing_p_arg(): void {
+		$this->seed_fulfillment( 971, 'acme-couriers' );
+		$this->seed_fulfillment( 972, 'acme-couriers' );
+
+		add_filter( 'woocommerce_hpos_pre_query', '__return_null' );
+		try {
+			$this->with_provider_param(
+				'acme-couriers',
+				function () {
+					// The query remaps p onto id, so a single-order query must not widen to the whole set.
+					$args = $this->renderer->filter_orders_by_shipping_provider( array( 'p' => 972 ) );
+
+					$this->assertSame( array( 972 ), $args['post__in'] );
+				}
+			);
+		} finally {
+			remove_filter( 'woocommerce_hpos_pre_query', '__return_null' );
+		}
+	}
+
+	/**
+	 * @testdox The legacy count query applies the provider filter when the result set is paginated.
+	 */
+	public function test_legacy_paginated_query_counts_only_matching_orders(): void {
+		$match_a = $this->create_shop_order_post();
+		$match_b = $this->create_shop_order_post();
+		$other   = $this->create_shop_order_post();
+
+		$this->seed_fulfillment( $match_a, 'acme-couriers' );
+		$this->seed_fulfillment( $match_b, 'acme-couriers' );
+		$this->seed_fulfillment( $other, 'other-co' );
+
+		add_filter( 'posts_clauses', array( $this->renderer, 'filter_legacy_orders_clauses_by_shipping_provider' ), 10, 2 );
+		try {
+			// A positive posts_per_page makes WP run the count query the pager reads, which an
+			// unlimited query skips entirely.
+			$query = new WP_Query(
+				array(
+					'post_type'                     => 'shop_order',
+					'post_status'                   => 'wc-processing',
+					'fields'                        => 'ids',
+					'posts_per_page'                => 1,
+					'fulfillment_shipping_provider' => 'acme-couriers',
+				)
+			);
+		} finally {
+			remove_filter( 'posts_clauses', array( $this->renderer, 'filter_legacy_orders_clauses_by_shipping_provider' ), 10 );
+		}
+
+		$this->assertCount( 1, $query->posts, 'The page should hold a single order.' );
+		$this->assertSame( 2, (int) $query->found_posts, 'The count query must apply the provider filter too.' );
+		$this->assertSame( 2, (int) $query->max_num_pages );
+		$this->assertNotContains( $other, array_map( 'absint', $query->posts ) );
+	}
+
+	/**
+	 * @testdox The HPOS filter restricts by id list when a callback can answer the query without the built SQL.
+	 */
+	public function test_filter_orders_falls_back_to_id_list_for_short_circuited_queries(): void {
+		$this->seed_fulfillment( 901, 'acme-couriers' );
+		$this->seed_fulfillment( 902, 'acme-couriers' );
+		$this->seed_fulfillment( 903, 'other-co' );
+
+		// Only the callback's presence matters here, not what it returns.
+		add_filter( 'woocommerce_hpos_pre_query', '__return_null' );
+		try {
+			$this->with_provider_param(
+				'acme-couriers',
+				function () {
+					$args = $this->renderer->filter_orders_by_shipping_provider( array() );
+
+					$this->assertArrayHasKey( 'post__in', $args );
+					$this->assertEqualsCanonicalizing( array( 901, 902 ), $args['post__in'] );
+					$this->assertArrayNotHasKey(
+						'fulfillment_shipping_provider',
+						$args,
+						'The marker would be ignored by a callback that discards the built SQL.'
+					);
+				}
+			);
+		} finally {
+			remove_filter( 'woocommerce_hpos_pre_query', '__return_null' );
+		}
+	}
+
+	/**
+	 * @testdox The HPOS id-list fallback narrows an existing post__in rather than replacing it.
+	 */
+	public function test_filter_orders_fallback_intersects_existing_ids(): void {
+		$this->seed_fulfillment( 911, 'acme-couriers' );
+		$this->seed_fulfillment( 912, 'acme-couriers' );
+
+		add_filter( 'woocommerce_hpos_pre_query', '__return_null' );
+		try {
+			$this->with_provider_param(
+				'acme-couriers',
+				function () {
+					$args = $this->renderer->filter_orders_by_shipping_provider( array( 'post__in' => array( 911, 999 ) ) );
+
+					$this->assertSame( array( 911 ), $args['post__in'] );
+				}
+			);
+		} finally {
+			remove_filter( 'woocommerce_hpos_pre_query', '__return_null' );
+		}
+	}
+
+	/**
+	 * @testdox The HPOS id-list fallback narrows an existing id restriction instead of replacing it.
+	 */
+	public function test_filter_orders_fallback_intersects_existing_id_arg(): void {
+		$this->seed_fulfillment( 961, 'acme-couriers' );
+		$this->seed_fulfillment( 962, 'acme-couriers' );
+
+		add_filter( 'woocommerce_hpos_pre_query', '__return_null' );
+		try {
+			$this->with_provider_param(
+				'acme-couriers',
+				function () {
+					// The query remaps post__in onto id, so an existing id must survive the fallback.
+					$args = $this->renderer->filter_orders_by_shipping_provider( array( 'id' => array( 962, 999 ) ) );
+
+					$this->assertSame( array( 962 ), $args['post__in'] );
+				}
+			);
+		} finally {
+			remove_filter( 'woocommerce_hpos_pre_query', '__return_null' );
+		}
+	}
+
+	/**
+	 * @testdox The HPOS id-list fallback matches no orders when the provider has none.
+	 */
+	public function test_filter_orders_fallback_matches_nothing_for_unused_provider(): void {
+		$this->seed_fulfillment( 921, 'acme-couriers' );
+
+		add_filter( 'woocommerce_hpos_pre_query', '__return_null' );
+		try {
+			$this->with_provider_param(
+				'nobody-ships-with-this',
+				function () {
+					$args = $this->renderer->filter_orders_by_shipping_provider( array() );
+
+					$this->assertSame( array( 0 ), $args['post__in'], 'An empty post__in would drop the filter instead of applying it.' );
+				}
+			);
+		} finally {
+			remove_filter( 'woocommerce_hpos_pre_query', '__return_null' );
+		}
+	}
+
+	/**
+	 * @testdox The legacy filter restricts by id list when a callback can answer the query without the built SQL.
+	 */
+	public function test_filter_legacy_orders_falls_back_to_id_list_for_short_circuited_queries(): void {
+		$this->seed_fulfillment( 931, 'acme-couriers' );
+		$this->seed_fulfillment( 932, 'other-co' );
+
+		$query = new WP_Query();
+		$query->set( 'post_type', 'shop_order' );
+
+		// Only the callback's presence matters here, not what it returns.
+		add_filter( 'posts_pre_query', '__return_null' );
+		try {
+			$this->with_main_query(
+				$query,
+				function () use ( $query ) {
+					$this->with_provider_param(
+						'acme-couriers',
+						function () use ( $query ) {
+							$this->renderer->filter_legacy_orders_by_shipping_provider( $query );
+
+							$this->assertSame( array( 931 ), $query->get( 'post__in' ) );
+							$this->assertEmpty(
+								$query->get( 'fulfillment_shipping_provider' ),
+								'The marker would be ignored by a callback that discards the built SQL.'
+							);
+						}
+					);
+				}
+			);
+		} finally {
+			remove_filter( 'posts_pre_query', '__return_null' );
+		}
+	}
+
+	/**
+	 * @testdox The HPOS filter restricts by id list when the query suppresses the clause filters.
+	 */
+	public function test_filter_orders_falls_back_to_id_list_when_filters_are_suppressed(): void {
+		$this->seed_fulfillment( 941, 'acme-couriers' );
+		$this->seed_fulfillment( 942, 'other-co' );
+
+		$this->with_provider_param(
+			'acme-couriers',
+			function () {
+				$args = $this->renderer->filter_orders_by_shipping_provider( array( 'suppress_filters' => true ) );
+
+				$this->assertSame( array( 941 ), $args['post__in'] );
+				$this->assertArrayNotHasKey(
+					'fulfillment_shipping_provider',
+					$args,
+					'A suppressed query never reaches the clause filter that reads the marker.'
+				);
+			}
+		);
+	}
+
+	/**
+	 * @testdox The legacy filter restricts by id list when the query suppresses the clause filters.
+	 */
+	public function test_filter_legacy_orders_falls_back_to_id_list_when_filters_are_suppressed(): void {
+		$this->seed_fulfillment( 951, 'acme-couriers' );
+		$this->seed_fulfillment( 952, 'other-co' );
+
+		$query = new WP_Query();
+		$query->set( 'post_type', 'shop_order' );
+		$query->set( 'suppress_filters', true );
+
+		$this->with_main_query(
+			$query,
+			function () use ( $query ) {
+				$this->with_provider_param(
+					'acme-couriers',
+					function () use ( $query ) {
+						$this->renderer->filter_legacy_orders_by_shipping_provider( $query );
+
+						$this->assertSame( array( 951 ), $query->get( 'post__in' ) );
+						$this->assertEmpty(
+							$query->get( 'fulfillment_shipping_provider' ),
+							'A suppressed query never reaches the clause filter that reads the marker.'
+						);
+					}
+				);
+			}
+		);
+	}
+
+	/**
 	 * Build the provider subquery and run it, returning the matching order ids.
 	 *
 	 * @param string $provider The provider key or the __other__ sentinel.
