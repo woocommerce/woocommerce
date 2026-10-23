@@ -30,7 +30,7 @@ class InvalidInputExceptionTest extends TestCase {
 			throw new InvalidInputException(
 				ValidationErrorCode::OUT_OF_BOUNDS,
 				'trial_duration.length',
-				'BillingPolicy: trial length must be positive.',
+				'Trial length must be positive.',
 				array( 'min' => 1 )
 			);
 		} catch ( DomainException $caught ) {
@@ -41,7 +41,7 @@ class InvalidInputExceptionTest extends TestCase {
 		$this->assertSame( 'out_of_bounds', $e->get_error_code() );
 		$this->assertSame( 'trial_duration.length', $e->get_field() );
 		$this->assertSame( array( 'min' => 1 ), $e->get_params() );
-		$this->assertSame( 'BillingPolicy: trial length must be positive.', $e->getMessage() );
+		$this->assertSame( 'Trial length must be positive.', $e->getMessage() );
 	}
 
 	/**

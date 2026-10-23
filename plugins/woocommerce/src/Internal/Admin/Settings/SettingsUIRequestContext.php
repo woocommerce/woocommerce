@@ -390,8 +390,7 @@ class SettingsUIRequestContext {
 					$this->record_script_handles_failure(
 						new \RuntimeException(
 							sprintf(
-								/* translators: %s: script handle. */
-								__( 'Settings UI script handle "%s" could not be enqueued.', 'woocommerce' ),
+								'Settings UI script handle "%s" could not be enqueued.',
 								sanitize_text_field( $script_handle )
 							)
 						),
@@ -446,7 +445,7 @@ class SettingsUIRequestContext {
 
 		return '' !== $this->script_handles_failure_reason
 			? $this->script_handles_failure_reason
-			: __( 'Settings UI script handles could not be resolved.', 'woocommerce' );
+			: 'Settings UI script handles could not be resolved.';
 	}
 
 	/**
@@ -495,7 +494,7 @@ class SettingsUIRequestContext {
 
 		return '' !== $this->schema_failure_reason
 			? $this->schema_failure_reason
-			: __( 'Settings UI schema could not be resolved.', 'woocommerce' );
+			: 'Settings UI schema could not be resolved.';
 	}
 
 	/**
@@ -566,8 +565,7 @@ class SettingsUIRequestContext {
 					wc_doing_it_wrong(
 						__METHOD__,
 						sprintf(
-							/* translators: 1: settings page id, 2: settings section id, 3: failure reason. */
-							esc_html__( 'The native Settings UI page for page "%1$s" section "%2$s" could not be resolved. Falling back to the default settings adapter. Reason: %3$s', 'woocommerce' ),
+							esc_html( 'The native Settings UI page for page "%1$s" section "%2$s" could not be resolved. Falling back to the default settings adapter. Reason: %3$s' ),
 							esc_html( $settings_page->get_id() ),
 							esc_html( self::get_section_key( $section ) ),
 							esc_html( get_class( $e ) . ': ' . $e->getMessage() )
@@ -610,15 +608,11 @@ class SettingsUIRequestContext {
 	 * @throws \InvalidArgumentException When a handle is not a non-empty string.
 	 */
 	private static function validate_script_handles( array $script_handles ): array {
-		// Exception messages are cached diagnostics rather than HTML output. Dynamic
-		// handles are sanitized before the exception crosses this boundary.
-		// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		foreach ( $script_handles as $script_handle ) {
 			if ( ! is_string( $script_handle ) || '' === trim( $script_handle ) ) {
-				throw new \InvalidArgumentException( __( 'Settings UI script handles must be non-empty strings.', 'woocommerce' ) );
+				throw new \InvalidArgumentException( 'Settings UI script handles must be non-empty strings.' );
 			}
 		}
-		// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
 
 		return array_values( array_unique( array_map( 'trim', $script_handles ) ) );
 	}
@@ -646,8 +640,7 @@ class SettingsUIRequestContext {
 				$this->record_script_handles_failure(
 					new \RuntimeException(
 						sprintf(
-							/* translators: %s: script handle. */
-							__( 'Settings UI script handle "%s" is not registered.', 'woocommerce' ),
+							'Settings UI script handle "%s" is not registered.',
 							sanitize_text_field( $script_handle )
 						)
 					),
@@ -672,8 +665,7 @@ class SettingsUIRequestContext {
 		self::log_resolution_failure( 'Settings UI script handles', $this->settings_page->get_id(), $this->section, $e, $caller );
 
 		$this->script_handles_failure_reason = sprintf(
-			/* translators: %s: failure reason. */
-			__( 'Settings UI script handles could not be resolved: %s', 'woocommerce' ),
+			'Settings UI script handles could not be resolved: %s',
 			self::sanitize_failure_reason( $e )
 		);
 	}

@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection\Utils as ProductC
 use Automattic\WooCommerce\Internal\ProductAttributes\VisualAttributeTermMeta;
 use Automattic\WooCommerce\Internal\ProductFilters\FilterDataProvider;
 use Automattic\WooCommerce\Internal\ProductFilters\QueryClauses;
+use WP_Block;
 
 /**
  * Product Filter: Attribute Block.
@@ -250,7 +251,15 @@ final class ProductFilterAttribute extends AbstractBlock {
 			),
 		);
 
-		if ( empty( $filter_context['items'] ) ) {
+		$is_empty            = empty( $filter_context['items'] );
+		$product_filters_key = $block->context['productFiltersKey'] ?? '';
+		if ( is_string( $product_filters_key ) && '' !== $product_filters_key ) {
+			$state = wp_interactivity_state( 'woocommerce/product-filters' );
+			$state['filterEmptyStates'][ $product_filters_key ][] = $is_empty;
+			wp_interactivity_state( 'woocommerce/product-filters', $state );
+		}
+
+		if ( $is_empty ) {
 			$wrapper_attributes['hidden'] = true;
 			$wrapper_attributes['class']  = 'wc-block-product-filter--hidden';
 		}
@@ -277,7 +286,8 @@ final class ProductFilterAttribute extends AbstractBlock {
 	 * @param string   $query_type Query type, accept 'and' or 'or'.
 	 */
 	private function get_attribute_counts( $block, $slug, $query_type ) {
-		if ( ! isset( $block->context['filterParams'] ) ) {
+		$context = $block->context;
+		if ( ! isset( $context['filterParams'] ) ) {
 			return array();
 		}
 
@@ -294,7 +304,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 			);
 		}
 
-		if ( ! empty( $query_vars['tax_query'] ) ) {
+		if ( ! isset( $context['queryId'] ) && ! empty( $query_vars['tax_query'] ) ) {
 			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 			$query_vars['tax_query'] = ProductCollectionUtils::remove_query_array( $query_vars['tax_query'], 'taxonomy', $slug );
 		}
