@@ -537,6 +537,51 @@ test.describe( 'Merchant → Checkout', () => {
 			await editor.selectBlocks( blockSelectorInEditor );
 		} );
 
+		test( 'Merchant can switch from the Terms block to the Actions block terms', async ( {
+			editor,
+		} ) => {
+			await editor.selectBlocks(
+				`${ blockSelectorInEditor } .wp-block-woocommerce-checkout-actions-block`
+			);
+
+			const showTermsToggle = editor.page.getByLabel(
+				'Show terms and conditions',
+				{ exact: true }
+			);
+			const actionsBlock = await editor.getBlockByName(
+				'woocommerce/checkout-actions-block'
+			);
+			const terms = actionsBlock.locator( '.wc-block-checkout__terms' );
+
+			// While the Terms block is in the checkout, it owns the terms.
+			await expect( showTermsToggle ).toHaveCount( 0 );
+			await expect(
+				editor.page.getByRole( 'button', {
+					name: 'Switch',
+					exact: true,
+				} )
+			).toHaveCount( 0 );
+
+			await editor.selectBlocks(
+				`${ blockSelectorInEditor } .wp-block-woocommerce-checkout-terms-block`
+			);
+
+			await editor.page
+				.getByRole( 'button', { name: 'Switch', exact: true } )
+				.click();
+
+			await expect(
+				editor.canvas.locator(
+					'[data-type="woocommerce/checkout-terms-block"]'
+				)
+			).toHaveCount( 0 );
+			await expect( showTermsToggle ).toBeChecked();
+			await expect( terms ).toBeVisible();
+
+			await showTermsToggle.uncheck();
+			await expect( terms ).toBeHidden();
+		} );
+
 		test( 'Return to cart link is visible and can be toggled', async ( {
 			editor,
 		} ) => {

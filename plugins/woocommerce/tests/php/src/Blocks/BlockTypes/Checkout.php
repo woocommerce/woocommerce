@@ -139,6 +139,36 @@ class Checkout extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Checkout is told whether woocommerce_checkout_show_terms hides the terms.
+	 */
+	public function test_enqueue_data_exposes_checkout_show_terms(): void {
+		$checkout = new CheckoutMock( $this->asset_api, $this->registry, $this->integration_registry, 'checkout-mock' );
+
+		$checkout->mock_enqueue_data();
+		$this->assertTrue( $this->registry->get()['checkoutShowTerms'], 'Terms are shown by default' );
+
+		add_filter( 'woocommerce_checkout_show_terms', '__return_false' );
+		\WP_Block_Type_Registry::get_instance()->unregister( 'woocommerce/checkout-mock' );
+		$registry = new AssetDataRegistryMock( $this->asset_api );
+		$checkout = new CheckoutMock( $this->asset_api, $registry, $this->integration_registry, 'checkout-mock' );
+		$checkout->mock_enqueue_data();
+		$this->assertFalse( $registry->get()['checkoutShowTerms'], 'The filter should hide terms' );
+	}
+
+	/**
+	 * @testdox New Checkout pages put terms on the Actions block instead of a Terms block.
+	 */
+	public function test_default_checkout_page_content_uses_actions_terms(): void {
+		$method = new \ReflectionMethod( \WC_Install::class, 'get_checkout_block_content' );
+		$method->setAccessible( true );
+		$fields = parse_blocks( $method->invoke( null ) )[0]['innerBlocks'][0];
+		$attrs  = array_column( $fields['innerBlocks'], 'attrs', 'blockName' );
+
+		$this->assertArrayNotHasKey( 'woocommerce/checkout-terms-block', $attrs, 'No Terms block' );
+		$this->assertTrue( $attrs['woocommerce/checkout-actions-block']['showTerms'] ?? null, 'Actions block shows terms' );
+	}
+
+	/**
 	 * Overrides the WC logger.
 	 *
 	 * @return mixed
