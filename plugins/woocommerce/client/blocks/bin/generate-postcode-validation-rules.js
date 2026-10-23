@@ -214,12 +214,12 @@ async function generate() {
 		const legacyFormat = LEGACY_FORMATS[ countryCode ];
 		const rule = legacyFormat
 			? `${ override ?? upstream }|${ legacyFormat }`
-			: override ?? upstream;
+			: ( override ?? upstream );
 		const anyPrefix = postalPrefix || legacyPrefix;
 		const pattern = anyPrefix
 			? `(?:${ anyPrefix })?${
 					rule.includes( '|' ) ? `(?:${ rule })` : rule
-			  }`
+				}`
 			: rule;
 
 		// PHP wraps the rule in ~ delimiters.
