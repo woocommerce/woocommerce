@@ -554,8 +554,8 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 			$attachment_ids[] = $product->get_image_id();
 		}
 
-		// Add gallery images.
-		$attachment_ids = array_merge( $attachment_ids, $product->get_gallery_image_ids() );
+		// Add gallery images, skipping the featured image if it is also in the gallery.
+		$attachment_ids = array_merge( $attachment_ids, array_diff( $product->get_gallery_image_ids(), $attachment_ids ) );
 
 		if ( ! empty( $attachment_ids ) ) {
 			// Prime caches to reduce future queries.
