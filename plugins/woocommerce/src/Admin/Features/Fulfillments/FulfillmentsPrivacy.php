@@ -20,7 +20,7 @@ defined( 'ABSPATH' ) || exit;
  * Redaction writes directly to the core fulfillment tables; a data store swapped in
  * through the `woocommerce_data_stores` filter is responsible for its own erasure.
  *
- * @since 11.3.0
+ * @since 11.4.0
  */
 class FulfillmentsPrivacy {
 
@@ -208,7 +208,7 @@ class FulfillmentsPrivacy {
 		/**
 		 * Filters the fulfillment meta keys redacted during personal-data erasure.
 		 *
-		 * @since 11.3.0
+		 * @since 11.4.0
 		 *
 		 * @param string[] $meta_keys The meta keys to clear.
 		 * @param WC_Order $order     The order being anonymized.
