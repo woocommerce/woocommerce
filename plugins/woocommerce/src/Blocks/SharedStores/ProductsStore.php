@@ -157,6 +157,19 @@ class ProductsStore {
 	}
 
 	/**
+	 * Omit image metadata from client state; product galleries hydrate their own image data.
+	 *
+	 * @param array $products Products or variations keyed by ID.
+	 * @return array Product data without images.
+	 */
+	private static function remove_images( array $products ): array {
+		return array_map(
+			static fn( array $product ): array => array_diff_key( $product, array( 'images' => true ) ),
+			$products
+		);
+	}
+
+	/**
 	 * Load a product into state.
 	 *
 	 * @param string $consent_statement The consent statement string.
@@ -178,7 +191,7 @@ class ProductsStore {
 		self::register_getters();
 		wp_interactivity_state(
 			self::$store_namespace,
-			array( 'products' => array( $product_id => self::$products[ $product_id ] ) )
+			array( 'products' => self::remove_images( array( $product_id => self::$products[ $product_id ] ) ) )
 		);
 
 		return self::$products[ $product_id ];
@@ -235,7 +248,7 @@ class ProductsStore {
 		self::register_getters();
 		wp_interactivity_state(
 			self::$store_namespace,
-			array( 'products' => $keyed_products )
+			array( 'products' => self::remove_images( $keyed_products ) )
 		);
 
 		return $keyed_products;
@@ -275,7 +288,7 @@ class ProductsStore {
 		self::register_getters();
 		wp_interactivity_state(
 			self::$store_namespace,
-			array( 'productVariations' => $keyed_variations )
+			array( 'productVariations' => self::remove_images( $keyed_variations ) )
 		);
 
 		return $keyed_variations;
