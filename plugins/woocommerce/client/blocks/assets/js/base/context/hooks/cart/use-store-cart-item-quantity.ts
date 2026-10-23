@@ -144,16 +144,15 @@ export const useStoreCartItemQuantity = (
 		previousDebouncedQuantity,
 	] );
 
+	// The cleanups release only the count their effect added, so other holds on
+	// the checkout calculating counter survive.
 	useEffect( () => {
-		if ( isPending.delete ) {
-			__internalStartCalculation();
-		} else {
-			__internalFinishCalculation();
+		if ( ! isPending.delete ) {
+			return;
 		}
+		__internalStartCalculation();
 		return () => {
-			if ( isPending.delete ) {
-				__internalFinishCalculation();
-			}
+			__internalFinishCalculation();
 		};
 	}, [
 		__internalFinishCalculation,
@@ -162,15 +161,12 @@ export const useStoreCartItemQuantity = (
 	] );
 
 	useEffect( () => {
-		if ( isPending.quantity || debouncedQuantity !== quantity ) {
-			__internalStartCalculation();
-		} else {
-			__internalFinishCalculation();
+		if ( ! isPending.quantity && debouncedQuantity === quantity ) {
+			return;
 		}
+		__internalStartCalculation();
 		return () => {
-			if ( isPending.quantity || debouncedQuantity !== quantity ) {
-				__internalFinishCalculation();
-			}
+			__internalFinishCalculation();
 		};
 	}, [
 		__internalStartCalculation,
