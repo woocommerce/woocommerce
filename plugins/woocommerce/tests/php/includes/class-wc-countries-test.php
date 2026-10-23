@@ -1014,8 +1014,9 @@ class WC_Countries_Test extends \WC_Unit_Test_Case {
 	public function test_get_formatted_address_decodes_entity_encoded_state_names(): void {
 		$this->translate_strings( array( 'Ancona' => 'Anc&ocirc;ne' ) );
 		$this->use_address_format( 'IT', "{state}\n{state_upper}" );
+		$sut = new WC_Countries();
 
-		$address = ( new WC_Countries() )->get_formatted_address(
+		$address = $sut->get_formatted_address(
 			array(
 				'state'   => 'AN',
 				'country' => 'IT',
@@ -1031,8 +1032,9 @@ class WC_Countries_Test extends \WC_Unit_Test_Case {
 	 */
 	public function test_get_formatted_address_decodes_entity_encoded_country_names(): void {
 		$this->use_address_format( 'CW', "{country}\n{country_upper}" );
+		$sut = new WC_Countries();
 
-		$address = ( new WC_Countries() )->get_formatted_address( array( 'country' => 'CW' ), "\n" );
+		$address = $sut->get_formatted_address( array( 'country' => 'CW' ), "\n" );
 
 		$this->assertSame( "Curaçao\nCURAÇAO", $address, 'The country should not be output as entities, or escaped twice once uppercased.' );
 	}
@@ -1043,8 +1045,9 @@ class WC_Countries_Test extends \WC_Unit_Test_Case {
 	public function test_get_formatted_address_escapes_markup_in_entity_encoded_state_names(): void {
 		$this->translate_strings( array( 'Ancona' => 'Anc&lt;b&gt;ne' ) );
 		$this->use_address_format( 'IT', '{state_upper}' );
+		$sut = new WC_Countries();
 
-		$address = ( new WC_Countries() )->get_formatted_address(
+		$address = $sut->get_formatted_address(
 			array(
 				'state'   => 'AN',
 				'country' => 'IT',
