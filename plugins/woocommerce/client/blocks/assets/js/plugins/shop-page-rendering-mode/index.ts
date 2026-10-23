@@ -41,7 +41,7 @@ const ShopPageRenderingMode = () => {
 			!! shopPageId &&
 			!! editor &&
 			editor.getCurrentPostType() === 'page' &&
-			Number( editor.getCurrentPostId() ) === shopPageId &&
+			Number( editor?.getCurrentPostId() ) === shopPageId &&
 			!! editor.getEditorSettings().supportsTemplateMode
 		);
 	}, [] );
