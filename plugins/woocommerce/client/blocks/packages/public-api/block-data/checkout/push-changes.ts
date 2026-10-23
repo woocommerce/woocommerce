@@ -12,7 +12,7 @@ import { getSetting } from '@woocommerce/settings';
  */
 import { STORE_KEY as CHECKOUT_STORE_KEY } from './constants';
 import { STORE_KEY as PAYMENT_STORE_KEY } from '../payment/constants';
-import { processErrorResponse } from '../utils/process-error-response';
+import { processErrorResponse } from '../utils';
 import { CheckoutPutData } from './types';
 import {
 	clearFieldErrorNotices,

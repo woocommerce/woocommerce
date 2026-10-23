@@ -7,8 +7,8 @@ import { debounce } from '@woocommerce/base-utils';
 /**
  * Internal dependencies
  */
-import { STORE_KEY as PAYMENT_STORE_KEY } from '../payment/constants';
-import { STORE_KEY as CART_STORE_KEY } from './constants';
+import { store as paymentStore } from '../payment';
+import { store as cartStore } from './index';
 
 /**
  * This function is used to update payment methods when the cart changes, or on first load.
@@ -17,13 +17,11 @@ import { STORE_KEY as CART_STORE_KEY } from './constants';
  */
 export const updatePaymentMethods = async () => {
 	const isInitialized =
-		select( CART_STORE_KEY ).hasFinishedResolution( 'getCartData' );
+		select( cartStore ).hasFinishedResolution( 'getCartData' );
 	if ( ! isInitialized ) {
 		return false;
 	}
-	await dispatch(
-		PAYMENT_STORE_KEY
-	).__internalUpdateAvailablePaymentMethods();
+	await dispatch( paymentStore ).__internalUpdateAvailablePaymentMethods();
 	return true;
 };
 

@@ -139,10 +139,7 @@ describe( 'pushChanges', () => {
 	beforeAll( () => {
 		wpDataFunctions.select.mockImplementation(
 			( storeNameOrDescriptor: unknown ) => {
-				if (
-					storeNameOrDescriptor === cartStore ||
-					storeNameOrDescriptor === cartStore.name
-				) {
+				if ( storeNameOrDescriptor === cartStore ) {
 					return {
 						...jest
 							.requireActual( '@wordpress/data' )
@@ -169,10 +166,7 @@ describe( 'pushChanges', () => {
 		);
 		wpDataFunctions.dispatch.mockImplementation(
 			( storeNameOrDescriptor: unknown ) => {
-				if (
-					storeNameOrDescriptor === cartStore ||
-					storeNameOrDescriptor === cartStore.name
-				) {
+				if ( storeNameOrDescriptor === cartStore ) {
 					return {
 						...jest
 							.requireActual( '@wordpress/data' )
