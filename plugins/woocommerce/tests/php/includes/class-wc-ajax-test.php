@@ -89,6 +89,91 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Should paginate item mutation notes only when the request opts in.
+	 * @param string $action AJAX action without the WooCommerce prefix.
+	 * @param bool   $paginate Whether to request paginated notes.
+	 * @testWith ["add_order_item", false]
+	 *           ["add_order_item", true]
+	 *           ["remove_order_coupon", false]
+	 *           ["remove_order_coupon", true]
+	 *           ["remove_order_item", false]
+	 *           ["remove_order_item", true]
+	 *           ["save_order_items", false]
+	 *           ["save_order_items", true]
+	 */
+	public function test_order_item_notes_pagination_is_opt_in( string $action, bool $paginate ): void {
+		$this->_setRole( 'administrator' );
+		$order   = wc_create_order();
+		$product = WC_Helper_Product::create_simple_product();
+		$item_id = $order->add_product( $product );
+		for ( $i = 1; $i <= 11; $i++ ) {
+			$order->add_order_note( 'Compatibility note ' . $i );
+		}
+
+		$_POST['order_id'] = $order->get_id();
+		$_POST['security'] = wp_create_nonce( 'order-item' );
+		unset( $_POST['paginate_notes'] );
+		if ( $paginate ) {
+			$_POST['paginate_notes'] = true;
+		}
+
+		switch ( $action ) {
+			case 'add_order_item':
+				$_POST['data'] = array(
+					array(
+						'id'  => $product->get_id(),
+						'qty' => 1,
+					),
+				);
+				break;
+			case 'remove_order_coupon':
+				$coupon = new WC_Coupon();
+				$coupon->set_code( 'notes-pagination' );
+				$coupon->save();
+				$order->apply_coupon( $coupon );
+				$_POST['coupon'] = $coupon->get_code();
+				break;
+			case 'remove_order_item':
+				$_POST['order_item_ids'] = array( $item_id );
+				break;
+			case 'save_order_items':
+				$_POST['items'] = '';
+				break;
+		}
+
+		// An Error bypasses endpoint catch blocks, matching wp_die() exiting a real request.
+		$stop_request = new Error( 'AJAX response sent.' );
+		$die_handler  = function () use ( $stop_request ) {
+			return function () use ( $stop_request ) {
+				$this->_last_response .= ob_get_clean();
+				throw $stop_request;
+			};
+		};
+		add_filter( 'wp_die_ajax_handler', $die_handler, PHP_INT_MAX );
+		try {
+			$this->do_ajax( 'woocommerce_' . $action );
+		} catch ( Error $error ) {
+			if ( $error !== $stop_request ) {
+				throw $error;
+			}
+		} finally {
+			remove_filter( 'wp_die_ajax_handler', $die_handler, PHP_INT_MAX );
+		}
+		$response             = json_decode( $this->_last_response, true );
+		$this->_last_response = false;
+
+		$this->assertTrue( $response['success'], 'The order item mutation should succeed.' );
+		$html = $response['data']['notes_html'];
+		$this->assertStringContainsString( 'Compatibility note 11</p>', $html, 'The newest fixture note should be included.' );
+		if ( $paginate ) {
+			$this->assertSame( 10, substr_count( $html, '<li rel=' ), 'An opted-in response should contain one page of notes.' );
+			$this->assertStringNotContainsString( 'Compatibility note 1</p>', $html, 'An opted-in response should omit the oldest note.' );
+		} else {
+			$this->assertStringContainsString( 'Compatibility note 1</p>', $html, 'Legacy requests should receive the oldest note too.' );
+		}
+	}
+
+	/**
 	 * Stock should not be reduced from AJAX when an item is added to an order.
 	 */
 	public function test_add_item_to_pending_payment_order() {

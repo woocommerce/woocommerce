@@ -619,6 +619,7 @@ jQuery( function ( $ ) {
 
 			var data = $.extend( {}, wc_meta_boxes_order_items.get_taxable_address(), {
 				action : 'woocommerce_remove_order_coupon',
+				paginate_notes: true,
 				dataType : 'json',
 				order_id : woocommerce_admin_meta_boxes.post_id,
 				security : woocommerce_admin_meta_boxes.order_item_nonce,
@@ -851,6 +852,7 @@ jQuery( function ( $ ) {
 					order_id      : woocommerce_admin_meta_boxes.post_id,
 					order_item_ids: order_item_id,
 					action        : 'woocommerce_remove_order_item',
+					paginate_notes: true,
 					security      : woocommerce_admin_meta_boxes.order_item_nonce
 				} );
 
@@ -1020,6 +1022,7 @@ jQuery( function ( $ ) {
 				order_id: woocommerce_admin_meta_boxes.post_id,
 				items:    $( 'table.woocommerce_order_items :input[name], .wc-order-totals-items :input[name]' ).serialize(),
 				action:   'woocommerce_save_order_items',
+				paginate_notes: true,
 				security: woocommerce_admin_meta_boxes.order_item_nonce
 			};
 
@@ -1768,6 +1771,7 @@ jQuery( function ( $ ) {
 
 				var data = $.extend( {}, wc_meta_boxes_order_items.get_taxable_address(), {
 					action   : 'woocommerce_add_order_item',
+					paginate_notes: true,
 					order_id : woocommerce_admin_meta_boxes.post_id,
 					security : woocommerce_admin_meta_boxes.order_item_nonce,
 					data     : add_items
