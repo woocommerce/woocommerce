@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Accept HTML entities such as &amp;nbsp; as valid price thousand and decimal separators when saving store settings.
