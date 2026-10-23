@@ -38,7 +38,7 @@ class TaxRatesQuery extends AbstractDomainAbility implements AbilityDefinition {
 	public static function get_registration_args(): array {
 		return array(
 			'label'               => __( 'Query tax rates', 'woocommerce' ),
-			'description'         => __( 'List the tax rates of every tax class, in the order WooCommerce matches them.', 'woocommerce' ),
+			'description'         => __( 'List the tax rates of every tax class, in the order of the tax settings.', 'woocommerce' ),
 			'category'            => 'woocommerce',
 			'input_schema'        => array(
 				'type'                 => 'object',
@@ -94,27 +94,48 @@ class TaxRatesQuery extends AbstractDomainAbility implements AbilityDefinition {
 	 * @since 11.4.0
 	 */
 	public static function execute( array $input ): array {
-		$classes = array_merge( array( 'standard' ), \WC_Tax::get_tax_class_slugs() );
+		global $wpdb;
+
+		$page     = max( 1, (int) ( $input['page'] ?? 1 ) );
+		$per_page = min( 100, max( 1, (int) ( $input['per_page'] ?? 50 ) ) );
+
+		$conditions = array( '1=1' );
 		if ( isset( $input['class'] ) ) {
-			$classes = array_intersect( $classes, array( sanitize_title( (string) $input['class'] ) ) );
-		}
-		$country = isset( $input['country'] ) ? strtoupper( (string) $input['country'] ) : '';
-
-		$rates = array();
-		foreach ( $classes as $tax_class ) {
-			foreach ( (array) \WC_Tax::get_rates_for_tax_class( 'standard' === $tax_class ? '' : $tax_class ) as $rate ) {
-				if ( $rate instanceof \stdClass && ( '' === $country || '' === $rate->tax_rate_country || $country === $rate->tax_rate_country ) ) {
-					$rates[] = self::format_rate_for_response( $rate, $tax_class );
-				}
+			$tax_class = sanitize_title( (string) $input['class'] );
+			if ( 'standard' !== $tax_class && ! in_array( $tax_class, \WC_Tax::get_tax_class_slugs(), true ) ) {
+				return array(
+					'rates'       => array(),
+					'total_pages' => 0,
+					'page'        => $page,
+					'per_page'    => $per_page,
+				);
 			}
+			$conditions[] = $wpdb->prepare( 'tax_rate_class = %s', 'standard' === $tax_class ? '' : $tax_class );
 		}
+		if ( isset( $input['country'] ) ) {
+			$conditions[] = $wpdb->prepare( "tax_rate_country IN ( '', %s )", strtoupper( (string) $input['country'] ) );
+		}
+		$where = implode( ' AND ', $conditions );
 
-		$page     = (int) ( $input['page'] ?? 1 );
-		$per_page = (int) ( $input['per_page'] ?? 50 );
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Each condition is prepared above.
+		$rows  = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT * FROM {$wpdb->prefix}woocommerce_tax_rates WHERE {$where} ORDER BY tax_rate_class, tax_rate_order, tax_rate_id LIMIT %d, %d",
+				( $page - 1 ) * $per_page,
+				$per_page
+			)
+		);
+		$total = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_tax_rates WHERE {$where}" );
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		$locations = self::get_locations( array_map( 'intval', wp_list_pluck( $rows, 'tax_rate_id' ) ) );
 
 		return array(
-			'rates'       => array_slice( $rates, ( $page - 1 ) * $per_page, $per_page ),
-			'total_pages' => (int) ceil( count( $rates ) / $per_page ),
+			'rates'       => array_map(
+				static fn ( \stdClass $rate ): array => self::format_rate_for_response( $rate, $locations[ (int) $rate->tax_rate_id ] ?? array() ),
+				$rows
+			),
+			'total_pages' => (int) ceil( $total / $per_page ),
 			'page'        => $page,
 			'per_page'    => $per_page,
 		);
@@ -132,25 +153,59 @@ class TaxRatesQuery extends AbstractDomainAbility implements AbilityDefinition {
 	}
 
 	/**
+	 * Get the postcodes and cities of the given tax rates in one query.
+	 *
+	 * @param int[] $rate_ids Tax rate IDs.
+	 * @return array<int, array{postcodes?: string[], cities?: string[]}> Locations keyed by tax rate ID.
+	 */
+	private static function get_locations( array $rate_ids ): array {
+		global $wpdb;
+
+		if ( empty( $rate_ids ) ) {
+			return array();
+		}
+
+		$placeholders = implode( ', ', array_fill( 0, count( $rate_ids ), '%d' ) );
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- The placeholders are generated for each ID.
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT tax_rate_id, location_code, location_type FROM {$wpdb->prefix}woocommerce_tax_rate_locations WHERE tax_rate_id IN ({$placeholders}) ORDER BY location_id",
+				$rate_ids
+			)
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+
+		$locations = array();
+		foreach ( $rows as $row ) {
+			$key = 'postcode' === $row->location_type ? 'postcodes' : ( 'city' === $row->location_type ? 'cities' : null );
+			if ( null !== $key ) {
+				$locations[ (int) $row->tax_rate_id ][ $key ][] = (string) $row->location_code;
+			}
+		}
+
+		return $locations;
+	}
+
+	/**
 	 * Format a tax rate row.
 	 *
-	 * @param \stdClass $rate      Rate row with its postcode and city lists.
-	 * @param string    $tax_class Tax class slug.
+	 * @param \stdClass $rate      Row of the tax rates table.
+	 * @param array     $locations Postcodes and cities of the rate.
 	 * @return array
 	 */
-	private static function format_rate_for_response( \stdClass $rate, string $tax_class ): array {
+	private static function format_rate_for_response( \stdClass $rate, array $locations ): array {
 		return array(
 			'id'        => (int) $rate->tax_rate_id,
 			'country'   => (string) $rate->tax_rate_country,
 			'state'     => (string) $rate->tax_rate_state,
-			'postcodes' => array_values( (array) ( $rate->postcode ?? array() ) ),
-			'cities'    => array_values( (array) ( $rate->city ?? array() ) ),
+			'postcodes' => $locations['postcodes'] ?? array(),
+			'cities'    => $locations['cities'] ?? array(),
 			'rate'      => (string) $rate->tax_rate,
 			'name'      => (string) $rate->tax_rate_name,
 			'priority'  => (int) $rate->tax_rate_priority,
 			'compound'  => (bool) $rate->tax_rate_compound,
 			'shipping'  => (bool) $rate->tax_rate_shipping,
-			'class'     => $tax_class,
+			'class'     => '' === (string) $rate->tax_rate_class ? 'standard' : (string) $rate->tax_rate_class,
 		);
 	}
 

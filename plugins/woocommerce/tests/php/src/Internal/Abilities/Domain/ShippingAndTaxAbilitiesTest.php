@@ -42,7 +42,7 @@ class ShippingAndTaxAbilitiesTest extends \WC_Unit_Test_Case {
 	 * Start each test from empty registries, so the abilities build their schemas again.
 	 */
 	public function setUp(): void {
-		global $wp_actions;
+		global $wp_actions, $wpdb;
 
 		if ( ! function_exists( 'wp_register_ability' ) ) {
 			require_once WC_ABSPATH . 'vendor/wordpress/abilities-api/includes/bootstrap.php';
@@ -53,6 +53,8 @@ class ShippingAndTaxAbilitiesTest extends \WC_Unit_Test_Case {
 		$wp_actions['init']        = max( 1, (int) ( $wp_actions['init'] ?? 0 ) ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
 		parent::setUp();
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rate_locations" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}woocommerce_tax_rates" );
 
 		wc_get_container()->get( AbilitiesLoader::class )->init();
 		self::reset_registries();
@@ -183,6 +185,35 @@ class ShippingAndTaxAbilitiesTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should add extension fields to each shipping method while the feature is on.
+	 */
+	public function test_methods_take_extension_fields(): void {
+		$instance_id = ( new \WC_Shipping_Zone( 0 ) )->add_shipping_method( 'flat_rate' );
+		$this->add_test_field(
+			'shipping_method',
+			static function ( \WC_Shipping_Method $method ) {
+				return 'method-' . $method->get_instance_id();
+			}
+		);
+
+		$result = $this->run_ability( 'woocommerce/shipping-zones-query', array( 'include' => array( 0 ) ) );
+
+		$this->assertSame( "method-{$instance_id}", $result['zones'][0]['methods'][0]['extensions']['test-ext']['code'] );
+	}
+
+	/**
+	 * @testdox Should return zones and methods without extensions while the feature is off.
+	 */
+	public function test_zones_and_methods_have_no_extensions_with_the_feature_off(): void {
+		( new \WC_Shipping_Zone( 0 ) )->add_shipping_method( 'flat_rate' );
+
+		$result = $this->run_ability( 'woocommerce/shipping-zones-query', array( 'include' => array( 0 ) ) );
+
+		$this->assertArrayNotHasKey( 'extensions', $result['zones'][0] );
+		$this->assertArrayNotHasKey( 'extensions', $result['zones'][0]['methods'][0] );
+	}
+
+	/**
 	 * @testdox Should list tax rates of every class and filter them by country.
 	 */
 	public function test_tax_rates_filter_by_country(): void {
@@ -228,5 +259,74 @@ class ShippingAndTaxAbilitiesTest extends \WC_Unit_Test_Case {
 
 		$this->assertWPError( $this->run_ability( 'woocommerce/shipping-zones-query' ) );
 		$this->assertWPError( $this->run_ability( 'woocommerce/tax-rates-query' ) );
+	}
+
+	/**
+	 * @testdox Should page tax rates in the order of the tax settings, and return none for an unknown class.
+	 */
+	public function test_tax_rates_are_paged(): void {
+		$ids = array();
+		foreach ( array( 2, 0, 1 ) as $order ) {
+			$ids[ $order ] = \WC_Tax::_insert_tax_rate(
+				array(
+					'tax_rate_country' => 'DE',
+					'tax_rate'         => '19.0000',
+					'tax_rate_order'   => $order,
+				)
+			);
+		}
+
+		$first   = $this->run_ability( 'woocommerce/tax-rates-query', array( 'per_page' => 2 ) );
+		$second  = $this->run_ability(
+			'woocommerce/tax-rates-query',
+			array(
+				'per_page' => 2,
+				'page'     => 2,
+			)
+		);
+		$unknown = $this->run_ability( 'woocommerce/tax-rates-query', array( 'class' => 'no-such-class' ) );
+
+		$this->assertSame( array( $ids[0], $ids[1] ), array_column( $first['rates'], 'id' ) );
+		$this->assertSame( array( $ids[2] ), array_column( $second['rates'], 'id' ) );
+		$this->assertSame( 2, $first['total_pages'] );
+		$this->assertSame( array(), $unknown['rates'] );
+	}
+
+	/**
+	 * @testdox Should load the postcodes and cities of a whole page in one query, whatever the number of rates.
+	 */
+	public function test_tax_rate_query_count_does_not_grow_with_the_rates(): void {
+		global $wpdb;
+
+		$this->insert_rate_with_locations( 0 );
+		$this->run_ability( 'woocommerce/tax-rates-query' );
+		$before = $wpdb->num_queries;
+		$this->run_ability( 'woocommerce/tax-rates-query' );
+		$one_rate = $wpdb->num_queries - $before;
+
+		for ( $i = 1; $i < 5; $i++ ) {
+			$this->insert_rate_with_locations( $i );
+		}
+		$before = $wpdb->num_queries;
+		$result = $this->run_ability( 'woocommerce/tax-rates-query' );
+
+		$this->assertCount( 5, $result['rates'] );
+		$this->assertSame( $one_rate, $wpdb->num_queries - $before );
+	}
+
+	/**
+	 * Insert a tax rate with one postcode and one city.
+	 *
+	 * @param int $i Number that makes the postcode and city unique.
+	 */
+	private function insert_rate_with_locations( int $i ): void {
+		$id = \WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country' => 'US',
+				'tax_rate'         => '5.0000',
+			)
+		);
+		\WC_Tax::_update_tax_rate_postcodes( $id, "1000{$i}" );
+		\WC_Tax::_update_tax_rate_cities( $id, "City {$i}" );
 	}
 }
