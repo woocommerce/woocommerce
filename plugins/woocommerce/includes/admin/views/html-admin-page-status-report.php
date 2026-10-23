@@ -7,7 +7,7 @@
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
-use Automattic\WooCommerce\Enums\{ DefaultCustomerAddress, TaxBasedOn, TaxDisplayMode };
+use Automattic\WooCommerce\Enums\{ DefaultCustomerAddress, ShippingTaxClass, TaxBasedOn, TaxDisplayMode };
 use Automattic\WooCommerce\Utilities\RestApiUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -61,7 +61,10 @@ $tax_based_on_labels  = array(
 );
 $tax_based_on_display = $tax_based_on_labels[ $settings['tax_based_on'] ] ?? $settings['tax_based_on'];
 
-$shipping_tax_class_labels  = array( 'inherit' => __( 'Based on cart items', 'woocommerce' ) ) + wc_get_product_tax_class_options();
+$shipping_tax_class_labels  = array(
+	ShippingTaxClass::INHERIT             => __( 'Based on cart items', 'woocommerce' ),
+	ShippingTaxClass::SPLIT_BY_ITEM_VALUE => __( 'Split by cart item value', 'woocommerce' ),
+) + wc_get_product_tax_class_options();
 $shipping_tax_class_display = $shipping_tax_class_labels[ $settings['shipping_tax_class'] ] ?? $settings['shipping_tax_class'];
 
 $tax_display_labels = array(

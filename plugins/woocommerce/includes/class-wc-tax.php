@@ -7,6 +7,7 @@
 
 use Automattic\WooCommerce\Enums\DefaultCustomerAddress;
 use Automattic\WooCommerce\Enums\TaxBasedOn;
+use Automattic\WooCommerce\Internal\Tax\ShippingTaxSplit;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -585,7 +586,7 @@ class WC_Tax {
 		// See if we have an explicitly set shipping tax class.
 		$shipping_tax_class = get_option( 'woocommerce_shipping_tax_class' );
 
-		if ( 'inherit' !== $shipping_tax_class ) {
+		if ( ! ShippingTaxSplit::is_based_on_items( $shipping_tax_class ) ) {
 			$tax_class = $shipping_tax_class;
 		}
 
