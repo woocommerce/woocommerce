@@ -32,13 +32,15 @@ jest.mock( '~/utils/admin-settings', () => ( {
 
 const mockApiFetch = apiFetch as jest.MockedFunction< typeof apiFetch >;
 
-const renderStep = () => {
+const renderStep = (
+	actions: Record< string, { href: string } > = {
+		authorize: { href: 'https://example.com/authorize' },
+	}
+) => {
 	( useOnboardingContext as jest.Mock ).mockReturnValue( {
 		currentStep: {
 			id: 'wpcom_connection',
-			actions: {
-				authorize: { href: 'https://example.com/authorize' },
-			},
+			actions,
 		},
 		closeModal: jest.fn(),
 		sessionEntryPoint: 'settings_payments',
@@ -48,9 +50,45 @@ const renderStep = () => {
 };
 
 describe( 'JetpackStep', () => {
+	const originalLocation = window.location;
+
 	beforeEach( () => {
 		jest.clearAllMocks();
 		mockApiFetch.mockReset();
+		Object.defineProperty( window, 'location', {
+			writable: true,
+			value: { ...originalLocation, href: '' },
+		} );
+	} );
+
+	afterEach( () => {
+		Object.defineProperty( window, 'location', {
+			writable: true,
+			value: originalLocation,
+		} );
+	} );
+
+	it( 'redirects to the authorization URL returned after registering the store', async () => {
+		mockApiFetch.mockResolvedValue( {
+			success: true,
+			url: 'https://wordpress.com/auth',
+		} );
+		renderStep();
+
+		fireEvent.click( screen.getByRole( 'button', { name: 'Connect' } ) );
+
+		await waitFor( () =>
+			expect( window.location.href ).toBe( 'https://wordpress.com/auth' )
+		);
+	} );
+
+	it( 'redirects to the auth URL without a request when the store is already registered', () => {
+		renderStep( { auth: { href: 'https://wordpress.com/auth' } } );
+
+		fireEvent.click( screen.getByRole( 'button', { name: 'Connect' } ) );
+
+		expect( mockApiFetch ).not.toHaveBeenCalled();
+		expect( window.location.href ).toBe( 'https://wordpress.com/auth' );
 	} );
 
 	it( 'decodes registration errors and lets the merchant retry', async () => {

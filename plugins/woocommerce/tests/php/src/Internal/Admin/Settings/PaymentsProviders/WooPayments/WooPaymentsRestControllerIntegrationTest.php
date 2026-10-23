@@ -1384,6 +1384,66 @@ class WooPaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Reports a failure without generating the authorization URL when registration returns false.
+	 */
+	public function test_handle_onboarding_wpcom_connection_authorize_registration_returns_false(): void {
+		$this->mock_wpcom_connection_manager->method( 'is_connected' )->willReturn( false );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->once() )
+			->method( 'try_registration' )
+			->willReturn( false );
+		$authorization_requested = false;
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'get_wpcom_connection_authorization' => function () use ( &$authorization_requested ) {
+						$authorization_requested = true;
+						return array(
+							'success' => true,
+							'url'     => 'https://wordpress.com/auth',
+						);
+					},
+				),
+			)
+		);
+
+		$request  = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/step/' . WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION . '/authorize' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( \WP_Http::INTERNAL_SERVER_ERROR, $response->get_status() );
+		$this->assertSame( 'Failed to register the store with WordPress.com.', $response->get_data()['message'] );
+		$this->assertFalse( $authorization_requested, 'The authorization URL should not be generated for an unregistered store' );
+	}
+
+	/**
+	 * @testdox Reports the first authorization error, or a fallback message, when the authorization URL cannot be generated.
+	 * @testWith [{"success": false, "errors": ["Jetpack is in offline mode."]}, "Jetpack is in offline mode."]
+	 *           [{"success": true, "url": ""}, "Failed to generate the WordPress.com authorization URL."]
+	 *
+	 * @param array  $authorization    The result of generating the authorization URL.
+	 * @param string $expected_message The expected error message.
+	 */
+	public function test_handle_onboarding_wpcom_connection_authorize_authorization_error( array $authorization, string $expected_message ): void {
+		$this->mock_wpcom_connection_manager->method( 'is_connected' )->willReturn( true );
+		$this->mockable_proxy->register_static_mocks(
+			array(
+				Utils::class => array(
+					'get_wpcom_connection_authorization' => function () use ( $authorization ) {
+						return $authorization;
+					},
+				),
+			)
+		);
+
+		$request  = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/step/' . WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION . '/authorize' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( \WP_Http::INTERNAL_SERVER_ERROR, $response->get_status() );
+		$this->assertSame( 'woocommerce_woopayments_onboarding_action_error', $response->get_data()['code'] );
+		$this->assertSame( $expected_message, $response->get_data()['message'] );
+	}
+
+	/**
 	 * @testdox Returns the original registration error code and data without changing the HTTP error status.
 	 * @testWith ["siteurl_private_ip"]
 	 *           ["wpcom_5??"]
