@@ -43,6 +43,7 @@ import {
 	getElementStyles,
 	getFontAppearanceValue,
 	getFontFamilyFaces,
+	withoutInherit,
 } from '../utils';
 import { useHasTextColorInTypographyPanel } from '../hooks';
 import { ColorDropdownItem } from './color-dropdown-item';
@@ -99,8 +100,10 @@ export function TypographyElementPanel( {
 		headingLevel
 	);
 	const renderedFontFamily =
-		getElementStyles( styles, element, headingLevel, true ).typography
-			.fontFamily ?? styles?.typography?.fontFamily;
+		withoutInherit(
+			getElementStyles( styles, element, headingLevel, true ).typography
+				.fontFamily
+		) ?? styles?.typography?.fontFamily;
 	const {
 		fontFamily,
 		fontSize,

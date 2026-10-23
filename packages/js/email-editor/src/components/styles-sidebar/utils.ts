@@ -110,6 +110,17 @@ const getFontFamilySlug = ( fontFamily: string | undefined ) => {
 };
 
 /**
+ * Treats a CSS `inherit` value as not set.
+ *
+ * Core's theme.json gives buttons `inherit` for their font family, style and weight.
+ *
+ * @param value The style value.
+ * @return The value, or undefined when it is `inherit`.
+ */
+export const withoutInherit = < T >( value: T ): T | undefined =>
+	value === 'inherit' ? undefined : value;
+
+/**
  * Fills in the missing half of a saved font style and weight.
  *
  * The Appearance control only shows an option when both values match it exactly.
@@ -119,10 +130,9 @@ const getFontFamilySlug = ( fontFamily: string | undefined ) => {
  * @param current.fontWeight The saved font weight.
  * @return The style and weight to show, or both undefined when nothing is saved.
  */
-export const getFontAppearanceValue = ( {
-	fontStyle,
-	fontWeight,
-}: FontFace ): { fontStyle?: string; fontWeight?: string } => {
+export const getFontAppearanceValue = ( current: FontFace ) => {
+	const fontStyle = withoutInherit( current.fontStyle );
+	const fontWeight = withoutInherit( current.fontWeight );
 	if ( ! fontStyle && ! fontWeight ) {
 		return { fontStyle: undefined, fontWeight: undefined };
 	}

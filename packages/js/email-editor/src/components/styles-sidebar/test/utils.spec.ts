@@ -93,6 +93,14 @@ describe( 'getFontAppearanceValue', () => {
 			{ fontStyle: 'italic', fontWeight: '300' },
 			{ fontStyle: 'italic', fontWeight: '300' },
 		],
+		[
+			{ fontStyle: 'inherit', fontWeight: 'inherit' },
+			{ fontStyle: undefined, fontWeight: undefined },
+		],
+		[
+			{ fontStyle: 'inherit', fontWeight: '700' },
+			{ fontStyle: 'normal', fontWeight: '700' },
+		],
 	] )( 'turns %j into %j', ( current, expected ) => {
 		expect( getFontAppearanceValue( current ) ).toEqual( expected );
 	} );
@@ -228,6 +236,15 @@ describe( 'getFontFamilyFaces', () => {
 			{ fontStyle: 'normal', fontWeight: '900' },
 			...variable.fontFace,
 		] );
+	} );
+
+	it( 'does not add an inherited style and weight', () => {
+		expect(
+			getFontFamilyFaces( fontFamilies, fontWeights, arial.fontFamily, {
+				fontStyle: 'inherit',
+				fontWeight: 'inherit',
+			} )
+		).toEqual( regularAndBold );
 	} );
 
 	it( 'does not add a saved value the font already offers', () => {

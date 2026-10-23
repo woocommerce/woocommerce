@@ -84,6 +84,7 @@ jest.mock( '../../utils', () => ( {
 	getFontFamilyFaces: jest.requireActual( '../../utils' ).getFontFamilyFaces,
 	getFontAppearanceValue:
 		jest.requireActual( '../../utils' ).getFontAppearanceValue,
+	withoutInherit: jest.requireActual( '../../utils' ).withoutInherit,
 } ) );
 
 jest.mock( '../../hooks', () => ( {
@@ -277,6 +278,37 @@ describe( 'TypographyElementPanel', () => {
 		expect(
 			fontAppearanceControlMock.mock.calls[ 0 ][ 0 ].fontFamilyFaces
 		).toHaveLength( 4 );
+	} );
+
+	it( 'treats an inherited font and appearance as not set', () => {
+		mockFontSettings();
+		getElementStylesMock.mockImplementation(
+			jest.requireActual( '../../utils' ).getElementStyles
+		);
+		useEmailStylesMock.mockReturnValue( {
+			...emailStyles,
+			styles: {
+				typography: { fontFamily: 'Inter, sans-serif' },
+				elements: {
+					button: {
+						typography: {
+							fontFamily: 'inherit',
+							fontStyle: 'inherit',
+							fontWeight: 'inherit',
+						},
+					},
+				},
+			},
+		} );
+
+		render( <TypographyElementPanel element="button" headingLevel="" /> );
+
+		const props = fontAppearanceControlMock.mock.calls[ 0 ][ 0 ];
+		expect( props.fontFamilyFaces ).toHaveLength( 4 );
+		expect( props.value ).toEqual( {
+			fontStyle: undefined,
+			fontWeight: undefined,
+		} );
 	} );
 
 	it( 'prefers a theme font over a default font with the same slug', () => {
