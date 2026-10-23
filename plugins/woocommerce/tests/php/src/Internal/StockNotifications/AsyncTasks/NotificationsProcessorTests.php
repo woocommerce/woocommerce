@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailManager;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\RestApi\UnitTests\LoggerSpyTrait;
 use Automattic\WooCommerce\Tests\Internal\StockNotifications\StockNotificationsFeatureTrait;
 use WC_Product;
 use WC_Helper_Product;
@@ -23,6 +24,7 @@ use WC_Helper_Product;
 class NotificationsProcessorTests extends \WC_Unit_Test_Case {
 
 	use StockNotificationsFeatureTrait;
+	use LoggerSpyTrait;
 
 	/**
 	 * @var NotificationsProcessor
@@ -56,6 +58,7 @@ class NotificationsProcessorTests extends \WC_Unit_Test_Case {
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_stock_notificationmeta" );
 		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_stock_notifications" );
 		$this->restore_stock_notifications_feature_option();
+		remove_all_filters( 'woocommerce_customer_stock_notifications_product_is_valid' );
 		parent::tearDown();
 	}
 
@@ -576,6 +579,47 @@ class NotificationsProcessorTests extends \WC_Unit_Test_Case {
 				JobManager::AS_JOB_GROUP
 			)
 		);
+	}
+
+	/**
+	 * Test process_batch logs an ineligible stock status at info level, as it is an expected outcome.
+	 */
+	public function test_process_batch_logs_not_eligible_stock_status_at_info_level() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
+		$product->save();
+
+		$this->sut->process_batch( $product->get_id() );
+
+		$this->assertLogged( 'info', 'stock status is not eligible' );
+		$this->assertNoErrorLogged();
+	}
+
+	/**
+	 * Test process_batch logs a missing product at error level.
+	 */
+	public function test_process_batch_logs_missing_product_at_error_level() {
+		$this->sut->process_batch( 123 );
+
+		$this->assertLogged( 'error', 'Product 123 not found' );
+	}
+
+	/**
+	 * Test process_batch logs an exception thrown by an eligibility filter callback at error level.
+	 */
+	public function test_process_batch_logs_filter_exception_at_error_level() {
+		$product = WC_Helper_Product::create_simple_product();
+
+		add_filter(
+			'woocommerce_customer_stock_notifications_product_is_valid',
+			function () {
+				throw new \RuntimeException( 'Callback failed.' );
+			}
+		);
+
+		$this->sut->process_batch( $product->get_id() );
+
+		$this->assertLogged( 'error', 'Callback failed.' );
 	}
 
 	/**

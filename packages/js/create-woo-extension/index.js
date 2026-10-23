@@ -20,6 +20,13 @@ const defaultDevDependencies = {
 	'@wordpress/prettier-config': 'latest',
 	'@wordpress/scripts': 'latest',
 	/*
+	 * Match the `react` and `react-dom` peer range of `@woocommerce/components`
+	 * (packages/js/components/package.json) instead of npm selecting React 19.
+	 * Update these when that range changes.
+	 */
+	react: '18.3.x',
+	'react-dom': '18.3.x',
+	/*
 	 * Without this, `@wordpress/prettier-config`'s `prettier: >=3` peer hoists plain
 	 * prettier over wp-prettier. Pinned to match `@woocommerce/eslint-plugin`.
 	 */
@@ -81,6 +88,11 @@ module.exports = {
 			npmDependencies: [
 				...defaultDependencies,
 				'@woocommerce/onboarding',
+				// The add-task template imports these directly; declare them to satisfy
+				// import/no-extraneous-dependencies without relying on transitive dependencies.
+				'@woocommerce/data',
+				'@wordpress/data',
+				'@wordpress/plugins',
 			],
 		},
 		'dashboard-section': {
@@ -95,6 +107,12 @@ module.exports = {
 				'dashboard-section',
 				'src'
 			),
+			npmDependencies: [
+				...defaultDependencies,
+				'@woocommerce/currency',
+				'@wordpress/icons',
+				'moment',
+			],
 		},
 		'table-column': {
 			pluginTemplatesPath: join( __dirname, 'variants', 'table-column' ),
