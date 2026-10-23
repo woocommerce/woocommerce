@@ -30,8 +30,8 @@ test.describe( 'Shopper → Taxes', () => {
 	} ) => {
 		// The rate has to be global. This test's subject is the store-wide
 		// "Enable tax rate calculations" option, and it shops with shared
-		// fixture products, so `withScopedTaxClass` does not apply: it asserts
-		// that tax calculation stays on, and scoping would mean reassigning
+		// fixture products, so `withScopedTaxClass` does not apply: it throws
+		// unless tax calculation is on, and scoping would mean reassigning
 		// products other specs also use. Both the rate and the option are put
 		// back in `finally` instead, so neither follows later specs.
 		const { id: taxRateId } = await requestUtils.rest< { id: number } >( {
