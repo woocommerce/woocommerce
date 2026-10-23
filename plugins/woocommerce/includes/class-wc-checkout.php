@@ -8,12 +8,14 @@
  * @version 3.4.0
  */
 
+use Automattic\WooCommerce\Enums\OrderItemType;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 use Automattic\WooCommerce\Internal\ProductVariations\SelectedVariationName;
 use Automattic\WooCommerce\Internal\Tax\TaxRateDataStore;
+use Automattic\WooCommerce\StoreApi\Utilities\CartController;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -61,6 +63,32 @@ class WC_Checkout {
 	 * @var WC_Customer
 	 */
 	private $logged_in_customer = null;
+
+	/**
+	 * Order item types that set_data_from_cart() creates from the cart.
+	 *
+	 * @var string[]
+	 */
+	private const CART_ORDER_ITEM_TYPES = array(
+		OrderItemType::LINE_ITEM,
+		OrderItemType::FEE,
+		OrderItemType::SHIPPING,
+		OrderItemType::TAX,
+		OrderItemType::COUPON,
+	);
+
+	/**
+	 * Order meta that stores a hash of each cart section and a fingerprint of each item the cart created, so a resumed
+	 * order can keep the items that haven't changed since checkout.
+	 */
+	private const CART_ORDER_ITEMS_SNAPSHOT_META_KEY = '_cart_order_items_snapshot';
+
+	/**
+	 * Item types that create_order() kept on a resumed order, so set_data_from_cart() doesn't add them again.
+	 *
+	 * @var string[]
+	 */
+	private $kept_order_item_types = array();
 
 	/**
 	 * Gets the main WC_Checkout Instance.
@@ -412,6 +440,7 @@ class WC_Checkout {
 		try {
 			$order_id           = absint( WC()->session->get( 'order_awaiting_payment' ) );
 			$cart_hash          = WC()->cart->get_cart_hash();
+			$cart_hashes        = $this->get_cart_section_hashes();
 			$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
 			$order              = $order_id ? wc_get_order( $order_id ) : null;
 
@@ -432,8 +461,24 @@ class WC_Checkout {
 				 */
 				do_action( 'woocommerce_resume_order', $order_id );
 
-				// Remove all items - we will re-add them later.
-				$order->remove_order_items();
+				/**
+				 * Filters whether a resumed classic checkout order keeps the items that haven't changed, so their IDs
+				 * stay the same. Kept items don't run the woocommerce_checkout_create_order_*_item hooks again. Return false
+				 * to remove every item and add it again from the cart.
+				 *
+				 * @since 11.4.0
+				 *
+				 * @param bool              $keep_items Whether to keep unchanged items. Default true.
+				 * @param WC_Abstract_Order $order      The resumed order.
+				 */
+				$keep_items = apply_filters( 'woocommerce_checkout_keep_order_items_on_resume', true, $order );
+
+				if ( true === $keep_items && $order instanceof WC_Order ) {
+					// The rest of the items are added again from the cart later.
+					$this->kept_order_item_types = $this->remove_changed_order_items( $order, $cart_hashes );
+				} else {
+					$order->remove_order_items();
+				}
 			} else {
 				$order = new WC_Order();
 			}
@@ -479,6 +524,12 @@ class WC_Checkout {
 				$order->calculate_cogs_total_value();
 			}
 
+			// Captured before woocommerce_checkout_create_order, so items extensions add or change there can be told apart.
+			$cart_order_items = array_map(
+				fn( WC_Order_Item $item ) => array( $item, $this->get_order_item_fingerprint( $item ) ),
+				$order->get_items( self::CART_ORDER_ITEM_TYPES )
+			);
+
 			/**
 			 * Action hook to adjust order before save.
 			 *
@@ -504,6 +555,9 @@ class WC_Checkout {
 				if ( ! $persisted_order || 0 === count( $persisted_order->get_items() ) ) {
 					throw new Exception( __( 'Order items could not be saved. Please try again.', 'woocommerce' ) );
 				}
+
+				$order->update_meta_data( self::CART_ORDER_ITEMS_SNAPSHOT_META_KEY, $this->get_cart_order_items_snapshot( $persisted_order, $cart_order_items, $cart_hashes ) );
+				$order->save_meta_data();
 			}
 
 			/**
@@ -532,6 +586,9 @@ class WC_Checkout {
 				do_action( 'woocommerce_checkout_order_exception', $order );
 			}
 			return new WP_Error( 'checkout-error', $e->getMessage() );
+		} finally {
+			// Reset on every path, including Errors, so a later set_data_from_cart() call adds every item type.
+			$this->kept_order_item_types = array();
 		}
 	}
 
@@ -551,12 +608,183 @@ class WC_Checkout {
 		$order->set_cart_tax( WC()->cart->get_cart_contents_tax() + WC()->cart->get_fee_tax() );
 		$order->set_shipping_tax( WC()->cart->get_shipping_tax() );
 		$order->set_total( WC()->cart->get_total( 'edit' ) );
-		$this->create_order_line_items( $order, WC()->cart );
-		$this->create_order_fee_lines( $order, WC()->cart );
-		$this->create_order_shipping_lines( $order, WC()->session->get( 'chosen_shipping_methods' ), WC()->shipping()->get_packages() );
-		$this->create_order_tax_lines( $order, WC()->cart );
-		$this->create_order_coupon_lines( $order, WC()->cart );
+		if ( $this->should_add_order_items( OrderItemType::LINE_ITEM ) ) {
+			$this->create_order_line_items( $order, WC()->cart );
+		}
+		if ( $this->should_add_order_items( OrderItemType::FEE ) ) {
+			$this->create_order_fee_lines( $order, WC()->cart );
+		}
+		if ( $this->should_add_order_items( OrderItemType::SHIPPING ) ) {
+			$this->create_order_shipping_lines( $order, WC()->session->get( 'chosen_shipping_methods' ), WC()->shipping()->get_packages() );
+		}
+		if ( $this->should_add_order_items( OrderItemType::TAX ) ) {
+			$this->create_order_tax_lines( $order, WC()->cart );
+		}
+		if ( $this->should_add_order_items( OrderItemType::COUPON ) ) {
+			$this->create_order_coupon_lines( $order, WC()->cart );
+		}
 	}
+
+	/**
+	 * Whether set_data_from_cart() should add items of a type, or keep the ones create_order() kept on a resumed order.
+	 *
+	 * @param string $item_type Order item type.
+	 * @return bool
+	 */
+	private function should_add_order_items( string $item_type ): bool {
+		return ! in_array( $item_type, $this->kept_order_item_types, true );
+	}
+
+	/**
+	 * Hashes each cart section that creates an order item type, using the Store API's cart hashes for fees, taxes and
+	 * coupons. Line items hash the cart's contents instead of the filterable cart hash, and shipping hashes the filtered
+	 * rate values that create_order_shipping_lines() copies, so filters can't hide a change to either.
+	 *
+	 * @return array<string, string> Hashes keyed by order item type.
+	 */
+	private function get_cart_section_hashes(): array {
+		$hashes         = ( new CartController() )->get_cart_hashes();
+		$shipping_rates = array_map(
+			fn( $rate ) => $rate instanceof WC_Shipping_Rate ? array( $rate->get_id(), $rate->get_label(), $rate->get_cost(), $rate->get_taxes(), $rate->get_meta_data() ) : $rate,
+			(array) WC()->cart->get_shipping_methods()
+		);
+
+		return array(
+			OrderItemType::LINE_ITEM => md5( (string) wp_json_encode( WC()->cart->get_cart_for_session() ) ),
+			OrderItemType::FEE       => $hashes['fees'],
+			OrderItemType::SHIPPING  => md5( (string) wp_json_encode( array( $shipping_rates, WC()->session->get( 'chosen_shipping_methods' ) ) ) ),
+			OrderItemType::TAX       => $hashes['taxes'],
+			OrderItemType::COUPON    => $hashes['coupons'],
+		);
+	}
+
+	/**
+	 * Builds the snapshot create_order() stores: the cart section hashes, and a fingerprint of each item the cart created,
+	 * read back from the saved order. An item an extension changed in woocommerce_checkout_create_order gets an empty
+	 * fingerprint, so its type is rebuilt on resume and the change isn't applied twice.
+	 *
+	 * @param WC_Abstract_Order     $persisted_order  The order, read again after it was saved.
+	 * @param array[]               $cart_order_items Each item set_data_from_cart() added or kept, with its fingerprint before the hook.
+	 * @param array<string, string> $cart_hashes      Hashes from get_cart_section_hashes().
+	 * @return array{hashes: array<string, string>, items: array<string, array<int, string>>}
+	 */
+	private function get_cart_order_items_snapshot( WC_Abstract_Order $persisted_order, array $cart_order_items, array $cart_hashes ): array {
+		$persisted_items = $persisted_order->get_items( self::CART_ORDER_ITEM_TYPES );
+		$items           = array();
+		foreach ( $cart_order_items as list( $item, $fingerprint ) ) {
+			$persisted_item = $persisted_items[ $item->get_id() ] ?? null;
+			if ( $persisted_item ) {
+				$changed_at_checkout                           = $fingerprint !== $this->get_order_item_fingerprint( $item );
+				$items[ $item->get_type() ][ $item->get_id() ] = $changed_at_checkout ? '' : $this->get_order_item_fingerprint( $persisted_item );
+			}
+		}
+
+		return array(
+			'hashes' => $cart_hashes,
+			'items'  => $items,
+		);
+	}
+
+	/**
+	 * Hashes an item's stored amounts and properties. Names and meta are left out, so renaming an item or adding meta
+	 * to it, as gateways do, doesn't count as a change.
+	 *
+	 * @param WC_Order_Item $item The order item.
+	 * @return string
+	 */
+	private function get_order_item_fingerprint( WC_Order_Item $item ): string {
+		// Include unsaved changes, so an item can be compared before and after it's saved.
+		$data = array_replace_recursive( $item->get_data(), $item->get_changes() );
+		unset( $data['id'], $data['order_id'], $data['name'], $data['meta_data'] );
+
+		return md5( (string) wp_json_encode( $this->sort_keys_recursively( $data ) ) );
+	}
+
+	/**
+	 * Sorts an array's keys at every level, since saving an item can reorder nested keys such as its taxes.
+	 *
+	 * @param array $data The array to sort.
+	 * @return array
+	 */
+	private function sort_keys_recursively( array $data ): array {
+		ksort( $data );
+		foreach ( $data as $key => $value ) {
+			if ( is_array( $value ) ) {
+				$data[ $key ] = $this->sort_keys_recursively( $value );
+			}
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Removes the items of a resumed order that changed, and returns the item types it kept.
+	 *
+	 * A type is kept when its cart section hash matches the snapshot and every item the cart created is still there with
+	 * the same fingerprint. Other items of a kept type, such as ones extensions add at checkout, are removed so they
+	 * aren't duplicated.
+	 *
+	 * @param WC_Order              $order       The resumed order.
+	 * @param array<string, string> $cart_hashes Hashes from get_cart_section_hashes().
+	 * @return string[] The kept item types.
+	 */
+	private function remove_changed_order_items( WC_Order $order, array $cart_hashes ): array {
+		global $wpdb;
+
+		$snapshot = $order->get_meta( self::CART_ORDER_ITEMS_SNAPSHOT_META_KEY );
+		if ( ! is_array( $snapshot ) || ! is_array( $snapshot['hashes'] ?? null ) || ! is_array( $snapshot['items'] ?? null ) ) {
+			$order->remove_order_items();
+			return array();
+		}
+
+		$kept_types = array();
+		foreach ( self::CART_ORDER_ITEM_TYPES as $item_type ) {
+			$cart_section_unchanged = ( $snapshot['hashes'][ $item_type ] ?? '' ) === $cart_hashes[ $item_type ];
+			$order_items            = $cart_section_unchanged ? $order->get_items( $item_type ) : array();
+			$snapshot_items         = (array) ( $snapshot['items'][ $item_type ] ?? array() );
+
+			if ( ! $cart_section_unchanged || ! $this->order_items_match_snapshot( $order_items, $snapshot_items ) ) {
+				$order->remove_order_items( $item_type );
+				continue;
+			}
+
+			$kept_types[] = $item_type;
+			foreach ( array_keys( array_diff_key( $order_items, $snapshot_items ) ) as $item_id ) {
+				$order->remove_item( $item_id );
+			}
+		}
+
+		// Read the types directly: get_items() only finds types registered with woocommerce_order_type_to_group, so it would miss some extension items.
+		$persisted_types = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT DISTINCT order_item_type FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d",
+				$order->get_id()
+			)
+		);
+		foreach ( array_diff( $persisted_types, self::CART_ORDER_ITEM_TYPES ) as $item_type ) {
+			$order->remove_order_items( $item_type );
+		}
+
+		return $kept_types;
+	}
+
+	/**
+	 * Whether every item in the snapshot is still on the order with the same fingerprint.
+	 *
+	 * @param WC_Order_Item[]    $order_items    The order's items of one type, keyed by ID.
+	 * @param array<int, string> $snapshot_items Fingerprints of the items the cart created, keyed by ID.
+	 * @return bool
+	 */
+	private function order_items_match_snapshot( array $order_items, array $snapshot_items ): bool {
+		foreach ( $snapshot_items as $item_id => $fingerprint ) {
+			if ( ! isset( $order_items[ $item_id ] ) || (string) $fingerprint !== $this->get_order_item_fingerprint( $order_items[ $item_id ] ) ) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
 	/**
 	 * Add line items to the order.
 	 *
