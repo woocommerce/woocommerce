@@ -1240,6 +1240,32 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Resuming a pending order replaces shipping lines when a shipping rate filter changes their values without changing the cart total.
+	 */
+	public function test_create_order_resume_replaces_shipping_changed_by_rate_filter(): void {
+		$order_id = $this->create_order_with_shipping_taxes_and_coupon();
+		$before   = $this->get_order_item_ids_by_type( $order_id );
+		// Moves shipping tax from one rate to the other, so the cart total stays the same.
+		add_filter(
+			'woocommerce_shipping_rate_taxes',
+			function ( $taxes ) {
+				$rate_ids               = array_keys( $taxes );
+				$taxes[ $rate_ids[0] ] += 0.1;
+				$taxes[ $rate_ids[1] ] -= 0.1;
+				return $taxes;
+			}
+		);
+		WC()->cart->calculate_totals();
+		$expected_taxes = array_map( 'wc_format_decimal', current( WC()->cart->get_shipping_methods() )->get_taxes() );
+
+		$this->resume_order( $order_id );
+		$shipping = array_values( wc_get_order( $order_id )->get_shipping_methods() )[0];
+
+		$this->assertNotSame( $before['shipping'], $this->get_order_item_ids_by_type( $order_id )['shipping'], 'The shipping line should be replaced.' );
+		$this->assertSame( $expected_taxes, $shipping->get_taxes()['total'], 'The shipping line should have the filtered taxes.' );
+	}
+
+	/**
 	 * @testdox Resuming a pending order keeps items that a gateway added meta to after checkout.
 	 */
 	public function test_create_order_resume_keeps_items_with_meta_added_after_checkout(): void {
