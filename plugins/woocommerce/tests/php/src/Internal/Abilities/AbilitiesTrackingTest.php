@@ -28,8 +28,6 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	 */
 	private const ADAPTER_DISCOVERY_IDS = array( 'mcp-adapter/get-ability-info', 'mcp-adapter/discover-abilities' );
 
-	private const SERVER_KEYS = array( 'REQUEST_SCHEME', 'HTTP_HOST', 'REQUEST_URI', 'HTTP_REFERER', 'HTTP_MCP_PROTOCOL_VERSION', 'HTTP_MCP_SESSION_ID', 'A8C_PROXIED_REQUEST' );
-
 	/**
 	 * Hooks that exist only on WordPress 7.1. Removed from this instance to exercise the 7.0 path.
 	 *
@@ -88,13 +86,6 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	private array $original_action_counts = array();
 
 	/**
-	 * Original $_SERVER values, restored on tear down.
-	 *
-	 * @var array<string, mixed>
-	 */
-	private array $original_server = array();
-
-	/**
 	 * Adapter discovery stand-ins this test registered, so real MCP Adapter abilities are left alone.
 	 *
 	 * @var string[]
@@ -128,10 +119,6 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 		// The Abilities API registry requires init to have fired.
 		$wp_actions['init'] = max( 1, (int) ( $wp_actions['init'] ?? 0 ) ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
-		foreach ( self::SERVER_KEYS as $key ) {
-			$this->original_server[ $key ] = $_SERVER[ $key ] ?? null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput
-		}
-
 		wp_set_current_user( self::$administrator_id );
 		$this->register_test_abilities();
 
@@ -164,14 +151,6 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 					unset( $wp_actions[ $action ] );
 				} else {
 					$wp_actions[ $action ] = $original_count; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-				}
-			}
-
-			foreach ( $this->original_server as $key => $value ) {
-				if ( null === $value ) {
-					unset( $_SERVER[ $key ] );
-				} else {
-					$_SERVER[ $key ] = $value;
 				}
 			}
 		} finally {

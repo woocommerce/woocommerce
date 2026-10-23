@@ -366,7 +366,6 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 	 * @param string $expected    The source label the request should carry.
 	 */
 	public function test_get_subscriptions_labels_the_request_source( string $request_uri, string $action, string $expected ): void {
-		$previous_uri           = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : null;
 		$_SERVER['REQUEST_URI'] = $request_uri;
 		if ( '' !== $action ) {
 			$_REQUEST['action'] = $action;
@@ -388,11 +387,6 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 		} finally {
 			remove_filter( 'pre_http_request', $capture, 9 );
 			unset( $_REQUEST['action'] );
-			if ( null === $previous_uri ) {
-				unset( $_SERVER['REQUEST_URI'] );
-			} else {
-				$_SERVER['REQUEST_URI'] = $previous_uri;
-			}
 		}
 
 		parse_str( (string) wp_parse_url( $requested_url, PHP_URL_QUERY ), $query );

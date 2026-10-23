@@ -1113,7 +1113,6 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 			$this->assertFalse( WC()->cart->show_shipping(), 'A removed postcode must not stop the state from being required.' );
 		} finally {
 			remove_filter( 'woocommerce_checkout_fields', $remove_billing_address );
-			WC()->customer->set_shipping_location( '', '', '', '' );
 		}
 	}
 
