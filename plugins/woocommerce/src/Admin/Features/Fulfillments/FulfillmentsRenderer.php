@@ -651,8 +651,6 @@ class FulfillmentsRenderer {
 	 * @return array The modified clauses.
 	 */
 	public function filter_orders_table_clauses_by_shipping_provider( $clauses, $query, $args ): array {
-		unset( $query );
-
 		$shipping_provider = $args[ self::SHIPPING_PROVIDER_FILTER_ARG ] ?? '';
 		if ( ! is_string( $shipping_provider ) || '' === $shipping_provider ) {
 			return $clauses;
