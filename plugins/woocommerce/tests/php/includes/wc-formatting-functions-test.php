@@ -150,7 +150,7 @@ class WC_Formatting_Functions_Test extends \WC_Unit_Test_Case {
 
 		$result = wc_format_option_price_separators( $raw_value, array( 'id' => $option_id ), $raw_value );
 
-		$this->assertSame( $expected, $result );
+		$this->assertEqualHTML( $expected, $result );
 
 		$errors = $this->get_wc_admin_settings_errors();
 
