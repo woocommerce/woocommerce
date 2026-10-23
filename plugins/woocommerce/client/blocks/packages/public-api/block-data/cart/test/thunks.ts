@@ -15,7 +15,7 @@ import {
 } from '../thunks';
 import { apiFetchWithHeaders } from '../../shared-controls';
 import { getIsCustomerDataDirty } from '../utils';
-import { STORE_KEY as CHECKOUT_STORE_KEY } from '../../checkout/constants';
+import { store as checkoutStore } from '../../checkout';
 
 jest.mock( '../../shared-controls', () => ( {
 	apiFetchWithHeaders: jest.fn(),
@@ -636,7 +636,7 @@ describe( 'applyExtensionCartUpdate', () => {
 			data: {},
 		} )( { dispatch, registry } as never );
 
-		expect( registry.dispatch ).toHaveBeenCalledWith( CHECKOUT_STORE_KEY );
+		expect( registry.dispatch ).toHaveBeenCalledWith( checkoutStore );
 		expect( setPrefersCollection ).toHaveBeenCalledWith( true );
 	} );
 
@@ -665,7 +665,7 @@ describe( 'applyExtensionCartUpdate', () => {
 			data: {},
 		} )( { dispatch, registry } as never );
 
-		expect( registry.dispatch ).toHaveBeenCalledWith( CHECKOUT_STORE_KEY );
+		expect( registry.dispatch ).toHaveBeenCalledWith( checkoutStore );
 		expect( setPrefersCollection ).toHaveBeenCalledWith( false );
 	} );
 
