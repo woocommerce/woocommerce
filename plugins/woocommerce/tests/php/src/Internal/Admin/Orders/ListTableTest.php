@@ -492,4 +492,28 @@ class ListTableTest extends \WC_Unit_Test_Case {
 		$this->assertArrayNotHasKey( 'date_created', $query_args, 'An invalid date should not produce a date filter' );
 		$this->assertCount( 2, $items, 'An invalid date filter should be ignored and all orders shown' );
 	}
+
+	/**
+	 * @testdox Quotes in an order status label cannot break out of the status column tooltip attribute.
+	 */
+	public function test_render_order_status_column_escapes_tooltip_attribute(): void {
+		$order = \WC_Helper_Order::create_order();
+		$order->set_status( OrderStatus::PROCESSING );
+		$order->save();
+
+		$filter = function ( $labels ) {
+			$labels[ OrderStatus::PROCESSING ] = 'Paid" onmouseover="alert(1)';
+			return $labels;
+		};
+		add_filter( 'woocommerce_get_order_status_labels', $filter );
+
+		ob_start();
+		$this->sut->render_order_status_column( $order );
+		$output = ob_get_clean();
+
+		remove_filter( 'woocommerce_get_order_status_labels', $filter );
+
+		$this->assertStringContainsString( 'data-tip="Paid&quot; onmouseover=&quot;alert(1)"', $output );
+		$this->assertStringNotContainsString( 'onmouseover="', $output );
+	}
 }
