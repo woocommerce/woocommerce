@@ -7,10 +7,26 @@ import { CORE_EDITOR_STORE } from '@woocommerce/utils/wordpress-stores';
 import { store as coreStore } from '@wordpress/core-data';
 import { select as selectStore, useDispatch, useSelect } from '@wordpress/data';
 import domReady from '@wordpress/dom-ready';
-import { useEffect } from '@wordpress/element';
+import { useEffect, useRef } from '@wordpress/element';
 import { registerPlugin } from '@wordpress/plugins';
+import { store as preferencesStore } from '@wordpress/preferences';
 
 const ShopPageRenderingMode = () => {
+	const currentValue = useRef< boolean | null >( null );
+
+	const defaultRenderingMode = useSelect( ( select ) => {
+		const defaultRenderingMode =
+			select( CORE_EDITOR_STORE ).getEditorSettings()
+				.defaultRenderingMode;
+
+		const theme = select( coreStore ).getCurrentTheme()?.stylesheet;
+		return (
+			select( preferencesStore ).get( 'core', 'renderingModes' )?.[
+				theme
+			].page ?? defaultRenderingMode
+		);
+	}, [] );
+
 	const { setRenderingMode } = useDispatch( CORE_EDITOR_STORE );
 	const shouldPreviewTemplate = useSelect( ( select ) => {
 		const editor = select( CORE_EDITOR_STORE );
@@ -34,8 +50,14 @@ const ShopPageRenderingMode = () => {
 		// Set the initial preview without overriding subsequent user toggles.
 		if ( shouldPreviewTemplate ) {
 			setRenderingMode( 'template-locked' );
+			currentValue.current = true;
 		}
-	}, [ shouldPreviewTemplate, setRenderingMode ] );
+
+		if ( shouldPreviewTemplate !== currentValue.current ) {
+			setRenderingMode( defaultRenderingMode );
+			currentValue.current = false;
+		}
+	}, [ shouldPreviewTemplate, setRenderingMode, defaultRenderingMode ] );
 
 	return null;
 };
