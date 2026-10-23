@@ -11,6 +11,9 @@ const webpack = require( 'webpack' );
 /**
  * Internal dependencies
  */
+const {
+	sharedOptimizationConfig,
+} = require( '@woocommerce/internal-build/webpack-optimization' );
 const { getEntryConfig } = require( './webpack-entries' );
 const {
 	editorStyleEntries,
@@ -24,9 +27,6 @@ const {
 	requestToHandle,
 } = require( './webpack-helpers' );
 const { getSharedPlugins, getStylingConfig } = require( './webpack-configs' );
-const {
-	sharedOptimizationConfig,
-} = require( '@woocommerce/internal-build/webpack-optimization' );
 
 const ROOT_DIR = path.resolve( __dirname, '../../../../../' );
 // Blocks' webpack writes directly to the WooCommerce plugin's

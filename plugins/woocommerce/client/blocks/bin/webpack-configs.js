@@ -18,6 +18,9 @@ const DependencyExtractionWebpackPlugin = require( '@woocommerce/dependency-extr
 const {
 	WebpackRTLPlugin,
 } = require( '@woocommerce/internal-build/style-build' );
+const {
+	sharedOptimizationConfig,
+} = require( '@woocommerce/internal-build/webpack-optimization' );
 const FilesystemCacheWarningsPlugin = require( './filesystem-cache-warnings-webpack-plugin.js' );
 const RemoveFilesPlugin = require( './remove-files-webpack-plugin' );
 const { getEntryConfig, genericBlocks } = require( './webpack-entries' );
@@ -32,9 +35,6 @@ const {
 	getResolve,
 } = require( './webpack-helpers' );
 const AddSplitChunkDependencies = require( './add-split-chunk-dependencies' );
-const {
-	sharedOptimizationConfig,
-} = require( '@woocommerce/internal-build/webpack-optimization' );
 
 const ROOT_DIR = path.resolve( __dirname, '../../../../../' );
 // Blocks' webpack writes directly to the WooCommerce plugin's
