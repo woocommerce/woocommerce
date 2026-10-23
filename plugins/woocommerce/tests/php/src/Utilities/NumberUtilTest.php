@@ -356,7 +356,9 @@ class NumberUtilTest extends \WC_Unit_Test_Case {
 		update_option( 'woocommerce_price_thousand_sep', ',' );
 		update_option( 'woocommerce_price_decimal_sep', '.' );
 
-		$this->expectExceptionMessage( '1,234.56&nbsp; is not a valid numeric value. Allowed characters are numbers, the thousand (,), and decimal (.) separators.' );
+		// WordPress 7.2's HTML API-based KSES parser can output a literal non-breaking space instead of &nbsp;.
+		// Accept either representation while still checking that the invalid value is rejected.
+		$this->expectExceptionMessageMatches( '/^1,234\.56(?:&nbsp;|\x{00a0}) is not a valid numeric value\. Allowed characters are numbers, the thousand \(,\), and decimal \(\.\) separators\.$/u' );
 		NumberUtil::sanitize_cost_in_current_locale( '&#36;1,234.56&nbsp;' );
 	}
 
@@ -369,8 +371,10 @@ class NumberUtilTest extends \WC_Unit_Test_Case {
 		update_option( 'woocommerce_price_thousand_sep', ',' );
 		update_option( 'woocommerce_price_decimal_sep', '.' );
 
-		$this->expectExceptionMessage( '&lt;b&gt;1,234.56&lt;/b&gt;alert(&quot;bad&quot;) is not a valid numeric value. Allowed characters are numbers, the thousand (,), and decimal (.) separators.' );
-		NumberUtil::sanitize_cost_in_current_locale( '<b>1,234.56</b><script>alert("bad")</script>' );
+		$this->expectExceptionMessage( '&lt;b&gt;1,234.56&lt;/b&gt; is not a valid numeric value. Allowed characters are numbers, the thousand (,), and decimal (.) separators.' );
+		// Legacy KSES preserves script contents, while WordPress 7.2's HTML API-based parser removes them.
+		// Use an empty script so this test checks unsafe HTML rejection with either parser.
+		NumberUtil::sanitize_cost_in_current_locale( '<b>1,234.56</b><script></script>' );
 	}
 
 	/**
