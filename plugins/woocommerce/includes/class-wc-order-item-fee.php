@@ -61,23 +61,22 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 	 * @return array
 	 */
 	protected function get_tax_class_costs( $order ) {
-		$order_item_tax_classes = $order->get_items_tax_classes();
-		$costs                  = array_fill_keys( $order_item_tax_classes, 0 );
-		$costs['non-taxable']   = 0;
+		$order_item_tax_classes                 = $order->get_items_tax_classes();
+		$costs                                  = array_fill_keys( $order_item_tax_classes, 0 );
+		$costs[ ShippingTaxSplit::NON_TAXABLE ] = 0;
 
 		foreach ( $order->get_items( array( 'line_item', 'fee', 'shipping' ) ) as $item ) {
 			if ( 0 > $item->get_total() ) {
 				continue;
 			}
 			if ( ProductTaxStatus::TAXABLE !== $item->get_tax_status() ) {
-				$costs['non-taxable'] += $item->get_total();
+				$costs[ ShippingTaxSplit::NON_TAXABLE ] += $item->get_total();
 			} elseif ( ShippingTaxSplit::is_based_on_items( $item->get_tax_class() ) ) {
 				$split_values = $item instanceof WC_Order_Item_Shipping ? wc_get_container()->get( ShippingTaxSplit::class )->get_shipping_line_values( $item, $order ) : null;
 				$item_total   = (float) $item->get_total();
 				$item_costs   = null === $split_values ? array( reset( $order_item_tax_classes ) => $item_total ) : ShippingTaxSplit::split_cost( $item_total, $split_values );
 
 				foreach ( $item_costs as $tax_class => $cost ) {
-					$tax_class           = ShippingTaxSplit::NON_TAXABLE === $tax_class ? 'non-taxable' : $tax_class;
 					$costs[ $tax_class ] = ( $costs[ $tax_class ] ?? 0 ) + $cost;
 				}
 			} else {
@@ -116,7 +115,7 @@ class WC_Order_Item_Fee extends WC_Order_Item {
 			$discount_taxes  = array();
 			if ( $total_costs ) {
 				foreach ( $tax_class_costs as $tax_class => $tax_class_cost ) {
-					if ( 'non-taxable' === $tax_class ) {
+					if ( ShippingTaxSplit::NON_TAXABLE === $tax_class ) {
 						continue;
 					}
 					$proportion                     = $tax_class_cost / $total_costs;
