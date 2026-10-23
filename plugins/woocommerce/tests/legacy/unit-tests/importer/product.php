@@ -414,9 +414,9 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 			'product_metadata'     => 'wc_clean',
 			'my attributes:value'  => 'wc_clean',
 			'a downloads:url1'     => 'wc_clean',
+			'attributes:default1'  => array( $importer, 'parse_attribute_default_field' ),
 			// Special columns handled elsewhere still get the default callback.
 			'attributes:name1'     => 'wc_clean',
-			'attributes:default1'  => 'wc_clean',
 			'downloads:name1'      => 'wc_clean',
 		);
 
