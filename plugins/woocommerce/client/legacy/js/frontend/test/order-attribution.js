@@ -93,6 +93,28 @@ describe( 'Order attribution input deduplication', () => {
 		expect( document.getElementById( 'first' ) ).not.toBeNull();
 		expect( document.getElementById( 'second' ) ).toBeNull();
 	} );
+
+	test( 'keeps the setter working for values assigned before the element is upgraded', () => {
+		// Elements in a template are not upgraded, so assigning `values` creates a plain property.
+		const template = document.createElement( 'template' );
+		template.innerHTML =
+			'<wc-order-attribution-inputs></wc-order-attribution-inputs>';
+		const element = template.content.firstElementChild;
+		element.values = { source_type: 'first' };
+
+		// Inserting the element upgrades it and calls `connectedCallback()`.
+		document.body.appendChild( element );
+
+		const getInput = () =>
+			element.querySelector(
+				'input[name="wc_order_attribution_source_type"]'
+			);
+		expect( getInput().value ).toBe( 'first' );
+
+		// A later assignment, such as the one from `setOrderTracking( true )`, must reach the input.
+		element.values = { source_type: 'second' };
+		expect( getInput().value ).toBe( 'second' );
+	} );
 } );
 
 describe( 'Order attribution sourcebuster.js init', () => {

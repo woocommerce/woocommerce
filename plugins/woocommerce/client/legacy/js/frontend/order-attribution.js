@@ -182,11 +182,12 @@
 			// Cache fieldNames available at the construction time, to avoid malformed behavior if they change in runtime.
 			this._fieldNames = Object.keys( wc_order_attribution.fields );
 			// Allow values to be lazily set before CE upgrade.
-			if ( this.hasOwnProperty( '_values' ) ) {
-				let values = this.values;
-				// Restore the setter.
+			// Before the upgrade `values` is a plain data property, so check for that.
+			if ( this.hasOwnProperty( 'values' ) ) {
+				const values = this.values;
+				// Restore the setter, and keep the values for `connectedCallback()` to stamp.
 				delete this.values;
-				this.values = values || {};
+				this._values = values || {};
 			}
 		}
 		/**
