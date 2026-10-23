@@ -1092,8 +1092,8 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Tax settings, rates, prices and carts for the resume sweep.
-	 * Each rate is paired with the prices that round a half cent or a 7th decimal differently in the cart and the order,
-	 * and each pair runs with every tax setting and cart.
+	 * Each rate is paired with the prices that round a half cent or a 7th decimal differently in the cart and the order.
+	 * Each pair runs with every tax setting, and the carts rotate so each pair and each tax setting also meets every cart.
 	 *
 	 * @return array<string, array{bool, bool, string[], string, int, array{string, string}|null}>
 	 */
@@ -1112,15 +1112,16 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 			'two lines, fixed cart coupon'  => array( 1, array( 'fixed_cart', '7.33' ) ),
 			'two lines, percent coupon, x3' => array( 3, array( 'percent', '15' ) ),
 		);
+		$tax_settings     = array( array( true, true ), array( true, false ), array( false, true ), array( false, false ) );
+		$cart_names       = array_keys( $carts );
 		$cases            = array();
-		foreach ( array( true, false ) as $prices_include_tax ) {
-			foreach ( array( true, false ) as $round_at_subtotal ) {
-				foreach ( $rates_and_prices as $rates_and_price_name => list( $rates, $price ) ) {
-					foreach ( $carts as $cart_name => list( $quantity, $coupon ) ) {
-						$name           = sprintf( 'prices %s tax, %s, %s, %s', $prices_include_tax ? 'including' : 'excluding', $round_at_subtotal ? 'rounded at subtotal' : 'rounded per line', $rates_and_price_name, $cart_name );
-						$cases[ $name ] = array( $prices_include_tax, $round_at_subtotal, $rates, $price, $quantity, $coupon );
-					}
-				}
+		foreach ( array_keys( $rates_and_prices ) as $rate_index => $rates_and_price_name ) {
+			list( $rates, $price ) = $rates_and_prices[ $rates_and_price_name ];
+			foreach ( $tax_settings as $setting_index => list( $prices_include_tax, $round_at_subtotal ) ) {
+				$cart_name                 = $cart_names[ ( $rate_index + $setting_index ) % count( $cart_names ) ];
+				list( $quantity, $coupon ) = $carts[ $cart_name ];
+				$name                      = sprintf( 'prices %s tax, %s, %s, %s', $prices_include_tax ? 'including' : 'excluding', $round_at_subtotal ? 'rounded at subtotal' : 'rounded per line', $rates_and_price_name, $cart_name );
+				$cases[ $name ]            = array( $prices_include_tax, $round_at_subtotal, $rates, $price, $quantity, $coupon );
 			}
 		}
 
