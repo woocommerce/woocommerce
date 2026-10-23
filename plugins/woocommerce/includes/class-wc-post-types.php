@@ -11,6 +11,7 @@
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
+use Automattic\WooCommerce\Internal\Admin\MenuIcons;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 
 /**
@@ -400,7 +401,7 @@ class WC_Post_Types {
 					'description'         => __( 'This is where you can browse products in this store.', 'woocommerce' ),
 					'public'              => true,
 					'show_ui'             => true,
-					'menu_icon'           => 'dashicons-archive',
+					'menu_icon'           => MenuIcons::get( 'core/tag', 'dashicons-archive' ), // TODO(WOOPLUG-7938): prototype guard.
 					'capability_type'     => 'product',
 					'map_meta_cap'        => true,
 					'publicly_queryable'  => true,
@@ -466,6 +467,8 @@ class WC_Post_Types {
 					'publicly_queryable'  => false,
 					'exclude_from_search' => true,
 					'show_in_menu'        => current_user_can( 'edit_others_shop_orders' ) ? 'woocommerce' : true,
+					// Only shown as a top-level item when the user can't see the WooCommerce menu.
+					'menu_icon'           => MenuIcons::get( 'core/receipt', 'dashicons-admin-post' ), // TODO(WOOPLUG-7938): prototype guard.
 					'hierarchical'        => false,
 					'show_in_nav_menus'   => false,
 					'rewrite'             => false,

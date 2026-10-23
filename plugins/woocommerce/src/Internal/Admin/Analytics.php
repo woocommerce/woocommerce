@@ -1237,7 +1237,7 @@ class Analytics {
 			'id'       => 'woocommerce-analytics',
 			'title'    => __( 'Analytics', 'woocommerce' ),
 			'path'     => '/analytics/overview',
-			'icon'     => 'dashicons-chart-bar',
+			'icon'     => MenuIcons::get( 'core/chart-bar', 'dashicons-chart-bar' ), // TODO(WOOPLUG-7938): prototype guard.
 			'position' => 57,
 		// After WooCommerce & Product menu items.
 		);
