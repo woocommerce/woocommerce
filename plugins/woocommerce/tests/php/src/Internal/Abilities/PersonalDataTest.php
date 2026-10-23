@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Tests\Internal\Abilities;
 
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
+use Automattic\WooCommerce\Internal\Abilities\AbilityResources;
 use Automattic\WooCommerce\Internal\Abilities\PersonalData;
 use Automattic\WooCommerce\Tests\Internal\Abilities\Domain\DomainAbilityTestCase;
 
@@ -108,6 +109,85 @@ class PersonalDataTest extends DomainAbilityTestCase {
 
 		$this->assertNotWPError( $result );
 		$this->assertNull( $result['order']['billing_email'] );
+	}
+
+	/**
+	 * @testdox Should refuse an extension field whose personal_data flag is not a boolean, instead of sharing it.
+	 */
+	public function test_extension_field_with_invalid_personal_data_flag_is_refused(): void {
+		$this->setExpectedIncorrectUsage( AbilityResources::class . '::register_field' );
+		$order = $this->create_order_with_email();
+		$this->add_test_field(
+			'order',
+			static function ( \WC_Order $order ) {
+				return $order->get_billing_phone();
+			},
+			array( 'personal_data' => 'yes' )
+		);
+
+		$result = $this->run_ability( 'woocommerce/orders-query', array( 'id' => $order->get_id() ) );
+
+		$this->assertArrayNotHasKey( 'extensions', $result['orders'][0] );
+	}
+
+	/**
+	 * @testdox Should withhold every field of a personal data group, except a field that opts out, and a field added to the group later.
+	 */
+	public function test_withholds_the_personal_fields_of_a_group(): void {
+		AbilityResources::register( 'test_customer' );
+		AbilityResources::register_field_group(
+			'test_customer',
+			'billing',
+			array(
+				'personal_data' => true,
+				'fields'        => array(
+					'phone'   => array(),
+					'country' => array( 'personal_data' => false ),
+				),
+			)
+		);
+		AbilityResources::register_field( 'test_customer', 'email', array( 'group' => 'billing' ) );
+		$this->withhold_personal_data();
+
+		$output = AbilityResources::withhold_personal_data(
+			array(
+				'id'      => 7,
+				'billing' => array(
+					'phone'   => '555-0100',
+					'email'   => 'jane@example.com',
+					'country' => 'PT',
+				),
+			),
+			'test_customer'
+		);
+
+		$this->assertSame( 7, $output['id'] );
+		$this->assertNull( $output['billing']['phone'] );
+		$this->assertNull( $output['billing']['email'] );
+		$this->assertSame( 'PT', $output['billing']['country'] );
+	}
+
+	/**
+	 * @testdox Should refuse a field in a group that is not registered.
+	 */
+	public function test_a_field_in_an_unknown_group_is_refused(): void {
+		$this->setExpectedIncorrectUsage( AbilityResources::class . '::register_field' );
+		AbilityResources::register( 'test_customer' );
+
+		AbilityResources::register_field(
+			'test_customer',
+			'email',
+			array(
+				'group'         => 'billing',
+				'personal_data' => true,
+			)
+		);
+
+		$this->withhold_personal_data();
+
+		$output = AbilityResources::withhold_personal_data( array( 'billing' => array( 'email' => 'jane@example.com' ) ), 'test_customer' );
+
+		$this->assertSame( 'jane@example.com', $output['billing']['email'] );
 	}
 
 	/**

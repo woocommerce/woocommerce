@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
+use Automattic\WooCommerce\Internal\Abilities\AbilityResources;
 use Automattic\WooCommerce\Internal\Abilities\PersonalData;
 
 /**
@@ -135,10 +136,16 @@ abstract class DomainAbilityTestCase extends \WC_Unit_Test_Case {
 	private static function reset_registries(): void {
 		global $wp_actions;
 
-		foreach ( array( 'fields', 'reported', 'validators', 'filters', 'resources' ) as $property ) {
-			$reflection = new \ReflectionProperty( ExtensibleAbilities::class, $property );
-			$reflection->setAccessible( true );
-			$reflection->setValue( null, array() );
+		$properties = array(
+			ExtensibleAbilities::class => array( 'fields', 'reported', 'validators', 'filters' ),
+			AbilityResources::class    => array( 'resources', 'fields', 'groups', 'extension_fields' ),
+		);
+		foreach ( $properties as $class => $names ) {
+			foreach ( $names as $property ) {
+				$reflection = new \ReflectionProperty( $class, $property );
+				$reflection->setAccessible( true );
+				$reflection->setValue( null, array() );
+			}
 		}
 
 		foreach ( array( 'WP_Abilities_Registry', 'WP_Ability_Categories_Registry' ) as $registry ) {

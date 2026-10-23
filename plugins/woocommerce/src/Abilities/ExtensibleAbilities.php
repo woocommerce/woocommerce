@@ -7,7 +7,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Abilities;
 
-use Automattic\WooCommerce\Internal\Abilities\PersonalData;
+use Automattic\WooCommerce\Internal\Abilities\AbilityResources;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -40,13 +40,6 @@ class ExtensibleAbilities {
 	 * @var array<string, array<string, array<string, array<string, mixed>>>>
 	 */
 	private static array $fields = array();
-
-	/**
-	 * Registered resources, keyed by resource name.
-	 *
-	 * @var array<string, bool>
-	 */
-	private static array $resources = array();
 
 	/**
 	 * Validators keyed by resource.
@@ -89,7 +82,7 @@ class ExtensibleAbilities {
 	 * Register a resource that abilities format, so extensions can register fields on it.
 	 *
 	 * Call it inside the `woocommerce_extensible_abilities_resources_init` action. A call after that action is refused.
-	 * Core registers `product`, `order` and `order_item` there. An
+	 * Core's `product`, `order` and `order_item` are registered before it. An
 	 * extension registers a resource that its own abilities format, and then calls `add_fields_to_object()`
 	 * and `add_fields_schema()` from those abilities, exactly as Core's abilities do.
 	 * Registering the same resource again does nothing.
@@ -108,7 +101,7 @@ class ExtensibleAbilities {
 			return;
 		}
 
-		self::$resources[ $resource_name ] = true;
+		AbilityResources::register( $resource_name );
 	}
 
 	/**
@@ -164,11 +157,11 @@ class ExtensibleAbilities {
 				return;
 			}
 		}
-		if ( ! isset( self::$resources[ $args['resource'] ] ) && ! did_action( 'woocommerce_extensible_abilities_resources_init' ) ) {
+		if ( ! AbilityResources::is_registered( $args['resource'] ) && ! did_action( 'woocommerce_extensible_abilities_resources_init' ) ) {
 			wc_doing_it_wrong( __METHOD__, __( 'Register a field inside the woocommerce_extensible_abilities_init action. The resources are not registered yet.', 'woocommerce' ), '11.3.0' );
 			return;
 		}
-		if ( ! isset( self::$resources[ $args['resource'] ] ) ) {
+		if ( ! AbilityResources::is_registered( $args['resource'] ) ) {
 			wc_doing_it_wrong(
 				__METHOD__,
 				sprintf(
@@ -196,10 +189,6 @@ class ExtensibleAbilities {
 			wc_doing_it_wrong( __METHOD__, __( 'The "update_callback" argument must be callable.', 'woocommerce' ), '11.3.0' );
 			return;
 		}
-		if ( isset( $args['personal_data'] ) && ! is_bool( $args['personal_data'] ) ) {
-			wc_doing_it_wrong( __METHOD__, __( 'The "personal_data" argument must be a boolean.', 'woocommerce' ), '11.4.0' );
-			return;
-		}
 		if ( isset( self::$fields[ $args['resource'] ][ $args['namespace'] ][ $args['field'] ] ) ) {
 			wc_doing_it_wrong(
 				__METHOD__,
@@ -215,7 +204,10 @@ class ExtensibleAbilities {
 			return;
 		}
 
-		self::$fields[ $args['resource'] ][ $args['namespace'] ][ $args['field'] ] = $args;
+		$resource_args = array_intersect_key( $args, array_flip( array( 'namespace', 'personal_data' ) ) );
+		if ( AbilityResources::register_field( $args['resource'], $args['field'], $resource_args ) ) {
+			self::$fields[ $args['resource'] ][ $args['namespace'] ][ $args['field'] ] = $args;
+		}
 	}
 
 	/**
@@ -266,7 +258,7 @@ class ExtensibleAbilities {
 				return;
 			}
 		}
-		if ( ! isset( self::$resources[ $args['resource'] ] ) ) {
+		if ( ! AbilityResources::is_registered( $args['resource'] ) ) {
 			wc_doing_it_wrong(
 				__METHOD__,
 				sprintf(
@@ -521,7 +513,7 @@ class ExtensibleAbilities {
 			wc_doing_it_wrong( __METHOD__, __( 'The "callback" argument must be callable.', 'woocommerce' ), '11.3.0' );
 			return;
 		}
-		if ( ! isset( self::$resources[ $args['resource'] ] ) ) {
+		if ( ! AbilityResources::is_registered( $args['resource'] ) ) {
 			wc_doing_it_wrong(
 				__METHOD__,
 				sprintf(
@@ -555,17 +547,26 @@ class ExtensibleAbilities {
 	 * @return array<string, mixed>
 	 */
 	public static function add_fields_to_object( array $output, string $resource_name, $subject ): array {
-		$output = PersonalData::withhold_fields( $output, $resource_name );
-		if ( empty( self::$fields[ $resource_name ] ) || ! self::is_enabled() ) {
-			return $output;
+		if ( ! empty( self::$fields[ $resource_name ] ) && self::is_enabled() ) {
+			$extensions = self::get_field_values( $resource_name, $subject );
+			if ( ! empty( $extensions ) ) {
+				$output['extensions'] = $extensions;
+			}
 		}
+		return AbilityResources::withhold_personal_data( $output, $resource_name );
+	}
 
+	/**
+	 * Values of the extension fields of an object, keyed by namespace, then field.
+	 *
+	 * @param string $resource_name Resource.
+	 * @param object $subject       Object to read.
+	 * @return array<string, array<string, mixed>>
+	 */
+	private static function get_field_values( string $resource_name, $subject ): array {
 		$extensions = array();
 		foreach ( self::$fields[ $resource_name ] as $namespace => $fields ) {
 			foreach ( $fields as $field => $args ) {
-				if ( ! empty( $args['personal_data'] ) && ! PersonalData::is_shared( $resource_name ) ) {
-					continue;
-				}
 				try {
 					$value = call_user_func( $args['get_callback'], $subject );
 				} catch ( \Throwable $e ) {
@@ -584,10 +585,7 @@ class ExtensibleAbilities {
 				}
 			}
 		}
-		if ( ! empty( $extensions ) ) {
-			$output['extensions'] = $extensions;
-		}
-		return $output;
+		return $extensions;
 	}
 
 	/**
