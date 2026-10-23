@@ -3,6 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Component } from '@wordpress/element';
+import type { ReactNode } from 'react';
 import { CURRENT_USER_IS_ADMIN } from '@woocommerce/settings';
 import { StoreNoticesContainer } from '@woocommerce/blocks-components';
 import { noticeContexts } from '@woocommerce/base-context';
@@ -14,7 +15,11 @@ import {
 
 interface PaymentMethodErrorBoundaryProps {
 	isEditor: boolean;
-	children: React.ReactNode;
+	children: ReactNode;
+	/**
+	 * Rendered instead of the default error notice when a child throws. Pass `null` to render nothing.
+	 */
+	fallback?: ReactNode;
 }
 
 class PaymentMethodErrorBoundary extends Component< PaymentMethodErrorBoundaryProps > {
@@ -28,9 +33,12 @@ class PaymentMethodErrorBoundary extends Component< PaymentMethodErrorBoundaryPr
 
 	render() {
 		const { hasError, errorMessage } = this.state;
-		const { isEditor } = this.props;
+		const { isEditor, fallback } = this.props;
 
 		if ( hasError ) {
+			if ( fallback !== undefined ) {
+				return fallback;
+			}
 			let errorText = __(
 				'We are experiencing difficulties with this payment method. Please contact us for assistance.',
 				'woocommerce'
