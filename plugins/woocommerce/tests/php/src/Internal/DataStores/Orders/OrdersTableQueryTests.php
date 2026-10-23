@@ -561,8 +561,10 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	 * @param bool $fts_enabled    Whether full-text search is enabled.
 	 */
 	public function test_first_search_page_supplies_total( int $matches, bool $count_expected, bool $fts_enabled ): void {
-		// The full-text address index created for this class includes the phone column added in 9.4.
-		update_option( 'woocommerce_db_version', WC_VERSION );
+		// The address search only adds the phone column to its MATCH() list when the stored database version is 9.4.0 or later.
+		// The full-text index this class creates always includes phone, so a lower stored version builds a column list that matches no index and fails.
+		// Pin the version in memory instead of writing the option.
+		add_filter( 'pre_option_woocommerce_db_version', static fn() => WC_VERSION );
 		add_filter( 'pre_option_' . CustomOrdersTableController::HPOS_FTS_INDEX_OPTION, static fn() => $fts_enabled ? 'yes' : 'no' );
 		add_filter( 'pre_option_' . CustomOrdersTableController::HPOS_FTS_ADDRESS_INDEX_CREATED_OPTION, static fn() => 'yes' );
 		add_filter( 'pre_option_' . CustomOrdersTableController::HPOS_FTS_ORDER_ITEM_INDEX_CREATED_OPTION, static fn() => 'yes' );
