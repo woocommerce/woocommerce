@@ -40,19 +40,19 @@ class SessionDataWriterTest extends WC_Unit_Test_Case {
 	 * @testdox Inserts a new row when the session is not stored yet.
 	 */
 	public function test_inserts_new_row(): void {
-		$saved = $this->sut->save( $this->table, self::SESSION_KEY, time() + 100, array( 'a' => 'mine' ), array() );
+		$saved = $this->sut->merge( $this->table, self::SESSION_KEY, time() + 100, array( 'a' => 'mine' ), array() );
 
 		$this->assertSame( array( 'a' => 'mine' ), $saved );
 		$this->assertSame( array( 'a' => 'mine' ), $this->get_stored() );
 	}
 
 	/**
-	 * @testdox Without a loaded snapshot, replaces the stored row.
+	 * @testdox Replacing overwrites the stored row.
 	 */
-	public function test_overwrites_without_loaded_snapshot(): void {
+	public function test_replace_overwrites_stored_row(): void {
 		$this->store( array( 'a' => 'theirs' ) );
 
-		$this->sut->save( $this->table, self::SESSION_KEY, time() + 100, array( 'b' => 'mine' ), null );
+		$this->sut->replace( $this->table, self::SESSION_KEY, time() + 100, array( 'b' => 'mine' ) );
 
 		$this->assertSame( array( 'b' => 'mine' ), $this->get_stored() );
 	}
@@ -78,7 +78,7 @@ class SessionDataWriterTest extends WC_Unit_Test_Case {
 			'changed' => 'mine',
 		);
 
-		$saved = $this->sut->save( $this->table, self::SESSION_KEY, time() + 100, $current, $loaded );
+		$saved = $this->sut->merge( $this->table, self::SESSION_KEY, time() + 100, $current, $loaded );
 
 		$expected = array(
 			'kept'    => 'theirs',
@@ -95,7 +95,7 @@ class SessionDataWriterTest extends WC_Unit_Test_Case {
 	public function test_same_key_changed_by_both_requests_uses_the_last_save(): void {
 		$this->store( array( 'a' => 'theirs' ) );
 
-		$this->sut->save( $this->table, self::SESSION_KEY, time() + 100, array( 'a' => 'mine' ), array( 'a' => 'old' ) );
+		$this->sut->merge( $this->table, self::SESSION_KEY, time() + 100, array( 'a' => 'mine' ), array( 'a' => 'old' ) );
 
 		$this->assertSame( array( 'a' => 'mine' ), $this->get_stored() );
 	}
@@ -118,7 +118,7 @@ class SessionDataWriterTest extends WC_Unit_Test_Case {
 		$suppress = $wpdb->suppress_errors( true );
 
 		try {
-			$saved = $this->sut->save(
+			$saved = $this->sut->merge(
 				$this->table,
 				self::SESSION_KEY,
 				time() + 100,

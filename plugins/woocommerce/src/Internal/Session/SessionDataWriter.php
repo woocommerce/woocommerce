@@ -10,29 +10,35 @@ namespace Automattic\WooCommerce\Internal\Session;
  * requests saved in the meantime, so only the keys this request changed are applied to the stored row. When two
  * requests change the same key, the last one to save wins.
  *
- * @since 11.3.0
+ * @since 11.4.0
  */
 class SessionDataWriter {
 
 	/**
-	 * Save session data.
+	 * Overwrite the stored session with this request's data.
 	 *
-	 * Without a loaded snapshot the session overwrites the stored row. With one, only the keys that changed since it
-	 * was loaded are applied to the stored row.
-	 *
-	 * @param string     $table       Sessions table name.
-	 * @param string     $session_key Session key (customer ID).
-	 * @param int        $expiry      Session expiry timestamp.
-	 * @param array      $current     Session data in this request.
-	 * @param array|null $loaded      Session data as this request loaded it, or null to overwrite the stored row.
+	 * @param string $table       Sessions table name.
+	 * @param string $session_key Session key (customer ID).
+	 * @param int    $expiry      Session expiry timestamp.
+	 * @param array  $current     Session data in this request.
 	 * @return array The session data that was saved.
 	 */
-	public function save( string $table, string $session_key, int $expiry, array $current, ?array $loaded ): array {
-		if ( null === $loaded ) {
-			$this->upsert( $table, $session_key, $expiry, $current );
-			return $current;
-		}
+	public function replace( string $table, string $session_key, int $expiry, array $current ): array {
+		$this->upsert( $table, $session_key, $expiry, $current );
+		return $current;
+	}
 
+	/**
+	 * Apply only the keys that changed since this request loaded the session to the stored session.
+	 *
+	 * @param string $table       Sessions table name.
+	 * @param string $session_key Session key (customer ID).
+	 * @param int    $expiry      Session expiry timestamp.
+	 * @param array  $current     Session data in this request.
+	 * @param array  $loaded      Session data as this request loaded it.
+	 * @return array The session data that was saved.
+	 */
+	public function merge( string $table, string $session_key, int $expiry, array $current, array $loaded ): array {
 		// Usually no other request saved in the meantime, so the row still holds what this request loaded.
 		if ( $this->write_if_unchanged( $table, $session_key, $expiry, $current, $loaded ) ) {
 			return $current;
@@ -44,8 +50,7 @@ class SessionDataWriter {
 
 		if ( '' !== $wpdb->last_error ) {
 			// Without the stored row there is nothing to apply the changes to, so save this request's whole session.
-			$this->upsert( $table, $session_key, $expiry, $current );
-			return $current;
+			return $this->replace( $table, $session_key, $expiry, $current );
 		}
 
 		$stored = maybe_unserialize( $value );

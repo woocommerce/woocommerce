@@ -42,11 +42,18 @@ abstract class WC_Session {
 	/**
 	 * Session data as loaded from storage, used to work out which keys this request changed.
 	 *
-	 * Null when saving should write the whole session instead of merging with the stored data.
-	 *
-	 * @var array|null
+	 * @var array
 	 */
-	private $loaded_session_snapshot = null;
+	private $loaded_session_snapshot = array();
+
+	/**
+	 * Whether saving should overwrite the stored session instead of merging this request's changes into it.
+	 *
+	 * True until a snapshot is recorded, so handlers that never record one keep overwriting the stored session.
+	 *
+	 * @var bool
+	 */
+	private $replace_session_on_save = true;
 
 	/**
 	 * Init hooks and session data. Extended by child classes.
@@ -143,25 +150,44 @@ abstract class WC_Session {
 	/**
 	 * Record the session data as loaded from storage, so saving writes only the keys this request changed.
 	 *
-	 * Pass null when the request replaces the whole session and saving should overwrite the stored data.
+	 * @since 11.4.0
 	 *
-	 * @since 11.3.0
-	 *
-	 * @param array|null $data Session data as loaded from storage.
+	 * @param array $data Session data as loaded from storage.
 	 */
-	protected function set_loaded_session_snapshot( ?array $data ): void {
+	protected function set_loaded_session_snapshot( array $data ): void {
 		$this->loaded_session_snapshot = $data;
+		$this->replace_session_on_save = false;
 	}
 
 	/**
 	 * Get the session data as loaded from storage.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 *
-	 * @return array|null Session data as loaded, or null when saving should overwrite the stored data.
+	 * @return array
 	 */
-	protected function get_loaded_session_snapshot(): ?array {
+	protected function get_loaded_session_snapshot(): array {
 		return $this->loaded_session_snapshot;
+	}
+
+	/**
+	 * Make the next save overwrite the stored session, for requests that replace the whole session.
+	 *
+	 * @since 11.4.0
+	 */
+	protected function replace_session_on_save(): void {
+		$this->replace_session_on_save = true;
+	}
+
+	/**
+	 * Whether the next save should overwrite the stored session instead of merging into it.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @return bool
+	 */
+	protected function should_replace_session_on_save(): bool {
+		return $this->replace_session_on_save;
 	}
 
 	/**

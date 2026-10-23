@@ -171,7 +171,7 @@ final class SessionHandler extends WC_Session {
 		$this->_data        = array();
 		$this->_dirty       = false;
 		$this->_customer_id = null;
-		$this->set_loaded_session_snapshot( null );
+		$this->replace_session_on_save();
 	}
 
 	/**
@@ -195,14 +195,14 @@ final class SessionHandler extends WC_Session {
 	public function save_data() {
 		// Dirty if something changed - prevents saving nothing new.
 		if ( $this->_dirty ) {
-			// Writes only the keys this request changed, so changes other requests saved since it loaded are kept.
-			wc_get_container()->get( SessionDataWriter::class )->save(
-				$this->table,
-				$this->get_customer_id(),
-				(int) $this->session_expiration,
-				$this->_data,
-				$this->get_loaded_session_snapshot()
-			);
+			$writer = wc_get_container()->get( SessionDataWriter::class );
+
+			// Merging writes only the keys this request changed, so changes other requests saved since it loaded are kept.
+			if ( $this->should_replace_session_on_save() ) {
+				$writer->replace( $this->table, $this->get_customer_id(), (int) $this->session_expiration, $this->_data );
+			} else {
+				$writer->merge( $this->table, $this->get_customer_id(), (int) $this->session_expiration, $this->_data, $this->get_loaded_session_snapshot() );
+			}
 
 			$this->set_loaded_session_snapshot( $this->_data );
 			$this->_dirty = false;

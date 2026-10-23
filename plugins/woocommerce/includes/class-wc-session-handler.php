@@ -211,7 +211,7 @@ class WC_Session_Handler extends WC_Session {
 		$session_data                         = array_diff_key( $session_data, array( 'customer' => true ) );
 		$this->_data                          = $session_data;
 		$this->_dirty                         = true;
-		$this->set_loaded_session_snapshot( null );
+		$this->replace_session_on_save();
 		$this->save_data();
 	}
 
@@ -225,7 +225,7 @@ class WC_Session_Handler extends WC_Session {
 		$this->_data        = $this->get_session( $guest_session_id, array() );
 		$this->_dirty       = true;
 		$this->_customer_id = $user_session_id;
-		$this->set_loaded_session_snapshot( null );
+		$this->replace_session_on_save();
 		$this->save_data( $guest_session_id );
 
 		/**
@@ -558,14 +558,12 @@ class WC_Session_Handler extends WC_Session {
 	public function save_data( $old_session_key = '' ) {
 		// Dirty if something changed - prevents saving nothing new.
 		if ( $this->_dirty && $this->has_session() ) {
-			// Writes only the keys this request changed, so changes other requests saved since it loaded are kept.
-			$saved_data = wc_get_container()->get( SessionDataWriter::class )->save(
-				$this->_table,
-				$this->get_customer_id(),
-				$this->_session_expiration,
-				$this->_data,
-				$this->get_loaded_session_snapshot()
-			);
+			$writer = wc_get_container()->get( SessionDataWriter::class );
+
+			// Merging writes only the keys this request changed, so changes other requests saved since it loaded are kept.
+			$saved_data = $this->should_replace_session_on_save()
+				? $writer->replace( $this->_table, $this->get_customer_id(), $this->_session_expiration, $this->_data )
+				: $writer->merge( $this->_table, $this->get_customer_id(), $this->_session_expiration, $this->_data, $this->get_loaded_session_snapshot() );
 
 			wp_cache_set( $this->get_cache_prefix() . $this->get_customer_id(), $saved_data, WC_SESSION_CACHE_GROUP, $this->_session_expiration - time() );
 
@@ -608,7 +606,7 @@ class WC_Session_Handler extends WC_Session {
 		$this->_dirty       = false;
 		$this->_customer_id = $this->generate_customer_id();
 		$this->_has_cookie  = false;
-		$this->set_loaded_session_snapshot( null );
+		$this->replace_session_on_save();
 	}
 
 	/**

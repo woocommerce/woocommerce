@@ -225,7 +225,7 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 			// The session row is rolled back but the session object keeps what it loaded, which no longer matches
 			// storage. Make its next save a full write instead of a merge against that stale snapshot.
 			( function () {
-				$this->set_loaded_session_snapshot( null );
+				$this->replace_session_on_save();
 			} )->call( WC()->session );
 		}
 
