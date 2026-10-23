@@ -468,7 +468,7 @@ class WC_Checkout {
 			 */
 			$order->set_customer_id( apply_filters( 'woocommerce_checkout_customer_id', get_current_user_id() ) );
 			$order->set_currency( get_woocommerce_currency() );
-			$order->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
+			$order->set_prices_include_tax( wc_prices_include_tax() );
 			$order->set_customer_ip_address( WC_Geolocation::get_ip_address() );
 			$order->set_customer_user_agent( wc_get_user_agent() );
 			$order->set_customer_note( isset( $data['order_comments'] ) ? $data['order_comments'] : '' );
@@ -1046,6 +1046,8 @@ class WC_Checkout {
 						)
 					);
 				}
+			} elseif ( $this->is_shipping_withheld_for_missing_address() ) {
+				$errors->add( 'shipping', __( 'Please enter an address to continue.', 'woocommerce' ) );
 			} else {
 				$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
 
@@ -1068,6 +1070,28 @@ class WC_Checkout {
 		}
 
 		do_action( 'woocommerce_after_checkout_validation', $data, $errors );
+	}
+
+	/**
+	 * Check whether shipping was left out because "Hide shipping costs until an address is entered" found the address incomplete.
+	 *
+	 * Without this check an order could be saved with no shipping line, for example when a store removes billing
+	 * address fields and the empty values are copied over the shipping address. Stores that turn off shipping
+	 * calculation through the woocommerce_cart_ready_to_calc_shipping filter are left alone.
+	 *
+	 * @return bool
+	 */
+	private function is_shipping_withheld_for_missing_address(): bool {
+		if ( 'yes' !== get_option( 'woocommerce_shipping_cost_requires_address' ) || WC()->cart->has_calculated_shipping() ) {
+			return false;
+		}
+
+		/**
+		 * This filter is documented in includes/class-wc-cart.php.
+		 *
+		 * @since 2.7.0
+		 */
+		return (bool) apply_filters( 'woocommerce_cart_ready_to_calc_shipping', true );
 	}
 
 	/**

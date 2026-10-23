@@ -21,11 +21,11 @@ class MiniCartCartButtonBlock extends AbstractInnerBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		$default_view_cart_text = __( 'View cart', 'woocommerce' );
-		$view_cart_text         = $attributes['cartButtonLabel'] ? $attributes['cartButtonLabel'] : $default_view_cart_text;
-		$cart_page_id           = wc_get_page_id( 'cart' );
-		$cart_page_url          = get_permalink( $cart_page_id );
-		$classes                = implode(
+		$default_cart_text  = __( 'Cart', 'woocommerce' );
+		$cart_text          = $attributes['cartButtonLabel'] ? $attributes['cartButtonLabel'] : $default_cart_text;
+		$cart_page_id       = wc_get_page_id( 'cart' );
+		$cart_page_url      = get_permalink( $cart_page_id );
+		$classes            = implode(
 			' ',
 			array_filter(
 				array(
@@ -36,7 +36,7 @@ class MiniCartCartButtonBlock extends AbstractInnerBlock {
 				)
 			)
 		);
-		$wrapper_attributes     = get_block_wrapper_attributes(
+		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
 				'href'  => esc_url( $cart_page_url ),
 				'class' => $classes,
@@ -48,7 +48,7 @@ class MiniCartCartButtonBlock extends AbstractInnerBlock {
 		?>
 		<a <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 			<div class="wc-block-components-button__text">
-				<?php echo esc_html( $view_cart_text ); ?>
+				<?php echo esc_html( $cart_text ); ?>
 			</div>
 		</a>
 		<?php

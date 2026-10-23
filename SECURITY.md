@@ -12,6 +12,8 @@ Generally, *only the latest version of WooCommerce has continued support*. If a 
 
 **For responsible disclosure of security issues and to be eligible for our bug bounty program, please submit your report based on instructions found on [automattic.com/security](https://automattic.com/security).**
 
+The security contact for this project is <security@automattic.com>.
+
 Our most critical targets are:
 
 * WooCommerce core (this repository)

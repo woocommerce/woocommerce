@@ -37,8 +37,10 @@
 		top: var(--top-padding);
 		z-index: 9999;
 		background-color: transparent;
-		// Delay the 200ms backdrop fade so it finishes with the 500ms drawer transition.
-		transition: background-color 200ms 300ms;
+		// Inherited visibility removes the closed drawer from the tab order.
+		// Keep it through the 500ms slide, after the 200ms backdrop fade.
+		visibility: hidden;
+		transition: background-color 200ms 300ms, visibility 0s 500ms;
 	}
 
 	.wc-block-product-filters__overlay-wrapper {
@@ -112,6 +114,7 @@
 	&.is-overlay-opened {
 		.wc-block-product-filters__overlay {
 			pointer-events: auto;
+			visibility: visible;
 			background-color: rgba(95, 95, 95, 0.35);
 			transition-delay: 0s;
 		}

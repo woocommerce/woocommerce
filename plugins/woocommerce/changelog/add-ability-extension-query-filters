@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add ExtensibleAbilities::register_query_filter(). With the experimental extensible abilities feature on, the product and order list abilities accept extension filters under filters.extensions.<namespace>.<filter>.

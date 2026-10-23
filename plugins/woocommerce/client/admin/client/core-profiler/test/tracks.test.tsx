@@ -151,7 +151,9 @@ const defaultServicesOverrides: ServicesOverrides = {
 	updateOnboardingProfileOption: resolvedActor( undefined ),
 	updateProfilerCompletedSteps: resolvedActor( undefined ),
 	getCoreProfilerCompletedSteps: resolvedActor( {} ),
-	skipFlowUpdateBusinessLocation: resolvedActor( undefined ),
+	skipFlowUpdateBusinessLocation: resolvedActor( {
+		storeLocationNotSaved: false,
+	} ),
 };
 
 const actionOverrides = {

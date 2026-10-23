@@ -41,9 +41,6 @@ export interface ProductCollectionAttributes {
 	 */
 	queryContextIncludes: string[];
 	forcePageReload: boolean;
-	filterable: boolean;
-	// eslint-disable-next-line @typescript-eslint/naming-convention
-	__privatePreviewState?: PreviewState;
 }
 
 export enum LayoutOptions {
@@ -118,7 +115,6 @@ export interface ProductCollectionQuery {
 	isProductCollectionBlock: boolean;
 	woocommerceHandPickedProducts: string[];
 	priceRange: undefined | PriceRange;
-	filterable: boolean;
 	productReference?: number;
 	/**
 	 * If `null`/`undefined`: Infer from location context.
@@ -209,7 +205,6 @@ export enum CoreFilterNames {
 	STOCK_STATUS = 'stock-status',
 	TAXONOMY = 'taxonomy',
 	PRICE_RANGE = 'price-range',
-	FILTERABLE = 'filterable',
 	PRODUCTS_PER_PAGE = 'products-per-page',
 	MAX_PAGES_TO_SHOW = 'max-pages-to-show',
 	OFFSET = 'offset',

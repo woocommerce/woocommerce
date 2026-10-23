@@ -55,12 +55,16 @@
 		"spacing": {
 			"margin": true,
 			"padding": true,
-			"__experimentalSkipSerialization": true
+			"__experimentalSkipSerialization": [ "padding" ]
 		},
 		"email": true
 	},
 	"selectors": {
-		"root": ".wp-block-woocommerce-product-button .wc-block-components-product-button__button"
+		"root": ".wp-block-woocommerce-product-button .wc-block-components-product-button__button",
+		"spacing": {
+			"margin": ".wp-block-woocommerce-product-button",
+			"padding": ".wp-block-woocommerce-product-button .wc-block-components-product-button__button"
+		}
 	},
 	"ancestor": [
 		"woocommerce/all-products",

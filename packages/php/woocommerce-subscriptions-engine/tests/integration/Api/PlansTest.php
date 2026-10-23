@@ -9,25 +9,29 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Integration\Api;
 
-use DomainException;
 use EngineIntegrationTestCase;
 use InvalidArgumentException;
 use RuntimeException;
 use WP_Error;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\Plans;
-use Automattic\WooCommerce\SubscriptionsEngine\Api\PlanValidationException;
+use Automattic\WooCommerce\SubscriptionsEngine\Api\ValidationException;
 use Automattic\WooCommerce\SubscriptionsEngine\Api\View\PlanView;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Plan;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\PlanStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\StatusRegistry;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\InvalidInputException;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ValidationErrorCode;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\PlanRepository;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller;
+use Automattic\WooCommerce\SubscriptionsEngine\Tests\Integration\AssertsValidationErrors;
 
 /**
  * @covers \Automattic\WooCommerce\SubscriptionsEngine\Api\Plans
- * @covers \Automattic\WooCommerce\SubscriptionsEngine\Api\PlanValidationException
+ * @covers \Automattic\WooCommerce\SubscriptionsEngine\Api\ValidationException
  */
 class PlansTest extends EngineIntegrationTestCase {
+
+	use AssertsValidationErrors;
 
 	private const OWNER = 'acme-subs';
 
@@ -144,37 +148,40 @@ class PlansTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @return array<string, array{0: array<string, mixed>}>
+	 * @return array<string, array{0: array<string, mixed>, 1: string, 2: string}>
 	 */
 	public function provide_invalid_create_args(): array {
 		return array(
-			'unregistered status' => array( array( 'status' => 'seasonal' ) ),
-			'non-string status'   => array( array( 'status' => 5 ) ),
-			'empty name'          => array( array( 'name' => '' ) ),
-			'whitespace name'     => array( array( 'name' => '   ' ) ),
-			'non-string name'     => array( array( 'name' => 12 ) ),
-			'list policy'         => array( array( 'pricing_policy' => array( 'a', 'b' ) ) ),
-			'scalar policy'       => array( array( 'billing_policy' => 'monthly' ) ),
-			'missing slug'        => array( array( 'extension_slug' => null ) ),
-			'empty slug'          => array( array( 'extension_slug' => '' ) ),
+			'unregistered status' => array( array( 'status' => 'seasonal' ), ValidationErrorCode::NOT_REGISTERED, 'status' ),
+			'non-string status'   => array( array( 'status' => 5 ), ValidationErrorCode::INVALID_TYPE, 'status' ),
+			'empty name'          => array( array( 'name' => '' ), ValidationErrorCode::REQUIRED, 'name' ),
+			'whitespace name'     => array( array( 'name' => '   ' ), ValidationErrorCode::REQUIRED, 'name' ),
+			'non-string name'     => array( array( 'name' => 12 ), ValidationErrorCode::INVALID_TYPE, 'name' ),
+			'list policy'         => array( array( 'pricing_policy' => array( 'a', 'b' ) ), ValidationErrorCode::INVALID_TYPE, 'pricing_policy' ),
+			'scalar policy'       => array( array( 'billing_policy' => 'monthly' ), ValidationErrorCode::INVALID_TYPE, 'billing_policy' ),
+			'missing slug'        => array( array( 'extension_slug' => null ), ValidationErrorCode::REQUIRED, 'extension_slug' ),
+			'empty slug'          => array( array( 'extension_slug' => '' ), ValidationErrorCode::REQUIRED, 'extension_slug' ),
+			'non-string slug'     => array( array( 'extension_slug' => 5 ), ValidationErrorCode::INVALID_TYPE, 'extension_slug' ),
 		);
 	}
 
 	/**
-	 * @testdox create rejects invalid args and stores nothing.
+	 * @testdox create rejects invalid args with the code and field, and stores nothing.
 	 * @dataProvider provide_invalid_create_args
 	 *
 	 * @param array<string, mixed> $overrides Invalid overrides.
+	 * @param string               $code      Expected error code.
+	 * @param string               $field     Expected field.
 	 */
-	public function test_create_rejects_invalid_args_and_stores_nothing( array $overrides ): void {
+	public function test_create_rejects_invalid_args_and_stores_nothing( array $overrides, string $code, string $field ): void {
 		$before = $this->plan_count();
 
-		try {
-			$this->create( $overrides );
-			$this->fail( 'Expected InvalidArgumentException.' );
-		} catch ( InvalidArgumentException $e ) {
-			$this->assertNotInstanceOf( PlanValidationException::class, $e );
-		}
+		$this->assert_validation_errors(
+			function () use ( $overrides ): void {
+				$this->create( $overrides );
+			},
+			array( array( $code, $field ) )
+		);
 
 		$this->assertSame( $before, $this->plan_count() );
 	}
@@ -183,35 +190,42 @@ class PlansTest extends EngineIntegrationTestCase {
 	 * @testdox an entity invariant failure is reported as invalid input, on create and on update.
 	 */
 	public function test_an_entity_invariant_failure_is_reported_as_invalid_input(): void {
-		try {
-			$this->create( array( 'status' => 'nonsense' ) );
-			$this->fail( 'Expected an InvalidArgumentException.' );
-		} catch ( InvalidArgumentException $e ) {
-			$this->assertInstanceOf( DomainException::class, $e->getPrevious() );
-			$this->assertSame( $e->getPrevious()->getMessage(), $e->getMessage() );
-		}
+		$e = $this->assert_validation_errors(
+			function (): void {
+				$this->create( array( 'status' => 'nonsense' ) );
+			},
+			array( array( ValidationErrorCode::NOT_REGISTERED, 'status' ) )
+		);
+		$this->assertSame( '"nonsense" is not registered.', $e->get_errors()->get_error_message( ValidationErrorCode::NOT_REGISTERED ) );
+		$previous = $e->getPrevious();
+		$this->assertInstanceOf( InvalidInputException::class, $previous );
+		$this->assertSame( esc_html( $previous->getMessage() ), $e->getMessage(), 'The exception message stays the English Core message.' );
 
-		try {
-			Plans::update(
-				$this->create(),
-				array(
-					'extension_slug' => self::OWNER,
-					'name'           => ' ',
-				)
-			);
-			$this->fail( 'Expected an InvalidArgumentException.' );
-		} catch ( InvalidArgumentException $e ) {
-			$this->assertInstanceOf( DomainException::class, $e->getPrevious() );
-		}
+		$e = $this->assert_validation_errors(
+			function (): void {
+				Plans::update(
+					$this->create(),
+					array(
+						'extension_slug' => self::OWNER,
+						'name'           => ' ',
+					)
+				);
+			},
+			array( array( ValidationErrorCode::REQUIRED, 'name' ) )
+		);
+		$this->assertSame( 'This field is required.', $e->get_errors()->get_error_message( ValidationErrorCode::REQUIRED ) );
 	}
 
 	/**
 	 * @testdox create requires a name.
 	 */
 	public function test_create_requires_a_name(): void {
-		$this->expectException( InvalidArgumentException::class );
-
-		Plans::create( array( 'extension_slug' => self::OWNER ) );
+		$this->assert_validation_errors(
+			static function (): void {
+				Plans::create( array( 'extension_slug' => self::OWNER ) );
+			},
+			array( array( ValidationErrorCode::REQUIRED, 'name' ) )
+		);
 	}
 
 	/**
@@ -458,28 +472,31 @@ class PlansTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @return array<string, array{0: array<string, mixed>}>
+	 * @return array<string, array{0: array<string, mixed>, 1: string}>
 	 */
 	public function provide_invalid_update_scopes(): array {
 		return array(
-			'missing slug'    => array( array( 'name' => 'Changed' ) ),
+			'missing slug'    => array( array( 'name' => 'Changed' ), ValidationErrorCode::REQUIRED ),
 			'null slug'       => array(
 				array(
 					'extension_slug' => null,
 					'name'           => 'Changed',
 				),
+				ValidationErrorCode::REQUIRED,
 			),
 			'empty slug'      => array(
 				array(
 					'extension_slug' => '',
 					'name'           => 'Changed',
 				),
+				ValidationErrorCode::REQUIRED,
 			),
 			'non-string slug' => array(
 				array(
 					'extension_slug' => 5,
 					'name'           => 'Changed',
 				),
+				ValidationErrorCode::INVALID_TYPE,
 			),
 		);
 	}
@@ -489,17 +506,18 @@ class PlansTest extends EngineIntegrationTestCase {
 	 * @dataProvider provide_invalid_update_scopes
 	 *
 	 * @param array<string, mixed> $args Update args without a valid extension slug.
+	 * @param string               $code Expected error code.
 	 */
-	public function test_update_without_a_valid_extension_slug_throws( array $args ): void {
+	public function test_update_without_a_valid_extension_slug_throws( array $args, string $code ): void {
 		$id     = $this->create();
 		$before = $this->stored( $id )->to_storage();
 
-		try {
-			Plans::update( $id, $args );
-			$this->fail( 'Expected InvalidArgumentException.' );
-		} catch ( InvalidArgumentException $e ) {
-			$this->assertNotInstanceOf( PlanValidationException::class, $e );
-		}
+		$this->assert_validation_errors(
+			static function () use ( $args, $id ): void {
+				Plans::update( $id, $args );
+			},
+			array( array( $code, 'extension_slug' ) )
+		);
 
 		$this->assertSame( $before, $this->stored( $id )->to_storage() );
 	}
@@ -554,22 +572,24 @@ class PlansTest extends EngineIntegrationTestCase {
 	}
 
 	/**
-	 * @return array<string, array{0: array<string, mixed>}>
+	 * @return array<string, array{0: array<string, mixed>, 1: string, 2: string}>
 	 */
 	public function provide_invalid_update_args(): array {
 		return array(
-			'unregistered status' => array( array( 'status' => 'seasonal' ) ),
-			'non-string status'   => array( array( 'status' => 5 ) ),
-			'empty name'          => array( array( 'name' => '' ) ),
-			'whitespace name'     => array( array( 'name' => '   ' ) ),
-			'non-string name'     => array( array( 'name' => 12 ) ),
-			'list policy'         => array( array( 'pricing_policy' => array( 'a', 'b' ) ) ),
-			'scalar policy'       => array( array( 'billing_policy' => 'monthly' ) ),
+			'unregistered status' => array( array( 'status' => 'seasonal' ), ValidationErrorCode::NOT_REGISTERED, 'status' ),
+			'non-string status'   => array( array( 'status' => 5 ), ValidationErrorCode::INVALID_TYPE, 'status' ),
+			'empty name'          => array( array( 'name' => '' ), ValidationErrorCode::REQUIRED, 'name' ),
+			'whitespace name'     => array( array( 'name' => '   ' ), ValidationErrorCode::REQUIRED, 'name' ),
+			'non-string name'     => array( array( 'name' => 12 ), ValidationErrorCode::INVALID_TYPE, 'name' ),
+			'list policy'         => array( array( 'pricing_policy' => array( 'a', 'b' ) ), ValidationErrorCode::INVALID_TYPE, 'pricing_policy' ),
+			'scalar policy'       => array( array( 'billing_policy' => 'monthly' ), ValidationErrorCode::INVALID_TYPE, 'billing_policy' ),
 			'valid then invalid'  => array(
 				array(
 					'name'   => 'Changed',
 					'status' => 'seasonal',
 				),
+				ValidationErrorCode::NOT_REGISTERED,
+				'status',
 			),
 		);
 	}
@@ -578,18 +598,20 @@ class PlansTest extends EngineIntegrationTestCase {
 	 * @testdox update rejects invalid args and leaves the plan unchanged.
 	 * @dataProvider provide_invalid_update_args
 	 *
-	 * @param array<string, mixed> $args Invalid update args.
+	 * @param array<string, mixed> $args  Invalid update args.
+	 * @param string               $code  Expected error code.
+	 * @param string               $field Expected field.
 	 */
-	public function test_update_rejects_invalid_args_and_leaves_the_plan_unchanged( array $args ): void {
+	public function test_update_rejects_invalid_args_and_leaves_the_plan_unchanged( array $args, string $code, string $field ): void {
 		$id     = $this->create();
 		$before = $this->stored( $id )->to_storage();
 
-		try {
-			Plans::update( $id, array( 'extension_slug' => self::OWNER ) + $args );
-			$this->fail( 'Expected InvalidArgumentException.' );
-		} catch ( InvalidArgumentException $e ) {
-			$this->assertNotInstanceOf( PlanValidationException::class, $e );
-		}
+		$this->assert_validation_errors(
+			static function () use ( $args, $id ): void {
+				Plans::update( $id, array( 'extension_slug' => self::OWNER ) + $args );
+			},
+			array( array( $code, $field ) )
+		);
 
 		$this->assertSame( $before, $this->stored( $id )->to_storage() );
 	}
@@ -763,11 +785,12 @@ class PlansTest extends EngineIntegrationTestCase {
 
 		try {
 			$this->create();
-			$this->fail( 'Expected PlanValidationException.' );
-		} catch ( PlanValidationException $e ) {
+			$this->fail( 'Expected ValidationException.' );
+		} catch ( ValidationException $e ) {
 			$this->assertSame( array( 'acme_bad_pricing', 'acme_bad_billing' ), $e->get_errors()->get_error_codes() );
 			$this->assertSame( array( 'status' => 400 ), $e->get_errors()->get_error_data( 'acme_bad_pricing' ) );
 			$this->assertSame( 'Pricing is wrong. Billing is wrong.', $e->getMessage() );
+			$this->assertNull( $e->getPrevious(), 'An extension error has no Core error behind it.' );
 		}
 
 		$this->assertSame( $before, $this->plan_count() );
@@ -793,8 +816,8 @@ class PlansTest extends EngineIntegrationTestCase {
 					'name'           => 'Refused',
 				)
 			);
-			$this->fail( 'Expected PlanValidationException.' );
-		} catch ( PlanValidationException $e ) {
+			$this->fail( 'Expected ValidationException.' );
+		} catch ( ValidationException $e ) {
 			$this->assertSame( array( 'acme_no' ), $e->get_errors()->get_error_codes() );
 		}
 
@@ -821,6 +844,163 @@ class PlansTest extends EngineIntegrationTestCase {
 		}
 
 		$this->assertSame( $before, $this->plan_count() );
+	}
+
+	/**
+	 * @testdox create reports every ill-typed argument at once and does not ask the extension.
+	 */
+	public function test_create_reports_every_ill_typed_argument_without_asking_the_extension(): void {
+		$calls = 0;
+		add_action(
+			self::HOOK,
+			static function () use ( &$calls ): void {
+				++$calls;
+			}
+		);
+
+		$this->assert_validation_errors(
+			function (): void {
+				$this->create(
+					array(
+						'name'           => 5,
+						'billing_policy' => 'monthly',
+					)
+				);
+			},
+			array(
+				array( ValidationErrorCode::INVALID_TYPE, 'name', array( 'type' => 'string' ) ),
+				array( ValidationErrorCode::INVALID_TYPE, 'billing_policy', array( 'type' => 'object' ) ),
+			)
+		);
+		$this->assertSame( 0, $calls );
+	}
+
+	/**
+	 * @testdox create reports the plan's refusals and the extension's together, the plan's first.
+	 */
+	public function test_create_reports_the_plan_and_extension_refusals_together(): void {
+		$before = $this->plan_count();
+		$views  = array();
+		add_action(
+			self::HOOK,
+			static function ( WP_Error $errors, PlanView $plan ) use ( &$views ): void {
+				$views[] = $plan;
+				$errors->add( 'out_of_bounds', 'Must not exceed 100 for a percentage policy.', array( 'field' => 'pricing_policy.policies.0.value' ) );
+			},
+			10,
+			2
+		);
+
+		$e = $this->assert_validation_errors(
+			function (): void {
+				$this->create(
+					array(
+						'name'   => '',
+						'status' => 'never-registered',
+					)
+				);
+			},
+			array(
+				array( ValidationErrorCode::REQUIRED, 'name' ),
+				array( ValidationErrorCode::NOT_REGISTERED, 'status' ),
+				array( ValidationErrorCode::OUT_OF_BOUNDS, 'pricing_policy.policies.0.value' ),
+			)
+		);
+
+		$this->assertCount( 1, $views );
+		$this->assertSame( '', $views[0]->get_name() );
+		$this->assertSame( 'never-registered', $views[0]->get_status() );
+		$this->assertInstanceOf( InvalidInputException::class, $e->getPrevious() );
+		$this->assertStringContainsString( 'Must not exceed 100 for a percentage policy.', $e->getMessage() );
+		$this->assertSame( $before, $this->plan_count() );
+	}
+
+	/**
+	 * @testdox update asks the extension about the would-be plan when the plan refuses, and writes nothing.
+	 */
+	public function test_update_asks_the_extension_about_the_refused_would_be_plan(): void {
+		$id     = $this->create( array( 'pricing_policy' => array( 'policies' => array() ) ) );
+		$before = $this->stored( $id )->to_storage();
+		$views  = array();
+		add_action(
+			self::HOOK,
+			static function ( WP_Error $errors, PlanView $plan ) use ( &$views ): void {
+				$views[] = $plan;
+				$errors->add( 'acme_refused', 'Refused.', array( 'field' => 'pricing_policy' ) );
+			},
+			10,
+			2
+		);
+
+		$this->assert_validation_errors(
+			static function () use ( $id ): void {
+				Plans::update(
+					$id,
+					array(
+						'extension_slug' => self::OWNER,
+						'name'           => '',
+						'pricing_policy' => array( 'policies' => array( 'x' ) ),
+					)
+				);
+			},
+			array(
+				array( ValidationErrorCode::REQUIRED, 'name' ),
+				array( 'acme_refused', 'pricing_policy' ),
+			)
+		);
+
+		$this->assertCount( 1, $views );
+		$this->assertSame( $id, $views[0]->get_id() );
+		$this->assertSame( '', $views[0]->get_name() );
+		$this->assertSame( array( 'policies' => array( 'x' ) ), $views[0]->get_pricing_policy() );
+		$this->assertSame( $before['billing_policy'], $views[0]->get_billing_policy() );
+		$this->assertSame( $before, $this->stored( $id )->to_storage() );
+	}
+
+	/**
+	 * @testdox update checks its arguments before reading, so ill-typed arguments throw for a missing plan.
+	 */
+	public function test_update_checks_its_arguments_before_reading(): void {
+		$this->assert_validation_errors(
+			static function (): void {
+				Plans::update(
+					999999,
+					array(
+						'extension_slug' => self::OWNER,
+						'name'           => 5,
+					)
+				);
+			},
+			array( array( ValidationErrorCode::INVALID_TYPE, 'name' ) )
+		);
+		$this->assertNull(
+			Plans::update(
+				999999,
+				array(
+					'extension_slug' => self::OWNER,
+					'name'           => 'Fine',
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox a throwing callback is a runtime exception even when the plan itself is refused.
+	 */
+	public function test_a_throwing_callback_wins_over_a_plan_refusal(): void {
+		add_action(
+			self::HOOK,
+			static function (): void {
+				throw new \LogicException( 'boom' );
+			}
+		);
+
+		try {
+			$this->create( array( 'name' => '' ) );
+			$this->fail( 'Expected RuntimeException.' );
+		} catch ( RuntimeException $e ) {
+			$this->assertInstanceOf( \LogicException::class, $e->getPrevious() );
+		}
 	}
 
 	/**
@@ -1086,27 +1266,60 @@ class PlansTest extends EngineIntegrationTestCase {
 	 * @testdox list rejects an invalid value.
 	 * @dataProvider provide_invalid_list_args
 	 *
-	 * @param array<string, mixed> $args List args.
+	 * @param array<string, mixed> $args  List args.
+	 * @param string               $code  Expected error code.
+	 * @param string               $field Expected field.
 	 */
-	public function test_list_rejects_an_invalid_value( array $args ): void {
-		$this->expectException( InvalidArgumentException::class );
-
-		Plans::list( $args );
+	public function test_list_rejects_an_invalid_value( array $args, string $code, string $field ): void {
+		$this->assert_validation_errors(
+			static function () use ( $args ): void {
+				Plans::list( $args );
+			},
+			array( array( $code, $field ) )
+		);
 	}
 
 	/**
-	 * @return array<string, array{0: array<string, mixed>}>
+	 * @testdox list reports every invalid value at once.
+	 */
+	public function test_list_reports_every_invalid_value(): void {
+		$this->assert_validation_errors(
+			static function (): void {
+				Plans::list(
+					array(
+						'limit'          => 0,
+						'offset'         => -1,
+						'extension_slug' => array( 'a', 'any' ),
+					)
+				);
+			},
+			array(
+				array( ValidationErrorCode::OUT_OF_BOUNDS, 'limit', array( 'min' => 1 ) ),
+				array( ValidationErrorCode::OUT_OF_BOUNDS, 'offset', array( 'min' => 0 ) ),
+				array( ValidationErrorCode::INVALID_VALUE, 'extension_slug', array() ),
+			)
+		);
+		$this->assert_validation_errors(
+			static function (): void {
+				Plans::list( array( 'ids' => array( 1, 0 ) ) );
+			},
+			array( array( ValidationErrorCode::OUT_OF_BOUNDS, 'ids.1', array( 'min' => 1 ) ) )
+		);
+	}
+
+	/**
+	 * @return array<string, array{0: array<string, mixed>, 1: string, 2: string}>
 	 */
 	public function provide_invalid_list_args(): array {
 		return array(
-			'empty extension slug' => array( array( 'extension_slug' => '' ) ),
-			'any extension slug'   => array( array( 'extension_slug' => 'any' ) ),
-			'any in a slug list'   => array( array( 'extension_slug' => array( self::OWNER, 'any' ) ) ),
-			'status not a string'  => array( array( 'status' => 5 ) ),
-			'id not positive'      => array( array( 'ids' => array( 1, 0 ) ) ),
-			'ids not a list'       => array( array( 'ids' => array( 'a' => 1 ) ) ),
-			'zero limit'           => array( array( 'limit' => 0 ) ),
-			'negative offset'      => array( array( 'offset' => -1 ) ),
+			'empty extension slug' => array( array( 'extension_slug' => '' ), ValidationErrorCode::REQUIRED, 'extension_slug' ),
+			'any extension slug'   => array( array( 'extension_slug' => 'any' ), ValidationErrorCode::INVALID_VALUE, 'extension_slug' ),
+			'any in a slug list'   => array( array( 'extension_slug' => array( self::OWNER, 'any' ) ), ValidationErrorCode::INVALID_VALUE, 'extension_slug' ),
+			'status not a string'  => array( array( 'status' => 5 ), ValidationErrorCode::INVALID_TYPE, 'status' ),
+			'id not positive'      => array( array( 'ids' => array( 0, 1 ) ), ValidationErrorCode::OUT_OF_BOUNDS, 'ids.0' ),
+			'ids not a list'       => array( array( 'ids' => array( 'a' => 1 ) ), ValidationErrorCode::INVALID_TYPE, 'ids' ),
+			'zero limit'           => array( array( 'limit' => 0 ), ValidationErrorCode::OUT_OF_BOUNDS, 'limit' ),
+			'negative offset'      => array( array( 'offset' => -1 ), ValidationErrorCode::OUT_OF_BOUNDS, 'offset' ),
 		);
 	}
 }
