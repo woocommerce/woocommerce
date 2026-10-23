@@ -7,28 +7,15 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\Settings\SettingsUIPages;
 
-use Automattic\WooCommerce\Admin\Settings\LegacySettingsPageAdapter;
-
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Adapts the WooCommerce Products settings page for the settings UI renderer.
+ * Adapted the WooCommerce Products settings page for the settings UI renderer.
  *
+ * Kept as an empty class so a cached class map from an older release still finds the file during an update.
+ *
+ * @internal
  * @since 10.9.0
+ * @deprecated 11.4.0 The Settings UI was removed.
  */
-final class ProductsSettingsPageAdapter extends LegacySettingsPageAdapter {
-
-	/**
-	 * Build the canonical settings schema for a section.
-	 *
-	 * @param string $section Section id. Empty string means the default section.
-	 * @return array
-	 */
-	public function get_schema( string $section ): array {
-		$schema = parent::get_schema( $section );
-
-		$schema['shell']['title'] = __( 'Product settings', 'woocommerce' );
-
-		return $schema;
-	}
-}
+final class ProductsSettingsPageAdapter {}
