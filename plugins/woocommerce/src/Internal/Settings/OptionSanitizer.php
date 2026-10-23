@@ -79,11 +79,11 @@ class OptionSanitizer {
 	 */
 	public function sanitize_price_separator_setting( $option_id, $raw_value ) {
 		if ( is_string( $raw_value ) ) {
-			$separator = wp_kses( $raw_value, array() );
-			$decoded   = html_entity_decode( $separator, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+			$decoded = html_entity_decode( $raw_value, ENT_QUOTES | ENT_HTML5, 'UTF-8' );
+			$decoded = wp_strip_all_tags( $decoded );
 
 			if ( 0 === preg_match( '/\p{N}/u', $decoded ) ) {
-				return $separator;
+				return $decoded;
 			}
 		}
 
