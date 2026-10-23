@@ -406,6 +406,43 @@ class OrderAttributionControllerTest extends WP_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Should fall back to the default cookie fields when the filter returns only non-strings.
+	 */
+	public function test_cookie_fields_filter_ignores_non_string_list(): void {
+		$default = $this->get_localized_script_data()['params']['cookieFields'];
+		add_filter(
+			'wc_order_attribution_cookie_fields',
+			function () {
+				return array( 42, null );
+			}
+		);
+
+		$this->assertSame( $default, $this->get_localized_script_data()['params']['cookieFields'] );
+	}
+
+	/**
+	 * @testdox Should not store empty or (none) values submitted from the cookies.
+	 */
+	public function test_source_values_skip_empty_and_none_values(): void {
+		$raw_values = array_fill_keys( $this->attribution_class->get_field_names(), '' );
+
+		$raw_values['source_type']  = 'utm';
+		$raw_values['utm_source']   = 'newsletter';
+		$raw_values['utm_campaign'] = '(none)';
+
+		$method = new \ReflectionMethod( OrderAttributionController::class, 'get_source_values' );
+		$method->setAccessible( true );
+
+		$this->assertSame(
+			array(
+				'source_type' => 'utm',
+				'utm_source'  => 'newsletter',
+			),
+			$method->invoke( $this->attribution_class, $raw_values )
+		);
+	}
+
+	/**
 	 * @testdox Should pass the filtered cookie fields to sourcebuster.js.
 	 *
 	 * @dataProvider provider_cookie_fields_filter
@@ -452,7 +489,7 @@ class OrderAttributionControllerTest extends WP_UnitTestCase {
 		wp_deregister_script( 'sourcebuster-js' );
 
 		$this->assertIsString( $data, 'The script should have localized data.' );
-		preg_match( '/var wc_order_attribution = (.*);/', $data, $matches );
+		$this->assertSame( 1, preg_match( '/var wc_order_attribution = (.*);/', $data, $matches ), 'The script should localize wc_order_attribution.' );
 
 		return json_decode( $matches[1], true );
 	}

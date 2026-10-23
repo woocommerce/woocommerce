@@ -338,8 +338,13 @@ class OrderAttributionController implements RegisterHooksInterface {
 		 *
 		 * @param string[] $cookie_fields Sourcebuster.js field paths, such as `current.typ`.
 		 */
-		$cookie_fields = apply_filters( 'wc_order_attribution_cookie_fields', $default_cookie_fields );
-		$cookie_fields = is_array( $cookie_fields ) ? array_values( array_unique( array_filter( $cookie_fields, 'is_string' ) ) ) : $default_cookie_fields;
+		$filtered_cookie_fields = apply_filters( 'wc_order_attribution_cookie_fields', $default_cookie_fields );
+		$cookie_fields          = is_array( $filtered_cookie_fields ) ? array_values( array_unique( array_filter( $filtered_cookie_fields, 'is_string' ) ) ) : array();
+
+		// An empty list stores every field, so only pass one on when the filter returned it.
+		if ( ! $cookie_fields && array() !== $filtered_cookie_fields ) {
+			$cookie_fields = $default_cookie_fields;
+		}
 
 		// Create Order Attribution JS namespace with parameters.
 		$namespace = array(
