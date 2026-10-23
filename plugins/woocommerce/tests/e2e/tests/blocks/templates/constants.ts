@@ -181,5 +181,3 @@ export const CUSTOMIZABLE_WC_TEMPLATES: TemplateCustomizationTest[] = [
 		canBeOverriddenByThemes: true,
 	},
 ];
-
-export const WC_TEMPLATES_SLUG = 'woocommerce/woocommerce';

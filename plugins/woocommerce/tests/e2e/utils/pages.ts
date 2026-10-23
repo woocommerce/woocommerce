@@ -1,31 +1,13 @@
 /**
  * External dependencies
  */
-import type { Browser } from '@playwright/test';
-import {
-	createClient,
-	goToPageEditor,
-	insertBlockByShortcut,
-	publishPage,
-	WP_API_PATH,
-} from '@woocommerce/e2e-utils-playwright';
+import { createClient, WP_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**
  * Internal dependencies
  */
-import { fillPageTitle } from './editor';
-import playwrightConfig, { ADMIN_STATE_PATH } from '../playwright.config';
+import playwrightConfig from '../playwright.config';
 import { admin } from '../test-data/data';
-
-export const BLOCKS_CHECKOUT_PAGE = {
-	name: 'blocks checkout',
-	slug: 'blocks-checkout',
-};
-
-export const BLOCKS_CART_PAGE = {
-	name: 'blocks cart',
-	slug: 'blocks-cart',
-};
 
 export const CLASSIC_CHECKOUT_PAGE = {
 	name: 'classic checkout',
@@ -98,44 +80,5 @@ export async function createClassicCartPage() {
 		CLASSIC_CART_PAGE.slug,
 		CLASSIC_CART_PAGE.name,
 		'<!-- wp:shortcode -->[woocommerce_cart]<!-- /wp:shortcode -->'
-	);
-}
-
-async function createBlocksPage(
-	browser: Browser,
-	slug: string,
-	title: string,
-	blockName: string
-) {
-	if ( ! ( await pageExists( slug ) ) ) {
-		console.log( 'Creating Checkout Blocks page' );
-		const context = await browser.newContext( {
-			storageState: ADMIN_STATE_PATH,
-		} );
-		const page = await context.newPage();
-		await goToPageEditor( { page } );
-		await fillPageTitle( page, title );
-		await insertBlockByShortcut( page, blockName );
-		await publishPage( page, title );
-		await page.close();
-		await context.close();
-	}
-}
-
-export async function createBlocksCheckoutPage( browser: Browser ) {
-	await createBlocksPage(
-		browser,
-		BLOCKS_CHECKOUT_PAGE.slug,
-		BLOCKS_CHECKOUT_PAGE.name,
-		'Checkout'
-	);
-}
-
-export async function createBlocksCartPage( browser: Browser ) {
-	await createBlocksPage(
-		browser,
-		BLOCKS_CART_PAGE.slug,
-		BLOCKS_CART_PAGE.name,
-		'Cart'
 	);
 }
