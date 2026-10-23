@@ -65,6 +65,8 @@ class UpdateUtils {
 		$ignore_keys = array( 'created_via', 'status', 'customer_id' );
 		$data_keys   = array_diff( array_keys( $this->order_schema->get_writable_item_schema_properties() ), $ignore_keys );
 
+		$this->check_new_line_item_products( $request['line_items'] );
+
 		// Make sure gateways are loaded so hooks from gateways fire on save/create.
 		WC()->payment_gateways();
 
@@ -339,12 +341,55 @@ class UpdateUtils {
 			$product_id = (int) $request_data['product_id'];
 		} elseif ( ! empty( $request_data['variation_id'] ) ) {
 			$product_id = (int) $request_data['variation_id'];
-		} elseif ( 'update' === $action ) {
+		} elseif ( 'update' === $action || $this->is_custom_line_item( $request_data ) ) {
 			$product_id = 0;
 		} else {
-			throw new WC_REST_Exception( 'woocommerce_rest_required_product_reference', esc_html__( 'Product ID or SKU is required.', 'woocommerce' ), 400 );
+			throw new WC_REST_Exception( 'woocommerce_rest_required_product_reference', esc_html__( 'Product ID or SKU is required. For a custom item, send a name and total instead.', 'woocommerce' ), 400 );
 		}
 		return $product_id;
+	}
+
+	/**
+	 * Checks whether a line item is a custom item: one with no product, but a name and a total.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param array $request_data Line item data.
+	 * @return bool
+	 */
+	protected function is_custom_line_item( $request_data ) {
+		$has_product_reference = ! empty( $request_data['product_id'] ) || ! empty( $request_data['variation_id'] ) || ! empty( $request_data['sku'] );
+		$has_name              = isset( $request_data['name'] ) && is_string( $request_data['name'] ) && '' !== trim( $request_data['name'] );
+		$has_total             = isset( $request_data['total'] ) && is_numeric( wc_format_decimal( $request_data['total'] ) );
+
+		return ! $has_product_reference && $has_name && $has_total;
+	}
+
+	/**
+	 * Checks that every new line item, other than custom items, points to an existing product, before any item is saved.
+	 * Otherwise a bad item fails the request after earlier items, and their stock, were already saved.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @throws WC_REST_Exception When a new line item has no product reference, or its product doesn't exist.
+	 * @param mixed $line_items Line items from the request.
+	 * @return void
+	 */
+	protected function check_new_line_item_products( $line_items ) {
+		if ( ! is_array( $line_items ) ) {
+			return;
+		}
+
+		foreach ( $line_items as $line_item_data ) {
+			if ( ! is_array( $line_item_data ) || ! empty( $line_item_data['id'] ) || $this->item_is_null_or_zero( $line_item_data ) || $this->is_custom_line_item( $line_item_data ) ) {
+				continue;
+			}
+
+			$product = wc_get_product( $this->get_product_id_from_line_item( $line_item_data ) );
+			if ( ! $product || ! $product->exists() ) {
+				throw new WC_REST_Exception( 'woocommerce_rest_invalid_product_id', esc_html__( 'Invalid product ID.', 'woocommerce' ), (int) WP_Http::BAD_REQUEST );
+			}
+		}
 	}
 
 	/**
@@ -359,6 +404,11 @@ class UpdateUtils {
 	protected function prepare_line_item_data( $request_data, $action = 'create', $item = null ) {
 		$item    = is_null( $item ) ? new WC_Order_Item_Product( ! empty( $request_data['id'] ) ? $request_data['id'] : '' ) : $item;
 		$product = wc_get_product( $this->get_product_id_from_line_item( $request_data, $action ) );
+
+		// New items must resolve unless they are custom items. Existing items need not, so orders whose products were deleted later stay editable.
+		if ( 'create' === $action && ( ! $product || ! $product->exists() ) && ! $this->is_custom_line_item( $request_data ) ) {
+			throw new WC_REST_Exception( 'woocommerce_rest_invalid_product_id', esc_html__( 'Invalid product ID.', 'woocommerce' ), (int) WP_Http::BAD_REQUEST );
+		}
 
 		if ( $product && $product !== $item->get_product() ) {
 			$item->set_product( $product );
