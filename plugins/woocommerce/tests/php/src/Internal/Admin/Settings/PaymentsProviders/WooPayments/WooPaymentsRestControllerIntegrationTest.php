@@ -1368,6 +1368,22 @@ class WooPaymentsRestControllerIntegrationTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Rejects authorization without registering the store when WooPayments is outdated.
+	 */
+	public function test_handle_onboarding_wpcom_connection_authorize_when_extension_outdated(): void {
+		Constants::set_constant( 'WCPAY_VERSION_NUMBER', '1.0.0' );
+		$this->mock_wpcom_connection_manager
+			->expects( $this->never() )
+			->method( 'try_registration' );
+
+		$request  = new WP_REST_Request( 'POST', self::ENDPOINT . '/onboarding/step/' . WooPaymentsService::ONBOARDING_STEP_WPCOM_CONNECTION . '/authorize' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( \WP_Http::FORBIDDEN, $response->get_status() );
+		$this->assertSame( 'woocommerce_woopayments_onboarding_extension_version', $response->get_data()['code'] );
+	}
+
+	/**
 	 * @testdox Returns the original registration error code and data without changing the HTTP error status.
 	 * @testWith ["siteurl_private_ip"]
 	 *           ["wpcom_5??"]
