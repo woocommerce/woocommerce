@@ -10,6 +10,8 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\StructuredData;
 
 use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\ProductType;
 use WC_Product;
 use WP_HTML_Tag_Processor;
 use WP_HTML_Text_Replacement;
@@ -24,7 +26,7 @@ class OpenGraph {
 	/**
 	 * Metadata candidates keyed by property.
 	 *
-	 * @var array<string, string>
+	 * @var array<string, string[]>
 	 */
 	private $tags = array();
 
@@ -79,12 +81,12 @@ class OpenGraph {
 	/**
 	 * Filter and validate metadata before rendering starts.
 	 *
-	 * @param array<string, string>                           $tags   Metadata candidates.
+	 * @param array<string, string|string[]>                  $tags   Metadata candidates.
 	 * @param WC_Product|\WP_Post|\WP_Term|\WP_Post_Type|null $context Product or queried object; null when no object is available.
-	 * @return array<string, string>
+	 * @return array<string, string[]>
 	 */
 	private function prepare_tags( array $tags, $context ): array {
-		$this->default_card = $tags['twitter:card'] ?? null;
+		$this->default_card = isset( $tags['twitter:card'] ) && is_string( $tags['twitter:card'] ) ? $tags['twitter:card'] : null;
 
 		/**
 		 * Filters Open Graph metadata before output. Currently applied only to product pages.
@@ -93,7 +95,7 @@ class OpenGraph {
 		 *
 		 * @since 11.4.0
 		 *
-		 * @param array<string, string> $tags Metadata keyed by og:, twitter:, or product: property name. Remove a key to omit a tag.
+		 * @param array<string, string|string[]> $tags Metadata keyed by og:, twitter:, or product: property name. Use an array for multiple og:see_also URLs. Remove a key to omit a tag.
 		 * @param WC_Product|\WP_Post|\WP_Term|\WP_Post_Type|null $context Product or queried object; null when no object is available.
 		 */
 		$tags = apply_filters( 'woocommerce_open_graph_tags', $tags, $context );
@@ -101,20 +103,29 @@ class OpenGraph {
 			return array();
 		}
 
+		$prepared = array();
 		foreach ( $tags as $property => $value ) {
-			if ( ! is_string( $property ) || ! is_string( $value ) || '' === trim( $value ) || ! preg_match( '/^(og|twitter|product):[a-z_:]+$/', $property ) ) {
-				unset( $tags[ $property ] );
+			if ( ! is_string( $property ) || ! preg_match( '/^(og|twitter|product):[a-z_0-9:]+$/', $property ) ) {
 				continue;
 			}
-			if ( in_array( $property, array( 'og:url', 'og:image' ), true ) ) {
-				$tags[ $property ] = esc_url_raw( $value );
-				if ( '' === $tags[ $property ] ) {
-					unset( $tags[ $property ] );
+			$values = 'og:see_also' === $property && is_array( $value ) ? $value : array( $value );
+			foreach ( $values as $content ) {
+				if ( ! is_string( $content ) || '' === trim( $content ) ) {
+					continue;
 				}
+				if ( in_array( $property, array( 'og:url', 'og:image', 'og:see_also' ), true ) ) {
+					$content = esc_url_raw( $content );
+				}
+				if ( '' !== $content ) {
+					$prepared[ $property ][] = $content;
+				}
+			}
+			if ( 'og:see_also' === $property && isset( $prepared[ $property ] ) ) {
+				$prepared[ $property ] = array_slice( array_values( array_unique( $prepared[ $property ] ) ), 0, 6 );
 			}
 		}
 
-		return $tags;
+		return $prepared;
 	}
 
 	/**
@@ -130,11 +141,12 @@ class OpenGraph {
 			return $html;
 		}
 
-		$processor      = new WP_HTML_Tag_Processor( $html );
-		$tags           = $this->tags;
-		$has_image      = false;
-		$head_complete  = false;
-		$template_depth = 0;
+		$processor         = new WP_HTML_Tag_Processor( $html );
+		$tags              = $this->tags;
+		$has_image         = false;
+		$head_complete     = false;
+		$template_depth    = 0;
+		$conflicting_price = false;
 
 		while ( $processor->next_tag( array( 'tag_closers' => 'visit' ) ) ) {
 			if ( 'TEMPLATE' === $processor->get_tag() ) {
@@ -156,14 +168,26 @@ class OpenGraph {
 			foreach ( self::get_meta_properties( $processor ) as $property ) {
 				$content = $processor->get_attribute( 'content' );
 				if ( 'og:type' === $property && isset( $this->tags['og:type'] ) ) {
-					$processor->set_attribute( 'content', html_entity_decode( $this->tags['og:type'], ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
+					$processor->set_attribute( 'content', html_entity_decode( $this->tags['og:type'][0], ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
 				} elseif ( ! is_string( $content ) || '' === trim( $content ) ) {
 					continue;
+				}
+				if ( is_string( $content ) && $this->has_conflicting_price( $property, $content ) ) {
+					$conflicting_price = true;
 				}
 				if ( in_array( $property, array( 'og:image', 'og:image:url' ), true ) ) {
 					$has_image = true;
 				}
 				if ( ! isset( $tags['og:image'] ) || 0 !== strpos( $property, 'og:image:' ) ) {
+					unset( $tags[ $property ] );
+				}
+			}
+		}
+
+		if ( $conflicting_price ) {
+			// Don't combine fallback prices with a different currency or price from another provider.
+			foreach ( array_keys( $tags ) as $property ) {
+				if ( preg_match( '/^(product:(sale_)?price(:|_)|og:price:)/', $property ) ) {
 					unset( $tags[ $property ] );
 				}
 			}
@@ -182,18 +206,40 @@ class OpenGraph {
 			return $html;
 		}
 
-		if ( isset( $tags['twitter:card'] ) && $tags['twitter:card'] === $this->default_card ) {
-			$tags['twitter:card'] = $has_image || ! empty( $tags['og:image'] ) ? 'summary_large_image' : 'summary';
+		if ( isset( $tags['twitter:card'] ) && $tags['twitter:card'][0] === $this->default_card ) {
+			$tags['twitter:card'] = array( $has_image || ! empty( $tags['og:image'] ) ? 'summary_large_image' : 'summary' );
 		}
 
 		return self::insert_tags( $processor->get_updated_html(), $tags );
 	}
 
 	/**
+	 * Check whether existing pricing disagrees with the fallback metadata.
+	 *
+	 * @param string $property Existing metadata property.
+	 * @param string $content Existing metadata value.
+	 * @return bool
+	 */
+	private function has_conflicting_price( string $property, string $content ): bool {
+		if ( ! isset( $this->tags[ $property ] ) ) {
+			return false;
+		}
+		$fallback = $this->tags[ $property ][0];
+		if ( in_array( $property, array( 'product:price:currency', 'og:price:currency', 'product:sale_price:currency' ), true ) ) {
+			return strtoupper( trim( $content ) ) !== $fallback;
+		}
+		if ( in_array( $property, array( 'product:price:amount', 'og:price:amount', 'product:sale_price:amount', 'og:price:standard_amount' ), true ) ) {
+			return ! is_numeric( $content ) || (float) $content !== (float) $fallback;
+		}
+
+		return false;
+	}
+
+	/**
 	 * Escape metadata and insert it at the end of the head.
 	 *
-	 * @param string                $html Template output.
-	 * @param array<string, string> $tags Metadata to insert.
+	 * @param string                  $html Template output.
+	 * @param array<string, string[]> $tags Metadata to insert.
 	 * @return string
 	 */
 	private static function insert_tags( string $html, array $tags ): string {
@@ -218,7 +264,7 @@ class OpenGraph {
 			},
 			ARRAY_FILTER_USE_KEY
 		);
-		$image_details['og:image:url'] = $image_details['og:image:url'] ?? $tags['og:image'] ?? '';
+		$image_details['og:image:url'] = $image_details['og:image:url'] ?? $tags['og:image'] ?? array();
 		$template_depth                = 0;
 		while ( $inserter->next_tag( array( 'tag_closers' => 'visit' ) ) ) {
 			if ( 'TEMPLATE' === $inserter->get_tag() ) {
@@ -234,12 +280,14 @@ class OpenGraph {
 			$content = $inserter->get_attribute( 'content' );
 			foreach ( self::get_meta_properties( $inserter ) as $property ) {
 				if ( $replace_image_details && 0 === strpos( $property, 'og:image:' ) ) {
-					$inserter->set_attribute( 'content', html_entity_decode( $image_details[ $property ] ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
+					$inserter->set_attribute( 'content', html_entity_decode( $image_details[ $property ][0] ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
 					unset( $tags[ $property ] );
 				} elseif ( isset( $tags[ $property ] ) && ( ! is_string( $content ) || '' === trim( $content ) ) ) {
 					// Decode existing entities because set_attribute() always encodes ampersands.
-					$inserter->set_attribute( 'content', html_entity_decode( $tags[ $property ], ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
-					unset( $tags[ $property ] );
+					$inserter->set_attribute( 'content', html_entity_decode( array_shift( $tags[ $property ] ) ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
+					if ( ! $tags[ $property ] ) {
+						unset( $tags[ $property ] );
+					}
 				}
 			}
 			if ( 'BODY' === $inserter->get_tag() ) {
@@ -276,16 +324,18 @@ class OpenGraph {
 	/**
 	 * Escape metadata for output in the head.
 	 *
-	 * @param array<string, string> $tags Metadata to render.
+	 * @param array<string, string[]> $tags Metadata to render.
 	 * @return string
 	 */
 	private static function render_tags( array $tags ): string {
 		$markup = '';
-		foreach ( $tags as $property => $value ) {
-			$content = in_array( $property, array( 'og:url', 'og:image' ), true ) ? esc_url( $value ) : esc_attr( $value );
-			if ( '' !== $content ) {
-				$attribute = 0 === strpos( $property, 'twitter:' ) ? 'name' : 'property';
-				$markup   .= '<meta ' . esc_attr( $attribute ) . '="' . esc_attr( $property ) . '" content="' . $content . '" />' . "\n";
+		foreach ( $tags as $property => $values ) {
+			foreach ( $values as $value ) {
+				$content = in_array( $property, array( 'og:url', 'og:image', 'og:see_also' ), true ) ? esc_url( $value ) : esc_attr( $value );
+				if ( '' !== $content ) {
+					$attribute = 0 === strpos( $property, 'twitter:' ) ? 'name' : 'property';
+					$markup   .= '<meta ' . esc_attr( $attribute ) . '="' . esc_attr( $property ) . '" content="' . $content . '" />' . "\n";
+				}
 			}
 		}
 
@@ -296,7 +346,7 @@ class OpenGraph {
 	 * Build metadata from the product and its featured image.
 	 *
 	 * @param WC_Product $product Product being shared.
-	 * @return array<string, string>
+	 * @return array<string, string|string[]>
 	 */
 	private function get_product_tags( WC_Product $product ): array {
 		$description          = $product->get_short_description();
@@ -313,7 +363,149 @@ class OpenGraph {
 		$tags                += $this->get_image_tags( (int) $product->get_image_id(), $product->get_name() );
 		$tags['twitter:card'] = isset( $tags['og:image'] ) ? 'summary_large_image' : 'summary';
 
+		$availability = array(
+			ProductStockStatus::IN_STOCK     => array(
+				'product:availability' => 'in stock',
+				'og:availability'      => 'instock',
+			),
+			ProductStockStatus::OUT_OF_STOCK => array(
+				'product:availability' => 'out of stock',
+				'og:availability'      => 'out of stock',
+			),
+			ProductStockStatus::ON_BACKORDER => array(
+				'product:availability' => 'available for order',
+				'og:availability'      => 'backorder',
+			),
+		);
+		$tags        += $availability[ $product->get_stock_status() ] ?? array();
+		if ( isset( $tags['og:locale'] ) ) {
+			$tags['product:locale'] = $tags['og:locale'];
+		}
+
+		$brand_ids = $product->get_brand_ids();
+		if ( 1 === count( $brand_ids ) ) {
+			$brand = get_term( reset( $brand_ids ), 'product_brand' );
+			if ( $brand instanceof \WP_Term ) {
+				$tags['product:brand'] = $brand->name;
+				$tags['og:brand']      = $brand->name;
+			}
+		}
+		if ( wc_review_ratings_enabled() && $product->get_rating_count() > 0 ) {
+			$tags['og:rating']       = (string) $product->get_average_rating();
+			$tags['og:rating_scale'] = '5';
+			$tags['og:rating_count'] = (string) $product->get_rating_count();
+		}
+
+		$tags += $this->get_price_tags( $product );
+		$tags += $this->get_identifier_tags( $product->get_global_unique_id() );
+		$urls  = $this->get_related_urls( $product );
+		if ( $urls ) {
+			$tags['og:see_also'] = $urls;
+		}
+
 		return $tags;
+	}
+
+	/**
+	 * Build prices and sale dates for products with a single price.
+	 *
+	 * @param WC_Product $product Product being shared.
+	 * @return array<string, string>
+	 */
+	private function get_price_tags( WC_Product $product ): array {
+		if ( ! $product->is_type( array( ProductType::SIMPLE, ProductType::EXTERNAL ) ) || '' === $product->get_price() ) {
+			return array();
+		}
+
+		$price    = wc_format_decimal( wc_get_price_to_display( $product ), wc_get_price_decimals() );
+		$currency = get_woocommerce_currency();
+		$tags     = array(
+			'product:price:amount'   => $price,
+			'product:price:currency' => $currency,
+			'og:price:amount'        => $price,
+			'og:price:currency'      => $currency,
+		);
+		if ( $product->is_on_sale() ) {
+			$tags['product:sale_price:amount']   = $price;
+			$tags['product:sale_price:currency'] = $currency;
+			$tags['og:price:standard_amount']    = wc_format_decimal( wc_get_price_to_display( $product, array( 'price' => $product->get_regular_price() ) ), wc_get_price_decimals() );
+			foreach ( array(
+				'start' => $product->get_date_on_sale_from(),
+				'end'   => $product->get_date_on_sale_to(),
+			) as $boundary => $date ) {
+				if ( $date ) {
+					$tags[ 'product:sale_price_dates:' . $boundary ] = $date->format( DATE_ATOM );
+					$tags[ 'og:price:' . $boundary . '_date' ]       = $date->format( DATE_ATOM );
+				}
+			}
+		}
+
+		return $tags;
+	}
+
+	/**
+	 * Identify UPC, EAN and ISBN values without treating arbitrary IDs as barcodes.
+	 *
+	 * @param string $identifier Product's global unique ID.
+	 * @return array<string, string>
+	 */
+	private function get_identifier_tags( string $identifier ): array {
+		$gtin = preg_replace( '/[\s-]+/', '', $identifier );
+		if ( ! is_string( $gtin ) || ! preg_match( '/^(?!0+$)([0-9]{8}|[0-9]{12}|[0-9]{13})$/', $gtin ) ) {
+			return array();
+		}
+		$sum    = 0;
+		$weight = 1;
+		for ( $i = strlen( $gtin ) - 1; $i >= 0; --$i ) {
+			$sum   += (int) $gtin[ $i ] * $weight;
+			$weight = 4 - $weight;
+		}
+		if ( 0 !== $sum % 10 ) {
+			return array();
+		}
+
+		$tags = array( 'product:gtin' => $gtin );
+		if ( 12 === strlen( $gtin ) ) {
+			$tags['og:upc'] = $gtin;
+		} else {
+			$tags['og:ean'] = $gtin;
+			if ( 13 === strlen( $gtin ) && ( 0 === strpos( $gtin, '978' ) || preg_match( '/^979[1-9]/', $gtin ) ) ) {
+				$tags['product:isbn'] = $gtin;
+				$tags['og:isbn']      = $gtin;
+			}
+		}
+
+		return $tags;
+	}
+
+	/**
+	 * Get up to six public upsell URLs on the same domain.
+	 *
+	 * @param WC_Product $product Product being shared.
+	 * @return string[]
+	 */
+	private function get_related_urls( WC_Product $product ): array {
+		$urls = array();
+		$ids  = $product->get_upsell_ids();
+		if ( ! empty( $ids ) ) {
+			// Prime caches to reduce future queries.
+			_prime_post_caches( $ids );
+			foreach ( $ids as $id ) {
+				$related = wc_get_product( $id );
+				if ( ! $related || $related->get_id() === $product->get_id() || ProductStatus::PUBLISH !== $related->get_status() || '' !== $related->get_post_password() || ! $related->is_visible() ) {
+					continue;
+				}
+				$url = $related->get_permalink();
+				if ( wp_parse_url( $url, PHP_URL_HOST ) === wp_parse_url( $product->get_permalink(), PHP_URL_HOST ) ) {
+					$urls[] = $url;
+				}
+				if ( 6 === count( $urls ) ) {
+					break;
+				}
+			}
+		}
+
+		return $urls;
 	}
 
 	/**
