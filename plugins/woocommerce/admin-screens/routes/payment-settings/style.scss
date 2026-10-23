@@ -1,0 +1,7 @@
+// admin-ui's Page has no width option, so this matches the column Core's own settings pages use.
+.woocommerce-payment-settings__content {
+	box-sizing: border-box;
+	margin-inline: auto;
+	max-width: 680px;
+	width: 100%;
+}
