@@ -184,6 +184,15 @@ Enable customers to keep track of their location within the store and navigate b
 - **Supports:** align (full, wide), color (link, text, ~~background~~), interactivity (clientNavigation), typography (fontSize, lineHeight), ~~html~~
 - **Attributes:** align, contentJustification, fontSize
 
+## Cart - woocommerce/cart
+
+Shopping cart.
+
+- **Name:** woocommerce/cart
+- **Category:** woocommerce
+- **Supports:** align (wide), ~~html~~, ~~multiple~~
+- **Attributes:** align, checkoutPageId, hasDarkControls, showRateAfterTaxName
+
 ## Accepted Payment Methods - woocommerce/cart-accepted-payment-methods-block
 
 Display accepted payment methods.
@@ -1060,7 +1069,7 @@ Display a collection of products from your store.
 - **Name:** woocommerce/product-collection
 - **Category:** woocommerce
 - **Supports:** align (full, wide), anchor, email, interactivity, ~~html~~
-- **Attributes:** __privatePreviewState, collection, convertedFromProducts, dimensions, displayLayout, forcePageReload, hideControls, query, queryContextIncludes, queryId, tagName
+- **Attributes:** collection, convertedFromProducts, dimensions, displayLayout, forcePageReload, hideControls, query, queryContextIncludes, queryId, tagName
 
 ## No results - woocommerce/product-collection-no-results
 
@@ -1545,7 +1554,7 @@ Contains the block elements used to render a product.
 
 - **Name:** woocommerce/product-template
 - **Category:** woocommerce
-- **Supports:** align (full, wide), anchor, color (background, gradients, link, text), email, interactivity, layout (~~allowEditing~~, ~~allowInheriting~~, ~~allowSizingOnChildren~~, ~~allowSwitching~~, ~~allowVerticalAlignment~~), typography (fontSize, lineHeight), ~~html~~, ~~inserter~~, ~~reusable~~
+- **Supports:** align (full, wide), anchor, color (background, gradients, link, text), email, interactivity, layout (~~allowEditing~~, ~~allowInheriting~~, ~~allowSizingOnChildren~~, ~~allowSwitching~~, ~~allowVerticalAlignment~~), shadow, spacing (margin, padding), typography (fontSize, lineHeight), ~~html~~, ~~inserter~~, ~~reusable~~
 
 ## Top Rated Products - woocommerce/product-top-rated
 

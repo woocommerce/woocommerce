@@ -322,7 +322,7 @@ class WC_AJAX {
 			wc_add_notice( __( 'Sorry there was a problem removing this coupon.', 'woocommerce' ), 'error' );
 		} else {
 			WC()->cart->remove_coupon( $coupon );
-			wc_add_notice( __( 'Coupon has been removed.', 'woocommerce' ) );
+			( new WC_Coupon( $coupon ) )->add_coupon_message( WC_Coupon::WC_COUPON_REMOVED );
 		}
 
 		wc_print_notices();
@@ -1372,11 +1372,13 @@ class WC_AJAX {
 			);
 
 			if ( strstr( $amount, '%' ) ) {
-				// We need to calculate totals first, so that $order->get_total() is correct.
+				// Refresh totals so the discount total is current. The percentage applies to
+				// the items after discounts, excluding tax, shipping and other fees.
 				$order->calculate_totals( false );
 				$formatted_amount = $amount;
 				$percent          = floatval( trim( $amount, '%' ) );
-				$amount           = $order->get_total() * ( $percent / 100 );
+				$base             = (float) $order->get_subtotal() - (float) $order->get_discount_total( 'edit' );
+				$amount           = NumberUtil::round( $base * ( $percent / 100 ), wc_get_price_decimals() );
 			} else {
 				$amount           = floatval( $amount );
 				$formatted_amount = wc_price( $amount, array( 'currency' => $order->get_currency() ) );

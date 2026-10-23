@@ -1,1 +1,1 @@
-./bin/pre-push.sh
+./bin/pre-push.sh "$@"

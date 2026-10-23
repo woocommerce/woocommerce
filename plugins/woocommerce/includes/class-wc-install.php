@@ -369,6 +369,11 @@ class WC_Install {
 			'wc_update_1130_set_legacy_variation_price_hash_option',
 			'wc_update_1130_delete_unpublished_variation_lookup_rows',
 			'wc_update_1130_split_tax_lookup_taxable_amount',
+			'wc_update_1130_delete_stock_notification_sync_notice_option',
+			'wc_update_1130_backfill_order_stats_payment_method',
+		),
+		'11.4.0'   => array(
+			'wc_update_1140_re_enable_autoload_options',
 		),
 	);
 
@@ -1487,7 +1492,8 @@ class WC_Install {
 	net_total double DEFAULT 0 NOT NULL,
 	returning_customer tinyint(1) DEFAULT NULL,
 	status varchar(20) NOT NULL,
-	customer_id bigint(20) unsigned NOT NULL" .
+	customer_id bigint(20) unsigned NOT NULL,
+	payment_method varchar(100) DEFAULT NULL" .
 		( $should_have_fulfillment_column ? ',
 	fulfillment_status varchar(50) DEFAULT NULL' : '' ) . ',
 	PRIMARY KEY (order_id),
@@ -1496,7 +1502,8 @@ class WC_Install {
 	KEY status (status)' .
 		( $should_have_fulfillment_column ? ',
 	KEY fulfillment_status (fulfillment_status)' : '' ) . ",
-	KEY idx_date_paid_status_parent (date_paid, status, parent_id)
+	KEY idx_date_paid_status_parent (date_paid, status, parent_id),
+	KEY idx_payment_method_date_paid_status (payment_method, date_paid, status)
 ) $collate;";
 	}
 
@@ -1817,6 +1824,7 @@ class WC_Install {
 		// Clear table caches.
 		delete_transient( 'wc_attribute_taxonomies' );
 		TaxesDataStore::flush_lookup_columns_cache();
+		OrdersStatsDataStore::flush_payment_method_column_cache();
 
 		return $db_delta_result;
 	}
@@ -3199,7 +3207,7 @@ EOT;
 <!-- wp:woocommerce/product-sale-badge {"align":"right"} /-->
 <!-- /wp:woocommerce/product-image -->
 
-<!-- wp:post-title {"textAlign":"center","isLink":true,"style":{"spacing":{"margin":{"bottom":"0.75rem","top":"0"}},"typography":{"lineHeight":"1.4"}},"fontSize":"medium","__woocommerceNamespace":"woocommerce/product-collection/product-title"} /-->
+<!-- wp:post-title {"textAlign":"center","isLink":true,"style":{"spacing":{"margin":{"bottom":"0.75rem","top":"0"}},"typography":{"lineHeight":"1.4"}},"fontSize":"medium","__woocommerceNamespace":"woocommerce/product-title"} /-->
 
 <!-- wp:woocommerce/product-price {"textAlign":"center","fontSize":"small"} /-->
 

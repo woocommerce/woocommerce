@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
+use Automattic\WooCommerce\Internal\Orders\UnpaidOrderTimeoutMarker;
 use Automattic\WooCommerce\Internal\Utilities\Users;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
@@ -1037,6 +1038,7 @@ function wc_update_coupon_usage_counts( $order_id ) {
 		return;
 	}
 
+	$coupon_codes     = array_filter( $order->get_coupon_codes(), fn( $code ) => ! StringUtil::is_null_or_whitespace( $code ) );
 	$has_recorded     = $order->get_data_store()->get_recorded_coupon_usage_counts( $order );
 	$invalid_statuses = array( OrderStatus::CANCELLED, OrderStatus::FAILED, OrderStatus::TRASH );
 
@@ -1052,25 +1054,23 @@ function wc_update_coupon_usage_counts( $order_id ) {
 		$invalid_statuses
 	);
 
-	if ( $order->has_status( $invalid_statuses ) && $has_recorded ) {
+	$is_invalid = $order->has_status( $invalid_statuses );
+
+	if ( $is_invalid && $has_recorded ) {
 		$action = 'reduce';
 		$order->get_data_store()->set_recorded_coupon_usage_counts( $order, false );
-	} elseif ( ! $order->has_status( $invalid_statuses ) && ! $has_recorded ) {
+	} elseif ( ! $is_invalid && $coupon_codes && ! $has_recorded ) {
 		$action = 'increase';
 		$order->get_data_store()->set_recorded_coupon_usage_counts( $order, true );
-	} elseif ( $order->has_status( $invalid_statuses ) ) {
+	} elseif ( $is_invalid ) {
 		wc_release_coupons_for_order( $order );
 		return;
 	} else {
 		return;
 	}
 
-	if ( count( $order->get_coupon_codes() ) > 0 ) {
-		foreach ( $order->get_coupon_codes() as $code ) {
-			if ( StringUtil::is_null_or_whitespace( $code ) ) {
-				continue;
-			}
-
+	if ( count( $coupon_codes ) > 0 ) {
+		foreach ( $coupon_codes as $code ) {
 			$coupon  = new WC_Coupon( $code );
 			$used_by = $order->get_user_id();
 
@@ -1164,7 +1164,7 @@ function wc_cancel_unpaid_orders() {
 			 * @param WC_Order $order          The unpaid order object.
 			 */
 			if ( apply_filters( 'woocommerce_cancel_unpaid_order', in_array( $order->get_created_via(), array( 'checkout', 'store-api' ), true ), $order ) ) {
-				$order->update_status( OrderStatus::CANCELLED, __( 'Unpaid order cancelled - time limit reached.', 'woocommerce' ) );
+				wc_get_container()->get( UnpaidOrderTimeoutMarker::class )->cancel_unpaid_order( $order, __( 'Unpaid order cancelled - time limit reached.', 'woocommerce' ) );
 			}
 		}
 	}

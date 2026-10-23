@@ -8,6 +8,9 @@
 namespace Automattic\WooCommerce\Tools;
 
 use WP_CLI\I18n\FileDataExtractor;
+use WP_CLI\Utils;
+
+require_once __DIR__ . '/composer/wp/vendor/wp-cli/wp-cli/php/utils-wp.php';
 
 /**
  * Generates extractable PHP strings from pattern headers.
@@ -40,6 +43,9 @@ class Generate_Pattern_Translations {
 				)
 			);
 			foreach ( $headers as $context => $text ) {
+				if ( 'Pattern title' === $context ) {
+					$text = Utils\strip_tags( html_entity_decode( (string) $text, ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
+				}
 				if ( '' === $text ) {
 					continue;
 				}

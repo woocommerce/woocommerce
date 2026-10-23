@@ -16,7 +16,7 @@ import {
 	DEFAULT_QUERY,
 	DEFAULT_ATTRIBUTES,
 } from '../constants';
-import { CoreCollectionNames, CoreFilterNames } from '../types';
+import { CoreCollectionNames } from '../types';
 
 const collection = {
 	name: CoreCollectionNames.UPSELLS,
@@ -43,7 +43,6 @@ const attributes = {
 		perPage: 8,
 		pages: 1,
 	},
-	hideControls: [ CoreFilterNames.FILTERABLE ],
 };
 
 const heading: InnerBlockTemplate = [

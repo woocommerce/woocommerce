@@ -3,13 +3,11 @@
 
 # Monorepo tooling folders.
 /packages/js/e2e-utils-playwright/ @woocommerce/monorepo
+/tools/theme-cli/ @woocommerce/monorepo
 
 # Files in root of repository
 /changelog.txt @woocommerce/monorepo
 /pnpm-lock.yaml @woocommerce/monorepo
-
-# Docs resources, which gets published to https://developer.woocommerce.com
-/docs/ @woocommerce/developer-advocacy
 
 # Interactivity API - public stores
 /plugins/woocommerce/client/blocks/assets/js/base/stores/ @woocommerce/billow
@@ -154,3 +152,6 @@
 
 # Subscriptions Engine packages
 /packages/php/woocommerce-subscriptions-engine/ @woocommerce/chronos
+
+# Themes.
+/themes/ @woocommerce/kirigami
