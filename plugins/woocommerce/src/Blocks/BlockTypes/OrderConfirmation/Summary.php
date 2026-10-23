@@ -2,6 +2,8 @@
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes\OrderConfirmation;
 
+use Automattic\WooCommerce\Utilities\HtmlUtil;
+
 /**
  * Summary class.
  */
@@ -28,11 +30,13 @@ class Summary extends AbstractOrderConfirmationBlock {
 			return '';
 		}
 
+		$email = (string) $order->get_billing_email();
+
 		$content  = '<ul class="wc-block-order-confirmation-summary-list">';
 		$content .= $this->render_summary_row( __( 'Order #:', 'woocommerce' ), $order->get_order_number() );
 		$content .= $this->render_summary_row( __( 'Date:', 'woocommerce' ), wc_format_datetime( $order->get_date_created() ) );
 		$content .= $this->render_summary_row( __( 'Total:', 'woocommerce' ), $order->get_formatted_order_total() );
-		$content .= $this->render_summary_row( __( 'Email:', 'woocommerce' ), $order->get_billing_email() );
+		$content .= $email ? $this->render_summary_row_html( __( 'Email:', 'woocommerce' ), HtmlUtil::esc_html_exact( $email ) ) : '';
 		$content .= $this->render_summary_row( __( 'Payment:', 'woocommerce' ), $order->get_payment_method_title() );
 		$content .= '</ul>';
 
@@ -47,6 +51,20 @@ class Summary extends AbstractOrderConfirmationBlock {
 	 * @return string
 	 */
 	protected function render_summary_row( $name, $value ) {
-		return $value ? '<li class="wc-block-order-confirmation-summary-list-item"><span class="wc-block-order-confirmation-summary-list-item__key">' . esc_html( $name ) . '</span> <span class="wc-block-order-confirmation-summary-list-item__value">' . wp_kses_post( $value ) . '</span></li>' : '';
+		return $value ? $this->render_summary_row_html( $name, wp_kses_post( $value ) ) : '';
+	}
+
+	/**
+	 * Build the markup for a summary row whose value is already safe HTML.
+	 *
+	 * The email row comes here directly: since WordPress 7.2, wp_kses_post() decodes the character
+	 * references esc_html_exact() writes, and wptexturize() would then rewrite the email again.
+	 *
+	 * @param string $name       Name of the row.
+	 * @param string $value_html Escaped value of the row.
+	 * @return string
+	 */
+	private function render_summary_row_html( string $name, string $value_html ): string {
+		return '<li class="wc-block-order-confirmation-summary-list-item"><span class="wc-block-order-confirmation-summary-list-item__key">' . esc_html( $name ) . '</span> <span class="wc-block-order-confirmation-summary-list-item__value">' . $value_html . '</span></li>';
 	}
 }
