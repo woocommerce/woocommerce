@@ -180,6 +180,32 @@ class SessionDataWriterTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox When another request deleted the stored row since this one loaded, saves this request's whole session instead of only its changes.
+	 */
+	public function test_saves_whole_session_when_stored_row_was_deleted(): void {
+		$saved = $this->sut->merge(
+			$this->table,
+			self::SESSION_KEY,
+			time() + 100,
+			array(
+				'a'    => 'mine',
+				'keep' => 'kept',
+			),
+			array(
+				'a'    => 'old',
+				'keep' => 'kept',
+			)
+		);
+
+		$expected = array(
+			'a'    => 'mine',
+			'keep' => 'kept',
+		);
+		$this->assertSame( $expected, $saved );
+		$this->assertSame( $expected, $this->get_stored(), 'Keys this request did not change should not be dropped' );
+	}
+
+	/**
 	 * Store a session row directly.
 	 *
 	 * @param array $data Session data.
