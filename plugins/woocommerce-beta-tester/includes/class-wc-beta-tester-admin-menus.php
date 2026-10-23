@@ -13,6 +13,16 @@ defined( 'ABSPATH' ) || exit;
 class WC_Beta_Tester_Admin_Menus {
 
 	/**
+	 * Environment values the WooCommerce Status page marks private and leaves out of its copyable report.
+	 *
+	 * Nested keys use dot notation.
+	 */
+	private const PRIVATE_KEYS = array(
+		'log_directory',
+		'action_scheduler.source_path', // Added to the environment section by WooCommerce PR #69882.
+	);
+
+	/**
 	 * Constructor
 	 */
 	public function __construct() {
@@ -150,7 +160,7 @@ Copy and paste the system status report from **WooCommerce > System Status** in 
 	/**
 	 * Get the environment section of the SSR, one "label: value" line per field.
 	 *
-	 * Object and array values are printed as JSON.
+	 * Object and array values are printed as JSON. Private values (see PRIVATE_KEYS) are left out.
 	 *
 	 * @param array|object $environment Environment values, already cast to their schema types.
 	 * @param array        $properties  The environment properties of the system status schema.
@@ -160,6 +170,10 @@ Copy and paste the system status report from **WooCommerce > System Status** in 
 		$ssr = '';
 
 		foreach ( $environment as $key => $value ) {
+			if ( in_array( $key, self::PRIVATE_KEYS, true ) ) {
+				continue;
+			}
+
 			if ( 'external_object_cache' === $key ) {
 				$ssr .= sprintf( "%s: %s\n", 'External object cache', wc_bool_to_string( $value ) );
 				continue;
@@ -168,7 +182,7 @@ Copy and paste the system status report from **WooCommerce > System Status** in 
 			if ( is_bool( $value ) ) {
 				$value = wc_bool_to_string( $value );
 			} elseif ( is_array( $value ) || is_object( $value ) ) {
-				$value = wp_json_encode( $value );
+				$value = wp_json_encode( $this->remove_private_keys( $value, $key ) );
 			}
 
 			$label = $properties[ $key ]['description'] ?? $key;
@@ -176,6 +190,45 @@ Copy and paste the system status report from **WooCommerce > System Status** in 
 		}
 
 		return $ssr;
+	}
+
+	/**
+	 * Remove the private keys nested under an environment field before it is printed as JSON.
+	 *
+	 * @param array|object $value Field value.
+	 * @param string       $key   Field key, the first segment of each dotted private key.
+	 * @return array|object
+	 */
+	private function remove_private_keys( $value, $key ) {
+		foreach ( self::PRIVATE_KEYS as $private_key ) {
+			$segments = explode( '.', $private_key );
+
+			if ( array_shift( $segments ) === $key && ! empty( $segments ) ) {
+				$value = $this->remove_key_path( $value, $segments );
+			}
+		}
+
+		return $value;
+	}
+
+	/**
+	 * Remove one key path from a nested array or object. The value comes back as an array.
+	 *
+	 * @param array|object $value    Value to remove the key from.
+	 * @param string[]     $segments Key path, outermost segment first.
+	 * @return array
+	 */
+	private function remove_key_path( $value, array $segments ) {
+		$value   = (array) $value;
+		$segment = array_shift( $segments );
+
+		if ( empty( $segments ) ) {
+			unset( $value[ $segment ] );
+		} elseif ( isset( $value[ $segment ] ) && ( is_array( $value[ $segment ] ) || is_object( $value[ $segment ] ) ) ) {
+			$value[ $segment ] = $this->remove_key_path( $value[ $segment ], $segments );
+		}
+
+		return $value;
 	}
 
 	/**
