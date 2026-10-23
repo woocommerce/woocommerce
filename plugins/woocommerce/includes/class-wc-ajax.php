@@ -187,6 +187,7 @@ class WC_AJAX {
 			'save_order_items',
 			'load_order_items',
 			'add_order_note',
+			'get_order_notes',
 			'delete_order_note',
 			'json_search_order_metakeys',
 			'json_search_tax_rates',
@@ -1324,7 +1325,12 @@ class WC_AJAX {
 			$items_html = ob_get_clean();
 
 			ob_start();
-			$notes = wc_get_order_notes( array( 'order_id' => $order_id ) );
+			if ( isset( $_POST['paginate_notes'] ) ) {
+				$pagination = WC_Meta_Box_Order_Notes::get_page( (int) $order_id );
+				$notes      = $pagination['notes'];
+			} else {
+				$notes = wc_get_order_notes( array( 'order_id' => $order_id ) );
+			}
 			include __DIR__ . '/admin/meta-boxes/views/html-order-notes.php';
 			$notes_html = ob_get_clean();
 
@@ -1559,7 +1565,12 @@ class WC_AJAX {
 			$response['html'] = ob_get_clean();
 
 			ob_start();
-			$notes = wc_get_order_notes( array( 'order_id' => $order_id ) );
+			if ( isset( $_POST['paginate_notes'] ) ) {
+				$pagination = WC_Meta_Box_Order_Notes::get_page( (int) $order_id );
+				$notes      = $pagination['notes'];
+			} else {
+				$notes = wc_get_order_notes( array( 'order_id' => $order_id ) );
+			}
 			include __DIR__ . '/admin/meta-boxes/views/html-order-notes.php';
 			$response['notes_html'] = ob_get_clean();
 
@@ -1669,7 +1680,12 @@ class WC_AJAX {
 			$items_html = ob_get_clean();
 
 			ob_start();
-			$notes = wc_get_order_notes( array( 'order_id' => $order_id ) );
+			if ( isset( $_POST['paginate_notes'] ) ) {
+				$pagination = WC_Meta_Box_Order_Notes::get_page( (int) $order_id );
+				$notes      = $pagination['notes'];
+			} else {
+				$notes = wc_get_order_notes( array( 'order_id' => $order_id ) );
+			}
 			include __DIR__ . '/admin/meta-boxes/views/html-order-notes.php';
 			$notes_html = ob_get_clean();
 
@@ -1779,7 +1795,12 @@ class WC_AJAX {
 			$items_html = ob_get_clean();
 
 			ob_start();
-			$notes = wc_get_order_notes( array( 'order_id' => $order_id ) );
+			if ( isset( $_POST['paginate_notes'] ) ) {
+				$pagination = WC_Meta_Box_Order_Notes::get_page( (int) $order_id );
+				$notes      = $pagination['notes'];
+			} else {
+				$notes = wc_get_order_notes( array( 'order_id' => $order_id ) );
+			}
 			include __DIR__ . '/admin/meta-boxes/views/html-order-notes.php';
 			$notes_html = ob_get_clean();
 
@@ -1882,6 +1903,16 @@ class WC_AJAX {
 			<?php
 		}
 		wp_die();
+	}
+
+	/**
+	 * Get a rendered page of order notes via AJAX.
+	 *
+	 * @since 11.3.0
+	 * @return void
+	 */
+	public static function get_order_notes() {
+		WC_Meta_Box_Order_Notes::get_order_notes();
 	}
 
 	/**
