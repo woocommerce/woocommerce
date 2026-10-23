@@ -34824,7 +34824,7 @@ parameters:
 		-
 			message: '#^Expected 2 @param tags, found 1\.$#'
 			identifier: paramTag.count
-			count: 2
+			count: 1
 			path: includes/wc-template-functions.php
 
 		-
