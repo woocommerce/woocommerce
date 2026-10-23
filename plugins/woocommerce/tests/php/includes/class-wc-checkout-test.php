@@ -24,6 +24,11 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	private $extra_field_filters = array();
 
 	/**
+	 * @var array The customer's location and VAT exemption before each test, restored on tear down.
+	 */
+	private $original_customer = array();
+
+	/**
 	 * Runs before each test.
 	 */
 	public function setUp(): void {
@@ -55,6 +60,9 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 
 		WC()->cart->empty_cart();
 
+		$customer                = WC()->customer;
+		$this->original_customer = array( $customer->get_billing_country(), $customer->get_billing_state(), $customer->get_shipping_country(), $customer->get_shipping_state(), $customer->get_is_vat_exempt() );
+
 		add_filter( 'woocommerce_checkout_registration_enabled', '__return_true' );
 	}
 
@@ -71,6 +79,12 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		}
 
 		$this->extra_field_filters = array();
+
+		$customer = WC()->customer;
+		$customer->set_billing_location( $this->original_customer[0], $this->original_customer[1] );
+		$customer->set_shipping_location( $this->original_customer[2], $this->original_customer[3] );
+		$customer->set_is_vat_exempt( $this->original_customer[4] );
+		WC_Helper_Shipping::delete_simple_flat_rate();
 
 		parent::tearDown();
 	}
@@ -925,6 +939,749 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( 'VAT', $tax_item->get_label() );
 		$this->assertFalse( $tax_item->get_compound() );
 		$this->assertSame( 19.0, $tax_item->get_rate_percent() );
+	}
+
+	/**
+	 * @testdox Resuming a pending order with an unchanged cart keeps its item IDs.
+	 */
+	public function test_create_order_resume_keeps_item_ids_when_cart_is_unchanged(): void {
+		$order_id        = $this->create_order_with_line_item_and_fee();
+		$before          = $this->get_order_item_ids_by_type( $order_id );
+		$line_item_calls = did_action( 'woocommerce_checkout_create_order_line_item' );
+		$fee_item_calls  = did_action( 'woocommerce_checkout_create_order_fee_item' );
+
+		$resumed_id = $this->resume_order( $order_id );
+
+		$this->assertSame( $order_id, $resumed_id );
+		$this->assertSame( $before, $this->get_order_item_ids_by_type( $order_id ) );
+		$this->assertSame( $line_item_calls, did_action( 'woocommerce_checkout_create_order_line_item' ), 'Kept line items should not be created again.' );
+		$this->assertSame( $fee_item_calls, did_action( 'woocommerce_checkout_create_order_fee_item' ), 'Kept fees should not be created again.' );
+		$this->assertSame( (float) WC()->cart->get_total( 'edit' ), (float) wc_get_order( $order_id )->get_total(), 'The order total should match the cart.' );
+	}
+
+	/**
+	 * @testdox Resuming a pending order whose $item_type cart section changed replaces only those items, and fires woocommerce_remove_order_items once for them.
+	 * @testWith ["fee"]
+	 *           ["shipping"]
+	 *           ["tax"]
+	 *           ["coupon"]
+	 *
+	 * @param string $item_type The item type whose cart section changed.
+	 */
+	public function test_create_order_resume_replaces_items_whose_cart_section_changed( string $item_type ): void {
+		$order_id         = $this->create_order_with_shipping_taxes_and_coupon();
+		$before           = $this->get_order_item_ids_by_type( $order_id );
+		$expected_amounts = $this->get_order_item_amounts_by_type( $order_id );
+		$this->set_stale_cart_section_hash( $order_id, $item_type );
+		$line_item_calls = did_action( 'woocommerce_checkout_create_order_line_item' );
+		$removed_types   = array();
+		add_action(
+			'woocommerce_remove_order_items',
+			function ( $order, $type ) use ( &$removed_types ) {
+				unset( $order );
+				$removed_types[] = $type;
+			},
+			10,
+			2
+		);
+
+		$this->resume_order( $order_id );
+
+		$this->assertSame( array( $item_type ), $removed_types, 'Only the changed type should be removed, once.' );
+		$this->assert_items_replaced( $before, $this->get_order_item_ids_by_type( $order_id ), array( $item_type ) );
+		$this->assertSame( $line_item_calls, did_action( 'woocommerce_checkout_create_order_line_item' ), 'Kept line items should not be created again.' );
+		$this->assertSame( $expected_amounts, $this->get_order_item_amounts_by_type( $order_id ), 'The replaced items should have the cart amounts.' );
+		$this->assertSame( (float) WC()->cart->get_total( 'edit' ), (float) wc_get_order( $order_id )->get_total(), 'The order total should match the cart.' );
+	}
+
+	/**
+	 * @testdox Resuming a pending order keeps every original item when checkout fails before the order is saved.
+	 */
+	public function test_create_order_resume_keeps_original_items_when_checkout_fails(): void {
+		$order_id = $this->create_order_with_line_item_and_fee();
+		$this->set_stale_cart_section_hash( $order_id, 'fee' );
+		wc_add_order_item(
+			$order_id,
+			array(
+				'order_item_name' => 'Extension gift',
+				'order_item_type' => 'line_item',
+			)
+		);
+		$before = $this->get_order_item_ids_by_type( $order_id );
+		add_action(
+			'woocommerce_checkout_create_order',
+			function () {
+				throw new Exception( 'Simulated checkout failure' );
+			}
+		);
+
+		$result = $this->resume_order( $order_id );
+
+		$this->assertInstanceOf( WP_Error::class, $result );
+		$this->assertSame( 'Simulated checkout failure', $result->get_error_message() );
+		$this->assertCount( 2, $before['line_item'], 'The extension line item should be on the order before resuming.' );
+		$this->assertSame( $before, $this->get_order_item_ids_by_type( $order_id ), 'The changed fee and the extension line item should not be deleted.' );
+	}
+
+	/**
+	 * @testdox Resuming a pending order removes item types the cart doesn't track, so extensions that add them at checkout don't duplicate them.
+	 */
+	public function test_create_order_resume_removes_untracked_item_types(): void {
+		$order_id = $this->create_order_with_line_item_and_fee();
+		$before   = $this->get_order_item_ids_by_type( $order_id );
+		wc_add_order_item(
+			$order_id,
+			array(
+				'order_item_name' => 'Extension item',
+				'order_item_type' => 'test_extension_item',
+			)
+		);
+
+		$this->resume_order( $order_id );
+		$after = $this->get_order_item_ids_by_type( $order_id );
+
+		$this->assertArrayNotHasKey( 'test_extension_item', $after );
+		$this->assertSame( $before['line_item'], $after['line_item'] );
+	}
+
+	/**
+	 * @testdox Resuming a pending order doesn't duplicate items that an extension adds in woocommerce_checkout_create_order.
+	 */
+	public function test_create_order_resume_does_not_duplicate_items_added_in_create_order_action(): void {
+		add_action(
+			'woocommerce_checkout_create_order',
+			function ( WC_Order $order ) {
+				$fee = new WC_Order_Item_Fee();
+				$fee->set_name( 'Extension surcharge' );
+				$fee->set_total( '2' );
+				$order->add_item( $fee );
+
+				$line_item = new WC_Order_Item_Product();
+				$line_item->set_name( 'Extension gift' );
+				$line_item->set_quantity( 1 );
+				$order->add_item( $line_item );
+			}
+		);
+		$order_id = $this->create_order_with_line_item_and_fee();
+		$before   = $this->get_order_item_names_by_id( $order_id );
+
+		$this->resume_order( $order_id );
+		$this->resume_order( $order_id );
+		$after = $this->get_order_item_names_by_id( $order_id );
+
+		$this->assertSame( array( 'Dummy Product', 'Extension gift' ), array_values( $after['line_item'] ), 'Each line item should exist once.' );
+		$this->assertSame( array( 'Handling', 'Extension surcharge' ), array_values( $after['fee'] ), 'Each fee should exist once.' );
+		$this->assertSame( array_search( 'Dummy Product', $before['line_item'], true ), array_search( 'Dummy Product', $after['line_item'], true ), 'The cart line item should keep its ID.' );
+		$this->assertSame( array_search( 'Handling', $before['fee'], true ), array_search( 'Handling', $after['fee'], true ), 'The cart fee should keep its ID.' );
+	}
+
+	/**
+	 * @testdox Resuming a pending order without a snapshot of its cart items, such as one created before it was stored, replaces every item.
+	 */
+	public function test_create_order_resume_without_snapshot_replaces_all_items(): void {
+		$order_id = $this->create_order_with_line_item_and_fee();
+		$before   = $this->get_order_item_ids_by_type( $order_id );
+		$order    = wc_get_order( $order_id );
+		$order->delete_meta_data( '_cart_order_items_snapshot' );
+		$order->save();
+
+		$this->resume_order( $order_id );
+
+		$this->assert_items_replaced( $before, $this->get_order_item_ids_by_type( $order_id ), array_keys( $before ) );
+	}
+
+	/**
+	 * Tax settings, rates, prices and carts for the resume sweep.
+	 * Each rate is paired with the prices that round a half cent or a 7th decimal differently in the cart and the order,
+	 * and each pair runs with every tax setting and cart.
+	 *
+	 * @return array<string, array{bool, bool, string[], string, int, array{string, string}|null}>
+	 */
+	public function provider_resume_tax_setups(): array {
+		$rates_and_prices = array(
+			'7.25%, 12.34'             => array( array( '7.2500' ), '12.34' ),
+			'7.25% + 1.5%, 23.45'      => array( array( '7.2500', '1.5000' ), '23.45' ),
+			'7.25% + 1.5%, 74.21'      => array( array( '7.2500', '1.5000' ), '74.21' ),
+			'8.875%, 19.99'            => array( array( '8.8750' ), '19.99' ),
+			'21%, 2.69'                => array( array( '21.0000' ), '2.69' ),
+			'10% + 5% compound, 19.99' => array( array( '10.0000', '5.0000c' ), '19.99' ),
+		);
+		$carts            = array(
+			'one item'                      => array( 1, null ),
+			'x3'                            => array( 3, null ),
+			'two lines, fixed cart coupon'  => array( 1, array( 'fixed_cart', '7.33' ) ),
+			'two lines, percent coupon, x3' => array( 3, array( 'percent', '15' ) ),
+		);
+		$cases            = array();
+		foreach ( array( true, false ) as $prices_include_tax ) {
+			foreach ( array( true, false ) as $round_at_subtotal ) {
+				foreach ( $rates_and_prices as $rates_and_price_name => list( $rates, $price ) ) {
+					foreach ( $carts as $cart_name => list( $quantity, $coupon ) ) {
+						$name           = sprintf( 'prices %s tax, %s, %s, %s', $prices_include_tax ? 'including' : 'excluding', $round_at_subtotal ? 'rounded at subtotal' : 'rounded per line', $rates_and_price_name, $cart_name );
+						$cases[ $name ] = array( $prices_include_tax, $round_at_subtotal, $rates, $price, $quantity, $coupon );
+					}
+				}
+			}
+		}
+
+		return $cases;
+	}
+
+	/**
+	 * @testdox Resuming an unchanged order keeps every item ID and the same totals as a fresh order, with prices including tax: $prices_include_tax, rounding at subtotal: $round_at_subtotal, price $price, quantity $quantity.
+	 * @dataProvider provider_resume_tax_setups
+	 *
+	 * @param bool                       $prices_include_tax Whether prices include tax.
+	 * @param bool                       $round_at_subtotal  Whether tax is rounded at subtotal.
+	 * @param string[]                   $rates              Tax rate percentages, applied in order. A "c" suffix makes the rate compound.
+	 * @param string                     $price              The product price.
+	 * @param int                        $quantity           How many of the product the cart has.
+	 * @param array{string, string}|null $coupon             The coupon's discount type and amount, added with a second cart line and a negative fee, or null for none of them.
+	 */
+	public function test_resume_keeps_items_and_matches_fresh_order_across_tax_setups( bool $prices_include_tax, bool $round_at_subtotal, array $rates, string $price, int $quantity, ?array $coupon ): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', $prices_include_tax ? 'yes' : 'no' );
+		update_option( 'woocommerce_tax_round_at_subtotal', $round_at_subtotal ? 'yes' : 'no' );
+		foreach ( $rates as $index => $rate ) {
+			$is_compound = 'c' === substr( $rate, -1 );
+			$this->insert_tax_rate( '', rtrim( $rate, 'c' ), "Tax {$index}", $index + 1, $is_compound );
+		}
+		WC()->customer->set_shipping_location( 'US', 'CA' );
+		WC()->customer->set_billing_location( 'US', 'CA' );
+		WC_Helper_Shipping::create_simple_flat_rate( 10 );
+		add_action(
+			'woocommerce_cart_calculate_fees',
+			function ( WC_Cart $cart ) use ( $coupon ) {
+				$cart->add_fee( 'Handling', 5, true );
+				if ( $coupon ) {
+					// A negative taxable fee splits its tax by each item's share of the cart, so with a zero-rate item each rate's tax has more decimals to round.
+					$cart->add_fee( 'Discount', -1.37, true );
+				}
+			}
+		);
+
+		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => $price ) );
+		WC()->cart->add_to_cart( $product->get_id(), $quantity );
+		if ( $coupon ) {
+			$second_product = WC_Helper_Product::create_simple_product(
+				true,
+				array(
+					'regular_price' => '3.33',
+					'tax_class'     => 'zero-rate',
+				)
+			);
+			WC()->cart->add_to_cart( $second_product->get_id(), 2 );
+			$sweep_coupon = WC_Helper_Coupon::create_coupon(
+				'resume-sweep',
+				array(
+					'discount_type' => $coupon[0],
+					'coupon_amount' => $coupon[1],
+				)
+			);
+			WC()->cart->apply_coupon( $sweep_coupon->get_code() );
+		}
+		WC()->cart->calculate_totals();
+		$this->assertTrue( WC()->cart->has_calculated_shipping(), 'The cart should have calculated shipping.' );
+
+		$order_id = $this->sut->create_order( array( 'payment_method' => WC_Gateway_BACS::ID ) );
+		$this->assertIsInt( $order_id );
+		$before = $this->get_order_item_ids_by_type( $order_id );
+		$this->resume_order( $order_id );
+		$fresh_id = $this->sut->create_order( array( 'payment_method' => WC_Gateway_BACS::ID ) );
+		$this->assertIsInt( $fresh_id );
+		$after = $this->get_order_item_ids_by_type( $order_id );
+
+		$expected_types = $coupon ? array( 'coupon', 'fee', 'line_item', 'shipping', 'tax' ) : array( 'fee', 'line_item', 'shipping', 'tax' );
+		$this->assertSame( $expected_types, array_keys( $before ), 'The order should have every cart item type.' );
+		$this->assertSame( $before, $after, 'Every item should keep its ID.' );
+		$this->assertNotSame( $order_id, $fresh_id, 'The fresh order should be a new order.' );
+
+		$resumed = wc_get_order( $order_id );
+		$fresh   = wc_get_order( $fresh_id );
+		foreach ( array( 'total', 'total_tax', 'cart_tax', 'shipping_total', 'shipping_tax', 'discount_total', 'discount_tax' ) as $prop ) {
+			$this->assertSame( $fresh->{"get_{$prop}"}(), $resumed->{"get_{$prop}"}(), "The resumed order's {$prop} should match a fresh order's." );
+		}
+		$this->assertSame( $this->get_order_item_amounts_by_type( $fresh_id ), $this->get_order_item_amounts_by_type( $order_id ), "The resumed order's items should have the same amounts as a fresh order's." );
+	}
+
+	/**
+	 * @testdox Resuming a pending order replaces the items whose amounts a merchant edited, and keeps items edited without changing amounts.
+	 * @testWith ["none", ""]
+	 *           ["line_item_name", ""]
+	 *           ["line_item_tax", "line_item"]
+	 *           ["line_item_tax_split", "line_item"]
+	 *           ["shipping_total", "shipping"]
+	 *           ["shipping_tax", "shipping"]
+	 *           ["shipping_tax_split", "shipping"]
+	 *           ["tax_line", "tax"]
+	 *           ["fee_total", "fee"]
+	 *           ["fee_tax", "fee"]
+	 *           ["fee_tax_split", "fee"]
+	 *           ["coupon_discount", "coupon"]
+	 *
+	 * @param string $edit          The merchant edit to make to the order.
+	 * @param string $replaced_type The item type that should be replaced, or an empty string when none should be.
+	 */
+	public function test_create_order_resume_replaces_items_with_edited_amounts( string $edit, string $replaced_type ): void {
+		$order_id         = $this->create_order_with_shipping_taxes_and_coupon();
+		$before           = $this->get_order_item_ids_by_type( $order_id );
+		$expected_amounts = $this->get_order_item_amounts_by_type( $order_id );
+		$this->edit_order_item_amounts( wc_get_order( $order_id ), $edit );
+
+		$this->resume_order( $order_id );
+		$order = wc_get_order( $order_id );
+
+		$this->assertSame( array( 'coupon', 'fee', 'line_item', 'shipping', 'tax' ), array_keys( $before ), 'The order should have every cart item type.' );
+		$this->assert_items_replaced( $before, $this->get_order_item_ids_by_type( $order_id ), array_filter( array( $replaced_type ) ) );
+		$this->assertSame( (float) WC()->cart->get_total( 'edit' ), (float) $order->get_total(), 'The order total should match the cart.' );
+		$this->assertEqualsWithDelta( (float) WC()->cart->get_total_tax(), (float) $order->get_total_tax(), 0.001, 'The order tax total should match the cart.' );
+		$this->assertEqualsWithDelta( (float) WC()->cart->get_shipping_total(), (float) $order->get_shipping_total(), 0.001, 'The order shipping total should match the cart.' );
+		$this->assertSame( $expected_amounts, $this->get_order_item_amounts_by_type( $order_id ), 'The resumed items should have their original amounts and tax allocations.' );
+	}
+
+	/**
+	 * @testdox Resuming a pending order keeps items that a gateway added meta to after checkout.
+	 */
+	public function test_create_order_resume_keeps_items_with_meta_added_after_checkout(): void {
+		$order_id = $this->create_order_with_line_item_and_fee();
+		$before   = $this->get_order_item_ids_by_type( $order_id );
+		foreach ( wc_get_order( $order_id )->get_items( array( 'line_item', 'fee' ) ) as $item ) {
+			$item->update_meta_data( '_gateway_line_reference', 'ref-' . $item->get_id() );
+			$item->save();
+		}
+
+		$this->resume_order( $order_id );
+
+		$this->assertSame( $before, $this->get_order_item_ids_by_type( $order_id ) );
+	}
+
+	/**
+	 * @testdox Resuming a pending order rebuilds items an extension changed in woocommerce_checkout_create_order, so the change isn't applied twice.
+	 */
+	public function test_create_order_resume_does_not_reapply_changes_made_in_create_order_action(): void {
+		add_action(
+			'woocommerce_checkout_create_order',
+			function ( WC_Order $order ) {
+				foreach ( $order->get_fees() as $fee ) {
+					$fee->set_total( (float) $fee->get_total() * 0.9 );
+				}
+				$order->calculate_totals( false );
+			}
+		);
+		$order_id = $this->create_order_with_line_item_and_fee();
+		$before   = $this->get_order_item_ids_by_type( $order_id );
+
+		$this->resume_order( $order_id );
+		$this->resume_order( $order_id );
+		$after = $this->get_order_item_ids_by_type( $order_id );
+		$order = wc_get_order( $order_id );
+
+		$this->assertSame( $before['line_item'], $after['line_item'], 'Line items should keep their IDs.' );
+		$this->assertNotSame( $before['fee'], $after['fee'], 'The changed fee should be rebuilt.' );
+		$this->assertSame( 4.5, (float) array_values( $order->get_fees() )[0]->get_total(), 'The extension should take 10% off the cart fee once.' );
+	}
+
+	/**
+	 * @testdox Resuming a pending order adds a cart item back when a merchant deleted it after checkout.
+	 */
+	public function test_create_order_resume_replaces_type_with_deleted_cart_item(): void {
+		$order_id = $this->create_order_with_line_item_and_fee();
+		$before   = $this->get_order_item_ids_by_type( $order_id );
+		$order    = wc_get_order( $order_id );
+		$order->remove_item( $before['fee'][0] );
+		$order->save();
+
+		$this->resume_order( $order_id );
+		$after = $this->get_order_item_ids_by_type( $order_id );
+
+		$this->assertSame( $before['line_item'], $after['line_item'], 'Line items should keep their IDs.' );
+		$this->assertCount( 1, $after['fee'], 'The fee should be added again.' );
+		$this->assertSame( (float) WC()->cart->get_total( 'edit' ), (float) wc_get_order( $order_id )->get_total(), 'The order total should match the cart.' );
+	}
+
+	/**
+	 * @testdox Resuming a pending order replaces every item when woocommerce_checkout_keep_order_items_on_resume returns false.
+	 */
+	public function test_create_order_resume_replaces_all_items_when_keeping_is_filtered_off(): void {
+		$order_id = $this->create_order_with_line_item_and_fee();
+		$before   = $this->get_order_item_ids_by_type( $order_id );
+		add_filter( 'woocommerce_checkout_keep_order_items_on_resume', '__return_false' );
+		$line_item_hook_calls = did_action( 'woocommerce_checkout_create_order_line_item' );
+
+		$this->resume_order( $order_id );
+		$after = $this->get_order_item_ids_by_type( $order_id );
+
+		$this->assertSame( $line_item_hook_calls + 1, did_action( 'woocommerce_checkout_create_order_line_item' ), 'The line item hook should fire again.' );
+		$this->assert_items_replaced( $before, $after, array_keys( $before ) );
+	}
+
+	/**
+	 * @testdox Resuming a pending order replaces line items that no longer match the cart, even when the cart hash still matches.
+	 */
+	public function test_create_order_resume_replaces_line_items_when_cart_hash_misses_a_quantity_change(): void {
+		// A cart hash that only covers product IDs, so a quantity change doesn't change it.
+		add_filter(
+			'woocommerce_cart_hash',
+			function ( $hash, $cart_session ) {
+				unset( $hash );
+				return md5( wp_json_encode( wp_list_pluck( (array) $cart_session, 'product_id' ) ) );
+			},
+			10,
+			2
+		);
+		$order_id = $this->create_order_with_line_item_and_fee();
+		$before   = $this->get_order_item_ids_by_type( $order_id );
+		WC()->cart->set_quantity( array_key_first( WC()->cart->get_cart() ), 3 );
+		WC()->cart->calculate_totals();
+
+		$resumed_id = $this->resume_order( $order_id );
+
+		$this->assertSame( $order_id, $resumed_id, 'The order should still be resumed.' );
+		$this->assert_line_items_match_cart( $order_id );
+		$this->assertNotSame( $before['line_item'], $this->get_order_item_ids_by_type( $order_id )['line_item'], 'The line item should be replaced.' );
+	}
+
+	/**
+	 * @testdox Resuming a pending order replaces line items a merchant edited, so they match the cart again.
+	 */
+	public function test_create_order_resume_replaces_line_items_edited_after_checkout(): void {
+		$order_id = $this->create_order_with_line_item_and_fee();
+		$before   = $this->get_order_item_ids_by_type( $order_id );
+		$order    = wc_get_order( $order_id );
+		$item     = array_values( $order->get_items() )[0];
+		$item->set_quantity( 2 );
+		$item->set_subtotal( (float) $item->get_subtotal() * 2 );
+		$item->set_total( (float) $item->get_total() * 2 );
+		$item->save();
+		$order->calculate_totals();
+
+		$this->resume_order( $order_id );
+
+		$this->assert_line_items_match_cart( $order_id );
+		$this->assertNotSame( $before['line_item'], $this->get_order_item_ids_by_type( $order_id )['line_item'], 'The edited line item should be replaced.' );
+	}
+
+	/**
+	 * @testdox An Error thrown while resuming an order doesn't make a later set_data_from_cart() call skip item types.
+	 */
+	public function test_create_order_resume_error_does_not_leave_item_types_skipped(): void {
+		$order_id = $this->create_order_with_line_item_and_fee();
+		// This filter runs after the resumed order's kept item types are set and before set_data_from_cart().
+		add_filter(
+			'woocommerce_checkout_customer_id',
+			function () {
+				throw new Error( 'Extension error' );
+			}
+		);
+
+		try {
+			$this->resume_order( $order_id );
+			$this->fail( 'The Error should reach the caller.' );
+		} catch ( Error $e ) {
+			$this->assertSame( 'Extension error', $e->getMessage() );
+		}
+
+		$order = new WC_Order();
+		$this->sut->set_data_from_cart( $order );
+
+		$this->assertCount( 1, $order->get_items(), 'set_data_from_cart() should add the line item.' );
+	}
+
+	/**
+	 * Creates an order from a cart with one product and one fee.
+	 *
+	 * @return int The order ID.
+	 */
+	private function create_order_with_line_item_and_fee(): int {
+		$product = WC_Helper_Product::create_simple_product();
+		add_action(
+			'woocommerce_cart_calculate_fees',
+			function ( WC_Cart $cart ) {
+				$cart->add_fee( 'Handling', 5 );
+			}
+		);
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->calculate_totals();
+
+		$order_id = $this->sut->create_order( array( 'payment_method' => WC_Gateway_BACS::ID ) );
+		$this->assertIsInt( $order_id );
+
+		return $order_id;
+	}
+
+	/**
+	 * Creates an order from a cart taxed at two rates, with one product, one fee, a coupon and flat rate shipping, shipped to Germany.
+	 *
+	 * @return int The order ID.
+	 */
+	private function create_order_with_shipping_taxes_and_coupon(): int {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		$this->insert_tax_rate( 'DE', '19.0000', 'VAT', 1 );
+		$this->insert_tax_rate( 'DE', '5.0000', 'Local tax', 2 );
+		WC_Helper_Shipping::create_simple_flat_rate( 10 );
+		WC()->customer->set_billing_country( 'DE' );
+		WC()->customer->set_shipping_country( 'DE' );
+		WC()->customer->set_is_vat_exempt( false );
+		$coupon = WC_Helper_Coupon::create_coupon( 'resume-coupon' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		add_action(
+			'woocommerce_cart_calculate_fees',
+			function ( WC_Cart $cart ) {
+				$cart->add_fee( 'Handling', 5, true );
+			}
+		);
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->apply_coupon( $coupon->get_code() );
+		WC()->cart->calculate_totals();
+		$this->assertTrue( WC()->cart->has_calculated_shipping(), 'The cart should have calculated shipping.' );
+
+		$order_id = $this->sut->create_order( array( 'payment_method' => WC_Gateway_BACS::ID ) );
+		$this->assertIsInt( $order_id );
+
+		return $order_id;
+	}
+
+	/**
+	 * Edits an order's items the way a merchant can in the order editor, without recalculating the order.
+	 *
+	 * @param WC_Order $order The order.
+	 * @param string   $edit  The edit to make.
+	 */
+	private function edit_order_item_amounts( WC_Order $order, string $edit ): void {
+		$line_item = array_values( $order->get_items() )[0];
+		$shipping  = array_values( $order->get_shipping_methods() )[0];
+		$tax       = array_values( $order->get_taxes() )[0];
+		$fee       = array_values( $order->get_fees() )[0];
+		$coupon    = array_values( $order->get_coupons() )[0];
+		$rate_id   = $tax->get_rate_id();
+
+		switch ( $edit ) {
+			case 'line_item_name':
+				$line_item->set_name( 'Renamed product' );
+				$line_item->save();
+				break;
+			case 'line_item_tax':
+				$line_item->set_taxes(
+					array(
+						'total'    => array( $rate_id => (float) $line_item->get_total_tax() + 1 ),
+						'subtotal' => array( $rate_id => (float) $line_item->get_subtotal_tax() + 1 ),
+					)
+				);
+				$line_item->save();
+				break;
+			case 'line_item_tax_split':
+			case 'shipping_tax_split':
+			case 'fee_tax_split':
+				// Moves tax from one rate to the other, so the item's tax sums don't change.
+				$item        = array(
+					'line_item_tax_split' => $line_item,
+					'shipping_tax_split'  => $shipping,
+					'fee_tax_split'       => $fee,
+				)[ $edit ];
+				$taxes       = $item->get_taxes();
+				$first_rate  = array_key_first( $taxes['total'] );
+				$second_rate = array_key_last( $taxes['total'] );
+				foreach ( array_keys( $taxes ) as $tax_type ) {
+					$taxes[ $tax_type ][ $first_rate ]  = (float) $taxes[ $tax_type ][ $first_rate ] + 0.1;
+					$taxes[ $tax_type ][ $second_rate ] = (float) $taxes[ $tax_type ][ $second_rate ] - 0.1;
+				}
+				$item->set_taxes( $taxes );
+				$item->save();
+				break;
+			case 'shipping_total':
+				$shipping->set_total( (float) $shipping->get_total() + 5 );
+				$shipping->save();
+				break;
+			case 'shipping_tax':
+				$shipping->set_taxes( array( 'total' => array( $rate_id => (float) $shipping->get_total_tax() + 1 ) ) );
+				$shipping->save();
+				break;
+			case 'tax_line':
+				$tax->set_tax_total( (float) $tax->get_tax_total() + 1 );
+				$tax->save();
+				break;
+			case 'fee_total':
+				$fee->set_total( (float) $fee->get_total() + 1 );
+				$fee->save();
+				break;
+			case 'fee_tax':
+				$fee->set_taxes( array( 'total' => array( $rate_id => (float) $fee->get_total_tax() + 1 ) ) );
+				$fee->save();
+				break;
+			case 'coupon_discount':
+				$coupon->set_discount( (float) $coupon->get_discount() + 1 );
+				$coupon->save();
+				break;
+		}
+	}
+
+	/**
+	 * Asserts that an order's line items have the cart's quantities and totals.
+	 *
+	 * @param int $order_id The order ID.
+	 */
+	private function assert_line_items_match_cart( int $order_id ): void {
+		$order      = wc_get_order( $order_id );
+		$line_items = array_values( $order->get_items() );
+		$cart_items = array_values( WC()->cart->get_cart() );
+
+		$this->assertCount( count( $cart_items ), $line_items, 'The order should have one line item per cart item.' );
+		$this->assertSame( (int) $cart_items[0]['quantity'], (int) $line_items[0]->get_quantity(), 'The line item quantity should match the cart.' );
+		$this->assertSame( (float) $cart_items[0]['line_total'], (float) $line_items[0]->get_total(), 'The line item total should match the cart.' );
+	}
+
+	/**
+	 * Asserts that each item type in $replaced_types was replaced once, and every other type kept its item IDs.
+	 *
+	 * @param array<string, int[]> $before         Item IDs by type before resuming.
+	 * @param array<string, int[]> $after          Item IDs by type after resuming.
+	 * @param string[]             $replaced_types The item types that should be replaced.
+	 */
+	private function assert_items_replaced( array $before, array $after, array $replaced_types ): void {
+		$this->assertSame( array_keys( $before ), array_keys( $after ), 'The same item types should exist.' );
+		foreach ( $before as $type => $ids ) {
+			if ( in_array( $type, $replaced_types, true ) ) {
+				$this->assertCount( count( $ids ), $after[ $type ], "The {$type} items should be added again once." );
+				$this->assertEmpty( array_intersect( $ids, $after[ $type ] ), "The {$type} items should be replaced." );
+			} else {
+				$this->assertSame( $ids, $after[ $type ], "The {$type} items should keep their IDs." );
+			}
+		}
+	}
+
+	/**
+	 * Changes the stored hash of an item type's cart section, as if that part of the cart changed since checkout.
+	 *
+	 * @param int    $order_id  The order ID.
+	 * @param string $item_type The order item type.
+	 */
+	private function set_stale_cart_section_hash( int $order_id, string $item_type ): void {
+		$order    = wc_get_order( $order_id );
+		$snapshot = $order->get_meta( '_cart_order_items_snapshot' );
+
+		$snapshot['hashes'][ $item_type ] = 'stale';
+		$order->update_meta_data( '_cart_order_items_snapshot', $snapshot );
+		$order->save();
+	}
+
+	/**
+	 * Adds a tax rate that also applies to shipping.
+	 *
+	 * @param string $country  The country code, or an empty string for every country.
+	 * @param string $rate     The rate percentage.
+	 * @param string $name     The rate name.
+	 * @param int    $priority The rate priority, also used as its order.
+	 * @param bool   $compound Whether the rate is compound.
+	 */
+	private function insert_tax_rate( string $country, string $rate, string $name, int $priority, bool $compound = false ): void {
+		WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => $country,
+				'tax_rate'          => $rate,
+				'tax_rate_name'     => $name,
+				'tax_rate_priority' => (string) $priority,
+				'tax_rate_compound' => $compound ? '1' : '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => (string) $priority,
+				'tax_rate_class'    => '',
+			)
+		);
+	}
+
+	/**
+	 * Runs checkout again with the order set as awaiting payment, as when a shopper retries a failed payment.
+	 *
+	 * @param int $order_id The order awaiting payment.
+	 * @return int|WP_Error The order ID returned by create_order().
+	 */
+	private function resume_order( int $order_id ) {
+		$original = WC()->session->get( 'order_awaiting_payment' );
+		WC()->session->set( 'order_awaiting_payment', $order_id );
+		try {
+			return $this->sut->create_order( array( 'payment_method' => WC_Gateway_BACS::ID ) );
+		} finally {
+			WC()->session->set( 'order_awaiting_payment', $original );
+		}
+	}
+
+	/**
+	 * Reads an order's persisted item IDs, grouped by item type.
+	 *
+	 * @param int $order_id The order ID.
+	 * @return array<string, int[]>
+	 */
+	private function get_order_item_ids_by_type( int $order_id ): array {
+		$ids_by_type = array_map( 'array_keys', $this->get_order_item_names_by_id( $order_id ) );
+		ksort( $ids_by_type );
+
+		return $ids_by_type;
+	}
+
+	/**
+	 * Reads the amounts of an order's items, grouped by item type and sorted, so two orders built from the same cart compare equal.
+	 *
+	 * @param int $order_id The order ID.
+	 * @return array<string, string[]>
+	 */
+	private function get_order_item_amounts_by_type( int $order_id ): array {
+		$order           = wc_get_order( $order_id );
+		$amounts_by_type = array();
+		foreach ( $order instanceof WC_Order ? $order->get_items( array( 'line_item', 'shipping', 'fee', 'coupon', 'tax' ) ) : array() as $item ) {
+			if ( $item instanceof WC_Order_Item_Product ) {
+				$values = array( $item->get_product_id(), $item->get_quantity(), $item->get_subtotal(), $item->get_total(), $item->get_subtotal_tax(), $item->get_total_tax(), $item->get_taxes() );
+			} elseif ( $item instanceof WC_Order_Item_Shipping ) {
+				$values = array( $item->get_method_id(), $item->get_total(), $item->get_total_tax(), $item->get_taxes() );
+			} elseif ( $item instanceof WC_Order_Item_Fee ) {
+				$values = array( $item->get_name(), $item->get_total(), $item->get_total_tax(), $item->get_taxes() );
+			} elseif ( $item instanceof WC_Order_Item_Coupon ) {
+				$values = array( $item->get_code(), $item->get_discount(), $item->get_discount_tax() );
+			} elseif ( $item instanceof WC_Order_Item_Tax ) {
+				$values = array( $item->get_rate_id(), $item->get_tax_total(), $item->get_shipping_tax_total() );
+			} else {
+				continue;
+			}
+			array_walk_recursive(
+				$values,
+				function ( &$value ) {
+					$value = is_numeric( $value ) ? (string) wc_format_decimal( $value ) : (string) $value;
+				}
+			);
+			$amounts_by_type[ $item->get_type() ][] = (string) wp_json_encode( $values );
+		}
+		ksort( $amounts_by_type );
+
+		return array_map(
+			function ( array $amounts ): array {
+				sort( $amounts );
+				return $amounts;
+			},
+			$amounts_by_type
+		);
+	}
+
+	/**
+	 * Reads an order's persisted item names, keyed by item ID and grouped by item type.
+	 *
+	 * @param int $order_id The order ID.
+	 * @return array<string, array<int, string>>
+	 */
+	private function get_order_item_names_by_id( int $order_id ): array {
+		global $wpdb;
+
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT order_item_id, order_item_name, order_item_type FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d ORDER BY order_item_id",
+				$order_id
+			)
+		);
+
+		$names_by_type = array();
+		foreach ( $rows as $row ) {
+			$names_by_type[ $row->order_item_type ][ (int) $row->order_item_id ] = $row->order_item_name;
+		}
+
+		return $names_by_type;
 	}
 
 	/**
