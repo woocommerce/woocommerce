@@ -1383,7 +1383,7 @@ class WC_AJAX {
 				// and round them as the order subtotal does.
 				$line_totals = array();
 				foreach ( $order->get_items() as $item ) {
-					if ( $item instanceof WC_Order_Item_Product ) {
+					if ( is_callable( array( $item, 'get_total' ) ) ) {
 						$line_totals[] = wc_add_number_precision( (float) $item->get_total( 'edit' ), false );
 					}
 				}
