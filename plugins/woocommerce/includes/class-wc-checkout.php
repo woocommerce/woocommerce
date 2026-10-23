@@ -635,19 +635,23 @@ class WC_Checkout {
 	}
 
 	/**
-	 * Hashes each cart section that creates an order item type, using the Store API's cart hashes. Line items hash the
-	 * cart's contents instead of the filterable cart hash, so a filter that leaves out quantities or amounts doesn't hide
-	 * a change to them.
+	 * Hashes each cart section that creates an order item type, using the Store API's cart hashes for fees, taxes and
+	 * coupons. Line items hash the cart's contents instead of the filterable cart hash, and shipping hashes the filtered
+	 * rate values that create_order_shipping_lines() copies, so filters can't hide a change to either.
 	 *
 	 * @return array<string, string> Hashes keyed by order item type.
 	 */
 	private function get_cart_section_hashes(): array {
-		$hashes = ( new CartController() )->get_cart_hashes();
+		$hashes         = ( new CartController() )->get_cart_hashes();
+		$shipping_rates = array_map(
+			fn( $rate ) => $rate instanceof WC_Shipping_Rate ? array( $rate->get_id(), $rate->get_label(), $rate->get_cost(), $rate->get_taxes(), $rate->get_meta_data() ) : $rate,
+			(array) WC()->cart->get_shipping_methods()
+		);
 
 		return array(
 			OrderItemType::LINE_ITEM => md5( (string) wp_json_encode( WC()->cart->get_cart_for_session() ) ),
 			OrderItemType::FEE       => $hashes['fees'],
-			OrderItemType::SHIPPING  => $hashes['shipping'],
+			OrderItemType::SHIPPING  => md5( (string) wp_json_encode( array( $shipping_rates, WC()->session->get( 'chosen_shipping_methods' ) ) ) ),
 			OrderItemType::TAX       => $hashes['taxes'],
 			OrderItemType::COUPON    => $hashes['coupons'],
 		);
