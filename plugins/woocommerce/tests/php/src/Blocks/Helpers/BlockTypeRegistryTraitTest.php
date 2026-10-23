@@ -23,6 +23,7 @@ class BlockTypeRegistryTraitTest extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		try {
+			// Restore before removing the synthetic originals, since @after runs after tearDown().
 			$this->restore_block_types();
 			$registry = \WP_Block_Type_Registry::get_instance();
 			foreach ( self::TEST_BLOCK_NAMES as $block_name ) {
@@ -90,8 +91,35 @@ class BlockTypeRegistryTraitTest extends WC_Unit_Test_Case {
 	 * @testdox A callback that registers a different name than the one replaced is rejected.
 	 */
 	public function test_a_callback_that_registers_another_name_is_rejected(): void {
+		$original = register_block_type( 'woocommerce-test/swapped', array( 'title' => 'Original' ) );
 		$this->expectException( \LogicException::class );
 
-		$this->replace_block_type( 'woocommerce-test/swapped', static fn () => register_block_type( 'woocommerce-test/other' ) );
+		try {
+			$this->replace_block_type( 'woocommerce-test/swapped', static fn () => register_block_type( 'woocommerce-test/other' ) );
+		} finally {
+			$this->restore_block_types();
+			$this->assertSame( $original, \WP_Block_Type_Registry::get_instance()->get_registered( 'woocommerce-test/swapped' ), 'The original block type should be restored after a rejected callback.' );
+		}
+	}
+
+	/**
+	 * @testdox PHPUnit restores the original block type without an explicit teardown call.
+	 */
+	public function test_phpunit_restores_block_types_automatically(): void {
+		$original = register_block_type( 'woocommerce-test/swapped', array( 'title' => 'Original' ) );
+		$test     = new class( 'test_replace_block_type' ) extends \PHPUnit\Framework\TestCase {
+			use BlockTypeRegistryTrait;
+
+			/**
+			 * @testdox A block type can be replaced during a test.
+			 */
+			public function test_replace_block_type(): void {
+				$this->replace_block_type( 'woocommerce-test/swapped', static fn () => register_block_type( 'woocommerce-test/swapped' ) );
+			}
+		};
+
+		$test->runBare();
+
+		$this->assertSame( $original, \WP_Block_Type_Registry::get_instance()->get_registered( 'woocommerce-test/swapped' ), 'PHPUnit should restore the original block type after the test.' );
 	}
 }

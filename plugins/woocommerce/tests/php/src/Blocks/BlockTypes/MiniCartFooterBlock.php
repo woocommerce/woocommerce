@@ -44,7 +44,6 @@ class MiniCartFooterBlock extends \WP_UnitTestCase {
 	 * Tear down test.
 	 */
 	public function tearDown(): void {
-		$this->restore_block_types();
 		unset( $this->block );
 		parent::tearDown();
 	}

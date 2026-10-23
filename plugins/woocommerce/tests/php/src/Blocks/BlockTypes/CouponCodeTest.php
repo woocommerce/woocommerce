@@ -42,17 +42,6 @@ class CouponCodeTest extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Tear down test fixtures.
-	 */
-	public function tearDown(): void {
-		try {
-			$this->restore_block_types();
-		} finally {
-			parent::tearDown();
-		}
-	}
-
-	/**
 	 * Test that render returns empty string when no coupon code is provided.
 	 */
 	public function test_render_returns_empty_when_no_coupon_code(): void {

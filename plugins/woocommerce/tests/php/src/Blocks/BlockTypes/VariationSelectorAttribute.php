@@ -31,17 +31,6 @@ class VariationSelectorAttribute extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Put back the block types setUp() replaced.
-	 */
-	public function tearDown(): void {
-		try {
-			$this->restore_block_types();
-		} finally {
-			parent::tearDown();
-		}
-	}
-
-	/**
 	 * Data provider for legacy Attribute Options block replacement styles.
 	 *
 	 * @return array<string, array{0: array<string, string>, 1: string, 2: string}>

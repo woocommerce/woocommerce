@@ -74,7 +74,6 @@ class ProductPageIntegrationTest extends WC_Unit_Test_Case {
 				$_SERVER['REQUEST_URI'] = $this->request_uri_at_setup;
 			}
 			$this->restore_stock_notifications_feature_option();
-			$this->restore_block_types();
 		} finally {
 			parent::tearDown();
 		}

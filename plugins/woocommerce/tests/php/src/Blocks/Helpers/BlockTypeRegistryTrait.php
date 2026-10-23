@@ -7,8 +7,8 @@ namespace Automattic\WooCommerce\Tests\Blocks\Helpers;
  * Registers block types for a test and puts the block type registry back as the test found it.
  *
  * Constructing a block class registers its block type, and WP_Block_Type_Registry outlives a
- * test, so a type registered without cleanup changes what every later test sees. Call
- * restore_block_types() from tearDown().
+ * test, so a type registered without cleanup changes what every later test sees.
+ * PHPUnit restores the replaced types automatically after each test.
  */
 trait BlockTypeRegistryTrait {
 
@@ -60,6 +60,8 @@ trait BlockTypeRegistryTrait {
 
 	/**
 	 * Put back the block types replaced during the test, and remove the ones that were new.
+	 *
+	 * @after
 	 */
 	protected function restore_block_types(): void {
 		$registry = \WP_Block_Type_Registry::get_instance();

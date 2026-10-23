@@ -141,7 +141,6 @@ class MiniCart extends \WP_UnitTestCase {
 		parent::tearDown();
 		WC()->cart->empty_cart();
 		remove_filter( 'woocommerce_is_rest_api_request', '__return_false', 1 );
-		$this->restore_block_types();
 	}
 
 	/**

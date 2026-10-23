@@ -29,17 +29,6 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Put back the block types setUp() replaced.
-	 */
-	protected function tearDown(): void {
-		try {
-			$this->restore_block_types();
-		} finally {
-			parent::tearDown();
-		}
-	}
-
-	/**
 	 * Print custom product type add to cart markup.
 	 *
 	 * Outputs the HTML markup for the custom product type add to cart form.
