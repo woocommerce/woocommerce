@@ -105,8 +105,9 @@ if ( $show_downloads ) {
 			foreach ( $fulfillments as $index => $fulfillment ) {
 				$pickup_location = FulfillmentUtils::get_fulfillment_pickup_location( $fulfillment );
 				$is_ready        = FulfillmentUtils::STATUS_READY_FOR_PICKUP === $fulfillment->get_status();
-				// Skip if the fulfillment is not fulfilled, unless it is waiting for the customer to pick it up.
-				if ( ! $fulfillment->get_is_fulfilled() && ! $is_ready ) {
+				$is_preparing    = FulfillmentUtils::STATUS_PREPARING === $fulfillment->get_status();
+				// Skip if the fulfillment is not fulfilled, unless it is being prepared or waiting for the customer to pick it up.
+				if ( ! $fulfillment->get_is_fulfilled() && ! $is_ready && ! $is_preparing ) {
 					continue;
 				}
 				$fulfillment_items = FulfillmentUtils::get_fulfillment_items( $order, $fulfillment );
@@ -116,7 +117,9 @@ if ( $show_downloads ) {
 			<tr>
 				<th colspan="2" class="woocommerce-table__product-name product-name">
 					<?php
-					if ( $is_ready && null !== $pickup_location ) {
+					if ( $is_preparing ) {
+						esc_html_e( 'Preparing', 'woocommerce' );
+					} elseif ( $is_ready && null !== $pickup_location ) {
 						/* translators: %s: pickup location name */
 						printf( esc_html__( 'Ready for pickup at %s', 'woocommerce' ), esc_html( $pickup_location['name'] ) );
 					} elseif ( $is_ready ) {

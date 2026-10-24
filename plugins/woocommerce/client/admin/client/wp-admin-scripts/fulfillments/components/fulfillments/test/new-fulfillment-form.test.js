@@ -27,6 +27,9 @@ jest.mock( '../../action-buttons/pickup-buttons', () => ( {
 		<button data-testid="picked-up-button">Mark picked up</button>
 	),
 } ) );
+jest.mock( '../../action-buttons/preparing-button', () => () => (
+	<button data-testid="start-preparing-button">Start preparing</button>
+) );
 jest.mock( '../../shipment-form', () => () => (
 	<div data-testid="shipment-form" />
 ) );
@@ -103,6 +106,9 @@ describe( 'NewFulfillmentForm', () => {
 		).toBeInTheDocument();
 		expect( screen.getByTestId( 'shipment-form' ) ).toBeInTheDocument();
 		expect(
+			screen.getByTestId( 'start-preparing-button' )
+		).toBeInTheDocument();
+		expect(
 			screen.queryByTestId( 'ready-for-pickup-button' )
 		).not.toBeInTheDocument();
 	} );
@@ -136,6 +142,9 @@ describe( 'NewFulfillmentForm', () => {
 			screen.getByTestId( 'ready-for-pickup-button' )
 		).toBeInTheDocument();
 		expect( screen.getByTestId( 'picked-up-button' ) ).toBeInTheDocument();
+		expect(
+			screen.getByTestId( 'start-preparing-button' )
+		).toBeInTheDocument();
 		expect(
 			screen.queryByTestId( 'fulfill-items-button' )
 		).not.toBeInTheDocument();

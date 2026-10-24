@@ -15,6 +15,13 @@ use WC_Order_Item_Shipping;
 class FulfillmentUtils {
 
 	/**
+	 * Fulfillment status: the merchant has started work on the items. Not yet fulfilled.
+	 *
+	 * @since 11.3.0
+	 */
+	public const STATUS_PREPARING = 'preparing';
+
+	/**
 	 * Fulfillment status: the items are waiting at the pickup location. Not yet fulfilled.
 	 *
 	 * @since 11.3.0
@@ -181,6 +188,9 @@ class FulfillmentUtils {
 				$status = 'partially_fulfilled';
 			} elseif ( empty( $pending_items ) && self::all_fulfillments_have_status( $fulfillments, self::STATUS_READY_FOR_PICKUP ) ) {
 				$status = self::STATUS_READY_FOR_PICKUP;
+			} elseif ( self::any_fulfillment_has_status( $fulfillments, self::STATUS_PREPARING ) ) {
+				// Work has started on at least one part of the order and nothing has been handed over yet.
+				$status = self::STATUS_PREPARING;
 			} else {
 				$status = 'unfulfilled';
 			}
@@ -220,6 +230,121 @@ class FulfillmentUtils {
 			}
 		}
 		return ! empty( $fulfillments );
+	}
+
+	/**
+	 * Whether at least one fulfillment in the list has the given status.
+	 *
+	 * @param array  $fulfillments An array of fulfillments.
+	 * @param string $status       The status to look for.
+	 *
+	 * @return bool
+	 */
+	private static function any_fulfillment_has_status( array $fulfillments, string $status ): bool {
+		foreach ( $fulfillments as $fulfillment ) {
+			if ( $fulfillment instanceof Fulfillment && $status === $fulfillment->get_status() ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Get the customer-facing progress steps for an order: Received, Preparing, then Ready for pickup
+	 * or Shipped, then Picked up or Delivered.
+	 *
+	 * Each step carries a `state` of `done`, `current` or `upcoming`. The steps come from the order's
+	 * fulfillment status and the order status alone, so an integration that only changes order status
+	 * still moves the strip to the end when it completes the order.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param WC_Order $order        The order object.
+	 * @param array    $fulfillments The order's fulfillments.
+	 *
+	 * @return array<int,array{key:string,label:string,state:string}> The steps, or an empty array when the order is not in a state that is being fulfilled.
+	 */
+	public static function get_order_progress_steps( WC_Order $order, array $fulfillments = array() ): array {
+		/**
+		 * Order statuses for which the customer sees the fulfillment progress steps.
+		 *
+		 * @since 11.3.0
+		 *
+		 * @param string[] $statuses Order statuses, without the `wc-` prefix.
+		 * @param WC_Order $order    The order object.
+		 */
+		$shown_for = apply_filters( 'woocommerce_fulfillment_progress_order_statuses', array( 'processing', 'completed' ), $order );
+		if ( ! $order->has_status( $shown_for ) ) {
+			return array();
+		}
+
+		$is_pickup = null !== self::get_pickup_shipping_line( $order );
+		$steps     = array(
+			array(
+				'key'   => 'received',
+				'label' => __( 'Order received', 'woocommerce' ),
+			),
+			array(
+				'key'   => self::STATUS_PREPARING,
+				'label' => __( 'Preparing', 'woocommerce' ),
+			),
+			$is_pickup ? array(
+				'key'   => self::STATUS_READY_FOR_PICKUP,
+				'label' => __( 'Ready for pickup', 'woocommerce' ),
+			) : array(
+				'key'   => 'shipped',
+				'label' => __( 'Shipped', 'woocommerce' ),
+			),
+			$is_pickup ? array(
+				'key'   => self::STATUS_PICKED_UP,
+				'label' => __( 'Picked up', 'woocommerce' ),
+			) : array(
+				'key'   => 'delivered',
+				'label' => __( 'Delivered', 'woocommerce' ),
+			),
+		);
+
+		$fulfillment_status = self::calculate_order_fulfillment_status( $order, $fulfillments );
+		$complete           = $order->has_status( 'completed' ) || self::STATUS_PICKED_UP === $fulfillment_status;
+		switch ( $fulfillment_status ) {
+			case self::STATUS_PREPARING:
+				$reached = 1;
+				break;
+			case self::STATUS_READY_FOR_PICKUP:
+			case 'partially_fulfilled':
+			case 'fulfilled':
+				$reached = 2;
+				break;
+			case self::STATUS_PICKED_UP:
+				$reached = 3;
+				break;
+			default:
+				$reached = 0;
+		}
+		if ( $complete ) {
+			$reached = 3;
+		}
+
+		foreach ( $steps as $index => $step ) {
+			if ( $index < $reached || ( $index === $reached && $complete ) ) {
+				$steps[ $index ]['state'] = 'done';
+			} elseif ( $index === $reached ) {
+				$steps[ $index ]['state'] = 'current';
+			} else {
+				$steps[ $index ]['state'] = 'upcoming';
+			}
+		}
+
+		/**
+		 * Filter the customer-facing fulfillment progress steps for an order.
+		 *
+		 * @since 11.3.0
+		 *
+		 * @param array    $steps        The steps, each with `key`, `label` and `state` ( done, current, upcoming ).
+		 * @param WC_Order $order        The order object.
+		 * @param array    $fulfillments The order's fulfillments.
+		 */
+		return apply_filters( 'woocommerce_fulfillment_progress_steps', $steps, $order, $fulfillments );
 	}
 
 	/**
@@ -583,6 +708,11 @@ class FulfillmentUtils {
 				'background_color' => '#C6E1C6',
 				'text_color'       => '#13550F',
 			),
+			self::STATUS_PREPARING        => array(
+				'label'            => __( 'Preparing', 'woocommerce' ),
+				'background_color' => '#C8D7E1',
+				'text_color'       => '#003D66',
+			),
 			self::STATUS_READY_FOR_PICKUP => array(
 				'label'            => __( 'Ready for pickup', 'woocommerce' ),
 				'background_color' => '#F8DDA7',
@@ -633,6 +763,12 @@ class FulfillmentUtils {
 				'is_fulfilled'     => false,
 				'background_color' => '#FBE5E5',
 				'text_color'       => '#CC1818',
+			),
+			self::STATUS_PREPARING        => array(
+				'label'            => __( 'Preparing', 'woocommerce' ),
+				'is_fulfilled'     => false,
+				'background_color' => '#C8D7E1',
+				'text_color'       => '#003D66',
 			),
 			self::STATUS_READY_FOR_PICKUP => array(
 				'label'            => __( 'Ready for pickup', 'woocommerce' ),

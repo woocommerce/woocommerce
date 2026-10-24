@@ -14,3 +14,4 @@ export const PICKUP_ADDRESS_META_KEY = '_pickup_address';
 export const PICKUP_DETAILS_META_KEY = '_pickup_details';
 export const FULFILLMENT_STATUS_READY_FOR_PICKUP = 'ready_for_pickup';
 export const FULFILLMENT_STATUS_PICKED_UP = 'picked_up';
+export const FULFILLMENT_STATUS_PREPARING = 'preparing';

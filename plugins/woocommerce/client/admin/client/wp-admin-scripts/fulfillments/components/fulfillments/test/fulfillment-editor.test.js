@@ -48,6 +48,9 @@ jest.mock( '../../action-buttons/pickup-buttons', () => ( {
 		<button data-testid="picked-up-button">Mark picked up</button>
 	),
 } ) );
+jest.mock( '../../action-buttons/preparing-button', () => () => (
+	<button data-testid="start-preparing-button">Start preparing</button>
+) );
 jest.mock( '../item-selector', () => () => (
 	<div data-testid="item-selector" />
 ) );
@@ -366,6 +369,44 @@ describe( 'FulfillmentEditor', () => {
 			).not.toBeInTheDocument();
 		} );
 
+		it( 'offers Start preparing on a draft but not once it is ready', () => {
+			const { unmount } = render(
+				<FulfillmentEditor { ...pickupProps( 'unfulfilled', false ) } />
+			);
+			expect(
+				screen.getByTestId( 'start-preparing-button' )
+			).toBeInTheDocument();
+			unmount();
+
+			render(
+				<FulfillmentEditor
+					{ ...pickupProps( 'ready_for_pickup', false ) }
+				/>
+			);
+			expect(
+				screen.queryByTestId( 'start-preparing-button' )
+			).not.toBeInTheDocument();
+		} );
+
+		it( 'offers Ready for pickup and Mark picked up while preparing, without Start preparing', () => {
+			render(
+				<FulfillmentEditor { ...pickupProps( 'preparing', false ) } />
+			);
+
+			expect(
+				screen.queryByTestId( 'start-preparing-button' )
+			).not.toBeInTheDocument();
+			expect(
+				screen.getByTestId( 'ready-for-pickup-button' )
+			).toBeInTheDocument();
+			expect(
+				screen.getByTestId( 'picked-up-button' )
+			).toBeInTheDocument();
+			expect(
+				screen.getByTestId( 'fulfillment-customer-notification-form' )
+			).toBeInTheDocument();
+		} );
+
 		it( 'offers no pickup steps once the items are picked up', () => {
 			render(
 				<FulfillmentEditor { ...pickupProps( 'picked_up', true ) } />
@@ -379,6 +420,60 @@ describe( 'FulfillmentEditor', () => {
 			).not.toBeInTheDocument();
 			expect(
 				screen.queryByTestId( 'picked-up-button' )
+			).not.toBeInTheDocument();
+		} );
+	} );
+
+	describe( 'preparing a shipment', () => {
+		const shippingProps = ( status, isFulfilled ) => {
+			const fulfillment = {
+				...mockProps.fulfillment,
+				status,
+				is_fulfilled: isFulfilled,
+			};
+			return {
+				...mockProps,
+				expanded: true,
+				fulfillment,
+				fulfillments: [ fulfillment ],
+			};
+		};
+
+		it( 'offers Start preparing and Fulfill items on a draft', () => {
+			render(
+				<FulfillmentEditor
+					{ ...shippingProps( 'unfulfilled', false ) }
+				/>
+			);
+			expect(
+				screen.getByTestId( 'start-preparing-button' )
+			).toBeInTheDocument();
+			expect(
+				screen.getByTestId( 'fulfill-items-button' )
+			).toBeInTheDocument();
+		} );
+
+		it( 'offers only Fulfill items while preparing', () => {
+			render(
+				<FulfillmentEditor { ...shippingProps( 'preparing', false ) } />
+			);
+			expect(
+				screen.queryByTestId( 'start-preparing-button' )
+			).not.toBeInTheDocument();
+			expect(
+				screen.getByTestId( 'fulfill-items-button' )
+			).toBeInTheDocument();
+		} );
+
+		it( 'offers neither once fulfilled', () => {
+			render(
+				<FulfillmentEditor { ...shippingProps( 'fulfilled', true ) } />
+			);
+			expect(
+				screen.queryByTestId( 'start-preparing-button' )
+			).not.toBeInTheDocument();
+			expect(
+				screen.queryByTestId( 'fulfill-items-button' )
 			).not.toBeInTheDocument();
 		} );
 	} );

@@ -53,7 +53,8 @@ class FulfillmentsRenderer {
 		add_action( 'admin_enqueue_scripts', array( $this, 'load_components' ) );
 		// Hook into the order details page to render the fulfillment badges.
 		add_action( 'woocommerce_admin_order_data_header_right', array( $this, 'render_order_details_badges' ) );
-		// Hook into the order details before order table to render the fulfillment customer details.
+		// Hook into the order details before order table to render the progress steps, then the fulfillment customer details.
+		add_action( 'woocommerce_order_details_before_order_table', array( $this, 'render_fulfillment_progress' ), 5 );
 		add_action( 'woocommerce_order_details_before_order_table', array( $this, 'render_fulfillment_customer_details' ) );
 		// Initialize the renderer for bulk actions.
 		add_action( 'admin_init', array( $this, 'init_admin_hooks' ) );
@@ -328,6 +329,28 @@ class FulfillmentsRenderer {
 		$fulfillments       = $this->maybe_read_fulfillments( $order );
 		$fulfillment_status = FulfillmentUtils::get_order_fulfillment_status_text( $order, $fulfillments );
 		return sprintf( '%s %s', $order_status, $fulfillment_status );
+	}
+
+	/**
+	 * Render the customer-facing progress steps ( Received, Preparing, Ready for pickup or Shipped,
+	 * Picked up or Delivered ) above the order table on the order received and My Account order pages.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param WC_Order $order The order object.
+	 */
+	public function render_fulfillment_progress( WC_Order $order ): void {
+		$steps = FulfillmentUtils::get_order_progress_steps( $order, $this->maybe_read_fulfillments( $order ) );
+		if ( empty( $steps ) ) {
+			return;
+		}
+		wc_get_template(
+			'order/order-fulfillment-progress.php',
+			array(
+				'order' => $order,
+				'steps' => $steps,
+			)
+		);
 	}
 
 	/**

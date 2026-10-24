@@ -21,6 +21,7 @@ import {
 	PickedUpButton,
 	ReadyForPickupButton,
 } from '../action-buttons/pickup-buttons';
+import StartPreparingButton from '../action-buttons/preparing-button';
 import ItemSelector from './item-selector';
 import { useFulfillmentDrawerContext } from '../../context/drawer-context';
 import ErrorLabel from '../user-interface/error-label';
@@ -152,6 +153,9 @@ const NewFulfillmentForm: React.FC = () => {
 										<SaveAsDraftButton
 											setError={ setError }
 										/>
+										<StartPreparingButton
+											setError={ setError }
+										/>
 										<PickedUpButton
 											variant="secondary"
 											setError={ setError }
@@ -167,6 +171,9 @@ const NewFulfillmentForm: React.FC = () => {
 									<CustomerNotificationBox type="fulfill" />
 									<div className="woocommerce-fulfillment-item-actions">
 										<SaveAsDraftButton
+											setError={ setError }
+										/>
+										<StartPreparingButton
 											setError={ setError }
 										/>
 										<FulfillItemsButton

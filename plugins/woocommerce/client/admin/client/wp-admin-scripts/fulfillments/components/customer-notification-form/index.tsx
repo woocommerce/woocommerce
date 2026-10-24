@@ -37,11 +37,11 @@ export default function CustomerNotificationBox( {
 	const contentStrings = useMemo( () => {
 		return {
 			fulfill: __(
-				'Automatically send an email to the customer when the selected items are fulfilled.',
+				'Automatically send an email to the customer when you start preparing the selected items or fulfill them.',
 				'woocommerce'
 			),
 			pickup: __(
-				'Automatically send an email to the customer when the selected items are ready for pickup.',
+				'Automatically send an email to the customer when you start preparing the selected items or they are ready for pickup.',
 				'woocommerce'
 			),
 			remove: __(

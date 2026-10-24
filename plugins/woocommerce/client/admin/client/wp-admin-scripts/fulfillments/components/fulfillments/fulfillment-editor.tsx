@@ -38,7 +38,11 @@ import {
 	PickedUpButton,
 	ReadyForPickupButton,
 } from '../action-buttons/pickup-buttons';
-import { FULFILLMENT_STATUS_READY_FOR_PICKUP } from '../../data/constants';
+import StartPreparingButton from '../action-buttons/preparing-button';
+import {
+	FULFILLMENT_STATUS_PREPARING,
+	FULFILLMENT_STATUS_READY_FOR_PICKUP,
+} from '../../data/constants';
 import LockLabel from '../user-interface/lock-label';
 
 interface FulfillmentEditorProps {
@@ -76,6 +80,10 @@ export default function FulfillmentEditor( {
 	const pickupLocation = getFulfillmentPickupLocation( fulfillment );
 	const isReadyForPickup =
 		fulfillment.status === FULFILLMENT_STATUS_READY_FOR_PICKUP;
+	const isPreparing = fulfillment.status === FULFILLMENT_STATUS_PREPARING;
+	// A draft can still be started; a fulfillment that is preparing, ready or fulfilled has moved past that step.
+	const canStartPreparing =
+		! fulfillment.is_fulfilled && ! isPreparing && ! isReadyForPickup;
 
 	// Reset error when order changes
 	useEffect( () => {
@@ -236,6 +244,11 @@ export default function FulfillmentEditor( {
 													setIsEditing( true );
 												} }
 											/>
+											{ canStartPreparing && (
+												<StartPreparingButton
+													setError={ setError }
+												/>
+											) }
 											{ ! fulfillment.is_fulfilled &&
 												! pickupLocation && (
 													<FulfillItemsButton

@@ -39,6 +39,8 @@ if ( null === $fulfillment->get_date_deleted() ) {
 		if ( '' !== $pickup_location['details'] ) {
 			echo wp_kses_post( wpautop( $pickup_location['details'] ) );
 		}
+	} elseif ( Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentUtils::STATUS_PREPARING === $fulfillment->get_status() ) {
+		echo '<p>' . esc_html__( 'We will send tracking details once these items ship.', 'woocommerce' ) . '</p>';
 	} elseif ( ! $tracking_number && ! $tracking_url && ! $shipment_provider ) {
 		echo '<p>' . esc_html__( 'No tracking information available for this fulfillment at the moment.', 'woocommerce' ) . '</p>';
 	} else {
