@@ -1378,31 +1378,45 @@ function wc_array_cartesian( $input ) {
 /**
  * Run a MySQL transaction query, if supported.
  *
+ * Calls nest. The first `start` opens a transaction, and a `start` inside it
+ * sets a savepoint. The matching `commit` or `rollback` releases or rolls back
+ * to that savepoint, so an inner failure leaves the outer transaction open.
+ * The outermost `commit` or `rollback` ends the transaction.
+ *
  * @since 2.5.0
+ * @since 11.4.0 Nested calls use savepoints.
  * @param string $type Types: start (default), commit, rollback.
  * @param bool   $force use of transactions.
  * @return void
  */
 function wc_transaction_query( $type = 'start', $force = false ) {
 	global $wpdb;
+	static $depth = 0;
 
 	$wpdb->hide_errors();
 
 	wc_maybe_define_constant( 'WC_USE_TRANSACTIONS', true );
 
-	if ( Constants::is_true( 'WC_USE_TRANSACTIONS' ) || $force ) {
-		switch ( $type ) {
-			case 'commit':
-				$wpdb->query( 'COMMIT' );
-				break;
-			case 'rollback':
-				$wpdb->query( 'ROLLBACK' );
-				break;
-			default:
-				$wpdb->query( 'START TRANSACTION' );
-				break;
-		}
+	if ( ! Constants::is_true( 'WC_USE_TRANSACTIONS' ) && ! $force ) {
+		return;
 	}
+
+	switch ( $type ) {
+		case 'commit':
+			$sql   = $depth > 1 ? 'RELEASE SAVEPOINT wc_' . ( $depth - 1 ) : 'COMMIT';
+			$depth = max( 0, $depth - 1 );
+			break;
+		case 'rollback':
+			$sql   = $depth > 1 ? 'ROLLBACK TO SAVEPOINT wc_' . ( $depth - 1 ) : 'ROLLBACK';
+			$depth = max( 0, $depth - 1 );
+			break;
+		default:
+			$sql = $depth > 0 ? 'SAVEPOINT wc_' . $depth : 'START TRANSACTION';
+			++$depth;
+			break;
+	}
+
+	$wpdb->query( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- The only variable part is an integer depth.
 }
 
 /**

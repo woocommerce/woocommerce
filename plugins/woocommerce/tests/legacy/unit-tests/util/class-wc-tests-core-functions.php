@@ -901,13 +901,14 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 		$this->assertEquals( '0', $col[0] );
 
 		// The commits above made the row permanent, so the cleanup has to be committed as well.
+		// A direct COMMIT, because wc_transaction_query() counts its nesting and this commit has no start.
 		$wpdb->delete(
 			$wpdb->prefix . 'options',
 			array(
 				'option_name' => 'transaction_test',
 			)
 		);
-		wc_transaction_query( 'commit', true );
+		$wpdb->query( 'COMMIT' );
 	}
 
 	/**
