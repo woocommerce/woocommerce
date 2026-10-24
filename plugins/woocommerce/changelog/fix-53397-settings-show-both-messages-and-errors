@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Allow both success messages and errors to be displayed simultaneously on WooCommerce settings pages.
