@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Use the existing enum constants instead of raw status strings in the CLI migrator, the product importer, and the order milestone query.

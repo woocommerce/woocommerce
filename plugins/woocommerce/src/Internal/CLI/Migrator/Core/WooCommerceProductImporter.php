@@ -15,6 +15,7 @@ use WC_Product_Variable;
 use WC_Product_Variation;
 use WP_Error;
 use Exception;
+use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -817,7 +818,7 @@ class WooCommerceProductImporter {
 
 			$variation->set_manage_stock( $var_data['manage_stock'] ?? false );
 			$variation->set_stock_quantity( $var_data['stock_quantity'] ?? null );
-			$variation->set_stock_status( $var_data['stock_status'] ?? 'instock' );
+			$variation->set_stock_status( $var_data['stock_status'] ?? ProductStockStatus::IN_STOCK );
 
 			// Only touch weight/dimensions when the mapper emits the key (see the product block above):
 			// an absent key on a re-run must preserve the existing value rather than clear it.

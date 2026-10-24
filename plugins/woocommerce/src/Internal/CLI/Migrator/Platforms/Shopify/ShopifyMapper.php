@@ -9,6 +9,8 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\CLI\Migrator\Platforms\Shopify;
 
+use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\WeightUnit;
 use Automattic\WooCommerce\Internal\CLI\Migrator\Interfaces\PlatformMapperInterface;
 
@@ -424,7 +426,7 @@ class ShopifyMapper implements PlatformMapperInterface {
 				$simple_data['manage_stock']   = $manage_stock;
 				$stock_quantity                = $variant_node->inventoryQuantity ?? 0; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
 				$allow_oversell                = $manage_stock && 'CONTINUE' === $variant_node->inventoryPolicy; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
-				$simple_data['stock_status']   = ( $stock_quantity > 0 || $allow_oversell ) ? 'instock' : 'outofstock';
+				$simple_data['stock_status']   = ( $stock_quantity > 0 || $allow_oversell ) ? ProductStockStatus::IN_STOCK : ProductStockStatus::OUT_OF_STOCK;
 				$simple_data['stock_quantity'] = $stock_quantity;
 			}
 
@@ -448,7 +450,7 @@ class ShopifyMapper implements PlatformMapperInterface {
 			}
 
 			if ( property_exists( $variant_node, 'taxable' ) ) {
-				$simple_data['tax_status'] = $variant_node->taxable ? 'taxable' : 'none';
+				$simple_data['tax_status'] = $variant_node->taxable ? ProductTaxStatus::TAXABLE : ProductTaxStatus::NONE;
 			}
 
 			$simple_data['original_variant_id'] = ! empty( $variant_node->id ) ? basename( $variant_node->id ) : null;
@@ -459,11 +461,11 @@ class ShopifyMapper implements PlatformMapperInterface {
 			$simple_data['sale_price']     = null;
 			$simple_data['stock_quantity'] = null;
 			$simple_data['manage_stock']   = false;
-			$simple_data['stock_status']   = 'instock';
+			$simple_data['stock_status']   = ProductStockStatus::IN_STOCK;
 			$simple_data['weight']         = null;
 
 			if ( property_exists( $shopify_product, 'taxable' ) ) {
-				$simple_data['tax_status'] = $shopify_product->taxable ? 'taxable' : 'none';
+				$simple_data['tax_status'] = $shopify_product->taxable ? ProductTaxStatus::TAXABLE : ProductTaxStatus::NONE;
 			}
 
 			$simple_data['original_variant_id'] = null;
@@ -523,7 +525,7 @@ class ShopifyMapper implements PlatformMapperInterface {
 					$variation_data['manage_stock']   = $manage_stock;
 					$stock_quantity                   = $variant_node->inventoryQuantity ?? 0; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
 					$allow_oversell                   = $manage_stock && 'CONTINUE' === $variant_node->inventoryPolicy; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
-					$variation_data['stock_status']   = ( $stock_quantity > 0 || $allow_oversell ) ? 'instock' : 'outofstock';
+					$variation_data['stock_status']   = ( $stock_quantity > 0 || $allow_oversell ) ? ProductStockStatus::IN_STOCK : ProductStockStatus::OUT_OF_STOCK;
 					$variation_data['stock_quantity'] = $stock_quantity;
 				}
 
@@ -547,7 +549,7 @@ class ShopifyMapper implements PlatformMapperInterface {
 				}
 
 				if ( property_exists( $variant_node, 'taxable' ) ) {
-					$variation_data['tax_status'] = $variant_node->taxable ? 'taxable' : 'none';
+					$variation_data['tax_status'] = $variant_node->taxable ? ProductTaxStatus::TAXABLE : ProductTaxStatus::NONE;
 				}
 
 				if ( $this->should_process( 'attributes' ) ) {
