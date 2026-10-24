@@ -561,11 +561,6 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 	 * @return string
 	 */
 	public function add_search_criteria_to_wp_query_join( $join ) {
-		// Check if already joined to avoid duplicate joins.
-		if ( strstr( $join, 'wc_product_meta_lookup' ) ) {
-			return $join;
-		}
-
 		// Only join if we need meta table search.
 		if ( ! $this->search_fields_tokens &&
 			! $this->search_sku_arg_value &&
@@ -573,12 +568,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			return $join;
 		}
 
-		global $wpdb;
-
-		$join .= " LEFT JOIN $wpdb->wc_product_meta_lookup wc_product_meta_lookup
-						ON $wpdb->posts.ID = wc_product_meta_lookup.product_id ";
-
-		return $join;
+		return wc_get_container()->get( ProductUtil::class )->append_product_sorting_table_join( $join );
 	}
 
 	/**
