@@ -27,12 +27,14 @@ defined( 'ABSPATH' ) || exit;
  * Only save() saves, inside a database transaction. A WP_Error or an exception
  * from save() rolls back every row it wrote, so an ability that saves more than
  * one object, with pending_objects(), leaves nothing behind when a later save
- * fails. Save hooks run inside the transaction, so a database write that an
- * extension makes from one, such as a table of its own or the parent of the
- * saved object, rolls back with the save. The rollback does not undo what a
- * hook did outside the database, such as an HTTP request, and it does nothing
- * on a table engine without transactions. The other steps must not save, send
- * email or make HTTP requests.
+ * fails. After the last save, still inside the transaction, the
+ * `woocommerce_ability_after_save` action gives extensions one moment to write
+ * what the saved objects imply elsewhere, such as the price range a variable
+ * parent derives from its variations, or a row in a table of the extension. A
+ * refusal there rolls the call back too. The rollback does not undo what a
+ * listener did outside the database, such as an HTTP request, and it does
+ * nothing on a table engine without transactions. The other steps must not
+ * save, send email or make HTTP requests.
  *
  * The API is experimental while the `extensible_abilities` feature exists.
  *
@@ -170,6 +172,9 @@ abstract class ActionableAbility extends \WP_Ability {
 		wc_transaction_query( 'start' );
 		try {
 			$saved = $this->save( $subject );
+			if ( ! is_wp_error( $saved ) && $enabled ) {
+				$saved = $this->after_save( array_column( $objects, 0 ) );
+			}
 		} catch ( \Throwable $e ) {
 			wc_transaction_query( 'rollback' );
 			self::forget_rolled_back_objects( $objects );
@@ -183,6 +188,39 @@ abstract class ActionableAbility extends \WP_Ability {
 		wc_transaction_query( 'commit' );
 
 		return $this->prepare_response( $subject );
+	}
+
+	/**
+	 * Give extensions one moment, after the last save and before the commit,
+	 * to write what the saved objects imply elsewhere.
+	 *
+	 * @param \WC_Data[] $saved The saved objects, the subject first.
+	 * @return \WP_Error|null A WP_Error when a listener refused, and then the call rolls back.
+	 */
+	private function after_save( array $saved ): ?\WP_Error {
+		$ability = $this;
+		return self::run_callback(
+			static function () use ( $saved, $ability ): void {
+				/**
+				 * Fires once per ability call, after every object of the call is
+				 * saved and before the transaction commits. Listeners write what
+				 * the saved objects imply on other objects or tables, such as the
+				 * price range a variable parent derives from its variations, or a
+				 * row in a table of the extension. A WC_Data_Exception refuses the
+				 * call with its code and message, any other exception refuses it
+				 * with a fixed message, and either way every save of the call is
+				 * rolled back. Listeners must not send email or make HTTP requests.
+				 *
+				 * @since 11.4.0
+				 *
+				 * @param \WC_Data[]  $saved   The saved objects, the subject of the ability first.
+				 * @param \WP_Ability $ability The ability that saved them.
+				 */
+				do_action( 'woocommerce_ability_after_save', $saved, $ability );
+			},
+			array(),
+			array( 'hook' => 'woocommerce_ability_after_save' )
+		);
 	}
 
 	/**
