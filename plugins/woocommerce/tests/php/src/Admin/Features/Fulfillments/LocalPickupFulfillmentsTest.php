@@ -211,8 +211,11 @@ class LocalPickupFulfillmentsTest extends WC_REST_Unit_Test_Case {
 		$fulfillment = $this->create_fulfillment( $order, FulfillmentUtils::STATUS_READY_FOR_PICKUP, $this->all_items( $order ), true );
 
 		$mailer = WC()->mailer();
-		// WC_Emails only hooks the fulfillment details when the feature was on as it was built; an
-		// earlier test may have built it with the feature off.
+		// WC_Emails only registers the fulfillment emails and hooks when the feature was on as it was
+		// built; an earlier test may have built it with the feature off. Rebuild it now that the feature is on.
+		if ( ! array_key_exists( 'WC_Email_Customer_Fulfillment_Ready_For_Pickup', $mailer->get_emails() ) ) {
+			$mailer->init();
+		}
 		if ( ! has_action( 'woocommerce_email_fulfillment_details', array( $mailer, 'fulfillment_details' ) ) ) {
 			add_action( 'woocommerce_email_fulfillment_details', array( $mailer, 'fulfillment_details' ), 10, 5 );
 		}
