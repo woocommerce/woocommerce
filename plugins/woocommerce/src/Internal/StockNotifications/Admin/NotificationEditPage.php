@@ -112,10 +112,30 @@ class NotificationEditPage {
 				if ( ! $product || ! $product->is_in_stock() ) {
 					$notice_message = __( 'Failed to send notification. Please make sure that the listed product is available.', 'woocommerce' );
 					NotificationsPage::add_notice( $notice_message, 'error' );
-				} elseif ( $this->email_manager->send_stock_notification_email( $notification ) ) {
+				} elseif ( $this->email_manager->deliver_stock_notification( $notification ) ) {
 					$notification->set_status( NotificationStatus::SENT );
 					$notification->set_date_notified( time() );
 					$notification->save();
+
+					try {
+						/**
+						 * Action: woocommerce_customer_stock_notification_sent
+						 *
+						 * @since 11.3.0
+						 *
+						 * Fires once a stock notification has been delivered and saved as sent.
+						 *
+						 * @param Notification $notification The notification that was sent.
+						 * @param \WC_Product  $product      The product the notification is about.
+						 */
+						do_action( 'woocommerce_customer_stock_notification_sent', $notification, $product );
+					} catch ( \Throwable $e ) {
+						wc_get_logger()->error(
+							sprintf( 'A woocommerce_customer_stock_notification_sent callback failed for notification %d: %s', $notification->get_id(), $e->getMessage() ),
+							array( 'source' => 'wc-customer-stock-notifications' )
+						);
+					}
+
 					// translators: %s user email.
 					$notice_message = sprintf( __( 'Notification sent to "%s".', 'woocommerce' ), $notification->get_user_email() );
 					NotificationsPage::add_notice( $notice_message, 'success' );
