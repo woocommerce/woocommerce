@@ -146,4 +146,20 @@ class WC_Products_Tracking_Test extends \WC_Unit_Test_Case {
 		$this->assertTrue( as_has_scheduled_action( WC_Products_Tracking::TRACK_PRODUCT_PUBLISHED_CALLBACK, null, 'woocommerce-tracks' ) );
 		as_unschedule_all_actions( WC_Products_Tracking::TRACK_PRODUCT_PUBLISHED_CALLBACK, null, 'woocommerce-tracks' );
 	}
+
+	/**
+	 * Test track_product_published returns early gracefully when wc_get_product returns false.
+	 */
+	public function test_track_product_published_with_invalid_product(): void {
+		$non_existent_product_id = 999999;
+		$post                    = (object) array(
+			'post_type'   => 'product',
+			'post_status' => 'publish',
+		);
+
+		$products_tracking = new WC_Products_Tracking();
+		$products_tracking->track_product_published( $non_existent_product_id, $post, false, null );
+
+		$this->assertNotRecordedTracksEvent( 'wcadmin_product_add_publish' );
+	}
 }
