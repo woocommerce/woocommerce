@@ -1,4 +1,8 @@
 /**
+ * See ./README.md for WooCommerce Interactivity API store usage.
+ */
+
+/**
  * Mutation Queue - Microtick-based request batcher for WooCommerce Store API
  *
  * Collects mutation requests within a single microtask tick and sends them

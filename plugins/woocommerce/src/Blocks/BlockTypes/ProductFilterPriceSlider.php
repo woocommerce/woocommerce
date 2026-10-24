@@ -1,5 +1,9 @@
 <?php
 /**
+ * For shared WooCommerce Interactivity API store documentation, see plugins/woocommerce/client/blocks/assets/js/base/stores/woocommerce/README.md.
+ */
+
+/**
  * ProductFilterPriceSlider class.
  *
  * @package Automattic\WooCommerce\Blocks\BlockTypes
