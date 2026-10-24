@@ -32,6 +32,220 @@ class WC_Cart_Totals_Tests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Inclusive checkout preserves gross discounts with split tax rates.
+	 * @testWith ["no", [50], "430.00", false, 481]
+	 *           ["yes", [50], "430.00", false]
+	 *           ["no", [], "480.00", false]
+	 *           ["no", [30, 20], "430.00", false]
+	 *           ["no", [10, 10, 30], "430.00", false]
+	 *           ["no", [49.89, 0.01], "430.10", false]
+	 *           ["no", [50], "430.08", true]
+	 *           ["no", [50.03], "430.00", true, 0, true]
+	 *           ["no", [50], "429.49", false, 0, false, 429.48]
+	 *
+	 * @param string $round_at_subtotal Whether to round tax at subtotal.
+	 * @param array  $discounts         Fixed-cart coupon amounts.
+	 * @param string $expected_total    Gross cart and order total.
+	 * @param bool   $include_fallback  Include a line whose net cannot be adjusted safely.
+	 * @param int    $new_price         Updated cart price for coupon allocation refresh.
+	 * @param bool   $shared_coupon     Apply one coupon across corrected and unchanged lines.
+	 * @param float  $filtered_price    Additional legacy price adjustment.
+	 */
+	public function test_inclusive_split_tax_preserves_discounted_total( string $round_at_subtotal, array $discounts, string $expected_total, bool $include_fallback, int $new_price = 0, bool $shared_coupon = false, float $filtered_price = 0 ): void {
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_tax_round_at_subtotal', $round_at_subtotal );
+		update_option( 'woocommerce_price_num_decimals', 2 );
+		update_option( 'woocommerce_default_country', 'IN:HR' );
+		update_option( 'woocommerce_tax_based_on', 'base' );
+		update_option( 'woocommerce_calc_discounts_sequentially', 'yes' );
+		WC()->customer->set_billing_country( 'IN' );
+		WC()->customer->set_shipping_country( 'IN' );
+		WC()->customer->set_billing_state( 'HR' );
+		WC()->customer->set_shipping_state( 'HR' );
+
+		foreach ( array( 1, 2 ) as $priority ) {
+			WC_Tax::_insert_tax_rate(
+				array(
+					'tax_rate_country'  => 'IN',
+					'tax_rate_state'    => 'HR',
+					'tax_rate'          => '9',
+					'tax_rate_name'     => 'GST ' . $priority,
+					'tax_rate_priority' => $priority,
+					'tax_rate_compound' => 0,
+					'tax_rate_shipping' => 0,
+				)
+			);
+		}
+		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => '480' ) );
+		WC()->cart->add_to_cart( $product->get_id() );
+		$expected_discounts = array();
+		foreach ( $discounts as $index => $discount ) {
+			$coupon                                    = WC_Helper_Coupon::create_coupon(
+				'split-tax-discount-' . $index,
+				array(
+					'discount_type' => $include_fallback && ! $shared_coupon ? 'fixed_product' : 'fixed_cart',
+					'coupon_amount' => $discount,
+					'product_ids'   => (string) $product->get_id(),
+				)
+			);
+			$expected_discounts[ $coupon->get_code() ] = $discount;
+			WC()->cart->apply_coupon( $coupon->get_code() );
+		}
+
+		if ( $include_fallback ) {
+			WC_Tax::create_tax_class( 'Fallback' );
+			foreach ( $shared_coupon ? array( 1 ) : array( 1, 2 ) as $priority ) {
+				WC_Tax::_insert_tax_rate(
+					array(
+						'tax_rate_country'  => 'IN',
+						'tax_rate_state'    => 'HR',
+						'tax_rate'          => $shared_coupon ? '20' : '25',
+						'tax_rate_name'     => 'Fallback ' . $priority,
+						'tax_rate_priority' => $priority,
+						'tax_rate_class'    => 'fallback',
+					)
+				);
+			}
+			$fallback = WC_Helper_Product::create_simple_product(
+				true,
+				array(
+					'regular_price' => $shared_coupon ? '0.03' : '0.59',
+					'tax_class'     => 'fallback',
+				)
+			);
+			WC()->cart->add_to_cart( $fallback->get_id() );
+			if ( ! $shared_coupon ) {
+				$coupon                                    = WC_Helper_Coupon::create_coupon(
+					'fallback-discount',
+					array(
+						'discount_type' => 'fixed_product',
+						'coupon_amount' => '0.50',
+						'product_ids'   => (string) $fallback->get_id(),
+					)
+				);
+				$expected_discounts[ $coupon->get_code() ] = 0.50;
+				WC()->cart->apply_coupon( $coupon->get_code() );
+			}
+		}
+		if ( $filtered_price ) {
+			add_filter(
+				'woocommerce_get_discounted_price',
+				static function () use ( $filtered_price ) {
+					return $filtered_price;
+				}
+			);
+		}
+		WC()->cart->calculate_totals();
+		$this->assertSame( $expected_total, WC()->cart->get_total( 'edit' ) );
+		if ( $filtered_price ) {
+			$this->assertNotContains( true, array_column( WC()->cart->get_cart(), 'line_discount_tax_adjusted' ) );
+			$this->assertEqualsWithDelta( 7.62711864, WC()->cart->get_discount_tax(), 0.000001 );
+		}
+		$net_discounts = WC()->cart->get_coupon_discount_totals();
+		$tax_discounts = WC()->cart->get_coupon_discount_tax_totals();
+		foreach ( $expected_discounts as $code => $gross ) {
+			$this->assertEqualsWithDelta( $gross, $net_discounts[ $code ] + $tax_discounts[ $code ], 0.000001 );
+			$this->assertGreaterThanOrEqual( 0, $net_discounts[ $code ], 'Coupon net discounts cannot be negative.' );
+			$this->assertGreaterThanOrEqual( 0, $tax_discounts[ $code ], 'Coupon tax discounts cannot be negative.' );
+		}
+
+		$classic_order_id = WC()->checkout()->create_order( array( 'payment_method' => 'bacs' ) );
+		$this->assertIsInt( $classic_order_id );
+		$orders = array(
+			wc_get_order( $classic_order_id ),
+			( new \Automattic\WooCommerce\StoreApi\Utilities\OrderController() )->create_order_from_cart(),
+		);
+		foreach ( $orders as $order ) {
+			$this->assertSame( $expected_total, $order->get_total() );
+			$expected_discount = $filtered_price && $order === $orders[1] ? 50.52 : array_sum( $expected_discounts );
+			$this->assertEqualsWithDelta( $expected_discount, (float) $order->get_discount_total() + (float) $order->get_discount_tax(), 0.000001 );
+			if ( ! $filtered_price || $order !== $orders[1] ) {
+				$this->assertSame( wc_format_decimal( WC()->cart->get_discount_tax(), 2 ), wc_format_decimal( $order->get_discount_tax(), 2 ) );
+			}
+			foreach ( $order->get_items( 'coupon' ) as $coupon_item ) {
+				$this->assertEqualsWithDelta( $expected_discounts[ $coupon_item->get_code() ], (float) $coupon_item->get_discount() + (float) $coupon_item->get_discount_tax(), 0.000001 );
+			}
+		}
+		if ( array( 10, 10, 30 ) === $discounts ) {
+			$this->assertSame( 1.53, $tax_discounts['split-tax-discount-0'] );
+			$this->assertSame( 1.52, $tax_discounts['split-tax-discount-1'] );
+		}
+		if ( $new_price ) {
+			$cart_items = WC()->cart->get_cart();
+			reset( $cart_items )['data']->set_price( $new_price );
+			WC()->cart->calculate_totals();
+			$this->assertNotContains( true, array_column( WC()->cart->get_cart(), 'line_discount_tax_adjusted' ) );
+			( new \Automattic\WooCommerce\StoreApi\Utilities\OrderController() )->update_order_from_cart( $orders[1] );
+			$updated_taxes = WC()->cart->get_coupon_discount_tax_totals();
+			foreach ( $orders[1]->get_items( 'coupon' ) as $coupon_item ) {
+				$this->assertSame( wc_format_decimal( $updated_taxes[ $coupon_item->get_code() ], 2 ), wc_format_decimal( $coupon_item->get_discount_tax(), 2 ) );
+			}
+			$discount_total = $orders[1]->get_discount_total();
+			$discount_tax   = $orders[1]->get_discount_tax();
+			$orders[1]->calculate_totals();
+			$this->assertSame( $discount_total, $orders[1]->get_discount_total() );
+			$this->assertSame( $discount_tax, $orders[1]->get_discount_tax() );
+
+			WC()->cart->set_quantity( key( $cart_items ), 2 );
+			( new \Automattic\WooCommerce\StoreApi\Utilities\OrderController() )->update_order_from_cart( $orders[1] );
+			$this->assertSame( WC()->cart->get_total( 'edit' ), $orders[1]->get_total() );
+			$this->assertSame( 2, $orders[1]->get_item_count() );
+			$this->assertSame( array_keys( $expected_discounts ), $orders[1]->get_coupon_codes() );
+		}
+	}
+
+	/**
+	 * @testdox Legacy price-filter accounting is preserved when another line could be corrected.
+	 */
+	public function test_inclusive_split_tax_preserves_mixed_legacy_price_adjustments(): void {
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_tax_round_at_subtotal', 'no' );
+		update_option( 'woocommerce_price_num_decimals', 2 );
+		update_option( 'woocommerce_tax_based_on', 'base' );
+		foreach ( array( 1, 2 ) as $priority ) {
+			WC_Tax::_insert_tax_rate(
+				array(
+					'tax_rate'          => '9',
+					'tax_rate_priority' => $priority,
+				)
+			);
+		}
+		$first  = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => '480' ) );
+		$second = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => '480' ) );
+		WC()->cart->add_to_cart( $first->get_id() );
+		WC()->cart->add_to_cart( $second->get_id() );
+		$coupon = WC_Helper_Coupon::create_coupon(
+			'mixed-filter-discount',
+			array(
+				'discount_type' => 'fixed_product',
+				'coupon_amount' => 50,
+			)
+		);
+		WC()->cart->apply_coupon( $coupon->get_code() );
+		add_filter(
+			'woocommerce_get_discounted_price',
+			static function ( $price, $item ) use ( $second ) {
+				return $second->get_id() === $item['product_id'] ? 429.48 : $price;
+			},
+			10,
+			2
+		);
+		WC()->cart->calculate_totals();
+		$this->assertNotContains( true, array_column( WC()->cart->get_cart(), 'line_discount_tax_adjusted' ) );
+		$this->assertSame( '859.50', WC()->cart->get_total( 'edit' ) );
+		$order = ( new \Automattic\WooCommerce\StoreApi\Utilities\OrderController() )->create_order_from_cart();
+		$this->assertSame( '859.50', $order->get_total() );
+		$this->assertEqualsWithDelta( 100.51, (float) $order->get_discount_total() + (float) $order->get_discount_tax(), 0.000001 );
+		$discount_total = $order->get_discount_total();
+		$discount_tax   = $order->get_discount_tax();
+		$order->calculate_totals();
+		$this->assertSame( $discount_total, $order->get_discount_total() );
+		$this->assertSame( $discount_tax, $order->get_discount_tax() );
+	}
+
+	/**
 	 * Tests whether discount tax is rounded properly in cart.
 	 *
 	 * @link https://github.com/woocommerce/woocommerce/issues/23916.
