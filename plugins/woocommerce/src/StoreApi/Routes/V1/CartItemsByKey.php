@@ -107,7 +107,7 @@ class CartItemsByKey extends AbstractCartRoute {
 		$cart = $this->cart_controller->get_cart_instance();
 
 		if ( isset( $request['quantity'] ) ) {
-			$this->cart_controller->set_cart_item_quantity( $request['key'], $request['quantity'] );
+			$this->cart_controller->update_cart_item_quantity_from_request( $request['key'], $request['quantity'] );
 		}
 
 		return rest_ensure_response( $this->prepare_item_for_response( $this->cart_controller->get_cart_item( $request['key'] ), $request ) );

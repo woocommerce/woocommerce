@@ -1,4 +1,6 @@
-# Cart Coupons API 
+# Cart Coupons API
+
+> **Soft-deprecated:** these endpoints duplicate the [Cart API](./cart.md) actions `POST /cart/apply-coupon` and `POST /cart/remove-coupon`, which return the whole updated cart. Use those in new code. The endpoints below still work in Store API v1.
 
 ## List Cart Coupons
 

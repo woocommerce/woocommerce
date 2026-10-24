@@ -259,6 +259,99 @@ class CartController {
 	}
 
 	/**
+	 * Add an item to the cart from a Store API request.
+	 *
+	 * Shared by the cart routes that add items so they apply the same filters and actions.
+	 *
+	 * @since 11.3.0
+	 * @throws RouteException Exception if invalid data is detected.
+	 *
+	 * @param \WP_REST_Request $request Request object with id, quantity and variation.
+	 * @return string Cart item key.
+	 */
+	public function add_to_cart_from_request( \WP_REST_Request $request ) {
+		/**
+		 * Filters cart item data sent via the API before it is passed to the cart controller.
+		 *
+		 * This hook filters cart items. It allows the request data to be changed, for example, quantity, or
+		 * supplemental cart item data, before it is passed into CartController::add_to_cart and stored to session.
+		 *
+		 * CartController::add_to_cart only expects the keys id, quantity, variation, and cart_item_data, so other values
+		 * may be ignored. CartController::add_to_cart (and core) do already have a filter hook called
+		 * woocommerce_add_cart_item, but this does not have access to the original Store API request like this hook does.
+		 *
+		 * @since 8.8.0
+		 *
+		 * @param array $add_to_cart_data An array of cart item data.
+		 * @return array
+		 */
+		$add_to_cart_data = apply_filters(
+			'woocommerce_store_api_add_to_cart_data',
+			array(
+				'id'             => $request['id'],
+				'quantity'       => $request['quantity'],
+				'variation'      => $request['variation'],
+				'cart_item_data' => array(),
+			),
+			$request
+		);
+
+		$item_id   = $this->add_to_cart( $add_to_cart_data );
+		$cart_item = $this->get_cart_instance()->get_cart_item( $item_id );
+
+		if ( ! empty( $cart_item ) ) {
+			$product_id = $cart_item['variation_id'] ? $cart_item['variation_id'] : $cart_item['product_id'];
+			$quantity   = wc_stock_amount( $add_to_cart_data['quantity'] ?? $cart_item['quantity'] );
+
+			/**
+			 * Fires when an item is added to the cart from a user request.
+			 *
+			 * @param int       $product_id Product ID (variation ID for variable products).
+			 * @param int|float $quantity   Quantity added to the cart.
+			 *
+			 * @since 10.6.0
+			 */
+			do_action( 'internal_woocommerce_cart_item_added_from_user_request', $product_id, $quantity );
+		}
+
+		return $item_id;
+	}
+
+	/**
+	 * Set a cart item quantity requested by the customer, and fire the update action when it changes.
+	 *
+	 * Shared by the cart routes that update item quantities so they behave the same way.
+	 *
+	 * @since 11.3.0
+	 * @throws RouteException Exception if invalid data is detected.
+	 *
+	 * @param string    $item_id  Cart item id.
+	 * @param int|float $quantity Requested quantity.
+	 */
+	public function update_cart_item_quantity_from_request( $item_id, $quantity ) {
+		$cart         = $this->get_cart_instance();
+		$cart_item    = $cart->get_cart_item( $item_id );
+		$old_quantity = wc_stock_amount( $cart_item['quantity'] ?? 0 );
+		$new_quantity = wc_stock_amount( $quantity );
+
+		$this->set_cart_item_quantity( $item_id, $new_quantity );
+
+		if ( $old_quantity !== $new_quantity ) {
+			/**
+			 * Fires when a cart item quantity is updated from a user request.
+			 *
+			 * @param string    $cart_item_key Cart item key.
+			 * @param int|float $quantity      New quantity.
+			 * @param int|float $old_quantity  Old quantity.
+			 * @param \WC_Cart  $cart          Cart object.
+			 *
+			 * @since 10.6.0
+			 */
+			do_action( 'internal_woocommerce_cart_item_updated_from_user_request', $item_id, $new_quantity, $old_quantity, $cart );
+		}
+	}
+
+	/**
 	 * Validate all items in the cart and check for errors.
 	 *
 	 * @throws RouteException Exception if invalid data is detected.
