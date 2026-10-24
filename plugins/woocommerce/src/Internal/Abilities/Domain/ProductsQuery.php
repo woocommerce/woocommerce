@@ -166,7 +166,7 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 	 * @since 10.9.0
 	 */
 	public static function can_query_products( $input = array() ): bool {
-		$product_id = self::get_id_from_input( $input );
+		$product_id = self::get_product_permission_id( self::get_id_from_input( $input ) );
 
 		return wc_rest_check_post_permissions( 'product', 'read', $product_id );
 	}

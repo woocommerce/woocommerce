@@ -27,10 +27,12 @@ defined( 'ABSPATH' ) || exit;
  * Only save() saves, inside a database transaction. A WP_Error or an exception
  * from save() rolls back every row it wrote, so an ability that saves more than
  * one object, with pending_objects(), leaves nothing behind when a later save
- * fails. The rollback does not undo what save hooks did outside the database,
- * such as an HTTP request from a listener, and it does nothing on a table
- * engine without transactions. The other steps must not save, send email or
- * make HTTP requests.
+ * fails. Save hooks run inside the transaction, so a database write that an
+ * extension makes from one, such as a table of its own or the parent of the
+ * saved object, rolls back with the save. The rollback does not undo what a
+ * hook did outside the database, such as an HTTP request, and it does nothing
+ * on a table engine without transactions. The other steps must not save, send
+ * email or make HTTP requests.
  *
  * The API is experimental while the `extensible_abilities` feature exists.
  *
