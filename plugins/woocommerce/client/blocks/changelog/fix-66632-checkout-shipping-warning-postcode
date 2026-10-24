@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix the Checkout block showing "No shipping options are available" while the shopper is still typing their postcode, before the address is complete.
