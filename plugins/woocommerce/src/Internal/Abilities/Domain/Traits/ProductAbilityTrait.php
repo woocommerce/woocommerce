@@ -48,7 +48,7 @@ trait ProductAbilityTrait {
 	 * @return array
 	 */
 	private static function get_product_mutation_input_schema( bool $creating ): array {
-		$configs     = self::get_supported_product_type_configs();
+		$configs     = self::get_supported_product_type_configs( $creating );
 		$fields      = array_merge( ...array_values( array_column( $configs, 'fields' ) ) );
 		$type_schema = self::get_product_type_schema( array_keys( $configs ) );
 
@@ -69,10 +69,109 @@ trait ProductAbilityTrait {
 			'properties'           => array_merge(
 				$properties,
 				array( 'type' => $type_schema ),
-				self::get_product_mutation_field_schemas_for_fields( $fields )
+				self::get_product_mutation_field_schemas_for_fields( $fields ),
+				in_array( 'attributes', $fields, true ) ? array( 'attributes' => self::get_product_mutation_attributes_schema() ) : array()
 			),
 			'required'             => array( $creating ? 'name' : 'id' ),
 			'additionalProperties' => false,
+		);
+	}
+
+	/**
+	 * Get the schema of the `attributes` input. A variable product takes
+	 * attributes with their options, and a variation takes the option it picks
+	 * for each attribute. The ability checks the shape against the type of the
+	 * loaded product.
+	 *
+	 * @return array
+	 */
+	private static function get_product_mutation_attributes_schema(): array {
+		return array(
+			'type'        => 'array',
+			'description' => __( 'On a variable product, the attributes with their options. On a variation, the option it picks for each attribute of its parent.', 'woocommerce' ),
+			'items'       => array(
+				'anyOf' => array(
+					self::get_product_attributes_schema( false )['items'],
+					self::get_product_attributes_schema( true )['items'],
+				),
+			),
+		);
+	}
+
+	/**
+	 * Get the schema of the `attributes` input and output.
+	 *
+	 * A parent product lists each attribute with its options. A variation lists
+	 * the one option it picks for each attribute of its parent.
+	 *
+	 * @param bool $for_variation Whether the schema is for a variation.
+	 * @return array
+	 */
+	private static function get_product_attributes_schema( bool $for_variation ): array {
+		if ( $for_variation ) {
+			return array(
+				'type'        => 'array',
+				'description' => __( 'The option this variation picks for each attribute of its parent, by attribute name.', 'woocommerce' ),
+				'items'       => array(
+					'type'                 => 'object',
+					'properties'           => array(
+						'name'   => array( 'type' => 'string' ),
+						'option' => array( 'type' => 'string' ),
+					),
+					'required'             => array( 'name', 'option' ),
+					'additionalProperties' => false,
+				),
+			);
+		}
+
+		return array(
+			'type'        => 'array',
+			'description' => __( 'Attributes of the product, such as Size with the options S, M and L. Each variation picks one option of every attribute.', 'woocommerce' ),
+			'items'       => array(
+				'type'                 => 'object',
+				'properties'           => array(
+					'name'    => array( 'type' => 'string' ),
+					'options' => array(
+						'type'     => 'array',
+						'items'    => array( 'type' => 'string' ),
+						'minItems' => 1,
+					),
+					'visible' => array(
+						'type'        => 'boolean',
+						'description' => __( 'Whether the attribute shows on the product page. Defaults to true.', 'woocommerce' ),
+					),
+				),
+				'required'             => array( 'name', 'options' ),
+				'additionalProperties' => false,
+			),
+		);
+	}
+
+	/**
+	 * Get the schema of the `variations` input of a variable product create.
+	 * Each item takes the fields of a variation and, when the feature is on,
+	 * the `extensions` input of the product resource.
+	 *
+	 * @return array
+	 */
+	private static function get_product_variations_input_schema(): array {
+		$variation_config = self::get_product_type_config( ProductType::VARIATION );
+		$properties       = self::get_product_mutation_field_schemas_for_fields( is_wp_error( $variation_config ) ? array() : $variation_config['fields'], true );
+
+		if ( ExtensibleAbilities::is_enabled() ) {
+			$properties['extensions'] = ExtensibleAbilities::get_input_schema( 'product' );
+		}
+
+		return array(
+			'type'        => 'array',
+			'description' => __( 'Variations to create with the product. Each one picks one option of every attribute, and no two pick the same options.', 'woocommerce' ),
+			'maxItems'    => 100,
+			'items'       => array(
+				'type'                 => 'object',
+				'properties'           => $properties,
+				'required'             => array( 'attributes' ),
+				'additionalProperties' => false,
+			),
 		);
 	}
 
@@ -93,11 +192,19 @@ trait ProductAbilityTrait {
 	/**
 	 * Get product mutation field schemas keyed by input field.
 	 *
+	 * @param bool $for_variation Whether the `attributes` schema is the one of a variation.
 	 * @return array<string, array>
 	 */
-	private static function get_product_mutation_field_schemas(): array {
+	private static function get_product_mutation_field_schemas( bool $for_variation = false ): array {
 		return array(
 			'name'              => array( 'type' => 'string' ),
+			'parent_id'         => array(
+				'type'        => 'integer',
+				'description' => __( 'ID of the variable product this variation belongs to.', 'woocommerce' ),
+				'minimum'     => 1,
+			),
+			'attributes'        => self::get_product_attributes_schema( $for_variation ),
+			'variations'        => array( 'type' => 'array' ),
 			'sku'               => array( 'type' => 'string' ),
 			'regular_price'     => array(
 				'type'        => 'string',
@@ -161,16 +268,17 @@ trait ProductAbilityTrait {
 	/**
 	 * Get product mutation field schemas for a set of fields.
 	 *
-	 * @param array<int, string> $fields Field names.
+	 * @param array<int, string> $fields        Field names.
+	 * @param bool               $for_variation Whether the `attributes` schema is the one of a variation.
 	 * @return array<string, array>
 	 */
-	private static function get_product_mutation_field_schemas_for_fields( array $fields ): array {
-		$schemas = self::get_product_mutation_field_schemas();
+	private static function get_product_mutation_field_schemas_for_fields( array $fields, bool $for_variation = false ): array {
+		$schemas = self::get_product_mutation_field_schemas( $for_variation );
 		$result  = array();
 
 		foreach ( $schemas as $field => $schema ) {
 			if ( in_array( $field, $fields, true ) ) {
-				$result[ $field ] = $schema;
+				$result[ $field ] = 'variations' === $field ? self::get_product_variations_input_schema() : $schema;
 			}
 		}
 
@@ -179,7 +287,8 @@ trait ProductAbilityTrait {
 
 	/**
 	 * Product types that the mutation abilities support: every registered type
-	 * with a class of its own, except the variable ones.
+	 * with a class of its own, and `variation`, which WooCommerce does not list
+	 * as a type.
 	 *
 	 * @return array<int, string>
 	 */
@@ -190,14 +299,15 @@ trait ProductAbilityTrait {
 	/**
 	 * Get the configuration of every supported product type, keyed by type.
 	 *
+	 * @param bool $creating Whether the fields are for a create.
 	 * @return array<string, array{fields: array<int, string>, product_props: array<string, mixed>}>
 	 */
-	private static function get_supported_product_type_configs(): array {
+	private static function get_supported_product_type_configs( bool $creating = false ): array {
 		$configs = array();
 
-		foreach ( array_keys( wc_get_product_types() ) as $product_type ) {
+		foreach ( array_merge( array_keys( wc_get_product_types() ), array( ProductType::VARIATION ) ) as $product_type ) {
 			$product_type = (string) $product_type;
-			$config       = self::get_product_class_config( \WC_Product_Factory::get_product_classname( 0, $product_type ), $product_type );
+			$config       = self::get_product_class_config( \WC_Product_Factory::get_product_classname( 0, $product_type ), $product_type, $creating );
 
 			if ( ! is_wp_error( $config ) ) {
 				$configs[ $product_type ] = $config;
@@ -211,22 +321,24 @@ trait ProductAbilityTrait {
 	 * Get the configuration of a product type.
 	 *
 	 * @param string $product_type Product type.
+	 * @param bool   $creating     Whether the fields are for a create.
 	 * @return array{fields: array<int, string>, product_props: array<string, mixed>}|\WP_Error
 	 */
-	protected static function get_product_type_config( string $product_type ) {
-		if ( ! isset( wc_get_product_types()[ $product_type ] ) ) {
+	protected static function get_product_type_config( string $product_type, bool $creating = false ) {
+		if ( ProductType::VARIATION !== $product_type && ! isset( wc_get_product_types()[ $product_type ] ) ) {
 			return self::get_unsupported_product_type_error();
 		}
 
-		return self::get_product_class_config( \WC_Product_Factory::get_product_classname( 0, $product_type ), $product_type );
+		return self::get_product_class_config( \WC_Product_Factory::get_product_classname( 0, $product_type ), $product_type, $creating );
 	}
 
 	/**
 	 * Get the configuration of a product class.
 	 *
 	 * The product class decides which Core fields apply. A class that extends
-	 * a Core class gets the fields of that class. The owner of a type changes
-	 * the list with the `woocommerce_ability_product_type_fields` filter.
+	 * a Core class gets the fields of that class. A create accepts `variations`
+	 * on a variable type and `parent_id` on a variation. The owner of a type
+	 * changes the list with the `woocommerce_ability_product_type_fields` filter.
 	 *
 	 * `WC_Product_Factory` returns `WC_Product_Simple` itself for a type that
 	 * has no class. Such a type is refused. A class that extends
@@ -234,17 +346,10 @@ trait ProductAbilityTrait {
 	 *
 	 * @param string $classname    Product class.
 	 * @param string $product_type Product type.
+	 * @param bool   $creating     Whether the fields are for a create.
 	 * @return array{fields: array<int, string>, product_props: array<string, mixed>}|\WP_Error
 	 */
-	private static function get_product_class_config( string $classname, string $product_type ) {
-		if (
-			is_a( $classname, \WC_Product_Variable::class, true )
-			|| is_a( $classname, \WC_Product_Variation::class, true )
-			|| ProductType::VARIATION === $product_type
-		) {
-			return self::get_unsupported_product_type_error();
-		}
-
+	private static function get_product_class_config( string $classname, string $product_type, bool $creating = false ) {
 		if ( \WC_Product_Simple::class === $classname && ProductType::SIMPLE !== $product_type ) {
 			return self::get_invalid_product_type_error();
 		}
@@ -252,8 +357,18 @@ trait ProductAbilityTrait {
 		$fields        = self::get_common_product_mutation_fields();
 		$product_props = array();
 		$price_fields  = array( 'regular_price', 'sale_price' );
+		$stock_fields  = array( 'manage_stock', 'stock_quantity', 'stock_status' );
 
-		if ( is_a( $classname, \WC_Product_External::class, true ) ) {
+		if ( is_a( $classname, \WC_Product_Variation::class, true ) ) {
+			$fields = array_merge(
+				array( 'sku', 'description', 'status', 'virtual', 'downloadable', 'attributes' ),
+				$price_fields,
+				$stock_fields,
+				$creating ? array( 'parent_id' ) : array()
+			);
+		} elseif ( is_a( $classname, \WC_Product_Variable::class, true ) ) {
+			$fields = array_merge( $fields, array( 'attributes' ), $creating ? array( 'variations' ) : array() );
+		} elseif ( is_a( $classname, \WC_Product_External::class, true ) ) {
 			$fields        = array_merge( $fields, $price_fields, array( 'external_url', 'button_text' ) );
 			$product_props = array(
 				'virtual'        => false,
@@ -272,7 +387,7 @@ trait ProductAbilityTrait {
 			$fields = array_merge( $fields, array( 'virtual', 'downloadable' ) );
 
 			if ( is_a( $classname, \WC_Product_Simple::class, true ) ) {
-				$fields = array_merge( $fields, $price_fields, array( 'manage_stock', 'stock_quantity', 'stock_status' ) );
+				$fields = array_merge( $fields, $price_fields, $stock_fields );
 			}
 		}
 
@@ -344,11 +459,12 @@ trait ProductAbilityTrait {
 	/**
 	 * Get the configuration for a product object, from its class.
 	 *
-	 * @param \WC_Product $product Product object.
+	 * @param \WC_Product $product  Product object.
+	 * @param bool        $creating Whether the fields are for a create.
 	 * @return array|\WP_Error
 	 */
-	protected static function get_product_config_for_product( \WC_Product $product ) {
-		return self::get_product_class_config( get_class( $product ), $product->get_type() );
+	protected static function get_product_config_for_product( \WC_Product $product, bool $creating = false ) {
+		return self::get_product_class_config( get_class( $product ), $product->get_type(), $creating );
 	}
 
 	/**
@@ -455,6 +571,7 @@ trait ProductAbilityTrait {
 		}
 
 		$setters = array(
+			'parent_id'         => 'set_parent_id',
 			'name'              => 'set_name',
 			'sku'               => 'set_sku',
 			'regular_price'     => 'set_regular_price',
@@ -470,6 +587,7 @@ trait ProductAbilityTrait {
 			'external_url'      => 'set_product_url',
 			'button_text'       => 'set_button_text',
 			'grouped_products'  => 'set_children',
+			'attributes'        => 'set_attributes',
 		);
 
 		foreach ( $setters as $field => $setter ) {
@@ -481,7 +599,9 @@ trait ProductAbilityTrait {
 				continue;
 			}
 
-			$prepared_value = self::prepare_product_field_value( $field, $input[ $field ] );
+			$prepared_value = 'attributes' === $field
+				? self::prepare_product_attributes( $product, $input[ $field ] )
+				: self::prepare_product_field_value( $field, $input[ $field ] );
 			if ( is_wp_error( $prepared_value ) ) {
 				return $prepared_value;
 			}
@@ -489,7 +609,145 @@ trait ProductAbilityTrait {
 			$product->{$setter}( $prepared_value );
 		}
 
+		if ( $product instanceof \WC_Product_Variation && array_key_exists( 'attributes', $input ) && $product->get_parent_id() > 0 ) {
+			$parent = wc_get_product( $product->get_parent_id() );
+			if ( ! $parent instanceof \WC_Product_Variable ) {
+				return new \WP_Error(
+					'woocommerce_product_parent_invalid',
+					__( 'The parent must be a variable product.', 'woocommerce' ),
+					array( 'status' => 400 )
+				);
+			}
+			return self::check_variation_attributes( $product->get_attributes(), $parent );
+		}
+
 		return null;
+	}
+
+	/**
+	 * Build the attributes of a product from input. A parent gets
+	 * WC_Product_Attribute objects. A variation gets the option it picks for each
+	 * attribute, keyed by the attribute slug.
+	 *
+	 * @param \WC_Product $product Product object.
+	 * @param mixed       $value   The `attributes` input.
+	 * @return array|\WP_Error
+	 */
+	private static function prepare_product_attributes( \WC_Product $product, $value ) {
+		if ( ! is_array( $value ) ) {
+			return self::get_invalid_product_attributes_error();
+		}
+
+		if ( $product instanceof \WC_Product_Variation ) {
+			$attributes = array();
+			foreach ( $value as $item ) {
+				if ( ! is_array( $item ) || ! is_string( $item['name'] ?? null ) || '' === $item['name'] || ! is_scalar( $item['option'] ?? null ) ) {
+					return self::get_invalid_product_attributes_error();
+				}
+				$attributes[ sanitize_title( $item['name'] ) ] = wc_clean( (string) $item['option'] );
+			}
+			return $attributes;
+		}
+
+		$attributes = array();
+		foreach ( $value as $position => $item ) {
+			$options = is_array( $item['options'] ?? null ) ? array_values( array_filter( array_map( 'wc_clean', $item['options'] ), 'is_string' ) ) : array();
+			if ( ! is_array( $item ) || ! is_string( $item['name'] ?? null ) || '' === trim( $item['name'] ) || empty( $options ) ) {
+				return self::get_invalid_product_attributes_error();
+			}
+			$attribute = new \WC_Product_Attribute();
+			$attribute->set_name( wc_clean( $item['name'] ) );
+			$attribute->set_options( $options );
+			$attribute->set_position( (int) $position );
+			$attribute->set_visible( (bool) ( $item['visible'] ?? true ) );
+			$attribute->set_variation( true );
+			$attributes[ sanitize_title( $item['name'] ) ] = $attribute;
+		}
+
+		if ( count( $attributes ) !== count( $value ) ) {
+			return new \WP_Error(
+				'woocommerce_product_attributes_invalid',
+				__( 'Two attributes have the same name.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		return $attributes;
+	}
+
+	/**
+	 * Check that a variation picks one option of every variation attribute of
+	 * its parent, and nothing else.
+	 *
+	 * @param array<string, string> $attributes     Attributes of the variation, keyed by attribute slug.
+	 * @param \WC_Product           $parent_product Parent product, saved or not.
+	 * @param int                   $position       Position of the variation in the input, for the message. 0 for a single variation.
+	 * @return null|\WP_Error
+	 */
+	protected static function check_variation_attributes( array $attributes, \WC_Product $parent_product, int $position = 0 ) {
+		$options = array();
+		foreach ( $parent_product->get_attributes() as $slug => $attribute ) {
+			if ( $attribute instanceof \WC_Product_Attribute && $attribute->get_variation() ) {
+				$options[ $slug ] = $attribute->get_slugs();
+			}
+		}
+
+		$missing = array_diff_key( $options, $attributes );
+		if ( empty( $options ) || ! empty( $missing ) || count( $attributes ) !== count( $options ) ) {
+			return new \WP_Error(
+				'woocommerce_product_variation_attributes_invalid',
+				sprintf(
+					/* translators: 1: variation position, 2: comma-separated attribute names. */
+					__( 'Variation %1$d must pick one option of each of these attributes: %2$s.', 'woocommerce' ),
+					$position,
+					implode( ', ', array_keys( $options ) )
+				),
+				array( 'status' => 400 )
+			);
+		}
+
+		foreach ( $attributes as $slug => $option ) {
+			if ( ! in_array( $option, $options[ $slug ], true ) && ! in_array( sanitize_title( $option ), $options[ $slug ], true ) ) {
+				return new \WP_Error(
+					'woocommerce_product_variation_attributes_invalid',
+					sprintf(
+						/* translators: 1: variation position, 2: attribute name, 3: option. */
+						__( 'Variation %1$d picks the option "%3$s" that the attribute "%2$s" does not have.', 'woocommerce' ),
+						$position,
+						$slug,
+						$option
+					),
+					array( 'status' => 400 )
+				);
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Get the error for an `attributes` input of the wrong shape.
+	 *
+	 * @return \WP_Error
+	 */
+	private static function get_invalid_product_attributes_error(): \WP_Error {
+		return new \WP_Error(
+			'woocommerce_product_attributes_invalid',
+			__( 'Each attribute needs a name and, on a parent product, at least one option, or, on a variation, one option.', 'woocommerce' ),
+			array( 'status' => 400 )
+		);
+	}
+
+	/**
+	 * Sync the parent of a saved variation, so its price range and stock
+	 * status follow the variation.
+	 *
+	 * @param \WC_Product $product Saved product.
+	 */
+	protected static function sync_variation_parent( \WC_Product $product ): void {
+		if ( $product instanceof \WC_Product_Variation && $product->get_parent_id() > 0 ) {
+			\WC_Product_Variable::sync( $product->get_parent_id() );
+		}
 	}
 
 	/**
@@ -768,6 +1026,9 @@ trait ProductAbilityTrait {
 			'external_url'      => $product instanceof \WC_Product_External ? $product->get_product_url() : null,
 			'button_text'       => $product instanceof \WC_Product_External ? $product->get_button_text() : null,
 			'grouped_products'  => $product instanceof \WC_Product_Grouped ? array_map( 'absint', $product->get_children( 'edit' ) ) : array(),
+			'parent_id'         => (int) $product->get_parent_id(),
+			'attributes'        => self::format_product_attributes( $product ),
+			'variation_ids'     => $product instanceof \WC_Product_Variable ? array_map( 'absint', $product->get_children() ) : array(),
 			'date_created'      => wc_rest_prepare_date_response( $product->get_date_created(), false ),
 			'date_created_gmt'  => wc_rest_prepare_date_response( $product->get_date_created() ),
 			'date_modified'     => wc_rest_prepare_date_response( $product->get_date_modified(), false ),
@@ -775,6 +1036,34 @@ trait ProductAbilityTrait {
 		);
 
 		return ExtensibleAbilities::add_fields_to_object( $data, 'product', $product );
+	}
+
+	/**
+	 * Format the attributes of a product for output, in the shape of the
+	 * `attributes` input: options on a parent, one option on a variation.
+	 *
+	 * @param \WC_Product $product Product object.
+	 * @return array<int, array<string, mixed>>
+	 */
+	private static function format_product_attributes( \WC_Product $product ): array {
+		$output = array();
+
+		foreach ( $product->get_attributes() as $slug => $attribute ) {
+			if ( $attribute instanceof \WC_Product_Attribute ) {
+				$output[] = array(
+					'name'    => wc_attribute_label( $attribute->get_name(), $product ),
+					'options' => array_map( 'strval', $attribute->get_slugs() ),
+					'visible' => (bool) $attribute->get_visible(),
+				);
+			} else {
+				$output[] = array(
+					'name'   => wc_attribute_label( (string) $slug, $product ),
+					'option' => (string) $attribute,
+				);
+			}
+		}
+
+		return $output;
 	}
 
 	/**
@@ -797,8 +1086,8 @@ trait ProductAbilityTrait {
 					),
 					'type'              => array(
 						'type'        => 'string',
-						'description' => __( 'Internal product type slug, such as simple, external, grouped, or variable.', 'woocommerce' ),
-						'enum'        => array_keys( wc_get_product_types() ),
+						'description' => __( 'Internal product type slug, such as simple, external, grouped, variable or variation.', 'woocommerce' ),
+						'enum'        => self::get_supported_product_types(),
 					),
 					'status'            => array(
 						'type' => 'string',
@@ -845,6 +1134,33 @@ trait ProductAbilityTrait {
 					'grouped_products'  => array(
 						'type'        => 'array',
 						'description' => __( 'Product IDs included as children of a grouped product.', 'woocommerce' ),
+						'items'       => array( 'type' => 'integer' ),
+					),
+					'parent_id'         => array(
+						'type'        => 'integer',
+						'description' => __( 'ID of the variable product of a variation, or 0.', 'woocommerce' ),
+					),
+					'attributes'        => array(
+						'type'        => 'array',
+						'description' => __( 'Attributes with their options on a product, or the option each attribute picks on a variation.', 'woocommerce' ),
+						'items'       => array(
+							'type'                 => 'object',
+							'properties'           => array(
+								'name'    => array( 'type' => 'string' ),
+								'options' => array(
+									'type'  => 'array',
+									'items' => array( 'type' => 'string' ),
+								),
+								'option'  => array( 'type' => 'string' ),
+								'visible' => array( 'type' => 'boolean' ),
+							),
+							'required'             => array( 'name' ),
+							'additionalProperties' => false,
+						),
+					),
+					'variation_ids'     => array(
+						'type'        => 'array',
+						'description' => __( 'IDs of the variations of a variable product.', 'woocommerce' ),
 						'items'       => array( 'type' => 'integer' ),
 					),
 					'date_created'      => array(

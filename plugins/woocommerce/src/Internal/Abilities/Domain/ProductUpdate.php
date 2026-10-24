@@ -154,7 +154,14 @@ class ProductUpdate extends ActionableAbility {
 	 * @return null|\WP_Error
 	 */
 	public function save( $subject ) {
-		return self::save_product( $subject, 'woocommerce_product_update_failed' );
+		$error = self::save_product( $subject, 'woocommerce_product_update_failed' );
+		if ( is_wp_error( $error ) ) {
+			return $error;
+		}
+
+		self::sync_variation_parent( $subject );
+
+		return null;
 	}
 
 	/**
