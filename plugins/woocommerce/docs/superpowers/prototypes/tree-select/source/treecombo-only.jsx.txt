@@ -1,0 +1,29 @@
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import TreeComboLab from './components/TreeComboLab.jsx';
+
+import '@wordpress/components/build-style/style.css';
+import '@wordpress/dataviews/build-style/style.css';
+import './styles.treecombo-excerpt.css';
+
+const params = new URLSearchParams(window.location.search);
+
+if (!params.has('view')) {
+  params.set('view', 'product-editor');
+}
+
+params.set('hideBack', '1');
+
+if (window.location.hash !== '#tree-combo-lab' || window.location.search !== `?${params.toString()}`) {
+  window.history.replaceState(
+    null,
+    document.title,
+    `${window.location.pathname}?${params.toString()}#tree-combo-lab`
+  );
+}
+
+createRoot(document.getElementById('root')).render(
+  <StrictMode>
+    <TreeComboLab onBack={() => {}} />
+  </StrictMode>
+);
