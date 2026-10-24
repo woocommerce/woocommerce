@@ -1,0 +1,12 @@
+.woocommerce-profile-wizard__spinner {
+	align-items: center;
+	display: flex;
+	margin: 0 auto;
+	height: 100vh;
+	justify-content: center;
+
+	.components-spinner {
+		width: 48px;
+		height: 48px;
+	}
+}

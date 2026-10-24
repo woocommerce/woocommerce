@@ -1,0 +1,54 @@
+// Shimmer animation keyframes - seamless loop
+@keyframes shimmer {
+	0% {
+		background-position: -200px 0;
+	}
+	100% {
+		background-position: 200px 0;
+	}
+}
+
+.step-placeholder {
+	.step-placeholder__item {
+		display: flex;
+		align-items: center;
+		padding: 8px 8px 8px 16px;
+		border-radius: 2px;
+		margin-bottom: 4px;
+		background-color: transparent;
+		cursor: default;
+		border: 1.5px solid transparent;
+
+		&:hover {
+			background-color: transparent;
+		}
+
+		.step-placeholder__icon {
+			background-color: $gray-100;
+			border-radius: 4px;
+			width: 24px;
+			height: 24px;
+			margin-right: $gap-smaller;
+			flex-shrink: 0;
+		}
+
+		.step-placeholder__content {
+			width: 100%;
+		}
+
+		.step-placeholder__text {
+			background-color: $gray-100;
+			border-radius: 4px;
+			width: 100%;
+			height: 16px;
+		}
+
+		// Shimmer effect for loading animation - seamless continuous loop
+		.step-placeholder__shimmer {
+			background: linear-gradient(90deg, $gray-200 0%, $gray-200 20%, $gray-100 40%, $gray-100 50%, $gray-100 60%, $gray-200 80%, $gray-200 100%);
+			background-size: 400px 100%;
+			animation: shimmer 2s infinite linear;
+			overflow: hidden;
+		}
+	}
+}
