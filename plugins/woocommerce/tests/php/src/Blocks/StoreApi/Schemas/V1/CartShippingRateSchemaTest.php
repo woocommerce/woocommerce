@@ -43,6 +43,72 @@ class CartShippingRateSchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Shipping rate responses use the cart's per-rate tax rounding.
+	 * @testWith ["yes", "no", 0, [10.5], "10", false]
+	 *           ["yes", "yes", 0, [10.5], "11", false]
+	 *           ["yes", "no", 0, [5.5, 5.5], "10", false]
+	 *           ["yes", "yes", 0, [5.5, 5.5], "11", false]
+	 *           ["yes", "no", 2, [0.105], "10", false]
+	 *           ["no", "no", 2, [0.105], "11", false]
+	 *           ["yes", "no", 0, [], "0", false]
+	 *           ["yes", "no", 0, [10.5], "11", true]
+	 *
+	 * @param string $prices_include_tax Whether product prices include tax.
+	 * @param string $round_at_subtotal  Whether tax rounds at subtotal.
+	 * @param int    $decimals           Currency decimals.
+	 * @param array  $taxes              Raw rate taxes.
+	 * @param string $expected           Expected tax in minor units.
+	 * @param bool   $round_up           Whether a tax filter selects half up.
+	 */
+	public function test_rate_response_rounds_each_tax( string $prices_include_tax, string $round_at_subtotal, int $decimals, array $taxes, string $expected, bool $round_up ): void {
+		update_option( 'woocommerce_prices_include_tax', $prices_include_tax );
+		update_option( 'woocommerce_tax_round_at_subtotal', $round_at_subtotal );
+		update_option( 'woocommerce_price_num_decimals', $decimals );
+		if ( $round_up ) {
+			add_filter(
+				'wc_round_tax_total',
+				static function ( $rounded, $value, $precision ) {
+					return round( $value, $precision, PHP_ROUND_HALF_UP );
+				},
+				10,
+				3
+			);
+		}
+		$rate = new WC_Shipping_Rate( 'flat_rate:1', 'Flat rate', 70, $taxes, 'flat_rate' );
+		foreach ( array( '', 'flat_rate:1' ) as $selected_rate ) {
+			$response = $this->invoke_get_rate_response( $rate, $selected_rate );
+			$this->assertSame( $expected, $response['taxes'] );
+			$this->assertSame( 'flat_rate:1' === $selected_rate, $response['selected'] );
+		}
+		$this->assertSame( $taxes, $rate->get_taxes(), 'Formatting must not change cached rate taxes.' );
+	}
+
+	/**
+	 * @testdox Rate responses preserve the existing raw-array filter contract.
+	 */
+	public function test_rate_response_preserves_tax_filters(): void {
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_tax_round_at_subtotal', 'no' );
+		update_option( 'woocommerce_price_num_decimals', 0 );
+		$rate = new WC_Shipping_Rate( 'flat_rate:1', 'Flat rate', 70, array( 10.5 ), 'flat_rate' );
+		add_filter(
+			'woocommerce_shipping_rate_taxes',
+			function ( $taxes, $filtered_rate ) use ( $rate ) {
+				$this->assertSame( array( 10.5 ), $taxes );
+				$this->assertSame( $rate, $filtered_rate );
+				return array( 5.5, 5.5 );
+			},
+			10,
+			2
+		);
+		$shipping_tax_filter_calls = did_filter( 'woocommerce_get_shipping_tax' );
+		$response                  = $this->invoke_get_rate_response( $rate );
+
+		$this->assertSame( '10', $response['taxes'] );
+		$this->assertSame( $shipping_tax_filter_calls, did_filter( 'woocommerce_get_shipping_tax' ), 'Store API rate responses must not acquire a classic-only tax filter.' );
+	}
+
+	/**
 	 * @testdox Should exclude hidden shipping rate meta from API response.
 	 */
 	public function test_get_rate_response_excludes_hidden_meta_data(): void {
@@ -98,14 +164,15 @@ class CartShippingRateSchemaTest extends WC_Unit_Test_Case {
 	/**
 	 * Invoke the protected get_rate_response method.
 	 *
-	 * @param WC_Shipping_Rate $rate Rate object.
+	 * @param WC_Shipping_Rate $rate          Rate object.
+	 * @param string           $selected_rate Selected rate ID.
 	 * @return array
 	 */
-	private function invoke_get_rate_response( WC_Shipping_Rate $rate ): array {
+	private function invoke_get_rate_response( WC_Shipping_Rate $rate, string $selected_rate = '' ): array {
 		$reflection = new ReflectionClass( $this->sut );
 		$method     = $reflection->getMethod( 'get_rate_response' );
 		$method->setAccessible( true );
 
-		return $method->invoke( $this->sut, $rate );
+		return $method->invoke( $this->sut, $rate, $selected_rate );
 	}
 }
