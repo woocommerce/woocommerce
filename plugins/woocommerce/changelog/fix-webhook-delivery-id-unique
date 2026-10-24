@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Give each webhook delivery a unique delivery ID, even when several deliveries are sent in the same second.
