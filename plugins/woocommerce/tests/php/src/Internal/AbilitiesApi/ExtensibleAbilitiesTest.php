@@ -1410,6 +1410,83 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should write extension fields to each variation and run validators on them before any save.
+	 */
+	public function test_variations_get_extension_fields_and_validators(): void {
+		$this->register_validator(
+			'product',
+			'other_ext',
+			static function ( \WC_Product $subject ) {
+				return $subject instanceof \WC_Product_Variation && 'red' === $subject->get_meta( '_test_color' )
+					? new \WP_Error( 'test_red_variation', 'No red variations.' )
+					: null;
+			}
+		);
+		$input = array(
+			'name'       => 'Shirt',
+			'type'       => 'variable',
+			'attributes' => array(
+				array(
+					'name'    => 'Size',
+					'options' => array( 'S', 'M' ),
+				),
+			),
+			'variations' => array(
+				array(
+					'attributes' => array(
+						array(
+							'name'   => 'Size',
+							'option' => 'S',
+						),
+					),
+					'extensions' => array( 'test-ext' => array( 'color' => 'blue' ) ),
+				),
+				array(
+					'attributes' => array(
+						array(
+							'name'   => 'Size',
+							'option' => 'M',
+						),
+					),
+					'extensions' => array( 'test-ext' => array( 'color' => 'red' ) ),
+				),
+			),
+		);
+
+		$schema  = wp_get_ability( 'woocommerce/product-create' )->get_input_schema();
+		$refused = $this->run_ability_response( 'woocommerce/product-create', $input );
+		$saved   = get_posts(
+			array(
+				'post_type'   => array( 'product', 'product_variation' ),
+				'post_status' => 'any',
+				'fields'      => 'ids',
+			)
+		);
+
+		$input['variations'][1]['extensions']['test-ext']['color'] = 'green';
+		$created = $this->run_ability( 'woocommerce/product-create', $input );
+
+		$variable_branch = null;
+		foreach ( $schema['oneOf'] as $branch ) {
+			if ( array( 'variable' ) === ( $branch['properties']['type']['enum'] ?? null ) ) {
+				$variable_branch = $branch;
+			}
+		}
+		$this->assertArrayHasKey( 'color', $variable_branch['properties']['variations']['items']['properties']['extensions']['properties']['test-ext']['properties'] );
+		$this->assertSame( 400, $refused->get_status() );
+		$this->assertSame( 'test_red_variation', $refused->get_data()['code'] );
+		$this->assertSame( array(), $saved );
+
+		$colors = array_map(
+			static function ( int $variation_id ): string {
+				return wc_get_product( $variation_id )->get_meta( '_test_color' );
+			},
+			$created['product']['variation_ids']
+		);
+		$this->assertSame( array( 'blue', 'green' ), $colors );
+	}
+
+	/**
 	 * @testdox Should call WC_Order::update_status() with the feature off and on.
 	 */
 	public function test_the_feature_off_path_calls_update_status(): void {
@@ -1618,7 +1695,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should list the writable fields one time at the top level of the product input schemas.
+	 * @testdox Should list the writable fields one time at the top level of the product input schemas, plus one time for the variations of a create.
 	 */
 	public function test_input_schemas_list_writable_fields_one_time(): void {
 		foreach ( array( 'woocommerce/product-create', 'woocommerce/product-update' ) as $name ) {
@@ -1628,7 +1705,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			$this->assertSame( array( 'string', 'null' ), $extensions['test-ext']['properties']['color']['type'] );
 			$this->assertSame( array( 'integer', 'null' ), $extensions['other_ext']['properties']['count']['type'] );
 			$this->assertArrayNotHasKey( 'code', $extensions['test-ext']['properties'] );
-			$this->assertSame( 1, substr_count( wp_json_encode( $schema ), '"color"' ) );
+			$this->assertSame( 'woocommerce/product-create' === $name ? 2 : 1, substr_count( wp_json_encode( $schema ), '"color"' ) );
 			foreach ( $schema['oneOf'] as $branch ) {
 				$this->assertSame( 'object', $branch['properties']['extensions']['type'] );
 				$this->assertArrayNotHasKey( 'properties', $branch['properties']['extensions'] );
