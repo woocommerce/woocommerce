@@ -119,8 +119,6 @@ class WC_Admin_Product_Export_View_Test extends WC_Unit_Test_Case {
 		$original_request       = $_REQUEST; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Snapshot test globals before constructing the isolated request.
 		$original_user_id       = get_current_user_id();
 		$original_buffer_level  = ob_get_level();
-		$had_request_uri        = isset( $_SERVER['REQUEST_URI'] );
-		$original_request_uri   = $had_request_uri ? $_SERVER['REQUEST_URI'] : null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Preserve the exact pre-test server value for restoration.
 		$had_wp_scripts         = isset( $wp_scripts );
 		$original_scripts_queue = $had_wp_scripts ? $wp_scripts->queue : array();
 		$original_scripts_to_do = $had_wp_scripts ? $wp_scripts->to_do : array();
@@ -149,11 +147,6 @@ class WC_Admin_Product_Export_View_Test extends WC_Unit_Test_Case {
 
 			$_GET     = $original_get; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Restore the exact globals captured before the test request.
 			$_REQUEST = $original_request; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Restore the exact globals captured before the test request.
-			if ( $had_request_uri ) {
-				$_SERVER['REQUEST_URI'] = $original_request_uri;
-			} else {
-				unset( $_SERVER['REQUEST_URI'] );
-			}
 
 			if ( $had_wp_scripts ) {
 				$wp_scripts->queue = $original_scripts_queue;
