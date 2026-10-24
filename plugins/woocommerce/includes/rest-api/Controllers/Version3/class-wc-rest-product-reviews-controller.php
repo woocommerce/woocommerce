@@ -949,7 +949,7 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 					'arg_options' => array(
-						'sanitize_callback' => 'wp_filter_post_kses',
+						'sanitize_callback' => 'wp_kses_post',
 					),
 				),
 				'rating'           => array(
