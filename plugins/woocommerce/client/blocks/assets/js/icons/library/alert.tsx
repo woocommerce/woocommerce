@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { IconProps } from '@wordpress/icons/build-types/icon';
+import type { IconProps } from '@wordpress/icons';
 import { SVG } from '@wordpress/primitives';
 
 interface AlertProps {

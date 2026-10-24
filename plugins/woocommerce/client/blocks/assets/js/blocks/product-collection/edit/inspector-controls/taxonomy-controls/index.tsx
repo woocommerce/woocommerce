@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { Taxonomy } from '@wordpress/core-data/src/entity-types';
 import { useMemo } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
@@ -9,6 +8,7 @@ import ProductCategoryControl from '@woocommerce/editor-components/product-categ
 import ProductTagControl from '@woocommerce/editor-components/product-tag-control';
 import ProductBrandControl from '@woocommerce/editor-components/product-brand-control';
 import type { SearchListItem } from '@woocommerce/editor-components/search-list-control/types';
+import type { Taxonomy } from '@wordpress/core-data';
 import {
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToolsPanelItem as ToolsPanelItem,

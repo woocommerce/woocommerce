@@ -23,8 +23,7 @@ export type AppliedFrom =
 	| typeof APPLIED_FROM_SELECTIVE_REST;
 
 export type ViewedFrom =
-	| typeof VIEWED_FROM_EDITOR_BANNER
-	| typeof VIEWED_FROM_EMAIL_LIST;
+	typeof VIEWED_FROM_EDITOR_BANNER | typeof VIEWED_FROM_EMAIL_LIST;
 
 /**
  * Shape of the base payload shared by every block-email update Tracks event
@@ -33,9 +32,8 @@ export type ViewedFrom =
  * should be able to query by any of these regardless of which surface fired
  * the event.
  *
- * Each event adds its own extension fields on top — see the individual call
- * sites (`use-update-banner.ts`, `settings-email-listing-update-cell.tsx`,
- * and the PHP tracker class) for the per-event keys.
+ * Each event adds its own extension fields on top. See the individual call
+ * sites for the per-event keys.
  */
 export interface SharedTracksPayload {
 	email_id: string;

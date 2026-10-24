@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { EmptyTable, Table, TablePlaceholder } from '@woocommerce/components';
-import {
+import type {
 	TableHeader,
 	TableRow,
 } from '@woocommerce/components/build-types/table/types';
@@ -72,6 +72,10 @@ export function InstalledSubscriptionsTable( props: {
 } ) {
 	const headers = [
 		...tableHeadersDefault,
+		{
+			key: 'auto-updates',
+			label: __( 'Automatic updates', 'woocommerce' ),
+		},
 		{
 			key: 'actions',
 			label: __( 'Actions', 'woocommerce' ),

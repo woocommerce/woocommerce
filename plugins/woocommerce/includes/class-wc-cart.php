@@ -12,10 +12,13 @@
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Enums\TaxDisplayMode;
+use Automattic\WooCommerce\Internal\ProductVariations\SelectedVariationName;
+use Automattic\WooCommerce\Internal\Tax\TaxRateDataStore;
+use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
 use Automattic\WooCommerce\Utilities\DiscountsUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Utilities\ShippingUtil;
-use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -35,6 +38,13 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @var string shortcode|store-api
 	 */
 	public $cart_context = 'shortcode';
+
+	/**
+	 * How many show_shipping() calls are reading the shipping address fields, so a field filter that recalculates the totals cannot nest the reads without limit.
+	 *
+	 * @var int
+	 */
+	private $shipping_address_field_reads = 0;
 
 	/**
 	 * Contains an array of cart items.
@@ -387,7 +397,14 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return bool
 	 */
 	public function display_prices_including_tax() {
-		return apply_filters( 'woocommerce_cart_' . __FUNCTION__, 'incl' === $this->get_tax_price_display_mode() );
+		/**
+		 * Filter whether or not the cart is displaying prices including tax.
+		 *
+		 * @since 3.3.0
+		 *
+		 * @param bool $display_prices_including_tax Whether or not the cart is displaying prices including tax.
+		 */
+		return apply_filters( 'woocommerce_cart_' . __FUNCTION__, TaxDisplayMode::INCLUSIVE === $this->get_tax_price_display_mode() );
 	}
 
 	/*
@@ -649,7 +666,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	public function get_cart() {
 		if ( ! did_action( 'wp_loaded' ) ) {
-			wc_doing_it_wrong( __FUNCTION__, __( 'Get cart should not be called before the wp_loaded action.', 'woocommerce' ), '2.3' );
+			wc_doing_it_wrong( __FUNCTION__, 'Get cart should not be called before the wp_loaded action.', '2.3' );
 		}
 		if ( ! did_action( 'woocommerce_load_cart_from_session' ) ) {
 			$this->session->get_cart_from_session();
@@ -870,9 +887,15 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return bool|WP_Error
 	 */
 	public function check_cart_item_stock() {
-		$error                    = new WP_Error();
-		$product_qty_in_cart      = $this->get_cart_item_quantities();
-		$current_session_order_id = isset( WC()->session->order_awaiting_payment ) ? absint( WC()->session->order_awaiting_payment ) : absint( WC()->session->get( 'store_api_draft_order', 0 ) );
+		$error               = new WP_Error();
+		$product_qty_in_cart = $this->get_cart_item_quantities();
+		// Identify the shopper's own order so its stock hold is not counted against them.
+		// The classic checkout stores an order ID in `order_awaiting_payment`, but completing a
+		// payment or cancelling an unpaid order writes `false` there instead of unsetting it, so
+		// treat any falsy value as "no order" and fall back to the Store API draft order. Read the
+		// value with get(), because WC_Session::__isset() reports a stored `false` as set.
+		$order_awaiting_payment   = absint( WC()->session->get( 'order_awaiting_payment' ) );
+		$current_session_order_id = $order_awaiting_payment ? $order_awaiting_payment : absint( WC()->session->get( 'store_api_draft_order', 0 ) );
 
 		foreach ( $this->get_cart() as $values ) {
 			$product = $values['data'];
@@ -922,6 +945,35 @@ class WC_Cart extends WC_Legacy_Cart {
 		wc_deprecated_function( 'WC_Cart::get_item_data', '3.3', 'wc_get_formatted_cart_item_data' );
 
 		return wc_get_formatted_cart_item_data( $cart_item, $flat );
+	}
+
+	/**
+	 * Gets the display name for a cart item.
+	 *
+	 * For variations, selected "Any" attribute values that are missing from the
+	 * stored variation name are appended so the name matches fully defined
+	 * variations. The stored product and variation names are not modified.
+	 *
+	 * @since 11.2.0
+	 * @param array           $cart_item Cart item.
+	 * @param WC_Product|null $product   Optional product object to use as the name source,
+	 *                                   e.g. the result of the `woocommerce_cart_item_product` filter.
+	 *                                   Defaults to the cart item's product.
+	 * @return string The product name including any selected "Any" attribute values,
+	 *                or an empty string when no product can be resolved from the arguments.
+	 */
+	public function get_item_product_name( $cart_item, $product = null ) {
+		if ( ! $product instanceof WC_Product ) {
+			$product = is_array( $cart_item ) && isset( $cart_item['data'] ) && $cart_item['data'] instanceof WC_Product ? $cart_item['data'] : null;
+		}
+
+		if ( ! $product instanceof WC_Product ) {
+			return '';
+		}
+
+		$variation = isset( $cart_item['variation'] ) && is_array( $cart_item['variation'] ) ? $cart_item['variation'] : array();
+
+		return wc_get_container()->get( SelectedVariationName::class )->get_product_name( $product, $variation, true );
 	}
 
 	/**
@@ -979,12 +1031,14 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return array
 	 */
 	public function get_tax_totals() {
-		$shipping_taxes = $this->get_shipping_taxes(); // Shipping taxes are rounded differently, so we will subtract from all taxes, then round and then add them back.
-		$taxes          = $this->get_taxes();
-		$tax_totals     = array();
+		$shipping_taxes   = $this->get_shipping_taxes();
+		$taxes            = $this->get_taxes();
+		$tax_rate_objects = wc_get_container()->get( TaxRateDataStore::class )->get_rate_objects_for_ids( array_keys( $taxes ) );
+		$tax_totals       = array();
 
 		foreach ( $taxes as $key => $tax ) {
-			$code = WC_Tax::get_rate_code( $key );
+			$tax_rate_object_or_id = $tax_rate_objects[ $key ] ?? $key;
+			$code                  = WC_Tax::get_rate_code( $tax_rate_object_or_id );
 
 			if ( $code || apply_filters( 'woocommerce_cart_remove_taxes_zero_rate_id', 'zero-rated' ) === $key ) {
 				if ( ! isset( $tax_totals[ $code ] ) ) {
@@ -993,9 +1047,10 @@ class WC_Cart extends WC_Legacy_Cart {
 				}
 
 				$tax_totals[ $code ]->tax_rate_id = $key;
-				$tax_totals[ $code ]->is_compound = WC_Tax::is_compound( $key );
-				$tax_totals[ $code ]->label       = WC_Tax::get_rate_label( $key );
+				$tax_totals[ $code ]->is_compound = WC_Tax::is_compound( $tax_rate_object_or_id );
+				$tax_totals[ $code ]->label       = WC_Tax::get_rate_label( $tax_rate_object_or_id );
 
+				// Shipping taxes are rounded differently, so we will subtract from all taxes, then round and then add them back.
 				if ( isset( $shipping_taxes[ $key ] ) ) {
 					$tax -= $shipping_taxes[ $key ];
 					$tax  = wc_round_tax_total( $tax );
@@ -1142,11 +1197,26 @@ class WC_Cart extends WC_Legacy_Cart {
 			// Ensure we don't add a variation to the cart directly by variation ID.
 			if ( 'product_variation' === get_post_type( $product_id ) ) {
 				$variation_id = $product_id;
-				$product_id   = wp_get_post_parent_id( $variation_id );
+
+				// Guard against wp_get_post_parent_id returning false for invalid posts.
+				$product_id = wp_get_post_parent_id( $variation_id );
+				if ( false === $product_id ) {
+					return false;
+				}
 			}
 
 			$product_data = wc_get_product( $variation_id ? $variation_id : $product_id );
-			$quantity     = apply_filters( 'woocommerce_add_to_cart_quantity', $quantity, $product_id );
+
+			/**
+			 * Filters the change the quantity to add to cart.
+			 *
+			 * @since 3.1.0
+			 * @since 11.0.0 Added the `$variation_id` parameter.
+			 * @param number $quantity The default quantity.
+			 * @param number $product_id The product id.
+			 * @param number $variation_id     The variation ID.
+			 */
+			$quantity = apply_filters( 'woocommerce_add_to_cart_quantity', $quantity, $product_id, $variation_id );
 
 			if ( $quantity <= 0 || ! $product_data || ProductStatus::TRASH === $product_data->get_status() ) {
 				return false;
@@ -1168,7 +1238,7 @@ class WC_Cart extends WC_Legacy_Cart {
 
 				$variation_attributes = $product_data->get_variation_attributes();
 				// Filter out 'any' variations, which are empty, as they need to be explicitly specified while adding to cart.
-				$variation_attributes = array_filter( $variation_attributes );
+				$variation_attributes = array_filter( $variation_attributes, 'wc_array_filter_default_attributes' );
 
 				// Gather posted attributes.
 				$posted_attributes = array();
@@ -1183,7 +1253,8 @@ class WC_Cart extends WC_Legacy_Cart {
 							// Don't use wc_clean as it destroys sanitized characters.
 							$value = sanitize_title( wp_unslash( $variation[ $attribute_key ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 						} else {
-							$value = html_entity_decode( wc_clean( wp_unslash( $variation[ $attribute_key ] ) ), ENT_QUOTES, get_bloginfo( 'charset' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+							// Don't use wc_clean as it strips percent sequences (e.g. `%20`) that can legitimately appear in custom attribute values, making them fail validation against the stored options. Entities are decoded before tag stripping so encoded markup cannot survive as literal tags.
+							$value = wp_strip_all_tags( html_entity_decode( wp_unslash( $variation[ $attribute_key ] ), ENT_QUOTES, get_bloginfo( 'charset' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 						}
 
 						// Don't include if it's empty.
@@ -1586,14 +1657,14 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return array
 	 */
 	public function calculate_shipping() {
-		// Reset totals.
-		$this->set_shipping_total( 0 );
-		$this->set_shipping_tax( 0 );
-		$this->set_shipping_taxes( array() );
-		$this->shipping_methods        = array();
-		$this->has_calculated_shipping = false;
+		$this->clear_shipping_totals();
 
-		if ( ! $this->needs_shipping() || ! $this->show_shipping() ) {
+		$ready = $this->needs_shipping() && $this->show_shipping();
+
+		// A filter run by show_shipping() can calculate the totals again and leave that nested run's shipping behind.
+		$this->clear_shipping_totals();
+
+		if ( ! $ready ) {
 			return $this->shipping_methods;
 		}
 
@@ -1614,6 +1685,17 @@ class WC_Cart extends WC_Legacy_Cart {
 		$this->set_shipping_taxes( $merged_taxes );
 
 		return $this->shipping_methods;
+	}
+
+	/**
+	 * Reset the shipping totals, taxes and methods to none calculated.
+	 */
+	private function clear_shipping_totals(): void {
+		$this->set_shipping_total( 0 );
+		$this->set_shipping_tax( 0 );
+		$this->set_shipping_taxes( array() );
+		$this->shipping_methods        = array();
+		$this->has_calculated_shipping = false;
 	}
 
 	/**
@@ -1813,13 +1895,20 @@ class WC_Cart extends WC_Legacy_Cart {
 				return apply_filters( 'woocommerce_cart_ready_to_calc_shipping', true );
 			}
 
-			if ( 'shortcode' === $this->cart_context ) {
+			// Calling calculate_totals() from an address field filter, such as woocommerce_default_address_fields, triggers show_shipping() again.
+			// Allow one nested field read for compatibility, then use the locale-based check below to prevent unbounded recursion.
+			if ( 'shortcode' === $this->cart_context && $this->shipping_address_field_reads < 2 ) {
 				$country = $this->get_customer()->get_shipping_country();
 				if ( ! $country ) {
 					return false;
 				}
-				$country_fields  = WC()->countries->get_address_fields( $country, 'shipping_' );
-				$checkout_fields = WC()->checkout()->get_checkout_fields();
+				++$this->shipping_address_field_reads;
+				try {
+					$country_fields  = WC()->countries->get_address_fields( $country, 'shipping_' );
+					$checkout_fields = WC()->checkout()->get_checkout_fields();
+				} finally {
+					--$this->shipping_address_field_reads;
+				}
 
 				/**
 				 * Filter to not require shipping state for shipping calculation, even if it is required at checkout.
@@ -1830,9 +1919,12 @@ class WC_Cart extends WC_Legacy_Cart {
 				 * @param bool $show_state Whether to use the state field. Default true.
 				 */
 				$state_enabled  = apply_filters( 'woocommerce_shipping_calculator_enable_state', true );
-				$state_required = isset( $country_fields['shipping_state'] ) && $country_fields['shipping_state']['required'];
+				$state_required = isset( $country_fields['shipping_state'] ) && $country_fields['shipping_state']['required'] && true !== ( $country_fields['shipping_state']['hidden'] ?? false );
 				// Takes care of late unsetting of checkout fields via hooks (woocommerce_checkout_fields, woocommerce_shipping_fields).
-				$checkout_state_field_exists = isset( $checkout_fields['shipping']['shipping_state'] );
+				// When shipping is forced to the billing address the shipping fields are never shown, so only a field the shopper
+				// can actually fill in (the billing one) should keep shipping hidden.
+				$address_fieldset            = wc_ship_to_billing_address_only() ? 'billing' : 'shipping';
+				$checkout_state_field_exists = isset( $checkout_fields[ $address_fieldset ][ $address_fieldset . '_state' ] );
 				if ( $state_enabled && $state_required && ! $this->get_customer()->get_shipping_state() && $checkout_state_field_exists ) {
 					return false;
 				}
@@ -1845,9 +1937,9 @@ class WC_Cart extends WC_Legacy_Cart {
 				 * @param bool $show_postcode Whether to use the postcode field. Default true.
 				 */
 				$postcode_enabled  = apply_filters( 'woocommerce_shipping_calculator_enable_postcode', true );
-				$postcode_required = isset( $country_fields['shipping_postcode'] ) && $country_fields['shipping_postcode']['required'];
+				$postcode_required = isset( $country_fields['shipping_postcode'] ) && $country_fields['shipping_postcode']['required'] && true !== ( $country_fields['shipping_postcode']['hidden'] ?? false );
 				// Takes care of late unsetting of checkout fields via hooks (woocommerce_checkout_fields, woocommerce_shipping_fields).
-				$checkout_postcode_field_exists = isset( $checkout_fields['shipping']['shipping_postcode'] );
+				$checkout_postcode_field_exists = isset( $checkout_fields[ $address_fieldset ][ $address_fieldset . '_postcode' ] );
 				if ( $postcode_enabled && $postcode_required && '' === $this->get_customer()->get_shipping_postcode() && $checkout_postcode_field_exists ) {
 					return false;
 				}
@@ -1970,7 +2062,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	public function is_coupon_emails_allowed( $check_emails, $restrictions ) {
 		wc_doing_it_wrong(
 			'WC_Cart::is_coupon_emails_allowed',
-			__( 'This method has been deprecated and will be removed soon. Use Automattic\WooCommerce\Utilities\DiscountsUtil::is_coupon_emails_allowed instead.', 'woocommerce' ),
+			'This method has been deprecated and will be removed soon. Use Automattic\WooCommerce\Utilities\DiscountsUtil::is_coupon_emails_allowed instead.',
 			'9.0.0'
 		);
 
@@ -2381,7 +2473,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	public function get_tax_amount( $tax_rate_id ) {
 		$taxes = wc_array_merge_recursive_numeric( $this->get_cart_contents_taxes(), $this->get_fee_taxes() );
-		return isset( $taxes[ $tax_rate_id ] ) ? $taxes[ $tax_rate_id ] : 0;
+		return $taxes[ $tax_rate_id ] ?? 0;
 	}
 
 	/**
@@ -2392,7 +2484,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	public function get_shipping_tax_amount( $tax_rate_id ) {
 		$taxes = $this->get_shipping_taxes();
-		return isset( $taxes[ $tax_rate_id ] ) ? $taxes[ $tax_rate_id ] : 0;
+		return $taxes[ $tax_rate_id ] ?? 0;
 	}
 
 	/**
@@ -2403,17 +2495,21 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return float price
 	 */
 	public function get_taxes_total( $compound = true, $display = true ) {
-		$total = 0;
 		$taxes = $this->get_taxes();
-		foreach ( $taxes as $key => $tax ) {
-			if ( ! $compound && WC_Tax::is_compound( $key ) ) {
-				continue;
+
+		// Skip compounding taxes if requested.
+		if ( ! $compound ) {
+			$tax_rate_objects = wc_get_container()->get( TaxRateDataStore::class )->get_rate_objects_for_ids( array_keys( $taxes ) );
+			foreach ( $taxes as $key => $tax ) {
+				if ( WC_Tax::is_compound( $tax_rate_objects[ $key ] ?? $key ) ) {
+					unset( $taxes[ $key ] );
+				}
 			}
-			$total += $tax;
 		}
-		if ( $display ) {
-			$total = wc_format_decimal( $total, wc_get_price_decimals() );
-		}
+
+		$total = array_sum( $taxes );
+		$total = $display ? wc_format_decimal( $total, wc_get_price_decimals() ) : $total;
+
 		return apply_filters( 'woocommerce_cart_taxes_total', $total, $compound, $display, $this );
 	}
 
@@ -2444,7 +2540,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	public function get_tax_price_display_mode() {
 		if ( $this->get_customer() && $this->get_customer()->get_is_vat_exempt() ) {
-			return 'excl';
+			return TaxDisplayMode::EXCLUSIVE;
 		}
 
 		return get_option( 'woocommerce_tax_display_cart' );

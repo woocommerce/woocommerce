@@ -1,0 +1,44 @@
+diff -ruN a/type-overrides/@wordpress/block-editor/index.d.ts b/type-overrides/@wordpress/block-editor/index.d.ts
+--- a/type-overrides/@wordpress/block-editor/index.d.ts
++++ b/type-overrides/@wordpress/block-editor/index.d.ts
+@@ -8,7 +8,7 @@
+ 
+ declare module '@wordpress/block-editor' {
+ 	import { BlockTypeIconDescriptor } from "@wordpress/blocks";
+-	import { ReduxStoreConfig, StoreDescriptor } from "@wordpress/data";
++	import { ReduxStoreConfig, StoreDescriptor } from "@wordpress/data/build-types/types";
+ 
+ 	export * from "@wordpress/block-editor/components";
+ 	export * from "@wordpress/block-editor/hooks";
+@@ -16,17 +16,6 @@
+ 	export { SETTINGS_DEFAULTS } from "@wordpress/block-editor/store/defaults";
+ 	export * from "@wordpress/block-editor/utils";
+ 
+-	declare module "@wordpress/data" {
+-	    /**
+-	     * @deprecated Use the version that takes a store descriptor object instead
+-	     */
+-	    function dispatch(key: "core/block-editor"): typeof import("@wordpress/block-editor/store/actions");
+-	    /**
+-	     * @deprecated Use the version that takes a store descriptor object instead
+-	     */
+-	    function select(key: "core/block-editor"): typeof import("@wordpress/block-editor/store/selectors");
+-	}
+-
+ 	type Decurry<S extends { [key: string]: (...args: any[]) => any }> = {
+ 	    [key in keyof S]: (state: any, ...args: Parameters<S[key]>) => ReturnType<S[key]>;
+ 	};
+@@ -235,5 +224,13 @@
+ 	     * @defaultValue `"Add title"`
+ 	     */
+ 	    titlePlaceholder: string;
++	}
++}
++
++declare module '@wordpress/data/build-types/types' {
++	import type { BlockEditorStoreDescriptor } from '@wordpress/block-editor';
++
++	interface StoreRegistry {
++		'core/block-editor': BlockEditorStoreDescriptor;
+ 	}
+ }

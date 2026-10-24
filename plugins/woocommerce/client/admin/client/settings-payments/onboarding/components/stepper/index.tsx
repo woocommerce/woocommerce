@@ -73,7 +73,9 @@ export default function Stepper( {
 		}
 	}, [ activeSubStep ] );
 
-	if ( ! topLevelStep ) return null;
+	if ( ! topLevelStep ) {
+		return null;
+	}
 
 	const activeStepIndex =
 		steps.findIndex( ( step ) => step.id === activeTopLevelStep ) + 1;
@@ -114,8 +116,8 @@ export default function Stepper( {
 							{ sprintf(
 								/* translators: %1$s: current step number, %2$s: total number of steps */
 								__( 'Step %1$s of %2$s', 'woocommerce' ),
-								activeStepIndex,
-								steps.length
+								activeStepIndex.toString(),
+								steps.length.toString()
 							) }
 						</div>
 					</div>

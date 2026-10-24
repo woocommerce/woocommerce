@@ -41,7 +41,7 @@ const defaultOnColumnsChange: (
  * `TableCard` serves as Card wrapper & contains a card header, `<Table />`, `<TableSummary />`, and `<Pagination />`.
  * This includes filtering and comparison functionality for report pages.
  */
-const TableCard: React.VFC< TableCardProps > = ( {
+const TableCard: React.FC< TableCardProps > = ( {
 	actions,
 	className,
 	hasSearch,
@@ -64,7 +64,6 @@ const TableCard: React.VFC< TableCardProps > = ( {
 	emptyMessage = undefined,
 	...props
 } ) => {
-	// eslint-disable-next-line no-console
 	const getShowCols = ( _headers: TableCardProps[ 'headers' ] = [] ) => {
 		return _headers
 			.map( ( { key, visible } ) => {

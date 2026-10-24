@@ -1,7 +1,8 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
-use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Enums\TaxDisplayMode;
+
 
 /**
  * MiniCartFooterBlock class.
@@ -30,20 +31,20 @@ class MiniCartFooterBlock extends AbstractInnerBlock {
 	}
 
 	/**
-	 * Render experimental iAPI powered Mini-Cart Footer block.
+	 * Render the markup for the Mini-Cart Contents block.
 	 *
-	 * @param array    $attributes Block attributes.
-	 * @param string   $content    Block content.
-	 * @param WP_Block $block      Block instance.
+	 * @param array     $attributes Block attributes.
+	 * @param string    $content    Block content.
+	 * @param \WP_Block $block      Block instance.
 	 * @return string Rendered block type output.
 	 */
-	protected function render_experimental_iapi_mini_cart_footer( $attributes, $content, $block ) {
+	protected function render( $attributes, $content, $block ) {
 		ob_start();
 
 		$cart                             = $this->get_cart_instance();
 		$subtotal_label                   = __( 'Subtotal', 'woocommerce' );
 		$other_costs_label                = $this->get_totals_item_description();
-		$display_cart_price_including_tax = get_option( 'woocommerce_tax_display_cart' ) === 'incl';
+		$display_cart_price_including_tax = get_option( 'woocommerce_tax_display_cart' ) === TaxDisplayMode::INCLUSIVE;
 		$subtotal                         = $display_cart_price_including_tax ? $cart->get_subtotal_tax() : $cart->get_subtotal();
 		$formatted_subtotal               = '';
 		$html                             = new \WP_HTML_Tag_Processor( wc_price( $subtotal ) );
@@ -71,11 +72,14 @@ class MiniCartFooterBlock extends AbstractInnerBlock {
 
 		?>
 		<div <?php echo $wrapper_attributes; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
-			<div class="wc-block-components-totals-item wc-block-mini-cart__footer-subtotal">
+			<div class="wc-block-components-totals-item wc-block-mini-cart__footer-subtotal" data-wp-bind--aria-busy="woocommerce/mini-cart::state.isCartUpdating">
 				<span class="wc-block-components-totals-item__label">
 					<?php echo esc_html( $subtotal_label ); ?>
 				</span>
-				<span data-wp-text="woocommerce/mini-cart::state.formattedSubtotal" class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-item__value notranslate">
+				<span data-wp-text="woocommerce/mini-cart::state.formattedSubtotal" data-wp-class--is-loading="woocommerce/mini-cart::state.isCartUpdating" data-wp-bind--aria-hidden="woocommerce/mini-cart::state.isCartUpdating" class="wc-block-formatted-money-amount wc-block-components-formatted-money-amount wc-block-components-totals-item__value notranslate">
+				</span>
+				<span class="screen-reader-text" hidden data-wp-bind--hidden="woocommerce/mini-cart::!state.isCartUpdating">
+					<?php echo esc_html_x( 'Updating', 'Mini-Cart subtotal while the cart is being updated', 'woocommerce' ); ?>
 				</span>
 				<div class="wc-block-components-totals-item__description">
 					<?php echo esc_html( $other_costs_label ); ?>
@@ -94,7 +98,7 @@ class MiniCartFooterBlock extends AbstractInnerBlock {
 			</div>
 		</div>
 		<?php
-		return ob_get_clean();
+		return (string) ob_get_clean();
 	}
 
 	/**
@@ -171,21 +175,5 @@ class MiniCartFooterBlock extends AbstractInnerBlock {
 
 		// None enabled.
 		return '';
-	}
-
-	/**
-	 * Render the markup for the Mini-Cart Contents block.
-	 *
-	 * @param array    $attributes Block attributes.
-	 * @param string   $content    Block content.
-	 * @param WP_Block $block      Block instance.
-	 * @return string Rendered block type output.
-	 */
-	protected function render( $attributes, $content, $block ) {
-		if ( Features::is_enabled( 'experimental-iapi-mini-cart' ) ) {
-			return $this->render_experimental_iapi_mini_cart_footer( $attributes, $content, $block );
-		}
-
-		return $content;
 	}
 }

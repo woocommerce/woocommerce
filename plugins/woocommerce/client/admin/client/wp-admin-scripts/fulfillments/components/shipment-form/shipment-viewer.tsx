@@ -47,7 +47,7 @@ export default function ShipmentViewer() {
 
 	return (
 		<FulfillmentCard
-			isCollapsable={ isShipmentInformationProvided }
+			isCollapsible={ isShipmentInformationProvided }
 			initialState="collapsed"
 			header={
 				isShipmentInformationProvided ? (

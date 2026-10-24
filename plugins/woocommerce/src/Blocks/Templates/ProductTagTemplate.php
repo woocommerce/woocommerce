@@ -2,7 +2,8 @@
 declare( strict_types=1 );
 namespace Automattic\WooCommerce\Blocks\Templates;
 
-use Automattic\WooCommerce\Blocks\Templates\ArchiveProductTemplatesCompatibility;
+use Automattic\WooCommerce\Blocks\BlockTemplatesRegistry;
+use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 
 /**
@@ -56,14 +57,7 @@ class ProductTagTemplate extends AbstractTemplateWithFallback {
 	 */
 	public function render_block_template() {
 		if ( ! is_embed() && is_product_taxonomy() && is_tax( 'product_tag' ) ) {
-			$compatibility_layer = new ArchiveProductTemplatesCompatibility();
-			$compatibility_layer->init();
-
-			$templates = get_block_templates( array( 'slug__in' => array( self::SLUG ) ) );
-
-			if ( isset( $templates[0] ) && BlockTemplateUtils::template_has_legacy_template_block( $templates[0] ) ) {
-				add_filter( 'woocommerce_disable_compatibility_layer', '__return_true' );
-			}
+			Package::container()->get( BlockTemplatesRegistry::class )->init_archive_compatibility();
 
 			add_filter( 'woocommerce_has_block_template', '__return_true', 10, 0 );
 		}

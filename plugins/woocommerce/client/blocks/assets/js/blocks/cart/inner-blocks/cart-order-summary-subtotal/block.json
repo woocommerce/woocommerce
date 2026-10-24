@@ -1,6 +1,5 @@
 {
 	"name": "woocommerce/cart-order-summary-subtotal-block",
-	"version": "1.0.0",
 	"title": "Subtotal",
 	"description": "Shows the cart subtotal row.",
 	"category": "woocommerce",

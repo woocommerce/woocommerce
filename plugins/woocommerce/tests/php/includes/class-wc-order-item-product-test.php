@@ -65,6 +65,76 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Formatting metadata preserves raw keys and values across repeated calls and saves.
+	 * @testWith ["Finish%20type", "Black%2520White", "Finish type", "Black%20White"]
+	 *           ["finish", "Black%20White", "finish", "Black White"]
+	 *           ["count", 123, "count", "123"]
+	 * @param string     $raw_key Original metadata key.
+	 * @param string|int $raw_value Original metadata value.
+	 * @param string     $display_key Decoded metadata key.
+	 * @param string     $display_value Decoded metadata value.
+	 */
+	public function test_formatting_preserves_raw_metadata( string $raw_key, $raw_value, string $display_key, string $display_value ): void {
+		$sut = $this->item;
+		$sut->add_meta_data( $raw_key, $raw_value, true );
+		$sut->save();
+		$raw_meta = $sut->get_meta( $raw_key, false )[0];
+
+		$first  = $sut->get_formatted_meta_data();
+		$second = $sut->get_formatted_meta_data();
+
+		$this->assertArrayHasKey( $raw_meta->id, $first, 'The saved metadata should be formatted.' );
+		$this->assertSame( $display_key, $first[ $raw_meta->id ]->key, 'Formatted keys should remain URL-decoded.' );
+		$this->assertSame( $display_value, $first[ $raw_meta->id ]->value, 'Formatted values should remain URL-decoded.' );
+		$this->assertSame( $first[ $raw_meta->id ]->value, $second[ $raw_meta->id ]->value, 'Repeated formatting must not decode the value again.' );
+		$this->assertSame( $raw_key, $raw_meta->key, 'Formatting must not change the live metadata key.' );
+		$this->assertSame( $raw_value, $raw_meta->value, 'Formatting must not change the live metadata value or type.' );
+
+		$sut->save();
+		$reloaded = new WC_Order_Item_Product( $sut->get_id() );
+		$this->assertSame( (string) $raw_value, $reloaded->get_meta( $raw_key ), 'Saving after formatting must preserve the original metadata in the database.' );
+	}
+
+	/**
+	 * @testdox Display filters receive decoded metadata without changing the order item.
+	 */
+	public function test_formatting_filters_receive_decoded_metadata(): void {
+		$sut = $this->item;
+		$sut->add_meta_data( 'Finish%20type', 'Black%20White', true );
+		$sut->save();
+		$raw_meta = $sut->get_meta( 'Finish%20type', false )[0];
+		$received = array();
+
+		foreach ( array( 'woocommerce_order_item_display_meta_key', 'woocommerce_order_item_display_meta_value' ) as $hook ) {
+			add_filter(
+				$hook,
+				static function ( $display, $meta, $item ) use ( &$received, $hook ) {
+					$received[ $hook ] = array( $display, $meta, $item );
+					return $display;
+				},
+				10,
+				3
+			);
+		}
+
+		$formatted = $sut->get_formatted_meta_data();
+
+		$this->assertCount( 2, $received, 'Both display filters must still run.' );
+		foreach ( $received as $arguments ) {
+			$this->assertInstanceOf( WC_Meta_Data::class, $arguments[1], 'Display filters must still receive WC_Meta_Data.' );
+			$this->assertSame( $raw_meta->id, $arguments[1]->id, 'The metadata ID must be preserved.' );
+			$this->assertSame( 'Finish type', $arguments[1]->key, 'Filters must receive the decoded key.' );
+			$this->assertSame( 'Black White', $arguments[1]->value, 'Filters must receive the decoded value.' );
+			$this->assertSame( $sut, $arguments[2], 'Filters must receive the original order item.' );
+		}
+		$this->assertSame( 'Finish type', $received['woocommerce_order_item_display_meta_key'][0] );
+		$this->assertSame( 'Black White', $received['woocommerce_order_item_display_meta_value'][0] );
+		$this->assertSame( "<p>Black White</p>\n", $formatted[ $raw_meta->id ]->display_value, 'Rendered output should remain unchanged.' );
+		$this->assertSame( 'Finish%20type', $raw_meta->key, 'Display filters must not be given the live metadata object.' );
+		$this->assertSame( 'Black%20White', $raw_meta->value, 'The order item must retain its original value.' );
+	}
+
+	/**
 	 * Test that backorder meta is excluded from formatted meta data
 	 * for completed orders.
 	 */
@@ -112,6 +182,41 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 		// Clean up.
 		WC_Helper_Product::delete_product( $this->product->get_id() );
 		WC_Helper_Order::delete_order( $this->order->get_id() );
+	}
+
+	/**
+	 * @testdox get_formatted_meta_data keeps a variation attribute whose value only appears in the parent product name.
+	 */
+	public function test_get_formatted_meta_data_keeps_attribute_that_matches_the_parent_name(): void {
+		// Three attributes keep the attribute list out of the variation title, so it is just "Vienna Huge".
+		list( $product, $variation ) = WC_Helper_Product::create_variation_product_with_global_attributes(
+			'Vienna Huge',
+			array(
+				'pa_size'   => 'huge',
+				'pa_number' => '1',
+				'pa_colour' => 'black',
+			),
+			array(
+				'size'   => array( 'small', 'huge' ),
+				'number' => array( '0', '1' ),
+				'colour' => array( 'black', 'white' ),
+			)
+		);
+
+		try {
+			$item_id = $this->order->add_product( $variation, 1 );
+			$item    = $this->order->get_item( $item_id );
+
+			$this->assertSame( 'Vienna Huge', $item->get_name() );
+			$this->assertSame(
+				array( 'huge', '1', 'black' ),
+				array_values( wp_list_pluck( $item->get_formatted_meta_data(), 'value' ) ),
+				'Every selected attribute is listed when the item name shows none of them.'
+			);
+		} finally {
+			$variation->delete( true );
+			$product->delete( true );
+		}
 	}
 
 	/**
@@ -621,5 +726,138 @@ class WC_Order_Item_Product_Test extends WC_Unit_Test_Case {
 
 		// Clean up order.
 		$order->delete( true );
+	}
+
+	/**
+	 * @testdox Should reset variation_id to 0 when set_product() switches the item to a non-variation product.
+	 */
+	public function test_set_product_resets_variation_id_when_switching_to_simple_product(): void {
+		$parent = new WC_Product_Variable();
+		$parent->set_name( 'Dummy Variable Product' );
+		$parent->save();
+
+		$variation = WC_Helper_Product::create_product_variation_object(
+			$parent->get_id(),
+			'VARIATION SKU ' . wp_generate_uuid4(),
+			10,
+			array()
+		);
+
+		$item = new WC_Order_Item_Product();
+		$item->set_product( $variation );
+
+		$this->assertSame( $variation->get_id(), $item->get_variation_id(), 'Precondition: the item should carry the variation ID before switching.' );
+
+		$item->set_product( $this->product );
+
+		$this->assertSame( 0, $item->get_variation_id(), 'variation_id should be reset to 0 when switching to a non-variation product.' );
+		$this->assertSame( $this->product->get_id(), $item->get_product_id(), 'product_id should point at the newly set product.' );
+		$this->assertSame( $this->product->get_id(), $item->get_product()->get_id(), 'get_product() should return the newly set product, not the stale variation.' );
+	}
+
+	/**
+	 * @testdox Should update variation_id when set_product() switches the item between two variations.
+	 */
+	public function test_set_product_updates_variation_id_when_switching_between_variations(): void {
+		$parent = new WC_Product_Variable();
+		$parent->set_name( 'Dummy Variable Product' );
+		$parent->save();
+
+		$variation_a = WC_Helper_Product::create_product_variation_object(
+			$parent->get_id(),
+			'VARIATION A SKU ' . wp_generate_uuid4(),
+			10,
+			array()
+		);
+		$variation_b = WC_Helper_Product::create_product_variation_object(
+			$parent->get_id(),
+			'VARIATION B SKU ' . wp_generate_uuid4(),
+			15,
+			array()
+		);
+
+		$item = new WC_Order_Item_Product();
+		$item->set_product( $variation_a );
+		$item->set_product( $variation_b );
+
+		$this->assertSame( $variation_b->get_id(), $item->get_variation_id(), 'variation_id should track the most recently set variation.' );
+		$this->assertSame( $parent->get_id(), $item->get_product_id(), 'product_id should remain the shared parent.' );
+	}
+
+	/**
+	 * @testdox Should clear variation_id when set_product() is given the variable parent of the item's own current variation.
+	 */
+	public function test_set_product_clears_variation_id_when_switched_to_own_variable_parent(): void {
+		$parent = new WC_Product_Variable();
+		$parent->set_name( 'T-Shirt' );
+		$parent->save();
+
+		$variation = WC_Helper_Product::create_product_variation_object(
+			$parent->get_id(),
+			'VARIATION SKU ' . wp_generate_uuid4(),
+			10,
+			array()
+		);
+
+		$item = new WC_Order_Item_Product();
+		$item->set_product( $variation );
+
+		$this->assertSame( $variation->get_id(), $item->get_variation_id(), 'Precondition: the item should carry the variation ID before switching to the parent.' );
+
+		$this->assertFalse( $parent->is_type( 'variation' ), 'Precondition: a WC_Product_Variable is not itself a variation.' );
+
+		$item->set_product( $parent );
+
+		$this->assertSame( 0, $item->get_variation_id(), 'A variable parent is not itself a sellable line item, so setting it deliberately clears variation_id rather than preserving the previously selected variation.' );
+		$this->assertSame( $parent->get_id(), $item->get_product_id(), 'product_id should point at the variable parent.' );
+	}
+
+	/**
+	 * @testdox Should set product_id and variation_id when set_product() switches the item from a simple product to a variation.
+	 */
+	public function test_set_product_sets_variation_id_when_switching_from_simple_product_to_variation(): void {
+		$parent = new WC_Product_Variable();
+		$parent->set_name( 'Dummy Variable Product' );
+		$parent->save();
+
+		$variation = WC_Helper_Product::create_product_variation_object(
+			$parent->get_id(),
+			'VARIATION SKU ' . wp_generate_uuid4(),
+			10,
+			array()
+		);
+
+		$item = new WC_Order_Item_Product();
+		$item->set_product( $this->product );
+		$item->set_product( $variation );
+
+		$this->assertSame( $parent->get_id(), $item->get_product_id(), 'product_id should point at the variation\'s parent when switching from a simple product.' );
+		$this->assertSame( $variation->get_id(), $item->get_variation_id(), 'variation_id should be set to the variation ID when switching from a simple product.' );
+	}
+
+	/**
+	 * @testdox Should leave stale variation attribute meta in place when set_product() switches to a simple product (documents the tradeoff tracked in #66733).
+	 */
+	public function test_set_product_leaves_stale_variation_attribute_meta_when_switching_to_simple_product(): void {
+		$parent = new WC_Product_Variable();
+		$parent->set_name( 'Dummy Variable Product' );
+		$parent->save();
+
+		$variation = WC_Helper_Product::create_product_variation_object(
+			$parent->get_id(),
+			'VARIATION SKU ' . wp_generate_uuid4(),
+			10,
+			array( 'color' => 'blue' )
+		);
+
+		$item = new WC_Order_Item_Product();
+		$item->set_product( $variation );
+
+		$this->assertSame( 'blue', $item->get_meta( 'color' ), 'Precondition: set_variation() writes the variation attribute as display meta with the attribute_ prefix stripped.' );
+
+		$item->set_product( $this->product );
+
+		$this->assertSame( $this->product->get_id(), $item->get_product()->get_id(), 'get_product() should resolve to the simple product once variation_id is cleared.' );
+		$this->assertSame( 'blue', $item->get_meta( 'color' ), 'Accepted behavior: the stale "color" attribute meta survives the switch because clearing it blindly could delete a merchant\'s own custom meta. Removing it is tracked in #66733.' );
 	}
 }

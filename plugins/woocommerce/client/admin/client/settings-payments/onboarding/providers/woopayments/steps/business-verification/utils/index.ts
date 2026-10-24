@@ -14,7 +14,9 @@ export const fromDotNotation = (
 	record: Record< string, unknown >
 ): Record< string, unknown > =>
 	toPairs( record ).reduce( ( result, [ key, value ] ) => {
-		return value !== null ? set( result, key, value ) : result;
+		return value !== null && value !== undefined
+			? set( result, key, value )
+			: result;
 	}, {} );
 
 export const getAvailableCountries = (
@@ -34,7 +36,7 @@ export const getBusinessTypes = ( data: Country[] ): Country[] => {
 					description: businessTypeDescriptionStrings[ country.key ]
 						? businessTypeDescriptionStrings[ country.key ][
 								type.key
-						  ]
+							]
 						: businessTypeDescriptionStrings.generic[ type.key ],
 				} ) ),
 			} ) )

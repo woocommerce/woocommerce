@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection\Utils as ProductC
 use Automattic\WooCommerce\Internal\ProductFilters\FilterDataProvider;
 use Automattic\WooCommerce\Internal\ProductFilters\QueryClauses;
 use Automattic\WooCommerce\Internal\ProductFilters\TaxonomyHierarchyData;
+use WP_Block;
 
 /**
  * Product Filter: Taxonomy Block.
@@ -67,10 +68,11 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 		foreach ( $terms as $term ) {
 			$taxonomy_object = get_taxonomy( $term->taxonomy );
 			if ( $taxonomy_object ) {
-				$items[] = array(
+				$term_name = wp_specialchars_decode( $term->name, ENT_QUOTES );
+				$items[]   = array(
 					'type'        => 'taxonomy/' . $term->taxonomy,
 					'value'       => $term->slug,
-					'activeLabel' => $taxonomy_object->labels->singular_name . ': ' . $term->name,
+					'activeLabel' => $taxonomy_object->labels->singular_name . ': ' . $term_name,
 				);
 			}//end if
 		}
@@ -243,12 +245,13 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 				function ( $term ) use ( $taxonomy_counts, $selected_terms, $taxonomy, $show_counts ) {
 					$term          = (array) $term;
 					$term['count'] = $taxonomy_counts[ $term['term_id'] ] ?? 0;
+					$term_name     = wp_specialchars_decode( $term['name'], ENT_QUOTES );
 
 					$type   = 'taxonomy/' . $taxonomy;
 					$option = array(
 						'id'        => $type . '-' . $term['slug'],
-						'label'     => $term['name'],
-						'ariaLabel' => $term['name'],
+						'label'     => $term_name,
+						'ariaLabel' => $term_name,
 						'value'     => $term['slug'],
 						'selected'  => in_array( $term['slug'], $selected_terms, true ),
 						'type'      => $type,
@@ -279,7 +282,7 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 
 		$wrapper_attributes = array(
 			'data-wp-interactive' => 'woocommerce/product-filters',
-			'data-wp-key'         => wp_unique_prefixed_id( $this->get_block_type() ),
+			'data-wp-key'         => wp_unique_prefixed_id( $this->get_full_block_name() ),
 			'data-wp-context'     => wp_json_encode(
 				array(
 					'activeLabelTemplate' => $taxonomy_object->labels->singular_name . ': {{label}}',
@@ -290,7 +293,15 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 			),
 		);
 
-		if ( empty( $filter_context['items'] ) ) {
+		$is_empty            = empty( $filter_context['items'] );
+		$product_filters_key = $block->context['productFiltersKey'] ?? '';
+		if ( is_string( $product_filters_key ) && '' !== $product_filters_key ) {
+			$state = wp_interactivity_state( 'woocommerce/product-filters' );
+			$state['filterEmptyStates'][ $product_filters_key ][] = $is_empty;
+			wp_interactivity_state( 'woocommerce/product-filters', $state );
+		}
+
+		if ( $is_empty ) {
 			$wrapper_attributes['hidden'] = true;
 			$wrapper_attributes['class']  = 'wc-block-product-filter--hidden';
 		}
@@ -365,7 +376,8 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 	 * @return array Term counts with term_id as key and count as value.
 	 */
 	private function get_taxonomy_term_counts( $block, $taxonomy ) {
-		if ( ! isset( $block->context['filterParams'] ) ) {
+		$context = $block->context;
+		if ( ! isset( $context['filterParams'] ) ) {
 			return array();
 		}
 
@@ -395,7 +407,7 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 		}
 
 		// Remove from tax_query if present.
-		if ( ! empty( $query_vars['tax_query'] ) ) {
+		if ( ! isset( $context['queryId'] ) && ! empty( $query_vars['tax_query'] ) ) {
 			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 			$query_vars['tax_query'] = ProductCollectionUtils::remove_query_array( $query_vars['tax_query'], 'taxonomy', $taxonomy );
 		}

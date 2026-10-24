@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Move the CommonJS build to prepack and route @woocommerce/* Jest imports through package sources so tests don't depend on built artifacts.

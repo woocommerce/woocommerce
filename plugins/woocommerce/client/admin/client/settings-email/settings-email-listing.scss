@@ -1,0 +1,5 @@
+// Styles for the DataViews runtime bundled into this chunk (the `/wp` build
+// pinned by the admin catalog). @woocommerce/settings-ui ships a different
+// DataViews major with its own stylesheet, so the two are not interchangeable
+// and this import must not be dropped as a duplicate of that one.
+@import "@wordpress/dataviews/build-style/style.css";

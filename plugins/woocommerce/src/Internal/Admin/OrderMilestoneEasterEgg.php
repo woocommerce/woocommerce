@@ -4,6 +4,9 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\Admin;
 
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
+use Automattic\WooCommerce\Utilities\OrderUtil;
+
 /**
  * Displays a full-screen animated piñata overlay when a merchant opens a
  * milestone order (1st, 100th, or 1000th real order) in the admin.
@@ -21,14 +24,14 @@ class OrderMilestoneEasterEgg {
 	private const MILESTONE_CACHE_OPTION = '_wc_order_milestone_egg_order_ids';
 
 	/**
+	 * Option key used to track whether all milestone order IDs have been found.
+	 */
+	private const MILESTONES_COMPLETE_OPTION = '_wc_order_milestone_egg_milestones_complete';
+
+	/**
 	 * Maximum number of qualifying orders needed to resolve all milestones.
 	 */
 	private const MAX_QUALIFYING_ORDERS = 1000;
-
-	/**
-	 * Number of orders to inspect per milestone scan batch.
-	 */
-	private const QUERY_BATCH_SIZE = 100;
 
 	/**
 	 * Milestone positions mapped to milestone message keys.
@@ -57,11 +60,19 @@ class OrderMilestoneEasterEgg {
 	}
 
 	/**
-	 * Clears the cached milestone order IDs.
+	 * Clears cached milestone order IDs until all milestones are complete.
+	 *
+	 * Once the 1st, 100th, and 1000th qualifying order IDs have been found,
+	 * later orders cannot create additional milestone overlays, so keep the cache
+	 * stable and avoid recomputing it after routine order changes.
 	 *
 	 * @internal
 	 */
 	public function clear_milestone_cache(): void {
+		if ( wc_string_to_bool( get_option( self::MILESTONES_COMPLETE_OPTION, 'no' ) ) ) {
+			return;
+		}
+
 		delete_option( self::MILESTONE_CACHE_OPTION );
 	}
 
@@ -109,7 +120,7 @@ class OrderMilestoneEasterEgg {
 			return;
 		}
 
-		if ( ! function_exists( 'wc_get_orders' ) ) {
+		if ( ! function_exists( 'wc_get_order' ) ) {
 			return;
 		}
 
@@ -129,7 +140,7 @@ class OrderMilestoneEasterEgg {
 			return;
 		}
 
-		// Only run the order query on the HPOS order edit page to avoid overhead on every admin page.
+		// Only run milestone logic on the HPOS order edit page to avoid overhead on every admin page.
 		$is_order_edit_page = 'wc-orders' === $page_param && 'edit' === $action_param;
 
 		if ( ! $is_debug_preview && ! $is_order_edit_page ) {
@@ -137,9 +148,13 @@ class OrderMilestoneEasterEgg {
 		}
 
 		// For real order pages: check cheaply whether the current order qualifies
-		// before running the more expensive milestone count query.
+		// before running the milestone lookup. The lookup relies on HPOS columns.
 		if ( ! $is_debug_preview ) {
-			if ( $id_param <= 0 || ! $this->is_qualifying_order( $id_param ) ) {
+			if (
+				! OrderUtil::custom_orders_table_usage_is_enabled()
+				|| $id_param <= 0
+				|| ! $this->is_qualifying_order( $id_param )
+			) {
 				return;
 			}
 		}
@@ -234,6 +249,7 @@ class OrderMilestoneEasterEgg {
 		if ( null === $milestone_order_ids ) {
 			$milestone_order_ids = $this->compute_milestone_order_ids();
 			update_option( self::MILESTONE_CACHE_OPTION, $milestone_order_ids, false );
+			$this->update_milestones_complete_option( $milestone_order_ids );
 		}
 
 		$messages      = $this->get_milestone_messages();
@@ -280,47 +296,52 @@ class OrderMilestoneEasterEgg {
 	}
 
 	/**
-	 * Computes milestone order IDs by scanning qualifying orders in chronological order.
+	 * Updates the complete option when all milestone IDs have been found.
+	 *
+	 * @param array<string, int> $milestone_order_ids Milestone order IDs keyed by milestone name.
+	 */
+	private function update_milestones_complete_option( array $milestone_order_ids ): void {
+		if ( count( $milestone_order_ids ) === count( self::MILESTONE_POSITIONS ) ) {
+			update_option( self::MILESTONES_COMPLETE_OPTION, 'yes', false );
+			return;
+		}
+
+		delete_option( self::MILESTONES_COMPLETE_OPTION );
+	}
+
+	/**
+	 * Computes milestone order IDs from HPOS without hydrating order objects.
 	 *
 	 * @return array<string, int>
 	 */
 	private function compute_milestone_order_ids(): array {
-		$qualifying_order_ids       = array();
-		$qualifying_order_ids_count = 0;
-		$page                       = 1;
+		global $wpdb;
 
-		while ( $qualifying_order_ids_count < self::MAX_QUALIFYING_ORDERS ) {
-			$batch = (array) wc_get_orders(
-				array(
-					'limit'   => self::QUERY_BATCH_SIZE,
-					'paged'   => $page,
-					'orderby' => 'date',
-					'order'   => 'ASC',
-					'status'  => array( 'processing', 'completed' ),
-					'return'  => 'objects',
-				)
-			);
-
-			if ( empty( $batch ) ) {
-				break;
-			}
-
-			foreach ( $batch as $order ) {
-				if ( $order instanceof \WC_Order && '' !== $order->get_transaction_id() ) {
-					$qualifying_order_ids[] = $order->get_id();
-					++$qualifying_order_ids_count;
-					if ( $qualifying_order_ids_count >= self::MAX_QUALIFYING_ORDERS ) {
-						break 2;
-					}
-				}
-			}
-
-			if ( count( $batch ) < self::QUERY_BATCH_SIZE ) {
-				break;
-			}
-
-			++$page;
+		if ( ! OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			return array();
 		}
+
+		$qualifying_order_ids = array_map(
+			'absint',
+			$wpdb->get_col(
+				$wpdb->prepare(
+					'SELECT id
+					FROM %i
+					WHERE type = %s
+					AND status IN ( %s, %s )
+					AND transaction_id IS NOT NULL
+					AND transaction_id <> %s
+					ORDER BY date_created_gmt ASC, id ASC
+					LIMIT %d',
+					OrdersTableDataStore::get_orders_table_name(),
+					'shop_order',
+					'wc-processing',
+					'wc-completed',
+					'',
+					self::MAX_QUALIFYING_ORDERS
+				)
+			)
+		);
 
 		$milestone_order_ids = array();
 		foreach ( self::MILESTONE_POSITIONS as $pos => $key ) {

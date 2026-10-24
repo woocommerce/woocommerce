@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Keep the WordPress-free Core zone pure: use gettype() instead of wp_json_encode() in the BillingPolicy trial_duration validation message, and cover the previously-untested error branch with a unit test.

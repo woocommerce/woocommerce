@@ -183,6 +183,29 @@ class Column_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test it preserves percentage width attributes.
+	 */
+	public function testItPreservesPercentageWidthAttributes(): void {
+		$parsed_column                   = $this->parsed_column;
+		$parsed_column['attrs']['width'] = '33.33%';
+		$rendered                        = $this->column_renderer->render( '<p>Column content</p>', $parsed_column, $this->rendering_context );
+		$this->checkValidHTML( $rendered );
+		$this->assertStringContainsString( 'width="33.33%"', $rendered );
+	}
+
+	/**
+	 * Test it uses numeric width attributes for pixel widths.
+	 */
+	public function testItUsesNumericWidthAttributesForPixelWidths(): void {
+		$parsed_column                   = $this->parsed_column;
+		$parsed_column['attrs']['width'] = '220px';
+		$rendered                        = $this->column_renderer->render( '<p>Column content</p>', $parsed_column, $this->rendering_context );
+		$this->checkValidHTML( $rendered );
+		$this->assertStringContainsString( 'width="220"', $rendered );
+		$this->assertStringNotContainsString( 'width="220px"', $rendered );
+	}
+
+	/**
 	 * Test it applies padding-left from email_attrs (set by Spacing_Preprocessor for columns blockGap)
 	 */
 	public function testItAppliesPaddingLeftFromEmailAttrs(): void {

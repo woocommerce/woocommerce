@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix attribute escaping in product gallery dialog images and remove the broken loading attribute so dialog images render eagerly as intended

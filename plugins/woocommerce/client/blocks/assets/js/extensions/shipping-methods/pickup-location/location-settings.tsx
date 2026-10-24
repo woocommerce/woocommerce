@@ -139,10 +139,10 @@ const LocationSettings = () => {
 										postcode: '',
 										country: readOnlySettings.storeCountry,
 									},
-							  }
+								}
 							: pickupLocations.find( ( { id } ) => {
 									return id === editingLocation;
-							  } ) || null
+								} ) || null
 					}
 					editingLocation={ editingLocation }
 					onSave={ ( values ) => {

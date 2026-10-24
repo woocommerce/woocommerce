@@ -6,12 +6,15 @@ namespace Automattic\WooCommerce\Tests\Internal\StockNotifications\Emails;
 use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailManager;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
+use Automattic\WooCommerce\Tests\Internal\StockNotifications\StockNotificationsFeatureTrait;
 use WC_Helper_Product;
 
 /**
  * Tests for EmailManager wrapper methods.
  */
 class EmailManagerTests extends \WC_Unit_Test_Case {
+
+	use StockNotificationsFeatureTrait;
 
 	/**
 	 * The System Under Test.
@@ -28,10 +31,18 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 	private $sent_to = array();
 
 	/**
+	 * Captured `wp_mail()` message bodies.
+	 *
+	 * @var string[]
+	 */
+	private $sent_messages = array();
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		$this->enable_stock_notifications_feature();
 
 		// Short-circuit `wp_mail()` so the tests never attempt a real SMTP handoff.
 		// Returning a non-null value from `pre_wp_mail` signals WP core to skip the actual send.
@@ -40,7 +51,11 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 		$this->sut = new EmailManager();
 		$this->sut->init();
 
-		// Boot the mailer so email classes are registered.
+		// `WC_Emails` is a singleton that keeps whichever email list it built on its first
+		// construction for the rest of the process. Reset it so this test's registration
+		// via `woocommerce_email_classes` is actually picked up rather than an earlier
+		// test's (feature-disabled) build of the list.
+		$this->reset_email_singleton();
 		WC()->mailer();
 	}
 
@@ -49,8 +64,22 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		remove_filter( 'pre_wp_mail', array( $this, 'capture_pre_wp_mail' ), 10 );
-		$this->sent_to = array();
+		$this->sent_to       = array();
+		$this->sent_messages = array();
+		$this->restore_stock_notifications_feature_option();
+		// Discard this test's `WC_Emails` build so later tests rebuild their own from
+		// whatever filters are active for them, rather than inheriting this test's list.
+		$this->reset_email_singleton();
 		parent::tearDown();
+	}
+
+	/**
+	 * Reset the `WC_Emails` singleton so the next `WC()->mailer()` call rebuilds it.
+	 */
+	private function reset_email_singleton(): void {
+		$instance_property = ( new \ReflectionClass( \WC_Emails::class ) )->getProperty( 'instance' );
+		$instance_property->setAccessible( true );
+		$instance_property->setValue( null, null );
 	}
 
 	/**
@@ -62,7 +91,8 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 	 */
 	public function capture_pre_wp_mail( $short_circuit, $atts ): bool {
 		unset( $short_circuit );
-		$recipients = is_array( $atts['to'] ?? null ) ? $atts['to'] : array( $atts['to'] ?? '' );
+		$recipients            = is_array( $atts['to'] ?? null ) ? $atts['to'] : array( $atts['to'] ?? '' );
+		$this->sent_messages[] = (string) ( $atts['message'] ?? '' );
 		foreach ( $recipients as $recipient ) {
 			$this->sent_to[ $recipient ] = true;
 		}
@@ -78,6 +108,36 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'WC_Email_Customer_Stock_Notification', $emails );
 		$this->assertArrayHasKey( 'WC_Email_Customer_Stock_Notification_Verify', $emails );
 		$this->assertArrayHasKey( 'WC_Email_Customer_Stock_Notification_Verified', $emails );
+	}
+
+	/**
+	 * @testdox Should log a warning instead of failing silently when the email class is missing from the mailer.
+	 */
+	public function test_send_verify_email_logs_a_warning_when_the_email_is_not_registered() {
+		$notification = $this->build_notification();
+
+		$logger = $this->getMockBuilder( \WC_Logger_Interface::class )->getMock();
+		$logger->expects( $this->once() )
+			->method( 'warning' )
+			->with( $this->stringContains( 'WC_Email_Customer_Stock_Notification_Verify' ) );
+		$use_logger = function () use ( $logger ) {
+			return $logger;
+		};
+		add_filter( 'woocommerce_logging_class', $use_logger );
+
+		$drop_bis_emails = function ( $emails ) {
+			unset( $emails['WC_Email_Customer_Stock_Notification_Verify'] );
+			return $emails;
+		};
+		add_filter( 'woocommerce_email_classes', $drop_bis_emails, 20 );
+		$this->reset_email_singleton();
+
+		$this->sut->send_verify_email( $notification );
+
+		remove_filter( 'woocommerce_email_classes', $drop_bis_emails, 20 );
+		remove_filter( 'woocommerce_logging_class', $use_logger );
+
+		$this->assertEmpty( $this->sent_to );
 	}
 
 	/**
@@ -108,6 +168,37 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 		$this->assertSame( $notification->get_user_email(), $verified->get_recipient() );
 		// Behavior assertion: the trigger path actually dispatched mail to the expected recipient.
 		$this->assertArrayHasKey( $notification->get_user_email(), $this->sent_to );
+	}
+
+	/**
+	 * @testdox Should build the $email_method action link on home_url() when WordPress core lives in a subdirectory.
+	 * @dataProvider provider_email_send_methods
+	 *
+	 * @param string $email_method EmailManager method that sends the email.
+	 */
+	public function test_email_action_link_uses_home_url_when_core_is_in_subdirectory( string $email_method ) {
+		add_filter( 'option_home', fn() => 'https://shop.example' );
+		add_filter( 'option_siteurl', fn() => 'https://shop.example/wp' );
+		$notification = $this->build_notification();
+
+		$this->sut->$email_method( $notification );
+
+		$this->assertCount( 1, $this->sent_messages );
+		$this->assertStringContainsString( 'https://shop.example/?email_link_action=', $this->sent_messages[0] );
+		$this->assertStringNotContainsString( 'https://shop.example/wp', $this->sent_messages[0] );
+	}
+
+	/**
+	 * EmailManager methods that send a BIS email with an action link.
+	 *
+	 * @return array<string, array<string>>
+	 */
+	public function provider_email_send_methods(): array {
+		return array(
+			'stock notification' => array( 'send_stock_notification_email' ),
+			'verify'             => array( 'send_verify_email' ),
+			'verified'           => array( 'send_verified_email' ),
+		);
 	}
 
 	/**

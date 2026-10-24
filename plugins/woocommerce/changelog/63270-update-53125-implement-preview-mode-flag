@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Refactor Product block to use isPreviewMode flag

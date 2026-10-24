@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix live-branches api request body structure to use 'data' instead of 'body'

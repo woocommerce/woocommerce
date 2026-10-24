@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails\Block
- * @version 10.7.0
+ * @version 11.1.0
  */
 
 use Automattic\WooCommerce\Internal\EmailEditor\BlockEmailRenderer;
@@ -24,7 +24,7 @@ defined( 'ABSPATH' ) || exit;
 ?>
 
 <!-- wp:heading -->
-<h2 class="wp-block-heading"> <?php echo esc_html__( 'Payment confirmation pending', 'woocommerce' ); ?> </h2>
+<h2 class="wp-block-heading"> <?php echo esc_html__( 'Your order is on hold', 'woocommerce' ); ?> </h2>
 <!-- /wp:heading -->
 
 <!-- wp:paragraph -->
@@ -35,14 +35,11 @@ defined( 'ABSPATH' ) || exit;
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
-<p><?php
-	/* translators: %s: Payment method (bold, personalization tag) */
-	printf( esc_html__( 'Thanks for your order. It’s currently on hold while we confirm your payment via %s.', 'woocommerce' ), '<strong><!--[woocommerce/order-payment-method]--></strong>' );
-?></p>
+<p> <?php echo esc_html__( 'Thanks for your order. We’ve received it, and it’s currently on hold while we complete the next required step, such as confirming, clearing, or finalizing payment.', 'woocommerce' ); ?> </p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
-<p> <?php echo esc_html__( 'We’ll update you once payment has been confirmed. Here’s a summary of your order:', 'woocommerce' ); ?> </p>
+<p> <?php echo esc_html__( 'We’ll send another update when your order moves forward. Here’s a summary of your order:', 'woocommerce' ); ?> </p>
 <!-- /wp:paragraph -->
 
 <!-- wp:woocommerce/email-content {"lock":{"move":false,"remove":true}} -->

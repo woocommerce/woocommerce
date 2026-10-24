@@ -8,10 +8,14 @@ permissions:
   contents: read
   issues: read
 
+env:
+  ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: 'true'
+
 jobs:
   check-upcoming-release-events:
     name: Check for upcoming release events
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     outputs:
       should-trigger-webhook: ${{ steps.check-code-freeze-8-weeks.outputs.should-trigger-webhook }}
       version: ${{ steps.check-code-freeze-8-weeks.outputs.version }}
@@ -26,7 +30,7 @@ jobs:
         run: npm install node-ical@0.23.1 rrule-temporal@1.4.1
       - name: Check for feature freeze events
         id: check-code-freeze-8-weeks
-        uses: actions/github-script@v7
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           script: |
             const ical = require( 'node-ical' );
@@ -82,7 +86,7 @@ jobs:
       - name: Get all events for version
         if: ${{ steps.check-code-freeze-8-weeks.outputs.version != '' }}
         id: get-all-events-for-version
-        uses: actions/github-script@v7
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           script: |
             const ical = require( 'node-ical' );
@@ -135,6 +139,7 @@ jobs:
     needs: [check-upcoming-release-events]
     if: ${{ needs.check-upcoming-release-events.outputs.should-trigger-webhook == 'true' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     outputs:
       create-tracking-issues: ${{ steps.trigger-upcoming-code-freeze-events.outputs.create-tracking-issues }}
       post: ${{ steps.trigger-upcoming-code-freeze-events.outputs.post }}
@@ -143,7 +148,7 @@ jobs:
       release-lead-google-login: ${{ steps.trigger-upcoming-code-freeze-events.outputs.release-lead-google-login }}
       release-lead-slack-member-id: ${{ steps.trigger-upcoming-code-freeze-events.outputs.release-lead-slack-member-id }}
     steps:
-      - uses: actions/github-script@v7
+      - uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         id: trigger-upcoming-code-freeze-events
         with:
           script: |
@@ -213,6 +218,7 @@ jobs:
     needs: [trigger-upcoming-code-freeze-events, check-upcoming-release-events, create-parent-tracking-issue, create-sub-tracking-issues]
     if: ${{ needs.trigger-upcoming-code-freeze-events.outputs.create-tracking-issues == 'true' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Send Slack notification
         uses: archive/github-actions-slack@a62d71a4ea93e68cbdc37581166b0298bea512e9 # v2.10.0
@@ -233,12 +239,13 @@ jobs:
     needs: [trigger-upcoming-code-freeze-events, check-upcoming-release-events]
     if: ${{ needs.trigger-upcoming-code-freeze-events.outputs.create-tracking-issues == 'true' }}
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     outputs:
       sub-issues-matrix: ${{ steps.build-matrix.outputs.matrix }}
       issue-url: ${{ steps.check-existing-issue.outputs.issue-url || steps.create-tracking-issue.outputs.issue-url }}
     steps:
       - name: Checkout repository (sparse)
-        uses: actions/checkout@v4
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           sparse-checkout: |
             .linear
@@ -249,7 +256,7 @@ jobs:
 
       - name: Check for existing release tracking issue
         id: check-existing-issue
-        uses: actions/github-script@v7
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           script: |
             const { LinearClient } = require( '@linear/sdk' );
@@ -281,7 +288,7 @@ jobs:
       - name: Get Linear data
         if: ${{ steps.check-existing-issue.outputs.exists != 'true' }}
         id: get-linear-data
-        uses: actions/github-script@v7
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           script: |
             const { LinearClient } = require( '@linear/sdk' );
@@ -314,7 +321,7 @@ jobs:
       - name: Get Linear user from email
         if: ${{ steps.check-existing-issue.outputs.exists != 'true' }}
         id: get-linear-user
-        uses: actions/github-script@v7
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           script: |
             const { LinearClient } = require( '@linear/sdk' );
@@ -339,10 +346,58 @@ jobs:
             core.setOutput( 'assignee-display-name', displayName || '' );
             core.setOutput( 'assignee-username', username || '' );
 
+      - name: Get release lead from two cycles ago
+        if: ${{ steps.check-existing-issue.outputs.exists != 'true' }}
+        id: get-previous-tracking-issue
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        with:
+          script: |
+            const { LinearClient } = require( '@linear/sdk' );
+            const linearClient = new LinearClient( {
+              apiKey: '${{ secrets.LINEAR_OAUTH_TOKEN }}'
+            } );
+
+            const releaseMainVersion = '${{ needs.check-upcoming-release-events.outputs.version }}';
+            const twoCyclesBackVersion = ( releaseMainVersion - 0.2 ).toFixed( 1 );
+            const fallbackMention = `the release lead from the ${ twoCyclesBackVersion } cycle`;
+
+            try {
+              const previousTitle = `[${ twoCyclesBackVersion }] Release tracking`;
+              console.log( `Looking for tracking issue two cycles back: "${ previousTitle }"` );
+
+              const issues = await linearClient.issues( {
+                includeArchived: true,
+                filter: {
+                  team: { id: { eq: '${{ secrets.LINEAR_TEAM_ID }}' } },
+                  title: { eq: previousTitle }
+                }
+              } );
+
+              const previousIssueUrl = issues.nodes[ 0 ]?.url;
+              const cycleRef = previousIssueUrl ? `[the ${ twoCyclesBackVersion } cycle](${ previousIssueUrl })` : `the ${ twoCyclesBackVersion } cycle`;
+
+              const assignee = await issues.nodes[ 0 ]?.assignee;
+
+              if ( ! assignee ) {
+                console.log( 'No assignee found for the tracking issue two cycles back' );
+                core.setOutput( 'mention', `the release lead from ${ cycleRef }` );
+                return;
+              }
+
+              console.log( 'Found release lead from two cycles back' );
+              const name = assignee.displayName;
+              core.setOutput( 'mention', `**${ name }** (release lead from ${ cycleRef })` );
+            } catch ( error ) {
+              core.warning( `Failed to look up the release lead from two cycles back, falling back to a generic mention: ${ error.message }` );
+              core.setOutput( 'mention', fallbackMention );
+            }
+
       - name: Process template and create release tracking issue
         if: ${{ steps.check-existing-issue.outputs.exists != 'true' }}
         id: create-tracking-issue
-        uses: actions/github-script@v7
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        env:
+          PREVIOUS_RELEASE_LEAD: ${{ steps.get-previous-tracking-issue.outputs.mention }}
         with:
           script: |
             const { LinearClient } = require( '@linear/sdk' );
@@ -395,7 +450,8 @@ jobs:
               '{date_beta1}': '${{ needs.check-upcoming-release-events.outputs.beta-1-release-date }}',
               '{date_beta2}': '${{ needs.check-upcoming-release-events.outputs.beta-2-release-date }}',
               '{date_rc1}': '${{ needs.check-upcoming-release-events.outputs.rc-1-release-date }}',
-              '{date_stable}': '${{ needs.check-upcoming-release-events.outputs.final-release-date }}'
+              '{date_stable}': '${{ needs.check-upcoming-release-events.outputs.final-release-date }}',
+              '{previous_release_lead}': process.env.PREVIOUS_RELEASE_LEAD || ''
             };
 
             // Apply replacements.
@@ -432,7 +488,7 @@ jobs:
 
       - name: Build sub-issues matrix
         id: build-matrix
-        uses: actions/github-script@v7
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         with:
           script: |
             const version = '${{ needs.check-upcoming-release-events.outputs.version }}';
@@ -467,6 +523,7 @@ jobs:
     needs: [check-upcoming-release-events, trigger-upcoming-code-freeze-events, send-slack-notification, create-parent-tracking-issue, create-sub-tracking-issues]
     if: ${{ failure() }}
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Send failure notification to Slack
         uses: archive/github-actions-slack@a62d71a4ea93e68cbdc37581166b0298bea512e9 # v2.10.0

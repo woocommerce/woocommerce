@@ -10,10 +10,6 @@ const resultsFiles = [
 		metricsPrefix: 'editor-',
 	},
 	{
-		file: 'product-editor.performance-results.json',
-		metricsPrefix: 'product-editor-',
-	},
-	{
 		file: 'frontend.performance-results.json',
 		metricsPrefix: 'frontend-',
 	},

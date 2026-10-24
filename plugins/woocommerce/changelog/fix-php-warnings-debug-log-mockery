@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Bump mockery/mockery dev dependency to ^1.6.10 to silence PHP 8.4 implicit-nullable deprecation warnings emitted on every request when opcache is disabled.

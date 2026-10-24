@@ -4,7 +4,6 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Jetpack;
 
 use Automattic\Jetpack\Connection\Manager;
-use Automattic\WooCommerce\Admin\Features\Features;
 use WP_Error;
 
 /**
@@ -64,10 +63,6 @@ class JetpackConnection {
 
 		$authorization_url = $manager->get_authorization_url( null, $redirect_url );
 		$authorization_url = add_query_arg( 'locale', self::get_wpcom_locale(), $authorization_url );
-
-		if ( Features::is_enabled( 'use-wp-horizon' ) ) {
-			$calypso_env = 'horizon';
-		}
 
 		$color_scheme = get_user_option( 'admin_color', get_current_user_id() );
 		if ( ! $color_scheme ) {

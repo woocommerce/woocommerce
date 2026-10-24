@@ -115,7 +115,6 @@ const OPTIONS_GROUPS = {
 	woocommerce_feature_remote_logging_enabled: 'Advanced',
 	woocommerce_feature_email_improvements_enabled: 'Advanced',
 	woocommerce_feature_blueprint_enabled: 'Advanced',
-	woocommerce_feature_product_block_editor_enabled: 'Advanced',
 	woocommerce_hpos_fts_index_enabled: 'Advanced',
 	woocommerce_feature_cost_of_goods_sold_enabled: 'Advanced',
 };

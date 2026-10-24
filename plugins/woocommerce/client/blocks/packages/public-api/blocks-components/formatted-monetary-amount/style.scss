@@ -1,0 +1,9 @@
+.wc-block-components-formatted-money-amount {
+	white-space: nowrap;
+}
+
+.wc-block-components-formatted-money-amount__currency-symbol {
+	// Theme resets can override the browser's default isolation for `dir`, which
+	// would draw an RTL-script symbol on the wrong side of the amount.
+	unicode-bidi: isolate;
+}

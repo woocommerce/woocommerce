@@ -49,9 +49,14 @@ class Products_API_V2 extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_products() {
 		wp_set_current_user( $this->user );
-		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_external_product();
-		sleep( 1 ); // So both products have different timestamps.
-		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
+		$external_product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_external_product();
+		$external_product->set_date_created( '2020-01-01 00:00:00' );
+		$external_product->save();
+
+		$simple_product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
+		$simple_product->set_date_created( '2020-01-02 00:00:00' );
+		$simple_product->save();
+
 		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v2/products' ) );
 		$products = $response->get_data();
 

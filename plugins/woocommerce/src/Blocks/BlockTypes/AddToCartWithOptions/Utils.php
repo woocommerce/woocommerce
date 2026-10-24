@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions;
 
 use Automattic\WooCommerce\Enums\ProductType;
-use WP_Block;
 
 /**
  * Utility methods used for the Add to Cart + Options block.
@@ -42,23 +41,25 @@ class Utils {
 	public static function add_quantity_steppers( $quantity_html, $product_name ) {
 		// Regex pattern to match the <input> element with id starting with 'quantity_'.
 		$pattern = '/(<input[^>]*id="quantity_[^"]*"[^>]*\/>)/';
-		// Replacement string to add button AFTER the matched <input> element.
+		// Add the minus button BEFORE the matched <input> element so DOM order matches the
+		// visual order (− input +), giving a logical focus and reading sequence.
 		// Use preg_replace_callback to avoid backreference interpretation of $, \ sequences in product names.
+		$new_html = preg_replace_callback(
+			$pattern,
+			function ( $matches ) use ( $product_name ) {
+				/* translators: %s refers to the item name in the cart. */
+				$minus_aria = esc_attr( sprintf( __( 'Reduce quantity of %s', 'woocommerce' ), $product_name ) );
+				return '<button aria-label="' . $minus_aria . '" type="button" data-wp-on--click="actions.decreaseQuantity" data-wp-bind--disabled="!state.allowsDecrease" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">−</button>' . $matches[1];
+			},
+			$quantity_html ?? ''
+		);
+		// Add the plus button AFTER the matched <input> element.
 		$new_html = preg_replace_callback(
 			$pattern,
 			function ( $matches ) use ( $product_name ) {
 				/* translators: %s refers to the item name in the cart. */
 				$plus_aria = esc_attr( sprintf( __( 'Increase quantity of %s', 'woocommerce' ), $product_name ) );
 				return $matches[1] . '<button aria-label="' . $plus_aria . '" type="button" data-wp-on--click="actions.increaseQuantity" data-wp-bind--disabled="!state.allowsIncrease" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">+</button>';
-			},
-			$quantity_html ?? ''
-		);
-		$new_html = preg_replace_callback(
-			$pattern,
-			function ( $matches ) use ( $product_name ) {
-				/* translators: %s refers to the item name in the cart. */
-				$minus_aria = esc_attr( sprintf( __( 'Reduce quantity of %s', 'woocommerce' ), $product_name ) );
-				return $matches[1] . '<button aria-label="' . $minus_aria . '" type="button" data-wp-on--click="actions.decreaseQuantity" data-wp-bind--disabled="!state.allowsDecrease" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">−</button>';
 			},
 			$new_html ?? ''
 		);
@@ -224,27 +225,6 @@ class Utils {
 		}
 
 		return false;
-	}
-
-	/**
-	 * Renders a new block with custom context
-	 *
-	 * @param WP_Block $block The block instance.
-	 * @param array    $context The context for the new block.
-	 * @return string Rendered block content
-	 */
-	public static function render_block_with_context( $block, $context ) {
-		// Get an instance of the current block.
-		$block_instance = $block->parsed_block;
-
-		// Create new block with custom context.
-		$new_block = new WP_Block(
-			$block_instance,
-			$context
-		);
-
-		// Render with dynamic set to false to prevent calling render_callback.
-		return $new_block->render( array( 'dynamic' => false ) );
 	}
 
 	/**

@@ -15,10 +15,8 @@ import { MARKETPLACE_PATH } from '../constants';
 
 /**
  * Search component.
- *
- * @return {JSX.Element} Search component.
  */
-function Search(): JSX.Element {
+function Search(): React.JSX.Element {
 	const [ searchTerm, setSearchTerm ] = useState( '' );
 	const searchPlaceholder = __( 'Search Marketplace', 'woocommerce' );
 
@@ -65,9 +63,15 @@ function Search(): JSX.Element {
 		}
 	};
 
-	const onClose = () => {
-		setSearchTerm( '' );
-		runSearch( '' );
+	// SearchControl only shows its reset button while the field has text,
+	// and reset empties the field through onChange. When a search is active,
+	// emptying the field also clears the results.
+	const onChange = ( value: string ) => {
+		setSearchTerm( value );
+
+		if ( value === '' && query.term ) {
+			runSearch( '' );
+		}
 	};
 
 	const onFocus = () => {
@@ -82,9 +86,8 @@ function Search(): JSX.Element {
 			label={ searchPlaceholder }
 			placeholder={ searchPlaceholder }
 			value={ searchTerm }
-			onChange={ setSearchTerm }
+			onChange={ onChange }
 			onKeyUp={ handleKeyUp }
-			onClose={ onClose }
 			onFocus={ onFocus }
 			className="woocommerce-marketplace__search"
 		/>

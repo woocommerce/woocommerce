@@ -5,6 +5,8 @@
  * @package WooCommerce\Emails
  */
 
+use Automattic\WooCommerce\EmailEditor\Engine\Personalizer;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
@@ -86,7 +88,7 @@ if ( ! class_exists( 'WC_Email_Customer_Partially_Refunded_Order', false ) ) :
 			 */
 			$subject = apply_filters( 'woocommerce_email_subject_customer_refunded_order', $this->format_string( $subject ), $this->object, $this );
 			if ( $this->block_email_editor_enabled ) {
-				$subject = $this->personalizer->personalize_transactional_content( $subject, $this );
+				$subject = $this->personalizer->personalize_transactional_content( $subject, $this, Personalizer::RENDERING_CONTEXT_TEXT );
 			}
 			return $subject;
 		}

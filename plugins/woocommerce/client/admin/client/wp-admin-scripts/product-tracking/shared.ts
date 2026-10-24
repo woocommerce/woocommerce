@@ -347,7 +347,7 @@ const attachProductInventoryTabTracks = () => {
  * Attaches product tags tracks.
  */
 const attachProductTagsTracks = () => {
-	function deleteTagEventListener(/* event: Event */) {
+	function deleteTagEventListener( /* event: Event */ ) {
 		recordEvent( 'product_tags_delete', {
 			page: 'product',
 			tag_list_size:
@@ -369,26 +369,26 @@ const attachProductTagsTracks = () => {
 		addTagsDeleteTracks
 	);
 
-	document
-		.querySelector( '.tagadd' )
-		?.addEventListener( 'click', (/* event: Event */) => {
-			const tagInput = document.querySelector< HTMLInputElement >(
-				'#new-tag-product_tag'
-			);
-			if ( tagInput && tagInput.value && tagInput.value.length > 0 ) {
-				recordEvent( 'product_tags_add', {
-					page: 'product',
-					tag_string_length: tagInput.value.length,
-					tag_list_size:
-						( document.querySelector( '.tagchecklist' )?.children
-							.length || 0 ) + 1,
-					most_used: false,
-				} );
-				setTimeout( () => {
-					addTagsDeleteTracks();
-				}, 500 );
-			}
-		} );
+	document.querySelector( '.tagadd' )?.addEventListener( 'click', (
+		/* event: Event */
+	) => {
+		const tagInput = document.querySelector< HTMLInputElement >(
+			'#new-tag-product_tag'
+		);
+		if ( tagInput && tagInput.value && tagInput.value.length > 0 ) {
+			recordEvent( 'product_tags_add', {
+				page: 'product',
+				tag_string_length: tagInput.value.length,
+				tag_list_size:
+					( document.querySelector( '.tagchecklist' )?.children
+						.length || 0 ) + 1,
+				most_used: false,
+			} );
+			setTimeout( () => {
+				addTagsDeleteTracks();
+			}, 500 );
+		}
+	} );
 
 	function addMostUsedTagEventListener( event: Event ) {
 		recordEvent( 'product_tags_add', {
@@ -474,7 +474,7 @@ const getUsedForVariationsAttributesCount = () =>
 		?.value === 'variable'
 		? document.querySelectorAll(
 				'input[name^="attribute_variation"]:checked'
-		  ).length
+			).length
 		: 0;
 
 /**
@@ -781,7 +781,7 @@ export function addExitPageListener( pageId: string ) {
 		}
 		return isDisabled;
 	}
-	window.addEventListener( 'beforeunload', function (/* event */) {
+	window.addEventListener( 'beforeunload', function ( /* event */ ) {
 		// Check if button disabled or triggered delete to see if user saved or deleted the product instead.
 		if ( checkIfSubmitButtonsDisabled() || triggeredDelete ) {
 			productChanged = false;

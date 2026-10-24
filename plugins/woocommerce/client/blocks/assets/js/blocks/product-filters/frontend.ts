@@ -2,12 +2,12 @@
  * External dependencies
  */
 import * as iAPI from '@wordpress/interactivity';
+import type { SelectableItemsParentStore } from '@woocommerce/types';
 
 /**
  * Internal dependencies
  */
 import { decodeHtmlEntities } from '../../utils/html-entities';
-import type { SelectableItemsParentStore } from '../../types/type-defs/selectable-items';
 import type {
 	ActiveFilterItem,
 	FilterItemFields,
@@ -15,10 +15,26 @@ import type {
 	ProductFiltersContext,
 } from './types';
 import { getClosestColor } from './utils/get-closest-color';
+import { getFocusableElements } from '../../utils/get-focusable-elements';
+import { reload } from '../../utils/navigation';
+import { PRODUCT_FILTERS_STORE_NAME } from './constants';
 
-const { getContext, getElement, store, getServerContext, getConfig } = iAPI;
+const {
+	getContext,
+	getElement,
+	store,
+	getServerContext,
+	getConfig,
+	withSyncEvent,
+} = iAPI;
 
-const BLOCK_NAME = 'woocommerce/product-filters';
+const BLOCK_NAME = PRODUCT_FILTERS_STORE_NAME;
+
+let pendingNavigation: { source: string; destination: string } | undefined;
+
+window.addEventListener( 'popstate', () => {
+	pendingNavigation = undefined;
+} );
 
 type ValidFilterOptionItem = FilterOptionItem & {
 	type: string;
@@ -77,28 +93,34 @@ function unselectFilter( item: ValidFilterOptionItem ) {
 const productFiltersStore = {
 	state: {
 		get params() {
-			const { activeFilters } = getContext< ProductFiltersContext >();
 			const params: Record< string, string > = {};
 
 			function addParam( key: string, value: string ) {
-				if ( key in params && params[ key ].length > 0 )
+				if ( key in params && params[ key ].length > 0 ) {
 					return ( params[ key ] = `${ params[ key ] },${ value }` );
+				}
 				params[ key ] = value;
 			}
 
 			const config = getConfig( BLOCK_NAME );
 			const taxonomyParamsMap = config?.taxonomyParamsMap || {};
 
-			activeFilters.forEach( ( filter ) => {
+			state.activeFilters.forEach( ( filter ) => {
 				// todo: refactor this to use params data from Automattic\WooCommerce\Internal\ProductFilters\Params.
 				const { type, value } = filter;
 
-				if ( ! value ) return;
+				if ( ! value ) {
+					return;
+				}
 
 				if ( type === 'price' ) {
 					const [ min, max ] = value.split( '|' );
-					if ( min ) params.min_price = min;
-					if ( max ) params.max_price = max;
+					if ( min ) {
+						params.min_price = min;
+					}
+					if ( max ) {
+						params.max_price = max;
+					}
 				}
 
 				if ( type === 'status' ) {
@@ -148,7 +170,9 @@ const productFiltersStore = {
 				? getServerContext< ProductFiltersContext >()
 				: getContext< ProductFiltersContext >();
 			const items = server.items;
-			if ( ! Array.isArray( items ) ) return [];
+			if ( ! Array.isArray( items ) ) {
+				return [];
+			}
 			return items.map( ( item ) => ( {
 				...item,
 				selected: state.activeFilters.some(
@@ -157,10 +181,19 @@ const productFiltersStore = {
 				),
 			} ) );
 		},
+		get overlayDialogRole() {
+			const { isOverlayOpened } = getContext< ProductFiltersContext >();
+			return isOverlayOpened ? 'dialog' : null;
+		},
+		get overlayDialogAriaModal() {
+			const { isOverlayOpened } = getContext< ProductFiltersContext >();
+			return isOverlayOpened ? true : null;
+		},
 	},
 	actions: {
 		openOverlay: () => {
 			const context = getContext< ProductFiltersContext >();
+			context.openButtonRef = getElement().ref;
 			context.isOverlayOpened = true;
 			if ( document.getElementById( 'wpadminbar' ) ) {
 				const scrollTop = (
@@ -177,13 +210,65 @@ const productFiltersStore = {
 		closeOverlay: () => {
 			const context = getContext< ProductFiltersContext >();
 			context.isOverlayOpened = false;
+			context.openButtonRef?.focus();
+			context.openButtonRef = null;
 		},
-		closeOverlayOnEscape: ( event: KeyboardEvent ) => {
-			const context = getContext< ProductFiltersContext >();
-			if ( context.isOverlayOpened && event.key === 'Escape' ) {
+		closeOverlayOnBackdrop: ( event: MouseEvent ) => {
+			if ( event.target === event.currentTarget ) {
 				actions.closeOverlay();
 			}
 		},
+		/**
+		 * @deprecated Since 11.4.0.
+		 */
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		closeOverlayOnEscape: ( event?: KeyboardEvent ) => {
+			console.warn(
+				'actions.closeOverlayOnEscape is deprecated since WooCommerce 11.4.0.'
+			);
+		},
+		handleOverlayKeydown: withSyncEvent( ( event: KeyboardEvent ) => {
+			const context = getContext< ProductFiltersContext >();
+			if ( ! context.isOverlayOpened ) {
+				return;
+			}
+
+			if ( event.key === 'Escape' ) {
+				event.preventDefault();
+				actions.closeOverlay();
+				return;
+			}
+
+			if ( event.key !== 'Tab' ) {
+				return;
+			}
+
+			const { ref: dialog } = getElement();
+			if ( ! dialog ) {
+				return;
+			}
+
+			const focusableElements = getFocusableElements( dialog );
+			const first = focusableElements[ 0 ];
+			const last = focusableElements[ focusableElements.length - 1 ];
+			if ( ! first || ! last ) {
+				return;
+			}
+
+			const active = dialog.ownerDocument.activeElement;
+			const focusIsOutside = ! dialog.contains( active );
+
+			if ( event.shiftKey && ( active === first || focusIsOutside ) ) {
+				event.preventDefault();
+				last.focus();
+				return;
+			}
+
+			if ( ! event.shiftKey && ( active === last || focusIsOutside ) ) {
+				event.preventDefault();
+				first.focus();
+			}
+		} ),
 		removeActiveFiltersBy: (
 			callback: ( item: ActiveFilterItem ) => boolean
 		) => {
@@ -198,8 +283,10 @@ const productFiltersStore = {
 				itemArg && ! ( itemArg instanceof Event )
 					? itemArg
 					: context.item;
-			if ( ! item || ! isValidFilterOptionItem( item ) ) return;
-			const isSelected = context.activeFilters.some(
+			if ( ! item || ! isValidFilterOptionItem( item ) ) {
+				return;
+			}
+			const isSelected = state.activeFilters.some(
 				( f ) => f.type === item.type && f.value === item.value
 			);
 			if ( isSelected ) {
@@ -207,20 +294,36 @@ const productFiltersStore = {
 			} else {
 				selectFilter( item );
 			}
-			actions.navigate();
+			void actions.navigate();
 		},
-		// TODO: Remove the hardcoded type once https://github.com/woocommerce/gutenberg/pull/8 is merged.
-		*navigate(): Generator {
+		*navigate() {
 			const context = getServerContext
 				? getServerContext< ProductFiltersContext >()
 				: getContext< ProductFiltersContext >();
 
-			const canonicalUrl = getConfig( BLOCK_NAME ).canonicalUrl;
-			const url = new URL( canonicalUrl );
+			const config = getConfig( BLOCK_NAME );
+			const { queryId } = context;
+			const prefix = queryId === undefined ? '' : `wcp-${ queryId }-`;
+			const currentUrl =
+				pendingNavigation?.source === window.location.href
+					? pendingNavigation.destination
+					: window.location.href;
+			const url = new URL(
+				queryId === undefined ? config.canonicalUrl : currentUrl
+			);
+			url.search = new URL( currentUrl ).search;
 			const { searchParams } = url;
 
-			for ( const key in context.params ) {
-				searchParams.delete( key );
+			if ( queryId === undefined ) {
+				searchParams.delete( 'paged' );
+				searchParams.delete( 'product-page' );
+			} else {
+				searchParams.delete( `query-${ queryId }-page` );
+			}
+
+			for ( const key of config.filterParamKeys ??
+				Object.keys( context.params ) ) {
+				searchParams.delete( `${ prefix }${ key }` );
 			}
 
 			for ( const key in state.params ) {
@@ -240,23 +343,82 @@ const productFiltersStore = {
 					}
 				}
 
-				searchParams.set( key, decodedValue );
+				searchParams.set( `${ prefix }${ key }`, decodedValue );
 			}
 
-			if ( window.location.href === url.href ) {
+			if ( currentUrl === url.href ) {
 				return;
 			}
 
-			const routerModule: typeof import('@wordpress/interactivity-router') =
-				yield import( '@wordpress/interactivity-router' );
+			// Per-instance context (set when Product Filters is a descendant
+			// of Product Collection) wins over the global config, which is
+			// the fallback for the sibling-block layout.
+			const forcePageReload =
+				typeof context.forcePageReload === 'boolean'
+					? context.forcePageReload
+					: config?.forcePageReload;
 
-			yield routerModule.actions.navigate( url.href );
+			if ( forcePageReload ) {
+				reload( url.href );
+				return;
+			}
+
+			const navigation = {
+				source: window.location.href,
+				destination: url.href,
+			};
+			pendingNavigation = navigation;
+			try {
+				const routerModule: typeof import( '@wordpress/interactivity-router' ) =
+					yield import( '@wordpress/interactivity-router' );
+
+				if ( pendingNavigation === navigation ) {
+					yield routerModule.actions.navigate( url.href );
+				}
+			} finally {
+				if ( pendingNavigation === navigation ) {
+					pendingNavigation = undefined;
+				}
+			}
 		},
 	},
 	callbacks: {
+		initOverlay: () => {
+			const { ref: openButton } = getElement();
+			if ( ! openButton ) {
+				return;
+			}
+			const context = getContext< ProductFiltersContext >();
+			const observer = new ResizeObserver( () => {
+				// Responsive CSS hides the opener when filters become inline.
+				if ( getComputedStyle( openButton ).display === 'none' ) {
+					context.isOverlayOpened = false;
+					context.openButtonRef = null;
+				}
+			} );
+			observer.observe( openButton );
+			return () => observer.disconnect();
+		},
+		focusOverlay: () => {
+			const context = getContext< ProductFiltersContext >();
+			if ( ! context.isOverlayOpened ) {
+				return;
+			}
+			const { ref: dialog } = getElement();
+
+			// Wait for the open class to make the drawer visible before focusing.
+			const frame = requestAnimationFrame( () => {
+				if ( context.isOverlayOpened ) {
+					getFocusableElements( dialog )[ 0 ]?.focus();
+				}
+			} );
+			return () => cancelAnimationFrame( frame );
+		},
 		initColors: () => {
 			const el = getElement();
-			if ( ! el.ref ) return;
+			if ( ! el.ref ) {
+				return;
+			}
 
 			const style = el.ref.style;
 			const hasBg = style.getPropertyValue(
@@ -290,11 +452,21 @@ const productFiltersStore = {
 				document.body.style.overflow = 'auto';
 			}
 		},
+		syncActiveFiltersWithServer: () => {
+			if ( ! getServerContext ) {
+				return;
+			}
+			const context = getContext< ProductFiltersContext >();
+			const serverContext = getServerContext< ProductFiltersContext >();
+
+			context.activeFilters = Array.isArray( serverContext.activeFilters )
+				? serverContext.activeFilters.map( ( item ) => ( { ...item } ) )
+				: [];
+		},
 	},
 };
 
 // Compile-time protocol conformance check.
-// eslint-disable-next-line @typescript-eslint/no-unused-expressions
 productFiltersStore satisfies SelectableItemsParentStore< FilterItemFields >;
 
 export type ProductFiltersStore = typeof productFiltersStore;

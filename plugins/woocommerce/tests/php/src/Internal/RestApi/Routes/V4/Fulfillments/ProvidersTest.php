@@ -29,25 +29,25 @@ class ProvidersTest extends WC_REST_Unit_Test_Case {
 	private static $original_fulfillments_flag;
 
 	/**
-	 * Admin user for tests
+	 * Admin user for tests, shared across all tests in the class for REST authentication.
 	 *
 	 * @var int
 	 */
-	private int $admin_user_id;
+	private static int $admin_user_id;
 
 	/**
-	 * Shop manager user for tests
+	 * Shop manager user for tests, shared across all tests in the class.
 	 *
 	 * @var int
 	 */
-	private int $shop_manager_user_id;
+	private static int $shop_manager_user_id;
 
 	/**
-	 * Customer user for tests
+	 * Customer user for tests, shared across all tests in the class.
 	 *
 	 * @var int
 	 */
-	private int $customer_user_id;
+	private static int $customer_user_id;
 
 	/**
 	 * Set up the test environment.
@@ -74,6 +74,31 @@ class ProvidersTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Create the shared users once for the whole class.
+	 *
+	 * @param object $factory Factory object.
+	 */
+	public static function wpSetUpBeforeClass( $factory ) {
+		self::$admin_user_id = $factory->user->create(
+			array(
+				'role' => 'administrator',
+			)
+		);
+
+		self::$shop_manager_user_id = $factory->user->create(
+			array(
+				'role' => 'shop_manager',
+			)
+		);
+
+		self::$customer_user_id = $factory->user->create(
+			array(
+				'role' => 'customer',
+			)
+		);
+	}
+
+	/**
 	 * Setup test environment
 	 */
 	public function setUp(): void {
@@ -82,36 +107,6 @@ class ProvidersTest extends WC_REST_Unit_Test_Case {
 		$this->controller = new FulfillmentsController();
 		$this->controller->init( new FulfillmentSchema(), new OrderFulfillmentsRestController() );
 		$this->controller->register_routes();
-
-		$this->admin_user_id = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
-
-		$this->shop_manager_user_id = $this->factory->user->create(
-			array(
-				'role' => 'shop_manager',
-			)
-		);
-
-		$this->customer_user_id = $this->factory->user->create(
-			array(
-				'role' => 'customer',
-			)
-		);
-	}
-
-	/**
-	 * Teardown test environment
-	 */
-	public function tearDown(): void {
-		// Delete the created users.
-		wp_delete_user( $this->admin_user_id );
-		wp_delete_user( $this->shop_manager_user_id );
-		wp_delete_user( $this->customer_user_id );
-
-		parent::tearDown();
 	}
 
 	/**
@@ -127,7 +122,7 @@ class ProvidersTest extends WC_REST_Unit_Test_Case {
 	 * Test get_providers endpoint success
 	 */
 	public function test_get_providers_success() {
-		wp_set_current_user( $this->admin_user_id );
+		wp_set_current_user( self::$admin_user_id );
 
 		$request = new WP_REST_Request( 'GET', '/wc/v4/fulfillments/providers' );
 
@@ -139,7 +134,7 @@ class ProvidersTest extends WC_REST_Unit_Test_Case {
 	 * Test get_providers contains expected providers
 	 */
 	public function test_get_providers_contains_expected_providers() {
-		wp_set_current_user( $this->admin_user_id );
+		wp_set_current_user( self::$admin_user_id );
 
 		// Add a test provider using the filter.
 		$test_provider = function () {
@@ -164,7 +159,7 @@ class ProvidersTest extends WC_REST_Unit_Test_Case {
 	 * Test permission check - admin user
 	 */
 	public function test_permission_check_admin() {
-		wp_set_current_user( $this->admin_user_id );
+		wp_set_current_user( self::$admin_user_id );
 
 		$request = new WP_REST_Request( 'GET', '/wc/v4/fulfillments/providers' );
 
@@ -176,7 +171,7 @@ class ProvidersTest extends WC_REST_Unit_Test_Case {
 	 * Test permission check - shop manager user
 	 */
 	public function test_permission_check_shop_manager() {
-		wp_set_current_user( $this->shop_manager_user_id );
+		wp_set_current_user( self::$shop_manager_user_id );
 
 		$request = new WP_REST_Request( 'GET', '/wc/v4/fulfillments/providers' );
 
@@ -188,7 +183,7 @@ class ProvidersTest extends WC_REST_Unit_Test_Case {
 	 * Test permission check - customer user
 	 */
 	public function test_permission_check_customer() {
-		wp_set_current_user( $this->customer_user_id );
+		wp_set_current_user( self::$customer_user_id );
 
 		$request = new WP_REST_Request( 'GET', '/wc/v4/fulfillments/providers' );
 
@@ -215,7 +210,7 @@ class ProvidersTest extends WC_REST_Unit_Test_Case {
 		// Disable the fulfillments feature.
 		update_option( 'woocommerce_feature_fulfillments_enabled', 'no' );
 
-		wp_set_current_user( $this->admin_user_id );
+		wp_set_current_user( self::$admin_user_id );
 
 		$request = new WP_REST_Request( 'GET', '/wc/v4/fulfillments/providers' );
 
@@ -233,7 +228,7 @@ class ProvidersTest extends WC_REST_Unit_Test_Case {
 	 * Test response format validation
 	 */
 	public function test_response_format_validation() {
-		wp_set_current_user( $this->admin_user_id );
+		wp_set_current_user( self::$admin_user_id );
 
 		$request = new WP_REST_Request( 'GET', '/wc/v4/fulfillments/providers' );
 

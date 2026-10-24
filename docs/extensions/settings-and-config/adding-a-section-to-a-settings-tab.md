@@ -1,6 +1,7 @@
 ---
 post_title: How to add a section to a settings tab
-sidebar_label: Add a section to a settings tab
+sidebar_label: Settings tab sections
+sidebar_position: 3
 
 ---
 
@@ -47,7 +48,7 @@ Make sure you change the  **wcslider**  parts to suit your extension's name / te
 
 ## How to Add Settings to a Section
 
-Now that you've got the tab, you need to filter the output of  `woocommerce_get_sections_products`  (or similar). You would add the settings like usual using the  [**WooCommerce Settings API**](./settings-api.md), but check for the current section before adding the settings to the tab's settings array. For example, let's add the sample settings we discussed above to the new  **wcslider**  section we just created:
+Now that you've got the tab, you need to filter the output of  `woocommerce_get_sections_products`  (or similar). You would add the settings like usual using the  [**WooCommerce Settings API**](/docs/extensions/settings-and-config/settings-api/), but check for the current section before adding the settings to the tab's settings array. For example, let's add the sample settings we discussed above to the new  **wcslider**  section we just created:
 
 ```php
 /**
@@ -138,4 +139,4 @@ You would now just use your newly created settings like you would any other Word
 
 ## Conclusion
 
-When creating an extension for WooCommerce, think about where your settings belong before you create them. The key to building a useful product is making it easy to use for the end user, so appropriate setting placement is crucially important. For more specific information on adding settings to WooCommerce, check out the  [**Settings API documentation**](https://github.com/woocommerce/woocommerce/blob/trunk/docs/extension-development/settings-api.md).
+When creating an extension for WooCommerce, think about where your settings belong before you create them. The key to building a useful product is making it easy to use for the end user, so appropriate setting placement is crucially important. For more specific information on adding settings to WooCommerce, check out the  [**Settings API documentation**](/docs/extensions/settings-and-config/settings-api/).

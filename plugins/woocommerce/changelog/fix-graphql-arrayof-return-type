@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Honor `#[ArrayOf]` on query and mutation return types in the GraphQL API builder

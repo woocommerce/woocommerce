@@ -29,7 +29,7 @@ type TablePlaceholderProps = {
 /**
  * `TablePlaceholder` behaves like `Table` but displays placeholder boxes instead of data. This can be used while loading.
  */
-const TablePlaceholder: React.VFC< TablePlaceholderProps > = ( {
+const TablePlaceholder: React.FC< TablePlaceholderProps > = ( {
 	query,
 	caption,
 	headers,

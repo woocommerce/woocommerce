@@ -2,7 +2,8 @@
  * External dependencies
  */
 import { useState } from '@wordpress/element';
-import { act, render, screen } from '@testing-library/react';
+// eslint-disable-next-line import/named -- React Testing Library re-exports screen from DOM Testing Library.
+import { act, render, screen, type RenderResult } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { registerCoreBlocks } from '@wordpress/block-library';
 import '@wordpress/format-library';
@@ -14,7 +15,6 @@ import {
 	// @ts-expect-error privateApis exists but is not typed
 	privateApis as blockEditorPrivateApis,
 } from '@wordpress/block-editor';
-// eslint-disable-next-line @woocommerce/dependency-group
 import {
 	type BlockAttributes,
 	type BlockInstance,
@@ -22,14 +22,12 @@ import {
 	createBlocksFromInnerBlocksTemplate,
 } from '@wordpress/blocks';
 
-// @ts-expect-error lock-unlock exists but is not typed
-import { unlock } from '@wordpress/block-library/build/lock-unlock'; // eslint-disable-line
-
 /**
  * Internal dependencies
  */
 import { waitForStoreResolvers } from './wait-for-store-resolvers';
-import { registerProductEntity } from '../../../assets/js/entities/register-entities';
+import { unlock } from '../../utils/lock-unlock';
+import { registerProductEntity } from '../../../packages/public-api/entity-registration/register-entities';
 
 const { ExperimentalBlockCanvas: BlockCanvas } = unlock(
 	blockEditorPrivateApis
@@ -47,14 +45,17 @@ export async function selectBlock( name: string | RegExp ) {
 export function Editor( {
 	testBlocks,
 	settings = {},
+	useSubRegistry = true,
 }: {
 	testBlocks: BlockInstance< BlockAttributes >[];
 	settings?: Partial< EditorSettings & EditorBlockListSettings >;
+	useSubRegistry?: boolean;
 } ) {
 	const [ currentBlocks, updateBlocks ] = useState( testBlocks );
 
 	return (
 		<BlockEditorProvider
+			useSubRegistry={ useSubRegistry }
 			value={ currentBlocks }
 			onInput={ updateBlocks }
 			onChange={ updateBlocks }
@@ -71,13 +72,16 @@ let areCoreBlocksRegistered = false;
 /**
  * Registers the core block, creates the test block instances, and then instantiates the Editor.
  *
- * @param testBlocks Block or array of block settings for blocks to be tested.
- * @param settings   Any additional editor settings to be passed to the editor.
+ * @param testBlocks             Block or array of block settings for blocks to be tested.
+ * @param settings               Any additional editor settings to be passed to the editor.
+ * @param options                Options for the editor data registry.
+ * @param options.useSubRegistry Whether to isolate the editor data registry.
  */
 export async function initializeEditor(
 	testBlocks: BlockAttributes | BlockAttributes[],
-	settings: Partial< EditorSettings & EditorBlockListSettings > = {}
-) {
+	settings: Partial< EditorSettings & EditorBlockListSettings > = {},
+	options: { useSubRegistry?: boolean } = {}
+): Promise< RenderResult > {
 	if ( ! areCoreBlocksRegistered ) {
 		registerCoreBlocks();
 		areCoreBlocksRegistered = true;
@@ -96,6 +100,12 @@ export async function initializeEditor(
 		)
 	);
 	return waitForStoreResolvers( () =>
-		render( <Editor testBlocks={ newBlocks } settings={ settings } /> )
+		render(
+			<Editor
+				testBlocks={ newBlocks }
+				settings={ settings }
+				useSubRegistry={ options.useSubRegistry }
+			/>
+		)
 	);
 }

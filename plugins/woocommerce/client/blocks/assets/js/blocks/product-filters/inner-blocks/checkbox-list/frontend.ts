@@ -2,17 +2,22 @@
  * External dependencies
  */
 import { store, getContext } from '@wordpress/interactivity';
+import type {
+	SelectableItem,
+	SelectableItemsParentStore,
+} from '@woocommerce/types';
 
 /**
  * Internal dependencies
  */
-import type {
-	SelectableItem,
-	SelectableItemsParentStore,
-} from '../../../../types/type-defs/selectable-items';
+import {
+	getVisualAttributeTermStyleString,
+	isVisualAttributeTermEmpty,
+} from '../../../../base/utils/visual-attribute-terms';
+import type { VisualAttributeTerm } from '../../../../base/utils/visual-attribute-terms';
 
 type CheckboxListItem = SelectableItem< {
-	color?: string;
+	visual?: VisualAttributeTerm;
 	index?: number;
 } >;
 
@@ -38,10 +43,12 @@ type CheckboxListStore = {
 };
 
 function getParentStore( storeNamespace?: string ) {
-	if ( ! storeNamespace ) return undefined;
-	return store< SelectableItemsParentStore< { color?: string } > >(
-		storeNamespace
-	);
+	if ( ! storeNamespace ) {
+		return undefined;
+	}
+	return store<
+		SelectableItemsParentStore< { visual?: VisualAttributeTerm } >
+	>( storeNamespace );
 }
 
 function normalizeDisplayLimit( displayLimit: number ): number {
@@ -66,7 +73,9 @@ const { state }: CheckboxListStore = store< CheckboxListStore >(
 					getContext< CheckboxListContext >();
 				const parentItems =
 					getParentStore( storeNamespace )?.state?.selectableItems;
-				if ( ! Array.isArray( parentItems ) ) return [];
+				if ( ! Array.isArray( parentItems ) ) {
+					return [];
+				}
 				const normalizedDisplayLimit =
 					normalizeDisplayLimit( displayLimit );
 				return parentItems.map( ( item, index ) => ( {
@@ -81,23 +90,26 @@ const { state }: CheckboxListStore = store< CheckboxListStore >(
 			},
 			get ratingStyle(): string {
 				const item = getCurrentItem();
-				if ( ! item ) return '';
+				if ( ! item ) {
+					return '';
+				}
 				return `width: ${ Number( item.value ) * 20 }%`;
 			},
 			get colorSwatchStyle(): string {
 				const item = getCurrentItem();
-				if ( ! item?.color ) return '';
-				return `background-color: ${ item.color }`;
+				return getVisualAttributeTermStyleString( item?.visual );
 			},
 			get isColorSwatchEmpty(): boolean {
 				const item = getCurrentItem();
-				return ! item?.color;
+				return isVisualAttributeTermEmpty( item?.visual );
 			},
 		},
 		actions: {
 			toggle() {
 				const item = getCurrentItem();
-				if ( ! item ) return;
+				if ( ! item ) {
+					return;
+				}
 				const { storeNamespace } = getContext< CheckboxListContext >();
 				getParentStore( storeNamespace )?.actions?.toggle?.( item );
 			},

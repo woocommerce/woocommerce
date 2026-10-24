@@ -80,6 +80,8 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 	 *           [true]
 	 *
 	 * @param bool $previously_existing True to create a lookup table beforehand.
+	 *
+	 * @ddlInTransaction The regenerator under test truncates and creates the lookup table.
 	 */
 	public function test_initiate_regeneration_creates_lookup_table( $previously_existing ) {
 		global $wpdb;
@@ -109,6 +111,8 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox `initiate_regeneration` initializes the transient options, and enqueues the first step for time()+1.
+	 *
+	 * @ddlInTransaction The regenerator under test truncates and creates the lookup table.
 	 */
 	public function test_initiate_regeneration_initializes_temporary_options_and_enqueues_regeneration_step() {
 		// phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.Found
@@ -149,6 +153,8 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 	 *           [[]]
 	 *
 	 * @param mixed $get_products_result Result from wc_get_products.
+	 *
+	 * @ddlInTransaction The regenerator under test truncates and creates the lookup table.
 	 */
 	public function test_initiate_regeneration_does_not_enqueues_regeneration_step_when_no_products( $get_products_result ) {
 		// phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.Found
@@ -171,6 +177,8 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox `initiate_regeneration` processes one chunk of products IDs and enqueues next step if there are more products available.
+	 *
+	 * @ddlInTransaction The regenerator under test truncates and creates the lookup table.
 	 */
 	public function test_initiate_regeneration_correctly_processes_ids_and_enqueues_next_step() {
 		$requested_products_offsets = array();
@@ -196,7 +204,6 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 
 		update_option( 'woocommerce_attribute_lookup_processed_count', 7 );
 
-		//phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'woocommerce_run_product_attribute_lookup_regeneration_callback' );
 
 		$this->assertEquals( array( 1, 2, 3 ), $this->lookup_data_store->passed_products );
@@ -221,6 +228,8 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 	 *           [false]
 	 *
 	 * @param bool $set_filter Whether to use the filter to change the processing group size or not.
+	 *
+	 * @ddlInTransaction The regenerator under test truncates and creates the lookup table.
 	 */
 	public function test_regeneration_uses_the_woocommerce_attribute_lookup_regeneration_step_size_filter( bool $set_filter ) {
 		$requested_step_sizes = array();
@@ -254,7 +263,6 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 		$this->sut->initiate_regeneration();
 		$this->queue->clear_methods_called();
 
-		//phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'woocommerce_run_product_attribute_lookup_regeneration_callback' );
 
 		remove_all_filters( ' woocommerce_attribute_lookup_regeneration_step_size' );
@@ -271,6 +279,8 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 	 *           [[]]
 	 *
 	 * @param array $product_ids The products ids that wc_get_products will return.
+	 *
+	 * @ddlInTransaction The regenerator under test truncates and creates the lookup table.
 	 */
 	public function test_initiate_regeneration_finishes_when_no_more_products_available( $product_ids ) {
 		$this->register_legacy_proxy_function_mocks(
@@ -288,7 +298,6 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 		$this->sut->initiate_regeneration();
 		$this->queue->clear_methods_called();
 
-		//phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'woocommerce_run_product_attribute_lookup_regeneration_callback' );
 
 		$this->assertEquals( $product_ids, $this->lookup_data_store->passed_products );
@@ -315,10 +324,100 @@ class DataRegeneratorTest extends \WC_Unit_Test_Case {
 			update_option( 'woocommerce_attribute_lookup_enabled', $previous_option_value );
 		}
 
-		//phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
 		do_action( 'woocommerce_installed' );
 
 		$actual_final_option_value = get_option( 'woocommerce_attribute_lookup_enabled' );
 		$this->assertEquals( $expected_final_option_value, $actual_final_option_value );
+	}
+
+	/**
+	 * @testdox The 'regenerate' tool callback runs without requiring a nonce (e.g. when invoked via the REST API).
+	 *
+	 * @ddlInTransaction The regenerator under test truncates and creates the lookup table.
+	 */
+	public function test_regenerate_tool_callback_runs_without_a_nonce() {
+		global $wpdb;
+
+		// Simulate a non-admin-page invocation (REST API / WP-CLI), where no 'debug_action' nonce is present.
+		unset( $_REQUEST['_wpnonce'] );
+
+		// Ensure the full-table path is exercised, not the admin product-selector branch.
+		unset( $_REQUEST['regenerate_product_attribute_lookup_data_product_id'] );
+
+		// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+		$wpdb->query( 'DROP TABLE IF EXISTS ' . $this->lookup_table_name );
+		$wpdb->query( 'CREATE TABLE ' . $this->lookup_table_name . ' ( foo int );' );
+		// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
+
+		$sut   = $this->get_sut_for_existing_lookup_table();
+		$tools = $sut->add_initiate_regeneration_entry_to_tools_array( array() );
+
+		$message = $tools['regenerate_product_attributes_lookup_table']['callback']();
+
+		$this->assertStringContainsString( 'regenerating', $message, 'The regenerate tool must run without a nonce.' );
+	}
+
+	/**
+	 * @testdox The 'abort' tool callback runs without requiring a nonce (e.g. when invoked via the REST API).
+	 */
+	public function test_abort_tool_callback_runs_without_a_nonce() {
+		// Simulate a non-admin-page invocation (REST API / WP-CLI), where no 'debug_action' nonce is present.
+		unset( $_REQUEST['_wpnonce'] );
+
+		$sut = $this->get_sut_for_existing_lookup_table( true );
+
+		$tools = $sut->add_initiate_regeneration_entry_to_tools_array( array() );
+
+		$message = $tools['abort_product_attributes_lookup_table_regeneration']['callback']();
+
+		$this->assertStringContainsString( 'aborted', $message, 'The abort tool must run without a nonce.' );
+	}
+
+	/**
+	 * @testdox The 'resume' tool callback runs without requiring a nonce (e.g. when invoked via the REST API).
+	 */
+	public function test_resume_tool_callback_runs_without_a_nonce() {
+		// Simulate a non-admin-page invocation (REST API / WP-CLI), where no 'debug_action' nonce is present.
+		unset( $_REQUEST['_wpnonce'] );
+
+		$sut = $this->get_sut_for_existing_lookup_table( false, true );
+
+		$tools = $sut->add_initiate_regeneration_entry_to_tools_array( array() );
+
+		$message = $tools['resume_product_attributes_lookup_table_regeneration']['callback']();
+
+		$this->assertStringContainsString( 'resumed', $message, 'The resume tool must run without a nonce.' );
+	}
+
+	/**
+	 * Build a DataRegenerator whose data store reports that the lookup table exists, so that the
+	 * Status - Tools entries (and their callbacks) get registered. The real existence check relies
+	 * on SHOW TABLES, which doesn't list the temporary tables that PHPUnit creates.
+	 *
+	 * @param bool $regeneration_in_progress Whether to flag a regeneration as currently in progress.
+	 * @param bool $regeneration_aborted     Whether to flag the last regeneration as aborted.
+	 * @return DataRegenerator
+	 */
+	private function get_sut_for_existing_lookup_table( bool $regeneration_in_progress = false, bool $regeneration_aborted = false ): DataRegenerator {
+		// phpcs:disable Squiz.Commenting
+		$data_store = new class() extends LookupDataStore {
+			public function check_lookup_table_exists() {
+				return true;
+			}
+		};
+		// phpcs:enable Squiz.Commenting
+
+		$container = wc_get_container();
+		$container->reset_all_resolved();
+		$container->replace( LookupDataStore::class, $data_store );
+
+		if ( $regeneration_in_progress ) {
+			$data_store->set_regeneration_in_progress_flag();
+		}
+		if ( $regeneration_aborted ) {
+			$data_store->set_regeneration_aborted_flag();
+		}
+
+		return $container->get( DataRegenerator::class );
 	}
 }

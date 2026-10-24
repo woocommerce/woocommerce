@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Invalidate the coupon code lookup cache when a coupon is unpublished or deleted outside the WooCommerce CRUD (bulk edit, WP-CLI, direct wp_update_post or wp_delete_post calls), so draft, pending, private or trashed coupons can no longer be applied from a stale cache entry on sites with a persistent object cache.

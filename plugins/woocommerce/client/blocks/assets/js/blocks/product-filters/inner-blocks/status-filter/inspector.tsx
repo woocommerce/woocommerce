@@ -4,6 +4,10 @@
 import { InspectorControls } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
 import {
+	DisplayStyleSwitcher,
+	resetDisplayStyleBlock,
+} from '@woocommerce/editor-components/display-style-switcher';
+import {
 	ToggleControl,
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToolsPanel as ToolsPanel,
@@ -15,10 +19,6 @@ import {
  * Internal dependencies
  */
 import { EditProps } from './types';
-import {
-	DisplayStyleSwitcher,
-	resetDisplayStyleBlock,
-} from '../../components/display-style-switcher';
 import metadata from './block.json';
 
 export const Inspector = ( {

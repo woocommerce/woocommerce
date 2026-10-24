@@ -13,8 +13,9 @@ import {
 } from '@wordpress/element';
 import { usePrevious } from '@woocommerce/base-hooks';
 import deprecated from '@wordpress/deprecated';
-import { useDispatch, useSelect } from '@wordpress/data';
+import { useDispatch, useRegistry, useSelect } from '@wordpress/data';
 import {
+	cartStore,
 	checkoutStore,
 	paymentStore,
 	validationStore,
@@ -34,12 +35,12 @@ import {
 /**
  * Internal dependencies
  */
+import type { EventListenerRegistrationFunction } from '@woocommerce/blocks-checkout-events/event-emitter';
 import { reducer as emitReducer } from './event-emit';
 import { emitterCallback, noticeContexts } from '../../../event-emit';
 import { useStoreEvents } from '../../../hooks/use-store-events';
 
 import { useEditorContext } from '../../editor-context';
-import { EventListenerRegistrationFunction } from '../../../../../events/event-emitter';
 
 type CheckoutEventsContextType = {
 	// Submits the checkout and begins processing.
@@ -122,6 +123,7 @@ export const CheckoutEventsProvider = ( {
 	const registeredMethods = getExpressPaymentMethods();
 
 	const { isEditor } = useEditorContext();
+	const registry = useRegistry();
 
 	const {
 		__internalUpdateAvailablePaymentMethods,
@@ -130,27 +132,33 @@ export const CheckoutEventsProvider = ( {
 
 	// Set the registered express payment methods
 	useEffect( () => {
-		__internalSetRegisteredExpressPaymentMethods(
+		void __internalSetRegisteredExpressPaymentMethods(
 			convertToPlainExpressPaymentMethods( registeredMethods )
 		);
-	}, [ registeredMethods ] );
+	}, [ __internalSetRegisteredExpressPaymentMethods, registeredMethods ] );
 
 	// Update the payment method store when paymentMethods or expressPaymentMethods changes.
 	// Ensure this happens in the editor even if paymentMethods is empty. This won't happen instantly when the objects
 	// are updated, but on the next re-render.
+	// On the storefront, skip the check until the cart has loaded: the cart store runs it as soon as the cart arrives,
+	// and checking against the empty default cart would show "no payment methods" until that run finishes.
 	useEffect( () => {
-		if (
-			! isEditor &&
-			Object.keys( paymentMethods ).length === 0 &&
-			Object.keys( expressPaymentMethods ).length === 0
-		) {
+		const hasRegisteredMethods =
+			Object.keys( paymentMethods ).length > 0 ||
+			Object.keys( expressPaymentMethods ).length > 0;
+		const hasCartLoaded = registry
+			.select( cartStore )
+			.hasFinishedResolution( 'getCartData' );
+
+		if ( ! isEditor && ( ! hasRegisteredMethods || ! hasCartLoaded ) ) {
 			return;
 		}
-		__internalUpdateAvailablePaymentMethods();
+		void __internalUpdateAvailablePaymentMethods();
 	}, [
 		isEditor,
 		paymentMethods,
 		expressPaymentMethods,
+		registry,
 		__internalUpdateAvailablePaymentMethods,
 	] );
 
@@ -185,7 +193,7 @@ export const CheckoutEventsProvider = ( {
 	} );
 
 	if ( redirectUrl && redirectUrl !== checkoutRedirectUrl ) {
-		__internalSetRedirectUrl( redirectUrl );
+		void __internalSetRedirectUrl( redirectUrl );
 	}
 
 	const { setValidationErrors } = useDispatch( validationStore );
@@ -240,7 +248,6 @@ export const CheckoutEventsProvider = ( {
 		return function ( ...args: Parameters< typeof onCheckoutValidation > ) {
 			deprecated( 'onCheckoutBeforeProcessing', {
 				alternative: 'onCheckoutValidation',
-				plugin: 'WooCommerce Blocks',
 			} );
 			return onCheckoutValidation( ...args );
 		};
@@ -252,9 +259,8 @@ export const CheckoutEventsProvider = ( {
 	const onCheckoutValidationBeforeProcessing = useMemo( () => {
 		return function ( ...args: Parameters< typeof onCheckoutValidation > ) {
 			deprecated( 'onCheckoutValidationBeforeProcessing', {
-				since: '9.7.0',
+				since: '7.6.0',
 				alternative: 'onCheckoutValidation',
-				plugin: 'WooCommerce Blocks',
 				link: 'https://github.com/woocommerce/woocommerce-blocks/pull/8381',
 			} );
 			return onCheckoutValidation( ...args );
@@ -267,9 +273,8 @@ export const CheckoutEventsProvider = ( {
 	const onCheckoutAfterProcessingWithSuccess = useMemo( () => {
 		return function ( ...args: Parameters< typeof onCheckoutSuccess > ) {
 			deprecated( 'onCheckoutAfterProcessingWithSuccess', {
-				since: '9.7.0',
+				since: '7.6.0',
 				alternative: 'onCheckoutSuccess',
-				plugin: 'WooCommerce Blocks',
 				link: 'https://github.com/woocommerce/woocommerce-blocks/pull/8381',
 			} );
 			return onCheckoutSuccess( ...args );
@@ -282,9 +287,8 @@ export const CheckoutEventsProvider = ( {
 	const onCheckoutAfterProcessingWithError = useMemo( () => {
 		return function ( ...args: Parameters< typeof onCheckoutFail > ) {
 			deprecated( 'onCheckoutAfterProcessingWithError', {
-				since: '9.7.0',
+				since: '7.6.0',
 				alternative: 'onCheckoutFail',
-				plugin: 'WooCommerce Blocks',
 				link: 'https://github.com/woocommerce/woocommerce-blocks/pull/8381',
 			} );
 			return onCheckoutFail( ...args );
@@ -295,7 +299,7 @@ export const CheckoutEventsProvider = ( {
 	// the registered callbacks
 	useEffect( () => {
 		if ( isCheckoutBeforeProcessing ) {
-			__internalEmitValidateEvent( {
+			void __internalEmitValidateEvent( {
 				setValidationErrors,
 			} );
 		}
@@ -319,7 +323,7 @@ export const CheckoutEventsProvider = ( {
 		}
 
 		if ( isCheckoutAfterProcessing ) {
-			__internalEmitAfterProcessingEvents( {
+			void __internalEmitAfterProcessingEvents( {
 				notices: {
 					checkoutNotices,
 					paymentNotices,
@@ -347,7 +351,7 @@ export const CheckoutEventsProvider = ( {
 
 	const onSubmit = useCallback( () => {
 		dispatchCheckoutEvent( 'submit' );
-		__internalSetBeforeProcessing();
+		void __internalSetBeforeProcessing();
 	}, [ dispatchCheckoutEvent, __internalSetBeforeProcessing ] );
 
 	const checkoutEventHandlers = {

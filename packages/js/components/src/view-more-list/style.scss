@@ -15,6 +15,12 @@
 .woocommerce-view-more-list__popover__item {
 	display: block;
 	margin: $gap 0;
+	// This will set the max-width of the popup item to
+	// 16rem on desktop. On mobile, it will be 80vw (to
+	// leave 20vw on the sides to close the popover) -
+	// minus the padding of the popover ($gap * 2).
+	max-width: min(16rem, calc(80vw - $gap * 2));
+	width: max-content;
 
 	&:first-child {
 		margin-top: 0;

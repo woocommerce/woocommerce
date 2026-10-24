@@ -21,7 +21,7 @@ describe( 'Project Graph', () => {
 					return '/test/monorepo/node_modules';
 				}
 
-				if ( command === 'pnpm -r list --only-projects --json' ) {
+				if ( command === 'pnpm -r list --depth -1 --json' ) {
 					return fs.readFileSync(
 						__dirname + '/test-pnpm-list.json'
 					);

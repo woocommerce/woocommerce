@@ -19,11 +19,6 @@ export default function ScheduledUpdatesPromotionNotice() {
 
 	const { updateUserPreferences, ...userData } = useUserPreferences();
 
-	// Check if feature flag is enabled
-	if ( ! window.wcAdminFeatures?.[ 'analytics-scheduled-import' ] ) {
-		return null;
-	}
-
 	const optionValue = wcAdminSettings?.[ SCHEDULED_IMPORT_OPTION ];
 	// No need to show notice if option is already set.
 	if ( optionValue === 'yes' || optionValue === 'no' ) {
@@ -38,7 +33,7 @@ export default function ScheduledUpdatesPromotionNotice() {
 	}
 
 	const onDismiss = () => {
-		updateUserPreferences( {
+		void updateUserPreferences( {
 			scheduled_updates_promotion_notice_dismissed: 'yes',
 		} );
 		recordEvent( 'scheduled_updates_promotion_notice_dismissed' );

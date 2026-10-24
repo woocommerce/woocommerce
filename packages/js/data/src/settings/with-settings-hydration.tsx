@@ -46,10 +46,10 @@ export const withSettingsHydration = ( group: string, settings: Settings ) =>
 					return;
 				}
 				if ( ! isResolvingGroup && ! hasFinishedResolutionGroup ) {
-					startResolution( 'getSettings', [ group ] );
-					updateSettingsForGroup( group, settingsRef.current );
-					clearIsDirty( group );
-					finishResolution( 'getSettings', [ group ] );
+					void startResolution( 'getSettings', [ group ] );
+					void updateSettingsForGroup( group, settingsRef.current );
+					void clearIsDirty( group );
+					void finishResolution( 'getSettings', [ group ] );
 				}
 			}, [
 				isResolvingGroup,

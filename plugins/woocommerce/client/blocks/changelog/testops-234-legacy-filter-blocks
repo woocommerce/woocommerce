@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Reduce the legacy Price, Rating, and Stock filter E2E tests from 26 titles to 8; Jest owns the editor control mappings and PHPUnit owns the rating and stock filter query identity.
+

@@ -9,6 +9,7 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Admin\API\Reports\DataStore as ReportsDataStore;
 use Automattic\WooCommerce\Admin\API\Reports\DataStoreInterface;
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 
 /**
@@ -134,10 +135,17 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @return int Product count.
 	 */
 	private function get_product_count() {
-		$query_args              = array();
-		$query_args['post_type'] = array( 'product', 'product_variation' );
-		$query                   = new \WP_Query();
+		// The statuses are the ones the counts above use. WP_Query's default set is context-dependent,
+		// and this count is cached store-wide for 30 days, so it would otherwise freeze at whatever
+		// the first caller's context produced and disagree with the rest of the report.
+		$query_args = array(
+			'post_type'   => array( 'product', 'product_variation' ),
+			'post_status' => array( ProductStatus::PUBLISH, ProductStatus::PRIVATE ),
+		);
+
+		$query = new \WP_Query();
 		$query->query( $query_args );
+
 		return intval( $query->found_posts );
 	}
 }

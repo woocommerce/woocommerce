@@ -184,12 +184,26 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			try {
 				// Prevent getting "variation_invalid_id" error message from Variation Data Store.
 				if ( ProductType::VARIATION === $data['type'] ) {
+					$was_variation = $id && 'product_variation' === get_post_type( $id );
+
 					$id = wp_update_post(
 						array(
 							'ID'        => $id,
 							'post_type' => 'product_variation',
 						)
 					);
+
+					// A placeholder created for this row by parse_id_field() is a
+					// simple product, so the product data store may have assigned it
+					// the default product category. Variations must not carry
+					// product_cat/product_tag terms, and WordPress does not clear
+					// them when the post type changes, so remove them here — but
+					// only when the post was just converted into a variation.
+					// Pre-existing variations (e.g. re-imports with "update
+					// existing" enabled) must keep any terms attached to them.
+					if ( $id && ! is_wp_error( $id ) && ! $was_variation ) {
+						wp_delete_object_term_relationships( $id, array( 'product_cat', 'product_tag' ) );
+					}
 				}
 
 				$product = wc_get_product_object( $data['type'], $id );
@@ -215,6 +229,61 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		}
 
 		return apply_filters( 'woocommerce_product_import_get_product_object', $product, $data );
+	}
+
+	/**
+	 * Reduce a Global Unique ID to the form it is stored in.
+	 *
+	 * Keep this in step with the stripping in WC_Product::set_global_unique_id(), so a row is
+	 * matched and judged usable on the same value the product would be saved with.
+	 *
+	 * @param string $global_unique_id Global Unique ID as entered in the row.
+	 * @return string Stored form of the Global Unique ID, or an empty string when nothing is left of it.
+	 *
+	 * @since 11.2.0
+	 */
+	protected function normalize_global_unique_id( $global_unique_id ) {
+		return (string) preg_replace( '/[^0-9Xx\-]/', '', (string) $global_unique_id );
+	}
+
+	/**
+	 * Find the product a row refers to by its Global Unique ID.
+	 *
+	 * A match whose product type disagrees with the row type is refused, because
+	 * get_product_object() would otherwise convert the matched product to that type.
+	 *
+	 * @param string $global_unique_id Global Unique ID as entered in the row.
+	 * @param string $type             Row product type, or an empty string when the row has none.
+	 * @return int|WP_Error Product ID, 0 when nothing matches, or WP_Error for a type mismatch.
+	 *
+	 * @since 11.2.0
+	 */
+	protected function match_product_id_by_global_unique_id( $global_unique_id, $type ) {
+		$global_unique_id = $this->normalize_global_unique_id( $global_unique_id );
+
+		if ( '' === $global_unique_id ) {
+			return 0;
+		}
+
+		$product_id = (int) wc_get_product_id_by_global_unique_id( $global_unique_id );
+
+		if ( ! $product_id || '' === $type ) {
+			return $product_id;
+		}
+
+		if ( WC_Product_Factory::get_product_type( $product_id ) !== $type ) {
+			return new WP_Error(
+				'woocommerce_product_importer_global_unique_id_type_mismatch',
+				esc_html__( 'The Global Unique ID matches a product of a different type.', 'woocommerce' ),
+				array(
+					'id'               => $product_id,
+					'global_unique_id' => esc_attr( $global_unique_id ),
+					'status'           => 401,
+				)
+			);
+		}
+
+		return $product_id;
 	}
 
 	/**
@@ -491,9 +560,11 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			foreach ( $data['raw_attributes'] as $attribute ) {
 				$attribute_id = 0;
 
-				// Get ID if is a global attribute.
+				// Get ID if is a global attribute. Resolved without creating the attribute, the same way
+				// validate_new_variation_attributes() does: creating it yields a taxonomy key the parent
+				// cannot have, so the row's attribute is dropped and the variation matches every value.
 				if ( ! empty( $attribute['taxonomy'] ) ) {
-					$attribute_id = $this->get_attribute_taxonomy_id( $attribute['name'] );
+					$attribute_id = $this->get_existing_attribute_taxonomy_id( $attribute['name'] );
 				}
 
 				if ( $attribute_id ) {
@@ -542,9 +613,9 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 		foreach ( $attributes as $attribute ) {
 			$attribute_id = 0;
 
-			// Get ID if is a global attribute.
+			// Get ID if is a global attribute. Resolved without creating it, as in set_variation_data().
 			if ( ! empty( $attribute['taxonomy'] ) ) {
-				$attribute_id = $this->get_attribute_taxonomy_id( $attribute['name'] );
+				$attribute_id = $this->get_existing_attribute_taxonomy_id( $attribute['name'] );
 			}
 
 			if ( $attribute_id ) {
@@ -665,6 +736,35 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	}
 
 	/**
+	 * Get the taxonomy name of a global attribute as written in the imported data.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param  string $raw_name Attribute name or label.
+	 * @return string
+	 */
+	protected function get_attribute_taxonomy_name_from_raw_name( $raw_name ) {
+		// These are exported as labels, so convert the label to a name if possible first.
+		$attribute_labels = wp_list_pluck( wc_get_attribute_taxonomies(), 'attribute_label', 'attribute_name' );
+		$attribute_name   = array_search( $raw_name, $attribute_labels, true );
+
+		// Cast because a numeric attribute name is returned as an integer array key by array_search().
+		return $attribute_name ? (string) $attribute_name : wc_sanitize_taxonomy_name( $raw_name );
+	}
+
+	/**
+	 * Get the ID of an existing global attribute taxonomy, without creating it when it is missing.
+	 *
+	 * @since 11.1.0
+	 *
+	 * @param  string $raw_name Attribute name or label.
+	 * @return int Attribute taxonomy ID, or 0 when no such global attribute exists.
+	 */
+	protected function get_existing_attribute_taxonomy_id( $raw_name ) {
+		return (int) wc_attribute_taxonomy_id_by_name( $this->get_attribute_taxonomy_name_from_raw_name( $raw_name ) );
+	}
+
+	/**
 	 * Get attribute taxonomy ID from the imported data.
 	 * If does not exists register a new attribute.
 	 *
@@ -675,15 +775,8 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	public function get_attribute_taxonomy_id( $raw_name ) {
 		global $wpdb, $wc_product_attributes;
 
-		// These are exported as labels, so convert the label to a name if possible first.
-		$attribute_labels = wp_list_pluck( wc_get_attribute_taxonomies(), 'attribute_label', 'attribute_name' );
-		$attribute_name   = array_search( $raw_name, $attribute_labels, true );
-
-		if ( ! $attribute_name ) {
-			$attribute_name = wc_sanitize_taxonomy_name( $raw_name );
-		}
-
-		$attribute_id = wc_attribute_taxonomy_id_by_name( $attribute_name );
+		$attribute_name = $this->get_attribute_taxonomy_name_from_raw_name( $raw_name );
+		$attribute_id   = $this->get_existing_attribute_taxonomy_id( $raw_name );
 
 		// Get the ID from the name.
 		if ( $attribute_id ) {

@@ -30,7 +30,6 @@ function wc_importer_shopify_mappings( $mappings, $raw_headers ) {
 		'Variant Inventory Qty'     => 'stock_quantity',
 		'Image Src'                 => 'images',
 		'Variant Image'             => 'images',
-		'Variant SKU'               => 'sku',
 		'Variant Price'             => 'sale_price',
 		'Variant Compare At Price'  => 'regular_price',
 		'Type'                      => 'category_ids',

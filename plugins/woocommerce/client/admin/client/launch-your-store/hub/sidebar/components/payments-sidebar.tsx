@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-/* eslint-disable @woocommerce/dependency-group */
+/* eslint-disable import/order */
 /**
  * External dependencies
  */
@@ -73,7 +73,7 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 			}
 		};
 
-		fetchPaymentsTask();
+		void fetchPaymentsTask();
 
 		// Cleanup function to prevent state updates after unmount.
 		return () => {
@@ -158,9 +158,12 @@ export const PaymentsSidebar = ( props: SidebarComponentProps ) => {
 		>
 			{ payments_task?.additionalData?.wooPaymentsIsInstalled
 				? /* translators: %s: WooPayments */
-				  sprintf( __( 'Enable %s', 'woocommerce' ), 'WooPayments' )
+					sprintf( __( 'Enable %s', 'woocommerce' ), 'WooPayments' )
 				: /* translators: %s: WooPayments */
-				  sprintf( __( 'Install %s', 'woocommerce' ), 'WooPayments' ) }
+					sprintf(
+						__( 'Install %s', 'woocommerce' ),
+						'WooPayments'
+					) }
 		</SidebarNavigationItem>
 	);
 

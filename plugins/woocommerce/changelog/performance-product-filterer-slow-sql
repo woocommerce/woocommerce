@@ -1,4 +1,0 @@
-Significance: minor
-Type: performance
-
-Optimize slow SQL and high CPU usage by DB in product filter utility.

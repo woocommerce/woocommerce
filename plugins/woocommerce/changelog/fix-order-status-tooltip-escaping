@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Escape the order status tooltip in the orders list as an attribute, so quotes in a status label no longer break its markup on WordPress 7.2.

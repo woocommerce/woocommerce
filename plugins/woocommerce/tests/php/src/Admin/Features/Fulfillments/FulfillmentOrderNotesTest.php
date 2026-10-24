@@ -227,12 +227,12 @@ class FulfillmentOrderNotesTest extends \WC_Unit_Test_Case {
 
 		$found = false;
 		foreach ( $notes as $note ) {
-			if ( str_contains( $note->content, 'TRACK123456' ) && str_contains( $note->content, 'fedex' ) ) {
+			if ( str_contains( $note->content, 'TRACK123456' ) && str_contains( $note->content, 'FedEx' ) ) {
 				$found = true;
 				break;
 			}
 		}
-		$this->assertTrue( $found, 'Expected the created note to include the shipping provider.' );
+		$this->assertTrue( $found, 'Expected the created note to include the resolved provider name, not the raw slug.' );
 	}
 
 	/**
@@ -316,7 +316,7 @@ class FulfillmentOrderNotesTest extends \WC_Unit_Test_Case {
 			if (
 				str_contains( $note->content, 'updated' )
 				&& str_contains( $note->content, 'UPS999' )
-				&& str_contains( $note->content, 'ups' )
+				&& str_contains( $note->content, 'Provider: UPS' )
 				&& str_contains( $note->content, 'https://ups.com/track/UPS999' )
 			) {
 				$found = true;

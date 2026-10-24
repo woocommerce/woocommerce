@@ -1,12 +1,15 @@
 <?php
+
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
-use WP_Block;
-use Automattic\WooCommerce\Blocks\Package;
-use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
-use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
-use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Blocks\Assets\Api as AssetApi;
+use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
+use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
+use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\Internal\Features\BlockEditorUnifiedAssets;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
+use WP_Block;
 
 /**
  * AbstractBlock class.
@@ -56,6 +59,13 @@ abstract class AbstractBlock {
 	protected $integration_registry;
 
 	/**
+	 * Whether unified block editor assets are enabled.
+	 *
+	 * @var bool
+	 */
+	private bool $unified_editor_assets_enabled;
+
+	/**
 	 * Constructor.
 	 *
 	 * @param AssetApi            $asset_api Instance of the asset API.
@@ -64,17 +74,18 @@ abstract class AbstractBlock {
 	 * @param string              $block_name Optionally set block name during construct.
 	 */
 	public function __construct( AssetApi $asset_api, AssetDataRegistry $asset_data_registry, IntegrationRegistry $integration_registry, $block_name = '' ) {
-		$this->asset_api            = $asset_api;
-		$this->asset_data_registry  = $asset_data_registry;
-		$this->integration_registry = $integration_registry;
-		$this->block_name           = $block_name ? $block_name : $this->block_name;
+		$this->asset_api                     = $asset_api;
+		$this->asset_data_registry           = $asset_data_registry;
+		$this->integration_registry          = $integration_registry;
+		$this->block_name                    = $block_name ? $block_name : $this->block_name;
+		$this->unified_editor_assets_enabled = BlockEditorUnifiedAssets::is_enabled();
 		$this->initialize();
 	}
 
 	/**
-	 * Get the interactivity namespace. Only used when utilizing the interactivity API.
-
-	 * @return string The interactivity namespace, used to namespace interactivity API actions and state.
+	 * Get the full block name, including namespace.
+	 *
+	 * @return string
 	 */
 	protected function get_full_block_name() {
 		return $this->namespace . '/' . $this->block_name;
@@ -131,7 +142,7 @@ abstract class AbstractBlock {
 	 */
 	protected function initialize() {
 		if ( empty( $this->block_name ) ) {
-			_doing_it_wrong( __METHOD__, esc_html__( 'Block name is required.', 'woocommerce' ), '4.5.0' );
+			_doing_it_wrong( __METHOD__, esc_html( 'Block name is required.' ), '4.5.0' );
 			return false;
 		}
 		$this->integration_registry->initialize( $this->block_name . '_block' );
@@ -145,34 +156,107 @@ abstract class AbstractBlock {
 	 * This registers the scripts; it does not enqueue them.
 	 */
 	protected function register_block_type_assets() {
-		if ( null !== $this->get_block_type_editor_script() ) {
-			$data     = $this->asset_api->get_script_data( $this->get_block_type_editor_script( 'path' ) );
-			$has_i18n = in_array( 'wp-i18n', $data['dependencies'], true );
+		// Skip on frontend: WordPress core gates editor script enqueuing on is_admin() (wp-includes/script-loader.php).
+		$editor_script = is_admin() ? $this->get_block_type_editor_script() : null;
+		if ( is_array( $editor_script ) ) {
+			$this->register_editor_script_asset( $editor_script );
+		}
 
-			$this->asset_api->register_script(
-				$this->get_block_type_editor_script( 'handle' ),
-				$this->get_block_type_editor_script( 'path' ),
+		$frontend_script = $this->get_block_type_script();
+		if ( is_array( $frontend_script ) ) {
+			$this->register_frontend_script_asset( $frontend_script );
+		}
+	}
+
+	/**
+	 * Register the editor script asset.
+	 *
+	 * @param array $editor_script The editor script data.
+	 * @return void
+	 */
+	private function register_editor_script_asset( $editor_script ) {
+		$handle       = (string) $editor_script['handle'];
+		$path         = (string) $editor_script['path'];
+		$dependencies = array_values(
+			array_unique(
 				array_merge(
-					$this->get_block_type_editor_script( 'dependencies' ),
+					(array) $editor_script['dependencies'],
 					$this->integration_registry->get_all_registered_editor_script_handles()
-				),
-				$has_i18n
-			);
-		}
-		if ( null !== $this->get_block_type_script() ) {
-			$data     = $this->asset_api->get_script_data( $this->get_block_type_script( 'path' ) );
-			$has_i18n = in_array( 'wp-i18n', $data['dependencies'], true );
+				)
+			)
+		);
+
+		if ( wp_script_is( $handle, 'registered' ) ) {
+			$this->add_script_dependencies( $handle, $dependencies );
+		} else {
+			$data     = $this->asset_api->get_script_data( $path );
+			$has_i18n = ! empty( $data['dependencies'] ) && in_array( 'wp-i18n', $data['dependencies'], true );
 
 			$this->asset_api->register_script(
-				$this->get_block_type_script( 'handle' ),
-				$this->get_block_type_script( 'path' ),
-				array_merge(
-					$this->get_block_type_script( 'dependencies' ),
-					$this->integration_registry->get_all_registered_script_handles()
-				),
+				$handle,
+				$path,
+				$dependencies,
 				$has_i18n
 			);
 		}
+	}
+
+	/**
+	 * Register the frontend script asset.
+	 *
+	 * @param array $frontend_script The frontend script data.
+	 * @return void
+	 */
+	private function register_frontend_script_asset( $frontend_script ) {
+		$handle       = (string) $frontend_script['handle'];
+		$path         = (string) $frontend_script['path'];
+		$dependencies = array_merge(
+			(array) $frontend_script['dependencies'],
+			$this->integration_registry->get_all_registered_script_handles()
+		);
+		$data         = $this->asset_api->get_script_data( $path );
+		$has_i18n     = ! empty( $data['dependencies'] ) && in_array( 'wp-i18n', $data['dependencies'], true );
+
+		$this->asset_api->register_script(
+			$handle,
+			$path,
+			$dependencies,
+			$has_i18n
+		);
+	}
+
+	/**
+	 * Add dependencies to a registered script.
+	 *
+	 * @param string $handle       The script handle.
+	 * @param array  $dependencies The dependencies to add.
+	 * @return void
+	 */
+	private function add_script_dependencies( $handle, $dependencies ) {
+		$wp_scripts = wp_scripts();
+
+		if ( ! isset( $wp_scripts->registered[ $handle ] ) ) {
+			return;
+		}
+
+		$script_dependencies = array_unique(
+			array_merge(
+				$wp_scripts->registered[ $handle ]->deps,
+				$dependencies
+			)
+		);
+
+		// For performance, the unified block library combines all block editor assets, so its dependencies include
+		// wp-editor even though blocks available in the widget editor do not use it. WordPress treats loading
+		// wp-editor alongside the block-based widget editor as incorrect usage, so remove it only on this screen.
+		if ( 'wc-block-library' === $handle && function_exists( 'get_current_screen' ) ) {
+			$screen = get_current_screen();
+			if ( $screen && 'widgets' === $screen->base ) {
+				$script_dependencies = array_diff( $script_dependencies, array( 'wp-editor' ) );
+			}
+		}
+
+		$wp_scripts->registered[ $handle ]->deps = array_values( $script_dependencies );
 	}
 
 	/**
@@ -183,11 +267,15 @@ abstract class AbstractBlock {
 	 * @param string[] $chunks Array of chunk names.
 	 */
 	protected function register_chunk_translations( $chunks ) {
+		$script_handle = $this->get_block_type_script( 'handle' );
+		if ( ! is_string( $script_handle ) || '' === $script_handle ) {
+			return;
+		}
 		foreach ( $chunks as $chunk ) {
 			$handle = 'wc-blocks-' . $chunk . '-chunk';
 			$this->asset_api->register_script( $handle, $this->asset_api->get_block_asset_build_path( $chunk ), [], true );
 			wp_add_inline_script(
-				$this->get_block_type_script( 'handle' ),
+				$script_handle,
 				wp_scripts()->print_translations( $handle, false ),
 				'before'
 			);
@@ -240,14 +328,12 @@ abstract class AbstractBlock {
 			$block_settings['api_version'] = intval( $this->api_version );
 		}
 
-		$metadata_path = $this->asset_api->get_block_metadata_path( $this->block_name );
-
 		// Prefer to register with metadata if the path is set in the block's class.
-		if ( ! empty( $metadata_path ) ) {
-			register_block_type_from_metadata(
-				$metadata_path,
-				$block_settings
-			);
+		$is_registered = (bool) register_block_type_from_metadata(
+			$this->asset_api->generate_block_metadata_path( $this->block_name ),
+			$block_settings
+		);
+		if ( $is_registered ) {
 			return;
 		}
 
@@ -261,7 +347,7 @@ abstract class AbstractBlock {
 		$block_settings['uses_context'] = $this->get_block_type_uses_context();
 
 		register_block_type(
-			$this->get_block_type(),
+			$this->get_full_block_name(),
 			$block_settings
 		);
 	}
@@ -269,10 +355,12 @@ abstract class AbstractBlock {
 	/**
 	 * Get the block type.
 	 *
+	 * @deprecated 10.9.0 Use get_full_block_name() instead.
 	 * @return string
 	 */
 	protected function get_block_type() {
-		return $this->namespace . '/' . $this->block_name;
+		wc_deprecated_function( __METHOD__, '10.9.0', 'get_full_block_name' );
+		return $this->get_full_block_name();
 	}
 
 	/**
@@ -295,11 +383,18 @@ abstract class AbstractBlock {
 	 * @return array|string
 	 */
 	protected function get_block_type_editor_script( $key = null ) {
-		$script = [
-			'handle'       => 'wc-' . $this->block_name . '-block',
-			'path'         => $this->asset_api->get_block_asset_build_path( $this->block_name ),
-			'dependencies' => [ 'wc-blocks' ],
-		];
+		$script = $this->unified_editor_assets_enabled
+			? array(
+				'handle'       => 'wc-block-library',
+				'path'         => $this->asset_api->get_block_asset_build_path( 'wc-block-library' ),
+				'dependencies' => array(),
+			)
+			: array(
+				'handle'       => 'wc-' . $this->block_name . '-block',
+				'path'         => $this->asset_api->get_block_asset_build_path( $this->block_name ),
+				'dependencies' => array( 'wc-blocks' ),
+			);
+
 		return $key ? $script[ $key ] : $script;
 	}
 
@@ -310,7 +405,7 @@ abstract class AbstractBlock {
 	 * @return string|null
 	 */
 	protected function get_block_type_editor_style() {
-		return 'wc-blocks-editor-style';
+		return $this->unified_editor_assets_enabled ? 'wc-block-library-style' : 'wc-blocks-editor-style';
 	}
 
 	/**
@@ -375,7 +470,7 @@ abstract class AbstractBlock {
 	 * @return array
 	 */
 	protected function parse_render_callback_attributes( $attributes ) {
-		return is_a( $attributes, 'WP_Block' ) ? $attributes->attributes : $attributes;
+		return $attributes instanceof \WP_Block ? $attributes->attributes : $attributes;
 	}
 
 	/**
@@ -441,8 +536,8 @@ abstract class AbstractBlock {
 				'wordCountType' => _x( 'words', 'Word count type. Do not translate!', 'woocommerce' ),
 			];
 			if ( is_admin() && ! WC()->is_rest_api_request() ) {
-				$product_counts     = wp_count_posts( 'product' );
-				$published_products = isset( $product_counts->publish ) ? $product_counts->publish : 0;
+				$product_counts     = wc_get_container()->get( ProductUtil::class )->get_counts_for_type( 'product' );
+				$published_products = $product_counts[ ProductStatus::PUBLISH ] ?? 0;
 				$wc_blocks_config   = array_merge(
 					$wc_blocks_config,
 					[

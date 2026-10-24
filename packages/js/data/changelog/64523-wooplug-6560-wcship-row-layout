@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Add row layout data to the WooCommerce Shipping partner suggestion so the card renders correctly in row / vertical placements.

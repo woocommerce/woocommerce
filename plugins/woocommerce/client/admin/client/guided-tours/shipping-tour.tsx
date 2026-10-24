@@ -70,7 +70,6 @@ const useShowShippingTour = () => {
 	return {
 		isLoading,
 		show:
-			window.wcAdminFeatures[ 'shipping-setting-tour' ] &&
 			! isLoading &&
 			hasCreatedDefaultShippingZones &&
 			! hasReviewedDefaultShippingOptions,
@@ -327,7 +326,7 @@ export const ShippingTour = ( {
 					}
 				);
 				// Fire-and-forget retry — failure only means the tour replays next visit.
-				updateOptions( {
+				void updateOptions( {
 					[ REVIEWED_DEFAULTS_OPTION ]: 'yes',
 				} );
 			}
@@ -373,6 +372,7 @@ export const ShippingTour = ( {
 				name: 'shipping-recommendations',
 				heading: __( 'WooCommerce Shipping', 'woocommerce' ),
 				descriptions: {
+					// eslint-disable-next-line @wordpress/i18n-no-flanking-whitespace
 					desktop: __(
 						'If you’d like to speed up your process and print your shipping label straight from your Woo dashboard, WooCommerce Shipping may be for you! ',
 						'woocommerce'

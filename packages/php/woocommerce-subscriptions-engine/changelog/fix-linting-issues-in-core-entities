@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Fix PHPDoc formatting issues that were flagged as linting problems

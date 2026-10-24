@@ -2,12 +2,11 @@
  * External dependencies
  */
 import { useSelect, useDispatch } from '@wordpress/data';
-import { useMemo, useEffect } from '@wordpress/element';
+import { useCallback, useMemo, useEffect } from '@wordpress/element';
 import { SlotFillProvider, ProgressBar } from '@wordpress/components';
 import { store as coreStore, Post } from '@wordpress/core-data';
 import { CommandMenu, store as commandsStore } from '@wordpress/commands';
 import { PluginArea } from '@wordpress/plugins';
-// eslint-disable-next-line @woocommerce/dependency-group
 import {
 	AutosaveMonitor as _AutosaveMonitor,
 	LocalAutosaveMonitor,
@@ -56,21 +55,21 @@ export function InnerEditor( {
 	settings,
 	contentRef,
 	customSavePanel,
+	customSaveButton,
 }: {
 	postId: number | string;
 	postType: string;
 	settings: Record< string, unknown >;
 	contentRef?: React.Ref< HTMLDivElement > | null;
 	customSavePanel?: React.ReactElement;
+	customSaveButton?: React.ReactElement;
 } ) {
 	const {
 		currentPost,
 		onNavigateToEntityRecord,
 		onNavigateToPreviousEntityRecord,
 	} = useNavigateToEntityRecord(
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 		initialPostId,
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-argument
 		initialPostType,
 		'post-only'
 	);
@@ -109,13 +108,32 @@ export function InnerEditor( {
 
 	// isFullScreenForced – comes from settings and cannot be changed by the user
 	// isFullscreenEnabled – indicates if a user has enabled fullscreen mode
-	const { isFullscreenEnabled, allCommands } = useSelect( ( select ) => {
-		return {
-			isFullscreenEnabled:
-				select( storeName ).isFeatureActive( 'fullscreenMode' ),
-			allCommands: select( commandsStore ).getCommands(),
-		};
-	}, [] );
+	const { isFullscreenEnabled, allCommands, listingsUrl } = useSelect(
+		( select ) => {
+			return {
+				isFullscreenEnabled:
+					select( storeName ).isFeatureActive( 'fullscreenMode' ),
+				allCommands: select( commandsStore ).getCommands(),
+				listingsUrl: select( storeName ).getUrls()?.listings,
+			};
+		},
+		[]
+	);
+
+	// From WordPress 7.2 emails whose post type doesn't opt in to the email editor's delete action
+	// (`woocommerce_email_editor_replace_trash_action`) get core's, which leave it to the editor
+	// screen to move away from the deleted post. Go back to the email list.
+	const onActionPerformed = useCallback(
+		( actionId: string ) => {
+			if (
+				listingsUrl &&
+				[ 'move-to-trash', 'permanently-delete' ].includes( actionId )
+			) {
+				window.location.href = listingsUrl;
+			}
+		},
+		[ listingsUrl ]
+	);
 
 	const {
 		isFullScreenForced,
@@ -125,13 +143,12 @@ export function InnerEditor( {
 
 	const { removeEditorPanel } = useDispatch( editorStore );
 	useEffect( () => {
-		removeEditorPanel( 'post-status' );
+		void removeEditorPanel( 'post-status' );
 	}, [ removeEditorPanel ] );
 
 	const [ styles ] = useEmailCss();
 
 	const editorSettings = useMemo(
-		// eslint-disable-next-line @typescript-eslint/no-unsafe-return
 		() => ( {
 			...settings,
 			onNavigateToEntityRecord,
@@ -182,9 +199,15 @@ export function InnerEditor( {
 					postType={ currentPost.postType }
 					settings={ editorSettings }
 					templateId={ template && template.id }
+					onActionPerformed={ onActionPerformed }
 					contentRef={ contentRef }
 					styles={ styles } // This is needed for BC for Gutenberg below v22
 					customSavePanel={ customSavePanel }
+					customSaveButton={
+						currentPost.postType === 'wp_template'
+							? undefined
+							: customSaveButton
+					}
 				>
 					<AutosaveMonitor />
 					<LocalAutosaveMonitor />

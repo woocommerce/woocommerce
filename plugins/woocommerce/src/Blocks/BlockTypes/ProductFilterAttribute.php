@@ -4,8 +4,10 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection\Utils as ProductCollectionUtils;
+use Automattic\WooCommerce\Internal\ProductAttributes\VisualAttributeTermMeta;
 use Automattic\WooCommerce\Internal\ProductFilters\FilterDataProvider;
 use Automattic\WooCommerce\Internal\ProductFilters\QueryClauses;
+use WP_Block;
 
 /**
  * Product Filter: Attribute Block.
@@ -18,13 +20,6 @@ final class ProductFilterAttribute extends AbstractBlock {
 	 * @var string
 	 */
 	protected $block_name = 'product-filter-attribute';
-
-	/**
-	 * Cached map of term ID to color value for all wc-visual attribute terms.
-	 *
-	 * @var array<int, string>|null
-	 */
-	private $term_colors = null;
 
 	/**
 	 * Initialize this block type.
@@ -52,48 +47,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 
 		if ( is_admin() ) {
 			$this->asset_data_registry->add( 'defaultProductFilterAttribute', $this->get_default_product_attribute() );
-			$this->asset_data_registry->add( 'productFilterTermColors', $this->get_visual_attribute_term_colors() );
 		}
-	}
-
-	/**
-	 * Get color values for all wc-visual attribute terms.
-	 *
-	 * @return array<int, string> Map of term ID to hex color.
-	 */
-	private function get_visual_attribute_term_colors(): array {
-		if ( null !== $this->term_colors ) {
-			return $this->term_colors;
-		}
-
-		$colors     = array();
-		$attributes = wc_get_attribute_taxonomies();
-
-		foreach ( $attributes as $attribute ) {
-			if ( 'wc-visual' !== $attribute->attribute_type ) {
-				continue;
-			}
-
-			$terms = get_terms(
-				array(
-					'taxonomy'   => 'pa_' . $attribute->attribute_name,
-					'hide_empty' => false,
-				)
-			);
-
-			if ( is_wp_error( $terms ) ) {
-				continue;
-			}
-
-			foreach ( $terms as $term ) {
-				$color                    = sanitize_hex_color( get_term_meta( $term->term_id, 'color', true ) );
-				$colors[ $term->term_id ] = $color ? $color : '';
-			}
-		}
-
-		$this->term_colors = $colors;
-
-		return $this->term_colors;
 	}
 
 	/**
@@ -106,8 +60,6 @@ final class ProductFilterAttribute extends AbstractBlock {
 			delete_transient( 'wc_block_product_filter_attribute_default_attribute' );
 		}
 	}
-
-
 
 	/**
 	 * Prepare the active filter items.
@@ -169,10 +121,11 @@ final class ProductFilterAttribute extends AbstractBlock {
 
 		foreach ( $attribute_terms as $term_object ) {
 			$attribute_name = str_replace( 'pa_', '', $term_object->taxonomy );
+			$term_name      = wp_specialchars_decode( $term_object->name, ENT_QUOTES );
 			$items[]        = array(
 				'type'               => 'attribute/' . $attribute_name,
 				'value'              => $term_object->slug,
-				'activeLabel'        => sprintf( '%s: %s', $product_attributes_map[ $attribute_name ], $term_object->name ),
+				'activeLabel'        => sprintf( '%s: %s', $product_attributes_map[ $attribute_name ], $term_name ),
 				'attributeQueryType' => $query_types[ $attribute_name ] ?? 'or',
 			);
 		}
@@ -224,6 +177,10 @@ final class ProductFilterAttribute extends AbstractBlock {
 
 		$attribute_terms = get_terms( $args );
 
+		if ( is_wp_error( $attribute_terms ) ) {
+			$attribute_terms = array();
+		}
+
 		$filter_param_key = 'filter_' . str_replace( 'pa_', '', $product_attribute->slug );
 		$filter_params    = $block->context['filterParams'] ?? array();
 		$selected_terms   = array();
@@ -240,17 +197,25 @@ final class ProductFilterAttribute extends AbstractBlock {
 		);
 
 		if ( ! empty( $attribute_counts ) ) {
-			$show_counts       = $block_attributes['showCounts'] ?? false;
+			$show_counts         = $block_attributes['showCounts'] ?? false;
+			$is_visual_attribute = VisualAttributeTermMeta::is_visual_attribute_taxonomy( $product_attribute->slug );
+			$visual_values       = array();
+
+			if ( $is_visual_attribute ) {
+				$visual_values = VisualAttributeTermMeta::get_term_visuals( wp_list_pluck( $attribute_terms, 'term_id' ) );
+			}
+
 			$attribute_options = array_map(
-				function ( $term ) use ( $block_attributes, $attribute_counts, $selected_terms, $product_attribute, $show_counts ) {
+				function ( $term ) use ( $block_attributes, $attribute_counts, $selected_terms, $product_attribute, $show_counts, $is_visual_attribute, $visual_values ) {
 					$term          = (array) $term;
 					$term['count'] = $attribute_counts[ $term['term_id'] ] ?? 0;
 
-					$type = 'attribute/' . str_replace( 'pa_', '', $product_attribute->slug );
-					$item = array(
+					$term_name = wp_specialchars_decode( $term['name'], ENT_QUOTES );
+					$type      = 'attribute/' . str_replace( 'pa_', '', $product_attribute->slug );
+					$item      = array(
 						'id'                 => $type . '-' . $term['slug'],
-						'label'              => $term['name'],
-						'ariaLabel'          => $term['name'],
+						'label'              => $term_name,
+						'ariaLabel'          => $term_name,
 						'value'              => $term['slug'],
 						'selected'           => in_array( $term['slug'], $selected_terms, true ),
 						'type'               => $type,
@@ -261,9 +226,8 @@ final class ProductFilterAttribute extends AbstractBlock {
 						$item['count'] = $term['count'];
 					}
 
-					if ( 'wc-visual' === $product_attribute->type ) {
-						$colors        = $this->get_visual_attribute_term_colors();
-						$item['color'] = $colors[ $term['term_id'] ] ?? '';
+					if ( $is_visual_attribute ) {
+						$item['visual'] = $visual_values[ $term['term_id'] ] ?? VisualAttributeTermMeta::get_empty_visual();
 					}
 
 					return $item;
@@ -287,7 +251,15 @@ final class ProductFilterAttribute extends AbstractBlock {
 			),
 		);
 
-		if ( empty( $filter_context['items'] ) ) {
+		$is_empty            = empty( $filter_context['items'] );
+		$product_filters_key = $block->context['productFiltersKey'] ?? '';
+		if ( is_string( $product_filters_key ) && '' !== $product_filters_key ) {
+			$state = wp_interactivity_state( 'woocommerce/product-filters' );
+			$state['filterEmptyStates'][ $product_filters_key ][] = $is_empty;
+			wp_interactivity_state( 'woocommerce/product-filters', $state );
+		}
+
+		if ( $is_empty ) {
 			$wrapper_attributes['hidden'] = true;
 			$wrapper_attributes['class']  = 'wc-block-product-filter--hidden';
 		}
@@ -314,7 +286,8 @@ final class ProductFilterAttribute extends AbstractBlock {
 	 * @param string   $query_type Query type, accept 'and' or 'or'.
 	 */
 	private function get_attribute_counts( $block, $slug, $query_type ) {
-		if ( ! isset( $block->context['filterParams'] ) ) {
+		$context = $block->context;
+		if ( ! isset( $context['filterParams'] ) ) {
 			return array();
 		}
 
@@ -331,7 +304,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 			);
 		}
 
-		if ( ! empty( $query_vars['tax_query'] ) ) {
+		if ( ! isset( $context['queryId'] ) && ! empty( $query_vars['tax_query'] ) ) {
 			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 			$query_vars['tax_query'] = ProductCollectionUtils::remove_query_array( $query_vars['tax_query'], 'taxonomy', $slug );
 		}

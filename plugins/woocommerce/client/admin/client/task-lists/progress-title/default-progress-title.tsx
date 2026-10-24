@@ -51,8 +51,8 @@ export const DefaultProgressTitle = ( {
 				? sprintf(
 						/* translators: %s = site title */
 						__( 'Welcome to %s', 'woocommerce' ),
-						siteTitle
-				  )
+						siteTitle as string
+					)
 				: __( 'Welcome to your store', 'woocommerce' );
 		}
 		if ( completedCount <= 3 ) {

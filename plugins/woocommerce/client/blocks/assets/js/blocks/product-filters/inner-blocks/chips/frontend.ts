@@ -2,18 +2,23 @@
  * External dependencies
  */
 import { store, getContext, getElement } from '@wordpress/interactivity';
+import type {
+	SelectableItem,
+	SelectableItemsParentStore,
+} from '@woocommerce/types';
 
 /**
  * Internal dependencies
  */
-import type {
-	SelectableItem,
-	SelectableItemsParentStore,
-} from '../../../../types/type-defs/selectable-items';
+import {
+	getVisualAttributeTermStyleString,
+	isVisualAttributeTermEmpty,
+} from '../../../../base/utils/visual-attribute-terms';
+import type { VisualAttributeTerm } from '../../../../base/utils/visual-attribute-terms';
 import { getClosestColor } from '../../utils/get-closest-color';
 
 type ChipsItem = SelectableItem< {
-	color?: string;
+	visual?: VisualAttributeTerm;
 	index?: number;
 } >;
 
@@ -43,10 +48,12 @@ type ChipsStore = {
 };
 
 function getParentStore( storeNamespace?: string ) {
-	if ( ! storeNamespace ) return undefined;
-	return store< SelectableItemsParentStore< { color?: string } > >(
-		storeNamespace
-	);
+	if ( ! storeNamespace ) {
+		return undefined;
+	}
+	return store<
+		SelectableItemsParentStore< { visual?: VisualAttributeTerm } >
+	>( storeNamespace );
 }
 
 function normalizeDisplayLimit( displayLimit: number ): number {
@@ -96,7 +103,9 @@ const { state }: ChipsStore = store< ChipsStore >(
 					getContext< ChipsContext >();
 				const parentItems =
 					getParentStore( storeNamespace )?.state?.selectableItems;
-				if ( ! Array.isArray( parentItems ) ) return [];
+				if ( ! Array.isArray( parentItems ) ) {
+					return [];
+				}
 				const normalizedDisplayLimit =
 					normalizeDisplayLimit( displayLimit );
 				return parentItems.map( ( item, index ) => ( {
@@ -111,18 +120,19 @@ const { state }: ChipsStore = store< ChipsStore >(
 			},
 			get swatchHidden(): boolean {
 				const item = getCurrentItem();
-				return ! item?.color;
+				return isVisualAttributeTermEmpty( item?.visual );
 			},
 			get swatchStyle(): string {
 				const item = getCurrentItem();
-				if ( ! item?.color ) return '';
-				return `background-color: ${ item.color }`;
+				return getVisualAttributeTermStyleString( item?.visual );
 			},
 		},
 		actions: {
 			toggle() {
 				const item = getCurrentItem();
-				if ( ! item ) return;
+				if ( ! item ) {
+					return;
+				}
 				const { storeNamespace } = getContext< ChipsContext >();
 				getParentStore( storeNamespace )?.actions?.toggle?.( item );
 			},

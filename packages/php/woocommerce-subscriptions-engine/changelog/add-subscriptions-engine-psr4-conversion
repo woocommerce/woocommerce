@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Convert the subscriptions-engine package source to PSR-4 PascalCase (behavior-preserving rename).

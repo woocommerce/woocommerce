@@ -82,12 +82,12 @@ export const CustomerEffortScoreModalContainer = () => {
 			secondQuestion={ visibleCESModalData.secondQuestion }
 			recordScoreCallback={ ( ...args ) => {
 				recordScore( ...args );
-				hideCesModal();
+				void hideCesModal();
 				visibleCESModalData.props?.onRecordScore?.();
 			} }
 			onCloseModal={ () => {
 				visibleCESModalData.props?.onCloseModal?.();
-				hideCesModal();
+				void hideCesModal();
 			} }
 			shouldShowComments={ visibleCESModalData.props?.shouldShowComments }
 			getExtraFieldsToBeShown={

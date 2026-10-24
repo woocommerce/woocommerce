@@ -3,8 +3,11 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\DataStores\Orders;
 
+use Automattic\WooCommerce\Caches\OrderCountCache;
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableQuery;
+use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\Utilities\OrderUtil;
@@ -20,6 +23,51 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	use HPOSToggleTrait;
 
 	/**
+	 * Whether this class created the address full-text index.
+	 *
+	 * @var bool
+	 */
+	private static $created_address_index = false;
+
+	/**
+	 * Whether this class created the order item full-text index.
+	 *
+	 * @var bool
+	 */
+	private static $created_item_index = false;
+
+	/**
+	 * Create tables and full-text indexes before per-test transactions start.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		self::setup_cot_tables();
+
+		$db_util                     = wc_get_container()->get( DatabaseUtil::class );
+		self::$created_address_index = ! $db_util->fts_index_on_order_address_table_exists();
+		self::$created_item_index    = ! $db_util->fts_index_on_order_item_table_exists();
+		if ( self::$created_address_index ) {
+			$db_util->create_fts_index_order_address_table();
+		}
+		if ( self::$created_item_index ) {
+			$db_util->create_fts_index_order_item_table();
+		}
+	}
+
+	/**
+	 * Remove only the full-text indexes created by this class.
+	 */
+	public static function wpTearDownAfterClass(): void {
+		global $wpdb;
+
+		if ( self::$created_address_index ) {
+			wc_get_container()->get( DatabaseUtil::class )->drop_fts_index_order_address_table();
+		}
+		if ( self::$created_item_index ) {
+			$wpdb->query( "ALTER TABLE {$wpdb->prefix}woocommerce_order_items DROP INDEX order_item_fts" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name uses the trusted WordPress prefix and a fixed suffix.
+		}
+	}
+
+	/**
 	 * Stores the original COT state.
 	 *
 	 * @var bool
@@ -33,7 +81,8 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 		parent::setUp();
 		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 		$this->cot_state = OrderUtil::custom_orders_table_usage_is_enabled();
-		$this->setup_cot();
+		remove_filter( 'query', array( $this, '_create_temporary_tables' ) );
+		remove_filter( 'query', array( $this, '_drop_temporary_tables' ) );
 		$this->toggle_cot_feature_and_usage( true );
 	}
 
@@ -471,6 +520,268 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Run an order query and check how many order count statements it executes.
+	 *
+	 * @param array $args                      Query arguments.
+	 * @param int   $expected_count_statements Expected number of order count statements.
+	 * @return OrdersTableQuery
+	 */
+	private function query_and_assert_count_statements( array $args, int $expected_count_statements ): OrdersTableQuery {
+		global $wpdb;
+
+		$statements = array();
+		$capture    = static function ( $sql ) use ( &$statements ) {
+			$statements[] = $sql;
+			return $sql;
+		};
+
+		add_filter( 'query', $capture );
+		try {
+			$query = new OrdersTableQuery( $args );
+			$this->assertSame( '', $wpdb->last_error, 'The order query should not produce a database error.' );
+		} finally {
+			remove_filter( 'query', $capture );
+		}
+
+		$count_statements = array_filter(
+			$statements,
+			static fn( $sql ) => 0 === stripos( $sql, 'SELECT COUNT(' ) && false !== stripos( $sql, " FROM {$wpdb->prefix}wc_orders " )
+		);
+		$this->assertCount( $expected_count_statements, $count_statements, 'Unexpected number of order count queries.' );
+
+		return $query;
+	}
+
+	/**
+	 * @testdox First-page totals remain correct with full-text search enabled or disabled.
+	 * @dataProvider provider_first_search_page_sizes
+	 *
+	 * @param int  $matches        Number of orders matching the search term.
+	 * @param bool $count_expected Whether the count query must still run.
+	 * @param bool $fts_enabled    Whether full-text search is enabled.
+	 */
+	public function test_first_search_page_supplies_total( int $matches, bool $count_expected, bool $fts_enabled ): void {
+		// The address search only adds the phone column to its MATCH() list when the stored database version is 9.4.0 or later.
+		// The full-text index this class creates always includes phone, so a lower stored version builds a column list that matches no index and fails.
+		// Pin the version in memory instead of writing the option.
+		add_filter( 'pre_option_woocommerce_db_version', static fn() => WC_VERSION );
+		add_filter( 'pre_option_' . CustomOrdersTableController::HPOS_FTS_INDEX_OPTION, static fn() => $fts_enabled ? 'yes' : 'no' );
+		add_filter( 'pre_option_' . CustomOrdersTableController::HPOS_FTS_ADDRESS_INDEX_CREATED_OPTION, static fn() => 'yes' );
+		add_filter( 'pre_option_' . CustomOrdersTableController::HPOS_FTS_ORDER_ITEM_INDEX_CREATED_OPTION, static fn() => 'yes' );
+
+		$ids = array();
+		for ( $i = 0; $i < $matches; $i++ ) {
+			$order = new WC_Order();
+			$order->set_billing_email( 'first-page@woo.test' );
+			$order->save();
+			$ids[] = $order->get_id();
+		}
+
+		$query = $this->query_and_assert_count_statements(
+			array(
+				's'        => 'first-page@woo.test',
+				'limit'    => 5,
+				'paginate' => true,
+				'orderby'  => 'ID',
+				'order'    => 'DESC',
+				'return'   => 'ids',
+			),
+			$count_expected ? 1 : 0
+		);
+
+		$this->assertSame( array_slice( array_reverse( $ids ), 0, 5 ), $query->orders );
+		$this->assertSame( $matches, $query->found_orders );
+		$this->assertSame( (int) ceil( $matches / 5 ), $query->max_num_pages );
+		if ( $fts_enabled ) {
+			$this->assertStringContainsString( 'AS fts_addresses ON', $query->request );
+			$this->assertStringContainsString( 'AS fts_items ON', $query->request );
+		} else {
+			$this->assertStringNotContainsString( 'JOIN', $query->request );
+		}
+	}
+
+	/**
+	 * Numbers of matching orders around the page size of 5, with both search modes.
+	 *
+	 * @return array<string, array{int, bool, bool}>
+	 */
+	public static function provider_first_search_page_sizes(): array {
+		return array(
+			'FTS off, no match'         => array( 0, false, false ),
+			'FTS off, one match'        => array( 1, false, false ),
+			'FTS off, almost full page' => array( 4, false, false ),
+			'FTS off, full page'        => array( 5, true, false ),
+			'FTS off, more than a page' => array( 6, true, false ),
+			'FTS on, no match'          => array( 0, false, true ),
+			'FTS on, one match'         => array( 1, true, true ),
+			'FTS on, almost full page'  => array( 4, true, true ),
+			'FTS on, full page'         => array( 5, true, true ),
+			'FTS on, more than a page'  => array( 6, true, true ),
+		);
+	}
+
+	/**
+	 * @testdox A global SQL filter that shortens the result page preserves the total and pagination.
+	 * @testWith ["LIMIT 0, 2", [0, 1]]
+	 *           ["LIMIT 4, 5", [4, 5]]
+	 *
+	 * @param string $limits           Replacement SQL limit and offset.
+	 * @param int[]  $expected_indexes Indexes of the orders expected on the page.
+	 */
+	public function test_globally_rewritten_query_keeps_count( string $limits, array $expected_indexes ): void {
+		global $wpdb;
+
+		$ids = array();
+		for ( $i = 0; $i < 6; $i++ ) {
+			$order = new WC_Order();
+			$order->set_transaction_id( 'rewritten-search' );
+			$order->save();
+			$ids[] = $order->get_id();
+		}
+
+		$rewrite = static function ( $sql ) use ( $wpdb, $limits ) {
+			if ( 0 === strpos( $sql, "SELECT {$wpdb->prefix}wc_orders.id" ) && false !== strpos( $sql, 'rewritten-search' ) ) {
+				return str_replace( 'LIMIT 0, 5', $limits, $sql );
+			}
+			return $sql;
+		};
+		add_filter( 'query', $rewrite );
+		try {
+			$query = $this->query_and_assert_count_statements(
+				array(
+					's'             => 'rewritten-search',
+					'search_filter' => 'transaction_id',
+					'limit'         => 5,
+					'paginate'      => true,
+					'return'        => 'ids',
+					'orderby'       => 'ID',
+					'order'         => 'ASC',
+				),
+				1
+			);
+		} finally {
+			remove_filter( 'query', $rewrite );
+		}
+
+		$this->assertSame( array( $ids[ $expected_indexes[0] ], $ids[ $expected_indexes[1] ] ), $query->orders );
+		$this->assertSame( 6, $query->found_orders );
+		$this->assertSame( 2, $query->max_num_pages );
+	}
+
+	/**
+	 * @testdox The count query still runs when the page cannot prove the total.
+	 * @dataProvider provider_pages_that_cannot_prove_total
+	 *
+	 * @param array $args            Query argument overrides.
+	 * @param int   $expected_orders Number of orders on the page.
+	 */
+	public function test_count_query_runs_when_page_cannot_prove_total( array $args, int $expected_orders ): void {
+		for ( $i = 0; $i < 3; $i++ ) {
+			$order = new WC_Order();
+			$order->set_billing_email( 'keep-count@woo.test' );
+			$order->update_meta_data( '_keep_count', 'yes' );
+			$order->save();
+		}
+
+		$query = $this->query_and_assert_count_statements(
+			array_merge(
+				array(
+					's'        => 'keep-count@woo.test',
+					'limit'    => 2,
+					'paginate' => true,
+					'return'   => 'ids',
+				),
+				$args
+			),
+			1
+		);
+
+		$this->assertCount( $expected_orders, $query->orders );
+		$this->assertSame( 3, $query->found_orders );
+	}
+
+	/**
+	 * Queries whose result page does not hold every match, or is not a plain search.
+	 *
+	 * @return array<string, array{array, int}>
+	 */
+	public static function provider_pages_that_cannot_prove_total(): array {
+		return array(
+			'second page'               => array( array( 'page' => 2 ), 1 ),
+			'offset'                    => array( array( 'offset' => 2 ), 1 ),
+			'not a search'              => array(
+				array(
+					's'     => '',
+					'limit' => 5,
+				),
+				3,
+			),
+			'search that joins a table' => array(
+				array(
+					'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+						array(
+							'key'   => '_keep_count',
+							'value' => 'yes',
+						),
+					),
+					'limit'      => 5,
+				),
+				3,
+			),
+		);
+	}
+
+	/**
+	 * @testdox A filter that changes the query keeps the count query.
+	 * @dataProvider provider_query_changing_filters
+	 *
+	 * @param string   $hook     Filter name.
+	 * @param callable $callback Callback that changes the filtered value.
+	 */
+	public function test_changed_query_keeps_count( string $hook, callable $callback ): void {
+		$order = new WC_Order();
+		$order->set_billing_email( 'changed-query@woo.test' );
+		$order->save();
+
+		add_filter( $hook, $callback );
+		$query = $this->query_and_assert_count_statements(
+			array(
+				's'        => 'changed-query@woo.test',
+				'limit'    => 5,
+				'paginate' => true,
+				'return'   => 'ids',
+			),
+			1
+		);
+		remove_filter( $hook, $callback );
+
+		$this->assertSame( array( $order->get_id() ), $query->orders );
+		$this->assertSame( 1, $query->found_orders );
+	}
+
+	/**
+	 * WooCommerce query filters, each with a callback that makes a harmless change.
+	 *
+	 * @return array<string, array{string, callable}>
+	 */
+	public static function provider_query_changing_filters(): array {
+		return array(
+			'clauses'   => array(
+				'woocommerce_orders_table_query_clauses',
+				static fn( array $clauses ) => array_merge( $clauses, array( 'where' => $clauses['where'] . ' AND 1=1' ) ),
+			),
+			'list SQL'  => array(
+				'woocommerce_orders_table_query_sql',
+				static fn( string $sql ) => $sql . ' ',
+			),
+			'count SQL' => array(
+				'woocommerce_orders_table_query_count_sql',
+				static fn( string $sql ) => $sql . ' ',
+			),
+		);
+	}
+
+	/**
 	 * Set up some dummy orders, to help test the search filter.
 	 *
 	 * @return array Order IDs
@@ -618,7 +929,7 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	public function test_total_filtering_with_operators() {
 		$order_totals_to_test = array( 5, 10, 50, 100.00, 100.00, 250.50, 250.50, 500.75, 1000.00 );
 		foreach ( $order_totals_to_test as $order_total ) {
-			$order = OrderHelper::create_order();
+			$order = wc_create_order();
 			$order->set_total( $order_total );
 			$order->save();
 		}
@@ -789,5 +1100,286 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 		$order1->delete( true );
 		$order2->delete( true );
 		$order3->delete( true );
+	}
+
+	/**
+	 * Helper function to create orders with interleaved statuses and strictly decreasing creation dates.
+	 *
+	 * @param int $count Number of orders to create.
+	 * @return int[] Order IDs, ordered by creation date descending.
+	 */
+	private function create_orders_with_interleaved_statuses( int $count ): array {
+		$statuses = array( OrderStatus::PENDING, OrderStatus::PROCESSING, OrderStatus::COMPLETED );
+		$ids      = array();
+
+		for ( $i = 0; $i < $count; $i++ ) {
+			$order = new \WC_Order();
+			$order->set_status( $statuses[ $i % count( $statuses ) ] );
+			$order->set_date_created( strtotime( '2023-06-01 12:00:00' ) - ( $i * HOUR_IN_SECONDS ) );
+			$order->save();
+			$ids[] = $order->get_id();
+		}
+
+		return $ids;
+	}
+
+	/**
+	 * Helper function to run wc_get_orders() and capture the SQL query executed by OrdersTableQuery.
+	 *
+	 * @param array $args Query args ('return' => 'ids' is always added).
+	 * @return array Two-element array containing the queried order IDs and the executed SQL query.
+	 */
+	private function get_orders_and_capture_sql( array $args ): array {
+		$captured_sql = '';
+		$callback     = function ( $result, $query, $sql ) use ( &$captured_sql ) {
+			// Avoid parameter not used PHPCS errors.
+			unset( $query );
+			$captured_sql = $sql;
+			return $result;
+		};
+
+		add_filter( 'woocommerce_hpos_pre_query', $callback, 10, 3 );
+		$ids = wc_get_orders( array_merge( $args, array( 'return' => 'ids' ) ) );
+		remove_filter( 'woocommerce_hpos_pre_query', $callback );
+
+		return array( $ids, $captured_sql );
+	}
+
+
+	/**
+	 * Helper function to force-enable the status union rewrite, which by default is gated by store size.
+	 */
+	private function force_enable_status_union_rewrite(): void {
+		add_filter( 'woocommerce_orders_table_query_status_union_optimization', '__return_true' );
+	}
+
+	/**
+	 * Helper function to remove the force-enablement of the status union rewrite.
+	 */
+	private function reset_status_union_rewrite(): void {
+		remove_filter( 'woocommerce_orders_table_query_status_union_optimization', '__return_true' );
+	}
+
+	/**
+	 * @testdox Multi-status queries ordered by creation date are rewritten as a UNION of single-status queries and return the same results.
+	 */
+	public function test_status_union_rewrite_applies_and_preserves_results(): void {
+		$ids  = $this->create_orders_with_interleaved_statuses( 9 );
+		$args = array(
+			'status'  => array( OrderStatus::PENDING, OrderStatus::PROCESSING, OrderStatus::COMPLETED ),
+			'orderby' => 'date',
+			'order'   => 'DESC',
+			'limit'   => 4,
+		);
+
+		$this->force_enable_status_union_rewrite();
+		list( $queried_ids, $sql ) = $this->get_orders_and_capture_sql( $args );
+		$this->reset_status_union_rewrite();
+
+		$this->assertStringContainsString( 'UNION ALL', $sql, 'Eligible multi-status queries should be rewritten as a UNION of single-status queries' );
+		$this->assertSame( array_slice( $ids, 0, 4 ), $queried_ids, 'The rewritten query should return the most recent orders across all statuses' );
+
+		add_filter( 'woocommerce_orders_table_query_status_union_optimization', '__return_false' );
+		list( $unoptimized_ids, $unoptimized_sql ) = $this->get_orders_and_capture_sql( $args );
+		remove_filter( 'woocommerce_orders_table_query_status_union_optimization', '__return_false' );
+
+		$this->assertStringNotContainsString( 'UNION ALL', $unoptimized_sql, 'The rewrite should be disabled by the woocommerce_orders_table_query_status_union_optimization filter' );
+		$this->assertSame( $unoptimized_ids, $queried_ids, 'Rewritten and regular queries should return identical results' );
+	}
+
+	/**
+	 * @testdox The default order query (multiple statuses, ordered by creation date) is rewritten as a UNION of single-status queries.
+	 */
+	public function test_status_union_rewrite_applies_to_default_query(): void {
+		$ids = $this->create_orders_with_interleaved_statuses( 3 );
+
+		$this->force_enable_status_union_rewrite();
+		list( $queried_ids, $sql ) = $this->get_orders_and_capture_sql( array() );
+		$this->reset_status_union_rewrite();
+
+		$this->assertStringContainsString( 'UNION ALL', $sql, 'The default order query should be rewritten as a UNION of single-status queries' );
+		$this->assertSame( $ids, $queried_ids, 'The rewritten default query should return all orders, most recent first' );
+	}
+
+	/**
+	 * @testdox The status union rewrite returns the same results as the regular query across pages and sort directions.
+	 */
+	public function test_status_union_rewrite_pagination_and_sort_direction(): void {
+		$this->create_orders_with_interleaved_statuses( 9 );
+
+		$this->force_enable_status_union_rewrite();
+
+		foreach ( array( 'DESC', 'ASC' ) as $order ) {
+			foreach ( array( 1, 2, 3 ) as $page ) {
+				$args = array(
+					'status'  => array( OrderStatus::PENDING, OrderStatus::PROCESSING, OrderStatus::COMPLETED ),
+					'orderby' => 'date',
+					'order'   => $order,
+					'limit'   => 4,
+					'page'    => $page,
+				);
+
+				list( $queried_ids, $sql ) = $this->get_orders_and_capture_sql( $args );
+
+				add_filter( 'woocommerce_orders_table_query_status_union_optimization', '__return_false' );
+				list( $unoptimized_ids ) = $this->get_orders_and_capture_sql( $args );
+				remove_filter( 'woocommerce_orders_table_query_status_union_optimization', '__return_false' );
+
+				$this->assertStringContainsString( 'UNION ALL', $sql, "Page {$page} ({$order}) should be served by the rewritten query" );
+				$this->assertSame( $unoptimized_ids, $queried_ids, "Page {$page} ({$order}) of the rewritten query should match the regular query" );
+			}
+		}
+
+		$this->reset_status_union_rewrite();
+	}
+
+	/**
+	 * @testdox The status union rewrite is skipped for queries it cannot serve identically.
+	 */
+	public function test_status_union_rewrite_skipped_for_ineligible_queries(): void {
+		$this->create_orders_with_interleaved_statuses( 3 );
+		$this->force_enable_status_union_rewrite();
+
+		$ineligible_args = array(
+			'a single status'    => array( 'status' => array( OrderStatus::PENDING ) ),
+			'no row limit'       => array( 'limit' => -1 ),
+			'a non-date orderby' => array( 'orderby' => 'id' ),
+			'a field filter'     => array( 'customer_id' => 123 ),
+			'a meta query'       => array(
+				'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+
+					array(
+						'key'   => 'some_key',
+						'value' => 'some_value',
+					),
+				),
+			),
+		);
+
+		foreach ( $ineligible_args as $description => $args ) {
+			$args = array_merge(
+				array(
+					'status'  => array( OrderStatus::PENDING, OrderStatus::PROCESSING ),
+					'orderby' => 'date',
+					'order'   => 'DESC',
+					'limit'   => 4,
+				),
+				$args
+			);
+
+			list( , $sql ) = $this->get_orders_and_capture_sql( $args );
+
+			$this->assertStringNotContainsString( 'UNION ALL', $sql, "A query with {$description} should not be rewritten" );
+		}
+
+		$this->reset_status_union_rewrite();
+	}
+
+	/**
+	 * @testdox Queries customized via the clauses filter are not rewritten.
+	 */
+	public function test_status_union_rewrite_skipped_when_clauses_modified(): void {
+		$ids = $this->create_orders_with_interleaved_statuses( 3 );
+		$this->force_enable_status_union_rewrite();
+
+		$filter_callback = function ( $clauses ) {
+			$clauses['where'] .= ' AND 1=1';
+			return $clauses;
+		};
+
+		add_filter( 'woocommerce_orders_table_query_clauses', $filter_callback );
+		list( $queried_ids, $sql ) = $this->get_orders_and_capture_sql(
+			array(
+				'status'  => array( OrderStatus::PENDING, OrderStatus::PROCESSING ),
+				'orderby' => 'date',
+				'order'   => 'DESC',
+				'limit'   => 4,
+			)
+		);
+		remove_filter( 'woocommerce_orders_table_query_clauses', $filter_callback );
+
+		$this->reset_status_union_rewrite();
+
+		$this->assertStringNotContainsString( 'UNION ALL', $sql, 'Queries modified via the clauses filter should not be rewritten' );
+		$this->assertSame( array( $ids[0], $ids[1] ), $queried_ids, 'The unmodified query should still return matching orders' );
+	}
+
+	/**
+	 * @testdox Queries modified via the SQL filter are not rewritten, and the modified SQL is the one executed.
+	 */
+	public function test_status_union_rewrite_skipped_when_sql_modified(): void {
+		$ids = $this->create_orders_with_interleaved_statuses( 3 );
+		$this->force_enable_status_union_rewrite();
+
+		$filter_callback = function ( $sql ) {
+			return $sql . ' -- modified';
+		};
+
+		add_filter( 'woocommerce_orders_table_query_sql', $filter_callback );
+		list( $queried_ids, $sql ) = $this->get_orders_and_capture_sql(
+			array(
+				'status'  => array( OrderStatus::PENDING, OrderStatus::PROCESSING ),
+				'orderby' => 'date',
+				'order'   => 'DESC',
+				'limit'   => 4,
+			)
+		);
+		remove_filter( 'woocommerce_orders_table_query_sql', $filter_callback );
+
+		$this->reset_status_union_rewrite();
+
+		$this->assertStringNotContainsString( 'UNION ALL', $sql, 'Queries modified via the SQL filter should not be rewritten' );
+		$this->assertStringEndsWith( '-- modified', $sql, 'The SQL modified by the filter should be the SQL that gets executed' );
+		$this->assertSame( array( $ids[0], $ids[1] ), $queried_ids, 'The filter-modified query should still return matching orders' );
+	}
+
+	/**
+	 * @testdox The status union rewrite is disabled by default on stores below the order count threshold.
+	 */
+	public function test_status_union_rewrite_disabled_by_default_on_small_stores(): void {
+		$this->create_orders_with_interleaved_statuses( 3 );
+
+		list( , $sql ) = $this->get_orders_and_capture_sql(
+			array(
+				'status'  => array( OrderStatus::PENDING, OrderStatus::PROCESSING, OrderStatus::COMPLETED ),
+				'orderby' => 'date',
+				'order'   => 'DESC',
+				'limit'   => 4,
+			)
+		);
+
+		$this->assertStringNotContainsString( 'UNION ALL', $sql, 'The rewrite should be disabled by default on stores below the order count threshold' );
+	}
+
+	/**
+	 * @testdox The status union rewrite is enabled by default once cached order counts reach the threshold.
+	 */
+	public function test_status_union_rewrite_enabled_by_default_on_large_stores(): void {
+		$ids = $this->create_orders_with_interleaved_statuses( 3 );
+
+		$count_cache = new OrderCountCache();
+		$count_cache->set_multiple(
+			'shop_order',
+			array(
+				'wc-pending'    => 200000,
+				'wc-processing' => 200000,
+				'wc-completed'  => 200000,
+			)
+		);
+
+		list( $queried_ids, $sql ) = $this->get_orders_and_capture_sql(
+			array(
+				'type'    => 'shop_order',
+				'status'  => array( OrderStatus::PENDING, OrderStatus::PROCESSING, OrderStatus::COMPLETED ),
+				'orderby' => 'date',
+				'order'   => 'DESC',
+				'limit'   => 4,
+			)
+		);
+
+		$count_cache->flush( 'shop_order' );
+
+		$this->assertStringContainsString( 'UNION ALL', $sql, 'The rewrite should be enabled by default once cached order counts reach the threshold' );
+		$this->assertSame( $ids, $queried_ids, 'The rewritten query should return all orders, most recent first' );
 	}
 }

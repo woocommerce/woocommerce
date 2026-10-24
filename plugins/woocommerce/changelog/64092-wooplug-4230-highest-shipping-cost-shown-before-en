@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Fix highest shipping cost shown before address entry when using Local Pickup with block checkout. Also improves shipping rate selection UX with optimistic UI updates in the order totals.

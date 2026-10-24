@@ -3,6 +3,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Internal\ProductAttributes\VisualAttributeTermMeta;
+
 /**
  * Product Filter: Checkbox List Block.
  */
@@ -83,9 +85,9 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 		$visible_items           = array_merge( $first_items, $overflow_selected_items );
 		$hidden_count            = count( $items ) - count( $visible_items );
 
-		$first_item  = reset( $items );
-		$show_counts = is_array( $first_item ) && array_key_exists( 'count', $first_item );
-		$has_colors  = is_array( $first_item ) && array_key_exists( 'color', $first_item );
+		$first_item          = reset( $items );
+		$show_counts         = is_array( $first_item ) && array_key_exists( 'count', $first_item );
+		$has_visual_swatches = self::has_visual_swatches( $items );
 
 		ob_start();
 		?>
@@ -137,11 +139,15 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 											<?php echo $stars_svg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 										</span>
 									<?php else : ?>
-										<?php if ( $has_colors ) : ?>
+										<?php if ( $has_visual_swatches ) : ?>
+											<?php
+											$swatch_style = $this->get_item_swatch_style( $item );
+											$has_visual   = '' !== $swatch_style;
+											?>
 											<span
-												class="wc-block-product-filter-checkbox-list__color-swatch<?php echo empty( $item['color'] ) ? ' is-empty' : ''; ?>"
-												<?php if ( ! empty( $item['color'] ) ) : ?>
-													style="background-color: <?php echo esc_attr( $item['color'] ); ?>"
+												class="wc-block-product-filter-checkbox-list__color-swatch<?php echo ! $has_visual ? ' is-empty' : ''; ?>"
+												<?php if ( $has_visual ) : ?>
+													style="<?php echo esc_attr( $swatch_style ); ?>"
 												<?php endif; ?>
 												aria-hidden="true"
 											></span>
@@ -194,7 +200,7 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 											<?php echo $stars_svg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 										</span>
 									<?php else : ?>
-										<?php if ( $has_colors ) : ?>
+										<?php if ( $has_visual_swatches ) : ?>
 											<span
 												class="wc-block-product-filter-checkbox-list__color-swatch"
 												data-wp-class--is-empty="woocommerce/product-filter-checkbox-list::state.isColorSwatchEmpty"
@@ -236,6 +242,34 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 		</div>
 		<?php
 		return ob_get_clean();
+	}
+
+	/**
+	 * Check whether any item has visual swatch data.
+	 *
+	 * @param array $items Selectable items.
+	 * @return bool
+	 */
+	private static function has_visual_swatches( array $items ): bool {
+		foreach ( $items as $item ) {
+			if ( is_array( $item ) && array_key_exists( 'visual', $item ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Build inline swatch style from item visual data.
+	 *
+	 * @param array $item Selectable item data.
+	 * @return string
+	 */
+	private function get_item_swatch_style( array $item ): string {
+		$visual = isset( $item['visual'] ) && is_array( $item['visual'] ) ? $item['visual'] : array();
+
+		return VisualAttributeTermMeta::get_swatch_style( $visual );
 	}
 
 	/**

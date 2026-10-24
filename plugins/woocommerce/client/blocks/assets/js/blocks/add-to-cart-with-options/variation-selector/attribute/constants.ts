@@ -4,6 +4,11 @@
 import type { TemplateArray } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
 
+/**
+ * Internal dependencies
+ */
+import type { VisualAttributeTerm } from '../../../../base/utils/visual-attribute-terms';
+
 export const ATTRIBUTE_ITEM_TEMPLATE: TemplateArray = [
 	[
 		'woocommerce/add-to-cart-with-options-variation-selector-attribute',
@@ -41,6 +46,11 @@ export const ATTRIBUTE_ITEM_TEMPLATE: TemplateArray = [
 	],
 ] as const;
 
+/**
+ * Placeholder attributes rendered in the editor when no variable product is in
+ * context. None of these exist in the database, so term IDs are negative: the
+ * term ID filter in `edit.tsx` relies on that to skip the Store API request.
+ */
 export const DEFAULT_ATTRIBUTES = [
 	{
 		id: 1,
@@ -59,15 +69,15 @@ export const DEFAULT_ATTRIBUTES = [
 		name: __( 'Size', 'woocommerce' ),
 		has_variations: true,
 		terms: [
-			{ id: 1, slug: 'sm', name: __( 'Small', 'woocommerce' ) },
-			{ id: 2, slug: 'md', name: __( 'Medium', 'woocommerce' ) },
-			{ id: 3, slug: 'lg', name: __( 'Large', 'woocommerce' ) },
+			{ id: -4, slug: 'sm', name: __( 'Small', 'woocommerce' ) },
+			{ id: -5, slug: 'md', name: __( 'Medium', 'woocommerce' ) },
+			{ id: -6, slug: 'lg', name: __( 'Large', 'woocommerce' ) },
 		],
 	},
 ] as const;
 
-export const EMPTY_TERM_COLORS: Record< string, string > = {
-	'-1': '#0000ff',
-	'-2': '#e10000',
-	'-3': '#009b00',
+export const EMPTY_TERM_VISUALS: Record< string, VisualAttributeTerm > = {
+	'-1': { type: 'color', value: '#0000ff' },
+	'-2': { type: 'color', value: '#e10000' },
+	'-3': { type: 'color', value: '#009b00' },
 };

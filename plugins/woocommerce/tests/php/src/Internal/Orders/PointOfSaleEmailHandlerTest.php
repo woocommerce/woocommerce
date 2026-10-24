@@ -53,6 +53,18 @@ class PointOfSaleEmailHandlerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox maybe_suppress_email returns false for Stripe POS card reader payment.
+	 */
+	public function test_suppresses_email_for_stripe_card_reader_payment(): void {
+		$order = new WC_Order();
+		$order->set_created_via( 'bookings' );
+		$order->update_meta_data( '_stripe_ipp_channel', 'mobile_pos' );
+		$order->save();
+
+		$this->assertFalse( $this->sut->maybe_suppress_email( true, $order ) );
+	}
+
+	/**
 	 * @testdox maybe_suppress_email returns false for cash payment at POS.
 	 */
 	public function test_suppresses_email_for_cash_payment(): void {

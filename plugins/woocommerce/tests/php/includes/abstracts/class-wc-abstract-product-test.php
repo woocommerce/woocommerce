@@ -1,5 +1,6 @@
 <?php
 
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
 
@@ -17,6 +18,7 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 		parent::tearDown();
 		$this->disable_cogs_feature();
 		remove_all_filters( 'woocommerce_get_cogs_total_value' );
+		self::disable_direct_product_attribute_lookup_updates();
 	}
 
 	/**
@@ -43,6 +45,7 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 	 * Setup items we need repeatedly across tests in this class.
 	 */
 	public function set_up() {
+		self::enable_direct_product_attribute_lookup_updates();
 		$this->admin_user           = self::factory()->user->create( array( 'role' => 'administrator' ) );
 		$this->shop_manager_user    = self::factory()->user->create( array( 'role' => 'shop_manager' ) );
 		$this->download_directories = wc_get_container()->get( Download_Directories::class );
@@ -68,6 +71,50 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox get_image() hands WordPress an integer attachment ID even when the product was loaded from the database.
+	 */
+	public function test_get_image_passes_an_integer_attachment_id_to_wordpress() {
+		$image_id = self::factory()->post->create( array( 'post_type' => 'attachment' ) );
+		$product  = WC_Helper_Product::create_simple_product( false );
+		$product->set_image_id( $image_id );
+		$product = wc_get_product( $product->save() );
+
+		$received_id = null;
+		add_filter(
+			'wp_get_attachment_image_src',
+			static function ( $image, $attachment_id ) use ( &$received_id ) {
+				if ( null === $received_id ) {
+					$received_id = $attachment_id;
+				}
+				return $image;
+			},
+			10,
+			2
+		);
+
+		$product->get_image( 'woocommerce_thumbnail', array(), false );
+
+		$this->assertSame( $image_id, $received_id, 'The attachment ID passed to WordPress should be an integer.' );
+	}
+
+	/**
+	 * @testdox Saving a product with an integer zero image ID leaves no stored thumbnail meta.
+	 */
+	public function test_saving_without_an_image_leaves_no_thumbnail_meta() {
+		$image_id = self::factory()->post->create( array( 'post_type' => 'attachment' ) );
+		$product  = WC_Helper_Product::create_simple_product( false );
+		$product->set_image_id( $image_id );
+		$product_id = $product->save();
+
+		$this->assertSame( (string) $image_id, get_post_meta( $product_id, '_thumbnail_id', true ), 'A product with an image should store the attachment ID.' );
+
+		$product->set_image_id( 0 );
+		$product->save();
+
+		$this->assertFalse( metadata_exists( 'post', $product_id, '_thumbnail_id' ), 'Clearing the image with integer zero should remove the thumbnail meta row, not store "0".' );
+	}
+
+	/**
 	 * @testdox Ensure that individual Downloadable Products follow the rules regarding Approved Download Directories.
 	 */
 	public function test_fetching_of_approved_downloads() {
@@ -78,6 +125,11 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 		);
 
 		$this->download_directories->disable_by_id( $this->download_directories->get_by_url( 'https://new.supplier/' )->get_id() );
+
+		// Approved Download Directory rule changes don't invalidate the product object cache, so
+		// flush to force a fresh read that reflects the updated rules.
+		wp_cache_flush();
+
 		$product_downloads = wc_get_product( $this->product->get_id() )->get_downloads();
 
 		$this->assertCount(
@@ -92,6 +144,7 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 		);
 
 		$this->download_directories->set_mode( Download_Directories::MODE_DISABLED );
+		wp_cache_flush();
 
 		$this->assertCount(
 			2,
@@ -337,5 +390,266 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 
 		$product->set_cogs_value( 12.34 );
 		$this->assertEquals( 123.4, $product->get_cogs_value() );
+	}
+
+	/**
+	 * @testdox validate_props() keeps a product in stock when stock quantity is a positive float below 1 and the woocommerce_stock_amount filter is set to floatval.
+	 *
+	 * See https://github.com/woocommerce/woocommerce/issues/41676 for more details.
+	 */
+	public function test_validate_props_preserves_in_stock_for_float_stock_quantity() {
+		remove_filter( 'woocommerce_stock_amount', 'intval' );
+		add_filter( 'woocommerce_stock_amount', 'floatval' );
+
+		$product = new WC_Product_Simple();
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( 0.5 );
+		$product->set_stock_status( 'instock' );
+
+		$product->validate_props();
+
+		$this->assertSame( 0.5, $product->get_stock_quantity() );
+		$this->assertSame( 'instock', $product->get_stock_status() );
+
+		remove_filter( 'woocommerce_stock_amount', 'floatval' );
+		add_filter( 'woocommerce_stock_amount', 'intval' );
+	}
+
+	/**
+	 * @testdox validate_props() compares fractional stock against a non-default woocommerce_notify_no_stock_amount threshold using a float comparison.
+	 *
+	 * See https://github.com/woocommerce/woocommerce/issues/41676 for more details.
+	 */
+	public function test_validate_props_respects_non_default_no_stock_threshold_for_float_stock_quantity() {
+		$previous_threshold = get_option( 'woocommerce_notify_no_stock_amount' );
+		update_option( 'woocommerce_notify_no_stock_amount', 5 );
+		remove_filter( 'woocommerce_stock_amount', 'intval' );
+		add_filter( 'woocommerce_stock_amount', 'floatval' );
+
+		$above_threshold = new WC_Product_Simple();
+		$above_threshold->set_manage_stock( true );
+		$above_threshold->set_stock_quantity( 5.5 );
+		$above_threshold->set_stock_status( 'instock' );
+
+		$above_threshold->validate_props();
+
+		$this->assertSame( 5.5, $above_threshold->get_stock_quantity() );
+		$this->assertSame( 'instock', $above_threshold->get_stock_status(), 'A fractional stock quantity above the threshold should stay in stock.' );
+
+		$at_threshold = new WC_Product_Simple();
+		$at_threshold->set_manage_stock( true );
+		$at_threshold->set_stock_quantity( 4.5 );
+		$at_threshold->set_stock_status( 'instock' );
+
+		$at_threshold->validate_props();
+
+		$this->assertSame( 4.5, $at_threshold->get_stock_quantity() );
+		$this->assertSame( 'outofstock', $at_threshold->get_stock_status(), 'A fractional stock quantity below the threshold should flip to out of stock.' );
+
+		remove_filter( 'woocommerce_stock_amount', 'floatval' );
+		add_filter( 'woocommerce_stock_amount', 'intval' );
+		update_option( 'woocommerce_notify_no_stock_amount', $previous_threshold );
+	}
+
+	/**
+	 * @testdox validate_props() treats a negative woocommerce_notify_no_stock_amount threshold by its magnitude (absolute value), matching the pre-#37855 absint() behaviour.
+	 *
+	 * Without the abs() wrap, a negative threshold would let every positive stock value compare as "above threshold"
+	 * and stay in stock. With abs(), the threshold is compared by magnitude, so -5 behaves like 5.
+	 */
+	public function test_validate_props_treats_negative_no_stock_threshold_by_magnitude() {
+		$previous_threshold = get_option( 'woocommerce_notify_no_stock_amount' );
+		update_option( 'woocommerce_notify_no_stock_amount', -5 );
+		remove_filter( 'woocommerce_stock_amount', 'intval' );
+		add_filter( 'woocommerce_stock_amount', 'floatval' );
+
+		$below_magnitude = new WC_Product_Simple();
+		$below_magnitude->set_manage_stock( true );
+		$below_magnitude->set_stock_quantity( 3.5 );
+		$below_magnitude->set_stock_status( 'instock' );
+
+		$below_magnitude->validate_props();
+
+		$this->assertSame( 3.5, $below_magnitude->get_stock_quantity() );
+		$this->assertSame( 'outofstock', $below_magnitude->get_stock_status(), 'A stock quantity below the threshold magnitude (3.5 vs abs(-5)=5) should flip to out of stock.' );
+
+		$above_magnitude = new WC_Product_Simple();
+		$above_magnitude->set_manage_stock( true );
+		$above_magnitude->set_stock_quantity( 5.5 );
+		$above_magnitude->set_stock_status( 'instock' );
+
+		$above_magnitude->validate_props();
+
+		$this->assertSame( 5.5, $above_magnitude->get_stock_quantity() );
+		$this->assertSame( 'instock', $above_magnitude->get_stock_status(), 'A stock quantity above the threshold magnitude (5.5 vs abs(-5)=5) should stay in stock.' );
+
+		remove_filter( 'woocommerce_stock_amount', 'floatval' );
+		add_filter( 'woocommerce_stock_amount', 'intval' );
+		update_option( 'woocommerce_notify_no_stock_amount', $previous_threshold );
+	}
+
+	/**
+	 * @testdox validate_props() marks a product as out of stock when the stock quantity drops to zero.
+	 */
+	public function test_validate_props_marks_zero_stock_as_out_of_stock() {
+		$product = new WC_Product_Simple();
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( 0 );
+		$product->set_stock_status( 'instock' );
+
+		$product->validate_props();
+
+		$this->assertSame( 'outofstock', $product->get_stock_status() );
+	}
+
+	/**
+	 * @testdox A published product is viewable by anyone, with or without capability checks.
+	 */
+	public function test_is_viewable_published_product() {
+		$product = WC_Helper_Product::create_simple_product();
+
+		wp_set_current_user( 0 );
+		$this->assertTrue( $product->is_viewable(), 'Published products are viewable when logged out.' );
+		$this->assertTrue( $product->is_publicly_viewable(), 'Published products are publicly viewable.' );
+
+		wp_set_current_user( $this->admin_user );
+		$this->assertTrue( $product->is_viewable(), 'Published products are viewable by admins.' );
+	}
+
+	/**
+	 * @testdox A non-published product is hidden from the public but viewable by users who can edit it, unless capability checks are disabled.
+	 * @testWith ["draft"]
+	 *           ["pending"]
+	 *           ["private"]
+	 * @param string $status A non-published product status.
+	 */
+	public function test_is_viewable_non_published_product( $status ) {
+		$customer = self::factory()->user->create( array( 'role' => 'customer' ) );
+		$product  = WC_Helper_Product::create_simple_product();
+		$product->set_status( $status );
+		$product->save();
+
+		wp_set_current_user( 0 );
+		$this->assertFalse( $product->is_viewable(), "A $status product is not viewable when logged out." );
+
+		wp_set_current_user( $customer );
+		$this->assertFalse( $product->is_viewable(), "A $status product is not viewable by customers." );
+
+		wp_set_current_user( $this->shop_manager_user );
+		$this->assertTrue( $product->is_viewable(), "A $status product is viewable by shop managers." );
+
+		wp_set_current_user( $this->admin_user );
+		$this->assertTrue( $product->is_viewable(), "A $status product is viewable by admins." );
+		$this->assertFalse( $product->is_publicly_viewable(), "A $status product is never publicly viewable, even for admins." );
+	}
+
+	/**
+	 * @testdox A missing or non-product parent doesn't affect visibility, but an unpublished product parent hides the product from the public.
+	 * @testWith ["missing", true]
+	 *           ["draft_page", true]
+	 *           ["draft_product", false]
+	 *           ["published_product", true]
+	 * @param string $parent_kind        Kind of post the parent ID points at.
+	 * @param bool   $visible_logged_out Whether the product should be visible to a logged-out user.
+	 */
+	public function test_is_viewable_with_parent( $parent_kind, $visible_logged_out ) {
+		switch ( $parent_kind ) {
+			case 'missing':
+				$parent_id = 987654321;
+				break;
+			case 'draft_page':
+				$parent_id = self::factory()->post->create(
+					array(
+						'post_type'   => 'page',
+						'post_status' => 'draft',
+					)
+				);
+				break;
+			case 'draft_product':
+			case 'published_product':
+				$parent = WC_Helper_Product::create_simple_product();
+				$parent->set_status( 'draft_product' === $parent_kind ? ProductStatus::DRAFT : ProductStatus::PUBLISH );
+				$parent->save();
+				$parent_id = $parent->get_id();
+				break;
+			default:
+				$this->fail( "Unhandled parent kind: $parent_kind." );
+		}
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_parent_id( $parent_id );
+		$product->save();
+
+		wp_set_current_user( 0 );
+		$this->assertSame( $visible_logged_out, $product->is_viewable(), "A product with a $parent_kind parent has unexpected is_viewable() when logged out." );
+		$this->assertSame( $visible_logged_out, $product->is_publicly_viewable(), "A product with a $parent_kind parent has unexpected is_publicly_viewable()." );
+		$this->assertSame( $visible_logged_out, $product->is_visible(), "A product with a $parent_kind parent has unexpected is_visible() when logged out." );
+		$this->assertSame( $visible_logged_out, $product->is_purchasable(), "A product with a $parent_kind parent has unexpected is_purchasable() when logged out." );
+
+		wp_set_current_user( $this->admin_user );
+		$this->assertTrue( $product->is_viewable(), "A product with a $parent_kind parent is viewable by admins." );
+	}
+
+	/**
+	 * @testdox Should persist normalized customs values as internal product data and remove cleared metadata.
+	 * @testWith ["customs_commodity_code", "01.02-03", "010203"]
+	 *           ["customs_country_of_origin", " ro ", "RO"]
+	 *           ["customs_description", " Cotton  shirt ", "Cotton shirt"]
+	 * @param string $field Property name.
+	 * @param string $input Input value.
+	 * @param string $expected Stored value.
+	 */
+	public function test_customs_properties_persist_and_clear( string $field, string $input, string $expected ): void {
+		$sut = new WC_Product_Simple();
+		$this->assertNull( $sut->{"get_$field"}(), 'New products should not have customs data.' );
+		$sut->{"set_$field"}( $input );
+		$product_id = $sut->save();
+		$sut        = new WC_Product_Simple( $product_id );
+
+		$this->assertSame( $expected, $sut->{"get_$field"}( 'edit' ), 'Customs data should round-trip through the product data store.' );
+		$this->assertSame( $expected, get_post_meta( $product_id, '_' . $field, true ), 'The underscore-prefixed metadata should contain the normalized value.' );
+		$this->assertNotContains( '_' . $field, wp_list_pluck( $sut->get_meta_data(), 'key' ), 'Customs fields should be internal metadata.' );
+
+		$sut->{"set_$field"}( null );
+		$sut->save();
+		$sut = new WC_Product_Simple( $product_id );
+
+		$this->assertNull( $sut->{"get_$field"}( 'edit' ), 'Cleared customs properties should reload as null.' );
+		$this->assertFalse( metadata_exists( 'post', $product_id, '_' . $field ), 'Clearing customs data should remove its metadata row.' );
+	}
+
+	/**
+	 * @testdox Should preserve a product value when a customs setter receives invalid data.
+	 * @testWith ["customs_country_of_origin", "RO", "ZZ"]
+	 *           ["customs_description", "Cotton shirt", "Size<M shirt"]
+	 * @param string $field Property name.
+	 * @param string $valid Original value.
+	 * @param string $invalid Invalid value.
+	 */
+	public function test_customs_setters_reject_invalid_updates( string $field, string $valid, string $invalid ): void {
+		$sut = new WC_Product_Simple();
+		$sut->{"set_$field"}( $valid );
+
+		try {
+			$sut->{"set_$field"}( $invalid );
+			$this->fail( 'An invalid update should throw a data exception.' );
+		} catch ( WC_Data_Exception $exception ) {
+			$this->assertSame( $valid, $sut->{"get_$field"}( 'edit' ), 'Validation should happen before changing the product.' );
+		}
+	}
+
+	/**
+	 * @testdox Should load invalid stored customs metadata as-is.
+	 */
+	public function test_customs_invalid_stored_values_are_read_without_validation(): void {
+		$description = str_repeat( 'a', 40 );
+		$product_id  = ( new WC_Product_Simple() )->save();
+		update_post_meta( $product_id, '_customs_country_of_origin', 'ZZ' );
+		update_post_meta( $product_id, '_customs_description', $description );
+
+		$sut = new WC_Product_Simple( $product_id );
+
+		$this->assertSame( 'ZZ', $sut->get_customs_country_of_origin( 'edit' ), 'An invalid stored country should be read without throwing.' );
+		$this->assertSame( $description, $sut->get_customs_description( 'edit' ), 'An over-long stored description should be read without throwing.' );
 	}
 }

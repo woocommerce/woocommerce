@@ -1,41 +1,12 @@
 {
 	"core": "https://wordpress.org/wordpress-latest.zip",
 	"phpVersion": "8.1",
-	"plugins": [ ".", "./tests/e2e-pw/test-plugins/wc-email-template-sync-test-helper" ],
+	"testsEnvironment": false,
+	"plugins": [ "." ],
 	"config": {
 		"JETPACK_AUTOLOAD_DEV": true,
 		"WP_DEBUG_LOG": true,
 		"WP_DEBUG_DISPLAY": true,
 		"ALTERNATE_WP_CRON": true
-	},
-	"lifecycleScripts": {
-		"afterStart": "./tests/e2e-pw/bin/test-env-setup.sh",
-		"afterClean": "./tests/e2e-pw/bin/test-env-setup.sh"
-	},
-	"env": {
-		"tests": {
-			"port": 8086,
-			"plugins": [
-				".",
-				"./tests/e2e-pw/test-plugins/wc-email-template-sync-test-helper",
-				"https://downloads.wordpress.org/plugin/akismet.zip",
-				"https://github.com/WP-API/Basic-Auth/archive/master.zip",
-				"https://downloads.wordpress.org/plugin/wp-mail-logging.zip"
-			],
-			"themes": [],
-			"config": {
-				"WP_TESTS_DOMAIN": "localhost",
-				"ALTERNATE_WP_CRON": false
-			},
-			"mappings": {
-				"wp-cli.yml": "./tests/wp-cli.yml",
-				"test-env-setup.sh": "./tests/e2e-pw/bin/test-env-setup.sh",
-				"wp-content/plugins/filter-setter.php": "./tests/e2e-pw/bin/filter-setter.php",
-				"wp-content/plugins/process-waiting-actions.php": "./tests/e2e-pw/bin/process-waiting-actions.php",
-				"wp-content/plugins/test-helper-apis.php": "./tests/e2e-pw/bin/test-helper-apis.php",
-				"wp-content/plugins/custom-place-order-button-test.php": "./client/blocks/tests/e2e/plugins/custom-place-order-button-test.php",
-				"test-data/images/": "./tests/e2e-pw/test-data/images/"
-			}
-		}
 	}
 }

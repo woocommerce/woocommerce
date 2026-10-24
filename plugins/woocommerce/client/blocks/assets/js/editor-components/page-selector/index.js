@@ -2,8 +2,15 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { PanelBody, SelectControl } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
+import {
+	SelectControl,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToolsPanel as ToolsPanel,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+	__experimentalToolsPanelItem as ToolsPanelItem,
+} from '@wordpress/components';
+
 /**
  * Internal dependencies
  */
@@ -21,25 +28,39 @@ const PageSelector = ( { setPageId, pageId, labels } ) => {
 		}, [] ) || null;
 	if ( pages ) {
 		return (
-			<PanelBody title={ labels.title }>
-				<SelectControl
+			<ToolsPanel
+				label={ labels.title }
+				resetAll={ () => setPageId( 0 ) }
+			>
+				<ToolsPanelItem
 					label={ __( 'Link to', 'woocommerce' ) }
-					value={ pageId }
-					options={ [
-						{
-							label: labels.default,
-							value: 0,
-						},
-						...pages.map( ( page ) => {
-							return {
-								label: formatTitle( page, pages ),
-								value: parseInt( page.id, 10 ),
-							};
-						} ),
-					] }
-					onChange={ ( value ) => setPageId( parseInt( value, 10 ) ) }
-				/>
-			</PanelBody>
+					hasValue={ () =>
+						typeof pageId === 'number' && pageId !== 0
+					}
+					onDeselect={ () => setPageId( 0 ) }
+					isShownByDefault
+				>
+					<SelectControl
+						label={ __( 'Link to', 'woocommerce' ) }
+						value={ pageId }
+						options={ [
+							{
+								label: labels.default,
+								value: 0,
+							},
+							...pages.map( ( page ) => {
+								return {
+									label: formatTitle( page, pages ),
+									value: parseInt( page.id, 10 ),
+								};
+							} ),
+						] }
+						onChange={ ( value ) =>
+							setPageId( parseInt( value, 10 ) )
+						}
+					/>
+				</ToolsPanelItem>
+			</ToolsPanel>
 		);
 	}
 	return null;

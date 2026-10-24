@@ -59,6 +59,18 @@ class PointOfSaleOrderUtilTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox is_order_paid_at_pos returns true for Stripe POS card reader payment.
+	 */
+	public function test_is_order_paid_at_pos_returns_true_for_stripe_card_reader_payment(): void {
+		$order = new WC_Order();
+		$order->set_created_via( 'bookings' );
+		$order->update_meta_data( '_stripe_ipp_channel', 'mobile_pos' );
+		$order->save();
+
+		$this->assertTrue( PointOfSaleOrderUtil::is_order_paid_at_pos( $order ) );
+	}
+
+	/**
 	 * @testdox is_order_paid_at_pos returns true for cash payment at POS.
 	 */
 	public function test_is_order_paid_at_pos_returns_true_for_cash_payment(): void {

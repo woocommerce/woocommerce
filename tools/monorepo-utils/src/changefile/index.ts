@@ -91,7 +91,7 @@ const program = new Command( 'changefile' )
 				: await cloneAuthenticatedRepo(
 						{ owner: headOwner, name },
 						false
-				  );
+					);
 
 			Logger.endTask();
 
@@ -195,7 +195,9 @@ const program = new Command( 'changefile' )
 					if ( comment ) {
 						fileContent += `Comment: ${ comment }\n`;
 					}
-					fileContent += `\n${ message }`;
+					// Terminate with a trailing newline to match `changelogger add`
+					// output and satisfy .editorconfig's insert_final_newline rule.
+					fileContent += `\n${ message }\n`;
 					writeFileSync( changelogFilePath, fileContent );
 				}
 			} catch ( e ) {

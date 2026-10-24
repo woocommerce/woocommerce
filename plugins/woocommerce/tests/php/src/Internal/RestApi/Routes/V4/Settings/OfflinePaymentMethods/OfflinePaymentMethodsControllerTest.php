@@ -36,9 +36,20 @@ class OfflinePaymentMethodsControllerTest extends WC_REST_Unit_Test_Case {
 	/**
 	 * The ID of the store admin user.
 	 *
+	 * Shared across the class for REST authentication; created once in wpSetUpBeforeClass().
+	 *
 	 * @var int
 	 */
-	protected $store_admin_id;
+	protected static $store_admin_id;
+
+	/**
+	 * Create the shared admin user once for the whole class.
+	 *
+	 * @param object $factory Factory object.
+	 */
+	public static function wpSetUpBeforeClass( $factory ) {
+		self::$store_admin_id = $factory->user->create( array( 'role' => 'administrator' ) );
+	}
 
 	/**
 	 * Set up test.
@@ -46,8 +57,7 @@ class OfflinePaymentMethodsControllerTest extends WC_REST_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->store_admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
-		wp_set_current_user( $this->store_admin_id );
+		wp_set_current_user( self::$store_admin_id );
 
 		$this->mock_payments_service = $this->getMockBuilder( Payments::class )
 			->disableOriginalConstructor()

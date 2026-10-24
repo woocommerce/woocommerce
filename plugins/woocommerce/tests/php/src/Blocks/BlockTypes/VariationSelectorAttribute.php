@@ -6,8 +6,7 @@ namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
-use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsVariationSelectorAttributeMock;
-use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsVariationSelectorAttributeNameMock;
+use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsMocks;
 use WC_Unit_Test_Case;
 
 /**
@@ -16,24 +15,15 @@ use WC_Unit_Test_Case;
 class VariationSelectorAttribute extends WC_Unit_Test_Case {
 
 	/**
-	 * Tracks whether blocks have been registered.
-	 *
-	 * @var bool
-	 */
-	protected static $are_blocks_registered = false;
-
-	/**
 	 * Register blocks required for do_blocks tests.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 
-		if ( ! self::$are_blocks_registered && ! \WP_Block_Type_Registry::get_instance()->is_registered( 'woocommerce/add-to-cart-with-options-variation-selector-attribute' ) ) {
-			new AddToCartWithOptionsVariationSelectorAttributeMock();
-			new AddToCartWithOptionsVariationSelectorAttributeNameMock();
-		}
-
-		self::$are_blocks_registered = true;
+		AddToCartWithOptionsMocks::register(
+			'add-to-cart-with-options-variation-selector-attribute',
+			'add-to-cart-with-options-variation-selector-attribute-name'
+		);
 	}
 
 	/**
@@ -147,6 +137,22 @@ class VariationSelectorAttribute extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests that non-visual attribute terms do not render swatch markup.
+	 *
+	 * @testdox VariationSelectorAttribute does not render swatches for non-visual attributes.
+	 * @covers \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\VariationSelectorAttribute::build_variation_selectable_items
+	 */
+	public function test_does_not_render_swatches_for_non_visual_attribute(): void {
+		$variable_product = $this->create_variable_product_with_variations();
+		$inner_blocks     = $this->get_attribute_name_block_markup() . $this->get_chips_block_markup();
+
+		$markup = $this->render_variation_selector_attribute( $variable_product, $inner_blocks );
+
+		$this->assertStringNotContainsString( 'is-style-swatch', $markup, 'Chips wrapper should not use swatch style for non-visual attributes.' );
+		$this->assertStringNotContainsString( 'wc-block-product-filter-chips__swatch', $markup, 'Swatch elements should not be rendered for non-visual attributes.' );
+	}
+
+	/**
 	 * Tests that wc-visual attribute terms render chips with swatch markup and classes.
 	 *
 	 * @testdox VariationSelectorAttribute renders wc-visual attribute options with swatch classes and colors.
@@ -178,7 +184,15 @@ class VariationSelectorAttribute extends WC_Unit_Test_Case {
 		delete_transient( 'wc_attribute_taxonomies' );
 		\WC_Cache_Helper::invalidate_cache_group( 'woocommerce-attributes' );
 
-		update_term_meta( $term_a->term_id, 'color', '#aa0000' );
+		$image_id = wp_insert_attachment(
+			array(
+				'post_title'     => 'Variation selector swatch image',
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+		update_post_meta( $image_id, '_wp_attached_file', 'variation-selector-swatch-image.jpg' );
+		update_term_meta( $term_a->term_id, 'image', $image_id );
 		update_term_meta( $term_b->term_id, 'color', '#0000aa' );
 
 		try {
@@ -217,11 +231,14 @@ class VariationSelectorAttribute extends WC_Unit_Test_Case {
 
 			$this->assertStringContainsString( 'is-style-swatch', $markup, 'Chips wrapper should use swatch style when colors are present.' );
 			$this->assertStringContainsString( 'wc-block-product-filter-chips__swatch', $markup, 'Swatch elements should be rendered for wc-visual terms.' );
-			$this->assertStringContainsString( 'background-color: #aa0000', $markup, 'First term swatch should use its term color meta.' );
-			$this->assertStringContainsString( 'background-color: #0000aa', $markup, 'Second term swatch should use its term color meta.' );
+			$this->assertStringContainsString( 'background-image:url(', $markup, 'First term swatch should use its term image meta.' );
+			$this->assertStringContainsString( 'background-color:#0000aa', $markup, 'Second term swatch should use its term color meta.' );
 		} finally {
-			delete_term_meta( $term_a->term_id, 'color' );
+			delete_term_meta( $term_a->term_id, 'image' );
 			delete_term_meta( $term_b->term_id, 'color' );
+			if ( $image_id ) {
+				wp_delete_attachment( $image_id, true );
+			}
 			$wpdb->update(
 				$wpdb->prefix . 'woocommerce_attribute_taxonomies',
 				array( 'attribute_type' => 'select' ),

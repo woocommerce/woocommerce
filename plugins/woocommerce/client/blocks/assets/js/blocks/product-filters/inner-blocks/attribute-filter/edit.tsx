@@ -19,6 +19,7 @@ import { withSpokenMessages } from '@wordpress/components';
 import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { getSetting } from '@woocommerce/settings';
+import type { SelectableItemsContext } from '@woocommerce/types';
 
 /**
  * Internal dependencies
@@ -31,13 +32,11 @@ import { getAttributeFromId } from './utils';
 import { getAllowedBlocks } from '../../utils/get-allowed-blocks';
 import { EXCLUDED_BLOCKS } from '../../constants';
 import { FilterOptionItem, FilterItemFields } from '../../types';
-import type { SelectableItemsContext } from '../../../../types/type-defs/selectable-items';
 import { InitialDisabled } from '../../components/initial-disabled';
 import { Notice } from '../../components/notice';
 import { sortFilterOptions } from '../../utils/sort-filter-options';
 
 const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
-const EMPTY_TERM_COLORS: Record< string, string > = {};
 
 const Edit = ( props: EditProps ) => {
 	const { attributes: blockAttributes } = props;
@@ -53,10 +52,6 @@ const Edit = ( props: EditProps ) => {
 	} = blockAttributes;
 
 	const attributeObject = getAttributeFromId( attributeId );
-	const termColors = getSetting< Record< string, string > >(
-		'productFilterTermColors',
-		EMPTY_TERM_COLORS
-	);
 
 	const [ attributeOptions, setAttributeOptions ] = useState<
 		FilterOptionItem[]
@@ -70,7 +65,11 @@ const Edit = ( props: EditProps ) => {
 			resourceName: 'products/attributes/terms',
 			resourceValues: [ attributeObject?.id || 0 ],
 			shouldSelect: !! attributeObject?.id,
-			query: { orderby: 'menu_order', hide_empty: hideEmpty },
+			query: {
+				orderby: 'menu_order',
+				hide_empty: hideEmpty,
+				__experimental_visual: true,
+			},
 		} );
 
 	const { data: filteredCounts, isLoading: isFilterCountsLoading } =
@@ -84,7 +83,9 @@ const Edit = ( props: EditProps ) => {
 		} );
 
 	useEffect( () => {
-		if ( isTermsLoading || isFilterCountsLoading ) return;
+		if ( isTermsLoading || isFilterCountsLoading ) {
+			return;
+		}
 
 		const termIdHasProducts =
 			objectHasProp( filteredCounts, 'attribute_counts' ) &&
@@ -97,8 +98,9 @@ const Edit = ( props: EditProps ) => {
 		} else {
 			const filteredOptions = attributeTerms
 				.filter( ( term ) => {
-					if ( hideEmpty )
+					if ( hideEmpty ) {
 						return termIdHasProducts.includes( term.id );
+					}
 					return true;
 				} )
 				.map( ( term, index ) => ( {
@@ -107,8 +109,8 @@ const Edit = ( props: EditProps ) => {
 					value: term.id.toString(),
 					selected: index === 0,
 					...( showCounts && { count: term.count } ),
-					...( term.id in termColors && {
-						color: termColors[ term.id ],
+					...( term.__experimentalVisual && {
+						visual: term.__experimentalVisual,
 					} ),
 				} ) );
 
@@ -127,7 +129,6 @@ const Edit = ( props: EditProps ) => {
 		isTermsLoading,
 		isFilterCountsLoading,
 		attributeObject,
-		termColors,
 	] );
 
 	const { children, ...innerBlocksProps } = useInnerBlocksProps(
@@ -160,7 +161,7 @@ const Edit = ( props: EditProps ) => {
 	const isLoading =
 		isTermsLoading || isFilterCountsLoading || isOptionsLoading;
 
-	if ( Object.keys( ATTRIBUTES ).length === 0 )
+	if ( Object.keys( ATTRIBUTES ).length === 0 ) {
 		return (
 			<div { ...innerBlocksProps }>
 				<Inspector { ...props } />
@@ -174,8 +175,9 @@ const Edit = ( props: EditProps ) => {
 				</Notice>
 			</div>
 		);
+	}
 
-	if ( ! attributeId || ! attributeObject )
+	if ( ! attributeId || ! attributeObject ) {
 		return (
 			<div { ...innerBlocksProps }>
 				<Inspector { ...props } />
@@ -189,8 +191,9 @@ const Edit = ( props: EditProps ) => {
 				</Notice>
 			</div>
 		);
+	}
 
-	if ( ! isLoading && attributeTerms.length === 0 )
+	if ( ! isLoading && attributeTerms.length === 0 ) {
 		return (
 			<div { ...innerBlocksProps }>
 				<Inspector { ...props } />
@@ -204,6 +207,7 @@ const Edit = ( props: EditProps ) => {
 				</Notice>
 			</div>
 		);
+	}
 
 	return (
 		<div { ...innerBlocksProps }>

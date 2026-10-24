@@ -32,7 +32,7 @@ const iconMap = {
 	percent,
 };
 
-export default function Notice( props: NoticeProps ): JSX.Element | null {
+export default function Notice( props: NoticeProps ): React.JSX.Element | null {
 	const {
 		id,
 		description,
@@ -64,7 +64,9 @@ export default function Notice( props: NoticeProps ): JSX.Element | null {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [ isVisible ] );
 
-	if ( ! isVisible ) return null;
+	if ( ! isVisible ) {
+		return null;
+	}
 
 	const classes = clsx(
 		'woocommerce-marketplace__notice',

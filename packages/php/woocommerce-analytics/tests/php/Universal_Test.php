@@ -90,4 +90,120 @@ class Universal_Test extends BaseTestCase {
 		// If we get here without errors, the method completed without processing a non-existent order.
 		$this->assertTrue( true, 'order_process should handle a missing order without throwing an exception.' );
 	}
+
+	/**
+	 * capture_remove_from_cart should return early — without raising a PHP
+	 * warning or queueing a pixel — when the cart key is not present in
+	 * removed_cart_contents. Reproduces the warnings reported on
+	 * line 141/142 of class-universal.php where third-party code fires the
+	 * woocommerce_cart_item_removed action with a key that was never copied
+	 * into removed_cart_contents.
+	 */
+	public function test_capture_remove_from_cart_skips_when_item_missing(): void {
+		$cart                        = new \stdClass();
+		$cart->removed_cart_contents = array();
+
+		$this->reset_pixel_batch_queue();
+
+		$universal = new Universal();
+		$universal->capture_remove_from_cart( 'unknown_key', $cart );
+
+		$this->assertSame( array(), $this->get_pixel_batch_queue(), 'No pixel should be queued when the removed cart item is missing.' );
+	}
+
+	/**
+	 * capture_remove_from_cart should also bail when the entry exists but is
+	 * missing the product_id/quantity keys the event payload requires.
+	 */
+	public function test_capture_remove_from_cart_skips_when_item_missing_keys(): void {
+		$cart                        = new \stdClass();
+		$cart->removed_cart_contents = array(
+			'partial_key' => array( 'product_id' => 5 ), // No quantity key.
+		);
+
+		$this->reset_pixel_batch_queue();
+
+		$universal = new Universal();
+		$universal->capture_remove_from_cart( 'partial_key', $cart );
+
+		$this->assertSame( array(), $this->get_pixel_batch_queue(), 'No pixel should be queued when the removed cart item lacks required keys.' );
+	}
+
+	/**
+	 * capture_cart_quantity_update should return early — without raising a
+	 * PHP warning or queueing a pixel — when the cart key is not present in
+	 * cart_contents. Reproduces the warning reported on line 159 of
+	 * class-universal.php.
+	 */
+	public function test_capture_cart_quantity_update_skips_when_item_missing(): void {
+		$cart                = new \stdClass();
+		$cart->cart_contents = array();
+
+		$this->reset_pixel_batch_queue();
+
+		$universal = new Universal();
+		$universal->capture_cart_quantity_update( 'unknown_key', 2, 1, $cart );
+
+		$this->assertSame( array(), $this->get_pixel_batch_queue(), 'No pixel should be queued when the cart item is missing.' );
+	}
+
+	/**
+	 * Universal consumes Woo_Analytics_Trait, whose get_common_properties()
+	 * and get_page_common_properties() both fire
+	 * jetpack_woocommerce_analytics_event_props with three arguments. A
+	 * callback registered with accepted_args = 3 used to fatal with an
+	 * ArgumentCountError because both call sites passed only one argument;
+	 * this pins the fix and the exact values passed ('' for the event name,
+	 * since neither call builds properties for a specific event, and false
+	 * for is_client_supplied, since neither is on the proxy path).
+	 */
+	public function test_trait_filter_call_sites_pass_empty_event_name_and_false_client_flag(): void {
+		$seen     = array();
+		$callback = function ( $props, $event_name, $is_client_supplied ) use ( &$seen ) {
+			$seen[] = array( $event_name, $is_client_supplied );
+			return $props;
+		};
+		add_filter( 'jetpack_woocommerce_analytics_event_props', $callback, 10, 3 );
+
+		try {
+			$universal = new Universal();
+			$universal->get_common_properties();
+			$universal->get_page_common_properties();
+		} finally {
+			remove_filter( 'jetpack_woocommerce_analytics_event_props', $callback, 10 );
+		}
+
+		$this->assertSame(
+			array(
+				array( '', false ),
+				array( '', false ),
+			),
+			$seen,
+			'Both trait call sites must invoke the filter with an empty-string event name and a false client-supplied flag, without fataling.'
+		);
+	}
+
+	/**
+	 * Reset the WC_Analytics_Tracking::$pixel_batch_queue static so each
+	 * test starts from a known-empty state.
+	 */
+	private function reset_pixel_batch_queue(): void {
+		$reflection = new \ReflectionClass( WC_Analytics_Tracking::class );
+		$queue      = $reflection->getProperty( 'pixel_batch_queue' );
+		$queue->setAccessible( true );
+		$queue->setValue( null, array() );
+	}
+
+	/**
+	 * Read WC_Analytics_Tracking::$pixel_batch_queue via reflection to
+	 * verify whether a pixel was queued.
+	 *
+	 * @return array
+	 */
+	private function get_pixel_batch_queue(): array {
+		$reflection = new \ReflectionClass( WC_Analytics_Tracking::class );
+		$property   = $reflection->getProperty( 'pixel_batch_queue' );
+		$property->setAccessible( true );
+		return $property->getValue();
+	}
 }

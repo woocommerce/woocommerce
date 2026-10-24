@@ -6,6 +6,10 @@ import { useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { getSetting } from '@woocommerce/settings';
 import {
+	DisplayStyleSwitcher,
+	resetDisplayStyleBlock,
+} from '@woocommerce/editor-components/display-style-switcher';
+import {
 	SelectControl,
 	ToggleControl,
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
@@ -18,10 +22,6 @@ import {
  * Internal dependencies
  */
 import type { EditProps } from './types';
-import {
-	DisplayStyleSwitcher,
-	resetDisplayStyleBlock,
-} from '../../components/display-style-switcher';
 import metadata from './block.json';
 
 // Get the list of taxonomies that support custom ordering (drag & drop in admin).

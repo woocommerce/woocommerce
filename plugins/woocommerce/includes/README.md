@@ -2,6 +2,10 @@
 
 This directory contains WooCommerce legacy code. Ideally, the code in this folder should only get the minimum required changes for bug fixing, and any new code should go in [the `src` directory](https://github.com/woocommerce/woocommerce/tree/trunk/plugins/woocommerce/src/README.md) instead.
 
+This applies especially to standalone (global) functions: **new functions must not be added to `includes` (nor to `src`)**: all new logic belongs in classes. This rule is enforced by a CI check (`bin/check-new-functions.php`) that fails any pull request adding a new function in either directory. The only exceptions are the database update files (`wc-update-functions.php` and `react-admin/wc-admin-update-functions.php`), whose routines have to be global functions because `WC_Install::$db_updates` registers and invokes them by name; those two files are excluded from the check.
+
+Adding a new public or protected method to an existing class in `includes/` is also discouraged, but (unlike a new function) it may be acceptable in special, well-justified cases (for example, as part of a bug fix).
+
 
 ## A note on `@internal` annotations
 

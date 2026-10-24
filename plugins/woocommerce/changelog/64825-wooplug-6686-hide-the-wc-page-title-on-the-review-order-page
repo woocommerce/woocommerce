@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Hide the duplicate page title heading on the Customer Review Order page so the shortcode body's heading is the only H1 visitors and screen readers encounter.

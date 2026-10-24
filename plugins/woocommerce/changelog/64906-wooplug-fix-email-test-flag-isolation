@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Make `WC_Email_Customer_Review_Request_Test` self-contained for the `customer_review_request` feature gate so `test_is_registered_with_wc_emails` doesn't depend on incidental test ordering.

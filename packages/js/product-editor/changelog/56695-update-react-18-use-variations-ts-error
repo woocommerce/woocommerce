@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-Comment: React 18 update cleanup task - fix `useVariations` TypeScript errors
-

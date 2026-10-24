@@ -1,0 +1,269 @@
+<?php
+
+declare( strict_types = 1 );
+
+namespace Automattic\WooCommerce\Internal\PushNotifications\Services;
+
+defined( 'ABSPATH' ) || exit;
+
+use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
+use Exception;
+
+/**
+ * Handles retry scheduling for failed WPCOM push notification sends.
+ *
+ * Uses ActionScheduler to schedule retries with exponential backoff.
+ * After all retry attempts are exhausted, logs a permanent failure.
+ *
+ * @since 10.8.0
+ */
+class NotificationRetryHandler {
+
+	/**
+	 * ActionScheduler hook for retry jobs.
+	 */
+	const RETRY_HOOK = 'wc_push_notification_retry';
+
+	/**
+	 * Maximum number of retries before giving up (5 total attempts including
+	 * the initial send).
+	 */
+	const MAX_RETRIES = 4;
+
+	/**
+	 * Maximum retry delay in seconds (24 hours). If WPCOM requests a
+	 * Retry-After longer than this the notification is dropped — a push
+	 * notification arriving days late would be more confusing than helpful.
+	 */
+	const MAX_RETRY_DELAY = 86400;
+
+	/**
+	 * Backoff delays in seconds, indexed by attempt number (1-based).
+	 *
+	 * Attempt 1: 60s (1 minute)
+	 * Attempt 2: 300s (5 minutes)
+	 * Attempt 3: 900s (15 minutes)
+	 * Attempt 4: 3600s (60 minutes)
+	 *
+	 * @var array<int, int>
+	 */
+	const BACKOFF_SCHEDULE = array(
+		1 => 60,
+		2 => 300,
+		3 => 900,
+		4 => 3600,
+	);
+
+	/**
+	 * The step logger.
+	 *
+	 * @var NotificationStepLogger
+	 */
+	private NotificationStepLogger $step_logger;
+
+	/**
+	 * Initialize injected dependencies.
+	 *
+	 * @internal
+	 *
+	 * @param NotificationStepLogger $step_logger The step logger.
+	 *
+	 * @since 11.3.0
+	 */
+	final public function init( NotificationStepLogger $step_logger ): void {
+		$this->step_logger = $step_logger;
+	}
+
+	/**
+	 * Registers the ActionScheduler hook for retry jobs.
+	 *
+	 * @return void
+	 *
+	 * @since 10.8.0
+	 */
+	public function register(): void {
+		add_action( self::RETRY_HOOK, array( $this, 'handle_retry' ), 10, 4 );
+	}
+
+	/**
+	 * Schedules a retry for a failed notification send.
+	 *
+	 * If the maximum number of retries has been reached, logs a permanent
+	 * failure instead of scheduling another attempt.
+	 *
+	 * Every path that ends without a scheduled retry calls
+	 * {@see Notification::reset_processing_meta()}, including a scheduling call
+	 * that returns 0. Action Scheduler returns 0 when it is not initialised or
+	 * when the store rejects the action, and nothing else would then clear the
+	 * claimed marker that {@see NotificationProcessor::process()} checks.
+	 *
+	 * @param Notification $notification    The notification that failed.
+	 * @param int|null     $retry_after     Optional Retry-After value from WPCOM (seconds).
+	 * @param int          $current_attempt The attempt number that just failed (0-based).
+	 * @return void
+	 *
+	 * @since 10.8.0
+	 */
+	public function schedule( Notification $notification, ?int $retry_after, int $current_attempt ): void {
+		$next_attempt = max( 0, $current_attempt ) + 1;
+
+		if ( $next_attempt > self::MAX_RETRIES || ! isset( self::BACKOFF_SCHEDULE[ $next_attempt ] ) ) {
+			$this->step_logger->log_failure(
+				$notification,
+				'retry',
+				'exhausted',
+				'error',
+				sprintf(
+					'Push notification permanently failed after %d attempts (type=%s, resource_id=%d).',
+					$next_attempt,
+					$notification->get_type(),
+					$notification->get_resource_id()
+				),
+				array( 'attempt' => $current_attempt )
+			);
+			$notification->reset_processing_meta();
+			return;
+		}
+
+		$delay = $retry_after ?? self::BACKOFF_SCHEDULE[ $next_attempt ];
+
+		if ( $delay > self::MAX_RETRY_DELAY ) {
+			$this->step_logger->log_failure(
+				$notification,
+				'retry',
+				'delay_too_long',
+				'warning',
+				sprintf(
+					'Push notification dropped: retry delay %ds exceeds maximum %ds (type=%s, resource_id=%d).',
+					$delay,
+					self::MAX_RETRY_DELAY,
+					$notification->get_type(),
+					$notification->get_resource_id()
+				),
+				array(
+					'attempt' => $current_attempt,
+					'delay'   => $delay,
+				)
+			);
+			$notification->reset_processing_meta();
+			return;
+		}
+
+		// Action Scheduler dispatches array_values( $args ), so these keys are
+		// decorative and the order alone decides which handle_retry() parameter
+		// each value lands in.
+		$args = array(
+			'type'        => $notification->get_type(),
+			'resource_id' => $notification->get_resource_id(),
+			'attempt'     => $next_attempt,
+		);
+
+		$identity_data = $notification->get_identity_data();
+
+		// Appended only when there is any, so orders and reviews keep the exact
+		// argument list they had before this field existed and `$unique` still
+		// matches a retry scheduled before it. Stock retries do change, so
+		// during the deploy both formats can be pending for one product.
+		if ( ! empty( $identity_data ) ) {
+			$args['extra'] = $identity_data;
+		}
+
+		$action_id = as_schedule_single_action(
+			time() + $delay,
+			self::RETRY_HOOK,
+			$args,
+			NotificationProcessor::ACTION_SCHEDULER_GROUP,
+			true
+		);
+
+		if ( ! $action_id ) {
+			$this->step_logger->log_failure(
+				$notification,
+				'retry',
+				'schedule_failed',
+				'error',
+				sprintf(
+					'Push notification retry could not be scheduled (type=%s, resource_id=%d, attempt=%d).',
+					$notification->get_type(),
+					$notification->get_resource_id(),
+					$next_attempt
+				),
+				array( 'attempt' => $current_attempt )
+			);
+			$notification->reset_processing_meta();
+			return;
+		}
+
+		$this->step_logger->log_notification_step(
+			$notification,
+			'retry',
+			'scheduled',
+			array(
+				'attempt'      => $current_attempt,
+				'next_attempt' => $next_attempt,
+				'delay'        => $delay,
+			)
+		);
+	}
+
+	/**
+	 * ActionScheduler callback for retry jobs.
+	 *
+	 * Reconstructs the notification from the stored identity, then delegates to
+	 * the processor with is_retry=true.
+	 *
+	 * `$extra` defaults to empty so retries scheduled before it was added still
+	 * run, rebuilding a stock notification as low_stock as they always did.
+	 *
+	 * @param string $type        The notification type.
+	 * @param int    $resource_id The resource ID.
+	 * @param int    $attempt     The current retry attempt number (1-based).
+	 * @param array  $extra       Identity fields from {@see Notification::get_identity_data()}.
+	 * @return void
+	 *
+	 * @since 10.8.0
+	 */
+	public function handle_retry( string $type, int $resource_id, int $attempt, array $extra = array() ): void {
+		try {
+			// `+` rather than array_merge for the reason given in
+			// NotificationProcessor::handle_safety_net().
+			$notification = Notification::from_array(
+				array(
+					'type'        => $type,
+					'resource_id' => $resource_id,
+				) + $extra
+			);
+		} catch ( Exception $e ) {
+			$this->step_logger->log_unattributed_failure(
+				'retry',
+				'invalid_notification',
+				'error',
+				sprintf( 'Retry failed: %s', $e->getMessage() ),
+				array(
+					'type'        => $type,
+					'resource_id' => $resource_id,
+					'attempt'     => $attempt,
+				)
+			);
+			return;
+		}
+
+		try {
+			wc_get_container()->get( NotificationProcessor::class )->process(
+				$notification,
+				true,
+				$attempt
+			);
+		} catch ( Exception $e ) {
+			$this->step_logger->log_failure(
+				$notification,
+				'retry',
+				'exception',
+				'error',
+				sprintf( 'Retry failed: %s', $e->getMessage() ),
+				array( 'attempt' => $attempt )
+			);
+			$this->schedule( $notification, null, $attempt );
+		}
+	}
+}

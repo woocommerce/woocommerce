@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 use Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection\Utils as ProductCollectionUtils;
 use Automattic\WooCommerce\Internal\ProductFilters\FilterDataProvider;
 use Automattic\WooCommerce\Internal\ProductFilters\QueryClauses;
+use WP_Block;
 
 /**
  * Product Filter: Status Block.
@@ -67,8 +68,8 @@ final class ProductFilterStatus extends AbstractBlock {
 			$items[] = array(
 				'type'        => 'status',
 				'value'       => $status,
-				// translators: %s: status.
-				'activeLabel' => sprintf( __( 'Status: %s', 'woocommerce' ), $status_options[ $status ] ),
+				// translators: %s: availability.
+				'activeLabel' => sprintf( __( 'Availability: %s', 'woocommerce' ), $status_options[ $status ] ),
 			);
 		}
 
@@ -134,7 +135,7 @@ final class ProductFilterStatus extends AbstractBlock {
 			'items'          => array_values( $filter_options ),
 			'selectionMode'  => 'multiple',
 			'storeNamespace' => 'woocommerce/product-filters',
-			'groupLabel'     => __( 'Status', 'woocommerce' ),
+			'groupLabel'     => __( 'Availability', 'woocommerce' ),
 		);
 
 		$wrapper_attributes = array(
@@ -142,8 +143,8 @@ final class ProductFilterStatus extends AbstractBlock {
 			'data-wp-key'         => wp_unique_prefixed_id( $this->get_full_block_name() ),
 			'data-wp-context'     => wp_json_encode(
 				array(
-					/* translators: {{label}} is the status filter item label. */
-					'activeLabelTemplate' => __( 'Status: {{label}}', 'woocommerce' ),
+					/* translators: {{label}} is the availability filter item label. */
+					'activeLabelTemplate' => __( 'Availability: {{label}}', 'woocommerce' ),
 					'filterType'          => 'status',
 					'items'               => $filter_context['items'],
 				),
@@ -151,7 +152,15 @@ final class ProductFilterStatus extends AbstractBlock {
 			),
 		);
 
-		if ( empty( $filter_options ) ) {
+		$is_empty            = empty( $filter_options );
+		$product_filters_key = $block->context['productFiltersKey'] ?? '';
+		if ( is_string( $product_filters_key ) && '' !== $product_filters_key ) {
+			$state = wp_interactivity_state( 'woocommerce/product-filters' );
+			$state['filterEmptyStates'][ $product_filters_key ][] = $is_empty;
+			wp_interactivity_state( 'woocommerce/product-filters', $state );
+		}
+
+		if ( $is_empty ) {
 			$wrapper_attributes['hidden'] = true;
 			$wrapper_attributes['class']  = 'wc-block-product-filter--hidden';
 		}

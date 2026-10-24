@@ -4,7 +4,6 @@
 import { useState, useEffect, useCallback } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { pluginsStore, useUser } from '@woocommerce/data';
-import { createErrorNotice } from '@woocommerce/data/src/plugins/actions';
 
 export const JetpackPluginStates = {
 	/** Jetpack plugin is not installed, can use installHandler() to install */
@@ -21,7 +20,7 @@ export const JetpackPluginStates = {
 	NOT_OWNER_OF_CONNECTION: 'not-owner-of-connection',
 	/** Jetpack Plugin installed and WordPress.com user connected */
 	FULL_CONNECTION: 'full-connection',
-	/** Still retrieving Jetpack state from Wordpress Installation */
+	/** Still retrieving Jetpack state from WordPress Installation */
 	INITIALIZING: 'initializing',
 } as const;
 
@@ -53,6 +52,7 @@ export const useJetpackPluginState = () => {
 	);
 
 	const { installJetpackAndConnect } = useDispatch( pluginsStore );
+	const { createErrorNotice } = useDispatch( 'core/notices' );
 
 	const [ pluginState, setPluginState ] = useState< JetpackPluginStates >(
 		JetpackPluginStates.INITIALIZING
@@ -63,12 +63,12 @@ export const useJetpackPluginState = () => {
 	 */
 	const onClickInstall = useCallback( () => {
 		const thisUrl = window.location.href;
-		installJetpackAndConnect(
+		void installJetpackAndConnect(
 			createErrorNotice,
 			() => thisUrl + '&jetpackState=returning'
 		);
 		setPluginState( JetpackPluginStates.INSTALLING );
-	}, [ installJetpackAndConnect ] );
+	}, [ installJetpackAndConnect, createErrorNotice ] );
 
 	useEffect( () => {
 		if ( ! canUserInstallPlugins ) {

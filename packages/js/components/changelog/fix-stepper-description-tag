@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Render the stepper step description as a `<p>` so it picks up the global widow-prevention rule in the WooCommerce admin.

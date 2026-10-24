@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Hide Mini Cart and Add to Cart with Options template parts from the block inserter, including instance variations.

@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Link the meta box border-radius bridge CSS to its upstream Trac ticket so future maintainers know when to remove it.

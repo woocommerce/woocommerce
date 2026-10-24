@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { Story, Meta } from '@storybook/react';
+import type { StoryFn, Meta } from '@storybook/react-webpack5';
 
 /**
  * Internal dependencies
@@ -18,7 +18,7 @@ export default {
 	disabledTagName: 'span',
 } as Meta< ProductNameProps >;
 
-const Template: Story< ProductNameProps > = ( args ) => (
+const Template: StoryFn< ProductNameProps > = ( args ) => (
 	<ProductName { ...args } />
 );
 

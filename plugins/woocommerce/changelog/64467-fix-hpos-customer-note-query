@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix `customer_note` query arg being silently ignored when using HPOS order storage.

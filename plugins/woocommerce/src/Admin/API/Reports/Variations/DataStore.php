@@ -242,6 +242,15 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * @param array $query_args Query parameters.
 	 */
 	protected function include_extended_info( &$products_data, $query_args ) {
+		if ( $query_args['extended_info'] ) {
+			self::prime_object_caches(
+				array_merge(
+					array_column( $products_data, 'product_id' ),
+					array_column( $products_data, 'variation_id' )
+				)
+			);
+		}
+
 		foreach ( $products_data as $key => $product_data ) {
 			$extended_info = new \ArrayObject();
 			if ( $query_args['extended_info'] ) {
@@ -407,7 +416,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 *
 	 * @see get_data
 	 * @param array $query_args Query parameters.
-	 * @return stdClass|WP_Error Data object `{ totals: *, intervals: array, total: int, pages: int, page_no: int }`, or error.
+	 * @return \stdClass|\WP_Error Data object `{ totals: *, intervals: array, total: int, pages: int, page_no: int }`, or error.
 	 */
 	public function get_noncached_data( $query_args ) {
 		global $wpdb;

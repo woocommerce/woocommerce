@@ -28,6 +28,7 @@ export interface WcGlobalExportsMap {
 	blocksComponents: 'wc-blocks-components';
 	wcTypes: 'wc-types';
 	sanitize: 'wc-sanitize';
+	wcEntities: 'wc-entities';
 }
 
 /**
@@ -309,7 +310,9 @@ export function parseStackForCallerUrl(
 		const line = lines[ i ];
 
 		// Skip internal lines (our script, webpack).
-		if ( shouldSkipLine( line, currentPage ) ) continue;
+		if ( shouldSkipLine( line, currentPage ) ) {
+			continue;
+		}
 
 		// Found an external URL - return it.
 		const url = extractJsUrl( line, format );
