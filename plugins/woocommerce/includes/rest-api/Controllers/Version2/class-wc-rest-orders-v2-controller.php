@@ -232,6 +232,8 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 			$data['sku']              = $product ? $product->get_sku() : null;
 			$data['global_unique_id'] = $product ? $product->get_global_unique_id() : null;
 			$data['price']            = $item->get_quantity() ? $item->get_total() / $item->get_quantity() : 0;
+			// A line saved before the status was stored holds no value; report the status it is taxed by.
+			$data['tax_status'] = $item->get_tax_status();
 
 			$image_id = $product ? $product->get_image_id() : 0;
 
@@ -1006,6 +1008,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		}
 
 		OrderLineMetaValidator::assert_no_serialized_meta_value( (array) ( $posted['meta_data'] ?? array() ) );
+		OrderLineMetaValidator::assert_no_tax_status_meta_key( (array) ( $posted['meta_data'] ?? array() ) );
 
 		$this->maybe_set_item_props( $item, array( 'name', 'quantity', 'total', 'subtotal', 'tax_class' ), $posted );
 		$this->maybe_set_item_meta_data( $item, $posted );
@@ -1592,6 +1595,13 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 								'description' => __( 'Tax class of product.', 'woocommerce' ),
 								'type'        => 'string',
 								'context'     => array( 'view', 'edit' ),
+							),
+							'tax_status'       => array(
+								'description' => __( 'Tax status the product had when it was added to the order.', 'woocommerce' ),
+								'type'        => 'string',
+								'context'     => array( 'view', 'edit' ),
+								'enum'        => array( 'taxable', 'shipping', 'none' ),
+								'readonly'    => true,
 							),
 							'subtotal'         => array(
 								'description' => __( 'Line subtotal, excluding tax (before discounts).', 'woocommerce' ),

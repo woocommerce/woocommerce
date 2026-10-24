@@ -86,6 +86,13 @@ class OrderItemSchema extends AbstractLineItemSchema {
 				'type'        => 'string',
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 			),
+			'tax_status'      => array(
+				'description' => __( 'Tax status the product had when it was added to the order.', 'woocommerce' ),
+				'type'        => 'string',
+				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+				'enum'        => array( 'taxable', 'shipping', 'none' ),
+				'readonly'    => true,
+			),
 			'subtotal'        => array(
 				'description' => __( 'Line subtotal (before discounts).', 'woocommerce' ),
 				'type'        => 'string',
@@ -183,6 +190,7 @@ class OrderItemSchema extends AbstractLineItemSchema {
 			'quantity'        => $order_item->get_quantity(),
 			'price'           => $quantity_amount ? $order_item->get_total() / $quantity_amount : 0,
 			'tax_class'       => $order_item->get_tax_class(),
+			'tax_status'      => $order_item->get_tax_status(),
 			'subtotal'        => wc_format_decimal( $order_item->get_subtotal(), $dp ),
 			'subtotal_tax'    => wc_format_decimal( $order_item->get_subtotal_tax(), $dp ),
 			'total'           => wc_format_decimal( $order_item->get_total(), $dp ),

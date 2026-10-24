@@ -22,7 +22,7 @@ class WC_Order_Item_Product_Data_Store extends Abstract_WC_Order_Item_Type_Data_
 	 * @since 3.0.0
 	 * @var array
 	 */
-	protected $internal_meta_keys = array( '_product_id', '_variation_id', '_qty', '_tax_class', '_line_subtotal', '_line_subtotal_tax', '_line_total', '_line_tax', '_line_tax_data' );
+	protected $internal_meta_keys = array( '_product_id', '_variation_id', '_qty', '_tax_class', '_tax_status', '_line_subtotal', '_line_subtotal_tax', '_line_total', '_line_tax', '_line_tax_data' );
 
 	/**
 	 * Read/populate data properties specific to this order item.
@@ -39,6 +39,7 @@ class WC_Order_Item_Product_Data_Store extends Abstract_WC_Order_Item_Type_Data_
 				'variation_id' => get_metadata( 'order_item', $id, '_variation_id', true ),
 				'quantity'     => get_metadata( 'order_item', $id, '_qty', true ),
 				'tax_class'    => get_metadata( 'order_item', $id, '_tax_class', true ),
+				'tax_status'   => get_metadata( 'order_item', $id, '_tax_status', true ),
 				'subtotal'     => get_metadata( 'order_item', $id, '_line_subtotal', true ),
 				'total'        => get_metadata( 'order_item', $id, '_line_total', true ),
 				'taxes'        => get_metadata( 'order_item', $id, '_line_tax_data', true ),
@@ -62,6 +63,7 @@ class WC_Order_Item_Product_Data_Store extends Abstract_WC_Order_Item_Type_Data_
 			'_variation_id'      => 'variation_id',
 			'_qty'               => 'quantity',
 			'_tax_class'         => 'tax_class',
+			'_tax_status'        => 'tax_status',
 			'_line_subtotal'     => 'subtotal',
 			'_line_subtotal_tax' => 'subtotal_tax',
 			'_line_total'        => 'total',

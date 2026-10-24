@@ -595,6 +595,7 @@ class WC_Checkout {
 					array(
 						'name'         => wc_get_container()->get( SelectedVariationName::class )->get_product_name( $product, $variation ),
 						'tax_class'    => $product->get_tax_class(),
+						'tax_status'   => $product->get_tax_status(),
 						'product_id'   => $product->is_type( ProductType::VARIATION ) ? $product->get_parent_id() : $product->get_id(),
 						'variation_id' => $product->is_type( ProductType::VARIATION ) ? $product->get_id() : 0,
 					)

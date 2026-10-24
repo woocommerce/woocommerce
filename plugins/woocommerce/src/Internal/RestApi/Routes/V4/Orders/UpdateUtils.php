@@ -372,6 +372,7 @@ class UpdateUtils {
 		}
 
 		OrderLineMetaValidator::assert_no_serialized_meta_value( (array) ( $request_data['meta_data'] ?? array() ) );
+		OrderLineMetaValidator::assert_no_tax_status_meta_key( (array) ( $request_data['meta_data'] ?? array() ) );
 
 		$this->maybe_set_item_props( $item, array( 'name', 'quantity', 'total', 'subtotal', 'tax_class' ), $request_data );
 		$this->maybe_set_item_meta_data( $item, $request_data );
