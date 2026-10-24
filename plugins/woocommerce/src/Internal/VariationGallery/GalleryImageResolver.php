@@ -9,6 +9,8 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Choose the image order for a selected variation.
+ *
+ * @internal
  */
 final class GalleryImageResolver {
 
@@ -31,7 +33,19 @@ final class GalleryImageResolver {
 		}
 
 		// Filters can supply a variation image even when none is saved.
-		return $image_id && wp_attachment_is_image( $image_id ) ? $image_id : 0;
+		return self::has_image_preview( $image_id ) ? $image_id : 0;
+	}
+
+	/**
+	 * Check whether an attachment is an image or has a generated image preview.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param int $attachment_id Attachment ID.
+	 * @return bool Whether the attachment can be displayed in the image gallery.
+	 */
+	public static function has_image_preview( int $attachment_id ): bool {
+		return $attachment_id > 0 && ( wp_attachment_is_image( $attachment_id ) || (bool) wp_get_attachment_image_src( $attachment_id, 'full' ) );
 	}
 
 	/**

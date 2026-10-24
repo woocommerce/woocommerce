@@ -76,8 +76,8 @@ class WC_Admin_Tests_Install extends WP_UnitTestCase {
 			// Verify all callbacks have been defined.
 			foreach ( $version_callbacks as $version_callback ) {
 				$this->assertTrue(
-					function_exists( $version_callback ),
-					"Callback {$version_callback}() is not defined."
+					is_callable( $version_callback ),
+					"Callback {$version_callback} is not callable."
 				);
 			}
 		}

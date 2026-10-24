@@ -9,6 +9,8 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Give existing gallery-only variations a featured image in bounded batches.
+ *
+ * @internal
  */
 final class OrphanedGalleryMigration {
 
@@ -120,7 +122,7 @@ final class OrphanedGalleryMigration {
 		}
 
 		$gallery_ids = $variation->get_gallery_image_ids( 'edit' );
-		$valid_ids   = array_values( array_filter( $gallery_ids, 'wp_attachment_is_image' ) );
+		$valid_ids   = array_values( array_filter( $gallery_ids, array( GalleryImageResolver::class, 'has_image_preview' ) ) );
 		if ( ! $valid_ids ) {
 			return;
 		}

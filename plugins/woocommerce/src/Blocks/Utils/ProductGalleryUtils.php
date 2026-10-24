@@ -2,6 +2,7 @@
 namespace Automattic\WooCommerce\Blocks\Utils;
 
 use Automattic\WooCommerce\Internal\ProductGallery\ProductMediaGallery;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 use Automattic\WooCommerce\Internal\VariationGallery\GalleryImageResolver;
 
 /**
@@ -411,51 +412,44 @@ class ProductGalleryUtils {
 			// Bulk-load posts + postmeta into WP's object cache.
 			_prime_post_caches( $variations );
 		}
+		$variation_products = array_filter(
+			array_map( 'wc_get_product', $variations ),
+			static fn( $variation ) => $variation instanceof \WC_Product_Variation
+		);
+		wc_get_container()->get( ProductUtil::class )->prime_image_caches( array_merge( array( $product ), $variation_products ) );
 
 		// 0 is placeholder image ID.
 		$parent_featured_id = 0;
 		$product_image_id   = (int) $product->get_image_id();
-		if ( $product_image_id && wp_attachment_is_image( $product_image_id ) ) {
+		if ( GalleryImageResolver::has_image_preview( $product_image_id ) ) {
 			$parent_featured_id = $product_image_id;
 		}
 
 		$parent_gallery_ids    = array_map( 'intval', $product->get_gallery_image_ids() );
-		$parent_gallery_ids    = array_filter( $parent_gallery_ids, 'wp_attachment_is_image' );
+		$parent_gallery_ids    = array_filter( $parent_gallery_ids, array( GalleryImageResolver::class, 'has_image_preview' ) );
 		$parent_gallery_extras = array_values( array_diff( $parent_gallery_ids, array( $parent_featured_id ) ) );
 
 		// Performance note: meta-based optimization (populating images from metas) was evaluated and dismissed due to impact to complexity ratio.
-		foreach ( $variations as $variation_id ) {
-			$variation_id = (int) $variation_id;
-			$entry        = self::build_variation_gallery_entry( $variation_id, $parent_featured_id, $parent_gallery_extras );
-
-			if ( null !== $entry ) {
-				$variation_gallery_data[ $variation_id ] = $entry;
-			}
+		foreach ( $variation_products as $variation ) {
+			$variation_gallery_data[ $variation->get_id() ] = self::build_variation_gallery_entry( $variation, $parent_featured_id, $parent_gallery_extras );
 		}
 
 		return $variation_gallery_data;
 	}
 
 	/**
-	 * Build the gallery payload for a single variation, or null when the
-	 * post isn't a real variation.
+	 * Build the gallery payload for a single variation.
 	 *
-	 * @param int   $variation_id          Variation post ID.
-	 * @param int   $parent_featured_id    Parent product's featured image ID (0 if missing/invalid).
-	 * @param int[] $parent_gallery_extras Parent gallery image IDs, with the featured filtered out.
-	 * @return array<string, mixed>|null
+	 * @param \WC_Product_Variation $variation             Variation to display.
+	 * @param int                   $parent_featured_id    Parent product's featured image ID (0 if missing/invalid).
+	 * @param int[]                 $parent_gallery_extras Parent gallery image IDs, with the featured filtered out.
+	 * @return array<string, mixed>
 	 */
-	private static function build_variation_gallery_entry( int $variation_id, int $parent_featured_id, array $parent_gallery_extras ): ?array {
-		$variation = wc_get_product( $variation_id );
-
-		if ( ! $variation instanceof \WC_Product_Variation ) {
-			return null;
-		}
-
+	private static function build_variation_gallery_entry( \WC_Product_Variation $variation, int $parent_featured_id, array $parent_gallery_extras ): array {
 		$featured_id = GalleryImageResolver::get_variation_featured_image_id( $variation );
 
 		$variation_gallery_ids = array_map( 'intval', $variation->get_gallery_image_ids() );
-		$variation_gallery_ids = array_filter( $variation_gallery_ids, 'wp_attachment_is_image' );
+		$variation_gallery_ids = array_filter( $variation_gallery_ids, array( GalleryImageResolver::class, 'has_image_preview' ) );
 		$variation_gallery_ids = array_values( $variation_gallery_ids );
 
 		$image_ids = GalleryImageResolver::resolve(

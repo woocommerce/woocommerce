@@ -442,12 +442,12 @@ class WC_Product_Variable extends WC_Product {
 
 		$variation_featured_id = GalleryImageResolver::get_variation_featured_image_id( $variation );
 		$parent_featured_id    = (int) $this->get_image_id();
-		$parent_featured_valid = $parent_featured_id && wp_attachment_is_image( $parent_featured_id );
+		$parent_featured_valid = GalleryImageResolver::has_image_preview( $parent_featured_id );
 
 		$variation_gallery_image_ids = array_values(
 			array_filter(
 				array_map( 'intval', $variation->get_gallery_image_ids() ),
-				'wp_attachment_is_image'
+				array( GalleryImageResolver::class, 'has_image_preview' )
 			)
 		);
 		$variation_gallery_html      = '';
@@ -456,7 +456,7 @@ class WC_Product_Variable extends WC_Product {
 		if ( $parent_gallery_ids ) {
 			_prime_post_caches( $parent_gallery_ids );
 		}
-		$parent_gallery_ids = array_values( array_filter( $parent_gallery_ids, 'wp_attachment_is_image' ) );
+		$parent_gallery_ids = array_values( array_filter( $parent_gallery_ids, array( GalleryImageResolver::class, 'has_image_preview' ) ) );
 		$display_image_ids  = GalleryImageResolver::resolve(
 			$variation_featured_id,
 			$variation_gallery_image_ids,

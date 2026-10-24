@@ -81,6 +81,75 @@ class OrphanedGalleryMigrationTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should promote a PDF with a preview before a later gallery photo.
+	 */
+	public function test_promotes_pdf_preview(): void {
+		$pdf = wp_insert_attachment( array( 'post_mime_type' => 'application/pdf' ) );
+		update_post_meta( $pdf, '_wp_attached_file', 'orphaned-document.pdf' );
+		wp_update_attachment_metadata(
+			$pdf,
+			array(
+				'sizes' => array(
+					'full' => array(
+						'file'      => 'orphaned-document.jpg',
+						'width'     => 600,
+						'height'    => 800,
+						'mime-type' => 'image/jpeg',
+					),
+				),
+			)
+		);
+		$photo     = $this->create_image();
+		$variation = $this->create_variation( array( $pdf, $photo ) );
+
+		OrphanedGalleryMigration::run();
+
+		$updated = new \WC_Product_Variation( $variation->get_id() );
+		$this->assertSame( $pdf, (int) $updated->get_image_id( 'edit' ) );
+		$this->assertSame( array( $photo ), $updated->get_gallery_image_ids( 'edit' ) );
+	}
+
+	/**
+	 * @testdox Should leave a PDF without a preview assigned to its original gallery field.
+	 */
+	public function test_leaves_pdf_without_preview_unchanged(): void {
+		$pdf = wp_insert_attachment( array( 'post_mime_type' => 'application/pdf' ) );
+		update_post_meta( $pdf, '_wp_attached_file', 'orphaned-document.pdf' );
+		$variation = $this->create_variation( array( $pdf ) );
+
+		OrphanedGalleryMigration::run();
+
+		$updated = new \WC_Product_Variation( $variation->get_id() );
+		$this->assertSame( 0, (int) $updated->get_image_id( 'edit' ) );
+		$this->assertSame( array( $pdf ), $updated->get_gallery_image_ids( 'edit' ) );
+	}
+
+	/**
+	 * @testdox Should normalize gallery-only data left by the inherited-image cleanup.
+	 */
+	public function test_normalizes_gallery_left_by_inherited_image_cleanup(): void {
+		include_once WC_ABSPATH . 'includes/wc-update-functions.php';
+		update_option( 'woocommerce_db_version', '11.1.0' );
+		delete_option( 'woocommerce_update_1120_completed_at' );
+		delete_option( 'woocommerce_update_1120_cleanup_state' );
+		$parent_image = $this->create_image();
+		$extra        = $this->create_image();
+		$variation    = $this->create_variation( array( $extra ), $parent_image );
+		$parent       = wc_get_product( $variation->get_parent_id() );
+		$parent->set_image_id( $parent_image );
+		$parent->save();
+
+		$this->assertFalse( wc_update_1120_cleanup_inherited_variation_images() );
+		$this->assertSame( '', get_post_meta( $variation->get_id(), '_thumbnail_id', true ) );
+
+		OrphanedGalleryMigration::run();
+
+		$updated = new \WC_Product_Variation( $variation->get_id() );
+		$this->assertSame( $extra, (int) $updated->get_image_id( 'edit' ) );
+		$this->assertSame( array(), $updated->get_gallery_image_ids( 'edit' ) );
+	}
+
+	/**
 	 * @testdox Should keep an explicit featured image even when it matches the parent.
 	 */
 	public function test_preserves_explicit_featured_image(): void {

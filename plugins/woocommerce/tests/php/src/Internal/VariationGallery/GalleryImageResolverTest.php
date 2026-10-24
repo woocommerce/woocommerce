@@ -38,6 +38,21 @@ class GalleryImageResolverTest extends \WC_Unit_Test_Case {
 			$this->images[ $name ] = wp_insert_attachment( array( 'post_mime_type' => 'image/jpeg' ) );
 			update_post_meta( $this->images[ $name ], '_wp_attached_file', 'orphaned-' . $name . '.jpg' );
 		}
+		$this->images['pdf'] = wp_insert_attachment( array( 'post_mime_type' => 'application/pdf' ) );
+		update_post_meta( $this->images['pdf'], '_wp_attached_file', 'orphaned-pdf.pdf' );
+		wp_update_attachment_metadata(
+			$this->images['pdf'],
+			array(
+				'sizes' => array(
+					'full' => array(
+						'file'      => 'orphaned-pdf.jpg',
+						'width'     => 600,
+						'height'    => 800,
+						'mime-type' => 'image/jpeg',
+					),
+				),
+			)
+		);
 
 		$this->parent = new \WC_Product_Variable();
 		$this->parent->set_image_id( $this->images['parent'] );
@@ -50,6 +65,7 @@ class GalleryImageResolverTest extends \WC_Unit_Test_Case {
 	 * @testWith ["none", [], ["parent", "size"]]
 	 *           ["front", [], ["front", "size"]]
 	 *           ["none", ["invalid"], ["parent", "size"]]
+	 *           ["pdf", [], ["pdf", "size"]]
 	 *
 	 * @param string   $featured Featured photo name, or none.
 	 * @param string[] $gallery Variation gallery photo names.
@@ -73,6 +89,9 @@ class GalleryImageResolverTest extends \WC_Unit_Test_Case {
 	 *           ["invalid", ["front"], ["front", "size"]]
 	 *           ["none", ["size"], ["size"]]
 	 *           ["size", [], ["size"]]
+	 *           ["none", ["pdf"], ["pdf", "size"]]
+	 *           ["none", ["pdf", "back"], ["pdf", "back"]]
+	 *           ["front", ["pdf"], ["front", "pdf"]]
 	 *
 	 * @param string   $featured Featured photo name, or none.
 	 * @param string[] $gallery Variation gallery photo names.
@@ -126,6 +145,35 @@ class GalleryImageResolverTest extends \WC_Unit_Test_Case {
 		$stored = new \WC_Product_Variation( $variation->get_id() );
 		$this->assertSame( $this->images[ $featured ], (int) $stored->get_image_id( 'edit' ), 'Rendering must not change the saved featured image.' );
 		$this->assertSame( $this->image_ids_for( $gallery ), $stored->get_gallery_image_ids( 'edit' ), 'Rendering must not change the saved gallery.' );
+	}
+
+	/**
+	 * @testdox Should retain PDF previews in the parent fallback gallery.
+	 */
+	public function test_parent_pdf_preview(): void {
+		$this->parent->set_image_id( $this->images['pdf'] );
+		$this->parent->save();
+		$variation = $this->create_variation( 'none', array() );
+
+		list( $classic, $block ) = $this->get_storefront_data( $variation );
+
+		$this->assertFalse( wp_attachment_is_image( $this->images['pdf'] ), 'The fixture must be a PDF, rather than an image attachment.' );
+		$this->assertSame( $this->images['pdf'], $classic['image_id'] );
+		$this->assertStringEndsWith( '/orphaned-pdf.jpg', $classic['image']['src'] );
+		$this->assertSame( $this->image_ids_for( array( 'pdf', 'size' ) ), $block['image_ids'] );
+	}
+
+	/**
+	 * @testdox Should not use a PDF without an image preview as a storefront image.
+	 */
+	public function test_pdf_without_preview(): void {
+		delete_post_meta( $this->images['pdf'], '_wp_attachment_metadata' );
+		$variation = $this->create_variation( 'none', array( 'pdf' ) );
+
+		list( $classic, $block ) = $this->get_storefront_data( $variation );
+
+		$this->assertSame( $this->images['parent'], $classic['image_id'] );
+		$this->assertSame( $this->image_ids_for( array( 'parent', 'size' ) ), $block['image_ids'] );
 	}
 
 	/**
