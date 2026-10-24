@@ -104,7 +104,8 @@ Recommend targeted watchers for focused work to reduce noise and startup time:
 ## Environment Details
 
 - Development URL: `http://localhost:8888/`
-- Test environment port: `8086`
+- PHP test environment (`.wp-env.test.json`, used by `test:php:env*`): `http://localhost:8186/`
+- E2E environment (`.wp-env.e2e.json`, used by `wp-env:e2e` and the Playwright `BASE_URL` default): `http://localhost:8086/`
 - wp-env config: `plugins/woocommerce/.wp-env.json`
 - wp-env PHP version: `8.1`
 - WooCommerce package: `@woocommerce/plugin-woocommerce`
