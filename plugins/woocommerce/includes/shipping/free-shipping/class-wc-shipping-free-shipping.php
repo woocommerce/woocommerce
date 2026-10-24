@@ -224,7 +224,6 @@ class WC_Shipping_Free_Shipping extends WC_Shipping_Method {
 			array(
 				'label'   => $this->title,
 				'cost'    => 0,
-				'taxes'   => false,
 				'package' => $package,
 			)
 		);
