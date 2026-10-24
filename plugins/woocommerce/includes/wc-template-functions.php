@@ -1677,6 +1677,15 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 		}
 
 		/**
+		 * Filter the use of a visible label for the orderby dropdown.
+		 * 
+		 * @since x.y.z
+		 * 
+		 * @param bool $use_label Whether to use a visible label for the orderby dropdown. Default is whatever was passed in the block attributes or false.
+		 */
+		$use_label = apply_filters( 'woocommerce_catalog_orderby_use_label', isset( $attributes ) && isset( $attributes['useLabel'] ) ? $attributes['useLabel'] : false );
+
+		/**
 		 * Filter the default catalog orderby.
 		 *
 		 * @since 1.6.4
@@ -1685,7 +1694,7 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 		 */
 		$show_default_orderby = 'menu_order' === apply_filters( 'woocommerce_default_catalog_orderby', get_option( 'woocommerce_default_catalog_orderby', 'menu_order' ) );
 
-		if ( isset( $attributes ) && isset( $attributes['useLabel'] ) && $attributes['useLabel'] ) {
+		if ( $use_label ) {
 			/**
 			 * Filters the catalog orderby options.
 			 *
@@ -1751,7 +1760,7 @@ if ( ! function_exists( 'woocommerce_catalog_ordering' ) ) {
 				'catalog_orderby_options' => $catalog_orderby_options,
 				'orderby'                 => $orderby,
 				'show_default_orderby'    => $show_default_orderby,
-				'use_label'               => isset( $attributes['useLabel'] ) ? $attributes['useLabel'] : false,
+				'use_label'               => $use_label,
 			)
 		);
 	}
