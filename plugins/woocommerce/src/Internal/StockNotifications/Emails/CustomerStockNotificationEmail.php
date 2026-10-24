@@ -195,6 +195,7 @@ class CustomerStockNotificationEmail extends WC_Email {
 	 * Trigger the sending of this email.
 	 *
 	 * @param Notification|int $notification The notification object or ID.
+	 * @return bool Whether the email was sent. False when the email is disabled, has no recipient, or the mail callback failed.
 	 */
 	public function trigger( $notification ) {
 		$this->setup_locale();
@@ -204,25 +205,26 @@ class CustomerStockNotificationEmail extends WC_Email {
 		}
 
 		if ( ! $notification instanceof Notification ) {
-			return;
+			return false;
 		}
 
 		$product = $notification->get_product();
 		if ( ! $product || ! is_a( $product, 'WC_Product' ) ) {
-			return;
+			return false;
 		}
 
 		$this->maybe_setup_notification_locale( $notification );
 		$this->prepare_email( $notification );
 
+		$sent = false;
 		if ( $this->is_enabled() && $this->get_recipient() ) {
-
-			$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
-
+			$sent = (bool) $this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
 		}
 
 		$this->maybe_restore_notification_locale( $notification );
 		$this->restore_locale();
+
+		return $sent;
 	}
 
 	/**
