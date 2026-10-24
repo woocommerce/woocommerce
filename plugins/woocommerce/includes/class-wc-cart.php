@@ -1162,7 +1162,7 @@ class WC_Cart extends WC_Legacy_Cart {
 				$missing_attributes = array();
 				$parent_data        = wc_get_product( $product_data->get_parent_id() );
 
-				if ( ! $parent_data ) {
+				if ( ! $parent_data instanceof WC_Product ) {
 					throw new Exception( __( 'Sorry, this product cannot be added to the cart.', 'woocommerce' ) );
 				}
 
