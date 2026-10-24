@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Give each cloned order its own meta objects, so an unsaved meta change on one order instance no longer appears on other instances from the order cache.

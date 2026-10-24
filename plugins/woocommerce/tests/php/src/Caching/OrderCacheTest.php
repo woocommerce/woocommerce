@@ -52,4 +52,22 @@ class OrderCacheTest extends \WC_Unit_Test_Case {
 		$this->assertEquals( 1, count( $wpdb->get_col( $query ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Already prepared query.
 	}
 
+	/**
+	 * Test that an unsaved meta change on one order instance does not reach another instance from the cache.
+	 */
+	public function test_unsaved_meta_change_does_not_reach_other_instances() {
+		if ( ! OrderUtil::orders_cache_usage_is_enabled() ) {
+			$this->markTestSkipped( 'HPOS based caching is not enabled.' );
+		}
+		$order = WC_Helper_Order::create_order();
+		$order->add_meta_data( 'test', 'saved' );
+		$order->save_meta_data();
+
+		$first = wc_get_order( $order->get_id() );
+		$first->update_meta_data( 'test', 'unsaved' );
+		$second = wc_get_order( $order->get_id() );
+
+		$this->assertSame( 'saved', $second->get_meta( 'test' ) );
+		$this->assertSame( 'unsaved', $first->get_meta( 'test' ) );
+	}
 }
