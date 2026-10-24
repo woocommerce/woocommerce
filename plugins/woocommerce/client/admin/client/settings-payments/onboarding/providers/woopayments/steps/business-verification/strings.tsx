@@ -6,10 +6,10 @@ import interpolateComponents from '@automattic/interpolate-components';
 import React from 'react';
 
 const documentationUrls = {
-	tos: 'https://wordpress.com/tos/',
+	tos: 'https://automattic.com/tos/',
 	signUpLink:
 		'https://woocommerce.com/document/woopayments/startup-guide/#sign-up-process',
-	merchantTerms: 'https://wordpress.com/tos/#more-woopay-specifically',
+	merchantTerms: 'https://automattic.com/tos/#more-woopay-specifically',
 	privacyPolicy: 'https://automattic.com/privacy/',
 };
 
