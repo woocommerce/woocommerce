@@ -14,6 +14,11 @@ use Automattic\WooCommerce\Utilities\OrderUtil;
 class ListTableTest extends \WC_Unit_Test_Case {
 
 	/**
+	 * Message of the exception used to trap the terminal redirect in handle_bulk_actions().
+	 */
+	private const REDIRECT_SENTINEL = 'woocommerce_list_table_test_redirected';
+
+	/**
 	 * @var ListTable
 	 */
 	private $sut;
@@ -24,6 +29,13 @@ class ListTableTest extends \WC_Unit_Test_Case {
 	 * @var bool
 	 */
 	private static bool $hpos_prev_state;
+
+	/**
+	 * Custom roles registered during a test.
+	 *
+	 * @var string[]
+	 */
+	private array $custom_roles = array();
 
 	/**
 	 * Set up class fixtures.
@@ -65,6 +77,18 @@ class ListTableTest extends \WC_Unit_Test_Case {
 			$this->order_type = $order_type;
 		};
 		$set_order_type->call( $this->sut, 'shop_order' );
+	}
+
+	/**
+	 * Tear down - removes any custom roles registered during a test.
+	 */
+	public function tearDown(): void {
+		foreach ( $this->custom_roles as $role ) {
+			remove_role( $role );
+		}
+		$this->custom_roles = array();
+
+		parent::tearDown();
 	}
 
 	/**
@@ -266,6 +290,240 @@ class ListTableTest extends \WC_Unit_Test_Case {
 		$filtered_items = $get_items->call( $this->sut );
 
 		$this->assertCount( 2, $filtered_items ); // Both orders should be shown.
+	}
+
+	/**
+	 * @testdox get_bulk_actions() offers the destructive actions only to roles that can delete orders.
+	 *
+	 * @testWith [true, null, ["trash", "mark_completed"], []]
+	 *           [true, ["trash"], ["delete", "untrash"], []]
+	 *           [false, null, ["mark_completed"], ["trash"]]
+	 *           [false, ["trash"], ["untrash"], ["delete"]]
+	 *
+	 * @param bool          $can_delete Whether the role holds delete_others_shop_orders.
+	 * @param string[]|null $status     Status view the list table is showing.
+	 * @param string[]      $expected   Bulk action keys that should be offered.
+	 * @param string[]      $forbidden  Bulk action keys that should be withheld.
+	 */
+	public function test_bulk_actions_offer_destructive_actions_only_when_user_can_delete_orders( bool $can_delete, ?array $status, array $expected, array $forbidden ): void {
+		$caps = array(
+			'read'                    => true,
+			'edit_shop_orders'        => true,
+			'edit_others_shop_orders' => true,
+		);
+
+		if ( $can_delete ) {
+			$caps['delete_others_shop_orders'] = true;
+		}
+
+		$this->login_as_user_with_caps( $can_delete ? 'orders_editor_with_delete' : 'orders_editor_without_delete', $caps );
+
+		$actions = $this->call_get_bulk_actions( $status );
+
+		foreach ( $expected as $key ) {
+			$this->assertArrayHasKey( $key, $actions, "The {$key} bulk action should be offered" );
+		}
+
+		foreach ( $forbidden as $key ) {
+			$this->assertArrayNotHasKey( $key, $actions, "The {$key} bulk action should be withheld without the delete capability" );
+		}
+	}
+
+	/**
+	 * @testdox Bulk actions are empty for users without the edit others capability.
+	 */
+	public function test_bulk_actions_empty_for_users_without_edit_others_capability(): void {
+		$this->login_as_role( 'customer' );
+
+		$actions = $this->call_get_bulk_actions();
+
+		$this->assertSame( array(), $actions, 'Users without the edit others capability should not see any bulk actions' );
+	}
+
+	/**
+	 * Helper to invoke the protected get_bulk_actions() method with a given status view.
+	 *
+	 * @param string[]|null $status The status filter applied to the list table, or null for the default view.
+	 * @return array<string, string> The available bulk actions.
+	 */
+	private function call_get_bulk_actions( ?array $status = null ): array {
+		$closure = function ( $status ) {
+			$this->wp_post_type               = get_post_type_object( $this->order_type );
+			$this->order_query_args['status'] = $status;
+
+			return $this->get_bulk_actions();
+		};
+
+		return $closure->call( $this->sut, $status );
+	}
+
+	/**
+	 * Orders have no meaningful author, so per-order checks resolve to delete_others_shop_orders.
+	 * The bulk gate uses the same capability, which makes delete_others the deciding one either way.
+	 *
+	 * @testdox handle_bulk_actions() trashes orders only for roles holding delete_others_shop_orders.
+	 *
+	 * @testWith ["orders_bulk_no_delete_caps", {}, false]
+	 *           ["orders_bulk_every_delete_cap", {"delete_shop_orders": true, "delete_others_shop_orders": true}, true]
+	 *           ["orders_bulk_delete_others_only", {"delete_others_shop_orders": true}, true]
+	 *           ["orders_bulk_base_delete_only", {"delete_shop_orders": true}, false]
+	 *
+	 * @param string              $role        Role to create for this case.
+	 * @param array<string, bool> $delete_caps Delete capabilities granted on top of the editing ones.
+	 * @param bool                $allowed     Whether the orders should end up trashed.
+	 */
+	public function test_handle_bulk_actions_trash_respects_delete_others_capability( string $role, array $delete_caps, bool $allowed ): void {
+		$order = \WC_Helper_Order::create_order();
+
+		$this->login_as_user_with_caps(
+			$role,
+			array_merge(
+				array(
+					'read'                    => true,
+					'edit_shop_orders'        => true,
+					'edit_others_shop_orders' => true,
+				),
+				$delete_caps
+			)
+		);
+
+		$_REQUEST['action']   = 'trash';
+		$_REQUEST['id']       = array( $order->get_id() );
+		$_REQUEST['_wpnonce'] = wp_create_nonce( 'bulk-orders' );
+
+		$died = $this->invoke_handle_bulk_actions();
+
+		unset( $_REQUEST['action'], $_REQUEST['id'], $_REQUEST['_wpnonce'] );
+
+		$this->assertSame( ! $allowed, $died, 'Roles without delete_others_shop_orders should be stopped by wp_die()' );
+
+		$status = wc_get_order( $order->get_id() )->get_status();
+
+		if ( $allowed ) {
+			$this->assertSame( OrderStatus::TRASH, $status, 'delete_others_shop_orders should be sufficient to trash orders' );
+		} else {
+			$this->assertNotSame( OrderStatus::TRASH, $status, 'Orders should not be trashed without delete_others_shop_orders' );
+		}
+	}
+
+	/**
+	 * @testdox handle_bulk_actions() blocks emptying the trash for a user without the delete capability.
+	 */
+	public function test_handle_bulk_actions_empty_trash_blocked_without_delete_capability(): void {
+		$order = \WC_Helper_Order::create_order();
+
+		// Move the order to the trash without permanently deleting it.
+		$order->set_status( OrderStatus::TRASH );
+		$order->save();
+
+		$this->login_as_user_with_caps(
+			'orders_editor_without_delete_empty_trash',
+			array(
+				'read'                    => true,
+				'edit_shop_orders'        => true,
+				'edit_others_shop_orders' => true,
+			)
+		);
+
+		$_REQUEST['delete_all'] = '1';
+
+		$died = $this->invoke_handle_bulk_actions();
+
+		unset( $_REQUEST['delete_all'] );
+
+		$this->assertTrue( $died, 'Emptying the trash without the delete capability should be stopped by wp_die()' );
+		$this->assertNotFalse( wc_get_order( $order->get_id() ), 'Trashed orders should not be permanently deleted for a user without the delete capability' );
+	}
+
+	/**
+	 * @testdox handle_bulk_actions() skips IDs that are not orders of this list table's type.
+	 */
+	public function test_handle_bulk_actions_trash_skips_non_order_ids(): void {
+		$order   = \WC_Helper_Order::create_order();
+		$post_id = wp_insert_post(
+			array(
+				'post_title'  => 'Not an order',
+				'post_type'   => 'post',
+				'post_status' => 'publish',
+			)
+		);
+
+		$this->login_as_role( 'administrator' );
+
+		$inject_post_id = static function ( $ids ) use ( $post_id ) {
+			$ids[] = $post_id;
+
+			return $ids;
+		};
+		add_filter( 'woocommerce_bulk_action_ids', $inject_post_id );
+
+		$_REQUEST['action']   = 'trash';
+		$_REQUEST['id']       = array( $order->get_id() );
+		$_REQUEST['_wpnonce'] = wp_create_nonce( 'bulk-orders' );
+
+		try {
+			$this->invoke_handle_bulk_actions();
+		} finally {
+			remove_filter( 'woocommerce_bulk_action_ids', $inject_post_id );
+			unset( $_REQUEST['action'], $_REQUEST['id'], $_REQUEST['_wpnonce'] );
+		}
+
+		$this->assertSame( OrderStatus::TRASH, wc_get_order( $order->get_id() )->get_status(), 'Orders in the selection should still be trashed' );
+		$this->assertSame( 'publish', get_post_status( $post_id ), 'IDs that are not orders should be left untouched' );
+
+		wp_delete_post( $post_id, true );
+	}
+
+	/**
+	 * Invoke the protected handle_bulk_actions() method, trapping its terminal redirect or wp_die().
+	 *
+	 * handle_bulk_actions() ends in wp_safe_redirect()/exit, or in wp_die() when a capability check
+	 * fails. The wp_redirect filter below turns the redirect into a catchable exception, and the
+	 * test suite already turns wp_die() into a WPDieException, so assertions can run afterwards.
+	 *
+	 * @return bool Whether the handler bailed out through wp_die().
+	 */
+	private function invoke_handle_bulk_actions(): bool {
+		$set_post_type = function () {
+			$this->wp_post_type = get_post_type_object( $this->order_type );
+		};
+		$set_post_type->call( $this->sut );
+
+		$throw_on_redirect = static function () {
+			throw new \RuntimeException( esc_html( self::REDIRECT_SENTINEL ) );
+		};
+		add_filter( 'wp_redirect', $throw_on_redirect );
+
+		try {
+			$this->sut->handle_bulk_actions();
+		} catch ( \WPDieException $e ) {
+			unset( $e );
+			return true;
+		} catch ( \RuntimeException $e ) {
+			// Only the sentinel below is expected; anything else is a real failure.
+			if ( self::REDIRECT_SENTINEL !== $e->getMessage() ) {
+				throw $e;
+			}
+		} finally {
+			remove_filter( 'wp_redirect', $throw_on_redirect );
+		}
+
+		return false;
+	}
+
+	/**
+	 * Create a user with a custom role and set it as the current user.
+	 *
+	 * @param string             $role Role name.
+	 * @param array<string,bool> $caps Capabilities.
+	 * @return int User ID.
+	 */
+	private function login_as_user_with_caps( string $role, array $caps ): int {
+		remove_role( $role );
+		add_role( $role, $role, $caps );
+		$this->custom_roles[] = $role;
+
+		return $this->login_as_role( $role );
 	}
 
 	/**
