@@ -1,4 +1,4 @@
 Significance: minor
 Type: update
 
-Product abilities: create variable products with their variations in one call, treat variations as products, and roll back every save of an ability when a later save fails.
+Product abilities: create and update variable products with their variations in one call, treat variations as products, and roll back every save of an ability when a later save fails.
