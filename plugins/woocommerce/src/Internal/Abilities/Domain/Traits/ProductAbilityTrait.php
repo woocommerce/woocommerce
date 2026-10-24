@@ -624,6 +624,23 @@ trait ProductAbilityTrait {
 	}
 
 	/**
+	 * The product whose permissions decide access to a product ID. A variation
+	 * follows its parent: a published variation of a draft parent is as hidden
+	 * as the parent, and whoever may edit the parent may edit its variations.
+	 *
+	 * @param int $product_id Product or variation ID.
+	 * @return int The parent ID for a variation, else the ID itself.
+	 */
+	protected static function get_product_permission_id( int $product_id ): int {
+		if ( $product_id > 0 && 'product_variation' === get_post_type( $product_id ) ) {
+			$parent_id = wp_get_post_parent_id( $product_id );
+			return $parent_id > 0 ? $parent_id : $product_id;
+		}
+
+		return $product_id;
+	}
+
+	/**
 	 * Sync the parent of a saved variation, so its price range and stock
 	 * status follow the variation.
 	 *

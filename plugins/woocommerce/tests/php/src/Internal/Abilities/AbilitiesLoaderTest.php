@@ -2085,6 +2085,36 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should check the permissions of a variation on its parent.
+	 */
+	public function test_variation_permissions_follow_the_parent(): void {
+		$created = wp_get_ability( 'woocommerce/product-create' )->execute( $this->get_shirt_input() );
+		$this->assertNotWPError( $created );
+		$this->created_product_ids[] = $created['product']['id'];
+		$parent_id                   = $created['product']['id'];
+		$small_id                    = $created['product']['variation_ids'][0];
+
+		$checked = array();
+		$capture = static function ( $caps, $cap, $user_id, $args ) use ( &$checked ) {
+			if ( in_array( $cap, array( 'edit_post', 'delete_post', 'read_private_products' ), true ) ) {
+				$checked[ $cap ] = (int) ( $args[0] ?? 0 );
+			}
+			return $caps;
+		};
+		add_filter( 'map_meta_cap', $capture, 10, 4 );
+		try {
+			$this->assertTrue( ProductUpdate::can_update_product( array( 'id' => $small_id ) ) );
+			$this->assertTrue( ProductDelete::can_delete_product( array( 'id' => $small_id ) ) );
+			$this->assertTrue( ProductsQuery::can_query_products( array( 'id' => $small_id ) ) );
+		} finally {
+			remove_filter( 'map_meta_cap', $capture, 10 );
+		}
+
+		$this->assertSame( $parent_id, $checked['edit_post'] ?? null );
+		$this->assertSame( $parent_id, $checked['delete_post'] ?? null );
+	}
+
+	/**
 	 * @testdox Should nest transactions with savepoints.
 	 */
 	public function test_transaction_query_nests_with_savepoints(): void {
