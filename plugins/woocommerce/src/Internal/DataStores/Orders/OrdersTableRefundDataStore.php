@@ -98,6 +98,8 @@ class OrdersTableRefundDataStore extends OrdersTableDataStore {
 			}
 		}
 
+		$this->clear_refund_total_caches( $parent_order_id );
+
 		/**
 		 * Fires when a refund is deleted.
 		 *

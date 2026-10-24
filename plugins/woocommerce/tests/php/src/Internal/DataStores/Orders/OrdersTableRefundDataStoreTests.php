@@ -341,6 +341,86 @@ class OrdersTableRefundDataStoreTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A deleted full refund can be created again after the refunded total has been cached.
+	 * @testWith [true, true]
+	 *           [true, false]
+	 *           [false, true]
+	 *           [false, false]
+	 *
+	 * @param bool $hpos_enabled Whether HPOS is authoritative.
+	 * @param bool $sync_enabled Whether order synchronization is enabled.
+	 */
+	public function test_deleted_full_refund_can_be_created_again( bool $hpos_enabled, bool $sync_enabled ): void {
+		$this->toggle_cot_authoritative( $hpos_enabled );
+		$sync_enabled ? $this->enable_cot_sync() : $this->disable_cot_sync();
+		$order = OrderHelper::create_order();
+		$args  = array(
+			'order_id' => $order->get_id(),
+			'amount'   => $order->get_total(),
+		);
+
+		$refund = wc_create_refund( $args );
+		$this->assertInstanceOf( WC_Order_Refund::class, $refund, 'The initial full refund should succeed.' );
+		$this->assertEquals( $order->get_total(), $order->get_total_refunded(), 'The full refunded amount should be cached.' );
+
+		$refund->delete( true );
+
+		$replacement = wc_create_refund( $args );
+		$this->assertInstanceOf( WC_Order_Refund::class, $replacement, 'Deleting a refund should make its amount available for refunding again.' );
+	}
+
+	/**
+	 * @testdox Deleting refunds refreshes cached totals without losing amounts from remaining refunds.
+	 * @testWith [true, true]
+	 *           [true, false]
+	 *           [false, true]
+	 *           [false, false]
+	 *
+	 * @param bool $hpos_enabled Whether HPOS is authoritative.
+	 * @param bool $sync_enabled Whether order synchronization is enabled.
+	 */
+	public function test_refund_deletion_refreshes_cached_totals( bool $hpos_enabled, bool $sync_enabled ): void {
+		$this->toggle_cot_authoritative( $hpos_enabled );
+		$sync_enabled ? $this->enable_cot_sync() : $this->disable_cot_sync();
+		$order   = OrderHelper::create_order();
+		$refunds = array();
+
+		foreach ( array( 25, 15 ) as $amount ) {
+			$refund = new WC_Order_Refund();
+			$refund->set_parent_id( $order->get_id() );
+			$refund->set_amount( $amount );
+			$refund->set_total( -$amount );
+
+			$shipping = new \WC_Order_Item_Shipping();
+			$shipping->set_total( -5 );
+			$refund->add_item( $shipping );
+
+			$tax = new \WC_Order_Item_Tax();
+			$tax->set_tax_total( -2 );
+			$tax->set_shipping_tax_total( -1 );
+			$refund->add_item( $tax );
+			$refund->save();
+			$refunds[] = $refund;
+		}
+
+		$this->assertEquals( 40, $order->get_total_refunded(), 'Both refunds should contribute to the cached refunded amount.' );
+		$this->assertEquals( 6, $order->get_total_tax_refunded(), 'Both refunds should contribute to the cached tax total.' );
+		$this->assertEquals( 10, $order->get_total_shipping_refunded(), 'Both refunds should contribute to the cached shipping total.' );
+
+		$refunds[0]->delete( true );
+
+		$this->assertEquals( 15, $order->get_total_refunded(), 'The remaining refund amount should still be counted.' );
+		$this->assertEquals( 3, $order->get_total_tax_refunded(), 'The remaining refunded tax should still be counted.' );
+		$this->assertEquals( 5, $order->get_total_shipping_refunded(), 'The remaining refunded shipping should still be counted.' );
+
+		$refunds[1]->delete( true );
+
+		$this->assertEquals( 0, $order->get_total_refunded(), 'No refunded amount should remain after deleting all refunds.' );
+		$this->assertEquals( 0, $order->get_total_tax_refunded(), 'No refunded tax should remain after deleting all refunds.' );
+		$this->assertEquals( 0, $order->get_total_shipping_refunded(), 'No refunded shipping should remain after deleting all refunds.' );
+	}
+
+	/**
 	 * @testdox Deleting an order does not fire woocommerce_order_refund_deleted for its refunds.
 	 * @testWith [true]
 	 *           [false]
