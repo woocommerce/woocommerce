@@ -829,14 +829,17 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox An order with missing tax-mode metadata uses the store setting without writing during the read.
+	 * @testdox An order with missing tax-mode metadata uses the filtered setting without writing during the read.
 	 */
-	public function test_reading_order_without_prices_include_tax_metadata_uses_store_setting(): void {
-		$previous_tax_mode = get_option( 'woocommerce_prices_include_tax' );
-		$order             = null;
+	public function test_reading_order_without_prices_include_tax_metadata_uses_effective_setting(): void {
+		$previous_tax_mode    = get_option( 'woocommerce_prices_include_tax' );
+		$previous_tax_enabled = get_option( 'woocommerce_calc_taxes' );
+		$order                = null;
 
 		try {
-			update_option( 'woocommerce_prices_include_tax', 'yes' );
+			update_option( 'woocommerce_calc_taxes', 'yes' );
+			update_option( 'woocommerce_prices_include_tax', 'no' );
+			add_filter( 'woocommerce_prices_include_tax', '__return_true' );
 
 			$order = WC_Helper_Order::create_order();
 			delete_post_meta( $order->get_id(), '_prices_include_tax' );
@@ -846,14 +849,16 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 			$this->assertTrue(
 				$read_order->get_prices_include_tax(),
-				'Missing metadata should use the existing CPT fallback to the store setting.'
+				'Missing metadata should use the effective price tax setting.'
 			);
 			$this->assertFalse( metadata_exists( 'post', $order->get_id(), '_prices_include_tax' ), 'Reading must not persist the fallback.' );
 		} finally {
+			remove_filter( 'woocommerce_prices_include_tax', '__return_true' );
 			if ( $order ) {
 				$order->delete( true );
 			}
 			update_option( 'woocommerce_prices_include_tax', $previous_tax_mode );
+			update_option( 'woocommerce_calc_taxes', $previous_tax_enabled );
 		}
 	}
 
@@ -871,6 +876,7 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$order_id          = 0;
 
 		try {
+			update_option( 'woocommerce_calc_taxes', 'yes' );
 			update_option( 'woocommerce_prices_include_tax', $tax_mode );
 			update_option( 'woocommerce_currency', 'EUR' );
 			$post     = get_default_post_to_edit( 'shop_order', true );
@@ -1696,5 +1702,41 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		foreach ( $items as $item ) {
 			$this->assertGreaterThan( 0, $item->get_product_id(), 'Item should have a product ID from cached meta' );
 		}
+	}
+
+	/**
+	 * @testdox Unsupported order query arguments are reported in English, with the singular or plural wording for their count, whatever the site language.
+	 *
+	 * @testWith [["meta_query"], "Order query argument (meta_query) is not supported on the current order datastore."]
+	 *           [["meta_query", "field_query"], "Order query arguments (meta_query, field_query) are not supported on the current order datastore."]
+	 *
+	 * @param string[] $unsupported_args Unsupported query arguments to pass.
+	 * @param string   $expected_message Expected start of the diagnostic message.
+	 */
+	public function test_query_reports_unsupported_args_in_english( array $unsupported_args, string $expected_message ): void {
+		$this->setExpectedIncorrectUsage( WC_Order_Data_Store_CPT::class . '::query' );
+		add_filter(
+			'ngettext',
+			function ( $translation, $single, $plural, $number, $domain ) {
+				return 'woocommerce' === $domain ? 'Übersetzt: ' . ( 1 === $number ? $single : $plural ) : $translation;
+			},
+			10,
+			5
+		);
+		$messages = array();
+		add_action(
+			'doing_it_wrong_run',
+			function ( $function_name, $message ) use ( &$messages ) {
+				$messages[ $function_name ] = $message;
+			},
+			10,
+			2
+		);
+
+		$query_vars = array_fill_keys( $unsupported_args, array( array( 'key' => '_unsupported_probe' ) ) );
+		( new WC_Order_Data_Store_CPT() )->query( $query_vars );
+
+		$this->assertArrayHasKey( WC_Order_Data_Store_CPT::class . '::query', $messages, 'Unsupported arguments should raise a notice.' );
+		$this->assertStringStartsWith( $expected_message, $messages[ WC_Order_Data_Store_CPT::class . '::query' ], 'The notice should use the English wording for the argument count.' );
 	}
 }

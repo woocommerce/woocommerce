@@ -188,7 +188,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$this->data['cogs_total_value'] = 0;
 		}
 
-		$this->data['prices_include_tax'] = 'yes' === get_option( 'woocommerce_prices_include_tax' );
+		$this->data['prices_include_tax'] = wc_prices_include_tax();
 
 		parent::__construct( $order );
 
@@ -929,9 +929,10 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				$new_status = OrderStatus::PENDING;
 			}
 
-			// If the old status is set but unknown (e.g. draft) assume its pending for action usage.
+			// If the status is changing from auto-draft or an unknown status (e.g. draft), assume it was pending for action usage.
 			if (
 				$old_status
+				&& $old_status !== $new_status
 				&& (
 					OrderStatus::AUTO_DRAFT === $old_status
 					|| (
@@ -1140,8 +1141,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		if ( null !== $type && ! is_string( $type ) ) {
 			wc_doing_it_wrong(
 				__METHOD__,
-				/* translators: %s: PHP type that was passed instead of a string. */
-				sprintf( esc_html__( 'remove_order_items() expects a string item type or null; received %s.', 'woocommerce' ), esc_html( gettype( $type ) ) ),
+				sprintf( esc_html( 'remove_order_items() expects a string item type or null; received %s.' ), esc_html( gettype( $type ) ) ),
 				'11.0.0'
 			);
 			return;
@@ -1429,8 +1429,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Get an order item object, based on its type.
 	 *
 	 * @since  3.0.0
-	 * @param  int  $item_id ID of item to get.
-	 * @param  bool $load_from_db Prior to 3.2 this item was loaded direct from WC_Order_Factory, not this object. This param is here for backwards compatibility with that. If false, uses the local items variable instead.
+	 * @param  int|string $item_id ID of item to get, or the temporary key of an unsaved item when $load_from_db is false.
+	 * @param  bool       $load_from_db Prior to 3.2 this item was loaded direct from WC_Order_Factory, not this object. This param is here for backwards compatibility with that. If false, uses the local items variable instead.
 	 * @return WC_Order_Item|false
 	 */
 	public function get_item( $item_id, $load_from_db = true ) {
@@ -1482,9 +1482,25 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
+	 * Get the key an item is stored under in this order's items list.
+	 *
+	 * Unsaved items are stored under a temporary key such as 'new:fee_lines0' rather than their ID.
+	 * Falls back to the item ID when the item isn't in the list, e.g. a filtered copy of a saved item.
+	 *
+	 * @param WC_Order_Item $item Order item.
+	 * @return int|string
+	 */
+	private function get_stored_item_key( $item ) {
+		$items_key = $this->get_items_key( $item );
+		$item_key  = $items_key && isset( $this->items[ $items_key ] ) ? array_search( $item, $this->items[ $items_key ], true ) : false;
+
+		return false === $item_key ? $item->get_id() : $item_key;
+	}
+
+	/**
 	 * Remove item from the order.
 	 *
-	 * @param int $item_id Item ID to delete.
+	 * @param int|string $item_id Item ID, or the temporary key of an unsaved item, to delete.
 	 * @return false|void
 	 */
 	public function remove_item( $item_id ) {
@@ -1495,9 +1511,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			return false;
 		}
 
+		if ( ( $this->items[ $items_key ][ $item_id ] ?? null ) !== $item ) {
+			$item_id = $this->get_stored_item_key( $item );
+		}
+
 		// Unset and remove later.
 		$this->items_to_delete[] = $item;
-		unset( $this->items[ $items_key ][ $item->get_id() ] );
+		unset( $this->items[ $items_key ][ $item_id ] );
 	}
 
 	/**
@@ -1902,9 +1922,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 
 		// Remove the coupon line.
-		foreach ( $coupons as $item_id => $coupon ) {
+		foreach ( $coupons as $coupon ) {
 			if ( wc_is_same_coupon( $coupon->get_code(), $code ) ) {
-				$this->remove_item( $item_id );
+				$this->remove_item( $this->get_stored_item_key( $coupon ) );
 				$coupon_object = new WC_Coupon( $code );
 
 				if ( $has_recorded ) {
@@ -2484,7 +2504,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$tax_rate_id = $tax->get_rate_id();
 			// Remove taxes which no longer exist for cart/shipping.
 			if ( ( ! array_key_exists( $tax_rate_id, $cart_taxes ) && ! array_key_exists( $tax_rate_id, $shipping_taxes ) ) || in_array( $tax_rate_id, $saved_rate_ids, true ) ) {
-				$this->remove_item( $tax->get_id() );
+				$this->remove_item( $this->get_stored_item_key( $tax ) );
 				continue;
 			}
 

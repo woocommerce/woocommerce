@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Send one email instead of two when signing in to the Woo mobile app with a QR code on WordPress 7.2 or later.

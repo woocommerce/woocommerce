@@ -33,6 +33,13 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 	protected $user;
 
 	/**
+	 * ORDER BY clauses of product variation queries, recorded by capture_variation_orderby_clauses().
+	 *
+	 * @var string[]
+	 */
+	private $variation_orderby_clauses = array();
+
+	/**
 	 * Runs before each test.
 	 */
 	public function setUp(): void {
@@ -1293,6 +1300,160 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_Unit_Test_Case {
 		$this->assertSame( 400, $response->get_status(), 'Invalid customs default values should return a 400 response.' );
 		$this->assertSame( 'woocommerce_product_invalid_customs_country_of_origin', $response->get_data()['code'], 'The error code should name the invalid field.' );
 		$this->assertSame( array(), wc_get_product( $product->get_id() )->get_children(), 'No variations should be generated.' );
+	}
+
+	/**
+	 * @testdox Paging variations that share a menu_order returns each variation exactly once, in the admin list order.
+	 *
+	 * @testWith ["offset"]
+	 *           ["page"]
+	 *
+	 * @param string $pagination_param Either 'offset' or 'page'.
+	 */
+	public function test_variations_paginated_by_menu_order_return_each_variation_once( string $pagination_param ): void {
+		$product       = $this->create_product_with_variations( array_fill( 0, 7, 0 ) );
+		$per_page      = 3;
+		$collected_ids = array();
+
+		// Request one page past the last, which should come back empty.
+		$page_count = (int) ceil( count( $product->get_children() ) / $per_page ) + 1;
+		for ( $page = 1; $page <= $page_count; $page++ ) {
+			$request = new WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() . '/variations' );
+			$request->set_query_params(
+				array(
+					'orderby'         => 'menu_order',
+					'order'           => 'asc',
+					'per_page'        => $per_page,
+					$pagination_param => 'offset' === $pagination_param ? ( $page - 1 ) * $per_page : $page,
+				)
+			);
+			$response = $this->server->dispatch( $request );
+			$this->assertSame( 200, $response->get_status(), "Page {$page} should load." );
+			$collected_ids = array_merge( $collected_ids, wp_list_pluck( $response->get_data(), 'id' ) );
+		}
+
+		// The admin variations list (WC_AJAX::load_variations) breaks menu_order ties by ID DESC.
+		$admin_order_ids = $product->get_children();
+		rsort( $admin_order_ids );
+		$this->assertSame( count( $collected_ids ), count( array_unique( $collected_ids ) ), 'No variation should appear on more than one page.' );
+		$this->assertSame( $admin_order_ids, $collected_ids, 'The pages together should contain every variation, in the admin variations list order.' );
+	}
+
+	/**
+	 * @testdox Sorting by menu_order sorts by menu_order first and breaks ties by ID DESC, like the admin variations list.
+	 */
+	public function test_variations_sorted_by_menu_order_break_ties_within_each_menu_order(): void {
+		$product = $this->create_product_with_variations( array( 1, 0, 1, 0, 2 ) );
+		$ids     = $product->get_children();
+		sort( $ids );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() . '/variations' );
+		$request->set_query_params(
+			array(
+				'orderby' => 'menu_order',
+				'order'   => 'asc',
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		// Variations were created with menu_order 1, 0, 1, 0, 2 in ascending ID order.
+		$expected_ids = array( $ids[3], $ids[1], $ids[2], $ids[0], $ids[4] );
+		$this->assertSame( $expected_ids, wp_list_pluck( $response->get_data(), 'id' ), 'Variations should be grouped by menu_order, newest first within each group.' );
+	}
+
+	/**
+	 * @testdox Non-unique orderby values get an ID tie-breaker; menu_order matches the admin variations list.
+	 *
+	 * @testWith ["menu_order", "asc", "{posts}.menu_order ASC, {posts}.ID DESC"]
+	 *           ["menu_order", "desc", "{posts}.menu_order DESC, {posts}.ID DESC"]
+	 *           ["title", "asc", "{posts}.post_title ASC, {posts}.ID ASC"]
+	 *           ["slug", "asc", "{posts}.post_name ASC, {posts}.ID ASC"]
+	 *           ["date", "asc", "{posts}.post_date ASC, {posts}.ID ASC"]
+	 *           ["id", "asc", "{posts}.ID ASC"]
+	 *
+	 * @param string $orderby  The orderby request param.
+	 * @param string $order    The order request param.
+	 * @param string $expected Expected ORDER BY clause, with the posts table name as {posts}.
+	 */
+	public function test_variations_orderby_adds_id_tie_breaker( string $orderby, string $order, string $expected ): void {
+		global $wpdb;
+
+		$product = $this->create_product_with_variations( array( 0, 0 ) );
+		$this->capture_variation_orderby_clauses();
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() . '/variations' );
+		$request->set_query_params(
+			array(
+				'orderby' => $orderby,
+				'order'   => $order,
+			)
+		);
+		$this->server->dispatch( $request );
+
+		$this->assertSame(
+			array( str_replace( '{posts}', $wpdb->posts, $expected ) ),
+			$this->variation_orderby_clauses,
+			"orderby={$orderby}&order={$order} should produce the expected ORDER BY clause."
+		);
+	}
+
+	/**
+	 * @testdox An array orderby set through the object query filter is left unchanged.
+	 */
+	public function test_variations_orderby_array_from_filter_is_left_unchanged(): void {
+		global $wpdb;
+
+		$product = $this->create_product_with_variations( array( 0, 0 ) );
+		$this->capture_variation_orderby_clauses();
+		add_filter(
+			'woocommerce_rest_product_variation_object_query',
+			function ( $args ) {
+				$args['orderby'] = array( 'menu_order' => 'ASC' );
+				return $args;
+			}
+		);
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() . '/variations' );
+		$request->set_query_params( array( 'orderby' => 'menu_order' ) );
+		$this->server->dispatch( $request );
+
+		$this->assertSame( array( "{$wpdb->posts}.menu_order ASC" ), $this->variation_orderby_clauses, 'A filtered array orderby should not get an ID tie-breaker.' );
+	}
+
+	/**
+	 * Record the ORDER BY clause of each product variation WP_Query in $variation_orderby_clauses.
+	 */
+	private function capture_variation_orderby_clauses(): void {
+		$this->variation_orderby_clauses = array();
+		add_filter(
+			'posts_orderby',
+			function ( $clause, $query ) {
+				if ( 'product_variation' === $query->get( 'post_type' ) ) {
+					$this->variation_orderby_clauses[] = $clause;
+				}
+				return $clause;
+			},
+			10,
+			2
+		);
+	}
+
+	/**
+	 * Create a variable product with one variation per given menu_order, in ascending ID order.
+	 *
+	 * @param int[] $menu_orders The menu_order of each variation.
+	 * @return WC_Product_Variable
+	 */
+	private function create_product_with_variations( array $menu_orders ): WC_Product_Variable {
+		$product = new WC_Product_Variable();
+		$product->save();
+		foreach ( $menu_orders as $menu_order ) {
+			$variation = new WC_Product_Variation();
+			$variation->set_parent_id( $product->get_id() );
+			$variation->set_menu_order( $menu_order );
+			$variation->save();
+		}
+		return new WC_Product_Variable( $product->get_id() );
 	}
 
 	/**

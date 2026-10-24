@@ -25,9 +25,10 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\SubscriptionsEngine\Core\Entity;
 
-use DomainException;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\MoneyScale;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\Coercion;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\InvalidInputException;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\ValidationErrorCode;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PaymentInstrumentRef;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\PlanSnapshot;
 
@@ -306,10 +307,11 @@ final class Contract {
 
 	/**
 	 * Build a new, unsaved contract. `extension_slug` is required; `creation_key` is an
-	 * optional idempotency key of 1-100 characters, trimmed of surrounding whitespace.
+	 * optional idempotency key of 1-100 characters, trimmed of surrounding whitespace. Every
+	 * invalid attribute is reported in one exception.
 	 *
 	 * @param array<string, mixed> $args Contract attributes.
-	 * @throws DomainException If the contract attributes are not valid.
+	 * @throws InvalidInputException If the contract attributes are not valid.
 	 */
 	public static function create( array $args ): self {
 		// A new contract is always unsaved and unlocked; never adopt a caller-supplied id or lock.
@@ -320,35 +322,46 @@ final class Contract {
 			$args['creation_key'] = trim( $args['creation_key'] );
 		}
 
-		self::assert_creation_key( $args['creation_key'] ?? null );
+		$creation_key_error = self::get_creation_key_error( $args['creation_key'] ?? null );
+		if ( null !== $creation_key_error ) {
+			unset( $args['creation_key'] );
+		}
 
 		$contract = new self( $args );
 
-		self::assert_status( $contract->status );
-		self::assert_extension_slug( $contract->extension_slug );
-		self::assert_schedule_source( $contract->schedule_source );
-		$contract->assert_money_has_currency();
+		$errors = array_filter(
+			array(
+				$creation_key_error,
+				self::get_status_error( $contract->status ),
+				self::get_extension_slug_error( $contract->extension_slug ),
+				self::get_schedule_source_error( $contract->schedule_source ),
+				$contract->get_money_currency_error(),
+			)
+		);
+		if ( array() !== $errors ) {
+			throw InvalidInputException::from_errors( array_values( $errors ) );
+		}
 
 		return $contract;
 	}
 
 	/**
-	 * Refuse money without a currency: a contract with no currency must have every total at zero.
-	 * Cross-field, so callers that change several fields check it once after the last change.
-	 * Checked against the state the caller holds; the contract lock serializes facade writers.
-	 *
-	 * @throws DomainException If a total is non-zero while the currency is unset.
+	 * The error for money without a currency, or null: a contract with no currency must have
+	 * every total at zero. Cross-field, so callers that change several fields check it once
+	 * after the last change. Checked against the state the caller holds; the contract lock serializes facade writers.
 	 */
-	public function assert_money_has_currency(): void {
+	public function get_money_currency_error(): ?InvalidInputException {
 		if ( null !== $this->currency ) {
-			return;
+			return null;
 		}
 
 		foreach ( array( $this->billing_total, $this->discount_total, $this->shipping_total, $this->tax_total ) as $total ) {
 			if ( 0.0 !== (float) $total ) {
-				throw new DomainException( 'Contract: money totals require a currency.' );
+				return new InvalidInputException( ValidationErrorCode::REQUIRED, 'currency', 'Contract: money totals require a currency.' );
 			}
 		}
+
+		return null;
 	}
 
 	/**
@@ -412,14 +425,17 @@ final class Contract {
 	 * status is a no-op, so a hydrated unregistered status survives it.
 	 *
 	 * @param string $status Target status; must be registered.
-	 * @throws DomainException If `$status` is not a registered contract status.
+	 * @throws InvalidInputException If `$status` is not a registered contract status.
 	 */
 	public function set_status( string $status ): void {
 		if ( $status === $this->status ) {
 			return;
 		}
 
-		self::assert_status( $status );
+		$error = self::get_status_error( $status );
+		if ( null !== $error ) {
+			throw $error;
+		}
 
 		$this->status = $status;
 	}
@@ -736,10 +752,13 @@ final class Contract {
 	 *
 	 * @param string $schedule_source 'subscriptions_engine' or the slug of the gateway or
 	 *                                extension that keeps its own schedule.
-	 * @throws DomainException If `$schedule_source` is not a valid slug.
+	 * @throws InvalidInputException If `$schedule_source` is not a valid slug.
 	 */
 	public function set_schedule_source( string $schedule_source ): void {
-		self::assert_schedule_source( $schedule_source );
+		$error = self::get_schedule_source_error( $schedule_source );
+		if ( null !== $error ) {
+			throw $error;
+		}
 
 		$this->schedule_source = $schedule_source;
 	}
@@ -854,56 +873,73 @@ final class Contract {
 	}
 
 	/**
-	 * Refuse a creation key that is not null or a string of 1-100 characters.
+	 * The error for a creation key that is not null or a string of 1-100 characters, or null.
 	 *
 	 * @param mixed $creation_key Creation key to check.
-	 * @throws DomainException If `$creation_key` is not valid.
 	 */
-	private static function assert_creation_key( $creation_key ): void {
+	private static function get_creation_key_error( $creation_key ): ?InvalidInputException {
 		if ( null === $creation_key ) {
-			return;
+			return null;
 		}
 
-		if ( ! is_string( $creation_key ) || '' === $creation_key || mb_strlen( $creation_key ) > 100 ) {
-			throw new DomainException( 'Contract: creation_key must be a string of 1-100 characters.' );
+		if ( ! is_string( $creation_key ) ) {
+			return new InvalidInputException( ValidationErrorCode::INVALID_TYPE, 'creation_key', 'Contract: creation_key must be a string.', array( 'type' => 'string' ) );
 		}
+
+		if ( '' === $creation_key || mb_strlen( $creation_key ) > 100 ) {
+			return new InvalidInputException( ValidationErrorCode::INVALID_VALUE, 'creation_key', 'Contract: creation_key must be 1-100 characters.' );
+		}
+
+		return null;
 	}
 
 	/**
-	 * Refuse a status that is not a registered contract status.
+	 * The error for a status that is not a registered contract status, or null.
 	 *
 	 * @param string $status Status to check.
-	 * @throws DomainException If `$status` is not registered.
 	 */
-	private static function assert_status( string $status ): void {
+	private static function get_status_error( string $status ): ?InvalidInputException {
 		if ( ! ContractStatus::is_registered( $status ) ) {
-			throw new DomainException( sprintf( 'Contract: status "%s" is not registered.', $status ) );
+			return new InvalidInputException(
+				ValidationErrorCode::NOT_REGISTERED,
+				'status',
+				sprintf( 'Contract: status "%s" is not registered.', $status ),
+				array( 'value' => $status )
+			);
 		}
+
+		return null;
 	}
 
 	/**
-	 * Refuse a missing or empty owning extension slug.
+	 * The error for a missing or empty owning extension slug, or null.
 	 *
 	 * @param string|null $extension_slug Extension slug to check.
-	 * @throws DomainException If `$extension_slug` is null or empty.
 	 */
-	private static function assert_extension_slug( ?string $extension_slug ): void {
+	private static function get_extension_slug_error( ?string $extension_slug ): ?InvalidInputException {
 		if ( null === $extension_slug || '' === $extension_slug ) {
-			throw new DomainException( 'Contract: extension_slug is required and must be a non-empty string.' );
+			return new InvalidInputException( ValidationErrorCode::REQUIRED, 'extension_slug', 'Contract: extension_slug is required and must be a non-empty string.' );
 		}
+
+		return null;
 	}
 
 	/**
-	 * Refuse a schedule source that is not a slug of 1-64 lowercase letters, digits,
+	 * The error for a schedule source that is not a slug of 1-64 lowercase letters, digits,
 	 * underscores or hyphens (the column is VARCHAR(64), wide enough for extension and
-	 * gateway slugs).
+	 * gateway slugs), or null.
 	 *
 	 * @param string $schedule_source Schedule source to check.
-	 * @throws DomainException If `$schedule_source` is not a valid slug.
 	 */
-	private static function assert_schedule_source( string $schedule_source ): void {
+	private static function get_schedule_source_error( string $schedule_source ): ?InvalidInputException {
 		if ( 1 !== preg_match( '/^[a-z0-9_-]{1,64}$/D', $schedule_source ) ) {
-			throw new DomainException( sprintf( 'Contract: invalid schedule source "%s".', $schedule_source ) );
+			return new InvalidInputException(
+				ValidationErrorCode::INVALID_VALUE,
+				'schedule_source',
+				sprintf( 'Contract: invalid schedule source "%s".', $schedule_source )
+			);
 		}
+
+		return null;
 	}
 }
