@@ -180,7 +180,7 @@ class CSVUploadHelper {
 
 	/**
 	 * Filters the WordPress determination of a file's type and extension, specifically to correct
-	 * CSV files that are misidentified as 'text/html'.
+	 * CSV files that are misidentified as 'text/html' or 'application/octet-stream'.
 	 *
 	 * @param array  $data      An array of file data: ['ext'] (string), ['type'] (string), ['proper_filename'] (string|false).
 	 * @param string $file      Full path to the file.
@@ -190,8 +190,8 @@ class CSVUploadHelper {
 	 * @return array Filtered file data.
 	 */
 	public function filter_woocommerce_check_filetype_for_csv( $data, $file, $filename, $mimes, $real_mime ) {
-		// Check if the file was misidentified as 'text/html' by PHP.
-		if ( 'text/html' === $real_mime ) {
+		// Check if the file was misidentified as 'text/html' or 'application/octet-stream' by PHP.
+		if ( 'text/html' === $real_mime || 'application/octet-stream' === $real_mime ) {
 			// Determine the expected file type based on the filename extension.
 			// $mimes here is the context-specific list of mimes for the current upload.
 			$filename_check = wp_check_filetype( $filename, $mimes );
