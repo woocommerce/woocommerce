@@ -170,15 +170,44 @@ abstract class ActionableAbility extends \WP_Ability {
 			$saved = $this->save( $subject );
 		} catch ( \Throwable $e ) {
 			wc_transaction_query( 'rollback' );
+			self::forget_rolled_back_objects( $objects );
 			throw $e;
 		}
 		if ( is_wp_error( $saved ) ) {
 			wc_transaction_query( 'rollback' );
+			self::forget_rolled_back_objects( $objects );
 			return $saved;
 		}
 		wc_transaction_query( 'commit' );
 
 		return $this->prepare_response( $subject );
+	}
+
+	/**
+	 * Drop the object caches of the objects a rolled back save() touched. The
+	 * saves filled the caches with rows the rollback removed, so a read in the
+	 * same request would still see them.
+	 *
+	 * @param array<int, array{0: \WC_Data, 1: array}> $objects The subject and the pending objects.
+	 */
+	private static function forget_rolled_back_objects( array $objects ): void {
+		foreach ( $objects as list( $object ) ) {
+			$id = $object instanceof \WC_Data ? $object->get_id() : 0;
+			if ( $id <= 0 ) {
+				continue;
+			}
+			if ( $object instanceof \WC_Product ) {
+				clean_post_cache( $id );
+				wc_delete_product_transients( $id );
+				if ( $object->get_parent_id() > 0 ) {
+					clean_post_cache( $object->get_parent_id() );
+					wc_delete_product_transients( $object->get_parent_id() );
+				}
+			} elseif ( $object instanceof \WC_Abstract_Order ) {
+				wc_get_container()->get( \Automattic\WooCommerce\Caches\OrderCache::class )->remove( $id );
+				clean_post_cache( $id );
+			}
+		}
 	}
 
 	/**
