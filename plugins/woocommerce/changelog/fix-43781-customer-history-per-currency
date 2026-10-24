@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show Customer history totals per currency on the order screen instead of adding different currencies together, on stores using High-Performance Order Storage.
