@@ -5,11 +5,14 @@
 
 namespace Automattic\WooCommerce\Internal\Admin\Orders;
 
+use Automattic\WooCommerce\Admin\Features\Features as AdminFeatures;
 use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\CustomerHistory;
 use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\CustomMetaBox;
 use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\OrderAttribution;
 use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\TaxonomiesMetaBox;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\Internal\Features\OrderDetailRedesign\OrderListNav;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Order;
 
@@ -435,6 +438,15 @@ class Edit {
 		<?php
 		if ( 'edit_order' === $this->current_action ) {
 			echo ' <a href="' . esc_url( $new_page_url ) . '" class="page-title-action">' . esc_html( $post_type->labels->add_new ) . '</a>';
+		}
+
+		// Note: using the wc-admin features API (`AdminFeatures::is_enabled`) rather than
+		// `FeaturesUtil::feature_is_enabled` because `order-detail-redesign` is registered in
+		// `client/admin/config/core.json` only and is not bridged to the core `FeaturesController`,
+		// so `FeaturesUtil::feature_is_enabled` always returns false for this feature. See PR
+		// description for the broader bug that needs fixing in #64669 / #64678 follow-ups.
+		if ( 'edit_order' === $this->current_action && AdminFeatures::is_enabled( 'order-detail-redesign' ) ) {
+			OrderListNav::render( $this->order );
 		}
 		?>
 		<hr class="wp-header-end">
