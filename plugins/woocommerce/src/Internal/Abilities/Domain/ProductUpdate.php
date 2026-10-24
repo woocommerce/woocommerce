@@ -28,6 +28,17 @@ class ProductUpdate extends ActionableAbility {
 	public const ABILITY_NAME = 'woocommerce/product-update';
 
 	/**
+	 * The variations that change() planned, saved after their parent by save().
+	 *
+	 * @var array{save: \WC_Product_Variation[], delete: \WC_Product_Variation[], extensions: array<int, array>}
+	 */
+	private array $variations = array(
+		'save'       => array(),
+		'delete'     => array(),
+		'extensions' => array(),
+	);
+
+	/**
 	 * Get the ability registration arguments.
 	 *
 	 * @return array
@@ -76,6 +87,12 @@ class ProductUpdate extends ActionableAbility {
 	 * @return \WC_Product|\WP_Error
 	 */
 	public function load( array $input ) {
+		$this->variations = array(
+			'save'       => array(),
+			'delete'     => array(),
+			'extensions' => array(),
+		);
+
 		$product = self::get_product_from_input( $input );
 
 		if ( is_wp_error( $product ) ) {
@@ -145,14 +162,39 @@ class ProductUpdate extends ActionableAbility {
 				self::apply_product_type_config( $subject, $product_config );
 			}
 
-			return self::set_product_props_from_input( $subject, $input, $product_config );
+			$error = self::set_product_props_from_input( $subject, $input, $product_config );
+			if ( is_wp_error( $error ) ) {
+				return $error;
+			}
+
+			if ( $subject instanceof \WC_Product_Variable && isset( $input['variations'] ) ) {
+				$plan = self::plan_variations( $subject, is_array( $input['variations'] ) ? $input['variations'] : array() );
+				if ( is_wp_error( $plan ) ) {
+					return $plan;
+				}
+				$this->variations = $plan;
+			}
+
+			return null;
 		} catch ( \WC_Data_Exception $exception ) {
 			return self::get_product_data_exception_error( $exception );
 		}
 	}
 
 	/**
-	 * Save the product.
+	 * The variations that the input names, each with the `extensions` input of
+	 * its `variations` item.
+	 *
+	 * @param \WC_Product $subject Changed product.
+	 * @param array       $input   Ability input.
+	 * @return array<int, array{0: \WC_Product_Variation, 1: array}>
+	 */
+	public function pending_objects( $subject, array $input ): array {
+		return array_map( null, $this->variations['save'], $this->variations['extensions'] );
+	}
+
+	/**
+	 * Save the product, then the variations that the input names.
 	 *
 	 * @param \WC_Product $subject Changed product.
 	 * @return null|\WP_Error
@@ -161,6 +203,10 @@ class ProductUpdate extends ActionableAbility {
 		$error = self::save_product( $subject, 'woocommerce_product_update_failed' );
 		if ( is_wp_error( $error ) ) {
 			return $error;
+		}
+
+		if ( $subject instanceof \WC_Product_Variable ) {
+			return self::save_variations( $subject, $this->variations, 'woocommerce_product_update_failed' );
 		}
 
 		self::sync_variation_parent( $subject );

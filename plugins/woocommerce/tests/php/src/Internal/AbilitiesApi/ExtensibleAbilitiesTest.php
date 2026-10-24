@@ -1695,7 +1695,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should list the writable fields one time at the top level of the product input schemas, plus one time for the variations of a create.
+	 * @testdox Should list the writable fields one time at the top level of the product input schemas, plus one time for the variations.
 	 */
 	public function test_input_schemas_list_writable_fields_one_time(): void {
 		foreach ( array( 'woocommerce/product-create', 'woocommerce/product-update' ) as $name ) {
@@ -1705,7 +1705,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			$this->assertSame( array( 'string', 'null' ), $extensions['test-ext']['properties']['color']['type'] );
 			$this->assertSame( array( 'integer', 'null' ), $extensions['other_ext']['properties']['count']['type'] );
 			$this->assertArrayNotHasKey( 'code', $extensions['test-ext']['properties'] );
-			$this->assertSame( 'woocommerce/product-create' === $name ? 2 : 1, substr_count( wp_json_encode( $schema ), '"color"' ) );
+			$this->assertSame( 2, substr_count( wp_json_encode( $schema ), '"color"' ) );
 			foreach ( $schema['oneOf'] as $branch ) {
 				$this->assertSame( 'object', $branch['properties']['extensions']['type'] );
 				$this->assertArrayNotHasKey( 'properties', $branch['properties']['extensions'] );
