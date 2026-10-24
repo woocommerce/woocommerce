@@ -425,4 +425,19 @@ class WC_Product_CSV_Exporter_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( 'US', $rows[ $variation->get_id() ]['customs_country_of_origin'], 'A variation origin override should export its own value.' );
 		$this->assertNull( $rows[ $variation->get_id() ]['customs_description'], 'An inherited description must export as an empty override.' );
 	}
+
+	/**
+	 * @testdox Attribute columns include whether each attribute is used for variations.
+	 */
+	public function test_export_includes_attribute_used_for_variations(): void {
+		$parent = WC_Helper_Product::create_variation_product();
+
+		$sut = new WC_Product_CSV_Exporter();
+		$sut->set_product_ids_to_export( array( $parent->get_id() ) );
+		$sut->prepare_data_to_export();
+		$rows = array_column( $this->get_exported_data( $sut ), null, 'id' );
+
+		$this->assertSame( 'Attribute 1 used for variations', $sut->get_column_names()['attributes:variation1'] );
+		$this->assertTrue( $rows[ $parent->get_id() ]['attributes:variation1'] );
+	}
 }
