@@ -15,6 +15,7 @@ import type {
 	ProductFiltersContext,
 } from './types';
 import { getClosestColor } from './utils/get-closest-color';
+import { prepareFocusRestoration } from './utils/focus';
 import { getFocusableElements } from '../../utils/get-focusable-elements';
 import { reload } from '../../utils/navigation';
 import { PRODUCT_FILTERS_STORE_NAME } from './constants';
@@ -363,6 +364,9 @@ const productFiltersStore = {
 				return;
 			}
 
+			const focusRestoration = prepareFocusRestoration(
+				getElement().ref
+			);
 			const navigation = {
 				source: window.location.href,
 				destination: url.href,
@@ -374,8 +378,12 @@ const productFiltersStore = {
 
 				if ( pendingNavigation === navigation ) {
 					yield routerModule.actions.navigate( url.href );
+					if ( pendingNavigation === navigation ) {
+						focusRestoration?.restore();
+					}
 				}
 			} finally {
+				focusRestoration?.cleanup();
 				if ( pendingNavigation === navigation ) {
 					pendingNavigation = undefined;
 				}
@@ -408,7 +416,11 @@ const productFiltersStore = {
 
 			// Wait for the open class to make the drawer visible before focusing.
 			const frame = requestAnimationFrame( () => {
-				if ( context.isOverlayOpened ) {
+				if (
+					context.isOverlayOpened &&
+					dialog &&
+					! dialog.contains( dialog.ownerDocument.activeElement )
+				) {
 					getFocusableElements( dialog )[ 0 ]?.focus();
 				}
 			} );
