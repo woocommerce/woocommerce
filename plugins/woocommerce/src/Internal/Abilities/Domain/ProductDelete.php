@@ -129,7 +129,7 @@ class ProductDelete extends AbstractDomainAbility implements AbilityDefinition {
 	 * @since 10.9.0
 	 */
 	public static function can_delete_product( $input = array() ): bool {
-		$product_id = self::get_id_from_input( $input );
+		$product_id = self::get_product_permission_id( self::get_id_from_input( $input ) );
 
 		return $product_id > 0 && wc_rest_check_post_permissions( 'product', 'delete', $product_id );
 	}
