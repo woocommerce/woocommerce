@@ -219,11 +219,9 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * (Edge case - legacy AVI shape): variation has gallery images but no own featured →
-	 * parent featured anchors the set, variation gallery follows. No parent
-	 * gallery extras appear — the variation owns the rest of the lineup.
+	 * @testdox Should use the variation's own gallery without an inherited parent lead image.
 	 */
-	public function test_get_product_variation_gallery_data_case_5_avi_shape_uses_parent_featured_plus_variation_gallery() {
+	public function test_get_product_variation_gallery_data_case_5_avi_shape_uses_variation_gallery() {
 		$parent_featured_id     = $this->create_image_attachment( 'Parent Featured', 'parent-featured.jpg' );
 		$parent_gallery_extra   = $this->create_image_attachment( 'Parent Gallery Extra', 'parent-gallery-extra.jpg' );
 		$variation_gallery_id_a = $this->create_image_attachment( 'Variation Gallery A', 'variation-gallery-a.jpg' );
@@ -236,9 +234,9 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 			array( $variation_gallery_id_a, $variation_gallery_id_b )
 		);
 
-		$this->assertSame( $parent_featured_id, $entry['image_id'] );
+		$this->assertSame( $variation_gallery_id_a, $entry['image_id'] );
 		$this->assertSame(
-			array( $parent_featured_id, $variation_gallery_id_a, $variation_gallery_id_b ),
+			array( $variation_gallery_id_a, $variation_gallery_id_b ),
 			$entry['image_ids']
 		);
 	}

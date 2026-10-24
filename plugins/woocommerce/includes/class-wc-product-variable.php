@@ -11,6 +11,7 @@
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
+use Automattic\WooCommerce\Internal\VariationGallery\GalleryImageResolver;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -439,11 +440,9 @@ class WC_Product_Variable extends WC_Product {
 			return false;
 		}
 
-		$variation_featured_id           = (int) $variation->get_image_id();
-		$variation_featured_is_inherited = ! $variation->get_image_id( 'edit' ) && (int) ( $variation->get_parent_data()['image_id'] ?? 0 ) === $variation_featured_id;
-		$variation_featured_valid        = ! $variation_featured_is_inherited && $variation_featured_id && wp_attachment_is_image( $variation_featured_id );
-		$parent_featured_id              = (int) $this->get_image_id();
-		$parent_featured_valid           = $parent_featured_id && wp_attachment_is_image( $parent_featured_id );
+		$variation_featured_id = GalleryImageResolver::get_variation_featured_image_id( $variation );
+		$parent_featured_id    = (int) $this->get_image_id();
+		$parent_featured_valid = $parent_featured_id && wp_attachment_is_image( $parent_featured_id );
 
 		$variation_gallery_image_ids = array_values(
 			array_filter(
@@ -453,24 +452,23 @@ class WC_Product_Variable extends WC_Product {
 		);
 		$variation_gallery_html      = '';
 
-		if ( $variation_featured_valid ) {
-			$selected_image_id = $variation_featured_id;
-		} elseif ( ! empty( $variation_gallery_image_ids ) ) {
-			$selected_image_id = $variation_gallery_image_ids[0];
-		} elseif ( $parent_featured_valid ) {
-			$selected_image_id = $parent_featured_id;
-		} else {
-			$selected_image_id = 0;
+		$parent_gallery_ids = array_map( 'intval', $this->get_gallery_image_ids() );
+		if ( $parent_gallery_ids ) {
+			_prime_post_caches( $parent_gallery_ids );
 		}
+		$parent_gallery_ids = array_values( array_filter( $parent_gallery_ids, 'wp_attachment_is_image' ) );
+		$display_image_ids  = GalleryImageResolver::resolve(
+			$variation_featured_id,
+			$variation_gallery_image_ids,
+			$parent_featured_valid ? $parent_featured_id : 0,
+			array_values( array_diff( $parent_gallery_ids, array( $parent_featured_id ) ) )
+		);
+		$selected_image_id  = $display_image_ids[0];
 
-		if ( ! empty( $variation_gallery_image_ids ) ) {
-			$gallery_html_ids = $variation_gallery_image_ids;
-
-			if ( $selected_image_id && ! in_array( $selected_image_id, $gallery_html_ids, true ) ) {
-				array_unshift( $gallery_html_ids, $selected_image_id );
-			}
-
-			$variation_gallery_html = wc_get_product_gallery_html( $this, $gallery_html_ids );
+		// Sliding to an existing parent thumbnail would leave the parent's main photo in the gallery.
+		$featured_is_in_parent_gallery = $variation_featured_id && in_array( $variation_featured_id, $parent_gallery_ids, true );
+		if ( ! empty( $variation_gallery_image_ids ) || $featured_is_in_parent_gallery ) {
+			$variation_gallery_html = wc_get_product_gallery_html( $this, $display_image_ids );
 		}
 
 		// See if prices should be shown for each variation after selection.
