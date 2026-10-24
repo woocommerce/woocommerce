@@ -145,3 +145,5 @@ final class StringUtil {
 		return is_null( $path ) ? null : str_replace( array( '\\', '/' ), DIRECTORY_SEPARATOR, $path );
 	}
 }
+
+// local-ci test change

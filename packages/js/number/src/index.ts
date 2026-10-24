@@ -151,3 +151,5 @@ export function parseNumber(
 
 	return Number.parseFloat( parsedValue ).toFixed( parsedPrecision );
 }
+
+// local-ci test change
