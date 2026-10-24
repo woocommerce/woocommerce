@@ -1,0 +1,72 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G29A-v3",
+			"path": "plugins/woocommerce/client/legacy/js/frontend/checkout.js",
+			"before": {
+				"file": "fixtures/G29A/before.js"
+			},
+			"after": {
+				"file": "fixtures/G29A/after.js"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "prefilter"
+			}
+		},
+		{
+			"id": "G29B-v3",
+			"path": "plugins/woocommerce/client/legacy/js/frontend/checkout.js",
+			"before": {
+				"file": "fixtures/G29B/before.js"
+			},
+			"after": {
+				"file": "fixtures/G29B/after.js"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "document.body"
+			}
+		},
+		{
+			"id": "G29C-v3",
+			"path": "plugins/woocommerce/client/legacy/js/frontend/checkout.js",
+			"before": {
+				"file": "fixtures/G29C/before.js"
+			},
+			"after": {
+				"file": "fixtures/G29C/after.js"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G29D-v3",
+			"path": "plugins/woocommerce/client/legacy/js/frontend/checkout.js",
+			"before": {
+				"file": "fixtures/G29D/before.js"
+			},
+			"after": {
+				"file": "fixtures/G29D/after.js"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G29D-v4",
+			"path": "plugins/woocommerce/client/legacy/js/frontend/checkout.js",
+			"before": {
+				"code": "/* Classic cart notification. */\nfunction notifyAddedToCart( fragments, cartHash, button ) { jQuery( document.body ).trigger( 'added_to_cart', [ fragments, cartHash, button ] ); }\n"
+			},
+			"after": {
+				"code": "/* Classic cart notification. */\nfunction notifyAddedToCart( fragments, cartHash, button ) { const event = jQuery.Event( 'added_to_cart' ); event.wcSource = 'classic'; jQuery( document.body ).trigger( event, [ fragments, cartHash, button ] ); }\n"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		}
+	]
+}

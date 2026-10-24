@@ -1,0 +1,82 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G32A-v3",
+			"path": "plugins/woocommerce/client/blocks/assets/js/blocks/cart/style.css",
+			"before": {
+				"file": "fixtures/G32A/before.css"
+			},
+			"after": {
+				"file": "fixtures/G32A/after.css"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "vertical"
+			}
+		},
+		{
+			"id": "G32B-v3",
+			"path": "plugins/woocommerce/client/blocks/assets/js/blocks/cart/style.css",
+			"before": {
+				"file": "fixtures/G32B/before.css"
+			},
+			"after": {
+				"file": "fixtures/G32B/after.css"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "selector"
+			}
+		},
+		{
+			"id": "G32C-v3",
+			"path": "plugins/woocommerce/client/blocks/assets/js/blocks/cart/style.css",
+			"before": {
+				"file": "fixtures/G32C/before.css"
+			},
+			"after": {
+				"file": "fixtures/G32C/after.css"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G32D-v3",
+			"path": "plugins/woocommerce/client/blocks/assets/js/blocks/cart/style.css",
+			"before": {
+				"file": "fixtures/G32D/before.css"
+			},
+			"after": {
+				"file": "fixtures/G32D/after.css"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G32A-v4",
+			"path": "plugins/woocommerce/client/blocks/assets/js/blocks/cart/style.css",
+			"before": {
+				"code": "/* Main and sidebar are consecutive children in the cart editor. */\n.editor-styles-wrapper .wc-block-cart { display: block; }\n.wc-block-cart .wc-block-cart__main + .wc-block-cart__sidebar { margin-block-start: 24px; }\n"
+			},
+			"after": {
+				"code": "/* Main and sidebar are consecutive children in the cart editor. */\n.editor-styles-wrapper .wc-block-cart { display: block; }\n.wc-block-cart { column-gap: 24px; }\n.wc-block-cart .wc-block-cart__main + .wc-block-cart__sidebar { margin-block-start: 0; }\n"
+			},
+			"expect": {
+				"outcome": "finding",
+				"locations": [
+					{
+						"file": "plugins/woocommerce/client/blocks/assets/js/blocks/cart/style.css",
+						"lines": [
+							3,
+							4
+						],
+						"anchor": ".wc-block-cart .wc-block-cart__main + .wc-block-cart__sidebar { margin-block-start: 0; }"
+					}
+				]
+			}
+		}
+	]
+}

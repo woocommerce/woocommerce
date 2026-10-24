@@ -27,6 +27,15 @@ tools until you know. Audit the last hunk as fully as the first; "same as above"
 - Each step must rest on an operative line you Read in this checkout. If the dependency is outside the
   checkout (WP core, the PHP runtime), mark the step [ASSUMED] and name what you assumed. Try to Read it
   first; only assume what you can't read here.
+- When a hunk changes a dependency version, locate source for both the old and new versions before
+  marking any step [ASSUMED]: search the checkout, including vendored, bundled, and reference source directories, for
+  each version. Where both are readable, compare the declarations the changed code relies on
+  (signatures, parameter order, class names, namespaces, parent methods). An identical declaration
+  is a Read step, not an assumption. Identical declarations establish API shape only. Read the
+  implementation for behavior the trace relies on; otherwise mark that step [ASSUMED]. A mismatch
+  claim quotes the differing or missing declaration. A
+  newer version number alone is not evidence that an API changed. If a version's source cannot be
+  found, that step is [ASSUMED] and the rules below apply unchanged.
 - End at what a user or integrator actually observes: rendered output, query rows, HTTP response,
   persisted value, hook payload. Never stop at an internal flag or constant the PR sets.
 - Verdict: the intended output is produced, the output is not produced, or unverified (an [ASSUMED]
@@ -185,6 +194,10 @@ It is not a contract break when, and only when, you can point at one of these in
 - the file is a test, fixture, build, CI, or dev-tooling file;
 - no hook carries the changed value and the symbol is not callable or overridable from outside the
   plugin (namespace or `@internal` alone does not show this);
+- the removed symbol is an internal implementation helper rather than a supported or evidenced
+  extension contract, and tracing its registrations, callers, and relevant dependency behavior shows
+  no affected execution path. PHP callability alone does not establish a contract; an `Internal`
+  label or empty search alone does not satisfy this exception;
 - the change is purely additive: a new optional parameter, array key, hook, or method whose default
   keeps every existing consumer's observed value identical. Changing an existing default's value or
   type is never additive (an `int` default becoming `false` is a break even though `false == 0`);
@@ -194,6 +207,11 @@ It is not a contract break when, and only when, you can point at one of these in
 - the change restores behavior the pre-PR docs or release promised (docs rewritten in this PR don't
   count);
 - the symbol is introduced by this same diff, so no release has it.
+
+When input validation rejects a value excluded by the pre-change documented contract, do not emit
+an extension-regression finding based only on that value's former implicit coercion. Read the contract
+and check a supported input path. A demonstrated working consumer or a supported input that now fails
+is still a finding. This exception does not apply to undocumented input contracts.
 
 If the PR description or changelog entry explicitly states the BC impact, rate it `medium`: `fix here`
 if it renames or removes a public symbol without the deprecation path AGENTS.md requires, otherwise

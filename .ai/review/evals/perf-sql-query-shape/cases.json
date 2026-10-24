@@ -1,0 +1,72 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G25A-v4",
+			"path": "plugins/woocommerce/includes/class-wc-eval-25.php",
+			"before": {
+				"file": "fixtures/G25A/before.php"
+			},
+			"after": {
+				"file": "fixtures/G25A/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "per product"
+			}
+		},
+		{
+			"id": "G25B-v3",
+			"path": "plugins/woocommerce/includes/class-wc-eval-25.php",
+			"before": {
+				"file": "fixtures/G25B/before.php"
+			},
+			"after": {
+				"file": "fixtures/G25B/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "post_status"
+			}
+		},
+		{
+			"id": "G25C-v3",
+			"path": "plugins/woocommerce/includes/class-wc-eval-25.php",
+			"before": {
+				"file": "fixtures/G25C/before.php"
+			},
+			"after": {
+				"file": "fixtures/G25C/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G25D-v3",
+			"path": "plugins/woocommerce/includes/class-wc-eval-25.php",
+			"before": {
+				"file": "fixtures/G25D/before.php"
+			},
+			"after": {
+				"file": "fixtures/G25D/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G25C-v7",
+			"path": "plugins/woocommerce/includes/class-wc-eval-25.php",
+			"before": {
+				"code": "<?php\n/* Product stock report returns a map keyed by ID. Map iteration order is not specified. */\nfunction wc_listing_totals( $ids ) { global $wpdb; $out = array(); foreach ( array_map( 'absint', $ids ) as $id ) { $row = $wpdb->get_row( $wpdb->prepare( \"SELECT product_id, stock_quantity FROM {$wpdb->prefix}wc_product_meta_lookup WHERE product_id = %d\", $id ), ARRAY_A ); if ( $row ) { $out[$row['product_id']] = $row['stock_quantity']; } } return $out; }\n"
+			},
+			"after": {
+				"code": "<?php\n/* Product stock report returns a map keyed by ID. Map iteration order is not specified. */\nfunction wc_listing_totals( $ids ) {\n    global $wpdb;\n    $normalized_ids = array_map( 'absint', $ids );\n    $out = array();\n    foreach ( $normalized_ids as $id ) {\n        $row = $wpdb->get_row( $wpdb->prepare( \"SELECT product_id, stock_quantity FROM {$wpdb->prefix}wc_product_meta_lookup WHERE product_id = %d\", $id ), ARRAY_A );\n        if ( $row ) { $out[$row['product_id']] = $row['stock_quantity']; }\n    }\n    return $out;\n}\n"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		}
+	]
+}

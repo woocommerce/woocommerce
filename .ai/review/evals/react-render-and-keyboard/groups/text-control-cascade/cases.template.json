@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "cases": [
+    {
+      "id": "text-control-fixed-height-original-v1",
+      "base_commit": "587df95622697a3772e9386f6b97b755c5f02379",
+      "patch": {
+        "file": "groups/text-control-cascade/original.patch"
+      },
+      "expect": {
+        "outcome": "quiet"
+      }
+    },
+    {
+      "id": "text-control-collapsed-control-v1",
+      "base_commit": "587df95622697a3772e9386f6b97b755c5f02379",
+      "patch": {
+        "file": "groups/text-control-cascade/control.patch"
+      },
+      "expect": {
+        "outcome": "finding",
+        "locations": [
+          {
+            "file": "packages/js/components/src/text-control/style.scss",
+            "lines": [
+              46,
+              47
+            ],
+            "anchor": "min-height: 0;"
+          }
+        ]
+      }
+    }
+  ],
+  "groups": [
+    {
+      "id": "text-control-cascade",
+      "regression": "text-control-fixed-height-original-v1",
+      "controls": [
+        "text-control-collapsed-control-v1"
+      ]
+    }
+  ]
+}

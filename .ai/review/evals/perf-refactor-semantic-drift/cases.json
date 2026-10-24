@@ -1,0 +1,105 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G23A-v5",
+			"path": "plugins/woocommerce/includes/class-wc-eval-23.php",
+			"before": {
+				"file": "fixtures/G23A/before.php"
+			},
+			"after": {
+				"file": "fixtures/G23A/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "first"
+			}
+		},
+		{
+			"id": "G23B-v3",
+			"path": "plugins/woocommerce/includes/class-wc-eval-23.php",
+			"before": {
+				"file": "fixtures/G23B/before.php"
+			},
+			"after": {
+				"file": "fixtures/G23B/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "visibility"
+			}
+		},
+		{
+			"id": "G23C-v3",
+			"path": "plugins/woocommerce/includes/class-wc-eval-23.php",
+			"before": {
+				"file": "fixtures/G23C/before.php"
+			},
+			"after": {
+				"file": "fixtures/G23C/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G23D-v3",
+			"path": "plugins/woocommerce/includes/class-wc-eval-23.php",
+			"before": {
+				"file": "fixtures/G23D/before.php"
+			},
+			"after": {
+				"file": "fixtures/G23D/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G23A-v6",
+			"path": "plugins/woocommerce/includes/class-wc-eval-23.php",
+			"before": {
+				"code": "<?php\n/* Variation children are ordered. Caller has already primed their posts. */\nfunction wc_first_buyable_child( $parent ) {\n    foreach ( $parent->get_children() as $id ) {\n        $child = wc_get_product( $id );\n        if ( $child && $child->is_purchasable() && $child->is_in_stock() ) { return $id; }\n    }\n    return 0;\n}\n"
+			},
+			"after": {
+				"code": "<?php\n/* Variation children are ordered. Caller has already primed their posts. */\nfunction wc_first_buyable_child( $parent ) {\n    foreach ( array_slice( $parent->get_children(), 0, 1 ) as $id ) {\n        $child = wc_get_product( $id );\n        if ( $child && $child->is_purchasable() && $child->is_in_stock() ) { return $id; }\n    }\n    return 0;\n}\n"
+			},
+			"expect": {
+				"outcome": "finding",
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-eval-23.php",
+						"lines": [
+							4,
+							4
+						],
+						"anchor": "    foreach ( array_slice( $parent->get_children(), 0, 1 ) as $id ) {"
+					}
+				]
+			}
+		},
+		{
+			"id": "G23B-v4",
+			"path": "plugins/woocommerce/includes/class-wc-eval-23.php",
+			"before": {
+				"code": "<?php\n/* Catalog visibility extension callbacks are registered before rendering. */\nfunction wc_first_visible_id( $ids ) {\n    $visible = apply_filters( 'woocommerce_visible_candidate_ids', $ids );\n    return array_slice( $visible, 0, 1 );\n}\n\nadd_filter( 'woocommerce_visible_candidate_ids', static function( $ids ) { return array_values( array_diff( $ids, array( 10 ) ) ); } );\n"
+			},
+			"after": {
+				"code": "<?php\n/* Catalog visibility extension callbacks are registered before rendering. */\nfunction wc_first_visible_id( $ids ) { $ids = array_slice( $ids, 0, 1 ); return array_slice( apply_filters( 'woocommerce_visible_candidate_ids', $ids ), 0, 1 ); }\n\nadd_filter( 'woocommerce_visible_candidate_ids', static function( $ids ) { return array_values( array_diff( $ids, array( 10 ) ) ); } );\n"
+			},
+			"expect": {
+				"outcome": "finding",
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-eval-23.php",
+						"lines": [
+							3,
+							3
+						],
+						"anchor": "function wc_first_visible_id( $ids ) { $ids = array_slice( $ids, 0, 1 ); return array_slice( apply_filters( 'woocommerce_visible_candidate_ids', $ids ), 0, 1 ); }"
+					}
+				]
+			}
+		}
+	]
+}

@@ -1,0 +1,72 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G06A-v3",
+			"path": "plugins/woocommerce/includes/class-wc-action-scheduler-lifecycle.php",
+			"before": {
+				"file": "fixtures/G06A/before.php"
+			},
+			"after": {
+				"file": "fixtures/G06A/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "unique"
+			}
+		},
+		{
+			"id": "G06B-v3",
+			"path": "plugins/woocommerce/includes/class-wc-action-scheduler-lifecycle.php",
+			"before": {
+				"file": "fixtures/G06B/before.php"
+			},
+			"after": {
+				"file": "fixtures/G06B/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"contains": "recurring"
+			}
+		},
+		{
+			"id": "G06C-v4",
+			"path": "plugins/woocommerce/includes/class-wc-action-scheduler-lifecycle.php",
+			"before": {
+				"file": "fixtures/G06C/before.php"
+			},
+			"after": {
+				"file": "fixtures/G06C/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G06D-v4",
+			"path": "plugins/woocommerce/includes/class-wc-action-scheduler-lifecycle.php",
+			"before": {
+				"file": "fixtures/G06D/before.php"
+			},
+			"after": {
+				"file": "fixtures/G06D/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G06C-v5",
+			"path": "plugins/woocommerce/includes/class-wc-action-scheduler-lifecycle.php",
+			"before": {
+				"code": "<?php\n// Runtime dependency: Action Scheduler 4.1.0 (WooCommerce composer.lock).\n/* Queue registration is loaded in web and runner bootstrap after action_scheduler_init. IDs address immutable saved export snapshots; repeated requests for the same ID request the same output. */\nfunction wc_queue_one_export( $id ) {\n    /* Action Scheduler 4.1.0, DBStore::build_where_clause_for_insert, ref 40a3df93:\n     * WHERE status IN ( $pending_status_placeholders ) AND hook = %s AND `group_id` = %d AND args = %s\n     * The placeholders receive pending/running statuses, hook, group ID, and JSON-encoded arguments. */\n    return as_enqueue_async_action( 'woocommerce_export_one', array( $id ), 'wc-export', false );\n}\nfunction wc_run_one_export( $id ) { wc_write_export_file( $id ); }\nadd_action( 'woocommerce_export_one', 'wc_run_one_export' );\n"
+			},
+			"after": {
+				"code": "<?php\n// Runtime dependency: Action Scheduler 4.1.0 (WooCommerce composer.lock).\n/* Queue registration is loaded in web and runner bootstrap after action_scheduler_init. IDs address immutable saved export snapshots; repeated requests for the same ID request the same output. */\nfunction wc_queue_one_export( $id ) {\n    /* Action Scheduler 4.1.0, DBStore::build_where_clause_for_insert, ref 40a3df93:\n     * WHERE status IN ( $pending_status_placeholders ) AND hook = %s AND `group_id` = %d AND args = %s\n     * The placeholders receive pending/running statuses, hook, group ID, and JSON-encoded arguments. */\n    return as_enqueue_async_action( 'woocommerce_export_one', array( $id ), 'wc-export', true );\n}\nfunction wc_run_one_export( $id ) { wc_write_export_file( $id ); }\nadd_action( 'woocommerce_export_one', 'wc_run_one_export' );\n"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		}
+	]
+}
