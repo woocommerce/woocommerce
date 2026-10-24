@@ -41,7 +41,7 @@ export async function addOneOrMoreProductToCart(
 		`product/${ productName.replace( / /gi, '-' ).toLowerCase() }`
 	);
 	await page
-		.getByLabel( 'Product quantity' )
+		.getByLabel( `${ productName } quantity`, { exact: true } )
 		.fill( quantityCount.toString() );
 	await page.locator( 'button[name="add-to-cart"]' ).click();
 }
