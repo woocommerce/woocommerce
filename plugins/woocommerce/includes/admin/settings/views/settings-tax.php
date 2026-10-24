@@ -34,6 +34,7 @@ $settings = array(
 	array(
 		'title'    => __( 'Calculate tax based on', 'woocommerce' ),
 		'id'       => 'woocommerce_tax_based_on',
+		'desc'     => __( '"Customer shipping address" uses the billing address when nothing in the cart needs shipping, such as downloads or services.', 'woocommerce' ),
 		'desc_tip' => __( 'This option determines which address is used to calculate tax.', 'woocommerce' ),
 		'default'  => TaxBasedOn::SHIPPING,
 		'type'     => 'select',
