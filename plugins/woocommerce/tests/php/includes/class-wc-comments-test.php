@@ -157,6 +157,7 @@ class WC_Comments_Tests extends \WC_Unit_Test_Case {
 	 * @testWith ["action_log"]
 	 *           ["note"]
 	 *           ["order_note"]
+	 *           ["reaction"]
 	 *           ["webhook_delivery"]
 	 *
 	 * @param string $comment_type Comment type that should be excluded from the counts.
@@ -192,9 +193,55 @@ class WC_Comments_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should not change cached comment counts when an excluded comment changes status.
+	 *
+	 * @testWith ["note"]
+	 *           ["reaction"]
+	 *
+	 * @param string $comment_type Comment type that should be excluded from the counts.
+	 */
+	public function test_excluded_comment_types_do_not_change_the_count_cache_on_status_change( string $comment_type ): void {
+		$post_id = wp_insert_post(
+			array(
+				'post_title'  => 'A post that is not a product',
+				'post_status' => 'publish',
+				'post_type'   => 'post',
+			)
+		);
+
+		$comment_id = wp_insert_comment(
+			array(
+				'comment_post_ID'  => $post_id,
+				'comment_type'     => $comment_type,
+				'comment_approved' => '1',
+			)
+		);
+
+		wp_cache_set( 'wc_count_comments_approved', 5, 'wc_comment_counts' );
+		wp_cache_set( 'wc_count_comments_unapproved', 0, 'wc_comment_counts' );
+
+		wp_set_comment_status( $comment_id, 'hold' );
+
+		$this->assertSame(
+			5,
+			wp_cache_get( 'wc_count_comments_approved', 'wc_comment_counts' ),
+			"Changing a '{$comment_type}' comment's status should leave the cached approved count untouched"
+		);
+		$this->assertSame(
+			0,
+			wp_cache_get( 'wc_count_comments_unapproved', 'wc_comment_counts' ),
+			"Changing a '{$comment_type}' comment's status should leave the cached unapproved count untouched"
+		);
+
+		// Clean up.
+		wp_delete_comment( $comment_id, true );
+		wp_delete_post( $post_id, true );
+	}
+
+	/**
 	 * @testdox Should still increment the cached comment count for a regular comment.
 	 *
-	 * Guards the test above: without this, the exclusion assertions could pass for the wrong reason.
+	 * Guards the insertion exclusion test by ensuring regular comments are still counted.
 	 */
 	public function test_regular_comments_still_increment_the_count_cache(): void {
 		$post_id = wp_insert_post(
@@ -219,6 +266,49 @@ class WC_Comments_Tests extends \WC_Unit_Test_Case {
 			1,
 			wp_cache_get( 'wc_count_comments_unapproved', 'wc_comment_counts' ),
 			'A regular comment should increment the cached unapproved count'
+		);
+
+		// Clean up.
+		wp_delete_comment( $comment_id, true );
+		wp_delete_post( $post_id, true );
+	}
+
+	/**
+	 * @testdox Should still update the cached comment counts when a regular comment changes status.
+	 *
+	 * Guards the status change exclusion test by ensuring regular comments still move between counts.
+	 */
+	public function test_regular_comments_still_update_the_count_cache_on_status_change(): void {
+		$post_id = wp_insert_post(
+			array(
+				'post_title'  => 'A post that is not a product',
+				'post_status' => 'publish',
+				'post_type'   => 'post',
+			)
+		);
+
+		$comment_id = wp_insert_comment(
+			array(
+				'comment_post_ID'  => $post_id,
+				'comment_type'     => 'comment',
+				'comment_approved' => '1',
+			)
+		);
+
+		wp_cache_set( 'wc_count_comments_approved', 5, 'wc_comment_counts' );
+		wp_cache_set( 'wc_count_comments_unapproved', 0, 'wc_comment_counts' );
+
+		wp_set_comment_status( $comment_id, 'hold' );
+
+		$this->assertSame(
+			4,
+			wp_cache_get( 'wc_count_comments_approved', 'wc_comment_counts' ),
+			'Holding a regular comment should decrement the cached approved count'
+		);
+		$this->assertSame(
+			1,
+			wp_cache_get( 'wc_count_comments_unapproved', 'wc_comment_counts' ),
+			'Holding a regular comment should increment the cached unapproved count'
 		);
 
 		// Clean up.
