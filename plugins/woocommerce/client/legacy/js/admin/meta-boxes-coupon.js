@@ -15,6 +15,13 @@ jQuery(function( $ ) {
 				.trigger( 'change' );
 
             this.insert_generate_coupon_code_button();
+
+			// Block saving a coupon without a code.
+			const codeField = document.querySelector( '.post-type-shop_coupon #title' );
+			if ( codeField ) {
+				codeField.required = true;
+			}
+
 			$( '.button.generate-coupon-code' ).on( 'click', this.generate_coupon_code );
 		},
 
