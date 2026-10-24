@@ -11,6 +11,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+use Automattic\WooCommerce\Internal\Utilities\SiteLocale;
+
 if ( class_exists( 'WC_Admin_Permalink_Settings', false ) ) {
 	return new WC_Admin_Permalink_Settings();
 }
@@ -71,7 +73,7 @@ class WC_Admin_Permalink_Settings {
 	 */
 	public function product_category_slug_input() {
 		?>
-		<input name="woocommerce_product_category_slug" type="text" class="regular-text code" value="<?php echo esc_attr( $this->permalinks['category_base'] ); ?>" placeholder="<?php echo esc_attr_x( 'product-category', 'slug', 'woocommerce' ); ?>" />
+		<input name="woocommerce_product_category_slug" type="text" class="regular-text code" value="<?php echo esc_attr( $this->permalinks['category_base'] ); ?>" placeholder="<?php echo esc_attr( SiteLocale::translate_slug( 'product-category' ) ); ?>" />
 		<?php
 	}
 
@@ -80,7 +82,7 @@ class WC_Admin_Permalink_Settings {
 	 */
 	public function product_tag_slug_input() {
 		?>
-		<input name="woocommerce_product_tag_slug" type="text" class="regular-text code" value="<?php echo esc_attr( $this->permalinks['tag_base'] ); ?>" placeholder="<?php echo esc_attr_x( 'product-tag', 'slug', 'woocommerce' ); ?>" />
+		<input name="woocommerce_product_tag_slug" type="text" class="regular-text code" value="<?php echo esc_attr( $this->permalinks['tag_base'] ); ?>" placeholder="<?php echo esc_attr( SiteLocale::translate_slug( 'product-tag' ) ); ?>" />
 		<?php
 	}
 
@@ -116,9 +118,9 @@ class WC_Admin_Permalink_Settings {
 	 * them separately -- which is what made every predefined structure revert to "Custom base".
 	 * See https://github.com/woocommerce/woocommerce/issues/29050.
 	 *
-	 * Must run inside a wc_switch_to_site_locale() window: the Default base is a translated slug,
-	 * and an administrator whose profile language differs from the site language would otherwise
-	 * store one translation and compare against another.
+	 * The Default base is a translated slug, resolved in the site locale directly so that neither
+	 * an administrator's profile language nor a `locale` filter can make the save path store one
+	 * translation while the comparison expects another.
 	 *
 	 * Sharing the rules is not the same as receiving identical input: the save path runs the
 	 * posted value through sanitize_text_field() first, which strips percent-encoded octets, so a
@@ -130,7 +132,7 @@ class WC_Admin_Permalink_Settings {
 	 * @return string The base as it is stored.
 	 */
 	private function get_stored_product_base( string $posted_base, ?string $posted_structure = null ): string {
-		$default_base = wc_sanitize_permalink( _x( 'product', 'slug', 'woocommerce' ) );
+		$default_base = wc_sanitize_permalink( SiteLocale::translate_slug( 'product' ) );
 
 		if ( 'custom' === $posted_base ) {
 			if ( null === $posted_structure ) {
@@ -158,14 +160,11 @@ class WC_Admin_Permalink_Settings {
 		/*
 		 * Resolve an empty base to the default one. A custom base that is blank, whitespace, or
 		 * nothing but hashes and slashes sanitizes down to empty, and an empty base does not
-		 * survive: wc_get_permalink_structure() drops it and refills the option from the request
-		 * locale, outside any locale window, persisting a slug the site locale never chose -- the
-		 * same divergence this resolver exists to prevent.
+		 * survive: wc_get_permalink_structure() drops it and refills the option with the default.
 		 *
-		 * This narrows that window rather than closing it. The default base is itself a translated
-		 * slug run through wc_sanitize_permalink(), so a translation or a gettext filter that
-		 * resolves it to something sanitizing away -- `/` untrailingslashits to nothing -- leaves
-		 * this assigning empty to empty.
+		 * The default base is itself a translated slug run through wc_sanitize_permalink(), so a
+		 * translation or a gettext filter that resolves it to something sanitizing away -- `/`
+		 * untrailingslashits to nothing -- leaves this assigning empty to empty.
 		 */
 		if ( '' === $base ) {
 			$base = $default_base;
@@ -181,6 +180,12 @@ class WC_Admin_Permalink_Settings {
 		 * the bare slug works everywhere. Converging on the bare form keeps Default checked after
 		 * that keystroke and never persists the broken shape.
 		 */
+		// A former Default base can now appear as Custom; posting it back must preserve its bare form.
+		$stored_base = (string) ( $this->permalinks['product_base'] ?? '' );
+		if ( 'custom' === $posted_base && '/' . $stored_base === $base ) {
+			return $stored_base;
+		}
+
 		return '/' . $default_base === $base ? $default_base : $base;
 	}
 
@@ -192,16 +197,9 @@ class WC_Admin_Permalink_Settings {
 		echo wp_kses_post( wpautop( sprintf( __( 'If you like, you may enter custom structures for your product URLs here. For example, using <code>shop</code> would make your product links like <code>%sshop/sample-product/</code>. This setting affects product URLs only, not things such as product categories.', 'woocommerce' ), esc_url( home_url( '/' ) ) ) ) );
 
 		/*
-		 * Resolve the Shop page and the translated slugs inside the same window settings_save()
-		 * opens, so the values compared below are the values a save would store.
-		 *
-		 * wc_get_page_id() is resolved here too because settings_save() resolves it inside its own
-		 * window, and the woocommerce_get_shop_page_id filter multilingual plugins attach to can
-		 * return a different page per locale.
-		 *
-		 * This holds only for a persisted product_base: wc_get_permalink_structure() initializes a
-		 * missing one in the request locale, outside any window, before this screen renders.
-		 * See https://github.com/woocommerce/woocommerce/issues/67507.
+		 * Resolve the Shop page inside the same window settings_save() opens, so the values
+		 * compared below are the values a save would store: the woocommerce_get_shop_page_id
+		 * filter multilingual plugins attach to can return a different page per locale.
 		 */
 		wc_switch_to_site_locale();
 		$shop_page_id = wc_get_page_id( 'shop' );
@@ -314,8 +312,8 @@ class WC_Admin_Permalink_Settings {
 			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Sanitized by wc_sanitize_permalink() inside the resolver.
 			$posted_structure = isset( $_POST['product_permalink_structure'] ) && is_string( $_POST['product_permalink_structure'] ) ? wp_unslash( $_POST['product_permalink_structure'] ) : null;
 
-			// Resolved inside the wc_switch_to_site_locale() window opened above, so the stored
-			// value is the same site-locale form settings() compares against.
+			// The resolver translates the Default base in the site locale, so the stored value is
+			// the same form settings() compares against.
 			$permalinks['product_base'] = $this->get_stored_product_base( $product_base, $posted_structure );
 
 			update_option( 'woocommerce_permalinks', $permalinks );
