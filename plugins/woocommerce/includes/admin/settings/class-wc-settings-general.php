@@ -376,7 +376,7 @@ class WC_Settings_General extends WC_Settings_Page {
 					'title'             => __( 'Number of decimals', 'woocommerce' ),
 					'desc'              => __( 'This sets the number of decimal points shown in displayed prices.', 'woocommerce' ),
 					'id'                => 'woocommerce_price_num_decimals',
-					'css'               => 'width:50px;',
+					'css'               => 'width:80px;',
 					'default'           => '2',
 					'desc_tip'          => true,
 					'type'              => 'number',
