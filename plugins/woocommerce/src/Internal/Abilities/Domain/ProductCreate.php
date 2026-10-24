@@ -29,11 +29,15 @@ class ProductCreate extends ActionableAbility {
 	public const ABILITY_NAME = 'woocommerce/product-create';
 
 	/**
-	 * Variations built in memory by change(), saved after their parent by save().
+	 * The variations that change() planned, saved after their parent by save().
 	 *
-	 * @var \WC_Product_Variation[]
+	 * @var array{save: \WC_Product_Variation[], delete: \WC_Product_Variation[], extensions: array<int, array>}
 	 */
-	private array $pending_variations = array();
+	private array $variations = array(
+		'save'       => array(),
+		'delete'     => array(),
+		'extensions' => array(),
+	);
 
 	/**
 	 * Get the ability registration arguments.
@@ -84,7 +88,11 @@ class ProductCreate extends ActionableAbility {
 	 * @return \WC_Product|\WP_Error
 	 */
 	public function load( array $input ) {
-		$this->pending_variations = array();
+		$this->variations = array(
+			'save'       => array(),
+			'delete'     => array(),
+			'extensions' => array(),
+		);
 
 		$product_type   = (string) ( $input['type'] ?? ProductType::SIMPLE );
 		$product_config = self::get_product_type_config( $product_type, true );
@@ -135,98 +143,22 @@ class ProductCreate extends ActionableAbility {
 						return $error;
 					}
 				}
-				self::publish_variation_by_default( $subject );
+				if ( ! $subject->get_status( 'edit' ) ) {
+					$subject->set_status( ProductStatus::PUBLISH );
+				}
 			}
 
 			if ( $subject instanceof \WC_Product_Variable ) {
-				$variations = $this->build_variations( $subject, is_array( $input['variations'] ?? null ) ? $input['variations'] : array() );
-				if ( is_wp_error( $variations ) ) {
-					return $variations;
+				$plan = self::plan_variations( $subject, is_array( $input['variations'] ?? null ) ? $input['variations'] : array() );
+				if ( is_wp_error( $plan ) ) {
+					return $plan;
 				}
-				$this->pending_variations = $variations;
+				$this->variations = $plan;
 			}
 
 			return null;
 		} catch ( \WC_Data_Exception $exception ) {
 			return self::get_product_data_exception_error( $exception );
-		}
-	}
-
-	/**
-	 * Build the variations of a variable product in memory. Each one must pick
-	 * one option of every attribute of the parent, and no two may pick the same
-	 * options or the same SKU. The database SKU check runs on each save and
-	 * does not see the other new variations, so the call checks them here.
-	 *
-	 * @param \WC_Product_Variable $parent_product Parent, with its attributes set and not saved.
-	 * @param array                $inputs Items of the `variations` input.
-	 * @return \WC_Product_Variation[]|\WP_Error
-	 * @throws \WC_Data_Exception When a variation setter rejects a value.
-	 */
-	private function build_variations( \WC_Product_Variable $parent_product, array $inputs ) {
-		$variation_config = self::get_product_type_config( ProductType::VARIATION );
-		$variations       = array();
-		$combinations     = array();
-		$skus             = array();
-
-		foreach ( array_values( $inputs ) as $index => $input ) {
-			$position  = $index + 1;
-			$variation = self::get_product_object_for_type( ProductType::VARIATION );
-			if ( is_wp_error( $variation ) ) {
-				return $variation;
-			}
-
-			$error = self::set_product_props_from_input( $variation, is_array( $input ) ? $input : array(), $variation_config );
-			if ( is_wp_error( $error ) ) {
-				return $error;
-			}
-
-			self::publish_variation_by_default( $variation );
-
-			$error = self::check_variation_attributes( $variation->get_attributes(), $parent_product, $position );
-			if ( is_wp_error( $error ) ) {
-				return $error;
-			}
-
-			$attributes = $variation->get_attributes();
-			ksort( $attributes );
-			$combination = wp_json_encode( $attributes );
-			if ( isset( $combinations[ $combination ] ) ) {
-				return new \WP_Error(
-					'woocommerce_product_variation_duplicate',
-					/* translators: %d: variation position. */
-					sprintf( __( 'Variation %d picks the same options as another variation.', 'woocommerce' ), $position ),
-					array( 'status' => 400 )
-				);
-			}
-			$combinations[ $combination ] = true;
-
-			$sku = $variation->get_sku( 'edit' );
-			if ( '' !== $sku && isset( $skus[ $sku ] ) ) {
-				return new \WP_Error(
-					'woocommerce_product_variation_sku_duplicate',
-					/* translators: %d: variation position. */
-					sprintf( __( 'Variation %d repeats the SKU of another variation.', 'woocommerce' ), $position ),
-					array( 'status' => 400 )
-				);
-			}
-			$skus[ $sku ] = true;
-
-			$variations[] = $variation;
-		}
-
-		return $variations;
-	}
-
-	/**
-	 * A new variation has no status until it is read back. WooCommerce saves it
-	 * as published, so the object says so too.
-	 *
-	 * @param \WC_Product_Variation $variation Variation.
-	 */
-	private static function publish_variation_by_default( \WC_Product_Variation $variation ): void {
-		if ( ! $variation->get_status( 'edit' ) ) {
-			$variation->set_status( ProductStatus::PUBLISH );
 		}
 	}
 
@@ -239,18 +171,11 @@ class ProductCreate extends ActionableAbility {
 	 * @return array<int, array{0: \WC_Product_Variation, 1: array}>
 	 */
 	public function pending_objects( $subject, array $input ): array {
-		$items   = array_values( is_array( $input['variations'] ?? null ) ? $input['variations'] : array() );
-		$objects = array();
-		foreach ( $this->pending_variations as $index => $variation ) {
-			$objects[] = array( $variation, $items[ $index ]['extensions'] ?? array() );
-		}
-		return $objects;
+		return array_map( null, $this->variations['save'], $this->variations['extensions'] );
 	}
 
 	/**
-	 * Save the product, then each of its variations with the new parent ID,
-	 * then sync the parent with its variations. A failed save returns an error,
-	 * and the transaction of the pipeline rolls back the earlier saves.
+	 * Save the product, then its variations.
 	 *
 	 * @param \WC_Product $subject Changed product.
 	 * @return null|\WP_Error
@@ -261,20 +186,8 @@ class ProductCreate extends ActionableAbility {
 			return $error;
 		}
 
-		foreach ( $this->pending_variations as $variation ) {
-			$variation->set_parent_id( $subject->get_id() );
-			$error = self::save_product( $variation, 'woocommerce_product_create_failed' );
-			if ( is_wp_error( $error ) ) {
-				return $error;
-			}
-		}
-
-		if ( ! empty( $this->pending_variations ) ) {
-			$children = $subject->get_data_store()->read_children( $subject, true );
-			$subject->set_children( $children['all'] );
-			$subject->set_visible_children( $children['visible'] );
-			\WC_Product_Variable::sync( $subject );
-			$subject->set_price( (string) get_post_meta( $subject->get_id(), '_price', true ) );
+		if ( $subject instanceof \WC_Product_Variable ) {
+			return self::save_variations( $subject, $this->variations, 'woocommerce_product_create_failed' );
 		}
 
 		self::sync_variation_parent( $subject );
