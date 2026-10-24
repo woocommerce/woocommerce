@@ -1410,6 +1410,136 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should fire woocommerce_ability_after_save once with every saved object, inside the transaction.
+	 */
+	public function test_after_save_fires_once_with_every_saved_object(): void {
+		$calls = array();
+		$this->add_test_action(
+			'woocommerce_ability_after_save',
+			static function ( array $saved, \WP_Ability $ability ) use ( &$calls ) {
+				$calls[] = array( $ability->get_name(), array_map( 'get_class', $saved ), array_map( static fn( \WC_Data $saved_object ) => $saved_object->get_id(), $saved ) );
+				$prices  = array();
+				foreach ( $saved as $object ) {
+					if ( $object instanceof \WC_Product_Variation ) {
+						$prices[] = (float) $object->get_regular_price();
+					}
+				}
+				if ( $prices && $saved[0] instanceof \WC_Product_Variable ) {
+					$saved[0]->update_meta_data( '_test_min_price', min( $prices ) );
+					$saved[0]->save();
+				}
+			},
+			10,
+			2
+		);
+
+		$created = $this->run_ability( 'woocommerce/product-create', $this->get_shirt_input() );
+
+		$this->assertCount( 1, $calls );
+		$this->assertSame( 'woocommerce/product-create', $calls[0][0] );
+		$this->assertSame( array( 'WC_Product_Variable', 'WC_Product_Variation', 'WC_Product_Variation' ), $calls[0][1] );
+		$this->assertSame( array_merge( array( $created['product']['id'] ), $created['product']['variation_ids'] ), $calls[0][2] );
+		$this->assertSame( '10', wc_get_product( $created['product']['id'] )->get_meta( '_test_min_price' ) );
+	}
+
+	/**
+	 * @testdox Should roll back every save of the call when an after-save listener refuses.
+	 */
+	public function test_a_refusal_in_after_save_rolls_back_the_call(): void {
+		$this->add_test_action(
+			'woocommerce_ability_after_save',
+			static function ( array $saved ) {
+				if ( $saved[0] instanceof \WC_Product_Variable ) {
+					throw new \WC_Data_Exception( 'test_range_refused', 'The range is not allowed.', 409 );
+				}
+			}
+		);
+
+		$response = $this->run_ability_response( 'woocommerce/product-create', $this->get_shirt_input() );
+
+		$this->assertSame( 409, $response->get_status() );
+		$this->assertSame( 'test_range_refused', $response->get_data()['code'] );
+		$this->assertSame( 'The range is not allowed.', $response->get_data()['message'] );
+		$this->assertSame( 0, wc_get_product_id_by_sku( 'shirt-s' ) );
+		$this->assertSame(
+			array(),
+			get_posts(
+				array(
+					'post_type'   => array( 'product', 'product_variation' ),
+					'post_status' => 'any',
+					'fields'      => 'ids',
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox Should not fire woocommerce_ability_after_save with the feature off.
+	 */
+	public function test_after_save_does_not_fire_with_the_feature_off(): void {
+		$this->set_feature( false );
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+		$fired   = 0;
+		$this->add_test_action(
+			'woocommerce_ability_after_save',
+			static function () use ( &$fired ) {
+				++$fired;
+			}
+		);
+
+		$output = $this->run_ability(
+			'woocommerce/product-update',
+			array(
+				'id'   => $product->get_id(),
+				'name' => 'Pencil',
+			)
+		);
+
+		$this->assertSame( 'Pencil', $output['product']['name'] );
+		$this->assertSame( 0, $fired );
+	}
+
+	/**
+	 * The input of a variable shirt with two variations.
+	 *
+	 * @return array
+	 */
+	private function get_shirt_input(): array {
+		return array(
+			'name'       => 'Shirt',
+			'type'       => 'variable',
+			'attributes' => array(
+				array(
+					'name'    => 'Size',
+					'options' => array( 'S', 'M' ),
+				),
+			),
+			'variations' => array(
+				array(
+					'attributes'    => array(
+						array(
+							'name'   => 'Size',
+							'option' => 'S',
+						),
+					),
+					'sku'           => 'shirt-s',
+					'regular_price' => '10.00',
+				),
+				array(
+					'attributes'    => array(
+						array(
+							'name'   => 'Size',
+							'option' => 'M',
+						),
+					),
+					'sku'           => 'shirt-m',
+					'regular_price' => '12.00',
+				),
+			),
+		);
+	}
+
+	/**
 	 * @testdox Should write extension fields to each variation and run validators on them before any save.
 	 */
 	public function test_variations_get_extension_fields_and_validators(): void {
@@ -2095,9 +2225,10 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	 * @param string   $hook     Action name.
 	 * @param callable $callback Callback.
 	 * @param int      $priority Priority.
+	 * @param int      $accepted_args Number of arguments the callback takes.
 	 */
-	private function add_test_action( string $hook, callable $callback, int $priority = 10 ): void {
-		add_action( $hook, $callback, $priority );
+	private function add_test_action( string $hook, callable $callback, int $priority = 10, int $accepted_args = 1 ): void {
+		add_action( $hook, $callback, $priority, $accepted_args );
 		$this->test_actions[] = array( $hook, $callback, $priority );
 	}
 

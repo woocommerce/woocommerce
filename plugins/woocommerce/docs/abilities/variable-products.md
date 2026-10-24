@@ -54,7 +54,8 @@ An item with an `id` changes that variation. An item without one creates a varia
 2. An ability that saves more than one object returns the extra objects from `pending_objects()`. The pipeline runs the extension fields and the validators on each of them before the first save. For a variable product these are the variations the input names.
 3. `save()` runs inside `wc_transaction_query( 'start' )`. An error or an exception from `save()` rolls the transaction back, and the pipeline drops the object caches of every touched object, because the saves filled them with rows the rollback removed. Success commits.
 4. `wc_transaction_query()` counts its depth. The first start opens a transaction, a start inside it sets a savepoint, and each commit or rollback closes its own level. An ability inside checkout, or checkout inside an ability, rolls back only its own part.
-5. For a variable product, `save()` saves the parent, sets the parent id on each new variation and saves it, deletes the variations marked for deletion, then syncs the parent's price range and stock status from its children. The sync saves the parent a second time, the same way the product editor does.
+5. After the last save, still inside the transaction, the pipeline fires `woocommerce_ability_after_save` with every saved object. Extensions write there what the saved objects imply elsewhere. A refusal rolls the call back.
+6. For a variable product, `save()` saves the parent, sets the parent id on each new variation and saves it, deletes the variations marked for deletion, then syncs the parent's price range and stock status from its children. The sync saves the parent a second time, the same way the product editor does.
 
 The permissions of a variation are checked on its parent. A published variation of a draft parent is as hidden as the parent, and whoever may edit the parent may edit its variations.
 
@@ -70,7 +71,7 @@ Wholesale Suite (`woocommerce-wholesale-prices` on WordPress.org, 20,000 install
 
 - **Addressing variations one by one is the model they chose.** It matches `type: "variation"` in `product-update`.
 - **Bulk writes need one call.** A comment in their `sync_variable_parent()` reports 10,000 product hydrations for pricing 100 variations one call at a time, because every write rebuilds the parent, while the editor pays once per submit. That is why the parent update takes `variations[]`.
-- **Some writes touch two objects.** Their variation write also rewrites the parent's derived meta. An `update_callback` changes one object in memory, so that second write belongs in a save hook of the object, such as `woocommerce_after_product_object_save`. The hook runs inside the transaction, so it rolls back with the save. The `register_field()` docblock says so.
+- **Some writes touch two objects.** Their variation write also rewrites the parent's derived meta. An `update_callback` changes one object in memory, so the second write needs a step of its own: the `woocommerce_ability_after_save` action. It fires once per call, after every object of the call is saved and before the transaction commits, with every saved object and the ability. A listener that throws refuses the call, and every save rolls back. For a bulk update of fifty variations the listener runs once, so the parent syncs one time, which is the editor's cost model. The `register_field()` docblock points to it.
 
 ## Open items
 

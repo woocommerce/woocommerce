@@ -149,10 +149,9 @@ class ExtensibleAbilities {
 	 *                                     4. It writes one object: the one it receives. Data that a
 	 *                                        write must keep on another object, such as a price range
 	 *                                        that a variable parent derives from its variations, is
-	 *                                        written from a save hook of the object, such as
-	 *                                        `woocommerce_after_product_object_save`. The hook runs
-	 *                                        inside the transaction of the ability, so that write is
-	 *                                        rolled back with the save when a later step fails.
+	 *                                        written in the `woocommerce_ability_after_save` action,
+	 *                                        which fires once per call after every object is saved
+	 *                                        and inside the transaction of the ability.
 	 * }
 	 */
 	public static function register_field( array $args ): void {
