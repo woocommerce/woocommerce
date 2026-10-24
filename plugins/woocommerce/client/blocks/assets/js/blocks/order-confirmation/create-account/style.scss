@@ -43,6 +43,14 @@
 				margin-bottom: $gap;
 			}
 		}
+		// Only some themes register the checkmark list style, so style it here.
+		ul.is-style-checkmark-list {
+			list-style-type: "\2713";
+
+			li {
+				padding-inline-start: 1ch;
+			}
+		}
 		* {
 			color: inherit;
 		}
