@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\ActionableAbility;
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\DomainAbilityHelpers;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\ProductAbilityTrait;
@@ -26,6 +27,17 @@ class ProductCreate extends ActionableAbility {
 	 * Ability name.
 	 */
 	public const ABILITY_NAME = 'woocommerce/product-create';
+
+	/**
+	 * The variations that change() planned, saved after their parent by save().
+	 *
+	 * @var array{save: \WC_Product_Variation[], delete: \WC_Product_Variation[], extensions: array<int, array>}
+	 */
+	private array $variations = array(
+		'save'       => array(),
+		'delete'     => array(),
+		'extensions' => array(),
+	);
 
 	/**
 	 * Get the ability registration arguments.
@@ -76,8 +88,14 @@ class ProductCreate extends ActionableAbility {
 	 * @return \WC_Product|\WP_Error
 	 */
 	public function load( array $input ) {
+		$this->variations = array(
+			'save'       => array(),
+			'delete'     => array(),
+			'extensions' => array(),
+		);
+
 		$product_type   = (string) ( $input['type'] ?? ProductType::SIMPLE );
-		$product_config = self::get_product_type_config( $product_type );
+		$product_config = self::get_product_type_config( $product_type, true );
 
 		if ( is_wp_error( $product_config ) ) {
 			return $product_config;
@@ -87,14 +105,16 @@ class ProductCreate extends ActionableAbility {
 	}
 
 	/**
-	 * Set the product properties in memory.
+	 * Set the product properties in memory. A variable product also gets its
+	 * variations built in memory, and a variation must belong to a saved
+	 * variable product.
 	 *
 	 * @param \WC_Product $subject Product.
 	 * @param array       $input   Ability input.
 	 * @return null|\WP_Error
 	 */
 	public function change( $subject, array $input ) {
-		$product_config = self::get_product_config_for_product( $subject );
+		$product_config = self::get_product_config_for_product( $subject, true );
 
 		if ( is_wp_error( $product_config ) ) {
 			return $product_config;
@@ -103,20 +123,69 @@ class ProductCreate extends ActionableAbility {
 		try {
 			self::apply_product_type_config( $subject, $product_config );
 
-			return self::set_product_props_from_input( $subject, $input, $product_config );
+			$error = self::set_product_props_from_input( $subject, $input, $product_config );
+			if ( is_wp_error( $error ) ) {
+				return $error;
+			}
+
+			if ( $subject instanceof \WC_Product_Variation ) {
+				if ( ! wc_get_product( $subject->get_parent_id() ) instanceof \WC_Product_Variable ) {
+					return new \WP_Error(
+						'woocommerce_product_parent_invalid',
+						__( 'The parent must be a variable product.', 'woocommerce' ),
+						array( 'status' => 400 )
+					);
+				}
+				if ( ! $subject->get_status( 'edit' ) ) {
+					$subject->set_status( ProductStatus::PUBLISH );
+				}
+			}
+
+			if ( $subject instanceof \WC_Product_Variable ) {
+				$plan = self::plan_variations( $subject, is_array( $input['variations'] ?? null ) ? $input['variations'] : array() );
+				if ( is_wp_error( $plan ) ) {
+					return $plan;
+				}
+				$this->variations = $plan;
+			}
+
+			return null;
 		} catch ( \WC_Data_Exception $exception ) {
 			return self::get_product_data_exception_error( $exception );
 		}
 	}
 
 	/**
-	 * Save the product.
+	 * The variations of a variable product, each with the `extensions` input of
+	 * its `variations` item.
+	 *
+	 * @param \WC_Product $subject Changed product.
+	 * @param array       $input   Ability input.
+	 * @return array<int, array{0: \WC_Product_Variation, 1: array}>
+	 */
+	public function pending_objects( $subject, array $input ): array {
+		return array_map( null, $this->variations['save'], $this->variations['extensions'] );
+	}
+
+	/**
+	 * Save the product, then its variations.
 	 *
 	 * @param \WC_Product $subject Changed product.
 	 * @return null|\WP_Error
 	 */
 	public function save( $subject ) {
-		return self::save_product( $subject, 'woocommerce_product_create_failed' );
+		$error = self::save_product( $subject, 'woocommerce_product_create_failed' );
+		if ( is_wp_error( $error ) ) {
+			return $error;
+		}
+
+		if ( $subject instanceof \WC_Product_Variable ) {
+			return self::save_variations( $subject, $this->variations, 'woocommerce_product_create_failed' );
+		}
+
+		self::sync_variation_parent( $subject );
+
+		return null;
 	}
 
 	/**

@@ -142,6 +142,12 @@ class ExtensibleAbilities {
 	 *                                        or make HTTP requests.
 	 *                                     2. It receives the value already cast to the field schema.
 	 *                                     3. A null value deletes the value of the field.
+	 *                                     4. It writes one object: the one it receives. Data that a
+	 *                                        write must keep on another object, such as a price range
+	 *                                        that a variable parent derives from its variations, is
+	 *                                        written in the `woocommerce_ability_after_save` action,
+	 *                                        which fires once per call after every object is saved
+	 *                                        and inside the transaction of the ability.
 	 * }
 	 */
 	public static function register_field( array $args ): void {
@@ -615,6 +621,55 @@ class ExtensibleAbilities {
 		}
 		$schema['properties']['extensions'] = $extensions;
 		return $schema;
+	}
+
+	/**
+	 * The schema of the `extensions` input of a resource. It lists the fields
+	 * that have an update_callback, and allows null for each one, because null
+	 * deletes the value. ActionableAbility adds it to the input schema of every
+	 * ability. An ability that writes other objects of the resource in the same
+	 * call, such as the variations of a product, adds it to their input too.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param string $resource_name Resource.
+	 * @return array<string, mixed>
+	 */
+	public static function get_input_schema( string $resource_name ): array {
+		$extensions = array(
+			'type'                 => 'object',
+			'description'          => __( 'Values to write to the fields that extensions add, keyed by extension namespace, then field. A null value deletes the value.', 'woocommerce' ),
+			'additionalProperties' => false,
+		);
+		foreach ( self::get_fields( $resource_name ) as $namespace => $fields ) {
+			$writable = array_filter(
+				$fields,
+				static function ( array $args ): bool {
+					return isset( $args['update_callback'] );
+				}
+			);
+			if ( empty( $writable ) ) {
+				continue;
+			}
+			$extensions['properties'][ $namespace ] = array(
+				'type'                 => 'object',
+				'properties'           => array_map(
+					static function ( array $args ): array {
+						$field_schema = $args['schema'];
+						if ( isset( $field_schema['type'] ) ) {
+							$field_schema['type'] = array_values( array_unique( array_merge( (array) $field_schema['type'], array( 'null' ) ) ) );
+						}
+						if ( isset( $field_schema['enum'] ) && ! in_array( null, $field_schema['enum'], true ) ) {
+							$field_schema['enum'][] = null;
+						}
+						return $field_schema;
+					},
+					$writable
+				),
+				'additionalProperties' => false,
+			);
+		}
+		return $extensions;
 	}
 
 	/**

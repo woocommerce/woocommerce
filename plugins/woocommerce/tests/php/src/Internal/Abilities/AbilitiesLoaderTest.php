@@ -325,9 +325,9 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$create_schema = wp_get_ability( 'woocommerce/product-create' )->get_input_schema();
 		$update_schema = wp_get_ability( 'woocommerce/product-update' )->get_input_schema();
 
-		$expected_types = array( 'simple', 'grouped', 'external' );
+		$expected_types = array( 'simple', 'grouped', 'external', 'variable', 'variation' );
 
-		$this->assertSame( array( 'simple', 'grouped', 'external', 'variable' ), $query_schema['properties']['type']['enum'] ?? array() );
+		$this->assertSame( $expected_types, $query_schema['properties']['type']['enum'] ?? array() );
 		$this->assertSame( $expected_types, $this->get_product_types_from_schema_branches( $create_schema ) );
 		$this->assertSame( $expected_types, $this->get_product_types_from_schema_branches( $update_schema ) );
 		$this->assertSame( 'simple', $this->get_product_type_schema_branch( $create_schema, 'simple' )['properties']['type']['default'] ?? null );
@@ -1716,6 +1716,473 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should create a variable product with its variations in one call and sync the parent.
+	 */
+	public function test_product_create_builds_a_variable_product_with_its_variations(): void {
+		$created = wp_get_ability( 'woocommerce/product-create' )->execute( $this->get_shirt_input() );
+
+		$this->assertNotWPError( $created );
+		$this->created_product_ids[] = $created['product']['id'];
+
+		$parent = wc_get_product( $created['product']['id'] );
+		$this->assertInstanceOf( \WC_Product_Variable::class, $parent );
+		$this->assertSame( 'variable', $created['product']['type'] );
+		$this->assertCount( 2, $created['product']['variation_ids'] );
+		$this->assertSame( $parent->get_children(), $created['product']['variation_ids'] );
+		$this->assertSame(
+			array(
+				array(
+					'name'    => 'Size',
+					'options' => array( 'S', 'M' ),
+					'visible' => true,
+				),
+			),
+			$created['product']['attributes']
+		);
+		$this->assertSame( '10.00', $created['product']['price'] );
+
+		$small = wc_get_product( $created['product']['variation_ids'][0] );
+		$this->assertInstanceOf( \WC_Product_Variation::class, $small );
+		$this->assertSame( $parent->get_id(), $small->get_parent_id() );
+		$this->assertSame( 'shirt-s', $small->get_sku() );
+		$this->assertSame( array( 'size' => 'S' ), $small->get_attributes() );
+		$this->assertSame( '10.00', $small->get_regular_price() );
+
+		$medium = wc_get_product( $created['product']['variation_ids'][1] );
+		$this->assertTrue( $medium->get_manage_stock() );
+		$this->assertSame( 3, $medium->get_stock_quantity() );
+	}
+
+	/**
+	 * @testdox Should leave no row behind when a later variation fails to save.
+	 */
+	public function test_product_create_rolls_back_every_save_when_a_variation_fails(): void {
+		global $wpdb;
+
+		$queries = array();
+		$log     = static function ( $query ) use ( &$queries ) {
+			$queries[] = $query;
+			return $query;
+		};
+		$fail    = static function ( $product ) {
+			if ( $product instanceof \WC_Product_Variation && 'shirt-m' === $product->get_sku( 'edit' ) ) {
+				throw new \RuntimeException( 'Disk full.' );
+			}
+		};
+		add_filter( 'query', $log );
+		add_action( 'woocommerce_before_product_object_save', $fail );
+		try {
+			$result = wp_get_ability( 'woocommerce/product-create' )->execute_change( $this->get_shirt_input() );
+		} finally {
+			remove_filter( 'query', $log );
+			remove_action( 'woocommerce_before_product_object_save', $fail );
+		}
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_product_create_failed', $result->get_error_code() );
+		$this->assertContains( 'SAVEPOINT wc_1', $queries );
+		$this->assertContains( 'ROLLBACK TO SAVEPOINT wc_1', $queries );
+		$this->assertNotContains( 'RELEASE SAVEPOINT wc_1', $queries );
+		$this->assertSame(
+			'0',
+			$wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type IN ( 'product', 'product_variation' ) AND post_title LIKE 'Shirt%'" )
+		);
+		$this->assertSame( 0, wc_get_product_id_by_sku( 'shirt-s' ) );
+	}
+
+	/**
+	 * @testdox Should refuse variations that do not match the attributes of the parent, and save nothing.
+	 */
+	public function test_product_create_refuses_variations_that_do_not_match_the_attributes(): void {
+		$ability = wp_get_ability( 'woocommerce/product-create' );
+		$input   = $this->get_shirt_input();
+
+		$input['variations'][1]['attributes'][0]['option'] = 'S';
+		$duplicate = $ability->execute_change( $input );
+
+		$input['variations'][1]['attributes'][0]['option'] = 'XL';
+		$unknown_option                                    = $ability->execute_change( $input );
+
+		$input['variations'][1]['attributes'] = array();
+		$missing                              = $ability->execute_change( $input );
+
+		$input['variations'][1]['attributes'] = array(
+			array(
+				'name'   => 'Size',
+				'option' => 'M',
+			),
+		);
+		$input['variations'][1]['sku']        = 'shirt-s';
+		$same_sku                             = $ability->execute_change( $input );
+
+		$this->assertWPError( $duplicate );
+		$this->assertSame( 'woocommerce_product_variation_duplicate', $duplicate->get_error_code() );
+		$this->assertWPError( $unknown_option );
+		$this->assertSame( 'woocommerce_product_variation_attributes_invalid', $unknown_option->get_error_code() );
+		$this->assertStringContainsString( 'Variation 2', $unknown_option->get_error_message() );
+		$this->assertWPError( $missing );
+		$this->assertSame( 'woocommerce_product_variation_attributes_invalid', $missing->get_error_code() );
+		$this->assertWPError( $same_sku );
+		$this->assertSame( 'woocommerce_product_variation_sku_duplicate', $same_sku->get_error_code() );
+		$this->assertSame( 0, wc_get_product_id_by_sku( 'shirt-s' ) );
+	}
+
+	/**
+	 * @testdox Should treat a variation as a product in update, create, query and delete.
+	 */
+	public function test_variations_are_products_in_the_other_abilities(): void {
+		$created = wp_get_ability( 'woocommerce/product-create' )->execute( $this->get_shirt_input() );
+		$this->assertNotWPError( $created );
+		$this->created_product_ids[] = $created['product']['id'];
+		$parent_id                   = $created['product']['id'];
+		$small_id                    = $created['product']['variation_ids'][0];
+
+		$updated = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'            => $small_id,
+				'type'          => 'variation',
+				'regular_price' => '8.00',
+			)
+		);
+		$this->assertNotWPError( $updated );
+		$this->assertSame( 'variation', $updated['product']['type'] );
+		$this->assertSame( $parent_id, $updated['product']['parent_id'] );
+		$this->assertSame( '8.00', $updated['product']['regular_price'] );
+		$this->assertSame(
+			array(
+				array(
+					'name'   => 'Size',
+					'option' => 'S',
+				),
+			),
+			$updated['product']['attributes']
+		);
+		$this->assertSame( '8.00', wc_get_product( $parent_id )->get_price() );
+
+		$wrong_option = wp_get_ability( 'woocommerce/product-update' )->execute_change(
+			array(
+				'id'         => $small_id,
+				'type'       => 'variation',
+				'attributes' => array(
+					array(
+						'name'   => 'Size',
+						'option' => 'XL',
+					),
+				),
+			)
+		);
+		$this->assertWPError( $wrong_option );
+		$this->assertSame( 'woocommerce_product_variation_attributes_invalid', $wrong_option->get_error_code() );
+
+		$resized = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'         => $parent_id,
+				'type'       => 'variable',
+				'attributes' => array(
+					array(
+						'name'    => 'Size',
+						'options' => array( 'S', 'M', 'L' ),
+					),
+				),
+			)
+		);
+		$this->assertNotWPError( $resized );
+		$large = wp_get_ability( 'woocommerce/product-create' )->execute(
+			array(
+				'type'          => 'variation',
+				'parent_id'     => $parent_id,
+				'attributes'    => array(
+					array(
+						'name'   => 'Size',
+						'option' => 'L',
+					),
+				),
+				'regular_price' => '15.00',
+			)
+		);
+		$this->assertNotWPError( $large );
+		$this->assertSame( $parent_id, $large['product']['parent_id'] );
+		$this->assertContains( $large['product']['id'], wc_get_product( $parent_id )->get_children() );
+
+		$orphan = wp_get_ability( 'woocommerce/product-create' )->execute_change(
+			array(
+				'type'       => 'variation',
+				'parent_id'  => $small_id,
+				'attributes' => array(
+					array(
+						'name'   => 'Size',
+						'option' => 'L',
+					),
+				),
+			)
+		);
+		$this->assertWPError( $orphan );
+		$this->assertSame( 'woocommerce_product_parent_invalid', $orphan->get_error_code() );
+
+		$listed = wp_get_ability( 'woocommerce/products-query' )->execute( array( 'parent_id' => $parent_id ) );
+		$this->assertNotWPError( $listed );
+		$this->assertCount( 3, $listed['products'] );
+		$this->assertSame( array( 'variation' ), array_values( array_unique( array_column( $listed['products'], 'type' ) ) ) );
+
+		$deleted = wp_get_ability( 'woocommerce/product-delete' )->execute(
+			array(
+				'id'    => $large['product']['id'],
+				'force' => true,
+			)
+		);
+		$this->assertNotWPError( $deleted );
+		$this->assertNull( get_post( $large['product']['id'] ) );
+		$this->assertNotContains( $large['product']['id'], wc_get_product( $parent_id )->get_children() );
+	}
+
+	/**
+	 * @testdox Should change, add and delete variations through the parent, and leave the others alone.
+	 */
+	public function test_product_update_changes_adds_and_deletes_variations(): void {
+		$created = wp_get_ability( 'woocommerce/product-create' )->execute( $this->get_shirt_input() );
+		$this->assertNotWPError( $created );
+		$this->created_product_ids[]  = $created['product']['id'];
+		$parent_id                    = $created['product']['id'];
+		list( $small_id, $medium_id ) = $created['product']['variation_ids'];
+
+		$updated = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'         => $parent_id,
+				'type'       => 'variable',
+				'attributes' => array(
+					array(
+						'name'    => 'Size',
+						'options' => array( 'S', 'M', 'L' ),
+					),
+				),
+				'variations' => array(
+					array(
+						'id'            => $small_id,
+						'regular_price' => '8.00',
+					),
+					array(
+						'attributes'    => array(
+							array(
+								'name'   => 'Size',
+								'option' => 'L',
+							),
+						),
+						'regular_price' => '15.00',
+					),
+				),
+			)
+		);
+		$this->assertNotWPError( $updated );
+		$this->assertCount( 3, $updated['product']['variation_ids'] );
+		$this->assertSame( '8.00', $updated['product']['price'] );
+		$this->assertSame( '8.00', wc_get_product( $small_id )->get_regular_price() );
+		$this->assertSame( '12.00', wc_get_product( $medium_id )->get_regular_price() );
+		$large_id = $updated['product']['variation_ids'][2];
+		$this->assertSame( '15.00', wc_get_product( $large_id )->get_regular_price() );
+
+		$deleted = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'         => $parent_id,
+				'type'       => 'variable',
+				'variations' => array(
+					array(
+						'id'     => $medium_id,
+						'delete' => true,
+					),
+				),
+			)
+		);
+		$this->assertNotWPError( $deleted );
+		$this->assertSame( array( $small_id, $large_id ), $deleted['product']['variation_ids'] );
+		$this->assertNull( get_post( $medium_id ) );
+
+		$other                       = \WC_Helper_Product::create_variation_product();
+		$this->created_product_ids[] = $other->get_id();
+		$foreign                     = wp_get_ability( 'woocommerce/product-update' )->execute_change(
+			array(
+				'id'         => $parent_id,
+				'type'       => 'variable',
+				'variations' => array( array( 'id' => $other->get_children()[0] ) ),
+			)
+		);
+		$this->assertWPError( $foreign );
+		$this->assertSame( 'woocommerce_product_variation_not_found', $foreign->get_error_code() );
+
+		$duplicate = wp_get_ability( 'woocommerce/product-update' )->execute_change(
+			array(
+				'id'         => $parent_id,
+				'type'       => 'variable',
+				'variations' => array(
+					array(
+						'attributes' => array(
+							array(
+								'name'   => 'Size',
+								'option' => 'L',
+							),
+						),
+					),
+				),
+			)
+		);
+		$this->assertWPError( $duplicate );
+		$this->assertSame( 'woocommerce_product_variation_duplicate', $duplicate->get_error_code() );
+	}
+
+	/**
+	 * @testdox Should leave every variation as it was when a later save of an update fails.
+	 */
+	public function test_product_update_rolls_back_every_save_when_a_variation_fails(): void {
+		$created = wp_get_ability( 'woocommerce/product-create' )->execute( $this->get_shirt_input() );
+		$this->assertNotWPError( $created );
+		$this->created_product_ids[] = $created['product']['id'];
+		$small_id                    = $created['product']['variation_ids'][0];
+
+		$fail = static function ( $product ) {
+			if ( $product instanceof \WC_Product_Variation && 'shirt-l' === $product->get_sku( 'edit' ) ) {
+				throw new \RuntimeException( 'Disk full.' );
+			}
+		};
+		add_action( 'woocommerce_before_product_object_save', $fail );
+		try {
+			$result = wp_get_ability( 'woocommerce/product-update' )->execute_change(
+				array(
+					'id'         => $created['product']['id'],
+					'type'       => 'variable',
+					'name'       => 'Renamed shirt',
+					'attributes' => array(
+						array(
+							'name'    => 'Size',
+							'options' => array( 'S', 'M', 'L' ),
+						),
+					),
+					'variations' => array(
+						array(
+							'id'            => $small_id,
+							'regular_price' => '8.00',
+						),
+						array(
+							'attributes'    => array(
+								array(
+									'name'   => 'Size',
+									'option' => 'L',
+								),
+							),
+							'sku'           => 'shirt-l',
+							'regular_price' => '15.00',
+						),
+					),
+				)
+			);
+		} finally {
+			remove_action( 'woocommerce_before_product_object_save', $fail );
+		}
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_product_update_failed', $result->get_error_code() );
+		$this->assertSame( 'Shirt', get_post( $created['product']['id'] )->post_title );
+		$this->assertSame( '10.00', get_post_meta( $small_id, '_regular_price', true ) );
+		$this->assertSame( 0, wc_get_product_id_by_sku( 'shirt-l' ) );
+	}
+
+	/**
+	 * @testdox Should check the permissions of a variation on its parent.
+	 */
+	public function test_variation_permissions_follow_the_parent(): void {
+		$created = wp_get_ability( 'woocommerce/product-create' )->execute( $this->get_shirt_input() );
+		$this->assertNotWPError( $created );
+		$this->created_product_ids[] = $created['product']['id'];
+		$parent_id                   = $created['product']['id'];
+		$small_id                    = $created['product']['variation_ids'][0];
+
+		$checked = array();
+		$capture = static function ( $caps, $cap, $user_id, $args ) use ( &$checked ) {
+			if ( in_array( $cap, array( 'edit_post', 'delete_post', 'read_private_products' ), true ) ) {
+				$checked[ $cap ] = (int) ( $args[0] ?? 0 );
+			}
+			return $caps;
+		};
+		add_filter( 'map_meta_cap', $capture, 10, 4 );
+		try {
+			$this->assertTrue( ProductUpdate::can_update_product( array( 'id' => $small_id ) ) );
+			$this->assertTrue( ProductDelete::can_delete_product( array( 'id' => $small_id ) ) );
+			$this->assertTrue( ProductsQuery::can_query_products( array( 'id' => $small_id ) ) );
+		} finally {
+			remove_filter( 'map_meta_cap', $capture, 10 );
+		}
+
+		$this->assertSame( $parent_id, $checked['edit_post'] ?? null );
+		$this->assertSame( $parent_id, $checked['delete_post'] ?? null );
+	}
+
+	/**
+	 * @testdox Should nest transactions with savepoints.
+	 */
+	public function test_transaction_query_nests_with_savepoints(): void {
+		$queries = array();
+		$log     = static function ( $query ) use ( &$queries ) {
+			$queries[] = $query;
+			return $query;
+		};
+
+		add_filter( 'query', $log );
+		try {
+			wc_transaction_query( 'start' );
+			wc_transaction_query( 'start' );
+			wc_transaction_query( 'rollback' );
+			wc_transaction_query( 'commit' );
+		} finally {
+			remove_filter( 'query', $log );
+		}
+
+		$this->assertSame(
+			array( 'SAVEPOINT wc_1', 'SAVEPOINT wc_2', 'ROLLBACK TO SAVEPOINT wc_2', 'RELEASE SAVEPOINT wc_1' ),
+			array_values( array_filter( $queries, static fn( $query ) => false !== strpos( $query, 'SAVEPOINT' ) ) )
+		);
+	}
+
+	/**
+	 * The input of a variable shirt with two variations.
+	 *
+	 * @return array
+	 */
+	private function get_shirt_input(): array {
+		return array(
+			'name'       => 'Shirt',
+			'type'       => 'variable',
+			'attributes' => array(
+				array(
+					'name'    => 'Size',
+					'options' => array( 'S', 'M' ),
+				),
+			),
+			'variations' => array(
+				array(
+					'attributes'    => array(
+						array(
+							'name'   => 'Size',
+							'option' => 'S',
+						),
+					),
+					'sku'           => 'shirt-s',
+					'regular_price' => '10.00',
+				),
+				array(
+					'attributes'     => array(
+						array(
+							'name'   => 'Size',
+							'option' => 'M',
+						),
+					),
+					'sku'            => 'shirt-m',
+					'regular_price'  => '12.00',
+					'manage_stock'   => true,
+					'stock_quantity' => 3,
+				),
+			),
+		);
+	}
+
+	/**
 	 * Add test product types to the product type registry.
 	 *
 	 * @internal
@@ -2005,9 +2472,9 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should reject product variation IDs when deleting products.
+	 * @testdox Should delete a product variation by ID.
 	 */
-	public function test_product_delete_rejects_variation_ids(): void {
+	public function test_product_delete_accepts_variation_ids(): void {
 		$variation_id = $this->create_variation_product_id_for_test();
 
 		$result = wp_get_ability( 'woocommerce/product-delete' )->execute(
@@ -2017,9 +2484,9 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertWPError( $result );
-		$this->assertSame( 'woocommerce_product_type_unsupported', $result->get_error_code() );
-		$this->assertNotNull( wc_get_product( $variation_id ) );
+		$this->assertNotWPError( $result );
+		$this->assertTrue( $result['deleted'] );
+		$this->assertNull( get_post( $variation_id ) );
 	}
 
 	/**
@@ -2141,15 +2608,18 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should reject product variation IDs when querying products by ID.
+	 * @testdox Should return a product variation by ID with its parent and attributes.
 	 */
-	public function test_products_query_rejects_variation_ids(): void {
+	public function test_products_query_accepts_variation_ids(): void {
 		$variation_id = $this->create_variation_product_id_for_test();
+		$variation    = wc_get_product( $variation_id );
 
 		$result = wp_get_ability( 'woocommerce/products-query' )->execute( array( 'id' => $variation_id ) );
 
-		$this->assertWPError( $result );
-		$this->assertSame( 'woocommerce_product_type_unsupported', $result->get_error_code() );
+		$this->assertNotWPError( $result );
+		$this->assertSame( 'variation', $result['products'][0]['type'] );
+		$this->assertSame( $variation->get_parent_id(), $result['products'][0]['parent_id'] );
+		$this->assertSame( count( $variation->get_attributes() ), count( $result['products'][0]['attributes'] ) );
 	}
 
 	/**

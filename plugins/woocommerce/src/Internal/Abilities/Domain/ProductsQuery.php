@@ -91,14 +91,6 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 				return $product;
 			}
 
-			if ( $product->is_type( ProductType::VARIATION ) ) {
-				return new \WP_Error(
-					'woocommerce_product_type_unsupported',
-					__( 'Product type is not supported by this ability.', 'woocommerce' ),
-					array( 'status' => 400 )
-				);
-			}
-
 			return array(
 				'products'    => array( self::format_product_for_response( $product ) ),
 				'total_pages' => 1,
@@ -124,6 +116,11 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 
 		if ( ! empty( $input['type'] ) && is_scalar( $input['type'] ) ) {
 			$args['type'] = sanitize_key( (string) $input['type'] );
+		}
+
+		if ( ! empty( $input['parent_id'] ) ) {
+			$args['parent'] = (int) $input['parent_id'];
+			$args['type']   = $args['type'] ?? ProductType::VARIATION;
 		}
 
 		foreach ( array( 'virtual', 'downloadable' ) as $field ) {
@@ -169,7 +166,7 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 	 * @since 10.9.0
 	 */
 	public static function can_query_products( $input = array() ): bool {
-		$product_id = self::get_id_from_input( $input );
+		$product_id = self::get_product_permission_id( self::get_id_from_input( $input ) );
 
 		return wc_rest_check_post_permissions( 'product', 'read', $product_id );
 	}
@@ -196,7 +193,12 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 					'type' => 'string',
 					'enum' => self::get_product_query_status_slugs(),
 				),
-				'type'         => self::get_product_type_schema( array_map( 'strval', array_keys( wc_get_product_types() ) ) ),
+				'type'         => self::get_product_type_schema( self::get_supported_product_types() ),
+				'parent_id'    => array(
+					'type'        => 'integer',
+					'description' => __( 'Limit results to the variations of this variable product.', 'woocommerce' ),
+					'minimum'     => 1,
+				),
 				'virtual'      => array(
 					'type'        => 'boolean',
 					'description' => __( 'Limit results to products that are not shipped (true) or that are shipped (false).', 'woocommerce' ),
