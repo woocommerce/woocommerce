@@ -45,6 +45,9 @@ class WC_Shipping_Local_Pickup extends WC_Shipping_Method {
 			'instance-settings',
 			'instance-settings-modal',
 		);
+		if ( self::class === static::class ) {
+			$this->supports[] = 'costs-entered-with-tax';
+		}
 		$this->init();
 	}
 
