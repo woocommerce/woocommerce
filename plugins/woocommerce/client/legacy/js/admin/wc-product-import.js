@@ -21,11 +21,23 @@
 		this.failed   = 0;
 		this.updated  = 0;
 		this.skipped  = 0;
+		this.retries = 0;
+		this.originalTitle = document.title.toString();
 
 		// Initial state.
 		this.$form.find('.woocommerce-importer-progress').val( 0 );
 
+		var $this = this;
+		this.$form.find('.woocommerce-importer__retry').click(function(){
+			// Let's give this another try
+			$this.$form.find('.spinner').addClass('is-active');
+			$this.$form.find('.woocommerce-importer__error').attr("aria-hidden", "true").addClass("hidden");
+			document.title = $this.originalTitle;
+			$this.run_import();
+		});
+
 		this.run_import = this.run_import.bind( this );
+		this.failed_import = this.failed_import.bind( this );
 
 		// Start importing.
 		this.run_import();
@@ -59,6 +71,7 @@
 					$this.failed   += response.data.failed;
 					$this.updated  += response.data.updated;
 					$this.skipped  += response.data.skipped;
+					$this.retries = 0;
 					$this.$form.find('.woocommerce-importer-progress').val( response.data.percentage );
 
 					if ( 'done' === response.data.position ) {
@@ -79,11 +92,32 @@
 					} else {
 						$this.run_import();
 					}
+				} else {
+					$this.failed_import();
 				}
 			}
 		} ).fail( function( response ) {
-			window.console.log( response );
+			$this.failed_import();
 		} );
+	};
+
+	/**
+	 * Function to handle a failure response from the server, either to retry or to alert the user
+	 */
+	productImportForm.prototype.failed_import = function() {
+		this.retries += 1;
+		if(this.retries > 3) {
+			// After 3 tries, there is likely a further problem beyond a temporary issue (i.e cloudflare)
+			this.$form.find('.spinner').removeClass('is-active');
+			this.$form.find('.woocommerce-importer__error').removeAttr("aria-hidden").removeClass("hidden");
+			document.title = '⚠️ ' + this.originalTitle;
+		} else {
+			// Hold off for a couple seconds while the server may recover
+			var $this = this;
+			setTimeout(function(){
+				$this.run_import();
+			}, 2500);
+		}
 	};
 
 	/**
