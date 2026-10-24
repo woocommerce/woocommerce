@@ -125,6 +125,25 @@ class PostsToOrdersMigrationControllerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should migrate an order that has no custom meta without raising warnings.
+	 */
+	public function test_migration_for_order_without_custom_meta(): void {
+		// Only meta that migrates into dedicated columns, like a post created by the WordPress importer.
+		$post_id = wp_insert_post(
+			array(
+				'post_type'   => 'shop_order',
+				'post_status' => 'wc-processing',
+			)
+		);
+		add_post_meta( $post_id, '_billing_first_name', 'Jane' );
+		$this->clear_all_orders();
+
+		$this->sut->migrate_order( $post_id );
+
+		$this->assertTrue( $this->data_store->order_exists( $post_id ) );
+	}
+
+	/**
 	 * Test that already migrated order isn't migrated twice.
 	 */
 	public function test_migration_for_already_migrated_order() {

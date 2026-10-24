@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Include HPOS orders, refunds and order notes in the WordPress Tools > Export file, and backfill orders imported through Tools > Import into the HPOS tables.
