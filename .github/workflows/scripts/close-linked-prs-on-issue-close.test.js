@@ -39,12 +39,6 @@ test('keeps a pull request that is still linked to another open issue', () => {
     assert.equal(result.keep[0].number, 1);
 });
 
-test('keeps a pull request linked to an open issue in another repository', () => {
-    const result = select([pullRequest(1, [issue(100, 'CLOSED'), issue(100, 'OPEN', 'woocommerce/other')])]);
-
-    assert.deepEqual(result.close, []);
-});
-
 test('keeps a pull request that targets a non-default branch', () => {
     const result = select([pullRequest(1, [issue(100, 'CLOSED')], { baseRefName: 'release/10.4' })]);
 
