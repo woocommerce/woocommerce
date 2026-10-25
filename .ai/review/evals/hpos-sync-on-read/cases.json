@@ -12,7 +12,16 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "hpos"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/src/Internal/DataStores/Orders/OrderMetaSynchronizer.php",
+						"lines": [
+							5,
+							5
+						],
+						"anchor": "        if ( $hpos === $cpt ) { return; }"
+					}
+				]
 			}
 		},
 		{
@@ -26,7 +35,16 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "placeholder"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/src/Internal/DataStores/Orders/OrderMetaSynchronizer.php",
+						"lines": [
+							5,
+							5
+						],
+						"anchor": "        $status = preg_replace( '/^wc-/', '', $post->post_status );"
+					}
+				]
 			}
 		},
 		{

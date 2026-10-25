@@ -13,9 +13,9 @@ Useful guidance should keep the regression quiet and still report the control. E
 
 ## Registration
 
-The committed `public-php-api-bc/cases.json` does not include these cases. The runner does not discover `cases.template.json` automatically. `prepare.py` creates a new, separate checkout and registers both cases and the group there. That checkout then contains 162 cases.
+The committed `public-php-api-bc/cases.json` does not include these cases. The runner does not discover `cases.template.json` automatically. `prepare.py` creates a new, separate checkout and registers both cases and the group there. That checkout then contains 163 cases.
 
-Grouping does not change the default selection. An unfiltered `eval` in the prepared checkout runs all 162 cases. Always pass `--group internal-helpers-and-extension-contracts` to run only this pair.
+Grouping does not change the default selection. An unfiltered `eval` in the prepared checkout runs all 163 cases. Always pass `--group internal-helpers-and-extension-contracts` to run only this pair.
 
 | Path | Contents |
 | --- | --- |

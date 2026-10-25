@@ -12,7 +12,16 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "inherit"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-meta-option-value-semantics.php",
+						"lines": [
+							4,
+							4
+						],
+						"anchor": "    update_post_meta( $id, '_export_shipping_cost', (string) (float) $cost );"
+					}
+				]
 			}
 		},
 		{
@@ -26,7 +35,16 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "url"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-meta-option-value-semantics.php",
+						"lines": [
+							4,
+							4
+						],
+						"anchor": "    update_option( 'woocommerce_export_settings', array( 'enabled' => $enabled ) );"
+					}
+				]
 			}
 		},
 		{

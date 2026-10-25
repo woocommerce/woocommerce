@@ -12,7 +12,16 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "disabled"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/templates/single-product/add-to-cart/simple.php",
+						"lines": [
+							7,
+							7
+						],
+						"anchor": "    <button type=\"submit\" disabled class=\"single_add_to_cart_button\">Add to cart</button>"
+					}
+				]
 			}
 		},
 		{
@@ -26,7 +35,16 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "hidden"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/templates/single-product/add-to-cart/simple.php",
+						"lines": [
+							5,
+							5
+						],
+						"anchor": "<form method=\"post\" hidden>"
+					}
+				]
 			}
 		},
 		{

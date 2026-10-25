@@ -12,7 +12,16 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "currency"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-eval-22.php",
+						"lines": [
+							4,
+							4
+						],
+						"anchor": "    $key = $id;"
+					}
+				]
 			}
 		},
 		{
@@ -26,7 +35,16 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "stock_label"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-eval-22.php",
+						"lines": [
+							12,
+							12
+						],
+						"anchor": "    wp_cache_delete( $id, 'stock_label' );"
+					}
+				]
 			}
 		},
 		{

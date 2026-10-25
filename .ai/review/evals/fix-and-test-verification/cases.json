@@ -12,7 +12,24 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "get_status"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-eval-24.php",
+						"lines": [
+							4,
+							4
+						],
+						"anchor": "    return 'wc-cancelled' === $status ? 'Cancelled' : 'Other';"
+					},
+					{
+						"file": "plugins/woocommerce/includes/class-wc-eval-24.php",
+						"lines": [
+							12,
+							13
+						],
+						"anchor": "        $order = $this->getMockBuilder( WC_Order::class )->onlyMethods( array( 'get_status' ) )->getMock();"
+					}
+				]
 			}
 		},
 		{
@@ -26,7 +43,24 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "catalog_page"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-eval-24.php",
+						"lines": [
+							4,
+							4
+						],
+						"anchor": "    return array( 'post_type' => 'product', 'posts_per_page' => 1, 'orderby' => 'ID', 'order' => 'ASC', 'catalog_page' => max( 1, $paged ) );"
+					},
+					{
+						"file": "plugins/woocommerce/includes/class-wc-eval-24.php",
+						"lines": [
+							12,
+							12
+						],
+						"anchor": "        $this->assertSame( 2, wc_catalog_page_args( 2 )['catalog_page'] );"
+					}
+				]
 			}
 		},
 		{

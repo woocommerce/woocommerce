@@ -12,7 +12,16 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "wc-"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-hook-payload-contract.php",
+						"lines": [
+							3,
+							3
+						],
+						"anchor": "    do_action( 'woocommerce_order_export_status', $id, 'wc-' . $status );"
+					}
+				]
 			}
 		},
 		{
@@ -26,7 +35,16 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "status"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-hook-payload-contract.php",
+						"lines": [
+							3,
+							3
+						],
+						"anchor": "    $args = array( 'id' => $order->get_id(), 'state' => $order->get_status() );"
+					}
+				]
 			}
 		},
 		{

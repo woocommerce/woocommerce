@@ -19,7 +19,7 @@ The group is optional. It does not change the default suite.
 Run this command from the policy repository. The source repository must contain both pinned commits:
 
 ```sh
-python3 .ai/review/evals/react-render-and-keyboard/groups/text-control-cascade/prepare.py \
+python3 .ai/review/evals/css-layout-regression/groups/text-control-cascade/prepare.py \
   --policy-repo "$PWD" \
   --source-repo /path/to/woocommerce-with-historical-objects \
   --output /path/to/new-cascade-checkout
@@ -32,9 +32,9 @@ Preparation does not call a model or modify either input repository.
 
 ```sh
 a8c-review eval --path /path/to/new-cascade-checkout \
-  --guideline react-render-and-keyboard --group text-control-cascade --plan
+  --guideline css-layout-regression --group text-control-cascade --plan
 a8c-review eval --path /path/to/new-cascade-checkout \
-  --guideline react-render-and-keyboard --group text-control-cascade
+  --guideline css-layout-regression --group text-control-cascade
 ```
 
 The second command uses the configured engines and their allowance.

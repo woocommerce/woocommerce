@@ -12,7 +12,16 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "permission"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/rest-api/class-wc-rest-eval-settings.php",
+						"lines": [
+							6,
+							6
+						],
+						"anchor": "        'permission_callback' => '__return_true',"
+					}
+				]
 			}
 		},
 		{
@@ -26,7 +35,16 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "nonce"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/rest-api/class-wc-rest-eval-settings.php",
+						"lines": [
+							7,
+							7
+						],
+						"anchor": "    wp_verify_nonce( $nonce, 'wc-reset-store-label' );"
+					}
+				]
 			}
 		},
 		{

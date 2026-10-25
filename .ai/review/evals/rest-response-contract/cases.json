@@ -12,7 +12,16 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "item_data"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/rest-api/controllers/order-items.php",
+						"lines": [
+							4,
+							5
+						],
+						"anchor": "    $item_data = array();"
+					}
+				]
 			}
 		},
 		{
@@ -26,7 +35,16 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "name"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/rest-api/controllers/product-search.php",
+						"lines": [
+							4,
+							4
+						],
+						"anchor": "    return rest_ensure_response( array( 'name' => $product['name'] ) );"
+					}
+				]
 			}
 		},
 		{

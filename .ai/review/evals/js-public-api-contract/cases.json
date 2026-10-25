@@ -12,7 +12,16 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "default"
+				"locations": [
+					{
+						"file": "packages/js/currency/src/index.ts",
+						"lines": [
+							6,
+							8
+						],
+						"anchor": "export * from './utils';"
+					}
+				]
 			}
 		},
 		{
@@ -26,7 +35,16 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "formatAmount"
+				"locations": [
+					{
+						"file": "packages/js/currency/src/utils.tsx",
+						"lines": [
+							148,
+							148
+						],
+						"anchor": "\t\tif ( ! number ) { return ''; }"
+					}
+				]
 			}
 		},
 		{

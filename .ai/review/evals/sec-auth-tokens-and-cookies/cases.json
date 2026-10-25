@@ -12,7 +12,16 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "loose"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-download-auth.php",
+						"lines": [
+							7,
+							7
+						],
+						"anchor": "    if ( ! is_string( $stored ) || '' === $stored || $stored != $token ) { wp_send_json_error( array(), 403 ); return; }"
+					}
+				]
 			}
 		},
 		{
@@ -26,7 +35,16 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "hash_equals"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-download-auth.php",
+						"lines": [
+							8,
+							9
+						],
+						"anchor": "    hash_equals( $expected, $mac );"
+					}
+				]
 			}
 		},
 		{

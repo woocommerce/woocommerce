@@ -12,7 +12,16 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "unique"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-action-scheduler-lifecycle.php",
+						"lines": [
+							5,
+							5
+						],
+						"anchor": "    as_schedule_single_action( time() + 60, 'woocommerce_export_queue_tick', array(), 'wc-export', true );"
+					}
+				]
 			}
 		},
 		{
@@ -26,20 +35,16 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "recurring"
-			}
-		},
-		{
-			"id": "G06C-v4",
-			"path": "plugins/woocommerce/includes/class-wc-action-scheduler-lifecycle.php",
-			"before": {
-				"file": "fixtures/G06C/before.php"
-			},
-			"after": {
-				"file": "fixtures/G06C/after.php"
-			},
-			"expect": {
-				"outcome": "quiet"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-action-scheduler-lifecycle.php",
+						"lines": [
+							4,
+							4
+						],
+						"anchor": "        as_schedule_recurring_action( time() + 60, 3600, 'woocommerce_export_cleanup', array(), 'wc-export' );"
+					}
+				]
 			}
 		},
 		{

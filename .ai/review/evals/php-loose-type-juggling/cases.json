@@ -12,7 +12,16 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "wc_status_label"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-php-loose-type-juggling.php",
+						"lines": [
+							5,
+							5
+						],
+						"anchor": "    return array_map( static function ( $key ) { return wc_status_label( $key ); }, array_keys( $statuses ) );"
+					}
+				]
 			}
 		},
 		{
@@ -26,7 +35,16 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "zero"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-php-loose-type-juggling.php",
+						"lines": [
+							3,
+							4
+						],
+						"anchor": "    $per_page = absint( $per_page );"
+					}
+				]
 			}
 		},
 		{

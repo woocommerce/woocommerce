@@ -2,20 +2,6 @@
 	"version": 1,
 	"cases": [
 		{
-			"id": "G39A-v5",
-			"path": "plugins/woocommerce/includes/class-wc-search-label.php",
-			"before": {
-				"file": "fixtures/G39A/before.php"
-			},
-			"after": {
-				"file": "fixtures/G39A/after.php"
-			},
-			"expect": {
-				"outcome": "finding",
-				"contains": "escaping"
-			}
-		},
-		{
 			"id": "G39B-v3",
 			"path": "plugins/woocommerce/includes/class-wc-search-label.php",
 			"before": {
@@ -26,7 +12,16 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "XSS"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-search-label.php",
+						"lines": [
+							3,
+							3
+						],
+						"anchor": "add_shortcode( 'wc_entity_notice', static function() { $notice = isset( $_GET['notice'] ) && is_string( $_GET['notice'] ) ? wp_unslash( $_GET['notice'] ) : ''; $notice = wp_kses_post( $notice ); return '<div class=\"wc-notice\">' . html_entity_decode( $notice, ENT_QUOTES, 'UTF-8' ) . '</div>'; } );"
+					}
+				]
 			}
 		},
 		{

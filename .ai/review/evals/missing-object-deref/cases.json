@@ -12,7 +12,16 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "get_product"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-missing-object-deref.php",
+						"lines": [
+							5,
+							5
+						],
+						"anchor": "    return $product->get_sku();"
+					}
+				]
 			}
 		},
 		{
@@ -26,7 +35,16 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "parent"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-missing-object-deref.php",
+						"lines": [
+							5,
+							6
+						],
+						"anchor": "    if ( ! $variation->get_parent_id() ) { return ''; }"
+					}
+				]
 			}
 		},
 		{

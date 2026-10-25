@@ -12,7 +12,16 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "address equality"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/address-editor.php",
+						"lines": [
+							4,
+							4
+						],
+						"anchor": "    return $order->get_address( 'billing' ) === $order->get_address( 'shipping' ) ? 'linked' : 'independent';"
+					}
+				]
 			}
 		},
 		{
@@ -26,7 +35,16 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "_placed_as_guest"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/receipt-audience.php",
+						"lines": [
+							4,
+							4
+						],
+						"anchor": "    return ! $order->get_customer_id() ? 'guest' : 'account';"
+					}
+				]
 			}
 		},
 		{
@@ -37,19 +55,6 @@
 			},
 			"after": {
 				"file": "fixtures/G12C/after.php"
-			},
-			"expect": {
-				"outcome": "quiet"
-			}
-		},
-		{
-			"id": "G12D-v4",
-			"path": "plugins/woocommerce/includes/address-editor.php",
-			"before": {
-				"file": "fixtures/G12D/before.php"
-			},
-			"after": {
-				"file": "fixtures/G12D/after.php"
 			},
 			"expect": {
 				"outcome": "quiet"

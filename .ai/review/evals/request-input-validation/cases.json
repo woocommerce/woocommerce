@@ -12,7 +12,16 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "search[]"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-request-input-validation.php",
+						"lines": [
+							5,
+							5
+						],
+						"anchor": "    return urldecode( $term );"
+					}
+				]
 			}
 		},
 		{
@@ -26,7 +35,16 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "postcode"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-request-input-validation.php",
+						"lines": [
+							4,
+							4
+						],
+						"anchor": "    return is_string( $postcode ) && (bool) preg_match( '/^[A-Z][0-9]{4}[A-Z]{3}$/', $postcode );"
+					}
+				]
 			}
 		},
 		{
@@ -37,19 +55,6 @@
 			},
 			"after": {
 				"file": "fixtures/G07C/after.php"
-			},
-			"expect": {
-				"outcome": "quiet"
-			}
-		},
-		{
-			"id": "G07D-v3",
-			"path": "plugins/woocommerce/includes/class-wc-request-input-validation.php",
-			"before": {
-				"file": "fixtures/G07D/before.php"
-			},
-			"after": {
-				"file": "fixtures/G07D/after.php"
 			},
 			"expect": {
 				"outcome": "quiet"

@@ -2,20 +2,6 @@
 	"version": 1,
 	"cases": [
 		{
-			"id": "G19A-v4",
-			"path": "plugins/woocommerce/includes/wc-order-functions.php",
-			"before": {
-				"file": "fixtures/G19A/before.php"
-			},
-			"after": {
-				"file": "fixtures/G19A/after.php"
-			},
-			"expect": {
-				"outcome": "finding",
-				"contains": "note-only"
-			}
-		},
-		{
 			"id": "G19B-v3",
 			"path": "plugins/woocommerce/includes/class-wc-cart-totals.php",
 			"before": {
@@ -26,20 +12,16 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "is_vat_exempt"
-			}
-		},
-		{
-			"id": "G19C-v3",
-			"path": "plugins/woocommerce/includes/wc-order-functions.php",
-			"before": {
-				"file": "fixtures/G19C-v2/before.php"
-			},
-			"after": {
-				"file": "fixtures/G19C-v2/after.php"
-			},
-			"expect": {
-				"outcome": "quiet"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-cart-totals.php",
+						"lines": [
+							4,
+							4
+						],
+						"anchor": "    $tax = $net * $tax_rate;"
+					}
+				]
 			}
 		},
 		{

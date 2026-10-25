@@ -12,7 +12,16 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "woocommerce_analytics_new_customer"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-hook-firing-scope.php",
+						"lines": [
+							3,
+							4
+						],
+						"anchor": "    if ( $customer ) {"
+					}
+				]
 			}
 		},
 		{
@@ -26,7 +35,16 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "delete_items"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-hook-firing-scope.php",
+						"lines": [
+							5,
+							5
+						],
+						"anchor": "        $store->delete_items( $id );"
+					}
+				]
 			}
 		},
 		{

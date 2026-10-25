@@ -12,7 +12,16 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "wc-cross-sell"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-cross-sells-assets.php",
+						"lines": [
+							4,
+							4
+						],
+						"anchor": "    wp_set_script_translations( 'wc-cross-sell', 'woocommerce' );"
+					}
+				]
 			}
 		},
 		{
@@ -26,7 +35,16 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "domain"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/client/blocks/assets/js/blocks/product-cross-sells/heading.js",
+						"lines": [
+							3,
+							3
+						],
+						"anchor": "export const getHeading = () => __( 'You may also like\u2026', 'woocommerce-extra' );"
+					}
+				]
 			}
 		},
 		{

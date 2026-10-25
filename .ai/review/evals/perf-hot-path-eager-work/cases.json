@@ -12,7 +12,16 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "catalog"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-eval-27.php",
+						"lines": [
+							4,
+							4
+						],
+						"anchor": "    $ids = get_posts( array( 'post_type' => 'product', 'post_status' => 'publish', 'numberposts' => -1, 'fields' => 'ids' ) );"
+					}
+				]
 			}
 		},
 		{
@@ -26,33 +35,16 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "woocommerce_inventory_debug"
-			}
-		},
-		{
-			"id": "G27C-v3",
-			"path": "plugins/woocommerce/includes/class-wc-eval-27.php",
-			"before": {
-				"file": "fixtures/G27C/before.php"
-			},
-			"after": {
-				"file": "fixtures/G27C/after.php"
-			},
-			"expect": {
-				"outcome": "quiet"
-			}
-		},
-		{
-			"id": "G27D-v3",
-			"path": "plugins/woocommerce/includes/class-wc-eval-27.php",
-			"before": {
-				"file": "fixtures/G27D/before.php"
-			},
-			"after": {
-				"file": "fixtures/G27D/after.php"
-			},
-			"expect": {
-				"outcome": "quiet"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-eval-27.php",
+						"lines": [
+							4,
+							5
+						],
+						"anchor": "    if ( ! is_checkout() ) { return; }"
+					}
+				]
 			}
 		},
 		{

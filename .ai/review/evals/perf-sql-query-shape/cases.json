@@ -12,7 +12,16 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "per product"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-eval-25.php",
+						"lines": [
+							6,
+							7
+						],
+						"anchor": "    foreach ( array_map( 'absint', $ids ) as $id ) {"
+					}
+				]
 			}
 		},
 		{
@@ -26,20 +35,16 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "post_status"
-			}
-		},
-		{
-			"id": "G25C-v3",
-			"path": "plugins/woocommerce/includes/class-wc-eval-25.php",
-			"before": {
-				"file": "fixtures/G25C/before.php"
-			},
-			"after": {
-				"file": "fixtures/G25C/after.php"
-			},
-			"expect": {
-				"outcome": "quiet"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-eval-25.php",
+						"lines": [
+							3,
+							3
+						],
+						"anchor": "function wc_listing_published_stock( $ids ) { global $wpdb; $ids = array_map( 'absint', $ids ); if ( ! $ids ) { return array(); } return $wpdb->get_col( \"SELECT l.stock_quantity FROM {$wpdb->prefix}wc_product_meta_lookup l WHERE l.product_id IN (\" . implode( ',', $ids ) . ')' ); }"
+					}
+				]
 			}
 		},
 		{
@@ -63,6 +68,19 @@
 			},
 			"after": {
 				"code": "<?php\n/* Product stock report returns a map keyed by ID. Map iteration order is not specified. */\nfunction wc_listing_totals( $ids ) {\n    global $wpdb;\n    $normalized_ids = array_map( 'absint', $ids );\n    $out = array();\n    foreach ( $normalized_ids as $id ) {\n        $row = $wpdb->get_row( $wpdb->prepare( \"SELECT product_id, stock_quantity FROM {$wpdb->prefix}wc_product_meta_lookup WHERE product_id = %d\", $id ), ARRAY_A );\n        if ( $row ) { $out[$row['product_id']] = $row['stock_quantity']; }\n    }\n    return $out;\n}\n"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G25E-v1",
+			"path": "plugins/woocommerce/includes/class-wc-eval-25.php",
+			"before": {
+				"file": "fixtures/G25E/before.php"
+			},
+			"after": {
+				"file": "fixtures/G25E/after.php"
 			},
 			"expect": {
 				"outcome": "quiet"

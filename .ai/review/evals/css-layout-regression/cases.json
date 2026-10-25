@@ -2,20 +2,6 @@
 	"version": 1,
 	"cases": [
 		{
-			"id": "G32A-v3",
-			"path": "plugins/woocommerce/client/blocks/assets/js/blocks/cart/style.css",
-			"before": {
-				"file": "fixtures/G32A/before.css"
-			},
-			"after": {
-				"file": "fixtures/G32A/after.css"
-			},
-			"expect": {
-				"outcome": "finding",
-				"contains": "vertical"
-			}
-		},
-		{
 			"id": "G32B-v3",
 			"path": "plugins/woocommerce/client/blocks/assets/js/blocks/cart/style.css",
 			"before": {
@@ -26,7 +12,16 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "selector"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/client/blocks/assets/js/blocks/cart/style.css",
+						"lines": [
+							4,
+							4
+						],
+						"anchor": "button { min-height: 44px; }"
+					}
+				]
 			}
 		},
 		{

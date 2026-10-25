@@ -12,7 +12,16 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "slug"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-catalog-probe.php",
+						"lines": [
+							7,
+							7
+						],
+						"anchor": "    $sql = \"SELECT COUNT(*) FROM {$wpdb->posts} WHERE post_type='product' AND post_status='publish' AND post_name='$slug'\";"
+					}
+				]
 			}
 		},
 		{
@@ -26,7 +35,16 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "inject"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-catalog-probe.php",
+						"lines": [
+							7,
+							8
+						],
+						"anchor": "    $orderby = esc_sql( $requested );"
+					}
+				]
 			}
 		},
 		{

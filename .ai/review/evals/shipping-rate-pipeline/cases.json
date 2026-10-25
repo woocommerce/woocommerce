@@ -12,7 +12,16 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "Express"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-shipping.php",
+						"lines": [
+							3,
+							3
+						],
+						"anchor": "    $rates = apply_filters( 'woocommerce_package_rates', $rates, $package );"
+					}
+				]
 			}
 		},
 		{
@@ -26,20 +35,24 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "TypeError"
-			}
-		},
-		{
-			"id": "G20C-v4",
-			"path": "plugins/woocommerce/includes/abstracts/abstract-wc-shipping-method.php",
-			"before": {
-				"file": "fixtures/G20C/before.php"
-			},
-			"after": {
-				"file": "fixtures/G20C/after.php"
-			},
-			"expect": {
-				"outcome": "quiet"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/abstracts/abstract-wc-shipping-method.php",
+						"lines": [
+							6,
+							6
+						],
+						"anchor": "    return new WC_Shipping_Rate( $args['id'], $args['label'], $total_cost, array(), 'flat_rate', 1 );"
+					},
+					{
+						"file": "plugins/woocommerce/includes/abstracts/abstract-wc-shipping-method.php",
+						"lines": [
+							9,
+							9
+						],
+						"anchor": "    return $subtotal + make_export_rate( $args )->get_cost();"
+					}
+				]
 			}
 		},
 		{

@@ -12,7 +12,16 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "amount"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/client/blocks/assets/js/blocks/checkout/extensions.js",
+						"lines": [
+							2,
+							2
+						],
+						"anchor": "export function extensionAmount( extensions ) { const raw = extensions['sample-shipping'].amount; return typeof raw === 'number' && Number.isFinite( raw ) ? raw : 0; }"
+					}
+				]
 			}
 		},
 		{
@@ -26,7 +35,16 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "hidden"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/client/blocks/assets/js/blocks/checkout/extensions.js",
+						"lines": [
+							4,
+							4
+						],
+						"anchor": "    return additionalFields.filter( ( field ) => field.hidden !== true );"
+					}
+				]
 			}
 		},
 		{

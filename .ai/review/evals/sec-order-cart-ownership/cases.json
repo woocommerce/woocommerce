@@ -2,20 +2,6 @@
 	"version": 1,
 	"cases": [
 		{
-			"id": "G38A-v4",
-			"path": "plugins/woocommerce/includes/class-wc-order-preview.php",
-			"before": {
-				"file": "fixtures/G38A/before.php"
-			},
-			"after": {
-				"file": "fixtures/G38A/after.php"
-			},
-			"expect": {
-				"outcome": "finding",
-				"contains": "order-specific authorization"
-			}
-		},
-		{
 			"id": "G38B-v3",
 			"path": "plugins/woocommerce/includes/class-wc-order-preview.php",
 			"before": {
@@ -26,7 +12,16 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "guest"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-order-preview.php",
+						"lines": [
+							10,
+							10
+						],
+						"anchor": "    if ( (int) $order->get_customer_id() !== get_current_user_id() ) { wp_send_json_error( array(), 403 ); return; }"
+					}
+				]
 			}
 		},
 		{

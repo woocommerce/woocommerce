@@ -12,7 +12,16 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "11.0.0"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-install.php",
+						"lines": [
+							4,
+							4
+						],
+						"anchor": "    $db_updates = array( '11.0.0' => array( 'rebuild_shipping_index', 'backfill_zone_codes' ) );"
+					}
+				]
 			}
 		},
 		{
@@ -26,7 +35,16 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "load_order"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/wc-update-functions.php",
+						"lines": [
+							6,
+							6
+						],
+						"anchor": "        $order->update_meta_data( '_refund_migrated', 'yes' );"
+					}
+				]
 			}
 		},
 		{

@@ -12,7 +12,16 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "key"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/client/blocks/assets/js/blocks/checkout/payment-list.jsx",
+						"lines": [
+							4,
+							4
+						],
+						"anchor": "export function PaymentList( { methods } ) { return createElement( 'div', {}, methods.map( ( method, index ) => createElement( PaymentRow, { key: index, method } ) ) ); }"
+					}
+				]
 			}
 		},
 		{
@@ -26,7 +35,16 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "keyboard"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/client/blocks/assets/js/blocks/checkout/payment-list.jsx",
+						"lines": [
+							3,
+							3
+						],
+						"anchor": "export function CouponToggle( { expanded, onToggle, label } ) { return createElement( 'div', { tabIndex: 0, 'aria-expanded': expanded, onClick: onToggle }, label ); }"
+					}
+				]
 			}
 		},
 		{

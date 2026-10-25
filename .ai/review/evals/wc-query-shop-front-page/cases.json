@@ -12,7 +12,16 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "pagename"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-query.php",
+						"lines": [
+							5,
+							5
+						],
+						"anchor": "    if ( $q->get( 'page_id' ) === $shop_id || $q->get( 'pagename' ) === $shop_slug ) {"
+					}
+				]
 			}
 		},
 		{
@@ -26,7 +35,16 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "cron"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-query.php",
+						"lines": [
+							4,
+							4
+						],
+						"anchor": "    if ( $request['is_cli'] ) { return; }"
+					}
+				]
 			}
 		},
 		{

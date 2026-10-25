@@ -15,7 +15,7 @@ Read [the original change](https://github.com/woocommerce/woocommerce/commit/e84
 Run these commands from the WooCommerce repository that contains this group. The source repository must already contain both commits listed in `sources.json`.
 
 ```sh
-python3 .ai/review/evals/js-public-api-contract/groups/event-name-contract/prepare.py \
+python3 .ai/review/evals/fix-and-test-verification/groups/event-name-contract/prepare.py \
   --policy-repo "$PWD" \
   --source-repo /path/to/woocommerce-with-historical-objects \
   --output /path/to/new-event-name-contract-checkout
@@ -23,13 +23,13 @@ python3 .ai/review/evals/js-public-api-contract/groups/event-name-contract/prepa
 
 The script checks the original patch and both patch hashes. It uses local Git objects and creates a separate checkout. Keep both input repositories available while using that checkout.
 
-The generated checkout registers this pair alongside the 160 default cases. Preparation never calls a model or changes an input repository.
+The generated checkout registers this pair alongside the 161 default cases. Preparation never calls a model or changes an input repository.
 
 ```sh
 a8c-review eval --path /path/to/new-event-name-contract-checkout \
-  --guideline js-public-api-contract --group event-name-contract --plan
+  --guideline fix-and-test-verification --group event-name-contract --plan
 a8c-review eval --path /path/to/new-event-name-contract-checkout \
-  --guideline js-public-api-contract --group event-name-contract
+  --guideline fix-and-test-verification --group event-name-contract
 ```
 
 The second command uses the configured review engines and consumes their allowance. Follow the main [eval setup instructions](../../../README.md) before running it.

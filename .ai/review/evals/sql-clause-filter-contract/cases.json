@@ -12,7 +12,24 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "wc_product_meta_lookup"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-eval-21.php",
+						"lines": [
+							5,
+							5
+						],
+						"anchor": "    $clauses['join'] .= \" LEFT JOIN {$wpdb->prefix}wc_product_meta_lookup lookup ON {$wpdb->posts}.ID = lookup.product_id\";"
+					},
+					{
+						"file": "plugins/woocommerce/includes/class-wc-eval-21.php",
+						"lines": [
+							10,
+							10
+						],
+						"anchor": "    $clauses['orderby'] = 'wc_product_meta_lookup.stock_quantity DESC';"
+					}
+				]
 			}
 		},
 		{
@@ -26,7 +43,16 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "region"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-eval-21.php",
+						"lines": [
+							5,
+							5
+						],
+						"anchor": "    $clauses['join'] = \" LEFT JOIN {$wpdb->prefix}wc_product_meta_lookup wc_product_meta_lookup ON {$wpdb->posts}.ID = wc_product_meta_lookup.product_id\";"
+					}
+				]
 			}
 		},
 		{

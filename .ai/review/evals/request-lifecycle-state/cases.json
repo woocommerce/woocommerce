@@ -12,7 +12,16 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "locale"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/order-fragment.php",
+						"lines": [
+							5,
+							6
+						],
+						"anchor": "    $html = $render();"
+					}
+				]
 			}
 		},
 		{
@@ -26,7 +35,16 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "priority"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/email-bootstrap.php",
+						"lines": [
+							14,
+							14
+						],
+						"anchor": "}, 1 );"
+					}
+				]
 			}
 		},
 		{

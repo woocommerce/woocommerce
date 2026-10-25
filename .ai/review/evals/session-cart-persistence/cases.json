@@ -12,7 +12,16 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "persistent"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-cart-session.php",
+						"lines": [
+							5,
+							5
+						],
+						"anchor": "    $delete_user_meta( $user_id, '_woocommerce_persistent_cart_' . get_current_blog_id() );"
+					}
+				]
 			}
 		},
 		{
@@ -26,7 +35,16 @@
 			},
 			"expect": {
 				"outcome": "finding",
-				"contains": "get_session_data"
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-cart-session.php",
+						"lines": [
+							4,
+							4
+						],
+						"anchor": "    $data = $session->get_session_data();"
+					}
+				]
 			}
 		},
 		{
