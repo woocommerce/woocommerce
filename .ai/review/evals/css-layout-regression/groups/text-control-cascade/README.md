@@ -5,6 +5,9 @@ This optional pair checks whether a reviewer establishes the prior CSS cascade b
 The original is the complete historical change from WooCommerce PR #69456.
 Its parent pins `@wordpress/components` 30.6.5, whose stylesheet already gives TextControl inputs a 32px height.
 The dependency version, archive integrity, and stylesheet path are recorded in `sources.json`.
+Preparation downloads that pinned archive, checks its SHA-512 integrity, and adds its unmodified stylesheet to the historical source used by both cases.
+The reviewer can read it at `eval-context/wordpress-components-30.6.5/style.css`, alongside its provenance.
+The original and control patches remain unchanged.
 The WooCommerce change adds an explicit 32px declaration to the wrapper stylesheet.
 A pre-existing `min-height: 30px` does not establish that the prior height was automatic.
 
@@ -15,6 +18,7 @@ The browser check uses native inputs, the pinned upstream stylesheet, and compil
 Color and shadow variables use neutral values. Layout declarations remain unchanged.
 It does not reproduce a full WordPress 7.1 page or test text-only zoom.
 
+The v2 case IDs distinguish the added dependency source from earlier preparation.
 The group is optional. It does not change the default suite.
 Run this command from the policy repository. The source repository must contain both pinned commits:
 
@@ -25,7 +29,8 @@ python3 .ai/review/evals/css-layout-regression/groups/text-control-cascade/prepa
   --output /path/to/new-cascade-checkout
 ```
 
-The script checks source completeness and patch hashes. It refuses to overwrite an existing output directory.
+The script checks source completeness and patch hashes. It creates a derived historical base containing the dependency reference files in the new checkout.
+It requires access to the pinned npm archive and refuses to overwrite an existing output directory.
 
 Keep both input repositories available while using the generated checkout.
 Preparation does not call a model or modify either input repository.

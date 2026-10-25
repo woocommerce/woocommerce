@@ -70,7 +70,7 @@ Each fixture directory contains before and after source files. The suite's `path
 
 The runner creates an isolated Git repository containing the case file and configured review prompts. It does not copy the whole WooCommerce checkout. Include the surrounding code needed to establish a case's behavior in its before and after files.
 
-A `finding` expectation requires a finding on that path containing the specified case-insensitive literal. A `quiet` expectation requires no findings, including suppressed ones. Wording changes can fail a case even when the reviewer detects the bug. An unrelated finding can pass if it contains the literal. A case with `locations` requires the finding's primary file and line to match. An `introduced_by` anchor alone cannot satisfy it. Inspect the finding's reasoning against the fixture before treating the automated score as evidence of detection. Routing alone does not determine whether a case passes.
+All current `finding` expectations use `locations`, which require the finding's primary file and line to match a listed location. A `quiet` expectation requires no findings, including suppressed ones. The runner also supports legacy `contains` checks, but these suites do not use them. An `introduced_by` anchor alone cannot satisfy it. Inspect the finding's reasoning against the fixture before treating the automated score as evidence of detection. Routing alone does not determine whether a case passes.
 
 ## Optional prepared pair
 
@@ -131,12 +131,12 @@ These cases exercise review behavior on selected changes. They do not measure pr
 
 | Guideline | Bug cases | Safe boundary cases |
 | --- | --- | --- |
-| [hook-payload-contract](hook-payload-contract/cases.json) | G01A-v3, G01B-v3 | G01C-v3, G01D-v3 |
+| [hook-payload-contract](hook-payload-contract/cases.json) | G01A-v3, G01B-v4 | G01C-v3, G01D-v3 |
 | [hook-firing-scope](hook-firing-scope/cases.json) | G02A-v3, G02B-v3 | G02C-v3, G02D-v3 |
 | [php-loose-type-juggling](php-loose-type-juggling/cases.json) | G03A-v3, G03B-v3 | G03C-v3, G03D-v3 |
 | [public-php-api-bc](public-php-api-bc/cases.json) | G04A-v3, G04B-v3 | G04C-v3, G04D-v3 |
 | [upgrade-time-class-load](upgrade-time-class-load/cases.json) | G05A-v3, G05B-v3 | G05C-v3, G05D-v3 |
-| [action-scheduler-lifecycle](action-scheduler-lifecycle/cases.json) | G06A-v3, G06B-v3 | G06D-v4, G06C-v5 |
+| [action-scheduler-lifecycle](action-scheduler-lifecycle/cases.json) | G06A-v3, G06B-v3 | G06D-v4, G06C-v6 |
 | [request-input-validation](request-input-validation/cases.json) | G07A-v4, G07B-v3 | G07C-v3, G07D-v4 |
 | [missing-object-deref](missing-object-deref/cases.json) | G08A-v3, G08B-v3 | G08C-v3, G08D-v3 |
 | [meta-option-value-semantics](meta-option-value-semantics/cases.json) | G09A-v3, G09B-v3 | G09C-v3, G09D-v3 |
@@ -158,7 +158,7 @@ These cases exercise review behavior on selected changes. They do not measure pr
 | [perf-sql-query-shape](perf-sql-query-shape/cases.json) | G25A-v4, G25B-v3 | G25D-v3, G25C-v7, G25E-v1 |
 | [perf-cache-option-priming](perf-cache-option-priming/cases.json) | G26A-v3, G26B-v6 | G26C-v3, G26D-v3 |
 | [perf-hot-path-eager-work](perf-hot-path-eager-work/cases.json) | G27A-v4, G27B-v4 | G27C-v4, G27D-v4 |
-| [script-handle-loading-contract](script-handle-loading-contract/cases.json) | G28A-v3, G28B-v3 | G28C-v3, G28D-v4 |
+| [script-handle-loading-contract](script-handle-loading-contract/cases.json) | G28A-v3, G28B-v4 | G28C-v3, G28D-v4 |
 | [classic-jquery-contract](classic-jquery-contract/cases.json) | G29A-v3, G29B-v3 | G29C-v3, G29D-v4 |
 | [js-public-api-contract](js-public-api-contract/cases.json) | G30A-v3, G30B-v3 | G30C-v3, G30D-v3 |
 | [checkout-extensibility-payload](checkout-extensibility-payload/cases.json) | G31A-v3, G31B-v3 | G31C-v3, G31D-v3 |
