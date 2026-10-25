@@ -7,6 +7,7 @@ const LINKED_PULL_REQUESTS_QUERY = `
                 name
             }
             issue(number: $number) {
+                state
                 closedByPullRequestsReferences(first: 50, includeClosedPrs: false) {
                     nodes {
                         number
@@ -98,6 +99,12 @@ module.exports = async ({ github, context, core }) => {
         number: issueNumber,
     });
 
+    // The issue may have been reopened while this job was queued.
+    if (result.issue.state === 'OPEN') {
+        core.info(`Issue #${issueNumber} has been reopened. Leaving its linked pull requests open.`);
+        return;
+    }
+
     const { close, keep } = selectPullRequestsToClose({
         pullRequests: result.issue.closedByPullRequestsReferences.nodes,
         issueNumber,
@@ -116,7 +123,23 @@ module.exports = async ({ github, context, core }) => {
 
     const closed = [];
     const failed = [];
+    // Close before commenting, so a failed close never leaves a comment saying the PR was closed.
     for (const prNumber of close) {
+        try {
+            await github.rest.pulls.update({
+                owner,
+                repo,
+                pull_number: prNumber,
+                state: 'closed',
+            });
+        } catch (error) {
+            core.warning(`Failed to close PR #${prNumber}: ${error.message}`);
+            failed.push({ number: prNumber, error: error.message });
+            continue;
+        }
+        closed.push(prNumber);
+        core.info(`Closed PR #${prNumber}.`);
+
         try {
             await github.rest.issues.createComment({
                 owner,
@@ -128,17 +151,9 @@ module.exports = async ({ github, context, core }) => {
                     'If this pull request is still needed, reopen it and link it to an open issue.',
                 ].join('\n'),
             });
-            await github.rest.pulls.update({
-                owner,
-                repo,
-                pull_number: prNumber,
-                state: 'closed',
-            });
-            closed.push(prNumber);
-            core.info(`Closed PR #${prNumber}.`);
         } catch (error) {
-            core.warning(`Failed to close PR #${prNumber}: ${error.message}`);
-            failed.push({ number: prNumber, error: error.message });
+            core.warning(`Closed PR #${prNumber} but failed to comment on it: ${error.message}`);
+            failed.push({ number: prNumber, error: `Closed, but the comment failed: ${error.message}` });
         }
     }
 
@@ -148,7 +163,7 @@ module.exports = async ({ github, context, core }) => {
     }
 
     if (failed.length > 0) {
-        core.setFailed(`Failed to close PR(s): ${failed.map(({ number }) => `#${number}`).join(', ')}`);
+        core.setFailed(`Failed to close or comment on PR(s): ${failed.map(({ number }) => `#${number}`).join(', ')}`);
     }
 };
 
