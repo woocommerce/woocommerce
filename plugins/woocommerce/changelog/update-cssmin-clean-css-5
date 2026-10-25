@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Bump grunt-contrib-cssmin to 4.x (clean-css 5) so the admin CSS pipeline preserves @container at-rules.

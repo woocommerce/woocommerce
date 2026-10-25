@@ -76,8 +76,7 @@
 		}
 		try {
 			const data = JSON.parse( el.textContent );
-			const pr =
-				data?.payload?.pullRequestsLayoutRoute?.pullRequest;
+			const pr = data?.payload?.pullRequestsLayoutRoute?.pullRequest;
 			if ( pr?.headBranch && pr?.state ) {
 				return {
 					currentBranch: pr.headBranch,
@@ -102,13 +101,16 @@
 		if ( ! currentBranch ) {
 			return null;
 		}
-		const branchStatus = $( '.gh-header-meta .State' )
-			.text()
-			.trim();
+		const branchStatus = $( '.gh-header-meta .State' ).text().trim();
 		if ( ! branchStatus ) {
 			return null;
 		}
-		return { currentBranch, branchStatus, headRepoOwner: '', isDraft: false };
+		return {
+			currentBranch,
+			branchStatus,
+			headRepoOwner: '',
+			isDraft: false,
+		};
 	}
 
 	/** Function. */
@@ -125,8 +127,7 @@
 
 		const host = 'https://jurassic.ninja';
 		const repo = determineRepo();
-		const prData =
-			getPRDataFromEmbeddedJson() ?? getPRDataFromDom();
+		const prData = getPRDataFromEmbeddedJson() ?? getPRDataFromDom();
 		if ( ! prData ) {
 			appendHtml(
 				markdownBody,
@@ -136,8 +137,7 @@
 		}
 		const { currentBranch, branchStatus } = prData;
 		const branchIsForked = prData.headRepoOwner
-			? prData.headRepoOwner !==
-				( repo ? repo.split( '/' )[ 0 ] : '' )
+			? prData.headRepoOwner !== ( repo ? repo.split( '/' )[ 0 ] : '' )
 			: currentBranch.includes( ':' );
 
 		if ( branchStatus === 'MERGED' || branchStatus === 'Merged' ) {
@@ -170,7 +170,6 @@
 		} else {
 			// TODO: Fetch the list of feature flags dynamically from the API or something.
 			const featureFlags = [
-				'launch-your-store',
 				'minified-js',
 				'product-custom-fields',
 				'settings',

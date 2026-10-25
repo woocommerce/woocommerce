@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Fix the Blocks e2e nightly suite: mount the released plugin at the canonical `woocommerce` folder via a wp-env mapping, instead of letting wp-env name the plugin folder after the release zip (e.g. `woocommerce-trunk-nightly`), which broke the test setup's plugin-path assumptions. The generated test translations are mapped into the plugin's languages directory the same way. Also resolve the active plugin path (WC_ABSPATH) for the sample product import.

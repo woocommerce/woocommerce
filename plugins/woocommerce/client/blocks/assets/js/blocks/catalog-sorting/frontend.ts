@@ -31,7 +31,7 @@ const catalogSortingStore = {
 			url.searchParams.set( 'paged', '1' );
 
 			// Client-side navigation.
-			const routerModule: typeof import('@wordpress/interactivity-router') =
+			const routerModule: typeof import( '@wordpress/interactivity-router' ) =
 				yield import( '@wordpress/interactivity-router' );
 
 			yield routerModule.actions.navigate( url.href );

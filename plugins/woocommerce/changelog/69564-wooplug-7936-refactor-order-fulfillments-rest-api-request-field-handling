@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure Order Fulfillments REST API requests operate on the fulfillment and order identified by the route.

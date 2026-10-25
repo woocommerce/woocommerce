@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { Page } from '@playwright/test';
+import { Locator, Page } from '@playwright/test';
 import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**
@@ -11,9 +11,60 @@ import { ADMIN_STATE_PATH } from '../../playwright.config';
 import { expect, test as baseTest } from '../../fixtures/fixtures';
 import { getInstalledWordPressVersion } from '../../utils/wordpress';
 
-// need to figure out whether tests are being run on a mac
-const macOS = process.platform === 'darwin';
-const cmdKeyCombo = macOS ? 'Meta+k' : 'Control+k';
+const openCommandPalette = async ( page: Page ) => {
+	// WordPress registers the command-palette shortcut via @wordpress/keycodes'
+	// `isAppleOS()`, which inspects `navigator.platform` only. In Playwright's
+	// Chromium on macOS these two disagree: `navigator.platform` is "MacIntel"
+	// (Apple → Cmd+K) while `navigator.userAgentData.platform` is "Windows".
+	// Deriving the modifier from `userAgentData` therefore sends Ctrl+K and the
+	// palette never opens. Reuse `isAppleOS()` so the test always matches whatever
+	// modifier WordPress actually registered (falling back to its logic if the
+	// keycodes package is unavailable).
+	const isApplePlatform = await page.evaluate( () => {
+		const isAppleOS = (
+			window as Window & {
+				wp?: { keycodes?: { isAppleOS?: () => boolean } };
+			}
+		 ).wp?.keycodes?.isAppleOS;
+		if ( typeof isAppleOS === 'function' ) {
+			return isAppleOS();
+		}
+		const { platform } = navigator;
+		return (
+			platform.indexOf( 'Mac' ) !== -1 ||
+			[ 'iPad', 'iPhone' ].includes( platform )
+		);
+	} );
+	const cmdKeyCombo = isApplePlatform ? 'Meta+k' : 'Control+k';
+
+	// Press `Ctrl`/`Cmd` + `K` to open the command palette.
+	await page.keyboard.press( cmdKeyCombo );
+
+	// Using a regex here because Gutenberg changes the text of the placeholder
+	return page.getByPlaceholder(
+		/Search (?:commands(?: and settings)?|for commands)/
+	);
+};
+
+const findCommandPaletteOption = async ( {
+	page,
+	searchBox,
+	optionName,
+}: {
+	page: Page;
+	searchBox: Locator;
+	optionName: string;
+} ) => {
+	await searchBox.fill( optionName );
+
+	// TODO: WP 7.0 compat - WP 7.0 appends "Action" to command palette option
+	// accessible names. Simplify when WP 7.0 is the minimum supported version.
+	const option = page.getByRole( 'option', {
+		name: new RegExp( `^${ optionName }( Action)?$` ),
+	} );
+	await expect( option ).toBeVisible();
+	return option;
+};
 
 const clickOnCommandPaletteOption = async ( {
 	page,
@@ -22,22 +73,12 @@ const clickOnCommandPaletteOption = async ( {
 	page: Page;
 	optionName: string;
 } ) => {
-	// Press `Ctrl` + `K` to open the command palette.
-	await page.keyboard.press( cmdKeyCombo );
-
-	// Using a regex here because Gutenberg changes the text of the placeholder
-	await page
-		.getByPlaceholder(
-			/Search (?:commands(?: and settings)?|for commands)/
-		)
-		.fill( optionName );
-
-	// TODO: WP 7.0 compat - WP 7.0 appends "Action" to command palette option
-	// accessible names. Simplify when WP 7.0 is the minimum supported version.
-	const option = page.getByRole( 'option', {
-		name: new RegExp( `^${ optionName }( Action)?$` ),
+	const searchBox = await openCommandPalette( page );
+	const option = await findCommandPaletteOption( {
+		page,
+		searchBox,
+		optionName,
 	} );
-	await expect( option ).toBeVisible();
 	await option.click();
 };
 
@@ -85,50 +126,25 @@ const test = baseTest.extend( {
 } );
 
 test( 'can use the "Add new product" command', async ( { page } ) => {
-	await clickOnCommandPaletteOption( {
+	const searchBox = await openCommandPalette( page );
+
+	// Analytics commands come from a separate bundle fed by PHP, so check that one reached the palette too.
+	await findCommandPaletteOption( {
 		page,
+		searchBox,
+		optionName: 'WooCommerce Analytics: Products',
+	} );
+
+	const option = await findCommandPaletteOption( {
+		page,
+		searchBox,
 		optionName: 'Add new product',
 	} );
+	await option.click();
 
 	// Verify that the page has loaded.
 	await expect(
 		page.getByRole( 'heading', { name: 'Add new product' } )
-	).toBeVisible();
-} );
-
-test( 'can use the "Add new order" command', async ( { page } ) => {
-	await clickOnCommandPaletteOption( {
-		page,
-		optionName: 'Add new order',
-	} );
-
-	// Verify that the page has loaded.
-	await expect(
-		page.getByRole( 'heading', { name: 'Add new order' } )
-	).toBeVisible();
-} );
-
-test( 'can use the "Products" command', async ( { page } ) => {
-	await clickOnCommandPaletteOption( {
-		page,
-		optionName: 'Products',
-	} );
-
-	// Verify that the page has loaded.
-	await expect(
-		page.locator( 'h1' ).filter( { hasText: 'Products' } ).first()
-	).toBeVisible();
-} );
-
-test( 'can use the "Orders" command', async ( { page } ) => {
-	await clickOnCommandPaletteOption( {
-		page,
-		optionName: 'Orders',
-	} );
-
-	// Verify that the page has loaded.
-	await expect(
-		page.locator( 'h1' ).filter( { hasText: 'Orders' } ).first()
 	).toBeVisible();
 } );
 
@@ -142,18 +158,4 @@ test( 'can use the product search command', async ( { page, product } ) => {
 	await expect( page.getByLabel( 'Product name' ) ).toHaveValue(
 		`${ product.name }`
 	);
-} );
-
-test( 'can use an analytics command', async ( { page } ) => {
-	await clickOnCommandPaletteOption( {
-		page,
-		optionName: 'WooCommerce Analytics: Products',
-	} );
-
-	// Verify that the page has loaded.
-	await expect(
-		page.locator( 'h1' ).filter( { hasText: 'Products' } )
-	).toBeVisible();
-	const pageTitle = await page.title();
-	expect( pageTitle.includes( 'Products ‹ Analytics' ) ).toBeTruthy();
 } );

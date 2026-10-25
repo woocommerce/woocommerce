@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix the log entry context being written and displayed as invalid JSON (e.g. with backtraces or namespaced class names) in WooCommerce > Status > Logs.

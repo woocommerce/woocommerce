@@ -6,10 +6,49 @@ import { resetGatewayOrder } from '../../../utils/payments-settings';
 
 const { BASE_URL } = process.env;
 
+/**
+ * Expected `enable_for_methods` setting for an offline gateway.
+ *
+ * The shared site setup attaches a free shipping method instance to zone 0,
+ * which adds a per-instance entry (free_shipping:<id>) alongside the base
+ * option. The instance ID is non-deterministic, so only assert the base
+ * option and tolerate the baseline instance.
+ *
+ * @param {string} methodTitle Gateway method title used in the field copy.
+ * @return {Object} Expected setting object.
+ */
+const enableForMethodsSetting = ( methodTitle ) => {
+	const description = `If ${ methodTitle } is only available for certain methods, set it up here. Leave blank to enable for all methods.`;
+
+	return {
+		id: 'enable_for_methods',
+		label: 'Enable for shipping methods',
+		description,
+		type: 'multiselect',
+		value: '',
+		default: '',
+		tip: description,
+		placeholder: '',
+		options: expect.objectContaining( {
+			'Flat rate': {
+				flat_rate: 'Any &quot;Flat rate&quot; method',
+			},
+			'Free shipping': expect.objectContaining( {
+				free_shipping: 'Any &quot;Free shipping&quot; method',
+			} ),
+			'Local pickup': {
+				local_pickup: 'Any &quot;Local pickup&quot; method',
+				pickup_location: 'Any &quot;Local pickup&quot; method',
+			},
+		} ),
+	};
+};
+
 test.describe( 'Payment Gateways API tests', () => {
 	test.beforeAll( async () => {
 		await resetGatewayOrder( BASE_URL );
 	} );
+
 	test( 'can view all payment gateways', async ( { request } ) => {
 		// call API to retrieve the payment gateways
 		const response = await request.get(
@@ -27,10 +66,11 @@ test.describe( 'Payment Gateways API tests', () => {
 					description:
 						'Make your payment directly into our bank account. Please use your Order ID as the payment reference. Your order will not be shipped until the funds have cleared in our account.',
 					order: '',
-					enabled: false,
+					// Enabled by the shared site setup (offline gateway baseline).
+					enabled: true,
 					method_title: 'Direct bank transfer',
 					method_description:
-						'Take payments in person via BACS. More commonly known as direct bank/wire transfer.',
+						'Accept offline bank-to-bank and wire transfer payments.',
 					method_supports: [ 'products' ],
 					settings: {
 						title: {
@@ -53,6 +93,19 @@ test.describe( 'Payment Gateways API tests', () => {
 							value: '',
 							default: '',
 							tip: 'Instructions that will be added to the thank you page and emails.',
+							placeholder: '',
+						},
+						enable_for_methods: enableForMethodsSetting(
+							'Direct bank transfer'
+						),
+						enable_for_virtual: {
+							id: 'enable_for_virtual',
+							label: 'Accept Direct bank transfer if the order is virtual',
+							description: '',
+							type: 'checkbox',
+							value: 'yes',
+							default: 'yes',
+							tip: '',
 							placeholder: '',
 						},
 					},
@@ -96,6 +149,18 @@ test.describe( 'Payment Gateways API tests', () => {
 							tip: 'Instructions that will be added to the thank you page and emails.',
 							placeholder: '',
 						},
+						enable_for_methods:
+							enableForMethodsSetting( 'Check payments' ),
+						enable_for_virtual: {
+							id: 'enable_for_virtual',
+							label: 'Accept Check payments if the order is virtual',
+							description: '',
+							type: 'checkbox',
+							value: 'yes',
+							default: 'yes',
+							tip: '',
+							placeholder: '',
+						},
 					},
 				} ),
 			] )
@@ -108,7 +173,8 @@ test.describe( 'Payment Gateways API tests', () => {
 					title: 'Cash on delivery',
 					description: 'Pay with cash upon delivery.',
 					order: '',
-					enabled: false,
+					// Enabled by the shared site setup (offline gateway baseline).
+					enabled: true,
 					method_title: 'Cash on delivery',
 					method_description:
 						'Let your shoppers pay upon delivery — by cash or other methods of payment.',
@@ -145,33 +211,11 @@ test.describe( 'Payment Gateways API tests', () => {
 					tip: 'Instructions that will be added to the thank you page.',
 					placeholder: '',
 				},
-				enable_for_methods: {
-					id: 'enable_for_methods',
-					label: 'Enable for shipping methods',
-					description:
-						'If COD is only available for certain methods, set it up here. Leave blank to enable for all methods.',
-					type: 'multiselect',
-					value: '',
-					default: '',
-					tip: 'If COD is only available for certain methods, set it up here. Leave blank to enable for all methods.',
-					placeholder: '',
-					options: expect.objectContaining( {
-						'Flat rate': {
-							flat_rate: 'Any &quot;Flat rate&quot; method',
-						},
-						'Free shipping': {
-							free_shipping:
-								'Any &quot;Free shipping&quot; method',
-						},
-						'Local pickup': {
-							pickup_location:
-								'Any &quot;Local pickup&quot; method',
-						},
-					} ),
-				},
+				enable_for_methods:
+					enableForMethodsSetting( 'Cash on delivery' ),
 				enable_for_virtual: {
 					id: 'enable_for_virtual',
-					label: 'Accept COD if the order is virtual',
+					label: 'Accept Cash on delivery if the order is virtual',
 					description: '',
 					type: 'checkbox',
 					value: 'yes',
@@ -199,10 +243,11 @@ test.describe( 'Payment Gateways API tests', () => {
 				description:
 					'Make your payment directly into our bank account. Please use your Order ID as the payment reference. Your order will not be shipped until the funds have cleared in our account.',
 				order: '',
-				enabled: false,
+				// Enabled by the shared site setup (offline gateway baseline).
+				enabled: true,
 				method_title: 'Direct bank transfer',
 				method_description:
-					'Take payments in person via BACS. More commonly known as direct bank/wire transfer.',
+					'Accept offline bank-to-bank and wire transfer payments.',
 				method_supports: [ 'products' ],
 				settings: {
 					title: {
@@ -227,18 +272,32 @@ test.describe( 'Payment Gateways API tests', () => {
 						tip: 'Instructions that will be added to the thank you page and emails.',
 						placeholder: '',
 					},
+					enable_for_methods: enableForMethodsSetting(
+						'Direct bank transfer'
+					),
+					enable_for_virtual: {
+						id: 'enable_for_virtual',
+						label: 'Accept Direct bank transfer if the order is virtual',
+						description: '',
+						type: 'checkbox',
+						value: 'yes',
+						default: 'yes',
+						tip: '',
+						placeholder: '',
+					},
 				},
 			} )
 		);
 	} );
 
 	test( 'can update a payment gateway', async ( { request } ) => {
-		// call API to update a payment gateway
+		// BACS is enabled by the shared site setup, so toggle it off to prove the
+		// update works, then restore the baseline so no global state leaks.
 		const response = await request.put(
 			'./wp-json/wc/v3/payment_gateways/bacs',
 			{
 				data: {
-					enabled: true,
+					enabled: false,
 				},
 			}
 		);
@@ -247,14 +306,14 @@ test.describe( 'Payment Gateways API tests', () => {
 
 		expect( responseJSON ).toEqual(
 			expect.objectContaining( {
-				enabled: true,
+				enabled: false,
 			} )
 		);
 
-		// reset payment gateway setting
+		// restore the baseline payment gateway setting
 		await request.put( './wp-json/wc/v3/payment_gateways/bacs', {
 			data: {
-				enabled: false,
+				enabled: true,
 			},
 		} );
 	} );

@@ -1,7 +1,7 @@
 ---
 post_title: How to manage WooCommerce Data Stores
 sidebar_label: Manage data stores
-
+description: A guide to managing WooCommerce data stores, including creating new data stores, replacing core data stores, and calling data stores from your own code.
 ---
 
 # How to manage WooCommerce Data Stores

@@ -7,7 +7,6 @@ import { test, expect, BlockData, wpCLI } from '@woocommerce/e2e-utils';
  * Internal dependencies
  */
 import { REGULAR_PRICED_PRODUCT_NAME } from '../checkout/constants';
-import config from '../../../../../client/admin/config/core.json';
 
 const blockData: BlockData = {
 	name: 'Mini-Cart',
@@ -45,7 +44,7 @@ test.describe( `${ blockData.name } Block`, () => {
 				).toBeVisible();
 			} else {
 				await expect( page.getByRole( 'dialog' ) ).toContainText(
-					'Your cart is currently empty!'
+					'Your cart is empty'
 				);
 			}
 		}
@@ -103,8 +102,11 @@ test.describe( `${ blockData.name } Block`, () => {
 		await miniCartUtils.openMiniCart();
 
 		await expect( page.getByRole( 'dialog' ) ).toContainText(
-			'Your cart is currently empty!'
+			'Your cart is empty'
 		);
+		await expect(
+			page.getByRole( 'link', { name: 'Return to shop' } )
+		).toBeVisible();
 	} );
 
 	test( 'should close the drawer when clicking on the close button', async ( {
@@ -116,7 +118,7 @@ test.describe( `${ blockData.name } Block`, () => {
 		await miniCartUtils.openMiniCart();
 
 		await expect( page.getByRole( 'dialog' ) ).toContainText(
-			'Your cart is currently empty!'
+			'Your cart is empty'
 		);
 
 		await page.getByRole( 'button', { name: 'Close' } ).click();
@@ -132,7 +134,7 @@ test.describe( `${ blockData.name } Block`, () => {
 		await miniCartUtils.openMiniCart();
 
 		await expect( page.getByRole( 'dialog' ) ).toContainText(
-			'Your cart is currently empty!'
+			'Your cart is empty'
 		);
 
 		await page.mouse.click( 0, 0 );
@@ -186,6 +188,53 @@ test.describe( `${ blockData.name } Block`, () => {
 		await checkProductLink( page );
 	} );
 
+	test( 'should render the product table with no client-side error for a product with no item data', async ( {
+		page,
+		frontendUtils,
+		miniCartUtils,
+	} ) => {
+		const pageErrors: string[] = [];
+		const consoleErrors: string[] = [];
+
+		// Register listeners before navigating so nothing that happens during
+		// the mini-cart's render is missed. This product has no variation and
+		// no `woocommerce_get_item_data` additions (no fixture plugin is
+		// activated in this describe block), which is the plain rendering
+		// path the item-data/separator getters must not throw on.
+		page.on( 'pageerror', ( error ) => {
+			pageErrors.push( error.message );
+		} );
+		page.on( 'console', ( message ) => {
+			// Exclude the browser's own "failed to load resource" network
+			// diagnostics: they are not JS errors raised by page code (no
+			// `console.error` call is involved) and can fire for reasons
+			// entirely unrelated to the item-data/separator logic under
+			// test, e.g. an unrelated missing stylesheet.
+			if (
+				message.type() === 'error' &&
+				! message.text().includes( 'Failed to load resource' )
+			) {
+				consoleErrors.push( message.text() );
+			}
+		} );
+
+		await frontendUtils.goToShop();
+		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
+		await miniCartUtils.openMiniCart();
+
+		// The product table renders normally: name, price, quantity.
+		await checkProductLink( page );
+		await expect(
+			page.locator( '.wc-block-components-product-price' ).first()
+		).toBeVisible();
+		await expect(
+			page.getByLabel( 'Quantity of Polo in your cart.' )
+		).toHaveValue( '1' );
+
+		expect( pageErrors ).toEqual( [] );
+		expect( consoleErrors ).toEqual( [] );
+	} );
+
 	test( 'should show subtotal, view cart button and checkout button', async ( {
 		page,
 		frontendUtils,
@@ -194,15 +243,18 @@ test.describe( `${ blockData.name } Block`, () => {
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await miniCartUtils.openMiniCart();
+		const miniCartDialog = page.getByRole( 'dialog' );
 
 		await expect( page.getByText( 'Subtotal' ) ).toBeVisible();
 
 		await expect(
-			page.getByRole( 'link', { name: 'View my cart' } )
+			miniCartDialog.getByRole( 'link', { name: 'Cart' } )
 		).toBeVisible();
 
 		await expect(
-			page.getByRole( 'link', { name: 'Go to checkout' } )
+			miniCartDialog.getByRole( 'link', {
+				name: 'Checkout',
+			} )
 		).toBeVisible();
 	} );
 
@@ -219,34 +271,26 @@ test.describe( `${ blockData.name } Block`, () => {
 			page.getByLabel( 'Quantity of Polo in your cart.' )
 		).toHaveValue( '1' );
 
-		// iAPI cart uses batch requests, legacy cart uses individual endpoints.
 		// Set up waitForResponse BEFORE the click to avoid race condition.
-		const useBatch = config.features[ 'experimental-iapi-mini-cart' ];
-		let batchPromise = useBatch
-			? page.waitForResponse( '**/wp-json/wc/store/v1/batch**' )
-			: null;
+		let batchPromise = page.waitForResponse(
+			'**/wp-json/wc/store/v1/batch**'
+		);
 		await page
 			.getByRole( 'button', { name: 'Increase quantity of Polo' } )
 			.click();
 
-		if ( batchPromise ) {
-			await batchPromise;
-		}
+		await batchPromise;
 
 		await expect(
 			page.getByLabel( 'Quantity of Polo in your cart.' )
 		).toHaveValue( '2' );
 
-		batchPromise = useBatch
-			? page.waitForResponse( '**/wp-json/wc/store/v1/batch**' )
-			: null;
+		batchPromise = page.waitForResponse( '**/wp-json/wc/store/v1/batch**' );
 		await page
 			.getByRole( 'button', { name: 'Reduce quantity of Polo' } )
 			.click();
 
-		if ( batchPromise ) {
-			await batchPromise;
-		}
+		await batchPromise;
 
 		await expect(
 			page.getByLabel( 'Quantity of Polo in your cart.' )
@@ -272,9 +316,7 @@ test.describe( `${ blockData.name } Block`, () => {
 			.getByRole( 'button', { name: 'Remove Polo from cart' } )
 			.click();
 
-		await expect(
-			page.getByText( 'Your cart is currently empty!' )
-		).toBeVisible();
+		await expect( page.getByText( 'Your cart is empty' ) ).toBeVisible();
 	} );
 
 	test( 'should allow to proceed to the cart page', async ( {
@@ -285,7 +327,10 @@ test.describe( `${ blockData.name } Block`, () => {
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await miniCartUtils.openMiniCart();
-		await page.getByRole( 'link', { name: 'View my cart' } ).click();
+		await page
+			.getByRole( 'dialog' )
+			.getByRole( 'link', { name: 'Cart' } )
+			.click();
 		await expect( page ).toHaveURL( /\/cart\/?$/ );
 	} );
 
@@ -297,7 +342,10 @@ test.describe( `${ blockData.name } Block`, () => {
 		await frontendUtils.goToShop();
 		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
 		await miniCartUtils.openMiniCart();
-		await page.getByRole( 'link', { name: 'Go to checkout' } ).click();
+		await page
+			.getByRole( 'dialog' )
+			.getByRole( 'link', { name: 'Checkout' } )
+			.click();
 		await expect( page ).toHaveURL( /\/checkout\/?$/ );
 	} );
 
@@ -455,107 +503,6 @@ test.describe( `${ blockData.name } Block (admin)`, () => {
 	} );
 } );
 
-test.describe( `${ blockData.name } Block (item data)`, () => {
-	test.use( {
-		storageState: {
-			origins: [],
-			cookies: [],
-		},
-	} );
-
-	// Activate in beforeEach because the DB is reset after every test.
-	test.beforeEach( async ( { requestUtils } ) => {
-		await requestUtils.activatePlugin(
-			'woocommerce-blocks-test-item-data-display'
-		);
-	} );
-
-	test( 'should render plain text item data', async ( {
-		page,
-		frontendUtils,
-		miniCartUtils,
-	} ) => {
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-		await miniCartUtils.openMiniCart();
-
-		const dialog = page.getByRole( 'dialog' );
-		await expect( dialog ).toBeVisible();
-
-		// Verify the plain text name and value are rendered.
-		await expect(
-			dialog.locator( '.wc-block-components-product-details__name' )
-		).toContainText( [ 'Gift Message' ] );
-		await expect(
-			dialog.locator( '.wc-block-components-product-details__value' )
-		).toContainText( [ 'Happy Birthday!' ] );
-	} );
-
-	test( 'should use display field value when present', async ( {
-		page,
-		frontendUtils,
-		miniCartUtils,
-	} ) => {
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-		await miniCartUtils.openMiniCart();
-
-		const dialog = page.getByRole( 'dialog' );
-		await expect( dialog ).toBeVisible();
-
-		// The display field contains "<em>Best Wishes</em>".
-		// Verify the <em> tag is rendered as an actual HTML element.
-		const engravingValue = dialog
-			.locator( '.wc-block-components-product-details__value' )
-			.filter( { hasText: 'Best Wishes' } );
-		await expect( engravingValue ).toBeVisible();
-		await expect( engravingValue.locator( 'em' ) ).toBeVisible();
-		await expect( engravingValue.locator( 'em' ) ).toHaveText(
-			'Best Wishes'
-		);
-	} );
-
-	test( 'should decode HTML entities in item data values', async ( {
-		page,
-		frontendUtils,
-		miniCartUtils,
-	} ) => {
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-		await miniCartUtils.openMiniCart();
-
-		const dialog = page.getByRole( 'dialog' );
-		await expect( dialog ).toBeVisible();
-
-		// The value "1 &lt; 2" should display as "1 < 2"
-		// (entity decoded), not as literal "1 &lt; 2".
-		const sizeValue = dialog
-			.locator( '.wc-block-components-product-details__value' )
-			.filter( { hasText: '1' } );
-		await expect( sizeValue ).toBeVisible();
-		await expect( sizeValue ).toContainText( '1 < 2' );
-	} );
-
-	test( 'should not render entity-encoded HTML tags as DOM elements', async ( {
-		page,
-		frontendUtils,
-		miniCartUtils,
-	} ) => {
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( REGULAR_PRICED_PRODUCT_NAME );
-		await miniCartUtils.openMiniCart();
-
-		const dialog = page.getByRole( 'dialog' );
-		await expect( dialog ).toBeVisible();
-
-		const noteValue = dialog
-			.locator( '.wc-block-components-product-details__value' )
-			.filter( { hasText: 'important' } );
-		await expect( noteValue ).toBeVisible();
-		await expect( noteValue.locator( 'b' ) ).toHaveCount( 0 );
-	} );
-} );
-
 test.describe( `${ blockData.name } Block (variation attributes)`, () => {
 	test.use( {
 		storageState: {
@@ -599,9 +546,37 @@ test.describe( `${ blockData.name } Block (variation attributes)`, () => {
 		await page
 			.getByLabel( 'Shade', { exact: true } )
 			.selectOption( 'Red & Blue' );
-		await page
-			.getByRole( 'button', { name: 'Add to cart', exact: true } )
-			.click();
+
+		// The classic variable-product Add to cart button only registers a
+		// selection once the variations script has processed it. Until then the
+		// hidden `variation_id` input stays at "0" and clicking is a silent
+		// no-op (the disabled state is class-based, which Playwright's
+		// actionability checks ignore). Wait for the variation to be registered
+		// (a positive, non-zero variation id) before clicking.
+		// That is necessary but not sufficient: the script sets `variation_id`
+		// synchronously and only drops the `disabled` class ~300ms later, from a
+		// setTimeout, so wait for the button to be enabled as well. Clicking in
+		// that window hits the guard that raises a window.alert Playwright
+		// silently dismisses, and the form never submits.
+		await expect( page.locator( 'input.variation_id' ) ).toHaveValue(
+			/^[1-9][0-9]*$/
+		);
+		const addToCartButton = page.getByRole( 'button', {
+			name: 'Add to cart',
+			exact: true,
+		} );
+		await expect( addToCartButton ).not.toHaveClass( /\bdisabled\b/ );
+		await addToCartButton.click();
+
+		// Wait for a definitive "added to cart" confirmation before navigating
+		// to the shop. The single-product Add to cart is a form submission; if
+		// we navigate away before it settles the item may not be in the cart
+		// when the mini-cart opens, which is what makes the assertions below
+		// race the add-to-cart request. Scope to the success notice (role=alert)
+		// so we don't match unrelated page text.
+		await expect(
+			page.getByRole( 'alert' ).getByText( /added to your cart/i )
+		).toBeVisible();
 
 		// Open the mini-cart.
 		await frontendUtils.goToShop();

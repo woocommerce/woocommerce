@@ -6,17 +6,15 @@ import { __ } from '@wordpress/i18n';
 import { useMemo } from '@wordpress/element';
 import { useIsEmailEditor } from '@woocommerce/email-editor';
 import { recordEvent } from '@woocommerce/tracks';
-import { CesFeedbackButton } from '@woocommerce/editor-components/ces-feedback-button';
 import {
-	PanelBody,
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToolsPanel as ToolsPanel,
+	PanelBody,
 } from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
-import metadata from '../../block.json';
 import { useTracksLocation } from '../../tracks-utils';
 import {
 	ProductCollectionContentProps,
@@ -27,10 +25,7 @@ import {
 } from '../../types';
 import { setQueryAttribute, getDefaultSettings } from '../../utils';
 import ColumnsControl from './columns-control';
-import {
-	InheritQueryControl,
-	FilterableControl,
-} from './use-page-context-control';
+import { InheritQueryControl } from './use-page-context-control';
 import useCarouselLayoutAdjustments from './use-carousel-layout-adjustments';
 import useEmailPaginationAdjustments from './use-email-pagination-adjustments';
 import useEmailColumnAdjustments from './use-email-column-adjustments';
@@ -95,8 +90,6 @@ const ProductCollectionInspectorControls = (
 	const showCustomQueryControls = inherit === false;
 	const showInheritQueryControl =
 		isArchiveTemplate && shouldShowFilter( CoreFilterNames.INHERIT );
-	const showFilterableControl =
-		! isArchiveTemplate && shouldShowFilter( CoreFilterNames.FILTERABLE );
 	const showCustomOrderControl =
 		showCustomQueryControls && shouldShowFilter( CoreFilterNames.ORDER );
 	const showDefaultOrderControl = ! showCustomQueryControls;
@@ -206,9 +199,6 @@ const ProductCollectionInspectorControls = (
 				{ showInheritQueryControl && (
 					<InheritQueryControl { ...queryControlProps } />
 				) }
-				{ showFilterableControl && (
-					<FilterableControl { ...queryControlProps } />
-				) }
 				{ showCustomOrderControl && (
 					<CustomQueryOrderByControl { ...queryControlProps } />
 				) }
@@ -249,7 +239,7 @@ const ProductCollectionInspectorControls = (
 			{ showCustomQueryControls ? (
 				<ToolsPanel
 					label={ __( 'Filters', 'woocommerce' ) }
-					resetAll={ ( resetAllFilters: ( () => void )[] ) => {
+					resetAll={ ( resetAllFilters = [] ) => {
 						resetAllFilters.forEach( ( resetFilter ) => {
 							resetFilter();
 						} );
@@ -289,10 +279,6 @@ const ProductCollectionInspectorControls = (
 					) }
 				</ToolsPanel>
 			) : null }
-			<CesFeedbackButton
-				blockName={ `${ metadata.title } block` }
-				wrapper={ PanelBody }
-			/>
 		</InspectorControls>
 	);
 };

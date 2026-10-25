@@ -2,6 +2,8 @@
 
 WooCommerce Admin data store and utilities.
 
+WooCommerce registers the `wc-store-data` script in wp-admin only, so these stores are not available on the storefront or in blocks rendered there. For settings in blocks and storefront code, use `getSetting` from `wc.wcSettings` instead. See [`@woocommerce/settings` in the dependency extraction plugin README](https://github.com/woocommerce/woocommerce/blob/trunk/packages/js/dependency-extraction-webpack-plugin/README.md#woocommercesettings).
+
 ## Installation
 
 Install the module

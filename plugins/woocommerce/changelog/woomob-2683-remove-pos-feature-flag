@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Deprecate the Point of Sale feature flag and remove its toggle from WooCommerce settings; POS-related functionality (settings page, product visibility, and transactional emails) is now always enabled. The flag setting remains readable via the REST API for mobile app compatibility.

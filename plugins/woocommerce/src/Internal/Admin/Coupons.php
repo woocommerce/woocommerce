@@ -5,7 +5,6 @@
 
 namespace Automattic\WooCommerce\Internal\Admin;
 
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\PageController;
 
 /**
@@ -37,11 +36,6 @@ class Coupons {
 	 */
 	public function __construct() {
 		if ( ! is_admin() ) {
-			return;
-		}
-
-		// If the main marketing feature is disabled, don't modify coupon behavior.
-		if ( ! Features::is_enabled( 'marketing' ) ) {
 			return;
 		}
 
@@ -109,8 +103,8 @@ class Coupons {
 	 * Maybe add our wc-admin coupon scripts if viewing coupon pages
 	 */
 	public function maybe_add_marketing_coupon_script() {
-		$curent_screen = PageController::get_instance()->get_current_page();
-		if ( ! isset( $curent_screen['id'] ) || $curent_screen['id'] !== 'woocommerce-coupons' ) {
+		$current_screen = PageController::get_instance()->get_current_page();
+		if ( ! isset( $current_screen['id'] ) || 'woocommerce-coupons' !== $current_screen['id'] ) {
 			return;
 		}
 

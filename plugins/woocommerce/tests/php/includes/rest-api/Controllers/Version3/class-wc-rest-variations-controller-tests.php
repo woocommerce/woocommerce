@@ -119,10 +119,8 @@ class WC_REST_Variations_Controller_Tests extends WC_REST_Unit_Test_Case {
 		// Given.
 		wp_set_current_user( $this->user );
 
-		// Creates 3 variable products to have more variations.
-		for ( $i = 0; $i < 3; $i++ ) {
-			WC_Helper_Product::create_variation_product();
-		}
+		// Creates a variable product with enough variations for multiple pages.
+		WC_Helper_Product::create_variation_product();
 
 		// When.
 		$request = new WP_REST_Request( 'GET', '/wc/v3/variations' );
@@ -140,8 +138,46 @@ class WC_REST_Variations_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'X-WP-TotalPages', $headers );
 		$total       = (int) $headers['X-WP-Total'];
 		$total_pages = (int) $headers['X-WP-TotalPages'];
-		$this->assertSame( 18, $total ); // 3 variable products * 6 variations per product.
-		$this->assertSame( 9, $total_pages );
+		$this->assertSame( 6, $total );
+		$this->assertSame( 3, $total_pages );
+	}
+
+	/**
+	 * @testdox Paging variations from several products that share a menu_order returns each variation exactly once.
+	 */
+	public function test_get_variations_paginated_by_menu_order_return_each_variation_once(): void {
+		wp_set_current_user( $this->user );
+		$expected_ids = array();
+		for ( $p = 0; $p < 2; $p++ ) {
+			$product = new WC_Product_Variable();
+			$product->save();
+			for ( $v = 0; $v < 4; $v++ ) {
+				$variation = new WC_Product_Variation();
+				$variation->set_parent_id( $product->get_id() );
+				$variation->set_menu_order( 0 );
+				$expected_ids[] = $variation->save();
+			}
+		}
+
+		$per_page      = 3;
+		$collected_ids = array();
+		// Request one page past the last, which should come back empty.
+		$page_count = (int) ceil( count( $expected_ids ) / $per_page ) + 1;
+		for ( $page = 1; $page <= $page_count; $page++ ) {
+			$request = new WP_REST_Request( 'GET', '/wc/v3/variations' );
+			$request->set_query_params(
+				array(
+					'orderby'  => 'menu_order',
+					'order'    => 'asc',
+					'per_page' => $per_page,
+					'page'     => $page,
+				)
+			);
+			$collected_ids = array_merge( $collected_ids, wp_list_pluck( $this->server->dispatch( $request )->get_data(), 'id' ) );
+		}
+
+		rsort( $expected_ids );
+		$this->assertSame( $expected_ids, $collected_ids, 'Every variation should appear exactly once, newest first among equal menu_order values.' );
 	}
 
 	/**

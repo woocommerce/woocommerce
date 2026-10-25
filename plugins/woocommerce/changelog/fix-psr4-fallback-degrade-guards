@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Harden the in-place-upgrade PSR-4 fallback autoloader so its remaining unguarded paths degrade gracefully: a foreign Composer ClassLoader shape and a torn/partially-written class file mid-upgrade now leave the class unresolved instead of fataling, so a defensive class_exists() probe during an upgrade returns false rather than raising an error.

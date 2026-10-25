@@ -1,0 +1,92 @@
+--- a/src/generate.php
++++ b/src/generate.php
+@@ -340,10 +340,7 @@
+ 					$description = preg_replace( '/[\n\r]+/', ' ', strval( $tag->getDescription() ) );
+ 
+ 					if ( ! empty( $description ) ) {
+-						$markdown = \Parsedown::instance();
+-						$html = $markdown->text( $description );
+-						$html = preg_replace( '/^<p>(.*)<\/p>$/', '$1', $html );
+-						$tag_data['description'] = $html;
++						$tag_data['description'] = $description;
+ 					}
+ 				} elseif ( $tag instanceof \phpDocumentor\Reflection\DocBlock\Tags\Deprecated ) {
+ 					$tag_data['content'] = (string) $tag;
+@@ -355,11 +352,6 @@
+ 						$tag_data['types'] = [ (string) $type ];
+ 					}
+ 					$tag_data['variable'] = '$' . $tag->getVariableName();
+-
+-					$markdown = \Parsedown::instance();
+-					$html = $markdown->text( $tag_data['content'] );
+-					$html = preg_replace( '/^<p>(.*)<\/p>$/', '$1', $html );
+-					$tag_data['content'] = $html;
+ 				} elseif ( $tag instanceof \phpDocumentor\Reflection\DocBlock\Tags\Link ) {
+ 					$link = $tag->getLink();
+ 					$tag_data['content'] = sprintf(
+@@ -372,26 +364,22 @@
+ 					//
+ 				} elseif ( $tag instanceof \phpDocumentor\Reflection\DocBlock\Tags\See ) {
+ 					$tag_data['refers'] = ltrim( (string) $tag->getReference(), '\\' );
+-					$markdown = \Parsedown::instance();
+-					$html = $markdown->text( $tag_data['content'] );
+-					$html = preg_replace( '/^<p>(.*)<\/p>$/', '$1', $html );
+-					$tag_data['content'] = $html;
+ 				} elseif ( $tag instanceof \phpDocumentor\Reflection\DocBlock\Tags\InvalidTag && $tag->getName() === 'see' ) {
+ 					//
+-				} elseif ( $tag instanceof \phpDocumentor\Reflection\DocBlock\Tags\Return_ ) {
++				} elseif ( $tag instanceof \phpDocumentor\Reflection\DocBlock\Tags\Return_ || $tag instanceof \phpDocumentor\Reflection\DocBlock\Tags\Throws ) {
++					$type = $tag->getType();
++					if ( $type instanceof \phpDocumentor\Reflection\Types\Compound ) {
++						$tag_data['types'] = array_map( 'strval', iterator_to_array( $type ) );
++					} else {
++						$tag_data['types'] = [ (string) $type ];
++					}
++				} else {
+ 					printf(
+-						'Hook "%s" contains a `@return` tag, which is not supported.' . "\n",
++						'Warning: unknown tag type "%s" (@%s) for hook "%s" in file "%s".' . "\n",
++						get_class( $tag ),
++						$tag->getName(),
+ 						$hook_name,
+-					);
+-				} else {
+-					throw new \Exception(
+-						sprintf(
+-							'Unknown tag type "%s" (@%s) for hook "%s" in file "%s".',
+-							get_class( $tag ),
+-							$tag->getName(),
+-							$hook_name,
+-							$filename,
+-						)
++						$filename,
+ 					);
+ 				}
+ 
+@@ -401,24 +389,11 @@
+ 			$markdown = \Parsedown::instance();
+ 			$html = $markdown->text((string) $db->getDescription());
+ 			$html = str_replace( "\n", ' ', $html );
+-			$long = fix_newlines( (string) $db->getDescription() );
+-			$long = str_replace(
+-				'  - ',
+-				"\n  - ",
+-				$long
+-			);
+-			$long = preg_replace_callback(
+-				'# ([1-9])\. #',
+-				static function( array $matches ) : string {
+-					return "\n {$matches[1]}. ";
+-				},
+-				$long
+-			);
+ 			$doc = [
+ 				'description' => str_replace( "\n", ' ', $summary ),
+-				'long_description' => $long,
++				'long_description' => (string) $db->getDescription(),
+ 				'tags' => $tags,
+-				'long_description_html' => $html,
++				'long_description_html' => '',
+ 			];
+ 			$out = [];
+ 

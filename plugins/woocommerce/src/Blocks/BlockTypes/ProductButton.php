@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils;
 use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\Utilities\InCartQuantity;
 
 /**
  * ProductButton class.
@@ -21,14 +22,6 @@ class ProductButton extends AbstractBlock {
 	 * @var string
 	 */
 	protected $block_name = 'product-button';
-
-
-	/**
-	 * Cart.
-	 *
-	 * @var array
-	 */
-	private static $cart = null;
 
 	/**
 	 * Register the context.
@@ -100,13 +93,13 @@ class ProductButton extends AbstractBlock {
 
 		BlocksSharedState::load_cart_state( 'I acknowledge that using private APIs means my theme or plugin will inevitably break in the next version of WooCommerce' );
 
-		$number_of_items_in_cart  = $this->get_cart_item_quantities_by_product_id( $product->get_id() );
+		$number_of_items_in_cart  = InCartQuantity::for_product( $product->get_id() );
 		$is_product_purchasable   = $this->is_product_purchasable( $product );
 		$cart_redirect_after_add  = get_option( 'woocommerce_cart_redirect_after_add' ) === 'yes';
 		$ajax_add_to_cart_enabled = get_option( 'woocommerce_enable_ajax_add_to_cart' ) === 'yes';
 		$is_ajax_button           = ( ( $ajax_add_to_cart_enabled && $product->supports( 'ajax_add_to_cart' ) ) || $is_descendant_of_add_to_cart_form ) && $is_product_purchasable && ! $cart_redirect_after_add;
 		$html_element             = $is_ajax_button || ( $is_descendant_of_add_to_cart_form && ! $product->is_type( ProductType::EXTERNAL ) ) ? 'button' : 'a';
-		$styles_and_classes       = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
+		$styles_and_classes       = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes', 'margin' ) );
 		$classname                = StyleAttributesUtils::get_classes_by_attributes( $attributes, array( 'extra_classes' ) );
 		$custom_width_classes     = isset( $attributes['width'] ) ? 'has-custom-width wp-block-button__width-' . $attributes['width'] : '';
 		$custom_align_classes     = isset( $attributes['textAlign'] ) ? 'align-' . $attributes['textAlign'] : '';
@@ -132,10 +125,12 @@ class ProductButton extends AbstractBlock {
 			 * Filters the change the quantity to add to cart.
 			 *
 			 * @since 8.5.0
-			 * @param number $default_quantity The default quantity.
-			 * @param number $product_id The product id.
+			 * @since 11.0.0 Added the `$variation_id` parameter.
+			 * @param int|float $default_quantity The default quantity.
+			 * @param int       $product_id The product id.
+			 * @param int       $variation_id The variation ID. Always 0 in this context.
 			 */
-			$default_quantity = apply_filters( 'woocommerce_add_to_cart_quantity', $default_quantity, $product->get_id() );
+			$default_quantity = apply_filters( 'woocommerce_add_to_cart_quantity', $default_quantity, $product->get_id(), 0 );
 		}
 
 		$add_to_cart_text = null !== $product->add_to_cart_text() ? $product->add_to_cart_text() : __( 'Add to cart', 'woocommerce' );
@@ -163,10 +158,15 @@ class ProductButton extends AbstractBlock {
 		);
 
 		if ( 'a' === $html_element ) {
-			$attributes = array(
-				'href' => esc_url( $product->add_to_cart_url() ),
-				'rel'  => 'nofollow',
+			$add_to_cart_url = $product->add_to_cart_url();
+			$attributes      = array(
+				'href' => esc_url( $add_to_cart_url ),
+				'rel'  => '',
 			);
+
+			if ( $product->get_permalink() !== $add_to_cart_url ) {
+				$attributes['rel'] = 'nofollow';
+			}
 
 			if ( $product->is_type( ProductType::EXTERNAL ) ) {
 				$attributes['target'] = '_blank';
@@ -183,19 +183,35 @@ class ProductButton extends AbstractBlock {
 			)
 		);
 
+		$get_add_to_cart_text = function () {
+			$context          = wp_interactivity_get_context();
+			$quantity         = $context['tempQuantity'];
+			$add_to_cart_text = $context['addToCartText'];
+
+			return $quantity > 0 ? sprintf(
+				/* translators: %s: product number. */
+				__( '%s in cart', 'woocommerce' ),
+				$quantity
+			) : $add_to_cart_text;
+		};
+
 		wp_interactivity_state(
 			'woocommerce/product-button',
 			array(
-				'addToCartText' => function () {
+				'addToCartText'      => $get_add_to_cart_text,
+				'addToCartAriaLabel' => function () use ( $get_add_to_cart_text ) {
 					$context = wp_interactivity_get_context();
-					$quantity = $context['tempQuantity'];
-					$add_to_cart_text = $context['addToCartText'];
+					$text    = $get_add_to_cart_text();
 
-					return $quantity > 0 ? sprintf(
-						/* translators: %s: product number. */
-						__( '%s in cart', 'woocommerce' ),
-						$quantity
-					) : $add_to_cart_text;
+					if ( $text === $context['addToCartText'] ) {
+						return $context['addToCartAriaLabel'];
+					}
+
+					$pos = strpos( $context['inTheCartAriaLabel'], '###' );
+
+					return false !== $pos
+						? substr_replace( $context['inTheCartAriaLabel'], $text, $pos, 3 )
+						: $context['inTheCartAriaLabel'];
 				},
 			)
 		);
@@ -204,6 +220,9 @@ class ProductButton extends AbstractBlock {
 		 * Allow filtering of the add to cart button arguments.
 		 *
 		 * @since 9.7.0
+		 *
+		 * @param array       $args    Button arguments, with a `class` string and an `attributes` array.
+		 * @param \WC_Product $product Product the button is rendered for.
 		 */
 		$args = apply_filters(
 			'woocommerce_loop_add_to_cart_args',
@@ -221,8 +240,22 @@ class ProductButton extends AbstractBlock {
 			$product
 		);
 
+		// The accessible name must keep containing the visible text once it changes to "N in cart" (WCAG 2.5.3).
 		if ( isset( $args['attributes']['aria-label'] ) ) {
 			$args['attributes']['aria-label'] = wp_strip_all_tags( $args['attributes']['aria-label'] );
+
+			if ( empty( $args['attributes']['aria-label'] ) ) {
+				unset( $args['attributes']['aria-label'] );
+			} else {
+				// Decode so the browser doesn't read entities such as &ldquo; as literal text when it sets the label.
+				$context['addToCartAriaLabel'] = html_entity_decode( $args['attributes']['aria-label'], ENT_QUOTES, get_bloginfo( 'charset' ) );
+				$context['inTheCartAriaLabel'] = sprintf(
+					/* translators: 1: Button text, such as "2 in cart". 2: Button description, such as "Add to cart: “Beanie”". */
+					_x( '%1$s, %2$s', 'Product button screen reader label: 1: button text, 2: product description', 'woocommerce' ),
+					'###',
+					$context['addToCartAriaLabel']
+				);
+			}
 		}
 
 		$div_directives = '
@@ -237,6 +270,10 @@ class ProductButton extends AbstractBlock {
 			data-wp-on--click="actions.handlePressedState"' :
 			'data-wp-on--click="actions.addCartItem"';
 		$anchor_directive  = $is_descendant_of_add_to_cart_form ? '' : 'data-wp-on--click="woocommerce/product-collection::actions.viewProduct"';
+
+		if ( isset( $context['addToCartAriaLabel'] ) ) {
+			$button_directives .= ' data-wp-bind--aria-label="state.addToCartAriaLabel"';
+		}
 
 		$span_button_directives = '
 			data-wp-text="state.addToCartText"
@@ -289,7 +326,7 @@ class ProductButton extends AbstractBlock {
 				'{context_directives}'     => $context_directives,
 				'{button_styles}'          => esc_attr( $styles_and_classes['styles'] ),
 				'{attributes}'             => isset( $args['attributes'] ) ? wc_implode_html_attributes( $args['attributes'] ) : '',
-				'{add_to_cart_text}'       => $is_ajax_button ? '' : $add_to_cart_text,
+				'{add_to_cart_text}'       => $is_ajax_button ? '' : esc_html( $add_to_cart_text ),
 				'{div_directives}'         => $is_ajax_button ? $div_directives : '',
 				'{button_directives}'      => $is_ajax_button ? $button_directives : $anchor_directive,
 				'{span_button_directives}' => $is_ajax_button ? $span_button_directives : '',
@@ -316,21 +353,6 @@ class ProductButton extends AbstractBlock {
 		$product = $previous_product;
 
 		return $html;
-	}
-
-	/**
-	 * Get the number of items in the cart for a given product id.
-	 *
-	 * @param number $product_id The product id.
-	 * @return number The number of items in the cart.
-	 */
-	private function get_cart_item_quantities_by_product_id( $product_id ) {
-		if ( ! isset( WC()->cart ) ) {
-			return 0;
-		}
-
-		$cart = WC()->cart->get_cart_item_quantities();
-		return isset( $cart[ $product_id ] ) ? $cart[ $product_id ] : 0;
 	}
 
 	/**

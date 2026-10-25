@@ -1,6 +1,9 @@
 <?php
 namespace Automattic\WooCommerce\StoreApi\Formatters;
 
+use Automattic\WooCommerce\Enums\CurrencyPosition;
+use Automattic\WooCommerce\Internal\Utilities\PriceSeparators;
+
 /**
  * Currency Formatter.
  *
@@ -21,16 +24,16 @@ class CurrencyFormatter implements FormatterInterface {
 		$suffix   = '';
 
 		switch ( $position ) {
-			case 'left_space':
+			case CurrencyPosition::LEFT_SPACE:
 				$prefix = $symbol . ' ';
 				break;
-			case 'left':
+			case CurrencyPosition::LEFT:
 				$prefix = $symbol;
 				break;
-			case 'right_space':
+			case CurrencyPosition::RIGHT_SPACE:
 				$suffix = ' ' . $symbol;
 				break;
-			case 'right':
+			case CurrencyPosition::RIGHT:
 				$suffix = $symbol;
 				break;
 		}
@@ -41,8 +44,8 @@ class CurrencyFormatter implements FormatterInterface {
 				'currency_code'               => get_woocommerce_currency(),
 				'currency_symbol'             => $symbol,
 				'currency_minor_unit'         => wc_get_price_decimals(),
-				'currency_decimal_separator'  => wc_get_price_decimal_separator(),
-				'currency_thousand_separator' => wc_get_price_thousand_separator(),
+				'currency_decimal_separator'  => PriceSeparators::get_decimal(),
+				'currency_thousand_separator' => PriceSeparators::get_thousand(),
 				'currency_prefix'             => $prefix,
 				'currency_suffix'             => $suffix,
 			]

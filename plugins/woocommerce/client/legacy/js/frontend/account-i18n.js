@@ -14,7 +14,7 @@ jQuery( function( $ ) {
          * in between.
          */
         setTimeout(function() {
-            $(notices[0]).attr('tabindex', '-1').focus();
+            $(notices[0]).attr('tabindex', '-1').trigger( 'focus' );
         });
     }
 });

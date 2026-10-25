@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Migrate Blocks e2e leaf utils (constants, test, types, wp-cli, get-test-translation, request-utils, navigation) and content-templates into the Core e2e suite under a blocks/ namespace; test-only, no changes to shipped code.

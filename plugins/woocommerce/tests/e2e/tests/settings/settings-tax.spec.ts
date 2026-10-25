@@ -12,6 +12,24 @@ import { ADMIN_STATE_PATH } from '../../playwright.config';
 test.describe( 'WooCommerce Tax Settings > enable', () => {
 	test.use( { storageState: ADMIN_STATE_PATH } );
 
+	// Tax calculation is enabled globally in site setup, so disable it first to
+	// make the UI toggle an actual change — otherwise the checkbox is already
+	// checked, the form is unchanged, and the React "Save changes" button stays
+	// disabled. Restore the baseline (enabled) afterwards so the shared site
+	// doesn't drift off-baseline for concurrent workers.
+	test.beforeEach( async ( { restApi } ) => {
+		await restApi.put(
+			`${ WC_API_PATH }/settings/general/woocommerce_calc_taxes`,
+			{ value: 'no' }
+		);
+	} );
+	test.afterEach( async ( { restApi } ) => {
+		await restApi.put(
+			`${ WC_API_PATH }/settings/general/woocommerce_calc_taxes`,
+			{ value: 'yes' }
+		);
+	} );
+
 	test( 'can enable tax calculation', async ( { page } ) => {
 		await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=general' );
 
@@ -49,10 +67,13 @@ test.describe.serial( 'WooCommerce Tax Settings', () => {
 		);
 	} );
 	test.afterEach( async ( { restApi } ) => {
+		// Restore the global baseline (tax calculation enabled in site setup)
+		// rather than leaving it off, which would disable tax for concurrent
+		// workers and drift the shared site off-baseline.
 		await restApi.put(
 			`${ WC_API_PATH }/settings/general/woocommerce_calc_taxes`,
 			{
-				value: 'no',
+				value: 'yes',
 			}
 		);
 	} );

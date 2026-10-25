@@ -5,7 +5,6 @@ const path = require( 'path' );
 const fs = require( 'fs' );
 const { paramCase } = require( 'change-case' );
 const webpack = require( 'webpack' );
-const RemoveFilesPlugin = require( './remove-files-webpack-plugin' );
 const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
 const ProgressBarPlugin = require( 'progress-bar-webpack-plugin' );
 const CircularDependencyPlugin = require( 'circular-dependency-plugin' );
@@ -16,10 +15,11 @@ const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
  * Internal dependencies
  */
 const DependencyExtractionWebpackPlugin = require( '@woocommerce/dependency-extraction-webpack-plugin' );
-const FilesystemCacheWarningsPlugin = require( './filesystem-cache-warnings-webpack-plugin.js' );
 const {
 	WebpackRTLPlugin,
 } = require( '@woocommerce/internal-build/style-build' );
+const FilesystemCacheWarningsPlugin = require( './filesystem-cache-warnings-webpack-plugin.js' );
+const RemoveFilesPlugin = require( './remove-files-webpack-plugin' );
 const { getEntryConfig, genericBlocks } = require( './webpack-entries' );
 const {
 	ASSET_CHECK,
@@ -52,14 +52,18 @@ let initialBundleAnalyzerPort = 8888;
 const getSharedPlugins = ( {
 	bundleAnalyzerReportTitle,
 	checkCircularDeps = true,
+	dependencyRequestToExternal = requestToExternal,
+	dependencyRequestToHandle = requestToHandle,
 } ) =>
 	[
 		CHECK_CIRCULAR_DEPS === 'true' && checkCircularDeps !== false
 			? new CircularDependencyPlugin( {
-					exclude: [ /[\/\\](node_modules|build|docs|vendor)[\/\\]/ ],
+					// This plugin calls exclude.test() directly, so it must be a
+					// single RegExp, not the array webpack's module rules accept.
+					exclude: /[\/\\](node_modules|build|docs|vendor)[\/\\]/,
 					cwd: process.cwd(),
 					failOnError: 'warn',
-			  } )
+				} )
 			: false,
 		// The WP_BUNDLE_ANALYZER global variable enables a utility that represents bundle
 		// content as a convenient interactive zoomable treemap.
@@ -72,8 +76,8 @@ const getSharedPlugins = ( {
 			injectPolyfill: true,
 			combineAssets: ASSET_CHECK,
 			outputFormat: ASSET_CHECK ? 'json' : 'php',
-			requestToExternal,
-			requestToHandle,
+			requestToExternal: dependencyRequestToExternal,
+			requestToHandle: dependencyRequestToHandle,
 		} ),
 		// Substitute the `__i18n_text_domain__` identifier used by the
 		// @woocommerce/email-editor package with the WooCommerce text
@@ -189,9 +193,7 @@ const getMainConfig = ( options = {} ) => {
 							presets: [ '@wordpress/babel-preset-default' ],
 							plugins: [
 								isProduction
-									? require.resolve(
-											'babel-plugin-transform-react-remove-prop-types'
-									  )
+									? require.resolve( 'babel-plugin-transform-react-remove-prop-types' )
 									: false,
 							].filter( Boolean ),
 							cacheDirectory: BABEL_CACHE_DIR,
@@ -252,8 +254,9 @@ const getMainConfig = ( options = {} ) => {
 							if (
 								metadata.parent &&
 								! genericBlocks[ blockName ]
-							)
+							) {
 								return `./inner-blocks/${ blockName }/block.json`;
+							}
 							return `./${ blockName }/block.json`;
 						},
 					},
@@ -317,9 +320,7 @@ const getFrontConfig = ( options = {} ) => {
 							],
 							plugins: [
 								isProduction
-									? require.resolve(
-											'babel-plugin-transform-react-remove-prop-types'
-									  )
+									? require.resolve( 'babel-plugin-transform-react-remove-prop-types' )
 									: false,
 							].filter( Boolean ),
 							cacheDirectory: BABEL_CACHE_DIR,
@@ -409,9 +410,7 @@ const getPaymentsConfig = ( options = {} ) => {
 							],
 							plugins: [
 								isProduction
-									? require.resolve(
-											'babel-plugin-transform-react-remove-prop-types'
-									  )
+									? require.resolve( 'babel-plugin-transform-react-remove-prop-types' )
 									: false,
 							].filter( Boolean ),
 							cacheDirectory: BABEL_CACHE_DIR,
@@ -490,9 +489,7 @@ const getExtensionsConfig = ( options = {} ) => {
 							],
 							plugins: [
 								isProduction
-									? require.resolve(
-											'babel-plugin-transform-react-remove-prop-types'
-									  )
+									? require.resolve( 'babel-plugin-transform-react-remove-prop-types' )
 									: false,
 							].filter( Boolean ),
 							cacheDirectory: BABEL_CACHE_DIR,
@@ -571,9 +568,7 @@ const getSiteEditorConfig = ( options = {} ) => {
 							],
 							plugins: [
 								isProduction
-									? require.resolve(
-											'babel-plugin-transform-react-remove-prop-types'
-									  )
+									? require.resolve( 'babel-plugin-transform-react-remove-prop-types' )
 									: false,
 							].filter( Boolean ),
 							cacheDirectory: BABEL_CACHE_DIR,
@@ -692,9 +687,7 @@ const getStylingConfig = ( options = {} ) => {
 							presets: [ '@wordpress/babel-preset-default' ],
 							plugins: [
 								isProduction
-									? require.resolve(
-											'babel-plugin-transform-react-remove-prop-types'
-									  )
+									? require.resolve( 'babel-plugin-transform-react-remove-prop-types' )
 									: false,
 							].filter( Boolean ),
 							cacheDirectory: BABEL_CACHE_DIR,
@@ -826,9 +819,7 @@ const getCartAndCheckoutFrontendConfig = ( options = {} ) => {
 							],
 							plugins: [
 								isProduction
-									? require.resolve(
-											'babel-plugin-transform-react-remove-prop-types'
-									  )
+									? require.resolve( 'babel-plugin-transform-react-remove-prop-types' )
 									: false,
 							].filter( Boolean ),
 							cacheDirectory: BABEL_CACHE_DIR,
@@ -858,7 +849,7 @@ const getCartAndCheckoutFrontendConfig = ( options = {} ) => {
 					},
 					base: {
 						// A refined include blocks and settings that are shared between cart and checkout that produces the smallest possible bundle.
-						test: /assets[\\/]js[\\/](settings|previews|base|data|utils|blocks[\\/]cart-checkout-shared|icons)|packages[\\/](checkout|components)|atomic[\\/]utils/,
+						test: /assets[\\/]js[\\/](settings|previews|base|utils|blocks[\\/]cart-checkout-shared|icons)|packages[\\/]public-api[\\/](block-data|blocks-checkout|blocks-components|settings)[\\/]/,
 						name: 'wc-cart-checkout-base',
 						chunks: 'all',
 						enforce: true,
@@ -884,6 +875,7 @@ const getCartAndCheckoutFrontendConfig = ( options = {} ) => {
 };
 
 module.exports = {
+	getSharedPlugins,
 	getCoreConfig,
 	getFrontConfig,
 	getMainConfig,

@@ -32,6 +32,7 @@ describe( 'StockPanel', () => {
 	it( 'should request more products when one is updated', async () => {
 		const createNotice = jest.fn();
 		const invalidateResolution = jest.fn();
+		const invalidateActivityPanel = jest.fn();
 		const updateProductStock = jest.fn().mockResolvedValue( true );
 
 		const { getByRole } = render(
@@ -49,19 +50,26 @@ describe( 'StockPanel', () => {
 					},
 				] }
 				invalidateResolution={ invalidateResolution }
+				invalidateActivityPanel={ invalidateActivityPanel }
 				updateProductStock={ updateProductStock }
 				createNotice={ createNotice }
 			/>
 		);
 
-		userEvent.click( getByRole( 'button', { name: 'Update stock' } ) );
+		await userEvent.click(
+			getByRole( 'button', { name: 'Update stock' } )
+		);
 		// Number input gets "spinbutton", apparently.
-		userEvent.type( getByRole( 'spinbutton' ), '3' );
+		await userEvent.type( getByRole( 'spinbutton' ), '3' );
 		fireEvent.submit( getByRole( 'button', { name: 'Save' } ) );
 
 		await waitFor( () => {
 			expect( invalidateResolution ).toHaveBeenCalled();
 		} );
+		expect( invalidateActivityPanel ).toHaveBeenCalledWith(
+			'getActivityPanelCounts',
+			[]
+		);
 	} );
 	it( 'should record activity_panel_stock_update_stock Tracks event when Update stock is clicked', async () => {
 		const createNotice = jest.fn();
@@ -87,7 +95,9 @@ describe( 'StockPanel', () => {
 				createNotice={ createNotice }
 			/>
 		);
-		userEvent.click( getByRole( 'button', { name: 'Update stock' } ) );
+		await userEvent.click(
+			getByRole( 'button', { name: 'Update stock' } )
+		);
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'activity_panel_stock_update_stock',
 			{}

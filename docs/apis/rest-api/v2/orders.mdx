@@ -91,10 +91,12 @@ The orders API allows you to create, view, update, and delete individual, or a b
 | `value`   | string  | Meta value.                                        |
 
 ### Order - Line items properties
+
 | Attribute      | Type    | Description                                                                                                   |
 | -------------- | ------- | ------------------------------------------------------------------------------------------------------------- |
 | `id`           | integer | Item ID. `READ-ONLY`                                                            |
 | `name`         | string  | Product name.                                                                                                 |
+| `parent_name`  | string or null | Parent product name if the product is a variation; otherwise `null`.                                      |
 | `product_id`   | integer | Product ID.                                                                                                   |
 | `variation_id` | integer | Variation ID, if applicable.                                                                                  |
 | `quantity`     | integer | Quantity ordered.                                                                                             |
@@ -106,7 +108,16 @@ The orders API allows you to create, view, update, and delete individual, or a b
 | `taxes`        | array   | Line taxes. See [Order - Taxes properties](#order---taxes-properties) `READ-ONLY` |
 | `meta_data`    | array   | Meta data. See [Order - Meta data properties](#order---meta-data-properties)                                    |
 | `sku`          | string  | Product SKU. `READ-ONLY`                                                        |
+| `global_unique_id` | string or null | Product GTIN, UPC, EAN or ISBN. An empty string if not set, or `null` if the product no longer exists. `READ-ONLY` |
 | `price`        | string  | Product price. `READ-ONLY`                                                      |
+| `image`        | object  | Main product image. See [Order - Line item image properties](#order---line-item-image-properties). `READ-ONLY` |
+
+### Order - Line item image properties
+
+| Attribute | Type | Description |
+| --------- | ---- | ----------- |
+| `id` | integer or string | Image attachment ID, returned as an integer or numeric string. An empty string or `0` if no image is set; `0` if the product no longer exists. `READ-ONLY` |
+| `src` | string or boolean | Full-size image URL. An empty string if no image is set or the product no longer exists, or `false` if the attachment cannot be resolved. `READ-ONLY` |
 
 ### Order - Tax lines properties
 | Attribute            | Type    | Description                                                                         |

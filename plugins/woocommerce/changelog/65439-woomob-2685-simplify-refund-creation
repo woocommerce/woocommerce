@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Make per-line `refund_total` optional on POST /wc/v4/refunds. When omitted, the backend computes the tax-inclusive refund total from the order line item's unit price × quantity. The legacy explicit form (refund_total without quantity) is preserved for v3-style callers.

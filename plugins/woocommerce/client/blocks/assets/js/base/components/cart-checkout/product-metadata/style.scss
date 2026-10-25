@@ -4,7 +4,20 @@
 	flex-direction: column;
 	gap: $gap-smallest;
 
-	.wc-block-components-product-metadata__description > p,
+	.wc-block-components-product-metadata__description {
+		> p,
+		> h1,
+		> h2,
+		> h3,
+		> h4,
+		> h5,
+		> h6 {
+			margin: 0;
+			color: inherit;
+			@include font-x-small-locked;
+		}
+	}
+
 	.wc-block-components-product-metadata__variation-data {
 		margin: 0;
 		@include font-x-small-locked;

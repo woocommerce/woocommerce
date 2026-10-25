@@ -9,17 +9,13 @@ import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 import { test as baseTest, expect, tags } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 import { checkCartContent } from '../../utils/cart';
+import {
+	getFakeAttribute,
+	getFakeCategory,
+	getFakeTag,
+} from '../../utils/data';
 
 const productData = {
-	virtual: {
-		name: `Virtual product ${ Date.now() }`,
-		description: `Virtual product longer description`,
-		shortDescription: `Virtual product short description`,
-		regularPrice: '100.05',
-		sku: `0_${ Date.now() }`,
-		virtual: true,
-		purchaseNote: 'Virtual product purchase note',
-	},
 	'non virtual': {
 		name: `Simple product ${ Date.now() }`,
 		description: `<b>Simple product HTML description.</b> <em>This should be italic.</em>`,
@@ -33,15 +29,6 @@ const productData = {
 			height: '30',
 		},
 		purchaseNote: 'Simple product purchase note',
-	},
-	downloadable: {
-		name: `Downloadable product ${ Date.now() }`,
-		regularPrice: '100.05',
-		description: `Downloadable product longer description`,
-		shortDescription: `Downloadable product short description`,
-		sku: `2_${ Date.now() }`,
-		purchaseNote: 'Downloadable product purchase note',
-		fileName: 'e2e-product.zip',
 	},
 };
 
@@ -62,10 +49,13 @@ const test = baseTest.extend( {
 	category: async ( { restApi }, use ) => {
 		let category = {};
 
+		// Use a random term so parallel workers don't collide on the same
+		// `Date.now()` category name (which fails with a 400 term_exists).
 		await restApi
-			.post( `${ WC_API_PATH }/products/categories`, {
-				name: `cat_${ Date.now() }`,
-			} )
+			.post(
+				`${ WC_API_PATH }/products/categories`,
+				getFakeCategory( { extraRandomTerm: true } )
+			)
 			.then( ( response ) => {
 				category = response.data;
 			} );
@@ -85,6 +75,11 @@ for ( const productType of Object.keys( productData ) ) {
 		`can create a simple ${ productType } product`,
 		{ tag: [ tags.GUTENBERG ] },
 		async ( { page, category, product } ) => {
+			// Unique global tags per test, so parallel workers don't share the
+			// same product_tag terms.
+			const productTag1 = getFakeTag().name;
+			const productTag2 = getFakeTag().name;
+
 			await test.step( 'add new product', async () => {
 				await page.goto( 'wp-admin/post-new.php?post_type=product' );
 			} );
@@ -98,13 +93,11 @@ for ( const productType of Object.keys( productData ) ) {
 				// Product description
 				await page.locator( '#content-html' ).click(); // text mode to avoid the iframe
 				await page
-					.locator( '.wp-editor-area' )
-					.first()
+					.locator( '#content' )
 					.fill( productData[ productType ].description );
 				await page.locator( '#excerpt-html' ).click(); // text mode to avoid the iframe
 				await page
-					.locator( '.wp-editor-area' )
-					.nth( 1 )
+					.locator( '#excerpt' )
 					.fill( productData[ productType ].shortDescription );
 			} );
 
@@ -126,7 +119,7 @@ for ( const productType of Object.keys( productData ) ) {
 
 			await test.step( 'add product attributes', async () => {
 				// Product attributes
-				const attributeName = 'attribute name';
+				const attributeName = getFakeAttribute().name;
 				await page
 					.locator( '#woocommerce-product-data' )
 					.getByRole( 'link', { name: 'Attributes' } )
@@ -175,80 +168,44 @@ for ( const productType of Object.keys( productData ) ) {
 				// Tags
 				await page
 					.getByLabel( 'Add new tag' )
-					.fill( 'e2e,test products' );
+					.fill( `${ productTag1 },${ productTag2 }` );
 				await page
 					.getByRole( 'button', { name: 'Add', exact: true } )
 					.click();
+
 				await expect(
-					page.locator( '#tagsdiv-product_tag li' ).getByText( 'e2e' )
+					page.getByRole( 'button', {
+						name: `Remove term: ${ productTag1 }`,
+					} )
 				).toBeVisible();
 				await expect(
-					page
-						.locator( '#tagsdiv-product_tag li' )
-						.getByText( 'test products' )
+					page.getByRole( 'button', {
+						name: `Remove term: ${ productTag2 }`,
+					} )
 				).toBeVisible();
 			} );
 
-			// eslint-disable-next-line playwright/no-conditional-in-test
-			if ( productData[ productType ].shipping ) {
-				await test.step( 'add shipping details', async () => {
-					await page
-						.getByRole( 'link', { name: 'Shipping' } )
-						.click();
-					await expect(
-						page.getByText( 'Shipping class', { exact: true } )
-					).toBeVisible();
-					await page
-						.locator( '#_weight' )
-						.fill( productData[ productType ].shipping.weight );
-					await page
-						.getByPlaceholder( 'Length', { exact: true } )
-						.fill( productData[ productType ].shipping.length );
-					await page
-						.getByPlaceholder( 'Width' )
-						.fill( productData[ productType ].shipping.width );
-					await page
-						.getByPlaceholder( 'Height' )
-						.fill( productData[ productType ].shipping.height );
-				} );
-			}
-
-			// eslint-disable-next-line playwright/no-conditional-in-test
-			if ( productData[ productType ].virtual ) {
-				await test.step( 'add virtual product details', async () => {
-					await page
-						.getByRole( 'checkbox', { name: 'Virtual' } )
-						.check();
-					await expect(
-						page.getByRole( 'checkbox', { name: 'Virtual' } )
-					).toBeChecked();
-				} );
-			}
-
-			// eslint-disable-next-line playwright/no-conditional-in-test
-			if ( productData[ productType ].downloadable ) {
-				await test.step( 'add downloadable product details', async () => {
-					await page.getByLabel( 'Downloadable' ).check();
-					await expect(
-						page.getByLabel( 'Downloadable' )
-					).toBeChecked();
-
-					// Add a download link
-					await page.getByRole( 'link', { name: 'General' } ).click();
-					await page
-						.getByRole( 'link', { name: 'Add File' } )
-						.click();
-					await page
-						.getByPlaceholder( 'File name' )
-						.fill( productData[ productType ].fileName );
-					await page
-						.getByPlaceholder( 'https://' )
-						.fill(
-							`https://example.com/${ productData[ productType ].fileName }`
-						);
-					await page.getByPlaceholder( 'Never' ).fill( '365' );
-				} );
-			}
+			await test.step( 'add shipping details', async () => {
+				await page
+					.locator( '#woocommerce-product-data' )
+					.getByRole( 'link', { name: 'Shipping' } )
+					.click();
+				await expect(
+					page.getByText( 'Shipping class', { exact: true } )
+				).toBeVisible();
+				await page
+					.locator( '#_weight' )
+					.fill( productData[ productType ].shipping.weight );
+				await page
+					.getByPlaceholder( 'Length', { exact: true } )
+					.fill( productData[ productType ].shipping.length );
+				await page
+					.getByPlaceholder( 'Width' )
+					.fill( productData[ productType ].shipping.width );
+				await page
+					.getByPlaceholder( 'Height' )
+					.fill( productData[ productType ].shipping.height );
+			} );
 
 			await test.step( 'publish the product', async () => {
 				await page
@@ -314,11 +271,11 @@ for ( const productType of Object.keys( productData ) ) {
 
 				// Verify tags
 				await expect(
-					page.getByRole( 'link', { name: 'e2e', exact: true } )
+					page.getByRole( 'link', { name: productTag1, exact: true } )
 				).toBeVisible();
 				await expect(
 					page.getByRole( 'link', {
-						name: 'test products',
+						name: productTag2,
 						exact: true,
 					} )
 				).toBeVisible();
@@ -329,8 +286,11 @@ for ( const productType of Object.keys( productData ) ) {
 				await page.context().clearCookies();
 				await page.reload();
 
+				// Use an exact match so the related-products block buttons
+				// ("Add to cart: <name>") that may show products created by
+				// parallel workers don't collide with the single product's button.
 				await page
-					.getByRole( 'button', { name: 'Add to cart' } )
+					.getByRole( 'button', { name: 'Add to cart', exact: true } )
 					.click();
 				await page.getByRole( 'link', { name: 'View cart' } ).click();
 

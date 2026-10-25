@@ -383,7 +383,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 			'wc-shipping-zones',
 			'shippingZonesLocalizeScript',
 			array(
-				'zones'                   => WC_Shipping_Zones::get_zones( 'json' ),
+				'zones'                   => WC_Shipping_Zones::get_zones_with_order_conflict_warnings( 'json' ),
 				'default_zone'            => array(
 					'zone_id'    => 0,
 					'zone_name'  => '',

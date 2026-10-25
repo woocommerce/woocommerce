@@ -130,7 +130,7 @@ class CartAddItem extends AbstractCartRoute {
 
 		if ( ! empty( $cart_item ) ) {
 			$product_id = $cart_item['variation_id'] ? $cart_item['variation_id'] : $cart_item['product_id'];
-			$quantity   = $add_to_cart_data['quantity'] ?? $cart_item['quantity'];
+			$quantity   = wc_stock_amount( $add_to_cart_data['quantity'] ?? $cart_item['quantity'] );
 
 			/**
 			 * Fires when an item is added to the cart from a user request.

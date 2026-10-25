@@ -1,6 +1,7 @@
 <?php
 namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 
+use Automattic\WooCommerce\StoreApi\Utilities\UnexpectedErrorResponse;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\Routes\RouteInterface;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
@@ -102,6 +103,8 @@ abstract class AbstractRoute implements RouteInterface {
 			$response = $this->get_route_error_response_from_object( $error->getError(), $error->getCode(), $error->getAdditionalData() );
 		} catch ( \Exception $error ) {
 			$response = $this->get_route_error_response( 'woocommerce_rest_unknown_server_error', $error->getMessage(), 500 );
+		} catch ( \Throwable $error ) {
+			$response = UnexpectedErrorResponse::create( $error, static::class );
 		}
 
 		return is_wp_error( $response ) ? $this->error_to_response( $response ) : $response;

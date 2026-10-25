@@ -178,7 +178,7 @@ class ShopperListsControllerTests extends WC_Unit_Test_Case {
 		return array(
 			'wishlist toggles flush'    => array( 'product_wishlist', true ),
 			'sfl change ignored'        => array( 'cart_save_for_later', false ),
-			'unrelated feature ignored' => array( 'agentic_checkout', false ),
+			'unrelated feature ignored' => array( 'fulfillments', false ),
 		);
 	}
 

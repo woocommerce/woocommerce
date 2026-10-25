@@ -17,7 +17,9 @@ test.describe( `${ blockData.slug } Block`, () => {
 		await admin.createNewPost();
 		await editor.insertBlock( { name: blockData.slug } );
 		const blockLocator = await editor.getBlockByName( blockData.slug );
-		await blockLocator.getByText( 'Recommended' ).click();
+		await blockLocator
+			.getByRole( 'checkbox', { name: 'Recommended' } )
+			.check();
 		await blockLocator.getByText( 'Done' ).click();
 		await expect( blockLocator.getByRole( 'listitem' ) ).toHaveCount( 2 );
 		await editor.publishAndVisitPost();

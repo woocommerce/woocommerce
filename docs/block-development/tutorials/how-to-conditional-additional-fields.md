@@ -102,6 +102,19 @@ woocommerce_register_additional_checkout_field(
 					]
 				]
 			]
+		],
+		'hidden' => [
+			'cart' => [
+				'properties' => [
+					'items' => [
+						'not' => [
+							'contains' => [
+								'enum' => [2766, 456, 789] // Hide unless a fragile item is in the cart
+							]
+						]
+					]
+				]
+			]
 		]
 	)
 );

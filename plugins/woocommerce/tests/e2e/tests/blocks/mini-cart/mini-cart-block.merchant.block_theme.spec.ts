@@ -50,12 +50,36 @@ test.describe( 'Merchant → Mini Cart', () => {
 				.getByRole( 'searchbox', { name: 'Search' } )
 				.fill( blockData.slug );
 
-			const miniCartButton = editor.page.getByRole( 'option', {
-				name: blockData.name,
-			} );
+			const miniCartButton = editor.page
+				.getByRole( 'listbox', { name: 'Blocks' } )
+				.getByRole( 'option', {
+					name: blockData.name,
+					exact: true,
+				} );
 
+			await expect( miniCartButton ).toHaveCount( 1 );
 			await expect( miniCartButton ).toBeVisible();
 			await expect( miniCartButton ).toBeDisabled();
+		} );
+
+		test( 'renders filled and empty views in the Mini-Cart template part', async ( {
+			editor,
+			admin,
+		} ) => {
+			await admin.visitSiteEditor( {
+				postType: 'wp_template_part',
+			} );
+			await editor.openTemplate( { templateName: 'Mini-Cart' } );
+
+			const filledMiniCart = await editor.getBlockByName(
+				'woocommerce/filled-mini-cart-contents-block'
+			);
+			const emptyMiniCart = await editor.getBlockByName(
+				'woocommerce/empty-mini-cart-contents-block'
+			);
+
+			await expect( filledMiniCart ).toBeVisible();
+			await expect( emptyMiniCart ).toBeAttached();
 		} );
 	} );
 } );

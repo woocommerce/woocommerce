@@ -49,11 +49,16 @@ export function getFakeCustomer() {
 	return getFakeUser( 'customer' );
 }
 
+// The name ends in random characters because `faker.commerce.productName()` is
+// not unique: parallel workers can generate the same name, and specs that
+// search the store by product name would then find the wrong product.
 export function getFakeProduct( options: any = {} ) {
 	const dec = options.dec ?? 2;
 
 	return {
-		name: `${ faker.commerce.productName() }`,
+		name: `${ faker.commerce.productName() } ${ faker.string.alphanumeric(
+			8
+		) }`,
 		description: faker.commerce.productDescription(),
 		regular_price: options.regular_price
 			? options.regular_price
@@ -67,5 +72,28 @@ export function getFakeCategory( options = { extraRandomTerm: false } ) {
 		name: `${ faker.commerce.productMaterial() } ${ faker.commerce.department() } ${
 			options.extraRandomTerm ? faker.string.alphanumeric( 5 ) : ''
 		}`.trim(),
+	};
+}
+
+// A unique taxonomy term name. Kept short so the generated `pa_*` attribute
+// taxonomy slug stays within WordPress' length limit, and suffixed with random
+// characters so parallel workers never share the same global term.
+function getFakeTermName() {
+	return `${ faker.commerce.productMaterial() } ${ faker.string.alphanumeric(
+		5
+	) }`;
+}
+
+// A unique product tag name, so parallel workers don't share global terms.
+export function getFakeTag() {
+	return {
+		name: getFakeTermName(),
+	};
+}
+
+// A unique product attribute (or attribute term) name.
+export function getFakeAttribute() {
+	return {
+		name: getFakeTermName(),
 	};
 }

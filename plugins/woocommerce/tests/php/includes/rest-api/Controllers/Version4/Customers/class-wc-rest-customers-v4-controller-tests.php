@@ -1,10 +1,12 @@
 <?php
 declare( strict_types=1 );
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Customers\Controller as CustomersController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Customers\CustomerSchema;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Customers\CollectionQuery;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Customers\UpdateUtils;
+use Automattic\WooCommerce\Internal\Utilities\Users;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 
 /**
@@ -30,11 +32,11 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	private $endpoint;
 
 	/**
-	 * User ID.
+	 * Administrator ID used to authenticate requests.
 	 *
 	 * @var int
 	 */
-	private $user_id;
+	private static $administrator_id;
 
 	/**
 	 * Customer schema instance.
@@ -42,6 +44,19 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 * @var CustomerSchema
 	 */
 	private $customer_schema;
+
+	/**
+	 * Create immutable class fixtures.
+	 *
+	 * @param WP_UnitTest_Factory $factory WordPress unit test factory.
+	 */
+	public static function wpSetUpBeforeClass( $factory ): void {
+		self::$administrator_id = $factory->user->create(
+			array(
+				'role' => 'administrator',
+			)
+		);
+	}
 
 	/**
 	 * Runs after each test.
@@ -95,12 +110,7 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->endpoint = new CustomersController();
 		$this->endpoint->init( $this->customer_schema, $collection_query, $update_utils );
 
-		$this->user_id = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
-		wp_set_current_user( $this->user_id );
+		wp_set_current_user( self::$administrator_id );
 	}
 
 	/**
@@ -163,6 +173,77 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->created_customers[] = $customer->get_id();
 
 		return $customer;
+	}
+
+	/**
+	 * Backdate a customer's registration timestamp so ordering-by-registration-date tests are
+	 * deterministic without waiting on the real clock.
+	 *
+	 * @param int $user_id     User ID.
+	 * @param int $seconds_ago How many seconds before "now" the user should appear to have registered.
+	 */
+	private function set_user_registered( int $user_id, int $seconds_ago ): void {
+		wp_update_user(
+			array(
+				'ID'              => $user_id,
+				'user_registered' => gmdate( 'Y-m-d H:i:s', time() - $seconds_ago ),
+			)
+		);
+	}
+
+	/**
+	 * Create a paid order totalling $50 for a customer, so the customer's order aggregates have
+	 * non-zero values. The status has to be a paid one for total_spent to count it.
+	 *
+	 * @param int $customer_id Customer ID.
+	 * @return WC_Order
+	 */
+	private function create_paid_order_for_customer( int $customer_id ): WC_Order {
+		$order = WC_Helper_Order::create_order( $customer_id );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		return $order;
+	}
+
+	/**
+	 * Drop the cached order count and money spent user meta so the next read has to recompute them
+	 * from the orders table.
+	 *
+	 * @param int $customer_id Customer ID.
+	 */
+	private function clear_customer_aggregate_caches( int $customer_id ): void {
+		Users::delete_site_user_meta( $customer_id, 'wc_order_count' );
+		Users::delete_site_user_meta( $customer_id, 'wc_money_spent' );
+	}
+
+	/**
+	 * Count the per-customer COUNT/SUM order aggregate queries — the ones backing orders_count and
+	 * total_spent — executed while the given callback runs. Matches both the HPOS and the posts
+	 * table variants of those queries.
+	 *
+	 * @param callable $callback Code to run while counting.
+	 * @return int Number of aggregate queries executed.
+	 */
+	private function count_customer_aggregate_queries( callable $callback ): int {
+		$count = 0;
+		$spy   = function ( $query ) use ( &$count ) {
+			$is_aggregate = 1 === preg_match( '/^\s*SELECT\s+(COUNT|SUM)\s*\(/i', $query );
+			$is_customer  = false !== strpos( $query, 'customer_id' ) || false !== strpos( $query, '_customer_user' );
+			if ( $is_aggregate && $is_customer ) {
+				++$count;
+			}
+			return $query;
+		};
+
+		add_filter( 'query', $spy );
+		try {
+			$callback();
+		} finally {
+			remove_filter( 'query', $spy );
+		}
+
+		return $count;
 	}
 
 	/**
@@ -433,6 +514,102 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'email', $response_data );
 		$this->assertArrayHasKey( 'first_name', $response_data );
 		$this->assertArrayNotHasKey( 'billing', $response_data );
+	}
+
+	/**
+	 * Test a default request (no _fields) includes the aggregate fields with their real values.
+	 */
+	public function test_default_request_includes_aggregate_fields(): void {
+		$customer = $this->create_test_customer();
+		$this->create_paid_order_for_customer( $customer->get_id() );
+		$this->clear_customer_aggregate_caches( $customer->get_id() );
+
+		$last_active = time() - HOUR_IN_SECONDS;
+		update_user_meta( $customer->get_id(), 'wc_last_active', (string) $last_active );
+
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/customers/' . $customer->get_id() );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		$this->assertSame( 1, $response_data['orders_count'] );
+		$this->assertSame( '50.00', $response_data['total_spent'] );
+		$this->assertNotEmpty( $response_data['avatar_url'] );
+		$this->assertSame( gmdate( 'Y-m-d\TH:i:s', $last_active ), $response_data['last_active_gmt'] );
+		$this->assertNotNull( $response_data['last_active'] );
+	}
+
+	/**
+	 * Test a sparse _fields request that excludes the aggregate fields omits them from the
+	 * response and skips computing them.
+	 */
+	public function test_fields_parameter_excluding_aggregates_omits_and_skips_them(): void {
+		$customer = $this->create_test_customer();
+
+		$avatar_lookups       = 0;
+		$count_avatar_lookups = function ( $args ) use ( &$avatar_lookups ) {
+			++$avatar_lookups;
+			return $args;
+		};
+		add_filter( 'pre_get_avatar_data', $count_avatar_lookups );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v4/customers/' . $customer->get_id() );
+		$request->set_param( '_fields', 'id,email' );
+		$response = $this->server->dispatch( $request );
+
+		remove_filter( 'pre_get_avatar_data', $count_avatar_lookups );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$response_data = $response->get_data();
+
+		$this->assertArrayHasKey( 'id', $response_data );
+		$this->assertArrayHasKey( 'email', $response_data );
+		foreach ( array( 'orders_count', 'total_spent', 'avatar_url' ) as $field ) {
+			$this->assertArrayNotHasKey( $field, $response_data, "Response must not contain unrequested field: {$field}" );
+		}
+		$this->assertSame( 0, $avatar_lookups, 'avatar_url must not be computed when it is not requested via _fields' );
+	}
+
+	/**
+	 * Test a sparse _fields request that excludes orders_count and total_spent does not run the
+	 * per-customer COUNT/SUM queries backing them, while a request that asks for them still does.
+	 */
+	public function test_fields_parameter_excluding_aggregates_skips_aggregate_queries(): void {
+		$customer = $this->create_test_customer();
+		$this->create_paid_order_for_customer( $customer->get_id() );
+
+		// A cold aggregate cache is the case this optimization targets: with the cache warm the
+		// COUNT/SUM never runs anyway and the test could not tell the gate apart from a no-op.
+		$this->clear_customer_aggregate_caches( $customer->get_id() );
+
+		$sparse_request = new WP_REST_Request( 'GET', '/wc/v4/customers/' . $customer->get_id() );
+		$sparse_request->set_param( '_fields', 'id,email' );
+		$sparse_queries = $this->count_customer_aggregate_queries(
+			function () use ( $sparse_request ) {
+				$this->assertEquals( 200, $this->server->dispatch( $sparse_request )->get_status() );
+			}
+		);
+
+		$this->assertSame( 0, $sparse_queries, 'orders_count/total_spent must not run their COUNT/SUM queries when not requested via _fields' );
+
+		// The sparse request left the cache cold, so the same request asking for the fields must
+		// now run them. This guards the assertion above against silently matching nothing.
+		$full_request = new WP_REST_Request( 'GET', '/wc/v4/customers/' . $customer->get_id() );
+		$full_request->set_param( '_fields', 'id,orders_count,total_spent' );
+		$response     = null;
+		$full_queries = $this->count_customer_aggregate_queries(
+			function () use ( $full_request, &$response ) {
+				$response = $this->server->dispatch( $full_request );
+			}
+		);
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertSame( 2, $full_queries, 'orders_count and total_spent must each run their aggregate query when requested via _fields' );
+
+		$response_data = $response->get_data();
+		$this->assertSame( 1, $response_data['orders_count'] );
+		$this->assertSame( '50.00', $response_data['total_spent'] );
 	}
 
 	/**
@@ -1044,15 +1221,15 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 			)
 		);
 
-		// Wait a moment to ensure different registration times.
-		sleep( 1 );
-
 		$customer2 = $this->create_test_customer(
 			array(
 				'email'    => 'orderby2@example.com',
 				'username' => 'orderby2',
 			)
 		);
+
+		$this->set_user_registered( $customer1->get_id(), 200 );
+		$this->set_user_registered( $customer2->get_id(), 100 );
 
 		// Test ordering by ID ascending.
 		$request = new WP_REST_Request( 'GET', '/wc/v4/customers' );
@@ -1346,9 +1523,6 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 			)
 		);
 
-		// Wait to ensure different registration times.
-		sleep( 1 );
-
 		$customer2 = $this->create_test_customer(
 			array(
 				'email'    => 'orderbydefault2@example.com',
@@ -1356,14 +1530,16 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 			)
 		);
 
-		sleep( 1 );
-
 		$customer3 = $this->create_test_customer(
 			array(
 				'email'    => 'orderbydefault3@example.com',
 				'username' => 'orderbydefault3',
 			)
 		);
+
+		$this->set_user_registered( $customer1->get_id(), 300 );
+		$this->set_user_registered( $customer2->get_id(), 200 );
+		$this->set_user_registered( $customer3->get_id(), 100 );
 
 		// Make request without orderby parameter.
 		$request  = new WP_REST_Request( 'GET', '/wc/v4/customers' );
@@ -1416,8 +1592,6 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 		);
 		update_user_meta( $customer1->get_id(), 'wc_order_count_' . $site_specific_key, 10 );
 
-		sleep( 1 );
-
 		$customer2 = $this->create_test_customer(
 			array(
 				'email'    => 'orderbypresent2@example.com',
@@ -1425,8 +1599,6 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 			)
 		);
 		update_user_meta( $customer2->get_id(), 'wc_order_count_' . $site_specific_key, 25 );
-
-		sleep( 1 );
 
 		$customer3 = $this->create_test_customer(
 			array(
@@ -1530,8 +1702,6 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 			)
 		);
 
-		sleep( 1 );
-
 		$customer2 = $this->create_test_customer(
 			array(
 				'email'    => 'registered2@example.com',
@@ -1539,14 +1709,16 @@ class WC_REST_Customers_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 			)
 		);
 
-		sleep( 1 );
-
 		$customer3 = $this->create_test_customer(
 			array(
 				'email'    => 'registered3@example.com',
 				'username' => 'registered3',
 			)
 		);
+
+		$this->set_user_registered( $customer1->get_id(), 300 );
+		$this->set_user_registered( $customer2->get_id(), 200 );
+		$this->set_user_registered( $customer3->get_id(), 100 );
 
 		// Test with orderby=registered_date.
 		$request = new WP_REST_Request( 'GET', '/wc/v4/customers' );

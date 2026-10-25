@@ -106,15 +106,16 @@ class CheckoutOrder extends AbstractCartRoute {
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_post_response( \WP_REST_Request $request ) {
-		$order_id    = absint( $request['id'] );
-		$this->order = wc_get_order( $order_id );
+		$order_id = absint( $request['id'] );
+		$order    = wc_get_order( $order_id );
 
-		if ( ! $this->order instanceof \WC_Order || ! $this->order->needs_payment() ) {
+		if ( ! $order instanceof \WC_Order || ! $order->needs_payment() ) {
 			return new \WP_Error(
 				'invalid_order_update_status',
 				__( 'This order cannot be paid for.', 'woocommerce' )
 			);
 		}
+		$this->order = $order;
 
 		/**
 		 * Process request data.
@@ -140,9 +141,12 @@ class CheckoutOrder extends AbstractCartRoute {
 		$this->order_controller->validate_existing_order_before_payment( $this->order );
 
 		/**
-		 * Fires before an order is processed by the Checkout Block/Store API.
+		 * Fires after the Checkout Block/Store API request has populated and validated the order.
 		 *
-		 * This hook informs extensions that $order has completed processing and is ready for payment.
+		 * The action runs before payment is processed, so callbacks can still act on the order
+		 * on its way to the gateway. Do not use this action for payment-completion logic or to
+		 * call WC_Order::payment_complete(). Use woocommerce_payment_complete or
+		 * woocommerce_order_status_completed instead.
 		 *
 		 * This is similar to existing core hook woocommerce_checkout_order_processed. We're using a new action:
 		 * - To keep the interface focused (only pass $order, not passing request data).
@@ -151,8 +155,8 @@ class CheckoutOrder extends AbstractCartRoute {
 		 * @since 7.2.0
 		 *
 		 * @see https://github.com/woocommerce/woocommerce-gutenberg-products-block/pull/3238
-		 * @example See docs/examples/checkout-order-processed.md
-
+		 * @example docs/examples/checkout-order-processed.md
+		 *
 		 * @param \WC_Order $order Order object.
 		 */
 		do_action( 'woocommerce_store_api_checkout_order_processed', $this->order );
@@ -245,12 +249,10 @@ class CheckoutOrder extends AbstractCartRoute {
 	 * @return \WC_Payment_Gateway|null
 	 */
 	private function get_request_payment_method( \WP_REST_Request $request ) {
-		$available_gateways      = WC()->payment_gateways->get_available_payment_gateways();
-		$request_payment_method  = wc_clean( wp_unslash( $request['payment_method'] ?? '' ) );
-		$requires_payment_method = $this->order->needs_payment();
+		$request_payment_method = wc_clean( wp_unslash( $request['payment_method'] ?? '' ) );
 
 		if ( empty( $request_payment_method ) ) {
-			if ( $requires_payment_method ) {
+			if ( $this->order->needs_payment() ) {
 				throw new RouteException(
 					'woocommerce_rest_checkout_missing_payment_method',
 					__( 'No payment method provided.', 'woocommerce' ),
@@ -259,6 +261,8 @@ class CheckoutOrder extends AbstractCartRoute {
 			}
 			return null;
 		}
+
+		$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
 
 		if ( ! isset( $available_gateways[ $request_payment_method ] ) ) {
 			throw new RouteException(

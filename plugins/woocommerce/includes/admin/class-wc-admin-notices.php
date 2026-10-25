@@ -64,10 +64,15 @@ class WC_Admin_Notices {
 		if ( defined( 'WC_PHP_MIN_REQUIREMENTS_NOTICE' ) ) {
 			self::remove_notice( WC_PHP_MIN_REQUIREMENTS_NOTICE );
 		}
+		// Notice about the PHP 8.1 requirement in WooCommerce 11.6, remove in that version (see also reset_admin_notices).
+		if ( ! function_exists( 'phpversion' ) || version_compare( phpversion(), '8.1', '>=' ) ) {
+			self::remove_notice( 'php81_required_in_woo_116' );
+		}
 
 		add_action( 'switch_theme', array( __CLASS__, 'reset_admin_notices' ) );
 		add_action( 'woocommerce_installed', array( __CLASS__, 'reset_admin_notices' ) );
 		add_action( 'admin_init', array( __CLASS__, 'hide_notices' ), 20 );
+		add_action( 'wp_ajax_woocommerce_hide_notice', array( __CLASS__, 'ajax_hide_notice' ) );
 
 		// @TODO: This prevents Action Scheduler async jobs from storing empty list of notices during WC installation.
 		// That could lead to OBW not starting and 'Run setup wizard' notice not appearing in WP admin, which we want
@@ -165,6 +170,48 @@ class WC_Admin_Notices {
 	 * @return void
 	 */
 	public static function reset_admin_notices() {
+		// Notice about the PHP 8.1 requirement in WooCommerce 11.6, remove in that version (see also init).
+		if ( function_exists( 'phpversion' ) && version_compare( phpversion(), '8.1', '<' ) ) {
+			self::add_custom_notice(
+				'php81_required_in_woo_116',
+				sprintf(
+					'<div class="wc-php-version-notice"><h4>%s</h4>%s%s<p class="wc-php-version-notice__learn-more"><b><a href="%s" target="_blank" rel="noopener noreferrer">%s<span class="screen-reader-text"> %s</span><span aria-hidden="true" class="dashicons dashicons-external"></span></a></b></p></div>',
+					esc_html__( 'PHP version requirements will change soon', 'woocommerce' ),
+					wpautop(
+						wp_kses_data(
+							sprintf(
+								/* translators: %s: The PHP version the server is currently running. */
+								__( 'WooCommerce 11.6, planned for release in <b>February 2027</b>, will require PHP 8.1 or newer to work. Your server is currently running PHP %s, so this change will impact your store. Please contact your hosting provider to upgrade to the latest PHP 8.3 release or newer (PHP 8.1 is the minimum WooCommerce will require).', 'woocommerce' ),
+								phpversion()
+							)
+						)
+					),
+					// CVE-2026-109618 and CVE-2026-109619 affect every PHP release below 8.2.35, and PHP has no fixed release below 8.2, so every version this notice targets is affected.
+					wpautop(
+						wp_kses_data(
+							sprintf(
+								/* translators: %s: The PHP version the server is currently running. */
+								__( '<b>Your PHP version may also be affected by critical security vulnerabilities.</b> Official PHP %s releases do not include the fixes for CVE-2026-109618 and CVE-2026-109619 (disclosed in October 2026), which can let attackers run code on your server. Some hosting providers apply these fixes themselves, so when you contact yours about upgrading, ask them to confirm your server is patched.', 'woocommerce' ),
+								phpversion()
+							)
+						)
+					),
+					esc_url(
+						add_query_arg(
+							array(
+								'utm_source'   => 'admin_notice',
+								'utm_medium'   => 'product',
+								'utm_campaign' => 'php81_requirement',
+								'utm_content'  => 'learn_more',
+							),
+							'https://developer.woocommerce.com/2026/09/29/php-8-1-requirement/'
+						)
+					),
+					esc_html__( 'Learn more about this change', 'woocommerce' ),
+					esc_html__( '(opens in a new tab)', 'woocommerce' )
+				)
+			);
+		}
 	}
 
 	/**
@@ -266,6 +313,43 @@ class WC_Admin_Notices {
 	}
 
 	/**
+	 * AJAX handler to hide a notice without a page reload.
+	 *
+	 * Accepts the same nonce as the query-string based dismissal in hide_notices(),
+	 * which is kept as a no-JS fallback.
+	 *
+	 * @since 11.1.0
+	 * @return void
+	 */
+	public static function ajax_hide_notice() {
+		check_ajax_referer( 'woocommerce_hide_notices_nonce', '_wc_notice_nonce' );
+
+		$notice_name = isset( $_POST['wc-hide-notice'] ) ? sanitize_text_field( wp_unslash( $_POST['wc-hide-notice'] ) ) : '';
+
+		if ( '' === $notice_name ) {
+			wp_send_json_error( null, 400 );
+		}
+
+		/**
+		 * This filter is documented above, in hide_notices().
+		 *
+		 * @since 6.7.0
+		 */
+		$required_capability = apply_filters( 'woocommerce_dismiss_admin_notice_capability', 'manage_woocommerce', $notice_name );
+
+		if ( ! current_user_can( $required_capability ) ) {
+			wp_send_json_error( null, 403 );
+		}
+
+		self::hide_notice( $notice_name );
+
+		// Notices are normally stored to the DB on 'shutdown'; save explicitly so the dismissal is persisted even if that hook was not registered for this request.
+		self::store_notices();
+
+		wp_send_json_success();
+	}
+
+	/**
 	 * Hide a single notice.
 	 *
 	 * @param string $name Notice name.
@@ -322,6 +406,9 @@ class WC_Admin_Notices {
 
 		// Add RTL support.
 		wp_style_add_data( 'woocommerce-activation', 'rtl', 'replace' );
+
+		$suffix = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
+		wp_enqueue_script( 'wc-admin-notices', plugins_url( '/assets/js/admin/wc-admin-notices' . $suffix . '.js', WC_PLUGIN_FILE ), array(), Constants::get_constant( 'WC_VERSION' ), true );
 
 		foreach ( $notices as $notice ) {
 			if ( ! empty( self::$core_notices[ $notice ] ) && apply_filters( 'woocommerce_show_admin_notice', true, $notice ) ) {
@@ -398,7 +485,7 @@ class WC_Admin_Notices {
 	 * @return void
 	 */
 	public static function install_notice() {
-		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.6.0', esc_html__( 'Onboarding is maintained in WooCommerce Admin.', 'woocommerce' ) );
+		_deprecated_function( __CLASS__ . '::' . __FUNCTION__, '4.6.0', esc_html( 'Onboarding is maintained in WooCommerce Admin.' ) );
 	}
 
 	/**

@@ -134,7 +134,7 @@ export default function ProductListContent( props: {
 											[ 'utm_medium', 'product' ],
 											[ 'utm_campaign', 'wcaddons' ],
 											[ 'utm_content', 'devpartner' ],
-									  ] )
+										] )
 									: '',
 								price: product.price,
 								url: appendURLParams(
@@ -159,6 +159,7 @@ export default function ProductListContent( props: {
 								currency: product.currency,
 								isOnSale: product.isOnSale,
 								regularPrice: product.regularPrice,
+								hasQualityBadge: product.hasQualityBadge,
 							} }
 							tracksData={ {
 								position: index + 1,

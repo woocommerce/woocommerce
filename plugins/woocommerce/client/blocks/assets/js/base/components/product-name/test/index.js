@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import TestRenderer from 'react-test-renderer';
+import { render } from '@testing-library/react';
 
 /**
  * Internal dependencies
@@ -10,31 +10,31 @@ import ProductName from '..';
 
 describe( 'ProductName', () => {
 	test( 'should not render a link if disabled is true', () => {
-		const component = TestRenderer.create(
+		const { container } = render(
 			<ProductName disabled={ true } name="Test product" permalink="/" />
 		);
 
-		expect( component.toJSON() ).toMatchSnapshot();
+		expect( container ).toMatchSnapshot();
 	} );
 
 	test( 'should render a link if disabled is false', () => {
-		const component = TestRenderer.create(
+		const { container } = render(
 			<ProductName disabled={ false } name="Test product" permalink="/" />
 		);
 
-		expect( component.toJSON() ).toMatchSnapshot();
+		expect( container ).toMatchSnapshot();
 	} );
 
 	test( 'should render a link if disabled is not defined', () => {
-		const component = TestRenderer.create(
+		const { container } = render(
 			<ProductName name="Test product" permalink="/" />
 		);
 
-		expect( component.toJSON() ).toMatchSnapshot();
+		expect( container ).toMatchSnapshot();
 	} );
 
 	test( 'should merge classes and props', () => {
-		const component = TestRenderer.create(
+		const { container } = render(
 			<ProductName
 				className="lorem-ipsum"
 				name="Test product"
@@ -43,6 +43,6 @@ describe( 'ProductName', () => {
 			/>
 		);
 
-		expect( component.toJSON() ).toMatchSnapshot();
+		expect( container ).toMatchSnapshot();
 	} );
 } );

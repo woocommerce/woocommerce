@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\Internal\Session\SessionDataWriter;
 use Automattic\WooCommerce\Utilities\StringUtil;
 use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
 
@@ -168,6 +169,7 @@ class WC_Session_Handler extends WC_Session {
 			// If there is no cookie, generate a new session/customer ID.
 			$this->_customer_id = $this->generate_customer_id();
 			$this->_data        = $this->get_session_data();
+			$this->set_loaded_session_snapshot( $this->_data );
 			return;
 		}
 
@@ -209,6 +211,7 @@ class WC_Session_Handler extends WC_Session {
 		$session_data                         = array_diff_key( $session_data, array( 'customer' => true ) );
 		$this->_data                          = $session_data;
 		$this->_dirty                         = true;
+		$this->replace_session_on_save();
 		$this->save_data();
 	}
 
@@ -222,6 +225,7 @@ class WC_Session_Handler extends WC_Session {
 		$this->_data        = $this->get_session( $guest_session_id, array() );
 		$this->_dirty       = true;
 		$this->_customer_id = $user_session_id;
+		$this->replace_session_on_save();
 		$this->save_data( $guest_session_id );
 
 		/**
@@ -269,6 +273,9 @@ class WC_Session_Handler extends WC_Session {
 		 * @return array Modified session data to be used for initialization.
 		 */
 		$this->_data = (array) apply_filters( 'woocommerce_restored_session_data', $session_data );
+
+		// Snapshot the unfiltered data, so changes made by the filter are saved like any other change.
+		$this->set_loaded_session_snapshot( $session_data );
 	}
 
 	/**
@@ -308,34 +315,24 @@ class WC_Session_Handler extends WC_Session {
 	}
 
 	/**
-	 * Hash a value using wp_fast_hash (from WP 6.8 onwards).
-	 *
-	 * This method can be removed when the minimum version supported is 6.8.
+	 * Hash a value for the session cookie integrity tag.
 	 *
 	 * @param string $message Value to hash.
 	 * @return string Hashed value.
 	 */
 	private function hash( string $message ) {
-		if ( function_exists( 'wp_fast_hash' ) ) {
-			return wp_fast_hash( $message );
-		}
 		return hash_hmac( 'md5', $message, wp_hash( $message ) );
 	}
 
 	/**
-	 * Verify a hash using wp_verify_fast_hash (from WP 6.8 onwards).
-	 *
-	 * This method can be removed when the minimum version supported is 6.8.
+	 * Verify a hash produced by self::hash().
 	 *
 	 * @param string $message Message to verify.
 	 * @param string $hash Hash to verify.
 	 * @return bool Whether the hash is valid.
 	 */
 	private function verify_hash( string $message, string $hash ) {
-		if ( function_exists( 'wp_verify_fast_hash' ) ) {
-			return wp_verify_fast_hash( $message, $hash );
-		}
-		return hash_equals( hash_hmac( 'md5', $message, wp_hash( $message ) ), $hash );
+		return hash_equals( $this->hash( $message ), $hash );
 	}
 
 	/**
@@ -561,19 +558,19 @@ class WC_Session_Handler extends WC_Session {
 	public function save_data( $old_session_key = '' ) {
 		// Dirty if something changed - prevents saving nothing new.
 		if ( $this->_dirty && $this->has_session() ) {
-			global $wpdb;
+			$writer      = wc_get_container()->get( SessionDataWriter::class );
+			$customer_id = (string) $this->get_customer_id();
+			$expiry      = (int) $this->_session_expiration;
 
-			$wpdb->query(
-				$wpdb->prepare(
-					'INSERT INTO %i (`session_key`, `session_value`, `session_expiry`) VALUES (%s, %s, %d)
- 					ON DUPLICATE KEY UPDATE `session_value` = VALUES(`session_value`), `session_expiry` = VALUES(`session_expiry`)',
-					$this->_table,
-					$this->get_customer_id(),
-					maybe_serialize( $this->_data ),
-					$this->_session_expiration
-				)
-			);
-			wp_cache_set( $this->get_cache_prefix() . $this->get_customer_id(), $this->_data, WC_SESSION_CACHE_GROUP, $this->_session_expiration - time() );
+			// Merging writes only the keys this request changed, so changes other requests saved since it loaded are kept.
+			$saved_data = $this->should_replace_session_on_save()
+				? $writer->replace( $this->_table, $customer_id, $expiry, $this->_data )
+				: $writer->merge( $this->_table, $customer_id, $expiry, $this->_data, $this->get_loaded_session_snapshot() );
+
+			wp_cache_set( $this->get_cache_prefix() . $this->get_customer_id(), $saved_data, WC_SESSION_CACHE_GROUP, $this->_session_expiration - time() );
+
+			// Later saves in this request compare against this request's own data, so they merge again.
+			$this->set_loaded_session_snapshot( $this->_data );
 			$this->_dirty = false;
 
 			/**
@@ -611,6 +608,7 @@ class WC_Session_Handler extends WC_Session {
 		$this->_dirty       = false;
 		$this->_customer_id = $this->generate_customer_id();
 		$this->_has_cookie  = false;
+		$this->replace_session_on_save();
 	}
 
 	/**
@@ -639,10 +637,10 @@ class WC_Session_Handler extends WC_Session {
 		$batch_size            = 100;
 		$deleted_entries_total = 0;
 		do {
-			$deleted_entries_count  = (int) $wpdb->query(
+			$deleted_entries_count = (int) $wpdb->query(
 				$wpdb->prepare(
-					'DELETE FROM %i WHERE session_expiry < %d ORDER BY session_expiry LIMIT %d',
-					$this->_table,
+					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- trusted table name.
+					"DELETE FROM {$this->_table} WHERE session_expiry < %d ORDER BY session_expiry LIMIT %d",
 					time(),
 					$batch_size
 				)
@@ -674,7 +672,8 @@ class WC_Session_Handler extends WC_Session {
 		$value = wp_cache_get( $this->get_cache_prefix() . $customer_id, WC_SESSION_CACHE_GROUP );
 
 		if ( false === $value ) {
-			$value = $wpdb->get_var( $wpdb->prepare( 'SELECT session_value FROM %i WHERE session_key = %s', $this->_table, $customer_id ) );
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- trusted table name.
+			$value = $wpdb->get_var( $wpdb->prepare( "SELECT session_value FROM {$this->_table} WHERE session_key = %s", $customer_id ) );
 
 			if ( is_null( $value ) ) {
 				$value = $default_value;
@@ -763,6 +762,7 @@ class WC_Session_Handler extends WC_Session {
 	 * @return bool
 	 */
 	private function session_exists( $customer_id ) {
-		return $customer_id && null !== $GLOBALS['wpdb']->get_var( $GLOBALS['wpdb']->prepare( 'SELECT session_key FROM %i WHERE session_key = %s', $this->_table, $customer_id ) );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- trusted table name.
+		return $customer_id && null !== $GLOBALS['wpdb']->get_var( $GLOBALS['wpdb']->prepare( "SELECT session_key FROM {$this->_table} WHERE session_key = %s", $customer_id ) );
 	}
 }

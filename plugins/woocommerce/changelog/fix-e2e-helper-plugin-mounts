@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Mount E2E helper plugins as a directory and provision wp-cli.yml in-container so single-file Docker mounts no longer surface as empty files under gRPC FUSE.

@@ -4,8 +4,7 @@ This is a quick reference for common commands used during development. For broad
 
 ## Tooling
 
-- [NVM](https://github.com/nvm-sh/nvm#installing-and-updating) (recommended for Node version management)
-- [Node.js](https://nodejs.org/)
+- [Node.js](https://nodejs.org/) (PNPM installs and uses the pinned version automatically; a version manager such as [NVM](https://github.com/nvm-sh/nvm#installing-and-updating) is optional)
 - [PNPM](https://pnpm.io/installation)
 - [PHP](https://www.php.net/manual/en/install.php)
 - [Composer](https://getcomposer.org/doc/00-intro.md)
@@ -16,9 +15,8 @@ A POSIX-compliant OS (Linux, macOS) is assumed. On Windows, use [WSL](https://le
 ## Initial install
 
 ```sh
-# Use the pinned Node version from .nvmrc
-nvm install
-# Install JS and PHP dependencies
+# Install JS and PHP dependencies.
+# PNPM automatically uses the pinned Node version for the scripts it runs.
 pnpm install
 ```
 
@@ -77,7 +75,7 @@ pnpm --filter='@woocommerce/plugin-woocommerce' watch:build
 # PHP unit tests (requires wp-env)
 cd plugins/woocommerce
 # Start the test environment
-pnpm env:dev
+pnpm env:test
 # Run all PHP unit tests
 pnpm test:unit:env
 # Run a specific test class
@@ -88,7 +86,7 @@ pnpm test:unit:env:watch
 # E2E tests (requires Docker)
 cd plugins/woocommerce
 # Start the E2E environment
-pnpm env:start
+pnpm env:e2e
 # Run Playwright E2E tests
 pnpm test:e2e
 

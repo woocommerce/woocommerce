@@ -14,7 +14,8 @@ import { expect, tags, test as baseTest } from '../../fixtures/fixtures';
 import { getFakeProduct } from '../../utils/data';
 import { createClassicCartPage, CLASSIC_CART_PAGE } from '../../utils/pages';
 import { checkCartContent } from '../../utils/cart';
-import { updateIfNeeded, resetValue } from '../../utils/settings';
+import { setGatewayEnabled } from '../../utils/payment-gateways';
+import { withScopedTaxClass } from '../../utils/taxes';
 
 const cartPages = [ { name: 'blocks cart', slug: 'cart' }, CLASSIC_CART_PAGE ];
 
@@ -27,55 +28,20 @@ const test = baseTest.extend( {
 	page: async ( { page, restApi }, use ) => {
 		await createClassicCartPage();
 
-		const calcTaxesState = await updateIfNeeded(
-			`general/woocommerce_calc_taxes`,
-			'yes'
-		);
-
-		// Check id COD payment is enabled and enable it if it is not
-		const codResponse = await restApi.get(
-			`${ WC_API_PATH }/payment_gateways/cod`
-		);
-		const codEnabled = codResponse.enabled;
-
-		if ( ! codEnabled ) {
-			await restApi.put( `${ WC_API_PATH }/payment_gateways/cod`, {
-				enabled: true,
-			} );
-		}
-
-		// Check id BACS payment is enabled and enable it if it is not
-		const bacsResponse = await restApi.get(
-			`${ WC_API_PATH }/payment_gateways/bacs`
-		);
-		const bacsEnabled = bacsResponse.enabled;
-
-		if ( ! bacsEnabled ) {
-			await restApi.put( `${ WC_API_PATH }/payment_gateways/bacs`, {
-				enabled: true,
-			} );
-		}
+		// COD and BACS are enabled globally in site setup; guard defensively in
+		// case they are somehow off, and restore their prior state afterwards.
+		const codWasEnabled = await setGatewayEnabled( restApi, 'cod', true );
+		const bacsWasEnabled = await setGatewayEnabled( restApi, 'bacs', true );
 
 		await page.context().clearCookies();
 		await use( page );
 
 		// revert the settings to initial state
 
-		await resetValue( `general/woocommerce_calc_taxes`, calcTaxesState );
-
-		if ( ! codEnabled ) {
-			await restApi.put( `${ WC_API_PATH }/payment_gateways/cod`, {
-				enabled: codEnabled,
-			} );
-		}
-
-		if ( ! bacsEnabled ) {
-			await restApi.put( `${ WC_API_PATH }/payment_gateways/bacs`, {
-				enabled: bacsEnabled,
-			} );
-		}
+		await setGatewayEnabled( restApi, 'cod', codWasEnabled );
+		await setGatewayEnabled( restApi, 'bacs', bacsWasEnabled );
 	},
-	products: async ( { restApi }, use ) => {
+	products: async ( { restApi, tax }, use ) => {
 		const products = [];
 
 		// Using dec: 0 to avoid small rounding issues
@@ -85,6 +51,10 @@ const test = baseTest.extend( {
 					...getFakeProduct( { dec: 0 } ),
 					manage_stock: true,
 					stock_quantity: 3,
+					// Assign to this spec's own tax class so only these products
+					// are taxed; other workers' products use the standard class,
+					// which has no rate under the taxes-on baseline.
+					tax_class: tax.taxClassSlug,
 				} )
 				.then( ( response ) => {
 					products.push( response.data );
@@ -100,105 +70,110 @@ const test = baseTest.extend( {
 		}
 	},
 	tax: async ( { restApi }, use ) => {
-		let tax;
-		await restApi
-			.post( `${ WC_API_PATH }/taxes`, {
-				country: 'US',
-				state: '*',
-				cities: '*',
-				postcodes: '*',
-				rate: '25',
-				name: 'US Tax',
-				shipping: false,
-			} )
-			.then( ( r ) => {
-				tax = r.data;
-			} );
-
-		await use( tax );
-
-		await restApi.delete( `${ WC_API_PATH }/taxes/${ tax.id }`, {
-			force: true,
-		} );
+		// Products in the `products` fixture are assigned to this scoped class so
+		// only this spec's products are taxed; concurrent workers are unaffected.
+		await withScopedTaxClass( restApi, 'Cart Spec', use );
 	},
 } );
 /* endregion */
 
 /* region tests */
-test(
-	'can undo product removal in classic cart',
-	{ tag: [ tags.PAYMENTS, tags.SERVICES, tags.HPOS ] },
-	async ( { page, products, tax } ) => {
-		const slug = CLASSIC_CART_PAGE.slug;
+for ( const referrerPolicy of [
+	'strict-origin-when-cross-origin',
+	'no-referrer',
+] ) {
+	test(
+		`can undo product removal in classic cart (${ referrerPolicy })`,
+		{ tag: [ tags.PAYMENTS, tags.SERVICES, tags.HPOS ] },
+		async ( { page, products, tax } ) => {
+			const slug = CLASSIC_CART_PAGE.slug;
 
-		await test.step( 'add product to cart', async () => {
-			await addAProductToCart( page, products[ 0 ].id, 1 );
-			await page.goto( slug );
-			await checkCartContent(
-				true,
-				page,
-				[ { data: products[ 0 ], qty: 1 } ],
-				tax
-			);
-		} );
+			await page.addInitScript( ( policy ) => {
+				document.addEventListener( 'DOMContentLoaded', () => {
+					const meta = document.createElement( 'meta' );
+					meta.name = 'referrer';
+					meta.content = policy;
+					document.head.appendChild( meta );
+				} );
+			}, referrerPolicy );
 
-		await test.step( 'remove product and verify undo link appears', async () => {
-			await page
-				.getByLabel( /Remove .* from cart/ )
-				.first()
-				.click();
+			await test.step( 'add product to cart', async () => {
+				await addAProductToCart( page, products[ 0 ].id, 1 );
+				await page.goto( slug );
+				await checkCartContent(
+					true,
+					page,
+					[ { data: products[ 0 ], qty: 1 } ],
+					tax
+				);
+			} );
 
-			// Verify the product was removed
-			await checkCartContent( true, page, [], tax );
+			await test.step( 'remove product and verify undo link appears', async () => {
+				const removalRequest = page.waitForRequest( ( request ) =>
+					new URL( request.url() ).searchParams.has( 'remove_item' )
+				);
+				await page
+					.getByLabel( /Remove .* from cart/ )
+					.first()
+					.click();
 
-			// Verify the undo link appears
-			await expect(
-				page.getByRole( 'link', { name: 'Undo?' } )
-			).toBeVisible();
-		} );
+				const request = await removalRequest;
+				expect( Boolean( request.headers().referer ) ).toBe(
+					referrerPolicy !== 'no-referrer'
+				);
 
-		await test.step( 'click undo to restore product', async () => {
-			await page.getByRole( 'link', { name: 'Undo?' } ).click();
+				// Verify the product was removed
+				await checkCartContent( true, page, [], tax );
 
-			// Verify the product is back in the cart
-			await checkCartContent(
-				true,
-				page,
-				[ { data: products[ 0 ], qty: 1 } ],
-				tax
-			);
-		} );
+				// Verify the undo link appears
+				await expect(
+					page.getByRole( 'link', { name: 'Undo?' } )
+				).toBeVisible();
+			} );
 
-		await test.step( 'remove product again after undo', async () => {
-			await page
-				.getByLabel( /Remove .* from cart/ )
-				.first()
-				.click();
+			await test.step( 'click undo to restore product', async () => {
+				await page.getByRole( 'link', { name: 'Undo?' } ).click();
 
-			// Verify the product was removed again
-			await checkCartContent( true, page, [], tax );
+				// Verify the product is back in the cart
+				await checkCartContent(
+					true,
+					page,
+					[ { data: products[ 0 ], qty: 1 } ],
+					tax
+				);
+			} );
 
-			// Verify undo link is visible
-			await expect(
-				page.getByRole( 'link', { name: 'Undo?' } )
-			).toBeVisible();
-		} );
+			await test.step( 'remove product again after undo', async () => {
+				await page
+					.getByLabel( /Remove .* from cart/ )
+					.first()
+					.click();
 
-		await test.step( 'verify undo link disappears after navigation', async () => {
-			// Navigate to shop page and return to cart
-			await page.goto( 'shop' );
-			await page.goto( slug );
+				// Verify the product was removed again
+				await checkCartContent( true, page, [], tax );
 
-			// Verify cart is still empty
-			await checkCartContent( true, page, [], tax );
+				// Verify undo link is visible
+				await expect(
+					page.getByRole( 'link', { name: 'Undo?' } )
+				).toBeVisible();
+			} );
 
-			// Verify undo link is no longer visible (cleanup occurred)
-			await expect(
-				page.getByRole( 'link', { name: 'Undo?' } )
-			).not.toBeVisible();
-		} );
-	}
-);
+			await test.step( 'verify undo link disappears after navigation', async () => {
+				// Navigate to shop page and return to cart
+				await page.goto( 'shop' );
+				await page.goto( slug );
+
+				// Verify cart is still empty
+				await checkCartContent( true, page, [], tax );
+
+				// Verify undo link is no longer visible (cleanup occurred)
+				await expect(
+					page.getByRole( 'link', { name: 'Undo?' } )
+				).toBeHidden();
+			} );
+		}
+	);
+}
 
 cartPages.forEach( ( { name, slug } ) => {
 	test(
@@ -206,7 +181,7 @@ cartPages.forEach( ( { name, slug } ) => {
 		{ tag: [ tags.PAYMENTS, tags.SERVICES, tags.HPOS ] },
 		async ( { page, products, tax } ) => {
 			await test.step( 'empty cart is displayed', async () => {
-				page.goto( slug );
+				await page.goto( slug );
 				await checkCartContent( isClassicCart( page ), page, [], tax );
 			} );
 

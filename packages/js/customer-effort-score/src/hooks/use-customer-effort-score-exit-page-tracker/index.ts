@@ -27,7 +27,7 @@ export const useCustomerEffortScoreExitPageTracker = (
 		return () => {
 			if ( hasUnsavedChangesRef.current ) {
 				// unmounted.
-				addExitPage( pageId );
+				void addExitPage( pageId );
 			}
 		};
 	}, [] );

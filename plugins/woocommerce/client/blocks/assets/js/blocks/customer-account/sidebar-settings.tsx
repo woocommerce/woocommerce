@@ -109,6 +109,10 @@ export const BlockSettings = ( {
 								iconStyle: value,
 							} )
 						}
+						help={ __(
+							'When a logged-in customer has a profile photo, it replaces the icon.',
+							'woocommerce'
+						) }
 						className="wc-block-editor-customer-account__icon-style-toggle"
 					>
 						<ToggleGroupControlOption

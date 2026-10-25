@@ -4,7 +4,6 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Admin\Features\Blueprint;
 
-use Automattic\WooCommerce\Admin\Features\Blueprint\Exporters\ExportWCPaymentGateways;
 use Automattic\WooCommerce\Admin\Features\Blueprint\Exporters\ExportWCSettingsAccount;
 use Automattic\WooCommerce\Admin\Features\Blueprint\Exporters\ExportWCSettingsAdvanced;
 use Automattic\WooCommerce\Admin\Features\Blueprint\Exporters\ExportWCSettingsEmails;
@@ -80,7 +79,6 @@ class Init {
 			ExportWCSettingsProducts::class,
 			ExportWCSettingsTax::class,
 			ExportWCSettingsShipping::class,
-			ExportWCPaymentGateways::class,
 			ExportWCSettingsAccount::class,
 			ExportWCSettingsEmails::class,
 			ExportWCSettingsIntegrations::class,
@@ -197,7 +195,7 @@ class Init {
 		return array(
 			array(
 				'id'          => 'settings',
-				'description' => __( 'Includes all the items featured in WooCommerce | Settings.', 'woocommerce' ),
+				'description' => __( 'Includes WooCommerce settings except payment settings, which must be configured manually after import.', 'woocommerce' ),
 				'label'       => __( 'WooCommerce Settings', 'woocommerce' ),
 				'icon'        => 'settings',
 				'items'       => array_map(
@@ -279,34 +277,40 @@ class Init {
 			$all_plugins[ $key ]['slug'] = $slug;
 		}
 
-		$api_response = $this->wp_plugins_api(
-			'plugin_information',
-			array(
-				'fields' => array(
-					'short_description' => false,
-					'sections'          => false,
-					'description'       => false,
-					'tested'            => false,
-					'requires'          => false,
-					'rating'            => false,
-					'ratings'           => false,
-					'downloaded'        => false,
-					'downloadlink'      => false,
-					'last_updated'      => false,
-					'added'             => false,
-					'tags'              => false,
-					'compatibility'     => false,
-					'homepage'          => false,
-					'versions'          => false,
-					'donate_link'       => false,
-					'reviews'           => false,
-					'banners'           => false,
-					'icons'             => false,
-					'active_installs'   => false,
-				),
-				'slugs'  => $plugin_slugs,
-			)
-		);
+		try {
+			$api_response = $this->wp_plugins_api(
+				'plugin_information',
+				array(
+					'fields' => array(
+						'short_description' => false,
+						'sections'          => false,
+						'description'       => false,
+						'tested'            => false,
+						'requires'          => false,
+						'rating'            => false,
+						'ratings'           => false,
+						'downloaded'        => false,
+						'downloadlink'      => false,
+						'last_updated'      => false,
+						'added'             => false,
+						'tags'              => false,
+						'compatibility'     => false,
+						'homepage'          => false,
+						'versions'          => false,
+						'donate_link'       => false,
+						'reviews'           => false,
+						'banners'           => false,
+						'icons'             => false,
+						'active_installs'   => false,
+					),
+					'slugs'  => $plugin_slugs,
+				)
+			);
+		} catch ( \Throwable $e ) {
+			// A third party filtering the plugins API result can throw. Don't let that take down the admin screen.
+			$this->log_api_failure( 'plugins_api', $e );
+			return $all_plugins;
+		}
 
 		// If API fails, return all plugins.
 		if ( is_wp_error( $api_response ) ) {
@@ -349,28 +353,34 @@ class Init {
 			}
 		}
 
-		$api_response = $this->wp_themes_api(
-			'theme_information',
-			array(
-				'fields' => array(
-					'downloadlink'    => true,
-					'sections'        => false,
-					'description'     => false,
-					'rating'          => false,
-					'ratings'         => false,
-					'downloaded'      => false,
-					'last_updated'    => false,
-					'tags'            => false,
-					'homepage'        => false,
-					'screenshots'     => false,
-					'screenshot_url'  => false,
-					'parent'          => false,
-					'versions'        => false,
-					'extended_author' => false,
-				),
-				'slugs'  => $theme_slugs,
-			)
-		);
+		try {
+			$api_response = $this->wp_themes_api(
+				'theme_information',
+				array(
+					'fields' => array(
+						'downloadlink'    => true,
+						'sections'        => false,
+						'description'     => false,
+						'rating'          => false,
+						'ratings'         => false,
+						'downloaded'      => false,
+						'last_updated'    => false,
+						'tags'            => false,
+						'homepage'        => false,
+						'screenshots'     => false,
+						'screenshot_url'  => false,
+						'parent'          => false,
+						'versions'        => false,
+						'extended_author' => false,
+					),
+					'slugs'  => $theme_slugs,
+				)
+			);
+		} catch ( \Throwable $e ) {
+			// A third party filtering the themes API result can throw. Don't let that take down the admin screen.
+			$this->log_api_failure( 'themes_api', $e );
+			return $all_themes;
+		}
 
 		// If the API fails, return all installed themes.
 		if ( is_wp_error( $api_response ) ) {
@@ -387,5 +397,26 @@ class Init {
 
 		set_transient( self::INSTALLED_WP_ORG_THEMES_TRANSIENT, $wp_org_themes );
 		return $wp_org_themes;
+	}
+
+	/**
+	 * Log a WordPress.org API request that threw.
+	 *
+	 * @param string     $api The API that was called, for example "themes_api".
+	 * @param \Throwable $e   The thrown error.
+	 *
+	 * @return void
+	 */
+	private function log_api_failure( string $api, \Throwable $e ) {
+		wc_get_logger()->error(
+			sprintf(
+				'Blueprint: %1$s() threw "%2$s" in %3$s:%4$d. Falling back to the installed list.',
+				$api,
+				$e->getMessage(),
+				$e->getFile(),
+				$e->getLine()
+			),
+			array( 'source' => 'blueprint' )
+		);
 	}
 }

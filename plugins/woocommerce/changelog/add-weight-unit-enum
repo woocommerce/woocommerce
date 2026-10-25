@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add WeightUnit enum class for woocommerce_weight_unit option values and implement it across the codebase.

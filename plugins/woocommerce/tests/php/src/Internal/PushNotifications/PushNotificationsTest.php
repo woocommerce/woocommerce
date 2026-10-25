@@ -5,7 +5,11 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Tests\Internal\PushNotifications;
 
 use Automattic\Jetpack\Connection\Manager as JetpackConnectionManager;
-use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\Internal\PushNotifications\Controllers\NotificationPreferencesRestController;
+use Automattic\WooCommerce\Internal\PushNotifications\Controllers\PushNotificationRestController;
+use Automattic\WooCommerce\Internal\PushNotifications\Controllers\PushNotificationStatusRestController;
+use Automattic\WooCommerce\Internal\PushNotifications\Controllers\PushTokenRestController;
+use Automattic\WooCommerce\Internal\PushNotifications\DataStores\PushTokensDataStore;
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
@@ -13,6 +17,9 @@ use Exception;
 use PHPUnit\Framework\MockObject\MockObject;
 use WC_Logger;
 use WC_Unit_Test_Case;
+use WP_Http;
+use WP_REST_Request;
+use WP_REST_Response;
 
 /**
  * PushNotifications test.
@@ -26,23 +33,11 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 	private $jetpack_connection_manager_mock;
 
 	/**
-	 * @var FeaturesController|MockObject
-	 */
-	private $features_controller_mock;
-
-	/**
-	 * Set up the test case.
-	 */
-	public function setUp(): void {
-		parent::setUp();
-
-		$this->set_up_features_controller_mock();
-	}
-
-	/**
 	 * Tear down the test case.
 	 */
 	public function tearDown(): void {
+		wp_set_current_user( 0 );
+
 		global $wp_rest_server;
 		$wp_rest_server = null;
 
@@ -58,25 +53,7 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Tests the functionality is disabled if the feature flag is
-	 * disabled.
-	 */
-	public function test_it_can_tell_push_notifications_should_not_be_enabled_if_feature_is_disabled() {
-		$this->set_up_features_controller_mock( false );
-		$this->set_up_jetpack_connection_manager_mock( array( 'is_connected' ) );
-
-		$this->jetpack_connection_manager_mock
-			->expects( $this->never() )
-			->method( 'is_connected' );
-
-		$push_notifications = new PushNotifications();
-
-		$this->assertFalse( $push_notifications->should_be_enabled() );
-	}
-
-	/**
-	 * @testdox Tests the functionality is enabled if feature flag is enabled
-	 * and Jetpack is connected.
+	 * @testdox Tests the functionality is enabled when Jetpack is connected.
 	 */
 	public function test_it_can_tell_push_notifications_should_be_enabled_if_jetpack_is_connected() {
 		$this->set_up_jetpack_connection_manager_mock( array( 'is_connected' ) );
@@ -109,6 +86,26 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Tests the functionality can be manually disabled via the
+	 * woocommerce_enhanced_push_notifications_disabled filter, skipping the Jetpack connection check.
+	 */
+	public function test_it_can_tell_push_notifications_should_not_be_enabled_when_disabled_via_filter() {
+		$this->set_up_jetpack_connection_manager_mock( array( 'is_connected' ) );
+
+		$this->jetpack_connection_manager_mock
+			->expects( $this->never() )
+			->method( 'is_connected' );
+
+		add_filter( 'woocommerce_enhanced_push_notifications_disabled', '__return_true' );
+
+		$push_notifications = new PushNotifications();
+
+		$this->assertFalse( $push_notifications->should_be_enabled() );
+
+		remove_filter( 'woocommerce_enhanced_push_notifications_disabled', '__return_true' );
+	}
+
+	/**
 	 * @testdox Tests that errors are logged when exception is thrown during
 	 * enablement check.
 	 */
@@ -117,12 +114,11 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 		$logger_mock->expects( $this->once() )
 			->method( 'error' )
 			->with(
-				$this->stringContains( 'Error determining if PushNotifications feature should be enabled' ),
-				$this->anything()
+				$this->stringContains( 'Error determining Jetpack connection state for push notifications' ),
+				array( 'source' => PushNotifications::FEATURE_NAME )
 			);
 
 		$this->register_legacy_proxy_function_mocks( array( 'wc_get_logger' => fn () => $logger_mock ) );
-		$this->set_up_features_controller_mock( true );
 		$this->set_up_jetpack_connection_manager_mock( array( 'is_connected' ) );
 
 		$this->jetpack_connection_manager_mock
@@ -218,41 +214,255 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Tests that on_init does not register post types when disabled.
+	 * @testdox Tests that on_init does not register post types when Jetpack is not connected,
+	 * leaving the tokens endpoint to register them if it is called.
 	 */
-	public function test_on_init_does_not_register_post_types_when_disabled() {
-		$this->set_up_features_controller_mock( false );
+	public function test_on_init_does_not_register_post_types_when_jetpack_is_not_connected() {
+		$this->set_up_jetpack_connection_manager_mock( array( 'is_connected' ) );
+
+		$this->jetpack_connection_manager_mock
+			->expects( $this->once() )
+			->method( 'is_connected' )
+			->willReturn( false );
 
 		$push_notifications = new PushNotifications();
 		$push_notifications->on_init();
 
 		$this->assertFalse(
 			post_type_exists( PushToken::POST_TYPE ),
-			'Push token post type should not be registered when disabled'
+			'Push token post type should not be registered when Jetpack is not connected'
 		);
 	}
 
 	/**
-	 * Sets up the FeaturesController mock.
-	 *
-	 * @param bool $feature_enabled Whether the push_notifications feature should be enabled.
+	 * @testdox Tests that on_init does not register post types when disabled via the filter.
 	 */
-	private function set_up_features_controller_mock( bool $feature_enabled = true ) {
-		$this->features_controller_mock = $this
-			->getMockBuilder( FeaturesController::class )
-			->disableOriginalConstructor()
-			->onlyMethods( array( 'feature_is_enabled' ) )
-			->getMock();
+	public function test_on_init_does_not_register_post_types_when_disabled_via_filter() {
+		add_filter( 'woocommerce_enhanced_push_notifications_disabled', '__return_true' );
 
-		$this->features_controller_mock
-			->method( 'feature_is_enabled' )
-			->willReturnCallback(
-				function ( $feature_id ) use ( $feature_enabled ) {
-					return PushNotifications::FEATURE_NAME === $feature_id ? $feature_enabled : false;
-				}
+		$push_notifications = new PushNotifications();
+		$push_notifications->on_init();
+
+		remove_filter( 'woocommerce_enhanced_push_notifications_disabled', '__return_true' );
+
+		$this->assertFalse(
+			post_type_exists( PushToken::POST_TYPE ),
+			'Push token post type should not be registered when disabled via the filter'
+		);
+	}
+
+	/**
+	 * @testdox Tests that on_init registers the status and token controllers, but not the send
+	 * or preferences controllers, when Jetpack is not connected.
+	 */
+	public function test_on_init_registers_status_and_token_controllers_when_jetpack_is_not_connected() {
+		$this->set_up_jetpack_connection_manager_mock( array( 'is_connected' ) );
+
+		$this->jetpack_connection_manager_mock
+			->expects( $this->once() )
+			->method( 'is_connected' )
+			->willReturn( false );
+
+		wc_get_container()->get( PushNotifications::class )->on_init();
+
+		$registered = $this->get_registered_rest_controllers();
+
+		$this->assertContains( PushNotificationStatusRestController::class, $registered );
+		$this->assertContains( PushTokenRestController::class, $registered );
+		$this->assertNotContains( PushNotificationRestController::class, $registered );
+		$this->assertNotContains( NotificationPreferencesRestController::class, $registered );
+	}
+
+	/**
+	 * @testdox Tests that on_init registers the status and token controllers, but not the send
+	 * or preferences controllers, when disabled via the filter.
+	 */
+	public function test_on_init_registers_status_and_token_controllers_when_disabled_via_filter() {
+		add_filter( 'woocommerce_enhanced_push_notifications_disabled', '__return_true' );
+
+		$push_notifications = new PushNotifications();
+		$push_notifications->on_init();
+
+		remove_filter( 'woocommerce_enhanced_push_notifications_disabled', '__return_true' );
+
+		$registered = $this->get_registered_rest_controllers();
+
+		$this->assertContains( PushNotificationStatusRestController::class, $registered );
+		$this->assertContains( PushTokenRestController::class, $registered );
+		$this->assertNotContains( PushNotificationRestController::class, $registered );
+		$this->assertNotContains( NotificationPreferencesRestController::class, $registered );
+	}
+
+	/**
+	 * @testdox Tests that the tokens endpoint returns the store's registered tokens while
+	 * the module is disabled via the filter.
+	 */
+	public function test_tokens_endpoint_returns_tokens_when_disabled_via_filter() {
+		add_filter( 'woocommerce_enhanced_push_notifications_disabled', '__return_true' );
+
+		try {
+			$tokens = $this->dispatch_tokens_request_after_on_init( 'filter-disabled-token' );
+		} finally {
+			remove_filter( 'woocommerce_enhanced_push_notifications_disabled', '__return_true' );
+		}
+
+		$this->assertCount( 1, $tokens );
+		$this->assertSame( 'filter-disabled-token', $tokens[0]['token'] );
+	}
+
+	/**
+	 * @testdox Tests that the tokens endpoint returns the store's registered tokens while
+	 * Jetpack is not connected.
+	 */
+	public function test_tokens_endpoint_returns_tokens_when_jetpack_is_not_connected() {
+		$this->set_up_jetpack_connection_manager_mock( array( 'is_connected' ) );
+
+		$this->jetpack_connection_manager_mock
+			->expects( $this->any() )
+			->method( 'is_connected' )
+			->willReturn( false );
+
+		$tokens = $this->dispatch_tokens_request_after_on_init( 'disconnected-token' );
+
+		$this->assertCount( 1, $tokens );
+		$this->assertSame( 'disconnected-token', $tokens[0]['token'] );
+	}
+
+	/**
+	 * @testdox Tests that registering a token returns a missing route while the module is disabled.
+	 */
+	public function test_token_registration_returns_no_route_when_disabled_via_filter() {
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/push-tokens' );
+		$request->set_param( 'token', str_repeat( 'a', 64 ) );
+		$request->set_param( 'platform', PushToken::PLATFORM_APPLE );
+		$request->set_param( 'device_uuid', 'refused-device-uuid' );
+		$request->set_param( 'origin', PushToken::ORIGIN_WOOCOMMERCE_IOS );
+		$request->set_param( 'device_locale', 'en_US' );
+
+		$response = $this->dispatch_as_shop_manager_while_disabled( $request );
+
+		$this->assertSame( WP_Http::NOT_FOUND, $response->get_status() );
+		$this->assertSame( 'rest_no_route', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Tests that deleting a token returns a missing route while the module is disabled.
+	 */
+	public function test_token_deletion_returns_no_route_when_disabled_via_filter() {
+		$response = $this->dispatch_as_shop_manager_while_disabled(
+			new WP_REST_Request( 'DELETE', '/wc-push-notifications/push-tokens/1' )
+		);
+
+		$this->assertSame( WP_Http::NOT_FOUND, $response->get_status() );
+		$this->assertSame( 'rest_no_route', $response->get_data()['code'] );
+	}
+
+	/**
+	 * Dispatches a request as a shop manager against the token routes, with the
+	 * module disabled through the filter.
+	 *
+	 * @param WP_REST_Request $request The request to dispatch.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 * @return WP_REST_Response
+	 */
+	private function dispatch_as_shop_manager_while_disabled( WP_REST_Request $request ): WP_REST_Response {
+		add_filter( 'woocommerce_enhanced_push_notifications_disabled', '__return_true' );
+
+		try {
+			wp_set_current_user( self::factory()->user->create( array( 'role' => 'shop_manager' ) ) );
+
+			$server = $this->create_rest_server_with_routes(
+				array( array( new PushTokenRestController(), 'register_routes' ) ),
+				true
 			);
 
-		wc_get_container()->replace( FeaturesController::class, $this->features_controller_mock );
+			return $server->dispatch( $request );
+		} finally {
+			remove_filter( 'woocommerce_enhanced_push_notifications_disabled', '__return_true' );
+		}
+	}
+
+	/**
+	 * Stores one token against a shop manager, runs on_init with the post type
+	 * unregistered, then dispatches a GET to the tokens endpoint as WPCOM and returns
+	 * the tokens it responded with.
+	 *
+	 * @param string $token The token value to store.
+	 * @return array[]
+	 */
+	private function dispatch_tokens_request_after_on_init( string $token ): array {
+		$push_notifications = new PushNotifications();
+
+		// Seed the token the way an enabled store would have, then drop the post type
+		// again, so the request starts from the state a disabled store is left in.
+		$push_notifications->register_post_types();
+
+		wc_get_container()->get( PushTokensDataStore::class )->create(
+			array(
+				'user_id'       => self::factory()->user->create( array( 'role' => 'shop_manager' ) ),
+				'token'         => $token,
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'device_uuid'   => 'device-' . $token,
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'device_locale' => 'en_US',
+			)
+		);
+
+		unregister_post_type( PushToken::POST_TYPE );
+
+		$push_notifications->on_init();
+
+		$this->assertFalse(
+			post_type_exists( PushToken::POST_TYPE ),
+			'Push token post type should still be unregistered when the request is dispatched'
+		);
+
+		$controller = new class() extends PushTokenRestController {
+			/**
+			 * Stands in for a request WPCOM signed with the Jetpack blog token.
+			 *
+			 * @return bool
+			 */
+			protected function is_signed_with_blog_token(): bool {
+				return true;
+			}
+		};
+
+		$server = $this->create_rest_server_with_routes(
+			array( array( $controller, 'register_routes' ) ),
+			true
+		);
+
+		$response = $server->dispatch( new WP_REST_Request( 'GET', '/wc-push-notifications/push-tokens' ) );
+
+		$this->assertSame( WP_Http::OK, $response->get_status() );
+
+		$this->assertFalse(
+			post_type_exists( PushToken::POST_TYPE ),
+			'Reading the token list should not need the push token post type registered'
+		);
+
+		return $response->get_data()['tokens'];
+	}
+
+	/**
+	 * Returns the controller classes that have added themselves to the WooCommerce REST
+	 * API namespaces.
+	 *
+	 * @return string[]
+	 */
+	private function get_registered_rest_controllers(): array {
+		// The status controller registers on rest_api_init rather than during
+		// on_init, so a front-end request does not resolve it for nothing. WooCommerce
+		// applies the namespaces filter on rest_api_init at priority 10, and the
+		// controller registers at priority 0, so it is always in place in time.
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Triggering a WordPress core hook, not defining one.
+		do_action( 'rest_api_init' );
+
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Triggering an existing filter from RestApiControllerBase, not defining one.
+		$namespaces = apply_filters( 'woocommerce_rest_api_get_rest_namespaces', array( 'wc/v3' => array() ) );
+
+		return array_values( $namespaces['wc/v3'] );
 	}
 
 	/**

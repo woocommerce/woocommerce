@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop product feed generation from clearing the site-wide object cache; only the process's in-memory cache is freed.

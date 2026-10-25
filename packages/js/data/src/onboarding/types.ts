@@ -6,6 +6,8 @@ import { Plugin } from '../plugins/types';
 export type TaskType = {
 	actionLabel?: string;
 	actionUrl?: string;
+	imageUrl?: string;
+	imageAlt?: string;
 	content: string;
 	id: string;
 	parentId: string;
@@ -216,8 +218,7 @@ export type OnboardingProductType = {
 };
 
 export type OnboardingProductTypes =
-	| Record< ProductTypeSlug, OnboardingProductType >
-	| Record< string, never >;
+	Record< ProductTypeSlug, OnboardingProductType > | Record< string, never >;
 
 export type ExtensionList = {
 	key: string;

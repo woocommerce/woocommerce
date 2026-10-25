@@ -494,16 +494,14 @@ describe( 'DateTimePickerControl', () => {
 
 		let count = 0;
 
-		const Container = (
-            {
-                children
-            }: {
-                children?: ( props: {
-                    className: string;
-                    onChange: () => void;
-                } ) => React.ReactNode;
-            }
-        ) => {
+		const Container = ( {
+			children,
+		}: {
+			children?: ( props: {
+				className: string;
+				onChange: () => void;
+			} ) => React.ReactNode;
+		} ) => {
 			function getChildren() {
 				if ( typeof children === 'function' ) {
 					return children( {

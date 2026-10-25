@@ -6,6 +6,8 @@ import { __ } from '@wordpress/i18n';
 import { decodeEntities } from '@wordpress/html-entities';
 import { PaymentGatewayProvider } from '@woocommerce/data';
 import { Tooltip } from '@wordpress/components';
+import { createInterpolateElement } from '@wordpress/element';
+import { Link } from '@wordpress/ui';
 
 /**
  * Internal dependencies
@@ -49,12 +51,19 @@ export const PaymentGatewayListItem = ( {
 	const itemIsWooPayments = isWooPayments( gateway.id );
 	const incentive = hasIncentive( gateway ) ? gateway._incentive : null;
 
+	const isIncompatibleWithCheckoutBlock =
+		gateway.state.enabled &&
+		(
+			window.wcSettings?.admin?.woocommerce_checkout_block_compatibility
+				?.incompatible_gateway_ids ?? []
+		).includes( gateway.id );
+
 	const gatewayHasRecommendedPaymentMethods =
 		( gateway.onboarding?.recommended_payment_methods ?? [] ).length > 0;
 
 	// Default to onboarding supported to avoid blocking the user, but only when onboarding exists.
 	const isOnboardingSupported = gateway.onboarding
-		? gateway.onboarding.state?.supported ?? true
+		? ( gateway.onboarding.state?.supported ?? true )
 		: true;
 
 	// If the account is not connected or the onboarding is not started, or not completed then the gateway needs onboarding.
@@ -153,6 +162,36 @@ export const PaymentGatewayListItem = ( {
 								popoverContent={ determineGatewayStatusMessage() }
 							/>
 						) }
+						{ isIncompatibleWithCheckoutBlock && (
+							<StatusBadge
+								status="not_supported"
+								message={ __(
+									'Limited compatibility',
+									'woocommerce'
+								) }
+								popoverContent={
+									<p>
+										{ createInterpolateElement(
+											__(
+												'Payment methods from this provider will only appear on classic checkout. <a>Learn more</a>',
+												'woocommerce'
+											),
+											{
+												a: (
+													<Link
+														href="https://woocommerce.com/document/woocommerce-store-editing/customizing-cart-and-checkout/#incompatible-extensions"
+														rel="noopener noreferrer"
+														openInNewTab
+													>
+														{ null }
+													</Link>
+												),
+											}
+										) }
+									</p>
+								}
+							/>
+						) }
 						{ /* If the gateway has a matching suggestion, it is an official extension. */ }
 						{ gateway._suggestion_id && (
 							<OfficialBadge
@@ -185,7 +224,7 @@ export const PaymentGatewayListItem = ( {
 					</span>
 					<span
 						className="woocommerce-list__item-content"
-						// eslint-disable-next-line react/no-danger -- This string is sanitized by the PaymentGateway class.
+
 						dangerouslySetInnerHTML={ sanitizeHTML(
 							decodeEntities( gateway.description )
 						) }

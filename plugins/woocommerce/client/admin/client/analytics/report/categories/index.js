@@ -32,9 +32,9 @@ class CategoriesReport extends Component {
 				: 'time-comparison';
 		const itemsLabel = isSingleCategoryView
 			? /* translators: %d: number of products */
-			  __( '%d products', 'woocommerce' )
+				__( '%d products', 'woocommerce' )
 			: /* translators: %d: number of categories */
-			  __( '%d categories', 'woocommerce' );
+				__( '%d categories', 'woocommerce' );
 
 		return {
 			isSingleCategoryView,
@@ -101,6 +101,7 @@ class CategoriesReport extends Component {
 					<ProductsReportTable
 						isRequesting={ isRequesting }
 						query={ chartQuery }
+						limitProperties={ [ 'products', 'categories' ] }
 						baseSearchQuery={ { filter: 'single_category' } }
 						hideCompare={ isSingleCategoryView }
 						filters={ filters }

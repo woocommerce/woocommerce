@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { CliUx, Command, Flags } from '@oclif/core';
+import { Args, Command, Flags, ux } from '@oclif/core';
 import { graphql, GraphqlResponseError } from '@octokit/graphql';
 import { RequestError } from '@octokit/request-error';
 
@@ -43,13 +43,12 @@ export default class TransferIssues extends Command {
 	static description =
 		'Transfers issues from another repository into the destination repository.';
 
-	static args = [
-		{
-			name: 'source',
+	static args = {
+		source: Args.string( {
 			description: 'The GitHub repository we are transferring from.',
 			required: true,
-		},
-	];
+		} ),
+	};
 
 	static flags = {
 		destination: Flags.string( {
@@ -88,12 +87,15 @@ export default class TransferIssues extends Command {
 				'The source and target repository must have the same owner!'
 			);
 		}
+		const { default: confirm } = await import( '@inquirer/confirm' );
 
-		let confirmation = await CliUx.ux.confirm(
-			'Are you sure you want to transfer issues from ' +
+		let confirmation = await confirm( {
+			message:
+				'Are you sure you want to transfer issues from ' +
 				args.source +
-				' into the monorepo? (y/n)'
-		);
+				' into the monorepo?',
+			default: false,
+		} );
 		if ( ! confirmation ) {
 			this.exit( 0 );
 		}
@@ -113,11 +115,13 @@ export default class TransferIssues extends Command {
 			this.exit( 0 );
 		}
 
-		confirmation = await CliUx.ux.confirm(
-			'This will transfer ' +
+		confirmation = await confirm( {
+			message:
+				'This will transfer ' +
 				numberOfIssues +
-				' issue(s). There is no command to reverse this, are you sure? (y/n)'
-		);
+				' issue(s). There is no command to reverse this, are you sure?',
+			default: false,
+		} );
 		if ( ! confirmation ) {
 			this.exit( 0 );
 		}
@@ -157,25 +161,43 @@ export default class TransferIssues extends Command {
 		// Wait for five seconds to label the issues. This is necessary so that GitHub
 		// can fully transfer the issue with the existing labels, since otherwise,
 		// we would replace the labels that would have been transferred.
-		CliUx.ux.action.start( 'Waiting for GitHub to process transfers' );
+		ux.action.start( 'Waiting for GitHub to process transfers' );
 		await new Promise( ( resolve ) => setTimeout( resolve, 25000 ) );
-		CliUx.ux.action.stop();
+		ux.action.stop();
 
-		CliUx.ux.action.start( 'Running post-transfer tasks' );
+		ux.action.start( 'Running post-transfer tasks' );
+		const postTransferFailures: string[] = [];
 		for ( const issue of issuesToTransfer ) {
 			if ( ! issue.newID ) {
 				continue;
 			}
 
-			this.resetProjectFields( authenticatedGraphQL, issue );
+			/*
+			 * These are awaited so failures surface, but one issue failing must
+			 * not leave the remaining transferred issues unprocessed.
+			 */
+			try {
+				await this.resetProjectFields( authenticatedGraphQL, issue );
 
-			this.addLabelsToIssue(
-				authenticatedGraphQL,
-				issue.newID,
-				labelsToAdd
+				await this.addLabelsToIssue(
+					authenticatedGraphQL,
+					issue.newID,
+					labelsToAdd
+				);
+			} catch ( error ) {
+				postTransferFailures.push(
+					`${ issue.title }: ${ ( error as Error ).message }`
+				);
+			}
+		}
+		ux.action.stop();
+
+		if ( postTransferFailures.length > 0 ) {
+			this.log(
+				'Post-transfer tasks failed for:\n' +
+					postTransferFailures.join( '\n' )
 			);
 		}
-		CliUx.ux.action.stop();
 
 		this.log(
 			'Successfully transferred ' +
@@ -191,15 +213,16 @@ export default class TransferIssues extends Command {
 	 */
 	private async authenticateGraphQL(): Promise< typeof graphql > {
 		// Prompt them for a token, rather than storing one. This reduces the likelihood that the command can be accidentally executed.
-		const token: string = await CliUx.ux.prompt(
-			'Please supply a GitHub API token',
-			{ type: 'hide', required: true }
-		);
+		const { default: password } = await import( '@inquirer/password' );
+		const token = await password( {
+			message: 'Please supply a GitHub API token',
+			validate: ( value ) => value !== '',
+		} );
 		if ( token === '' ) {
 			this.error( 'You must enter a valid GitHub API token' );
 		}
 
-		CliUx.ux.action.start( 'Validating GitHub API token' );
+		ux.action.start( 'Validating GitHub API token' );
 
 		const authenticatedGraphQL = graphql.defaults( {
 			headers: {
@@ -218,7 +241,7 @@ export default class TransferIssues extends Command {
 
 			throw err;
 		} finally {
-			CliUx.ux.action.stop();
+			ux.action.stop();
 		}
 
 		return authenticatedGraphQL;
@@ -236,7 +259,7 @@ export default class TransferIssues extends Command {
 		destinationOwner: string,
 		destinationRepo: string
 	): Promise< string > {
-		CliUx.ux.action.start( 'Finding Monorepo' );
+		ux.action.start( 'Finding Monorepo' );
 
 		try {
 			const { repository } = await authenticatedGraphQL< {
@@ -259,11 +282,11 @@ export default class TransferIssues extends Command {
 				}
 			);
 
-			CliUx.ux.action.stop();
+			ux.action.stop();
 
 			return repository.id;
 		} catch ( err ) {
-			CliUx.ux.action.stop();
+			ux.action.stop();
 
 			if ( err instanceof GraphqlResponseError ) {
 				this.error(
@@ -277,7 +300,7 @@ export default class TransferIssues extends Command {
 
 			throw err;
 		} finally {
-			CliUx.ux.action.stop();
+			ux.action.stop();
 		}
 	}
 
@@ -300,7 +323,7 @@ export default class TransferIssues extends Command {
 		}
 		const addLabels = labels.split( ',' );
 
-		CliUx.ux.action.start( 'Getting labels to add' );
+		ux.action.start( 'Getting labels to add' );
 
 		// Gather all of the labels from the monorepo so that
 		// we can validate the labels we want to add and
@@ -369,7 +392,7 @@ export default class TransferIssues extends Command {
 			} );
 		}
 
-		CliUx.ux.action.stop();
+		ux.action.stop();
 
 		return gitHubLabels;
 	}
@@ -386,7 +409,7 @@ export default class TransferIssues extends Command {
 		source: string,
 		searchFilter: string
 	) {
-		CliUx.ux.action.start( 'Counting issues' );
+		ux.action.start( 'Counting issues' );
 
 		const searchQuery = 'repo:' + source + ' is:issue ' + searchFilter;
 
@@ -407,7 +430,7 @@ export default class TransferIssues extends Command {
 			{ searchQuery }
 		);
 
-		CliUx.ux.action.stop();
+		ux.action.stop();
 
 		return search.issueCount;
 	}
@@ -426,7 +449,7 @@ export default class TransferIssues extends Command {
 	) {
 		const searchQuery = 'repo:' + source + ' is:issue ' + searchFilter;
 
-		CliUx.ux.action.start( 'Getting issues' );
+		ux.action.start( 'Getting issues' );
 
 		const issues: GitHubIssue[] = [];
 		let cursor: string | null = null;
@@ -593,7 +616,7 @@ export default class TransferIssues extends Command {
 			}
 		} while ( cursor !== null );
 
-		CliUx.ux.action.stop();
+		ux.action.stop();
 
 		return issues;
 	}
@@ -610,7 +633,7 @@ export default class TransferIssues extends Command {
 		issue: GitHubIssue,
 		monorepoNodeID: string
 	) {
-		CliUx.ux.action.start( 'Transferring "' + issue.title + '"' );
+		ux.action.start( 'Transferring "' + issue.title + '"' );
 
 		try {
 			const input = {
@@ -639,14 +662,14 @@ export default class TransferIssues extends Command {
 			return transferIssue.issue.id;
 		} catch ( err ) {
 			if ( err instanceof GraphqlResponseError && err.errors ) {
-				CliUx.ux.action.stop( err.errors[ 0 ].message );
+				ux.action.stop( err.errors[ 0 ].message );
 			} else {
-				CliUx.ux.action.stop( 'Failed to migrate issue' );
+				ux.action.stop( 'Failed to migrate issue' );
 			}
 
 			return null;
 		} finally {
-			CliUx.ux.action.stop();
+			ux.action.stop();
 		}
 	}
 

@@ -7,23 +7,25 @@ import {
 	useCallback,
 	createContext,
 } from '@wordpress/element';
+import { useExperiment } from '@woocommerce/explat';
 
 /**
  * Internal dependencies
  */
 import { SearchResultsCountType, MarketplaceContextType } from './types';
-import { getAdminSetting } from '../../utils/admin-settings';
+import { LOCALE, getAdminSetting } from '../../utils/admin-settings';
 import { createStorageUtils } from '../../utils/localStorage';
 import {
 	MARKETPLACE_HOST,
 	MARKETPLACE_IAM_SETTINGS_API_PATH,
 } from '../components/constants';
+import { PRODUCT_PREVIEW_EXPERIMENT_NAME } from '../utils/product-preview-experiment';
 
 // Create storage utils with 24h expiration
-const iamSettingsStorage = createStorageUtils(
-	'wc_iam_settings',
-	24 * 60 * 60
-);
+const iamSettingsStorage = createStorageUtils< {
+	locale: string | null | undefined;
+	settings: MarketplaceContextType[ 'iamSettings' ];
+} >( 'wc_iam_settings', 24 * 60 * 60 );
 
 export const MarketplaceContext = createContext< MarketplaceContextType >( {
 	isLoading: false,
@@ -39,6 +41,7 @@ export const MarketplaceContext = createContext< MarketplaceContextType >( {
 	},
 	setSearchResultsCount: () => {},
 	iamSettings: {},
+	productPreviewVariation: null,
 } );
 
 export function MarketplaceContextProvider( props: {
@@ -47,6 +50,14 @@ export function MarketplaceContextProvider( props: {
 	const [ isLoading, setIsLoading ] = useState( true );
 	const [ selectedTab, setSelectedTab ] = useState( '' );
 	const [ iamSettings, setIamSettings ] = useState( {} );
+	// Loaded up front so product cards already know whether to open the preview modal when clicked.
+	const [ , productPreviewAssignment ] = useExperiment(
+		PRODUCT_PREVIEW_EXPERIMENT_NAME
+	);
+	// useExperiment keeps returning a cached assignment after tracking is turned off, so drop it here.
+	const productPreviewVariation = window.wcTracks?.isEnabled
+		? ( productPreviewAssignment?.variationName ?? null )
+		: null;
 	const [ installedPlugins, setInstalledPlugins ] = useState< string[] >(
 		[]
 	);
@@ -68,16 +79,21 @@ export function MarketplaceContextProvider( props: {
 	);
 
 	/**
-	 * Load IAM settings from localStorage or WCCOM.
+	 * Load IAM settings from localStorage or WCCOM. The response contains
+	 * translated copy (e.g. the quality badge tooltip), so the cache is keyed
+	 * to the locale it was fetched for.
 	 */
 	useEffect( () => {
-		const cachedSettings = iamSettingsStorage.getWithExpiry();
-		if ( cachedSettings ) {
-			setIamSettings( cachedSettings );
+		const cached = iamSettingsStorage.getWithExpiry();
+		if ( cached?.settings && cached.locale === LOCALE.userLocale ) {
+			setIamSettings( cached.settings );
 			return;
 		}
 
-		const url = `${ MARKETPLACE_HOST }${ MARKETPLACE_IAM_SETTINGS_API_PATH }`;
+		let url = `${ MARKETPLACE_HOST }${ MARKETPLACE_IAM_SETTINGS_API_PATH }`;
+		if ( LOCALE.userLocale ) {
+			url += `?locale=${ LOCALE.userLocale }`;
+		}
 		fetch( url )
 			.then( ( response ) => {
 				if ( ! response.ok ) {
@@ -89,7 +105,10 @@ export function MarketplaceContextProvider( props: {
 			} )
 			.then( ( data ) => {
 				setIamSettings( data );
-				iamSettingsStorage.setWithExpiry( data );
+				iamSettingsStorage.setWithExpiry( {
+					locale: LOCALE.userLocale,
+					settings: data,
+				} );
 			} )
 			.catch( ( error ) => {
 				// eslint-disable-next-line no-console
@@ -128,6 +147,7 @@ export function MarketplaceContextProvider( props: {
 		searchResultsCount,
 		setSearchResultsCount,
 		iamSettings,
+		productPreviewVariation,
 	};
 
 	return (

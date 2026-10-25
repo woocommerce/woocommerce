@@ -10,6 +10,8 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\SubscriptionsEngine\Tests\Integration\Integration\Storage;
 
 use EngineIntegrationTestCase;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
+use Automattic\WooCommerce\SubscriptionsEngine\Core\Support\Coercion;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller;
 
 /**
@@ -18,18 +20,20 @@ use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstall
 class SchemaInstallerTest extends EngineIntegrationTestCase {
 
 	/**
-	 * The six baseline tables the installer owns.
+	 * The baseline tables the installer owns, including the cycle tables.
 	 *
 	 * @return array<int, array<int, string>>
 	 */
 	public function table_provider(): array {
 		return array(
-			array( SchemaInstaller::TABLE_PLAN_GROUPS ),
 			array( SchemaInstaller::TABLE_PLANS ),
+			array( SchemaInstaller::TABLE_PLAN_META ),
 			array( SchemaInstaller::TABLE_CONTRACTS ),
 			array( SchemaInstaller::TABLE_CONTRACT_ITEMS ),
 			array( SchemaInstaller::TABLE_CONTRACT_ADDRESSES ),
 			array( SchemaInstaller::TABLE_CONTRACT_META ),
+			array( SchemaInstaller::TABLE_CYCLES ),
+			array( SchemaInstaller::TABLE_SNAPSHOTS ),
 		);
 	}
 
@@ -51,19 +55,41 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 
 	public function test_version_option_is_set_after_install(): void {
 		$this->assertTrue( SchemaInstaller::is_current() );
-		$this->assertSame( SchemaInstaller::VERSION, get_option( SchemaInstaller::VERSION_OPTION ) );
+		$this->assertSame( SchemaInstaller::get_version(), SchemaInstaller::get_database_version() );
 	}
 
 	public function test_install_is_idempotent(): void {
 		// Running install again must not error or change the recorded version.
 		SchemaInstaller::install();
 
-		$this->assertSame( SchemaInstaller::VERSION, get_option( SchemaInstaller::VERSION_OPTION ) );
+		$this->assertSame( SchemaInstaller::get_version(), SchemaInstaller::get_database_version() );
 	}
 
 	public function test_unknown_table_identifier_throws(): void {
 		$this->expectException( \InvalidArgumentException::class );
 		SchemaInstaller::get_table_name( 'not_a_table' );
+	}
+
+	/**
+	 * @testdox A chain is the pair (contract_id, kind), so there is no chains table.
+	 */
+	public function test_there_is_no_chains_table(): void {
+		global $wpdb;
+
+		$chains = $wpdb->prefix . 'wc_subscription_chains';
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$found = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $chains ) );
+
+		$this->assertNull( $found, 'Did not expect a wc_subscription_chains table.' );
+	}
+
+	/**
+	 * @testdox The chains logical identifier is no longer registered.
+	 */
+	public function test_chains_logical_identifier_is_unknown(): void {
+		$this->expectException( \InvalidArgumentException::class );
+		SchemaInstaller::get_table_name( 'chains' );
 	}
 
 	public function test_plans_table_has_extension_slug_column(): void {
@@ -77,6 +103,58 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 		$this->assertSame( 'extension_slug', $column );
 	}
 
+	/**
+	 * @testdox The plans table keeps status, drops the retired columns, and has a nullable billing_policy.
+	 */
+	public function test_plans_table_columns_after_the_records_rework(): void {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS );
+
+		$this->assertTrue( $this->has_column( $table, 'status' ), 'Expected plans.status.' );
+
+		foreach ( array( 'description', 'category', 'sort_order', 'merchant_code', 'inventory_policy' ) as $column ) {
+			$this->assertFalse( $this->has_column( $table, $column ), "Did not expect plans.{$column}." );
+		}
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$row = $wpdb->get_row( $wpdb->prepare( "SHOW COLUMNS FROM {$table} LIKE %s", 'billing_policy' ), ARRAY_A );
+
+		$this->assertIsArray( $row, 'Expected a plans.billing_policy column.' );
+		$this->assertSame( 'YES', $row['Null'] ?? null, 'Expected plans.billing_policy to be NULLable.' );
+	}
+
+	/**
+	 * @testdox The plans table is indexed by (extension_slug, status) and carries no retired indexes.
+	 */
+	public function test_plans_table_indexes(): void {
+		$table   = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLANS );
+		$indexes = $this->index_names( $table );
+
+		$this->assertContains( 'extension_status', $indexes );
+		$this->assertSame( array( 'extension_slug', 'status' ), $this->index_columns( $table, 'extension_status' ) );
+
+		foreach ( array( 'category', 'status_sort', 'extension_merchant_code' ) as $index ) {
+			$this->assertNotContains( $index, $indexes, "Did not expect the plans {$index} index." );
+		}
+	}
+
+	/**
+	 * @testdox Plan meta carries the HPOS-style key/value indexes.
+	 */
+	public function test_plan_meta_has_hpos_style_indexes(): void {
+		$table   = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_PLAN_META );
+		$indexes = $this->index_names( $table );
+
+		$this->assertContains( 'meta_key_value', $indexes );
+		$this->assertContains( 'plan_meta_key_value', $indexes );
+		$this->assertSame( array( 'meta_key', 'meta_value' ), $this->index_columns( $table, 'meta_key_value' ) );
+		$this->assertSame(
+			array( 'plan_id', 'meta_key', 'meta_value' ),
+			$this->index_columns( $table, 'plan_meta_key_value' )
+		);
+	}
+
 	public function test_contracts_table_has_extension_slug_column(): void {
 		global $wpdb;
 
@@ -86,5 +164,591 @@ class SchemaInstallerTest extends EngineIntegrationTestCase {
 		$column = $wpdb->get_var( $wpdb->prepare( "SHOW COLUMNS FROM {$table} LIKE %s", 'extension_slug' ) );
 
 		$this->assertSame( 'extension_slug', $column );
+	}
+
+	public function test_contracts_table_has_the_live_source_of_truth_columns(): void {
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+
+		$columns = array(
+			'id',
+			'status',
+			'customer_id',
+			'currency',
+			'selling_plan_id',
+			'origin_order_id',
+			'extension_slug',
+			'payment_method',
+			'payment_method_title',
+			'payment_token_id',
+			'start_gmt',
+			'next_payment_gmt',
+			'plan_snapshot_id',
+			'items_snapshot_id',
+			'billing_total',
+			'discount_total',
+			'shipping_total',
+			'tax_total',
+			'last_payment_gmt',
+			'last_attempt_gmt',
+			'trial_end_gmt',
+			'end_gmt',
+			'schedule_source',
+		);
+
+		foreach ( $columns as $column ) {
+			$this->assertTrue( $this->has_column( $table, $column ), "Expected contracts.{$column} column." );
+		}
+	}
+
+	/**
+	 * @testdox origin_order_id is nullable so a manual/admin contract can omit it.
+	 */
+	public function test_contracts_origin_order_id_is_nullable(): void {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$row = $wpdb->get_row( $wpdb->prepare( "SHOW COLUMNS FROM {$table} LIKE %s", 'origin_order_id' ), ARRAY_A );
+
+		$this->assertIsArray( $row, 'Expected a contracts.origin_order_id column.' );
+		$this->assertArrayHasKey( 'Null', $row );
+		$this->assertIsString( $row['Null'] );
+		$this->assertSame( 'YES', $row['Null'], 'Expected contracts.origin_order_id to be NULLable.' );
+	}
+
+	/**
+	 * @testdox The contract row has no generic cycle_count - counters are per-chain and derived.
+	 */
+	public function test_contracts_table_has_no_generic_cycle_count(): void {
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+
+		$this->assertFalse(
+			$this->has_column( $table, 'cycle_count' ),
+			'Did not expect a generic contracts.cycle_count column; per-chain counts are derived from the cycle rows.'
+		);
+	}
+
+	/**
+	 * @testdox The contract carries the live config: the four totals and the four stamps.
+	 */
+	public function test_contracts_table_carries_live_config_columns(): void {
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+
+		// These are live values on the contract (the source of truth), not caches of
+		// cycles: the four recurring totals and the four lifecycle stamps.
+		$live_config = array(
+			'billing_total',
+			'discount_total',
+			'shipping_total',
+			'tax_total',
+			'last_payment_gmt',
+			'last_attempt_gmt',
+			'trial_end_gmt',
+			'end_gmt',
+		);
+
+		foreach ( $live_config as $column ) {
+			$this->assertTrue( $this->has_column( $table, $column ), "Expected the live contracts.{$column} column." );
+		}
+	}
+
+	/**
+	 * @testdox The contract carries the latest/live snapshot references.
+	 */
+	public function test_contracts_table_carries_latest_snapshot_refs(): void {
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+
+		$this->assertTrue( $this->has_column( $table, 'plan_snapshot_id' ), 'Expected contracts.plan_snapshot_id.' );
+		$this->assertTrue( $this->has_column( $table, 'items_snapshot_id' ), 'Expected contracts.items_snapshot_id.' );
+	}
+
+	public function test_contracts_due_index_keys_the_next_bill_cache(): void {
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+
+		$this->assertContains( 'due', $this->index_names( $table ) );
+		$this->assertSame(
+			array( 'next_payment_gmt', 'status' ),
+			$this->index_columns( $table, 'due' )
+		);
+	}
+
+	/**
+	 * @testdox The due_owner index keys the dispatcher scan as (extension_slug, next_payment_gmt).
+	 */
+	public function test_contracts_due_owner_index_keys_the_dispatcher_scan(): void {
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+
+		// The dispatcher scans extension_slug IN (registered owners) AND next_payment_gmt <= now;
+		// the owner-first column order is load-bearing for the index, so assert it exactly.
+		// The retired due_contract index is not asserted absent: dbDelta never drops an index,
+		// so it lingers on any reused database until the tables are recreated.
+		$this->assertContains( 'due_owner', $this->index_names( $table ) );
+		$this->assertSame(
+			array( 'extension_slug', 'next_payment_gmt' ),
+			$this->index_columns( $table, 'due_owner' )
+		);
+	}
+
+	/**
+	 * @testdox The schema version is 2.8.0 (contract lock).
+	 */
+	public function test_schema_version_is_2_8_0(): void {
+		$this->assertSame( '2.8.0', SchemaInstaller::get_version() );
+	}
+
+	/**
+	 * @testdox Contracts default schedule_source to the engine's own schedule, in a column wide enough for extension slugs.
+	 */
+	public function test_contracts_schedule_source_defaults_to_the_engine(): void {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$row = $wpdb->get_row( $wpdb->prepare( "SHOW COLUMNS FROM {$table} LIKE %s", 'schedule_source' ), ARRAY_A );
+
+		$this->assertIsArray( $row, 'Expected a contracts.schedule_source column.' );
+		$this->assertSame( Contract::SCHEDULE_SOURCE_ENGINE, $row['Default'] ?? null );
+		$this->assertSame( 'varchar(64)', $row['Type'] ?? null );
+	}
+
+	/**
+	 * @testdox Contracts carry nullable lock and creation-key columns and no claimed_until.
+	 */
+	public function test_contracts_lock_and_creation_key_columns_are_nullable(): void {
+		global $wpdb;
+
+		$table    = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+		$expected = array(
+			'lock_token'       => 'char(32)',
+			'locked_until_gmt' => 'datetime',
+			'lock_operation'   => 'varchar(64)',
+			'creation_key'     => 'varchar(100)',
+		);
+
+		foreach ( $expected as $column => $type ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$row = $wpdb->get_row( $wpdb->prepare( "SHOW COLUMNS FROM {$table} LIKE %s", $column ), ARRAY_A );
+
+			$this->assertIsArray( $row, "Expected a contracts.{$column} column." );
+			$this->assertSame( 'YES', $row['Null'] ?? null, "Expected contracts.{$column} to be NULLable." );
+			$this->assertSame( $type, $row['Type'] ?? null );
+		}
+
+		$this->assertFalse( $this->has_column( $table, 'claimed_until' ) );
+	}
+
+	/**
+	 * @testdox Contracts carry a write_seq counter that starts at 0.
+	 */
+	public function test_contracts_write_seq_column(): void {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$row = $wpdb->get_row( $wpdb->prepare( "SHOW COLUMNS FROM {$table} LIKE %s", 'write_seq' ), ARRAY_A );
+
+		$this->assertIsArray( $row, 'Expected a contracts.write_seq column.' );
+		$this->assertSame( 'NO', $row['Null'] ?? null );
+		$this->assertSame( '0', $row['Default'] ?? null );
+		$type = $row['Type'] ?? null;
+		$this->assertIsString( $type );
+		$this->assertMatchesRegularExpression( '/^bigint(\(\d+\))? unsigned$/', $type );
+	}
+
+	/**
+	 * @testdox The creation index makes (extension_slug, creation_key) unique.
+	 */
+	public function test_contracts_creation_index_is_unique(): void {
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+
+		$this->assertSame( array( 'extension_slug', 'creation_key' ), $this->index_columns( $table, 'creation' ) );
+		$this->assertTrue( $this->index_is_unique( $table, 'creation' ) );
+	}
+
+	/**
+	 * @testdox The creation key column compares binary, in the table charset.
+	 */
+	public function test_contracts_creation_key_is_binary_collated(): void {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$row = $wpdb->get_row( $wpdb->prepare( "SHOW FULL COLUMNS FROM {$table} LIKE %s", 'creation_key' ), ARRAY_A );
+
+		$this->assertIsArray( $row );
+		$this->assertSame( $wpdb->charset . '_bin', $row['Collation'] ?? null );
+	}
+
+	/**
+	 * @testdox Contract identity columns are nullable until the extension supplies them.
+	 */
+	public function test_contracts_identity_columns_are_nullable(): void {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACTS );
+
+		foreach ( array( 'customer_id', 'currency', 'selling_plan_id', 'start_gmt' ) as $column ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$row = $wpdb->get_row( $wpdb->prepare( "SHOW COLUMNS FROM {$table} LIKE %s", $column ), ARRAY_A );
+
+			$this->assertIsArray( $row, "Expected a contracts.{$column} column." );
+			$this->assertSame( 'YES', $row['Null'] ?? null, "Expected contracts.{$column} to be NULLable." );
+		}
+	}
+
+	/**
+	 * @testdox Contract meta carries the HPOS-style key/value indexes and no contract_key index.
+	 */
+	public function test_contract_meta_has_hpos_style_indexes(): void {
+		$table   = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CONTRACT_META );
+		$indexes = $this->index_names( $table );
+
+		$this->assertContains( 'meta_key_value', $indexes );
+		$this->assertContains( 'contract_meta_key_value', $indexes );
+		$this->assertNotContains( 'contract_key', $indexes );
+		$this->assertSame( array( 'meta_key', 'meta_value' ), $this->index_columns( $table, 'meta_key_value' ) );
+		$this->assertSame(
+			array( 'contract_id', 'meta_key', 'meta_value' ),
+			$this->index_columns( $table, 'contract_meta_key_value' )
+		);
+	}
+
+	public function test_cycles_table_has_expected_columns(): void {
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
+
+		$columns = array(
+			'id',
+			'contract_id',
+			'kind',
+			'sequence_no',
+			'count',
+			'status',
+			'reason',
+			'starts_at_gmt',
+			'ends_at_gmt',
+			'expected_total',
+			'currency',
+			'plan_snapshot_id',
+			'items_snapshot_id',
+			'order_id',
+			'extension_slug',
+			'retry_at',
+		);
+
+		foreach ( $columns as $column ) {
+			$this->assertTrue( $this->has_column( $table, $column ), "Expected cycles.{$column} column." );
+		}
+
+		$this->assertFalse( $this->has_column( $table, 'claimed_until' ), 'Cycles carry no claim column.' );
+	}
+
+	/**
+	 * @testdox The reserved cycle retry_at column is nullable.
+	 */
+	public function test_cycles_table_dispatcher_columns_are_nullable(): void {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
+
+		foreach ( array( 'retry_at' ) as $column ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$row = $wpdb->get_row( $wpdb->prepare( "SHOW COLUMNS FROM {$table} LIKE %s", $column ), ARRAY_A );
+
+			$this->assertIsArray( $row, "Expected a cycles.{$column} column." );
+			$this->assertArrayHasKey( 'Null', $row );
+			$this->assertIsString( $row['Null'] );
+			$this->assertSame( 'YES', $row['Null'], "Expected cycles.{$column} to be NULLable." );
+		}
+	}
+
+	/**
+	 * @testdox A chain is (contract_id, kind), so cycles carry no chain_id column.
+	 */
+	public function test_cycles_table_has_no_chain_id_column(): void {
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
+
+		$this->assertFalse(
+			$this->has_column( $table, 'chain_id' ),
+			'Did not expect a cycles.chain_id column; a chain is the pair (contract_id, kind).'
+		);
+	}
+
+	public function test_cycles_table_has_all_expected_indexes(): void {
+		$table   = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
+		$indexes = $this->index_names( $table );
+
+		$this->assertContains( 'chain_seq', $indexes, 'Expected the UNIQUE (contract_id, kind, sequence_no) index.' );
+		$this->assertContains( 'chain_count', $indexes, 'Expected the UNIQUE (contract_id, kind, count) index.' );
+		$this->assertContains( 'order_id', $indexes, 'Expected the (order_id) index.' );
+		$this->assertContains( 'contract_kind', $indexes, 'Expected the (contract_id, kind) index.' );
+	}
+
+	/**
+	 * @testdox The installer declares no cycles due index (the due dispatcher scans contracts).
+	 *
+	 * Reads the schema the installer hands to dbDelta rather than the live table: dbDelta never
+	 * drops an index, so a long-lived test database may still carry one from an earlier schema.
+	 */
+	public function test_cycles_schema_declares_no_due_index(): void {
+		$queries = array();
+		$capture = static function ( array $dbdelta_queries ) use ( &$queries ): array {
+			$queries = array_merge( $queries, $dbdelta_queries );
+
+			// Run no DDL: it would implicitly commit the test transaction.
+			return array();
+		};
+
+		add_filter( 'dbdelta_queries', $capture );
+		try {
+			SchemaInstaller::install();
+		} finally {
+			remove_filter( 'dbdelta_queries', $capture );
+		}
+
+		$cycles = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
+		$create = '';
+		foreach ( $queries as $query ) {
+			if ( is_string( $query ) && false !== strpos( $query, "CREATE TABLE {$cycles} (" ) ) {
+				$create = $query;
+			}
+		}
+
+		$this->assertNotSame( '', $create, 'Expected the installer to declare the cycles table.' );
+		$this->assertStringContainsString( 'KEY contract_kind (contract_id, kind)', $create );
+		$this->assertDoesNotMatchRegularExpression( '/\bKEY due\b/', $create );
+	}
+
+	public function test_cycles_chain_sequence_index_columns_are_in_order(): void {
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
+
+		$this->assertSame(
+			array( 'contract_id', 'kind', 'sequence_no' ),
+			$this->index_columns( $table, 'chain_seq' )
+		);
+	}
+
+	public function test_cycles_chain_count_index_columns_are_in_order(): void {
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
+
+		$this->assertSame(
+			array( 'contract_id', 'kind', 'count' ),
+			$this->index_columns( $table, 'chain_count' )
+		);
+	}
+
+	public function test_cycles_contract_kind_index_columns_are_in_order(): void {
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
+
+		$this->assertSame(
+			array( 'contract_id', 'kind' ),
+			$this->index_columns( $table, 'contract_kind' )
+		);
+	}
+
+	public function test_cycles_chain_sequence_index_is_unique(): void {
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
+
+		$this->assertTrue(
+			$this->index_is_unique( $table, 'chain_seq' ),
+			'Expected the (contract_id, kind, sequence_no) index to be UNIQUE.'
+		);
+	}
+
+	/**
+	 * @testdox The chain_count index is UNIQUE so (contract_id, kind, count) is the per-charge idempotency anchor.
+	 */
+	public function test_cycles_chain_count_index_is_unique(): void {
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
+
+		$this->assertTrue(
+			$this->index_is_unique( $table, 'chain_count' ),
+			'Expected the (contract_id, kind, count) index to be UNIQUE.'
+		);
+	}
+
+	/**
+	 * @testdox A nullable count lets multiple non-counting cycles coexist under the UNIQUE chain_count index.
+	 */
+	public function test_cycles_count_column_is_nullable(): void {
+		global $wpdb;
+
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_CYCLES );
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$row = $wpdb->get_row( $wpdb->prepare( "SHOW COLUMNS FROM {$table} LIKE %s", 'count' ), ARRAY_A );
+
+		$this->assertIsArray( $row, 'Expected a cycles.count column.' );
+		$this->assertArrayHasKey( 'Null', $row );
+		$this->assertIsString( $row['Null'] );
+		$this->assertSame( 'YES', $row['Null'], 'Expected cycles.count to be NULLable so NULL counts coexist.' );
+	}
+
+	public function test_snapshots_table_has_expected_columns(): void {
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_SNAPSHOTS );
+
+		$columns = array(
+			'id',
+			'contract_id',
+			'snapshot_type',
+			'parent_id',
+			'schema_version',
+			'payload',
+			'date_created_gmt',
+		);
+
+		foreach ( $columns as $column ) {
+			$this->assertTrue( $this->has_column( $table, $column ), "Expected snapshots.{$column} column." );
+		}
+	}
+
+	/**
+	 * @testdox Snapshots are deduped by copy-forward, so there is no content_hash column.
+	 */
+	public function test_snapshots_table_has_no_content_hash_column(): void {
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_SNAPSHOTS );
+
+		$this->assertFalse(
+			$this->has_column( $table, 'content_hash' ),
+			'Did not expect a snapshots.content_hash column; dedup is by copy-forward, not content hashing.'
+		);
+	}
+
+	/**
+	 * @testdox The owner lives on the cycle, not the snapshot, so snapshots have no extension_slug column.
+	 */
+	public function test_snapshots_table_has_no_extension_slug_column(): void {
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_SNAPSHOTS );
+
+		$this->assertFalse(
+			$this->has_column( $table, 'extension_slug' ),
+			'Did not expect a snapshots.extension_slug column; the owner is recorded on the cycle.'
+		);
+	}
+
+	public function test_snapshots_table_has_contract_type_and_parent_indexes(): void {
+		$table   = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_SNAPSHOTS );
+		$indexes = $this->index_names( $table );
+
+		$this->assertContains( 'contract_type', $indexes, 'Expected the (contract_id, snapshot_type) index.' );
+		$this->assertContains( 'parent', $indexes, 'Expected the (parent_id) index.' );
+	}
+
+	public function test_snapshots_contract_type_index_columns_are_in_order(): void {
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_SNAPSHOTS );
+
+		$this->assertSame(
+			array( 'contract_id', 'snapshot_type' ),
+			$this->index_columns( $table, 'contract_type' )
+		);
+	}
+
+	public function test_snapshots_parent_index_columns_are_in_order(): void {
+		$table = SchemaInstaller::get_table_name( SchemaInstaller::TABLE_SNAPSHOTS );
+
+		$this->assertSame(
+			array( 'parent_id' ),
+			$this->index_columns( $table, 'parent' )
+		);
+	}
+
+	/**
+	 * Whether `$table` has a column named `$column`.
+	 *
+	 * @param string $table  Prefixed table name.
+	 * @param string $column Column name.
+	 */
+	private function has_column( string $table, string $column ): bool {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$found = $wpdb->get_var( $wpdb->prepare( "SHOW COLUMNS FROM {$table} LIKE %s", $column ) );
+
+		return $column === $found;
+	}
+
+	/**
+	 * The set of index names defined on `$table`.
+	 *
+	 * @param string $table Prefixed table name.
+	 * @return array<int, string>
+	 */
+	private function index_names( string $table ): array {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$rows = $wpdb->get_results( "SHOW INDEX FROM {$table}", ARRAY_A );
+
+		$names = array();
+		foreach ( is_array( $rows ) ? $rows : array() as $row ) {
+			if ( is_array( $row ) ) {
+				$names[] = Coercion::coerce_string( $row['Key_name'] ?? null );
+			}
+		}
+
+		return array_values( array_unique( $names ) );
+	}
+
+	/**
+	 * The ordered column names of a named index on `$table`.
+	 *
+	 * @param string $table     Prefixed table name.
+	 * @param string $key_name  Index name.
+	 * @return array<int, string> Column names in index order (by Seq_in_index).
+	 */
+	private function index_columns( string $table, string $key_name ): array {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$rows = $wpdb->get_results( $wpdb->prepare( "SHOW INDEX FROM {$table} WHERE Key_name = %s", $key_name ), ARRAY_A );
+
+		$rows = is_array( $rows ) ? $rows : array();
+		usort(
+			$rows,
+			static function ( $a, $b ): int {
+				$a_seq = is_array( $a ) ? Coercion::coerce_int( $a['Seq_in_index'] ?? null ) : 0;
+				$b_seq = is_array( $b ) ? Coercion::coerce_int( $b['Seq_in_index'] ?? null ) : 0;
+
+				return $a_seq <=> $b_seq;
+			}
+		);
+
+		$columns = array();
+		foreach ( $rows as $row ) {
+			if ( is_array( $row ) ) {
+				$columns[] = Coercion::coerce_string( $row['Column_name'] ?? null );
+			}
+		}
+
+		return $columns;
+	}
+
+	/**
+	 * Whether the named index on `$table` is UNIQUE.
+	 *
+	 * @param string $table    Prefixed table name.
+	 * @param string $key_name Index name.
+	 */
+	private function index_is_unique( string $table, string $key_name ): bool {
+		global $wpdb;
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$rows = $wpdb->get_results( $wpdb->prepare( "SHOW INDEX FROM {$table} WHERE Key_name = %s", $key_name ), ARRAY_A );
+
+		$rows = is_array( $rows ) ? $rows : array();
+		if ( empty( $rows ) ) {
+			return false;
+		}
+
+		foreach ( $rows as $row ) {
+			// Non_unique = 0 marks a UNIQUE index.
+			if ( is_array( $row ) && '0' !== Coercion::coerce_string( $row['Non_unique'] ?? null ) ) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 }

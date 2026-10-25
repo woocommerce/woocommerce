@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Resolve downloadable file paths and Mini Cart lazy-loaded script URLs against the configured content directory and site URL instead of a hardcoded /wp-content location, so they work on non-default WordPress directory layouts (e.g. Bedrock or a custom WP_CONTENT_DIR).

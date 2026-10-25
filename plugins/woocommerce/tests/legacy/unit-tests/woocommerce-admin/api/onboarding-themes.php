@@ -66,16 +66,33 @@ class WC_Admin_Tests_API_Onboarding_Themes extends WC_REST_Unit_Test_Case {
 	public function test_install_invalid_theme() {
 		wp_set_current_user( $this->user );
 
+		$api_calls  = 0;
+		$api_filter = function ( $result, $action, $args ) use ( &$api_calls ) {
+			++$api_calls;
+			$this->assertSame( 'theme_information', $action );
+			$this->assertSame( 'invalid-theme-name', $args->slug );
+
+			return new WP_Error( 'themes_api_failed', 'Expected test failure.' );
+		};
+
+		add_filter( 'themes_api', $api_filter, 10, 3 );
+
 		$request = new WP_REST_Request( 'POST', $this->endpoint . '/install' );
 		$request->set_query_params(
 			array(
 				'theme' => 'invalid-theme-name',
 			)
 		);
-		$response = $this->server->dispatch( $request );
-		$data     = $response->get_data();
+
+		try {
+			$response = $this->server->dispatch( $request );
+			$data     = $response->get_data();
+		} finally {
+			remove_filter( 'themes_api', $api_filter, 10 );
+		}
 
 		$this->assertEquals( 'woocommerce_rest_theme_install', $data['code'] );
+		$this->assertSame( 1, $api_calls );
 	}
 
 	/**

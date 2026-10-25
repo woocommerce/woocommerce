@@ -1812,8 +1812,9 @@ test.describe( 'Settings API tests: CRUD', () => {
 					expect.arrayContaining( [
 						expect.objectContaining( {
 							id: 'woocommerce_analytics_enabled',
-							label: 'Analytics',
-							description: 'Enable WooCommerce Analytics',
+							label: 'WooCommerce Analytics',
+							description:
+								"Enable WooCommerce Analytics to track your store's key metrics and view them in a detailed dashboard. All data stays within your store.",
 							type: 'checkbox',
 							default: 'yes',
 							value: expect.any( String ),
@@ -2965,39 +2966,11 @@ test.describe( 'Settings API tests: CRUD', () => {
 					} ),
 				] )
 			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'cc',
-						label: 'Cc(s)',
-						description: expect.stringContaining(
-							'Enter Cc recipients (comma-separated) for this email.'
-						),
-						type: 'text',
-						default: '',
-						tip: expect.stringContaining(
-							'Enter Cc recipients (comma-separated) for this email.'
-						),
-						value: expect.any( String ),
-					} ),
-				] )
+			expect( responseJSON ).not.toContainEqual(
+				expect.objectContaining( { id: 'cc' } )
 			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'bcc',
-						label: 'Bcc(s)',
-						description: expect.stringContaining(
-							'Enter Bcc recipients (comma-separated) for this email.'
-						),
-						type: 'text',
-						default: '',
-						tip: expect.stringContaining(
-							'Enter Bcc recipients (comma-separated) for this email.'
-						),
-						value: expect.any( String ),
-					} ),
-				] )
+			expect( responseJSON ).not.toContainEqual(
+				expect.objectContaining( { id: 'bcc' } )
 			);
 		} );
 	} );
@@ -3087,39 +3060,11 @@ test.describe( 'Settings API tests: CRUD', () => {
 					} ),
 				] )
 			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'cc',
-						label: 'Cc(s)',
-						description: expect.stringContaining(
-							'Enter Cc recipients (comma-separated) for this email.'
-						),
-						type: 'text',
-						default: '',
-						tip: expect.stringContaining(
-							'Enter Cc recipients (comma-separated) for this email.'
-						),
-						value: expect.any( String ),
-					} ),
-				] )
+			expect( responseJSON ).not.toContainEqual(
+				expect.objectContaining( { id: 'cc' } )
 			);
-			expect( responseJSON ).toEqual(
-				expect.arrayContaining( [
-					expect.objectContaining( {
-						id: 'bcc',
-						label: 'Bcc(s)',
-						description: expect.stringContaining(
-							'Enter Bcc recipients (comma-separated) for this email.'
-						),
-						type: 'text',
-						default: '',
-						tip: expect.stringContaining(
-							'Enter Bcc recipients (comma-separated) for this email.'
-						),
-						value: expect.any( String ),
-					} ),
-				] )
+			expect( responseJSON ).not.toContainEqual(
+				expect.objectContaining( { id: 'bcc' } )
 			);
 		} );
 	} );

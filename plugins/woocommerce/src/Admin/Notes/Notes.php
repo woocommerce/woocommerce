@@ -24,7 +24,7 @@ class Notes {
 	 */
 	public static function init() {
 		add_action( 'admin_init', array( __CLASS__, 'schedule_unsnooze_notes' ) );
-		add_action( 'admin_init', array( __CLASS__, 'possibly_delete_survey_notes' ) );
+		add_action( 'wc_admin_daily', array( __CLASS__, 'possibly_delete_survey_notes' ), 9 );
 		add_action( 'update_option_woocommerce_show_marketplace_suggestions', array( __CLASS__, 'possibly_delete_marketing_notes' ), 10, 2 );
 		add_action( self::UNSNOOZE_HOOK, array( __CLASS__, 'unsnooze_notes' ) );
 	}

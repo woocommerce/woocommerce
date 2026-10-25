@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { faker } from '@faker-js/faker';
 import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**
@@ -15,140 +16,70 @@ test.describe(
 	() => {
 		test.use( { storageState: ADMIN_STATE_PATH } );
 
-		let orderId1: number,
-			orderId2: number,
-			orderId3: number,
-			orderId4: number,
-			orderId5: number;
+		// A few orders are enough to prove bulk editing works. They share a unique
+		// billing email so the orders list can be filtered down to just these rows,
+		// and we select only those rows (not "select all"). Together this keeps the
+		// test mutating only its own orders and immune to other workers' orders
+		// pushing it off the first page — safe to run in parallel.
+		const billingEmail = `bulk-edit-${ faker.string
+			.alphanumeric( 10 )
+			.toLowerCase() }@example.com`;
+		const orderIds: number[] = [];
 
 		test.beforeAll( async ( { restApi } ) => {
-			await restApi
-				.post( `${ WC_API_PATH }/orders`, {
-					status: 'processing',
-				} )
-				.then( ( response: { data: { id: number } } ) => {
-					orderId1 = response.data.id;
-				} );
-			await restApi
-				.post( `${ WC_API_PATH }/orders`, {
-					status: 'processing',
-				} )
-				.then( ( response: { data: { id: number } } ) => {
-					orderId2 = response.data.id;
-				} );
-			await restApi
-				.post( `${ WC_API_PATH }/orders`, {
-					status: 'processing',
-				} )
-				.then( ( response: { data: { id: number } } ) => {
-					orderId3 = response.data.id;
-				} );
-			await restApi
-				.post( `${ WC_API_PATH }/orders`, {
-					status: 'processing',
-				} )
-				.then( ( response: { data: { id: number } } ) => {
-					orderId4 = response.data.id;
-				} );
-			await restApi
-				.post( `${ WC_API_PATH }/orders`, {
-					status: 'processing',
-				} )
-				.then( ( response: { data: { id: number } } ) => {
-					orderId5 = response.data.id;
-				} );
+			for ( let i = 0; i < 3; i++ ) {
+				const response = await restApi.post(
+					`${ WC_API_PATH }/orders`,
+					{
+						status: 'processing',
+						billing: { email: billingEmail },
+					}
+				);
+				orderIds.push( response.data.id );
+			}
 		} );
 
 		test.afterAll( async ( { restApi } ) => {
-			await restApi.delete( `${ WC_API_PATH }/orders/${ orderId1 }`, {
-				force: true,
-			} );
-			await restApi.delete( `${ WC_API_PATH }/orders/${ orderId2 }`, {
-				force: true,
-			} );
-			await restApi.delete( `${ WC_API_PATH }/orders/${ orderId3 }`, {
-				force: true,
-			} );
-			await restApi.delete( `${ WC_API_PATH }/orders/${ orderId4 }`, {
-				force: true,
-			} );
-			await restApi.delete( `${ WC_API_PATH }/orders/${ orderId5 }`, {
-				force: true,
-			} );
+			await Promise.all(
+				orderIds.map( ( id ) =>
+					restApi.delete( `${ WC_API_PATH }/orders/${ id }`, {
+						force: true,
+					} )
+				)
+			);
 		} );
 
 		test( 'can bulk update order status', async ( { page } ) => {
-			await page.goto( 'wp-admin/admin.php?page=wc-orders' );
+			const orderRow = ( id: number ) =>
+				page.locator( `:is(#order-${ id }, #post-${ id })` );
 
-			// expect order status 'processing' to show
-			await expect(
-				page
-					.locator( `:is(#order-${ orderId1 }, #post-${ orderId1 })` )
-					.getByText( 'Processing' )
-					.nth( 1 )
-			).toBeVisible();
-			await expect(
-				page
-					.locator( `:is(#order-${ orderId2 }, #post-${ orderId2 })` )
-					.getByText( 'Processing' )
-					.nth( 1 )
-			).toBeVisible();
-			await expect(
-				page
-					.locator( `:is(#order-${ orderId3 }, #post-${ orderId3 })` )
-					.getByText( 'Processing' )
-					.nth( 1 )
-			).toBeVisible();
-			await expect(
-				page
-					.locator( `:is(#order-${ orderId4 }, #post-${ orderId4 })` )
-					.getByText( 'Processing' )
-					.nth( 1 )
-			).toBeVisible();
-			await expect(
-				page
-					.locator( `:is(#order-${ orderId5 }, #post-${ orderId5 })` )
-					.getByText( 'Processing' )
-					.nth( 1 )
-			).toBeVisible();
+			// Filter the orders list to just this test's orders (shared billing
+			// email) so concurrently-created orders can't push them off the page.
+			await page.goto(
+				`wp-admin/admin.php?page=wc-orders&s=${ encodeURIComponent(
+					billingEmail
+				) }`
+			);
 
-			await page.locator( '#cb-select-all-1' ).click();
+			// Expect each created order to show 'Processing', then select its row.
+			for ( const id of orderIds ) {
+				await expect(
+					orderRow( id ).getByText( 'Processing' ).nth( 1 )
+				).toBeVisible();
+				await page.locator( `#cb-select-${ id }` ).check();
+			}
+
 			await page
 				.locator( '#bulk-action-selector-top' )
 				.selectOption( 'Change status to completed' );
 			await page.locator( '#doaction' ).click();
 
-			// expect order status 'completed' to show
-			await expect(
-				page
-					.locator( `:is(#order-${ orderId1 }, #post-${ orderId1 })` )
-					.getByText( 'Completed' )
-					.nth( 1 )
-			).toBeVisible();
-			await expect(
-				page
-					.locator( `:is(#order-${ orderId2 }, #post-${ orderId2 })` )
-					.getByText( 'Completed' )
-					.nth( 1 )
-			).toBeVisible();
-			await expect(
-				page
-					.locator( `:is(#order-${ orderId3 }, #post-${ orderId3 })` )
-					.getByText( 'Completed' )
-					.nth( 1 )
-			).toBeVisible();
-			await expect(
-				page
-					.locator( `:is(#order-${ orderId4 }, #post-${ orderId4 })` )
-					.getByText( 'Completed' )
-					.nth( 1 )
-			).toBeVisible();
-			await expect(
-				page
-					.locator( `:is(#order-${ orderId5 }, #post-${ orderId5 })` )
-					.getByText( 'Completed' )
-					.nth( 1 )
-			).toBeVisible();
+			// Expect only the selected orders to now show 'Completed'.
+			for ( const id of orderIds ) {
+				await expect(
+					orderRow( id ).getByText( 'Completed' ).nth( 1 )
+				).toBeVisible();
+			}
 		} );
 	}
 );

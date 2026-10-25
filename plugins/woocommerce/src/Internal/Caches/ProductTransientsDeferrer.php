@@ -14,6 +14,14 @@ use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 class ProductTransientsDeferrer {
 
 	/**
+	 * Priority for the shutdown safety-net hook.
+	 *
+	 * This must run before WC_Post_Data::do_deferred_product_sync() at priority 10
+	 * so stale product transients are cleared before parent product sync reads them.
+	 */
+	private const SHUTDOWN_HOOK_PRIORITY = 0;
+
+	/**
 	 * The product utility instance.
 	 *
 	 * @var ProductUtil
@@ -54,7 +62,7 @@ class ProductTransientsDeferrer {
 	public function start_deferring(): void {
 		++$this->deferral_level;
 		if ( 1 === $this->deferral_level ) {
-			add_action( 'shutdown', array( $this, 'handle_shutdown' ) );
+			add_action( 'shutdown', array( $this, 'handle_shutdown' ), self::SHUTDOWN_HOOK_PRIORITY );
 		}
 	}
 
@@ -72,7 +80,7 @@ class ProductTransientsDeferrer {
 
 		--$this->deferral_level;
 		if ( 0 === $this->deferral_level ) {
-			remove_action( 'shutdown', array( $this, 'handle_shutdown' ) );
+			remove_action( 'shutdown', array( $this, 'handle_shutdown' ), self::SHUTDOWN_HOOK_PRIORITY );
 			$this->flush();
 		}
 	}

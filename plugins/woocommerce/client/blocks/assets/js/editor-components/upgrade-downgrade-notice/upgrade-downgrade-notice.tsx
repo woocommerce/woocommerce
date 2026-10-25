@@ -15,11 +15,14 @@ export function UpgradeDowngradeNotice( {
 	className,
 	actionLabel,
 	onActionClick,
+	status = 'info',
 	...props
 }: UpgradeDowngradeNoticeProps ) {
 	return (
 		<Notice
 			{ ...props }
+			status={ status }
+			politeness="polite"
 			className={ clsx(
 				'wc-block-editor-components-upgrade-downgrade-notice',
 				className

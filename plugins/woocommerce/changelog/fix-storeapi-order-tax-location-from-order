@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Resolve the local pickup tax location from the order's own shipping line instead of attaching a per-call closure to woocommerce_order_get_tax_location during cart sync.

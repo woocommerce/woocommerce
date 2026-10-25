@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import type { Request } from '@playwright/test';
 import { ApiClient, WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**
@@ -10,13 +11,23 @@ import { tags, expect, test } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 import { random } from '../../utils/helpers';
 import { getMediaBySlug } from '../../utils/media';
+import { wpCLI } from '../../utils/cli';
 
 test.use( { storageState: ADMIN_STATE_PATH } );
+
+const isOrderFormPost = ( request: Request ) =>
+	request.method() === 'POST' && request.resourceType() === 'document';
+
+// The order form saves to admin.php with HPOS and post.php with posts storage.
+const isOrderSaveUrl = ( url: URL ) =>
+	url.pathname.endsWith( '/wp-admin/admin.php' ) ||
+	url.pathname.endsWith( '/wp-admin/post.php' );
 
 test.describe( 'Edit order', { tag: [ tags.SERVICES, tags.HPOS ] }, () => {
 	let orderId: number,
 		secondOrderId: number,
 		orderToCancel: number,
+		doubleClickOrderId: number,
 		customerId: number;
 	const username = `big.archie.${ Date.now() }`;
 
@@ -30,7 +41,7 @@ test.describe( 'Edit order', { tag: [ tags.SERVICES, tags.HPOS ] }, () => {
 			} );
 		await restApi
 			.post( `${ WC_API_PATH }/orders`, {
-				status: 'processing',
+				status: 'pending',
 			} )
 			.then( ( response: { data: { id: number } } ) => {
 				secondOrderId = response.data.id;
@@ -42,7 +53,14 @@ test.describe( 'Edit order', { tag: [ tags.SERVICES, tags.HPOS ] }, () => {
 			.then( ( response: { data: { id: number } } ) => {
 				orderToCancel = response.data.id;
 			} );
-
+		await restApi
+			.post( `${ WC_API_PATH }/orders`, {
+				status: 'processing',
+				billing: { email: `${ username }@email.addr` },
+			} )
+			.then( ( response: { data: { id: number } } ) => {
+				doubleClickOrderId = response.data.id;
+			} );
 		await restApi
 			.post( `${ WC_API_PATH }/customers`, {
 				email: `${ username }@email.addr`,
@@ -89,6 +107,10 @@ test.describe( 'Edit order', { tag: [ tags.SERVICES, tags.HPOS ] }, () => {
 		await restApi.delete( `${ WC_API_PATH }/orders/${ orderToCancel }`, {
 			force: true,
 		} );
+		await restApi.delete(
+			`${ WC_API_PATH }/orders/${ doubleClickOrderId }`,
+			{ force: true }
+		);
 		await restApi.delete( `${ WC_API_PATH }/customers/${ customerId }`, {
 			force: true,
 		} );
@@ -195,6 +217,83 @@ test.describe( 'Edit order', { tag: [ tags.SERVICES, tags.HPOS ] }, () => {
 		await expect( page.locator( 'input[name=order_date]' ) ).toHaveValue(
 			'2018-12-14'
 		);
+	} );
+
+	test( 'double-clicking Update only submits the order once', async ( {
+		page,
+	} ) => {
+		await page.goto(
+			`wp-admin/admin.php?page=wc-orders&action=edit&id=${ doubleClickOrderId }`
+		);
+
+		const requests: Request[] = [];
+		page.on( 'request', ( request ) => requests.push( request ) );
+
+		await page
+			.locator( 'select[name="wc_order_action"]' )
+			.selectOption( 'send_order_details' );
+
+		// Hold the save request so the second click lands on the same page, like a double-click on a slow site.
+		let releaseSave = () => {};
+		const saveReleased = new Promise< void >( ( resolve ) => {
+			releaseSave = resolve;
+		} );
+		await page.route( isOrderSaveUrl, async ( route ) => {
+			await saveReleased;
+			await route.continue().catch( () => undefined );
+		} );
+
+		// Mouse clicks don't wait for the pending navigation, unlike locator clicks.
+		const updateButton = ( await page
+			.locator( 'button.save_order' )
+			.boundingBox() )!;
+		const x = updateButton.x + updateButton.width / 2;
+		const y = updateButton.y + updateButton.height / 2;
+		const firstPost = page.waitForRequest( isOrderFormPost );
+		await page.mouse.click( x, y );
+		await firstPost;
+		await page.mouse.click( x, y );
+		releaseSave();
+
+		await expect(
+			page
+				.locator( 'div.notice-success > p' )
+				.filter( { hasText: /^Order updated/ } )
+		).toBeVisible();
+		const orderDetailsSentNotes = page
+			.locator( '#woocommerce-order-notes .note_content' )
+			.filter( { hasText: 'Order details manually sent to customer.' } );
+		await expect( orderDetailsSentNotes ).toHaveCount( 1 );
+		expect( requests.filter( isOrderFormPost ) ).toHaveLength( 1 );
+	} );
+
+	test( 'saving an order does not trigger a false unsaved-changes warning', async ( {
+		page,
+	} ) => {
+		if ( process.env.DISABLE_HPOS === '1' ) {
+			await page.goto(
+				`wp-admin/post.php?post=${ orderId }&action=edit`
+			);
+		} else {
+			await page.goto(
+				`wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
+			);
+		}
+
+		const dialogMessages: string[] = [];
+		page.on( 'dialog', async ( dialog ) => {
+			dialogMessages.push( dialog.message() );
+			await dialog.accept();
+		} );
+
+		await page.locator( 'button.save_order' ).click();
+		await expect(
+			page
+				.locator( 'div.notice-success > p' )
+				.filter( { hasText: 'Order updated.' } )
+		).toBeVisible();
+
+		expect( dialogMessages ).toEqual( [] );
 	} );
 
 	test( 'can add and delete order notes', async ( { page } ) => {
@@ -344,6 +443,39 @@ test.describe( 'Edit order', { tag: [ tags.SERVICES, tags.HPOS ] }, () => {
 			await page.locator( 'li.select2-results__option' ).click();
 		} );
 
+		await test.step( 'Update the shipping method name', async () => {
+			await page.getByRole( 'button', { name: 'Add item(s)' } ).click();
+			await page.getByRole( 'button', { name: 'Add shipping' } ).click();
+
+			const shippingRow = page.locator( 'tr.shipping' ).last();
+			await expect( shippingRow ).toBeVisible();
+			await shippingRow
+				.getByRole( 'link', { name: 'Edit shipping' } )
+				.click();
+
+			const method = shippingRow.locator( 'select.shipping_method' );
+			const name = shippingRow.locator( 'input.shipping_method_name' );
+
+			await method.selectOption( 'free_shipping' );
+			await expect( name ).toHaveValue( 'Free shipping' );
+
+			await method.selectOption( '' );
+			await expect( name ).toHaveValue( 'Shipping' );
+
+			await method.selectOption( 'free_shipping' );
+			await expect( name ).toHaveValue( 'Free shipping' );
+			await method.selectOption( 'other' );
+			await expect( name ).toHaveValue( 'Shipping' );
+
+			await method.selectOption( 'free_shipping' );
+			await expect( name ).toHaveValue( 'Free shipping' );
+			await name.fill( 'Local courier' );
+			await method.selectOption( '' );
+			await expect( name ).toHaveValue( 'Local courier' );
+
+			await page.locator( 'button.save-action' ).click();
+		} );
+
 		await test.step( 'Load the billing address and then copy it to the shipping address', async () => {
 			// Click the load billing address button
 			await page
@@ -379,6 +511,42 @@ test.describe( 'Edit order', { tag: [ tags.SERVICES, tags.HPOS ] }, () => {
 			).toBeVisible();
 		} );
 	} );
+
+	test( 'shows the lost connection notice when the heartbeat request fails', async ( {
+		page,
+	} ) => {
+		if ( process.env.DISABLE_HPOS === '1' ) {
+			await page.goto(
+				`wp-admin/post.php?post=${ orderId }&action=edit`
+			);
+		} else {
+			await page.goto(
+				`wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
+			);
+		}
+
+		const notice = page.locator( '#wc-lost-connection-notice' );
+		await expect( notice ).toBeHidden();
+
+		// Dispatch the same event heartbeat.js fires on a real timeout.
+		await page.evaluate( () =>
+			// @ts-expect-error jQuery isn't typed here.
+			jQuery( document ).trigger( 'heartbeat-connection-lost', [
+				'timeout',
+				0,
+			] )
+		);
+
+		await expect( notice ).toBeVisible();
+		await expect( notice ).toContainText( 'Connection lost.' );
+
+		await page.evaluate( () =>
+			// @ts-expect-error jQuery isn't typed here.
+			jQuery( document ).trigger( 'heartbeat-connection-restored' )
+		);
+
+		await expect( notice ).toBeHidden();
+	} );
 } );
 
 test.describe(
@@ -390,6 +558,15 @@ test.describe(
 		const customerBilling = {
 			email: 'john.doe@example.com',
 		};
+
+		// The downloads box is hidden by default on the order edit screen. These tests run
+		// in both the HPOS (woocommerce_page_wc-orders) and HPOS-disabled (shop_order) jobs,
+		// so the admin user's hidden-meta-boxes preference is cleared for both screen ids to
+		// keep the box visible. Keys are blog-prefixed user meta (single-site wp-env prefix).
+		const orderScreenHiddenMetaKeys = [
+			'wp_metaboxhidden_woocommerce_page_wc-orders',
+			'wp_metaboxhidden_shop_order',
+		];
 
 		let orderId: number,
 			productId: number,
@@ -429,9 +606,30 @@ test.describe(
 		};
 
 		test.beforeAll( async () => {
-			( { source_url: downloadFile } = await getMediaBySlug(
-				'image-01'
-			) );
+			( { source_url: downloadFile } =
+				await getMediaBySlug( 'image-01' ) );
+
+			// Persist a Screen Options preference (an empty hidden-meta-boxes list) for the
+			// admin user (ID 1) so the box stays visible while the tests navigate between
+			// orders. An empty list short-circuits the default_hidden_meta_boxes filter that
+			// would otherwise hide it. --skip-plugins/--skip-themes bootstraps core only:
+			// the meta write needs no plugins, and loading them all exhausts WP-CLI's memory
+			// limit in the @services environment (google-listings-and-ads fatals on boot).
+			for ( const key of orderScreenHiddenMetaKeys ) {
+				await wpCLI(
+					`wp user meta update 1 ${ key } '[]' --format=json --skip-plugins --skip-themes`
+				);
+			}
+		} );
+
+		test.afterAll( async () => {
+			// Restore the default-hidden behaviour so the visible state doesn't leak to
+			// other order-screen tests.
+			for ( const key of orderScreenHiddenMetaKeys ) {
+				await wpCLI(
+					`wp user meta delete 1 ${ key } --skip-plugins --skip-themes`
+				);
+			}
 		} );
 
 		test.beforeEach( async ( { restApi } ) => {

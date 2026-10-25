@@ -7,12 +7,13 @@
 
 namespace Automattic\WooCommerce\Admin\API;
 
+use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Admin\Features\OnboardingTasks\DeprecatedExtendedTask;
+use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingIndustries;
 use Automattic\WooCommerce\Internal\Admin\Onboarding\OnboardingProfile;
-use Automattic\WooCommerce\Admin\Features\Features;
-use Automattic\WooCommerce\Admin\Features\OnboardingTasks\TaskLists;
-use Automattic\WooCommerce\Admin\Features\OnboardingTasks\DeprecatedExtendedTask;
+use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -162,6 +163,12 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 			$this->namespace,
 			'/' . $this->rest_base . '/(?P<id>[a-z0-9_\-]+)/dismiss',
 			array(
+				'args'   => array(
+					'task_list_id' => array(
+						'description' => __( 'Optional parameter to query specific task list.', 'woocommerce' ),
+						'type'        => 'string',
+					),
+				),
 				array(
 					'methods'             => \WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'dismiss_task' ),
@@ -175,6 +182,12 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 			$this->namespace,
 			'/' . $this->rest_base . '/(?P<id>[a-z0-9_\-]+)/undo_dismiss',
 			array(
+				'args'   => array(
+					'task_list_id' => array(
+						'description' => __( 'Optional parameter to query specific task list.', 'woocommerce' ),
+						'type'        => 'string',
+					),
+				),
 				array(
 					'methods'             => \WP_REST_Server::EDITABLE,
 					'callback'            => array( $this, 'undo_dismiss_task' ),
@@ -192,7 +205,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 					'duration'     => array(
 						'description'       => __( 'Time period to snooze the task.', 'woocommerce' ),
 						'type'              => 'string',
-						'validate_callback' => function( $param, $request, $key ) {
+						'validate_callback' => function ( $param ) {
 							return in_array( $param, array_keys( $this->duration_to_ms ), true );
 						},
 					),
@@ -315,7 +328,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	 * Import sample products from given CSV path.
 	 *
 	 * @param  string $csv_file CSV file path.
-	 * @return WP_Error|WP_REST_Response
+	 * @return \WP_Error|array
 	 */
 	public static function import_sample_products_from_csv( $csv_file ) {
 		include_once WC_ABSPATH . 'includes/import/class-wc-product-csv-importer.php';
@@ -324,15 +337,29 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 			// Override locale so we can return mappings from WooCommerce in English language stores.
 			add_filter( 'locale', '__return_false', 9999 );
 			$importer_class = apply_filters( 'woocommerce_product_csv_importer_class', 'WC_Product_CSV_Importer' );
-			$args           = array(
-				'parse'   => true,
-				'mapping' => self::get_header_mappings( $csv_file ),
-			);
-			$args           = apply_filters( 'woocommerce_product_csv_importer_args', $args, $importer_class );
 
-			$importer = new $importer_class( $csv_file, $args );
-			$import   = $importer->import();
-			return $import;
+			try {
+				$args = array(
+					'parse'   => true,
+					'mapping' => self::get_header_mappings( $csv_file ),
+				);
+
+				/**
+				 * Filter the arguments used by the product CSV importer.
+				 *
+				 * @since 3.1.0
+				 *
+				 * @param array  $args           Importer arguments.
+				 * @param string $importer_class Importer class name.
+				 */
+				$args = apply_filters( 'woocommerce_product_csv_importer_args', $args, $importer_class );
+
+				$importer = new $importer_class( $csv_file, $args );
+				$import   = $importer->import();
+				return $import;
+			} catch ( \RuntimeException $e ) {
+				return new \WP_Error( 'woocommerce_rest_import_error', $e->getMessage() );
+			}
 		} else {
 			return new \WP_Error( 'woocommerce_rest_import_error', __( 'Sorry, the sample products data file was not found.', 'woocommerce' ) );
 		}
@@ -345,8 +372,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	 * @return WP_Error|WP_REST_Response
 	 */
 	public static function import_sample_products() {
-		$sample_csv_file = Features::is_enabled( 'experimental-fashion-sample-products' ) ? WC_ABSPATH . 'sample-data/experimental_fashion_sample_9_products.csv' :
-		WC_ABSPATH . 'sample-data/experimental_sample_9_products.csv';
+		$sample_csv_file = WC_ABSPATH . 'sample-data/experimental_fashion_sample_9_products.csv';
 
 		$import = self::import_sample_products_from_csv( $sample_csv_file );
 		return rest_ensure_response( $import );
@@ -512,8 +538,8 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	 * @return string Template contents.
 	 */
 	private static function get_homepage_template( $post_id ) {
-		$products = wp_count_posts( 'product' );
-		if ( $products->publish >= 4 ) {
+		$products = wc_get_container()->get( ProductUtil::class )->get_counts_for_type( 'product' );
+		if ( ( $products[ ProductStatus::PUBLISH ] ?? 0 ) >= 4 ) {
 			$images   = self::sideload_homepage_images( $post_id, 1 );
 			$image_1  = ! empty( $images[0] ) ? $images[0] : '';
 			$template = self::get_homepage_cover_block( $image_1 ) . '
@@ -660,7 +686,8 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 				'post_title'   => __( 'Homepage', 'woocommerce' ),
 				'post_type'    => 'page',
 				'post_status'  => 'publish',
-				'post_content' => '', // Template content is updated below, so images can be attached to the post.
+				'post_content' => '',
+			// Template content is updated below, so images can be attached to the post.
 			)
 		);
 
@@ -714,7 +741,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 		$params['extended_tasks'] = array(
 			'description'       => __( 'List of extended deprecated tasks from the client side filter.', 'woocommerce' ),
 			'type'              => 'array',
-			'validate_callback' => function( $param, $request, $key ) {
+			'validate_callback' => function ( $param ) {
 				$has_valid_keys = true;
 				foreach ( $param as $task ) {
 					if ( $has_valid_keys ) {
@@ -742,7 +769,7 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 		$lists = is_array( $task_list_ids ) && count( $task_list_ids ) > 0 ? TaskLists::get_lists_by_ids( $task_list_ids ) : TaskLists::get_lists();
 
 		$json = array_map(
-			function( $list ) {
+			function ( $list ) { // phpcs:ignore Universal.NamingConventions.NoReservedKeywordParameterNames.listFound
 				return $list->sort_tasks()->get_json();
 			},
 			$lists
@@ -754,12 +781,24 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	/**
 	 * Dismiss a single task.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_REST_Request|WP_Error
+	 * @param \WP_REST_Request<array<string, mixed>> $request Full details about the request.
+	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function dismiss_task( $request ) {
-		$id   = $request->get_param( 'id' );
-		$task = TaskLists::get_task( $id );
+		$id           = $request->get_param( 'id' );
+		$task_list_id = $request->get_param( 'task_list_id' );
+
+		if ( null !== $task_list_id && ! TaskLists::get_list( $task_list_id ) ) {
+			return new \WP_Error(
+				'woocommerce_rest_invalid_task_list',
+				__( 'Sorry, no task list with that ID was found.', 'woocommerce' ),
+				array(
+					'status' => 404,
+				)
+			);
+		}
+
+		$task = TaskLists::get_task( $id, $task_list_id );
 
 		if ( ! $task && $id ) {
 			$task = new DeprecatedExtendedTask(
@@ -788,12 +827,24 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 	/**
 	 * Undo dismissal of a single task.
 	 *
-	 * @param WP_REST_Request $request Full details about the request.
-	 * @return WP_REST_Request|WP_Error
+	 * @param \WP_REST_Request<array<string, mixed>> $request Full details about the request.
+	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function undo_dismiss_task( $request ) {
-		$id   = $request->get_param( 'id' );
-		$task = TaskLists::get_task( $id );
+		$id           = $request->get_param( 'id' );
+		$task_list_id = $request->get_param( 'task_list_id' );
+
+		if ( null !== $task_list_id && ! TaskLists::get_list( $task_list_id ) ) {
+			return new \WP_Error(
+				'woocommerce_rest_invalid_task_list',
+				__( 'Sorry, no task list with that ID was found.', 'woocommerce' ),
+				array(
+					'status' => 404,
+				)
+			);
+		}
+
+		$task = TaskLists::get_task( $id, $task_list_id );
 
 		if ( ! $task && $id ) {
 			$task = new DeprecatedExtendedTask(
@@ -986,5 +1037,4 @@ class OnboardingTasks extends \WC_REST_Data_Controller {
 		$task->mark_actioned();
 		return rest_ensure_response( $task->get_json() );
 	}
-
 }

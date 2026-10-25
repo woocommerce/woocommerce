@@ -44,10 +44,6 @@ describe( 'SearchListControl', () => {
 			/>
 		);
 		expect( component ).toMatchSnapshot();
-
-		// wp-6.8: upstream @wordpress/* deprecation warnings that we cannot
-		// opt out of without changing the visual output.
-		expect( console ).toHaveWarned();
 	} );
 
 	test( 'should render a search box and list of options with a custom className', () => {
@@ -195,7 +191,7 @@ describe( 'SearchListControl', () => {
 	test( 'should render a search box and list of options, with a custom render callback for each item', () => {
 		const renderItem = ( { item } ) => (
 			<div key={ item.id }>{ item.name }!</div>
-		); // eslint-disable-line
+		);
 		const component = render(
 			<SearchListControl
 				instanceId={ 1 }

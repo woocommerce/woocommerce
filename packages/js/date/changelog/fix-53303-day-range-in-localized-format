@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Build the same-month range label by substituting the day token in the date format, so month names that contain digits are no longer corrupted (#53303).

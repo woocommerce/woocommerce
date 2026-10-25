@@ -6,7 +6,7 @@ import type { BlockEditProps } from '@wordpress/blocks';
 /**
  * Internal dependencies
  */
-import type { SelectableItem } from '../../types/type-defs/selectable-items';
+import type { SelectableItem } from '@woocommerce/types';
 import type { VisualAttributeTerm } from '../../base/utils/visual-attribute-terms';
 
 // ----------------------------------------
@@ -36,6 +36,8 @@ export type ActiveFilterItem = {
 
 export type ProductFiltersContext = {
 	isOverlayOpened: boolean;
+	queryId?: number;
+	openButtonRef?: HTMLElement | null;
 	params: Record< string, string >;
 	activeFilters: ActiveFilterItem[];
 	items?: FilterOptionItem[];
@@ -51,10 +53,13 @@ export type ProductFiltersContext = {
 // ----------------------------------------
 // Block props
 // ----------------------------------------
+export type OverlayMode = 'off' | 'mobile' | 'always';
+
 export type BlockAttributes = {
 	productId?: string;
 	isPreview: boolean;
-	showFilterDrawer?: boolean;
+	overlayMode?: OverlayMode;
+	overlayPosition?: 'left' | 'right';
 };
 
 export type EditProps = BlockEditProps< BlockAttributes >;

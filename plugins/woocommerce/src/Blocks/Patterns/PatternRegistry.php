@@ -1,8 +1,6 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Patterns;
 
-use Automattic\WooCommerce\Admin\Features\Features;
-
 /**
  * PatternRegistry class.
  *
@@ -21,7 +19,7 @@ class PatternRegistry {
 	 */
 	private function get_category_labels() {
 		return [
-			'woo-commerce'     => __( 'WooCommerce', 'woocommerce' ),
+			'woo-commerce'     => __( 'Shop', 'woocommerce' ),
 			'intro'            => __( 'Intro', 'woocommerce' ),
 			'featured-selling' => __( 'Featured Selling', 'woocommerce' ),
 			'about'            => __( 'About', 'woocommerce' ),
@@ -45,8 +43,7 @@ class PatternRegistry {
 				'register_block_patterns',
 				esc_html(
 					sprintf(
-					/* translators: %s: file name. */
-						__( 'Could not register pattern "%s" as a block pattern ("Slug" field missing)', 'woocommerce' ),
+						'Could not register pattern "%s" as a block pattern ("Slug" field missing)',
 						$source
 					)
 				),
@@ -60,8 +57,7 @@ class PatternRegistry {
 				'register_block_patterns',
 				esc_html(
 					sprintf(
-					/* translators: %1s: file name; %2s: slug value found. */
-						__( 'Could not register pattern "%1$s" as a block pattern (invalid slug "%2$s")', 'woocommerce' ),
+						'Could not register pattern "%1$s" as a block pattern (invalid slug "%2$s")',
 						$source,
 						$pattern_data['slug']
 					)
@@ -75,18 +71,13 @@ class PatternRegistry {
 			return;
 		}
 
-		if ( isset( $pattern_data['featureFlag'] ) && '' !== $pattern_data['featureFlag'] && ! Features::is_enabled( $pattern_data['featureFlag'] ) ) {
-			return;
-		}
-
 		// Title is a required property.
 		if ( ! isset( $pattern_data['title'] ) || ! $pattern_data['title'] ) {
 			_doing_it_wrong(
 				'register_block_patterns',
 				esc_html(
 					sprintf(
-					/* translators: %1s: file name; %2s: slug value found. */
-						__( 'Could not register pattern "%s" as a block pattern ("Title" field missing)', 'woocommerce' ),
+						'Could not register pattern "%s" as a block pattern ("Title" field missing)',
 						$source
 					)
 				),
@@ -142,15 +133,25 @@ class PatternRegistry {
 			}
 		}
 
-		// phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText, WordPress.WP.I18n.LowLevelTranslationFunction
-		$pattern_data['title'] = translate_with_gettext_context( $pattern_data['title'], 'Pattern title', 'woocommerce' );
+		// phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText
+		$pattern_data['title'] = _x( wp_strip_all_tags( html_entity_decode( (string) $pattern_data['title'], ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ), 'Pattern title', 'woocommerce' );
 		if ( ! empty( $pattern_data['description'] ) ) {
-			// phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText, WordPress.WP.I18n.LowLevelTranslationFunction
-			$pattern_data['description'] = translate_with_gettext_context( $pattern_data['description'], 'Pattern description', 'woocommerce' );
+			// phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText
+			$pattern_data['description'] = _x( $pattern_data['description'], 'Pattern description', 'woocommerce' );
 		}
 
-		if ( empty( $pattern_data['content'] ) ) {
+		// A pattern is registrable as long as it provides either inline content
+		// or a `filePath` that core can load lazily (WP 6.5+). Bail only when
+		// neither is available.
+		if ( empty( $pattern_data['content'] ) && empty( $pattern_data['filePath'] ) ) {
 			return;
+		}
+
+		// When a `filePath` is provided, let core load the content lazily on
+		// demand. Drop any empty `content` so core falls back to `filePath`
+		// instead of registering an empty pattern.
+		if ( ! empty( $pattern_data['filePath'] ) && empty( $pattern_data['content'] ) ) {
+			unset( $pattern_data['content'] );
 		}
 
 		$category_labels = $this->get_category_labels();
@@ -174,7 +175,6 @@ class PatternRegistry {
 
 		register_block_pattern( $pattern_data['slug'], $pattern_data );
 	}
-
 
 	/**
 	 * Convert a kebab-case string to capital case.

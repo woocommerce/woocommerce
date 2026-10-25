@@ -10,6 +10,7 @@ import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 import { expect, tags, test as baseTest } from '../../fixtures/fixtures';
 import { random } from '../../utils/helpers';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
+import { assertTaxCalculationEnabled } from '../../utils/taxes';
 
 const taxClasses = [
 	{
@@ -54,15 +55,28 @@ async function getOrderIdFromPage( page: Page ) {
 async function addProductToOrder( page: Page, product, quantity: number ) {
 	await page.getByRole( 'button', { name: 'Add item(s)' } ).click();
 	await page.getByRole( 'button', { name: 'Add product(s)' } ).click();
-	await page.getByText( 'Search for a product…' ).click();
 	await page.locator( 'span > .select2-search__field' ).fill( product.name );
 	await page.getByRole( 'option', { name: product.name } ).first().click();
-	await page
+
+	const quantityField = page
 		.locator( 'tr' )
 		.filter( { hasText: product.name } )
-		.getByPlaceholder( '1' )
-		.fill( quantity.toString() );
+		.getByPlaceholder( '1' );
+	await quantityField.fill( quantity.toString() );
+	// Confirm the quantity stuck before committing, so the line item is never
+	// added with a stale/empty value.
+	await expect( quantityField ).toHaveValue( quantity.toString() );
+
 	await page.locator( '#btn-ok' ).click();
+
+	// Adding the product fires an AJAX request that inserts the line item and
+	// recalculates the order totals. Wait for the item row to render before
+	// returning; otherwise a subsequent "Create"/save can persist the order
+	// before the line item is fully applied, saving a 0-quantity / $0 line
+	// (observed intermittently under parallel load).
+	await expect(
+		page.locator( 'td.name > a' ).filter( { hasText: product.name } )
+	).toBeVisible();
 }
 
 const test = baseTest.extend( {
@@ -192,10 +206,10 @@ const test = baseTest.extend( {
 				product = response.data;
 			} );
 
-		for ( const key in variations ) {
-			restApi.post(
+		for ( const variation of variations ) {
+			await restApi.post(
 				`${ WC_API_PATH }/products/${ product.id }/variations`,
-				variations[ key ]
+				variation
 			);
 		}
 
@@ -277,13 +291,7 @@ test.describe(
 	{ tag: [ tags.SERVICES, tags.HPOS ] },
 	() => {
 		test.beforeAll( async ( { restApi } ) => {
-			// enable taxes on the account
-			await restApi.put(
-				`${ WC_API_PATH }/settings/general/woocommerce_calc_taxes`,
-				{
-					value: 'yes',
-				}
-			);
+			await assertTaxCalculationEnabled( restApi );
 			// add tax classes
 			for ( const taxClass of taxClasses ) {
 				await restApi.post(
@@ -318,13 +326,6 @@ test.describe(
 						}
 					);
 			}
-			// turn off taxes
-			await restApi.put(
-				`${ WC_API_PATH }/settings/general/woocommerce_calc_taxes`,
-				{
-					value: 'no',
-				}
-			);
 		} );
 
 		test( 'can create a simple guest order', async ( {
@@ -416,6 +417,72 @@ test.describe(
 			).toBeVisible();
 			await expect(
 				page.locator( 'table' ).filter( { hasText: 'Paid: $200.00' } )
+			).toBeVisible();
+		} );
+
+		test( 'can add a product without an extra click or rogue search box', async ( {
+			page,
+			simpleProduct,
+		} ) => {
+			await page.goto( 'wp-admin/admin.php?page=wc-orders&action=new' );
+
+			// Open the Add products modal.
+			await page.getByRole( 'button', { name: 'Add item(s)' } ).click();
+			await page
+				.getByRole( 'button', { name: 'Add product(s)' } )
+				.click();
+
+			const modal = page.locator( '.wc-backbone-modal-content' );
+			await expect( modal ).toBeVisible();
+
+			const productSearch = page.locator(
+				'span > .select2-search__field'
+			);
+			await expect( productSearch ).toBeFocused();
+
+			// Close the automatically opened search so the existing keyboard
+			// regression still exercises opening the control with Enter.
+			await page.keyboard.press( 'Escape' );
+
+			// Focus the (closed) product-search control and press Enter.
+			// Before the fix this submitted the modal, closing it and
+			// stranding a detached selectWoo dropdown at the top-left of the
+			// page.
+			await modal.locator( '.select2-selection' ).first().focus();
+			await page.keyboard.press( 'Enter' );
+
+			// The modal must still be open: Enter on the search control must
+			// not submit/close the modal.
+			await expect( modal ).toBeVisible();
+
+			// selectWoo attaches its search dropdown to <body> (not inside the
+			// modal), so target the search field at the page level — the same
+			// locator the mouse-driven helper uses. Enter (above) opened the
+			// dropdown; type the query, wait for the result, then press Enter to
+			// choose it with the keyboard (results are loaded first, so this is
+			// not the premature-Enter path).
+			await productSearch.fill( simpleProduct.name );
+			await page
+				.getByRole( 'option', { name: simpleProduct.name } )
+				.first()
+				.waitFor();
+			await page.keyboard.press( 'Enter' );
+
+			// The product is selected in the modal's search control; commit.
+			// Assert on the rendered selection specifically — a bare getByText
+			// also matches the hidden <option>, which trips strict mode.
+			await expect(
+				modal
+					.locator( '.select2-selection__rendered' )
+					.filter( { hasText: simpleProduct.name } )
+			).toBeVisible();
+			await page.locator( '#btn-ok' ).click();
+
+			// Line item lands on the order.
+			await expect(
+				page
+					.locator( 'td.name > a' )
+					.filter( { hasText: simpleProduct.name } )
 			).toBeVisible();
 		} );
 
@@ -532,13 +599,15 @@ test.describe(
 			await page.locator( 'button.add-order-item' ).click();
 
 			// search for each product to add
-			for ( const product of [
+			for ( const [ index, product ] of [
 				simpleProduct,
 				variableProduct,
 				groupedProduct,
 				externalProduct,
-			] ) {
-				await page.getByText( 'Search for a product…' ).click();
+			].entries() ) {
+				if ( index > 0 ) {
+					await page.getByText( 'Search for a product…' ).click();
+				}
 				await page
 					.locator( 'span > .select2-search__field' )
 					.fill( product.name );

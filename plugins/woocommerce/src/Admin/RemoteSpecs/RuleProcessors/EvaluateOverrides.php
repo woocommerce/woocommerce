@@ -27,7 +27,7 @@ class EvaluateOverrides {
 					}
 
 					if ( $rule_evaluator->evaluate( $override->rules ) ) {
-						// If value exisit and can be accessed directly, update it.
+						// If value exist and can be accessed directly, update it.
 						if ( isset( $spec_item->{$override->field} ) ) {
 							$spec_item->{$override->field} = $override->value;
 						} else {

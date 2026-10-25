@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Add compatibility shims for the removed block templates PHP API to avoid third-party extension fatals.

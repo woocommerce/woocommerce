@@ -1041,7 +1041,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			}
 		}
 
-		// Handle custom orderby paramers.
+		// Handle custom orderby parameters.
 		if ( 'total' === $wp_query_args['orderby'] ) {
 			$wp_query_args['orderby']   = 'meta_value_num';
 			$wp_query_args['meta_key']  = '_order_total'; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
@@ -1085,13 +1085,9 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 				__METHOD__,
 				esc_html(
 					sprintf(
-					// translators: %s is a comma separated list of query arguments.
-						_n(
-							'Order query argument (%s) is not supported on the current order datastore.',
-							'Order query arguments (%s) are not supported on the current order datastore.',
-							count( $unsupported_args_in_query ),
-							'woocommerce'
-						),
+						1 === count( $unsupported_args_in_query )
+							? 'Order query argument (%s) is not supported on the current order datastore.'
+							: 'Order query arguments (%s) are not supported on the current order datastore.',
 						implode( ', ', $unsupported_args_in_query )
 					)
 				),

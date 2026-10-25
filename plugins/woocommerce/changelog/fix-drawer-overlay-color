@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Use a fixed black overlay color for the drawer instead of inheriting the theme palette.

@@ -20,11 +20,11 @@ use WP_REST_Request;
 class EmailSettingsControllerTest extends WC_REST_Unit_Test_Case {
 
 	/**
-	 * User ID.
+	 * Shared shop_manager user for REST auth.
 	 *
 	 * @var int
 	 */
-	private $user_id;
+	protected static $user_id;
 
 	/**
 	 * @var callable
@@ -37,6 +37,15 @@ class EmailSettingsControllerTest extends WC_REST_Unit_Test_Case {
 	 * @var array<string, mixed>
 	 */
 	private $prev_options = array();
+
+	/**
+	 * Create the shared shop manager user once for the whole class.
+	 *
+	 * @param object $factory Factory object.
+	 */
+	public static function wpSetUpBeforeClass( $factory ) {
+		self::$user_id = $factory->user->create( array( 'role' => 'shop_manager' ) );
+	}
 
 	/**
 	 * Setup.
@@ -65,13 +74,6 @@ class EmailSettingsControllerTest extends WC_REST_Unit_Test_Case {
 		foreach ( $option_ids as $id ) {
 			$this->prev_options[ $id ] = get_option( $id, null );
 		}
-
-		// Create a user with permissions.
-		$this->user_id = $this->factory->user->create(
-			array(
-				'role' => 'shop_manager',
-			)
-		);
 	}
 
 	/**
@@ -109,7 +111,7 @@ class EmailSettingsControllerTest extends WC_REST_Unit_Test_Case {
 	 * Reply-to fields should be present, but design fields should not be present.
 	 */
 	public function test_get_item() {
-		wp_set_current_user( $this->user_id );
+		wp_set_current_user( self::$user_id );
 		$request  = new WP_REST_Request( 'GET', '/wc/v4/settings/email' );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
@@ -164,7 +166,7 @@ class EmailSettingsControllerTest extends WC_REST_Unit_Test_Case {
 		// Disable block email editor feature.
 		update_option( 'woocommerce_feature_block_email_editor_enabled', 'no' );
 
-		wp_set_current_user( $this->user_id );
+		wp_set_current_user( self::$user_id );
 		$request  = new WP_REST_Request( 'GET', '/wc/v4/settings/email' );
 		$response = $this->server->dispatch( $request );
 		$data     = $response->get_data();
@@ -232,7 +234,7 @@ class EmailSettingsControllerTest extends WC_REST_Unit_Test_Case {
 	 * Test updating email settings.
 	 */
 	public function test_update_item() {
-		wp_set_current_user( $this->user_id );
+		wp_set_current_user( self::$user_id );
 		$request = new WP_REST_Request( 'PUT', '/wc/v4/settings/email' );
 		$request->set_header( 'Content-Type', 'application/json' );
 		$request->set_body(
@@ -264,7 +266,7 @@ class EmailSettingsControllerTest extends WC_REST_Unit_Test_Case {
 	 * When reply-to is enabled, the name is required.
 	 */
 	public function test_update_item_with_invalid_reply_to_name() {
-		wp_set_current_user( $this->user_id );
+		wp_set_current_user( self::$user_id );
 		$request = new WP_REST_Request( 'PUT', '/wc/v4/settings/email' );
 		$request->set_header( 'Content-Type', 'application/json' );
 		$request->set_body(
@@ -289,7 +291,7 @@ class EmailSettingsControllerTest extends WC_REST_Unit_Test_Case {
 	 * When reply-to is enabled, the name is required.
 	 */
 	public function test_update_item_with_invalid_reply_to_address() {
-		wp_set_current_user( $this->user_id );
+		wp_set_current_user( self::$user_id );
 		$request = new WP_REST_Request( 'PUT', '/wc/v4/settings/email' );
 		$request->set_header( 'Content-Type', 'application/json' );
 		$request->set_body(

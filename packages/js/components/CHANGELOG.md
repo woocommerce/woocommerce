@@ -2,10 +2,15 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [14.1.0](https://www.npmjs.com/package/@woocommerce/components/v/14.1.0) - 2026-06-26 
+
+-   Patch - Improve summary trend indicator contrast in Analytics. [#65784]
+-   Minor - Update Timeline date rendering from browser-local formatting to localized timezone-aware formatting. [#65914]
+
 ## [14.0.0](https://www.npmjs.com/package/@woocommerce/components/v/14.0.0) - 2026-06-11 
 
--   Major - Replace MediaItem with native Attachment from @wordpress/media-utils throughout media-uploader and image-gallery components. [#64114]
--   Major - Update @wordpress/* dependencies to WordPress 6.8 minimum. Remove @types/wordpress__media-utils and @types/wordpress__rich-text (native types at wp-6.8). [#64114]
+-   Major [ **BREAKING CHANGE** ] - Replace MediaItem with native Attachment from @wordpress/media-utils throughout media-uploader and image-gallery components. [#64114]
+-   Major [ **BREAKING CHANGE** ] - Update @wordpress/* dependencies to WordPress 6.8 minimum. Remove @types/wordpress__media-utils and @types/wordpress__rich-text (native types at wp-6.8). [#64114]
 -   Minor - Export MediaUploadProps and MediaUploadComponentType for typed MediaUpload component props (native types are `Component<any>`). [#64114]
 -   Minor - Fix tax rate search in Analytics filters by using the correct `search` query parameter instead of `code` when calling the `/wc-analytics/taxes` endpoint. [#64754]
 -   Minor - Improve build time for components by using webpack filesystem cache. [#64082]
@@ -115,8 +120,6 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 -   Minor - Fix typos in inline documentation [#48640]
 -   Minor - Fix typos in README.md files [#48569]
 -   Minor - Fix image gallery state conflict with external consumer state [#50181]
--   Remove unused deprecated components: ProductSectionLayout, WooProductFieldItem, WooProductSectionItem, WooProductTabItem, ProductFieldSection. [#54149]
--   Updated declared dependencies to React 18 and Wordpress 6.6 [#53531]
 
 ## [12.3.0](https://www.npmjs.com/package/@woocommerce/components/v/12.3.0) - 2024-04-26 
 

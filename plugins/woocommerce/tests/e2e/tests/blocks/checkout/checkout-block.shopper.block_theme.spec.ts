@@ -141,7 +141,7 @@ test.describe( 'Shopper → Local pickup', () => {
 			.getByRole( 'button', { name: 'Save changes' } )
 			.click();
 		await admin.page.waitForResponse( ( response ) => {
-			return response.url().includes( 'wp-json/wp/v2/settings' );
+			return response.url().includes( 'wp-json/wc/v3/pickup-locations' );
 		} );
 	} );
 
@@ -290,29 +290,6 @@ test.describe( 'Shopper → Local pickup', () => {
 			page.getByRole( 'cell', { name: /Collection from Testing.*/ } )
 		).toBeVisible();
 		await checkoutPageObject.verifyBillingDetails();
-	} );
-} );
-
-test.describe( 'Shopper → Payment Methods', () => {
-	test( 'User can change payment methods', async ( {
-		frontendUtils,
-		page,
-	} ) => {
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
-		await frontendUtils.goToCheckout();
-
-		await page
-			.getByRole( 'radio', { name: 'Direct bank transfer' } )
-			.click();
-		await expect(
-			page.getByRole( 'radio', { name: 'Direct bank transfer' } )
-		).toBeChecked();
-
-		await page.getByRole( 'radio', { name: 'Cash on delivery' } ).click();
-		await expect(
-			page.getByRole( 'radio', { name: 'Cash on delivery' } )
-		).toBeChecked();
 	} );
 } );
 
