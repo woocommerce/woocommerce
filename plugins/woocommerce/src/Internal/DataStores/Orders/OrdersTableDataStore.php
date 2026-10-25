@@ -3680,12 +3680,33 @@ CREATE TABLE $meta_table (
 	 * @return bool The number of rows updated, or false on error.
 	 */
 	public function update_meta( &$object, $meta ) { // phpcs:ignore Universal.NamingConventions.NoReservedKeywordParameterNames.objectFound
+		// The post meta row that mirrors this one can only be found by its value: meta IDs differ
+		// between the orders table and the posts table. Without the previous value,
+		// update_post_meta() rewrites every row of the key, so changing one value of a
+		// multi-value key overwrote the others in post meta (#70189).
+		$previous_value = null;
+		if ( $this->should_backfill_post_record() && isset( $meta->id ) ) {
+			$db_meta = $this->data_store_meta->get_metadata_by_id( $meta->id );
+			if ( is_object( $db_meta ) && isset( $db_meta->meta_value ) ) {
+				$previous_value = $db_meta->meta_value;
+			}
+		}
+
 		$update_meta     = $this->data_store_meta->update_meta( $object, $meta );
 		$changes_applied = $this->after_meta_change( $object, $meta );
 
 		if ( ! $changes_applied && $object instanceof WC_Abstract_Order && $this->should_backfill_post_record() ) {
 			self::$backfilling_order_ids[] = $object->get_id();
-			update_post_meta( $object->get_id(), $meta->key, $meta->value );
+			// update_post_meta() ignores an empty previous value and would update every row anyway;
+			// and when no post meta row holds the previous value (the tables had drifted apart), the
+			// keyed update still brings the key back in line, as it always did.
+			$synced = false;
+			if ( null !== $previous_value && '' !== $previous_value ) {
+				$synced = false !== update_post_meta( $object->get_id(), $meta->key, $meta->value, $previous_value );
+			}
+			if ( ! $synced ) {
+				update_post_meta( $object->get_id(), $meta->key, $meta->value );
+			}
 			self::$backfilling_order_ids = array_diff( self::$backfilling_order_ids, array( $object->get_id() ) );
 		}
 

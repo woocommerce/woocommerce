@@ -3715,6 +3715,84 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	}
 
 	/**
+	 * @testDox Updating one value of a multi-value meta key by its meta ID syncs only that post meta row.
+	 */
+	public function test_updating_one_value_of_a_multi_value_meta_syncs_only_that_row() {
+		$this->toggle_cot_authoritative( true );
+		$this->enable_cot_sync();
+
+		$order = WC_Helper_Order::create_order();
+		$order->add_meta_data( 'multi_key', 'a' );
+		$order->add_meta_data( 'multi_key', 'b' );
+		$order->save();
+		$this->assertEqualsCanonicalizing( array( 'a', 'b' ), get_post_meta( $order->get_id(), 'multi_key', false ) );
+
+		$order  = wc_get_order( $order->get_id() );
+		$meta_a = current(
+			array_filter(
+				$order->get_meta_data(),
+				function ( $meta ) {
+					return 'multi_key' === $meta->key && 'a' === $meta->value;
+				}
+			)
+		);
+		$this->assertNotEmpty( $meta_a->id, 'Precondition: the row to update is known by its meta ID.' );
+
+		// Take the backfill path, not a full order save, as a meta change right after a save does.
+		add_filter( 'woocommerce_orders_table_datastore_should_save_after_meta_change', '__return_false' );
+		try {
+			$order->update_meta_data( 'multi_key', 'c', $meta_a->id );
+			$order->save_meta_data();
+		} finally {
+			remove_filter( 'woocommerce_orders_table_datastore_should_save_after_meta_change', '__return_false' );
+		}
+
+		$this->assertEqualsCanonicalizing( array( 'b', 'c' ), get_post_meta( $order->get_id(), 'multi_key', false ), 'Only the updated row changed in post meta.' );
+
+		$hpos_values = array();
+		foreach ( wc_get_order( $order->get_id() )->get_meta_data() as $meta ) {
+			if ( 'multi_key' === $meta->key ) {
+				$hpos_values[] = $meta->value;
+			}
+		}
+		$this->assertEqualsCanonicalizing( array( 'b', 'c' ), $hpos_values, 'The orders table holds the same two values.' );
+	}
+
+	/**
+	 * @testDox Updating a meta value that post meta does not hold yet still brings the key in line.
+	 */
+	public function test_updating_a_drifted_meta_value_still_syncs_the_key() {
+		$this->toggle_cot_authoritative( true );
+		$this->enable_cot_sync();
+
+		$order = WC_Helper_Order::create_order();
+		$order->add_meta_data( 'drift_key', 'a' );
+		$order->save();
+		// Post meta drifted away from the orders table.
+		update_post_meta( $order->get_id(), 'drift_key', 'stale' );
+
+		$order  = wc_get_order( $order->get_id() );
+		$meta_a = current(
+			array_filter(
+				$order->get_meta_data(),
+				function ( $meta ) {
+					return 'drift_key' === $meta->key;
+				}
+			)
+		);
+
+		add_filter( 'woocommerce_orders_table_datastore_should_save_after_meta_change', '__return_false' );
+		try {
+			$order->update_meta_data( 'drift_key', 'c', $meta_a->id );
+			$order->save_meta_data();
+		} finally {
+			remove_filter( 'woocommerce_orders_table_datastore_should_save_after_meta_change', '__return_false' );
+		}
+
+		$this->assertEquals( array( 'c' ), get_post_meta( $order->get_id(), 'drift_key', false ) );
+	}
+
+	/**
 	 * @testDox Test that date queries correctly handle timezones.
 	 */
 	public function test_timezone_date_query_support() {
