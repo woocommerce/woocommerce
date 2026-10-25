@@ -20,8 +20,7 @@ const pullRequest = (number, linkedIssues, overrides = {}) => ({
     ...overrides,
 });
 
-const select = (pullRequests) =>
-    selectPullRequestsToClose({ pullRequests, issueNumber: 100, repository, defaultBranch: 'trunk' });
+const select = (pullRequests) => selectPullRequestsToClose({ pullRequests, repository, defaultBranch: 'trunk' });
 
 test('closes a pull request linked only to the closed issue', () => {
     assert.deepEqual(select([pullRequest(1, [issue(100, 'CLOSED')])]), { close: [1], keep: [] });
@@ -60,6 +59,11 @@ test('keeps a pull request from another repository', () => {
     assert.deepEqual(result.close, []);
 });
 
-test('ignores the closed issue even if it is still reported as open', () => {
-    assert.deepEqual(select([pullRequest(1, [issue(100, 'OPEN')])]).close, [1]);
+test('ignores merged and closed pull requests', () => {
+    const result = select([
+        pullRequest(1, [issue(100, 'CLOSED')], { state: 'MERGED' }),
+        pullRequest(2, [issue(100, 'CLOSED')], { state: 'CLOSED' }),
+    ]);
+
+    assert.deepEqual(result, { close: [], keep: [] });
 });

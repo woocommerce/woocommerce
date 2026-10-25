@@ -17,6 +17,8 @@ jobs:
       contents: read
       issues: read
       pull-requests: write
+    env:
+      REPORT_PATH: close-linked-prs-report.json
     steps:
       - name: Checkout
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
@@ -27,8 +29,6 @@ jobs:
 
       - name: Close linked PRs
         uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
-        env:
-          REPORT_PATH: ${{ runner.temp }}/close-linked-prs-report.json
         with:
           script: |
             const script = require('./.github/workflows/scripts/close-linked-prs-on-issue-close.js');
@@ -40,5 +40,7 @@ jobs:
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: close-linked-prs-issue-${{ github.event.issue.number }}
-          path: ${{ runner.temp }}/close-linked-prs-report.json
+          path: ${{ env.REPORT_PATH }}
           if-no-files-found: ignore
+          # A re-run of a failed job uploads under the same name again.
+          overwrite: true

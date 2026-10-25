@@ -39,16 +39,16 @@ const LINKED_PULL_REQUESTS_QUERY = `
  *
  * @param {Object}   params
  * @param {Object[]} params.pullRequests  Linked pull requests from the GraphQL query.
- * @param {number}   params.issueNumber   The closed issue number.
  * @param {string}   params.repository    The closed issue's repository, as "owner/repo".
  * @param {string}   params.defaultBranch The repository's default branch.
  * @return {{close: number[], keep: {number: number, reason: string}[]}}
  */
-function selectPullRequestsToClose({ pullRequests, issueNumber, repository, defaultBranch }) {
+function selectPullRequestsToClose({ pullRequests, repository, defaultBranch }) {
     const close = [];
     const keep = [];
 
     for (const pr of pullRequests) {
+        // `includeClosedPrs: false` still returns merged PRs, such as the one that closed the issue.
         if (pr.state !== 'OPEN') {
             continue;
         }
@@ -63,11 +63,7 @@ function selectPullRequestsToClose({ pullRequests, issueNumber, repository, defa
             continue;
         }
 
-        const otherOpenIssues = pr.closingIssuesReferences.nodes.filter(
-            (issue) =>
-                issue.state === 'OPEN' &&
-                !(issue.number === issueNumber && issue.repository.nameWithOwner === repository)
-        );
+        const otherOpenIssues = pr.closingIssuesReferences.nodes.filter((issue) => issue.state === 'OPEN');
         if (otherOpenIssues.length > 0) {
             const refs = otherOpenIssues.map((issue) => `${issue.repository.nameWithOwner}#${issue.number}`);
             keep.push({ number: pr.number, reason: `it is still linked to open issue(s) ${refs.join(', ')}` });
@@ -107,7 +103,6 @@ module.exports = async ({ github, context, core }) => {
 
     const { close, keep } = selectPullRequestsToClose({
         pullRequests: result.issue.closedByPullRequestsReferences.nodes,
-        issueNumber,
         repository: `${owner}/${repo}`,
         defaultBranch: result.defaultBranchRef.name,
     });
