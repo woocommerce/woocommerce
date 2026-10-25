@@ -10099,12 +10099,6 @@ parameters:
 			path: includes/class-wc-cart.php
 
 		-
-			message: '#^Cannot call method get_attributes\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: includes/class-wc-cart.php
-
-		-
 			message: '#^Method WC_Cart\:\:check_cart_items\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -10623,12 +10617,6 @@ parameters:
 		-
 			message: '#^Call to an undefined method object\:\:increase_usage_count\(\)\.$#'
 			identifier: method.notFound
-			count: 1
-			path: includes/class-wc-coupon.php
-
-		-
-			message: '#^Cannot access property \$name on WP_Error\|WP_Term\|null\.$#'
-			identifier: property.nonObject
 			count: 1
 			path: includes/class-wc-coupon.php
 
@@ -33887,24 +33875,6 @@ parameters:
 
 		-
 			message: '#^Cannot call method add_order_note\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/wc-order-functions.php
-
-		-
-			message: '#^Cannot call method get_download_expiry\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/wc-order-functions.php
-
-		-
-			message: '#^Cannot call method get_download_limit\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: includes/wc-order-functions.php
-
-		-
-			message: '#^Cannot call method get_id\(\) on WC_Product\|false\|null\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: includes/wc-order-functions.php
