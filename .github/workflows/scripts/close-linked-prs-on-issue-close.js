@@ -1,3 +1,5 @@
+const fs = require('fs');
+
 const LINKED_PULL_REQUESTS_QUERY = `
     query ($owner: String!, $repo: String!, $number: Int!) {
         repository(owner: $owner, name: $repo) {
@@ -79,6 +81,7 @@ function selectPullRequestsToClose({ pullRequests, issueNumber, repository, defa
 
 /**
  * Closes open pull requests that were linked to an issue that just got closed, leaving a comment on each.
+ * When REPORT_PATH is set, writes a JSON report of the closed, kept, and failed pull requests there.
  *
  * @param {Object} params - The parameters object
  * @param {Object} params.github - GitHub API client
@@ -102,15 +105,16 @@ module.exports = async ({ github, context, core }) => {
         defaultBranch: result.defaultBranchRef.name,
     });
 
+    if (close.length === 0 && keep.length === 0) {
+        core.info(`No open pull requests are linked to issue #${issueNumber}.`);
+        return;
+    }
+
     for (const { number, reason } of keep) {
         core.info(`Leaving PR #${number} open because ${reason}.`);
     }
 
-    if (close.length === 0) {
-        core.info(`No linked open pull requests to close for issue #${issueNumber}.`);
-        return;
-    }
-
+    const closed = [];
     const failed = [];
     for (const prNumber of close) {
         try {
@@ -130,15 +134,21 @@ module.exports = async ({ github, context, core }) => {
                 pull_number: prNumber,
                 state: 'closed',
             });
+            closed.push(prNumber);
             core.info(`Closed PR #${prNumber}.`);
         } catch (error) {
             core.warning(`Failed to close PR #${prNumber}: ${error.message}`);
-            failed.push(prNumber);
+            failed.push({ number: prNumber, error: error.message });
         }
     }
 
+    if (process.env.REPORT_PATH) {
+        const report = { issue: issueNumber, closed, kept: keep, failed };
+        fs.writeFileSync(process.env.REPORT_PATH, `${JSON.stringify(report, null, 2)}\n`);
+    }
+
     if (failed.length > 0) {
-        core.setFailed(`Failed to close PR(s): ${failed.map((n) => `#${n}`).join(', ')}`);
+        core.setFailed(`Failed to close PR(s): ${failed.map(({ number }) => `#${number}`).join(', ')}`);
     }
 };
 
