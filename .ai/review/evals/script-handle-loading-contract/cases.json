@@ -25,7 +25,7 @@
 			}
 		},
 		{
-			"id": "G28B-v3",
+			"id": "G28B-v4",
 			"path": "plugins/woocommerce/includes/class-wc-eval-28.php",
 			"before": {
 				"file": "fixtures/G28B/before.php"
@@ -43,6 +43,14 @@
 							4
 						],
 						"anchor": "    wp_register_script( 'wc-tokenization-ui', plugins_url( 'assets/js/frontend/tokenization-form.js', WC_PLUGIN_FILE ), array( 'jquery' ), WC()->version, false );"
+					},
+					{
+						"file": "plugins/woocommerce/includes/class-wc-eval-28.php",
+						"lines": [
+							8,
+							8
+						],
+						"anchor": "array( 'jquery', 'woocommerce-tokenization-form' )"
 					}
 				]
 			}
