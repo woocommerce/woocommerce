@@ -3698,8 +3698,10 @@ CREATE TABLE $meta_table (
 	 * A single row cannot be mirrored: meta IDs differ between the two tables, and a value does not
 	 * identify a row either (two rows may hold the same value, and WordPress treats '' and '0' as no
 	 * filter at all). An `update_post_meta()` by key therefore rewrote every row of a multi-value key
-	 * (#70189). The orders table being authoritative here, its rows for the key replace the post meta
-	 * rows for that key, and only when the two sides differ. Other keys are left alone.
+	 * (#70189). The orders table being authoritative here, each of its values for the key is paired
+	 * with a post meta row holding the same stored value; those rows are left untouched. A row left
+	 * over is updated in place to a value left over, so it keeps its meta ID and `updated_post_meta`
+	 * fires as it did; only a difference in row count deletes or adds rows. Other keys are left alone.
 	 *
 	 * @param \WC_Abstract_Order $order    Order whose meta changed.
 	 * @param string             $meta_key Key to reconcile.
@@ -3707,6 +3709,7 @@ CREATE TABLE $meta_table (
 	private function sync_post_meta_key( \WC_Abstract_Order $order, string $meta_key ): void {
 		global $wpdb;
 
+		$order_id    = $order->get_id();
 		$rows        = $this->data_store_meta->get_metadata_by_key( $order, $meta_key );
 		$hpos_values = array();
 		if ( is_array( $rows ) ) {
@@ -3714,33 +3717,65 @@ CREATE TABLE $meta_table (
 				$hpos_values[] = $row->meta_value ?? '';
 			}
 		}
-		$post_values = get_post_meta( $order->get_id(), $meta_key, false );
 
-		$hpos_serialized = array_map( 'maybe_serialize', $hpos_values );
-		$post_serialized = array_map( 'maybe_serialize', is_array( $post_values ) ? $post_values : array() );
-		sort( $hpos_serialized );
-		sort( $post_serialized );
-		if ( $hpos_serialized === $post_serialized ) {
+		// The post meta rows of the key with their IDs, as stored, so that matching rows can be kept.
+		$post_rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT meta_id, meta_value FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = %s ORDER BY meta_id ASC", // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				$order_id,
+				$meta_key
+			)
+		);
+		$unmatched = is_array( $post_rows ) ? $post_rows : array();
+
+		$missing = array();
+		foreach ( $hpos_values as $value ) {
+			$stored = (string) maybe_serialize( $value );
+			$paired = false;
+			foreach ( $unmatched as $index => $row ) {
+				if ( (string) $row->meta_value === $stored ) {
+					unset( $unmatched[ $index ] );
+					$paired = true;
+					break;
+				}
+			}
+			if ( ! $paired ) {
+				$missing[] = $value;
+			}
+		}
+		$stale = array_values( $unmatched );
+		if ( empty( $missing ) && empty( $stale ) ) {
 			return;
 		}
 
-		delete_post_meta( $order->get_id(), $meta_key );
-		foreach ( $hpos_values as $value ) {
-			if ( is_object( $value ) && '__PHP_Incomplete_Class' === get_class( $value ) ) {
+		foreach ( $missing as $value ) {
+			$row        = array_shift( $stale );
+			$incomplete = is_object( $value ) && '__PHP_Incomplete_Class' === get_class( $value );
+			if ( null !== $row && ! $incomplete ) {
+				update_metadata_by_mid( 'post', (int) $row->meta_id, $value );
+				continue;
+			}
+			if ( null !== $row ) {
+				delete_metadata_by_mid( 'post', (int) $row->meta_id );
+			}
+			if ( $incomplete ) {
 				// Same handling as the full backfill: WordPress cannot sanitize such a value.
 				$wpdb->insert(
 					_get_meta_table( 'post' ),
 					array(
-						'post_id'    => $order->get_id(),
+						'post_id'    => $order_id,
 						'meta_key'   => $meta_key, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 						'meta_value' => maybe_serialize( $value ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 					),
 					array( '%d', '%s', '%s' )
 				);
-				wp_cache_delete( $order->get_id(), 'post_meta' );
+				wp_cache_delete( $order_id, 'post_meta' );
 				continue;
 			}
-			add_post_meta( $order->get_id(), $meta_key, $value, false );
+			add_post_meta( $order_id, $meta_key, $value, false );
+		}
+		foreach ( $stale as $row ) {
+			delete_metadata_by_mid( 'post', (int) $row->meta_id );
 		}
 	}
 

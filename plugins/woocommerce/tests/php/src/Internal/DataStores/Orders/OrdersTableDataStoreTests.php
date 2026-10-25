@@ -3786,12 +3786,42 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	 * @testdox Updating one value of a multi-value meta key by its meta ID syncs only that post meta row.
 	 */
 	public function test_updating_one_value_of_a_multi_value_meta_syncs_only_that_row(): void {
-		$order = $this->create_synced_order_with_meta_values( 'multi_key', array( 'a', 'b' ) );
+		$order      = $this->create_synced_order_with_meta_values( 'multi_key', array( 'a', 'b' ) );
+		$ids_before = $this->post_meta_ids( $order->get_id(), 'multi_key' );
 
 		$this->update_meta_row_by_id( $order, 'multi_key', 'a', 'c' );
 
 		$this->assertEqualsCanonicalizing( array( 'b', 'c' ), get_post_meta( $order->get_id(), 'multi_key', false ), 'Only the updated row changed in post meta.' );
 		$this->assertEqualsCanonicalizing( array( 'b', 'c' ), $this->hpos_meta_values( $order->get_id(), 'multi_key' ), 'The orders table holds the same two values.' );
+		$this->assertSame( $ids_before, $this->post_meta_ids( $order->get_id(), 'multi_key' ), 'Both post meta rows kept their meta IDs.' );
+	}
+
+	/**
+	 * @testdox Updating a single-value meta key updates its post meta row in place and fires updated_post_meta, as before.
+	 */
+	public function test_updating_a_single_value_meta_updates_the_post_meta_row_in_place(): void {
+		$order     = $this->create_synced_order_with_meta_values( 'single_key', array( 'a' ) );
+		$id_before = $this->post_meta_ids( $order->get_id(), 'single_key' );
+		$fired     = array();
+		$listener  = function ( $meta_id, $object_id, $key ) use ( &$fired ) {
+			if ( 'single_key' === $key ) {
+				$fired[] = current_action();
+			}
+		};
+		foreach ( array( 'added_post_meta', 'updated_post_meta', 'deleted_post_meta' ) as $hook ) {
+			add_action( $hook, $listener, 10, 3 );
+		}
+		try {
+			$this->update_meta_row_by_id( $order, 'single_key', 'a', 'c' );
+		} finally {
+			foreach ( array( 'added_post_meta', 'updated_post_meta', 'deleted_post_meta' ) as $hook ) {
+				remove_action( $hook, $listener, 10 );
+			}
+		}
+
+		$this->assertSame( array( 'c' ), get_post_meta( $order->get_id(), 'single_key', false ) );
+		$this->assertSame( $id_before, $this->post_meta_ids( $order->get_id(), 'single_key' ), 'The row kept its meta ID.' );
+		$this->assertSame( array( 'updated_post_meta' ), $fired, 'Listeners saw an update, not a delete and an add.' );
 	}
 
 	/**
@@ -3837,16 +3867,44 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	 * @testdox Syncing a meta key leaves post meta untouched when both sides already agree.
 	 */
 	public function test_meta_sync_does_not_rewrite_post_meta_that_already_agrees(): void {
-		global $wpdb;
 		$order = $this->create_synced_order_with_meta_values( 'same_key', array( 'a', 'b' ) );
 		// Post meta already holds what the orders table is about to hold.
 		update_post_meta( $order->get_id(), 'same_key', 'c', 'a' );
-		$ids_before = $wpdb->get_col( $wpdb->prepare( "SELECT meta_id FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = 'same_key' ORDER BY meta_id", $order->get_id() ) );
+		$ids_before = $this->post_meta_ids( $order->get_id(), 'same_key' );
+		$fired      = 0;
+		$listener   = function ( $meta_id, $object_id, $key ) use ( &$fired ) {
+			if ( 'same_key' === $key ) {
+				++$fired;
+			}
+		};
+		foreach ( array( 'added_post_meta', 'updated_post_meta', 'deleted_post_meta' ) as $hook ) {
+			add_action( $hook, $listener, 10, 3 );
+		}
+		try {
+			$this->update_meta_row_by_id( $order, 'same_key', 'a', 'c' );
+		} finally {
+			foreach ( array( 'added_post_meta', 'updated_post_meta', 'deleted_post_meta' ) as $hook ) {
+				remove_action( $hook, $listener, 10 );
+			}
+		}
 
-		$this->update_meta_row_by_id( $order, 'same_key', 'a', 'c' );
+		$this->assertSame( $ids_before, $this->post_meta_ids( $order->get_id(), 'same_key' ), 'The post meta rows were not rewritten.' );
+		$this->assertSame( 0, $fired, 'No post meta hook fired.' );
+	}
 
-		$ids_after = $wpdb->get_col( $wpdb->prepare( "SELECT meta_id FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = 'same_key' ORDER BY meta_id", $order->get_id() ) );
-		$this->assertSame( $ids_before, $ids_after, 'The post meta rows were not rewritten.' );
+	/**
+	 * Meta IDs of the `$key` rows of `$order_id` in post meta, in order.
+	 *
+	 * @param int    $order_id Order ID.
+	 * @param string $key      Meta key.
+	 * @return int[]
+	 */
+	private function post_meta_ids( int $order_id, string $key ): array {
+		global $wpdb;
+		return array_map(
+			'intval',
+			$wpdb->get_col( $wpdb->prepare( "SELECT meta_id FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = %s ORDER BY meta_id ASC", $order_id, $key ) ) // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+		);
 	}
 
 	/**
