@@ -3680,37 +3680,68 @@ CREATE TABLE $meta_table (
 	 * @return bool The number of rows updated, or false on error.
 	 */
 	public function update_meta( &$object, $meta ) { // phpcs:ignore Universal.NamingConventions.NoReservedKeywordParameterNames.objectFound
-		// The post meta row that mirrors this one can only be found by its value: meta IDs differ
-		// between the orders table and the posts table. Without the previous value,
-		// update_post_meta() rewrites every row of the key, so changing one value of a
-		// multi-value key overwrote the others in post meta (#70189).
-		$previous_value = null;
-		if ( $this->should_backfill_post_record() && isset( $meta->id ) ) {
-			$db_meta = $this->data_store_meta->get_metadata_by_id( $meta->id );
-			if ( is_object( $db_meta ) && isset( $db_meta->meta_value ) ) {
-				$previous_value = $db_meta->meta_value;
-			}
-		}
-
 		$update_meta     = $this->data_store_meta->update_meta( $object, $meta );
 		$changes_applied = $this->after_meta_change( $object, $meta );
 
-		if ( ! $changes_applied && $object instanceof WC_Abstract_Order && $this->should_backfill_post_record() ) {
+		if ( ! $changes_applied && $object instanceof WC_Abstract_Order && $this->should_backfill_post_record() && isset( $meta->key ) ) {
 			self::$backfilling_order_ids[] = $object->get_id();
-			// update_post_meta() ignores an empty previous value and would update every row anyway;
-			// and when no post meta row holds the previous value (the tables had drifted apart), the
-			// keyed update still brings the key back in line, as it always did.
-			$synced = false;
-			if ( null !== $previous_value && '' !== $previous_value ) {
-				$synced = false !== update_post_meta( $object->get_id(), $meta->key, $meta->value, $previous_value );
-			}
-			if ( ! $synced ) {
-				update_post_meta( $object->get_id(), $meta->key, $meta->value );
-			}
+			$this->sync_post_meta_key( $object, (string) $meta->key );
 			self::$backfilling_order_ids = array_diff( self::$backfilling_order_ids, array( $object->get_id() ) );
 		}
 
 		return $update_meta;
+	}
+
+	/**
+	 * Bring the post meta rows of one key in line with the orders table.
+	 *
+	 * A single row cannot be mirrored: meta IDs differ between the two tables, and a value does not
+	 * identify a row either (two rows may hold the same value, and WordPress treats '' and '0' as no
+	 * filter at all). An `update_post_meta()` by key therefore rewrote every row of a multi-value key
+	 * (#70189). The orders table being authoritative here, its rows for the key replace the post meta
+	 * rows for that key, and only when the two sides differ. Other keys are left alone.
+	 *
+	 * @param \WC_Abstract_Order $order    Order whose meta changed.
+	 * @param string             $meta_key Key to reconcile.
+	 */
+	private function sync_post_meta_key( \WC_Abstract_Order $order, string $meta_key ): void {
+		global $wpdb;
+
+		$rows        = $this->data_store_meta->get_metadata_by_key( $order, $meta_key );
+		$hpos_values = array();
+		if ( is_array( $rows ) ) {
+			foreach ( $rows as $row ) {
+				$hpos_values[] = $row->meta_value ?? '';
+			}
+		}
+		$post_values = get_post_meta( $order->get_id(), $meta_key, false );
+
+		$hpos_serialized = array_map( 'maybe_serialize', $hpos_values );
+		$post_serialized = array_map( 'maybe_serialize', is_array( $post_values ) ? $post_values : array() );
+		sort( $hpos_serialized );
+		sort( $post_serialized );
+		if ( $hpos_serialized === $post_serialized ) {
+			return;
+		}
+
+		delete_post_meta( $order->get_id(), $meta_key );
+		foreach ( $hpos_values as $value ) {
+			if ( is_object( $value ) && '__PHP_Incomplete_Class' === get_class( $value ) ) {
+				// Same handling as the full backfill: WordPress cannot sanitize such a value.
+				$wpdb->insert(
+					_get_meta_table( 'post' ),
+					array(
+						'post_id'    => $order->get_id(),
+						'meta_key'   => $meta_key, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+						'meta_value' => maybe_serialize( $value ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+					),
+					array( '%d', '%s', '%s' )
+				);
+				wp_cache_delete( $order->get_id(), 'post_meta' );
+				continue;
+			}
+			add_post_meta( $order->get_id(), $meta_key, $value, false );
+		}
 	}
 
 	/**

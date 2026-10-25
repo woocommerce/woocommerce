@@ -3715,81 +3715,138 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	}
 
 	/**
-	 * @testDox Updating one value of a multi-value meta key by its meta ID syncs only that post meta row.
+	 * Creates an order whose `$key` holds `$values` in the orders table, with sync on, and returns it
+	 * with the meta IDs loaded.
+	 *
+	 * @param string $key    Meta key.
+	 * @param array  $values Values to add, in order.
+	 * @return \WC_Order
 	 */
-	public function test_updating_one_value_of_a_multi_value_meta_syncs_only_that_row() {
+	private function create_synced_order_with_meta_values( string $key, array $values ): \WC_Order {
 		$this->toggle_cot_authoritative( true );
 		$this->enable_cot_sync();
 
 		$order = WC_Helper_Order::create_order();
-		$order->add_meta_data( 'multi_key', 'a' );
-		$order->add_meta_data( 'multi_key', 'b' );
+		foreach ( $values as $value ) {
+			$order->add_meta_data( $key, $value );
+		}
 		$order->save();
-		$this->assertEqualsCanonicalizing( array( 'a', 'b' ), get_post_meta( $order->get_id(), 'multi_key', false ) );
+		$this->assertEqualsCanonicalizing( $values, get_post_meta( $order->get_id(), $key, false ), 'Precondition: post meta mirrors the orders table.' );
 
-		$order  = wc_get_order( $order->get_id() );
-		$meta_a = current(
-			array_filter(
-				$order->get_meta_data(),
-				function ( $meta ) {
-					return 'multi_key' === $meta->key && 'a' === $meta->value;
-				}
-			)
-		);
-		$this->assertNotEmpty( $meta_a->id, 'Precondition: the row to update is known by its meta ID.' );
-
-		// Take the backfill path, not a full order save, as a meta change right after a save does.
-		add_filter( 'woocommerce_orders_table_datastore_should_save_after_meta_change', '__return_false' );
-		try {
-			$order->update_meta_data( 'multi_key', 'c', $meta_a->id );
-			$order->save_meta_data();
-		} finally {
-			remove_filter( 'woocommerce_orders_table_datastore_should_save_after_meta_change', '__return_false' );
-		}
-
-		$this->assertEqualsCanonicalizing( array( 'b', 'c' ), get_post_meta( $order->get_id(), 'multi_key', false ), 'Only the updated row changed in post meta.' );
-
-		$hpos_values = array();
-		foreach ( wc_get_order( $order->get_id() )->get_meta_data() as $meta ) {
-			if ( 'multi_key' === $meta->key ) {
-				$hpos_values[] = $meta->value;
-			}
-		}
-		$this->assertEqualsCanonicalizing( array( 'b', 'c' ), $hpos_values, 'The orders table holds the same two values.' );
+		return wc_get_order( $order->get_id() );
 	}
 
 	/**
-	 * @testDox Updating a meta value that post meta does not hold yet still brings the key in line.
+	 * Updates, by meta ID, the first `$key` row of `$order` that holds `$from` to `$to`, taking the
+	 * backfill path rather than a full order save, as a meta change right after a save does.
+	 *
+	 * @param \WC_Order $order Order.
+	 * @param string    $key   Meta key.
+	 * @param mixed     $from  Current value of the row to update.
+	 * @param mixed     $to    New value.
 	 */
-	public function test_updating_a_drifted_meta_value_still_syncs_the_key() {
-		$this->toggle_cot_authoritative( true );
-		$this->enable_cot_sync();
-
-		$order = WC_Helper_Order::create_order();
-		$order->add_meta_data( 'drift_key', 'a' );
-		$order->save();
-		// Post meta drifted away from the orders table.
-		update_post_meta( $order->get_id(), 'drift_key', 'stale' );
-
-		$order  = wc_get_order( $order->get_id() );
-		$meta_a = current(
+	private function update_meta_row_by_id( \WC_Order $order, string $key, $from, $to ): void {
+		$row = current(
 			array_filter(
 				$order->get_meta_data(),
-				function ( $meta ) {
-					return 'drift_key' === $meta->key;
+				function ( $meta ) use ( $key, $from ) {
+					return $key === $meta->key && $from === $meta->value;
 				}
 			)
 		);
+		$this->assertNotEmpty( $row->id, 'Precondition: the row to update is known by its meta ID.' );
 
 		add_filter( 'woocommerce_orders_table_datastore_should_save_after_meta_change', '__return_false' );
 		try {
-			$order->update_meta_data( 'drift_key', 'c', $meta_a->id );
+			$order->update_meta_data( $key, $to, $row->id );
 			$order->save_meta_data();
 		} finally {
 			remove_filter( 'woocommerce_orders_table_datastore_should_save_after_meta_change', '__return_false' );
 		}
+	}
 
-		$this->assertEquals( array( 'c' ), get_post_meta( $order->get_id(), 'drift_key', false ) );
+	/**
+	 * Values of `$key` as the orders table holds them.
+	 *
+	 * @param int    $order_id Order ID.
+	 * @param string $key      Meta key.
+	 * @return array
+	 */
+	private function hpos_meta_values( int $order_id, string $key ): array {
+		$values = array();
+		foreach ( wc_get_order( $order_id )->get_meta_data() as $meta ) {
+			if ( $key === $meta->key ) {
+				$values[] = $meta->value;
+			}
+		}
+		return $values;
+	}
+
+	/**
+	 * @testdox Updating one value of a multi-value meta key by its meta ID syncs only that post meta row.
+	 */
+	public function test_updating_one_value_of_a_multi_value_meta_syncs_only_that_row(): void {
+		$order = $this->create_synced_order_with_meta_values( 'multi_key', array( 'a', 'b' ) );
+
+		$this->update_meta_row_by_id( $order, 'multi_key', 'a', 'c' );
+
+		$this->assertEqualsCanonicalizing( array( 'b', 'c' ), get_post_meta( $order->get_id(), 'multi_key', false ), 'Only the updated row changed in post meta.' );
+		$this->assertEqualsCanonicalizing( array( 'b', 'c' ), $this->hpos_meta_values( $order->get_id(), 'multi_key' ), 'The orders table holds the same two values.' );
+	}
+
+	/**
+	 * @testdox Updating a meta value WordPress treats as empty, such as '0', still leaves the other rows alone.
+	 */
+	public function test_updating_an_empty_like_meta_value_leaves_the_other_rows_alone(): void {
+		$order = $this->create_synced_order_with_meta_values( 'zero_key', array( '0', 'b' ) );
+
+		$this->update_meta_row_by_id( $order, 'zero_key', '0', 'c' );
+
+		$this->assertEqualsCanonicalizing( array( 'b', 'c' ), get_post_meta( $order->get_id(), 'zero_key', false ) );
+		$this->assertEqualsCanonicalizing( array( 'b', 'c' ), $this->hpos_meta_values( $order->get_id(), 'zero_key' ) );
+	}
+
+	/**
+	 * @testdox Updating one of two rows that hold the same value changes one post meta row, not both.
+	 */
+	public function test_updating_one_of_two_equal_meta_values_changes_one_row(): void {
+		$order = $this->create_synced_order_with_meta_values( 'twin_key', array( 'a', 'a' ) );
+
+		$this->update_meta_row_by_id( $order, 'twin_key', 'a', 'c' );
+
+		$this->assertEqualsCanonicalizing( array( 'a', 'c' ), get_post_meta( $order->get_id(), 'twin_key', false ) );
+		$this->assertEqualsCanonicalizing( array( 'a', 'c' ), $this->hpos_meta_values( $order->get_id(), 'twin_key' ) );
+	}
+
+	/**
+	 * @testdox Updating a meta value when post meta has drifted brings the whole key back in line without touching the other rows' values.
+	 */
+	public function test_updating_a_meta_value_on_a_drifted_key_reconciles_the_key(): void {
+		$order = $this->create_synced_order_with_meta_values( 'drift_key', array( 'a', 'b' ) );
+		// Post meta drifted away from the orders table on the row about to change.
+		update_post_meta( $order->get_id(), 'drift_key', 'stale', 'a' );
+		$this->assertEqualsCanonicalizing( array( 'stale', 'b' ), get_post_meta( $order->get_id(), 'drift_key', false ) );
+
+		$this->update_meta_row_by_id( $order, 'drift_key', 'a', 'c' );
+
+		$this->assertEqualsCanonicalizing( array( 'b', 'c' ), get_post_meta( $order->get_id(), 'drift_key', false ), 'The stale row follows the orders table and b is kept.' );
+		$this->assertEqualsCanonicalizing( array( 'b', 'c' ), $this->hpos_meta_values( $order->get_id(), 'drift_key' ) );
+	}
+
+	/**
+	 * @testdox Syncing a meta key leaves post meta untouched when both sides already agree.
+	 */
+	public function test_meta_sync_does_not_rewrite_post_meta_that_already_agrees(): void {
+		global $wpdb;
+		$order = $this->create_synced_order_with_meta_values( 'same_key', array( 'a', 'b' ) );
+		// Post meta already holds what the orders table is about to hold.
+		update_post_meta( $order->get_id(), 'same_key', 'c', 'a' );
+		$ids_before = $wpdb->get_col( $wpdb->prepare( "SELECT meta_id FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = 'same_key' ORDER BY meta_id", $order->get_id() ) );
+
+		$this->update_meta_row_by_id( $order, 'same_key', 'a', 'c' );
+
+		$ids_after = $wpdb->get_col( $wpdb->prepare( "SELECT meta_id FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = 'same_key' ORDER BY meta_id", $order->get_id() ) );
+		$this->assertSame( $ids_before, $ids_after, 'The post meta rows were not rewritten.' );
 	}
 
 	/**
