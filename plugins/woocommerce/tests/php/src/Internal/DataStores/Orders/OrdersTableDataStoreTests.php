@@ -3893,6 +3893,107 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	}
 
 	/**
+	 * @testdox When post meta lacks rows of the key, the sync updates the rows it has and adds the rest.
+	 */
+	public function test_meta_sync_adds_the_rows_post_meta_lacks(): void {
+		$order = $this->create_synced_order_with_meta_values( 'short_key', array( 'a', 'b' ) );
+		delete_post_meta( $order->get_id(), 'short_key', 'b' );
+		$ids_before = $this->post_meta_ids( $order->get_id(), 'short_key' );
+		$this->assertCount( 1, $ids_before, 'Precondition: post meta holds one row.' );
+
+		$this->update_meta_row_by_id( $order, 'short_key', 'a', 'c' );
+
+		$ids_after = $this->post_meta_ids( $order->get_id(), 'short_key' );
+		$this->assertEqualsCanonicalizing( array( 'b', 'c' ), get_post_meta( $order->get_id(), 'short_key', false ) );
+		$this->assertCount( 2, $ids_after );
+		$this->assertContains( $ids_before[0], $ids_after, 'The existing row was reused, not replaced.' );
+	}
+
+	/**
+	 * @testdox When post meta holds rows the orders table lacks, the sync deletes only those rows.
+	 */
+	public function test_meta_sync_deletes_the_rows_the_orders_table_lacks(): void {
+		$order      = $this->create_synced_order_with_meta_values( 'long_key', array( 'a', 'b' ) );
+		$ids_before = $this->post_meta_ids( $order->get_id(), 'long_key' );
+		add_post_meta( $order->get_id(), 'long_key', 'extra', false );
+
+		$this->update_meta_row_by_id( $order, 'long_key', 'a', 'c' );
+
+		$this->assertEqualsCanonicalizing( array( 'b', 'c' ), get_post_meta( $order->get_id(), 'long_key', false ) );
+		$this->assertSame( $ids_before, $this->post_meta_ids( $order->get_id(), 'long_key' ), 'The two original rows stayed, the extra one went.' );
+	}
+
+	/**
+	 * @testdox A value of a class that no longer exists is inserted directly when no post meta row is left over.
+	 */
+	public function test_meta_sync_inserts_an_incomplete_class_value_directly(): void {
+		$order = $this->create_synced_order_with_meta_values( 'ic_key', array( 'a' ) );
+		$this->add_incomplete_class_value_to_orders_table_only( $order->get_id(), 'ic_key' );
+		$order      = wc_get_order( $order->get_id() );
+		$ids_before = $this->post_meta_ids( $order->get_id(), 'ic_key' );
+		$this->assertCount( 1, $ids_before, 'Precondition: post meta holds the plain row only.' );
+
+		$this->update_meta_row_by_id( $order, 'ic_key', 'a', 'c' );
+
+		$this->assertSame( array( 'c', self::INCOMPLETE_CLASS_VALUE ), $this->post_meta_raw_values( $order->get_id(), 'ic_key' ) );
+		$this->assertContains( $ids_before[0], $this->post_meta_ids( $order->get_id(), 'ic_key' ), 'The plain row was updated in place.' );
+	}
+
+	/**
+	 * @testdox A value of a class that no longer exists replaces a left-over post meta row by delete and direct insert.
+	 */
+	public function test_meta_sync_replaces_a_left_over_row_by_an_incomplete_class_value(): void {
+		$order = $this->create_synced_order_with_meta_values( 'ic_extra_key', array( 'a' ) );
+		$this->add_incomplete_class_value_to_orders_table_only( $order->get_id(), 'ic_extra_key' );
+		add_post_meta( $order->get_id(), 'ic_extra_key', 'extra', false );
+		$order = wc_get_order( $order->get_id() );
+		$this->assertCount( 2, $this->post_meta_ids( $order->get_id(), 'ic_extra_key' ), 'Precondition: post meta holds the plain row and an extra one.' );
+
+		$this->update_meta_row_by_id( $order, 'ic_extra_key', 'a', 'c' );
+
+		$this->assertSame( array( 'c', self::INCOMPLETE_CLASS_VALUE ), $this->post_meta_raw_values( $order->get_id(), 'ic_extra_key' ) );
+		$this->assertCount( 2, $this->post_meta_ids( $order->get_id(), 'ic_extra_key' ) );
+	}
+
+	/**
+	 * A serialized object of a class that does not exist, as a plugin that was removed leaves behind.
+	 */
+	private const INCOMPLETE_CLASS_VALUE = 'O:11:"geoiprecord":2:{s:12:"country_code";s:2:"BE";s:4:"city";s:8:"Brussels";}';
+
+	/**
+	 * Writes an incomplete-class value for `$key` into the orders meta table only, so that post meta lacks it.
+	 *
+	 * @param int    $order_id Order ID.
+	 * @param string $key      Meta key.
+	 */
+	private function add_incomplete_class_value_to_orders_table_only( int $order_id, string $key ): void {
+		global $wpdb;
+		$wpdb->insert(
+			$this->sut::get_meta_table_name(),
+			array(
+				'order_id'   => $order_id,
+				'meta_key'   => $key, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+				'meta_value' => self::INCOMPLETE_CLASS_VALUE, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+			),
+			array( '%d', '%s', '%s' )
+		);
+		wc_get_container()->get( OrderCache::class )->remove( $order_id );
+		$this->sut->clear_cached_data( array( $order_id ) );
+	}
+
+	/**
+	 * Values of the `$key` rows of `$order_id` in post meta, as stored, in meta ID order.
+	 *
+	 * @param int    $order_id Order ID.
+	 * @param string $key      Meta key.
+	 * @return string[]
+	 */
+	private function post_meta_raw_values( int $order_id, string $key ): array {
+		global $wpdb;
+		return $wpdb->get_col( $wpdb->prepare( "SELECT meta_value FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = %s ORDER BY meta_id ASC", $order_id, $key ) ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+	}
+
+	/**
 	 * Meta IDs of the `$key` rows of `$order_id` in post meta, in order.
 	 *
 	 * @param int    $order_id Order ID.
