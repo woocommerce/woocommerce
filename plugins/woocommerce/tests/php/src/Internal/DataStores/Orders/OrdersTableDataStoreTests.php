@@ -3937,6 +3937,10 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 
 		$this->assertSame( array( 'c', self::INCOMPLETE_CLASS_VALUE ), $this->post_meta_raw_values( $order->get_id(), 'ic_key' ) );
 		$this->assertContains( $ids_before[0], $this->post_meta_ids( $order->get_id(), 'ic_key' ), 'The plain row was updated in place.' );
+		$post_meta = get_post_meta( $order->get_id(), 'ic_key', false );
+		$this->assertCount( 2, $post_meta, 'The meta API sees the inserted row: the post meta cache was invalidated.' );
+		$this->assertSame( 'c', $post_meta[0] );
+		$this->assertInstanceOf( \__PHP_Incomplete_Class::class, $post_meta[1] );
 	}
 
 	/**
@@ -3953,6 +3957,10 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 
 		$this->assertSame( array( 'c', self::INCOMPLETE_CLASS_VALUE ), $this->post_meta_raw_values( $order->get_id(), 'ic_extra_key' ) );
 		$this->assertCount( 2, $this->post_meta_ids( $order->get_id(), 'ic_extra_key' ) );
+		$post_meta = get_post_meta( $order->get_id(), 'ic_extra_key', false );
+		$this->assertCount( 2, $post_meta, 'The meta API sees the inserted row: the post meta cache was invalidated.' );
+		$this->assertSame( 'c', $post_meta[0] );
+		$this->assertInstanceOf( \__PHP_Incomplete_Class::class, $post_meta[1] );
 	}
 
 	/**
