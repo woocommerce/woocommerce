@@ -537,6 +537,15 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox update_order_from_cart() sets the payment method title alongside the id, matching the gateway's own title.
+	 */
+	public function test_update_order_from_cart_sets_payment_method_title_with_the_session_choice(): void {
+		$order = $this->sync_order_from_cart_with_cod_enabled( 'cod' );
+
+		$this->assertSame( WC()->payment_gateways()->payment_gateways()['cod']->get_title(), $order->get_payment_method_title() );
+	}
+
+	/**
 	 * @testdox update_order_from_cart() writes the filtered default on the order when the shopper has not chosen a method.
 	 */
 	public function test_update_order_from_cart_writes_the_filtered_default_without_a_session_choice(): void {
