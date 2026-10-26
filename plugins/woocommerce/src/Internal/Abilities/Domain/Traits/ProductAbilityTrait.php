@@ -70,7 +70,7 @@ trait ProductAbilityTrait {
 				$properties,
 				array( 'type' => $type_schema ),
 				self::get_product_mutation_field_schemas_for_fields( $fields, false, $creating ),
-				in_array( 'attributes', $fields, true ) ? array( 'attributes' => self::get_product_mutation_attributes_schema() ) : array()
+				$creating && in_array( 'attributes', $fields, true ) ? array( 'attributes' => self::get_product_create_attributes_schema() ) : array()
 			),
 			'required'             => array( $creating ? 'name' : 'id' ),
 			'additionalProperties' => false,
@@ -78,14 +78,15 @@ trait ProductAbilityTrait {
 	}
 
 	/**
-	 * Get the schema of the `attributes` input. A variable product takes
-	 * attributes with their options, and a variation takes the option it picks
-	 * for each attribute. The ability checks the shape against the type of the
-	 * loaded product.
+	 * Get the schema of the `attributes` input of a create. A variable product
+	 * takes attributes with their options, and a variation takes the option it
+	 * picks for each attribute. The ability checks the shape against the type.
+	 * An update takes the parent shape only: a variation's options change
+	 * through the `variations` input of its parent.
 	 *
 	 * @return array
 	 */
-	private static function get_product_mutation_attributes_schema(): array {
+	private static function get_product_create_attributes_schema(): array {
 		return array(
 			'type'        => 'array',
 			'description' => __( 'On a variable product, the attributes with their options. On a variation, the option it picks for each attribute of its parent.', 'woocommerce' ),
@@ -383,9 +384,11 @@ trait ProductAbilityTrait {
 	 * Get the configuration of a product class.
 	 *
 	 * The product class decides which Core fields apply. A class that extends
-	 * a Core class gets the fields of that class. A create accepts `variations`
-	 * on a variable type and `parent_id` on a variation. The owner of a type
-	 * changes the list with the `woocommerce_ability_product_type_fields` filter.
+	 * a Core class gets the fields of that class. A variable type accepts
+	 * `attributes` and `variations`. A variation accepts `parent_id` and
+	 * `attributes` on create only: on update its options change through the
+	 * `variations` input of its parent. The owner of a type changes the list
+	 * with the `woocommerce_ability_product_type_fields` filter.
 	 *
 	 * `WC_Product_Factory` returns `WC_Product_Simple` itself for a type that
 	 * has no class. Such a type is refused. A class that extends
@@ -410,6 +413,8 @@ trait ProductAbilityTrait {
 			$fields = self::get_variation_config()['fields'];
 			if ( $creating ) {
 				$fields[] = 'parent_id';
+			} else {
+				$fields = array_values( array_diff( $fields, array( 'attributes' ) ) );
 			}
 		} elseif ( is_a( $classname, \WC_Product_Variable::class, true ) ) {
 			$fields = array_merge( $fields, array( 'attributes', 'variations' ) );
@@ -652,18 +657,6 @@ trait ProductAbilityTrait {
 			}
 
 			$product->{$setter}( $prepared_value );
-		}
-
-		if ( $product instanceof \WC_Product_Variation && array_key_exists( 'attributes', $input ) && $product->get_parent_id() > 0 ) {
-			$parent = wc_get_product( $product->get_parent_id() );
-			if ( ! $parent instanceof \WC_Product_Variable ) {
-				return new \WP_Error(
-					'woocommerce_product_parent_invalid',
-					__( 'The parent must be a variable product.', 'woocommerce' ),
-					array( 'status' => 400 )
-				);
-			}
-			return self::check_variation_attributes( $product, $parent );
 		}
 
 		return null;

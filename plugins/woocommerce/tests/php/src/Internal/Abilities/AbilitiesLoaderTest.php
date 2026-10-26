@@ -1969,19 +1969,20 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		);
 		$this->assertSame( '8.00', wc_get_product( $parent_id )->get_price() );
 
-		$wrong_option = wp_get_ability( 'woocommerce/product-update' )->execute_change(
+		$direct_options = wp_get_ability( 'woocommerce/product-update' )->execute_change(
 			array(
 				'id'         => $small_id,
 				'attributes' => array(
 					array(
 						'name'   => 'Size',
-						'option' => 'XL',
+						'option' => 'M',
 					),
 				),
 			)
 		);
-		$this->assertWPError( $wrong_option );
-		$this->assertSame( 'woocommerce_product_variation_attributes_invalid', $wrong_option->get_error_code() );
+		$this->assertWPError( $direct_options );
+		$this->assertSame( 'woocommerce_product_field_unsupported', $direct_options->get_error_code() );
+		$this->assertStringContainsString( 'attributes', $direct_options->get_error_message() );
 
 		$resized = wp_get_ability( 'woocommerce/product-update' )->execute(
 			array(
@@ -2041,6 +2042,44 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertNotWPError( $deleted );
 		$this->assertNull( get_post( $large['product']['id'] ) );
 		$this->assertNotContains( $large['product']['id'], wc_get_product( $parent_id )->get_children() );
+
+		$taken = wp_get_ability( 'woocommerce/product-update' )->execute_change(
+			array(
+				'id'         => $parent_id,
+				'variations' => array(
+					array(
+						'id'         => $small_id,
+						'attributes' => array(
+							array(
+								'name'   => 'Size',
+								'option' => 'M',
+							),
+						),
+					),
+				),
+			)
+		);
+		$this->assertWPError( $taken );
+		$this->assertSame( 'woocommerce_product_variation_duplicate', $taken->get_error_code() );
+
+		$reslotted = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'         => $parent_id,
+				'variations' => array(
+					array(
+						'id'         => $small_id,
+						'attributes' => array(
+							array(
+								'name'   => 'Size',
+								'option' => 'L',
+							),
+						),
+					),
+				),
+			)
+		);
+		$this->assertNotWPError( $reslotted );
+		$this->assertSame( 'L', wc_get_product( $small_id )->get_attribute( 'size' ) );
 	}
 
 	/**
