@@ -2,7 +2,7 @@
  * @jest-environment jest-fixed-jsdom
  */
 
-describe( 'Order attribution input deduplication', () => {
+describe( 'Order attribution inputs', () => {
 	beforeAll( () => {
 		window.wc_order_attribution = {
 			fields: {
