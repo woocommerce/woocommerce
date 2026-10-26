@@ -55,6 +55,13 @@ class ExtensibleAbilities {
 	private static array $validators = array();
 
 	/**
+	 * Syncs keyed by resource.
+	 *
+	 * @var array<string, array<int, array<string, mixed>>>
+	 */
+	private static array $syncs = array();
+
+	/**
 	 * Fields already reported for a value that does not match the schema, keyed by resource, namespace and field.
 	 *
 	 * @var array<string, bool>
@@ -149,9 +156,9 @@ class ExtensibleAbilities {
 	 *                                     4. It writes one object: the one it receives. Data that a
 	 *                                        write must keep on another object, such as a price range
 	 *                                        that a variable parent derives from its variations, is
-	 *                                        written in the `woocommerce_ability_after_save` action,
-	 *                                        which fires once per call after every object is saved
-	 *                                        and inside the transaction of the ability.
+	 *                                        written by a sync that register_sync() adds. A sync runs
+	 *                                        once per call after every object is saved and inside the
+	 *                                        transaction of the ability.
 	 * }
 	 */
 	public static function register_field( array $args ): void {
@@ -547,6 +554,73 @@ class ExtensibleAbilities {
 	}
 
 	/**
+	 * Register a sync on a resource. A sync runs once per ability call, after
+	 * every object of the call is saved, and writes what the saved objects imply
+	 * elsewhere, such as the price range a variable parent derives from its
+	 * variations, or a row in a table of the extension.
+	 *
+	 * Call it inside the `woocommerce_extensible_abilities_init` action. Syncs
+	 * run only when the `extensible_abilities` feature is on, inside the
+	 * transaction of the ActionableAbility.
+	 *
+	 * A sync registered for a resource runs only when an object of that resource
+	 * was saved in the call. It runs once per call, not once per object.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param array $args {
+	 *     Sync arguments.
+	 *
+	 *     @type string   $resource  Resource that an ActionableAbility saves, such as `product`.
+	 *     @type string   $namespace Slug of the extension that owns the sync, such as `subscriptions`.
+	 *     @type callable $callback  Receives `\WC_Data[] $saved` and the ActionableAbility. `$saved` is every
+	 *                               saved object of the call, the primary object first. It returns a WP_Error
+	 *                               to refuse, and then every save of the call is undone. A thrown exception
+	 *                               refuses it too. The error gets the namespace in its data. A sync must not
+	 *                               send email or make HTTP requests, because an undo does not reach outside
+	 *                               the database.
+	 * }
+	 */
+	public static function register_sync( array $args ): void {
+		if ( did_action( 'woocommerce_extensible_abilities_init' ) && ! doing_action( 'woocommerce_extensible_abilities_init' ) ) {
+			wc_doing_it_wrong( __METHOD__, __( 'Register a sync inside the woocommerce_extensible_abilities_init action.', 'woocommerce' ), '11.4.0' );
+			return;
+		}
+		foreach ( array( 'resource', 'namespace' ) as $key ) {
+			if ( ! is_string( $args[ $key ] ?? null ) || '' === $args[ $key ] || sanitize_key( $args[ $key ] ) !== $args[ $key ] ) {
+				wc_doing_it_wrong(
+					__METHOD__,
+					sprintf(
+						/* translators: %s: argument name. */
+						__( 'The "%s" argument must be a slug of lowercase letters, numbers, dashes and underscores.', 'woocommerce' ),
+						$key
+					),
+					'11.4.0'
+				);
+				return;
+			}
+		}
+		if ( ! is_callable( $args['callback'] ?? null ) ) {
+			wc_doing_it_wrong( __METHOD__, __( 'The "callback" argument must be callable.', 'woocommerce' ), '11.4.0' );
+			return;
+		}
+		if ( ! isset( self::$resources[ $args['resource'] ] ) ) {
+			wc_doing_it_wrong(
+				__METHOD__,
+				sprintf(
+					/* translators: %s: resource name. */
+					__( 'The "%s" resource is not registered. Call ExtensibleAbilities::register_resource() first.', 'woocommerce' ),
+					$args['resource']
+				),
+				'11.4.0'
+			);
+			return;
+		}
+
+		self::$syncs[ $args['resource'] ][] = $args;
+	}
+
+	/**
 	 * Add the field values of an object to its formatted output, under
 	 * `extensions.<namespace>.<field>`. A value is cast to its schema type, so
 	 * `'12'` becomes `12` for an integer field. A field that throws or returns a
@@ -739,6 +813,18 @@ class ExtensibleAbilities {
 	 */
 	public static function get_validators( string $resource_name ): array {
 		return self::$validators[ $resource_name ] ?? array();
+	}
+
+	/**
+	 * Syncs of a resource.
+	 *
+	 * @internal
+	 *
+	 * @param string $resource_name Resource.
+	 * @return array<int, array<string, mixed>>
+	 */
+	public static function get_syncs( string $resource_name ): array {
+		return self::$syncs[ $resource_name ] ?? array();
 	}
 
 	/**

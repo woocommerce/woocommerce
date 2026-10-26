@@ -144,7 +144,7 @@ class ProductUpdate extends ActionableAbility {
 	 *
 	 * @param \WC_Product $subject Product.
 	 * @param array       $input   Ability input.
-	 * @return null|\WP_Error
+	 * @return null|\WP_Error|array<int, array{0: \WC_Product_Variation, 1: array}> The variations that the input names, each with the `extensions` input of its `variations` item.
 	 */
 	public function change( $subject, array $input ) {
 		$product_config = self::get_product_config_for_product( $subject );
@@ -169,24 +169,13 @@ class ProductUpdate extends ActionableAbility {
 					return $plan;
 				}
 				$this->variations = $plan;
+				return array_map( null, $plan['save'], $plan['extensions'] );
 			}
 
 			return null;
 		} catch ( \WC_Data_Exception $exception ) {
 			return self::get_product_data_exception_error( $exception );
 		}
-	}
-
-	/**
-	 * The variations that the input names, each with the `extensions` input of
-	 * its `variations` item.
-	 *
-	 * @param \WC_Product $subject Changed product.
-	 * @param array       $input   Ability input.
-	 * @return array<int, array{0: \WC_Product_Variation, 1: array}>
-	 */
-	public function pending_objects( $subject, array $input ): array {
-		return array_map( null, $this->variations['save'], $this->variations['extensions'] );
 	}
 
 	/**

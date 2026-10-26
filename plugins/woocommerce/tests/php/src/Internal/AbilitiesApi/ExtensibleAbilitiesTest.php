@@ -1410,13 +1410,14 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should fire woocommerce_ability_after_save once with every saved object, inside the transaction.
+	 * @testdox Should run a sync once with every saved object, the primary object first, inside the transaction.
 	 */
-	public function test_after_save_fires_once_with_every_saved_object(): void {
+	public function test_a_sync_runs_once_with_every_saved_object(): void {
 		$calls = array();
-		$this->add_test_action(
-			'woocommerce_ability_after_save',
-			static function ( array $saved, \WP_Ability $ability ) use ( &$calls ) {
+		$this->register_sync(
+			'product',
+			'test-ext',
+			static function ( array $saved, ActionableAbility $ability ) use ( &$calls ) {
 				$calls[] = array( $ability->get_name(), array_map( 'get_class', $saved ), array_map( static fn( \WC_Data $saved_object ) => $saved_object->get_id(), $saved ) );
 				$prices  = array();
 				foreach ( $saved as $object ) {
@@ -1428,9 +1429,8 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 					$saved[0]->update_meta_data( '_test_min_price', min( $prices ) );
 					$saved[0]->save();
 				}
-			},
-			10,
-			2
+				return null;
+			}
 		);
 
 		$created = $this->run_ability( 'woocommerce/product-create', $this->get_shirt_input() );
@@ -1443,15 +1443,16 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should roll back every save of the call when an after-save listener refuses.
+	 * @testdox Should undo every save of the call when a sync returns a WP_Error.
 	 */
-	public function test_a_refusal_in_after_save_rolls_back_the_call(): void {
-		$this->add_test_action(
-			'woocommerce_ability_after_save',
+	public function test_a_refusal_in_a_sync_rolls_back_the_call(): void {
+		$this->register_sync(
+			'product',
+			'test-ext',
 			static function ( array $saved ) {
-				if ( $saved[0] instanceof \WC_Product_Variable ) {
-					throw new \WC_Data_Exception( 'test_range_refused', 'The range is not allowed.', 409 );
-				}
+				return $saved[0] instanceof \WC_Product_Variable
+					? new \WP_Error( 'test_range_refused', 'The range is not allowed.', array( 'status' => 409 ) )
+					: null;
 			}
 		);
 
@@ -1459,7 +1460,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 		$this->assertSame( 409, $response->get_status() );
 		$this->assertSame( 'test_range_refused', $response->get_data()['code'] );
-		$this->assertSame( 'The range is not allowed.', $response->get_data()['message'] );
+		$this->assertSame( 'test-ext', $response->get_data()['data']['namespace'] );
 		$this->assertSame( 0, wc_get_product_id_by_sku( 'shirt-s' ) );
 		$this->assertSame(
 			array(),
@@ -1474,18 +1475,21 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should not fire woocommerce_ability_after_save with the feature off.
+	 * @testdox Should not run a sync with the feature off.
 	 */
-	public function test_after_save_does_not_fire_with_the_feature_off(): void {
-		$this->set_feature( false );
-		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
-		$fired   = 0;
-		$this->add_test_action(
-			'woocommerce_ability_after_save',
+	public function test_a_sync_does_not_run_with_the_feature_off(): void {
+		$fired = 0;
+		$this->register_sync(
+			'product',
+			'test-ext',
 			static function () use ( &$fired ) {
 				++$fired;
 			}
 		);
+		$this->reset_registries();
+		AbilitiesLoader::init_extensions();
+		$this->set_feature( false );
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
 
 		$output = $this->run_ability(
 			'woocommerce/product-update',
@@ -1495,8 +1499,96 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			)
 		);
 
+		$this->assertNotEmpty( ExtensibleAbilities::get_syncs( 'product' ) );
 		$this->assertSame( 'Pencil', $output['product']['name'] );
 		$this->assertSame( 0, $fired );
+	}
+
+	/**
+	 * @testdox Should not run a sync of a resource that the call did not save.
+	 */
+	public function test_a_sync_of_a_resource_that_was_not_saved_does_not_run(): void {
+		$fired = 0;
+		$this->register_sync(
+			'order_item',
+			'test-ext',
+			static function () use ( &$fired ) {
+				++$fired;
+			}
+		);
+
+		$this->run_ability( 'woocommerce/product-create', $this->get_shirt_input() );
+
+		$this->assertSame( 0, $fired );
+	}
+
+	/**
+	 * @testdox Should refuse a sync on a resource that is not registered.
+	 */
+	public function test_a_sync_on_an_unregistered_resource_is_refused(): void {
+		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_sync' );
+		$this->register_sync( 'refund', 'test-ext', '__return_null' );
+		$this->reset_registries();
+		AbilitiesLoader::init_extensions();
+
+		$this->assertEmpty( ExtensibleAbilities::get_syncs( 'refund' ) );
+	}
+
+	/**
+	 * @testdox Should run the validators of a secondary object's own resource, and not those of the primary object's resource.
+	 */
+	public function test_a_secondary_object_gets_the_validators_of_its_own_resource(): void {
+		$checked = array(
+			'product'    => array(),
+			'order_item' => array(),
+		);
+		foreach ( array_keys( $checked ) as $resource_name ) {
+			$this->register_validator(
+				$resource_name,
+				'test-ext',
+				static function ( \WC_Data $subject ) use ( &$checked, $resource_name ) {
+					$checked[ $resource_name ][] = get_class( $subject );
+					return null;
+				}
+			);
+		}
+		$this->add_test_action(
+			'wp_abilities_api_init',
+			static function () {
+				wp_register_ability(
+					'test-ext/product-with-item',
+					array(
+						'label'               => 'Rename product with an item',
+						'description'         => 'Renames a product and changes an order item.',
+						'category'            => 'woocommerce',
+						'input_schema'        => array(
+							'type'       => 'object',
+							'properties' => array(
+								'id'   => array( 'type' => 'integer' ),
+								'name' => array( 'type' => 'string' ),
+							),
+						),
+						'output_schema'       => array( 'type' => 'object' ),
+						'permission_callback' => '__return_true',
+						'ability_class'       => TestProductWithItemAbility::class,
+						'meta'                => array( 'show_in_rest' => true ),
+					)
+				);
+			},
+			20
+		);
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+
+		$this->run_ability(
+			'test-ext/product-with-item',
+			array(
+				'id'   => $product->get_id(),
+				'name' => 'Pencil',
+			)
+		);
+
+		$this->assertSame( array( 'WC_Product_Simple' ), $checked['product'] );
+		$this->assertSame( array( 'WC_Order_Item_Product' ), $checked['order_item'] );
 	}
 
 	/**
@@ -2255,6 +2347,28 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Register a sync inside woocommerce_extensible_abilities_init, the way an extension does.
+	 *
+	 * @param string   $resource_name       Resource.
+	 * @param string   $extension_namespace Extension namespace.
+	 * @param callable $callback            Sync.
+	 */
+	private function register_sync( string $resource_name, string $extension_namespace, callable $callback ): void {
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () use ( $resource_name, $extension_namespace, $callback ) {
+				ExtensibleAbilities::register_sync(
+					array(
+						'resource'  => $resource_name,
+						'namespace' => $extension_namespace,
+						'callback'  => $callback,
+					)
+				);
+			}
+		);
+	}
+
+	/**
 	 * Register test-ext/order-status, an ActionableAbility of an extension that changes orders.
 	 */
 	private function register_order_status_ability(): void {
@@ -2390,7 +2504,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	private function reset_registries(): void {
 		global $wp_actions;
 
-		foreach ( array( 'fields', 'reported', 'validators', 'filters' ) as $property ) {
+		foreach ( array( 'fields', 'reported', 'validators', 'syncs', 'filters' ) as $property ) {
 			$reflection = new \ReflectionProperty( ExtensibleAbilities::class, $property );
 			$reflection->setAccessible( true );
 			$reflection->setValue( null, array() );

@@ -10,12 +10,13 @@ namespace Automattic\WooCommerce\Abilities;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * An ability that changes one object and saves it one time. Register it with
- * a subclass as the `ability_class`. The execute callback loads the object,
- * checks the `extensions` input against the field schemas, changes the object
- * in memory, writes the fields with their `update_callback`, runs the validators
- * that ExtensibleAbilities::register_validator() adds, and then saves it. A
- * rejection from any step saves nothing.
+ * An ability that changes a primary object, and optionally secondary objects,
+ * and saves them in one call. Register it with a subclass as the
+ * `ability_class`. The execute callback loads the primary object, checks the
+ * `extensions` input against the field schemas, changes the objects in memory,
+ * writes the fields with their `update_callback`, runs the validators that
+ * ExtensibleAbilities::register_validator() adds, and then saves. A rejection
+ * from any step saves nothing.
  *
  * The input schema gets the `extensions` property of the resource, so the
  * ability accepts the fields with no extra code.
@@ -24,17 +25,22 @@ defined( 'ABSPATH' ) || exit;
  * input is ignored. An ability whose own input schema sets
  * `additionalProperties` to false rejects it instead.
  *
+ * The object that load() returns is the primary object. An ability that saves
+ * more objects returns them from change(). These are the secondary objects. Each
+ * object gets the field writes and the validators of its own resource before
+ * the first save.
+ *
  * Only save() saves, inside a database transaction. A WP_Error or an exception
- * from save() rolls back every row it wrote, so an ability that saves more than
- * one object, with pending_objects(), leaves nothing behind when a later save
- * fails. After the last save, still inside the transaction, the
- * `woocommerce_ability_after_save` action gives extensions one moment to write
- * what the saved objects imply elsewhere, such as the price range a variable
- * parent derives from its variations, or a row in a table of the extension. A
- * refusal there rolls the call back too. The rollback does not undo what a
- * listener did outside the database, such as an HTTP request, and it does
- * nothing on a table engine without transactions. The other steps must not
- * save, send email or make HTTP requests.
+ * from save() rolls back every row it wrote, so an ability that saves secondary
+ * objects leaves nothing behind when a later save fails. After the last save,
+ * still inside the transaction, the syncs that ExtensibleAbilities::register_sync()
+ * adds write what the saved objects imply elsewhere, such as the price range a
+ * variable parent derives from its variations, or a row in a table of the
+ * extension. A refusal there rolls the call back too. A rollback drops the
+ * object caches of the objects the call saved. It does not undo what a sync
+ * did outside the database, such as an HTTP request, and it does nothing on a
+ * table engine without transactions. The other steps must not save, send email
+ * or make HTTP requests.
  *
  * The API is experimental while the `extensible_abilities` feature exists.
  *
@@ -62,13 +68,18 @@ abstract class ActionableAbility extends \WP_Ability {
 	abstract public function load( array $input );
 
 	/**
-	 * Change the object in memory.
+	 * Change the primary object in memory, and build the secondary objects that
+	 * save() also writes. Return the secondary objects, each with its
+	 * `extensions` input and, when it differs from get_resource(), the name of
+	 * its resource. The field writes and the validators of that resource run on
+	 * each one after the primary object, before save(). An ability that saves
+	 * only the primary object returns null.
 	 *
 	 * @since 11.3.0
 	 *
-	 * @param \WC_Data $subject Object to change.
+	 * @param \WC_Data $subject Primary object to change.
 	 * @param array    $input   Ability input.
-	 * @return null|\WP_Error A WP_Error rejects the change, and nothing is saved.
+	 * @return null|\WP_Error|array<int, array{0: \WC_Data, 1: array, 2?: string}> A WP_Error rejects the change, and nothing is saved. An array lists the secondary objects.
 	 */
 	abstract public function change( $subject, array $input );
 
@@ -82,21 +93,6 @@ abstract class ActionableAbility extends \WP_Ability {
 	 * @return mixed
 	 */
 	abstract public function prepare_response( $subject );
-
-	/**
-	 * The other objects that save() writes, each paired with its `extensions`
-	 * input. The field writes and the validators of the resource run on each
-	 * one after the subject, before save(). The default saves the subject only.
-	 *
-	 * @since 11.4.0
-	 *
-	 * @param \WC_Data $subject Changed subject.
-	 * @param array    $input   Ability input.
-	 * @return array<int, array{0: \WC_Data, 1: array}> Pairs of object and `extensions` input.
-	 */
-	public function pending_objects( $subject, array $input ): array {
-		return array();
-	}
 
 	/**
 	 * Save the changed object. The default calls WC_Data::save(). When the save
@@ -140,7 +136,7 @@ abstract class ActionableAbility extends \WP_Ability {
 		}
 
 		$enabled = ExtensibleAbilities::is_enabled();
-		$updates = $enabled ? $this->prepare_fields( $input['extensions'] ?? null ) : array();
+		$updates = $enabled ? $this->prepare_fields( $input['extensions'] ?? null, $this->get_resource() ) : array();
 		if ( is_wp_error( $updates ) ) {
 			return $updates;
 		}
@@ -150,19 +146,20 @@ abstract class ActionableAbility extends \WP_Ability {
 			return $changed;
 		}
 
-		$objects = array( array( $subject, $updates ) );
-		foreach ( $this->pending_objects( $subject, $input ) as list( $object, $extensions ) ) {
-			$pending = $enabled ? $this->prepare_fields( $extensions ) : array();
-			if ( is_wp_error( $pending ) ) {
-				return $pending;
+		$objects = array( array( $subject, $updates, $this->get_resource() ) );
+		foreach ( is_array( $changed ) ? $changed : array() as $secondary ) {
+			$resource_name = $secondary[2] ?? $this->get_resource();
+			$fields        = $enabled ? $this->prepare_fields( $secondary[1], $resource_name ) : array();
+			if ( is_wp_error( $fields ) ) {
+				return $fields;
 			}
-			$objects[] = array( $object, $pending );
+			$objects[] = array( $secondary[0], $fields, $resource_name );
 		}
 
-		foreach ( $objects as list( $object, $fields ) ) {
+		foreach ( $objects as list( $object, $fields, $resource_name ) ) {
 			$rejected = $this->apply_fields( $object, $fields );
 			if ( null === $rejected && $enabled ) {
-				$rejected = $this->validate( $object );
+				$rejected = $this->validate( $object, $resource_name );
 			}
 			if ( null !== $rejected ) {
 				return $rejected;
@@ -173,7 +170,7 @@ abstract class ActionableAbility extends \WP_Ability {
 		try {
 			$saved = $this->save( $subject );
 			if ( ! is_wp_error( $saved ) && $enabled ) {
-				$saved = $this->after_save( array_column( $objects, 0 ) );
+				$saved = $this->sync( $objects );
 			}
 		} catch ( \Throwable $e ) {
 			wc_transaction_query( 'rollback' );
@@ -191,36 +188,23 @@ abstract class ActionableAbility extends \WP_Ability {
 	}
 
 	/**
-	 * Give extensions one moment, after the last save and before the commit,
-	 * to write what the saved objects imply elsewhere.
+	 * Run the syncs of each resource that the call saved, once, after the last
+	 * save and before the commit.
 	 *
-	 * @param \WC_Data[] $saved The saved objects, the subject first.
-	 * @return \WP_Error|null A WP_Error when a listener refused, and then the call rolls back.
+	 * @param array<int, array{0: \WC_Data, 1: array, 2: string}> $objects The primary object and the secondary objects, with their resources.
+	 * @return \WP_Error|null A WP_Error when a sync refused, and then the call rolls back.
 	 */
-	private function after_save( array $saved ): ?\WP_Error {
-		$ability = $this;
-		return self::run_callback(
-			static function () use ( $saved, $ability ): void {
-				/**
-				 * Fires once per ability call, after every object of the call is
-				 * saved and before the transaction commits. Listeners write what
-				 * the saved objects imply on other objects or tables, such as the
-				 * price range a variable parent derives from its variations, or a
-				 * row in a table of the extension. A WC_Data_Exception refuses the
-				 * call with its code and message, any other exception refuses it
-				 * with a fixed message, and either way every save of the call is
-				 * rolled back. Listeners must not send email or make HTTP requests.
-				 *
-				 * @since 11.4.0
-				 *
-				 * @param \WC_Data[]  $saved   The saved objects, the subject of the ability first.
-				 * @param \WP_Ability $ability The ability that saved them.
-				 */
-				do_action( 'woocommerce_ability_after_save', $saved, $ability );
-			},
-			array(),
-			array( 'hook' => 'woocommerce_ability_after_save' )
-		);
+	private function sync( array $objects ): ?\WP_Error {
+		$saved = array_column( $objects, 0 );
+		foreach ( array_unique( array_column( $objects, 2 ) ) as $resource_name ) {
+			foreach ( ExtensibleAbilities::get_syncs( $resource_name ) as $args ) {
+				$rejected = self::run_callback( $args['callback'], array( $saved, $this ), array( 'namespace' => $args['namespace'] ) );
+				if ( null !== $rejected ) {
+					return $rejected;
+				}
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -228,7 +212,7 @@ abstract class ActionableAbility extends \WP_Ability {
 	 * saves filled the caches with rows the rollback removed, so a read in the
 	 * same request would still see them.
 	 *
-	 * @param array<int, array{0: \WC_Data, 1: array}> $objects The subject and the pending objects.
+	 * @param array<int, array{0: \WC_Data, 1: array, 2: string}> $objects The primary object and the secondary objects.
 	 */
 	private static function forget_rolled_back_objects( array $objects ): void {
 		foreach ( $objects as list( $object ) ) {
@@ -270,11 +254,12 @@ abstract class ActionableAbility extends \WP_Ability {
 	 * each field, and cast them. No callback runs here. A null value is kept as
 	 * is, to delete the value.
 	 *
-	 * @param mixed $values Values keyed by namespace, then field. Anything but an array is ignored.
+	 * @param mixed  $values        Values keyed by namespace, then field. Anything but an array is ignored.
+	 * @param string $resource_name Resource of the object that gets the values.
 	 * @return array|\WP_Error A list of field arguments and value pairs, or a WP_Error when a value is rejected.
 	 */
-	private function prepare_fields( $values ) {
-		$registered = ExtensibleAbilities::get_fields( $this->get_resource() );
+	private function prepare_fields( $values, string $resource_name ) {
+		$registered = ExtensibleAbilities::get_fields( $resource_name );
 		$updates    = array();
 		foreach ( is_array( $values ) ? $values : array() as $namespace => $fields ) {
 			foreach ( (array) $fields as $field => $value ) {
@@ -336,13 +321,14 @@ abstract class ActionableAbility extends \WP_Ability {
 	}
 
 	/**
-	 * Run the validators of the resource on the changed object.
+	 * Run the validators of a resource on the changed object.
 	 *
-	 * @param \WC_Data $subject Changed object.
+	 * @param \WC_Data $subject       Changed object.
+	 * @param string   $resource_name Resource of the object.
 	 * @return \WP_Error|null A WP_Error when a validator refuses the change.
 	 */
-	private function validate( $subject ): ?\WP_Error {
-		foreach ( ExtensibleAbilities::get_validators( $this->get_resource() ) as $args ) {
+	private function validate( $subject, string $resource_name ): ?\WP_Error {
+		foreach ( ExtensibleAbilities::get_validators( $resource_name ) as $args ) {
 			$rejected = self::run_callback( $args['callback'], array( $subject, $this ), array( 'namespace' => $args['namespace'] ) );
 			if ( null !== $rejected ) {
 				return $rejected;
@@ -357,7 +343,7 @@ abstract class ActionableAbility extends \WP_Ability {
 	 * logged and becomes a 500 with a fixed message, so its text never reaches
 	 * the client.
 	 *
-	 * @param callable             $callback Field update_callback or validator.
+	 * @param callable             $callback Field update_callback, validator or sync.
 	 * @param array                $args     Callback arguments.
 	 * @param array<string, mixed> $data     Data that names the field or the namespace.
 	 * @return \WP_Error|null
