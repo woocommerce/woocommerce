@@ -33,8 +33,8 @@
           "sha256": "9aa17d624c6b2f4e5666763e9354b424c5c988f1b6e506d26ca8df40ad9c0fa0"
         }
       },
-      "$comment": "Every test:js is jest, which defaults to cores-1 workers per invocation. The pool runs up to 4 jobs, so 4 workers each fills 16 cores without oversubscribing; measured on admin-library (1648 tests): 2 workers 62 s, 4 workers 38 s, 8 workers 32 s.",
-      "run": [ "pnpm", "--filter={project}", "{command}", "--maxWorkers=4" ]
+      "$comment": "Every test:js is jest, which defaults to cores-1 workers per invocation. gh local-ci sizes {workers} for the machine it runs on, from a budget the jobs share; on a Mac with more than one core tier, from the fastest tier only. A fixed 4 per job oversubscribed an M5 Max's 6 fast cores: the seven jest jobs of one diff took 83 s, against 65 to 73 s sized by the tool.",
+      "run": [ "pnpm", "--filter={project}", "{command}", "--maxWorkers={workers}" ]
     }
   ],
 
