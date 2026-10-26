@@ -638,6 +638,12 @@ function wc_create_refund( $args = array() ) {
 				$class         = get_class( $item );
 				$refunded_item = new $class( $item );
 				$refunded_item->set_id( 0 );
+
+				// Copied metadata needs new IDs so refund changes cannot update or delete the original item's metadata.
+				foreach ( $refunded_item->get_meta_data() as $meta ) {
+					$meta->id = 0;
+				}
+
 				$refunded_item->add_meta_data( '_refunded_item_id', $item_id, true );
 				$refunded_item->set_total( wc_format_refund_total( $refund_total ) );
 				$refunded_item->set_taxes(
