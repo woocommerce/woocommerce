@@ -29,15 +29,16 @@ fi
 directories=()
 fileDirectories=()
 for file in "${changedFiles[@]}"; do
-    directory=$(dirname "$file")
+    directory="./$file"
     while [[ "$directory" != "." ]]; do
+        directory=${directory%/*}
         for config in "$directory"/eslint.config.{js,mjs,cjs,ts,mts,cts}; do
             if [[ -f "$config" ]]; then
                 break 2
             fi
         done
-        directory=$(dirname "$directory")
     done
+    directory=${directory#./}
     fileDirectories+=("$directory")
 
     found=false
@@ -63,7 +64,7 @@ for directory in "${directories[@]}"; do
 
     # The blocks webpack resolver needs this, matching that package's lint:js.
     (
-        cd "$directory" || exit 1
+        cd -- "$directory" || exit 1
         WP_EXPERIMENTAL_MODULES=true pnpm eslint "${files[@]}" "$@"
     ) || exitCode=$?
 done
