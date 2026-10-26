@@ -178,11 +178,13 @@ class ProductQuery implements QueryClausesGenerator {
 		if ( ! empty( $tax_query ) && 'product_variation' !== $args['post_type'] ) {
 			$args['tax_query'] = $tax_query; // phpcs:ignore
 		} else {
-			// Taxonomies registered for variations are queried directly. The rest are stored on variations as attribute meta.
+			// Taxonomies registered for variations are queried directly. Attributes are always stored on variations as meta, even when registered for them.
 			$variation_tax_query = array_filter(
 				$tax_query,
 				function ( $tax_query_item ) {
-					return isset( $tax_query_item['taxonomy'] ) && is_object_in_taxonomy( 'product_variation', $tax_query_item['taxonomy'] );
+					return isset( $tax_query_item['taxonomy'] )
+						&& ! taxonomy_is_product_attribute( $tax_query_item['taxonomy'] )
+						&& is_object_in_taxonomy( 'product_variation', $tax_query_item['taxonomy'] );
 				}
 			);
 

@@ -433,6 +433,37 @@ class ProductQueryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Attribute filters on variations use attribute meta even when the attribute taxonomy is registered for variations.
+	 */
+	public function test_variation_attribute_filter_uses_meta_when_attribute_is_registered_for_variations(): void {
+		$fixtures  = new FixtureData();
+		$attribute = $fixtures->get_product_attribute( 'variation-registered', array( 'red', 'blue' ) );
+		$taxonomy  = $attribute['attribute_taxonomy'];
+		register_taxonomy_for_object_type( $taxonomy, 'product_variation' );
+
+		$parent_product = $fixtures->get_variable_product( array(), array( $attribute ) );
+		$red_variation  = $fixtures->get_variation_product( $parent_product->get_id(), array( $taxonomy => 'red' ) );
+		$blue_variation = $fixtures->get_variation_product( $parent_product->get_id(), array( $taxonomy => 'blue' ) );
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$request->set_param( 'type', 'variation' );
+		$request->set_param( 'include', array( $red_variation->get_id(), $blue_variation->get_id() ) );
+		$request->set_param(
+			'attributes',
+			array(
+				array(
+					'attribute' => $taxonomy,
+					'slug'      => array( 'red' ),
+				),
+			)
+		);
+
+		$results = $this->product_query->get_results( $request );
+
+		$this->assertSame( array( $red_variation->get_id() ), $results['results'], 'Only the variation with the requested attribute value should be returned.' );
+	}
+
+	/**
 	 * Get product IDs matched by a Store API slug filter.
 	 *
 	 * @param string $slug_filter Slug filter value.
