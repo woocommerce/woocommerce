@@ -2,7 +2,9 @@
  * External dependencies
  */
 import clsx from 'clsx';
+import type { JSX } from 'react';
 import { SelectControl } from '@wordpress/components';
+import { decodeEntities } from '@wordpress/html-entities';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import ErrorMessage from '@woocommerce/editor-components/error-placeholder/error-message';
 import {
@@ -80,9 +82,11 @@ const getAriaLabel = (
 	count: number,
 	countType: 'product' | 'review'
 ) => {
-	const name = item.breadcrumbs.length
-		? `${ item.breadcrumbs.join( ', ' ) }, ${ item.name }`
-		: item.name;
+	const name = decodeEntities(
+		item.breadcrumbs.length
+			? `${ item.breadcrumbs.join( ', ' ) }, ${ item.name }`
+			: item.name
+	);
 
 	return countType === 'review'
 		? sprintf(

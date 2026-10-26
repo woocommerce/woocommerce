@@ -69,6 +69,25 @@ describe( 'ProductTaxonomyControl', () => {
 		).toBeInTheDocument();
 	} );
 
+	test( 'decodes HTML entities in accessible labels', () => {
+		renderControl( {
+			list: [
+				{
+					...list[ 0 ],
+					count: 3,
+					name: 'Rock &amp; Roll',
+				},
+			],
+		} );
+
+		expect( screen.getByText( 'Rock & Roll' ) ).toBeInTheDocument();
+		expect(
+			screen.getByRole( 'checkbox', {
+				name: 'Rock & Roll, has 3 products',
+			} )
+		).toBeInTheDocument();
+	} );
+
 	test( 'renders review counts from item details', () => {
 		renderControl( {
 			countType: 'review',
