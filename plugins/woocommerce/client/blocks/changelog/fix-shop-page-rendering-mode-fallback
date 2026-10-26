@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Prevent a block editor error when the current theme has no saved template preview preference.
