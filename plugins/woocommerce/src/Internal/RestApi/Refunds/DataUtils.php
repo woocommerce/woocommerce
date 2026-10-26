@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Internal\RestApi\Refunds;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\Utilities\CurrencyUtil;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use WC_Order;
@@ -518,7 +519,8 @@ class DataUtils {
 	 * @return true|WP_Error Validation result.
 	 */
 	public function validate_refund_line_total( $item, float $refund_total, float $already_refunded_total ) {
-		$price_decimals      = wc_get_price_decimals();
+		$order               = $item->get_order();
+		$price_decimals      = CurrencyUtil::get_price_decimals( $order ? $order->get_currency() : null );
 		$signed_line_total   = (float) $item->get_total() + (float) $item->get_total_tax();
 		$item_total_with_tax = abs( $signed_line_total );
 		$abs_refund_total    = NumberUtil::round( abs( $refund_total ), $price_decimals );

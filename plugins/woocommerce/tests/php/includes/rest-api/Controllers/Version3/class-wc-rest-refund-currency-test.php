@@ -151,4 +151,67 @@ class WC_REST_Refund_Currency_Test extends WC_REST_Unit_Test_Case {
 			$this->amounts( $order, $refund )
 		);
 	}
+
+	/**
+	 * @testdox Explicit line totals cannot exceed the gateway refund amount.
+	 * @param string $store Store currency.
+	 * @param int    $dp Store decimals.
+	 * @param string $currency Order currency.
+	 * @dataProvider currencies
+	 */
+	public function test_explicit_mismatches( string $store, int $dp, string $currency ): void {
+		foreach ( array( array( 5.25, 5 ), array( 0.25, 0 ) ) as $values ) {
+			list( $order, $item_id ) = $this->order_fixture( $store, $dp, $currency );
+			$response                = $this->request(
+				$order,
+				array(
+					'amount'     => $values[1],
+					'line_items' => array(
+						array(
+							'id'           => $item_id,
+							'refund_total' => $values[0],
+						),
+					),
+				)
+			);
+			$this->assertSame( 'JPY' === $currency ? 201 : 400, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		}
+	}
+
+	/**
+	 * @testdox Explicit v3 can refund the last fractional amount.
+	 * @param string $store Store currency.
+	 * @param int    $dp Store decimals.
+	 * @param string $currency Order currency.
+	 * @dataProvider currencies
+	 */
+	public function test_explicit_last_fraction( string $store, int $dp, string $currency ): void {
+		list( $order, $item_id ) = $this->order_fixture( $store, $dp, $currency );
+		$first                   = $this->request(
+			$order,
+			array(
+				'amount'     => 17.75,
+				'line_items' => array(
+					array(
+						'id'           => $item_id,
+						'refund_total' => 17.75,
+					),
+				),
+			)
+		);
+		$this->assertSame( 201, $first->get_status(), wp_json_encode( $first->get_data() ) );
+		$last = $this->request(
+			$order,
+			array(
+				'amount'     => 0.25,
+				'line_items' => array(
+					array(
+						'id'           => $item_id,
+						'refund_total' => 0.25,
+					),
+				),
+			)
+		);
+		$this->assertSame( 'JPY' === $currency ? 422 : 201, $last->get_status(), wp_json_encode( $last->get_data() ) );
+	}
 }

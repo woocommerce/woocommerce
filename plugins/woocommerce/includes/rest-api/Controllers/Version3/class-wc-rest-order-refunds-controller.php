@@ -10,6 +10,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\Utilities\CurrencyUtil;
 use Automattic\WooCommerce\Internal\RestApiParameterUtil;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 use Automattic\WooCommerce\Internal\RestApi\Refunds\DataUtils;
@@ -484,7 +485,7 @@ class WC_REST_Order_Refunds_Controller extends WC_REST_Order_Refunds_V2_Controll
 		}
 
 		$line_total     = 0.0;
-		$price_decimals = wc_get_price_decimals();
+		$price_decimals = CurrencyUtil::get_price_decimals( $order->get_currency() );
 		$refund_data    = null;
 		foreach ( $line_items as $item_id => $line ) {
 			if ( ! is_array( $line ) || ( ! isset( $line['refund_total'] ) && empty( $line['refund_tax'] ) ) ) {
