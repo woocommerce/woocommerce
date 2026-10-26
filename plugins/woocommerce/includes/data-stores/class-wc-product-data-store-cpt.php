@@ -208,30 +208,35 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$product->set_date_created( time() );
 		}
 
-		$id = wp_insert_post(
-			wp_slash( // @phpstan-ignore argument.type (The filtered data is passed on unchecked, as before. wp_slash() keeps its type.)
-				apply_filters(
-					'woocommerce_new_product_data',
-					array(
-						'post_type'      => 'product',
-						'post_status'    => $product->get_status() ? $product->get_status() : ProductStatus::PUBLISH,
-						'post_author'    => get_current_user_id(),
-						'post_title'     => $product->get_name() ? $product->get_name() : __( 'Product', 'woocommerce' ),
-						'post_content'   => $product->get_description(),
-						'post_excerpt'   => $product->get_short_description(),
-						'post_parent'    => $product->get_parent_id(),
-						'comment_status' => $product->get_reviews_allowed() ? 'open' : 'closed',
-						'ping_status'    => 'closed',
-						'menu_order'     => $product->get_menu_order(),
-						'post_password'  => $product->get_post_password( 'edit' ),
-						'post_date'      => gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getOffsetTimestamp() ),
-						'post_date_gmt'  => gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getTimestamp() ),
-						'post_name'      => $product->get_slug( 'edit' ),
-					)
-				)
-			),
-			true
+		/**
+		 * Filters the post data used to create a product.
+		 *
+		 * Values are unslashed. They are slashed before being passed to wp_insert_post().
+		 *
+		 * @since 3.0.0
+		 * @param array $data Post data for wp_insert_post().
+		 */
+		$post_data = apply_filters(
+			'woocommerce_new_product_data',
+			array(
+				'post_type'      => 'product',
+				'post_status'    => $product->get_status() ? $product->get_status() : ProductStatus::PUBLISH,
+				'post_author'    => get_current_user_id(),
+				'post_title'     => $product->get_name() ? $product->get_name() : __( 'Product', 'woocommerce' ),
+				'post_content'   => $product->get_description(),
+				'post_excerpt'   => $product->get_short_description(),
+				'post_parent'    => $product->get_parent_id(),
+				'comment_status' => $product->get_reviews_allowed() ? 'open' : 'closed',
+				'ping_status'    => 'closed',
+				'menu_order'     => $product->get_menu_order(),
+				'post_password'  => $product->get_post_password( 'edit' ),
+				'post_date'      => gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getOffsetTimestamp() ),
+				'post_date_gmt'  => gmdate( 'Y-m-d H:i:s', $product->get_date_created( 'edit' )->getTimestamp() ),
+				'post_name'      => $product->get_slug( 'edit' ),
+			)
 		);
+
+		$id = wp_insert_post( wp_slash( $post_data ), true );
 
 		if ( $id && ! is_wp_error( $id ) ) {
 			$product->set_id( $id );
