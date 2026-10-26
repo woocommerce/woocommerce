@@ -1309,8 +1309,7 @@ class WC_Helper_Updater {
 
 		$count = self::get_updates_count() ?? 0;
 		if ( ! WC_Woo_Update_Manager_Plugin::is_plugin_installed() ) {
-			// WooCommerce.com can't push the install to a local store, so it isn't offered as an update there.
-			if ( ! WC_Woo_Update_Manager_Plugin::is_local_url( home_url() ) ) {
+			if ( ! WC_Woo_Update_Manager_Plugin::needs_manual_install() ) {
 				++$count;
 			}
 		} elseif ( ! WC_Woo_Update_Manager_Plugin::is_plugin_active() ) {

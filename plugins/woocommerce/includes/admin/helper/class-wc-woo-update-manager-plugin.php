@@ -97,6 +97,22 @@ class WC_Woo_Update_Manager_Plugin {
 	}
 
 	/**
+	 * Whether the Update Manager has to be installed by hand: the home URL is local and the helper talks to production
+	 * WooCommerce.com. Pointing `woocommerce_helper_api_base` or `woo_com_base_url` at another host keeps the one-click install.
+	 *
+	 * @return bool
+	 */
+	public static function needs_manual_install(): bool {
+		foreach ( array( WC_Helper_API::$api_base, WC_Helper::get_woocommerce_com_base_url() ) as $url ) {
+			if ( 'woocommerce.com' !== wp_parse_url( (string) $url, PHP_URL_HOST ) ) {
+				return false;
+			}
+		}
+
+		return self::is_local_url( home_url() );
+	}
+
+	/**
 	 * Get the id of the Woo Update Manager plugin.
 	 *
 	 * @return int

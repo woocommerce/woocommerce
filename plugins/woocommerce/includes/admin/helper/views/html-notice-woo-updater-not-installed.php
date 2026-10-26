@@ -11,7 +11,7 @@ defined( 'ABSPATH' ) || exit;
 	<a class="woocommerce-message-close notice-dismiss" href="<?php echo esc_url( wp_nonce_url( add_query_arg( 'wc-hide-notice', 'woo_updater_not_installed' ), 'woocommerce_hide_notices_nonce', '_wc_notice_nonce' ) ); ?>"><?php esc_html_e( 'Dismiss', 'woocommerce' ); ?></a>
 	<p>
 	<?php
-	if ( WC_Woo_Update_Manager_Plugin::is_local_url( home_url() ) ) {
+	if ( WC_Woo_Update_Manager_Plugin::needs_manual_install() ) {
 		echo wp_kses_post(
 			sprintf(
 				/* translators: 1: Woo Update Manager plugin download URL 2: Upload plugin screen URL */

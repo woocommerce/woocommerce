@@ -2515,15 +2515,17 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A missing Update Manager adds one to the updates count, except on a local store WooCommerce.com can't reach.
+	 * @testdox A missing Update Manager adds one to the updates count, except on a local store connected to production WooCommerce.com.
 	 *
-	 * @testWith ["https://store.example.com", 1]
-	 *           ["http://localhost:8888", 0]
+	 * @testWith ["https://store.example.com", "https://woocommerce.com/wp-json/helper/1.0", 1]
+	 *           ["http://localhost:8888", "https://woocommerce.com/wp-json/helper/1.0", 0]
+	 *           ["http://localhost:8888", "https://woocommerce.test/wp-json/helper/1.0", 1]
 	 *
 	 * @param string $home     Store home URL.
+	 * @param string $api_base Helper API base URL.
 	 * @param int    $expected Expected updates count.
 	 */
-	public function test_updates_count_includes_missing_update_manager_unless_local( string $home, int $expected ): void {
+	public function test_updates_count_includes_missing_update_manager_unless_manual_install( string $home, string $api_base, int $expected ): void {
 		$this->assertFalse( WC_Woo_Update_Manager_Plugin::is_plugin_installed(), 'The test site should not have the Update Manager' );
 		WC_Helper_Options::update( 'auth', array( 'access_token' => 'token' ) );
 		set_transient( '_woocommerce_helper_updates_count', 0, HOUR_IN_SECONDS );
@@ -2534,7 +2536,19 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 				return $home;
 			}
 		);
+		add_filter(
+			'woocommerce_helper_api_base',
+			static function () use ( $api_base ) {
+				return $api_base;
+			}
+		);
+		WC_Helper_API::load();
 
-		$this->assertSame( $expected, WC_Helper_Updater::get_updates_count_based_on_site_status() );
+		try {
+			$this->assertSame( $expected, WC_Helper_Updater::get_updates_count_based_on_site_status() );
+		} finally {
+			remove_all_filters( 'woocommerce_helper_api_base' );
+			WC_Helper_API::load();
+		}
 	}
 }
