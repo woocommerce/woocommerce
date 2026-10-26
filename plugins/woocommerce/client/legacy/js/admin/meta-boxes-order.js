@@ -1301,6 +1301,9 @@ jQuery( function ( $ ) {
 					}
 				});
 
+				// Round away floating point noise when stores allow decimal quantities.
+				restock_qty = parseFloat( accounting.formatNumber( restock_qty, woocommerce_admin_meta_boxes.rounding_precision, '' ) );
+
 				if ( restock_qty > 0 ) {
 					// Apply the default from the woocommerce_restock_refunded_items filter each time it becomes available.
 					if ( $checkbox.prop( 'disabled' ) ) {

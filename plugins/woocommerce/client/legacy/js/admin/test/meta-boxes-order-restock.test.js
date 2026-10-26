@@ -132,6 +132,16 @@ describe( 'Order refund restock checkbox', () => {
 		expect( description() ).toBe( '3 items will be restocked.' );
 	} );
 
+	test( 'counts decimal quantities without floating point noise', () => {
+		renderOrderItems( { lines: [ 'yes', 'yes' ] } );
+		openRefundPanel();
+
+		setRefundQty( 1, 0.1 );
+		setRefundQty( 2, 0.2 );
+		expect( checkbox().disabled ).toBe( false );
+		expect( description() ).toBe( '0.3 items will be restocked.' );
+	} );
+
 	test( 'keeps the merchant choice when unticked and quantities change', () => {
 		renderOrderItems( { lines: [ 'yes' ] } );
 		openRefundPanel();
