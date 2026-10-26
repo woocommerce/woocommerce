@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add Site Health checks for database updates, store pages, payments, order storage, webhooks, Action Scheduler, and more.
