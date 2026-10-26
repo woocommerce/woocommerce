@@ -8,6 +8,78 @@
 class WC_Coupon_Tests extends WC_Unit_Test_Case {
 
 	/**
+	 * @testdox Spend limit setters compare stored amounts when getters are filtered.
+	 * @testWith [2, false, "60"]
+	 *           [0.5, true, "60"]
+	 *           [2, false, "50"]
+	 *           [2, false, "0.00"]
+	 *           [0.5, true, "0.00"]
+	 * @param float  $rate Conversion rate.
+	 * @param bool   $maximum_first Whether to set the maximum first.
+	 * @param string $maximum Maximum spend, with zero meaning unlimited.
+	 */
+	public function test_spend_limit_setters_with_filtered_amounts( float $rate, bool $maximum_first, string $maximum ): void {
+		$sut     = new WC_Coupon();
+		$convert = static function ( $amount ) use ( $rate ) {
+			return (float) $amount * $rate;
+		};
+		add_filter( 'woocommerce_coupon_get_minimum_amount', $convert );
+		add_filter( 'woocommerce_coupon_get_maximum_amount', $convert );
+
+		$limits = array(
+			'minimum_amount' => '50',
+			'maximum_amount' => $maximum,
+		);
+		if ( $maximum_first ) {
+			$limits = array_reverse( $limits, true );
+		}
+		foreach ( $limits as $property => $amount ) {
+			$sut->set_props( array( $property => $amount ) );
+		}
+
+		$this->assertSame( array( '50', $maximum ), array( $sut->get_minimum_amount( 'edit' ), $sut->get_maximum_amount( 'edit' ) ) );
+		$this->assertSame( (string) ( 50 * $rate ), $sut->get_minimum_amount() );
+		$this->assertSame( (string) ( (float) $maximum * $rate ), $sut->get_maximum_amount() );
+	}
+
+	/**
+	 * @testdox Loading coupons preserves stored spend limits when getters are filtered.
+	 * @testWith [false]
+	 *           [true]
+	 * @param bool $manual Whether to load a manual coupon.
+	 */
+	public function test_load_spend_limits_with_filtered_amounts( bool $manual ): void {
+		$sut = new WC_Coupon();
+		$sut->set_code( 'filtered-spend-limits' );
+		$sut->set_minimum_amount( '50' );
+		$sut->set_maximum_amount( '60' );
+		$id = $sut->save();
+
+		if ( $manual ) {
+			add_filter(
+				'woocommerce_get_shop_coupon_data',
+				static function () {
+					return array(
+						'minimum_amount' => '50',
+						'maximum_amount' => '60',
+					);
+				}
+			);
+		}
+		$convert = static function ( $amount ) {
+			return (float) $amount * 2;
+		};
+		add_filter( 'woocommerce_coupon_get_minimum_amount', $convert );
+		add_filter( 'woocommerce_coupon_get_maximum_amount', $convert );
+
+		$sut = new WC_Coupon( $id );
+
+		$this->assertSame( array( '50', '60' ), array( $sut->get_minimum_amount( 'edit' ), $sut->get_maximum_amount( 'edit' ) ) );
+		$this->assertSame( '100', $sut->get_minimum_amount() );
+		$this->assertSame( '120', $sut->get_maximum_amount() );
+	}
+
+	/**
 	 * @testdox set_short_info validates amount and throws exception for invalid values.
 	 */
 	public function test_set_short_info_validates_amount(): void {
