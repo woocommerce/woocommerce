@@ -150,7 +150,7 @@ function SettingsForm( { config }: { config: SettingsEntityConfig } ) {
 			<Stack
 				direction="column"
 				gap="lg"
-				className="woocommerce-payment-settings__content"
+				className="woocommerce-settings__content"
 			>
 				{ hasLoadError && (
 					<Notice.Root intent="error">
