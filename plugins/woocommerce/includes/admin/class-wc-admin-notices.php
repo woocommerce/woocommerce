@@ -465,10 +465,8 @@ class WC_Admin_Notices {
 		}
 
 		if ( WC_Install::needs_db_update() ) {
-			$next_scheduled_date = WC()->queue()->get_next( 'woocommerce_run_update_callback', null, 'woocommerce-db-updates' );
-
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			if ( $next_scheduled_date || ! empty( $_GET['do_update_woocommerce'] ) ) {
+			if ( WC_Install::is_db_update_queued() || ! empty( $_GET['do_update_woocommerce'] ) ) {
 				include __DIR__ . '/views/html-notice-updating.php';
 			} else {
 				include __DIR__ . '/views/html-notice-update.php';

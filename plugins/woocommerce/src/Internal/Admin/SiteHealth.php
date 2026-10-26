@@ -1154,16 +1154,7 @@ class SiteHealth {
 			return array();
 		}
 
-		$queued_actions = WC()->queue()->search(
-			array(
-				'group'    => 'woocommerce-db-updates',
-				'status'   => array( ActionScheduler_Store::STATUS_PENDING, ActionScheduler_Store::STATUS_RUNNING ),
-				'per_page' => 1,
-			),
-			'ids'
-		);
-
-		return array( 'running' => ! empty( $queued_actions ) );
+		return array( 'running' => WC_Install::is_db_update_queued() );
 	}
 
 	/**

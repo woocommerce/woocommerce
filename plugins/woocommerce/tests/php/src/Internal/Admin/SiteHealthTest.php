@@ -391,15 +391,11 @@ class SiteHealthTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Database update check reports progress without an update link while any update step is queued.
-	 * @testWith ["woocommerce_run_update_callback"]
-	 *           ["woocommerce_update_db_to_current_version"]
-	 *
-	 * @param string $hook Queued update action hook.
+	 * @testdox Database update check reports progress without an update link while the update is queued.
 	 */
-	public function test_database_update_reports_progress_when_update_is_queued( string $hook ): void {
+	public function test_database_update_reports_progress_when_update_is_queued(): void {
 		update_option( 'woocommerce_db_version', '1.0.0' );
-		WC()->queue()->schedule_single( time() + HOUR_IN_SECONDS, $hook, array(), 'woocommerce-db-updates' );
+		WC()->queue()->schedule_single( time() + HOUR_IN_SECONDS, 'woocommerce_run_update_callback', array(), 'woocommerce-db-updates' );
 
 		$result = $this->sut->run_test( 'woocommerce_database_update' );
 

@@ -31,6 +31,22 @@ class WC_Admin_Notices_Test extends WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Should show update progress instead of the update button while the final database update step is queued.
+	 */
+	public function test_update_notice_shows_progress_while_final_update_step_is_queued(): void {
+		set_current_screen( 'dashboard' );
+		update_option( 'woocommerce_db_version', '1.0.0' );
+		WC()->queue()->schedule_single( time() + HOUR_IN_SECONDS, 'woocommerce_update_db_to_current_version', array( 'version' => WC()->version ), 'woocommerce-db-updates' );
+
+		ob_start();
+		WC_Admin_Notices::update_notice();
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString( 'WooCommerce is updating the database in the background', $output, 'The notice should report the update in progress.' );
+		$this->assertStringNotContainsString( 'wc-update-now', $output, 'The notice should not offer to start the update again.' );
+	}
+
+	/**
 	 * @testdox Should hide the notice and persist the dismissal when dismissed over AJAX.
 	 */
 	public function test_ajax_hide_notice_dismisses_notice(): void {
