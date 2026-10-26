@@ -21,6 +21,7 @@ import {
 import { Subscription } from '../../types';
 import { installingStore } from '../../../../contexts/install-store';
 import { NoticeStatus } from '../../../../contexts/types';
+import { MARKETPLACE_RENEW_SUBSCRIPTION_PATH } from '../../../constants';
 
 type ButtonProps = ComponentProps< typeof Button >;
 
@@ -76,7 +77,7 @@ export default function Install( props: InstallProps ) {
 								'Download and install manually',
 								'woocommerce'
 							),
-							url: 'https://woocommerce.com/my-account/my-subscriptions/',
+							url: MARKETPLACE_RENEW_SUBSCRIPTION_PATH,
 							onClick: () => {},
 						},
 					],

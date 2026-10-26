@@ -85,7 +85,7 @@ class WC_Woo_Update_Manager_Plugin {
 			return false === filter_var( $host, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE );
 		}
 
-		if ( false === strpos( $host, '.' ) ) {
+		if ( ! str_contains( $host, '.' ) ) {
 			return true;
 		}
 
@@ -106,13 +106,17 @@ class WC_Woo_Update_Manager_Plugin {
 	 * @return bool
 	 */
 	public static function needs_manual_install(): bool {
+		if ( ! self::is_local_url( home_url() ) ) {
+			return false;
+		}
+
 		foreach ( array( WC_Helper_API::$api_base, WC_Helper::get_woocommerce_com_base_url() ) as $url ) {
 			if ( 'woocommerce.com' !== strtolower( (string) wp_parse_url( (string) $url, PHP_URL_HOST ) ) ) {
 				return false;
 			}
 		}
 
-		return self::is_local_url( home_url() );
+		return true;
 	}
 
 	/**
