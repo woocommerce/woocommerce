@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useId, useRef, useState } from 'react';
 import { check, chevronDown, chevronUp, Icon } from '@wordpress/icons';
 import clsx from 'clsx';
 import { __ } from '@wordpress/i18n';
@@ -43,6 +43,9 @@ const GroupedSelectControl = < ItemType extends ListItem >( {
 	searchable,
 }: GroupedSelectControlProps< ItemType > ): JSX.Element => {
 	const searchRef = useRef< HTMLInputElement >( null );
+	const toggleButtonRef = useRef< HTMLButtonElement >( null );
+	const restoreFocusRef = useRef( false );
+	const instanceId = useId();
 	const previousStateRef = useRef< {
 		visibleItems: Set< string >;
 	} >();
@@ -64,6 +67,18 @@ const GroupedSelectControl = < ItemType extends ListItem >( {
 		visibleItems.has( item.key )
 	);
 
+	// Groups only toggle their items, which search has already expanded, so
+	// search results show them as headings that can't be highlighted or picked.
+	const isSearching = searchText !== '';
+	const selectableItems = isSearching
+		? itemsToRender.filter( ( item ) => ! item.items )
+		: itemsToRender;
+	const getGroupHeadingId = ( groupKey: string ) =>
+		`${ instanceId }-group-${ groupKey }`;
+	const labelId = `${ instanceId }-label`;
+	const menuId = `${ instanceId }-menu`;
+	const getItemId = ( index: number ) => `${ instanceId }-item-${ index }`;
+
 	const {
 		isOpen,
 		selectedItem,
@@ -72,11 +87,21 @@ const GroupedSelectControl = < ItemType extends ListItem >( {
 		getLabelProps,
 		highlightedIndex,
 		getItemProps,
+		setHighlightedIndex,
+		selectItem,
+		closeMenu,
 	} = useSelect( {
-		items: itemsToRender,
+		items: selectableItems,
+		labelId,
+		menuId,
+		getItemId,
 		itemToString: ( item ) => item?.name || '',
 		selectedItem: value || ( {} as ItemType ),
 		onSelectedItemChange,
+		onIsOpenChange: ( { isOpen: willOpen, type } ) => {
+			restoreFocusRef.current =
+				! willOpen && type === useSelect.stateChangeTypes.ItemClick;
+		},
 		stateReducer: ( state, { changes, type } ) => {
 			if (
 				searchable &&
@@ -86,9 +111,6 @@ const GroupedSelectControl = < ItemType extends ListItem >( {
 			}
 
 			if ( changes.selectedItem && changes.selectedItem.items ) {
-				if ( searchText ) {
-					return state;
-				}
 				const key = changes.selectedItem.key;
 				if ( openedGroups.has( key ) ) {
 					openedGroups.delete( key );
@@ -104,6 +126,15 @@ const GroupedSelectControl = < ItemType extends ListItem >( {
 				setOpenedGroups( openedGroups );
 				setVisibleItems( visibleItems );
 				return state;
+			}
+
+			// Picking an option from the search field closes the menu in the
+			// same update, so Downshift still reports the selection.
+			if (
+				type === useSelect.stateChangeTypes.FunctionSelectItem &&
+				changes.selectedItem
+			) {
+				return { ...changes, isOpen: false };
 			}
 
 			return changes;
@@ -143,6 +174,61 @@ const GroupedSelectControl = < ItemType extends ListItem >( {
 		setSearchText( target.value );
 	};
 
+	// Downshift keeps focus on the toggle button, so a searchable menu moves it
+	// to the search field and drives the list from there.
+	useEffect( () => {
+		if ( isOpen && searchable ) {
+			searchRef.current?.focus();
+		} else if ( ! isOpen && restoreFocusRef.current ) {
+			// A clicked option unmounts the focused search field with the menu.
+			restoreFocusRef.current = false;
+			toggleButtonRef.current?.focus();
+		}
+	}, [ isOpen, searchable ] );
+
+	const handleSearchKeyDown = (
+		event: React.KeyboardEvent< HTMLInputElement >
+	) => {
+		const lastIndex = selectableItems.length - 1;
+
+		switch ( event.key ) {
+			case 'ArrowDown':
+				event.preventDefault();
+				if ( lastIndex >= 0 ) {
+					setHighlightedIndex(
+						Math.min( highlightedIndex + 1, lastIndex )
+					);
+				}
+				break;
+			case 'ArrowUp':
+				event.preventDefault();
+				if ( lastIndex >= 0 ) {
+					setHighlightedIndex( Math.max( highlightedIndex - 1, 0 ) );
+				}
+				break;
+			case 'Enter': {
+				event.preventDefault();
+				const item = selectableItems[ highlightedIndex ];
+				if ( ! item ) {
+					break;
+				}
+				selectItem( item );
+				if ( ! item.items ) {
+					toggleButtonRef.current?.focus();
+				}
+				break;
+			}
+			case 'Escape':
+				event.preventDefault();
+				closeMenu();
+				toggleButtonRef.current?.focus();
+				break;
+			case 'Tab':
+				closeMenu();
+				break;
+		}
+	};
+
 	const menuProps = getMenuProps( {
 		className: 'components-grouped-select-control__list',
 		'aria-hidden': ! isOpen,
@@ -178,7 +264,17 @@ const GroupedSelectControl = < ItemType extends ListItem >( {
 			</label>
 			<button
 				{ ...getToggleButtonProps( {
+					ref: toggleButtonRef,
 					type: 'button',
+					onBlur: ( event: React.FocusEvent ) => {
+						if ( event.relatedTarget === searchRef.current ) {
+							(
+								event.nativeEvent as FocusEvent & {
+									preventDownshiftDefault?: boolean;
+								}
+							 ).preventDownshiftDefault = true;
+						}
+					},
 					className: clsx(
 						'components-text-control__input components-grouped-select-control__button',
 						{ placeholder: ! selectedItem?.name }
@@ -202,15 +298,51 @@ const GroupedSelectControl = < ItemType extends ListItem >( {
 								className="components-grouped-select-control__search"
 								ref={ searchRef }
 								type="text"
+								role="combobox"
+								aria-label={ __( 'Search', 'woocommerce' ) }
+								aria-controls={ menuId }
+								aria-expanded={ isOpen }
+								aria-autocomplete="list"
+								aria-activedescendant={
+									selectableItems[ highlightedIndex ]
+										? getItemId( highlightedIndex )
+										: undefined
+								}
 								value={ searchText }
 								onChange={ handleSearch }
+								onKeyDown={ handleSearchKeyDown }
 								tabIndex={ -1 }
 								placeholder={ __( 'Search…', 'woocommerce' ) }
 							/>
 						) }
-						<ul className="components-grouped-select-control__list-container">
-							{ itemsToRender.map( ( item, index ) => {
+						{ /* The menu element is the listbox; this list only scrolls its options. */ }
+						<ul
+							role="presentation"
+							className="components-grouped-select-control__list-container"
+						>
+							{ itemsToRender.map( ( item ) => {
 								const isGroup = !! item.items;
+
+								if ( isSearching && isGroup ) {
+									return (
+										<li
+											key={ item.key }
+											id={ getGroupHeadingId( item.key ) }
+											role="presentation"
+											className="components-grouped-select-control__item is-group"
+										>
+											<div className="components-grouped-select-control__item-content">
+												{ item.name }
+											</div>
+											<Icon
+												icon={ chevronUp }
+												size={ 18 }
+											/>
+										</li>
+									);
+								}
+
+								const index = selectableItems.indexOf( item );
 
 								return (
 									<li
@@ -218,6 +350,12 @@ const GroupedSelectControl = < ItemType extends ListItem >( {
 										{ ...getItemProps( {
 											item,
 											index,
+											'aria-describedby':
+												isSearching && item.group
+													? getGroupHeadingId(
+															item.group
+														)
+													: undefined,
 											className: clsx(
 												'components-grouped-select-control__item',
 												item.className,
@@ -228,6 +366,7 @@ const GroupedSelectControl = < ItemType extends ListItem >( {
 												},
 												{
 													'is-group': isGroup,
+													'is-item': ! isGroup,
 												}
 											),
 										} ) }
@@ -238,13 +377,14 @@ const GroupedSelectControl = < ItemType extends ListItem >( {
 										{ item.key === selectedItem?.key && (
 											<Icon icon={ check } />
 										) }
-										{ ! searchText && isGroup && (
+										{ isGroup && (
 											<Icon
 												icon={
 													openedGroups.has( item.key )
 														? chevronUp
 														: chevronDown
 												}
+												size={ 18 }
 											/>
 										) }
 									</li>

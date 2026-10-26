@@ -52,6 +52,7 @@
 
 	&__list {
 		position: absolute;
+		box-sizing: border-box;
 		max-height: 300px;
 		min-width: 100%;
 		background-color: #fff;
@@ -76,20 +77,33 @@
 		display: grid;
 		grid-template-columns: auto 24px;
 		align-items: center;
-		padding: $gap-small;
+		// The end padding and end-aligned icons line up item chevrons with the
+		// toggle button's chevron.
+		padding-block: $gap-smallest;
+		padding-inline: $gap-small $gap-smaller;
 		margin: 0;
-		min-height: 24px + $gap-small * 2;
+		min-height: 24px;
+
+		> svg {
+			justify-self: end;
+		}
 
 		&.is-highlighted {
 			background: $studio-gray-0;
 		}
 
 		&.is-item &-content {
-			padding-left: $gap;
+			padding-inline-start: $gap;
 		}
 
+		// Spacing uses padding, not margin, so the highlight fills each row.
 		&.is-group {
 			color: $gray-700;
+			padding-block: $gap-smaller;
+		}
+
+		&.is-group:not( :first-child ) {
+			border-block-start: 1px solid $gray-200;
 		}
 	}
 
