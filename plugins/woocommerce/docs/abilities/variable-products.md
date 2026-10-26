@@ -7,13 +7,13 @@ Status: prototype on `wooai/variable-products`, built on the custom product type
 | Task | Call |
 | --- | --- |
 | Create a variable product with its variations | `product-create` with `type: "variable"`, `attributes` and `variations[]` |
-| Change one variation | `product-update` with the variation id |
+| Change one variation | `product-update` with the variation id, for price, stock and the other fields. Its options change through the parent's `variations[]`, because the parent path checks the options against the other variations. |
 | Change, add or delete many variations at once | `product-update` on the parent with `variations[]` |
 | Add one variation to an existing product | `product-create` with `type: "variation"`, `parent_id` and `attributes` |
 | Read or list variations | `products-query` with a variation id, or with `parent_id` |
 | Delete one variation | `product-delete` with the variation id |
 
-A variation is a product with `type: "variation"`. Its class extends `WC_Product_Simple`, so it takes price, stock, `virtual` and `downloadable` like a simple product, plus `attributes`. A variable parent takes the common fields, `attributes` and `variations`. The output of every product carries `parent_id` and `attributes`, and a variable parent carries `variation_ids`. An update needs no `type`: `product-update` loads the product and refuses a field that its type does not take, such as `variations` on a simple product. Its `attributes` property accepts both shapes, options for a parent and one option for a variation, and the update checks the shape against the loaded product.
+A variation is a product with `type: "variation"`. Its class extends `WC_Product_Simple`, so it takes price, stock, `virtual` and `downloadable` like a simple product, plus `attributes` on create. A variable parent takes the common fields, `attributes` and `variations`. The output of every product carries `parent_id` and `attributes`, and a variable parent carries `variation_ids`. An update needs no `type`: `product-update` loads the product and refuses a field that its type does not take, such as `variations` on a simple product. Its `attributes` property takes the parent shape only, and a direct update of a variation refuses `attributes` with `woocommerce_product_field_unsupported`.
 
 ### Create
 
