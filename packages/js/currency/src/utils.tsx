@@ -309,9 +309,14 @@ const CurrencyFactoryBase = function ( currencySetting?: CurrencyConfig ) {
 				return '';
 			}
 			const { precision } = currency;
-			return roundHalfAwayFromZero( number, precision ).toFixed(
-				precision
-			);
+			// Round at the same number of places toFixed() will use:
+			// ToIntegerOrInfinity( Number( precision ) ), falling back to 0
+			// for unset/null/NaN precision exactly like toFixed() does.
+			const places = Number( precision );
+			return roundHalfAwayFromZero(
+				number,
+				Number.isFinite( places ) ? Math.trunc( places ) : 0
+			).toFixed( precision );
 		},
 
 		/**
