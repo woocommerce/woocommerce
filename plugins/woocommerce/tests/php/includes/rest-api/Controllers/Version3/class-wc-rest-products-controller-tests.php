@@ -2924,7 +2924,7 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 	 * @testdox Creating and updating a product keeps backslashes and quotes in its name and descriptions.
 	 */
 	public function test_create_and_update_product_keep_backslashes_in_post_fields(): void {
-		$fields = array(
+		$fields         = array(
 			'name'              => 'Cable 1\\2" it\'s',
 			'description'       => 'Path C:\\temp',
 			'short_description' => 'Short C:\\temp',
