@@ -168,9 +168,10 @@ class NewOrderNotificationTriggerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should notify about an order created before push notifications were enabled when it moves out of an unpaid status.
+	 * @testdox Should notify about an order created before push notifications were enabled when it is paid from an unpaid status.
 	 * @testWith ["pending"]
 	 *           ["failed"]
+	 *           ["cancelled"]
 	 *           ["checkout-draft"]
 	 *
 	 * @param string $previous_status The unpaid status the order leaves.
@@ -182,6 +183,64 @@ class NewOrderNotificationTriggerTest extends WC_Unit_Test_Case {
 		$this->trigger->on_order_status_changed( $order->get_id(), $previous_status, OrderStatus::PROCESSING, $order );
 
 		$this->assertSame( 1, $this->store->count(), "A payment arriving on a '{$previous_status}' order should still be announced" );
+	}
+
+	/**
+	 * @testdox Should treat statuses added to the payment complete filter as unpaid, with or without the wc- prefix, ignoring non-string values.
+	 * @testWith ["wc-in-production"]
+	 *           ["in-production"]
+	 *
+	 * @param string $filtered_status The status a plugin adds to the filter.
+	 */
+	public function test_status_change_from_status_added_to_payment_complete_filter_notifies( string $filtered_status ): void {
+		add_filter(
+			'woocommerce_valid_order_statuses_for_payment_complete',
+			static function ( array $statuses ) use ( $filtered_status ): array {
+				return array_merge( $statuses, array( $filtered_status, 123, null ) );
+			}
+		);
+		$order = $this->create_order_in_custom_status();
+		update_option( PushNotifications::ENABLED_AT_OPTION, $order->get_date_created()->getTimestamp() + 60 );
+
+		$order->set_status( OrderStatus::PROCESSING );
+		$order->save();
+
+		$this->assertSame( 1, $this->store->count(), "A payment arriving from '{$filtered_status}' should still be announced" );
+	}
+
+	/**
+	 * @testdox Should not run the payment complete filter for an order created after push notifications were enabled.
+	 */
+	public function test_payment_complete_filter_is_not_run_for_orders_created_after_enablement(): void {
+		$calls = 0;
+		add_filter(
+			'woocommerce_valid_order_statuses_for_payment_complete',
+			function ( $statuses ) use ( &$calls ) {
+				++$calls;
+				return $statuses;
+			}
+		);
+		$order = $this->create_order_in_custom_status();
+		update_option( PushNotifications::ENABLED_AT_OPTION, $order->get_date_created()->getTimestamp() - 60 );
+
+		$order->set_status( OrderStatus::PROCESSING );
+		$order->save();
+
+		$this->assertSame( 0, $calls, 'The filter should only run for orders created before push notifications were enabled' );
+		$this->assertSame( 1, $this->store->count(), 'The new order should be announced' );
+	}
+
+	/**
+	 * @testdox Should fall back to the default unpaid statuses when the payment complete filter does not return an array.
+	 */
+	public function test_invalid_payment_complete_filter_value_falls_back_to_defaults(): void {
+		add_filter( 'woocommerce_valid_order_statuses_for_payment_complete', '__return_false', PHP_INT_MAX );
+		$order = wc_create_order();
+		update_option( PushNotifications::ENABLED_AT_OPTION, $order->get_date_created()->getTimestamp() + 60 );
+
+		$this->trigger->on_order_status_changed( $order->get_id(), OrderStatus::CANCELLED, OrderStatus::PROCESSING, $order );
+
+		$this->assertSame( 1, $this->store->count(), 'Cancelled should still count as unpaid when the filter returns a bad value' );
 	}
 
 	/**
