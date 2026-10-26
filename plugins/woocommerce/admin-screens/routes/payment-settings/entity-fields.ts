@@ -11,7 +11,7 @@ import { __dangerousOptInToUnstableAPIsOnlyForCoreModules } from '@wordpress/pri
  */
 import type { SettingsField } from '../../entity-fields/types';
 
-// The editor's entity field registry is private until the server-side Entity Fields API lands.
+// The editor's field registry is private. This logic will be replaced once the Field Collection API is available.
 const { unlock } = __dangerousOptInToUnstableAPIsOnlyForCoreModules(
 	'I acknowledge private features are not for use in themes or plugins and doing so will break in the next version of WordPress.',
 	'@wordpress/routes'
