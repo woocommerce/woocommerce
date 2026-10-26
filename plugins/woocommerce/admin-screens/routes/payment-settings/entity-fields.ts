@@ -3,6 +3,7 @@
  */
 import { dispatch } from '@wordpress/data';
 import { store as editorStore } from '@wordpress/editor';
+import type { Field } from '@wordpress/dataviews';
 import { __dangerousOptInToUnstableAPIsOnlyForCoreModules } from '@wordpress/private-apis';
 
 /**
@@ -17,10 +18,10 @@ const { unlock } = __dangerousOptInToUnstableAPIsOnlyForCoreModules(
 );
 
 interface EntityFieldActions {
-	registerEntityField: (
+	registerEntityField: < Item >(
 		kind: string,
 		name: string,
-		field: SettingsField
+		field: Field< Item >
 	) => void;
 }
 
@@ -31,10 +32,10 @@ interface EntityFieldSelectors {
 /**
  * Add fields to an entity in the editor's field registry.
  */
-export function registerEntityFields(
+export function registerEntityFields< Item >(
 	kind: string,
 	name: string,
-	fields: SettingsField[]
+	fields: Field< Item >[]
 ): void {
 	const { registerEntityField } = unlock< EntityFieldActions >(
 		dispatch( editorStore )

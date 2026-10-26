@@ -6,9 +6,10 @@ import { __ } from '@wordpress/i18n';
 /**
  * Internal dependencies
  */
-import type { SettingsField } from '../../types';
+import type { Field } from '@wordpress/dataviews';
+import type { ChequeSettings } from '../types';
 
-export const field: SettingsField = {
+export const field: Field< ChequeSettings > = {
 	id: 'title',
 	type: 'text',
 	label: __( 'Title', 'woocommerce' ),
