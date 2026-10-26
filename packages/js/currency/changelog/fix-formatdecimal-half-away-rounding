@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Fix `formatDecimal` and `formatDecimalString` rounding exact half fractions (e.g. `1.005`) down instead of half away from zero, diverging from PHP's `wc_format_decimal()` on values that are not exactly representable as doubles. (#70212)
+Fix `formatDecimal` and `formatDecimalString` rounding half values such as `1.005` differently from displayed amounts by reusing `numberFormat()`, while preserving legacy behavior for unsupported precision and values the display formatter cannot handle. (#70212)
