@@ -557,7 +557,7 @@ class WC_Admin_Post_Types {
 
 		$data_store = $product->get_data_store();
 
-		$term_updates = $this->prepare_bulk_edit_term_updates( $product, $request_data );
+		$this->apply_bulk_edit_taxonomy_changes( $product, $request_data );
 
 		if ( ! empty( $request_data['change_weight'] ) && isset( $request_data['_weight'] ) ) {
 			$product->set_weight( wc_clean( wp_unslash( $request_data['_weight'] ) ) );
@@ -690,10 +690,6 @@ class WC_Admin_Post_Types {
 		}
 
 		$product->save();
-
-		foreach ( $term_updates as $taxonomy => $terms ) {
-			wp_set_object_terms( $post_id, $terms, $taxonomy );
-		}
 
 		do_action( 'woocommerce_product_bulk_edit_save', $product );
 
@@ -1028,39 +1024,40 @@ class WC_Admin_Post_Types {
 	}
 
 	/**
-	 * Apply built-in taxonomy changes and return other term assignments to save after the product.
+	 * Apply category and brand changes through the product's CRUD properties.
 	 *
 	 * @since 11.4.0
+	 *
 	 * @param WC_Product $product Product being edited.
 	 * @param array      $request_data Bulk edit request fields.
-	 * @return array<string, int[]> Term assignments for additional product taxonomies.
+	 * @return void
 	 */
-	private function prepare_bulk_edit_term_updates( WC_Product $product, array $request_data ): array {
+	private function apply_bulk_edit_taxonomy_changes( WC_Product $product, array $request_data ): void {
 		$taxonomies = $request_data['wc_bulk_edit_taxonomies'] ?? array();
 		$tax_input  = $request_data['tax_input'] ?? array();
 		$mixed      = $request_data['wc_bulk_edit_indeterminate'] ?? array();
 		if ( ! is_array( $taxonomies ) || ! is_array( $tax_input ) || ! is_array( $mixed ) ) {
-			return array();
+			return;
 		}
 
-		$properties   = array(
+		// Taxonomy names differ from CRUD property names; setters keep the product object in sync.
+		$taxonomy_properties = array(
 			'product_cat'   => 'category_ids',
 			'product_brand' => 'brand_ids',
 		);
-		$term_updates = array();
-		foreach ( get_object_taxonomies( 'product', 'objects' ) as $taxonomy ) {
-			$seen          = $taxonomies[ $taxonomy->name ] ?? null;
-			$checked       = $tax_input[ $taxonomy->name ] ?? array();
-			$indeterminate = $mixed[ $taxonomy->name ] ?? array();
-			if ( ! is_string( $seen ) || ! is_array( $checked ) || ! is_array( $indeterminate ) || ! $taxonomy->hierarchical || ! $taxonomy->show_in_quick_edit || ! current_user_can( $taxonomy->cap->assign_terms ) ) {
+		foreach ( $taxonomy_properties as $taxonomy_name => $property ) {
+			$taxonomy      = get_taxonomy( $taxonomy_name );
+			$seen          = $taxonomies[ $taxonomy_name ] ?? null;
+			$checked       = $tax_input[ $taxonomy_name ] ?? array();
+			$indeterminate = $mixed[ $taxonomy_name ] ?? array();
+			if ( ! $taxonomy || ! is_string( $seen ) || ! is_array( $checked ) || ! is_array( $indeterminate ) || ! $taxonomy->hierarchical || ! $taxonomy->show_in_quick_edit || ! current_user_can( $taxonomy->cap->assign_terms ) ) {
 				continue;
 			}
 
 			$seen          = wp_parse_id_list( wp_unslash( $seen ) );
 			$checked       = wp_parse_id_list( array_filter( wp_unslash( $checked ), 'is_scalar' ) );
 			$indeterminate = wp_parse_id_list( array_filter( wp_unslash( $indeterminate ), 'is_scalar' ) );
-			$property      = $properties[ $taxonomy->name ] ?? null;
-			$current       = $property ? $product->{"get_$property"}( 'edit' ) : wc_get_object_terms( $product->get_id(), $taxonomy->name, 'term_id' );
+			$current       = $product->{"get_$property"}( 'edit' );
 
 			// Match Core's mixed-state handling while preserving terms omitted from the checklist.
 			$editable  = array_diff( $seen, $indeterminate );
@@ -1070,14 +1067,8 @@ class WC_Admin_Post_Types {
 				continue;
 			}
 
-			if ( $property ) {
-				$product->{"set_$property"}( $terms );
-			} else {
-				$term_updates[ $taxonomy->name ] = $terms;
-			}
+			$product->{"set_$property"}( $terms );
 		}
-
-		return $term_updates;
 	}
 
 	/**

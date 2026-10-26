@@ -8,8 +8,7 @@ jQuery(
 				return;
 			}
 
-			$( '#inline_' + checkedProducts.first().val() + ' .post_category' ).each( function() {
-				const taxonomy = this.id.slice( 0, -checkedProducts.first().val().length - 1 );
+			[ 'product_cat', 'product_brand' ].forEach( function( taxonomy ) {
 				const list = $( 'ul.' + taxonomy + '-checklist', bulk_row );
 				const checkboxes = list.find( 'input[type="checkbox"]' );
 				if ( ! checkboxes.length ) {
