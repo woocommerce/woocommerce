@@ -2513,4 +2513,28 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 			)
 		);
 	}
+
+	/**
+	 * @testdox A missing Update Manager adds one to the updates count, except on a local store WooCommerce.com can't reach.
+	 *
+	 * @testWith ["https://store.example.com", 1]
+	 *           ["http://localhost:8888", 0]
+	 *
+	 * @param string $home     Store home URL.
+	 * @param int    $expected Expected updates count.
+	 */
+	public function test_updates_count_includes_missing_update_manager_unless_local( string $home, int $expected ): void {
+		$this->assertFalse( WC_Woo_Update_Manager_Plugin::is_plugin_installed(), 'The test site should not have the Update Manager' );
+		WC_Helper_Options::update( 'auth', array( 'access_token' => 'token' ) );
+		set_transient( '_woocommerce_helper_updates_count', 0, HOUR_IN_SECONDS );
+		// wp-env defines WP_HOME, so the home option alone doesn't change home_url().
+		add_filter(
+			'home_url',
+			static function () use ( $home ) {
+				return $home;
+			}
+		);
+
+		$this->assertSame( $expected, WC_Helper_Updater::get_updates_count_based_on_site_status() );
+	}
 }

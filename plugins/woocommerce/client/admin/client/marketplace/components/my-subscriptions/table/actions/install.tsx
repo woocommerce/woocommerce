@@ -76,7 +76,7 @@ export default function Install( props: InstallProps ) {
 								'Download and install manually',
 								'woocommerce'
 							),
-							url: 'https://woocommerce.com/my-account/downloads/',
+							url: 'https://woocommerce.com/my-account/my-subscriptions/',
 							onClick: () => {},
 						},
 					],

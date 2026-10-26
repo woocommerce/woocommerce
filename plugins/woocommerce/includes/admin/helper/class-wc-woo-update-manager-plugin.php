@@ -23,6 +23,11 @@ class WC_Woo_Update_Manager_Plugin {
 	const WOO_UPDATE_MANAGER_SLUG             = 'woo-update-manager';
 
 	/**
+	 * Domains, and their subdomains, that WooCommerce.com treats as local.
+	 */
+	private const LOCAL_DOMAINS = array( 'localhost', 'local', 'test', 'lan', 'internal', 'invalid', 'example', 'home', 'localdomain', 'ddev.site', 'lndo.site' );
+
+	/**
 	 * Loads the class, runs on init.
 	 *
 	 * @return void
@@ -58,6 +63,37 @@ class WC_Woo_Update_Manager_Plugin {
 		$install_url = WC_Helper::get_install_base_url() . self::WOO_UPDATE_MANAGER_SLUG . '/';
 
 		return WC_Helper_API::add_auth_parameters( $install_url );
+	}
+
+	/**
+	 * Whether the URL's host is one WooCommerce.com can't reach to push an install: private or reserved IPs,
+	 * single-label hosts and local development domains. Matches the check WooCommerce.com runs on its side.
+	 *
+	 * @param string $url URL to check, usually the home URL.
+	 * @return bool
+	 */
+	public static function is_local_url( string $url ): bool {
+		$host = strtolower( trim( (string) wp_parse_url( $url, PHP_URL_HOST ), '[]' ) );
+
+		if ( '' === $host ) {
+			return false;
+		}
+
+		if ( false !== filter_var( $host, FILTER_VALIDATE_IP ) ) {
+			return false === filter_var( $host, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE );
+		}
+
+		if ( false === strpos( $host, '.' ) ) {
+			return true;
+		}
+
+		foreach ( self::LOCAL_DOMAINS as $domain ) {
+			if ( $host === $domain || str_ends_with( $host, '.' . $domain ) ) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**

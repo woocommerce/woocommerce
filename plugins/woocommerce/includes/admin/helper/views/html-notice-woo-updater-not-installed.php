@@ -11,6 +11,19 @@ defined( 'ABSPATH' ) || exit;
 	<a class="woocommerce-message-close notice-dismiss" href="<?php echo esc_url( wp_nonce_url( add_query_arg( 'wc-hide-notice', 'woo_updater_not_installed' ), 'woocommerce_hide_notices_nonce', '_wc_notice_nonce' ) ); ?>"><?php esc_html_e( 'Dismiss', 'woocommerce' ); ?></a>
 	<p>
 	<?php
+	if ( WC_Woo_Update_Manager_Plugin::is_local_url( home_url() ) ) {
+		echo wp_kses_post(
+			sprintf(
+				/* translators: 1: Woo Update Manager plugin download URL 2: Upload plugin screen URL */
+				__(
+					'Please <a href="%1$s">download the WooCommerce.com Update Manager</a> and <a href="%2$s">upload it on the Add Plugins screen</a> to continue receiving the updates and streamlined support included in your WooCommerce.com subscriptions. WooCommerce.com can’t install it for you because it can’t reach local sites.',
+					'woocommerce'
+				),
+				esc_url( WC_Woo_Update_Manager_Plugin::WOO_UPDATE_MANAGER_DOWNLOAD_URL ),
+				esc_url( network_admin_url( 'plugin-install.php?tab=upload' ) )
+			)
+		);
+	} else {
 		echo wp_kses_post(
 			sprintf(
 				/* translators: 1: Woo Update Manager plugin install URL 2: Woo Update Manager plugin download URL */
@@ -22,6 +35,7 @@ defined( 'ABSPATH' ) || exit;
 				esc_url( WC_Woo_Update_Manager_Plugin::WOO_UPDATE_MANAGER_DOWNLOAD_URL )
 			)
 		);
-		?>
+	}
+	?>
 	</p>
 </div>
