@@ -1401,9 +1401,27 @@ export function isLeapYear( year: number ) {
  * @return {boolean} True if date range contains a leap year
  */
 export function containsLeapYear( startDate: string, endDate: string ) {
-	// Parse the input dates to get the years
-	const startYear = new Date( startDate ).getFullYear();
-	const endYear = new Date( endDate ).getFullYear();
+	// Parse the input dates to get the years. Date-only ISO 8601 strings
+	// (YYYY, YYYY-MM, YYYY-MM-DD) are parsed as UTC midnight, so
+	// getFullYear() would return the previous year in timezones west of
+	// UTC; use the written year for those. Date-time strings keep
+	// local-time interpretation.
+	const DATE_ONLY_PATTERN = /^\d{4}(-\d{2}(-\d{2})?)?$/;
+	const yearOf = ( dateString: string ): number => {
+		const parsed = new Date( dateString );
+		if ( isNaN( parsed.getTime() ) ) {
+			return NaN;
+		}
+		if ( typeof dateString === 'string' ) {
+			const trimmed = dateString.trim();
+			if ( DATE_ONLY_PATTERN.test( trimmed ) ) {
+				return parseInt( trimmed.slice( 0, 4 ), 10 );
+			}
+		}
+		return parsed.getFullYear();
+	};
+	const startYear = yearOf( startDate );
+	const endYear = yearOf( endDate );
 
 	if ( ! isNaN( startYear ) && ! isNaN( endYear ) ) {
 		// Check each year in the range
