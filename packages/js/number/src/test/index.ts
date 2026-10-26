@@ -112,3 +112,110 @@ describe( 'parseNumber', () => {
 		expect( parseNumber( config, '1,2345,679' ) ).toBe( '12345679.00' );
 	} );
 } );
+
+describe( 'numberFormat PHP number_format() parity', () => {
+	// PHP's number_format() rounds half away from zero; locutus (the
+	// underlying port) rounds half up via Math.round, which sends negative
+	// exact halves one unit toward zero. These expectations were verified
+	// against real PHP 8.4.23/8.5.8 number_format() output.
+	it.each( [
+		[ -1.005, 2, '-1.01' ],
+		[ -2.675, 2, '-2.68' ],
+		[ -0.125, 2, '-0.13' ],
+		[ -1234.565, 2, '-1,234.57' ],
+		[ -0.5, 0, '-1' ],
+		[ -2.5, 0, '-3' ],
+		[ -0.005, 2, '-0.01' ],
+	] )(
+		'rounds negative exact halves away from zero: %d @ precision %d',
+		( value, precision, expected ) => {
+			expect( numberFormat( { precision }, value ) ).toBe( expected );
+		}
+	);
+
+	it( 'parses numeric strings before rounding', () => {
+		expect( numberFormat( { precision: 2 }, '-1.005' ) ).toBe( '-1.01' );
+	} );
+
+	it( 'keeps the sign off results that round to zero, like PHP', () => {
+		expect( numberFormat( { precision: 2 }, -0.001 ) ).toBe( '0.00' );
+		expect( numberFormat( { precision: 2 }, -0 ) ).toBe( '0.00' );
+		expect( numberFormat( { precision: 0 }, -0.4 ) ).toBe( '0' );
+	} );
+
+	it( 'honours configured separators for negative halves', () => {
+		expect(
+			numberFormat(
+				{ precision: 2, decimalSeparator: ',', thousandSeparator: '.' },
+				-1234.565
+			)
+		).toBe( '-1.234,57' );
+	} );
+
+	it( 'does not misread digit-containing separators as a nonzero result', () => {
+		expect(
+			numberFormat( { precision: 2, decimalSeparator: '5' }, -0.001 )
+		).toBe( '0500' );
+		expect(
+			numberFormat( { precision: 2, decimalSeparator: '5' }, -0.005 )
+		).toBe( '-0501' );
+	} );
+
+	it( 'preserves the pre-existing locutus overflow artifact on huge values', () => {
+		// 1e20 at precision 2 overflows locutus's string-concat scaling to
+		// 'NaN.00' on trunk; PHP formats these fine, but that separate
+		// defect is out of scope here - this fix must not change it.
+		expect( numberFormat( { precision: 2 }, -1e21 ) ).toBe( 'NaN.00' );
+		expect( numberFormat( { precision: 2 }, -Number.MAX_VALUE ) ).toBe(
+			'NaN.00'
+		);
+		expect( numberFormat( { precision: 2 }, 1e21 ) ).toBe( 'NaN.00' );
+		expect(
+			numberFormat( { precision: 2, decimalSeparator: '5' }, -1e21 )
+		).toBe( 'NaN500' );
+	} );
+
+	it( 'restores the sign with adversarial separator alphabets', () => {
+		// All expectations verified against real PHP number_format()
+		// (8.4.23 and 8.5.8 agree).
+		// Digit as the thousand separator.
+		expect(
+			numberFormat( { precision: 2, thousandSeparator: '5' }, -5 )
+		).toBe( '-5.00' );
+		// Overlapping separators ('.b' contains '.').
+		expect(
+			numberFormat(
+				{
+					precision: 2,
+					decimalSeparator: '.b',
+					thousandSeparator: '.',
+				},
+				-1234.5
+			)
+		).toBe( '-1.234.b50' );
+		// The literal string 'NaN' as the decimal separator.
+		expect(
+			numberFormat( { precision: 2, decimalSeparator: 'NaN' }, -1.005 )
+		).toBe( '-1NaN01' );
+		// Tiny value that keeps a nonzero result after rounding.
+		expect( numberFormat( { precision: 8 }, -1.5e-8 ) ).toBe(
+			'-0.00000002'
+		);
+	} );
+
+	it( 'is unchanged for ordinary negative values', () => {
+		// Verified against real PHP 8.4.23/8.5.8 number_format().
+		expect( numberFormat( { precision: 4 }, -1.234567 ) ).toBe( '-1.2346' );
+		expect( numberFormat( { precision: 2 }, -1234567.891 ) ).toBe(
+			'-1,234,567.89'
+		);
+		expect( numberFormat( { precision: 0 }, -5.1 ) ).toBe( '-5' );
+		expect( numberFormat( { precision: 0 }, -0.4 ) ).toBe( '0' );
+	} );
+
+	it( 'is unchanged for non-negative values', () => {
+		expect( numberFormat( { precision: 2 }, 1.005 ) ).toBe( '1.01' );
+		expect( numberFormat( { precision: 2 }, 4492.605 ) ).toBe( '4,492.61' );
+		expect( numberFormat( { precision: 0 }, 2.5 ) ).toBe( '3' );
+	} );
+} );
