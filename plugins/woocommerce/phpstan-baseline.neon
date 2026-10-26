@@ -47002,12 +47002,6 @@ parameters:
 			path: src/Blocks/Assets/Api.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\Assets\\Api\:\:get_file_version\(\) should return string but returns int\<0, max\>\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Blocks/Assets/Api.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\Assets\\Api\:\:register_script\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
