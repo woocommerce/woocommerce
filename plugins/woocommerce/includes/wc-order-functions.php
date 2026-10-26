@@ -1073,6 +1073,9 @@ function wc_update_coupon_usage_counts( $order_id ) {
 	}
 
 	if ( count( $coupon_codes ) > 0 ) {
+		$identities = $order->get_meta( '_coupon_usage_identities' );
+		$identities = is_array( $identities ) ? $identities : array();
+
 		foreach ( $coupon_codes as $code ) {
 			$coupon  = new WC_Coupon( $code );
 			$used_by = $order->get_user_id();
@@ -1083,13 +1086,23 @@ function wc_update_coupon_usage_counts( $order_id ) {
 
 			switch ( $action ) {
 				case 'reduce':
-					$coupon->decrease_usage_count( $used_by );
+					$coupon->decrease_usage_count( $identities[ $coupon->get_id() ] ?? $used_by );
 					break;
 				case 'increase':
 					$coupon->increase_usage_count( $used_by, $order );
+					if ( $coupon->get_id() ) {
+						$identities[ $coupon->get_id() ] = $used_by;
+					}
 					break;
 			}
 		}
+
+		if ( 'increase' === $action && $identities ) {
+			$order->update_meta_data( '_coupon_usage_identities', $identities );
+		} elseif ( 'reduce' === $action ) {
+			$order->delete_meta_data( '_coupon_usage_identities' );
+		}
+		$order->save_meta_data();
 		wc_release_coupons_for_order( $order );
 	}
 }
