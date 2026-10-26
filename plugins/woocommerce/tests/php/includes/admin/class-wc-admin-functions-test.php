@@ -702,7 +702,7 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 				'post_status'  => 'publish',
 				'post_name'    => 'my-custom-cart',
 				'post_title'   => 'My custom cart',
-				'post_content' => '<!-- wp:paragraph --><p>Intro added by the merchant.</p><!-- /wp:paragraph --><!-- wp:woocommerce/cart--><div class="wp-block-woocommerce-cart">customized</div><!-- /wp:woocommerce/cart -->',
+				'post_content' => '<!-- wp:paragraph --><p>Intro added by the merchant.</p><!-- /wp:paragraph --><!-- wp:woocommerce/cart --><div class="wp-block-woocommerce-cart">customized</div><!-- /wp:woocommerce/cart -->',
 			)
 		);
 
@@ -710,6 +710,62 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 
 		$this->assertEquals( $existing_page_id, $page_id );
 		$this->assertEquals( $existing_page_id, get_option( 'woocommerce_cart_page_id' ) );
+	}
+
+	/**
+	 * @testdox The page with the requested slug and status is preferred when multiple pages contain the block.
+	 */
+	public function test_wc_create_page_prefers_matching_slug_and_status(): void {
+		delete_option( 'woocommerce_cart_page_id' );
+
+		wp_insert_post(
+			array(
+				'post_type'    => 'page',
+				'post_status'  => 'draft',
+				'post_name'    => 'untitled-cart-draft',
+				'post_title'   => '',
+				'post_content' => '<!-- wp:woocommerce/cart --><div class="wp-block-woocommerce-cart">draft</div><!-- /wp:woocommerce/cart -->',
+			)
+		);
+		$published_page_id = wp_insert_post(
+			array(
+				'post_type'    => 'page',
+				'post_status'  => 'publish',
+				'post_name'    => 'cart',
+				'post_title'   => 'Cart',
+				'post_content' => '<!-- wp:woocommerce/cart --><div class="wp-block-woocommerce-cart">customized</div><!-- /wp:woocommerce/cart -->',
+			)
+		);
+
+		$page_id = wc_create_page( 'cart', 'woocommerce_cart_page_id', 'Cart', '<!-- wp:woocommerce/cart --><div class="wp-block-woocommerce-cart">default</div><!-- /wp:woocommerce/cart -->' );
+
+		$this->assertEquals( $published_page_id, $page_id );
+	}
+
+	/**
+	 * @testdox A draft or private block page remains eligible when it is the only match.
+	 * @testWith ["draft"]
+	 *           ["private"]
+	 *
+	 * @param string $page_status Status of the existing page.
+	 */
+	public function test_wc_create_page_preserves_existing_status_policy( string $page_status ): void {
+		delete_option( 'woocommerce_cart_page_id' );
+
+		$existing_page_id = wp_insert_post(
+			array(
+				'post_type'    => 'page',
+				'post_status'  => $page_status,
+				'post_name'    => 'custom-cart',
+				'post_title'   => 'Custom cart',
+				'post_content' => '<!-- wp:woocommerce/cart --><div class="wp-block-woocommerce-cart">customized</div><!-- /wp:woocommerce/cart -->',
+			)
+		);
+
+		$page_id = wc_create_page( 'cart', 'woocommerce_cart_page_id', 'Cart', '<!-- wp:woocommerce/cart --><div class="wp-block-woocommerce-cart">default</div><!-- /wp:woocommerce/cart -->' );
+
+		$this->assertEquals( $existing_page_id, $page_id );
+		$this->assertSame( $page_status, get_post_status( $page_id ) );
 	}
 
 	/**
@@ -753,6 +809,36 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 		$page_id = wc_create_page( 'cart', 'woocommerce_cart_page_id', 'Cart', '<!-- wp:shortcode -->[woocommerce_cart]<!-- /wp:shortcode -->' );
 
 		$this->assertEquals( $existing_page_id, $page_id );
+	}
+
+	/**
+	 * @testdox An empty shortcode wrapper falls back to matching the requested slug.
+	 */
+	public function test_wc_create_page_does_not_match_empty_content_needle(): void {
+		delete_option( 'woocommerce_cart_page_id' );
+
+		wp_insert_post(
+			array(
+				'post_type'    => 'page',
+				'post_status'  => 'publish',
+				'post_name'    => 'unrelated',
+				'post_title'   => 'Unrelated page',
+				'post_content' => 'Unrelated content',
+			)
+		);
+		$cart_page_id = wp_insert_post(
+			array(
+				'post_type'    => 'page',
+				'post_status'  => 'publish',
+				'post_name'    => 'cart',
+				'post_title'   => 'Cart',
+				'post_content' => 'Existing cart content',
+			)
+		);
+
+		$page_id = wc_create_page( 'cart', 'woocommerce_cart_page_id', 'Cart', '<!-- wp:shortcode --><!-- /wp:shortcode -->' );
+
+		$this->assertEquals( $cart_page_id, $page_id );
 	}
 
 	/**
