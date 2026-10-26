@@ -110,11 +110,12 @@ class ProductQuery implements QueryClausesGenerator {
 		// Gets all registered product taxonomies and prefixes them with `tax_`.
 		// This is needed to avoid situations where a user registers a new product taxonomy with the same name as default field.
 		// eg an `sku` taxonomy will be mapped to `tax_sku`.
+		// The `objects` output is used because it is keyed by taxonomy name, which the loop below relies on.
 		$all_product_taxonomies = array_map(
-			function ( $value ) {
-				return '_unstable_tax_' . $value;
+			function ( $taxonomy ) {
+				return '_unstable_tax_' . $taxonomy->name;
 			},
-			get_taxonomies( array( 'object_type' => array( 'product' ) ), 'names' )
+			get_object_taxonomies( 'product', 'objects' )
 		);
 
 		// Map between taxonomy name and arg key.
@@ -177,8 +178,19 @@ class ProductQuery implements QueryClausesGenerator {
 		if ( ! empty( $tax_query ) && 'product_variation' !== $args['post_type'] ) {
 			$args['tax_query'] = $tax_query; // phpcs:ignore
 		} else {
-			// For product_variations we need to convert the tax_query to a meta_query.
-			$args['meta_query'] = $this->convert_tax_query_to_meta_query( $tax_query ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+			// Taxonomies registered for variations are queried directly. The rest are stored on variations as attribute meta.
+			$variation_tax_query = array_filter(
+				$tax_query,
+				function ( $tax_query_item ) {
+					return isset( $tax_query_item['taxonomy'] ) && is_object_in_taxonomy( 'product_variation', $tax_query_item['taxonomy'] );
+				}
+			);
+
+			if ( ! empty( $variation_tax_query ) ) {
+				$args['tax_query'] = array_values( $variation_tax_query ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+			}
+
+			$args['meta_query'] = $this->convert_tax_query_to_meta_query( array_diff_key( $tax_query, $variation_tax_query ) ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 		}
 
 		// Filter featured.

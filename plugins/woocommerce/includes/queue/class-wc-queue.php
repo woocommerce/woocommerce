@@ -57,7 +57,7 @@ class WC_Queue {
 	 */
 	protected static function get_class() {
 		if ( ! did_action( 'plugins_loaded' ) ) {
-			wc_doing_it_wrong( __FUNCTION__, __( 'This function should not be called before plugins_loaded.', 'woocommerce' ), '3.5.0' );
+			wc_doing_it_wrong( __FUNCTION__, 'This function should not be called before plugins_loaded.', '3.5.0' );
 		}
 
 		return apply_filters( 'woocommerce_queue_class', self::$default_cass );
@@ -72,8 +72,7 @@ class WC_Queue {
 	protected static function validate_instance( $instance ) {
 		if ( false === ( $instance instanceof WC_Queue_Interface ) ) {
 			$default_class = self::$default_cass;
-			/* translators: %s: Default class name */
-			wc_doing_it_wrong( __FUNCTION__, sprintf( __( 'The class attached to the "woocommerce_queue_class" does not implement the WC_Queue_Interface interface. The default %s class will be used instead.', 'woocommerce' ), $default_class ), '3.5.0' );
+			wc_doing_it_wrong( __FUNCTION__, sprintf( 'The class attached to the "woocommerce_queue_class" does not implement the WC_Queue_Interface interface. The default %s class will be used instead.', $default_class ), '3.5.0' );
 			$instance = new $default_class();
 		}
 
