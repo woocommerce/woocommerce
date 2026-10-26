@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Add the woocommerce_reports_cache_expiration filter to change how long Analytics report data is cached.
