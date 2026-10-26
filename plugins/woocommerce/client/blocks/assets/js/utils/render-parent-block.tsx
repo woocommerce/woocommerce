@@ -128,9 +128,9 @@ interface RenderInnerBlocksProps {
 }
 
 /**
- * Keep interactive regions outside React's DOM reconciliation so their hydration and event handlers survive.
+ * Keep interactive regions outside React's DOM reconciliation so their hydration and event handlers remain.
  */
-const InteractiveBlock = ( { node }: { node: HTMLElement } ) => {
+const InteractivityApiElement = ( { node }: { node: HTMLElement } ) => {
 	const ref = useCallback(
 		( container: HTMLDivElement | null ) => {
 			container?.appendChild( node );
@@ -185,7 +185,12 @@ const renderInnerBlocks = ( {
 				node instanceof HTMLElement &&
 				node.hasAttribute( 'data-wp-interactive' )
 			) {
-				return <InteractiveBlock key={ componentKey } node={ node } />;
+				return (
+					<InteractivityApiElement
+						key={ componentKey }
+						node={ node }
+					/>
+				);
 			}
 
 			const parsedElement = parse(
