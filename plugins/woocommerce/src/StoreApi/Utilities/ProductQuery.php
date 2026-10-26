@@ -178,8 +178,19 @@ class ProductQuery implements QueryClausesGenerator {
 		if ( ! empty( $tax_query ) && 'product_variation' !== $args['post_type'] ) {
 			$args['tax_query'] = $tax_query; // phpcs:ignore
 		} else {
-			// For product_variations we need to convert the tax_query to a meta_query.
-			$args['meta_query'] = $this->convert_tax_query_to_meta_query( $tax_query ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+			// Taxonomies registered for variations are queried directly. The rest are stored on variations as attribute meta.
+			$variation_tax_query = array_filter(
+				$tax_query,
+				function ( $tax_query_item ) {
+					return isset( $tax_query_item['taxonomy'] ) && is_object_in_taxonomy( 'product_variation', $tax_query_item['taxonomy'] );
+				}
+			);
+
+			if ( ! empty( $variation_tax_query ) ) {
+				$args['tax_query'] = array_values( $variation_tax_query ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+			}
+
+			$args['meta_query'] = $this->convert_tax_query_to_meta_query( array_diff_key( $tax_query, $variation_tax_query ) ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 		}
 
 		// Filter featured.

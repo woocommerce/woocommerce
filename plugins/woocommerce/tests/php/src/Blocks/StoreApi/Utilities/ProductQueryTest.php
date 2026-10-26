@@ -405,6 +405,34 @@ class ProductQueryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Taxonomy filters on variations use terms for taxonomies that are registered for variations.
+	 */
+	public function test_variation_taxonomy_filter_supports_taxonomy_registered_for_variations(): void {
+		$taxonomy = 'test_multi_object_tax';
+		register_taxonomy( $taxonomy, array( 'product', 'product_variation' ) );
+
+		try {
+			$fixtures        = new FixtureData();
+			$parent_product  = $fixtures->get_variable_product( array() );
+			$alpha_variation = $fixtures->get_variation_product( $parent_product->get_id() );
+			$beta_variation  = $fixtures->get_variation_product( $parent_product->get_id() );
+			wp_set_object_terms( $alpha_variation->get_id(), 'alpha', $taxonomy );
+			wp_set_object_terms( $beta_variation->get_id(), 'beta', $taxonomy );
+
+			$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+			$request->set_param( 'type', 'variation' );
+			$request->set_param( 'include', array( $alpha_variation->get_id(), $beta_variation->get_id() ) );
+			$request->set_param( '_unstable_tax_' . $taxonomy, array( 'alpha' ) );
+
+			$results = $this->product_query->get_results( $request );
+		} finally {
+			unregister_taxonomy( $taxonomy );
+		}
+
+		$this->assertSame( array( $alpha_variation->get_id() ), $results['results'], 'Only the variation assigned the requested term should be returned.' );
+	}
+
+	/**
 	 * Get product IDs matched by a Store API slug filter.
 	 *
 	 * @param string $slug_filter Slug filter value.
