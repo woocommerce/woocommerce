@@ -186,6 +186,21 @@ const renderInnerBlocks = ( {
 				return parsedElement;
 			}
 
+			// Template markup lives in `content`, not `childNodes`, so copy it over as HTML.
+			if ( node instanceof HTMLTemplateElement ) {
+				return cloneElement(
+					parsedElement as React.ReactElement<
+						Record< string, unknown >
+					>,
+					{
+						key: componentKey,
+						...( parsedElement?.props || {} ),
+						children: undefined,
+						dangerouslySetInnerHTML: { __html: node.innerHTML },
+					}
+				);
+			}
+
 			const renderedChildren = node.childNodes.length
 				? renderInnerBlocks( {
 						block,

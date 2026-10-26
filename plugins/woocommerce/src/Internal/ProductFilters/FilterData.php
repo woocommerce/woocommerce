@@ -546,7 +546,7 @@ class FilterData {
 	 */
 	private function normalize_query_vars( array $query_vars ): array {
 		// Taxonomy filter params are treated as unordered sets. Read from Params so that names
-		// changed through the woocommerce_product_filter_taxonomy_params filter stay normalised.
+		// changed through the woocommerce_product_filter_params filter stay normalised.
 		$taxonomy_set_params = array_values( $this->params->get_param( 'taxonomy' ) );
 
 		ksort( $query_vars );
@@ -707,6 +707,7 @@ class FilterData {
 		$query_vars['no_found_rows']  = true;
 		$query_vars['posts_per_page'] = -1;
 		$query_vars['fields']         = 'ids';
+		$query_vars['orderby']        = 'none';
 		$query                        = new \WP_Query();
 
 		$query->query( $query_vars );

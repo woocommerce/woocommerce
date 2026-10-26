@@ -6,7 +6,7 @@ import { SelectControl } from '@wordpress/components';
 import { find, partial } from 'lodash';
 import clsx from 'clsx';
 import { __, _x } from '@wordpress/i18n';
-import { isoDateFormat, toMoment } from '@woocommerce/date';
+import { getShortDateFormat, isoDateFormat, toMoment } from '@woocommerce/date';
 import moment from 'moment';
 import type { Moment } from 'moment';
 import type { ReactNode } from 'react';
@@ -22,7 +22,6 @@ import {
 import type { FilterComponentProps, FilterConfig, FilterRule } from './types';
 
 const dateStringFormat = __( 'MMM D, YYYY', 'woocommerce' );
-const dateFormat = __( 'MM/DD/YYYY', 'woocommerce' );
 
 export type DateFilterProps = FilterComponentProps;
 
@@ -54,6 +53,7 @@ class DateFilter extends Component< DateFilterProps, DateFilterState > {
 			: [ null, filter.value ];
 		const after = isoAfter ? toMoment( isoDateFormat, isoAfter ) : null;
 		const before = isoBefore ? toMoment( isoDateFormat, isoBefore ) : null;
+		const dateFormat = getShortDateFormat();
 
 		this.state = {
 			before,
@@ -208,7 +208,7 @@ class DateFilter extends Component< DateFilterProps, DateFilterState > {
 		return (
 			<DatePicker
 				date={ date }
-				dateFormat={ dateFormat }
+				dateFormat={ getShortDateFormat() }
 				error={ error }
 				isInvalidDate={ this.isFutureDate }
 				onUpdate={ onUpdate }

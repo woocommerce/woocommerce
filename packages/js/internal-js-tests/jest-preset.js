@@ -21,6 +21,9 @@ const transformModules = {
 	'parsel-js': {
 		'.*\\.js$': 'babel-jest',
 	},
+	'@wordpress/theme': {
+		'.*\\.mjs$': 'babel-jest',
+	},
 };
 
 /**

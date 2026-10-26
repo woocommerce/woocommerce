@@ -186,8 +186,9 @@ const ShippingRatesControl = ( {
 		return rate === selectedRateIds[ 0 ];
 	} );
 
+	// Match the rates on screen so the layout does not jump while they reload.
 	if ( isLoadingRates ) {
-		return <CheckoutShippingSkeleton />;
+		return <CheckoutShippingSkeleton rows={ shippingRatesRateCount } />;
 	}
 
 	return (

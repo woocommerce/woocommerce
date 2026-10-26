@@ -17,6 +17,7 @@ use Automattic\WooCommerce\Utilities\{ LoggingUtil, OrderUtil, PluginUtil };
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Enums\{ DefaultCustomerAddress, TaxBasedOn, TaxDisplayMode };
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
 
 /**
  * System status controller class.
@@ -52,6 +53,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 		add_action( 'switch_theme', array( __CLASS__, 'clean_theme_cache' ) );
 		add_action( 'activate_plugin', array( __CLASS__, 'clean_plugin_cache' ) );
 		add_action( 'deactivate_plugin', array( __CLASS__, 'clean_plugin_cache' ) );
+		add_action( 'deleted_plugin', array( __CLASS__, 'clean_plugin_cache' ) );
 		add_action(
 			'upgrader_process_complete',
 			function ( $upgrader, $extra ) {
@@ -190,7 +192,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 							'readonly'    => true,
 						),
 						'wp_memory_limit'           => array(
-							'description' => __( 'WordPress memory limit.', 'woocommerce' ),
+							'description' => __( 'WordPress memory limit in bytes, or at least 32G if there is no memory limit.', 'woocommerce' ),
 							'type'        => 'integer',
 							'context'     => array( 'view' ),
 							'readonly'    => true,
@@ -1026,9 +1028,11 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 		}
 
 		// WP memory limit.
-		$wp_memory_limit = wc_let_to_num( WP_MEMORY_LIMIT );
+		$wp_memory_limit = wp_convert_hr_to_bytes( WP_MEMORY_LIMIT );
 		if ( function_exists( 'memory_get_usage' ) ) {
-			$wp_memory_limit = max( $wp_memory_limit, wc_let_to_num( @ini_get( 'memory_limit' ) ) ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+			$php_memory_limit = @wc_get_container()->get( LegacyProxy::class )->call_function( 'ini_get', 'memory_limit' ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+			// Use 32G for no limit (-1) so numeric comparisons keep working.
+			$wp_memory_limit = max( $wp_memory_limit, wp_convert_hr_to_bytes( '-1' === $php_memory_limit ? '32G' : $php_memory_limit ) );
 		}
 
 		// Test POST requests.

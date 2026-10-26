@@ -37,14 +37,26 @@ final class UnexpectedErrorResponse {
 			$error->getLine()
 		);
 
+		// PHP reports subclasses of ParseError and CompileError as E_ERROR, so match exact classes.
+		$error_types = array(
+			\ParseError::class   => E_PARSE,
+			\CompileError::class => E_COMPILE_ERROR,
+		);
+
 		try {
 			wc_get_logger()->critical(
 				$log_message,
 				array(
-					'source'    => 'store-api',
-					'exception' => $error,
+					'source'         => 'store-api',
+					'error'          => array(
+						'type' => $error_types[ get_class( $error ) ] ?? E_ERROR,
+						'file' => $error->getFile(),
+						'line' => $error->getLine(),
+					),
 					// Same shape the fatal-error shutdown handler logs, so log handlers and readers see one trace format.
-					'backtrace' => array_slice( explode( "\n", $error->getTraceAsString() ), 0, self::MAX_BACKTRACE_FRAMES ),
+					'backtrace'      => array_slice( explode( "\n", $error->getTraceAsString() ), 0, self::MAX_BACKTRACE_FRAMES ),
+					// These failures reached remote logging as fatals before the dispatchers caught them.
+					'remote-logging' => true,
 				)
 			);
 		} catch ( \Throwable $logging_error ) {

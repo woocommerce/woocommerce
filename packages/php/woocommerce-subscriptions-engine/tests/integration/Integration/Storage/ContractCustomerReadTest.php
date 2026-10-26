@@ -54,7 +54,7 @@ class ContractCustomerReadTest extends EngineIntegrationTestCase {
 			)
 		);
 
-		return $this->sut->insert( $contract );
+		return $this->insert_released( $contract );
 	}
 
 	/**

@@ -505,6 +505,53 @@ class WC_Helper_Updater {
 	}
 
 	/**
+	 * Active WooCommerce.com plugins that have no subscription on this store.
+	 *
+	 * A connected store uses the same check as the Plugins screen "Subscribe" notice. A store that
+	 * isn't connected has no subscription for any of them. Returns null when an active plugin needs
+	 * checking but the subscription list is unknown: the last fetch failed (for example, rate limited),
+	 * or it isn't cached and $fetch is false.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param bool $fetch Whether to fetch the subscription list from WooCommerce.com when it isn't cached.
+	 *                    False keeps this call local; a page that can't afford to block passes it.
+	 * @return array|null Plugin data from WC_Helper::get_local_woo_plugins(), keyed by plugin file.
+	 */
+	public static function get_plugins_without_subscription( bool $fetch = true ): ?array {
+		$plugins = array_filter(
+			WC_Helper::get_local_woo_plugins(),
+			static function ( $plugin_file ) {
+				return WC_Woo_Update_Manager_Plugin::WOO_UPDATE_MANAGER_PLUGIN_MAIN_FILE !== $plugin_file
+					&& is_plugin_active( $plugin_file );
+			},
+			ARRAY_FILTER_USE_KEY
+		);
+
+		if ( empty( $plugins ) || ! WC_Helper::is_site_connected() ) {
+			return $plugins;
+		}
+
+		if ( ! $fetch && ! WC_Helper::has_cached_subscriptions() ) {
+			return null;
+		}
+
+		$plugins = array_filter(
+			$plugins,
+			static function ( $plugin ) {
+				return empty( self::get_subscriptions_for_product( $plugin['_product_id'] ) );
+			}
+		);
+
+		// Read after the subscriptions fetch above, so a failure from it is already recorded.
+		if ( null !== WC_Helper::get_api_error() ) {
+			return null;
+		}
+
+		return $plugins;
+	}
+
+	/**
 	 * WooCommerce.com product page URL for a plugin, from the update data Core already holds.
 	 *
 	 * @since 11.2.0
@@ -1186,6 +1233,7 @@ class WC_Helper_Updater {
 		}
 
 		set_transient( $cache_key, $data, WEEK_IN_SECONDS );
+		delete_transient( '_woocommerce_helper_updates_count' );
 		return $data['products'];
 	}
 
@@ -1201,17 +1249,13 @@ class WC_Helper_Updater {
 			return $count;
 		}
 
-		// This runs often, so it only counts from cached data; a cache that's stale or expired by a refresh triggers one update check here.
+		// This runs on every admin page, so it counts from the cached update data, even when stale, and never runs an update check.
 		if ( ! get_transient( '_woocommerce_helper_subscriptions' ) ) {
 			return 0;
 		}
 
-		if ( ! get_transient( '_woocommerce_helper_updates' ) ) {
-			return 0;
-		}
-
 		$count       = 0;
-		$update_data = self::get_update_data();
+		$update_data = self::get_cached_products( get_transient( '_woocommerce_helper_updates' ), '' );
 
 		if ( empty( $update_data ) ) {
 			set_transient( $cache_key, $count, 12 * HOUR_IN_SECONDS );
@@ -1220,7 +1264,7 @@ class WC_Helper_Updater {
 
 		// Scan local plugins.
 		foreach ( WC_Helper::get_local_woo_plugins() as $plugin ) {
-			if ( empty( $update_data[ $plugin['_product_id'] ] ) ) {
+			if ( ! isset( $update_data[ $plugin['_product_id'] ]['version'] ) ) {
 				continue;
 			}
 
@@ -1235,7 +1279,7 @@ class WC_Helper_Updater {
 
 		// Scan local themes.
 		foreach ( WC_Helper::get_local_woo_themes() as $theme ) {
-			if ( empty( $update_data[ $theme['_product_id'] ] ) ) {
+			if ( ! isset( $update_data[ $theme['_product_id'] ]['version'] ) ) {
 				continue;
 			}
 

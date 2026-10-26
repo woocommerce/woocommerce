@@ -196,13 +196,25 @@ class WC_Admin_Addons {
 			exit();
 		}
 
-		$sections         = self::get_sections();
-		$allowed_sections = array_map( fn( $section_object ) => $section_object->slug, $sections );
-		// Validate if the category is supported.
-		$section = in_array( $section, $allowed_sections, true ) ? $section : '_featured';
+		$default_redirect_url = admin_url( 'admin.php?page=wc-admin&path=%2Fextensions' );
 
 		if ( '_featured' === $section ) {
-			wp_safe_redirect( admin_url( 'admin.php?page=wc-admin&path=%2Fextensions' ) );
+			wp_safe_redirect( $default_redirect_url );
+			exit();
+		}
+
+		// get_sections() returns false when the request fails, and the filter can return anything.
+		$sections         = self::get_sections();
+		$sections         = is_array( $sections ) ? $sections : array();
+		$allowed_sections = array();
+		foreach ( $sections as $section_object ) {
+			if ( is_object( $section_object ) && isset( $section_object->slug ) && is_string( $section_object->slug ) ) {
+				$allowed_sections[] = $section_object->slug;
+			}
+		}
+
+		if ( ! in_array( $section, $allowed_sections, true ) ) {
+			wp_safe_redirect( $default_redirect_url );
 			exit();
 		}
 

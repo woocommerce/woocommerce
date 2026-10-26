@@ -325,6 +325,63 @@ class Universal_Page_Output_Test extends BaseTestCase {
 	}
 
 	/**
+	 * Test that the page output tells the client no consent plugin decides without the WP Consent API.
+	 */
+	public function test_page_output_reports_consent_unmanaged_without_the_consent_api(): void {
+		$this->assertStringContainsString( 'wcAnalytics.consentManaged = false;', $this->render_analytics_data() );
+	}
+
+	/**
+	 * Test that the page output tells the client no consent plugin decides when none sets a consent type.
+	 *
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
+	 */
+	public function test_page_output_reports_consent_unmanaged_without_a_consent_type(): void {
+		require_once __DIR__ . '/mocks/wp-consent-api-functions.php';
+
+		$this->assertStringContainsString( 'wcAnalytics.consentManaged = false;', $this->render_analytics_data() );
+	}
+
+	/**
+	 * Test that the page output tells the client no consent plugin decides when only wp_has_consent() is defined.
+	 *
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
+	 */
+	public function test_page_output_reports_consent_unmanaged_with_only_wp_has_consent(): void {
+		require_once __DIR__ . '/mocks/wp-has-consent-function.php';
+
+		$this->assertStringContainsString( 'wcAnalytics.consentManaged = false;', $this->render_analytics_data() );
+	}
+
+	/**
+	 * Test that the page output tells the client a consent plugin decides when it sets a consent type.
+	 *
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
+	 */
+	public function test_page_output_reports_consent_managed_with_a_consent_type(): void {
+		require_once __DIR__ . '/mocks/wp-consent-api-functions.php';
+		add_filter( 'wp_get_consent_type', fn() => 'optin' );
+
+		$this->assertStringContainsString( 'wcAnalytics.consentManaged = true;', $this->render_analytics_data() );
+	}
+
+	/**
+	 * Test that the page output tells the client a consent plugin decides when it sets the consent type in the browser.
+	 *
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
+	 */
+	public function test_page_output_reports_consent_managed_when_the_consent_type_is_set_later(): void {
+		require_once __DIR__ . '/mocks/wp-consent-api-functions.php';
+		add_filter( 'wp_consent_api_waitfor_consent_hook', '__return_true' );
+
+		$this->assertStringContainsString( 'wcAnalytics.consentManaged = true;', $this->render_analytics_data() );
+	}
+
+	/**
 	 * Test that the server-fired pixel path keeps its request-derived
 	 * properties. That path runs on uncached requests and is the only place
 	 * where pixel.wp.com can learn the visitor's real IP, user agent and

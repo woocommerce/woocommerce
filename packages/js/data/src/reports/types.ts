@@ -154,6 +154,8 @@ export type OrderReport = {
 	total_formatted: string;
 	/** Returning or new customer. */
 	customer_type: string;
+	/** Payment gateway ID the order was paid with. */
+	payment_method: string;
 	extended_info: {
 		/** List of order product IDs, names, quantities. */
 		products: Array< {

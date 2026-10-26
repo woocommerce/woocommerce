@@ -55,7 +55,6 @@
 				"@typescript-eslint/*",
 				"@wordpress/autop",
 				"@wordpress/private-apis",
-				"@wordpress/scripts",
 				"@wordpress/style-engine",
 				"eslint*"
 			],
@@ -119,9 +118,12 @@
 				"@babel/preset-react",
 				"@babel/preset-typescript",
 				"@babel/runtime",
+				"@wordpress/env",
 				"@wordpress/prettier-config",
 				"@wordpress/postcss-plugins-preset",
+				"@wordpress/scripts",
 				"postcss",
+				"prettier",
 				"webpack"
 			],
 			"packages": [
@@ -366,7 +368,6 @@
 		},
 		{
 			"dependencies": [
-				"@wordpress/scripts",
 				"@wordpress/jest-console",
 				"@wordpress/e2e-test-utils"
 			],
@@ -403,15 +404,6 @@
 				"**"
 			],
 			"pinVersion": "25.6.0"
-		},
-		{
-			"dependencies": [
-				"@wordpress/env"
-			],
-			"packages": [
-				"**"
-			],
-			"pinVersion": "11.9.0"
 		},
 		{
 			"label": "Ensure @woocommerce/* dependencies are locked to the monorepo itself - except certain dependencies (migration pending).",
