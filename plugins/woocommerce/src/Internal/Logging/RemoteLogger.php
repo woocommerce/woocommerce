@@ -367,9 +367,10 @@ class RemoteLogger extends \WC_Log_Handler {
 		/**
 		 * Filter to allow other plugins to overwrite the result of the third-party error check for remote logging.
 		 *
-		 * Runs for `fatal-errors` entries (from the shutdown handler, with `error.type`, `error.file` and `error.line`) and, since 11.3.0, for `store-api` entries (caught Store API engine errors, with `error.file` and `error.line` only). Both carry a `backtrace` list of `#N file(line): call` strings.
+		 * Runs for `fatal-errors` entries from the shutdown handler and, since 11.3.0, for caught `store-api` errors. Both provide `error.type`, `error.file` and `error.line`; caught errors use the PHP error type they would produce if uncaught.
 		 *
 		 * @since 9.2.0
+		 * @since 11.4.0 Store API entries include the equivalent uncaught PHP error type.
 		 *
 		 * @param bool   $is_third_party_error The result of the third-party error check.
 		 * @param string $message              The error message.
