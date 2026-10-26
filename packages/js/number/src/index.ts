@@ -51,12 +51,42 @@ export function numberFormat(
 		parsedPrecision = decimals ? decimals.length : 0;
 	}
 
-	return numberFormatter(
-		number,
+	// PHP's number_format() rounds half away from zero, while locutus rounds
+	// half up (toward +Infinity) via Math.round, so negative exact halves
+	// come out one unit toward zero (e.g. -1.005 -> '-1.00' vs PHP '-1.01').
+	// Format the absolute value - on every tested row locutus matches PHP
+	// for non-negative inputs - and restore the sign.
+	const formatted = numberFormatter(
+		Math.abs( number ),
 		parsedPrecision,
 		decimalSeparator,
 		thousandSeparator
 	);
+
+	if (
+		number < 0 &&
+		! formatted.startsWith( 'NaN' ) &&
+		formatted !==
+			numberFormatter(
+				0,
+				parsedPrecision,
+				decimalSeparator,
+				thousandSeparator
+			)
+	) {
+		// Restore the sign only for a finite, nonzero result:
+		// - A finite formatted magnitude always begins with a digit, while
+		//   the pre-existing locutus overflow artifact (e.g. 'NaN.00' for
+		//   1e20 at precision 2) is always 'NaN'-prefixed, so the prefix
+		//   check keeps that artifact sign-free exactly as trunk does.
+		// - PHP drops the sign when the result rounds to zero ('0.00',
+		//   never '-0.00'); the zero-compare works for any separator
+		//   alphabet, including digits, because it compares formatted
+		//   output against formatted output instead of parsing back.
+		return `-${ formatted }`;
+	}
+
+	return formatted;
 }
 
 /**
