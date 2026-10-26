@@ -1977,6 +1977,9 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			'woocommerce_get_wp_query_args' => array( 'woocommerce_get_wp_query_args' ),
 			'woocommerce_order_data_store_cpt_get_orders_query' => array( 'woocommerce_order_data_store_cpt_get_orders_query' ),
 		);
+	}
+
+	/**
 	 * @testdox Unsupported order query arguments are reported in English, with the singular or plural wording for their count, whatever the site language.
 	 *
 	 * @testWith [["meta_query"], "Order query argument (meta_query) is not supported on the current order datastore."]
