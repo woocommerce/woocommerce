@@ -510,4 +510,78 @@ class SiteHealthTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'recommended', $result['status'], 'Failing webhooks should require attention.' );
 		$this->assertStringContainsString( '2 webhooks failed', $result['description'], 'Active and auto-disabled failing webhooks should both be counted.' );
 	}
+
+	/**
+	 * @testdox Scheduled actions check reports a backlog of actions more than an hour past due.
+	 */
+	public function test_past_due_actions_check_reports_backlog(): void {
+		global $wpdb;
+
+		// Actions scheduled when the test site was installed become past due as it ages, so only count this test's backlog.
+		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->actionscheduler_actions} WHERE status = %s", 'pending' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		for ( $i = 0; $i < 50; $i++ ) {
+			as_schedule_single_action( time() - 2 * HOUR_IN_SECONDS, 'wc_site_health_test_hook', array( $i ) );
+		}
+		$this->assertSame( 'good', $this->sut->run_test( 'woocommerce_past_due_actions' )['status'], 'A backlog at the threshold should pass.' );
+
+		as_schedule_single_action( time() - 2 * HOUR_IN_SECONDS, 'wc_site_health_test_hook', array( 50 ) );
+		$result = $this->sut->run_test( 'woocommerce_past_due_actions' );
+
+		$this->assertSame( 'recommended', $result['status'], 'A backlog above the threshold should require attention.' );
+		$this->assertStringContainsString( 'More than 50 scheduled actions', $result['description'], 'The result should describe the size of the backlog.' );
+	}
+
+	/**
+	 * @testdox Scheduled actions check reports a single action that is more than a day past due.
+	 */
+	public function test_past_due_actions_check_reports_action_stuck_for_a_day(): void {
+		as_schedule_single_action( time() - 2 * DAY_IN_SECONDS, 'wc_site_health_test_hook' );
+
+		$this->assertSame( 'recommended', $this->sut->run_test( 'woocommerce_past_due_actions' )['status'], 'An action stuck for over a day should require attention.' );
+	}
+
+	/**
+	 * @testdox Scheduled actions table size check runs its query without errors.
+	 */
+	public function test_scheduled_actions_table_check_runs_query(): void {
+		global $wpdb;
+
+		$result = $this->sut->run_test( 'woocommerce_scheduled_actions_table' );
+
+		$this->assertSame( 'good', $result['status'], 'A small actions table should pass.' );
+		$this->assertSame( '', $wpdb->last_error, 'The size query should not fail, since a failed query would read as a healthy table.' );
+	}
+
+	/**
+	 * @testdox Product lookup table check reports products without lookup rows, even when orphaned rows keep the counts equal, and reports regeneration in progress.
+	 */
+	public function test_product_lookup_table_check_reports_missing_rows(): void {
+		global $wpdb;
+
+		$product_ids = self::factory()->post->create_many( 2, array( 'post_type' => 'product' ) );
+		self::factory()->post->create(
+			array(
+				'post_type'   => 'product',
+				'post_status' => 'auto-draft',
+			)
+		);
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery
+		$wpdb->query( "DELETE FROM {$wpdb->wc_product_meta_lookup}" );
+		$wpdb->insert( $wpdb->wc_product_meta_lookup, array( 'product_id' => $product_ids[0] ) );
+		$wpdb->insert( $wpdb->wc_product_meta_lookup, array( 'product_id' => PHP_INT_MAX ) );
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery
+
+		$result = $this->sut->run_test( 'woocommerce_product_lookup_table' );
+
+		$this->assertSame( 'recommended', $result['status'], 'A product without a lookup row should require attention.' );
+		$this->assertStringContainsString( '1 product is missing', $result['description'], 'Only the published product should be counted, not the auto-draft.' );
+		$this->assertStringContainsString( 'regenerate_product_lookup_tables', $result['actions'], 'The result should link to the regeneration tool.' );
+
+		WC()->queue()->schedule_single( time() + HOUR_IN_SECONDS, 'wc_update_product_lookup_tables_column', array(), 'wc_update_product_lookup_tables' );
+
+		$result = $this->sut->run_test( 'woocommerce_product_lookup_table' );
+
+		$this->assertSame( 'WooCommerce product lookup table is being regenerated', $result['label'], 'A table being regenerated should be reported as in progress.' );
+		$this->assertSame( '', $result['actions'], 'The result should not offer to regenerate the table again.' );
+	}
 }

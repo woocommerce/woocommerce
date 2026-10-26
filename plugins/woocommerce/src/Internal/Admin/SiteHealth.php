@@ -35,6 +35,16 @@ class SiteHealth {
 	private const REST_NAMESPACE = 'wc-site-health/v1';
 
 	/**
+	 * Number of past-due scheduled actions above which the backlog is reported.
+	 */
+	private const PAST_DUE_ACTIONS_THRESHOLD = 50;
+
+	/**
+	 * Number of scheduled actions above which the table is reported as large.
+	 */
+	private const SCHEDULED_ACTIONS_THRESHOLD = 500000;
+
+	/**
 	 * Class instance.
 	 *
 	 * @var SiteHealth instance
@@ -664,6 +674,98 @@ class SiteHealth {
 					),
 				),
 			),
+			'woocommerce_past_due_actions'             => array(
+				'label' => __( 'Action Scheduler backlog', 'woocommerce' ),
+				'badge' => 'performance',
+				'async' => true,
+				'check' => array( $this, 'get_past_due_actions' ),
+				'good'  => array(
+					'label'       => __( 'Action Scheduler has no significant backlog', 'woocommerce' ),
+					'description' => __( 'No scheduled actions are more than a day past due, and few are more than an hour past due.', 'woocommerce' ),
+				),
+				'fail'  => array(
+					'label'       => __( 'Action Scheduler has a backlog of past-due actions', 'woocommerce' ),
+					'description' => fn( array $past_due ) => $past_due['count'] > self::PAST_DUE_ACTIONS_THRESHOLD
+						? sprintf(
+							/* translators: %s: Number of scheduled actions. */
+							__( 'More than %s scheduled actions are more than an hour past due. This usually means WP-Cron or the Action Scheduler queue runner is not running.', 'woocommerce' ),
+							number_format_i18n( self::PAST_DUE_ACTIONS_THRESHOLD )
+						)
+						: sprintf(
+							/* translators: %s: Number of scheduled actions. */
+							_n(
+								'%s scheduled action is past due, and at least one has been waiting for more than a day. This usually means WP-Cron or the Action Scheduler queue runner is not running.',
+								'%s scheduled actions are past due, and at least one has been waiting for more than a day. This usually means WP-Cron or the Action Scheduler queue runner is not running.',
+								$past_due['count'],
+								'woocommerce'
+							),
+							number_format_i18n( $past_due['count'] )
+						),
+					'actions'     => array(
+						array(
+							'url'   => admin_url( 'admin.php?page=wc-status&tab=action-scheduler&status=past-due' ),
+							'label' => __( 'View past-due actions', 'woocommerce' ),
+						),
+					),
+				),
+			),
+			'woocommerce_scheduled_actions_table'      => array(
+				'label' => __( 'Action Scheduler table size', 'woocommerce' ),
+				'badge' => 'performance',
+				'async' => true,
+				'check' => fn() => ! $this->is_scheduled_actions_table_oversized(),
+				'good'  => array(
+					'label'       => __( 'Action Scheduler table size is healthy', 'woocommerce' ),
+					'description' => __( 'The scheduled actions table is not large enough to slow down background processing.', 'woocommerce' ),
+				),
+				'fail'  => array(
+					'label'       => __( 'Action Scheduler table is large', 'woocommerce' ),
+					'description' => fn() => sprintf(
+						/* translators: %s: Number of rows. */
+						__( 'The scheduled actions table has more than %s rows. Completed, canceled, and failed actions are kept for a retention period, and a very large table slows down background processing.', 'woocommerce' ),
+						number_format_i18n( self::SCHEDULED_ACTIONS_THRESHOLD )
+					),
+					'actions'     => array(
+						array(
+							'url'   => admin_url( 'admin.php?page=wc-status&tab=action-scheduler' ),
+							'label' => __( 'View scheduled actions', 'woocommerce' ),
+						),
+					),
+				),
+			),
+			'woocommerce_product_lookup_table'         => array(
+				'label' => __( 'WooCommerce product lookup table', 'woocommerce' ),
+				'badge' => 'performance',
+				'async' => true,
+				'check' => array( $this, 'get_products_missing_from_lookup_table' ),
+				'good'  => array(
+					'label'       => __( 'WooCommerce product lookup table has every product', 'woocommerce' ),
+					'description' => __( 'Every product has a row in the product lookup table.', 'woocommerce' ),
+				),
+				'fail'  => array(
+					'label'       => fn( array $missing ) => isset( $missing['regenerating'] )
+						? __( 'WooCommerce product lookup table is being regenerated', 'woocommerce' )
+						: __( 'WooCommerce products are missing from the product lookup table', 'woocommerce' ),
+					'description' => fn( array $missing ) => isset( $missing['regenerating'] )
+						? __( 'Sorting and filtering products by price, stock, or rating can be wrong until regeneration finishes.', 'woocommerce' )
+						: sprintf(
+							/* translators: %s: Number of products. */
+							_n(
+								'%s product is missing from the product lookup table. Sorting and filtering products by price, stock, or rating can be wrong until the table is regenerated.',
+								'%s products are missing from the product lookup table. Sorting and filtering products by price, stock, or rating can be wrong until the table is regenerated.',
+								$missing['count'],
+								'woocommerce'
+							),
+							number_format_i18n( $missing['count'] )
+						),
+					'actions'     => fn( array $missing ) => isset( $missing['regenerating'] ) ? array() : array(
+						array(
+							'url'   => wp_nonce_url( admin_url( 'admin.php?page=wc-status&tab=tools&action=regenerate_product_lookup_tables' ), 'debug_action' ),
+							'label' => __( 'Regenerate product lookup tables', 'woocommerce' ),
+						),
+					),
+				),
+			),
 		);
 	}
 
@@ -1113,6 +1215,87 @@ class SiteHealth {
 		global $wpdb;
 
 		$count = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}wc_webhooks WHERE failure_count > 0 AND status <> 'paused'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+
+		return $count ? array( 'count' => $count ) : array();
+	}
+
+	/**
+	 * Count pending scheduled actions that are more than an hour past due, stopping just past the threshold.
+	 *
+	 * Reported when the backlog passes the threshold, or when any action is more than a day past due.
+	 *
+	 * @return array{count?: int} Empty when there is no significant backlog.
+	 */
+	private function get_past_due_actions(): array {
+		$store = ActionScheduler_Store::instance();
+		$query = array(
+			'status'       => ActionScheduler_Store::STATUS_PENDING,
+			'date'         => as_get_datetime_object( time() - HOUR_IN_SECONDS ),
+			'date_compare' => '<=',
+			'per_page'     => self::PAST_DUE_ACTIONS_THRESHOLD + 1,
+		);
+		$count = count( (array) $store->query_actions( $query ) );
+
+		if ( 0 === $count || $count > self::PAST_DUE_ACTIONS_THRESHOLD ) {
+			return $count ? array( 'count' => $count ) : array();
+		}
+
+		$query['date']     = as_get_datetime_object( time() - DAY_IN_SECONDS );
+		$query['per_page'] = 1;
+
+		return empty( $store->query_actions( $query ) ) ? array() : array( 'count' => $count );
+	}
+
+	/**
+	 * Check whether the Action Scheduler actions table has more rows than the threshold.
+	 *
+	 * Counting stops just past the threshold, so this stays cheap on very large tables.
+	 *
+	 * @return bool
+	 */
+	private function is_scheduled_actions_table_oversized(): bool {
+		global $wpdb;
+
+		// The table is only registered when Action Scheduler uses its default database store.
+		$table = (string) ( $wpdb->actionscheduler_actions ?? '' );
+		if ( '' === $table ) {
+			return false;
+		}
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$count = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name registered by Action Scheduler.
+				"SELECT COUNT(*) FROM ( SELECT 1 FROM {$table} LIMIT %d ) AS actions",
+				self::SCHEDULED_ACTIONS_THRESHOLD + 1
+			)
+		);
+
+		return $count > self::SCHEDULED_ACTIONS_THRESHOLD;
+	}
+
+	/**
+	 * Count products that have no row in the product lookup table.
+	 *
+	 * Auto-drafts and trashed products are skipped because they never appear in the storefront.
+	 *
+	 * @return array{count?: int, regenerating?: bool} Empty when no products are missing.
+	 */
+	private function get_products_missing_from_lookup_table(): array {
+		global $wpdb;
+
+		if ( wc_update_product_lookup_tables_is_running() ) {
+			return array( 'regenerating' => true );
+		}
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		$count = (int) $wpdb->get_var(
+			"SELECT COUNT(*) FROM {$wpdb->posts} AS posts
+			LEFT JOIN {$wpdb->wc_product_meta_lookup} AS lookup ON lookup.product_id = posts.ID
+			WHERE posts.post_type IN ( 'product', 'product_variation' )
+			AND posts.post_status NOT IN ( 'auto-draft', 'trash' )
+			AND lookup.product_id IS NULL"
+		);
 
 		return $count ? array( 'count' => $count ) : array();
 	}
