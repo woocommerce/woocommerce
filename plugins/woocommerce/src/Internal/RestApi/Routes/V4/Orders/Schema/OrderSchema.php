@@ -725,7 +725,7 @@ class OrderSchema extends AbstractSchema {
 				// Mirror Refunds\DataUtils validation: compare on a tax-inclusive, absolute basis
 				// (so discount/negative lines are handled) and round to currency precision (so a
 				// fully-refunded line is not reported refundable on a sub-cent float residue).
-				$remaining                    = abs( (float) $shipping_line->get_total() + (float) $shipping_line->get_total_tax() ) - $refunded;
+				$remaining                    = abs( $this->data_utils->compute_line_item_refund_total( $shipping_line, 1 ) ) - $refunded;
 				$item_data['can_be_refunded'] = NumberUtil::round( $remaining, CurrencyUtil::get_price_decimals( $order->get_currency() ) ) > 0;
 
 				$data['shipping_lines'][] = $item_data;
@@ -755,7 +755,7 @@ class OrderSchema extends AbstractSchema {
 				// Mirror Refunds\DataUtils validation: compare on a tax-inclusive, absolute basis
 				// (so discount/negative fee lines are handled) and round to currency precision (so a
 				// fully-refunded line is not reported refundable on a sub-cent float residue).
-				$remaining                    = abs( (float) $fee_line->get_total() + (float) $fee_line->get_total_tax() ) - $refunded;
+				$remaining                    = abs( $this->data_utils->compute_line_item_refund_total( $fee_line, 1 ) ) - $refunded;
 				$item_data['can_be_refunded'] = NumberUtil::round( $remaining, CurrencyUtil::get_price_decimals( $order->get_currency() ) ) > 0;
 
 				$data['fee_lines'][] = $item_data;

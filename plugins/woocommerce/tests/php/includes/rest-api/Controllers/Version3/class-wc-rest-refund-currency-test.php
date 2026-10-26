@@ -99,7 +99,7 @@ class WC_REST_Refund_Currency_Test extends WC_REST_Unit_Test_Case {
 		if ( isset( $body['amount'] ) ) {
 			$body['amount'] = (string) $body['amount'];
 		}
-		$request->set_body_params( $body );
+		$request->set_body_params( array_merge( array( 'dp' => 2 ), $body ) );
 		return $this->server->dispatch( $request );
 	}
 
@@ -264,5 +264,56 @@ class WC_REST_Refund_Currency_Test extends WC_REST_Unit_Test_Case {
 			),
 			$actual
 		);
+	}
+
+	/**
+	 * @testdox Closing a partial taxed refund uses exact tax history.
+	 * @param string $store Store currency.
+	 * @param int    $dp Store decimals.
+	 * @param string $currency Order currency.
+	 * @dataProvider currencies
+	 */
+	public function test_taxed_partial_then_quantity( string $store, int $dp, string $currency ): void {
+		list( $order, $item_id ) = $this->order_fixture( $store, $dp, $currency, 100, 10 );
+		$first                   = $this->request(
+			$order,
+			array(
+				'compute_totals' => true,
+				'line_items'     => array(
+					array(
+						'id'           => $item_id,
+						'refund_total' => 55.25,
+					),
+				),
+			)
+		);
+		$this->assertSame( 201, $first->get_status(), wp_json_encode( $first->get_data() ) );
+		$preview = $this->request(
+			$order,
+			array(
+				'line_items' => array(
+					array(
+						'line_item_id' => $item_id,
+						'quantity'     => 1,
+					),
+				),
+			),
+			true
+		);
+		$last    = $this->request(
+			$order,
+			array(
+				'compute_totals' => true,
+				'line_items'     => array(
+					array(
+						'id'       => $item_id,
+						'quantity' => 1,
+					),
+				),
+			)
+		);
+		$this->assertSame( 201, $last->get_status(), wp_json_encode( $last->get_data() ) );
+		$expected = 'JPY' === $currency ? 55.0 : 54.75;
+		$this->assertEquals( array( $expected, $expected, $expected, 110.0 ), array( (float) $last->get_data()['amount'], (float) ( $preview->get_data()['total'] ?? -1 ), end( $this->gateway_amounts ), (float) wc_get_order( $order->get_id() )->get_total_refunded() ) );
 	}
 }

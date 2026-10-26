@@ -66,6 +66,20 @@ class DataUtils {
 	}
 
 	/**
+	 * Read exact per-rate taxes when item tax aggregates use a coarser store precision.
+	 *
+	 * @param WC_Order_Item_Product|WC_Order_Item_Shipping|WC_Order_Item_Fee $item Order item.
+	 * @return float
+	 */
+	private function get_item_gross( $item ): float {
+		$tax = $this->get_price_decimals( $item->get_order() ) === wc_get_price_decimals()
+			? (float) $item->get_total_tax()
+			: array_sum( array_map( 'floatval', $item->get_taxes()['total'] ?? array() ) );
+
+		return (float) $item->get_total() + $tax;
+	}
+
+	/**
 	 * Convert line items (schema format) to internal format. This keys arrays by item ID and has some different naming
 	 * conventions.
 	 *
@@ -381,7 +395,7 @@ class DataUtils {
 			// accepted (or rejected) there behaves the same way here.
 			if ( isset( $line_item['refund_total'] ) ) {
 				$price_decimals    = $this->get_price_decimals( $order );
-				$signed_line_total = (float) $item->get_total() + (float) $item->get_total_tax();
+				$signed_line_total = $this->get_item_gross( $item );
 
 				// Reject a refund_total whose sign is opposite the line: you cannot refund
 				// a positive amount from a discount line, or a negative amount from a normal
@@ -541,7 +555,7 @@ class DataUtils {
 	 */
 	public function validate_refund_line_total( $item, float $refund_total, float $already_refunded_total ) {
 		$price_decimals      = $this->get_price_decimals( $item->get_order() );
-		$signed_line_total   = (float) $item->get_total() + (float) $item->get_total_tax();
+		$signed_line_total   = $this->get_item_gross( $item );
 		$item_total_with_tax = abs( $signed_line_total );
 		$abs_refund_total    = NumberUtil::round( abs( $refund_total ), $price_decimals );
 
@@ -745,11 +759,11 @@ class DataUtils {
 				);
 				return 0.0;
 			}
-			$unit_price_with_tax = ( (float) $item->get_total() + (float) $item->get_total_tax() ) / $original_qty;
+			$unit_price_with_tax = ( $this->get_item_gross( $item ) ) / $original_qty;
 			return NumberUtil::round( $unit_price_with_tax * $quantity, $price_decimals );
 		}
 
-		return NumberUtil::round( (float) $item->get_total() + (float) $item->get_total_tax(), $price_decimals );
+		return NumberUtil::round( $this->get_item_gross( $item ), $price_decimals );
 	}
 
 	/**
@@ -793,7 +807,7 @@ class DataUtils {
 	private function compute_quantity_refund_total( $item, int $quantity, array $refund_data ): float {
 		$computed          = $this->compute_line_item_refund_total( $item, $quantity );
 		$price_decimals    = $this->get_price_decimals( $item->get_order() );
-		$signed_line_total = (float) $item->get_total() + (float) $item->get_total_tax();
+		$signed_line_total = $this->get_item_gross( $item );
 		$refunded_total    = abs( (float) ( $refund_data['totals'][ $item->get_id() ] ?? 0.0 ) );
 		$remaining_total   = NumberUtil::round( abs( $signed_line_total ) - $refunded_total, $price_decimals );
 
@@ -1200,7 +1214,7 @@ class DataUtils {
 			}
 
 			$price_decimals    = $this->get_price_decimals( $order );
-			$signed_line_total = (float) $item->get_total() + (float) $item->get_total_tax();
+			$signed_line_total = $this->get_item_gross( $item );
 
 			// Validate an explicit refund_total. Mirrors validate_line_items() exactly (sign,
 			// zero, and the three over-refund caps) so a previewed amount that is accepted or
@@ -1631,10 +1645,10 @@ class DataUtils {
 			foreach ( $refunded_line_items as $refunded_item ) {
 				$original_id                    = absint( $refunded_item->get_meta( '_refunded_item_id' ) );
 				$qtys[ $original_id ]           = ( $qtys[ $original_id ] ?? 0 ) + $refunded_item->get_quantity();
-				$totals[ $original_id ]         = ( $totals[ $original_id ] ?? 0.0 ) + ( (float) $refunded_item->get_total() + (float) $refunded_item->get_total_tax() ) * -1;
+				$totals[ $original_id ]         = ( $totals[ $original_id ] ?? 0.0 ) + ( $this->get_item_gross( $refunded_item ) ) * -1;
 				$line_refunds[ $original_id ][] = array(
 					'qty'   => absint( $refunded_item->get_quantity() ),
-					'gross' => abs( (float) $refunded_item->get_total() + (float) $refunded_item->get_total_tax() ),
+					'gross' => abs( $this->get_item_gross( $refunded_item ) ),
 				);
 				$add_refunded_taxes( $refunded_item, $original_id );
 			}
@@ -1646,7 +1660,7 @@ class DataUtils {
 			$refunded_fees = $refund->get_items( 'fee' );
 			foreach ( $refunded_fees as $refunded_item ) {
 				$original_id            = absint( $refunded_item->get_meta( '_refunded_item_id' ) );
-				$totals[ $original_id ] = ( $totals[ $original_id ] ?? 0.0 ) + ( (float) $refunded_item->get_total() + (float) $refunded_item->get_total_tax() ) * -1;
+				$totals[ $original_id ] = ( $totals[ $original_id ] ?? 0.0 ) + ( $this->get_item_gross( $refunded_item ) ) * -1;
 				$add_refunded_taxes( $refunded_item, $original_id );
 			}
 			/**
@@ -1657,7 +1671,7 @@ class DataUtils {
 			$refunded_shipping = $refund->get_items( 'shipping' );
 			foreach ( $refunded_shipping as $refunded_item ) {
 				$original_id            = absint( $refunded_item->get_meta( '_refunded_item_id' ) );
-				$totals[ $original_id ] = ( $totals[ $original_id ] ?? 0.0 ) + ( (float) $refunded_item->get_total() + (float) $refunded_item->get_total_tax() ) * -1;
+				$totals[ $original_id ] = ( $totals[ $original_id ] ?? 0.0 ) + ( $this->get_item_gross( $refunded_item ) ) * -1;
 				$add_refunded_taxes( $refunded_item, $original_id );
 			}
 		}
