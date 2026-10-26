@@ -17431,12 +17431,6 @@ parameters:
 			path: includes/data-stores/class-wc-product-data-store-cpt.php
 
 		-
-			message: '#^Parameter \#1 \$postarr of function wp_update_post expects array\{ID\?\: int, post_author\?\: int, post_date\?\: string, post_date_gmt\?\: string, post_content\?\: string, post_content_filtered\?\: string, post_title\?\: string, post_excerpt\?\: string, \.\.\.\}, array\{ID\: int, post_content\: string, post_excerpt\: string, post_title\: string, post_parent\: int, comment_status\: ''closed''\|''open'', post_status\: non\-falsy\-string, menu_order\: int, \.\.\.\} given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/data-stores/class-wc-product-data-store-cpt.php
-
-		-
 			message: '#^Parameter \#1 \$posts of function update_post_caches expects array\<WP_Post\>, array\<int\|WP_Post\> given\.$#'
 			identifier: argument.type
 			count: 1
