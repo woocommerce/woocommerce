@@ -182,8 +182,8 @@ class NewOrderNotificationTrigger {
 	 * Records that the order has reached a notifiable status, once. Failures are
 	 * logged rather than thrown, as this runs inside another plugin's status change.
 	 *
-	 * Writes meta only, like NewOrderNotification::write_meta(), so it does not
-	 * fire the order save hooks again.
+	 * Writes meta only, and the key is listed as ephemeral in OrdersTableDataStore,
+	 * so on HPOS the write does not turn into a full order save.
 	 *
 	 * @param WC_Order $order The order object.
 	 * @return void

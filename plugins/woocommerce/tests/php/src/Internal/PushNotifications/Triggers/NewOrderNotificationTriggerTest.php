@@ -5,13 +5,16 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Triggers;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\PushNotifications\Dispatchers\InternalNotificationDispatcher;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewOrderNotification;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\PendingNotificationStore;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationStepLogger;
 use Automattic\WooCommerce\Internal\PushNotifications\Triggers\NewOrderNotificationTrigger;
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\Tests\Internal\PushNotifications\Helpers\PushNotificationsTestTrait;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 use Exception;
 use WC_Logger;
 use WC_Order;
@@ -305,6 +308,49 @@ class NewOrderNotificationTriggerTest extends WC_Unit_Test_Case {
 		$this->trigger->on_order_status_changed_while_disabled( $order->get_id(), OrderStatus::PENDING, OrderStatus::CANCELLED, $order );
 
 		$this->assertFalse( wc_get_order( $order->get_id() )->meta_exists( NewOrderNotificationTrigger::NOTIFIABLE_META_KEY ), 'A cancelled order should not be marked' );
+	}
+
+	/**
+	 * @testdox Should mark the order on HPOS without a full order save, so woocommerce_update_order does not fire.
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $sync_enabled Whether HPOS and posts data sync is on.
+	 */
+	public function test_marking_order_does_not_fire_update_order_hook( bool $sync_enabled ): void {
+		$previous_hpos = OrderUtil::custom_orders_table_usage_is_enabled();
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		add_filter(
+			'pre_option_' . DataSynchronizer::ORDERS_DATA_SYNC_ENABLED_OPTION,
+			static function () use ( $sync_enabled ) {
+				return wc_bool_to_string( $sync_enabled );
+			}
+		);
+		OrderHelper::toggle_cot_feature_and_usage( true );
+
+		try {
+			$order = wc_create_order( array( 'status' => OrderStatus::PENDING ) );
+			// HPOS saves the whole order after a meta change unless the order was modified in the current second.
+			$order->set_date_modified( time() - HOUR_IN_SECONDS );
+			$order->save();
+			$update_order_count = 0;
+			add_action(
+				'woocommerce_update_order',
+				function () use ( &$update_order_count ) {
+					++$update_order_count;
+				}
+			);
+
+			$this->trigger->on_order_status_changed_while_disabled( $order->get_id(), OrderStatus::PENDING, OrderStatus::PROCESSING, $order );
+
+			$this->assertTrue( wc_get_order( $order->get_id() )->meta_exists( NewOrderNotificationTrigger::NOTIFIABLE_META_KEY ), 'The order should be marked as notifiable' );
+			$this->assertSame( 0, $update_order_count, 'Marking the order should not fire woocommerce_update_order' );
+			if ( $sync_enabled ) {
+				$this->assertNotEmpty( get_post_meta( $order->get_id(), NewOrderNotificationTrigger::NOTIFIABLE_META_KEY, true ), 'The marker should be copied to the posts table when sync is on' );
+			}
+		} finally {
+			OrderHelper::toggle_cot_feature_and_usage( $previous_hpos );
+		}
 	}
 
 	/**
