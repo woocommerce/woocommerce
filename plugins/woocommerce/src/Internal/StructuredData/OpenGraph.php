@@ -87,11 +87,13 @@ class OpenGraph {
 	 */
 	private function prepare_tags( array $tags, $context ): array {
 		$this->default_card = isset( $tags['twitter:card'] ) && is_string( $tags['twitter:card'] ) ? $tags['twitter:card'] : null;
+		$default_tags       = $tags;
 
 		/**
 		 * Filters Open Graph metadata before output. Currently applied only to product pages.
 		 * Other page types may be supported later; callbacks must check the object type.
 		 * Removing og:type from $tags also preserves an existing provider's type.
+		 * Unchanged price aliases follow filtered prices and currencies.
 		 *
 		 * @since 11.4.0
 		 *
@@ -122,6 +124,26 @@ class OpenGraph {
 			}
 			if ( 'og:see_also' === $property && isset( $prepared[ $property ] ) ) {
 				$prepared[ $property ] = array_slice( array_values( array_unique( $prepared[ $property ] ) ), 0, 6 );
+			}
+		}
+
+		foreach ( array(
+			array( 'product:price:amount', 'og:price:amount', 'product:sale_price:amount' ),
+			array( 'product:price:currency', 'og:price:currency', 'product:sale_price:currency' ),
+		) as $properties ) {
+			$changed_values = array();
+			foreach ( $properties as $property ) {
+				if ( isset( $prepared[ $property ], $default_tags[ $property ] ) && $prepared[ $property ][0] !== $default_tags[ $property ] ) {
+					$changed_values[] = $prepared[ $property ][0];
+				}
+			}
+			if ( 1 !== count( array_unique( $changed_values ) ) ) {
+				continue;
+			}
+			foreach ( $properties as $property ) {
+				if ( isset( $prepared[ $property ], $default_tags[ $property ] ) && $prepared[ $property ][0] === $default_tags[ $property ] ) {
+					$prepared[ $property ] = array( $changed_values[0] );
+				}
 			}
 		}
 
@@ -221,12 +243,16 @@ class OpenGraph {
 	 * @return bool
 	 */
 	private function has_conflicting_price( string $property, string $content ): bool {
-		if ( ! isset( $this->tags[ $property ] ) ) {
-			return false;
-		}
-		$fallback = $this->tags[ $property ][0];
 		if ( in_array( $property, array( 'product:price:currency', 'og:price:currency', 'product:sale_price:currency' ), true ) ) {
-			return strtoupper( trim( $content ) ) !== $fallback;
+			$fallback = $this->tags[ $property ][0] ?? $this->tags['product:price:currency'][0] ?? $this->tags['og:price:currency'][0] ?? $this->tags['product:sale_price:currency'][0] ?? null;
+			return null !== $fallback && strtoupper( trim( $content ) ) !== strtoupper( trim( $fallback ) );
+		}
+		$fallback = $this->tags[ $property ][0] ?? null;
+		if ( null === $fallback && 'product:sale_price:amount' === $property ) {
+			$fallback = $this->tags['product:price:amount'][0] ?? $this->tags['og:price:amount'][0] ?? null;
+		}
+		if ( null === $fallback ) {
+			return false;
 		}
 		if ( in_array( $property, array( 'product:price:amount', 'og:price:amount', 'product:sale_price:amount', 'og:price:standard_amount' ), true ) ) {
 			return ! is_numeric( $content ) || (float) $content !== (float) $fallback;
@@ -444,14 +470,14 @@ class OpenGraph {
 	}
 
 	/**
-	 * Identify UPC, EAN and ISBN values without treating arbitrary IDs as barcodes.
+	 * Identify GTIN, UPC, EAN and ISBN values without treating arbitrary IDs as barcodes.
 	 *
 	 * @param string $identifier Product's global unique ID.
 	 * @return array<string, string>
 	 */
 	private function get_identifier_tags( string $identifier ): array {
 		$gtin = preg_replace( '/[\s-]+/', '', $identifier );
-		if ( ! is_string( $gtin ) || ! preg_match( '/^(?!0+$)([0-9]{8}|[0-9]{12}|[0-9]{13})$/', $gtin ) ) {
+		if ( ! is_string( $gtin ) || ! preg_match( '/^(?!0+$)([0-9]{8}|[0-9]{12,14})$/', $gtin ) ) {
 			return array();
 		}
 		$sum    = 0;
@@ -467,7 +493,7 @@ class OpenGraph {
 		$tags = array( 'product:gtin' => $gtin );
 		if ( 12 === strlen( $gtin ) ) {
 			$tags['og:upc'] = $gtin;
-		} else {
+		} elseif ( in_array( strlen( $gtin ), array( 8, 13 ), true ) ) {
 			$tags['og:ean'] = $gtin;
 			if ( 13 === strlen( $gtin ) && ( 0 === strpos( $gtin, '978' ) || preg_match( '/^979[1-9]/', $gtin ) ) ) {
 				$tags['product:isbn'] = $gtin;
