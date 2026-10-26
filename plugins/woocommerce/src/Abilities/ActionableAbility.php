@@ -149,7 +149,18 @@ abstract class ActionableAbility extends \WP_Ability {
 		$objects = array( array( $subject, $updates, $this->get_resource() ) );
 		foreach ( is_array( $changed ) ? $changed : array() as $secondary ) {
 			$resource_name = $secondary[2] ?? $this->get_resource();
-			$fields        = $enabled ? $this->prepare_fields( $secondary[1], $resource_name ) : array();
+			if ( $enabled && ! ExtensibleAbilities::is_resource_registered( $resource_name ) ) {
+				wc_doing_it_wrong(
+					get_class( $this ) . '::change',
+					sprintf(
+						/* translators: %s: resource name. */
+						__( 'The "%s" resource of a secondary object is not registered, so no extension field or validator runs on it. Call ExtensibleAbilities::register_resource() first.', 'woocommerce' ),
+						$resource_name
+					),
+					'11.4.0'
+				);
+			}
+			$fields = $enabled ? $this->prepare_fields( $secondary[1], $resource_name ) : array();
 			if ( is_wp_error( $fields ) ) {
 				return $fields;
 			}
