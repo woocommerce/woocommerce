@@ -1511,7 +1511,7 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Set the payment method.
 	 *
-	 * @param string $payment_method Supports WC_Payment_Gateway for bw compatibility with < 3.0.
+	 * @param string|WC_Payment_Gateway $payment_method Gateway id, or a gateway object (also sets the title).
 	 * @throws WC_Data_Exception Throws exception when invalid data is found.
 	 * @return void
 	 */

@@ -87,7 +87,12 @@ class OrderController {
 		$order->set_customer_id( get_current_user_id() );
 		$order->set_customer_ip_address( \WC_Geolocation::get_ip_address() );
 		$order->set_customer_user_agent( wc_get_user_agent() );
-		$order->set_payment_method( PaymentUtils::get_checkout_payment_method() );
+		$payment_method     = PaymentUtils::get_checkout_payment_method();
+		$available_gateways = WC()->payment_gateways()->get_available_payment_gateways();
+		if ( isset( $available_gateways[ $payment_method ] ) ) {
+			$payment_method = $available_gateways[ $payment_method ];
+		}
+		$order->set_payment_method( $payment_method );
 		$order->update_meta_data( 'is_vat_exempt', wc_bool_to_string( wc()->cart->get_customer()->get_is_vat_exempt() ) );
 		$order->calculate_totals();
 	}
