@@ -97,6 +97,7 @@ function SettingsForm( { config }: { config: SettingsEntityConfig } ) {
 	};
 	const hasLoadError = !! loadError;
 	const isReady = ! hasLoadError && !! data && !! form;
+	// Breadcrumbs link through the router, which only leaves the screen for an absolute URL.
 	const paymentsUrl = new URL(
 		'admin.php?page=wc-settings&tab=checkout',
 		window.location.href
