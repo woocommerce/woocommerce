@@ -6,6 +6,7 @@
  */
 
 use Automattic\WooCommerce\Internal\Caches\CouponCodeLookupInvalidator;
+use Automattic\WooCommerce\Internal\DataStores\PostDataSlashing;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -104,7 +105,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 			)
 		);
 
-		$coupon_id = wp_insert_post( wp_slash( $post_data ), true );
+		$coupon_id = wp_insert_post( PostDataSlashing::slash( $post_data ), true );
 
 		if ( $coupon_id ) {
 			$coupon->set_id( $coupon_id );
@@ -222,7 +223,7 @@ class WC_Coupon_Data_Store_CPT extends WC_Data_Store_WP implements WC_Coupon_Dat
 				$GLOBALS['wpdb']->update( $GLOBALS['wpdb']->posts, $post_data, array( 'ID' => $coupon->get_id() ) );
 				clean_post_cache( $coupon->get_id() );
 			} else {
-				wp_update_post( wp_slash( array_merge( array( 'ID' => $coupon->get_id() ), $post_data ) ) );
+				wp_update_post( PostDataSlashing::slash( array_merge( array( 'ID' => $coupon->get_id() ), $post_data ) ) );
 			}
 			$coupon->read_meta_data( true ); // Refresh internal meta data, in case things were hooked into `save_post` or another WP hook.
 		}

@@ -8,6 +8,7 @@
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
+use Automattic\WooCommerce\Internal\DataStores\PostDataSlashing;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -159,7 +160,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			)
 		);
 
-		$id = wp_insert_post( wp_slash( $post_data ), true );
+		$id = wp_insert_post( PostDataSlashing::slash( $post_data ), true );
 
 		if ( $id && ! is_wp_error( $id ) ) {
 			$product->set_id( $id );
@@ -253,7 +254,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 				$GLOBALS['wpdb']->update( $GLOBALS['wpdb']->posts, $post_data, array( 'ID' => $product->get_id() ) );
 				clean_post_cache( $product->get_id() );
 			} else {
-				wp_update_post( wp_slash( array_merge( array( 'ID' => $product->get_id() ), $post_data ) ) );
+				wp_update_post( PostDataSlashing::slash( array_merge( array( 'ID' => $product->get_id() ), $post_data ) ) );
 			}
 			$product->read_meta_data( true ); // Refresh internal meta data, in case things were hooked into `save_post` or another WP hook.
 
