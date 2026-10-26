@@ -99,6 +99,22 @@ class WC_Shipping_Flat_Rate_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A percentage fee that should end in 5 rounds half up, even when floating point stores it just below.
+	 */
+	public function test_evaluate_cost_percent_fee_rounds_half_up(): void {
+		$val = $this->call_evaluate_cost->call(
+			$this->sut,
+			'[fee percent="15"]',
+			array(
+				'qty'  => 1,
+				'cost' => 16.90,
+			)
+		);
+
+		$this->assertEquals( 2.54, $val, '15% of 16.90 is 2.535, which should round up to 2.54.' );
+	}
+
+	/**
 	 * Percent fee calculation keeps the decimals when the store uses a comma as the decimal separator.
 	 */
 	public function test_evaluate_cost_percent_fee_comma() {
