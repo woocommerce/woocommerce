@@ -7,13 +7,13 @@ Status: prototype on `wooai/variable-products`, built on the custom product type
 | Task | Call |
 | --- | --- |
 | Create a variable product with its variations | `product-create` with `type: "variable"`, `attributes` and `variations[]` |
-| Change one variation | `product-update` with the variation id and `type: "variation"` |
-| Change, add or delete many variations at once | `product-update` on the parent with `type: "variable"` and `variations[]` |
+| Change one variation | `product-update` with the variation id |
+| Change, add or delete many variations at once | `product-update` on the parent with `variations[]` |
 | Add one variation to an existing product | `product-create` with `type: "variation"`, `parent_id` and `attributes` |
 | Read or list variations | `products-query` with a variation id, or with `parent_id` |
 | Delete one variation | `product-delete` with the variation id |
 
-A variation is a product with `type: "variation"`. Its class extends `WC_Product_Simple`, so it takes price, stock, `virtual` and `downloadable` like a simple product, plus `attributes`. A variable parent takes the common fields, `attributes` and `variations`. The output of every product carries `parent_id` and `attributes`, and a variable parent carries `variation_ids`.
+A variation is a product with `type: "variation"`. Its class extends `WC_Product_Simple`, so it takes price, stock, `virtual` and `downloadable` like a simple product, plus `attributes`. A variable parent takes the common fields, `attributes` and `variations`. The output of every product carries `parent_id` and `attributes`, and a variable parent carries `variation_ids`. An update needs no `type`: `product-update` loads the product and refuses a field that its type does not take, such as `variations` on a simple product.
 
 ### Create
 
@@ -37,7 +37,6 @@ Each variation picks one option of every attribute. The call refuses a variation
 ```json
 {
   "id": 123,
-  "type": "variable",
   "variations": [
     { "id": 124, "regular_price": "8.00" },
     { "attributes": [ { "name": "Size", "option": "L" } ], "regular_price": "15.00" },
@@ -69,14 +68,13 @@ Every `wc_transaction_query()` caller must stay balanced. One commit without a s
 
 Wholesale Suite (`woocommerce-wholesale-prices` on WordPress.org, 20,000 installs) stores a wholesale price per role on each variation, and derives a flag, a min and max price and a list of priced variations on the parent. Its REST layer subclasses the Core variations controller, and its own `set-wholesale-price` ability accepts `simple` and `variation` only, with "set it on each variation" for a variable parent. Three things followed from reading it:
 
-- **Addressing variations one by one is the model they chose.** It matches `type: "variation"` in `product-update`.
+- **Addressing variations one by one is the model they chose.** It matches `product-update` with a variation id.
 - **Bulk writes need one call.** A comment in their `sync_variable_parent()` reports 10,000 product hydrations for pricing 100 variations one call at a time, because every write rebuilds the parent, while the editor pays once per submit. That is why the parent update takes `variations[]`.
 - **Some writes touch two objects.** Their variation write also rewrites the parent's derived meta. An `update_callback` changes one object in memory, so the second write needs a step of its own: a sync that `ExtensibleAbilities::register_sync()` adds. It runs once per call, after every object of the call is saved and before the transaction commits, with every saved object and the ability. A sync that returns a `WP_Error` or throws refuses the call, and every save rolls back. For a bulk update of fifty variations the sync runs once, so the parent syncs one time, which is the editor's cost model. The `register_field()` docblock points to it.
 
 ## Open items
 
 - **Global attributes.** The `attributes` input always builds local attributes. A global attribute is a taxonomy such as `pa_size` with shared terms, and it drives layered navigation, attribute archives and the editor dropdowns. When the name matches a registered global attribute, set the attribute as a taxonomy and resolve the options to term ids, as `WC_REST_Products_V2_Controller::prepare_attributes()` does. Variation options then compare against term slugs.
-- **Updates need `type` for per-type fields.** The update schema is a `oneOf` per type, so a price change needs `type: "simple"` or `type: "variation"`, and `variations` needs `type: "variable"`, although Core knows the type after loading the product. Proposed fix: one flat update schema, and a runtime refusal of fields that do not apply to the loaded product with the existing `woocommerce_product_field_unsupported` error. This is open question 5 of the custom product types spike.
 - **The bulk update response lists ids.** A variable parent returns `variation_ids`, so a client that changed fifty prices reads them back with `products-query` and `parent_id`. Embedding the changed variations in the response is a small addition if clients need it.
 - **Limits of the transaction.** A plugin that opens a transaction with a raw query is outside the depth counter. A `commit` without a `start` from a plugin shifts the depth for the rest of the request. MyISAM tables ignore the transaction. A read replica can make the variation data store miss a parent that the primary has not replicated yet. Side effects of save hooks outside the database are not undone. These are documented on `ActionableAbility` and are the same trade as checkout.
 - **Attributes are local to the call.** Changing the parent's attributes does not revalidate existing variations that the input does not name.
