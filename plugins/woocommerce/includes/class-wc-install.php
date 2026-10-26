@@ -23,6 +23,7 @@ use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\WCCom\ConnectionHelper as WCConnectionHelper;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
+use Automattic\WooCommerce\Internal\VariationGallery\OrphanedGalleryMigration;
 use Automattic\WooCommerce\Utilities\{ OrderUtil, PluginUtil };
 
 defined( 'ABSPATH' ) || exit;
@@ -374,6 +375,7 @@ class WC_Install {
 		),
 		'11.4.0'   => array(
 			'wc_update_1140_re_enable_autoload_options',
+			OrphanedGalleryMigration::class . '::run',
 		),
 	);
 
