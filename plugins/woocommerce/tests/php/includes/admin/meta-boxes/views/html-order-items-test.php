@@ -87,6 +87,43 @@ class WC_Admin_Meta_Box_Order_Items_View_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The "Paid" totals section is shown for custom paid statuses and can be hidden with a filter.
+	 */
+	public function test_paid_totals_render_for_custom_paid_status_and_can_be_filtered(): void {
+		add_filter(
+			'wc_order_statuses',
+			static function ( $statuses ) {
+				$statuses['wc-ready-for-pickup'] = 'Ready for pickup';
+				return $statuses;
+			}
+		);
+		add_filter(
+			'woocommerce_order_is_paid_statuses',
+			static function ( $statuses ) {
+				$statuses[] = 'ready-for-pickup';
+				return $statuses;
+			}
+		);
+
+		$order = wc_create_order();
+		$order->set_status( 'ready-for-pickup' );
+		$order->set_date_paid( time() );
+		$order->save();
+
+		$render_order_items = function () use ( $order ): string {
+			ob_start();
+			include WC_ABSPATH . 'includes/admin/meta-boxes/views/html-order-items.php';
+			return (string) ob_get_clean();
+		};
+
+		$this->assertStringContainsString( 'Paid:', $render_order_items(), 'The "Paid" totals section should show for a custom paid status.' );
+
+		add_filter( 'woocommerce_admin_order_should_render_paid_totals', '__return_false' );
+
+		$this->assertStringNotContainsString( 'Paid:', $render_order_items(), 'The filter should be able to hide the "Paid" totals section.' );
+	}
+
+	/**
 	 * Parses an HTML fragment and returns an XPath object for it.
 	 *
 	 * @param string $html The HTML fragment.
