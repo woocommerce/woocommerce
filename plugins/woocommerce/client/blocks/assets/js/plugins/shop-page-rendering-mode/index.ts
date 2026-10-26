@@ -23,7 +23,7 @@ const ShopPageRenderingMode = () => {
 		return (
 			select( preferencesStore ).get( 'core', 'renderingModes' )?.[
 				theme
-			].page ?? defaultRenderingMode
+			]?.page ?? defaultRenderingMode
 		);
 	}, [] );
 
