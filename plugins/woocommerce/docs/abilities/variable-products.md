@@ -13,7 +13,7 @@ Status: prototype on `wooai/variable-products`, built on the custom product type
 | Read or list variations | `products-query` with a variation id, or with `parent_id` |
 | Delete one variation | `product-delete` with the variation id |
 
-A variation is a product with `type: "variation"`. Its class extends `WC_Product_Simple`, so it takes price, stock, `virtual` and `downloadable` like a simple product, plus `attributes`. A variable parent takes the common fields, `attributes` and `variations`. The output of every product carries `parent_id` and `attributes`, and a variable parent carries `variation_ids`. An update needs no `type`: `product-update` loads the product and refuses a field that its type does not take, such as `variations` on a simple product.
+A variation is a product with `type: "variation"`. Its class extends `WC_Product_Simple`, so it takes price, stock, `virtual` and `downloadable` like a simple product, plus `attributes`. A variable parent takes the common fields, `attributes` and `variations`. The output of every product carries `parent_id` and `attributes`, and a variable parent carries `variation_ids`. An update needs no `type`: `product-update` loads the product and refuses a field that its type does not take, such as `variations` on a simple product. Its `attributes` property accepts both shapes, options for a parent and one option for a variation, and the update checks the shape against the loaded product.
 
 ### Create
 
@@ -29,6 +29,8 @@ A variation is a product with `type: "variation"`. Its class extends `WC_Product
   ]
 }
 ```
+
+An attribute whose `name` or `id` matches a global attribute, such as `pa_size`, becomes a taxonomy attribute with the term ids of its options, as the REST API builds it, and the save creates missing terms. A variation picks a global attribute's option by term slug, and the output gives each attribute its global `id`, or 0 for a local attribute.
 
 Each variation picks one option of every attribute. The call refuses a variation that picks an option the parent does not have, two variations with the same options, and two variations with the same SKU. Each `variations[]` item accepts the `extensions` input of the product resource, so extension fields and validators run on every variation.
 
@@ -74,7 +76,6 @@ Wholesale Suite (`woocommerce-wholesale-prices` on WordPress.org, 20,000 install
 
 ## Open items
 
-- **Global attributes.** The `attributes` input always builds local attributes. A global attribute is a taxonomy such as `pa_size` with shared terms, and it drives layered navigation, attribute archives and the editor dropdowns. When the name matches a registered global attribute, set the attribute as a taxonomy and resolve the options to term ids, as `WC_REST_Products_V2_Controller::prepare_attributes()` does. Variation options then compare against term slugs.
 - **The bulk update response lists ids.** A variable parent returns `variation_ids`, so a client that changed fifty prices reads them back with `products-query` and `parent_id`. Embedding the changed variations in the response is a small addition if clients need it.
 - **Limits of the transaction.** A plugin that opens a transaction with a raw query is outside the depth counter. A `commit` without a `start` from a plugin shifts the depth for the rest of the request. MyISAM tables ignore the transaction. A read replica can make the variation data store miss a parent that the primary has not replicated yet. Side effects of save hooks outside the database are not undone. These are documented on `ActionableAbility` and are the same trade as checkout.
 - **Attributes are local to the call.** Changing the parent's attributes does not revalidate existing variations that the input does not name.
