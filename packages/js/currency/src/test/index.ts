@@ -109,6 +109,32 @@ describe( 'currency.formatDecimalString', () => {
 		expect( currency.formatDecimalString( -1.005 ) ).toBe( '-1.01' );
 	} );
 
+	it( 'should keep pre-existing behavior when precision is unset, null, a string, or fractional', () => {
+		// Trunk tolerated these because toFixed(undefined)/toFixed(NaN)
+		// use zero decimal places; the null path is an explicitly
+		// supported configuration (see the 'Currency precision is null'
+		// warning in setCurrency).
+		// @ts-expect-error precision is typed as number
+		const unsetPrecision = Currency( { precision: undefined } );
+		expect( unsetPrecision.formatDecimalString( 1.23 ) ).toBe( '1' );
+		// @ts-expect-error precision is typed as number
+		const nullPrecision = Currency( { precision: null } );
+		expect( nullPrecision.formatDecimalString( 1.23 ) ).toBe( '1' );
+		// String precision is normalized by setCurrency via parseInt.
+		// @ts-expect-error precision is typed as number
+		const stringPrecision = Currency( { precision: '2' } );
+		expect( stringPrecision.formatDecimalString( 1.23 ) ).toBe( '1.23' );
+		// Fractional precision: toFixed(2.7) truncates to 2 decimal places,
+		// and the helper rounds at the same place count.
+		const fractionalPrecision = Currency( { precision: 2.7 } );
+		expect( fractionalPrecision.formatDecimalString( 1.23 ) ).toBe(
+			'1.23'
+		);
+		expect( fractionalPrecision.formatDecimalString( 1.005 ) ).toBe(
+			'1.01'
+		);
+	} );
+
 	it( 'should round a number to 0 decimal places in JPY', () => {
 		const currency = Currency( { precision: 0 } );
 		expect( currency.formatDecimalString( 1239.88 ) ).toBe( '1240' );
