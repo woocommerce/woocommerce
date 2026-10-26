@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix `numberFormat` rounding negative exact half fractions (e.g. `-1.005`) toward zero instead of half away from zero, diverging from PHP's `number_format()`. (#70216)
