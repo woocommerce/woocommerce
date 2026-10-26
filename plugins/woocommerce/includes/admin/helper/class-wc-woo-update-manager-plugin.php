@@ -75,14 +75,17 @@ class WC_Woo_Update_Manager_Plugin {
 	 * @return bool
 	 */
 	public static function is_local_url( string $url ): bool {
-		$host = strtolower( trim( (string) wp_parse_url( $url, PHP_URL_HOST ), '[]' ) );
+		$host = rtrim( strtolower( trim( (string) wp_parse_url( $url, PHP_URL_HOST ), '[]' ) ), '.' );
 
 		if ( '' === $host ) {
 			return false;
 		}
 
 		if ( false !== filter_var( $host, FILTER_VALIDATE_IP ) ) {
-			return false === filter_var( $host, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE );
+			// 100.64.0.0/10 is shared address space (carrier-grade NAT), which the PHP range flags don't cover.
+			$is_shared_ipv4 = false !== filter_var( $host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 ) && ( ip2long( $host ) & 0xFFC00000 ) === ip2long( '100.64.0.0' );
+
+			return $is_shared_ipv4 || false === filter_var( $host, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE );
 		}
 
 		if ( ! str_contains( $host, '.' ) ) {
