@@ -69,6 +69,8 @@ class WC_Woo_Update_Manager_Plugin {
 	 * Whether the URL's host is one WooCommerce.com can't reach to push an install: private or reserved IPs,
 	 * single-label hosts and local development domains. Matches the check WooCommerce.com runs on its side.
 	 *
+	 * @internal
+	 * @since 11.4.0
 	 * @param string $url URL to check, usually the home URL.
 	 * @return bool
 	 */
@@ -100,11 +102,12 @@ class WC_Woo_Update_Manager_Plugin {
 	 * Whether the Update Manager has to be installed by hand: the home URL is local and the helper talks to production
 	 * WooCommerce.com. Pointing `woocommerce_helper_api_base` or `woo_com_base_url` at another host keeps the one-click install.
 	 *
+	 * @since 11.4.0
 	 * @return bool
 	 */
 	public static function needs_manual_install(): bool {
 		foreach ( array( WC_Helper_API::$api_base, WC_Helper::get_woocommerce_com_base_url() ) as $url ) {
-			if ( 'woocommerce.com' !== wp_parse_url( (string) $url, PHP_URL_HOST ) ) {
+			if ( 'woocommerce.com' !== strtolower( (string) wp_parse_url( (string) $url, PHP_URL_HOST ) ) ) {
 				return false;
 			}
 		}

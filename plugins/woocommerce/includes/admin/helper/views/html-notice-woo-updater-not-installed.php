@@ -16,7 +16,7 @@ defined( 'ABSPATH' ) || exit;
 			sprintf(
 				/* translators: 1: Woo Update Manager plugin download URL 2: Upload plugin screen URL */
 				__(
-					'Please <a href="%1$s">download the WooCommerce.com Update Manager</a> and <a href="%2$s">upload it on the Add Plugins screen</a> to continue receiving the updates and streamlined support included in your WooCommerce.com subscriptions. WooCommerce.com can’t install it for you because it can’t reach local sites.',
+					'Please <a href="%1$s">download the WooCommerce.com Update Manager</a> and <a href="%2$s">upload it on the Add Plugins screen</a> to continue receiving the updates and streamlined support included in your WooCommerce.com subscriptions. WooCommerce.com can’t reach local sites, so it can’t install it for you.',
 					'woocommerce'
 				),
 				esc_url( WC_Woo_Update_Manager_Plugin::WOO_UPDATE_MANAGER_DOWNLOAD_URL ),

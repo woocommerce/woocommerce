@@ -2526,7 +2526,9 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	 * @param int    $expected Expected updates count.
 	 */
 	public function test_updates_count_includes_missing_update_manager_unless_manual_install( string $home, string $api_base, int $expected ): void {
-		$this->assertFalse( WC_Woo_Update_Manager_Plugin::is_plugin_installed(), 'The test site should not have the Update Manager' );
+		if ( WC_Woo_Update_Manager_Plugin::is_plugin_installed() ) {
+			$this->markTestSkipped( 'The Update Manager is installed in this environment.' );
+		}
 		WC_Helper_Options::update( 'auth', array( 'access_token' => 'token' ) );
 		set_transient( '_woocommerce_helper_updates_count', 0, HOUR_IN_SECONDS );
 		// wp-env defines WP_HOME, so the home option alone doesn't change home_url().
@@ -2536,18 +2538,17 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 				return $home;
 			}
 		);
-		add_filter(
-			'woocommerce_helper_api_base',
-			static function () use ( $api_base ) {
-				return $api_base;
-			}
-		);
+		$api_base_filter = static function () use ( $api_base ) {
+			return $api_base;
+		};
+		add_filter( 'woocommerce_helper_api_base', $api_base_filter );
 		WC_Helper_API::load();
 
 		try {
 			$this->assertSame( $expected, WC_Helper_Updater::get_updates_count_based_on_site_status() );
 		} finally {
-			remove_all_filters( 'woocommerce_helper_api_base' );
+			// The static API base outlives the hook restore, so reload it without the test's filter.
+			remove_filter( 'woocommerce_helper_api_base', $api_base_filter );
 			WC_Helper_API::load();
 		}
 	}
