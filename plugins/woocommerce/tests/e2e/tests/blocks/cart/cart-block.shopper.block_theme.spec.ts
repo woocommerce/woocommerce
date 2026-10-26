@@ -249,22 +249,43 @@ test.describe( 'Shopper → Cart block', () => {
 		).toBeVisible();
 	} );
 
-	test( 'User can see Cross-Sells products block', async ( {
-		frontendUtils,
-		page,
-	} ) => {
-		await frontendUtils.goToShop();
-		await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
-		await frontendUtils.goToCart();
-		await page
-			.locator( '.wp-block-woocommerce-product-collection' )
-			.waitFor();
-		// Cap is the cross sells product that will be added to the cart
-		await page
-			.getByRole( 'button', { name: 'Add to cart: “Cap”' } )
-			.click();
-		await expect(
-			page.getByLabel( `Quantity of Cap in your cart.` )
-		).toHaveValue( '1' );
-	} );
+	for ( const hydrateCollectionFirst of [ false, true ] ) {
+		test( `User can add cross-sell products${
+			hydrateCollectionFirst
+				? ' when the collection hydrates before Cart'
+				: ''
+		}`, async ( { frontendUtils, page } ) => {
+			// eslint-disable-next-line playwright/no-conditional-in-test -- Exercise both hydration orders with identical assertions.
+			if ( hydrateCollectionFirst ) {
+				await page.route( '**/cart-frontend.js*', async ( route ) => {
+					const response = await route.fetch();
+					// Force the hydration order that can occur in Safari, without relying on a timeout.
+					await route.fulfill( {
+						response,
+						body: `document.addEventListener('wc-blocks_product_list_rendered', () => {
+							${ await response.text() }
+						}, { once: true });`,
+					} );
+				} );
+			}
+
+			await frontendUtils.goToShop();
+			await frontendUtils.addToCart( SIMPLE_PHYSICAL_PRODUCT_NAME );
+			await frontendUtils.goToCart();
+			await expect(
+				page
+					.locator( '.wc-block-cart-items__row' )
+					.filter( { hasText: SIMPLE_PHYSICAL_PRODUCT_NAME } )
+			).toBeVisible();
+			await page
+				.locator( '.wp-block-woocommerce-product-collection' )
+				.waitFor();
+			await page
+				.getByRole( 'button', { name: 'Add to cart: “Cap”' } )
+				.click();
+			await expect(
+				page.getByLabel( 'Quantity of Cap in your cart.' )
+			).toHaveValue( '1' );
+		} );
+	}
 } );

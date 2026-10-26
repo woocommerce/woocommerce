@@ -8,6 +8,7 @@ import {
 	Suspense,
 	isValidElement,
 	cloneElement,
+	useCallback,
 } from '@wordpress/element';
 import parse from 'html-react-parser';
 import {
@@ -17,6 +18,7 @@ import {
 import BlockErrorBoundary from '@woocommerce/base-components/block-error-boundary';
 import type { ReactRootWithContainer } from '@woocommerce/base-utils';
 import { RegisteredBlockComponent } from '@woocommerce/types';
+import type * as React from 'react';
 
 /**
  * This file contains logic used on the frontend to convert DOM elements (saved by the block editor) to React
@@ -89,7 +91,7 @@ const renderForcedBlocks = (
 				(
 					{ blockName, component },
 					index: number
-				): JSX.Element | null => {
+				): React.JSX.Element | null => {
 					const ForcedComponent = component
 						? component
 						: getBlockComponentFromMap( blockName, blockMap );
@@ -126,6 +128,20 @@ interface RenderInnerBlocksProps {
 }
 
 /**
+ * Keep interactive regions outside React's DOM reconciliation so their hydration and event handlers survive.
+ */
+const InteractiveBlock = ( { node }: { node: HTMLElement } ) => {
+	const ref = useCallback(
+		( container: HTMLDivElement | null ) => {
+			container?.appendChild( node );
+		},
+		[ node ]
+	);
+
+	return <div ref={ ref } style={ { display: 'contents' } } />;
+};
+
+/**
  * Recursively replace block markup in the DOM with React Components.
  */
 const renderInnerBlocks = ( {
@@ -139,7 +155,7 @@ const renderInnerBlocks = ( {
 	children,
 	// Current depth of the children. Used to ensure keys are unique.
 	depth = 1,
-}: RenderInnerBlocksProps ): ( string | JSX.Element | null )[] | null => {
+}: RenderInnerBlocksProps ): ( string | React.JSX.Element | null )[] | null => {
 	if ( ! children || children.length === 0 ) {
 		return null;
 	}
@@ -165,6 +181,13 @@ const renderInnerBlocks = ( {
 		 * Note we use childNodes rather than children so that text nodes are also rendered.
 		 */
 		if ( ! InnerBlockComponent ) {
+			if (
+				node instanceof HTMLElement &&
+				node.hasAttribute( 'data-wp-interactive' )
+			) {
+				return <InteractiveBlock key={ componentKey } node={ node } />;
+			}
+
 			const parsedElement = parse(
 				( node instanceof Element && node?.outerHTML ) ||
 					node?.textContent ||
