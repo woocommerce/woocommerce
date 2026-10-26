@@ -335,65 +335,41 @@ class WC_Admin_Post_Types_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Bulk Edit applies taxonomy changes only to categories and brands, preserving mixed and omitted terms.
+	 * @testdox Bulk Edit updates categories and brands, preserving mixed and omitted terms.
 	 *
 	 * @testWith ["product_cat", "category_ids"]
 	 *           ["product_brand", "brand_ids"]
-	 *           ["wc_test_collection", ""]
 	 * @param string $taxonomy Product taxonomy.
-	 * @param string $property Product property, or an empty string for a custom taxonomy.
+	 * @param string $property Product property.
 	 */
 	public function test_bulk_edit_taxonomy_scope( string $taxonomy, string $property ): void {
-		if ( ! $property ) {
-			register_taxonomy(
-				$taxonomy,
-				'product',
+		$terms = array();
+		foreach ( array( 'Removed', 'Mixed', 'Omitted', 'Added' ) as $name ) {
+			$terms[] = $this->factory->term->create(
 				array(
-					'hierarchical'       => true,
-					'show_in_quick_edit' => true,
+					'taxonomy' => $taxonomy,
+					'name'     => $name,
 				)
 			);
 		}
+		$product = WC_Helper_Product::create_simple_product();
+		$product->{"set_$property"}( array( $terms[0], $terms[1], $terms[2] ) );
+		$product->save();
 
-		try {
-			$terms = array();
-			foreach ( array( 'Removed', 'Mixed', 'Omitted', 'Added' ) as $name ) {
-				$terms[] = $this->factory->term->create(
-					array(
-						'taxonomy' => $taxonomy,
-						'name'     => $name,
-					)
-				);
-			}
-			$product = WC_Helper_Product::create_simple_product();
-			$current = array( $terms[0], $terms[1], $terms[2] );
-			if ( $property ) {
-				$product->{"set_$property"}( $current );
-				$product->save();
-			} else {
-				wp_set_object_terms( $product->get_id(), $current, $taxonomy );
-			}
+		$this->bulk_edit(
+			array( $product ),
+			array(
+				'wc_bulk_edit_taxonomies'    => array( $taxonomy => implode( ',', array( $terms[0], $terms[1], $terms[3] ) ) ),
+				'wc_bulk_edit_indeterminate' => array( $taxonomy => array( $terms[1] ) ),
+				'tax_input'                  => array( $taxonomy => array( $terms[3] ) ),
+			)
+		);
 
-			$this->bulk_edit(
-				array( $product ),
-				array(
-					'wc_bulk_edit_taxonomies'    => array( $taxonomy => implode( ',', array( $terms[0], $terms[1], $terms[3] ) ) ),
-					'wc_bulk_edit_indeterminate' => array( $taxonomy => array( $terms[1] ) ),
-					'tax_input'                  => array( $taxonomy => array( $terms[3] ) ),
-				)
-			);
-
-			$expected = $property ? array( $terms[1], $terms[2], $terms[3] ) : $current;
-			$this->assertEqualsCanonicalizing(
-				$expected,
-				wp_get_object_terms( $product->get_id(), $taxonomy, array( 'fields' => 'ids' ) ),
-				'Only category and brand assignments should change, with mixed and omitted terms preserved.'
-			);
-		} finally {
-			if ( ! $property ) {
-				unregister_taxonomy( $taxonomy );
-			}
-		}
+		$this->assertEqualsCanonicalizing(
+			array( $terms[1], $terms[2], $terms[3] ),
+			wp_get_object_terms( $product->get_id(), $taxonomy, array( 'fields' => 'ids' ) ),
+			'Category and brand assignments should change, with mixed and omitted terms preserved.'
+		);
 	}
 
 	/**

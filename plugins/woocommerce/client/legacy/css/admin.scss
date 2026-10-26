@@ -938,6 +938,7 @@ table.wc_status_table--tools {
 	}
 }
 
+// Adapted from WordPress Core's indeterminate checkbox styles.
 #bulk-edit ul.product_cat-checklist input[type="checkbox"]:indeterminate::before,
 #bulk-edit ul.product_brand-checklist input[type="checkbox"]:indeterminate::before {
 	content: "";
