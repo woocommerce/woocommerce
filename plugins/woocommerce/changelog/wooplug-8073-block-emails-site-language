@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Send block editor emails in the site language and text direction, so right-to-left sites get right-to-left emails.

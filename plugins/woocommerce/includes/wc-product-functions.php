@@ -1473,7 +1473,6 @@ function wc_get_related_products( $product_id, $limit = 5, $exclude_ids = array(
 
 	// We want to query related posts if they are not cached, or we don't have enough.
 	if ( false === $related_posts || count( $related_posts ) < $limit ) {
-
 		$cats_array = apply_filters( 'woocommerce_product_related_posts_relate_by_category', true, $product_id ) ? apply_filters( 'woocommerce_get_related_product_cat_terms', wc_get_product_term_ids( $product_id, 'product_cat' ), $product_id ) : array();
 		$tags_array = apply_filters( 'woocommerce_product_related_posts_relate_by_tag', true, $product_id ) ? apply_filters( 'woocommerce_get_related_product_tag_terms', wc_get_product_term_ids( $product_id, 'product_tag' ), $product_id ) : array();
 
@@ -1485,13 +1484,16 @@ function wc_get_related_products( $product_id, $limit = 5, $exclude_ids = array(
 			$related_posts = $data_store->get_related_products( $cats_array, $tags_array, $exclude_ids, $limit + 10, $product_id );
 		}
 
+		$original_transient = $transient;
 		if ( $transient && is_array( $transient ) ) {
 			$transient[ $query_args ] = $related_posts;
 		} else {
 			$transient = array( $query_args => $related_posts );
 		}
 
-		set_transient( $transient_name, $transient, DAY_IN_SECONDS );
+		if ( $original_transient !== $transient ) {
+			set_transient( $transient_name, $transient, DAY_IN_SECONDS );
+		}
 	}
 
 	$related_posts = apply_filters(
@@ -2249,6 +2251,10 @@ function wc_update_product_lookup_tables() {
 		'tax_status', // When last column is updated, woocommerce_product_lookup_table_is_generating is updated.
 	);
 
+	if ( get_option( 'woocommerce_schema_version', 0 ) >= 1140 ) {
+		array_splice( $columns, 4, 0, array( 'mpn' ) );
+	}
+
 	foreach ( $columns as $index => $column ) {
 		if ( 'average_rating' === $column && ! $reviews_enabled ) {
 			continue;
@@ -2347,6 +2353,13 @@ function wc_update_product_lookup_tables_column( $column ) {
 						SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_manage_stock' AND meta_value = 'yes'
 					)
 				"
+			);
+			break;
+		case 'mpn':
+			$wpdb->query(
+				"UPDATE {$wpdb->wc_product_meta_lookup} lookup_table
+				LEFT JOIN {$wpdb->postmeta} meta ON lookup_table.product_id = meta.post_id AND meta.meta_key = '_mpn'
+				SET lookup_table.mpn = LEFT( COALESCE( meta.meta_value, '' ), 100 )"
 			);
 			break;
 		case 'sku':

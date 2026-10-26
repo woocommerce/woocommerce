@@ -8455,18 +8455,6 @@ parameters:
 			path: includes/class-wc-ajax.php
 
 		-
-			message: '#^Cannot call method get_total\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Cannot call method get_total_refunded\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: includes/class-wc-ajax.php
-
-		-
 			message: '#^Cannot call method get_zone_name\(\) on bool\|WC_Shipping_Zone\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -10099,12 +10087,6 @@ parameters:
 			path: includes/class-wc-cart.php
 
 		-
-			message: '#^Cannot call method get_attributes\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: includes/class-wc-cart.php
-
-		-
 			message: '#^Method WC_Cart\:\:check_cart_items\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -10623,12 +10605,6 @@ parameters:
 		-
 			message: '#^Call to an undefined method object\:\:increase_usage_count\(\)\.$#'
 			identifier: method.notFound
-			count: 1
-			path: includes/class-wc-coupon.php
-
-		-
-			message: '#^Cannot access property \$name on WP_Error\|WP_Term\|null\.$#'
-			identifier: property.nonObject
 			count: 1
 			path: includes/class-wc-coupon.php
 
@@ -33892,24 +33868,6 @@ parameters:
 			path: includes/wc-order-functions.php
 
 		-
-			message: '#^Cannot call method get_download_expiry\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/wc-order-functions.php
-
-		-
-			message: '#^Cannot call method get_download_limit\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: includes/wc-order-functions.php
-
-		-
-			message: '#^Cannot call method get_id\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/wc-order-functions.php
-
-		-
 			message: '#^Cannot call method get_total\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -47028,12 +46986,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\Assets\\Api\:\:add_inline_script\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Blocks/Assets/Api.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\Assets\\Api\:\:get_file_version\(\) should return string but returns int\<0, max\>\|false\.$#'
-			identifier: return.type
 			count: 1
 			path: src/Blocks/Assets/Api.php
 

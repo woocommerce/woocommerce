@@ -124,6 +124,80 @@ class WC_Admin_Meta_Box_Order_Items_View_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The refund quantity input's max excludes units that were already refunded.
+	 */
+	public function test_refund_quantity_max_excludes_refunded_units(): void {
+		$order   = wc_create_order();
+		$item_id = $order->add_product( WC_Helper_Product::create_simple_product(), 3 );
+		$order->calculate_totals();
+		$order->save();
+
+		wc_create_refund(
+			array(
+				'amount'     => 10,
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					$item_id => array(
+						'qty'          => 1,
+						'refund_total' => 10,
+					),
+				),
+			)
+		);
+		$order = wc_get_order( $order->get_id() );
+
+		ob_start();
+		include WC_ABSPATH . 'includes/admin/meta-boxes/views/html-order-items.php';
+		$order_items_html = ob_get_clean();
+
+		$qty_inputs = $this->get_xpath_for_html( $order_items_html )->query( "//input[@name='refund_order_item_qty[{$item_id}]']" );
+
+		$this->assertSame( 1, $qty_inputs->length, 'The line item should have one refund quantity input.' );
+		$this->assertSame( '2', $qty_inputs->item( 0 )->getAttribute( 'max' ), 'The max should be the 3 ordered units less the 1 already refunded.' );
+	}
+
+	/**
+	 * @testdox The refund quantity input's max keeps fractional remainders when stock amounts allow decimals.
+	 */
+	public function test_refund_quantity_max_keeps_fractional_remainder(): void {
+		remove_filter( 'woocommerce_stock_amount', 'intval' );
+		add_filter( 'woocommerce_stock_amount', 'floatval' );
+
+		try {
+			$order   = wc_create_order();
+			$item_id = $order->add_product( WC_Helper_Product::create_simple_product(), 2.3 );
+			$order->calculate_totals();
+			$order->save();
+
+			wc_create_refund(
+				array(
+					'amount'     => 1,
+					'order_id'   => $order->get_id(),
+					'line_items' => array(
+						$item_id => array(
+							'qty'          => 0.1,
+							'refund_total' => 1,
+						),
+					),
+				)
+			);
+			$order = wc_get_order( $order->get_id() );
+
+			ob_start();
+			include WC_ABSPATH . 'includes/admin/meta-boxes/views/html-order-items.php';
+			$order_items_html = ob_get_clean();
+		} finally {
+			remove_filter( 'woocommerce_stock_amount', 'floatval' );
+			add_filter( 'woocommerce_stock_amount', 'intval' );
+		}
+
+		$qty_inputs = $this->get_xpath_for_html( $order_items_html )->query( "//input[@name='refund_order_item_qty[{$item_id}]']" );
+
+		$this->assertSame( 1, $qty_inputs->length, 'The line item should have one refund quantity input.' );
+		$this->assertSame( '2.2', $qty_inputs->item( 0 )->getAttribute( 'max' ), 'The max should be the 2.3 ordered units less the 0.1 already refunded.' );
+	}
+
+	/**
 	 * Parses an HTML fragment and returns an XPath object for it.
 	 *
 	 * @param string $html The HTML fragment.
