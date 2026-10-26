@@ -127,12 +127,14 @@ class Analytics {
 			return;
 		}
 
+		$should_show_refund_fix_tool = self::should_show_refund_fix_tool();
+
 		// Register debug tools in admin, REST, and WP-CLI contexts where they can be consumed.
 		add_filter( 'woocommerce_debug_tools', array( $this, 'register_cache_clear_tool' ) );
 		add_filter( 'woocommerce_debug_tools', array( $this, 'register_regenerate_order_fulfillment_status_tool' ), 12 );
 		add_filter( 'woocommerce_debug_tools', array( $this, 'register_refund_double_count_tool' ) );
 
-		if ( self::should_show_refund_fix_tool() ) {
+		if ( $should_show_refund_fix_tool ) {
 			add_filter( 'woocommerce_debug_tools', array( $this, 'register_full_refund_fix_data_tool' ) );
 		}
 
@@ -146,7 +148,7 @@ class Analytics {
 			add_filter( 'woocommerce_component_settings_preload_endpoints', array( $this, 'add_preload_endpoints' ) );
 			add_action( 'admin_menu', array( $this, 'register_pages' ) );
 
-			if ( self::should_show_refund_fix_tool() ) {
+			if ( $should_show_refund_fix_tool ) {
 				add_action( 'admin_footer', array( $this, 'output_refund_fix_tool_js' ) );
 				add_action( 'wp_ajax_woocommerce_check_refund_fix_needed', array( $this, 'ajax_check_refund_fix_needed' ) );
 			}
