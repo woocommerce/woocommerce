@@ -858,4 +858,30 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$store->update_product_sales( $product_id, 30.5, 'set' );
 		$this->assertSame( '30.500000', get_post_meta( $product_id, 'total_sales', true ) );
 	}
+
+	/**
+	 * @testdox Creating and updating a product keeps backslashes and quotes in its name and descriptions.
+	 */
+	public function test_create_and_update_keep_backslashes_in_post_fields(): void {
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Cable 1\\2" it\'s' );
+		$product->set_description( 'Path C:\\temp' );
+		$product->set_short_description( 'Short C:\\temp' );
+		$product->save();
+
+		$post = get_post( $product->get_id() );
+		$this->assertSame( 'Cable 1\\2" it\'s', $post->post_title, 'The created name should keep its backslash and quotes.' );
+		$this->assertSame( 'Path C:\\temp', $post->post_content, 'The created description should keep its backslash.' );
+		$this->assertSame( 'Short C:\\temp', $post->post_excerpt, 'The created short description should keep its backslash.' );
+
+		$product->set_name( 'Cable 3\\4" it\'s' );
+		$product->set_description( 'Path D:\\temp' );
+		$product->set_short_description( 'Short D:\\temp' );
+		$product->save();
+
+		$post = get_post( $product->get_id() );
+		$this->assertSame( 'Cable 3\\4" it\'s', $post->post_title, 'The updated name should keep its backslash and quotes.' );
+		$this->assertSame( 'Path D:\\temp', $post->post_content, 'The updated description should keep its backslash.' );
+		$this->assertSame( 'Short D:\\temp', $post->post_excerpt, 'The updated short description should keep its backslash.' );
+	}
 }
