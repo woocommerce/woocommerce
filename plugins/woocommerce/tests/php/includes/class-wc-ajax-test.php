@@ -37,6 +37,56 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Refunds use the order currency precision for amounts sent to the gateway.
+	 * @param string $store Store currency.
+	 * @param int    $decimals Store decimals.
+	 * @param string $currency Order currency.
+	 * @param float  $expected Expected refund amount.
+	 * @testWith ["JPY", 0, "USD", 5.25]
+	 *           ["JPY", 0, "JPY", 5.0]
+	 *           ["USD", 2, "USD", 5.25]
+	 */
+	public function test_refund_currency_precision( string $store, int $decimals, string $currency, float $expected ): void {
+		$this->_setRole( 'administrator' );
+		update_option( 'woocommerce_currency', $store );
+		update_option( 'woocommerce_price_num_decimals', $decimals );
+		$gateway           = $this->getMockBuilder( WC_Payment_Gateway::class )->onlyMethods( array( 'process_refund' ) )->getMock();
+		$gateway->id       = 'currency_test';
+		$gateway->supports = array( \Automattic\WooCommerce\Enums\PaymentGatewayFeature::REFUNDS );
+		$gateway->expects( $this->once() )->method( 'process_refund' )->with( $this->anything(), $expected )->willReturn( true );
+		$register = static function () use ( $gateway ) {
+			return array( $gateway );
+		};
+		add_filter( 'woocommerce_payment_gateways', $register );
+		WC()->payment_gateways()->init();
+		$order = wc_create_order();
+		$order->set_currency( $currency );
+		$order->set_payment_method( 'currency_test' );
+		$order->set_total( 18 );
+		$order->set_status( OrderStatus::PROCESSING );
+		$order->save();
+		$_POST['security']        = wp_create_nonce( 'order-item' );
+		$_POST['order_id']        = $order->get_id();
+		$_POST['refund_amount']   = '5.25';
+		$_POST['refunded_amount'] = '0';
+		$_POST['api_refund']      = 'true';
+		try {
+			$response = $this->do_ajax( 'woocommerce_refund_line_items' );
+			$this->assertTrue( $response['success'], wp_json_encode( $response ) );
+			$order   = wc_get_order( $order->get_id() );
+			$refunds = $order->get_refunds();
+			$this->assertCount( 1, $refunds );
+			$this->assertSame( $expected, (float) $refunds[0]->get_amount() );
+			$this->assertSame( -$expected, (float) $refunds[0]->get_total() );
+			$this->assertSame( 18 - $expected, (float) $order->get_remaining_refund_amount() );
+		} finally {
+			unset( $_POST['security'], $_POST['order_id'], $_POST['refund_amount'], $_POST['refunded_amount'], $_POST['api_refund'] );
+			remove_filter( 'woocommerce_payment_gateways', $register );
+			WC()->payment_gateways()->init();
+		}
+	}
+
+	/**
 	 * @testdox Should return a rendered page of notes with pagination for an order editor.
 	 */
 	public function test_get_order_notes_page(): void {

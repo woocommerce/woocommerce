@@ -6,6 +6,7 @@
  * @version 2.2.0
  */
 
+use Automattic\WooCommerce\Internal\Utilities\CurrencyUtil;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -2491,7 +2492,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return string
 	 */
 	public function get_remaining_refund_amount() {
-		return wc_format_decimal( (float) $this->get_total() - (float) $this->get_total_refunded(), wc_get_price_decimals() );
+		return wc_format_decimal( (float) $this->get_total() - (float) $this->get_total_refunded(), CurrencyUtil::get_price_decimals( $this->get_currency() ) );
 	}
 
 	/**

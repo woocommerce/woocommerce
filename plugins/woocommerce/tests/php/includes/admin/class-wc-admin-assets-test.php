@@ -57,6 +57,28 @@ class WC_Admin_Assets_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The order refund script receives the order currency precision.
+	 */
+	public function test_refund_currency_precision_localization(): void {
+		global $theorder;
+		$previous_order = $theorder;
+		update_option( 'woocommerce_currency', 'JPY' );
+		update_option( 'woocommerce_price_num_decimals', 0 );
+		$theorder = wc_create_order();
+		$theorder->set_currency( 'USD' );
+		set_current_screen( wc_get_page_screen_id( 'shop_order' ) );
+		wp_scripts()->add_data( 'wc-admin-meta-boxes', 'data', '' );
+		try {
+			$this->sut->admin_scripts();
+			$this->assertStringContainsString( '"currency_format_num_decimals":"2"', wp_scripts()->get_data( 'wc-admin-meta-boxes', 'data' ) );
+		} finally {
+			$theorder = $previous_order;
+			wp_scripts()->add_data( 'wc-admin-meta-boxes', 'data', '' );
+			set_current_screen();
+		}
+	}
+
+	/**
 	 * @testdox Quick Edit remains loadable when the optional datepicker is unavailable.
 	 */
 	public function test_quick_edit_does_not_depend_on_datepicker(): void {
