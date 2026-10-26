@@ -14,9 +14,9 @@ use Automattic\WooCommerce\Internal\PushNotifications\DataStores\PushTokensDataS
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Internal\PushNotifications\Triggers\NewOrderNotificationTrigger;
+use Automattic\WooCommerce\Tests\Internal\PushNotifications\Helpers\PushNotificationsTestTrait;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Exception;
-use PHPUnit\Framework\MockObject\MockObject;
 use WC_Logger;
 use WC_Unit_Test_Case;
 use WP_Http;
@@ -29,10 +29,7 @@ use WP_REST_Response;
  * @covers \Automattic\WooCommerce\Internal\PushNotifications\PushNotifications
  */
 class PushNotificationsTest extends WC_Unit_Test_Case {
-	/**
-	 * @var JetpackConnectionManager|MockObject
-	 */
-	private $jetpack_connection_manager_mock;
+	use PushNotificationsTestTrait;
 
 	/**
 	 * Tear down the test case.
@@ -309,6 +306,26 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Tests that on_init does not read the enablement time while disabled.
+	 */
+	public function test_on_init_does_not_read_enabled_at_while_disabled() {
+		$this->set_up_jetpack_connection_manager_mock( array( 'is_connected' ) );
+		$this->jetpack_connection_manager_mock->method( 'is_connected' )->willReturn( false );
+		$reads = 0;
+		add_filter(
+			'pre_option_' . PushNotifications::ENABLED_AT_OPTION,
+			function ( $pre ) use ( &$reads ) {
+				++$reads;
+				return $pre;
+			}
+		);
+
+		( new PushNotifications() )->on_init();
+
+		$this->assertSame( 0, $reads, 'The option should only be read when an order moves into a notifiable status' );
+	}
+
+	/**
 	 * @testdox Tests that on_init keeps marking orders while disabled only on a site that has used push notifications.
 	 * @testWith [1000, true]
 	 *           [null, false]
@@ -317,6 +334,7 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 	 * @param bool     $expect_marked Whether the order should be marked.
 	 */
 	public function test_on_init_marks_orders_while_disabled_only_after_first_enablement( ?int $enabled_at, bool $expect_marked ) {
+		$this->remove_trigger_callbacks_registered_at_boot();
 		if ( null !== $enabled_at ) {
 			update_option( PushNotifications::ENABLED_AT_OPTION, $enabled_at );
 		}

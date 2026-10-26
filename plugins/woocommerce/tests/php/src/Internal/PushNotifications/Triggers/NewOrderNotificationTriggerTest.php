@@ -61,6 +61,7 @@ class NewOrderNotificationTriggerTest extends WC_Unit_Test_Case {
 		wc_get_container()->replace( PendingNotificationStore::class, $this->store );
 		wc_get_container()->reset_all_resolved();
 
+		$this->remove_trigger_callbacks_registered_at_boot();
 		$this->trigger = new NewOrderNotificationTrigger();
 		$this->trigger->register();
 	}
@@ -258,6 +259,7 @@ class NewOrderNotificationTriggerTest extends WC_Unit_Test_Case {
 	 * @param string $handler The trigger callback that handles the status change.
 	 */
 	public function test_status_change_between_notifiable_statuses_does_not_mark_order( string $handler ): void {
+		update_option( PushNotifications::ENABLED_AT_OPTION, 1000 );
 		$order = wc_create_order( array( 'status' => OrderStatus::PENDING ) );
 
 		$this->trigger->{$handler}( $order->get_id(), OrderStatus::PROCESSING, OrderStatus::COMPLETED, $order );
@@ -288,9 +290,10 @@ class NewOrderNotificationTriggerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should mark an order reaching a notifiable status while push notifications are off, without queuing a notification.
+	 * @testdox Should mark an order reaching a notifiable status while push notifications are off on a site that has used them, without queuing a notification.
 	 */
 	public function test_status_change_while_disabled_marks_order_without_notifying(): void {
+		update_option( PushNotifications::ENABLED_AT_OPTION, 1000 );
 		$order = $this->create_order_in_custom_status();
 
 		$this->trigger->on_order_status_changed_while_disabled( $order->get_id(), self::CUSTOM_STATUS, OrderStatus::COMPLETED, $order );
@@ -300,9 +303,40 @@ class NewOrderNotificationTriggerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should not mark an order while push notifications are off on a site that never enabled them.
+	 */
+	public function test_status_change_while_disabled_does_not_mark_order_before_first_enablement(): void {
+		$order = $this->create_order_in_custom_status();
+
+		$this->trigger->on_order_status_changed_while_disabled( $order->get_id(), self::CUSTOM_STATUS, OrderStatus::COMPLETED, $order );
+
+		$this->assertFalse( wc_get_order( $order->get_id() )->meta_exists( NewOrderNotificationTrigger::NOTIFIABLE_META_KEY ), 'Orders should only be marked once push notifications have been enabled' );
+	}
+
+	/**
+	 * @testdox Should not read the enablement time while push notifications are off when an order moves to a non-notifiable status.
+	 */
+	public function test_status_change_while_disabled_to_non_notifiable_status_does_not_read_enabled_at(): void {
+		$order = wc_create_order( array( 'status' => OrderStatus::PENDING ) );
+		$reads = 0;
+		add_filter(
+			'pre_option_' . PushNotifications::ENABLED_AT_OPTION,
+			function ( $pre ) use ( &$reads ) {
+				++$reads;
+				return $pre;
+			}
+		);
+
+		$this->trigger->on_order_status_changed_while_disabled( $order->get_id(), OrderStatus::PENDING, OrderStatus::CANCELLED, $order );
+
+		$this->assertSame( 0, $reads, 'The option should only be read when an order moves into a notifiable status' );
+	}
+
+	/**
 	 * @testdox Should not mark an order moving to a non-notifiable status while push notifications are off.
 	 */
 	public function test_status_change_while_disabled_ignores_non_notifiable_status(): void {
+		update_option( PushNotifications::ENABLED_AT_OPTION, 1000 );
 		$order = wc_create_order( array( 'status' => OrderStatus::PENDING ) );
 
 		$this->trigger->on_order_status_changed_while_disabled( $order->get_id(), OrderStatus::PENDING, OrderStatus::CANCELLED, $order );
@@ -329,6 +363,7 @@ class NewOrderNotificationTriggerTest extends WC_Unit_Test_Case {
 		OrderHelper::toggle_cot_feature_and_usage( true );
 
 		try {
+			update_option( PushNotifications::ENABLED_AT_OPTION, 1000 );
 			$order = wc_create_order( array( 'status' => OrderStatus::PENDING ) );
 			// HPOS saves the whole order after a meta change unless the order was modified in the current second.
 			$order->set_date_modified( time() - HOUR_IN_SECONDS );
@@ -357,6 +392,7 @@ class NewOrderNotificationTriggerTest extends WC_Unit_Test_Case {
 	 * @testdox Should log, not throw, when the order cannot be marked.
 	 */
 	public function test_marking_failure_is_logged_not_thrown(): void {
+		update_option( PushNotifications::ENABLED_AT_OPTION, 1000 );
 		$logger = $this->createMock( WC_Logger::class );
 		$logger->expects( $this->once() )
 			->method( 'error' )

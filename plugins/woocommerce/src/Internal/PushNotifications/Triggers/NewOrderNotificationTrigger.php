@@ -68,8 +68,8 @@ class NewOrderNotificationTrigger {
 
 	/**
 	 * Registers only the notifiable marker, for when push notifications are
-	 * switched off on a site that has used them. Orders reaching a notifiable
-	 * status meanwhile are then not announced as new once they are back on.
+	 * switched off. Orders reaching a notifiable status meanwhile are then not
+	 * announced as new once they are back on.
 	 *
 	 * @since 11.4.0
 	 *
@@ -142,10 +142,11 @@ class NewOrderNotificationTrigger {
 	// phpcs:disable Generic.CodeAnalysis.UnusedFunctionParameter.FoundBeforeLastUsed
 	/**
 	 * Handles the woocommerce_order_status_changed hook while push notifications
-	 * are switched off: marks the order without queuing a notification.
+	 * are switched off: marks the order without queuing a notification, on sites
+	 * that have used push notifications.
 	 *
-	 * Parameters are untyped because this runs on every status change of a store
-	 * with push notifications off, where a bad value must not become a fatal.
+	 * Parameters are untyped and optional because this runs on every store, where
+	 * a bad or missing value must not become a fatal.
 	 *
 	 * @since 11.4.0
 	 *
@@ -155,9 +156,14 @@ class NewOrderNotificationTrigger {
 	 * @param mixed $order           The order object.
 	 * @return void
 	 */
-	public function on_order_status_changed_while_disabled( $order_id, $previous_status, $next_status, $order ): void {
+	public function on_order_status_changed_while_disabled( $order_id = null, $previous_status = null, $next_status = null, $order = null ): void {
 		// phpcs:enable Generic.CodeAnalysis.UnusedFunctionParameter.FoundBeforeLastUsed
-		if ( $order instanceof WC_Order && self::enters_notifiable_status( $previous_status, $next_status ) ) {
+		// The option is read last, so only when an order moves into a notifiable status.
+		if (
+			$order instanceof WC_Order
+			&& self::enters_notifiable_status( $previous_status, $next_status )
+			&& null !== wc_get_container()->get( PushNotifications::class )->get_enabled_at()
+		) {
 			$this->mark_notifiable( $order );
 		}
 	}

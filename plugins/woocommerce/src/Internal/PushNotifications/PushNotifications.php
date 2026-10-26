@@ -101,12 +101,10 @@ class PushNotifications {
 		wc_get_container()->get( StepLogRestController::class )->register();
 
 		if ( ! $this->should_be_enabled() ) {
-			// Once a site has used push notifications, keep marking orders that
-			// reach a notifiable status while they are off, so turning them back
-			// on does not announce those orders as new.
-			if ( null !== $this->get_enabled_at() ) {
-				( new NewOrderNotificationTrigger() )->register_while_disabled();
-			}
+			// Keep marking orders that reach a notifiable status while push
+			// notifications are off, so turning them back on does not announce
+			// those orders as new.
+			( new NewOrderNotificationTrigger() )->register_while_disabled();
 
 			return;
 		}
