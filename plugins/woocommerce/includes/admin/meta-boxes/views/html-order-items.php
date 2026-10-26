@@ -21,6 +21,19 @@ defined( 'ABSPATH' ) || exit;
  */
 $render_refunds = (bool) apply_filters( 'woocommerce_admin_order_should_render_refunds', 0 < $order->get_total() - $order->get_total_refunded() || 0 < absint( $order->get_item_count() - $order->get_item_count_refunded() ), $order->get_id(), $order );
 
+$date_paid = $order->get_date_paid(); // @phpstan-ignore variable.undefined
+
+/**
+ * Allow plugins to determine whether the "Paid" totals section should be rendered in the template.
+ *
+ * @since 11.4.0
+ *
+ * @param bool     $render_paid If the "Paid" totals section should be rendered.
+ * @param int      $order_id    The Order ID.
+ * @param WC_Order $order       The Order object.
+ */
+$render_paid = (bool) apply_filters( 'woocommerce_admin_order_should_render_paid_totals', ( $order->is_paid() || $order->has_status( OrderStatus::REFUNDED ) ) && $date_paid, $order->get_id(), $order ) && $date_paid;
+
 global $wpdb;
 
 $payment_gateway     = wc_get_payment_gateway_by_order( $order );
@@ -236,7 +249,7 @@ if ( wc_tax_enabled() ) {
 
 	<div class="clear"></div>
 
-	<?php if ( in_array( $order->get_status(), array( OrderStatus::PROCESSING, OrderStatus::COMPLETED, OrderStatus::REFUNDED ), true ) && ! empty( $order->get_date_paid() ) ) : ?>
+	<?php if ( $render_paid ) : ?>
 
 		<table class="wc-order-totals" style="border-top: 1px solid #999; margin-top:12px; padding-top:12px">
 			<tr>
@@ -252,9 +265,9 @@ if ( wc_tax_enabled() ) {
 					<?php
 					if ( $order->get_payment_method_title() ) {
 						/* translators: 1: payment date. 2: payment method */
-						echo esc_html( sprintf( __( '%1$s via %2$s', 'woocommerce' ), $order->get_date_paid()->date_i18n( get_option( 'date_format' ) ), $order->get_payment_method_title() ) );
+						echo esc_html( sprintf( __( '%1$s via %2$s', 'woocommerce' ), $date_paid->date_i18n( get_option( 'date_format' ) ), $order->get_payment_method_title() ) );
 					} else {
-						echo esc_html( $order->get_date_paid()->date_i18n( get_option( 'date_format' ) ) );
+						echo esc_html( $date_paid->date_i18n( get_option( 'date_format' ) ) );
 					}
 					?>
 					</span>
