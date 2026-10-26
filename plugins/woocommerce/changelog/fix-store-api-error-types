@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Preserve error types in Store API logs for compatibility with extensions.
