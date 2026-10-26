@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Internal\Admin\SiteHealth;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
 use WC_Admin_Notices;
 use WC_Unit_Test_Case;
+use WC_Webhook;
 use WP_Error;
 use WP_REST_Request;
 
@@ -375,5 +376,138 @@ class SiteHealthTest extends WC_Unit_Test_Case {
 			remove_filter( 'pre_http_request', $http_callback );
 			remove_filter( 'upload_dir', $upload_dir_callback );
 		}
+	}
+
+	/**
+	 * @testdox Database update check is critical and links to the update when an update has not started.
+	 */
+	public function test_database_update_is_critical_when_update_has_not_started(): void {
+		update_option( 'woocommerce_db_version', '1.0.0' );
+
+		$result = $this->sut->run_test( 'woocommerce_database_update' );
+
+		$this->assertSame( 'critical', $result['status'], 'A pending database update should be critical.' );
+		$this->assertStringContainsString( 'do_update_woocommerce=true', $result['actions'], 'The result should let the merchant start the update.' );
+	}
+
+	/**
+	 * @testdox Database update check reports progress without an update link while any update step is queued.
+	 * @testWith ["woocommerce_run_update_callback"]
+	 *           ["woocommerce_update_db_to_current_version"]
+	 *
+	 * @param string $hook Queued update action hook.
+	 */
+	public function test_database_update_reports_progress_when_update_is_queued( string $hook ): void {
+		update_option( 'woocommerce_db_version', '1.0.0' );
+		WC()->queue()->schedule_single( time() + HOUR_IN_SECONDS, $hook, array(), 'woocommerce-db-updates' );
+
+		$result = $this->sut->run_test( 'woocommerce_database_update' );
+
+		$this->assertSame( 'recommended', $result['status'], 'A running update should not be critical.' );
+		$this->assertSame( 'WooCommerce database update is scheduled', $result['label'], 'The result should report that the update is scheduled.' );
+		$this->assertSame( '', $result['actions'], 'The result should not offer to start the update again.' );
+	}
+
+	/**
+	 * @testdox Required pages check status depends on which page is missing.
+	 * @testWith ["shop", "recommended", "Shop"]
+	 *           ["cart", "critical", "Cart"]
+	 *           ["checkout", "critical", "Checkout"]
+	 *
+	 * @param string $missing_page    Page slug left unassigned.
+	 * @param string $expected_status Expected Site Health status.
+	 * @param string $page_name       Page name listed in the description.
+	 */
+	public function test_required_pages_status_depends_on_missing_page( string $missing_page, string $expected_status, string $page_name ): void {
+		foreach ( array( 'shop', 'cart', 'checkout', 'myaccount' ) as $page ) {
+			update_option( "woocommerce_{$page}_page_id", $page === $missing_page ? 0 : self::factory()->post->create( array( 'post_type' => 'page' ) ) );
+		}
+
+		$result = $this->sut->run_test( 'woocommerce_required_pages' );
+
+		$this->assertSame( $expected_status, $result['status'], 'The status should reflect whether checkout can work without the page.' );
+		$this->assertSame( "<p>These WooCommerce pages are not assigned or not published: {$page_name}.</p>", $result['description'], 'Only the missing page should be listed.' );
+	}
+
+	/**
+	 * @testdox Required pages check treats an unpublished page as missing.
+	 */
+	public function test_required_pages_treats_unpublished_page_as_missing(): void {
+		foreach ( array( 'shop', 'cart', 'checkout', 'myaccount' ) as $page ) {
+			update_option( "woocommerce_{$page}_page_id", self::factory()->post->create( array( 'post_type' => 'page' ) ) );
+		}
+		wp_update_post(
+			array(
+				'ID'          => wc_get_page_id( 'checkout' ),
+				'post_status' => 'draft',
+			)
+		);
+
+		$result = $this->sut->run_test( 'woocommerce_required_pages' );
+
+		$this->assertSame( 'critical', $result['status'], 'A draft checkout page should be reported as missing.' );
+		$this->assertStringContainsString( 'Checkout', $result['description'], 'The draft page should be listed.' );
+	}
+
+	/**
+	 * @testdox Payment methods check passes only when a payment gateway is enabled.
+	 */
+	public function test_payment_methods_check_requires_an_enabled_gateway(): void {
+		$gateways = WC()->payment_gateways()->payment_gateways();
+		$original = wp_list_pluck( $gateways, 'enabled' );
+		$this->assertNotEmpty( $gateways, 'The test needs at least one registered payment gateway.' );
+
+		try {
+			foreach ( $gateways as $gateway ) {
+				$gateway->enabled = 'no';
+			}
+			$this->assertSame( 'recommended', $this->sut->run_test( 'woocommerce_payment_methods' )['status'], 'No enabled gateways should require attention.' );
+
+			reset( $gateways )->enabled = 'yes';
+			$this->assertSame( 'good', $this->sut->run_test( 'woocommerce_payment_methods' )['status'], 'One enabled gateway should pass.' );
+		} finally {
+			foreach ( $gateways as $id => $gateway ) {
+				$gateway->enabled = $original[ $id ];
+			}
+		}
+	}
+
+	/**
+	 * @testdox Webhook deliveries check reports webhooks whose most recent delivery failed.
+	 */
+	public function test_webhook_deliveries_check_reports_failing_webhooks(): void {
+		$paused = new WC_Webhook();
+		$paused->set_props(
+			array(
+				'status'        => 'paused',
+				'topic'         => 'order.created',
+				'delivery_url'  => 'https://example.com/webhook',
+				'failure_count' => 2,
+			)
+		);
+		$paused->save();
+		$this->assertSame( 'good', $this->sut->run_test( 'woocommerce_webhook_deliveries' )['status'], 'Paused webhooks should not be reported.' );
+
+		$failure_counts = array(
+			'active'   => 1,
+			'disabled' => 6,
+		);
+		foreach ( $failure_counts as $status => $failure_count ) {
+			$webhook = new WC_Webhook();
+			$webhook->set_props(
+				array(
+					'status'        => $status,
+					'topic'         => 'order.created',
+					'delivery_url'  => 'https://example.com/webhook',
+					'failure_count' => $failure_count,
+				)
+			);
+			$webhook->save();
+		}
+
+		$result = $this->sut->run_test( 'woocommerce_webhook_deliveries' );
+
+		$this->assertSame( 'recommended', $result['status'], 'Failing webhooks should require attention.' );
+		$this->assertStringContainsString( '2 webhooks failed', $result['description'], 'Active and auto-disabled failing webhooks should both be counted.' );
 	}
 }

@@ -7,6 +7,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\Admin;
 
+use ActionScheduler_Store;
 use Automattic\WooCommerce\Enums\DefaultCustomerAddress;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
@@ -178,8 +179,10 @@ class SiteHealth {
 			: $data['description'];
 
 		$actions_html = '';
-		if ( ! $is_good && ! empty( $data['actions'] ) ) {
-			foreach ( $data['actions'] as $action ) {
+		$actions      = $data['actions'] ?? array();
+		$actions      = is_callable( $actions ) ? $actions( $context ) : $actions;
+		if ( ! $is_good && ! empty( $actions ) ) {
+			foreach ( $actions as $action ) {
 				$url           = is_callable( $action['url'] ) ? ( $action['url'] )( $context ) : $action['url'];
 				$actions_html .= $this->get_site_health_action( $url, $action['label'], ! empty( $action['new_tab'] ) );
 			}
@@ -208,7 +211,7 @@ class SiteHealth {
 	 *   - check: callable returning bool (true = good) or array (empty = good, otherwise context for description/actions).
 	 *   - good: result data when the check passes (label, description).
 	 *   - fail: result data when the check fails (status defaults to 'recommended', label, description, optional actions).
-	 *     Label, status, and description may be callables that receive the check context.
+	 *     Label, status, description, and actions may be callables that receive the check context.
 	 *
 	 * @return array<string, array>
 	 */
@@ -515,6 +518,148 @@ class SiteHealth {
 						array(
 							'url'   => $this->get_woocommerce_com_extensions_url(),
 							'label' => __( 'Connect your store', 'woocommerce' ),
+						),
+					),
+				),
+			),
+			'woocommerce_database_update'              => array(
+				'label' => __( 'WooCommerce database update', 'woocommerce' ),
+				'badge' => 'performance',
+				'check' => array( $this, 'get_pending_database_update' ),
+				'good'  => array(
+					'label'       => __( 'WooCommerce database is up to date', 'woocommerce' ),
+					'description' => __( 'No WooCommerce database updates are pending.', 'woocommerce' ),
+				),
+				'fail'  => array(
+					'status'      => fn( array $update ) => $update['running'] ? 'recommended' : 'critical',
+					'label'       => fn( array $update ) => $update['running']
+						? __( 'WooCommerce database update is scheduled', 'woocommerce' )
+						: __( 'WooCommerce database update required', 'woocommerce' ),
+					'description' => fn( array $update ) => $update['running']
+						? __( 'WooCommerce has scheduled its database update to run in the background. If it does not finish, check that scheduled actions are running.', 'woocommerce' )
+						: __( 'WooCommerce has database updates that need to run to keep your store working correctly.', 'woocommerce' ),
+					'actions'     => fn( array $update ) => $update['running'] ? array() : array(
+						array(
+							'url'   => wp_nonce_url(
+								add_query_arg( 'do_update_woocommerce', 'true', admin_url( 'admin.php?page=wc-settings' ) ),
+								'wc_db_update',
+								'wc_db_update_nonce'
+							),
+							'label' => __( 'Update WooCommerce database', 'woocommerce' ),
+						),
+					),
+				),
+			),
+			'woocommerce_required_pages'               => array(
+				'label' => __( 'WooCommerce pages', 'woocommerce' ),
+				'badge' => 'performance',
+				'check' => array( $this, 'get_missing_required_pages' ),
+				'good'  => array(
+					'label'       => __( 'WooCommerce pages are set up', 'woocommerce' ),
+					'description' => __( 'The shop, cart, checkout, and my account pages are assigned and published.', 'woocommerce' ),
+				),
+				'fail'  => array(
+					'status'      => fn( array $missing ) => isset( $missing['cart'] ) || isset( $missing['checkout'] ) ? 'critical' : 'recommended',
+					'label'       => __( 'WooCommerce pages are missing', 'woocommerce' ),
+					'description' => fn( array $missing ) => sprintf(
+						/* translators: %s: Comma-separated list of page names. */
+						__( 'These WooCommerce pages are not assigned or not published: %s.', 'woocommerce' ),
+						implode( ', ', $missing )
+					),
+					'actions'     => array(
+						array(
+							'url'   => admin_url( 'admin.php?page=wc-settings&tab=advanced' ),
+							'label' => __( 'Review page settings', 'woocommerce' ),
+						),
+					),
+				),
+			),
+			'woocommerce_order_storage'                => array(
+				'label' => __( 'WooCommerce order storage', 'woocommerce' ),
+				'badge' => 'performance',
+				'check' => fn() => OrderUtil::custom_orders_table_usage_is_enabled(),
+				'good'  => array(
+					'label'       => __( 'WooCommerce uses high-performance order storage', 'woocommerce' ),
+					'description' => __( 'Orders are stored in dedicated tables, which keeps order queries fast.', 'woocommerce' ),
+				),
+				'fail'  => array(
+					'label'       => __( 'WooCommerce is using legacy order storage', 'woocommerce' ),
+					'description' => __( 'Orders are stored as WordPress posts. High-performance order storage uses dedicated tables, which makes order queries faster.', 'woocommerce' ),
+					'actions'     => array(
+						array(
+							'url'   => admin_url( 'admin.php?page=wc-settings&tab=advanced&section=features' ),
+							'label' => __( 'Review order storage settings', 'woocommerce' ),
+						),
+						array(
+							'url'     => 'https://woocommerce.com/document/high-performance-order-storage/',
+							'label'   => __( 'Learn more about high-performance order storage', 'woocommerce' ),
+							'new_tab' => true,
+						),
+					),
+				),
+			),
+			'woocommerce_payment_methods'              => array(
+				'label' => __( 'WooCommerce payment methods', 'woocommerce' ),
+				'badge' => 'performance',
+				'check' => array( $this, 'has_enabled_payment_gateway' ),
+				'good'  => array(
+					'label'       => __( 'WooCommerce has a payment method enabled', 'woocommerce' ),
+					'description' => __( 'At least one payment method is enabled.', 'woocommerce' ),
+				),
+				'fail'  => array(
+					'label'       => __( 'WooCommerce has no payment methods enabled', 'woocommerce' ),
+					'description' => __( 'Customers cannot pay for orders until at least one payment method is enabled.', 'woocommerce' ),
+					'actions'     => array(
+						array(
+							'url'   => admin_url( 'admin.php?page=wc-settings&tab=checkout' ),
+							'label' => __( 'Set up payments', 'woocommerce' ),
+						),
+					),
+				),
+			),
+			'woocommerce_legacy_rest_api'              => array(
+				'label' => __( 'WooCommerce Legacy REST API', 'woocommerce' ),
+				'badge' => 'security',
+				'check' => fn() => ! WC()->legacy_rest_api_is_available(),
+				'good'  => array(
+					'label'       => __( 'WooCommerce Legacy REST API is not active', 'woocommerce' ),
+					'description' => __( 'The deprecated Legacy REST API extension is not active.', 'woocommerce' ),
+				),
+				'fail'  => array(
+					'label'       => __( 'WooCommerce Legacy REST API is active', 'woocommerce' ),
+					'description' => __( 'The Legacy REST API is deprecated. If no integrations depend on it, deactivate the WooCommerce Legacy REST API extension.', 'woocommerce' ),
+					'actions'     => array(
+						array(
+							'url'   => admin_url( 'plugins.php' ),
+							'label' => __( 'Manage plugins', 'woocommerce' ),
+						),
+					),
+				),
+			),
+			'woocommerce_webhook_deliveries'           => array(
+				'label' => __( 'WooCommerce webhook deliveries', 'woocommerce' ),
+				'badge' => 'performance',
+				'check' => array( $this, 'get_failing_webhooks' ),
+				'good'  => array(
+					'label'       => __( 'WooCommerce webhooks are delivering', 'woocommerce' ),
+					'description' => __( 'No active or disabled webhooks failed their most recent delivery.', 'woocommerce' ),
+				),
+				'fail'  => array(
+					'label'       => __( 'WooCommerce webhooks are failing', 'woocommerce' ),
+					'description' => fn( array $failing ) => sprintf(
+						/* translators: %s: Number of webhooks. */
+						_n(
+							'%s webhook failed its most recent delivery. Check that the delivery URL is reachable. WooCommerce disables webhooks that fail repeatedly, so set the webhook to active again once it is fixed. This clears after the next successful delivery.',
+							'%s webhooks failed their most recent delivery. Check that their delivery URLs are reachable. WooCommerce disables webhooks that fail repeatedly, so set them to active again once they are fixed. This clears after their next successful delivery.',
+							$failing['count'],
+							'woocommerce'
+						),
+						number_format_i18n( $failing['count'] )
+					),
+					'actions'     => array(
+						array(
+							'url'   => admin_url( 'admin.php?page=wc-settings&tab=advanced&section=webhooks' ),
+							'label' => __( 'Review webhooks', 'woocommerce' ),
 						),
 					),
 				),
@@ -895,5 +1040,80 @@ class SiteHealth {
 			),
 			admin_url( 'admin.php' )
 		);
+	}
+
+	/**
+	 * Get the pending WooCommerce database update, if any.
+	 *
+	 * @return array{running?: bool} Empty when the database is up to date.
+	 */
+	private function get_pending_database_update(): array {
+		if ( ! WC_Install::needs_db_update() ) {
+			return array();
+		}
+
+		$queued_actions = WC()->queue()->search(
+			array(
+				'group'    => 'woocommerce-db-updates',
+				'status'   => array( ActionScheduler_Store::STATUS_PENDING, ActionScheduler_Store::STATUS_RUNNING ),
+				'per_page' => 1,
+			),
+			'ids'
+		);
+
+		return array( 'running' => ! empty( $queued_actions ) );
+	}
+
+	/**
+	 * Get the WooCommerce pages that are not assigned or not published.
+	 *
+	 * @return array<string, string> Page names keyed by page slug.
+	 */
+	private function get_missing_required_pages(): array {
+		$pages = array(
+			'shop'      => __( 'Shop', 'woocommerce' ),
+			'cart'      => __( 'Cart', 'woocommerce' ),
+			'checkout'  => __( 'Checkout', 'woocommerce' ),
+			'myaccount' => __( 'My account', 'woocommerce' ),
+		);
+
+		return array_filter(
+			$pages,
+			fn( string $page ) => 'publish' !== get_post_status( wc_get_page_id( $page ) ),
+			ARRAY_FILTER_USE_KEY
+		);
+	}
+
+	/**
+	 * Determine whether at least one payment gateway is enabled.
+	 *
+	 * Checks the enabled setting rather than availability, because availability depends on the cart and runs
+	 * third-party filters that expect a front-end request.
+	 *
+	 * @return bool
+	 */
+	private function has_enabled_payment_gateway(): bool {
+		foreach ( WC()->payment_gateways()->payment_gateways() as $gateway ) {
+			if ( wc_string_to_bool( $gateway->enabled ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Count webhooks whose most recent delivery failed.
+	 *
+	 * A successful delivery resets the failure count, and repeated failures disable the webhook without resetting it.
+	 *
+	 * @return array{count?: int} Empty when no webhooks are failing.
+	 */
+	private function get_failing_webhooks(): array {
+		global $wpdb;
+
+		$count = (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->prefix}wc_webhooks WHERE failure_count > 0 AND status <> 'paused'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+
+		return $count ? array( 'count' => $count ) : array();
 	}
 }
