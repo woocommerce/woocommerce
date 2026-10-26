@@ -410,4 +410,16 @@ class WC_Coupon_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$this->assertSame( 'save\\20', $post->post_title, 'The updated code should keep its backslash.' );
 		$this->assertSame( 'Path D:\\temp, it\'s "quoted"', $post->post_excerpt, 'The updated description should keep its backslash and quotes.' );
 	}
+
+	/**
+	 * @testdox Saving a coupon keeps the existing behavior for a description that is already slashed.
+	 */
+	public function test_save_unslashes_already_slashed_description(): void {
+		$coupon = new WC_Coupon();
+		$coupon->set_code( 'slashed-description' );
+		$coupon->set_description( wp_filter_post_kses( 'It\'s 12" off' ) );
+		$coupon->save();
+
+		$this->assertSame( 'It\'s 12" off', get_post( $coupon->get_id() )->post_excerpt );
+	}
 }
