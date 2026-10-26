@@ -199,8 +199,7 @@ class WC_Formatting_Functions_Test extends \WC_Unit_Test_Case {
 
 		$result = wc_format_option_price_separators( $raw_value, array( 'id' => $option_id ), $raw_value );
 
-		// Compare the separator as displayed, since WordPress 7.2's wp_kses() stores character references as the characters themselves.
-		$this->assertSame( $expected, html_entity_decode( $result, ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
+		$this->assertEqualHTML( $expected, $result );
 
 		$errors = $this->get_wc_admin_settings_errors();
 

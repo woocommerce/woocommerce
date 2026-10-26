@@ -72,6 +72,7 @@ class UnexpectedErrorResponseTest extends WC_Unit_Test_Case {
 			array(
 				'source'         => 'store-api',
 				'error'          => array(
+					'type' => E_ERROR,
 					'file' => $error->getFile(),
 					'line' => $error->getLine(),
 				),
@@ -94,6 +95,67 @@ class UnexpectedErrorResponseTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should log the PHP error type the failure would have produced if uncaught.
+	 * @dataProvider uncaught_error_type_provider
+	 *
+	 * @param \Throwable $error         Caught failure.
+	 * @param int        $expected_type Native uncaught error type.
+	 */
+	public function test_logs_uncaught_error_type( \Throwable $error, int $expected_type ): void {
+		UnexpectedErrorResponse::create( $error, self::class );
+
+		$this->assertSame( $expected_type, $this->captured_logs[0]['context']['error']['type'] ?? null );
+	}
+
+	/**
+	 * Error types reported by PHP for uncaught throwables.
+	 *
+	 * @return array
+	 */
+	public function uncaught_error_type_provider(): array {
+		return array(
+			'type error with unrelated code' => array( new \TypeError( 'Fixture failure.', E_PARSE ), E_ERROR ),
+			'parse error'                    => array( new \ParseError( 'Fixture failure.' ), E_PARSE ),
+			'compile error'                  => array( new \CompileError( 'Fixture failure.' ), E_COMPILE_ERROR ),
+			'exception with unrelated code'  => array( new \RuntimeException( 'Fixture failure.', E_PARSE ), E_ERROR ),
+			'converted warning'              => array( new \ErrorException( 'Fixture failure.', 0, E_WARNING ), E_ERROR ),
+			'parse error subclass'           => array( new class() extends \ParseError {}, E_ERROR ),
+			'compile error subclass'         => array( new class() extends \CompileError {}, E_ERROR ),
+		);
+	}
+
+	/**
+	 * @testdox Should preserve a legacy remote logging override that reads the PHP error type.
+	 */
+	public function test_logged_context_preserves_legacy_error_type_override(): void {
+		UnexpectedErrorResponse::create( new \TypeError( 'Fixture extension failure.' ), self::class );
+		$context              = $this->captured_logs[0]['context'];
+		$context['backtrace'] = array( '#0 ' . WP_PLUGIN_DIR . '/fixture-extension/error.php(1): fail()' );
+		$filter_calls         = 0;
+		add_filter(
+			'woocommerce_remote_logging_is_third_party_error',
+			static function ( $is_third_party, $message, $context ) use ( &$filter_calls ) {
+				unset( $is_third_party, $message );
+				++$filter_calls;
+				return E_ERROR !== $context['error']['type'];
+			},
+			10,
+			3
+		);
+
+		$classify = new \ReflectionMethod( RemoteLogger::class, 'is_third_party_error' );
+		$classify->setAccessible( true );
+		$result = $classify->invoke(
+			wc_get_container()->get( RemoteLogger::class ),
+			'Fixture extension failure.',
+			$context
+		);
+
+		$this->assertSame( 1, $filter_calls );
+		$this->assertFalse( $result, 'The existing callback must still allow E_ERROR records.' );
+	}
+
+	/**
 	 * @testdox Should produce a remote log record that keeps the file and leaks nothing from the error object.
 	 */
 	public function test_logged_context_formats_into_a_remote_record(): void {
@@ -113,6 +175,7 @@ class UnexpectedErrorResponseTest extends WC_Unit_Test_Case {
 		$record        = $remote_logger->get_formatted_log( 'critical', $logged['message'], $logged['context'] );
 
 		$this->assertSame( 'store-api', $record['extra']['source'] );
+		$this->assertSame( E_ERROR, $record['extra']['error']['type'] ?? null );
 		$this->assertStringContainsString( basename( __FILE__ ), $record['file'], 'The remote record must carry the file the error was raised in.' );
 		$this->assertStringStartsWith( '#0 ', $record['trace'] );
 		$this->assertStringNotContainsString( 'fixture-secret-token', wp_json_encode( $record ), 'Error object state must not reach the remote record.' );

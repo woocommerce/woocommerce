@@ -130,25 +130,19 @@ class Api {
 		// Preload option caches to minimize future queries for options that do not yet exist or are not set to autoload.
 		wp_prime_option_caches(
 			array(
-				'woocommerce_cheque_settings',
-				'woocommerce_paypal_settings',
+				'woocommerce_bacs_settings',
 				'woocommerce_bacs_accounts',
+				'woocommerce_cheque_settings',
 				'woocommerce_cod_settings',
+				'woocommerce_paypal_settings',
 			)
 		);
 
-		$payment_method_registry->register(
-			Package::container()->get( Cheque::class )
-		);
-		$payment_method_registry->register(
-			Package::container()->get( PayPal::class )
-		);
-		$payment_method_registry->register(
-			Package::container()->get( BankTransfer::class )
-		);
-		$payment_method_registry->register(
-			Package::container()->get( CashOnDelivery::class )
-		);
+		$container = Package::container();
+		$payment_method_registry->register( $container->get( Cheque::class ) );
+		$payment_method_registry->register( $container->get( PayPal::class ) );
+		$payment_method_registry->register( $container->get( BankTransfer::class ) );
+		$payment_method_registry->register( $container->get( CashOnDelivery::class ) );
 	}
 
 	/**

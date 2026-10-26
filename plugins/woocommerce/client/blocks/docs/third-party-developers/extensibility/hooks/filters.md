@@ -2073,6 +2073,7 @@ The same filter WC_Order::needs_payment() applies. A status a site declares paya
 ### Source
 
 - [StoreApi/Utilities/CheckoutTrait.php](../../../../../../src/StoreApi/Utilities/CheckoutTrait.php)
+- [StoreApi/Utilities/DraftOrderTrait.php](../../../../../../src/StoreApi/Utilities/DraftOrderTrait.php)
 
 ---
 
