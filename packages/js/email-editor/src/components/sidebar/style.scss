@@ -1,4 +1,5 @@
 @import "~@wordpress/base-styles/colors";
+@import "~@wordpress/base-styles/variables";
 
 .background-block-support-panel .woocommerce-grid-full-width,
 .border-block-support-panel .woocommerce-grid-full-width {
@@ -7,4 +8,21 @@
 	grid-column: 1/3;
 	// resetting margin fits the notice to the full column width
 	margin: 0;
+}
+
+// WP 7.1 sets row-gap: 0 on the Background panel wrapper, so the notice needs its own spacing.
+.background-block-support-panel
+	.background-block-support-panel__inner-wrapper
+	.woocommerce-grid-full-width {
+	margin-block-start: $grid-unit-20;
+}
+
+// Hide core’s quick-navigation “Content” panels (template and template part)
+// from the document tab only. They list the single block that fills the canvas
+// and core has no opt-out that keeps the body editable. The block icon class is
+// used because older core has no class on the quick-navigation markup.
+.editor-sidebar__panel > [role="tabpanel"] {
+	> .components-panel__body:has(.components-button .block-editor-block-icon) {
+		display: none;
+	}
 }

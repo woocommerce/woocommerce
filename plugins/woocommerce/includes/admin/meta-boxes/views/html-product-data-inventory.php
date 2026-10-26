@@ -54,7 +54,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 		/**
 		 * Action hook after the MPN (Manufacturer part number) product option field.
 		 *
-		 * @since 11.3.0
+		 * @since 11.4.0
 		 */
 		do_action( 'woocommerce_product_options_mpn' );
 

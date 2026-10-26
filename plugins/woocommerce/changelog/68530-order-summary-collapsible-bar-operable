@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Checkout block: keep the collapsible order summary expandable by mouse and keyboard before the container width has been measured.

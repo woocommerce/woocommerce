@@ -34,8 +34,15 @@ export const getContributorData = async (
 	baseRef: string,
 	headRef: string
 ) => {
-	const isValidAuthor = ( commit: { author?: { login?: string | null; } | null; } ) => {
-		return !! commit.author && !! commit.author.login && ! commit.author.login.includes( 'bot' ) && 'invalid-email-address' !== commit.author.login;
+	const isValidAuthor = ( commit: {
+		author?: { login?: string | null } | null;
+	} ) => {
+		return (
+			!! commit.author &&
+			!! commit.author.login &&
+			! commit.author.login.includes( 'bot' ) &&
+			'invalid-email-address' !== commit.author.login
+		);
 	};
 	const octokit = new Octokit( {
 		auth: getEnvVar( 'GITHUB_ACCESS_TOKEN', true ),
@@ -55,9 +62,7 @@ export const getContributorData = async (
 
 	// add page 1 commits
 	allAuthors.push(
-		...commits
-			.filter( isValidAuthor )
-			.map( ( commit ) => commit.author )
+		...commits.filter( isValidAuthor ).map( ( commit ) => commit.author )
 	);
 
 	for ( let i = 2; i <= pages; i++ ) {
@@ -91,45 +96,4 @@ export const getContributorData = async (
 		baseRef,
 		headRef,
 	} as ContributorData;
-};
-
-export const getMostRecentFinal = async () => {
-	const octokit = new Octokit( {
-		auth: getEnvVar( 'GITHUB_ACCESS_TOKEN', true ),
-	} );
-
-	const release = await octokit.repos.getLatestRelease( {
-		owner: 'woocommerce',
-		repo: 'woocommerce',
-	} );
-
-	return release.data;
-};
-
-export const getMostRecentBeta = async () => {
-	const octokit = new Octokit( {
-		auth: getEnvVar( 'GITHUB_ACCESS_TOKEN', true ),
-	} );
-
-	const { data: releases } = await octokit.repos.listReleases( {
-		owner: 'woocommerce',
-		repo: 'woocommerce',
-	} );
-
-	const betaReleases = releases.filter(
-		( release ) =>
-			release?.name && release.name.toLowerCase().includes( 'beta' )
-	);
-
-	if ( betaReleases.length === 0 ) {
-		throw new Error( 'No beta releases found' );
-	}
-
-	const latestBetaRelease = betaReleases.reduce( ( latest, current ) => {
-		const latestDate = new Date( latest.created_at );
-		const currentDate = new Date( current.created_at );
-		return currentDate > latestDate ? current : latest;
-	} );
-
-	return latestBetaRelease;
 };

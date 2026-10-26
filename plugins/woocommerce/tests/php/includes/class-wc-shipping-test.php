@@ -70,6 +70,84 @@ class WC_Shipping_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * A destination the store does not ship to cannot be delivered, but it can still be collected,
+	 * so the shopper is left with collection rather than with nothing.
+	 *
+	 * @testdox A destination the store does not ship to leaves collection as the only option.
+	 */
+	public function test_an_unshippable_destination_leaves_collection_as_the_only_option(): void {
+		update_option( 'woocommerce_ship_to_countries', 'specific' );
+		update_option( 'woocommerce_specific_ship_to_countries', array( 'GB' ) );
+
+		$rates = $this->rates_offered_to( 'US' );
+
+		$this->assertSame( array( 'local_pickup:1' ), array_keys( $rates ), 'Only what the shopper can collect should be offered.' );
+	}
+
+	/**
+	 * @testdox A destination the store does ship to is offered delivery as well as collection.
+	 */
+	public function test_a_shippable_destination_is_offered_delivery_too(): void {
+		update_option( 'woocommerce_ship_to_countries', 'specific' );
+		update_option( 'woocommerce_specific_ship_to_countries', array( 'US' ) );
+
+		$rates = $this->rates_offered_to( 'US' );
+
+		$this->assertSame( array( 'flat_rate:1', 'local_pickup:1' ), array_keys( $rates ), 'A destination the store ships to should be offered both.' );
+	}
+
+	/**
+	 * A package with nowhere named yet cannot be proven unshippable, so the shopper keeps every
+	 * option while they are still typing.
+	 *
+	 * @testdox A package with no destination country is offered delivery as well as collection.
+	 */
+	public function test_a_package_with_no_destination_country_is_offered_delivery_too(): void {
+		update_option( 'woocommerce_ship_to_countries', 'specific' );
+		update_option( 'woocommerce_specific_ship_to_countries', array( 'GB' ) );
+
+		$rates = $this->rates_offered_to( '' );
+
+		$this->assertSame( array( 'flat_rate:1', 'local_pickup:1' ), array_keys( $rates ), 'Nothing has been ruled out yet, so nothing should be withheld.' );
+	}
+
+	/**
+	 * Ask for the rates a package bound for the given country is offered.
+	 *
+	 * @param string $country Destination country.
+	 * @return array Rates keyed by rate id.
+	 */
+	private function rates_offered_to( string $country ): array {
+		$methods = array( new WC_Shipping_Flat_Rate( 1 ), new WC_Shipping_Local_Pickup( 1 ) );
+		$hook    = fn () => $methods;
+
+		// Rates are cached in the session against a hash of the package, and the ship-to setting is
+		// not part of that hash, so two calls with the same package would otherwise read the first
+		// call's answer.
+		WC()->session->set( 'shipping_for_package_0', null );
+
+		add_action( 'woocommerce_shipping_methods', $hook );
+
+		try {
+			$package = $this->sut->calculate_shipping_for_package(
+				array(
+					'contents'      => array(),
+					'contents_cost' => 10,
+					'destination'   => array(
+						'country'  => $country,
+						'state'    => 'CA',
+						'postcode' => '00000',
+					),
+				)
+			);
+		} finally {
+			remove_action( 'woocommerce_shipping_methods', $hook );
+		}
+
+		return $package['rates'];
+	}
+
+	/**
 	 * @testdox package rates filter doesn't cause errors when accessing non-existent rates with arithmetic operations
 	 *
 	 * @dataProvider provide_test_package_rates_filter_error_handling

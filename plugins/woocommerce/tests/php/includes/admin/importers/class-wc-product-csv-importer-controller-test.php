@@ -77,6 +77,41 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should map exported global unique ID headers in English and translated stores.
+	 * @testWith ["en_US", "GTIN, UPC, EAN, or ISBN"]
+	 *           ["es_ES", "GTIN, UPC, EAN o ISBN"]
+	 *           ["es_ES", "GTIN, UPC, EAN, or ISBN"]
+	 *
+	 * @param string $locale Store locale.
+	 * @param string $header CSV column header.
+	 */
+	public function test_auto_mapping_global_unique_id( string $locale, string $header ): void {
+		wp_set_current_user( 0 );
+		add_filter(
+			'locale',
+			static function () use ( $locale ) {
+				return $locale;
+			}
+		);
+		add_filter(
+			'gettext_woocommerce',
+			static function ( $translation, $text ) use ( $locale ) {
+				return 'es_ES' === $locale && 'GTIN, UPC, EAN, or ISBN' === $text ? 'GTIN, UPC, EAN o ISBN' : $translation;
+			},
+			10,
+			2
+		);
+
+		$sut = new WC_Product_CSV_Importer_Controller();
+		// Mappings are included once, but the test framework restores hooks between datasets.
+		add_filter( 'woocommerce_csv_product_import_mapping_default_columns', 'wc_importer_default_english_mappings', 100 );
+		$method = new ReflectionMethod( WC_Product_CSV_Importer_Controller::class, 'auto_map_columns' );
+		$method->setAccessible( true );
+
+		$this->assertSame( array( 'global_unique_id' ), $method->invoke( $sut, array( $header ) ), 'The exported identifier column should be selected for import.' );
+	}
+
+	/**
 	 * @testdox Should URL-encode request-derived values in the next step link so special characters like '+' survive the round trip.
 	 */
 	public function test_get_next_step_link_url_encodes_request_derived_params(): void {
@@ -669,5 +704,47 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 		global $wpdb;
 
 		return (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->wc_product_meta_lookup} WHERE product_id = %d", $product_id ) );
+	}
+
+	/**
+	 * @testdox Customs CSV headers map to product properties regardless of case.
+	 */
+	public function test_customs_headers_are_mapped(): void {
+		$method = new ReflectionMethod( WC_Product_CSV_Importer_Controller::class, 'auto_map_columns' );
+		$method->setAccessible( true );
+		$sut = new WC_Product_CSV_Importer_Controller();
+
+		$expected = array( 'customs_commodity_code', 'customs_country_of_origin', 'customs_description' );
+
+		$this->assertSame(
+			$expected,
+			$method->invoke( $sut, array( 'Commodity code (HS code)', 'COUNTRY OF ORIGIN', 'Customs description' ) ),
+			'Exported customs labels should map to the customs setters.'
+		);
+		$this->assertSame(
+			$expected,
+			$method->invoke( $sut, array( 'CUSTOMS_COMMODITY_CODE', 'Customs_Country_Of_Origin', 'customs_description' ) ),
+			'Canonical customs headers should map to the customs setters.'
+		);
+
+		// The controller has loaded the mappings; an empty list skips the en_US early return.
+		$english = wc_importer_default_english_mappings( array() );
+		foreach ( array( 'Commodity code (HS code)', 'Country of origin', 'Customs description' ) as $index => $label ) {
+			$this->assertSame( $expected[ $index ], $english[ $label ] ?? null, "Translated stores should still map the English {$label} header." );
+		}
+	}
+
+	/**
+	 * @testdox Customs fields are available in the CSV mapping selector.
+	 */
+	public function test_customs_fields_are_mapping_options(): void {
+		$method = new ReflectionMethod( WC_Product_CSV_Importer_Controller::class, 'get_mapping_options' );
+		$method->setAccessible( true );
+		$options = $method->invoke( new WC_Product_CSV_Importer_Controller() );
+
+		foreach ( array( 'customs_commodity_code', 'customs_country_of_origin', 'customs_description' ) as $property ) {
+			$this->assertArrayHasKey( $property, $options, 'Merchants should be able to map each customs field manually.' );
+		}
+		$this->assertSame( 'Commodity code (HS code)', $options['customs_commodity_code'], 'The commodity code option should match the export label.' );
 	}
 }

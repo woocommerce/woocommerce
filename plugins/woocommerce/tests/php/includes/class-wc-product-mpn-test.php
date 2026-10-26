@@ -95,9 +95,9 @@ class WC_Product_Mpn_Test extends WC_Unit_Test_Case {
 		$this->assertSame( 'PRE-UPGRADE', wc_get_product( $sut->get_id() )->get_mpn() );
 		$this->assertSame( '', $this->get_lookup_mpn( $sut->get_id() ) );
 
-		update_option( 'woocommerce_schema_version', '1130' );
-		wc_update_1130_add_mpn_to_product_lookup_table();
-		wc_update_1130_add_mpn_to_product_lookup_table();
+		update_option( 'woocommerce_schema_version', '1140' );
+		wc_update_1140_add_mpn_to_product_lookup_table();
+		wc_update_1140_add_mpn_to_product_lookup_table();
 		$this->assertSame( 'PRE-UPGRADE', wc_get_product( $sut->get_id() )->get_mpn() );
 		$this->assertSame( '', $this->get_lookup_mpn( $sut->get_id() ), 'The schema upgrade must not backfill pre-existing MPN metadata.' );
 

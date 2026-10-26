@@ -71,8 +71,7 @@ function wc_get_products( $args ) {
  */
 function wc_get_product( $the_product = false, $deprecated = array() ) {
 	if ( ! did_action( 'woocommerce_init' ) || ! did_action( 'woocommerce_after_register_taxonomy' ) || ! did_action( 'woocommerce_after_register_post_type' ) ) {
-		/* translators: 1: wc_get_product 2: woocommerce_init 3: woocommerce_after_register_taxonomy 4: woocommerce_after_register_post_type */
-		wc_doing_it_wrong( __FUNCTION__, sprintf( __( '%1$s should not be called before the %2$s, %3$s and %4$s actions have finished.', 'woocommerce' ), 'wc_get_product', 'woocommerce_init', 'woocommerce_after_register_taxonomy', 'woocommerce_after_register_post_type' ), '3.9' );
+		wc_doing_it_wrong( __FUNCTION__, sprintf( '%1$s should not be called before the %2$s, %3$s and %4$s actions have finished.', 'wc_get_product', 'woocommerce_init', 'woocommerce_after_register_taxonomy', 'woocommerce_after_register_post_type' ), '3.9' );
 		return false;
 	}
 	if ( ! empty( $deprecated ) ) {
@@ -417,13 +416,10 @@ add_action( 'template_redirect', 'wc_product_canonical_redirect', 5 );
  * @return string
  */
 function wc_placeholder_img_src( $size = 'woocommerce_thumbnail' ) {
-	$src               = WC()->plugin_url() . '/assets/images/placeholder.webp';
 	$placeholder_image = get_option( 'woocommerce_placeholder_image', 0 );
-
 	if ( ! empty( $placeholder_image ) ) {
 		if ( is_numeric( $placeholder_image ) ) {
 			$image = wp_get_attachment_image_src( $placeholder_image, $size );
-
 			if ( ! empty( $image[0] ) ) {
 				$src = $image[0];
 			}
@@ -432,7 +428,15 @@ function wc_placeholder_img_src( $size = 'woocommerce_thumbnail' ) {
 		}
 	}
 
-	return apply_filters( 'woocommerce_placeholder_img_src', $src );
+	/**
+	 * Filters the placeholder image source URL.
+	 *
+	 * @since 1.0.0
+	 *
+	 * @param string $src Placeholder image URL.
+	 * @return string
+	 */
+	return apply_filters( 'woocommerce_placeholder_img_src', $src ?? ( WC()->plugin_url() . '/assets/images/placeholder.webp' ) );
 }
 
 /**
@@ -1469,7 +1473,6 @@ function wc_get_related_products( $product_id, $limit = 5, $exclude_ids = array(
 
 	// We want to query related posts if they are not cached, or we don't have enough.
 	if ( false === $related_posts || count( $related_posts ) < $limit ) {
-
 		$cats_array = apply_filters( 'woocommerce_product_related_posts_relate_by_category', true, $product_id ) ? apply_filters( 'woocommerce_get_related_product_cat_terms', wc_get_product_term_ids( $product_id, 'product_cat' ), $product_id ) : array();
 		$tags_array = apply_filters( 'woocommerce_product_related_posts_relate_by_tag', true, $product_id ) ? apply_filters( 'woocommerce_get_related_product_tag_terms', wc_get_product_term_ids( $product_id, 'product_tag' ), $product_id ) : array();
 
@@ -1481,13 +1484,16 @@ function wc_get_related_products( $product_id, $limit = 5, $exclude_ids = array(
 			$related_posts = $data_store->get_related_products( $cats_array, $tags_array, $exclude_ids, $limit + 10, $product_id );
 		}
 
+		$original_transient = $transient;
 		if ( $transient && is_array( $transient ) ) {
 			$transient[ $query_args ] = $related_posts;
 		} else {
 			$transient = array( $query_args => $related_posts );
 		}
 
-		set_transient( $transient_name, $transient, DAY_IN_SECONDS );
+		if ( $original_transient !== $transient ) {
+			set_transient( $transient_name, $transient, DAY_IN_SECONDS );
+		}
 	}
 
 	$related_posts = apply_filters(
@@ -1614,7 +1620,7 @@ function wc_get_price_including_tax( $product, $args = array() ) {
  *
  * @since  3.0.0
  * @param  WC_Product $product WC_Product object.
- * @param  array      $args Optional arguments to pass product quantity and price.
+ * @param  array      $args Optional quantity, price, order, and tax location arguments.
  * @return float|string Price with tax excluded, or an empty string if price calculation failed.
  */
 function wc_get_price_excluding_tax( $product, $args = array() ) {
@@ -1646,21 +1652,30 @@ function wc_get_price_excluding_tax( $product, $args = array() ) {
 
 		if ( apply_filters( 'woocommerce_adjust_non_base_location_prices', true ) ) {
 			$tax_rates = WC_Tax::get_base_tax_rates( $product->get_tax_class( 'unfiltered' ) );
-		} elseif ( $customer_id ) {
+		} elseif ( $customer_id && empty( $args['tax_location']['country'] ) ) {
 			$customer  = wc_get_container()->get( LegacyProxy::class )->get_instance_of( WC_Customer::class, $customer_id );
 			$tax_rates = WC_Tax::get_rates( $product->get_tax_class(), $customer );
 		} elseif ( is_object( $order ) && method_exists( $order, 'get_taxable_location' ) ) {
-			$tax_location = $order->get_taxable_location();
+			$tax_location = $order->get_taxable_location( ! empty( $args['tax_location']['country'] ) ? $args['tax_location'] : array() );
 			if ( is_array( $tax_location ) && isset( $tax_location['country'] ) ) {
-				$tax_rates = WC_Tax::find_rates(
-					array(
-						'country'   => $tax_location['country'],
-						'state'     => $tax_location['state'] ?? '',
-						'postcode'  => $tax_location['postcode'] ?? '',
-						'city'      => $tax_location['city'] ?? '',
-						'tax_class' => $product->get_tax_class(),
-					)
-				);
+				if ( $customer_id ) {
+					$customer  = wc_get_container()->get( LegacyProxy::class )->get_instance_of( WC_Customer::class, $customer_id );
+					$tax_rates = WC_Tax::get_rates_from_location(
+						$product->get_tax_class(),
+						array( $tax_location['country'], $tax_location['state'] ?? '', $tax_location['postcode'] ?? '', $tax_location['city'] ?? '' ),
+						$customer
+					);
+				} else {
+					$tax_rates = WC_Tax::find_rates(
+						array(
+							'country'   => $tax_location['country'],
+							'state'     => $tax_location['state'] ?? '',
+							'postcode'  => $tax_location['postcode'] ?? '',
+							'city'      => $tax_location['city'] ?? '',
+							'tax_class' => $product->get_tax_class(),
+						)
+					);
+				}
 			}
 		}
 
@@ -1747,8 +1762,7 @@ function wc_get_product_category_list( $product_id, $sep = ', ', $before = '', $
 			wc_doing_it_wrong(
 				__FUNCTION__,
 				sprintf(
-					/* translators: 1: the unsupported ordering mode that was passed. */
-					__( 'Unsupported $orderby value "%1$s". Use "name", "breadcrumb", or an empty string for WordPress term-list order.', 'woocommerce' ),
+					'Unsupported $orderby value "%1$s". Use "name", "breadcrumb", or an empty string for WordPress term-list order.',
 					is_scalar( $orderby ) ? (string) $orderby : gettype( $orderby )
 				),
 				'11.2.0'
@@ -2129,6 +2143,40 @@ function wc_products_array_orderby_price( $a, $b ) {
 }
 
 /**
+ * Get min/max price meta query args for the `_price` meta key.
+ *
+ * Deprecated in 3.6.0 and restored in 11.3.0, because the REST API products and
+ * variations controllers still use it for the min_price and max_price filters.
+ *
+ * @since 3.0.0
+ * @param array|WP_REST_Request<array<string, mixed>> $args Min price and max price arguments.
+ * @return array
+ */
+function wc_get_min_max_price_meta_query( $args ) {
+	$current_min_price = isset( $args['min_price'] ) ? floatval( $args['min_price'] ) : 0;
+	$current_max_price = isset( $args['max_price'] ) ? floatval( $args['max_price'] ) : PHP_INT_MAX;
+
+	/**
+	 * Filters the meta query used to match products by price.
+	 *
+	 * @since 3.0.0
+	 *
+	 * @param array                                       $meta_query Meta query args for the `_price` meta key.
+	 * @param array|WP_REST_Request<array<string, mixed>> $args       Min price and max price arguments.
+	 */
+	return apply_filters(
+		'woocommerce_get_min_max_price_meta_query',
+		array(
+			'key'     => '_price',
+			'value'   => array( $current_min_price, $current_max_price ),
+			'compare' => 'BETWEEN',
+			'type'    => 'DECIMAL(10,' . wc_get_price_decimals() . ')',
+		),
+		$args
+	);
+}
+
+/**
  * Queue a product for syncing at the end of the request.
  *
  * @param int $product_id Product ID.
@@ -2203,7 +2251,7 @@ function wc_update_product_lookup_tables() {
 		'tax_status', // When last column is updated, woocommerce_product_lookup_table_is_generating is updated.
 	);
 
-	if ( get_option( 'woocommerce_schema_version', 0 ) >= 1130 ) {
+	if ( get_option( 'woocommerce_schema_version', 0 ) >= 1140 ) {
 		array_splice( $columns, 4, 0, array( 'mpn' ) );
 	}
 
@@ -2292,16 +2340,18 @@ function wc_update_product_lookup_tables_column( $column ) {
 			);
 			break;
 		case 'stock_quantity':
+			// The subquery narrows the update to managed-stock products by primary key, so the optimizer never scans the whole lookup table.
 			$wpdb->query(
 				"
 				UPDATE
 					{$wpdb->wc_product_meta_lookup} lookup_table
-					LEFT JOIN {$wpdb->postmeta} meta1 ON lookup_table.product_id = meta1.post_id AND meta1.meta_key = '_manage_stock'
-					LEFT JOIN {$wpdb->postmeta} meta2 ON lookup_table.product_id = meta2.post_id AND meta2.meta_key = '_stock'
+					LEFT JOIN {$wpdb->postmeta} meta ON lookup_table.product_id = meta.post_id AND meta.meta_key = '_stock'
 				SET
-					lookup_table.stock_quantity = meta2.meta_value
+					lookup_table.stock_quantity = meta.meta_value
 				WHERE
-					meta1.meta_value = 'yes'
+					lookup_table.product_id IN (
+						SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_manage_stock' AND meta_value = 'yes'
+					)
 				"
 			);
 			break;

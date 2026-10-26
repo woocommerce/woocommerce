@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Encode apostrophes in classic cart request data.

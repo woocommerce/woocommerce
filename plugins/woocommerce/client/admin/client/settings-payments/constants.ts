@@ -8,3 +8,7 @@ export const wooPaymentsOnboardingSessionEntrySettings = 'settings_payments';
 export const wooPaymentsOnboardingSessionEntryLYS = 'lys';
 
 export const WC_SETTINGS_PAYMENTS_NAMESPACE = '/wc-admin/settings/payments';
+
+// The WooCommerce.com marketplace page the "More payment options" link points to.
+export const morePaymentOptionsBaseUrl =
+	'https://woocommerce.com/product-category/woocommerce-extensions/payment-gateways/?utm_source=payments_recommendations';

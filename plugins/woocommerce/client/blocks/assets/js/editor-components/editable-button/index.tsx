@@ -4,8 +4,10 @@
 import Button, { ButtonProps } from '@woocommerce/base-components/button';
 import { RichText } from '@wordpress/block-editor';
 
-export interface EditableButtonProps
-	extends Omit< ButtonProps, 'onChange' | 'placeholder' | 'value' > {
+export interface EditableButtonProps extends Omit<
+	ButtonProps,
+	'onChange' | 'placeholder' | 'value'
+> {
 	/**
 	 * On change callback.
 	 */

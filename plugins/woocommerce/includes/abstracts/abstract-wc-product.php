@@ -16,6 +16,7 @@ use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore as ProductAttributesLookupDataStore;
+use Automattic\WooCommerce\Internal\ProductCustoms\CustomsDataValidator;
 
 /**
  * Legacy product contains all deprecated methods for this class and can be
@@ -61,60 +62,63 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @var array
 	 */
 	protected $data = array(
-		'name'               => '',
-		'slug'               => '',
-		'date_created'       => null,
-		'date_modified'      => null,
-		'status'             => false,
-		'featured'           => false,
-		'catalog_visibility' => CatalogVisibility::VISIBLE,
-		'description'        => '',
-		'short_description'  => '',
-		'sku'                => '',
-		'global_unique_id'   => '',
-		'mpn'                => '',
-		'price'              => '',
-		'regular_price'      => '',
-		'sale_price'         => '',
-		'date_on_sale_from'  => null,
-		'date_on_sale_to'    => null,
-		'total_sales'        => '0',
-		'tax_status'         => ProductTaxStatus::TAXABLE,
-		'tax_class'          => '',
-		'manage_stock'       => false,
-		'stock_quantity'     => null,
-		'stock_status'       => ProductStockStatus::IN_STOCK,
-		'backorders'         => 'no',
-		'low_stock_amount'   => '',
-		'sold_individually'  => false,
-		'weight'             => '',
-		'length'             => '',
-		'width'              => '',
-		'height'             => '',
-		'upsell_ids'         => array(),
-		'cross_sell_ids'     => array(),
-		'parent_id'          => 0,
-		'reviews_allowed'    => true,
-		'purchase_note'      => '',
-		'attributes'         => array(),
-		'default_attributes' => array(),
-		'menu_order'         => 0,
-		'post_password'      => '',
-		'virtual'            => false,
-		'downloadable'       => false,
-		'category_ids'       => array(),
-		'tag_ids'            => array(),
-		'brand_ids'          => array(),
-		'shipping_class_id'  => 0,
-		'downloads'          => array(),
-		'image_id'           => '',
-		'gallery_image_ids'  => array(),
-		'download_limit'     => -1,
-		'download_expiry'    => -1,
-		'rating_counts'      => array(),
-		'average_rating'     => 0,
-		'review_count'       => 0,
-		'cogs_value'         => null,
+		'name'                      => '',
+		'slug'                      => '',
+		'date_created'              => null,
+		'date_modified'             => null,
+		'status'                    => false,
+		'featured'                  => false,
+		'catalog_visibility'        => CatalogVisibility::VISIBLE,
+		'description'               => '',
+		'short_description'         => '',
+		'sku'                       => '',
+		'global_unique_id'          => '',
+		'mpn'                       => '',
+		'price'                     => '',
+		'regular_price'             => '',
+		'sale_price'                => '',
+		'date_on_sale_from'         => null,
+		'date_on_sale_to'           => null,
+		'total_sales'               => '0',
+		'tax_status'                => ProductTaxStatus::TAXABLE,
+		'tax_class'                 => '',
+		'manage_stock'              => false,
+		'stock_quantity'            => null,
+		'stock_status'              => ProductStockStatus::IN_STOCK,
+		'backorders'                => 'no',
+		'low_stock_amount'          => '',
+		'sold_individually'         => false,
+		'weight'                    => '',
+		'length'                    => '',
+		'width'                     => '',
+		'height'                    => '',
+		'upsell_ids'                => array(),
+		'cross_sell_ids'            => array(),
+		'parent_id'                 => 0,
+		'reviews_allowed'           => true,
+		'purchase_note'             => '',
+		'attributes'                => array(),
+		'default_attributes'        => array(),
+		'menu_order'                => 0,
+		'post_password'             => '',
+		'virtual'                   => false,
+		'downloadable'              => false,
+		'category_ids'              => array(),
+		'tag_ids'                   => array(),
+		'brand_ids'                 => array(),
+		'shipping_class_id'         => 0,
+		'downloads'                 => array(),
+		'image_id'                  => '',
+		'gallery_image_ids'         => array(),
+		'download_limit'            => -1,
+		'download_expiry'           => -1,
+		'rating_counts'             => array(),
+		'average_rating'            => 0,
+		'review_count'              => 0,
+		'cogs_value'                => null,
+		'customs_commodity_code'    => null,
+		'customs_country_of_origin' => null,
+		'customs_description'       => null,
 	);
 
 	/**
@@ -284,12 +288,48 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Get MPN.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 * @param  string $context What the value is for. Valid values are view and edit.
 	 * @return string
 	 */
 	public function get_mpn( $context = 'view' ) {
 		return $this->get_prop( 'mpn', $context );
+	}
+
+	/**
+	 * Gets the customs commodity code.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param string $context View or edit context.
+	 * @return string|null
+	 */
+	public function get_customs_commodity_code( $context = 'view' ) {
+		return $this->get_prop( 'customs_commodity_code', $context );
+	}
+
+	/**
+	 * Gets the customs country of origin.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param string $context View or edit context.
+	 * @return string|null
+	 */
+	public function get_customs_country_of_origin( $context = 'view' ) {
+		return $this->get_prop( 'customs_country_of_origin', $context );
+	}
+
+	/**
+	 * Gets the customs description.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param string $context View or edit context.
+	 * @return string|null
+	 */
+	public function get_customs_description( $context = 'view' ) {
+		return $this->get_prop( 'customs_description', $context );
 	}
 
 	/**
@@ -931,12 +971,60 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	/**
 	 * Set MPN.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 * @param string $mpn Product MPN.
 	 * @return void
 	 */
 	public function set_mpn( $mpn ) {
 		$this->set_prop( 'mpn', (string) $mpn );
+	}
+
+	/**
+	 * Sets the customs commodity code.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param string|null $code Commodity code, or null to clear it.
+	 * @throws WC_Data_Exception When the commodity code is invalid.
+	 * @return void
+	 */
+	public function set_customs_commodity_code( $code ) {
+		$this->set_prop(
+			'customs_commodity_code',
+			$this->get_object_read() ? CustomsDataValidator::normalize_commodity_code( $code ) : CustomsDataValidator::normalize_stored_value( 'customs_commodity_code', $code )
+		);
+	}
+
+	/**
+	 * Sets the customs country of origin.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param string|null $country Country code, or null to clear it.
+	 * @throws WC_Data_Exception When the country code is invalid.
+	 * @return void
+	 */
+	public function set_customs_country_of_origin( $country ) {
+		$this->set_prop(
+			'customs_country_of_origin',
+			$this->get_object_read() ? CustomsDataValidator::normalize_country_of_origin( $country ) : CustomsDataValidator::normalize_stored_value( 'customs_country_of_origin', $country )
+		);
+	}
+
+	/**
+	 * Sets the customs description.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param string|null $description Plain text description, or null to clear it.
+	 * @throws WC_Data_Exception When the description is not valid text or exceeds thirty-five characters.
+	 * @return void
+	 */
+	public function set_customs_description( $description ) {
+		$this->set_prop(
+			'customs_description',
+			$this->get_object_read() ? CustomsDataValidator::normalize_description( $description ) : CustomsDataValidator::normalize_stored_value( 'customs_description', $description )
+		);
 	}
 
 	/**

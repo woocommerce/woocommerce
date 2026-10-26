@@ -25,7 +25,7 @@ const blockData = {
 };
 
 const test = base.extend< { templateCompiler: TemplateCompiler } >( {
-	templateCompiler: async ( { requestUtils }, use ) => {
+	templateCompiler: async ( { requestUtils }, provideFixture ) => {
 		// Retry the template creation to handle socket hang up errors
 		const maxRetries = 3;
 		let retryCount = 0;
@@ -67,7 +67,7 @@ const test = base.extend< { templateCompiler: TemplateCompiler } >( {
 			throw lastError;
 		}
 
-		await use( compiler );
+		await provideFixture( compiler );
 	},
 } );
 
@@ -241,6 +241,27 @@ test.describe( `${ blockData.name } Block - with All products Block`, () => {
 			new RegExp( blockData.urlSearchParamWhenFilterIsApplied )
 		);
 		await expect( productTitles ).toHaveText( [ 'Single' ] );
+	} );
+
+	test( 'restores decimal URL prices without rejecting the Store API request', async ( {
+		page,
+	} ) => {
+		const filteredPageUrl = new URL( page.url() );
+		filteredPageUrl.searchParams.set( 'min_price', '1.1' );
+
+		const productsResponse = page.waitForResponse( ( response ) => {
+			const responseUrl = new URL( response.url() );
+
+			return (
+				responseUrl.pathname.endsWith( '/wc/store/v1/products' ) &&
+				responseUrl.searchParams.get( 'min_price' ) ===
+					'110.00000000000001'
+			);
+		} );
+
+		await page.goto( filteredPageUrl.toString() );
+
+		expect( ( await productsResponse ).status() ).toBe( 200 );
 	} );
 } );
 
