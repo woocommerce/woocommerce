@@ -37,6 +37,143 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Should return a rendered page of notes with pagination for an order editor.
+	 */
+	public function test_get_order_notes_page(): void {
+		$this->_setRole( 'administrator' );
+		$order = wc_create_order();
+		for ( $i = 1; $i <= 11; $i++ ) {
+			$order->add_order_note( 'Pagination note ' . $i );
+		}
+
+		$_POST['security'] = wp_create_nonce( 'get-order-notes' );
+		$_POST['order_id'] = $order->get_id();
+		$_POST['page']     = 2;
+
+		$response = $this->do_ajax( 'woocommerce_get_order_notes' );
+
+		$this->assertTrue( $response['success'], 'An order editor should be able to load notes.' );
+		$this->assertStringContainsString( 'Pagination note 1</p>', $response['data']['html'], 'The second page should contain the oldest note.' );
+		$this->assertStringNotContainsString( 'Pagination note 2</p>', $response['data']['html'], 'The response should not contain notes from the first page.' );
+		$this->assertStringContainsString( '1 of 11 notes', $response['data']['html'], 'The count should reflect the current page.' );
+		$this->assertStringContainsString( 'data-page="2"', $response['data']['html'], 'The response should identify the current page.' );
+	}
+
+	/**
+	 * @testdox Should deny access to order notes to a customer with a valid nonce.
+	 */
+	public function test_get_order_notes_denies_customer(): void {
+		$this->_setRole( 'customer' );
+		$order = wc_create_order();
+		$order->add_order_note( 'Private order note' );
+		$_POST['security'] = wp_create_nonce( 'get-order-notes' );
+		$_POST['order_id'] = $order->get_id();
+
+		$response = $this->do_ajax( 'woocommerce_get_order_notes' );
+
+		$this->assertFalse( $response['success'], 'Customers must not be able to read private notes.' );
+		$this->assertEmpty( $response['data'], 'An unauthorized response must not disclose note content.' );
+	}
+
+	/**
+	 * @testdox Should reject a request for order notes without a valid nonce.
+	 */
+	public function test_get_order_notes_requires_nonce(): void {
+		$this->_setRole( 'administrator' );
+		$_POST['order_id'] = wc_create_order()->get_id();
+		$_POST['security'] = 'invalid';
+
+		$response = $this->do_ajax( 'woocommerce_get_order_notes' );
+
+		$this->assertNotTrue( $response['success'] ?? false, 'A request with an invalid nonce must not succeed.' );
+	}
+
+	/**
+	 * @testdox Should paginate item mutation notes only when the request opts in.
+	 * @param string $action AJAX action without the WooCommerce prefix.
+	 * @param bool   $paginate Whether to request paginated notes.
+	 * @testWith ["add_order_item", false]
+	 *           ["add_order_item", true]
+	 *           ["remove_order_coupon", false]
+	 *           ["remove_order_coupon", true]
+	 *           ["remove_order_item", false]
+	 *           ["remove_order_item", true]
+	 *           ["save_order_items", false]
+	 *           ["save_order_items", true]
+	 */
+	public function test_order_item_notes_pagination_is_opt_in( string $action, bool $paginate ): void {
+		$this->_setRole( 'administrator' );
+		$order   = wc_create_order();
+		$product = WC_Helper_Product::create_simple_product();
+		$item_id = $order->add_product( $product );
+		for ( $i = 1; $i <= 11; $i++ ) {
+			$order->add_order_note( 'Compatibility note ' . $i );
+		}
+
+		$_POST['order_id'] = $order->get_id();
+		$_POST['security'] = wp_create_nonce( 'order-item' );
+		unset( $_POST['paginate_notes'] );
+		if ( $paginate ) {
+			$_POST['paginate_notes'] = true;
+		}
+
+		switch ( $action ) {
+			case 'add_order_item':
+				$_POST['data'] = array(
+					array(
+						'id'  => $product->get_id(),
+						'qty' => 1,
+					),
+				);
+				break;
+			case 'remove_order_coupon':
+				$coupon = new WC_Coupon();
+				$coupon->set_code( 'notes-pagination' );
+				$coupon->save();
+				$order->apply_coupon( $coupon );
+				$_POST['coupon'] = $coupon->get_code();
+				break;
+			case 'remove_order_item':
+				$_POST['order_item_ids'] = array( $item_id );
+				break;
+			case 'save_order_items':
+				$_POST['items'] = '';
+				break;
+		}
+
+		// An Error bypasses endpoint catch blocks, matching wp_die() exiting a real request.
+		$stop_request = new Error( 'AJAX response sent.' );
+		$die_handler  = function () use ( $stop_request ) {
+			return function () use ( $stop_request ) {
+				$this->_last_response .= ob_get_clean();
+				throw $stop_request;
+			};
+		};
+		add_filter( 'wp_die_ajax_handler', $die_handler, PHP_INT_MAX );
+		try {
+			$this->do_ajax( 'woocommerce_' . $action );
+		} catch ( Error $error ) {
+			if ( $error !== $stop_request ) {
+				throw $error;
+			}
+		} finally {
+			remove_filter( 'wp_die_ajax_handler', $die_handler, PHP_INT_MAX );
+		}
+		$response             = json_decode( $this->_last_response, true );
+		$this->_last_response = false;
+
+		$this->assertTrue( $response['success'], 'The order item mutation should succeed.' );
+		$html = $response['data']['notes_html'];
+		$this->assertStringContainsString( 'Compatibility note 11</p>', $html, 'The newest fixture note should be included.' );
+		if ( $paginate ) {
+			$this->assertSame( 10, substr_count( $html, '<li rel=' ), 'An opted-in response should contain one page of notes.' );
+			$this->assertStringNotContainsString( 'Compatibility note 1</p>', $html, 'An opted-in response should omit the oldest note.' );
+		} else {
+			$this->assertStringContainsString( 'Compatibility note 1</p>', $html, 'Legacy requests should receive the oldest note too.' );
+		}
+	}
+
+	/**
 	 * Stock should not be reduced from AJAX when an item is added to an order.
 	 */
 	public function test_add_item_to_pending_payment_order() {
@@ -109,6 +246,207 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 				$this->assertEquals( 10, $line_item->get_meta( '_reduced_stock', true ) );
 			}
 		}
+	}
+
+	/**
+	 * Call the private `maybe_add_order_item` method.
+	 *
+	 * @param int   $order_id     Order ID.
+	 * @param array $items_to_add Items to add.
+	 * @param array $tax_location Tax location entered in the order editor.
+	 */
+	private function add_items_to_order( int $order_id, array $items_to_add, array $tax_location = array() ): void {
+		$maybe_add_order_item_func = function () use ( $order_id, $items_to_add, $tax_location ) {
+			return static::maybe_add_order_item( $order_id, '', $items_to_add, $tax_location );
+		};
+		$maybe_add_order_item_func->call( new WC_AJAX() );
+	}
+
+	/**
+	 * @testdox Should apply a coupon to products added after the coupon was applied to an empty order.
+	 */
+	public function test_add_item_after_coupon_on_empty_order_applies_discount(): void {
+		WC_Helper_Coupon::create_coupon(
+			'tenpercent',
+			array(
+				'discount_type' => 'percent',
+				'coupon_amount' => '10',
+			)
+		);
+		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 10 ) );
+		$order   = wc_create_order();
+
+		$result = $order->apply_coupon( 'tenpercent' );
+		$this->assertTrue( $result, 'The coupon should apply to the empty order' );
+
+		$this->add_items_to_order(
+			$order->get_id(),
+			array(
+				array(
+					'id'  => $product->get_id(),
+					'qty' => 2,
+				),
+			)
+		);
+
+		$order       = wc_get_order( $order->get_id() );
+		$coupon_item = current( $order->get_items( 'coupon' ) );
+		$line_item   = current( $order->get_items() );
+
+		$this->assertEquals( 2, $coupon_item->get_discount(), 'The coupon discount should include the added product' );
+		$this->assertEquals( 18, $line_item->get_total(), 'The added line item should be discounted' );
+		$this->assertEquals( 18, $order->get_total(), 'The order total should include the coupon discount' );
+	}
+
+	/**
+	 * @testdox Should apply an existing coupon to a product added to an order that already has items.
+	 */
+	public function test_add_item_after_coupon_on_order_with_items_applies_discount(): void {
+		WC_Helper_Coupon::create_coupon(
+			'tenpercent',
+			array(
+				'discount_type' => 'percent',
+				'coupon_amount' => '10',
+			)
+		);
+		$product_a = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 10 ) );
+		$product_b = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 10 ) );
+		$order     = wc_create_order();
+		$order->add_product( $product_a, 1 );
+		$order->calculate_totals();
+		$order->apply_coupon( 'tenpercent' );
+
+		$this->add_items_to_order(
+			$order->get_id(),
+			array(
+				array(
+					'id'  => $product_b->get_id(),
+					'qty' => 1,
+				),
+			)
+		);
+
+		$order       = wc_get_order( $order->get_id() );
+		$coupon_item = current( $order->get_items( 'coupon' ) );
+
+		foreach ( $order->get_items() as $line_item ) {
+			$this->assertEquals( 9, $line_item->get_total(), 'Every line item should be discounted' );
+		}
+		$this->assertEquals( 2, $coupon_item->get_discount(), 'The coupon discount should include both products' );
+		$this->assertEquals( 18, $order->get_total(), 'The order total should include the coupon discount' );
+	}
+
+	/**
+	 * @testdox Should use the editor tax location when coupons are applied again to an added product.
+	 */
+	public function test_add_item_after_coupon_uses_editor_tax_location(): void {
+		$order     = $this->add_item_to_coupon_order_with_editor_tax_location( false );
+		$line_item = current( $order->get_items() );
+
+		$this->assertEquals( 21.6, $line_item->get_total(), 'The added line item should be discounted' );
+		$this->assertEqualsWithDelta( 1.94, (float) $line_item->get_total_tax(), 0.01, 'The line tax should use the editor country rate' );
+		$this->assertEqualsWithDelta( 23.54, (float) $order->get_total(), 0.01, 'The order total should use the editor country tax' );
+		$this->assertSame( '', $order->get_billing_country(), 'The unsaved billing country must not be persisted' );
+	}
+
+	/**
+	 * @testdox Should use the editor tax location for the coupon discount when prices include tax.
+	 */
+	public function test_add_item_after_coupon_uses_editor_tax_location_with_prices_including_tax(): void {
+		$order     = $this->add_item_to_coupon_order_with_editor_tax_location( true );
+		$line_item = current( $order->get_items() );
+
+		$this->assertEqualsWithDelta( 22.21, (float) $order->get_total(), 0.01, 'The order total should be 10% off the price with the editor country tax' );
+		$this->assertEqualsWithDelta( 0.09, (float) $line_item->get_total_tax() / (float) $line_item->get_total(), 0.001, 'The line tax should use the editor country rate' );
+		$this->assertSame( '', $order->get_billing_country(), 'The unsaved billing country must not be persisted' );
+	}
+
+	/**
+	 * Create an order with a 10% coupon in a store based in BE (6% tax), then add a product priced 24 with NL (9% tax) typed in the editor.
+	 *
+	 * @param bool $prices_include_tax Whether prices are entered with tax.
+	 * @return WC_Order The order loaded again after the product was added.
+	 */
+	private function add_item_to_coupon_order_with_editor_tax_location( bool $prices_include_tax ): WC_Order {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', $prices_include_tax ? 'yes' : 'no' );
+		update_option( 'woocommerce_default_country', 'BE' );
+		update_option( 'woocommerce_tax_based_on', 'billing' );
+
+		WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'BE',
+				'tax_rate'          => '6.0000',
+				'tax_rate_name'     => 'Belgian VAT',
+				'tax_rate_priority' => 1,
+				'tax_rate_class'    => '',
+			)
+		);
+		WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'NL',
+				'tax_rate'          => '9.0000',
+				'tax_rate_name'     => 'Dutch VAT',
+				'tax_rate_priority' => 1,
+				'tax_rate_class'    => '',
+			)
+		);
+
+		WC_Helper_Coupon::create_coupon(
+			'tenpercent',
+			array(
+				'discount_type' => 'percent',
+				'coupon_amount' => '10',
+			)
+		);
+		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 24 ) );
+		$order   = wc_create_order();
+		$order->apply_coupon( 'tenpercent' );
+
+		$this->add_items_to_order(
+			$order->get_id(),
+			array(
+				array(
+					'id'  => $product->get_id(),
+					'qty' => 1,
+				),
+			),
+			array(
+				'country'  => 'NL',
+				'state'    => '',
+				'postcode' => '',
+				'city'     => '',
+			)
+		);
+
+		return wc_get_order( $order->get_id() );
+	}
+
+	/**
+	 * @testdox Should keep edited line totals when adding a product to an order without coupons.
+	 */
+	public function test_add_item_to_order_without_coupons_keeps_line_totals(): void {
+		$product_a = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 10 ) );
+		$product_b = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 10 ) );
+		$order     = wc_create_order();
+		$item_id   = $order->add_product( $product_a, 1 );
+		$item      = $order->get_item( $item_id );
+		$item->set_total( 5 );
+		$item->save();
+
+		$this->add_items_to_order(
+			$order->get_id(),
+			array(
+				array(
+					'id'  => $product_b->get_id(),
+					'qty' => 1,
+				),
+			)
+		);
+
+		$order = wc_get_order( $order->get_id() );
+
+		$this->assertEquals( 5, $order->get_item( $item_id )->get_total(), 'The edited line total should not be reset' );
 	}
 
 	/**

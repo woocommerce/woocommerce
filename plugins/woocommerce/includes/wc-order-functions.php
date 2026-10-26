@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
+use Automattic\WooCommerce\Internal\Orders\UnpaidOrderTimeoutMarker;
 use Automattic\WooCommerce\Internal\Utilities\Users;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
@@ -182,7 +183,7 @@ function wc_get_order_status_name( $status ) {
 	if ( ! is_string( $status ) ) {
 		wc_doing_it_wrong(
 			__FUNCTION__,
-			__( 'An invalid order status slug was supplied.', 'woocommerce' ),
+			'An invalid order status slug was supplied.',
 			'9.6'
 		);
 	}
@@ -432,6 +433,9 @@ function wc_orders_count( $status, string $type = '' ) {
 function wc_downloadable_file_permission( $download_id, $product, $order, $qty = 1, $item = null ) {
 	if ( is_numeric( $product ) ) {
 		$product = wc_get_product( $product );
+	}
+	if ( ! $product instanceof WC_Product ) {
+		return false;
 	}
 	$download = new WC_Customer_Download();
 	$download->set_download_id( $download_id );
@@ -1069,6 +1073,9 @@ function wc_update_coupon_usage_counts( $order_id ) {
 	}
 
 	if ( count( $coupon_codes ) > 0 ) {
+		$identities = $order->get_meta( '_coupon_usage_identities' );
+		$identities = is_array( $identities ) ? $identities : array();
+
 		foreach ( $coupon_codes as $code ) {
 			$coupon  = new WC_Coupon( $code );
 			$used_by = $order->get_user_id();
@@ -1079,13 +1086,23 @@ function wc_update_coupon_usage_counts( $order_id ) {
 
 			switch ( $action ) {
 				case 'reduce':
-					$coupon->decrease_usage_count( $used_by );
+					$coupon->decrease_usage_count( $identities[ $coupon->get_id() ] ?? $used_by );
 					break;
 				case 'increase':
 					$coupon->increase_usage_count( $used_by, $order );
+					if ( $coupon->get_id() ) {
+						$identities[ $coupon->get_id() ] = $used_by;
+					}
 					break;
 			}
 		}
+
+		if ( 'increase' === $action && $identities ) {
+			$order->update_meta_data( '_coupon_usage_identities', $identities );
+		} elseif ( 'reduce' === $action ) {
+			$order->delete_meta_data( '_coupon_usage_identities' );
+		}
+		$order->save_meta_data();
 		wc_release_coupons_for_order( $order );
 	}
 }
@@ -1163,7 +1180,7 @@ function wc_cancel_unpaid_orders() {
 			 * @param WC_Order $order          The unpaid order object.
 			 */
 			if ( apply_filters( 'woocommerce_cancel_unpaid_order', in_array( $order->get_created_via(), array( 'checkout', 'store-api' ), true ), $order ) ) {
-				$order->update_status( OrderStatus::CANCELLED, __( 'Unpaid order cancelled - time limit reached.', 'woocommerce' ) );
+				wc_get_container()->get( UnpaidOrderTimeoutMarker::class )->cancel_unpaid_order( $order, __( 'Unpaid order cancelled - time limit reached.', 'woocommerce' ) );
 			}
 		}
 	}
@@ -1224,6 +1241,8 @@ function wc_get_order_note( $data ) {
  *
  *     @type string $limit         Maximum number of notes to retrieve.
  *                                 Default empty (no limit).
+ *     @type int    $page          Page of notes to retrieve (starting at 1). Use with limit.
+ *                                 Default 1.
  *     @type int    $order_id      Limit results to those affiliated with a given order ID.
  *                                 Default 0.
  *     @type array  $order__in     Array of order IDs to include affiliated notes for.
@@ -1245,6 +1264,7 @@ function wc_get_order_note( $data ) {
 function wc_get_order_notes( $args ) {
 	$key_mapping = array(
 		'limit'         => 'number',
+		'page'          => 'paged',
 		'order_id'      => 'post_id',
 		'order__in'     => 'post__in',
 		'order__not_in' => 'post__not_in',

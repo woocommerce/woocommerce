@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Checkout as CheckoutRoute;
 use Automattic\WooCommerce\StoreApi\Routes\V1\CheckoutOrder as CheckoutOrderRoute;
 use Automattic\WooCommerce\StoreApi\SchemaController;
+use Automattic\WooCommerce\StoreApi\Utilities\OrderController;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\Enums\OrderStatus;
@@ -2614,6 +2615,66 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * @testdox Rejecting payment because the new billing email cannot use the coupon releases the row this order added, not another order's row.
+	 */
+	public function test_checkout_order_with_changed_email_releases_own_coupon_row() {
+		$coupon = new \WC_Coupon();
+		$coupon->set_code( 'route-changed-email' );
+		$coupon->set_amount( 2 );
+		$coupon->set_usage_limit_per_user( 1 );
+		$coupon->save();
+
+		$buyer_order = \WC_Helper_Order::create_order( 0 );
+		$buyer_order->set_billing_email( 'buyer@example.com' );
+		$buyer_order->set_status( OrderStatus::PENDING );
+		$buyer_order->save();
+		$buyer_order->apply_coupon( $coupon->get_code() );
+
+		$order = \WC_Helper_Order::create_order( 0 );
+		$order->set_billing_email( 'reserve@example.com' );
+		$order->set_status( OrderStatus::PENDING );
+		$order->save();
+		$order->apply_coupon( $coupon->get_code() );
+
+		$address = array(
+			'first_name' => 'Test',
+			'last_name'  => 'User',
+			'company'    => '',
+			'address_1'  => '123 Test St',
+			'address_2'  => '',
+			'city'       => 'Test City',
+			'state'      => 'CA',
+			'postcode'   => '90210',
+			'country'    => 'US',
+			'phone'      => '555-32123',
+		);
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout/' . $order->get_id() );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_query_params(
+			array(
+				'key'           => $order->get_order_key(),
+				'billing_email' => 'reserve@example.com',
+			)
+		);
+		$request->set_body_params(
+			array(
+				'billing_address'  => array_merge( $address, array( 'email' => 'buyer@example.com' ) ),
+				'shipping_address' => $address,
+				'payment_method'   => WC_Gateway_BACS::ID,
+			)
+		);
+
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 409, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertSame( 'woocommerce_rest_order_coupon_errors', $response->get_data()['code'] );
+
+		$coupon = new \WC_Coupon( 'route-changed-email' );
+		$this->assertSame( array( 'buyer@example.com' ), array_values( $coupon->get_used_by() ) );
+		$this->assertEquals( 1, $coupon->get_usage_count() );
+	}
+
+	/**
 	 * @testdox Checkout refuses to complete a cancelled unpaid non-zero order.
 	 */
 	public function test_checkout_rejects_cancelled_unpaid_non_zero_order(): void {
@@ -3371,6 +3432,95 @@ class Checkout extends \WP_Test_REST_TestCase {
 		);
 		$this->assertSame( $first_order_id, $session_order_id_during_retry, 'Session pointer should reference the reused order while the second POST is being processed.' );
 		$this->assertEmpty( WC()->session->get( 'store_api_draft_order' ), 'Successful checkout should clear the draft order pointer when the cart is emptied.' );
+	}
+
+	/**
+	 * @testdox Checkout places a zero-total pending or failed order from the session instead of creating a new one.
+	 * @testWith ["pending"]
+	 *           ["failed"]
+	 *
+	 * @param string $status Status of the order in the session.
+	 */
+	public function test_post_reuses_zero_total_order_from_session( string $status ): void {
+		$this->apply_full_discount_coupon();
+		$order = $this->create_session_order_from_cart( $status );
+		$order->update_meta_data( '_subscription_renewal', 123 );
+		$order->save();
+		$this->assertSame( 0.0, (float) $order->get_total(), 'The coupon must take the order to a zero total, which is the case this test covers.' );
+
+		$response = rest_get_server()->dispatch( $this->build_valid_post_request() );
+
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertSame( $order->get_id(), (int) $response->get_data()['order_id'], 'Checkout must place the zero-total order from the session, not a new one without its data.' );
+
+		$placed_order = wc_get_order( $order->get_id() );
+		$this->assertTrue( $placed_order->is_paid(), 'The zero-total order from the session should be completed by checkout.' );
+		$this->assertSame( '123', (string) $placed_order->get_meta( '_subscription_renewal' ), 'Renewal metadata on the order from the session should be kept.' );
+	}
+
+	/**
+	 * @testdox Checkout does not reuse a zero-total order from the session once it has moved past awaiting payment.
+	 */
+	public function test_post_does_not_reuse_completed_zero_total_order_from_session(): void {
+		$this->apply_full_discount_coupon();
+		$order = $this->create_session_order_from_cart( OrderStatus::COMPLETED );
+
+		$response = rest_get_server()->dispatch( $this->build_valid_post_request() );
+
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertNotSame( $order->get_id(), (int) $response->get_data()['order_id'], 'A completed order must not be placed again.' );
+		$this->assertTrue( wc_get_order( $order->get_id() )->has_status( OrderStatus::COMPLETED ), 'The completed order should be left as it was.' );
+	}
+
+	/**
+	 * @testdox Checkout does not reuse a positive-total order from the session when woocommerce_order_needs_payment says it needs no payment.
+	 */
+	public function test_post_respects_needs_payment_filter_for_positive_total_order_from_session(): void {
+		$order = $this->create_session_order_from_cart( OrderStatus::PENDING );
+		add_filter(
+			'woocommerce_order_needs_payment',
+			function ( $needs_payment, $filtered_order ) use ( $order ) {
+				return $filtered_order->get_id() === $order->get_id() ? false : $needs_payment;
+			},
+			10,
+			2
+		);
+
+		$response = rest_get_server()->dispatch( $this->build_valid_post_request() );
+
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertNotSame( $order->get_id(), (int) $response->get_data()['order_id'], 'An order the filter says needs no payment must not be reused.' );
+	}
+
+	/**
+	 * Apply a 100% coupon to the cart, taking its total to zero.
+	 */
+	private function apply_full_discount_coupon(): void {
+		$coupon = new \WC_Coupon();
+		$coupon->set_code( 'full_discount_coupon' );
+		$coupon->set_discount_type( 'percent' );
+		$coupon->set_amount( 100 );
+		$coupon->save();
+
+		WC()->cart->apply_coupon( 'full_discount_coupon' );
+	}
+
+	/**
+	 * Create an order from the cart and point the session at it, as Subscriptions does with a renewal order.
+	 *
+	 * @param string $status Order status.
+	 * @return \WC_Order
+	 */
+	private function create_session_order_from_cart( string $status ): \WC_Order {
+		WC()->cart->calculate_totals();
+
+		$order = ( new OrderController() )->create_order_from_cart();
+		$order->set_status( $status );
+		$order->save();
+
+		WC()->session->set( 'store_api_draft_order', $order->get_id() );
+
+		return $order;
 	}
 
 	/**
