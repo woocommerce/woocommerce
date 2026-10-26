@@ -21,18 +21,22 @@ defined( 'ABSPATH' ) || exit;
  */
 $render_refunds = (bool) apply_filters( 'woocommerce_admin_order_should_render_refunds', 0 < $order->get_total() - $order->get_total_refunded() || 0 < absint( $order->get_item_count() - $order->get_item_count_refunded() ), $order->get_id(), $order );
 
-$date_paid = $order->get_date_paid(); // @phpstan-ignore variable.undefined
+$date_paid          = $order->get_date_paid(); // @phpstan-ignore variable.undefined
+$render_paid_totals = false;
 
-/**
- * Allow plugins to determine whether the "Paid" totals section should be rendered in the template.
- *
- * @since 11.4.0
- *
- * @param bool     $render_paid If the "Paid" totals section should be rendered.
- * @param int      $order_id    The Order ID.
- * @param WC_Order $order       The Order object.
- */
-$render_paid = (bool) apply_filters( 'woocommerce_admin_order_should_render_paid_totals', ( $order->is_paid() || $order->has_status( OrderStatus::REFUNDED ) ) && $date_paid, $order->get_id(), $order ) && $date_paid;
+if ( $date_paid ) {
+	/**
+	 * Allow plugins to determine whether the "Paid" totals section should be rendered in the template.
+	 * Only applies to orders with a paid date.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param bool     $render_paid_totals If the "Paid" totals section should be rendered.
+	 * @param int      $order_id           The Order ID.
+	 * @param WC_Order $order              The Order object.
+	 */
+	$render_paid_totals = (bool) apply_filters( 'woocommerce_admin_order_should_render_paid_totals', $order->is_paid() || $order->has_status( OrderStatus::REFUNDED ), $order->get_id(), $order );
+}
 
 global $wpdb;
 
@@ -249,7 +253,7 @@ if ( wc_tax_enabled() ) {
 
 	<div class="clear"></div>
 
-	<?php if ( $render_paid ) : ?>
+	<?php if ( $render_paid_totals ) : ?>
 
 		<table class="wc-order-totals" style="border-top: 1px solid #999; margin-top:12px; padding-top:12px">
 			<tr>
