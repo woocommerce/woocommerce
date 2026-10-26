@@ -812,6 +812,31 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Classic Cart and Checkout blocks are distinguished by their shortcode attribute.
+	 */
+	public function test_wc_create_page_distinguishes_classic_shortcode_blocks(): void {
+		delete_option( 'woocommerce_cart_page_id' );
+		delete_option( 'woocommerce_checkout_page_id' );
+
+		$cart_page_id = wp_insert_post(
+			array(
+				'post_type'    => 'page',
+				'post_status'  => 'publish',
+				'post_name'    => 'cart',
+				'post_title'   => 'Cart',
+				'post_content' => '<!-- wp:paragraph --><p>Customized cart.</p><!-- /wp:paragraph --><!-- wp:woocommerce/classic-shortcode {"shortcode":"cart"} /-->',
+			)
+		);
+
+		$checkout_page_id = wc_create_page( 'checkout', 'woocommerce_checkout_page_id', 'Checkout', '<!-- wp:woocommerce/classic-shortcode {"shortcode":"checkout"} /-->' );
+		$matched_cart_id  = wc_create_page( 'cart', 'woocommerce_cart_page_id', 'Cart', '<!-- wp:woocommerce/classic-shortcode {"shortcode":"cart"} /-->' );
+
+		$this->assertNotEquals( $cart_page_id, $checkout_page_id );
+		$this->assertEquals( $checkout_page_id, get_option( 'woocommerce_checkout_page_id' ) );
+		$this->assertEquals( $cart_page_id, $matched_cart_id );
+	}
+
+	/**
 	 * @testdox An empty shortcode wrapper falls back to matching the requested slug.
 	 */
 	public function test_wc_create_page_does_not_match_empty_content_needle(): void {
