@@ -337,10 +337,9 @@ class Packages {
 		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
 			error_log(  // phpcs:ignore
 				sprintf(
-					/* Translators: %s package name. */
-					esc_html__( 'Missing the WooCommerce %s package', 'woocommerce' ),
+					esc_html( 'Missing the WooCommerce %s package' ),
 					'<code>' . esc_html( $package ) . '</code>'
-				) . ' - ' . esc_html__( 'Your installation of WooCommerce is incomplete. If you installed WooCommerce from GitHub, please refer to this document to set up your development environment: https://developer.woocommerce.com/docs/contribution/contributing/#setting-up-your-development-environment', 'woocommerce' )
+				) . ' - ' . esc_html( 'Your installation of WooCommerce is incomplete. If you installed WooCommerce from GitHub, please refer to this document to set up your development environment: https://developer.woocommerce.com/docs/contribution/contributing/#setting-up-your-development-environment' )
 			);
 		}
 		add_action(

@@ -112,6 +112,8 @@
 				session_length: Number( params.session ),
 				base64: Boolean( params.base64 ),
 				timezone_offset: '0', // utc
+				// Only store the fields WooCommerce reads. An empty list stores every field.
+				fields: params.cookieFields,
 			} );
 		}
 		const values = wc_order_attribution.getAttributionData();

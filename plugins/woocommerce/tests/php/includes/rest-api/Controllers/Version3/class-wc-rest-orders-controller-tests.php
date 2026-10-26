@@ -392,6 +392,88 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Create an auto-draft order the same way the admin "Add order" screen does.
+	 *
+	 * @return int Order ID.
+	 */
+	private function create_admin_auto_draft_order(): int {
+		$order = new WC_Order();
+		$order->set_object_read( false );
+		$order->set_status( OrderStatus::AUTO_DRAFT );
+		$order->set_created_via( 'admin' );
+
+		return $order->save();
+	}
+
+	/**
+	 * Update an order's status through the V3 route and record the status changes it fires.
+	 *
+	 * @param int    $order_id         Order ID.
+	 * @param string $requested_status Status supplied in the request.
+	 * @return array<int, array{string, string}> The from and to statuses of each `woocommerce_order_status_changed` call.
+	 */
+	private function update_order_status_and_record_changes( int $order_id, string $requested_status ): array {
+		$status_changes = array();
+		add_action(
+			'woocommerce_order_status_changed',
+			function ( $changed_order_id, $from, $to ) use ( &$status_changes ) {
+				$status_changes[] = array( $from, $to );
+			},
+			10,
+			3
+		);
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order_id );
+		$request->set_body_params( array( 'status' => $requested_status ) );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status(), 'Updating the order should return HTTP 200.' );
+		$this->assertSame( $requested_status, $response->get_data()['status'], 'The update response should contain the requested order status.' );
+
+		return $status_changes;
+	}
+
+	/**
+	 * @testdox Saving an auto-draft order as auto-draft again through the V3 route adds no order note and fires no status change.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $hpos_enabled True to store orders in the HPOS tables, false to store them as posts.
+	 */
+	public function test_orders_update_auto_draft_order_as_auto_draft_records_no_status_change( bool $hpos_enabled ): void {
+		$this->toggle_cot_feature_and_usage( $hpos_enabled );
+		$order_id = $this->create_admin_auto_draft_order();
+
+		$status_changes = $this->update_order_status_and_record_changes( $order_id, OrderStatus::AUTO_DRAFT );
+
+		$this->assertSame( array(), $status_changes, 'An auto-draft order saved as auto-draft should not fire woocommerce_order_status_changed.' );
+		$this->assertSame( array(), wc_get_order_notes( array( 'order_id' => $order_id ) ), 'An auto-draft order saved as auto-draft should not get a status change note.' );
+	}
+
+	/**
+	 * @testdox Moving an auto-draft order to processing through the V3 route records the change as coming from pending.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $hpos_enabled True to store orders in the HPOS tables, false to store them as posts.
+	 */
+	public function test_orders_update_auto_draft_order_to_processing_records_change_from_pending( bool $hpos_enabled ): void {
+		$this->toggle_cot_feature_and_usage( $hpos_enabled );
+		$order_id = $this->create_admin_auto_draft_order();
+
+		$status_changes = $this->update_order_status_and_record_changes( $order_id, OrderStatus::PROCESSING );
+
+		$this->assertSame( array( array( OrderStatus::PENDING, OrderStatus::PROCESSING ) ), $status_changes, 'An auto-draft order should move to processing as if it were pending.' );
+		$this->assertContains(
+			'Order status changed from Pending payment to Processing.',
+			wp_list_pluck( wc_get_order_notes( array( 'order_id' => $order_id ) ), 'content' ),
+			'The status change note should name pending as the old status.'
+		);
+	}
+
+	/**
 	 * Search terms accepted by the V3 orders collection route.
 	 *
 	 * @return array<string, array{string|null, string, bool}>

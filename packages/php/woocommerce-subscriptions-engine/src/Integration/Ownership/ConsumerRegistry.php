@@ -18,7 +18,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\SubscriptionsEngine\Integration\Ownership;
 
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Dispatch\DueDispatcher;
-use Automattic\WooCommerce\SubscriptionsEngine\Integration\Support\ArgumentValidator;
+use Automattic\WooCommerce\SubscriptionsEngine\Integration\Support\ArgumentFilter;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -72,7 +72,7 @@ final class ConsumerRegistry {
 			return;
 		}
 
-		$filtered_config = ArgumentValidator::filter_known_keys( __METHOD__, $config, self::CONFIG_KEYS );
+		$filtered_config = ArgumentFilter::filter_known_keys( __METHOD__, $config, self::CONFIG_KEYS );
 		$registration    = array();
 
 		if ( array_key_exists( 'contract_due_handler', $filtered_config ) ) {

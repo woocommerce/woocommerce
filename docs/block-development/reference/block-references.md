@@ -186,10 +186,12 @@ Enable customers to keep track of their location within the store and navigate b
 
 ## Cart - woocommerce/cart
 
-Display a shopping cart.
+Shopping cart.
 
 - **Name:** woocommerce/cart
 - **Category:** woocommerce
+- **Supports:** align (wide), ~~html~~, ~~multiple~~
+- **Attributes:** align, checkoutPageId, hasDarkControls, showRateAfterTaxName
 
 ## Accepted Payment Methods - woocommerce/cart-accepted-payment-methods-block
 
