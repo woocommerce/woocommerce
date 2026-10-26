@@ -135,6 +135,7 @@ class UnexpectedErrorResponseTest extends WC_Unit_Test_Case {
 		add_filter(
 			'woocommerce_remote_logging_is_third_party_error',
 			static function ( $is_third_party, $message, $context ) use ( &$filter_calls ) {
+				unset( $is_third_party, $message );
 				++$filter_calls;
 				return E_ERROR !== $context['error']['type'];
 			},
