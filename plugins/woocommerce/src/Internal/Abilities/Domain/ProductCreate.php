@@ -140,7 +140,11 @@ class ProductCreate extends ActionableAbility {
 				if ( ! $subject->get_status( 'edit' ) ) {
 					$subject->set_status( ProductStatus::PUBLISH );
 				}
-				return self::check_variation_attributes( $subject, $parent );
+				$error = self::check_variation_attributes( $subject, $parent );
+				if ( is_wp_error( $error ) ) {
+					return $error;
+				}
+				return self::check_variation_siblings( $parent, array( $subject ) );
 			}
 
 			if ( $subject instanceof \WC_Product_Variable ) {
