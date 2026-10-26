@@ -406,7 +406,9 @@ test.describe( 'woocommerce/product-filter-attribute - Frontend', () => {
 		);
 		await trigger.click();
 		const listStyle = await page.addStyleTag( {
-			path: 'assets/client/blocks/woocommerce/product-filter-checkbox-list-style.css',
+			path: `${
+				process.env.WC_SHARED_PLUGIN_BUILD_PATH || '.'
+			}/assets/client/blocks/woocommerce/product-filter-checkbox-list-style.css`,
 		} );
 		const blue = panel.getByRole( 'checkbox', {
 			name: 'Blue',
