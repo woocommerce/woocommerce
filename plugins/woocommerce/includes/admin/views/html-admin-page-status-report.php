@@ -128,6 +128,14 @@ if ( file_exists( $plugin_path ) ) {
 		</p>
 	</div>
 </div>
+<?php if ( current_user_can( 'view_site_health_checks' ) ) : ?>
+<div class="notice notice-info inline">
+	<p>
+		<?php esc_html_e( 'WooCommerce also checks your store for configuration and performance issues on the Site Health screen.', 'woocommerce' ); ?>
+		<a href="<?php echo esc_url( admin_url( 'site-health.php' ) ); ?>"><?php esc_html_e( 'View Site Health', 'woocommerce' ); ?></a>
+	</p>
+</div>
+<?php endif; ?>
 <table class="wc_status_table widefat" cellspacing="0" id="status">
 	<thead>
 		<tr>
