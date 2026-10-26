@@ -117,10 +117,15 @@ function wc_create_page( $slug, $option = '', $page_title = '', $page_content = 
 	if ( strlen( $page_content ) > 0 ) {
 		// Search for an existing page by its shortcode, or by a stable WooCommerce block identifier for block content.
 		$content_needle = str_replace( array( '<!-- wp:shortcode -->', '<!-- /wp:shortcode -->' ), '', $page_content );
-		foreach ( parse_blocks( $page_content ) as $block ) {
+		$blocks         = parse_blocks( $page_content );
+		while ( ! empty( $blocks ) ) {
+			$block = array_shift( $blocks );
 			if ( isset( $block['blockName'] ) && 0 === strpos( $block['blockName'], 'woocommerce/' ) ) {
 				$block_needle = 'woocommerce/classic-shortcode' === $block['blockName'] ? serialize_block( $block ) : '<!-- wp:' . $block['blockName'] . ' ';
 				break;
+			}
+			if ( ! empty( $block['innerBlocks'] ) ) {
+				$blocks = array_merge( $block['innerBlocks'], $blocks );
 			}
 		}
 	}

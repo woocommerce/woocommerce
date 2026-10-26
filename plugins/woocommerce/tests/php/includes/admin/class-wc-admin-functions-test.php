@@ -713,6 +713,28 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A customized page is adopted when its WooCommerce block is nested inside another block.
+	 */
+	public function test_wc_create_page_adopts_nested_block_page(): void {
+		delete_option( 'woocommerce_cart_page_id' );
+
+		$existing_page_id = wp_insert_post(
+			array(
+				'post_type'    => 'page',
+				'post_status'  => 'publish',
+				'post_name'    => 'nested-cart',
+				'post_title'   => 'Nested cart',
+				'post_content' => '<!-- wp:group --><div class="wp-block-group"><!-- wp:paragraph --><p>Customized.</p><!-- /wp:paragraph --><!-- wp:woocommerce/cart --><div class="wp-block-woocommerce-cart">customized</div><!-- /wp:woocommerce/cart --></div><!-- /wp:group -->',
+			)
+		);
+
+		$page_id = wc_create_page( 'cart', 'woocommerce_cart_page_id', 'Cart', '<!-- wp:group --><div class="wp-block-group"><!-- wp:woocommerce/cart --><div class="wp-block-woocommerce-cart">default</div><!-- /wp:woocommerce/cart --></div><!-- /wp:group -->' );
+
+		$this->assertEquals( $existing_page_id, $page_id );
+		$this->assertEquals( $existing_page_id, get_option( 'woocommerce_cart_page_id' ) );
+	}
+
+	/**
 	 * @testdox The page with the requested slug and status is preferred when multiple pages contain the block.
 	 */
 	public function test_wc_create_page_prefers_matching_slug_and_status(): void {
