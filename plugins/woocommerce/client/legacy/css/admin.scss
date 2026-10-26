@@ -938,6 +938,18 @@ table.wc_status_table--tools {
 	}
 }
 
+#bulk-edit ul.cat-checklist input[type="checkbox"]:indeterminate::before {
+	content: "";
+	border-block-start: 2px solid #808080;
+	width: 65%;
+	height: 2px;
+	position: absolute;
+	inset-block-start: calc(50% + 1px);
+	inset-inline: 0;
+	margin-inline: auto;
+	transform: translateY(-50%);
+}
+
 #woocommerce-fields.inline-edit-col {
 	clear: left;
 
