@@ -388,4 +388,26 @@ class WC_Coupon_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$this->assertNull( $reloaded_coupon->get_date_created( 'edit' ) );
 		$this->assertSame( 'Updated description', $reloaded_coupon->get_description() );
 	}
+
+	/**
+	 * @testdox Creating and updating a coupon keeps backslashes and quotes in its code and description.
+	 */
+	public function test_create_and_update_keep_backslashes_in_post_fields(): void {
+		$coupon = new WC_Coupon();
+		$coupon->set_code( 'save\\10' );
+		$coupon->set_description( 'Path C:\\temp, it\'s "quoted"' );
+		$coupon->save();
+
+		$post = get_post( $coupon->get_id() );
+		$this->assertSame( 'save\\10', $post->post_title, 'The created code should keep its backslash.' );
+		$this->assertSame( 'Path C:\\temp, it\'s "quoted"', $post->post_excerpt, 'The created description should keep its backslash and quotes.' );
+
+		$coupon->set_code( 'save\\20' );
+		$coupon->set_description( 'Path D:\\temp, it\'s "quoted"' );
+		$coupon->save();
+
+		$post = get_post( $coupon->get_id() );
+		$this->assertSame( 'save\\20', $post->post_title, 'The updated code should keep its backslash.' );
+		$this->assertSame( 'Path D:\\temp, it\'s "quoted"', $post->post_excerpt, 'The updated description should keep its backslash and quotes.' );
+	}
 }
