@@ -77,6 +77,15 @@ class WC_Helper_Admin {
 			'isConnected'                   => WC_Helper::is_site_connected(),
 			'connectURL'                    => self::get_connection_url(),
 			'reConnectURL'                  => self::get_connection_url( true ),
+			'reviewURL'                     => add_query_arg(
+				array(
+					'page'             => 'wc-addons',
+					'section'          => 'helper',
+					'wc-helper-review' => 1,
+					'wc-helper-nonce'  => wp_create_nonce( 'review' ),
+				),
+				admin_url( 'admin.php' )
+			),
 			'userEmail'                     => $auth_user_email,
 			'userAvatar'                    => get_avatar_url( $auth_user_email, array( 'size' => '48' ) ),
 			'storeCountry'                  => wc_get_base_location()['country'],

@@ -38,6 +38,8 @@ export type Subscription = {
 	is_shared: boolean;
 	owner_email: string;
 	has_changelog: boolean;
+	/** Sent by WooCommerce.com when a store admin can review this product from here. */
+	can_review?: boolean;
 };
 
 export interface SubscriptionLocal {

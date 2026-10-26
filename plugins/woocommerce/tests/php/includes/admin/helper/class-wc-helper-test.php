@@ -1548,4 +1548,179 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 			remove_filter( 'pre_http_request', $http_mock, 10 );
 		}
 	}
+
+	/**
+	 * Connect the store, cache one subscription and log in a shop manager, so review requests have something to point at.
+	 */
+	private function prepare_review_env(): void {
+		WC_Helper_Options::update(
+			'auth',
+			array(
+				'access_token'        => 'token',
+				'access_token_secret' => 'secret',
+				'site_id'             => 12,
+			)
+		);
+		set_transient(
+			'_woocommerce_helper_subscriptions',
+			array(
+				array(
+					'product_id'  => 123,
+					'product_key' => 'review-key',
+					'zip_slug'    => 'review-extension',
+					'connections' => array( 12 ),
+				),
+			),
+			HOUR_IN_SECONDS
+		);
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'shop_manager' ) ) );
+	}
+
+	/**
+	 * Answer the review-url request with the given status and body, and record the request.
+	 *
+	 * @param int        $code     Response status.
+	 * @param array|null $body     Response body, JSON-encoded.
+	 * @param array      $requests By-ref, receives each request's URL and args.
+	 */
+	private function mock_review_url_response( int $code, ?array $body, array &$requests = array() ): void {
+		add_filter(
+			'pre_http_request',
+			function ( $preempt, $args, $url ) use ( $code, $body, &$requests ) {
+				$requests[] = array(
+					'url'  => $url,
+					'args' => $args,
+				);
+				return array(
+					'response' => array( 'code' => $code ),
+					'body'     => wp_json_encode( $body ),
+				);
+			},
+			10,
+			3
+		);
+	}
+
+	/**
+	 * Run the My Subscriptions screen handler with a review request.
+	 *
+	 * @param string|null $nonce       Nonce to send, a valid one when null.
+	 * @param string      $product_key Product key to send.
+	 * @return string "redirect <url>" or "die <status>: <message>".
+	 */
+	private function request_review( ?string $nonce = null, string $product_key = 'review-key' ): string {
+		$_GET = array(
+			'page'                  => 'wc-addons',
+			'section'               => 'helper',
+			'wc-helper-review'      => '1',
+			'wc-helper-product-key' => $product_key,
+			'wc-helper-nonce'       => $nonce ?? wp_create_nonce( 'review' ),
+		);
+		add_filter(
+			'wp_redirect',
+			function ( $location ) {
+				throw new Exception( 'redirect ' . $location ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+			}
+		);
+
+		try {
+			WC_Helper::current_screen( (object) array( 'id' => 'woocommerce_page_wc-addons' ) );
+		} catch ( WPDieException $e ) {
+			return 'die ' . $e->getCode() . ': ' . $e->getMessage();
+		} catch ( Exception $e ) {
+			return $e->getMessage();
+		}
+		return 'nothing';
+	}
+
+	/**
+	 * @testdox The review route should send a signed request with the product key and redirect to the WooCommerce.com URL.
+	 */
+	public function test_review_route_redirects_to_woocommerce_com(): void {
+		$this->prepare_review_env();
+		$requests = array();
+		$this->mock_review_url_response( 200, array( 'url' => 'https://woocommerce.com/store-review/abc/' ), $requests );
+
+		$this->assertSame( 'redirect https://woocommerce.com/store-review/abc/', $this->request_review() );
+		$this->assertCount( 1, $requests, 'Only the review-url request should be made' );
+		$this->assertStringContainsString( '/helper/1.0/review-url', $requests[0]['url'] );
+		$this->assertSame( 'POST', $requests[0]['args']['method'] );
+		$this->assertSame( 'Bearer token', $requests[0]['args']['headers']['Authorization'] );
+		$this->assertNotEmpty( $requests[0]['args']['headers']['X-Woo-Signature'] );
+		$this->assertSame( array( 'product_key' => 'review-key' ), json_decode( $requests[0]['args']['body'], true ) );
+	}
+
+	/**
+	 * @testdox The review route should follow the woo_com_base_url filter, so local WooCommerce.com setups work.
+	 */
+	public function test_review_route_accepts_the_filtered_host(): void {
+		$this->prepare_review_env();
+		add_filter(
+			'woo_com_base_url',
+			function () {
+				return 'https://3.woocommerce.test/';
+			}
+		);
+		$this->mock_review_url_response( 200, array( 'url' => 'https://3.woocommerce.test/store-review/abc/' ) );
+
+		$this->assertSame( 'redirect https://3.woocommerce.test/store-review/abc/', $this->request_review() );
+	}
+
+	/**
+	 * @testdox The review route should show an error instead of following a URL it can't trust.
+	 * @testWith [500, {"url": "https://woocommerce.com/store-review/abc/"}]
+	 *           [200, {"message": "no url"}]
+	 *           [200, {"url": "https://evil.example/store-review/abc/"}]
+	 *           [200, {"url": "https://woocommerce.com.evil.example/"}]
+	 *           [200, {"url": "https://woocommerce.com:4443/"}]
+	 *           [200, {"url": "http://woocommerce.com/store-review/abc/"}]
+	 *           [200, {"url": "javascript:alert(1)"}]
+	 *
+	 * @param int   $code Response status.
+	 * @param array $body Response body.
+	 */
+	public function test_review_route_rejects_unusable_responses( int $code, array $body ): void {
+		$this->prepare_review_env();
+		$this->mock_review_url_response( $code, $body );
+
+		$this->assertStringStartsWith( 'die 502: ' . esc_html( 'We couldn\'t open the review form' ), $this->request_review() );
+	}
+
+	/**
+	 * @testdox The review route should not ask WooCommerce.com about a key this store doesn't have.
+	 * @testWith [""]
+	 *           ["unknown-key"]
+	 *
+	 * @param string $product_key Product key from the request.
+	 */
+	public function test_review_route_rejects_unknown_keys( string $product_key ): void {
+		$this->prepare_review_env();
+		$requests = array();
+		$this->mock_review_url_response( 200, array( 'url' => 'https://woocommerce.com/' ), $requests );
+
+		$this->assertStringStartsWith( 'die 400: ' . esc_html( 'We couldn\'t find a subscription' ), $this->request_review( null, $product_key ) );
+		$this->assertEmpty( $requests, 'No request should reach WooCommerce.com' );
+	}
+
+	/**
+	 * @testdox The review route should stop with an expired or invalid nonce.
+	 */
+	public function test_review_route_requires_a_nonce(): void {
+		$this->prepare_review_env();
+
+		$this->assertStringStartsWith( 'die 403: This link has expired', $this->request_review( 'invalid' ) );
+	}
+
+	/**
+	 * @testdox The review route should stop for users who can't manage WooCommerce.
+	 */
+	public function test_review_route_requires_manage_woocommerce(): void {
+		$this->prepare_review_env();
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'editor' ) ) );
+		$requests = array();
+		$this->mock_review_url_response( 200, array( 'url' => 'https://woocommerce.com/' ), $requests );
+
+		$this->assertStringStartsWith( 'die 403: Sorry, you are not allowed', $this->request_review() );
+		$this->assertEmpty( $requests, 'No request should reach WooCommerce.com' );
+	}
 }

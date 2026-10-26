@@ -951,6 +951,10 @@ class WC_Helper {
 		if ( ! empty( $_GET['wc-helper-deactivate-plugin'] ) ) {
 			return self::_helper_plugin_deactivate();
 		}
+
+		if ( ! empty( $_GET['wc-helper-review'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Verified in helper_subscription_review().
+			return self::helper_subscription_review();
+		}
 	}
 
 	/**
@@ -1559,6 +1563,92 @@ class WC_Helper {
 		);
 
 		return WC_Helper_API::add_auth_parameters( $install_url );
+	}
+
+	/**
+	 * Send the browser to WooCommerce.com to review a subscribed product.
+	 *
+	 * @return never
+	 */
+	private static function helper_subscription_review() {
+		$title = esc_html__( 'Review unavailable', 'woocommerce' );
+		$back  = array(
+			'link_url'  => esc_url( self::get_subscriptions_url() ),
+			'link_text' => esc_html__( 'Back to My Subscriptions', 'woocommerce' ),
+		);
+
+		if ( empty( $_GET['wc-helper-nonce'] ) || ! wp_verify_nonce( wp_unslash( $_GET['wc-helper-nonce'] ), 'review' ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			self::log( 'Could not verify nonce in helper_subscription_review' );
+			wp_die( esc_html__( 'This link has expired. Reload My Subscriptions and try again.', 'woocommerce' ), $title, array( 'response' => 403 ) + $back ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $title and $back are escaped above.
+		}
+
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			wp_die( esc_html__( 'Sorry, you are not allowed to review extensions from this store.', 'woocommerce' ), $title, array( 'response' => 403 ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $title is escaped above.
+		}
+
+		$product_key = isset( $_GET['wc-helper-product-key'] ) ? sanitize_text_field( wp_unslash( $_GET['wc-helper-product-key'] ) ) : '';
+		$review_url  = self::get_subscription_review_url( $product_key );
+
+		if ( is_wp_error( $review_url ) ) {
+			wp_die( esc_html( $review_url->get_error_message() ), $title, array( 'response' => $review_url->get_error_data()['status'] ?? 502 ) + $back ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $title and $back are escaped above.
+		}
+
+		wp_redirect( $review_url ); // phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect -- The URL is checked to be on WooCommerce.com.
+		die();
+	}
+
+	/**
+	 * Ask WooCommerce.com where to send a store admin who wants to review a subscribed product.
+	 *
+	 * WooCommerce.com decides who can review and returns either its review link or a page explaining why not.
+	 *
+	 * @param string $product_key Subscription product key.
+	 * @return string|WP_Error A WooCommerce.com URL, or an error when there is nowhere safe to redirect to.
+	 */
+	private static function get_subscription_review_url( string $product_key ) {
+		if ( '' === $product_key || ! self::get_subscription( $product_key ) ) {
+			return new WP_Error(
+				'woocommerce_helper_review_unknown_subscription',
+				__( 'We couldn\'t find a subscription for this product. Refresh My Subscriptions and try again.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		$response = WC_Helper_API::post(
+			'review-url',
+			array(
+				'authenticated' => true,
+				'body'          => wp_json_encode( array( 'product_key' => $product_key ) ),
+			)
+		);
+
+		$code = wp_remote_retrieve_response_code( $response );
+		$body = json_decode( wp_remote_retrieve_body( $response ), true );
+		$url  = is_array( $body ) && isset( $body['url'] ) && is_string( $body['url'] ) ? $body['url'] : '';
+
+		if ( 200 !== $code || ! self::is_woocommerce_com_url( $url ) ) {
+			$detail = is_wp_error( $response ) ? $response->get_error_message() : $code . ', url host: ' . ( wp_parse_url( $url, PHP_URL_HOST ) ?? 'none' );
+			self::log( 'Call to review-url returned an unusable response (' . $detail . ')', 'error' );
+			return new WP_Error( 'woocommerce_helper_review_url_failed', __( 'We couldn\'t open the review form on WooCommerce.com. Try again in a few minutes.', 'woocommerce' ) );
+		}
+
+		return $url;
+	}
+
+	/**
+	 * Check that a URL points at WooCommerce.com, using the same scheme, host and port as the woo_com_base_url filter.
+	 *
+	 * @param string $url URL to check.
+	 * @return bool
+	 */
+	private static function is_woocommerce_com_url( string $url ): bool {
+		$base = wp_parse_url( self::get_woocommerce_com_base_url() );
+		$url  = wp_parse_url( $url );
+
+		return isset( $base['scheme'], $base['host'], $url['scheme'], $url['host'] )
+			&& strtolower( $url['scheme'] ) === strtolower( $base['scheme'] )
+			&& strtolower( $url['host'] ) === strtolower( $base['host'] )
+			&& ( $url['port'] ?? null ) === ( $base['port'] ?? null );
 	}
 
 	/**

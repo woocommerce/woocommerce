@@ -9,7 +9,10 @@ import { __ } from '@wordpress/i18n';
  * Internal dependencies
  */
 import { Subscription } from '../../types';
-import { ADMIN_URL } from '../../../../../utils/admin-settings';
+import {
+	ADMIN_URL,
+	getAdminSetting,
+} from '../../../../../utils/admin-settings';
 
 export default function ActionsDropdownMenu( props: {
 	subscription: Subscription;
@@ -22,6 +25,26 @@ export default function ActionsDropdownMenu( props: {
 			},
 		},
 	];
+
+	const reviewURL = getAdminSetting( 'wccomHelper', {} ).reviewURL;
+
+	if (
+		props.subscription.can_review &&
+		props.subscription.product_key &&
+		reviewURL
+	) {
+		controls.unshift( {
+			title: __( 'Review on WooCommerce.com', 'woocommerce' ),
+			onClick: () => {
+				const url = new URL( reviewURL );
+				url.searchParams.set(
+					'wc-helper-product-key',
+					props.subscription.product_key
+				);
+				window.open( url.toString(), '_blank', 'noopener' );
+			},
+		} );
+	}
 
 	if ( ! props.subscription.is_shared ) {
 		controls.unshift( {
