@@ -1629,7 +1629,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			$this->assertSame( array( 'integer', 'null' ), $extensions['other_ext']['properties']['count']['type'] );
 			$this->assertArrayNotHasKey( 'code', $extensions['test-ext']['properties'] );
 			$this->assertSame( 1, substr_count( wp_json_encode( $schema ), '"color"' ) );
-			foreach ( $schema['oneOf'] as $branch ) {
+			foreach ( $schema['oneOf'] ?? array() as $branch ) {
 				$this->assertSame( 'object', $branch['properties']['extensions']['type'] );
 				$this->assertArrayNotHasKey( 'properties', $branch['properties']['extensions'] );
 			}
@@ -1663,7 +1663,6 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 		$this->assertInstanceOf( ActionableAbility::class, wp_get_ability( 'woocommerce/product-update' ) );
 		$this->assertArrayNotHasKey( 'extensions', $schema['properties'] ?? array() );
-		$this->assertArrayNotHasKey( 'extensions', $schema['oneOf'][0]['properties'] );
 		$this->assertSame( 400, $rejected->get_status() );
 		$this->assertSame( 'Pencil', $output['product']['name'] );
 		$this->assertFalse( wc_get_product( $product->get_id() )->meta_exists( '_test_color' ) );

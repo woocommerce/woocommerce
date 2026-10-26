@@ -27,56 +27,52 @@ trait ProductAbilityTrait {
 	protected static function get_product_create_input_schema(): array {
 		return array(
 			'type'  => 'object',
-			'oneOf' => self::get_product_type_input_schema_branches( array( 'name' ), false ),
+			'oneOf' => self::get_product_type_input_schema_branches(),
 		);
 	}
 
 	/**
 	 * Get the product update input schema.
 	 *
-	 * Updates without a product type can mutate fields shared by all
-	 * supported product types. Type-specific fields require an explicit type.
+	 * The schema lists the fields of every supported product type. The update
+	 * refuses a field that the type of the loaded product does not support.
 	 *
 	 * @return array
 	 */
 	protected static function get_product_update_input_schema(): array {
-		$branches          = self::get_product_type_input_schema_branches( array( 'id' ), true );
-		$mutation_schemas  = self::get_product_mutation_field_schemas();
-		$common_properties = array(
-			'id' => array(
-				'type'    => 'integer',
-				'minimum' => 1,
-			),
-		);
+		$product_types = self::get_supported_product_types();
+		$fields        = array();
 
-		foreach ( self::get_common_product_mutation_fields() as $field ) {
-			$common_properties[ $field ] = $mutation_schemas[ $field ];
+		foreach ( $product_types as $product_type ) {
+			$product_config = self::get_product_type_config( $product_type );
+			if ( ! is_wp_error( $product_config ) ) {
+				$fields = array_merge( $fields, $product_config['fields'] );
+			}
 		}
 
-		array_unshift(
-			$branches,
-			array(
-				'type'                 => 'object',
-				'properties'           => $common_properties,
-				'required'             => array( 'id' ),
-				'additionalProperties' => false,
-			)
-		);
-
 		return array(
-			'type'  => 'object',
-			'oneOf' => $branches,
+			'type'                 => 'object',
+			'properties'           => array_merge(
+				array(
+					'id'   => array(
+						'type'    => 'integer',
+						'minimum' => 1,
+					),
+					'type' => self::get_product_type_schema( $product_types ),
+				),
+				self::get_product_mutation_field_schemas_for_fields( $fields )
+			),
+			'required'             => array( 'id' ),
+			'additionalProperties' => false,
 		);
 	}
 
 	/**
-	 * Get product input schema branches, one for each supported product type.
+	 * Get the product create input schema branches, one for each supported product type.
 	 *
-	 * @param array<int, string> $base_required Required fields for every branch.
-	 * @param bool               $require_type  Whether every branch must include type.
 	 * @return array<int, array>
 	 */
-	private static function get_product_type_input_schema_branches( array $base_required, bool $require_type ): array {
+	private static function get_product_type_input_schema_branches(): array {
 		$branches = array();
 
 		foreach ( self::get_supported_product_types() as $product_type ) {
@@ -85,36 +81,22 @@ trait ProductAbilityTrait {
 				continue;
 			}
 
-			$required = $base_required;
+			$required    = array( 'name' );
+			$type_schema = self::get_product_type_schema( array( $product_type ) );
 
-			if ( $require_type || ProductType::SIMPLE !== $product_type ) {
+			if ( ProductType::SIMPLE === $product_type ) {
+				$type_schema['default'] = ProductType::SIMPLE;
+			} else {
 				$required[] = 'type';
 			}
 
-			$properties = array();
-
-			if ( in_array( 'id', $base_required, true ) ) {
-				$properties['id'] = array(
-					'type'    => 'integer',
-					'minimum' => 1,
-				);
-			}
-
-			$properties['type'] = self::get_product_type_schema( array( $product_type ) );
-
-			if ( ProductType::SIMPLE === $product_type && ! $require_type ) {
-				$properties['type']['default'] = ProductType::SIMPLE;
-			}
-
-			$properties = array_merge(
-				$properties,
-				self::get_product_mutation_field_schemas_for_fields( $product_config['fields'] )
-			);
-
 			$branches[] = array(
 				'type'                 => 'object',
-				'properties'           => $properties,
-				'required'             => array_values( array_unique( $required ) ),
+				'properties'           => array_merge(
+					array( 'type' => $type_schema ),
+					self::get_product_mutation_field_schemas_for_fields( $product_config['fields'] )
+				),
+				'required'             => $required,
 				'additionalProperties' => false,
 			);
 		}

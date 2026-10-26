@@ -329,9 +329,9 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		$this->assertSame( array( 'simple', 'grouped', 'external', 'variable' ), $query_schema['properties']['type']['enum'] ?? array() );
 		$this->assertSame( $expected_types, $this->get_product_types_from_schema_branches( $create_schema ) );
-		$this->assertSame( $expected_types, $this->get_product_types_from_schema_branches( $update_schema ) );
+		$this->assertSame( $expected_types, $update_schema['properties']['type']['enum'] ?? array() );
 		$this->assertSame( 'simple', $this->get_product_type_schema_branch( $create_schema, 'simple' )['properties']['type']['default'] ?? null );
-		$this->assertArrayNotHasKey( 'default', $this->get_product_type_schema_branch( $update_schema, 'simple' )['properties']['type'] ?? array() );
+		$this->assertArrayNotHasKey( 'default', $update_schema['properties']['type'] ?? array() );
 		$this->assertArrayNotHasKey(
 			'product_type_alias',
 			wp_get_ability( 'woocommerce/product-create' )->get_output_schema()['properties']['product']['properties'] ?? array()
@@ -341,7 +341,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should expose only type-relevant product fields in mutation schema branches.
+	 * @testdox Should expose only type-relevant product fields in create branches, and every field in the flat update schema.
 	 */
 	public function test_product_mutation_schema_branches_only_include_type_relevant_fields(): void {
 		$create_schema = wp_get_ability( 'woocommerce/product-create' )->get_input_schema();
@@ -350,7 +350,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$simple_properties   = $this->get_product_type_schema_branch( $create_schema, 'simple' )['properties'];
 		$external_properties = $this->get_product_type_schema_branch( $create_schema, 'external' )['properties'];
 		$grouped_properties  = $this->get_product_type_schema_branch( $create_schema, 'grouped' )['properties'];
-		$common_properties   = $update_schema['oneOf'][0]['properties'];
+		$update_properties   = $update_schema['properties'];
 
 		$this->assertArrayHasKey( 'virtual', $simple_properties );
 		$this->assertArrayHasKey( 'downloadable', $simple_properties );
@@ -367,10 +367,14 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertArrayNotHasKey( 'sale_price', $grouped_properties );
 		$this->assertArrayNotHasKey( 'stock_status', $grouped_properties );
 
-		$this->assertArrayNotHasKey( 'type', $common_properties );
-		$this->assertArrayNotHasKey( 'regular_price', $common_properties );
-		$this->assertArrayNotHasKey( 'external_url', $common_properties );
-		$this->assertArrayNotHasKey( 'grouped_products', $common_properties );
+		$this->assertArrayNotHasKey( 'oneOf', $update_schema );
+		$this->assertSame( array( 'id' ), $update_schema['required'] );
+		$this->assertFalse( $update_schema['additionalProperties'] );
+		$this->assertArrayHasKey( 'type', $update_properties );
+		$this->assertArrayHasKey( 'regular_price', $update_properties );
+		$this->assertArrayHasKey( 'external_url', $update_properties );
+		$this->assertArrayHasKey( 'grouped_products', $update_properties );
+		$this->assertArrayHasKey( 'manage_stock', $update_properties );
 	}
 
 	/**
@@ -1874,7 +1878,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should update product properties and reflect changes in the response.
+	 * @testdox Should update a per-type field such as regular_price without a type in the input.
 	 */
 	public function test_product_update_changes_props_and_returns_updated_response(): void {
 		$product                     = \WC_Helper_Product::create_simple_product();
@@ -1883,7 +1887,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$result = wp_get_ability( 'woocommerce/product-update' )->execute(
 			array(
 				'id'            => $product->get_id(),
-				'type'          => 'simple',
 				'name'          => 'Updated Name',
 				'regular_price' => '99.00',
 			)
@@ -1892,6 +1895,25 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertNotWPError( $result );
 		$this->assertSame( 'Updated Name', $result['product']['name'] );
 		$this->assertSame( '99.00', $result['product']['regular_price'] );
+	}
+
+	/**
+	 * @testdox Should refuse an update field that the type of the loaded product does not support.
+	 */
+	public function test_product_update_rejects_fields_not_supported_by_loaded_product_type(): void {
+		$product                     = \WC_Helper_Product::create_grouped_product();
+		$this->created_product_ids[] = $product->get_id();
+
+		$result = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'            => $product->get_id(),
+				'regular_price' => '19.99',
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_product_field_unsupported', $result->get_error_code() );
+		$this->assertSame( '', wc_get_product( $product->get_id() )->get_regular_price() );
 	}
 
 	/**
