@@ -30,18 +30,12 @@ final class PaymentSettingsScreen {
 	private const RENDER_FUNCTION = 'woocommerce_routes_wc_payment_settings_wp_admin_render_page';
 
 	/**
-	 * Generated `admin_init` callback that renders the full-screen version of the page.
-	 */
-	private const FULL_SCREEN_RENDER_CALLBACK = 'woocommerce_routes_wc_payment_settings_intercept_render';
-
-	/**
 	 * Register hooks.
 	 *
 	 * @internal
 	 */
 	public function __construct() {
 		add_action( 'init', array( $this, 'handle_init' ) );
-		add_action( 'admin_init', array( $this, 'handle_admin_init' ), 0 );
 	}
 
 	/**
@@ -61,32 +55,16 @@ final class PaymentSettingsScreen {
 	}
 
 	/**
-	 * Remove wp-build's full-screen version of the page when the screen isn't available.
-	 *
-	 * The build can load without the screen, for example before WordPress has the View Config API.
-	 *
-	 * @internal
-	 *
-	 * @since 11.3.0
-	 */
-	public function handle_admin_init(): void {
-		if ( ! $this->is_available() ) {
-			remove_action( 'admin_init', self::FULL_SCREEN_RENDER_CALLBACK );
-		}
-	}
-
-	/**
 	 * Whether the screen can be used on this site.
 	 *
-	 * It needs the admin screens feature flag and WordPress's View Config API.
+	 * It needs the admin screens feature flag.
 	 *
 	 * @since 11.3.0
 	 *
 	 * @return bool
 	 */
 	public function is_available(): bool {
-		return Features::is_enabled( AdminScreens::FEATURE_FLAG )
-			&& function_exists( 'wp_get_entity_view_config' );
+		return Features::is_enabled( AdminScreens::FEATURE_FLAG );
 	}
 
 	/**
