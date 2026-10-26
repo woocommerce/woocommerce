@@ -214,4 +214,55 @@ class WC_REST_Refund_Currency_Test extends WC_REST_Unit_Test_Case {
 		);
 		$this->assertSame( 'JPY' === $currency ? 422 : 201, $last->get_status(), wp_json_encode( $last->get_data() ) );
 	}
+
+	/**
+	 * @testdox Computed refunds and previews preserve cents.
+	 * @param string $store Store currency.
+	 * @param int    $dp Store decimals.
+	 * @param string $currency Order currency.
+	 * @dataProvider currencies
+	 */
+	public function test_computed_and_preview( string $store, int $dp, string $currency ): void {
+		list( $order, $item_id ) = $this->order_fixture( $store, $dp, $currency );
+		$preview                 = $this->request(
+			$order,
+			array(
+				'line_items' => array(
+					array(
+						'line_item_id' => $item_id,
+						'refund_total' => 10.50,
+					),
+				),
+			),
+			true
+		);
+		$response                = $this->request(
+			$order,
+			array(
+				'compute_totals' => true,
+				'line_items'     => array(
+					array(
+						'id'           => $item_id,
+						'refund_total' => 10.50,
+					),
+				),
+			)
+		);
+		$this->assertSame( 200, $preview->get_status(), wp_json_encode( $preview->get_data() ) );
+		$this->assertSame( 201, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$expected          = 'JPY' === $currency ? 11.0 : 10.5;
+		$actual            = $this->amounts( $order, wc_get_order( $response->get_data()['id'] ) );
+		$actual['preview'] = (float) $preview->get_data()['total'];
+		$this->assertEquals(
+			array(
+				'amount'    => $expected,
+				'total'     => -$expected,
+				'gateway'   => $expected,
+				'refunded'  => $expected,
+				'remaining' => 18 - $expected,
+				'preview'   => $expected,
+			),
+			$actual
+		);
+	}
 }

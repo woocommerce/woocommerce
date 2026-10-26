@@ -11,6 +11,7 @@ namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Schema;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\Utilities\CurrencyUtil;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\AbstractSchema;
 use Automattic\WooCommerce\Enums\OrderItemType;
 use Automattic\WooCommerce\Enums\OrderStatus;
@@ -725,7 +726,7 @@ class OrderSchema extends AbstractSchema {
 				// (so discount/negative lines are handled) and round to currency precision (so a
 				// fully-refunded line is not reported refundable on a sub-cent float residue).
 				$remaining                    = abs( (float) $shipping_line->get_total() + (float) $shipping_line->get_total_tax() ) - $refunded;
-				$item_data['can_be_refunded'] = NumberUtil::round( $remaining, wc_get_price_decimals() ) > 0;
+				$item_data['can_be_refunded'] = NumberUtil::round( $remaining, CurrencyUtil::get_price_decimals( $order->get_currency() ) ) > 0;
 
 				$data['shipping_lines'][] = $item_data;
 			}
@@ -755,7 +756,7 @@ class OrderSchema extends AbstractSchema {
 				// (so discount/negative fee lines are handled) and round to currency precision (so a
 				// fully-refunded line is not reported refundable on a sub-cent float residue).
 				$remaining                    = abs( (float) $fee_line->get_total() + (float) $fee_line->get_total_tax() ) - $refunded;
-				$item_data['can_be_refunded'] = NumberUtil::round( $remaining, wc_get_price_decimals() ) > 0;
+				$item_data['can_be_refunded'] = NumberUtil::round( $remaining, CurrencyUtil::get_price_decimals( $order->get_currency() ) ) > 0;
 
 				$data['fee_lines'][] = $item_data;
 			}
