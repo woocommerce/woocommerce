@@ -1841,6 +1841,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertSame(
 			array(
 				array(
+					'id'      => 0,
 					'name'    => 'Size',
 					'options' => array( 'S', 'M' ),
 					'visible' => true,
@@ -1959,6 +1960,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertSame(
 			array(
 				array(
+					'id'     => 0,
 					'name'   => 'Size',
 					'option' => 'S',
 				),
@@ -2249,6 +2251,115 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertSame(
 			array( 'SAVEPOINT wc_1', 'SAVEPOINT wc_2', 'ROLLBACK TO SAVEPOINT wc_2', 'RELEASE SAVEPOINT wc_1' ),
 			array_values( array_filter( $queries, static fn( $query ) => false !== strpos( $query, 'SAVEPOINT' ) ) )
+		);
+	}
+
+	/**
+	 * @testdox Should create a variable product with a global attribute, its terms and two variations.
+	 */
+	public function test_product_create_uses_a_global_attribute(): void {
+		$attribute = \WC_Helper_Product::create_attribute( 'size', array( 'small', 'large' ) );
+		$created   = wp_get_ability( 'woocommerce/product-create' )->execute( $this->get_global_size_shirt_input( $attribute['attribute_id'], 'large' ) );
+		$this->assertNotWPError( $created );
+		$this->created_product_ids[] = $created['product']['id'];
+
+		$product = wc_get_product( $created['product']['id'] );
+		$stored  = $product->get_attributes()['pa_size'] ?? null;
+		$medium  = get_term_by( 'slug', 'medium', 'pa_size' );
+		$this->assertInstanceOf( \WC_Product_Attribute::class, $stored );
+		$this->assertTrue( $stored->is_taxonomy() );
+		$this->assertSame( $attribute['attribute_id'], $stored->get_id() );
+		$this->assertInstanceOf( \WP_Term::class, $medium );
+		$this->assertEqualsCanonicalizing( array_merge( $attribute['term_ids'], array( $medium->term_id ) ), $stored->get_options() );
+		$this->assertEqualsCanonicalizing( array( 'small', 'large', 'medium' ), wp_get_post_terms( $product->get_id(), 'pa_size', array( 'fields' => 'slugs' ) ) );
+
+		list( $small_id, $large_id ) = $created['product']['variation_ids'];
+		$this->assertSame( 'small', get_post_meta( $small_id, 'attribute_pa_size', true ) );
+		$this->assertSame( 'large', get_post_meta( $large_id, 'attribute_pa_size', true ) );
+		$this->assertSame( $attribute['attribute_id'], $created['product']['attributes'][0]['id'] );
+		$this->assertSame( 'size', $created['product']['attributes'][0]['name'] );
+	}
+
+	/**
+	 * @testdox Should refuse a variation whose option is not a term of the global attribute.
+	 */
+	public function test_product_create_refuses_a_variation_option_that_is_not_a_term(): void {
+		$attribute = \WC_Helper_Product::create_attribute( 'size', array( 'small', 'large' ) );
+		$result    = wp_get_ability( 'woocommerce/product-create' )->execute_change( $this->get_global_size_shirt_input( $attribute['attribute_id'], 'xl' ) );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_product_variation_attributes_invalid', $result->get_error_code() );
+		$this->assertFalse( get_term_by( 'slug', 'xl', 'pa_size' ) );
+	}
+
+	/**
+	 * @testdox Should return the global attribute id, name and term slugs from products-query.
+	 */
+	public function test_products_query_returns_global_attributes(): void {
+		$attribute = \WC_Helper_Product::create_attribute( 'size', array( 'small', 'large' ) );
+		$created   = wp_get_ability( 'woocommerce/product-create' )->execute( $this->get_global_size_shirt_input( $attribute['attribute_id'], 'large' ) );
+		$this->assertNotWPError( $created );
+		$this->created_product_ids[] = $created['product']['id'];
+
+		$parent     = wp_get_ability( 'woocommerce/products-query' )->execute( array( 'id' => $created['product']['id'] ) );
+		$variations = wp_get_ability( 'woocommerce/products-query' )->execute( array( 'parent_id' => $created['product']['id'] ) );
+		$this->assertNotWPError( $parent );
+		$this->assertNotWPError( $variations );
+
+		$parent_attribute = $parent['products'][0]['attributes'][0];
+		$this->assertSame( $attribute['attribute_id'], $parent_attribute['id'] );
+		$this->assertSame( 'size', $parent_attribute['name'] );
+		$this->assertEqualsCanonicalizing( array( 'small', 'large', 'medium' ), $parent_attribute['options'] );
+
+		$options = array();
+		foreach ( $variations['products'] as $variation ) {
+			$this->assertSame( $attribute['attribute_id'], $variation['attributes'][0]['id'] );
+			$this->assertSame( 'size', $variation['attributes'][0]['name'] );
+			$options[] = $variation['attributes'][0]['option'];
+		}
+		$this->assertEqualsCanonicalizing( array( 'small', 'large' ), $options );
+	}
+
+	/**
+	 * The input of a variable shirt with the global size attribute and two
+	 * variations. The parent names the attribute by name and adds the term
+	 * Medium, which does not exist yet. The first variation names the
+	 * attribute by name, the second by id.
+	 *
+	 * @param int    $attribute_id  ID of the global size attribute.
+	 * @param string $second_option Option of the second variation.
+	 * @return array
+	 */
+	private function get_global_size_shirt_input( int $attribute_id, string $second_option ): array {
+		return array(
+			'name'       => 'Global shirt',
+			'type'       => 'variable',
+			'attributes' => array(
+				array(
+					'name'    => 'size',
+					'options' => array( 'small', 'Large', 'Medium' ),
+				),
+			),
+			'variations' => array(
+				array(
+					'attributes'    => array(
+						array(
+							'name'   => 'size',
+							'option' => 'small',
+						),
+					),
+					'regular_price' => '10.00',
+				),
+				array(
+					'attributes'    => array(
+						array(
+							'id'     => $attribute_id,
+							'option' => $second_option,
+						),
+					),
+					'regular_price' => '12.00',
+				),
+			),
 		);
 	}
 

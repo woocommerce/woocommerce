@@ -102,7 +102,8 @@ trait ProductAbilityTrait {
 	 * Get the schema of the `attributes` input and output.
 	 *
 	 * A parent product lists each attribute with its options. A variation lists
-	 * the one option it picks for each attribute of its parent.
+	 * the one option it picks for each attribute of its parent. An attribute
+	 * whose name or id matches a global attribute uses that global attribute.
 	 *
 	 * @param bool $for_variation Whether the schema is for a variation.
 	 * @return array
@@ -111,14 +112,15 @@ trait ProductAbilityTrait {
 		if ( $for_variation ) {
 			return array(
 				'type'        => 'array',
-				'description' => __( 'The option this variation picks for each attribute of its parent, by attribute name.', 'woocommerce' ),
+				'description' => __( 'The option this variation picks for each attribute of its parent, by attribute name or global attribute id. For a global attribute the option is the term slug.', 'woocommerce' ),
 				'items'       => array(
 					'type'                 => 'object',
 					'properties'           => array(
+						'id'     => self::get_global_attribute_id_schema(),
 						'name'   => array( 'type' => 'string' ),
 						'option' => array( 'type' => 'string' ),
 					),
-					'required'             => array( 'name', 'option' ),
+					'required'             => array( 'option' ),
 					'additionalProperties' => false,
 				),
 			);
@@ -126,10 +128,11 @@ trait ProductAbilityTrait {
 
 		return array(
 			'type'        => 'array',
-			'description' => __( 'Attributes of the product, such as Size with the options S, M and L. Each variation picks one option of every attribute.', 'woocommerce' ),
+			'description' => __( 'Attributes of the product, such as Size with the options S, M and L. Each variation picks one option of every attribute. A name or id that matches a global attribute uses that global attribute, and its options are term names or slugs. Missing terms are created.', 'woocommerce' ),
 			'items'       => array(
 				'type'                 => 'object',
 				'properties'           => array(
+					'id'      => self::get_global_attribute_id_schema(),
 					'name'    => array( 'type' => 'string' ),
 					'options' => array(
 						'type'     => 'array',
@@ -141,9 +144,22 @@ trait ProductAbilityTrait {
 						'description' => __( 'Whether the attribute shows on the product page. Defaults to true.', 'woocommerce' ),
 					),
 				),
-				'required'             => array( 'name', 'options' ),
+				'required'             => array( 'options' ),
 				'additionalProperties' => false,
 			),
+		);
+	}
+
+	/**
+	 * Get the schema of the `id` of an attribute.
+	 *
+	 * @return array
+	 */
+	private static function get_global_attribute_id_schema(): array {
+		return array(
+			'type'        => 'integer',
+			'description' => __( 'ID of a global attribute. Send it or the name.', 'woocommerce' ),
+			'minimum'     => 1,
 		);
 	}
 
@@ -647,7 +663,7 @@ trait ProductAbilityTrait {
 					array( 'status' => 400 )
 				);
 			}
-			return self::check_variation_attributes( $product->get_attributes(), $parent );
+			return self::check_variation_attributes( $product, $parent );
 		}
 
 		return null;
@@ -740,7 +756,7 @@ trait ProductAbilityTrait {
 				return $error;
 			}
 
-			$error = self::check_variation_attributes( $variation->get_attributes(), $parent_product, $position );
+			$error = self::check_variation_attributes( $variation, $parent_product, $position );
 			if ( is_wp_error( $error ) ) {
 				return $error;
 			}
@@ -839,8 +855,11 @@ trait ProductAbilityTrait {
 
 	/**
 	 * Build the attributes of a product from input. A parent gets
-	 * WC_Product_Attribute objects. A variation gets the option it picks for each
-	 * attribute, keyed by the attribute slug.
+	 * WC_Product_Attribute objects: a taxonomy attribute with term ids for a
+	 * global attribute, like the REST API builds, else a local attribute. An
+	 * option without a term keeps its name, and the save creates the term. A
+	 * variation gets the option it picks for each attribute, keyed by the
+	 * attribute slug, or by the taxonomy for a global attribute id.
 	 *
 	 * @param \WC_Product $product Product object.
 	 * @param mixed       $value   The `attributes` input.
@@ -854,27 +873,45 @@ trait ProductAbilityTrait {
 		if ( $product instanceof \WC_Product_Variation ) {
 			$attributes = array();
 			foreach ( $value as $item ) {
-				if ( ! is_array( $item ) || ! is_string( $item['name'] ?? null ) || '' === $item['name'] || ! is_scalar( $item['option'] ?? null ) ) {
+				if ( ! is_array( $item ) || ! is_scalar( $item['option'] ?? null ) ) {
 					return self::get_invalid_product_attributes_error();
 				}
-				$attributes[ sanitize_title( $item['name'] ) ] = wc_clean( (string) $item['option'] );
+				$key = empty( $item['id'] ) ? sanitize_title( (string) ( $item['name'] ?? '' ) ) : wc_attribute_taxonomy_name_by_id( (int) $item['id'] );
+				if ( '' === $key ) {
+					return self::get_invalid_product_attributes_error();
+				}
+				$attributes[ $key ] = wc_clean( (string) $item['option'] );
 			}
 			return $attributes;
 		}
 
 		$attributes = array();
 		foreach ( $value as $position => $item ) {
-			$options = is_array( $item['options'] ?? null ) ? array_values( array_filter( array_map( 'wc_clean', $item['options'] ), 'is_string' ) ) : array();
-			if ( ! is_array( $item ) || ! is_string( $item['name'] ?? null ) || '' === trim( $item['name'] ) || empty( $options ) ) {
+			if ( ! is_array( $item ) ) {
+				return self::get_invalid_product_attributes_error();
+			}
+			$options  = is_array( $item['options'] ?? null ) ? array_values( array_filter( array_map( 'wc_clean', $item['options'] ), 'is_string' ) ) : array();
+			$taxonomy = self::get_global_attribute_taxonomy( $item );
+			$name     = '' === $taxonomy ? wc_clean( trim( (string) ( $item['name'] ?? '' ) ) ) : $taxonomy;
+			if ( '' === $name || empty( $options ) || ( ! empty( $item['id'] ) && '' === $taxonomy ) ) {
 				return self::get_invalid_product_attributes_error();
 			}
 			$attribute = new \WC_Product_Attribute();
-			$attribute->set_name( wc_clean( $item['name'] ) );
+			if ( '' !== $taxonomy ) {
+				$attribute->set_id( wc_attribute_taxonomy_id_by_name( $taxonomy ) );
+				foreach ( $options as $index => $option ) {
+					$term              = get_term_by( 'slug', $option, $taxonomy );
+					$term              = $term instanceof \WP_Term ? $term : get_term_by( 'name', $option, $taxonomy );
+					$options[ $index ] = $term instanceof \WP_Term ? $term->term_id : $option;
+				}
+				$options = array_values( array_unique( $options ) );
+			}
+			$attribute->set_name( $name );
 			$attribute->set_options( $options );
 			$attribute->set_position( (int) $position );
 			$attribute->set_visible( (bool) ( $item['visible'] ?? true ) );
 			$attribute->set_variation( true );
-			$attributes[ sanitize_title( $item['name'] ) ] = $attribute;
+			$attributes[ sanitize_title( $name ) ] = $attribute;
 		}
 
 		if ( count( $attributes ) !== count( $value ) ) {
@@ -889,20 +926,71 @@ trait ProductAbilityTrait {
 	}
 
 	/**
-	 * Check that a variation picks one option of every variation attribute of
-	 * its parent, and nothing else.
+	 * The taxonomy of the global attribute that an `attributes` item names: by
+	 * `id`, or by a `name` that matches a global attribute, with or without the
+	 * `pa_` prefix.
 	 *
-	 * @param array<string, string> $attributes     Attributes of the variation, keyed by attribute slug.
+	 * @param array $item Item of the `attributes` input.
+	 * @return string The taxonomy, such as `pa_size`, or an empty string for a local attribute.
+	 */
+	private static function get_global_attribute_taxonomy( array $item ): string {
+		if ( ! empty( $item['id'] ) ) {
+			return wc_attribute_taxonomy_name_by_id( (int) $item['id'] );
+		}
+
+		$name = is_string( $item['name'] ?? null ) ? $item['name'] : '';
+
+		return wc_attribute_taxonomy_id_by_name( $name ) > 0 ? wc_attribute_taxonomy_name( wc_attribute_taxonomy_slug( $name ) ) : '';
+	}
+
+	/**
+	 * The values a variation can pick for an attribute: the term slugs of a
+	 * global attribute, or the options of a local one. An option of a global
+	 * attribute that has no term yet gives the slug that the save creates.
+	 *
+	 * @param \WC_Product_Attribute $attribute Attribute of the parent.
+	 * @return array<int, string>
+	 */
+	private static function get_attribute_option_slugs( \WC_Product_Attribute $attribute ): array {
+		if ( ! $attribute->is_taxonomy() ) {
+			return array_map( 'strval', $attribute->get_options() );
+		}
+
+		$slugs = array();
+		foreach ( $attribute->get_options() as $option ) {
+			$term    = is_int( $option ) ? get_term( $option, $attribute->get_name() ) : null;
+			$slugs[] = $term instanceof \WP_Term ? $term->slug : sanitize_title( (string) $option );
+		}
+
+		return $slugs;
+	}
+
+	/**
+	 * Check that a variation picks one option of every variation attribute of
+	 * its parent, and nothing else. An attribute name matches the parent's
+	 * local attribute first, then its global attribute. The variation then
+	 * stores each option as the parent lists it: the term slug for a global
+	 * attribute, as `WC_Product_Variation` stores it.
+	 *
+	 * @param \WC_Product_Variation $variation      Variation, with its attributes set from input.
 	 * @param \WC_Product           $parent_product Parent product, saved or not.
 	 * @param int                   $position       Position of the variation in the input, for the message. 0 for a single variation.
 	 * @return null|\WP_Error
 	 */
-	protected static function check_variation_attributes( array $attributes, \WC_Product $parent_product, int $position = 0 ) {
+	protected static function check_variation_attributes( \WC_Product_Variation $variation, \WC_Product $parent_product, int $position = 0 ) {
 		$options = array();
 		foreach ( $parent_product->get_attributes() as $slug => $attribute ) {
 			if ( $attribute instanceof \WC_Product_Attribute && $attribute->get_variation() ) {
-				$options[ $slug ] = $attribute->get_slugs();
+				$options[ $slug ] = self::get_attribute_option_slugs( $attribute );
 			}
+		}
+
+		$attributes = array();
+		foreach ( $variation->get_attributes() as $slug => $option ) {
+			if ( ! isset( $options[ $slug ] ) && isset( $options[ wc_attribute_taxonomy_name( $slug ) ] ) ) {
+				$slug = wc_attribute_taxonomy_name( $slug );
+			}
+			$attributes[ $slug ] = (string) $option;
 		}
 
 		$missing = array_diff_key( $options, $attributes );
@@ -920,7 +1008,10 @@ trait ProductAbilityTrait {
 		}
 
 		foreach ( $attributes as $slug => $option ) {
-			if ( ! in_array( $option, $options[ $slug ], true ) && ! in_array( sanitize_title( $option ), $options[ $slug ], true ) ) {
+			if ( in_array( $option, $options[ $slug ], true ) ) {
+				continue;
+			}
+			if ( ! in_array( sanitize_title( $option ), $options[ $slug ], true ) ) {
 				return new \WP_Error(
 					'woocommerce_product_variation_attributes_invalid',
 					sprintf(
@@ -933,7 +1024,10 @@ trait ProductAbilityTrait {
 					array( 'status' => 400 )
 				);
 			}
+			$attributes[ $slug ] = sanitize_title( $option );
 		}
+
+		$variation->set_attributes( $attributes );
 
 		return null;
 	}
@@ -1252,12 +1346,14 @@ trait ProductAbilityTrait {
 		foreach ( $product->get_attributes() as $slug => $attribute ) {
 			if ( $attribute instanceof \WC_Product_Attribute ) {
 				$output[] = array(
+					'id'      => $attribute->get_id(),
 					'name'    => wc_attribute_label( $attribute->get_name(), $product ),
-					'options' => array_map( 'strval', $attribute->get_slugs() ),
+					'options' => self::get_attribute_option_slugs( $attribute ),
 					'visible' => (bool) $attribute->get_visible(),
 				);
 			} else {
 				$output[] = array(
+					'id'     => taxonomy_is_product_attribute( (string) $slug ) ? wc_attribute_taxonomy_id_by_name( (string) $slug ) : 0,
 					'name'   => wc_attribute_label( (string) $slug, $product ),
 					'option' => (string) $attribute,
 				);
@@ -1351,10 +1447,14 @@ trait ProductAbilityTrait {
 				),
 				'attributes'        => array(
 					'type'        => 'array',
-					'description' => __( 'Attributes with their options on a product, or the option each attribute picks on a variation.', 'woocommerce' ),
+					'description' => __( 'Attributes with their options on a product, or the option each attribute picks on a variation. For a global attribute the options are term slugs.', 'woocommerce' ),
 					'items'       => array(
 						'type'                 => 'object',
 						'properties'           => array(
+							'id'      => array(
+								'type'        => 'integer',
+								'description' => __( 'ID of the global attribute, or 0 for an attribute of this product only.', 'woocommerce' ),
+							),
 							'name'    => array( 'type' => 'string' ),
 							'options' => array(
 								'type'  => 'array',
