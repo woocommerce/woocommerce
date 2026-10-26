@@ -11,6 +11,7 @@ import { DataForm, useFormValidity } from '@wordpress/dataviews';
 import type { Form } from '@wordpress/dataviews';
 import { __ } from '@wordpress/i18n';
 import { useParams } from '@wordpress/route';
+// eslint-disable-next-line @wordpress/use-recommended-components -- Fine on this experimental screen until the repo enables allowUseWithCaution.
 import { Button, Notice, Stack } from '@wordpress/ui';
 import { useViewConfig } from '@wordpress/views';
 import { useState } from 'react';
