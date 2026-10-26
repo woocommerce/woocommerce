@@ -116,10 +116,23 @@ function wc_create_page( $slug, $option = '', $page_title = '', $page_content = 
 	if ( strlen( $page_content ) > 0 ) {
 		// Search for an existing page by its shortcode, or by its WooCommerce block opener for block content.
 		$content_needle = str_replace( array( '<!-- wp:shortcode -->', '<!-- /wp:shortcode -->' ), '', $page_content );
-		if ( preg_match( '#<!-- wp:woocommerce/[a-z0-9-]+ #', $page_content, $block_opener ) ) {
-			$content_needle = $block_opener[0];
+		foreach ( parse_blocks( $page_content ) as $block ) {
+			if ( isset( $block['blockName'] ) && 0 === strpos( $block['blockName'], 'woocommerce/' ) ) {
+				$block_opener = '<!-- wp:' . $block['blockName'];
+				break;
+			}
 		}
-		$valid_page_found = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type='page' AND post_status NOT IN ( 'pending', 'trash', 'future', 'auto-draft' ) AND post_content LIKE %s LIMIT 1;", '%' . $wpdb->esc_like( $content_needle ) . '%' ) );
+		if ( isset( $block_opener ) ) {
+			$valid_page_found = $wpdb->get_var(
+				$wpdb->prepare(
+					"SELECT ID FROM $wpdb->posts WHERE post_type='page' AND post_status NOT IN ( 'pending', 'trash', 'future', 'auto-draft' ) AND ( post_content LIKE %s OR post_content LIKE %s ) LIMIT 1;",
+					'%' . $wpdb->esc_like( $block_opener . ' ' ) . '%',
+					'%' . $wpdb->esc_like( $block_opener . '-->' ) . '%'
+				)
+			);
+		} else {
+			$valid_page_found = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type='page' AND post_status NOT IN ( 'pending', 'trash', 'future', 'auto-draft' ) AND post_content LIKE %s LIMIT 1;", '%' . $wpdb->esc_like( $content_needle ) . '%' ) );
+		}
 	} else {
 		// Search for an existing page with the specified page slug.
 		$valid_page_found = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type='page' AND post_status NOT IN ( 'pending', 'trash', 'future', 'auto-draft' )  AND post_name = %s LIMIT 1;", $slug ) );

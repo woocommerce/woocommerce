@@ -702,7 +702,7 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 				'post_status'  => 'publish',
 				'post_name'    => 'my-custom-cart',
 				'post_title'   => 'My custom cart',
-				'post_content' => '<!-- wp:paragraph --><p>Intro added by the merchant.</p><!-- /wp:paragraph --><!-- wp:woocommerce/cart --><div class="wp-block-woocommerce-cart">customized</div><!-- /wp:woocommerce/cart -->',
+				'post_content' => '<!-- wp:paragraph --><p>Intro added by the merchant.</p><!-- /wp:paragraph --><!-- wp:woocommerce/cart--><div class="wp-block-woocommerce-cart">customized</div><!-- /wp:woocommerce/cart -->',
 			)
 		);
 
@@ -710,9 +710,6 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 
 		$this->assertEquals( $existing_page_id, $page_id );
 		$this->assertEquals( $existing_page_id, get_option( 'woocommerce_cart_page_id' ) );
-
-		wp_delete_post( $existing_page_id, true );
-		delete_option( 'woocommerce_cart_page_id' );
 	}
 
 	/**
@@ -735,10 +732,6 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 
 		$this->assertNotEquals( $other_page_id, $page_id );
 		$this->assertSame( 'cart', get_post( $page_id )->post_name );
-
-		wp_delete_post( $other_page_id, true );
-		wp_delete_post( $page_id, true );
-		delete_option( 'woocommerce_cart_page_id' );
 	}
 
 	/**
@@ -760,9 +753,6 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 		$page_id = wc_create_page( 'cart', 'woocommerce_cart_page_id', 'Cart', '<!-- wp:shortcode -->[woocommerce_cart]<!-- /wp:shortcode -->' );
 
 		$this->assertEquals( $existing_page_id, $page_id );
-
-		wp_delete_post( $existing_page_id, true );
-		delete_option( 'woocommerce_cart_page_id' );
 	}
 
 	/**
@@ -785,9 +775,5 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 
 		$this->assertNotEquals( $trashed_page_id, $page_id );
 		$this->assertSame( 'trash', get_post( $trashed_page_id )->post_status );
-
-		wp_delete_post( $trashed_page_id, true );
-		wp_delete_post( $page_id, true );
-		delete_option( 'woocommerce_cart_page_id' );
 	}
 }
