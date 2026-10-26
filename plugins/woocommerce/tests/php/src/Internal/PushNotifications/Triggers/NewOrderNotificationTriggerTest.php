@@ -226,6 +226,43 @@ class NewOrderNotificationTriggerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should notify about a new order that a plugin completes from the processing status hook.
+	 */
+	public function test_new_order_completed_from_processing_hook_adds_notification(): void {
+		add_action(
+			'woocommerce_order_status_processing',
+			static function ( $order_id, $order ) {
+				unset( $order_id ); // Avoid parameter not used PHPCS errors.
+				$order->update_status( OrderStatus::COMPLETED );
+			},
+			10,
+			2
+		);
+		$order = wc_create_order( array( 'status' => OrderStatus::PENDING ) );
+
+		$order->set_status( OrderStatus::PROCESSING );
+		$order->save();
+
+		$this->assertSame( OrderStatus::COMPLETED, wc_get_order( $order->get_id() )->get_status(), 'The plugin should have completed the order' );
+		$this->assertSame( 1, $this->store->count(), 'The nested processing to completed change should not hide the new order' );
+	}
+
+	/**
+	 * @testdox Should not mark an order moving between two notifiable statuses.
+	 * @testWith ["on_order_status_changed"]
+	 *           ["on_order_status_changed_while_disabled"]
+	 *
+	 * @param string $handler The trigger callback that handles the status change.
+	 */
+	public function test_status_change_between_notifiable_statuses_does_not_mark_order( string $handler ): void {
+		$order = wc_create_order( array( 'status' => OrderStatus::PENDING ) );
+
+		$this->trigger->{$handler}( $order->get_id(), OrderStatus::PROCESSING, OrderStatus::COMPLETED, $order );
+
+		$this->assertFalse( wc_get_order( $order->get_id() )->meta_exists( NewOrderNotificationTrigger::NOTIFIABLE_META_KEY ), "{$handler} should only mark an order moving into a notifiable status" );
+	}
+
+	/**
 	 * @testdox Should not notify about an order that already reached a notifiable status, and should log why.
 	 */
 	public function test_status_change_on_previously_notifiable_order_is_ignored(): void {

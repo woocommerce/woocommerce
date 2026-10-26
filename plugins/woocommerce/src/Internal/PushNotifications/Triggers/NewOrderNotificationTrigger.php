@@ -117,16 +117,12 @@ class NewOrderNotificationTrigger {
 		WC_Order $order
 	): void {
 		// phpcs:enable Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
-		if ( ! in_array( $next_status, self::NOTIFIABLE_STATUSES, true ) ) {
+		if ( ! self::enters_notifiable_status( $previous_status, $next_status ) ) {
 			return;
 		}
 
 		$was_notifiable = $order->meta_exists( self::NOTIFIABLE_META_KEY );
 		$this->mark_notifiable( $order );
-
-		if ( in_array( $previous_status, self::NOTIFIABLE_STATUSES, true ) ) {
-			return;
-		}
 
 		$notification = new NewOrderNotification( $order_id );
 
@@ -161,9 +157,25 @@ class NewOrderNotificationTrigger {
 	 */
 	public function on_order_status_changed_while_disabled( $order_id, $previous_status, $next_status, $order ): void {
 		// phpcs:enable Generic.CodeAnalysis.UnusedFunctionParameter.FoundBeforeLastUsed
-		if ( $order instanceof WC_Order && in_array( $next_status, self::NOTIFIABLE_STATUSES, true ) ) {
+		if ( $order instanceof WC_Order && self::enters_notifiable_status( $previous_status, $next_status ) ) {
 			$this->mark_notifiable( $order );
 		}
+	}
+
+	/**
+	 * Whether the order moves into a notifiable status from one that is not.
+	 *
+	 * Moves between notifiable statuses are skipped and not marked: a plugin that
+	 * completes the order from the processing hook fires processing to completed
+	 * before pending to processing.
+	 *
+	 * @param mixed $previous_status The previous order status.
+	 * @param mixed $next_status     The new order status.
+	 * @return bool
+	 */
+	private static function enters_notifiable_status( $previous_status, $next_status ): bool {
+		return ! in_array( $previous_status, self::NOTIFIABLE_STATUSES, true )
+			&& in_array( $next_status, self::NOTIFIABLE_STATUSES, true );
 	}
 
 	/**
