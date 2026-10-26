@@ -8,62 +8,6 @@ import { NumberConfig, numberFormat, parseNumber } from '@woocommerce/number';
 import deprecated from '@wordpress/deprecated';
 
 /**
- * Rounds a number to the given number of decimal places, half away from zero,
- * with the same floating-point error correction as PHP's `_php_math_round()`
- * (used by `round()` and `number_format()`), so that values exactly between
- * two candidates round the same way as PHP's `wc_format_decimal()`.
- *
- * The edge comparison intentionally divides the scaled half-integer back down
- * before comparing: both sides then hold the exact same double, which is what
- * makes e.g. `1.005` round to `1.01` despite `1.005 * 100` evaluating to
- * `100.49999999999999`.
- *
- * See https://wiki.php.net/rfc/rounding
- *
- * @param {number} value  The number to round.
- * @param {number} places Decimal places to round to (>= 0).
- * @return {number} The rounded number.
- */
-function roundHalfAwayFromZero( value: number, places: number ): number {
-	if ( ! Number.isFinite( value ) || value === 0 ) {
-		return value;
-	}
-	const exponent = Math.pow( 10, places );
-	let integral =
-		value >= 0
-			? Math.floor( value * exponent )
-			: Math.ceil( value * exponent );
-	const corrected = value >= 0 ? integral + 1 : integral - 1;
-	if ( corrected / exponent === value ) {
-		integral = corrected;
-	}
-	if ( Math.abs( integral ) >= 1e16 ) {
-		return value;
-	}
-	const edge = Math.abs(
-		( integral + copysign( 0.5, integral ) ) / exponent
-	);
-	if ( Math.abs( value ) >= edge ) {
-		integral += copysign( 1, integral );
-	}
-	return integral / exponent;
-}
-
-/**
- * Returns a number whose magnitude has the sign of `signSource`, like C's
- * `copysign()`. The sign of zero is preserved: -0 counts as negative, like C's copysign().
- *
- * @param {number} magnitude  The value providing the magnitude.
- * @param {number} signSource The value providing the sign.
- * @return {number} The magnitude with the applied sign.
- */
-function copysign( magnitude: number, signSource: number ): number {
-	return signSource < 0 || Object.is( signSource, -0 )
-		? -Math.abs( magnitude )
-		: Math.abs( magnitude );
-}
-
-/**
  * @typedef {import('@woocommerce/number').NumberConfig} NumberConfig
  */
 /**
@@ -266,6 +210,28 @@ const CurrencyFactoryBase = function ( currencySetting?: CurrencyConfig ) {
 
 	setCurrency( currencySetting );
 
+	/**
+	 * Format decimal values with the display formatter, without separators.
+	 * Locutus can return a non-numeric string when its exponent shift produces
+	 * scientific notation, so retain the previous result in those cases.
+	 */
+	function formatDecimalValue( number: number, precision: number ) {
+		if (
+			! Number.isInteger( precision ) ||
+			precision < 0 ||
+			precision > 100 ||
+			! Number.isFinite( number ) ||
+			Math.abs( number ) >= 1e21
+		) {
+			return undefined;
+		}
+		const formatted = numberFormat(
+			{ precision, decimalSeparator: '.', thousandSeparator: '' },
+			number
+		);
+		return Number.isFinite( Number( formatted ) ) ? formatted : undefined;
+	}
+
 	return {
 		getCurrencyConfig: () => {
 			return { ...currency };
@@ -291,7 +257,12 @@ const CurrencyFactoryBase = function ( currencySetting?: CurrencyConfig ) {
 				return 0;
 			}
 			const { precision } = currency;
-			return roundHalfAwayFromZero( number, precision );
+			const formatted = formatDecimalValue( number, precision );
+			if ( formatted !== undefined ) {
+				return Number( formatted );
+			}
+			const exponent = Math.pow( 10, precision );
+			return Math.round( number * exponent ) / exponent;
 		},
 
 		/**
@@ -309,14 +280,10 @@ const CurrencyFactoryBase = function ( currencySetting?: CurrencyConfig ) {
 				return '';
 			}
 			const { precision } = currency;
-			// Round at the same number of places toFixed() will use:
-			// ToIntegerOrInfinity( Number( precision ) ), falling back to 0
-			// for unset/null/NaN precision exactly like toFixed() does.
-			const places = Number( precision );
-			return roundHalfAwayFromZero(
-				number,
-				Number.isFinite( places ) ? Math.trunc( places ) : 0
-			).toFixed( precision );
+			return (
+				formatDecimalValue( number, precision ) ??
+				number.toFixed( precision )
+			);
 		},
 
 		/**
