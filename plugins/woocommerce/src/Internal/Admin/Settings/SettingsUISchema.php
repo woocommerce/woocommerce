@@ -340,8 +340,7 @@ class SettingsUISchema {
 		self::emit_conversion_notice(
 			__METHOD__,
 			$converted_fields,
-			/* translators: %s: comma-separated field ids. */
-			__( 'A Settings UI schema provider supplied non-string option, field, or visibility values that WooCommerce converted for compatibility: %s. Update the provider to supply string values.', 'woocommerce' ),
+			'A Settings UI schema provider supplied non-string option, field, or visibility values that WooCommerce converted for compatibility: %s. Update the provider to supply string values.',
 			'11.0.0'
 		);
 
@@ -549,8 +548,7 @@ class SettingsUISchema {
 			self::emit_conversion_notice(
 				self::class . '::canonicalize_schema_values',
 				$converted_fields,
-				/* translators: %s: comma-separated field ids. */
-				__( 'A Settings UI schema provider supplied legacy field values or metadata that WooCommerce converted for compatibility: %s. Update the provider to supply canonical values.', 'woocommerce' ),
+				'A Settings UI schema provider supplied legacy field values or metadata that WooCommerce converted for compatibility: %s. Update the provider to supply canonical values.',
 				'11.2.0'
 			);
 		}
@@ -1328,7 +1326,7 @@ class SettingsUISchema {
 	 *
 	 * @param string   $method Method name reported by the notice.
 	 * @param string[] $field_ids Affected field ids.
-	 * @param string   $message Translatable sprintf message.
+	 * @param string   $message English sprintf message with one %s placeholder for the field ids.
 	 * @param string   $version Version when the notice was introduced.
 	 */
 	private static function emit_conversion_notice( string $method, array $field_ids, string $message, string $version ): void {
@@ -1339,7 +1337,6 @@ class SettingsUISchema {
 		wc_doing_it_wrong(
 			$method,
 			sprintf(
-				/* translators: %s: comma-separated field ids. */
 				esc_html( $message ),
 				esc_html( implode( ', ', array_unique( $field_ids ) ) )
 			),

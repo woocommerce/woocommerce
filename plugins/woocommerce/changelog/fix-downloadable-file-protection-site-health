@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show a Site Health warning when downloadable product files can be accessed directly, instead of reporting them as protected.
