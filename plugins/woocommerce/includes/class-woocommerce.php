@@ -196,7 +196,7 @@ final class WooCommerce {
 	 * @return void
 	 */
 	public function __clone() {
-		wc_doing_it_wrong( __FUNCTION__, __( 'Cloning is forbidden.', 'woocommerce' ), '2.1' );
+		wc_doing_it_wrong( __FUNCTION__, 'Cloning is forbidden.', '2.1' );
 	}
 
 	/**
@@ -207,7 +207,7 @@ final class WooCommerce {
 	 * @return void
 	 */
 	public function __wakeup() {
-		wc_doing_it_wrong( __FUNCTION__, __( 'Unserializing instances of this class is forbidden.', 'woocommerce' ), '2.1' );
+		wc_doing_it_wrong( __FUNCTION__, 'Unserializing instances of this class is forbidden.', '2.1' );
 	}
 
 	/**
@@ -448,6 +448,7 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\Ucp\UcpDiscovery::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Admin\OrderTaxLookupMigrator::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Orders\PaymentModeMarker::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\ProductDownloads\DownloadableFileAttachments::class )->register();
 
 		// Classes inheriting from RestApiControllerBase.
 		$container->get( Automattic\WooCommerce\Internal\ReceiptRendering\ReceiptRenderingRestController::class )->register();
