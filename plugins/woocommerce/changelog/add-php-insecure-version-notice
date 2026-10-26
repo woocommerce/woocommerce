@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Warn stores on PHP older than 8.1 that their PHP version may be affected by critical security vulnerabilities, and recommend the latest PHP 8.3 release.

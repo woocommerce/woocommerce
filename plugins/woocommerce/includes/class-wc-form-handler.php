@@ -61,6 +61,7 @@ class WC_Form_Handler {
 		add_action( 'wp_loaded', array( __CLASS__, 'redirect_after_cancel_order' ), PHP_INT_MAX );
 		add_action( 'wp_loaded', array( __CLASS__, 'update_cart_action' ), 20 );
 		add_action( 'wp_loaded', array( __CLASS__, 'add_to_cart_action' ), 20 );
+		add_filter( 'redirect_canonical', array( __CLASS__, 'remove_add_to_cart_from_canonical_redirect' ), 10, 2 );
 
 		// May need $wp global to access query vars.
 		add_action( 'wp', array( __CLASS__, 'pay_action' ), 20 );
@@ -1262,6 +1263,36 @@ class WC_Form_Handler {
 				exit;
 			}
 		}
+	}
+
+	/**
+	 * Remove add-to-cart from WordPress's canonical redirect, since add_to_cart_action() has already added the product.
+	 *
+	 * Redirects to another host (www vs non-www), or from HTTPS to HTTP, keep it, because the cart session cookie may not carry across.
+	 *
+	 * @since 11.4.0
+	 * @internal
+	 *
+	 * @param string|false $redirect_url  The canonical redirect URL.
+	 * @param string       $requested_url The requested URL.
+	 * @return string|false The redirect URL.
+	 */
+	public static function remove_add_to_cart_from_canonical_redirect( $redirect_url, $requested_url = '' ) {
+		if ( ! is_string( $redirect_url ) || ! is_string( $requested_url ) ) {
+			return $redirect_url;
+		}
+
+		if ( ! isset( $_REQUEST['add-to-cart'] ) || ! is_numeric( wp_unslash( $_REQUEST['add-to-cart'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			return $redirect_url;
+		}
+
+		$is_https_downgrade = 'https' === strtolower( (string) wp_parse_url( $requested_url, PHP_URL_SCHEME ) ) && 'http' === strtolower( (string) wp_parse_url( $redirect_url, PHP_URL_SCHEME ) );
+
+		if ( $is_https_downgrade || wp_parse_url( $redirect_url, PHP_URL_HOST ) !== wp_parse_url( $requested_url, PHP_URL_HOST ) ) {
+			return $redirect_url;
+		}
+
+		return remove_query_arg( 'add-to-cart', $redirect_url );
 	}
 
 	/**
