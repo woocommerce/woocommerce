@@ -364,6 +364,7 @@ jQuery( function ( $ ) {
 				.on( 'change', '.refund input.refund_line_total, .refund input.refund_line_tax', this.refunds.input_changed )
 				.on( 'change keyup', '.wc-order-refund-items #refund_amount', this.refunds.amount_changed )
 				.on( 'change', 'input.refund_order_item_qty', this.refunds.refund_quantity_changed )
+				.on( 'change', '#restock_refunded_items', this.refunds.update_restock_checkbox )
 
 				// Qty
 				.on( 'change', 'input.quantity', this.quantity_changed )
@@ -653,6 +654,7 @@ jQuery( function ( $ ) {
 			$( 'div.wc-order-totals-items' ).slideUp();
 			$( '#woocommerce-order-items' ).find( 'div.refund' ).show();
 			$( '.wc-order-edit-line-item .wc-order-edit-line-item-actions' ).hide();
+			wc_meta_boxes_order_items.refunds.update_restock_checkbox();
 
 			window.wcTracks.recordEvent( 'order_edit_refund_button_click', {
 				order_id: woocommerce_admin_meta_boxes.post_id,
@@ -1265,19 +1267,66 @@ jQuery( function ( $ ) {
 					}
 				});
 
-				// Restock checkbox
-				if ( refund_qty > 0 ) {
-					$( '#restock_refunded_items' ).closest( 'tr' ).show();
-				} else {
-					$( '#restock_refunded_items' ).closest( 'tr' ).hide();
-					$( '.woocommerce_order_items input.refund_order_item_qty' ).each( function() {
-						if ( $( this ).val() > 0 ) {
-							$( '#restock_refunded_items' ).closest( 'tr' ).show();
-						}
-					});
-				}
+				wc_meta_boxes_order_items.refunds.update_restock_checkbox();
 
 				$( this ).trigger( 'refund_quantity_changed' );
+			},
+
+			// Only enable restocking once a line that holds stock has a refund quantity, and say what will happen.
+			update_restock_checkbox: function() {
+				var $checkbox          = $( '#restock_refunded_items' );
+				var restock_qty        = 0;
+				var has_restockable    = false;
+				var has_other_quantity = false;
+				var message;
+
+				if ( ! $checkbox.length ) {
+					return;
+				}
+
+				$( '.woocommerce_order_items input.refund_order_item_qty' ).each( function() {
+					var can_restock = 'yes' === $( this ).attr( 'data-can-restock' );
+					var qty         = parseFloat( $( this ).val() ) || 0;
+
+					has_restockable = has_restockable || can_restock;
+
+					if ( qty <= 0 ) {
+						return;
+					}
+
+					if ( can_restock ) {
+						restock_qty += qty;
+					} else {
+						has_other_quantity = true;
+					}
+				});
+
+				if ( restock_qty > 0 ) {
+					// Apply the default from the woocommerce_restock_refunded_items filter each time it becomes available.
+					if ( $checkbox.prop( 'disabled' ) ) {
+						$checkbox.prop( 'disabled', false ).prop( 'checked', $checkbox.prop( 'defaultChecked' ) );
+					}
+
+					if ( ! $checkbox.prop( 'checked' ) ) {
+						message = woocommerce_admin_meta_boxes.i18n_restock_none;
+					} else if ( 1 === restock_qty ) {
+						message = woocommerce_admin_meta_boxes.i18n_restock_count_single;
+					} else {
+						message = woocommerce_admin_meta_boxes.i18n_restock_count_plural.replace( '%qty%', restock_qty );
+					}
+				} else {
+					$checkbox.prop( 'disabled', true ).prop( 'checked', false );
+
+					if ( ! has_restockable ) {
+						message = woocommerce_admin_meta_boxes.i18n_restock_order_not_reduced;
+					} else if ( has_other_quantity ) {
+						message = woocommerce_admin_meta_boxes.i18n_restock_items_not_reduced;
+					} else {
+						message = woocommerce_admin_meta_boxes.i18n_restock_enter_quantity;
+					}
+				}
+
+				$( '#restock_refunded_items_description' ).text( message );
 			}
 		},
 
