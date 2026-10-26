@@ -1938,6 +1938,61 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should refuse a new variation that repeats the options or the SKU of an existing variation.
+	 */
+	public function test_product_create_checks_a_new_variation_against_its_siblings(): void {
+		$created = wp_get_ability( 'woocommerce/product-create' )->execute( $this->get_shirt_input() );
+		$this->assertNotWPError( $created );
+		$this->created_product_ids[] = $created['product']['id'];
+		$parent_id                   = $created['product']['id'];
+
+		$resized = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'         => $parent_id,
+				'attributes' => array(
+					array(
+						'name'    => 'Size',
+						'options' => array( 'S', 'M', 'L' ),
+					),
+				),
+			)
+		);
+		$this->assertNotWPError( $resized );
+
+		$same_options = wp_get_ability( 'woocommerce/product-create' )->execute_change(
+			array(
+				'type'       => 'variation',
+				'parent_id'  => $parent_id,
+				'attributes' => array(
+					array(
+						'name'   => 'Size',
+						'option' => 'M',
+					),
+				),
+			)
+		);
+		$same_sku     = wp_get_ability( 'woocommerce/product-create' )->execute_change(
+			array(
+				'type'       => 'variation',
+				'parent_id'  => $parent_id,
+				'attributes' => array(
+					array(
+						'name'   => 'Size',
+						'option' => 'L',
+					),
+				),
+				'sku'        => 'shirt-s',
+			)
+		);
+
+		$this->assertWPError( $same_options );
+		$this->assertSame( 'woocommerce_product_variation_duplicate', $same_options->get_error_code() );
+		$this->assertWPError( $same_sku );
+		$this->assertSame( 'product_invalid_sku', $same_sku->get_error_code() );
+		$this->assertCount( 2, wc_get_product( $parent_id )->get_children() );
+	}
+
+	/**
 	 * @testdox Should treat a variation as a product in update, create, query and delete.
 	 */
 	public function test_variations_are_products_in_the_other_abilities(): void {

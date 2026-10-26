@@ -32,7 +32,7 @@ A variation is a product with `type: "variation"`. Its class extends `WC_Product
 
 An attribute whose `name` or `id` matches a global attribute, such as `pa_size`, becomes a taxonomy attribute with the term ids of its options, as the REST API builds it, and the save creates missing terms. A variation picks a global attribute's option by term slug, and the output gives each attribute its global `id`, or 0 for a local attribute.
 
-Each variation picks one option of every attribute. The call refuses a variation that picks an option the parent does not have, two variations with the same options, and two variations with the same SKU. Each `variations[]` item accepts the `extensions` input of the product resource, so extension fields and validators run on every variation.
+Each variation picks one option of every attribute. The call refuses a variation that picks an option the parent does not have, two variations with the same options, and two variations with the same SKU. `product-create` with `type: "variation"` runs the same checks against the parent's existing variations. Each `variations[]` item accepts the `extensions` input of the product resource, so extension fields and validators run on every variation.
 
 ### Bulk update through the parent
 

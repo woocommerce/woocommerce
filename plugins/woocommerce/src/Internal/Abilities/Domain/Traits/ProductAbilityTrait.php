@@ -758,6 +758,26 @@ trait ProductAbilityTrait {
 			$plan['extensions'][] = is_array( $item['extensions'] ?? null ) ? $item['extensions'] : array();
 		}
 
+		$error = self::check_variation_siblings( $parent_product, $plan['save'], $named );
+		if ( is_wp_error( $error ) ) {
+			return $error;
+		}
+
+		return $plan;
+	}
+
+	/**
+	 * Check that no variation picks the same options or carries the same SKU
+	 * as another variation in the list, or as a saved variation of the parent.
+	 * A saved variation that the input names is left out, because the input
+	 * changes or deletes it.
+	 *
+	 * @param \WC_Product_Variable    $parent_product Parent product.
+	 * @param \WC_Product_Variation[] $variations     Variations to save, in input order.
+	 * @param array<int, true>        $named          IDs of the saved variations that the input names.
+	 * @return null|\WP_Error
+	 */
+	protected static function check_variation_siblings( \WC_Product_Variable $parent_product, array $variations, array $named = array() ) {
 		$combinations = array();
 		$skus         = array();
 		foreach ( $parent_product->get_children() as $child_id ) {
@@ -767,7 +787,7 @@ trait ProductAbilityTrait {
 				$skus[ $child->get_sku( 'edit' ) ]                         = true;
 			}
 		}
-		foreach ( $plan['save'] as $index => $variation ) {
+		foreach ( array_values( $variations ) as $index => $variation ) {
 			$position    = $index + 1;
 			$combination = self::get_variation_combination( $variation );
 			if ( isset( $combinations[ $combination ] ) ) {
@@ -792,7 +812,7 @@ trait ProductAbilityTrait {
 			$skus[ $sku ] = true;
 		}
 
-		return $plan;
+		return null;
 	}
 
 	/**
