@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Restore the order coupon data conversion tool under WooCommerce > Status > Tools.
