@@ -125,6 +125,14 @@ class Packages {
 	protected static function get_enabled_packages() {
 		$enabled_packages = array();
 
+		// Preload option caches to minimize future queries for options that do not yet exist or are not set to autoload.
+		wp_prime_option_caches(
+			array_map(
+				static fn( $name ) => 'wc_feature_' . str_replace( '-', '_', $name ) . '_enabled',
+				array_keys( self::$merged_packages )
+			)
+		);
+
 		foreach ( self::$merged_packages as $merged_package_name => $package_class ) {
 
 			$option       = 'wc_feature_' . str_replace( '-', '_', $merged_package_name ) . '_enabled';
@@ -337,10 +345,9 @@ class Packages {
 		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
 			error_log(  // phpcs:ignore
 				sprintf(
-					/* Translators: %s package name. */
-					esc_html__( 'Missing the WooCommerce %s package', 'woocommerce' ),
+					esc_html( 'Missing the WooCommerce %s package' ),
 					'<code>' . esc_html( $package ) . '</code>'
-				) . ' - ' . esc_html__( 'Your installation of WooCommerce is incomplete. If you installed WooCommerce from GitHub, please refer to this document to set up your development environment: https://developer.woocommerce.com/docs/contribution/contributing/#setting-up-your-development-environment', 'woocommerce' )
+				) . ' - ' . esc_html( 'Your installation of WooCommerce is incomplete. If you installed WooCommerce from GitHub, please refer to this document to set up your development environment: https://developer.woocommerce.com/docs/contribution/contributing/#setting-up-your-development-environment' )
 			);
 		}
 		add_action(

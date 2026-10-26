@@ -1,3 +1,0 @@
-Significance: patch
-Type: fix
-Comment: Refuse a query filter value that fails its schema in the unreleased extensible abilities feature.
