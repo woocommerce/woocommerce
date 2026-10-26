@@ -13,7 +13,14 @@ namespace Automattic\WooCommerce\Tests\Internal\AbilitiesApi;
 class TestProductWithItemAbility extends TestProductRenameAbility {
 
 	/**
-	 * Rename the product in memory, and return a new order item as a secondary object of the `order_item` resource.
+	 * Resource name that the secondary object carries.
+	 *
+	 * @var string
+	 */
+	public static string $item_resource = 'order_item';
+
+	/**
+	 * Rename the product in memory, and return a new order item as a secondary object of the `$item_resource` resource.
 	 *
 	 * @param \WC_Product $subject Product.
 	 * @param array       $input   Ability input.
@@ -21,6 +28,6 @@ class TestProductWithItemAbility extends TestProductRenameAbility {
 	 */
 	public function change( $subject, array $input ) {
 		parent::change( $subject, $input );
-		return array( array( new \WC_Order_Item_Product(), array(), 'order_item' ) );
+		return array( array( new \WC_Order_Item_Product(), array(), self::$item_resource ) );
 	}
 }

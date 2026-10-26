@@ -564,7 +564,9 @@ class ExtensibleAbilities {
 	 * transaction of the ActionableAbility.
 	 *
 	 * A sync registered for a resource runs only when an object of that resource
-	 * was saved in the call. It runs once per call, not once per object.
+	 * was saved in the call. It runs once per call, not once per object. The
+	 * saved objects can belong to more than one resource, so a sync reads the
+	 * objects it owns and ignores the rest.
 	 *
 	 * @since 11.4.0
 	 *
@@ -813,6 +815,20 @@ class ExtensibleAbilities {
 	 */
 	public static function get_validators( string $resource_name ): array {
 		return self::$validators[ $resource_name ] ?? array();
+	}
+
+	/**
+	 * Whether a resource is registered.
+	 *
+	 * @internal
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param string $resource_name Resource.
+	 * @return bool
+	 */
+	public static function is_resource_registered( string $resource_name ): bool {
+		return isset( self::$resources[ $resource_name ] );
 	}
 
 	/**

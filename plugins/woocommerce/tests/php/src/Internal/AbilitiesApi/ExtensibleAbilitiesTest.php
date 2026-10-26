@@ -1552,6 +1552,49 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 				}
 			);
 		}
+		$this->register_product_with_item_ability();
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+
+		$this->run_ability(
+			'test-ext/product-with-item',
+			array(
+				'id'   => $product->get_id(),
+				'name' => 'Pencil',
+			)
+		);
+
+		$this->assertSame( array( 'WC_Product_Simple' ), $checked['product'] );
+		$this->assertSame( array( 'WC_Order_Item_Product' ), $checked['order_item'] );
+	}
+
+	/**
+	 * @testdox Should warn when a secondary object names a resource that is not registered, and still run the call.
+	 */
+	public function test_a_secondary_object_with_an_unregistered_resource_warns(): void {
+		$this->setExpectedIncorrectUsage( TestProductWithItemAbility::class . '::change' );
+		$this->register_product_with_item_ability();
+		TestProductWithItemAbility::$item_resource = 'refund';
+		$product                                   = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+
+		try {
+			$this->run_ability(
+				'test-ext/product-with-item',
+				array(
+					'id'   => $product->get_id(),
+					'name' => 'Pencil',
+				)
+			);
+		} finally {
+			TestProductWithItemAbility::$item_resource = 'order_item';
+		}
+
+		$this->assertSame( 'Pencil', wc_get_product( $product->get_id() )->get_name() );
+	}
+
+	/**
+	 * Register the test ability that renames a product and returns an order item as a secondary object.
+	 */
+	private function register_product_with_item_ability(): void {
 		$this->add_test_action(
 			'wp_abilities_api_init',
 			static function () {
@@ -1577,18 +1620,6 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			},
 			20
 		);
-		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
-
-		$this->run_ability(
-			'test-ext/product-with-item',
-			array(
-				'id'   => $product->get_id(),
-				'name' => 'Pencil',
-			)
-		);
-
-		$this->assertSame( array( 'WC_Product_Simple' ), $checked['product'] );
-		$this->assertSame( array( 'WC_Order_Item_Product' ), $checked['order_item'] );
 	}
 
 	/**
