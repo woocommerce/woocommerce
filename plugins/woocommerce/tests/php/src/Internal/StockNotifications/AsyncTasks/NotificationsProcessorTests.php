@@ -561,6 +561,40 @@ class NotificationsProcessorTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The sent action does not fire for a sign-up that could not be saved as sent.
+	 */
+	public function test_process_batch_skips_sent_action_when_save_fails(): void {
+		add_filter(
+			'woocommerce_customer_stock_notification_pre_send',
+			function ( $handled, Notification $notification ) {
+				$notification->set_user_email( 'not-an-email' );
+				return true;
+			},
+			10,
+			2
+		);
+		$sent_action_fired = false;
+		add_action(
+			'woocommerce_customer_stock_notification_sent',
+			function () use ( &$sent_action_fired ) {
+				$sent_action_fired = true;
+			}
+		);
+
+		$product      = WC_Helper_Product::create_simple_product();
+		$notification = new Notification();
+		$notification->set_product_id( $product->get_id() );
+		$notification->set_user_email( 'test@test.com' );
+		$notification->set_status( NotificationStatus::ACTIVE );
+		$notification->save();
+
+		$this->sut->process_batch( $product->get_id() );
+
+		$this->assertFalse( $sent_action_fired );
+		$this->assertSame( NotificationStatus::ACTIVE, ( new Notification( $notification->get_id() ) )->get_status() );
+	}
+
+	/**
 	 * Test process_batch method on a product with a notification that is throttled.
 	 */
 	public function test_process_batch_throttled() {

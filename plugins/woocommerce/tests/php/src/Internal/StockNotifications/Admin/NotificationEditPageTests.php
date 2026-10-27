@@ -167,6 +167,43 @@ class NotificationEditPageTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A throwing `woocommerce_customer_stock_notification_pre_send` callback leaves the sign-up active and shows the failure notice.
+	 */
+	public function test_send_notification_survives_throwing_delivery(): void {
+		$this->email_manager->method( 'deliver_stock_notification' )->willThrowException( new \RuntimeException( 'Provider exploded.' ) );
+
+		$notification_id = $this->submit_send_notification();
+
+		$this->assertSame( NotificationStatus::ACTIVE, ( new Notification( $notification_id ) )->get_status() );
+		$this->assertSame( 'error', get_option( NotificationsPage::ADMIN_NOTICE_OPTION_NAME )['type'] );
+	}
+
+	/**
+	 * @testdox "Send now" does not fire the sent action when the sign-up cannot be saved as sent.
+	 */
+	public function test_send_notification_skips_sent_action_when_save_fails(): void {
+		$this->email_manager->method( 'deliver_stock_notification' )->willReturnCallback(
+			function ( Notification $notification ) {
+				$notification->set_user_email( 'not-an-email' );
+				return true;
+			}
+		);
+		$sent_action_fired = false;
+		add_action(
+			'woocommerce_customer_stock_notification_sent',
+			function () use ( &$sent_action_fired ) {
+				$sent_action_fired = true;
+			}
+		);
+
+		$notification_id = $this->submit_send_notification();
+
+		$this->assertFalse( $sent_action_fired );
+		$this->assertSame( NotificationStatus::ACTIVE, ( new Notification( $notification_id ) )->get_status() );
+		$this->assertSame( 'error', get_option( NotificationsPage::ADMIN_NOTICE_OPTION_NAME )['type'] );
+	}
+
+	/**
 	 * Data provider for test_send_notification_fires_sent_action_only_when_delivered.
 	 *
 	 * @return array[]

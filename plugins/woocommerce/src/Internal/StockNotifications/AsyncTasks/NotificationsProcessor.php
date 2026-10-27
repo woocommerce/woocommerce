@@ -246,7 +246,14 @@ class NotificationsProcessor {
 			}
 
 			// Always save the notification to reflect last attempt time.
-			$notification->save();
+			$saved = $notification->save();
+			if ( is_wp_error( $saved ) ) {
+				$this->logger->error(
+					sprintf( 'Failed to save notification %d: %s', $notification->get_id(), $saved->get_error_message() ),
+					array( 'source' => 'wc-customer-stock-notifications' )
+				);
+				continue;
+			}
 
 			$notification_product = $notification->get_product();
 			if ( $is_sent && $notification_product instanceof \WC_Product ) {
