@@ -510,20 +510,21 @@ export function sanitizeDisplayLayout(
 	displayLayout?: Partial< ProductCollectionDisplayLayout > | null
 ): ProductCollectionDisplayLayout {
 	if (
-		displayLayout?.type !== LayoutOptions.STACK &&
-		displayLayout?.type !== LayoutOptions.CAROUSEL
+		displayLayout?.type === LayoutOptions.STACK ||
+		displayLayout?.type === LayoutOptions.CAROUSEL
 	) {
-		const defaults = getDefaultDisplayLayout();
-
-		return {
-			type: displayLayout?.type ?? defaults.type,
-			columns: displayLayout?.columns ?? defaults.columns,
-			shrinkColumns:
-				displayLayout?.shrinkColumns ?? defaults.shrinkColumns,
-		};
+		return { type: displayLayout.type };
 	}
 
-	return { type: displayLayout.type };
+	const defaults = getDefaultDisplayLayout();
+
+	return {
+		type: displayLayout?.type ?? defaults.type,
+		columns: displayLayout?.columns ?? defaults.columns,
+		shrinkColumns:
+			displayLayout?.shrinkColumns ?? defaults.shrinkColumns,
+	};
+
 }
 
 export const getDefaultSettings = (
