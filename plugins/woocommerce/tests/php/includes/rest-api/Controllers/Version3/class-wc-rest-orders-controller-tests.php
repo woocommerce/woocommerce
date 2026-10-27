@@ -427,6 +427,98 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Creating an order keeps the entered tax-inclusive price when non-base price adjustment is off.
+	 * @dataProvider orders_create_non_base_location_cases
+	 *
+	 * @param array $extra_params  Extra order params to send.
+	 * @param bool  $has_customer  Whether the order has a customer with a saved base-country address.
+	 * @param float $expected_rate Tax rate the line price should exclude.
+	 */
+	public function test_orders_create_keeps_tax_inclusive_price_when_non_base_prices_are_not_adjusted( array $extra_params, bool $has_customer, float $expected_rate ): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_default_country', 'BE' );
+		update_option( 'woocommerce_tax_based_on', 'billing' );
+		add_filter( 'woocommerce_adjust_non_base_location_prices', '__return_false' );
+
+		$rates = array(
+			'BE' => '6.0000',
+			'NL' => '9.0000',
+		);
+		foreach ( $rates as $country => $rate ) {
+			WC_Tax::_insert_tax_rate(
+				array(
+					'tax_rate_country'  => $country,
+					'tax_rate'          => $rate,
+					'tax_rate_name'     => "$country VAT",
+					'tax_rate_priority' => 1,
+					'tax_rate_class'    => '',
+				)
+			);
+		}
+
+		$product      = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'regular_price' => '24',
+				'price'         => '24',
+			)
+		);
+		$order_params = array(
+			'billing'    => array( 'country' => 'NL' ),
+			'line_items' => array(
+				array(
+					'product_id' => $product->get_id(),
+					'quantity'   => 1,
+				),
+			),
+		) + $extra_params;
+
+		if ( $has_customer ) {
+			$customer = WC_Helper_Customer::create_customer( 'rest-tax-location-customer', wp_generate_password(), 'rest-tax-location@example.com' );
+			$customer->set_billing_country( 'BE' );
+			$customer->save();
+			$order_params['customer_id'] = $customer->get_id();
+		}
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders' );
+		$request->set_body_params( $order_params );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 201, $response->get_status(), 'Creating the order should return HTTP 201.' );
+
+		$order = wc_get_order( $response->get_data()['id'] );
+		$item  = current( $order->get_items() );
+		$this->assertEqualsWithDelta( 24 / ( 1 + $expected_rate ), (float) $item->get_subtotal(), 0.0001, 'The line price should exclude the tax rate for the order location.' );
+		$this->assertEquals( 24, (float) $order->get_total(), 'The order total should match the entered tax-inclusive price.' );
+	}
+
+	/**
+	 * Cases for the non-base location price test. Billing is NL (9%), the store base is BE (6%).
+	 *
+	 * @return array
+	 */
+	public function orders_create_non_base_location_cases(): array {
+		return array(
+			'guest'                  => array( array(), false, 0.09 ),
+			'customer saved in BE'   => array( array(), true, 0.09 ),
+			'local pickup uses base' => array(
+				array(
+					'shipping_lines' => array(
+						array(
+							'method_id'    => 'local_pickup',
+							'method_title' => 'Local pickup',
+							'total'        => '0',
+						),
+					),
+				),
+				false,
+				0.06,
+			),
+		);
+	}
+
+	/**
 	 * Order statuses accepted when creating through the V3 route.
 	 *
 	 * @return array<string, array{string|null, string}>
