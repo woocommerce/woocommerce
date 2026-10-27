@@ -415,7 +415,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * The default is matched against the attribute options with a strict comparison, so
 	 * it goes through the same parsing as the values: a quoted default loses its quotes
 	 * the way the quoted option does. A cell that would split into several values is
-	 * kept as it was, since the default is a single value.
+	 * kept whole, since the default is a single value.
 	 *
 	 * @since 11.4.0
 	 *
@@ -426,7 +426,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	public function parse_attribute_default_field( $value ) {
 		$values = $this->parse_comma_field( $value );
 
-		return 1 === count( $values ) ? $values[0] : wc_clean( $value );
+		return 1 === count( $values ) ? $values[0] : wc_clean( $this->unescape_data( $value ) );
 	}
 
 	/**

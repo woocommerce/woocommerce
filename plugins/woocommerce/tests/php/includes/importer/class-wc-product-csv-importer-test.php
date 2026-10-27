@@ -2006,6 +2006,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	public function provider_parse_comma_field_quoted_values(): array {
 		return array(
 			'quoted value with commas'    => array( 'Red, "Blue, navy", Green', array( 'Red', 'Blue, navy', 'Green' ) ),
+			'two quoted groups'           => array( '"Blue, navy", "Red, dark"', array( 'Blue, navy', 'Red, dark' ) ),
 			'whole cell quoted'           => array( '"New, no box. Multiple quantity, minor shelf wear."', array( 'New, no box. Multiple quantity, minor shelf wear.' ) ),
 			'backslash-escaped comma'     => array( 'Red\\, Green, Blue', array( 'Red, Green', 'Blue' ) ),
 			'escaped comma inside quotes' => array( '"Red\\, Green, Blue", Black', array( 'Red, Green, Blue', 'Black' ) ),
@@ -2019,6 +2020,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 			'lone quote segments'         => array( 'a, ", b, "', array( 'a', '"', 'b', '"' ) ),
 			'empty quoted value'          => array( '""', array( '' ) ),
 			'unterminated quote'          => array( 'Red, "Blue', array( 'Red', '"Blue' ) ),
+			'several unterminated quotes' => array( '"a, "b, c', array( '"a', '"b', 'c' ) ),
 			'plain list'                  => array( 'Red, Green', array( 'Red', 'Green' ) ),
 		);
 	}
@@ -2040,6 +2042,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	 *           ["\"Blue, navy\"", "Blue, navy"]
 	 *           ["Blue, navy", "Blue, navy"]
 	 *           ["Basic", "Basic"]
+	 *           ["'=Blue, navy", "=Blue, navy"]
 	 *           ["", ""]
 	 *
 	 * @param string $value    Raw CSV cell value.
