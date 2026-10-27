@@ -3,18 +3,18 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Screens\Settings;
 
-use Automattic\WooCommerce\Internal\Admin\Screens\Settings\PaymentSettingsScreen;
+use Automattic\WooCommerce\Internal\Admin\Screens\Settings\SettingsScreen;
 use WC_Unit_Test_Case;
 
 /**
- * Tests for the PaymentSettingsScreen class.
+ * Tests for the SettingsScreen class.
  */
-class PaymentSettingsScreenTest extends WC_Unit_Test_Case {
+class SettingsScreenTest extends WC_Unit_Test_Case {
 
 	/**
 	 * The System Under Test.
 	 *
-	 * @var PaymentSettingsScreen
+	 * @var SettingsScreen
 	 */
 	private $sut;
 
@@ -23,7 +23,7 @@ class PaymentSettingsScreenTest extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->sut = new PaymentSettingsScreen();
+		$this->sut = new SettingsScreen();
 		add_action( 'admin_notices', '__return_null' );
 		add_action( 'all_admin_notices', '__return_null' );
 	}
@@ -37,10 +37,10 @@ class PaymentSettingsScreenTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should remove admin notices on the payment settings screen.
+	 * @testdox Should remove admin notices on the settings screen.
 	 */
 	public function test_removes_admin_notices_on_the_screen(): void {
-		$_GET['page'] = 'wc-payment-settings-wp-admin';
+		$_GET['page'] = 'wc-settings-screen-wp-admin';
 
 		$this->sut->handle_in_admin_header();
 
