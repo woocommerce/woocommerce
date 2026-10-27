@@ -5,6 +5,7 @@
 		"settings-ui": false,
 		"store-alerts": true,
 		"rest-api-v4": false,
-		"order-detail-redesign": false
+		"order-detail-redesign": false,
+		"payment-settings-screen": true
 	}
 }

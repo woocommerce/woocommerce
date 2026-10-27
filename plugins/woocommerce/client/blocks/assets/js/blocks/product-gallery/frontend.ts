@@ -836,7 +836,7 @@ const productGallery = {
 						: getVariationImageSetByCurrentImage(
 								productImageSet,
 								currentImageId
-						  );
+							);
 
 					if ( variationImageSet?.image_ids?.length ) {
 						actions.setImageData(
@@ -1026,7 +1026,9 @@ const productGallery = {
 		// See https://github.com/woocommerce/woocommerce/issues/59810.
 		hideGhostOverflow: () => {
 			const element = getElement()?.ref as HTMLElement;
-			if ( ! element ) return;
+			if ( ! element ) {
+				return;
+			}
 
 			const { clientWidth, scrollWidth } = element;
 

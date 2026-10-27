@@ -579,6 +579,7 @@ LEFT JOIN $wpdb->posts posts ON posts.ID = orders.id",
 				// Both IN clauses need their own copy of the order-type arguments.
 				array_merge( array( OrderStatus::AUTO_DRAFT ), $order_post_types, $order_post_types )
 			);
+			$pending_count = (int) $wpdb->get_var( $sql );
 		} else {
 			if ( $orders_table_is_authoritative ) {
 				$missing_orders_count_sql = $wpdb->prepare(
@@ -608,26 +609,22 @@ $limit_clause",
 				$operator = '<';
 			}
 
-			$sql = $wpdb->prepare(
+			$changed_orders_count_sql = $wpdb->prepare(
 				"
-SELECT(
-	COALESCE(($missing_orders_count_sql), 0)
-	+
-	(SELECT COUNT(1) FROM (
-		SELECT orders.id FROM $orders_table orders
-		JOIN $wpdb->posts posts on posts.ID = orders.id
-		WHERE
-		  posts.post_type IN ($order_post_type_placeholder)
-		  AND orders.date_updated_gmt $operator posts.post_modified_gmt
-	) x)
-) count",
+SELECT $count_clause FROM $orders_table orders
+JOIN $wpdb->posts posts ON posts.ID = orders.id
+WHERE
+  posts.post_type IN ($order_post_type_placeholder)
+  AND orders.date_updated_gmt $operator posts.post_modified_gmt
+$limit_clause",
 				$order_post_types
 			);
+
+			// MySQL cannot reference the same temporary table twice in one query.
+			$pending_count  = (int) $wpdb->get_var( $missing_orders_count_sql );
+			$pending_count += (int) $wpdb->get_var( $changed_orders_count_sql );
 		}
 		// phpcs:enable
-
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		$pending_count = (int) $wpdb->get_var( $sql );
 
 		$deleted_from_table = $this->get_current_deletion_record_meta_value();
 
@@ -999,7 +996,7 @@ ORDER BY orders.id ASC
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
 	public function maybe_prevent_deletion_of_post( $delete, $post ) {
-		if ( self::PLACEHOLDER_ORDER_POST_TYPE !== $post->post_type && $this->custom_orders_table_is_authoritative() && $this->data_store->order_exists( $post->ID ) ) {
+		if ( $this->custom_orders_table_is_authoritative() && $this->data_store->order_exists( $post->ID ) ) {
 			$delete = false;
 		}
 

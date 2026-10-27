@@ -58,9 +58,9 @@ const getResetEmailTemplateAction = () => {
 			if ( item.source !== 'custom' ) {
 				return false;
 			}
-			if (
-				! ( Boolean( item.plugin ) || Boolean( item.has_theme_file ) )
-			) {
+			if ( ! (
+				Boolean( item.plugin ) || Boolean( item.has_theme_file )
+			) ) {
 				return false;
 			}
 			const { permissions } = item;

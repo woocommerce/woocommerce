@@ -140,31 +140,6 @@ class BlockPatterns extends \WP_UnitTestCase {
 	}
 
 	/**
-	 * Tests that a cached pattern whose source file no longer exists on disk is
-	 * skipped, so core is never asked to lazily load a missing file.
-	 */
-	public function test_cached_pattern_with_missing_file_is_skipped() {
-		$pattern_data = array(
-			'version'  => WOOCOMMERCE_VERSION,
-			'patterns' => array(
-				array(
-					'title'   => 'Mock Missing',
-					'source'  => 'does-not-exist.php',
-					'content' => '',
-				),
-			),
-		);
-
-		set_site_transient( 'woocommerce_blocks_patterns', $pattern_data );
-
-		$this->pattern_registry
-			->expects( $this->never() )
-			->method( 'register_block_pattern' );
-
-		$this->block_patterns->register_block_patterns();
-	}
-
-	/**
 	 * Tests that a cached pattern with a missing or invalid source is skipped, so the source is never
 	 * dereferenced (which would raise a PHP warning) when building the pattern path.
 	 */

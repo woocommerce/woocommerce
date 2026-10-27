@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Assets\Api;
 use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
 use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
+use Automattic\WooCommerce\Tests\Blocks\Helpers\BlockTypeRegistryTrait;
 
 /**
  * Tests for the MiniCartFooterBlock block type.
@@ -14,6 +15,7 @@ use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
  * @since 10.4.0
  */
 class MiniCartFooterBlock extends \WP_UnitTestCase {
+	use BlockTypeRegistryTrait;
 
 	/**
 	 * Instance of the block being tested.
@@ -28,15 +30,13 @@ class MiniCartFooterBlock extends \WP_UnitTestCase {
 	public function setUp(): void {
 		parent::setUp();
 
-		$registry = \WP_Block_Type_Registry::get_instance();
-		if ( $registry->is_registered( 'woocommerce/mini-cart-footer-block' ) ) {
-			$registry->unregister( 'woocommerce/mini-cart-footer-block' );
-		}
-
-		$this->block = new MiniCartFooterBlockType(
-			Package::container()->get( Api::class ),
-			Package::container()->get( AssetDataRegistry::class ),
-			new IntegrationRegistry()
+		$this->block = $this->replace_block_type(
+			'woocommerce/mini-cart-footer-block',
+			static fn () => new MiniCartFooterBlockType(
+				Package::container()->get( Api::class ),
+				Package::container()->get( AssetDataRegistry::class ),
+				new IntegrationRegistry()
+			)
 		);
 	}
 
@@ -44,10 +44,6 @@ class MiniCartFooterBlock extends \WP_UnitTestCase {
 	 * Tear down test.
 	 */
 	public function tearDown(): void {
-		$registry = \WP_Block_Type_Registry::get_instance();
-		if ( $registry->is_registered( 'woocommerce/mini-cart-footer-block' ) ) {
-			$registry->unregister( 'woocommerce/mini-cart-footer-block' );
-		}
 		unset( $this->block );
 		parent::tearDown();
 	}

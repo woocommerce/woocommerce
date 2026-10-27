@@ -13,8 +13,8 @@ declare module '@wordpress/keyboard-shortcuts' {
 		modifier?: string;
 		character: string;
 	};
-	export declare const store: import('@wordpress/data').StoreDescriptor<
-		import('@wordpress/data').ReduxStoreConfig<
+	export declare const store: import( '@wordpress/data' ).StoreDescriptor<
+		import( '@wordpress/data' ).ReduxStoreConfig<
 			unknown,
 			{
 				registerShortcut: ( shortcut: {

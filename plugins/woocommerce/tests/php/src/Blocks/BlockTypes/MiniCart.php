@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 use Automattic\WooCommerce\Blocks\BlockTypes\MiniCart as MiniCartBlock;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
+use Automattic\WooCommerce\Tests\Blocks\Helpers\BlockTypeRegistryTrait;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\MiniCartMock;
@@ -15,6 +16,7 @@ use Automattic\WooCommerce\Tests\Blocks\Mocks\MiniCartMock;
  * @since $VID:$
  */
 class MiniCart extends \WP_UnitTestCase {
+	use BlockTypeRegistryTrait;
 
 	/**
 	 * Mock instance of the MiniCart block.
@@ -22,13 +24,6 @@ class MiniCart extends \WP_UnitTestCase {
 	 * @var MiniCartMock
 	 */
 	protected $mock;
-
-	/**
-	 * The original block type registry entry for the MiniCart block.
-	 *
-	 * @var \WP_Block_Type
-	 */
-	protected $original_block_type;
 
 	/**
 	 * The upcoming template for the Mini-Cart block.
@@ -121,15 +116,7 @@ class MiniCart extends \WP_UnitTestCase {
 	public function setUp(): void {
 		parent::setUp();
 
-		$registry = \WP_Block_Type_Registry::get_instance();
-
-		$this->original_block_type = null;
-		if ( $registry->is_registered( 'woocommerce/mini-cart' ) ) {
-			$this->original_block_type = $registry->get_registered( 'woocommerce/mini-cart' );
-			$registry->unregister( 'woocommerce/mini-cart' );
-		}
-
-		$this->mock = new MiniCartMock();
+		$this->mock = $this->replace_block_type( 'woocommerce/mini-cart', static fn () => new MiniCartMock() );
 
 		$fixtures       = new FixtureData();
 		$this->products = array(
@@ -154,12 +141,6 @@ class MiniCart extends \WP_UnitTestCase {
 		parent::tearDown();
 		WC()->cart->empty_cart();
 		remove_filter( 'woocommerce_is_rest_api_request', '__return_false', 1 );
-
-		$registry = \WP_Block_Type_Registry::get_instance();
-		$registry->unregister( 'woocommerce/mini-cart' );
-		if ( $this->original_block_type ) {
-			$registry->register( $this->original_block_type );
-		}
 	}
 
 	/**
@@ -544,6 +525,35 @@ class MiniCart extends \WP_UnitTestCase {
 		$block_type = \WP_Block_Type_Registry::get_instance()->get_registered( 'woocommerce/mini-cart' );
 
 		$this->assertSame( array(), $block_type->view_script_module_ids, 'The view script module must only be enqueued explicitly from render().' );
+	}
+
+	/**
+	 * Cart/checkout constants defined by other tests cannot be reset in this process.
+	 *
+	 * @testdox Should keep the closed drawer out of the tab order and the accessibility tree.
+	 * @runInSeparateProcess
+	 * @preserveGlobalState disabled
+	 */
+	public function test_closed_drawer_is_inert_and_hidden(): void {
+		$processor = new \WP_HTML_Tag_Processor( $this->render_overlay() );
+
+		$this->assertTrue( $processor->next_tag( array( 'class_name' => 'wc-block-mini-cart__drawer' ) ), 'The drawer should be rendered.' );
+		$this->assertTrue( $processor->get_attribute( 'inert' ), 'The closed drawer should be inert so its contents are not focusable.' );
+		$this->assertSame( 'true', $processor->get_attribute( 'aria-hidden' ), 'The closed drawer should be hidden from assistive technologies.' );
+	}
+
+	/**
+	 * Render the Mini-Cart block and return the overlay markup it prints in the footer.
+	 *
+	 * @return string
+	 */
+	private function render_overlay(): string {
+		$block = parse_blocks( '<!-- wp:woocommerce/mini-cart /-->' );
+		render_block( $block[0] );
+
+		ob_start();
+		$this->mock->render_mini_cart_overlay();
+		return (string) ob_get_clean();
 	}
 
 	/**

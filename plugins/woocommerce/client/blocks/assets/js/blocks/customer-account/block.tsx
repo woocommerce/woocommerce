@@ -70,7 +70,7 @@ export const CustomerAccountBlock = ( {
 		displayStyle === DisplayStyle.ICON_ONLY
 			? {
 					'aria-label': __( 'My Account', 'woocommerce' ),
-			  }
+				}
 			: {};
 
 	const content = (

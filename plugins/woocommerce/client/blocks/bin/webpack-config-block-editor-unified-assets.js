@@ -254,9 +254,7 @@ const getUnifiedMainConfig = ( options = {} ) => {
 							presets: [ '@wordpress/babel-preset-default' ],
 							plugins: [
 								isProduction
-									? require.resolve(
-											'babel-plugin-transform-react-remove-prop-types'
-									  )
+									? require.resolve( 'babel-plugin-transform-react-remove-prop-types' )
 									: false,
 							].filter( Boolean ),
 							cacheDirectory: BABEL_CACHE_DIR,

@@ -1,6 +1,10 @@
 .wp-block-woocommerce-product-sale-badge {
 	display: flex;
 	flex-direction: column;
+
+	&[hidden] {
+		display: none;
+	}
 }
 
 .wc-block-components-product-sale-badge {

@@ -58,7 +58,8 @@
 	"dependencies": {
 		"@automattic/color-studio": "^4.0.0",
 		"@wordpress/base-styles": "catalog:wp-bundled",
-		"@wordpress/postcss-plugins-preset": "catalog:wp-min",
+		"@wordpress/postcss-plugins-preset": "catalog:tooling",
+		"@wordpress/theme": "catalog:wp-bundled",
 		"chokidar": "^3.6.0",
 		"css-loader": "6.11.x",
 		"esbuild": "^0.24.0",

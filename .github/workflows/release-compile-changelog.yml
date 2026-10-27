@@ -189,7 +189,8 @@ jobs:
           if [[ -z "${{ github.event.inputs.append_changelog }}" || "${{ github.event.inputs.append_changelog }}" == "auto" ]]; then
             # If a prerelease, append if there's already content in the changelog.
             if [[ "$VERSION" == *"-"* || "$VERSION" =~ \.0$ ]]; then
-              if sed -n '/== Changelog ==/,$p' release-branch/plugins/woocommerce/readme.txt | grep -Fq '**WooCommerce**'; then
+              # No pipe: under pipefail, grep -q exiting early can SIGPIPE the writer and fail this check.
+              if awk '/== Changelog ==/{f=1} f && index($0, "**WooCommerce**"){found=1; exit} END{exit !found}' release-branch/plugins/woocommerce/readme.txt; then
                 APPEND_CHANGELOG="--append-changelog"
               fi
             fi

@@ -23,15 +23,15 @@ import { getAdminSetting } from '../../../utils/admin-settings';
 import { MarketplaceContext } from '../../contexts/marketplace-context';
 
 enum InstallFlowStatus {
-	'notConnected',
-	'notInstalled',
-	'installing',
-	'installedCanActivate',
-	'installedCannotActivate',
-	'installFailed',
-	'activating',
-	'activated',
-	'activationFailed',
+	notConnected,
+	notInstalled,
+	installing,
+	installedCanActivate,
+	installedCannotActivate,
+	installFailed,
+	activating,
+	activated,
+	activationFailed,
 }
 
 function InstallNewProductModal( props: { products: Product[] } ) {

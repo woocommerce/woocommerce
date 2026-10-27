@@ -1,0 +1,57 @@
+{
+	"settings": {
+		"color": {
+			"palette": [
+				{
+					"color": "#FFFFFF",
+					"name": "Base",
+					"slug": "theme-1"
+				},
+				{
+					"color": "#111111",
+					"name": "Contrast",
+					"slug": "theme-2"
+				},
+				{
+					"color": "#243DC8",
+					"name": "Primary",
+					"slug": "theme-3"
+				},
+				{
+					"color": "#686868",
+					"name": "Contrast Alt",
+					"slug": "theme-4"
+				},
+				{
+					"color": "#F7F7F7",
+					"name": "Base Alt",
+					"slug": "theme-5"
+				},
+				{
+					"color": "rgba(17, 17, 17, 0.2)",
+					"name": "Border",
+					"slug": "theme-6"
+				},
+				{
+					"color": "#DC352F",
+					"name": "Accent",
+					"slug": "theme-7"
+				}
+			],
+			"duotone": [
+				{
+					"colors": [ "#111111", "#FFFFFF" ],
+					"name": "Duotone 1",
+					"slug": "duotone-1"
+				},
+				{
+					"colors": [ "#111111", "#F7F7F7" ],
+					"name": "Duotone 2",
+					"slug": "duotone-2"
+				}
+			]
+		}
+	},
+	"version": 3,
+	"title": "Cobalt"
+}
