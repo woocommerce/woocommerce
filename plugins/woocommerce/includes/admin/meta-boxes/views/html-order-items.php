@@ -21,7 +21,7 @@ defined( 'ABSPATH' ) || exit;
  */
 $render_refunds = (bool) apply_filters( 'woocommerce_admin_order_should_render_refunds', 0 < $order->get_total() - $order->get_total_refunded() || 0 < absint( $order->get_item_count() - $order->get_item_count_refunded() ), $order->get_id(), $order );
 
-$date_paid          = $order->get_date_paid(); // @phpstan-ignore variable.undefined
+$date_paid          = $order->get_date_paid(); // @phpstan-ignore variable.undefined ($order is set by the code that includes this view.)
 $render_paid_totals = false;
 
 if ( $date_paid ) {
