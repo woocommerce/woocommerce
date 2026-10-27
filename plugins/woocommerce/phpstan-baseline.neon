@@ -3079,12 +3079,6 @@ parameters:
 			path: includes/admin/class-wc-admin-upload-downloadable-product.php
 
 		-
-			message: '#^Negated boolean expression is always false\.$#'
-			identifier: booleanNot.alwaysFalse
-			count: 1
-			path: includes/admin/class-wc-admin-upload-downloadable-product.php
-
-		-
 			message: '#^Parameter \#2 \$callback of function add_action expects callable\(\)\: mixed, array\{\$this\(WC_Admin_Upload_Downloadable_Product\), ''media_upload…''\} given\.$#'
 			identifier: argument.type
 			count: 1
