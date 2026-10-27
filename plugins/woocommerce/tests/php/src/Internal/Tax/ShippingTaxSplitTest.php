@@ -160,9 +160,13 @@ class ShippingTaxSplitTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Each package is split by its own items, and the order created from the cart keeps that split.
+	 * @testdox Each package is split by its own items, and the order created from the cart keeps that split, also when the other package ships free.
+	 * @testWith [10]
+	 *           [0]
+	 *
+	 * @param int $first_cost Shipping cost of the zero rate package.
 	 */
-	public function test_split_per_package(): void {
+	public function test_split_per_package( int $first_cost ): void {
 		update_option( 'woocommerce_shipping_tax_class', ShippingTaxClass::SPLIT_BY_ITEM_VALUE );
 		$products = $this->create_products(
 			array(
@@ -182,6 +186,15 @@ class ShippingTaxSplitTest extends WC_Unit_Test_Case {
 				$rest['contents']  = array_diff_key( $packages[0]['contents'], $first['contents'] );
 
 				return array( $first, $rest );
+			}
+		);
+		add_filter(
+			'woocommerce_shipping_method_add_rate_args',
+			function ( $args ) use ( $first_id, $first_cost ) {
+				if ( wp_list_filter( $args['package']['contents'] ?? array(), array( 'product_id' => $first_id ) ) ) {
+					$args['cost'] = $first_cost;
+				}
+				return $args;
 			}
 		);
 
@@ -207,6 +220,41 @@ class ShippingTaxSplitTest extends WC_Unit_Test_Case {
 		// Half of the 10.00 includes 20% tax.
 		$this->assertEqualsWithDelta( 0.83, (float) WC()->cart->get_shipping_tax(), 0.001 );
 		$this->assertEqualsWithDelta( 0.83, (float) $order->get_shipping_tax(), 0.001 );
+	}
+
+	/**
+	 * @testdox Recalculating an order after its items change splits shipping by the items it has now.
+	 *
+	 * @testWith ["remove", 0.0]
+	 *           ["quantity", 0.71]
+	 *
+	 * @param string $edit     Change made to the standard rate item.
+	 * @param float  $expected Expected shipping tax after recalculating.
+	 */
+	public function test_recalculate_after_items_change( string $edit, float $expected ): void {
+		update_option( 'woocommerce_shipping_tax_class', ShippingTaxClass::SPLIT_BY_ITEM_VALUE );
+		$products = $this->create_products( array( array( '', ProductTaxStatus::TAXABLE, 10, false ), array( 'zero-rate', ProductTaxStatus::TAXABLE, 90, false ) ) );
+
+		$this->fill_cart( $products );
+		WC()->cart->calculate_totals();
+		$order = $this->create_order_from_cart();
+		$this->assertEqualsWithDelta( 0.2, (float) $order->get_shipping_tax(), 0.001 );
+
+		foreach ( $order->get_items() as $item_id => $item ) {
+			if ( $item->get_product_id() === $products[0]->get_id() ) {
+				if ( 'remove' === $edit ) {
+					$order->remove_item( $item_id );
+				} else {
+					$item->set_quantity( 5 );
+					$item->set_subtotal( '50' );
+					$item->set_total( '50' );
+				}
+			}
+		}
+		$order->calculate_totals();
+
+		// With 5 standard rate items, 50 of the 140 is standard rate: 20% of 3.57.
+		$this->assertEqualsWithDelta( $expected, (float) $order->get_shipping_tax(), 0.001 );
 	}
 
 	/**

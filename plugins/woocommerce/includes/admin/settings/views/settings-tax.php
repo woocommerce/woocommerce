@@ -75,7 +75,7 @@ $settings = array(
 		'desc_tip' => true,
 	),
 
-	array(
+	'shipping-tax-split-help'            => array(
 		'type'      => 'info',
 		'title'     => '',
 		'row_class' => 'shipping-tax-split-help',
@@ -158,7 +158,7 @@ $settings = array(
 );
 
 if ( ! wc_shipping_enabled() ) {
-	unset( $settings['shipping-tax-class'] );
+	unset( $settings['shipping-tax-class'], $settings['shipping-tax-split-help'] );
 }
 
 if ( '' === $base_location_no_rate_warning ) {
