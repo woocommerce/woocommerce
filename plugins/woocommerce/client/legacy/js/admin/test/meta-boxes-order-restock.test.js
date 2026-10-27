@@ -142,6 +142,21 @@ describe( 'Order refund restock checkbox', () => {
 		expect( description() ).toBe( '0.3 items will be restocked.' );
 	} );
 
+	test( 'does not round a small positive quantity down to zero', () => {
+		const roundingPrecision =
+			global.woocommerce_admin_meta_boxes.rounding_precision;
+		global.woocommerce_admin_meta_boxes.rounding_precision = 2;
+
+		renderOrderItems( { lines: [ 'yes' ] } );
+		openRefundPanel();
+		setRefundQty( 1, 0.001 );
+
+		global.woocommerce_admin_meta_boxes.rounding_precision =
+			roundingPrecision;
+		expect( checkbox().disabled ).toBe( false );
+		expect( description() ).toBe( '0.001 items will be restocked.' );
+	} );
+
 	test( 'keeps the merchant choice when unticked and quantities change', () => {
 		renderOrderItems( { lines: [ 'yes' ] } );
 		openRefundPanel();
