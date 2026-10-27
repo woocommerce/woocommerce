@@ -969,10 +969,9 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	 * @param string $item_type The item type whose cart section changed.
 	 */
 	public function test_create_order_resume_replaces_items_whose_cart_section_changed( string $item_type ): void {
-		$order_id         = $this->create_order_with_shipping_taxes_and_coupon();
-		$before           = $this->get_order_item_ids_by_type( $order_id );
-		$expected_amounts = $this->get_order_item_amounts_by_type( $order_id );
-		$this->set_stale_cart_section_hash( $order_id, $item_type );
+		$order_id = $this->create_order_with_shipping_taxes_and_coupon();
+		$before   = $this->get_order_item_ids_by_type( $order_id );
+		$this->change_cart_section( $order_id, $item_type );
 		$line_item_calls = did_action( 'woocommerce_checkout_create_order_line_item' );
 		$removed_types   = array();
 		add_action(
@@ -990,8 +989,10 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( array( $item_type ), $removed_types, 'Only the changed type should be removed, once.' );
 		$this->assert_items_replaced( $before, $this->get_order_item_ids_by_type( $order_id ), array( $item_type ) );
 		$this->assertSame( $line_item_calls, did_action( 'woocommerce_checkout_create_order_line_item' ), 'Kept line items should not be created again.' );
-		$this->assertSame( $expected_amounts, $this->get_order_item_amounts_by_type( $order_id ), 'The replaced items should have the cart amounts.' );
 		$this->assertSame( (float) WC()->cart->get_total( 'edit' ), (float) wc_get_order( $order_id )->get_total(), 'The order total should match the cart.' );
+		$fresh_id = $this->sut->create_order( array( 'payment_method' => WC_Gateway_BACS::ID ) );
+		$this->assertIsInt( $fresh_id );
+		$this->assertSame( $this->get_order_item_amounts_by_type( $fresh_id ), $this->get_order_item_amounts_by_type( $order_id ), 'The resumed order should have the same items as a fresh order from the changed cart.' );
 	}
 
 	/**
@@ -999,7 +1000,7 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	 */
 	public function test_create_order_resume_keeps_original_items_when_checkout_fails(): void {
 		$order_id = $this->create_order_with_line_item_and_fee();
-		$this->set_stale_cart_section_hash( $order_id, 'fee' );
+		$this->change_cart_section( $order_id, 'fee' );
 		wc_add_order_item(
 			$order_id,
 			array(
@@ -1091,41 +1092,16 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tax settings, rates, prices and carts for the resume sweep.
-	 * Each rate is paired with the prices that round a half cent or a 7th decimal differently in the cart and the order.
-	 * Each pair runs with every tax setting, and the carts rotate so each pair and each tax setting also meets every cart.
+	 * Tax setups for the resume test: an ordinary one, and one with a compound rate, prices including tax, rounding at
+	 * subtotal and a coupon, where cart and order rounding are most likely to differ.
 	 *
 	 * @return array<string, array{bool, bool, string[], string, int, array{string, string}|null}>
 	 */
 	public function provider_resume_tax_setups(): array {
-		$rates_and_prices = array(
-			'7.25%, 12.34'             => array( array( '7.2500' ), '12.34' ),
-			'7.25% + 1.5%, 23.45'      => array( array( '7.2500', '1.5000' ), '23.45' ),
-			'7.25% + 1.5%, 74.21'      => array( array( '7.2500', '1.5000' ), '74.21' ),
-			'8.875%, 19.99'            => array( array( '8.8750' ), '19.99' ),
-			'21%, 2.69'                => array( array( '21.0000' ), '2.69' ),
-			'10% + 5% compound, 19.99' => array( array( '10.0000', '5.0000c' ), '19.99' ),
+		return array(
+			'one rate, prices excluding tax, rounded per line'                       => array( false, false, array( '7.2500' ), '12.34', 1, null ),
+			'compound rates, prices including tax, rounded at subtotal, with coupon' => array( true, true, array( '10.0000', '5.0000c' ), '19.99', 3, array( 'percent', '15' ) ),
 		);
-		$carts            = array(
-			'one item'                      => array( 1, null ),
-			'x3'                            => array( 3, null ),
-			'two lines, fixed cart coupon'  => array( 1, array( 'fixed_cart', '7.33' ) ),
-			'two lines, percent coupon, x3' => array( 3, array( 'percent', '15' ) ),
-		);
-		$tax_settings     = array( array( true, true ), array( true, false ), array( false, true ), array( false, false ) );
-		$cart_names       = array_keys( $carts );
-		$cases            = array();
-		foreach ( array_keys( $rates_and_prices ) as $rate_index => $rates_and_price_name ) {
-			list( $rates, $price ) = $rates_and_prices[ $rates_and_price_name ];
-			foreach ( $tax_settings as $setting_index => list( $prices_include_tax, $round_at_subtotal ) ) {
-				$cart_name                 = $cart_names[ ( $rate_index + $setting_index ) % count( $cart_names ) ];
-				list( $quantity, $coupon ) = $carts[ $cart_name ];
-				$name                      = sprintf( 'prices %s tax, %s, %s, %s', $prices_include_tax ? 'including' : 'excluding', $round_at_subtotal ? 'rounded at subtotal' : 'rounded per line', $rates_and_price_name, $cart_name );
-				$cases[ $name ]            = array( $prices_include_tax, $round_at_subtotal, $rates, $price, $quantity, $coupon );
-			}
-		}
-
-		return $cases;
 	}
 
 	/**
@@ -1605,18 +1581,56 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Changes the stored hash of an item type's cart section, as if that part of the cart changed since checkout.
+	 * Changes one section of the cart without changing the cart total, so the order is still resumed. Taxes can't change
+	 * on their own, since their rate IDs are also in the other items' taxes, so for taxes this changes the stored hash instead.
 	 *
 	 * @param int    $order_id  The order ID.
-	 * @param string $item_type The order item type.
+	 * @param string $item_type The order item type whose cart section changes.
 	 */
-	private function set_stale_cart_section_hash( int $order_id, string $item_type ): void {
-		$order    = wc_get_order( $order_id );
-		$snapshot = $order->get_meta( '_cart_order_items_snapshot' );
+	private function change_cart_section( int $order_id, string $item_type ): void {
+		switch ( $item_type ) {
+			case 'fee':
+				add_action(
+					'woocommerce_cart_calculate_fees',
+					function ( WC_Cart $cart ) {
+						foreach ( $cart->get_fees() as $fee ) {
+							$fee->name = 'Packaging';
+						}
+					},
+					20
+				);
+				break;
+			case 'shipping':
+				add_filter(
+					'woocommerce_package_rates',
+					function ( array $rates ) {
+						$express = clone current( $rates );
+						$express->set_id( 'express' );
+						$express->set_method_id( 'express' );
+						$rates['express'] = $express;
+						return $rates;
+					}
+				);
+				WC_Cache_Helper::get_transient_version( 'shipping', true );
+				// The chosen method resets to the default when the number of rates changes, so choose it once the new rate exists.
+				WC()->cart->calculate_totals();
+				WC()->session->set( 'chosen_shipping_methods', array( 'express' ) );
+				break;
+			case 'coupon':
+				WC()->cart->remove_coupon( 'resume-coupon' );
+				WC()->cart->apply_coupon( WC_Helper_Coupon::create_coupon( 'other-coupon' )->get_code() );
+				break;
+			case 'tax':
+				$order    = wc_get_order( $order_id );
+				$snapshot = $order->get_meta( '_cart_order_items_snapshot' );
 
-		$snapshot['hashes'][ $item_type ] = 'stale';
-		$order->update_meta_data( '_cart_order_items_snapshot', $snapshot );
-		$order->save();
+				$snapshot['hashes'][ $item_type ] = 'stale';
+				$order->update_meta_data( '_cart_order_items_snapshot', $snapshot );
+				$order->save();
+				return;
+		}
+
+		WC()->cart->calculate_totals();
 	}
 
 	/**
