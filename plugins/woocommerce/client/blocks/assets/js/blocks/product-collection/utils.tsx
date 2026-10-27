@@ -513,13 +513,13 @@ export function sanitizeDisplayLayout(
 		displayLayout?.type !== LayoutOptions.STACK &&
 		displayLayout?.type !== LayoutOptions.CAROUSEL
 	) {
-
 		const defaults = getDefaultDisplayLayout();
-	
+
 		return {
 			type: displayLayout?.type ?? defaults.type,
 			columns: displayLayout?.columns ?? defaults.columns,
-			shrinkColumns: displayLayout?.shrinkColumns ?? defaults.shrinkColumns,
+			shrinkColumns:
+				displayLayout?.shrinkColumns ?? defaults.shrinkColumns,
 		};
 	}
 
