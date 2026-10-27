@@ -54,7 +54,8 @@ reviews:
           width, and margin additions are fine because they don't change the component's appearance. If an override
           only preserves old visuals, or stacks on another override, ask whether it is needed or whether the shared
           component should change.
-        - Don't target internal `.component-*` or other `@wordpress/components` class names. They aren't stable.
+        - Don't target internal `.components-*` (e.g. `.components-button`,
+          `.components-popover__content`) or other `@wordpress/components` class names. They aren't stable.
         - If a WPDS component seems to misbehave, suspect a CSS reset or specificity conflict before accepting a local
           workaround.
         - If a workaround is needed because a WPDS component lacks a capability, it is acceptable as a temporary
