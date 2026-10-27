@@ -1,0 +1,5 @@
+Significance: patch
+Type: dev
+Comment: Separate Open Graph page metadata from HTML output; no change to shared product links.
+
+
