@@ -660,8 +660,8 @@ class WC_Checkout {
 
 	/**
 	 * Builds the snapshot create_order() stores: the cart section hashes, and a fingerprint of each item the cart created,
-	 * read back from the saved order. An item an extension changed in woocommerce_checkout_create_order gets an empty
-	 * fingerprint, so its type is rebuilt on resume and the change isn't applied twice.
+	 * read back from the saved order. An item that wasn't saved, or that an extension changed in
+	 * woocommerce_checkout_create_order, gets an empty fingerprint, so its type is rebuilt on resume.
 	 *
 	 * @param WC_Abstract_Order     $persisted_order  The order, read again after it was saved.
 	 * @param array[]               $cart_order_items Each item set_data_from_cart() added or kept, with its fingerprint before the hook.
@@ -673,10 +673,9 @@ class WC_Checkout {
 		$items           = array();
 		foreach ( $cart_order_items as list( $item, $fingerprint ) ) {
 			$persisted_item = $persisted_items[ $item->get_id() ] ?? null;
-			if ( $persisted_item ) {
-				$changed_at_checkout                           = $fingerprint !== $this->get_order_item_fingerprint( $item );
-				$items[ $item->get_type() ][ $item->get_id() ] = $changed_at_checkout ? '' : $this->get_order_item_fingerprint( $persisted_item );
-			}
+			$is_unchanged   = $persisted_item && $fingerprint === $this->get_order_item_fingerprint( $item );
+
+			$items[ $item->get_type() ][ $item->get_id() ] = $is_unchanged ? $this->get_order_item_fingerprint( $persisted_item ) : '';
 		}
 
 		return array(

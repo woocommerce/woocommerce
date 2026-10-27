@@ -1267,6 +1267,33 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Resuming a pending order adds back a cart item that failed to save on the previous attempt.
+	 */
+	public function test_create_order_resume_rebuilds_type_with_item_that_failed_to_save(): void {
+		add_action(
+			'woocommerce_cart_calculate_fees',
+			function ( WC_Cart $cart ) {
+				$cart->add_fee( 'Gift wrap', 3 );
+			}
+		);
+		$fail_gift_wrap = function ( $item ) {
+			if ( $item instanceof WC_Order_Item_Fee && 'Gift wrap' === $item->get_name() ) {
+				throw new Exception( 'Simulated item save failure' );
+			}
+		};
+		add_action( 'woocommerce_before_order_item_object_save', $fail_gift_wrap );
+		$order_id = $this->create_order_with_line_item_and_fee();
+		remove_action( 'woocommerce_before_order_item_object_save', $fail_gift_wrap );
+		$this->assertCount( 1, wc_get_order( $order_id )->get_fees(), 'The gift wrap fee should fail to save on the first attempt.' );
+
+		$this->resume_order( $order_id );
+		$order = wc_get_order( $order_id );
+
+		$this->assertCount( 2, $order->get_fees(), 'Both cart fees should be on the resumed order.' );
+		$this->assertSame( (float) WC()->cart->get_total( 'edit' ), (float) $order->get_total(), 'The order total should match the cart.' );
+	}
+
+	/**
 	 * @testdox Resuming a pending order keeps items that a gateway added meta to after checkout.
 	 */
 	public function test_create_order_resume_keeps_items_with_meta_added_after_checkout(): void {
