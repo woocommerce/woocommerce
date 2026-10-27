@@ -86,6 +86,7 @@ const GroupedSelectControl = < ItemType extends ListItem >( {
 		getMenuProps,
 		getLabelProps,
 		highlightedIndex,
+		inputValue,
 		getItemProps,
 		setHighlightedIndex,
 		selectItem,
@@ -95,36 +96,18 @@ const GroupedSelectControl = < ItemType extends ListItem >( {
 		labelId,
 		menuId,
 		getItemId,
+		// Scroll the modal as well as the list when a result is below its visible edge.
+		scrollIntoView: ( node ) =>
+			node?.scrollIntoView( { block: 'nearest' } ),
 		itemToString: ( item ) => item?.name || '',
-		selectedItem: value || ( {} as ItemType ),
+		selectedItem: value ?? null,
 		onSelectedItemChange,
 		onIsOpenChange: ( { isOpen: willOpen, type } ) => {
 			restoreFocusRef.current =
 				! willOpen && type === useSelect.stateChangeTypes.ItemClick;
 		},
 		stateReducer: ( state, { changes, type } ) => {
-			if (
-				searchable &&
-				type === useSelect.stateChangeTypes.ToggleButtonKeyDownArrowDown
-			) {
-				return state;
-			}
-
 			if ( changes.selectedItem && changes.selectedItem.items ) {
-				const key = changes.selectedItem.key;
-				if ( openedGroups.has( key ) ) {
-					openedGroups.delete( key );
-					changes.selectedItem.items.forEach( ( itemKey ) =>
-						visibleItems.delete( itemKey )
-					);
-				} else {
-					openedGroups.add( key );
-					changes.selectedItem.items.forEach( ( itemKey ) =>
-						visibleItems.add( itemKey )
-					);
-				}
-				setOpenedGroups( openedGroups );
-				setVisibleItems( visibleItems );
 				return state;
 			}
 
@@ -140,6 +123,20 @@ const GroupedSelectControl = < ItemType extends ListItem >( {
 			return changes;
 		},
 	} );
+
+	const toggleGroup = ( item: ItemType ) => {
+		const nextOpenedGroups = new Set( openedGroups );
+		const nextVisibleItems = new Set( visibleItems );
+		if ( nextOpenedGroups.has( item.key ) ) {
+			nextOpenedGroups.delete( item.key );
+			item.items?.forEach( ( key ) => nextVisibleItems.delete( key ) );
+		} else {
+			nextOpenedGroups.add( item.key );
+			item.items?.forEach( ( key ) => nextVisibleItems.add( key ) );
+		}
+		setOpenedGroups( nextOpenedGroups );
+		setVisibleItems( nextVisibleItems );
+	};
 
 	const handleSearch = ( {
 		target,
@@ -172,6 +169,7 @@ const GroupedSelectControl = < ItemType extends ListItem >( {
 		}
 
 		setSearchText( target.value );
+		setHighlightedIndex( -1 );
 	};
 
 	// Downshift keeps focus on the toggle button, so a searchable menu moves it
@@ -212,8 +210,10 @@ const GroupedSelectControl = < ItemType extends ListItem >( {
 				if ( ! item ) {
 					break;
 				}
-				selectItem( item );
-				if ( ! item.items ) {
+				if ( item.items ) {
+					toggleGroup( item );
+				} else {
+					selectItem( item );
 					toggleButtonRef.current?.focus();
 				}
 				break;
@@ -266,6 +266,18 @@ const GroupedSelectControl = < ItemType extends ListItem >( {
 				{ ...getToggleButtonProps( {
 					ref: toggleButtonRef,
 					type: 'button',
+					onKeyDown: ( event: React.KeyboardEvent ) => {
+						const item = selectableItems[ highlightedIndex ];
+						if (
+							isOpen &&
+							item?.items &&
+							( event.key === 'Enter' ||
+								( event.key === ' ' && ! inputValue ) )
+						) {
+							event.preventDefault();
+							toggleGroup( item );
+						}
+					},
 					onBlur: ( event: React.FocusEvent ) => {
 						if ( event.relatedTarget === searchRef.current ) {
 							(
@@ -350,6 +362,11 @@ const GroupedSelectControl = < ItemType extends ListItem >( {
 										{ ...getItemProps( {
 											item,
 											index,
+											onClick: () => {
+												if ( isGroup ) {
+													toggleGroup( item );
+												}
+											},
 											'aria-describedby':
 												isSearching && item.group
 													? getGroupHeadingId(

@@ -12,6 +12,16 @@ import GroupedSelectControl, { GroupedSelectControlProps } from '..';
 
 describe( 'GroupedSelectControl', () => {
 	const onChange = jest.fn();
+	const scrollIntoView = jest.fn();
+	const originalScrollIntoView = window.HTMLElement.prototype.scrollIntoView;
+
+	beforeAll( () => {
+		window.HTMLElement.prototype.scrollIntoView = scrollIntoView;
+	} );
+
+	afterAll( () => {
+		window.HTMLElement.prototype.scrollIntoView = originalScrollIntoView;
+	} );
 
 	const options = [
 		{ key: 'g1', name: 'Group 1', items: [ 'o1', 'o2' ] },
@@ -59,6 +69,54 @@ describe( 'GroupedSelectControl', () => {
 		);
 
 		expect( screen.getByText( 'Option 3' ) ).toBeInTheDocument();
+		expect( onChange ).not.toHaveBeenCalled();
+	} );
+
+	it( 'expands a group on the first click when React replays renders', async () => {
+		render(
+			<React.StrictMode>
+				<GroupedSelectControl
+					label="Group select"
+					options={ options }
+					onChange={ onChange }
+					searchable
+				/>
+			</React.StrictMode>
+		);
+		await openMenu();
+		await userEvent.click(
+			screen.getByRole( 'option', { name: 'Group 2' } )
+		);
+
+		expect(
+			screen.getByRole( 'option', { name: 'Option 3' } )
+		).toBeInTheDocument();
+		expect( onChange ).not.toHaveBeenCalled();
+	} );
+
+	it( 'keeps the selected industry when toggling a group from a non-searchable field', async () => {
+		renderControl( { value: options[ 1 ] } );
+		await openMenu();
+		await userEvent.keyboard( '{ArrowDown}{ArrowDown}{Enter}' );
+
+		expect(
+			screen.getByRole( 'option', { name: 'Option 3' } )
+		).toBeInTheDocument();
+		expect(
+			screen.getByRole( 'combobox', { name: 'Group select' } )
+		).toHaveTextContent( 'Option 1' );
+		expect( onChange ).not.toHaveBeenCalled();
+	} );
+
+	it( 'does not toggle a group when Space is part of a typeahead search', async () => {
+		renderControl();
+		await openMenu();
+		await userEvent.keyboard( 'Group ' );
+
+		expect(
+			screen.getByRole( 'option', { name: 'Option 1' } )
+		).toBeInTheDocument();
+		expect( onChange ).not.toHaveBeenCalled();
 	} );
 
 	it( 'moves focus to the search field when a searchable menu opens', async () => {
@@ -117,6 +175,47 @@ describe( 'GroupedSelectControl', () => {
 		);
 	} );
 
+	it( 'starts navigation at the first result after changing the search', async () => {
+		renderControl( { searchable: true } );
+		await openMenu();
+		await userEvent.hover(
+			screen.getByRole( 'option', { name: 'Group 3' } )
+		);
+		await userEvent.type( getSearch(), 'Option' );
+		await userEvent.keyboard( '{ArrowDown}{Enter}' );
+
+		expect( onChange ).toHaveBeenCalledWith(
+			expect.objectContaining( { selectedItem: options[ 1 ] } )
+		);
+	} );
+
+	it( 'opens a searchable menu with ArrowDown from the field', async () => {
+		renderControl( { searchable: true } );
+		await userEvent.tab();
+		await userEvent.keyboard( '{ArrowDown}' );
+
+		expect( getSearch() ).toHaveFocus();
+		expect(
+			screen.getByRole( 'option', { name: 'Option 1' } )
+		).toBeInTheDocument();
+	} );
+
+	it( 'scrolls the highlighted result into view within its scrollable ancestors', async () => {
+		renderControl( { searchable: true } );
+		await openMenu();
+		await userEvent.type( getSearch(), 'Option' );
+		await userEvent.keyboard( '{ArrowDown}{ArrowDown}{ArrowDown}' );
+
+		expect( scrollIntoView ).toHaveBeenLastCalledWith( {
+			block: 'nearest',
+		} );
+		expect(
+			scrollIntoView.mock.instances[
+				scrollIntoView.mock.instances.length - 1
+			]
+		).toBe( screen.getByRole( 'option', { name: 'Option 3' } ) );
+	} );
+
 	it( 'returns focus to the field after picking an option', async () => {
 		renderControl( { searchable: true } );
 		await openMenu();
@@ -154,6 +253,7 @@ describe( 'GroupedSelectControl', () => {
 
 		expect( screen.getByText( 'Option 3' ) ).toBeInTheDocument();
 		expect( getSearch() ).toHaveFocus();
+		expect( onChange ).not.toHaveBeenCalled();
 	} );
 
 	it( 'ignores clicks on group headings while searching', async () => {
