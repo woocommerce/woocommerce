@@ -1663,6 +1663,215 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Line items that point to a missing product.
+	 *
+	 * @return array<string, array{callable(): array<string, int|string>}>
+	 */
+	public function provide_line_items_with_missing_product(): array {
+		return array(
+			'deleted product'                     => array(
+				static function (): array {
+					$product    = WC_Helper_Product::create_simple_product();
+					$product_id = $product->get_id();
+					$product->delete( true );
+
+					return array( 'product_id' => $product_id );
+				},
+			),
+			'deleted variation'                   => array(
+				static function (): array {
+					$variable  = WC_Helper_Product::create_variation_product();
+					$variation = wc_get_product( $variable->get_children()[0] );
+					$line_item = array(
+						'product_id'   => $variable->get_id(),
+						'variation_id' => $variation->get_id(),
+					);
+					$variation->delete( true );
+
+					return $line_item;
+				},
+			),
+			'unknown SKU'                         => array(
+				static function (): array {
+					return array( 'sku' => 'missing-sku' );
+				},
+			),
+			'deleted product with name and total' => array(
+				static function (): array {
+					$product    = WC_Helper_Product::create_simple_product();
+					$product_id = $product->get_id();
+					$product->delete( true );
+
+					return array(
+						'product_id' => $product_id,
+						'name'       => 'Gone',
+						'total'      => '25.00',
+					);
+				},
+			),
+			'unknown SKU with name and total'     => array(
+				static function (): array {
+					return array(
+						'sku'   => 'missing-sku',
+						'name'  => 'Gone',
+						'total' => '25.00',
+					);
+				},
+			),
+		);
+	}
+
+	/**
+	 * @testdox POST /orders rejects a line item for a missing product ($_dataName), and creates no order.
+	 * @dataProvider provide_line_items_with_missing_product
+	 *
+	 * @param callable $build_line_item Builds the line item payload.
+	 */
+	public function test_create_order_rejects_line_item_with_missing_product( callable $build_line_item ): void {
+		$line_item   = $build_line_item();
+		$query_args  = array(
+			'return' => 'ids',
+			'limit'  => -1,
+		);
+		$order_count = count( wc_get_orders( $query_args ) );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders' );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body( wp_json_encode( array( 'line_items' => array( $line_item ) ) ) );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 400, $response->get_status(), 'The request should be rejected.' );
+		$this->assertSame( 'woocommerce_rest_invalid_product_id', $response->get_data()['code'], 'The error should name the invalid product.' );
+		$this->assertCount( $order_count, wc_get_orders( $query_args ), 'No order should be created.' );
+	}
+
+	/**
+	 * @testdox POST /orders adds a custom line item that has a name and total but no product.
+	 */
+	public function test_create_order_with_custom_line_item(): void {
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders' );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'line_items' => array(
+						array(
+							'name'     => 'Gift wrap',
+							'quantity' => 2,
+							'total'    => '5.00',
+						),
+					),
+				)
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 201, $response->get_status(), 'The order should be created.' );
+		$item = current( wc_get_order( $response->get_data()['id'] )->get_items() );
+		$this->assertSame( 0, $item->get_product_id(), 'The item should have no product.' );
+		$this->assertSame( 'Gift wrap', $item->get_name(), 'The item should keep its name.' );
+		$this->assertSame( 2, $item->get_quantity(), 'The item should keep its quantity.' );
+		$this->assertSame( 5.0, (float) $item->get_total(), 'The item should keep its total.' );
+	}
+
+	/**
+	 * @testdox POST /orders rejects a line item with no product and no name or total.
+	 * @testWith [{"name": "Gift wrap"}]
+	 *           [{"total": "5.00"}]
+	 *           [{"name": " ", "total": "5.00"}]
+	 *           [{"product_id": 0, "name": "Gift wrap", "total": ""}]
+	 *
+	 * @param array<string, int|string> $line_item Line item payload.
+	 */
+	public function test_create_order_rejects_incomplete_custom_line_item( array $line_item ): void {
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders' );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body( wp_json_encode( array( 'line_items' => array( $line_item ) ) ) );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 400, $response->get_status(), 'The request should be rejected.' );
+		$this->assertSame( 'woocommerce_rest_required_product_reference', $response->get_data()['code'], 'The error should ask for a product.' );
+	}
+
+	/**
+	 * @testdox PUT /orders rejects a new line item for a deleted product.
+	 */
+	public function test_update_order_rejects_new_line_item_with_deleted_product(): void {
+		list( $order ) = $this->create_order_with_line_item();
+		$deleted       = WC_Helper_Product::create_simple_product();
+		$deleted_id    = $deleted->get_id();
+		$deleted->delete( true );
+
+		$response = $this->dispatch_line_item_update( $order->get_id(), array( 'product_id' => $deleted_id ) );
+
+		$this->assertSame( 400, $response->get_status(), 'The request should be rejected.' );
+		$this->assertSame( 'woocommerce_rest_invalid_product_id', $response->get_data()['code'], 'The error should name the invalid product.' );
+		$this->assertCount( 1, wc_get_order( $order->get_id() )->get_items(), 'The order should keep only its original line item.' );
+	}
+
+	/**
+	 * @testdox PUT /orders with a deleted product leaves earlier new items and their stock unchanged.
+	 */
+	public function test_update_order_with_deleted_product_saves_no_earlier_items(): void {
+		list( $order ) = $this->create_order_with_line_item();
+		$order->set_status( OrderStatus::PROCESSING );
+		$order->save();
+		$stocked = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'manage_stock'   => true,
+				'stock_quantity' => 10,
+			)
+		);
+
+		$deleted    = WC_Helper_Product::create_simple_product();
+		$deleted_id = $deleted->get_id();
+		$deleted->delete( true );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'line_items' => array(
+						array(
+							'product_id' => $stocked->get_id(),
+							'quantity'   => 2,
+						),
+						array( 'product_id' => $deleted_id ),
+					),
+				)
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 400, $response->get_status(), 'The request should be rejected.' );
+		$this->assertCount( 1, wc_get_order( $order->get_id() )->get_items(), 'The order should keep only its original line item.' );
+		$this->assertSame( 10, wc_get_product( $stocked->get_id() )->get_stock_quantity(), 'The stock should not change.' );
+	}
+
+	/**
+	 * @testdox PUT /orders still updates an existing line item whose product was deleted.
+	 */
+	public function test_update_existing_line_item_with_deleted_product_succeeds(): void {
+		list( $order, $item_id ) = $this->create_order_with_line_item();
+		$product_id              = ( new WC_Order_Item_Product( $item_id ) )->get_product_id();
+		wc_get_product( $product_id )->delete( true );
+
+		$response = $this->dispatch_line_item_update(
+			$order->get_id(),
+			array(
+				'id'         => $item_id,
+				'product_id' => $product_id,
+				'quantity'   => 2,
+			)
+		);
+
+		$this->assertSame( 200, $response->get_status(), 'The update should succeed.' );
+		$this->assertSame( 2, ( new WC_Order_Item_Product( $item_id ) )->get_quantity(), 'The quantity should be updated.' );
+	}
+
+	/**
 	 * Builds a variable product with a single variation carrying a real "color" attribute.
 	 *
 	 * @return array Two-element array: the WC_Product_Variable parent and its WC_Product_Variation.

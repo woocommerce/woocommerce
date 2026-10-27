@@ -453,7 +453,7 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 	/**
 	 * Prepare a single order for create.
 	 *
-	 * @throws WC_REST_Exception If the customer ID is invalid.
+	 * @throws WC_REST_Exception If the customer ID, or a new line item's product, is invalid.
 	 *
 	 * @param  WP_REST_Request $request Request object.
 	 * @return WP_Error|WC_Order $data Object.
@@ -463,6 +463,8 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 		$order     = new WC_Order( $id );
 		$schema    = $this->get_item_schema();
 		$data_keys = array_keys( array_filter( $schema['properties'], array( $this, 'filter_writable_props' ) ) );
+
+		$this->check_new_line_item_products( $request['line_items'] );
 
 		if ( ! is_null( $request['customer_id'] ) && 0 !== $request['customer_id'] ) {
 			if ( is_wp_error( Users::get_user_in_current_site( $request['customer_id'] ) ) ) {
@@ -628,12 +630,55 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 			$product_id = (int) $posted['product_id'];
 		} elseif ( ! empty( $posted['variation_id'] ) ) {
 			$product_id = (int) $posted['variation_id'];
-		} elseif ( 'update' === $action ) {
+		} elseif ( 'update' === $action || $this->is_custom_line_item( $posted ) ) {
 			$product_id = 0;
 		} else {
-			throw new WC_REST_Exception( 'woocommerce_rest_required_product_reference', __( 'Product ID or SKU is required.', 'woocommerce' ), 400 );
+			throw new WC_REST_Exception( 'woocommerce_rest_required_product_reference', esc_html__( 'Product ID or SKU is required. For a custom item, send a name and total instead.', 'woocommerce' ), 400 );
 		}
 		return $product_id;
+	}
+
+	/**
+	 * Checks whether a line item is a custom item: one with no product, but a name and a total.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param array $posted Line item data.
+	 * @return bool
+	 */
+	protected function is_custom_line_item( $posted ) {
+		$has_product_reference = ! empty( $posted['product_id'] ) || ! empty( $posted['variation_id'] ) || ! empty( $posted['sku'] );
+		$has_name              = isset( $posted['name'] ) && is_string( $posted['name'] ) && '' !== trim( $posted['name'] );
+		$has_total             = isset( $posted['total'] ) && is_numeric( wc_format_decimal( $posted['total'] ) );
+
+		return ! $has_product_reference && $has_name && $has_total;
+	}
+
+	/**
+	 * Checks that every new line item, other than custom items, points to an existing product, before any item is saved.
+	 * Otherwise a bad item fails the request after earlier items were already saved.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @throws WC_REST_Exception When a new line item has no product reference, or its product doesn't exist.
+	 * @param mixed $line_items Line items from the request.
+	 * @return void
+	 */
+	protected function check_new_line_item_products( $line_items ) {
+		if ( ! is_array( $line_items ) ) {
+			return;
+		}
+
+		foreach ( $line_items as $posted ) {
+			if ( ! is_array( $posted ) || ! empty( $posted['id'] ) || $this->item_is_null( $posted ) || ( isset( $posted['quantity'] ) && 0 === $posted['quantity'] ) || $this->is_custom_line_item( $posted ) ) {
+				continue;
+			}
+
+			$product = wc_get_product( $this->get_product_id( $posted ) );
+			if ( ! $product || ! $product->exists() ) {
+				throw new WC_REST_Exception( 'woocommerce_rest_invalid_product_id', esc_html__( 'Invalid product ID.', 'woocommerce' ), 400 );
+			}
+		}
 	}
 
 	/**
@@ -660,7 +705,6 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 		}
 	}
 
-	// phpcs:disable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber -- This method also throws WC_REST_Exception indirectly through get_product_id().
 	/**
 	 * Create or update a line item.
 	 *
@@ -691,6 +735,11 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 			&& $current_variation_id
 			&& array_key_exists( 'variation_id', $posted )
 			&& 0 === (int) $posted['variation_id'];
+
+		// New items must resolve unless they are custom items. Existing items need not, so orders whose products were deleted later stay editable.
+		if ( 'create' === $action && ( ! $product || ! $product->exists() ) && ! $this->is_custom_line_item( $posted ) ) {
+			throw new WC_REST_Exception( 'woocommerce_rest_invalid_product_id', esc_html__( 'Invalid product ID.', 'woocommerce' ), 400 );
+		}
 
 		if ( $clear_variation_id && $product instanceof WC_Product_Variation ) {
 			$product = wc_get_product( $current_product_id );
@@ -736,8 +785,6 @@ class WC_REST_Orders_V1_Controller extends WC_REST_Posts_Controller {
 
 		return $item;
 	}
-
-	// phpcs:enable Squiz.Commenting.FunctionCommentThrowTag.WrongNumber
 
 	/**
 	 * Create or update an order shipping method.

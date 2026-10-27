@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Return an error when REST API orders add line items for deleted or unknown products, instead of adding items with no product.

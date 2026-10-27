@@ -702,8 +702,7 @@ class OrderSchema extends AbstractSchema {
 			foreach ( $line_items as $line_item ) {
 				$item_data = $this->order_item_schema->get_item_response( $line_item, $request );
 
-				$item_data['can_be_refunded'] = 0 !== $line_item->get_product_id()
-					&& ( $line_item->get_quantity() + ( $refund_data['qtys'][ $line_item->get_id() ] ?? 0 ) ) > 0;
+				$item_data['can_be_refunded'] = ( $line_item->get_quantity() + ( $refund_data['qtys'][ $line_item->get_id() ] ?? 0 ) ) > 0;
 
 				$data['line_items'][] = $item_data;
 			}
