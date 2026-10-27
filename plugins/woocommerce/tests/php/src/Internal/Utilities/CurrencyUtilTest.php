@@ -19,6 +19,7 @@ class CurrencyUtilTest extends WC_Unit_Test_Case {
 	 *           ["JPY", 0, "KWD", 3]
 	 *           ["JPY", 0, "JPY", 0]
 	 *           ["USD", 0, "USD", 0]
+	 *           ["USD", 0, "JPY", 0]
 	 *           ["USD", 4, "JPY", 4]
 	 *           ["JPY", 0, "UNKNOWN", 0]
 	 *           ["JPY", 0, null, 0]
@@ -28,5 +29,26 @@ class CurrencyUtilTest extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_currency', $store );
 		update_option( 'woocommerce_price_num_decimals', $decimals );
 		$this->assertSame( $expected, CurrencyUtil::get_price_decimals( $currency ) );
+	}
+
+	/** @testdox Currency metadata loads independently of the current working directory. */
+	public function test_metadata_loads_outside_plugin_directory(): void {
+		update_option( 'woocommerce_currency', 'JPY' );
+		update_option( 'woocommerce_price_num_decimals', 0 );
+		$cache = new \ReflectionProperty( CurrencyUtil::class, 'currency_decimals' );
+		$cache->setAccessible( true );
+		$previous_cache     = $cache->getValue();
+		$previous_directory = getcwd();
+		if ( false === $previous_directory ) {
+			throw new \RuntimeException( 'Cannot determine the directory to restore after the test.' );
+		}
+		try {
+			$cache->setValue( null, null );
+			chdir( ABSPATH );
+			$this->assertSame( 2, CurrencyUtil::get_price_decimals( 'USD' ) );
+		} finally {
+			chdir( $previous_directory );
+			$cache->setValue( null, $previous_cache );
+		}
 	}
 }
