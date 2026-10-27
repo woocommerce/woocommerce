@@ -158,6 +158,61 @@ class WC_Meta_Box_Product_Data_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The classic editor saves MPNs, preserving omitted values and allowing explicit clearing.
+	 * @testWith [null, "ORIGINAL"]
+	 *           ["0", "0"]
+	 *           ["PART / Blue", "PART / Blue"]
+	 *           ["", ""]
+	 *
+	 * @param string|null $submitted_mpn Submitted MPN, or null to omit the input.
+	 * @param string      $expected_mpn Expected saved value.
+	 */
+	public function test_save_mpn( ?string $submitted_mpn, string $expected_mpn ): void {
+		$sut = new WC_Product_Simple();
+		$sut->set_mpn( 'ORIGINAL' );
+		$sut->save();
+
+		$_POST = array();
+		if ( null !== $submitted_mpn ) {
+			$_POST['_mpn'] = wp_slash( $submitted_mpn ); // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Supply Core's form input.
+		}
+
+		WC_Meta_Box_Product_Data::save( $sut->get_id(), get_post( $sut->get_id() ) );
+
+		$this->assertSame( $expected_mpn, wc_get_product( $sut->get_id() )->get_mpn( 'edit' ) );
+	}
+
+	/**
+	 * @testdox Variation saves preserve omitted MPNs and allow explicit clearing.
+	 * @testWith [null, "ORIGINAL"]
+	 *           ["0", "0"]
+	 *           ["PART / Blue", "PART / Blue"]
+	 *           ["", ""]
+	 *
+	 * @param string|null $submitted_mpn Submitted MPN, or null to omit the input.
+	 * @param string      $expected_mpn Expected saved value.
+	 */
+	public function test_save_variation_mpn( ?string $submitted_mpn, string $expected_mpn ): void {
+		$parent = new WC_Product_Variable();
+		$parent->save();
+		$sut = new WC_Product_Variation();
+		$sut->set_parent_id( $parent->get_id() );
+		$sut->set_mpn( 'ORIGINAL' );
+		$sut->save();
+
+		$_POST = array( // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Supply the variation editor request.
+			'variable_post_id' => array( $sut->get_id() ),
+		);
+		if ( null !== $submitted_mpn ) {
+			$_POST['variable_mpn'] = array( wp_slash( $submitted_mpn ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Supply Core's form input.
+		}
+
+		WC_Meta_Box_Product_Data::save_variations( $parent->get_id(), get_post( $parent->get_id() ) );
+
+		$this->assertSame( $expected_mpn, wc_get_product( $sut->get_id() )->get_mpn( 'edit' ) );
+	}
+
+	/**
 	 * Save a product through the public classic product data meta-box seam.
 	 *
 	 * @param WC_Product                                    $product Product to save.

@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Product Collection: show no products in the On Sale collection when no products are on sale, instead of every product.

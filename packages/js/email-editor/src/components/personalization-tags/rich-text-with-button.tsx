@@ -4,7 +4,7 @@
 import type { ReactNode } from 'react';
 import { BaseControl, Button } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
-import { useCallback, useRef, useState } from '@wordpress/element';
+import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
 import { create, insert, toHTMLString } from '@wordpress/rich-text';
 import { RichText } from '@wordpress/block-editor';
 import { __ } from '@wordpress/i18n';
@@ -15,6 +15,8 @@ import { __ } from '@wordpress/i18n';
 import { PersonalizationTagsModal } from './personalization-tags-modal';
 import {
 	getCursorPosition,
+	getElementRange,
+	renameTagComment,
 	replacePersonalizationTagsWithHTMLComments,
 } from './rich-text-utils';
 import { storeName } from '../../store';
@@ -43,7 +45,9 @@ export function RichTextWithButton( {
 	attributeValue,
 	updateProperty = () => {},
 }: Props ) {
-	const [ selectionRange, setSelectionRange ] = useState( null );
+	const selectionRange = useRef< { start: number; end: number } | null >(
+		null
+	);
 	const [ isModalOpened, setIsModalOpened ] = useState( false );
 	const list = useSelect(
 		( select ) => select( storeName ).getPersonalizationTagsList(),
@@ -52,13 +56,32 @@ export function RichTextWithButton( {
 
 	const richTextRef = useRef( null );
 
+	useEffect( () => {
+		const doc = richTextRef.current?.ownerDocument ?? document;
+		const onSelectionChange = () => {
+			if (
+				! richTextRef.current ||
+				doc.activeElement !== richTextRef.current
+			) {
+				return;
+			}
+			const position = getCursorPosition( richTextRef );
+			if ( position ) {
+				selectionRange.current = position;
+			}
+		};
+		doc.addEventListener( 'selectionchange', onSelectionChange );
+		return () =>
+			doc.removeEventListener( 'selectionchange', onSelectionChange );
+	}, [] );
+
 	const handleInsertPersonalizationTag = useCallback(
 		( tagName, currentValue, currentSelectionRange ) => {
-			// Ensure selection range is within bounds
-			const start = currentSelectionRange?.start ?? currentValue.length;
-			const end = currentSelectionRange?.end ?? currentValue.length;
-
 			let richTextValue = create( { html: currentValue } );
+			const start =
+				currentSelectionRange?.start ?? richTextValue.text.length;
+			const end = currentSelectionRange?.end ?? start;
+
 			richTextValue = insert(
 				richTextValue,
 				create( { html: `<!--${ tagName }-->` } ),
@@ -70,7 +93,7 @@ export function RichTextWithButton( {
 			// Update the corresponding property
 			updateProperty( attributeName, updatedValue );
 
-			setSelectionRange( null );
+			selectionRange.current = { start: start + 1, end: start + 1 };
 		},
 		[ attributeName, updateProperty ]
 	);
@@ -115,7 +138,7 @@ export function RichTextWithButton( {
 					handleInsertPersonalizationTag(
 						value,
 						attributeValue ?? '',
-						selectionRange
+						selectionRange.current
 					);
 					setIsModalOpened( false );
 					recordEvent(
@@ -131,35 +154,36 @@ export function RichTextWithButton( {
 			/>
 			<PersonalizationTagsPopover
 				contentRef={ richTextRef }
-				onUpdate={ ( originalTag, updatedTag ) => {
+				onUpdate={ ( originalTag, updatedTag, anchor ) => {
 					const currentValue = attributeValue ?? '';
+					if ( anchor ) {
+						const updated = renameTagComment(
+							create( { html: currentValue } ),
+							getElementRange( richTextRef.current, anchor ),
+							updatedTag
+						);
+						if ( updated ) {
+							updateProperty(
+								attributeName,
+								toHTMLString( { value: updated } )
+							);
+							return;
+						}
+					}
 					// When we update the tag, we need to add brackets to the tag, because the popover removes them
-					const updatedContent = currentValue.replace(
-						`<!--[${ originalTag }]-->`,
-						`<!--[${ updatedTag }]-->`
+					updateProperty(
+						attributeName,
+						currentValue.replace(
+							`<!--[${ originalTag }]-->`,
+							`<!--[${ updatedTag }]-->`
+						)
 					);
-					updateProperty( attributeName, updatedContent );
 				} }
 			/>
 			<RichText
 				ref={ richTextRef }
 				className="woocommerce-settings-panel-richtext"
 				placeholder={ placeholder }
-				onFocus={ () => {
-					setSelectionRange(
-						getCursorPosition( richTextRef, attributeValue ?? '' )
-					);
-				} }
-				onKeyUp={ () => {
-					setSelectionRange(
-						getCursorPosition( richTextRef, attributeValue ?? '' )
-					);
-				} }
-				onClick={ () => {
-					setSelectionRange(
-						getCursorPosition( richTextRef, attributeValue ?? '' )
-					);
-				} }
 				onChange={ ( value ) => {
 					value = replacePersonalizationTagsWithHTMLComments(
 						value ?? '',

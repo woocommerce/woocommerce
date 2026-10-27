@@ -5,9 +5,12 @@ namespace Automattic\WooCommerce\Tests\Internal\DataStores\Orders;
 
 use Automattic\WooCommerce\Caches\OrderCountCache;
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableQuery;
+use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
+use Automattic\WooCommerce\Tests\Helpers\InterleavedStatusOrdersTrait;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Helper_Product;
 use WC_Order;
@@ -19,12 +22,51 @@ use WC_Order;
  */
 class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	use HPOSToggleTrait;
+	use InterleavedStatusOrdersTrait;
 
 	/**
-	 * Ensure permanent HPOS tables exist before per-test transactions start.
+	 * Whether this class created the address full-text index.
+	 *
+	 * @var bool
+	 */
+	private static $created_address_index = false;
+
+	/**
+	 * Whether this class created the order item full-text index.
+	 *
+	 * @var bool
+	 */
+	private static $created_item_index = false;
+
+	/**
+	 * Create tables and full-text indexes before per-test transactions start.
 	 */
 	public static function wpSetUpBeforeClass(): void {
 		self::setup_cot_tables();
+
+		$db_util                     = wc_get_container()->get( DatabaseUtil::class );
+		self::$created_address_index = ! $db_util->fts_index_on_order_address_table_exists();
+		self::$created_item_index    = ! $db_util->fts_index_on_order_item_table_exists();
+		if ( self::$created_address_index ) {
+			$db_util->create_fts_index_order_address_table();
+		}
+		if ( self::$created_item_index ) {
+			$db_util->create_fts_index_order_item_table();
+		}
+	}
+
+	/**
+	 * Remove only the full-text indexes created by this class.
+	 */
+	public static function wpTearDownAfterClass(): void {
+		global $wpdb;
+
+		if ( self::$created_address_index ) {
+			wc_get_container()->get( DatabaseUtil::class )->drop_fts_index_order_address_table();
+		}
+		if ( self::$created_item_index ) {
+			$wpdb->query( "ALTER TABLE {$wpdb->prefix}woocommerce_order_items DROP INDEX order_item_fts" ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name uses the trusted WordPress prefix and a fixed suffix.
+		}
 	}
 
 	/**
@@ -480,6 +522,268 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Run an order query and check how many order count statements it executes.
+	 *
+	 * @param array $args                      Query arguments.
+	 * @param int   $expected_count_statements Expected number of order count statements.
+	 * @return OrdersTableQuery
+	 */
+	private function query_and_assert_count_statements( array $args, int $expected_count_statements ): OrdersTableQuery {
+		global $wpdb;
+
+		$statements = array();
+		$capture    = static function ( $sql ) use ( &$statements ) {
+			$statements[] = $sql;
+			return $sql;
+		};
+
+		add_filter( 'query', $capture );
+		try {
+			$query = new OrdersTableQuery( $args );
+			$this->assertSame( '', $wpdb->last_error, 'The order query should not produce a database error.' );
+		} finally {
+			remove_filter( 'query', $capture );
+		}
+
+		$count_statements = array_filter(
+			$statements,
+			static fn( $sql ) => 0 === stripos( $sql, 'SELECT COUNT(' ) && false !== stripos( $sql, " FROM {$wpdb->prefix}wc_orders " )
+		);
+		$this->assertCount( $expected_count_statements, $count_statements, 'Unexpected number of order count queries.' );
+
+		return $query;
+	}
+
+	/**
+	 * @testdox First-page totals remain correct with full-text search enabled or disabled.
+	 * @dataProvider provider_first_search_page_sizes
+	 *
+	 * @param int  $matches        Number of orders matching the search term.
+	 * @param bool $count_expected Whether the count query must still run.
+	 * @param bool $fts_enabled    Whether full-text search is enabled.
+	 */
+	public function test_first_search_page_supplies_total( int $matches, bool $count_expected, bool $fts_enabled ): void {
+		// The address search only adds the phone column to its MATCH() list when the stored database version is 9.4.0 or later.
+		// The full-text index this class creates always includes phone, so a lower stored version builds a column list that matches no index and fails.
+		// Pin the version in memory instead of writing the option.
+		add_filter( 'pre_option_woocommerce_db_version', static fn() => WC_VERSION );
+		add_filter( 'pre_option_' . CustomOrdersTableController::HPOS_FTS_INDEX_OPTION, static fn() => $fts_enabled ? 'yes' : 'no' );
+		add_filter( 'pre_option_' . CustomOrdersTableController::HPOS_FTS_ADDRESS_INDEX_CREATED_OPTION, static fn() => 'yes' );
+		add_filter( 'pre_option_' . CustomOrdersTableController::HPOS_FTS_ORDER_ITEM_INDEX_CREATED_OPTION, static fn() => 'yes' );
+
+		$ids = array();
+		for ( $i = 0; $i < $matches; $i++ ) {
+			$order = new WC_Order();
+			$order->set_billing_email( 'first-page@woo.test' );
+			$order->save();
+			$ids[] = $order->get_id();
+		}
+
+		$query = $this->query_and_assert_count_statements(
+			array(
+				's'        => 'first-page@woo.test',
+				'limit'    => 5,
+				'paginate' => true,
+				'orderby'  => 'ID',
+				'order'    => 'DESC',
+				'return'   => 'ids',
+			),
+			$count_expected ? 1 : 0
+		);
+
+		$this->assertSame( array_slice( array_reverse( $ids ), 0, 5 ), $query->orders );
+		$this->assertSame( $matches, $query->found_orders );
+		$this->assertSame( (int) ceil( $matches / 5 ), $query->max_num_pages );
+		if ( $fts_enabled ) {
+			$this->assertStringContainsString( 'AS fts_addresses ON', $query->request );
+			$this->assertStringContainsString( 'AS fts_items ON', $query->request );
+		} else {
+			$this->assertStringNotContainsString( 'JOIN', $query->request );
+		}
+	}
+
+	/**
+	 * Numbers of matching orders around the page size of 5, with both search modes.
+	 *
+	 * @return array<string, array{int, bool, bool}>
+	 */
+	public static function provider_first_search_page_sizes(): array {
+		return array(
+			'FTS off, no match'         => array( 0, false, false ),
+			'FTS off, one match'        => array( 1, false, false ),
+			'FTS off, almost full page' => array( 4, false, false ),
+			'FTS off, full page'        => array( 5, true, false ),
+			'FTS off, more than a page' => array( 6, true, false ),
+			'FTS on, no match'          => array( 0, false, true ),
+			'FTS on, one match'         => array( 1, true, true ),
+			'FTS on, almost full page'  => array( 4, true, true ),
+			'FTS on, full page'         => array( 5, true, true ),
+			'FTS on, more than a page'  => array( 6, true, true ),
+		);
+	}
+
+	/**
+	 * @testdox A global SQL filter that shortens the result page preserves the total and pagination.
+	 * @testWith ["LIMIT 0, 2", [0, 1]]
+	 *           ["LIMIT 4, 5", [4, 5]]
+	 *
+	 * @param string $limits           Replacement SQL limit and offset.
+	 * @param int[]  $expected_indexes Indexes of the orders expected on the page.
+	 */
+	public function test_globally_rewritten_query_keeps_count( string $limits, array $expected_indexes ): void {
+		global $wpdb;
+
+		$ids = array();
+		for ( $i = 0; $i < 6; $i++ ) {
+			$order = new WC_Order();
+			$order->set_transaction_id( 'rewritten-search' );
+			$order->save();
+			$ids[] = $order->get_id();
+		}
+
+		$rewrite = static function ( $sql ) use ( $wpdb, $limits ) {
+			if ( 0 === strpos( $sql, "SELECT {$wpdb->prefix}wc_orders.id" ) && false !== strpos( $sql, 'rewritten-search' ) ) {
+				return str_replace( 'LIMIT 0, 5', $limits, $sql );
+			}
+			return $sql;
+		};
+		add_filter( 'query', $rewrite );
+		try {
+			$query = $this->query_and_assert_count_statements(
+				array(
+					's'             => 'rewritten-search',
+					'search_filter' => 'transaction_id',
+					'limit'         => 5,
+					'paginate'      => true,
+					'return'        => 'ids',
+					'orderby'       => 'ID',
+					'order'         => 'ASC',
+				),
+				1
+			);
+		} finally {
+			remove_filter( 'query', $rewrite );
+		}
+
+		$this->assertSame( array( $ids[ $expected_indexes[0] ], $ids[ $expected_indexes[1] ] ), $query->orders );
+		$this->assertSame( 6, $query->found_orders );
+		$this->assertSame( 2, $query->max_num_pages );
+	}
+
+	/**
+	 * @testdox The count query still runs when the page cannot prove the total.
+	 * @dataProvider provider_pages_that_cannot_prove_total
+	 *
+	 * @param array $args            Query argument overrides.
+	 * @param int   $expected_orders Number of orders on the page.
+	 */
+	public function test_count_query_runs_when_page_cannot_prove_total( array $args, int $expected_orders ): void {
+		for ( $i = 0; $i < 3; $i++ ) {
+			$order = new WC_Order();
+			$order->set_billing_email( 'keep-count@woo.test' );
+			$order->update_meta_data( '_keep_count', 'yes' );
+			$order->save();
+		}
+
+		$query = $this->query_and_assert_count_statements(
+			array_merge(
+				array(
+					's'        => 'keep-count@woo.test',
+					'limit'    => 2,
+					'paginate' => true,
+					'return'   => 'ids',
+				),
+				$args
+			),
+			1
+		);
+
+		$this->assertCount( $expected_orders, $query->orders );
+		$this->assertSame( 3, $query->found_orders );
+	}
+
+	/**
+	 * Queries whose result page does not hold every match, or is not a plain search.
+	 *
+	 * @return array<string, array{array, int}>
+	 */
+	public static function provider_pages_that_cannot_prove_total(): array {
+		return array(
+			'second page'               => array( array( 'page' => 2 ), 1 ),
+			'offset'                    => array( array( 'offset' => 2 ), 1 ),
+			'not a search'              => array(
+				array(
+					's'     => '',
+					'limit' => 5,
+				),
+				3,
+			),
+			'search that joins a table' => array(
+				array(
+					'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+						array(
+							'key'   => '_keep_count',
+							'value' => 'yes',
+						),
+					),
+					'limit'      => 5,
+				),
+				3,
+			),
+		);
+	}
+
+	/**
+	 * @testdox A filter that changes the query keeps the count query.
+	 * @dataProvider provider_query_changing_filters
+	 *
+	 * @param string   $hook     Filter name.
+	 * @param callable $callback Callback that changes the filtered value.
+	 */
+	public function test_changed_query_keeps_count( string $hook, callable $callback ): void {
+		$order = new WC_Order();
+		$order->set_billing_email( 'changed-query@woo.test' );
+		$order->save();
+
+		add_filter( $hook, $callback );
+		$query = $this->query_and_assert_count_statements(
+			array(
+				's'        => 'changed-query@woo.test',
+				'limit'    => 5,
+				'paginate' => true,
+				'return'   => 'ids',
+			),
+			1
+		);
+		remove_filter( $hook, $callback );
+
+		$this->assertSame( array( $order->get_id() ), $query->orders );
+		$this->assertSame( 1, $query->found_orders );
+	}
+
+	/**
+	 * WooCommerce query filters, each with a callback that makes a harmless change.
+	 *
+	 * @return array<string, array{string, callable}>
+	 */
+	public static function provider_query_changing_filters(): array {
+		return array(
+			'clauses'   => array(
+				'woocommerce_orders_table_query_clauses',
+				static fn( array $clauses ) => array_merge( $clauses, array( 'where' => $clauses['where'] . ' AND 1=1' ) ),
+			),
+			'list SQL'  => array(
+				'woocommerce_orders_table_query_sql',
+				static fn( string $sql ) => $sql . ' ',
+			),
+			'count SQL' => array(
+				'woocommerce_orders_table_query_count_sql',
+				static fn( string $sql ) => $sql . ' ',
+			),
+		);
+	}
+
+	/**
 	 * Set up some dummy orders, to help test the search filter.
 	 *
 	 * @return array Order IDs
@@ -801,24 +1105,340 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Helper function to create orders with interleaved statuses and strictly decreasing creation dates.
+	 * @testdox wc_get_orders returns no orders when filtering by an unregistered custom status.
 	 *
-	 * @param int $count Number of orders to create.
-	 * @return int[] Order IDs, ordered by creation date descending.
+	 * @dataProvider order_storage_provider
+	 * @param bool $hpos_enabled Whether HPOS is enabled.
 	 */
-	private function create_orders_with_interleaved_statuses( int $count ): array {
-		$statuses = array( OrderStatus::PENDING, OrderStatus::PROCESSING, OrderStatus::COMPLETED );
-		$ids      = array();
+	public function test_wc_get_orders_returns_empty_for_unregistered_custom_status( bool $hpos_enabled ): void {
+		$this->toggle_cot_feature_and_usage( $hpos_enabled );
+		$this->create_order_with_unregistered_custom_status();
+		$this->create_orders_with_interleaved_statuses( 3 );
 
-		for ( $i = 0; $i < $count; $i++ ) {
-			$order = new \WC_Order();
-			$order->set_status( $statuses[ $i % count( $statuses ) ] );
-			$order->set_date_created( strtotime( '2023-06-01 12:00:00' ) - ( $i * HOUR_IN_SECONDS ) );
-			$order->save();
-			$ids[] = $order->get_id();
-		}
+		$queried_order_ids = wc_get_orders(
+			array(
+				'status' => 'foobar',
+				'return' => 'ids',
+			)
+		);
 
-		return $ids;
+		$this->assertSame( array(), $queried_order_ids, 'An unregistered custom status should not match orphaned or core-status orders' );
+	}
+
+	/**
+	 * @testdox wc_get_orders retains known statuses when filtering by known and unknown statuses.
+	 *
+	 * @dataProvider order_storage_provider
+	 * @param bool $hpos_enabled Whether HPOS is enabled.
+	 */
+	public function test_wc_get_orders_filters_by_known_status_when_mixed_with_unknown_status( bool $hpos_enabled ): void {
+		$this->toggle_cot_feature_and_usage( $hpos_enabled );
+		$this->create_order_with_unregistered_custom_status();
+		$core_order_ids = $this->create_orders_with_interleaved_statuses( 3 );
+
+		$queried_order_ids = wc_get_orders(
+			array(
+				'status' => array( OrderStatus::PROCESSING, 'foobar' ),
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertSame( array( $core_order_ids[1] ), $queried_order_ids, 'Known statuses should still be applied when unknown statuses are also requested' );
+	}
+
+	/**
+	 * @testdox wc_get_orders supports the "$status" special status.
+	 *
+	 * @dataProvider special_status_provider
+	 * @param bool         $hpos_enabled Whether HPOS is enabled.
+	 * @param string|array $status       Special status value.
+	 */
+	public function test_wc_get_orders_supports_special_status_values( bool $hpos_enabled, $status ): void {
+		$this->toggle_cot_feature_and_usage( $hpos_enabled );
+		$order_ids = $this->create_orders_with_interleaved_statuses( 3 );
+
+		$queried_order_ids = wc_get_orders(
+			array(
+				'limit'  => -1,
+				'status' => $status,
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertSame( $order_ids, $queried_order_ids, 'A special status should not filter out orders with registered statuses.' );
+	}
+
+	/**
+	 * Provides special status values supported by order queries, for both order storages.
+	 *
+	 * @return array<string, array{bool, string|array}>
+	 */
+	public function special_status_provider(): array {
+		return array(
+			'HPOS, any'                       => array( true, 'any' ),
+			'HPOS, all'                       => array( true, 'all' ),
+			'HPOS, uppercase any'             => array( true, 'ANY' ),
+			'HPOS, padded all'                => array( true, ' all ' ),
+			'HPOS, all with unknown'          => array( true, array( 'all', 'foobar' ) ),
+			'HPOS, any with unknown'          => array( true, array( 'any', 'foobar' ) ),
+			'HPOS, all with known'            => array( true, array( 'all', OrderStatus::PROCESSING ) ),
+			'HPOS, all in comma string'       => array( true, 'all,' . OrderStatus::PROCESSING ),
+			'legacy CPT, any'                 => array( false, 'any' ),
+			'legacy CPT, all'                 => array( false, 'all' ),
+			'legacy CPT, uppercase any'       => array( false, 'ANY' ),
+			'legacy CPT, padded all'          => array( false, ' all ' ),
+			'legacy CPT, all with unknown'    => array( false, array( 'all', 'foobar' ) ),
+			'legacy CPT, any with unknown'    => array( false, array( 'any', 'foobar' ) ),
+			'legacy CPT, all with known'      => array( false, array( 'all', OrderStatus::PROCESSING ) ),
+			'legacy CPT, all in comma string' => array( false, 'all,' . OrderStatus::PROCESSING ),
+		);
+	}
+
+	/**
+	 * @testdox wc_get_orders returns only matching orders when the known status "$status" is supplied in uppercase.
+	 *
+	 * @testWith [true, "WC-COMPLETED"]
+	 *           [true, "COMPLETED"]
+	 *           [false, "WC-COMPLETED"]
+	 *           [false, "COMPLETED"]
+	 *
+	 * @param bool   $hpos_enabled Whether HPOS is enabled.
+	 * @param string $status       Uppercase status value.
+	 */
+	public function test_wc_get_orders_filters_by_uppercase_known_status( bool $hpos_enabled, string $status ): void {
+		$this->toggle_cot_feature_and_usage( $hpos_enabled );
+		$order_ids = $this->create_orders_with_interleaved_statuses( 3 );
+
+		$queried_order_ids = wc_get_orders(
+			array(
+				'status' => $status,
+				'limit'  => -1,
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertSame( array( $order_ids[2] ), $queried_order_ids, 'An uppercase known status should match its registered lowercase counterpart and return only the matching orders.' );
+	}
+
+	/**
+	 * @testdox wc_get_orders matches a known status surrounded by whitespace.
+	 *
+	 * @dataProvider order_storage_provider
+	 * @param bool $hpos_enabled Whether HPOS is enabled.
+	 */
+	public function test_wc_get_orders_trims_status_values( bool $hpos_enabled ): void {
+		$this->toggle_cot_feature_and_usage( $hpos_enabled );
+		$order_ids = $this->create_orders_with_interleaved_statuses( 3 );
+
+		$queried_order_ids = wc_get_orders(
+			array(
+				'status' => array( ' ' . OrderStatus::COMPLETED . ' ' ),
+				'limit'  => -1,
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertSame( array( $order_ids[2] ), $queried_order_ids, 'Whitespace around a known status should be ignored on both order storages.' );
+	}
+
+	/**
+	 * @testdox wc_get_orders returns no orders for an unknown status that already has the "wc-" prefix.
+	 *
+	 * @dataProvider order_storage_provider
+	 * @param bool $hpos_enabled Whether HPOS is enabled.
+	 */
+	public function test_wc_get_orders_returns_empty_for_prefixed_unknown_status( bool $hpos_enabled ): void {
+		$this->toggle_cot_feature_and_usage( $hpos_enabled );
+		$this->create_orders_with_interleaved_statuses( 3 );
+
+		$queried_order_ids = wc_get_orders(
+			array(
+				'status' => 'wc-foobar',
+				'limit'  => -1,
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertSame( array(), $queried_order_ids, 'A prefixed unknown status should not make the query return every order.' );
+	}
+
+	/**
+	 * @testdox wc_get_orders matches orders stored with an unregistered "wc-" prefixed status on HPOS only.
+	 *
+	 * @dataProvider order_storage_provider
+	 * @param bool $hpos_enabled Whether HPOS is enabled.
+	 */
+	public function test_wc_get_orders_prefixed_unregistered_custom_status_matches_orphaned_orders_only_on_hpos( bool $hpos_enabled ): void {
+		$this->toggle_cot_feature_and_usage( $hpos_enabled );
+		$orphaned_order_id = $this->create_order_with_unregistered_custom_status();
+		$this->create_orders_with_interleaved_statuses( 3 );
+
+		$queried_order_ids = wc_get_orders(
+			array(
+				'status' => 'wc-foobar',
+				'limit'  => -1,
+				'return' => 'ids',
+			)
+		);
+
+		$expected = $hpos_enabled ? array( $orphaned_order_id ) : array();
+		$this->assertSame( $expected, $queried_order_ids, 'HPOS matches the stored status literally, while CPT treats the unregistered status as unknown.' );
+	}
+
+	/**
+	 * @testdox wc_get_orders splits a comma-separated status string and ignores whitespace around each status.
+	 *
+	 * @dataProvider order_storage_provider
+	 * @param bool $hpos_enabled Whether HPOS is enabled.
+	 */
+	public function test_wc_get_orders_splits_comma_separated_statuses( bool $hpos_enabled ): void {
+		$this->toggle_cot_feature_and_usage( $hpos_enabled );
+		$order_ids = $this->create_orders_with_interleaved_statuses( 3 );
+
+		$queried_order_ids = wc_get_orders(
+			array(
+				'status' => 'foobar, ' . OrderStatus::PROCESSING . ',' . OrderStatus::COMPLETED,
+				'limit'  => -1,
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertSame( array( $order_ids[1], $order_ids[2] ), $queried_order_ids, 'Each status in a comma-separated list should be matched on both order storages.' );
+	}
+
+	/**
+	 * @testdox wc_get_orders ignores non-string values in the status array instead of throwing a TypeError.
+	 *
+	 * @dataProvider order_storage_provider
+	 * @param bool $hpos_enabled Whether HPOS is enabled.
+	 */
+	public function test_wc_get_orders_ignores_non_string_status_values( bool $hpos_enabled ): void {
+		$this->toggle_cot_feature_and_usage( $hpos_enabled );
+		$order_ids = $this->create_orders_with_interleaved_statuses( 3 );
+
+		$queried_order_ids = wc_get_orders(
+			array(
+				'status' => array( OrderStatus::COMPLETED, array( 'nested' ), new \stdClass() ),
+				'limit'  => -1,
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertSame( array( $order_ids[2] ), $queried_order_ids, 'Non-string status values should be ignored while valid statuses are still applied.' );
+	}
+
+	/**
+	 * @testdox wc_get_orders returns no orders when every status value is non-string.
+	 *
+	 * @dataProvider order_storage_provider
+	 * @param bool $hpos_enabled Whether HPOS is enabled.
+	 */
+	public function test_wc_get_orders_returns_empty_when_all_status_values_are_non_string( bool $hpos_enabled ): void {
+		$this->toggle_cot_feature_and_usage( $hpos_enabled );
+		$this->create_orders_with_interleaved_statuses( 3 );
+
+		$queried_order_ids = wc_get_orders(
+			array(
+				'status' => array( array( 'nested' ), new \stdClass() ),
+				'limit'  => -1,
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertSame( array(), $queried_order_ids, 'A status array with only non-string values should not be treated as "any" and return every order.' );
+	}
+
+	/**
+	 * @testdox wc_get_orders does not use the properties of an object passed as the status.
+	 *
+	 * @dataProvider order_storage_provider
+	 * @param bool $hpos_enabled Whether HPOS is enabled.
+	 */
+	public function test_wc_get_orders_ignores_object_status( bool $hpos_enabled ): void {
+		$this->toggle_cot_feature_and_usage( $hpos_enabled );
+		$this->create_orders_with_interleaved_statuses( 3 );
+
+		$queried_order_ids = wc_get_orders(
+			array(
+				'status' => (object) array( 'status' => OrderStatus::COMPLETED ),
+				'limit'  => -1,
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertSame( array(), $queried_order_ids, 'Only strings are accepted as statuses, so an object should not be read as a list of statuses.' );
+	}
+
+	/**
+	 * @testdox wc_get_orders returns no orders when every status value is an empty-like string.
+	 *
+	 * @testWith [true, ["0"]]
+	 *           [true, "0"]
+	 *           [true, [""]]
+	 *           [true, ["  "]]
+	 *           [false, ["0"]]
+	 *           [false, "0"]
+	 *           [false, [""]]
+	 *           [false, ["  "]]
+	 *
+	 * @param bool         $hpos_enabled Whether HPOS is enabled.
+	 * @param string|array $statuses     The status query var value.
+	 */
+	public function test_wc_get_orders_returns_empty_when_all_status_values_are_empty_like( bool $hpos_enabled, $statuses ): void {
+		$this->toggle_cot_feature_and_usage( $hpos_enabled );
+		$this->create_orders_with_interleaved_statuses( 3 );
+
+		$queried_order_ids = wc_get_orders(
+			array(
+				'status' => $statuses,
+				'limit'  => -1,
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertSame( array(), $queried_order_ids, 'A status with only empty-like strings should not drop the status condition and return every order.' );
+	}
+
+	/**
+	 * Provides order storage configurations.
+	 *
+	 * @return array<string, array{bool}>
+	 */
+	public function order_storage_provider(): array {
+		return array(
+			'HPOS'       => array( true ),
+			'legacy CPT' => array( false ),
+		);
+	}
+
+	/**
+	 * Creates an order with a custom status, then unregisters the status.
+	 *
+	 * @return int ID of the created order.
+	 */
+	private function create_order_with_unregistered_custom_status(): int {
+		global $wp_post_statuses;
+
+		$register_custom_status = function ( array $statuses ): array {
+			$statuses['wc-foobar'] = 'Foobar';
+			return $statuses;
+		};
+
+		register_post_status(
+			'wc-foobar',
+			array(
+				'label'               => 'Foobar',
+				'exclude_from_search' => false,
+			)
+		);
+		add_filter( 'wc_order_statuses', $register_custom_status );
+		$order = new WC_Order();
+		$order->set_status( 'foobar' );
+		$order->save();
+		remove_filter( 'wc_order_statuses', $register_custom_status );
+		unset( $wp_post_statuses['wc-foobar'] );
+
+		return $order->get_id();
 	}
 
 	/**
