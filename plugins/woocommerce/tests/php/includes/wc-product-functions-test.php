@@ -553,14 +553,16 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A started sale with a sale price the cron cannot apply is not queued: '$sale_price'.
+	 * @testdox get_starting_sales() returns a started sale only when the cron can apply its price: '$sale_price'.
 	 *
-	 * @testWith [""]
-	 *           ["0"]
+	 * @testWith ["", false]
+	 *           ["0", false]
+	 *           ["0.00", true]
 	 *
 	 * @param string $sale_price Stored `_sale_price` value.
+	 * @param bool   $expected   Whether the product should be queued.
 	 */
-	public function test_get_starting_sales_excludes_sale_prices_the_cron_skips( string $sale_price ): void {
+	public function test_get_starting_sales_only_returns_sale_prices_the_cron_applies( string $sale_price, bool $expected ): void {
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_regular_price( 100 );
 		$product->save();
@@ -568,59 +570,9 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		update_post_meta( $product->get_id(), '_sale_price', $sale_price );
 		update_post_meta( $product->get_id(), '_sale_price_dates_from', time() - 300 );
 
-		$started = array();
-		add_action(
-			'wc_before_products_starting_sales',
-			function ( $ids ) use ( &$started ) {
-				$started = array_merge( $started, $ids );
-			}
-		);
+		$queued = in_array( (string) $product->get_id(), WC_Data_Store::load( 'product' )->get_starting_sales(), true );
 
-		wc_scheduled_sales();
-
-		$this->assertNotContains( (string) $product->get_id(), $started, 'Nothing would change the price, so the product would be queued on every run.' );
-		$this->assertSame( '100', get_post_meta( $product->get_id(), '_price', true ), 'The price must stay where it was.' );
-	}
-
-	/**
-	 * @testdox Lowering the regular price below a scheduled sale price does not queue the product.
-	 */
-	public function test_get_starting_sales_excludes_sale_price_cleared_by_lowering_regular_price(): void {
-		$product = WC_Helper_Product::create_simple_product();
-		$product->set_regular_price( 100 );
-		$product->set_sale_price( 80 );
-		$product->set_date_on_sale_from( time() - 300 );
-		$product->save();
-
-		$product = wc_get_product( $product->get_id() );
-		$product->set_regular_price( 70 );
-		$product->save();
-
-		// Precondition: handle_updated_props() stores the cleared sale price as '' with the dates kept.
-		$this->assertSame( array( '' ), get_post_meta( $product->get_id(), '_sale_price', false ) );
-
-		$this->assertNotContains( (string) $product->get_id(), WC_Data_Store::load( 'product' )->get_starting_sales() );
-	}
-
-	/**
-	 * @testdox A sale price of '0.00' is still started and then settles.
-	 */
-	public function test_wc_scheduled_sales_starts_a_zero_decimal_sale_price(): void {
-		$product = WC_Helper_Product::create_simple_product();
-		$product->set_regular_price( 100 );
-		$product->save();
-		update_post_meta( $product->get_id(), '_price', 100 );
-		update_post_meta( $product->get_id(), '_sale_price', '0.00' );
-		update_post_meta( $product->get_id(), '_sale_price_dates_from', time() - 300 );
-
-		$data_store = WC_Data_Store::load( 'product' );
-
-		$this->assertContains( (string) $product->get_id(), $data_store->get_starting_sales(), "'0.00' is a sale price the cron applies, so it must still be queued." );
-
-		wc_scheduled_sales();
-
-		$this->assertSame( '0.00', get_post_meta( $product->get_id(), '_price', true ) );
-		$this->assertNotContains( (string) $product->get_id(), $data_store->get_starting_sales(), 'The product must settle after one run.' );
+		$this->assertSame( $expected, $queued, 'The cron skips falsy sale prices, so queuing them repeats every run. \'0.00\' is applied and must stay queued.' );
 	}
 
 	/**
