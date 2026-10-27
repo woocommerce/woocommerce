@@ -924,12 +924,13 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		 * `expand_data()` never treats as special.
 		 */
 		$prefix_match_data_formatting = array(
-			'attributes:value'    => array( $this, 'parse_comma_field' ),
-			'attributes:visible'  => array( $this, 'parse_bool_field' ),
-			'attributes:taxonomy' => array( $this, 'parse_bool_field' ),
-			'downloads:url'       => array( $this, 'parse_download_file_field' ),
+			'attributes:value'     => array( $this, 'parse_comma_field' ),
+			'attributes:visible'   => array( $this, 'parse_bool_field' ),
+			'attributes:variation' => array( $this, 'parse_bool_field' ),
+			'attributes:taxonomy'  => array( $this, 'parse_bool_field' ),
+			'downloads:url'        => array( $this, 'parse_download_file_field' ),
 			// Allow some HTML in meta fields.
-			'meta:'               => 'wp_kses_post',
+			'meta:'                => 'wp_kses_post',
 		);
 
 		$callbacks = array();
@@ -1096,6 +1097,13 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 			} elseif ( $this->starts_with( $key, 'attributes:visible' ) ) {
 				$attributes[ str_replace( 'attributes:visible', '', $key ) ]['visible'] = wc_string_to_bool( $value );
+				unset( $data[ $key ] );
+
+			} elseif ( $this->starts_with( $key, 'attributes:variation' ) ) {
+				// An empty cell keeps the inferred setting.
+				if ( '' !== $value && null !== $value ) {
+					$attributes[ str_replace( 'attributes:variation', '', $key ) ]['variation'] = wc_string_to_bool( $value );
+				}
 				unset( $data[ $key ] );
 
 			} elseif ( $this->starts_with( $key, 'attributes:default' ) ) {
