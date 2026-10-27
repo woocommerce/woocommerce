@@ -568,7 +568,7 @@ class WC_Tax {
 	 * Gets shipping tax rates based on tax class and customer location.
 	 *
 	 * This method determines which tax rates to apply to shipping costs by following this priority:
-	 * 1. Uses the explicitly configured shipping tax class from WooCommerce settings, unless it is set to take the class from the cart items ('inherit' or 'split_by_item_value')
+	 * 1. Uses the explicitly configured shipping tax class from WooCommerce settings, unless it is set to take the class from the cart items ('inherit' or ':split_by_item_value')
 	 * 2. If tax_class is provided (per-item shipping), uses that specific class
 	 * 3. If no tax_class provided (per-order shipping), analyzes cart items to determine the appropriate class:
 	 *    - Returns empty array if cart has no taxable items

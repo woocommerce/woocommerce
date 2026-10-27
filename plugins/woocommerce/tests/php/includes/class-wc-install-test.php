@@ -466,7 +466,7 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox New stores split shipping tax by cart item value unless another value was set before install.
 	 *
-	 * @testWith ["inherit", "split_by_item_value"]
+	 * @testWith ["inherit", ":split_by_item_value"]
 	 *           ["reduced-rate", "reduced-rate"]
 	 *
 	 * @param string $before   Shipping tax class before the hook runs.

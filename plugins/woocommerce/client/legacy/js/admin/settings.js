@@ -32,7 +32,7 @@
 		$( 'select#woocommerce_shipping_tax_class' )
 			.on( 'change', function () {
 				$( 'tr.wc-settings-row-shipping-tax-split-help' ).toggle(
-					'split_by_item_value' === $( this ).val()
+					':split_by_item_value' === $( this ).val()
 				);
 			} )
 			.trigger( 'change' );
