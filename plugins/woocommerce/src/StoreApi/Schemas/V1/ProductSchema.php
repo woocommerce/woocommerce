@@ -708,7 +708,7 @@ class ProductSchema extends AbstractSchema {
 				// Collect the chain of parent term IDs for cache priming below.
 				foreach ( $product_terms as $term ) {
 					$current = $term->term_id;
-					while ( isset( $parent_map[ $current ] ) ) {
+					while ( isset( $parent_map[ $current ] ) && ! in_array( $parent_map[ $current ], $term_hierarchy_ids, true ) ) {
 						$parent_id            = $parent_map[ $current ];
 						$term_hierarchy_ids[] = $parent_id;
 						$current              = $parent_id;
