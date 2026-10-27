@@ -316,4 +316,62 @@ class WC_REST_Refund_Currency_Test extends WC_REST_Unit_Test_Case {
 		$expected = 'JPY' === $currency ? 55.0 : 54.75;
 		$this->assertEquals( array( $expected, $expected, $expected, 110.0 ), array( (float) $last->get_data()['amount'], (float) ( $preview->get_data()['total'] ?? -1 ), end( $this->gateway_amounts ), (float) wc_get_order( $order->get_id() )->get_total_refunded() ) );
 	}
+
+	/**
+	 * @testdox Closing a tax-only refund preserves the original net amount.
+	 * @param string $store Store currency.
+	 * @param int    $dp Store decimals.
+	 * @param string $currency Order currency.
+	 * @dataProvider currencies
+	 */
+	public function test_tax_only_then_close( string $store, int $dp, string $currency ): void {
+		list( $order, $item_id ) = $this->order_fixture( $store, $dp, $currency, 97.50, 9.75 );
+		$first                   = $this->request(
+			$order,
+			array(
+				'amount'     => 9.75,
+				'line_items' => array(
+					array(
+						'id'           => $item_id,
+						'refund_total' => 0,
+						'refund_tax'   => array(
+							array(
+								'id'           => 1,
+								'refund_total' => 9.75,
+							),
+						),
+					),
+				),
+			)
+		);
+		$this->assertSame( 201, $first->get_status(), wp_json_encode( $first->get_data() ) );
+		$preview = $this->request(
+			$order,
+			array(
+				'line_items' => array(
+					array(
+						'line_item_id' => $item_id,
+						'quantity'     => 1,
+					),
+				),
+			),
+			true
+		);
+		$last    = $this->request(
+			$order,
+			array(
+				'compute_totals' => true,
+				'line_items'     => array(
+					array(
+						'id'       => $item_id,
+						'quantity' => 1,
+					),
+				),
+			)
+		);
+		$this->assertSame( 'JPY' === $currency ? 422 : 201, $last->get_status(), wp_json_encode( $last->get_data() ) );
+		if ( 'JPY' !== $currency ) {
+			$this->assertEquals( array( 97.50, 97.50, 97.50 ), array( (float) $last->get_data()['amount'], (float) ( $preview->get_data()['total'] ?? -1 ), end( $this->gateway_amounts ) ) );
+		}
+	}
 }
