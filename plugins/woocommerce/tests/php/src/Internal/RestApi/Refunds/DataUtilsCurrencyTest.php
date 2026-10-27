@@ -34,50 +34,24 @@ class DataUtilsCurrencyTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A quantity preview accepts the fractional amount remaining on a USD line.
+	 * @testdox Quantity and amount previews preserve a fractional remainder and its cap.
+	 * @param array $line Requested quantity or amount.
+	 * @param bool  $valid Whether the request fits the remainder.
+	 * @testWith [{"quantity": 1}, true]
+	 *           [{"refund_total": 0.25}, true]
+	 *           [{"refund_total": 0.26}, false]
 	 */
-	public function test_quantity_preview_accepts_fractional_remaining_amount(): void {
+	public function test_preview_preserves_fractional_remainder( array $line, bool $valid ): void {
 		list( $order, $item ) = $this->create_order( 10.25 );
 		$this->add_refund( $order, $item, 10.0, 0 );
-		$order = new WC_Order( $order->get_id() );
-		$lines = array(
-			array(
-				'line_item_id' => $item->get_id(),
-				'quantity'     => 1,
-			),
-		);
-
-		$this->assertTrue( $this->sut->validate_preview_line_items( $lines, $order ) );
-		$preview = $this->sut->compute_refund_preview_or_error( $order, $lines, 'currency-test' );
-		$this->assertIsArray( $preview );
-		$this->assertSame( '0.25', $preview['total'] );
-		$this->assertSame( '0.25', $preview['max_refundable'] );
-	}
-
-	/**
-	 * @testdox Explicit USD line refunds are capped at the remaining cents.
-	 * @testWith [0.25, true]
-	 *           [0.26, false]
-	 *
-	 * @param float $amount Requested amount.
-	 * @param bool  $valid Whether the amount fits the remainder.
-	 */
-	public function test_explicit_preview_preserves_fractional_remaining_cap( float $amount, bool $valid ): void {
-		list( $order, $item ) = $this->create_order( 10.25 );
-		$this->add_refund( $order, $item, 10.0, 0 );
-		$order  = new WC_Order( $order->get_id() );
-		$result = $this->sut->validate_preview_line_items(
-			array(
-				array(
-					'line_item_id' => $item->get_id(),
-					'refund_total' => $amount,
-				),
-			),
-			$order
-		);
+		$order                = new WC_Order( $order->get_id() );
+		$line['line_item_id'] = $item->get_id();
+		$result               = $this->sut->compute_refund_preview_or_error( $order, array( $line ), 'currency-test' );
 
 		if ( $valid ) {
-			$this->assertTrue( $result );
+			$this->assertIsArray( $result );
+			$this->assertSame( '0.25', $result['total'] );
+			$this->assertSame( '0.25', $result['max_refundable'] );
 		} else {
 			$this->assertWPError( $result );
 			$this->assertSame( 'refund_total_exceeds_remaining', $result->get_error_code() );
@@ -125,13 +99,15 @@ class DataUtilsCurrencyTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Amount override guards compare and describe USD cents.
 	 * @testWith [10.24, "invalid_refund_amount", "Refund amount (10.24) cannot be less than the total of line items (10.25)."]
+	 *           [10.25, null, null]
+	 *           [20.25, null, null]
 	 *           [20.26, "refund_exceeds_remaining", "Refund amount (20.26) exceeds the remaining refundable amount (20.25)."]
 	 *
-	 * @param float  $amount Requested override.
-	 * @param string $code Expected error code.
-	 * @param string $message Expected error message.
+	 * @param float       $amount Requested override.
+	 * @param string|null $code Expected error code, or null on success.
+	 * @param string|null $message Expected error message.
 	 */
-	public function test_amount_override_guards_use_order_precision( float $amount, string $code, string $message ): void {
+	public function test_amount_override_guards_use_order_precision( float $amount, ?string $code, ?string $message ): void {
 		list( $order, $item ) = $this->create_order( 20.25 );
 		$result               = $this->sut->prepare_refund_creation_or_error(
 			$order,
@@ -146,9 +122,14 @@ class DataUtilsCurrencyTest extends WC_Unit_Test_Case {
 			'currency-test'
 		);
 
-		$this->assertWPError( $result );
-		$this->assertSame( $code, $result->get_error_code() );
-		$this->assertSame( $message, $result->get_error_message() );
+		if ( null === $code ) {
+			$this->assertIsArray( $result );
+			$this->assertSame( $amount, $result['amount'] );
+		} else {
+			$this->assertWPError( $result );
+			$this->assertSame( $code, $result->get_error_code() );
+			$this->assertSame( $message, $result->get_error_message() );
+		}
 	}
 
 	/**
@@ -241,48 +222,140 @@ class DataUtilsCurrencyTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Array-only helpers keep store precision and remain overridable with their original signatures.
+	 * @testdox Public overrides affect every workflow while standalone calls retain store precision.
+	 * @param string $store Store currency.
+	 * @param int    $decimals Store decimals.
+	 * @param float  $normalized Standalone normalized total.
+	 * @param float  $calculated Standalone calculated amount.
+	 * @testWith ["JPY", 0, 11.0, 12.0]
+	 *           ["USD", 2, 11.25, 12.25]
 	 */
-	public function test_array_only_helpers_keep_store_precision_and_signatures(): void {
-		$subclass = new class() extends DataUtils {
+	public function test_public_helper_overrides( string $store, int $decimals, float $normalized, float $calculated ): void {
+		update_option( 'woocommerce_currency', $store );
+		list( $order, $item ) = $this->create_order( 20.25 );
+		update_option( 'woocommerce_price_num_decimals', $decimals );
+		$sut   = new class() extends DataUtils {
 			/**
-			 * Calls received by the public overrides.
-			 *
-			 * @var array<string, int>
-			 */
-			public $calls = array(
-				'normalize' => 0,
-				'calculate' => 0,
-			);
-
-			/**
-			 * Normalize through the original array-only signature.
-			 *
-			 * @param array $line_items Refund lines.
+			 * Add a line adjustment after normalization.
+			 * @param array $line_items Lines.
 			 * @return array
 			 */
 			public function normalize_refund_totals( array $line_items ): array {
-				++$this->calls['normalize'];
+				$line_items                     = parent::normalize_refund_totals( $line_items );
+				$line_items[0]['refund_total'] += 1;
+				return $line_items;
+			}
+
+			/**
+			 * Add goodwill to the calculated amount.
+			 * @param array $line_items Lines.
+			 * @return float|null
+			 */
+			public function calculate_refund_amount( array $line_items ): ?float {
+				return parent::calculate_refund_amount( $line_items ) + 2;
+			}
+		};
+		$lines = array(
+			array(
+				'line_item_id' => $item->get_id(),
+				'refund_total' => 10.25,
+			),
+		);
+
+		$this->assertSame( 11.25, $sut->fill_missing_refund_totals( $lines, $order )[0]['refund_total'] );
+		$preview = $sut->compute_refund_preview_or_error( $order, $lines, 'currency-test' );
+		$this->assertIsArray( $preview );
+		$this->assertSame( '11.25', $preview['total'] );
+		$prepared = $sut->prepare_refund_creation_or_error( $order, $lines, false, null, 'currency-test' );
+		$this->assertIsArray( $prepared );
+		$this->assertSame( 11.25, $prepared['schema_line_items'][0]['refund_total'] );
+		$this->assertSame( 13.25, $prepared['amount'] );
+		$this->assertSame( $normalized, $sut->normalize_refund_totals( $lines )[0]['refund_total'] );
+		$this->assertSame( $calculated, $sut->calculate_refund_amount( $lines ) );
+	}
+
+	/**
+	 * @testdox Nested helper calls and exceptions restore the previous precision on a reused instance.
+	 * @param string $helper Override triggering the nested call or exception.
+	 * @param bool   $throws Whether the override throws.
+	 * @testWith ["normalize", false]
+	 *           ["calculate", false]
+	 *           ["normalize", true]
+	 *           ["calculate", true]
+	 */
+	public function test_helper_precision_scope( string $helper, bool $throws ): void {
+		list( $order, $item )               = $this->create_order( 20 );
+		list( $nested_order, $nested_item ) = $this->create_order( 20 );
+		$nested_order->set_currency( 'KWD' );
+		$nested_order->save();
+		$lines         = array(
+			array(
+				'line_item_id' => $item->get_id(),
+				'refund_total' => 10.251,
+			),
+		);
+		$sut           = new class() extends DataUtils {
+			/** @var callable|null Operation performed by an override. */
+			public $on_call;
+
+			/**
+			 * Run an extension operation before delegating to core.
+			 * @param array $line_items Lines.
+			 * @return array
+			 */
+			public function normalize_refund_totals( array $line_items ): array {
+				if ( $this->on_call ) {
+					( $this->on_call )( 'normalize' );
+				}
 				return parent::normalize_refund_totals( $line_items );
 			}
 
 			/**
-			 * Sum through the original array-only signature.
-			 *
-			 * @param array $line_items Refund lines.
+			 * Run an extension operation before delegating to core.
+			 * @param array $line_items Lines.
 			 * @return float|null
 			 */
 			public function calculate_refund_amount( array $line_items ): ?float {
-				++$this->calls['calculate'];
+				if ( $this->on_call ) {
+					( $this->on_call )( 'calculate' );
+				}
 				return parent::calculate_refund_amount( $line_items );
 			}
 		};
-		$lines    = array( array( 'refund_total' => 10.25 ) );
+		$nested_amount = null;
+		$sut->on_call  = function ( $called ) use ( $sut, $helper, $throws, $nested_order, $nested_item, &$nested_amount ) {
+			if ( $called !== $helper ) {
+				return;
+			}
+			$sut->on_call = null;
+			if ( $throws ) {
+				throw new \RuntimeException( 'Extension failure' );
+			}
+			$nested_lines = array(
+				array(
+					'line_item_id' => $nested_item->get_id(),
+					'refund_total' => 10.251,
+				),
+			);
+			$result       = $sut->prepare_refund_creation_or_error( $nested_order, $nested_lines, false, null, 'nested-currency-test' );
+			$this->assertIsArray( $result );
+			$nested_amount = $result['amount'];
+		};
 
-		$this->assertSame( 10.0, $subclass->normalize_refund_totals( $lines )[0]['refund_total'] );
-		$this->assertSame( 10.0, $subclass->calculate_refund_amount( $lines ) );
-		$this->assertSame( 1, $subclass->calls['normalize'] );
-		$this->assertSame( 1, $subclass->calls['calculate'] );
+		$error_message = null;
+		try {
+			$prepared = $sut->prepare_refund_creation_or_error( $order, $lines, false, null, 'currency-test' );
+		} catch ( \RuntimeException $error ) {
+			$error_message = $error->getMessage();
+		}
+		$this->assertSame( $throws ? 'Extension failure' : null, $error_message );
+		if ( ! $throws ) {
+			$this->assertIsArray( $prepared );
+			$this->assertSame( 10.25, $prepared['amount'] );
+		}
+		$this->assertSame( $throws ? null : 10.251, $nested_amount );
+		$this->assertSame( 10.0, $sut->normalize_refund_totals( $lines )[0]['refund_total'] );
+		$this->assertSame( 10.0, $sut->calculate_refund_amount( $lines ) );
 	}
 
 	/**
@@ -380,30 +453,6 @@ class DataUtilsCurrencyTest extends WC_Unit_Test_Case {
 		$this->assertWPError( $result );
 		$this->assertSame( 'preview_exceeds_max_refundable', $result->get_error_code() );
 		$this->assertSame( 'Requested refund preview (16.25) exceeds the remaining refundable amount (15.25).', $result->get_error_message() );
-	}
-
-	/**
-	 * @testdox Exact amount override boundaries accept the line total and remaining order total.
-	 * @param float $amount Requested amount.
-	 * @testWith [10.25]
-	 *           [20.25]
-	 */
-	public function test_amount_override_accepts_exact_boundaries( float $amount ): void {
-		list( $order, $item ) = $this->create_order( 20.25 );
-		$result               = $this->sut->prepare_refund_creation_or_error(
-			$order,
-			array(
-				array(
-					'line_item_id' => $item->get_id(),
-					'refund_total' => 10.25,
-				),
-			),
-			true,
-			$amount,
-			'currency-test'
-		);
-		$this->assertIsArray( $result );
-		$this->assertSame( $amount, $result['amount'] );
 	}
 
 	/**

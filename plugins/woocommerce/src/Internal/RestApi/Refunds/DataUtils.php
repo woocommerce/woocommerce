@@ -56,6 +56,13 @@ class DataUtils {
 	private $log_source = self::DEFAULT_LOG_SOURCE;
 
 	/**
+	 * Precision during a public helper call; null keeps standalone calls at store precision.
+	 *
+	 * @var int|null
+	 */
+	private $price_decimals;
+
+	/**
 	 * Resolve an order's price precision, including unsaved items without an order.
 	 *
 	 * @param \WC_Abstract_Order|false $order Order or false for an unassigned item.
@@ -195,17 +202,6 @@ class DataUtils {
 	 * @return float|null The refund amount, or null if it can't be calculated.
 	 */
 	public function calculate_refund_amount( array $line_items ): ?float {
-		return $this->calculate_refund_amount_with_precision( $line_items, wc_get_price_decimals() );
-	}
-
-	/**
-	 * Sum refund amounts at the precision selected by the caller.
-	 *
-	 * @param array $line_items Refund lines.
-	 * @param int   $price_decimals Price precision.
-	 * @return float|null
-	 */
-	private function calculate_refund_amount_with_precision( array $line_items, int $price_decimals ): ?float {
 		if ( empty( $line_items ) ) {
 			return null;
 		}
@@ -228,7 +224,24 @@ class DataUtils {
 			}
 		}
 
-		return (float) NumberUtil::round( $amount, $price_decimals );
+		return (float) NumberUtil::round( $amount, $this->price_decimals ?? wc_get_price_decimals() );
+	}
+
+	/**
+	 * Calculate through public overrides at the selected precision.
+	 *
+	 * @param array $line_items Refund lines.
+	 * @param int   $price_decimals Price precision.
+	 * @return float|null
+	 */
+	private function calculate_refund_amount_with_precision( array $line_items, int $price_decimals ): ?float {
+		$previous_decimals    = $this->price_decimals;
+		$this->price_decimals = $price_decimals;
+		try {
+			return $this->calculate_refund_amount( $line_items );
+		} finally {
+			$this->price_decimals = $previous_decimals;
+		}
 	}
 
 	/**
@@ -887,28 +900,35 @@ class DataUtils {
 	 * and already rounded by {@see compute_line_item_refund_total()}.
 	 *
 	 * @param array $line_items Line items in schema format.
-	 * @return array Line items with numeric refund_total values rounded to the store price precision.
+	 * @return array Line items rounded to the scoped order precision, or store precision for standalone calls.
 	 *
 	 * @since 10.9.0
 	 */
 	public function normalize_refund_totals( array $line_items ): array {
-		return $this->normalize_refund_totals_with_precision( $line_items, wc_get_price_decimals() );
-	}
-
-	/**
-	 * Normalize caller-supplied totals at the selected price precision.
-	 *
-	 * @param array $line_items Refund lines.
-	 * @param int   $price_decimals Price precision.
-	 * @return array
-	 */
-	private function normalize_refund_totals_with_precision( array $line_items, int $price_decimals ): array {
+		$price_decimals = $this->price_decimals ?? wc_get_price_decimals();
 		foreach ( $line_items as $key => $line_item ) {
 			if ( isset( $line_item['refund_total'] ) && is_numeric( $line_item['refund_total'] ) ) {
 				$line_items[ $key ]['refund_total'] = NumberUtil::round( (float) $line_item['refund_total'], $price_decimals );
 			}
 		}
 		return $line_items;
+	}
+
+	/**
+	 * Normalize through public overrides at the selected precision.
+	 *
+	 * @param array $line_items Refund lines.
+	 * @param int   $price_decimals Price precision.
+	 * @return array
+	 */
+	private function normalize_refund_totals_with_precision( array $line_items, int $price_decimals ): array {
+		$previous_decimals    = $this->price_decimals;
+		$this->price_decimals = $price_decimals;
+		try {
+			return $this->normalize_refund_totals( $line_items );
+		} finally {
+			$this->price_decimals = $previous_decimals;
+		}
 	}
 
 	/**
