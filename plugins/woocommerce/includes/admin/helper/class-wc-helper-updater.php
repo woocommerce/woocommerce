@@ -1317,11 +1317,7 @@ class WC_Helper_Updater {
 		}
 
 		$count = self::get_updates_count() ?? 0;
-		if ( ! WC_Woo_Update_Manager_Plugin::is_plugin_installed() ) {
-			if ( ! WC_Woo_Update_Manager_Plugin::needs_manual_install() ) {
-				++$count;
-			}
-		} elseif ( ! WC_Woo_Update_Manager_Plugin::is_plugin_active() ) {
+		if ( ! WC_Woo_Update_Manager_Plugin::is_plugin_installed() || ! WC_Woo_Update_Manager_Plugin::is_plugin_active() ) {
 			++$count;
 		}
 
