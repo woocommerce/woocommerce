@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Keep recommended extensions selected, named, and correctly ordered when the onboarding wizard installs or retries them.

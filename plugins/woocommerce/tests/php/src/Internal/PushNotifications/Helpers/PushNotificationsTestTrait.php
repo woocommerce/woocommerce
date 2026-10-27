@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Helpers;
 use Automattic\Jetpack\Connection\Manager as JetpackConnectionManager;
 use Automattic\WooCommerce\Internal\PushNotifications\DataStores\PushTokensDataStore;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
+use Automattic\WooCommerce\Internal\PushNotifications\Triggers\NewOrderNotificationTrigger;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
@@ -77,5 +78,28 @@ trait PushNotificationsTestTrait {
 		$data_store->method( 'has_tokens' )->willReturn( $has_tokens );
 
 		return $data_store;
+	}
+
+	/**
+	 * Removes new order trigger callbacks that WooCommerce registered when it booted.
+	 * Push notifications are off in tests, so the off-state marker is registered and
+	 * would otherwise mark orders before the code under test does.
+	 *
+	 * @return void
+	 */
+	protected function remove_trigger_callbacks_registered_at_boot(): void {
+		global $wp_filter;
+
+		foreach ( array( 'woocommerce_new_order', 'woocommerce_order_status_changed' ) as $hook ) {
+			$callbacks = isset( $wp_filter[ $hook ] ) ? $wp_filter[ $hook ]->callbacks : array();
+
+			foreach ( $callbacks as $priority => $by_priority ) {
+				foreach ( $by_priority as $callback ) {
+					if ( is_array( $callback['function'] ) && $callback['function'][0] instanceof NewOrderNotificationTrigger ) {
+						remove_action( $hook, $callback['function'], $priority );
+					}
+				}
+			}
+		}
 	}
 }
