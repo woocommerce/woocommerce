@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Give each cloned order its own meta objects and its own copies of the loaded items, so an unsaved change on one order instance no longer appears on other instances from the order cache.
+Give each cloned order its own meta objects and its own copies of the loaded items, so an unsaved change on one order instance no longer appears on other instances from the order cache. Give each cloned product its own attribute and download objects for the same reason.

@@ -131,6 +131,26 @@ class ProductCacheTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that an unsaved attribute change on one cached copy does not reach another copy.
+	 */
+	public function test_unsaved_attribute_change_does_not_reach_other_copies() {
+		$attribute = new \WC_Product_Attribute();
+		$attribute->set_name( 'color' );
+		$attribute->set_options( array( 'red', 'blue' ) );
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+		$this->sut->set( $product );
+
+		$first = $this->sut->get( $product->get_id() );
+		$first->get_attributes()['color']->set_options( array( 'green' ) );
+		$second = $this->sut->get( $product->get_id() );
+
+		$this->assertSame( array( 'red', 'blue' ), $second->get_attributes()['color']->get_options() );
+		$this->assertSame( array( 'red', 'blue' ), $product->get_attributes()['color']->get_options() );
+	}
+
+	/**
 	 * Test that cloning a retrieved product uses DUPLICATE mode.
 	 *
 	 * This verifies backward compatibility - products retrieved from cache
