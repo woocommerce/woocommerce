@@ -341,15 +341,17 @@ abstract class ActionableAbility extends \WP_Ability {
 	}
 
 	/**
-	 * Add data to an error, and the 400 status when it has none.
+	 * Add data to every code of an error, and the 400 status to a code that has none.
 	 *
 	 * @param \WP_Error            $error Error.
 	 * @param array<string, mixed> $data  Data to add.
 	 * @return \WP_Error
 	 */
 	private static function with_data( \WP_Error $error, array $data ): \WP_Error {
-		$current = $error->get_error_data();
-		$error->add_data( array_merge( array( 'status' => 400 ), is_array( $current ) ? $current : array(), $data ) );
+		foreach ( $error->get_error_codes() as $code ) {
+			$current = $error->get_error_data( $code );
+			$error->add_data( array_merge( array( 'status' => 400 ), is_array( $current ) ? $current : array(), $data ), $code );
+		}
 		return $error;
 	}
 }
