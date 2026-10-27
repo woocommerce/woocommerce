@@ -555,6 +555,31 @@ class OrderControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox update_order_from_cart() still pairs the title with the id when the chosen gateway is registered but disabled.
+	 */
+	public function test_update_order_from_cart_sets_payment_method_title_for_a_disabled_registered_gateway(): void {
+		$bacs                = WC()->payment_gateways()->payment_gateways()['bacs'];
+		$bacs_enabled_before = $bacs->enabled;
+		$bacs->enabled       = 'no';
+		WC()->session->set( 'chosen_payment_method', 'bacs' );
+
+		try {
+			WC()->cart->empty_cart();
+			WC()->cart->add_to_cart( WC_Helper_Product::create_simple_product()->get_id() );
+			$order = WC_Helper_Order::create_order();
+
+			$this->sut->update_order_from_cart( $order );
+
+			$this->assertSame( 'bacs', $order->get_payment_method() );
+			$this->assertSame( $bacs->get_title(), $order->get_payment_method_title() );
+		} finally {
+			WC()->cart->empty_cart();
+			$bacs->enabled = $bacs_enabled_before;
+			WC()->session->set( 'chosen_payment_method', null );
+		}
+	}
+
+	/**
 	 * Sync an order from a one-item cart with COD enabled, the given session choice and a callback that returns nothing.
 	 *
 	 * Gateway instances and the session choice are restored afterwards; the base class does not reset them.
