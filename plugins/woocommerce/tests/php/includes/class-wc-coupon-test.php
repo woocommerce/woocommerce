@@ -8,6 +8,96 @@
 class WC_Coupon_Tests extends WC_Unit_Test_Case {
 
 	/**
+	 * @testdox Amount validation uses the stored discount type when getters are filtered.
+	 * @testWith ["fixed_cart", "percent", "150"]
+	 *           ["fixed_product", "percent", "150"]
+	 *           ["percent", "fixed_cart", "100"]
+	 * @param string $stored_type Stored discount type.
+	 * @param string $view_type Filtered discount type.
+	 * @param string $amount Valid amount for the stored type.
+	 */
+	public function test_set_amount_with_filtered_discount_type( string $stored_type, string $view_type, string $amount ): void {
+		$sut = new WC_Coupon();
+		$sut->set_discount_type( $stored_type );
+		add_filter(
+			'woocommerce_coupon_get_discount_type',
+			static function () use ( $view_type ) {
+				return $view_type;
+			}
+		);
+
+		$sut->set_amount( $amount );
+
+		$this->assertSame( $amount, $sut->get_amount( 'edit' ) );
+		$this->assertSame( $stored_type, $sut->get_discount_type( 'edit' ) );
+		$this->assertSame( $view_type, $sut->get_discount_type() );
+	}
+
+	/**
+	 * @testdox A filtered discount type cannot bypass the stored percentage limit.
+	 */
+	public function test_set_amount_rejects_percentage_above_100_with_filtered_discount_type(): void {
+		$sut = new WC_Coupon();
+		$sut->set_discount_type( 'percent' );
+		add_filter(
+			'woocommerce_coupon_get_discount_type',
+			static function () {
+				return 'fixed_cart';
+			}
+		);
+
+		$this->expectException( WC_Data_Exception::class );
+		$this->expectExceptionMessage( 'Invalid discount amount.' );
+
+		$sut->set_amount( '150' );
+	}
+
+	/**
+	 * @testdox Loading coupons preserves fixed amounts when type and amount getters are filtered.
+	 * @testWith [false]
+	 *           [true]
+	 * @param bool $manual Whether to load a manual coupon.
+	 */
+	public function test_load_amount_with_filtered_discount_type( bool $manual ): void {
+		$props = array(
+			'discount_type' => 'fixed_cart',
+			'amount'        => '150',
+		);
+		$sut   = new WC_Coupon();
+		$sut->set_code( 'filtered-discount-type' );
+		$sut->set_props( $props );
+		$id = $sut->save();
+
+		if ( $manual ) {
+			add_filter(
+				'woocommerce_get_shop_coupon_data',
+				static function () use ( $props ) {
+					return $props;
+				}
+			);
+		}
+		add_filter(
+			'woocommerce_coupon_get_discount_type',
+			static function () {
+				return 'percent';
+			}
+		);
+		add_filter(
+			'woocommerce_coupon_get_amount',
+			static function () {
+				return '25';
+			}
+		);
+
+		$sut = new WC_Coupon( $id );
+
+		$this->assertSame( '150', $sut->get_amount( 'edit' ) );
+		$this->assertSame( 'fixed_cart', $sut->get_discount_type( 'edit' ) );
+		$this->assertSame( '25', $sut->get_amount() );
+		$this->assertSame( 'percent', $sut->get_discount_type() );
+	}
+
+	/**
 	 * @testdox Spend limit setters compare stored amounts when getters are filtered.
 	 * @testWith [2, false, "60"]
 	 *           [0.5, true, "60"]

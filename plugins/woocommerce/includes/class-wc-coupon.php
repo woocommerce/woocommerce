@@ -634,7 +634,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 			$this->error( 'coupon_invalid_amount', __( 'Invalid discount amount.', 'woocommerce' ) );
 		}
 
-		if ( 'percent' === $this->get_discount_type() && (float) $amount > 100 ) {
+		if ( 'percent' === $this->get_discount_type( 'edit' ) && (float) $amount > 100 ) {
 			$this->error( 'coupon_invalid_amount', __( 'Invalid discount amount.', 'woocommerce' ) );
 		}
 
