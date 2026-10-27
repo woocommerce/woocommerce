@@ -390,10 +390,14 @@ class Controller extends AbstractBlock {
 
 		// phpcs:ignore WordPress.DB.SlowDBQuery
 		$block_context_query['tax_query'] = ! empty( $query['tax_query'] ) ? $query['tax_query'] : array();
-		$block_context_query['queryId']   = $block->context['queryId'] ?? null;
+		$query_id                         = $block->context['queryId'] ?? null;
+		$block_context_query['queryId']   = is_string( $query_id ) ? (int) $query_id : $query_id;
 
 		if ( ! ( $block_context_query['inherit'] ?? false ) ) {
-			$block_context_query['filterParams'] = wc_get_container()->get( \Automattic\WooCommerce\Internal\ProductFilters\Params::class )->get_filter_params( $block_context_query['queryId'] );
+			$params                              = wc_get_container()->get( \Automattic\WooCommerce\Internal\ProductFilters\Params::class );
+			$block_context_query['filterParams'] = is_string( $query_id )
+				? $params->get_filter_params_for_prefix( 'wcp-' . $query_id . '-' )
+				: $params->get_filter_params( $query_id );
 		}
 
 		$collection_args = array(

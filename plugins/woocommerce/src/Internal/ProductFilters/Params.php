@@ -57,12 +57,23 @@ class Params implements FilterUrlParam {
 	 * @return array<string, string> Selections keyed by effective filter name.
 	 */
 	public function get_filter_params( ?int $query_id = null ): array {
+		return $this->get_filter_params_for_prefix( null === $query_id ? '' : 'wcp-' . $query_id . '-' );
+	}
+
+	/**
+	 * Read filter selections for a rendered collection's URL prefix.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param string $prefix Collection prefix, or an empty string for global filters.
+	 * @return array<string, string> Selections keyed by effective filter name.
+	 */
+	public function get_filter_params_for_prefix( string $prefix ): array {
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Values are validated below against registered filter parameters.
 		$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : '';
 		$query       = wp_parse_url( $request_uri, PHP_URL_QUERY );
 		$url_params  = array();
 		parse_str( is_string( $query ) ? $query : '', $url_params );
-		$prefix = null === $query_id ? '' : 'wcp-' . $query_id . '-';
 		$params = array();
 
 		foreach ( $this->get_param_keys() as $key ) {

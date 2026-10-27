@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep duplicated Product Collections' filters and pagination independent without changing saved templates.

@@ -55,6 +55,20 @@ class Renderer {
 	protected $parsed_block;
 
 	/**
+	 * Number of prepared collections for each saved query ID.
+	 *
+	 * @var array<int, int>
+	 */
+	private $query_id_counts = array();
+
+	/**
+	 * Active block scopes, whose prepared descendants survive inspection renders.
+	 *
+	 * @var \stdClass[]
+	 */
+	private $query_id_scopes = array();
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -98,7 +112,83 @@ class Renderer {
 			3
 		);
 		add_filter( 'render_block_core/query-pagination', array( $this, 'add_navigation_link_directives' ), 10, 3 );
+		add_filter( 'render_block_data', array( $this, 'prepare_query_ids' ) );
+		add_filter( 'render_block', array( $this, 'finish_query_id_scope' ), PHP_INT_MAX, 2 );
 		add_filter( 'render_block_context', array( $this, 'handle_render_block_context' ), 11, 3 );
+	}
+
+	/**
+	 * Assign runtime IDs once per parsed occurrence, including across inspection renders.
+	 *
+	 * @since 11.4.0
+	 * @internal
+	 *
+	 * @param array $parsed_block The block and its currently available descendants.
+	 * @return array
+	 */
+	public function prepare_query_ids( $parsed_block ) {
+		$parsed_block            = $this->prepare_query_id_tree( $parsed_block );
+		$scope                   = $parsed_block['__woocommerceProductCollection'];
+		$scope->index            = 0;
+		$this->query_id_scopes[] = $scope;
+		return $parsed_block;
+	}
+
+	/**
+	 * Close the scope after its block has rendered.
+	 *
+	 * @since 11.4.0
+	 * @internal
+	 *
+	 * @param string $content Rendered block content.
+	 * @param array  $parsed_block The rendered block.
+	 * @return string
+	 */
+	public function finish_query_id_scope( $content, $parsed_block ) {
+		if ( end( $this->query_id_scopes ) === ( $parsed_block['__woocommerceProductCollection'] ?? null ) ) {
+			array_pop( $this->query_id_scopes );
+		}
+		return $content;
+	}
+
+	/**
+	 * Prepare the available tree, reusing metadata when an owner expands it again.
+	 *
+	 * @param array $parsed_block Block to prepare.
+	 * @return array
+	 */
+	private function prepare_query_id_tree( $parsed_block ) {
+		if ( isset( $parsed_block['__woocommerceProductCollection'] ) ) {
+			return $parsed_block;
+		}
+
+		$owner = end( $this->query_id_scopes );
+		$index = $owner ? $owner->index++ : null;
+		$scope = $owner ? ( $owner->children[ $index ] ?? null ) : null;
+		if ( null === $scope ) {
+			$scope    = (object) array(
+				'query_id' => null,
+				'children' => array(),
+				'index'    => 0,
+			);
+			$query_id = $parsed_block['attrs']['queryId'] ?? null;
+			if ( 'woocommerce/product-collection' === ( $parsed_block['blockName'] ?? '' ) && is_int( $query_id ) ) {
+				$count                              = $this->query_id_counts[ $query_id ] ?? 0;
+				$this->query_id_counts[ $query_id ] = $count + 1;
+				$scope->query_id                    = $count ? $query_id . '-copy-' . $count : $query_id;
+			}
+			if ( $owner ) {
+				$owner->children[ $index ] = $scope;
+			}
+		}
+
+		// Objects survive parsed-array copies; attributes remain untouched for their numeric schema.
+		$parsed_block['__woocommerceProductCollection'] = $scope;
+		foreach ( $parsed_block['innerBlocks'] ?? array() as $key => $inner_block ) {
+			$parsed_block['innerBlocks'][ $key ] = $this->prepare_query_id_tree( $inner_block );
+		}
+
+		return $parsed_block;
 	}
 
 	/**
@@ -475,6 +565,12 @@ class Renderer {
 		$block_name = $parsed_block['blockName'] ?? '';
 
 		if ( 'woocommerce/product-collection' === $block_name ) {
+			$query_id = $parsed_block['__woocommerceProductCollection']->query_id ?? $parsed_block['attrs']['queryId'] ?? null;
+			if ( null !== $query_id ) {
+				$this->parsed_block['attrs']['queryId'] = $query_id;
+				$context['queryId']                     = $query_id;
+			}
+
 			$this->has_cart_reference_context = $this->context_provides_cart_reference( $context );
 
 			// Set productCollectionLocation for the Product Collection block itself.
@@ -486,6 +582,8 @@ class Renderer {
 		if ( ! isset( $context['query'] ) || ! isset( $context['query']['isProductCollectionBlock'] ) || ! $context['query']['isProductCollectionBlock'] ) {
 			return $context;
 		}
+
+		$context['queryId'] = $this->parsed_block['attrs']['queryId'] ?? $context['queryId'] ?? null;
 
 		if ( 'woocommerce/product-filters' === $block_name && ( $context['query']['inherit'] ?? false ) ) {
 			// A null override also clears the saved ID when WordPress refreshes available context.

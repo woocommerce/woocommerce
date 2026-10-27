@@ -410,8 +410,8 @@ describe( 'product filters interactivity store', () => {
 		}
 	);
 
-	it.each( [ 0, 17 ] )(
-		'scopes navigation and clearing to collection %i',
+	it.each( [ 0, 17, '0-copy-1' ] )(
+		'scopes navigation and clearing to collection %s',
 		( queryId ) => {
 			if ( ! mockRegisteredStore ) {
 				throw new Error( 'Product filters store was not registered.' );

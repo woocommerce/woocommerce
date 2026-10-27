@@ -178,7 +178,9 @@ CSS;
 
 		$query_id      = $block->context['queryId'] ?? null;
 		$params        = wc_get_container()->get( Params::class );
-		$filter_params = $params->get_filter_params( $query_id );
+		$filter_params = is_string( $query_id )
+			? $params->get_filter_params_for_prefix( 'wcp-' . $query_id . '-' )
+			: $params->get_filter_params( $query_id );
 
 		wp_interactivity_config(
 			$this->get_full_block_name(),

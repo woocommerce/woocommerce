@@ -21,9 +21,126 @@ class RendererTest extends WC_Unit_Test_Case {
 		'render_block_woocommerce/product-collection',
 		'render_block_woocommerce/product-template',
 		'render_block_woocommerce/product-collection-no-results',
+		'render_block_woocommerce/product-filters',
 		'render_block_core/query-pagination',
+		'render_block',
+		'render_block_data',
 		'render_block_context',
 	);
+
+	/**
+	 * @testdox Should isolate duplicate collections without taking a later collection's saved ID.
+	 * @dataProvider duplicate_collection_requests
+	 *
+	 * @param string $request_uri Request URL.
+	 * @param string $second_title Expected product in the second collection.
+	 * @param bool   $in_product_details Whether Product Details inspects and renders the collections.
+	 * @param bool   $synced Whether the collections are stored in a synced pattern.
+	 */
+	public function test_duplicate_collection_controls( string $request_uri, string $second_title, bool $in_product_details = false, bool $synced = false ): void {
+		foreach ( self::RENDER_HOOKS as $hook_name ) {
+			remove_all_filters( $hook_name );
+		}
+		new Renderer();
+
+		$products = array();
+		foreach ( array( 'Identity A', 'Identity B', 'Identity C' ) as $name ) {
+			$product = WC_Helper_Product::create_simple_product();
+			$product->set_name( $name );
+			$product->set_stock_status( 'Identity B' === $name ? \Automattic\WooCommerce\Enums\ProductStockStatus::OUT_OF_STOCK : \Automattic\WooCommerce\Enums\ProductStockStatus::IN_STOCK );
+			$product->save();
+			$products[] = $product->get_id();
+		}
+
+		$markup = '';
+		foreach ( array( array( 0, array_slice( $products, 0, 2 ) ), array( 0, array_slice( $products, 1 ) ), array( 1, array( $products[2] ) ) ) as list( $query_id, $product_ids ) ) {
+			$attributes            = Utils::get_base_parsed_block()['attrs'];
+			$attributes['queryId'] = $query_id;
+			$attributes['query']   = array_merge(
+				$attributes['query'],
+				array(
+					'inherit'                       => false,
+					'perPage'                       => 1,
+					'orderBy'                       => 'title',
+					'order'                         => 'asc',
+					'woocommerceHandPickedProducts' => $product_ids,
+				)
+			);
+			$markup               .= '<!-- wp:woocommerce/product-collection ' . wp_json_encode( $attributes ) . ' --><div class="wp-block-woocommerce-product-collection">'
+				. '<!-- wp:woocommerce/product-filters --><div class="wp-block-woocommerce-product-filters"></div><!-- /wp:woocommerce/product-filters -->'
+				. '<!-- wp:woocommerce/product-template --><!-- wp:post-title /--><!-- /wp:woocommerce/product-template -->'
+				. '<!-- wp:query-pagination --><!-- wp:query-pagination-next /--><!-- /wp:query-pagination -->'
+				. '</div><!-- /wp:woocommerce/product-collection -->';
+		}
+
+		if ( $synced ) {
+			$pattern_id = self::factory()->post->create(
+				array(
+					'post_type'    => 'wp_block',
+					'post_status'  => 'publish',
+					'post_content' => $markup,
+				)
+			);
+			$markup     = '<!-- wp:block {"ref":' . $pattern_id . '} /-->';
+		}
+
+		if ( $in_product_details ) {
+			add_filter( 'woocommerce_disable_compatibility_layer', '__return_true' );
+			$markup = '<!-- wp:woocommerce/product-details --><div class="wp-block-woocommerce-product-details">'
+				. '<!-- wp:accordion --><div class="wp-block-accordion">'
+				. '<!-- wp:accordion-item {"openByDefault":true} --><div class="wp-block-accordion-item">'
+				. '<!-- wp:accordion-panel --><div class="wp-block-accordion-panel">' . $markup
+				. '</div><!-- /wp:accordion-panel --></div><!-- /wp:accordion-item -->'
+				. '</div><!-- /wp:accordion --></div><!-- /wp:woocommerce/product-details -->';
+		}
+
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- Restore the original request verbatim after the test.
+		$original_uri = $_SERVER['REQUEST_URI'] ?? null;
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Preserve the original request for restoration.
+		$original_get = $_GET;
+		try {
+			$_SERVER['REQUEST_URI'] = $request_uri;
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Simulate a public pagination request.
+			parse_str( (string) wp_parse_url( $request_uri, PHP_URL_QUERY ), $_GET );
+			$html     = do_blocks( $markup );
+			$document = new \DOMDocument();
+			$document->loadHTML( $html, LIBXML_NOERROR | LIBXML_NOWARNING );
+			$xpath = new \DOMXPath( $document );
+			foreach ( array(
+				'0'        => 'Identity A',
+				'0-copy-1' => $second_title,
+				'1'        => 'Identity C',
+			) as $identity => $title ) {
+				$regions = $xpath->query( '//*[@data-wp-router-region="wc-product-collection-' . $identity . '"]' );
+				$this->assertCount( 1, $regions, 'Each collection must have one distinct router region.' );
+				$titles = $xpath->query( './/h2', $regions->item( 0 ) );
+				$this->assertCount( 1, $titles, 'Each collection must retain its own product page.' );
+				$this->assertSame( $title, $titles->item( 0 )->textContent, 'Filtering and pagination must affect only the targeted collection.' );
+			}
+		} finally {
+			$_GET = $original_get; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Restore the original request after rendering.
+			if ( null === $original_uri ) {
+				unset( $_SERVER['REQUEST_URI'] );
+			} else {
+				$_SERVER['REQUEST_URI'] = $original_uri;
+			}
+		}
+	}
+
+	/**
+	 * Independent controls for copied collections.
+	 *
+	 * @return array<string, array{0: string, 1: string, 2?: bool, 3?: bool}>
+	 */
+	public function duplicate_collection_requests(): array {
+		return array(
+			'initial'                   => array( '/', 'Identity B' ),
+			'filter copy'               => array( '/?wcp-0-copy-1-filter_stock_status=instock', 'Identity C' ),
+			'paginate copy'             => array( '/?query-0-copy-1-page=2', 'Identity C' ),
+			'inspected panels'          => array( '/?wcp-0-copy-1-filter_stock_status=instock', 'Identity C', true ),
+			'inspected synced patterns' => array( '/?wcp-0-copy-1-filter_stock_status=instock', 'Identity C', true, true ),
+		);
+	}
 
 	/**
 	 * @testdox Should extend context only for Product Collection and its descendants, including through Group and Product Template blocks.
