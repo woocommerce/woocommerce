@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Keep order withdrawal requests rate limited when an order already has a withdrawal request.
