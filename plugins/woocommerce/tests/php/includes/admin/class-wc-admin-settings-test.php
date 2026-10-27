@@ -580,6 +580,103 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should render the value saved through a nested field name instead of the default.
+	 */
+	public function test_output_fields_renders_value_saved_through_nested_field_name(): void {
+		$options = array(
+			array(
+				'id'         => 'test_nested_one',
+				'field_name' => 'test_nested_options[one]',
+				'type'       => 'text',
+				'default'    => 'default value',
+			),
+		);
+
+		WC_Admin_Settings::save_fields( $options, array( 'test_nested_options' => array( 'one' => 'saved value' ) ) );
+
+		$this->assertSame( array( 'one' => 'saved value' ), get_option( 'test_nested_options' ) );
+		$this->assertStringContainsString( 'value="saved value"', $this->render_fields( $options ) );
+	}
+
+	/**
+	 * @testdox Should read through the field name only when a value is stored there, and through the ID otherwise.
+	 *
+	 * @dataProvider field_name_read_data
+	 *
+	 * @param array  $stored_options Options to store, keyed by option name.
+	 * @param mixed  $field_name     Field name of the rendered field.
+	 * @param string $expected       Value the rendered input should carry.
+	 */
+	public function test_output_fields_reads_through_field_name_or_id( array $stored_options, $field_name, string $expected ): void {
+		foreach ( $stored_options as $option_name => $option_value ) {
+			update_option( $option_name, $option_value );
+		}
+
+		$output = $this->render_fields(
+			array(
+				array(
+					'id'         => 'test_field_id',
+					'field_name' => $field_name,
+					'type'       => 'text',
+					'default'    => 'default value',
+				),
+			)
+		);
+
+		$this->assertStringContainsString( 'value="' . $expected . '"', $output );
+	}
+
+	/**
+	 * Data provider for test_output_fields_reads_through_field_name_or_id().
+	 *
+	 * @return array<string, array{array<string, mixed>, mixed, string}>
+	 */
+	public static function field_name_read_data(): array {
+		$id_value     = array( 'test_field_id' => 'id value' );
+		$parent_value = array(
+			'test_parent' => array(
+				'key'  => 'nested value',
+				'deep' => array( 'leaf' => 'deep value' ),
+			),
+		);
+
+		return array(
+			'nested key'                => array( $parent_value + $id_value, 'test_parent[key]', 'nested value' ),
+			'plain name'                => array( array( 'test_plain' => 'plain value' ) + $id_value, 'test_plain', 'plain value' ),
+			'nothing stored under name' => array( $id_value, 'test_parent[key]', 'id value' ),
+			'key missing from option'   => array( $parent_value + $id_value, 'test_parent[missing]', 'id value' ),
+			'nothing stored at all'     => array( array(), 'test_parent[key]', 'default value' ),
+			'two levels'                => array( $parent_value + $id_value, 'test_parent[deep][leaf]', 'id value' ),
+			'trailing brackets'         => array( $parent_value + $id_value, 'test_parent[deep][]', 'id value' ),
+			'bare brackets'             => array( $parent_value + $id_value, 'test_parent[]', 'id value' ),
+			'unbalanced bracket'        => array( $parent_value + $id_value, 'test_parent[', 'id value' ),
+			'no base name'              => array( $parent_value + $id_value, '[key]', 'id value' ),
+			'string option'             => array( array( 'test_string' => 'abc' ) + $id_value, 'test_string[0]', 'id value' ),
+			'object option'             => array( array( 'test_object' => new stdClass() ) + $id_value, 'test_object[key]', 'id value' ),
+			'object value under key'    => array( array( 'test_object' => array( 'key' => new stdClass() ) ) + $id_value, 'test_object[key]', 'id value' ),
+			'field name same as the ID' => array( $id_value, 'test_field_id', 'id value' ),
+		);
+	}
+
+	/**
+	 * Render settings fields and return the output.
+	 *
+	 * @param array $options Field definitions.
+	 * @return string
+	 */
+	private function render_fields( array $options ): string {
+		ob_start();
+		try {
+			WC_Admin_Settings::output_fields( $options );
+			$output = (string) ob_get_contents();
+		} finally {
+			ob_end_clean();
+		}
+
+		return $output;
+	}
+
+	/**
 	 * Prepare globals used by WC_Admin_Settings::save().
 	 *
 	 * @param string|null $redirect_to Requested redirect target, or null to omit the Settings UI redirect field.

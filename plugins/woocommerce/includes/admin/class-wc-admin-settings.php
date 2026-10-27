@@ -242,6 +242,32 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 		}
 
 		/**
+		 * Get the stored value of a settings field.
+		 *
+		 * When a field sets 'field_name', save_fields() stores the value under it, so read it from there.
+		 * Other names, and values not stored there, are read through the field ID as before.
+		 *
+		 * @param array $field Field definition with 'id', 'field_name' and 'default' set.
+		 * @return mixed
+		 */
+		private static function get_field_value( $field ) {
+			$field_name = $field['field_name'];
+
+			if ( $field_name !== $field['id'] && is_string( $field_name ) && preg_match( '/^([^\[\]]+)(?:\[([^\[\]]+)\])?$/', $field_name, $matches ) ) {
+				$stored = get_option( $matches[1], null );
+				if ( isset( $matches[2] ) ) {
+					$stored = is_array( $stored ) ? ( $stored[ $matches[2] ] ?? null ) : null;
+				}
+
+				if ( null !== $stored && ! is_object( $stored ) ) {
+					return self::get_option( $field_name, $field['default'] );
+				}
+			}
+
+			return self::get_option( $field['id'], $field['default'] );
+		}
+
+		/**
 		 * Output admin fields.
 		 *
 		 * Loops through the woocommerce options array and outputs each field.
@@ -294,7 +320,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 					$value['suffix'] = '';
 				}
 				if ( ! isset( $value['value'] ) ) {
-					$value['value'] = self::get_option( $value['id'], $value['default'] );
+					$value['value'] = self::get_field_value( $value );
 				}
 
 				if ( ! is_null( $value['fixed_value'] ?? null ) ) {
