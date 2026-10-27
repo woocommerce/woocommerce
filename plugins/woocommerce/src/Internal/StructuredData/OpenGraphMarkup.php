@@ -36,13 +36,26 @@ class OpenGraphMarkup {
 			return $html;
 		}
 
-		$processor        = new WP_HTML_Tag_Processor( $html );
-		$tags             = $candidates;
-		$has_image        = false;
-		$has_prices       = false;
-		$has_availability = false;
-		$head_complete    = false;
-		$template_depth   = 0;
+		$tag_groups = array(
+			'image'        => array(
+				'detect' => '/^og:image(?::url)?$/D',
+				'match'  => '/^og:image(?::|$)/D',
+				'exists' => false,
+			),
+			'prices'       => array(
+				'match'  => '/^(product:(sale_)?price(:|_)|og:price:)/',
+				'exists' => false,
+			),
+			'availability' => array(
+				'match'  => '/^(product|og):availability$/D',
+				'exists' => false,
+			),
+		);
+
+		$processor      = new WP_HTML_Tag_Processor( $html );
+		$tags           = $candidates;
+		$head_complete  = false;
+		$template_depth = 0;
 
 		while ( $processor->next_tag( array( 'tag_closers' => 'visit' ) ) ) {
 			if ( 'TEMPLATE' === $processor->get_tag() ) {
@@ -68,14 +81,10 @@ class OpenGraphMarkup {
 				} elseif ( ! is_string( $content ) || '' === trim( $content ) ) {
 					continue;
 				}
-				if ( in_array( $property, array( 'og:image', 'og:image:url' ), true ) ) {
-					$has_image = true;
-				}
-				if ( preg_match( '/^(product:(sale_)?price(:|_)|og:price:)/', $property ) ) {
-					$has_prices = true;
-				}
-				if ( in_array( $property, array( 'product:availability', 'og:availability' ), true ) ) {
-					$has_availability = true;
+				foreach ( $tag_groups as $group_name => $group ) {
+					if ( preg_match( $group['detect'] ?? $group['match'], $property ) ) {
+						$tag_groups[ $group_name ]['exists'] = true;
+					}
 				}
 				if ( ! isset( $tags['og:image'] ) || 0 !== strpos( $property, 'og:image:' ) ) {
 					unset( $tags[ $property ] );
@@ -85,12 +94,11 @@ class OpenGraphMarkup {
 
 		// Keep related metadata with the provider that supplied it.
 		foreach ( array_keys( $tags ) as $property ) {
-			if (
-				( $has_image && ( 'og:image' === $property || 0 === strpos( $property, 'og:image:' ) ) )
-				|| ( $has_prices && preg_match( '/^(product:(sale_)?price(:|_)|og:price:)/', $property ) )
-				|| ( $has_availability && in_array( $property, array( 'product:availability', 'og:availability' ), true ) )
-			) {
-				unset( $tags[ $property ] );
+			foreach ( $tag_groups as $group ) {
+				if ( $group['exists'] && preg_match( $group['match'], $property ) ) {
+					unset( $tags[ $property ] );
+					break;
+				}
 			}
 		}
 
@@ -99,7 +107,7 @@ class OpenGraphMarkup {
 		}
 
 		if ( isset( $tags['twitter:card'] ) && $tags['twitter:card'] === $default_card ) {
-			$tags['twitter:card'] = $has_image || ! empty( $tags['og:image'] ) ? 'summary_large_image' : 'summary';
+			$tags['twitter:card'] = $tag_groups['image']['exists'] || ! empty( $tags['og:image'] ) ? 'summary_large_image' : 'summary';
 		}
 
 		return self::insert_tags( $processor->get_updated_html(), $tags );
