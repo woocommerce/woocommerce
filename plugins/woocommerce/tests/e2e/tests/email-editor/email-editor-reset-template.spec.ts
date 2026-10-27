@@ -127,9 +127,12 @@ test.describe(
 			// Click the Reset action
 			await page.getByRole( 'menuitem', { name: 'Reset' } ).click();
 
-			// Verify the reset confirmation modal appears
+			// Verify the reset confirmation modal appears. Up to WP 7.1 the email
+			// editor shows its own reset action, from WP 7.2 core's.
 			await expect(
-				page.getByText( /Are you sure you want to reset.*to default\?/ )
+				page.getByText(
+					/Are you sure you want to reset.*to default\?|Reset to default and clear all customizations\?/
+				)
 			).toBeVisible();
 
 			// Verify Cancel button exists

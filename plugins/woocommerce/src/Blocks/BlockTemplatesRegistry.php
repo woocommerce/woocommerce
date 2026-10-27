@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Blocks;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
 use Automattic\WooCommerce\Blocks\Templates\AbstractTemplate;
 use Automattic\WooCommerce\Blocks\Templates\AbstractTemplatePart;
+use Automattic\WooCommerce\Blocks\Templates\ArchiveProductTemplatesCompatibility;
 use Automattic\WooCommerce\Blocks\Templates\MiniCartTemplate;
 use Automattic\WooCommerce\Blocks\Templates\CartTemplate;
 use Automattic\WooCommerce\Blocks\Templates\CheckoutTemplate;
@@ -18,6 +19,7 @@ use Automattic\WooCommerce\Blocks\Templates\ProductCategoryTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductTagTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ProductSearchResultsTemplate;
 use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplate;
+use Automattic\WooCommerce\Blocks\Templates\SingleProductTemplateCompatibility;
 use Automattic\WooCommerce\Blocks\Templates\SimpleProductAddToCartWithOptionsTemplate;
 use Automattic\WooCommerce\Blocks\Templates\ExternalProductAddToCartWithOptionsTemplate;
 use Automattic\WooCommerce\Blocks\Templates\VariableProductAddToCartWithOptionsTemplate;
@@ -44,6 +46,44 @@ class BlockTemplatesRegistry {
 	 * @var array<string,string>
 	 */
 	private $template_paths = array();
+
+	/**
+	 * Shared hook compatibility for product archives.
+	 *
+	 * @var ArchiveProductTemplatesCompatibility|null
+	 */
+	private $archive_compatibility;
+
+	/**
+	 * Shared hook compatibility for single products.
+	 *
+	 * @var SingleProductTemplateCompatibility|null
+	 */
+	private $single_product_compatibility;
+
+	/**
+	 * Initialize the shared product archive compatibility layer.
+	 *
+	 * @internal
+	 */
+	public function init_archive_compatibility(): void {
+		if ( null === $this->archive_compatibility ) {
+			$this->archive_compatibility = new ArchiveProductTemplatesCompatibility();
+		}
+		$this->archive_compatibility->init();
+	}
+
+	/**
+	 * Initialize the shared single product compatibility layer.
+	 *
+	 * @internal
+	 */
+	public function init_single_product_compatibility(): void {
+		if ( null === $this->single_product_compatibility ) {
+			$this->single_product_compatibility = new SingleProductTemplateCompatibility();
+		}
+		$this->single_product_compatibility->init();
+	}
 
 	/**
 	 * Initialization method.
@@ -74,18 +114,18 @@ class BlockTemplatesRegistry {
 			);
 			if ( wp_is_block_theme() ) {
 				$product_types = wc_get_product_types();
-				if ( count( $product_types ) > 0 ) {
+				if ( ! empty( $product_types ) ) {
 					add_filter( 'default_wp_template_part_areas', array( $this, 'register_add_to_cart_with_options_template_part_area' ), 10, 1 );
-					if ( array_key_exists( ProductType::SIMPLE, $product_types ) ) {
+					if ( isset( $product_types[ ProductType::SIMPLE ] ) ) {
 						$template_parts[ SimpleProductAddToCartWithOptionsTemplate::SLUG ] = new SimpleProductAddToCartWithOptionsTemplate();
 					}
-					if ( array_key_exists( ProductType::EXTERNAL, $product_types ) ) {
+					if ( isset( $product_types[ ProductType::EXTERNAL ] ) ) {
 						$template_parts[ ExternalProductAddToCartWithOptionsTemplate::SLUG ] = new ExternalProductAddToCartWithOptionsTemplate();
 					}
-					if ( array_key_exists( ProductType::VARIABLE, $product_types ) ) {
+					if ( isset( $product_types[ ProductType::VARIABLE ] ) ) {
 						$template_parts[ VariableProductAddToCartWithOptionsTemplate::SLUG ] = new VariableProductAddToCartWithOptionsTemplate();
 					}
-					if ( array_key_exists( ProductType::GROUPED, $product_types ) ) {
+					if ( isset( $product_types[ ProductType::GROUPED ] ) ) {
 						$template_parts[ GroupedProductAddToCartWithOptionsTemplate::SLUG ] = new GroupedProductAddToCartWithOptionsTemplate();
 					}
 				}
