@@ -46,7 +46,7 @@ $settings = array(
 		),
 	),
 
-	'shipping-tax-class' => array(
+	'shipping-tax-class'      => array(
 		'title'    => __( 'Shipping tax class', 'woocommerce' ),
 		'desc'     => __( 'Optionally control which tax class shipping gets, or leave it so shipping tax is based on the cart items themselves.', 'woocommerce' ),
 		'id'       => 'woocommerce_shipping_tax_class',
@@ -61,7 +61,7 @@ $settings = array(
 		'desc_tip' => true,
 	),
 
-	array(
+	'shipping-tax-split-help' => array(
 		'type'      => 'info',
 		'title'     => '',
 		'row_class' => 'shipping-tax-split-help',
@@ -144,7 +144,7 @@ $settings = array(
 );
 
 if ( ! wc_shipping_enabled() ) {
-	unset( $settings['shipping-tax-class'] );
+	unset( $settings['shipping-tax-class'], $settings['shipping-tax-split-help'] );
 }
 
 return apply_filters( 'woocommerce_tax_settings', $settings );

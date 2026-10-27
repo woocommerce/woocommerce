@@ -71,6 +71,18 @@ class WC_Settings_Tax_Test extends WC_Settings_Unit_Test_Case {
 	}
 
 	/**
+	 * @testDox 'get_settings' leaves out the shipping tax class and its help text when shipping is disabled.
+	 */
+	public function test_get_settings_for_default_section_without_shipping() {
+		add_filter( 'wc_shipping_enabled', '__return_false' );
+
+		$settings = ( new WC_Settings_Tax() )->get_settings_for_section( '' );
+
+		$this->assertArrayNotHasKey( 'woocommerce_shipping_tax_class', $this->get_ids_and_types( $settings ) );
+		$this->assertEmpty( wp_list_filter( $settings, array( 'row_class' => 'shipping-tax-split-help' ) ) );
+	}
+
+	/**
 	 * @testDox 'output' invokes 'output_tax_rates' for the 'standard' section and for sections named as a tax class.
 	 *
 	 * @testWith ["standard"]

@@ -314,31 +314,28 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 		}
 
 		// Total up the cost.
-		$total_cost      = is_array( $args['cost'] ) ? array_sum( $args['cost'] ) : $args['cost'];
-		$taxes           = $args['taxes'];
-		$tax_class_costs = array();
-		$tax_class_taxes = array();
+		$total_cost       = is_array( $args['cost'] ) ? array_sum( $args['cost'] ) : $args['cost'];
+		$taxes            = $args['taxes'];
+		$tax_class_values = wc_get_container()->get( ShippingTaxSplit::class )->get_package_values( $args['package'] );
+		$tax_class_costs  = array();
+		$tax_class_taxes  = array();
 
 		// Taxes - if not an array and not set to false, calc tax based on cost and passed calc_tax variable. This saves shipping methods having to do complex tax calculations.
 		if ( ! is_array( $taxes ) && false !== $taxes && $total_cost > 0 && $this->is_taxable() ) {
 			if ( 'per_item' === $args['calc_tax'] ) {
 				$taxes = $this->get_taxes_per_item( $args['cost'] );
+			} elseif ( null === $tax_class_values ) {
+				$shipping_tax_rates = WC_Tax::get_shipping_tax_rates();
+				$taxes              = WC_Tax::calc_shipping_tax( $total_cost, $shipping_tax_rates );
 			} else {
-				$tax_class_values = wc_get_container()->get( ShippingTaxSplit::class )->get_package_values( $args['package'] );
+				$taxes           = array();
+				$tax_class_costs = ShippingTaxSplit::split_cost( (float) $total_cost, $tax_class_values );
 
-				if ( null === $tax_class_values ) {
-					$shipping_tax_rates = WC_Tax::get_shipping_tax_rates();
-					$taxes              = WC_Tax::calc_shipping_tax( $total_cost, $shipping_tax_rates );
-				} else {
-					$taxes           = array();
-					$tax_class_costs = ShippingTaxSplit::split_cost( (float) $total_cost, $tax_class_values );
-
-					foreach ( $tax_class_costs as $tax_class => $cost ) {
-						if ( ShippingTaxSplit::NON_TAXABLE !== $tax_class ) {
-							$class_taxes                   = WC_Tax::calc_shipping_tax( $cost, WC_Tax::get_shipping_tax_rates( (string) $tax_class ) );
-							$taxes                         = wc_array_merge_recursive_numeric( $taxes, $class_taxes );
-							$tax_class_taxes[ $tax_class ] = array_sum( $class_taxes );
-						}
+				foreach ( $tax_class_costs as $tax_class => $cost ) {
+					if ( ShippingTaxSplit::NON_TAXABLE !== $tax_class ) {
+						$class_taxes                   = WC_Tax::calc_shipping_tax( $cost, WC_Tax::get_shipping_tax_rates( (string) $tax_class ) );
+						$taxes                         = wc_array_merge_recursive_numeric( $taxes, $class_taxes );
+						$tax_class_taxes[ $tax_class ] = array_sum( $class_taxes );
 					}
 				}
 			}
@@ -360,10 +357,15 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 				}
 			}
 
-			// The order line keeps the split, so recalculating the order's taxes gives the same figures.
+			// The order line keeps the split, so recalculating the order's taxes gives the same figures until its items change.
 			if ( $tax_class_costs ) {
 				$args['meta_data'][ ShippingTaxSplit::COSTS_META_KEY ] = $tax_class_costs;
 			}
+		}
+
+		// Every package keeps its item values, split or not, so the order can tell when its items change.
+		if ( null !== $tax_class_values ) {
+			$args['meta_data'][ ShippingTaxSplit::VALUES_META_KEY ] = $tax_class_values;
 		}
 
 		// Round the total cost after taxes have been calculated.

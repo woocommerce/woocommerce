@@ -20,12 +20,17 @@ class ShippingTaxSplit {
 	 *
 	 * The colon keeps it apart from tax class slugs, which sanitize_title() strips colons from, so a class slugged 'non-taxable' is still taxed.
 	 */
-	const NON_TAXABLE = ':non-taxable';
+	public const NON_TAXABLE = ':non-taxable';
 
 	/**
 	 * Meta key on a shipping rate, and the order line made from it, for its cost before tax per tax class.
 	 */
-	const COSTS_META_KEY = '_tax_class_costs';
+	public const COSTS_META_KEY = '_tax_class_costs';
+
+	/**
+	 * Meta key on a shipping rate, and the order line made from it, for the value per tax class of the items its cost was split by.
+	 */
+	public const VALUES_META_KEY = '_tax_class_values';
 
 	/**
 	 * Whether the shipping tax class is set to split by cart item value.
@@ -138,7 +143,8 @@ class ShippingTaxSplit {
 	/**
 	 * Get the value per tax class to split an order's shipping line by.
 	 *
-	 * A line made at checkout keeps the split of its package. Any other line is split by the order's items.
+	 * A line made at checkout keeps the split of its package while the order's items are as they were at checkout.
+	 * Any other line, or any line once the items change, is split by the order's items.
 	 *
 	 * @since 11.4.0
 	 *
@@ -151,9 +157,14 @@ class ShippingTaxSplit {
 			return null;
 		}
 
-		$costs = $item->get_meta( self::COSTS_META_KEY );
+		$order_values = $this->get_order_values( $order );
+		$costs        = $item->get_meta( self::COSTS_META_KEY );
 
-		return ( is_array( $costs ) ? self::get_positive_values( $costs ) : null ) ?? $this->get_order_values( $order );
+		if ( is_array( $costs ) && $this->has_items_as_split( $order, $order_values ) ) {
+			return self::get_positive_values( $costs ) ?? $order_values;
+		}
+
+		return $order_values;
 	}
 
 	/**
@@ -187,6 +198,38 @@ class ShippingTaxSplit {
 		$costs[ $largest ] = NumberUtil::round( $costs[ $largest ] + $cost - NumberUtil::array_sum( $costs ), $decimals );
 
 		return $costs;
+	}
+
+	/**
+	 * Whether the order's items have the values per tax class its shipping lines were split by.
+	 *
+	 * @param \WC_Abstract_Order        $order        Order.
+	 * @param array<string, float>|null $order_values Value per tax class of the order's items.
+	 * @return bool
+	 */
+	private function has_items_as_split( \WC_Abstract_Order $order, ?array $order_values ): bool {
+		$decimals     = wc_get_price_decimals();
+		$split_values = array();
+
+		foreach ( $order->get_shipping_methods() as $shipping_item ) {
+			$line_values = $shipping_item->get_meta( self::VALUES_META_KEY );
+
+			foreach ( is_array( $line_values ) ? $line_values : array() as $tax_class => $value ) {
+				$split_values[ $tax_class ] = ( $split_values[ $tax_class ] ?? 0 ) + (float) $value;
+			}
+		}
+
+		if ( null === $order_values || ! $split_values || count( $split_values ) !== count( $order_values ) ) {
+			return false;
+		}
+
+		foreach ( $order_values as $tax_class => $value ) {
+			if ( ! isset( $split_values[ $tax_class ] ) || NumberUtil::round( $split_values[ $tax_class ], $decimals ) !== NumberUtil::round( $value, $decimals ) ) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	/**
