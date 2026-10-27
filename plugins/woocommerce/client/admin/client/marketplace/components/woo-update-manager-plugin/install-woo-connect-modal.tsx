@@ -61,14 +61,17 @@ export default function InstallWooConnectModal( props: ConnectProps ) {
 					>
 						{ __( 'Download', 'woocommerce' ) }
 					</Button>
-					{ isManualInstall && (
-						<Button
-							href={ wccomSettings?.wooUpdateManagerUploadUrl }
-							variant="secondary"
-						>
-							{ __( 'Upload plugin', 'woocommerce' ) }
-						</Button>
-					) }
+					{ isManualInstall &&
+						wccomSettings?.wooUpdateManagerUploadUrl && (
+							<Button
+								href={
+									wccomSettings?.wooUpdateManagerUploadUrl
+								}
+								variant="secondary"
+							>
+								{ __( 'Upload plugin', 'woocommerce' ) }
+							</Button>
+						) }
 					{ ! isManualInstall && (
 						<Button
 							href={ wccomSettings?.wooUpdateManagerInstallUrl }

@@ -70,16 +70,17 @@ export default function PluginInstallNotice( props: { selectedTab: string } ) {
 						>
 							{ __( 'Download', 'woocommerce' ) }
 						</Button>
-						{ isManualInstall && (
-							<Button
-								href={
-									wccomSettings?.wooUpdateManagerUploadUrl
-								}
-								variant="link"
-							>
-								{ __( 'Upload plugin', 'woocommerce' ) }
-							</Button>
-						) }
+						{ isManualInstall &&
+							wccomSettings?.wooUpdateManagerUploadUrl && (
+								<Button
+									href={
+										wccomSettings?.wooUpdateManagerUploadUrl
+									}
+									variant="link"
+								>
+									{ __( 'Upload plugin', 'woocommerce' ) }
+								</Button>
+							) }
 					</div>
 				</Notice>
 			</section>

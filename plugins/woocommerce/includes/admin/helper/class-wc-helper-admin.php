@@ -88,7 +88,7 @@ class WC_Helper_Admin {
 			'wooUpdateManagerActive'        => WC_Woo_Update_Manager_Plugin::is_plugin_active(),
 			'wooUpdateManagerInstallUrl'    => WC_Woo_Update_Manager_Plugin::generate_install_url(),
 			'wooUpdateManagerManualInstall' => WC_Woo_Update_Manager_Plugin::needs_manual_install(),
-			'wooUpdateManagerUploadUrl'     => network_admin_url( 'plugin-install.php?tab=upload' ),
+			'wooUpdateManagerUploadUrl'     => current_user_can( 'install_plugins' ) ? network_admin_url( 'plugin-install.php?tab=upload' ) : '',
 			'wooUpdateManagerPluginSlug'    => WC_Woo_Update_Manager_Plugin::WOO_UPDATE_MANAGER_SLUG,
 			'dismissNoticeNonce'            => wp_create_nonce( 'dismiss_notice' ),
 			'trackingAllowed'               => 'yes' === get_option( 'woocommerce_allow_tracking' ),
