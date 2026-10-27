@@ -2974,35 +2974,8 @@ class Checkout extends \WP_Test_REST_TestCase {
 		$order->save();
 		$order->apply_coupon( $coupon->get_code() );
 
-		$address = array(
-			'first_name' => 'Test',
-			'last_name'  => 'User',
-			'company'    => '',
-			'address_1'  => '123 Test St',
-			'address_2'  => '',
-			'city'       => 'Test City',
-			'state'      => 'CA',
-			'postcode'   => '90210',
-			'country'    => 'US',
-			'phone'      => '555-32123',
-		);
-		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout/' . $order->get_id() );
-		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
-		$request->set_query_params(
-			array(
-				'key'           => $order->get_order_key(),
-				'billing_email' => 'reserve@example.com',
-			)
-		);
-		$request->set_body_params(
-			array(
-				'billing_address'  => array_merge( $address, array( 'email' => 'buyer@example.com' ) ),
-				'shipping_address' => $address,
-				'payment_method'   => WC_Gateway_BACS::ID,
-			)
-		);
-
-		$response = rest_get_server()->dispatch( $request );
+		// Only the email changes, so the address guard lets the request reach the coupon check.
+		$response = $this->dispatch_pay_for_order_request( $order, array( 'email' => 'buyer@example.com' ) );
 
 		$this->assertSame( 409, $response->get_status(), print_r( $response->get_data(), true ) );
 		$this->assertSame( 'woocommerce_rest_order_coupon_errors', $response->get_data()['code'] );
