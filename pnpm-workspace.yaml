@@ -57,12 +57,12 @@ catalogs:
 
     # `@wordpress/*` runtime packages that WooCommerce needs to bundle because
     # they are not provided as WordPress script externals.
-    # https://github.com/WordPress/gutenberg/blob/69ef4b46569ccb662b09528f1ebe1a1bcbc0b715/packages/dependency-extraction-webpack-plugin/lib/util.js#L2-L14
+    # https://github.com/WordPress/gutenberg/blob/e1d5efda04d8a8d868f220392f89f68cf37f1893/packages/dependency-extraction-webpack-plugin/lib/util.js#L2-L14
     wp-bundled:
         '@wordpress/admin-ui': 2.5.0
         '@wordpress/dataviews': 20.0.0
         '@wordpress/fields': 0.25.11
-        '@wordpress/global-styles-engine': 1.11.0
+        '@wordpress/global-styles-engine': ^1.3.0
         '@wordpress/icons': 11.0.1
         '@wordpress/interface': 10.3.0
         '@wordpress/theme': 0.17.0
