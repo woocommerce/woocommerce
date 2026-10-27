@@ -1174,10 +1174,7 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$this->assertSame(
 			array(
 				'pa_size'   => array( 'small', 'large', 'huge' ),
-				'pa_colour' => array(
-					0 => 'red',
-					2 => 'blue',
-				),
+				'pa_colour' => array( 'blue', 'red' ),
 				'pa_number' => array( '0', '1', '2' ),
 			),
 			$attributes
