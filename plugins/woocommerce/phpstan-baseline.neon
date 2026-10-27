@@ -4437,7 +4437,7 @@ parameters:
 		-
 			message: '#^Call to an undefined method WC_Order_Item\:\:get_total\(\)\.$#'
 			identifier: method.notFound
-			count: 2
+			count: 1
 			path: includes/admin/list-tables/class-wc-admin-list-table-orders.php
 
 		-
