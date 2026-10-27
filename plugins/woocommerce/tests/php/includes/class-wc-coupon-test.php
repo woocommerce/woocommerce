@@ -8,6 +8,181 @@
 class WC_Coupon_Tests extends WC_Unit_Test_Case {
 
 	/**
+	 * @testdox Amount validation uses the stored discount type when getters are filtered.
+	 * @testWith ["fixed_cart", "percent", "150"]
+	 *           ["fixed_product", "percent", "150"]
+	 *           ["percent", "fixed_cart", "100"]
+	 * @param string $stored_type Stored discount type.
+	 * @param string $view_type Filtered discount type.
+	 * @param string $amount Valid amount for the stored type.
+	 */
+	public function test_set_amount_with_filtered_discount_type( string $stored_type, string $view_type, string $amount ): void {
+		$sut = new WC_Coupon();
+		$sut->set_discount_type( $stored_type );
+		add_filter(
+			'woocommerce_coupon_get_discount_type',
+			static function () use ( $view_type ) {
+				return $view_type;
+			}
+		);
+
+		$sut->set_amount( $amount );
+
+		$this->assertSame( $amount, $sut->get_amount( 'edit' ) );
+		$this->assertSame( $stored_type, $sut->get_discount_type( 'edit' ) );
+		$this->assertSame( $view_type, $sut->get_discount_type() );
+	}
+
+	/**
+	 * @testdox A filtered discount type cannot bypass the stored percentage limit.
+	 */
+	public function test_set_amount_rejects_percentage_above_100_with_filtered_discount_type(): void {
+		$sut = new WC_Coupon();
+		$sut->set_discount_type( 'percent' );
+		add_filter(
+			'woocommerce_coupon_get_discount_type',
+			static function () {
+				return 'fixed_cart';
+			}
+		);
+
+		$this->expectException( WC_Data_Exception::class );
+		$this->expectExceptionMessage( 'Invalid discount amount.' );
+
+		$sut->set_amount( '150' );
+	}
+
+	/**
+	 * @testdox Loading coupons preserves fixed amounts when type and amount getters are filtered.
+	 * @testWith [false]
+	 *           [true]
+	 * @param bool $manual Whether to load a manual coupon.
+	 */
+	public function test_load_amount_with_filtered_discount_type( bool $manual ): void {
+		$props = array(
+			'discount_type' => 'fixed_cart',
+			'amount'        => '150',
+		);
+		$sut   = new WC_Coupon();
+		$sut->set_code( 'filtered-discount-type' );
+		$sut->set_props( $props );
+		$id = $sut->save();
+
+		if ( $manual ) {
+			add_filter(
+				'woocommerce_get_shop_coupon_data',
+				static function () use ( $props ) {
+					return $props;
+				}
+			);
+		}
+		add_filter(
+			'woocommerce_coupon_get_discount_type',
+			static function () {
+				return 'percent';
+			}
+		);
+		add_filter(
+			'woocommerce_coupon_get_amount',
+			static function () {
+				return '25';
+			}
+		);
+
+		$sut = new WC_Coupon( $id );
+
+		$this->assertSame( '150', $sut->get_amount( 'edit' ) );
+		$this->assertSame( 'fixed_cart', $sut->get_discount_type( 'edit' ) );
+		$this->assertSame( '25', $sut->get_amount() );
+		$this->assertSame( 'percent', $sut->get_discount_type() );
+	}
+
+	/**
+	 * @testdox Spend limit setters compare stored amounts when getters are filtered.
+	 * @testWith [2, false, "60"]
+	 *           [0.5, true, "60"]
+	 *           [2, false, "50"]
+	 *           [2, false, "0.00"]
+	 *           [0.5, true, "0.00"]
+	 * @param float  $rate Conversion rate.
+	 * @param bool   $maximum_first Whether to set the maximum first.
+	 * @param string $maximum Maximum spend, with zero meaning unlimited.
+	 */
+	public function test_spend_limit_setters_with_filtered_amounts( float $rate, bool $maximum_first, string $maximum ): void {
+		$sut     = new WC_Coupon();
+		$convert = static function ( $amount ) use ( $rate ) {
+			return (float) $amount * $rate;
+		};
+		add_filter( 'woocommerce_coupon_get_minimum_amount', $convert );
+		add_filter( 'woocommerce_coupon_get_maximum_amount', $convert );
+
+		$limits = array(
+			'minimum_amount' => '50',
+			'maximum_amount' => $maximum,
+		);
+		if ( $maximum_first ) {
+			$limits = array_reverse( $limits, true );
+		}
+		foreach ( $limits as $property => $amount ) {
+			$sut->set_props( array( $property => $amount ) );
+		}
+
+		$this->assertSame( array( '50', $maximum ), array( $sut->get_minimum_amount( 'edit' ), $sut->get_maximum_amount( 'edit' ) ) );
+		$this->assertSame( (string) ( 50 * $rate ), $sut->get_minimum_amount() );
+		$this->assertSame( (string) ( (float) $maximum * $rate ), $sut->get_maximum_amount() );
+	}
+
+	/**
+	 * @testdox Loaded coupons preserve stored spend limits and reject carts above the filtered maximum.
+	 * @testWith [false]
+	 *           [true]
+	 * @param bool $manual Whether to load a manual coupon.
+	 */
+	public function test_load_spend_limits_with_filtered_amounts( bool $manual ): void {
+		$sut = new WC_Coupon();
+		$sut->set_code( 'filtered-spend-limits' );
+		$sut->set_minimum_amount( '50' );
+		$sut->set_maximum_amount( '60' );
+		$id = $sut->save();
+
+		if ( $manual ) {
+			add_filter(
+				'woocommerce_get_shop_coupon_data',
+				static function () {
+					return array(
+						'minimum_amount' => '50',
+						'maximum_amount' => '60',
+					);
+				}
+			);
+		}
+		$convert = static function ( $amount ) {
+			return (float) $amount * 2;
+		};
+		add_filter( 'woocommerce_coupon_get_minimum_amount', $convert );
+		add_filter( 'woocommerce_coupon_get_maximum_amount', $convert );
+
+		$sut = new WC_Coupon( $id );
+
+		$this->assertSame( array( '50', '60' ), array( $sut->get_minimum_amount( 'edit' ), $sut->get_maximum_amount( 'edit' ) ) );
+		$this->assertSame( '100', $sut->get_minimum_amount() );
+		$this->assertSame( '120', $sut->get_maximum_amount() );
+
+		update_option( 'woocommerce_enable_coupons', 'yes' );
+		WC()->cart->empty_cart();
+		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 130 ) );
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->calculate_totals();
+
+		$this->assertSame( 130.0, (float) WC()->cart->get_subtotal() );
+		$this->assertFalse( WC()->cart->apply_coupon( $sut->get_code() ) );
+		$this->assertSame(
+			$sut->get_coupon_error( WC_Coupon::E_WC_COUPON_MAX_SPEND_LIMIT_MET ),
+			wc_get_notices( 'error' )[0]['notice']
+		);
+	}
+
+	/**
 	 * @testdox set_short_info validates amount and throws exception for invalid values.
 	 */
 	public function test_set_short_info_validates_amount(): void {
