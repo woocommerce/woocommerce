@@ -111,3 +111,64 @@ describe( 'ProductCardFooter rating', () => {
 		).toBeNull();
 	} );
 } );
+
+describe( 'ProductCardFooter free trial', () => {
+	const paidProduct: Product = {
+		...product,
+		price: 79,
+		regularPrice: 99,
+		isOnSale: true,
+		billingPeriod: 'year',
+		billingPeriodInterval: 1,
+	};
+
+	function renderPaidFooter( freeTrialLengthDays?: number | null ) {
+		return render(
+			<MarketplaceContext.Provider value={ context }>
+				<ProductCardFooter
+					product={ { ...paidProduct, freeTrialLengthDays } }
+				/>
+			</MarketplaceContext.Provider>
+		);
+	}
+
+	it( 'shows the trial copy instead of the price, sale price and billing period', () => {
+		const { container, getAllByText } = renderPaidFooter( 14 );
+
+		// Once visible, once for screen readers.
+		expect( getAllByText( '14 day free trial' ) ).toHaveLength( 2 );
+		expect( container.textContent ).not.toMatch( /\$|annually/ );
+	} );
+
+	it.each( [ undefined, null, 0, -7, 1.5 ] )(
+		'shows the price when the trial length is %p',
+		( freeTrialLengthDays ) => {
+			const { container, getByText } =
+				renderPaidFooter( freeTrialLengthDays );
+
+			expect( container.textContent ).not.toContain( 'free trial' );
+			expect( getByText( '$79' ) ).toBeInTheDocument();
+			expect( getByText( '$99' ) ).toBeInTheDocument();
+			expect( getByText( 'annually' ) ).toBeInTheDocument();
+		}
+	);
+
+	it( 'shows "Installed" over the trial copy', () => {
+		const { getByText, queryByText } = render(
+			<MarketplaceContext.Provider
+				value={ { ...context, isProductInstalled: () => true } }
+			>
+				<ProductCardFooter
+					product={ {
+						...paidProduct,
+						slug: 'test-extension',
+						freeTrialLengthDays: 14,
+					} }
+				/>
+			</MarketplaceContext.Provider>
+		);
+
+		expect( getByText( 'Installed' ) ).toBeInTheDocument();
+		expect( queryByText( '14 day free trial' ) ).toBeNull();
+	} );
+} );
