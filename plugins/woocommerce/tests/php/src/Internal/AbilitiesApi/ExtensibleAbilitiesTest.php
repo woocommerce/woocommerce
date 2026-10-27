@@ -1768,6 +1768,47 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should run every validator and return all refusals in one error, and save nothing.
+	 */
+	public function test_every_validator_runs_and_all_refusals_are_returned(): void {
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+		$this->register_validator(
+			'product',
+			'first_ext',
+			static function () {
+				return new \WP_Error( 'test_first_refused', 'First refused.' );
+			}
+		);
+		$this->register_validator(
+			'product',
+			'second_ext',
+			static function () {
+				return new \WP_Error( 'test_second_refused', 'Second refused.', array( 'status' => 409 ) );
+			}
+		);
+
+		$response = $this->run_ability_response(
+			'woocommerce/product-update',
+			array(
+				'id'   => $product->get_id(),
+				'name' => 'Pencil',
+			)
+		);
+
+		$data = $response->get_data();
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'test_first_refused', $data['code'] );
+		$this->assertSame( 'First refused.', $data['message'] );
+		$this->assertSame( 'first_ext', $data['data']['namespace'] );
+		$this->assertCount( 1, $data['additional_errors'] );
+		$this->assertSame( 'test_second_refused', $data['additional_errors'][0]['code'] );
+		$this->assertSame( 'Second refused.', $data['additional_errors'][0]['message'] );
+		$this->assertSame( 'second_ext', $data['additional_errors'][0]['data']['namespace'] );
+		$this->assertSame( 409, $data['additional_errors'][0]['data']['status'] );
+		$this->assertSame( 'Pen', wc_get_product( $product->get_id() )->get_name() );
+	}
+
+	/**
 	 * @testdox Should run a validator in an ActionableAbility of an extension, with that ability.
 	 */
 	public function test_a_validator_runs_in_an_extension_actionable_ability(): void {

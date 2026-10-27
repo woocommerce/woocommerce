@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Extensible abilities: run every validator on a change and return all refusals in one error.

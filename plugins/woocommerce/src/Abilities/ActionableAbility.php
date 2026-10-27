@@ -217,19 +217,21 @@ abstract class ActionableAbility extends \WP_Ability {
 	}
 
 	/**
-	 * Run the validators of the resource on the changed object.
+	 * Run every validator of the resource on the changed object, also after one
+	 * refuses.
 	 *
 	 * @param \WC_Data $subject Changed object.
-	 * @return \WP_Error|null A WP_Error when a validator refuses the change.
+	 * @return \WP_Error|null One WP_Error with the refusals of all validators that refuse the change.
 	 */
 	private function validate( $subject ): ?\WP_Error {
+		$refused = new \WP_Error();
 		foreach ( ExtensibleAbilities::get_validators( $this->get_resource() ) as $args ) {
 			$rejected = self::run_callback( $args['callback'], array( $subject, $this ), array( 'namespace' => $args['namespace'] ) );
 			if ( null !== $rejected ) {
-				return $rejected;
+				$refused->merge_from( $rejected );
 			}
 		}
-		return null;
+		return $refused->has_errors() ? $refused : null;
 	}
 
 	/**
