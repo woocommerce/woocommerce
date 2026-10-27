@@ -30,19 +30,11 @@ class OpenGraphTest extends WC_Unit_Test_Case {
 	private $product;
 
 	/**
-	 * Request URI before navigating to the product.
-	 *
-	 * @var string|null
-	 */
-	private $request_uri;
-
-	/**
 	 * Set up a published product with a featured image.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->sut         = new OpenGraph();
-		$this->request_uri = $_SERVER['REQUEST_URI'] ?? null; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- Preserve request state changed by go_to().
+		$this->sut = new OpenGraph();
 
 		update_option( 'woocommerce_coming_soon', 'no' );
 		update_option( 'blogname', 'Test store' );
@@ -74,21 +66,6 @@ class OpenGraphTest extends WC_Unit_Test_Case {
 			)
 		);
 		$this->go_to( $this->product->get_permalink() );
-	}
-
-	/**
-	 * Restore request state that WordPress does not reset.
-	 */
-	public function tearDown(): void {
-		try {
-			if ( null === $this->request_uri ) {
-				unset( $_SERVER['REQUEST_URI'] );
-			} else {
-				$_SERVER['REQUEST_URI'] = $this->request_uri;
-			}
-		} finally {
-			parent::tearDown();
-		}
 	}
 
 	/**

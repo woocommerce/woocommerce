@@ -22,22 +22,12 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	protected $add_to_cart_quantity_filter_args = array();
 
 	/**
-	 * Customer shipping address before the test, restored at teardown.
-	 *
-	 * @var array<string, string>
-	 */
-	private $previous_shipping_address = array();
-
-	/**
 	 * Called before every test.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 		$fixtures = new FixtureData();
 		$fixtures->shipping_add_flat_rate();
-
-		// Several tests change the shipping address on WC()->customer, which outlives a test.
-		$this->previous_shipping_address = WC()->customer->get_shipping( 'edit' );
 	}
 
 	/**
@@ -47,9 +37,6 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		parent::tearDown();
 
 		WC()->customer->set_is_vat_exempt( false );
-		foreach ( $this->previous_shipping_address as $key => $value ) {
-			WC()->customer->{"set_shipping_{$key}"}( $value );
-		}
 		WC()->session->set( 'wc_notices', null );
 
 		// The checkout fields may have been built while a test's filters were attached.
@@ -1126,7 +1113,6 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 			$this->assertFalse( WC()->cart->show_shipping(), 'A removed postcode must not stop the state from being required.' );
 		} finally {
 			remove_filter( 'woocommerce_checkout_fields', $remove_billing_address );
-			WC()->customer->set_shipping_location( '', '', '', '' );
 		}
 	}
 
@@ -1530,13 +1516,7 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$product = WC_Helper_Product::create_simple_product();
 		WC()->cart->add_to_cart( $product->get_id(), 1 );
 
-		$customer                        = WC()->cart->get_customer();
-		$this->original_shipping_address = array(
-			'shipping_country'  => $customer->get_shipping_country(),
-			'shipping_state'    => $customer->get_shipping_state(),
-			'shipping_city'     => $customer->get_shipping_city(),
-			'shipping_postcode' => $customer->get_shipping_postcode(),
-		);
+		$customer = WC()->cart->get_customer();
 		$customer->set_shipping_country( 'GB' );
 		$customer->set_shipping_state( '' );
 		$customer->set_shipping_city( '' );
