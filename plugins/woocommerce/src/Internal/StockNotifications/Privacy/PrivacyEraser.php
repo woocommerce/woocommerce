@@ -53,7 +53,7 @@ class PrivacyEraser extends \WC_Abstract_Privacy {
 	/**
 	 * Export customer stock notification data for a given email address and the account it belongs to.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 *
 	 * @param string $email_address The email address to export data for.
 	 * @param int    $page          Page number, starting at 1.
@@ -103,7 +103,7 @@ class PrivacyEraser extends \WC_Abstract_Privacy {
 	/**
 	 * Get the personal data to export for a single sign-up.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 *
 	 * @param Notification $notification The sign-up.
 	 *
@@ -162,7 +162,7 @@ class PrivacyEraser extends \WC_Abstract_Privacy {
 	/**
 	 * Get the `customer` query values for an email address and the account it belongs to.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 *
 	 * @param string $email_address The email address, in the letter case the request was made with.
 	 *
@@ -193,7 +193,7 @@ class PrivacyEraser extends \WC_Abstract_Privacy {
 	 * filter, and a replacement that ignores the `customer` query argument would return every
 	 * sign-up. Checking each row keeps both paths from touching other customers' data.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 *
 	 * @param Notification      $notification The sign-up.
 	 * @param array<int|string> $customer     The `customer` query values from `get_customer()`.
