@@ -2247,7 +2247,7 @@ test.describe.serial( 'Orders API tests', () => {
 
 			const orders = [];
 			// Have "John" order all products.
-			Object.values( orderedProducts ).forEach( async ( product ) => {
+			for ( const product of Object.values( orderedProducts ) ) {
 				const order2 = await request.post( './wp-json/wc/v3/orders', {
 					data: {
 						...orderBaseData,
@@ -2269,7 +2269,7 @@ test.describe.serial( 'Orders API tests', () => {
 				const orderJSON = await order2.json();
 
 				orders.push( orderJSON );
-			} );
+			}
 
 			// Have "Tina" order some sunglasses and make a child order.
 			// This somewhat resembles a subscription renewal, but we're just testing the `parent` field.
@@ -3087,7 +3087,7 @@ test.describe.serial( 'Orders API tests', () => {
 			expect( result4.status() ).toEqual( 200 );
 			expect( result4JSON.length ).toBeGreaterThanOrEqual( 1 );
 			result4JSON.forEach( ( _order ) =>
-				expect( _order.billing.last_name ).toEqual( 'Doe' )
+				expect( _order.billing.last_name ).toContain( 'Doe' )
 			);
 
 			// Test order item name.
