@@ -4,6 +4,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
+use WP_Block;
+
 /**
  * Product Filter: Active Block.
  */
@@ -65,6 +67,14 @@ final class ProductFilterActive extends AbstractBlock {
 			'items'          => $removable_items,
 			'storeNamespace' => 'woocommerce/product-filters',
 		);
+
+		$is_empty            = empty( $removable_items );
+		$product_filters_key = $block->context['productFiltersKey'] ?? '';
+		if ( is_string( $product_filters_key ) && '' !== $product_filters_key ) {
+			$state = wp_interactivity_state( 'woocommerce/product-filters' );
+			$state['filterEmptyStates'][ $product_filters_key ][] = $is_empty;
+			wp_interactivity_state( 'woocommerce/product-filters', $state );
+		}
 
 		$wrapper_attributes = array(
 			'data-wp-interactive'  => 'woocommerce/product-filters',

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep tax-inclusive prices fixed for orders created through the REST API when non-base location price adjustment is turned off.

@@ -24,6 +24,19 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The CSV importer automatically maps the MPN column.
+	 */
+	public function test_mpn_csv_header_mapping(): void {
+		$sut    = new WC_Product_CSV_Importer_Controller();
+		$method = new ReflectionMethod( $sut, 'auto_map_columns' );
+		$method->setAccessible( true );
+
+		$mapping = $method->invoke( $sut, array( 'ID', 'MPN' ), false );
+
+		$this->assertSame( 'mpn', $mapping['MPN'] );
+	}
+
+	/**
 	 * Tests that the automatic mapping is case insensitive so that columns can be matched more easily.
 	 */
 	public function test_that_auto_mapping_is_case_insensitive() {
@@ -61,6 +74,41 @@ class WC_Product_CSV_Importer_Controller_Test extends WC_Unit_Test_Case {
 			),
 			$columns
 		);
+	}
+
+	/**
+	 * @testdox Should map exported global unique ID headers in English and translated stores.
+	 * @testWith ["en_US", "GTIN, UPC, EAN, or ISBN"]
+	 *           ["es_ES", "GTIN, UPC, EAN o ISBN"]
+	 *           ["es_ES", "GTIN, UPC, EAN, or ISBN"]
+	 *
+	 * @param string $locale Store locale.
+	 * @param string $header CSV column header.
+	 */
+	public function test_auto_mapping_global_unique_id( string $locale, string $header ): void {
+		wp_set_current_user( 0 );
+		add_filter(
+			'locale',
+			static function () use ( $locale ) {
+				return $locale;
+			}
+		);
+		add_filter(
+			'gettext_woocommerce',
+			static function ( $translation, $text ) use ( $locale ) {
+				return 'es_ES' === $locale && 'GTIN, UPC, EAN, or ISBN' === $text ? 'GTIN, UPC, EAN o ISBN' : $translation;
+			},
+			10,
+			2
+		);
+
+		$sut = new WC_Product_CSV_Importer_Controller();
+		// Mappings are included once, but the test framework restores hooks between datasets.
+		add_filter( 'woocommerce_csv_product_import_mapping_default_columns', 'wc_importer_default_english_mappings', 100 );
+		$method = new ReflectionMethod( WC_Product_CSV_Importer_Controller::class, 'auto_map_columns' );
+		$method->setAccessible( true );
+
+		$this->assertSame( array( 'global_unique_id' ), $method->invoke( $sut, array( $header ) ), 'The exported identifier column should be selected for import.' );
 	}
 
 	/**

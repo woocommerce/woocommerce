@@ -125,6 +125,7 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 		'_wp_trash_meta_comments_status',
 		'_debug_log_source',
 		'_debug_log_source_pending_deletion',
+		'_wc_push_notification_notifiable_at',
 	);
 
 	/**
@@ -2430,8 +2431,7 @@ FROM $order_meta_table
 			$taxonomy_obj = get_taxonomy( $taxonomy );
 
 			if ( ! $taxonomy_obj ) {
-				/* translators: %s: Taxonomy name. */
-				_doing_it_wrong( __FUNCTION__, esc_html( sprintf( __( 'Invalid taxonomy: %s.', 'woocommerce' ), $taxonomy ) ), '7.9.0' );
+				_doing_it_wrong( __FUNCTION__, esc_html( sprintf( 'Invalid taxonomy: %s.', $taxonomy ) ), '7.9.0' );
 				continue;
 			}
 

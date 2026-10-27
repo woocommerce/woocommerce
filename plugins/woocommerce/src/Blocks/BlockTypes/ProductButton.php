@@ -118,39 +118,10 @@ class ProductButton extends AbstractBlock {
 			)
 		);
 
-		$default_quantity = 1;
-
-		if ( ! $is_descendant_of_add_to_cart_form ) {
-			/**
-			 * Filters the change the quantity to add to cart.
-			 *
-			 * @since 8.5.0
-			 * @since 11.0.0 Added the `$variation_id` parameter.
-			 * @param int|float $default_quantity The default quantity.
-			 * @param int       $product_id The product id.
-			 * @param int       $variation_id The variation ID. Always 0 in this context.
-			 */
-			$default_quantity = apply_filters( 'woocommerce_add_to_cart_quantity', $default_quantity, $product->get_id(), 0 );
-		}
-
 		$add_to_cart_text = null !== $product->add_to_cart_text() ? $product->add_to_cart_text() : __( 'Add to cart', 'woocommerce' );
 
 		if ( $is_descendant_of_add_to_cart_form && null !== $product->single_add_to_cart_text() ) {
 			$add_to_cart_text = $product->single_add_to_cart_text();
-		}
-
-		$context = array(
-			'quantityToAdd'    => $default_quantity,
-			'addToCartText'    => $add_to_cart_text,
-			'tempQuantity'     => $number_of_items_in_cart,
-			'animationStatus'  => 'IDLE',
-			'inTheCartText'    => $this->get_in_the_cart_text( $product ),
-			'noticeId'         => '',
-			'hasPressedButton' => false,
-		);
-
-		if ( $product->is_type( ProductType::GROUPED ) ) {
-			$context['groupedProductIds'] = $product->get_children();
 		}
 
 		$attributes = array(
@@ -174,43 +145,15 @@ class ProductButton extends AbstractBlock {
 			}
 		}
 
-		wp_interactivity_config(
-			'woocommerce',
-			array(
-				'messages' => array(
-					'addedToCartText' => __( 'Added to cart', 'woocommerce' ),
-				),
-			)
-		);
-
-		wp_interactivity_state(
-			'woocommerce/product-button',
-			array(
-				'addToCartText' => function () {
-					$context = wp_interactivity_get_context();
-					$quantity = $context['tempQuantity'];
-					$add_to_cart_text = $context['addToCartText'];
-
-					return $quantity > 0 ? sprintf(
-						/* translators: %s: product number. */
-						__( '%s in cart', 'woocommerce' ),
-						$quantity
-					) : $add_to_cart_text;
-				},
-			)
-		);
-
 		/**
-		 * Allow filtering of the add to cart button arguments.
+		 * This filter is documented in includes/wc-template-functions.php.
 		 *
-		 * @since 9.7.0
-		 *
-		 * @param array       $args    Button arguments, with a `class` string and an `attributes` array.
-		 * @param \WC_Product $product Product the button is rendered for.
+		 * @since 2.4.11
 		 */
 		$args = apply_filters(
 			'woocommerce_loop_add_to_cart_args',
 			array(
+				'quantity'   => 1,
 				'class'      => $html_classes,
 				'attributes' => array_merge(
 					$attributes,
@@ -224,8 +167,84 @@ class ProductButton extends AbstractBlock {
 			$product
 		);
 
+		// Single-product forms take their quantity from the quantity input.
+		$default_quantity = 1;
+		if ( ! $is_descendant_of_add_to_cart_form && isset( $args['quantity'] ) && is_numeric( $args['quantity'] ) ) {
+			$default_quantity = wc_stock_amount( (float) $args['quantity'] );
+		}
+
+		$context = array(
+			'quantityToAdd'    => $default_quantity,
+			'addToCartText'    => $add_to_cart_text,
+			'tempQuantity'     => $number_of_items_in_cart,
+			'animationStatus'  => 'IDLE',
+			'inTheCartText'    => $this->get_in_the_cart_text( $product ),
+			'noticeId'         => '',
+			'hasPressedButton' => false,
+		);
+
+		if ( $product->is_type( ProductType::GROUPED ) ) {
+			$context['groupedProductIds'] = $product->get_children();
+		}
+
+		wp_interactivity_config(
+			'woocommerce',
+			array(
+				'messages' => array(
+					'addedToCartText' => __( 'Added to cart', 'woocommerce' ),
+				),
+			)
+		);
+
+		$get_add_to_cart_text = function () {
+			$context          = wp_interactivity_get_context();
+			$quantity         = $context['tempQuantity'];
+			$add_to_cart_text = $context['addToCartText'];
+
+			return $quantity > 0 ? sprintf(
+				/* translators: %s: product number. */
+				__( '%s in cart', 'woocommerce' ),
+				$quantity
+			) : $add_to_cart_text;
+		};
+
+		wp_interactivity_state(
+			'woocommerce/product-button',
+			array(
+				'addToCartText'      => $get_add_to_cart_text,
+				'addToCartAriaLabel' => function () use ( $get_add_to_cart_text ) {
+					$context = wp_interactivity_get_context();
+					$text    = $get_add_to_cart_text();
+
+					if ( $text === $context['addToCartText'] ) {
+						return $context['addToCartAriaLabel'];
+					}
+
+					$pos = strpos( $context['inTheCartAriaLabel'], '###' );
+
+					return false !== $pos
+						? substr_replace( $context['inTheCartAriaLabel'], $text, $pos, 3 )
+						: $context['inTheCartAriaLabel'];
+				},
+			)
+		);
+
+		// The accessible name must keep containing the visible text once it changes to "N in cart" (WCAG 2.5.3).
 		if ( isset( $args['attributes']['aria-label'] ) ) {
 			$args['attributes']['aria-label'] = wp_strip_all_tags( $args['attributes']['aria-label'] );
+
+			if ( empty( $args['attributes']['aria-label'] ) ) {
+				unset( $args['attributes']['aria-label'] );
+			} else {
+				// Decode so the browser doesn't read entities such as &ldquo; as literal text when it sets the label.
+				$context['addToCartAriaLabel'] = html_entity_decode( $args['attributes']['aria-label'], ENT_QUOTES, get_bloginfo( 'charset' ) );
+				$context['inTheCartAriaLabel'] = sprintf(
+					/* translators: 1: Button text, such as "2 in cart". 2: Button description, such as "Add to cart: “Beanie”". */
+					_x( '%1$s, %2$s', 'Product button screen reader label: 1: button text, 2: product description', 'woocommerce' ),
+					'###',
+					$context['addToCartAriaLabel']
+				);
+			}
 		}
 
 		$div_directives = '
@@ -240,6 +259,10 @@ class ProductButton extends AbstractBlock {
 			data-wp-on--click="actions.handlePressedState"' :
 			'data-wp-on--click="actions.addCartItem"';
 		$anchor_directive  = $is_descendant_of_add_to_cart_form ? '' : 'data-wp-on--click="woocommerce/product-collection::actions.viewProduct"';
+
+		if ( isset( $context['addToCartAriaLabel'] ) ) {
+			$button_directives .= ' data-wp-bind--aria-label="state.addToCartAriaLabel"';
+		}
 
 		$span_button_directives = '
 			data-wp-text="state.addToCartText"

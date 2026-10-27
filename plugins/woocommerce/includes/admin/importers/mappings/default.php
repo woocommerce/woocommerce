@@ -44,6 +44,7 @@ function wc_importer_default_english_mappings( $mappings ) {
 		'ID'                                      => 'id',
 		'Type'                                    => 'type',
 		'SKU'                                     => 'sku',
+		'GTIN, UPC, EAN, or ISBN'                 => 'global_unique_id',
 		'Name'                                    => 'name',
 		'Published'                               => 'published',
 		'Is featured?'                            => 'featured',

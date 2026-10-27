@@ -14,6 +14,7 @@
 	margin-bottom: 0;
 }
 .woocommerce.wc-block-catalog-sorting label,
-.woocommerce.wc-block-catalog-sorting.wc-block-catalog-sorting label.orderby-label {
+.woocommerce.wc-block-catalog-sorting.wc-block-catalog-sorting
+	label.orderby-label {
 	margin: 0;
 }

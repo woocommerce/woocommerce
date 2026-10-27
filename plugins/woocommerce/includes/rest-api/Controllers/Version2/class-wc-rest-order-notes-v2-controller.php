@@ -63,9 +63,31 @@ class WC_REST_Order_Notes_V2_Controller extends WC_REST_Order_Notes_V1_Controlle
 			);
 		}
 
+		$paginate = $request->has_param( 'page' ) || $request->has_param( 'per_page' );
+		$per_page = $request['per_page'] ?? 10;
+		$total    = 0;
+		if ( $paginate ) {
+			$args['number']        = $per_page;
+			$args['offset']        = ( ( $request['page'] ?? 1 ) - 1 ) * $args['number'];
+			$args['orderby']       = 'comment_ID';
+			$args['no_found_rows'] = false;
+		}
+
 		remove_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ), 10, 1 );
 
-		$notes = get_comments( $args );
+		if ( $paginate ) {
+			$query = new WP_Comment_Query();
+			$notes = (array) $query->query( $args );
+			$total = (int) $query->found_comments;
+
+			if ( 0 === $total ) {
+				unset( $args['number'], $args['offset'] );
+				$args['count'] = true;
+				$total         = (int) ( new WP_Comment_Query() )->query( $args );
+			}
+		} else {
+			$notes = (array) get_comments( $args );
+		}
 
 		add_filter( 'comments_clauses', array( 'WC_Comments', 'exclude_order_comments' ), 10, 1 );
 
@@ -76,7 +98,23 @@ class WC_REST_Order_Notes_V2_Controller extends WC_REST_Order_Notes_V1_Controlle
 			$data[]     = $order_note;
 		}
 
-		return rest_ensure_response( $data );
+		$response = rest_ensure_response( $data );
+		if ( $paginate ) {
+			$page      = $request['page'] ?? 1;
+			$max_pages = (int) ceil( $total / $per_page );
+			$response->header( 'X-WP-Total', (string) $total );
+			$response->header( 'X-WP-TotalPages', (string) $max_pages );
+
+			$base = add_query_arg( $request->get_query_params(), rest_url( sprintf( '%s/orders/%d/notes', $this->namespace, $order->get_id() ) ) );
+			if ( $page > 1 && $max_pages > 0 ) {
+				$response->link_header( 'prev', add_query_arg( 'page', min( $page - 1, $max_pages ), $base ) );
+			}
+			if ( $page < $max_pages ) {
+				$response->link_header( 'next', add_query_arg( 'page', $page + 1, $base ) );
+			}
+		}
+
+		return $response;
 	}
 
 	/**
@@ -166,14 +204,27 @@ class WC_REST_Order_Notes_V2_Controller extends WC_REST_Order_Notes_V1_Controlle
 	 * @return array
 	 */
 	public function get_collection_params() {
-		$params            = array();
-		$params['context'] = $this->get_context_param( array( 'default' => 'view' ) );
-		$params['type']    = array(
+		$params             = array();
+		$params['context']  = $this->get_context_param( array( 'default' => 'view' ) );
+		$params['type']     = array(
 			'default'           => 'any',
 			'description'       => __( 'Limit result to customers or internal notes.', 'woocommerce' ),
 			'type'              => 'string',
 			'enum'              => array( 'any', 'customer', 'internal' ),
 			'sanitize_callback' => 'sanitize_key',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['page']     = array(
+			'description'       => __( 'Page of order notes to retrieve. Pagination is opt-in.', 'woocommerce' ),
+			'type'              => 'integer',
+			'minimum'           => 1,
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+		$params['per_page'] = array(
+			'description'       => __( 'Maximum number of order notes per page.', 'woocommerce' ),
+			'type'              => 'integer',
+			'minimum'           => 1,
+			'maximum'           => 100,
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 

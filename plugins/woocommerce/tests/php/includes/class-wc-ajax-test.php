@@ -37,6 +37,143 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Should return a rendered page of notes with pagination for an order editor.
+	 */
+	public function test_get_order_notes_page(): void {
+		$this->_setRole( 'administrator' );
+		$order = wc_create_order();
+		for ( $i = 1; $i <= 11; $i++ ) {
+			$order->add_order_note( 'Pagination note ' . $i );
+		}
+
+		$_POST['security'] = wp_create_nonce( 'get-order-notes' );
+		$_POST['order_id'] = $order->get_id();
+		$_POST['page']     = 2;
+
+		$response = $this->do_ajax( 'woocommerce_get_order_notes' );
+
+		$this->assertTrue( $response['success'], 'An order editor should be able to load notes.' );
+		$this->assertStringContainsString( 'Pagination note 1</p>', $response['data']['html'], 'The second page should contain the oldest note.' );
+		$this->assertStringNotContainsString( 'Pagination note 2</p>', $response['data']['html'], 'The response should not contain notes from the first page.' );
+		$this->assertStringContainsString( '1 of 11 notes', $response['data']['html'], 'The count should reflect the current page.' );
+		$this->assertStringContainsString( 'data-page="2"', $response['data']['html'], 'The response should identify the current page.' );
+	}
+
+	/**
+	 * @testdox Should deny access to order notes to a customer with a valid nonce.
+	 */
+	public function test_get_order_notes_denies_customer(): void {
+		$this->_setRole( 'customer' );
+		$order = wc_create_order();
+		$order->add_order_note( 'Private order note' );
+		$_POST['security'] = wp_create_nonce( 'get-order-notes' );
+		$_POST['order_id'] = $order->get_id();
+
+		$response = $this->do_ajax( 'woocommerce_get_order_notes' );
+
+		$this->assertFalse( $response['success'], 'Customers must not be able to read private notes.' );
+		$this->assertEmpty( $response['data'], 'An unauthorized response must not disclose note content.' );
+	}
+
+	/**
+	 * @testdox Should reject a request for order notes without a valid nonce.
+	 */
+	public function test_get_order_notes_requires_nonce(): void {
+		$this->_setRole( 'administrator' );
+		$_POST['order_id'] = wc_create_order()->get_id();
+		$_POST['security'] = 'invalid';
+
+		$response = $this->do_ajax( 'woocommerce_get_order_notes' );
+
+		$this->assertNotTrue( $response['success'] ?? false, 'A request with an invalid nonce must not succeed.' );
+	}
+
+	/**
+	 * @testdox Should paginate item mutation notes only when the request opts in.
+	 * @param string $action AJAX action without the WooCommerce prefix.
+	 * @param bool   $paginate Whether to request paginated notes.
+	 * @testWith ["add_order_item", false]
+	 *           ["add_order_item", true]
+	 *           ["remove_order_coupon", false]
+	 *           ["remove_order_coupon", true]
+	 *           ["remove_order_item", false]
+	 *           ["remove_order_item", true]
+	 *           ["save_order_items", false]
+	 *           ["save_order_items", true]
+	 */
+	public function test_order_item_notes_pagination_is_opt_in( string $action, bool $paginate ): void {
+		$this->_setRole( 'administrator' );
+		$order   = wc_create_order();
+		$product = WC_Helper_Product::create_simple_product();
+		$item_id = $order->add_product( $product );
+		for ( $i = 1; $i <= 11; $i++ ) {
+			$order->add_order_note( 'Compatibility note ' . $i );
+		}
+
+		$_POST['order_id'] = $order->get_id();
+		$_POST['security'] = wp_create_nonce( 'order-item' );
+		unset( $_POST['paginate_notes'] );
+		if ( $paginate ) {
+			$_POST['paginate_notes'] = true;
+		}
+
+		switch ( $action ) {
+			case 'add_order_item':
+				$_POST['data'] = array(
+					array(
+						'id'  => $product->get_id(),
+						'qty' => 1,
+					),
+				);
+				break;
+			case 'remove_order_coupon':
+				$coupon = new WC_Coupon();
+				$coupon->set_code( 'notes-pagination' );
+				$coupon->save();
+				$order->apply_coupon( $coupon );
+				$_POST['coupon'] = $coupon->get_code();
+				break;
+			case 'remove_order_item':
+				$_POST['order_item_ids'] = array( $item_id );
+				break;
+			case 'save_order_items':
+				$_POST['items'] = '';
+				break;
+		}
+
+		// An Error bypasses endpoint catch blocks, matching wp_die() exiting a real request.
+		$stop_request = new Error( 'AJAX response sent.' );
+		$die_handler  = function () use ( $stop_request ) {
+			return function () use ( $stop_request ) {
+				$this->_last_response .= ob_get_clean();
+				throw $stop_request;
+			};
+		};
+		add_filter( 'wp_die_ajax_handler', $die_handler, PHP_INT_MAX );
+		try {
+			$this->do_ajax( 'woocommerce_' . $action );
+		} catch ( Error $error ) {
+			if ( $error !== $stop_request ) {
+				throw $error;
+			}
+		} finally {
+			remove_filter( 'wp_die_ajax_handler', $die_handler, PHP_INT_MAX );
+		}
+		$response             = json_decode( $this->_last_response, true );
+		$this->_last_response = false;
+
+		$this->assertTrue( $response['success'], 'The order item mutation should succeed.' );
+		$html = $response['data']['notes_html'];
+		$this->assertStringContainsString( 'Compatibility note 11</p>', $html, 'The newest fixture note should be included.' );
+		if ( $paginate ) {
+			$this->assertSame( 10, substr_count( $html, '<li rel=' ), 'An opted-in response should contain one page of notes.' );
+			$this->assertStringNotContainsString( 'Compatibility note 1</p>', $html, 'An opted-in response should omit the oldest note.' );
+		} else {
+			$this->assertStringContainsString( 'Compatibility note 1</p>', $html, 'Legacy requests should receive the oldest note too.' );
+		}
+	}
+
+	/**
 	 * Stock should not be reduced from AJAX when an item is added to an order.
 	 */
 	public function test_add_item_to_pending_payment_order() {
@@ -109,6 +246,207 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 				$this->assertEquals( 10, $line_item->get_meta( '_reduced_stock', true ) );
 			}
 		}
+	}
+
+	/**
+	 * Call the private `maybe_add_order_item` method.
+	 *
+	 * @param int   $order_id     Order ID.
+	 * @param array $items_to_add Items to add.
+	 * @param array $tax_location Tax location entered in the order editor.
+	 */
+	private function add_items_to_order( int $order_id, array $items_to_add, array $tax_location = array() ): void {
+		$maybe_add_order_item_func = function () use ( $order_id, $items_to_add, $tax_location ) {
+			return static::maybe_add_order_item( $order_id, '', $items_to_add, $tax_location );
+		};
+		$maybe_add_order_item_func->call( new WC_AJAX() );
+	}
+
+	/**
+	 * @testdox Should apply a coupon to products added after the coupon was applied to an empty order.
+	 */
+	public function test_add_item_after_coupon_on_empty_order_applies_discount(): void {
+		WC_Helper_Coupon::create_coupon(
+			'tenpercent',
+			array(
+				'discount_type' => 'percent',
+				'coupon_amount' => '10',
+			)
+		);
+		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 10 ) );
+		$order   = wc_create_order();
+
+		$result = $order->apply_coupon( 'tenpercent' );
+		$this->assertTrue( $result, 'The coupon should apply to the empty order' );
+
+		$this->add_items_to_order(
+			$order->get_id(),
+			array(
+				array(
+					'id'  => $product->get_id(),
+					'qty' => 2,
+				),
+			)
+		);
+
+		$order       = wc_get_order( $order->get_id() );
+		$coupon_item = current( $order->get_items( 'coupon' ) );
+		$line_item   = current( $order->get_items() );
+
+		$this->assertEquals( 2, $coupon_item->get_discount(), 'The coupon discount should include the added product' );
+		$this->assertEquals( 18, $line_item->get_total(), 'The added line item should be discounted' );
+		$this->assertEquals( 18, $order->get_total(), 'The order total should include the coupon discount' );
+	}
+
+	/**
+	 * @testdox Should apply an existing coupon to a product added to an order that already has items.
+	 */
+	public function test_add_item_after_coupon_on_order_with_items_applies_discount(): void {
+		WC_Helper_Coupon::create_coupon(
+			'tenpercent',
+			array(
+				'discount_type' => 'percent',
+				'coupon_amount' => '10',
+			)
+		);
+		$product_a = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 10 ) );
+		$product_b = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 10 ) );
+		$order     = wc_create_order();
+		$order->add_product( $product_a, 1 );
+		$order->calculate_totals();
+		$order->apply_coupon( 'tenpercent' );
+
+		$this->add_items_to_order(
+			$order->get_id(),
+			array(
+				array(
+					'id'  => $product_b->get_id(),
+					'qty' => 1,
+				),
+			)
+		);
+
+		$order       = wc_get_order( $order->get_id() );
+		$coupon_item = current( $order->get_items( 'coupon' ) );
+
+		foreach ( $order->get_items() as $line_item ) {
+			$this->assertEquals( 9, $line_item->get_total(), 'Every line item should be discounted' );
+		}
+		$this->assertEquals( 2, $coupon_item->get_discount(), 'The coupon discount should include both products' );
+		$this->assertEquals( 18, $order->get_total(), 'The order total should include the coupon discount' );
+	}
+
+	/**
+	 * @testdox Should use the editor tax location when coupons are applied again to an added product.
+	 */
+	public function test_add_item_after_coupon_uses_editor_tax_location(): void {
+		$order     = $this->add_item_to_coupon_order_with_editor_tax_location( false );
+		$line_item = current( $order->get_items() );
+
+		$this->assertEquals( 21.6, $line_item->get_total(), 'The added line item should be discounted' );
+		$this->assertEqualsWithDelta( 1.94, (float) $line_item->get_total_tax(), 0.01, 'The line tax should use the editor country rate' );
+		$this->assertEqualsWithDelta( 23.54, (float) $order->get_total(), 0.01, 'The order total should use the editor country tax' );
+		$this->assertSame( '', $order->get_billing_country(), 'The unsaved billing country must not be persisted' );
+	}
+
+	/**
+	 * @testdox Should use the editor tax location for the coupon discount when prices include tax.
+	 */
+	public function test_add_item_after_coupon_uses_editor_tax_location_with_prices_including_tax(): void {
+		$order     = $this->add_item_to_coupon_order_with_editor_tax_location( true );
+		$line_item = current( $order->get_items() );
+
+		$this->assertEqualsWithDelta( 22.21, (float) $order->get_total(), 0.01, 'The order total should be 10% off the price with the editor country tax' );
+		$this->assertEqualsWithDelta( 0.09, (float) $line_item->get_total_tax() / (float) $line_item->get_total(), 0.001, 'The line tax should use the editor country rate' );
+		$this->assertSame( '', $order->get_billing_country(), 'The unsaved billing country must not be persisted' );
+	}
+
+	/**
+	 * Create an order with a 10% coupon in a store based in BE (6% tax), then add a product priced 24 with NL (9% tax) typed in the editor.
+	 *
+	 * @param bool $prices_include_tax Whether prices are entered with tax.
+	 * @return WC_Order The order loaded again after the product was added.
+	 */
+	private function add_item_to_coupon_order_with_editor_tax_location( bool $prices_include_tax ): WC_Order {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', $prices_include_tax ? 'yes' : 'no' );
+		update_option( 'woocommerce_default_country', 'BE' );
+		update_option( 'woocommerce_tax_based_on', 'billing' );
+
+		WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'BE',
+				'tax_rate'          => '6.0000',
+				'tax_rate_name'     => 'Belgian VAT',
+				'tax_rate_priority' => 1,
+				'tax_rate_class'    => '',
+			)
+		);
+		WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'NL',
+				'tax_rate'          => '9.0000',
+				'tax_rate_name'     => 'Dutch VAT',
+				'tax_rate_priority' => 1,
+				'tax_rate_class'    => '',
+			)
+		);
+
+		WC_Helper_Coupon::create_coupon(
+			'tenpercent',
+			array(
+				'discount_type' => 'percent',
+				'coupon_amount' => '10',
+			)
+		);
+		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 24 ) );
+		$order   = wc_create_order();
+		$order->apply_coupon( 'tenpercent' );
+
+		$this->add_items_to_order(
+			$order->get_id(),
+			array(
+				array(
+					'id'  => $product->get_id(),
+					'qty' => 1,
+				),
+			),
+			array(
+				'country'  => 'NL',
+				'state'    => '',
+				'postcode' => '',
+				'city'     => '',
+			)
+		);
+
+		return wc_get_order( $order->get_id() );
+	}
+
+	/**
+	 * @testdox Should keep edited line totals when adding a product to an order without coupons.
+	 */
+	public function test_add_item_to_order_without_coupons_keeps_line_totals(): void {
+		$product_a = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 10 ) );
+		$product_b = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 10 ) );
+		$order     = wc_create_order();
+		$item_id   = $order->add_product( $product_a, 1 );
+		$item      = $order->get_item( $item_id );
+		$item->set_total( 5 );
+		$item->save();
+
+		$this->add_items_to_order(
+			$order->get_id(),
+			array(
+				array(
+					'id'  => $product_b->get_id(),
+					'qty' => 1,
+				),
+			)
+		);
+
+		$order = wc_get_order( $order->get_id() );
+
+		$this->assertEquals( 5, $order->get_item( $item_id )->get_total(), 'The edited line total should not be reset' );
 	}
 
 	/**
@@ -2540,6 +2878,147 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Refunding more units of a line item than were ordered is rejected and creates no refund.
+	 */
+	public function test_refund_line_items_rejects_quantity_above_ordered_quantity(): void {
+		$order   = $this->create_order_for_refund_quantity_test( 1 );
+		$item_id = array_keys( $order->get_items() )[0];
+
+		$response = $this->do_refund_line_items_request( $order, $item_id, 2, '20' );
+
+		$this->assertFalse( $response['success'] ?? true, 'The AJAX refund request should fail.' );
+		$this->assertSame( 'Line item quantity cannot be greater than the remaining refundable quantity (1).', $response['data']['error'] ?? '', 'The error should state the remaining refundable quantity.' );
+		$this->assertCount( 0, wc_get_order( $order->get_id() )->get_refunds(), 'No refund should be created.' );
+	}
+
+	/**
+	 * @testdox A refund that would exceed the quantity left after earlier refunds is rejected.
+	 */
+	public function test_refund_line_items_rejects_quantity_above_remaining_quantity(): void {
+		$order   = $this->create_order_for_refund_quantity_test( 2 );
+		$item_id = array_keys( $order->get_items() )[0];
+
+		$response = $this->do_refund_line_items_request( $order, $item_id, 1, '10' );
+		$this->assertTrue( $response['success'] ?? false, 'The first refund of 1 unit should succeed.' );
+
+		$response = $this->do_refund_line_items_request( wc_get_order( $order->get_id() ), $item_id, 2, '20' );
+
+		$this->assertFalse( $response['success'] ?? true, 'The second refund of 2 units should fail.' );
+		$this->assertSame( 'Line item quantity cannot be greater than the remaining refundable quantity (1).', $response['data']['error'] ?? '', 'The error should state the remaining refundable quantity.' );
+
+		$order = wc_get_order( $order->get_id() );
+		$this->assertCount( 1, $order->get_refunds(), 'Only the first refund should exist.' );
+		$this->assertSame( -1, $order->get_qty_refunded_for_item( $item_id ), 'Only 1 unit should be refunded.' );
+	}
+
+	/**
+	 * @testdox Refunding the units left after an earlier partial refund still works.
+	 */
+	public function test_refund_line_items_allows_refunding_remaining_quantity(): void {
+		$order   = $this->create_order_for_refund_quantity_test( 2 );
+		$item_id = array_keys( $order->get_items() )[0];
+
+		$this->do_refund_line_items_request( $order, $item_id, 1, '10' );
+		$response = $this->do_refund_line_items_request( wc_get_order( $order->get_id() ), $item_id, 1, '10' );
+
+		$this->assertTrue( $response['success'] ?? false, 'Refunding the last remaining unit should succeed.' );
+
+		$order = wc_get_order( $order->get_id() );
+		$this->assertCount( 2, $order->get_refunds(), 'Both refunds should exist.' );
+		$this->assertSame( -2, $order->get_qty_refunded_for_item( $item_id ), 'Both units should be refunded.' );
+	}
+
+	/**
+	 * @testdox Fractional quantities are checked against the exact fractional remainder when stock amounts allow decimals.
+	 */
+	public function test_refund_line_items_checks_fractional_remaining_quantity(): void {
+		remove_filter( 'woocommerce_stock_amount', 'intval' );
+		add_filter( 'woocommerce_stock_amount', 'floatval' );
+
+		try {
+			$order   = $this->create_order_for_refund_quantity_test( 2.3 );
+			$item_id = array_keys( $order->get_items() )[0];
+
+			$response = $this->do_refund_line_items_request( $order, $item_id, 0.1, '1' );
+			$this->assertTrue( $response['success'] ?? false, 'Refunding 0.1 units should succeed.' );
+
+			$response = $this->do_refund_line_items_request( wc_get_order( $order->get_id() ), $item_id, 2.3, '23' );
+			$this->assertFalse( $response['success'] ?? true, 'Refunding more than the 2.2 units left should fail.' );
+			$this->assertSame( 'Line item quantity cannot be greater than the remaining refundable quantity (2.2).', $response['data']['error'] ?? '', 'The error should state the fractional remaining quantity.' );
+
+			$response = $this->do_refund_line_items_request( wc_get_order( $order->get_id() ), $item_id, 2.2, '22' );
+			$this->assertTrue( $response['success'] ?? false, 'Refunding exactly the 2.2 units left should succeed despite float rounding in 2.3 - 0.1.' );
+		} finally {
+			remove_filter( 'woocommerce_stock_amount', 'floatval' );
+			add_filter( 'woocommerce_stock_amount', 'intval' );
+		}
+	}
+
+	/**
+	 * @testdox Refunding an order that does not exist returns an error instead of a fatal.
+	 */
+	public function test_refund_line_items_rejects_missing_order(): void {
+		$order   = $this->create_order_for_refund_quantity_test( 1 );
+		$item_id = array_keys( $order->get_items() )[0];
+		$order->delete( true );
+
+		$response = $this->do_refund_line_items_request( $order, $item_id, 1, '10' );
+
+		$this->assertFalse( $response['success'] ?? true, 'The AJAX refund request should fail.' );
+		$this->assertSame( 'Invalid order ID.', $response['data']['error'] ?? '', 'The error should say the order ID is invalid.' );
+	}
+
+	/**
+	 * Creates an order with a $10 product at the given quantity plus a $100 product, so the
+	 * refund amount limit never blocks a refund before the quantity check does.
+	 *
+	 * @param int|float $quantity Quantity of the first (cheaper) product.
+	 * @return WC_Order
+	 */
+	private function create_order_for_refund_quantity_test( $quantity ): WC_Order {
+		$expensive_product = WC_Helper_Product::create_simple_product();
+		$expensive_product->set_regular_price( 100 );
+		$expensive_product->save();
+
+		$order = new WC_Order();
+		$order->add_product( WC_Helper_Product::create_simple_product(), $quantity );
+		$order->add_product( $expensive_product, 1 );
+		$order->calculate_totals();
+		$order->save();
+
+		return $order;
+	}
+
+	/**
+	 * Posts a single line item refund through the admin AJAX handler.
+	 *
+	 * @param WC_Order  $order   Order to refund.
+	 * @param int       $item_id Order item ID to refund.
+	 * @param int|float $qty     Quantity to refund.
+	 * @param string    $amount  Amount to refund, used for both the line and the refund total.
+	 * @return array|null Decoded JSON response.
+	 */
+	private function do_refund_line_items_request( WC_Order $order, int $item_id, $qty, string $amount ): ?array {
+		$this->_setRole( 'administrator' );
+
+		$_POST['security']             = wp_create_nonce( 'order-item' );
+		$_POST['order_id']             = $order->get_id();
+		$_POST['refund_amount']        = $amount;
+		$_POST['refunded_amount']      = (string) $order->get_total_refunded();
+		$_POST['refund_reason']        = '';
+		$_POST['line_item_qtys']       = wp_json_encode( array( $item_id => $qty ) );
+		$_POST['line_item_totals']     = wp_json_encode( array( $item_id => $amount ) );
+		$_POST['line_item_tax_totals'] = wp_json_encode( array() );
+		$_POST['api_refund']           = 'false';
+
+		try {
+			return $this->do_ajax( 'woocommerce_refund_line_items' );
+		} finally {
+			unset( $_POST['security'], $_POST['order_id'], $_POST['refund_amount'], $_POST['refunded_amount'], $_POST['refund_reason'], $_POST['line_item_qtys'], $_POST['line_item_totals'], $_POST['line_item_tax_totals'], $_POST['api_refund'] );
+		}
+	}
+
+	/**
 	 * The ?wc-ajax=get_variation endpoint renders the matched variation's description through
 	 * wc_format_content(), which fires the woocommerce_short_description filter. Eager block registration is
 	 * skipped on AJAX requests, so Bootstrap registers WooCommerce block types on demand there — otherwise a
@@ -2941,6 +3420,212 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		$fresh_item = \WC_Order_Factory::get_order_item( $item_id );
 		$this->assertInstanceOf( \WC_Order_Item_Product::class, $fresh_item, 'The item should not have been deleted.' );
 		$this->assertEquals( $original_qty, $fresh_item->get_quantity() );
+	}
+
+	/**
+	 * @testdox Percentage order fees added via AJAX are calculated on the order items excluding tax.
+	 *
+	 * @testWith ["25%", 25.0, 5.0, 150.0]
+	 *           ["-25%", -25.0, -5.0, 90.0]
+	 *
+	 * @param string $amount          Fee amount posted to the AJAX handler.
+	 * @param float  $expected_fee    Expected fee line total (ex tax).
+	 * @param float  $expected_fee_tax Expected fee tax.
+	 * @param float  $expected_total  Expected order grand total.
+	 */
+	public function test_add_order_fee_percentage_uses_items_excluding_tax( string $amount, float $expected_fee, float $expected_fee_tax, float $expected_total ): void {
+		$order = $this->create_order_with_20_percent_tax();
+
+		$fee = $this->add_order_fee_via_ajax( $order, $amount );
+
+		$this->assertEquals( $expected_fee, (float) $fee->get_total(), 'Fee total should be a percentage of the items excluding tax.' );
+		$this->assertEquals( $expected_fee_tax, (float) $fee->get_total_tax(), 'Fee tax should be calculated on the fee amount.' );
+		$this->assertEquals( $expected_total, (float) $fee->get_order()->get_total(), 'Order total should include the fee and its tax.' );
+	}
+
+	/**
+	 * @testdox Percentage order fees leave shipping out of their base.
+	 */
+	public function test_add_order_fee_percentage_excludes_shipping_from_base(): void {
+		$order = $this->create_order_with_20_percent_tax();
+
+		$shipping = new WC_Order_Item_Shipping();
+		$shipping->set_method_title( 'Flat rate' );
+		$shipping->set_method_id( 'flat_rate' );
+		$shipping->set_total( 10 );
+		$order->add_item( $shipping );
+		$order->calculate_totals( true );
+		$order->save();
+
+		$fee = $this->add_order_fee_via_ajax( $order, '10%' );
+
+		// The base is the items (100), not items plus shipping (110), so 10% is 10, not 11.
+		$this->assertEquals( 10.0, (float) $fee->get_total(), 'Percentage fee should leave shipping out of its base.' );
+	}
+
+	/**
+	 * @testdox Percentage order fees leave existing fees out of their base.
+	 */
+	public function test_add_order_fee_percentage_excludes_existing_fees_from_base(): void {
+		$order = $this->create_order_with_20_percent_tax();
+		$this->add_order_fee_via_ajax( $order, '10%' );
+
+		$fee = $this->add_order_fee_via_ajax( $order, '10%' );
+
+		// The first fee (10) is not part of the base, so the second 10% is 10 again, not 11.
+		$this->assertEquals( 10.0, (float) $fee->get_total(), 'Percentage fee should leave existing fees out of its base.' );
+		$this->assertEquals( 144.0, (float) $fee->get_order()->get_total(), 'Order total should include both fees and their tax.' );
+	}
+
+	/**
+	 * @testdox Percentage order fees are calculated on the items after coupon discounts.
+	 */
+	public function test_add_order_fee_percentage_uses_items_after_discounts(): void {
+		$order = $this->create_order_with_20_percent_tax();
+		$this->apply_10_percent_coupon( $order );
+
+		$fee = $this->add_order_fee_via_ajax( $order, '10%' );
+
+		// The coupon brings the items to 90, so 10% is 9.
+		$this->assertEquals( 9.0, (float) $fee->get_total(), 'Percentage fee should use the items after discounts.' );
+	}
+
+	/**
+	 * @testdox Percentage order fees use the stored discount total, not a filtered one.
+	 */
+	public function test_add_order_fee_percentage_ignores_filtered_discount_total(): void {
+		$order = $this->create_order_with_20_percent_tax();
+		$this->apply_10_percent_coupon( $order );
+		add_filter( 'woocommerce_order_get_discount_total', '__return_zero' );
+
+		$fee = $this->add_order_fee_via_ajax( $order, '10%' );
+
+		// The stored discount is 10, so the base stays 90 even though the filter reports 0.
+		$this->assertEquals( 9.0, (float) $fee->get_total(), 'Percentage fee should use the stored discount total.' );
+	}
+
+	/**
+	 * @testdox Percentage order fees use the items excluding tax when prices are entered including tax.
+	 */
+	public function test_add_order_fee_percentage_with_prices_including_tax(): void {
+		$order = $this->create_order_with_20_percent_tax( true );
+
+		$fee = $this->add_order_fee_via_ajax( $order, '10%' );
+
+		// The $100 price includes 16.67 tax, so the items are 83.33 and 10% is 8.33 plus 1.67 tax.
+		$this->assertEquals( 8.33, (float) $fee->get_total(), 'Fee total should be a percentage of the items excluding tax.' );
+		$this->assertEquals( 1.67, (float) $fee->get_total_tax(), 'Fee tax should be calculated on the fee amount.' );
+		$this->assertEquals( 110.0, (float) $fee->get_order()->get_total(), 'Order total should include the fee and its tax.' );
+	}
+
+	/**
+	 * @testdox Percentage order fees are rounded to the store's price decimals.
+	 */
+	public function test_add_order_fee_percentage_is_rounded_to_price_decimals(): void {
+		$order = $this->create_order_with_20_percent_tax();
+
+		$fee = $this->add_order_fee_via_ajax( $order, '12.345%' );
+
+		// 12.345% of the net 100 is 12.345, which rounds half up to 12.35. Before
+		// rounding was applied the full 12.345 reached the fee line.
+		$this->assertEquals( 12.35, (float) $fee->get_total(), 'Percentage fee should be rounded to the price decimals.' );
+	}
+
+	/**
+	 * @testdox Fixed-amount order fees added via AJAX are stored as posted and taxed.
+	 */
+	public function test_add_order_fee_fixed_amount_is_stored_as_posted(): void {
+		$order = $this->create_order_with_20_percent_tax();
+
+		$fee = $this->add_order_fee_via_ajax( $order, '12.5' );
+
+		$this->assertEquals( 12.5, (float) $fee->get_total(), 'Fixed fee amount should be stored as posted.' );
+		$this->assertEquals( 2.5, (float) $fee->get_total_tax(), 'Fixed fee tax should remain 20% of the fee.' );
+		$this->assertEquals( 135.0, (float) $fee->get_order()->get_total(), 'Order total should include the fixed fee and its tax.' );
+	}
+
+	/**
+	 * Create an order for one $100 product with a 20% tax rate for order fee AJAX tests.
+	 *
+	 * @param bool $prices_include_tax Whether the $100 price includes tax.
+	 * @return WC_Order
+	 */
+	private function create_order_with_20_percent_tax( bool $prices_include_tax = false ): WC_Order {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', $prices_include_tax ? 'yes' : 'no' );
+
+		WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '20.0000',
+				'tax_rate_name'     => 'Tax',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 100 );
+		$product->save();
+
+		$order = new WC_Order();
+		$order->add_product( $product, 1 );
+		$order->calculate_totals( true );
+		$order->save();
+
+		$this->assertEquals( $prices_include_tax ? 16.67 : 20.0, (float) $order->get_total_tax(), 'Fixture order should have a 20% tax line.' );
+		$this->assertEquals( $prices_include_tax ? 100.0 : 120.0, (float) $order->get_total(), 'Fixture order should have the expected gross total.' );
+
+		return $order;
+	}
+
+	/**
+	 * Apply a 10% percentage coupon to an order for order fee AJAX tests.
+	 *
+	 * @param WC_Order $order Order to apply the coupon to.
+	 */
+	private function apply_10_percent_coupon( WC_Order $order ): void {
+		WC_Helper_Coupon::create_coupon(
+			'tenpercent',
+			array(
+				'discount_type' => 'percent',
+				'coupon_amount' => '10',
+			)
+		);
+		$this->assertTrue( $order->apply_coupon( 'tenpercent' ), 'Fixture coupon should apply.' );
+	}
+
+	/**
+	 * Add a fee to an order through the admin AJAX handler and return the new fee line.
+	 *
+	 * Asserts that the request succeeds and adds exactly one fee to the order.
+	 *
+	 * @param WC_Order $order  Order to add the fee to.
+	 * @param string   $amount Fee amount as typed in the admin prompt, fixed or with a trailing "%".
+	 * @return WC_Order_Item_Fee
+	 */
+	private function add_order_fee_via_ajax( WC_Order $order, string $amount ): WC_Order_Item_Fee {
+		$fee_count = count( wc_get_order( $order->get_id() )->get_fees() );
+
+		$this->_setRole( 'administrator' );
+		$_POST['security'] = wp_create_nonce( 'order-item' );
+		$_POST['order_id'] = $order->get_id();
+		$_POST['amount']   = $amount;
+
+		$response = $this->do_ajax( 'woocommerce_add_order_fee' );
+
+		unset( $_POST['security'], $_POST['order_id'], $_POST['amount'] );
+
+		$this->assertTrue( $response['success'] ?? false, 'Adding a fee via AJAX should succeed.' );
+
+		$fees = wc_get_order( $order->get_id() )->get_fees();
+		$this->assertCount( $fee_count + 1, $fees, 'Exactly one fee should be added to the order.' );
+
+		return end( $fees );
 	}
 
 	/**
