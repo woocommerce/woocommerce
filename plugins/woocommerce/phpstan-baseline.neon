@@ -65719,12 +65719,6 @@ parameters:
 			path: src/StoreApi/Routes/V1/Checkout.php
 
 		-
-			message: '#^Cannot access offset string on 0\|0\.0\|''''\|''0''\|array\<string, array\|string\>\|false\|null\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/StoreApi/Routes/V1/Checkout.php
-
-		-
 			message: '#^Expression on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.expr
 			count: 2
@@ -65769,12 +65763,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\Checkout\:\:get_request_payment_data\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
-			count: 1
-			path: src/StoreApi/Routes/V1/Checkout.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\Checkout\:\:get_request_payment_data\(\) should return array but returns array\<string, array\|string\>\|float\|int\|string\|false\|null\.$#'
-			identifier: return.type
 			count: 1
 			path: src/StoreApi/Routes/V1/Checkout.php
 
@@ -65977,12 +65965,6 @@ parameters:
 			path: src/StoreApi/Routes/V1/CheckoutOrder.php
 
 		-
-			message: '#^Cannot access offset string on 0\|0\.0\|''''\|''0''\|array\<string, array\|string\>\|false\|null\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/StoreApi/Routes/V1/CheckoutOrder.php
-
-		-
 			message: '#^Instanceof between Automattic\\WooCommerce\\StoreApi\\Payments\\PaymentResult and Automattic\\WooCommerce\\StoreApi\\Payments\\PaymentResult will always evaluate to true\.$#'
 			identifier: instanceof.alwaysTrue
 			count: 1
@@ -66009,12 +65991,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\CheckoutOrder\:\:get_request_payment_data\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
-			count: 1
-			path: src/StoreApi/Routes/V1/CheckoutOrder.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\CheckoutOrder\:\:get_request_payment_data\(\) should return array but returns array\<string, array\|string\>\|float\|int\|string\|false\|null\.$#'
-			identifier: return.type
 			count: 1
 			path: src/StoreApi/Routes/V1/CheckoutOrder.php
 
