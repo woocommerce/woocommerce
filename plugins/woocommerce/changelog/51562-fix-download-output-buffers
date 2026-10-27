@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix some cases where output from other plugins could corrupt file downloads.

@@ -112,14 +112,16 @@ class NotificationEditPage {
 				if ( ! $product || ! $product->is_in_stock() ) {
 					$notice_message = __( 'Failed to send notification. Please make sure that the listed product is available.', 'woocommerce' );
 					NotificationsPage::add_notice( $notice_message, 'error' );
-				} else {
-					$this->email_manager->send_stock_notification_email( $notification );
+				} elseif ( $this->email_manager->send_stock_notification_email( $notification ) ) {
 					$notification->set_status( NotificationStatus::SENT );
 					$notification->set_date_notified( time() );
 					$notification->save();
 					// translators: %s user email.
 					$notice_message = sprintf( __( 'Notification sent to "%s".', 'woocommerce' ), $notification->get_user_email() );
 					NotificationsPage::add_notice( $notice_message, 'success' );
+				} else {
+					$notice_message = __( 'Failed to send notification. Please make sure that the "Back in stock notification" email is enabled and check the email logs.', 'woocommerce' );
+					NotificationsPage::add_notice( $notice_message, 'error' );
 				}
 				break;
 			case 'send_verification_email':

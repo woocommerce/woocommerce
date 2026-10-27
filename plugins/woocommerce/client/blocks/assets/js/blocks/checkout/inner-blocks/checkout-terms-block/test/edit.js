@@ -78,11 +78,11 @@ describe( 'Edit', () => {
 		);
 
 		expect(
-			queryByText( container, 'Setup a Terms and Conditions page' )
+			queryByText( container, 'Set up a Terms and Conditions page' )
 		).toBeInTheDocument();
 
 		expect(
-			queryByText( container, 'Setup a Privacy Policy page' )
+			queryByText( container, 'Set up a Privacy Policy page' )
 		).toBeInTheDocument();
 
 		expect(
