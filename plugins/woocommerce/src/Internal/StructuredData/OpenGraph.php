@@ -34,13 +34,6 @@ class OpenGraph {
 	private $default_card = null;
 
 	/**
-	 * Related tags and their coexistence rules.
-	 *
-	 * @var array<array{properties: string[], matches: callable(array): bool}>
-	 */
-	private $groups = array();
-
-	/**
 	 * Register the frontend callback.
 	 *
 	 * @internal
@@ -71,8 +64,7 @@ class OpenGraph {
 			return;
 		}
 
-		$this->tags   = $this->prepare_tags( $page['tags'], $page['context'] );
-		$this->groups = array( wc_get_container()->get( ProductOpenGraphPrices::class )->get_group( $this->tags ) );
+		$this->tags = $this->prepare_tags( $page['tags'], $page['context'] );
 		if ( $this->tags ) {
 			add_filter( 'wp_template_enhancement_output_buffer', array( $this, 'handle_wp_template_enhancement_output_buffer' ), PHP_INT_MAX );
 		}
@@ -167,6 +159,6 @@ class OpenGraph {
 			return $html;
 		}
 
-		return wc_get_container()->get( OpenGraphMarkup::class )->merge( $html, $this->tags, $this->default_card, $this->groups );
+		return wc_get_container()->get( OpenGraphMarkup::class )->merge( $html, $this->tags, $this->default_card );
 	}
 }

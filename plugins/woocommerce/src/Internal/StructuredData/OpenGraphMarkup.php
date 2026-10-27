@@ -26,13 +26,12 @@ class OpenGraphMarkup {
 	 *
 	 * @since 11.4.0
 	 *
-	 * @param string                                                             $html         Template output.
-	 * @param array<string, string>                                              $candidates   Validated metadata.
-	 * @param string|null                                                        $default_card Twitter card before filtering.
-	 * @param array<array{properties: string[], matches: callable(array): bool}> $groups Related tags and their coexistence rules.
+	 * @param string                $html         Template output.
+	 * @param array<string, string> $candidates   Validated metadata.
+	 * @param string|null           $default_card Twitter card before filtering.
 	 * @return string
 	 */
-	public function merge( string $html, array $candidates, ?string $default_card, array $groups = array() ): string {
+	public function merge( string $html, array $candidates, ?string $default_card ): string {
 		if ( ! $candidates ) {
 			return $html;
 		}
@@ -68,7 +67,9 @@ class OpenGraphMarkup {
 				} elseif ( ! is_string( $content ) || '' === trim( $content ) ) {
 					continue;
 				}
-				$existing[ $property ][] = $content;
+				if ( is_string( $content ) ) {
+					$existing[ $property ][] = $content;
+				}
 				if ( in_array( $property, array( 'og:image', 'og:image:url' ), true ) ) {
 					$has_image = true;
 				}
@@ -78,10 +79,8 @@ class OpenGraphMarkup {
 			}
 		}
 
-		foreach ( $groups as $group ) {
-			if ( ! $group['matches']( $existing ) ) {
-				$tags = array_diff_key( $tags, array_flip( $group['properties'] ) );
-			}
+		if ( ProductOpenGraphPrices::has_conflict( $existing, $candidates ) ) {
+			$tags = ProductOpenGraphPrices::remove_price_tags( $tags );
 		}
 
 		if ( $has_image ) {

@@ -94,33 +94,40 @@ class ProductOpenGraphPrices {
 	}
 
 	/**
-	 * Describe the price tags that must stand down together on a conflict.
+	 * Check whether any existing price or currency conflicts with the candidates.
 	 *
 	 * @since 11.4.0
 	 *
-	 * @param array<string, string> $tags Filtered candidates.
-	 * @return array{properties: string[], matches: callable(array): bool}
+	 * @param array<string, string[]> $existing Existing metadata.
+	 * @param array<string, string>   $candidates Filtered candidates.
+	 * @return bool
 	 */
-	public function get_group( array $tags ): array {
-		return array(
-			'properties' => array_values(
-				array_filter(
-					array_keys( $tags ),
-					static function ( string $property ): bool {
-						return (bool) preg_match( '/^(product:(sale_)?price(:|_)|og:price:)/', $property );
-					}
-				)
-			),
-			'matches'    => function ( array $existing ) use ( $tags ): bool {
-				foreach ( $existing as $property => $values ) {
-					foreach ( $values as $content ) {
-						if ( $this->has_conflicting_price( $property, $content, $tags ) ) {
-							return false;
-						}
-					}
+	public static function has_conflict( array $existing, array $candidates ): bool {
+		foreach ( $existing as $property => $values ) {
+			foreach ( $values as $content ) {
+				if ( self::has_conflicting_price( $property, $content, $candidates ) ) {
+					return true;
 				}
-				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Remove fallback prices, currencies, and sale dates.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param array<string, string> $tags Metadata still to be inserted.
+	 * @return array<string, string>
+	 */
+	public static function remove_price_tags( array $tags ): array {
+		return array_filter(
+			$tags,
+			static function ( string $property ): bool {
+				return ! preg_match( '/^(product:(sale_)?price(:|_)|og:price:)/', $property );
 			},
+			ARRAY_FILTER_USE_KEY
 		);
 	}
 
@@ -132,7 +139,7 @@ class ProductOpenGraphPrices {
 	 * @param array<string, string> $tags Filtered candidates.
 	 * @return bool
 	 */
-	private function has_conflicting_price( string $property, string $content, array $tags ): bool {
+	private static function has_conflicting_price( string $property, string $content, array $tags ): bool {
 		if ( in_array( $property, array( 'product:price:currency', 'og:price:currency', 'product:sale_price:currency' ), true ) ) {
 			$values = $tags[ $property ] ?? $tags['product:price:currency'] ?? $tags['og:price:currency'] ?? $tags['product:sale_price:currency'] ?? '';
 			return '' !== $values && strtoupper( trim( $content ) ) !== strtoupper( trim( (string) $values ) );
