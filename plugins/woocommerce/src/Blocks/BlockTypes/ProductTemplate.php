@@ -62,7 +62,7 @@ class ProductTemplate extends AbstractBlock {
 		$classnames = '';
 		if ( isset( $block->context['displayLayout'] ) && isset( $block->context['query'] ) ) {
 			$type    = $block->context['displayLayout']['type'] ?? '';
-			$columns = $block->context['displayLayout']['columns'];
+			$columns = $block->context['displayLayout']['columns'] ?? null;
 
 			$classnames = 'is-product-collection-layout-' . $type . ' ';
 
