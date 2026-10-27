@@ -38,8 +38,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	use CogsAwareTrait;
 
 	/**
-	 * Clone mode. A clone of an order keeps the meta IDs and gets its own meta objects, so a cached copy
-	 * does not insert its meta again, and a change to one copy does not reach the others.
+	 * Clone mode. A clone of an order keeps the meta IDs, so a cached copy does not insert its meta again.
 	 *
 	 * @var string
 	 */
@@ -214,6 +213,23 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		if ( $this->get_id() > 0 ) {
 			$this->data_store->read( $this );
+		}
+	}
+
+	/**
+	 * Give the clone its own meta objects and its own copies of the loaded items. The item copies keep
+	 * their meta IDs, so a cached copy does not insert the item meta again.
+	 */
+	public function __clone() {
+		parent::__clone();
+		foreach ( $this->items as $group => $items ) {
+			foreach ( $items as $key => $item ) {
+				$mode = $item->get_clone_mode();
+				$item->set_clone_mode( self::CLONE_MODE_CACHE );
+				$this->items[ $group ][ $key ] = clone $item;
+				$this->items[ $group ][ $key ]->set_clone_mode( $mode );
+				$item->set_clone_mode( $mode );
+			}
 		}
 	}
 

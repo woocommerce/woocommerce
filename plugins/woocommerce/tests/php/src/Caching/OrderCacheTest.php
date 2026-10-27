@@ -70,4 +70,30 @@ class OrderCacheTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 'saved', $second->get_meta( 'test' ) );
 		$this->assertSame( 'unsaved', $first->get_meta( 'test' ) );
 	}
+
+	/**
+	 * Test that an unsaved change to an item or its meta on one order copy does not reach another copy.
+	 */
+	public function test_unsaved_item_change_does_not_reach_cloned_order() {
+		$order = WC_Helper_Order::create_order();
+		$item  = current( $order->get_items() );
+		$item->add_meta_data( 'test', 'saved' );
+		$item->save();
+
+		$first = wc_get_order( $order->get_id() );
+		$first->get_items();
+		$second      = clone $first;
+		$first_item  = current( $first->get_items() );
+		$second_item = current( $second->get_items() );
+		$first_item->set_quantity( 99 );
+		$first_item->update_meta_data( 'test', 'unsaved' );
+
+		$this->assertNotSame( $first_item, $second_item );
+		$this->assertSame( $first_item->get_id(), $second_item->get_id() );
+		$this->assertSame( 'saved', $second_item->get_meta( 'test' ) );
+		$this->assertNotEmpty( current( $second_item->get_meta_data() )->id );
+		$this->assertNotSame( 99, $second_item->get_quantity() );
+		$this->assertSame( \WC_Data::CLONE_MODE_DUPLICATE, $second_item->get_clone_mode() );
+		$this->assertSame( \WC_Data::CLONE_MODE_DUPLICATE, $first_item->get_clone_mode() );
+	}
 }
