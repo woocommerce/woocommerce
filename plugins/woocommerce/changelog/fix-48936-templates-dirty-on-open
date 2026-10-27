@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix Cart and Checkout templates and pages showing unsaved changes in the editor when nothing was edited.

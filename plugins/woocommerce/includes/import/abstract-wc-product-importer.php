@@ -937,8 +937,8 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	}
 
 	/**
-	 * Explode CSV cell values using commas by default, and handling escaped
-	 * separators.
+	 * Explode CSV cell values using commas by default, handling escaped
+	 * separators and values wrapped in double quotes.
 	 *
 	 * @since  3.2.0
 	 * @param  string $value     Value to explode.
@@ -946,11 +946,97 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * @return array
 	 */
 	protected function explode_values( $value, $separator = ',' ) {
-		$value  = str_replace( '\\,', '::separator::', $value );
-		$values = explode( $separator, $value );
-		$values = array_map( array( $this, 'explode_values_formatter' ), $values );
+		$value    = str_replace( '\\,', '::separator::', $value );
+		$segments = explode( $separator, $value );
+		$values   = $this->group_quoted_values( is_array( $segments ) ? $segments : array( $value ), $separator );
+		$values   = array_map( array( $this, 'explode_values_formatter' ), $values );
 
 		return $values;
+	}
+
+	/**
+	 * Re-join exploded segments that were wrapped in double quotes, so a quoted value
+	 * can contain the separator, as in `Red, "Blue, navy", Green`. Quotes that are
+	 * balanced inside a segment (`"Large" size`) never open or close a value.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param string[] $segments  Segments produced by splitting the cell on the separator.
+	 * @param string   $separator Separator the segments were split on.
+	 * @return string[]
+	 */
+	protected function group_quoted_values( array $segments, $separator ) {
+		$values        = array();
+		$count         = count( $segments );
+		$unclosed_from = $count;
+
+		for ( $i = 0; $i < $count; $i++ ) {
+			$segment = trim( $segments[ $i ] );
+			$end     = false;
+
+			if ( $this->opens_quoted_value( $segment ) ) {
+				if ( $this->is_self_closed_quoted_value( $segment ) ) {
+					$end = $i;
+				} elseif ( $i < $unclosed_from ) {
+					for ( $end = $i + 1; $end < $count; $end++ ) {
+						if ( $this->closes_quoted_value( trim( $segments[ $end ] ) ) ) {
+							break;
+						}
+					}
+
+					// Nothing after this segment closes a quote, so later openers cannot be closed either.
+					if ( $end >= $count ) {
+						$unclosed_from = $i;
+						$end           = false;
+					}
+				}
+			}
+
+			if ( false === $end ) {
+				$values[] = $segments[ $i ];
+				continue;
+			}
+
+			$quoted   = trim( implode( $separator, array_slice( $segments, $i, $end - $i + 1 ) ) );
+			$values[] = (string) substr( $quoted, 1, -1 );
+			$i        = $end;
+		}
+
+		return $values;
+	}
+
+	/**
+	 * Whether a trimmed segment starts a double-quoted value: it begins with a quote that the
+	 * segment either closes itself (`"Large"`) or leaves open (`"Blue`, an odd number of quotes).
+	 * A lone `"` is left as it is.
+	 *
+	 * @param string $segment Trimmed segment.
+	 * @return bool
+	 */
+	private function opens_quoted_value( string $segment ): bool {
+		return strlen( $segment ) > 1 && '"' === substr( $segment, 0, 1 ) && ( $this->is_self_closed_quoted_value( $segment ) || 1 === substr_count( $segment, '"' ) % 2 );
+	}
+
+	/**
+	 * Whether a trimmed segment is a complete double-quoted value on its own, such as `"Large"`.
+	 * A segment with more quotes, such as `"Pro" or "Max"`, is ambiguous and is left as it is.
+	 *
+	 * @param string $segment Trimmed segment.
+	 * @return bool
+	 */
+	private function is_self_closed_quoted_value( string $segment ): bool {
+		return strlen( $segment ) > 1 && '"' === substr( $segment, 0, 1 ) && '"' === substr( $segment, -1 ) && 2 === substr_count( $segment, '"' );
+	}
+
+	/**
+	 * Whether a trimmed segment ends a double-quoted value opened by an earlier segment: it ends
+	 * with a quote that is not balanced inside the segment, such as `navy"` but not `15" Wheel"` or a lone `"`.
+	 *
+	 * @param string $segment Trimmed segment.
+	 * @return bool
+	 */
+	private function closes_quoted_value( string $segment ): bool {
+		return strlen( $segment ) > 1 && '"' === substr( $segment, -1 ) && 1 === substr_count( $segment, '"' ) % 2;
 	}
 
 	/**

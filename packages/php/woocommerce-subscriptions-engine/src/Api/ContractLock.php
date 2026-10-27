@@ -62,7 +62,7 @@ final class ContractLock implements Serializable {
 	 */
 	public function __construct( int $contract_id, string $operation, string $token ) {
 		if ( ! self::is_called_by_repository() ) {
-			_doing_it_wrong( __METHOD__, esc_html__( 'Take a contract lock with Contracts::lock() or Contracts::create(); a lock built from a stored token bypasses the lock lifetime.', 'woocommerce-subscriptions-engine' ), '0.0.1' );
+			_doing_it_wrong( __METHOD__, esc_html__( 'Take a contract lock with Contracts::lock() or Contracts::create(); a lock built from a stored token bypasses the lock lifetime.', 'woocommerce' ), '0.0.1' );
 		}
 
 		$this->contract_id = $contract_id;
@@ -90,7 +90,7 @@ final class ContractLock implements Serializable {
 	 */
 	public function get_state(): ContractLockState {
 		if ( ! self::is_called_by_repository() ) {
-			_doing_it_wrong( __METHOD__, esc_html__( 'The lock state is engine-only; pass the lock to Contracts write methods instead.', 'woocommerce-subscriptions-engine' ), '0.0.1' );
+			_doing_it_wrong( __METHOD__, esc_html__( 'The lock state is engine-only; pass the lock to Contracts write methods instead.', 'woocommerce' ), '0.0.1' );
 		}
 
 		return $this->state;

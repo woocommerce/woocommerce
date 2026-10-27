@@ -20,7 +20,6 @@ use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Contract;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\ContractStatus;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\Cycle;
 use Automattic\WooCommerce\SubscriptionsEngine\Core\Entity\CycleStatus;
-use Automattic\WooCommerce\SubscriptionsEngine\Core\ValueObject\BillingPolicy;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractLockState;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\ContractRepository;
 use Automattic\WooCommerce\SubscriptionsEngine\Integration\Storage\SchemaInstaller;
@@ -435,6 +434,9 @@ abstract class EngineIntegrationTestCase extends WP_UnitTestCase {
 			? new DateTimeImmutable( '@' . $paid->getTimestamp() )
 			: new DateTimeImmutable( 'now', new DateTimeZone( 'UTC' ) );
 
+		// The engine does not read the plan's cadence, so the fixture bills monthly like make_plan().
+		$next_payment = $start->setTimezone( new DateTimeZone( 'UTC' ) )->modify( '+1 month' );
+
 		$items = array();
 		foreach ( $order->get_items() as $item ) {
 			if ( $item instanceof WC_Order_Item_Product ) {
@@ -465,7 +467,7 @@ abstract class EngineIntegrationTestCase extends WP_UnitTestCase {
 				'payment_method_title' => '' !== $order->get_payment_method_title() ? $order->get_payment_method_title() : null,
 				'payment_token_id'     => $token_id > 0 ? $token_id : null,
 				'start_gmt'            => $start,
-				'next_payment_gmt'     => BillingPolicy::from_array( $plan->get_billing_policy() ?? array() )->compute_first_renewal_from( $start ),
+				'next_payment_gmt'     => $next_payment,
 				'billing_total'        => (string) $order->get_total(),
 				'discount_total'       => (string) $order->get_total_discount(),
 				'shipping_total'       => (string) $order->get_shipping_total(),
