@@ -96,7 +96,7 @@ class PrivacyEraser extends \WC_Abstract_Privacy {
 			 * `woocommerce_stock_notification_status_changed` with the anonymized row, which cannot
 			 * identify the shopper any more.
 			 *
-			 * @since 11.4.0
+			 * @since 11.3.0
 			 *
 			 * @param int          $notification_id The notification ID.
 			 * @param string       $original_email  The email stored on the notification before anonymization.
