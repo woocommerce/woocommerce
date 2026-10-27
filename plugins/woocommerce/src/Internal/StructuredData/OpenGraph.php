@@ -12,6 +12,7 @@ namespace Automattic\WooCommerce\Internal\StructuredData;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Internal\ProductGallery\ProductMediaGallery;
 use WC_Product;
 use WP_HTML_Tag_Processor;
 use WP_HTML_Text_Replacement;
@@ -97,7 +98,7 @@ class OpenGraph {
 		 *
 		 * @since 11.4.0
 		 *
-		 * @param array<string, string|string[]> $tags Metadata keyed by og:, twitter:, or product: property name. Use an array for multiple og:see_also URLs. Remove a key to omit a tag.
+		 * @param array<string, string|string[]> $tags Metadata keyed by og:, twitter:, or product: property name. Arrays support multiple og:see_also URLs and image, video, or audio values, with media details at matching indexes. Remove a key to omit a tag.
 		 * @param WC_Product|\WP_Post|\WP_Term|\WP_Post_Type|null $context Product or queried object; null when no object is available.
 		 */
 		$tags = apply_filters( 'woocommerce_open_graph_tags', $tags, $context );
@@ -110,16 +111,17 @@ class OpenGraph {
 			if ( ! is_string( $property ) || ! preg_match( '/^(og|twitter|product):[a-z_0-9:]+$/', $property ) ) {
 				continue;
 			}
-			$values = 'og:see_also' === $property && is_array( $value ) ? $value : array( $value );
-			foreach ( $values as $content ) {
+			$is_media = null !== self::get_media_root( $property );
+			$values   = ( 'og:see_also' === $property || $is_media ) && is_array( $value ) ? $value : array( $value );
+			foreach ( $values as $index => $content ) {
 				if ( ! is_string( $content ) || '' === trim( $content ) ) {
 					continue;
 				}
-				if ( in_array( $property, array( 'og:url', 'og:image', 'og:see_also' ), true ) ) {
-					$content = esc_url_raw( $content );
+				if ( self::is_url_property( $property ) ) {
+					$content = esc_url_raw( $content, $is_media ? array( 'http', 'https' ) : null );
 				}
 				if ( '' !== $content ) {
-					$prepared[ $property ][] = $content;
+					$prepared[ $property ][ $index ] = $content;
 				}
 			}
 			if ( 'og:see_also' === $property && isset( $prepared[ $property ] ) ) {
@@ -165,7 +167,7 @@ class OpenGraph {
 
 		$processor         = new WP_HTML_Tag_Processor( $html );
 		$tags              = $this->tags;
-		$has_image         = false;
+		$existing_media    = array();
 		$head_complete     = false;
 		$template_depth    = 0;
 		$conflicting_price = false;
@@ -197,10 +199,11 @@ class OpenGraph {
 				if ( is_string( $content ) && $this->has_conflicting_price( $property, $content ) ) {
 					$conflicting_price = true;
 				}
-				if ( in_array( $property, array( 'og:image', 'og:image:url' ), true ) ) {
-					$has_image = true;
+				if ( preg_match( '/^og:(image|video|audio)(:url)?$/', $property, $matches ) ) {
+					$existing_media[ 'og:' . $matches[1] ] = true;
 				}
-				if ( ! isset( $tags['og:image'] ) || 0 !== strpos( $property, 'og:image:' ) ) {
+				$root = self::get_media_root( $property );
+				if ( null === $root || ! isset( $tags[ $root ] ) || $root === $property ) {
 					unset( $tags[ $property ] );
 				}
 			}
@@ -215,12 +218,11 @@ class OpenGraph {
 			}
 		}
 
-		if ( $has_image ) {
-			// WooCommerce's image details may not describe the existing provider's image.
-			foreach ( array_keys( $tags ) as $property ) {
-				if ( 'og:image' === $property || 0 === strpos( $property, 'og:image:' ) ) {
-					unset( $tags[ $property ] );
-				}
+		// Keep each provider's media URLs and details together.
+		foreach ( array_keys( $tags ) as $property ) {
+			$root = self::get_media_root( $property );
+			if ( null !== $root && isset( $existing_media[ $root ] ) ) {
+				unset( $tags[ $property ] );
 			}
 		}
 
@@ -229,7 +231,7 @@ class OpenGraph {
 		}
 
 		if ( isset( $tags['twitter:card'] ) && $tags['twitter:card'][0] === $this->default_card ) {
-			$tags['twitter:card'] = array( $has_image || ! empty( $tags['og:image'] ) ? 'summary_large_image' : 'summary' );
+			$tags['twitter:card'] = array( isset( $existing_media['og:image'] ) || ! empty( $tags['og:image'] ) ? 'summary_large_image' : 'summary' );
 		}
 
 		return self::insert_tags( $processor->get_updated_html(), $tags );
@@ -280,18 +282,18 @@ class OpenGraph {
 				$this->set_bookmark( 'here' );
 				$this->lexical_updates[] = new WP_HTML_Text_Replacement( $this->bookmarks['here']->start, 0, $markup );
 			}
+
+			/**
+			 * Remove the current tag.
+			 */
+			public function remove_tag(): void {
+				$this->set_bookmark( 'here' );
+				$this->lexical_updates[] = new WP_HTML_Text_Replacement( $this->bookmarks['here']->start, $this->bookmarks['here']->length, '' );
+			}
 		};
 
-		$replace_image_details         = isset( $tags['og:image'] );
-		$image_details                 = array_filter(
-			$tags,
-			static function ( string $property ): bool {
-				return 0 === strpos( $property, 'og:image:' );
-			},
-			ARRAY_FILTER_USE_KEY
-		);
-		$image_details['og:image:url'] = $image_details['og:image:url'] ?? $tags['og:image'] ?? array();
-		$template_depth                = 0;
+		$replace_media  = array_intersect_key( $tags, array_flip( array( 'og:image', 'og:video', 'og:audio' ) ) );
+		$template_depth = 0;
 		while ( $inserter->next_tag( array( 'tag_closers' => 'visit' ) ) ) {
 			if ( 'TEMPLATE' === $inserter->get_tag() ) {
 				$template_depth = max( 0, $template_depth + ( $inserter->is_tag_closer() ? -1 : 1 ) );
@@ -303,12 +305,39 @@ class OpenGraph {
 				$inserter->insert_before( self::render_tags( $tags ) );
 				return $inserter->get_updated_html();
 			}
-			$content = $inserter->get_attribute( 'content' );
-			foreach ( self::get_meta_properties( $inserter ) as $property ) {
-				if ( $replace_image_details && 0 === strpos( $property, 'og:image:' ) ) {
-					$inserter->set_attribute( 'content', html_entity_decode( $image_details[ $property ][0] ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
-					unset( $tags[ $property ] );
-				} elseif ( isset( $tags[ $property ] ) && ( ! is_string( $content ) || '' === trim( $content ) ) ) {
+			$content    = $inserter->get_attribute( 'content' );
+			$properties = self::get_meta_properties( $inserter );
+			// Rebuild empty media tags and orphaned details together to preserve grouping.
+			if ( $replace_media ) {
+				$remaining = array_filter(
+					$properties,
+					static function ( string $property ) use ( $replace_media ): bool {
+						$root = self::get_media_root( $property );
+						return null === $root || ! isset( $replace_media[ $root ] );
+					}
+				);
+				if ( $properties !== $remaining ) {
+					if ( ! $remaining ) {
+						$inserter->remove_tag();
+						continue;
+					}
+					foreach ( array( 'property', 'name' ) as $attribute ) {
+						$value = $inserter->get_attribute( $attribute );
+						if ( is_string( $value ) ) {
+							$names = preg_split( '/\s+/', strtolower( trim( $value ) ) );
+							$names = false !== $names ? array_intersect( $names, $remaining ) : array();
+							if ( $names ) {
+								$inserter->set_attribute( $attribute, implode( ' ', $names ) );
+							} else {
+								$inserter->remove_attribute( $attribute );
+							}
+						}
+					}
+					$properties = $remaining;
+				}
+			}
+			foreach ( $properties as $property ) {
+				if ( isset( $tags[ $property ] ) && ( ! is_string( $content ) || '' === trim( $content ) ) ) {
 					// Decode existing entities because set_attribute() always encodes ampersands.
 					$inserter->set_attribute( 'content', html_entity_decode( array_shift( $tags[ $property ] ) ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
 					if ( ! $tags[ $property ] ) {
@@ -356,11 +385,18 @@ class OpenGraph {
 	private static function render_tags( array $tags ): string {
 		$markup = '';
 		foreach ( $tags as $property => $values ) {
-			foreach ( $values as $value ) {
-				$content = in_array( $property, array( 'og:url', 'og:image', 'og:see_also' ), true ) ? esc_url( $value ) : esc_attr( $value );
-				if ( '' !== $content ) {
-					$attribute = 0 === strpos( $property, 'twitter:' ) ? 'name' : 'property';
-					$markup   .= '<meta ' . esc_attr( $attribute ) . '="' . esc_attr( $property ) . '" content="' . $content . '" />' . "\n";
+			$root = self::get_media_root( $property );
+			if ( null !== $root && $root !== $property && isset( $tags[ $root ] ) ) {
+				continue;
+			}
+			foreach ( $values as $index => $value ) {
+				$markup .= self::render_tag( $property, $value );
+				if ( $root === $property ) {
+					foreach ( $tags as $detail => $contents ) {
+						if ( 0 === strpos( $detail, $root . ':' ) && isset( $contents[ $index ] ) ) {
+							$markup .= self::render_tag( $detail, $contents[ $index ] );
+						}
+					}
 				}
 			}
 		}
@@ -369,7 +405,24 @@ class OpenGraph {
 	}
 
 	/**
-	 * Build metadata from the product and its featured image.
+	 * Escape and render a single metadata tag.
+	 *
+	 * @param string $property Metadata property.
+	 * @param string $value Metadata value.
+	 * @return string
+	 */
+	private static function render_tag( string $property, string $value ): string {
+		$protocols = self::get_media_root( $property ) ? array( 'http', 'https' ) : null;
+		$content   = self::is_url_property( $property ) ? esc_url( $value, $protocols ) : esc_attr( $value );
+		if ( '' === $content ) {
+			return '';
+		}
+		$attribute = 0 === strpos( $property, 'twitter:' ) ? 'name' : 'property';
+		return '<meta ' . esc_attr( $attribute ) . '="' . esc_attr( $property ) . '" content="' . $content . '" />' . "\n";
+	}
+
+	/**
+	 * Build metadata from the product and its images.
 	 *
 	 * @param WC_Product $product Product being shared.
 	 * @return array<string, string|string[]>
@@ -386,7 +439,8 @@ class OpenGraph {
 			'og:description' => wc_trim_string( $description ),
 		);
 		$tags                += $this->get_site_tags();
-		$tags                += $this->get_image_tags( (int) $product->get_image_id(), $product->get_name() );
+		$tags                += $this->get_image_tags( $product );
+		$tags                += $this->get_media_tags( $product );
 		$tags['twitter:card'] = isset( $tags['og:image'] ) ? 'summary_large_image' : 'summary';
 
 		$availability = array(
@@ -550,26 +604,176 @@ class OpenGraph {
 	}
 
 	/**
-	 * Build metadata for an attachment and its image properties.
+	 * Build metadata for up to six featured and gallery images.
 	 *
-	 * @param int    $image_id Attachment ID.
-	 * @param string $title Fallback alternative text.
-	 * @return array<string, string>
+	 * @param WC_Product $product Product being shared.
+	 * @return array<string, string[]>
 	 */
-	private function get_image_tags( int $image_id, string $title ): array {
-		$tags  = array();
-		$image = wp_get_attachment_image_src( $image_id, 'full' );
-		if ( $image ) {
-			$tags['og:image'] = $image[0];
-			if ( $image[1] > 0 && $image[2] > 0 ) {
-				$tags['og:image:width']  = (string) $image[1];
-				$tags['og:image:height'] = (string) $image[2];
+	private function get_image_tags( WC_Product $product ): array {
+		$tags      = array();
+		$image_ids = array_slice( array_unique( array_filter( array_map( 'intval', array_merge( array( $product->get_image_id() ), $product->get_gallery_image_ids() ) ) ) ), 0, 6 );
+		if ( ! empty( $image_ids ) ) {
+			// Prime caches to reduce future queries.
+			_prime_post_caches( $image_ids );
+		}
+		foreach ( $image_ids as $image_id ) {
+			$image = wp_get_attachment_image_src( $image_id, 'full' );
+			if ( ! $image || in_array( $image[0], $tags['og:image'] ?? array(), true ) ) {
+				continue;
 			}
-			$alt                   = get_post_meta( $image_id, '_wp_attachment_image_alt', true );
-			$tags['og:image:alt']  = is_string( $alt ) && '' !== trim( $alt ) ? $alt : $title;
-			$tags['og:image:type'] = (string) get_post_mime_type( $image_id );
+			$index                          = count( $tags['og:image'] ?? array() );
+			$tags['og:image'][ $index ]     = $image[0];
+			$tags['og:image:url'][ $index ] = $image[0];
+			if ( 'https' === wp_parse_url( $image[0], PHP_URL_SCHEME ) ) {
+				$tags['og:image:secure_url'][ $index ] = $image[0];
+			}
+			if ( $image[1] > 0 && $image[2] > 0 ) {
+				$tags['og:image:width'][ $index ]  = (string) $image[1];
+				$tags['og:image:height'][ $index ] = (string) $image[2];
+			}
+			$alt                             = get_post_meta( $image_id, '_wp_attachment_image_alt', true );
+			$tags['og:image:alt'][ $index ]  = is_string( $alt ) && '' !== trim( $alt ) ? $alt : $product->get_name();
+			$tags['og:image:type'][ $index ] = (string) get_post_mime_type( $image_id );
 		}
 
+		return $tags;
+	}
+
+	/**
+	 * Get the root property for an image, video, or audio tag.
+	 *
+	 * @param string $property Metadata property.
+	 * @return string|null
+	 */
+	private static function get_media_root( string $property ): ?string {
+		return preg_match( '/^(og:(image|video|audio))(:|$)/', $property, $matches ) ? $matches[1] : null;
+	}
+
+	/**
+	 * Check whether a metadata property contains a URL.
+	 *
+	 * @param string $property Metadata property.
+	 * @return bool
+	 */
+	private static function is_url_property( string $property ): bool {
+		return in_array( $property, array( 'og:url', 'og:see_also' ), true ) || (bool) preg_match( '/^og:(image|video|audio)(:(url|secure_url))?$/', $property );
+	}
+
+	/**
+	 * Build metadata for the first video and audio used by a product.
+	 *
+	 * @param WC_Product $product Product being shared.
+	 * @return array<string, string>
+	 */
+	private function get_media_tags( WC_Product $product ): array {
+		$tags = array();
+		foreach ( ProductMediaGallery::get_product_media_gallery_items( $product, array( 'resolve_video_posters' => false ) ) as $item ) {
+			if ( 'video' !== ( $item['media_type'] ?? '' ) ) {
+				continue;
+			}
+			$id       = (int) ( $item['id'] ?? 0 );
+			$url      = $id ? wp_get_attachment_url( $id ) : ( $item['url'] ?? '' );
+			$metadata = $id ? wp_get_attachment_metadata( $id ) : array();
+			$metadata = is_array( $metadata ) ? $metadata : array();
+			if ( $id ) {
+				$metadata['type'] = get_post_mime_type( $id );
+			}
+			$tags = self::get_media_url_tags( 'video', is_string( $url ) ? $url : '', $metadata );
+			if ( $tags ) {
+				break;
+			}
+		}
+
+		$content = $product->get_description() . "\n" . $product->get_short_description();
+		// Parse core media shortcodes without running shortcode callbacks or fetching embeds.
+		$content        = preg_replace_callback(
+			'/' . get_shortcode_regex( array( 'video', 'audio' ) ) . '/s',
+			static function ( array $shortcode ): string {
+				if ( '[' === $shortcode[1] && ']' === $shortcode[6] ) {
+					return '';
+				}
+				$attributes = shortcode_parse_atts( $shortcode[3] );
+				$attributes = is_array( $attributes ) ? $attributes : array();
+				$extensions = 'video' === $shortcode[2] ? wp_get_video_extensions() : wp_get_audio_extensions();
+				foreach ( array_merge( array( 'src' ), $extensions ) as $key ) {
+					if ( ! empty( $attributes[ $key ] ) && is_string( $attributes[ $key ] ) ) {
+						$media_attributes = array( 'src' => $attributes[ $key ] );
+						foreach ( array( 'width', 'height' ) as $dimension ) {
+							if ( isset( $attributes[ $dimension ] ) && is_string( $attributes[ $dimension ] ) ) {
+								$media_attributes[ $dimension ] = $attributes[ $dimension ];
+							}
+						}
+						return '<' . $shortcode[2] . ' ' . wc_implode_html_attributes( $media_attributes ) . '></' . $shortcode[2] . '>';
+					}
+				}
+				return '';
+			},
+			$content
+		);
+		$processor      = new WP_HTML_Tag_Processor( $content ?? '' );
+		$media          = null;
+		$metadata       = array();
+		$template_depth = 0;
+		while ( $processor->next_tag( array( 'tag_closers' => 'visit' ) ) ) {
+			$tag = $processor->get_tag();
+			if ( 'TEMPLATE' === $tag ) {
+				$template_depth = max( 0, $template_depth + ( $processor->is_tag_closer() ? -1 : 1 ) );
+			}
+			if ( $template_depth > 0 ) {
+				continue;
+			}
+			if ( in_array( $tag, array( 'VIDEO', 'AUDIO' ), true ) ) {
+				$media    = $processor->is_tag_closer() ? null : strtolower( $tag );
+				$metadata = array(
+					'width'  => $processor->get_attribute( 'width' ),
+					'height' => $processor->get_attribute( 'height' ),
+				);
+			}
+			if ( null === $media || isset( $tags[ 'og:' . $media ] ) || ! in_array( $tag, array( 'VIDEO', 'AUDIO', 'SOURCE' ), true ) || $processor->is_tag_closer() ) {
+				continue;
+			}
+			$url = $processor->get_attribute( 'src' );
+			if ( is_string( $url ) ) {
+				$metadata['type'] = $processor->get_attribute( 'type' );
+				$tags            += self::get_media_url_tags( $media, $url, $metadata );
+			}
+		}
+		return $tags;
+	}
+
+	/**
+	 * Build media properties from a URL and available MIME type and dimensions.
+	 *
+	 * @param string               $media Media type.
+	 * @param string               $url Media URL.
+	 * @param array<string, mixed> $metadata Media details.
+	 * @return array<string, string>
+	 */
+	private static function get_media_url_tags( string $media, string $url, array $metadata ): array {
+		$url = esc_url_raw( $url, array( 'http', 'https' ) );
+		if ( ! in_array( wp_parse_url( $url, PHP_URL_SCHEME ), array( 'http', 'https' ), true ) ) {
+			return array();
+		}
+		$root = 'og:' . $media;
+		$tags = array(
+			$root          => $url,
+			$root . ':url' => $url,
+		);
+		if ( 'https' === wp_parse_url( $url, PHP_URL_SCHEME ) ) {
+			$tags[ $root . ':secure_url' ] = $url;
+		}
+		$type = $metadata['type'] ?? wp_check_filetype( (string) wp_parse_url( $url, PHP_URL_PATH ) )['type'];
+		if ( is_string( $type ) && 0 === strpos( $type, $media . '/' ) ) {
+			$tags[ $root . ':type' ] = $type;
+		}
+		if ( 'video' === $media ) {
+			foreach ( array( 'width', 'height' ) as $dimension ) {
+				$value = $metadata[ $dimension ] ?? null;
+				if ( is_scalar( $value ) && ctype_digit( (string) $value ) && (int) $value > 0 ) {
+					$tags[ $root . ':' . $dimension ] = (string) $value;
+				}
+			}
+		}
 		return $tags;
 	}
 }
