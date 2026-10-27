@@ -2723,6 +2723,24 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * @testdox Existing order payment should ship to billing when neither the order nor the request holds a shipping address.
+	 */
+	public function test_checkout_order_copies_billing_to_shipping_when_neither_holds_one() {
+		$this->set_taxes_based_on( 'shipping' );
+
+		// An order made in the admin often has no shipping address, and a client may send only billing.
+		$order = \WC_Helper_Order::create_order( 0 );
+		$this->assertEquals( '', $order->get_shipping_country() );
+
+		$response = $this->dispatch_pay_for_order_request( $order, array( 'address_1' => '1 New Street' ), null );
+
+		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$stored_order = wc_get_order( $order->get_id() );
+		$this->assertEquals( 'US', $stored_order->get_shipping_country() );
+		$this->assertEquals( '1 New Street', $stored_order->get_shipping_address_1() );
+	}
+
+	/**
 	 * @testdox Existing order payment should reject a billing change when the store ships to the billing address only.
 	 */
 	public function test_checkout_order_rejects_billing_change_when_store_ships_to_billing_only() {
@@ -2895,6 +2913,39 @@ class Checkout extends \WP_Test_REST_TestCase {
 		$stored_order = wc_get_order( $order->get_id() );
 		$this->assertEquals( 'New York', $stored_order->get_billing_state() );
 		$this->assertEquals( $original_total, $stored_order->get_total(), 'An unchanged address must not change the total' );
+	}
+
+	/**
+	 * @testdox Existing order payment should keep a state name on the shipping address it copies from billing.
+	 */
+	public function test_checkout_order_keeps_state_name_when_shipping_is_copied_from_billing() {
+		$this->set_taxes_based_on( 'shipping' );
+		$this->inserted_tax_rate_ids[] = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => 'NY',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'NY Sales Tax',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '0',
+				'tax_rate_order'    => '1',
+			)
+		);
+
+		// With no shipping address the order is taxed on billing, which holds the state name.
+		$order = \WC_Helper_Order::create_order( 0 );
+		$order->set_billing_state( 'New York' );
+		$order->calculate_totals();
+		$order->save();
+		$original_total = $order->get_total();
+
+		$response = $this->dispatch_pay_for_order_request( $order, array( 'state' => 'NY' ), null );
+
+		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$stored_order = wc_get_order( $order->get_id() );
+		$this->assertEquals( 'New York', $stored_order->get_shipping_state() );
+		$this->assertEquals( $original_total, $stored_order->get_total(), 'An unchanged location must not change the total' );
 	}
 
 	/**
