@@ -1,4 +1,3 @@
 Significance: patch
 Type: dev
-
-Render the product data panel checkboxes, the all-view Approve review action and the reviews screen scripts in PHPUnit
+Comment: Improve classic product editor and review moderation tests; no production change.
