@@ -34770,7 +34770,7 @@ parameters:
 		-
 			message: '#^Expected 2 @param tags, found 1\.$#'
 			identifier: paramTag.count
-			count: 2
+			count: 1
 			path: includes/wc-template-functions.php
 
 		-
@@ -50254,26 +50254,8 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductTag.php
 
 		-
-			message: '#^Iterating over an object of an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block_List\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductTemplate.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductTemplate\:\:initialize\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockTypes/ProductTemplate.php
-
-		-
-			message: '#^Parameter \#1 \$inner_blocks of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductTemplate\:\:block_core_post_template_uses_featured_image\(\) expects Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block_List, WP_Block_List given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductTemplate.php
-
-		-
-			message: '#^Parameter \$inner_blocks of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductTemplate\:\:block_core_post_template_uses_featured_image\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block_List\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Blocks/BlockTypes/ProductTemplate.php
 
