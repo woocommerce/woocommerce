@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Keep a pending order's items when resuming checkout fails. remove_order_items() deletes items and fires woocommerce_removed_order_items immediately again, as before 11.0.
