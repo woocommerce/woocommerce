@@ -1,7 +1,7 @@
 # Live test runbook
 
 Run this for any change to `receipt.js`, `action.yml`, the `ci.yml` receipt
-step or its `if:` guards, or `.github/local-ci.json`. It is the action's only
+step, its `if:` guards or the comparison step, or `.github/local-ci.json`. It is the action's only
 test: it proves the consumer end to end in real CI without touching trunk.
 Budget: ~30 minutes, mostly waiting. Everything created here is deleted at
 the end.
@@ -100,7 +100,36 @@ change), commit, push. Expected on every JavaScript job:
 `substituted=false reason=.github/local-ci.json differs between the pull
 request and the base branch; config changes always get full CI`.
 
-## 7. Record and clean up
+## 7. Parity
+
+On both scratch branches, set `"sampleRate": 100` on the JavaScript unit
+rule (the head config must stay byte-identical to the base), commit and
+push the base, then run `gh local-ci run --push` on the child.
+
+- **Agree.** Every JavaScript unit job runs in full and logs
+  `substituted=false reason=parity sample: bucket N < sampleRate 100; …`.
+  The step `Compare with the local CI receipt` adds a
+  `local-ci-parity result=agree` notice and a job summary section.
+- **Local pass, CI fail.** On the child, add a throwaway test to
+  `packages/js/number` that expects `process.platform` to be `'darwin'`.
+  Run `gh local-ci run --push` natively on macOS (not `--docker`). Expected
+  on `@woocommerce/number`: an error annotation
+  `local-ci-parity result=mismatch local=success ci=failure`, the job red,
+  and the summary linking the receipt.
+- **Failed receipt.** Change the expectation to `'linux'` and run
+  `gh local-ci run`; the receipt fails. Push with `git push --no-verify`.
+  Expected: a warning annotation
+  `local-ci-parity result=mismatch local=failure ci=success kind=failed-receipt`.
+- **Inconclusive.** Re-run the job and cancel the run while `Run tests`
+  is going. Expected: `local-ci-parity result=inconclusive ci=cancelled`.
+- **Determinism.** Re-run one sampled job. Its bucket is unchanged and
+  matches the one-liner in README.md.
+- **Rate 0.** Set `"sampleRate": 0` on both branches and run again. Jobs
+  are substituted as in step 4, and the comparison step is skipped.
+
+Remove the throwaway test before cleaning up.
+
+## 8. Record and clean up
 
 Add a row per run to the evidence document in the tool repository
 (`docs/evidence-<date>.md`): run URL, what was set, the decision line, the

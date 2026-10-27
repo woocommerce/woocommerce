@@ -2,7 +2,10 @@
  * Decides whether a `gh local-ci` receipt (a check run on the head commit)
  * lets this matrix job skip its install and test steps. Anything short of
  * a verified, passing receipt yields `substituted=false` with a reason.
- * `decide()` is pure; `lookup()` fetches its inputs. See README.md.
+ * A sampled job runs anyway, and so does one whose receipt failed; for
+ * both, `report()` compares CI's result with the receipt's after the tests.
+ * `decide()` and `parityReport()` are pure; `lookup()` and `report()` do
+ * the I/O. See README.md.
  */
 
 const crypto = require( 'crypto' );
@@ -13,6 +16,8 @@ const OFF_VALUES = [ '', '0', 'false', 'off', 'no' ];
 // Only job types whose remaining steps ci.yml guards.
 const SUBSTITUTABLE_TYPES = [ 'unit' ];
 const RECEIPT_VERSION = 'v1';
+// Local results worth comparing with CI's; `cancelled` is not a result.
+const COMPARABLE_CONCLUSIONS = [ 'success', 'failure', 'timed_out' ];
 const API_TIMEOUT_MS = 20000;
 
 /**
@@ -44,6 +49,20 @@ function parseExternalId( externalId ) {
  */
 function killSwitchSet( value ) {
 	return ! OFF_VALUES.includes( String( value === undefined || value === null ? '' : value ).trim().toLowerCase() );
+}
+
+/**
+ * Deterministic sample bucket for a (commit, job) pair: 0..99. The same
+ * pair always lands in the same bucket, so a re-run samples the same jobs
+ * and anyone can recompute the draw.
+ *
+ * @param {string} headSha
+ * @param {string} jobName
+ * @return {number}
+ */
+function sampleBucket( headSha, jobName ) {
+	const digest = crypto.createHash( 'sha256' ).update( headSha + jobName ).digest();
+	return digest.readUInt32BE( 0 ) % 100;
 }
 
 /**
@@ -91,7 +110,9 @@ function ruleFor( config, jobName ) {
  * @param {Object|null} input.baseConfig       `{ raw, parsed, sha256 }`, or null.
  * @param {string|null} input.headConfigRaw
  * @param {Array}       input.checkRuns
- * @return {{substituted: boolean, reason: string}}
+ * @return {{substituted: boolean, reason: string, parity?: Object}} `parity`
+ *         is set when CI runs the job and its result can be compared with
+ *         the receipt's.
  */
 function decide( input ) {
 	const no = ( reason ) => ( { substituted: false, reason } );
@@ -138,9 +159,7 @@ function decide( input ) {
 	}
 	// Newest wins: a later failure supersedes an earlier success.
 	const receipt = candidates.reduce( ( a, b ) => ( Number( b.id ) > Number( a.id ) ? b : a ) );
-	if ( receipt.conclusion !== 'success' ) {
-		return no( `newest receipt ${ receipt.html_url || receipt.id } concluded ${ receipt.conclusion }` );
-	}
+	const receiptRef = receipt.html_url || receipt.id;
 
 	const meta = parseExternalId( receipt.external_id );
 	if ( ! meta ) {
@@ -160,11 +179,140 @@ function decide( input ) {
 	if ( ! SUBSTITUTABLE_TYPES.includes( jobType( input.jobName ) ) ) {
 		return no( `ci.yml does not guard the steps a ${ jobType( input.jobName ) } job needs; only ${ SUBSTITUTABLE_TYPES.join( '/' ) } jobs may be substituted` );
 	}
-	let reason = `receipt ${ receipt.html_url || receipt.id } by ${ meta.author } (${ trust })`;
+	// The conclusion is checked after the receipt is known to be valid, so a
+	// failed one is still worth comparing: CI runs that job anyway.
+	const parity = ( kind, extra = {} ) => ( {
+		kind,
+		receipt: { id: receipt.id, url: receipt.html_url || '', conclusion: receipt.conclusion },
+		author: meta.author,
+		mode: meta.mode || '',
+		tool: meta.tool || '',
+		base: meta.base || '',
+		ciBase: ( pr.base && pr.base.sha ) || '',
+		...extra,
+	} );
+	if ( receipt.conclusion !== 'success' ) {
+		const result = no( `newest receipt ${ receiptRef } concluded ${ receipt.conclusion }` );
+		if ( COMPARABLE_CONCLUSIONS.includes( receipt.conclusion ) ) {
+			result.parity = parity( 'failed-receipt' );
+		}
+		return result;
+	}
+
+	const bucket = sampleBucket( String( ( pr.head && pr.head.sha ) || '' ), input.jobName );
+	// A rate that is not a number fails closed: sample everything rather
+	// than nothing.
+	const rate = rule.sampleRate === undefined ? 0 : Number( rule.sampleRate );
+	if ( ! Number.isFinite( rate ) || bucket < rate ) {
+		return {
+			substituted: false,
+			reason: `parity sample: bucket ${ bucket } < sampleRate ${ rule.sampleRate }; running in CI to compare with receipt ${ receiptRef }`,
+			parity: parity( 'sample', { bucket, rate: rule.sampleRate } ),
+		};
+	}
+
+	let reason = `receipt ${ receiptRef } by ${ meta.author } (${ trust })`;
 	if ( meta.base && pr.base && meta.base !== pr.base.sha ) {
 		reason += ` (base moved since: tested against ${ meta.base.slice( 0, 11 ) }, base is now ${ String( pr.base.sha ).slice( 0, 11 ) })`;
 	}
 	return { substituted: true, reason };
+}
+
+/**
+ * @param {string} sha
+ * @return {string} The 11-character short form, or "unknown".
+ */
+function short( sha ) {
+	return sha ? String( sha ).slice( 0, 11 ) : 'unknown';
+}
+
+/**
+ * Compares CI's result with the receipt's. Pure.
+ *
+ * @param {Object} input
+ * @param {Object} input.parity    `decide()`'s `parity`.
+ * @param {string} input.ciOutcome The `Run tests` step's outcome.
+ * @param {string} input.jobName
+ * @return {{result: string, level: string, marker: string, message: string, markdown: string}}
+ */
+function parityReport( { parity, ciOutcome, jobName } ) {
+	const local = parity.receipt.conclusion;
+	const ci = ciOutcome || 'unknown';
+	const baseMoved = Boolean( parity.base && parity.ciBase && parity.base !== parity.ciBase );
+	const localPassed = local === 'success';
+
+	let result;
+	let level;
+	let message;
+	if ( ci !== 'success' && ci !== 'failure' ) {
+		result = 'inconclusive';
+		level = 'notice';
+		message = `CI's tests did not finish (${ ci }), so there is nothing to compare with the receipt.`;
+	} else if ( localPassed === ( ci === 'success' ) ) {
+		result = 'agree';
+		level = 'notice';
+		message = `CI ${ localPassed ? 'passed' : 'failed' }, as the receipt did.`;
+	} else {
+		result = 'mismatch';
+		// A local pass that CI fails is the case that would let a bad change
+		// through on a receipt; the other way round costs only a re-run.
+		level = localPassed ? 'error' : 'warning';
+		message = `the receipt ${ localPassed ? 'passed' : 'failed' } and CI ${ ci === 'success' ? 'passed' : 'failed' }.`;
+		if ( baseMoved ) {
+			message += ' The base moved since the receipt, so the difference may come from the base branch.';
+		}
+	}
+
+	const marker = `local-ci-parity result=${ result } local=${ local } ci=${ ci } base-moved=${ baseMoved ? 'yes' : 'no' } kind=${ parity.kind }`;
+	const receiptLink = parity.receipt.url ? `[receipt ${ parity.receipt.id }](${ parity.receipt.url })` : `receipt ${ parity.receipt.id }`;
+	const why =
+		parity.kind === 'sample'
+			? `sampled (bucket ${ parity.bucket } < sampleRate ${ parity.rate })`
+			: 'the newest receipt did not pass';
+	const base = baseMoved
+		? `the receipt tested against ${ short( parity.base ) }; CI merged onto ${ short( parity.ciBase ) }`
+		: `the same base, ${ short( parity.ciBase ) }`;
+	const markdown = [
+		`### Local CI parity: ${ result }`,
+		'',
+		`${ jobName }: ${ message }`,
+		'',
+		`- **Receipt:** ${ receiptLink }, ${ local }, by ${ parity.author } (mode ${ parity.mode || 'unknown' }, tool ${ parity.tool || 'unknown' })`,
+		`- **CI:** ${ ci }`,
+		`- **Why CI ran it:** ${ why }`,
+		`- **Base:** ${ base }`,
+		'',
+		result === 'mismatch' ? 'See "When CI and a receipt disagree" in `.github/actions/local-ci-receipt/README.md`.' : '',
+		'',
+		`\`${ marker }\``,
+		'',
+	].join( '\n' );
+
+	return { result, level, marker, message: `${ marker }: ${ message } ${ parity.receipt.url || parity.receipt.id }`, markdown };
+}
+
+/**
+ * Writes the comparison as an annotation and a job summary section. Never
+ * throws and never fails the job: CI's own result is already the job's.
+ *
+ * @param {Object} args
+ * @param {Object} args.core
+ * @return {Promise<Object|null>}
+ */
+async function report( { core } ) {
+	try {
+		const out = parityReport( {
+			parity: JSON.parse( process.env.PARITY ),
+			ciOutcome: process.env.CI_OUTCOME,
+			jobName: process.env.JOB_NAME,
+		} );
+		core[ out.level ]( out.message, { title: `Local CI parity: ${ out.result }` } );
+		await core.summary.addRaw( out.markdown ).write();
+		return out;
+	} catch ( e ) {
+		core.warning( `local-ci: parity report failed: ${ e && e.message ? e.message : e }` );
+		return null;
+	}
 }
 
 /**
@@ -292,7 +440,8 @@ async function lookup( { github, context, core } ) {
 	core.info( `substituted=${ result.substituted } reason=${ result.reason }` );
 	core.setOutput( 'substituted', String( result.substituted ) );
 	core.setOutput( 'reason', result.reason );
+	core.setOutput( 'parity', result.parity ? JSON.stringify( result.parity ) : '' );
 	return result;
 }
 
-module.exports = { decide, lookup, parseExternalId, ruleFor, jobType, killSwitchSet, CONFIG_PATH, SUBSTITUTABLE_TYPES };
+module.exports = { decide, lookup, parityReport, report, parseExternalId, sampleBucket, ruleFor, jobType, killSwitchSet, CONFIG_PATH, SUBSTITUTABLE_TYPES };

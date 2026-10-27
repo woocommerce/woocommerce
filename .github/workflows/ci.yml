@@ -326,8 +326,9 @@ jobs:
 
       # Skip install and tests when a `gh local-ci` receipt vouches for this
       # job on this commit. Off switch: repository variable
-      # LOCAL_CI_RECEIPTS_DISABLED=1. Rollback: revert this step and the two
-      # guards below. See .github/actions/local-ci-receipt/README.md.
+      # LOCAL_CI_RECEIPTS_DISABLED=1. Rollback: revert this step, the two
+      # guards below and the comparison step after the tests. See
+      # .github/actions/local-ci-receipt/README.md.
       - uses: './.github/actions/local-ci-receipt'
         name: 'Look for a local CI receipt'
         id: 'local-ci-receipt'
@@ -462,6 +463,7 @@ jobs:
           path: '${{ runner.temp }}/last-run-info'
 
       - name: 'Run tests (${{ matrix.testType }})'
+        id: 'run-tests'
         if: ${{ steps.local-ci-receipt.outputs.substituted != 'true' }}
         timeout-minutes: ${{ ( github.event_name == 'pull_request' && ( ( matrix.testType == 'e2e' && 20 ) || ( matrix.testType == 'unit:php' && 20 ) ) ) || 360 }}
         env:
@@ -509,6 +511,18 @@ jobs:
 
           # Finally, run the tests
           pnpm --filter="${{ matrix.projectName }}" ${{ matrix.command }} $lastRunFlag
+
+      # When the lookup ran the job anyway with a receipt in hand (a parity
+      # sample, or a failed receipt), report whether CI agreed with it.
+      - uses: './.github/actions/local-ci-receipt'
+        name: 'Compare with the local CI receipt'
+        if: ${{ always() && steps.local-ci-receipt.outputs.parity != '' }}
+        continue-on-error: true
+        with:
+          job-name: ${{ matrix.name }}
+          github-token: ${{ github.token }}
+          parity: ${{ steps.local-ci-receipt.outputs.parity }}
+          ci-outcome: ${{ steps.run-tests.outcome }}
 
       - name: 'Upload Playwright last run info'
         # always upload the last run info, even if the test run passed
