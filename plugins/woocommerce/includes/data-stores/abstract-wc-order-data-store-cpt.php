@@ -795,7 +795,8 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	/**
 	 * Get persisted order item IDs, optionally limited to an item type.
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
+	 * @deprecated 11.4.0 No longer used by WooCommerce; read the order's items with get_items() instead.
 	 *
 	 * @param WC_Order    $order Order object.
 	 * @param string|null $type Order item type, or null for every type.
@@ -804,6 +805,8 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 */
 	public function get_item_ids( $order, $type = null ) {
 		global $wpdb;
+
+		wc_deprecated_function( __METHOD__, '11.4.0', 'WC_Abstract_Order::get_items()' );
 
 		if ( ! $order->get_id() ) {
 			return array();
@@ -844,9 +847,8 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	/**
 	 * Delete selected order items by ID.
 	 *
-	 * Custom order data stores that override this method opt in to deferred item deletion. The IDs are captured when items are removed and deleted during order save.
-	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
+	 * @deprecated 11.4.0 No longer used by WooCommerce, and overriding it no longer changes how remove_order_items() deletes items. Use WC_Abstract_Order::remove_item() instead.
 	 *
 	 * @param WC_Order $order Order object.
 	 * @param int[]    $ids   Order item IDs to delete.
@@ -855,6 +857,8 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	 */
 	public function delete_items_by_ids( $order, $ids ) {
 		global $wpdb;
+
+		wc_deprecated_function( __METHOD__, '11.4.0', 'WC_Abstract_Order::remove_item()' );
 
 		if ( ! $order->get_id() || empty( $ids ) ) {
 			return;

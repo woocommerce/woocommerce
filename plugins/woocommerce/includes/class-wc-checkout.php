@@ -414,6 +414,7 @@ class WC_Checkout {
 			$cart_hash          = WC()->cart->get_cart_hash();
 			$available_gateways = WC()->payment_gateways->get_available_payment_gateways();
 			$order              = $order_id ? wc_get_order( $order_id ) : null;
+			$is_resumed_order   = false;
 
 			/**
 			 * If there is an order pending payment, we can resume it here so
@@ -432,8 +433,7 @@ class WC_Checkout {
 				 */
 				do_action( 'woocommerce_resume_order', $order_id );
 
-				// Remove all items - we will re-add them later.
-				$order->remove_order_items();
+				$is_resumed_order = true;
 			} else {
 				$order = new WC_Order();
 			}
@@ -473,6 +473,13 @@ class WC_Checkout {
 			$order->set_customer_user_agent( wc_get_user_agent() );
 			$order->set_customer_note( isset( $data['order_comments'] ) ? $data['order_comments'] : '' );
 			$order->set_payment_method( isset( $available_gateways[ $data['payment_method'] ] ) ? $available_gateways[ $data['payment_method'] ] : $data['payment_method'] );
+
+			// Remove the resumed order's items only now, so a failure above (e.g. invalid posted data or
+			// a coupon that can't be held) leaves them in place. They are re-added from the cart below.
+			if ( $is_resumed_order ) {
+				$order->remove_order_items();
+			}
+
 			$this->set_data_from_cart( $order );
 
 			if ( $order->has_cogs() && $this->cogs_is_enabled() ) {

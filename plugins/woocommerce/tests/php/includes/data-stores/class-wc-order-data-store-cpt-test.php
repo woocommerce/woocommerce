@@ -586,9 +586,26 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox delete_items_by_ids() should reject invalid IDs and preserve items belonging to other orders.
+	 * @testdox The deprecated get_item_ids() should still return the order's persisted item IDs, optionally by type.
+	 */
+	public function test_deprecated_get_item_ids_returns_persisted_item_ids() {
+		$this->setExpectedDeprecated( 'Abstract_WC_Order_Data_Store_CPT::get_item_ids' );
+
+		$order             = WC_Helper_Order::create_order();
+		$line_item_ids     = array_keys( $order->get_items() );
+		$shipping_item_ids = array_keys( $order->get_items( 'shipping' ) );
+		$data_store        = $order->get_data_store();
+
+		$this->assertEqualsCanonicalizing( array_merge( $line_item_ids, $shipping_item_ids ), $data_store->get_item_ids( $order ), 'Every persisted item ID should be returned when no type is given.' );
+		$this->assertEqualsCanonicalizing( $shipping_item_ids, $data_store->get_item_ids( $order, 'shipping' ), 'Only item IDs of the requested type should be returned.' );
+	}
+
+	/**
+	 * @testdox The deprecated delete_items_by_ids() should reject invalid IDs and preserve items belonging to other orders.
 	 */
 	public function test_delete_items_by_ids_sanitizes_and_scopes_ids_to_order() {
+		$this->setExpectedDeprecated( 'Abstract_WC_Order_Data_Store_CPT::delete_items_by_ids' );
+
 		$order_1         = WC_Helper_Order::create_order();
 		$order_2         = WC_Helper_Order::create_order();
 		$order_1_item_id = array_key_first( $order_1->get_items() );

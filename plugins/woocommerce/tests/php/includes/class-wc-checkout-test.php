@@ -1110,6 +1110,115 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Get the IDs of an order's persisted item rows, read straight from the database.
+	 *
+	 * @param int $order_id Order ID.
+	 * @return int[]
+	 */
+	private function get_persisted_order_item_ids( int $order_id ): array {
+		global $wpdb;
+
+		return array_map(
+			'intval',
+			$wpdb->get_col( $wpdb->prepare( "SELECT order_item_id FROM {$wpdb->prefix}woocommerce_order_items WHERE order_id = %d ORDER BY order_item_id", $order_id ) )
+		);
+	}
+
+	/**
+	 * @testdox Resuming a pending order replaces its items with the cart's items.
+	 */
+	public function test_create_order_resume_replaces_order_items(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 2 );
+		$data = array(
+			'ship_to_different_address' => false,
+			'payment_method'            => WC_Gateway_BACS::ID,
+			'billing_email'             => 'customer@example.com',
+		);
+
+		try {
+			$order_id          = $this->sut->create_order( $data );
+			$original_item_ids = $this->get_persisted_order_item_ids( $order_id );
+			WC()->session->set( 'order_awaiting_payment', $order_id );
+
+			$resumed_order_id = $this->sut->create_order( $data );
+		} finally {
+			WC()->session->set( 'order_awaiting_payment', null );
+			WC()->cart->empty_cart();
+		}
+
+		$this->assertSame( $order_id, $resumed_order_id, 'The pending order should be resumed rather than replaced.' );
+		$this->assertEmpty( array_intersect( $original_item_ids, $this->get_persisted_order_item_ids( $resumed_order_id ) ), 'The original items should be replaced, not kept alongside the new ones.' );
+		$line_items = wc_get_order( $resumed_order_id )->get_items();
+		$this->assertCount( 1, $line_items, 'The resumed order should hold the cart line item once.' );
+		$this->assertSame( 2, current( $line_items )->get_quantity(), 'The rebuilt line item should match the cart.' );
+	}
+
+	/**
+	 * @testdox Resuming a pending order keeps its persisted items when a coupon can't be held.
+	 */
+	public function test_create_order_resume_keeps_order_items_when_coupon_hold_fails(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$coupon  = WC_Helper_Coupon::create_coupon( 'resume-limited' );
+		$coupon->set_usage_limit( 1 );
+		$coupon->save();
+		WC()->cart->add_to_cart( $product->get_id() );
+		WC()->cart->apply_coupon( $coupon->get_code() );
+		$data = array(
+			'ship_to_different_address' => false,
+			'payment_method'            => WC_Gateway_BACS::ID,
+			'billing_email'             => 'customer@example.com',
+		);
+
+		try {
+			$order_id          = $this->sut->create_order( $data );
+			$original_item_ids = $this->get_persisted_order_item_ids( $order_id );
+			WC()->session->set( 'order_awaiting_payment', $order_id );
+
+			// Use up the coupon elsewhere so holding it again during the resume throws.
+			$coupon->set_usage_count( 1 );
+			$coupon->save();
+
+			$result = $this->sut->create_order( $data );
+		} finally {
+			WC()->session->set( 'order_awaiting_payment', null );
+			WC()->cart->empty_cart();
+		}
+
+		$this->assertNotEmpty( $original_item_ids, 'Precondition: the pending order should have persisted items.' );
+		$this->assertInstanceOf( WP_Error::class, $result, 'The resume should fail when the coupon cannot be held.' );
+		$this->assertSame( $original_item_ids, $this->get_persisted_order_item_ids( $order_id ), 'The pending order should keep its persisted items after the failed resume.' );
+	}
+
+	/**
+	 * @testdox Resuming a pending order keeps its persisted items when the posted data is invalid.
+	 */
+	public function test_create_order_resume_keeps_order_items_when_posted_data_is_invalid(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id() );
+		$data = array(
+			'ship_to_different_address' => false,
+			'payment_method'            => WC_Gateway_BACS::ID,
+			'billing_email'             => 'customer@example.com',
+		);
+
+		try {
+			$order_id          = $this->sut->create_order( $data );
+			$original_item_ids = $this->get_persisted_order_item_ids( $order_id );
+			WC()->session->set( 'order_awaiting_payment', $order_id );
+
+			$result = $this->sut->create_order( array_merge( $data, array( 'billing_email' => 'not-an-email' ) ) );
+		} finally {
+			WC()->session->set( 'order_awaiting_payment', null );
+			WC()->cart->empty_cart();
+		}
+
+		$this->assertNotEmpty( $original_item_ids, 'Precondition: the pending order should have persisted items.' );
+		$this->assertInstanceOf( WP_Error::class, $result, 'The resume should fail when a posted field is invalid.' );
+		$this->assertSame( $original_item_ids, $this->get_persisted_order_item_ids( $order_id ), 'The pending order should keep its persisted items after the failed resume.' );
+	}
+
+	/**
 	 * @testdox Checkout tolerates non-array cart variation data when building contextual item names.
 	 */
 	public function test_create_order_line_items_tolerates_malformed_variation_data(): void {
