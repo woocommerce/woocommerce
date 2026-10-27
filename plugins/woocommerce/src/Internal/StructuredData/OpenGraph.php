@@ -62,11 +62,7 @@ class OpenGraph {
 		 *
 		 * @param bool $enabled Whether metadata is enabled.
 		 */
-		if ( ! apply_filters( 'woocommerce_enable_open_graph', true ) ) {
-			return;
-		}
-
-		if ( is_preview() || 'yes' === get_option( 'woocommerce_coming_soon' ) ) {
+		if ( ! apply_filters( 'woocommerce_enable_open_graph', true ) || is_preview() ) {
 			return;
 		}
 
@@ -130,12 +126,25 @@ class OpenGraph {
 	 * @return array{tags: array<string, string>, context: WC_Product|\WP_Post|\WP_Term|\WP_Post_Type|null}|null
 	 */
 	private function get_page_data(): ?array {
-		if ( ! is_singular( 'product' ) ) {
-			return null;
+		if ( is_product() ) {
+			return $this->get_product_page_data();
 		}
 
+		return null;
+	}
+
+	/**
+	 * Build metadata for a published, unprotected product page.
+	 *
+	 * @return array{tags: array<string, string>, context: WC_Product}|null
+	 */
+	private function get_product_page_data(): ?array {
 		$product = wc_get_product( get_queried_object_id() );
-		if ( ! $product instanceof WC_Product || ProductStatus::PUBLISH !== $product->get_status() || '' !== $product->get_post_password() ) {
+		if (
+			! $product instanceof WC_Product
+			|| ProductStatus::PUBLISH !== $product->get_status()
+			|| '' !== $product->get_post_password()
+		) {
 			return null;
 		}
 
