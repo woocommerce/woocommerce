@@ -218,7 +218,8 @@ abstract class ActionableAbility extends \WP_Ability {
 
 	/**
 	 * Run every validator of the resource on the changed object, also after one
-	 * refuses.
+	 * refuses. Each refusal gets the code `<namespace>:<code>`, so refusals with
+	 * the same code keep their own data.
 	 *
 	 * @param \WC_Data $subject Changed object.
 	 * @return \WP_Error|null One WP_Error with the refusals of all validators that refuse the change.
@@ -227,8 +228,13 @@ abstract class ActionableAbility extends \WP_Ability {
 		$refused = new \WP_Error();
 		foreach ( ExtensibleAbilities::get_validators( $this->get_resource() ) as $args ) {
 			$rejected = self::run_callback( $args['callback'], array( $subject, $this ), array( 'namespace' => $args['namespace'] ) );
-			if ( null !== $rejected ) {
-				$refused->merge_from( $rejected );
+			if ( null === $rejected ) {
+				continue;
+			}
+			foreach ( $rejected->get_error_codes() as $code ) {
+				foreach ( $rejected->get_error_messages( $code ) as $message ) {
+					$refused->add( $args['namespace'] . ':' . $code, $message, $rejected->get_error_data( $code ) );
+				}
 			}
 		}
 		return $refused->has_errors() ? $refused : null;

@@ -1727,7 +1727,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		);
 
 		$this->assertSame( 400, $response->get_status() );
-		$this->assertSame( 'test_locked', $response->get_data()['code'] );
+		$this->assertSame( 'test-ext:test_locked', $response->get_data()['code'] );
 		$this->assertSame( 'Use test-ext/order-unlock first.', $response->get_data()['message'] );
 		$this->assertSame( 'test-ext', $response->get_data()['data']['namespace'] );
 		$this->assertSame( 1, did_action( 'woocommerce_order_status_changed' ) - $changes );
@@ -1797,14 +1797,47 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 		$data = $response->get_data();
 		$this->assertSame( 400, $response->get_status() );
-		$this->assertSame( 'test_first_refused', $data['code'] );
+		$this->assertSame( 'first_ext:test_first_refused', $data['code'] );
 		$this->assertSame( 'First refused.', $data['message'] );
 		$this->assertSame( 'first_ext', $data['data']['namespace'] );
 		$this->assertCount( 1, $data['additional_errors'] );
-		$this->assertSame( 'test_second_refused', $data['additional_errors'][0]['code'] );
+		$this->assertSame( 'second_ext:test_second_refused', $data['additional_errors'][0]['code'] );
 		$this->assertSame( 'Second refused.', $data['additional_errors'][0]['message'] );
 		$this->assertSame( 'second_ext', $data['additional_errors'][0]['data']['namespace'] );
 		$this->assertSame( 409, $data['additional_errors'][0]['data']['status'] );
+		$this->assertSame( 'Pen', wc_get_product( $product->get_id() )->get_name() );
+	}
+
+	/**
+	 * @testdox Should keep the namespace of each refusal when validators of two namespaces return the same code.
+	 */
+	public function test_refusals_with_the_same_code_keep_their_namespace(): void {
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+		foreach ( array( 'first_ext', 'second_ext' ) as $extension_namespace ) {
+			$this->register_validator(
+				'product',
+				$extension_namespace,
+				static function () use ( $extension_namespace ) {
+					return new \WP_Error( 'test_refused', $extension_namespace . ' refused.' );
+				}
+			);
+		}
+
+		$data = $this->run_ability_response(
+			'woocommerce/product-update',
+			array(
+				'id'   => $product->get_id(),
+				'name' => 'Pencil',
+			)
+		)->get_data();
+
+		$this->assertSame( 'first_ext:test_refused', $data['code'] );
+		$this->assertSame( 'first_ext refused.', $data['message'] );
+		$this->assertSame( 'first_ext', $data['data']['namespace'] );
+		$this->assertCount( 1, $data['additional_errors'] );
+		$this->assertSame( 'second_ext:test_refused', $data['additional_errors'][0]['code'] );
+		$this->assertSame( 'second_ext refused.', $data['additional_errors'][0]['message'] );
+		$this->assertSame( 'second_ext', $data['additional_errors'][0]['data']['namespace'] );
 		$this->assertSame( 'Pen', wc_get_product( $product->get_id() )->get_name() );
 	}
 
@@ -1833,7 +1866,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		);
 
 		$this->assertSame( 400, $response->get_status() );
-		$this->assertSame( 'test_rename_refused', $response->get_data()['code'] );
+		$this->assertSame( 'other_ext:test_rename_refused', $response->get_data()['code'] );
 		$this->assertSame( 'other_ext', $response->get_data()['data']['namespace'] );
 		$this->assertSame( 'Pen', wc_get_product( $product->get_id() )->get_name() );
 	}
