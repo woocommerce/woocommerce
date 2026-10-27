@@ -37,6 +37,7 @@ import {
 import {
 	addProductCollectionToQueryPaginationParentOrAncestor,
 	getDefaultValueOfInherit,
+	sanitizeDisplayLayout,
 } from '../utils';
 import {
 	CoreCollectionNames,
@@ -182,6 +183,50 @@ describe( 'Product Collection editor contracts', () => {
 			expect( serialized ).not.toContain( '__privatePreviewState' );
 		}
 	);
+
+	it.each( [
+		{
+			layout: LayoutOptions.STACK,
+			saved: { type: LayoutOptions.STACK },
+		},
+		{
+			layout: LayoutOptions.CAROUSEL,
+			saved: { type: LayoutOptions.CAROUSEL },
+		},
+	] )(
+		'omits column settings from the saved $layout markup',
+		( { layout, saved } ) => {
+			const block = createBlock( PRODUCT_COLLECTION_BLOCK_NAME, {
+				displayLayout: sanitizeDisplayLayout( {
+					type: layout,
+					columns: 4,
+					shrinkColumns: true,
+				} ),
+			} );
+			const serialized = serialize( block );
+			const match = serialized.match( /"displayLayout":(\{[^}]*\})/ );
+
+			expect( JSON.parse( match?.[ 1 ] ?? '{}' ) ).toEqual( saved );
+		}
+	);
+
+	it( 'keeps column settings in the saved Grid markup', () => {
+		const block = createBlock( PRODUCT_COLLECTION_BLOCK_NAME, {
+			displayLayout: sanitizeDisplayLayout( {
+				type: LayoutOptions.GRID,
+				columns: 4,
+				shrinkColumns: false,
+			} ),
+		} );
+		const serialized = serialize( block );
+		const match = serialized.match( /"displayLayout":(\{[^}]*\})/ );
+
+		expect( JSON.parse( match?.[ 1 ] ?? '{}' ) ).toEqual( {
+			type: LayoutOptions.GRID,
+			columns: 4,
+			shrinkColumns: false,
+		} );
+	} );
 
 	it( 'adds Product Collection to the real Pagination metadata filter', () => {
 		addProductCollectionToQueryPaginationParentOrAncestor();
