@@ -79,12 +79,18 @@ class BlockTypeRegistryTraitTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox replace_block_types() constructs each class under its block name.
+	 * @testdox replace_block_types() replaces an existing registration with the requested mock class.
 	 */
 	public function test_replace_block_types_constructs_each_class(): void {
+		$registry = \WP_Block_Type_Registry::get_instance();
+		$original = $registry->get_registered( 'woocommerce/coupon-code' );
+		$this->assertInstanceOf( \WP_Block_Type::class, $original, 'The coupon block should be registered before replacement.' );
+
 		$this->replace_block_types( array( 'woocommerce/coupon-code' => CouponCodeMock::class ) );
 
-		$this->assertTrue( \WP_Block_Type_Registry::get_instance()->is_registered( 'woocommerce/coupon-code' ), 'Constructing the mock should register its block type.' );
+		$replacement = $registry->get_registered( 'woocommerce/coupon-code' );
+		$this->assertNotSame( $original, $replacement, 'The mock should replace the original block type.' );
+		$this->assertInstanceOf( CouponCodeMock::class, $replacement->render_callback[0], 'The registered block should render through the requested mock.' );
 	}
 
 	/**
