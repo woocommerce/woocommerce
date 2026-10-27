@@ -1197,7 +1197,11 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox wc_get_orders returns only matching orders when the known status "$status" is supplied in uppercase.
 	 *
-	 * @dataProvider uppercase_status_provider
+	 * @testWith [true, "WC-COMPLETED"]
+	 *           [true, "COMPLETED"]
+	 *           [false, "WC-COMPLETED"]
+	 *           [false, "COMPLETED"]
+	 *
 	 * @param bool   $hpos_enabled Whether HPOS is enabled.
 	 * @param string $status       Uppercase status value.
 	 */
@@ -1214,20 +1218,6 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertSame( array( $order_ids[2] ), $queried_order_ids, 'An uppercase known status should match its registered lowercase counterpart and return only the matching orders.' );
-	}
-
-	/**
-	 * Provides uppercase variants of a known status, with and without the prefix, for both order storages.
-	 *
-	 * @return array<string, array{bool, string}>
-	 */
-	public function uppercase_status_provider(): array {
-		return array(
-			'HPOS, prefixed'         => array( true, 'WC-COMPLETED' ),
-			'HPOS, unprefixed'       => array( true, 'COMPLETED' ),
-			'legacy CPT, prefixed'   => array( false, 'WC-COMPLETED' ),
-			'legacy CPT, unprefixed' => array( false, 'COMPLETED' ),
-		);
 	}
 
 	/**
@@ -1382,7 +1372,15 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	/**
 	 * @testdox wc_get_orders returns no orders when every status value is an empty-like string.
 	 *
-	 * @dataProvider empty_like_status_provider
+	 * @testWith [true, ["0"]]
+	 *           [true, "0"]
+	 *           [true, [""]]
+	 *           [true, ["  "]]
+	 *           [false, ["0"]]
+	 *           [false, "0"]
+	 *           [false, [""]]
+	 *           [false, ["  "]]
+	 *
 	 * @param bool         $hpos_enabled Whether HPOS is enabled.
 	 * @param string|array $statuses     The status query var value.
 	 */
@@ -1399,24 +1397,6 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertSame( array(), $queried_order_ids, 'A status with only empty-like strings should not drop the status condition and return every order.' );
-	}
-
-	/**
-	 * Provides statuses whose values are dropped as empty, for both order storages.
-	 *
-	 * @return array<string, array{bool, string|array}>
-	 */
-	public function empty_like_status_provider(): array {
-		return array(
-			'HPOS, zero'              => array( true, array( '0' ) ),
-			'HPOS, scalar zero'       => array( true, '0' ),
-			'HPOS, empty'             => array( true, array( '' ) ),
-			'HPOS, whitespace'        => array( true, array( '  ' ) ),
-			'legacy CPT, zero'        => array( false, array( '0' ) ),
-			'legacy CPT, scalar zero' => array( false, '0' ),
-			'legacy CPT, empty'       => array( false, array( '' ) ),
-			'legacy CPT, whitespace'  => array( false, array( '  ' ) ),
-		);
 	}
 
 	/**

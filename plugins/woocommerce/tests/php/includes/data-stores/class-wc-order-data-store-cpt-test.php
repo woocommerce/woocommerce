@@ -1794,7 +1794,9 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	/**
 	 * @testdox CPT order queries return matching orders when a query filter sets a status that WP_Query normalizes to a registered one.
 	 *
-	 * @dataProvider cpt_filtered_status_normalized_by_wp_query_provider
+	 * @testWith [["WC-COMPLETED"]]
+	 *           ["wc-completed "]
+	 *
 	 * @param string|array $post_status Status value set by the filter.
 	 */
 	public function test_cpt_order_queries_validate_filtered_status_as_wp_query_normalizes_it( $post_status ): void {
@@ -1817,18 +1819,6 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		);
 
 		$this->assertSame( array( $order_ids[2] ), $queried_order_ids, 'A status that WP_Query can match after its own normalization should not be treated as unknown.' );
-	}
-
-	/**
-	 * Provides status values that WP_Query normalizes to a registered status.
-	 *
-	 * @return array<string, array{string|array}>
-	 */
-	public function cpt_filtered_status_normalized_by_wp_query_provider(): array {
-		return array(
-			'uppercase in array'              => array( array( 'WC-COMPLETED' ) ),
-			'trailing whitespace in a string' => array( 'wc-completed ' ),
-		);
 	}
 
 	/**
