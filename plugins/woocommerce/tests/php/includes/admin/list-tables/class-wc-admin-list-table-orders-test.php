@@ -541,6 +541,64 @@ class WC_Admin_List_Table_Orders_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Order previews show a refund only on the refunded line item ($line_items).
+	 * @testWith ["sibling_variations"]
+	 *           ["same_simple_product"]
+	 *           ["same_variation"]
+	 *
+	 * @param string $line_items Which pair of products to add as separate line items.
+	 */
+	public function test_order_preview_shows_refund_only_on_refunded_line_item( string $line_items ): void {
+		if ( 'same_simple_product' === $line_items ) {
+			$simple_product = WC_Helper_Product::create_simple_product();
+			$products       = array( $simple_product, $simple_product );
+		} else {
+			$variation_ids = WC_Helper_Product::create_variation_product()->get_children();
+			$products      = array(
+				wc_get_product( $variation_ids[0] ),
+				wc_get_product( 'same_variation' === $line_items ? $variation_ids[0] : $variation_ids[1] ),
+			);
+		}
+
+		$order             = wc_create_order();
+		$refunded_item_id  = $order->add_product( $products[0], 2 );
+		$untouched_item_id = $order->add_product( $products[1], 2 );
+		$order->calculate_totals();
+		$order->save();
+
+		wc_create_refund(
+			array(
+				'amount'        => 5,
+				'order_id'      => $order->get_id(),
+				'line_items'    => array(
+					$refunded_item_id => array(
+						'qty'          => 1,
+						'refund_total' => 5,
+						'refund_tax'   => array(),
+					),
+				),
+				'restock_items' => false,
+			)
+		);
+
+		$preview_html = WC_Admin_List_Table_Orders::get_order_preview_item_html( wc_get_order( $order->get_id() ) );
+
+		$document       = new DOMDocument();
+		$previous_state = libxml_use_internal_errors( true );
+		$document->loadHTML( '<!DOCTYPE html><html><body>' . $preview_html . '</body></html>' );
+		libxml_clear_errors();
+		libxml_use_internal_errors( $previous_state );
+		$xpath = new DOMXPath( $document );
+
+		$refunded_qty_nodes = $xpath->query( "//tr[contains(@class, 'wc-order-preview-table__item--{$refunded_item_id}')]/td[contains(@class, 'wc-order-preview-table__column--quantity')]//small[contains(@class, 'refunded')]" );
+		$untouched_nodes    = $xpath->query( "//tr[contains(@class, 'wc-order-preview-table__item--{$untouched_item_id}')]//small[contains(@class, 'refunded')]" );
+
+		$this->assertSame( 1, $refunded_qty_nodes->length, 'The refunded line item should show its refunded quantity.' );
+		$this->assertSame( '-1', trim( $refunded_qty_nodes->item( 0 )->textContent ), 'The refunded quantity should only count the refunded line item.' );
+		$this->assertSame( 0, $untouched_nodes->length, 'A line item that was not refunded should not show a refund.' );
+	}
+
+	/**
 	 * @testdox Should not warn or drop orders when the m parameter is not a string.
 	 */
 	public function test_date_filter_with_non_string_m_does_not_trigger_warning(): void {
