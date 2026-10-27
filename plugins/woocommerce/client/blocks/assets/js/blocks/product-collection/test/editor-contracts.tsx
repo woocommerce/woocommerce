@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {
 	createBlock,
@@ -436,14 +436,12 @@ describe( 'default catalog order control', () => {
 					trackInteraction={ trackInteraction }
 				/>
 			);
-			await act( async () => {
-				await user.selectOptions(
-					screen.getByRole( 'combobox', {
-						name: 'Default sort by',
-					} ),
-					'price-desc'
-				);
-			} );
+			await user.selectOptions(
+				screen.getByRole( 'combobox', {
+					name: 'Default sort by',
+				} ),
+				'price-desc'
+			);
 
 			expect( editEntityRecord ).toHaveBeenCalledWith(
 				'root',

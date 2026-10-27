@@ -521,10 +521,8 @@ export function sanitizeDisplayLayout(
 	return {
 		type: displayLayout?.type ?? defaults.type,
 		columns: displayLayout?.columns ?? defaults.columns,
-		shrinkColumns:
-			displayLayout?.shrinkColumns ?? defaults.shrinkColumns,
+		shrinkColumns: displayLayout?.shrinkColumns ?? defaults.shrinkColumns,
 	};
-
 }
 
 export const getDefaultSettings = (
@@ -613,7 +611,7 @@ export const useGetProduct = ( productId: number | undefined ) => {
 						productId
 					) ) as ProductResponseItem;
 					setProduct( fetchedProduct );
-				} catch ( error ) {
+				} catch {
 					setProduct( null );
 				} finally {
 					setIsLoading( false );
