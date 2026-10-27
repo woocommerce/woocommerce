@@ -3080,12 +3080,16 @@ test.describe.serial( 'Orders API tests', () => {
 			const result4 = await request.get( './wp-json/wc/v3/orders', {
 				params: {
 					search: 'Doe',
+					per_page: 100,
 				},
 			} );
 			const result4JSON = await result4.json();
 
 			expect( result4.status() ).toEqual( 200 );
 			expect( result4JSON.length ).toBeGreaterThanOrEqual( 1 );
+			expect( result4JSON.map( ( { id } ) => id ) ).toContain(
+				sampleData.orders[ 0 ].id
+			);
 			result4JSON.forEach( ( _order ) =>
 				expect( _order.billing.last_name ).toContain( 'Doe' )
 			);
