@@ -1,4 +1,4 @@
 Significance: minor
 Type: add
 
-Record whether each paid order used a gateway in test or live mode, and report test order totals in usage tracking.
+Let payment gateways record whether an order was paid in test or live mode, and report those totals in usage tracking.
