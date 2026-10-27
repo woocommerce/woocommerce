@@ -61,7 +61,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 
 	.wc-settings-ui-shell__title {
 		font-size: 16px;
-		font-weight: var(--wpds-typography-font-weight-medium);
+		font-weight: var(--wpds-typography-font-weight-emphasis);
 		line-height: var(--wpds-typography-line-height-md);
 		margin: 0;
 	}
@@ -87,7 +87,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		border-radius: var(--wpds-border-radius-lg);
 		display: inline-flex;
 		font-size: var(--wpds-typography-font-size-sm);
-		font-weight: var(--wpds-typography-font-weight-regular);
+		font-weight: var(--wpds-typography-font-weight-default);
 		line-height: var(--wpds-typography-line-height-xs);
 		min-height: 24px;
 		padding: 0 var(--wpds-dimension-padding-sm);
@@ -170,7 +170,7 @@ body.woocommerce_page_wc-settings.woocommerce-settings-ui-page {
 		color: var(--wpds-color-foreground-interactive-neutral);
 		display: inline-flex;
 		font-size: var(--wpds-typography-font-size-md);
-		font-weight: var(--wpds-typography-font-weight-medium);
+		font-weight: var(--wpds-typography-font-weight-emphasis);
 		height: 48px;
 		line-height: var(--wpds-typography-line-height-sm);
 		padding: 0 var(--wpds-dimension-padding-lg);

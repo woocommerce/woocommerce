@@ -60,7 +60,7 @@
 	@include breakpoint( "<960px" ) {
 		&.has-search {
 			.woocommerce-table__actions {
-				grid-gap: $gap-small;
+				gap: $gap-small;
 				grid-template-columns: auto 1fr;
 				grid-row-start: 2;
 				grid-row-end: 2;

@@ -1,3 +1,4 @@
+/* eslint-disable @wordpress/i18n-text-domain -- Example code uses a placeholder text domain. */
 /**
  * External dependencies
  */

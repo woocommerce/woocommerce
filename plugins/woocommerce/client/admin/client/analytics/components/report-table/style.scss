@@ -22,7 +22,7 @@
 
 	.components-card__header {
 		display: grid;
-		grid-gap: $gap-small;
+		gap: $gap-small;
 		grid-template-columns: min-content 1fr min-content;
 	}
 

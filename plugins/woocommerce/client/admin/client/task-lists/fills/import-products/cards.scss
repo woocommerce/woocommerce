@@ -6,8 +6,8 @@
 	.woocommerce-list {
 		display: grid;
 		grid-template-columns: auto auto;
-		grid-column-gap: 16px;
-		grid-row-gap: 24px;
+		column-gap: 16px;
+		row-gap: 24px;
 		// Set it to center here since we only have one import option.
 		// We can change it to start when we have more import options.
 		justify-content: center;

@@ -15,7 +15,10 @@
 	background: var(--wpds-color-background-surface-neutral-strong);
 	border-radius: var(--wpds-border-radius-sm);
 	box-shadow:
-		var(--wpds-elevation-md),
+		0 2px 3px 0 #0000000d,
+		0 4px 5px 0 #0000000a,
+		0 12px 12px 0 #00000008,
+		0 16px 16px 0 #00000005,
 		0 4px 12px rgba(0, 0, 0, 0.08);
 	border-left: 3px solid var(--wpds-color-stroke-surface-brand-strong);
 	padding: 12px 16px;

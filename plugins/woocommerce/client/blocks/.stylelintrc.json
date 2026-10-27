@@ -13,6 +13,8 @@
 		"at-rule-no-unknown": null,
 		"comment-empty-line-before": null,
 		"font-weight-notation": null,
+		"property-no-deprecated": [ true, { "ignoreProperties": [ "clip" ] } ],
+		"declaration-property-value-keyword-no-deprecated": null,
 		"rule-empty-line-before": null,
 		"value-keyword-case": null,
 		"@stylistic/declaration-colon-newline-after": null,

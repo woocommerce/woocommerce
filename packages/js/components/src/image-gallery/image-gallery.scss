@@ -7,7 +7,7 @@
  &__wrapper {
         display: grid;
         grid-template-columns: inherit;
-        grid-gap: $gap;
+        gap: $gap;
     }
 
     .woocommerce-sortable__handle {

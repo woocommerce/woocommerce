@@ -1,4 +1,5 @@
-@import "node_modules/@wordpress/base-styles/colors.native";
+@import "node_modules/@wordpress/base-styles/colors.scss";
+@import "legacy-colors.scss";
 // By using CSS variables, we can switch the spacing rhythm using a single media query.
 :root {
 	--large-gap: 40px;

@@ -1,7 +1,7 @@
 .wc-block-components-product-summary {
 	margin-top: 0;
 	margin-bottom: $gap-small;
-	word-wrap: break-word;
+	overflow-wrap: break-word;
 
 	// While "classic" product editor allows inserting heading elements, they were
 	// never respected with previous Product Summary block (core/post-excerpt variation).

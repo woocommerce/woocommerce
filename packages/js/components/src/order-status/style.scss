@@ -1,7 +1,7 @@
 .woocommerce-order-status {
 	display: grid;
 	grid-template-columns: min-content min-content;
-	grid-gap: $gap-smallest * 2;
+	gap: $gap-smallest * 2;
 	align-items: center;
 	white-space: nowrap;
 }

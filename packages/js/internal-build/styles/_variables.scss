@@ -25,12 +25,12 @@ $gap-smallest: 4px;
 // Header
 $header-height: 60px;
 $header-border-width: 1px;
-// Matches Gutenberg's `--wpds-elevation-xs` (subtle 4-layer drop with
+// Matches the former Gutenberg `--wpds-elevation-xs` (subtle 4-layer drop with
 // very low alphas) visually without binding to a CSS custom property
 // that isn't loaded on wp-admin pages yet. Previously a single heavy
 // 30% rgba drop — replaced with the modern WPDS layered shadow
 // aesthetic.
-// TODO: swap to `var(--wpds-elevation-xs, [these layers as fallback])`
+// TODO: swap to a WPDS shadow token if one is reintroduced
 // once WP exposes design-tokens.css globally on wp-admin pages
 // (tracked in https://core.trac.wordpress.org/ticket/65085 and the
 // unified admin header discussion at WordPress/gutenberg#76709).

@@ -6,6 +6,15 @@
 	/* stylelint-disable no-invalid-position-at-import-rule */
 	@import "node_modules/@wordpress/base-styles/breakpoints";
 	@import "node_modules/@wordpress/base-styles/mixins";
+
+	// Removed from @wordpress/base-styles 14 but still used by the vendored
+	// wordpress-components@14.2.0 styles below.
+	@mixin input-style__focus($accent-color: var(--wp-admin-theme-color)) {
+		border-color: $accent-color;
+		box-shadow: 0 0 0 0.5px $accent-color;
+		outline: 2px solid transparent;
+	}
+
 	@import "node_modules/wordpress-components/src/popover/style";
 	@import "node_modules/wordpress-components/src/tooltip/style";
 	@import "node_modules/wordpress-components/src/form-token-field/style";

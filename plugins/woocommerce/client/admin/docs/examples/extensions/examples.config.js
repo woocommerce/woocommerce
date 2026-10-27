@@ -4,10 +4,9 @@
 const path = require( 'path' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
 const fs = require( 'fs' );
-const woocommerceAdminConfig = require( path.resolve(
-	__dirname,
-	'../../../webpack.config.js'
-) );
+const woocommerceAdminConfig = require(
+	path.resolve( __dirname, '../../../webpack.config.js' )
+);
 const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
 
 if ( ! process.env.WC_EXT ) {

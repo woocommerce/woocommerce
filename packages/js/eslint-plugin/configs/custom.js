@@ -7,6 +7,7 @@ const wordpress = require( '@wordpress/eslint-plugin' );
 /**
  * Internal dependencies
  */
+const jestConfig = require( './jest' );
 const reactTestingLibraryConfig = require( './react-testing-library' );
 
 /*
@@ -47,7 +48,7 @@ module.exports = defineConfig( [
 		// Upstream ships these unscoped; `extends` narrows them to test files.
 		files: TEST_FILES,
 		extends: [
-			wordpress.configs[ 'test-unit' ],
+			jestConfig,
 			reactTestingLibraryConfig,
 		],
 		rules: {

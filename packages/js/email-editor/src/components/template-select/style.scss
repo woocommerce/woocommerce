@@ -31,7 +31,7 @@ $email-editor-template-select-sidebar-width: 280px;
 
 .email-editor-template-select__templates {
 	display: grid;
-	grid-gap: $grid-unit-40;
+	gap: $grid-unit-40;
 	grid-template-columns: repeat(1, 1fr);
 	margin-bottom: $grid-unit-20;
 

@@ -45,7 +45,7 @@ $min-product-width: 150px;
 
 	&__responsive {
 		display: grid;
-		grid-gap: $grid-gap;
+		gap: $grid-gap;
 
 		@for $i from 2 through 6 {
 			$gap-count: calc(#{$i} - 1);

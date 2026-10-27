@@ -67,7 +67,7 @@ $border-width: 1px;
 		list-style: none;
 		display: grid;
 		grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-		grid-gap: 12px;
+		gap: 12px;
 
 		@include cart-checkout-mobile-container {
 			grid-template-columns: 1fr;

@@ -73,7 +73,7 @@
 .woocommerce-task-payment-method__fields {
 	display: grid;
 	grid-template-columns: 1fr 1fr;
-	grid-gap: 0 $gap;
+	gap: 0 $gap;
 	margin-bottom: $gap-smaller;
 
 	.components-base-control {

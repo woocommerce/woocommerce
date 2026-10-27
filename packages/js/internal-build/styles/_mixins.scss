@@ -161,7 +161,7 @@
 	overflow: hidden;
 	/* Many screen reader and browser combinations announce broken words as they would appear visually. */
 	overflow-wrap: normal !important;
-	word-wrap: normal !important;
+	overflow-wrap: normal !important;
 }
 
 @mixin screen-reader-only {

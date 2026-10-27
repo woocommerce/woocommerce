@@ -79,7 +79,7 @@ $wc-setting-email-width: 634px;
 	border-radius: 4px;
 	box-sizing: border-box;
 	display: grid;
-	grid-gap: $wc-setting-email-preview-gap;
+	gap: $wc-setting-email-preview-gap;
 	grid-template-rows: 36px 1fr;
 	height: 960px;
 	margin-bottom: 60px;
@@ -137,7 +137,7 @@ $wc-setting-email-width: 634px;
 
 .wc-settings-email-preview-device-type {
 	display: grid;
-	grid-gap: 8px;
+	gap: 8px;
 	grid-template-columns: 32px 32px;
 	padding-right: 8px;
 

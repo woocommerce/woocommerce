@@ -31,6 +31,8 @@ module.exports = {
 		'scss/load-no-partial-leading-underscore': null,
 		'scss/no-global-function-names': null,
 		'scss/selector-no-redundant-nesting-selector': null,
+		'property-no-deprecated': [ true, { ignoreProperties: [ 'clip' ] } ],
+		'declaration-property-value-keyword-no-deprecated': null,
 		'selector-id-pattern': null,
 		'length-zero-no-unit': [ true, { ignoreFunctions: [ 'calc', 'var' ] } ],
 		'plugin-wpds/no-token-fallback-values': true,

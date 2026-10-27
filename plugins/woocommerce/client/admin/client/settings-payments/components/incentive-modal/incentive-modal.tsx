@@ -51,7 +51,7 @@ interface IncentiveModalProps {
 	/**
 	 * Callback to handle dismiss action.
 	 *
-	 * @param dismissHref Dismiss URL.
+	 * @param dismissUrl  Dismiss URL.
 	 * @param context     The context in which the incentive is dismissed. (e.g. whether it was in a modal or banner).
 	 * @param doNotTrack  Optional. If true, the dismissal should not be tracked.
 	 */

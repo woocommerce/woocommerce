@@ -23,7 +23,7 @@ export function compareTemplateVersions( a: string, b: string ): number {
 
 /**
  * Mirrors the canonical "update available" check from
- * {@see WCEmailTemplateDivergenceDetector}'s docblock:
+ * `WCEmailTemplateDivergenceDetector`'s docblock:
  *
  *   $reviewed = (string) get_post_meta( $post_id, VERSION_META_KEY, true );
  *   $current  = (string) ( $sync_registry[ $email_id ]['version'] ?? '' );

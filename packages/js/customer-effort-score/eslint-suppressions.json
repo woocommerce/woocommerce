@@ -1,4 +1,9 @@
 {
+  "src/components/customer-feedback-modal/index.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 2
+    }
+  },
   "src/components/customer-feedback-simple/customer-feedback-simple.tsx": {
     "@wordpress/use-recommended-components": {
       "count": 1
