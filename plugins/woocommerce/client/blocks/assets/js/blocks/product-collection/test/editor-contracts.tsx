@@ -204,9 +204,10 @@ describe( 'Product Collection editor contracts', () => {
 				} ),
 			} );
 			const serialized = serialize( block );
-			const match = serialized.match( /"displayLayout":(\{[^}]*\})/ );
 
-			expect( JSON.parse( match?.[ 1 ] ?? '{}' ) ).toEqual( saved );
+			expect( serialized ).toContain(
+				`"displayLayout":${ JSON.stringify( saved ) }`
+			);
 		}
 	);
 
@@ -219,13 +220,14 @@ describe( 'Product Collection editor contracts', () => {
 			} ),
 		} );
 		const serialized = serialize( block );
-		const match = serialized.match( /"displayLayout":(\{[^}]*\})/ );
 
-		expect( JSON.parse( match?.[ 1 ] ?? '{}' ) ).toEqual( {
-			type: LayoutOptions.GRID,
-			columns: 4,
-			shrinkColumns: false,
-		} );
+		expect( serialized ).toContain(
+			`"displayLayout":${ JSON.stringify( {
+				type: LayoutOptions.GRID,
+				columns: 4,
+				shrinkColumns: false,
+			} ) }`
+		);
 	} );
 
 	it( 'adds Product Collection to the real Pagination metadata filter', () => {
