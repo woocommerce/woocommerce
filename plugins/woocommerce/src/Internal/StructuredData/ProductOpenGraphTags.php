@@ -29,9 +29,10 @@ class ProductOpenGraphTags {
 	 * @return array<string, string>
 	 */
 	public function get_tags( WC_Product $product ): array {
-		$description          = $product->get_short_description();
-		$description          = '' !== $description ? $description : $product->get_description();
-		$description          = wp_strip_all_tags( strip_shortcodes( $description ) );
+		$description = $product->get_short_description();
+		$description = '' !== $description ? $description : $product->get_description();
+		$description = wp_strip_all_tags( strip_shortcodes( $description ) );
+		// Collapse Unicode whitespace, including NBSP, which wp_strip_all_tags() leaves intact.
 		$description          = trim( (string) preg_replace( '/\s+/u', ' ', $description ) );
 		$tags                 = array(
 			'og:title'       => $product->get_name(),
@@ -54,6 +55,7 @@ class ProductOpenGraphTags {
 	private function get_site_tags(): array {
 		$tags   = array( 'og:site_name' => get_bloginfo( 'name' ) );
 		$locale = get_locale();
+		// Accept only language_TERRITORY locales, such as en_US.
 		if ( preg_match( '/^[a-z]{2,3}_[A-Z]{2}$/', $locale ) ) {
 			$tags['og:locale'] = $locale;
 		}
