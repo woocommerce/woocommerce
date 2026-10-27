@@ -4089,6 +4089,73 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * Failures the gateway can raise while taking payment, and whether the place-order debug
+	 * log trail should survive them for investigation or be cleared as routine.
+	 *
+	 * @return array<string, array{\Throwable, int, string, bool}>
+	 */
+	public function provider_checkout_failures_and_expected_debug_log_outcome(): array {
+		return array(
+			'unexpected server error'                  => array(
+				new \Error( 'Extension raised an engine error while taking payment.' ),
+				500,
+				'woocommerce_rest_unknown_server_error',
+				true,
+			),
+			'ordinary client error (declined payment)' => array(
+				new \Exception( 'Card declined.' ),
+				400,
+				'woocommerce_rest_checkout_process_payment_error',
+				false,
+			),
+		);
+	}
+
+	/**
+	 * @testdox The place-order debug log is kept only for an unexpected server error, not an ordinary client error: $_dataName.
+	 * @dataProvider provider_checkout_failures_and_expected_debug_log_outcome
+	 *
+	 * @param \Throwable $failure         The failure raised while the gateway is taking payment.
+	 * @param int        $expected_status The HTTP status the checkout should fail with.
+	 * @param string     $expected_code   The REST error code the checkout should fail with.
+	 * @param bool       $log_is_kept     Whether the debug log trail should survive this failure.
+	 */
+	public function test_debug_log_kept_only_for_unexpected_server_errors( \Throwable $failure, int $expected_status, string $expected_code, bool $log_is_kept ) {
+		add_action(
+			'woocommerce_rest_checkout_process_payment_with_context',
+			function () use ( $failure ) {
+				throw $failure;
+			},
+			998
+		);
+
+		$response = rest_get_server()->dispatch( $this->build_checkout_post_request() );
+
+		$this->assertSame( $expected_status, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertSame( $expected_code, $response->get_data()['code'] );
+
+		$orders = wc_get_orders(
+			array(
+				'limit'  => -1,
+				'status' => 'any',
+			)
+		);
+		$this->assertCount( 1, $orders, 'Exactly one order should exist.' );
+
+		if ( $log_is_kept ) {
+			$this->assertStringStartsWith( 'place-order-debug-', $orders[0]->get_meta( '_debug_log_source' ), 'The debug log trail must be kept for an unexpected server error, not cleared.' );
+			$this->assertEmpty( $orders[0]->get_meta( '_debug_log_source_pending_deletion' ), 'The debug log must not be scheduled for deletion on an unexpected server error.' );
+		} else {
+			$this->assertEmpty( $orders[0]->get_meta( '_debug_log_source' ), 'The debug log trail must be cleared for an ordinary client error.' );
+			$this->assertStringStartsWith( 'place-order-debug-', $orders[0]->get_meta( '_debug_log_source_pending_deletion' ), 'The debug log must be scheduled for deletion on an ordinary client error.' );
+		}
+
+		// wc_log_order_step()'s static state is request-scoped in production; PHPUnit keeps one process
+		// alive across tests, so end the session explicitly here to avoid bleeding into the next test.
+		wc_log_order_step( 'Test cleanup', null, true );
+	}
+
+	/**
 	 * @testdox An Error raised inside a status transition after the gateway moved the order on is recovered.
 	 */
 	public function test_error_raised_inside_a_status_transition_after_the_gateway_ran_is_recovered() {
