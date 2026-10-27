@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Include grouped products with discounted children in sale-filtered product lists.
