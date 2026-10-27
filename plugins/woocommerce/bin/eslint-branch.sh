@@ -2,14 +2,17 @@
 # Lint branch
 #
 # Runs eslint, comparing the current branch to its "base" or "parent" branch.
-# The base branch defaults to trunk, but another branch name can be specified as an
-# optional positional argument. Further arguments are passed to ESLint.
+# The base branch defaults to origin/trunk. A different base can be specified as
+# the first argument; all remaining arguments are passed to ESLint.
 #
-# Example:
+# Examples:
 # ./eslint-branch.sh base-branch
+# ./eslint-branch.sh --fix
+# ./eslint-branch.sh base-branch --fix
 
-baseBranch=${1:-"origin/trunk"}
-if (( $# > 0 )); then
+baseBranch="origin/trunk"
+if (( $# > 0 )) && [[ "$1" != -* ]]; then
+    baseBranch=${1:-"origin/trunk"}
     shift
 fi
 mergeBase=$(git merge-base HEAD "$baseBranch") || exit $?
