@@ -1842,7 +1842,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should run the other validators after one throws, and give every code of a refusal its namespace and status.
+	 * @testdox Should run the other validators after one throws, list the crash last, and give every code of a refusal its namespace and status.
 	 */
 	public function test_validators_run_after_a_throw_and_every_code_gets_its_namespace(): void {
 		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
@@ -1863,21 +1863,25 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			}
 		);
 
-		$data = $this->run_ability_response(
+		$response = $this->run_ability_response(
 			'woocommerce/product-update',
 			array(
 				'id'   => $product->get_id(),
 				'name' => 'Pencil',
 			)
-		)->get_data();
+		);
+		$data     = $response->get_data();
 
-		$this->assertSame( 'first_ext:woocommerce_ability_extension_failed', $data['code'] );
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'second_ext:test_name_refused', $data['code'] );
+		$this->assertSame( 'second_ext', $data['data']['namespace'] );
 		$this->assertCount( 2, $data['additional_errors'] );
-		foreach ( array( 'test_name_refused', 'test_price_refused' ) as $index => $code ) {
-			$this->assertSame( 'second_ext:' . $code, $data['additional_errors'][ $index ]['code'] );
-			$this->assertSame( 'second_ext', $data['additional_errors'][ $index ]['data']['namespace'] );
-			$this->assertSame( 400, $data['additional_errors'][ $index ]['data']['status'] );
-		}
+		$this->assertSame( 'second_ext:test_price_refused', $data['additional_errors'][0]['code'] );
+		$this->assertSame( 'second_ext', $data['additional_errors'][0]['data']['namespace'] );
+		$this->assertSame( 400, $data['additional_errors'][0]['data']['status'] );
+		$this->assertSame( 'first_ext:woocommerce_ability_extension_failed', $data['additional_errors'][1]['code'] );
+		$this->assertSame( 'first_ext', $data['additional_errors'][1]['data']['namespace'] );
+		$this->assertSame( 500, $data['additional_errors'][1]['data']['status'] );
 		$this->assertSame( 'Pen', wc_get_product( $product->get_id() )->get_name() );
 	}
 
