@@ -353,4 +353,105 @@ class DataUtilsCurrencyTest extends WC_Unit_Test_Case {
 		$refund->add_item( $refunded_item );
 		$refund->save();
 	}
+
+	/**
+	 * @testdox The preview explains a fractional order-level cap after an amount-only refund.
+	 */
+	public function test_preview_order_cap_message_preserves_cents(): void {
+		list( $order, $item ) = $this->create_order( 20.25 );
+		$refund               = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 5,
+			)
+		);
+		$this->assertInstanceOf( WC_Order_Refund::class, $refund );
+		$order  = new WC_Order( $order->get_id() );
+		$result = $this->sut->compute_refund_preview_or_error(
+			$order,
+			array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'refund_total' => 16.25,
+				),
+			),
+			'currency-test'
+		);
+		$this->assertWPError( $result );
+		$this->assertSame( 'preview_exceeds_max_refundable', $result->get_error_code() );
+		$this->assertSame( 'Requested refund preview (16.25) exceeds the remaining refundable amount (15.25).', $result->get_error_message() );
+	}
+
+	/**
+	 * @testdox Exact amount override boundaries accept the line total and remaining order total.
+	 * @param float $amount Requested amount.
+	 * @testWith [10.25]
+	 *           [20.25]
+	 */
+	public function test_amount_override_accepts_exact_boundaries( float $amount ): void {
+		list( $order, $item ) = $this->create_order( 20.25 );
+		$result               = $this->sut->prepare_refund_creation_or_error(
+			$order,
+			array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'refund_total' => 10.25,
+				),
+			),
+			true,
+			$amount,
+			'currency-test'
+		);
+		$this->assertIsArray( $result );
+		$this->assertSame( $amount, $result['amount'] );
+	}
+
+	/**
+	 * @testdox Foreign-currency tax history keeps the configured per-rate rounding policy.
+	 * @param string $store Store currency.
+	 * @param int    $decimals Store decimals.
+	 * @param string $at_subtotal Whether to round at subtotal.
+	 * @param float  $expected Expected gross amount.
+	 * @testWith ["JPY", 0, "no", 20.99]
+	 *           ["USD", 2, "no", 20.99]
+	 *           ["JPY", 0, "yes", 21.0]
+	 *           ["USD", 2, "yes", 21.0]
+	 */
+	public function test_subcent_tax_buckets_keep_rounding_policy( string $store, int $decimals, string $at_subtotal, float $expected ): void {
+		update_option( 'woocommerce_currency', $store );
+		update_option( 'woocommerce_tax_round_at_subtotal', $at_subtotal );
+		list( $order, $item ) = $this->create_order( 20 );
+		update_option( 'woocommerce_price_num_decimals', $decimals );
+		$taxes = array(
+			123 => 0.333,
+			124 => 0.333,
+			125 => 0.333,
+		);
+		$item->set_taxes(
+			array(
+				'total'    => $taxes,
+				'subtotal' => $taxes,
+			)
+		);
+		$item->save();
+		$order->set_total( $expected );
+		$order->save();
+		$order = new WC_Order( $order->get_id() );
+
+		$result = $this->sut->prepare_refund_creation_or_error(
+			$order,
+			array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'quantity'     => 1,
+				),
+			),
+			false,
+			null,
+			'currency-test'
+		);
+
+		$this->assertIsArray( $result );
+		$this->assertSame( $expected, $result['amount'] );
+	}
 }

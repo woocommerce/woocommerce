@@ -4299,4 +4299,35 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 
 		return $result;
 	}
+
+	/**
+	 * @testdox A remaining foreign-currency balance can be refunded without rounding its cap down.
+	 */
+	public function test_refund_currency_precision_remaining_cap(): void {
+		update_option( 'woocommerce_currency', 'JPY' );
+		update_option( 'woocommerce_price_num_decimals', 0 );
+		$order = wc_create_order();
+		$order->set_currency( 'USD' );
+		$order->set_total( 18 );
+		$order->set_status( OrderStatus::PROCESSING );
+		$item = new WC_Order_Item_Product();
+		$item->set_total( 18 );
+		$item->set_subtotal( 18 );
+		$order->add_item( $item );
+		$order->save();
+		$first = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 5.75,
+			)
+		);
+		$this->assertInstanceOf( WC_Order_Refund::class, $first );
+
+		$response = $this->do_refund_line_items_request( wc_get_order( $order->get_id() ), $item->get_id(), 0, '12.25' );
+
+		$this->assertTrue( $response['success'], wp_json_encode( $response ) );
+		$order = wc_get_order( $order->get_id() );
+		$this->assertSame( 18.0, (float) $order->get_total_refunded() );
+		$this->assertSame( 0.0, (float) $order->get_remaining_refund_amount() );
+	}
 }

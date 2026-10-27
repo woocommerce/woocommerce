@@ -66,15 +66,26 @@ class DataUtils {
 	}
 
 	/**
-	 * Read exact per-rate taxes when item tax aggregates use a coarser store precision.
+	 * Recalculate taxes at order precision when item aggregates use a coarser precision.
 	 *
 	 * @param WC_Order_Item_Product|WC_Order_Item_Shipping|WC_Order_Item_Fee $item Order item.
 	 * @return float
 	 */
 	private function get_item_gross( $item ): float {
-		$tax = $this->get_price_decimals( $item->get_order() ) === wc_get_price_decimals()
-			? (float) $item->get_total_tax()
-			: array_sum( array_map( 'floatval', $item->get_taxes()['total'] ?? array() ) );
+		$price_decimals = $this->get_price_decimals( $item->get_order() );
+		$tax            = (float) $item->get_total_tax();
+		if ( wc_get_price_decimals() !== $price_decimals ) {
+			$taxes = array_map( 'floatval', $item->get_taxes()['total'] ?? array() );
+			if ( 'yes' !== get_option( 'woocommerce_tax_round_at_subtotal' ) ) {
+				$taxes = array_map(
+					static function ( $amount ) use ( $price_decimals ) {
+						return wc_round_tax_total( $amount, $price_decimals );
+					},
+					$taxes
+				);
+			}
+			$tax = array_sum( $taxes );
+		}
 
 		return (float) $item->get_total() + $tax;
 	}

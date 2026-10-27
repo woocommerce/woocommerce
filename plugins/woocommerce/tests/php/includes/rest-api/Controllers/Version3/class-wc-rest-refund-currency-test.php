@@ -374,4 +374,91 @@ class WC_REST_Refund_Currency_Test extends WC_REST_Unit_Test_Case {
 			$this->assertEquals( array( 97.50, 97.50, 97.50 ), array( (float) $last->get_data()['amount'], (float) ( $preview->get_data()['total'] ?? -1 ), end( $this->gateway_amounts ) ) );
 		}
 	}
+
+	/**
+	 * @testdox Computed refunds can close the last cents by quantity or amount.
+	 * @param string $store Store currency.
+	 * @param int    $dp Store decimals.
+	 * @param string $currency Order currency.
+	 * @dataProvider currencies
+	 */
+	public function test_computed_last_fraction( string $store, int $dp, string $currency ): void {
+		foreach ( array( true, false ) as $quantity_only ) {
+			list( $order, $item_id ) = $this->order_fixture( $store, $dp, $currency );
+			$first                   = wc_create_refund(
+				array(
+					'order_id'   => $order->get_id(),
+					'amount'     => 17.75,
+					'line_items' => array(
+						$item_id => array(
+							'qty'          => 0,
+							'refund_total' => 17.75,
+						),
+					),
+				)
+			);
+			$this->assertInstanceOf( WC_Order_Refund::class, $first );
+			$line = array( 'id' => $item_id );
+			$line[ $quantity_only ? 'quantity' : 'refund_total' ] = $quantity_only ? 1 : 0.25;
+			$response = $this->request(
+				$order,
+				array(
+					'compute_totals' => true,
+					'line_items'     => array( $line ),
+				)
+			);
+			$this->assertSame( 'JPY' === $currency ? 422 : 201, $response->get_status(), wp_json_encode( $response->get_data() ) );
+			if ( 'JPY' !== $currency ) {
+				$refund = wc_get_order( $response->get_data()['id'] );
+				$this->assertSame( 0.25, (float) $refund->get_amount() );
+				$this->assertSame( -0.25, (float) $refund->get_total() );
+				$this->assertSame( 0.25, end( $this->gateway_amounts ) );
+				$this->assertSame( 0.0, (float) wc_get_order( $order->get_id() )->get_remaining_refund_amount() );
+			}
+		}
+	}
+
+	/**
+	 * @testdox Three-decimal refunds preserve the third decimal through preview, persistence and gateway.
+	 */
+	public function test_three_decimal_gateway_roundtrip(): void {
+		list( $order, $item_id ) = $this->order_fixture( 'JPY', 0, 'KWD' );
+		$preview                 = $this->request(
+			$order,
+			array(
+				'line_items' => array(
+					array(
+						'line_item_id' => $item_id,
+						'refund_total' => 10.501,
+					),
+				),
+			),
+			true
+		);
+		$response                = $this->request(
+			$order,
+			array(
+				'compute_totals' => true,
+				'line_items'     => array(
+					array(
+						'id'           => $item_id,
+						'refund_total' => 10.501,
+					),
+				),
+			)
+		);
+		$this->assertSame( 200, $preview->get_status(), wp_json_encode( $preview->get_data() ) );
+		$this->assertSame( '10.501', $preview->get_data()['total'] );
+		$this->assertSame( 201, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$this->assertEquals(
+			array(
+				'amount'    => 10.501,
+				'total'     => -10.501,
+				'gateway'   => 10.501,
+				'refunded'  => 10.501,
+				'remaining' => 7.499,
+			),
+			$this->amounts( $order, wc_get_order( $response->get_data()['id'] ) )
+		);
+	}
 }
