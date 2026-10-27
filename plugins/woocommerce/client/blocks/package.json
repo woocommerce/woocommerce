@@ -151,6 +151,7 @@
 		"@wordpress/patterns": "catalog:wp-min",
 		"@wordpress/postcss-plugins-preset": "catalog:tooling",
 		"@wordpress/postcss-themes": "next",
+		"@wordpress/preferences": "catalog:wp-min",
 		"@wordpress/private-apis": "catalog:wp-min",
 		"@wordpress/rich-text": "catalog:wp-min",
 		"@wordpress/scripts": "catalog:tooling",

@@ -1,4 +1,0 @@
-Significance: patch
-Type: enhancement
-
-Use consistent markup for classic notices by wrapping them all in `woocommerce-notices-wrapper`.
