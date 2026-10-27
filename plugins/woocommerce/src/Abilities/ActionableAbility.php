@@ -172,6 +172,9 @@ abstract class ActionableAbility extends \WP_Ability {
 		$updates    = array();
 		foreach ( $values as $namespace => $fields ) {
 			foreach ( (array) $fields as $field => $value ) {
+				if ( ExtensibleAbilities::OMITTED_KEY === $field ) {
+					continue;
+				}
 				$args = $registered[ $namespace ][ $field ] ?? array();
 				if ( ! isset( $args['update_callback'] ) ) {
 					return new \WP_Error(
@@ -285,9 +288,7 @@ abstract class ActionableAbility extends \WP_Ability {
 					return isset( $args['update_callback'] );
 				}
 			);
-			if ( empty( $writable ) ) {
-				continue;
-			}
+
 			$extensions['properties'][ $namespace ] = array(
 				'type'                 => 'object',
 				'properties'           => array_map(
@@ -302,6 +303,11 @@ abstract class ActionableAbility extends \WP_Ability {
 						return $field_schema;
 					},
 					$writable
+				) + array(
+					ExtensibleAbilities::OMITTED_KEY => array(
+						'type'        => 'object',
+						'description' => __( 'Ignored, so a client can send back the extensions of a read result.', 'woocommerce' ),
+					),
 				),
 				'additionalProperties' => false,
 			);

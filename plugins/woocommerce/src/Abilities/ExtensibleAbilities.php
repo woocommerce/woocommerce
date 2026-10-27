@@ -34,6 +34,11 @@ class ExtensibleAbilities {
 	public const FEATURE_ID = 'extensible_abilities';
 
 	/**
+	 * Key next to the values of a namespace that lists the fields left out, with the reason for each one.
+	 */
+	public const OMITTED_KEY = '_omitted';
+
+	/**
 	 * Fields keyed by resource, then namespace, then field name.
 	 *
 	 * @var array<string, array<string, array<string, array<string, mixed>>>>
@@ -123,7 +128,7 @@ class ExtensibleAbilities {
 	 *
 	 *     @type string   $resource     Resource that an ability formats, for example `product`, `order` or `order_item`.
 	 *     @type string   $namespace    Slug of the extension that owns the field, such as `subscriptions`.
-	 *     @type string   $field        Field name inside the namespace, such as `trial_length`.
+	 *     @type string   $field        Field name inside the namespace, such as `trial_length`. It cannot be `_omitted`.
 	 *     @type array    $schema       JSON schema of the value. It needs a `type`. Its `title` is the label clients show.
 	 *                                  It cannot set `required`, because a value that fails its schema is
 	 *                                  left out. For a field that is always present, allow null and return null.
@@ -158,6 +163,10 @@ class ExtensibleAbilities {
 				);
 				return;
 			}
+		}
+		if ( self::OMITTED_KEY === $args['field'] ) {
+			wc_doing_it_wrong( __METHOD__, 'The field name "_omitted" is reserved.', '11.4.0' );
+			return;
 		}
 		if ( ! isset( self::$resources[ $args['resource'] ] ) && ! did_action( 'woocommerce_extensible_abilities_resources_init' ) ) {
 			wc_doing_it_wrong( __METHOD__, 'Register a field inside the woocommerce_extensible_abilities_init action. The resources are not registered yet.', '11.3.0' );
@@ -525,9 +534,10 @@ class ExtensibleAbilities {
 	 * Add the field values of an object to its formatted output, under
 	 * `extensions.<namespace>.<field>`. A value is cast to its schema type, so
 	 * `'12'` becomes `12` for an integer field. A field that throws or returns a
-	 * value that its schema does not allow is left out. A namespace with no
-	 * values is left out, and `extensions` is left out when no namespace has
-	 * values or the feature is off.
+	 * value other than null that its schema does not allow is left out, and
+	 * `extensions.<namespace>._omitted.<field>` says why. A namespace with no
+	 * values and no fields left out is left out, and `extensions` is left out
+	 * when no namespace is in the output or the feature is off.
 	 *
 	 * @since 11.3.0
 	 *
@@ -551,14 +561,15 @@ class ExtensibleAbilities {
 						sprintf( 'Ability field "%s.%s" of "%s" failed: %s', $namespace, $field, $resource_name, $e->getMessage() ),
 						array( 'source' => 'extensible-abilities' )
 					);
+					$extensions[ $namespace ][ self::OMITTED_KEY ][ $field ] = __( 'The extension failed to read this value.', 'woocommerce' );
 					continue;
 				}
-				if ( ! self::matches_schema( $args, $value ) ) {
-					continue;
-				}
-				$sanitized = rest_sanitize_value_from_schema( $value, $args['schema'], $field );
+				$valid     = self::matches_schema( $args, $value );
+				$sanitized = true === $valid ? rest_sanitize_value_from_schema( $value, $args['schema'], $field ) : $valid;
 				if ( ! is_wp_error( $sanitized ) ) {
 					$extensions[ $namespace ][ $field ] = $sanitized;
+				} elseif ( null !== $value ) {
+					$extensions[ $namespace ][ self::OMITTED_KEY ][ $field ] = $sanitized->get_error_message();
 				}
 			}
 		}
@@ -598,6 +609,12 @@ class ExtensibleAbilities {
 						return $args['schema'];
 					},
 					$fields
+				) + array(
+					self::OMITTED_KEY => array(
+						'type'                 => 'object',
+						'description'          => __( 'Fields left out of this object, with the reason for each one.', 'woocommerce' ),
+						'additionalProperties' => array( 'type' => 'string' ),
+					),
 				),
 				'additionalProperties' => false,
 			);
@@ -638,9 +655,9 @@ class ExtensibleAbilities {
 	 *
 	 * @param array<string, mixed> $args  Field arguments.
 	 * @param mixed                $value Value that the get_callback returned.
-	 * @return bool
+	 * @return true|\WP_Error The error when the value does not match.
 	 */
-	private static function matches_schema( array $args, $value ): bool {
+	private static function matches_schema( array $args, $value ) {
 		$valid = rest_validate_value_from_schema( $value, $args['schema'], $args['field'] );
 		if ( true === $valid ) {
 			return true;
@@ -648,7 +665,7 @@ class ExtensibleAbilities {
 
 		$key = $args['resource'] . '.' . $args['namespace'] . '.' . $args['field'];
 		if ( null === $value || isset( self::$reported[ $key ] ) ) {
-			return false;
+			return $valid;
 		}
 
 		self::$reported[ $key ] = true;
@@ -667,6 +684,6 @@ class ExtensibleAbilities {
 			),
 			'11.3.0'
 		);
-		return false;
+		return $valid;
 	}
 }

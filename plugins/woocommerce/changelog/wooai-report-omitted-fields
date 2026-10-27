@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Abilities: List the extension fields that were left out of an object, and why, under `extensions.<namespace>._omitted`.

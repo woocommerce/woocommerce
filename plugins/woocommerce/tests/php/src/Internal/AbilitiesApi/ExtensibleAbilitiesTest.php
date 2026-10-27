@@ -1152,6 +1152,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		);
 		ExtensibleAbilities::register_field( array_merge( $valid, array( 'namespace' => '0' ) ) );
 		ExtensibleAbilities::register_field( array_merge( $valid, array( 'field' => '123' ) ) );
+		ExtensibleAbilities::register_field( array_merge( $valid, array( 'field' => ExtensibleAbilities::OMITTED_KEY ) ) );
 		$order = \WC_Helper_Order::create_order();
 
 		$this->assertSame(
@@ -1161,7 +1162,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should leave out a field that throws or fails sanitization, cast a value to its schema type, and keep a null that the schema allows.
+	 * @testdox Should leave out and report a field that throws or fails sanitization, cast a value to its schema type, and keep a null that the schema allows.
 	 */
 	public function test_field_values_follow_their_schema(): void {
 		AbilitiesLoader::register_core_resources();
@@ -1203,13 +1204,20 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 		$output = ExtensibleAbilities::add_fields_to_object( array(), 'order', $order );
 
+		$values  = $output['extensions']['values'];
+		$omitted = $values[ ExtensibleAbilities::OMITTED_KEY ];
+		unset( $values[ ExtensibleAbilities::OMITTED_KEY ] );
+
 		$this->assertSame(
 			array(
 				'count' => 12,
 				'empty' => null,
 			),
-			$output['extensions']['values']
+			$values
 		);
+		$this->assertSame( array( 'broken', 'dupes' ), array_keys( $omitted ) );
+		$this->assertSame( 'The extension failed to read this value.', $omitted['broken'] );
+		$this->assertStringNotContainsString( 'Broken', wp_json_encode( $output ) );
 	}
 
 	/**
@@ -1247,12 +1255,53 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 		$products = array_column( $this->run_ability( 'woocommerce/products-query', array( 'search' => 'Pen' ) )['products'], null, 'id' );
 
-		$this->assertSame( array( 'code' => 'A1' ), $products[ $first->get_id() ]['extensions']['test-ext'] );
+		foreach ( $products as $product ) {
+			$this->assertStringContainsString( 'integer', $product['extensions']['test-ext'][ ExtensibleAbilities::OMITTED_KEY ]['count'] );
+		}
+		$this->assertSame( 'A1', $products[ $first->get_id() ]['extensions']['test-ext']['code'] );
 		$matches = array_filter(
 			$reported,
 			static fn( $message ) => false !== strpos( $message, '"test-ext.count" of "product"' )
 		);
 		$this->assertCount( 1, $matches );
+	}
+
+	/**
+	 * @testdox Should accept the extensions of a read result that lists a field left out, in an update.
+	 */
+	public function test_a_read_result_with_a_field_left_out_can_be_sent_back(): void {
+		add_action(
+			'woocommerce_extensible_abilities_init',
+			static function () {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'        => 'product',
+						'namespace'       => 'test-ext',
+						'field'           => 'broken',
+						'schema'          => array( 'type' => 'string' ),
+						'get_callback'    => static function () {
+							throw new \RuntimeException( 'Broken' );
+						},
+						'update_callback' => '__return_null',
+					)
+				);
+			}
+		);
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+		$product->update_meta_data( '_test_color', 'red' );
+		$product->save();
+
+		$read   = $this->run_ability( 'woocommerce/products-query', array( 'id' => $product->get_id() ) )['products'][0];
+		$output = $this->run_ability(
+			'woocommerce/product-update',
+			array(
+				'id'         => $product->get_id(),
+				'extensions' => $read['extensions'],
+			)
+		);
+
+		$this->assertArrayHasKey( 'broken', $read['extensions']['test-ext'][ ExtensibleAbilities::OMITTED_KEY ] );
+		$this->assertSame( $read['extensions'], $output['product']['extensions'] );
 	}
 
 	/**
