@@ -351,6 +351,7 @@ class WC_Product_Variable extends WC_Product {
 			_prime_post_caches( $variation_ids );
 		}
 
+		// Performance note: meta-based optimization (skipping out-of-stock variations) was evaluated and dismissed due to impact to complexity ratio.
 		foreach ( $variation_ids as $variation_id ) {
 			$variation = wc_get_product( $variation_id );
 
@@ -402,6 +403,8 @@ class WC_Product_Variable extends WC_Product {
 		 * - The transient improves the 95th percentile (P95) load time of the product page by approximately 10%, but does not affect the median.
 		 * - The transient breaks backward compatibility. The woocommerce_is_purchasable filter from \WC_Product::is_purchasable is used by
 		 *   extensions to control product purchasability based on user role, membership, geolocation, or login status.
+		 *
+		 * Meta-based optimization (skipping out-of-stock variations) was evaluated and dismissed due to impact to complexity ratio.
 		 */
 		$has_purchasable_variations = false;
 		$variation_ids              = $this->get_children();

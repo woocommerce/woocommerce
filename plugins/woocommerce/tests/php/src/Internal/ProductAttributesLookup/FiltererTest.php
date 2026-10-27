@@ -7,6 +7,8 @@ namespace Automattic\WooCommerce\Tests\Internal\ProductAttributesLookup;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Internal\AttributesHelper;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\Filterer;
+use Automattic\WooCommerce\Internal\ProductFilters\FilterDataProvider;
+use Automattic\WooCommerce\Internal\ProductFilters\QueryClauses;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
@@ -1268,6 +1270,98 @@ class FiltererTest extends \WC_Unit_Test_Case {
 		$expected_to_be_included_in_count = 'or' === $filter_type || $expected_to_be_visible;
 
 		$this->assert_counters( 'Color', $expected_to_be_included_in_count ? array( 'Blue', 'Red', 'Green' ) : array(), $filter_type );
+	}
+
+	/**
+	 * @testdox Multiple AND attributes match across variation and non-variation lookup rows.
+	 *
+	 * @testWith [["Red", "Blue"]]
+	 *           [["Red"]]
+	 *
+	 * @param string[] $color_terms Selected color terms.
+	 */
+	public function test_and_filters_match_variation_and_non_variation_attributes( array $color_terms ): void {
+		$this->set_use_lookup_table( true );
+		$this->create_product_attribute( 'Color', array( 'Red', 'Blue' ) );
+		$this->create_product_attribute( 'Material', array( 'Cotton', 'Wool' ) );
+
+		$data             = array(
+			'variation_attributes'     => array( 'Color' => array( 'Red', 'Blue' ) ),
+			'non_variation_attributes' => array( 'Material' => array( 'Cotton', 'Wool' ) ),
+			'variations'               => array(
+				array(
+					'in_stock'            => true,
+					'defining_attributes' => array( 'Color' => 'Red' ),
+				),
+				array(
+					'in_stock'            => true,
+					'defining_attributes' => array( 'Color' => 'Blue' ),
+				),
+			),
+		);
+		$matching_product = $this->create_variable_product( $data );
+
+		$data['non_variation_attributes']['Material'] = array( 'Cotton' );
+		$this->create_variable_product( $data );
+
+		$expected = array( $matching_product['id'] );
+		$this->assertSame(
+			$expected,
+			$this->do_product_request(
+				array(
+					'Color'    => $color_terms,
+					'Material' => array( 'Cotton', 'Wool' ),
+				),
+				array(
+					'Color'    => 'and',
+					'Material' => 'and',
+				)
+			),
+			'Catalog must match both selected terms in each attribute.'
+		);
+
+		$chosen_attributes = array(
+			'pa_color'    => array(
+				'terms'      => array_map( 'wc_sanitize_taxonomy_name', $color_terms ),
+				'query_type' => 'and',
+			),
+			'pa_material' => array(
+				'terms'      => array( 'cotton', 'wool' ),
+				'query_type' => 'and',
+			),
+		);
+		$query_clauses     = wc_get_container()->get( QueryClauses::class );
+		$filter            = static function ( $clauses ) use ( $query_clauses, $chosen_attributes ) {
+			return $query_clauses->add_attribute_clauses( $clauses, $chosen_attributes );
+		};
+		add_filter( 'posts_clauses', $filter );
+		try {
+			$filtered_ids = wc_get_products(
+				array(
+					'include' => $this->product_ids,
+					'limit'   => -1,
+					'return'  => 'ids',
+				)
+			);
+		} finally {
+			remove_filter( 'posts_clauses', $filter );
+		}
+		$this->assertSame( $expected, $filtered_ids, 'Shared clauses must match the catalog result.' );
+
+		$counts = wc_get_container()->get( FilterDataProvider::class )->with( $query_clauses )->get_attribute_counts(
+			array(
+				'post_type'           => 'product',
+				'post__in'            => $this->product_ids,
+				'filter_color'        => implode( ',', array_map( 'wc_sanitize_taxonomy_name', $color_terms ) ),
+				'query_type_color'    => 'and',
+				'filter_material'     => 'cotton,wool',
+				'query_type_material' => 'and',
+			),
+			'pa_material'
+		);
+		$this->assertSame( 1, $counts[ term_exists( 'Cotton', 'pa_material' )['term_id'] ] );
+		$this->assertSame( 1, $counts[ term_exists( 'Wool', 'pa_material' )['term_id'] ] );
+		$this->assert_counters( 'Material', array( 'Cotton', 'Wool' ), 'and' );
 	}
 
 	/**

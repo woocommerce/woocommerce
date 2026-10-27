@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { dispatch as wpDispatch } from '@wordpress/data';
+import { getSetting } from '@woocommerce/settings';
 import type { Cart } from '@woocommerce/types';
 
 /**
@@ -19,7 +20,15 @@ jest.mock( '@woocommerce/utils', () => ( {
 	isSiteEditorPage: jest.fn().mockReturnValue( true ),
 } ) );
 jest.mock( '../persistence-layer' );
+jest.mock( '@woocommerce/settings', () => {
+	const actual = jest.requireActual( '@woocommerce/settings' );
+	return {
+		...actual,
+		getSetting: jest.fn( actual.getSetting ),
+	};
+} );
 
+const mockGetSetting = jest.mocked( getSetting );
 const mockHasCartSession = jest.mocked( hasCartSession );
 const mockIsAddingToCart = jest.mocked( isAddingToCart );
 const mockPersistenceLayerGet = jest.mocked( persistenceLayer.get );
@@ -80,6 +89,19 @@ describe( 'Window load event handler', () => {
 		loadHandler( new Event( 'load' ) );
 
 		expect( mockFinishResolution ).toHaveBeenCalledWith( 'getCartData' );
+	} );
+
+	it( 'should let the resolver read the cart when the page preloaded it, even if cached cart has items', () => {
+		mockHasCartSession.mockReturnValue( true );
+		mockIsAddingToCart.mockReturnValue( false );
+		mockPersistenceLayerGet.mockReturnValue( {
+			itemsCount: 2,
+		} as unknown as Cart );
+		mockGetSetting.mockReturnValueOnce( [ '/wc/store/v1/cart' ] );
+
+		loadHandler( new Event( 'load' ) );
+
+		expect( mockFinishResolution ).not.toHaveBeenCalled();
 	} );
 
 	it( 'should make API request when has cart session but cached cart is empty', () => {

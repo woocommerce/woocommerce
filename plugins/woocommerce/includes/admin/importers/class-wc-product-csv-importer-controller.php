@@ -778,6 +778,8 @@ class WC_Product_CSV_Importer_Controller {
 			__( 'ID', 'woocommerce' )                      => 'id',
 			__( 'Type', 'woocommerce' )                    => 'type',
 			__( 'SKU', 'woocommerce' )                     => 'sku',
+			__( 'GTIN, UPC, EAN, or ISBN', 'woocommerce' ) => 'global_unique_id',
+			__( 'MPN', 'woocommerce' )                     => 'mpn',
 			__( 'Name', 'woocommerce' )                    => 'name',
 			__( 'Published', 'woocommerce' )               => 'published',
 			__( 'Is featured?', 'woocommerce' )            => 'featured',
@@ -818,6 +820,9 @@ class WC_Product_CSV_Importer_Controller {
 			__( 'External URL', 'woocommerce' )            => 'product_url',
 			__( 'Button text', 'woocommerce' )             => 'button_text',
 			__( 'Position', 'woocommerce' )                => 'menu_order',
+			__( 'Commodity code (HS code)', 'woocommerce' ) => 'customs_commodity_code',
+			__( 'Country of origin', 'woocommerce' )       => 'customs_country_of_origin',
+			__( 'Customs description', 'woocommerce' )     => 'customs_description',
 		);
 
 		if ( wc_get_container()->get( CostOfGoodsSoldController::class )->feature_is_enabled() ) {
@@ -957,6 +962,7 @@ class WC_Product_CSV_Importer_Controller {
 			'type'               => __( 'Type', 'woocommerce' ),
 			'sku'                => __( 'SKU', 'woocommerce' ),
 			'global_unique_id'   => __( 'GTIN, UPC, EAN, or ISBN', 'woocommerce' ),
+			'mpn'                => __( 'MPN', 'woocommerce' ),
 			'name'               => __( 'Name', 'woocommerce' ),
 			'published'          => __( 'Published', 'woocommerce' ),
 			'featured'           => __( 'Is featured?', 'woocommerce' ),
@@ -1033,6 +1039,10 @@ class WC_Product_CSV_Importer_Controller {
 			'meta:' . $meta      => __( 'Import as meta data', 'woocommerce' ),
 			'menu_order'         => __( 'Position', 'woocommerce' ),
 		);
+
+		$options['customs_commodity_code']    = __( 'Commodity code (HS code)', 'woocommerce' );
+		$options['customs_country_of_origin'] = __( 'Country of origin', 'woocommerce' );
+		$options['customs_description']       = __( 'Customs description', 'woocommerce' );
 
 		if ( wc_get_container()->get( CostOfGoodsSoldController::class )->feature_is_enabled() ) {
 			$options['cogs_value'] = __( 'Cost of goods', 'woocommerce' );

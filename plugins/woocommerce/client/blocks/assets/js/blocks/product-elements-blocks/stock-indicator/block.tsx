@@ -85,8 +85,7 @@ export const Block = ( props: Props ): JSX.Element | null => {
 				// When inside All products block
 				...( props.isDescendantOfAllProducts && {
 					[ styleProps.className ]: styleProps.className,
-					'wc-block-components-product-stock-indicator wp-block-woocommerce-product-stock-indicator':
-						true,
+					'wc-block-components-product-stock-indicator wp-block-woocommerce-product-stock-indicator': true,
 				} ),
 			} ) }
 			// When inside All products block

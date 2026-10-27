@@ -65,7 +65,7 @@ jest.mock( '@wordpress/components', () => {
 					const state = __unstableStateReducer
 						? __unstableStateReducer( {
 								value: event.target.value,
-						  } )
+							} )
 						: { value: event.target.value };
 					onChange( state.value );
 				},

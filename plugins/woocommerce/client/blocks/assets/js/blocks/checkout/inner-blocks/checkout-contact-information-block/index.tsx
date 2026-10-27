@@ -11,9 +11,7 @@ import { Edit, Save } from './edit';
 import attributes from './attributes';
 import metadata from './block.json';
 
-registerBlockType( 'woocommerce/checkout-contact-information-block', {
-	apiVersion: metadata.apiVersion,
-	title: metadata.title,
+registerBlockType( metadata, {
 	icon: {
 		src: (
 			<Icon

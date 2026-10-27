@@ -91,9 +91,11 @@
 	 * Handle fields per export type.
 	 */
 	productExportForm.prototype.exportTypeFields = function() {
-		var exportCategory = $( '.woocommerce-exporter-category' );
+		var exportCategory          = $( '.woocommerce-exporter-category' );
+		var exportTypes             = $( this ).val() || [];
+		var exportingVariationsOnly = -1 !== $.inArray( 'variation', exportTypes ) && -1 === $.inArray( 'variable', exportTypes );
 
-		if ( -1 !== $.inArray( 'variation', $( this ).val() ) ) {
+		if ( exportingVariationsOnly ) {
 			exportCategory.closest( 'tr' ).hide();
 			exportCategory.val( '' ).trigger( 'change' ); // Reset WooSelect selected value.
 		} else {

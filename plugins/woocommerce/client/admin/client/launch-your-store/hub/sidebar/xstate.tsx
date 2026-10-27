@@ -217,8 +217,8 @@ const recordStoreLaunchAttempt = ( {
 			.filter( ( task ) => task.isComplete )
 			.map( ( task ) => task.id ) || [];
 
-	const tasks_completed_in_lys = completed.filter(
-		( task ) => context.tasklist?.recentlyActionedTasks.includes( task )
+	const tasks_completed_in_lys = completed.filter( ( task ) =>
+		context.tasklist?.recentlyActionedTasks.includes( task )
 	); // recently actioned tasks can include incomplete tasks
 
 	recordEvent( 'launch_your_store_hub_store_launch_attempted', {

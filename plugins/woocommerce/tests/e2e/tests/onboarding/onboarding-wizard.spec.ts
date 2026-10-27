@@ -18,6 +18,46 @@ const getPluginLocator = ( page: Page, slug: string ) => {
 	);
 };
 
+const selectMobileBusinessProfile = async (
+	page: Page,
+	businessChoice: string
+) => {
+	await page
+		.getByRole( 'radio' )
+		.filter( { hasText: businessChoice } )
+		.click();
+
+	if ( businessChoice === 'already selling' ) {
+		await page
+			.locator(
+				'.woocommerce-profiler-select-control__selling-online-question input'
+			)
+			.press( 'ArrowDown' );
+		await page
+			.getByRole( 'option', { name: 'Yes, I’m selling online' } )
+			.click();
+		const selectedPlatforms = page
+			.locator( '.woocommerce-profiler-platform-selector' )
+			.getByRole( 'button', { name: /^Remove / } );
+		while ( await selectedPlatforms.count() ) {
+			await selectedPlatforms.first().click();
+		}
+		const platformsInput = page.locator(
+			'.woocommerce-profiler-platform-selector .woocommerce-experimental-select-control__input'
+		);
+		await expect( platformsInput ).toHaveCSS( 'font-size', '16px' );
+		await platformsInput.click();
+		await page
+			.getByRole( 'option', { name: 'Shopify', exact: true } )
+			.click();
+		await page
+			.getByRole( 'heading', {
+				name: 'Which one of these best describes you?',
+			} )
+			.click();
+	}
+};
+
 test.use( { storageState: ADMIN_STATE_PATH } );
 
 test.afterAll( async ( { baseURL } ) => {
@@ -40,6 +80,58 @@ test.describe(
 				console.log( error );
 			}
 		} );
+
+		for ( const businessChoice of [
+			'just starting my business',
+			'already selling',
+		] ) {
+			test( `Allows mobile zoom without automatic input focus zoom (${ businessChoice })`, async ( {
+				page,
+			} ) => {
+				test.skip(
+					!! process.env.IS_MULTISITE,
+					'Test not working on a multisite setup, see https://github.com/woocommerce/woocommerce/issues/55066'
+				);
+				await page.setViewportSize( { width: 390, height: 844 } );
+				await page.goto(
+					'wp-admin/admin.php?page=wc-admin&path=%2Fsetup-wizard'
+				);
+
+				await expect(
+					page.locator( 'meta[name="viewport"]' )
+				).toHaveAttribute(
+					'content',
+					'width=device-width, initial-scale=1.0'
+				);
+				await page
+					.getByRole( 'button', { name: 'Set up my store' } )
+					.click();
+				await selectMobileBusinessProfile( page, businessChoice );
+				await page.getByRole( 'button', { name: 'Continue' } ).click();
+
+				await expect(
+					page.getByRole( 'heading', {
+						name: 'Tell us a bit about your store',
+					} )
+				).toBeVisible();
+				await expect(
+					page.getByPlaceholder( 'Ex. My awesome store' )
+				).toHaveCSS( 'font-size', '16px' );
+				await expect(
+					page.getByPlaceholder( 'wordpress@example.com' )
+				).toHaveCSS( 'font-size', '16px' );
+				await expect(
+					page.locator(
+						'.woocommerce-profiler-select-control__industry .woocommerce-select-control__control-input'
+					)
+				).toHaveCSS( 'font-size', '16px' );
+				await expect(
+					page.locator(
+						'.woocommerce-profiler-select-control__country .woocommerce-select-control__control-input'
+					)
+				).toHaveCSS( 'font-size', '16px' );
+			} );
+		}
 
 		test( 'Can complete the core profiler skipping extension install', async ( {
 			page,
@@ -110,7 +202,7 @@ test.describe(
 				await page
 					.getByPlaceholder( 'wordpress@example.com' )
 					.fill( 'merchant@example.com' );
-				await page.getByLabel( 'Opt-in to receive tips,' ).uncheck();
+				await page.getByLabel( 'Get tips, discounts,' ).uncheck();
 				await page.getByRole( 'button', { name: 'Continue' } ).click();
 			} );
 
@@ -274,7 +366,7 @@ test.describe(
 				await page
 					.getByPlaceholder( 'wordpress@example.com' )
 					.fill( 'merchant@example.com' );
-				await page.getByLabel( 'Opt-in to receive tips,' ).uncheck();
+				await page.getByLabel( 'Get tips, discounts,' ).uncheck();
 				await page.getByRole( 'button', { name: 'Continue' } ).click();
 			} );
 

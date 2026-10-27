@@ -30,6 +30,13 @@ class DeferredEmailQueueTest extends WC_Unit_Test_Case {
 	private $created_stock_notification_ids = array();
 
 	/**
+	 * Locale filters added by a test, as hook name, callback and priority.
+	 *
+	 * @var array<int, array{0: string, 1: callable, 2: int}>
+	 */
+	private $locale_filters = array();
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
@@ -56,6 +63,15 @@ class DeferredEmailQueueTest extends WC_Unit_Test_Case {
 		remove_all_actions( 'woocommerce_deferred_email_test_unknown_object_notification' );
 		remove_all_actions( 'woocommerce_deferred_email_test_unsaved_product' );
 		remove_all_actions( 'woocommerce_deferred_email_test_unsaved_product_notification' );
+		remove_all_filters( 'woocommerce_mail_callback' );
+		remove_all_filters( 'woocommerce_allow_switching_email_locale' );
+		foreach ( $this->locale_filters as list( $hook, $callback, $priority ) ) {
+			remove_filter( $hook, $callback, $priority );
+		}
+		$this->locale_filters = array();
+		if ( is_locale_switched() ) {
+			restore_current_locale();
+		}
 		$this->set_wc_emails_deferred_queue( null );
 		$this->delete_stock_notifications();
 		$this->restore_stock_notifications_feature_option();
@@ -411,6 +427,103 @@ class DeferredEmailQueueTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Dispatch stores the locale the email was queued in.
+	 */
+	public function test_dispatch_stores_the_queued_locale(): void {
+		$this->force_locale_filter( 'determine_locale', 'de_DE' );
+
+		$this->sut->push( 'woocommerce_order_status_pending_to_processing', array( 42 ) );
+		$this->sut->dispatch();
+
+		$action = $this->get_scheduled_email_action();
+
+		$this->assertArrayHasKey( 2, $action['args'], 'The queued locale should be scheduled with the email' );
+		$this->assertSame( 'de_DE', $action['args'][2] );
+	}
+
+	/**
+	 * @testdox Processing sends an admin email in the queued locale and restores the runner's locale afterwards.
+	 */
+	public function test_send_queued_transactional_email_sends_admin_email_in_the_queued_locale(): void {
+		$sent = $this->send_queued_order_emails( 'en_US' );
+
+		$this->assertArrayHasKey( 'new_order', $sent, 'The admin email should be sent' );
+		$this->assertTrue( $sent['new_order']['switched'], 'The admin email should be sent with the queued locale switched in' );
+		$this->assertSame( 'en_US', $sent['new_order']['locale'] );
+		$this->assertFalse( is_locale_switched(), 'The runner locale should be restored after sending' );
+	}
+
+	/**
+	 * @testdox Processing sends a customer email in the site locale, whatever locale it was queued in.
+	 */
+	public function test_send_queued_transactional_email_sends_customer_email_in_the_site_locale(): void {
+		$sent = $this->send_queued_order_emails( 'en_US' );
+
+		$this->assertArrayHasKey( 'customer_processing_order', $sent, 'The customer email should be sent' );
+		$this->assertSame( 'fr_FR', $sent['customer_processing_order']['locale'] );
+	}
+
+	/**
+	 * @testdox Processing sends an admin email hooked after a customer email in the queued locale.
+	 */
+	public function test_send_queued_transactional_email_sends_admin_email_after_customer_email_in_the_queued_locale(): void {
+		$sent = $this->send_queued_order_emails( 'en_US', true );
+
+		$this->assertArrayHasKey( 'new_order', $sent, 'The admin email should be sent' );
+		$this->assertSame( 'en_US', $sent['new_order']['locale'] );
+	}
+
+	/**
+	 * @testdox Processing restores the runner's locale when sending throws.
+	 */
+	public function test_send_queued_transactional_email_restores_locale_when_sending_throws(): void {
+		$order_id = $this->prepare_processing_order_emails();
+
+		add_filter(
+			'woocommerce_mail_callback',
+			function () {
+				return static function () {
+					throw new \RuntimeException( 'Sending failed.' );
+				};
+			}
+		);
+
+		$thrown = null;
+		try {
+			$this->sut->send_queued_transactional_email( 'woocommerce_order_status_pending_to_processing', array( $order_id ), 'en_US' );
+		} catch ( \RuntimeException $e ) {
+			$thrown = $e;
+		}
+
+		$this->assertInstanceOf( \RuntimeException::class, $thrown, 'The sending exception should propagate' );
+		$this->assertFalse( is_locale_switched(), 'The runner locale should be restored even when sending throws' );
+	}
+
+	/**
+	 * @testdox Processing does not switch locale for emails queued without one.
+	 */
+	public function test_send_queued_transactional_email_without_queued_locale_does_not_switch(): void {
+		$sent = $this->send_queued_order_emails( '' );
+
+		$this->assertArrayHasKey( 'new_order', $sent, 'The admin email should be sent' );
+		$this->assertFalse( $sent['new_order']['switched'], 'Emails queued without a locale should not switch locale' );
+		$this->assertSame( 'fr_FR', $sent['new_order']['locale'] );
+	}
+
+	/**
+	 * @testdox Processing leaves the email locale alone when email locale switching is turned off, as translation plugins do.
+	 */
+	public function test_send_queued_transactional_email_respects_disabled_email_locale_switching(): void {
+		add_filter( 'woocommerce_allow_switching_email_locale', '__return_false' );
+
+		$sent = $this->send_queued_order_emails( 'en_US' );
+
+		$this->assertArrayHasKey( 'new_order', $sent, 'The admin email should be sent' );
+		$this->assertFalse( $sent['new_order']['switched'], 'The admin email should not switch locale when switching is turned off' );
+		$this->assertFalse( is_locale_switched(), 'No locale switch should be left behind' );
+	}
+
+	/**
 	 * @testdox Push can be called again after dispatch to queue new emails.
 	 */
 	public function test_push_after_dispatch_queues_new_emails(): void {
@@ -526,6 +639,91 @@ class DeferredEmailQueueTest extends WC_Unit_Test_Case {
 			10,
 			3
 		);
+	}
+
+	/**
+	 * Send the real "processing order" emails (new_order to the admin, customer_processing_order to the
+	 * customer) through the queue, with fr_FR as the site locale. Instead of mailing, record the locale
+	 * active while each email is sent.
+	 *
+	 * @param string $queued_locale    The locale the emails were queued in.
+	 * @param bool   $admin_email_last Whether to send the admin email after the customer email.
+	 * @return array<string, array{locale: string, switched: bool}> Keyed by email ID.
+	 */
+	private function send_queued_order_emails( string $queued_locale, bool $admin_email_last = false ): array {
+		$order_id = $this->prepare_processing_order_emails( $admin_email_last );
+
+		$sent = array();
+		add_filter(
+			'woocommerce_mail_callback',
+			function ( $callback, $email ) use ( &$sent ) {
+				unset( $callback );
+				return static function () use ( &$sent, $email ) {
+					$sent[ $email->id ] = array(
+						'locale'   => get_locale(),
+						'switched' => is_locale_switched(),
+					);
+					return true;
+				};
+			},
+			10,
+			2
+		);
+
+		$this->sut->send_queued_transactional_email( 'woocommerce_order_status_pending_to_processing', array( $order_id ), $queued_locale );
+
+		return $sent;
+	}
+
+	/**
+	 * Create an order and set fr_FR as the site locale, ready to send the "processing order" emails.
+	 *
+	 * @param bool $admin_email_last Whether to send the admin email after the customer email.
+	 * @return int The order ID.
+	 */
+	private function prepare_processing_order_emails( bool $admin_email_last = false ): int {
+		$order = \WC_Helper_Order::create_order();
+		$this->set_site_locale( 'fr_FR' );
+
+		// Emails hook their triggers once, when the mailer is created, and hooks are reset between tests.
+		$emails = \WC_Emails::instance()->get_emails();
+		$hooks  = array(
+			array( $emails['WC_Email_New_Order'], $admin_email_last ? 20 : 10 ),
+			array( $emails['WC_Email_Customer_Processing_Order'], 10 ),
+		);
+		foreach ( $hooks as list( $email, $priority ) ) {
+			remove_action( 'woocommerce_order_status_pending_to_processing_notification', array( $email, 'trigger' ), 10 );
+			add_action( 'woocommerce_order_status_pending_to_processing_notification', array( $email, 'trigger' ), $priority, 2 );
+		}
+
+		return $order->get_id();
+	}
+
+	/**
+	 * Set the site locale until tear down. Only en_US can be switched to in the test environment,
+	 * so a different site locale shows which emails were switched away from it.
+	 *
+	 * @param string $locale The site locale.
+	 */
+	private function set_site_locale( string $locale ): void {
+		// Below WP_Locale_Switcher's priority 10, so a switched locale still wins as it does on a real site.
+		$this->force_locale_filter( 'locale', $locale, 5 );
+	}
+
+	/**
+	 * Force a locale filter to return the given locale until tear down.
+	 *
+	 * @param string $hook     The filter name (locale or determine_locale).
+	 * @param string $locale   The locale to return.
+	 * @param int    $priority The filter priority.
+	 */
+	private function force_locale_filter( string $hook, string $locale, int $priority = 20 ): void {
+		$callback = static function () use ( $locale ) {
+			return $locale;
+		};
+
+		add_filter( $hook, $callback, $priority );
+		$this->locale_filters[] = array( $hook, $callback, $priority );
 	}
 
 	/**

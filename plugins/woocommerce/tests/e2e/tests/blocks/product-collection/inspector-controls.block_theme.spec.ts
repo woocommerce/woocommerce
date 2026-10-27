@@ -7,8 +7,30 @@ import { test as base, expect, BLOCK_THEME_SLUG } from '@woocommerce/e2e-utils';
  * Internal dependencies
  */
 import ProductCollectionPage, { SELECTORS } from './product-collection.page';
+import { getProductCollectionQuery } from '../products/utils';
+import { locks } from '../../../fixtures/fixtures';
 
-const test = base.extend< { pageObject: ProductCollectionPage } >( {
+const TAXONOMY_TEMPLATES = [
+	{
+		slug: `${ BLOCK_THEME_SLUG }//taxonomy-product_cat`,
+		title: 'Products by Category',
+	},
+	{
+		slug: `${ BLOCK_THEME_SLUG }//taxonomy-product_tag`,
+		title: 'Products by Tag',
+	},
+	{
+		slug: `${ BLOCK_THEME_SLUG }//taxonomy-product_brand`,
+		title: 'Products by Brand',
+	},
+];
+
+const test = base.extend< {
+	pageObject: ProductCollectionPage;
+	createTaxonomyTemplate: (
+		template: ( typeof TAXONOMY_TEMPLATES )[ number ]
+	) => Promise< void >;
+} >( {
 	pageObject: async ( { page, admin, editor }, use ) => {
 		const pageObject = new ProductCollectionPage( {
 			page,
@@ -16,6 +38,31 @@ const test = base.extend< { pageObject: ProductCollectionPage } >( {
 			editor,
 		} );
 		await use( pageObject );
+	},
+	createTaxonomyTemplate: async ( { admin, editor, requestUtils }, use ) => {
+		const deleteTemplate = ( slug: string ) =>
+			requestUtils
+				.rest( {
+					method: 'DELETE',
+					path: `/wp/v2/templates/${ slug }`,
+					params: { force: true },
+				} )
+				.catch( ( error ) => {
+					if ( error?.code !== 'rest_template_not_found' ) {
+						throw error;
+					}
+				} );
+		let createdSlug: string | undefined;
+		await use( async ( { slug, title } ) => {
+			// A stopped run can leave the template, and then the Site Editor does not offer it.
+			await deleteTemplate( slug );
+			createdSlug = slug;
+			await admin.visitSiteEditor( { postType: 'wp_template' } );
+			await editor.createTemplate( { templateName: title } );
+		} );
+		if ( createdSlug ) {
+			await deleteTemplate( createdSlug );
+		}
 	},
 } );
 
@@ -96,7 +143,7 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 	} ) => {
 		await pageObject.createNewPostAndInsertBlock();
 
-		await pageObject.addFilter( 'Show Hand-picked' );
+		await pageObject.addFilter( 'Hand-Picked' );
 
 		const filterName = 'Hand-picked';
 		await pageObject.setFilterComboboxValue( filterName, [ 'Album' ] );
@@ -134,7 +181,7 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 	} ) => {
 		await pageObject.createNewPostAndInsertBlock();
 
-		await pageObject.addFilter( 'Show product categories' );
+		await pageObject.addFilter( 'Product Categories' );
 		await pageObject.checkTaxonomyTerm( 'categories', 'Clothing' );
 		await expect( pageObject.products ).toHaveCount( 9 );
 
@@ -171,7 +218,7 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 	} ) => {
 		await pageObject.createNewPostAndInsertBlock();
 
-		await pageObject.addFilter( 'Show product tags' );
+		await pageObject.addFilter( 'Product Tags' );
 		await pageObject.checkTaxonomyTerm( 'tags', 'Recommended' );
 		await expect( pageObject.productTitles ).toHaveText( [
 			'Beanie',
@@ -190,7 +237,7 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 	} ) => {
 		await pageObject.createNewPostAndInsertBlock();
 
-		await pageObject.addFilter( 'Show Product Brands' );
+		await pageObject.addFilter( 'Product Brands' );
 		await pageObject.checkTaxonomyTerm( 'brands', 'WooCommerce' );
 		await expect( pageObject.productTitles ).toHaveText( [
 			'Album',
@@ -211,7 +258,7 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 	} ) => {
 		await pageObject.createNewPostAndInsertBlock();
 
-		await pageObject.addFilter( 'Show Product Attributes' );
+		await pageObject.addFilter( 'Product Attributes' );
 		await pageObject.setProductAttribute( 'Color', 'Green' );
 
 		await expect( pageObject.products ).toHaveCount( 3 );
@@ -295,6 +342,7 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 	} );
 
 	test( 'Products can be filtered based on price range.', async ( {
+		page,
 		pageObject,
 	} ) => {
 		await pageObject.createNewPostAndInsertBlock();
@@ -313,12 +361,24 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 			max: '17.21',
 		} );
 
+		await expect
+			.poll(
+				async () =>
+					( await getProductCollectionQuery( page ) ).priceRange
+			)
+			.toEqual( { min: 15.28, max: 17.21 } );
 		await expect( pageObject.products ).toHaveCount( 2 );
 
 		await pageObject.setPriceRange( {
 			max: '17.29',
 		} );
 
+		await expect
+			.poll(
+				async () =>
+					( await getProductCollectionQuery( page ) ).priceRange
+			)
+			.toMatchObject( { max: 17.29 } );
 		await expect( pageObject.products ).toHaveCount( 5 );
 
 		await pageObject.publishAndGoToFrontend();
@@ -360,10 +420,15 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 
 		await expect( pageObject.products ).toHaveCount( 9 );
 
-		await editor.insertBlock( {
-			name: 'woocommerce/filter-wrapper',
-			attributes: { filterType: 'price-filter' },
-		} );
+		const productCollectionBlock = await editor.getBlockByName(
+			'woocommerce/product-collection'
+		);
+		const productCollectionClientId =
+			( await productCollectionBlock.getAttribute( 'data-block' ) ) ?? '';
+		await editor.insertBlock(
+			{ name: 'woocommerce/product-filters' },
+			{ clientId: productCollectionClientId }
+		);
 
 		await pageObject.publishAndGoToFrontend();
 
@@ -371,14 +436,14 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 
 		await page
 			.getByRole( 'textbox', {
-				name: 'Filter products by minimum',
+				name: 'Filter products by minimum price',
 			} )
 			.dblclick();
 		await page.keyboard.type( '45' );
 
 		await page
 			.getByRole( 'textbox', {
-				name: 'Filter products by maximum',
+				name: 'Filter products by maximum price',
 			} )
 			.dblclick();
 		await page.keyboard.type( '55' );
@@ -397,14 +462,14 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 	} );
 
 	test.describe( '"Query Type" control', () => {
-		test( 'should be visible on posts', async ( { pageObject } ) => {
+		test( 'should be hidden on posts', async ( { pageObject } ) => {
 			await pageObject.createNewPostAndInsertBlock();
 
 			await expect(
 				pageObject
 					.locateSidebarSettings()
 					.getByLabel( SELECTORS.usePageContextControl )
-			).toBeVisible();
+			).toBeHidden();
 		} );
 
 		[
@@ -430,42 +495,26 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 			} );
 		} );
 
-		[
-			{
-				slug: `${ BLOCK_THEME_SLUG }//taxonomy-product_cat`,
-				title: 'Products by Category',
-			},
-			{
-				slug: `${ BLOCK_THEME_SLUG }//taxonomy-product_tag`,
-				title: 'Products by Tag',
-			},
-			{
-				slug: `${ BLOCK_THEME_SLUG }//taxonomy-product_brand`,
-				title: 'Products by Brand',
-			},
-		].forEach( ( template ) => {
-			test( `should be visible in archive template: ${ template.slug }`, async ( {
-				admin,
-				pageObject,
-				editor,
-			} ) => {
-				await admin.visitSiteEditor( {
-					postType: 'wp_template',
-				} );
-				await editor.createTemplate( {
-					templateName: template.title,
-				} );
-				await pageObject.insertProductCollection();
-				await pageObject.chooseCollectionInTemplate();
-				await pageObject.focusProductCollection();
-				await editor.openDocumentSettingsSidebar();
+		TAXONOMY_TEMPLATES.forEach( ( template ) => {
+			test(
+				`should be visible in archive template: ${ template.slug }`,
+				{
+					lock: locks.TAXONOMY_TEMPLATES,
+				},
+				async ( { pageObject, editor, createTaxonomyTemplate } ) => {
+					await createTaxonomyTemplate( template );
+					await pageObject.insertProductCollection();
+					await pageObject.chooseCollectionInTemplate();
+					await pageObject.focusProductCollection();
+					await editor.openDocumentSettingsSidebar();
 
-				await expect(
-					pageObject
-						.locateSidebarSettings()
-						.getByLabel( SELECTORS.usePageContextControl )
-				).toBeVisible();
-			} );
+					await expect(
+						pageObject
+							.locateSidebarSettings()
+							.getByLabel( SELECTORS.usePageContextControl )
+					).toBeVisible();
+				}
+			);
 		} );
 
 		[
@@ -473,7 +522,7 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 			`${ BLOCK_THEME_SLUG }//home`,
 			`${ BLOCK_THEME_SLUG }//index`,
 		].forEach( ( slug ) => {
-			test( `should be visible in non-archive template: ${ slug }`, async ( {
+			test( `should be hidden in non-archive template: ${ slug }`, async ( {
 				pageObject,
 				editor,
 			} ) => {
@@ -487,7 +536,7 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 					pageObject
 						.locateSidebarSettings()
 						.getByLabel( SELECTORS.usePageContextControl )
-				).toBeVisible();
+				).toBeHidden();
 			} );
 		} );
 
@@ -591,13 +640,11 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 			await expect( customQueryType ).not.toBeChecked();
 		} );
 
-		test( 'allows filtering in non-archive context', async ( {
+		test( 'nested filters affect only their local collection', async ( {
 			pageObject,
 			editor,
 			page,
-			requestUtils,
 		} ) => {
-			await requestUtils.setFeatureFlag( 'experimental-blocks', true );
 			await pageObject.createNewPostAndInsertBlock();
 
 			await expect( pageObject.products ).toHaveCount( 9 );
@@ -643,25 +690,22 @@ test.describe( 'Product Collection: Inspector Controls', () => {
 
 			await expect(
 				productCollection.first().locator( SELECTORS.product )
-			).toHaveCount( 1 );
+			).toHaveCount( 9 );
 			await expect(
 				productCollection.last().locator( SELECTORS.product )
-			).toHaveCount( 9 );
+			).toHaveCount( 1 );
 		} );
 
 		test( 'correctly combines editor and front-end filters', async ( {
 			pageObject,
 			editor,
 			page,
-			requestUtils,
 		} ) => {
-			await requestUtils.setFeatureFlag( 'experimental-blocks', true );
-
 			await pageObject.createNewPostAndInsertBlock();
 
 			await expect( pageObject.products ).toHaveCount( 9 );
 
-			await pageObject.addFilter( 'Show product categories' );
+			await pageObject.addFilter( 'Product Categories' );
 			await pageObject.checkTaxonomyTerm( 'categories', 'Music' );
 
 			const productCollectionBlock = await editor.getBlockByName(

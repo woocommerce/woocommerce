@@ -14,9 +14,7 @@ import { Edit, Save } from './edit';
 import metadata from './block.json';
 import './style.scss';
 
-const blockConfig: BlockConfiguration = {
-	apiVersion: metadata.apiVersion,
-	title: metadata.title,
+const blockConfig: Partial< BlockConfiguration > = {
 	example: {
 		attributes: {
 			showPrice: true,
@@ -37,4 +35,4 @@ const blockConfig: BlockConfiguration = {
 	edit: Edit,
 };
 
-registerBlockType( 'woocommerce/checkout-actions-block', blockConfig );
+registerBlockType( metadata, blockConfig );

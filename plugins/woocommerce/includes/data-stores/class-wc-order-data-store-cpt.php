@@ -939,38 +939,24 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 			}
 		}
 
-		// Add the 'wc-' prefix to status if needed. Statuses arrive as an array or a
-		// comma-separated string; normalize to an array so the case normalization and prefix
-		// check only need to run once. Status slugs are stored lowercase, so an uppercase
-		// value like 'WC-COMPLETED' must be lowercased first — otherwise it is not recognized,
-		// and WP_Query's own sanitization strips the uppercase letters and drops the status
-		// clause, returning every order.
+		// Add the 'wc-' prefix to status if needed.
 		if ( ! empty( $query_vars['post_status'] ) ) {
 			$statuses = is_string( $query_vars['post_status'] )
 				? explode( ',', $query_vars['post_status'] )
-				: (array) $query_vars['post_status'];
+				: ( is_array( $query_vars['post_status'] ) ? $query_vars['post_status'] : array( $query_vars['post_status'] ) );
 
-			// Drop entries that can't be used as strings — arrays would cause a TypeError in
-			// strtolower(), and non-Stringable objects would fatal on trunk too.
-			$statuses = array_filter(
-				$statuses,
-				static function ( $s ) {
-					return is_string( $s ) || ( is_object( $s ) && method_exists( $s, '__toString' ) );
-				}
-			);
-
-			// If nothing remains, keep a sentinel so the guard below rejects the query
-			// instead of returning every order.
-			if ( empty( $statuses ) ) {
-				$statuses = array( '' );
+			$order_statuses            = array_keys( wc_get_order_statuses() );
+			$query_vars['post_status'] = array();
+			foreach ( array_filter( $statuses, 'is_string' ) as $status ) {
+				// Lowercase here, so an uppercase status still gets the 'wc-' prefix.
+				$status                      = strtolower( trim( $status ) );
+				$query_vars['post_status'][] = in_array( 'wc-' . $status, $order_statuses, true ) ? 'wc-' . $status : $status;
 			}
 
-			foreach ( $statuses as &$status ) {
-				$status = strtolower( (string) $status );
-				$status = wc_is_order_status( 'wc-' . $status ) ? 'wc-' . $status : $status;
+			// WP_Query ignores 'all' and keeps the other statuses, while HPOS drops the status filter. Match HPOS.
+			if ( in_array( 'all', $query_vars['post_status'], true ) && ! in_array( 'any', $query_vars['post_status'], true ) ) {
+				$query_vars['post_status'] = array( 'all' );
 			}
-
-			$query_vars['post_status'] = $statuses;
 		}
 
 		$wp_query_args = parent::get_wp_query_args( $query_vars );
@@ -1108,13 +1094,9 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 				__METHOD__,
 				esc_html(
 					sprintf(
-					// translators: %s is a comma separated list of query arguments.
-						_n(
-							'Order query argument (%s) is not supported on the current order datastore.',
-							'Order query arguments (%s) are not supported on the current order datastore.',
-							count( $unsupported_args_in_query ),
-							'woocommerce'
-						),
+						1 === count( $unsupported_args_in_query )
+							? 'Order query argument (%s) is not supported on the current order datastore.'
+							: 'Order query arguments (%s) are not supported on the current order datastore.',
 						implode( ', ', $unsupported_args_in_query )
 					)
 				),
@@ -1124,7 +1106,7 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 
 		$args = $this->get_wp_query_args( $query_vars );
 
-		if ( ! empty( $args['errors'] ) || $this->has_only_unknown_statuses( $args ) ) {
+		if ( ! empty( $args['errors'] ) || ( is_array( $args ) && $this->has_only_unknown_statuses( $args ) ) ) {
 			$query = (object) array(
 				'posts'         => array(),
 				'found_posts'   => 0,
@@ -1154,25 +1136,32 @@ class WC_Order_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT implement
 	}
 
 	/**
-	 * Check whether none of the requested statuses are registered. WP_Query drops the status clause in that case,
-	 * which would return every order. Runs on the final query args so changes made by query filters are respected.
-	 * Statuses from wc_get_order_statuses() also count as known, so queries that run before they are registered
-	 * on `init` (e.g. during upgrades) still find orders.
+	 * Check whether none of the requested statuses are known. WP_Query drops the status clause in that case, which would
+	 * return every order. Runs on the final query args, after query filters. Until any wc_get_order_statuses() status is
+	 * registered on `init`, all of them count as known, so early queries (e.g. during upgrades) still find orders.
 	 *
 	 * @param array $wp_query_args Final WP_Query args.
 	 * @return bool
 	 */
 	private function has_only_unknown_statuses( array $wp_query_args ): bool {
-		if ( empty( $wp_query_args['post_status'] ) ) {
+		$post_status = $wp_query_args['post_status'] ?? null;
+
+		// Without a status (including '0'), WP_Query applies its default statuses, which never match an order status.
+		if ( empty( $post_status ) ) {
 			return false;
 		}
 
-		$statuses = is_string( $wp_query_args['post_status'] )
-			? explode( ',', $wp_query_args['post_status'] )
-			: (array) $wp_query_args['post_status'];
+		// Normalize like WP_Query::parse_query(): arrays go through sanitize_key(), strings lose disallowed characters (including uppercase).
+		$requested_statuses = is_array( $post_status )
+			? array_map( 'sanitize_key', $post_status )
+			: explode( ',', (string) preg_replace( '|[^a-z0-9_,-]|', '', is_scalar( $post_status ) ? (string) $post_status : '' ) );
 
-		$requested_statuses = array_map( 'sanitize_key', array_filter( $statuses, 'is_string' ) );
-		$known_statuses     = array_merge( array( 'any', 'all' ), get_post_stati(), array_keys( wc_get_order_statuses() ) );
+		$registered_statuses = get_post_stati();
+		$order_statuses      = array_keys( wc_get_order_statuses() );
+		$known_statuses      = array_merge( array( 'any', 'all' ), $registered_statuses );
+		if ( ! array_intersect( $order_statuses, $registered_statuses ) ) {
+			$known_statuses = array_merge( $known_statuses, $order_statuses );
+		}
 
 		return ! array_intersect( $requested_statuses, $known_statuses );
 	}

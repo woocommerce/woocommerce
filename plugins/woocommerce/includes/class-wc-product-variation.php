@@ -11,6 +11,7 @@
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
+use Automattic\WooCommerce\Internal\ProductCustoms\CustomsDataValidator;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -32,19 +33,22 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * @var array
 	 */
 	protected $parent_data = array(
-		'title'             => '',
-		'sku'               => '',
-		'manage_stock'      => '',
-		'backorders'        => '',
-		'stock_quantity'    => '',
-		'weight'            => '',
-		'length'            => '',
-		'width'             => '',
-		'height'            => '',
-		'tax_class'         => '',
-		'shipping_class_id' => '',
-		'image_id'          => '',
-		'purchase_note'     => '',
+		'title'                     => '',
+		'sku'                       => '',
+		'manage_stock'              => '',
+		'backorders'                => '',
+		'stock_quantity'            => '',
+		'weight'                    => '',
+		'length'                    => '',
+		'width'                     => '',
+		'height'                    => '',
+		'tax_class'                 => '',
+		'shipping_class_id'         => '',
+		'image_id'                  => '',
+		'purchase_note'             => '',
+		'customs_commodity_code'    => null,
+		'customs_country_of_origin' => null,
+		'customs_description'       => null,
 	);
 
 	/**
@@ -220,6 +224,69 @@ class WC_Product_Variation extends WC_Product_Simple {
 		// Inherit value from parent.
 		if ( 'view' === $context && empty( $value ) ) {
 			$value = apply_filters( $this->get_hook_prefix() . 'sku', $this->parent_data['sku'], $this );
+		}
+		return $value;
+	}
+
+	/**
+	 * Gets the commodity code, inheriting from the parent in view context.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param string $context View or edit context.
+	 * @return string|null
+	 */
+	public function get_customs_commodity_code( $context = 'view' ) {
+		return $this->get_customs_prop( 'customs_commodity_code', $context );
+	}
+
+	/**
+	 * Gets the origin country, inheriting from the parent in view context.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param string $context View or edit context.
+	 * @return string|null
+	 */
+	public function get_customs_country_of_origin( $context = 'view' ) {
+		return $this->get_customs_prop( 'customs_country_of_origin', $context );
+	}
+
+	/**
+	 * Gets the customs description, inheriting from the parent in view context.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param string $context View or edit context.
+	 * @return string|null
+	 */
+	public function get_customs_description( $context = 'view' ) {
+		return $this->get_customs_prop( 'customs_description', $context );
+	}
+
+	/**
+	 * Gets a customs value, falling back to the parent value in view context when the variation has none.
+	 *
+	 * @param string $prop    Customs prop name.
+	 * @param string $context View or edit context.
+	 * @return string|null
+	 */
+	private function get_customs_prop( string $prop, $context ) {
+		$value = $this->get_prop( $prop, $context );
+		if ( 'view' === $context && null === $value ) {
+			/**
+			 * Filters a resolved customs value: woocommerce_product_variation_get_customs_commodity_code,
+			 * woocommerce_product_variation_get_customs_country_of_origin, or woocommerce_product_variation_get_customs_description.
+			 *
+			 * The dynamic portion of the hook name, `$prop`, refers to the customs prop name. Runs for the variation's
+			 * own value via get_prop() (may be null), and again with the parent value when the variation inherits it.
+			 *
+			 * @since 11.3.0
+			 *
+			 * @param string|null          $value     Customs value.
+			 * @param WC_Product_Variation $variation Product variation.
+			 */
+			$value = apply_filters( $this->get_hook_prefix() . $prop, $this->parent_data[ $prop ], $this );
 		}
 		return $value;
 	}
@@ -467,21 +534,24 @@ class WC_Product_Variation extends WC_Product_Simple {
 		$parent_data = wp_parse_args(
 			$parent_data,
 			array(
-				'title'              => '',
-				'status'             => '',
-				'sku'                => '',
-				'manage_stock'       => 'no',
-				'backorders'         => 'no',
-				'stock_quantity'     => '',
-				'weight'             => '',
-				'length'             => '',
-				'width'              => '',
-				'height'             => '',
-				'tax_class'          => '',
-				'shipping_class_id'  => 0,
-				'image_id'           => 0,
-				'purchase_note'      => '',
-				'catalog_visibility' => CatalogVisibility::VISIBLE,
+				'title'                     => '',
+				'status'                    => '',
+				'sku'                       => '',
+				'manage_stock'              => 'no',
+				'backorders'                => 'no',
+				'stock_quantity'            => '',
+				'weight'                    => '',
+				'length'                    => '',
+				'width'                     => '',
+				'height'                    => '',
+				'tax_class'                 => '',
+				'shipping_class_id'         => 0,
+				'image_id'                  => 0,
+				'purchase_note'             => '',
+				'catalog_visibility'        => CatalogVisibility::VISIBLE,
+				'customs_commodity_code'    => null,
+				'customs_country_of_origin' => null,
+				'customs_description'       => null,
 			)
 		);
 
@@ -492,6 +562,10 @@ class WC_Product_Variation extends WC_Product_Simple {
 
 		if ( ! in_array( $parent_data['tax_class'], $valid_classes, true ) ) {
 			$parent_data['tax_class'] = '';
+		}
+
+		foreach ( CustomsDataValidator::FIELDS as $field ) {
+			$parent_data[ $field ] = CustomsDataValidator::normalize_stored_value( $field, $parent_data[ $field ] );
 		}
 
 		$this->parent_data = $parent_data;

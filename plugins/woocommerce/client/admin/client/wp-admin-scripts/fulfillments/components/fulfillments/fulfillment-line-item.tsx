@@ -67,8 +67,7 @@ export default function FulfillmentLineItem( {
 			...storeCurrency,
 			symbol: decodeEntities( symbol ),
 			symbolPosition: storeCurrency.symbolPosition as
-				| SymbolPosition
-				| undefined,
+				SymbolPosition | undefined,
 			code: orderCurrencyCode,
 		} ).formatAmount( total );
 	};

@@ -28,7 +28,7 @@ class ProductFilters extends AbstractBlock {
 	 * @return string[]
 	 */
 	protected function get_block_type_uses_context() {
-		return array( 'postId', 'query', 'queryId', 'forcePageReload' );
+		return array( 'postId', 'query', 'queryId', 'collection', 'productCollectionLocation', 'forcePageReload' );
 	}
 
 	/**
@@ -110,6 +110,7 @@ class ProductFilters extends AbstractBlock {
 	:where(.wc-block-product-filters).is-mobile-overlay .wc-block-product-filters__overlay {
 		position: relative;
 		pointer-events: auto;
+		visibility: visible;
 		inset: 0;
 		z-index: auto;
 		background: inherit;
@@ -175,10 +176,17 @@ CSS;
 
 		wp_enqueue_script( 'wc-settings' );
 
-		$query_id      = $block->context['queryId'] ?? 0;
-		$filter_params = $this->get_filter_params( $query_id );
+		$query_id      = $block->context['queryId'] ?? null;
+		$params        = wc_get_container()->get( Params::class );
+		$filter_params = $params->get_filter_params( $query_id );
 
-		wp_interactivity_config( $this->get_full_block_name(), [ 'canonicalUrl' => $this->get_canonical_url_no_pagination( $filter_params ) ] );
+		wp_interactivity_config(
+			$this->get_full_block_name(),
+			array(
+				'canonicalUrl'    => $this->get_canonical_url_no_pagination( $params->get_filter_params() ),
+				'filterParamKeys' => $params->get_param_keys(),
+			)
+		);
 
 		/**
 		 * Filter hook to modify the selected filter items.
@@ -194,11 +202,14 @@ CSS;
 			}
 		);
 
+		$navigation_id         = $this->generate_navigation_id( $block );
+		$product_filters_key   = wp_unique_prefixed_id( $navigation_id . '-' );
 		$block_context         = array_merge(
 			$block->context,
 			array(
-				'filterParams'  => $filter_params,
-				'activeFilters' => $active_filters,
+				'filterParams'      => $filter_params,
+				'activeFilters'     => $active_filters,
+				'productFiltersKey' => $product_filters_key,
 			),
 		);
 		$inner_blocks          = array_reduce(
@@ -216,11 +227,20 @@ CSS;
 			// frontend can fall back to the global interactivity config.
 			'forcePageReload' => isset( $block->context['forcePageReload'] ) ? (bool) $block->context['forcePageReload'] : null,
 		);
+		if ( null !== $query_id ) {
+			$interactivity_context['queryId'] = $query_id;
+		}
 
 		$overlay_mode     = $this->get_overlay_mode( $attributes );
 		$has_overlay      = 'off' !== $overlay_mode;
 		$overlay_position = isset( $attributes['overlayPosition'] ) && 'right' === $attributes['overlayPosition'] ? 'right' : 'left';
-		$wrapper_classes  = array( 'wc-block-product-filters' );
+
+		$state               = wp_interactivity_state( 'woocommerce/product-filters' );
+		$filter_empty_states = $state['filterEmptyStates'][ $product_filters_key ] ?? array();
+		$wrapper_classes     = array( 'wc-block-product-filters' );
+		if ( ! empty( $filter_empty_states ) && ! in_array( false, $filter_empty_states, true ) ) {
+			$wrapper_classes[] = 'wc-block-product-filters--empty';
+		}
 		if ( ! $has_overlay ) {
 			$wrapper_classes[] = 'is-filter-drawer-disabled';
 		}
@@ -232,23 +252,18 @@ CSS;
 		}
 
 		$wrapper_attributes = array(
-			'class'                         => implode( ' ', $wrapper_classes ),
-			'data-wp-interactive'           => $this->get_full_block_name(),
-			'data-wp-init--colors'          => 'callbacks.initColors',
-			'data-wp-watch--active-filters' => 'callbacks.syncActiveFiltersWithServer',
-			'data-wp-context'               => (string) wp_json_encode( $interactivity_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
-			'style'                         => $this->get_css_variables( $attributes ),
+			'class'                          => implode( ' ', $wrapper_classes ),
+			'data-wp-router-region'          => $navigation_id,
+			'data-wp-interactive'            => $this->get_full_block_name(),
+			'data-wp-init---colors'          => 'callbacks.initColors',
+			'data-wp-watch---active-filters' => 'callbacks.syncActiveFiltersWithServer',
+			'data-wp-context'                => (string) wp_json_encode( $interactivity_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
+			'style'                          => $this->get_css_variables( $attributes ),
 		);
 
 		if ( $has_overlay ) {
-			$wrapper_attributes['data-wp-watch--scrolling']         = 'callbacks.scrollLimit';
-			$wrapper_attributes['data-wp-on--keyup']                = 'actions.closeOverlayOnEscape';
+			$wrapper_attributes['data-wp-watch---scrolling']        = 'callbacks.scrollLimit';
 			$wrapper_attributes['data-wp-class--is-overlay-opened'] = 'context.isOverlayOpened';
-		}
-
-		// Remove this conditional once the fix is released in WP. https://github.com/woocommerce/gutenberg/pull/4.
-		if ( ! isset( $block->context['productCollectionLocation'] ) ) {
-			$wrapper_attributes['data-wp-router-region'] = $this->generate_navigation_id( $block );
 		}
 
 		ob_start();
@@ -258,6 +273,7 @@ CSS;
 				<button
 					type="button"
 					class="wc-block-product-filters__open-overlay"
+					data-wp-init="callbacks.initOverlay"
 					data-wp-on--click="actions.openOverlay"
 				>
 					<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -267,10 +283,13 @@ CSS;
 				</button>
 				<div class="wc-block-product-filters__overlay">
 					<div class="wc-block-product-filters__overlay-wrapper" data-wp-on--click="actions.closeOverlayOnBackdrop">
-						<div
+						<section
 							class="wc-block-product-filters__overlay-dialog"
-							role="dialog"
-							aria-label="<?php echo esc_html__( 'Product Filters', 'woocommerce' ); ?>"
+							data-wp-bind--role="state.overlayDialogRole"
+							aria-label="<?php echo esc_attr__( 'Product Filters', 'woocommerce' ); ?>"
+							data-wp-bind--aria-modal="state.overlayDialogAriaModal"
+							data-wp-on-document--keydown="actions.handleOverlayKeydown"
+							data-wp-watch="callbacks.focusOverlay"
 						>
 							<header class="wc-block-product-filters__overlay-header">
 								<button
@@ -299,7 +318,7 @@ CSS;
 									<span><?php echo esc_html__( 'Apply', 'woocommerce' ); ?></span>
 								</button>
 							</footer>
-						</div>
+						</section>
 					</div>
 				</div>
 			<?php else : ?>
@@ -353,40 +372,10 @@ CSS;
 					array(
 						'attrs'       => $block->parsed_block['attrs'] ?? array(),
 						'innerBlocks' => $block->parsed_block['innerBlocks'] ?? array(),
+						'queryId'     => $block->context['queryId'] ?? null,
 					)
 				)
 			)
-		);
-	}
-
-	/**
-	 * Parse the filter parameters from the URL.
-	 * For now we only get the global query params from the URL. In the future,
-	 * we should get the query params based on $query_id.
-	 *
-	 * @param int $query_id Query ID.
-	 * @return array Parsed filter params.
-	 */
-	private function get_filter_params( $query_id ) {
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-		$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : '';
-
-		$parsed_url = wp_parse_url( esc_url_raw( $request_uri ) );
-
-		if ( empty( $parsed_url['query'] ) ) {
-			return array();
-		}
-
-		parse_str( $parsed_url['query'], $url_query_params );
-
-		$filter_param_keys = wc_get_container()->get( Params::class )->get_param_keys();
-
-		return array_filter(
-			$url_query_params,
-			function ( $key ) use ( $filter_param_keys ) {
-				return in_array( $key, $filter_param_keys, true );
-			},
-			ARRAY_FILTER_USE_KEY
 		);
 	}
 

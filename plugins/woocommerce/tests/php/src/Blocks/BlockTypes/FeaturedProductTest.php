@@ -81,6 +81,28 @@ class FeaturedProductTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Rendering a Featured Product title on a post leaves that post in place for the comments template.
+	 */
+	public function test_featured_product_title_restores_enclosing_post(): void {
+		$this->product = WC_Helper_Product::create_simple_product( true, array( 'name' => 'Featured cap' ) );
+		$post_id       = self::factory()->post->create( array( 'post_title' => 'Containing post' ) );
+		$this->go_to( get_permalink( $post_id ) );
+		$previous_post = $GLOBALS['post'];
+
+		$html = do_blocks(
+			sprintf(
+				'<!-- wp:woocommerce/featured-product {"productId":%d} -->
+				<!-- wp:post-title {"level":2} /-->
+				<!-- /wp:woocommerce/featured-product -->',
+				$this->product->get_id()
+			)
+		);
+
+		$this->assertStringContainsString( 'Featured cap', $html, 'The inner title should render the featured product title.' );
+		$this->assertSame( $previous_post, $GLOBALS['post'], 'The global post must be restored after the block renders.' );
+	}
+
+	/**
 	 * @testdox Should not render a password-protected description in the legacy Featured Product block.
 	 */
 	public function test_does_not_render_password_protected_legacy_description(): void {
