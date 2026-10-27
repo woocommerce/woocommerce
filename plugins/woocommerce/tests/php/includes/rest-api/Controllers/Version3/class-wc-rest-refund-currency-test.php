@@ -51,6 +51,19 @@ class WC_REST_Refund_Currency_Test extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Computed refunds, including a currency with three decimal places.
+	 * @return array
+	 */
+	public function computed_refunds(): array {
+		return array(
+			'USD on JPY' => array( 'JPY', 0, 'USD', 10.50, '10.50', 7.50 ),
+			'JPY on JPY' => array( 'JPY', 0, 'JPY', 10.50, '11', 7.0 ),
+			'USD on USD' => array( 'USD', 2, 'USD', 10.50, '10.50', 7.50 ),
+			'KWD on JPY' => array( 'JPY', 0, 'KWD', 10.501, '10.501', 7.499 ),
+		);
+	}
+
+	/**
 	 * Persist checkout-like totals before restoring the configured store precision.
 	 * @param string $store Store currency.
 	 * @param int    $dp Store decimals.
@@ -88,14 +101,18 @@ class WC_REST_Refund_Currency_Test extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Dispatch v3 request.
+	 * Dispatch a v3 request containing one refund line.
 	 * @param WC_Order $order Order.
-	 * @param array    $body Body.
+	 * @param int      $item_id Original line item ID.
+	 * @param array    $line Refund line values.
+	 * @param array    $body Top-level request parameters.
 	 * @param bool     $preview Preview request.
 	 * @return WP_REST_Response
 	 */
-	private function request( WC_Order $order, array $body, bool $preview = false ): WP_REST_Response {
-		$request = new WP_REST_Request( 'POST', '/wc/v3/orders/' . $order->get_id() . '/refunds' . ( $preview ? '/preview' : '' ) );
+	private function request( WC_Order $order, int $item_id, array $line, array $body = array(), bool $preview = false ): WP_REST_Response {
+		$line[ $preview ? 'line_item_id' : 'id' ] = $item_id;
+		$body['line_items']                       = array( $line );
+		$request                                  = new WP_REST_Request( 'POST', '/wc/v3/orders/' . $order->get_id() . '/refunds' . ( $preview ? '/preview' : '' ) );
 		if ( isset( $body['amount'] ) ) {
 			$body['amount'] = (string) $body['amount'];
 		}
@@ -164,15 +181,9 @@ class WC_REST_Refund_Currency_Test extends WC_REST_Unit_Test_Case {
 			list( $order, $item_id ) = $this->order_fixture( $store, $dp, $currency );
 			$response                = $this->request(
 				$order,
-				array(
-					'amount'     => $values[1],
-					'line_items' => array(
-						array(
-							'id'           => $item_id,
-							'refund_total' => $values[0],
-						),
-					),
-				)
+				$item_id,
+				array( 'refund_total' => $values[0] ),
+				array( 'amount' => $values[1] )
 			);
 			$this->assertSame( 'JPY' === $currency ? 201 : 400, $response->get_status(), wp_json_encode( $response->get_data() ) );
 		}
@@ -189,80 +200,58 @@ class WC_REST_Refund_Currency_Test extends WC_REST_Unit_Test_Case {
 		list( $order, $item_id ) = $this->order_fixture( $store, $dp, $currency );
 		$first                   = $this->request(
 			$order,
-			array(
-				'amount'     => 17.75,
-				'line_items' => array(
-					array(
-						'id'           => $item_id,
-						'refund_total' => 17.75,
-					),
-				),
-			)
+			$item_id,
+			array( 'refund_total' => 17.75 ),
+			array( 'amount' => 17.75 )
 		);
 		$this->assertSame( 201, $first->get_status(), wp_json_encode( $first->get_data() ) );
 		$last = $this->request(
 			$order,
-			array(
-				'amount'     => 0.25,
-				'line_items' => array(
-					array(
-						'id'           => $item_id,
-						'refund_total' => 0.25,
-					),
-				),
-			)
+			$item_id,
+			array( 'refund_total' => 0.25 ),
+			array( 'amount' => 0.25 )
 		);
 		$this->assertSame( 'JPY' === $currency ? 422 : 201, $last->get_status(), wp_json_encode( $last->get_data() ) );
 	}
 
 	/**
-	 * @testdox Computed refunds and previews preserve cents.
+	 * @testdox Computed refunds and previews preserve the order currency's decimal places.
 	 * @param string $store Store currency.
 	 * @param int    $dp Store decimals.
 	 * @param string $currency Order currency.
-	 * @dataProvider currencies
+	 * @param float  $requested Requested refund amount.
+	 * @param string $expected_total Expected preview total, including decimal places.
+	 * @param float  $remaining Expected remaining refundable amount.
+	 * @dataProvider computed_refunds
 	 */
-	public function test_computed_and_preview( string $store, int $dp, string $currency ): void {
+	public function test_computed_and_preview( string $store, int $dp, string $currency, float $requested, string $expected_total, float $remaining ): void {
 		list( $order, $item_id ) = $this->order_fixture( $store, $dp, $currency );
 		$preview                 = $this->request(
 			$order,
-			array(
-				'line_items' => array(
-					array(
-						'line_item_id' => $item_id,
-						'refund_total' => 10.50,
-					),
-				),
-			),
+			$item_id,
+			array( 'refund_total' => $requested ),
+			array(),
 			true
 		);
 		$response                = $this->request(
 			$order,
-			array(
-				'compute_totals' => true,
-				'line_items'     => array(
-					array(
-						'id'           => $item_id,
-						'refund_total' => 10.50,
-					),
-				),
-			)
+			$item_id,
+			array( 'refund_total' => $requested ),
+			array( 'compute_totals' => true )
 		);
 		$this->assertSame( 200, $preview->get_status(), wp_json_encode( $preview->get_data() ) );
+		$this->assertSame( $expected_total, $preview->get_data()['total'] );
 		$this->assertSame( 201, $response->get_status(), wp_json_encode( $response->get_data() ) );
-		$expected          = 'JPY' === $currency ? 11.0 : 10.5;
-		$actual            = $this->amounts( $order, wc_get_order( $response->get_data()['id'] ) );
-		$actual['preview'] = (float) $preview->get_data()['total'];
+		$expected = (float) $expected_total;
 		$this->assertEquals(
 			array(
 				'amount'    => $expected,
 				'total'     => -$expected,
 				'gateway'   => $expected,
 				'refunded'  => $expected,
-				'remaining' => 18 - $expected,
-				'preview'   => $expected,
+				'remaining' => $remaining,
 			),
-			$actual
+			$this->amounts( $order, wc_get_order( $response->get_data()['id'] ) )
 		);
 	}
 
@@ -277,40 +266,23 @@ class WC_REST_Refund_Currency_Test extends WC_REST_Unit_Test_Case {
 		list( $order, $item_id ) = $this->order_fixture( $store, $dp, $currency, 100, 10 );
 		$first                   = $this->request(
 			$order,
-			array(
-				'compute_totals' => true,
-				'line_items'     => array(
-					array(
-						'id'           => $item_id,
-						'refund_total' => 55.25,
-					),
-				),
-			)
+			$item_id,
+			array( 'refund_total' => 55.25 ),
+			array( 'compute_totals' => true )
 		);
 		$this->assertSame( 201, $first->get_status(), wp_json_encode( $first->get_data() ) );
 		$preview = $this->request(
 			$order,
-			array(
-				'line_items' => array(
-					array(
-						'line_item_id' => $item_id,
-						'quantity'     => 1,
-					),
-				),
-			),
+			$item_id,
+			array( 'quantity' => 1 ),
+			array(),
 			true
 		);
 		$last    = $this->request(
 			$order,
-			array(
-				'compute_totals' => true,
-				'line_items'     => array(
-					array(
-						'id'       => $item_id,
-						'quantity' => 1,
-					),
-				),
-			)
+			$item_id,
+			array( 'quantity' => 1 ),
+			array( 'compute_totals' => true )
 		);
 		$this->assertSame( 201, $last->get_status(), wp_json_encode( $last->get_data() ) );
 		$expected = 'JPY' === $currency ? 55.0 : 54.75;
@@ -328,46 +300,31 @@ class WC_REST_Refund_Currency_Test extends WC_REST_Unit_Test_Case {
 		list( $order, $item_id ) = $this->order_fixture( $store, $dp, $currency, 97.50, 9.75 );
 		$first                   = $this->request(
 			$order,
+			$item_id,
 			array(
-				'amount'     => 9.75,
-				'line_items' => array(
+				'refund_total' => 0,
+				'refund_tax'   => array(
 					array(
-						'id'           => $item_id,
-						'refund_total' => 0,
-						'refund_tax'   => array(
-							array(
-								'id'           => 1,
-								'refund_total' => 9.75,
-							),
-						),
+						'id'           => 1,
+						'refund_total' => 9.75,
 					),
 				),
-			)
+			),
+			array( 'amount' => 9.75 )
 		);
 		$this->assertSame( 201, $first->get_status(), wp_json_encode( $first->get_data() ) );
 		$preview = $this->request(
 			$order,
-			array(
-				'line_items' => array(
-					array(
-						'line_item_id' => $item_id,
-						'quantity'     => 1,
-					),
-				),
-			),
+			$item_id,
+			array( 'quantity' => 1 ),
+			array(),
 			true
 		);
 		$last    = $this->request(
 			$order,
-			array(
-				'compute_totals' => true,
-				'line_items'     => array(
-					array(
-						'id'       => $item_id,
-						'quantity' => 1,
-					),
-				),
-			)
+			$item_id,
+			array( 'quantity' => 1 ),
+			array( 'compute_totals' => true )
 		);
 		$this->assertSame( 'JPY' === $currency ? 422 : 201, $last->get_status(), wp_json_encode( $last->get_data() ) );
 		if ( 'JPY' !== $currency ) {
@@ -398,14 +355,12 @@ class WC_REST_Refund_Currency_Test extends WC_REST_Unit_Test_Case {
 				)
 			);
 			$this->assertInstanceOf( WC_Order_Refund::class, $first );
-			$line = array( 'id' => $item_id );
-			$line[ $quantity_only ? 'quantity' : 'refund_total' ] = $quantity_only ? 1 : 0.25;
+			$line     = $quantity_only ? array( 'quantity' => 1 ) : array( 'refund_total' => 0.25 );
 			$response = $this->request(
 				$order,
-				array(
-					'compute_totals' => true,
-					'line_items'     => array( $line ),
-				)
+				$item_id,
+				$line,
+				array( 'compute_totals' => true )
 			);
 			$this->assertSame( 'JPY' === $currency ? 422 : 201, $response->get_status(), wp_json_encode( $response->get_data() ) );
 			if ( 'JPY' !== $currency ) {
@@ -416,49 +371,5 @@ class WC_REST_Refund_Currency_Test extends WC_REST_Unit_Test_Case {
 				$this->assertSame( 0.0, (float) wc_get_order( $order->get_id() )->get_remaining_refund_amount() );
 			}
 		}
-	}
-
-	/**
-	 * @testdox Three-decimal refunds preserve the third decimal through preview, persistence and gateway.
-	 */
-	public function test_three_decimal_gateway_roundtrip(): void {
-		list( $order, $item_id ) = $this->order_fixture( 'JPY', 0, 'KWD' );
-		$preview                 = $this->request(
-			$order,
-			array(
-				'line_items' => array(
-					array(
-						'line_item_id' => $item_id,
-						'refund_total' => 10.501,
-					),
-				),
-			),
-			true
-		);
-		$response                = $this->request(
-			$order,
-			array(
-				'compute_totals' => true,
-				'line_items'     => array(
-					array(
-						'id'           => $item_id,
-						'refund_total' => 10.501,
-					),
-				),
-			)
-		);
-		$this->assertSame( 200, $preview->get_status(), wp_json_encode( $preview->get_data() ) );
-		$this->assertSame( '10.501', $preview->get_data()['total'] );
-		$this->assertSame( 201, $response->get_status(), wp_json_encode( $response->get_data() ) );
-		$this->assertEquals(
-			array(
-				'amount'    => 10.501,
-				'total'     => -10.501,
-				'gateway'   => 10.501,
-				'refunded'  => 10.501,
-				'remaining' => 7.499,
-			),
-			$this->amounts( $order, wc_get_order( $response->get_data()['id'] ) )
-		);
 	}
 }
