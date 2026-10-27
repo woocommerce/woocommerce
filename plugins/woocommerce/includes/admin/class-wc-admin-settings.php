@@ -254,7 +254,14 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 			$field_name = $field['field_name'];
 
 			if ( $field_name !== $field['id'] && is_string( $field_name ) && preg_match( '/^([^\[\]]+)(?:\[([^\[\]]+)\])?$/', $field_name, $matches ) ) {
-				$stored = get_option( $matches[1], null );
+				$option_name = $matches[1];
+				if ( isset( $matches[2] ) ) {
+					// Resolve the name the way save_fields() does: parse_str() stores 'a.b[c]' under 'a_b'.
+					parse_str( $field_name, $parsed_name );
+					$option_name = (string) key( $parsed_name );
+				}
+
+				$stored = get_option( $option_name, null );
 				if ( isset( $matches[2] ) ) {
 					$stored = is_array( $stored ) ? ( $stored[ $matches[2] ] ?? null ) : null;
 				}

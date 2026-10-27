@@ -580,21 +580,27 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should render the value saved through a nested field name instead of the default.
+	 * @testdox Should render the value saved through nested field name $field_name instead of the default.
+	 *
+	 * @testWith ["test_nested_options[one]", "test_nested_options"]
+	 *           ["test.dotted options[one]", "test_dotted_options"]
+	 *
+	 * @param string $field_name  Field name of the saved and rendered field.
+	 * @param string $option_name Option the value is posted and stored under. PHP replaces dots and spaces in posted names.
 	 */
-	public function test_output_fields_renders_value_saved_through_nested_field_name(): void {
+	public function test_output_fields_renders_value_saved_through_nested_field_name( string $field_name, string $option_name ): void {
 		$options = array(
 			array(
 				'id'         => 'test_nested_one',
-				'field_name' => 'test_nested_options[one]',
+				'field_name' => $field_name,
 				'type'       => 'text',
 				'default'    => 'default value',
 			),
 		);
 
-		WC_Admin_Settings::save_fields( $options, array( 'test_nested_options' => array( 'one' => 'saved value' ) ) );
+		WC_Admin_Settings::save_fields( $options, array( $option_name => array( 'one' => 'saved value' ) ) );
 
-		$this->assertSame( array( 'one' => 'saved value' ), get_option( 'test_nested_options' ) );
+		$this->assertSame( array( 'one' => 'saved value' ), get_option( $option_name ) );
 		$this->assertStringContainsString( 'value="saved value"', $this->render_fields( $options ) );
 	}
 
