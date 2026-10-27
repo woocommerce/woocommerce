@@ -93,10 +93,11 @@ class PrivacyEraser extends \WC_Abstract_Privacy {
 			 *
 			 * Fires before a stock notification is anonymized by the privacy eraser, while it still
 			 * holds the original email and user ID. The save that follows fires
-			 * `woocommerce_stock_notification_status_changed` with the anonymized row, which cannot
-			 * identify the shopper any more.
+			 * `woocommerce_update_stock_notification` with the anonymized row, plus
+			 * `woocommerce_stock_notification_status_changed` only when an active or pending
+			 * notification is cancelled. Neither can identify the shopper any more.
 			 *
-			 * @since 11.4.0
+			 * @since 11.3.0
 			 *
 			 * @param int          $notification_id The notification ID.
 			 * @param string       $original_email  The email stored on the notification before anonymization.
