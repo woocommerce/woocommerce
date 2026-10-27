@@ -35,30 +35,51 @@ export default function PluginInstallNotice( props: { selectedTab: string } ) {
 		! wccomSettings?.wooUpdateManagerActive &&
 		! wccomSettings?.wooUpdateManagerInstalled
 	) {
+		const isManualInstall = !! wccomSettings?.wooUpdateManagerManualInstall;
+
 		return (
 			<section className="woocommerce-marketplace__woo-update-manager-plugin__notices">
 				<Notice status="error" isDismissible={ false }>
 					<span
 						dangerouslySetInnerHTML={ sanitizeHTML(
-							__(
-								'Please install the <b>WooCommerce.com Update Manager</b> to continue receiving the updates and streamlined support included in your WooCommerce.com subscriptions.<br/>Alternatively, you can download and install it manually.',
-								'woocommerce'
-							)
+							isManualInstall
+								? __(
+										'Please download the <b>WooCommerce.com Update Manager</b> and upload it on the Add Plugins screen to continue receiving the updates and streamlined support included in your WooCommerce.com subscriptions.<br/>WooCommerce.com can’t reach local sites, so it can’t install it for you.',
+										'woocommerce'
+									)
+								: __(
+										'Please install the <b>WooCommerce.com Update Manager</b> to continue receiving the updates and streamlined support included in your WooCommerce.com subscriptions.<br/>Alternatively, you can download and install it manually.',
+										'woocommerce'
+									)
 						) }
 					></span>
 					<div className="components-notice__buttons">
-						<Button
-							href={ wccomSettings?.wooUpdateManagerInstallUrl }
-							variant="secondary"
-						>
-							{ __( 'Install', 'woocommerce' ) }
-						</Button>
+						{ ! isManualInstall && (
+							<Button
+								href={
+									wccomSettings?.wooUpdateManagerInstallUrl
+								}
+								variant="secondary"
+							>
+								{ __( 'Install', 'woocommerce' ) }
+							</Button>
+						) }
 						<Button
 							href={ WOO_CONNECT_PLUGIN_DOWNLOAD_URL }
-							variant="link"
+							variant={ isManualInstall ? 'secondary' : 'link' }
 						>
 							{ __( 'Download', 'woocommerce' ) }
 						</Button>
+						{ isManualInstall && (
+							<Button
+								href={
+									wccomSettings?.wooUpdateManagerUploadUrl
+								}
+								variant="link"
+							>
+								{ __( 'Upload plugin', 'woocommerce' ) }
+							</Button>
+						) }
 					</div>
 				</Notice>
 			</section>
