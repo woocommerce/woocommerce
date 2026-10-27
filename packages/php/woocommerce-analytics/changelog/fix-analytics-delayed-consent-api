@@ -1,4 +1,0 @@
-Significance: patch
-Type: fixed
-
-Wait for a consent plugin's delayed script before tracking, instead of tracking visitors who have not consented yet.

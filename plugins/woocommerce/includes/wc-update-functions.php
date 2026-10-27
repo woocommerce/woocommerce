@@ -2267,10 +2267,16 @@ function wc_update_450_sanitize_coupons_code() {
 	);
 
 	$codes_changed = false;
+	$encode_emoji  = in_array( $wpdb->get_col_charset( $wpdb->posts, 'post_title' ), array( 'utf8', 'utf8mb3' ), true );
 
 	foreach ( $coupons as $key => $data ) {
 		$coupon_id = intval( $data['ID'] );
-		$code      = trim( wp_filter_kses( $data['post_title'] ) );
+		$code      = wc_sanitize_coupon_code( $data['post_title'] );
+
+		// Like coupon saves, keep emoji encoded when the column can't store them.
+		if ( $encode_emoji ) {
+			$code = wp_encode_emoji( $code );
+		}
 
 		if ( ! empty( $code ) && $data['post_title'] !== $code ) {
 			$wpdb->update(
@@ -4218,4 +4224,40 @@ function wc_update_1130_backfill_order_stats_payment_method() {
 	wp_cache_delete( OrdersDataStore::ORDERS_PAYMENT_METHODS_ALL_CACHE_KEY, 'woocommerce_analytics' );
 
 	return false;
+}
+
+/**
+ * Re-enable autoloading for options whose settings definitions reverted it on save after the 10.5.0 migration.
+ *
+ * @since 11.4.0
+ */
+function wc_update_1140_re_enable_autoload_options(): void {
+	wp_set_option_autoload_values(
+		array(
+			'woocommerce_cart_page_id'                    => true,
+			'woocommerce_checkout_page_id'                => true,
+			'woocommerce_myaccount_page_id'               => true,
+			'woocommerce_terms_page_id'                   => true,
+			'woocommerce_show_marketplace_suggestions'    => true,
+			'woocommerce_enable_delayed_account_creation' => true,
+			'woocommerce_logs_logging_enabled'            => true,
+		)
+	);
+}
+
+/**
+ * Add the MPN lookup column and index for existing stores.
+ *
+ * @since 11.4.0
+ */
+function wc_update_1140_add_mpn_to_product_lookup_table(): void {
+	global $wpdb;
+
+	if ( ! $wpdb->get_var( "SHOW COLUMNS FROM {$wpdb->wc_product_meta_lookup} LIKE 'mpn'" ) ) {
+		$wpdb->query( "ALTER TABLE {$wpdb->wc_product_meta_lookup} ADD COLUMN mpn varchar(100) NOT NULL DEFAULT '' AFTER global_unique_id" );
+	}
+
+	if ( ! $wpdb->get_var( "SHOW INDEX FROM {$wpdb->wc_product_meta_lookup} WHERE Key_name = 'mpn'" ) ) {
+		$wpdb->query( "ALTER TABLE {$wpdb->wc_product_meta_lookup} ADD INDEX mpn (mpn(50))" );
+	}
 }

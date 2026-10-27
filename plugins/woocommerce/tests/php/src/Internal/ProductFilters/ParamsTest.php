@@ -33,6 +33,39 @@ class ParamsTest extends AbstractProductFiltersTest {
 	private $taxonomy_params_filter;
 
 	/**
+	 * @testdox Should isolate local filter parameters, including ID zero, and reject malformed values.
+	 */
+	public function test_scoped_request_parameters(): void {
+		$this->taxonomy_params_filter = static function ( $params ) {
+			$params['taxonomy']['product_brand'] = 'makers';
+			return $params;
+		};
+		add_filter( 'woocommerce_product_filter_params', $this->taxonomy_params_filter );
+
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- Restore the original request verbatim after the test.
+		$original_uri = $_SERVER['REQUEST_URI'] ?? null;
+		try {
+			$_SERVER['REQUEST_URI'] = '/?min_price=5&wcp-0-min_price=10.28&wcp-17-min_price=20&wcp-0-rating_filter[]=4&wcp-0-max_price=invalid&wcp-0-unknown=value&wcp-0-filter_color=blue,red&wcp-0-query_type_color=and&wcp-00-min_price=999&wcp-0-makers=%25e6%2597%25a5';
+			$local                  = $this->sut->get_filter_params( 0 );
+			$this->assertSame( '%e6%97%a5', $local['makers'] );
+			$this->assertSame( '10.28', $local['min_price'] );
+			$this->assertSame( 'blue,red', $local['filter_color'] );
+			$this->assertSame( 'and', $local['query_type_color'] );
+			$this->assertArrayNotHasKey( 'rating_filter', $local );
+			$this->assertArrayNotHasKey( 'max_price', $local );
+			$this->assertArrayNotHasKey( 'unknown', $local );
+			$this->assertSame( '20', $this->sut->get_filter_params( 17 )['min_price'] );
+			$this->assertSame( '5', $this->sut->get_filter_params()['min_price'] );
+		} finally {
+			if ( null === $original_uri ) {
+				unset( $_SERVER['REQUEST_URI'] );
+			} else {
+				$_SERVER['REQUEST_URI'] = $original_uri;
+			}
+		}
+	}
+
+	/**
 	 * Runs before each test.
 	 */
 	public function setUp(): void {

@@ -52,6 +52,7 @@ use Automattic\WooCommerce\Internal\Caches\ProductVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\Caches\OrdersVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\Caches\TaxRateVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\CustomerEmailVerification\CustomerEmailVerification;
+use Automattic\WooCommerce\Internal\StructuredData\OpenGraph;
 
 /**
  * Main WooCommerce Class.
@@ -74,7 +75,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $db_version = '920';
+	public $db_version = '1140';
 
 	/**
 	 * The single instance of the class.
@@ -197,7 +198,7 @@ final class WooCommerce {
 	 * @return void
 	 */
 	public function __clone() {
-		wc_doing_it_wrong( __FUNCTION__, __( 'Cloning is forbidden.', 'woocommerce' ), '2.1' );
+		wc_doing_it_wrong( __FUNCTION__, 'Cloning is forbidden.', '2.1' );
 	}
 
 	/**
@@ -208,7 +209,7 @@ final class WooCommerce {
 	 * @return void
 	 */
 	public function __wakeup() {
-		wc_doing_it_wrong( __FUNCTION__, __( 'Unserializing instances of this class is forbidden.', 'woocommerce' ), '2.1' );
+		wc_doing_it_wrong( __FUNCTION__, 'Unserializing instances of this class is forbidden.', '2.1' );
 	}
 
 	/**
@@ -419,6 +420,7 @@ final class WooCommerce {
 		$container->get( ChequeSettings::class );
 		$container->get( SettingsScreen::class );
 		$container->get( AbilitiesTracking::class );
+		$container->get( OpenGraph::class );
 
 		/**
 		 * These classes have a register method for attaching hooks.
@@ -441,6 +443,7 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\ProductFeed\ProductFeed::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\PushNotifications\PushNotifications::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Orders\PointOfSaleEmailHandler::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\Orders\UnpaidOrderTimeoutMarker::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\POS\POSController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ShopperLists\ShopperListsController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\StockNotifications\StockNotifications::class )->register();
@@ -448,6 +451,7 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Ucp\UcpDiscovery::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Admin\OrderTaxLookupMigrator::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\ProductDownloads\DownloadableFileAttachments::class )->register();
 
 		// Classes inheriting from RestApiControllerBase.
 		$container->get( Automattic\WooCommerce\Internal\ReceiptRendering\ReceiptRenderingRestController::class )->register();

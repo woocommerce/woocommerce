@@ -372,6 +372,10 @@ class WC_Install {
 			'wc_update_1130_delete_stock_notification_sync_notice_option',
 			'wc_update_1130_backfill_order_stats_payment_method',
 		),
+		'11.4.0'   => array(
+			'wc_update_1140_re_enable_autoload_options',
+			'wc_update_1140_add_mpn_to_product_lookup_table',
+		),
 	);
 
 	/**
@@ -2056,6 +2060,7 @@ CREATE TABLE {$wpdb->prefix}wc_product_meta_lookup (
   `product_id` bigint(20) NOT NULL,
   `sku` varchar(100) NULL default '',
   `global_unique_id` varchar(100) NULL default '',
+  `mpn` varchar(100) NOT NULL DEFAULT '',
   `virtual` tinyint(1) NULL default 0,
   `downloadable` tinyint(1) NULL default 0,
   `min_price` decimal(19,4) NULL default NULL,
@@ -2076,7 +2081,8 @@ CREATE TABLE {$wpdb->prefix}wc_product_meta_lookup (
   KEY `onsale` (`onsale`),
   KEY min_max_price (`min_price`, `max_price`),
   KEY sku (sku(50)),
-  KEY global_unique_id (global_unique_id(50))
+  KEY global_unique_id (global_unique_id(50)),
+  KEY mpn (mpn(50))
 ) $collate;
 CREATE TABLE {$wpdb->prefix}wc_tax_rate_classes (
   tax_rate_class_id bigint(20) unsigned NOT NULL auto_increment,
@@ -3204,7 +3210,7 @@ EOT;
 <!-- wp:woocommerce/product-sale-badge {"align":"right"} /-->
 <!-- /wp:woocommerce/product-image -->
 
-<!-- wp:post-title {"textAlign":"center","isLink":true,"style":{"spacing":{"margin":{"bottom":"0.75rem","top":"0"}},"typography":{"lineHeight":"1.4"}},"fontSize":"medium","__woocommerceNamespace":"woocommerce/product-collection/product-title"} /-->
+<!-- wp:post-title {"textAlign":"center","isLink":true,"style":{"spacing":{"margin":{"bottom":"0.75rem","top":"0"}},"typography":{"lineHeight":"1.4"}},"fontSize":"medium","__woocommerceNamespace":"woocommerce/product-title"} /-->
 
 <!-- wp:woocommerce/product-price {"textAlign":"center","fontSize":"small"} /-->
 
