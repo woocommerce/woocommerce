@@ -3555,6 +3555,41 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * @testdox Each checkout request handled in the same PHP request receives its own payment data, as Store API batch subrequests do.
+	 */
+	public function test_payment_data_is_not_reused_across_checkout_requests_in_one_php_request(): void {
+		$received_markers = array();
+		$payment_handler  = function ( $context, $payment_result ) use ( &$received_markers ) {
+			$received_markers[] = $context->payment_data['marker'] ?? '';
+			$payment_result->set_status( 'failure' );
+		};
+
+		add_action( 'woocommerce_rest_checkout_process_payment_with_context', $payment_handler, 1, 2 );
+
+		try {
+			foreach ( array( 'ALPHA', 'BETA' ) as $marker ) {
+				$request = $this->build_valid_post_request();
+				$request->set_param(
+					'payment_data',
+					array(
+						array(
+							'key'   => 'marker',
+							'value' => $marker,
+						),
+					)
+				);
+				$response = rest_get_server()->dispatch( $request );
+				$data     = $response->get_data();
+				$this->assertSame( 'failure', $data['payment_result']['payment_status'] ?? null, "Checkout {$marker} should end with the handler's failed payment: " . print_r( $data, true ) );
+			}
+		} finally {
+			remove_action( 'woocommerce_rest_checkout_process_payment_with_context', $payment_handler, 1 );
+		}
+
+		$this->assertSame( array( 'ALPHA', 'BETA' ), $received_markers, 'The second checkout must not receive payment data from the first.' );
+	}
+
+	/**
 	 * @testdox A logged in customer's VAT exemption should survive a failed checkout that saves their account.
 	 */
 	public function test_failed_checkout_keeps_logged_in_customer_vat_exemption() {
