@@ -1842,6 +1842,46 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should run the other validators after one throws, and give every code of a refusal its namespace and status.
+	 */
+	public function test_validators_run_after_a_throw_and_every_code_gets_its_namespace(): void {
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+		$this->register_validator(
+			'product',
+			'first_ext',
+			static function () {
+				throw new \RuntimeException( 'Validator broke.' );
+			}
+		);
+		$this->register_validator(
+			'product',
+			'second_ext',
+			static function () {
+				$error = new \WP_Error( 'test_name_refused', 'Name refused.' );
+				$error->add( 'test_price_refused', 'Price refused.' );
+				return $error;
+			}
+		);
+
+		$data = $this->run_ability_response(
+			'woocommerce/product-update',
+			array(
+				'id'   => $product->get_id(),
+				'name' => 'Pencil',
+			)
+		)->get_data();
+
+		$this->assertSame( 'first_ext:woocommerce_ability_extension_failed', $data['code'] );
+		$this->assertCount( 2, $data['additional_errors'] );
+		foreach ( array( 'test_name_refused', 'test_price_refused' ) as $index => $code ) {
+			$this->assertSame( 'second_ext:' . $code, $data['additional_errors'][ $index ]['code'] );
+			$this->assertSame( 'second_ext', $data['additional_errors'][ $index ]['data']['namespace'] );
+			$this->assertSame( 400, $data['additional_errors'][ $index ]['data']['status'] );
+		}
+		$this->assertSame( 'Pen', wc_get_product( $product->get_id() )->get_name() );
+	}
+
+	/**
 	 * @testdox Should run a validator in an ActionableAbility of an extension, with that ability.
 	 */
 	public function test_a_validator_runs_in_an_extension_actionable_ability(): void {
