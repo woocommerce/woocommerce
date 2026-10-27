@@ -387,7 +387,7 @@ class ShippingTaxSplitTest extends WC_Unit_Test_Case {
 	 */
 	public function test_negative_fee_tax_with_a_class_slugged_like_the_option( bool $in_cart ): void {
 		update_option( 'woocommerce_shipping_tax_class', ShippingTaxClass::INHERIT );
-		$slug     = $this->create_tax_class( 'Split class', ShippingTaxClass::SPLIT_BY_ITEM_VALUE );
+		$slug     = $this->create_tax_class( 'split_by_item_value' );
 		$products = $this->create_products( array( array( 'zero-rate', ProductTaxStatus::TAXABLE, 90, false ), array( $slug, ProductTaxStatus::TAXABLE, 10, false ) ) );
 
 		if ( $in_cart ) {
@@ -412,6 +412,34 @@ class ShippingTaxSplitTest extends WC_Unit_Test_Case {
 
 		// Shipping goes to the first item's zero rate class, and the product's 10.00 is 10 of the 110 total: 20% of -0.91.
 		$this->assertEqualsWithDelta( -0.18, (float) $fee_tax, 0.001 );
+	}
+
+	/**
+	 * @testdox A tax class slugged split_by_item_value can be the fixed shipping tax class.
+	 *
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $in_cart Whether to check the cart or an order.
+	 */
+	public function test_fixed_shipping_tax_class_slugged_like_the_option( bool $in_cart ): void {
+		$slug = $this->create_tax_class( 'split_by_item_value' );
+		$this->assertSame( 'split_by_item_value', $slug );
+		update_option( 'woocommerce_shipping_tax_class', $slug );
+		$products = $this->create_products( array( array( 'zero-rate', ProductTaxStatus::TAXABLE, 100, false ) ) );
+
+		if ( $in_cart ) {
+			$this->fill_cart( $products );
+			WC()->cart->calculate_totals();
+			$shipping_tax = WC()->cart->get_shipping_tax();
+		} else {
+			$order = $this->create_order( $products );
+			$order->calculate_totals();
+			$shipping_tax = $order->get_shipping_tax();
+		}
+
+		// All 10.00 of shipping in the class at 20%, where a split by the zero rate items would give none.
+		$this->assertEqualsWithDelta( 2.0, (float) $shipping_tax, 0.001 );
 	}
 
 	/**

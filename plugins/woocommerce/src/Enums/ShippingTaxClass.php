@@ -21,7 +21,9 @@ final class ShippingTaxClass {
 	/**
 	 * Shipping tax is split across the tax classes of the cart items, in proportion to their value.
 	 *
+	 * The colon keeps it apart from tax class slugs, which sanitize_title() strips colons from, so a class slugged 'split_by_item_value' can still be the shipping tax class.
+	 *
 	 * @var string
 	 */
-	public const SPLIT_BY_ITEM_VALUE = 'split_by_item_value';
+	public const SPLIT_BY_ITEM_VALUE = ':split_by_item_value';
 }
