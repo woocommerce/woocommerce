@@ -20,8 +20,12 @@ export const selectView = (
 	viewName: string,
 	selectParent = true
 ) => {
-	const { updateBlockAttributes, selectBlock } =
-		dispatch( 'core/block-editor' );
+	const {
+		updateBlockAttributes,
+		selectBlock,
+		__unstableMarkNextChangeAsNotPersistent,
+	} = dispatch( 'core/block-editor' );
+	__unstableMarkNextChangeAsNotPersistent();
 	updateBlockAttributes( clientId, {
 		currentView: viewName,
 	} );
