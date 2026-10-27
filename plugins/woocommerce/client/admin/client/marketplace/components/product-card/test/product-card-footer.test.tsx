@@ -137,7 +137,8 @@ describe( 'ProductCardFooter free trial', () => {
 
 		// Once visible, once for screen readers.
 		expect( getAllByText( '14 day free trial' ) ).toHaveLength( 2 );
-		expect( container.textContent ).not.toMatch( /\$|annually/ );
+		expect( container.textContent ).not.toContain( '$' );
+		expect( container.textContent ).not.toContain( 'annually' );
 	} );
 
 	it.each( [ undefined, null, 0, -7, 1.5 ] )(
