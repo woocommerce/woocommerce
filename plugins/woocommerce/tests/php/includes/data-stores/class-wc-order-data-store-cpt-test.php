@@ -1,9 +1,11 @@
 <?php
 
+use Automattic\WooCommerce\Enums\OrderInternalStatus;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
+use Automattic\WooCommerce\Tests\Helpers\InterleavedStatusOrdersTrait;
 
 //phpcs:disable Squiz.Classes.ClassFileName.NoMatch, Squiz.Classes.ValidClassName.NotCamelCaps -- Legacy class name.
 /**
@@ -13,6 +15,7 @@ use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
  */
 class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	use CogsAwareUnitTestSuiteTrait;
+	use InterleavedStatusOrdersTrait;
 
 	/**
 	 * Store the COT state before the test class.
@@ -1702,6 +1705,268 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		foreach ( $items as $item ) {
 			$this->assertGreaterThan( 0, $item->get_product_id(), 'Item should have a product ID from cached meta' );
 		}
+	}
+
+	/**
+	 * @testdox CPT order queries return matching orders when the "$filter" filter replaces an unknown status with a registered one.
+	 *
+	 * @dataProvider cpt_query_args_filter_provider
+	 * @param string $filter Filter that receives the WP_Query args.
+	 */
+	public function test_cpt_order_queries_respect_filter_replacing_unknown_status_with_registered_one( string $filter ): void {
+		$order_ids = $this->create_orders_with_interleaved_statuses( 3 );
+
+		add_filter(
+			$filter,
+			function ( $wp_query_args ) {
+				$wp_query_args['post_status'] = array( OrderInternalStatus::COMPLETED );
+				return $wp_query_args;
+			}
+		);
+
+		$queried_order_ids = wc_get_orders(
+			array(
+				'status' => 'foobar',
+				'limit'  => -1,
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertSame( array( $order_ids[2] ), $queried_order_ids, 'The status set by the filter should be validated instead of the original unknown one.' );
+	}
+
+	/**
+	 * @testdox CPT order queries return no orders when the "$filter" filter replaces a registered status with an unknown one.
+	 *
+	 * @dataProvider cpt_query_args_filter_provider
+	 * @param string $filter Filter that receives the WP_Query args.
+	 */
+	public function test_cpt_order_queries_return_empty_when_filter_replaces_registered_status_with_unknown_one( string $filter ): void {
+		$this->create_orders_with_interleaved_statuses( 3 );
+
+		add_filter(
+			$filter,
+			function ( $wp_query_args ) {
+				$wp_query_args['post_status'] = 'foobar';
+				return $wp_query_args;
+			}
+		);
+
+		$queried_order_ids = wc_get_orders(
+			array(
+				'status' => OrderStatus::COMPLETED,
+				'limit'  => -1,
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertSame( array(), $queried_order_ids, 'An unknown status set by the filter should not make the query return every order.' );
+	}
+
+	/**
+	 * @testdox CPT order queries return no orders when the "$filter" filter sets an uppercase status string, which WP_Query cannot match.
+	 *
+	 * @dataProvider cpt_query_args_filter_provider
+	 * @param string $filter Filter that receives the WP_Query args.
+	 */
+	public function test_cpt_order_queries_return_empty_when_filter_sets_uppercase_status_string( string $filter ): void {
+		$this->create_orders_with_interleaved_statuses( 3 );
+
+		add_filter(
+			$filter,
+			function ( $wp_query_args ) {
+				$wp_query_args['post_status'] = 'WC-COMPLETED';
+				return $wp_query_args;
+			}
+		);
+
+		$queried_order_ids = wc_get_orders(
+			array(
+				'status' => OrderStatus::COMPLETED,
+				'limit'  => -1,
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertSame( array(), $queried_order_ids, 'WP_Query strips uppercase letters from a status string, so the status should be validated as WP_Query sees it.' );
+	}
+
+	/**
+	 * @testdox CPT order queries return matching orders when a query filter sets a status that WP_Query normalizes to a registered one.
+	 *
+	 * @testWith [["WC-COMPLETED"]]
+	 *           ["wc-completed "]
+	 *
+	 * @param string|array $post_status Status value set by the filter.
+	 */
+	public function test_cpt_order_queries_validate_filtered_status_as_wp_query_normalizes_it( $post_status ): void {
+		$order_ids = $this->create_orders_with_interleaved_statuses( 3 );
+
+		add_filter(
+			'woocommerce_order_data_store_cpt_get_orders_query',
+			function ( $wp_query_args ) use ( $post_status ) {
+				$wp_query_args['post_status'] = $post_status;
+				return $wp_query_args;
+			}
+		);
+
+		$queried_order_ids = wc_get_orders(
+			array(
+				'status' => 'foobar',
+				'limit'  => -1,
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertSame( array( $order_ids[2] ), $queried_order_ids, 'A status that WP_Query can match after its own normalization should not be treated as unknown.' );
+	}
+
+	/**
+	 * @testdox CPT order queries with default statuses still find orders before order statuses are registered, as during upgrades.
+	 */
+	public function test_cpt_order_queries_find_orders_before_order_statuses_are_registered(): void {
+		global $wp_post_statuses;
+
+		$order_ids = $this->create_orders_with_interleaved_statuses( 3 );
+
+		$registered_statuses = $wp_post_statuses;
+		foreach ( array_keys( wc_get_order_statuses() ) as $status ) {
+			unset( $wp_post_statuses[ $status ] );
+		}
+
+		try {
+			$queried_order_ids = wc_get_orders(
+				array(
+					'limit'  => -1,
+					'return' => 'ids',
+				)
+			);
+		} finally {
+			// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restoring the global changed above.
+			$wp_post_statuses = $registered_statuses;
+		}
+
+		$this->assertEqualsCanonicalizing( $order_ids, $queried_order_ids, 'Default order statuses should count as known even before they are registered, so early queries such as the HPOS new-shop check still find orders.' );
+	}
+
+	/**
+	 * @testdox CPT order queries for an unknown status return no orders even before order statuses are registered.
+	 */
+	public function test_cpt_order_queries_return_empty_for_unknown_status_before_order_statuses_are_registered(): void {
+		global $wp_post_statuses;
+
+		$this->create_orders_with_interleaved_statuses( 3 );
+
+		$registered_statuses = $wp_post_statuses;
+		foreach ( array_keys( wc_get_order_statuses() ) as $status ) {
+			unset( $wp_post_statuses[ $status ] );
+		}
+
+		try {
+			$queried_order_ids = wc_get_orders(
+				array(
+					'status' => 'foobar',
+					'limit'  => -1,
+					'return' => 'ids',
+				)
+			);
+		} finally {
+			// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restoring the global changed above.
+			$wp_post_statuses = $registered_statuses;
+		}
+
+		$this->assertSame( array(), $queried_order_ids, 'The early-query fallback should only make order statuses known, not unknown ones.' );
+	}
+
+	/**
+	 * @testdox CPT order queries return every order when the "$filter" filter replaces the status with "any".
+	 *
+	 * @dataProvider cpt_query_args_filter_provider
+	 * @param string $filter Filter that receives the WP_Query args.
+	 */
+	public function test_cpt_order_queries_respect_filter_replacing_status_with_any( string $filter ): void {
+		$order_ids = $this->create_orders_with_interleaved_statuses( 3 );
+
+		add_filter(
+			$filter,
+			function ( $wp_query_args ) {
+				$wp_query_args['post_status'] = 'any';
+				return $wp_query_args;
+			}
+		);
+
+		$queried_order_ids = wc_get_orders(
+			array(
+				'status' => 'foobar',
+				'limit'  => -1,
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertSame( $order_ids, $queried_order_ids, 'A special status set by the filter should not be treated as unknown.' );
+	}
+
+	/**
+	 * @testdox CPT order queries do not fail when the woocommerce_order_data_store_cpt_get_orders_query filter returns a query string.
+	 */
+	public function test_cpt_order_queries_accept_query_string_from_filter(): void {
+		$order_ids = $this->create_orders_with_interleaved_statuses( 3 );
+
+		add_filter(
+			'woocommerce_order_data_store_cpt_get_orders_query',
+			function () {
+				return 'post_type=shop_order&post_status=' . OrderInternalStatus::COMPLETED . '&fields=ids';
+			}
+		);
+
+		$queried_order_ids = wc_get_orders(
+			array(
+				'status' => OrderStatus::COMPLETED,
+				'limit'  => -1,
+				'return' => 'ids',
+			)
+		);
+
+		$this->assertSame( array( $order_ids[2] ), $queried_order_ids, 'A query string returned by the filter should still reach WP_Query.' );
+	}
+
+	/**
+	 * @testdox CPT order queries return no orders for an order status that was left out of the post status registration.
+	 */
+	public function test_cpt_order_queries_return_empty_for_order_status_left_out_of_registration(): void {
+		global $wp_post_statuses;
+
+		$this->create_orders_with_interleaved_statuses( 3 );
+
+		$registered_statuses = $wp_post_statuses;
+		unset( $wp_post_statuses[ OrderInternalStatus::COMPLETED ] );
+
+		try {
+			$queried_order_ids = wc_get_orders(
+				array(
+					'status' => OrderStatus::COMPLETED,
+					'limit'  => -1,
+					'return' => 'ids',
+				)
+			);
+		} finally {
+			// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restoring the global changed above.
+			$wp_post_statuses = $registered_statuses;
+		}
+
+		$this->assertSame( array(), $queried_order_ids, 'A status listed by wc_get_order_statuses() but not registered as a post status should not make the query return every order.' );
+	}
+
+	/**
+	 * Provides filters that can change the WP_Query args of CPT order queries.
+	 *
+	 * @return array<string, array{string}>
+	 */
+	public function cpt_query_args_filter_provider(): array {
+		return array(
+			'woocommerce_get_wp_query_args' => array( 'woocommerce_get_wp_query_args' ),
+			'woocommerce_order_data_store_cpt_get_orders_query' => array( 'woocommerce_order_data_store_cpt_get_orders_query' ),
+		);
 	}
 
 	/**

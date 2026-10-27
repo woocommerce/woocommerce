@@ -6,7 +6,7 @@
  * suite proves the code matches this file — it cannot prove this file matches
  * the sheet. Only a harness run against a fresh export can do that.
  *
- * Last verified against the sheet: 2026-08-05, using the regional CSV exports of
+ * Last verified against the sheet: 2026-10-26, using the regional CSV exports of
  * that date and a clone-local audit harness.
  *
  * Sections mirror the sheet's rows. `primary_offline` describes the offline
@@ -811,7 +811,6 @@ return array(
 	),
 	'GY' => array(
 		'primary_psp' => 'tilopay',
-		'primary_apm' => 'paypal_full_stack',
 		'other_psp'   => array(
 			'visa_as',
 		),
@@ -1161,6 +1160,7 @@ return array(
 	),
 	'LK' => array(
 		'primary_psp' => 'payoneer',
+		'primary_apm' => 'paypal_full_stack',
 		'other_psp'   => array(
 			'visa_as',
 		),
@@ -1195,6 +1195,7 @@ return array(
 	),
 	'VU' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'VN' => array(
 		'primary_psp' => 'payoneer',
@@ -1257,6 +1258,7 @@ return array(
 	),
 	'CD' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'DJ' => array(
 		'primary_psp' => 'visa_as',
@@ -1328,6 +1330,7 @@ return array(
 	),
 	'YT' => array(
 		'primary_psp' => 'visa_as',
+		'primary_apm' => 'paypal_full_stack',
 	),
 	'MA' => array(
 		'primary_psp' => 'payoneer',
@@ -1439,6 +1442,7 @@ return array(
 	),
 	'IL' => array(
 		'primary_psp' => 'airwallex',
+		'primary_apm' => 'paypal_full_stack',
 		'other_psp'   => array(
 			'visa_as',
 		),
