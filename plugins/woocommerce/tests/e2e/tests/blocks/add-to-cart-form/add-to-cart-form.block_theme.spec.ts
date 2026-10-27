@@ -1,8 +1,9 @@
 /**
  * External dependencies
  */
+import { randomUUID } from 'crypto';
 import { Page } from '@playwright/test';
-import { test as base, expect, Editor, wpCLI } from '@woocommerce/e2e-utils';
+import { test as base, expect, Editor } from '@woocommerce/e2e-utils';
 
 /**
  * Internal dependencies
@@ -73,23 +74,46 @@ class BlockUtils {
 		await ( await this.editor.getBlockByName( blockData.slug ) ).click();
 		await this.page.getByLabel( 'Stepper' ).click();
 	}
-
-	async createSoldIndividuallyProduct() {
-		await wpCLI(
-			'wc product create --name="Sold Individually" --regular_price=10 --sold_individually=true --user=admin'
-		);
-	}
-
-	async createManagedStockProduct() {
-		await wpCLI(
-			'wc product create --name="Managed Stock" --regular_price=10 --manage_stock=true --stock_quantity=1 --user=admin'
-		);
-	}
 }
 
-const test = base.extend< { blockUtils: BlockUtils } >( {
+const test = base.extend< {
+	blockUtils: BlockUtils;
+	createHiddenProduct: (
+		name: string,
+		data: Record< string, unknown >
+	) => Promise< string >;
+} >( {
 	blockUtils: async ( { editor, page }, use ) => {
 		await use( new BlockUtils( { editor, page } ) );
+	},
+	createHiddenProduct: async ( { requestUtils }, use ) => {
+		const productIds: number[] = [];
+
+		await use( async ( name, data ) => {
+			const uniqueName = `${ name } ${ randomUUID().slice( 0, 8 ) }`;
+			const { id } = await requestUtils.rest< { id: number } >( {
+				method: 'POST',
+				path: 'wc/v3/products',
+				data: {
+					name: uniqueName,
+					regular_price: '10',
+					catalog_visibility: 'hidden',
+					...data,
+				},
+			} );
+			productIds.push( id );
+			return uniqueName;
+		} );
+
+		await Promise.allSettled(
+			productIds.map( ( id ) =>
+				requestUtils.rest( {
+					method: 'DELETE',
+					path: `wc/v3/products/${ id }`,
+					params: { force: true },
+				} )
+			)
+		);
 	},
 } );
 
@@ -127,47 +151,47 @@ test.describe( `${ blockData.name } Block`, () => {
 		// inner block of the Single Product Block except for the Single Product
 		// Template
 		const template = await requestUtils.createTemplate( 'wp_template', {
-			slug: 'product-catalog',
-			title: 'Custom Product Catalog',
+			slug: `add-to-cart-form-test-${ test.info().repeatEachIndex }`,
+			title: `Add to Cart Form Test ${ test.info().repeatEachIndex }`,
 			content: 'placeholder',
 		} );
 
-		await admin.visitSiteEditor( {
-			postId: template.id,
-			postType: 'wp_template',
-			canvas: 'edit',
-		} );
+		try {
+			await admin.visitSiteEditor( {
+				postId: template.id,
+				postType: 'wp_template',
+				canvas: 'edit',
+			} );
 
-		await expect(
-			editor.getCustomHtmlBlockContentLocator( 'placeholder' )
-		).toBeVisible();
+			await expect(
+				editor.getCustomHtmlBlockContentLocator( 'placeholder' )
+			).toBeVisible();
 
-		await editor.insertBlock( { name: 'woocommerce/single-product' } );
+			await editor.insertBlock( { name: 'woocommerce/single-product' } );
 
-		await blockUtils.configureSingleProductBlock();
+			await blockUtils.configureSingleProductBlock();
 
-		await expect(
-			await editor.getBlockByName( blockData.slug )
-		).toBeVisible();
+			await expect(
+				await editor.getBlockByName( blockData.slug )
+			).toBeVisible();
 
-		// When the block is registered as ancestor, the function doesn't throw an error, but the block is not added.
-		// So we check that only one instance of the block is present.
-		await editor.insertBlock( { name: blockData.slug } );
-		await expect(
-			await editor.getBlockByName( blockData.slug )
-		).toBeVisible();
+			// When the block is registered as ancestor, the function doesn't throw an error, but the block is not added.
+			// So we check that only one instance of the block is present.
+			await editor.insertBlock( { name: blockData.slug } );
+			await expect(
+				await editor.getBlockByName( blockData.slug )
+			).toBeVisible();
+		} finally {
+			await requestUtils.revertTemplate( 'wp_template', template.id );
+		}
 	} );
 
 	test( 'can be added in the Post Editor - Single Product Template', async ( {
 		admin,
 		editor,
-		requestUtils,
+		createProductTemplate,
 	} ) => {
-		const template = await requestUtils.createTemplate( 'wp_template', {
-			slug: 'single-product',
-			title: 'Custom Single Product',
-			content: 'placeholder',
-		} );
+		const { template } = await createProductTemplate( 'beanie' );
 
 		await admin.visitSiteEditor( {
 			postId: template.id,
@@ -261,12 +285,14 @@ test.describe( `${ blockData.name } Block`, () => {
 			editor,
 			blockUtils,
 			page,
+			createHiddenProduct,
 		} ) => {
-			await blockUtils.createSoldIndividuallyProduct();
+			const productName = await createHiddenProduct(
+				'Sold Individually',
+				{ sold_individually: true }
+			);
 			await admin.createNewPost();
 			await editor.insertBlock( { name: 'woocommerce/single-product' } );
-
-			const productName = 'Sold Individually';
 
 			await blockUtils.configureSingleProductBlock( productName );
 			await blockUtils.enableStepperMode();
@@ -285,12 +311,14 @@ test.describe( `${ blockData.name } Block`, () => {
 			editor,
 			blockUtils,
 			page,
+			createHiddenProduct,
 		} ) => {
-			await blockUtils.createManagedStockProduct();
+			const productName = await createHiddenProduct( 'Managed Stock', {
+				manage_stock: true,
+				stock_quantity: 1,
+			} );
 			await admin.createNewPost();
 			await editor.insertBlock( { name: 'woocommerce/single-product' } );
-
-			const productName = 'Managed Stock';
 
 			await blockUtils.configureSingleProductBlock( productName );
 			await blockUtils.enableStepperMode();

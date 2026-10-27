@@ -120,6 +120,10 @@ test.describe( 'Add to Cart + Options Block', () => {
 		await addToCartButton.click();
 
 		await expect( addToCartButton ).toHaveText( '3 in cart' );
+		await expect( addToCartButton ).toHaveAttribute(
+			'aria-label',
+			'3 in cart, Add to cart: “Beanie”'
+		);
 
 		await page.getByLabel( 'Beanie quantity', { exact: true } ).fill( '1' );
 		await addToCartButton.click();

@@ -39,7 +39,12 @@ import {
  */
 import { useEmailStyles, setImmutably } from '../../../hooks';
 import { storeName } from '../../../store';
-import { getElementStyles } from '../utils';
+import {
+	getElementStyles,
+	getFontAppearanceValue,
+	getFontFamilyFaces,
+	withoutInherit,
+} from '../utils';
 import { useHasTextColorInTypographyPanel } from '../hooks';
 import { ColorDropdownItem } from './color-dropdown-item';
 import { recordEvent, debouncedRecordEvent } from '../../../events';
@@ -71,9 +76,15 @@ export function TypographyElementPanel( {
 		'typography.fontFamilies'
 	);
 	const [ availableUnits ] = useSettings( 'spacing.units' ) as [ string[] ];
+	const [ fontWeights ] = useSettings( 'custom.fontWeights' ) as [
+		Record< string, string > | undefined,
+	];
 
 	// Ref: https://github.com/WordPress/gutenberg/issues/59778
 	const fontFamilies = blockLevelFontFamilies?.default || [];
+	const allFontFamilies = [ 'custom', 'theme', 'default' ].flatMap(
+		( origin ) => blockLevelFontFamilies?.[ origin ] ?? []
+	);
 	const theme = useSelect( ( select ) => select( storeName ).getTheme(), [] );
 	const colorGradientSettings = useMultipleOriginColorsAndGradients();
 	// Text color renders here only when the running WordPress no longer offers
@@ -88,6 +99,11 @@ export function TypographyElementPanel( {
 		element,
 		headingLevel
 	);
+	const renderedFontFamily =
+		withoutInherit(
+			getElementStyles( styles, element, headingLevel, true ).typography
+				.fontFamily
+		) ?? styles?.typography?.fontFamily;
 	const {
 		fontFamily,
 		fontSize,
@@ -379,11 +395,17 @@ export function TypographyElementPanel( {
 				isShownByDefault={ defaultControls.fontAppearance }
 			>
 				<FontAppearanceControl
-					value={ {
+					value={ getFontAppearanceValue( {
 						fontStyle,
 						fontWeight,
-					} }
+					} ) }
 					onChange={ setFontAppearance }
+					fontFamilyFaces={ getFontFamilyFaces(
+						allFontFamilies,
+						fontWeights,
+						renderedFontFamily,
+						{ fontStyle, fontWeight }
+					) }
 					hasFontStyles
 					hasFontWeights
 					size="__unstable-large"
