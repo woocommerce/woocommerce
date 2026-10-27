@@ -98,7 +98,7 @@ class OpenGraph {
 		 *
 		 * @since 11.4.0
 		 *
-		 * @param array<string, string|string[]> $tags Metadata keyed by og:, twitter:, or product: property name. Arrays support multiple og:see_also URLs and image, video, or audio values, with media details at matching indexes. Remove a key to omit a tag.
+		 * @param array<string, scalar|scalar[]> $tags Metadata keyed by namespaced property name, including custom namespaces. Arrays repeat a property; structured details use the same indexes as their parent values. Remove a key to omit a tag.
 		 * @param WC_Product|\WP_Post|\WP_Term|\WP_Post_Type|null $context Product or queried object; null when no object is available.
 		 */
 		$tags = apply_filters( 'woocommerce_open_graph_tags', $tags, $context );
@@ -108,24 +108,32 @@ class OpenGraph {
 
 		$prepared = array();
 		foreach ( $tags as $property => $value ) {
-			if ( ! is_string( $property ) || ! preg_match( '/^(og|twitter|product):[a-z_0-9:]+$/', $property ) ) {
+			if ( ! is_string( $property ) || ! preg_match( '/^[a-z][a-z0-9_.-]*(?::[a-z0-9_.-]+)+$/D', $property ) ) {
 				continue;
 			}
-			$is_media = null !== self::get_media_root( $property );
-			$values   = ( 'og:see_also' === $property || $is_media ) && is_array( $value ) ? $value : array( $value );
+			$values = is_array( $value ) ? $value : array( $value );
 			foreach ( $values as $index => $content ) {
-				if ( ! is_string( $content ) || '' === trim( $content ) ) {
+				if ( ! is_scalar( $content ) ) {
+					continue;
+				}
+				$content = is_bool( $content ) ? ( $content ? 'true' : 'false' ) : (string) $content;
+				if ( '' === trim( $content ) && ! ( 'og:determiner' === $property && '' === $content ) ) {
 					continue;
 				}
 				if ( self::is_url_property( $property ) ) {
-					$content = esc_url_raw( $content, $is_media ? array( 'http', 'https' ) : null );
+					$content = esc_url_raw( $content, array( 'http', 'https' ) );
+					if ( '' === $content ) {
+						continue;
+					}
 				}
-				if ( '' !== $content ) {
-					$prepared[ $property ][ $index ] = $content;
-				}
+				$prepared[ $property ][ $index ] = $content;
 			}
-			if ( 'og:see_also' === $property && isset( $prepared[ $property ] ) ) {
-				$prepared[ $property ] = array_slice( array_values( array_unique( $prepared[ $property ] ) ), 0, 6 );
+		}
+		// Media :url properties are aliases of their roots and must group the same details.
+		foreach ( array( 'og:image', 'og:video', 'og:audio' ) as $root ) {
+			if ( ! isset( $prepared[ $root ] ) && isset( $prepared[ $root . ':url' ] ) ) {
+				$prepared[ $root ] = $prepared[ $root . ':url' ];
+				unset( $prepared[ $root . ':url' ] );
 			}
 		}
 
@@ -135,15 +143,15 @@ class OpenGraph {
 		) as $properties ) {
 			$changed_values = array();
 			foreach ( $properties as $property ) {
-				if ( isset( $prepared[ $property ], $default_tags[ $property ] ) && $prepared[ $property ][0] !== $default_tags[ $property ] ) {
-					$changed_values[] = $prepared[ $property ][0];
+				if ( isset( $prepared[ $property ], $default_tags[ $property ] ) && reset( $prepared[ $property ] ) !== $default_tags[ $property ] ) {
+					$changed_values[] = reset( $prepared[ $property ] );
 				}
 			}
 			if ( 1 !== count( array_unique( $changed_values ) ) ) {
 				continue;
 			}
 			foreach ( $properties as $property ) {
-				if ( isset( $prepared[ $property ], $default_tags[ $property ] ) && $prepared[ $property ][0] === $default_tags[ $property ] ) {
+				if ( isset( $prepared[ $property ], $default_tags[ $property ] ) && reset( $prepared[ $property ] ) === $default_tags[ $property ] ) {
 					$prepared[ $property ] = array( $changed_values[0] );
 				}
 			}
@@ -167,7 +175,7 @@ class OpenGraph {
 
 		$processor         = new WP_HTML_Tag_Processor( $html );
 		$tags              = $this->tags;
-		$existing_media    = array();
+		$existing_roots    = array();
 		$head_complete     = false;
 		$template_depth    = 0;
 		$conflicting_price = false;
@@ -192,17 +200,17 @@ class OpenGraph {
 			foreach ( self::get_meta_properties( $processor ) as $property ) {
 				$content = $processor->get_attribute( 'content' );
 				if ( 'og:type' === $property && isset( $this->tags['og:type'] ) ) {
-					$processor->set_attribute( 'content', html_entity_decode( $this->tags['og:type'][0], ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
-				} elseif ( ! is_string( $content ) || '' === trim( $content ) ) {
+					$processor->set_attribute( 'content', html_entity_decode( (string) reset( $this->tags['og:type'] ), ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
+				} elseif ( ! is_string( $content ) || ( '' === trim( $content ) && 'og:determiner' !== $property ) ) {
 					continue;
 				}
 				if ( is_string( $content ) && $this->has_conflicting_price( $property, $content ) ) {
 					$conflicting_price = true;
 				}
-				if ( preg_match( '/^og:(image|video|audio)(:url)?$/', $property, $matches ) ) {
-					$existing_media[ 'og:' . $matches[1] ] = true;
+				$root = self::get_structured_root( $property );
+				if ( null !== $root && ( $root === $property || $root . ':url' === $property ) ) {
+					$existing_roots[ $root ] = true;
 				}
-				$root = self::get_media_root( $property );
 				if ( null === $root || ! isset( $tags[ $root ] ) || $root === $property ) {
 					unset( $tags[ $property ] );
 				}
@@ -218,10 +226,10 @@ class OpenGraph {
 			}
 		}
 
-		// Keep each provider's media URLs and details together.
+		// Keep each provider's objects and their structured details together.
 		foreach ( array_keys( $tags ) as $property ) {
-			$root = self::get_media_root( $property );
-			if ( null !== $root && isset( $existing_media[ $root ] ) ) {
+			$root = self::get_structured_root( $property );
+			if ( null !== $root && isset( $existing_roots[ $root ] ) ) {
 				unset( $tags[ $property ] );
 			}
 		}
@@ -230,8 +238,8 @@ class OpenGraph {
 			return $html;
 		}
 
-		if ( isset( $tags['twitter:card'] ) && $tags['twitter:card'][0] === $this->default_card ) {
-			$tags['twitter:card'] = array( isset( $existing_media['og:image'] ) || ! empty( $tags['og:image'] ) ? 'summary_large_image' : 'summary' );
+		if ( isset( $tags['twitter:card'] ) && reset( $tags['twitter:card'] ) === $this->default_card ) {
+			$tags['twitter:card'] = array( isset( $existing_roots['og:image'] ) || ! empty( $tags['og:image'] ) ? 'summary_large_image' : 'summary' );
 		}
 
 		return self::insert_tags( $processor->get_updated_html(), $tags );
@@ -246,16 +254,17 @@ class OpenGraph {
 	 */
 	private function has_conflicting_price( string $property, string $content ): bool {
 		if ( in_array( $property, array( 'product:price:currency', 'og:price:currency', 'product:sale_price:currency' ), true ) ) {
-			$fallback = $this->tags[ $property ][0] ?? $this->tags['product:price:currency'][0] ?? $this->tags['og:price:currency'][0] ?? $this->tags['product:sale_price:currency'][0] ?? null;
-			return null !== $fallback && strtoupper( trim( $content ) ) !== strtoupper( trim( $fallback ) );
+			$values = $this->tags[ $property ] ?? $this->tags['product:price:currency'] ?? $this->tags['og:price:currency'] ?? $this->tags['product:sale_price:currency'] ?? array();
+			return $values && strtoupper( trim( $content ) ) !== strtoupper( trim( (string) reset( $values ) ) );
 		}
-		$fallback = $this->tags[ $property ][0] ?? null;
-		if ( null === $fallback && 'product:sale_price:amount' === $property ) {
-			$fallback = $this->tags['product:price:amount'][0] ?? $this->tags['og:price:amount'][0] ?? null;
+		$values = $this->tags[ $property ] ?? array();
+		if ( ! $values && 'product:sale_price:amount' === $property ) {
+			$values = $this->tags['product:price:amount'] ?? $this->tags['og:price:amount'] ?? array();
 		}
-		if ( null === $fallback ) {
+		if ( ! $values ) {
 			return false;
 		}
+		$fallback = reset( $values );
 		if ( in_array( $property, array( 'product:price:amount', 'og:price:amount', 'product:sale_price:amount', 'og:price:standard_amount' ), true ) ) {
 			return ! is_numeric( $content ) || (float) $content !== (float) $fallback;
 		}
@@ -292,7 +301,12 @@ class OpenGraph {
 			}
 		};
 
-		$replace_media  = array_intersect_key( $tags, array_flip( array( 'og:image', 'og:video', 'og:audio' ) ) );
+		$replace_roots = array();
+		foreach ( $tags as $property => $values ) {
+			if ( self::get_structured_root( $property ) === $property ) {
+				$replace_roots[ $property ] = true;
+			}
+		}
 		$template_depth = 0;
 		while ( $inserter->next_tag( array( 'tag_closers' => 'visit' ) ) ) {
 			if ( 'TEMPLATE' === $inserter->get_tag() ) {
@@ -307,13 +321,13 @@ class OpenGraph {
 			}
 			$content    = $inserter->get_attribute( 'content' );
 			$properties = self::get_meta_properties( $inserter );
-			// Rebuild empty media tags and orphaned details together to preserve grouping.
-			if ( $replace_media ) {
+			// Rebuild empty roots and orphaned details together to preserve grouping.
+			if ( $replace_roots ) {
 				$remaining = array_filter(
 					$properties,
-					static function ( string $property ) use ( $replace_media ): bool {
-						$root = self::get_media_root( $property );
-						return null === $root || ! isset( $replace_media[ $root ] );
+					static function ( string $property ) use ( $replace_roots ): bool {
+						$root = self::get_structured_root( $property );
+						return null === $root || ! isset( $replace_roots[ $root ] );
 					}
 				);
 				if ( $properties !== $remaining ) {
@@ -344,9 +358,6 @@ class OpenGraph {
 						unset( $tags[ $property ] );
 					}
 				}
-			}
-			if ( 'BODY' === $inserter->get_tag() ) {
-				break;
 			}
 		}
 
@@ -383,19 +394,22 @@ class OpenGraph {
 	 * @return string
 	 */
 	private static function render_tags( array $tags ): string {
+		$details = array();
+		foreach ( $tags as $property => $values ) {
+			$root = self::get_structured_root( $property );
+			if ( null !== $root && $root !== $property && isset( $tags[ $root ] ) ) {
+				$details[ $root ][ $property ] = $values;
+				unset( $tags[ $property ] );
+			}
+		}
+
 		$markup = '';
 		foreach ( $tags as $property => $values ) {
-			$root = self::get_media_root( $property );
-			if ( null !== $root && $root !== $property && isset( $tags[ $root ] ) ) {
-				continue;
-			}
 			foreach ( $values as $index => $value ) {
 				$markup .= self::render_tag( $property, $value );
-				if ( $root === $property ) {
-					foreach ( $tags as $detail => $contents ) {
-						if ( 0 === strpos( $detail, $root . ':' ) && isset( $contents[ $index ] ) ) {
-							$markup .= self::render_tag( $detail, $contents[ $index ] );
-						}
+				foreach ( $details[ $property ] ?? array() as $detail => $contents ) {
+					if ( isset( $contents[ $index ] ) ) {
+						$markup .= self::render_tag( $detail, $contents[ $index ] );
 					}
 				}
 			}
@@ -412,9 +426,8 @@ class OpenGraph {
 	 * @return string
 	 */
 	private static function render_tag( string $property, string $value ): string {
-		$protocols = self::get_media_root( $property ) ? array( 'http', 'https' ) : null;
-		$content   = self::is_url_property( $property ) ? esc_url( $value, $protocols ) : esc_attr( $value );
-		if ( '' === $content ) {
+		$content = self::is_url_property( $property ) ? esc_url( $value, array( 'http', 'https' ) ) : esc_attr( $value );
+		if ( '' === $content && 'og:determiner' !== $property ) {
 			return '';
 		}
 		$attribute = 0 === strpos( $property, 'twitter:' ) ? 'name' : 'property';
@@ -640,13 +653,20 @@ class OpenGraph {
 	}
 
 	/**
-	 * Get the root property for an image, video, or audio tag.
+	 * Get the root property that groups structured details.
 	 *
 	 * @param string $property Metadata property.
 	 * @return string|null
 	 */
-	private static function get_media_root( string $property ): ?string {
-		return preg_match( '/^(og:(image|video|audio))(:|$)/', $property, $matches ) ? $matches[1] : null;
+	private static function get_structured_root( string $property ): ?string {
+		$parts = explode( ':', $property, 3 );
+		if ( count( $parts ) < 2 ) {
+			return null;
+		}
+		$root = $parts[0] . ':' . $parts[1];
+
+		// Alternate locales are independent values, rather than details of the primary locale.
+		return 'og:locale' === $root ? null : $root;
 	}
 
 	/**
@@ -656,7 +676,25 @@ class OpenGraph {
 	 * @return bool
 	 */
 	private static function is_url_property( string $property ): bool {
-		return in_array( $property, array( 'og:url', 'og:see_also' ), true ) || (bool) preg_match( '/^og:(image|video|audio)(:(url|secure_url))?$/', $property );
+		return in_array(
+			$property,
+			array(
+				'og:url',
+				'og:see_also',
+				'article:author',
+				'book:author',
+				'music:album',
+				'music:song',
+				'music:musician',
+				'music:creator',
+				'video:actor',
+				'video:director',
+				'video:writer',
+				'video:series',
+				'payment:success_url',
+			),
+			true
+		) || (bool) preg_match( '/^og:(image|video|audio)(:(url|secure_url))?$/', $property );
 	}
 
 	/**
