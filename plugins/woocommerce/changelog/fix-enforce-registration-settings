@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Respect disabled customer registration settings on My Account and classic checkout.

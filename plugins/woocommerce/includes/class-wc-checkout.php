@@ -1453,6 +1453,16 @@ class WC_Checkout {
 			// Validate posted data and cart items before proceeding.
 			$this->validate_checkout( $posted_data, $errors );
 
+			if ( ! is_user_logged_in() && ! $this->is_registration_enabled() && $this->is_registration_required() ) {
+				/**
+				 * This filter is documented in the Store API checkout route.
+				 *
+				 * @since 9.4.3
+				 */
+				$message = apply_filters( 'woocommerce_checkout_must_be_logged_in_message', __( 'You must be logged in to checkout.', 'woocommerce' ) );
+				$errors->add( 'registration_disabled', esc_html( is_string( $message ) ? $message : __( 'You must be logged in to checkout.', 'woocommerce' ) ) );
+			}
+
 			if ( empty( $errors->errors ) ) {
 				wc_log_order_step( '[Shortcode #3] Checkout posted data validated', array( 'payment_method' => $posted_data['payment_method'] ) );
 			}
