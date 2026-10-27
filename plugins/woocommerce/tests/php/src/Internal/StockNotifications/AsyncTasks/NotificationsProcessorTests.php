@@ -567,6 +567,7 @@ class NotificationsProcessorTests extends \WC_Unit_Test_Case {
 		add_filter(
 			'woocommerce_customer_stock_notification_pre_send',
 			function ( $handled, Notification $notification ) {
+				unset( $handled );
 				$notification->set_user_email( 'not-an-email' );
 				return true;
 			},
