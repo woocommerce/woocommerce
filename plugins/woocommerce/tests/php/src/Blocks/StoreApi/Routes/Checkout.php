@@ -2949,6 +2949,39 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * @testdox Existing order payment should reject a state that differs from the order's only in surrounding whitespace.
+	 */
+	public function test_checkout_order_rejects_state_that_differs_only_in_whitespace() {
+		$this->set_taxes_based_on( 'billing' );
+		$this->inserted_tax_rate_ids[] = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => 'NY',
+				'tax_rate'          => '10.0000',
+				'tax_rate_name'     => 'NY Sales Tax',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '0',
+				'tax_rate_order'    => '1',
+			)
+		);
+
+		// Tax rates match the stored state as it is, so the stray space kept this order away from the NY rate.
+		$order = $this->create_pay_for_order_with_shipping_address();
+		$order->set_billing_state( ' NY' );
+		$order->calculate_totals();
+		$order->save();
+		$original_total = $order->get_total();
+
+		$response = $this->dispatch_pay_for_order_request( $order, array( 'state' => 'NY' ) );
+
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertEquals( 'woocommerce_rest_checkout_order_address_change_not_allowed', $response->get_data()['code'] );
+		$this->assertStringContainsString( 'the tax was calculated', $response->get_data()['message'] );
+		$this->assertEquals( $original_total, wc_get_order( $order->get_id() )->get_total(), 'A rejected request must not change the total' );
+	}
+
+	/**
 	 * @testdox Existing order payment should reject a billing address change when tax is based on billing.
 	 */
 	public function test_checkout_order_rejects_billing_address_change_when_tax_is_billing_based() {

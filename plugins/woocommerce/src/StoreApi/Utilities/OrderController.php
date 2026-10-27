@@ -347,9 +347,9 @@ class OrderController {
 			return wc_normalize_postcode( $value );
 		}
 
-		// Both lookups use strtoupper(), which leaves multibyte characters alone. Matching that keeps
-		// the check from treating two values as equal when the lookups would not.
-		return strtoupper( trim( $value ) );
+		// Both lookups use strtoupper(), which leaves multibyte characters alone, and the tax lookup does
+		// not trim. Matching them keeps the check from treating two values as equal when a lookup would not.
+		return strtoupper( $value );
 	}
 
 	/**
