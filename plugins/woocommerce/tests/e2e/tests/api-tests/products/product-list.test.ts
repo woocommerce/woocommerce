@@ -1239,6 +1239,7 @@ test.describe( 'Products API tests: List All Products', () => {
 							},
 						],
 					},
+					failOnStatusCode: true,
 				}
 			);
 			const simpleProductsJSON = await simpleProducts.json();
@@ -2053,6 +2054,7 @@ test.describe( 'Products API tests: List All Products', () => {
 						},
 					],
 				},
+				failOnStatusCode: true,
 			} );
 			const orderJSON = await order.json();
 			return [ orderJSON ];
@@ -2220,7 +2222,9 @@ test.describe( 'Products API tests: List All Products', () => {
 			}
 		};
 
-		await deleteSampleData( sampleData );
+		if ( sampleData ) {
+			await deleteSampleData( sampleData );
+		}
 	}, 10000 );
 
 	test.describe( 'List all products', () => {
