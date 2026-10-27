@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix Store API product filtering by custom taxonomies that are also registered for variations or other post types.
