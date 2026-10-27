@@ -10,6 +10,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\StructuredData;
 
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\ProductType;
 use WC_Product;
 
 defined( 'ABSPATH' ) || exit;
@@ -60,7 +61,7 @@ class ProductOpenGraphTags {
 		);
 		$tags        += $availability[ $product->get_stock_status() ] ?? array();
 
-		$tags += wc_get_container()->get( ProductOpenGraphPrices::class )->get_tags( $product );
+		$tags += $this->get_price_tags( $product );
 
 		return $tags;
 	}
@@ -99,6 +100,43 @@ class ProductOpenGraphTags {
 			$alt                   = get_post_meta( $image_id, '_wp_attachment_image_alt', true );
 			$tags['og:image:alt']  = is_string( $alt ) && '' !== trim( $alt ) ? $alt : $title;
 			$tags['og:image:type'] = (string) get_post_mime_type( $image_id );
+		}
+
+		return $tags;
+	}
+
+	/**
+	 * Build prices and sale dates for products with a single price.
+	 *
+	 * @param WC_Product $product Product being shared.
+	 * @return array<string, string>
+	 */
+	private function get_price_tags( WC_Product $product ): array {
+		if ( ! $product->is_type( array( ProductType::SIMPLE, ProductType::EXTERNAL ) ) || '' === $product->get_price() ) {
+			return array();
+		}
+
+		$price    = wc_format_decimal( wc_get_price_to_display( $product ), wc_get_price_decimals() );
+		$currency = get_woocommerce_currency();
+		$tags     = array(
+			'product:price:amount'   => $price,
+			'product:price:currency' => $currency,
+			'og:price:amount'        => $price,
+			'og:price:currency'      => $currency,
+		);
+		if ( $product->is_on_sale() ) {
+			$tags['product:sale_price:amount']   = $price;
+			$tags['product:sale_price:currency'] = $currency;
+			$tags['og:price:standard_amount']    = wc_format_decimal( wc_get_price_to_display( $product, array( 'price' => $product->get_regular_price() ) ), wc_get_price_decimals() );
+			foreach ( array(
+				'start' => $product->get_date_on_sale_from(),
+				'end'   => $product->get_date_on_sale_to(),
+			) as $boundary => $date ) {
+				if ( $date ) {
+					$tags[ 'product:sale_price_dates:' . $boundary ] = $date->format( DATE_ATOM );
+					$tags[ 'og:price:' . $boundary . '_date' ]       = $date->format( DATE_ATOM );
+				}
+			}
 		}
 
 		return $tags;

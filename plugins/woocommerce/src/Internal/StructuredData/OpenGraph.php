@@ -79,7 +79,6 @@ class OpenGraph {
 	 */
 	private function prepare_tags( array $tags, $context ): array {
 		$this->default_card = $tags['twitter:card'] ?? null;
-		$defaults           = $tags;
 
 		/**
 		 * Filters Open Graph metadata before output. Currently applied only to product pages.
@@ -97,7 +96,7 @@ class OpenGraph {
 		}
 
 		foreach ( $tags as $property => $value ) {
-			if ( ! is_string( $property ) || ! is_string( $value ) || '' === trim( $value ) || ! preg_match( '/^(og|twitter|product):[a-z_][a-z_0-9:]*$/D', $property ) ) {
+			if ( ! is_string( $property ) || ! is_string( $value ) || '' === trim( $value ) || ! preg_match( '/^(og|twitter|product):[a-z_:]+$/', $property ) ) {
 				unset( $tags[ $property ] );
 				continue;
 			}
@@ -109,7 +108,7 @@ class OpenGraph {
 			}
 		}
 
-		return $context instanceof WC_Product ? wc_get_container()->get( ProductOpenGraphPrices::class )->synchronize_aliases( $tags, $defaults ) : $tags;
+		return $tags;
 	}
 
 	/**

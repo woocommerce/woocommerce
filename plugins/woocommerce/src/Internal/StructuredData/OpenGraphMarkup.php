@@ -36,12 +36,13 @@ class OpenGraphMarkup {
 			return $html;
 		}
 
-		$processor      = new WP_HTML_Tag_Processor( $html );
-		$tags           = $candidates;
-		$has_image      = false;
-		$existing       = array();
-		$head_complete  = false;
-		$template_depth = 0;
+		$processor        = new WP_HTML_Tag_Processor( $html );
+		$tags             = $candidates;
+		$has_image        = false;
+		$has_prices       = false;
+		$has_availability = false;
+		$head_complete    = false;
+		$template_depth   = 0;
 
 		while ( $processor->next_tag( array( 'tag_closers' => 'visit' ) ) ) {
 			if ( 'TEMPLATE' === $processor->get_tag() ) {
@@ -67,11 +68,14 @@ class OpenGraphMarkup {
 				} elseif ( ! is_string( $content ) || '' === trim( $content ) ) {
 					continue;
 				}
-				if ( is_string( $content ) ) {
-					$existing[ $property ][] = $content;
-				}
 				if ( in_array( $property, array( 'og:image', 'og:image:url' ), true ) ) {
 					$has_image = true;
+				}
+				if ( preg_match( '/^(product:(sale_)?price(:|_)|og:price:)/', $property ) ) {
+					$has_prices = true;
+				}
+				if ( in_array( $property, array( 'product:availability', 'og:availability' ), true ) ) {
+					$has_availability = true;
 				}
 				if ( ! isset( $tags['og:image'] ) || 0 !== strpos( $property, 'og:image:' ) ) {
 					unset( $tags[ $property ] );
@@ -79,16 +83,14 @@ class OpenGraphMarkup {
 			}
 		}
 
-		if ( ProductOpenGraphPrices::has_conflict( $existing, $candidates ) ) {
-			$tags = ProductOpenGraphPrices::remove_price_tags( $tags );
-		}
-
-		if ( $has_image ) {
-			// WooCommerce's image details may not describe the existing provider's image.
-			foreach ( array_keys( $tags ) as $property ) {
-				if ( 'og:image' === $property || 0 === strpos( $property, 'og:image:' ) ) {
-					unset( $tags[ $property ] );
-				}
+		// Keep related metadata with the provider that supplied it.
+		foreach ( array_keys( $tags ) as $property ) {
+			if (
+				( $has_image && ( 'og:image' === $property || 0 === strpos( $property, 'og:image:' ) ) )
+				|| ( $has_prices && preg_match( '/^(product:(sale_)?price(:|_)|og:price:)/', $property ) )
+				|| ( $has_availability && in_array( $property, array( 'product:availability', 'og:availability' ), true ) )
+			) {
+				unset( $tags[ $property ] );
 			}
 		}
 
