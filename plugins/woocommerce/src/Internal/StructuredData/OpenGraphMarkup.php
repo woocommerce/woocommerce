@@ -26,12 +26,13 @@ class OpenGraphMarkup {
 	 *
 	 * @since 11.4.0
 	 *
-	 * @param string                $html         Template output.
-	 * @param array<string, string> $candidates   Validated metadata.
-	 * @param string|null           $default_card Twitter card before filtering.
+	 * @param string                                                             $html         Template output.
+	 * @param array<string, string>                                              $candidates   Validated metadata.
+	 * @param string|null                                                        $default_card Twitter card before filtering.
+	 * @param array<array{properties: string[], matches: callable(array): bool}> $groups Related tags and their coexistence rules.
 	 * @return string
 	 */
-	public function merge( string $html, array $candidates, ?string $default_card ): string {
+	public function merge( string $html, array $candidates, ?string $default_card, array $groups = array() ): string {
 		if ( ! $candidates ) {
 			return $html;
 		}
@@ -39,6 +40,7 @@ class OpenGraphMarkup {
 		$processor      = new WP_HTML_Tag_Processor( $html );
 		$tags           = $candidates;
 		$has_image      = false;
+		$existing       = array();
 		$head_complete  = false;
 		$template_depth = 0;
 
@@ -66,12 +68,19 @@ class OpenGraphMarkup {
 				} elseif ( ! is_string( $content ) || '' === trim( $content ) ) {
 					continue;
 				}
+				$existing[ $property ][] = $content;
 				if ( in_array( $property, array( 'og:image', 'og:image:url' ), true ) ) {
 					$has_image = true;
 				}
 				if ( ! isset( $tags['og:image'] ) || 0 !== strpos( $property, 'og:image:' ) ) {
 					unset( $tags[ $property ] );
 				}
+			}
+		}
+
+		foreach ( $groups as $group ) {
+			if ( ! $group['matches']( $existing ) ) {
+				$tags = array_diff_key( $tags, array_flip( $group['properties'] ) );
 			}
 		}
 

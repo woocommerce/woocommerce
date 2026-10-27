@@ -9,6 +9,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\StructuredData;
 
+use Automattic\WooCommerce\Enums\ProductStockStatus;
 use WC_Product;
 
 defined( 'ABSPATH' ) || exit;
@@ -42,6 +43,24 @@ class ProductOpenGraphTags {
 		$tags                += $this->get_site_tags();
 		$tags                += $this->get_image_tags( (int) $product->get_image_id(), $product->get_name() );
 		$tags['twitter:card'] = isset( $tags['og:image'] ) ? 'summary_large_image' : 'summary';
+
+		$availability = array(
+			ProductStockStatus::IN_STOCK     => array(
+				'product:availability' => 'in stock',
+				'og:availability'      => 'instock',
+			),
+			ProductStockStatus::OUT_OF_STOCK => array(
+				'product:availability' => 'out of stock',
+				'og:availability'      => 'out of stock',
+			),
+			ProductStockStatus::ON_BACKORDER => array(
+				'product:availability' => 'available for order',
+				'og:availability'      => 'backorder',
+			),
+		);
+		$tags        += $availability[ $product->get_stock_status() ] ?? array();
+
+		$tags += wc_get_container()->get( ProductOpenGraphPrices::class )->get_tags( $product );
 
 		return $tags;
 	}

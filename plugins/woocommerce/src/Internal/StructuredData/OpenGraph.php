@@ -34,6 +34,13 @@ class OpenGraph {
 	private $default_card = null;
 
 	/**
+	 * Related tags and their coexistence rules.
+	 *
+	 * @var array<array{properties: string[], matches: callable(array): bool}>
+	 */
+	private $groups = array();
+
+	/**
 	 * Register the frontend callback.
 	 *
 	 * @internal
@@ -68,7 +75,8 @@ class OpenGraph {
 			return;
 		}
 
-		$this->tags = $this->prepare_tags( $page['tags'], $page['context'] );
+		$this->tags   = $this->prepare_tags( $page['tags'], $page['context'] );
+		$this->groups = array( wc_get_container()->get( ProductOpenGraphPrices::class )->get_group( $this->tags ) );
 		if ( $this->tags ) {
 			add_filter( 'wp_template_enhancement_output_buffer', array( $this, 'handle_wp_template_enhancement_output_buffer' ), PHP_INT_MAX );
 		}
@@ -83,6 +91,7 @@ class OpenGraph {
 	 */
 	private function prepare_tags( array $tags, $context ): array {
 		$this->default_card = $tags['twitter:card'] ?? null;
+		$defaults           = $tags;
 
 		/**
 		 * Filters Open Graph metadata before output. Currently applied only to product pages.
@@ -100,7 +109,7 @@ class OpenGraph {
 		}
 
 		foreach ( $tags as $property => $value ) {
-			if ( ! is_string( $property ) || ! is_string( $value ) || '' === trim( $value ) || ! preg_match( '/^(og|twitter|product):[a-z_:]+$/', $property ) ) {
+			if ( ! is_string( $property ) || ! is_string( $value ) || '' === trim( $value ) || ! preg_match( '/^(og|twitter|product):[a-z_][a-z_0-9:]*$/D', $property ) ) {
 				unset( $tags[ $property ] );
 				continue;
 			}
@@ -112,7 +121,7 @@ class OpenGraph {
 			}
 		}
 
-		return $tags;
+		return $context instanceof WC_Product ? wc_get_container()->get( ProductOpenGraphPrices::class )->synchronize_aliases( $tags, $defaults ) : $tags;
 	}
 
 	/**
@@ -149,6 +158,6 @@ class OpenGraph {
 			return $html;
 		}
 
-		return wc_get_container()->get( OpenGraphMarkup::class )->merge( $html, $this->tags, $this->default_card );
+		return wc_get_container()->get( OpenGraphMarkup::class )->merge( $html, $this->tags, $this->default_card, $this->groups );
 	}
 }
