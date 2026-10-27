@@ -36,6 +36,11 @@ class OpenGraphMarkup {
 			return $html;
 		}
 
+		/**
+		 * Metadata ownership rules.
+		 *
+		 * @var array<string, array{detect?: string, match: string, exists: bool}> $tag_groups
+		 */
 		$tag_groups = array(
 			'image'        => array(
 				'detect' => '/^og:image(?::url)?$/D',
