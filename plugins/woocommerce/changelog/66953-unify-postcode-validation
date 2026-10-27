@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Unify postcode validation rules used by the server and Checkout blocks.

@@ -103,7 +103,7 @@ export function* testNotification( name ) {
 				typeof response.message === 'string'
 					? response.message
 					: 'The following rules have failed.\n\n' +
-					  JSON.stringify( response.message, null, 2 ),
+						JSON.stringify( response.message, null, 2 ),
 			status: response.success ? 'success' : 'error',
 		} );
 	} catch ( e ) {

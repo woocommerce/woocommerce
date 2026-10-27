@@ -26,6 +26,46 @@ class ParamsTest extends AbstractProductFiltersTest {
 	private $sut;
 
 	/**
+	 * Callback added to the woocommerce_product_filter_params filter during a test.
+	 *
+	 * @var callable|null
+	 */
+	private $taxonomy_params_filter;
+
+	/**
+	 * @testdox Should isolate local filter parameters, including ID zero, and reject malformed values.
+	 */
+	public function test_scoped_request_parameters(): void {
+		$this->taxonomy_params_filter = static function ( $params ) {
+			$params['taxonomy']['product_brand'] = 'makers';
+			return $params;
+		};
+		add_filter( 'woocommerce_product_filter_params', $this->taxonomy_params_filter );
+
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput -- Restore the original request verbatim after the test.
+		$original_uri = $_SERVER['REQUEST_URI'] ?? null;
+		try {
+			$_SERVER['REQUEST_URI'] = '/?min_price=5&wcp-0-min_price=10.28&wcp-17-min_price=20&wcp-0-rating_filter[]=4&wcp-0-max_price=invalid&wcp-0-unknown=value&wcp-0-filter_color=blue,red&wcp-0-query_type_color=and&wcp-00-min_price=999&wcp-0-makers=%25e6%2597%25a5';
+			$local                  = $this->sut->get_filter_params( 0 );
+			$this->assertSame( '%e6%97%a5', $local['makers'] );
+			$this->assertSame( '10.28', $local['min_price'] );
+			$this->assertSame( 'blue,red', $local['filter_color'] );
+			$this->assertSame( 'and', $local['query_type_color'] );
+			$this->assertArrayNotHasKey( 'rating_filter', $local );
+			$this->assertArrayNotHasKey( 'max_price', $local );
+			$this->assertArrayNotHasKey( 'unknown', $local );
+			$this->assertSame( '20', $this->sut->get_filter_params( 17 )['min_price'] );
+			$this->assertSame( '5', $this->sut->get_filter_params()['min_price'] );
+		} finally {
+			if ( null === $original_uri ) {
+				unset( $_SERVER['REQUEST_URI'] );
+			} else {
+				$_SERVER['REQUEST_URI'] = $original_uri;
+			}
+		}
+	}
+
+	/**
 	 * Runs before each test.
 	 */
 	public function setUp(): void {
@@ -37,6 +77,20 @@ class ParamsTest extends AbstractProductFiltersTest {
 		$container = wc_get_container();
 		$this->sut = $container->get( Params::class );
 		$this->clear_params_cache();
+	}
+
+	/**
+	 * Runs after each test.
+	 */
+	public function tearDown(): void {
+		try {
+			if ( null !== $this->taxonomy_params_filter ) {
+				remove_filter( 'woocommerce_product_filter_params', $this->taxonomy_params_filter );
+				$this->taxonomy_params_filter = null;
+			}
+		} finally {
+			parent::tearDown();
+		}
 	}
 
 	/**
@@ -77,6 +131,7 @@ class ParamsTest extends AbstractProductFiltersTest {
 		$params = $this->sut->get_param( $type );
 
 		$this->assertIsArray( $params );
+		$this->assertSame( $params, $this->sut->get_params()[ $type ] ?? array() );
 
 		if ( ! empty( $expected_structure ) ) {
 			foreach ( $expected_structure as $expected_param ) {
@@ -255,12 +310,172 @@ class ParamsTest extends AbstractProductFiltersTest {
 	}
 
 	/**
-	 * Helper method to clear params cache for testing.
+	 * @testdox Taxonomy params can be renamed while omitted mappings keep their defaults.
 	 */
-	private function clear_params_cache() {
-		$reflection      = new \ReflectionClass( Params::class );
-		$params_property = $reflection->getProperty( 'params' );
-		$params_property->setAccessible( true );
-		$params_property->setValue( array() );
+	public function test_taxonomy_params_are_filterable_by_rename(): void {
+		$this->taxonomy_params_filter = function ( array $params ): array {
+			$this->assertSame( array( 'min_price', 'max_price' ), $params['price'], 'The filter receives the default price parameters.' );
+			$this->assertSame( array( 'rating_filter' ), $params['rating'], 'The filter receives the default rating parameter.' );
+			$this->assertSame( array( 'filter_stock_status' ), $params['status'], 'The filter receives the default stock parameter.' );
+			$this->assertSame( 'filter_color', $params['attribute']['color'], 'The filter receives the default attribute parameter.' );
+			$this->assertSame( 'categories', $params['taxonomy']['product_cat'] ?? null, 'The filter receives the default category parameter.' );
+			$this->assertSame( 'tags', $params['taxonomy']['product_tag'] ?? null, 'The filter receives the default tag parameter.' );
+			$this->assertSame( 'brands', $params['taxonomy']['product_brand'] ?? null, 'The filter receives the default brand parameter.' );
+			$params['taxonomy']['product_brand'] = 'wc_brands';
+			unset( $params['taxonomy']['product_tag'] );
+			return $params;
+		};
+		add_filter( 'woocommerce_product_filter_params', $this->taxonomy_params_filter );
+
+		$taxonomy_params = $this->sut->get_param( 'taxonomy' );
+		$param_keys      = $this->sut->get_param_keys();
+
+		$this->assertSame( 'wc_brands', $taxonomy_params['product_brand'], 'Renamed taxonomy param should use the new key.' );
+		$this->assertSame( 'tags', $taxonomy_params['product_tag'], 'Omitted taxonomy param should keep its default.' );
+		$this->assertContains( 'tags', $param_keys, 'get_param_keys() should retain the omitted taxonomy param.' );
+		$this->assertContains( 'wc_brands', $param_keys, 'get_param_keys() should expose the renamed param.' );
+		$this->assertNotContains( 'brands', $param_keys, 'get_param_keys() should not expose the original param name once renamed.' );
+	}
+
+	/**
+	 * @testdox A taxonomy cannot claim another filter's parameter.
+	 */
+	public function test_taxonomy_param_collisions_keep_defaults(): void {
+		foreach ( array( 'categories', 'tags', 'min_price', 'max_price', 'rating_filter', 'filter_stock_status', 'filter_color', 'query_type_color' ) as $claimed_param ) {
+			$this->taxonomy_params_filter = static function ( array $params ) use ( $claimed_param ): array {
+				$params['taxonomy']['product_brand'] = $claimed_param;
+				return $params;
+			};
+			add_filter( 'woocommerce_product_filter_params', $this->taxonomy_params_filter );
+
+			$this->assertSame( 'brands', $this->sut->get_param( 'taxonomy' )['product_brand'], "The brand filter must not claim {$claimed_param}." );
+
+			remove_filter( 'woocommerce_product_filter_params', $this->taxonomy_params_filter );
+			$this->taxonomy_params_filter = null;
+			$this->clear_params_cache();
+		}
+	}
+
+	/**
+	 * @testdox An attribute parameter remains reserved when its map key matches a product taxonomy.
+	 */
+	public function test_taxonomy_rename_cannot_claim_attribute_with_same_map_key(): void {
+		$attribute_id = wc_create_attribute( array( 'name' => 'product_brand' ) );
+		$this->assertNotWPError( $attribute_id, 'The attribute fixture should be created.' );
+
+		$this->taxonomy_params_filter = static function ( array $params ): array {
+			$params['taxonomy']['product_brand'] = 'filter_product_brand';
+			return $params;
+		};
+		add_filter( 'woocommerce_product_filter_params', $this->taxonomy_params_filter );
+
+		$this->assertSame( 'brands', $this->sut->get_param( 'taxonomy' )['product_brand'], 'A taxonomy cannot claim the attribute parameter with the same map key.' );
+		$this->assertSame( 'filter_product_brand', $this->sut->get_param( 'attribute' )['product_brand'], 'The original attribute parameter remains unchanged.' );
+		$this->assertContains( 'brands', $this->sut->get_param_keys(), 'Parameter initialization must retain the default brand key.' );
+	}
+
+	/**
+	 * @testdox Two taxonomies cannot be renamed to the same new parameter.
+	 */
+	public function test_duplicate_taxonomy_renames_keep_one_default(): void {
+		$this->taxonomy_params_filter = static function ( array $params ): array {
+			$params['taxonomy']['product_tag']   = 'wc_shared';
+			$params['taxonomy']['product_brand'] = 'wc_shared';
+			return $params;
+		};
+		add_filter( 'woocommerce_product_filter_params', $this->taxonomy_params_filter );
+
+		$taxonomy_params = $this->sut->get_param( 'taxonomy' );
+		$this->assertSame( 1, array_count_values( $taxonomy_params )['wc_shared'] ?? 0 );
+		$this->assertTrue( 'tags' === $taxonomy_params['product_tag'] || 'brands' === $taxonomy_params['product_brand'], 'A colliding rename must keep its default.' );
+	}
+
+	/**
+	 * @testdox The taxonomy params filter runs once before the map is cached.
+	 */
+	public function test_taxonomy_params_filter_runs_once_before_cache_is_warm(): void {
+		$calls                        = 0;
+		$this->taxonomy_params_filter = function ( array $params ) use ( &$calls ): array {
+			++$calls;
+			$params['taxonomy']['product_brand'] = 'wc_brands';
+			return $params;
+		};
+		add_filter( 'woocommerce_product_filter_params', $this->taxonomy_params_filter );
+
+		$this->assertSame( 'wc_brands', $this->sut->get_param( 'taxonomy' )['product_brand'] );
+		remove_filter( 'woocommerce_product_filter_params', $this->taxonomy_params_filter );
+		$this->taxonomy_params_filter = null;
+
+		$this->assertSame( 'wc_brands', $this->sut->get_param( 'taxonomy' )['product_brand'], 'The cached map remains stable after the callback is removed.' );
+		$this->assertSame( 1, $calls, 'The filter should only run when the map is initialized.' );
+	}
+
+	/**
+	 * @testdox An invalid callback result or missing taxonomy map keeps the default taxonomy parameters.
+	 *
+	 * @testWith ["null"]
+	 *           ["string"]
+	 *           ["false"]
+	 *           ["missing taxonomy"]
+	 *           ["invalid taxonomy"]
+	 *
+	 * @param string $return_type Which callback result to return.
+	 */
+	public function test_taxonomy_params_filter_falls_back_when_callback_returns_an_invalid_map( string $return_type ): void {
+		$return_values = array(
+			'null'             => null,
+			'string'           => 'brands',
+			'false'            => false,
+			'missing taxonomy' => array(),
+			'invalid taxonomy' => array( 'taxonomy' => 'brands' ),
+		);
+
+		$this->taxonomy_params_filter = static function () use ( $return_values, $return_type ) {
+			return $return_values[ $return_type ];
+		};
+		add_filter( 'woocommerce_product_filter_params', $this->taxonomy_params_filter );
+
+		$taxonomy_params = $this->sut->get_param( 'taxonomy' );
+
+		$this->assertSame( 'categories', $taxonomy_params['product_cat'] ?? null, "A callback returning {$return_type} should leave the default map in place." );
+		$this->assertSame( 'brands', $taxonomy_params['product_brand'] ?? null, "A callback returning {$return_type} should leave the default map in place." );
+		$this->assertContains( 'categories', $this->sut->get_param_keys(), 'get_param_keys() should still resolve after a callback returns an invalid map.' );
+	}
+
+	/**
+	 * @testdox Invalid taxonomy param values keep their defaults and unknown taxonomies are ignored.
+	 */
+	public function test_taxonomy_params_filter_ignores_invalid_entries(): void {
+		$this->taxonomy_params_filter = static function ( array $params ): array {
+			$params['taxonomy']['product_cat']   = array( 'categories', 'cats' );
+			$params['taxonomy']['product_tag']   = 42;
+			$params['taxonomy']['product_brand'] = '';
+			$params['taxonomy']['post_tag']      = 'post_tags';
+			$params['price']                     = array( 'custom_min', 'custom_max' );
+			$params['rating']                    = array( 'custom_rating' );
+			$params['status']                    = array( 'custom_stock' );
+			$params['attribute']                 = array( 'color' => 'custom_color' );
+			$params['taxonomy'][]                = 'orphan';
+
+			return $params;
+		};
+		add_filter( 'woocommerce_product_filter_params', $this->taxonomy_params_filter );
+
+		$taxonomy_params = $this->sut->get_param( 'taxonomy' );
+		$param_keys      = $this->sut->get_param_keys();
+
+		$this->assertSame( 'categories', $taxonomy_params['product_cat'], 'An array value must not disable the category filter.' );
+		$this->assertSame( 'tags', $taxonomy_params['product_tag'], 'A non-string value must not disable the tag filter.' );
+		$this->assertSame( 'brands', $taxonomy_params['product_brand'], 'An empty value must not disable the brand filter.' );
+		$this->assertArrayNotHasKey( 'post_tag', $taxonomy_params, 'Taxonomies outside the product map should be discarded.' );
+		$this->assertArrayNotHasKey( 0, $taxonomy_params, 'A numerically keyed entry should be discarded.' );
+		$this->assertSame( array( 'min_price', 'max_price' ), $this->sut->get_param( 'price' ), 'The hook must not customize price parameters.' );
+		$this->assertSame( array( 'rating_filter' ), $this->sut->get_param( 'rating' ), 'The hook must not customize rating parameters.' );
+		$this->assertSame( array( 'filter_stock_status' ), $this->sut->get_param( 'status' ), 'The hook must not customize stock parameters.' );
+		$this->assertSame( 'filter_color', $this->sut->get_param( 'attribute' )['color'], 'The hook must not customize attribute parameters.' );
+
+		foreach ( $param_keys as $param_key ) {
+			$this->assertIsString( $param_key, 'get_param_keys() must only expose strings, since they become public query vars.' );
+		}
 	}
 }

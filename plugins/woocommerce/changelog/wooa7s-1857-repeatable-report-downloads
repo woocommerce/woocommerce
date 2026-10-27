@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Keep emailed Analytics report exports downloadable for a week instead of deleting them on the first request.

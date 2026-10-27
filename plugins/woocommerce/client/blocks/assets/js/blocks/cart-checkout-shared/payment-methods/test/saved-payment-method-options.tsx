@@ -39,6 +39,8 @@ mockedUseSelect.mockImplementation(
 								{
 									tokenId: 1,
 									expires: '1/2099',
+									// Card labels come from brand, last4 and expiry; extensions enrich those fields, so display_name is not used.
+									display_name: 'Card display name',
 									method: {
 										brand: 'Visa',
 										gateway:
@@ -74,6 +76,56 @@ mockedUseSelect.mockImplementation(
 										gateway:
 											'can-pay-true-test-payment-method',
 										last4: '1001',
+									},
+								},
+							],
+							fake_custom: [
+								{
+									tokenId: 5,
+									expires: 'N/A',
+									display_name:
+										'Test bank account ending in 9876',
+									method: {
+										brand: '',
+										gateway:
+											'can-pay-true-test-payment-method',
+										last4: '',
+									},
+								},
+								{
+									tokenId: 6,
+									expires: 'N/A',
+									display_name: 'Token display name',
+									method: {
+										brand: 'SEPA IBAN',
+										gateway:
+											'can-pay-true-test-payment-method',
+										last4: '3000',
+									},
+								},
+								{
+									tokenId: 7,
+									expires: 'N/A',
+									display_name: '   ',
+									method: {
+										brand: '',
+										gateway:
+											'can-pay-true-test-payment-method',
+										last4: '',
+									},
+								},
+							],
+							applepay: [
+								{
+									tokenId: 8,
+									expires: 'N/A',
+									// The default WC_Payment_Token::get_display_name() returns the token type.
+									display_name: 'ApplePay',
+									method: {
+										brand: 'ApplePay #8',
+										gateway:
+											'can-pay-true-test-payment-method',
+										last4: '',
 									},
 								},
 							],
@@ -127,6 +179,28 @@ describe( 'SavedPaymentMethodOptions', () => {
 				'Cartes Bancaires ending in 1001 (expires 1/2099)'
 			)
 		).toBeInTheDocument();
+
+		// Custom token type without brand and last4: the token's own display name labels the radio.
+		expect(
+			screen.getByRole( 'radio', {
+				name: 'Test bank account ending in 9876',
+			} )
+		).toBeInTheDocument();
+
+		// Custom token type with brand and last4 from an extension: that label wins over display_name.
+		expect(
+			screen.getByRole( 'radio', { name: 'SEPA IBAN ending in 3000' } )
+		).toBeInTheDocument();
+
+		// A blank display name, or one that is only the token type, falls back to the generic label.
+		const fallbackRadios = screen.getAllByRole( 'radio', {
+			name: 'Saved token for can-pay-true-test-payment-method',
+		} );
+		expect(
+			fallbackRadios.map(
+				( radio ) => ( radio as HTMLInputElement ).value
+			)
+		).toEqual( [ '7', '8' ] );
 	} );
 	it( "does not show saved methods when the method's canPay function returns false", () => {
 		registerPaymentMethod( {

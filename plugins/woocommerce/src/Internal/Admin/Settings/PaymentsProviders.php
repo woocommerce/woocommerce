@@ -181,7 +181,6 @@ class PaymentsProviders {
 		ExtensionSuggestions::VIVA_WALLET       => Vivacom::class,
 		ExtensionSuggestions::TILOPAY           => Tilopay::class,
 		ExtensionSuggestions::HELCIM            => Helcim::class,
-		ExtensionSuggestions::HELIOPAY          => HelioPay::class,
 		ExtensionSuggestions::PAYTRAIL          => Paytrail::class,
 		ExtensionSuggestions::MONEI             => Monei::class,
 		ExtensionSuggestions::GOCARDLESS        => GoCardless::class,
@@ -409,8 +408,7 @@ class PaymentsProviders {
 			wc_doing_it_wrong(
 				__METHOD__,
 				sprintf(
-					/* translators: %s: Gateway ID. */
-					esc_html__( 'The provider class for gateway ID "%s" must extend the PaymentGateway class.', 'woocommerce' ),
+					esc_html( 'The provider class for gateway ID "%s" must extend the PaymentGateway class.' ),
 					$gateway_id
 				),
 				'10.4.0'
@@ -457,8 +455,7 @@ class PaymentsProviders {
 				wc_doing_it_wrong(
 					__METHOD__,
 					sprintf(
-						/* translators: %s: Payment extension suggestion ID. */
-						esc_html__( 'The provider class for payment extension suggestion ID "%s" must extend the PaymentGateway class.', 'woocommerce' ),
+						esc_html( 'The provider class for payment extension suggestion ID "%s" must extend the PaymentGateway class.' ),
 						$pes_id
 					),
 					'10.4.0'
@@ -1389,11 +1386,11 @@ class PaymentsProviders {
 					ExtensionSuggestions::SQUARE,
 					ExtensionSuggestions::PAYONEER,
 					ExtensionSuggestions::AIRWALLEX,
+					ExtensionSuggestions::KOMOJU,
 					ExtensionSuggestions::COINBASE,         // We don't have suggestion details yet.
 					ExtensionSuggestions::AUTHORIZE_NET,    // We don't have suggestion details yet.
 					ExtensionSuggestions::BOLT,             // We don't have suggestion details yet.
 					ExtensionSuggestions::DEPAY,            // We don't have suggestion details yet.
-					ExtensionSuggestions::ELAVON,           // We don't have suggestion details yet.
 					ExtensionSuggestions::FORTISPAY,        // We don't have suggestion details yet.
 					ExtensionSuggestions::PAYPAL_ZETTLE,    // We don't have suggestion details yet.
 					ExtensionSuggestions::RAPYD,            // We don't have suggestion details yet.

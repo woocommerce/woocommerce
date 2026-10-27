@@ -50,9 +50,7 @@ add_filter( 'woocommerce_attribute_label', 'wp_kses_post', 100 );
 /**
  * Short Description (excerpt).
  */
-if ( function_exists( 'do_blocks' ) ) {
-	add_filter( 'woocommerce_short_description', 'do_blocks', 9 );
-}
+add_filter( 'woocommerce_short_description', 'do_blocks', 9 );
 add_filter( 'woocommerce_short_description', 'wptexturize' );
 add_filter( 'woocommerce_short_description', 'convert_smilies' );
 add_filter( 'woocommerce_short_description', 'convert_chars' );
@@ -129,7 +127,7 @@ function wc_create_order( $args = array() ) {
 		// Set these fields when creating a new order but not when updating an existing order.
 		if ( ! $args['order_id'] ) {
 			$order->set_currency( get_woocommerce_currency() );
-			$order->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
+			$order->set_prices_include_tax( wc_prices_include_tax() );
 			$order->set_customer_ip_address( WC_Geolocation::get_ip_address() );
 			$order->set_customer_user_agent( wc_get_user_agent() );
 		}
@@ -321,8 +319,7 @@ function wc_get_template( $template_name, $args = array(), $template_path = '', 
 
 	if ( $filter_template !== $template ) {
 		if ( ! file_exists( $filter_template ) ) {
-			/* translators: %s template */
-			wc_doing_it_wrong( __FUNCTION__, sprintf( __( '%s does not exist.', 'woocommerce' ), '<code>' . $filter_template . '</code>' ), '2.1' );
+			wc_doing_it_wrong( __FUNCTION__, sprintf( '%s does not exist.', '<code>' . $filter_template . '</code>' ), '2.1' );
 			return;
 		}
 		$template = $filter_template;
@@ -339,7 +336,7 @@ function wc_get_template( $template_name, $args = array(), $template_path = '', 
 		if ( isset( $args['action_args'] ) ) {
 			wc_doing_it_wrong(
 				__FUNCTION__,
-				__( 'action_args should not be overwritten when calling wc_get_template.', 'woocommerce' ),
+				'action_args should not be overwritten when calling wc_get_template.',
 				'3.6.0'
 			);
 			unset( $args['action_args'] );
@@ -2016,8 +2013,7 @@ function wc_get_logger() {
 		wc_doing_it_wrong(
 			__FUNCTION__,
 			sprintf(
-				/* translators: 1: class name 2: woocommerce_logging_class 3: WC_Logger_Interface */
-				__( 'The class %1$s provided by %2$s filter must implement %3$s.', 'woocommerce' ),
+				'The class %1$s provided by %2$s filter must implement %3$s.',
 				'<code>' . esc_html( is_object( $class ) ? get_class( $class ) : $class ) . '</code>',
 				'<code>woocommerce_logging_class</code>',
 				'<code>WC_Logger_Interface</code>'
@@ -2538,8 +2534,7 @@ function wc_get_server_database_version() {
  */
 function wc_load_cart() {
 	if ( ! did_action( 'before_woocommerce_init' ) || doing_action( 'before_woocommerce_init' ) ) {
-		/* translators: 1: wc_load_cart 2: woocommerce_init */
-		wc_doing_it_wrong( __FUNCTION__, sprintf( __( '%1$s should not be called before the %2$s action.', 'woocommerce' ), 'wc_load_cart', 'woocommerce_init' ), '3.7' );
+		wc_doing_it_wrong( __FUNCTION__, sprintf( '%1$s should not be called before the %2$s action.', 'wc_load_cart', 'woocommerce_init' ), '3.7' );
 		return;
 	}
 

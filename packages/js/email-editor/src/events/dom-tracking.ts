@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { select } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -9,6 +10,26 @@ import { __ } from '@wordpress/i18n';
 import { recordEvent, isEventTrackingEnabled } from '.';
 
 let EVENTS_TO_TRACK = [];
+
+const SIDEBAR_TABS = {
+	'edit-post/document': 'document',
+	'edit-post/block': 'block',
+};
+
+/**
+ * Records whether a header menu is open after the click on its toggle.
+ * WordPress 7.2 menus set only `aria-expanded` (no `is-opened` class), and only after the
+ * click event, so the state is read once the click has been handled.
+ */
+function recordMenuToggle( eventName: string, target: Element ) {
+	setTimeout( () => {
+		recordEvent( eventName, {
+			isOpened:
+				target.classList.contains( 'is-opened' ) ||
+				target.getAttribute( 'aria-expanded' ) === 'true',
+		} );
+	} );
+}
 
 /**
  * Filter events by selector and record the event.
@@ -70,14 +91,9 @@ export function initDomTracking() {
 		},
 		// Header more menu toggle
 		{
-			track: ( target ) => {
-				const isOpened = target.classList.contains( 'is-opened' );
-				recordEvent( 'header_more_menu_dropdown_toggle', {
-					isOpened,
-				} );
-			},
-			// eslint-disable-next-line @wordpress/i18n-text-domain
-			selector: `.components-dropdown-menu__toggle[aria-label="${ __(
+			track: ( target ) =>
+				recordMenuToggle( 'header_more_menu_dropdown_toggle', target ),
+			selector: `.editor-header__settings button[aria-label="${ __(
 				'Options'
 			) }"]`,
 		},
@@ -85,10 +101,8 @@ export function initDomTracking() {
 		{
 			track: ( target ) => {
 				if (
-					// eslint-disable-next-line @wordpress/i18n-text-domain
 					( target.textContent === __( 'Save' ) &&
 						target.getAttribute( 'aria-disabled' ) === 'false' ) ||
-					// eslint-disable-next-line @wordpress/i18n-text-domain
 					target.textContent === __( 'Saving…' )
 				) {
 					recordEvent( 'header_save_button_clicked' );
@@ -109,27 +123,27 @@ export function initDomTracking() {
 		},
 		// Preview dropdown toggle clicked
 		{
-			track: ( target ) => {
-				const isOpened = target.classList.contains( 'is-opened' );
-				recordEvent( 'header_preview_dropdown_clicked', {
-					isOpened,
-				} );
-			},
+			track: ( target ) =>
+				recordMenuToggle( 'header_preview_dropdown_clicked', target ),
 			selector: '.editor-preview-dropdown__toggle',
 		},
-		// Email tab in the sidebar clicked
+		// Email or Block tab in the sidebar clicked
 		{
+			// The editor has already switched the sidebar when the click reaches the document.
 			track: () => {
-				recordEvent( 'sidebar_tab_selected', { tab: 'document' } );
+				const tab =
+					SIDEBAR_TABS[
+						select( 'core/interface' ).getActiveComplementaryArea(
+							'core'
+						)
+					];
+				if ( tab ) {
+					recordEvent( 'sidebar_tab_selected', { tab } );
+				}
 			},
-			selector: '[data-tab-id="edit-post/document"]',
-		},
-		// Block tab in the sidebar clicked
-		{
-			track: () => {
-				recordEvent( 'sidebar_tab_selected', { tab: 'block' } );
-			},
-			selector: '[data-tab-id="edit-post/block"]',
+			// WordPress 7.0 renders the tabs with role="button", but with `data-tab-id`.
+			selector:
+				'.editor-sidebar__panel-tabs [data-tab-id], .editor-sidebar__panel-tabs [role="tab"]',
 		},
 		// Header inserter sidebar toggle clicked
 		{

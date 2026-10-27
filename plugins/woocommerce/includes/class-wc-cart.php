@@ -40,6 +40,13 @@ class WC_Cart extends WC_Legacy_Cart {
 	public $cart_context = 'shortcode';
 
 	/**
+	 * How many show_shipping() calls are reading the shipping address fields, so a field filter that recalculates the totals cannot nest the reads without limit.
+	 *
+	 * @var int
+	 */
+	private $shipping_address_field_reads = 0;
+
+	/**
 	 * Contains an array of cart items.
 	 *
 	 * @var array
@@ -659,7 +666,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	public function get_cart() {
 		if ( ! did_action( 'wp_loaded' ) ) {
-			wc_doing_it_wrong( __FUNCTION__, __( 'Get cart should not be called before the wp_loaded action.', 'woocommerce' ), '2.3' );
+			wc_doing_it_wrong( __FUNCTION__, 'Get cart should not be called before the wp_loaded action.', '2.3' );
 		}
 		if ( ! did_action( 'woocommerce_load_cart_from_session' ) ) {
 			$this->session->get_cart_from_session();
@@ -1225,6 +1232,10 @@ class WC_Cart extends WC_Legacy_Cart {
 				$missing_attributes = array();
 				$parent_data        = wc_get_product( $product_data->get_parent_id() );
 
+				if ( ! $parent_data instanceof WC_Product ) {
+					throw new Exception( __( 'Sorry, this product cannot be added to the cart.', 'woocommerce' ) );
+				}
+
 				$variation_attributes = $product_data->get_variation_attributes();
 				// Filter out 'any' variations, which are empty, as they need to be explicitly specified while adding to cart.
 				$variation_attributes = array_filter( $variation_attributes, 'wc_array_filter_default_attributes' );
@@ -1242,7 +1253,8 @@ class WC_Cart extends WC_Legacy_Cart {
 							// Don't use wc_clean as it destroys sanitized characters.
 							$value = sanitize_title( wp_unslash( $variation[ $attribute_key ] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 						} else {
-							$value = html_entity_decode( wc_clean( wp_unslash( $variation[ $attribute_key ] ) ), ENT_QUOTES, get_bloginfo( 'charset' ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+							// Don't use wc_clean as it strips percent sequences (e.g. `%20`) that can legitimately appear in custom attribute values, making them fail validation against the stored options. Entities are decoded before tag stripping so encoded markup cannot survive as literal tags.
+							$value = wp_strip_all_tags( html_entity_decode( wp_unslash( $variation[ $attribute_key ] ), ENT_QUOTES, get_bloginfo( 'charset' ) ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 						}
 
 						// Don't include if it's empty.
@@ -1645,14 +1657,14 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return array
 	 */
 	public function calculate_shipping() {
-		// Reset totals.
-		$this->set_shipping_total( 0 );
-		$this->set_shipping_tax( 0 );
-		$this->set_shipping_taxes( array() );
-		$this->shipping_methods        = array();
-		$this->has_calculated_shipping = false;
+		$this->clear_shipping_totals();
 
-		if ( ! $this->needs_shipping() || ! $this->show_shipping() ) {
+		$ready = $this->needs_shipping() && $this->show_shipping();
+
+		// A filter run by show_shipping() can calculate the totals again and leave that nested run's shipping behind.
+		$this->clear_shipping_totals();
+
+		if ( ! $ready ) {
 			return $this->shipping_methods;
 		}
 
@@ -1673,6 +1685,17 @@ class WC_Cart extends WC_Legacy_Cart {
 		$this->set_shipping_taxes( $merged_taxes );
 
 		return $this->shipping_methods;
+	}
+
+	/**
+	 * Reset the shipping totals, taxes and methods to none calculated.
+	 */
+	private function clear_shipping_totals(): void {
+		$this->set_shipping_total( 0 );
+		$this->set_shipping_tax( 0 );
+		$this->set_shipping_taxes( array() );
+		$this->shipping_methods        = array();
+		$this->has_calculated_shipping = false;
 	}
 
 	/**
@@ -1872,13 +1895,20 @@ class WC_Cart extends WC_Legacy_Cart {
 				return apply_filters( 'woocommerce_cart_ready_to_calc_shipping', true );
 			}
 
-			if ( 'shortcode' === $this->cart_context ) {
+			// Calling calculate_totals() from an address field filter, such as woocommerce_default_address_fields, triggers show_shipping() again.
+			// Allow one nested field read for compatibility, then use the locale-based check below to prevent unbounded recursion.
+			if ( 'shortcode' === $this->cart_context && $this->shipping_address_field_reads < 2 ) {
 				$country = $this->get_customer()->get_shipping_country();
 				if ( ! $country ) {
 					return false;
 				}
-				$country_fields  = WC()->countries->get_address_fields( $country, 'shipping_' );
-				$checkout_fields = WC()->checkout()->get_checkout_fields();
+				++$this->shipping_address_field_reads;
+				try {
+					$country_fields  = WC()->countries->get_address_fields( $country, 'shipping_' );
+					$checkout_fields = WC()->checkout()->get_checkout_fields();
+				} finally {
+					--$this->shipping_address_field_reads;
+				}
 
 				/**
 				 * Filter to not require shipping state for shipping calculation, even if it is required at checkout.
@@ -1889,9 +1919,12 @@ class WC_Cart extends WC_Legacy_Cart {
 				 * @param bool $show_state Whether to use the state field. Default true.
 				 */
 				$state_enabled  = apply_filters( 'woocommerce_shipping_calculator_enable_state', true );
-				$state_required = isset( $country_fields['shipping_state'] ) && $country_fields['shipping_state']['required'];
+				$state_required = isset( $country_fields['shipping_state'] ) && $country_fields['shipping_state']['required'] && true !== ( $country_fields['shipping_state']['hidden'] ?? false );
 				// Takes care of late unsetting of checkout fields via hooks (woocommerce_checkout_fields, woocommerce_shipping_fields).
-				$checkout_state_field_exists = isset( $checkout_fields['shipping']['shipping_state'] );
+				// When shipping is forced to the billing address the shipping fields are never shown, so only a field the shopper
+				// can actually fill in (the billing one) should keep shipping hidden.
+				$address_fieldset            = wc_ship_to_billing_address_only() ? 'billing' : 'shipping';
+				$checkout_state_field_exists = isset( $checkout_fields[ $address_fieldset ][ $address_fieldset . '_state' ] );
 				if ( $state_enabled && $state_required && ! $this->get_customer()->get_shipping_state() && $checkout_state_field_exists ) {
 					return false;
 				}
@@ -1904,9 +1937,9 @@ class WC_Cart extends WC_Legacy_Cart {
 				 * @param bool $show_postcode Whether to use the postcode field. Default true.
 				 */
 				$postcode_enabled  = apply_filters( 'woocommerce_shipping_calculator_enable_postcode', true );
-				$postcode_required = isset( $country_fields['shipping_postcode'] ) && $country_fields['shipping_postcode']['required'];
+				$postcode_required = isset( $country_fields['shipping_postcode'] ) && $country_fields['shipping_postcode']['required'] && true !== ( $country_fields['shipping_postcode']['hidden'] ?? false );
 				// Takes care of late unsetting of checkout fields via hooks (woocommerce_checkout_fields, woocommerce_shipping_fields).
-				$checkout_postcode_field_exists = isset( $checkout_fields['shipping']['shipping_postcode'] );
+				$checkout_postcode_field_exists = isset( $checkout_fields[ $address_fieldset ][ $address_fieldset . '_postcode' ] );
 				if ( $postcode_enabled && $postcode_required && '' === $this->get_customer()->get_shipping_postcode() && $checkout_postcode_field_exists ) {
 					return false;
 				}
@@ -2029,7 +2062,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	public function is_coupon_emails_allowed( $check_emails, $restrictions ) {
 		wc_doing_it_wrong(
 			'WC_Cart::is_coupon_emails_allowed',
-			__( 'This method has been deprecated and will be removed soon. Use Automattic\WooCommerce\Utilities\DiscountsUtil::is_coupon_emails_allowed instead.', 'woocommerce' ),
+			'This method has been deprecated and will be removed soon. Use Automattic\WooCommerce\Utilities\DiscountsUtil::is_coupon_emails_allowed instead.',
 			'9.0.0'
 		);
 

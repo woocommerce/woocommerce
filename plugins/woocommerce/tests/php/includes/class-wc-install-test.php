@@ -14,6 +14,8 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test if verify base table can detect missing tables and clear the stored missing table list.
+	 *
+	 * @ddlInTransaction WC_Install creates, verifies and re-keys the tables under test.
 	 */
 	public function test_verify_base_tables_stores_and_removes_missing_tables() {
 		global $wpdb;
@@ -55,6 +57,8 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test if verify base table can fix the table as well.
+	 *
+	 * @ddlInTransaction WC_Install creates, verifies and re-keys the tables under test.
 	 */
 	public function test_verify_base_tables_fix_tables() {
 		global $wpdb;
@@ -118,6 +122,8 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 	 * runs again on every update, the second pass has to leave everything alone.
 	 *
 	 * @testdox create_tables() re-keys the tax lookup by tax order item, keeps its rows, and runs once.
+	 *
+	 * @ddlInTransaction WC_Install creates, verifies and re-keys the tables under test.
 	 */
 	public function test_create_tables_rekeys_the_order_tax_lookup_by_tax_order_item(): void {
 		global $wpdb;
@@ -170,6 +176,8 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 	 * says the store missed the fix.
 	 *
 	 * @testdox create_tables() logs a tax lookup re-key that did not land.
+	 *
+	 * @ddlInTransaction WC_Install creates, verifies and re-keys the tables under test.
 	 */
 	public function test_create_tables_logs_a_failed_order_tax_lookup_rekey(): void {
 		global $wpdb;
@@ -404,6 +412,22 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 		} else {
 			$this->assertFalse( $update_scheduled );
 		}
+	}
+
+	/**
+	 * @testdox Stores already on 11.3 schedule the MPN schema migration when upgrading.
+	 */
+	public function test_mpn_migration_is_scheduled_after_113(): void {
+		$args = array( 'update_callback' => 'wc_update_1140_add_mpn_to_product_lookup_table' );
+		update_option( 'woocommerce_db_version', '11.3.0' );
+		$this->assertNull( WC()->queue()->get_next( 'woocommerce_run_update_callback', $args, 'woocommerce-db-updates' ) );
+
+		WC_Install::run_manual_database_update();
+
+		$this->assertNotNull(
+			WC()->queue()->get_next( 'woocommerce_run_update_callback', $args, 'woocommerce-db-updates' ),
+			'Stores already on 11.3 must receive the MPN schema migration.'
+		);
 	}
 
 	/**
@@ -745,7 +769,7 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 			'The "New in store" heading should be stored as a pattern reference so it is translated at render time.'
 		);
 		$this->assertStringNotContainsString(
-			'Your cart is currently empty!',
+			'Your cart is empty',
 			$content,
 			'The empty cart title must not be frozen into the page content in the install-time locale.'
 		);
@@ -757,7 +781,7 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should render the empty cart title, the Browse store link, and the New in store heading from the referenced patterns.
+	 * @testdox Should render the empty cart title, the Return to shop button, and the New in store heading from the referenced patterns.
 	 */
 	public function test_empty_cart_message_patterns_render_expected_markup(): void {
 		$registry = WP_Block_Patterns_Registry::get_instance();
@@ -775,7 +799,7 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertStringContainsString(
-			'Your cart is currently empty!',
+			'Your cart is empty',
 			$rendered,
 			'The cart-empty-message pattern should render the empty cart title.'
 		);
@@ -784,15 +808,25 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 			$rendered,
 			'The rendered empty cart title should keep the markup the installer previously inlined.'
 		);
+		$this->assertStringNotContainsString(
+			'with-empty-cart-icon',
+			$rendered,
+			'The empty cart heading must not carry the class that used to inject the icon via CSS (WOOPLUG-2240).'
+		);
 		$this->assertStringContainsString(
 			'New in store',
 			$rendered,
 			'The cart-new-in-store-message pattern should render the "New in store" heading.'
 		);
 		$this->assertStringContainsString(
-			'Browse store',
+			'Return to shop',
 			$rendered,
-			'The cart-empty-message pattern should render the Browse store link that the default Cart page lost when it moved to installer-generated content in 8.3.0.'
+			'The cart-empty-message pattern should render the Return to shop button that the default Cart page lost when it moved to installer-generated content in 8.3.0.'
+		);
+		$this->assertStringContainsString(
+			'wp-block-button__link',
+			$rendered,
+			'The Return to shop link should render as a core button, matching the empty Mini-Cart.'
 		);
 	}
 

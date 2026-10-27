@@ -179,6 +179,13 @@ class OrdersTableQuery {
 	private $suppress_filters = false;
 
 	/**
+	 * Whether a short first page of results can supply the total without running the count query.
+	 *
+	 * @var bool
+	 */
+	private $can_infer_first_page_total = false;
+
+	/**
 	 * Sets up and runs the query after processing arguments.
 	 *
 	 * @param array $args Array of query vars.
@@ -352,7 +359,7 @@ class OrdersTableQuery {
 			$date      = new \WC_DateTime( "@{$date}", new \DateTimeZone( 'UTC' ) );
 			$precision = 'second';
 		} elseif ( ! is_a( $date, 'WC_DateTime' ) ) {
-			// For backwards compat (see https://developer.woocommerce.com/docs/extensions/core-concepts/wc-get-orders/#date)
+			// For backwards compat (see https://developer.woocommerce.com/docs/features/orders/wc-get-orders/#date)
 			// only YYYY-MM-DD is considered for date values. Timestamps do support second precision.
 			$date      = wc_string_to_datetime( date( 'Y-m-d', strtotime( $date ) ) );
 			$precision = 'day';
@@ -385,7 +392,7 @@ class OrdersTableQuery {
 	private function local_time_to_gmt_date_query( $dates_raw, $operator ) {
 		$result = array();
 
-		// Convert YYYY-MM-DD to UTC timestamp. Per https://developer.woocommerce.com/docs/extensions/core-concepts/wc-get-orders/#date only date is relevant (time is ignored).
+		// Convert YYYY-MM-DD to UTC timestamp. Per https://developer.woocommerce.com/docs/features/orders/wc-get-orders/#date only date is relevant (time is ignored).
 		foreach ( $dates_raw as &$raw_date ) {
 			$raw_date = is_numeric( $raw_date ) ? $raw_date : strtotime( get_gmt_from_date( date( 'Y-m-d', strtotime( $raw_date ) ) ) );
 		}
@@ -501,7 +508,7 @@ class OrdersTableQuery {
 				$date_key = $local_to_gmt_date_keys[ $date_key ];
 
 				if ( ! is_numeric( $dates_raw[0] ) && ( ! isset( $dates_raw[1] ) || ! is_numeric( $dates_raw[1] ) ) ) {
-					// Only non-numeric args can be considered local time. Timestamps are assumed to be UTC per https://developer.woocommerce.com/docs/extensions/core-concepts/wc-get-orders/#date.
+					// Only non-numeric args can be considered local time. Timestamps are assumed to be UTC per https://developer.woocommerce.com/docs/features/orders/wc-get-orders/#date.
 					$date_queries[] = array_merge(
 						array(
 							'column' => $date_key,
@@ -611,11 +618,19 @@ class OrdersTableQuery {
 
 		// Convert any local dates to GMT.
 		if ( isset( $local_to_gmt_date_keys[ $query['column'] ] ) ) {
-			$query['column']  = $local_to_gmt_date_keys[ $query['column'] ];
-			$op               = isset( $query['after'] ) ? 'after' : 'before';
+			$query['column'] = $local_to_gmt_date_keys[ $query['column'] ];
+			$op              = isset( $query['after'] ) ? 'after' : 'before';
+
+			// WP_Date_Query ignores an empty boundary, so leave it empty rather than resolving it to a date.
+			if ( empty( $query[ $op ] ) ) {
+				return $query;
+			}
+
 			$date_value_local = $query[ $op ];
-			$date_value_gmt   = wc_string_to_timestamp( get_gmt_from_date( wc_string_to_datetime( $date_value_local ) ) );
-			$query[ $op ]     = $this->date_to_date_query_arg( $date_value_gmt );
+			// date_create() honors an offset in the string; wc_string_to_datetime() re-applies the site offset to formats like "10:00:00.500Z" or "+02".
+			$parsed_date    = is_string( $date_value_local ) && ! is_numeric( $date_value_local ) ? date_create( $date_value_local, wp_timezone() ) : false;
+			$date_value_gmt = $parsed_date ? $parsed_date->getTimestamp() : wc_string_to_timestamp( get_gmt_from_date( wc_string_to_datetime( $date_value_local ) ) );
+			$query[ $op ]   = $this->date_to_date_query_arg( $date_value_gmt );
 		}
 
 		return $query;
@@ -868,7 +883,8 @@ class OrdersTableQuery {
 		// GROUP BY.
 		$groupby = $this->groupby ? implode( ', ', (array) $this->groupby ) : '';
 
-		$pieces = compact( 'fields', 'join', 'where', 'groupby', 'orderby', 'limits' );
+		$pieces  = compact( 'fields', 'join', 'where', 'groupby', 'orderby', 'limits' );
+		$clauses = $pieces;
 
 		if ( ! $this->suppress_filters ) {
 			/**
@@ -941,6 +957,11 @@ class OrdersTableQuery {
 			$filtered_sql     = $status_union_sql ?? $this->sql;
 		}
 
+		// A short first page of a plain search already holds every match, so the count query, which repeats the
+		// search's expensive WHERE, can be skipped. Conservatively keep the count for joined queries, including
+		// full-text searches, and for queries changed by filters.
+		$this->can_infer_first_page_total = ! empty( $this->args['s'] ) && '' === $join && $clauses === $pieces && $filtered_sql === $this->sql;
+
 		$this->sql = $filtered_sql;
 
 		$this->build_count_query( $fields, $join, $where, $groupby );
@@ -964,7 +985,8 @@ class OrdersTableQuery {
 			// DISTINCT adds performance overhead, exclude the DISTINCT function when confident it is not needed.
 			$count_fields = 'COUNT(*)';
 		}
-		$this->count_sql = "SELECT $count_fields FROM $orders_table $join WHERE $where";
+		$this->count_sql      = "SELECT $count_fields FROM $orders_table $join WHERE $where";
+		$unfiltered_count_sql = $this->count_sql;
 
 		if ( ! $this->suppress_filters ) {
 			/**
@@ -982,6 +1004,8 @@ class OrdersTableQuery {
 			 */
 			$this->count_sql = apply_filters_ref_array( 'woocommerce_orders_table_query_count_sql', array( $this->count_sql, &$this, $this->args, $fields, $join, $where, $groupby ) );
 		}
+
+		$this->can_infer_first_page_total = $this->can_infer_first_page_total && $this->count_sql === $unfiltered_count_sql;
 	}
 
 	/**
@@ -1464,7 +1488,13 @@ class OrdersTableQuery {
 		$row_count = (int) ( $this->limits[1] ?? 0 );
 
 		if ( $row_count > 0 || $offset > 0 ) {
-			$this->found_orders  = absint( $wpdb->get_var( $this->count_sql ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			// Compare after WordPress's normal placeholder removal to detect SQL changed during execution.
+			$first_page_holds_all = $this->can_infer_first_page_total
+				&& 0 === $offset
+				&& count( $this->orders ) < $row_count
+				&& $wpdb->last_query === $wpdb->remove_placeholder_escape( $this->sql );
+
+			$this->found_orders  = $first_page_holds_all ? count( $this->orders ) : absint( $wpdb->get_var( $this->count_sql ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 			$this->max_num_pages = $row_count > 0
 				? (int) ceil( $this->found_orders / $row_count )
 				: 0;

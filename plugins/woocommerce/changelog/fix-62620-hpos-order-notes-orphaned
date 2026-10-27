@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Delete orphaned order notes (comments) when an order is permanently deleted with HPOS enabled and sync disabled.

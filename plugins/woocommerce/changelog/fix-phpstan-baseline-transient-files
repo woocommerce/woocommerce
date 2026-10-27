@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Remove two stale PHPStan baseline entries for TransientFilesEngine that no longer match any reported error.

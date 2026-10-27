@@ -10,14 +10,14 @@ import {
 	ColorIndicator,
 	Dropdown,
 	FlexItem,
-	__experimentalDropdownContentWrapper as DropdownContentWrapper, // eslint-disable-line
-	__experimentalHStack as HStack, // eslint-disable-line
-	__experimentalToolsPanelItem as ToolsPanelItem, // eslint-disable-line
+	__experimentalDropdownContentWrapper as DropdownContentWrapper,
+	__experimentalHStack as HStack,
+	__experimentalToolsPanelItem as ToolsPanelItem,
 } from '@wordpress/components';
-// eslint-disable-next-line
+
 import {
 	// @ts-expect-error TS7016: Could not find a declaration file for module '@wordpress/block-editor'.
-	__experimentalColorGradientControl as ColorGradientControl, // eslint-disable-line
+	__experimentalColorGradientControl as ColorGradientControl,
 } from '@wordpress/block-editor';
 
 const popoverProps = {

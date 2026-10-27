@@ -53,6 +53,12 @@
 		<include-pattern>includes/</include-pattern>
     </rule>  
     
+	<!-- Local sniff: developer diagnostic messages (wc_doing_it_wrong(), trigger_error(), error_log(), deprecation notices) stay in English. -->
+	<rule ref="./tests/Tools/phpcs/WooCommerceInternal/Sniffs/I18n/DiagnosticMessageSniff.php">
+		<include-pattern>src/</include-pattern>
+		<include-pattern>includes/</include-pattern>
+	</rule>
+
 	<!-- The cart token selects which customer session loads; it must be read from one place only. -->
 	<rule ref="./bin/phpcs/WooCommerceStoreApi/Sniffs/StoreApi/CartTokenSourceSniff.php">
 		<!-- The canonical accessor, and tests that simulate raw request headers. -->
@@ -133,6 +139,7 @@
 				<element key="15" value="manage_woocommerce"/>
 				<element key="16" value="manage_product_terms"/>
 				<element key="17" value="view_woocommerce_reports"/>
+				<element key="18" value="read_private_products"/>
 			</property>
 		</properties>
 	</rule>

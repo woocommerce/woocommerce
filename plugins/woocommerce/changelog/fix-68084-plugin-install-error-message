@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Plugin install and activation failure notices now name the plugin once and state the reason WordPress reported (for example an unmet PHP version) instead of generic advice.

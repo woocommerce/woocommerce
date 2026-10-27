@@ -553,7 +553,7 @@ class Segmenter {
 	/**
 	 * Adds missing segments to intervals, modifies $data.
 	 *
-	 * @param stdClass $data Response data.
+	 * @param \stdClass $data Response data.
 	 */
 	protected function fill_in_missing_interval_segments( &$data ) {
 		foreach ( $data->intervals as $order_id => $interval_data ) {
@@ -729,9 +729,9 @@ class Segmenter {
 	/**
 	 * Adds an array of segments to data->intervals object.
 	 *
-	 * @param stdClass $data Data object representing the REST response.
-	 * @param array    $intervals_query Intervals SQL query parameters.
-	 * @param string   $table_name Name of the SQL table that is the main order stats table.
+	 * @param \stdClass $data Data object representing the REST response.
+	 * @param array     $intervals_query Intervals SQL query parameters.
+	 * @param string    $table_name Name of the SQL table that is the main order stats table.
 	 */
 	public function add_intervals_segments( &$data, $intervals_query, $table_name ) {
 		$intervals_segments = $this->get_segments( 'intervals', $intervals_query, $table_name );

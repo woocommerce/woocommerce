@@ -21,7 +21,7 @@ export const Skeleton = ( {
 					? __(
 							'Loading the Add to Cart + Options template part',
 							'woocommerce'
-					  )
+						)
 					: __( 'Add to Cart + Options form', 'woocommerce' )
 			}
 		>

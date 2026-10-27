@@ -43,8 +43,7 @@ class PatternRegistry {
 				'register_block_patterns',
 				esc_html(
 					sprintf(
-					/* translators: %s: file name. */
-						__( 'Could not register pattern "%s" as a block pattern ("Slug" field missing)', 'woocommerce' ),
+						'Could not register pattern "%s" as a block pattern ("Slug" field missing)',
 						$source
 					)
 				),
@@ -58,8 +57,7 @@ class PatternRegistry {
 				'register_block_patterns',
 				esc_html(
 					sprintf(
-					/* translators: %1s: file name; %2s: slug value found. */
-						__( 'Could not register pattern "%1$s" as a block pattern (invalid slug "%2$s")', 'woocommerce' ),
+						'Could not register pattern "%1$s" as a block pattern (invalid slug "%2$s")',
 						$source,
 						$pattern_data['slug']
 					)
@@ -79,8 +77,7 @@ class PatternRegistry {
 				'register_block_patterns',
 				esc_html(
 					sprintf(
-					/* translators: %1s: file name; %2s: slug value found. */
-						__( 'Could not register pattern "%s" as a block pattern ("Title" field missing)', 'woocommerce' ),
+						'Could not register pattern "%s" as a block pattern ("Title" field missing)',
 						$source
 					)
 				),
@@ -136,11 +133,11 @@ class PatternRegistry {
 			}
 		}
 
-		// phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText, WordPress.WP.I18n.LowLevelTranslationFunction
-		$pattern_data['title'] = translate_with_gettext_context( wp_strip_all_tags( html_entity_decode( (string) $pattern_data['title'], ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ), 'Pattern title', 'woocommerce' );
+		// phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText
+		$pattern_data['title'] = _x( wp_strip_all_tags( html_entity_decode( (string) $pattern_data['title'], ENT_QUOTES | ENT_HTML5, 'UTF-8' ) ), 'Pattern title', 'woocommerce' );
 		if ( ! empty( $pattern_data['description'] ) ) {
-			// phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText, WordPress.WP.I18n.LowLevelTranslationFunction
-			$pattern_data['description'] = translate_with_gettext_context( $pattern_data['description'], 'Pattern description', 'woocommerce' );
+			// phpcs:ignore WordPress.WP.I18n.NonSingularStringLiteralText
+			$pattern_data['description'] = _x( $pattern_data['description'], 'Pattern description', 'woocommerce' );
 		}
 
 		// A pattern is registrable as long as it provides either inline content

@@ -21,7 +21,7 @@ export function getUrlParams( locationSearch ) {
 				const key = chunks[ 0 ];
 				let value = decodeURIComponent( chunks[ 1 ] );
 				value = isNaN( Number( value ) ) ? value : Number( value );
-				return ( params[ key ] = value ), params;
+				return ( ( params[ key ] = value ), params );
 			}, {} );
 	}
 	return {};
