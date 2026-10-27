@@ -445,15 +445,6 @@
 			"pinVersion": "next"
 		},
 		{
-			"dependencies": [
-				"@wordpress/global-styles-engine"
-			],
-			"packages": [
-				"**"
-			],
-			"isIgnored": true
-		},
-		{
 			"label": "settings-ui temporarily pins DataViews 17.1.0 for the DataForm migration",
 			"dependencies": [
 				"@wordpress/dataviews"
