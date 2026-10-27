@@ -76,14 +76,14 @@ function ProductCardFooter( props: { product: Product } ) {
 		return currencyFormats[ currencyCode ] || '%s';
 	};
 
-	// Sent by WooCommerce.com only while a free trial campaign runs; anything but a positive integer means no trial.
+	// WooCommerce.com sends a day count only for products with a free trial; anything but a positive integer means no trial.
 	const freeTrialDays = product.freeTrialLengthDays;
 	const freeTrialLabel =
 		typeof freeTrialDays === 'number' &&
 		Number.isInteger( freeTrialDays ) &&
 		freeTrialDays > 0
 			? sprintf(
-					/* translators: %d: free trial length in days */
+					/* translators: %d: free trial length in days. English uses the same form for singular and plural. */
 					_n(
 						'%d day free trial',
 						'%d day free trial',
