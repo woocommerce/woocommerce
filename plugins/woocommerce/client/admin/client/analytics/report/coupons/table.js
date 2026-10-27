@@ -95,7 +95,7 @@ class CouponsReportTable extends Component {
 					? getNewPath( persistedQuery, '/analytics/coupons', {
 							filter: 'single_coupon',
 							coupons: couponId,
-					  } )
+						} )
 					: null;
 
 			const couponLink =
@@ -112,7 +112,7 @@ class CouponsReportTable extends Component {
 					? getNewPath( persistedQuery, '/analytics/orders', {
 							filter: 'advanced',
 							coupon_includes: couponId,
-					  } )
+						} )
 					: null;
 			const ordersLink =
 				ordersUrl === null ? (

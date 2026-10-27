@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\StockNotifications;
 
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
+use Automattic\WooCommerce\Internal\StockNotifications\Frontend\NotificationManagementService;
 
 /**
  * Controller for managing data retention of customer stock notifications.
@@ -37,14 +38,14 @@ class DataRetentionController {
 	/**
 	 * Responds to changes in the option for deleting unverified notifications.
 	 * If the new value is numeric and greater than zero, it schedules a daily task.
-	 * If the new value is not numeric or is empty, it clears the scheduled tasks.
+	 * If the new value is not numeric, or is zero or less, it clears the scheduled tasks.
 	 *
 	 * @param mixed $unused The old option value or option name (not used in this function).
 	 * @param mixed $new_option_value The new value of the option.
 	 * @return void
 	 */
 	public function schedule_or_unschedule_daily_task( $unused, $new_option_value ): void {
-		if ( ! is_numeric( $new_option_value ) || empty( $new_option_value ) ) {
+		if ( ! is_numeric( $new_option_value ) || (int) $new_option_value <= 0 ) {
 			$this->clear_daily_task();
 			return;
 		}
@@ -64,7 +65,7 @@ class DataRetentionController {
 	/**
 	 * Deletes overdue notifications based on the configured time threshold.
 	 * It retrieves notifications that are pending and past the threshold,
-	 * then deletes them.
+	 * then deletes them, except those whose verification email was resent within the threshold.
 	 *
 	 * @return void
 	 */
@@ -85,7 +86,13 @@ class DataRetentionController {
 
 		foreach ( $overdue_notifications as $notification_id ) {
 			$notification = Factory::get_notification( $notification_id );
-			if ( $notification instanceof Notification ) {
+			if ( ! $notification instanceof Notification ) {
+				continue;
+			}
+
+			// Keep sign-ups whose verification email was resent within the retention window.
+			$last_verify_email_sent_at = (int) $notification->get_meta( NotificationManagementService::LAST_VERIFY_EMAIL_SENT_META );
+			if ( $last_verify_email_sent_at <= $overdue_threshold ) {
 				$notification->delete();
 			}
 		}

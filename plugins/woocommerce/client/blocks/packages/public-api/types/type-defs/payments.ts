@@ -77,8 +77,7 @@ export interface CanMakePaymentArgumentCart {
 }
 
 export type CanMakePaymentReturnType =
-	| boolean
-	| Promise< boolean | { error: { message: string } } >;
+	boolean | Promise< boolean | { error: { message: string } } >;
 
 export type CanMakePaymentCallback = (
 	cartData: CanMakePaymentArgument
@@ -148,8 +147,7 @@ export interface ExpressPaymentMethodConfiguration {
 }
 
 export type PaymentMethods =
-	| Record< string, PaymentMethodConfigInstance >
-	| EmptyObjectType;
+	Record< string, PaymentMethodConfigInstance > | EmptyObjectType;
 
 /**
  * Used to represent payment methods in a context where storing objects is not allowed, i.e. in data stores.
@@ -177,8 +175,7 @@ export type PlainExpressPaymentMethods = Record<
 >;
 
 export type ExpressPaymentMethods =
-	| Record< string, ExpressPaymentMethodConfigInstance >
-	| EmptyObjectType;
+	Record< string, ExpressPaymentMethodConfigInstance > | EmptyObjectType;
 
 export interface PaymentMethodConfigInstance {
 	name: string;

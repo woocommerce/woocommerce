@@ -80,13 +80,15 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	 *
 	 * @param string $name   Product name.
 	 * @param string $status Post status.
+	 * @param array  $props  Extra product props, such as sku or description.
 	 * @return WC_Product_Simple The saved product.
 	 */
-	private function create_search_test_product( string $name, string $status = 'publish' ): WC_Product_Simple {
+	private function create_search_test_product( string $name, string $status = 'publish', array $props = array() ): WC_Product_Simple {
 		$product = new WC_Product_Simple();
 		$product->set_name( $name );
 		$product->set_status( $status );
 		$product->set_regular_price( '10' );
+		$product->set_props( $props );
 		$product->save();
 
 		return $product;
@@ -324,6 +326,127 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 			$results = $data_store->search_products( 'Zero exclude', '', true, true, null, null, array( $value ) );
 			$this->assertEqualSets( $baseline, $results, "An exclude list holding a {$label} must not change the results" );
 		}
+	}
+
+	/**
+	 * @testdox Search should include private products for users who can read them but not edit them.
+	 */
+	public function test_search_products_includes_private_products_for_users_who_can_read_them(): void {
+		$product = $this->create_search_test_product( 'Searchable private product', 'private' );
+		$user_id = self::factory()->user->create( array( 'role' => 'customer' ) );
+		wp_set_current_user( $user_id );
+
+		$data_store = WC_Data_Store::load( 'product' );
+
+		$this->assertNotContains( $product->get_id(), $data_store->search_products( 'Searchable private product', '', false, false ), 'Private product should not be returned to users who cannot read private products' );
+
+		wp_get_current_user()->add_cap( 'read_private_products' );
+
+		$this->assertTrue( current_user_can( 'read_private_products' ), 'The user under test should be able to read private products' );
+		$this->assertFalse( current_user_can( 'edit_private_products' ), 'Granting read access should leave the user unable to edit private products' );
+
+		$this->assertContains( $product->get_id(), $data_store->search_products( 'Searchable private product', '', false, false ), 'Private product should be returned to users who can read private products but not edit them' );
+	}
+
+	/**
+	 * @testdox Limited search should keep SKU matches when more description-only matches sort ahead of them by title.
+	 */
+	public function test_search_products_limit_keeps_sku_matches_over_description_matches(): void {
+		for ( $i = 1; $i <= 5; $i++ ) {
+			$this->create_search_test_product(
+				"Aaa Filler Card {$i}",
+				'publish',
+				array(
+					'sku'         => "FILLER-{$i}",
+					'description' => 'A greeting card featuring a rose motif.',
+				)
+			);
+		}
+
+		$parent = WC_Helper_Product::create_variation_product();
+		$parent->set_name( 'Rose Oil' );
+		$parent->set_sku( 'ROSO' );
+		$parent->save();
+
+		list( $exact_sku_variation_id, $prefix_sku_variation_id ) = $parent->get_children();
+
+		$exact_sku_variation = wc_get_product( $exact_sku_variation_id );
+		$exact_sku_variation->set_sku( 'ROS' );
+		$exact_sku_variation->save();
+		$prefix_sku_variation = wc_get_product( $prefix_sku_variation_id );
+		$prefix_sku_variation->set_sku( 'ROS4' );
+		$prefix_sku_variation->save();
+
+		$results = WC_Data_Store::load( 'product' )->search_products( 'ROS', '', true, false, 5 );
+
+		$this->assertContains( $parent->get_id(), $results, 'Variable product with a matching SKU should be returned' );
+		$this->assertContains( $exact_sku_variation_id, $results, 'Variation with an exact SKU match should be returned' );
+		$this->assertContains( $prefix_sku_variation_id, $results, 'Variation with a matching SKU prefix should be returned' );
+	}
+
+	/**
+	 * @testdox Search should rank SKU matches, then title matches, ahead of description-only matches.
+	 */
+	public function test_search_products_ranks_results_by_relevance(): void {
+		$products = array();
+		foreach (
+			array(
+				'description' => array( 'Aaa bulb', 'BULB-1', 'Fits any lamp.' ),
+				'contains'    => array( 'Floor lamp', 'FLOOR-1', '' ),
+				'title_start' => array( 'Lamp shade', 'SHADE-1', '' ),
+				'sku_start'   => array( 'Table light', 'LAMP-2', '' ),
+				'sku_exact'   => array( 'Desk lamp', 'LAMP', '' ),
+			) as $key => list( $name, $sku, $description )
+		) {
+			$products[ $key ] = $this->create_search_test_product(
+				$name,
+				'publish',
+				array(
+					'sku'         => $sku,
+					'description' => $description,
+				)
+			)->get_id();
+		}
+
+		// Simple products report a parent ID of 0, which search_products() appends after the matches.
+		$results = array_values( array_filter( WC_Data_Store::load( 'product' )->search_products( 'lamp', '', false, false ) ) );
+
+		$this->assertSame(
+			array( $products['sku_exact'], $products['sku_start'], $products['title_start'], $products['contains'], $products['description'] ),
+			$results,
+			'Results should be ordered by exact SKU, SKU prefix, title prefix, title match, then other matches'
+		);
+	}
+
+	/**
+	 * @testdox Search for $term should rank the exact SKU match ahead of title matches.
+	 *
+	 * @testWith ["\"lamp\"", "LAMP", "Lamp shade"]
+	 *           ["AB+12", "AB+12", "AB 12 holder"]
+	 *
+	 * @param string $term             Search term, as typed.
+	 * @param string $sku              SKU that exactly matches the term.
+	 * @param string $title_match_name Name of a product that only matches by title.
+	 */
+	public function test_search_products_ranks_exact_sku_first_for_quoted_and_split_terms( string $term, string $sku, string $title_match_name ): void {
+		$title_match = $this->create_search_test_product( $title_match_name );
+		$exact_sku   = $this->create_search_test_product( 'Zzz item', 'publish', array( 'sku' => $sku ) );
+
+		$results = WC_Data_Store::load( 'product' )->search_products( $term, '', false, false );
+
+		$this->assertSame( array( $exact_sku->get_id(), $title_match->get_id() ), array_values( array_filter( $results ) ), 'The exact SKU match should rank first' );
+	}
+
+	/**
+	 * @testdox Limited search should keep a GTIN match when a description-only match sorts ahead of it by title.
+	 */
+	public function test_search_products_limit_keeps_gtin_matches_over_description_matches(): void {
+		$this->create_search_test_product( 'Aaa barcode list', 'publish', array( 'description' => 'Replaces 4006381333931.' ) );
+		$product = $this->create_search_test_product( 'Pencil', 'publish', array( 'global_unique_id' => '4006381333931' ) );
+
+		$results = WC_Data_Store::load( 'product' )->search_products( '4006381333931', '', false, false, 1 );
+
+		$this->assertContains( $product->get_id(), $results, 'Product with an exact GTIN match should be returned' );
 	}
 
 	/**

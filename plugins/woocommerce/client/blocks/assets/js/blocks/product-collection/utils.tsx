@@ -3,7 +3,7 @@
  */
 import { store as blockEditorStore } from '@wordpress/block-editor';
 import { addFilter } from '@wordpress/hooks';
-import { select, useSelect, useDispatch } from '@wordpress/data';
+import { select, useSelect } from '@wordpress/data';
 import { store as coreDataStore } from '@wordpress/core-data';
 import type { BlockEditProps, Block } from '@wordpress/blocks';
 import { CORE_EDITOR_STORE } from '@woocommerce/utils';
@@ -79,8 +79,7 @@ export function setQueryAttribute(
 ) {
 	const currentBlock = select( blockEditorStore ).getBlock( block.clientId );
 	const currentAttributes = currentBlock?.attributes as
-		| ProductCollectionAttributes
-		| undefined;
+		ProductCollectionAttributes | undefined;
 	const query = currentAttributes?.query || block.attributes.query;
 
 	block.setAttributes( {
@@ -126,9 +125,7 @@ const isInProductArchive = () => {
 	return false;
 };
 
-const isFirstBlockThatUsesPageContext = (
-	property: 'inherit' | 'filterable'
-) => {
+const isFirstBlockThatUsesPageContext = () => {
 	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore No types for this exist yet, natively.
 	const { getBlocksByName, getBlock } = select( blockEditorStore );
@@ -140,7 +137,7 @@ const isFirstBlockThatUsesPageContext = (
 		( clientId ) => {
 			const block = getBlock( clientId );
 
-			return block.attributes?.query?.[ property ];
+			return block.attributes?.query?.inherit;
 		}
 	);
 
@@ -148,15 +145,7 @@ const isFirstBlockThatUsesPageContext = (
 };
 
 export function getDefaultValueOfInherit() {
-	return isInProductArchive()
-		? isFirstBlockThatUsesPageContext( 'inherit' )
-		: false;
-}
-
-export function getDefaultValueOfFilterable() {
-	return ! isInProductArchive()
-		? isFirstBlockThatUsesPageContext( 'filterable' )
-		: false;
+	return isInProductArchive() ? isFirstBlockThatUsesPageContext() : false;
 }
 
 /**
@@ -394,32 +383,23 @@ export const useProductCollectionUIState = ( {
 
 export const useSetPreviewState = ( {
 	setPreviewState,
+	initialPreviewState,
 	location,
 	attributes,
-	setAttributes,
 	isUsingReferencePreviewMode,
 }: {
 	setPreviewState?: SetPreviewState | undefined;
+	initialPreviewState?: PreviewState | undefined;
 	location: WooCommerceBlockLocation;
 	attributes: ProductCollectionAttributes;
-	setAttributes: (
-		attributes: Partial< ProductCollectionAttributes >
-	) => void;
 	usesReference?: string[] | undefined;
 	isUsingReferencePreviewMode: boolean;
-} ) => {
-	const { __unstableMarkNextChangeAsNotPersistent } =
-		useDispatch( blockEditorStore );
-
-	const setState = ( newPreviewState: PreviewState ) => {
-		__unstableMarkNextChangeAsNotPersistent();
-		setAttributes( {
-			__privatePreviewState: {
-				...attributes.__privatePreviewState,
-				...newPreviewState,
-			},
-		} );
-	};
+} ): PreviewState | undefined => {
+	// Preview state is editor-only UI, so keep it in local state rather than a
+	// block attribute — attribute writes mark the entity dirty (#48936).
+	const [ previewState, setState ] = useState< PreviewState | undefined >(
+		initialPreviewState
+	);
 
 	/**
 	 * When usesReference is available on Frontend but not on Editor side,
@@ -431,20 +411,12 @@ export const useSetPreviewState = ( {
 	);
 	useEffect( () => {
 		if ( isUsingReferencePreviewMode ) {
-			__unstableMarkNextChangeAsNotPersistent();
-			setAttributes( {
-				__privatePreviewState: {
-					isPreview: usesReferencePreviewMessage.length > 0,
-					previewMessage: usesReferencePreviewMessage,
-				},
+			setState( {
+				isPreview: usesReferencePreviewMessage.length > 0,
+				previewMessage: usesReferencePreviewMessage,
 			} );
 		}
-	}, [
-		setAttributes,
-		usesReferencePreviewMessage,
-		isUsingReferencePreviewMode,
-		__unstableMarkNextChangeAsNotPersistent,
-	] );
+	}, [ usesReferencePreviewMessage, isUsingReferencePreviewMode ] );
 
 	// Running setPreviewState function provided by Collection, if it exists.
 	useLayoutEffect( () => {
@@ -480,21 +452,24 @@ export const useSetPreviewState = ( {
 			? location.sourceData?.termId
 			: null;
 	useEffect( () => {
-		if ( ! setPreviewState && ! isUsingReferencePreviewMode ) {
+		// Don't overwrite a collection's static `initialPreviewState` with the
+		// generic archive fallback.
+		if (
+			! setPreviewState &&
+			! isUsingReferencePreviewMode &&
+			! initialPreviewState
+		) {
 			const isGenericArchiveTemplate =
 				location.type === LocationType.Archive && termId === null;
 
-			__unstableMarkNextChangeAsNotPersistent();
-			setAttributes( {
-				__privatePreviewState: {
-					isPreview: isGenericArchiveTemplate
-						? !! attributes?.query?.inherit
-						: false,
-					previewMessage: __(
-						'Actual products will vary depending on the page being viewed.',
-						'woocommerce'
-					),
-				},
+			setState( {
+				isPreview: isGenericArchiveTemplate
+					? !! attributes?.query?.inherit
+					: false,
+				previewMessage: __(
+					'Actual products will vary depending on the page being viewed.',
+					'woocommerce'
+				),
 			} );
 		}
 	}, [
@@ -502,11 +477,12 @@ export const useSetPreviewState = ( {
 		usesReferencePreviewMessage,
 		termId,
 		location.type,
-		setAttributes,
 		setPreviewState,
+		initialPreviewState,
 		isUsingReferencePreviewMode,
-		__unstableMarkNextChangeAsNotPersistent,
 	] );
+
+	return previewState;
 };
 export const getDefaultQueryForSettingsSection = (
 	currentQuery: ProductCollectionQuery
@@ -515,7 +491,6 @@ export const getDefaultQueryForSettingsSection = (
 	orderBy: DEFAULT_QUERY.orderBy as TProductCollectionOrderBy,
 	order: DEFAULT_QUERY.order as TProductCollectionOrder,
 	inherit: getDefaultValueOfInherit(),
-	filterable: getDefaultValueOfFilterable(),
 	perPage: DEFAULT_QUERY.perPage,
 	offset: DEFAULT_QUERY.offset,
 	pages: DEFAULT_QUERY.pages,
@@ -540,7 +515,6 @@ export const getDefaultProductCollection = () =>
 			query: {
 				...DEFAULT_ATTRIBUTES.query,
 				inherit: getDefaultValueOfInherit(),
-				filterable: getDefaultValueOfFilterable(),
 			},
 		},
 		createBlocksFromInnerBlocksTemplate( INNER_BLOCKS_TEMPLATE )

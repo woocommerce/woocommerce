@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Internal\EmailEditor;
 
 use Automattic\WooCommerce\EmailEditor\Email_Editor_Container;
 use Automattic\WooCommerce\EmailEditor\Engine\Dependency_Check;
+use Automattic\WooCommerce\EmailEditor\Engine\Email_Editor;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\Renderer;
 use Automattic\WooCommerce\EmailEditor\Engine\Send_Preview_Email;
 use Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreview;
@@ -71,11 +72,12 @@ class Integration {
 	private string $sending_preview_for_email_type = '';
 
 	/**
-	 * The WC_Email instance.
+	 * Email used to resolve the "From" address and name for preview sends. Resolved lazily
+	 * by get_wc_email_instance().
 	 *
-	 * @var \WC_Email
+	 * @var \WC_Email|null
 	 */
-	private \WC_Email $wc_email_instance;
+	private ?\WC_Email $wc_email_instance = null;
 
 	/**
 	 * Whether the email editor page has been rendered.
@@ -146,15 +148,6 @@ class Integration {
 		$this->editor_page_renderer    = $container->get( PageRenderer::class );
 		$this->template_api_controller = $container->get( TemplateApiController::class );
 		$this->email_api_controller    = $container->get( EmailApiController::class );
-
-		// Using any email class to get the instance.
-		$registered_emails = \WC_Emails::instance()->get_emails();
-		if ( isset( $registered_emails['WC_Email_New_Order'] ) ) {
-			$this->wc_email_instance = $registered_emails['WC_Email_New_Order'];
-		} else {
-			$first_email_key         = array_key_first( $registered_emails );
-			$this->wc_email_instance = $registered_emails[ $first_email_key ];
-		}
 	}
 
 	/**
@@ -179,6 +172,8 @@ class Integration {
 		add_action( 'admin_init', array( $this, 'render_block_email_preview_page' ) );
 		add_action( 'rest_api_init', array( $this->email_api_controller, 'register_routes' ) );
 		add_action( 'transition_post_status', array( $this, 'save_email_mapping_on_publish' ), 10, 3 );
+		add_action( 'wp_entity_actions_api_init', array( $this, 'register_entity_actions' ) );
+		add_filter( 'woocommerce_email_editor_replace_trash_action', array( $this, 'replace_trash_action' ), 10, 2 );
 		// Priority 11 ensures the email editor's `init` bootstrap (default priority 10)
 		// has registered the `woo_email` post type before we register meta against it.
 		add_action( 'init', array( WCEmailTemplateDivergenceDetector::class, 'register_meta' ), 11 );
@@ -195,6 +190,46 @@ class Integration {
 		// RSM-149 sync-meta backfill finalises. The backfill class itself is in the
 		// 10.8 feature freeze, so we hook the existing action it already publishes.
 		add_action( WCEmailTemplateSyncBackfill::BACKFILL_COMPLETE_ACTION, array( WCEmailTemplateSyncTracker::class, 'on_backfill_complete' ), 20 );
+	}
+
+	/**
+	 * Register the "Reset" email content action on WordPress 7.2+, where post actions come from a server-side registry.
+	 * Its JavaScript parts come from the email editor script module, see email-editor-integration/index.ts.
+	 *
+	 * @internal
+	 */
+	public function register_entity_actions(): void {
+		if ( ! function_exists( 'wp_register_entity_actions' ) ) {
+			return;
+		}
+		wp_register_entity_actions(
+			'woocommerce',
+			'postType',
+			self::EMAIL_POST_TYPE,
+			array(
+				array(
+					'id'                => 'reset-notification-email-content',
+					'label'             => __( 'Reset', 'woocommerce' ),
+					'supportsBulk'      => false,
+					'hideModalHeader'   => true,
+					'modalFocusOnMount' => 'firstContentElement',
+				),
+			),
+			Email_Editor::ENTITY_ACTIONS_SCRIPT_MODULE_ID
+		);
+	}
+
+	/**
+	 * Use the email editor's delete action instead of core's "Trash…" for WooCommerce emails on WordPress 7.2+.
+	 *
+	 * @internal
+	 *
+	 * @param bool|mixed $replace   Whether to replace core's action.
+	 * @param string     $post_type The email post type.
+	 * @return bool|mixed
+	 */
+	public function replace_trash_action( $replace, $post_type ) {
+		return self::EMAIL_POST_TYPE === $post_type ? true : $replace;
 	}
 
 	/**
@@ -722,8 +757,12 @@ class Integration {
 	 * @return void
 	 */
 	public function send_preview_email_before_wp_mail() {
-		add_filter( 'wp_mail_from', array( $this->wc_email_instance, 'get_from_address' ) );
-		add_filter( 'wp_mail_from_name', array( $this->wc_email_instance, 'get_from_name' ) );
+		$email = $this->get_wc_email_instance();
+		if ( ! $email ) {
+			return;
+		}
+		add_filter( 'wp_mail_from', array( $email, 'get_from_address' ) );
+		add_filter( 'wp_mail_from_name', array( $email, 'get_from_name' ) );
 	}
 
 	/**
@@ -733,8 +772,30 @@ class Integration {
 	 * @return void
 	 */
 	public function send_preview_email_after_wp_mail() {
-		remove_filter( 'wp_mail_from', array( $this->wc_email_instance, 'get_from_address' ) );
-		remove_filter( 'wp_mail_from_name', array( $this->wc_email_instance, 'get_from_name' ) );
+		$email = $this->get_wc_email_instance();
+		if ( ! $email ) {
+			return;
+		}
+		remove_filter( 'wp_mail_from', array( $email, 'get_from_address' ) );
+		remove_filter( 'wp_mail_from_name', array( $email, 'get_from_name' ) );
+	}
+
+	/**
+	 * Get a registered email whose "From" address and name apply to preview sends.
+	 *
+	 * Resolved on first use, not during `woocommerce_init`: building `WC_Emails` that early
+	 * applies `woocommerce_email_classes` before features hooked on `init` register their
+	 * emails, and the mailer is never rebuilt. Any registered email works, since the "From"
+	 * settings are shared across all of them.
+	 *
+	 * @return \WC_Email|null Null when no email is registered.
+	 */
+	private function get_wc_email_instance(): ?\WC_Email {
+		if ( null === $this->wc_email_instance ) {
+			$registered_emails       = \WC_Emails::instance()->get_emails();
+			$this->wc_email_instance = $registered_emails['WC_Email_New_Order'] ?? $registered_emails[ array_key_first( $registered_emails ) ] ?? null;
+		}
+		return $this->wc_email_instance;
 	}
 
 	/**

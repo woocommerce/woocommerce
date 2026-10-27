@@ -94,7 +94,7 @@ export const MultipleSelector = ( {
 					? selectedOptions.filter(
 							( existingItem ) =>
 								existingItem.value !== item.value
-					  )
+						)
 					: [ ...selectedOptions, item ];
 				onSelect( updatedPlatforms );
 			} }

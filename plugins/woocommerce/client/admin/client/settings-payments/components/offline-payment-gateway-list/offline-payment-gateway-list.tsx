@@ -64,7 +64,7 @@ export const OfflinePaymentGatewayListItem = ( {
 					</span>
 					<span
 						className="woocommerce-list__item-content"
-						// eslint-disable-next-line react/no-danger -- This string is sanitized by the PaymentGateway class.
+
 						dangerouslySetInnerHTML={ sanitizeHTML(
 							decodeEntities( gateway.description )
 						) }

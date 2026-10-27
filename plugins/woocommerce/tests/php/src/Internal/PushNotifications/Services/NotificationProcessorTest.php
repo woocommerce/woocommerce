@@ -8,6 +8,8 @@ use Automattic\WooCommerce\Internal\PushNotifications\DataStores\PushTokensDataS
 use Automattic\WooCommerce\Internal\PushNotifications\Dispatchers\InternalNotificationDispatcher;
 use Automattic\WooCommerce\Internal\PushNotifications\Dispatchers\WpcomNotificationDispatcher;
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
+use Automattic\WooCommerce\Internal\PushNotifications\Enums\SendOutcome;
+use Automattic\WooCommerce\Internal\PushNotifications\Enums\SuppressionReason;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewOrderNotification;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewReviewNotification;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
@@ -16,6 +18,7 @@ use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationPreferencesService;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationRetryHandler;
+use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationStepLogger;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\PendingNotificationStore;
 use Automattic\WooCommerce\RestApi\UnitTests\LoggerSpyTrait;
 use Automattic\WooCommerce\Tests\Internal\PushNotifications\Helpers\PushNotificationsTestTrait;
@@ -66,6 +69,13 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 	private $retry_handler;
 
 	/**
+	 * Mock step logger.
+	 *
+	 * @var NotificationStepLogger
+	 */
+	private $step_logger;
+
+	/**
 	 * A test order ID.
 	 *
 	 * @var int
@@ -82,10 +92,11 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 		$this->data_store          = $this->createMock( PushTokensDataStore::class );
 		$this->preferences_service = $this->createMock( NotificationPreferencesService::class );
 		$this->retry_handler       = $this->createMock( NotificationRetryHandler::class );
+		$this->step_logger         = $this->createMock( NotificationStepLogger::class );
 		$this->order_id            = wc_create_order( array( 'status' => 'processing' ) )->get_id();
 
 		$this->sut = new NotificationProcessor();
-		$this->sut->init( $this->dispatcher, $this->data_store, $this->preferences_service, $this->retry_handler );
+		$this->sut->init( $this->dispatcher, $this->data_store, $this->preferences_service, $this->retry_handler, $this->step_logger );
 
 		// By default every user has every notification type enabled, so existing
 		// tests behave as before. Per-user/per-type filtering is exercised in
@@ -314,7 +325,7 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 		$this->dispatcher->expects( $this->never() )->method( 'dispatch' );
 
 		$sut = new NotificationProcessor();
-		$sut->init( $this->dispatcher, $data_store, $this->preferences_service, $this->retry_handler );
+		$sut->init( $this->dispatcher, $data_store, $this->preferences_service, $this->retry_handler, $this->step_logger );
 
 		$notification = new NewOrderNotification( $this->order_id );
 		$result       = $sut->process( $notification );
@@ -343,7 +354,7 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 		$this->dispatcher->expects( $this->never() )->method( 'dispatch' );
 
 		$sut = new NotificationProcessor();
-		$sut->init( $this->dispatcher, $this->data_store, $preferences_service, $this->retry_handler );
+		$sut->init( $this->dispatcher, $this->data_store, $preferences_service, $this->retry_handler, $this->step_logger );
 
 		$notification = new NewOrderNotification( $this->order_id );
 		$result       = $sut->process( $notification );
@@ -414,7 +425,7 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 			);
 
 		$sut = new NotificationProcessor();
-		$sut->init( $this->dispatcher, $data_store, $preferences_service, $this->retry_handler );
+		$sut->init( $this->dispatcher, $data_store, $preferences_service, $this->retry_handler, $this->step_logger );
 
 		$notification = new NewOrderNotification( $this->order_id );
 		$result       = $sut->process( $notification );
@@ -445,7 +456,7 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 			);
 
 		$sut = new NotificationProcessor();
-		$sut->init( $this->dispatcher, $this->data_store, $preferences_service, $this->retry_handler );
+		$sut->init( $this->dispatcher, $this->data_store, $preferences_service, $this->retry_handler, $this->step_logger );
 
 		// store_order is enabled — should dispatch.
 		$order_notification = new NewOrderNotification( $this->order_id );
@@ -525,14 +536,14 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 			);
 
 		$sut = new NotificationProcessor();
-		$sut->init( $this->dispatcher, $data_store, $preferences_service, $this->retry_handler );
+		$sut->init( $this->dispatcher, $data_store, $preferences_service, $this->retry_handler, $this->step_logger );
 
 		$this->assertTrue( $sut->process( new NewOrderNotification( $this->order_id ) ) );
 	}
 
 	/**
 	 * Locks the delegation contract: the processor must consult
-	 * {@see Notification::should_send_to_user()} for the per-user decision and
+	 * {@see Notification::get_suppression_reason()} for the per-user decision and
 	 * pass it the raw stored preference value (so parametrized prefs like
 	 * `['enabled' => true, 'min_value' => 500]` reach the subclass intact
 	 * once the storage layer is widened to support them).
@@ -560,21 +571,21 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 					'write_meta',
 					'read_meta',
 					'delete_meta',
-					'should_send_to_user',
+					'get_suppression_reason',
 				)
 			)
 			->getMock();
 		$notification->method( 'get_type' )->willReturn( 'store_order' );
 		$notification->method( 'has_meta' )->willReturn( false );
 		$notification->expects( $this->once() )
-			->method( 'should_send_to_user' )
+			->method( 'get_suppression_reason' )
 			->with( $this->equalTo( $pref_value ) )
-			->willReturn( false );
+			->willReturn( SuppressionReason::NOTIFICATIONS_OFF );
 
 		$this->dispatcher->expects( $this->never() )->method( 'dispatch' );
 
 		$sut = new NotificationProcessor();
-		$sut->init( $this->dispatcher, $this->data_store, $preferences_service, $this->retry_handler );
+		$sut->init( $this->dispatcher, $this->data_store, $preferences_service, $this->retry_handler, $this->step_logger );
 
 		$result = $sut->process( $notification );
 
@@ -776,6 +787,329 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should log a no_tokens outcome with the counts when the store has no eligible tokens.
+	 */
+	public function test_process_logs_no_tokens(): void {
+		$data_store = $this->createMock( PushTokensDataStore::class );
+		$data_store->method( 'get_tokens_for_roles' )->willReturn( array() );
+		$data_store->method( 'count_tokens' )->willReturn( 2 );
+
+		$logger = $this->create_active_step_logger();
+		$logger->expects( $this->once() )
+			->method( 'log_notification_step' )
+			->with(
+				$this->anything(),
+				'recipients',
+				'none',
+				$this->callback(
+					function ( array $context ) {
+						return 2 === $context['tokens_total']
+							&& 0 === $context['tokens_eligible']
+							&& 0 === $context['recipients']
+							&& 0 === $context['held_back']
+							&& 0 === $context['attempt']
+							&& false === $context['is_retry'];
+					}
+				)
+			);
+		$logger->expects( $this->never() )->method( 'log_suppressed_step' );
+
+		$sut = new NotificationProcessor();
+		$sut->init( $this->dispatcher, $data_store, $this->preferences_service, $this->retry_handler, $logger );
+
+		$sut->process( new NewOrderNotification( $this->order_id ) );
+	}
+
+	/**
+	 * @testdox Should name the excluded tokens grouped by reason and log an all_excluded outcome when nobody wants it.
+	 */
+	public function test_process_logs_excluded_tokens_with_reasons(): void {
+		$data_store = $this->createMock( PushTokensDataStore::class );
+		$data_store->method( 'get_tokens_for_roles' )->willReturn(
+			array(
+				$this->create_token( 11, 1 ),
+				$this->create_token( 12, 1 ),
+				$this->create_token( 13, 2 ),
+			)
+		);
+		$data_store->method( 'count_tokens' )->willReturn( 3 );
+
+		$preferences_service = $this->createMock( NotificationPreferencesService::class );
+		$preferences_service->method( 'get_preferences' )->willReturn(
+			array( 'store_order' => array( 'enabled' => false ) )
+		);
+
+		$logger = $this->create_active_step_logger();
+		$logger->expects( $this->once() )
+			->method( 'log_notification_step' )
+			->with(
+				$this->anything(),
+				'recipients',
+				'all_excluded',
+				$this->callback(
+					function ( array $context ) {
+						return 3 === $context['held_back']
+							&& 0 === $context['recipients']
+							&& array( 'notifications_off' => 3 ) === $context['held_back_reasons'];
+					}
+				)
+			);
+		$logger->expects( $this->once() )
+			->method( 'log_suppressed_step' )
+			->with(
+				$this->anything(),
+				'token_excluded',
+				'notifications_off',
+				$this->callback(
+					fn( array $context ) => array( 'notifications_off' => array( 11, 12, 13 ) ) === $context['excluded_tokens']
+				)
+			);
+
+		$sut = new NotificationProcessor();
+		$sut->init( $this->dispatcher, $data_store, $preferences_service, $this->retry_handler, $logger );
+
+		$this->assertTrue( $sut->process( new NewOrderNotification( $this->order_id ) ) );
+	}
+
+	/**
+	 * @testdox Should log recipients resolved with the recipient token IDs and no line per recipient.
+	 */
+	public function test_process_logs_recipients_resolved(): void {
+		$data_store = $this->createMock( PushTokensDataStore::class );
+		$data_store->method( 'get_tokens_for_roles' )->willReturn(
+			array( $this->create_token( 11, 1 ), $this->create_token( 12, 2 ) )
+		);
+		$data_store->method( 'count_tokens' )->willReturn( 2 );
+		$this->dispatcher->method( 'dispatch' )->willReturn( array( 'success' => true ) );
+
+		$logger = $this->create_active_step_logger();
+		$logger->expects( $this->once() )
+			->method( 'log_notification_step' )
+			->with(
+				$this->anything(),
+				'recipients',
+				'resolved',
+				$this->callback(
+					function ( array $context ) {
+						return 2 === $context['recipients']
+							&& array( 11, 12 ) === $context['token_ids'];
+					}
+				)
+			);
+
+		$sut = new NotificationProcessor();
+		$sut->init( $this->dispatcher, $data_store, $this->preferences_service, $this->retry_handler, $logger );
+
+		$this->assertTrue( $sut->process( new NewOrderNotification( $this->order_id ) ) );
+	}
+
+	/**
+	 * @testdox Should name the tokens WPCOM refused on one dispatched line.
+	 */
+	public function test_process_names_the_refused_tokens(): void {
+		$data_store = $this->createMock( PushTokensDataStore::class );
+		$data_store->method( 'get_tokens_for_roles' )->willReturn(
+			array( $this->create_token( 11, 1 ), $this->create_token( 12, 2 ) )
+		);
+		$data_store->method( 'count_tokens' )->willReturn( 2 );
+		$this->dispatcher->method( 'dispatch' )->willReturn(
+			array(
+				'success'        => false,
+				'retry_after'    => null,
+				'outcome'        => SendOutcome::REJECTED_INVALID_TOKEN,
+				'invalid_tokens' => array( 'token-12' ),
+			)
+		);
+
+		$logged = array();
+		$logger = $this->create_active_step_logger();
+		$logger->method( 'log_notification_step' )
+			->willReturnCallback(
+				function ( $notification, string $step, string $outcome, array $context = array() ) use ( &$logged ) {
+					$logged[] = array( $step, $outcome, $context );
+				}
+			);
+
+		$sut = new NotificationProcessor();
+		$sut->init( $this->dispatcher, $data_store, $this->preferences_service, $this->retry_handler, $logger );
+
+		$this->assertFalse( $sut->process( new NewOrderNotification( $this->order_id ) ) );
+
+		$dispatched = array_values(
+			array_filter( $logged, fn( array $line ) => 'dispatched' === $line[0] )
+		);
+
+		$this->assertCount( 1, $dispatched, 'Exactly one dispatched line should name the refused tokens.' );
+		$this->assertSame( 'invalid_token', $dispatched[0][1] );
+		$this->assertSame( array( 12 ), $dispatched[0][2]['invalid_token_ids'] );
+	}
+
+	/**
+	 * @testdox Should log the fallback firing before processing.
+	 */
+	public function test_handle_safety_net_logs_that_it_fired(): void {
+		$this->data_store->method( 'get_tokens_for_roles' )->willReturn( array() );
+
+		$logger = $this->create_active_step_logger();
+		$logger->expects( $this->atLeastOnce() )
+			->method( 'log_notification_step' )
+			->withConsecutive( array( $this->anything(), 'fallback', 'fired' ) );
+
+		$sut = new NotificationProcessor();
+		$sut->init( $this->dispatcher, $this->data_store, $this->preferences_service, $this->retry_handler, $logger );
+
+		$sut->handle_safety_net( 'store_order', $this->order_id );
+	}
+
+	/**
+	 * @testdox Should record the full recipient count but cap the token IDs it names.
+	 */
+	public function test_process_caps_the_recipient_ids_it_names(): void {
+		$tokens = array();
+		for ( $i = 1; $i <= NotificationProcessor::RECIPIENT_ID_CAP + 5; $i++ ) {
+			$tokens[] = $this->create_token( 100 + $i, 1 );
+		}
+
+		$data_store = $this->createMock( PushTokensDataStore::class );
+		$data_store->method( 'get_tokens_for_roles' )->willReturn( $tokens );
+		$data_store->method( 'count_tokens' )->willReturn( count( $tokens ) );
+		$this->dispatcher->method( 'dispatch' )->willReturn( array( 'success' => true ) );
+
+		$logger = $this->create_active_step_logger();
+		$logger->expects( $this->once() )
+			->method( 'log_notification_step' )
+			->with(
+				$this->anything(),
+				'recipients',
+				'resolved',
+				$this->callback(
+					function ( array $context ) {
+						return count( $context['token_ids'] ) === NotificationProcessor::RECIPIENT_ID_CAP
+							&& NotificationProcessor::RECIPIENT_ID_CAP + 5 === $context['recipients'];
+					}
+				)
+			);
+
+		$sut = new NotificationProcessor();
+		$sut->init( $this->dispatcher, $data_store, $this->preferences_service, $this->retry_handler, $logger );
+
+		$sut->process( new NewOrderNotification( $this->order_id ) );
+	}
+
+	/**
+	 * @testdox Should not count tokens or write recipient lines when step logging is inactive.
+	 */
+	public function test_process_skips_recipient_logging_when_inactive(): void {
+		$data_store = $this->createMock( PushTokensDataStore::class );
+		$data_store->method( 'get_tokens_for_roles' )->willReturn( array( $this->create_token( 11, 1 ) ) );
+		$data_store->expects( $this->never() )->method( 'count_tokens' );
+		$this->dispatcher->method( 'dispatch' )->willReturn( array( 'success' => true ) );
+
+		$logger = $this->createMock( NotificationStepLogger::class );
+		$logger->method( 'is_active' )->willReturn( false );
+		$logger->expects( $this->never() )->method( 'log_notification_step' );
+		$logger->expects( $this->never() )->method( 'log_suppressed_step' );
+
+		$sut = new NotificationProcessor();
+		$sut->init( $this->dispatcher, $data_store, $this->preferences_service, $this->retry_handler, $logger );
+
+		$this->assertTrue( $sut->process( new NewOrderNotification( $this->order_id ) ) );
+	}
+
+	/**
+	 * @testdox Should write excluded tokens to the store-wide suppressed source, naming them on one line.
+	 */
+	public function test_process_writes_excluded_tokens_to_the_suppressed_source(): void {
+		$data_store = $this->createMock( PushTokensDataStore::class );
+		$data_store->method( 'get_tokens_for_roles' )->willReturn( array( $this->create_token( 11, 1 ) ) );
+		$data_store->method( 'count_tokens' )->willReturn( 1 );
+
+		$preferences_service = $this->createMock( NotificationPreferencesService::class );
+		$preferences_service->method( 'get_preferences' )->willReturn(
+			array( 'store_order' => array( 'enabled' => false ) )
+		);
+
+		$sut = new NotificationProcessor();
+		$sut->init( $this->dispatcher, $data_store, $preferences_service, $this->retry_handler, $this->create_real_step_logger() );
+
+		$this->assertTrue( $sut->process( new NewOrderNotification( $this->order_id ) ) );
+
+		$this->assertLogged(
+			'info',
+			'Token excluded: notifications off',
+			array(
+				'source'          => NotificationStepLogger::SUPPRESSED_SOURCE,
+				'excluded_tokens' => array( 'notifications_off' => array( 11 ) ),
+			)
+		);
+	}
+
+	/**
+	 * @testdox Should log a skipped step when the notification was already sent or already claimed.
+	 */
+	public function test_process_logs_already_sent_and_already_claimed(): void {
+		$logger = $this->create_active_step_logger();
+		$logger->expects( $this->exactly( 2 ) )
+			->method( 'log_notification_step' )
+			->withConsecutive(
+				array( $this->anything(), 'skipped', 'already_claimed' ),
+				array( $this->anything(), 'skipped', 'already_sent' )
+			);
+
+		$sut = new NotificationProcessor();
+		$sut->init( $this->dispatcher, $this->data_store, $this->preferences_service, $this->retry_handler, $logger );
+
+		$notification = new NewOrderNotification( $this->order_id );
+		$notification->write_meta( NotificationProcessor::CLAIMED_META_KEY );
+		$sut->process( $notification );
+
+		$notification->write_meta( NotificationProcessor::SENT_META_KEY );
+		$sut->process( $notification );
+	}
+
+	/**
+	 * Creates a token with an ID, as the data store returns them.
+	 *
+	 * @param int $id      The token post ID.
+	 * @param int $user_id The owning user.
+	 * @return PushToken
+	 */
+	private function create_token( int $id, int $user_id ): PushToken {
+		return new PushToken(
+			array(
+				'id'            => $id,
+				'user_id'       => $user_id,
+				'token'         => 'token-' . $id,
+				'origin'        => PushToken::ORIGIN_WOOCOMMERCE_IOS,
+				'platform'      => PushToken::PLATFORM_APPLE,
+				'device_locale' => 'en_US',
+				'device_uuid'   => 'uuid-' . $id,
+			)
+		);
+	}
+
+	/**
+	 * Creates a step logger mock that reports itself active.
+	 *
+	 * @return NotificationStepLogger|\PHPUnit\Framework\MockObject\MockObject
+	 */
+	private function create_active_step_logger() {
+		$logger = $this->createMock( NotificationStepLogger::class );
+		$logger->method( 'is_active' )->willReturn( true );
+		return $logger;
+	}
+
+	/**
+	 * Creates a real step logger on a store that has registered tokens, so its
+	 * lines reach the spy logger.
+	 *
+	 * @return NotificationStepLogger
+	 */
+	private function create_real_step_logger(): NotificationStepLogger {
+		return new NotificationStepLogger();
+	}
+
+	/**
 	 * Schedules a safety-net action through the real
 	 * {@see PendingNotificationStore::schedule_safety_net()} so tests exercise
 	 * the production schedule shape rather than a hand-built fixture.
@@ -785,7 +1119,7 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 	 */
 	private function schedule_safety_net( Notification $notification ): void {
 		$store = new PendingNotificationStore();
-		$store->init( $this->createMock( InternalNotificationDispatcher::class ), $this->create_data_store_with_tokens( true ) );
+		$store->init( $this->createMock( InternalNotificationDispatcher::class ), $this->create_data_store_with_tokens( true ), $this->createMock( NotificationStepLogger::class ) );
 
 		$method = new \ReflectionMethod( PendingNotificationStore::class, 'schedule_safety_net' );
 		$method->setAccessible( true );
@@ -830,9 +1164,21 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 	public function test_handle_safety_net_logs_error_for_unknown_type(): void {
 		$this->dispatcher->expects( $this->never() )->method( 'dispatch' );
 
-		$this->sut->handle_safety_net( 'unknown_type', 1 );
+		$sut = new NotificationProcessor();
+		$sut->init( $this->dispatcher, $this->data_store, $this->preferences_service, $this->retry_handler, $this->create_real_step_logger() );
 
-		$this->assertLogged( 'error', 'Safety net failed:', array( 'source' => PushNotifications::FEATURE_NAME ) );
+		$sut->handle_safety_net( 'unknown_type', 1 );
+
+		$this->assertLogged(
+			'error',
+			'Fallback failed:',
+			array(
+				'source'  => PushNotifications::FEATURE_NAME,
+				'step'    => 'fallback',
+				'outcome' => 'invalid_notification',
+				'type'    => 'unknown_type',
+			)
+		);
 	}
 
 	/**
@@ -857,7 +1203,7 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 		$this->dispatcher->expects( $this->never() )->method( 'dispatch' );
 
 		$sut = new NotificationProcessor();
-		$sut->init( $this->dispatcher, $this->data_store, $preferences_service, $this->retry_handler );
+		$sut->init( $this->dispatcher, $this->data_store, $preferences_service, $this->retry_handler, $this->step_logger );
 
 		$notification = new NewOrderNotification( $order->get_id() );
 		$result       = $sut->process( $notification );
@@ -893,7 +1239,7 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 		$this->dispatcher->expects( $this->never() )->method( 'dispatch' );
 
 		$sut = new NotificationProcessor();
-		$sut->init( $this->dispatcher, $this->data_store, $preferences_service, $this->retry_handler );
+		$sut->init( $this->dispatcher, $this->data_store, $preferences_service, $this->retry_handler, $this->step_logger );
 
 		$notification = new NewReviewNotification( $comment_id );
 		$result       = $sut->process( $notification );
@@ -1079,7 +1425,7 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 		$this->dispatcher->expects( $this->never() )->method( 'dispatch' );
 
 		$sut = new NotificationProcessor();
-		$sut->init( $this->dispatcher, $this->data_store, $preferences_service, $this->retry_handler );
+		$sut->init( $this->dispatcher, $this->data_store, $preferences_service, $this->retry_handler, $this->step_logger );
 
 		$notification = new StockNotification( $product->get_id(), StockNotification::EVENT_LOW_STOCK );
 		$result       = $sut->process( $notification );

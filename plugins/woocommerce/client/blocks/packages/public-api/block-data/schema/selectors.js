@@ -50,7 +50,7 @@ const getRouteFromResourceEntries = ( stateSlice, ids = [] ) => {
 					matchingRoute,
 					routePlaceholders,
 					ids
-			  );
+				);
 	}
 	return '';
 };

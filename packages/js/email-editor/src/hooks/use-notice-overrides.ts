@@ -147,7 +147,7 @@ function transformNotice(
 				candidates,
 				override.labelKeys,
 				notice.content
-		  )
+			)
 		: undefined;
 
 	const rewriteText = ! override.labelKeys || !! matchedCandidate;
@@ -275,7 +275,7 @@ export function useNoticeOverrides(): void {
 														};
 												  }
 												| undefined
-									   )?.getPostType( postType )?.labels
+										 )?.getPostType( postType )?.labels
 									: undefined;
 
 							// The post type currently being edited: navigating
@@ -287,8 +287,7 @@ export function useNoticeOverrides(): void {
 								originalSelect( CORE_EDITOR_STORE ) as
 									| {
 											getCurrentPostType?: () =>
-												| string
-												| undefined;
+												string | undefined;
 									  }
 									| undefined
 							 )?.getCurrentPostType?.();
@@ -305,8 +304,7 @@ export function useNoticeOverrides(): void {
 								originalSelect( emailEditorStoreName ) as
 									| {
 											getEmailPostType?: () =>
-												| string
-												| undefined;
+												string | undefined;
 									  }
 									| undefined
 							 )?.getEmailPostType?.();

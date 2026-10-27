@@ -57,7 +57,6 @@ const Edit = ( {
 		( select ) => {
 			return {
 				wasBlockJustInserted:
-					// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 					// @ts-expect-error method exists but not typed
 					select( blockEditorStore ).wasBlockJustInserted( clientId ),
 				isInProductGallery:

@@ -732,4 +732,208 @@ class WC_REST_Authentication_Tests extends WC_REST_Unit_Test_Case {
 		$update_last_access->setAccessible( false );
 		add_filter( 'woocommerce_disable_rest_api_access_log', $last_access_spy );
 	}
+
+	/**
+	 * @testdox Should accept two distinct nonces
+	 */
+	public function test_check_oauth_timestamp_and_nonce_accepts_distinct_nonces_at_same_timestamp(): void {
+		global $wpdb;
+
+		$key_id = $this->insert_nonce_test_key();
+
+		try {
+			$timestamp = time();
+
+			$first = $this->check_oauth_timestamp_and_nonce( $this->fetch_nonce_test_user( $key_id ), $timestamp, 'nonce-a' );
+			$this->assertTrue( $first, 'The first request should be accepted.' );
+
+			$second = $this->check_oauth_timestamp_and_nonce( $this->fetch_nonce_test_user( $key_id ), $timestamp, 'nonce-b' );
+			$this->assertTrue( $second, 'A second, distinct nonce must also be accepted.' );
+		} finally {
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_api_keys', array( 'key_id' => $key_id ) );
+		}
+	}
+
+	/**
+	 * @testdox Should reject a nonce that was already used.
+	 */
+	public function test_check_oauth_timestamp_and_nonce_rejects_reused_nonce(): void {
+		global $wpdb;
+
+		$key_id = $this->insert_nonce_test_key();
+
+		try {
+			$timestamp = time();
+
+			$this->check_oauth_timestamp_and_nonce( $this->fetch_nonce_test_user( $key_id ), $timestamp, 'nonce-a' );
+			$this->check_oauth_timestamp_and_nonce( $this->fetch_nonce_test_user( $key_id ), $timestamp, 'nonce-b' );
+
+			$repeat = $this->check_oauth_timestamp_and_nonce( $this->fetch_nonce_test_user( $key_id ), $timestamp, 'nonce-a' );
+
+			$this->assertWPError( $repeat, 'A nonce already recorded must be rejected on reuse.' );
+			$this->assertSame( 'woocommerce_rest_authentication_error', $repeat->get_error_code() );
+		} finally {
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_api_keys', array( 'key_id' => $key_id ) );
+		}
+	}
+
+	/**
+	 * @testdox Should purge nonces older than the 15-minute validity window instead of retaining them indefinitely.
+	 */
+	public function test_check_oauth_timestamp_and_nonce_purges_expired_nonces(): void {
+		global $wpdb;
+
+		$key_id = $this->insert_nonce_test_key();
+
+		try {
+			$expired_timestamp = time() - ( 16 * MINUTE_IN_SECONDS );
+
+			$wpdb->update(
+				$wpdb->prefix . 'woocommerce_api_keys',
+				array( 'nonces' => maybe_serialize( array( $expired_timestamp => 'expired-nonce' ) ) ),
+				array( 'key_id' => $key_id )
+			);
+
+			$timestamp = time();
+
+			$this->check_oauth_timestamp_and_nonce( $this->fetch_nonce_test_user( $key_id ), $timestamp, 'fresh-nonce' );
+
+			$stored_nonces = maybe_unserialize( $this->fetch_nonce_test_user( $key_id )->nonces );
+
+			$this->assertSame( array( $timestamp => 'fresh-nonce' ), $stored_nonces, 'Only the nonce from the current request must remain.' );
+		} finally {
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_api_keys', array( 'key_id' => $key_id ) );
+		}
+	}
+
+	/**
+	 * @testdox Should reject a nonce that a previous version stored, and keep that entry.
+	 */
+	public function test_check_oauth_timestamp_and_nonce_rejects_previously_stored_nonce(): void {
+		global $wpdb;
+
+		$key_id = $this->insert_nonce_test_key();
+
+		try {
+			$stored_timestamp = time() - MINUTE_IN_SECONDS;
+
+			$wpdb->update(
+				$wpdb->prefix . 'woocommerce_api_keys',
+				array( 'nonces' => maybe_serialize( array( $stored_timestamp => 'stored-nonce' ) ) ),
+				array( 'key_id' => $key_id )
+			);
+
+			$repeat = $this->check_oauth_timestamp_and_nonce( $this->fetch_nonce_test_user( $key_id ), $stored_timestamp, 'stored-nonce' );
+			$this->assertWPError( $repeat, 'A nonce stored before the update must still be rejected on reuse.' );
+
+			$timestamp = time();
+			$this->check_oauth_timestamp_and_nonce( $this->fetch_nonce_test_user( $key_id ), $timestamp, 'fresh-nonce' );
+
+			$stored_nonces = maybe_unserialize( $this->fetch_nonce_test_user( $key_id )->nonces );
+
+			$this->assertSame(
+				array(
+					$stored_timestamp => 'stored-nonce',
+					$timestamp        => 'fresh-nonce',
+				),
+				$stored_nonces,
+				'A still-valid stored nonce must survive a later request.'
+			);
+		} finally {
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_api_keys', array( 'key_id' => $key_id ) );
+		}
+	}
+
+	/**
+	 * @testdox Should store a single nonce as a string and nonces sharing a timestamp as a list.
+	 */
+	public function test_check_oauth_timestamp_and_nonce_stored_shape(): void {
+		global $wpdb;
+
+		$key_id = $this->insert_nonce_test_key();
+
+		try {
+			$shared_timestamp = time() - 1;
+			$single_timestamp = time();
+
+			$this->check_oauth_timestamp_and_nonce( $this->fetch_nonce_test_user( $key_id ), $shared_timestamp, 'nonce-a' );
+			$this->check_oauth_timestamp_and_nonce( $this->fetch_nonce_test_user( $key_id ), $shared_timestamp, 'nonce-b' );
+			$this->check_oauth_timestamp_and_nonce( $this->fetch_nonce_test_user( $key_id ), $shared_timestamp, 'nonce-c' );
+			$this->check_oauth_timestamp_and_nonce( $this->fetch_nonce_test_user( $key_id ), $single_timestamp, 'nonce-d' );
+
+			$stored_nonces = maybe_unserialize( $this->fetch_nonce_test_user( $key_id )->nonces );
+
+			$this->assertSame(
+				array(
+					$shared_timestamp => array( 'nonce-a', 'nonce-b', 'nonce-c' ),
+					$single_timestamp => 'nonce-d',
+				),
+				$stored_nonces,
+				'A lone nonce must keep the plain string shape; only a shared timestamp becomes a list.'
+			);
+
+			$repeat = $this->check_oauth_timestamp_and_nonce( $this->fetch_nonce_test_user( $key_id ), $shared_timestamp, 'nonce-b' );
+			$this->assertWPError( $repeat, 'A nonce held in a list must be rejected on reuse.' );
+		} finally {
+			$wpdb->delete( $wpdb->prefix . 'woocommerce_api_keys', array( 'key_id' => $key_id ) );
+		}
+	}
+
+	/**
+	 * Insert a real API key row for the nonce tests and return its key_id.
+	 *
+	 * @return int
+	 */
+	private function insert_nonce_test_key(): int {
+		global $wpdb;
+
+		$consumer_key = 'ck_' . wp_generate_password( 32, false );
+
+		$wpdb->insert(
+			$wpdb->prefix . 'woocommerce_api_keys',
+			array(
+				'user_id'         => 1,
+				'description'     => 'Nonce test key',
+				'permissions'     => 'read_write',
+				'consumer_key'    => wc_api_hash( $consumer_key ),
+				'consumer_secret' => 'cs_' . wp_generate_password( 32, false ),
+				'truncated_key'   => substr( $consumer_key, -7 ),
+			)
+		);
+
+		return (int) $wpdb->insert_id;
+	}
+
+	/**
+	 * Fetch a fresh copy of the user data check_oauth_timestamp_and_nonce() expects, the way a live request
+	 * would after WC_REST_Authentication re-reads the key row from the database.
+	 *
+	 * @param int $key_id API key row to fetch.
+	 * @return object
+	 */
+	private function fetch_nonce_test_user( int $key_id ): object {
+		global $wpdb;
+
+		return $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT key_id, user_id, permissions, consumer_key, consumer_secret, nonces FROM {$wpdb->prefix}woocommerce_api_keys WHERE key_id = %d",
+				$key_id
+			)
+		);
+	}
+
+	/**
+	 * Call the private check_oauth_timestamp_and_nonce() for the given user/timestamp/nonce.
+	 *
+	 * @param object $user      User data, as returned by fetch_nonce_test_user().
+	 * @param int    $timestamp OAuth timestamp.
+	 * @param string $nonce     OAuth nonce.
+	 * @return bool|WP_Error
+	 */
+	private function check_oauth_timestamp_and_nonce( object $user, int $timestamp, string $nonce ) {
+		$method = new ReflectionMethod( $this->sut, 'check_oauth_timestamp_and_nonce' );
+		$method->setAccessible( true );
+
+		return $method->invoke( $this->sut, $user, $timestamp, $nonce );
+	}
 }

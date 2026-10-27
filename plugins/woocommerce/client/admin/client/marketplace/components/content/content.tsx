@@ -319,9 +319,7 @@ export default function Content(): React.JSX.Element {
 					} );
 
 					const tab = query.tab as
-						| 'extensions'
-						| 'themes'
-						| 'business-services';
+						'extensions' | 'themes' | 'business-services';
 
 					recordSearchFinishedEvent( resultsCounts[ tab ] );
 
@@ -386,10 +384,19 @@ export default function Content(): React.JSX.Element {
 			search_term: query?.term,
 			product_type: query?.section,
 			category: query?.category,
+			utm_source: query?.utm_source,
+			utm_campaign: query?.utm_campaign,
 		};
 		recordMarketplaceView( marketplaceViewProps );
 		recordLegacyTabView( marketplaceViewProps );
-	}, [ query?.tab, query?.term, query?.section, query?.category ] );
+	}, [
+		query?.tab,
+		query?.term,
+		query?.section,
+		query?.category,
+		query?.utm_source,
+		query?.utm_campaign,
+	] );
 
 	// Reset current page when tab, term, category or badge filter changes
 	useEffect( () => {

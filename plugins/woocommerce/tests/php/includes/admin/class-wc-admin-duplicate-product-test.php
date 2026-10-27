@@ -180,4 +180,33 @@ class WC_Admin_Duplicate_Product_Test extends WC_Unit_Test_Case {
 		$duplicate = ( new WC_Admin_Duplicate_Product() )->product_duplicate( $product );
 		$this->assertEquals( 'SKU-2', $duplicate->get_sku(), 'Duplicate must not collide with case-variant sku-1' );
 	}
+
+	/**
+	 * @testdox Should preserve parent customs data and variation null overrides when duplicating a variable product.
+	 */
+	public function test_duplicate_preserves_customs_data(): void {
+		$product = new WC_Product_Variable();
+		$product->set_customs_commodity_code( '010203' );
+		$product->set_customs_country_of_origin( 'RO' );
+		$product->set_customs_description( 'Cotton shirt' );
+		$product->save();
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_customs_country_of_origin( 'US' );
+		$variation->save();
+		$product = new WC_Product_Variable( $product->get_id() );
+
+		$duplicate = ( new WC_Admin_Duplicate_Product() )->product_duplicate( $product );
+		$child_ids = $duplicate->get_children();
+		$this->assertCount( 1, $child_ids, 'Duplicating a variable product should also copy its variation.' );
+		$child = new WC_Product_Variation( $child_ids[0] );
+
+		$this->assertSame( '010203', $duplicate->get_customs_commodity_code( 'edit' ), 'The duplicate should preserve its commodity code.' );
+		$this->assertSame( 'RO', $duplicate->get_customs_country_of_origin( 'edit' ), 'The duplicate should preserve its origin country.' );
+		$this->assertSame( 'Cotton shirt', $duplicate->get_customs_description( 'edit' ), 'The duplicate should preserve its customs description.' );
+		$this->assertSame( 'US', $child->get_customs_country_of_origin( 'edit' ), 'The duplicated variation should preserve its override.' );
+		$this->assertNull( $child->get_customs_commodity_code( 'edit' ), 'Duplication should not persist an inherited commodity code.' );
+		$this->assertNull( $child->get_customs_description( 'edit' ), 'Duplication should not persist an inherited description.' );
+		$this->assertSame( '010203', $child->get_customs_commodity_code(), 'The duplicated variation should inherit from its duplicated parent.' );
+	}
 }

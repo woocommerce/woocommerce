@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\StoreApi\Routes\V1\Checkout as CheckoutRoute;
 use Automattic\WooCommerce\StoreApi\Routes\V1\CheckoutOrder as CheckoutOrderRoute;
 use Automattic\WooCommerce\StoreApi\SchemaController;
+use Automattic\WooCommerce\StoreApi\Utilities\OrderController;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\Enums\OrderStatus;
@@ -927,6 +928,53 @@ class Checkout extends \WP_Test_REST_TestCase {
 			'country'    => 'GB',
 			'phone'      => '01865 000000',
 		);
+	}
+
+	/**
+	 * @testdox Address values should round-trip through the cart response and checkout without HTML encoding.
+	 */
+	public function test_address_values_round_trip_without_html_encoding(): void {
+		$billing_address             = $this->get_fallback_billing_address();
+		$billing_address['company']  = 'AT&T';
+		$shipping_address            = $this->get_fallback_shipping_address();
+		$shipping_address['company'] = "St John's";
+
+		$update_request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/update-customer' );
+		$update_request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$update_request->set_body_params(
+			array(
+				'billing_address'  => (object) $billing_address,
+				'shipping_address' => (object) $shipping_address,
+			)
+		);
+
+		$update_response = rest_get_server()->dispatch( $update_request );
+		$this->assertSame( 200, $update_response->get_status(), print_r( $update_response->get_data(), true ) );
+		$cart_data                 = $update_response->get_data();
+		$response_billing_address  = (array) $cart_data['billing_address'];
+		$response_shipping_address = (array) $cart_data['shipping_address'];
+
+		$this->assertSame( 'AT&T', $response_billing_address['company'] );
+		$this->assertSame( "St John's", $response_shipping_address['company'] );
+
+		$checkout_request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout' );
+		$checkout_request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$checkout_request->set_body_params(
+			array(
+				'billing_address'  => (object) $response_billing_address,
+				'shipping_address' => (object) $response_shipping_address,
+				'payment_method'   => WC_Gateway_BACS::ID,
+				'expected_total'   => '3000',
+			)
+		);
+
+		$checkout_response = rest_get_server()->dispatch( $checkout_request );
+		$this->assertSame( 200, $checkout_response->get_status(), print_r( $checkout_response->get_data(), true ) );
+
+		$order = wc_get_order( $checkout_response->get_data()['order_id'] );
+		$this->assertInstanceOf( \WC_Order::class, $order );
+		$this->assertSame( 'AT&T', $order->get_billing_company( 'edit' ) );
+		$this->assertSame( "St John's", $order->get_shipping_company( 'edit' ) );
 	}
 
 	/**
@@ -2393,6 +2441,58 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * @testdox Pay for Order should store and return address fields as plain text without HTML encoding.
+	 */
+	public function test_checkout_order_address_values_round_trip_without_html_encoding(): void {
+		$order                       = \WC_Helper_Order::create_order( 0 );
+		$billing_address             = array(
+			'first_name' => 'Test',
+			'last_name'  => 'User',
+			'company'    => 'AT&T',
+			'address_1'  => '123 Test St',
+			'address_2'  => '',
+			'city'       => 'Test City',
+			'state'      => 'CA',
+			'postcode'   => '90210',
+			'country'    => 'US',
+			'email'      => $order->get_billing_email(),
+			'phone'      => '555-32123',
+		);
+		$shipping_address            = $billing_address;
+		$shipping_address['company'] = "St John's";
+		unset( $shipping_address['email'] );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout/' . $order->get_id() );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_query_params(
+			array(
+				'key'           => $order->get_order_key(),
+				'billing_email' => $order->get_billing_email(),
+			)
+		);
+		$request->set_body_params(
+			array(
+				'billing_address'  => $billing_address,
+				'shipping_address' => $shipping_address,
+				'payment_method'   => WC_Gateway_BACS::ID,
+			)
+		);
+
+		$response = rest_get_server()->dispatch( $request );
+		$data     = $response->get_data();
+		$this->assertSame( 200, $response->get_status(), print_r( $data, true ) );
+
+		$response_billing_address  = (array) $data['billing_address'];
+		$response_shipping_address = (array) $data['shipping_address'];
+		$this->assertSame( 'AT&T', $response_billing_address['company'] );
+		$this->assertSame( "St John's", $response_shipping_address['company'] );
+
+		$stored_order = wc_get_order( $order->get_id() );
+		$this->assertSame( 'AT&T', $stored_order->get_billing_company( 'edit' ) );
+		$this->assertSame( "St John's", $stored_order->get_shipping_company( 'edit' ) );
+	}
+
+	/**
 	 * @testdox Existing order payment should not persist address data when country validation fails.
 	 */
 	public function test_checkout_order_does_not_persist_invalid_country_address() {
@@ -2512,6 +2612,108 @@ class Checkout extends \WP_Test_REST_TestCase {
 			$this->assertNotContains( $code, $codes );
 			$this->assertEquals( 'woocommerce_rest_order_coupon_errors', $response->get_data()['code'] );
 		}
+	}
+
+	/**
+	 * @testdox Rejecting payment because the new billing email cannot use the coupon releases the row this order added, not another order's row.
+	 */
+	public function test_checkout_order_with_changed_email_releases_own_coupon_row() {
+		$coupon = new \WC_Coupon();
+		$coupon->set_code( 'route-changed-email' );
+		$coupon->set_amount( 2 );
+		$coupon->set_usage_limit_per_user( 1 );
+		$coupon->save();
+
+		$buyer_order = \WC_Helper_Order::create_order( 0 );
+		$buyer_order->set_billing_email( 'buyer@example.com' );
+		$buyer_order->set_status( OrderStatus::PENDING );
+		$buyer_order->save();
+		$buyer_order->apply_coupon( $coupon->get_code() );
+
+		$order = \WC_Helper_Order::create_order( 0 );
+		$order->set_billing_email( 'reserve@example.com' );
+		$order->set_status( OrderStatus::PENDING );
+		$order->save();
+		$order->apply_coupon( $coupon->get_code() );
+
+		$address = array(
+			'first_name' => 'Test',
+			'last_name'  => 'User',
+			'company'    => '',
+			'address_1'  => '123 Test St',
+			'address_2'  => '',
+			'city'       => 'Test City',
+			'state'      => 'CA',
+			'postcode'   => '90210',
+			'country'    => 'US',
+			'phone'      => '555-32123',
+		);
+		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout/' . $order->get_id() );
+		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$request->set_query_params(
+			array(
+				'key'           => $order->get_order_key(),
+				'billing_email' => 'reserve@example.com',
+			)
+		);
+		$request->set_body_params(
+			array(
+				'billing_address'  => array_merge( $address, array( 'email' => 'buyer@example.com' ) ),
+				'shipping_address' => $address,
+				'payment_method'   => WC_Gateway_BACS::ID,
+			)
+		);
+
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertSame( 409, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertSame( 'woocommerce_rest_order_coupon_errors', $response->get_data()['code'] );
+
+		$coupon = new \WC_Coupon( 'route-changed-email' );
+		$this->assertSame( array( 'buyer@example.com' ), array_values( $coupon->get_used_by() ) );
+		$this->assertEquals( 1, $coupon->get_usage_count() );
+	}
+
+	/**
+	 * @testdox Checkout refuses to complete a cancelled unpaid non-zero order.
+	 */
+	public function test_checkout_rejects_cancelled_unpaid_non_zero_order(): void {
+		$order_id = 0;
+		add_action(
+			'woocommerce_store_api_checkout_order_processed',
+			function ( \WC_Order $order ) use ( &$order_id ) {
+				$order->set_status( OrderStatus::CANCELLED );
+				$order->save();
+				$order_id = $order->get_id();
+			}
+		);
+
+		$response = rest_get_server()->dispatch( $this->build_valid_post_request() );
+
+		$this->assertSame( 400, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertSame( 'woocommerce_rest_checkout_payment_required', $response->get_data()['code'] );
+		$this->assertSame( 'This order cannot be completed without payment. Please try again.', $response->get_data()['message'] );
+		$this->assertGreaterThan( 0, $order_id, 'Checkout should have created an order before refusing to complete it.' );
+
+		$order = wc_get_order( $order_id );
+		$this->assertSame( OrderStatus::CANCELLED, $order->get_status(), 'The order should remain cancelled.' );
+		$this->assertNull( $order->get_date_paid(), 'The order should not be marked paid.' );
+	}
+
+	/**
+	 * @testdox Checkout allows extensions to waive payment for a pending non-zero order.
+	 */
+	public function test_checkout_allows_waived_payment_for_pending_non_zero_order(): void {
+		add_filter( 'woocommerce_order_needs_payment', '__return_false' );
+
+		$response = rest_get_server()->dispatch( $this->build_valid_post_request() );
+
+		$this->assertSame( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertSame( 'success', $response->get_data()['payment_result']['payment_status'] );
+
+		$order = wc_get_order( $response->get_data()['order_id'] );
+		$this->assertTrue( $order->is_paid(), 'The intentionally payment-free order should be completed.' );
+		$this->assertNotNull( $order->get_date_paid(), 'The intentionally payment-free order should have a paid date.' );
 	}
 
 	/**
@@ -3233,6 +3435,95 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * @testdox Checkout places a zero-total pending or failed order from the session instead of creating a new one.
+	 * @testWith ["pending"]
+	 *           ["failed"]
+	 *
+	 * @param string $status Status of the order in the session.
+	 */
+	public function test_post_reuses_zero_total_order_from_session( string $status ): void {
+		$this->apply_full_discount_coupon();
+		$order = $this->create_session_order_from_cart( $status );
+		$order->update_meta_data( '_subscription_renewal', 123 );
+		$order->save();
+		$this->assertSame( 0.0, (float) $order->get_total(), 'The coupon must take the order to a zero total, which is the case this test covers.' );
+
+		$response = rest_get_server()->dispatch( $this->build_valid_post_request() );
+
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertSame( $order->get_id(), (int) $response->get_data()['order_id'], 'Checkout must place the zero-total order from the session, not a new one without its data.' );
+
+		$placed_order = wc_get_order( $order->get_id() );
+		$this->assertTrue( $placed_order->is_paid(), 'The zero-total order from the session should be completed by checkout.' );
+		$this->assertSame( '123', (string) $placed_order->get_meta( '_subscription_renewal' ), 'Renewal metadata on the order from the session should be kept.' );
+	}
+
+	/**
+	 * @testdox Checkout does not reuse a zero-total order from the session once it has moved past awaiting payment.
+	 */
+	public function test_post_does_not_reuse_completed_zero_total_order_from_session(): void {
+		$this->apply_full_discount_coupon();
+		$order = $this->create_session_order_from_cart( OrderStatus::COMPLETED );
+
+		$response = rest_get_server()->dispatch( $this->build_valid_post_request() );
+
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertNotSame( $order->get_id(), (int) $response->get_data()['order_id'], 'A completed order must not be placed again.' );
+		$this->assertTrue( wc_get_order( $order->get_id() )->has_status( OrderStatus::COMPLETED ), 'The completed order should be left as it was.' );
+	}
+
+	/**
+	 * @testdox Checkout does not reuse a positive-total order from the session when woocommerce_order_needs_payment says it needs no payment.
+	 */
+	public function test_post_respects_needs_payment_filter_for_positive_total_order_from_session(): void {
+		$order = $this->create_session_order_from_cart( OrderStatus::PENDING );
+		add_filter(
+			'woocommerce_order_needs_payment',
+			function ( $needs_payment, $filtered_order ) use ( $order ) {
+				return $filtered_order->get_id() === $order->get_id() ? false : $needs_payment;
+			},
+			10,
+			2
+		);
+
+		$response = rest_get_server()->dispatch( $this->build_valid_post_request() );
+
+		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
+		$this->assertNotSame( $order->get_id(), (int) $response->get_data()['order_id'], 'An order the filter says needs no payment must not be reused.' );
+	}
+
+	/**
+	 * Apply a 100% coupon to the cart, taking its total to zero.
+	 */
+	private function apply_full_discount_coupon(): void {
+		$coupon = new \WC_Coupon();
+		$coupon->set_code( 'full_discount_coupon' );
+		$coupon->set_discount_type( 'percent' );
+		$coupon->set_amount( 100 );
+		$coupon->save();
+
+		WC()->cart->apply_coupon( 'full_discount_coupon' );
+	}
+
+	/**
+	 * Create an order from the cart and point the session at it, as Subscriptions does with a renewal order.
+	 *
+	 * @param string $status Order status.
+	 * @return \WC_Order
+	 */
+	private function create_session_order_from_cart( string $status ): \WC_Order {
+		WC()->cart->calculate_totals();
+
+		$order = ( new OrderController() )->create_order_from_cart();
+		$order->set_status( $status );
+		$order->save();
+
+		WC()->session->set( 'store_api_draft_order', $order->get_id() );
+
+		return $order;
+	}
+
+	/**
 	 * @testdox Store API checkout stores the order awaiting payment before invoking the payment gateway.
 	 */
 	public function test_post_sets_order_awaiting_payment_before_processing_payment(): void {
@@ -3261,6 +3552,41 @@ class Checkout extends \WP_Test_REST_TestCase {
 		$persisted_session_data = WC()->session->get_session_data();
 		$this->assertArrayHasKey( 'order_awaiting_payment', $persisted_session_data, 'Redirect payments should persist the order link in the shopper session.' );
 		$this->assertSame( $order_id, (int) $persisted_session_data['order_awaiting_payment'], 'Redirect payments should leave the persisted order linked to the shopper session.' );
+	}
+
+	/**
+	 * @testdox A logged in customer's VAT exemption should survive a failed checkout that saves their account.
+	 */
+	public function test_failed_checkout_keeps_logged_in_customer_vat_exemption() {
+		$customer_id = \WC_Helper_Customer::create_customer( 'vat_exempt_retry', 'password', 'vat-exempt-retry@example.com' )->get_id();
+		// Backdate the account so checkout's save gives it a newer timestamp than the session.
+		update_user_meta( $customer_id, 'last_update', time() - MINUTE_IN_SECONDS );
+		wp_set_current_user( $customer_id );
+		WC()->session->init();
+		WC()->customer = new \WC_Customer( $customer_id, true );
+		WC()->customer->set_is_vat_exempt( true );
+		WC()->customer->save();
+
+		$fail_hook = function () {
+			throw new \Automattic\WooCommerce\StoreApi\Exceptions\RouteException( 'woocommerce_rest_checkout_payment_failed', 'Payment declined.', 400 );
+		};
+		add_action( 'woocommerce_store_api_checkout_order_processed', $fail_hook, 999 );
+
+		$response = rest_get_server()->dispatch( $this->build_valid_post_request() );
+		$this->assertEquals( 400, $response->get_status(), 'Checkout should fail per the forced-failure hook.' );
+
+		// The session customer is saved on shutdown in a real request.
+		WC()->customer->save();
+
+		$this->assertNotSame(
+			(string) WC()->session->get( 'customer' )['date_modified'],
+			(string) ( new \WC_Customer( $customer_id ) )->get_date_modified( 'edit' ),
+			'Checkout should have saved the account, leaving the session snapshot behind it.'
+		);
+
+		$reloaded_customer = new \WC_Customer( $customer_id, true );
+		$this->assertTrue( $reloaded_customer->get_is_vat_exempt(), 'VAT exemption should survive the account save so the retry is not charged tax.' );
+		$this->assertSame( '123 Test St', $reloaded_customer->get_billing_address_1(), 'The address should come from the saved account.' );
 	}
 
 	/**
@@ -3657,9 +3983,24 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
-	 * @testdox A failure while the order is still a draft releases the stock it had reserved.
+	 * Failures an extension can raise while the order is still a draft.
+	 *
+	 * @return array<string, array{\Throwable}>
 	 */
-	public function test_failure_before_the_order_leaves_draft_releases_held_stock() {
+	public function provider_draft_order_failures() {
+		return array(
+			'ordinary exception' => array( new \Exception( 'Extension failed while the order was still a draft.' ) ),
+			'engine error'       => array( new \TypeError( 'Extension raised an engine error while the order was still a draft.' ) ),
+		);
+	}
+
+	/**
+	 * @testdox A failure while the order is still a draft releases the stock it had reserved: $_dataName.
+	 * @dataProvider provider_draft_order_failures
+	 *
+	 * @param \Throwable $failure The failure raised while the order is still a draft.
+	 */
+	public function test_failure_before_the_order_leaves_draft_releases_held_stock( \Throwable $failure ) {
 		// Its own product rather than a class fixture, so enabling stock management here cannot
 		// leak into the other tests in this class.
 		$product = \WC_Helper_Product::create_simple_product();
@@ -3683,7 +4024,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 		$state_at_failure = null;
 		add_action(
 			'woocommerce_blocks_checkout_order_processed',
-			function () use ( &$state_at_failure, $product ) {
+			function () use ( &$state_at_failure, $product, $failure ) {
 				$draft_ids = wc_get_orders(
 					array(
 						'limit'  => 1,
@@ -3696,7 +4037,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 					'held'   => (int) wc_get_held_stock_quantity( wc_get_product( $product->get_id() ) ),
 					'status' => $draft_ids ? wc_get_order( $draft_ids[0] )->get_status() : 'none',
 				);
-				throw new \Exception( 'Extension failed while the order was still a draft.' );
+				throw $failure;
 			}
 		);
 
@@ -3717,11 +4058,11 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
-	 * @testdox An Error raised before any payment was taken still surfaces instead of being swallowed.
+	 * @testdox An Error raised before any payment was taken is reported as a failed checkout.
 	 */
 	public function test_error_raised_before_payment_is_not_converted_into_a_successful_checkout() {
 		// No payment_complete() here: the order is still awaiting payment when this lands, so the
-		// recovery path must not claim it, and an Error must keep behaving as it did before.
+		// recovery path must not claim it, and the Error must reach the client as a failure.
 		add_action(
 			'woocommerce_rest_checkout_process_payment_with_context',
 			function () {
@@ -3732,14 +4073,10 @@ class Checkout extends \WP_Test_REST_TestCase {
 			998
 		);
 
-		$caught = null;
-		try {
-			rest_get_server()->dispatch( $this->build_checkout_post_request() );
-		} catch ( \Throwable $error ) {
-			$caught = $error;
-		}
+		$response = rest_get_server()->dispatch( $this->build_checkout_post_request() );
 
-		$this->assertInstanceOf( \Error::class, $caught, 'An Error with no payment taken must surface rather than be reported as a successful checkout.' );
+		$this->assertSame( 500, $response->get_status(), 'An Error with no payment taken must be reported as a failed checkout: ' . print_r( $response->get_data(), true ) );
+		$this->assertSame( 'woocommerce_rest_unknown_server_error', $response->get_data()['code'] );
 
 		$orders = wc_get_orders(
 			array(
