@@ -62,7 +62,7 @@ catalogs:
         '@wordpress/admin-ui': 2.5.0
         '@wordpress/dataviews': 20.0.0
         '@wordpress/fields': 0.25.11
-        '@wordpress/global-styles-engine': ^1.3.0
+        '@wordpress/global-styles-engine': 1.11.0
         '@wordpress/icons': 11.0.1
         '@wordpress/interface': 10.3.0
         '@wordpress/theme': 0.17.0
