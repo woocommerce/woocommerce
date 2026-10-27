@@ -2759,6 +2759,26 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * @testdox Existing order payment should keep an order's own shipping address when the store ships to the billing address only.
+	 */
+	public function test_checkout_order_keeps_distinct_shipping_address_when_store_ships_to_billing_only() {
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		update_option( 'woocommerce_ship_to_destination', 'billing_only' );
+
+		// An order made in the admin can ship somewhere other than its billing address, even on this store.
+		$order = \WC_Helper_Order::create_order( 0 );
+		$order->set_shipping_address( array_merge( $order->get_address( 'billing' ), $this->get_different_destination() ) );
+		$order->save();
+
+		$response = $this->dispatch_pay_for_order_request( $order, array( 'address_1' => '1 New Street' ) );
+
+		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		$stored_order = wc_get_order( $order->get_id() );
+		$this->assertEquals( '1 New Street', $stored_order->get_billing_address_1() );
+		$this->assertEquals( 'GB', $stored_order->get_shipping_country(), 'Billing must not be copied over the address the order already ships to' );
+	}
+
+	/**
 	 * @testdox Existing order payment should reject a shipping city change even when tax is billing based.
 	 */
 	public function test_checkout_order_rejects_shipping_city_change() {
