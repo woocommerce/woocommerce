@@ -67,6 +67,8 @@ class SpecRunner {
 		// a stdClass is left alone for set_content_data() to reject.
 		$content_data = isset( $spec->content_data ) ? $spec->content_data : (object) array();
 		if ( $content_data instanceof \stdClass ) {
+			// Work on a copy so the caller's spec is left as it was.
+			$content_data = clone $content_data;
 			unset( $content_data->publish_before );
 
 			$publish_before = self::get_publish_before( $spec );

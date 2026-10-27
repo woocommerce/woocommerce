@@ -124,6 +124,27 @@ class SpecRunnerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Storing the end date leaves the caller's spec unchanged.
+	 */
+	public function test_spec_content_data_is_not_changed(): void {
+		$spec = $this->build_spec(
+			array(
+				array(
+					'type'           => 'publish_before_time',
+					'publish_before' => '2999-01-01 00:00:00',
+				),
+			)
+		);
+
+		SpecRunner::run_spec( $spec, new \stdClass() );
+
+		$this->assertFalse(
+			property_exists( $spec->content_data, 'publish_before' ),
+			'The end date belongs on the note, not on the spec passed in.'
+		);
+	}
+
+	/**
 	 * Run a spec with the given rules and return the note it created.
 	 *
 	 * @param array $rules        Spec rules.
@@ -131,7 +152,23 @@ class SpecRunnerTest extends WC_Unit_Test_Case {
 	 * @return Note The created note.
 	 */
 	private function run_spec( array $rules, array $content_data = array() ): Note {
-		$spec = json_decode(
+		SpecRunner::run_spec( $this->build_spec( $rules, $content_data ), new \stdClass() );
+
+		$note = Notes::get_note_by_name( self::SLUG );
+		$this->assertInstanceOf( Note::class, $note, 'The spec should have created a note.' );
+
+		return $note;
+	}
+
+	/**
+	 * Build a spec with the given rules.
+	 *
+	 * @param array $rules        Spec rules.
+	 * @param array $content_data Spec content data.
+	 * @return object The spec.
+	 */
+	private function build_spec( array $rules, array $content_data = array() ): object {
+		return json_decode(
 			(string) wp_json_encode(
 				array(
 					'slug'         => self::SLUG,
@@ -151,12 +188,5 @@ class SpecRunnerTest extends WC_Unit_Test_Case {
 				)
 			)
 		);
-
-		SpecRunner::run_spec( $spec, new \stdClass() );
-
-		$note = Notes::get_note_by_name( self::SLUG );
-		$this->assertInstanceOf( Note::class, $note, 'The spec should have created a note.' );
-
-		return $note;
 	}
 }

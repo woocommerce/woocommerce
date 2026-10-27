@@ -728,6 +728,36 @@ class RemoteInboxNotificationsEngineTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A note that fails to save does not stop the rest of the pass.
+	 */
+	public function test_failed_save_does_not_stop_the_pass(): void {
+		$failing_note_id = $this->create_expiring_note( Note::E_WC_ADMIN_NOTE_UPDATE, Note::E_WC_ADMIN_NOTE_UNACTIONED, self::PAST );
+
+		// Rows come back newest first, so this one is reached after the failing note.
+		$later_note_id = $this->create_expiring_note( Note::E_WC_ADMIN_NOTE_UPDATE, Note::E_WC_ADMIN_NOTE_UNACTIONED, self::PAST );
+		$later_note    = new Note( $later_note_id );
+		$later_note->set_date_created( time() - HOUR_IN_SECONDS );
+		$later_note->save();
+
+		add_action(
+			'woocommerce_note_updated',
+			function ( $note_id ) use ( $failing_note_id ) {
+				if ( $failing_note_id === (int) $note_id ) {
+					throw new \RuntimeException( 'Save failed.' );
+				}
+			}
+		);
+
+		RemoteInboxNotificationsEngine::retire_expired_alerts();
+
+		$this->assertSame(
+			Note::E_WC_ADMIN_NOTE_PENDING,
+			( new Note( $later_note_id ) )->get_status(),
+			'One note that throws should not keep the notes after it from retiring.'
+		);
+	}
+
+	/**
 	 * @testdox Notes that are not shown as an alert are left alone.
 	 */
 	public function test_other_note_types_are_left_alone(): void {

@@ -210,15 +210,21 @@ class RemoteInboxNotificationsEngine extends RemoteSpecsEngine {
 					'source' => array( 'woocommerce.com' ),
 				)
 			);
+		} catch ( \Throwable $e ) {
+			self::log_retire_error( $e );
+			return;
+		}
 
-			if ( ! is_array( $notes ) ) {
-				return;
-			}
+		if ( ! is_array( $notes ) ) {
+			return;
+		}
 
-			// Read the date the same way a live spec would, so a note behaves the same either way.
-			$rule_processor = new PublishBeforeTimeRuleProcessor();
+		// Read the date the same way a live spec would, so a note behaves the same either way.
+		$rule_processor = new PublishBeforeTimeRuleProcessor();
 
-			foreach ( $notes as $note_row ) {
+		foreach ( $notes as $note_row ) {
+			// Catch per note, so one that fails doesn't keep every note after it from retiring on each run.
+			try {
 				$content_data = json_decode( (string) $note_row->content_data );
 
 				if ( ! isset( $content_data->publish_before ) ) {
@@ -248,21 +254,31 @@ class RemoteInboxNotificationsEngine extends RemoteSpecsEngine {
 
 				$note->set_status( Note::E_WC_ADMIN_NOTE_PENDING );
 				$note->save();
+			} catch ( \Throwable $e ) {
+				self::log_retire_error( $e, isset( $note_row->note_id ) ? (string) $note_row->note_id : '' );
 			}
-		} catch ( \Throwable $e ) {
-			// run() is hooked to activated_plugin, so a throw here would surface during any
-			// plugin activation. The file log handler writes the message and drops the context,
-			// so put what is worth reading into the message.
-			wc_get_logger()->error(
-				sprintf(
-					'Could not retire expired store alerts%s: %s: %s',
-					isset( $note_row->note_id ) ? ' at note ' . $note_row->note_id : '',
-					get_class( $e ),
-					$e->getMessage()
-				),
-				array( 'source' => 'remote-inbox-notifications' )
-			);
 		}
+	}
+
+	/**
+	 * Log a failure while retiring expired store alerts.
+	 *
+	 * run() is hooked to activated_plugin, so a throw would surface during any plugin activation.
+	 * The file log handler drops the context, so what is worth reading goes in the message.
+	 *
+	 * @param \Throwable $e       The error.
+	 * @param string     $note_id ID of the note being retired, if any.
+	 */
+	private static function log_retire_error( \Throwable $e, string $note_id = '' ): void {
+		wc_get_logger()->error(
+			sprintf(
+				'Could not retire expired store alerts%s: %s: %s',
+				'' !== $note_id ? ' at note ' . $note_id : '',
+				get_class( $e ),
+				$e->getMessage()
+			),
+			array( 'source' => 'remote-inbox-notifications' )
+		);
 	}
 
 	/**
