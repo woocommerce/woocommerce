@@ -4,7 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Blocks\Mocks;
 
 /**
- * Registers the Add to Cart with Options mock blocks, which `init` skips under a classic theme.
+ * Maps the Add to Cart with Options block names to their mock classes.
  */
 class AddToCartWithOptionsMocks {
 
@@ -34,27 +34,5 @@ class AddToCartWithOptionsMocks {
 			$mock_classes[ 'woocommerce/' . $block_name ] = self::MOCKS[ $block_name ];
 		}
 		return $mock_classes;
-	}
-
-	/**
-	 * Register the given mock blocks, skipping any already registered, since the registry outlives a test.
-	 *
-	 * @param string ...$block_names Block names without the `woocommerce/` namespace.
-	 */
-	public static function register( string ...$block_names ): void {
-		$registry = \WP_Block_Type_Registry::get_instance();
-		foreach ( $block_names as $block_name ) {
-			if ( ! $registry->is_registered( 'woocommerce/' . $block_name ) ) {
-				$mock_class = self::MOCKS[ $block_name ];
-				new $mock_class();
-			}
-		}
-	}
-
-	/**
-	 * Register every mock block that is not registered yet.
-	 */
-	public static function register_all(): void {
-		self::register( ...array_keys( self::MOCKS ) );
 	}
 }
