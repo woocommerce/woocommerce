@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show saved values instead of defaults for extension settings fields that store their value inside another option.
