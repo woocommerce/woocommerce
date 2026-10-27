@@ -22,10 +22,12 @@ function register_woocommerce_admin_test_helper_rest_route( $route, $callback, $
 				'methods'             => 'POST',
 				'callback'            => $callback,
 				'permission_callback' => function ( $request ) {
-					if ( ! wc_rest_check_manager_permissions( 'settings', 'edit' ) ) {
+					// Match the capability required by the Test Helper admin page.
+					if ( ! current_user_can( 'install_plugins' ) ) {
 						return new \WP_Error(
 							'woocommerce_rest_cannot_edit',
-							__( 'Sorry, you cannot perform this action', 'woocommerce-beta-tester' )
+							__( 'Sorry, you cannot perform this action', 'woocommerce-beta-tester' ),
+							array( 'status' => rest_authorization_required_code() )
 						);
 					}
 					return true;

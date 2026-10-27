@@ -285,7 +285,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 					$display_value = wp_kses_post( rawurldecode( (string) $meta->value ) );
 
 					// Skip items with values already in the product details area of the product name.
-					if ( $product && $product->is_type( ProductType::VARIATION ) && wc_is_attribute_in_product_name( $display_value, $order_item_name ) ) {
+					if ( $product && $product->is_type( ProductType::VARIATION ) && wc_is_attribute_in_product_name( $display_value, $order_item_name, $product ) ) {
 						return false;
 					}
 
@@ -823,7 +823,7 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 
 			if ( $creating ) {
 				$object->set_created_via( 'rest-api' );
-				$object->set_prices_include_tax( 'yes' === get_option( 'woocommerce_prices_include_tax' ) );
+				$object->set_prices_include_tax( wc_prices_include_tax() );
 				$object->save();
 				$object->calculate_totals();
 			} else {

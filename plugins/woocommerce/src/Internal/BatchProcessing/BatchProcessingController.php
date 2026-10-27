@@ -855,17 +855,28 @@ class BatchProcessingController {
 			return;
 		}
 
-		if ( ActionSchedulerUtil::has_scheduled_action( self::WATCHDOG_ACTION_NAME ) ) {
+		// Normalize corrupted option values before passing processor names to is_scheduled().
+		$enqueued_processors = $this->sanitize_processor_list( $this->get_enqueued_processors() );
+		if ( empty( $enqueued_processors ) ) {
 			return;
 		}
 
-		/*
-		 * Sanitize before array_diff()/array_filter(): array_diff() string-casts its operands (fatal on an object
-		 * entry in PHP 8) and is_scheduled() is typed string, so a corrupted option must be reduced to class-name
-		 * strings first.
-		 */
-		$enqueued_processors    = $this->sanitize_processor_list( $this->get_enqueued_processors() );
-		$unscheduled_processors = array_diff( $enqueued_processors, array_filter( $enqueued_processors, array( $this, 'is_scheduled' ) ) );
+		$watchdog_scheduled = $this->run_scheduler_lookup( fn() => ActionSchedulerUtil::has_scheduled_action( self::WATCHDOG_ACTION_NAME ) );
+		if ( false !== $watchdog_scheduled ) {
+			return;
+		}
+
+		$unscheduled_processors = array();
+		foreach ( $enqueued_processors as $processor ) {
+			$is_scheduled = $this->run_scheduler_lookup( fn() => $this->is_scheduled( $processor ) );
+			// A failed lookup is not evidence of a failed processor. Finish all checks before changing state.
+			if ( null === $is_scheduled ) {
+				return;
+			}
+			if ( ! $is_scheduled ) {
+				$unscheduled_processors[] = $processor;
+			}
+		}
 
 		foreach ( $unscheduled_processors as $processor ) {
 			try {
@@ -885,5 +896,31 @@ class BatchProcessingController {
 				$this->schedule_batch_processing( $processor, true );
 			}
 		}
+	}
+
+	/**
+	 * Run an Action Scheduler lookup, distinguishing "not scheduled" from a failed database query.
+	 *
+	 * Action Scheduler returns the same value for both, so the database state is checked directly. $wpdb->last_error
+	 * only counts when the lookup ran a query: otherwise (e.g. a custom store that bypasses $wpdb) it is left over
+	 * from an earlier, unrelated query.
+	 *
+	 * @param callable $lookup Callback performing the lookup.
+	 * @return bool|null The lookup result, or null if the lookup failed.
+	 */
+	private function run_scheduler_lookup( callable $lookup ): ?bool {
+		global $wpdb;
+
+		$queries_before = $wpdb->num_queries;
+		$result         = (bool) $lookup();
+		$query_failed   = $wpdb->num_queries > $queries_before && ! empty( $wpdb->last_error );
+
+		// When reconnecting after a lost connection fails, wpdb::query() returns false without an error but discards
+		// the connection handle. A later query can reconnect, so state changes would succeed on top of this failed read.
+		if ( $query_failed || empty( $wpdb->dbh ) ) {
+			return null;
+		}
+
+		return $result;
 	}
 }

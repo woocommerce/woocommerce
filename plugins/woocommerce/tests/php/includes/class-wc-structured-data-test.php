@@ -350,6 +350,69 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Product schema includes zero MPNs, omits empty values, and preserves extension filters.
+	 * @testWith ["0"]
+	 *           [""]
+	 *
+	 * @param string $mpn Manufacturer part number.
+	 */
+	public function test_mpn_structured_data( string $mpn ): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_mpn( $mpn );
+		$sut = new WC_Structured_Data();
+		$sut->generate_product_data( $product );
+		$this->assertSame( '' === $mpn ? null : $mpn, $sut->get_data()[0]['mpn'] ?? null );
+
+		add_filter(
+			'woocommerce_structured_data_product',
+			static function ( $markup ) {
+				$markup['mpn'] = 'EXTENSION-MPN';
+				return $markup;
+			}
+		);
+		$sut = new WC_Structured_Data();
+		$sut->generate_product_data( $product );
+		$this->assertSame( 'EXTENSION-MPN', $sut->get_data()[0]['mpn'] );
+	}
+
+	/**
+	 * @testdox Product schema uses the selected variation's MPN without inheriting the parent's value.
+	 * @testWith ["CHILD-PART", true, "CHILD-PART"]
+	 *           ["0", true, "0"]
+	 *           ["", true, null]
+	 *           ["CHILD-PART", false, "PARENT-PART"]
+	 *
+	 * @param string      $variation_mpn Variation MPN.
+	 * @param bool        $selected Whether the request selects the variation.
+	 * @param string|null $expected_mpn Expected MPN, or null when it should be omitted.
+	 */
+	public function test_mpn_structured_data_for_selected_variation( string $variation_mpn, bool $selected, ?string $expected_mpn ): void {
+		$product = WC_Helper_Product::create_variation_product();
+		$product->set_mpn( 'PARENT-PART' );
+		$product->save();
+		$variation = wc_get_product( wc_get_product_id_by_sku( 'DUMMY SKU VARIABLE HUGE RED 0' ) );
+		$variation->set_mpn( $variation_mpn );
+		$variation->save();
+		WC_Product_Variable::sync( $product->get_id() );
+
+		if ( $selected ) {
+			$_GET['attribute_pa_size']   = 'huge';
+			$_GET['attribute_pa_colour'] = 'red';
+			$_GET['attribute_pa_number'] = '0';
+		}
+		$sut = new WC_Structured_Data();
+		$sut->generate_product_data( wc_get_product( $product->get_id() ) );
+		$data = $sut->get_data()[0];
+
+		$this->assertSame( $selected ? 'Offer' : 'AggregateOffer', $data['offers'][0]['@type'] );
+		if ( null === $expected_mpn ) {
+			$this->assertArrayNotHasKey( 'mpn', $data );
+		} else {
+			$this->assertSame( $expected_mpn, $data['mpn'] );
+		}
+	}
+
+	/**
 	 * Test simple product offer structured data includes offer-level price currency.
 	 *
 	 * @return void
@@ -713,5 +776,116 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 		} finally {
 			unset( $_GET['attribute_pa_size'], $_GET['attribute_pa_colour'], $_GET['attribute_pa_number'] );
 		}
+	}
+
+	/**
+	 * @testdox A selected public return-policy page emits only a link, not inferred policy facts.
+	 */
+	public function test_online_store_links_to_selected_public_return_policy_page(): void {
+		$page_id = self::factory()->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+			)
+		);
+		update_option( 'woocommerce_refund_returns_page_id', $page_id );
+		$this->go_to( get_permalink( $page_id ) );
+
+		$this->assertSame( 9, has_action( 'wp_footer', array( $this->structured_data, 'generate_online_store_data' ) ), 'Policy data must be generated before the footer output at priority 10.' );
+		$this->assertSame( array(), $this->structured_data->get_structured_data( array( 'onlinestore' ) ), 'Policy data should not be generated before the footer (including in emails).' );
+		$this->structured_data->generate_online_store_data();
+		$this->assertSame(
+			array(
+				'@context'                => 'https://schema.org/',
+				'@type'                   => 'OnlineStore',
+				'name'                    => get_bloginfo( 'name' ),
+				'url'                     => home_url(),
+				'hasMerchantReturnPolicy' => array(
+					'@type'              => 'MerchantReturnPolicy',
+					'merchantReturnLink' => get_permalink( $page_id ),
+				),
+			),
+			$this->structured_data->get_structured_data( array( 'onlinestore' ) ),
+			'The policy page should expose a link-only OnlineStore node.'
+		);
+
+		ob_start();
+		$this->structured_data->output_structured_data();
+		$output = ob_get_clean();
+		$this->assertStringContainsString( '"merchantReturnLink":"' . get_permalink( $page_id ) . '"', $output, 'The footer should output the policy link.' );
+
+		remove_all_actions( 'woocommerce_email_order_details' );
+		add_action( 'woocommerce_email_order_details', array( $this->structured_data, 'output_email_structured_data' ), 30, 3 );
+		ob_start();
+		do_action( 'woocommerce_email_order_details', null, false, false );
+		$email = ob_get_clean();
+		$this->assertStringNotContainsString( 'OnlineStore', $email, 'The policy node must not appear in an order email, even after the footer.' );
+	}
+
+	/**
+	 * @testdox No return-policy data is generated on another page or for an unpublished, private, or password-protected page.
+	 */
+	public function test_online_store_requires_a_public_selected_page(): void {
+		$page_id  = self::factory()->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+			)
+		);
+		$other_id = self::factory()->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+			)
+		);
+		update_option( 'woocommerce_refund_returns_page_id', $page_id );
+		$this->go_to( get_permalink( $other_id ) );
+		$this->structured_data->generate_online_store_data();
+		$this->assertSame( array(), $this->structured_data->get_data(), 'Other pages must not advertise the policy.' );
+
+		$this->go_to( get_permalink( $page_id ) );
+		foreach ( array( 'draft', 'private' ) as $status ) {
+			wp_update_post(
+				array(
+					'ID'          => $page_id,
+					'post_status' => $status,
+				)
+			);
+			$this->structured_data->generate_online_store_data();
+			$this->assertSame( array(), $this->structured_data->get_data(), "{$status} pages must not be advertised." );
+		}
+
+		wp_update_post(
+			array(
+				'ID'            => $page_id,
+				'post_status'   => 'publish',
+				'post_password' => 'secret',
+			)
+		);
+		$this->structured_data->generate_online_store_data();
+		$this->assertSame( array(), $this->structured_data->get_data(), 'Password-protected pages must not be advertised.' );
+	}
+
+	/**
+	 * @testdox Invalid permalink filters cannot advertise a missing or unsafe URL.
+	 */
+	public function test_online_store_rejects_invalid_permalink(): void {
+		$page_id = self::factory()->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+			)
+		);
+		update_option( 'woocommerce_refund_returns_page_id', $page_id );
+		add_filter(
+			'woocommerce_get_refund_returns_page_permalink',
+			static function () {
+				return 'javascript:alert(1)';
+			}
+		);
+		$this->go_to( get_permalink( $page_id ) );
+
+		$this->structured_data->generate_online_store_data();
+		$this->assertSame( array(), $this->structured_data->get_data(), 'Invalid URL must not produce policy markup.' );
 	}
 }

@@ -14,7 +14,7 @@ import { renderParentBlock } from '@woocommerce/utils/render-parent-block';
 import './inner-blocks/register-components';
 import Block from './block';
 import { blockName, blockAttributes } from './attributes';
-import { metadata } from './metadata';
+import metadata from './block.json';
 
 const getProps = ( el ) => {
 	return {
@@ -27,7 +27,7 @@ const getProps = ( el ) => {
 
 const Wrapper = ( { children } ) => {
 	// we need to pluck out receiveCart.
-	// eslint-disable-next-line no-unused-vars
+
 	const { extensions, receiveCart, ...cart } = useStoreCart();
 	return Children.map( children, ( child ) => {
 		if ( isValidElement( child ) ) {

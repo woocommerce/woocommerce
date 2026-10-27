@@ -72,7 +72,7 @@ const Banner = ( { isSubmitted, handleSetup }: Props ) => {
 					{ strings.noThanks }
 				</Button>
 				<p>
-					{ isWooPayEligible ?? false
+					{ ( isWooPayEligible ?? false )
 						? strings.TosAndPpWooPay
 						: strings.TosAndPp }
 				</p>

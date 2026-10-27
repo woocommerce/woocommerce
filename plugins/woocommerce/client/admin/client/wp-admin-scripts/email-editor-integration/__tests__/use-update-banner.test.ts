@@ -17,7 +17,6 @@ if (
 	typeof ( globalThis as { TextEncoder?: unknown } ).TextEncoder ===
 	'undefined'
 ) {
-	// eslint-disable-next-line @typescript-eslint/no-var-requires
 	const { TextEncoder: NodeTextEncoder } = require( 'util' );
 	(
 		globalThis as unknown as { TextEncoder: typeof TextEncoder }

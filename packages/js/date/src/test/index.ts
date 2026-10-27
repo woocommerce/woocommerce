@@ -39,6 +39,7 @@ import {
 	dayTicksThreshold,
 	isLeapYear,
 	containsLeapYear,
+	getShortDateFormat,
 } from '..';
 declare global {
 	interface Window {
@@ -88,7 +89,9 @@ describe( 'toMoment', () => {
 
 	it( 'should handle isoFormat dates', () => {
 		const myMoment = toMoment( 'YYYY', '2018-04-15' );
-		if ( myMoment === null ) fail( 'myMoment should not be null' );
+		if ( myMoment === null ) {
+			fail( 'myMoment should not be null' );
+		}
 
 		expect( moment.isMoment( myMoment ) ).toBe( true );
 		expect( myMoment.isValid() ).toBe( true );
@@ -96,7 +99,9 @@ describe( 'toMoment', () => {
 
 	it( 'should handle local formats', () => {
 		const longDate = toMoment( 'MMMM D, YYYY', 'April 15, 2018' );
-		if ( longDate === null ) fail( 'longDate should not be null' );
+		if ( longDate === null ) {
+			fail( 'longDate should not be null' );
+		}
 
 		expect( moment.isMoment( longDate ) ).toBe( true );
 		expect( longDate.isValid() ).toBe( true );
@@ -105,7 +110,9 @@ describe( 'toMoment', () => {
 		expect( longDate.year() ).toBe( 2018 );
 
 		const shortDate = toMoment( 'DD/MM/YYYY', '15/04/2018' );
-		if ( shortDate === null ) fail( 'shortDate should not be null' );
+		if ( shortDate === null ) {
+			fail( 'shortDate should not be null' );
+		}
 
 		expect( moment.isMoment( shortDate ) ).toBe( true );
 		expect( shortDate.isValid() ).toBe( true );
@@ -1440,6 +1447,78 @@ describe( 'getRangeLabel', () => {
 	} );
 } );
 
+describe( 'getShortDateFormat', () => {
+	const translateShortDateFormat = ( translation: string ) =>
+		( __ as jest.Mock ).mockImplementation( ( text: string ) =>
+			text === 'MM/DD/YYYY' ? translation : text
+		);
+
+	afterEach( () => {
+		( __ as jest.Mock ).mockImplementation( ( text: string ) => text );
+	} );
+
+	it.each( [
+		[ 'MM/DD/YYYY', 'MM/DD/YYYY' ],
+		[ 'DD/MM/YYYY', 'DD/MM/YYYY' ],
+		[ 'DD.MM.YYYY', 'DD.MM.YYYY' ],
+		[ 'YYYY-MM-DD', 'YYYY-MM-DD' ],
+		// Strict parsing rejects "09" for "M", so single tokens are padded.
+		[ 'D/M/YYYY', 'DD/MM/YYYY' ],
+		[ 'D. M. YYYY', 'DD. MM. YYYY' ],
+		[ '[D] D/M/YYYY', '[D] DD/MM/YYYY' ],
+		[ 'D/M/YYYY \\D', 'DD/MM/YYYY \\D' ],
+		[ 'Do MMM YYYY', 'Do MMM YYYY' ],
+		// Translations from real language packs that aren't Moment.js formats.
+		[ 'MM/DD/RRRR', 'MM/DD/YYYY' ],
+		[ 'JJ/MM/AAAA', 'MM/DD/YYYY' ],
+		[ 'KK/PP/AAAA', 'MM/DD/YYYY' ],
+		[ 'MM/DD/AAAA', 'MM/DD/YYYY' ],
+		[ 'MM/DD/VVVV', 'MM/DD/YYYY' ],
+		[ 'dd/mm/aaaa', 'MM/DD/YYYY' ],
+		[ 'મમ/દદ/વવવવ', 'MM/DD/YYYY' ],
+		[ 'DD/MM', 'MM/DD/YYYY' ],
+		[ 'DD/YYYY', 'MM/DD/YYYY' ],
+		[ 'MM/YYYY', 'MM/DD/YYYY' ],
+		// Localized tokens would make loadLocaleData() define "L" as itself.
+		[ 'L', 'MM/DD/YYYY' ],
+		[ 'l', 'MM/DD/YYYY' ],
+		[ 'LL', 'MM/DD/YYYY' ],
+		[ 'DD/MM/YYYY LT', 'MM/DD/YYYY' ],
+		[ 'DD/MM/YYYY [L]', 'DD/MM/YYYY [L]' ],
+	] )( 'returns %s as %s', ( translation, expected ) => {
+		translateShortDateFormat( translation );
+		expect( getShortDateFormat() ).toBe( expected );
+	} );
+
+	it( 'validates month names with the current locale', () => {
+		const originalLocale = moment.locale();
+		moment.defineLocale( 'xx-short-date', {
+			monthsShort:
+				'sij_velj_ožu_tra_svi_lip_srp_kol_ruj_lis_stu_pro'.split( '_' ),
+		} );
+		translateShortDateFormat( 'D MMM YYYY' );
+
+		const format = getShortDateFormat();
+		moment.locale( originalLocale );
+		moment.updateLocale( 'xx-short-date', null );
+
+		expect( format ).toBe( 'DD MMM YYYY' );
+	} );
+
+	it( 'parses padded and formats padded dates for a single-token translation', () => {
+		translateShortDateFormat( 'D/M/YYYY' );
+		const format = getShortDateFormat();
+
+		expect(
+			toMoment( format, '25/09/2026' )?.format( isoDateFormat )
+		).toBe( '2026-09-25' );
+		expect(
+			toMoment( format, '05/10/2026' )?.format( isoDateFormat )
+		).toBe( '2026-10-05' );
+		expect( moment( '2026-10-05' ).format( format ) ).toBe( '05/10/2026' );
+	} );
+} );
+
 describe( 'loadLocaleData', () => {
 	const originalLocale = {
 		siteLocale: 'en_US',
@@ -1469,6 +1548,20 @@ describe( 'loadLocaleData', () => {
 			weekdaysShort,
 		} );
 		expect( moment.localeData().weekdaysMin() ).toEqual( weekdaysShort );
+	} );
+
+	it( 'falls back to MM/DD/YYYY for "L" when the translation is not a Moment.js format', () => {
+		moment.locale( 'cs_CZ', {} );
+		( __ as jest.Mock ).mockImplementation( ( text: string ) =>
+			text === 'MM/DD/YYYY' ? 'MM/DD/RRRR' : text
+		);
+
+		loadLocaleData( { userLocale: 'cs_CZ' } );
+
+		( __ as jest.Mock ).mockImplementation( ( text: string ) => text );
+		expect( moment.localeData().longDateFormat( 'L' ) ).toBe(
+			'MM/DD/YYYY'
+		);
 	} );
 } );
 

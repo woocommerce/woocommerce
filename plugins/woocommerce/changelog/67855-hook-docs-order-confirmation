@@ -1,4 +1,0 @@
-Significance: patch
-Type: dev
-
-Correct the woocommerce_thankyou_order_received_title docblock on the Order Confirmation Status block.

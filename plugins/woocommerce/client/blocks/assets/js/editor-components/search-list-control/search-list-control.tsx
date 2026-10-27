@@ -206,7 +206,7 @@ const ListItemsContainer = < T extends object = object >( {
 				<span className="woocommerce-search-list__not-found-text">
 					{ search
 						? // eslint-disable-next-line @wordpress/valid-sprintf
-						  sprintf( messages.noResults, search )
+							sprintf( messages.noResults, search )
 						: messages.noItems }
 				</span>
 			</div>
@@ -369,7 +369,7 @@ export const SearchListControl = < T extends object = object >(
 								: selected.map( ( token ) => ( {
 										...token,
 										value: token.name,
-								  } ) )
+									} ) )
 						}
 						__experimentalShowHowTo={ false }
 					/>

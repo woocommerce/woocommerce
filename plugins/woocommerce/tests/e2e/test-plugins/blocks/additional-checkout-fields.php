@@ -7,6 +7,12 @@ declare(strict_types=1);
  * Author: WooCommerce
  * @package woocommerce-blocks-test-additional-checkout-fields
  */
+
+// Only requests from specs that enable this plugin send the cookie.
+if ( ! isset( $_COOKIE['woocommerce-blocks-test-additional-checkout-fields'] ) ) {
+	return;
+}
+
 class Additional_Checkout_Fields_Test_Helper {
 	/**
 	 * Constructor.
@@ -321,38 +327,6 @@ class Additional_Checkout_Fields_Test_Helper {
 					array(
 						'value' => 'other',
 						'label' => 'Other',
-					),
-				),
-			)
-		);
-
-		// Only shown once "How did you hear about us?" is set to Facebook. Covers a rule that
-		// reads another additional field, which needs that field to have a value from the start.
-		woocommerce_register_additional_checkout_field(
-			array(
-				'id'       => 'third-plugin-namespace/facebook-page',
-				'label'    => 'Which Facebook page did you see us on?',
-				'location' => 'order',
-				'type'     => 'text',
-				'hidden'   => array(
-					'not' => array(
-						'type'       => 'object',
-						'properties' => array(
-							'checkout' => array(
-								'type'       => 'object',
-								'properties' => array(
-									'additional_fields' => array(
-										'type'       => 'object',
-										'properties' => array(
-											'third-plugin-namespace/how-did-you-hear-about-us' => array(
-												'type'  => 'string',
-												'const' => 'facebook',
-											),
-										),
-									),
-								),
-							),
-						),
 					),
 				),
 			)

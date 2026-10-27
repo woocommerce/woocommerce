@@ -3,11 +3,10 @@
  */
 import type { InputHTMLAttributes, ReactNode } from 'react';
 
-export interface ValidatedTextInputProps
-	extends Omit<
-		InputHTMLAttributes< HTMLInputElement >,
-		'onChange' | 'onBlur'
-	> {
+export interface ValidatedTextInputProps extends Omit<
+	InputHTMLAttributes< HTMLInputElement >,
+	'onChange' | 'onBlur'
+> {
 	// Unique instance ID. id will be used instead if provided.
 	instanceId?: string;
 	// aria-describedby attribute to add to the input.

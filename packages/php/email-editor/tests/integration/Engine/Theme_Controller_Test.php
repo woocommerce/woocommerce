@@ -150,6 +150,75 @@ class Theme_Controller_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test that a slug the palette does not define translates to an empty string.
+	 *
+	 * The slug as a value (`background-color: theme-4`) is invalid CSS that mail clients drop, which
+	 * costs the block its color.
+	 */
+	public function testItReturnsNoColorForUnknownSlug(): void {
+		add_filter( 'woocommerce_email_editor_site_style_sync_enabled', '__return_true' );
+		$this->assertSame( '', $this->theme_controller->translate_slug_to_color( 'theme-4' ) );
+	}
+
+	/**
+	 * Test the generated preset classes agree with the color lookup on a duplicated slug.
+	 *
+	 * The stylesheet emits one rule per definition and the cascade reads the last, while the lookup
+	 * reads the first, so one definition per slug is what keeps the two routes agreeing.
+	 */
+	public function testItGeneratesPresetClassesThatAgreeWithTheColorLookup(): void {
+		add_filter( 'woocommerce_email_editor_site_style_sync_enabled', '__return_false' );
+
+		// `black` is in core's default palette, so defining it again here duplicates the slug.
+		$duplicate = static function ( $theme ) {
+			$theme->merge(
+				new \WP_Theme_JSON(
+					array(
+						'version'  => 3,
+						'settings' => array(
+							'color' => array(
+								'palette' => array(
+									array(
+										'slug'  => 'black',
+										'color' => '#abcdef',
+									),
+								),
+							),
+						),
+					),
+					'custom'
+				)
+			);
+			return $theme;
+		};
+		add_filter( 'woocommerce_email_editor_theme_json', $duplicate, 20 );
+
+		$controller = $this->di_container->get( Theme_Controller::class );
+		$stylesheet = $controller->get_stylesheet_for_rendering();
+
+		$this->assertSame( '#abcdef', $controller->translate_slug_to_color( 'black' ) );
+		$this->assertStringContainsString( '.has-black-color { color: #abcdef; }', $stylesheet );
+		$this->assertStringNotContainsString( '.has-black-color { color: #000000; }', $stylesheet );
+
+		// One rule per slug, not one per origin that defines it.
+		$this->assertSame( 1, substr_count( $stylesheet, '.has-black-color {' ) );
+
+		remove_filter( 'woocommerce_email_editor_theme_json', $duplicate, 20 );
+	}
+
+	/**
+	 * Test that a literal color passes through untranslated.
+	 *
+	 * Color block attributes usually hold a slug, but a literal color can arrive in one, and callers
+	 * rely on getting it back unchanged.
+	 */
+	public function testItPassesLiteralColorsThrough(): void {
+		add_filter( 'woocommerce_email_editor_site_style_sync_enabled', '__return_true' );
+		$this->assertSame( '#012345', $this->theme_controller->translate_slug_to_color( '#012345' ) );
+		$this->assertSame( 'rgba(1, 2, 3, 0.5)', $this->theme_controller->translate_slug_to_color( 'rgba(1, 2, 3, 0.5)' ) );
+	}
+
+	/**
 	 * Test if the theme controller loads custom user theme
 	 */
 	public function testItLoadsCustomUserTheme(): void {
@@ -184,6 +253,20 @@ class Theme_Controller_Test extends \Email_Editor_Integration_Test_Case {
 		add_filter( 'woocommerce_email_editor_site_style_sync_enabled', '__return_true' );
 		$settings = $this->theme_controller->get_settings();
 		$this->assertNotEmpty( $settings['color']['palette']['theme'] );
+	}
+
+	/**
+	 * Test that every email font family has a list of font weights
+	 */
+	public function testItProvidesFontWeightsForEveryFontFamily(): void {
+		$settings     = $this->theme_controller->get_settings();
+		$font_weights = $settings['custom']['fontWeights'] ?? array();
+
+		foreach ( $settings['typography']['fontFamilies']['default'] as $font_family ) {
+			$this->assertNotEmpty( $font_weights[ $font_family['slug'] ] ?? array(), $font_family['slug'] );
+		}
+		$this->assertSame( '400, 700', $font_weights['arial'] );
+		$this->assertSame( '300, 400, 500, 700', $font_weights['open-sans'] );
 	}
 
 	/**
