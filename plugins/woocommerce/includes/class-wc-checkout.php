@@ -433,10 +433,17 @@ class WC_Checkout {
 				do_action( 'woocommerce_resume_order', $order_id );
 
 				// A woocommerce_resume_order callback may have changed the order in the database, so read it
-				// back before touching the status; otherwise saving this stale object would overwrite that change.
+				// back before acting on it; otherwise saving this stale object would overwrite that change.
 				$resumed_order = wc_get_order( $order_id );
-				if ( $resumed_order ) {
+				if ( $resumed_order instanceof WC_Order ) {
 					$order = $resumed_order;
+
+					// A callback may have moved the order to a status that no longer needs payment. Resuming it
+					// would rebuild the items and complete it through process_order_without_payment() without
+					// charging, so refuse it here while it still has an unpaid balance.
+					if ( 0 < $order->get_total() && ! $order->is_paid() && ! $order->needs_payment() ) {
+						throw new Exception( esc_html__( 'This order cannot be completed without payment. Please try again.', 'woocommerce' ) );
+					}
 				}
 
 				// Stock holds only count for pending and draft orders, so a failed order has to be pending again

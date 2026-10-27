@@ -1012,9 +1012,9 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A woocommerce_resume_order callback's status change is not overwritten when the order is resumed.
+	 * @testdox Checkout refuses to resume an order a resume hook moved to a status that no longer needs payment.
 	 */
-	public function test_create_order_keeps_a_resume_hook_status_change(): void {
+	public function test_create_order_rejects_a_resumed_order_that_no_longer_needs_payment(): void {
 		$product = WC_Helper_Product::create_simple_product();
 		WC()->cart->add_to_cart( $product->get_id() );
 
@@ -1024,8 +1024,8 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 			'billing_email'             => 'customer@example.com',
 		);
 
-		// A callback parks the resumed order in a status the store treats as paid, so the checkout should
-		// leave it there instead of forcing it back to pending.
+		// A callback parks the resumed order on-hold, which no longer needs payment. Resuming it would
+		// complete the order through process_order_without_payment() without charging, so checkout must refuse.
 		$park_on_hold = static function ( $order_id ) {
 			wc_get_order( $order_id )->update_status( OrderStatus::ON_HOLD );
 		};
@@ -1036,14 +1036,17 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 			wc_get_order( $order_id )->update_status( OrderStatus::FAILED );
 			WC()->session->set( 'order_awaiting_payment', $order_id );
 
-			$resumed_order_id = $this->sut->create_order( $data );
+			$result = $this->sut->create_order( $data );
 		} finally {
 			remove_action( 'woocommerce_resume_order', $park_on_hold );
 			WC()->cart->empty_cart();
 		}
 
-		$this->assertSame( $order_id, $resumed_order_id, 'The second submit should resume the session order.' );
-		$this->assertSame( OrderStatus::ON_HOLD, wc_get_order( $resumed_order_id )->get_status(), 'The resume hook\'s status change should survive, not be overwritten with pending.' );
+		$this->assertInstanceOf( WP_Error::class, $result, 'Checkout should refuse to resume an order moved out of a payable status.' );
+
+		$order = wc_get_order( $order_id );
+		$this->assertSame( OrderStatus::ON_HOLD, $order->get_status(), 'The order should be left in the status the hook set, not resumed.' );
+		$this->assertFalse( $order->is_paid(), 'The order must not be completed without payment.' );
 	}
 
 	/**
