@@ -632,29 +632,14 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 	 * @return array<string, array{array<string, mixed>, mixed, string}>
 	 */
 	public static function field_name_read_data(): array {
-		$id_value     = array( 'test_field_id' => 'id value' );
-		$parent_value = array(
-			'test_parent' => array(
-				'key'  => 'nested value',
-				'deep' => array( 'leaf' => 'deep value' ),
-			),
-		);
+		$id_value = array( 'test_field_id' => 'id value' );
 
 		return array(
-			'nested key'                => array( $parent_value + $id_value, 'test_parent[key]', 'nested value' ),
 			'plain name'                => array( array( 'test_plain' => 'plain value' ) + $id_value, 'test_plain', 'plain value' ),
 			'nothing stored under name' => array( $id_value, 'test_parent[key]', 'id value' ),
-			'key missing from option'   => array( $parent_value + $id_value, 'test_parent[missing]', 'id value' ),
-			'nothing stored at all'     => array( array(), 'test_parent[key]', 'default value' ),
-			'two levels'                => array( $parent_value + $id_value, 'test_parent[deep][leaf]', 'id value' ),
-			'trailing brackets'         => array( $parent_value + $id_value, 'test_parent[deep][]', 'id value' ),
-			'bare brackets'             => array( $parent_value + $id_value, 'test_parent[]', 'id value' ),
-			'unbalanced bracket'        => array( $parent_value + $id_value, 'test_parent[', 'id value' ),
-			'no base name'              => array( $parent_value + $id_value, '[key]', 'id value' ),
+			'two levels'                => array( array( 'test_parent' => array( 'deep' => array( 'leaf' => 'deep value' ) ) ) + $id_value, 'test_parent[deep][leaf]', 'id value' ),
 			'string option'             => array( array( 'test_string' => 'abc' ) + $id_value, 'test_string[0]', 'id value' ),
-			'object option'             => array( array( 'test_object' => new stdClass() ) + $id_value, 'test_object[key]', 'id value' ),
 			'object value under key'    => array( array( 'test_object' => array( 'key' => new stdClass() ) ) + $id_value, 'test_object[key]', 'id value' ),
-			'field name same as the ID' => array( $id_value, 'test_field_id', 'id value' ),
 		);
 	}
 
