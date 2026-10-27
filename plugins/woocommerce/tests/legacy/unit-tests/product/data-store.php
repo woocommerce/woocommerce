@@ -296,10 +296,7 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 
 		$expected_attributes = array(
 			'pa_size'   => array( 'small', 'large', 'huge' ),
-			'pa_colour' => array(
-				0 => 'red',
-				2 => 'blue',
-			),
+			'pa_colour' => array( 'blue', 'red' ),
 			'pa_number' => array( '0', '1', '2' ),
 		);
 		$this->assertEquals( $expected_attributes, $product->get_variation_attributes() );

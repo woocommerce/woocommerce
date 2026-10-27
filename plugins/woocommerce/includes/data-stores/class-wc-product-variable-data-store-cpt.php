@@ -268,7 +268,8 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 			$child_ids  = $product->get_children();
 			$attributes = array_values( array_filter( $attributes, static fn ( $attribute ) => ! empty( $attribute['is_variation'] ) ) );
 
-			$attributes_values = array();
+			$attributes_values   = array();
+			$attributes_children = array();
 			if ( ! empty( $child_ids ) && ! empty( $attributes ) ) {
 				// Performance note: for optimal performance, retrieve attribute values using a single SQL query.
 				$attributes_placeholders = implode( ', ', array_fill( 0, count( $attributes ), '%s' ) );
@@ -277,7 +278,7 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 					$wpdb->prepare(
 						// Performance: DISTINCT + CAST(meta_value AS BINARY(200)) is feasible but forces a temp table — keep array_unique.
 						// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
-						"SELECT meta_key, meta_value FROM {$wpdb->postmeta} WHERE post_id IN ( {$children_placeholders} ) AND meta_key IN ( {$attributes_placeholders} )",
+						"SELECT post_id, meta_key, meta_value FROM {$wpdb->postmeta} WHERE post_id IN ( {$children_placeholders} ) AND meta_key IN ( {$attributes_placeholders} )",
 						...$child_ids,
 						...array_map( static fn( $attribute ) => wc_variation_attribute_name( $attribute['name'] ), $attributes )
 					)
@@ -285,15 +286,21 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 				foreach ( $prefetch as $row ) {
 					// Defensive: normalize non-canonical meta_key casing (e.g. attribute_pa_Size → attribute_pa_size).
 					// sanitize_title over wc_variation_attribute_name as the latter adds 'attribute_' prefix.
-					$attributes_values[ sanitize_title( $row->meta_key ) ][] = $row->meta_value;
+					$meta_key                         = sanitize_title( $row->meta_key );
+					$attributes_values[ $meta_key ][] = $row->meta_value;
+					$attributes_children[ $meta_key ][ $row->post_id ] = true;
 				}
 			}
 
 			foreach ( $attributes as $attribute ) {
-				$values = $attributes_values[ wc_variation_attribute_name( $attribute['name'] ) ] ?? array();
+				$meta_key = wc_variation_attribute_name( $attribute['name'] );
+				$values   = $attributes_values[ $meta_key ] ?? array();
+
+				// A variation without a row for this attribute accepts any value, as in wc_get_product_variation_attributes().
+				$has_child_without_row = count( $attributes_children[ $meta_key ] ?? array() ) < count( $child_ids );
 
 				// Empty value indicates that all options for given attribute are available.
-				if ( empty( $values ) || in_array( null, $values, true ) || in_array( '', $values, true ) ) {
+				if ( empty( $values ) || $has_child_without_row || in_array( null, $values, true ) || in_array( '', $values, true ) ) {
 					$values = $attribute['is_taxonomy'] ? wc_get_object_terms( $product_id, $attribute['name'], 'slug' ) : wc_get_text_attributes( $attribute['value'] );
 					// Get custom attributes (non taxonomy) as defined.
 				} elseif ( ! $attribute['is_taxonomy'] ) {
