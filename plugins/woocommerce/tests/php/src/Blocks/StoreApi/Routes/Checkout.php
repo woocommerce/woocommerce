@@ -3578,7 +3578,9 @@ class Checkout extends \WP_Test_REST_TestCase {
 						),
 					)
 				);
-				rest_get_server()->dispatch( $request );
+				$response = rest_get_server()->dispatch( $request );
+				$data     = $response->get_data();
+				$this->assertSame( 'failure', $data['payment_result']['payment_status'] ?? null, "Checkout {$marker} should end with the handler's failed payment: " . print_r( $data, true ) );
 			}
 		} finally {
 			remove_action( 'woocommerce_rest_checkout_process_payment_with_context', $payment_handler, 1 );
