@@ -133,7 +133,7 @@ class WC_Coupon_Tests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Loading coupons preserves stored spend limits when getters are filtered.
+	 * @testdox Loaded coupons preserve stored spend limits and reject carts above the filtered maximum.
 	 * @testWith [false]
 	 *           [true]
 	 * @param bool $manual Whether to load a manual coupon.
@@ -167,6 +167,19 @@ class WC_Coupon_Tests extends WC_Unit_Test_Case {
 		$this->assertSame( array( '50', '60' ), array( $sut->get_minimum_amount( 'edit' ), $sut->get_maximum_amount( 'edit' ) ) );
 		$this->assertSame( '100', $sut->get_minimum_amount() );
 		$this->assertSame( '120', $sut->get_maximum_amount() );
+
+		update_option( 'woocommerce_enable_coupons', 'yes' );
+		WC()->cart->empty_cart();
+		$product = WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 130 ) );
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->calculate_totals();
+
+		$this->assertSame( 130.0, (float) WC()->cart->get_subtotal() );
+		$this->assertFalse( WC()->cart->apply_coupon( $sut->get_code() ) );
+		$this->assertSame(
+			$sut->get_coupon_error( WC_Coupon::E_WC_COUPON_MAX_SPEND_LIMIT_MET ),
+			wc_get_notices( 'error' )[0]['notice']
+		);
 	}
 
 	/**
