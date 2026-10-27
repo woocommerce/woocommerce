@@ -58,10 +58,10 @@ class ComingSoonRequestHandler {
 	/**
 	 * Formerly initialized block templates so classic themes could show the block Coming Soon page.
 	 *
-	 * @deprecated 11.3.0 Classic themes now use PHP templates, and block themes initialize block templates in the Blocks bootstrap.
+	 * @deprecated 11.4.0 Classic themes now use PHP templates, and block themes initialize block templates in the Blocks bootstrap.
 	 */
 	public function possibly_init_block_templates() {
-		wc_deprecated_function( __METHOD__, '11.3.0' );
+		wc_deprecated_function( __METHOD__, '11.4.0' );
 	}
 
 	/**
