@@ -217,8 +217,14 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
-	 * Give the clone its own meta objects and its own copies of the loaded items. The item copies keep
-	 * their meta IDs, so a cached copy does not insert the item meta again.
+	 * Clone the order.
+	 *
+	 * Orders use cache mode. A cached copy keeps its meta IDs, so it does not insert its meta again on save.
+	 * Each copy gets its own meta objects and its own item objects, so a change to one copy does not reach
+	 * the others.
+	 *
+	 * Eventually, Core should stop unsetting meta IDs in WC_Data::__clone() for every subclass, and make
+	 * duplication an explicit operation. Duplicating an object does not need to hook into __clone().
 	 */
 	public function __clone() {
 		parent::__clone();
