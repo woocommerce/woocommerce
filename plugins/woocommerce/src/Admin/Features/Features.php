@@ -305,6 +305,10 @@ class Features {
 		if ( FeaturesUtil::feature_is_enabled( 'order-detail-redesign' ) ) {
 			new \Automattic\WooCommerce\Internal\Features\OrderDetailRedesign\Init();
 		}
+
+		if ( self::is_enabled( 'purple-cys-prototype' ) ) {
+			( new \Automattic\WooCommerce\Internal\Admin\PurpleCysPrototype() )->register_hooks();
+		}
 	}
 
 	/**
