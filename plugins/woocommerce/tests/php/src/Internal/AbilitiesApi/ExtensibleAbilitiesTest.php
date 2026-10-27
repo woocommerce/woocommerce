@@ -1267,7 +1267,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should accept the extensions of a read result that lists a field left out, in an update.
+	 * @testdox Should accept the extensions of a read result with a read-only field and a field left out, in an update.
 	 */
 	public function test_a_read_result_with_a_field_left_out_can_be_sent_back(): void {
 		add_action(
@@ -1289,6 +1289,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		);
 		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
 		$product->update_meta_data( '_test_color', 'red' );
+		$product->update_meta_data( '_test_code', 'A1' );
 		$product->save();
 
 		$read   = $this->run_ability( 'woocommerce/products-query', array( 'id' => $product->get_id() ) )['products'][0];
@@ -1301,7 +1302,9 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		);
 
 		$this->assertArrayHasKey( 'broken', $read['extensions']['test-ext'][ ExtensibleAbilities::OMITTED_KEY ] );
+		$this->assertSame( 'A1', $read['extensions']['test-ext']['code'] );
 		$this->assertSame( $read['extensions'], $output['product']['extensions'] );
+		$this->assertSame( 'A1', wc_get_product( $product->get_id() )->get_meta( '_test_code' ) );
 	}
 
 	/**
@@ -1358,14 +1361,13 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should save nothing when a value is rejected, does not match its schema, or belongs to a read-only field.
+	 * @testdox Should save nothing when a value is rejected, does not match its schema, or belongs to an unknown namespace.
 	 */
 	public function test_a_rejected_value_saves_nothing(): void {
 		$product  = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
 		$rejected = array(
 			array( 'other_ext' => array( 'count' => -1 ) ),
 			array( 'other_ext' => array( 'count' => 'many' ) ),
-			array( 'other_ext' => array( 'code' => 7 ) ),
 			array( 'unknown' => array( 'color' => 'red' ) ),
 		);
 
@@ -1558,7 +1560,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		);
 
 		$this->assertSame( array( 'string', 'null' ), $schema['properties']['test-ext']['properties']['color']['type'] );
-		$this->assertArrayNotHasKey( 'code', $schema['properties']['test-ext']['properties'] );
+		$this->assertSame( 'string', $schema['properties']['test-ext']['properties']['code']['type'] );
 		$this->assertSame( 'Pencil', wc_get_product( $product->get_id() )->get_name() );
 		$this->assertSame( array( 'color' => 'green' ), $output['extensions']['test-ext'] );
 	}
@@ -1676,7 +1678,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 			$this->assertSame( array( 'string', 'null' ), $extensions['test-ext']['properties']['color']['type'] );
 			$this->assertSame( array( 'integer', 'null' ), $extensions['other_ext']['properties']['count']['type'] );
-			$this->assertArrayNotHasKey( 'code', $extensions['test-ext']['properties'] );
+			$this->assertSame( 'Read-only. An update ignores it.', $extensions['test-ext']['properties']['code']['description'] );
 			$this->assertSame( 1, substr_count( wp_json_encode( $schema ), '"color"' ) );
 			foreach ( $schema['oneOf'] as $branch ) {
 				$this->assertSame( 'object', $branch['properties']['extensions']['type'] );
