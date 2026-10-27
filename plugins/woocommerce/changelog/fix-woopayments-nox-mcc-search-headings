@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Make the WooPayments industry search keyboard-friendly and show categories as headings, not options.
+Fix industry selection, category browsing, and keyboard navigation during WooPayments setup.
