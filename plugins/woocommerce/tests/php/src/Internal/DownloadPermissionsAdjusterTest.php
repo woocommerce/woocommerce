@@ -109,6 +109,76 @@ class DownloadPermissionsAdjusterTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Does not check variations or schedule adjustment when the parent has no download files.
+	 * @testWith [false]
+	 *           [true]
+	 * @param bool $downloadable Whether a child is downloadable.
+	 */
+	public function test_parent_without_downloads_does_not_check_children( bool $downloadable ): void {
+		$product = $this->create_downloadable_variation_product();
+		$product->set_downloads( array() );
+		$child = wc_get_product( current( $product->get_children() ) );
+		$child->set_downloadable( $downloadable );
+		$child->save();
+		$checks = 0;
+		add_filter(
+			'woocommerce_is_downloadable',
+			static function ( $is_downloadable, $candidate ) use ( &$checks ) {
+				if ( $candidate->is_type( 'variation' ) ) {
+					++$checks;
+				}
+				return $is_downloadable;
+			},
+			10,
+			2
+		);
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'as_get_scheduled_actions' => function () {
+					$this->fail( 'A parent without download files should not reach scheduling.' );
+				},
+			)
+		);
+
+		$this->sut->maybe_schedule_adjust_download_permissions( $product );
+
+		$this->assertSame( 0, $checks, 'No children should be checked for empty parent downloads.' );
+	}
+
+	/**
+	 * @testdox Uses filtered parent downloads when deciding whether to schedule adjustment.
+	 */
+	public function test_filtered_parent_downloads_are_scheduled(): void {
+		$product   = $this->create_downloadable_variation_product();
+		$downloads = $product->get_downloads();
+		$product->set_downloads( array() );
+		add_filter(
+			'woocommerce_product_get_downloads',
+			static function ( $files, $candidate ) use ( $product, $downloads ) {
+				return $candidate->get_id() === $product->get_id() ? $downloads : $files;
+			},
+			10,
+			2
+		);
+		$scheduled_args = null;
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'as_get_scheduled_actions'  => static function () {
+					return array();
+				},
+				'as_schedule_single_action' => static function ( $timestamp, $hook, $args ) use ( &$scheduled_args ) {
+					unset( $timestamp, $hook );
+					$scheduled_args = $args;
+				},
+			)
+		);
+
+		$this->sut->maybe_schedule_adjust_download_permissions( $product );
+
+		$this->assertSame( array( $product->get_id() ), $scheduled_args );
+	}
+
+	/**
 	 * @testdox 'maybe_schedule_adjust_download_permissions' does nothing if the an adjustment is already pending.
 	 */
 	public function test_no_adjustment_is_scheduled_if_already_scheduled() {
@@ -389,12 +459,20 @@ class DownloadPermissionsAdjusterTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Creates a variable product with a downloadable variation. No downloads are added.
+	 * Creates a variable product with parent downloads and a downloadable variation.
 	 *
 	 * @return \WC_Product A product.
 	 */
 	private function create_downloadable_variation_product() {
 		$product = ProductHelper::create_variation_product();
+		$product->set_downloads(
+			array(
+				array(
+					'name' => 'the_file',
+					'file' => 'the_file.foo',
+				),
+			)
+		);
 
 		$child = wc_get_product( current( $product->get_children() ) );
 		$child->set_downloadable( true );

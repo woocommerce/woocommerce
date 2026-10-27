@@ -44,6 +44,11 @@ class DownloadPermissionsAdjuster {
 			return;
 		}
 
+		// Permission adjustment cannot copy grants without parent download files.
+		if ( ! $product->get_downloads() ) {
+			return;
+		}
+
 		_prime_post_caches( $children_ids );
 
 		$are_any_children_downloadable = false;
