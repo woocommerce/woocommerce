@@ -6,7 +6,7 @@
  *
  * @see     Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\CustomerHistory
  * @package WooCommerce\Templates
- * @version 11.3.0
+ * @version 11.4.0
  */
 
 declare( strict_types=1 );
@@ -20,12 +20,12 @@ defined( 'ABSPATH' ) || exit;
  * @var float                $total_spend           The total money spent by the current customer, across every order currency.
  * @var float                $avg_order_value       The average money spent by the current customer, across every order currency.
  * @var string               $tooltip               The tooltip text for the "Total orders" heading.
- * @var array<string, float> $totals_per_currency   The total money spent by the current customer, keyed by order currency. Passed since 11.3.0.
- * @var array<string, int>   $counts_per_currency   The number of paid orders placed by the current customer, keyed by order currency. Passed since 11.3.0.
- * @var array<string, float> $averages_per_currency The average money spent by the current customer, keyed by order currency. Passed since 11.3.0.
+ * @var array<string, float> $totals_per_currency   The total money spent by the current customer, keyed by order currency. Passed since 11.4.0.
+ * @var array<string, int>   $counts_per_currency   The number of paid orders placed by the current customer, keyed by order currency. Passed since 11.4.0.
+ * @var array<string, float> $averages_per_currency The average money spent by the current customer, keyed by order currency. Passed since 11.4.0.
  */
 
-// Callers written before 11.3.0 pass only the single total and average.
+// Callers written before 11.4.0 pass only the single total and average.
 $totals_per_currency   = is_array( $totals_per_currency ?? null ) ? $totals_per_currency : array();
 $counts_per_currency   = is_array( $counts_per_currency ?? null ) ? $counts_per_currency : array();
 $averages_per_currency = is_array( $averages_per_currency ?? null ) ? $averages_per_currency : array();
