@@ -162,7 +162,7 @@ abstract class ActionableAbility extends \WP_Ability {
 	/**
 	 * Check `extensions.<namespace>.<field>` input values against the schema of
 	 * each field, and cast them. No callback runs here. A null value is kept as
-	 * is, to delete the value. A read-only field and `_omitted` are ignored.
+	 * is, to delete the value. A read-only field and the `_errors` key are ignored.
 	 *
 	 * @param array<string, mixed> $values Values keyed by namespace, then field.
 	 * @return array|\WP_Error A list of update_callback and value pairs, or a WP_Error when a value is rejected.
@@ -173,7 +173,7 @@ abstract class ActionableAbility extends \WP_Ability {
 		foreach ( $values as $namespace => $fields ) {
 			foreach ( (array) $fields as $field => $value ) {
 				$args = $registered[ $namespace ][ $field ] ?? array();
-				if ( ExtensibleAbilities::OMITTED_KEY === $field || ( ! empty( $args ) && ! isset( $args['update_callback'] ) ) ) {
+				if ( ExtensibleAbilities::ERRORS_KEY === $field || ( ! empty( $args ) && ! isset( $args['update_callback'] ) ) ) {
 					continue;
 				}
 				if ( ! isset( $args['update_callback'] ) ) {
@@ -303,7 +303,7 @@ abstract class ActionableAbility extends \WP_Ability {
 					},
 					$fields
 				) + array(
-					ExtensibleAbilities::OMITTED_KEY => array(
+					ExtensibleAbilities::ERRORS_KEY => array(
 						'type'        => 'object',
 						'description' => __( 'Ignored, so a client can send back the extensions of a read result.', 'woocommerce' ),
 					),

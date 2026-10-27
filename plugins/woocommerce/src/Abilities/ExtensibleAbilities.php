@@ -34,9 +34,9 @@ class ExtensibleAbilities {
 	public const FEATURE_ID = 'extensible_abilities';
 
 	/**
-	 * Key next to the values of a namespace that lists the fields left out, with the reason for each one.
+	 * Key next to the values of a namespace that lists the fields the extension failed to provide, with the error for each one.
 	 */
-	public const OMITTED_KEY = '_omitted';
+	public const ERRORS_KEY = '_errors';
 
 	/**
 	 * Fields keyed by resource, then namespace, then field name.
@@ -128,7 +128,7 @@ class ExtensibleAbilities {
 	 *
 	 *     @type string   $resource     Resource that an ability formats, for example `product`, `order` or `order_item`.
 	 *     @type string   $namespace    Slug of the extension that owns the field, such as `subscriptions`.
-	 *     @type string   $field        Field name inside the namespace, such as `trial_length`. It cannot be `_omitted`.
+	 *     @type string   $field        Field name inside the namespace, such as `trial_length`. It cannot be `_errors`.
 	 *     @type array    $schema       JSON schema of the value. It needs a `type`. Its `title` is the label clients show.
 	 *                                  It cannot set `required`, because a value that fails its schema is
 	 *                                  left out. For a field that is always present, allow null and return null.
@@ -164,8 +164,8 @@ class ExtensibleAbilities {
 				return;
 			}
 		}
-		if ( self::OMITTED_KEY === $args['field'] ) {
-			wc_doing_it_wrong( __METHOD__, 'The field name "_omitted" is reserved.', '11.4.0' );
+		if ( self::ERRORS_KEY === $args['field'] ) {
+			wc_doing_it_wrong( __METHOD__, 'The field name "_errors" is reserved.', '11.4.0' );
 			return;
 		}
 		if ( ! isset( self::$resources[ $args['resource'] ] ) && ! did_action( 'woocommerce_extensible_abilities_resources_init' ) ) {
@@ -535,7 +535,7 @@ class ExtensibleAbilities {
 	 * `extensions.<namespace>.<field>`. A value is cast to its schema type, so
 	 * `'12'` becomes `12` for an integer field. A field that throws or returns a
 	 * value other than null that its schema does not allow is left out, and
-	 * `extensions.<namespace>._omitted.<field>` says why. A namespace with no
+	 * `extensions.<namespace>._errors.<field>` says why. A namespace with no
 	 * values and no fields left out is left out, and `extensions` is left out
 	 * when no namespace is in the output or the feature is off.
 	 *
@@ -561,7 +561,7 @@ class ExtensibleAbilities {
 						sprintf( 'Ability field "%s.%s" of "%s" failed: %s', $namespace, $field, $resource_name, $e->getMessage() ),
 						array( 'source' => 'extensible-abilities' )
 					);
-					$extensions[ $namespace ][ self::OMITTED_KEY ][ $field ] = __( 'The extension failed to read this value.', 'woocommerce' );
+					$extensions[ $namespace ][ self::ERRORS_KEY ][ $field ] = __( 'The extension failed to read this value.', 'woocommerce' );
 					continue;
 				}
 				$valid     = self::matches_schema( $args, $value );
@@ -569,7 +569,7 @@ class ExtensibleAbilities {
 				if ( ! is_wp_error( $sanitized ) ) {
 					$extensions[ $namespace ][ $field ] = $sanitized;
 				} elseif ( null !== $value ) {
-					$extensions[ $namespace ][ self::OMITTED_KEY ][ $field ] = $sanitized->get_error_message();
+					$extensions[ $namespace ][ self::ERRORS_KEY ][ $field ] = $sanitized->get_error_message();
 				}
 			}
 		}
@@ -610,9 +610,9 @@ class ExtensibleAbilities {
 					},
 					$fields
 				) + array(
-					self::OMITTED_KEY => array(
+					self::ERRORS_KEY => array(
 						'type'                 => 'object',
-						'description'          => __( 'Fields left out of this object, with the reason for each one.', 'woocommerce' ),
+						'description'          => __( 'Fields of this extension that were left out because of an error, with the error for each one.', 'woocommerce' ),
 						'additionalProperties' => array( 'type' => 'string' ),
 					),
 				),

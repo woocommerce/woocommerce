@@ -1152,7 +1152,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		);
 		ExtensibleAbilities::register_field( array_merge( $valid, array( 'namespace' => '0' ) ) );
 		ExtensibleAbilities::register_field( array_merge( $valid, array( 'field' => '123' ) ) );
-		ExtensibleAbilities::register_field( array_merge( $valid, array( 'field' => ExtensibleAbilities::OMITTED_KEY ) ) );
+		ExtensibleAbilities::register_field( array_merge( $valid, array( 'field' => ExtensibleAbilities::ERRORS_KEY ) ) );
 		$order = \WC_Helper_Order::create_order();
 
 		$this->assertSame(
@@ -1204,9 +1204,9 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 		$output = ExtensibleAbilities::add_fields_to_object( array(), 'order', $order );
 
-		$values  = $output['extensions']['values'];
-		$omitted = $values[ ExtensibleAbilities::OMITTED_KEY ];
-		unset( $values[ ExtensibleAbilities::OMITTED_KEY ] );
+		$values = $output['extensions']['values'];
+		$errors = $values[ ExtensibleAbilities::ERRORS_KEY ];
+		unset( $values[ ExtensibleAbilities::ERRORS_KEY ] );
 
 		$this->assertSame(
 			array(
@@ -1215,8 +1215,8 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			),
 			$values
 		);
-		$this->assertSame( array( 'broken', 'dupes' ), array_keys( $omitted ) );
-		$this->assertSame( 'The extension failed to read this value.', $omitted['broken'] );
+		$this->assertSame( array( 'broken', 'dupes' ), array_keys( $errors ) );
+		$this->assertSame( 'The extension failed to read this value.', $errors['broken'] );
 		$this->assertStringNotContainsString( 'Broken', wp_json_encode( $output ) );
 	}
 
@@ -1256,7 +1256,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$products = array_column( $this->run_ability( 'woocommerce/products-query', array( 'search' => 'Pen' ) )['products'], null, 'id' );
 
 		foreach ( $products as $product ) {
-			$this->assertStringContainsString( 'integer', $product['extensions']['test-ext'][ ExtensibleAbilities::OMITTED_KEY ]['count'] );
+			$this->assertStringContainsString( 'integer', $product['extensions']['test-ext'][ ExtensibleAbilities::ERRORS_KEY ]['count'] );
 		}
 		$this->assertSame( 'A1', $products[ $first->get_id() ]['extensions']['test-ext']['code'] );
 		$matches = array_filter(
@@ -1301,7 +1301,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			)
 		);
 
-		$this->assertArrayHasKey( 'broken', $read['extensions']['test-ext'][ ExtensibleAbilities::OMITTED_KEY ] );
+		$this->assertArrayHasKey( 'broken', $read['extensions']['test-ext'][ ExtensibleAbilities::ERRORS_KEY ] );
 		$this->assertSame( 'A1', $read['extensions']['test-ext']['code'] );
 		$this->assertSame( $read['extensions'], $output['product']['extensions'] );
 		$this->assertSame( 'A1', wc_get_product( $product->get_id() )->get_meta( '_test_code' ) );
