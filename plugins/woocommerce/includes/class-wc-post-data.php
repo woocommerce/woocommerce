@@ -39,11 +39,17 @@ class WC_Post_Data {
 	public static function init() {
 		add_action( 'clean_post_cache', array( __CLASS__, 'invalidate_products_last_modified' ), 10, 2 );
 		add_action( 'clean_post_cache', array( __CLASS__, 'invalidate_db_block_templates_cache' ), 10, 2 );
+		add_action( 'clean_post_cache', array( __CLASS__, 'invalidate_grouped_product_sale_cache' ), 0, 2 );
+		add_action( 'post_updated', array( __CLASS__, 'invalidate_grouped_product_sale_cache' ), 0, 3 );
 		add_filter( 'post_type_link', array( __CLASS__, 'variation_post_link' ), 10, 2 );
 		add_action( 'shutdown', array( __CLASS__, 'do_deferred_product_sync' ), 10 );
 		add_action( 'set_object_terms', array( __CLASS__, 'force_default_term' ), 10, 5 );
 		add_action( 'set_object_terms', array( __CLASS__, 'delete_product_query_transients' ) );
 		add_action( 'deleted_term_relationships', array( __CLASS__, 'delete_product_query_transients' ) );
+		add_action( 'set_object_terms', array( __CLASS__, 'invalidate_grouped_sale_cache_for_terms' ), 0, 4 );
+		add_action( 'deleted_term_relationships', array( __CLASS__, 'invalidate_grouped_sale_cache_for_taxonomy' ), 0, 3 );
+		add_action( 'edited_term', array( __CLASS__, 'invalidate_grouped_sale_cache_for_taxonomy' ), 0, 3 );
+		add_action( 'delete_term', array( __CLASS__, 'invalidate_grouped_sale_cache_for_taxonomy' ), 0, 3 );
 		add_action( 'woocommerce_product_set_stock_status', array( __CLASS__, 'delete_product_query_transients' ) );
 		add_action( 'woocommerce_product_set_visibility', array( __CLASS__, 'delete_product_query_transients' ) );
 		add_action( 'woocommerce_product_type_changed', array( __CLASS__, 'product_type_changed' ), 10, 3 );
@@ -61,6 +67,7 @@ class WC_Post_Data {
 		// Status transitions.
 		add_action( 'transition_post_status', array( __CLASS__, 'transition_post_status' ), 10, 3 );
 		add_action( 'delete_post', array( __CLASS__, 'delete_post_data' ) );
+		add_action( 'deleted_post', array( __CLASS__, 'invalidate_product_sale_cache' ), 10, 2 );
 		add_action( 'wp_trash_post', array( __CLASS__, 'trash_post' ) );
 		add_action( 'untrashed_post', array( __CLASS__, 'untrash_post' ) );
 		add_action( 'before_delete_post', array( __CLASS__, 'before_delete_order' ) );
@@ -156,6 +163,9 @@ class WC_Post_Data {
 	public static function transition_post_status( $new_status, $old_status, $post ) {
 		if ( ( ProductStatus::PUBLISH === $new_status || ProductStatus::PUBLISH === $old_status ) && in_array( $post->post_type, array( 'product', 'product_variation' ), true ) ) {
 			self::delete_product_query_transients();
+			if ( $new_status !== $old_status ) {
+				delete_transient( 'wc_products_onsale' );
+			}
 		}
 
 		if ( ProductStatus::PUBLISH === $new_status && ProductStatus::PUBLISH !== $old_status && in_array( $post->post_type, array( 'product', 'product_variation' ), true ) ) {
@@ -176,6 +186,67 @@ class WC_Post_Data {
 	 */
 	public static function delete_product_query_transients() {
 		WC_Cache_Helper::get_transient_version( 'product_query', true );
+	}
+
+	/**
+	 * Evict sale IDs after deletion, when a concurrent cache refill can no longer include the post.
+	 *
+	 * @since 11.4.0
+	 * @param int     $post_id Deleted post ID.
+	 * @param WP_Post $post Deleted post.
+	 */
+	public static function invalidate_product_sale_cache( $post_id, $post ): void {
+		if ( $post instanceof WP_Post && in_array( $post->post_type, array( 'product', 'product_variation' ), true ) ) {
+			delete_transient( 'wc_products_onsale' );
+			WC_Product_Grouped_Data_Store_CPT::invalidate_sale_cache();
+		}
+	}
+
+	/**
+	 * Invalidate grouped sale discovery after product post changes, including a change away from a product post type.
+	 *
+	 * @since 11.4.0
+	 * @param int          $post_id Post ID.
+	 * @param WP_Post      $post Current post.
+	 * @param WP_Post|null $previous_post Previous post on post_updated, otherwise null.
+	 */
+	public static function invalidate_grouped_product_sale_cache( $post_id, $post, $previous_post = null ): void {
+		if ( $previous_post instanceof WP_Post && $post instanceof WP_Post && $previous_post->post_type === $post->post_type ) {
+			return;
+		}
+		foreach ( array( $post, $previous_post ) as $candidate ) {
+			if ( $candidate instanceof WP_Post && in_array( $candidate->post_type, array( 'product', 'product_variation' ), true ) ) {
+				WC_Product_Grouped_Data_Store_CPT::invalidate_sale_cache();
+				return;
+			}
+		}
+	}
+
+	/**
+	 * Adapt term assignments to the product-type invalidation callback.
+	 *
+	 * @since 11.4.0
+	 * @param int    $object_id Object ID.
+	 * @param mixed  $terms Assigned terms.
+	 * @param array  $tt_ids Term taxonomy IDs.
+	 * @param string $taxonomy Taxonomy name.
+	 */
+	public static function invalidate_grouped_sale_cache_for_terms( $object_id, $terms, $tt_ids, $taxonomy ): void {
+		self::invalidate_grouped_sale_cache_for_taxonomy( $object_id, $tt_ids, $taxonomy );
+	}
+
+	/**
+	 * Invalidate grouped sale discovery when product types or their assignments change.
+	 *
+	 * @since 11.4.0
+	 * @param int       $object_or_term_id Object or term ID.
+	 * @param int|int[] $tt_ids Term taxonomy IDs.
+	 * @param string    $taxonomy Taxonomy name.
+	 */
+	public static function invalidate_grouped_sale_cache_for_taxonomy( $object_or_term_id, $tt_ids, $taxonomy ): void {
+		if ( 'product_type' === $taxonomy ) {
+			WC_Product_Grouped_Data_Store_CPT::invalidate_sale_cache();
+		}
 	}
 
 	/**
@@ -704,6 +775,11 @@ class WC_Post_Data {
 	 */
 	public static function flush_object_meta_cache( $meta_id, $object_id, $meta_key, $meta_value ) {
 		WC_Cache_Helper::invalidate_cache_group( 'object_' . $object_id );
+		// Updates by meta ID can rename a relevant old key to an unrelated new key.
+		if ( in_array( $meta_key, array( '_children', '_price', '_regular_price', '_sale_price', '_sale_price_dates_from', '_sale_price_dates_to' ), true )
+			|| ( 'updated_post_meta' === current_filter() && in_array( get_post_type( $object_id ), array( 'product', 'product_variation' ), true ) ) ) {
+			WC_Product_Grouped_Data_Store_CPT::invalidate_sale_cache();
+		}
 	}
 
 	/**

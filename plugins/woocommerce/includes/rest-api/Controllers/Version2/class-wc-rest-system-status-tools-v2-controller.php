@@ -582,6 +582,9 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 					WHERE wp.ID IS NULL AND products.post_type = 'product_variation';"
 					)
 				);
+				if ( $result ) {
+					WC_Product_Grouped_Data_Store_CPT::invalidate_sale_cache();
+				}
 				/* translators: %d: amount of orphaned variations */
 				$message = sprintf( __( '%d orphaned variations deleted', 'woocommerce' ), $result );
 				break;

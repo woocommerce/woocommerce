@@ -986,6 +986,381 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Sale IDs include every group sharing a discounted child, including with a warm cache.
+	 */
+	public function test_sale_ids_include_shared_grouped_products(): void {
+		$child = WC_Helper_Product::create_simple_product( false );
+		$child->set_regular_price( '37' );
+		$child->set_sale_price( '19' );
+		$child->save();
+
+		$groups = array();
+		foreach ( range( 1, 2 ) as $unused ) {
+			$group = new WC_Product_Grouped();
+			$group->set_status( ProductStatus::PUBLISH );
+			$group->set_children( array( $child->get_id() ) );
+			$group->save();
+			$groups[] = $group->get_id();
+		}
+
+		set_transient( 'wc_products_onsale', array( $child->get_id() ) );
+		$this->assertEqualsCanonicalizing( array_merge( array( $child->get_id() ), $groups ), wc_get_product_ids_on_sale() );
+
+		update_post_meta( $groups[0], '_children', array() );
+		$this->assertEqualsCanonicalizing( array( $child->get_id(), $groups[1] ), wc_get_product_ids_on_sale() );
+
+		$child->set_sale_price( '' );
+		$child->save();
+		$this->assertSame( array(), wc_get_product_ids_on_sale() );
+	}
+
+	/**
+	 * @testdox Sale discovery removes stale grouped IDs and never caches the expanded group list.
+	 */
+	public function test_sale_ids_reconcile_stale_grouped_cache(): void {
+		$child = WC_Helper_Product::create_simple_product( false );
+		$child->set_regular_price( '37' );
+		$child->set_sale_price( '19' );
+		$child->save();
+		$group = new WC_Product_Grouped();
+		$group->set_status( ProductStatus::PUBLISH );
+		$group->save();
+
+		set_transient( 'wc_products_onsale', array( $child->get_id(), $group->get_id() ) );
+		$this->assertSame( array( $child->get_id() ), wc_get_product_ids_on_sale() );
+
+		$group->set_children( array( $child->get_id() ) );
+		$group->save();
+		$this->assertEqualsCanonicalizing( array( $child->get_id(), $group->get_id() ), wc_get_product_ids_on_sale() );
+		$this->assertSame( array( $child->get_id() ), get_transient( 'wc_products_onsale' ) );
+
+		set_transient( 'wc_products_onsale', array( $child->get_id(), $group->get_id() ) );
+		wp_delete_post( $group->get_id(), true );
+		$this->assertSame( array( $child->get_id() ), wc_get_product_ids_on_sale() );
+	}
+
+	/**
+	 * @testdox Warm sale discovery follows child dates and core type changes without a group save.
+	 */
+	public function test_group_sale_ids_recheck_live_child_eligibility(): void {
+		$child = WC_Helper_Product::create_simple_product( false );
+		$child->set_regular_price( '37' );
+		$child->set_sale_price( '19' );
+		$child->save();
+		$group = new WC_Product_Grouped();
+		$group->set_status( ProductStatus::PUBLISH );
+		$group->set_children( array( $child->get_id() ) );
+		$group->save();
+		$this->assertContains( $group->get_id(), wc_get_product_ids_on_sale() );
+
+		update_post_meta( $child->get_id(), '_sale_price_dates_from', time() + HOUR_IN_SECONDS );
+		$this->assertNotContains( $group->get_id(), wc_get_product_ids_on_sale() );
+		update_post_meta( $child->get_id(), '_sale_price_dates_from', time() - HOUR_IN_SECONDS );
+		$this->assertContains( $group->get_id(), wc_get_product_ids_on_sale() );
+		update_post_meta( $child->get_id(), '_sale_price_dates_to', time() - HOUR_IN_SECONDS );
+		$this->assertNotContains( $group->get_id(), wc_get_product_ids_on_sale() );
+		delete_post_meta( $child->get_id(), '_sale_price_dates_to' );
+
+		foreach ( array( ProductType::EXTERNAL, ProductType::VARIABLE, ProductType::GROUPED ) as $type ) {
+			wp_set_object_terms( $child->get_id(), $type, 'product_type' );
+			$this->assertNotContains( $group->get_id(), wc_get_product_ids_on_sale(), $type );
+		}
+		wp_set_object_terms( $child->get_id(), ProductType::SIMPLE, 'product_type' );
+		$this->assertContains( $group->get_id(), wc_get_product_ids_on_sale() );
+	}
+
+	/**
+	 * @testdox Group sale caching follows parent reassignment and conversion away from product post types.
+	 */
+	public function test_group_sale_ids_follow_post_relationship_changes(): void {
+		$child = WC_Helper_Product::create_simple_product( false );
+		$child->set_regular_price( '37' );
+		$child->set_sale_price( '19' );
+		$child->save();
+		$parent = WC_Helper_Product::create_simple_product();
+		$parent->set_status( ProductStatus::DRAFT );
+		$parent->save();
+		$group = new WC_Product_Grouped();
+		$group->set_status( ProductStatus::PUBLISH );
+		$group->set_children( array( $child->get_id() ) );
+		$group->save();
+		$this->assertContains( $group->get_id(), wc_get_product_ids_on_sale() );
+
+		wp_update_post(
+			array(
+				'ID'          => $child->get_id(),
+				'post_parent' => $parent->get_id(),
+			)
+		);
+		$this->assertNotContains( $group->get_id(), wc_get_product_ids_on_sale() );
+		wp_update_post(
+			array(
+				'ID'          => $child->get_id(),
+				'post_parent' => 0,
+			)
+		);
+		$this->assertContains( $group->get_id(), wc_get_product_ids_on_sale() );
+		wp_update_post(
+			array(
+				'ID'        => $group->get_id(),
+				'post_type' => 'post',
+			)
+		);
+		$this->assertNotContains( $group->get_id(), wc_get_product_ids_on_sale() );
+	}
+
+	/**
+	 * @testdox Group sale discovery stays fresh during deferred transient deletion.
+	 */
+	public function test_group_sale_ids_during_deferred_invalidation(): void {
+		$child = WC_Helper_Product::create_simple_product( false );
+		$child->set_regular_price( '37' );
+		$child->set_sale_price( '19' );
+		$child->save();
+		$group = new WC_Product_Grouped();
+		$group->set_status( ProductStatus::PUBLISH );
+		$group->set_children( array( $child->get_id() ) );
+		$group->save();
+		$this->assertContains( $group->get_id(), wc_get_product_ids_on_sale() );
+
+		$deferrer = wc_get_container()->get( Automattic\WooCommerce\Internal\Caches\ProductTransientsDeferrer::class );
+		$deferrer->start_deferring();
+		try {
+			$child->set_sale_price( '' );
+			$child->save();
+			$this->assertNotContains( $group->get_id(), wc_get_product_ids_on_sale() );
+			$child->set_sale_price( '17' );
+			$child->save();
+			$this->assertContains( $group->get_id(), wc_get_product_ids_on_sale() );
+		} finally {
+			$deferrer->stop_deferring();
+		}
+	}
+
+	/**
+	 * @testdox Groups remain on sale when their qualifying child is excluded from the sale catalog.
+	 * @param string $sale Child sale price.
+	 * @testWith ["19"]
+	 *           ["0"]
+	 */
+	public function test_sale_ids_include_groups_with_hidden_out_of_stock_children( string $sale ): void {
+		update_option( 'woocommerce_hide_out_of_stock_items', 'yes' );
+		$child = WC_Helper_Product::create_simple_product( false );
+		$child->set_regular_price( '37' );
+		$child->set_sale_price( $sale );
+		$child->set_catalog_visibility( CatalogVisibility::HIDDEN );
+		$child->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
+		$child->save();
+		$group = new WC_Product_Grouped();
+		$group->set_status( ProductStatus::PUBLISH );
+		$group->set_children( array( $child->get_id() ) );
+		$group->save();
+
+		$this->assertSame( array( $group->get_id() ), wc_get_product_ids_on_sale() );
+	}
+
+	/**
+	 * @testdox Group sale eligibility follows numeric discounts and sale date boundaries.
+	 * @param string $sale Child sale price.
+	 * @param string $regular Child regular price.
+	 * @param int    $from Sale start offset in seconds, or zero for no start date.
+	 * @param int    $to Sale end offset in seconds, or zero for no end date.
+	 * @param bool   $expected Whether the group should be included.
+	 * @testWith ["9", "19", 0, 0, true]
+	 *           ["19", "9", 0, 0, false]
+	 *           ["9", "19", 3600, 0, false]
+	 *           ["9", "19", 0, -3600, false]
+	 *           ["9", "19", -3600, 3600, true]
+	 */
+	public function test_group_sale_ids_follow_prices_and_dates( string $sale, string $regular, int $from, int $to, bool $expected ): void {
+		$child = WC_Helper_Product::create_simple_product( false );
+		$child->set_regular_price( $regular );
+		$child->set_sale_price( $sale );
+		$child->set_date_on_sale_from( $from ? time() + $from : null );
+		$child->set_date_on_sale_to( $to ? time() + $to : null );
+		$child->save();
+		$group = new WC_Product_Grouped();
+		$group->set_status( ProductStatus::PUBLISH );
+		$group->set_children( array( $child->get_id() ) );
+		$group->save();
+
+		$this->assertSame( $expected, in_array( $group->get_id(), wc_get_product_ids_on_sale(), true ) );
+	}
+
+	/**
+	 * @testdox Sale IDs follow publication changes and completed deletion, even with a warm cache.
+	 */
+	public function test_group_sale_ids_follow_publication_and_deletion(): void {
+		$child = WC_Helper_Product::create_simple_product( false );
+		$child->set_regular_price( '37' );
+		$child->set_sale_price( '19' );
+		$child->save();
+		$group = new WC_Product_Grouped();
+		$group->set_status( ProductStatus::PUBLISH );
+		$group->set_children( array( $child->get_id() ) );
+		$group->save();
+		$this->assertEqualsCanonicalizing( array( $child->get_id(), $group->get_id() ), wc_get_product_ids_on_sale() );
+
+		wp_update_post(
+			array(
+				'ID'          => $child->get_id(),
+				'post_status' => ProductStatus::DRAFT,
+			)
+		);
+		$this->assertSame( array(), wc_get_product_ids_on_sale() );
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
+		$this->assertSame( array(), wc_get_product_ids_on_sale(), 'Editor capabilities must not expose draft children in the global sale list.' );
+		wp_set_current_user( 0 );
+
+		wp_update_post(
+			array(
+				'ID'          => $child->get_id(),
+				'post_status' => ProductStatus::PUBLISH,
+			)
+		);
+		$this->assertEqualsCanonicalizing( array( $child->get_id(), $group->get_id() ), wc_get_product_ids_on_sale() );
+		wp_update_post(
+			array(
+				'ID'          => $group->get_id(),
+				'post_status' => ProductStatus::DRAFT,
+			)
+		);
+		$this->assertSame( array( $child->get_id() ), wc_get_product_ids_on_sale() );
+		wp_update_post(
+			array(
+				'ID'          => $group->get_id(),
+				'post_status' => ProductStatus::PUBLISH,
+			)
+		);
+		$this->assertEqualsCanonicalizing( array( $child->get_id(), $group->get_id() ), wc_get_product_ids_on_sale() );
+
+		wp_delete_post( $child->get_id(), true );
+		$this->assertSame( array(), wc_get_product_ids_on_sale() );
+	}
+
+	/**
+	 * @testdox Variation members preserve ordinary variable sale IDs and respect their parent's publication.
+	 */
+	public function test_group_sale_ids_with_variation_members(): void {
+		$parent = WC_Helper_Product::create_variation_product();
+		$child  = wc_get_product( $parent->get_children()[0] );
+		$child->set_regular_price( '37' );
+		$child->set_sale_price( '19' );
+		$child->save();
+		$group = new WC_Product_Grouped();
+		$group->set_status( ProductStatus::PUBLISH );
+		$group->set_children( array( $child->get_id() ) );
+		$group->save();
+
+		$this->assertEqualsCanonicalizing( array( $child->get_id(), $parent->get_id(), $group->get_id() ), wc_get_product_ids_on_sale() );
+		delete_post_meta( $child->get_id(), '_price' );
+		$this->assertEqualsCanonicalizing( array( $child->get_id(), $parent->get_id(), $group->get_id() ), wc_get_product_ids_on_sale() );
+		wp_update_post(
+			array(
+				'ID'          => $parent->get_id(),
+				'post_status' => ProductStatus::DRAFT,
+			)
+		);
+		$this->assertSame( array(), wc_get_product_ids_on_sale() );
+	}
+
+	/**
+	 * @testdox Replacement grouped datastores without sale expansion retain ordinary sale discovery.
+	 */
+	public function test_group_sale_ids_allow_replacement_datastores(): void {
+		$child = WC_Helper_Product::create_simple_product( false );
+		$child->set_regular_price( '37' );
+		$child->set_sale_price( '19' );
+		$child->save();
+		$group = new WC_Product_Grouped();
+		$group->set_status( ProductStatus::PUBLISH );
+		$group->set_children( array( $child->get_id() ) );
+		$group->save();
+		add_filter( 'woocommerce_product-grouped_data_store', static fn() => WC_Product_Data_Store_CPT::class );
+
+		$this->assertSame( array( $child->get_id() ), wc_get_product_ids_on_sale() );
+		remove_all_filters( 'woocommerce_product-grouped_data_store' );
+		$group_store = new class() extends WC_Product_Grouped_Data_Store_CPT {};
+		add_filter( 'woocommerce_product-grouped_data_store', static fn() => $group_store );
+		$this->assertSame( array( $child->get_id() ), wc_get_product_ids_on_sale(), 'Inheritance must not opt a replacement datastore into CPT discovery.' );
+		remove_all_filters( 'woocommerce_product-grouped_data_store' );
+
+		$store = $this->getMockBuilder( WC_Product_Data_Store_CPT::class )->onlyMethods( array( 'get_on_sale_products' ) )->getMock();
+		$store->method( 'get_on_sale_products' )->willReturn( array() );
+		add_filter( 'woocommerce_product_data_store', static fn() => $store );
+		delete_transient( 'wc_products_onsale' );
+		$this->assertSame( array(), wc_get_product_ids_on_sale(), 'A replacement general datastore owns sale eligibility.' );
+		set_transient( 'wc_products_onsale', array( $group->get_id() ) );
+		$this->assertSame( array( $group->get_id() ), wc_get_product_ids_on_sale() );
+	}
+
+	/**
+	 * @testdox Sale discovery follows metadata-key renames and product-type slug edits.
+	 */
+	public function test_group_sale_ids_follow_metadata_and_term_edits(): void {
+		global $wpdb;
+
+		$child = WC_Helper_Product::create_simple_product( false );
+		$child->set_regular_price( '37' );
+		$child->set_sale_price( '19' );
+		$child->save();
+		$group = new WC_Product_Grouped();
+		$group->set_status( ProductStatus::PUBLISH );
+		$group->set_children( array( $child->get_id() ) );
+		$group->save();
+		$this->assertContains( $group->get_id(), wc_get_product_ids_on_sale() );
+
+		$mid = (int) $wpdb->get_var( $wpdb->prepare( "SELECT meta_id FROM {$wpdb->postmeta} WHERE post_id = %d AND meta_key = '_sale_price'", $child->get_id() ) );
+		update_metadata_by_mid( 'post', $mid, '19', '_retired_sale_price' );
+		$this->assertNotContains( $group->get_id(), wc_get_product_ids_on_sale() );
+		update_metadata_by_mid( 'post', $mid, '19', '_sale_price' );
+		$this->assertContains( $group->get_id(), wc_get_product_ids_on_sale() );
+
+		$term = get_term_by( 'slug', ProductType::GROUPED, 'product_type' );
+		wp_update_term( $term->term_id, 'product_type', array( 'slug' => 'renamed-grouped' ) );
+		$this->assertContains( $group->get_id(), wc_get_product_ids_on_sale() );
+	}
+
+	/**
+	 * @testdox Removing orphan variations removes their containing groups from sale discovery.
+	 */
+	public function test_group_sale_ids_follow_orphan_cleanup(): void {
+		$child = new WC_Product_Variation();
+		$child->set_status( ProductStatus::PUBLISH );
+		$child->set_regular_price( '37' );
+		$child->set_sale_price( '19' );
+		$child->save();
+		$group = new WC_Product_Grouped();
+		$group->set_status( ProductStatus::PUBLISH );
+		$group->set_children( array( $child->get_id() ) );
+		$group->save();
+		$this->assertContains( $group->get_id(), wc_get_product_ids_on_sale() );
+
+		( new WC_REST_System_Status_Tools_V2_Controller() )->execute_tool( 'delete_orphaned_variations' );
+		$this->assertNotContains( $group->get_id(), wc_get_product_ids_on_sale() );
+	}
+
+	/**
+	 * @testdox Repeated sale discovery uses its warm cache instead of querying memberships again.
+	 */
+	public function test_group_sale_ids_use_warm_cache(): void {
+		global $wpdb;
+
+		$child = WC_Helper_Product::create_simple_product( false );
+		$child->set_regular_price( '37' );
+		$child->set_sale_price( '19' );
+		$child->save();
+		$group = new WC_Product_Grouped();
+		$group->set_status( ProductStatus::PUBLISH );
+		$group->set_children( array( $child->get_id() ) );
+		$group->save();
+		$this->assertContains( $group->get_id(), wc_get_product_ids_on_sale() );
+		$queries = $wpdb->num_queries;
+		$this->assertContains( $group->get_id(), wc_get_product_ids_on_sale() );
+		$this->assertSame( $queries, $wpdb->num_queries );
+	}
+
+	/**
 	 * Test wc_get_featured_product_ids().
 	 *
 	 * @since 2.4

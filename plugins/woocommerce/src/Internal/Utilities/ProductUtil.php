@@ -72,6 +72,7 @@ class ProductUtil {
 	 */
 	public function delete_product_transients_for_products( array $product_ids ): void {
 		$product_ids = array_unique( array_map( 'absint', $product_ids ) );
+		\WC_Product_Grouped_Data_Store_CPT::invalidate_sale_cache();
 
 		// Transient data to clear with a fixed name which may be stale after product updates.
 		$transients_to_clear = array(
