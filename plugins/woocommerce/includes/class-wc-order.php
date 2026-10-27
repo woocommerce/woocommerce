@@ -1517,6 +1517,8 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return void
 	 */
 	public function set_payment_method( $payment_method = '' ) {
+		$previous_payment_method = $this->get_payment_method( 'edit' );
+
 		if ( is_object( $payment_method ) ) {
 			$this->set_payment_method( $payment_method->id );
 			$this->set_payment_method_title( $payment_method->get_title() );
@@ -1525,6 +1527,11 @@ class WC_Order extends WC_Abstract_Order {
 			$this->set_prop( 'payment_method_title', '' );
 		} else {
 			$this->set_prop( 'payment_method', $payment_method );
+		}
+
+		// A mode recorded by the previous gateway doesn't describe the new one.
+		if ( true === $this->object_read && $previous_payment_method !== $this->get_payment_method( 'edit' ) ) {
+			$this->delete_meta_data( '_wc_payment_mode' );
 		}
 	}
 
