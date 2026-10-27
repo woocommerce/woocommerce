@@ -232,18 +232,16 @@ final class DependencyDetection {
 	 */
 	private function is_woocommerce_script( string $url ): bool {
 		// Get the WooCommerce plugin URL (accounts for custom plugin directories).
-		$wc_plugin_url = \plugins_url( '/', WC_PLUGIN_FILE );
+		static $wc_plugin_url = null;
+		$wc_plugin_url        = $wc_plugin_url ?? \plugins_url( '/', WC_PLUGIN_FILE );
 
 		// Check if the URL starts with the WooCommerce plugin URL and is in a known subdirectory.
 		if ( strpos( $url, $wc_plugin_url ) !== 0 ) {
 			return false;
 		}
 
-		// Get the path after the WooCommerce plugin URL.
-		$relative_path = substr( $url, strlen( $wc_plugin_url ) );
-
-		// Check if it's in one of the known WooCommerce asset directories.
-		return (bool) preg_match( '#^(client|assets|build|vendor)/#', $relative_path );
+		// Check if it's in one of the known WooCommerce asset directories (requires normalization to relative path).
+		return (bool) preg_match( '#^(client|assets|build|vendor)/#', substr( $url, strlen( $wc_plugin_url ) ) );
 	}
 
 	/**
