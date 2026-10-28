@@ -3874,16 +3874,25 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
-	 * @testdox Checkout does not reuse a zero-total order from the session once it has moved past awaiting payment.
+	 * @testdox Checkout answers with the zero-total order from the session, without placing another, once that order has moved past awaiting payment.
 	 */
-	public function test_post_does_not_reuse_completed_zero_total_order_from_session(): void {
+	public function test_post_answers_with_completed_zero_total_order_from_session(): void {
 		$this->apply_full_discount_coupon();
 		$order = $this->create_session_order_from_cart( OrderStatus::COMPLETED );
 
 		$response = rest_get_server()->dispatch( $this->build_valid_post_request() );
 
+		$order_ids = wc_get_orders(
+			array(
+				'limit'  => -1,
+				'status' => 'any',
+				'return' => 'ids',
+			)
+		);
+
 		$this->assertEquals( 200, $response->get_status(), print_r( $response->get_data(), true ) );
-		$this->assertNotSame( $order->get_id(), (int) $response->get_data()['order_id'], 'A completed order must not be placed again.' );
+		$this->assertSame( array( $order->get_id() ), $order_ids, 'A completed order must not be placed again.' );
+		$this->assertSame( $order->get_checkout_order_received_url(), $response->get_data()['payment_result']['redirect_url'], 'The shopper should be sent to the order received page of the completed order.' );
 		$this->assertTrue( wc_get_order( $order->get_id() )->has_status( OrderStatus::COMPLETED ), 'The completed order should be left as it was.' );
 	}
 
