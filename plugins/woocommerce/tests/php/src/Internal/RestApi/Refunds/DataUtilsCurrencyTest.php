@@ -503,4 +503,129 @@ class DataUtilsCurrencyTest extends WC_Unit_Test_Case {
 		$this->assertIsArray( $result );
 		$this->assertSame( $expected, $result['amount'] );
 	}
+
+	/**
+	 * @testdox Refunds match the precision the order total was calculated at.
+	 * @param int   $calculated_at Price decimals in effect when the order total was calculated.
+	 * @param int   $expected_decimals Expected refund precision.
+	 * @param float $expected_gross Expected full refund for the line.
+	 * @testWith [2, 2, 9.75]
+	 *           [0, 0, 10.0]
+	 */
+	public function test_refunds_follow_the_precision_the_total_was_calculated_at( int $calculated_at, int $expected_decimals, float $expected_gross ): void {
+		list( $order, $item ) = $this->create_calculated_order( $calculated_at );
+
+		$this->assertSame( $expected_gross, (float) $order->get_total(), 'The fixture should store the calculated total.' );
+		$this->assertSame( $expected_decimals, $this->sut->get_order_price_decimals( $order ) );
+		$this->assertSame( $expected_gross, $this->sut->compute_line_item_refund_total( $item, 1 ) );
+		$this->assertTrue( $this->sut->validate_refund_line_total( $item, $expected_gross, 0.0 ) );
+		$result = $this->sut->prepare_refund_creation_or_error(
+			$order,
+			array(
+				array(
+					'line_item_id' => $item->get_id(),
+					'quantity'     => 1,
+				),
+			),
+			false,
+			null,
+			'currency-test'
+		);
+		$this->assertIsArray( $result );
+		$this->assertSame( $expected_gross, (float) $result['amount'] );
+	}
+
+	/**
+	 * @testdox A refund resolves its precision from its parent order.
+	 */
+	public function test_refund_uses_parent_order_precision(): void {
+		list( $order ) = $this->create_calculated_order( 0 );
+		$refund        = wc_create_refund(
+			array(
+				'order_id' => $order->get_id(),
+				'amount'   => 1,
+			)
+		);
+
+		$this->assertInstanceOf( WC_Order_Refund::class, $refund );
+		$this->assertSame( 0, $this->sut->get_order_price_decimals( $refund ) );
+	}
+
+	/**
+	 * @testdox Orders keep the order currency precision unless their stored total proves store-precision rounding.
+	 * @param float $total Stored order total.
+	 * @param bool  $with_item Whether the order has a taxed line.
+	 * @testWith [18.0, false]
+	 *           [9.7, true]
+	 */
+	public function test_order_currency_precision_without_store_rounding_evidence( float $total, bool $with_item ): void {
+		$order = new WC_Order();
+		$order->set_currency( 'USD' );
+		if ( $with_item ) {
+			$item = new WC_Order_Item_Product();
+			$item->set_quantity( 1 );
+			$item->set_subtotal( 9 );
+			$item->set_total( 9 );
+			$item->set_taxes(
+				array(
+					'total'    => array( 123 => 0.747 ),
+					'subtotal' => array( 123 => 0.747 ),
+				)
+			);
+			$order->add_item( $item );
+		}
+		$order->set_total( $total );
+
+		$this->assertSame( 2, $this->sut->get_order_price_decimals( $order ) );
+	}
+
+	/**
+	 * @testdox A line with an aggregate tax but no per-rate breakdown keeps its tax.
+	 */
+	public function test_line_without_rate_breakdown_keeps_its_tax(): void {
+		$order = new WC_Order();
+		$order->set_currency( 'USD' );
+		$fee = new \WC_Order_Item_Fee();
+		$fee->set_total( 10 );
+		$fee->set_total_tax( 1 );
+		$order->add_item( $fee );
+		$order->set_total( 11 );
+
+		$this->assertSame( 11.0, $this->sut->compute_line_item_refund_total( $fee, 1 ) );
+	}
+
+	/**
+	 * Create a taxed USD order whose total is calculated by WooCommerce at the given precision.
+	 *
+	 * @param int $decimals Price decimals in effect while the total is calculated.
+	 * @return array
+	 */
+	private function create_calculated_order( int $decimals ): array {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		\WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate'          => '8.3000',
+				'tax_rate_name'     => 'Currency precision',
+				'tax_rate_priority' => 1,
+				'tax_rate_class'    => '',
+			)
+		);
+		update_option( 'woocommerce_price_num_decimals', $decimals );
+		$order = new WC_Order();
+		$order->set_currency( 'USD' );
+		$order->set_billing_country( 'US' );
+		$order->set_status( OrderStatus::PROCESSING );
+		$item = new WC_Order_Item_Product();
+		$item->set_product( \WC_Helper_Product::create_simple_product() );
+		$item->set_quantity( 1 );
+		$item->set_subtotal( 9 );
+		$item->set_total( 9 );
+		$order->add_item( $item );
+		$order->calculate_totals();
+		update_option( 'woocommerce_price_num_decimals', 0 );
+		$order = new WC_Order( $order->get_id() );
+
+		return array( $order, $order->get_item( $item->get_id() ) );
+	}
 }

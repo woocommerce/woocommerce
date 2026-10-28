@@ -6,7 +6,7 @@
  * @package WooCommerce\Classes
  */
 
-use Automattic\WooCommerce\Internal\Utilities\CurrencyUtil;
+use Automattic\WooCommerce\Internal\RestApi\Refunds\DataUtils;
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
@@ -2956,7 +2956,7 @@ class WC_AJAX {
 				throw new Exception( __( 'Invalid order ID.', 'woocommerce' ) );
 			}
 
-			$price_decimals  = CurrencyUtil::get_price_decimals( $order->get_currency() );
+			$price_decimals  = wc_get_container()->get( DataUtils::class )->get_order_price_decimals( $order );
 			$refund_amount   = isset( $_POST['refund_amount'] ) ? wc_format_decimal( sanitize_text_field( wp_unslash( $_POST['refund_amount'] ) ), $price_decimals ) : 0;
 			$refunded_amount = isset( $_POST['refunded_amount'] ) ? wc_format_decimal( sanitize_text_field( wp_unslash( $_POST['refunded_amount'] ) ), $price_decimals ) : 0;
 
