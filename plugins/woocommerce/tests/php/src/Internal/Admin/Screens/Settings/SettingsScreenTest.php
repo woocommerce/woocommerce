@@ -59,4 +59,22 @@ class SettingsScreenTest extends WC_Unit_Test_Case {
 		$this->assertNotFalse( has_action( 'admin_notices', '__return_null' ), 'admin_notices callbacks should stay' );
 		$this->assertNotFalse( has_action( 'all_admin_notices', '__return_null' ), 'all_admin_notices callbacks should stay' );
 	}
+
+	/**
+	 * @testdox Should keep the WooCommerce admin header off the settings screen.
+	 */
+	public function test_disconnects_the_screen_from_the_admin_header(): void {
+		$_GET['page'] = 'wc-settings-screen-wp-admin';
+
+		$this->assertFalse( $this->sut->handle_is_connected_page( true ) );
+	}
+
+	/**
+	 * @testdox Should leave the admin header setting unchanged on other admin pages.
+	 */
+	public function test_keeps_other_pages_connected(): void {
+		$_GET['page'] = 'wc-settings';
+
+		$this->assertTrue( $this->sut->handle_is_connected_page( true ) );
+	}
 }
