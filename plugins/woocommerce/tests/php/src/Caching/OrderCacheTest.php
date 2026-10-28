@@ -95,5 +95,8 @@ class OrderCacheTest extends \WC_Unit_Test_Case {
 		$this->assertNotSame( 99, $second_item->get_quantity() );
 		$this->assertSame( \WC_Data::CLONE_MODE_DUPLICATE, $second_item->get_clone_mode() );
 		$this->assertSame( \WC_Data::CLONE_MODE_DUPLICATE, $first_item->get_clone_mode() );
+		$this->assertSame( $second, $second_item->get_order() );
+		$this->assertSame( $first, $first_item->get_order() );
+		$this->assertEmpty( $second_item->get_changes() );
 	}
 }
