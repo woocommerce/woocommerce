@@ -26,9 +26,9 @@ class OpenGraphMarkup {
 	 *
 	 * @since 11.4.0
 	 *
-	 * @param string                $html         Template output.
-	 * @param array<string, string> $candidates   Validated metadata.
-	 * @param string|null           $default_card Twitter card before filtering.
+	 * @param string                       $html         Template output.
+	 * @param array<array<string, string>> $candidates   Validated metadata.
+	 * @param string|null                  $default_card Twitter card before filtering.
 	 * @return string
 	 */
 	public function merge( string $html, array $candidates, ?string $default_card ): string {
@@ -57,8 +57,13 @@ class OpenGraphMarkup {
 			),
 		);
 
-		$processor      = new WP_HTML_Tag_Processor( $html );
-		$tags           = $candidates;
+		$processor = new WP_HTML_Tag_Processor( $html );
+		$tags      = $candidates;
+		$values    = array();
+		foreach ( $candidates as $group ) {
+			$values += $group;
+		}
+		$existing       = array();
 		$head_complete  = false;
 		$template_depth = 0;
 
@@ -81,8 +86,8 @@ class OpenGraphMarkup {
 
 			foreach ( self::get_meta_properties( $processor ) as $property ) {
 				$content = $processor->get_attribute( 'content' );
-				if ( 'og:type' === $property && isset( $candidates['og:type'] ) ) {
-					$processor->set_attribute( 'content', html_entity_decode( $candidates['og:type'], ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
+				if ( 'og:type' === $property && isset( $values['og:type'] ) ) {
+					$processor->set_attribute( 'content', html_entity_decode( $values['og:type'], ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
 				} elseif ( ! is_string( $content ) || '' === trim( $content ) ) {
 					continue;
 				}
@@ -91,18 +96,22 @@ class OpenGraphMarkup {
 						$tag_groups[ $group_name ]['exists'] = true;
 					}
 				}
-				if ( ! isset( $tags['og:image'] ) || 0 !== strpos( $property, 'og:image:' ) ) {
-					unset( $tags[ $property ] );
-				}
+				$existing[ $property ] = true;
 			}
 		}
 
 		// Keep related metadata with the provider that supplied it.
-		foreach ( array_keys( $tags ) as $property ) {
-			foreach ( $tag_groups as $group ) {
-				if ( $group['exists'] && preg_match( $group['match'], $property ) ) {
-					unset( $tags[ $property ] );
-					break;
+		foreach ( $tags as $index => $candidate ) {
+			if ( isset( $existing[ array_key_first( $candidate ) ] ) ) {
+				unset( $tags[ $index ] );
+				continue;
+			}
+			foreach ( $candidate as $property => $value ) {
+				foreach ( $tag_groups as $group ) {
+					if ( $group['exists'] && preg_match( $group['match'], $property ) ) {
+						unset( $tags[ $index ] );
+						continue 3;
+					}
 				}
 			}
 		}
@@ -111,8 +120,11 @@ class OpenGraphMarkup {
 			return $html;
 		}
 
-		if ( isset( $tags['twitter:card'] ) && $tags['twitter:card'] === $default_card ) {
-			$tags['twitter:card'] = $tag_groups['image']['exists'] || ! empty( $tags['og:image'] ) ? 'summary_large_image' : 'summary';
+		foreach ( $tags as $index => $group ) {
+			if ( isset( $group['twitter:card'] ) && $group['twitter:card'] === $default_card ) {
+				$has_image                      = $tag_groups['image']['exists'] || isset( $values['og:image'] ) || isset( $values['og:image:url'] );
+				$tags[ $index ]['twitter:card'] = $has_image ? 'summary_large_image' : 'summary';
+			}
 		}
 
 		return self::insert_tags( $processor->get_updated_html(), $tags );
@@ -121,8 +133,8 @@ class OpenGraphMarkup {
 	/**
 	 * Escape metadata and insert it at the end of the head.
 	 *
-	 * @param string                $html Template output.
-	 * @param array<string, string> $tags Metadata to insert.
+	 * @param string                       $html Template output.
+	 * @param array<array<string, string>> $tags Metadata to insert.
 	 * @return string
 	 */
 	private static function insert_tags( string $html, array $tags ): string {
@@ -137,18 +149,26 @@ class OpenGraphMarkup {
 				$this->set_bookmark( 'here' );
 				$this->lexical_updates[] = new WP_HTML_Text_Replacement( $this->bookmarks['here']->start, 0, $markup );
 			}
+
+			/**
+			 * Remove the current tag.
+			 *
+			 * @internal
+			 */
+			public function remove_tag(): void {
+				$this->set_bookmark( 'here' );
+				$this->lexical_updates[] = new WP_HTML_Text_Replacement( $this->bookmarks['here']->start, $this->bookmarks['here']->length, '' );
+			}
 		};
 
-		$replace_image_details         = isset( $tags['og:image'] );
-		$image_details                 = array_filter(
-			$tags,
-			static function ( string $property ): bool {
-				return 0 === strpos( $property, 'og:image:' );
-			},
-			ARRAY_FILTER_USE_KEY
-		);
-		$image_details['og:image:url'] = $image_details['og:image:url'] ?? $tags['og:image'] ?? '';
-		$template_depth                = 0;
+		$media_roots = array();
+		foreach ( $tags as $group ) {
+			$root = array_key_first( $group );
+			if ( in_array( $root, array( 'og:image', 'og:video', 'og:audio' ), true ) ) {
+				$media_roots[ $root ] = true;
+			}
+		}
+		$template_depth = 0;
 		while ( $inserter->next_tag( array( 'tag_closers' => 'visit' ) ) ) {
 			if ( 'TEMPLATE' === $inserter->get_tag() ) {
 				$template_depth = max( 0, $template_depth + ( $inserter->is_tag_closer() ? -1 : 1 ) );
@@ -160,19 +180,56 @@ class OpenGraphMarkup {
 				$inserter->insert_before( self::render_tags( $tags ) );
 				return $inserter->get_updated_html();
 			}
-			$content = $inserter->get_attribute( 'content' );
-			foreach ( self::get_meta_properties( $inserter ) as $property ) {
-				if ( $replace_image_details && 0 === strpos( $property, 'og:image:' ) ) {
-					$inserter->set_attribute( 'content', html_entity_decode( $image_details[ $property ] ?? '', ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
-					unset( $tags[ $property ] );
-				} elseif ( isset( $tags[ $property ] ) && ( ! is_string( $content ) || '' === trim( $content ) ) ) {
-					// Decode existing entities because set_attribute() always encodes ampersands.
-					$inserter->set_attribute( 'content', html_entity_decode( $tags[ $property ], ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
-					unset( $tags[ $property ] );
+			$properties = self::get_meta_properties( $inserter );
+			if ( $media_roots ) {
+				// Rebuild empty media roots and orphaned details together in group order.
+				$remaining = array_filter(
+					$properties,
+					static function ( string $property ) use ( $media_roots ): bool {
+						foreach ( $media_roots as $root => $unused ) {
+							if ( $root === $property || 0 === strpos( $property, $root . ':' ) ) {
+								return false;
+							}
+						}
+						return true;
+					}
+				);
+				if ( $properties !== $remaining ) {
+					if ( ! $remaining ) {
+						$inserter->remove_tag();
+						continue;
+					}
+					foreach ( array( 'property', 'name' ) as $attribute ) {
+						$value = $inserter->get_attribute( $attribute );
+						if ( is_string( $value ) ) {
+							$names = preg_split( '/\s+/', strtolower( trim( $value ) ) );
+							$names = false !== $names ? array_intersect( $names, $remaining ) : array();
+							if ( $names ) {
+								$inserter->set_attribute( $attribute, implode( ' ', $names ) );
+							} else {
+								$inserter->remove_attribute( $attribute );
+							}
+						}
+					}
+					$properties = $remaining;
 				}
 			}
-			if ( 'BODY' === $inserter->get_tag() ) {
-				break;
+			$content = $inserter->get_attribute( 'content' );
+			if ( is_string( $content ) && '' !== trim( $content ) ) {
+				continue;
+			}
+			foreach ( $properties as $property ) {
+				foreach ( $tags as $index => $group ) {
+					if ( isset( $group[ $property ] ) ) {
+						// Decode existing entities because set_attribute() always encodes ampersands.
+						$inserter->set_attribute( 'content', html_entity_decode( $group[ $property ], ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
+						unset( $tags[ $index ][ $property ] );
+						if ( ! $tags[ $index ] ) {
+							unset( $tags[ $index ] );
+						}
+						break;
+					}
+				}
 			}
 		}
 
@@ -205,16 +262,19 @@ class OpenGraphMarkup {
 	/**
 	 * Escape metadata for output in the head.
 	 *
-	 * @param array<string, string> $tags Metadata to render.
+	 * @param array<array<string, string>> $tags Metadata to render.
 	 * @return string
 	 */
 	private static function render_tags( array $tags ): string {
 		$markup = '';
-		foreach ( $tags as $property => $value ) {
-			$content = in_array( $property, array( 'og:url', 'og:image' ), true ) ? esc_url( $value ) : esc_attr( $value );
-			if ( '' !== $content ) {
-				$attribute = 0 === strpos( $property, 'twitter:' ) ? 'name' : 'property';
-				$markup   .= '<meta ' . esc_attr( $attribute ) . '="' . esc_attr( $property ) . '" content="' . $content . '" />' . "\n";
+		foreach ( $tags as $group ) {
+			foreach ( $group as $property => $value ) {
+				$is_url  = 'og:url' === $property || preg_match( '/^og:(image|video|audio)(:(url|secure_url))?$/D', $property );
+				$content = $is_url ? esc_url( $value, array( 'http', 'https' ) ) : esc_attr( $value );
+				if ( '' !== $content ) {
+					$attribute = 0 === strpos( $property, 'twitter:' ) ? 'name' : 'property';
+					$markup   .= '<meta ' . esc_attr( $attribute ) . '="' . esc_attr( $property ) . '" content="' . $content . '" />' . "\n";
+				}
 			}
 		}
 

@@ -20,9 +20,9 @@ defined( 'ABSPATH' ) || exit;
 class OpenGraph {
 
 	/**
-	 * Metadata candidates keyed by property.
+	 * Ordered metadata groups, each containing related tags.
 	 *
-	 * @var array<string, string>
+	 * @var array<array<string, string>>
 	 */
 	private $tags = array();
 
@@ -73,21 +73,21 @@ class OpenGraph {
 	/**
 	 * Filter and validate metadata before rendering starts.
 	 *
-	 * @param array<string, string>                           $tags   Metadata candidates.
+	 * @param array<array<string, string>>                    $tags   Metadata candidates.
 	 * @param WC_Product|\WP_Post|\WP_Term|\WP_Post_Type|null $context Product or queried object; null when no object is available.
-	 * @return array<string, string>
+	 * @return array<array<string, string>>
 	 */
 	private function prepare_tags( array $tags, $context ): array {
-		$this->default_card = $tags['twitter:card'] ?? null;
+		$this->default_card = array_column( $tags, 'twitter:card' )[0] ?? null;
 
 		/**
 		 * Filters Open Graph metadata before output. Currently applied only to product pages.
 		 * Other page types may be supported later; callbacks must check the object type.
-		 * Removing og:type from $tags also preserves an existing provider's type.
+		 * The first tag in each group is its root; details follow it. Remove or replace an entire group to omit or replace its details.
 		 *
 		 * @since 11.4.0
 		 *
-		 * @param array<string, string> $tags Metadata keyed by og:, twitter:, or product: property name. Remove a key to omit a tag.
+		 * @param array<array<string, string>> $tags Ordered groups of og:, twitter:, or product: tags with string values. Removing the og:type group preserves an existing provider's type.
 		 * @param WC_Product|\WP_Post|\WP_Term|\WP_Post_Type|null $context Product or queried object; null when no object is available.
 		 */
 		$tags = apply_filters( 'woocommerce_open_graph_tags', $tags, $context );
@@ -95,26 +95,39 @@ class OpenGraph {
 			return array();
 		}
 
-		foreach ( $tags as $property => $value ) {
-			if ( ! is_string( $property ) || ! is_string( $value ) || '' === trim( $value ) || ! preg_match( '/^(og|twitter|product):[a-z_:]+$/', $property ) ) {
-				unset( $tags[ $property ] );
+		$prepared = array();
+		foreach ( $tags as $group ) {
+			if ( ! is_array( $group ) || ! $group ) {
 				continue;
 			}
-			if ( in_array( $property, array( 'og:url', 'og:image' ), true ) ) {
-				$tags[ $property ] = esc_url_raw( $value );
-				if ( '' === $tags[ $property ] ) {
-					unset( $tags[ $property ] );
+			$root = array_key_first( $group );
+			if ( ! is_string( $root ) || preg_match( '/^og:(image|video|audio):(?!url$)/D', $root ) ) {
+				continue;
+			}
+			foreach ( $group as $property => $value ) {
+				if ( ! is_string( $property ) || ! is_string( $value ) || '' === trim( $value ) || ! preg_match( '/^(og|twitter|product):[a-z_:]+$/D', $property ) ) {
+					unset( $group[ $property ] );
+					continue;
 				}
+				if ( 'og:url' === $property || preg_match( '/^og:(image|video|audio)(:(url|secure_url))?$/D', $property ) ) {
+					$group[ $property ] = esc_url_raw( $value, array( 'http', 'https' ) );
+					if ( '' === $group[ $property ] ) {
+						unset( $group[ $property ] );
+					}
+				}
+			}
+			if ( isset( $group[ $root ] ) ) {
+				$prepared[] = $group;
 			}
 		}
 
-		return $tags;
+		return $prepared;
 	}
 
 	/**
 	 * Select metadata and its source object for the current page.
 	 *
-	 * @return array{tags: array<string, string>, context: WC_Product|\WP_Post|\WP_Term|\WP_Post_Type|null}|null
+	 * @return array{tags: array<array<string, string>>, context: WC_Product|\WP_Post|\WP_Term|\WP_Post_Type|null}|null
 	 */
 	private function get_page_data(): ?array {
 		if ( is_product() ) {
@@ -127,7 +140,7 @@ class OpenGraph {
 	/**
 	 * Build metadata for a published, unprotected product page.
 	 *
-	 * @return array{tags: array<string, string>, context: WC_Product}|null
+	 * @return array{tags: array<array<string, string>>, context: WC_Product}|null
 	 */
 	private function get_product_page_data(): ?array {
 		$product = wc_get_product( get_queried_object_id() );
