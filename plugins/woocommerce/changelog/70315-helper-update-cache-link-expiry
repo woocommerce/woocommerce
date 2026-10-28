@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop the Helper from using cached update data after the package download links in it may have expired, which made extension auto-updates fail.
