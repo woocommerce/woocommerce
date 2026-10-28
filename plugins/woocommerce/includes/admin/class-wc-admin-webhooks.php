@@ -181,6 +181,40 @@ class WC_Admin_Webhooks {
 	}
 
 	/**
+	 * Update the status of selected webhooks.
+	 *
+	 * @since 11.4.0
+	 * @param array  $webhooks List of webhook IDs.
+	 * @param string $status   New webhook status.
+	 * @return int Number of webhooks updated.
+	 */
+	public static function bulk_update_status( $webhooks, $status ) {
+		if ( ! in_array( $status, array( 'active', 'disabled', 'paused' ), true ) ) {
+			return 0;
+		}
+
+		$updated = 0;
+
+		foreach ( array_unique( array_map( 'absint', $webhooks ) ) as $webhook_id ) {
+			if ( ! $webhook_id ) {
+				continue;
+			}
+
+			$webhook = wc_get_webhook( $webhook_id );
+
+			if ( ! $webhook || $status === $webhook->get_status() ) {
+				continue;
+			}
+
+			$webhook->set_status( $status );
+			$webhook->save();
+			++$updated;
+		}
+
+		return $updated;
+	}
+
+	/**
 	 * Delete webhook.
 	 */
 	private function delete() {
@@ -240,6 +274,15 @@ class WC_Admin_Webhooks {
 	 * Notices.
 	 */
 	public static function notices() {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Display-only count from the redirect after a verified bulk action.
+		if ( isset( $_GET['bulk_updated'] ) ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Display-only count.
+			$updated = absint( $_GET['bulk_updated'] );
+
+			/* translators: %d: number of webhooks updated. */
+			WC_Admin_Settings::add_message( sprintf( _n( '%d webhook updated.', '%d webhooks updated.', $updated, 'woocommerce' ), $updated ) );
+		}
+
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( isset( $_GET['deleted'] ) ) {
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
