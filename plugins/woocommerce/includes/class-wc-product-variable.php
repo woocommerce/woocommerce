@@ -473,7 +473,15 @@ class WC_Product_Variable extends WC_Product {
 			$variation_gallery_html = wc_get_product_gallery_html( $this, $gallery_html_ids );
 		}
 
-		// See if prices should be shown for each variation after selection.
+		/**
+		 * Filters whether the variation price is shown after the variation is selected.
+		 *
+		 * @since 2.4.0
+		 *
+		 * @param bool                 $show_variation_price Whether to show the variation price.
+		 * @param WC_Product_Variable  $product              The variable product.
+		 * @param WC_Product_Variation $variation            The variation.
+		 */
 		$show_variation_price = apply_filters( 'woocommerce_show_variation_price', $variation->get_price() === '' || $this->get_variation_sale_price( 'min' ) !== $this->get_variation_sale_price( 'max' ) || $this->get_variation_regular_price( 'min' ) !== $this->get_variation_regular_price( 'max' ), $this, $variation );
 
 		return apply_filters(
