@@ -13,14 +13,14 @@ use WC_Unit_Test_Case;
 class SummaryTest extends WC_Unit_Test_Case {
 
 	/**
-	 * @testdox The billing email reads as entered after wptexturize() runs over the block output.
+	 * @testdox The billing email reads as entered after wp_kses_post() and wptexturize() run over the block output.
 	 */
 	public function test_billing_email_survives_wptexturize(): void {
 		$order = wc_create_order();
 		$order->set_billing_email( "o'neil--shop@48x17.com" );
 		$order->save();
 
-		$text = html_entity_decode( wp_strip_all_tags( wptexturize( $this->render( $order ) ) ), ENT_QUOTES | ENT_HTML5 );
+		$text = html_entity_decode( wp_strip_all_tags( wptexturize( wp_kses_post( $this->render( $order ) ) ) ), ENT_QUOTES | ENT_HTML5 );
 
 		$this->assertStringContainsString( "o'neil--shop@48x17.com", $text, 'The email should not gain a curly apostrophe, en dash or multiplication sign.' );
 	}

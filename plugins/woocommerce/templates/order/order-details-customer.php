@@ -15,8 +15,6 @@
  * @version 11.4.0
  */
 
-use Automattic\WooCommerce\Utilities\HtmlUtil;
-
 defined( 'ABSPATH' ) || exit;
 
 $show_shipping = ! wc_ship_to_billing_address_only() && $order->needs_shipping_address();
@@ -40,7 +38,7 @@ $show_shipping = ! wc_ship_to_billing_address_only() && $order->needs_shipping_a
 		<?php endif; ?>
 
 		<?php if ( $order->get_billing_email() ) : ?>
-			<p class="woocommerce-customer-details--email"><?php echo HtmlUtil::esc_html_exact( $order->get_billing_email() ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- esc_html_exact() escapes for HTML. ?></p>
+			<p class="woocommerce-customer-details--email"><code class="woocommerce-email"><?php echo esc_html( $order->get_billing_email() ); ?></code></p>
 		<?php endif; ?>
 
 		<?php
