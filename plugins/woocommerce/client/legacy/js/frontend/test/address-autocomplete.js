@@ -1069,7 +1069,12 @@ describe( 'Address Suggestions Component', () => {
 		} );
 
 		test( 'should ask the checkout to refresh once the address fields are filled', async () => {
-			const jQueryTrigger = jest.fn();
+			let cityAtRefresh;
+			const jQueryTrigger = jest.fn( ( event ) => {
+				if ( event === 'update_checkout' ) {
+					cityAtRefresh = document.getElementById( 'billing_city' ).value;
+				}
+			} );
 			window.jQuery = jest.fn( () => ( {
 				hasClass: jest.fn( () => false ),
 				trigger: jQueryTrigger,
@@ -1093,6 +1098,8 @@ describe( 'Address Suggestions Component', () => {
 
 			expect( document.getElementById( 'billing_city' ).value ).toBe( 'City' );
 			expect( jQueryTrigger ).toHaveBeenCalledWith( 'update_checkout' );
+			// The refresh must run after the fields are filled, not before.
+			expect( cityAtRefresh ).toBe( 'City' );
 		} );
 
 		test( 'should update value attribute of address fields when address is selected', async () => {
