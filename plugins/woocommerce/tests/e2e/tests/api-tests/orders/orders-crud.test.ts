@@ -374,10 +374,15 @@ test.describe.serial( 'Orders API tests: CRUD', () => {
 			expect( response.status() ).toEqual( 200 );
 
 			// Verify that the order can no longer be retrieved.
-			const getOrderResponse = await request.get(
-				`./wp-json/wc/v3/orders/${ orderId }`
-			);
-			expect( getOrderResponse.status() ).toEqual( 404 );
+			// Poll, since the object cache variant can briefly serve a stale read after a delete.
+			await expect
+				.poll( async () => {
+					const getOrderResponse = await request.get(
+						`./wp-json/wc/v3/orders/${ orderId }`
+					);
+					return getOrderResponse.status();
+				} )
+				.toEqual( 404 );
 		} );
 	} );
 } );
