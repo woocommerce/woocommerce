@@ -176,7 +176,7 @@ const Edit = ( props: EditProps ): JSX.Element => {
 											{ typeof item.label === 'string'
 												? decodeHtmlEntities(
 														item.label
-												  )
+													)
 												: item.label }
 										</span>
 										{ item.count !== undefined && (
@@ -225,7 +225,7 @@ const Edit = ( props: EditProps ): JSX.Element => {
 												} );
 											},
 										},
-								  ]
+									]
 								: [] ),
 							{
 								label: __(
@@ -299,7 +299,7 @@ const Edit = ( props: EditProps ): JSX.Element => {
 												} );
 											},
 										},
-								  ]
+									]
 								: [] ),
 							{
 								label: __(
@@ -351,7 +351,7 @@ const Edit = ( props: EditProps ): JSX.Element => {
 												} );
 											},
 										},
-								  ]
+									]
 								: [] ),
 						] }
 						panelId={ clientId }

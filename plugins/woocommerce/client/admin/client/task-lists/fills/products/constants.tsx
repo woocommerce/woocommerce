@@ -8,6 +8,7 @@ import TypesIcon from 'gridicons/dist/types';
 import { Icon, chevronRight, chevronLeft } from '@wordpress/icons';
 import { recordEvent } from '@woocommerce/tracks';
 import { getAdminLink } from '@woocommerce/settings';
+import type { ReactNode } from 'react';
 
 /**
  * Internal dependencies
@@ -137,8 +138,18 @@ export const ImportCSVItem = {
 };
 
 export type SponsoredProductPlacementType =
-	| typeof PrintfulAdvertProductPlacement
-	| typeof ImportCSVItem;
+	typeof PrintfulAdvertProductPlacement | typeof ImportCSVItem;
+
+/** A card built from the marketplace suggestions feed. Kept out of ProductType so its string key doesn't widen ProductTypeKey. */
+export type MarketplaceSuggestionPlacementType = {
+	key: string;
+	title: string;
+	content: ReactNode;
+	before: ReactNode;
+	after: ReactNode;
+	className: string;
+	onClick: () => void;
+};
 
 export type ProductType =
 	| ( typeof productTypes )[ number ]

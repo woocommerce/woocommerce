@@ -18,7 +18,7 @@ let capturedPlugin: ( registry: {
 
 jest.mock( '@wordpress/data', () => {
 	const actual =
-		jest.requireActual< typeof import('@wordpress/data') >(
+		jest.requireActual< typeof import( '@wordpress/data' ) >(
 			'@wordpress/data'
 		);
 

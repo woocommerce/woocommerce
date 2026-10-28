@@ -62,7 +62,7 @@ const CloseButtonPortal = ( {
 					<Icon icon={ close } />
 				</Button>,
 				closeButtonWrapper
-		  )
+			)
 		: null;
 };
 

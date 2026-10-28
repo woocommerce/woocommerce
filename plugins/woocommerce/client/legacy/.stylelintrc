@@ -8,6 +8,8 @@
 	# authoritative exclusion, so a direct `stylelint` run skips it too.
 	"ignoreFiles": [ "css/select2.scss" ],
 
+	"reportNeedlessDisables": true,
+
 	"rules": {
 		# The icon fonts have no generic fallback by design.
 		"font-family-no-missing-generic-family-keyword": [

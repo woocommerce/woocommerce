@@ -1106,6 +1106,13 @@ p.demo_store,
 	}
 
 	table.woocommerce-MyAccount-customerStockNotifications {
+		font-size: 0.85em;
+
+		th,
+		td {
+			padding: 4px 8px;
+			vertical-align: middle;
+		}
 
 		.woocommerce-customer-stock-notifications-table__cell-actions {
 

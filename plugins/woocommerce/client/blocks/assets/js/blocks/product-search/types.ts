@@ -4,10 +4,7 @@
 import type { EditorBlock } from '@woocommerce/types';
 
 export type ButtonPositionProps =
-	| 'button-outside'
-	| 'button-inside'
-	| 'no-button'
-	| 'button-only';
+	'button-outside' | 'button-inside' | 'no-button' | 'button-only';
 
 export interface SearchBlockAttributes {
 	buttonPosition: ButtonPositionProps;

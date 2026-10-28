@@ -169,9 +169,8 @@ const productCollectionStore = {
 					.closest( '[data-wp-router-region]' )
 					?.getAttribute( 'data-wp-router-region' );
 
-				const { actions } = yield import(
-					'@wordpress/interactivity-router'
-				);
+				const { actions } =
+					yield import( '@wordpress/interactivity-router' );
 
 				yield actions.navigate( ref.href );
 
@@ -197,9 +196,8 @@ const productCollectionStore = {
 			const { ref } = getElement();
 
 			if ( isValidLink( ref ) ) {
-				const { actions } = yield import(
-					'@wordpress/interactivity-router'
-				);
+				const { actions } =
+					yield import( '@wordpress/interactivity-router' );
 
 				yield actions.prefetch( ref.href );
 			}
@@ -249,9 +247,8 @@ const productCollectionStore = {
 			const context = getContext< ProductCollectionStoreContext >();
 
 			if ( isValidLink( ref ) && context.isPrefetchNextOrPreviousLink ) {
-				const { actions } = yield import(
-					'@wordpress/interactivity-router'
-				);
+				const { actions } =
+					yield import( '@wordpress/interactivity-router' );
 
 				yield actions.prefetch( ref.href );
 			}
@@ -282,5 +279,5 @@ const productCollectionStore = {
 };
 
 store( 'woocommerce/product-collection', productCollectionStore, {
-	lock: true,
+	lock: universalLock,
 } );

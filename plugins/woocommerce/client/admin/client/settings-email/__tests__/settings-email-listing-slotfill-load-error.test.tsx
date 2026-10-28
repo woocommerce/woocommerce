@@ -56,6 +56,7 @@ jest.mock( '@woocommerce/settings', () => ( {
 const email: EmailType = {
 	id: 'new-order',
 	post_id: '123',
+	block_editor_supported: true,
 	file_template_preview_url: null,
 	title: 'New order',
 	description: '',

@@ -385,6 +385,46 @@ class WC_Settings_Emails_Test extends WC_Settings_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The block emails listing payload flags whether each email can open in the block editor.
+	 */
+	public function test_block_emails_listing_payload_flags_block_editor_support(): void {
+		$classic_email = new class() extends WC_Email {
+			/**
+			 * Constructor.
+			 */
+			public function __construct() {
+				$this->id    = 'classic_test_email';
+				$this->title = 'Classic test email';
+				parent::__construct();
+			}
+		};
+
+		// Inject straight into the registry: WC_Emails::init() only appends, so
+		// re-running it would not remove the stub again.
+		$mailer          = WC()->mailer();
+		$emails_property = new ReflectionProperty( WC_Emails::class, 'emails' );
+		$emails_property->setAccessible( true );
+		$original_emails = $emails_property->getValue( $mailer );
+		$emails_property->setValue( $mailer, array_merge( $original_emails, array( 'WC_Email_Classic_Test' => $classic_email ) ) );
+
+		try {
+			ob_start();
+			( new WC_Settings_Emails() )->email_notification_setting_block_emails();
+			$html = ob_get_clean();
+		} finally {
+			$emails_property->setValue( $mailer, $original_emails );
+		}
+
+		$this->assertSame( 1, preg_match( '/data-email-types="([^"]*)"/', $html, $matches ), 'Listing mount point should carry the email types payload' );
+		$rows_by_id = array_column( json_decode( html_entity_decode( $matches[1], ENT_QUOTES ), true ), null, 'id' );
+
+		$this->assertTrue( $rows_by_id['new_order']['block_editor_supported'] );
+		$this->assertNotNull( $rows_by_id['new_order']['file_template_preview_url'] );
+		$this->assertFalse( $rows_by_id['classic_test_email']['block_editor_supported'] );
+		$this->assertNull( $rows_by_id['classic_test_email']['file_template_preview_url'] );
+	}
+
+	/**
 	 * @testDox When the current section is the name of an existing email, 'output' invokes that email's 'admin_options' method.
 	 */
 	public function test_output_is_done_via_admin_options_method_of_email_specified_as_settings_section() {

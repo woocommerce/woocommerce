@@ -1,5 +1,3 @@
-/* eslint-disable max-len */
-
 /**
  * Customised appearance variables for the external KYC flow.
  */
