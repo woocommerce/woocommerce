@@ -43,7 +43,7 @@ A variable product with some priced variations fails `missing_regular_price` but
 
 Two Google exceptions, per product: `missing_brand` leaves Google out when Google for WooCommerce sends its own brand (`_wc_gla_brand`), and `missing_gtin` leaves Google out when the product has a brand and an MPN (`_wc_gla_mpn` or an "MPN" attribute). Brands set through Google for WooCommerce attribute mapping rules are not read yet.
 
-Store-wide conditions (`StoreConditions`) are reported first because they hide every product: coming soon mode and "Discourage search engines".
+Store-wide conditions (`StoreConditions`) are reported first because they affect every product: coming soon mode and "Discourage search engines" hide the products, UCP off hides the catalog from UCP agents, and guest checkout off stops agents placing orders.
 
 ## Report format
 
