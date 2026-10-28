@@ -9,6 +9,7 @@ declare(strict_types = 1);
 namespace Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Email_Editor;
+use Automattic\WooCommerce\EmailEditor\Integrations\Core\Initializer as Core_Initializer;
 use Automattic\WooCommerce\EmailEditor\Integrations\Core\Renderer\Blocks\Fallback;
 
 require_once __DIR__ . '/Dummy_Block_Renderer.php';
@@ -61,6 +62,59 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		);
 		$this->assertIsString( $content );
 		$this->assertStringContainsString( 'Hello!', $content );
+	}
+
+	/**
+	 * Test a caption color saved in the email's design reaches the rendered caption.
+	 *
+	 * The stylesheet holding the rule is not enough. The rule has to survive CSS inlining and land on
+	 * the caption element itself.
+	 */
+	public function testItAppliesASavedCaptionColorToAnImageCaption(): void {
+		// Give the core image block the email renderer the Core integration attaches to it in production.
+		$core_integration = $this->di_container->get( Core_Initializer::class );
+		$core_integration->initialize();
+		$image_block_type = \WP_Block_Type_Registry::get_instance()->get_registered( 'core/image' );
+		$this->assertInstanceOf( \WP_Block_Type::class, $image_block_type );
+		$image_block_type->render_email_callback = array( $core_integration, 'render_block' );
+
+		$email_post_id = $this->factory->post->create(
+			array(
+				'post_content' => '<!-- wp:image {"id":1,"sizeSlug":"full","linkDestination":"none"} -->
+<figure class="wp-block-image size-full"><img src="https://example.com/image.jpg" alt=""/><figcaption class="wp-element-caption">Caption text</figcaption></figure>
+<!-- /wp:image -->',
+			)
+		);
+		$this->assertIsInt( $email_post_id );
+		update_post_meta(
+			$email_post_id,
+			'woocommerce_email_theme',
+			array(
+				'styles' => array(
+					'elements' => array(
+						'caption' => array(
+							'color' => array( 'text' => '#f78da7' ),
+						),
+					),
+				),
+			)
+		);
+		$email_post = get_post( $email_post_id );
+		$this->assertInstanceOf( \WP_Post::class, $email_post );
+
+		$template          = new \WP_Block_Template();
+		$template->id      = 'template-id';
+		$template->content = '<!-- wp:post-content /-->';
+
+		try {
+			$content = $this->renderer->render( $email_post, $template );
+		} finally {
+			unset( $image_block_type->render_email_callback );
+		}
+
+		$this->assertStringContainsString( 'Caption text', $content );
+		$this->assertSame( 1, preg_match( '/<span[^>]*class="[^"]*wp-element-caption[^"]*"[^>]*>/', $content, $caption_span ) );
+		$this->assertStringContainsString( '#f78da7', $caption_span[0] );
 	}
 
 	/**
