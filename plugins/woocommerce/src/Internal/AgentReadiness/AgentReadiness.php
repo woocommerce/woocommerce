@@ -45,6 +45,13 @@ class AgentReadiness {
 	private StoreConditions $store_conditions;
 
 	/**
+	 * Rules from the published rules file.
+	 *
+	 * @var RemoteRules
+	 */
+	private RemoteRules $remote_rules;
+
+	/**
 	 * Scan reused for single-product checks, so its shared GTIN lookup runs once per request.
 	 *
 	 * @var ProductScan|null
@@ -64,9 +71,11 @@ class AgentReadiness {
 	 * @internal
 	 *
 	 * @param StoreConditions $store_conditions Store-wide conditions.
+	 * @param RemoteRules     $remote_rules     Rules from the published rules file.
 	 */
-	final public function init( StoreConditions $store_conditions ): void {
+	final public function init( StoreConditions $store_conditions, RemoteRules $remote_rules ): void {
 		$this->store_conditions = $store_conditions;
+		$this->remote_rules     = $remote_rules;
 	}
 
 	/**
@@ -99,17 +108,21 @@ class AgentReadiness {
 	}
 
 	/**
-	 * Field and effect per channel for each check, after the
+	 * Field and effect per channel for each check: the bundled map, replaced
+	 * by the published rules file's map where it has one, then the
 	 * woocommerce_agent_readiness_rules filter. A check whose id is missing
 	 * from the filtered array does not run.
 	 *
 	 * @return array<string, array<string, array{field:string,effect:string}>>
 	 */
 	public function get_channel_rules(): array {
-		$defaults = array();
+		$bundled = array();
 		foreach ( $this->get_default_rules() as $id => $rule ) {
-			$defaults[ $id ] = $rule->channels();
+			$bundled[ $id ] = $rule->channels();
 		}
+		// A file entry with no valid channel left keeps the bundled map.
+		$remote   = array_filter( $this->sanitize_channel_rules( $this->remote_rules->channel_rules(), $bundled ) );
+		$defaults = array_merge( $bundled, $remote );
 
 		/**
 		 * Filters the per-channel field and effect of each agent readiness check.
@@ -163,9 +176,11 @@ class AgentReadiness {
 	 * @return array{generated_at:string,products:int,products_with_issues:int,store_checks:array<int,array<string,mixed>>,channels:array<string,array<string,mixed>>,checks:array<int,array<string,mixed>>,truncated:bool}
 	 */
 	public function get_report(): array {
-		$active        = $this->get_active_rules();
-		$rules         = $active['rules'];
-		$channel_rules = $active['channel_rules'];
+		// Rebuild the rules for each report: a long-running process may have fetched a new rules file since.
+		$this->active_rules = null;
+		$active             = $this->get_active_rules();
+		$rules              = $active['rules'];
+		$channel_rules      = $active['channel_rules'];
 
 		$scan = new ProductScan();
 		$scan->evaluate( $rules, $channel_rules, self::PRODUCT_IDS_LIMIT );

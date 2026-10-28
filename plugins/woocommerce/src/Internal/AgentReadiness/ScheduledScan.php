@@ -43,16 +43,25 @@ class ScheduledScan implements RegisterHooksInterface {
 	private AgentReadiness $agent_readiness;
 
 	/**
+	 * Rules from the published rules file.
+	 *
+	 * @var RemoteRules
+	 */
+	private RemoteRules $remote_rules;
+
+	/**
 	 * Initialize dependencies.
 	 *
 	 * @internal
 	 *
 	 * @param FeaturesController $features_controller Features controller.
 	 * @param AgentReadiness     $agent_readiness     Readiness service.
+	 * @param RemoteRules        $remote_rules        Rules from the published rules file.
 	 */
-	final public function init( FeaturesController $features_controller, AgentReadiness $agent_readiness ): void {
+	final public function init( FeaturesController $features_controller, AgentReadiness $agent_readiness, RemoteRules $remote_rules ): void {
 		$this->features_controller = $features_controller;
 		$this->agent_readiness     = $agent_readiness;
+		$this->remote_rules        = $remote_rules;
 	}
 
 	/**
@@ -80,7 +89,7 @@ class ScheduledScan implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Schedule the next daily run, then run the scan and store the report.
+	 * Schedule the next daily run, fetch the rules file, then run the scan and store the report.
 	 *
 	 * @internal
 	 */
@@ -91,6 +100,7 @@ class ScheduledScan implements RegisterHooksInterface {
 		as_unschedule_all_actions( self::DAILY_HOOK, array(), self::GROUP );
 		as_schedule_single_action( time() + DAY_IN_SECONDS, self::DAILY_HOOK, array(), self::GROUP );
 
+		$this->remote_rules->refresh();
 		$this->agent_readiness->refresh_report();
 	}
 }

@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\AgentReadiness;
 
 use Automattic\WooCommerce\Internal\AgentReadiness\AgentReadiness;
+use Automattic\WooCommerce\Internal\AgentReadiness\RemoteRules;
 use Automattic\WooCommerce\Internal\AgentReadiness\ScheduledScan;
 use WC_Helper_Product;
 use WC_Unit_Test_Case;
@@ -83,6 +84,38 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 		$report = wc_get_container()->get( AgentReadiness::class )->get_cached_report();
 		$this->assertSame( 1, $report['products'] );
 		$this->assertCount( 1, $this->pending( ScheduledScan::DAILY_HOOK ) );
+	}
+
+	/**
+	 * @testdox A run fetches the rules file before scanning, so the new rules shape the report.
+	 */
+	public function test_run_fetches_rules_before_scanning(): void {
+		add_filter(
+			'woocommerce_agent_readiness_rules_url',
+			static function () {
+				return 'https://rules.example/agent-readiness.json';
+			}
+		);
+		$answer = static function () {
+			return array(
+				'headers'  => array(),
+				'body'     => '{"version":"2026-11-01","checks":{"missing_brand":{"channels":{"google":{"field":"brand","effect":"not_listable"}}}}}',
+				'response' => array(
+					'code'    => 200,
+					'message' => '',
+				),
+				'cookies'  => array(),
+			);
+		};
+		add_filter( 'pre_http_request', $answer );
+		WC_Helper_Product::create_simple_product();
+
+		$this->sut->run();
+		remove_filter( 'pre_http_request', $answer );
+		delete_option( RemoteRules::OPTION );
+
+		$report = wc_get_container()->get( AgentReadiness::class )->get_cached_report();
+		$this->assertSame( 1, $report['channels']['google']['not_listable'] );
 	}
 
 	/**

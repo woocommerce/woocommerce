@@ -80,6 +80,12 @@ array(
 )
 ```
 
+## Rules file
+
+Channel specs change faster than WooCommerce releases, so each background scan first fetches a published rules file (`RemoteRules`). Only a GET of the file is made; no store data is sent. The URL comes from the `woocommerce_agent_readiness_rules_url` filter and is empty by default until the file has a home, so nothing is fetched unless it is set.
+
+The file has a `version` and, per check id, a `channels` map in the same shape as the `woocommerce_agent_readiness_rules` filter. A channel entry may carry `effect_from` (`{ "2027-01-31": "not_listable" }`) for a spec change announced ahead. A check in the file uses the file's map; other checks keep the bundled one, and the rules filter runs last. Unknown checks, channels and effects are dropped before the filter sees them, a file entry with nothing valid left keeps the bundled map, and a failed or malformed fetch keeps the last good copy (option `woocommerce_agent_readiness_remote_rules`). The file can change fields and effects, not add checks: a new check still needs code.
+
 ## Background scan and REST
 
 "Run check" on the tab, or `POST wc/v3/agent-readiness/scan`, queues the scan in Action Scheduler (`ScheduledScan`). The report is stored in the `woocommerce_agent_readiness_report` option (not autoloaded). Each run schedules the next one a day later, before scanning, so a failed scan doesn't stop the daily refresh; a run that finds the feature disabled does.
