@@ -1,6 +1,3 @@
-# Keep equal to .nvmrc: nvm and actions/setup-node read .nvmrc, pnpm uses this one for every pnpm command. CI fails when they differ. On a major bump also update the engines.node range in .syncpackrc.
-nodeVersion: 24.15.0
-
 catalogs:
     # A curated set of `@wordpress/*` packages that are bundled with our minimum supported WordPress version.
     wp-min:
