@@ -30,10 +30,10 @@ const ARTIFACTS_PATH =
  * installed, aligns Node with the checked-out ref's `.nvmrc`.
  *
  * nvm is no longer required: refs built here pin their Node version through
- * pnpm's `useNodeVersion` setting (pnpm-workspace.yaml), so pnpm provisions and
+ * pnpm's `nodeVersion` setting (pnpm-workspace.yaml), so pnpm provisions and
  * uses the correct runtime for every pnpm invocation on its own. Sourcing nvm is
  * kept only as a best-effort fallback for older refs that predate
- * `useNodeVersion`, and is skipped silently when nvm isn't present so the tool
+ * `nodeVersion`, and is skipped silently when nvm isn't present so the tool
  * works without it. The first `npm`/`pnpm` call still needs a base Node on PATH,
  * which the caller's environment provides (in CI via actions/setup-node).
  *
