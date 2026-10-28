@@ -167,8 +167,8 @@ class WC_Meta_Box_Coupon_Data {
 				woocommerce_wp_checkbox(
 					array(
 						'id'          => 'auto_apply',
-						'label'       => __( 'Apply coupon automatically', 'woocommerce' ),
-						'description' => __( 'Check this box to apply this coupon to every cart that meets the restrictions below, without the customer entering a code. Customers cannot remove it themselves. With no restrictions set, it applies to every cart in the store.', 'woocommerce' ),
+						'label'       => __( 'Apply automatically', 'woocommerce' ),
+						'description' => __( 'Applies to any cart that meets usage restrictions, or to all carts if no restrictions are set. Customers can’t remove it.', 'woocommerce' ),
 						'value'       => wc_bool_to_string( $coupon->get_auto_apply( 'edit' ) ),
 					)
 				);
@@ -178,7 +178,7 @@ class WC_Meta_Box_Coupon_Data {
 					array(
 						'id'          => 'individual_use',
 						'label'       => __( 'Individual use only', 'woocommerce' ),
-						'description' => __( 'Check this box if the coupon cannot be used in conjunction with other coupons.', 'woocommerce' ),
+						'description' => __( 'Can’t be combined with other coupons.', 'woocommerce' ),
 						'value'       => wc_bool_to_string( $coupon->get_individual_use( 'edit' ) ),
 					)
 				);
@@ -188,7 +188,7 @@ class WC_Meta_Box_Coupon_Data {
 					array(
 						'id'          => 'exclude_sale_items',
 						'label'       => __( 'Exclude sale items', 'woocommerce' ),
-						'description' => __( 'Check this box if the coupon should not apply to items on sale. Per-item coupons will only work if the item is not on sale. Per-cart coupons will only work if there are items in the cart that are not on sale.', 'woocommerce' ),
+						'description' => __( 'Won’t discount items on sale. Cart discounts apply only if the cart has at least one item that’s not on sale.', 'woocommerce' ),
 						'value'       => wc_bool_to_string( $coupon->get_exclude_sale_items( 'edit' ) ),
 					)
 				);
