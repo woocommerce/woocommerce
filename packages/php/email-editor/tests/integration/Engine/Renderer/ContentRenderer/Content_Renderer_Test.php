@@ -99,25 +99,24 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		$template->id      = 'template-id';
 		$template->content = '<!-- wp:post-content /-->';
 
-		// Re-register the core image block through the Core integration, which is what gives it an email
-		// renderer in production. Restore the original registration afterwards so later tests still see
-		// the block core registered.
+		// Re-register the core image block with the email renderer the Core integration gives it, the same
+		// way Renderer_Test does. Restore the original registration afterwards, since this class's other
+		// tests expect the block core registered.
 		$core_integration = $this->di_container->get( Core_Initializer::class );
 		$core_integration->initialize();
-		$settings_filter = array( $core_integration, 'update_block_settings' );
-		$registry        = \WP_Block_Type_Registry::get_instance();
-		$original_block  = $registry->get_registered( 'core/image' );
+		$registry       = \WP_Block_Type_Registry::get_instance();
+		$original_block = $registry->get_registered( 'core/image' );
 		$this->assertInstanceOf( \WP_Block_Type::class, $original_block );
 
-		add_filter( 'block_type_metadata_settings', $settings_filter );
 		$registry->unregister( 'core/image' );
 		register_block_type(
 			'core/image',
 			$core_integration->update_block_settings(
 				array(
-					'name'       => 'core/image',
-					'attributes' => $original_block->attributes,
-					'supports'   => (array) $original_block->supports,
+					'title'    => $original_block->title,
+					'name'     => $original_block->name,
+					'category' => $original_block->category,
+					'supports' => $original_block->supports ?? array(),
 				)
 			)
 		);
@@ -125,7 +124,6 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		try {
 			$content = $this->renderer->render( $email_post, $template );
 		} finally {
-			remove_filter( 'block_type_metadata_settings', $settings_filter );
 			$registry->unregister( 'core/image' );
 			$registry->register( $original_block );
 		}
