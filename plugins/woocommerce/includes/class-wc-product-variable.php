@@ -9,6 +9,7 @@
  */
 
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Utilities\ProductUtil;
 
@@ -473,6 +474,9 @@ class WC_Product_Variable extends WC_Product {
 			$variation_gallery_html = wc_get_product_gallery_html( $this, $gallery_html_ids );
 		}
 
+		// A suffix like {price_including_tax} only shows on the chosen variation's price, so show that price even when all prices match.
+		$has_variation_only_suffix = wc_tax_enabled() && ProductTaxStatus::TAXABLE === $variation->get_tax_status() && str_contains( (string) get_option( 'woocommerce_price_display_suffix' ), '{' );
+
 		/**
 		 * Filters whether the variation price is shown after the variation is selected.
 		 *
@@ -482,7 +486,7 @@ class WC_Product_Variable extends WC_Product {
 		 * @param WC_Product_Variable  $product              The variable product.
 		 * @param WC_Product_Variation $variation            The variation.
 		 */
-		$show_variation_price = apply_filters( 'woocommerce_show_variation_price', $variation->get_price() === '' || $this->get_variation_sale_price( 'min' ) !== $this->get_variation_sale_price( 'max' ) || $this->get_variation_regular_price( 'min' ) !== $this->get_variation_regular_price( 'max' ), $this, $variation );
+		$show_variation_price = apply_filters( 'woocommerce_show_variation_price', $variation->get_price() === '' || $has_variation_only_suffix || $this->get_variation_sale_price( 'min' ) !== $this->get_variation_sale_price( 'max' ) || $this->get_variation_regular_price( 'min' ) !== $this->get_variation_regular_price( 'max' ), $this, $variation );
 
 		return apply_filters(
 			'woocommerce_available_variation',
