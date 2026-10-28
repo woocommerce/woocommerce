@@ -71,13 +71,6 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	 * the caption element itself.
 	 */
 	public function testItAppliesASavedCaptionColorToAnImageCaption(): void {
-		// Give the core image block the email renderer the Core integration attaches to it in production.
-		$core_integration = $this->di_container->get( Core_Initializer::class );
-		$core_integration->initialize();
-		$image_block_type = \WP_Block_Type_Registry::get_instance()->get_registered( 'core/image' );
-		$this->assertInstanceOf( \WP_Block_Type::class, $image_block_type );
-		$image_block_type->render_email_callback = array( $core_integration, 'render_block' );
-
 		$email_post_id = $this->factory->post->create(
 			array(
 				'post_content' => '<!-- wp:image {"id":1,"sizeSlug":"full","linkDestination":"none"} -->
@@ -106,10 +99,35 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 		$template->id      = 'template-id';
 		$template->content = '<!-- wp:post-content /-->';
 
+		// Re-register the core image block through the Core integration, which is what gives it an email
+		// renderer in production. Restore the original registration afterwards so later tests still see
+		// the block core registered.
+		$core_integration = $this->di_container->get( Core_Initializer::class );
+		$core_integration->initialize();
+		$settings_filter = array( $core_integration, 'update_block_settings' );
+		$registry        = \WP_Block_Type_Registry::get_instance();
+		$original_block  = $registry->get_registered( 'core/image' );
+		$this->assertInstanceOf( \WP_Block_Type::class, $original_block );
+
+		add_filter( 'block_type_metadata_settings', $settings_filter );
+		$registry->unregister( 'core/image' );
+		register_block_type(
+			'core/image',
+			$core_integration->update_block_settings(
+				array(
+					'name'       => 'core/image',
+					'attributes' => $original_block->attributes,
+					'supports'   => (array) $original_block->supports,
+				)
+			)
+		);
+
 		try {
 			$content = $this->renderer->render( $email_post, $template );
 		} finally {
-			unset( $image_block_type->render_email_callback );
+			remove_filter( 'block_type_metadata_settings', $settings_filter );
+			$registry->unregister( 'core/image' );
+			$registry->register( $original_block );
 		}
 
 		$this->assertStringContainsString( 'Caption text', $content );
