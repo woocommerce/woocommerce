@@ -139,7 +139,7 @@ class WC_REST_Refund_Currency_Test extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Direct refund persistence agrees with the gateway and remaining amount.
+	 * @testdox Direct refunds keep cents for foreign currencies and existing rounding for the store currency.
 	 * @param string $store Store currency.
 	 * @param int    $dp Store decimals.
 	 * @param string $currency Order currency.
@@ -155,6 +155,8 @@ class WC_REST_Refund_Currency_Test extends WC_REST_Unit_Test_Case {
 			)
 		);
 		$this->assertInstanceOf( WC_Order_Refund::class, $refund );
+		// Existing store-currency behavior: the refund total rounds to the store's whole yen while
+		// the gateway and refund amount keep 5.25. HPOS sums refund totals, legacy storage sums amounts.
 		$total    = 'JPY' === $currency ? 5.0 : 5.25;
 		$refunded = \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled() ? $total : 5.25;
 		$this->assertEquals(
@@ -170,23 +172,40 @@ class WC_REST_Refund_Currency_Test extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Explicit line totals cannot exceed the gateway refund amount.
-	 * @param string $store Store currency.
-	 * @param int    $dp Store decimals.
-	 * @param string $currency Order currency.
-	 * @dataProvider currencies
+	 * @testdox Explicit line totals must match the requested amount at the order precision.
+	 * @param string      $store Store currency.
+	 * @param int         $dp Store decimals.
+	 * @param string      $currency Order currency.
+	 * @param float       $line_total Requested line total.
+	 * @param int         $amount Requested refund amount.
+	 * @param int         $status Expected response status.
+	 * @param string|null $code Expected error code.
+	 * @dataProvider explicit_mismatches
 	 */
-	public function test_explicit_mismatches( string $store, int $dp, string $currency ): void {
-		foreach ( array( array( 5.25, 5 ), array( 0.25, 0 ) ) as $values ) {
-			list( $order, $item_id ) = $this->order_fixture( $store, $dp, $currency );
-			$response                = $this->request(
-				$order,
-				$item_id,
-				array( 'refund_total' => $values[0] ),
-				array( 'amount' => $values[1] )
-			);
-			$this->assertSame( 'JPY' === $currency ? 201 : 400, $response->get_status(), wp_json_encode( $response->get_data() ) );
+	public function test_explicit_mismatches( string $store, int $dp, string $currency, float $line_total, int $amount, int $status, ?string $code ): void {
+		list( $order, $item_id ) = $this->order_fixture( $store, $dp, $currency );
+
+		$response = $this->request( $order, $item_id, array( 'refund_total' => $line_total ), array( 'amount' => $amount ) );
+
+		$this->assertSame( $status, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		if ( $code ) {
+			$this->assertSame( $code, $response->get_data()['code'] );
 		}
+	}
+
+	/**
+	 * Explicit line totals whose cents the requested amount drops.
+	 * @return array
+	 */
+	public function explicit_mismatches(): array {
+		return array(
+			'USD on JPY, 5.25 as 5' => array( 'JPY', 0, 'USD', 5.25, 5, 400, 'woocommerce_rest_invalid_refund_amount' ),
+			'USD on JPY, 0.25 as 0' => array( 'JPY', 0, 'USD', 0.25, 0, 400, 'woocommerce_rest_invalid_refund_amount' ),
+			'JPY on JPY, 5.25 as 5' => array( 'JPY', 0, 'JPY', 5.25, 5, 201, null ),
+			'JPY on JPY, 0.25 as 0' => array( 'JPY', 0, 'JPY', 0.25, 0, 201, null ),
+			'USD on USD, 5.25 as 5' => array( 'USD', 2, 'USD', 5.25, 5, 400, 'woocommerce_rest_invalid_refund_amount' ),
+			'USD on USD, 0.25 as 0' => array( 'USD', 2, 'USD', 0.25, 0, 400, 'woocommerce_rest_invalid_refund_amount' ),
+		);
 	}
 
 	/**
