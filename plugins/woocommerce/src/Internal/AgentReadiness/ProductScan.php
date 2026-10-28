@@ -119,14 +119,20 @@ class ProductScan {
 				)
 			);
 
-			$batch_count = count( $query->posts );
-			self::prime_related( $query->posts );
-			foreach ( $query->posts as $product_id ) {
+			$product_ids = array_map(
+				static function ( $post ): int {
+					return $post instanceof \WP_Post ? $post->ID : (int) $post;
+				},
+				$query->posts
+			);
+			$batch_count = count( $product_ids );
+			self::prime_related( $product_ids );
+			foreach ( $product_ids as $product_id ) {
 				if ( self::PRODUCT_LIMIT === $this->products ) {
 					$this->truncated = true;
 					break 2;
 				}
-				$product = wc_get_product( (int) $product_id );
+				$product = wc_get_product( $product_id );
 				if ( $product ) {
 					$this->record( $product, $rules, $channel_rules, $ids_limit );
 				}
@@ -330,11 +336,13 @@ class ProductScan {
 	private function record( \WC_Product $product, array $rules, array $channel_rules, int $ids_limit ): void {
 		$failed_channels = array();
 		foreach ( $this->failed_rule_ids( $product, $rules ) as $id ) {
-			++$this->results[ $id ]['count'];
-			if ( count( $this->results[ $id ]['product_ids'] ) < $ids_limit ) {
-				$this->results[ $id ]['product_ids'][] = $product->get_id();
+			$result = $this->result( $id );
+			++$result['count'];
+			if ( count( $result['product_ids'] ) < $ids_limit ) {
+				$result['product_ids'][] = $product->get_id();
 			}
-			$failed_channels[] = $rules[ $id ]->channels_for( $product, $channel_rules[ $id ] ?? array() );
+			$this->results[ $id ] = $result;
+			$failed_channels[]    = $rules[ $id ]->channels_for( $product, $channel_rules[ $id ] ?? array() );
 		}
 
 		++$this->products;
