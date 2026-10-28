@@ -86,13 +86,14 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A scan queued just now is pending, not stalled.
+	 * @testdox A scan queued just now is pending, not stalled, and has a due date.
 	 */
 	public function test_fresh_scan_is_not_stalled(): void {
 		$this->sut->queue();
 
 		$this->assertTrue( $this->sut->is_pending() );
 		$this->assertFalse( $this->sut->is_stalled() );
+		$this->assertIsInt( as_next_scheduled_action( ScheduledScan::RUN_NOW_HOOK, array(), ScheduledScan::GROUP ), 'The queued scan has a due date to tell a stall by.' );
 	}
 
 	/**

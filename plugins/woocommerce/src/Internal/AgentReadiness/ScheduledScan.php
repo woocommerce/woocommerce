@@ -77,11 +77,13 @@ class ScheduledScan implements RegisterHooksInterface {
 	public function queue(): void {
 		if ( $this->is_stalled() ) {
 			as_unschedule_all_actions( self::RUN_NOW_HOOK, array(), self::GROUP );
+			wc_set_time_limit( 0 );
 			$this->run();
 			return;
 		}
 		if ( ! $this->is_pending() ) {
-			as_enqueue_async_action( self::RUN_NOW_HOOK, array(), self::GROUP );
+			// A single action due now rather than an async one, which has no date to tell a stalled scan by.
+			as_schedule_single_action( time(), self::RUN_NOW_HOOK, array(), self::GROUP );
 		}
 	}
 
