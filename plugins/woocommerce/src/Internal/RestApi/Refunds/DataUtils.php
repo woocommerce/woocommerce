@@ -66,9 +66,9 @@ class DataUtils {
 	/**
 	 * Get the price precision refunds use for an order.
 	 *
-	 * An order in a currency with more decimals than the store uses those decimals, unless its lines do not
-	 * add up to its stored total at that precision and the total is rounded to store precision (for example,
-	 * a total calculated through the REST API).
+	 * An order in a currency with more decimals than the store uses those decimals, unless its lines miss its
+	 * stored total by more than per-line rounding explains and the total is rounded to store precision (for
+	 * example, a total calculated through the REST API).
 	 *
 	 * @since 11.4.0
 	 * @param \WC_Abstract_Order|false|null $order Order or refund, or false for an unassigned item.
@@ -104,13 +104,15 @@ class DataUtils {
 			$rebuilt_total += $this->get_item_gross( $item, $currency_decimals );
 		}
 
+		// Cart totals can differ from the rebuilt lines by up to half a unit per line (for example with
+		// tax-inclusive prices), so only a larger gap shows the total was rounded at store precision.
+		$half_unit    = 0.5 / ( 10 ** $currency_decimals );
 		$stored_total = (float) $order->get_total();
-		$tolerance    = 0.5 / ( 10 ** $currency_decimals );
-		if ( abs( NumberUtil::round( $rebuilt_total, $currency_decimals ) - $stored_total ) < $tolerance ) {
+		if ( abs( $rebuilt_total - $stored_total ) <= count( $items ) * $half_unit + 1e-9 ) {
 			return $currency_decimals;
 		}
 
-		return abs( NumberUtil::round( $stored_total, $store_decimals ) - $stored_total ) < $tolerance ? $store_decimals : $currency_decimals;
+		return abs( NumberUtil::round( $stored_total, $store_decimals ) - $stored_total ) < $half_unit ? $store_decimals : $currency_decimals;
 	}
 
 	/**

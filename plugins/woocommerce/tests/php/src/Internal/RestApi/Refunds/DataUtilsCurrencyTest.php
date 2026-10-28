@@ -566,6 +566,58 @@ class DataUtilsCurrencyTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A checkout total on a whole amount keeps cents when its lines differ only by per-line rounding.
+	 */
+	public function test_checkout_total_on_whole_amount_keeps_cents(): void {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		\WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate'          => '8.3000',
+				'tax_rate_name'     => 'Currency precision',
+				'tax_rate_priority' => 1,
+				'tax_rate_class'    => '',
+			)
+		);
+		// The cart is totalled at the order currency's precision, as a multi-currency checkout does.
+		update_option( 'woocommerce_price_num_decimals', 2 );
+		$first  = \WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'regular_price' => 6.98,
+				'virtual'       => true,
+			)
+		);
+		$second = \WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'regular_price' => 10.01,
+				'virtual'       => true,
+			)
+		);
+		WC()->customer->set_billing_country( 'US' );
+		WC()->cart->add_to_cart( $first->get_id(), 1 );
+		WC()->cart->add_to_cart( $second->get_id(), 2 );
+		WC()->cart->calculate_totals();
+		$order_id = WC()->checkout()->create_order(
+			array(
+				'billing_country' => 'US',
+				'billing_email'   => 'precision@example.com',
+				'payment_method'  => 'bacs',
+			)
+		);
+		$order    = wc_get_order( $order_id );
+		$order->set_currency( 'USD' );
+		$order->save();
+		update_option( 'woocommerce_price_num_decimals', 0 );
+		$order = new WC_Order( $order_id );
+
+		$this->assertSame( 27.0, (float) $order->get_total(), 'The fixture should land on a whole amount.' );
+		$this->assertSame( 2, $this->sut->get_order_price_decimals( $order ) );
+	}
+
+	/**
 	 * @testdox A refund resolves its precision from its parent order.
 	 */
 	public function test_refund_uses_parent_order_precision(): void {
