@@ -180,7 +180,7 @@ class ReadinessChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Store conditions report coming soon mode and discouraged search engines.
+	 * @testdox Store conditions report coming soon mode, discouraged search engines, UCP and guest checkout.
 	 */
 	public function test_store_conditions(): void {
 		$sut = new StoreConditions();
@@ -188,10 +188,14 @@ class ReadinessChecksTest extends WC_Unit_Test_Case {
 
 		update_option( 'woocommerce_coming_soon', 'no' );
 		update_option( 'blog_public', '1' );
+		update_option( 'woocommerce_feature_ucp_enabled', 'yes' );
+		update_option( 'woocommerce_enable_guest_checkout', 'yes' );
 		$this->assertSame(
 			array(
 				'launched'       => true,
 				'search_visible' => true,
+				'ucp_on'         => true,
+				'guest_checkout' => true,
 			),
 			array_column( $sut->all(), 'ok', 'id' )
 		);
@@ -199,10 +203,14 @@ class ReadinessChecksTest extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_coming_soon', 'yes' );
 		update_option( 'woocommerce_store_pages_only', 'yes' );
 		update_option( 'blog_public', '0' );
+		update_option( 'woocommerce_feature_ucp_enabled', 'no' );
+		update_option( 'woocommerce_enable_guest_checkout', 'no' );
 		$this->assertSame(
 			array(
 				'launched'       => false,
 				'search_visible' => false,
+				'ucp_on'         => false,
+				'guest_checkout' => false,
 			),
 			array_column( $sut->all(), 'ok', 'id' )
 		);
