@@ -13,6 +13,12 @@ defined( 'ABSPATH' ) || exit;
 class ProductFields {
 
 	/**
+	 * Characters normalise_gtin() removes: hyphen, ASCII whitespace, no-break
+	 * space, figure space, narrow no-break space and the byte order mark.
+	 */
+	public const GTIN_SEPARATORS = array( '-', ' ', "\t", "\n", "\r", "\x0B", "\x0C", "\u{00A0}", "\u{2007}", "\u{202F}", "\u{FEFF}" );
+
+	/**
 	 * Plain-text description, falling back to the short description, as feeds do.
 	 *
 	 * @param \WC_Product $product Product.
@@ -133,14 +139,13 @@ class ProductFields {
 
 	/**
 	 * Remove the hyphens and spaces, including non-breaking ones, that core
-	 * allows inside a GTIN and that imports leave around it.
+	 * allows inside a GTIN and that imports leave around it. The duplicate
+	 * GTIN query strips the same characters.
 	 *
 	 * @param string $gtin Stored GTIN.
 	 */
 	public static function normalise_gtin( string $gtin ): string {
-		$normalised = preg_replace( '/[\s\x{00A0}\x{2007}\x{202F}\x{FEFF}\-]+/u', '', $gtin );
-		// Not valid UTF-8: fall back to ASCII whitespace so the value still fails validation.
-		return null === $normalised ? (string) preg_replace( '/[\s\-]+/', '', $gtin ) : $normalised;
+		return str_replace( self::GTIN_SEPARATORS, '', $gtin );
 	}
 
 	/**

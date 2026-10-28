@@ -273,13 +273,20 @@ class ProductScan {
 			// Read from postmeta, not wc_product_meta_lookup: imports and direct
 			// meta writes skip both the lookup table and core's uniqueness check.
 			// Only shared GTINs come back, so memory follows the duplicates.
+			// The separators go in as hex literals: a non-ASCII query sends
+			// wpdb into its per-table charset checks.
+			$normalised = 'pm.meta_value';
+			foreach ( ProductFields::GTIN_SEPARATORS as $separator ) {
+				$normalised = "REPLACE( {$normalised}, _utf8mb4 X'" . bin2hex( $separator ) . "', '' )";
+			}
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $normalised is built from constant hex literals.
 			$gtins = (array) $wpdb->get_col(
 				$wpdb->prepare(
 					"
 					SELECT owned.gtin
 					FROM (
 						SELECT DISTINCT IF( p.post_type = %s, p.post_parent, p.ID ) AS owner_id,
-							TRIM( LEADING '0' FROM REPLACE( REPLACE( REPLACE( REPLACE( REPLACE( REPLACE( pm.meta_value, ' ', '' ), '-', '' ), '\t', '' ), '\r', '' ), '\n', '' ), _utf8mb4 X'C2A0', '' ) ) AS gtin
+							TRIM( LEADING '0' FROM {$normalised} ) AS gtin
 						FROM {$wpdb->postmeta} pm
 						INNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id
 						INNER JOIN {$wpdb->posts} owner ON owner.ID = IF( p.post_type = %s, p.post_parent, p.ID )
@@ -301,6 +308,7 @@ class ProductScan {
 					'publish'
 				)
 			);
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 			$this->shared_gtins = array_fill_keys( array_map( 'strval', $gtins ), true );
 		}

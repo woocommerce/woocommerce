@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\AgentReadiness;
 
+use Automattic\WooCommerce\Internal\AgentReadiness\Checks\DuplicateGtinCheck;
 use Automattic\WooCommerce\Internal\AgentReadiness\Checks\ImageTooSmallCheck;
 use Automattic\WooCommerce\Internal\AgentReadiness\Checks\InvalidGtinCheck;
 use Automattic\WooCommerce\Internal\AgentReadiness\Checks\MissingBrandCheck;
@@ -110,6 +111,26 @@ class ReadinessChecksTest extends WC_Unit_Test_Case {
 
 		$this->assertFalse( $sut->fails( $valid, $this->scan ), 'A valid GTIN with separators should pass' );
 		$this->assertTrue( $sut->fails( $invalid, $this->scan ), 'A GTIN with a wrong check digit should fail' );
+	}
+
+	/**
+	 * @testdox GTINs that differ only by a narrow no-break space or a byte order mark count as duplicates.
+	 */
+	public function test_duplicate_gtin_strips_the_same_separators_as_validation(): void {
+		$sut    = new DuplicateGtinCheck();
+		$plain  = WC_Helper_Product::create_simple_product();
+		$narrow = WC_Helper_Product::create_simple_product();
+		$bom    = WC_Helper_Product::create_simple_product();
+		$other  = WC_Helper_Product::create_simple_product();
+		// Written to meta directly, as imports do, past core's uniqueness check.
+		update_post_meta( $plain->get_id(), '_global_unique_id', '4006381333931' );
+		update_post_meta( $narrow->get_id(), '_global_unique_id', "4006381\u{202F}333931" );
+		update_post_meta( $bom->get_id(), '_global_unique_id', "\u{FEFF}036000291452" );
+		update_post_meta( $other->get_id(), '_global_unique_id', '036000291452' );
+
+		foreach ( array( $plain, $narrow, $bom, $other ) as $product ) {
+			$this->assertTrue( $sut->fails( wc_get_product( $product->get_id() ), $this->scan ), 'Product ' . $product->get_id() . ' shares its GTIN' );
+		}
 	}
 
 	/**
