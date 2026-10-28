@@ -1519,11 +1519,13 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	 * @testdox Should run a subclass of a Core write ability with its fields and validators.
 	 */
 	public function test_a_subclass_of_a_core_ability_runs_the_change(): void {
-		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+		$product          = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+		$validator_called = false;
 		$this->register_validator(
 			'product',
 			'test-ext',
-			static function ( $subject ) {
+			static function ( $subject ) use ( &$validator_called ) {
+				$validator_called = true;
 				return 'Pencil (extended)' === $subject->get_name() ? null : new \WP_Error( 'test_refused', 'Refused.' );
 			}
 		);
@@ -1546,6 +1548,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			)
 		);
 
+		$this->assertTrue( $validator_called );
 		$this->assertSame( 'Pencil (extended)', wc_get_product( $product->get_id() )->get_name() );
 		$this->assertSame( 'blue', $output['product']['extensions']['test-ext']['color'] );
 	}
