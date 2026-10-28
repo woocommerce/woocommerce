@@ -37690,30 +37690,6 @@ parameters:
 			path: src/Admin/API/Notice.php
 
 		-
-			message: '#^Instantiated class Automattic\\WooCommerce\\Admin\\API\\WP_Error not found\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Notice.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Notice\:\:dissmiss_notice\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Notice.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Notice\:\:dissmiss_notice\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\WP_REST_Response\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Notice.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Notice\:\:dissmiss_notice\(\) should return Automattic\\WooCommerce\\Admin\\API\\WP_Error\|Automattic\\WooCommerce\\Admin\\API\\WP_REST_Response but returns WP_REST_Response\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/Notice.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Notice\:\:register_routes\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -38860,20 +38836,8 @@ parameters:
 			path: src/Admin/API/ProductAttributeTerms.php
 
 		-
-			message: '#^Instantiated class Automattic\\WooCommerce\\Admin\\API\\WP_Error not found\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/ProductAttributeTerms.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\ProductAttributeTerms\:\:get_custom_attribute_by_slug\(\) should return object but returns array\.$#'
 			identifier: return.type
-			count: 1
-			path: src/Admin/API/ProductAttributeTerms.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\ProductAttributeTerms\:\:get_custom_attribute_permissions_check\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\WP_Error\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Admin/API/ProductAttributeTerms.php
 
