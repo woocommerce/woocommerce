@@ -1031,7 +1031,7 @@ describe( 'Address Suggestions Component', () => {
 			);
 		} );
 
-		test( 'should not bubble the native change event for Select2 fields, as the jQuery trigger already does', async () => {
+		test( 'should bubble the native change event once for Select2 fields without a separate jQuery trigger', async () => {
 			const jQueryTrigger = jest.fn();
 			window.jQuery = jest.fn( ( element ) => ( {
 				hasClass: jest.fn(
@@ -1060,11 +1060,39 @@ describe( 'Address Suggestions Component', () => {
 
 			document.body.removeEventListener( 'change', onChange );
 
-			// The Select2 country field is updated through jQuery only.
-			expect( changedIds ).not.toContain( 'billing_country' );
-			expect( jQueryTrigger ).toHaveBeenCalledWith( 'change' );
-			// Other fields still bubble.
-			expect( changedIds ).toContain( 'billing_city' );
+			// Native listeners and Select2's own listener both get one bubbling event.
+			expect(
+				changedIds.filter( ( id ) => id === 'billing_country' )
+			).toHaveLength( 1 );
+			// A second jQuery-triggered event would run delegated jQuery handlers twice.
+			expect( jQueryTrigger ).not.toHaveBeenCalledWith( 'change' );
+		} );
+
+		test( 'should ask the checkout to refresh once the address fields are filled', async () => {
+			const jQueryTrigger = jest.fn();
+			window.jQuery = jest.fn( () => ( {
+				hasClass: jest.fn( () => false ),
+				trigger: jQueryTrigger,
+				select2: jest.fn(),
+				on: jest.fn(),
+			} ) );
+
+			billingAddressInput.value = '123';
+			billingAddressInput.focus();
+			billingAddressInput.dispatchEvent( new Event( 'input' ) );
+			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
+
+			document
+				.querySelector( '#address_suggestions_billing .suggestions-list li' )
+				.click();
+
+			// Before the delayed fields are filled there is no refresh request.
+			expect( jQueryTrigger ).not.toHaveBeenCalledWith( 'update_checkout' );
+
+			await new Promise( ( resolve ) => setTimeout( resolve, 250 ) );
+
+			expect( document.getElementById( 'billing_city' ).value ).toBe( 'City' );
+			expect( jQueryTrigger ).toHaveBeenCalledWith( 'update_checkout' );
 		} );
 
 		test( 'should update value attribute of address fields when address is selected', async () => {
