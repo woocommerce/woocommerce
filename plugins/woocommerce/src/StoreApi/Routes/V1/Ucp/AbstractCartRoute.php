@@ -68,7 +68,7 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	 */
 	public function get_response( \WP_REST_Request $request ) {
 		if ( '' !== $this->route_cart_id( $request ) && '' === $this->validated_cart_id( $request ) ) {
-			return $this->ucp_not_found();
+			return $this->add_response_headers( $this->ucp_not_found() );
 		}
 
 		$inherited_token = CartTokenUtils::get_request_cart_token();

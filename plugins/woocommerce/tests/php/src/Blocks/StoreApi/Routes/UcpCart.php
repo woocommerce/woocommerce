@@ -799,6 +799,7 @@ class UcpCart extends ControllerTestCase {
 		$this->assertSame( 'error', $data['ucp']['status'] );
 		$this->assertSame( 'not_found', $data['messages'][0]['code'] );
 		$this->assertArrayNotHasKey( 'line_items', $data );
+		$this->assertSame( 'no-store', $response->get_headers()['Cache-Control'] ?? null, 'A 200 not-found must not be cacheable.' );
 	}
 
 	/**
