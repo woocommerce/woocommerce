@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Caches;
 
 use Automattic\WooCommerce\Internal\Caches\ProductCache;
 use Automattic\WooCommerce\Internal\Caches\ProductCacheController;
+use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use WC_Data;
 use WC_Helper_Product;
@@ -131,23 +132,72 @@ class ProductCacheTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that an unsaved attribute change on one cached copy does not reach another copy.
+	 * @testdox Should keep an unsaved attribute or download change on one cached copy away from other copies.
 	 */
-	public function test_unsaved_attribute_change_does_not_reach_other_copies() {
-		$attribute = new \WC_Product_Attribute();
-		$attribute->set_name( 'color' );
-		$attribute->set_options( array( 'red', 'blue' ) );
+	public function test_unsaved_attribute_change_does_not_reach_other_copies(): void {
 		$product = WC_Helper_Product::create_simple_product();
-		$product->set_attributes( array( $attribute ) );
+		$product->set_attributes( array( $this->create_attribute() ) );
+		$product->set_downloads( array( $this->create_download() ) );
 		$product->save();
+
+		$this->assert_cached_copies_are_isolated( $product );
+	}
+
+	/**
+	 * @testdox Should keep an unsaved change on one cached copy away from other copies when the attributes and downloads are pending changes.
+	 */
+	public function test_unsaved_change_does_not_reach_other_copies_when_props_are_pending(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_attributes( array( $this->create_attribute() ) );
+		$product->set_downloads( array( $this->create_download() ) );
+
+		$this->assertArrayHasKey( 'attributes', $product->get_changes() );
+		$this->assertArrayHasKey( 'downloads', $product->get_changes() );
+		$this->assert_cached_copies_are_isolated( $product );
+	}
+
+	/**
+	 * Cache the product, change the attribute and download objects on one copy, and check that another copy and the original keep their values.
+	 *
+	 * @param \WC_Product $product The product to cache.
+	 */
+	private function assert_cached_copies_are_isolated( \WC_Product $product ): void {
 		$this->sut->set( $product );
 
 		$first = $this->sut->get( $product->get_id() );
 		$first->get_attributes()['color']->set_options( array( 'green' ) );
+		current( $first->get_downloads() )->set_name( 'Changed' );
 		$second = $this->sut->get( $product->get_id() );
 
 		$this->assertSame( array( 'red', 'blue' ), $second->get_attributes()['color']->get_options() );
 		$this->assertSame( array( 'red', 'blue' ), $product->get_attributes()['color']->get_options() );
+		$this->assertSame( 'Manual', current( $second->get_downloads() )->get_name() );
+		$this->assertSame( 'Manual', current( $product->get_downloads() )->get_name() );
+	}
+
+	/**
+	 * Create a color attribute with two options.
+	 *
+	 * @return \WC_Product_Attribute
+	 */
+	private function create_attribute(): \WC_Product_Attribute {
+		$attribute = new \WC_Product_Attribute();
+		$attribute->set_name( 'color' );
+		$attribute->set_options( array( 'red', 'blue' ) );
+		return $attribute;
+	}
+
+	/**
+	 * Create a download named Manual in an approved directory.
+	 *
+	 * @return \WC_Product_Download
+	 */
+	private function create_download(): \WC_Product_Download {
+		wc_get_container()->get( Download_Directories::class )->add_approved_directory( 'https://example.com/' );
+		$download = new \WC_Product_Download();
+		$download->set_name( 'Manual' );
+		$download->set_file( 'https://example.com/manual.pdf' );
+		return $download;
 	}
 
 	/**

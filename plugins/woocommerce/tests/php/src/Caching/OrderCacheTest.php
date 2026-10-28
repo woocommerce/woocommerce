@@ -53,9 +53,9 @@ class OrderCacheTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that an unsaved meta change on one order instance does not reach another instance from the cache.
+	 * @testdox Should keep an unsaved meta change on one order instance away from another instance from the cache.
 	 */
-	public function test_unsaved_meta_change_does_not_reach_other_instances() {
+	public function test_unsaved_meta_change_does_not_reach_other_instances(): void {
 		if ( ! OrderUtil::orders_cache_usage_is_enabled() ) {
 			$this->markTestSkipped( 'HPOS based caching is not enabled.' );
 		}
@@ -72,9 +72,9 @@ class OrderCacheTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that an unsaved change to an item or its meta on one order copy does not reach another copy.
+	 * @testdox Should keep an unsaved change to an item or its meta on one order copy away from another copy.
 	 */
-	public function test_unsaved_item_change_does_not_reach_cloned_order() {
+	public function test_unsaved_item_change_does_not_reach_cloned_order(): void {
 		$order = WC_Helper_Order::create_order();
 		$item  = current( $order->get_items() );
 		$item->add_meta_data( 'test', 'saved' );
