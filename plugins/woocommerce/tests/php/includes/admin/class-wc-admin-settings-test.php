@@ -697,6 +697,34 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should read a field with is_option set to false through ID "$id", not through its field name.
+	 *
+	 * @testWith ["test_field_id", "id value"]
+	 *           ["", "default value"]
+	 *
+	 * @param string $id       ID of the rendered field.
+	 * @param string $expected Value the rendered input should carry.
+	 */
+	public function test_output_fields_reads_non_option_field_through_id( string $id, string $expected ): void {
+		update_option( 'test_field_id', 'id value' );
+		update_option( 'test_parent', array( 'key' => 'nested value' ) );
+
+		$output = $this->render_fields(
+			array(
+				array(
+					'id'         => $id,
+					'field_name' => 'test_parent[key]',
+					'type'       => 'text',
+					'default'    => 'default value',
+					'is_option'  => false,
+				),
+			)
+		);
+
+		$this->assertStringContainsString( 'value="' . $expected . '"', $output );
+	}
+
+	/**
 	 * @testdox Should pass the default to a custom field without an ID, even when a value is stored under field name $field_name.
 	 *
 	 * @testWith ["test_rules"]

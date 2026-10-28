@@ -244,17 +244,17 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 		/**
 		 * Get the stored value of a settings field.
 		 *
-		 * When a field with an ID sets 'field_name', save_fields() stores the value under it, so read it from there.
-		 * Fields without an ID, other names, and values not stored there are read through the field ID as before.
+		 * When save_fields() saves a field that sets 'field_name', it stores the value under that name, so read it from there.
+		 * Fields it skips, other names, and values not stored there are read through the field ID as before.
 		 *
-		 * @param array $field  Field definition with 'id', 'field_name' and 'default' set.
-		 * @param bool  $has_id Whether the field definition sets 'id'.
+		 * @param array $field    Field definition with 'id', 'field_name' and 'default' set.
+		 * @param bool  $is_saved Whether save_fields() saves this field.
 		 * @return mixed
 		 */
-		private static function get_field_value( $field, $has_id ) {
+		private static function get_field_value( $field, $is_saved ) {
 			$field_name = $field['field_name'];
 
-			if ( $has_id && $field_name !== $field['id'] && is_string( $field_name ) && preg_match( '/^([^\[\]]+)(?:\[([^\[\]]+)\])?$/', $field_name, $matches ) ) {
+			if ( $is_saved && $field_name !== $field['id'] && is_string( $field_name ) && preg_match( '/^([^\[\]]+)(?:\[([^\[\]]+)\])?$/', $field_name, $matches ) ) {
 				$option_name = $matches[1];
 				if ( isset( $matches[2] ) ) {
 					// Resolve the name the way save_fields() does: parse_str() stores 'a.b[c]' under 'a_b'.
@@ -287,8 +287,9 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 				if ( ! isset( $value['type'] ) ) {
 					continue;
 				}
-				$has_id = isset( $value['id'] );
-				if ( ! $has_id ) {
+				// Same skip rules as save_fields(), checked before a missing ID is filled in.
+				$is_saved = isset( $value['id'] ) && ! ( isset( $value['is_option'] ) && false === $value['is_option'] );
+				if ( ! isset( $value['id'] ) ) {
 					$value['id'] = '';
 				}
 
@@ -329,7 +330,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 					$value['suffix'] = '';
 				}
 				if ( ! isset( $value['value'] ) ) {
-					$value['value'] = self::get_field_value( $value, $has_id );
+					$value['value'] = self::get_field_value( $value, $is_saved );
 				}
 
 				if ( ! is_null( $value['fixed_value'] ?? null ) ) {
