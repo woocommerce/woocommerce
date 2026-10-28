@@ -642,11 +642,39 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 
 		return array(
 			'plain name'                => array( array( 'test_plain' => 'plain value' ) + $id_value, 'test_plain', 'plain value' ),
+			'nested name'               => array( array( 'test_parent' => array( 'key' => 'nested value' ) ) + $id_value, 'test_parent[key]', 'nested value' ),
 			'nothing stored under name' => array( $id_value, 'test_parent[key]', 'id value' ),
 			'two levels'                => array( array( 'test_parent' => array( 'deep' => array( 'leaf' => 'deep value' ) ) ) + $id_value, 'test_parent[deep][leaf]', 'id value' ),
 			'string option'             => array( array( 'test_string' => 'abc' ) + $id_value, 'test_string[0]', 'id value' ),
 			'object value under key'    => array( array( 'test_object' => array( 'key' => new stdClass() ) ) + $id_value, 'test_object[key]', 'id value' ),
 		);
+	}
+
+	/**
+	 * @testdox Should render an explicit $explicit_value without reading the stored values.
+	 *
+	 * @testWith [""]
+	 *           [false]
+	 *
+	 * @param mixed $explicit_value Value passed in the field definition.
+	 */
+	public function test_output_fields_renders_explicit_value_over_stored_values( $explicit_value ): void {
+		update_option( 'test_field_id', 'id value' );
+		update_option( 'test_parent', array( 'key' => 'nested value' ) );
+
+		$output = $this->render_fields(
+			array(
+				array(
+					'id'         => 'test_field_id',
+					'field_name' => 'test_parent[key]',
+					'type'       => 'text',
+					'default'    => 'default value',
+					'value'      => $explicit_value,
+				),
+			)
+		);
+
+		$this->assertStringContainsString( 'value=""', $output );
 	}
 
 	/**
