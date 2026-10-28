@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Fix a fatal error for unauthorised requests to the wc-analytics attribute terms endpoint. Denied GET requests return 401 for unauthenticated users and 403 for authenticated users without the required capability.
+Return a 401 instead of a fatal error for unauthorised requests to the wc-analytics attribute terms endpoint.
