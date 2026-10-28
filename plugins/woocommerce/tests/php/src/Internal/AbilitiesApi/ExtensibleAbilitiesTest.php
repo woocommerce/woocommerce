@@ -1842,6 +1842,39 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should give a repeated code in the same namespace a numeric suffix, so each refusal keeps its own data.
+	 */
+	public function test_refusals_with_the_same_code_in_one_namespace_keep_their_data(): void {
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+		foreach ( array( 'name', 'price' ) as $field ) {
+			$this->register_validator(
+				'product',
+				'ns',
+				static function () use ( $field ) {
+					return new \WP_Error( 'test_refused', $field . ' refused.', array( 'field' => $field ) );
+				}
+			);
+		}
+
+		$data = $this->run_ability_response(
+			'woocommerce/product-update',
+			array(
+				'id'   => $product->get_id(),
+				'name' => 'Pencil',
+			)
+		)->get_data();
+
+		$this->assertSame( 'ns:test_refused', $data['code'] );
+		$this->assertSame( 'name refused.', $data['message'] );
+		$this->assertSame( 'name', $data['data']['field'] );
+		$this->assertCount( 1, $data['additional_errors'] );
+		$this->assertSame( 'ns:test_refused:2', $data['additional_errors'][0]['code'] );
+		$this->assertSame( 'price refused.', $data['additional_errors'][0]['message'] );
+		$this->assertSame( 'price', $data['additional_errors'][0]['data']['field'] );
+		$this->assertSame( 'Pen', wc_get_product( $product->get_id() )->get_name() );
+	}
+
+	/**
 	 * @testdox Should run the other validators after one throws, list the crash last, and give every code of a refusal its namespace and status.
 	 */
 	public function test_validators_run_after_a_throw_and_every_code_gets_its_namespace(): void {

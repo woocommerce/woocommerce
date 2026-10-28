@@ -477,7 +477,9 @@ class ExtensibleAbilities {
 	 *                               field callbacks, before the one save. It returns a WP_Error to refuse the
 	 *                               change, and then nothing is saved. The other validators still run, and
 	 *                               the client gets every refusal in one error. The client sees the code
-	 *                               prefixed with the namespace, as `<namespace>:<code>`. The error gets the
+	 *                               prefixed with the namespace, as `<namespace>:<code>`. A code that another
+	 *                               validator in the same namespace already used gets a numeric suffix, as
+	 *                               `<namespace>:<code>:2`. The error gets the
 	 *                               namespace in its data, and the 400 status when it has no status. Its
 	 *                               message can name the ability or screen to use instead. Rules:
 	 *                               1. It only reads. It does not change the object, save, send email or
