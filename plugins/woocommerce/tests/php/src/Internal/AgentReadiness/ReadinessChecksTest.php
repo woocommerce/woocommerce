@@ -1,0 +1,202 @@
+<?php
+declare( strict_types = 1 );
+
+namespace Automattic\WooCommerce\Tests\Internal\AgentReadiness;
+
+use Automattic\WooCommerce\Internal\AgentReadiness\Checks\ImageTooSmallCheck;
+use Automattic\WooCommerce\Internal\AgentReadiness\Checks\InvalidGtinCheck;
+use Automattic\WooCommerce\Internal\AgentReadiness\Checks\MissingBrandCheck;
+use Automattic\WooCommerce\Internal\AgentReadiness\Checks\MissingRegularPriceCheck;
+use Automattic\WooCommerce\Internal\AgentReadiness\FeedChannels;
+use Automattic\WooCommerce\Internal\AgentReadiness\ProductFields;
+use Automattic\WooCommerce\Internal\AgentReadiness\ProductScan;
+use Automattic\WooCommerce\Internal\AgentReadiness\ReadinessRule;
+use Automattic\WooCommerce\Internal\AgentReadiness\StoreConditions;
+use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonHelper;
+use WC_Helper_Product;
+use WC_Unit_Test_Case;
+
+/**
+ * Tests for the agent readiness checks.
+ */
+class ReadinessChecksTest extends WC_Unit_Test_Case {
+
+	/**
+	 * Shared scan for the checks.
+	 *
+	 * @var ProductScan
+	 */
+	private ProductScan $scan;
+
+	/**
+	 * Set up test fixtures.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+		$this->scan = new ProductScan();
+	}
+
+	/**
+	 * @testdox A physical product with no brand fails; a brand term or a virtual product passes.
+	 */
+	public function test_missing_brand(): void {
+		$sut     = new MissingBrandCheck();
+		$product = WC_Helper_Product::create_simple_product();
+
+		$this->assertTrue( $sut->fails( $product, $this->scan ), 'A product with no brand should fail' );
+
+		wp_set_object_terms( $product->get_id(), 'Acme', 'product_brand' );
+		$this->assertFalse( $sut->fails( wc_get_product( $product->get_id() ), $this->scan ), 'A product with a brand term should pass' );
+
+		$virtual = WC_Helper_Product::create_simple_product( true, array( 'virtual' => true ) );
+		$this->assertFalse( $sut->fails( $virtual, $this->scan ), 'A virtual product is not asked for a brand' );
+	}
+
+	/**
+	 * @testdox A variable product with some unpriced variations fails as a gap; with none priced it can't be listed.
+	 */
+	public function test_missing_price_on_partly_priced_variable_product(): void {
+		$sut      = new MissingRegularPriceCheck();
+		$product  = WC_Helper_Product::create_variation_product();
+		$children = $product->get_children();
+
+		$this->assertFalse( $sut->fails( wc_get_product( $product->get_id() ), $this->scan ), 'A fully priced variable product should pass' );
+
+		$this->unprice( (int) $children[0] );
+		$partly = wc_get_product( $product->get_id() );
+
+		$this->assertTrue( $sut->fails( $partly, $this->scan ), 'A partly priced variable product should fail' );
+		$effects = array_unique( array_column( $sut->channels_for( $partly, $sut->channels() ), 'effect' ) );
+		$this->assertSame( array( ReadinessRule::EFFECT_GAPS ), array_values( $effects ), 'Priced variations still list, so the effect is a gap' );
+
+		foreach ( $children as $child_id ) {
+			$this->unprice( (int) $child_id );
+		}
+		$unpriced = wc_get_product( $product->get_id() );
+
+		$this->assertTrue( $sut->fails( $unpriced, $this->scan ), 'A variable product with no priced variation should fail' );
+		$effects = array_unique( array_column( $sut->channels_for( $unpriced, $sut->channels() ), 'effect' ) );
+		$this->assertSame( array( ReadinessRule::EFFECT_NOT_LISTABLE ), array_values( $effects ), 'With no price at all the product can\'t be listed' );
+	}
+
+	/**
+	 * @testdox GTIN validation checks length and check digit and keeps leading zeros.
+	 *
+	 * @testWith ["036000291452", true]
+	 *           ["0036000291452", true]
+	 *           ["00036000291452", true]
+	 *           ["036000291453", false]
+	 *           ["96385074", true]
+	 *           ["4006381333931", true]
+	 *           ["4006381333932", false]
+	 *           ["0306406152", false]
+	 *           ["12345", false]
+	 *           ["ABC000291452", false]
+	 *
+	 * @param string $gtin     GTIN as stored.
+	 * @param bool   $expected Whether it is valid.
+	 */
+	public function test_is_valid_gtin( string $gtin, bool $expected ): void {
+		$this->assertSame( $expected, ProductFields::is_valid_gtin( ProductFields::normalise_gtin( $gtin ) ) );
+	}
+
+	/**
+	 * @testdox A GTIN with hyphens and spaces is normalised before validation.
+	 */
+	public function test_invalid_gtin_check_normalises_separators(): void {
+		$sut     = new InvalidGtinCheck();
+		$valid   = WC_Helper_Product::create_simple_product( true, array( 'global_unique_id' => '4006-3813 33931' ) );
+		$invalid = WC_Helper_Product::create_simple_product( true, array( 'global_unique_id' => '4006381333932' ) );
+
+		$this->assertFalse( $sut->fails( $valid, $this->scan ), 'A valid GTIN with separators should pass' );
+		$this->assertTrue( $sut->fails( $invalid, $this->scan ), 'A GTIN with a wrong check digit should fail' );
+	}
+
+	/**
+	 * @testdox A small main image is a gap on Google before January 31, 2027 and required from then.
+	 *
+	 * @testWith ["2027-01-30", "gaps"]
+	 *           ["2027-01-31", "not_listable"]
+	 *
+	 * @param string $date     Date to judge at.
+	 * @param string $expected Expected Google effect.
+	 */
+	public function test_image_too_small_effect_switches_on_date( string $date, string $expected ): void {
+		$sut = new ImageTooSmallCheck( (int) strtotime( $date . ' 12:00:00 UTC' ) );
+
+		$this->assertSame( $expected, $sut->channels()[ FeedChannels::GOOGLE ]['effect'] );
+	}
+
+	/**
+	 * @testdox An image under 500 pixels on either side fails; one without recorded size does not.
+	 */
+	public function test_image_too_small_reads_attachment_size(): void {
+		$sut        = new ImageTooSmallCheck();
+		$product    = WC_Helper_Product::create_simple_product();
+		$attachment = self::factory()->attachment->create( array( 'post_mime_type' => 'image/jpeg' ) );
+		$product->set_image_id( $attachment );
+		$product->save();
+
+		$this->assertFalse( $sut->fails( $product, $this->scan ), 'An image with no recorded size should not be flagged' );
+
+		wp_update_attachment_metadata(
+			$attachment,
+			array(
+				'width'  => 800,
+				'height' => 400,
+			)
+		);
+		$this->assertTrue( $sut->fails( $product, $this->scan ), 'An 800 x 400 image should fail' );
+
+		wp_update_attachment_metadata(
+			$attachment,
+			array(
+				'width'  => 500,
+				'height' => 500,
+			)
+		);
+		$this->assertFalse( $sut->fails( $product, $this->scan ), 'A 500 x 500 image should pass' );
+	}
+
+	/**
+	 * @testdox Store conditions report coming soon mode and discouraged search engines.
+	 */
+	public function test_store_conditions(): void {
+		$sut = new StoreConditions();
+		$sut->init( new ComingSoonHelper() );
+
+		update_option( 'woocommerce_coming_soon', 'no' );
+		update_option( 'blog_public', '1' );
+		$this->assertSame(
+			array(
+				'launched'       => true,
+				'search_visible' => true,
+			),
+			array_column( $sut->all(), 'ok', 'id' )
+		);
+
+		update_option( 'woocommerce_coming_soon', 'yes' );
+		update_option( 'woocommerce_store_pages_only', 'yes' );
+		update_option( 'blog_public', '0' );
+		$this->assertSame(
+			array(
+				'launched'       => false,
+				'search_visible' => false,
+			),
+			array_column( $sut->all(), 'ok', 'id' )
+		);
+	}
+
+	/**
+	 * Clear the prices on a variation.
+	 *
+	 * @param int $variation_id Variation id.
+	 */
+	private function unprice( int $variation_id ): void {
+		$variation = wc_get_product( $variation_id );
+		$variation->set_regular_price( '' );
+		$variation->set_sale_price( '' );
+		$variation->set_price( '' );
+		$variation->save();
+	}
+}
