@@ -80,6 +80,10 @@ array(
 )
 ```
 
+## One product
+
+`AgentReadiness::check_product( $product )` judges one product as the scan does: each failing check with its field and effect per channel for that product (after per-product exceptions such as a partly priced variable product), and the product's status per channel (`not_listable`, `with_gaps`, `complete`). It returns null for products the scan leaves out, and judges a variation by its parent. Extensions that rank or fix products one at a time use it, since the stored report keeps only counts and up to 10 example ids per check.
+
 ## Rules file
 
 Channel specs change faster than WooCommerce releases, so each background scan first fetches a published rules file (`RemoteRules`). Only a GET of the file is made; no store data is sent. The URL comes from the `woocommerce_agent_readiness_rules_url` filter and is empty by default until the file has a home, so nothing is fetched unless it is set.

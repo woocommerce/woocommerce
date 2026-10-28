@@ -151,6 +151,36 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox check_product gives each failing check's channel map for that product and its status per channel.
+	 */
+	public function test_check_product(): void {
+		$product = WC_Helper_Product::create_simple_product( true, array( 'description' => 'A sturdy mug.' ) );
+		$product->update_meta_data( '_wc_gla_brand', 'Acme' );
+		$product->save();
+
+		$result = $this->sut->check_product( $product );
+
+		$this->assertSame( $product->get_id(), $result['product_id'] );
+		$this->assertArrayHasKey( 'missing_brand', $result['checks'] );
+		$this->assertArrayNotHasKey( 'google', $result['checks']['missing_brand'], 'The per-product map, not the check\'s default one' );
+		$this->assertArrayNotHasKey( 'missing_product_text', $result['checks'] );
+		$this->assertSame( 'not_listable', $result['statuses']['chatgpt'], 'No image keeps it off every channel' );
+		$this->assertSame( array_keys( $result['checks'] ), $this->sut->get_failing_check_ids( $product ) );
+	}
+
+	/**
+	 * @testdox check_product judges a variation by its parent and returns null for products the scan leaves out.
+	 */
+	public function test_check_product_coverage(): void {
+		$variable  = WC_Helper_Product::create_variation_product();
+		$variation = wc_get_product( $variable->get_children()[0] );
+
+		$this->assertSame( $variable->get_id(), $this->sut->check_product( $variation )['product_id'] );
+		$this->assertNull( $this->sut->check_product( WC_Helper_Product::create_grouped_product() ) );
+		$this->assertNull( $this->sut->check_product( WC_Helper_Product::create_simple_product( true, array( 'status' => 'draft' ) ) ) );
+	}
+
+	/**
 	 * @testdox The rules filter runs once per instance, not once per product.
 	 */
 	public function test_rules_are_built_once(): void {

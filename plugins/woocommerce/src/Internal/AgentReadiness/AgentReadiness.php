@@ -241,20 +241,46 @@ class AgentReadiness {
 	 * @return array<int, string>
 	 */
 	public function get_failing_check_ids( \WC_Product $product ): array {
+		$result = $this->check_product( $product );
+		return null === $result ? array() : array_map( 'strval', array_keys( $result['checks'] ) );
+	}
+
+	/**
+	 * One product as the scan judges it: each failing check with its field and
+	 * effect per channel for this product, and the product's status on each
+	 * channel. Null for products the scan leaves out (grouped, external,
+	 * unpublished). A variation is judged by its parent.
+	 *
+	 * For extensions that rank or fix products one at a time; the stored
+	 * report keeps only counts and a few example ids per check.
+	 *
+	 * @param \WC_Product $product Product or variation.
+	 * @return array{product_id:int,checks:array<string, array<string, array{field:string,effect:string}>>,statuses:array<string, string>}|null
+	 */
+	public function check_product( \WC_Product $product ): ?array {
 		if ( $product instanceof \WC_Product_Variation ) {
 			$parent = wc_get_product( $product->get_parent_id() );
 			if ( ! $parent instanceof \WC_Product ) {
-				return array();
+				return null;
 			}
 			$product = $parent;
 		}
 		if ( ! ProductScan::covers( $product ) ) {
-			return array();
+			return null;
 		}
 		if ( null === $this->product_scan ) {
 			$this->product_scan = new ProductScan();
 		}
-		return $this->product_scan->failed_rule_ids( $product, $this->get_active_rules()['rules'] );
+		$active = $this->get_active_rules();
+		$checks = array();
+		foreach ( $this->product_scan->failed_rule_ids( $product, $active['rules'] ) as $id ) {
+			$checks[ $id ] = $active['rules'][ $id ]->channels_for( $product, $active['channel_rules'][ $id ] ?? array() );
+		}
+		return array(
+			'product_id' => $product->get_id(),
+			'checks'     => $checks,
+			'statuses'   => ProductScan::statuses( array_values( $checks ) ),
+		);
 	}
 
 	/**
