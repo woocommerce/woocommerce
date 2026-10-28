@@ -650,6 +650,39 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should pass the default to a custom field without an ID, even when a value is stored under field name $field_name.
+	 *
+	 * @testWith ["test_rules"]
+	 *           ["test_parent[rules]"]
+	 *
+	 * @param string $field_name Field name of the rendered field.
+	 */
+	public function test_output_fields_passes_default_to_id_less_custom_field( string $field_name ): void {
+		update_option( 'test_rules', array( 'stored rule' ) );
+		update_option( 'test_parent', array( 'rules' => array( 'stored rule' ) ) );
+
+		$received = null;
+		add_action(
+			'woocommerce_admin_field_test_custom',
+			function ( $field ) use ( &$received ) {
+				$received = $field['value'];
+			}
+		);
+
+		$this->render_fields(
+			array(
+				array(
+					'type'       => 'test_custom',
+					'field_name' => $field_name,
+					'default'    => 'default value',
+				),
+			)
+		);
+
+		$this->assertSame( 'default value', $received );
+	}
+
+	/**
 	 * Render settings fields and return the output.
 	 *
 	 * @param array $options Field definitions.

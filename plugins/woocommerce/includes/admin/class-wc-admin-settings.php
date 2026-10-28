@@ -244,8 +244,8 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 		/**
 		 * Get the stored value of a settings field.
 		 *
-		 * When a field sets 'field_name', save_fields() stores the value under it, so read it from there.
-		 * Other names, and values not stored there, are read through the field ID as before.
+		 * When a field with an ID sets 'field_name', save_fields() stores the value under it, so read it from there.
+		 * Fields without an ID, other names, and values not stored there are read through the field ID as before.
 		 *
 		 * @param array $field Field definition with 'id', 'field_name' and 'default' set.
 		 * @return mixed
@@ -253,7 +253,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 		private static function get_field_value( $field ) {
 			$field_name = $field['field_name'];
 
-			if ( $field_name !== $field['id'] && is_string( $field_name ) && preg_match( '/^([^\[\]]+)(?:\[([^\[\]]+)\])?$/', $field_name, $matches ) ) {
+			if ( '' !== $field['id'] && $field_name !== $field['id'] && is_string( $field_name ) && preg_match( '/^([^\[\]]+)(?:\[([^\[\]]+)\])?$/', $field_name, $matches ) ) {
 				$option_name = $matches[1];
 				if ( isset( $matches[2] ) ) {
 					// Resolve the name the way save_fields() does: parse_str() stores 'a.b[c]' under 'a_b'.
