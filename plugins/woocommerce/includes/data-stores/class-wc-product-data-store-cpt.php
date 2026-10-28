@@ -36,6 +36,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		'_visibility',
 		'_sku',
 		'_global_unique_id',
+		'_mpn',
 		'_customs_commodity_code',
 		'_customs_country_of_origin',
 		'_customs_description',
@@ -453,6 +454,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$meta_key_to_props = array(
 			'_sku'                       => 'sku',
 			'_global_unique_id'          => 'global_unique_id',
+			'_mpn'                       => 'mpn',
 			'_regular_price'             => 'regular_price',
 			'_sale_price'                => 'sale_price',
 			'_price'                     => 'price',
@@ -742,6 +744,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$meta_key_to_props = array(
 			'_sku'                       => 'sku',
 			'_global_unique_id'          => 'global_unique_id',
+			'_mpn'                       => 'mpn',
 			'_regular_price'             => 'regular_price',
 			'_sale_price'                => 'sale_price',
 			'_sale_price_dates_from'     => 'date_on_sale_from',
@@ -975,7 +978,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			}
 		}
 
-		$props_in_lookup_table = array( 'sku', 'global_unique_id', 'regular_price', 'sale_price', 'date_on_sale_from', 'date_on_sale_to', 'total_sales', 'average_rating', 'stock_quantity', 'stock_status', 'manage_stock', 'downloadable', 'virtual', 'tax_status', 'tax_class' );
+		$props_in_lookup_table = array( 'sku', 'global_unique_id', 'mpn', 'regular_price', 'sale_price', 'date_on_sale_from', 'date_on_sale_to', 'total_sales', 'average_rating', 'stock_quantity', 'stock_status', 'manage_stock', 'downloadable', 'virtual', 'tax_status', 'tax_class' );
 		if ( $this->cogs_feature_is_enabled() ) {
 			$props_in_lookup_table[] = 'cogs_value';
 		}
@@ -1462,6 +1465,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * The exclusion must keep reading `_sale_price_dates_to` exactly the way
 	 * get_ending_sales() does, or a product ends up in neither queue. See the note there.
 	 *
+	 * Sale prices of '' and '0' are excluded because wc_apply_sale_state_for_product() skips
+	 * them, so the price never changes and the product would match on every run. '0.00' is
+	 * applied and settles, so it must stay matched: do not replace this with `> 0`.
+	 *
 	 * Keep the exclusion as NOT EXISTS: the LEFT JOIN ... IS NULL rewrite is faster on MariaDB
 	 * but materially slower on MySQL.
 	 *
@@ -1485,6 +1492,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 					AND postmeta.meta_value > 0
 					AND postmeta.meta_value < %s
 					AND postmeta_2.meta_value != postmeta_3.meta_value
+					AND postmeta_3.meta_value NOT IN ( '', '0' )
 					AND NOT EXISTS (
 						SELECT 1 FROM {$wpdb->postmeta} as ended
 						WHERE ended.post_id = postmeta.post_id
@@ -2113,6 +2121,19 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$search_where   = '';
 		$search_queries = array();
 
+		// A variation without its own SKU or GTIN is searched by its parent's, so rank it by that too.
+		$identifier_columns = array();
+		foreach ( array( 'sku', 'global_unique_id' ) as $column ) {
+			$identifier_columns[] = $include_variations ? "COALESCE( NULLIF( wc_product_meta_lookup.{$column}, '' ), parent_wc_product_meta_lookup.{$column} )" : "wc_product_meta_lookup.{$column}";
+		}
+
+		$rank_tiers = array(
+			'identifier_exact'  => array(),
+			'identifier_prefix' => array(),
+			'title_prefix'      => array(),
+			'title_match'       => array(),
+		);
+
 		foreach ( $term_groups as $term_group ) {
 			// Parse search terms.
 			if ( preg_match_all( '/".*?("|$)|((?<=[\t ",+])|^)[^\t ",+]+/', $term_group, $matches ) ) {
@@ -2127,10 +2148,35 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 				$search_terms = array( $term_group );
 			}
 
-			$term_group_query = array();
+			$term_group_query  = array();
+			$title_match_query = array();
+
+			// Rank on the raw term as well as the parsed one: parsing strips quotes, but also splits SKUs like "AB+12".
+			$rank_phrases = array_unique(
+				array_filter(
+					array( trim( $term_group ), implode( ' ', $search_terms ) ),
+					static function ( $phrase ) {
+						return '' !== $phrase;
+					}
+				)
+			);
+
+			foreach ( $rank_phrases as $rank_phrase ) {
+				$phrase_like  = $wpdb->esc_like( $rank_phrase );
+				$exact_value  = $wpdb->prepare( '%s', $phrase_like );
+				$prefix_value = $wpdb->prepare( '%s', $phrase_like . '%' );
+
+				foreach ( $identifier_columns as $column ) {
+					$rank_tiers['identifier_exact'][]  = "{$column} LIKE {$exact_value}";
+					$rank_tiers['identifier_prefix'][] = "{$column} LIKE {$prefix_value}";
+				}
+
+				$rank_tiers['title_prefix'][] = "posts.post_title LIKE {$prefix_value}";
+			}
 
 			foreach ( $search_terms as $search_term ) {
-				$like = '%' . $wpdb->esc_like( $search_term ) . '%';
+				$like                = '%' . $wpdb->esc_like( $search_term ) . '%';
+				$title_match_query[] = $wpdb->prepare( 'posts.post_title LIKE %s', $like );
 
 				// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber -- an array of placeholders is a valid arg.
 				$term_query = $wpdb->prepare(
@@ -2148,9 +2194,23 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			}
 
 			if ( $term_group_query ) {
-				$search_queries[] = implode( ' AND ', $term_group_query );
+				$search_queries[]            = implode( ' AND ', $term_group_query );
+				$rank_tiers['title_match'][] = '( ' . implode( ' AND ', $title_match_query ) . ' )';
 			}
 		}
+
+		// Rank SKU, GTIN and title matches first so a limit doesn't drop them in favour of description-only matches.
+		// The rank is only used in ORDER BY: selecting it makes DISTINCT slower on MariaDB. Both joins are on primary
+		// keys, so each product has a single rank and DISTINCT can't merge rows with different ranks.
+		$rank_cases = '';
+
+		foreach ( array_values( $rank_tiers ) as $rank => $tier_queries ) {
+			if ( $tier_queries ) {
+				$rank_cases .= ' WHEN ( ' . implode( ' OR ', $tier_queries ) . " ) THEN {$rank}";
+			}
+		}
+
+		$rank_cases .= ' ELSE ' . count( $rank_tiers );
 
 		if ( ! empty( $search_queries ) ) {
 			$search_where = ' AND ((' . implode( ') OR (', $search_queries ) . ')) ';
@@ -2198,7 +2258,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$search_where
 			$status_where
 			$type_where
-			ORDER BY posts.post_parent ASC, posts.post_title ASC
+			ORDER BY CASE{$rank_cases} END ASC, posts.post_parent ASC, posts.post_title ASC
 			$limit_query
 			"
 			// phpcs:enable
@@ -2622,6 +2682,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			}
 			if ( get_option( 'woocommerce_schema_version', 0 ) >= 920 ) {
 				$product_data['global_unique_id'] = get_post_meta( $id, '_global_unique_id', true );
+			}
+			if ( get_option( 'woocommerce_schema_version', 0 ) >= 1140 ) {
+				$raw_mpn = (string) get_post_meta( $id, '_mpn', true );
+				// Ensure we don't exceed lookup column size (varchar 100).
+				$product_data['mpn'] = mb_substr( $raw_mpn, 0, 100 );
 			}
 			return $product_data;
 		}

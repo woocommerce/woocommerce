@@ -22,7 +22,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function wc_notice_count( $notice_type = '' ) {
 	if ( ! did_action( 'woocommerce_init' ) ) {
-		wc_doing_it_wrong( __FUNCTION__, __( 'This function should not be called before woocommerce_init.', 'woocommerce' ), '2.3' );
+		wc_doing_it_wrong( __FUNCTION__, 'This function should not be called before woocommerce_init.', '2.3' );
 		return;
 	}
 
@@ -55,7 +55,7 @@ function wc_notice_count( $notice_type = '' ) {
  */
 function wc_has_notice( $message, $notice_type = 'success' ) {
 	if ( ! did_action( 'woocommerce_init' ) ) {
-		wc_doing_it_wrong( __FUNCTION__, __( 'This function should not be called before woocommerce_init.', 'woocommerce' ), '2.3' );
+		wc_doing_it_wrong( __FUNCTION__, 'This function should not be called before woocommerce_init.', '2.3' );
 		return false;
 	}
 
@@ -75,14 +75,14 @@ function wc_has_notice( $message, $notice_type = 'success' ) {
  */
 function wc_add_notice( $message, $notice_type = 'success', $data = array() ) {
 	if ( ! did_action( 'woocommerce_init' ) ) {
-		wc_doing_it_wrong( __FUNCTION__, __( 'This function should not be called before woocommerce_init.', 'woocommerce' ), '2.3' );
+		wc_doing_it_wrong( __FUNCTION__, 'This function should not be called before woocommerce_init.', '2.3' );
 		return;
 	}
 
 	// If this is called before the session is initialized, for example if a plugin includes this file incorrectly on
 	// the admin, skip doing anything to prevent errors.
 	if ( ! WC()->session ) {
-		wc_doing_it_wrong( __FUNCTION__, __( 'This function should not be called before the WooCommerce session is initialized, or places where there is no session, e.g. WordPress admin.', 'woocommerce' ), '10.5' );
+		wc_doing_it_wrong( __FUNCTION__, 'This function should not be called before the WooCommerce session is initialized, or places where there is no session, e.g. WordPress admin.', '10.5' );
 		return;
 	}
 
@@ -113,7 +113,7 @@ function wc_add_notice( $message, $notice_type = 'success', $data = array() ) {
  */
 function wc_set_notices( $notices ) {
 	if ( ! did_action( 'woocommerce_init' ) ) {
-		wc_doing_it_wrong( __FUNCTION__, __( 'This function should not be called before woocommerce_init.', 'woocommerce' ), '2.6' );
+		wc_doing_it_wrong( __FUNCTION__, 'This function should not be called before woocommerce_init.', '2.6' );
 		return;
 	}
 
@@ -127,7 +127,7 @@ function wc_set_notices( $notices ) {
  */
 function wc_clear_notices() {
 	if ( ! did_action( 'woocommerce_init' ) ) {
-		wc_doing_it_wrong( __FUNCTION__, __( 'This function should not be called before woocommerce_init.', 'woocommerce' ), '2.3' );
+		wc_doing_it_wrong( __FUNCTION__, 'This function should not be called before woocommerce_init.', '2.3' );
 		return;
 	}
 	WC()->session->set( 'wc_notices', null );
@@ -142,7 +142,7 @@ function wc_clear_notices() {
  */
 function wc_print_notices( $return = false ) {
 	if ( ! did_action( 'woocommerce_init' ) ) {
-		wc_doing_it_wrong( __FUNCTION__, __( 'This function should not be called before woocommerce_init.', 'woocommerce' ), '2.3' );
+		wc_doing_it_wrong( __FUNCTION__, 'This function should not be called before woocommerce_init.', '2.3' );
 		return;
 	}
 
@@ -240,7 +240,7 @@ function wc_print_notice( $message, $notice_type = 'success', $data = array(), $
  */
 function wc_get_notices( $notice_type = '' ) {
 	if ( ! did_action( 'woocommerce_init' ) ) {
-		wc_doing_it_wrong( __FUNCTION__, __( 'This function should not be called before woocommerce_init.', 'woocommerce' ), '2.3' );
+		wc_doing_it_wrong( __FUNCTION__, 'This function should not be called before woocommerce_init.', '2.3' );
 		return;
 	}
 

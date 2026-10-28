@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Order Confirmation section headings now use the theme's heading size instead of a fixed 24px
