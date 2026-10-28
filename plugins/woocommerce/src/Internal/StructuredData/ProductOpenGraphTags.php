@@ -26,23 +26,28 @@ class ProductOpenGraphTags {
 	 * @since 11.4.0
 	 *
 	 * @param WC_Product $product Product being shared.
-	 * @return array<string, string>
+	 * @return array<array<string, string>>
 	 */
 	public function get_tags( WC_Product $product ): array {
 		$description = $product->get_short_description();
 		$description = '' !== $description ? $description : $product->get_description();
 		$description = wp_strip_all_tags( strip_shortcodes( $description ) );
 		// Collapse Unicode whitespace, including NBSP, which wp_strip_all_tags() leaves intact.
-		$description          = trim( (string) preg_replace( '/\s+/u', ' ', $description ) );
-		$tags                 = array(
-			'og:title'       => $product->get_name(),
-			'og:type'        => 'product',
-			'og:url'         => $product->get_permalink(),
-			'og:description' => wc_trim_string( $description ),
+		$description = trim( (string) preg_replace( '/\s+/u', ' ', $description ) );
+		$tags        = array(
+			array( 'og:title' => $product->get_name() ),
+			array( 'og:type' => 'product' ),
+			array( 'og:url' => $product->get_permalink() ),
+			array( 'og:description' => wc_trim_string( $description ) ),
 		);
-		$tags                += $this->get_site_tags();
-		$tags                += $this->get_image_tags( (int) $product->get_image_id(), $product->get_name() );
-		$tags['twitter:card'] = isset( $tags['og:image'] ) ? 'summary_large_image' : 'summary';
+		foreach ( $this->get_site_tags() as $property => $value ) {
+			$tags[] = array( $property => $value );
+		}
+		$image = $this->get_image_tags( (int) $product->get_image_id(), $product->get_name() );
+		if ( $image ) {
+			$tags[] = $image;
+		}
+		$tags[] = array( 'twitter:card' => $image ? 'summary_large_image' : 'summary' );
 
 		return $tags;
 	}
