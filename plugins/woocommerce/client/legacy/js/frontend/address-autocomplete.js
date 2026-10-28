@@ -688,15 +688,21 @@ if (
 				if ( input ) {
 					input.value = value;
 					input.setAttribute( 'value', value );
-					input.dispatchEvent( new Event( 'change' ) );
 
-					// Also trigger Select2 update if it's a Select2 field.
-					if (
-						window.jQuery &&
+					const isSelect2 =
+						!! window.jQuery &&
 						window
 							.jQuery( input )
-							.hasClass( 'select2-hidden-accessible' )
-					) {
+							.hasClass( 'select2-hidden-accessible' );
+
+					// Bubble the event so delegated listeners, such as `$( document.body ).on( 'change', ... )`, see the change.
+					// Select2 fields get a bubbling event from the jQuery trigger below, so skip bubbling here to avoid running those listeners twice.
+					input.dispatchEvent(
+						new Event( 'change', { bubbles: ! isSelect2 } )
+					);
+
+					// Also trigger Select2 update if it's a Select2 field.
+					if ( isSelect2 ) {
 						window.jQuery( input ).trigger( 'change' );
 					}
 				}

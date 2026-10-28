@@ -1003,6 +1003,70 @@ describe( 'Address Suggestions Component', () => {
 			);
 		} );
 
+		test( 'should dispatch bubbling change events so delegated listeners see the filled fields', async () => {
+			const changedIds = [];
+			const onChange = ( event ) => changedIds.push( event.target.id );
+			document.body.addEventListener( 'change', onChange );
+
+			billingAddressInput.value = '123';
+			billingAddressInput.focus();
+			billingAddressInput.dispatchEvent( new Event( 'input' ) );
+			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
+
+			document
+				.querySelector( '#address_suggestions_billing .suggestions-list li' )
+				.click();
+			await new Promise( ( resolve ) => setTimeout( resolve, 250 ) );
+
+			document.body.removeEventListener( 'change', onChange );
+
+			expect( changedIds ).toEqual(
+				expect.arrayContaining( [
+					'billing_address_1',
+					'billing_city',
+					'billing_postcode',
+					'billing_state',
+					'billing_country',
+				] )
+			);
+		} );
+
+		test( 'should not bubble the native change event for Select2 fields, as the jQuery trigger already does', async () => {
+			const jQueryTrigger = jest.fn();
+			window.jQuery = jest.fn( ( element ) => ( {
+				hasClass: jest.fn(
+					( className ) =>
+						className === 'select2-hidden-accessible' &&
+						element.id === 'billing_country'
+				),
+				trigger: jQueryTrigger,
+				select2: jest.fn(),
+				on: jest.fn(),
+			} ) );
+
+			const changedIds = [];
+			const onChange = ( event ) => changedIds.push( event.target.id );
+			document.body.addEventListener( 'change', onChange );
+
+			billingAddressInput.value = '123';
+			billingAddressInput.focus();
+			billingAddressInput.dispatchEvent( new Event( 'input' ) );
+			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
+
+			document
+				.querySelector( '#address_suggestions_billing .suggestions-list li' )
+				.click();
+			await new Promise( ( resolve ) => setTimeout( resolve, 250 ) );
+
+			document.body.removeEventListener( 'change', onChange );
+
+			// The Select2 country field is updated through jQuery only.
+			expect( changedIds ).not.toContain( 'billing_country' );
+			expect( jQueryTrigger ).toHaveBeenCalledWith( 'change' );
+			// Other fields still bubble.
+			expect( changedIds ).toContain( 'billing_city' );
+		} );
+
 		test( 'should update value attribute of address fields when address is selected', async () => {
 			// Pre-populate fields with old values (simulating pre-filled checkout)
 			document.getElementById( 'billing_city' ).setAttribute( 'value', 'Old City' );
