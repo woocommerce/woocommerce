@@ -224,7 +224,7 @@ class EndpointTest extends WC_Unit_Test_Case {
 		$this->assertFalse( $wp_query->is_404 );
 		$this->assertStringContainsString( 'woocommerce-review-order', $html );
 		$this->assertStringContainsString( 'Review your order', $html );
-		$this->assertStringContainsString( 'Order #' . $order->get_order_number(), $html );
+		$this->assertStringContainsString( 'Order #' . $order->get_order_number(), html_entity_decode( $html, ENT_QUOTES | ENT_HTML5 ) );
 	}
 
 	/**
@@ -262,7 +262,7 @@ class EndpointTest extends WC_Unit_Test_Case {
 
 		$wp_query->queried_object = get_post( $page_id );
 		$html                     = $this->endpoint->render_shortcode();
-		$this->assertStringContainsString( 'Order #' . $order->get_order_number(), $html, 'Correct key on the managed page.' );
+		$this->assertStringContainsString( 'Order #' . $order->get_order_number(), html_entity_decode( $html, ENT_QUOTES | ENT_HTML5 ), 'Correct key on the managed page.' );
 	}
 
 	/**
@@ -626,7 +626,7 @@ class EndpointTest extends WC_Unit_Test_Case {
 
 		$this->assertStringContainsString( 'woocommerce-review-order--empty', $html );
 		$this->assertStringContainsString( 'woocommerce-breadcrumb woocommerce-review-order__meta', $html );
-		$this->assertStringContainsString( 'Order #' . $order->get_order_number(), $html );
+		$this->assertStringContainsString( 'Order #' . $order->get_order_number(), html_entity_decode( $html, ENT_QUOTES | ENT_HTML5 ) );
 		$this->assertStringContainsString( 'Thank you for your reviews', $html );
 		$this->assertStringContainsString( 'Your feedback helps', $html );
 	}
