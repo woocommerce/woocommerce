@@ -21,6 +21,8 @@ function wc_webhook_execute_queue() {
 		return;
 	}
 
+	$now = time();
+
 	foreach ( $wc_queued_webhooks as $data ) {
 		// Webhooks are processed in the background by default
 		// so as to avoid delays or failures in delivery from affecting the
@@ -36,7 +38,7 @@ function wc_webhook_execute_queue() {
 
 			// Make webhooks unique - only schedule one webhook every 10 minutes to maintain backward compatibility with WP Cron behaviour seen in WC < 3.5.0.
 			// A pending delivery has a timestamp; an in-progress delivery (true) or none (false) gets a new one.
-			if ( ! is_numeric( $next_scheduled ) || $next_scheduled >= ( 10 * MINUTE_IN_SECONDS + time() ) ) {
+			if ( ! is_numeric( $next_scheduled ) || $next_scheduled >= ( 10 * MINUTE_IN_SECONDS + $now ) ) {
 				/**
 				 * Filters the Action Scheduler priority of a queued webhook delivery.
 				 *
@@ -49,7 +51,7 @@ function wc_webhook_execute_queue() {
 				$priority = apply_filters( 'woocommerce_webhook_delivery_priority', 10, $data['webhook'], $data['arg'] );
 				$priority = is_numeric( $priority ) && is_finite( $priority ) ? (int) max( 0, min( $priority, 255 ) ) : 10;
 
-				ActionSchedulerUtil::schedule_single( time(), 'woocommerce_deliver_webhook_async', $queue_args, 'woocommerce-webhooks', false, $priority );
+				ActionSchedulerUtil::schedule_single( $now, 'woocommerce_deliver_webhook_async', $queue_args, 'woocommerce-webhooks', false, $priority );
 			}
 		} else {
 			// Deliver immediately.
