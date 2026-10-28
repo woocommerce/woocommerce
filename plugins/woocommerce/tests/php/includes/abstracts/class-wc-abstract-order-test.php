@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
+use Automattic\WooCommerce\Enums\TaxBasedOn;
 
 // phpcs:disable Squiz.Classes.ClassFileName.NoMatch, Squiz.Classes.ValidClassName.NotCamelCaps -- Backward compatibility.
 /**
@@ -382,6 +383,55 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		$this->assertEquals( 90, $order->get_total() );
 		$this->assertEquals( 18, $order->get_total_tax() );
 		$this->assertEquals( 2, $order->get_discount_tax() );
+	}
+
+	/**
+	 * @testdox A fixed cart coupon applied to an order records no more than the line price when removing the base tax leaves half a cent.
+	 */
+	public function test_apply_fixed_cart_coupon_records_line_price_with_half_cent_price(): void {
+		update_option( 'woocommerce_default_country', 'US:CA' );
+		update_option( 'woocommerce_tax_based_on', TaxBasedOn::SHIPPING );
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_tax_round_at_subtotal', 'no' );
+		WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country' => 'US',
+				'tax_rate_state'   => '',
+				'tax_rate'         => '20.0000',
+				'tax_rate_name'    => 'VAT',
+				'tax_rate_order'   => '1',
+				'tax_rate_class'   => '',
+			)
+		);
+		$product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'regular_price' => 9.99,
+				'price'         => 9.99,
+			)
+		);
+		WC_Helper_Coupon::create_coupon(
+			'fixed-cart-25',
+			array(
+				'discount_type' => 'fixed_cart',
+				'coupon_amount' => '25',
+			)
+		);
+
+		$order = wc_create_order();
+		$order->set_billing_country( 'FR' );
+		$order->set_shipping_country( 'FR' );
+		$order->add_product( $product, 1 );
+		$shipping = new WC_Order_Item_Shipping();
+		$shipping->set_total( 10 );
+		$order->add_item( $shipping );
+		$order->calculate_totals();
+
+		$this->assertTrue( $order->apply_coupon( 'fixed-cart-25' ), 'The coupon should apply to the order' );
+		$coupon_items = array_values( $order->get_items( 'coupon' ) );
+		$this->assertEquals( 8.33, $coupon_items[0]->get_discount(), 'The coupon should record no more than the line price' );
+		$this->assertEquals( 10, $order->get_total(), 'Only shipping should remain to pay' );
 	}
 
 	/**

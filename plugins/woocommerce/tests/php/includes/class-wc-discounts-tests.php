@@ -536,4 +536,32 @@ class WC_Discounts_Tests extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'is not applicable to selected products', $result->get_error_message(), 'With no matched categories the generic message is used.' );
 		remove_filter( 'woocommerce_coupon_is_valid_for_excluded_product_categories', '__return_false' );
 	}
+
+	/**
+	 * @testdox A fixed cart coupon larger than the item stops at the item price when the price ends in half a cent.
+	 */
+	public function test_fixed_cart_coupon_stops_at_half_cent_item_price(): void {
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		$product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'regular_price' => 9.995,
+				'price'         => 9.995,
+			)
+		);
+		$coupon  = WC_Helper_Coupon::create_coupon(
+			'fixed-cart-25',
+			array(
+				'discount_type' => 'fixed_cart',
+				'coupon_amount' => '25',
+			)
+		);
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$discounts = new WC_Discounts( WC()->cart );
+		$discounts->apply_coupon( $coupon );
+
+		$this->assertEquals( 1000, $discounts->get_discounts_by_coupon( true )[ $coupon->get_code() ], 'The discount should stop at the rounded item price' );
+		$this->assertSame( 0, $discounts->get_discounted_price_in_cents( current( $discounts->get_items() ) ), 'A used-up item should have nothing left to discount' );
+	}
 }
