@@ -12,6 +12,9 @@ use DMS\PHPUnitExtensions\ArraySubset\ArraySubsetAsserts;
  * Payment gateway test class.
  */
 class Payment_Gateways_V2 extends WC_REST_Unit_Test_Case {
+
+	/** Reuse only the baseline administrator; explicit actors stay per-test. */
+	protected const USE_SHARED_ADMINISTRATOR_FIXTURE = true;
 	use ArraySubsetAsserts;
 
 	/**
@@ -20,11 +23,7 @@ class Payment_Gateways_V2 extends WC_REST_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		$this->endpoint = new WC_REST_Payment_Gateways_Controller();
-		$this->user     = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
+		$this->user     = self::get_shared_administrator_fixture_id();
 	}
 
 	/**

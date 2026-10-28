@@ -10,6 +10,9 @@ use Automattic\WooCommerce\Utilities\ArrayUtil;
  */
 class WC_Tests_API_Shipping_Zones_V2 extends WC_REST_Unit_Test_Case {
 
+	/** Reuse only the baseline administrator; explicit actors stay per-test. */
+	protected const USE_SHARED_ADMINISTRATOR_FIXTURE = true;
+
 	protected $server;
 
 	protected $endpoint;
@@ -24,11 +27,7 @@ class WC_Tests_API_Shipping_Zones_V2 extends WC_REST_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		$this->endpoint = new WC_REST_Shipping_Zones_Controller();
-		$this->user     = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
+		$this->user     = self::get_shared_administrator_fixture_id();
 		$this->zones    = array();
 	}
 

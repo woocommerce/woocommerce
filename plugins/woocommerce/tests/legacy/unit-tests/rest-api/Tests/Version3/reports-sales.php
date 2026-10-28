@@ -18,6 +18,9 @@ use Automattic\WooCommerce\Utilities\OrderUtil;
  */
 class WC_Tests_API_Reports_Sales extends WC_REST_Unit_Test_Case {
 
+	/** Reuse only the baseline administrator; explicit actors stay per-test. */
+	protected const USE_SHARED_ADMINISTRATOR_FIXTURE = true;
+
 	use HPOSToggleTrait;
 
 	/**
@@ -57,11 +60,7 @@ class WC_Tests_API_Reports_Sales extends WC_REST_Unit_Test_Case {
 		// counts as switching with orders out of sync. The parent rollback discards
 		// those rows straight after, so allow it.
 		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
-		$this->user = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
+		$this->user = self::get_shared_administrator_fixture_id();
 		$this->clear_sales_report_cache();
 	}
 

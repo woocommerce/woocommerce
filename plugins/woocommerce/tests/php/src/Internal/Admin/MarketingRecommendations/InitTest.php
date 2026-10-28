@@ -22,11 +22,6 @@ class InitTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->user = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
 		delete_option( 'woocommerce_show_marketplace_suggestions' );
 	}
 
@@ -46,7 +41,7 @@ class InitTest extends WC_Unit_Test_Case {
 		remove_all_filters( 'transient_woocommerce_admin_' . MarketingRecommendationsDataSourcePoller::ID . '_specs' );
 		add_filter(
 			DataSourcePoller::FILTER_NAME,
-			function() {
+			function () {
 				return array();
 			}
 		);

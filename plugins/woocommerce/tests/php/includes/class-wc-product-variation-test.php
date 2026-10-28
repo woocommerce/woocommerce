@@ -10,6 +10,98 @@ class WC_Product_Variation_Test extends WC_Unit_Test_Case {
 	use CogsAwareUnitTestSuiteTrait;
 
 	/**
+	 * Full variable-product catalog shared by the class.
+	 *
+	 * @var int
+	 */
+	private static $fixture_product_id;
+
+	/**
+	 * Attribute rows created by the class fixture.
+	 *
+	 * @var int[]
+	 */
+	private static $fixture_attribute_ids = array();
+
+	/**
+	 * Whether the rewrite flush was scheduled before the class fixture.
+	 *
+	 * @var bool
+	 */
+	private static $fixture_had_rewrite_flush;
+
+	/**
+	 * Create the original full catalog with Cost of Goods Sold enabled.
+	 */
+	public static function wpSetUpBeforeClass(): void {
+		WC_Install::create_terms();
+		$existing_attribute_ids          = wp_list_pluck( wc_get_attribute_taxonomies(), 'attribute_id' );
+		self::$fixture_had_rewrite_flush = false !== wp_next_scheduled( 'woocommerce_flush_rewrite_rules' );
+
+		self::with_fixture_cogs_enabled(
+			static function () {
+				self::with_direct_product_attribute_lookup_updates(
+					static function () {
+						self::$fixture_product_id = WC_Helper_Product::create_variation_product()->get_id();
+					}
+				);
+			}
+		);
+
+		self::$fixture_attribute_ids = array_values( array_diff( wp_list_pluck( wc_get_attribute_taxonomies(), 'attribute_id' ), $existing_attribute_ids ) );
+	}
+
+	/**
+	 * Delete only the catalog and attributes owned by this class.
+	 */
+	public static function wpTearDownAfterClass(): void {
+		global $wpdb;
+
+		self::with_fixture_cogs_enabled(
+			static function () use ( $wpdb ) {
+				self::with_direct_product_attribute_lookup_updates(
+					static function () use ( $wpdb ) {
+						$product = wc_get_product( self::$fixture_product_id );
+						if ( $product ) {
+							$product->delete( true );
+						}
+
+						foreach ( self::$fixture_attribute_ids as $attribute_id ) {
+							$wpdb->delete( $wpdb->prefix . 'woocommerce_attribute_taxonomies', array( 'attribute_id' => $attribute_id ), array( '%d' ) );
+						}
+						delete_transient( 'wc_attribute_taxonomies' );
+						WC_Cache_Helper::invalidate_cache_group( 'woocommerce-attributes' );
+
+						if ( ! self::$fixture_had_rewrite_flush ) {
+							wp_clear_scheduled_hook( 'woocommerce_flush_rewrite_rules' );
+						}
+					}
+				);
+			}
+		);
+	}
+
+	/**
+	 * Keep the class fixture's feature mode local to its lifecycle callback.
+	 *
+	 * @param callable $callback Fixture lifecycle callback.
+	 * @return mixed Callback result.
+	 */
+	private static function with_fixture_cogs_enabled( callable $callback ) {
+		$previous = get_option( 'woocommerce_feature_cost_of_goods_sold_enabled', null );
+		update_option( 'woocommerce_feature_cost_of_goods_sold_enabled', 'yes' );
+		try {
+			return $callback();
+		} finally {
+			if ( null === $previous ) {
+				delete_option( 'woocommerce_feature_cost_of_goods_sold_enabled' );
+			} else {
+				update_option( 'woocommerce_feature_cost_of_goods_sold_enabled', $previous );
+			}
+		}
+	}
+
+	/**
 	 * @var WC_Product_Variable
 	 */
 	private WC_Product_Variable $parent_product;
@@ -21,14 +113,24 @@ class WC_Product_Variation_Test extends WC_Unit_Test_Case {
 
 	/**
 	 * Runs before each test.
+	 *
+	 * @throws RuntimeException When a class fixture is unavailable.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 
 		$this->enable_cogs_feature();
 
-		$this->parent_product = WC_Helper_Product::create_variation_product();
-		$this->variation      = wc_get_product( $this->parent_product->get_children()[0] );
+		$parent_product = wc_get_product( self::$fixture_product_id );
+		if ( ! $parent_product instanceof WC_Product_Variable ) {
+			throw new RuntimeException( 'The variable product class fixture is unavailable.' );
+		}
+		$variation = wc_get_product( $parent_product->get_children()[0] );
+		if ( ! $variation instanceof WC_Product_Variation ) {
+			throw new RuntimeException( 'The variation class fixture is unavailable.' );
+		}
+		$this->parent_product = $parent_product;
+		$this->variation      = $variation;
 	}
 
 	/**

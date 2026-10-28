@@ -16,6 +16,9 @@ require_once __DIR__ . '/date-filtering.php';
  * @since 3.5.0
  */
 class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
+
+	/** Reuse only the baseline administrator; explicit actors stay per-test. */
+	protected const USE_SHARED_ADMINISTRATOR_FIXTURE = true;
 	use ArraySubsetAsserts;
 	use DateFilteringForCrudControllers;
 
@@ -31,11 +34,7 @@ class WC_Tests_API_Coupons extends WC_REST_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		$this->endpoint = new WC_REST_Coupons_Controller();
-		$this->user     = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
+		$this->user     = self::get_shared_administrator_fixture_id();
 	}
 
 	/**

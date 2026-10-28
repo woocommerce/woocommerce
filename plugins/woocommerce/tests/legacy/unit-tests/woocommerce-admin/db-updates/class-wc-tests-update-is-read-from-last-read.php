@@ -8,8 +8,11 @@ use Automattic\WooCommerce\Admin\Notes\Note;
  * @package WooCommerce\Admin\Tests\DBUpdates
  */
 class WC_Admin_Tests_Update_Is_Read_From_Last_Read extends WC_Unit_Test_Case {
+
+	/** Reuse only the baseline administrator; explicit actors stay per-test. */
+	protected const USE_SHARED_ADMINISTRATOR_FIXTURE = true;
 	/**
-	 * @var object current user
+	 * @var int Current user ID.
 	 */
 	private $user;
 
@@ -18,11 +21,7 @@ class WC_Admin_Tests_Update_Is_Read_From_Last_Read extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->user = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
+		$this->user = self::get_shared_administrator_fixture_id();
 	}
 
 	/**

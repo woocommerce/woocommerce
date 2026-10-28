@@ -44,6 +44,14 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Supply deterministic external responses for the real system status report.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+		add_filter( 'pre_http_request', array( $this, 'mock_status_http_responses' ), 10, 3 );
+	}
+
+	/**
 	 * Fetches the System Status Report data and caches it.
 	 * @param  int $user The ID of a WordPress user to switch to before fetching the data.
 	 * @return Array An array of the data returned by the System Status Report endpoint.
@@ -402,5 +410,63 @@ class WC_Tests_REST_System_Status_V2 extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'description', $properties );
 		$this->assertArrayHasKey( 'success', $properties );
 		$this->assertArrayHasKey( 'message', $properties );
+	}
+
+	/**
+	 * Supply captured public responses while retaining real status report parsing.
+	 *
+	 * @param mixed  $preempt Existing HTTP preemption.
+	 * @param array  $request HTTP request arguments.
+	 * @param string $url HTTP request URL.
+	 * @return mixed Existing preemption, fixture response, or false for another request.
+	 */
+	public function mock_status_http_responses( $preempt, $request, $url ) {
+		if ( false !== $preempt ) {
+			return $preempt;
+		}
+		$host   = wp_parse_url( $url, PHP_URL_HOST );
+		$path   = wp_parse_url( $url, PHP_URL_PATH );
+		$method = $request['method'] ?? 'GET';
+
+		if ( 'api.wordpress.org' === $host && '/themes/info/1.2/' === $path && 'GET' === $method ) {
+			return array(
+				'headers'  => array(
+					'cache-for'    => '',
+					'content-type' => 'application/json; charset=UTF-8',
+				),
+				'body'     => '{"name":"Default","slug":"default","version":"1.7.2","preview_url":"https://wp-themes.com/default/","author":{"user_nicename":"wordpressdotorg","profile":"https://profiles.wordpress.org/wordpressdotorg/","avatar":"https://secure.gravatar.com/avatar/178f40079143ff7464125e4fbc88e62024a16442920a6a3d6dfa3d7e626be20d?s=96&d=monsterid&r=g","display_name":"WordPress.org","author":false,"author_url":"http://binarybonsai.com/"},"screenshot_url":"//ts.w.org/wp-content/themes/default/screenshot.png?ver=1.7.2","rating":100,"num_ratings":3,"reviews_url":"https://wordpress.org/support/theme/default/reviews/","downloaded":592381,"last_updated":"2010-06-14","last_updated_time":"2010-06-14 22:06:29","creation_time":"2010-03-26 20:14:43","homepage":"https://wordpress.org/themes/default/","download_link":"https://downloads.wordpress.org/theme/default.1.7.2.zip","requires":false,"requires_php":false,"is_commercial":false,"external_support_url":false,"is_community":true,"external_repository_url":""}',
+				'response' => array(
+					'code' => 200,
+				),
+			);
+		}
+
+		if ( 'www.paypal.com' === $host && '/cgi-bin/webscr' === $path && 'POST' === $method ) {
+			return array(
+				'headers'  => array(
+					'cache-for'    => '',
+					'content-type' => 'text/html; charset=utf-8',
+				),
+				'body'     => 'INVALID',
+				'response' => array(
+					'code' => 200,
+				),
+			);
+		}
+
+		if ( 'woocommerce.com' === $host && '/wc-api/product-key-api' === $path && 'GET' === $method ) {
+			return array(
+				'headers'  => array(
+					'cache-for'    => '',
+					'content-type' => 'application/json; charset=UTF-8',
+				),
+				'body'     => '{"success":true,"data":{"success":true}}',
+				'response' => array(
+					'code' => 200,
+				),
+			);
+		}
+
+		return false;
 	}
 }

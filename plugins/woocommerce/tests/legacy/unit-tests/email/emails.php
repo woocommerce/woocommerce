@@ -21,8 +21,7 @@ class WC_Tests_WC_Emails extends WC_Unit_Test_Case {
 		parent::setUp();
 
 		// Load email classes.
-		$emails = new WC_Emails();
-		$emails->init();
+		new WC_Emails();
 	}
 
 	/**
