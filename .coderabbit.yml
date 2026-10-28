@@ -66,5 +66,5 @@ reviews:
 knowledge_base:
     code_guidelines:
         filePatterns:
-        - files: '.ai/review/design-system/tokens.md'
+        - files: '.github/coderabbit/wpds-tokens.md'
           applyTo: '**/*.{js,jsx,ts,tsx,css,scss}'
