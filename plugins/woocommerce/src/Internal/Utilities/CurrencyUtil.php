@@ -29,7 +29,7 @@ final class CurrencyUtil {
 	 */
 	public static function get_price_decimals( $currency ): int {
 		$store_decimals = wc_get_price_decimals();
-		if ( ! is_string( $currency ) || get_woocommerce_currency() === $currency ) {
+		if ( ! is_string( $currency ) || '' === $currency || get_woocommerce_currency() === $currency ) {
 			return $store_decimals;
 		}
 
