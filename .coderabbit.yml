@@ -63,3 +63,8 @@ reviews:
           deliberate workaround that can be removed once the issue is fixed.
         Copy:
         - Button and label text uses sentence case ("Edit form", not "Edit Form").
+knowledge_base:
+    code_guidelines:
+        filePatterns:
+        - files: '.ai/review/design-system/tokens.md'
+          applyTo: '**/*.{js,jsx,ts,tsx,css,scss}'
