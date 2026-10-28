@@ -122,13 +122,14 @@ class StatusTab implements RegisterHooksInterface {
 	public function render(): void {
 		$report  = $this->agent_readiness->get_cached_report();
 		$pending = $this->scheduled_scan->is_pending();
+		$stalled = $pending && $this->scheduled_scan->is_stalled();
 		?>
 		<h2><?php esc_html_e( 'Agent readiness', 'woocommerce' ); ?></h2>
 		<p><?php esc_html_e( 'Checks your products against the product data specs of AI shopping channels, so agents such as ChatGPT, Google and Copilot can list and recommend them.', 'woocommerce' ); ?></p>
 		<form method="post" action="<?php echo esc_url( $this->tab_url() ); ?>">
 			<?php wp_nonce_field( self::NONCE_ACTION ); ?>
 			<p>
-				<button type="submit" name="wc_agent_readiness_run" value="1" class="button button-primary" <?php disabled( $pending ); ?>><?php esc_html_e( 'Run check', 'woocommerce' ); ?></button>
+				<button type="submit" name="wc_agent_readiness_run" value="1" class="button button-primary" <?php disabled( $pending && ! $stalled ); ?>><?php esc_html_e( 'Run check', 'woocommerce' ); ?></button>
 				<?php if ( null !== $report && ! empty( $report['generated_at'] ) ) : ?>
 					<span class="description">
 						<?php
@@ -140,7 +141,9 @@ class StatusTab implements RegisterHooksInterface {
 			</p>
 		</form>
 		<?php
-		if ( $pending ) {
+		if ( $stalled ) {
+			echo '<div class="notice notice-warning inline"><p>' . esc_html__( 'The background check has not started, so scheduled actions may not be running on this site. Run check to check your products now instead.', 'woocommerce' ) . '</p></div>';
+		} elseif ( $pending ) {
 			echo '<div class="notice notice-info inline"><p>' . esc_html__( 'Checking your products in the background. Reload this page in a minute to see the result.', 'woocommerce' ) . '</p></div>';
 		}
 		if ( null === $report ) {

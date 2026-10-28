@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Internal\AgentReadiness;
 
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
+use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -18,6 +19,10 @@ defined( 'ABSPATH' ) || exit;
  * fails or times out does not end the chain; a run that finds the feature
  * disabled does.
  *
+ * A requested scan that has not started 10 minutes after it was due is taken
+ * as stalled (Action Scheduler is not running on the site), and the next
+ * request runs the scan in that request instead of waiting on it.
+ *
  * @since 11.4.0
  */
 class ScheduledScan implements RegisterHooksInterface {
@@ -27,6 +32,8 @@ class ScheduledScan implements RegisterHooksInterface {
 	public const DAILY_HOOK = 'woocommerce_agent_readiness_daily_scan';
 
 	public const GROUP = 'woocommerce-agent-readiness';
+
+	public const STALLED_AFTER = 10 * MINUTE_IN_SECONDS;
 
 	/**
 	 * Features controller.
@@ -73,9 +80,15 @@ class ScheduledScan implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Queue a scan unless one is already waiting or running.
+	 * Queue a scan unless one is already waiting or running. When the waiting
+	 * one has stalled, drop it and run the scan now.
 	 */
 	public function queue(): void {
+		if ( $this->is_stalled() ) {
+			as_unschedule_all_actions( self::RUN_NOW_HOOK, array(), self::GROUP );
+			$this->run();
+			return;
+		}
 		if ( ! $this->is_pending() ) {
 			as_enqueue_async_action( self::RUN_NOW_HOOK, array(), self::GROUP );
 		}
@@ -85,7 +98,19 @@ class ScheduledScan implements RegisterHooksInterface {
 	 * Whether a requested scan has not finished yet.
 	 */
 	public function is_pending(): bool {
-		return as_has_scheduled_action( self::RUN_NOW_HOOK, array(), self::GROUP );
+		return ActionSchedulerUtil::has_scheduled_action( self::RUN_NOW_HOOK, array(), self::GROUP );
+	}
+
+	/**
+	 * Whether a requested scan is still waiting to start STALLED_AFTER seconds after it was due.
+	 */
+	public function is_stalled(): bool {
+		if ( ! function_exists( 'as_next_scheduled_action' ) ) {
+			return false;
+		}
+		// The timestamp of a pending action; true while it runs.
+		$due = as_next_scheduled_action( self::RUN_NOW_HOOK, array(), self::GROUP );
+		return is_int( $due ) && time() - $due > self::STALLED_AFTER;
 	}
 
 	/**
