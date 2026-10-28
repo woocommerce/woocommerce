@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Admin\Features\Fulfillments;
 
 use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Order;
 
@@ -15,6 +16,13 @@ use WC_Order;
  * FulfillmentsRenderer class.
  */
 class FulfillmentsRenderer {
+
+	/**
+	 * Query argument that carries the selected shipping provider through to the clause filters.
+	 *
+	 * @var string
+	 */
+	private const SHIPPING_PROVIDER_FILTER_ARG = 'fulfillment_shipping_provider';
 
 	/**
 	 * Fulfillments cache, that holds the fulfillments for each order to eliminate
@@ -67,6 +75,7 @@ class FulfillmentsRenderer {
 			add_action( 'woocommerce_order_list_table_restrict_manage_orders', array( $this, 'render_shipping_provider_filter' ) );
 			add_filter( 'woocommerce_order_query_args', array( $this, 'filter_orders_list_table_query' ), 10, 1 );
 			add_filter( 'woocommerce_order_list_table_prepare_items_query_args', array( $this, 'filter_orders_by_shipping_provider' ), 10, 1 );
+			add_filter( 'woocommerce_orders_table_query_clauses', array( $this, 'filter_orders_table_clauses_by_shipping_provider' ), 10, 3 );
 		} else {
 			// For legacy orders table, we need to add the bulk actions to the legacy orders table.
 			add_filter( 'bulk_actions-edit-shop_order', array( $this, 'define_fulfillment_bulk_actions' ) );
@@ -76,6 +85,7 @@ class FulfillmentsRenderer {
 			add_action( 'restrict_manage_posts', array( $this, 'render_shipping_provider_filter_legacy' ) );
 			add_action( 'pre_get_posts', array( $this, 'filter_legacy_orders_list_query' ) );
 			add_action( 'pre_get_posts', array( $this, 'filter_legacy_orders_by_shipping_provider' ) );
+			add_filter( 'posts_clauses', array( $this, 'filter_legacy_orders_clauses_by_shipping_provider' ), 10, 2 );
 		}
 	}
 
@@ -193,13 +203,8 @@ class FulfillmentsRenderer {
 			echo '<span>' . esc_html__( 'Multiple providers', 'woocommerce' ) . '</span>';
 		} elseif ( 1 === count( $providers ) ) {
 			$provider_fulfillment   = reset( $providers );
-			$provider_slug          = $provider_fulfillment->get_shipment_provider();
-			$known_providers        = FulfillmentUtils::get_shipping_providers();
-			$provider_name_meta     = $provider_fulfillment->get_meta( '_provider_name' );
-			$provider_display_label = isset( $known_providers[ $provider_slug ] )
-				? $known_providers[ $provider_slug ]->get_name()
-				: ( ! empty( $provider_name_meta ) ? $provider_name_meta : $provider_slug );
-			echo '<span>' . esc_html( $provider_display_label ) . '</span>';
+			$provider_display_label = FulfillmentUtils::get_provider_display_name( $provider_fulfillment );
+			echo '<span>' . esc_html( '' !== $provider_display_label ? $provider_display_label : '--' ) . '</span>';
 		} else {
 			echo '<span>--</span>';
 		}
@@ -611,24 +616,58 @@ class FulfillmentsRenderer {
 
 		// phpcs:ignore WordPress.Security.NonceVerification
 		$shipping_provider = sanitize_text_field( wp_unslash( $_GET['shipping_provider'] ) );
-		$order_ids         = $this->get_order_ids_by_shipping_provider( $shipping_provider );
 
-		if ( empty( $order_ids ) ) {
-			$args['post__in'] = array( 0 );
-		} elseif ( isset( $args['post__in'] ) && is_array( $args['post__in'] ) ) {
-			$args['post__in'] = array_intersect( $args['post__in'], $order_ids );
-			if ( empty( $args['post__in'] ) ) {
-				$args['post__in'] = array( 0 );
-			}
-		} else {
-			$args['post__in'] = $order_ids;
+		// A `woocommerce_hpos_pre_query` callback may answer the query from its own source, and
+		// `suppress_filters` skips the clause filter, so fall back to an id list the query carries.
+		if ( has_filter( 'woocommerce_hpos_pre_query' ) || ! empty( $args['suppress_filters'] ) ) {
+			// `p` and `post__in` are both remapped onto `id`, so narrow every restriction the
+			// query already carries rather than overwriting any of them.
+			$args['post__in'] = $this->restrict_ids_to_shipping_provider(
+				array( $args['post__in'] ?? null, $args['id'] ?? null, $args['p'] ?? null ),
+				$shipping_provider
+			);
+
+			return $args;
 		}
+
+		// Carry the provider through as a marker; the subquery is injected later in the clause filter
+		// so high-volume stores never materialize every matching order id into PHP.
+		$args[ self::SHIPPING_PROVIDER_FILTER_ARG ] = $shipping_provider;
 
 		return $args;
 	}
 
 	/**
-	 * Filter legacy orders by shipping provider.
+	 * Inject the shipping provider filter into the HPOS orders query clauses.
+	 *
+	 * Restricts the orders to those with a matching fulfillment via an `IN ( subquery )`
+	 * condition, instead of a materialized `post__in` id list.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param array  $clauses The query clauses (fields, join, where, etc).
+	 * @param object $query   The OrdersTableQuery instance.
+	 * @param array  $args    The query args.
+	 * @return array The modified clauses.
+	 */
+	public function filter_orders_table_clauses_by_shipping_provider( $clauses, $query, $args ): array {
+		$shipping_provider = $args[ self::SHIPPING_PROVIDER_FILTER_ARG ] ?? '';
+		if ( ! is_string( $shipping_provider ) || '' === $shipping_provider ) {
+			return $clauses;
+		}
+
+		$orders_table = OrdersTableDataStore::get_orders_table_name();
+		$subquery     = $this->get_shipping_provider_order_ids_subquery( $shipping_provider );
+
+		// The table name comes from the data store and the subquery is already prepared.
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$clauses['where'] = ( $clauses['where'] ?? '' ) . " AND {$orders_table}.id IN ( {$subquery} )";
+
+		return $clauses;
+	}
+
+	/**
+	 * Mark the legacy orders query with the selected shipping provider.
 	 *
 	 * @since 10.7.0
 	 *
@@ -650,31 +689,88 @@ class FulfillmentsRenderer {
 
 		// phpcs:ignore WordPress.Security.NonceVerification
 		$shipping_provider = sanitize_text_field( wp_unslash( $_GET['shipping_provider'] ) );
-		$order_ids         = $this->get_order_ids_by_shipping_provider( $shipping_provider );
 
-		if ( empty( $order_ids ) ) {
-			$query->set( 'post__in', array( 0 ) );
-		} else {
-			$existing = $query->get( 'post__in' );
-			if ( ! empty( $existing ) && is_array( $existing ) ) {
-				$order_ids = array_intersect( $existing, $order_ids );
-				if ( empty( $order_ids ) ) {
-					$order_ids = array( 0 );
-				}
-			}
-			$query->set( 'post__in', $order_ids );
+		// A `posts_pre_query` callback may answer the query from its own source, and `suppress_filters`
+		// skips the clause filter, so fall back to an id list the query carries.
+		if ( has_filter( 'posts_pre_query' ) || $query->get( 'suppress_filters' ) ) {
+			$query->set(
+				'post__in',
+				$this->restrict_ids_to_shipping_provider( array( $query->get( 'post__in' ) ), $shipping_provider )
+			);
+
+			return;
 		}
+
+		$query->set( self::SHIPPING_PROVIDER_FILTER_ARG, $shipping_provider );
 	}
 
 	/**
-	 * Get order IDs that have fulfillments with a specific shipping provider.
+	 * Inject the shipping provider filter into the legacy orders query clauses.
 	 *
-	 * @since 10.7.0
+	 * @since 11.4.0
 	 *
-	 * @param string $shipping_provider The shipping provider key to filter by.
-	 * @return array Array of order IDs.
+	 * @param array     $clauses The query clauses (join, where, etc).
+	 * @param \WP_Query $query   The WP_Query being filtered.
+	 * @return array The modified clauses.
 	 */
-	private function get_order_ids_by_shipping_provider( string $shipping_provider ): array {
+	public function filter_legacy_orders_clauses_by_shipping_provider( $clauses, $query ): array {
+		$shipping_provider = $query->get( self::SHIPPING_PROVIDER_FILTER_ARG );
+		if ( ! is_string( $shipping_provider ) || '' === $shipping_provider ) {
+			return $clauses;
+		}
+
+		global $wpdb;
+		$subquery = $this->get_shipping_provider_order_ids_subquery( $shipping_provider );
+
+		// The subquery is already prepared and the table name comes from $wpdb.
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$clauses['where'] = ( $clauses['where'] ?? '' ) . " AND {$wpdb->posts}.ID IN ( {$subquery} )";
+
+		return $clauses;
+	}
+
+	/**
+	 * Narrow a set of order ids to those whose fulfillments use a shipping provider.
+	 *
+	 * Only used when the orders query can be answered without the SQL the clause filters build.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param array  $existing_restrictions The id restrictions the query already carries, if any.
+	 * @param string $shipping_provider     The shipping provider key, or the `__other__` sentinel.
+	 * @return array<int> The ids to restrict the query to, or `array( 0 )` when nothing matches.
+	 */
+	private function restrict_ids_to_shipping_provider( array $existing_restrictions, string $shipping_provider ): array {
+		global $wpdb;
+
+		// The subquery is prepared by get_shipping_provider_order_ids_subquery().
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$results   = $wpdb->get_col( $this->get_shipping_provider_order_ids_subquery( $shipping_provider ) );
+		$order_ids = array_map( 'absint', $results );
+
+		foreach ( $existing_restrictions as $restriction ) {
+			if ( empty( $restriction ) ) {
+				continue;
+			}
+
+			$order_ids = array_intersect( array_map( 'absint', (array) $restriction ), $order_ids );
+		}
+
+		// An empty list drops the restriction instead of applying it, so use an id that cannot match.
+		return empty( $order_ids ) ? array( 0 ) : array_values( $order_ids );
+	}
+
+	/**
+	 * Build the prepared subquery selecting order ids whose fulfillments use a shipping provider.
+	 *
+	 * The returned SQL is fully prepared and safe to embed as an `IN ( ... )` subquery.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param string $shipping_provider The shipping provider key, or the `__other__` sentinel.
+	 * @return string The prepared SELECT statement returning matching order ids.
+	 */
+	private function get_shipping_provider_order_ids_subquery( string $shipping_provider ): string {
 		global $wpdb;
 
 		$fulfillments_table = $wpdb->prefix . 'wc_order_fulfillments';
@@ -686,53 +782,51 @@ class FulfillmentsRenderer {
 			$known_keys      = array_keys( $known_providers );
 
 			if ( empty( $known_keys ) ) {
-				$results = $wpdb->get_col(
-					$wpdb->prepare(
-						"SELECT DISTINCT f.entity_id
-						FROM {$fulfillments_table} f
-						INNER JOIN {$meta_table} m ON f.fulfillment_id = m.fulfillment_id
-						WHERE m.meta_key = %s
-						AND m.meta_value IS NOT NULL
-						AND m.meta_value != ''
-						AND f.date_deleted IS NULL
-						AND m.date_deleted IS NULL",
-						'_shipment_provider'
-					)
-				);
-			} else {
-				$placeholders = implode( ',', array_fill( 0, count( $known_keys ), '%s' ) );
-				$results      = $wpdb->get_col(
-					$wpdb->prepare(
-						"SELECT DISTINCT f.entity_id
-						FROM {$fulfillments_table} f
-						INNER JOIN {$meta_table} m ON f.fulfillment_id = m.fulfillment_id
-						WHERE m.meta_key = '_shipment_provider'
-						AND m.meta_value NOT IN ({$placeholders})
-						AND m.meta_value IS NOT NULL
-						AND m.meta_value != ''
-						AND f.date_deleted IS NULL
-						AND m.date_deleted IS NULL",
-						...array_map( 'wp_json_encode', $known_keys )
-					)
-				);
-			}
-		} else {
-			$results = $wpdb->get_col(
-				$wpdb->prepare(
+				return $wpdb->prepare(
 					"SELECT DISTINCT f.entity_id
 					FROM {$fulfillments_table} f
 					INNER JOIN {$meta_table} m ON f.fulfillment_id = m.fulfillment_id
-					WHERE m.meta_key = '_shipment_provider'
-					AND m.meta_value = %s
+					WHERE m.meta_key = %s
+					AND m.meta_value IS NOT NULL
+					AND m.meta_value NOT IN ( '', %s )
 					AND f.date_deleted IS NULL
 					AND m.date_deleted IS NULL",
-					wp_json_encode( $shipping_provider )
-				)
+					'_shipment_provider',
+					wp_json_encode( '' )
+				);
+			}
+
+			// Exclude known providers and both empty string and the JSON-encoded one the data store writes.
+			$excluded     = array_merge(
+				array( '', wp_json_encode( '' ) ),
+				array_map( 'wp_json_encode', $known_keys )
+			);
+			$placeholders = implode( ',', array_fill( 0, count( $excluded ), '%s' ) );
+
+			return $wpdb->prepare(
+				"SELECT DISTINCT f.entity_id
+				FROM {$fulfillments_table} f
+				INNER JOIN {$meta_table} m ON f.fulfillment_id = m.fulfillment_id
+				WHERE m.meta_key = '_shipment_provider'
+				AND m.meta_value NOT IN ({$placeholders})
+				AND m.meta_value IS NOT NULL
+				AND f.date_deleted IS NULL
+				AND m.date_deleted IS NULL",
+				...$excluded
 			);
 		}
-		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 
-		return array_map( 'absint', $results );
+		return $wpdb->prepare(
+			"SELECT DISTINCT f.entity_id
+			FROM {$fulfillments_table} f
+			INNER JOIN {$meta_table} m ON f.fulfillment_id = m.fulfillment_id
+			WHERE m.meta_key = '_shipment_provider'
+			AND m.meta_value = %s
+			AND f.date_deleted IS NULL
+			AND m.date_deleted IS NULL",
+			wp_json_encode( $shipping_provider )
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 	}
 
 	/**

@@ -9,6 +9,7 @@
  * @var array $variation_data array of variation data @deprecated 4.4.0.
  */
 
+use Automattic\WooCommerce\Internal\ProductCustoms\ClassicEditorFields;
 use Automattic\WooCommerce\Utilities\I18nUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -114,6 +115,18 @@ defined( 'ABSPATH' ) || exit;
 						'label'         => sprintf( __( '%1$s, %2$s, %3$s, or %4$s', 'woocommerce' ), '<abbr title="' . esc_attr__( 'Global Trade Item Number', 'woocommerce' ) . '">' . esc_html__( 'GTIN', 'woocommerce' ) . '</abbr>', '<abbr title="' . esc_attr__( 'Universal Product Code', 'woocommerce' ) . '">' . esc_html__( 'UPC', 'woocommerce' ) . '</abbr>', '<abbr title="' . esc_attr__( 'European Article Number', 'woocommerce' ) . '">' . esc_html__( 'EAN', 'woocommerce' ) . '</abbr>', '<abbr title="' . esc_attr__( 'International Standard Book Number', 'woocommerce' ) . '">' . esc_html__( 'ISBN', 'woocommerce' ) . '</abbr>' ),
 						'desc_tip'      => true,
 						'description'   => __( 'Enter a barcode or any other identifier unique to this product. It can help you list this product on other channels or marketplaces.', 'woocommerce' ),
+						'wrapper_class' => 'form-row',
+					)
+				);
+
+				woocommerce_wp_text_input(
+					array(
+						'id'            => "variable_mpn{$loop}", // @phpstan-ignore variable.undefined (The including meta box supplies $loop.)
+						'name'          => "variable_mpn[{$loop}]", // @phpstan-ignore variable.undefined (The including meta box supplies $loop.)
+						'value'         => $variation_object->get_mpn( 'edit' ),
+						'label'         => '<abbr title="' . esc_attr__( 'Manufacturer part number', 'woocommerce' ) . '">' . esc_html__( 'MPN', 'woocommerce' ) . '</abbr>',
+						'desc_tip'      => true,
+						'description'   => __( 'Enter the manufacturer part number for this variation.', 'woocommerce' ),
 						'wrapper_class' => 'form-row',
 					)
 				);
@@ -431,6 +444,10 @@ defined( 'ABSPATH' ) || exit;
 				</p>
 
 				<?php
+				if ( isset( $product_object, $loop ) ) {
+					wc_get_container()->get( ClassicEditorFields::class )->render_fields( $variation_object, $product_object, $loop );
+				}
+
 				if ( wc_tax_enabled() ) {
 					woocommerce_wp_select(
 						array(

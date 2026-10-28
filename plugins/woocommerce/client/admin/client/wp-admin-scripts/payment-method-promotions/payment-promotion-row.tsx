@@ -154,7 +154,7 @@ export const PaymentPromotionRow = ( {
 								subTitleContent ? (
 									<div
 										className="pre-install-payment-gateway__subtitle"
-										// eslint-disable-next-line react/no-danger -- innerHTML from the element with class name: gateway-subtitle.
+
 										dangerouslySetInnerHTML={ sanitizeHTMLForReact(
 											subTitleContent
 										) }
@@ -219,7 +219,7 @@ export const PaymentPromotionRow = ( {
 							column.className.includes( 'renewals' )
 								? {
 										__html: column.html,
-								  }
+									}
 								: sanitizeHTMLForReact( column.html )
 						}
 					></td>

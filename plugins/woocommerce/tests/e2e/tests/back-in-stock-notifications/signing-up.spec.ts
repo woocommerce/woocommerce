@@ -1,7 +1,7 @@
 /**
  * Internal dependencies
  */
-import { expect, request, tags } from '../../fixtures/fixtures';
+import { expect, request, tags, locks } from '../../fixtures/fixtures';
 import { CUSTOMER_STATE_PATH } from '../../playwright.config';
 import { customer } from '../../test-data/data';
 import {
@@ -29,7 +29,10 @@ const trimSlash = ( path: string ) => path.replace( /\/$/, '' );
 
 test.describe(
 	'Back in Stock Notifications — signing up',
-	{ tag: [ tags.SKIP_ON_EXTERNAL_ENV ] },
+	{
+		tag: [ tags.SKIP_ON_EXTERNAL_ENV ],
+		lock: [ locks.STOCK_NOTIFICATIONS, locks.EMAIL_FEATURE_FLAGS ],
+	},
 	() => {
 		test.beforeAll( async ( { baseURL } ) => {
 			await setOption( request, baseURL!, BIS_FEATURE_OPTION, 'yes' );
@@ -73,9 +76,9 @@ test.describe(
 				await page.goto( product.permalink );
 				await expect( bisFormLocator( page ) ).toHaveCount( 0 );
 				await expect(
-					page.getByRole( 'heading', {
-						name: /Want to be notified when this product is back in stock\?/i,
-					} )
+					page.getByText(
+						'Want to be notified when this product is back in stock?'
+					)
 				).toHaveCount( 0 );
 			} );
 		} );
@@ -98,8 +101,17 @@ test.describe(
 				await page.goto( product.permalink );
 
 				await expect(
-					page.getByRole( 'heading', {
+					page.getByRole( 'form', {
 						name: /Want to be notified when this product is back in stock\?/i,
+					} )
+				).toBeVisible();
+
+				// The prompt is a paragraph, not a heading, so it stays out of
+				// the document outline.
+				await expect(
+					page.getByRole( 'paragraph' ).filter( {
+						hasText:
+							'Want to be notified when this product is back in stock?',
 					} )
 				).toBeVisible();
 

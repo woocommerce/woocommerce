@@ -321,8 +321,8 @@ const ShellHeader = ( {
 		: undefined;
 	const hasNavigation = Boolean(
 		( shell.navigation && shell.navigation.length > 0 ) ||
-			( shell.sectionNavigation && shell.sectionNavigation.length > 0 ) ||
-			NavigationComponent
+		( shell.sectionNavigation && shell.sectionNavigation.length > 0 ) ||
+		NavigationComponent
 	);
 
 	const breadcrumbs =
@@ -356,7 +356,7 @@ const ShellHeader = ( {
 				>
 					{ badge.label }
 				</span>
-		  ) )
+			) )
 		: undefined;
 
 	return (

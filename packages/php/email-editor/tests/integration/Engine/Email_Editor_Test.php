@@ -101,6 +101,154 @@ class Email_Editor_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * The preview link an email post opens keeps preview=true, which is what
+	 * makes WordPress serve the unsaved revision, and drops the nonce.
+	 */
+	public function testItStripsOnlyThePreviewNonceFromAnEmailPreviewLink(): void {
+		$post = get_post( $this->create_email_post( 'publish' ) );
+
+		$link = apply_filters(
+			'preview_post_link',
+			'http://example.com/?p=1&preview=true&preview_nonce=abc123',
+			$post
+		);
+
+		$this->assertSame( 'http://example.com/?p=1&preview=true', $link );
+	}
+
+	/**
+	 * A post of another type keeps the preview link WordPress built for it.
+	 */
+	public function testItLeavesThePreviewLinkOfANonEmailPostUntouched(): void {
+		$post_id = self::factory()->post->create( array( 'post_type' => 'post' ) );
+		$this->assertIsInt( $post_id );
+		$link = 'http://example.com/?p=1&preview=true&preview_nonce=abc123';
+
+		$this->assertSame( $link, apply_filters( 'preview_post_link', $link, get_post( $post_id ) ) );
+	}
+
+	/**
+	 * Without a post to inspect the preview link passes through unchanged.
+	 */
+	public function testItLeavesThePreviewLinkUntouchedWhenThereIsNoPost(): void {
+		$link = 'http://example.com/?p=1&preview=true&preview_nonce=abc123';
+
+		$this->assertSame( $link, apply_filters( 'preview_post_link', $link, null ) );
+	}
+
+	/**
+	 * On WordPress 7.2+ an email post type that opts in gets the email editor's trash action instead of core's.
+	 */
+	public function testItReplacesCoreMoveToTrashActionForEmailPostTypesThatOptIn(): void {
+		if ( ! function_exists( 'wp_get_registered_entity_actions' ) ) {
+			$this->markTestSkipped( 'The entity actions API requires WordPress 7.2.' );
+		}
+		$this->reset_entity_actions_registry();
+		add_filter(
+			'woocommerce_email_editor_replace_trash_action',
+			function ( $replace, $post_type ) {
+				return 'custom_email_type' === $post_type ? true : $replace;
+			},
+			10,
+			2
+		);
+
+		$ids = array_column( wp_get_registered_entity_actions( 'postType', 'custom_email_type' ), 'id' );
+
+		$this->assertContains( 'trash-email-post', $ids );
+		$this->assertNotContains( 'move-to-trash', $ids );
+		$this->assertSame( array( 'trash-email-post' ), $this->get_script_module_action_ids( 'custom_email_type' ) );
+		$this->assertStringContainsString( Email_Editor::ENTITY_ACTIONS_SCRIPT_MODULE_ID, $this->get_import_map() );
+	}
+
+	/**
+	 * Email post types keep core's trash action unless they opt in, since their editor's JavaScript may not provide the replacement.
+	 */
+	public function testItKeepsCoreMoveToTrashActionForEmailPostTypesThatDoNotOptIn(): void {
+		if ( ! function_exists( 'wp_get_registered_entity_actions' ) ) {
+			$this->markTestSkipped( 'The entity actions API requires WordPress 7.2.' );
+		}
+		$this->reset_entity_actions_registry();
+
+		$ids = array_column( wp_get_registered_entity_actions( 'postType', 'custom_email_type' ), 'id' );
+
+		$this->assertContains( 'move-to-trash', $ids );
+		$this->assertNotContains( 'trash-email-post', $ids );
+	}
+
+	/**
+	 * Post types the email editor does not handle keep core's trash action.
+	 */
+	public function testItKeepsCoreMoveToTrashActionForOtherPostTypes(): void {
+		if ( ! function_exists( 'wp_get_registered_entity_actions' ) ) {
+			$this->markTestSkipped( 'The entity actions API requires WordPress 7.2.' );
+		}
+		$this->reset_entity_actions_registry();
+
+		$ids = array_column( wp_get_registered_entity_actions( 'postType', 'post' ), 'id' );
+
+		$this->assertContains( 'move-to-trash', $ids );
+		$this->assertNotContains( 'trash-email-post', $ids );
+	}
+
+	/**
+	 * Returns the ids of the actions the email editor's script module provides for a post type.
+	 * WordPress 7.2 Beta 1 keys the modules by id, later builds list them as `id` and `actions` entries.
+	 *
+	 * @param string $post_type The post type.
+	 * @return array The action ids.
+	 */
+	private function get_script_module_action_ids( string $post_type ): array {
+		if ( ! function_exists( 'wp_get_registered_entity_action_modules' ) ) {
+			return array();
+		}
+		foreach ( wp_get_registered_entity_action_modules( 'postType', $post_type ) as $key => $module ) {
+			if ( isset( $module['id'], $module['actions'] ) ) {
+				if ( Email_Editor::ENTITY_ACTIONS_SCRIPT_MODULE_ID === $module['id'] ) {
+					return $module['actions'];
+				}
+			} elseif ( Email_Editor::ENTITY_ACTIONS_SCRIPT_MODULE_ID === (string) $key ) {
+				return $module;
+			}
+		}
+		return array();
+	}
+
+	/**
+	 * Returns the import map the editor page would print with the email editor's script module as a dependency.
+	 */
+	private function get_import_map(): string {
+		wp_register_script_module(
+			'email-editor-test',
+			'https://example.com/test.js',
+			array(
+				array(
+					'id'     => Email_Editor::ENTITY_ACTIONS_SCRIPT_MODULE_ID,
+					'import' => 'dynamic',
+				),
+			)
+		);
+		wp_enqueue_script_module( 'email-editor-test' );
+		$import_map = get_echo( array( wp_script_modules(), 'print_import_map' ) );
+		wp_dequeue_script_module( 'email-editor-test' );
+		wp_deregister_script_module( 'email-editor-test' );
+		return $import_map;
+	}
+
+	/**
+	 * Drops the entity actions registry, which fills once per request,
+	 * so the next read fires `wp_entity_actions_api_init` again.
+	 */
+	private function reset_entity_actions_registry(): void {
+		if ( ! class_exists( \WP_Entity_Actions_Registry::class ) ) {
+			return;
+		}
+		$instance = new \ReflectionProperty( \WP_Entity_Actions_Registry::class, 'instance' );
+		$instance->setAccessible( true );
+		$instance->setValue( null, null );
+	}
+
+	/**
 	 * Create an email post of the registered custom type.
 	 *
 	 * @param string $status The post status.
@@ -122,6 +270,7 @@ class Email_Editor_Test extends \Email_Editor_Integration_Test_Case {
 	 */
 	public function tearDown(): void {
 		unset( $_GET['post'] );
+		$this->reset_entity_actions_registry();
 		parent::tearDown();
 		remove_filter( 'woocommerce_email_editor_post_types', $this->post_register_callback );
 	}

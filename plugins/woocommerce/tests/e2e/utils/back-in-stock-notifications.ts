@@ -14,6 +14,7 @@ import {
 import { deleteOption, setOption } from './options';
 import { expectEmail } from './email';
 import { setFilterValue } from './filters';
+import { quotedPattern } from './helpers';
 import { wpCLI } from './cli';
 import { expect, test as baseTest } from '../fixtures/fixtures';
 import { admin } from '../test-data/data';
@@ -272,7 +273,7 @@ export async function createOutOfStockVariableProduct(
 						{ name: BIS_VARIATION_ATTRIBUTE, option: '' },
 					],
 				},
-		  ]
+			]
 		: [
 				{
 					regular_price: '9.99',
@@ -290,7 +291,7 @@ export async function createOutOfStockVariableProduct(
 						{ name: BIS_VARIATION_ATTRIBUTE, option: 'White' },
 					],
 				},
-		  ];
+			];
 
 	const { data: batch } = await restApi.post< {
 		create: Array< { id: number; stock_status: string } >;
@@ -325,7 +326,7 @@ export async function createOutOfStockVariableProduct(
 				id: created[ 0 ].id,
 				option: 'Blue',
 				notificationName: notificationName( 'Blue' ),
-		  };
+			};
 
 	return {
 		id: product.id,
@@ -554,8 +555,8 @@ export async function signUpInNewContext(
 	} );
 	const page = await context.newPage();
 
-	// Closed in `finally`: these specs run on a single worker, so a context
-	// left open by a failed signup would otherwise outlive the test.
+	// Closed in `finally` so a context left open by a failed signup does not
+	// outlive the test.
 	try {
 		await page.goto( permalink );
 
@@ -849,9 +850,9 @@ export const bisNotice = {
 	 */
 	success: ( productName: string ): RegExp =>
 		new RegExp(
-			`You have successfully signed up! You will be notified when "${ escapeRegExp(
-				productName
-			) }" is back in stock\\.`
+			`You have successfully signed up! You will be notified when ${ quotedPattern(
+				escapeRegExp( productName )
+			) } is back in stock\\.`
 		),
 	doubleOptIn:
 		/Thanks for signing up! Please complete the sign-up process by following the verification link sent to your e-mail\./,
@@ -864,9 +865,9 @@ export const bisNotice = {
 	 */
 	verified: ( productName: string ): RegExp =>
 		new RegExp(
-			`Successfully verified stock notifications for "${ escapeRegExp(
-				productName
-			) }"\\.`
+			`Successfully verified stock notifications for ${ quotedPattern(
+				escapeRegExp( productName )
+			) }\\.`
 		),
 	/**
 	 * Printed on the shop page after an unsubscribe link is followed.
@@ -878,10 +879,32 @@ export const bisNotice = {
 		new RegExp(
 			`Successfully unsubscribed ${ escapeRegExp(
 				email
-			) }\\. You will not receive a notification when "${ escapeRegExp(
-				productName
-			) }" becomes available\\.`
+			) }\\. You will not receive a notification when ${ quotedPattern(
+				escapeRegExp( productName )
+			) } becomes available\\.`
 		),
+	/**
+	 * Printed on the shop page after an unsubscribe link is followed for a
+	 * notification that was already sent.
+	 */
+	alreadySent:
+		'This notification has already been sent, so there is nothing to unsubscribe from.',
+	/**
+	 * Printed on the shop page after a verify link whose key does not match
+	 * the stored one (tampered, or superseded by a resend) is followed.
+	 */
+	verifyLinkInvalid:
+		'This verification link is no longer valid. Please use the link in the most recent verification email.',
+	/**
+	 * Printed on the shop page after an expired verify link is followed.
+	 */
+	verifyLinkExpired:
+		'This verification link has expired. Sign up again to request a new one.',
+	/**
+	 * Printed on the shop page after an unsubscribe link with a rejected key
+	 * is followed.
+	 */
+	unsubscribeLinkInvalid: 'This unsubscribe link is no longer valid.',
 	errors: {
 		invalidEmail: /Invalid email address\./,
 		invalidProduct: /Invalid product\./,
@@ -1060,10 +1083,18 @@ export async function getEmailLinkById(
 /**
  * Run any pending Action Scheduler jobs via the process-waiting-actions mu-plugin.
  *
+ * wp-env has no mail transport, so `wp_mail()` returns false even though WP
+ * Mail Logging has already captured the message. A failed send cancels the
+ * sign-up instead of marking it sent, so `wp_mail()` is short-circuited to
+ * report success for this context through the `e2e-filters` cookie. It is
+ * scoped here rather than in the helper plugin because other specs assert
+ * the failure path.
+ *
  * @param {Page} page Playwright page (can be on any URL).
  */
 export async function triggerStockNotificationsBatch(
 	page: Page
 ): Promise< void > {
+	await setFilterValue( page, 'pre_wp_mail', true );
 	await page.goto( '?process-waiting-actions' );
 }

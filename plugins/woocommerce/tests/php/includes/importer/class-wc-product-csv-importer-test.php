@@ -36,10 +36,62 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox CSV imports update MPNs and allow zero and explicit clearing.
+	 * @testWith ["simple", "PART-IMPORTED"]
+	 *           ["simple", "0"]
+	 *           ["simple", ""]
+	 *           ["variation", "PART-IMPORTED"]
+	 *           ["variation", "0"]
+	 *           ["variation", ""]
+	 *
+	 * @param string $type Product type.
+	 * @param string $mpn MPN to import.
+	 */
+	public function test_mpn_csv_import( string $type, string $mpn ): void {
+		$class   = WC_Product_Factory::get_product_classname( 0, $type );
+		$product = new $class();
+		$product->set_name( 'MPN test product' );
+		$product->set_status( ProductStatus::PUBLISH );
+		$product->set_regular_price( '10' );
+		if ( ProductType::VARIATION === $type ) {
+			$parent = new WC_Product_Variable();
+			$parent->save();
+			$product->set_parent_id( $parent->get_id() );
+		}
+		$product->set_mpn( 'ORIGINAL' );
+		$product->save();
+		$csv = "ID,MPN\n{$product->get_id()},{$mpn}\n";
+
+		$temporary_file = wp_tempnam( 'mpn' );
+		$file           = $temporary_file . '.csv';
+		rename( $temporary_file, $file ); // phpcs:ignore WordPress.WP.AlternativeFunctions.rename_rename -- The importer requires a CSV extension on the temporary fixture.
+		try {
+			file_put_contents( $file, $csv ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Write an isolated temporary CSV fixture.
+			$sut    = new WC_Product_CSV_Importer(
+				$file,
+				array(
+					'mapping'         => array(
+						'ID'  => 'id',
+						'MPN' => 'mpn',
+					),
+					'update_existing' => true,
+					'parse'           => true,
+				)
+			);
+			$result = $sut->import();
+
+			$this->assertSame( array( $product->get_id() ), $result['updated'], wp_json_encode( $result ) );
+			$this->assertSame( $mpn, wc_get_product( $product->get_id() )->get_mpn() );
+		} finally {
+			wp_delete_file( $file );
+		}
+	}
+
+	/**
 	 * @testdox variations need to set the status back to published if parent product is a draft
 	 */
 	public function test_expand_data_with_draft_variable() {
-		$csv_file = dirname( __FILE__ ) . '/sample.csv';
+		$csv_file = __DIR__ . '/sample.csv';
 		$raw_data = array(
 			array(
 				'type'      => ProductType::VARIABLE,
@@ -101,7 +153,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	 * @testdox Test that the importer calculates the percent complete as 99 when it's >= 99.5% through the file.
 	 */
 	public function test_import_completion_issue_36618_lines_remaining() {
-		$csv_file = dirname( __FILE__ ) . '/sample2.csv';
+		$csv_file = __DIR__ . '/sample2.csv';
 		$args     = array(
 			'lines' => 200,
 		);
@@ -115,7 +167,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	 * @testdox Test that the importer calculates the percent complete as 100 when it's at the end of the file.
 	 */
 	public function test_import_completion_issue_36618_end_of_file() {
-		$csv_file = dirname( __FILE__ ) . '/sample2.csv';
+		$csv_file = __DIR__ . '/sample2.csv';
 		$args     = array(
 			'lines' => 201,
 		);
@@ -440,6 +492,85 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( $category_ids, wp_get_object_terms( $product->get_id(), 'product_cat', array( 'fields' => 'ids' ) ) );
 
 		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
+	 * @testdox A new product row whose GTIN belongs to another product fails without creating a product.
+	 */
+	public function test_import_fails_new_product_rows_with_a_duplicated_global_unique_id() {
+		$existing = WC_Helper_Product::create_simple_product();
+		$existing->set_global_unique_id( '0012345678905' );
+		$existing->save();
+
+		$csv_file = trailingslashit( get_temp_dir() ) . 'import-duplicated-global-unique-id-new.csv';
+		file_put_contents( $csv_file, "SKU,\"GTIN, UPC, EAN, or ISBN\",Name\nnew-sku,0012345678905,Copied product\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
+
+		$importer = new WC_Product_CSV_Importer(
+			$csv_file,
+			array(
+				'parse'   => true,
+				'mapping' => array(
+					'SKU'                     => 'sku',
+					'GTIN, UPC, EAN, or ISBN' => 'global_unique_id',
+					'Name'                    => 'name',
+				),
+			)
+		);
+		$data     = $importer->import();
+
+		wp_delete_file( $csv_file );
+
+		$this->assertEmpty( $data['imported'], 'A row with a duplicated GTIN should not create a product.' );
+		$this->assertCount( 1, $data['failed'] );
+		$this->assertSame( 'Invalid or duplicated GTIN, UPC, EAN or ISBN.', $data['failed'][0]->get_error_message() );
+		$this->assertSame( 0, wc_get_product_id_by_sku( 'new-sku' ), 'No product should be saved for the failed row.' );
+		$this->assertSame( $existing->get_id(), wc_get_product_id_by_global_unique_id( '0012345678905' ), 'The GTIN should stay with the original product.' );
+
+		WC_Helper_Product::delete_product( $existing->get_id() );
+	}
+
+	/**
+	 * @testdox Updating a product with another product's GTIN fails the row and leaves the product unchanged.
+	 */
+	public function test_import_fails_update_rows_with_a_duplicated_global_unique_id() {
+		$owner = WC_Helper_Product::create_simple_product();
+		$owner->set_global_unique_id( '0012345678905' );
+		$owner->save();
+
+		$target = WC_Helper_Product::create_simple_product();
+		$target->set_name( 'Original name' );
+		$target->save();
+
+		$csv_file = trailingslashit( get_temp_dir() ) . 'import-duplicated-global-unique-id-update.csv';
+		file_put_contents( $csv_file, sprintf( "ID,\"GTIN, UPC, EAN, or ISBN\",Name\n%d,0012345678905,Updated name\n", $target->get_id() ) ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
+
+		$importer = new WC_Product_CSV_Importer(
+			$csv_file,
+			array(
+				'parse'           => true,
+				'update_existing' => true,
+				'mapping'         => array(
+					'ID'                      => 'id',
+					'GTIN, UPC, EAN, or ISBN' => 'global_unique_id',
+					'Name'                    => 'name',
+				),
+			)
+		);
+		$data     = $importer->import();
+
+		wp_delete_file( $csv_file );
+
+		$this->assertEmpty( $data['updated'] );
+		$this->assertCount( 1, $data['failed'] );
+		$this->assertSame( 'Invalid or duplicated GTIN, UPC, EAN or ISBN.', $data['failed'][0]->get_error_message() );
+
+		$target = wc_get_product( $target->get_id() );
+		$this->assertSame( 'Original name', $target->get_name(), 'Other fields in the failed row should not be saved.' );
+		$this->assertSame( '', $target->get_global_unique_id() );
+		$this->assertSame( $owner->get_id(), wc_get_product_id_by_global_unique_id( '0012345678905' ) );
+
+		WC_Helper_Product::delete_product( $owner->get_id() );
+		WC_Helper_Product::delete_product( $target->get_id() );
 	}
 
 	/**
@@ -1807,5 +1938,283 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 			'ISO-8859-1 is converted'     => array( 'ISO-8859-1', "Caf\xE9", 'Café' ),
 			'Windows-1252 is converted'   => array( 'Windows-1252', "Caf\xE9", 'Café' ),
 		);
+	}
+
+	/**
+	 * @testdox CSV import creates products with normalized customs values.
+	 */
+	public function test_import_creates_customs_values(): void {
+		$result = $this->import_customs_csv( "Type,SKU,Name,commodity_code,country_of_origin,customs_description\nsimple,customs-create,Customs product,0901%210010,ro,\"Salt & pepper, 20%Acrylic\"\n" );
+
+		$this->assertEmpty( $result['failed'], 'Valid customs values should be imported.' );
+		$this->assertCount( 1, $result['imported'], 'The customs row should create one product.' );
+		$product = wc_get_product( $result['imported'][0] );
+		$this->assertSame( '0901210010', $product->get_customs_commodity_code( 'edit' ), 'Commodity codes should keep every digit and remove punctuation.' );
+		$this->assertSame( 'RO', $product->get_customs_country_of_origin( 'edit' ), 'Origin codes should be normalized.' );
+		$this->assertSame( 'Salt & pepper, 20%Acrylic', $product->get_customs_description( 'edit' ), 'The description should not be entity-encoded or lose percent sequences.' );
+	}
+
+	/**
+	 * @testdox Customs formatting callbacks can change the commodity code before it is validated.
+	 */
+	public function test_customs_formatting_callback_can_change_code(): void {
+		$received_code = null;
+		add_filter(
+			'woocommerce_product_importer_formatting_callbacks',
+			static function ( $callbacks, $importer ) use ( &$received_code ) {
+				$index               = array_search( 'customs_commodity_code', $importer->get_mapped_keys(), true );
+				$callbacks[ $index ] = static function ( $value ) use ( &$received_code ) {
+					$received_code = $value;
+					return '0201.10';
+				};
+				return $callbacks;
+			},
+			10,
+			2
+		);
+
+		$result = $this->import_customs_csv( "Type,SKU,Name,commodity_code\nsimple,customs-filtered,Customs product,0901%210010\n" );
+
+		$this->assertSame( '0901%210010', $received_code, 'Formatting callbacks should receive the raw cell value.' );
+		$this->assertEmpty( $result['failed'], 'A valid formatting callback result should be imported.' );
+		$this->assertCount( 1, $result['imported'], 'The filtered customs row should create one product.' );
+		$this->assertSame( '020110', wc_get_product( $result['imported'][0] )->get_customs_commodity_code( 'edit' ), 'The formatting callback result should still be honored and validated.' );
+	}
+
+	/**
+	 * @testdox Omitted CSV customs columns leave existing values unchanged.
+	 */
+	public function test_import_preserves_omitted_customs_values(): void {
+		$product = $this->create_product_with_customs();
+
+		$result = $this->import_customs_csv( "ID,Name,country_of_origin\n{$product->get_id()},Updated name,\n", array( 'update_existing' => true ) );
+
+		$this->assertSame( array( $product->get_id() ), $result['updated'], 'The row should update the existing product.' );
+		$product = wc_get_product( $product->get_id() );
+		$this->assertSame( 'Updated name', $product->get_name(), 'The row should update the product name.' );
+		$this->assertSame( '010121', $product->get_customs_commodity_code( 'edit' ), 'An omitted commodity code column must not change the stored value.' );
+		$this->assertNull( $product->get_customs_country_of_origin( 'edit' ), 'The blank mapped origin cell should clear the stored value.' );
+		$this->assertSame( 'Cotton shirt', $product->get_customs_description( 'edit' ), 'An omitted description column must not change the stored value.' );
+	}
+
+	/**
+	 * @testdox CSV customs descriptions escaped by the exporter are unescaped on import.
+	 */
+	public function test_import_unescapes_customs_description(): void {
+		$result = $this->import_customs_csv( "Type,SKU,Name,customs_description\nsimple,customs-escaped,Customs product,'-Cotton shirt\n" );
+
+		$this->assertEmpty( $result['failed'], 'The escaped description should be imported.' );
+		$this->assertCount( 1, $result['imported'], 'The row should create one product.' );
+		$this->assertSame( '-Cotton shirt', wc_get_product( $result['imported'][0] )->get_customs_description( 'edit' ), 'The exporter escape prefix should be removed.' );
+	}
+
+	/**
+	 * @testdox Invalid customs data rejects the entire product update.
+	 * @testWith ["country_of_origin", "XX"]
+	 *
+	 * @param string $header Invalid customs column.
+	 * @param string $value Invalid value.
+	 */
+	public function test_invalid_customs_rejects_product_update( string $header, string $value ): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_name( 'Original name' );
+		$product->save();
+
+		$result = $this->import_customs_csv( "ID,Name,{$header}\n{$product->get_id()},Changed name,{$value}\n", array( 'update_existing' => true ) );
+
+		$this->assertEmpty( $result['updated'], 'An invalid customs row must not update the product.' );
+		$this->assertCount( 1, $result['failed'], 'Each invalid row should have an import error.' );
+		$this->assertNotEmpty( $result['failed'][0]->get_error_message(), 'The failed row should explain its invalid value.' );
+		$this->assertStringContainsString( (string) $product->get_id(), $result['failed'][0]->get_error_data()['row'], 'The error should identify the failed row.' );
+		$this->assertSame( 'Original name', wc_get_product( $product->get_id() )->get_name(), 'Other submitted fields must remain unchanged.' );
+	}
+
+	/**
+	 * @testdox Invalid customs rows are not saved and do not stop following valid rows.
+	 */
+	public function test_invalid_customs_row_does_not_stop_import(): void {
+		$result = $this->import_customs_csv( "Type,SKU,Name,commodity_code\nsimple,customs-invalid,Invalid customs,ABC123\nsimple,customs-valid,Valid customs,010121\n" );
+
+		$this->assertCount( 1, $result['failed'], 'The invalid row should be reported.' );
+		$this->assertCount( 1, $result['imported'], 'The following valid row should still import.' );
+		$this->assertSame( 0, wc_get_product_id_by_sku( 'customs-invalid' ), 'The invalid row must not be saved.' );
+	}
+
+	/**
+	 * @testdox Invalid customs values added by the process item data filter reject the row.
+	 */
+	public function test_filtered_invalid_customs_rejects_row(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_name( 'Original product' );
+		$product->save();
+		add_filter(
+			'woocommerce_product_import_process_item_data',
+			static function ( $data ) {
+				$data['customs_country_of_origin'] = 'XX';
+				return $data;
+			}
+		);
+
+		$result = $this->import_customs_csv( "ID,Name,country_of_origin\n{$product->get_id()},Changed product,US\n", array( 'update_existing' => true ) );
+
+		$this->assertCount( 1, $result['failed'], 'Invalid filtered customs data should reject the row.' );
+		$this->assertSame( 'Original product', wc_get_product( $product->get_id() )->get_name(), 'The original product name should remain unchanged.' );
+	}
+
+	/**
+	 * Create a simple product with every customs field set.
+	 *
+	 * @return WC_Product
+	 */
+	private function create_product_with_customs(): WC_Product {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_props(
+			array(
+				'customs_commodity_code'    => '010121',
+				'customs_country_of_origin' => 'RO',
+				'customs_description'       => 'Cotton shirt',
+			)
+		);
+		$product->save();
+
+		return $product;
+	}
+
+	/**
+	 * Import a temporary CSV using the customs column mappings.
+	 *
+	 * @param string $csv CSV contents.
+	 * @param array  $args Import options.
+	 * @return array Import results.
+	 */
+	private function import_customs_csv( string $csv, array $args = array() ): array {
+		$file = get_temp_dir() . 'customs-import-' . wp_generate_uuid4() . '.csv';
+		file_put_contents( $file, $csv ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Temporary CSV fixture.
+
+		try {
+			$sut = new WC_Product_CSV_Importer(
+				$file,
+				array_merge(
+					array(
+						'parse'   => true,
+						'mapping' => array(
+							'ID'                  => 'id',
+							'Type'                => 'type',
+							'SKU'                 => 'sku',
+							'Name'                => 'name',
+							'commodity_code'      => 'customs_commodity_code',
+							'country_of_origin'   => 'customs_country_of_origin',
+							'customs_description' => 'customs_description',
+						),
+					),
+					$args
+				)
+			);
+			return $sut->import();
+		} finally {
+			wp_delete_file( $file );
+		}
+	}
+
+	/**
+	 * @testdox Should keep double-quoted values together and leave other values untouched when splitting comma-separated fields.
+	 * @dataProvider provider_parse_comma_field_quoted_values
+	 *
+	 * @param string $value    Raw CSV cell value.
+	 * @param array  $expected Expected list of values.
+	 */
+	public function test_parse_comma_field_handles_quoted_values( string $value, array $expected ): void {
+		$importer = new WC_Product_CSV_Importer( __DIR__ . '/sample.csv' );
+
+		$this->assertSame( $expected, $importer->parse_comma_field( $value ) );
+	}
+
+	/**
+	 * Data provider for test_parse_comma_field_handles_quoted_values.
+	 *
+	 * @return array[]
+	 */
+	public function provider_parse_comma_field_quoted_values(): array {
+		return array(
+			'quoted value with commas'    => array( 'Red, "Blue, navy", Green', array( 'Red', 'Blue, navy', 'Green' ) ),
+			'two quoted groups'           => array( '"Blue, navy", "Red, dark"', array( 'Blue, navy', 'Red, dark' ) ),
+			'whole cell quoted'           => array( '"New, no box. Multiple quantity, minor shelf wear."', array( 'New, no box. Multiple quantity, minor shelf wear.' ) ),
+			'backslash-escaped comma'     => array( 'Red\\, Green, Blue', array( 'Red, Green', 'Blue' ) ),
+			'escaped comma inside quotes' => array( '"Red\\, Green, Blue", Black', array( 'Red, Green, Blue', 'Black' ) ),
+			'quote inside a value'        => array( 'Red, 5" Wheel, Green', array( 'Red', '5" Wheel', 'Green' ) ),
+			'quote not closing a segment' => array( '"Large" size, Small', array( '"Large" size', 'Small' ) ),
+			'closed quote then inch mark' => array( '"Large" size, 15"', array( '"Large" size', '15"' ) ),
+			'balanced quotes in both'     => array( '"Pro" edition, Small "S"', array( '"Pro" edition', 'Small "S"' ) ),
+			'quotes inside a group'       => array( '"a, "b", c"', array( 'a, "b", c' ) ),
+			'quoted words in one value'   => array( '"Pro" or "Max", Small', array( '"Pro" or "Max"', 'Small' ) ),
+			'nested quotes in one value'  => array( '"Pro "P" edition"', array( '"Pro "P" edition"' ) ),
+			'lone quote segments'         => array( 'a, ", b, "', array( 'a', '"', 'b', '"' ) ),
+			'empty quoted value'          => array( '""', array( '' ) ),
+			'unterminated quote'          => array( 'Red, "Blue', array( 'Red', '"Blue' ) ),
+			'several unterminated quotes' => array( '"a, "b, c', array( '"a', '"b', 'c' ) ),
+			'plain list'                  => array( 'Red, Green', array( 'Red', 'Green' ) ),
+		);
+	}
+
+	/**
+	 * @testdox Should keep a double-quoted tag together when tags are separated by spaces.
+	 */
+	public function test_parse_tags_spaces_field_handles_quoted_values(): void {
+		$importer = new WC_Product_CSV_Importer( __DIR__ . '/sample.csv' );
+
+		$term_ids = $importer->parse_tags_spaces_field( '"New York" Boston 15"' );
+
+		$this->assertSame( array( 'New York', 'Boston', '15"' ), array_map( fn( $id ) => get_term( $id, 'product_tag' )->name, $term_ids ) );
+	}
+
+	/**
+	 * @testdox Should parse an attribute default like a single attribute value.
+	 * @testWith ["\"Premium\"", "Premium"]
+	 *           ["\"Blue, navy\"", "Blue, navy"]
+	 *           ["Blue, navy", "Blue, navy"]
+	 *           ["Basic", "Basic"]
+	 *           ["'=Blue, navy", "=Blue, navy"]
+	 *           ["", ""]
+	 *
+	 * @param string $value    Raw CSV cell value.
+	 * @param string $expected Expected default.
+	 */
+	public function test_parse_attribute_default_field( string $value, string $expected ): void {
+		$importer = new WC_Product_CSV_Importer( __DIR__ . '/sample.csv' );
+
+		$this->assertSame( $expected, $importer->parse_attribute_default_field( $value ) );
+	}
+
+	/**
+	 * @testdox Should keep a quoted attribute default matched to its unquoted option when importing a variable product.
+	 */
+	public function test_import_keeps_quoted_attribute_default(): void {
+		$csv_file = trailingslashit( get_temp_dir() ) . 'import-quoted-attribute-default.csv';
+		file_put_contents( $csv_file, "SKU,Type,Name,Attribute 1 name,Attribute 1 value(s),Attribute 1 default,Attribute 1 visible,Attribute 1 global\nIMPORT-QUOTED-DEFAULT,variable,Quoted default,Edition,\"\"\"Premium\"\", Basic\",\"\"\"Premium\"\"\",1,0\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
+
+		$importer = new WC_Product_CSV_Importer(
+			$csv_file,
+			array(
+				'parse'   => true,
+				'mapping' => array(
+					'SKU'                  => 'sku',
+					'Type'                 => 'type',
+					'Name'                 => 'name',
+					'Attribute 1 name'     => 'attributes:name1',
+					'Attribute 1 value(s)' => 'attributes:value1',
+					'Attribute 1 default'  => 'attributes:default1',
+					'Attribute 1 visible'  => 'attributes:visible1',
+					'Attribute 1 global'   => 'attributes:taxonomy1',
+				),
+			)
+		);
+		$data     = $importer->import();
+
+		wp_delete_file( $csv_file );
+
+		$this->assertCount( 1, $data['imported'] );
+		$product = wc_get_product( $data['imported'][0] );
+		$this->assertSame( array( 'Premium', 'Basic' ), $product->get_attributes()['edition']->get_options() );
+		$this->assertSame( array( 'edition' => 'Premium' ), $product->get_default_attributes() );
 	}
 }

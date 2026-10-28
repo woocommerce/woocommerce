@@ -7,7 +7,7 @@ const files = ( sources ) => {
 				ul: sources.map( ( file ) => {
 					return `[${ file }](../../../../../../src/${ file })`;
 				} ),
-		  }
+			}
 		: null;
 };
 

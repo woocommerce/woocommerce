@@ -36,7 +36,7 @@ class FakeQueue implements \WC_Queue_Interface {
 	// phpcs:disable Squiz.Commenting.FunctionComment.Missing
 
 	public function add( $hook, $args = array(), $group = '' ) {
-		// TODO: Implement add() method.
+		$this->add_to_methods_called( 'add', $args, $group, array( 'hook' => $hook ) );
 	}
 
 	public function schedule_single( $timestamp, $hook, $args = array(), $group = '' ) {
@@ -73,6 +73,12 @@ class FakeQueue implements \WC_Queue_Interface {
 
 	public function search( $args = array(), $return_format = OBJECT ) {
 		$result = array();
+
+		// Only a search naming both the hook and the exact arguments is matched.
+		if ( ! isset( $args['args'], $args['hook'] ) ) {
+			return $result;
+		}
+
 		foreach ( $this->methods_called as $method_called ) {
 			if ( $method_called['args'] === $args['args'] && $method_called['hook'] === $args['hook'] ) {
 				$result[] = $method_called;

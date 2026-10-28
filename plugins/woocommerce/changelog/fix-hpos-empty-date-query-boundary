@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix order date queries that leave the "after" or "before" date empty, so they no longer drop matching orders on HPOS stores.

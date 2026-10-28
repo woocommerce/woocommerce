@@ -127,7 +127,7 @@ class OrderAttributionControllerTest extends WP_UnitTestCase {
 		);
 
 		$anon_test = Closure::bind(
-			function( $order ) {
+			function ( $order ) {
 				$this->output_origin_column( $order );
 			},
 			$this->attribution_class,
@@ -149,6 +149,71 @@ class OrderAttributionControllerTest extends WP_UnitTestCase {
 
 			$this->assertEquals( $test_case['expected_output'], $output );
 		}
+	}
+
+	/**
+	 * Data provider for test_output_origin_column_uses_filtered_label.
+	 *
+	 * @return array[] Source type, source, filtered label, expected output.
+	 */
+	public function provider_filtered_origin_labels(): array {
+		return array(
+			'plain label, custom type'          => array( 'trade-show', '', 'Trade show', 'Trade show' ),
+			// A placeholder is still filled with the formatted source, which is "Unknown" for a custom type.
+			'%s placeholder, custom type'       => array( 'trade-show', 'booth-12', 'Trade show: %s', 'Trade show: Unknown' ),
+			'positional placeholder'            => array( 'trade-show', '', 'Trade show: %1$s', 'Trade show: Unknown' ),
+			'width-qualified placeholder'       => array( 'trade-show', '', '[%10s]', '[   Unknown]' ),
+			'left-aligned width placeholder'    => array( 'trade-show', '', '[%-10s]', '[Unknown   ]' ),
+			'space flag with width placeholder' => array( 'trade-show', '', '[% 10s]', '[   Unknown]' ),
+			'custom padding placeholder'        => array( 'trade-show', '', "[%'.10s]", '[...Unknown]' ),
+			'empty label falls back'            => array( 'trade-show', '', '', 'Unknown' ),
+			'plain label, built-in type'        => array( 'utm', 'example', 'Campaign', 'Campaign' ),
+			// A lone percent sign is literal text and must not reach sprintf().
+			'lone percent sign'                 => array( 'trade-show', '', '100% organic', '100% organic' ),
+			'percent followed by a space and s' => array( 'trade-show', '', '50% sale', '50% sale' ),
+			// An escaped percent sign keeps sprintf() semantics, as every label had before.
+			'escaped percent sign'              => array( 'trade-show', '', '100%% organic', '100% organic' ),
+			'escaped percent before s'          => array( 'trade-show', '', 'Save %%s today', 'Save %s today' ),
+			'escaped percent and a placeholder' => array( 'trade-show', '', '100%% from %s', '100% from Unknown' ),
+		);
+	}
+
+	/**
+	 * @testdox A filtered label is used as the whole origin unless it is a sprintf() format string.
+	 * @dataProvider provider_filtered_origin_labels
+	 *
+	 * @param string $source_type     Source type meta value.
+	 * @param string $source          Source meta value.
+	 * @param string $label           Label returned by the filter.
+	 * @param string $expected_output Expected column output.
+	 */
+	public function test_output_origin_column_uses_filtered_label( string $source_type, string $source, string $label, string $expected_output ): void {
+		$anon_test = Closure::bind(
+			function ( $order ) {
+				$this->output_origin_column( $order );
+			},
+			$this->attribution_class,
+			$this->attribution_class
+		);
+
+		$order = $this->getMockBuilder( WC_Order::class )
+			->onlyMethods( array( 'get_meta' ) )
+			->getMock();
+		$order->method( 'get_meta' )
+			->willReturnOnConsecutiveCalls( $source_type, $source );
+
+		$label_filter = function () use ( $label ) {
+			return $label;
+		};
+		add_filter( 'wc_order_attribution_origin_label', $label_filter );
+
+		ob_start();
+		$anon_test( $order );
+		$output = ob_get_clean();
+
+		remove_filter( 'wc_order_attribution_origin_label', $label_filter );
+
+		$this->assertSame( $expected_output, $output );
 	}
 
 	/**
@@ -274,5 +339,158 @@ class OrderAttributionControllerTest extends WP_UnitTestCase {
 		$this->assertEmpty( $output3, 'Second call within same request should be suppressed' );
 
 		remove_filter( 'wc_order_attribution_allow_multiple_elements', '__return_false' );
+	}
+
+	/**
+	 * @testdox Should pass the tracking field paths to sourcebuster.js as cookie fields by default.
+	 */
+	public function test_cookie_fields_default_to_tracking_field_paths(): void {
+		$cookie_fields = $this->get_localized_script_data()['params']['cookieFields'];
+
+		$this->assertSame(
+			array(
+				'current.typ',
+				'current_add.rf',
+				'current.cmp',
+				'current.src',
+				'current.mdm',
+				'current.cnt',
+				'current.id',
+				'current.trm',
+				'current.plt',
+				'current.fmt',
+				'current.tct',
+				'current_add.ep',
+				'current_add.fd',
+				'session.pgs',
+				'udata.vst',
+				'udata.uag',
+			),
+			$cookie_fields,
+			'Cookie fields should match the paths of the default tracking fields.'
+		);
+	}
+
+	/**
+	 * @testdox Should derive the cookie fields from the filtered tracking fields.
+	 */
+	public function test_cookie_fields_follow_filtered_tracking_fields(): void {
+		$filter = function ( $fields ) {
+			unset( $fields['utm_content'] );
+			$fields['first_source'] = 'first.src';
+			return $fields;
+		};
+		add_filter( 'wc_order_attribution_tracking_fields', $filter );
+		$set_fields = new \ReflectionMethod( OrderAttributionController::class, 'set_fields_and_prefix' );
+		$set_fields->setAccessible( true );
+		$set_fields->invoke( $this->attribution_class );
+
+		$data = $this->get_localized_script_data();
+
+		$this->assertNotContains( 'current.cnt', $data['params']['cookieFields'], 'A removed tracking field should not be a cookie field.' );
+		$this->assertContains( 'first.src', $data['params']['cookieFields'], 'An added tracking field should be a cookie field.' );
+		$this->assertSame( 'first.src', $data['fields']['first_source'], 'The tracking fields should still be passed to the script.' );
+	}
+
+	/**
+	 * Data provider for test_cookie_fields_filter.
+	 *
+	 * @return array[]
+	 */
+	public function provider_cookie_fields_filter(): array {
+		return array(
+			'added first.* paths'        => array( array( 'current.typ', 'first.typ', 'first.src', 'first.mdm' ), array( 'current.typ', 'first.typ', 'first.src', 'first.mdm' ) ),
+			'empty array'                => array( array(), array() ),
+			'duplicates and non-strings' => array( array( 'current.typ', 42, 'current.typ', null, 'session.pgs' ), array( 'current.typ', 'session.pgs' ) ),
+		);
+	}
+
+	/**
+	 * @testdox Should fall back to the default cookie fields when the filter returns only non-strings.
+	 */
+	public function test_cookie_fields_filter_ignores_non_string_list(): void {
+		$default = $this->get_localized_script_data()['params']['cookieFields'];
+		add_filter(
+			'wc_order_attribution_cookie_fields',
+			function () {
+				return array( 42, null );
+			}
+		);
+
+		$this->assertSame( $default, $this->get_localized_script_data()['params']['cookieFields'] );
+	}
+
+	/**
+	 * @testdox Should not store empty or (none) values submitted from the cookies.
+	 */
+	public function test_source_values_skip_empty_and_none_values(): void {
+		$raw_values = array_fill_keys( $this->attribution_class->get_field_names(), '' );
+
+		$raw_values['source_type']  = 'utm';
+		$raw_values['utm_source']   = 'newsletter';
+		$raw_values['utm_campaign'] = '(none)';
+
+		$method = new \ReflectionMethod( OrderAttributionController::class, 'get_source_values' );
+		$method->setAccessible( true );
+
+		$this->assertSame(
+			array(
+				'source_type' => 'utm',
+				'utm_source'  => 'newsletter',
+			),
+			$method->invoke( $this->attribution_class, $raw_values )
+		);
+	}
+
+	/**
+	 * @testdox Should pass the filtered cookie fields to sourcebuster.js.
+	 *
+	 * @dataProvider provider_cookie_fields_filter
+	 *
+	 * @param array $filtered The value returned by the filter.
+	 * @param array $expected The expected cookie fields.
+	 */
+	public function test_cookie_fields_filter( array $filtered, array $expected ): void {
+		add_filter(
+			'wc_order_attribution_cookie_fields',
+			function () use ( $filtered ) {
+				return $filtered;
+			}
+		);
+
+		$this->assertSame( $expected, $this->get_localized_script_data()['params']['cookieFields'] );
+	}
+
+	/**
+	 * @testdox Should fall back to the default cookie fields when the filter does not return an array.
+	 */
+	public function test_cookie_fields_filter_ignores_non_array(): void {
+		$default = $this->get_localized_script_data()['params']['cookieFields'];
+		add_filter( 'wc_order_attribution_cookie_fields', '__return_false' );
+
+		$this->assertSame( $default, $this->get_localized_script_data()['params']['cookieFields'] );
+	}
+
+	/**
+	 * Enqueue the frontend scripts and return the data localized for `wc-order-attribution`.
+	 *
+	 * @return array
+	 */
+	private function get_localized_script_data(): array {
+		wp_deregister_script( 'wc-order-attribution' );
+		wp_deregister_script( 'sourcebuster-js' );
+
+		$method = new \ReflectionMethod( OrderAttributionController::class, 'enqueue_scripts_and_styles' );
+		$method->setAccessible( true );
+		$method->invoke( $this->attribution_class );
+
+		$data = wp_scripts()->get_data( 'wc-order-attribution', 'data' );
+		wp_deregister_script( 'wc-order-attribution' );
+		wp_deregister_script( 'sourcebuster-js' );
+
+		$this->assertIsString( $data, 'The script should have localized data.' );
+		$this->assertSame( 1, preg_match( '/var wc_order_attribution = (.*);/', $data, $matches ), 'The script should localize wc_order_attribution.' );
+
+		return json_decode( $matches[1], true );
 	}
 }

@@ -19,11 +19,13 @@ const singletonWpModules = [
 	'@wordpress/core-data',
 	'@wordpress/data',
 	'@wordpress/editor',
+	'@wordpress/hooks',
 	'@wordpress/html-entities',
 	'@wordpress/keyboard-shortcuts',
 	'@wordpress/patterns',
 	'@wordpress/rich-text',
 	'@wordpress/notices',
+	'@wordpress/preferences',
 ];
 
 const wpSingletonMapper = singletonWpModules.reduce( ( acc, mod ) => {

@@ -123,62 +123,6 @@ export async function seedWooEmailPost(
 	return postId;
 }
 
-/**
- * Create a woo_email post directly via the seed-bulk endpoint, bypassing the
- * WCTransactionalEmailPostsGenerator. The created post has no entry in the
- * options-table mapping used by WCTransactionalEmailPostsManager, so the
- * backfill and divergence-sweep pipelines cannot resolve its email_id and
- * will skip it entirely.
- *
- * Use this for scenarios that need a woo_email post for an email type that is
- * NOT in the sync registry (e.g. a third-party email that is registered as a
- * WC_Email subclass but is not enrolled in the block-editor transactional
- * emails list).
- */
-export async function seedWooEmailPostDirect(
-	seed: Pick< WooEmailSeed, 'postContent' | 'stripStampMeta' >
-): Promise< number > {
-	const meta: Record< string, unknown > = {};
-
-	if ( seed.stripStampMeta ) {
-		meta[ META_KEYS.STATUS ] = null;
-		meta[ META_KEYS.SOURCE_HASH ] = null;
-		meta[ META_KEYS.SOURCE_VERSION ] = null;
-		meta[ META_KEYS.LAST_SYNCED_AT ] = null;
-		meta[ META_KEYS.BACKFILLED ] = null;
-	}
-
-	const postData: Record< string, unknown > = {
-		post_type: 'woo_email',
-		post_status: 'publish',
-	};
-	if ( seed.postContent !== undefined ) {
-		postData.post_content = seed.postContent;
-	}
-
-	const client = apiClient();
-	const res = await client.post( `${ TEST_HELPER_API_BASE }/seed-bulk`, {
-		seeds: [
-			{
-				post: postData,
-				meta,
-			},
-		],
-	} );
-
-	const results: Array< { post_id?: number; error?: string } > =
-		res?.data?.results ?? [];
-	const first = results[ 0 ];
-	if ( ! first?.post_id ) {
-		throw new Error(
-			`seedWooEmailPostDirect: failed to create post — ${
-				first?.error ?? 'no post_id returned'
-			}`
-		);
-	}
-	return Number( first.post_id );
-}
-
 export async function getWooEmailPostContent(
 	postId: number
 ): Promise< string > {
@@ -187,39 +131,4 @@ export async function getWooEmailPostContent(
 		`${ TEST_HELPER_API_BASE }/post-content/${ postId }`
 	);
 	return String( res?.data?.post_content ?? '' );
-}
-
-export type ResetResult = {
-	content: string;
-	version: string | null;
-	source_hash: string | null;
-	synced_at: string | null;
-	/** The post-reset sync status (e.g. "in_sync") for sync-enabled emails, or null otherwise. */
-	status: string | null;
-};
-
-/**
- * Call the /reset endpoint for a woo_email post using basic-auth credentials,
- * bypassing the cookie+nonce requirement of the WP REST API for authenticated
- * cookie sessions. Resets the post content to the canonical WooCommerce template.
- *
- * The reset endpoint returns the post-reset sync status (for example,
- * "in_sync") in the `status` field.
- */
-export async function resetWooEmailTemplate(
-	postId: number
-): Promise< ResetResult > {
-	const client = apiClient();
-	const res = await client.post(
-		`woocommerce-email-editor/v1/emails/${ postId }/reset`,
-		{}
-	);
-	if ( res?.data?.content === undefined ) {
-		throw new Error(
-			`resetWooEmailTemplate: unexpected response for post ${ postId }: ${ JSON.stringify(
-				res?.data
-			) }`
-		);
-	}
-	return res.data as ResetResult;
 }
