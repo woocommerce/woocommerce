@@ -194,4 +194,43 @@ class WC_Customer_Test extends \WC_Unit_Test_Case {
 
 		return $customer;
 	}
+
+	/**
+	 * Checkout validation counts "0" as a filled in field, so this check has to agree with it;
+	 * a shopper whose town is literally "0" must not have shipping withheld.
+	 *
+	 * @testdox has_full_shipping_address() reads a field the way checkout validation does.
+	 *
+	 * @dataProvider provide_shipping_city_values
+	 *
+	 * @param mixed $city     Shipping city to set.
+	 * @param bool  $expected Whether the address should read as complete.
+	 */
+	public function test_has_full_shipping_address_agrees_with_checkout_validation( $city, bool $expected ): void {
+		$sut = new WC_Customer();
+		$sut->set_shipping_country( 'US' );
+		$sut->set_shipping_state( 'CA' );
+		$sut->set_shipping_city( $city );
+		$sut->set_shipping_postcode( '94103' );
+
+		$this->assertSame( $expected, $sut->has_full_shipping_address() );
+	}
+
+	/**
+	 * Shipping city values, and whether each should leave the address complete. The non-string
+	 * cases matter because a `woocommerce_customer_get_shipping_city` callback can return any type.
+	 *
+	 * @return array<string, array{0: mixed, 1: bool}>
+	 */
+	public function provide_shipping_city_values(): array {
+		return array(
+			'a town named zero'   => array( '0', true ),
+			'an ordinary town'    => array( 'San Francisco', true ),
+			'nothing typed'       => array( '', false ),
+			'only whitespace'     => array( '   ', false ),
+			'false from a filter' => array( false, false ),
+			'null from a filter'  => array( null, false ),
+			'an array'            => array( array(), false ),
+		);
+	}
 }
