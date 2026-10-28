@@ -81,7 +81,7 @@ class ProductQueryFiltersTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_core_stock_status_counts(): void {
 		$fixtures = new FixtureData();
-		foreach ( array( 'instock', 'outofstock', 'onbackorder' ) as $status ) {
+		foreach ( array( ProductStockStatus::IN_STOCK, ProductStockStatus::OUT_OF_STOCK, ProductStockStatus::ON_BACKORDER ) as $status ) {
 			$fixtures->get_simple_product(
 				array(
 					'name'          => "Core {$status}",
@@ -93,16 +93,16 @@ class ProductQueryFiltersTest extends \WC_Unit_Test_Case {
 
 		$result = ( new ProductQueryFilters() )->get_stock_status_counts( new \WP_REST_Request( 'GET', '/wc/store/v1/products' ) );
 
-		$this->assertSame(
-			array(
-				'instock'     => '1',
-				'outofstock'  => '1',
-				'onbackorder' => '1',
-				'custom1'     => '1',
-				'custom2'     => '2',
-			),
-			$result
-		);
+		$this->assertArrayHasKey( ProductStockStatus::IN_STOCK, $result );
+		$this->assertSame( '1', $result[ ProductStockStatus::IN_STOCK ] );
+		$this->assertArrayHasKey( ProductStockStatus::OUT_OF_STOCK, $result );
+		$this->assertSame( '1', $result[ ProductStockStatus::OUT_OF_STOCK ] );
+		$this->assertArrayHasKey( ProductStockStatus::ON_BACKORDER, $result );
+		$this->assertSame( '1', $result[ ProductStockStatus::ON_BACKORDER ] );
+		$this->assertArrayHasKey( 'custom1', $result );
+		$this->assertSame( '1', $result['custom1'] );
+		$this->assertArrayHasKey( 'custom2', $result );
+		$this->assertSame( '2', $result['custom2'] );
 	}
 
 	/**
@@ -123,16 +123,16 @@ class ProductQueryFiltersTest extends \WC_Unit_Test_Case {
 			remove_filter( 'query', $observer );
 		}
 
-		$this->assertSame(
-			array(
-				'instock'     => '0',
-				'outofstock'  => '0',
-				'onbackorder' => '0',
-				'custom1'     => '1',
-				'custom2'     => '2',
-			),
-			$result
-		);
+		$this->assertArrayHasKey( ProductStockStatus::IN_STOCK, $result );
+		$this->assertSame( '0', $result[ ProductStockStatus::IN_STOCK ] );
+		$this->assertArrayHasKey( ProductStockStatus::OUT_OF_STOCK, $result );
+		$this->assertSame( '0', $result[ ProductStockStatus::OUT_OF_STOCK ] );
+		$this->assertArrayHasKey( ProductStockStatus::ON_BACKORDER, $result );
+		$this->assertSame( '0', $result[ ProductStockStatus::ON_BACKORDER ] );
+		$this->assertArrayHasKey( 'custom1', $result );
+		$this->assertSame( '1', $result['custom1'] );
+		$this->assertArrayHasKey( 'custom2', $result );
+		$this->assertSame( '2', $result['custom2'] );
 		$this->assertCount( 1, $queries, 'All stock statuses should be counted by one statement.' );
 	}
 
