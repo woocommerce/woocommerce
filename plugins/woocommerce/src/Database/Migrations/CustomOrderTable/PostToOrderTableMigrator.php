@@ -69,18 +69,13 @@ class PostToOrderTableMigrator extends MetaToCustomTableMigrator {
 				'type'        => 'string',
 				'destination' => 'status',
 			),
-			// WordPress leaves the GMT columns at the zero date for some posts (drafts, imports) and treats the local
-			// columns as the truth in that case. Without the fallback such orders arrive here with no date at all, and the
-			// next save stamps them with the current time.
 			'post_date_gmt'     => array(
-				'type'            => 'date',
-				'destination'     => 'date_created_gmt',
-				'fallback_column' => 'post_date',
+				'type'        => 'date',
+				'destination' => 'date_created_gmt',
 			),
 			'post_modified_gmt' => array(
-				'type'            => 'date',
-				'destination'     => 'date_updated_gmt',
-				'fallback_column' => 'post_modified',
+				'type'        => 'date',
+				'destination' => 'date_updated_gmt',
 			),
 			'post_parent'       => array(
 				'type'        => 'int',

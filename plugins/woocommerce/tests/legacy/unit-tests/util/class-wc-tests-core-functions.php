@@ -852,6 +852,8 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 
 	/**
 	 * Test wc_transaction_query function.
+	 *
+	 * @ddlInTransaction Starting and committing a transaction is the subject; the cleanup is committed too.
 	 */
 	public function test_wc_transaction_query() {
 		global $wpdb;
@@ -898,12 +900,14 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 		$col = $wpdb->get_col( "SElECT option_value FROM {$wpdb->prefix}options WHERE option_name = 'transaction_test'" );
 		$this->assertEquals( '0', $col[0] );
 
+		// The commits above made the row permanent, so the cleanup has to be committed as well.
 		$wpdb->delete(
 			$wpdb->prefix . 'options',
 			array(
 				'option_name' => 'transaction_test',
 			)
 		);
+		wc_transaction_query( 'commit', true );
 	}
 
 	/**

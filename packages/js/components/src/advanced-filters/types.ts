@@ -71,10 +71,7 @@ export type AdvancedFilterConfig = {
  * Range filters hold `[ start, end ]` while either end may still be unset.
  */
 export type ActiveFilterValue =
-	| string
-	| number
-	| Array< string | number | null | undefined >
-	| null;
+	string | number | Array< string | number | null | undefined > | null;
 
 export type ActiveFilter = {
 	key: string;
@@ -92,11 +89,7 @@ export type FilterChange = {
 export type OnFilterChange = ( change: FilterChange ) => void;
 
 export type AdvancedFilterAction =
-	| 'add'
-	| 'remove'
-	| 'match'
-	| 'filter'
-	| 'clear_all';
+	'add' | 'remove' | 'match' | 'filter' | 'clear_all';
 
 /**
  * `getCurrencyConfig()` returns `symbolPosition` as a plain string, so this stays

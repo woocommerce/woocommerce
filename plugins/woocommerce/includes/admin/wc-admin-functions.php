@@ -113,10 +113,34 @@ function wc_create_page( $slug, $option = '', $page_title = '', $page_content = 
 		}
 	}
 
+	$content_needle = '';
 	if ( strlen( $page_content ) > 0 ) {
-		// Search for an existing page with the specified page content (typically a shortcode).
-		$shortcode        = str_replace( array( '<!-- wp:shortcode -->', '<!-- /wp:shortcode -->' ), '', $page_content );
-		$valid_page_found = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type='page' AND post_status NOT IN ( 'pending', 'trash', 'future', 'auto-draft' ) AND post_content LIKE %s LIMIT 1;", "%{$shortcode}%" ) );
+		// Search for an existing page by its shortcode, or by a stable WooCommerce block identifier for block content.
+		$content_needle = str_replace( array( '<!-- wp:shortcode -->', '<!-- /wp:shortcode -->' ), '', $page_content );
+		$blocks         = parse_blocks( $page_content );
+		while ( ! empty( $blocks ) ) {
+			$block = array_shift( $blocks );
+			if ( isset( $block['blockName'] ) && 0 === strpos( $block['blockName'], 'woocommerce/' ) ) {
+				$block_needle = 'woocommerce/classic-shortcode' === $block['blockName'] ? serialize_block( $block ) : '<!-- wp:' . $block['blockName'] . ' ';
+				break;
+			}
+			if ( ! empty( $block['innerBlocks'] ) ) {
+				$blocks = array_merge( $block['innerBlocks'], $blocks );
+			}
+		}
+	}
+
+	if ( isset( $block_needle ) ) {
+		$valid_page_found = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT ID FROM $wpdb->posts WHERE post_type='page' AND post_status NOT IN ( 'pending', 'trash', 'future', 'auto-draft' ) AND post_content LIKE %s ORDER BY post_name = %s DESC, post_status = %s DESC, ID ASC LIMIT 1;",
+				'%' . $wpdb->esc_like( $block_needle ) . '%',
+				$slug,
+				$post_status
+			)
+		);
+	} elseif ( strlen( $content_needle ) > 0 ) {
+		$valid_page_found = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type='page' AND post_status NOT IN ( 'pending', 'trash', 'future', 'auto-draft' ) AND post_content LIKE %s LIMIT 1;", '%' . $wpdb->esc_like( $content_needle ) . '%' ) );
 	} else {
 		// Search for an existing page with the specified page slug.
 		$valid_page_found = $wpdb->get_var( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type='page' AND post_status NOT IN ( 'pending', 'trash', 'future', 'auto-draft' )  AND post_name = %s LIMIT 1;", $slug ) );
@@ -423,6 +447,11 @@ function wc_save_order_items( $order_id, $items ) {
 
 			foreach ( $data_keys as $key => $default ) {
 				$item_data[ $key ] = isset( $items[ $key ][ $item_id ] ) ? wc_clean( wp_unslash( $items[ $key ][ $item_id ] ) ) : $default;
+			}
+
+			// A cleared cost field shows a 0 placeholder, so store 0 rather than an empty string.
+			if ( is_string( $item_data['shipping_cost'] ) && '' === wc_format_decimal( $item_data['shipping_cost'] ) ) {
+				$item_data['shipping_cost'] = 0;
 			}
 
 			$item_data['shipping_method']       = is_string( $item_data['shipping_method'] ) ? $item_data['shipping_method'] : '';

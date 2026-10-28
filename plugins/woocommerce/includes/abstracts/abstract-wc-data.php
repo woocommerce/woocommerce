@@ -397,8 +397,7 @@ abstract class WC_Data {
 			return true; // return without warning because we don't want to break legacy code which was calling add/get/update/delete meta.
 		}
 
-		/* translators: %s: $key Key to check */
-		wc_doing_it_wrong( __FUNCTION__, sprintf( __( 'Generic add/update/get meta methods should not be used for internal meta data, including "%s". Use getters and setters.', 'woocommerce' ), $key ), '3.2.0' );
+		wc_doing_it_wrong( __FUNCTION__, sprintf( 'Generic add/update/get meta methods should not be used for internal meta data, including "%s". Use getters and setters.', $key ), '3.2.0' );
 
 		return true;
 	}
@@ -978,7 +977,7 @@ abstract class WC_Data {
 				return;
 			}
 
-			if ( is_a( $value, 'WC_DateTime' ) ) {
+			if ( $value instanceof WC_DateTime ) {
 				$datetime = $value;
 			} elseif ( is_numeric( $value ) ) {
 				// Timestamps are handled as UTC timestamps in all cases.

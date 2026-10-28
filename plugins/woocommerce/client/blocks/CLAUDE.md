@@ -44,13 +44,13 @@ pnpm --filter=@woocommerce/block-library analyze-bundles              # Webpack 
 ```text
 client/blocks/
 ├── assets/js/
-│   ├── blocks/              # ~56 block implementations (cart, checkout, product-*, filter-*)
-│   ├── atomic/              # Atomic/primitive blocks (product elements)
+│   ├── blocks/              # Block implementations (cart, checkout, filters, products)
+│   │   └── product-elements-blocks/ # Reusable product element blocks
 │   ├── base/                # Shared components, context, hooks, stores
 │   │   └── stores/woocommerce/  # Interactivity API stores (LOCKED)
 │   ├── editor-components/   # 33+ shared editor UI components
 │   ├── extensions/          # Extension integrations
-│   └── utils/               # Utility functions
+│   └── utils/               # Shared utility functions
 ├── packages/
 │   ├── public-api/          # Supported package-root extension contracts
 │   │   ├── block-data/      # WordPress @data stores
@@ -217,6 +217,7 @@ Webpack writes directly to `plugins/woocommerce/assets/client/blocks/` so PHP en
 ### Playwright E2E Tests
 
 - Config: `../../tests/e2e/playwright.config.ts` (Blocks e2e now lives in the core e2e suite)
+- Projects: `blocks-parallel` (default) and `blocks-serial` (specs in `blocksSerialSpecs`, database reset after each test). Write new specs parallel-safe, or use a test lock; add them to `blocksSerialSpecs` only as a last resort. See `../../tests/e2e/README.md#parallel-locked-and-serial-specs`.
 - Test themes: `block-theme`, `classic-theme`, `block-theme-with-templates`
 - Setup script: `../../tests/e2e/bin/blocks/test-env-setup.sh`
 - Uses MSW for API mocking, Allure for reporting

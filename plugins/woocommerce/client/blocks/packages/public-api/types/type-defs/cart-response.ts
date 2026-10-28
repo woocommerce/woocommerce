@@ -19,8 +19,7 @@ export interface CartResponseCouponItem {
 	totals: CartResponseTotalsItem;
 }
 
-export interface CartResponseCouponItemWithLabel
-	extends CartResponseCouponItem {
+export interface CartResponseCouponItemWithLabel extends CartResponseCouponItem {
 	label: string;
 }
 
@@ -52,11 +51,9 @@ export interface MetaKeyValue {
 }
 
 export type ExtensionsData =
-	| Record< string, unknown >
-	| Record< string, never >;
+	Record< string, unknown > | Record< string, never >;
 
-export interface CartResponseShippingPackageShippingRate
-	extends CurrencyResponse {
+export interface CartResponseShippingPackageShippingRate extends CurrencyResponse {
 	rate_id: string;
 	name: string;
 	description: string;
@@ -72,14 +69,12 @@ export interface CartResponseShippingPackageShippingRate
 export type CartResponseShippingRate = CartShippingRate;
 
 export interface CartResponseShippingAddress
-	extends ResponseBaseAddress,
-		ResponseFirstNameLastName {
+	extends ResponseBaseAddress, ResponseFirstNameLastName {
 	company: string;
 	phone: string;
 }
 
-export interface CartResponseBillingAddress
-	extends CartResponseShippingAddress {
+export interface CartResponseBillingAddress extends CartResponseShippingAddress {
 	email: string;
 }
 

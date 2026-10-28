@@ -26,6 +26,9 @@ export const MARKETPLACE_COLLABORATION_PATH =
 export const MARKETPLACE_SHARING_PATH =
 	MARKETPLACE_HOST +
 	'/document/managing-woocommerce-com-subscriptions/#share-a-subscription';
+export const MARKETPLACE_CONNECT_DOCS_PATH =
+	MARKETPLACE_HOST +
+	'/document/managing-woocommerce-com-subscriptions/connect-your-site-to-woocommerce-com/';
 export const WP_ADMIN_PLUGIN_LIST_URL = ADMIN_URL + 'plugins.php';
 export const WOO_CONNECT_PLUGIN_DOWNLOAD_URL =
 	MARKETPLACE_HOST + '/product-download/woo-update-manager';

@@ -31,6 +31,13 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	protected $meta_type = 'post';
 
 	/**
+	 * IDs of orders currently being permanently deleted, keyed by order ID.
+	 *
+	 * @var array<int, true>
+	 */
+	protected static $orders_being_deleted = array();
+
+	/**
 	 * Data stored in meta keys, but not considered "meta" for an order.
 	 *
 	 * @since 3.0.0
@@ -153,8 +160,8 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 			$order,
 			array(
 				'parent_id'     => $post_object->post_parent,
-				'date_created'  => $this->post_date_to_timestamp( $post_object->post_date_gmt, $post_object->post_date ),
-				'date_modified' => $this->post_date_to_timestamp( $post_object->post_modified_gmt, $post_object->post_modified ),
+				'date_created'  => $this->string_to_timestamp( $post_object->post_date_gmt ),
+				'date_modified' => $this->string_to_timestamp( $post_object->post_modified_gmt ),
 				'status'        => $post_object->post_status,
 			)
 		);
@@ -284,30 +291,35 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		$do_filters = ! $args['suppress_filters'];
 
 		if ( $args['force_delete'] ) {
-			if ( $do_filters ) {
-				/**
-				 * Fires immediately before an order is deleted from the database.
-				 *
-				 * @since 8.0.0
-				 *
-				 * @param int      $order_id ID of the order about to be deleted.
-				 * @param WC_Order $order    Instance of the order that is about to be deleted.
-				 */
-				do_action( 'woocommerce_before_delete_order', $id, $order );
-			}
+			self::$orders_being_deleted[ $id ] = true;
+			try {
+				if ( $do_filters ) {
+					/**
+					 * Fires immediately before an order is deleted from the database.
+					 *
+					 * @since 8.0.0
+					 *
+					 * @param int      $order_id ID of the order about to be deleted.
+					 * @param WC_Order $order    Instance of the order that is about to be deleted.
+					 */
+					do_action( 'woocommerce_before_delete_order', $id, $order );
+				}
 
-			wp_delete_post( $id );
-			$order->set_id( 0 );
+				wp_delete_post( $id );
+				$order->set_id( 0 );
 
-			if ( $do_filters ) {
-				/**
-				 * Fires immediately after an order is deleted.
-				 *
-				 * @since 2.7.0
-				 *
-				 * @param int $order_id ID of the order that has been deleted.
-				 */
-				do_action( 'woocommerce_delete_order', $id );
+				if ( $do_filters ) {
+					/**
+					 * Fires immediately after an order is deleted.
+					 *
+					 * @since 2.7.0
+					 *
+					 * @param int $order_id ID of the order that has been deleted.
+					 */
+					do_action( 'woocommerce_delete_order', $id );
+				}
+			} finally {
+				unset( self::$orders_being_deleted[ $id ] );
 			}
 		} else {
 			if ( $do_filters ) {
@@ -427,26 +439,6 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 	}
 
 	/**
-	 * Convert a post's GMT datetime to a timestamp, using the local one when the GMT column holds the zero date.
-	 *
-	 * WordPress leaves the GMT columns at the zero date for some posts (drafts, imports) and treats the local
-	 * column as the truth. The HPOS migrator applies the same rule, so both stores read the same date.
-	 *
-	 * @since 11.3.0
-	 *
-	 * @param string $gmt_date   Datetime in GMT, possibly the zero date.
-	 * @param string $local_date The same datetime in the site timezone.
-	 * @return int|null
-	 */
-	protected function post_date_to_timestamp( $gmt_date, $local_date ) {
-		$timestamp = $this->string_to_timestamp( $gmt_date );
-		if ( null === $timestamp && '' !== $local_date && '0000-00-00 00:00:00' !== $local_date ) {
-			$timestamp = $this->string_to_timestamp( get_gmt_from_date( $local_date ) );
-		}
-		return $timestamp;
-	}
-
-	/**
 	 * Read order data. Can be overridden by child classes to load other props.
 	 *
 	 * @param WC_Order $order Order object.
@@ -471,7 +463,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 				'cart_tax'           => $meta_data['_order_tax'][0] ?? '',
 				'total'              => $meta_data['_order_total'][0] ?? '',
 				'version'            => $meta_data['_order_version'][0] ?? '',
-				'prices_include_tax' => metadata_exists( 'post', $id, '_prices_include_tax' ) ? 'yes' === $prices_include_tax : 'yes' === get_option( 'woocommerce_prices_include_tax' ),
+				'prices_include_tax' => metadata_exists( 'post', $id, '_prices_include_tax' ) ? 'yes' === $prices_include_tax : wc_prices_include_tax(),
 			)
 		);
 
@@ -1001,6 +993,8 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 		add_filter( 'wp_insert_post_data', array( $this, 'update_post_modified_data' ), 10, 2 );
 		$post_data = array(
 			'ID'                 => $order->get_id(),
+			'post_date'          => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getOffsetTimestamp() ),
+			'post_date_gmt'      => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
 			'post_status'        => $this->get_post_status( $order ),
 			'post_parent'        => $order->get_parent_id(),
 			'edit_date'          => true,
@@ -1009,13 +1003,7 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 			'order_modified'     => ! is_null( $order->get_date_modified() ) ? gmdate( 'Y-m-d H:i:s', $order->get_date_modified( 'edit' )->getOffsetTimestamp() ) : '',
 			'order_modified_gmt' => ! is_null( $order->get_date_modified() ) ? gmdate( 'Y-m-d H:i:s', $order->get_date_modified( 'edit' )->getTimestamp() ) : '',
 		);
-		// An order with no created date leaves the post's date columns to WordPress, which keeps them unless they are zero too.
-		$date_created = $order->get_date_created( 'edit' );
-		if ( ! is_null( $date_created ) ) {
-			$post_data['post_date']     = gmdate( 'Y-m-d H:i:s', $date_created->getOffsetTimestamp() );
-			$post_data['post_date_gmt'] = gmdate( 'Y-m-d H:i:s', $date_created->getTimestamp() );
-		}
-		$updated = wp_update_post( $post_data );
+		$updated   = wp_update_post( $post_data );
 		remove_filter( 'wp_insert_post_data', array( $this, 'update_post_modified_data' ) );
 		return $updated;
 	}

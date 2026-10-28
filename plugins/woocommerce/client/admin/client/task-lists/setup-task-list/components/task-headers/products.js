@@ -29,10 +29,13 @@ const ProductsHeader = ( { task, goToTask } ) => {
 						: __( 'List your products', 'woocommerce' ) }
 				</h1>
 				<p>
-					{ __(
-						'Start selling by adding products or services to your store. Choose to list products manually, or import them from a different store. ',
-						'woocommerce'
-					) }
+					{
+						// eslint-disable-next-line @wordpress/i18n-no-flanking-whitespace
+						__(
+							'Start selling by adding products or services to your store. Choose to list products manually, or import them from a different store. ',
+							'woocommerce'
+						)
+					}
 				</p>
 				<Button
 					isSecondary={ task.isComplete }

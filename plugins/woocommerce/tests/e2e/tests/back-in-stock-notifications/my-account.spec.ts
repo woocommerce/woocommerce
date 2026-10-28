@@ -6,15 +6,17 @@ import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 /**
  * Internal dependencies
  */
-import { expect, request, tags } from '../../fixtures/fixtures';
+import { expect, request, tags, locks } from '../../fixtures/fixtures';
 import {
 	BIS_FEATURE_OPTION,
 	createOutOfStockProduct,
+	escapeRegExp,
 	resetBISOptions,
 	setBISOptions,
 	signUpOnProductPage,
 	test,
 } from '../../utils/back-in-stock-notifications';
+import { quotedPattern } from '../../utils/helpers';
 import { logInFromMyAccount } from '../../utils/login';
 import { setOption } from '../../utils/options';
 
@@ -60,7 +62,10 @@ async function createTestCustomer( restApi ): Promise< TestCustomer > {
 
 test.describe(
 	'Back in Stock Notifications — My Account',
-	{ tag: [ tags.SKIP_ON_EXTERNAL_ENV ] },
+	{
+		tag: [ tags.SKIP_ON_EXTERNAL_ENV ],
+		lock: [ locks.STOCK_NOTIFICATIONS, locks.EMAIL_FEATURE_FLAGS ],
+	},
 	() => {
 		test.beforeAll( async ( { baseURL } ) => {
 			await setOption( request, baseURL!, BIS_FEATURE_OPTION, 'yes' );
@@ -230,7 +235,7 @@ test.describe(
 					);
 					await expect(
 						page.getByText(
-							"You haven't signed up for any back-in-stock notifications yet."
+							/You haven['’]t signed up for any back-in-stock notifications yet\./
 						)
 					).toHaveCount( 0 );
 
@@ -326,7 +331,11 @@ test.describe(
 					// And a notice confirms the cancellation.
 					await expect(
 						page.getByText(
-							`Back in stock notification for "${ product.name }" cancelled.`
+							new RegExp(
+								`Back in stock notification for ${ quotedPattern(
+									escapeRegExp( product.name )
+								) } cancelled\\.`
+							)
 						)
 					).toBeVisible();
 				} finally {
@@ -365,7 +374,7 @@ test.describe(
 
 					await expect(
 						page.getByText(
-							"You haven't signed up for any back-in-stock notifications yet."
+							/You haven['’]t signed up for any back-in-stock notifications yet\./
 						)
 					).toBeVisible();
 

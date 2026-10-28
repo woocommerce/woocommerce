@@ -646,7 +646,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 			$this->error( 'coupon_invalid_amount', __( 'Invalid discount amount.', 'woocommerce' ) );
 		}
 
-		if ( 'percent' === $this->get_discount_type() && (float) $amount > 100 ) {
+		if ( 'percent' === $this->get_discount_type( 'edit' ) && (float) $amount > 100 ) {
 			$this->error( 'coupon_invalid_amount', __( 'Invalid discount amount.', 'woocommerce' ) );
 		}
 
@@ -827,7 +827,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 */
 	public function set_minimum_amount( $amount ) {
 		$amount = wc_format_decimal( $amount );
-		if ( (float) $this->get_maximum_amount() && (float) $amount > (float) $this->get_maximum_amount() ) {
+		if ( (float) $this->get_maximum_amount( 'edit' ) && (float) $amount > (float) $this->get_maximum_amount( 'edit' ) ) {
 			$this->error( 'coupon_invalid_minimum_amount', __( 'Invalid minimum spend value.', 'woocommerce' ) );
 		}
 		$this->set_prop( 'minimum_amount', $amount );
@@ -842,7 +842,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 */
 	public function set_maximum_amount( $amount ) {
 		$amount = wc_format_decimal( $amount );
-		if ( (float) $amount && (float) $this->get_minimum_amount() > (float) $amount ) {
+		if ( (float) $amount && (float) $this->get_minimum_amount( 'edit' ) > (float) $amount ) {
 			$this->error( 'coupon_invalid_maximum_amount', __( 'Invalid maximum spend value.', 'woocommerce' ) );
 		}
 
@@ -948,8 +948,8 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	/**
 	 * Increase usage count for current coupon.
 	 *
-	 * @param string   $used_by  Either user ID or billing email.
-	 * @param WC_Order $order  If provided, will clear the coupons held by this order.
+	 * @param int|string $used_by  Either user ID or billing email.
+	 * @param WC_Order   $order  If provided, will clear the coupons held by this order.
 	 * @return void
 	 */
 	public function increase_usage_count( $used_by = '', $order = null ) {
@@ -967,7 +967,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	/**
 	 * Decrease usage count for current coupon.
 	 *
-	 * @param string $used_by Either user ID or billing email.
+	 * @param int|string $used_by Either user ID or billing email.
 	 * @return void
 	 */
 	public function decrease_usage_count( $used_by = '' ) {
@@ -1291,8 +1291,10 @@ class WC_Coupon extends WC_Legacy_Coupon {
 
 						if ( count( $intersect ) > 0 ) {
 							foreach ( $intersect as $cat_id ) {
-								$cat          = get_term( $cat_id, 'product_cat' );
-								$categories[] = $cat->name;
+								$cat = get_term( $cat_id, 'product_cat' );
+								if ( $cat instanceof WP_Term ) {
+									$categories[] = $cat->name;
+								}
 							}
 						}
 					}
@@ -1506,7 +1508,7 @@ class WC_Coupon extends WC_Legacy_Coupon {
 	 * guard still applies.  When neither is supplied, this delegates entirely
 	 * to the parent.
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 * @param array  $props   Key/value pairs of properties to set.
 	 * @param string $context Operation context ('set', 'edit', 'view').
 	 * @return bool|WP_Error True on success, WP_Error on failure.
@@ -1517,7 +1519,8 @@ class WC_Coupon extends WC_Legacy_Coupon {
 
 		// When only one amount or neither is supplied, the parent sequential
 		// setter calls (and their individual guards) handle everything.
-		if ( ! $has_minimum || ! $has_maximum ) {
+		// While loading from the database, skip the pair check so a stored minimum above the maximum is kept rather than dropped.
+		if ( ! $has_minimum || ! $has_maximum || ! $this->get_object_read() ) {
 			return parent::set_props( $props, $context );
 		}
 

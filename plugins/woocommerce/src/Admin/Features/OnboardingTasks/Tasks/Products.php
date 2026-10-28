@@ -330,7 +330,7 @@ class Products extends Task {
 				return;
 			}
 
-			wp_safe_redirect( admin_url( 'admin.php?page=wc-admin&path=/add-product&task=products' ) );
+			wp_safe_redirect( admin_url( 'admin.php?page=wc-admin&path=/add-product&task=products&from=products-list' ) );
 			exit;
 		}
 	}

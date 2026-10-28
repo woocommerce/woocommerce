@@ -51,6 +51,11 @@ class SignupService {
 	// phpcs:enable
 
 	/**
+	 * Maximum length allowed for a single posted attribute value.
+	 */
+	private const MAX_ATTRIBUTE_LENGTH = 255;
+
+	/**
 	 * Eligibility service.
 	 *
 	 * @var EligibilityService
@@ -105,6 +110,9 @@ class SignupService {
 	 * exception raised further down still holds the customer back until the window expires. A
 	 * window that cannot be claimed at all is the exception, and lets the sign-up through.
 	 *
+	 * The rate limit is checked before the duplicate sign-up lookup, so a limited request is
+	 * rejected without also paying for that lookup.
+	 *
 	 * @param int    $product_id The product ID.
 	 * @param int    $user_id The user ID.
 	 * @param string $user_email The user email.
@@ -141,9 +149,13 @@ class SignupService {
 			return new \WP_Error( self::ERROR_INVALID_PRODUCT );
 		}
 
-		// Attempts that only find an existing active or pending sign-up, or activate an existing
-		// pending one, create nothing new and send no verification mail, so they are answered
-		// before the rate limit is consulted or claimed.
+		if ( SignupRateLimiter::is_rate_limited( $user_email ) ) {
+			return new \WP_Error( self::ERROR_RATE_LIMITED );
+		}
+
+		// An existing rate limit window blocks these attempts too, but attempts that only find
+		// an existing active or pending sign-up, or activate an existing pending one, never claim
+		// a window themselves: they create nothing new and send no verification mail.
 		$notification = $this->is_already_signed_up( $product_id, $user_id, $user_email, $posted_attributes );
 		if ( $notification instanceof Notification ) {
 			if ( NotificationStatus::ACTIVE === $notification->get_status() ) {
@@ -174,10 +186,6 @@ class SignupService {
 			}
 		}
 
-		if ( SignupRateLimiter::is_rate_limited( $user_email ) ) {
-			return new \WP_Error( self::ERROR_RATE_LIMITED );
-		}
-
 		// Claim the rate limit window before storing a notification or sending mail. This
 		// narrows the window in which two near-simultaneous requests both get through; it
 		// does not close it.
@@ -199,6 +207,8 @@ class SignupService {
 		$notification->set_user_email( $user_email );
 
 		if ( ! empty( $posted_attributes ) ) {
+			// Sort by key so the stored blob matches what the duplicate lookup serializes.
+			ksort( $posted_attributes );
 			$notification->update_meta_data( 'posted_attributes', $posted_attributes );
 		}
 
@@ -253,64 +263,31 @@ class SignupService {
 		// email, or vice versa. Match on user ID first, then fall back to the email so both states are found.
 		$identities = array();
 		if ( ! empty( $user_id ) ) {
-			$identities[] = array( 'user_id' => $user_id );
+			$identities[] = array(
+				'user_id'    => $user_id,
+				'user_email' => '',
+			);
 		}
 		if ( ! empty( $user_email ) ) {
-			$identities[] = array( 'user_email' => $user_email );
+			$identities[] = array(
+				'user_id'    => 0,
+				'user_email' => $user_email,
+			);
 		}
 
 		foreach ( $identities as $identity ) {
-			$notifications = NotificationQuery::get_notifications(
-				array_merge(
-					$identity,
-					array(
-						'product_id' => $product_id,
-						'status'     => array( NotificationStatus::ACTIVE, NotificationStatus::PENDING ),
-						'order_by'   => array( 'id' => 'DESC' ),
-						'return'     => 'objects',
-					)
-				)
-			);
+			$notification_id = NotificationQuery::get_matching_notification_id( $product_id, $identity['user_id'], $identity['user_email'], $posted_attributes );
+			if ( empty( $notification_id ) ) {
+				continue;
+			}
 
-			foreach ( $notifications as $notification ) {
-				if ( $notification instanceof Notification && $this->matches_posted_attributes( $notification, $posted_attributes ) ) {
-					return $notification;
-				}
+			$notification = Factory::get_notification( $notification_id );
+			if ( $notification instanceof Notification ) {
+				return $notification;
 			}
 		}
 
 		return null;
-	}
-
-	/**
-	 * Check whether a notification was signed up for with the posted attributes.
-	 *
-	 * A variation with "any" attributes can be signed up for more than once with different
-	 * attribute values, so the stored attributes have to match the posted ones. An empty set
-	 * of posted attributes matches any notification.
-	 *
-	 * @param Notification $notification The notification.
-	 * @param array        $posted_attributes The posted attributes.
-	 * @return bool True if the notification matches the posted attributes.
-	 */
-	private function matches_posted_attributes( Notification $notification, array $posted_attributes ): bool {
-
-		if ( empty( $posted_attributes ) ) {
-			return true;
-		}
-
-		$stored_attributes = $notification->get_meta( 'posted_attributes' );
-		if ( ! is_array( $stored_attributes ) || count( $stored_attributes ) !== count( $posted_attributes ) ) {
-			return false;
-		}
-
-		foreach ( $posted_attributes as $key => $value ) {
-			if ( ! array_key_exists( $key, $stored_attributes ) || (string) $stored_attributes[ $key ] !== (string) $value ) {
-				return false;
-			}
-		}
-
-		return true;
 	}
 
 	/**
@@ -341,6 +318,9 @@ class SignupService {
 		$parsed_data['product_id'] = $product->get_id();
 		if ( $product instanceof \WC_Product_Variation ) {
 			$posted_attributes = $this->parse_posted_attributes( $source, $product );
+			if ( \is_wp_error( $posted_attributes ) ) {
+				return $posted_attributes;
+			}
 
 			if ( ! empty( $posted_attributes ) ) {
 				$parsed_data['posted_attributes'] = $posted_attributes;
@@ -426,13 +406,21 @@ class SignupService {
 	 * For example, if a t-shirt variation has 'any' size but a specific color, we need to capture
 	 * the chosen size from the form submission while the color comes from the variation itself.
 	 *
-	 * @see \WC_Cart::add_to_cart() for similar attribute parsing logic.
+	 * Only 'any' attributes are read from the request. Every attribute the variation fixes is
+	 * already identified by the variation ID, so a posted value for one carries no information
+	 * and is ignored.
+	 *
+	 * Posted values are checked against the attribute's declared values, the same way
+	 * `WC_Cart::add_to_cart()` checks them for an 'any' attribute, so a request cannot store a
+	 * value the store never offered and mint a sign-up row that no later request can match.
+	 *
+	 * @see \WC_Cart::add_to_cart() for similar attribute parsing and validation logic.
 	 *
 	 * @param array       $source The source data, e.g. $_POST or $_REQUEST.
 	 * @param \WC_Product $variation The variation.
-	 * @return array The posted attributes.
+	 * @return array|\WP_Error The posted attributes, or a WP_Error if a posted value is too long or not one the store offers.
 	 */
-	private function parse_posted_attributes( array $source, \WC_Product $variation ): array {
+	private function parse_posted_attributes( array $source, \WC_Product $variation ) {
 
 		if ( ! $variation instanceof \WC_Product_Variation ) {
 			return array();
@@ -443,34 +431,46 @@ class SignupService {
 			return array();
 		}
 
+		// Empty values are the 'any' attributes, so what is left is the set the variation fixes.
+		$fixed_attributes = array_filter( $variation->get_variation_attributes(), 'wc_array_filter_default_attributes' );
+
 		$posted_attributes = array();
 		foreach ( $product->get_attributes() as $attribute ) {
-			if ( ! $attribute['is_variation'] ) {
+			if ( ! $attribute instanceof \WC_Product_Attribute || ! $attribute['is_variation'] ) {
 				continue;
 			}
 
 			$attribute_key = 'attribute_' . sanitize_title( $attribute['name'] );
-			if ( isset( $source[ $attribute_key ] ) ) {
-				if ( $attribute['is_taxonomy'] ) {
-					$value = sanitize_title( wp_unslash( $source[ $attribute_key ] ) );
-				} else {
-					$value = html_entity_decode( wc_clean( wp_unslash( $source[ $attribute_key ] ) ), ENT_QUOTES, get_bloginfo( 'charset' ) );
-				}
-
-				// Don't include if it's empty.
-				if ( ! empty( $value ) || '0' === $value ) {
-					$posted_attributes[ $attribute_key ] = $value;
-				}
+			if ( isset( $fixed_attributes[ $attribute_key ] ) || ! isset( $source[ $attribute_key ] ) ) {
+				continue;
 			}
+
+			// A request can post the value as an array, which the string sanitizers below cannot take.
+			$raw_value = wp_unslash( $source[ $attribute_key ] );
+			if ( ! is_string( $raw_value ) ) {
+				return new \WP_Error( self::ERROR_INVALID_REQUEST );
+			}
+
+			if ( $attribute['is_taxonomy'] ) {
+				$value = sanitize_title( $raw_value );
+			} else {
+				$value = html_entity_decode( wc_clean( $raw_value ), ENT_QUOTES, get_bloginfo( 'charset' ) );
+			}
+
+			// Don't include if it's empty.
+			if ( empty( $value ) && '0' !== $value ) {
+				continue;
+			}
+
+			// Length first, so an oversized value is rejected without reading the declared ones.
+			if ( strlen( $value ) > self::MAX_ATTRIBUTE_LENGTH || ! in_array( $value, $attribute->get_slugs(), true ) ) {
+				return new \WP_Error( self::ERROR_INVALID_REQUEST );
+			}
+
+			$posted_attributes[ $attribute_key ] = $value;
 		}
 
-		$variation_attributes = $variation->get_variation_attributes();
-		// Filter out 'any' variations, which are empty.
-		$variation_attributes = array_filter( $variation_attributes );
-		$diff                 = array_diff( $posted_attributes, $variation_attributes );
-
-		// Return the posted attributes only if a variation with `any` attribute is detected.
-		return ! empty( $diff ) ? $diff : array();
+		return $posted_attributes;
 	}
 
 	/**
