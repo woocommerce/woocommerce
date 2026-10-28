@@ -123,6 +123,36 @@ class Image_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test a caption saved without core's caption class still gets it.
+	 *
+	 * Image captions saved before WordPress 6.2 carry no class, and the email's caption styles key off
+	 * that class, so without it a saved caption color never reaches them.
+	 */
+	public function testItAddsTheCaptionClassToACaptionSavedWithoutIt(): void {
+		$image_content             = str_replace( '</figure>', '<figcaption>Caption</figcaption></figure>', $this->image_content );
+		$parsed_image              = $this->parsed_image;
+		$parsed_image['innerHTML'] = $image_content;
+
+		$rendered = $this->image_renderer->render( $image_content, $parsed_image, $this->rendering_context );
+
+		$this->assertStringContainsString( '<span class="wp-element-caption">Caption</span>', $rendered );
+	}
+
+	/**
+	 * Test it keeps a caption's existing classes and does not repeat the caption class.
+	 */
+	public function testItKeepsExistingCaptionClasses(): void {
+		$image_content             = str_replace( '</figure>', '<figcaption class="custom-caption wp-element-caption">Caption</figcaption></figure>', $this->image_content );
+		$parsed_image              = $this->parsed_image;
+		$parsed_image['innerHTML'] = $image_content;
+
+		$rendered = $this->image_renderer->render( $image_content, $parsed_image, $this->rendering_context );
+
+		$this->assertStringContainsString( '<span class="custom-caption wp-element-caption">Caption</span>', $rendered );
+		$this->assertSame( 1, substr_count( $rendered, 'wp-element-caption' ) );
+	}
+
+	/**
 	 * Test it renders image alignment
 	 */
 	public function testItRendersImageAlignment(): void {
