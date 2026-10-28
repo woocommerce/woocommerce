@@ -2,6 +2,10 @@
 
 Checks published products against the product data specs of AI shopping channels and reports what keeps them from being listed or found. Behind the experimental `agent_readiness` feature flag (disabled by default, not shown on the Features screen).
 
+## Scope
+
+The checks read product data and store settings, because most gaps are empty fields only the merchant can fill, and a check can name the product and field. When data is filled in but a store output (UCP catalog, product structured data) doesn't send it, that is a bug fixed in that output's code, not a check. What a store can't see from its own data, such as crawler blocks at a CDN, `llms.txt` or page markup from themes and plugins, is left to an outside scan of the store's public pages.
+
 ## Channels
 
 | Id | Channel | Spec |
@@ -108,7 +112,7 @@ The per-channel field and effect live in each check's `channels()`. The final ma
 
 `ReadinessFeedValidator` implements `ProductFeed\Feed\FeedValidatorInterface` and returns the ids of the checks a product fails, so feed integrations can reuse the checks. It judges a variation by its parent, as the scan counts it, and returns no issues for products the scan leaves out (grouped, external, unpublished). The rules are built once per request. The feed framework skips rows with issues, so an integration that only wants to report gaps should wrap it.
 
-Core's UCP catalog mapper (`src/Internal/ProductFeed/Mapping/UcpProductMapper.php`) sends no brand and no GTIN today, so a product that passes `missing_brand` and `missing_gtin` still doesn't give agents those fields through it.
+Core's UCP catalog mapper (`src/Internal/ProductFeed/Mapping/UcpProductMapper.php`) sends each variant's GTIN as a barcode since #70351. UCP has no brand field, so `missing_brand` matters for the other channels, not UCP.
 
 ## Trying it
 
