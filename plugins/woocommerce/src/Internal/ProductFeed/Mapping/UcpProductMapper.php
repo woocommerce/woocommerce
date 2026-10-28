@@ -673,7 +673,7 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 	 * @return array Empty, or one `{ type, value }` barcode.
 	 */
 	private function build_barcodes( \WC_Product $product ): array {
-		$gtin = preg_replace( '/[^0-9]/', '', (string) $product->get_global_unique_id() );
+		$gtin = (string) preg_replace( '/[^0-9]/', '', (string) $product->get_global_unique_id() );
 		if ( ! preg_match( '/^(\d{8}|\d{12,14})$/', $gtin ) ) {
 			return array();
 		}
