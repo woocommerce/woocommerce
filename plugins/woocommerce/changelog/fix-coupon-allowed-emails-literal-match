@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Match coupon "Allowed emails" entries exactly, with the asterisk (*) as the only wildcard.
