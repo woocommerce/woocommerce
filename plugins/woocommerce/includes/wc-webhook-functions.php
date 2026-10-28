@@ -36,7 +36,7 @@ function wc_webhook_execute_queue() {
 
 			// Make webhooks unique - only schedule one webhook every 10 minutes to maintain backward compatibility with WP Cron behaviour seen in WC < 3.5.0.
 			// A pending delivery has a timestamp; an in-progress delivery (true) or none (false) gets a new one.
-			if ( ! is_numeric( $next_scheduled ) || $next_scheduled >= ( 600 + time() ) ) {
+			if ( ! is_numeric( $next_scheduled ) || $next_scheduled >= ( 10 * MINUTE_IN_SECONDS + time() ) ) {
 				/**
 				 * Filters the Action Scheduler priority of a queued webhook delivery.
 				 *
