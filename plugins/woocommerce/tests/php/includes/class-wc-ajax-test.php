@@ -3783,6 +3783,43 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox A checkout update converts posted state names to state codes before calculating totals.
+	 */
+	public function test_update_order_review_converts_state_names_to_codes(): void {
+		$original_post     = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing -- Restored after the AJAX fixture.
+		$original_customer = clone WC()->customer;
+		$product           = null;
+
+		try {
+			WC()->cart->empty_cart();
+			$product = WC_Helper_Product::create_simple_product();
+			WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+			$_POST = array(
+				'security'  => wp_create_nonce( 'update-order-review' ),
+				'post_data' => '',
+				'country'   => 'US',
+				'state'     => 'Hawaii',
+				's_country' => 'US',
+				's_state'   => 'ıL',
+			);
+
+			$this->do_ajax( 'woocommerce_update_order_review' );
+
+			$this->assertSame( 'HI', WC()->customer->get_billing_state(), 'The billing state name should be stored as its code.' );
+			$this->assertSame( 'IL', WC()->customer->get_shipping_state(), 'The shipping state spelling should be stored as its code.' );
+		} finally {
+			wc_clear_notices();
+			WC()->cart->empty_cart();
+			if ( $product instanceof WC_Product ) {
+				$product->delete( true );
+			}
+			WC()->customer = $original_customer;
+			$_POST         = $original_post;
+		}
+	}
+
+	/**
 	 * @testdox Saving shipping providers is rejected when the fulfillments feature is disabled.
 	 */
 	public function test_shipping_providers_save_changes_rejects_when_feature_disabled(): void {

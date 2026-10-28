@@ -20,6 +20,7 @@ use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\CustomMetaBox;
 use Automattic\WooCommerce\Internal\Products\ProductsOrderingMoveService;
 use Automattic\WooCommerce\Internal\Utilities\Users;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Automattic\WooCommerce\StoreApi\Utilities\ValidationUtils;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
@@ -470,6 +471,17 @@ class WC_AJAX {
 					'shipping_address_2' => isset( $_POST['s_address_2'] ) ? wc_clean( wp_unslash( $_POST['s_address_2'] ) ) : null,
 				)
 			);
+		}
+
+		// Shipping zones and tax rates match on state codes, so convert posted state names (e.g. "Hawaii") to their codes.
+		$validation_utils = new ValidationUtils();
+
+		if ( isset( $_POST['state'] ) ) {
+			WC()->customer->set_billing_state( $validation_utils->format_state( WC()->customer->get_billing_state( 'edit' ), WC()->customer->get_billing_country( 'edit' ) ) );
+		}
+
+		if ( isset( $_POST[ wc_ship_to_billing_address_only() ? 'state' : 's_state' ] ) ) {
+			WC()->customer->set_shipping_state( $validation_utils->format_state( WC()->customer->get_shipping_state( 'edit' ), WC()->customer->get_shipping_country( 'edit' ) ) );
 		}
 
 		if ( isset( $_POST['has_full_address'] ) && wc_string_to_bool( wc_clean( wp_unslash( $_POST['has_full_address'] ) ) ) ) {

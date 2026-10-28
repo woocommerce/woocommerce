@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 use Automattic\WooCommerce\Internal\ProductVariations\SelectedVariationName;
 use Automattic\WooCommerce\Internal\Tax\TaxRateDataStore;
+use Automattic\WooCommerce\StoreApi\Utilities\ValidationUtils;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -863,6 +864,20 @@ class WC_Checkout {
 		if ( in_array( 'shipping', $skipped, true ) && ( WC()->cart->needs_shipping_address() || wc_ship_to_billing_address_only() ) ) {
 			foreach ( $this->get_checkout_fields( 'shipping' ) as $key => $field ) {
 				$data[ $key ] = isset( $data[ 'billing_' . substr( $key, 9 ) ] ) ? $data[ 'billing_' . substr( $key, 9 ) ] : '';
+			}
+		}
+
+		// Totals are calculated from this data before validate_posted_data() runs, and shipping zones and tax rates
+		// match on state codes, so convert state names (e.g. "Hawaii") to their codes here.
+		$validation_utils = new ValidationUtils();
+
+		foreach ( $this->get_checkout_fields() as $fieldset_key => $fieldset ) {
+			foreach ( $fieldset as $key => $field ) {
+				if ( empty( $data[ $key ] ) || ! is_string( $data[ $key ] ) || ! in_array( 'state', (array) ( $field['validate'] ?? array() ), true ) ) {
+					continue;
+				}
+
+				$data[ $key ] = $validation_utils->format_state( $data[ $key ], $this->get_fieldset_country( $fieldset_key, $data ) );
 			}
 		}
 
