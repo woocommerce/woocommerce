@@ -219,8 +219,10 @@ abstract class ActionableAbility extends \WP_Ability {
 	/**
 	 * Run every validator of the resource on the changed object, also after one
 	 * refuses. Each refusal gets the code `<namespace>:<code>`, so refusals with
-	 * the same code keep their own data. A validator that throws goes after the
-	 * refusals, so the response status comes from a refusal when there is one.
+	 * the same code keep their own data. When the code is already taken in the
+	 * same namespace, it gets a numeric suffix, as `<namespace>:<code>:2`. A
+	 * validator that throws goes after the refusals, so the response status
+	 * comes from a refusal when there is one.
 	 *
 	 * @param \WC_Data $subject Changed object.
 	 * @return \WP_Error|null One WP_Error with the refusals of all validators that refuse the change.
@@ -236,8 +238,13 @@ abstract class ActionableAbility extends \WP_Ability {
 			foreach ( $rejected->get_error_codes() as $code ) {
 				$data   = $rejected->get_error_data( $code );
 				$target = 500 === ( $data['status'] ?? null ) ? $failed : $refused;
+				$key    = $args['namespace'] . ':' . $code;
+				$n      = 1;
+				while ( in_array( $key, $target->get_error_codes(), true ) ) {
+					$key = $args['namespace'] . ':' . $code . ':' . ( ++$n );
+				}
 				foreach ( $rejected->get_error_messages( $code ) as $message ) {
-					$target->add( $args['namespace'] . ':' . $code, $message, $data );
+					$target->add( $key, $message, $data );
 				}
 			}
 		}
