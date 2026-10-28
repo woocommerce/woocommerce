@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Fix a fatal error when a user without permission requests attribute terms from the wc-analytics REST API.
+Fix fatal errors from unqualified WP_Error in the wc-analytics attribute terms and notice endpoints.
