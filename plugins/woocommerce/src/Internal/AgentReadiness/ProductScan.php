@@ -98,19 +98,17 @@ class ProductScan {
 		do {
 			$query = new \WP_Query(
 				array(
-					'post_type'              => 'product',
-					'post_status'            => 'publish',
-					'posts_per_page'         => self::BATCH_SIZE,
-					'paged'                  => $page,
-					'fields'                 => 'ids',
-					'orderby'                => array(
+					'post_type'      => 'product',
+					'post_status'    => 'publish',
+					'posts_per_page' => self::BATCH_SIZE,
+					'paged'          => $page,
+					'fields'         => 'ids',
+					'orderby'        => array(
 						'modified' => 'DESC',
 						'ID'       => 'DESC',
 					),
-					'no_found_rows'          => true,
-					'update_post_meta_cache' => true,
-					'update_post_term_cache' => true,
-					'tax_query'              => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+					'no_found_rows'  => true,
+					'tax_query'      => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
 						array(
 							'taxonomy' => 'product_type',
 							'field'    => 'slug',
@@ -143,16 +141,18 @@ class ProductScan {
 	}
 
 	/**
-	 * Load the featured images and variations the checks read for these
-	 * products, one query each instead of one per product.
+	 * Load the products with their meta and terms, then the featured images
+	 * and variations the checks read, one query each instead of one per product.
 	 *
-	 * @param array<int, int|string> $product_ids Product ids, already primed.
+	 * @param array<int, int|string> $product_ids Product ids.
 	 */
 	public static function prime_related( array $product_ids ): void {
 		global $wpdb;
 		if ( empty( $product_ids ) ) {
 			return;
 		}
+
+		_prime_post_caches( array_map( 'intval', $product_ids ), true, true );
 
 		_prime_post_caches(
 			array_filter(

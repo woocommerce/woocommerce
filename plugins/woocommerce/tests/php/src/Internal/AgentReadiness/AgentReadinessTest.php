@@ -119,4 +119,38 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 		$this->assertNotContains( 'missing_product_text', $issues );
 		$this->assertNotContains( 'missing_regular_price', $issues );
 	}
+
+	/**
+	 * @testdox The feed validator judges a variation by its parent and skips products the scan leaves out.
+	 */
+	public function test_feed_validator_follows_scan_coverage(): void {
+		$variable  = WC_Helper_Product::create_variation_product();
+		$variation = wc_get_product( $variable->get_children()[0] );
+		$grouped   = WC_Helper_Product::create_grouped_product();
+		$draft     = WC_Helper_Product::create_simple_product( true, array( 'status' => 'draft' ) );
+
+		$this->assertSame( $this->sut->get_failing_check_ids( $variable ), $this->sut->get_failing_check_ids( $variation ), 'A variation should get its parent\'s issues' );
+		$this->assertContains( 'missing_brand', $this->sut->get_failing_check_ids( $variation ) );
+		$this->assertSame( array(), $this->sut->get_failing_check_ids( $grouped ), 'Grouped products are not scanned' );
+		$this->assertSame( array(), $this->sut->get_failing_check_ids( $draft ), 'Unpublished products are not scanned' );
+	}
+
+	/**
+	 * @testdox The rules filter runs once per instance, not once per product.
+	 */
+	public function test_rules_are_built_once(): void {
+		$calls = 0;
+		add_filter(
+			'woocommerce_agent_readiness_rules',
+			static function ( $rules ) use ( &$calls ) {
+				++$calls;
+				return $rules;
+			}
+		);
+
+		$this->sut->get_failing_check_ids( WC_Helper_Product::create_simple_product() );
+		$this->sut->get_failing_check_ids( WC_Helper_Product::create_simple_product() );
+
+		$this->assertSame( 1, $calls );
+	}
 }

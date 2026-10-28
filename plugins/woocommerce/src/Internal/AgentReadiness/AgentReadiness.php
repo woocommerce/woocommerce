@@ -52,6 +52,13 @@ class AgentReadiness {
 	private ?ProductScan $product_scan = null;
 
 	/**
+	 * Rules that run and their channel maps, built once per instance.
+	 *
+	 * @var array{rules:array<string, ReadinessRule>,channel_rules:array<string, array<string, array{field:string,effect:string}>>}|null
+	 */
+	private ?array $active_rules = null;
+
+	/**
 	 * Initialize dependencies.
 	 *
 	 * @internal
@@ -156,8 +163,9 @@ class AgentReadiness {
 	 * @return array{generated_at:string,products:int,store_checks:array<int,array<string,mixed>>,channels:array<string,array<string,mixed>>,checks:array<int,array<string,mixed>>,truncated:bool}
 	 */
 	public function get_report(): array {
-		$channel_rules = $this->get_channel_rules();
-		$rules         = array_intersect_key( $this->get_default_rules(), $channel_rules );
+		$active        = $this->get_active_rules();
+		$rules         = $active['rules'];
+		$channel_rules = $active['channel_rules'];
 
 		$scan = new ProductScan();
 		$scan->evaluate( $rules, $channel_rules, self::PRODUCT_IDS_LIMIT );
@@ -209,16 +217,44 @@ class AgentReadiness {
 	}
 
 	/**
-	 * Ids of the checks one product fails.
+	 * Ids of the checks one product fails. A variation is judged by its parent,
+	 * as the scan counts it; other products the scan leaves out (grouped,
+	 * external, unpublished) have no issues.
 	 *
-	 * @param \WC_Product $product Product.
+	 * @param \WC_Product $product Product or variation.
 	 * @return array<int, string>
 	 */
 	public function get_failing_check_ids( \WC_Product $product ): array {
+		if ( $product instanceof \WC_Product_Variation ) {
+			$parent = wc_get_product( $product->get_parent_id() );
+			if ( ! $parent instanceof \WC_Product ) {
+				return array();
+			}
+			$product = $parent;
+		}
+		if ( ! ProductScan::covers( $product ) ) {
+			return array();
+		}
 		if ( null === $this->product_scan ) {
 			$this->product_scan = new ProductScan();
 		}
-		$rules = array_intersect_key( $this->get_default_rules(), $this->get_channel_rules() );
-		return $this->product_scan->failed_rule_ids( $product, $rules );
+		return $this->product_scan->failed_rule_ids( $product, $this->get_active_rules()['rules'] );
+	}
+
+	/**
+	 * The checks that run after the rules filter, with their channel maps.
+	 * Built once, so the feed path does not rebuild them per product.
+	 *
+	 * @return array{rules:array<string, ReadinessRule>,channel_rules:array<string, array<string, array{field:string,effect:string}>>}
+	 */
+	private function get_active_rules(): array {
+		if ( null === $this->active_rules ) {
+			$channel_rules      = $this->get_channel_rules();
+			$this->active_rules = array(
+				'rules'         => array_intersect_key( $this->get_default_rules(), $channel_rules ),
+				'channel_rules' => $channel_rules,
+			);
+		}
+		return $this->active_rules;
 	}
 }
