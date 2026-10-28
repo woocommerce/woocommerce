@@ -910,6 +910,11 @@ class OrderController {
 	 */
 	private function get_usage_per_aliases( $coupon, $aliases ) {
 		global $wpdb;
+		$data_store = $coupon->get_data_store();
+		if ( $data_store instanceof \WC_Data_Store && $data_store->has_callable( 'add_recorded_user_ids_to_aliases' ) ) {
+			// @phpstan-ignore-next-line method.notFound (Guarded by has_callable() and called via __call() on the coupon data store instance.)
+			$aliases = $data_store->add_recorded_user_ids_to_aliases( $coupon, $aliases );
+		}
 		$aliases        = array_unique( array_filter( $aliases ) );
 		$aliases_string = "('" . implode( "','", array_map( 'esc_sql', $aliases ) ) . "')";
 		$usage_count    = $wpdb->get_var(
@@ -920,7 +925,6 @@ class OrderController {
 			)
 		);
 
-		$data_store = $coupon->get_data_store();
 		// Coupons can be held for an x amount of time before being applied to an order, so we need to check if it's already being held in (maybe via another flow).
 		$tentative_usage_count = $data_store->get_tentative_usages_for_user( $coupon->get_id(), $aliases );
 		return $tentative_usage_count + $usage_count;
