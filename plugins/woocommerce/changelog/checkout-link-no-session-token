@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Checkout link URLs now carry a token that only copies the cart to another browser, without the shopper's details.

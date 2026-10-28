@@ -147,4 +147,16 @@ class SessionHandlerTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( $customer_id, $handler->get_customer_id(), 'A customer token should address its own session' );
 	}
+
+	/**
+	 * @testdox A cart link token sent as a Cart-Token does not load the session it names.
+	 */
+	public function test_cart_link_token_does_not_load_the_session_it_names(): void {
+		$_SERVER['HTTP_CART_TOKEN'] = CartTokenUtils::get_cart_link_token( 't_guest_session' );
+
+		$handler = new SessionHandler();
+		$handler->init();
+
+		$this->assertNotSame( 't_guest_session', $handler->get_customer_id(), 'A link token should not address the session it names' );
+	}
 }
