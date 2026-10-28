@@ -85,7 +85,8 @@ trait ProductAbilityTrait {
 			$type_schema = self::get_product_type_schema( array( $product_type ) );
 
 			if ( ProductType::SIMPLE === $product_type ) {
-				$type_schema['default'] = ProductType::SIMPLE;
+				$type_schema['default']      = ProductType::SIMPLE;
+				$type_schema['description'] .= ' ' . __( 'A product without a type is simple.', 'woocommerce' );
 			} else {
 				$required[] = 'type';
 			}
@@ -206,75 +207,130 @@ trait ProductAbilityTrait {
 	}
 
 	/**
-	 * Product types that the mutation abilities support.
+	 * Product types that the mutation abilities support: every registered type
+	 * with a class of its own, except the variable ones.
 	 *
 	 * @return array<int, string>
 	 */
 	protected static function get_supported_product_types(): array {
-		return array_values(
-			array_filter(
-				array_map( 'strval', array_keys( wc_get_product_types() ) ),
-				static function ( string $product_type ): bool {
-					return ! is_a( \WC_Product_Factory::get_product_classname( 0, $product_type ), \WC_Product_Variable::class, true );
-				}
-			)
-		);
+		$product_types = array();
+
+		foreach ( array_keys( wc_get_product_types() ) as $product_type ) {
+			$product_type = (string) $product_type;
+
+			if ( ! is_wp_error( self::get_product_class_config( \WC_Product_Factory::get_product_classname( 0, $product_type ), $product_type ) ) ) {
+				$product_types[] = $product_type;
+			}
+		}
+
+		return $product_types;
 	}
 
 	/**
 	 * Get the configuration of a product type.
 	 *
-	 * The product class decides which Core fields apply. A type whose class
-	 * extends a Core class gets the fields of that class.
-	 *
 	 * @param string $product_type Product type.
 	 * @return array{fields: array<int, string>, product_props: array<string, mixed>}|\WP_Error
 	 */
 	protected static function get_product_type_config( string $product_type ) {
-		if ( ! in_array( $product_type, self::get_supported_product_types(), true ) ) {
-			return new \WP_Error(
-				'woocommerce_product_type_unsupported',
-				__( 'Product type is not supported by this ability.', 'woocommerce' ),
-				array( 'status' => 400 )
-			);
+		if ( ! isset( wc_get_product_types()[ $product_type ] ) ) {
+			return self::get_unsupported_product_type_error();
 		}
 
-		$classname     = \WC_Product_Factory::get_product_classname( 0, $product_type );
-		$common_fields = self::get_common_product_mutation_fields();
+		return self::get_product_class_config( \WC_Product_Factory::get_product_classname( 0, $product_type ), $product_type );
+	}
+
+	/**
+	 * Get the configuration of a product class.
+	 *
+	 * The product class decides which Core fields apply. A class that extends
+	 * a Core class gets the fields of that class. The owner of a type changes
+	 * the list with the `woocommerce_ability_product_type_fields` filter.
+	 *
+	 * @param string $classname    Product class.
+	 * @param string $product_type Product type.
+	 * @return array{fields: array<int, string>, product_props: array<string, mixed>}|\WP_Error
+	 */
+	private static function get_product_class_config( string $classname, string $product_type ) {
+		if ( is_a( $classname, \WC_Product_Variable::class, true ) ) {
+			return self::get_unsupported_product_type_error();
+		}
+
+		if ( \WC_Product_Simple::class === $classname && ProductType::SIMPLE !== $product_type ) {
+			return self::get_invalid_product_type_error();
+		}
+
+		$fields        = self::get_common_product_mutation_fields();
+		$product_props = array();
 		$price_fields  = array( 'regular_price', 'sale_price' );
 
 		if ( is_a( $classname, \WC_Product_External::class, true ) ) {
-			return array(
-				'fields'        => array_merge( $common_fields, $price_fields, array( 'external_url', 'button_text' ) ),
-				'product_props' => array(
-					'virtual'        => false,
-					'downloadable'   => false,
-					'manage_stock'   => false,
-					'stock_quantity' => '',
-					'stock_status'   => ProductStockStatus::IN_STOCK,
-				),
+			$fields        = array_merge( $fields, $price_fields, array( 'external_url', 'button_text' ) );
+			$product_props = array(
+				'virtual'        => false,
+				'downloadable'   => false,
+				'manage_stock'   => false,
+				'stock_quantity' => '',
+				'stock_status'   => ProductStockStatus::IN_STOCK,
 			);
-		}
-
-		if ( is_a( $classname, \WC_Product_Grouped::class, true ) ) {
-			return array(
-				'fields'        => array_merge( $common_fields, array( 'grouped_products' ) ),
-				'product_props' => array(
-					'manage_stock'   => false,
-					'stock_quantity' => '',
-				),
+		} elseif ( is_a( $classname, \WC_Product_Grouped::class, true ) ) {
+			$fields        = array_merge( $fields, array( 'grouped_products' ) );
+			$product_props = array(
+				'manage_stock'   => false,
+				'stock_quantity' => '',
 			);
+		} else {
+			$fields = array_merge( $fields, array( 'virtual', 'downloadable' ) );
+
+			if ( is_a( $classname, \WC_Product_Simple::class, true ) ) {
+				$fields = array_merge( $fields, $price_fields, array( 'manage_stock', 'stock_quantity', 'stock_status' ) );
+			}
 		}
 
-		$fields = array_merge( $common_fields, array( 'virtual', 'downloadable' ) );
-
-		if ( is_a( $classname, \WC_Product_Simple::class, true ) ) {
-			$fields = array_merge( $fields, $price_fields, array( 'manage_stock', 'stock_quantity', 'stock_status' ) );
-		}
+		/**
+		 * Filter the Core fields that the product abilities accept for a product type.
+		 *
+		 * WooCommerce picks the fields from the product class. The owner of a
+		 * type adds a Core field that its type needs, such as a price for a
+		 * bundle, or removes one. A name that is not a Core field is ignored.
+		 *
+		 * @since 11.4.0
+		 *
+		 * @param array<int, string> $fields       Field names.
+		 * @param string             $product_type Product type.
+		 * @param string             $classname    Product class.
+		 */
+		$fields = apply_filters( 'woocommerce_ability_product_type_fields', $fields, $product_type, $classname );
 
 		return array(
-			'fields'        => $fields,
-			'product_props' => array(),
+			'fields'        => array_values( array_intersect( array_keys( self::get_product_mutation_field_schemas() ), (array) $fields ) ),
+			'product_props' => $product_props,
+		);
+	}
+
+	/**
+	 * The error for a product type that the ability does not support.
+	 *
+	 * @return \WP_Error
+	 */
+	private static function get_unsupported_product_type_error(): \WP_Error {
+		return new \WP_Error(
+			'woocommerce_product_type_unsupported',
+			__( 'Product type is not supported by this ability.', 'woocommerce' ),
+			array( 'status' => 400 )
+		);
+	}
+
+	/**
+	 * The error for a product type without a class.
+	 *
+	 * @return \WP_Error
+	 */
+	private static function get_invalid_product_type_error(): \WP_Error {
+		return new \WP_Error(
+			'woocommerce_invalid_product_type',
+			__( 'Invalid product type.', 'woocommerce' ),
+			array( 'status' => 400 )
 		);
 	}
 
@@ -289,24 +345,20 @@ trait ProductAbilityTrait {
 		$product = wc_get_product_object( $product_type, $product_id );
 
 		if ( ! $product || $product->get_type() !== $product_type ) {
-			return new \WP_Error(
-				'woocommerce_invalid_product_type',
-				__( 'Invalid product type.', 'woocommerce' ),
-				array( 'status' => 400 )
-			);
+			return self::get_invalid_product_type_error();
 		}
 
 		return $product;
 	}
 
 	/**
-	 * Get the configuration for an existing product.
+	 * Get the configuration for a product object, from its class.
 	 *
 	 * @param \WC_Product $product Product object.
 	 * @return array|\WP_Error
 	 */
 	protected static function get_product_config_for_product( \WC_Product $product ) {
-		return self::get_product_type_config( $product->get_type() );
+		return self::get_product_class_config( get_class( $product ), $product->get_type() );
 	}
 
 	/**

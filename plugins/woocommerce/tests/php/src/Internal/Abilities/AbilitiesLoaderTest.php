@@ -1551,6 +1551,17 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 1, $physical_result['total_pages'] );
 		$this->assertSame( $physical['product']['id'], $physical_result['products'][0]['id'] );
 
+		$string_booleans_result = wp_get_ability( 'woocommerce/products-query' )->execute(
+			array(
+				'virtual'      => 'false',
+				'downloadable' => 'false',
+				'sku'          => $physical_sku,
+			)
+		);
+
+		$this->assertNotWPError( $string_booleans_result );
+		$this->assertSame( array( $physical['product']['id'] ), array_column( $string_booleans_result['products'], 'id' ) );
+
 		$virtual_result = wp_get_ability( 'woocommerce/products-query' )->execute(
 			array(
 				'type'         => 'simple',
@@ -1665,6 +1676,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			$this->register_domain_abilities();
 
 			$create_schema = wp_get_ability( 'woocommerce/product-create' )->get_input_schema();
+			$update_schema = wp_get_ability( 'woocommerce/product-update' )->get_input_schema();
 			$bundle        = wp_get_ability( 'woocommerce/product-create' )->execute(
 				array(
 					'name'         => 'Bundle',
@@ -1706,6 +1718,10 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->created_product_ids[] = $subscription['product']['id'];
 
 		$this->assertContains( 'test-bundle', $this->get_product_types_from_schema_branches( $create_schema ) );
+		$this->assertNotContains( 'test-missing', $this->get_product_types_from_schema_branches( $create_schema ) );
+		$this->assertContains( 'test-bundle', $update_schema['properties']['type']['enum'] );
+		$this->assertContains( 'test-subscription', $update_schema['properties']['type']['enum'] );
+		$this->assertNotContains( 'test-missing', $update_schema['properties']['type']['enum'] );
 		$this->assertArrayNotHasKey( 'regular_price', $this->get_product_type_schema_branch( $create_schema, 'test-bundle' )['properties'] );
 		$this->assertArrayHasKey( 'regular_price', $this->get_product_type_schema_branch( $create_schema, 'test-subscription' )['properties'] );
 		$this->assertSame( 'test-bundle', $bundle['product']['type'] );
@@ -1717,6 +1733,114 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 'woocommerce_product_field_unsupported', $bundle_price->get_error_code() );
 		$this->assertWPError( $missing_class );
 		$this->assertSame( 'woocommerce_invalid_product_type', $missing_class->get_error_code() );
+	}
+
+	/**
+	 * @testdox Should change a product to a type that an extension registers, refuse a type without a class, and query by the type.
+	 */
+	public function test_product_update_changes_the_type_to_a_registered_product_type(): void {
+		$product                     = \WC_Helper_Product::create_simple_product();
+		$this->created_product_ids[] = $product->get_id();
+
+		$this->unregister_domain_abilities();
+		add_filter( 'product_type_selector', array( $this, 'add_test_product_types' ) );
+		add_filter( 'woocommerce_product_class', array( $this, 'get_test_product_class' ), 10, 2 );
+
+		try {
+			$this->register_domain_abilities();
+
+			$subscription  = wp_get_ability( 'woocommerce/product-update' )->execute(
+				array(
+					'id'            => $product->get_id(),
+					'type'          => 'test-subscription',
+					'regular_price' => '12.00',
+				)
+			);
+			$missing_class = wp_get_ability( 'woocommerce/product-update' )->execute_change(
+				array(
+					'id'   => $product->get_id(),
+					'type' => 'test-missing',
+				)
+			);
+			$bundle        = wp_get_ability( 'woocommerce/product-create' )->execute(
+				array(
+					'name' => 'Bundle',
+					'type' => 'test-bundle',
+				)
+			);
+			$bundles       = wp_get_ability( 'woocommerce/products-query' )->execute( array( 'type' => 'test-bundle' ) );
+		} finally {
+			remove_filter( 'product_type_selector', array( $this, 'add_test_product_types' ) );
+			remove_filter( 'woocommerce_product_class', array( $this, 'get_test_product_class' ), 10 );
+			$this->unregister_domain_abilities();
+			$this->register_domain_abilities();
+		}
+
+		$this->assertNotWPError( $bundle );
+		$this->created_product_ids[] = $bundle['product']['id'];
+
+		$this->assertNotWPError( $subscription );
+		$this->assertSame( 'test-subscription', $subscription['product']['type'] );
+		$this->assertSame( '12.00', $subscription['product']['regular_price'] );
+		$this->assertWPError( $missing_class );
+		$this->assertSame( 'woocommerce_invalid_product_type', $missing_class->get_error_code() );
+		$this->assertNotWPError( $bundles );
+		$this->assertSame( array( $bundle['product']['id'] ), array_column( $bundles['products'], 'id' ) );
+	}
+
+	/**
+	 * @testdox Should let the owner of a product type add a Core field to it with the woocommerce_ability_product_type_fields filter.
+	 */
+	public function test_product_type_fields_filter_adds_a_core_field_to_a_registered_product_type(): void {
+		$this->unregister_domain_abilities();
+		add_filter( 'product_type_selector', array( $this, 'add_test_product_types' ) );
+		add_filter( 'woocommerce_product_class', array( $this, 'get_test_product_class' ), 10, 2 );
+		add_filter( 'woocommerce_ability_product_type_fields', array( $this, 'add_price_to_test_bundle' ), 10, 2 );
+
+		try {
+			$this->register_domain_abilities();
+
+			$create_schema = wp_get_ability( 'woocommerce/product-create' )->get_input_schema();
+			$bundle        = wp_get_ability( 'woocommerce/product-create' )->execute(
+				array(
+					'name'          => 'Bundle with price',
+					'type'          => 'test-bundle',
+					'regular_price' => '9.00',
+				)
+			);
+		} finally {
+			remove_filter( 'product_type_selector', array( $this, 'add_test_product_types' ) );
+			remove_filter( 'woocommerce_product_class', array( $this, 'get_test_product_class' ), 10 );
+			remove_filter( 'woocommerce_ability_product_type_fields', array( $this, 'add_price_to_test_bundle' ), 10 );
+			$this->unregister_domain_abilities();
+			$this->register_domain_abilities();
+		}
+
+		$this->assertNotWPError( $bundle );
+		$this->created_product_ids[] = $bundle['product']['id'];
+
+		$bundle_properties = $this->get_product_type_schema_branch( $create_schema, 'test-bundle' )['properties'];
+		$this->assertArrayHasKey( 'regular_price', $bundle_properties );
+		$this->assertArrayNotHasKey( 'sale_price', $bundle_properties );
+		$this->assertArrayNotHasKey( 'regular_price', $this->get_product_type_schema_branch( $create_schema, 'grouped' )['properties'] );
+		$this->assertSame( '9.00', $bundle['product']['regular_price'] );
+	}
+
+	/**
+	 * Give the test bundle type a regular price, and ignore a name that is not a Core field.
+	 *
+	 * @internal
+	 *
+	 * @param array  $fields       Field names.
+	 * @param string $product_type Product type.
+	 * @return array
+	 */
+	public function add_price_to_test_bundle( array $fields, string $product_type ): array {
+		if ( 'test-bundle' === $product_type ) {
+			$fields[] = 'regular_price';
+			$fields[] = 'not-a-core-field';
+		}
+		return $fields;
 	}
 
 	/**

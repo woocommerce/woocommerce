@@ -90,12 +90,6 @@ class ProductUpdate extends ActionableAbility {
 			);
 		}
 
-		$product_config = self::get_product_config_for_product( $product );
-
-		if ( is_wp_error( $product_config ) ) {
-			return $product_config;
-		}
-
 		if (
 			isset( $input['status'] )
 			&& in_array(
@@ -114,13 +108,7 @@ class ProductUpdate extends ActionableAbility {
 		}
 
 		if ( isset( $input['type'] ) ) {
-			$product_config = self::get_product_type_config( (string) $input['type'] );
-
-			if ( is_wp_error( $product_config ) ) {
-				return $product_config;
-			}
-
-			$product = self::get_product_object_for_type( (string) $input['type'], $product->get_id() );
+			return self::get_product_object_for_type( (string) $input['type'], $product->get_id() );
 		}
 
 		return $product;

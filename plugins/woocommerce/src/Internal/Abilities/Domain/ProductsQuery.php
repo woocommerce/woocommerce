@@ -128,7 +128,7 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 
 		foreach ( array( 'virtual', 'downloadable' ) as $field ) {
 			if ( isset( $input[ $field ] ) ) {
-				$args[ $field ] = (bool) $input[ $field ];
+				$args[ $field ] = rest_sanitize_boolean( $input[ $field ] );
 			}
 		}
 
