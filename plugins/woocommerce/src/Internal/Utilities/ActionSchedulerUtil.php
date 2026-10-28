@@ -630,6 +630,9 @@ final class ActionSchedulerUtil {
 		$relative = self::relative_to( $path, WP_PLUGIN_DIR );
 		if ( null !== $relative ) {
 			$directory = (string) strtok( $relative, '/' );
+			// get_plugins() ships in an admin include but has no admin-only dependencies, so loading
+			// it is safe in any context. This path also runs outside wp-admin, for example from the
+			// system status REST endpoint and WP-CLI.
 			if ( ! function_exists( 'get_plugins' ) ) {
 				require_once ABSPATH . 'wp-admin/includes/plugin.php';
 			}
