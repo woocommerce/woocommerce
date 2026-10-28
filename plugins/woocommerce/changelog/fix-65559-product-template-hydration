@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Reduce page size on product pages and archives by sending only the product data interactive blocks use.
