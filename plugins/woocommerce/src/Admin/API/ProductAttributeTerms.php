@@ -61,7 +61,7 @@ class ProductAttributeTerms extends \WC_REST_Product_Attribute_Terms_Controller 
 	 */
 	public function get_custom_attribute_permissions_check( $request ) {
 		if ( ! wc_rest_check_manager_permissions( 'attributes', 'read' ) ) {
-			return new WP_Error(
+			return new \WP_Error(
 				'woocommerce_rest_cannot_view',
 				__( 'Sorry, you cannot view this resource.', 'woocommerce' ),
 				array(
