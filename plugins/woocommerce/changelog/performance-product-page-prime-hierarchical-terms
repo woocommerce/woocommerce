@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Fixed N+1 query pattern in StoreAPI (ProductSchema::get_item_response method).
