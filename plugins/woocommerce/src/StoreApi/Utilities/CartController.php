@@ -1137,6 +1137,11 @@ class CartController {
 			);
 		}
 
+		// Later errors name the product or its attributes, so refuse unpublished products the shopper cannot view before reaching them.
+		if ( ! $product->is_viewable() && ! $product->is_purchasable() ) {
+			$this->throw_default_product_exception( $product );
+		}
+
 		return $product;
 	}
 
@@ -1161,13 +1166,13 @@ class CartController {
 	}
 
 	/**
-	 * Get product name, hiding it for draft and private products.
+	 * Get product name, hiding it for products the current user cannot view (unpublished products, or variations of one).
 	 *
 	 * @param \WC_Product $product Product instance.
 	 * @return string
 	 */
 	protected function get_product_name( \WC_Product $product ) {
-		if ( $product->get_status() === ProductStatus::DRAFT || $product->get_status() === ProductStatus::PRIVATE ) {
+		if ( ! $product->is_viewable() ) {
 			return '';
 		}
 		return $product->get_name();

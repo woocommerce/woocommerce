@@ -279,7 +279,7 @@ class CheckoutLinkTest extends \WC_Unit_Test_Case {
 		wp_parse_str( (string) wp_parse_url( $url, PHP_URL_QUERY ), $query );
 
 		$this->assertStringNotContainsString( 'attribute_pa_size', $url, 'An unpublished product page should not be used as the redirect.' );
-		$this->assertStringContainsString( 'Missing variation data', $query['wc_error'] ?? '', 'The add to cart error should still be shown.' );
+		$this->assertSame( 'This item is not available for purchase.', $query['wc_error'], 'The add to cart error should not name the unpublished product or its attributes.' );
 	}
 
 	/**

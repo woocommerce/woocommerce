@@ -843,6 +843,82 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Create a variable product with an "Any" variation for the unpublished product tests.
+	 *
+	 * @param string $status Status of the variable product.
+	 * @return WC_Product_Variation The (published) variation.
+	 */
+	private function create_any_variation_of_product_with_status( string $status ): WC_Product_Variation {
+		$product   = new WC_Product_Variable();
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Secret Finish' );
+		$attribute->set_options( array( 'Matte', 'Gloss' ) );
+		$attribute->set_variation( true );
+		$product->set_name( 'Unreleased Product' );
+		$product->set_status( $status );
+		$product->set_date_created( 'future' === $status ? time() + DAY_IN_SECONDS : time() );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_attributes( array( 'secret-finish' => '' ) );
+		$variation->set_regular_price( '10' );
+		$variation->save();
+
+		return $variation;
+	}
+
+	/**
+	 * @testdox Add to cart errors do not name a variable product, or its attributes, when the shopper cannot view it.
+	 * @testWith ["draft"]
+	 *           ["pending"]
+	 *           ["private"]
+	 *           ["future"]
+	 * @param string $status Status of the variable product.
+	 */
+	public function test_add_to_cart_errors_do_not_name_products_the_shopper_cannot_view( string $status ): void {
+		wp_set_current_user( 0 );
+		WC()->cart->empty_cart();
+
+		$variation      = $this->create_any_variation_of_product_with_status( $status );
+		$product_id     = $variation->get_parent_id();
+		$single_product = WC_Helper_Product::create_simple_product();
+
+		$requests = array(
+			'no variation'      => array( $product_id, 1, 0, array(), 'Sorry, this product cannot be purchased.' ),
+			'missing attribute' => array( $product_id, 1, $variation->get_id(), array(), 'Sorry, this product cannot be purchased.' ),
+			'invalid attribute' => array( $product_id, 1, $variation->get_id(), array( 'attribute_secret-finish' => 'Nope' ), 'Sorry, this product cannot be purchased.' ),
+			'variation by ID'   => array( $variation->get_id(), 1, 0, array(), 'Sorry, this product cannot be purchased.' ),
+			'foreign variation' => array( $product_id, 1, $single_product->get_id(), array(), 'The selected product is invalid.' ),
+		);
+
+		foreach ( $requests as $label => $request ) {
+			WC()->session->set( 'wc_notices', null );
+			$expected = array_pop( $request );
+
+			$this->assertFalse( WC()->cart->add_to_cart( ...$request ), $label );
+			$this->assertSame( array( $expected ), wp_list_pluck( wc_get_notices( 'error' ), 'notice' ), $label );
+		}
+
+		$this->assertCount( 0, WC()->cart->get_cart_contents() );
+	}
+
+	/**
+	 * @testdox Add to cart errors still name an unpublished variable product for a user who can edit it.
+	 */
+	public function test_add_to_cart_errors_name_unpublished_products_the_user_can_edit(): void {
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
+		WC()->cart->empty_cart();
+		WC()->session->set( 'wc_notices', null );
+
+		$variation = $this->create_any_variation_of_product_with_status( 'draft' );
+
+		$this->assertFalse( WC()->cart->add_to_cart( $variation->get_parent_id() ) );
+		$this->assertStringContainsString( 'Unreleased Product', wc_get_notices( 'error' )[0]['notice'] );
+	}
+
+	/**
 	 * Test cloning cart holds no references in session
 	 */
 	public function test_cloning_cart_session() {
@@ -1528,6 +1604,24 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'error', $notices );
 		$this->assertCount( 1, $notices['error'] );
 		$this->assertMatchesRegularExpression( '/Please choose product options by visiting/', $notices['error'][0]['notice'] );
+	}
+
+	/**
+	 * @testdox The add to cart form handler does not name a variable product the shopper cannot view.
+	 *
+	 * @see WC_Form_Handler::add_to_cart_action()
+	 */
+	public function test_form_handler_add_to_cart_action_with_unpublished_parent_variable_product(): void {
+		wp_set_current_user( 0 );
+		WC()->session->set( 'wc_notices', null );
+
+		$_REQUEST['add-to-cart'] = $this->create_any_variation_of_product_with_status( 'draft' )->get_parent_id();
+
+		WC_Form_Handler::add_to_cart_action();
+
+		unset( $_REQUEST['add-to-cart'] );
+
+		$this->assertSame( array( 'Sorry, this product cannot be purchased.' ), wp_list_pluck( wc_get_notices( 'error' ), 'notice' ) );
 	}
 
 	/**
