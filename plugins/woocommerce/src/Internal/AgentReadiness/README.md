@@ -37,7 +37,7 @@ A channel whose spec does not ask for the field is left out of the check's map.
 
 A variable product with some priced variations fails `missing_regular_price` but counts as `gaps`, not `not_listable`, in the channel totals, since its priced variations still list.
 
-Store-wide conditions (`StoreConditions`) are reported first because they affect every product: coming soon mode and "Discourage search engines" hide the products, UCP off hides the catalog from UCP agents, and guest checkout off stops agents placing orders.
+Store-wide conditions (`StoreConditions`) are reported first because they affect every product: coming soon mode and "Discourage search engines" hide the products, UCP off and Plain permalinks (no `/.well-known/ucp`) hide the catalog from UCP agents, and guest checkout off stops agents placing orders. Each condition's `blocks` says which, so a reader can tell a hidden store from one agents can't buy from.
 
 ## Report format
 
@@ -48,7 +48,8 @@ array(
 	'generated_at' => '2026-10-28T12:00:00+00:00',
 	'products'     => 120,          // Published products checked.
 	'store_checks' => array(
-		array( 'id' => 'launched', 'ok' => true, 'label' => '…', 'why' => '…', 'fix' => '…' ),
+		// blocks: 'listing' (every product on every channel), 'ucp' (the catalog for UCP agents) or 'checkout' (agent orders).
+		array( 'id' => 'launched', 'ok' => true, 'blocks' => 'listing', 'label' => '…', 'why' => '…', 'fix' => '…' ),
 	),
 	'channels'     => array(
 		'chatgpt' => array(
