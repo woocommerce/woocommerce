@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Recalculate cart totals after removing all coupons through the Store API.
