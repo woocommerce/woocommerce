@@ -803,6 +803,33 @@ class UcpCart extends ControllerTestCase {
 	}
 
 	/**
+	 * A cart an extension preloaded is not written by a UCP create: it mints its own session.
+	 */
+	public function test_preloaded_cookie_session_is_not_written_by_create(): void {
+		// Stand in for an extension that loads the cart on `init`: a cookie session is in
+		// memory and the "loaded" marker is set, so the route's handler swap would be a no-op
+		// unless the route discards it first.
+		WC()->initialize_session();
+		WC()->initialize_cart();
+		WC()->cart->add_to_cart( self::$product_ids[0], 1 );
+		$GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] = 1; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Simulates an extension that already loaded the cart.
+
+		$this->assertInstanceOf( \WC_Session_Handler::class, WC()->session );
+		$cookie_customer = WC()->session->get_customer_id();
+
+		$response = $this->request( 'POST', '/carts', array( 'line_items' => array( $this->line_item( 1, 5 ) ) ) );
+		$data     = $response->get_data();
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( 'success', $data['ucp']['status'] );
+
+		// The returned id is signed from the session the create wrote to. It must be a fresh
+		// token, not the preloaded cookie session, or the create clobbered that shopper's cart.
+		$written_customer = CartTokenUtils::get_cart_token_payload( $data['id'] )['user_id'];
+		$this->assertNotSame( $cookie_customer, $written_customer, 'A create must not write the preloaded cookie session.' );
+	}
+
+	/**
 	 * Cancel answers with the cart as it stood, then the id stops resolving.
 	 */
 	public function test_cancel_cart_returns_prior_state_then_not_found(): void {

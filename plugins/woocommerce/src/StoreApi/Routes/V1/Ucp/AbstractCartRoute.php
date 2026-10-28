@@ -129,7 +129,31 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 		// trust: the id is the only credential, so the handler is fixed for every route.
 		add_filter( 'woocommerce_session_handler', array( self::class, 'session_handler_class' ) );
 
+		// An extension that calls wc_load_cart() on init leaves a session already in memory, so
+		// load_cart() below keeps it and the filter above never binds: the request would act on
+		// that cookie or guest session instead of the id it named. Drop it unless it already is
+		// the token handler for this id, so a legitimate request keeps its own loaded cart.
+		$session  = WC()->session;
+		$expected = CartTokenUtils::get_cart_token_payload( $cart_id )['user_id'];
+		if ( ! $session instanceof SessionHandler || (string) $session->get_customer_id() !== (string) $expected ) {
+			$this->discard_preloaded_cart_session();
+		}
+
 		parent::load_cart_session( $request );
+	}
+
+	/**
+	 * Reset to the cart state a REST request starts from, before anything called wc_load_cart().
+	 *
+	 * Clearing the session, cart, customer and the one-time load marker lets load_cart()
+	 * rebuild through the forced token handler, whatever ran earlier in the request.
+	 */
+	private function discard_preloaded_cart_session(): void {
+		WC()->session  = null;
+		WC()->customer = null;
+		WC()->cart     = null;
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Clears the per-process marker so load_cart() reloads.
+		unset( $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] );
 	}
 
 	/**
