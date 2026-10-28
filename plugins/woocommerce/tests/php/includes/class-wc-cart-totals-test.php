@@ -1,6 +1,8 @@
 <?php
 declare( strict_types = 1 );
 
+use Automattic\WooCommerce\Enums\TaxBasedOn;
+
 /**
  * Class WC_Cart_Totals_Tests. Tests for WC_Cart_Total class.
  */
@@ -573,5 +575,105 @@ class WC_Cart_Totals_Tests extends WC_Unit_Test_Case {
 		WC()->cart->empty_cart();
 		$product->delete( true );
 		$coupon->delete( true );
+	}
+
+	/**
+	 * @testdox A fixed cart coupon larger than the cart stops at the line price when removing the base tax leaves half a cent.
+	 */
+	public function test_fixed_cart_coupon_stops_at_line_price_with_half_cent_price(): void {
+		update_option( 'woocommerce_default_country', 'US:CA' );
+		update_option( 'woocommerce_tax_based_on', TaxBasedOn::SHIPPING );
+		update_option( 'woocommerce_prices_include_tax', 'yes' );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_tax_round_at_subtotal', 'no' );
+		WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => 'US',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '20.0000',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '0',
+				'tax_rate_order'    => '1',
+			)
+		);
+		add_filter( 'woocommerce_customer_taxable_address', fn() => array( 'FR', '', '75001', 'Paris' ) );
+		// The fee keeps the cart total above zero, where it is floored, so line totals show in it.
+		add_action( 'woocommerce_cart_calculate_fees', fn( $cart ) => $cart->add_fee( 'Handling', 10 ) );
+
+		$product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'regular_price' => 9.99,
+				'price'         => 9.99,
+			)
+		);
+		$coupon  = WC_Helper_Coupon::create_coupon(
+			'fixed-cart-25',
+			array(
+				'discount_type' => 'fixed_cart',
+				'coupon_amount' => '25',
+			)
+		);
+
+		WC()->cart->empty_cart();
+		$item_key = WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->cart->apply_coupon( $coupon->get_code() );
+		WC()->cart->calculate_totals();
+
+		$this->assertNotEmpty( WC_Tax::get_base_tax_rates(), 'The base country should have a tax rate' );
+		$this->assertEmpty( WC_Tax::get_rates( '', WC()->customer ), 'The customer location should have no tax rate' );
+		$this->assertEquals( '8.33', wc_format_decimal( WC()->cart->get_discount_total(), 2 ), 'The discount should stop at the line price' );
+		$this->assertEqualsWithDelta( 0.0, WC()->cart->get_cart()[ $item_key ]['line_total'], 0.001, 'The line total should not go below zero' );
+		$this->assertEquals( '10.00', wc_format_decimal( WC()->cart->get_total( 'edit' ), 2 ), 'Only the fee should remain to pay' );
+	}
+
+	/**
+	 * @testdox A $discount_type coupon of $amount discounts only the positive line and leaves the negative-priced line at its price.
+	 * @testWith ["fixed_cart", "1", "24.00"]
+	 *           ["fixed_cart", "100", "5.00"]
+	 *           ["percent", "10", "23.00"]
+	 *           ["fixed_product", "1", "24.00"]
+	 *
+	 * @param string $discount_type  Coupon discount type.
+	 * @param string $amount         Coupon amount.
+	 * @param string $expected_total Expected cart total.
+	 */
+	public function test_coupon_leaves_negative_priced_line_at_its_price( string $discount_type, string $amount, string $expected_total ): void {
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		// The fee keeps the cart total above zero, where it is floored, so line totals show in it.
+		add_action( 'woocommerce_cart_calculate_fees', fn( $cart ) => $cart->add_fee( 'Handling', 10 ) );
+
+		$product          = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'regular_price' => 20,
+				'price'         => 20,
+			)
+		);
+		$negative_product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'regular_price' => -5,
+				'price'         => -5,
+			)
+		);
+		$coupon           = WC_Helper_Coupon::create_coupon(
+			'negative-line-coupon',
+			array(
+				'discount_type' => $discount_type,
+				'coupon_amount' => $amount,
+			)
+		);
+
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		$negative_item_key = WC()->cart->add_to_cart( $negative_product->get_id(), 1 );
+		WC()->cart->apply_coupon( $coupon->get_code() );
+		WC()->cart->calculate_totals();
+
+		$this->assertEqualsWithDelta( -5.0, WC()->cart->get_cart()[ $negative_item_key ]['line_total'], 0.001, 'The negative-priced line should keep its price' );
+		$this->assertEquals( $expected_total, wc_format_decimal( WC()->cart->get_total( 'edit' ), 2 ), 'The coupon should discount only the positive line' );
 	}
 }
