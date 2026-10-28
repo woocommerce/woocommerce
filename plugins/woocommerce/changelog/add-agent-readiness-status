@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add an experimental Agent readiness tab under WooCommerce > Status that checks products against AI shopping channel specs.
