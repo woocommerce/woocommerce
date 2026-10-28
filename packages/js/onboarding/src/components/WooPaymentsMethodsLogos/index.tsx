@@ -29,6 +29,9 @@ import eps from '../../images/payment-methods/eps.svg';
 import becs from '../../images/payment-methods/becs.svg';
 import przelewy24 from '../../images/payment-methods/przelewy24.svg';
 import grabpay from '../../images/payment-methods/grabpay.svg';
+import alipay from '../../images/payment-methods/alipay.svg';
+import wechatpay from '../../images/payment-methods/wechatpay.svg';
+import multibanco from '../../images/payment-methods/multibanco.svg';
 
 interface PaymentMethod {
 	name: string;
@@ -73,6 +76,9 @@ const PaymentMethods: PaymentMethod[] = [
 	{ name: 'ideal', src: ideal },
 	{ name: 'przelewy24', src: przelewy24 },
 	{ name: 'grabpay', src: grabpay },
+	{ name: 'alipay', src: alipay },
+	{ name: 'wechatpay', src: wechatpay },
+	{ name: 'multibanco', src: multibanco },
 ];
 
 // Logos are decorative: the surrounding copy and the "+N" affordance convey
@@ -118,10 +124,10 @@ export const WooPaymentsMethodsLogos = ( {
 	maxElementsMobile = 5,
 	/**
 	 * Total number of payment methods that WooPayments supports.
-	 * The default is set according to https://woocommerce.com/document/woopayments/payment-methods.
+	 * Defaults to the number of logos in the list, so adding a logo keeps the "+N" count in sync.
 	 * If not eligible for WooPay, the total number of payment methods is reduced by one.
 	 */
-	totalPaymentMethods = 21,
+	totalPaymentMethods = PaymentMethods.length,
 }: {
 	isWooPayEligible: boolean;
 	maxElements: number;
