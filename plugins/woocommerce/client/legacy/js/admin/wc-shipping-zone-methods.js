@@ -34,8 +34,13 @@
 					this.trigger( 'change:methods' );
 				},
 				save: function() {
+					// Deep copy, so an edit made while the request is in flight is not mistaken for
+					// part of what this request submitted.
+					var model    = this,
+						snapshot = $.extend( true, {}, this.changes ),
+						changes  = $.extend( {}, snapshot );
+
 					// Special handling for an empty 'zone_locations' array, which jQuery filters out during $.post().
-					var changes = _.clone( this.changes );
 					if ( _.has( changes, 'zone_locations' ) && _.isEmpty( changes.zone_locations ) ) {
 						changes.zone_locations = [''];
 					}
@@ -47,33 +52,63 @@
 							changes                 : changes,
 							zone_id                 : data.zone_id
 						},
-						this.onSaveResponse,
+						function( response, textStatus ) {
+							model.onSaveResponse( response, textStatus, snapshot );
+						},
 						'json'
-					);
+					).fail( function() {
+						model.onSaveFailure();
+					} );
 				},
-				onSaveResponse: function( response, textStatus ) {
-					if ( 'success' === textStatus ) {
-						if ( response.success ) {
-							if ( response.data.zone_id !== data.zone_id ) {
-								data.zone_id = response.data.zone_id;
-								if ( window.history.pushState ) {
-									window.history.pushState(
-										{},
-										'',
-										'admin.php?page=wc-settings&tab=shipping&zone_id=' + response.data.zone_id
-									);
-								}
-							}
-							shippingMethod.set( 'methods', response.data.methods );
-							shippingMethod.trigger( 'change:methods' );
-							shippingMethod.changes = {};
-							shippingMethod.trigger( 'saved:methods' );
+				onSaveFailure: function() {
+					window.alert( data.strings.save_failed );
 
-							// Overrides the onbeforeunload callback added by settings.js.
-							window.onbeforeunload = null;
-						} else {
-							window.alert( data.strings.save_failed );
+					// Nothing was saved, so redraw from the model, which releases the table.
+					shippingMethod.trigger( 'rerender' );
+
+					if ( _.isEmpty( shippingMethod.changes ) ) {
+						// Saving an empty change set would just fail again, so clear the busy
+						// state without marking the form dirty.
+						$save_button.removeClass( 'is-busy' );
+					} else {
+						shippingMethod.trigger( 'change:methods' );
+					}
+				},
+				onSaveResponse: function( response, textStatus, snapshot ) {
+					if (
+						'success' !== textStatus ||
+						! response ||
+						! response.success ||
+						! response.data
+					) {
+						shippingMethod.onSaveFailure();
+						return;
+					}
+
+					if ( response.data.zone_id !== data.zone_id ) {
+						data.zone_id = response.data.zone_id;
+						if ( window.history.pushState ) {
+							window.history.pushState(
+								{},
+								'',
+								'admin.php?page=wc-settings&tab=shipping&zone_id=' + response.data.zone_id
+							);
 						}
+					}
+					shippingMethod.set( 'methods', response.data.methods );
+					shippingMethod.trigger( 'change:methods' );
+
+					// Clear only what this request submitted; anything edited since stays unsaved.
+					shippingMethod.changes = _.omit( shippingMethod.changes, function( value, key ) {
+						return _.isEqual( value, ( snapshot || {} )[ key ] );
+					} );
+					shippingMethod.trigger( 'saved:methods' );
+
+					if ( _.isEmpty( shippingMethod.changes ) ) {
+						// Overrides the onbeforeunload callback added by settings.js.
+						window.onbeforeunload = null;
+					} else {
+						shippingMethod.trigger( 'change:methods' );
 					}
 				}
 			} ),
@@ -412,12 +447,13 @@
 										shippingMethodView.model.onSaveResponse( response, textStatus );
 									}
 								} else {
-									window.alert( data.strings.save_failed );
-									shippingMethodView.unblock();
+									shippingMethod.onSaveFailure();
 								}
 							},
 							'json'
-						);
+						).fail( function() {
+							shippingMethod.onSaveFailure();
+						} );
 					}
 				},
 				onConfigureShippingMethodBack: function( event, target ) {
@@ -610,26 +646,38 @@
 							method_id               : posted_data.add_method_id,
 							zone_id                 : data.zone_id
 						}, function( response, textStatus ) {
-							if ( 'success' === textStatus && response.success ) {
-								if ( response.data.zone_id !== data.zone_id ) {
-									data.zone_id = response.data.zone_id;
-									if ( window.history.pushState ) {
-										window.history.pushState(
-											{},
-											'',
-											'admin.php?page=wc-settings&tab=shipping&zone_id=' + response.data.zone_id
-										);
-									}
-								}
-
-								// Avoid triggering a rerender here because we don't want to show the method
-								// in the table in case merchant doesn't finish flow.
-
-								shippingMethodView.model.set( 'methods', response.data.methods );
-
-								// Close original modal
-								closeModal();
+							// An error response carries a message in place of the methods, so bail
+							// before reading them.
+							if (
+								'success' !== textStatus ||
+								! response ||
+								! response.success ||
+								! response.data
+							) {
+								$( '#btn-next' ).removeClass( 'is-busy' );
+								shippingMethod.onSaveFailure();
+								return;
 							}
+
+							if ( response.data.zone_id !== data.zone_id ) {
+								data.zone_id = response.data.zone_id;
+								if ( window.history.pushState ) {
+									window.history.pushState(
+										{},
+										'',
+										'admin.php?page=wc-settings&tab=shipping&zone_id=' + response.data.zone_id
+									);
+								}
+							}
+
+							// Avoid triggering a rerender here because we don't want to show the method
+							// in the table in case merchant doesn't finish flow.
+
+							shippingMethodView.model.set( 'methods', response.data.methods );
+
+							// Close original modal
+							closeModal();
+
 							var instance_id = response.data.instance_id,
 							    method      = response.data.methods[ instance_id ];
 
@@ -667,7 +715,10 @@
 							}
 
 							$( document.body ).trigger( 'init_tooltips' );
-						}, 'json' );
+						}, 'json' ).fail( function() {
+							$( '#btn-next' ).removeClass( 'is-busy' );
+							shippingMethod.onSaveFailure();
+						} );
 					}
 				},
 				// Free Shipping has hidden field elements depending on data values.

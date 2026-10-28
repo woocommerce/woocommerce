@@ -3,6 +3,7 @@
  */
 import { faker } from '@faker-js/faker';
 import { ApiClient, WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
+import type { Page } from '@playwright/test';
 
 /**
  * Internal dependencies
@@ -12,6 +13,47 @@ import { expect, test as baseTest } from '../../fixtures/fixtures';
 
 function rand() {
 	return faker.string.alphanumeric( 5 );
+}
+
+const SAVE_CHANGES_ACTION = 'woocommerce_shipping_zone_methods_save_changes';
+const SAVE_SETTINGS_ACTION = 'woocommerce_shipping_zone_methods_save_settings';
+const ADD_METHOD_ACTION = 'woocommerce_shipping_zone_add_method';
+
+function isSaveChanges( url: URL ) {
+	return url.searchParams.get( 'action' ) === SAVE_CHANGES_ACTION;
+}
+
+async function openAddMethodModal( page: Page ) {
+	// The edit screen binds the add-method modal after its methods table renders, so retry
+	// opening it in case the first click lands before the handler is bound.
+	const addMethodButton = page.getByRole( 'button', {
+		name: 'Add shipping method',
+	} );
+	const createMethodHeading = page.getByRole( 'heading', {
+		name: 'Create shipping method',
+	} );
+
+	await expect( async () => {
+		if ( ! ( await createMethodHeading.isVisible() ) ) {
+			await addMethodButton.click();
+		}
+		await expect( createMethodHeading ).toBeVisible( { timeout: 3000 } );
+	} ).toPass( { timeout: 20000 } );
+}
+
+async function openZone( page: Page, zoneName: string ) {
+	await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=shipping' );
+	await page
+		.getByText( zoneName )
+		.locator(
+			'~ td.wc-shipping-zone-actions a.wc-shipping-zone-action-edit'
+		)
+		.click();
+	await expect(
+		page.locator( '.wc-shipping-zone-method-title', {
+			hasText: 'Flat rate',
+		} )
+	).toBeVisible();
 }
 
 async function deleteZoneById( restApi: ApiClient, zoneId?: number ) {
@@ -294,22 +336,7 @@ test( 'persists pending zone edits when adding a non-modal method to an existing
 } ) => {
 	const renamedZone = `Renamed zone ${ rand() }`;
 
-	await page.goto( 'wp-admin/admin.php?page=wc-settings&tab=shipping' );
-	await page
-		.getByText( zone.name )
-		.locator(
-			'~ td.wc-shipping-zone-actions a.wc-shipping-zone-action-edit'
-		)
-		.click();
-
-	// The edit screen binds the add-method modal after its methods table renders, so
-	// wait for the existing method, then retry opening the modal in case the first
-	// click lands before the handler is bound.
-	await expect(
-		page.locator( '.wc-shipping-zone-method-title', {
-			hasText: 'Flat rate',
-		} )
-	).toBeVisible();
+	await openZone( page, zone.name );
 
 	// Register before the edit so an unexpected onbeforeunload prompt is caught.
 	const dialogMessages: string[] = [];
@@ -322,18 +349,7 @@ test( 'persists pending zone edits when adding a non-modal method to an existing
 	await page.getByLabel( 'Zone name' ).fill( renamedZone );
 	await expect( page.locator( '#submit' ) ).toBeEnabled();
 
-	const addMethodButton = page.getByRole( 'button', {
-		name: 'Add shipping method',
-	} );
-	const createMethodHeading = page.getByRole( 'heading', {
-		name: 'Create shipping method',
-	} );
-	await expect( async () => {
-		if ( ! ( await createMethodHeading.isVisible() ) ) {
-			await addMethodButton.click();
-		}
-		await expect( createMethodHeading ).toBeVisible( { timeout: 3000 } );
-	} ).toPass( { timeout: 20000 } );
+	await openAddMethodModal( page );
 	await page.getByText( 'E2E Non-Modal Method' ).click();
 
 	const addMethodResponsePromise = page.waitForResponse( ( response ) =>
@@ -385,4 +401,211 @@ test( 'persists pending zone edits when adding a non-modal method to an existing
 		`${ WC_API_PATH }/shipping/zones/${ zone.id }`
 	);
 	expect( savedZone.data.name ).toBe( renamedZone );
+} );
+
+// Regression: a failed zone save must surface the error and release the methods table.
+// The old flow left the table under the blocking overlay with no message at all.
+test( 'surfaces a failed zone save and releases the methods table', async ( {
+	page,
+	zone,
+} ) => {
+	await openZone( page, zone.name );
+
+	const dialogMessages: string[] = [];
+	page.on( 'dialog', async ( dialog ) => {
+		dialogMessages.push( dialog.message() );
+		await dialog.accept();
+	} );
+
+	await page.route( isSaveChanges, ( route ) =>
+		route.fulfill( {
+			status: 500,
+			contentType: 'text/plain',
+			body: 'Injected save failure',
+		} )
+	);
+
+	await page.getByLabel( 'Zone name' ).fill( `Failed save ${ rand() }` );
+	await expect( page.locator( '#submit' ) ).toBeEnabled();
+	await page.locator( '#submit' ).click();
+
+	await expect
+		.poll( () => dialogMessages )
+		.toContain( 'Your changes were not saved. Please retry.' );
+
+	// Releasing the table and clearing the busy state are what regress; the enabled button
+	// is recorded as the expected end state rather than as coverage, since Save changes is
+	// never disabled on this path either way.
+	await expect( page.locator( '.blockUI' ) ).toHaveCount( 0 );
+	await expect( page.locator( '#submit' ) ).toBeEnabled();
+	await expect( page.locator( '#submit' ) ).not.toHaveClass( /is-busy/ );
+	expect( dialogMessages ).toHaveLength( 1 );
+} );
+
+// Regression: an edit typed while a save is in flight must stay unsaved instead of being
+// cleared when that response lands, so the next save still carries it.
+test( 'keeps a zone edit made while an earlier save is in flight', async ( {
+	page,
+	restApi,
+	zone,
+} ) => {
+	const firstName = `First save ${ rand() }`;
+	const secondName = `Typed during save ${ rand() }`;
+
+	await openZone( page, zone.name );
+
+	let releaseFirstSave = () => {};
+	const firstSaveHeld = new Promise< void >( ( resolve ) => {
+		releaseFirstSave = resolve;
+	} );
+	let alreadyHeld = false;
+	await page.route( isSaveChanges, async ( route ) => {
+		if ( ! alreadyHeld ) {
+			alreadyHeld = true;
+			await firstSaveHeld;
+		}
+		await route.continue();
+	} );
+
+	// jQuery fires ajaxComplete after the request's success callback, so this flag is the only
+	// barrier that proves the save response was handled. Editing the zone name re-renders and
+	// unblocks the table on its own, so the overlay clearing proves nothing here.
+	await page.evaluate( ( action: string ) => {
+		const context = window as unknown as {
+			wcSaveHandled?: boolean;
+			jQuery: ( target: Document ) => {
+				on: (
+					event: string,
+					handler: ( ...args: unknown[] ) => void
+				) => void;
+			};
+		};
+
+		context.wcSaveHandled = false;
+		context.jQuery( document ).on( 'ajaxComplete', ( ...args ) => {
+			const settings = args[ 2 ] as { url?: string } | undefined;
+			if ( settings && settings.url && settings.url.includes( action ) ) {
+				context.wcSaveHandled = true;
+			}
+		} );
+	}, SAVE_CHANGES_ACTION );
+
+	await page.getByLabel( 'Zone name' ).fill( firstName );
+	await page.locator( '#submit' ).click();
+
+	// The zone fields stay editable while the table is blocked, so type again mid-request.
+	await page.getByLabel( 'Zone name' ).fill( secondName );
+	releaseFirstSave();
+	await page.waitForFunction(
+		() =>
+			( window as unknown as { wcSaveHandled?: boolean } )
+				.wcSaveHandled === true
+	);
+
+	await expect( page.locator( '#submit' ) ).toBeEnabled();
+	await expect( page.locator( '.blockUI' ) ).toHaveCount( 0 );
+	await expect( page.getByLabel( 'Zone name' ) ).toHaveValue( secondName );
+
+	await page.locator( '#submit' ).click();
+	await expect( page.locator( '#submit' ) ).toBeDisabled();
+
+	const saved = await restApi.get(
+		`${ WC_API_PATH }/shipping/zones/${ zone.id }`
+	);
+	expect( saved.data.name ).toBe( secondName );
+} );
+
+// Regression: a failed method-settings save must surface the error and release the table without
+// pretending the zone has unsaved changes, which would offer a retry that cannot succeed.
+const settingsSaveFailures = [
+	{
+		label: 'a transport failure',
+		response: {
+			status: 500,
+			contentType: 'text/plain',
+			body: 'Injected settings save failure',
+		},
+	},
+	{
+		label: 'an error response',
+		response: {
+			status: 200,
+			contentType: 'application/json',
+			body: JSON.stringify( { success: false, data: 'bad_nonce' } ),
+		},
+	},
+];
+
+for ( const { label, response } of settingsSaveFailures ) {
+	test( `surfaces ${ label } when saving method settings, without faking unsaved zone changes`, async ( {
+		page,
+		zone,
+	} ) => {
+		await openZone( page, zone.name );
+
+		const dialogMessages: string[] = [];
+		page.on( 'dialog', async ( dialog ) => {
+			dialogMessages.push( dialog.message() );
+			await dialog.accept();
+		} );
+
+		await page.route(
+			( url ) =>
+				url.searchParams.get( 'action' ) === SAVE_SETTINGS_ACTION,
+			( route ) => route.fulfill( response )
+		);
+
+		await page
+			.locator( 'a.wc-shipping-zone-method-settings' )
+			.first()
+			.click();
+		await page.locator( '#btn-ok' ).click();
+
+		await expect
+			.poll( () => dialogMessages )
+			.toContain( 'Your changes were not saved. Please retry.' );
+
+		await expect( page.locator( '.blockUI' ) ).toHaveCount( 0 );
+		// The zone itself was never edited, so it must not look dirty.
+		await expect( page.locator( '#submit' ) ).toBeDisabled();
+		await expect( page.locator( '#submit' ) ).not.toHaveClass( /is-busy/ );
+		expect( dialogMessages ).toHaveLength( 1 );
+	} );
+}
+
+// Regression: wp_send_json_error answers with HTTP 200, so the add-method response has to be
+// checked before its methods are read. Reading them threw, which skipped every cleanup.
+test( 'recovers when adding a shipping method is rejected with an error response', async ( {
+	page,
+	zone,
+} ) => {
+	await openZone( page, zone.name );
+
+	const dialogMessages: string[] = [];
+	page.on( 'dialog', async ( dialog ) => {
+		dialogMessages.push( dialog.message() );
+		await dialog.accept();
+	} );
+
+	await page.route(
+		( url ) => url.searchParams.get( 'action' ) === ADD_METHOD_ACTION,
+		( route ) =>
+			route.fulfill( {
+				status: 200,
+				contentType: 'application/json',
+				body: JSON.stringify( { success: false, data: 'bad_nonce' } ),
+			} )
+	);
+
+	await openAddMethodModal( page );
+	await page.getByText( 'Free shipping', { exact: true } ).click();
+	await page.getByRole( 'button', { name: 'Continue' } ).click();
+
+	await expect
+		.poll( () => dialogMessages )
+		.toContain( 'Your changes were not saved. Please retry.' );
+
+	await expect( page.locator( '.blockUI' ) ).toHaveCount( 0 );
+	await expect( page.locator( '#btn-next' ) ).not.toHaveClass( /is-busy/ );
+	expect( dialogMessages ).toHaveLength( 1 );
 } );
