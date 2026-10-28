@@ -408,6 +408,52 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox When all variations cost the same, the selected variation's price shows only if taxes are on, the product is taxable, and the price suffix uses a tag like {price_including_tax}.
+	 * @testWith ["{price_including_tax} (inc vat)", "yes", "taxable", "$12.00 (inc vat)"]
+	 *           ["inc. VAT", "yes", "taxable", ""]
+	 *           ["{price_including_tax} (inc vat)", "no", "taxable", ""]
+	 *           ["{price_including_tax} (inc vat)", "yes", "none", ""]
+	 *
+	 * @param string $suffix          The price display suffix option.
+	 * @param string $calc_taxes      The calc taxes option.
+	 * @param string $tax_status      The variable product tax status.
+	 * @param string $expected_suffix Text expected in the variation price HTML, or empty when no price HTML is expected.
+	 */
+	public function test_same_price_variation_shows_price_only_for_tax_tag_suffix( string $suffix, string $calc_taxes, string $tax_status, string $expected_suffix ): void {
+		update_option( 'woocommerce_calc_taxes', $calc_taxes );
+		update_option( 'woocommerce_price_display_suffix', $suffix );
+		WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate'          => '20.0000',
+				'tax_rate_name'     => 'VAT',
+				'tax_rate_priority' => '1',
+				'tax_rate_order'    => '1',
+			)
+		);
+		$product = WC_Helper_Product::create_variation_product();
+		$product->set_tax_status( $tax_status );
+		$product->save();
+		foreach ( $product->get_children() as $child_id ) {
+			$child = wc_get_product( $child_id );
+			$child->set_regular_price( '10' );
+			$child->set_sale_price( '' );
+			$child->save();
+		}
+		WC_Product_Variable::sync( $product->get_id() );
+		$product   = wc_get_product( $product->get_id() );
+		$variation = wc_get_product( $product->get_children()[0] );
+
+		$price_html = html_entity_decode( wp_strip_all_tags( $product->get_available_variation( $variation )['price_html'] ) );
+
+		if ( '' === $expected_suffix ) {
+			$this->assertSame( '', $price_html );
+		} else {
+			$this->assertStringContainsString( $expected_suffix, $price_html );
+		}
+	}
+
+	/**
 	 * @testdox get_variation_prices sorts on first call, skips re-sorting on repeat calls, and treats float and string prices as equal via loose comparison.
 	 */
 	public function test_get_variation_prices_skips_sort_on_repeated_call_and_with_equivalent_types(): void {
