@@ -283,19 +283,26 @@ class WC_Comments {
 	 * Ensure product average rating and review count is kept up to date.
 	 *
 	 * @param int $post_id Post ID.
+	 * @return void
 	 */
 	public static function clear_transients( $post_id ) {
-		$post_id = absint( $post_id );
-		if ( 0 === $post_id || 'product' !== get_post_type( $post_id ) ) {
-			return;
-		}
-
-		$product = wc_get_product( $post_id );
+		$product_id = absint( $post_id );
+		$product    = ( $product_id && 'product' === get_post_type( $product_id ) ) ? wc_get_product( $product_id ) : false;
+		// Performance note: save triggers products cache invalidation cascade, hence perform it only if necessary.
 		if ( $product instanceof WC_Product ) {
-			$product->set_rating_counts( self::get_rating_counts_for_product( $product ) );
-			$product->set_average_rating( self::get_average_rating_for_product( $product ) );
-			$product->set_review_count( self::get_review_count_for_product( $product ) );
-			$product->save();
+			$reviews_count = (int) self::get_review_count_for_product( $product );
+			$ratings_stats = self::get_rating_counts_for_product( $product );
+			if ( $reviews_count !== $product->get_review_count( 'edit' ) || $ratings_stats != $product->get_rating_counts( 'edit' ) ) { // phpcs:ignore Universal.Operators.StrictComparisons -- performance optimization
+				$ratings_count   = array_sum( $ratings_stats );
+				$weighted_sum    = array_sum( array_map( static fn( $rating, $count ) => $rating * $count, array_keys( $ratings_stats ), $ratings_stats ) );
+				$ratings_average = $ratings_count ? (float) number_format( $weighted_sum / $ratings_count, 2, '.', '' ) : 0.0;
+
+				$product->set_review_count( $reviews_count );
+				$product->set_rating_counts( $ratings_stats );
+				$product->set_average_rating( $ratings_average );
+
+				$product->save();
+			}
 		}
 	}
 
@@ -608,9 +615,10 @@ class WC_Comments {
 	 * @return int
 	 */
 	public static function get_review_count_for_product( &$product ) {
-		$counts = self::get_review_counts_for_product_ids( array( $product->get_id() ) );
+		$product_id = $product->get_id();
+		$counts     = self::get_review_counts_for_product_ids( array( $product_id ) );
 
-		return $counts[ $product->get_id() ];
+		return $counts[ $product_id ];
 	}
 
 	/**
@@ -623,24 +631,23 @@ class WC_Comments {
 	public static function get_rating_counts_for_product( &$product ) {
 		global $wpdb;
 
-		$counts     = array();
-		$raw_counts = $wpdb->get_results(
+		$rows = $wpdb->get_results(
 			$wpdb->prepare(
-				"
-			SELECT meta_value, COUNT( * ) as meta_value_count FROM $wpdb->commentmeta
-			LEFT JOIN $wpdb->comments ON $wpdb->commentmeta.comment_id = $wpdb->comments.comment_ID
-			WHERE meta_key = 'rating'
-			AND comment_post_ID = %d
-			AND comment_approved = '1'
-			AND meta_value > 0
-			GROUP BY meta_value
-				",
+				"SELECT metas.meta_value AS rating, COUNT(*) AS count
+				FROM {$wpdb->commentmeta} metas
+				INNER JOIN {$wpdb->comments} comments ON metas.comment_id = comments.comment_ID
+				WHERE metas.meta_key = 'rating'
+					AND comments.comment_post_ID = %d
+					AND comments.comment_approved = '1'
+					AND metas.meta_value > 0
+				GROUP BY rating",
 				$product->get_id()
 			)
 		);
 
-		foreach ( $raw_counts as $count ) {
-			$counts[ $count->meta_value ] = absint( $count->meta_value_count );
+		$counts = array();
+		foreach ( $rows as $row ) {
+			$counts[ (int) $row->rating ] = (int) $row->count;
 		}
 
 		return $counts;

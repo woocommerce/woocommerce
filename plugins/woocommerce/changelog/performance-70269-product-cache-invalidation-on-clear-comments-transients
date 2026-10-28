@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Optimized clearing comments transients to avoid unnecessary products cache invalidation cascades.
