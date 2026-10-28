@@ -3079,12 +3079,6 @@ parameters:
 			path: includes/admin/class-wc-admin-upload-downloadable-product.php
 
 		-
-			message: '#^Negated boolean expression is always false\.$#'
-			identifier: booleanNot.alwaysFalse
-			count: 1
-			path: includes/admin/class-wc-admin-upload-downloadable-product.php
-
-		-
 			message: '#^Parameter \#2 \$callback of function add_action expects callable\(\)\: mixed, array\{\$this\(WC_Admin_Upload_Downloadable_Product\), ''media_upload…''\} given\.$#'
 			identifier: argument.type
 			count: 1
@@ -19744,12 +19738,6 @@ parameters:
 			message: '#^Method WC_Product_Importer\:\:set_variation_data\(\) should return WC_Product\|WP_Error but return statement is missing\.$#'
 			identifier: return.missing
 			count: 2
-			path: includes/import/abstract-wc-product-importer.php
-
-		-
-			message: '#^Parameter \#2 \$array of function array_map expects array, list\<string\>\|false given\.$#'
-			identifier: argument.type
-			count: 1
 			path: includes/import/abstract-wc-product-importer.php
 
 		-
@@ -65695,12 +65683,6 @@ parameters:
 			path: src/StoreApi/Routes/V1/Checkout.php
 
 		-
-			message: '#^Cannot access offset string on 0\|0\.0\|''''\|''0''\|array\<string, array\|string\>\|false\|null\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/StoreApi/Routes/V1/Checkout.php
-
-		-
 			message: '#^Expression on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.expr
 			count: 2
@@ -65745,12 +65727,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\Checkout\:\:get_request_payment_data\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
-			count: 1
-			path: src/StoreApi/Routes/V1/Checkout.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\Checkout\:\:get_request_payment_data\(\) should return array but returns array\<string, array\|string\>\|float\|int\|string\|false\|null\.$#'
-			identifier: return.type
 			count: 1
 			path: src/StoreApi/Routes/V1/Checkout.php
 
@@ -65953,12 +65929,6 @@ parameters:
 			path: src/StoreApi/Routes/V1/CheckoutOrder.php
 
 		-
-			message: '#^Cannot access offset string on 0\|0\.0\|''''\|''0''\|array\<string, array\|string\>\|false\|null\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/StoreApi/Routes/V1/CheckoutOrder.php
-
-		-
 			message: '#^Instanceof between Automattic\\WooCommerce\\StoreApi\\Payments\\PaymentResult and Automattic\\WooCommerce\\StoreApi\\Payments\\PaymentResult will always evaluate to true\.$#'
 			identifier: instanceof.alwaysTrue
 			count: 1
@@ -65985,12 +65955,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\CheckoutOrder\:\:get_request_payment_data\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
-			count: 1
-			path: src/StoreApi/Routes/V1/CheckoutOrder.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\CheckoutOrder\:\:get_request_payment_data\(\) should return array but returns array\<string, array\|string\>\|float\|int\|string\|false\|null\.$#'
-			identifier: return.type
 			count: 1
 			path: src/StoreApi/Routes/V1/CheckoutOrder.php
 

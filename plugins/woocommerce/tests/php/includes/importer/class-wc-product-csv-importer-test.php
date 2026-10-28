@@ -2115,4 +2115,106 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 			wp_delete_file( $file );
 		}
 	}
+
+	/**
+	 * @testdox Should keep double-quoted values together and leave other values untouched when splitting comma-separated fields.
+	 * @dataProvider provider_parse_comma_field_quoted_values
+	 *
+	 * @param string $value    Raw CSV cell value.
+	 * @param array  $expected Expected list of values.
+	 */
+	public function test_parse_comma_field_handles_quoted_values( string $value, array $expected ): void {
+		$importer = new WC_Product_CSV_Importer( __DIR__ . '/sample.csv' );
+
+		$this->assertSame( $expected, $importer->parse_comma_field( $value ) );
+	}
+
+	/**
+	 * Data provider for test_parse_comma_field_handles_quoted_values.
+	 *
+	 * @return array[]
+	 */
+	public function provider_parse_comma_field_quoted_values(): array {
+		return array(
+			'quoted value with commas'    => array( 'Red, "Blue, navy", Green', array( 'Red', 'Blue, navy', 'Green' ) ),
+			'two quoted groups'           => array( '"Blue, navy", "Red, dark"', array( 'Blue, navy', 'Red, dark' ) ),
+			'whole cell quoted'           => array( '"New, no box. Multiple quantity, minor shelf wear."', array( 'New, no box. Multiple quantity, minor shelf wear.' ) ),
+			'backslash-escaped comma'     => array( 'Red\\, Green, Blue', array( 'Red, Green', 'Blue' ) ),
+			'escaped comma inside quotes' => array( '"Red\\, Green, Blue", Black', array( 'Red, Green, Blue', 'Black' ) ),
+			'quote inside a value'        => array( 'Red, 5" Wheel, Green', array( 'Red', '5" Wheel', 'Green' ) ),
+			'quote not closing a segment' => array( '"Large" size, Small', array( '"Large" size', 'Small' ) ),
+			'closed quote then inch mark' => array( '"Large" size, 15"', array( '"Large" size', '15"' ) ),
+			'balanced quotes in both'     => array( '"Pro" edition, Small "S"', array( '"Pro" edition', 'Small "S"' ) ),
+			'quotes inside a group'       => array( '"a, "b", c"', array( 'a, "b", c' ) ),
+			'quoted words in one value'   => array( '"Pro" or "Max", Small', array( '"Pro" or "Max"', 'Small' ) ),
+			'nested quotes in one value'  => array( '"Pro "P" edition"', array( '"Pro "P" edition"' ) ),
+			'lone quote segments'         => array( 'a, ", b, "', array( 'a', '"', 'b', '"' ) ),
+			'empty quoted value'          => array( '""', array( '' ) ),
+			'unterminated quote'          => array( 'Red, "Blue', array( 'Red', '"Blue' ) ),
+			'several unterminated quotes' => array( '"a, "b, c', array( '"a', '"b', 'c' ) ),
+			'plain list'                  => array( 'Red, Green', array( 'Red', 'Green' ) ),
+		);
+	}
+
+	/**
+	 * @testdox Should keep a double-quoted tag together when tags are separated by spaces.
+	 */
+	public function test_parse_tags_spaces_field_handles_quoted_values(): void {
+		$importer = new WC_Product_CSV_Importer( __DIR__ . '/sample.csv' );
+
+		$term_ids = $importer->parse_tags_spaces_field( '"New York" Boston 15"' );
+
+		$this->assertSame( array( 'New York', 'Boston', '15"' ), array_map( fn( $id ) => get_term( $id, 'product_tag' )->name, $term_ids ) );
+	}
+
+	/**
+	 * @testdox Should parse an attribute default like a single attribute value.
+	 * @testWith ["\"Premium\"", "Premium"]
+	 *           ["\"Blue, navy\"", "Blue, navy"]
+	 *           ["Blue, navy", "Blue, navy"]
+	 *           ["Basic", "Basic"]
+	 *           ["'=Blue, navy", "=Blue, navy"]
+	 *           ["", ""]
+	 *
+	 * @param string $value    Raw CSV cell value.
+	 * @param string $expected Expected default.
+	 */
+	public function test_parse_attribute_default_field( string $value, string $expected ): void {
+		$importer = new WC_Product_CSV_Importer( __DIR__ . '/sample.csv' );
+
+		$this->assertSame( $expected, $importer->parse_attribute_default_field( $value ) );
+	}
+
+	/**
+	 * @testdox Should keep a quoted attribute default matched to its unquoted option when importing a variable product.
+	 */
+	public function test_import_keeps_quoted_attribute_default(): void {
+		$csv_file = trailingslashit( get_temp_dir() ) . 'import-quoted-attribute-default.csv';
+		file_put_contents( $csv_file, "SKU,Type,Name,Attribute 1 name,Attribute 1 value(s),Attribute 1 default,Attribute 1 visible,Attribute 1 global\nIMPORT-QUOTED-DEFAULT,variable,Quoted default,Edition,\"\"\"Premium\"\", Basic\",\"\"\"Premium\"\"\",1,0\n" ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Test fixture written to the temp dir.
+
+		$importer = new WC_Product_CSV_Importer(
+			$csv_file,
+			array(
+				'parse'   => true,
+				'mapping' => array(
+					'SKU'                  => 'sku',
+					'Type'                 => 'type',
+					'Name'                 => 'name',
+					'Attribute 1 name'     => 'attributes:name1',
+					'Attribute 1 value(s)' => 'attributes:value1',
+					'Attribute 1 default'  => 'attributes:default1',
+					'Attribute 1 visible'  => 'attributes:visible1',
+					'Attribute 1 global'   => 'attributes:taxonomy1',
+				),
+			)
+		);
+		$data     = $importer->import();
+
+		wp_delete_file( $csv_file );
+
+		$this->assertCount( 1, $data['imported'] );
+		$product = wc_get_product( $data['imported'][0] );
+		$this->assertSame( array( 'Premium', 'Basic' ), $product->get_attributes()['edition']->get_options() );
+		$this->assertSame( array( 'edition' => 'Premium' ), $product->get_default_attributes() );
+	}
 }
