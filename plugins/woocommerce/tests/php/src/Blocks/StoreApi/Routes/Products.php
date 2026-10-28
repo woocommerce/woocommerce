@@ -112,7 +112,7 @@ class Products extends ControllerTestCase {
 		$this->assertEquals( $this->products[0]->is_purchasable(), $data['is_purchasable'] );
 		$this->assertEquals( $this->products[0]->is_in_stock(), $data['is_in_stock'] );
 		$this->assertEquals( $this->products[0]->add_to_cart_text(), $data['add_to_cart']->text );
-		$this->assertEquals( $this->products[0]->add_to_cart_description(), $data['add_to_cart']->description );
+		$this->assertEqualHTML( $this->products[0]->add_to_cart_description(), $data['add_to_cart']->description );
 		$this->assertEquals( $this->products[0]->single_add_to_cart_text(), $data['add_to_cart']->single_text );
 		$this->assertEquals( $this->products[0]->is_on_sale(), $data['on_sale'] );
 		$this->assertEquals( $this->products[0]->get_weight(), $data['weight'] );

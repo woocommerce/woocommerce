@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { faker } from '@faker-js/faker';
+import { Frame } from '@playwright/test';
 import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**
@@ -116,25 +117,9 @@ test.describe( 'Product Reviews', () => {
 			).toContainText( review.product_name );
 		} );
 
-		// Canary for the moderation actions. This batch moved review edit and reply
-		// to ReviewsAjaxTest, but approve, spam and trash have no PHP coverage of
-		// their state transition: ReviewsListTableTest::test_handle_row_actions
-		// asserts only that the row renders those links. Nothing else in the suite
-		// moderates a review.
-		//
-		// Every step checks the review's new status by loading the matching
-		// filtered view rather than by looking at the row's own buttons. The list
-		// renders both Approve and Unapprove in the all view regardless of status,
-		// so asserting on them proves nothing -- an earlier version of this test
-		// did exactly that and survived two mutations of the approve path.
-		//
-		// Spam and trash use different rows on purpose: once a review is spammed
-		// its actions become Not Spam and Delete Permanently, so Trash is only
-		// reachable from the main list.
-		//
-		// The list dims or hides the row before its AJAX request finishes, so each
-		// action waits for the response before loading the next view. Otherwise the
-		// navigation can cancel the request, or read the status before it changes.
+		// Approve from All must update the row in place through WordPress JavaScript.
+		// Filtered views also verify that each moderation action persisted its status.
+		// Wait for AJAX before navigating, since the row changes before the request finishes.
 		test( 'can approve, spam and trash a product review', async ( {
 			page,
 			reviews,
@@ -204,7 +189,24 @@ test.describe( 'Product Reviews', () => {
 				await page.goto( `${ reviewsUrl }&comment_status=moderated` );
 				await expect( rowFor( moderated.id ) ).toBeVisible();
 
-				await moderate( moderated.id, 'Approve' );
+				await page.goto( reviewsUrl );
+				const navigatedFrames: Frame[] = [];
+				const recordNavigation = ( frame: Frame ) => {
+					navigatedFrames.push( frame );
+				};
+				page.on( 'framenavigated', recordNavigation );
+				try {
+					await moderate( moderated.id, 'Approve' );
+					await expect( rowFor( moderated.id ) ).toBeVisible();
+					await expect(
+						rowFor( moderated.id ).getByRole( 'button', {
+							name: 'Unapprove',
+						} )
+					).toBeVisible();
+					expect( navigatedFrames ).not.toContain( page.mainFrame() );
+				} finally {
+					page.off( 'framenavigated', recordNavigation );
+				}
 
 				await page.goto( `${ reviewsUrl }&comment_status=approved` );
 				await expect( rowFor( moderated.id ) ).toBeVisible();

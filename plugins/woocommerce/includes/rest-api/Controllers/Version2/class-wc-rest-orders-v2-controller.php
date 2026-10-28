@@ -65,6 +65,13 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 	protected $request = array();
 
 	/**
+	 * Order whose item set_item() is preparing, so new line items are priced at the order's tax location.
+	 *
+	 * @var WC_Order|null
+	 */
+	private $order_for_item = null;
+
+	/**
 	 * Register the routes for orders.
 	 */
 	public function register_routes() {
@@ -729,8 +736,10 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		$schema    = $this->get_item_schema();
 		$data_keys = array_keys( array_filter( $schema['properties'], array( $this, 'filter_writable_props' ) ) );
 
+		$item_types = array( 'shipping_lines', 'line_items', 'fee_lines', 'coupon_lines' );
+
 		// Handle all writable props.
-		foreach ( $data_keys as $key ) {
+		foreach ( array_diff( $data_keys, $item_types ) as $key ) {
 			$value = $request[ $key ];
 
 			if ( ! is_null( $value ) ) {
@@ -741,22 +750,6 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 					case 'billing':
 					case 'shipping':
 						$this->update_address( $order, $value, $key );
-						break;
-					case 'line_items':
-					case 'shipping_lines':
-					case 'fee_lines':
-					case 'coupon_lines':
-						if ( is_array( $value ) ) {
-							foreach ( $value as $item ) {
-								if ( is_array( $item ) ) {
-									if ( $this->item_is_null( $item ) || ( isset( $item['quantity'] ) && 0 === $item['quantity'] ) ) {
-										$order->remove_item( $item['id'] );
-									} else {
-										$this->set_item( $order, $key, $item );
-									}
-								}
-							}
-						}
 						break;
 					case 'meta_data':
 						if ( is_array( $value ) ) {
@@ -770,6 +763,23 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 							$order->{"set_{$key}"}( $value );
 						}
 						break;
+				}
+			}
+		}
+
+		// Set items once the address is known, shipping lines first, so new line items are priced at the order's tax location (the base address for local pickup).
+		foreach ( array_intersect( $item_types, $data_keys ) as $key ) {
+			if ( ! is_array( $request[ $key ] ) ) {
+				continue;
+			}
+
+			foreach ( $request[ $key ] as $item ) {
+				if ( is_array( $item ) ) {
+					if ( $this->item_is_null( $item ) || ( isset( $item['quantity'] ) && 0 === $item['quantity'] ) ) {
+						$order->remove_item( $item['id'] );
+					} else {
+						$this->set_item( $order, $key, $item );
+					}
 				}
 			}
 		}
@@ -996,7 +1006,15 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 
 			if ( 'create' === $action ) {
 				$quantity = isset( $posted['quantity'] ) ? $posted['quantity'] : 1;
-				$total    = wc_get_price_excluding_tax( $product, array( 'qty' => $quantity ) );
+				$order    = $this->order_for_item;
+				$total    = wc_get_price_excluding_tax(
+					$product,
+					array(
+						'qty'          => $quantity,
+						'order'        => $order,
+						'tax_location' => $order ? $order->get_taxable_location() : array(),
+					)
+				);
 				$item->set_total( $total );
 				$item->set_subtotal( $total );
 			}
@@ -1124,7 +1142,12 @@ class WC_REST_Orders_V2_Controller extends WC_REST_CRUD_Controller {
 		}
 
 		// Prepare item data.
-		$item = $this->$method( $posted, $action, $item );
+		$this->order_for_item = $order;
+		try {
+			$item = $this->$method( $posted, $action, $item );
+		} finally {
+			$this->order_for_item = null;
+		}
 
 		/**
 		 * Allow extensions be notified before the item is saved.

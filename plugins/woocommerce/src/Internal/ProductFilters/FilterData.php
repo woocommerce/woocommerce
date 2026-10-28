@@ -707,6 +707,7 @@ class FilterData {
 		$query_vars['no_found_rows']  = true;
 		$query_vars['posts_per_page'] = -1;
 		$query_vars['fields']         = 'ids';
+		$query_vars['orderby']        = 'none';
 		$query                        = new \WP_Query();
 
 		$query->query( $query_vars );
