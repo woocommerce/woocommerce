@@ -176,8 +176,9 @@ class AgentReadiness {
 	 * @return array{generated_at:string,products:int,products_with_issues:int,store_checks:array<int,array<string,mixed>>,channels:array<string,array<string,mixed>>,checks:array<int,array<string,mixed>>,truncated:bool}
 	 */
 	public function get_report(): array {
-		// Rebuild the rules for each report: a long-running process may have fetched a new rules file since.
+		// Rebuild the rules and the scan for each report: a long-running process may have fetched a new rules file or changed GTINs since.
 		$this->active_rules = null;
+		$this->product_scan = null;
 		$active             = $this->get_active_rules();
 		$rules              = $active['rules'];
 		$channel_rules      = $active['channel_rules'];
@@ -252,7 +253,8 @@ class AgentReadiness {
 	 * unpublished). A variation is judged by its parent.
 	 *
 	 * For extensions that rank or fix products one at a time; the stored
-	 * report keeps only counts and a few example ids per check.
+	 * report keeps only counts and a few example ids per check. Shared GTINs
+	 * are read once per report, so call get_report() again after changing GTINs.
 	 *
 	 * @param \WC_Product $product Product or variation.
 	 * @return array{product_id:int,checks:array<string, array<string, array{field:string,effect:string}>>,statuses:array<string, string>}|null

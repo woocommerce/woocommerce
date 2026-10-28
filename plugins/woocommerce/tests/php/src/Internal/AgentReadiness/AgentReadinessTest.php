@@ -181,6 +181,24 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A report rereads shared GTINs, so check_product sees a duplicate fixed since.
+	 */
+	public function test_check_product_after_a_report_sees_gtin_changes(): void {
+		$first = WC_Helper_Product::create_simple_product();
+		$first->set_global_unique_id( '4006381333931' );
+		$first->save();
+		// The product setter rejects a duplicate, as imports and direct writes do not.
+		$second_id = WC_Helper_Product::create_simple_product()->get_id();
+		update_post_meta( $second_id, '_global_unique_id', '4006381333931' );
+		$this->assertArrayHasKey( 'duplicate_gtin', $this->sut->check_product( $first )['checks'] );
+
+		delete_post_meta( $second_id, '_global_unique_id' );
+		$this->sut->get_report();
+
+		$this->assertArrayNotHasKey( 'duplicate_gtin', $this->sut->check_product( $first )['checks'] );
+	}
+
+	/**
 	 * @testdox The rules filter runs once per instance, not once per product.
 	 */
 	public function test_rules_are_built_once(): void {
