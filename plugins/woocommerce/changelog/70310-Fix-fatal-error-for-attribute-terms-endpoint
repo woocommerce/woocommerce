@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Return a 401 instead of a fatal error for unauthorised requests to the wc-analytics attribute terms endpoint.
