@@ -678,6 +678,25 @@ class WC_Admin_Settings_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should render the value saved through a nested field name for a field with an empty ID.
+	 */
+	public function test_output_fields_renders_value_saved_for_empty_id(): void {
+		$options = array(
+			array(
+				'id'         => '',
+				'field_name' => 'test_parent[key]',
+				'type'       => 'text',
+				'default'    => 'default value',
+			),
+		);
+
+		WC_Admin_Settings::save_fields( $options, array( 'test_parent' => array( 'key' => 'saved value' ) ) );
+
+		$this->assertSame( array( 'key' => 'saved value' ), get_option( 'test_parent' ) );
+		$this->assertStringContainsString( 'value="saved value"', $this->render_fields( $options ) );
+	}
+
+	/**
 	 * @testdox Should pass the default to a custom field without an ID, even when a value is stored under field name $field_name.
 	 *
 	 * @testWith ["test_rules"]
