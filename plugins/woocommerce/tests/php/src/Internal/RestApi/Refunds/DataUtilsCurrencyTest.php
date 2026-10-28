@@ -536,6 +536,36 @@ class DataUtilsCurrencyTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Full line refunds add up to the stored total whatever precision and tax rounding computed it.
+	 *
+	 * Rounding tax at subtotal rounds the order's tax once while refunds round each line, so the sum can
+	 * differ by one cent, as it does for store-currency orders.
+	 *
+	 * @param int    $calculated_at Price decimals in effect when the order total was calculated.
+	 * @param string $at_subtotal Whether tax is rounded at subtotal.
+	 * @param float  $shipping Shipping line total.
+	 * @testWith [2, "no", 0.0]
+	 *           [0, "no", 0.0]
+	 *           [2, "yes", 0.0]
+	 *           [0, "yes", 0.0]
+	 *           [2, "no", 2.5]
+	 *           [0, "no", 2.5]
+	 *           [2, "yes", 2.5]
+	 *           [0, "yes", 2.5]
+	 */
+	public function test_full_line_refunds_add_up_to_the_stored_total( int $calculated_at, string $at_subtotal, float $shipping ): void {
+		update_option( 'woocommerce_tax_round_at_subtotal', $at_subtotal );
+		list( $order ) = $this->create_calculated_order( $calculated_at, $shipping );
+
+		$refundable = 0.0;
+		foreach ( $order->get_items( array( 'line_item', 'shipping' ) ) as $item ) {
+			$refundable += $this->sut->compute_line_item_refund_total( $item, 1 );
+		}
+
+		$this->assertEqualsWithDelta( (float) $order->get_total(), $refundable, 0.011 );
+	}
+
+	/**
 	 * @testdox A refund resolves its precision from its parent order.
 	 */
 	public function test_refund_uses_parent_order_precision(): void {
@@ -597,10 +627,11 @@ class DataUtilsCurrencyTest extends WC_Unit_Test_Case {
 	/**
 	 * Create a taxed USD order whose total is calculated by WooCommerce at the given precision.
 	 *
-	 * @param int $decimals Price decimals in effect while the total is calculated.
+	 * @param int   $decimals Price decimals in effect while the total is calculated.
+	 * @param float $shipping Optional shipping line total.
 	 * @return array
 	 */
-	private function create_calculated_order( int $decimals ): array {
+	private function create_calculated_order( int $decimals, float $shipping = 0.0 ): array {
 		update_option( 'woocommerce_calc_taxes', 'yes' );
 		\WC_Tax::_insert_tax_rate(
 			array(
@@ -622,6 +653,12 @@ class DataUtilsCurrencyTest extends WC_Unit_Test_Case {
 		$item->set_subtotal( 9 );
 		$item->set_total( 9 );
 		$order->add_item( $item );
+		if ( $shipping ) {
+			$shipping_item = new \WC_Order_Item_Shipping();
+			$shipping_item->set_method_title( 'Flat rate' );
+			$shipping_item->set_total( $shipping );
+			$order->add_item( $shipping_item );
+		}
 		$order->calculate_totals();
 		update_option( 'woocommerce_price_num_decimals', 0 );
 		$order = new WC_Order( $order->get_id() );

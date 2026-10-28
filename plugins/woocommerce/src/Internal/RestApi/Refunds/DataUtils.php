@@ -66,8 +66,9 @@ class DataUtils {
 	/**
 	 * Get the price precision refunds use for an order.
 	 *
-	 * An order in a currency with more decimals than the store uses those decimals, unless its stored
-	 * total matches its lines only at store precision (for example, a total calculated through the REST API).
+	 * An order in a currency with more decimals than the store uses those decimals, unless its lines do not
+	 * add up to its stored total at that precision and the total is rounded to store precision (for example,
+	 * a total calculated through the REST API).
 	 *
 	 * @since 11.4.0
 	 * @param \WC_Abstract_Order|false|null $order Order or refund, or false for an unassigned item.
@@ -88,25 +89,28 @@ class DataUtils {
 			return $store_decimals;
 		}
 
-		$stored_total  = (float) $order->get_total();
-		$store_total   = 0.0;
-		$rebuilt_total = 0.0;
 		/**
 		 * Product, fee and shipping lines, as requested.
 		 *
 		 * @var WC_Order_Item_Product[]|WC_Order_Item_Fee[]|WC_Order_Item_Shipping[] $items
 		 */
 		$items = $order->get_items( array( 'line_item', 'fee', 'shipping' ) );
+		if ( ! $items ) {
+			return $currency_decimals;
+		}
+
+		$rebuilt_total = 0.0;
 		foreach ( $items as $item ) {
-			$store_total   += $this->get_item_gross( $item, $store_decimals );
 			$rebuilt_total += $this->get_item_gross( $item, $currency_decimals );
 		}
 
-		$tolerance             = 0.5 / ( 10 ** $currency_decimals );
-		$matches_store_total   = abs( NumberUtil::round( $store_total, $currency_decimals ) - $stored_total ) < $tolerance;
-		$matches_rebuilt_total = abs( NumberUtil::round( $rebuilt_total, $currency_decimals ) - $stored_total ) < $tolerance;
+		$stored_total = (float) $order->get_total();
+		$tolerance    = 0.5 / ( 10 ** $currency_decimals );
+		if ( abs( NumberUtil::round( $rebuilt_total, $currency_decimals ) - $stored_total ) < $tolerance ) {
+			return $currency_decimals;
+		}
 
-		return $matches_store_total && ! $matches_rebuilt_total ? $store_decimals : $currency_decimals;
+		return abs( NumberUtil::round( $stored_total, $store_decimals ) - $stored_total ) < $tolerance ? $store_decimals : $currency_decimals;
 	}
 
 	/**
