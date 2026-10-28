@@ -56,6 +56,19 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	private static $direct_product_attribute_lookup_updates_depth = 0;
 
 	/**
+	 * Release the owned factory after all test and subclass cleanup has finished.
+	 *
+	 * PHPUnit retains completed test instances until the suite ends.
+	 */
+	public function runBare(): void {
+		try {
+			parent::runBare();
+		} finally {
+			unset( $this->factory );
+		}
+	}
+
+	/**
 	 * Enable synchronous product attribute lookup updates for test fixtures.
 	 *
 	 * Calls can be nested; the filter is removed once every enable has been
