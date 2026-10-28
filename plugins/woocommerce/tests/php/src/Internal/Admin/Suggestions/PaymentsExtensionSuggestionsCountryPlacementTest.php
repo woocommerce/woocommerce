@@ -86,11 +86,47 @@ class PaymentsExtensionSuggestionsCountryPlacementTest extends WC_Unit_Test_Case
 	protected PaymentsExtensionSuggestions $suggestions;
 
 	/**
+	 * Class-owned administrator shared by the per-test transactions.
+	 *
+	 * @var int
+	 */
+	private static int $shared_store_admin_id = 0;
+
+	/**
 	 * The ID of the store admin user.
 	 *
 	 * @var int
 	 */
 	protected int $store_admin_id;
+
+	/**
+	 * Create the administrator fixture once for this class.
+	 *
+	 * @param \WP_UnitTest_Factory $factory WordPress test factory.
+	 */
+	public static function wpSetUpBeforeClass( $factory ): void {
+		// Match the empty request context parent setup supplies to per-test factories.
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Preserve the test request while creating the class fixture.
+		$original_post = $_POST;
+		$_POST         = array();
+		try {
+			$user_id = $factory->user->create( array( 'role' => 'administrator' ) );
+			if ( is_wp_error( $user_id ) ) {
+				throw new \RuntimeException( 'Failed to create the administrator class fixture: ' . $user_id->get_error_message() );
+			}
+			self::$shared_store_admin_id = $user_id;
+		} finally {
+			$_POST = $original_post;
+		}
+	}
+
+	/**
+	 * Delete the administrator owned by this class fixture.
+	 */
+	public static function wpTearDownAfterClass(): void {
+		self::delete_user( self::$shared_store_admin_id );
+		self::$shared_store_admin_id = 0;
+	}
 
 	/**
 	 * Set up the baseline store state.
@@ -105,7 +141,7 @@ class PaymentsExtensionSuggestionsCountryPlacementTest extends WC_Unit_Test_Case
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->store_admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$this->store_admin_id = self::$shared_store_admin_id;
 		wp_set_current_user( $this->store_admin_id );
 
 		// The online-equivalent profiler state.
