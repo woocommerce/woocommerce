@@ -4,13 +4,14 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\AgentReadiness;
 
 use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonHelper;
+use Automattic\WooCommerce\StoreApi\Utilities\UcpUtils;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Store-wide conditions that hide every product from agents, whatever the
- * product data. `ok` says whether the store is clear of the problem the label
- * names.
+ * Store settings that stop agents finding or buying the store's products,
+ * whatever the product data. `ok` says whether the store is clear of the
+ * problem the label names.
  *
  * @since 11.4.0
  */
@@ -54,6 +55,20 @@ class StoreConditions {
 				'label' => __( 'Store is hidden from search engines', 'woocommerce' ),
 				'why'   => __( '"Discourage search engines" asks crawlers, including AI shopping crawlers, to skip your store.', 'woocommerce' ),
 				'fix'   => __( 'Clear "Discourage search engines from indexing this site" under Settings > Reading.', 'woocommerce' ),
+			),
+			array(
+				'id'    => 'ucp_on',
+				'ok'    => UcpUtils::is_enabled(),
+				'label' => __( 'Universal Commerce Protocol (UCP) is off', 'woocommerce' ),
+				'why'   => __( 'Shopping agents that use UCP cannot read your catalog.', 'woocommerce' ),
+				'fix'   => __( 'Turn on agentic commerce in the extension that connects your store to AI agents.', 'woocommerce' ),
+			),
+			array(
+				'id'    => 'guest_checkout',
+				'ok'    => 'no' !== get_option( 'woocommerce_enable_guest_checkout', 'yes' ),
+				'label' => __( 'Guest checkout is off', 'woocommerce' ),
+				'why'   => __( 'Shopping agents check out for shoppers without an account on your store, so they cannot place orders.', 'woocommerce' ),
+				'fix'   => __( 'Tick "Enable guest checkout" under WooCommerce > Settings > Accounts & Privacy.', 'woocommerce' ),
 			),
 		);
 	}

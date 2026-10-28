@@ -162,7 +162,7 @@ class StatusTab implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Store-wide problems, shown first because they hide every product.
+	 * Store-wide problems, shown first because they affect every product.
 	 *
 	 * @param array $store_checks Store checks from the report.
 	 */
