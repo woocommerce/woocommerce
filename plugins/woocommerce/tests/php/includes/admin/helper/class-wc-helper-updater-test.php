@@ -976,6 +976,7 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	 * @testdox Connect notice is skipped when Core already renders an update row for the plugin.
 	 */
 	public function test_connect_notice_is_skipped_when_core_renders_an_update_row(): void {
+		$this->mock_plugin_row_update_check();
 		$this->prepare_plugins_screen();
 
 		$transient                                     = new stdClass();
@@ -1064,6 +1065,7 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	 * @testdox Purchase notice links to the product page when the connected account holds no subscription.
 	 */
 	public function test_purchase_notice_renders_without_a_subscription(): void {
+		$this->mock_plugin_row_update_check();
 		$this->prepare_plugins_screen();
 		$this->set_subscriptions( array() );
 
@@ -1655,6 +1657,7 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	 * @testdox Subscription notice is skipped when Core already renders an update row for the plugin.
 	 */
 	public function test_subscription_notice_is_skipped_when_core_renders_an_update_row(): void {
+		$this->mock_plugin_row_update_check();
 		$this->prepare_plugins_screen();
 		$this->set_subscriptions( array() );
 
@@ -2304,6 +2307,27 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 
 				return $item;
 			}
+		);
+	}
+
+	/**
+	 * Keep fixture transient writes from contacting the public update service.
+	 */
+	private function mock_plugin_row_update_check(): void {
+		add_filter(
+			'pre_http_request',
+			static function ( $preempt, $args, $url ) {
+				if ( false !== $preempt || 'POST' !== ( $args['method'] ?? '' ) || 'https://woocommerce.com/wp-json/helper/1.0/update-check-public' !== $url ) {
+					return $preempt;
+				}
+
+				return array(
+					'response' => array( 'code' => 200 ),
+					'body'     => wp_json_encode( array() ),
+				);
+			},
+			10,
+			3
 		);
 	}
 

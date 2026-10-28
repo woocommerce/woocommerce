@@ -29,6 +29,10 @@ class WC_REST_System_Status_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+
+		remove_action( 'upgrader_process_complete', 'wp_version_check' );
+		remove_action( 'upgrader_process_complete', 'wp_update_plugins' );
+		remove_action( 'upgrader_process_complete', 'wp_update_themes' );
 		$this->sut = new WC_REST_System_Status_V2_Controller();
 		delete_transient( 'wc_system_status_theme_info' );
 	}
