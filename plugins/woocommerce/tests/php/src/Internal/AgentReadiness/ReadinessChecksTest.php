@@ -257,6 +257,12 @@ class ReadinessChecksTest extends WC_Unit_Test_Case {
 			),
 			array_column( $sut->all(), 'ok', 'id' )
 		);
+
+		update_option( 'woocommerce_enable_guest_checkout', 'yes' );
+		add_filter( 'woocommerce_checkout_registration_required', '__return_true' );
+		$guest_checkout = array_column( $sut->all(), 'ok', 'id' )['guest_checkout'];
+		remove_filter( 'woocommerce_checkout_registration_required', '__return_true' );
+		$this->assertFalse( $guest_checkout, 'An extension that requires registration should fail the check' );
 	}
 
 	/**
