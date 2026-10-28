@@ -8,6 +8,7 @@
 declare( strict_types=1 );
 
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\StoreApi\Utilities\CartTokenUtils;
 
 /**
  * Tests for the WC_Session_Handler class.
@@ -515,6 +516,59 @@ class WC_Tests_Session_Handler extends WC_Unit_Test_Case {
 
 		// Verify the DB and cache cleanup results.
 		$this->assertSame( array( array( 'customer' ) ), $wpdb->get_results( $wpdb->prepare( "SELECT session_key FROM %i WHERE session_key IN ('guest', 'customer')", "{$wpdb->prefix}woocommerce_sessions" ), ARRAY_N ) );
+	}
+
+	/**
+	 * Session tokens that can be passed in the `session` query arg.
+	 *
+	 * @return array<string, array<string>>
+	 */
+	public function provide_session_query_tokens(): array {
+		return array(
+			'cart link token' => array( 'cart-link' ),
+			'cart token'      => array( 'store-api' ),
+		);
+	}
+
+	/**
+	 * @testdox A $token_type in the session query arg copies the guest's cart without their customer details.
+	 * @dataProvider provide_session_query_tokens
+	 *
+	 * @param string $token_type Token issuer.
+	 */
+	public function test_session_query_arg_copies_guest_cart_without_customer( string $token_type ) {
+		global $wpdb;
+
+		$guest_session_id = 't_' . wc_rand_hash( '', 30 );
+
+		$wpdb->insert(
+			$wpdb->prefix . 'woocommerce_sessions',
+			array(
+				'session_key'    => $guest_session_id,
+				'session_value'  => maybe_serialize(
+					array(
+						'cart'     => 'shared cart',
+						'customer' => array( 'email' => 'guest@example.org' ),
+					)
+				),
+				'session_expiry' => time() + 50000,
+			),
+			array( '%s', '%s', '%d' )
+		);
+
+		wp_set_current_user( 0 );
+		$_GET['session'] = 'cart-link' === $token_type ? CartTokenUtils::get_cart_link_token( $guest_session_id ) : CartTokenUtils::get_cart_token( $guest_session_id );
+		add_filter( 'woocommerce_set_cookie_enabled', '__return_false' );
+
+		$handler = new WC_Session_Handler();
+		$handler->init();
+
+		remove_filter( 'woocommerce_set_cookie_enabled', '__return_false' );
+		unset( $_GET['session'] );
+
+		$this->assertNotSame( $guest_session_id, $handler->get_customer_id(), 'The visitor should get a new session.' );
+		$this->assertSame( 'shared cart', $handler->get( 'cart' ), 'The cart should be copied.' );
+		$this->assertNull( $handler->get( 'customer' ), 'Customer details should not be copied.' );
 	}
 
 	/**

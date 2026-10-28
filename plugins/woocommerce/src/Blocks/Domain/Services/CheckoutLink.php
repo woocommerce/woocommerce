@@ -65,6 +65,10 @@ class CheckoutLink {
 			return;
 		}
 
+		// The redirect depends on the visitor's session, so page caches must not store it.
+		\WC_Cache_Helper::set_nocache_constants();
+		nocache_headers();
+
 		if ( ! $this->validate_checkout_link() ) {
 			$redirect = add_query_arg( 'wc_error', rawurlencode( __( 'The provided checkout link was out of date or invalid. No products were added to the cart.', 'woocommerce' ) ), wc_get_cart_url() );
 		} else {
@@ -222,7 +226,7 @@ class CheckoutLink {
 	}
 
 	/**
-	 * Process the query params and return the checkout link to redirect to complete with session token.
+	 * Process the query params and return the checkout link to redirect to complete with a cart link token.
 	 *
 	 * @return string The checkout link.
 	 */
@@ -310,14 +314,16 @@ class CheckoutLink {
 					'products',
 					'coupon',
 					'checkout-link',
+					'session',
 				],
 				add_query_arg( wp_unslash( $_SERVER['QUERY_STRING'] ), '', $redirect_url ) // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 			);
 		}
 
-		// If the user is logged in, the session is tied to the user ID. Do not use a cart token.
+		// Logged-in sessions are tied to the user ID. Guests get a link token so the cart survives opening the URL in
+		// another browser, such as leaving an in-app browser. It can't be used as a Store API Cart-Token.
 		if ( ! is_user_logged_in() ) {
-			$session_token = CartTokenUtils::get_cart_token( (string) wc()->session->get_customer_id() );
+			$session_token = CartTokenUtils::get_cart_link_token( (string) wc()->session->get_customer_id() );
 			$redirect_url  = add_query_arg( 'session', $session_token, $redirect_url );
 		}
 
