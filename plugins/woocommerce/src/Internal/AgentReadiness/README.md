@@ -77,7 +77,7 @@ array(
 )
 ```
 
-The same shape is meant for every consumer: this Status tab, an outside scan of a store, and extensions such as Woo AI that rank the findings by sales and offer fixes. Check and channel ids are stable keys.
+The same shape is meant for every consumer: this Status tab, an outside scan of a store, and extensions that rank the findings by sales or offer fixes. Check and channel ids are stable keys.
 
 The scan walks published products (not grouped or external) in batches of 200, most recently modified first, primes meta, terms, images and variations per batch, and stops at 5,000 products. The Status tab runs it on request and keeps the result in a transient for an hour.
 
