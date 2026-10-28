@@ -100,8 +100,6 @@ The scan walks published products (not grouped or external) in batches of 200, m
 
 The per-channel field and effect live in each check's `channels()`. The final map passes through the `woocommerce_agent_readiness_rules` filter, keyed by check id, so it can change without a release. Removing a check id stops that check. Unknown channels and effects are dropped.
 
-Next step, out of scope here: fetch the rules map from a remote JSON spec with the bundled `channels()` as the fallback, the way core polls remote specs for payment and marketing suggestions with bundled defaults.
-
 ## Product feed integration
 
 `ReadinessFeedValidator` implements `ProductFeed\Feed\FeedValidatorInterface` and returns the ids of the checks a product fails, so feed integrations can reuse the checks. It judges a variation by its parent, as the scan counts it, and returns no issues for products the scan leaves out (grouped, external, unpublished). The rules are built once per request. The feed framework skips rows with issues, so an integration that only wants to report gaps should wrap it.
