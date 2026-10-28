@@ -1267,6 +1267,73 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should report the order and line item fields that fail on every order in a list, and keep the valid values.
+	 */
+	public function test_order_list_items_report_their_failed_fields(): void {
+		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_field' );
+		add_action(
+			'woocommerce_extensible_abilities_init',
+			static function () {
+				$throws = static function () {
+					throw new \RuntimeException( 'Broken' );
+				};
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'     => 'order',
+						'namespace'    => 'test-ext',
+						'field'        => 'count',
+						'schema'       => array( 'type' => 'integer' ),
+						'get_callback' => static fn() => 'many',
+					)
+				);
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'     => 'order',
+						'namespace'    => 'test-ext',
+						'field'        => 'broken',
+						'schema'       => array( 'type' => 'string' ),
+						'get_callback' => $throws,
+					)
+				);
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'     => 'order_item',
+						'namespace'    => 'test-ext',
+						'field'        => 'broken',
+						'schema'       => array( 'type' => 'string' ),
+						'get_callback' => $throws,
+					)
+				);
+			}
+		);
+		\WC_Helper_Order::create_order();
+		\WC_Helper_Order::create_order();
+
+		$orders = $this->run_ability( 'woocommerce/orders-query', array( 'include_line_items' => true ) )['orders'];
+
+		$this->assertCount( 2, $orders );
+		foreach ( $orders as $order ) {
+			$extension = $order['extensions']['test-ext'];
+			$errors    = $extension[ ExtensibleAbilities::ERRORS_KEY ];
+			$this->assertSame( 'order-' . $order['id'], $extension['note'] );
+			$this->assertSame( array( 'count', 'broken' ), array_keys( $errors ) );
+			$this->assertStringContainsString( 'integer', $errors['count'] );
+			$this->assertSame( 'The extension failed to read this value.', $errors['broken'] );
+			$this->assertNotEmpty( $order['line_items'] );
+			foreach ( $order['line_items'] as $item ) {
+				$this->assertSame(
+					array(
+						'gift'                          => 'item-' . $item['id'],
+						ExtensibleAbilities::ERRORS_KEY => array( 'broken' => 'The extension failed to read this value.' ),
+					),
+					$item['extensions']['test-ext']
+				);
+			}
+		}
+		$this->assertStringNotContainsString( 'Broken', wp_json_encode( $orders ) );
+	}
+
+	/**
 	 * @testdox Should accept the extensions of a read result with a read-only field and a field left out, in an update.
 	 */
 	public function test_a_read_result_with_a_field_left_out_can_be_sent_back(): void {
