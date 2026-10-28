@@ -43,6 +43,13 @@ class ProductScan {
 	private int $products = 0;
 
 	/**
+	 * Products not complete on at least one channel.
+	 *
+	 * @var int
+	 */
+	private int $products_with_issues = 0;
+
+	/**
 	 * Product statuses by channel id.
 	 *
 	 * @var array<string, array<string, int>>
@@ -82,16 +89,17 @@ class ProductScan {
 	 * @param int                                                             $ids_limit     Product ids kept per rule.
 	 */
 	public function evaluate( array $rules, array $channel_rules, int $ids_limit ): void {
-		$this->results   = array_fill_keys(
+		$this->results              = array_fill_keys(
 			array_keys( $rules ),
 			array(
 				'count'       => 0,
 				'product_ids' => array(),
 			)
 		);
-		$this->products  = 0;
-		$this->statuses  = array();
-		$this->truncated = false;
+		$this->products             = 0;
+		$this->products_with_issues = 0;
+		$this->statuses             = array();
+		$this->truncated            = false;
 
 		$flush_runtime_cache = wp_cache_supports( 'flush_runtime' );
 		$page                = 1;
@@ -204,6 +212,13 @@ class ProductScan {
 	 */
 	public function products(): int {
 		return $this->products;
+	}
+
+	/**
+	 * Products that can't be listed, or list with gaps, on at least one channel.
+	 */
+	public function products_with_issues(): int {
+		return $this->products_with_issues;
 	}
 
 	/**
@@ -354,7 +369,11 @@ class ProductScan {
 		}
 
 		++$this->products;
-		foreach ( self::statuses( $failed_channels ) as $channel => $status ) {
+		$statuses = self::statuses( $failed_channels );
+		if ( array_diff( $statuses, array( self::COMPLETE ) ) ) {
+			++$this->products_with_issues;
+		}
+		foreach ( $statuses as $channel => $status ) {
 			$this->statuses[ $channel ][ $status ] = ( $this->statuses[ $channel ][ $status ] ?? 0 ) + 1;
 		}
 	}

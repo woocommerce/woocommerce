@@ -36,7 +36,7 @@ class StatusTabTest extends WC_Unit_Test_Case {
 	 * @testdox The tab asks for a first run when no report is cached.
 	 */
 	public function test_render_without_report(): void {
-		delete_transient( AgentReadiness::REPORT_TRANSIENT );
+		delete_option( AgentReadiness::REPORT_OPTION );
 
 		ob_start();
 		wc_get_container()->get( StatusTab::class )->render();

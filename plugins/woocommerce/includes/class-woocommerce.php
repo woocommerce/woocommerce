@@ -451,6 +451,8 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\OrderWithdrawal\OrderWithdrawalController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Ucp\UcpDiscovery::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\AgentReadiness\StatusTab::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\AgentReadiness\ScheduledScan::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\AgentReadiness\ReadinessRestController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Admin\OrderTaxLookupMigrator::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ProductDownloads\DownloadableFileAttachments::class )->register();
 

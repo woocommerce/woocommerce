@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Internal\AgentReadiness\Checks\DuplicateGtinCheck;
 use Automattic\WooCommerce\Internal\AgentReadiness\Checks\ImageTooSmallCheck;
 use Automattic\WooCommerce\Internal\AgentReadiness\Checks\InvalidGtinCheck;
 use Automattic\WooCommerce\Internal\AgentReadiness\Checks\MissingBrandCheck;
+use Automattic\WooCommerce\Internal\AgentReadiness\Checks\MissingGtinCheck;
 use Automattic\WooCommerce\Internal\AgentReadiness\Checks\MissingRegularPriceCheck;
 use Automattic\WooCommerce\Internal\AgentReadiness\FeedChannels;
 use Automattic\WooCommerce\Internal\AgentReadiness\ProductFields;
@@ -51,6 +52,48 @@ class ReadinessChecksTest extends WC_Unit_Test_Case {
 
 		$virtual = WC_Helper_Product::create_simple_product( true, array( 'virtual' => true ) );
 		$this->assertFalse( $sut->fails( $virtual, $this->scan ), 'A virtual product is not asked for a brand' );
+	}
+
+	/**
+	 * @testdox A brand set only in Google for WooCommerce still fails, but no longer counts against Google.
+	 */
+	public function test_missing_brand_with_google_feed_brand(): void {
+		$sut     = new MissingBrandCheck();
+		$product = WC_Helper_Product::create_simple_product();
+		$product->update_meta_data( '_wc_gla_brand', 'Acme' );
+		$product->save();
+
+		$this->assertTrue( $sut->fails( $product, $this->scan ), 'ChatGPT and Copilot do not read the Google for WooCommerce brand' );
+		$channels = $sut->channels_for( $product, $sut->channels() );
+		$this->assertArrayNotHasKey( FeedChannels::GOOGLE, $channels );
+		$this->assertArrayHasKey( FeedChannels::CHATGPT, $channels );
+	}
+
+	/**
+	 * @testdox A product with no GTIN but a brand and an MPN no longer counts against Google.
+	 */
+	public function test_missing_gtin_with_brand_and_mpn(): void {
+		$sut     = new MissingGtinCheck();
+		$product = WC_Helper_Product::create_simple_product();
+		$this->assertArrayHasKey( FeedChannels::GOOGLE, $sut->channels_for( $product, $sut->channels() ), 'No brand and no MPN' );
+
+		$product->update_meta_data( '_wc_gla_mpn', 'AC-100' );
+		$product->save();
+		$this->assertArrayHasKey( FeedChannels::GOOGLE, $sut->channels_for( $product, $sut->channels() ), 'An MPN without a brand is not enough' );
+
+		$product->update_meta_data( '_wc_gla_brand', 'Acme' );
+		$product->save();
+		$this->assertTrue( $sut->fails( $product, $this->scan ) );
+		$channels = $sut->channels_for( $product, $sut->channels() );
+		$this->assertArrayNotHasKey( FeedChannels::GOOGLE, $channels );
+		$this->assertArrayHasKey( FeedChannels::COPILOT, $channels );
+
+		$branded = WC_Helper_Product::create_simple_product();
+		wp_set_object_terms( $branded->get_id(), 'Acme', 'product_brand' );
+		$branded = wc_get_product( $branded->get_id() );
+		$branded->update_meta_data( '_wc_gla_mpn', 'AC-200' );
+		$branded->save();
+		$this->assertArrayNotHasKey( FeedChannels::GOOGLE, $sut->channels_for( $branded, $sut->channels() ), 'A WooCommerce Brands brand counts too' );
 	}
 
 	/**

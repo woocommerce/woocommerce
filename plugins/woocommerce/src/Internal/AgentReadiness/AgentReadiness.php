@@ -33,9 +33,9 @@ class AgentReadiness {
 	public const PRODUCT_IDS_LIMIT = 10;
 
 	/**
-	 * Transient holding the last report.
+	 * Option holding the last report, kept until the next scan replaces it.
 	 */
-	public const REPORT_TRANSIENT = 'woocommerce_agent_readiness_report';
+	public const REPORT_OPTION = 'woocommerce_agent_readiness_report';
 
 	/**
 	 * Store-wide conditions.
@@ -160,7 +160,7 @@ class AgentReadiness {
 	/**
 	 * Run every check over the catalog.
 	 *
-	 * @return array{generated_at:string,products:int,store_checks:array<int,array<string,mixed>>,channels:array<string,array<string,mixed>>,checks:array<int,array<string,mixed>>,truncated:bool}
+	 * @return array{generated_at:string,products:int,products_with_issues:int,store_checks:array<int,array<string,mixed>>,channels:array<string,array<string,mixed>>,checks:array<int,array<string,mixed>>,truncated:bool}
 	 */
 	public function get_report(): array {
 		$active        = $this->get_active_rules();
@@ -186,12 +186,13 @@ class AgentReadiness {
 		}
 
 		return array(
-			'generated_at' => gmdate( 'c' ),
-			'products'     => $scan->products(),
-			'store_checks' => $this->store_conditions->all(),
-			'channels'     => $scan->channel_totals(),
-			'checks'       => $checks,
-			'truncated'    => $scan->truncated(),
+			'generated_at'         => gmdate( 'c' ),
+			'products'             => $scan->products(),
+			'products_with_issues' => $scan->products_with_issues(),
+			'store_checks'         => $this->store_conditions->all(),
+			'channels'             => $scan->channel_totals(),
+			'checks'               => $checks,
+			'truncated'            => $scan->truncated(),
 		);
 	}
 
@@ -201,18 +202,18 @@ class AgentReadiness {
 	 * @return array<string, mixed>|null
 	 */
 	public function get_cached_report(): ?array {
-		$report = get_transient( self::REPORT_TRANSIENT );
+		$report = get_option( self::REPORT_OPTION );
 		return is_array( $report ) ? $report : null;
 	}
 
 	/**
-	 * Run the report and store it for an hour.
+	 * Run the report and store it. Not autoloaded: only the readiness screens read it.
 	 *
 	 * @return array<string, mixed>
 	 */
 	public function refresh_report(): array {
 		$report = $this->get_report();
-		set_transient( self::REPORT_TRANSIENT, $report, HOUR_IN_SECONDS );
+		update_option( self::REPORT_OPTION, $report, false );
 		return $report;
 	}
 

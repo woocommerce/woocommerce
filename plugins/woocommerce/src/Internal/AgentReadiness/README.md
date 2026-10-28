@@ -37,6 +37,8 @@ A channel whose spec does not ask for the field is left out of the check's map.
 
 A variable product with some priced variations fails `missing_regular_price` but counts as `gaps`, not `not_listable`, in the channel totals, since its priced variations still list.
 
+Two Google exceptions, per product: `missing_brand` leaves Google out when Google for WooCommerce sends its own brand (`_wc_gla_brand`), and `missing_gtin` leaves Google out when the product has a brand and an MPN (`_wc_gla_mpn` or an "MPN" attribute). Brands set through Google for WooCommerce attribute mapping rules are not read yet.
+
 Store-wide conditions (`StoreConditions`) are reported first because they hide every product: coming soon mode and "Discourage search engines".
 
 ## Report format
@@ -47,6 +49,7 @@ Store-wide conditions (`StoreConditions`) are reported first because they hide e
 array(
 	'generated_at' => '2026-10-28T12:00:00+00:00',
 	'products'     => 120,          // Published products checked.
+	'products_with_issues' => 31,   // Not complete on at least one channel.
 	'store_checks' => array(
 		array( 'id' => 'launched', 'ok' => true, 'label' => '…', 'why' => '…', 'fix' => '…' ),
 	),
@@ -76,6 +79,12 @@ array(
 	'truncated'    => false, // True when the scan stopped at 5,000 products.
 )
 ```
+
+## Background scan and REST
+
+"Run check" on the tab, or `POST wc/v3/agent-readiness/scan`, queues the scan in Action Scheduler (`ScheduledScan`). The report is stored in the `woocommerce_agent_readiness_report` option (not autoloaded). Each run schedules the next one a day later, before scanning, so a failed scan doesn't stop the daily refresh; a run that finds the feature disabled does.
+
+`GET wc/v3/agent-readiness` returns `{ "report": <report or null>, "scan_pending": <bool> }`. Both routes need `manage_woocommerce` and exist only while the feature is enabled.
 
 The same shape is meant for every consumer: this Status tab, an outside scan of a store, and extensions that rank the findings by sales or offer fixes. Check and channel ids are stable keys.
 

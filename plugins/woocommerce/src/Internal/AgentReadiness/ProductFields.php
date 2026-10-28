@@ -63,6 +63,30 @@ class ProductFields {
 	}
 
 	/**
+	 * The brand Google for WooCommerce sends for the product when it has its
+	 * own value set, or ''. Google reads it; other channels don't.
+	 *
+	 * @param \WC_Product $product Product, not a variation.
+	 */
+	public static function google_feed_brand( \WC_Product $product ): string {
+		return trim( (string) $product->get_meta( '_wc_gla_brand' ) );
+	}
+
+	/**
+	 * The product's MPN from Google for WooCommerce or an "MPN" attribute, or ''.
+	 *
+	 * @param \WC_Product $product Product, not a variation.
+	 */
+	public static function mpn( \WC_Product $product ): string {
+		$mpn = trim( (string) $product->get_meta( '_wc_gla_mpn' ) );
+		if ( '' !== $mpn ) {
+			return $mpn;
+		}
+		$values = array_map( 'trim', self::attribute_values( $product, array( 'mpn' ) ) );
+		return implode( ', ', array_diff( $values, array( '' ) ) );
+	}
+
+	/**
 	 * Whether the feeds expect a brand and GTIN for this product. Google lets a
 	 * product with no assigned identifiers set identifier_exists to false; gift
 	 * cards and virtual or downloadable products are treated as such here.
