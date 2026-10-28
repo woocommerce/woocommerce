@@ -103,6 +103,7 @@ class ProductQueryFiltersTest extends \WC_Unit_Test_Case {
 		$this->assertSame( '1', $result['custom1'] );
 		$this->assertArrayHasKey( 'custom2', $result );
 		$this->assertSame( '2', $result['custom2'] );
+		$this->assertSame( array_keys( wc_get_product_stock_status_options() ), array_keys( $result ), 'Counts should follow the stock status options order.' );
 	}
 
 	/**
