@@ -239,6 +239,7 @@ class ProductQueryFiltersTest extends \WC_Unit_Test_Case {
 			$result = ( new ProductQueryFilters() )->get_stock_status_counts( new \WP_REST_Request( 'GET', '/wc/store/v1/products' ) );
 			$this->assertNotEmpty( $wpdb->last_error, 'The count query must fail to exercise the fallback.' );
 		} finally {
+			// The hook restore runs only after WC_Unit_Test_Case clears its singleton state, so detach this SQL rewrite now to keep it out of that cleanup.
 			remove_filter( 'query', $fail_count_query );
 			$wpdb->suppress_errors( $suppress_errors );
 		}
