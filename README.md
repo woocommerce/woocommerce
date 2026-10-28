@@ -12,7 +12,7 @@ To get up and running within the WooCommerce Monorepo, you will need to make sur
 
 ### Prerequisites
 
--   [Node.js](https://nodejs.org/): Required to run PNPM and the monorepo's build and test scripts. You do not need to match a specific Node version by hand. PNPM reads the version pinned in [`pnpm-workspace.yaml`](pnpm-workspace.yaml) (`useNodeVersion`, mirrored in [`.nvmrc`](.nvmrc)) and automatically installs and uses it for every script it runs. A Node version manager such as [NVM](https://github.com/nvm-sh/nvm#installing-and-updating) is optional, but still handy for installing Node itself.
+-   [Node.js](https://nodejs.org/): Required to run PNPM and the monorepo's build and test scripts. You do not need to match a specific Node version by hand. PNPM reads the version pinned in [`pnpm-workspace.yaml`](pnpm-workspace.yaml) (`nodeVersion`, mirrored in [`.nvmrc`](.nvmrc)) and automatically installs and uses it for every script it runs. A Node version manager such as [NVM](https://github.com/nvm-sh/nvm#installing-and-updating) is optional, but still handy for installing Node itself.
 -   [PNPM](https://pnpm.io/installation): Our repository utilizes PNPM to manage project dependencies and run various scripts involved in building and testing projects.
 -   [PHP 7.4+](https://www.php.net/manual/en/install.php): WooCommerce Core currently requires PHP version 7.4 or higher. It is also needed to run Composer and various project build scripts. See [troubleshooting](DEVELOPMENT.md#troubleshooting) for troubleshooting problems installing PHP.
 -   [Composer](https://getcomposer.org/doc/00-intro.md): We use Composer to manage all of the dependencies for PHP packages and plugins.
