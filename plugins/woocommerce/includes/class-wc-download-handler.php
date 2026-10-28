@@ -122,6 +122,11 @@ class WC_Download_Handler {
 
 		$download = new WC_Customer_Download( current( $download_ids ) );
 
+		// The database lookup can match IDs that differ in case or accents. Only the enabled download checked above may be served.
+		if ( (string) $download->get_download_id() !== $key ) {
+			self::download_error( __( 'Invalid download link.', 'woocommerce' ) );
+		}
+
 		/**
 		 * Filter download filepath.
 		 *
