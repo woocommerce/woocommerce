@@ -34,11 +34,11 @@
 					this.trigger( 'change:methods' );
 				},
 				save: function() {
-					// Deep copy, so an edit made while the request is in flight is not mistaken for
-					// part of what this request submitted.
+					// Keep what this request submits, so the response can tell it apart from an edit
+					// made while the request was in flight.
 					var model    = this,
-						snapshot = $.extend( true, {}, this.changes ),
-						changes  = $.extend( {}, snapshot );
+						snapshot = _.clone( this.changes ),
+						changes  = _.clone( this.changes );
 
 					// Special handling for an empty 'zone_locations' array, which jQuery filters out during $.post().
 					if ( _.has( changes, 'zone_locations' ) && _.isEmpty( changes.zone_locations ) ) {
@@ -66,7 +66,9 @@
 					// Nothing was saved, so redraw from the model, which releases the table.
 					shippingMethod.trigger( 'rerender' );
 
-					if ( _.isEmpty( shippingMethod.changes ) ) {
+					// A row delete leaves a methods entry behind while marking the form clean, so
+					// ignore methods here exactly as the response does.
+					if ( _.isEmpty( _.omit( shippingMethod.changes, 'methods' ) ) ) {
 						// Saving an empty change set would just fail again, so clear the busy
 						// state without marking the form dirty.
 						$save_button.removeClass( 'is-busy' );
@@ -98,9 +100,10 @@
 					shippingMethod.set( 'methods', response.data.methods );
 					shippingMethod.trigger( 'change:methods' );
 
-					// Clear only what this request submitted; anything edited since stays unsaved.
+					// Clear what this request submitted. Only the zone fields are editable while the
+					// table is blocked, so they are the only ones a mid-request edit can reach.
 					shippingMethod.changes = _.omit( shippingMethod.changes, function( value, key ) {
-						return _.isEqual( value, ( snapshot || {} )[ key ] );
+						return 'methods' === key || _.isEqual( value, ( snapshot || {} )[ key ] );
 					} );
 					shippingMethod.trigger( 'saved:methods' );
 
@@ -432,7 +435,7 @@
 								data                    : shippingMethodView.unformatShippingMethodNumericValues( posted_data )
 							},
 							function( response, textStatus ) {
-								if ( 'success' === textStatus && response.success ) {
+								if ( 'success' === textStatus && response.success && response.data ) {
 									$( 'table.wc-shipping-zone-methods' ).parent().find( '#woocommerce_errors' ).remove();
 
 									// If there were errors, prepend the form.

@@ -609,3 +609,66 @@ test( 'recovers when adding a shipping method is rejected with an error response
 	await expect( page.locator( '#btn-next' ) ).not.toHaveClass( /is-busy/ );
 	expect( dialogMessages ).toHaveLength( 1 );
 } );
+
+// Regression: deleting a row leaves an entry in the pending set while correctly marking the
+// form clean, so a later failure must not read that as unsaved zone work and light Save changes.
+test( 'does not claim unsaved zone changes after a row delete and a failed settings save', async ( {
+	page,
+	restApi,
+	zone,
+} ) => {
+	// The delete only leaves that entry behind when another method remains.
+	await restApi.post(
+		`${ WC_API_PATH }/shipping/zones/${ zone.id }/methods`,
+		{
+			method_id: 'free_shipping',
+		}
+	);
+
+	await openZone( page, zone.name );
+
+	const dialogMessages: string[] = [];
+	page.on( 'dialog', async ( dialog ) => {
+		dialogMessages.push( dialog.message() );
+		await dialog.accept();
+	} );
+
+	await page
+		.getByRole( 'cell', { name: 'Edit | Delete', exact: true } )
+		.first()
+		.locator( 'text=Delete' )
+		.click();
+	await expect(
+		page.locator(
+			'.wc-shipping-zone-method-rows .wc-shipping-zone-method-title'
+		)
+	).toHaveCount( 1 );
+	await expect( page.locator( '#submit' ) ).toBeDisabled();
+
+	await page.route(
+		( url ) => url.searchParams.get( 'action' ) === SAVE_SETTINGS_ACTION,
+		( route ) =>
+			route.fulfill( {
+				status: 500,
+				contentType: 'text/plain',
+				body: 'Injected settings save failure',
+			} )
+	);
+
+	await page.locator( 'a.wc-shipping-zone-method-settings' ).first().click();
+	await page.locator( '#btn-ok' ).click();
+
+	await expect
+		.poll( () => dialogMessages )
+		.toContain( 'Your changes were not saved. Please retry.' );
+
+	// Nothing about the zone is pending, so the screen must not claim otherwise.
+	await expect( page.locator( '.blockUI' ) ).toHaveCount( 0 );
+	await expect( page.locator( '#submit' ) ).toBeDisabled();
+	expect(
+		dialogMessages.filter(
+			( message ) =>
+				message === 'Your changes were not saved. Please retry.'
+		)
+	).toHaveLength( 1 );
+} );
