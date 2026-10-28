@@ -672,16 +672,7 @@ final class WooCommerce {
 	}
 
 	/**
-	 * Returns true if the request is a store REST API request.
-	 *
-	 * The UCP namespace counts as one: like the Store API it returns data rather than rendered
-	 * pages, so callers can skip the same work — block and template registration, site tracking.
-	 * The `ucp` feature flag is deliberately not consulted here: this runs in the constructor,
-	 * before `plugins_loaded`, and resolving the flag would build every feature definition there.
-	 *
-	 * This is a rendering decision only. StoreApi\Authentication keeps its own, narrower check
-	 * and does not treat UCP as Store API: its filters assume a browser client with a nonce,
-	 * which a UCP agent never sends, so UCP routes must not inherit them.
+	 * Returns true if the request is a store REST API or UCP API request.
 	 *
 	 * @return bool
 	 */
