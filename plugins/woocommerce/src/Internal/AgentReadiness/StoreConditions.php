@@ -65,7 +65,7 @@ class StoreConditions {
 			),
 			array(
 				'id'    => 'guest_checkout',
-				'ok'    => 'no' !== get_option( 'woocommerce_enable_guest_checkout', 'yes' ),
+				'ok'    => ! WC()->checkout()->is_registration_required(),
 				'label' => __( 'Guest checkout is off', 'woocommerce' ),
 				'why'   => __( 'Shopping agents check out for shoppers without an account on your store, so they cannot place orders.', 'woocommerce' ),
 				'fix'   => __( 'Tick "Enable guest checkout" under WooCommerce > Settings > Accounts & Privacy.', 'woocommerce' ),
