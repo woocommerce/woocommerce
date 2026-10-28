@@ -7,7 +7,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\AbilitiesApi;
 
-use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
+use Automattic\WooCommerce\Abilities\AbilityResources;
 use Automattic\WooCommerce\Abilities\ActionableAbility;
 
 /**
@@ -48,12 +48,26 @@ class TestProductRenameAbility extends ActionableAbility {
 	}
 
 	/**
-	 * The renamed product with its extension fields.
+	 * The renamed product's ID with its extension fields.
 	 *
 	 * @param \WC_Product $subject Saved product.
 	 * @return array
 	 */
 	public function prepare_response( $subject ) {
-		return ExtensibleAbilities::add_fields_to_object( array( 'id' => $subject->get_id() ), 'product', $subject );
+		return array( 'product' => AbilityResources::output_data( 'product', $subject, array( 'id', 'extensions' ) ) );
+	}
+
+	/**
+	 * A registration without an output schema gets the one of prepare_response().
+	 *
+	 * @param array<string, mixed> $args Ability properties.
+	 * @return array<string, mixed>
+	 */
+	protected function prepare_properties( array $args ): array {
+		$args['output_schema'] ??= array(
+			'type'       => 'object',
+			'properties' => array( 'product' => AbilityResources::output_schema( 'product', array( 'id', 'extensions' ) ) ),
+		);
+		return parent::prepare_properties( $args );
 	}
 }

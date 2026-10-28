@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities;
 
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
+use Automattic\WooCommerce\Abilities\AbilityResources;
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Abilities\ActionableAbility;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderAddNote;
@@ -18,6 +19,8 @@ use Automattic\WooCommerce\Internal\Abilities\Domain\ProductCreate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductDelete;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductsQuery;
+use Automattic\WooCommerce\Internal\Abilities\Resources\OrderResource;
+use Automattic\WooCommerce\Internal\Abilities\Resources\ProductResource;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -87,7 +90,7 @@ class AbilitiesLoader {
 		 * Support both old (pre-6.9) and new (6.9+) action names.
 		 */
 		AbilitiesCategories::init();
-		add_action( 'woocommerce_extensible_abilities_resources_init', array( __CLASS__, 'register_core_resources' ), 0 );
+		add_action( 'wp_abilities_api_init', array( __CLASS__, 'register_core_resources' ), 0 );
 		add_action( 'abilities_api_init', array( __CLASS__, 'init_extensions' ), 0 );
 		add_action( 'wp_abilities_api_init', array( __CLASS__, 'init_extensions' ), 0 );
 		add_action( 'abilities_api_init', array( __CLASS__, 'register_abilities' ) );
@@ -99,16 +102,17 @@ class AbilitiesLoader {
 	}
 
 	/**
-	 * Register the resources that Core's abilities format, so extensions can register fields on them.
+	 * Register Core's resources and their fields, also while the extensible abilities feature is off.
 	 *
 	 * @internal
 	 *
 	 * @since 11.3.0
 	 */
 	public static function register_core_resources(): void {
-		foreach ( array( 'product', 'order', 'order_item' ) as $resource_name ) {
-			ExtensibleAbilities::register_resource( $resource_name );
+		if ( AbilityResources::is_registered( ProductResource::NAME ) ) {
+			return;
 		}
+		AbilityResources::register_core( array( ProductResource::class, 'register' ), array( OrderResource::class, 'register' ) );
 	}
 
 	/**
@@ -148,7 +152,7 @@ class AbilitiesLoader {
 		}
 
 		/**
-		 * Fires when extensions can register their resources with ExtensibleAbilities.
+		 * Fires when extensions can register their resources with AbilityResources.
 		 *
 		 * Fires one time, before `woocommerce_extensible_abilities_init`, only when the
 		 * experimental `extensible_abilities` feature is on.
@@ -156,9 +160,10 @@ class AbilitiesLoader {
 		 * @since 11.3.0
 		 */
 		do_action( 'woocommerce_extensible_abilities_resources_init' );
+		AbilityResources::close_root_fields();
 
 		/**
-		 * Fires when extensions can register their fields with ExtensibleAbilities.
+		 * Fires when extensions can register their fields, query filters and validators with ExtensibleAbilities.
 		 *
 		 * Fires one time, only when the experimental `extensible_abilities` feature is on.
 		 *
