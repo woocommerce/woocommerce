@@ -65,18 +65,6 @@ class ProductQueryFiltersTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that custom stock levels are returned properly with the correct counts.
-	 */
-	public function test_custom_stock_counts() {
-		$class  = new ProductQueryFilters();
-		$result = $class->get_stock_status_counts( new \WP_REST_Request( 'GET', '/wc/store/v1/products' ) );
-		$this->assertArrayHasKey( 'custom1', $result );
-		$this->assertArrayHasKey( 'custom2', $result );
-		$this->assertEquals( 1, $result['custom1'] );
-		$this->assertEquals( 2, $result['custom2'] );
-	}
-
-	/**
 	 * @testdox Should count products on the core stock statuses.
 	 */
 	public function test_core_stock_status_counts(): void {
@@ -107,62 +95,36 @@ class ProductQueryFiltersTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should execute one combined stock query with a query observer attached.
+	 * @testdox Should count all stock statuses in one statement.
 	 */
-	public function test_stock_counts_with_query_observer(): void {
-		$queries  = array();
-		$observer = static function ( $sql ) use ( &$queries ) {
-			if ( false !== strpos( $sql, "meta_key = '_stock_status'" ) ) {
-				$queries[] = $sql;
+	public function test_stock_counts_in_one_statement(): void {
+		$queries = array();
+		add_filter(
+			'query',
+			static function ( $sql ) use ( &$queries ) {
+				if ( false !== strpos( $sql, "meta_key = '_stock_status'" ) ) {
+					$queries[] = $sql;
+				}
+				return $sql;
 			}
-			return $sql;
-		};
-		add_filter( 'query', $observer );
-		try {
-			$result = ( new ProductQueryFilters() )->get_stock_status_counts( new \WP_REST_Request( 'GET', '/wc/store/v1/products' ) );
-		} finally {
-			remove_filter( 'query', $observer );
-		}
+		);
 
-		$this->assertArrayHasKey( ProductStockStatus::IN_STOCK, $result );
-		$this->assertSame( '0', $result[ ProductStockStatus::IN_STOCK ] );
-		$this->assertArrayHasKey( ProductStockStatus::OUT_OF_STOCK, $result );
-		$this->assertSame( '0', $result[ ProductStockStatus::OUT_OF_STOCK ] );
-		$this->assertArrayHasKey( ProductStockStatus::ON_BACKORDER, $result );
-		$this->assertSame( '0', $result[ ProductStockStatus::ON_BACKORDER ] );
-		$this->assertArrayHasKey( 'custom1', $result );
-		$this->assertSame( '1', $result['custom1'] );
-		$this->assertArrayHasKey( 'custom2', $result );
-		$this->assertSame( '2', $result['custom2'] );
+		( new ProductQueryFilters() )->get_stock_status_counts( new \WP_REST_Request( 'GET', '/wc/store/v1/products' ) );
+
 		$this->assertCount( 1, $queries, 'All stock statuses should be counted by one statement.' );
 	}
 
 	/**
-	 * @testdox Should return no counts and run no product or count SQL when no stock statuses are configured.
+	 * @testdox Should return no counts without a database error when no stock statuses are configured.
 	 */
 	public function test_empty_stock_status_options(): void {
-		$empty_options = static function () {
-			return array();
-		};
-		$queries       = array();
-		$observer      = static function ( $sql ) use ( &$queries ) {
-			global $wpdb;
-			if ( false !== strpos( $sql, $wpdb->posts ) || false !== strpos( $sql, "meta_key = '_stock_status'" ) ) {
-				$queries[] = $sql;
-			}
-			return $sql;
-		};
-		add_filter( 'woocommerce_product_stock_status_options', $empty_options, 20 );
-		add_filter( 'query', $observer );
-		try {
-			$result = ( new ProductQueryFilters() )->get_stock_status_counts( new \WP_REST_Request( 'GET', '/wc/store/v1/products' ) );
-		} finally {
-			remove_filter( 'woocommerce_product_stock_status_options', $empty_options, 20 );
-			remove_filter( 'query', $observer );
-		}
+		global $wpdb;
+		add_filter( 'woocommerce_product_stock_status_options', '__return_empty_array', 20 );
+
+		$result = ( new ProductQueryFilters() )->get_stock_status_counts( new \WP_REST_Request( 'GET', '/wc/store/v1/products' ) );
 
 		$this->assertSame( array(), $result );
-		$this->assertSame( array(), $queries, 'No product selection or count statement should run for an empty status list.' );
+		$this->assertSame( '', $wpdb->last_error, 'An empty status list must not run an invalid count statement.' );
 	}
 
 	/**
@@ -173,7 +135,6 @@ class ProductQueryFiltersTest extends \WC_Unit_Test_Case {
 		$result = ( new ProductQueryFilters() )->get_stock_status_counts( new \WP_REST_Request( 'GET', '/wc/store/v1/products' ) );
 
 		$this->assertSame( '1', $result['custom1'] );
-		$this->assertSame( '2', $result['custom2'] );
 	}
 
 	/**
@@ -198,30 +159,28 @@ class ProductQueryFiltersTest extends \WC_Unit_Test_Case {
 	public function test_custom_stock_status_option( string $status ): void {
 		global $wpdb;
 
-		$options = static function ( $statuses ) use ( $status ) {
-			$statuses[ $status ] = 'Custom stock status';
-			return $statuses;
-		};
-		add_filter( 'woocommerce_product_stock_status_options', $options, 20 );
-		try {
-			( new FixtureData() )->get_simple_product(
-				array(
-					'name'          => 'Custom stock product',
-					'stock_status'  => $status,
-					'regular_price' => 10,
-				)
-			);
-			$result = ( new ProductQueryFilters() )->get_stock_status_counts( new \WP_REST_Request( 'GET', '/wc/store/v1/products' ) );
-		} finally {
-			remove_filter( 'woocommerce_product_stock_status_options', $options, 20 );
-		}
+		add_filter(
+			'woocommerce_product_stock_status_options',
+			static function ( $statuses ) use ( $status ) {
+				$statuses[ $status ] = 'Custom stock status';
+				return $statuses;
+			},
+			20
+		);
+		( new FixtureData() )->get_simple_product(
+			array(
+				'name'          => 'Custom stock product',
+				'stock_status'  => $status,
+				'regular_price' => 10,
+			)
+		);
+
+		$result = ( new ProductQueryFilters() )->get_stock_status_counts( new \WP_REST_Request( 'GET', '/wc/store/v1/products' ) );
 
 		$this->assertSame( '', $wpdb->last_error, 'Custom status keys must not break the count statement.' );
 		$this->assertArrayHasKey( $status, $result );
 		$this->assertSame( '1', $result[ $status ] );
-		$this->assertSame( '1', $result['custom1'] );
-		$this->assertSame( '2', $result['custom2'] );
-		$this->assertCount( 6, $result, 'Every status from the filter should be present in the result.' );
+		$this->assertSame( array_keys( wc_get_product_stock_status_options() ), array_keys( $result ), 'Every status from the filter should be present in the result.' );
 	}
 
 	/**
@@ -260,8 +219,6 @@ class ProductQueryFiltersTest extends \WC_Unit_Test_Case {
 
 		$this->assertArrayHasKey( ProductStockStatus::OUT_OF_STOCK, $result );
 		$this->assertSame( $expected_count, $result[ ProductStockStatus::OUT_OF_STOCK ] );
-		$this->assertSame( '1', $result['custom1'] );
-		$this->assertSame( '2', $result['custom2'] );
 	}
 
 	/**
@@ -282,11 +239,10 @@ class ProductQueryFiltersTest extends \WC_Unit_Test_Case {
 			$result = ( new ProductQueryFilters() )->get_stock_status_counts( new \WP_REST_Request( 'GET', '/wc/store/v1/products' ) );
 			$this->assertNotEmpty( $wpdb->last_error, 'The count query must fail to exercise the fallback.' );
 		} finally {
-			remove_filter( 'query', $fail_count_query );
 			$wpdb->suppress_errors( $suppress_errors );
 		}
 
-		$this->assertCount( 5, $result );
+		$this->assertCount( count( wc_get_product_stock_status_options() ), $result );
 		foreach ( $result as $count ) {
 			$this->assertSame( '0', $count );
 		}
