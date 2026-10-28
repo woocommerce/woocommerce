@@ -817,6 +817,7 @@ class Endpoint {
 					'pending_moderation' => __( 'Thanks, your review is pending approval.', 'woocommerce' ),
 					'error'              => __( 'Something went wrong, please try again.', 'woocommerce' ),
 					'rating_required'    => __( 'Please rate this product before submitting your review.', 'woocommerce' ),
+					'submit_hint'        => __( 'Add or change a rating or review to submit.', 'woocommerce' ),
 				),
 			)
 		);

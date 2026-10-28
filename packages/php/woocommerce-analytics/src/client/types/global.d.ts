@@ -12,11 +12,14 @@ declare global {
 			pages: Record< string, boolean >;
 			breadcrumbs?: string[];
 			assets_url: string;
+			consentManaged?: boolean;
 		};
 		_wca?: {
 			push: ( props: Record< string, unknown > ) => void;
 		};
 		wp_has_consent?: ( type: string ) => boolean;
+		waitfor_consent_hook?: string;
+		wp_consent_type?: string;
 	}
 }
 

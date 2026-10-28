@@ -58,7 +58,7 @@ class ContractsControllerTest extends EngineIntegrationTestCase {
 	 * A store manager reads the stored contract facts, children included.
 	 */
 	public function test_get_returns_the_contract_to_a_store_manager(): void {
-		$contract = Contracts::create(
+		$contract = $this->create_released(
 			array(
 				'extension_slug'   => 'test-extension',
 				'status'           => 'active',
@@ -108,7 +108,7 @@ class ContractsControllerTest extends EngineIntegrationTestCase {
 	 * A contract without addresses encodes them as an empty JSON object.
 	 */
 	public function test_get_encodes_no_addresses_as_an_object(): void {
-		$contract = Contracts::create(
+		$contract = $this->create_released(
 			array(
 				'extension_slug' => 'test-extension',
 				'status'         => 'active',
@@ -645,7 +645,7 @@ class ContractsControllerTest extends EngineIntegrationTestCase {
 	 * @param string   $extension_slug Owning extension.
 	 */
 	private function create_contract( ?int $customer_id, string $extension_slug = self::EXTENSION_SLUG ): ContractView {
-		return Contracts::create(
+		return $this->create_released(
 			array(
 				'extension_slug' => $extension_slug,
 				'status'         => 'active',

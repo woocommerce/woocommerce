@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\StoreApi;
 
 use Automattic\WooCommerce\Internal\ShopperLists\ShopperListsController;
 use Automattic\WooCommerce\StoreApi\Routes\V1\AbstractRoute;
+use Automattic\WooCommerce\StoreApi\Utilities\UcpUtils;
 
 /**
  * RoutesController class.
@@ -82,6 +83,12 @@ class RoutesController {
 				Routes\V1\ShopperListItems::IDENTIFIER   => Routes\V1\ShopperListItems::class,
 				Routes\V1\ShopperListItemsByKey::IDENTIFIER => Routes\V1\ShopperListItemsByKey::class,
 			],
+			'ucp'           => [
+				// Universal Commerce Protocol endpoints, gated by UcpUtils::is_enabled().
+				Routes\V1\Ucp\CatalogSearch::IDENTIFIER  => Routes\V1\Ucp\CatalogSearch::class,
+				Routes\V1\Ucp\CatalogLookup::IDENTIFIER  => Routes\V1\Ucp\CatalogLookup::class,
+				Routes\V1\Ucp\CatalogProduct::IDENTIFIER => Routes\V1\Ucp\CatalogProduct::class,
+			],
 		];
 	}
 
@@ -95,6 +102,10 @@ class RoutesController {
 
 		if ( wc_get_container()->get( ShopperListsController::class )->is_enabled() ) {
 			$this->register_routes( 'shopper_lists', self::$api_namespace . '/v1' );
+		}
+
+		if ( UcpUtils::is_enabled() ) {
+			$this->register_routes( 'ucp', 'wc/ucp/v1' );
 		}
 	}
 

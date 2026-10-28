@@ -289,7 +289,7 @@ class WC_Customer_Download_Data_Store implements WC_Customer_Download_Data_Store
 		} elseif ( is_float( $value ) ) {
 			$value_placeholder = '%f';
 		} else {
-			wc_doing_it_wrong( __METHOD__, __( 'Unsupported argument type provided as value.', 'woocommerce' ), '7.0' );
+			wc_doing_it_wrong( __METHOD__, 'Unsupported argument type provided as value.', '7.0' );
 			// The `prepare` further down would fail if the placeholder was missing, so skip download log removal.
 			return;
 		}

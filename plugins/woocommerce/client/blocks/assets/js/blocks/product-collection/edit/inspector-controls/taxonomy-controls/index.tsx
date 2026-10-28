@@ -1,9 +1,6 @@
 /**
  * External dependencies
  */
-import { useMemo } from '@wordpress/element';
-import { useSelect } from '@wordpress/data';
-import { store as coreStore } from '@wordpress/core-data';
 import ProductCategoryControl from '@woocommerce/editor-components/product-category-control';
 import ProductTagControl from '@woocommerce/editor-components/product-tag-control';
 import ProductBrandControl from '@woocommerce/editor-components/product-brand-control';
@@ -21,24 +18,7 @@ import TaxonomyItem from './taxonomy-item';
 import { QueryControlProps } from '../../../types';
 import useTaxonomyControls from './use-taxonomy-controls';
 
-/**
- * Hook that returns the taxonomies associated with product post type.
- */
-export const useTaxonomies = (): Taxonomy[] => {
-	const taxonomies = useSelect( ( select ) => {
-		const { getTaxonomies } = select( coreStore );
-		const filteredTaxonomies: Taxonomy[] = getTaxonomies( {
-			type: 'product',
-			per_page: -1,
-		} );
-		return filteredTaxonomies;
-	}, [] );
-	return useMemo( () => {
-		return taxonomies?.filter(
-			( { visibility } ) => !! visibility?.publicly_queryable
-		);
-	}, [ taxonomies ] );
-};
+export { useTaxonomies } from './use-taxonomies';
 
 /**
  * Normalize the name so first letter of every word is capitalized.

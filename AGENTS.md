@@ -209,6 +209,10 @@ WordPress exposes more contracts than class and function signatures. The followi
 
 **Do not assume install layout.** WordPress could be configured to run in a subdirectory, with relocated `wp-content`, and behind reverse proxies. Never build paths or URLs by concatenation from the domain root; derive them (`plugins_url()`, `plugin_dir_path()`, `wp_upload_dir()`, and mind the `home_url()` vs `site_url()` distinction). A path that works on a root install and breaks elsewhere is a compatibility bug, not an edge case.
 
+### PRs that change Core and themes
+
+Flag any PR that changes both WooCommerce Core (`plugins/woocommerce/`) and themes (`themes/`) as a **potential compatibility change**. Updating themes alongside Core can hide a breaking change for stores that update Core without updating their theme.
+
 ### Before changing any public or externally exposed surface (agent checklist)
 
 1. Identify the contract you are touching: signature, hook, global/scope expectation, site topology, or install layout.
@@ -256,6 +260,45 @@ WooCommerce names its enumerated string vocabularies — order statuses, product
 - **Constants name values; they never change them.** The string is the contract and the constant is a permanent alias for it. Never change a constant's value, and never rename or remove one — deprecate instead (see Backward Compatibility). These constants are public API that extensions may rely on.
 - **Respect the plugin lifecycle.** Some code paths (REST controllers, report queries) can run during install or upgrade, before the autoloader resolves classes under `src/`; referencing an enum class there is a fatal (`Class ... not found`). Code that can execute mid-install or mid-upgrade keeps its string literals.
 - **Near-duplicate vocabularies are distinct classes on purpose.** `OrderStatus` holds the unprefixed values (`completed`) most WooCommerce APIs expect; `OrderInternalStatus` holds the `wc-`-prefixed variants (`wc-completed`) WordPress stores. Reach for the class that matches what the consuming API expects.
+
+## Theme Development
+
+Each theme lives in its own private pnpm workspace package under `themes/<slug>/`, with independent versioning, changelogs, and releases. Shared tooling lives in `tools/theme-cli/` as `@woocommerce/theme-cli`. Register each theme explicitly in `pnpm-workspace.yaml`.
+
+Run setup from the repository root:
+
+```sh
+pnpm install --frozen-lockfile
+composer install --working-dir=tools/theme-cli
+```
+
+### Theme Commands
+
+Replace `<slug>` with the directory name of an existing theme, such as `purple`:
+
+```sh
+# Lint CSS, Markdown, and JavaScript, then run WordPress Theme Check.
+pnpm --filter=@woocommerce/theme-cli validate <slug>
+
+# Build a ZIP from the theme's working files.
+pnpm --filter=@woocommerce/theme-cli build <slug>
+
+# Start the theme's local environment using Playground by default.
+pnpm --filter=@woocommerce/theme-cli wp-env start <slug>
+
+# Start using Docker instead.
+pnpm --filter=@woocommerce/theme-cli wp-env start <slug> --runtime=docker
+
+# Stop the theme's local environment.
+pnpm --filter=@woocommerce/theme-cli wp-env stop <slug>
+
+# Lint and validate all themes.
+pnpm --filter=@woocommerce/theme-cli validate --all
+```
+
+`@woocommerce/theme-cli` provides the `wp-env` command, dependency, and shared configuration at `tools/theme-cli/.wp-env.json`.
+
+See [the theme CLI README](tools/theme-cli/README.md) and the selected theme's README for setup details. Validation lints CSS, Markdown, and JavaScript with wp-scripts, then runs the official WordPress Theme Check command in a separate Docker environment.
 
 ## Block Development
 
@@ -325,6 +368,8 @@ This is part of the WooCommerce monorepo:
 - Multiple packages managed with pnpm workspaces
 - Root-level scripts coordinate across packages
 - Some dependencies shared across packages
+
+**Dependency changes and `pnpm-lock.yaml`.** Adding, updating or removing a dependency can make pnpm rewrite unrelated lockfile lines. Before committing a lockfile change, follow "Dependency Changes" in `.ai/skills/woocommerce-dev-cycle/code-quality.md`; it says when to trim the diff to your entries and when to commit pnpm's output as written.
 
 ## Historical Context
 

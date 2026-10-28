@@ -106,7 +106,7 @@ class FilesystemUtil {
 
 		_doing_it_wrong(
 			__METHOD__,
-			esc_html__( 'WP_Filesystem_Direct could not be loaded. Falling back to the configured FS_METHOD; operations on the uploads directory may fail if FS_METHOD is misconfigured.', 'woocommerce' ),
+			esc_html( 'WP_Filesystem_Direct could not be loaded. Falling back to the configured FS_METHOD; operations on the uploads directory may fail if FS_METHOD is misconfigured.' ),
 			'11.0.0'
 		);
 
