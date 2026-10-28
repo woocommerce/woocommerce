@@ -661,9 +661,9 @@ jobs:
       - name: 'Validate - Node version sources agree'
         run: |
           nvmrc="$(tr -d 'v[:space:]' < .nvmrc)"
-          workspace="$(sed -nE "s/^nodeVersion:[[:space:]]*['\"]?([^'\"#[:space:]]+).*/\1/p" pnpm-workspace.yaml)"
+          workspace="$(jq -r '.devEngines.runtime.version // empty' package.json)"
           if [ -z "$nvmrc" ] || [ -z "$workspace" ] || [ "$nvmrc" != "$workspace" ]; then
-            echo "::error::.nvmrc ($nvmrc) and nodeVersion in pnpm-workspace.yaml ($workspace) must name the same Node version."
+            echo "::error::.nvmrc ($nvmrc) and devEngines.runtime.version in package.json ($workspace) must name the same Node version."
             exit 1
           fi
 
