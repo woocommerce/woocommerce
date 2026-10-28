@@ -153,8 +153,8 @@ class WC_Shipping_Flat_Rate extends WC_Shipping_Method {
 
 		if ( $atts['percent'] ) {
 			$calculated_fee = $this->fee_cost * ( floatval( $atts['percent'] ) / 100 );
-			// Round in cents first, as cart totals do, so a fee stored just below .5 (15% of 16.90 is 2.53499…) rounds up.
-			// @see https://github.com/woocommerce/woocommerce/issues/62692.
+			// Round at the store's price decimals first, as cart totals do, so a fee stored just below a half (15% of 16.90 is 2.53499…) still rounds up.
+			// @see https://github.com/woocommerce/woocommerce/issues/70187.
 			$calculated_fee = wc_remove_number_precision(
 				NumberUtil::round(
 					wc_add_number_precision( $calculated_fee )

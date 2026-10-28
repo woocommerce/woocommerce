@@ -99,19 +99,29 @@ class WC_Shipping_Flat_Rate_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A percentage fee that should end in 5 rounds half up, even when floating point stores it just below.
+	 * @testdox A 15% fee that falls exactly halfway rounds half up at $decimals price decimals, even when floating point stores it just below.
+	 * @testWith [2, 16.90, 2.54]
+	 *           [2, 3.30, 0.50]
+	 *           [3, 0.19, 0.029]
+	 *           [0, 30, 5]
+	 *
+	 * @param int   $decimals Store price decimals.
+	 * @param float $cost     Cost the fee applies to.
+	 * @param float $expected Fee rounded half up at the store's price decimals.
 	 */
-	public function test_evaluate_cost_percent_fee_rounds_half_up(): void {
+	public function test_evaluate_cost_percent_fee_rounds_half_up( int $decimals, float $cost, float $expected ): void {
+		update_option( 'woocommerce_price_num_decimals', $decimals );
+
 		$val = $this->call_evaluate_cost->call(
 			$this->sut,
 			'[fee percent="15"]',
 			array(
 				'qty'  => 1,
-				'cost' => 16.90,
+				'cost' => $cost,
 			)
 		);
 
-		$this->assertEquals( 2.54, $val, '15% of 16.90 is 2.535, which should round up to 2.54.' );
+		$this->assertEquals( $expected, $val, "15% of {$cost} should round half up to {$expected} at {$decimals} decimals." );
 	}
 
 	/**
