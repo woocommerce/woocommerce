@@ -7,28 +7,31 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
+use Automattic\WooCommerce\Abilities\AbilityResources;
 use Automattic\WooCommerce\Abilities\ActionableAbility;
-use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\DomainAbilityHelpers;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderAbilityTrait;
+use Automattic\WooCommerce\Internal\Abilities\Resources\OrderResource;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * The WooCommerce order update status ability. It runs the steps of
- * ActionableAbility. With the feature on, change() stages the status with
- * WC_Order::stage_status(), so validators see the new status before the save.
- * With the feature off, save() calls WC_Order::update_status() as before.
+ * Registers the WooCommerce order update status ability.
  */
 class OrderUpdateStatus extends ActionableAbility {
 
 	use DomainAbilityHelpers;
 	use OrderAbilityTrait;
 
-	/**
-	 * Ability name.
-	 */
 	public const ABILITY_NAME = 'woocommerce/order-update-status';
+
+	/**
+	 * What change() hands to save(), keyed by order object, so another run of the ability in between cannot overwrite it.
+	 *
+	 * @var array<int, array{status: string, date_paid: ?int, date_completed: ?int, new_status: string, note: string}>
+	 */
+	private array $staged = array();
 
 	/**
 	 * Get the ability registration arguments.
@@ -46,7 +49,7 @@ class OrderUpdateStatus extends ActionableAbility {
 			),
 			'category'            => 'woocommerce',
 			'input_schema'        => self::build_input_schema(),
-			'output_schema'       => self::get_entity_output_schema( 'order', self::get_order_output_schema() ),
+			'output_schema'       => self::get_entity_output_schema( 'order', AbilityResources::output_schema( OrderResource::NAME, null, array( 'line_items' ) ) ),
 			'permission_callback' => array( __CLASS__, 'can_edit_order' ),
 			'meta'                => array(
 				'show_in_rest' => true,
@@ -64,37 +67,49 @@ class OrderUpdateStatus extends ActionableAbility {
 	}
 
 	/**
-	 * Resource that the ability changes.
+	 * Resource the ability changes.
 	 *
 	 * @return string
 	 */
 	public function get_resource(): string {
-		return 'order';
+		return OrderResource::NAME;
 	}
 
 	/**
-	 * Load the order to change.
+	 * Load the order.
 	 *
 	 * @param array $input Ability input.
-	 * @return \WC_Order|\WP_Error
+	 * @return \WC_Data|\WP_Error
 	 */
 	public function load( array $input ) {
 		return self::get_order_from_input( $input );
 	}
 
 	/**
-	 * Check the new status. With the feature on, stage it with
-	 * WC_Order::stage_status(), or refuse the change when the order class cannot
-	 * stage it. With the feature off, no field or validator runs before save(),
-	 * so this step changes the status with WC_Order::update_status(), which
-	 * also saves, and save() does nothing.
+	 * Set the new status so validators see it, without the transition hooks that save() runs.
 	 *
-	 * @param \WC_Order $subject Order.
+	 * @param \WC_Order $subject Order to change.
 	 * @param array     $input   Ability input.
 	 * @return null|\WP_Error
 	 */
 	public function change( $subject, array $input ) {
-		$status = $input['status'];
+		if ( empty( $input['status'] ) ) {
+			return new \WP_Error(
+				'woocommerce_order_status_required',
+				__( 'Order status is required.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		$status = OrderUtil::remove_status_prefix( sanitize_key( $input['status'] ) );
+
+		if ( ! in_array( $status, self::get_query_order_status_slugs(), true ) ) {
+			return new \WP_Error(
+				'woocommerce_order_status_invalid',
+				__( 'Order status is invalid.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
+		}
 
 		if ( $status === $subject->get_status() ) {
 			return new \WP_Error(
@@ -116,80 +131,59 @@ class OrderUpdateStatus extends ActionableAbility {
 			);
 		}
 
-		if ( ! ExtensibleAbilities::is_enabled() ) {
-			return self::update_status( $subject, $status, self::get_note( $input ) );
-		}
-
-		$subject->stage_status( $status, self::get_note( $input ), true );
-
+		$paid                                      = $subject->get_date_paid( 'edit' );
+		$completed                                 = $subject->get_date_completed( 'edit' );
+		$this->staged[ spl_object_id( $subject ) ] = array(
+			'status'         => $subject->get_status(),
+			'date_paid'      => $paid ? $paid->getTimestamp() : null,
+			'date_completed' => $completed ? $completed->getTimestamp() : null,
+			'new_status'     => $status,
+			'note'           => isset( $input['note'] ) ? wp_kses_post( $input['note'] ) : '',
+		);
+		$subject->set_status( $status );
 		return null;
 	}
 
 	/**
-	 * Save the order. With the feature off, change() already saved it through
-	 * WC_Order::update_status().
+	 * Save through WC_Order::update_status(), which order classes can override.
 	 *
-	 * @param \WC_Order $subject Order.
+	 * @param \WC_Order $subject Changed order.
 	 * @return null|\WP_Error
 	 */
 	public function save( $subject ) {
-		return ExtensibleAbilities::is_enabled() ? parent::save( $subject ) : null;
-	}
+		$staged = $this->staged[ spl_object_id( $subject ) ] ?? null;
+		unset( $this->staged[ spl_object_id( $subject ) ] );
+		if ( null === $staged ) {
+			return new \WP_Error( 'woocommerce_order_status_update_failed', __( 'Failed to update order status.', 'woocommerce' ), array( 'status' => 500 ) );
+		}
 
-	/**
-	 * Change the status with WC_Order::update_status(), as a manual change. The
-	 * order's own rules run, and the order is saved.
-	 *
-	 * @param \WC_Order $order  Order.
-	 * @param string    $status New status, without the wc- prefix.
-	 * @param string    $note   Status change note.
-	 * @return null|\WP_Error
-	 */
-	private static function update_status( \WC_Order $order, string $status, string $note ): ?\WP_Error {
+		// Restore the loaded order, so update_status() runs the transition from the original status.
+		$subject->set_status( $staged['status'] );
+		$subject->set_date_paid( $staged['date_paid'] );
+		$subject->set_date_completed( $staged['date_completed'] );
+
 		try {
-			$updated = $order->update_status( $status, $note, true );
+			$updated = $subject->update_status( $staged['new_status'], $staged['note'], true );
 		} catch ( \Exception $e ) {
-			return new \WP_Error(
-				'woocommerce_order_status_update_failed',
-				$e->getMessage(),
-				array( 'status' => 400 )
-			);
+			return new \WP_Error( 'woocommerce_order_status_update_failed', $e->getMessage(), array( 'status' => 400 ) );
 		}
 
 		if ( ! $updated ) {
-			return new \WP_Error(
-				'woocommerce_order_status_update_failed',
-				__( 'Failed to update order status.', 'woocommerce' ),
-				array( 'status' => 500 )
-			);
+			return new \WP_Error( 'woocommerce_order_status_update_failed', __( 'Failed to update order status.', 'woocommerce' ), array( 'status' => 500 ) );
 		}
-
 		return null;
 	}
 
 	/**
-	 * The ability output for the saved order.
+	 * The ability output for the saved order. Line items are left out, like in its output schema.
 	 *
 	 * @param \WC_Order $subject Saved order.
-	 * @return array|\WP_Error
+	 * @return array
 	 */
-	public function prepare_response( $subject ) {
-		$order = self::format_saved_order_for_response( $subject );
-		if ( is_wp_error( $order ) ) {
-			return $order;
-		}
-
-		return array( 'order' => $order );
-	}
-
-	/**
-	 * Get the status change note from the input.
-	 *
-	 * @param array $input Ability input.
-	 * @return string
-	 */
-	private static function get_note( array $input ): string {
-		return isset( $input['note'] ) ? wp_kses_post( $input['note'] ) : '';
+	public function prepare_response( $subject ): array {
+		return array(
+			'order' => self::format_order_for_response( $subject, false ),
+		);
 	}
 
 	/**
