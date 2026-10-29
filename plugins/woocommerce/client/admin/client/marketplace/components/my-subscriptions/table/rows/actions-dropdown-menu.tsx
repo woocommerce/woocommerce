@@ -34,7 +34,7 @@ export default function ActionsDropdownMenu( props: {
 		reviewURL
 	) {
 		controls.unshift( {
-			title: __( 'Review on WooCommerce.com', 'woocommerce' ),
+			title: __( 'Leave a review', 'woocommerce' ),
 			onClick: () => {
 				const url = new URL( reviewURL );
 				url.searchParams.set(

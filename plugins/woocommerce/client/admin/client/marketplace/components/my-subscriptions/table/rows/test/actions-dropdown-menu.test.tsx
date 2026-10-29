@@ -52,7 +52,7 @@ describe( 'ActionsDropdownMenu', () => {
 
 		expect(
 			screen.queryByRole( 'menuitem', {
-				name: 'Review on WooCommerce.com',
+				name: 'Leave a review',
 			} ) !== null
 		).toBe( expected );
 	} );
@@ -63,7 +63,7 @@ describe( 'ActionsDropdownMenu', () => {
 
 		fireEvent.click(
 			screen.getByRole( 'menuitem', {
-				name: 'Review on WooCommerce.com',
+				name: 'Leave a review',
 			} )
 		);
 
@@ -85,7 +85,7 @@ describe( 'ActionsDropdownMenu', () => {
 
 		expect(
 			screen.queryByRole( 'menuitem', {
-				name: 'Review on WooCommerce.com',
+				name: 'Leave a review',
 			} )
 		).toBeNull();
 	} );
