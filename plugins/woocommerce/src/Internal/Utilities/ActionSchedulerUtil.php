@@ -408,18 +408,35 @@ final class ActionSchedulerUtil {
 			return (bool) self::proxy()->call_function( 'as_has_scheduled_action', $hook, $args, $group );
 		}
 
-		if ( self::function_exists( 'as_next_scheduled_action' ) ) {
-			// Returns the timestamp of the next pending action, or true for an in-progress one, hence the cast.
-			return (bool) self::proxy()->call_function( 'as_next_scheduled_action', $hook, $args, $group );
+		if ( ! self::function_exists( 'as_next_scheduled_action' ) ) {
+			wc_doing_it_wrong(
+				__METHOD__,
+				'Action Scheduler is not loaded, so scheduled actions cannot be checked. Call this after Action Scheduler has initialized.',
+				'11.2.0'
+			);
+
+			return false;
 		}
 
-		wc_doing_it_wrong(
-			__METHOD__,
-			'Action Scheduler is not loaded, so scheduled actions cannot be checked. Call this after Action Scheduler has initialized.',
-			'11.2.0'
+		// Returns the timestamp of the next pending action, or true for an in-progress one, hence the cast.
+		if ( (bool) self::proxy()->call_function( 'as_next_scheduled_action', $hook, $args, $group ) ) {
+			return true;
+		}
+
+		// Before 3.0.0 that lookup covers pending actions only, so look for a running one as well.
+		$running = self::proxy()->call_function(
+			'as_get_scheduled_actions',
+			array(
+				'hook'     => $hook,
+				'args'     => $args,
+				'group'    => $group,
+				'status'   => \ActionScheduler_Store::STATUS_RUNNING,
+				'per_page' => 1,
+			),
+			'ids'
 		);
 
-		return false;
+		return ! empty( $running );
 	}
 
 	/**

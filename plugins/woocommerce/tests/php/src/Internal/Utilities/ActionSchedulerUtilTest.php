@@ -538,6 +538,55 @@ class ActionSchedulerUtilTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox has_scheduled_action also looks for a running action when as_next_scheduled_action() finds nothing.
+	 */
+	public function test_has_scheduled_action_falls_back_to_a_running_action_lookup(): void {
+		$this->simulate_loaded_copy( '2.2.0' );
+		$queries = array();
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'as_next_scheduled_action' => fn() => false,
+				'as_get_scheduled_actions' => function ( array $query, string $return_format ) use ( &$queries ) {
+					$queries[] = array( $query, $return_format );
+					return array( 123 );
+				},
+			)
+		);
+
+		$this->assertTrue( ActionSchedulerUtil::has_scheduled_action( self::HOOK, array( 'a' ), self::GROUP ) );
+		$this->assertSame(
+			array(
+				array(
+					array(
+						'hook'     => self::HOOK,
+						'args'     => array( 'a' ),
+						'group'    => self::GROUP,
+						'status'   => \ActionScheduler_Store::STATUS_RUNNING,
+						'per_page' => 1,
+					),
+					'ids',
+				),
+			),
+			$queries
+		);
+	}
+
+	/**
+	 * @testdox has_scheduled_action is false when neither a pending nor a running action exists.
+	 */
+	public function test_has_scheduled_action_is_false_without_pending_or_running_actions(): void {
+		$this->simulate_loaded_copy( '2.2.0' );
+		$this->register_legacy_proxy_function_mocks(
+			array(
+				'as_next_scheduled_action' => fn() => false,
+				'as_get_scheduled_actions' => fn() => array(),
+			)
+		);
+
+		$this->assertFalse( ActionSchedulerUtil::has_scheduled_action( self::HOOK, array( 'a' ), self::GROUP ) );
+	}
+
+	/**
 	 * @testdox when_ready runs the callback at once on a ready copy.
 	 */
 	public function test_when_ready_runs_the_callback_at_once_on_a_ready_copy(): void {
