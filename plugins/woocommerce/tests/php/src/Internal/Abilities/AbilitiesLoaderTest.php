@@ -2151,6 +2151,27 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should refuse a type change on a variable product, because WooCommerce would delete its variations.
+	 */
+	public function test_product_update_rejects_a_type_change_on_a_variable_product(): void {
+		$variable                    = \WC_Helper_Product::create_variation_product();
+		$this->created_product_ids[] = $variable->get_id();
+		$children                    = $variable->get_children();
+
+		$result = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'   => $variable->get_id(),
+				'type' => 'simple',
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_product_type_unsupported', $result->get_error_code() );
+		$this->assertSame( 'variable', wc_get_product( $variable->get_id() )->get_type() );
+		$this->assertSame( $children, wc_get_product( $variable->get_id() )->get_children() );
+	}
+
+	/**
 	 * @testdox Should reject product variation IDs when updating products, with and without a type.
 	 */
 	public function test_product_update_rejects_variation_ids(): void {
