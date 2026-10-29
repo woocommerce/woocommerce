@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
+use Automattic\WooCommerce\Internal\Orders\StagedMethod;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -430,7 +431,8 @@ class WC_Order extends WC_Abstract_Order {
 	 *
 	 * An order class that overrides update_status() with rules of its own must override this method
 	 * too, with the same rules. Abilities stage a status change with this method only when no class
-	 * below the one that declares it overrides update_status().
+	 * below the one that declares it overrides update_status(). Until then, update_status() warns
+	 * with wc_doing_it_wrong() for that class, one time per request.
 	 *
 	 * @since 11.4.0
 	 * @param string       $new_status    Status to change the order to. No internal wc- prefix is required.
@@ -460,6 +462,8 @@ class WC_Order extends WC_Abstract_Order {
 		if ( ! $this->get_id() ) { // Order must exist.
 			return false;
 		}
+
+		StagedMethod::maybe_doing_it_wrong( $this, 'update_status', 'stage_status' );
 
 		try {
 			$this->stage_status( $new_status, $note, $manual );
