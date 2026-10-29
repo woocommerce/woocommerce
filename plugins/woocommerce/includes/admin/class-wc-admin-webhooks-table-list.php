@@ -253,10 +253,10 @@ class WC_Admin_Webhooks_Table_List extends WP_List_Table {
 	 * @param string $which The location of the extra table nav markup: 'top' or 'bottom'.
 	 */
 	protected function display_tablenav( $which ) {
-		echo '<div class="tablenav wc-settings-prevent-change-event ' . esc_attr( $which ) . '">';
+		echo '<div class="tablenav ' . esc_attr( $which ) . '">';
 
 		if ( $this->has_items() ) {
-			echo '<div class="alignleft actions bulkactions">';
+			echo '<div class="alignleft actions bulkactions wc-settings-prevent-change-event">';
 			$this->bulk_actions( $which );
 			echo '</div>';
 		}

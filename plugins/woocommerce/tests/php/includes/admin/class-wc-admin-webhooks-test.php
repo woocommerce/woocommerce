@@ -50,18 +50,52 @@ class WC_Admin_Webhooks_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Create a webhook without a pending ping.
+	 * @testdox Bulk activation pings a pending webhook without blocking the request.
+	 */
+	public function test_bulk_activate_pings_webhooks_without_blocking(): void {
+		$captured_args = array();
+
+		$capture = function ( $response, $parsed_args ) use ( &$captured_args ) {
+			$captured_args[] = $parsed_args;
+			return array(
+				'response' => array( 'code' => 200 ),
+				'body'     => '',
+			);
+		};
+
+		add_filter( 'pre_http_request', $capture, 10, 2 );
+
+		try {
+			$webhook = $this->create_webhook( 'disabled', true );
+
+			$updated = WC_Admin_Webhooks::bulk_update_status( array( $webhook->get_id() ), 'active' );
+		} finally {
+			remove_filter( 'pre_http_request', $capture, 10 );
+		}
+
+		$this->assertSame( 1, $updated, 'The pending webhook should be activated.' );
+		$this->assertSame( 'active', wc_get_webhook( $webhook->get_id() )->get_status(), 'The webhook should be active.' );
+		$this->assertNotEmpty( $captured_args, 'Activating a pending webhook should send a delivery ping.' );
+
+		foreach ( $captured_args as $args ) {
+			$this->assertFalse( $args['blocking'], 'Bulk activation pings must not block the request.' );
+		}
+	}
+
+	/**
+	 * Create a webhook, optionally one that still needs a delivery ping.
 	 *
-	 * @param string $status Initial status.
+	 * @param string $status           Initial status.
+	 * @param bool   $pending_delivery Whether the webhook still needs its first ping.
 	 * @return WC_Webhook
 	 */
-	private function create_webhook( string $status ): WC_Webhook {
+	private function create_webhook( string $status, bool $pending_delivery = false ): WC_Webhook {
 		$webhook = new WC_Webhook();
 		$webhook->set_name( 'Bulk status test' );
 		$webhook->set_topic( 'order.created' );
 		$webhook->set_delivery_url( 'https://example.com/webhook' );
 		$webhook->set_status( $status );
-		$webhook->set_pending_delivery( false );
+		$webhook->set_pending_delivery( $pending_delivery );
 		$webhook->save();
 
 		return $webhook;

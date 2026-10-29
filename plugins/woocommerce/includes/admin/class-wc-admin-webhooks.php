@@ -189,26 +189,46 @@ class WC_Admin_Webhooks {
 	 * @return int Number of webhooks updated.
 	 */
 	public static function bulk_update_status( $webhooks, $status ) {
-		if ( ! in_array( $status, array( 'active', 'disabled', 'paused' ), true ) ) {
+		if ( ! array_key_exists( $status, wc_get_webhook_statuses() ) ) {
 			return 0;
+		}
+
+		// Saving an active webhook makes the data store ping its delivery URL with a
+		// blocking request. In bulk that would be one blocking request per webhook, so a
+		// slow or unreachable URL could stall or time out the whole action and leave it
+		// half-applied. Send those pings non-blocking instead; activate a webhook on its
+		// own to get the verified ping that surfaces delivery errors.
+		$non_blocking_ping = static function ( $args ) {
+			$args['blocking'] = false;
+			return $args;
+		};
+
+		if ( 'active' === $status ) {
+			add_filter( 'woocommerce_webhook_http_args', $non_blocking_ping );
 		}
 
 		$updated = 0;
 
-		foreach ( array_unique( array_map( 'absint', $webhooks ) ) as $webhook_id ) {
-			if ( ! $webhook_id ) {
-				continue;
+		try {
+			foreach ( array_unique( array_map( 'absint', $webhooks ) ) as $webhook_id ) {
+				if ( ! $webhook_id ) {
+					continue;
+				}
+
+				$webhook = wc_get_webhook( $webhook_id );
+
+				if ( ! $webhook || $status === $webhook->get_status() ) {
+					continue;
+				}
+
+				$webhook->set_status( $status );
+				$webhook->save();
+				++$updated;
 			}
-
-			$webhook = wc_get_webhook( $webhook_id );
-
-			if ( ! $webhook || $status === $webhook->get_status() ) {
-				continue;
+		} finally {
+			if ( 'active' === $status ) {
+				remove_filter( 'woocommerce_webhook_http_args', $non_blocking_ping );
 			}
-
-			$webhook->set_status( $status );
-			$webhook->save();
-			++$updated;
 		}
 
 		return $updated;
