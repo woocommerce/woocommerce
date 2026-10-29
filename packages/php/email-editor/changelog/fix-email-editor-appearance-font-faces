@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+List the font weights each email font can show in the email theme.json, under `settings.custom.fontWeights`.

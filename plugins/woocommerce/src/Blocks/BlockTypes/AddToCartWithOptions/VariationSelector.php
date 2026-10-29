@@ -37,7 +37,7 @@ class VariationSelector extends AbstractBlock {
 
 			if ( $p->next_tag( array( 'class_name' => 'wp-block-woocommerce-add-to-cart-with-options-variation-selector' ) ) ) {
 				$p->set_attribute( 'data-wp-watch', 'callbacks.setSelectedVariationId' );
-				$p->set_attribute( 'data-wp-watch--validate', 'callbacks.validateVariation' );
+				$p->set_attribute( 'data-wp-watch---validate', 'callbacks.validateVariation' );
 			}
 
 			return $p->get_updated_html();

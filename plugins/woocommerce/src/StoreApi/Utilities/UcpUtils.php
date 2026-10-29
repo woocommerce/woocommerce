@@ -59,13 +59,12 @@ class UcpUtils {
 	}
 
 	/**
-	 * Spec and schema references for a capability.
+	 * Spec and schema references for every capability these routes serve, keyed by capability name.
 	 *
-	 * @param string $capability One of the CAPABILITY_* constants.
 	 * @return array
 	 */
-	private static function capability_declaration( string $capability ): array {
-		$declarations = array(
+	public static function capability_declarations(): array {
+		return array(
 			self::CAPABILITY_CATALOG_SEARCH => array(
 				'version' => self::VERSION,
 				'spec'    => 'https://ucp.dev/' . self::VERSION . '/specification/catalog/search',
@@ -77,7 +76,15 @@ class UcpUtils {
 				'schema'  => 'https://ucp.dev/' . self::VERSION . '/schemas/shopping/catalog_lookup.json',
 			),
 		);
+	}
 
-		return $declarations[ $capability ] ?? array( 'version' => self::VERSION );
+	/**
+	 * Spec and schema references for a capability.
+	 *
+	 * @param string $capability One of the CAPABILITY_* constants.
+	 * @return array
+	 */
+	private static function capability_declaration( string $capability ): array {
+		return self::capability_declarations()[ $capability ] ?? array( 'version' => self::VERSION );
 	}
 }

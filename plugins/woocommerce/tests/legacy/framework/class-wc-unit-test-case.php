@@ -176,10 +176,10 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 	/**
 	 * Tear down test case.
 	 *
-	 * The cart contents, the cart context, the queued notices, and the cached country
-	 * locale all live on the WC() singletons, which neither the per-test database
-	 * rollback nor the hook restore resets, so clear them here or they leak into every
-	 * later test in the process.
+	 * The cart contents, the cart context, the queued notices, the cached country
+	 * locale, and the loaded shipping methods all live on the WC() singletons, which
+	 * neither the per-test database rollback nor the hook restore resets, so clear them
+	 * here or they leak into every later test in the process.
 	 *
 	 * @since 11.1.0
 	 */
@@ -221,6 +221,14 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 			wc_clear_notices();
 		}
 
+		if ( WC()->session instanceof WC_Session ) {
+			// The session row is rolled back but the session object keeps what it loaded, which no longer matches
+			// storage. Make its next save a full write instead of a merge against that stale snapshot.
+			( function () {
+				$this->replace_session_on_save();
+			} )->call( WC()->session );
+		}
+
 		if ( isset( WC()->countries ) ) {
 			// The locale is cached on first read. A test that reads it while a
 			// woocommerce_get_country_locale filter is attached leaves the filtered
@@ -228,6 +236,9 @@ class WC_Unit_Test_Case extends WP_HTTP_TestCase {
 			// cache it produced.
 			WC()->countries->locale = array();
 		}
+
+		// WC_Shipping caches the loaded methods, including any a test's filters or zones added.
+		WC()->shipping()->unregister_shipping_methods();
 	}
 
 	/**

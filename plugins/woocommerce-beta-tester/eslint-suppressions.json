@@ -1,0 +1,17 @@
+{
+  "src/app/app.js": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "src/live-branches/App.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 1
+    }
+  },
+  "src/live-branches/components/BranchList.tsx": {
+    "@wordpress/use-recommended-components": {
+      "count": 4
+    }
+  }
+}
