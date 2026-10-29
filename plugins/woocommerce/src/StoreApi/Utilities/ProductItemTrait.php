@@ -25,7 +25,7 @@ trait ProductItemTrait {
 			'precision'     => $rounding_precision,
 			'price'         => $this->prepare_money_response( $price_function( $product ), $rounding_precision ),
 			'regular_price' => $this->prepare_money_response( $price_function( $product, array( 'price' => $product->get_regular_price() ) ), $rounding_precision ),
-			'sale_price'    => $this->prepare_money_response( $price_function( $product, array( 'price' => $product->get_sale_price() ) ), $rounding_precision ),
+			'sale_price'    => $this->prepare_money_response( $price_function( $product, array( 'price' => $product->is_on_sale() ? $product->get_sale_price() : '' ) ), $rounding_precision ),
 		);
 
 		return $prices;

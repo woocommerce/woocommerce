@@ -15043,18 +15043,6 @@ parameters:
 			path: includes/class-wc-structured-data.php
 
 		-
-			message: '#^Cannot call method get_regular_price\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: includes/class-wc-structured-data.php
-
-		-
-			message: '#^Cannot call method get_sale_price\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: includes/class-wc-structured-data.php
-
-		-
 			message: '#^Method WC_Structured_Data\:\:generate_breadcrumblist_data\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
