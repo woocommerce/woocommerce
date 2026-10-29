@@ -1111,8 +1111,9 @@ class WC_Form_Handler {
 			$quantity_set = false;
 
 			foreach ( $items as $item => $quantity ) {
+				$item     = absint( $item );
 				$quantity = wc_stock_amount( $quantity );
-				if ( $quantity <= 0 ) {
+				if ( ! $item || $quantity <= 0 ) {
 					continue;
 				}
 				$quantity_set = true;

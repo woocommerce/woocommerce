@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Normalize product IDs on grouped add-to-cart before validating them
