@@ -1118,6 +1118,31 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test: two stage_status calls before one save fire woocommerce_order_edit_status once, with the last status, and set_status after stage_status fires it once.
+	 */
+	public function test_edit_status_action_fires_once_for_the_last_staged_status() {
+		$statuses = array();
+		$listener = static function ( $order_id, $status ) use ( &$statuses ) {
+			$statuses[] = $status;
+		};
+		add_action( 'woocommerce_order_edit_status', $listener, 10, 2 );
+
+		$object = new WC_Order();
+		$object->save();
+		$object->stage_status( OrderStatus::ON_HOLD, '', true );
+		$object->stage_status( OrderStatus::PROCESSING, '', true );
+		$object->save();
+
+		$object->stage_status( OrderStatus::ON_HOLD, '', true );
+		$object->set_status( OrderStatus::COMPLETED, '', true );
+		$object->save();
+
+		remove_action( 'woocommerce_order_edit_status', $listener, 10 );
+		$this->assertSame( array( OrderStatus::PROCESSING, OrderStatus::COMPLETED ), $statuses );
+		$this->assertSame( OrderStatus::COMPLETED, wc_get_order( $object->get_id() )->get_status() );
+	}
+
+	/**
 	 * Test: update_status fires woocommerce_order_edit_status before it writes, and set_status fires it before the paid and completed dates are set.
 	 */
 	public function test_edit_status_action_fires_before_the_write() {
