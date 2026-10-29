@@ -2675,6 +2675,16 @@ class Checkout extends \WP_Test_REST_TestCase {
 		$this->set_taxes_based_on( 'shipping' );
 		$this->enable_taxes_with_us_ca_rate();
 
+		// A shipping extension may decide from the submitted address, so the hook must see billing after it is set.
+		add_filter(
+			'woocommerce_order_needs_shipping',
+			static function ( $needs_shipping, $filtered_order ) {
+				return 'US' !== $filtered_order->get_billing_country() || $needs_shipping;
+			},
+			10,
+			2
+		);
+
 		// A merchant-created order for a virtual product, awaiting the shopper's details.
 		$virtual_product = \WC_Helper_Product::create_simple_product( true, array( 'virtual' => true ) );
 		$order           = \WC_Helper_Order::create_order( 0, $virtual_product );

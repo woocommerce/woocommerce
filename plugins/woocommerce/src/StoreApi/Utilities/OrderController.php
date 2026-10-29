@@ -220,14 +220,7 @@ class OrderController {
 			'shipping' => $order->get_shipping_country() ? $order->get_shipping_state( 'edit' ) : $order->get_billing_state( 'edit' ),
 		];
 
-		// Shipping needs depend on the order's items, not its addresses.
-		$needs_shipping = $order->needs_shipping();
-
-		if ( ! $needs_shipping && empty( $old_shipping_location['country'] ) ) {
-			// An order with no address yet may take any first address, but the shipping address of an order that
-			// ships nothing is not validated while it still sets the tax. Such an order ships, and is taxed, at billing.
-			$shipping = $billing;
-		} elseif ( wc_ship_to_billing_address_only() ) {
+		if ( wc_ship_to_billing_address_only() ) {
 			// Stores that ship to billing only ignore the request's shipping. An order that already ships somewhere
 			// else, e.g. one made in the admin, keeps its shipping, since copying billing over it would block payment.
 			$shipping = self::locations_differ( $old_shipping_location, $order->get_address( 'billing' ) ) ? null : $billing;
@@ -241,6 +234,16 @@ class OrderController {
 			$order->set_shipping_address( $shipping );
 		}
 		$this->restore_state_names( $order, $old_states );
+
+		// Evaluate after setting the addresses so the public filter sees the request data.
+		$needs_shipping = $order->needs_shipping();
+		if ( ! $needs_shipping && empty( $old_shipping_location['country'] ) ) {
+			// An order with no address yet may take any first address, but the shipping address of an order that
+			// ships nothing is not validated while it still sets the tax. Such an order ships, and is taxed, at billing.
+			$shipping = $billing;
+			$order->set_shipping_address( $shipping );
+			$this->restore_state_names( $order, $old_states );
+		}
 
 		$this->validate_addresses( $order, $needs_shipping );
 		$this->validate_location_change( $order, $old_shipping_location, $old_tax_location, $needs_shipping );
