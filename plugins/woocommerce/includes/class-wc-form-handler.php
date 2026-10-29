@@ -1688,23 +1688,36 @@ class WC_Form_Handler {
 					throw new Exception( $new_customer->get_error_message() );
 				}
 
-				wc_add_notice( __( 'Your account was created successfully and a password has been sent to your email address.', 'woocommerce' ) );
+				wc_add_notice(
+					sprintf(
+						/* translators: %s: customer email address */
+						__( 'Your account has been created. Check %s for a link to set your password.', 'woocommerce' ),
+						'<strong>' . esc_html( sanitize_email( $email ) ) . '</strong>'
+					)
+				);
 
-				// Only redirect after a forced login - otherwise output a success notice.
-				if ( apply_filters( 'woocommerce_registration_auth_new_customer', true, $new_customer ) ) {
-					wc_set_customer_auth_cookie( $new_customer );
+				// The shopper stays on the same page, so empty the form to avoid a second submit for the same email.
+				unset( $_POST['email'], $_POST['username'] );
 
-					if ( ! empty( $_POST['redirect'] ) ) {
-						$redirect = wp_sanitize_redirect( wp_unslash( $_POST['redirect'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-					} elseif ( wc_get_raw_referer() ) {
-						$redirect = wc_get_raw_referer();
-					} else {
-						$redirect = wc_get_page_permalink( 'myaccount' );
-					}
-
-					wp_redirect( wp_validate_redirect( apply_filters( 'woocommerce_registration_redirect', $redirect ), wc_get_page_permalink( 'myaccount' ) ) ); //phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect
-					exit;
-				}
+				/**
+				 * Filters whether to log in a customer straight after registration.
+				 *
+				 * Deprecated: new customers are never logged in. They set a password from the new account email, which
+				 * also verifies their email address. The return value is ignored.
+				 *
+				 * @since 3.0.0
+				 * @deprecated 11.5.0
+				 *
+				 * @param bool $auth_new_customer Whether to log in the new customer.
+				 * @param int  $new_customer      New customer ID.
+				 */
+				apply_filters_deprecated(
+					'woocommerce_registration_auth_new_customer',
+					array( true, $new_customer ),
+					'11.5.0',
+					'',
+					'New customers are no longer logged in after registration. They set a password from the new account email first. The return value is ignored.'
+				);
 			} catch ( Exception $e ) {
 				if ( $e->getMessage() ) {
 					wc_add_notice( '<strong>' . __( 'Error:', 'woocommerce' ) . '</strong> ' . $e->getMessage(), 'error' );
