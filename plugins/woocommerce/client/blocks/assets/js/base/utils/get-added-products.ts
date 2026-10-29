@@ -4,9 +4,16 @@
 import type { AddToCartEventProduct } from '@woocommerce/types';
 
 type CartLine = {
-	key?: string | undefined;
 	id: number;
 	quantity: number;
+};
+
+const getQuantitiesById = ( items: CartLine[] ) => {
+	const quantities = new Map< number, number >();
+	for ( const { id, quantity } of items ) {
+		quantities.set( id, ( quantities.get( id ) ?? 0 ) + quantity );
+	}
+	return quantities;
 };
 
 /**
@@ -22,22 +29,11 @@ export const getAddedProducts = (
 	previousItems: CartLine[],
 	items: CartLine[]
 ): AddToCartEventProduct[] => {
-	const previousQuantities = new Map(
-		previousItems.map( ( item ) => [ item.key, item.quantity ] )
-	);
-	const addedQuantities = new Map< number, number >();
-	for ( const item of items ) {
-		const added =
-			item.quantity - ( previousQuantities.get( item.key ) ?? 0 );
-		if ( added > 0 ) {
-			addedQuantities.set(
-				item.id,
-				( addedQuantities.get( item.id ) ?? 0 ) + added
-			);
+	const previousQuantities = getQuantitiesById( previousItems );
+	return Array.from( getQuantitiesById( items ) ).flatMap(
+		( [ id, quantity ] ) => {
+			const added = quantity - ( previousQuantities.get( id ) ?? 0 );
+			return added > 0 ? [ { id, quantity: added } ] : [];
 		}
-	}
-	return Array.from( addedQuantities, ( [ id, quantity ] ) => ( {
-		id,
-		quantity,
-	} ) );
+	);
 };
