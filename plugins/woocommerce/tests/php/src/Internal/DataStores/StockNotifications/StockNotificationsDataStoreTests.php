@@ -563,7 +563,7 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should leave the modified date alone when a save has no changes.
+	 * @testdox Should fire the update action once and leave the modified date alone when a save has no changes.
 	 */
 	public function test_save_without_changes_keeps_modified_date(): void {
 		$notification = $this->create_notification_modified_in_the_past();
@@ -571,6 +571,45 @@ class StockNotificationsDataStoreTests extends \WC_Unit_Test_Case {
 		$notification->save();
 
 		$this->assertSame( 1, did_action( 'woocommerce_update_stock_notification' ) - $fired );
+		$notification = new Notification( $notification->get_id() );
+		$this->assertSame( '2024-01-01 00:00:00', $notification->get_date_modified()->format( 'Y-m-d H:i:s' ) );
+	}
+
+	/**
+	 * @testdox Should report no meta changes when meta was never read.
+	 */
+	public function test_has_meta_changes_is_false_when_meta_was_never_read(): void {
+		$notification = $this->create_notification_modified_in_the_past();
+
+		$this->assertFalse( $notification->has_meta_changes() );
+	}
+
+	/**
+	 * @testdox Should report no meta changes for unchanged loaded meta.
+	 */
+	public function test_has_meta_changes_is_false_for_unchanged_loaded_meta(): void {
+		$notification = $this->create_notification_modified_in_the_past();
+		$notification->add_meta_data( 'test_meta', 'test_value' );
+		$notification->save();
+
+		$notification = new Notification( $notification->get_id() );
+		$notification->get_meta( 'test_meta' );
+
+		$this->assertFalse( $notification->has_meta_changes() );
+	}
+
+	/**
+	 * @testdox Should report no meta changes when meta is added and deleted before saving.
+	 */
+	public function test_has_meta_changes_is_false_when_meta_is_added_then_deleted_before_save(): void {
+		$notification = $this->create_notification_modified_in_the_past();
+		$notification->add_meta_data( 'test_meta', 'test_value' );
+		$this->assertTrue( $notification->has_meta_changes() );
+
+		$notification->delete_meta_data( 'test_meta' );
+		$this->assertFalse( $notification->has_meta_changes() );
+
+		$notification->save();
 		$notification = new Notification( $notification->get_id() );
 		$this->assertSame( '2024-01-01 00:00:00', $notification->get_date_modified()->format( 'Y-m-d H:i:s' ) );
 	}

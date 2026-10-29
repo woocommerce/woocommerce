@@ -591,7 +591,11 @@ class Notification extends \WC_Data {
 		}
 
 		foreach ( $this->meta_data as $meta ) {
-			if ( is_null( $meta->value ) ? ! empty( $meta->id ) : ( empty( $meta->id ) || $meta->get_changes() ) ) {
+			if ( is_null( $meta->value ) ) {
+				if ( ! empty( $meta->id ) ) {
+					return true;
+				}
+			} elseif ( empty( $meta->id ) || $meta->get_changes() ) {
 				return true;
 			}
 		}
