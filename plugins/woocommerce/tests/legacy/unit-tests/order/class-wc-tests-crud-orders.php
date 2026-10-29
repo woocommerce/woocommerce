@@ -1143,6 +1143,95 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test: stage_payment_complete changes the order in memory, and the next save writes it, adds the note and fires woocommerce_payment_complete.
+	 */
+	public function test_stage_payment_complete_changes_the_order_in_memory_only() {
+		$object = new WC_Order();
+		$object->save();
+		$fired = did_action( 'woocommerce_payment_complete' );
+		$notes = count( wc_get_order_notes( array( 'order_id' => $object->get_id() ) ) );
+
+		$this->assertTrue( $object->stage_payment_complete( '12345' ) );
+		$this->assertSame( OrderStatus::COMPLETED, $object->get_status() );
+		$this->assertSame( '12345', $object->get_transaction_id() );
+		$this->assertNotNull( $object->get_date_paid( 'edit' ) );
+
+		$stored = wc_get_order( $object->get_id() );
+		$this->assertSame( OrderStatus::PENDING, $stored->get_status() );
+		$this->assertSame( '', $stored->get_transaction_id() );
+		$this->assertSame( 0, did_action( 'woocommerce_payment_complete' ) - $fired );
+		$this->assertCount( $notes, wc_get_order_notes( array( 'order_id' => $object->get_id() ) ) );
+
+		$object->save();
+		$this->assertSame( OrderStatus::COMPLETED, wc_get_order( $object->get_id() )->get_status() );
+		$this->assertSame( 1, did_action( 'woocommerce_payment_complete' ) - $fired );
+		$this->assertCount( $notes + 1, wc_get_order_notes( array( 'order_id' => $object->get_id() ) ) );
+
+		$object->save();
+		$this->assertSame( 1, did_action( 'woocommerce_payment_complete' ) - $fired );
+	}
+
+	/**
+	 * Test: payment_complete fires woocommerce_payment_complete once, after the write, and does not save an order whose status payment cannot complete.
+	 */
+	public function test_payment_complete_fires_its_action_after_the_write() {
+		$statuses = array();
+		$listener = static function ( $order_id, $transaction_id ) use ( &$statuses ) {
+			$statuses[] = array( wc_get_order( $order_id )->get_status(), $transaction_id );
+		};
+		add_action( 'woocommerce_payment_complete', $listener, 10, 2 );
+
+		$object = new WC_Order();
+		$object->save();
+		$this->assertTrue( $object->payment_complete( '12345' ) );
+
+		$updates = did_action( 'woocommerce_update_order' );
+		$skipped = did_action( 'woocommerce_payment_complete_order_status_completed' );
+		$this->assertTrue( $object->payment_complete( '67890' ) );
+
+		remove_action( 'woocommerce_payment_complete', $listener, 10 );
+		$this->assertSame( array( array( OrderStatus::COMPLETED, '12345' ) ), $statuses );
+		$this->assertSame( 1, did_action( 'woocommerce_payment_complete_order_status_completed' ) - $skipped );
+		$this->assertSame( $updates, did_action( 'woocommerce_update_order' ) );
+		$this->assertSame( '12345', wc_get_order( $object->get_id() )->get_transaction_id() );
+	}
+
+	/**
+	 * Test: stage_product_item adds an unsaved line item to the order, and the next save writes it.
+	 */
+	public function test_stage_product_item_adds_an_unsaved_item() {
+		$product = WC_Helper_Product::create_simple_product();
+		$object  = new WC_Order();
+		$object->save();
+
+		$item = $object->stage_product_item( $product, 2 );
+		$this->assertInstanceOf( WC_Order_Item_Product::class, $item );
+		$this->assertSame( 0, $item->get_id() );
+		$this->assertSame( 2, $item->get_quantity() );
+		$this->assertSame( array( $item ), array_values( $object->get_items() ) );
+		$this->assertCount( 0, wc_get_order( $object->get_id() )->get_items() );
+
+		$object->save();
+		$this->assertGreaterThan( 0, $item->get_id() );
+		$this->assertSame( array( $item->get_id() ), array_keys( wc_get_order( $object->get_id() )->get_items() ) );
+	}
+
+	/**
+	 * Test: add_product saves the item right away and keys it by its ID, as before.
+	 */
+	public function test_add_product_saves_the_item() {
+		$product = WC_Helper_Product::create_simple_product();
+		$object  = new WC_Order();
+		$object->save();
+
+		$item_id = $object->add_product( $product, 3 );
+		$this->assertGreaterThan( 0, $item_id );
+		$this->assertSame( array( $item_id ), array_keys( $object->get_items() ) );
+		$this->assertSame( array( $item_id ), array_keys( wc_get_order( $object->get_id() )->get_items() ) );
+		$this->assertSame( 3, $object->get_item( $item_id )->get_quantity() );
+	}
+
+	/**
 	 * Test: update_status fires woocommerce_order_edit_status before it writes and after the paid and completed dates are set, and set_status fires it before those dates are set.
 	 */
 	public function test_edit_status_action_fires_before_the_write() {
