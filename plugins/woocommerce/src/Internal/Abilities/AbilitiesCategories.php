@@ -32,12 +32,7 @@ class AbilitiesCategories {
 	 * @since 10.9.0
 	 */
 	public static function register_categories(): void {
-		// Only register if the function exists.
-		if ( ! function_exists( 'wp_register_ability_category' ) ) {
-			return;
-		}
-
-		if ( ! function_exists( 'wp_has_ability_category' ) || ! wp_has_ability_category( 'woocommerce' ) ) {
+		if ( ! wp_has_ability_category( 'woocommerce' ) ) {
 			wp_register_ability_category(
 				'woocommerce',
 				array(
@@ -47,7 +42,7 @@ class AbilitiesCategories {
 			);
 		}
 
-		if ( ! function_exists( 'wp_has_ability_category' ) || ! wp_has_ability_category( 'woocommerce-rest' ) ) {
+		if ( ! wp_has_ability_category( 'woocommerce-rest' ) ) {
 			wp_register_ability_category(
 				'woocommerce-rest',
 				array(
