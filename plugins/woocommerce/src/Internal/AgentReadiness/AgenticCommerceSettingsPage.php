@@ -79,7 +79,12 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	 */
 	protected function get_settings_for_default_section() {
 		$pages     = array( '' => __( 'Select a page…', 'woocommerce' ) );
-		$published = get_pages( array( 'post_status' => 'publish' ) );
+		$published = get_pages(
+			array(
+				'post_status' => 'publish',
+				'exclude'     => self::store_page_ids(),
+			)
+		);
 		foreach ( is_array( $published ) ? $published : array() as $page ) {
 			$pages[ (string) $page->ID ] = $page->post_title;
 		}
@@ -162,6 +167,9 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 			return $value;
 		}
 		$page_id = absint( is_scalar( $raw_value ) ? $raw_value : 0 );
+		if ( in_array( $page_id, self::store_page_ids(), true ) ) {
+			return null;
+		}
 		if ( SetupChecks::is_published_page( $page_id ) ) {
 			return (string) $page_id;
 		}
@@ -169,6 +177,21 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 			return '';
 		}
 		return null;
+	}
+
+	/**
+	 * The cart, checkout, shop and My account pages, which can't be a policy page.
+	 * Advanced > Page setup leaves them out of its terms and refund fields too.
+	 *
+	 * @return array<int, int>
+	 */
+	private static function store_page_ids(): array {
+		return array_values(
+			array_filter(
+				array_map( 'wc_get_page_id', array( 'cart', 'checkout', 'shop', 'myaccount' ) ),
+				static fn ( $page_id ) => $page_id > 0
+			)
+		);
 	}
 
 	/**

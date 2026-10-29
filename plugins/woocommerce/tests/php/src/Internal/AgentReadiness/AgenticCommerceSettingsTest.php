@@ -152,6 +152,33 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The cart, checkout, shop and My account pages can't be picked as a policy page.
+	 */
+	public function test_store_pages_are_not_policy_pages(): void {
+		$checkout = self::factory()->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+			)
+		);
+		update_option( 'woocommerce_checkout_page_id', $checkout );
+		$terms_field = array();
+		foreach ( $this->page()->get_settings_for_section( '' ) as $field ) {
+			if ( AgenticCommerceSettings::TERMS_PAGE_OPTION === ( $field['id'] ?? '' ) ) {
+				$terms_field = $field;
+			}
+		}
+		$this->assertArrayNotHasKey( (string) $checkout, $terms_field['options'], 'The checkout page is not offered' );
+
+		WC_Admin_Settings::save_fields(
+			$this->page()->get_settings_for_section( '' ),
+			array( AgenticCommerceSettings::TERMS_PAGE_OPTION => (string) $checkout )
+		);
+
+		$this->assertNotSame( $checkout, (int) get_option( AgenticCommerceSettings::TERMS_PAGE_OPTION ), 'A posted checkout page id is not saved' );
+	}
+
+	/**
 	 * @testdox Clearing a published page on the tab clears it everywhere.
 	 */
 	public function test_save_clears_published_page(): void {
