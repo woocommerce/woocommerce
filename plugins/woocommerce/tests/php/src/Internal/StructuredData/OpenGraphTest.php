@@ -164,10 +164,16 @@ class OpenGraphTest extends WC_Unit_Test_Case {
 				$this->assertInstanceOf( WC_Product::class, $context, 'The filter context should be a product.' );
 				$this->assertSame( $this->product->get_id(), $context->get_id(), 'The filter should receive the queried product.' );
 
-				$tags['og:title']      = 'Custom & "title"';
-				$tags['twitter:title'] = 'Twitter title';
-				$tags['twitter:card']  = 'summary';
-				unset( $tags['og:description'], $tags['og:type'] );
+				foreach ( $tags as $index => $group ) {
+					if ( isset( $group['og:description'] ) || isset( $group['og:type'] ) ) {
+						unset( $tags[ $index ] );
+					} elseif ( isset( $group['og:title'] ) ) {
+						$tags[ $index ]['og:title'] = 'Custom & "title"';
+					} elseif ( isset( $group['twitter:card'] ) ) {
+						$tags[ $index ]['twitter:card'] = 'summary';
+					}
+				}
+				$tags[] = array( 'twitter:title' => 'Twitter title' );
 
 				return $tags;
 			},
@@ -191,8 +197,16 @@ class OpenGraphTest extends WC_Unit_Test_Case {
 		add_filter(
 			'woocommerce_open_graph_tags',
 			static function ( $tags ) {
-				$tags['product:price:amount']   = '19.99';
-				$tags['product:price:currency'] = 'USD';
+				foreach ( $tags as $index => $group ) {
+					unset( $group['product:price:amount'], $group['product:price:currency'] );
+					if ( $group ) {
+						$tags[ $index ] = $group;
+					} else {
+						unset( $tags[ $index ] );
+					}
+				}
+				$tags[] = array( 'product:price:amount' => '19.99' );
+				$tags[] = array( 'product:price:currency' => 'USD' );
 
 				return $tags;
 			}

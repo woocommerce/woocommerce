@@ -698,8 +698,8 @@ Display options in a dropdown.
 
 - **Name:** woocommerce/dropdown
 - **Category:** woocommerce
-- **Ancestor:** woocommerce/add-to-cart-with-options-variation-selector-attribute
-- **Supports:** interactivity, woocommerce (innerBlockDisplayStyle)
+- **Ancestor:** woocommerce/add-to-cart-with-options-variation-selector-attribute, woocommerce/product-filter-attribute, woocommerce/product-filter-taxonomy, woocommerce/product-filter-status
+- **Supports:** color (background, text), interactivity, woocommerce (innerBlockDisplayStyle)
 
 ## Email Content - woocommerce/email-content
 

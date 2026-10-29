@@ -31,6 +31,7 @@ export type ActiveFilterItem = {
 	type: string;
 	value: string;
 	attributeQueryType?: 'and' | 'or';
+	label?: string;
 	activeLabel: string;
 };
 
