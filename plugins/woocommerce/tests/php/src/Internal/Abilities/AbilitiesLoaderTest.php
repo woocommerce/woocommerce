@@ -362,7 +362,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			$this->assertStringNotContainsString( 'Applies to: ', $schema['properties']['sku']['description'] ?? '' );
 		}
 
-		$this->assertSame( array( 'name' ), $create_schema['required'] );
+		$this->assertArrayNotHasKey( 'required', $create_schema );
 		$this->assertArrayNotHasKey( 'id', $create_schema['properties'] );
 		$this->assertStringContainsString( 'A product without a type is simple.', $create_schema['properties']['type']['description'] );
 		$this->assertSame( array( 'id' ), $update_schema['required'] );

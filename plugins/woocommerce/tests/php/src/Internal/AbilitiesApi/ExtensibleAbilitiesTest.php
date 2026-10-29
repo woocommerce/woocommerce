@@ -1719,13 +1719,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$input['variations'][1]['extensions']['test-ext']['color'] = 'green';
 		$created = $this->run_ability( 'woocommerce/product-create', $input );
 
-		$variable_branch = null;
-		foreach ( $schema['oneOf'] as $branch ) {
-			if ( array( 'variable' ) === ( $branch['properties']['type']['enum'] ?? null ) ) {
-				$variable_branch = $branch;
-			}
-		}
-		$this->assertArrayHasKey( 'color', $variable_branch['properties']['variations']['items']['properties']['extensions']['properties']['test-ext']['properties'] );
+		$this->assertArrayHasKey( 'color', $schema['properties']['variations']['items']['properties']['extensions']['properties']['test-ext']['properties'] );
 		$this->assertSame( 400, $refused->get_status() );
 		$this->assertSame( 'test_red_variation', $refused->get_data()['code'] );
 		$this->assertSame( array(), $saved );

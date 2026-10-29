@@ -101,6 +101,14 @@ class ProductCreate extends ActionableAbility {
 			return $product_config;
 		}
 
+		if ( ProductType::VARIATION !== $product_type && '' === trim( (string) ( $input['name'] ?? '' ) ) ) {
+			return new \WP_Error(
+				'woocommerce_product_name_required',
+				__( 'A product needs a name.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
+		}
+
 		return self::get_product_object_for_type( $product_type );
 	}
 
@@ -153,7 +161,7 @@ class ProductCreate extends ActionableAbility {
 					return $plan;
 				}
 				$this->variations = $plan;
-				return array_map( null, $plan['save'], $plan['extensions'] );
+				return self::get_variation_objects( $plan );
 			}
 
 			return null;
