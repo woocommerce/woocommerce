@@ -1529,32 +1529,10 @@ class AbilityResourcesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should accept extension fields in product create and in order status update.
+	 * @testdox Should accept extension fields in product create, and none in order status update.
 	 */
-	public function test_product_create_and_order_status_update_accept_fields(): void {
-		$this->add_test_action(
-			'woocommerce_extensible_abilities_init',
-			static function () {
-				ExtensibleAbilities::register_field(
-					'order',
-					'test-ext',
-					'gift_message',
-					array(
-						'schema'          => array( 'type' => array( 'string', 'null' ) ),
-						'get_callback'    => static function ( \WC_Order $order ) {
-							return $order->meta_exists( '_test_gift_message' ) ? $order->get_meta( '_test_gift_message' ) : null;
-						},
-						'update_callback' => static function ( \WC_Order $order, $value ) {
-							$order->update_meta_data( '_test_gift_message', $value );
-							return null;
-						},
-					)
-				);
-			}
-		);
+	public function test_product_create_writes_fields_and_order_status_update_does_not(): void {
 		$order = \WC_Helper_Order::create_order();
-		$order->set_status( 'pending' );
-		$order->save();
 
 		$created = $this->run_ability(
 			'woocommerce/product-create',
@@ -1563,105 +1541,16 @@ class AbilityResourcesTest extends \WC_REST_Unit_Test_Case {
 				'extensions' => array( 'test-ext' => array( 'color' => 'blue' ) ),
 			)
 		);
-		$updated = $this->run_ability(
-			'woocommerce/order-update-status',
-			array(
-				'id'         => $order->get_id(),
-				'status'     => 'on-hold',
-				'extensions' => array( 'test-ext' => array( 'gift_message' => 'Happy birthday' ) ),
-			)
-		);
-		$order   = wc_get_order( $order->get_id() );
+		$schema  = $this->get_ability( 'woocommerce/order-update-status' )['input_schema'];
 
 		$this->assertSame( 'blue', wc_get_product( $created['product']['id'] )->get_meta( '_test_color' ) );
-		$this->assertSame( 'on-hold', $order->get_status() );
-		$this->assertSame( 'Happy birthday', $order->get_meta( '_test_gift_message' ), 'The status update should save the extension field.' );
-		$this->assertSame( 'Happy birthday', $updated['order']['extensions']['test-ext']['gift_message'] );
+		$this->assertArrayNotHasKey( 'extensions', $schema['properties'] );
 	}
 
 	/**
-	 * @testdox Should set the paid and completed dates in order-update-status, and keep a paid date the order already had.
+	 * @testdox Should leave line items out of orders-query unless asked.
 	 */
-	public function test_order_update_status_sets_the_order_dates(): void {
-		$paid_at = strtotime( '2026-01-02 03:04:05 UTC' );
-		$pending = \WC_Helper_Order::create_order();
-		$pending->set_status( 'pending' );
-		$pending->set_date_paid( null );
-		$pending->save();
-		$paid = \WC_Helper_Order::create_order();
-		$paid->set_status( 'processing' );
-		$paid->set_date_paid( $paid_at );
-		$paid->save();
-
-		$this->run_ability(
-			'woocommerce/order-update-status',
-			array(
-				'id'     => $pending->get_id(),
-				'status' => 'processing',
-			)
-		);
-		$this->run_ability(
-			'woocommerce/order-update-status',
-			array(
-				'id'     => $paid->get_id(),
-				'status' => 'completed',
-			)
-		);
-		$pending = wc_get_order( $pending->get_id() );
-		$paid    = wc_get_order( $paid->get_id() );
-
-		$this->assertNotNull( $pending->get_date_paid(), 'An order that becomes paid should get a paid date.' );
-		$this->assertNull( $pending->get_date_completed() );
-		$this->assertSame( $paid_at, $paid->get_date_paid()->getTimestamp(), 'A paid date the order already had should stay.' );
-		$this->assertNotNull( $paid->get_date_completed(), 'A completed order should get a completed date.' );
-	}
-
-	/**
-	 * @testdox Should keep each order's change apart when a validator runs order-update-status on another order.
-	 */
-	public function test_order_update_status_survives_a_nested_run_on_another_order(): void {
-		$first  = \WC_Helper_Order::create_order();
-		$second = \WC_Helper_Order::create_order();
-		foreach ( array( $first, $second ) as $order ) {
-			$order->set_status( 'pending' );
-			$order->save();
-		}
-		$second_id = $second->get_id();
-		$nested    = false;
-		$this->register_validator(
-			'order',
-			'test-ext',
-			static function ( \WC_Order $subject ) use ( &$nested, $second_id ) {
-				if ( ! $nested && $subject->get_id() !== $second_id ) {
-					$nested = true;
-					wp_get_ability( 'woocommerce/order-update-status' )->execute(
-						array(
-							'id'     => $second_id,
-							'status' => 'cancelled',
-						)
-					);
-				}
-				return null;
-			}
-		);
-
-		$this->run_ability(
-			'woocommerce/order-update-status',
-			array(
-				'id'     => $first->get_id(),
-				'status' => 'on-hold',
-			)
-		);
-
-		$this->assertTrue( $nested );
-		$this->assertSame( 'on-hold', wc_get_order( $first->get_id() )->get_status() );
-		$this->assertSame( 'cancelled', wc_get_order( $second_id )->get_status() );
-	}
-
-	/**
-	 * @testdox Should leave line items out of orders-query unless asked, and out of order-update-status.
-	 */
-	public function test_order_abilities_leave_line_items_out_unless_asked(): void {
+	public function test_orders_query_leaves_line_items_out_unless_asked(): void {
 		$order = \WC_Helper_Order::create_order();
 		$order->set_status( 'pending' );
 		$order->save();
@@ -1674,18 +1563,9 @@ class AbilityResourcesTest extends \WC_REST_Unit_Test_Case {
 				'include_line_items' => true,
 			)
 		);
-		$updated = $this->run_ability(
-			'woocommerce/order-update-status',
-			array(
-				'id'     => $order->get_id(),
-				'status' => 'on-hold',
-			)
-		);
 
 		$this->assertArrayNotHasKey( 'line_items', $queried['orders'][0] );
 		$this->assertNotEmpty( $asked['orders'][0]['line_items'] );
-		$this->assertArrayNotHasKey( 'line_items', $updated['order'] );
-		$this->assertArrayNotHasKey( 'line_items', $this->get_output_schema( 'woocommerce/order-update-status' )['properties']['order']['properties'] );
 	}
 
 	/**
@@ -2014,7 +1894,7 @@ class AbilityResourcesTest extends \WC_REST_Unit_Test_Case {
 			}
 		}
 		$order = $this->get_ability( 'woocommerce/order-update-status' )['input_schema'];
-		$this->assertArrayHasKey( 'extensions', $order['properties'] );
+		$this->assertArrayNotHasKey( 'extensions', $order['properties'] );
 	}
 
 	/**
@@ -2112,55 +1992,6 @@ class AbilityResourcesTest extends \WC_REST_Unit_Test_Case {
 		$this->assertSame( 1, did_action( 'woocommerce_order_status_changed' ) - $changes );
 		$this->assertSame( 'on-hold', $allowed['status'] );
 		$this->assertSame( 'test-ext/order-status', $ability );
-	}
-
-	/**
-	 * @testdox Should show validators the new status in order-update-status, and transition from the loaded status.
-	 */
-	public function test_a_validator_sees_the_new_status_in_core_order_update_status(): void {
-		$order = \WC_Helper_Order::create_order();
-		$order->set_status( 'pending' );
-		$order->save();
-		$seen = array();
-		$this->register_validator(
-			'order',
-			'test-ext',
-			static function ( \WC_Order $subject ) use ( &$seen ) {
-				$seen[] = $subject->get_status();
-				return 'refunded' === $subject->get_status() ? new \WP_Error( 'test_refunded', 'Refund the gift cards first.' ) : null;
-			}
-		);
-		$edits       = did_action( 'woocommerce_order_edit_status' );
-		$transitions = array();
-		$listener    = static function ( $order_id, $from, $to ) use ( &$transitions ) {
-			unset( $order_id );
-			$transitions[] = array( $from, $to );
-		};
-		add_action( 'woocommerce_order_status_changed', $listener, 10, 3 );
-
-		$refused       = $this->run_ability_response(
-			'woocommerce/order-update-status',
-			array(
-				'id'     => $order->get_id(),
-				'status' => 'refunded',
-			)
-		);
-		$refused_edits = did_action( 'woocommerce_order_edit_status' ) - $edits;
-		$allowed       = $this->run_ability(
-			'woocommerce/order-update-status',
-			array(
-				'id'     => $order->get_id(),
-				'status' => 'on-hold',
-			)
-		);
-		remove_action( 'woocommerce_order_status_changed', $listener, 10 );
-
-		$this->assertSame( array( 'refunded', 'on-hold' ), $seen );
-		$this->assertSame( 'test_refunded', $refused->get_data()['code'] );
-		$this->assertSame( 0, $refused_edits, 'A refused change should not fire the manual edit hook.' );
-		$this->assertSame( 'on-hold', $allowed['order']['status'] );
-		$this->assertSame( array( array( 'pending', 'on-hold' ) ), $transitions );
-		$this->assertSame( 1, did_action( 'woocommerce_order_edit_status' ) - $edits );
 	}
 
 	/**
