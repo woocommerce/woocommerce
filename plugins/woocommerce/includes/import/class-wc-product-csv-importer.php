@@ -734,7 +734,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * screen. Values with a time, a timezone, a Unix timestamp or a relative expression are
 	 * left as written.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 *
 	 * @param string $value Field value.
 	 *
@@ -806,7 +806,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * Skips wc_clean(), which would drop digits from codes such as "0901%210010" and encode a lone "<".
 	 * The product setters validate the value.
 	 *
-	 * @since 11.4.0
+	 * @since 11.3.0
 	 *
 	 * @param string $value Field value.
 	 *
