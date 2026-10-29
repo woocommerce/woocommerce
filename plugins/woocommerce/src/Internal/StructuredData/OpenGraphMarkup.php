@@ -47,6 +47,10 @@ class OpenGraphMarkup {
 				'match'  => '/^og:image(?::|$)/D',
 				'exists' => false,
 			),
+			'ratings' => array(
+				'match'  => '/^og:rating(_scale|_count)?$/D',
+				'exists' => false,
+			),
 		);
 
 		$processor = new WP_HTML_Tag_Processor( $html );
