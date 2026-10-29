@@ -238,7 +238,7 @@ class WC_Structured_Data {
 		wc_get_container()->get( ProductUtil::class )->prime_image_caches( array( $product ) );
 		$image   = wp_get_attachment_url( (int) $product->get_image_id() );
 		$gallery = $product->get_gallery_image_ids();
-		$gallery = is_array( $gallery ) ? array_unique( array_filter( array_map( 'intval', $gallery ) ) ) : array();
+		$gallery = array_unique( array_filter( array_map( 'intval', $gallery ) ) );
 		$images  = $image ? array( $image ) : array();
 		foreach ( $gallery as $image_id ) {
 			$gallery_image = wp_attachment_is_image( $image_id ) ? wp_get_attachment_url( $image_id ) : false;

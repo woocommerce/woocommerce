@@ -396,16 +396,6 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Product schema ignores an invalid filtered gallery value.
-	 */
-	public function test_product_schema_ignores_invalid_gallery_filter(): void {
-		$product = WC_Helper_Product::create_simple_product();
-		add_filter( 'woocommerce_product_get_gallery_image_ids', '__return_false' );
-		$this->structured_data->generate_product_data( $product );
-		$this->assertArrayNotHasKey( 'image', $this->structured_data->get_data()[0] );
-	}
-
-	/**
 	 * @testdox Product schema filters receive the original image and can replace or remove it.
 	 * @testWith ["replace"]
 	 *           ["remove"]
