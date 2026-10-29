@@ -600,8 +600,11 @@ class ExtensibleAbilities {
 	 * @return bool
 	 */
 	public static function field_applies_to( array $args, $subject ): bool {
+		if ( empty( $args['object_types'] ) ) {
+			return true;
+		}
 		$type = self::get_object_type( $subject );
-		return empty( $args['object_types'] ) || null === $type || in_array( $type, $args['object_types'], true );
+		return null !== $type && in_array( $type, $args['object_types'], true );
 	}
 
 	/**
@@ -610,10 +613,10 @@ class ExtensibleAbilities {
 	 * @since 11.4.0
 	 *
 	 * @param mixed $subject The object.
-	 * @return string|null Null when the object has no `get_type()` method.
+	 * @return string|null Null when the object has no callable `get_type()` method.
 	 */
 	public static function get_object_type( $subject ): ?string {
-		if ( ! is_object( $subject ) || ! method_exists( $subject, 'get_type' ) ) {
+		if ( ! is_object( $subject ) || ! is_callable( array( $subject, 'get_type' ) ) ) {
 			return null;
 		}
 		return (string) call_user_func( array( $subject, 'get_type' ) );

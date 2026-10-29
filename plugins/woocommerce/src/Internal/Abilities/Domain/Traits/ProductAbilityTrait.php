@@ -237,7 +237,11 @@ trait ProductAbilityTrait {
 	 * @return array{fields: array<int, string>, product_props: array<string, mixed>}|\WP_Error
 	 */
 	private static function get_product_class_config( string $classname, string $product_type ) {
-		if ( is_a( $classname, \WC_Product_Variable::class, true ) ) {
+		if (
+			is_a( $classname, \WC_Product_Variable::class, true )
+			|| is_a( $classname, \WC_Product_Variation::class, true )
+			|| ProductType::VARIATION === $product_type
+		) {
 			return self::get_unsupported_product_type_error();
 		}
 

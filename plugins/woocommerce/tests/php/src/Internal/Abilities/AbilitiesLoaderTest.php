@@ -1804,6 +1804,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->created_product_ids[] = $bundle['product']['id'];
 
 		$this->assertSame( '9.00', $bundle['product']['regular_price'] );
+		$this->assertArrayNotHasKey( 'not-a-core-field', $create_schema['properties'] );
 	}
 
 	/**
@@ -2147,6 +2148,30 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertWPError( $result );
 		$this->assertSame( 'woocommerce_product_type_unsupported', $result->get_error_code() );
 		$this->assertNotNull( wc_get_product( $variation_id ) );
+	}
+
+	/**
+	 * @testdox Should reject product variation IDs when updating products, with and without a type.
+	 */
+	public function test_product_update_rejects_variation_ids(): void {
+		$variation_id = $this->create_variation_product_id_for_test();
+
+		foreach ( array( array(), array( 'type' => 'simple' ) ) as $type_input ) {
+			$result = wp_get_ability( 'woocommerce/product-update' )->execute(
+				array_merge(
+					array(
+						'id'   => $variation_id,
+						'name' => 'Changed variation',
+					),
+					$type_input
+				)
+			);
+
+			$this->assertWPError( $result );
+			$this->assertSame( 'woocommerce_product_type_unsupported', $result->get_error_code() );
+		}
+
+		$this->assertSame( 'variation', wc_get_product( $variation_id )->get_type() );
 	}
 
 	/**

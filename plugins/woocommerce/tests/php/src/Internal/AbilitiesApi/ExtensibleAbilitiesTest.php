@@ -1690,6 +1690,30 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should not apply a field with object_types to an object without a callable get_type().
+	 */
+	public function test_a_field_with_object_types_does_not_apply_to_an_object_of_unknown_type(): void {
+		$restricted   = array( 'object_types' => array( 'simple' ) );
+		$unrestricted = array();
+		$untyped      = new \stdClass();
+		$hidden_type  = new class() {
+			/**
+			 * A type that callers cannot read.
+			 *
+			 * @return string
+			 */
+			private function get_type(): string {
+				return 'simple';
+			}
+		};
+
+		$this->assertFalse( ExtensibleAbilities::field_applies_to( $restricted, $untyped ) );
+		$this->assertFalse( ExtensibleAbilities::field_applies_to( $restricted, $hidden_type ) );
+		$this->assertTrue( ExtensibleAbilities::field_applies_to( $unrestricted, $untyped ) );
+		$this->assertTrue( ExtensibleAbilities::field_applies_to( $unrestricted, $hidden_type ) );
+	}
+
+	/**
 	 * @testdox Should not accept extension fields in the write abilities with the feature off.
 	 */
 	public function test_writes_do_not_change_with_the_feature_off(): void {

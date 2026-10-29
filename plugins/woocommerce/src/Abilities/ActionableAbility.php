@@ -215,7 +215,7 @@ abstract class ActionableAbility extends \WP_Ability {
 						/* translators: 1: extension field, 2: object type, 3: comma-separated list of object types. */
 						__( 'The %1$s field does not apply to the %2$s type. It applies to %3$s.', 'woocommerce' ),
 						$param,
-						ExtensibleAbilities::get_object_type( $subject ),
+						ExtensibleAbilities::get_object_type( $subject ) ?? 'unknown',
 						implode( ', ', $args['object_types'] )
 					),
 					array( 'status' => 400 )

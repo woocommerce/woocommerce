@@ -82,6 +82,10 @@ class ProductUpdate extends ActionableAbility {
 			return $product;
 		}
 
+		if ( $product instanceof \WC_Product_Variation ) {
+			return self::get_unsupported_product_type_error();
+		}
+
 		if ( empty( array_diff( array_keys( $input ), array( 'id' ) ) ) ) {
 			return new \WP_Error(
 				'woocommerce_product_update_no_fields',
