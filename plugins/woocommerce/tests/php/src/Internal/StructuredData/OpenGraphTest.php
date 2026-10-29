@@ -219,6 +219,79 @@ class OpenGraphTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should add shop metadata and preserve a provider's image.
+	 */
+	public function test_shop_metadata(): void {
+		$shop_id = self::factory()->post->create(
+			array(
+				'post_type'    => 'page',
+				'post_title'   => 'Coffee shop',
+				'post_status'  => 'publish',
+				'post_excerpt' => '<p>Fresh <strong>coffee</strong>.</p>',
+			)
+		);
+		$this->assertIsInt( $shop_id );
+		update_option( 'woocommerce_shop_page_id', $shop_id );
+		set_post_thumbnail( $shop_id, (int) $this->product->get_image_id() );
+		$shop_url = get_permalink( $shop_id );
+		$this->assertIsString( $shop_url );
+		$this->go_to( $shop_url );
+
+		$tags = $this->render_meta_tags( '<meta property="og:type" content="article">' );
+
+		$this->assertSame( array( 'Coffee shop' ), $tags['og:title'] );
+		$this->assertSame( array( 'website' ), $tags['og:type'] );
+		$this->assertSame( array( $shop_url ), $tags['og:url'] );
+		$this->assertSame( array( 'Fresh coffee.' ), $tags['og:description'] );
+		$this->assertSame( array( 'Test store' ), $tags['og:site_name'] );
+		$this->assertSame( array( wp_get_attachment_url( (int) $this->product->get_image_id() ) ), $tags['og:image'] );
+		$this->assertSame( array( '1200' ), $tags['og:image:width'] );
+		$this->assertSame( array( '800' ), $tags['og:image:height'] );
+		$this->assertSame( array( 'Product photo' ), $tags['og:image:alt'] );
+		$this->assertSame( array( 'summary_large_image' ), $tags['twitter:card'] );
+
+		$tags = $this->render_meta_tags( '<meta property="og:image" content="https://example.org/provider.jpg"><meta property="og:image:width" content="600">' );
+		$this->assertSame( array( 'https://example.org/provider.jpg' ), $tags['og:image'] );
+		$this->assertSame( array( '600' ), $tags['og:image:width'] );
+		$this->assertArrayNotHasKey( 'og:image:height', $tags );
+		$this->assertSame( array( 'summary_large_image' ), $tags['twitter:card'] );
+	}
+
+	/**
+	 * @testdox Should add shop metadata regardless of query parameters.
+	 * @testWith ["woo-share"]
+	 *           ["min_price"]
+	 *           ["utm_source"]
+	 *
+	 * @param string $query_arg Query argument to check.
+	 */
+	public function test_shop_query_arguments( string $query_arg ): void {
+		$shop_id = self::factory()->post->create(
+			array(
+				'post_type'   => 'page',
+				'post_title'  => 'Shop',
+				'post_status' => 'publish',
+			)
+		);
+		$this->assertIsInt( $shop_id );
+		update_option( 'woocommerce_shop_page_id', $shop_id );
+		update_option( 'woocommerce_coming_soon', 'yes' );
+		$shop_url = get_permalink( $shop_id );
+		$this->assertIsString( $shop_url );
+		$this->go_to( $shop_url );
+		$original_get = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Restore request state after the test.
+		$_GET         = array( $query_arg => 'test-value' );
+
+		try {
+			$tags = $this->render_meta_tags( '' );
+			$this->assertSame( array( $shop_url ), $tags['og:url'] );
+			$this->assertSame( array( 'summary' ), $tags['twitter:card'] );
+		} finally {
+			$_GET = $original_get;
+		}
+	}
+
+	/**
 	 * Process a product document through the output filter and collect its metadata.
 	 *
 	 * @param string $head Existing head markup.
