@@ -734,7 +734,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * screen. Values with a time, a timezone, a Unix timestamp or a relative expression are
 	 * left as written.
 	 *
-	 * @since 11.4.0
+	 * @since 11.3.0
 	 *
 	 * @param string $value Field value.
 	 *
