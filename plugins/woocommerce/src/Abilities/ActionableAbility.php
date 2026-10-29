@@ -236,11 +236,11 @@ abstract class ActionableAbility extends \WP_Ability {
 	 */
 	private function sync( array $objects, array $input ): ?\WP_Error {
 		$deleted   = $this->get_deleted_objects();
-		$gone      = array_map( static fn( $object ) => get_class( $object ) . ':' . $object->get_id(), $deleted );
+		$gone      = array_map( static fn( $item ) => get_class( $item ) . ':' . $item->get_id(), $deleted );
 		$saved     = array_values(
 			array_filter(
 				array_column( $objects, 0 ),
-				static fn( $object ) => $object->get_id() > 0 && ! in_array( get_class( $object ) . ':' . $object->get_id(), $gone, true )
+				static fn( $item ) => $item->get_id() > 0 && ! in_array( get_class( $item ) . ':' . $item->get_id(), $gone, true )
 			)
 		);
 		$resources = array_column( $objects, 2 );
@@ -271,7 +271,7 @@ abstract class ActionableAbility extends \WP_Ability {
 	 * @param \WC_Data[]                                          $deleted The objects the call deleted.
 	 */
 	private static function forget_rolled_back_objects( array $objects, array $deleted = array() ): void {
-		foreach ( array_merge( $objects, array_map( static fn( $object ) => array( $object ), $deleted ) ) as list( $object ) ) {
+		foreach ( array_merge( $objects, array_map( static fn( $item ) => array( $item ), $deleted ) ) as list( $object ) ) {
 			$id = $object instanceof \WC_Data ? $object->get_id() : 0;
 			if ( $id <= 0 ) {
 				continue;
