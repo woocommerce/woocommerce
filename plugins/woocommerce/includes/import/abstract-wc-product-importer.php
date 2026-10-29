@@ -342,6 +342,9 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 				if ( isset( $data['status'] ) && -1 === $data['status'] ) {
 					$data['status'] = 0; // Variations cannot be drafts - set to private.
 				}
+				if ( isset( $data['description'] ) ) {
+					$data['description'] = wp_kses_post( $data['description'] );
+				}
 				$is_variation = true;
 			}
 
