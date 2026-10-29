@@ -15685,12 +15685,6 @@ parameters:
 			path: includes/class-wc-webhook.php
 
 		-
-			message: '#^Method WC_Webhook\:\:failed_delivery\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-webhook.php
-
-		-
 			message: '#^Method WC_Webhook\:\:get_wp_api_payload\(\) should return array but returns array\|WP_Error\.$#'
 			identifier: return.type
 			count: 1

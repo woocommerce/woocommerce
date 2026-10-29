@@ -1,4 +1,4 @@
 Significance: minor
 Type: add
 
-Add non-saving stage_*() twins for every order method that saves inside itself: stage_payment_complete(), stage_product_item(), stage_totals(), stage_taxes(), stage_tax_items(), stage_shipping_total(), stage_coupon(), stage_coupon_removal() and stage_recalculated_coupons(). Warn when an order class overrides payment_complete() or add_product() without the twin, and add a PHPStan rule that reports a WC_Data method that writes outside save() without a stage_*() twin.
+Add non-saving stage_*() twins for the WC_Data methods that save inside themselves: on orders stage_payment_complete(), stage_product_item(), stage_totals(), stage_taxes(), stage_tax_items(), stage_shipping_total(), stage_coupon(), stage_coupon_removal(), stage_recalculated_coupons() and stage_order_items_removal(); on webhooks stage_delivery_result() and stage_delivery_ping(); on stock notifications stage_verification_key() and stage_unsubscribe_key(). Add a PHPStan rule that reports a WC_Data method that writes outside save() without a stage_*() twin.

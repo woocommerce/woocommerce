@@ -369,6 +369,22 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
+	 * Run one deferred callback right away and remove it from the list. A method that writes right away calls
+	 * its stage method, then this method.
+	 *
+	 * @since 11.4.0
+	 * @param string $key Name of the entry.
+	 */
+	protected function run_deferred_action_now( string $key ): void {
+		$entry = $this->deferred_actions[ $key ] ?? null;
+		unset( $this->deferred_actions[ $key ] );
+
+		if ( null !== $entry ) {
+			call_user_func_array( $entry['callback'], $entry['args'] );
+		}
+	}
+
+	/**
 	 * Run the deferred callbacks that belong before or after the write.
 	 *
 	 * @since 11.4.0
@@ -1193,18 +1209,34 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * database deletion until the next call to save(). Custom stores overriding `delete_items()`
 	 * without also overriding `delete_items_by_ids()` retain the historical synchronous behavior.
 	 *
+	 * @uses self::stage_order_items_removal()
 	 * @param string|null $type Order item type. Default null (remove every type).
 	 * @throws Exception If persisted item IDs cannot be read or synchronous item deletion fails.
 	 * @return void
 	 */
 	public function remove_order_items( $type = null ) {
+		$this->stage_order_items_removal( $type );
+		$this->run_deferred_action_now( 'delete_order_items_' . ( is_string( $type ) ? $type : '' ) );
+	}
+
+	/**
+	 * Remove line items from the order in memory, like remove_order_items(). For a custom store that deletes
+	 * items synchronously, leave the deletion and woocommerce_removed_order_items to the next save(), which
+	 * runs them before it writes. remove_order_items() calls this method, then runs that deletion right away.
+	 *
+	 * @since 11.4.0
+	 * @param string|null $type Order item type. Default null (remove every type).
+	 * @throws Exception If persisted item IDs cannot be read.
+	 * @return void
+	 */
+	public function stage_order_items_removal( $type = null ) {
 
 		// Guard against extension code passing non-string values. Anything not
 		// a string or null is ignored so it never reaches the deferred queue or
 		// the data store. Surface the misuse so it's traceable rather than silent.
 		if ( null !== $type && ! is_string( $type ) ) {
 			wc_doing_it_wrong(
-				__METHOD__,
+				__CLASS__ . '::remove_order_items',
 				sprintf( esc_html( 'remove_order_items() expects a string item type or null; received %s.' ), esc_html( gettype( $type ) ) ),
 				'11.0.0'
 			);
@@ -1225,9 +1257,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$has_persisted_items  = $this->get_id() > 0;
 		$delete_synchronously = ! $this->data_store_supports_deferred_item_deletion();
 
-		if ( $delete_synchronously && $has_persisted_items ) {
-			// @phpstan-ignore-next-line -- Required order data store method forwarded by WC_Data_Store::__call().
-			$this->data_store->delete_items( $this, $type );
+		if ( $delete_synchronously ) {
+			$this->defer_to_save( 'delete_order_items_' . (string) $type, array( $this, 'delete_order_items_synchronously' ), array( $type, $has_persisted_items ) );
 		}
 
 		if ( ! empty( $type ) ) {
@@ -1290,15 +1321,28 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				$this->items[ $group ] = array();
 			}
 		}
+	}
 
-		if ( $delete_synchronously ) {
-			/**
-			 * This action is documented in save_items().
-			 *
-			 * @since 7.8.0
-			 */
-			do_action( 'woocommerce_removed_order_items', $this, $type );
+	/**
+	 * Delete order items through a custom store that does not defer the deletion, then fire
+	 * woocommerce_removed_order_items.
+	 *
+	 * @param string|null $type                Order item type, or null for every type.
+	 * @param bool        $has_persisted_items Whether the order had an ID when the removal was staged.
+	 * @throws Exception If synchronous item deletion fails.
+	 */
+	private function delete_order_items_synchronously( $type, bool $has_persisted_items ): void {
+		if ( $has_persisted_items ) {
+			// @phpstan-ignore-next-line -- Required order data store method forwarded by WC_Data_Store::__call().
+			$this->data_store->delete_items( $this, $type );
 		}
+
+		/**
+		 * This action is documented in save_items().
+		 *
+		 * @since 7.8.0
+		 */
+		do_action( 'woocommerce_removed_order_items', $this, $type );
 	}
 
 	/**

@@ -44,100 +44,35 @@ parameters:
 		-
 			message: '#Call to an undefined static method Automattic\\WooCommerce\\StoreApi\\Schemas\\V1\\AbstractSchema::prepare_product_price_response\(\)#'
 			path: src/StoreApi/Utilities/ProductItemTrait.php
-		# Known exception: payment tokens are stored by the data store apart from the order data.
+		# Deprecated code; phpcs excludes this folder too.
+		-
+			identifier: woocommerce.stagedWrite
+			path: includes/legacy/*
+		# Payment tokens live in a data store table apart from the order data, and the write takes no order change to stage.
 		-
 			identifier: woocommerce.stagedWrite
 			message: '#^Method WC_Abstract_Order::add_payment_token\(\) writes outside save\(\)\.#'
 			path: includes/abstracts/abstract-wc-order.php
-		# Known exception: a note is a comment, written right away and not part of the order data.
+		# A note is a comment row with its own ID, written right away; the order data does not change.
 		-
 			identifier: woocommerce.stagedWrite
 			message: '#^Method WC_Order::add_order_note\(\) writes outside save\(\)\.#'
 			path: includes/class-wc-order.php
-		# Known exception: usage counts change through atomic data store updates.
+		# Usage counts change through atomic data store updates; a save would rewrite them from stale values.
 		-
 			identifier: woocommerce.stagedWrite
-			message: '#^Method WC_Coupon::increase_usage_count\(\) writes outside save\(\)\.#'
+			message: '#^Method WC_Coupon::(increase|decrease)_usage_count\(\) writes outside save\(\)\.#'
 			path: includes/class-wc-coupon.php
-		# Known exception: usage counts change through atomic data store updates.
-		-
-			identifier: woocommerce.stagedWrite
-			message: '#^Method WC_Coupon::decrease_usage_count\(\) writes outside save\(\)\.#'
-			path: includes/class-wc-coupon.php
-		# Candidate: deletes order items right away instead of on save.
-		-
-			identifier: woocommerce.stagedWrite
-			message: '#^Method WC_Abstract_Order::remove_order_items\(\) writes outside save\(\)\.#'
-			path: includes/abstracts/abstract-wc-order.php
-		# Candidate: records a download, not reviewed for staging yet.
+		# Download counts change through an atomic SQL update; a save writes the whole row and would reopen the race the update avoids.
 		-
 			identifier: woocommerce.stagedWrite
 			message: '#^Method WC_Customer_Download::track_download\(\) writes outside save\(\)\.#'
 			path: includes/class-wc-customer-download.php
-		# Candidate: deletes a customer and reassigns content, not reviewed for staging yet.
-		-
-			identifier: woocommerce.stagedWrite
-			message: '#^Method WC_Customer::delete_and_reassign\(\) writes outside save\(\)\.#'
-			path: includes/class-wc-customer.php
-		# Candidate: syncs variation data while it validates, not reviewed for staging yet.
-		-
-			identifier: woocommerce.stagedWrite
-			message: '#^Method WC_Product_Variable::validate_props\(\) writes outside save\(\)\.#'
-			path: includes/class-wc-product-variable.php
-		# Candidate: syncs the parent product after its own save, not reviewed for staging yet.
-		-
-			identifier: woocommerce.stagedWrite
-			message: '#^Method WC_Product_Variable::after_data_store_save_or_update\(\) writes outside save\(\)\.#'
-			path: includes/class-wc-product-variable.php
-		# Candidate: writes the zone method row right away, not reviewed for staging yet.
+		# A zone does not hold its methods in memory, and the returned instance ID comes from the insert.
 		-
 			identifier: woocommerce.stagedWrite
 			message: '#^Method WC_Shipping_Zone::add_shipping_method\(\) writes outside save\(\)\.#'
 			path: includes/class-wc-shipping-zone.php
-		# Candidate: deletes the zone method row right away, not reviewed for staging yet.
-		-
-			identifier: woocommerce.stagedWrite
-			message: '#^Method WC_Shipping_Zone::delete_shipping_method\(\) writes outside save\(\)\.#'
-			path: includes/class-wc-shipping-zone.php
-		# Candidate: logs a webhook delivery, not reviewed for staging yet.
-		-
-			identifier: woocommerce.stagedWrite
-			message: '#^Method WC_Webhook::log_delivery\(\) writes outside save\(\)\.#'
-			path: includes/class-wc-webhook.php
-		# Candidate: counts a failed webhook delivery, not reviewed for staging yet.
-		-
-			identifier: woocommerce.stagedWrite
-			message: '#^Method WC_Webhook::failed_delivery\(\) writes outside save\(\)\.#'
-			path: includes/class-wc-webhook.php
-		# Candidate: saves after a webhook ping, not reviewed for staging yet.
-		-
-			identifier: woocommerce.stagedWrite
-			message: '#^Method WC_Webhook::deliver_ping\(\) writes outside save\(\)\.#'
-			path: includes/class-wc-webhook.php
-		# Candidate: legacy customer method, not reviewed for staging yet.
-		-
-			identifier: woocommerce.stagedWrite
-			message: '#^Method WC_Legacy_Customer::save_data\(\) writes outside save\(\)\.#'
-			path: includes/legacy/class-wc-legacy-customer.php
-		# Candidate: legacy webhook method, not reviewed for staging yet.
-		-
-			identifier: woocommerce.stagedWrite
-			message: '#^Method WC_Legacy_Webhook::update_status\(\) writes outside save\(\)\.#'
-			path: includes/legacy/class-wc-legacy-webhook.php
-		# Candidate: creates the verification key on first read, not reviewed for staging yet.
-		-
-			identifier: woocommerce.stagedWrite
-			message: '#^Method Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification::get_verification_key\(\) writes outside save\(\)\.#'
-			path: src/Internal/StockNotifications/Notification.php
-		# Candidate: creates the unsubscribe key on first read, not reviewed for staging yet.
-		-
-			identifier: woocommerce.stagedWrite
-			message: '#^Method Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification::get_unsubscribe_key\(\) writes outside save\(\)\.#'
-			path: src/Internal/StockNotifications/Notification.php
-		# Candidate: deprecated 3.0 order methods that save by design, not reviewed for staging yet.
-		-
-			identifier: woocommerce.stagedWrite
-			path: includes/legacy/abstract-wc-legacy-order.php
 	parallel:
 		maximumNumberOfProcesses: 4
 
