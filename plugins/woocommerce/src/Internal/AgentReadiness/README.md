@@ -119,7 +119,7 @@ The per-channel field and effect live in each check's `channels()`. The final ma
 
 ## Product feed integration
 
-`ReadinessFeedValidator` implements `ProductFeed\Feed\FeedValidatorInterface` and returns the ids of the checks a product fails, so feed integrations can reuse the checks. It judges a variation by its parent, as the scan counts it, and returns no issues for products the scan leaves out (other types, hidden from the shop catalog, unpublished). The rules are built once per request. The feed framework skips rows with issues, so an integration that only wants to report gaps should wrap it.
+`ReadinessFeedValidator` implements `ProductFeed\Feed\FeedValidatorInterface` and returns the ids of the checks a product fails, so feed integrations can reuse the checks. It judges a variation by its parent, as the scan counts it, and returns `not_checked` for products the scan leaves out (other types, hidden from the shop catalog, unpublished), so a feed skips them instead of exporting them unchecked. The rules are built once per request. The feed framework skips rows with issues, so an integration that only wants to report gaps should wrap it.
 
 Core's UCP catalog mapper (`src/Internal/ProductFeed/Mapping/UcpProductMapper.php`) sends each variant's GTIN as a barcode since #70351. UCP has no brand field, so `missing_brand` matters for the other channels, not UCP.
 
