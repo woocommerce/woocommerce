@@ -175,6 +175,7 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 			'description',
 			'short_description',
 			'sku',
+			'mpn',
 			'global_unique_id',
 			'price',
 			'regular_price',
@@ -383,6 +384,53 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 			$this->assertSame( 200, $response->get_status(), $name );
 			$this->assertSame( $case['expected'], wp_list_pluck( $response->get_data(), 'id' ), $name );
 		}
+	}
+
+	/**
+	 * @testdox The min_price and max_price parameters filter products by price without a deprecation notice.
+	 *
+	 * @testWith [{"min_price": "30"}, ["expensive"]]
+	 *           [{"max_price": "30"}, ["cheap"]]
+	 *           [{"min_price": "15", "max_price": "25"}, ["cheap"]]
+	 *           [{"min_price": "60"}, []]
+	 *
+	 * @param array    $params   Price filter query params.
+	 * @param string[] $expected Keys of the products expected in the response.
+	 */
+	public function test_products_filter_by_min_and_max_price( array $params, array $expected ): void {
+		$products = array(
+			'cheap'     => WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 20 ) ),
+			'expensive' => WC_Helper_Product::create_simple_product( true, array( 'regular_price' => 50 ) ),
+		);
+
+		$product_ids = array_map(
+			static function ( WC_Product $product ): int {
+				return $product->get_id();
+			},
+			$products
+		);
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_query_params(
+			array_merge(
+				$params,
+				array(
+					'include' => array_values( $product_ids ),
+					'orderby' => 'id',
+					'order'   => 'asc',
+				)
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$expected_ids = array_map(
+			static function ( string $key ) use ( $product_ids ): int {
+				return $product_ids[ $key ];
+			},
+			$expected
+		);
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( $expected_ids, wp_list_pluck( $response->get_data(), 'id' ), 'Price filter returned the wrong products' );
 	}
 
 	/**
@@ -2847,5 +2895,28 @@ class WC_REST_Products_Controller_Tests extends WC_Unit_Test_Case {
 		$this->assertSame( 400, $response->get_status(), 'A numeric commodity code should be rejected.' );
 		$this->assertSame( 'rest_invalid_param', $response->get_data()['code'], 'Schema validation should reject the non-string value.' );
 		$this->assertFalse( metadata_exists( 'post', $product->get_id(), '_customs_commodity_code' ), 'A rejected commodity code should not be stored.' );
+	}
+
+	/**
+	 * @testdox The featured image is returned only once when it is also part of the product gallery.
+	 */
+	public function test_get_product_does_not_duplicate_featured_image_in_gallery(): void {
+		$image_file  = WC_Unit_Tests_Bootstrap::instance()->tests_dir . '/data/Dr1Bczxq4q.png';
+		$featured_id = self::factory()->attachment->create_upload_object( $image_file );
+		$gallery_id  = self::factory()->attachment->create_upload_object( $image_file );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_image_id( $featured_id );
+		$product->set_gallery_image_ids( array( $featured_id, $gallery_id ) );
+		$product->save();
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() ) );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame(
+			array( $featured_id, $gallery_id ),
+			wp_list_pluck( $response->get_data()['images'], 'id' ),
+			'The featured image should be listed first and only once.'
+		);
 	}
 }

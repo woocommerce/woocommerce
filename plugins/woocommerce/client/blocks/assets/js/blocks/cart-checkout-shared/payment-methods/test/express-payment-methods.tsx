@@ -22,6 +22,7 @@ import mockEditorContext from './__mocks__/editor-context';
 import { getExpectedExpressPaymentProps } from './__mocks__/express-payment-props';
 import ExpressPaymentMethods from '../express-payment-methods';
 jest.mock( '@woocommerce/base-context', () => ( {
+	...jest.requireActual( '@woocommerce/base-context' ),
 	useEditorContext: mockEditorContext,
 } ) );
 
@@ -382,6 +383,84 @@ describe( 'Express payment methods', () => {
 					).toHaveProperty( 'tagName', 'LI' );
 				} );
 			} );
+		} );
+	} );
+
+	describe( 'One payment method throws an error', () => {
+		const BrokenExpressButton = () => {
+			throw new Error( 'Broken express payment method' );
+		};
+
+		beforeAll( async () => {
+			registerExpressPaymentMethod( {
+				name: 'paypal',
+				title: 'PayPal',
+				gatewayId: 'test-express-payment-method',
+				content: <MockExpressButton name="paypal" />,
+				edit: <MockEditorExpressButton name="paypal" />,
+				canMakePayment: () => true,
+				supports: { features: [ 'products' ] },
+			} );
+			registerExpressPaymentMethod( {
+				name: 'apple-pay',
+				title: 'Apple Pay',
+				gatewayId: 'test-express-payment-method',
+				content: <BrokenExpressButton />,
+				edit: <BrokenExpressButton />,
+				canMakePayment: () => true,
+				supports: { features: [ 'products' ] },
+			} );
+			await dispatch(
+				paymentStore
+			).__internalUpdateAvailablePaymentMethods();
+		} );
+		afterAll( () => {
+			deregisterMockExpressPaymentMethods();
+		} );
+
+		it( 'should hide the broken method on the storefront and keep the others', () => {
+			mockEditorContext.mockImplementation( () => ( {
+				isEditor: false,
+			} ) );
+			render( <ExpressPaymentMethods /> );
+
+			expect( screen.getByText( 'paypal button' ) ).toBeVisible();
+			expect(
+				document.querySelector( '#express-payment-method-apple-pay' )
+			).toBeNull();
+			expect(
+				document.querySelector(
+					'.wc-block-components-express-payment__event-buttons'
+				)?.children
+			).toHaveLength( 1 );
+			expect(
+				document.querySelector( '.wc-block-components-notice-banner' )
+			).toBeNull();
+			expect( screen.queryByText( /couldn't load/ ) ).toBeNull();
+			// React logs errors caught by the error boundary.
+			expect( console ).toHaveErrored();
+		} );
+
+		it( 'should show an inline error for the broken method in the editor and keep the others', () => {
+			mockEditorContext.mockImplementation( () => ( {
+				isEditor: true,
+			} ) );
+			render( <ExpressPaymentMethods /> );
+
+			expect( screen.getByText( 'paypal preview' ) ).toBeVisible();
+			const brokenItem = document.querySelector(
+				'#express-payment-method-apple-pay'
+			);
+			expect( brokenItem ).toHaveProperty( 'tagName', 'LI' );
+			expect( brokenItem ).toHaveTextContent(
+				"Apple Pay couldn't load."
+			);
+			expect(
+				brokenItem?.querySelector(
+					'.wc-block-components-notice-banner.is-error'
+				)
+			).toBeInTheDocument();
+			expect( console ).toHaveErrored();
 		} );
 	} );
 } );

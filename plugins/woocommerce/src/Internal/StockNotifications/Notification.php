@@ -483,20 +483,48 @@ class Notification extends \WC_Data {
 	 * @return bool True if the key is valid, false otherwise.
 	 */
 	public function check_verification_key( string $key ): bool {
+		return $this->verification_key_matches( $key ) && ! $this->is_verification_key_expired();
+	}
+
+	/**
+	 * Check whether the given key matches the stored verification key hash, ignoring expiration.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @param string $key The key to check.
+	 * @return bool True if a verification key is stored and the given key matches it, false otherwise.
+	 */
+	public function verification_key_matches( string $key ): bool {
 		$action_key = (string) $this->get_meta( 'verification_action_key' );
 
 		if ( ! str_contains( $action_key, ':' ) ) {
 			return false;
 		}
 
-		list( $timestamp, $hash ) = explode( ':', $action_key, 2 );
+		list( , $hash ) = explode( ':', $action_key, 2 );
 
-		$threshold = Config::get_verification_expiration_time_threshold();
-		if ( time() - (int) $timestamp > $threshold ) {
+		return wp_verify_fast_hash( $key, $hash );
+	}
+
+	/**
+	 * Check whether the stored verification key is past its expiration time.
+	 *
+	 * A missing or malformed key is not reported as expired.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @return bool True if a verification key is stored and has expired, false otherwise.
+	 */
+	public function is_verification_key_expired(): bool {
+		$action_key = (string) $this->get_meta( 'verification_action_key' );
+
+		if ( ! str_contains( $action_key, ':' ) ) {
 			return false;
 		}
 
-		return wp_verify_fast_hash( $key, $hash );
+		list( $timestamp ) = explode( ':', $action_key, 2 );
+
+		return time() - (int) $timestamp > Config::get_verification_expiration_time_threshold();
 	}
 
 	/**
