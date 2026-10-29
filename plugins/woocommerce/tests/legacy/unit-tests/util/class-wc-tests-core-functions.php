@@ -899,16 +899,6 @@ class WC_Tests_Core_Functions extends WC_Unit_Test_Case {
 		wc_transaction_query( 'commit', true );
 		$col = $wpdb->get_col( "SElECT option_value FROM {$wpdb->prefix}options WHERE option_name = 'transaction_test'" );
 		$this->assertEquals( '0', $col[0] );
-
-		// The commits above made the row permanent, so the cleanup has to be committed as well.
-		// A direct COMMIT, because wc_transaction_query() counts its nesting and this commit has no start.
-		$wpdb->delete(
-			$wpdb->prefix . 'options',
-			array(
-				'option_name' => 'transaction_test',
-			)
-		);
-		$wpdb->query( 'COMMIT' );
 	}
 
 	/**

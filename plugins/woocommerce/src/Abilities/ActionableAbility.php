@@ -227,8 +227,7 @@ abstract class ActionableAbility extends \WP_Ability {
 	/**
 	 * Run the syncs of each resource that the call saved or deleted, once,
 	 * after the last save and before the commit. A deleted object is not in
-	 * the saved list, even when it was the primary object: a forced delete
-	 * clears its ID, and a trashed one matches a deleted object by ID.
+	 * the saved list, even when it was the primary object.
 	 *
 	 * @param array<int, array{0: \WC_Data, 1: array, 2: string}> $objects The primary object and the secondary objects, with their resources.
 	 * @param array                                               $input   Ability input.
@@ -299,7 +298,7 @@ abstract class ActionableAbility extends \WP_Ability {
 	 */
 	protected function prepare_properties( array $args ): array {
 		$args['execute_callback'] = array( $this, 'execute_change' );
-		if ( is_array( $args['input_schema'] ?? null ) && ExtensibleAbilities::is_enabled() ) {
+		if ( is_array( $args['input_schema'] ?? null ) && ExtensibleAbilities::is_enabled() && $this->writes_extension_fields() ) {
 			$args['input_schema'] = $this->add_extensions_input_schema( $args['input_schema'] );
 		}
 		return parent::prepare_properties( $args );

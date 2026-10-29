@@ -186,7 +186,16 @@ class ProductDelete extends ActionableAbility {
 		$variations = array();
 
 		if ( $subject instanceof \WC_Product_Variable ) {
-			foreach ( self::get_variation_ids( $subject, true ) as $variation_id ) {
+			$variation_ids = get_posts(
+				array(
+					'post_parent' => $product_id,
+					'post_type'   => 'product_variation',
+					'post_status' => array( 'any', 'trash', 'auto-draft' ),
+					'fields'      => 'ids',
+					'numberposts' => -1, // phpcs:ignore WordPress.WP.PostsPerPage.posts_per_page_numberposts -- Every variation of one product.
+				)
+			);
+			foreach ( $variation_ids as $variation_id ) {
 				$variation = wc_get_product( $variation_id );
 				if ( $variation instanceof \WC_Product_Variation ) {
 					$variations[] = $variation;
