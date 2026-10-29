@@ -374,24 +374,38 @@ class ActionSchedulerUtilTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox On a copy whose unique check ignores args, unique is emulated with and without args.
+	 * @testdox On a copy whose unique check ignores args, unique with args is emulated.
 	 */
-	public function test_emulates_unique_on_a_copy_whose_unique_check_ignores_args(): void {
+	public function test_emulates_unique_with_args_on_a_copy_whose_unique_check_ignores_args(): void {
 		$this->simulate_loaded_copy( '3.9.3' );
 		$calls = $this->capture_scheduling_calls();
 
 		ActionSchedulerUtil::schedule_single( 1000, self::HOOK, array( 'a' ), self::GROUP, true, 5 );
-		ActionSchedulerUtil::schedule_single( 1000, self::HOOK, array(), self::GROUP, true );
 
 		$this->assertSame(
 			array(
 				array( 'as_has_scheduled_action', self::HOOK, array( 'a' ), self::GROUP ),
 				array( 'as_schedule_single_action', 1000, self::HOOK, array( 'a' ), self::GROUP, false, 5 ),
-				array( 'as_has_scheduled_action', self::HOOK, array(), self::GROUP ),
-				array( 'as_schedule_single_action', 1000, self::HOOK, array(), self::GROUP, false, 10 ),
 			),
 			$calls(),
-			'Unique should be emulated (checked, then passed as false) with and without args'
+			'Unique with args should be emulated: checked first, then passed as false'
+		);
+	}
+
+	/**
+	 * @testdox On a copy whose unique check ignores args, unique without args is passed through.
+	 */
+	public function test_passes_unique_through_without_args_on_a_copy_whose_unique_check_ignores_args(): void {
+		$this->simulate_loaded_copy( '3.9.3' );
+		$calls = $this->capture_scheduling_calls( true );
+
+		$this->assertSame( 123, ActionSchedulerUtil::schedule_single( 1000, self::HOOK, array(), self::GROUP, true ) );
+		$this->assertSame(
+			array(
+				array( 'as_schedule_single_action', 1000, self::HOOK, array(), self::GROUP, true, 10 ),
+			),
+			$calls(),
+			'Without args the hook and group check of the loaded copy is exact, so unique should be passed as true with no emulated check'
 		);
 	}
 

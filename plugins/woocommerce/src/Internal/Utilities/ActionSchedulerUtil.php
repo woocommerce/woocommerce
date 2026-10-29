@@ -494,7 +494,8 @@ final class ActionSchedulerUtil {
 			return 0;
 		}
 
-		$native_unique = $unique && self::supports( ActionSchedulerFeature::UNIQUE_ARGS );
+		// Below 4.0.0 the loaded copy matches on hook and group only, which is exact when there are no args.
+		$native_unique = $unique && ( self::supports( ActionSchedulerFeature::UNIQUE_ARGS ) || ( array() === $args && self::supports( ActionSchedulerFeature::UNIQUE ) ) );
 
 		if ( $unique && ! $native_unique && self::has_scheduled_action( $hook, $args, $group ) ) {
 			return 0;
