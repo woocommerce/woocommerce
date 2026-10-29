@@ -62,7 +62,7 @@ export const Edit = ( {
 									href={ `${ ADMIN_URL }admin.php?page=wc-settings&tab=advanced` }
 								>
 									{ __(
-										'Setup a Terms and Conditions page',
+										'Set up a Terms and Conditions page',
 										'woocommerce'
 									) }
 								</ExternalLink>
@@ -75,7 +75,7 @@ export const Edit = ( {
 									href={ `${ ADMIN_URL }options-privacy.php` }
 								>
 									{ __(
-										'Setup a Privacy Policy page',
+										'Set up a Privacy Policy page',
 										'woocommerce'
 									) }
 								</ExternalLink>

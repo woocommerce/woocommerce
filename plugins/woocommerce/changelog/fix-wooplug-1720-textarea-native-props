@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Allow extensions to use standard textarea attributes and event handlers in text areas.

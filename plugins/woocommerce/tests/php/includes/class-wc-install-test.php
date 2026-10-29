@@ -415,6 +415,22 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Stores already on 11.3 schedule the MPN schema migration when upgrading.
+	 */
+	public function test_mpn_migration_is_scheduled_after_113(): void {
+		$args = array( 'update_callback' => 'wc_update_1140_add_mpn_to_product_lookup_table' );
+		update_option( 'woocommerce_db_version', '11.3.0' );
+		$this->assertNull( WC()->queue()->get_next( 'woocommerce_run_update_callback', $args, 'woocommerce-db-updates' ) );
+
+		WC_Install::run_manual_database_update();
+
+		$this->assertNotNull(
+			WC()->queue()->get_next( 'woocommerce_run_update_callback', $args, 'woocommerce-db-updates' ),
+			'Stores already on 11.3 must receive the MPN schema migration.'
+		);
+	}
+
+	/**
 	 * Tests that the version check reaches the automatic database updater.
 	 *
 	 * This is a single end-to-end smoke test of the check_version() -> install() ->

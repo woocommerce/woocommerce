@@ -2363,6 +2363,90 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should apply date_after and date_before with a time in the store timezone.
+	 *
+	 * @dataProvider provider_order_storage_engines
+	 *
+	 * @param bool $hpos_enabled Whether HPOS/COT should be enabled for the test.
+	 */
+	public function test_orders_query_filters_created_date_in_store_timezone( bool $hpos_enabled ): void {
+		$this->set_order_storage_for_test( $hpos_enabled );
+
+		update_option( 'timezone_string', 'Europe/Amsterdam' );
+
+		$email = wp_unique_id( 'abilities-order-created-timezone-' ) . '@example.com';
+		$early = $this->create_order_for_query_sorting( $email, '2025-07-15T09:00:00', '2025-07-15T09:00:00' );
+		$late  = $this->create_order_for_query_sorting( $email, '2025-07-15T11:00:00', '2025-07-15T11:00:00' );
+
+		$after = wp_get_ability( 'woocommerce/orders-query' )->execute(
+			array(
+				'billing_email' => $email,
+				'date_after'    => '2025-07-15T10:00:00',
+				'per_page'      => 2,
+			)
+		);
+
+		$this->assertNotWPError( $after );
+		$this->assertSame( array( $late->get_id() ), array_column( $after['orders'], 'id' ), 'date_after 10:00 should return only the order created at 11:00 store time.' );
+
+		$before = wp_get_ability( 'woocommerce/orders-query' )->execute(
+			array(
+				'billing_email' => $email,
+				'date_before'   => '2025-07-15T10:00:00',
+				'per_page'      => 2,
+			)
+		);
+
+		$this->assertNotWPError( $before );
+		$this->assertSame( array( $early->get_id() ), array_column( $before['orders'], 'id' ), 'date_before 10:00 should return only the order created at 09:00 store time.' );
+
+		$after_utc = wp_get_ability( 'woocommerce/orders-query' )->execute(
+			array(
+				'billing_email' => $email,
+				'date_after'    => '2025-07-15T08:00:00Z',
+				'per_page'      => 2,
+			)
+		);
+
+		$this->assertNotWPError( $after_utc );
+		$this->assertSame( array( $late->get_id() ), array_column( $after_utc['orders'], 'id' ), 'date_after 08:00 UTC (10:00 store time) should return only the order created at 11:00 store time.' );
+
+		$after_millis_utc = wp_get_ability( 'woocommerce/orders-query' )->execute(
+			array(
+				'billing_email' => $email,
+				'date_after'    => '2025-07-15T08:00:00.000Z',
+				'per_page'      => 2,
+			)
+		);
+
+		$this->assertNotWPError( $after_millis_utc );
+		$this->assertSame( array( $late->get_id() ), array_column( $after_millis_utc['orders'], 'id' ), 'date_after 08:00 UTC with fractional seconds (the form JavaScript toISOString() produces) should match the plain UTC value.' );
+
+		$after_short_offset = wp_get_ability( 'woocommerce/orders-query' )->execute(
+			array(
+				'billing_email' => $email,
+				'date_after'    => '2025-07-15T10:00:00+02',
+				'per_page'      => 2,
+			)
+		);
+
+		$this->assertNotWPError( $after_short_offset );
+		$this->assertSame( array( $late->get_id() ), array_column( $after_short_offset['orders'], 'id' ), 'date_after 10:00 with a +02 offset (08:00 UTC) should return only the order created at 11:00 store time.' );
+
+		$range = wp_get_ability( 'woocommerce/orders-query' )->execute(
+			array(
+				'billing_email' => $email,
+				'date_after'    => '2025-07-15T08:00:00',
+				'date_before'   => '2025-07-15T10:00:00',
+				'per_page'      => 2,
+			)
+		);
+
+		$this->assertNotWPError( $range );
+		$this->assertSame( array( $early->get_id() ), array_column( $range['orders'], 'id' ), 'date_after 08:00 together with date_before 10:00 store time should return only the order created at 09:00.' );
+	}
+
+	/**
 	 * @testdox Should filter modified_before with time precision across order storage engines.
 	 *
 	 * @dataProvider provider_order_storage_engines
@@ -2388,6 +2472,36 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$ids = array_column( $result['orders'], 'id' );
 		$this->assertContains( $early->get_id(), $ids );
 		$this->assertNotContains( $late->get_id(), $ids );
+	}
+
+	/**
+	 * @testdox Should apply modified_before with a UTC offset in the store timezone.
+	 *
+	 * @dataProvider provider_order_storage_engines
+	 *
+	 * @param bool $hpos_enabled Whether HPOS/COT should be enabled for the test.
+	 */
+	public function test_orders_query_filters_modified_date_in_store_timezone( bool $hpos_enabled ): void {
+		$this->set_order_storage_for_test( $hpos_enabled );
+
+		update_option( 'timezone_string', 'Europe/Amsterdam' );
+
+		$email = wp_unique_id( 'abilities-order-modified-timezone-' ) . '@example.com';
+		$early = $this->create_order_for_query_sorting( $email, '2025-07-15T09:00:00', '2025-07-15T10:00:00' );
+		$late  = $this->create_order_for_query_sorting( $email, '2025-07-15T09:00:00', '2025-07-15T12:00:00' );
+
+		$result = wp_get_ability( 'woocommerce/orders-query' )->execute(
+			array(
+				'billing_email'   => $email,
+				'modified_before' => '2025-07-15T09:00:00.000Z',
+				'per_page'        => 2,
+			)
+		);
+
+		$this->assertNotWPError( $result );
+		$ids = array_column( $result['orders'], 'id' );
+		$this->assertContains( $early->get_id(), $ids, 'modified_before 09:00 UTC with fractional seconds should return the order modified at 10:00 store time (08:00 UTC).' );
+		$this->assertNotContains( $late->get_id(), $ids, 'modified_before 09:00 UTC with fractional seconds should exclude the order modified at 12:00 store time (10:00 UTC).' );
 	}
 
 	/**
