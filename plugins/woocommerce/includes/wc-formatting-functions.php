@@ -1246,12 +1246,13 @@ function wc_format_option_hold_stock_minutes( $value, $option, $raw_value ) {
 	$value = ! empty( $raw_value ) ? absint( $raw_value ) : ''; // Allow > 0 or set to ''.
 
 	$value_changed         = (string) get_option( 'woocommerce_hold_stock_minutes', '60' ) !== (string) $value;
-	$next_scheduled_action = function_exists( 'as_next_scheduled_action' )
+	$use_action_scheduler  = ActionSchedulerUtil::is_ready();
+	$next_scheduled_action = $use_action_scheduler
 		? as_next_scheduled_action( 'woocommerce_cancel_unpaid_orders', array(), 'woocommerce' )
 		: wp_next_scheduled( 'woocommerce_cancel_unpaid_orders' );
 
 	// Clear existing scheduled events.
-	if ( $value_changed && function_exists( 'as_unschedule_all_actions' ) ) {
+	if ( $value_changed && $use_action_scheduler ) {
 		as_unschedule_all_actions( 'woocommerce_cancel_unpaid_orders' );
 	} elseif ( $value_changed ) {
 		wp_clear_scheduled_hook( 'woocommerce_cancel_unpaid_orders' );
@@ -1267,7 +1268,7 @@ function wc_format_option_hold_stock_minutes( $value, $option, $raw_value ) {
 		 */
 		$cancel_unpaid_interval = apply_filters( 'woocommerce_cancel_unpaid_orders_interval_minutes', absint( $value ) );
 
-		if ( function_exists( 'as_schedule_single_action' ) ) {
+		if ( $use_action_scheduler ) {
 			ActionSchedulerUtil::schedule_single( time() + ( absint( $cancel_unpaid_interval ) * 60 ), 'woocommerce_cancel_unpaid_orders', array(), 'woocommerce', true );
 		} else {
 			wp_schedule_single_event( time() + ( absint( $cancel_unpaid_interval ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
