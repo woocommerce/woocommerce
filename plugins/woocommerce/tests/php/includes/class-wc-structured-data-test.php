@@ -350,6 +350,55 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Product schema includes unique gallery images after the featured image.
+	 */
+	public function test_product_schema_includes_gallery_images(): void {
+		$featured  = self::factory()->post->create( array( 'post_type' => 'attachment' ) );
+		$gallery   = self::factory()->post->create( array( 'post_type' => 'attachment' ) );
+		$duplicate = self::factory()->post->create( array( 'post_type' => 'attachment' ) );
+		$invalid   = self::factory()->post->create();
+		update_post_meta( $featured, '_wp_attached_file', 'featured.jpg' );
+		update_post_meta( $gallery, '_wp_attached_file', 'gallery.jpg' );
+		update_post_meta( $duplicate, '_wp_attached_file', 'gallery.jpg' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_image_id( $featured );
+		$product->set_gallery_image_ids( array( $gallery, $featured, $duplicate, $invalid ) );
+		$this->structured_data->generate_product_data( $product );
+
+		$this->assertSame(
+			array( wp_get_attachment_url( $featured ), wp_get_attachment_url( $gallery ) ),
+			$this->structured_data->get_data()[0]['image'],
+			'The featured image should precede unique, valid gallery URLs.'
+		);
+	}
+
+	/**
+	 * @testdox Product schema preserves single-image output and supports a gallery without a featured image.
+	 * @testWith [true, false]
+	 *           [false, true]
+	 *           [false, false]
+	 *
+	 * @param bool $featured Whether to set a featured image.
+	 * @param bool $gallery Whether to set a gallery image.
+	 */
+	public function test_product_schema_with_one_or_no_image( bool $featured, bool $gallery ): void {
+		$image = self::factory()->post->create( array( 'post_type' => 'attachment' ) );
+		update_post_meta( $image, '_wp_attached_file', 'product.jpg' );
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_image_id( $featured ? $image : 0 );
+		$product->set_gallery_image_ids( $gallery ? array( $image ) : array() );
+		$this->structured_data->generate_product_data( $product );
+
+		$data = $this->structured_data->get_data()[0];
+		if ( $featured || $gallery ) {
+			$this->assertSame( wp_get_attachment_url( $image ), $data['image'] );
+		} else {
+			$this->assertArrayNotHasKey( 'image', $data );
+		}
+	}
+
+	/**
 	 * @testdox Product schema includes zero MPNs, omits empty values, and preserves extension filters.
 	 * @testWith ["0"]
 	 *           [""]
