@@ -7,6 +7,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Abilities;
 
+use Automattic\WooCommerce\Internal\Abilities\AbilityResources;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -39,13 +40,6 @@ class ExtensibleAbilities {
 	 * @var array<string, array<string, array<string, array<string, mixed>>>>
 	 */
 	private static array $fields = array();
-
-	/**
-	 * Registered resources, keyed by resource name.
-	 *
-	 * @var array<string, bool>
-	 */
-	private static array $resources = array();
 
 	/**
 	 * Validators keyed by resource.
@@ -88,7 +82,7 @@ class ExtensibleAbilities {
 	 * Register a resource that abilities format, so extensions can register fields on it.
 	 *
 	 * Call it inside the `woocommerce_extensible_abilities_resources_init` action. A call after that action is refused.
-	 * Core registers `product`, `order` and `order_item` there. An
+	 * Core's `product`, `order` and `order_item` are registered before it. An
 	 * extension registers a resource that its own abilities format, and then calls `add_fields_to_object()`
 	 * and `add_fields_schema()` from those abilities, exactly as Core's abilities do.
 	 * Registering the same resource again does nothing.
@@ -107,7 +101,7 @@ class ExtensibleAbilities {
 			return;
 		}
 
-		self::$resources[ $resource_name ] = true;
+		AbilityResources::register( $resource_name );
 	}
 
 	/**
@@ -139,6 +133,9 @@ class ExtensibleAbilities {
 	 *                                        or make HTTP requests.
 	 *                                     2. It receives the value already cast to the field schema.
 	 *                                     3. A null value deletes the value of the field.
+	 *     @type bool     $personal_data   Optional. Whether the value is personal data, such as a phone number.
+	 *                                     The value is left out when the store does not share personal data
+	 *                                     with abilities. Default false.
 	 * }
 	 */
 	public static function register_field( array $args ): void {
@@ -159,11 +156,11 @@ class ExtensibleAbilities {
 				return;
 			}
 		}
-		if ( ! isset( self::$resources[ $args['resource'] ] ) && ! did_action( 'woocommerce_extensible_abilities_resources_init' ) ) {
+		if ( ! AbilityResources::is_registered( $args['resource'] ) && ! did_action( 'woocommerce_extensible_abilities_resources_init' ) ) {
 			wc_doing_it_wrong( __METHOD__, 'Register a field inside the woocommerce_extensible_abilities_init action. The resources are not registered yet.', '11.3.0' );
 			return;
 		}
-		if ( ! isset( self::$resources[ $args['resource'] ] ) ) {
+		if ( ! AbilityResources::is_registered( $args['resource'] ) ) {
 			wc_doing_it_wrong(
 				__METHOD__,
 				sprintf(
@@ -204,7 +201,10 @@ class ExtensibleAbilities {
 			return;
 		}
 
-		self::$fields[ $args['resource'] ][ $args['namespace'] ][ $args['field'] ] = $args;
+		$resource_args = array_intersect_key( $args, array_flip( array( 'namespace', 'personal_data' ) ) );
+		if ( AbilityResources::register_field( $args['resource'], $args['field'], $resource_args ) ) {
+			self::$fields[ $args['resource'] ][ $args['namespace'] ][ $args['field'] ] = $args;
+		}
 	}
 
 	/**
@@ -254,7 +254,7 @@ class ExtensibleAbilities {
 				return;
 			}
 		}
-		if ( ! isset( self::$resources[ $args['resource'] ] ) ) {
+		if ( ! AbilityResources::is_registered( $args['resource'] ) ) {
 			wc_doing_it_wrong(
 				__METHOD__,
 				sprintf(
@@ -506,7 +506,7 @@ class ExtensibleAbilities {
 			wc_doing_it_wrong( __METHOD__, 'The "callback" argument must be callable.', '11.3.0' );
 			return;
 		}
-		if ( ! isset( self::$resources[ $args['resource'] ] ) ) {
+		if ( ! AbilityResources::is_registered( $args['resource'] ) ) {
 			wc_doing_it_wrong(
 				__METHOD__,
 				sprintf(
@@ -527,7 +527,9 @@ class ExtensibleAbilities {
 	 * `'12'` becomes `12` for an integer field. A field that throws or returns a
 	 * value that its schema does not allow is left out. A namespace with no
 	 * values is left out, and `extensions` is left out when no namespace has
-	 * values or the feature is off.
+	 * values or the feature is off. When the store does not share personal data,
+	 * Core's personal data fields are null and extension fields flagged as
+	 * personal data are left out, also while the feature is off.
 	 *
 	 * @since 11.3.0
 	 *
@@ -537,10 +539,23 @@ class ExtensibleAbilities {
 	 * @return array<string, mixed>
 	 */
 	public static function add_fields_to_object( array $output, string $resource_name, $subject ): array {
-		if ( empty( self::$fields[ $resource_name ] ) || ! self::is_enabled() ) {
-			return $output;
+		if ( ! empty( self::$fields[ $resource_name ] ) && self::is_enabled() ) {
+			$extensions = self::get_field_values( $resource_name, $subject );
+			if ( ! empty( $extensions ) ) {
+				$output['extensions'] = $extensions;
+			}
 		}
+		return AbilityResources::withhold_personal_data( $output, $resource_name );
+	}
 
+	/**
+	 * Values of the extension fields of an object, keyed by namespace, then field.
+	 *
+	 * @param string $resource_name Resource.
+	 * @param object $subject       Object to read.
+	 * @return array<string, array<string, mixed>>
+	 */
+	private static function get_field_values( string $resource_name, $subject ): array {
 		$extensions = array();
 		foreach ( self::$fields[ $resource_name ] as $namespace => $fields ) {
 			foreach ( $fields as $field => $args ) {
@@ -562,10 +577,7 @@ class ExtensibleAbilities {
 				}
 			}
 		}
-		if ( ! empty( $extensions ) ) {
-			$output['extensions'] = $extensions;
-		}
-		return $output;
+		return $extensions;
 	}
 
 	/**
