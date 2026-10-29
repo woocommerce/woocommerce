@@ -2554,12 +2554,18 @@ class Checkout extends \WP_Test_REST_TestCase {
 	 * Both addresses default to the one the order already carries and the payment method to one the guard
 	 * accepts, so a test states only the fields it changes.
 	 *
-	 * @param \WC_Order  $order    Order being paid for.
-	 * @param array      $billing  Billing fields to override.
-	 * @param array|null $shipping Shipping fields to override, or null to leave the shipping address out.
+	 * @param \WC_Order  $order                  Order being paid for.
+	 * @param array      $billing                Billing fields to override.
+	 * @param array|null $shipping               Shipping fields to override, or null to leave the shipping address out.
+	 * @param bool       $merge_existing_billing Whether to merge the stored billing address into the request.
 	 * @return \WP_REST_Response
 	 */
-	private function dispatch_pay_for_order_request( \WC_Order $order, array $billing = array(), ?array $shipping = array() ) {
+	private function dispatch_pay_for_order_request(
+		\WC_Order $order,
+		array $billing = array(),
+		?array $shipping = array(),
+		bool $merge_existing_billing = true
+	) {
 		$address = $order->get_address( 'billing' );
 		$request = new \WP_REST_Request( 'POST', '/wc/store/v1/checkout/' . $order->get_id() );
 		$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
@@ -2570,7 +2576,7 @@ class Checkout extends \WP_Test_REST_TestCase {
 			)
 		);
 		$body = array(
-			'billing_address' => array_merge( $address, $billing ),
+			'billing_address' => $merge_existing_billing ? array_merge( $address, $billing ) : $billing,
 			'payment_method'  => WC_Gateway_BACS::ID,
 		);
 		if ( null !== $shipping ) {
@@ -2688,25 +2694,32 @@ class Checkout extends \WP_Test_REST_TestCase {
 		// A merchant-created order for a virtual product, awaiting the shopper's details.
 		$virtual_product = \WC_Helper_Product::create_simple_product( true, array( 'virtual' => true ) );
 		$order           = \WC_Helper_Order::create_order( 0, $virtual_product );
-		$order->set_billing_address( array_fill_keys( array( 'city', 'state', 'postcode', 'country' ), '' ) );
+		$order->set_billing_address(
+			array(
+				'city'     => '',
+				'state'    => 'CA',
+				'postcode' => '94103',
+				'country'  => '',
+			)
+		);
 		$order->save();
 
 		$billing = array(
-			'city'     => 'San Francisco',
-			'state'    => 'CA',
-			'postcode' => '94103',
-			'country'  => 'US',
+			'city'    => 'San Francisco',
+			'country' => 'US',
+			'email'   => $order->get_billing_email(),
 		);
 
 		// The shipping address of an order that ships nothing is not validated, so it must not set the tax.
-		$response = $this->dispatch_pay_for_order_request( $order, $billing, $this->get_different_destination() );
+		$response = $this->dispatch_pay_for_order_request( $order, $billing, $this->get_different_destination(), false );
 
 		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
 
 		$stored_order = wc_get_order( $order->get_id() );
 		$this->assertEquals( 'US', $stored_order->get_shipping_country() );
 		$this->assertEquals( 'CA', $stored_order->get_shipping_state() );
-		$this->assertGreaterThan( 0, (float) $stored_order->get_total_tax() );
+		$this->assertEquals( '94103', $stored_order->get_shipping_postcode() );
+		$this->assertEquals( 4.0, (float) $stored_order->get_total_tax() );
 	}
 
 	/**

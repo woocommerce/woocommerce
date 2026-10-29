@@ -240,7 +240,7 @@ class OrderController {
 		if ( ! $needs_shipping && empty( $old_shipping_location['country'] ) ) {
 			// An order with no address yet may take any first address, but the shipping address of an order that
 			// ships nothing is not validated while it still sets the tax. Such an order ships, and is taxed, at billing.
-			$shipping = $billing;
+			$shipping = $order->get_address( 'billing' );
 			$order->set_shipping_address( $shipping );
 			$this->restore_state_names( $order, $old_states );
 		}
