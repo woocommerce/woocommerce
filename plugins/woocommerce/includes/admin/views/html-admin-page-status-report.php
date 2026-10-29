@@ -175,15 +175,15 @@ if ( file_exists( $plugin_path ) ) {
 						case 'woocommerce':
 						case 'plugin':
 							/* Translators: %s: Plugin name. */
-							$as_source_text = sprintf( __( 'Loaded from the %s plugin.', 'woocommerce' ), $as_source_name );
+							$as_source_text = sprintf( __( 'Loaded from the "%s" plugin.', 'woocommerce' ), $as_source_name );
 							break;
 						case 'mu-plugin':
 							/* Translators: %s: Must-use plugin name. */
-							$as_source_text = sprintf( __( 'Loaded from the %s must-use plugin.', 'woocommerce' ), $as_source_name );
+							$as_source_text = sprintf( __( 'Loaded from the "%s" must-use plugin.', 'woocommerce' ), $as_source_name );
 							break;
 						case 'theme':
 							/* Translators: %s: Theme name. */
-							$as_source_text = sprintf( __( 'Loaded from the %s theme.', 'woocommerce' ), $as_source_name );
+							$as_source_text = sprintf( __( 'Loaded from the "%s" theme.', 'woocommerce' ), $as_source_name );
 							break;
 						default:
 							$as_source_text = __( 'Loaded from an unknown location.', 'woocommerce' );
