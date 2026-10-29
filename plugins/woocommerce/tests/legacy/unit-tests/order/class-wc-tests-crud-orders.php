@@ -1232,6 +1232,53 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test: stage_totals recalculates the totals in memory and saves nothing until the next save.
+	 */
+	public function test_stage_totals_saves_nothing() {
+		$order    = WC_Helper_Order::create_order();
+		$shipping = current( $order->get_items( 'shipping' ) );
+		$shipping->set_total( 20 );
+
+		$this->assertEquals( 60, $order->stage_totals( false ) );
+		$this->assertEquals( 50, wc_get_order( $order->get_id() )->get_total() );
+
+		$order->save();
+		$this->assertEquals( 60, wc_get_order( $order->get_id() )->get_total() );
+	}
+
+	/**
+	 * Test: stage_coupon and stage_coupon_removal change the order in memory, and the next save writes the order and fires the removed coupon action.
+	 */
+	public function test_stage_coupon_and_removal_write_on_save() {
+		$order  = WC_Helper_Order::create_order();
+		$coupon = new WC_Coupon();
+		$coupon->set_code( 'staged' );
+		$coupon->set_discount_type( 'fixed_cart' );
+		$coupon->set_amount( 10 );
+		$coupon->save();
+
+		$this->assertTrue( $order->stage_coupon( 'staged' ) );
+		$this->assertEquals( 40, $order->get_total() );
+		$this->assertCount( 0, wc_get_order( $order->get_id() )->get_items( 'coupon' ) );
+		$this->assertEquals( 50, wc_get_order( $order->get_id() )->get_total() );
+
+		$order->save();
+		$this->assertCount( 1, wc_get_order( $order->get_id() )->get_items( 'coupon' ) );
+		$this->assertEquals( 40, wc_get_order( $order->get_id() )->get_total() );
+
+		$removed = did_action( 'woocommerce_order_removed_coupon' );
+		$this->assertTrue( $order->stage_coupon_removal( 'staged' ) );
+		$this->assertEquals( 50, $order->get_total() );
+		$this->assertSame( 0, did_action( 'woocommerce_order_removed_coupon' ) - $removed );
+		$this->assertCount( 1, wc_get_order( $order->get_id() )->get_items( 'coupon' ) );
+
+		$order->save();
+		$this->assertSame( 1, did_action( 'woocommerce_order_removed_coupon' ) - $removed );
+		$this->assertCount( 0, wc_get_order( $order->get_id() )->get_items( 'coupon' ) );
+		$this->assertEquals( 50, wc_get_order( $order->get_id() )->get_total() );
+	}
+
+	/**
 	 * Test: update_status fires woocommerce_order_edit_status before it writes and after the paid and completed dates are set, and set_status fires it before those dates are set.
 	 */
 	public function test_edit_status_action_fires_before_the_write() {
