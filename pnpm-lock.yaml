@@ -4374,6 +4374,9 @@ importers:
 
   tools/theme-cli:
     devDependencies:
+      '@woocommerce/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
       '@wordpress/env':
         specifier: catalog:tooling
         version: 11.17.0(@types/node@24.12.2)

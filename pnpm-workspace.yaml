@@ -126,7 +126,7 @@ childConcurrency: 8 # 5 by default
 modulesCacheMaxAge: 20160 # two weeks in minutes
 updateNotifier: false
 virtualStoreDirMaxLength: 60
-# pnpm 10 hoisted these to the root by default; pnpm 12 doesn't. ESLint configs resolve their plugins from there.
+# Hoist ESLint and Prettier packages to the root node_modules so shared configs and plugins resolve from any package.
 publicHoistPattern:
     - '*eslint*'
     - '*prettier*'
