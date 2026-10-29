@@ -1,6 +1,0 @@
-{
-	"route": {
-		"path": "/settings/$page",
-		"page": "wc-payment-settings"
-	}
-}
