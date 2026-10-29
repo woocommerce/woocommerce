@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add WC_Order::stage_payment_complete() and WC_Abstract_Order::stage_product_item(), non-saving twins of payment_complete() and add_product(), and warn when an order class overrides the saving method without the twin.

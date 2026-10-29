@@ -2196,12 +2196,41 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Add a product line item to the order. This is the only line item type with
 	 * its own method because it saves looking up order amounts (costs are added up for you).
 	 *
+	 * @uses self::stage_product_item()
 	 * @param  WC_Product $product Product object.
 	 * @param  int        $qty Quantity to add.
 	 * @param  array      $args Args for the added product, including an optional tax location for its price.
 	 * @return int
 	 */
 	public function add_product( $product, $qty = 1, $args = array() ) {
+		$item = $this->stage_product_item( $product, $qty, $args );
+		$item->save();
+
+		$items_key = $this->get_items_key( $item );
+		$temp_id   = $items_key && isset( $this->items[ $items_key ] ) ? array_search( $item, $this->items[ $items_key ], true ) : false;
+		if ( false !== $temp_id ) {
+			unset( $this->items[ $items_key ][ $temp_id ] );
+			$this->items[ $items_key ][ $item->get_id() ] = $item;
+		}
+
+		wc_do_deprecated_action( 'woocommerce_order_add_product', array( $this->get_id(), $item->get_id(), $product, $qty, $args ), '3.0', 'woocommerce_new_order_item action instead' );
+		return $item->get_id();
+	}
+
+	/**
+	 * Build a product line item and add it to the order in memory, like add_product(), but do not save the
+	 * item. The next save() of the order writes it. add_product() calls this method, then saves the item.
+	 *
+	 * An order class that overrides add_product() with rules of its own must override this method too, with
+	 * the same rules.
+	 *
+	 * @since 11.4.0
+	 * @param  WC_Product $product Product object.
+	 * @param  int        $qty Quantity to add.
+	 * @param  array      $args Args for the added product, including an optional tax location for its price.
+	 * @return WC_Order_Item_Product The unsaved item.
+	 */
+	public function stage_product_item( $product, $qty = 1, $args = array() ) {
 		if ( $product ) {
 			$order = ArrayUtil::get_value_or_default( $args, 'order' );
 			$total = wc_get_price_excluding_tax(
@@ -2248,11 +2277,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$item->set_props( $args );
 		$item->set_backorder_meta();
 		$item->set_order_id( $this->get_id() );
-		$item->save();
 		$this->add_item( $item );
-		wc_do_deprecated_action( 'woocommerce_order_add_product', array( $this->get_id(), $item->get_id(), $product, $qty, $args ), '3.0', 'woocommerce_new_order_item action instead' );
 		wp_cache_delete( 'order-needs-processing-' . $this->get_id(), 'orders' );
-		return $item->get_id();
+		return $item;
 	}
 
 	/*
