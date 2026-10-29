@@ -126,10 +126,6 @@ childConcurrency: 8 # 5 by default
 modulesCacheMaxAge: 20160 # two weeks in minutes
 updateNotifier: false
 virtualStoreDirMaxLength: 60
-# Hoist ESLint and Prettier packages to the root node_modules so shared configs and plugins resolve from any package.
-publicHoistPattern:
-    - '*eslint*'
-    - '*prettier*'
 
 # Supply chain security (pnpm 10)
 # Context: axios supply chain attack (2026-03-31) — malicious versions lived ~2-3hrs on npm.
