@@ -149,9 +149,11 @@ class WC_Order extends WC_Abstract_Order {
 		}
 
 		try {
-			if ( $this->stage_payment_complete( $transaction_id ) ) {
-				$this->save();
-			}
+			$this->write_through(
+				function () use ( $transaction_id ) {
+					return $this->stage_payment_complete( $transaction_id );
+				}
+			);
 		} catch ( Exception $e ) {
 			/**
 			 * If there was an error completing the payment, log to a file and add an order note so the admin can take action.
@@ -176,8 +178,8 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Make the in-memory changes of payment_complete(): the transaction ID, the paid date and the payment
 	 * complete status. Leave the payment note and woocommerce_payment_complete to the next save(), which adds
-	 * the note before it writes and fires the action after it writes. payment_complete() calls this method,
-	 * then save().
+	 * the note before it writes and fires the action after it writes. payment_complete() runs this method
+	 * through write_through(), so it adds the note, saves and fires the action right away, as it always did.
 	 *
 	 * When the order status is not one that payment can complete, the order does not change, the
 	 * woocommerce_payment_complete_order_status_<status> action fires right away, and the method returns false.
@@ -248,8 +250,9 @@ class WC_Order extends WC_Abstract_Order {
 
 		$this->set_status( $next_status, false );
 
-		$this->defer_to_save( 'payment_complete_note', array( $this, 'add_order_note' ), array( $payment_complete_note, false, false, array( 'note_group' => OrderNoteGroup::PAYMENT ) ) );
-		$this->defer_to_save( 'payment_complete', 'do_action', array( 'woocommerce_payment_complete', $this->get_id(), $transaction_id ), true );
+		$this->write_or_defer( 'payment_complete_note', array( $this, 'add_order_note' ), array( $payment_complete_note, false, false, array( 'note_group' => OrderNoteGroup::PAYMENT ) ) );
+		$this->save_if_writing_through();
+		$this->write_or_defer( 'payment_complete', 'do_action', array( 'woocommerce_payment_complete', $this->get_id(), $transaction_id ), true );
 
 		return true;
 	}
@@ -2165,6 +2168,33 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return int                       Comment ID.
 	 */
 	public function add_order_note( $note, $is_customer_note = 0, $added_by_user = false, $meta_data = array() ) {
+		return $this->insert_order_note( $note, $is_customer_note, $added_by_user, $meta_data );
+	}
+
+	/**
+	 * Queue a note for the order in memory. The next save() adds it with add_order_note() after the write, so
+	 * the note sees the saved order and woocommerce_order_note_added fires after the write.
+	 *
+	 * @since 11.4.0
+	 * @param  string $note              Note to add.
+	 * @param  int    $is_customer_note  Is this a note for the customer?.
+	 * @param  bool   $added_by_user     Was the note added by a user?.
+	 * @param  array  $meta_data         Optional meta data to add to the note. Key value pairs.
+	 */
+	public function stage_order_note( $note, $is_customer_note = 0, $added_by_user = false, $meta_data = array() ): void {
+		$this->defer_to_save( uniqid( 'order_note_', true ), array( $this, 'add_order_note' ), array( $note, $is_customer_note, $added_by_user, $meta_data ), true );
+	}
+
+	/**
+	 * Insert a note (comment) for the order. add_order_note() calls it.
+	 *
+	 * @param  string $note              Note to add.
+	 * @param  int    $is_customer_note  Is this a note for the customer?.
+	 * @param  bool   $added_by_user     Was the note added by a user?.
+	 * @param  array  $meta_data         Optional meta data to add to the note. Key value pairs.
+	 * @return int                       Comment ID.
+	 */
+	private function insert_order_note( $note, $is_customer_note, $added_by_user, $meta_data ) {
 		if ( ! $this->get_id() ) {
 			return 0;
 		}

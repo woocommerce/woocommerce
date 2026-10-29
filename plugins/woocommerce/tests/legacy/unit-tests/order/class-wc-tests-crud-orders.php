@@ -1232,6 +1232,93 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test: stage_order_note saves nothing until save, then exactly one note exists.
+	 */
+	public function test_stage_order_note_adds_the_note_on_save() {
+		$order = new WC_Order();
+		$order->save();
+		$notes = count( wc_get_order_notes( array( 'order_id' => $order->get_id() ) ) );
+
+		$order->stage_order_note( 'Staged note.' );
+		$this->assertCount( $notes, wc_get_order_notes( array( 'order_id' => $order->get_id() ) ) );
+
+		$order->save();
+		$found = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
+		$this->assertCount( $notes + 1, $found );
+		$this->assertSame( 'Staged note.', current( $found )->content );
+
+		$order->save();
+		$this->assertCount( $notes + 1, wc_get_order_notes( array( 'order_id' => $order->get_id() ) ) );
+	}
+
+	/**
+	 * Test: stage_totals fires woocommerce_order_after_calculate_totals on the next save, right before the write, and a change made by the listener is written.
+	 */
+	public function test_staged_after_calculate_totals_fires_on_save() {
+		$order    = WC_Helper_Order::create_order();
+		$calls    = array();
+		$listener = static function ( ...$args ) use ( &$calls ) {
+			$calls[] = count( $args ) > 2 ? $args[2] : null;
+			$args[1]->set_total( 99 );
+		};
+		add_action( 'woocommerce_order_after_calculate_totals', $listener, 10, 3 );
+
+		$order->stage_totals( false );
+		$this->assertSame( array(), $calls );
+
+		$order->save();
+		$this->assertSame( array( true ), $calls );
+		$this->assertEquals( 99, wc_get_order( $order->get_id() )->get_total() );
+
+		$order->calculate_totals( false );
+		remove_action( 'woocommerce_order_after_calculate_totals', $listener, 10 );
+		$this->assertSame( array( true, null ), $calls );
+	}
+
+	/**
+	 * Test: the saving methods save as many times as before, so hooks see saved items, and their stage twins save nothing.
+	 */
+	public function test_saving_methods_keep_their_saves() {
+		$order  = WC_Helper_Order::create_order();
+		$coupon = new WC_Coupon();
+		$coupon->set_code( 'saves' );
+		$coupon->set_discount_type( 'fixed_cart' );
+		$coupon->set_amount( 10 );
+		$coupon->save();
+
+		$saves = static function () {
+			return did_action( 'woocommerce_after_order_object_save' );
+		};
+
+		$before = $saves();
+		$order->calculate_totals( true );
+		$this->assertSame( 2, $saves() - $before );
+
+		$before = $saves();
+		$order->calculate_totals( false );
+		$this->assertSame( 1, $saves() - $before );
+
+		$before = $saves();
+		$order->apply_coupon( 'saves' );
+		$this->assertSame( 4, $saves() - $before );
+
+		$item_ids = array();
+		$listener = static function ( $and_taxes, $listened_order ) use ( &$item_ids ) {
+			$item_ids = array_keys( $listened_order->get_items( 'coupon' ) );
+		};
+		add_action( 'woocommerce_order_after_calculate_totals', $listener, 10, 2 );
+		$order->calculate_totals( true );
+		remove_action( 'woocommerce_order_after_calculate_totals', $listener, 10 );
+		$this->assertCount( 1, $item_ids );
+		$this->assertIsInt( $item_ids[0] );
+
+		$before = $saves();
+		$order->stage_totals( true );
+		$order->stage_coupon_removal( 'saves' );
+		$this->assertSame( 0, $saves() - $before );
+	}
+
+	/**
 	 * Test: stage_totals recalculates the totals in memory and saves nothing until the next save.
 	 */
 	public function test_stage_totals_saves_nothing() {
