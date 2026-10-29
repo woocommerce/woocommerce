@@ -39,4 +39,24 @@ class WC_Product_Factory_Test extends WC_Unit_Test_Case {
 
 		$this->assertFalse( wc_get_product( $variation_id ) );
 	}
+
+	/**
+	 * @testdox get_product returns false for a deleted variation when the attribute lookup table updates directly, which loads the product during the delete.
+	 */
+	public function test_get_product_returns_false_for_deleted_variation_with_direct_lookup_updates(): void {
+		$parent       = WC_Helper_Product::create_variation_product();
+		$variation_id = $parent->get_children()[0];
+		update_option( 'woocommerce_attribute_lookup_direct_updates', 'yes' );
+
+		try {
+			$this->assertInstanceOf( WC_Product_Variation::class, wc_get_product( $variation_id ) );
+
+			$parent->delete( true );
+
+			$this->assertFalse( wc_get_product( $variation_id ) );
+			$this->assertFalse( wc_get_product( $parent->get_id() ) );
+		} finally {
+			delete_option( 'woocommerce_attribute_lookup_direct_updates' );
+		}
+	}
 }
