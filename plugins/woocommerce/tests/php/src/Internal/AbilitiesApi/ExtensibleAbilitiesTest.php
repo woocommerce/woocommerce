@@ -1644,9 +1644,8 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		add_filter( 'woocommerce_ability_product_type_fields', $remove_color, 10, 2 );
 
 		try {
-			$schema      = $this->get_ability( 'woocommerce/product-create' )['input_schema'];
-			$description = $schema['properties']['type']['description'];
-			$rejected    = $this->run_ability_response(
+			$schema   = $this->get_ability( 'woocommerce/product-create' )['input_schema'];
+			$rejected = $this->run_ability_response(
 				'woocommerce/product-create',
 				array(
 					'name'             => 'Box',
@@ -1655,7 +1654,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 					'extensions'       => array( 'test-ext' => array( 'color' => 'red' ) ),
 				)
 			);
-			$created     = $this->run_ability(
+			$created  = $this->run_ability(
 				'woocommerce/product-create',
 				array(
 					'name'       => 'Box',
@@ -1663,7 +1662,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 					'extensions' => array( 'other_ext' => array( 'count' => 2 ) ),
 				)
 			);
-			$pen         = $this->run_ability(
+			$pen      = $this->run_ability(
 				'woocommerce/product-update',
 				array(
 					'id'         => $simple->get_id(),
@@ -1674,8 +1673,6 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			remove_filter( 'woocommerce_ability_product_type_fields', $remove_color, 10 );
 		}
 
-		$this->assertStringContainsString( 'simple: name, sku, regular_price, sale_price, description, short_description, status, virtual, downloadable, manage_stock, stock_quantity, stock_status, extensions.test-ext.color, extensions.other_ext.count, extensions.other_ext.size.', $description );
-		$this->assertStringContainsString( 'grouped: name, sku, description, short_description, status, grouped_products, extensions.other_ext.count, extensions.other_ext.size.', $description );
 		$this->assertArrayHasKey( 'color', $schema['properties']['extensions']['properties']['test-ext']['properties'] );
 		$this->assertSame( 400, $rejected->get_status() );
 		$this->assertSame( 'woocommerce_product_field_unsupported', $rejected->get_data()['code'] );

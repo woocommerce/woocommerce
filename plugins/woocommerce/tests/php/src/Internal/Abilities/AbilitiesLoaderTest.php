@@ -341,9 +341,9 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should list every field in the flat create and update schemas, and the fields of each type in the type description.
+	 * @testdox Should list every field in the flat create and update schemas.
 	 */
-	public function test_product_mutation_schemas_list_the_fields_of_each_type(): void {
+	public function test_product_mutation_schemas_list_every_field(): void {
 		$create_schema = wp_get_ability( 'woocommerce/product-create' )->get_input_schema();
 		$update_schema = wp_get_ability( 'woocommerce/product-update' )->get_input_schema();
 
@@ -353,11 +353,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			foreach ( array( 'type', 'virtual', 'downloadable', 'regular_price', 'external_url', 'grouped_products', 'manage_stock' ) as $field ) {
 				$this->assertArrayHasKey( $field, $schema['properties'] );
 			}
-
-			$description = $schema['properties']['type']['description'];
-			$this->assertStringContainsString( 'simple: name, sku, regular_price, sale_price, description, short_description, status, virtual, downloadable, manage_stock, stock_quantity, stock_status.', $description );
-			$this->assertStringContainsString( 'external: name, sku, regular_price, sale_price, description, short_description, status, external_url, button_text.', $description );
-			$this->assertStringContainsString( 'grouped: name, sku, description, short_description, status, grouped_products.', $description );
 		}
 
 		$this->assertSame( array( 'name' ), $create_schema['required'] );
@@ -1712,8 +1707,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertContains( 'test-bundle', $update_schema['properties']['type']['enum'] );
 		$this->assertContains( 'test-subscription', $update_schema['properties']['type']['enum'] );
 		$this->assertNotContains( 'test-missing', $update_schema['properties']['type']['enum'] );
-		$this->assertStringContainsString( 'test-bundle: name, sku, description, short_description, status, virtual, downloadable.', $create_schema['properties']['type']['description'] );
-		$this->assertStringContainsString( 'test-subscription: name, sku, regular_price, sale_price, description, short_description, status, virtual, downloadable, manage_stock, stock_quantity, stock_status.', $create_schema['properties']['type']['description'] );
 		$this->assertSame( 'test-bundle', $bundle['product']['type'] );
 		$this->assertTrue( $bundle['product']['virtual'] );
 		$this->assertTrue( $bundle['product']['downloadable'] );
@@ -1810,9 +1803,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertNotWPError( $bundle );
 		$this->created_product_ids[] = $bundle['product']['id'];
 
-		$description = $create_schema['properties']['type']['description'];
-		$this->assertStringContainsString( 'test-bundle: name, sku, regular_price, description, short_description, status, virtual, downloadable.', $description );
-		$this->assertStringContainsString( 'grouped: name, sku, description, short_description, status, grouped_products.', $description );
 		$this->assertSame( '9.00', $bundle['product']['regular_price'] );
 	}
 

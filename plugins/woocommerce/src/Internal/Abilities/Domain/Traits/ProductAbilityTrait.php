@@ -41,28 +41,16 @@ trait ProductAbilityTrait {
 	 * Get the input schema of product-create or product-update.
 	 *
 	 * The schema is one flat object with the fields of every supported product
-	 * type. The description of `type` lists the fields that each type takes,
-	 * and the ability refuses a field that the type does not take with
+	 * type. The ability refuses a field that the type does not take with
 	 * `woocommerce_product_field_unsupported`, naming the fields it takes.
 	 *
 	 * @param bool $creating Whether the schema is for product-create.
 	 * @return array
 	 */
 	private static function get_product_mutation_input_schema( bool $creating ): array {
-		$configs = self::get_supported_product_type_configs();
-		$fields  = array_merge( ...array_values( array_column( $configs, 'fields' ) ) );
-		$lines   = array();
-
-		foreach ( $configs as $product_type => $config ) {
-			$extension_fields = array_map(
-				static fn( string $field ): string => 'extensions.' . $field,
-				$config['extension_fields']
-			);
-			$lines[]          = $product_type . ': ' . implode( ', ', array_merge( $config['fields'], $extension_fields ) ) . '.';
-		}
-
-		$type_schema                 = self::get_product_type_schema( array_keys( $configs ) );
-		$type_schema['description'] .= ' ' . __( 'Each type takes these fields.', 'woocommerce' ) . ' ' . implode( ' ', $lines );
+		$configs     = self::get_supported_product_type_configs();
+		$fields      = array_merge( ...array_values( array_column( $configs, 'fields' ) ) );
+		$type_schema = self::get_product_type_schema( array_keys( $configs ) );
 
 		if ( $creating ) {
 			$type_schema['default']      = ProductType::SIMPLE;
