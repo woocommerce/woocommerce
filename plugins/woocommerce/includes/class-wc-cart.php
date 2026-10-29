@@ -1156,6 +1156,8 @@ class WC_Cart extends WC_Legacy_Cart {
 		}
 
 		if ( is_array( $variation ) && ! empty( $variation ) ) {
+			// Sort for consistent item identification regardless of attribute order.
+			ksort( $variation );
 			$variation_key = '';
 			foreach ( $variation as $key => $value ) {
 				$variation_key .= trim( $key ) . trim( $value );
