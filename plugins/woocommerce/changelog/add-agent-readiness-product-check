@@ -1,4 +1,4 @@
 Significance: patch
 Type: dev
-Comment: Experimental agent readiness checks can judge one product for extensions; behind a hidden flag, no merchant change.
+Comment: Experimental agent readiness: check one product, and re-check after product changes; behind a hidden flag, no merchant change.
 
