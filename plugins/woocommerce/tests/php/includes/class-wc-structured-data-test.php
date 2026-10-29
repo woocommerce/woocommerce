@@ -353,35 +353,11 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 	 * @testdox Product schema includes unique gallery images after the featured image.
 	 */
 	public function test_product_schema_includes_gallery_images(): void {
-		$featured  = self::factory()->post->create(
-			array(
-				'post_type'      => 'attachment',
-				'post_mime_type' => 'image/jpeg',
-			)
-		);
-		$gallery   = self::factory()->post->create(
-			array(
-				'post_type'      => 'attachment',
-				'post_mime_type' => 'image/jpeg',
-			)
-		);
-		$duplicate = self::factory()->post->create(
-			array(
-				'post_type'      => 'attachment',
-				'post_mime_type' => 'image/jpeg',
-			)
-		);
-		$pdf       = self::factory()->post->create(
-			array(
-				'post_type'      => 'attachment',
-				'post_mime_type' => 'application/pdf',
-			)
-		);
+		$featured  = $this->create_schema_attachment( 'featured.jpg' );
+		$gallery   = $this->create_schema_attachment( 'gallery.jpg' );
+		$duplicate = $this->create_schema_attachment( 'gallery.jpg' );
+		$pdf       = $this->create_schema_attachment( 'document.pdf', 'application/pdf' );
 		$invalid   = self::factory()->post->create();
-		update_post_meta( $featured, '_wp_attached_file', 'featured.jpg' );
-		update_post_meta( $gallery, '_wp_attached_file', 'gallery.jpg' );
-		update_post_meta( $duplicate, '_wp_attached_file', 'gallery.jpg' );
-		update_post_meta( $pdf, '_wp_attached_file', 'document.pdf' );
 
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_image_id( $featured );
@@ -405,13 +381,7 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 	 * @param bool $gallery Whether to set a gallery image.
 	 */
 	public function test_product_schema_with_one_or_no_image( bool $featured, bool $gallery ): void {
-		$image = self::factory()->post->create(
-			array(
-				'post_type'      => 'attachment',
-				'post_mime_type' => 'image/jpeg',
-			)
-		);
-		update_post_meta( $image, '_wp_attached_file', 'product.jpg' );
+		$image   = $this->create_schema_attachment( 'product.jpg' );
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_image_id( $featured ? $image : 0 );
 		$product->set_gallery_image_ids( $gallery ? array( $image ) : array() );
@@ -443,21 +413,9 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 	 * @param string $action Filter action.
 	 */
 	public function test_product_schema_filter_preserves_image_control( string $action ): void {
-		$featured = self::factory()->post->create(
-			array(
-				'post_type'      => 'attachment',
-				'post_mime_type' => 'image/jpeg',
-			)
-		);
-		$gallery  = self::factory()->post->create(
-			array(
-				'post_type'      => 'attachment',
-				'post_mime_type' => 'image/jpeg',
-			)
-		);
-		update_post_meta( $featured, '_wp_attached_file', 'featured.jpg' );
-		update_post_meta( $gallery, '_wp_attached_file', 'gallery.jpg' );
-		$product = WC_Helper_Product::create_simple_product();
+		$featured = $this->create_schema_attachment( 'featured.jpg' );
+		$gallery  = $this->create_schema_attachment( 'gallery.jpg' );
+		$product  = WC_Helper_Product::create_simple_product();
 		$product->set_image_id( $featured );
 		$product->set_gallery_image_ids( array( $gallery ) );
 		$expected = wp_get_attachment_url( $featured );
@@ -480,6 +438,25 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 		} else {
 			$this->assertArrayNotHasKey( 'image', $data );
 		}
+	}
+
+
+	/**
+	 * Create an attachment for product schema tests.
+	 *
+	 * @param string $file Attachment file name.
+	 * @param string $mime_type Attachment MIME type.
+	 * @return int Attachment ID.
+	 */
+	private function create_schema_attachment( string $file, string $mime_type = 'image/jpeg' ): int {
+		$id = self::factory()->post->create(
+			array(
+				'post_type'      => 'attachment',
+				'post_mime_type' => $mime_type,
+			)
+		);
+		update_post_meta( $id, '_wp_attached_file', $file );
+		return $id;
 	}
 
 	/**
