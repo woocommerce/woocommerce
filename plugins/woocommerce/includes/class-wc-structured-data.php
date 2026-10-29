@@ -563,6 +563,19 @@ class WC_Structured_Data {
 		}
 
 		$measurement_product = $selected_variation ?? $product;
+		$weight_units        = array(
+			WeightUnit::KILOGRAM => 'KGM',
+			WeightUnit::GRAM     => 'GRM',
+			WeightUnit::POUND    => 'LBR',
+			WeightUnit::OUNCE    => 'ONZ',
+		);
+		$dimension_units     = array(
+			DimensionUnit::METER      => 'MTR',
+			DimensionUnit::CENTIMETER => 'CMT',
+			DimensionUnit::MILLIMETER => 'MMT',
+			DimensionUnit::INCH       => 'INH',
+			DimensionUnit::YARD       => 'YRD',
+		);
 		$weight_unit         = get_option( 'woocommerce_weight_unit' );
 		$dimension_unit      = get_option( 'woocommerce_dimension_unit' );
 		$measurements        = array(
@@ -572,25 +585,16 @@ class WC_Structured_Data {
 			'depth'  => $measurement_product->get_length(),
 		);
 		foreach ( $measurements as $property => $value ) {
-			if ( ! is_numeric( $value ) || ! is_finite( (float) $value ) || (float) $value <= 0 ) {
+			$unit  = 'weight' === $property ? $weight_unit : $dimension_unit;
+			$units = 'weight' === $property ? $weight_units : $dimension_units;
+			if ( ! is_numeric( $value ) || ! is_finite( (float) $value ) || (float) $value <= 0 || ! is_string( $unit ) || ! isset( $units[ $unit ] ) || isset( $markup[ $property ] ) ) {
 				continue;
 			}
-			if ( 'weight' === $property && in_array( $weight_unit, WeightUnit::get_all(), true ) ) {
-				$value     = wc_get_weight( (float) $value, WeightUnit::KILOGRAM, $weight_unit );
-				$unit_code = 'KGM';
-			} elseif ( 'weight' !== $property && in_array( $dimension_unit, DimensionUnit::get_all(), true ) ) {
-				$value     = wc_get_dimension( (float) $value, DimensionUnit::CENTIMETER, $dimension_unit );
-				$unit_code = 'CMT';
-			} else {
-				continue;
-			}
-			if ( is_finite( (float) $value ) && $value > 0 && ! isset( $markup[ $property ] ) ) {
-				$markup[ $property ] = array(
-					'@type'    => 'QuantitativeValue',
-					'value'    => (float) $value,
-					'unitCode' => $unit_code,
-				);
-			}
+			$markup[ $property ] = array(
+				'@type'    => 'QuantitativeValue',
+				'value'    => (float) $value,
+				'unitCode' => $units[ $unit ],
+			);
 		}
 
 		$this->set_data( apply_filters( 'woocommerce_structured_data_product', $markup, $product ) );
