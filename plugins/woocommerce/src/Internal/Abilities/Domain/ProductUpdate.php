@@ -169,7 +169,7 @@ class ProductUpdate extends ActionableAbility {
 					return $plan;
 				}
 				$this->variations = $plan;
-				return array_map( null, $plan['save'], $plan['extensions'] );
+				return self::get_variation_objects( $plan );
 			}
 
 			return null;

@@ -72,9 +72,8 @@ trait ProductAbilityTrait {
 				self::get_product_mutation_field_schemas_for_fields( $fields, false, $creating ),
 				$creating && in_array( 'attributes', $fields, true ) ? array( 'attributes' => self::get_product_create_attributes_schema() ) : array()
 			),
-			'required'             => array( $creating ? 'name' : 'id' ),
 			'additionalProperties' => false,
-		);
+		) + ( $creating ? array() : array( 'required' => array( 'id' ) ) );
 	}
 
 	/**
@@ -231,7 +230,10 @@ trait ProductAbilityTrait {
 	 */
 	private static function get_product_mutation_field_schemas( bool $for_variation = false ): array {
 		return array(
-			'name'              => array( 'type' => 'string' ),
+			'name'              => array(
+				'type'        => 'string',
+				'description' => __( 'Required, except on a variation, which takes its name from its parent.', 'woocommerce' ),
+			),
 			'parent_id'         => array(
 				'type'        => 'integer',
 				'description' => __( 'ID of the variable product this variation belongs to.', 'woocommerce' ),
@@ -739,6 +741,9 @@ trait ProductAbilityTrait {
 				if ( is_wp_error( $variation ) ) {
 					return $variation;
 				}
+				if ( ! $variation instanceof \WC_Product_Variation ) {
+					return self::get_invalid_product_type_error();
+				}
 				if ( ! $variation->get_status( 'edit' ) ) {
 					$variation->set_status( ProductStatus::PUBLISH );
 				}
@@ -764,6 +769,20 @@ trait ProductAbilityTrait {
 		}
 
 		return $plan;
+	}
+
+	/**
+	 * Pair each variation of a plan with the `extensions` input of its item, for change().
+	 *
+	 * @param array{save: \WC_Product_Variation[], extensions: array<int, array>} $plan Plan from plan_variations().
+	 * @return array<int, array{0: \WC_Product_Variation, 1: array}>
+	 */
+	protected static function get_variation_objects( array $plan ): array {
+		$objects = array();
+		foreach ( $plan['save'] as $index => $variation ) {
+			$objects[] = array( $variation, $plan['extensions'][ $index ] ?? array() );
+		}
+		return $objects;
 	}
 
 	/**
@@ -857,7 +876,7 @@ trait ProductAbilityTrait {
 			return null;
 		}
 
-		$children = $parent_product->get_data_store()->read_children( $parent_product, true );
+		$children = $parent_product->get_data_store()->read_children( $parent_product, true ); // @phpstan-ignore method.notFound (WC_Data_Store forwards the call to the variable product data store)
 		$parent_product->set_children( $children['all'] );
 		$parent_product->set_visible_children( $children['visible'] );
 		\WC_Product_Variable::sync( $parent_product );
@@ -905,7 +924,7 @@ trait ProductAbilityTrait {
 			}
 			$options  = is_array( $item['options'] ?? null ) ? array_values( array_filter( array_map( 'wc_clean', $item['options'] ), 'is_string' ) ) : array();
 			$taxonomy = self::get_global_attribute_taxonomy( $item );
-			$name     = '' === $taxonomy ? wc_clean( trim( (string) ( $item['name'] ?? '' ) ) ) : $taxonomy;
+			$name     = '' === $taxonomy ? sanitize_text_field( trim( (string) ( $item['name'] ?? '' ) ) ) : $taxonomy;
 			if ( '' === $name || empty( $options ) || ( ! empty( $item['id'] ) && '' === $taxonomy ) ) {
 				return self::get_invalid_product_attributes_error();
 			}
