@@ -126,6 +126,10 @@ childConcurrency: 8 # 5 by default
 modulesCacheMaxAge: 20160 # two weeks in minutes
 updateNotifier: false
 virtualStoreDirMaxLength: 60
+# pnpm 10 hoisted these to the root by default; pnpm 12 doesn't. ESLint configs resolve their plugins from there.
+publicHoistPattern:
+    - '*eslint*'
+    - '*prettier*'
 
 # Supply chain security (pnpm 10)
 # Context: axios supply chain attack (2026-03-31) — malicious versions lived ~2-3hrs on npm.
