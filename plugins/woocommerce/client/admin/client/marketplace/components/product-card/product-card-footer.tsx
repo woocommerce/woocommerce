@@ -76,9 +76,11 @@ function ProductCardFooter( props: { product: Product } ) {
 		return currencyFormats[ currencyCode ] || '%s';
 	};
 
-	// WooCommerce.com sends a day count only for products with a free trial; anything but a positive integer means no trial.
+	// The trial replaces only a paid price, so free and freemium cards keep their label. Anything but a positive day count means no trial.
 	const freeTrialDays = product.freeTrialLengthDays;
 	const freeTrialLabel =
+		product.price > 0 &&
+		product.freemium_type !== 'primary' &&
 		typeof freeTrialDays === 'number' &&
 		Number.isInteger( freeTrialDays ) &&
 		freeTrialDays > 0

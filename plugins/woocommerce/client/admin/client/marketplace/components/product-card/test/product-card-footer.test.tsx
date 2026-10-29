@@ -155,6 +155,26 @@ describe( 'ProductCardFooter free trial', () => {
 		}
 	);
 
+	it.each( [
+		[ 'Free download', { price: 0, isOnSale: false } ],
+		[ 'Free plan available', { freemium_type: 'primary' } ],
+	] as const )( 'keeps "%s" over the trial copy', ( label, overrides ) => {
+		const { getAllByText, queryByText } = render(
+			<MarketplaceContext.Provider value={ context }>
+				<ProductCardFooter
+					product={ {
+						...paidProduct,
+						...overrides,
+						freeTrialLengthDays: 14,
+					} }
+				/>
+			</MarketplaceContext.Provider>
+		);
+
+		expect( getAllByText( label ).length ).toBeGreaterThan( 0 );
+		expect( queryByText( '14 day free trial' ) ).toBeNull();
+	} );
+
 	it( 'shows "Installed" over the trial copy', () => {
 		const { getByText, queryByText } = render(
 			<MarketplaceContext.Provider
