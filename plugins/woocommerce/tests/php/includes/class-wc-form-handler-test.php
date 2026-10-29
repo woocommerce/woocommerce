@@ -102,6 +102,39 @@ class WC_Form_Handler_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox My Account registration honors its own merchant setting even when checkout registration is enabled.
+	 *
+	 * @testWith ["no", false]
+	 *           ["yes", true]
+	 *
+	 * @param string $registration_enabled Whether My Account registration is enabled.
+	 * @param bool   $expected_customer Whether a customer should be created.
+	 */
+	public function test_process_registration_respects_myaccount_setting( string $registration_enabled, bool $expected_customer ): void {
+		wp_set_current_user( 0 );
+		update_option( 'woocommerce_enable_myaccount_registration', $registration_enabled );
+		update_option( 'woocommerce_enable_signup_and_login_from_checkout', 'yes' );
+		add_filter( 'woocommerce_registration_auth_new_customer', '__return_false' );
+		add_filter( 'pre_wp_mail', '__return_true' );
+
+		$_POST             = array(
+			'register'                   => 'Register',
+			'email'                      => 'registration-policy@example.com',
+			'woocommerce-register-nonce' => wp_create_nonce( 'woocommerce-register' ),
+		);
+		$created_customers = did_action( 'woocommerce_created_customer' );
+
+		WC_Form_Handler::process_registration();
+
+		$this->assertSame( $expected_customer, get_user_by( 'email', 'registration-policy@example.com' ) instanceof WP_User, 'The stored customer must reflect the My Account registration setting.' );
+		$this->assertSame( $created_customers + ( $expected_customer ? 1 : 0 ), did_action( 'woocommerce_created_customer' ), 'Disabled registration must not notify customer-creation consumers.' );
+		$this->assertSame( $expected_customer ? 0 : 1, wc_notice_count( 'error' ), 'Only disabled registration should produce an error.' );
+		if ( ! $expected_customer ) {
+			$this->assertTrue( wc_has_notice( 'Registration is disabled.', 'error' ), 'The registration policy error should be shown.' );
+		}
+	}
+
+	/**
 	 * @testdox cancel_order() redirects to a clean endpoint when no custom redirect is provided.
 	 *
 	 * @covers WC_Form_Handler::cancel_order()
