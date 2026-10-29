@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Remove coupons already applied to a cart when coupon codes are disabled in WooCommerce settings.
