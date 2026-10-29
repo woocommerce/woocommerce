@@ -65,5 +65,4 @@ class ProductOpenGraphTags {
 
 		return $tags;
 	}
-
 }
