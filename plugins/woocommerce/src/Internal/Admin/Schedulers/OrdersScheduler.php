@@ -727,13 +727,14 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 		 * @param int $interval The import interval in seconds. Default is 12 hours.
 		 */
 		$interval = apply_filters( 'woocommerce_analytics_import_interval', 12 * HOUR_IN_SECONDS );
+		$seconds  = is_numeric( $interval ) && is_finite( (float) $interval ) && $interval <= PHP_INT_MAX ? (int) $interval : 0;
 
-		if ( ! is_numeric( $interval ) || ! is_finite( (float) $interval ) || $interval <= 0 || $interval > PHP_INT_MAX ) {
+		if ( $seconds < 1 ) {
 			wc_doing_it_wrong( __METHOD__, 'The woocommerce_analytics_import_interval filter must return a positive number of seconds; the 12 hour default was used.', '11.4.0' );
 			return 12 * HOUR_IN_SECONDS;
 		}
 
-		return (int) $interval;
+		return $seconds;
 	}
 
 	/**
