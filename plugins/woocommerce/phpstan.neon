@@ -48,15 +48,20 @@ parameters:
 		-
 			identifier: woocommerce.stagedWrite
 			path: includes/legacy/*
+		# The save point that stage_*() methods share: it saves only while the saving method runs the stage method.
+		-
+			identifier: woocommerce.stagedWrite
+			message: '#^Method WC_Abstract_Order::save_if_writing_through\(\) writes outside save\(\)\.#'
+			path: includes/abstracts/abstract-wc-order.php
 		# Payment tokens live in a data store table apart from the order data, and the write takes no order change to stage.
 		-
 			identifier: woocommerce.stagedWrite
 			message: '#^Method WC_Abstract_Order::add_payment_token\(\) writes outside save\(\)\.#'
 			path: includes/abstracts/abstract-wc-order.php
-		# A note is a comment row with its own ID, written right away; the order data does not change.
+		# The one place that inserts a note row: add_order_note() calls it, and save() runs add_order_note() for notes that stage_order_note() queued.
 		-
 			identifier: woocommerce.stagedWrite
-			message: '#^Method WC_Order::add_order_note\(\) writes outside save\(\)\.#'
+			message: '#^Method WC_Order::insert_order_note\(\) writes outside save\(\)\.#'
 			path: includes/class-wc-order.php
 		# Usage counts change through atomic data store updates; a save would rewrite them from stale values.
 		-
@@ -68,7 +73,7 @@ parameters:
 			identifier: woocommerce.stagedWrite
 			message: '#^Method WC_Customer_Download::track_download\(\) writes outside save\(\)\.#'
 			path: includes/class-wc-customer-download.php
-		# A zone does not hold its methods in memory, and the returned instance ID comes from the insert.
+		# A zone object does not hold its shipping methods; add_shipping_method() inserts the row and returns its ID. A twin needs the zone to carry its methods in memory and write them in save() first.
 		-
 			identifier: woocommerce.stagedWrite
 			message: '#^Method WC_Shipping_Zone::add_shipping_method\(\) writes outside save\(\)\.#'
