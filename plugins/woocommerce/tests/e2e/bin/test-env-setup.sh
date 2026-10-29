@@ -1,11 +1,16 @@
 #!/usr/bin/env bash
 
 # Command prefix for running wp-cli against the single-container E2E environment
-# (started via `wp-env --config .wp-env.e2e.json`, whose container is `cli`).
+# (whose container is `cli`). wp-env runs this script as an afterStart lifecycle
+# hook without telling it which config started the env, so the command targets
+# the base `.wp-env.e2e.json` by default. Plugin-installing variants (Gutenberg,
+# object cache) start from a `.wp-env.e2e.<variant>.json` and export
+# E2E_WP_ENV_CONFIG so this prefix drives wp-cli against the running variant
+# instance instead of the base one.
 # The CI fast-path below re-runs this script inside the container with the prefix
 # blanked out (WP_CLI_PREFIX=), so each command runs as a bare `wp …` in a single
 # container exec instead of one `wp-env run` round-trip per command.
-WP_ENV_CMD="wp-env --config .wp-env.e2e.json"
+WP_ENV_CMD="wp-env --config ${E2E_WP_ENV_CONFIG:-.wp-env.e2e.json}"
 WP_CLI_PREFIX="${WP_CLI_PREFIX-$WP_ENV_CMD run cli}"
 
 if [ ! -z ${CI+y} ]; then
