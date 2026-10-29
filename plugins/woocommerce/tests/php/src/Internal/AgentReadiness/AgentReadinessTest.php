@@ -43,7 +43,7 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 
 		$report = $this->sut->get_report();
 
-		$this->assertSame( array( 'generated_at', 'products', 'products_with_issues', 'store_checks', 'channels', 'checks', 'truncated' ), array_keys( $report ) );
+		$this->assertSame( array( 'generated_at', 'products', 'products_with_issues', 'hidden_from_catalog', 'unsupported_types', 'store_checks', 'channels', 'checks', 'truncated' ), array_keys( $report ) );
 		$this->assertFalse( $report['truncated'] );
 		$this->assertSame( array( 'id', 'ok', 'blocks', 'label', 'why', 'fix' ), array_keys( $report['store_checks'][0] ) );
 		$this->assertSame( array( 'chatgpt', 'google', 'copilot' ), array_keys( $report['channels'] ) );
@@ -178,6 +178,7 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 		$this->assertSame( $variable->get_id(), $this->sut->check_product( $variation )['product_id'] );
 		$this->assertNull( $this->sut->check_product( WC_Helper_Product::create_grouped_product() ) );
 		$this->assertNull( $this->sut->check_product( WC_Helper_Product::create_simple_product( true, array( 'status' => 'draft' ) ) ) );
+		$this->assertNull( $this->sut->check_product( WC_Helper_Product::create_simple_product( true, array( 'catalog_visibility' => 'hidden' ) ) ) );
 	}
 
 	/**
@@ -196,6 +197,40 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 		$this->sut->get_report();
 
 		$this->assertArrayNotHasKey( 'duplicate_gtin', $this->sut->check_product( $first )['checks'] );
+	}
+
+	/**
+	 * @testdox Products hidden from the shop catalog and unsupported types are counted, not checked.
+	 */
+	public function test_scan_counts_hidden_and_unsupported_products(): void {
+		WC_Helper_Product::create_simple_product();
+		$hidden_variable = WC_Helper_Product::create_variation_product();
+		$hidden_variable->set_catalog_visibility( 'hidden' );
+		$hidden_variable->save();
+		$search_only = WC_Helper_Product::create_simple_product();
+		$search_only->set_catalog_visibility( 'search' );
+		$search_only->save();
+		$shop_only = WC_Helper_Product::create_simple_product();
+		$shop_only->set_catalog_visibility( 'catalog' );
+		$shop_only->save();
+		WC_Helper_Product::create_external_product();
+		// A subscription whose plugin is inactive loads as simple but keeps its stored type.
+		$subscription = WC_Helper_Product::create_simple_product();
+		wp_set_object_terms( $subscription->get_id(), 'subscription', 'product_type' );
+		\WC_Cache_Helper::invalidate_cache_group( 'product_' . $subscription->get_id() );
+		$subscription = wc_get_product( $subscription->get_id() );
+		WC_Helper_Product::create_simple_product( true, array( 'status' => 'draft' ) );
+
+		$report = $this->sut->get_report();
+
+		$this->assertSame( 2, $report['products'], 'Only the shown simple product and the shop-only one are checked' );
+		$this->assertSame( 2, $report['hidden_from_catalog'], 'Hidden and search-only products are counted apart' );
+		$this->assertSame( 2, $report['unsupported_types'], 'External and the subscription are counted apart' );
+		$this->assertSame( 2, $report['channels']['chatgpt']['listable'] + $report['channels']['chatgpt']['not_listable'] );
+		$this->assertNotContains( 'hidden_from_catalog', array_column( $report['checks'], 'id' ) );
+		$this->assertSame( array(), $this->sut->get_failing_check_ids( $hidden_variable ), 'A hidden product has no issues' );
+		$this->assertSame( array(), $this->sut->get_failing_check_ids( wc_get_product( $hidden_variable->get_children()[0] ) ), 'Nor do its variations' );
+		$this->assertSame( array(), $this->sut->get_failing_check_ids( $subscription ), 'An unsupported type has no issues' );
 	}
 
 	/**

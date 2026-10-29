@@ -67,7 +67,7 @@ class ReadinessRestController extends RestApiControllerBase {
 	/**
 	 * Register the routes.
 	 */
-	public function register_routes() {
+	public function register_routes(): void {
 		if ( ! $this->features_controller->feature_is_enabled( StatusTab::FEATURE_ID ) ) {
 			return;
 		}
@@ -100,7 +100,7 @@ class ReadinessRestController extends RestApiControllerBase {
 	/**
 	 * The stored report and whether a scan is pending.
 	 *
-	 * @param WP_REST_Request $request Request.
+	 * @param WP_REST_Request<array<string, mixed>> $request Request.
 	 * @return array{report:array<string,mixed>|null,scan_pending:bool}
 	 */
 	protected function get_status( WP_REST_Request $request ): array {
@@ -113,7 +113,7 @@ class ReadinessRestController extends RestApiControllerBase {
 	/**
 	 * Queue a scan, then answer like GET.
 	 *
-	 * @param WP_REST_Request $request Request.
+	 * @param WP_REST_Request<array<string, mixed>> $request Request.
 	 * @return \WP_REST_Response
 	 */
 	protected function queue_scan( WP_REST_Request $request ): \WP_REST_Response {

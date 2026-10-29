@@ -4,7 +4,6 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\AgentReadiness;
 
 use Automattic\WooCommerce\Internal\AgentReadiness\Checks\DuplicateGtinCheck;
-use Automattic\WooCommerce\Internal\AgentReadiness\Checks\HiddenFromCatalogCheck;
 use Automattic\WooCommerce\Internal\AgentReadiness\Checks\ImageTooSmallCheck;
 use Automattic\WooCommerce\Internal\AgentReadiness\Checks\InvalidGtinCheck;
 use Automattic\WooCommerce\Internal\AgentReadiness\Checks\MissingBrandCheck;
@@ -91,7 +90,6 @@ class AgentReadiness {
 				new MissingImagesCheck(),
 				new MissingProductTextCheck(),
 				new MissingBrandCheck(),
-				new HiddenFromCatalogCheck(),
 				new InvalidGtinCheck(),
 				new MissingGtinCheck(),
 				new DuplicateGtinCheck(),
@@ -173,7 +171,7 @@ class AgentReadiness {
 	/**
 	 * Run every check over the catalog.
 	 *
-	 * @return array{generated_at:string,products:int,products_with_issues:int,store_checks:array<int,array<string,mixed>>,channels:array<string,array<string,mixed>>,checks:array<int,array<string,mixed>>,truncated:bool}
+	 * @return array{generated_at:string,products:int,products_with_issues:int,hidden_from_catalog:int,unsupported_types:int,store_checks:array<int,array<string,mixed>>,channels:array<string,array<string,mixed>>,checks:array<int,array<string,mixed>>,truncated:bool}
 	 */
 	public function get_report(): array {
 		// Rebuild the rules and the scan for each report: a long-running process may have fetched a new rules file or changed GTINs since.
@@ -205,6 +203,8 @@ class AgentReadiness {
 			'generated_at'         => gmdate( 'c' ),
 			'products'             => $scan->products(),
 			'products_with_issues' => $scan->products_with_issues(),
+			'hidden_from_catalog'  => $scan->hidden_from_catalog(),
+			'unsupported_types'    => $scan->unsupported_types(),
 			'store_checks'         => $this->store_conditions->all(),
 			'channels'             => $scan->channel_totals(),
 			'checks'               => $checks,
@@ -235,8 +235,8 @@ class AgentReadiness {
 
 	/**
 	 * Ids of the checks one product fails. A variation is judged by its parent,
-	 * as the scan counts it; other products the scan leaves out (grouped,
-	 * external, unpublished) have no issues.
+	 * as the scan counts it; other products the scan leaves out (other types,
+	 * hidden from the shop catalog, unpublished) have no issues.
 	 *
 	 * @param \WC_Product $product Product or variation.
 	 * @return array<int, string>

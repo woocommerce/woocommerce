@@ -1,6 +1,6 @@
 # Agent readiness
 
-Checks published products against the product data specs of AI shopping channels and reports what keeps them from being listed or found. Behind the experimental `agent_readiness` feature flag (disabled by default, not shown on the Features screen).
+Checks published simple and variable products against the product data specs of AI shopping channels and reports what keeps them from being listed or found. Behind the experimental `agent_readiness` feature flag (disabled by default, not shown on the Features screen).
 
 ## Scope
 
@@ -29,7 +29,6 @@ A channel whose spec does not ask for the field is left out of the check's map.
 | `missing_images` | image_url, not_listable | image_link, not_listable | imageLink, not_listable |
 | `missing_product_text` | description, not_listable | description, gaps | description, gaps |
 | `missing_brand` | brand, not_listable | brand, gaps | brand, gaps |
-| `hidden_from_catalog` | is_eligible_search, not_listable | | |
 | `invalid_gtin` | gtin, gaps | gtin, not_listable | gtin, gaps |
 | `missing_gtin` | gtin, gaps | gtin, gaps | gtin, gaps |
 | `duplicate_gtin` | | gtin, gaps | |
@@ -43,6 +42,13 @@ A variable product with some priced variations fails `missing_regular_price` but
 
 Two Google exceptions, per product: `missing_brand` leaves Google out when Google for WooCommerce sends its own brand (`_wc_gla_brand`), and `missing_gtin` leaves Google out when the product has a brand and an MPN (`_wc_gla_mpn` or an "MPN" attribute). Brands set through Google for WooCommerce attribute mapping rules are not read yet.
 
+## Scope
+
+Only published simple and variable products are checked, the types agents support today. Two groups are counted instead of checked, so the merchant sees them without being asked to fix them:
+
+- Products hidden from the shop catalog (catalog visibility "Search results only" or "Hidden"). Agents see the products shoppers see in the shop, so hiding one is the merchant's choice, not a problem.
+- Products of any other type: grouped, external, subscription, booking, bundle and so on. A product keeps its stored type when its plugin is inactive, so it stays in this group.
+
 Store-wide conditions (`StoreConditions`) are reported first because they affect every product: coming soon mode and "Discourage search engines" hide the products, UCP off and Plain permalinks (no `/.well-known/ucp`) hide the catalog from UCP agents, and guest checkout off stops agents placing orders. Each condition's `blocks` says which, so a reader can tell a hidden store from one agents can't buy from.
 
 ## Report format
@@ -52,8 +58,10 @@ Store-wide conditions (`StoreConditions`) are reported first because they affect
 ```php
 array(
 	'generated_at' => '2026-10-28T12:00:00+00:00',
-	'products'     => 120,          // Published products checked.
-	'products_with_issues' => 31,   // Not complete on at least one channel.
+	'products'             => 120, // Published simple and variable products checked.
+	'products_with_issues' => 31,  // Not complete on at least one channel.
+	'hidden_from_catalog'  => 4,   // Not checked: catalog visibility "Search results only" or "Hidden", the merchant's choice.
+	'unsupported_types'    => 6,   // Not checked: grouped, external, subscription, bundle and other types agents don't support yet.
 	'store_checks' => array(
 		// blocks: 'listing' (every product on every channel), 'ucp' (the catalog for UCP agents) or 'checkout' (agent orders).
 		array( 'id' => 'launched', 'ok' => true, 'blocks' => 'listing', 'label' => '…', 'why' => '…', 'fix' => '…' ),
@@ -103,7 +111,7 @@ The file has a `version` and, per check id, a `channels` map in the same shape a
 
 The same shape is meant for every consumer: this Status tab, an outside scan of a store, and extensions that rank the findings by sales or offer fixes. Check and channel ids are stable keys.
 
-The scan walks published products (not grouped or external) in batches of 200, most recently modified first, primes meta, terms, images and variations per batch, and stops at 5,000 products. The Status tab runs it on request and keeps the result in a transient for an hour.
+The scan walks published simple and variable products shown in the shop catalog in batches of 200, most recently modified first, primes meta, terms, images and variations per batch, and stops at 5,000 products.
 
 ## Updating rules
 
@@ -111,7 +119,7 @@ The per-channel field and effect live in each check's `channels()`. The final ma
 
 ## Product feed integration
 
-`ReadinessFeedValidator` implements `ProductFeed\Feed\FeedValidatorInterface` and returns the ids of the checks a product fails, so feed integrations can reuse the checks. It judges a variation by its parent, as the scan counts it, and returns no issues for products the scan leaves out (grouped, external, unpublished). The rules are built once per request. The feed framework skips rows with issues, so an integration that only wants to report gaps should wrap it.
+`ReadinessFeedValidator` implements `ProductFeed\Feed\FeedValidatorInterface` and returns the ids of the checks a product fails, so feed integrations can reuse the checks. It judges a variation by its parent, as the scan counts it, and returns no issues for products the scan leaves out (other types, hidden from the shop catalog, unpublished). The rules are built once per request. The feed framework skips rows with issues, so an integration that only wants to report gaps should wrap it.
 
 Core's UCP catalog mapper (`src/Internal/ProductFeed/Mapping/UcpProductMapper.php`) sends each variant's GTIN as a barcode since #70351. UCP has no brand field, so `missing_brand` matters for the other channels, not UCP.
 
