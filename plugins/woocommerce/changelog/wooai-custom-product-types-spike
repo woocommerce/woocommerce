@@ -1,4 +1,4 @@
 Significance: minor
 Type: update
 
-Product abilities: accept registered product types, with virtual and downloadable as separate fields, let the owner of a type choose its Core fields with the woocommerce_ability_product_type_fields filter, and let an extension field name the object types it applies to with object_types in ExtensibleAbilities::register_field().
+Product abilities: accept the product types that extensions register, and let extension fields apply to some product types only.
