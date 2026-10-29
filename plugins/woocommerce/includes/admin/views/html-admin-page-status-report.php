@@ -171,7 +171,7 @@ if ( file_exists( $plugin_path ) ) {
 
 					$as_source_name = (string) ( $action_scheduler['source_name'] ?? '' );
 					$as_source_type = (string) ( $action_scheduler['source_type'] ?? '' );
-					switch ( '' === $as_source_name ? 'other' : $as_source_type ) {
+					switch ( $as_source_type ) {
 						case 'woocommerce':
 						case 'plugin':
 							/* Translators: %s: Plugin name. */
