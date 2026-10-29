@@ -1,25 +1,29 @@
 <?php
 /**
- * ExtensibleAbilitiesTest class file.
+ * AbilityResourcesTest class file.
  */
 
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\Tests\Internal\AbilitiesApi;
+namespace Automattic\WooCommerce\Tests\Abilities;
 
-use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
+use Automattic\WooCommerce\Abilities\AbilityResources;
 use Automattic\WooCommerce\Abilities\ActionableAbility;
+use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
+use Automattic\WooCommerce\Tests\Internal\AbilitiesApi\TestOrderStatusAbility;
+use Automattic\WooCommerce\Tests\Internal\AbilitiesApi\TestProductRenameAbility;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
  * Namespaced extension fields in the product and order abilities, read and written through the REST route.
  */
-class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
+class AbilityResourcesTest extends \WC_REST_Unit_Test_Case {
 
+	use AbilityRegistriesTrait;
 	use HPOSToggleTrait;
 
 	private const CODE_SCHEMA = array(
@@ -135,10 +139,10 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	 */
 	public function register_test_fields(): void {
 		ExtensibleAbilities::register_field(
+			'product',
+			'test-ext',
+			'code',
 			array(
-				'resource'     => 'product',
-				'namespace'    => 'test-ext',
-				'field'        => 'code',
 				'schema'       => self::CODE_SCHEMA,
 				'get_callback' => static function ( \WC_Product $product ) {
 					$code = $product->get_meta( '_test_code' );
@@ -147,10 +151,10 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			)
 		);
 		ExtensibleAbilities::register_field(
+			'product',
+			'other_ext',
+			'code',
 			array(
-				'resource'     => 'product',
-				'namespace'    => 'other_ext',
-				'field'        => 'code',
 				'schema'       => array( 'type' => 'integer' ),
 				'get_callback' => static function ( \WC_Product $product ) {
 					return '' === $product->get_meta( '_test_code' ) ? null : 7;
@@ -158,10 +162,10 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			)
 		);
 		ExtensibleAbilities::register_field(
+			'order',
+			'test-ext',
+			'note',
 			array(
-				'resource'     => 'order',
-				'namespace'    => 'test-ext',
-				'field'        => 'note',
 				'schema'       => array( 'type' => 'string' ),
 				'get_callback' => static function ( \WC_Order $order ) {
 					return 'order-' . $order->get_id();
@@ -169,10 +173,10 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			)
 		);
 		ExtensibleAbilities::register_field(
+			'order_item',
+			'test-ext',
+			'gift',
 			array(
-				'resource'     => 'order_item',
-				'namespace'    => 'test-ext',
-				'field'        => 'gift',
 				'schema'       => array( 'type' => 'string' ),
 				'get_callback' => static function ( \WC_Order_Item $item ) {
 					return 'item-' . $item->get_id();
@@ -194,10 +198,10 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		);
 		foreach ( $writable as list( $resource, $namespace, $field, $schema ) ) {
 			ExtensibleAbilities::register_field(
+				$resource,
+				$namespace,
+				$field,
 				array(
-					'resource'        => $resource,
-					'namespace'       => $namespace,
-					'field'           => $field,
 					'schema'          => $schema,
 					'get_callback'    => static function ( \WC_Data $data ) use ( $field ) {
 						return $data->meta_exists( '_test_' . $field ) ? $data->get_meta( '_test_' . $field ) : null;
@@ -232,62 +236,56 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	 */
 	public function register_test_filters(): void {
 		ExtensibleAbilities::register_query_filter(
-			array(
-				'resource'  => 'product',
-				'namespace' => 'test-ext',
-				'filter'    => 'has_code',
-				'schema'    => array( 'type' => 'boolean' ),
-				'callback'  => static function ( bool $has_code ) {
-					return array(
-						'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-							array(
-								'key'     => '_test_code',
-								'compare' => $has_code ? 'EXISTS' : 'NOT EXISTS',
-							),
+			'product',
+			'test-ext',
+			'has_code',
+			array( 'type' => 'boolean' ),
+			static function ( bool $has_code ) {
+				return array(
+					'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+						array(
+							'key'     => '_test_code',
+							'compare' => $has_code ? 'EXISTS' : 'NOT EXISTS',
 						),
-					);
-				},
-			)
+					),
+				);
+			}
 		);
 		ExtensibleAbilities::register_query_filter(
-			array(
-				'resource'  => 'product',
-				'namespace' => 'test-ext',
-				'filter'    => 'category',
-				'schema'    => array( 'type' => 'string' ),
-				'callback'  => static function ( string $slug ) {
-					return array(
-						'tax_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
-							array(
-								'taxonomy' => 'product_cat',
-								'field'    => 'slug',
-								'terms'    => $slug,
-							),
+			'product',
+			'test-ext',
+			'category',
+			array( 'type' => 'string' ),
+			static function ( string $slug ) {
+				return array(
+					'tax_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+						array(
+							'taxonomy' => 'product_cat',
+							'field'    => 'slug',
+							'terms'    => $slug,
 						),
-					);
-				},
-			)
+					),
+				);
+			}
 		);
 		ExtensibleAbilities::register_query_filter(
-			array(
-				'resource'  => 'order',
-				'namespace' => 'test-ext',
-				'filter'    => 'tag',
-				'schema'    => array( 'type' => 'string' ),
-				'callback'  => static function ( string $tag ) {
-					if ( 'bad' === $tag ) {
-						return new \WP_Error( 'test_bad_tag', 'Bad tag.', array( 'status' => 400 ) );
-					}
-					return array(
-						'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-							array(
-								'key'   => '_test_tag',
-								'value' => $tag,
-							),
+			'order',
+			'test-ext',
+			'tag',
+			array( 'type' => 'string' ),
+			static function ( string $tag ) {
+				if ( 'bad' === $tag ) {
+					return new \WP_Error( 'test_bad_tag', 'Bad tag.', array( 'status' => 400 ) );
+				}
+				return array(
+					'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+						array(
+							'key'   => '_test_tag',
+							'value' => $tag,
 						),
-					);
-				},
-			)
+					),
+				);
+			}
 		);
 	}
 
@@ -513,35 +511,31 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	 */
 	public function register_contains_product_filter(): void {
 		ExtensibleAbilities::register_query_filter(
+			'order',
+			'test-ext',
+			'without',
 			array(
-				'resource'  => 'order',
-				'namespace' => 'test-ext',
-				'filter'    => 'without',
-				'schema'    => array(
-					'type'  => 'array',
-					'items' => array( 'type' => 'integer' ),
-				),
-				'callback'  => static fn( array $ids ) => array( 'exclude_ids' => $ids ),
-			)
+				'type'  => 'array',
+				'items' => array( 'type' => 'integer' ),
+			),
+			static fn( array $ids ) => array( 'exclude_ids' => $ids )
 		);
 		ExtensibleAbilities::register_query_filter(
-			array(
-				'resource'  => 'order',
-				'namespace' => 'test-ext',
-				'filter'    => 'contains_product',
-				'schema'    => array( 'type' => 'integer' ),
-				'callback'  => static function ( int $product_id ) {
-					global $wpdb;
-					return array(
-						'include_ids' => $wpdb->get_col(
-							$wpdb->prepare(
-								"SELECT DISTINCT items.order_id FROM {$wpdb->prefix}woocommerce_order_items AS items INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS meta ON meta.order_item_id = items.order_item_id WHERE meta.meta_key = '_product_id' AND meta.meta_value = %d",
-								$product_id
-							)
-						),
-					);
-				},
-			)
+			'order',
+			'test-ext',
+			'contains_product',
+			array( 'type' => 'integer' ),
+			static function ( int $product_id ) {
+				global $wpdb;
+				return array(
+					'include_ids' => $wpdb->get_col(
+						$wpdb->prepare(
+							"SELECT DISTINCT items.order_id FROM {$wpdb->prefix}woocommerce_order_items AS items INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS meta ON meta.order_item_id = items.order_item_id WHERE meta.meta_key = '_product_id' AND meta.meta_value = %d",
+							$product_id
+						)
+					),
+				);
+			}
 		);
 	}
 
@@ -563,16 +557,14 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 				);
 				foreach ( $callbacks as $filter => $callback ) {
 					ExtensibleAbilities::register_query_filter(
-						array(
-							'resource'  => 'product',
-							'namespace' => 'test-ext',
-							'filter'    => $filter,
-							'schema'    => 'picked' === $filter ? array(
-								'type'  => 'array',
-								'items' => array( 'type' => 'integer' ),
-							) : array( 'type' => 'boolean' ),
-							'callback'  => $callback,
-						)
+						'product',
+						'test-ext',
+						$filter,
+						'picked' === $filter ? array(
+							'type'  => 'array',
+							'items' => array( 'type' => 'integer' ),
+						) : array( 'type' => 'boolean' ),
+						$callback
 					);
 				}
 			}
@@ -654,13 +646,11 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 				);
 				foreach ( $callbacks as list( $resource, $filter, $callback ) ) {
 					ExtensibleAbilities::register_query_filter(
-						array(
-							'resource'  => $resource,
-							'namespace' => 'test-ext',
-							'filter'    => $filter,
-							'schema'    => array( 'type' => 'boolean' ),
-							'callback'  => $callback,
-						)
+						$resource,
+						'test-ext',
+						$filter,
+						array( 'type' => 'boolean' ),
+						$callback
 					);
 				}
 			}
@@ -685,19 +675,17 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			'woocommerce_extensible_abilities_init',
 			static function () {
 				ExtensibleAbilities::register_query_filter(
-					array(
-						'resource'  => 'product',
-						'namespace' => 'test-ext',
-						'filter'    => 'empty_clause',
-						'schema'    => array( 'type' => 'boolean' ),
-						'callback'  => static fn() => array( 'meta_query' => array() ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-					)
+					'product',
+					'test-ext',
+					'empty_clause',
+					array( 'type' => 'boolean' ),
+					static fn() => array( 'meta_query' => array() ) // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 				);
 			}
 		);
 		$this->get_ability( 'woocommerce/products-query' )['input_schema'];
 
-		$this->assertSame( array(), ExtensibleAbilities::get_query_args( 'product', array( 'filters' => array( 'extensions' => array( 'test-ext' => array( 'empty_clause' => true ) ) ) ) ) );
+		$this->assertSame( array(), $this->get_query_args( 'product', array( 'filters' => array( 'extensions' => array( 'test-ext' => array( 'empty_clause' => true ) ) ) ) ) );
 	}
 
 	/**
@@ -706,30 +694,29 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	public function test_a_filter_on_an_unsupported_resource_is_refused(): void {
 		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_query_filter' );
 		$input  = array( 'filters' => array( 'extensions' => array( 'test-ext' => array( 'gift' => true ) ) ) );
-		$filter = array(
-			'resource'  => 'ticket',
-			'namespace' => 'test-ext',
-			'filter'    => 'gift',
-			'schema'    => array( 'type' => 'boolean' ),
-			'callback'  => static fn() => array( 'meta_query' => array( array( 'key' => 'gift' ) ) ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-		);
+		$filter = static function () {
+			ExtensibleAbilities::register_query_filter(
+				'ticket',
+				'test-ext',
+				'gift',
+				array( 'type' => 'boolean' ),
+				static fn() => array( 'meta_query' => array( array( 'key' => 'gift' ) ) ) // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+			);
+		};
 
-		ExtensibleAbilities::register_query_filter( $filter );
-		$this->assertSame( array(), ExtensibleAbilities::get_query_args( 'ticket', $input ) );
+		$filter();
+		$this->assertSame( array(), $this->get_query_args( 'ticket', $input ) );
 
 		$register_resource = static function () {
-			ExtensibleAbilities::register_resource( 'ticket' );
-		};
-		$register          = static function () use ( $filter ) {
-			ExtensibleAbilities::register_query_filter( $filter );
+			AbilityResources::register_resource( 'ticket' );
 		};
 		add_action( 'woocommerce_extensible_abilities_resources_init', $register_resource );
-		add_action( 'woocommerce_extensible_abilities_init', $register );
+		add_action( 'woocommerce_extensible_abilities_init', $filter );
 		$this->get_ability( 'woocommerce/products-query' )['input_schema'];
 		remove_action( 'woocommerce_extensible_abilities_resources_init', $register_resource );
-		remove_action( 'woocommerce_extensible_abilities_init', $register );
+		remove_action( 'woocommerce_extensible_abilities_init', $filter );
 
-		$this->assertSame( array( 'meta_query' => array( array( array( 'key' => 'gift' ) ) ) ), ExtensibleAbilities::get_query_args( 'ticket', $input ) ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+		$this->assertSame( array( 'meta_query' => array( array( array( 'key' => 'gift' ) ) ) ), $this->get_query_args( 'ticket', $input ) ); // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 	}
 
 	/**
@@ -740,13 +727,11 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$register = static function () {
 			foreach ( array( array( '0', 'gift' ), array( 'test-ext', '42' ) ) as list( $extension_namespace, $filter ) ) {
 				ExtensibleAbilities::register_query_filter(
-					array(
-						'resource'  => 'product',
-						'namespace' => $extension_namespace,
-						'filter'    => $filter,
-						'schema'    => array( 'type' => 'boolean' ),
-						'callback'  => static fn() => array( 'meta_query' => array( array( 'key' => 'gift' ) ) ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-					)
+					'product',
+					$extension_namespace,
+					$filter,
+					array( 'type' => 'boolean' ),
+					static fn() => array( 'meta_query' => array( array( 'key' => 'gift' ) ) ) // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 				);
 			}
 		};
@@ -765,27 +750,25 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$called   = false;
 		$register = static function () use ( &$called ) {
 			ExtensibleAbilities::register_query_filter(
+				'order',
+				'test-ext',
+				'tags',
 				array(
-					'resource'  => 'order',
-					'namespace' => 'test-ext',
-					'filter'    => 'tags',
-					'schema'    => array(
-						'type'        => 'array',
-						'items'       => array( 'type' => 'string' ),
-						'uniqueItems' => true,
-					),
-					'callback'  => static function () use ( &$called ) {
-						$called = true;
-						return array();
-					},
-				)
+					'type'        => 'array',
+					'items'       => array( 'type' => 'string' ),
+					'uniqueItems' => true,
+				),
+				static function () use ( &$called ) {
+					$called = true;
+					return array();
+				}
 			);
 		};
 		add_action( 'woocommerce_extensible_abilities_init', $register );
 		$this->get_ability( 'woocommerce/orders-query' );
 		remove_action( 'woocommerce_extensible_abilities_init', $register );
 
-		$result = ExtensibleAbilities::get_query_args( 'order', array( 'filters' => array( 'extensions' => array( 'test-ext' => array( 'tags' => array( 'gift', 'gift' ) ) ) ) ) );
+		$result = $this->get_query_args( 'order', array( 'filters' => array( 'extensions' => array( 'test-ext' => array( 'tags' => array( 'gift', 'gift' ) ) ) ) ) );
 
 		$this->assertWPError( $result );
 		$this->assertSame( 400, $result->get_error_data()['status'] );
@@ -800,16 +783,14 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->get_ability( 'woocommerce/products-query' )['input_schema'];
 
 		ExtensibleAbilities::register_query_filter(
-			array(
-				'resource'  => 'product',
-				'namespace' => 'late-ext',
-				'filter'    => 'gift',
-				'schema'    => array( 'type' => 'boolean' ),
-				'callback'  => static fn() => array( 'meta_query' => array( array( 'key' => 'gift' ) ) ), // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-			)
+			'product',
+			'late-ext',
+			'gift',
+			array( 'type' => 'boolean' ),
+			static fn() => array( 'meta_query' => array( array( 'key' => 'gift' ) ) ) // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 		);
 
-		$this->assertSame( array(), ExtensibleAbilities::get_query_args( 'product', array( 'filters' => array( 'extensions' => array( 'late-ext' => array( 'gift' => true ) ) ) ) ) );
+		$this->assertSame( array(), $this->get_query_args( 'product', array( 'filters' => array( 'extensions' => array( 'late-ext' => array( 'gift' => true ) ) ) ) ) );
 	}
 
 	/**
@@ -897,7 +878,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->assertSame( self::CODE_SCHEMA, $product['properties']['test-ext']['properties']['code'] );
 		$this->assertSame( array( 'type' => 'string' ), $order['extensions']['properties']['test-ext']['properties']['note'] );
 		$this->assertSame( array( 'type' => 'string' ), $order['line_items']['items']['properties']['extensions']['properties']['test-ext']['properties']['gift'] );
-		$this->assertSame( array( 'type' => 'object' ), ExtensibleAbilities::add_fields_schema( array( 'type' => 'object' ), 'customer' ) );
+		$this->assertSame( array(), AbilityResources::output_schema( 'customer' )['properties'] );
 		$this->assertFalse( $products['additionalProperties'] );
 		$this->assertFalse( $products['properties']['test-ext']['additionalProperties'] );
 	}
@@ -937,10 +918,10 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen late' ) );
 
 		ExtensibleAbilities::register_field(
+			'product',
+			'late-ext',
+			'code',
 			array(
-				'resource'     => 'product',
-				'namespace'    => 'late-ext',
-				'field'        => 'code',
 				'schema'       => array( 'type' => 'string' ),
 				'get_callback' => static fn() => 'late',
 			)
@@ -948,7 +929,252 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$products = array_column( $this->run_ability( 'woocommerce/products-query', array( 'search' => 'Pen late' ) )['products'], null, 'id' );
 
 		$this->assertArrayNotHasKey( 'late-ext', $products[ $product->get_id() ]['extensions'] ?? array() );
-		$this->assertArrayNotHasKey( 'late-ext', ExtensibleAbilities::add_fields_to_object( array(), 'product', $product )['extensions'] ?? array() );
+		$this->assertArrayNotHasKey( 'late-ext', $this->get_extension_values( 'product', $product ) ?? array() );
+	}
+
+	/**
+	 * @testdox Should let an extension declare its own resource with root fields, the same way Core does.
+	 */
+	public function test_an_extension_resource_has_root_fields(): void {
+		$register_resource = static function () {
+			AbilityResources::register_resource( 'ticket' );
+			AbilityResources::register_field(
+				'ticket',
+				'id',
+				array(
+					'schema'       => array( 'type' => 'integer' ),
+					'get_callback' => static fn( array $ticket ) => $ticket['id'],
+				)
+			);
+			AbilityResources::register_field(
+				'ticket',
+				'email',
+				array(
+					'schema'        => array( 'type' => 'string' ),
+					'get_callback'  => static fn( array $ticket ) => $ticket['email'],
+					'personal_data' => true,
+				)
+			);
+		};
+		add_action( 'woocommerce_extensible_abilities_resources_init', $register_resource );
+		$this->withhold_personal_data();
+		$this->get_output_schema( 'woocommerce/products-query' );
+		remove_action( 'woocommerce_extensible_abilities_resources_init', $register_resource );
+
+		$output = AbilityResources::output_data(
+			'ticket',
+			array(
+				'id'    => 7,
+				'email' => 'jane@example.com',
+			)
+		);
+
+		$this->assertSame( array( 'id' => 7 ), $output );
+		$this->assertSame( array( 'id' ), array_keys( AbilityResources::output_schema( 'ticket' )['properties'] ) );
+	}
+
+	/**
+	 * @testdox Should refuse a root field that an extension adds to a Core resource, or after the init action.
+	 */
+	public function test_root_fields_on_resources_of_others_are_refused(): void {
+		$this->setExpectedIncorrectUsage( AbilityResources::class . '::register_field' );
+		$register = static function () {
+			AbilityResources::register_field(
+				'product',
+				'early',
+				array(
+					'schema'       => array( 'type' => 'string' ),
+					'get_callback' => static fn() => 'x',
+				)
+			);
+		};
+		$late     = static function () {
+			AbilityResources::register_field(
+				'product',
+				'late',
+				array(
+					'schema'       => array( 'type' => 'string' ),
+					'get_callback' => static fn() => 'x',
+				)
+			);
+		};
+		add_action( 'woocommerce_extensible_abilities_resources_init', $register );
+		add_action( 'woocommerce_extensible_abilities_init', $late );
+		$schema = $this->get_output_schema( 'woocommerce/products-query' )['properties']['products']['items']['properties'];
+		remove_action( 'woocommerce_extensible_abilities_resources_init', $register );
+		remove_action( 'woocommerce_extensible_abilities_init', $late );
+
+		$this->assertArrayNotHasKey( 'early', $schema );
+		$this->assertArrayNotHasKey( 'late', $schema );
+		$this->assertArrayHasKey( 'name', $schema );
+	}
+
+	/**
+	 * @testdox Should refuse a root field that an extension adds to its own resource after the resources action.
+	 */
+	public function test_root_fields_on_an_extension_resource_close_after_the_resources_action(): void {
+		$this->setExpectedIncorrectUsage( AbilityResources::class . '::register_field' );
+		$register_resource = static function () {
+			AbilityResources::register_resource( 'ticket' );
+		};
+		$late              = static function () {
+			AbilityResources::register_field(
+				'ticket',
+				'late',
+				array(
+					'schema'       => array( 'type' => 'string' ),
+					'get_callback' => static fn() => 'x',
+				)
+			);
+		};
+		add_action( 'woocommerce_extensible_abilities_resources_init', $register_resource );
+		add_action( 'woocommerce_extensible_abilities_init', $late );
+		$this->get_output_schema( 'woocommerce/products-query' );
+		remove_action( 'woocommerce_extensible_abilities_resources_init', $register_resource );
+		remove_action( 'woocommerce_extensible_abilities_init', $late );
+
+		$this->assertTrue( AbilityResources::is_registered( 'ticket' ) );
+		$this->assertArrayNotHasKey( 'late', AbilityResources::output_schema( 'ticket' )['properties'] );
+	}
+
+	/**
+	 * @testdox Should refuse a root field on a Core resource after Core registered it, also while the feature is off.
+	 */
+	public function test_root_fields_on_core_resources_are_refused_while_the_feature_is_off(): void {
+		$this->setExpectedIncorrectUsage( AbilityResources::class . '::register_field' );
+		update_option( 'woocommerce_feature_' . ExtensibleAbilities::FEATURE_ID . '_enabled', 'no' );
+		AbilitiesLoader::register_core_resources();
+
+		AbilityResources::register_field(
+			'product',
+			'early',
+			array(
+				'schema'       => array( 'type' => 'string' ),
+				'get_callback' => static fn() => 'x',
+			)
+		);
+
+		$this->assertArrayNotHasKey( 'early', AbilityResources::output_schema( 'product' )['properties'] );
+	}
+
+	/**
+	 * @testdox Should refuse a root field named extensions, which would clash with the extension fields.
+	 */
+	public function test_a_root_field_named_extensions_is_refused(): void {
+		$this->setExpectedIncorrectUsage( AbilityResources::class . '::register_field' );
+		$this->register_resources( 'ticket' );
+
+		AbilityResources::register_field(
+			'ticket',
+			'extensions',
+			array(
+				'schema'       => array( 'type' => 'object' ),
+				'get_callback' => static fn() => array(),
+			)
+		);
+
+		$this->assertSame( array(), AbilityResources::output_schema( 'ticket' )['properties'] );
+	}
+
+	/**
+	 * @testdox Should refuse a $ref that the registry would not resolve: in an extension field, or under oneOf in a root field.
+	 */
+	public function test_an_unresolved_ref_is_refused(): void {
+		$this->setExpectedIncorrectUsage( AbilityResources::class . '::register_field' );
+		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_field' );
+		AbilitiesLoader::register_core_resources();
+		$this->register_resources( 'ticket' );
+
+		ExtensibleAbilities::register_field(
+			'product',
+			'test-ext',
+			'related',
+			array(
+				'schema'       => array(
+					'type' => 'object',
+					'$ref' => 'product',
+				),
+				'get_callback' => static fn() => null,
+			)
+		);
+		AbilityResources::register_field(
+			'ticket',
+			'product',
+			array(
+				'schema'       => array(
+					'type'  => array( 'object', 'null' ),
+					'oneOf' => array(
+						array( '$ref' => 'product' ),
+						array( 'type' => 'null' ),
+					),
+				),
+				'get_callback' => static fn() => null,
+			)
+		);
+
+		$this->assertArrayNotHasKey( 'extensions', AbilityResources::output_schema( 'product' )['properties'] );
+		$this->assertSame( array(), AbilityResources::output_schema( 'ticket' )['properties'] );
+	}
+
+	/**
+	 * @testdox Should report a $ref to a resource that is not registered once, and fall back to a plain object.
+	 */
+	public function test_a_ref_to_an_unregistered_resource_is_reported(): void {
+		$this->setExpectedIncorrectUsage( AbilityResources::class . '::resolve_schema' );
+		$this->register_resources( 'ticket' );
+		AbilityResources::register_field(
+			'ticket',
+			'event',
+			array(
+				'schema'       => array( '$ref' => 'event' ),
+				'get_callback' => static fn() => array( 'id' => 1 ),
+			)
+		);
+
+		$reports = 0;
+		add_action(
+			'doing_it_wrong_run',
+			static function ( $function_name ) use ( &$reports ) {
+				$reports += AbilityResources::class . '::resolve_schema' === $function_name ? 1 : 0;
+			}
+		);
+
+		$schema = AbilityResources::output_schema( 'ticket' );
+		AbilityResources::output_schema( 'ticket' );
+		$output = AbilityResources::output_data( 'ticket', array() );
+
+		$this->assertSame( 1, $reports );
+		$this->assertSame( array( 'type' => 'object' ), $schema['properties']['event'] );
+		$this->assertEquals( new \stdClass(), $output['event'] );
+	}
+
+	/**
+	 * @testdox Should refuse a namespace or an update_callback on a root field, since only extension fields have them.
+	 */
+	public function test_a_root_field_with_extension_field_arguments_is_refused(): void {
+		$this->setExpectedIncorrectUsage( AbilityResources::class . '::register_field' );
+		$this->register_resources( 'ticket' );
+
+		AbilityResources::register_field(
+			'ticket',
+			'id',
+			array(
+				'schema'          => array( 'type' => 'integer' ),
+				'get_callback'    => static fn() => 1,
+				'update_callback' => '__return_null',
+			)
+		);
+		AbilityResources::register_field(
+			'ticket',
+			'code',
+			array(
+				'schema'       => array( 'type' => 'string' ),
+				'get_callback' => static fn() => 'T1',
+				'namespace'    => 'test-ext',
+			)
+		);
+
+		$this->assertSame( array(), AbilityResources::output_schema( 'ticket' )['properties'] );
 	}
 
 	/**
@@ -956,14 +1182,14 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	 */
 	public function test_register_resource_lets_an_extension_register_fields_on_its_own_resource(): void {
 		$register_resource = static function () {
-			ExtensibleAbilities::register_resource( 'ticket' );
+			AbilityResources::register_resource( 'ticket' );
 		};
 		$register_field    = static function () {
 			ExtensibleAbilities::register_field(
+				'ticket',
+				'test-ext',
+				'code',
 				array(
-					'resource'     => 'ticket',
-					'namespace'    => 'test-ext',
-					'field'        => 'code',
 					'schema'       => array( 'type' => 'string' ),
 					'get_callback' => static fn() => 'T1',
 				)
@@ -975,10 +1201,10 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		remove_action( 'woocommerce_extensible_abilities_resources_init', $register_resource, 99 );
 		remove_action( 'woocommerce_extensible_abilities_init', $register_field, 1 );
 
-		$output = ExtensibleAbilities::add_fields_to_object( array(), 'ticket', new \stdClass() );
-		$schema = ExtensibleAbilities::add_fields_schema( array( 'type' => 'object' ), 'ticket' );
+		$values = $this->get_extension_values( 'ticket', new \stdClass() );
+		$schema = AbilityResources::output_schema( 'ticket' );
 
-		$this->assertSame( array( 'test-ext' => array( 'code' => 'T1' ) ), $output['extensions'] );
+		$this->assertSame( array( 'test-ext' => array( 'code' => 'T1' ) ), $values );
 		$this->assertSame( array( 'type' => 'string' ), $schema['properties']['extensions']['properties']['test-ext']['properties']['code'] );
 	}
 
@@ -986,25 +1212,50 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	 * @testdox Should refuse a resource that is registered after the resources action.
 	 */
 	public function test_a_resource_registered_after_the_resources_action_is_refused(): void {
-		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_resource' );
+		$this->setExpectedIncorrectUsage( AbilityResources::class . '::register_resource' );
 		$this->get_output_schema( 'woocommerce/products-query' );
 
-		ExtensibleAbilities::register_resource( 'late_resource' );
+		AbilityResources::register_resource( 'late_resource' );
 
-		$resources = new \ReflectionProperty( ExtensibleAbilities::class, 'resources' );
-		$resources->setAccessible( true );
-		$this->assertSame( array( 'product', 'order', 'order_item' ), array_keys( $resources->getValue() ) );
+		$this->assertFalse( AbilityResources::is_registered( 'late_resource' ) );
+	}
+
+	/**
+	 * @testdox Should refuse a Core resource registered before Core, also while the feature is off.
+	 */
+	public function test_a_core_resource_claimed_before_core_is_refused(): void {
+		$this->setExpectedIncorrectUsage( AbilityResources::class . '::register_resource' );
+		$this->setExpectedIncorrectUsage( AbilityResources::class . '::register_field' );
+		$this->set_feature( false );
+
+		AbilityResources::register_resource( 'order' );
+		AbilityResources::register_field(
+			'order',
+			'billing_email',
+			array(
+				'schema'       => array( 'type' => 'string' ),
+				'get_callback' => static fn() => 'jane@example.com',
+			)
+		);
+		AbilitiesLoader::register_core_resources();
+		$shared = AbilityResources::output_schema( 'order' )['properties'];
+		$this->withhold_personal_data();
+		$withheld = AbilityResources::output_schema( 'order' )['properties'];
+
+		$this->assertSame( array( 'string', 'null' ), $shared['billing_email']['type'] );
+		$this->assertArrayNotHasKey( 'billing_email', $withheld );
+		$this->assertArrayHasKey( 'total', $withheld );
 	}
 
 	/**
 	 * @testdox Should refuse a resource name made only of digits.
 	 */
 	public function test_a_resource_name_of_only_digits_is_refused(): void {
-		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_resource' );
+		$this->setExpectedIncorrectUsage( AbilityResources::class . '::register_resource' );
 
-		ExtensibleAbilities::register_resource( '42' );
+		$this->register_resources( '42' );
 
-		$resources = new \ReflectionProperty( ExtensibleAbilities::class, 'resources' );
+		$resources = new \ReflectionProperty( AbilityResources::class, 'resources' );
 		$resources->setAccessible( true );
 		$this->assertSame( array(), $resources->getValue() );
 	}
@@ -1021,10 +1272,10 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_field' );
 
 		ExtensibleAbilities::register_field(
+			'product',
+			'test-ext',
+			'code',
 			array(
-				'resource'     => 'product',
-				'namespace'    => 'test-ext',
-				'field'        => 'code',
 				'schema'       => array( 'type' => 'string' ),
 				'get_callback' => static fn() => 'T1',
 			)
@@ -1081,16 +1332,9 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 						'type'       => 'object',
 						'properties' => array( 'id' => array( 'type' => 'integer' ) ),
 					),
-					'output_schema'       => ExtensibleAbilities::add_fields_schema(
-						array(
-							'type'       => 'object',
-							'properties' => array( 'id' => array( 'type' => 'integer' ) ),
-						),
-						'product'
-					),
+					'output_schema'       => AbilityResources::output_schema( 'product', array( 'id', 'extensions' ) ),
 					'execute_callback'    => static function ( array $input ) {
-						$product = wc_get_product( $input['id'] );
-						return ExtensibleAbilities::add_fields_to_object( array( 'id' => $product->get_id() ), 'product', $product );
+						return AbilityResources::output_data( 'product', wc_get_product( $input['id'] ), array( 'id', 'extensions' ) );
 					},
 					'permission_callback' => '__return_true',
 					'meta'                => array(
@@ -1114,34 +1358,26 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	public function test_invalid_and_duplicate_fields_are_refused(): void {
 		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_field' );
 		$valid = array(
-			'resource'     => 'order',
-			'namespace'    => 'test-ext',
-			'field'        => 'note',
 			'schema'       => array( 'type' => 'string' ),
 			'get_callback' => static fn() => 'second',
 		);
 		AbilitiesLoader::register_core_resources();
 		$this->register_test_fields();
 
-		ExtensibleAbilities::register_field( $valid );
-		ExtensibleAbilities::register_field( array_merge( $valid, array( 'namespace' => 'Test Ext' ) ) );
-		ExtensibleAbilities::register_field( array_merge( $valid, array( 'field' => '' ) ) );
-		ExtensibleAbilities::register_field( array_merge( $valid, array( 'field' => 'other' ), array( 'schema' => null ) ) );
-		ExtensibleAbilities::register_field( array_merge( $valid, array( 'field' => 'other' ), array( 'get_callback' => 'not_a_function' ) ) );
+		ExtensibleAbilities::register_field( 'order', 'test-ext', 'note', $valid );
+		ExtensibleAbilities::register_field( 'order', 'Test Ext', 'note', $valid );
+		ExtensibleAbilities::register_field( 'order', '0', 'note', $valid );
+		ExtensibleAbilities::register_field( 'order', 'test-ext', '', $valid );
+		ExtensibleAbilities::register_field( 'order', 'test-ext', '123', $valid );
+		ExtensibleAbilities::register_field( 'line_item', 'test-ext', 'other', $valid );
+		ExtensibleAbilities::register_field( 'order', 'test-ext', 'other', array_merge( $valid, array( 'schema' => null ) ) );
+		ExtensibleAbilities::register_field( 'order', 'test-ext', 'other', array_merge( $valid, array( 'schema' => array( 'description' => 'x' ) ) ) );
 		ExtensibleAbilities::register_field(
+			'order',
+			'test-ext',
+			'other',
 			array_merge(
 				$valid,
-				array(
-					'field'    => 'other',
-					'resource' => 'line_item',
-				)
-			)
-		);
-		ExtensibleAbilities::register_field( array_merge( $valid, array( 'field' => 'other' ), array( 'schema' => array( 'description' => 'x' ) ) ) );
-		ExtensibleAbilities::register_field(
-			array_merge(
-				$valid,
-				array( 'field' => 'other' ),
 				array(
 					'schema' => array(
 						'type'     => 'string',
@@ -1150,13 +1386,14 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 				)
 			)
 		);
-		ExtensibleAbilities::register_field( array_merge( $valid, array( 'namespace' => '0' ) ) );
-		ExtensibleAbilities::register_field( array_merge( $valid, array( 'field' => '123' ) ) );
+		ExtensibleAbilities::register_field( 'order', 'test-ext', 'other', array_merge( $valid, array( 'get_callback' => 'not_a_function' ) ) );
+		ExtensibleAbilities::register_field( 'order', 'test-ext', 'other', array_merge( $valid, array( 'update_callback' => 'not_a_function' ) ) );
+		ExtensibleAbilities::register_field( 'order', 'test-ext', 'other', array_merge( $valid, array( 'personal_data' => 'yes' ) ) );
 		$order = \WC_Helper_Order::create_order();
 
 		$this->assertSame(
 			array( 'test-ext' => array( 'note' => 'order-' . $order->get_id() ) ),
-			ExtensibleAbilities::add_fields_to_object( array(), 'order', $order )['extensions']
+			$this->get_extension_values( 'order', $order )
 		);
 	}
 
@@ -1192,23 +1429,25 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		);
 		foreach ( $fields as $field => $args ) {
 			ExtensibleAbilities::register_field(
+				'order',
+				'values',
+				$field,
 				array(
-					'resource'  => 'order',
-					'namespace' => 'values',
-					'field'     => $field,
-				) + $args
+					'schema'       => $args['schema'],
+					'get_callback' => $args['get_callback'],
+				)
 			);
 		}
 		$order = \WC_Helper_Order::create_order();
 
-		$output = ExtensibleAbilities::add_fields_to_object( array(), 'order', $order );
+		$values = $this->get_extension_values( 'order', $order );
 
 		$this->assertSame(
 			array(
 				'count' => 12,
 				'empty' => null,
 			),
-			$output['extensions']['values']
+			$values['values']
 		);
 	}
 
@@ -1221,10 +1460,10 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			'woocommerce_extensible_abilities_init',
 			static function () {
 				ExtensibleAbilities::register_field(
+					'product',
+					'test-ext',
+					'count',
 					array(
-						'resource'     => 'product',
-						'namespace'    => 'test-ext',
-						'field'        => 'count',
 						'schema'       => array( 'type' => 'integer' ),
 						'get_callback' => static fn() => 'many',
 					)
@@ -1306,6 +1545,27 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 		$this->assertSame( 'blue', wc_get_product( $created['product']['id'] )->get_meta( '_test_color' ) );
 		$this->assertArrayNotHasKey( 'extensions', $schema['properties'] );
+	}
+
+	/**
+	 * @testdox Should leave line items out of orders-query unless asked.
+	 */
+	public function test_orders_query_leaves_line_items_out_unless_asked(): void {
+		$order = \WC_Helper_Order::create_order();
+		$order->set_status( 'pending' );
+		$order->save();
+
+		$queried = $this->run_ability( 'woocommerce/orders-query', array( 'id' => $order->get_id() ) );
+		$asked   = $this->run_ability(
+			'woocommerce/orders-query',
+			array(
+				'id'                 => $order->get_id(),
+				'include_line_items' => true,
+			)
+		);
+
+		$this->assertArrayNotHasKey( 'line_items', $queried['orders'][0] );
+		$this->assertNotEmpty( $asked['orders'][0]['line_items'] );
 	}
 
 	/**
@@ -1511,7 +1771,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->assertSame( array( 'string', 'null' ), $schema['properties']['test-ext']['properties']['color']['type'] );
 		$this->assertArrayNotHasKey( 'code', $schema['properties']['test-ext']['properties'] );
 		$this->assertSame( 'Pencil', wc_get_product( $product->get_id() )->get_name() );
-		$this->assertSame( array( 'color' => 'green' ), $output['extensions']['test-ext'] );
+		$this->assertSame( array( 'color' => 'green' ), $output['product']['extensions']['test-ext'] );
 	}
 
 	/**
@@ -1588,7 +1848,6 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 							'type'   => 'object',
 							$keyword => array( $branch ),
 						),
-						'output_schema'       => ExtensibleAbilities::add_fields_schema( array( 'type' => 'object' ), 'product' ),
 						'permission_callback' => '__return_true',
 						'ability_class'       => TestProductRenameAbility::class,
 						'meta'                => array( 'show_in_rest' => true ),
@@ -1610,7 +1869,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 						'extensions' => array( 'test-ext' => array( 'color' => 'blue' ) ),
 					)
 				);
-				$this->assertSame( array( 'color' => 'blue' ), $output['extensions']['test-ext'] );
+				$this->assertSame( array( 'color' => 'blue' ), $output['product']['extensions']['test-ext'] );
 			}
 
 			remove_action( 'wp_abilities_api_init', $register, 20 );
@@ -1806,10 +2065,10 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			'woocommerce_extensible_abilities_init',
 			static function () {
 				ExtensibleAbilities::register_field(
+					'product',
+					'test-ext',
+					'broken',
 					array(
-						'resource'        => 'product',
-						'namespace'       => 'test-ext',
-						'field'           => 'broken',
 						'schema'          => array( 'type' => 'string' ),
 						'get_callback'    => '__return_null',
 						'update_callback' => static function () {
@@ -1868,6 +2127,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			}
 		);
 		$this->reset_registries();
+		AbilitiesLoader::register_core_resources();
 		AbilitiesLoader::init_extensions();
 		$this->set_feature( false );
 		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
@@ -1885,34 +2145,20 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should refuse a validator without a slug namespace or a callback, or on an unknown resource.
+	 * @testdox Should refuse a validator without a slug namespace, or on an unknown resource.
 	 */
 	public function test_invalid_validators_are_refused(): void {
 		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_validator' );
 		$this->add_test_action(
 			'woocommerce_extensible_abilities_init',
 			static function () {
-				$invalid = array(
-					array(
-						'resource' => 'order',
-						'callback' => '__return_null',
-					),
-					array(
-						'resource'  => 'order',
-						'namespace' => 'test-ext',
-					),
-					array(
-						'resource'  => 'refund',
-						'namespace' => 'test-ext',
-						'callback'  => '__return_null',
-					),
-				);
-				foreach ( $invalid as $args ) {
-					ExtensibleAbilities::register_validator( $args );
-				}
+				ExtensibleAbilities::register_validator( 'order', '', '__return_null' );
+				ExtensibleAbilities::register_validator( 'order', 'Test Ext', '__return_null' );
+				ExtensibleAbilities::register_validator( 'refund', 'test-ext', '__return_null' );
 			}
 		);
 		$this->reset_registries();
+		AbilitiesLoader::register_core_resources();
 		AbilitiesLoader::init_extensions();
 
 		$this->assertEmpty( ExtensibleAbilities::get_validators( 'order' ) );
@@ -1925,14 +2171,13 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	public function test_a_late_validator_is_refused(): void {
 		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_validator' );
 		$this->reset_registries();
+		AbilitiesLoader::register_core_resources();
 		AbilitiesLoader::init_extensions();
 
 		ExtensibleAbilities::register_validator(
-			array(
-				'resource'  => 'order',
-				'namespace' => 'test-ext',
-				'callback'  => '__return_null',
-			)
+			'order',
+			'test-ext',
+			'__return_null'
 		);
 
 		$this->assertEmpty( ExtensibleAbilities::get_validators( 'order' ) );
@@ -1962,11 +2207,9 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			'woocommerce_extensible_abilities_init',
 			static function () use ( $resource_name, $extension_namespace, $callback ) {
 				ExtensibleAbilities::register_validator(
-					array(
-						'resource'  => $resource_name,
-						'namespace' => $extension_namespace,
-						'callback'  => $callback,
-					)
+					$resource_name,
+					$extension_namespace,
+					$callback
 				);
 			}
 		);
@@ -2025,7 +2268,6 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 							),
 							'additionalProperties' => false,
 						),
-						'output_schema'       => ExtensibleAbilities::add_fields_schema( array( 'type' => 'object' ), 'product' ),
 						'permission_callback' => '__return_true',
 						'ability_class'       => TestProductRenameAbility::class,
 						'meta'                => array( 'show_in_rest' => true ),
@@ -2094,37 +2336,42 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Extension field values of an object, keyed by namespace, then field.
+	 *
+	 * @param string $resource_name Resource.
+	 * @param object $subject       Object to read.
+	 * @return array|null Null when no extension returned a value.
+	 */
+	private function get_extension_values( string $resource_name, $subject ): ?array {
+		$output = AbilityResources::output_data( $resource_name, $subject, array( 'extensions' ) );
+		return $output['extensions'] ?? null;
+	}
+
+	/**
+	 * Query arguments that the extension filters of a resource add for an input.
+	 *
+	 * @param string $resource_name Resource.
+	 * @param array  $input         Ability input.
+	 * @return array|\WP_Error
+	 */
+	private function get_query_args( string $resource_name, array $input ) {
+		return ExtensibleAbilities::get_query_args( $resource_name, $input );
+	}
+
+	/**
+	 * Withhold personal data for the rest of the test, also where it was already decided.
+	 */
+	private function withhold_personal_data(): void {
+		add_filter( 'woocommerce_abilities_share_personal_data', '__return_false' );
+		$this->forget_personal_data_decisions();
+	}
+
+	/**
 	 * Turn the feature on or off.
 	 *
 	 * @param bool $enabled Whether the feature is on.
 	 */
 	private function set_feature( bool $enabled ): void {
 		update_option( 'woocommerce_feature_' . ExtensibleAbilities::FEATURE_ID . '_enabled', $enabled ? 'yes' : 'no' );
-	}
-
-	/**
-	 * Drop every registered field and ability, so the next read fires the init actions again.
-	 */
-	private function reset_registries(): void {
-		global $wp_actions;
-
-		foreach ( array( 'fields', 'reported', 'validators', 'filters' ) as $property ) {
-			$reflection = new \ReflectionProperty( ExtensibleAbilities::class, $property );
-			$reflection->setAccessible( true );
-			$reflection->setValue( null, array() );
-		}
-
-		$reflection = new \ReflectionProperty( ExtensibleAbilities::class, 'resources' );
-		$reflection->setAccessible( true );
-		$reflection->setValue( null, array() );
-
-		foreach ( array( 'WP_Abilities_Registry', 'WP_Ability_Categories_Registry' ) as $registry ) {
-			if ( class_exists( $registry ) ) {
-				$instance = new \ReflectionProperty( $registry, 'instance' );
-				$instance->setAccessible( true );
-				$instance->setValue( null, null );
-			}
-		}
-		unset( $wp_actions['wp_abilities_api_init'], $wp_actions['wp_abilities_api_categories_init'], $wp_actions['woocommerce_extensible_abilities_resources_init'], $wp_actions['woocommerce_extensible_abilities_init'] );
 	}
 }

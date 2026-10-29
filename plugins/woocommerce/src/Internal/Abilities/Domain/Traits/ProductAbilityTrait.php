@@ -10,7 +10,8 @@ namespace Automattic\WooCommerce\Internal\Abilities\Domain\Traits;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
-use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
+use Automattic\WooCommerce\Abilities\AbilityResources;
+use Automattic\WooCommerce\Internal\Abilities\Resources\ProductResource;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -413,10 +414,7 @@ trait ProductAbilityTrait {
 	 * @return array<int, string>
 	 */
 	protected static function get_product_mutation_status_slugs(): array {
-		return array_merge(
-			array_keys( get_post_statuses() ),
-			array( ProductStatus::FUTURE )
-		);
+		return ProductResource::get_mutation_status_slugs();
 	}
 
 	/**
@@ -425,14 +423,7 @@ trait ProductAbilityTrait {
 	 * @return array<int, string>
 	 */
 	protected static function get_product_output_status_slugs(): array {
-		return array_values(
-			array_unique(
-				array_merge(
-					self::get_product_mutation_status_slugs(),
-					array( ProductStatus::AUTO_DRAFT, ProductStatus::TRASH )
-				)
-			)
-		);
+		return ProductResource::get_output_status_slugs();
 	}
 
 	/**
@@ -454,16 +445,7 @@ trait ProductAbilityTrait {
 	 * @return \WC_Product|\WP_Error
 	 */
 	protected static function get_product_from_input( array $input ) {
-		if ( empty( $input['id'] ) ) {
-			return new \WP_Error(
-				'woocommerce_product_id_required',
-				__( 'Product ID is required.', 'woocommerce' ),
-				array( 'status' => 400 )
-			);
-		}
-
-		$product_id = (int) $input['id'];
-
+		$product_id = (int) ( $input['id'] ?? 0 );
 		if ( $product_id < 1 ) {
 			return new \WP_Error(
 				'woocommerce_product_id_required',
@@ -473,8 +455,7 @@ trait ProductAbilityTrait {
 		}
 
 		$product = wc_get_product( $product_id );
-
-		if ( ! $product ) {
+		if ( ! $product instanceof \WC_Product ) {
 			return new \WP_Error(
 				'woocommerce_product_not_found',
 				__( 'Product not found.', 'woocommerce' ),
@@ -782,40 +763,7 @@ trait ProductAbilityTrait {
 	 * @return array
 	 */
 	protected static function format_product_for_response( \WC_Product $product ): array {
-		$stock_quantity = $product->get_stock_quantity();
-		$permalink      = $product->get_permalink();
-
-		$data = array(
-			'id'                => $product->get_id(),
-			'name'              => $product->get_name(),
-			'slug'              => $product->get_slug(),
-			'permalink'         => false === $permalink ? null : $permalink,
-			'type'              => $product->get_type(),
-			'status'            => $product->get_status(),
-			'sku'               => $product->get_sku(),
-			'currency'          => get_woocommerce_currency(),
-			'currency_symbol'   => html_entity_decode(
-				get_woocommerce_currency_symbol(),
-				ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401
-			),
-			'price'             => $product->get_price(),
-			'regular_price'     => $product->get_regular_price(),
-			'sale_price'        => $product->get_sale_price(),
-			'stock_status'      => $product->get_stock_status(),
-			'stock_quantity'    => null === $stock_quantity ? null : wc_stock_amount( $stock_quantity ),
-			'manage_stock'      => (bool) $product->get_manage_stock(),
-			'virtual'           => (bool) $product->get_virtual(),
-			'downloadable'      => (bool) $product->get_downloadable(),
-			'external_url'      => $product instanceof \WC_Product_External ? $product->get_product_url() : null,
-			'button_text'       => $product instanceof \WC_Product_External ? $product->get_button_text() : null,
-			'grouped_products'  => $product instanceof \WC_Product_Grouped ? array_map( 'absint', $product->get_children( 'edit' ) ) : array(),
-			'date_created'      => wc_rest_prepare_date_response( $product->get_date_created(), false ),
-			'date_created_gmt'  => wc_rest_prepare_date_response( $product->get_date_created() ),
-			'date_modified'     => wc_rest_prepare_date_response( $product->get_date_modified(), false ),
-			'date_modified_gmt' => wc_rest_prepare_date_response( $product->get_date_modified() ),
-		);
-
-		return ExtensibleAbilities::add_fields_to_object( $data, 'product', $product );
+		return AbilityResources::output_data( ProductResource::NAME, $product );
 	}
 
 	/**
@@ -824,91 +772,7 @@ trait ProductAbilityTrait {
 	 * @return array
 	 */
 	protected static function get_product_output_schema(): array {
-		return ExtensibleAbilities::add_fields_schema(
-			array(
-				'type'                 => 'object',
-				'properties'           => array(
-					'id'                => array( 'type' => 'integer' ),
-					'name'              => array( 'type' => 'string' ),
-					'slug'              => array( 'type' => 'string' ),
-					'permalink'         => array(
-						'type'        => array( 'string', 'null' ),
-						'description' => __( 'Product permalink, or null when no public permalink is available.', 'woocommerce' ),
-						'format'      => 'uri',
-					),
-					'type'              => array(
-						'type'        => 'string',
-						'description' => __( 'Internal product type slug, such as simple, external, grouped, or variable.', 'woocommerce' ),
-						'enum'        => array_keys( wc_get_product_types() ),
-					),
-					'status'            => array(
-						'type' => 'string',
-						'enum' => self::get_product_output_status_slugs(),
-					),
-					'sku'               => array( 'type' => 'string' ),
-					'currency'          => array(
-						'type' => 'string',
-						'enum' => array_keys( get_woocommerce_currencies() ),
-					),
-					'currency_symbol'   => array( 'type' => 'string' ),
-					'price'             => array(
-						'type'        => 'string',
-						'description' => __( 'Decimal price as a string, without a currency symbol.', 'woocommerce' ),
-					),
-					'regular_price'     => array(
-						'type'        => 'string',
-						'description' => __( 'Decimal price as a string, without a currency symbol.', 'woocommerce' ),
-					),
-					'sale_price'        => array(
-						'type'        => 'string',
-						'description' => __( 'Decimal price as a string, without a currency symbol.', 'woocommerce' ),
-					),
-					'stock_status'      => array(
-						'type' => 'string',
-						'enum' => array_keys( wc_get_product_stock_status_options() ),
-					),
-					'stock_quantity'    => array(
-						'type'        => array( self::get_product_stock_quantity_schema_type(), 'null' ),
-						'description' => __( 'Current stock quantity, or null when no stock quantity is set.', 'woocommerce' ),
-					),
-					'manage_stock'      => array( 'type' => 'boolean' ),
-					'virtual'           => array( 'type' => 'boolean' ),
-					'downloadable'      => array( 'type' => 'boolean' ),
-					'external_url'      => array(
-						'type'        => array( 'string', 'null' ),
-						'description' => __( 'External product URL for external products.', 'woocommerce' ),
-						'format'      => 'uri',
-					),
-					'button_text'       => array(
-						'type'        => array( 'string', 'null' ),
-						'description' => __( 'Button text for external products.', 'woocommerce' ),
-					),
-					'grouped_products'  => array(
-						'type'        => 'array',
-						'description' => __( 'Product IDs included as children of a grouped product.', 'woocommerce' ),
-						'items'       => array( 'type' => 'integer' ),
-					),
-					'date_created'      => array(
-						'type'   => array( 'string', 'null' ),
-						'format' => 'date-time',
-					),
-					'date_created_gmt'  => array(
-						'type'   => array( 'string', 'null' ),
-						'format' => 'date-time',
-					),
-					'date_modified'     => array(
-						'type'   => array( 'string', 'null' ),
-						'format' => 'date-time',
-					),
-					'date_modified_gmt' => array(
-						'type'   => array( 'string', 'null' ),
-						'format' => 'date-time',
-					),
-				),
-				'additionalProperties' => false,
-			),
-			'product'
-		);
+		return AbilityResources::output_schema( ProductResource::NAME );
 	}
 
 	/**
@@ -920,6 +784,6 @@ trait ProductAbilityTrait {
 	 * @return string
 	 */
 	protected static function get_product_stock_quantity_schema_type(): string {
-		return wc_is_stock_amount_integer() ? 'integer' : 'number';
+		return ProductResource::get_stock_quantity_schema_type();
 	}
 }
