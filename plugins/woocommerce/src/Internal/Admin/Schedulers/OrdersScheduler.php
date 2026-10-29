@@ -534,13 +534,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 			return;
 		}
 
-		$interval = self::get_import_interval();
-		if ( ! is_numeric( $interval ) ) {
-			wc_doing_it_wrong( __METHOD__, 'The woocommerce_analytics_import_interval filter must return a number of seconds; the recurring import was not scheduled.', '11.3.0' );
-			return;
-		}
-
-		ActionSchedulerUtil::schedule_recurring( time(), (int) $interval, $action_hook, array(), static::$group ?? '', true );
+		ActionSchedulerUtil::schedule_recurring( time(), self::get_import_interval(), $action_hook, array(), static::$group ?? '', true );
 	}
 
 	/**
@@ -732,7 +726,14 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 		 * @since 10.4.0
 		 * @param int $interval The import interval in seconds. Default is 12 hours.
 		 */
-		return apply_filters( 'woocommerce_analytics_import_interval', 12 * HOUR_IN_SECONDS );
+		$interval = apply_filters( 'woocommerce_analytics_import_interval', 12 * HOUR_IN_SECONDS );
+
+		if ( ! is_numeric( $interval ) || ! is_finite( (float) $interval ) || $interval <= 0 || $interval > PHP_INT_MAX ) {
+			wc_doing_it_wrong( __METHOD__, 'The woocommerce_analytics_import_interval filter must return a positive number of seconds; the 12 hour default was used.', '11.4.0' );
+			return 12 * HOUR_IN_SECONDS;
+		}
+
+		return (int) $interval;
 	}
 
 	/**

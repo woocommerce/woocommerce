@@ -116,21 +116,23 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that a non-numeric import interval from the filter schedules nothing and raises no error.
+	 * Test that an invalid import interval from the filter falls back to the 12 hour default.
 	 */
-	public function test_non_numeric_import_interval_schedules_nothing() {
+	public function test_invalid_import_interval_falls_back_to_default() {
 		$this->clear_scheduled_batch_processor();
-		$this->setExpectedIncorrectUsage( OrdersScheduler::class . '::schedule_recurring_batch_processor' );
+		$this->setExpectedIncorrectUsage( OrdersScheduler::class . '::get_import_interval' );
 
 		add_filter( 'woocommerce_analytics_import_interval', '__return_null' );
 
+		$interval = OrdersScheduler::get_import_interval();
 		OrdersScheduler::schedule_recurring_batch_processor();
 
 		remove_filter( 'woocommerce_analytics_import_interval', '__return_null' );
 
-		$this->assertFalse(
+		$this->assertSame( 12 * HOUR_IN_SECONDS, $interval, 'An invalid import interval should fall back to 12 hours' );
+		$this->assertTrue(
 			$this->is_batch_processor_scheduled(),
-			'A non-numeric import interval should leave the batch processor unscheduled'
+			'An invalid import interval should still schedule the batch processor'
 		);
 	}
 
