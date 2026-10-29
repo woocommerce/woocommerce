@@ -236,12 +236,14 @@ class WC_Structured_Data {
 		$currency  = get_woocommerce_currency();
 		$permalink = get_permalink( $product->get_id() );
 		wc_get_container()->get( ProductUtil::class )->prime_image_caches( array( $product ) );
-		$image_ids = array_unique( array_filter( array_map( 'intval', array_merge( array( $product->get_image_id() ), $product->get_gallery_image_ids() ) ) ) );
-		$images    = array();
-		foreach ( $image_ids as $image_id ) {
-			$image = wp_get_attachment_url( $image_id );
-			if ( $image && ! in_array( $image, $images, true ) ) {
-				$images[] = $image;
+		$image   = wp_get_attachment_url( (int) $product->get_image_id() );
+		$gallery = $product->get_gallery_image_ids();
+		$gallery = is_array( $gallery ) ? array_unique( array_filter( array_map( 'intval', $gallery ) ) ) : array();
+		$images  = $image ? array( $image ) : array();
+		foreach ( $gallery as $image_id ) {
+			$gallery_image = wp_attachment_is_image( $image_id ) ? wp_get_attachment_url( $image_id ) : false;
+			if ( $gallery_image && ! in_array( $gallery_image, $images, true ) ) {
+				$images[] = $gallery_image;
 			}
 		}
 
@@ -253,8 +255,8 @@ class WC_Structured_Data {
 			'description' => wp_strip_all_tags( do_shortcode( $product->get_short_description() ? $product->get_short_description() : $product->get_description() ) ),
 		);
 
-		if ( $images ) {
-			$markup['image'] = 1 === count( $images ) ? $images[0] : $images;
+		if ( $image ) {
+			$markup['image'] = $image;
 		}
 
 		// Declare SKU or fallback to ID.
@@ -569,7 +571,18 @@ class WC_Structured_Data {
 			return;
 		}
 
-		$this->set_data( apply_filters( 'woocommerce_structured_data_product', $markup, $product ) );
+		/**
+		 * Filters the structured data for a product.
+		 *
+		 * @since 3.0.0
+		 * @param array      $markup Product structured data.
+		 * @param WC_Product $product Product object.
+		 */
+		$markup = apply_filters( 'woocommerce_structured_data_product', $markup, $product );
+		if ( is_array( $markup ) && ( $image ? isset( $markup['image'] ) && $markup['image'] === $image : ! array_key_exists( 'image', $markup ) ) && $images ) {
+			$markup['image'] = 1 === count( $images ) ? $images[0] : $images;
+		}
+		$this->set_data( $markup );
 	}
 
 	/**

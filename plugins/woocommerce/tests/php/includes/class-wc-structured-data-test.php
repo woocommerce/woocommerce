@@ -353,17 +353,39 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 	 * @testdox Product schema includes unique gallery images after the featured image.
 	 */
 	public function test_product_schema_includes_gallery_images(): void {
-		$featured  = self::factory()->post->create( array( 'post_type' => 'attachment' ) );
-		$gallery   = self::factory()->post->create( array( 'post_type' => 'attachment' ) );
-		$duplicate = self::factory()->post->create( array( 'post_type' => 'attachment' ) );
+		$featured  = self::factory()->post->create(
+			array(
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+		$gallery   = self::factory()->post->create(
+			array(
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+		$duplicate = self::factory()->post->create(
+			array(
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+		$pdf       = self::factory()->post->create(
+			array(
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'application/pdf',
+			)
+		);
 		$invalid   = self::factory()->post->create();
 		update_post_meta( $featured, '_wp_attached_file', 'featured.jpg' );
 		update_post_meta( $gallery, '_wp_attached_file', 'gallery.jpg' );
 		update_post_meta( $duplicate, '_wp_attached_file', 'gallery.jpg' );
+		update_post_meta( $pdf, '_wp_attached_file', 'document.pdf' );
 
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_image_id( $featured );
-		$product->set_gallery_image_ids( array( $gallery, $featured, $duplicate, $invalid ) );
+		$product->set_gallery_image_ids( array( $gallery, $featured, $duplicate, $pdf, $invalid ) );
 		$this->structured_data->generate_product_data( $product );
 
 		$this->assertSame(
@@ -383,7 +405,12 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 	 * @param bool $gallery Whether to set a gallery image.
 	 */
 	public function test_product_schema_with_one_or_no_image( bool $featured, bool $gallery ): void {
-		$image = self::factory()->post->create( array( 'post_type' => 'attachment' ) );
+		$image = self::factory()->post->create(
+			array(
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
 		update_post_meta( $image, '_wp_attached_file', 'product.jpg' );
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_image_id( $featured ? $image : 0 );
@@ -393,6 +420,63 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 		$data = $this->structured_data->get_data()[0];
 		if ( $featured || $gallery ) {
 			$this->assertSame( wp_get_attachment_url( $image ), $data['image'] );
+		} else {
+			$this->assertArrayNotHasKey( 'image', $data );
+		}
+	}
+
+	/**
+	 * @testdox Product schema ignores an invalid filtered gallery value.
+	 */
+	public function test_product_schema_ignores_invalid_gallery_filter(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		add_filter( 'woocommerce_product_get_gallery_image_ids', '__return_false' );
+		$this->structured_data->generate_product_data( $product );
+		$this->assertArrayNotHasKey( 'image', $this->structured_data->get_data()[0] );
+	}
+
+	/**
+	 * @testdox Product schema filters receive the original image and can replace or remove it.
+	 * @testWith ["replace"]
+	 *           ["remove"]
+	 *
+	 * @param string $action Filter action.
+	 */
+	public function test_product_schema_filter_preserves_image_control( string $action ): void {
+		$featured = self::factory()->post->create(
+			array(
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+		$gallery  = self::factory()->post->create(
+			array(
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+		update_post_meta( $featured, '_wp_attached_file', 'featured.jpg' );
+		update_post_meta( $gallery, '_wp_attached_file', 'gallery.jpg' );
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_image_id( $featured );
+		$product->set_gallery_image_ids( array( $gallery ) );
+		$expected = wp_get_attachment_url( $featured );
+		add_filter(
+			'woocommerce_structured_data_product',
+			function ( $markup ) use ( $action, $expected ) {
+				$this->assertSame( $expected, $markup['image'] );
+				if ( 'replace' === $action ) {
+					$markup['image'] = 'https://example.com/replacement.jpg';
+				} else {
+					unset( $markup['image'] );
+				}
+				return $markup;
+			}
+		);
+		$this->structured_data->generate_product_data( $product );
+		$data = $this->structured_data->get_data()[0];
+		if ( 'replace' === $action ) {
+			$this->assertSame( 'https://example.com/replacement.jpg', $data['image'] );
 		} else {
 			$this->assertArrayNotHasKey( 'image', $data );
 		}
