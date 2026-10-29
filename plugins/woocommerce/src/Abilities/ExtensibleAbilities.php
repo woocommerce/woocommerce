@@ -576,7 +576,8 @@ class ExtensibleAbilities {
 	 *     @type string   $resource  Resource that an ActionableAbility saves, such as `product`.
 	 *     @type string   $namespace Slug of the extension that owns the sync, such as `subscriptions`.
 	 *     @type callable $callback  Receives `\WC_Data[] $saved`, the ActionableAbility and `array $context`.
-	 *                               `$saved` is every saved object of the call, the primary object first.
+	 *                               `$saved` is every saved object of the call, the primary object first
+	 *                               unless the call deleted it.
 	 *                               `$context['deleted']` is every object the call deleted, as it was before
 	 *                               the delete, with its ID, and
 	 *                               `$context['input']` is the input of the call, so a sync can skip work

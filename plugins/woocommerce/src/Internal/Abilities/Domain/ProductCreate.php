@@ -210,10 +210,17 @@ class ProductCreate extends ActionableAbility {
 	 * @since 10.9.0
 	 */
 	public static function can_create_product( $input = array() ): bool {
-		// Cap is not object-scoped for create.
-		unset( $input );
+		if ( ! wc_rest_check_post_permissions( 'product', 'create' ) ) {
+			return false;
+		}
 
-		return wc_rest_check_post_permissions( 'product', 'create' );
+		if ( ProductType::VARIATION !== ( $input['type'] ?? '' ) ) {
+			return true;
+		}
+
+		$parent_id = (int) ( $input['parent_id'] ?? 0 );
+
+		return $parent_id > 0 && wc_rest_check_post_permissions( 'product', 'edit', $parent_id );
 	}
 
 	/**

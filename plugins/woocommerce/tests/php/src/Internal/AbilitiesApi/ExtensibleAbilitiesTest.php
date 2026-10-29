@@ -2049,6 +2049,8 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		}
 		$order = $this->get_ability( 'woocommerce/order-update-status' )['input_schema'];
 		$this->assertArrayNotHasKey( 'extensions', $order['properties'] );
+		$delete = $this->get_ability( 'woocommerce/product-delete' )['input_schema'];
+		$this->assertArrayNotHasKey( 'extensions', $delete['properties'], 'A delete writes no extension fields.' );
 	}
 
 	/**

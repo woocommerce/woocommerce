@@ -103,7 +103,7 @@ trait ProductAbilityTrait {
 	 *
 	 * A parent product lists each attribute with its options. A variation lists
 	 * the one option it picks for each attribute of its parent. An attribute
-	 * whose name or id matches a global attribute uses that global attribute.
+	 * with `global: true` or an `id` is a global attribute.
 	 *
 	 * @param bool $for_variation Whether the schema is for a variation.
 	 * @return array
@@ -166,8 +166,8 @@ trait ProductAbilityTrait {
 	private static function get_global_attribute_id_schema(): array {
 		return array(
 			'type'        => 'integer',
-			'description' => __( 'ID of a global attribute. Send it or the name.', 'woocommerce' ),
-			'minimum'     => 1,
+			'description' => __( 'ID of a global attribute. 0 or absent for an attribute of this product only.', 'woocommerce' ),
+			'minimum'     => 0,
 		);
 	}
 
@@ -270,7 +270,7 @@ trait ProductAbilityTrait {
 			),
 			'status'            => array(
 				'type' => 'string',
-				'enum' => self::get_product_mutation_status_slugs(),
+				'enum' => $for_variation ? self::get_variation_status_slugs() : self::get_product_mutation_status_slugs(),
 			),
 			'virtual'           => array(
 				'type'        => 'boolean',
@@ -507,7 +507,11 @@ trait ProductAbilityTrait {
 	 * @return \WC_Product|\WP_Error
 	 */
 	protected static function get_product_object_for_type( string $product_type, int $product_id = 0 ) {
-		$product = wc_get_product_object( $product_type, $product_id );
+		try {
+			$product = wc_get_product_object( $product_type, $product_id );
+		} catch ( \WC_Data_Exception $exception ) {
+			return self::get_invalid_product_type_error();
+		}
 
 		if ( ! $product || $product->get_type() !== $product_type ) {
 			return self::get_invalid_product_type_error();
@@ -548,6 +552,16 @@ trait ProductAbilityTrait {
 			array_keys( get_post_statuses() ),
 			array( ProductStatus::FUTURE )
 		);
+	}
+
+	/**
+	 * The statuses a variation can have. WooCommerce counts a variation as a
+	 * child of its parent only when it is published or private.
+	 *
+	 * @return array<int, string>
+	 */
+	protected static function get_variation_status_slugs(): array {
+		return array( ProductStatus::PUBLISH, ProductStatus::PRIVATE );
 	}
 
 	/**
@@ -729,6 +743,15 @@ trait ProductAbilityTrait {
 			$item     = is_array( $item ) ? $item : array();
 			$id       = (int) ( $item['id'] ?? 0 );
 
+			if ( array_key_exists( 'delete', $item ) && ( $id <= 0 || count( $item ) > 2 ) ) {
+				return new \WP_Error(
+					'woocommerce_product_variation_invalid',
+					/* translators: %d: variation position. */
+					sprintf( __( 'Variation %d: an item with delete takes an id and nothing else.', 'woocommerce' ), $position ),
+					array( 'status' => 400 )
+				);
+			}
+
 			if ( $id > 0 ) {
 				$variation = wc_get_product( $id );
 				if ( ! $variation instanceof \WC_Product_Variation || $variation->get_parent_id() !== $parent_product->get_id() ) {
@@ -737,6 +760,14 @@ trait ProductAbilityTrait {
 						/* translators: %d: variation position. */
 						sprintf( __( 'Variation %d is not a variation of this product.', 'woocommerce' ), $position ),
 						array( 'status' => 404 )
+					);
+				}
+				if ( isset( $named[ $id ] ) ) {
+					return new \WP_Error(
+						'woocommerce_product_variation_invalid',
+						/* translators: %d: variation position. */
+						sprintf( __( 'Variation %d names a variation that an earlier item already names.', 'woocommerce' ), $position ),
+						array( 'status' => 400 )
 					);
 				}
 				$named[ $id ] = true;
@@ -751,6 +782,9 @@ trait ProductAbilityTrait {
 				}
 				if ( ! $variation instanceof \WC_Product_Variation ) {
 					return self::get_invalid_product_type_error();
+				}
+				if ( $parent_product->get_id() > 0 ) {
+					$variation->set_parent_id( $parent_product->get_id() );
 				}
 				if ( ! $variation->get_status( 'edit' ) ) {
 					$variation->set_status( ProductStatus::PUBLISH );
@@ -835,7 +869,7 @@ trait ProductAbilityTrait {
 	protected static function check_variation_siblings( \WC_Product_Variable $parent_product, array $variations, array $named = array() ) {
 		$combinations = array();
 		$skus         = array();
-		foreach ( self::get_variation_ids( $parent_product, true ) as $child_id ) {
+		foreach ( $parent_product->get_id() > 0 ? self::get_variation_ids( $parent_product, true ) : array() as $child_id ) {
 			$child = isset( $named[ $child_id ] ) ? null : wc_get_product( $child_id );
 			if ( $child instanceof \WC_Product_Variation ) {
 				$combinations[ self::get_variation_combination( $child ) ] = true;
@@ -1027,9 +1061,22 @@ trait ProductAbilityTrait {
 			return wc_attribute_taxonomy_name_by_id( (int) $item['id'] );
 		}
 
-		$name = is_string( $item['name'] ?? null ) ? $item['name'] : '';
+		$name = is_string( $item['name'] ?? null ) ? trim( $item['name'] ) : '';
+		if ( empty( $item['global'] ) || '' === $name ) {
+			return '';
+		}
 
-		return ! empty( $item['global'] ) && wc_attribute_taxonomy_id_by_name( $name ) > 0 ? wc_attribute_taxonomy_name( wc_attribute_taxonomy_slug( $name ) ) : '';
+		if ( wc_attribute_taxonomy_id_by_name( $name ) > 0 ) {
+			return wc_attribute_taxonomy_name( wc_attribute_taxonomy_slug( $name ) );
+		}
+
+		foreach ( wc_get_attribute_taxonomies() as $taxonomy ) {
+			if ( 0 === strcasecmp( (string) $taxonomy->attribute_label, $name ) ) {
+				return wc_attribute_taxonomy_name( (string) $taxonomy->attribute_name );
+			}
+		}
+
+		return '';
 	}
 
 	/**
@@ -1087,9 +1134,9 @@ trait ProductAbilityTrait {
 			return new \WP_Error(
 				'woocommerce_product_variation_attributes_invalid',
 				sprintf(
-					/* translators: 1: variation position, 2: comma-separated attribute names. */
-					__( 'Variation %1$d must pick one option of each of these attributes: %2$s.', 'woocommerce' ),
-					$position,
+					/* translators: 1: "Variation N" or "The variation", 2: comma-separated attribute names. */
+					__( '%1$s must pick one option of each of these attributes: %2$s.', 'woocommerce' ),
+					self::get_variation_label( $position ),
 					implode( ', ', array_keys( $options ) )
 				),
 				array( 'status' => 400 )
@@ -1104,9 +1151,9 @@ trait ProductAbilityTrait {
 				return new \WP_Error(
 					'woocommerce_product_variation_attributes_invalid',
 					sprintf(
-						/* translators: 1: variation position, 2: attribute name, 3: option. */
-						__( 'Variation %1$d picks the option "%3$s" that the attribute "%2$s" does not have.', 'woocommerce' ),
-						$position,
+						/* translators: 1: "Variation N" or "The variation", 2: attribute name, 3: option. */
+						__( '%1$s picks the option "%3$s" that the attribute "%2$s" does not have.', 'woocommerce' ),
+						self::get_variation_label( $position ),
 						$slug,
 						$option
 					),
@@ -1119,6 +1166,17 @@ trait ProductAbilityTrait {
 		$variation->set_attributes( $attributes );
 
 		return null;
+	}
+
+	/**
+	 * How an error names a variation: by its position in a list, or alone.
+	 *
+	 * @param int $position Position in the input, or 0 for a single variation.
+	 * @return string
+	 */
+	private static function get_variation_label( int $position ): string {
+		/* translators: %d: variation position in the input. */
+		return $position > 0 ? sprintf( __( 'Variation %d', 'woocommerce' ), $position ) : __( 'The variation', 'woocommerce' );
 	}
 
 	/**
