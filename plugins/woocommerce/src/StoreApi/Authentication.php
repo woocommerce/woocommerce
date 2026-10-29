@@ -53,7 +53,7 @@ class Authentication {
 		}
 
 		$cart_token = CartTokenUtils::get_request_cart_token();
-		if ( $cart_token && CartTokenUtils::validate_cart_token( $cart_token ) ) {
+		if ( $cart_token && CartTokenUtils::validate_cart_token_for_current_user( $cart_token ) ) {
 			return SessionHandler::class;
 		}
 		return $handler;
