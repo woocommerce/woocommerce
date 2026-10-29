@@ -81,7 +81,7 @@ class OpenGraph {
 		$this->default_card = array_column( $tags, 'twitter:card' )[0] ?? null;
 
 		/**
-		 * Filters Open Graph metadata before output. Applied to product and shop pages.
+		 * Filters Open Graph metadata before output. Applied to product, shop and product taxonomy pages.
 		 * Other page types may be supported later; callbacks must check the object type.
 		 * The first tag in each group is its root; details follow it. Remove or replace an entire group to omit or replace its details.
 		 *
@@ -137,6 +137,16 @@ class OpenGraph {
 
 		if ( is_shop() && ! is_search() && ! is_paged() ) {
 			return $this->get_shop_page_data();
+		}
+
+		if ( ! is_search() && is_tax( array( 'product_cat', 'product_brand', 'product_tag' ) ) ) {
+			$term = get_queried_object();
+			if ( $term instanceof \WP_Term ) {
+				return array(
+					'tags'    => wc_get_container()->get( ProductTaxonomyOpenGraphTags::class )->get_tags( $term ),
+					'context' => $term,
+				);
+			}
 		}
 
 		return null;
