@@ -178,6 +178,8 @@ async function fetchSearchResults(
 								product.billing_period_interval,
 							currency: product.currency,
 							hasQualityBadge: product.has_quality_badge ?? false,
+							freeTrialLengthDays:
+								product.free_trial_length_days ?? null,
 						};
 					}
 				);
