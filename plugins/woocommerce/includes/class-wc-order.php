@@ -37,14 +37,6 @@ class WC_Order extends WC_Abstract_Order {
 	private $staging_status = false;
 
 	/**
-	 * Callbacks that the next save() runs, keyed by name. Each entry holds the callback, its arguments, and
-	 * whether it runs after the order is written. stage_status() and stage_payment_complete() add them.
-	 *
-	 * @var array<string, array{callback: callable, args: array, after_save: bool}>
-	 */
-	private $deferred_actions = array();
-
-	/**
 	 * Order Data array. This is the core order data exposed in APIs since 3.0.0.
 	 *
 	 * @since 3.0.0
@@ -256,16 +248,8 @@ class WC_Order extends WC_Abstract_Order {
 
 		$this->set_status( $next_status, false );
 
-		$this->deferred_actions['payment_complete_note'] = array(
-			'callback'   => array( $this, 'add_order_note' ),
-			'args'       => array( $payment_complete_note, false, false, array( 'note_group' => OrderNoteGroup::PAYMENT ) ),
-			'after_save' => false,
-		);
-		$this->deferred_actions['payment_complete']      = array(
-			'callback'   => 'do_action',
-			'args'       => array( 'woocommerce_payment_complete', $this->get_id(), $transaction_id ),
-			'after_save' => true,
-		);
+		$this->defer_to_save( 'payment_complete_note', array( $this, 'add_order_note' ), array( $payment_complete_note, false, false, array( 'note_group' => OrderNoteGroup::PAYMENT ) ) );
+		$this->defer_to_save( 'payment_complete', 'do_action', array( 'woocommerce_payment_complete', $this->get_id(), $transaction_id ), true );
 
 		return true;
 	}
@@ -343,9 +327,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return int order ID
 	 */
 	public function save() {
-		$deferred_actions       = $this->deferred_actions;
-		$this->deferred_actions = array();
-
+		$deferred_actions = $this->take_deferred_actions();
 		$this->run_deferred_actions( $deferred_actions, false );
 
 		$this->maybe_set_user_billing_email();
@@ -355,20 +337,6 @@ class WC_Order extends WC_Abstract_Order {
 		$this->run_deferred_actions( $deferred_actions, true );
 
 		return $this->get_id();
-	}
-
-	/**
-	 * Run the deferred callbacks that belong before or after the write.
-	 *
-	 * @param array $deferred_actions Entries taken from $deferred_actions.
-	 * @param bool  $after_save       True to run the entries that belong after the write.
-	 */
-	private function run_deferred_actions( array $deferred_actions, bool $after_save ): void {
-		foreach ( $deferred_actions as $entry ) {
-			if ( $entry['after_save'] === $after_save ) {
-				call_user_func_array( $entry['callback'], $entry['args'] );
-			}
-		}
 	}
 
 	/**
@@ -411,13 +379,9 @@ class WC_Order extends WC_Abstract_Order {
 			);
 
 			if ( $manual_update && $this->staging_status ) {
-				$this->deferred_actions['order_edit_status'] = array(
-					'callback'   => 'do_action',
-					'args'       => array( 'woocommerce_order_edit_status', $this->get_id(), $result['to'] ),
-					'after_save' => false,
-				);
+				$this->defer_to_save( 'order_edit_status', 'do_action', array( 'woocommerce_order_edit_status', $this->get_id(), $result['to'] ) );
 			} else {
-				unset( $this->deferred_actions['order_edit_status'] );
+				$this->defer_to_save( 'order_edit_status', null );
 			}
 
 			if ( $manual_update && ! $this->staging_status ) {

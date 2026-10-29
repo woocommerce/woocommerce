@@ -601,18 +601,6 @@ parameters:
 			path: includes/abstracts/abstract-wc-order.php
 
 		-
-			message: '#^Cannot call method set_discount\(\) on WC_Order_Item\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/abstracts/abstract-wc-order.php
-
-		-
-			message: '#^Cannot call method set_discount_tax\(\) on WC_Order_Item\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/abstracts/abstract-wc-order.php
-
-		-
 			message: '#^Cannot call method set_total\(\) on WC_Order_Item\|false\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -691,12 +679,6 @@ parameters:
 			path: includes/abstracts/abstract-wc-order.php
 
 		-
-			message: '#^Parameter \#1 \$item of method WC_Abstract_Order\:\:add_item\(\) expects WC_Order_Item, WC_Order_Item\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/abstracts/abstract-wc-order.php
-
-		-
 			message: '#^Parameter \#1 \$object of class WC_Discounts constructor expects WC_Cart\|WC_Order\|null, \$this\(WC_Abstract_Order\) given\.$#'
 			identifier: argument.type
 			count: 2
@@ -740,6 +722,12 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$value of method WC_Abstract_Order\:\:set_discount_tax\(\) expects string, float given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/abstracts/abstract-wc-order.php
+
+		-
+			message: '#^Parameter \#1 \$value of method WC_Order_Item_Coupon\:\:set_discount_tax\(\) expects string, \(float\|int\) given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/abstracts/abstract-wc-order.php
@@ -12775,7 +12763,7 @@ parameters:
 			path: includes/class-wc-order.php
 
 		-
-			message: '#^PHPDoc tag @param has invalid value \(WC_Order \$this                     Order object\.\)\: Unexpected token "\$this", expected variable at offset 193 on line 5$#'
+			message: '#^PHPDoc tag @param has invalid value \(WC_Order \$this                     Order object\.\)\: Unexpected token "\$this", expected variable at offset 189 on line 5$#'
 			identifier: phpDoc.parseError
 			count: 1
 			path: includes/class-wc-order.php
@@ -12793,7 +12781,7 @@ parameters:
 			path: includes/class-wc-order.php
 
 		-
-			message: '#^PHPDoc tag @param has invalid value \(WC_Order \$this          Order object\.\)\: Unexpected token "\$this", expected variable at offset 197 on line 6$#'
+			message: '#^PHPDoc tag @param has invalid value \(WC_Order \$this          Order object\.\)\: Unexpected token "\$this", expected variable at offset 187 on line 6$#'
 			identifier: phpDoc.parseError
 			count: 1
 			path: includes/class-wc-order.php
@@ -12843,7 +12831,7 @@ parameters:
 		-
 			message: '#^Parameter \#2 \$is_customer_note of method WC_Order\:\:add_order_note\(\) expects int, false given\.$#'
 			identifier: argument.type
-			count: 5
+			count: 4
 			path: includes/class-wc-order.php
 
 		-
