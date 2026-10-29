@@ -1636,52 +1636,57 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should let the owner of an extension field remove it from a product type with the woocommerce_ability_product_type_fields filter.
+	 * @testdox Should leave a field with object_types out of the other objects and refuse a write to them.
 	 */
-	public function test_product_type_fields_filter_removes_an_extension_field_from_a_type(): void {
-		$remove_color = static fn( array $fields, string $type ) => 'grouped' === $type ? array_diff( $fields, array( 'test-ext.color' ) ) : $fields;
-		$simple       = \WC_Helper_Product::create_simple_product();
-		add_filter( 'woocommerce_ability_product_type_fields', $remove_color, 10, 2 );
+	public function test_object_types_limit_a_field_to_some_objects(): void {
+		$register = static function () {
+			ExtensibleAbilities::register_field(
+				array(
+					'resource'        => 'product',
+					'namespace'       => 'test-ext',
+					'field'           => 'plan',
+					'schema'          => array( 'type' => 'string' ),
+					'object_types'    => array( 'simple' ),
+					'get_callback'    => static fn() => 'monthly',
+					'update_callback' => static function ( \WC_Product $product, $value ) {
+						$product->update_meta_data( '_test_plan', $value );
+					},
+				)
+			);
+		};
+		add_action( 'woocommerce_extensible_abilities_init', $register );
+		$simple  = \WC_Helper_Product::create_simple_product();
+		$grouped = \WC_Helper_Product::create_grouped_product();
 
 		try {
 			$schema   = $this->get_ability( 'woocommerce/product-create' )['input_schema'];
 			$rejected = $this->run_ability_response(
-				'woocommerce/product-create',
+				'woocommerce/product-update',
 				array(
-					'name'             => 'Box',
-					'type'             => 'grouped',
-					'grouped_products' => array( $simple->get_id() ),
-					'extensions'       => array( 'test-ext' => array( 'color' => 'red' ) ),
+					'id'         => $grouped->get_id(),
+					'extensions' => array( 'test-ext' => array( 'plan' => 'yearly' ) ),
 				)
 			);
-			$created  = $this->run_ability(
-				'woocommerce/product-create',
-				array(
-					'name'       => 'Box',
-					'type'       => 'grouped',
-					'extensions' => array( 'other_ext' => array( 'count' => 2 ) ),
-				)
-			);
-			$pen      = $this->run_ability(
+			$updated  = $this->run_ability(
 				'woocommerce/product-update',
 				array(
 					'id'         => $simple->get_id(),
-					'extensions' => array( 'test-ext' => array( 'color' => 'red' ) ),
+					'extensions' => array( 'test-ext' => array( 'plan' => 'yearly' ) ),
 				)
 			);
+			$read     = $this->run_ability( 'woocommerce/products-query', array( 'id' => $grouped->get_id() ) );
 		} finally {
-			remove_filter( 'woocommerce_ability_product_type_fields', $remove_color, 10 );
+			remove_action( 'woocommerce_extensible_abilities_init', $register );
 		}
 
-		$this->assertArrayHasKey( 'color', $schema['properties']['extensions']['properties']['test-ext']['properties'] );
+		$this->assertArrayHasKey( 'plan', $schema['properties']['extensions']['properties']['test-ext']['properties'] );
 		$this->assertSame( 400, $rejected->get_status() );
-		$this->assertSame( 'woocommerce_product_field_unsupported', $rejected->get_data()['code'] );
-		$this->assertSame(
-			'The grouped product type does not take extensions.test-ext.color. It takes name, sku, description, short_description, status, grouped_products, extensions.other_ext.count, extensions.other_ext.size.',
-			$rejected->get_data()['message']
-		);
-		$this->assertSame( 2, $created['product']['extensions']['other_ext']['count'] );
-		$this->assertSame( 'red', $pen['product']['extensions']['test-ext']['color'] );
+		$this->assertSame( 'woocommerce_ability_field_object_type', $rejected->get_data()['code'] );
+		$this->assertSame( 'The extensions.test-ext.plan field does not apply to the grouped type. It applies to simple.', $rejected->get_data()['message'] );
+		$this->assertSame( '', wc_get_product( $grouped->get_id() )->get_meta( '_test_plan' ) );
+		$this->assertSame( 'monthly', $updated['product']['extensions']['test-ext']['plan'] );
+		$this->assertSame( 'yearly', wc_get_product( $simple->get_id() )->get_meta( '_test_plan' ) );
+		$this->assertArrayNotHasKey( 'plan', $read['products'][0]['extensions']['test-ext'] ?? array() );
 	}
 
 	/**

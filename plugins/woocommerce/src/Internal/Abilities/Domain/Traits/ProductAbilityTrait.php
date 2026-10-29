@@ -190,7 +190,7 @@ trait ProductAbilityTrait {
 	/**
 	 * Get the configuration of every supported product type, keyed by type.
 	 *
-	 * @return array<string, array{fields: array<int, string>, extension_fields: array<int, string>, product_props: array<string, mixed>}>
+	 * @return array<string, array{fields: array<int, string>, product_props: array<string, mixed>}>
 	 */
 	private static function get_supported_product_type_configs(): array {
 		$configs = array();
@@ -211,7 +211,7 @@ trait ProductAbilityTrait {
 	 * Get the configuration of a product type.
 	 *
 	 * @param string $product_type Product type.
-	 * @return array{fields: array<int, string>, extension_fields: array<int, string>, product_props: array<string, mixed>}|\WP_Error
+	 * @return array{fields: array<int, string>, product_props: array<string, mixed>}|\WP_Error
 	 */
 	protected static function get_product_type_config( string $product_type ) {
 		if ( ! isset( wc_get_product_types()[ $product_type ] ) ) {
@@ -225,13 +225,16 @@ trait ProductAbilityTrait {
 	 * Get the configuration of a product class.
 	 *
 	 * The product class decides which Core fields apply. A class that extends
-	 * a Core class gets the fields of that class. Every extension field applies
-	 * by default. The `woocommerce_ability_product_type_fields` filter changes
-	 * both lists.
+	 * a Core class gets the fields of that class. The owner of a type changes
+	 * the list with the `woocommerce_ability_product_type_fields` filter.
+	 *
+	 * `WC_Product_Factory` returns `WC_Product_Simple` itself for a type that
+	 * has no class. Such a type is refused. A class that extends
+	 * `WC_Product_Simple`, such as a subscription, is a class of its own.
 	 *
 	 * @param string $classname    Product class.
 	 * @param string $product_type Product type.
-	 * @return array{fields: array<int, string>, extension_fields: array<int, string>, product_props: array<string, mixed>}|\WP_Error
+	 * @return array{fields: array<int, string>, product_props: array<string, mixed>}|\WP_Error
 	 */
 	private static function get_product_class_config( string $classname, string $product_type ) {
 		if ( is_a( $classname, \WC_Product_Variable::class, true ) ) {
@@ -269,38 +272,25 @@ trait ProductAbilityTrait {
 			}
 		}
 
-		$extension_fields = array();
-		if ( ExtensibleAbilities::is_enabled() ) {
-			foreach ( ExtensibleAbilities::get_fields( 'product' ) as $namespace => $namespace_fields ) {
-				foreach ( $namespace_fields as $field => $args ) {
-					if ( isset( $args['update_callback'] ) ) {
-						$extension_fields[] = $namespace . '.' . $field;
-					}
-				}
-			}
-		}
-
 		/**
-		 * Filter the fields that the product abilities accept for a product type.
+		 * Filter the Core fields that the product abilities accept for a product type.
 		 *
-		 * WooCommerce picks the Core fields from the product class, and adds
-		 * every writable extension field as `<namespace>.<field>`. The owner of a type
-		 * adds a Core field that its type needs, such as a price for a bundle.
-		 * The owner of an extension field removes it from the types it does not
-		 * apply to. A name that is not a Core field or a registered extension
-		 * field is ignored.
+		 * WooCommerce picks the fields from the product class. The owner of a
+		 * type adds a Core field that its type needs, such as a price for a
+		 * bundle, or removes one. A name that is not a Core field is ignored.
+		 * An extension field names its types in `object_types` of
+		 * `ExtensibleAbilities::register_field()`.
 		 *
 		 * @since 11.4.0
 		 *
 		 * @param array<int, string> $fields       Field names.
 		 * @param string             $product_type Product type.
 		 */
-		$fields = (array) apply_filters( 'woocommerce_ability_product_type_fields', array_merge( $fields, $extension_fields ), $product_type );
+		$fields = (array) apply_filters( 'woocommerce_ability_product_type_fields', $fields, $product_type );
 
 		return array(
-			'fields'           => array_values( array_intersect( array_keys( self::get_product_mutation_field_schemas() ), $fields ) ),
-			'extension_fields' => array_values( array_intersect( $extension_fields, $fields ) ),
-			'product_props'    => $product_props,
+			'fields'        => array_values( array_intersect( array_keys( self::get_product_mutation_field_schemas() ), $fields ) ),
+			'product_props' => $product_props,
 		);
 	}
 
@@ -523,7 +513,7 @@ trait ProductAbilityTrait {
 	}
 
 	/**
-	 * Refuse a Core or extension field that the product type does not take.
+	 * Refuse a Core field that the product type does not take.
 	 *
 	 * @param \WC_Product $product        Product object.
 	 * @param array       $input          Ability input.
@@ -531,19 +521,8 @@ trait ProductAbilityTrait {
 	 * @return null|\WP_Error
 	 */
 	private static function validate_product_fields_for_config( \WC_Product $product, array $input, array $product_config ) {
-		$sent = array_diff( array_keys( $input ), array( 'id', 'type', 'extensions' ) );
-		foreach ( (array) ( $input['extensions'] ?? array() ) as $namespace => $fields ) {
-			foreach ( array_keys( (array) $fields ) as $field ) {
-				$sent[] = 'extensions.' . $namespace . '.' . $field;
-			}
-		}
-
-		$extension_fields = array_map(
-			static fn( string $field ): string => 'extensions.' . $field,
-			$product_config['extension_fields']
-		);
-		$supported        = array_merge( $product_config['fields'], $extension_fields );
-		$unsupported      = array_diff( $sent, $supported );
+		$supported   = $product_config['fields'];
+		$unsupported = array_diff( array_keys( $input ), array( 'id', 'type', 'extensions' ), $supported );
 
 		if ( empty( $unsupported ) ) {
 			return null;
