@@ -759,7 +759,7 @@ class FeaturesController {
 			),
 			ExtensibleAbilities::FEATURE_ID        => array(
 				'name'                         => __( 'Extensible abilities', 'woocommerce' ),
-				'description'                  => __( 'Let extensions add their own data, filters and checks to WooCommerce abilities.', 'woocommerce' ),
+				'description'                  => __( 'Let extensions add their fields to the output of WooCommerce abilities.', 'woocommerce' ),
 				'is_experimental'              => true,
 				'enabled_by_default'           => false,
 				'disable_ui'                   => false,
