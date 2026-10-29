@@ -1421,10 +1421,9 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should call WC_Order::update_status() with the feature off, which warns for an order class that only overrides it, and refuse that class with the feature on.
+	 * @testdox Should call WC_Order::update_status() with the feature off, and refuse an order class that only overrides it with the feature on.
 	 */
 	public function test_the_feature_off_path_calls_update_status(): void {
-		$this->setExpectedIncorrectUsage( 'WC_Order::update_status' );
 		$calls        = 0;
 		$order_class  = get_class(
 			new class() extends \WC_Order {
