@@ -147,6 +147,15 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 		$this->assertContains( 'missing_brand', $this->sut->get_failing_check_ids( $variation ) );
 		$this->assertSame( array(), $this->sut->get_failing_check_ids( $grouped ), 'Grouped products are not scanned' );
 		$this->assertSame( array(), $this->sut->get_failing_check_ids( $draft ), 'Unpublished products are not scanned' );
+
+		$hidden = WC_Helper_Product::create_variation_product();
+		$hidden->set_catalog_visibility( 'hidden' );
+		$hidden->save();
+		$validator = new ReadinessFeedValidator();
+		$validator->init( $this->sut );
+		$this->assertSame( $this->sut->get_failing_check_ids( $variable ), $validator->validate_entry( array(), $variation ) );
+		$this->assertSame( array( ReadinessFeedValidator::NOT_CHECKED ), $validator->validate_entry( array(), $grouped ), 'The feed skips products the checks leave out' );
+		$this->assertSame( array( ReadinessFeedValidator::NOT_CHECKED ), $validator->validate_entry( array(), wc_get_product( $hidden->get_children()[0] ) ), 'Nor exports a hidden product\'s variations' );
 	}
 
 	/**
