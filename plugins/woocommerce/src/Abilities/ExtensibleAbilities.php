@@ -564,9 +564,9 @@ class ExtensibleAbilities {
 	 * transaction of the ActionableAbility.
 	 *
 	 * A sync registered for a resource runs only when an object of that resource
-	 * was saved in the call. It runs once per call, not once per object. The
-	 * saved objects can belong to more than one resource, so a sync reads the
-	 * objects it owns and ignores the rest.
+	 * was saved or deleted in the call. It runs once per call, not once per
+	 * object. The saved objects can belong to more than one resource, so a sync
+	 * reads the objects it owns and ignores the rest.
 	 *
 	 * @since 11.4.0
 	 *
@@ -575,9 +575,13 @@ class ExtensibleAbilities {
 	 *
 	 *     @type string   $resource  Resource that an ActionableAbility saves, such as `product`.
 	 *     @type string   $namespace Slug of the extension that owns the sync, such as `subscriptions`.
-	 *     @type callable $callback  Receives `\WC_Data[] $saved` and the ActionableAbility. `$saved` is every
-	 *                               saved object of the call, the primary object first. It returns a WP_Error
-	 *                               to refuse, and then every save of the call is undone. A thrown exception
+	 *     @type callable $callback  Receives `\WC_Data[] $saved`, the ActionableAbility and `array $context`.
+	 *                               `$saved` is every saved object of the call, the primary object first.
+	 *                               `$context['deleted']` is every object the call deleted, as it was before
+	 *                               the delete, with its ID, and
+	 *                               `$context['input']` is the input of the call, so a sync can skip work
+	 *                               when the call did not write its fields. It returns a WP_Error to
+	 *                               refuse, and then every save of the call is undone. A thrown exception
 	 *                               refuses it too. The error gets the namespace in its data. A sync must not
 	 *                               send email or make HTTP requests, because an undo does not reach outside
 	 *                               the database.

@@ -112,13 +112,13 @@ trait ProductAbilityTrait {
 		if ( $for_variation ) {
 			return array(
 				'type'        => 'array',
-				'description' => __( 'The option this variation picks for each attribute of its parent, by attribute name or global attribute id. For a global attribute the option is the term slug.', 'woocommerce' ),
+				'description' => __( 'The option this variation picks for each attribute of its parent, by attribute name or global attribute id. For a global attribute the option is the term slug. A null option matches any option of the attribute.', 'woocommerce' ),
 				'items'       => array(
 					'type'                 => 'object',
 					'properties'           => array(
 						'id'     => self::get_global_attribute_id_schema(),
 						'name'   => array( 'type' => 'string' ),
-						'option' => array( 'type' => 'string' ),
+						'option' => array( 'type' => array( 'string', 'null' ) ),
 					),
 					'required'             => array( 'option' ),
 					'additionalProperties' => false,
@@ -128,20 +128,28 @@ trait ProductAbilityTrait {
 
 		return array(
 			'type'        => 'array',
-			'description' => __( 'Attributes of the product, such as Size with the options S, M and L. Each variation picks one option of every attribute. A name or id that matches a global attribute uses that global attribute, and its options are term names or slugs. Missing terms are created.', 'woocommerce' ),
+			'description' => __( 'Attributes of the product, such as Size with the options S, M and L. Each variation picks one option of every attribute that is for variations. A name is an attribute of this product only, unless global is true or an id names a global attribute. The options of a global attribute are term names or slugs, and missing terms are created.', 'woocommerce' ),
 			'items'       => array(
 				'type'                 => 'object',
 				'properties'           => array(
-					'id'      => self::get_global_attribute_id_schema(),
-					'name'    => array( 'type' => 'string' ),
-					'options' => array(
+					'id'        => self::get_global_attribute_id_schema(),
+					'name'      => array( 'type' => 'string' ),
+					'global'    => array(
+						'type'        => 'boolean',
+						'description' => __( 'Use the global attribute with this name. The input is refused when there is none. Defaults to false.', 'woocommerce' ),
+					),
+					'options'   => array(
 						'type'     => 'array',
 						'items'    => array( 'type' => 'string' ),
 						'minItems' => 1,
 					),
-					'visible' => array(
+					'visible'   => array(
 						'type'        => 'boolean',
 						'description' => __( 'Whether the attribute shows on the product page. Defaults to true.', 'woocommerce' ),
+					),
+					'variation' => array(
+						'type'        => 'boolean',
+						'description' => __( 'Whether the variations pick an option of this attribute. Defaults to true. An attribute that is not for variations only shows on the product page.', 'woocommerce' ),
 					),
 				),
 				'required'             => array( 'options' ),
@@ -772,6 +780,34 @@ trait ProductAbilityTrait {
 	}
 
 	/**
+	 * The variations of a parent, from the data store. `WC_Product_Variable::get_children()`
+	 * runs the `woocommerce_get_children` filter, which a plugin can use to hide
+	 * variations from a user, so checks and output read the data store instead.
+	 *
+	 * @param \WC_Product_Variable $parent_product Parent product.
+	 * @param bool                 $force_read     Whether to skip the children cache.
+	 * @return array{all: array<int, int>, visible: array<int, int>}
+	 */
+	private static function read_variation_children( \WC_Product_Variable $parent_product, bool $force_read ): array {
+		$children = $parent_product->get_data_store()->read_children( $parent_product, $force_read ); // @phpstan-ignore method.notFound (WC_Data_Store forwards the call to the variable product data store)
+		return array(
+			'all'     => array_map( 'intval', (array) ( $children['all'] ?? array() ) ),
+			'visible' => array_map( 'intval', (array) ( $children['visible'] ?? array() ) ),
+		);
+	}
+
+	/**
+	 * The IDs of every variation of a parent, from the data store.
+	 *
+	 * @param \WC_Product_Variable $parent_product Parent product.
+	 * @param bool                 $force_read     Whether to skip the children cache.
+	 * @return array<int, int>
+	 */
+	protected static function get_variation_ids( \WC_Product_Variable $parent_product, bool $force_read ): array {
+		return self::read_variation_children( $parent_product, $force_read )['all'];
+	}
+
+	/**
 	 * Pair each variation of a plan with the `extensions` input of its item, for change().
 	 *
 	 * @param array{save: \WC_Product_Variation[], extensions: array<int, array>} $plan Plan from plan_variations().
@@ -799,7 +835,7 @@ trait ProductAbilityTrait {
 	protected static function check_variation_siblings( \WC_Product_Variable $parent_product, array $variations, array $named = array() ) {
 		$combinations = array();
 		$skus         = array();
-		foreach ( $parent_product->get_children() as $child_id ) {
+		foreach ( self::get_variation_ids( $parent_product, true ) as $child_id ) {
 			$child = isset( $named[ $child_id ] ) ? null : wc_get_product( $child_id );
 			if ( $child instanceof \WC_Product_Variation ) {
 				$combinations[ self::get_variation_combination( $child ) ] = true;
@@ -876,13 +912,23 @@ trait ProductAbilityTrait {
 			return null;
 		}
 
-		$children = $parent_product->get_data_store()->read_children( $parent_product, true ); // @phpstan-ignore method.notFound (WC_Data_Store forwards the call to the variable product data store)
+		self::sync_variable_parent( $parent_product );
+
+		return null;
+	}
+
+	/**
+	 * Sync a parent with its variations after they changed: reload its
+	 * children from the data store, then sync its price range and stock status.
+	 *
+	 * @param \WC_Product_Variable $parent_product Saved parent.
+	 */
+	protected static function sync_variable_parent( \WC_Product_Variable $parent_product ): void {
+		$children = self::read_variation_children( $parent_product, true );
 		$parent_product->set_children( $children['all'] );
 		$parent_product->set_visible_children( $children['visible'] );
 		\WC_Product_Variable::sync( $parent_product );
 		$parent_product->set_price( (string) get_post_meta( $parent_product->get_id(), '_price', true ) );
-
-		return null;
 	}
 
 	/**
@@ -905,14 +951,14 @@ trait ProductAbilityTrait {
 		if ( $product instanceof \WC_Product_Variation ) {
 			$attributes = array();
 			foreach ( $value as $item ) {
-				if ( ! is_array( $item ) || ! is_scalar( $item['option'] ?? null ) ) {
+				if ( ! is_array( $item ) || ! array_key_exists( 'option', $item ) || ! ( null === $item['option'] || is_scalar( $item['option'] ) ) ) {
 					return self::get_invalid_product_attributes_error();
 				}
 				$key = empty( $item['id'] ) ? sanitize_title( (string) ( $item['name'] ?? '' ) ) : wc_attribute_taxonomy_name_by_id( (int) $item['id'] );
 				if ( '' === $key ) {
 					return self::get_invalid_product_attributes_error();
 				}
-				$attributes[ $key ] = wc_clean( (string) $item['option'] );
+				$attributes[ $key ] = null === $item['option'] ? '' : wc_clean( (string) $item['option'] );
 			}
 			return $attributes;
 		}
@@ -925,7 +971,18 @@ trait ProductAbilityTrait {
 			$options  = is_array( $item['options'] ?? null ) ? array_values( array_filter( array_map( 'wc_clean', $item['options'] ), 'is_string' ) ) : array();
 			$taxonomy = self::get_global_attribute_taxonomy( $item );
 			$name     = '' === $taxonomy ? sanitize_text_field( trim( (string) ( $item['name'] ?? '' ) ) ) : $taxonomy;
-			if ( '' === $name || empty( $options ) || ( ! empty( $item['id'] ) && '' === $taxonomy ) ) {
+			if ( '' === $taxonomy && ( ! empty( $item['id'] ) || ! empty( $item['global'] ) ) ) {
+				return new \WP_Error(
+					'woocommerce_product_attributes_invalid',
+					sprintf(
+						/* translators: %s: attribute name or id. */
+						__( 'There is no global attribute "%s".', 'woocommerce' ),
+						(string) ( $item['id'] ?? $item['name'] ?? '' )
+					),
+					array( 'status' => 400 )
+				);
+			}
+			if ( '' === $name || empty( $options ) ) {
 				return self::get_invalid_product_attributes_error();
 			}
 			$attribute = new \WC_Product_Attribute();
@@ -942,7 +999,7 @@ trait ProductAbilityTrait {
 			$attribute->set_options( $options );
 			$attribute->set_position( (int) $position );
 			$attribute->set_visible( (bool) ( $item['visible'] ?? true ) );
-			$attribute->set_variation( true );
+			$attribute->set_variation( (bool) ( $item['variation'] ?? true ) );
 			$attributes[ sanitize_title( $name ) ] = $attribute;
 		}
 
@@ -972,7 +1029,7 @@ trait ProductAbilityTrait {
 
 		$name = is_string( $item['name'] ?? null ) ? $item['name'] : '';
 
-		return wc_attribute_taxonomy_id_by_name( $name ) > 0 ? wc_attribute_taxonomy_name( wc_attribute_taxonomy_slug( $name ) ) : '';
+		return ! empty( $item['global'] ) && wc_attribute_taxonomy_id_by_name( $name ) > 0 ? wc_attribute_taxonomy_name( wc_attribute_taxonomy_slug( $name ) ) : '';
 	}
 
 	/**
@@ -1040,7 +1097,7 @@ trait ProductAbilityTrait {
 		}
 
 		foreach ( $attributes as $slug => $option ) {
-			if ( in_array( $option, $options[ $slug ], true ) ) {
+			if ( '' === $option || in_array( $option, $options[ $slug ], true ) ) {
 				continue;
 			}
 			if ( ! in_array( sanitize_title( $option ), $options[ $slug ], true ) ) {
@@ -1355,7 +1412,7 @@ trait ProductAbilityTrait {
 			'grouped_products'  => $product instanceof \WC_Product_Grouped ? array_map( 'absint', $product->get_children( 'edit' ) ) : array(),
 			'parent_id'         => (int) $product->get_parent_id(),
 			'attributes'        => self::format_product_attributes( $product ),
-			'variation_ids'     => $product instanceof \WC_Product_Variable ? array_map( 'absint', $product->get_children() ) : array(),
+			'variation_ids'     => $product instanceof \WC_Product_Variable ? self::get_variation_ids( $product, false ) : array(),
 			'date_created'      => wc_rest_prepare_date_response( $product->get_date_created(), false ),
 			'date_created_gmt'  => wc_rest_prepare_date_response( $product->get_date_created() ),
 			'date_modified'     => wc_rest_prepare_date_response( $product->get_date_modified(), false ),
@@ -1378,16 +1435,17 @@ trait ProductAbilityTrait {
 		foreach ( $product->get_attributes() as $slug => $attribute ) {
 			if ( $attribute instanceof \WC_Product_Attribute ) {
 				$output[] = array(
-					'id'      => $attribute->get_id(),
-					'name'    => wc_attribute_label( $attribute->get_name(), $product ),
-					'options' => self::get_attribute_option_slugs( $attribute ),
-					'visible' => (bool) $attribute->get_visible(),
+					'id'        => $attribute->get_id(),
+					'name'      => wc_attribute_label( $attribute->get_name(), $product ),
+					'options'   => self::get_attribute_option_slugs( $attribute ),
+					'visible'   => (bool) $attribute->get_visible(),
+					'variation' => (bool) $attribute->get_variation(),
 				);
 			} else {
 				$output[] = array(
 					'id'     => taxonomy_is_product_attribute( (string) $slug ) ? wc_attribute_taxonomy_id_by_name( (string) $slug ) : 0,
 					'name'   => wc_attribute_label( (string) $slug, $product ),
-					'option' => (string) $attribute,
+					'option' => '' === (string) $attribute ? null : (string) $attribute,
 				);
 			}
 		}
@@ -1483,17 +1541,24 @@ trait ProductAbilityTrait {
 					'items'       => array(
 						'type'                 => 'object',
 						'properties'           => array(
-							'id'      => array(
+							'id'        => array(
 								'type'        => 'integer',
 								'description' => __( 'ID of the global attribute, or 0 for an attribute of this product only.', 'woocommerce' ),
 							),
-							'name'    => array( 'type' => 'string' ),
-							'options' => array(
+							'name'      => array( 'type' => 'string' ),
+							'options'   => array(
 								'type'  => 'array',
 								'items' => array( 'type' => 'string' ),
 							),
-							'option'  => array( 'type' => 'string' ),
-							'visible' => array( 'type' => 'boolean' ),
+							'option'    => array(
+								'type'        => array( 'string', 'null' ),
+								'description' => __( 'The option a variation picks. Null matches any option.', 'woocommerce' ),
+							),
+							'visible'   => array( 'type' => 'boolean' ),
+							'variation' => array(
+								'type'        => 'boolean',
+								'description' => __( 'Whether the variations pick an option of this attribute.', 'woocommerce' ),
+							),
 						),
 						'required'             => array( 'name' ),
 						'additionalProperties' => false,

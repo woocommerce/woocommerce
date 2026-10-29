@@ -1841,10 +1841,11 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertSame(
 			array(
 				array(
-					'id'      => 0,
-					'name'    => 'Size',
-					'options' => array( 'S', 'M' ),
-					'visible' => true,
+					'id'        => 0,
+					'name'      => 'Size',
+					'options'   => array( 'S', 'M' ),
+					'visible'   => true,
+					'variation' => true,
 				),
 			),
 			$created['product']['attributes']
@@ -2349,6 +2350,122 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should treat a name as a local attribute unless global is true, and refuse an unknown global attribute.
+	 */
+	public function test_product_create_uses_a_global_attribute_only_when_asked(): void {
+		\WC_Helper_Product::create_attribute( 'size', array( 'small', 'large' ) );
+		$input = $this->get_shirt_input();
+
+		$local                            = wp_get_ability( 'woocommerce/product-create' )->execute( $input );
+		$input['attributes'][0]['global'] = true;
+		$input['attributes'][0]['name']   = 'Color';
+		$unknown                          = wp_get_ability( 'woocommerce/product-create' )->execute_change( $input );
+
+		$this->assertNotWPError( $local );
+		$this->created_product_ids[] = $local['product']['id'];
+		$this->assertSame( 0, $local['product']['attributes'][0]['id'] );
+		$this->assertArrayHasKey( 'size', wc_get_product( $local['product']['id'] )->get_attributes() );
+		$this->assertWPError( $unknown );
+		$this->assertSame( 'woocommerce_product_attributes_invalid', $unknown->get_error_code() );
+		$this->assertSame( 'There is no global attribute "Color".', $unknown->get_error_message() );
+	}
+
+	/**
+	 * @testdox Should let a variation match any option with a null option, and show null in the output.
+	 */
+	public function test_product_create_accepts_any_option_variations(): void {
+		$input                                  = $this->get_shirt_input();
+		$input['attributes'][]                  = array(
+			'name'    => 'Color',
+			'options' => array( 'Red', 'Blue' ),
+		);
+		$input['variations'][0]['attributes'][] = array(
+			'name'   => 'Color',
+			'option' => null,
+		);
+		$input['variations'][1]['attributes'][] = array(
+			'name'   => 'Color',
+			'option' => 'Red',
+		);
+
+		$created = wp_get_ability( 'woocommerce/product-create' )->execute( $input );
+		$this->assertNotWPError( $created );
+		$this->created_product_ids[] = $created['product']['id'];
+
+		$small = wp_get_ability( 'woocommerce/products-query' )->execute( array( 'id' => $created['product']['variation_ids'][0] ) );
+		$this->assertNotWPError( $small );
+		$this->assertSame(
+			array(
+				array(
+					'id'     => 0,
+					'name'   => 'Size',
+					'option' => 'S',
+				),
+				array(
+					'id'     => 0,
+					'name'   => 'Color',
+					'option' => null,
+				),
+			),
+			$small['products'][0]['attributes']
+		);
+		$this->assertSame( '', wc_get_product( $created['product']['variation_ids'][0] )->get_attributes()['color'] );
+	}
+
+	/**
+	 * @testdox Should not require a variation to pick an attribute that is not for variations.
+	 */
+	public function test_product_create_accepts_attributes_that_are_not_for_variations(): void {
+		$input                 = $this->get_shirt_input();
+		$input['attributes'][] = array(
+			'name'      => 'Material',
+			'options'   => array( 'Cotton' ),
+			'variation' => false,
+		);
+
+		$created = wp_get_ability( 'woocommerce/product-create' )->execute( $input );
+		$this->assertNotWPError( $created );
+		$this->created_product_ids[] = $created['product']['id'];
+
+		$this->assertCount( 2, $created['product']['variation_ids'] );
+		$this->assertSame( array( true, false ), array_column( $created['product']['attributes'], 'variation' ) );
+		$this->assertFalse( wc_get_product( $created['product']['id'] )->get_attributes()['material']->get_variation() );
+	}
+
+	/**
+	 * @testdox Should check siblings and list variation ids from the data store, not through the woocommerce_get_children filter.
+	 */
+	public function test_variation_checks_ignore_the_get_children_filter(): void {
+		$created = wp_get_ability( 'woocommerce/product-create' )->execute( $this->get_shirt_input() );
+		$this->assertNotWPError( $created );
+		$this->created_product_ids[] = $created['product']['id'];
+
+		add_filter( 'woocommerce_get_children', '__return_empty_array' );
+		try {
+			$duplicate = wp_get_ability( 'woocommerce/product-create' )->execute_change(
+				array(
+					'type'       => 'variation',
+					'parent_id'  => $created['product']['id'],
+					'attributes' => array(
+						array(
+							'name'   => 'Size',
+							'option' => 'S',
+						),
+					),
+				)
+			);
+			$read      = wp_get_ability( 'woocommerce/products-query' )->execute( array( 'id' => $created['product']['id'] ) );
+		} finally {
+			remove_filter( 'woocommerce_get_children', '__return_empty_array' );
+		}
+
+		$this->assertWPError( $duplicate );
+		$this->assertSame( 'woocommerce_product_variation_duplicate', $duplicate->get_error_code() );
+		$this->assertNotWPError( $read );
+		$this->assertSame( $created['product']['variation_ids'], $read['products'][0]['variation_ids'] );
+	}
+
+	/**
 	 * @testdox Should create a variable product with a global attribute, its terms and two variations.
 	 */
 	public function test_product_create_uses_a_global_attribute(): void {
@@ -2431,6 +2548,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			'attributes' => array(
 				array(
 					'name'    => 'size',
+					'global'  => true,
 					'options' => array( 'small', 'Large', 'Medium' ),
 				),
 			),

@@ -36,8 +36,9 @@ defined( 'ABSPATH' ) || exit;
  * still inside the transaction, the syncs that ExtensibleAbilities::register_sync()
  * adds write what the saved objects imply elsewhere, such as the price range a
  * variable parent derives from its variations, or a row in a table of the
- * extension. A refusal there rolls the call back too. A rollback drops the
- * object caches of the objects the call saved. It does not undo what a sync
+ * extension. A sync also sees the objects the call deleted and the input of
+ * the call. A refusal there rolls the call back too. A rollback drops the
+ * object caches of the objects the call saved or deleted. It does not undo what a sync
  * did outside the database, such as an HTTP request, and it does nothing on a
  * table engine without transactions. The other steps must not save, send email
  * or make HTTP requests.
@@ -120,6 +121,30 @@ abstract class ActionableAbility extends \WP_Ability {
 	}
 
 	/**
+	 * Whether the ability writes the extension fields of its resource. An
+	 * ability that does not, such as a delete, gets no `extensions` input.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @return bool
+	 */
+	protected function writes_extension_fields(): bool {
+		return true;
+	}
+
+	/**
+	 * The objects that save() deleted, for the syncs. An ability that deletes
+	 * objects collects them in save() and returns them here.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @return \WC_Data[]
+	 */
+	protected function get_deleted_objects(): array {
+		return array();
+	}
+
+	/**
 	 * Run the change. This is the execute callback of the ability.
 	 *
 	 * @internal
@@ -136,7 +161,8 @@ abstract class ActionableAbility extends \WP_Ability {
 		}
 
 		$enabled = ExtensibleAbilities::is_enabled();
-		$updates = $enabled ? $this->prepare_fields( $input['extensions'] ?? null, $this->get_resource() ) : array();
+		$writes  = $enabled && $this->writes_extension_fields();
+		$updates = $writes ? $this->prepare_fields( $input['extensions'] ?? null, $this->get_resource() ) : array();
 		if ( is_wp_error( $updates ) ) {
 			return $updates;
 		}
@@ -160,7 +186,7 @@ abstract class ActionableAbility extends \WP_Ability {
 					'11.4.0'
 				);
 			}
-			$fields = $enabled ? $this->prepare_fields( $secondary[1], $resource_name ) : array();
+			$fields = $writes ? $this->prepare_fields( $secondary[1], $resource_name ) : array();
 			if ( is_wp_error( $fields ) ) {
 				return $fields;
 			}
@@ -181,16 +207,16 @@ abstract class ActionableAbility extends \WP_Ability {
 		try {
 			$saved = $this->save( $subject );
 			if ( ! is_wp_error( $saved ) && $enabled ) {
-				$saved = $this->sync( $objects );
+				$saved = $this->sync( $objects, $input );
 			}
 		} catch ( \Throwable $e ) {
 			wc_transaction_query( 'rollback' );
-			self::forget_rolled_back_objects( $objects );
+			self::forget_rolled_back_objects( $objects, $this->get_deleted_objects() );
 			throw $e;
 		}
 		if ( is_wp_error( $saved ) ) {
 			wc_transaction_query( 'rollback' );
-			self::forget_rolled_back_objects( $objects );
+			self::forget_rolled_back_objects( $objects, $this->get_deleted_objects() );
 			return $saved;
 		}
 		wc_transaction_query( 'commit' );
@@ -199,17 +225,35 @@ abstract class ActionableAbility extends \WP_Ability {
 	}
 
 	/**
-	 * Run the syncs of each resource that the call saved, once, after the last
-	 * save and before the commit.
+	 * Run the syncs of each resource that the call saved or deleted, once,
+	 * after the last save and before the commit. A deleted object is not in
+	 * the saved list, even when it was the primary object: a forced delete
+	 * clears its ID, and a trashed one matches a deleted object by ID.
 	 *
 	 * @param array<int, array{0: \WC_Data, 1: array, 2: string}> $objects The primary object and the secondary objects, with their resources.
+	 * @param array                                               $input   Ability input.
 	 * @return \WP_Error|null A WP_Error when a sync refused, and then the call rolls back.
 	 */
-	private function sync( array $objects ): ?\WP_Error {
-		$saved = array_column( $objects, 0 );
-		foreach ( array_unique( array_column( $objects, 2 ) ) as $resource_name ) {
+	private function sync( array $objects, array $input ): ?\WP_Error {
+		$deleted   = $this->get_deleted_objects();
+		$gone      = array_map( static fn( $object ) => get_class( $object ) . ':' . $object->get_id(), $deleted );
+		$saved     = array_values(
+			array_filter(
+				array_column( $objects, 0 ),
+				static fn( $object ) => $object->get_id() > 0 && ! in_array( get_class( $object ) . ':' . $object->get_id(), $gone, true )
+			)
+		);
+		$resources = array_column( $objects, 2 );
+		if ( ! empty( $deleted ) ) {
+			$resources[] = $this->get_resource();
+		}
+		$context = array(
+			'deleted' => array_values( $deleted ),
+			'input'   => $input,
+		);
+		foreach ( array_unique( $resources ) as $resource_name ) {
 			foreach ( ExtensibleAbilities::get_syncs( $resource_name ) as $args ) {
-				$rejected = self::run_callback( $args['callback'], array( $saved, $this ), array( 'namespace' => $args['namespace'] ) );
+				$rejected = self::run_callback( $args['callback'], array( $saved, $this, $context ), array( 'namespace' => $args['namespace'] ) );
 				if ( null !== $rejected ) {
 					return $rejected;
 				}
@@ -224,9 +268,10 @@ abstract class ActionableAbility extends \WP_Ability {
 	 * same request would still see them.
 	 *
 	 * @param array<int, array{0: \WC_Data, 1: array, 2: string}> $objects The primary object and the secondary objects.
+	 * @param \WC_Data[]                                          $deleted The objects the call deleted.
 	 */
-	private static function forget_rolled_back_objects( array $objects ): void {
-		foreach ( $objects as list( $object ) ) {
+	private static function forget_rolled_back_objects( array $objects, array $deleted = array() ): void {
+		foreach ( array_merge( $objects, array_map( static fn( $object ) => array( $object ), $deleted ) ) as list( $object ) ) {
 			$id = $object instanceof \WC_Data ? $object->get_id() : 0;
 			if ( $id <= 0 ) {
 				continue;

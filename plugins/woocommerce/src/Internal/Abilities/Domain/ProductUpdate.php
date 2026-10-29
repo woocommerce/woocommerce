@@ -179,6 +179,23 @@ class ProductUpdate extends ActionableAbility {
 	}
 
 	/**
+	 * The variations that the `variations` input marked for deletion, as they
+	 * were before the delete.
+	 *
+	 * @var \WC_Product_Variation[]
+	 */
+	private array $deleted = array();
+
+	/**
+	 * The variations that the `variations` input marked for deletion.
+	 *
+	 * @return \WC_Product_Variation[]
+	 */
+	protected function get_deleted_objects(): array {
+		return $this->deleted;
+	}
+
+	/**
 	 * Save the product, then the variations that the input names.
 	 *
 	 * @param \WC_Product $subject Changed product.
@@ -191,6 +208,7 @@ class ProductUpdate extends ActionableAbility {
 		}
 
 		if ( $subject instanceof \WC_Product_Variable ) {
+			$this->deleted = array_map( static fn( \WC_Product_Variation $variation ) => clone $variation, $this->variations['delete'] );
 			return self::save_variations( $subject, $this->variations, 'woocommerce_product_update_failed' );
 		}
 

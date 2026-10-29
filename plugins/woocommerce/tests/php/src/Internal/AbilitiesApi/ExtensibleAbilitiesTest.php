@@ -1443,6 +1443,98 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should give a sync the deleted objects and the input of the call.
+	 */
+	public function test_a_sync_gets_the_deleted_objects_and_the_input(): void {
+		$contexts = array();
+		$this->register_sync(
+			'product',
+			'test-ext',
+			static function ( array $saved, ActionableAbility $ability, array $context ) use ( &$contexts ) {
+				$contexts[] = array(
+					'saved'   => array_map( static fn( \WC_Data $object ) => $object->get_id(), $saved ),
+					'deleted' => array_map( static fn( \WC_Data $object ) => $object->get_id(), $context['deleted'] ),
+					'input'   => $context['input'],
+				);
+				return null;
+			}
+		);
+
+		$created = $this->run_ability( 'woocommerce/product-create', $this->get_shirt_input() );
+		$input   = array(
+			'id'         => $created['product']['id'],
+			'variations' => array(
+				array(
+					'id'     => $created['product']['variation_ids'][1],
+					'delete' => true,
+				),
+			),
+		);
+		$this->run_ability( 'woocommerce/product-update', $input );
+		$this->run_ability(
+			'woocommerce/product-delete',
+			array(
+				'id'    => $created['product']['variation_ids'][0],
+				'force' => true,
+			)
+		);
+		$this->run_ability(
+			'woocommerce/product-delete',
+			array(
+				'id'    => $created['product']['id'],
+				'force' => true,
+			)
+		);
+
+		$this->assertCount( 4, $contexts );
+		$this->assertSame( array(), $contexts[0]['deleted'] );
+		$this->assertSame( array( $created['product']['id'] ), $contexts[1]['saved'] );
+		$this->assertSame( array( $created['product']['variation_ids'][1] ), $contexts[1]['deleted'] );
+		$this->assertSame( $input, $contexts[1]['input'] );
+		$this->assertSame( array( $created['product']['id'] ), $contexts[2]['saved'], 'A variation delete saves the parent.' );
+		$this->assertSame( array( $created['product']['variation_ids'][0] ), $contexts[2]['deleted'] );
+		$this->assertSame( array(), $contexts[3]['saved'] );
+		$this->assertSame( array( $created['product']['id'] ), $contexts[3]['deleted'], 'A parent delete reports the parent; its variations were deleted before.' );
+	}
+
+	/**
+	 * @testdox Should let a validator refuse a delete, and then delete nothing.
+	 */
+	public function test_a_validator_can_refuse_a_delete(): void {
+		$this->register_validator(
+			'product',
+			'test-ext',
+			static fn( \WC_Product $product, ActionableAbility $ability ) => 'woocommerce/product-delete' === $ability->get_name() && 'keep' === $product->get_sku()
+				? new \WP_Error( 'test_keep', 'Keep it.' )
+				: null
+		);
+		$created = $this->run_ability( 'woocommerce/product-create', $this->get_shirt_input() );
+		$kept    = \WC_Helper_Product::create_simple_product( true, array( 'sku' => 'keep' ) );
+
+		$refused = $this->run_ability_response(
+			'woocommerce/product-delete',
+			array(
+				'id'    => $kept->get_id(),
+				'force' => true,
+			)
+		);
+		$deleted = $this->run_ability(
+			'woocommerce/product-delete',
+			array(
+				'id'    => $created['product']['id'],
+				'force' => true,
+			)
+		);
+
+		$this->assertSame( 400, $refused->get_status() );
+		$this->assertSame( 'test_keep', $refused->get_data()['code'] );
+		$this->assertInstanceOf( \WC_Product::class, wc_get_product( $kept->get_id() ) );
+		$this->assertTrue( $deleted['deleted'] );
+		$this->assertFalse( wc_get_product( $created['product']['id'] ) );
+		$this->assertNull( get_post( $created['product']['variation_ids'][0] ), 'The variations go with the parent.' );
+	}
+
+	/**
 	 * @testdox Should undo every save of the call when a sync returns a WP_Error.
 	 */
 	public function test_a_refusal_in_a_sync_rolls_back_the_call(): void {
@@ -2479,9 +2571,11 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	 * @return \WP_REST_Response
 	 */
 	private function run_ability_response( string $name, array $input ): \WP_REST_Response {
-		$readonly = ! empty( wp_get_ability( $name )->get_meta()['annotations']['readonly'] );
-		$request  = new \WP_REST_Request( $readonly ? 'GET' : 'POST', '/wp-abilities/v1/abilities/' . $name . '/run' );
-		if ( $readonly ) {
+		$annotations = wp_get_ability( $name )->get_meta()['annotations'] ?? array();
+		$readonly    = ! empty( $annotations['readonly'] );
+		$method      = $readonly ? 'GET' : ( ! empty( $annotations['destructive'] ) && ! empty( $annotations['idempotent'] ) ? 'DELETE' : 'POST' );
+		$request     = new \WP_REST_Request( $method, '/wp-abilities/v1/abilities/' . $name . '/run' );
+		if ( 'POST' !== $method ) {
 			$request->set_query_params( array( 'input' => $input ) );
 		} else {
 			$request->set_header( 'Content-Type', 'application/json' );

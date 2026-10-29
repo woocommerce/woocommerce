@@ -11,7 +11,8 @@ Status: prototype on `wooai/variable-products`, built on the custom product type
 | Change, add or delete many variations at once | `product-update` on the parent with `variations[]` |
 | Add one variation to an existing product | `product-create` with `type: "variation"`, `parent_id` and `attributes` |
 | Read or list variations | `products-query` with a variation id, or with `parent_id` |
-| Delete one variation | `product-delete` with the variation id |
+| Delete one variation | `product-delete` with the variation id. The parent syncs its price range and stock status. |
+| Delete a variable product | `product-delete` with the parent id. Its variations go with it. |
 
 A variation is a product with `type: "variation"`. Its class extends `WC_Product_Simple`, so it takes price, stock, `virtual` and `downloadable` like a simple product, plus `attributes` on create. A variable parent takes the common fields, `attributes` and `variations`. The output of every product carries `parent_id` and `attributes`, and a variable parent carries `variation_ids`. An update needs no `type`: `product-update` loads the product and refuses a field that its type does not take, such as `variations` on a simple product. Its `attributes` property takes the parent shape only, and a direct update of a variation refuses `attributes` with `woocommerce_product_field_unsupported`.
 
@@ -30,9 +31,11 @@ A variation is a product with `type: "variation"`. Its class extends `WC_Product
 }
 ```
 
-An attribute whose `name` or `id` matches a global attribute, such as `pa_size`, becomes a taxonomy attribute with the term ids of its options, as the REST API builds it, and the save creates missing terms. A variation picks a global attribute's option by term slug, and the output gives each attribute its global `id`, or 0 for a local attribute.
+A `name` is an attribute of this product only, even when a global attribute has the same name. With `global: true`, or an `id`, the attribute is the global one, such as `pa_size`: it becomes a taxonomy attribute with the term ids of its options, as the REST API builds it, and the save creates missing terms. A `global: true` name that matches no global attribute is refused. A variation picks a global attribute's option by term slug, and the output gives each attribute its global `id`, or 0 for a local attribute.
 
-Each variation picks one option of every attribute. The call refuses a variation that picks an option the parent does not have, two variations with the same options, and two variations with the same SKU. `product-create` with `type: "variation"` runs the same checks against the parent's existing variations. Each `variations[]` item accepts the `extensions` input of the product resource, so extension fields and validators run on every variation.
+An attribute is for variations unless it sends `variation: false`. An attribute that is not for variations shows on the product page, and the variations do not pick it. A variation that sends `"option": null` for an attribute matches any option of it, as "Any Size" does in the product editor, and the output shows the null.
+
+Each variation picks one option of every attribute that is for variations. The call refuses a variation that picks an option the parent does not have, two variations with the same options, and two variations with the same SKU. `product-create` with `type: "variation"` runs the same checks against the parent's existing variations. Each `variations[]` item accepts the `extensions` input of the product resource, so extension fields and validators run on every variation.
 
 ### Bulk update through the parent
 
@@ -55,8 +58,10 @@ An item with an `id` changes that variation. An item without one creates a varia
 2. The object that `load()` returns is the primary object. An ability that saves more objects returns them from `change()`: each secondary object with its `extensions` input and, when it differs from the ability's resource, the name of its resource. The pipeline runs the extension fields and the validators of each object's own resource before the first save. For a variable product the secondary objects are the variations the input names.
 3. `save()` runs inside `wc_transaction_query( 'start' )`. An error or an exception from `save()` rolls the transaction back, and the pipeline drops the object caches of every touched object, because the saves filled them with rows the rollback removed. Success commits.
 4. `wc_transaction_query()` counts its depth. The first start opens a transaction, a start inside it sets a savepoint, and each commit or rollback closes its own level. An ability inside checkout, or checkout inside an ability, rolls back only its own part.
-5. After the last save, still inside the transaction, the pipeline runs the syncs that extensions add with `ExtensibleAbilities::register_sync()`. A sync receives every saved object, the primary object first, and writes what the saved objects imply elsewhere. It runs once per call, and only when an object of its resource was saved. A refusal rolls the call back.
+5. After the last save, still inside the transaction, the pipeline runs the syncs that extensions add with `ExtensibleAbilities::register_sync()`. A sync receives every saved object, the primary object first, the ability, and a context with the objects the call deleted and the input of the call, so it can skip work when the call did not write its fields. It writes what the saved objects imply elsewhere. It runs once per call, and only when an object of its resource was saved or deleted. A refusal rolls the call back. The response is built after the syncs, from the primary object in memory: a variation update returns the variation, so a client that needs the parent's new derived data reads the parent.
 6. For a variable product, `save()` saves the parent, sets the parent id on each new variation and saves it, deletes the variations marked for deletion, then syncs the parent's price range and stock status from its children. The sync saves the parent a second time, the same way the product editor does.
+7. `product-delete` runs on the same pipeline. The validators of the product resource can refuse a delete, the syncs get the deleted objects, and a variation delete syncs its parent inside the transaction.
+8. Sibling checks and `variation_ids` read the children from the data store, not through `WC_Product_Variable::get_children()`, because a plugin can filter that list for the current user and hide a variation from the duplicate check.
 
 The permissions of a variation are checked on its parent. A published variation of a draft parent is as hidden as the parent, and whoever may edit the parent may edit its variations.
 
@@ -79,3 +84,4 @@ Wholesale Suite (`woocommerce-wholesale-prices` on WordPress.org, 20,000 install
 - **The bulk update response lists ids.** A variable parent returns `variation_ids`, so a client that changed fifty prices reads them back with `products-query` and `parent_id`. Embedding the changed variations in the response is a small addition if clients need it.
 - **Limits of the transaction.** A plugin that opens a transaction with a raw query is outside the depth counter. A `commit` without a `start` from a plugin shifts the depth for the rest of the request. MyISAM tables ignore the transaction. A read replica can make the variation data store miss a parent that the primary has not replicated yet. Side effects of save hooks outside the database are not undone. These are documented on `ActionableAbility` and are the same trade as checkout.
 - **Attributes are local to the call.** Changing the parent's attributes does not revalidate existing variations that the input does not name.
+- **The sync gets the whole input.** It does not get a per-object list of the fields the call wrote. A sync that needs it reads the input, where each `variations[]` item carries its own `extensions`.
