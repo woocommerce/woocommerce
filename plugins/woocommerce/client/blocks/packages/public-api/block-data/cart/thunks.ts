@@ -477,7 +477,6 @@ export const addItemToCart =
 	async ( { dispatch, select }: CartThunkArgs ) => {
 		try {
 			dispatch.startAddingToCart( productId );
-			const previousItems = select.getCartData().items;
 			const { response } = await apiFetchWithHeaders< {
 				response: CartResponse;
 			} >( {
@@ -491,15 +490,14 @@ export const addItemToCart =
 				},
 				cache: 'no-store',
 			} );
+			// Read the cart once the response arrives: adds batched with this
+			// one have already been received, so they aren't reported again.
+			const previousItems = select.getCartData().items;
 			dispatch.receiveCart( response );
 			dispatch.finishAddingToCart(
 				productId,
 				true,
-				// Concurrent adds are batched, so the response can include
-				// other products added at the same time.
-				getAddedProducts( previousItems, response.items ).filter(
-					( product ) => product.id === productId
-				)
+				getAddedProducts( previousItems, response.items )
 			);
 			return response;
 		} catch ( error ) {
