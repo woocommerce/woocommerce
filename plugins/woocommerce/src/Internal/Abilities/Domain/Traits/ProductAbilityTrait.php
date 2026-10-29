@@ -1454,6 +1454,38 @@ trait ProductAbilityTrait {
 	}
 
 	/**
+	 * Get the output schema of product-create and product-update: the product,
+	 * and the variations the call created or changed.
+	 *
+	 * @return array
+	 */
+	protected static function get_product_mutation_output_schema(): array {
+		$schema = self::get_entity_output_schema( 'product', self::get_product_output_schema() );
+
+		$schema['properties']['variations'] = array(
+			'type'        => 'array',
+			'description' => __( 'The variations the call created or changed, in input order. Deleted variations are not listed.', 'woocommerce' ),
+			'items'       => self::get_product_output_schema(),
+		);
+
+		return $schema;
+	}
+
+	/**
+	 * Build the response of product-create and product-update.
+	 *
+	 * @param \WC_Product             $product    Saved product.
+	 * @param \WC_Product_Variation[] $variations Variations the call saved, in input order.
+	 * @return array
+	 */
+	protected static function format_product_mutation_response( \WC_Product $product, array $variations ): array {
+		return array(
+			'product'    => self::format_product_for_response( $product ),
+			'variations' => array_map( array( self::class, 'format_product_for_response' ), array_values( $variations ) ),
+		);
+	}
+
+	/**
 	 * Get the schema for a single product in a response.
 	 *
 	 * @return array

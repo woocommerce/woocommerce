@@ -1838,6 +1838,8 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 'variable', $created['product']['type'] );
 		$this->assertCount( 2, $created['product']['variation_ids'] );
 		$this->assertSame( $parent->get_children(), $created['product']['variation_ids'] );
+		$this->assertSame( $created['product']['variation_ids'], array_column( $created['variations'], 'id' ) );
+		$this->assertSame( array( 'shirt-s', 'shirt-m' ), array_column( $created['variations'], 'sku' ) );
 		$this->assertSame(
 			array(
 				array(
@@ -2176,6 +2178,8 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		);
 		$this->assertNotWPError( $updated );
 		$this->assertCount( 3, $updated['product']['variation_ids'] );
+		$this->assertSame( array( '8.00', '15.00' ), array_column( $updated['variations'], 'regular_price' ), 'The response carries the changed and the new variation, in input order.' );
+		$this->assertSame( $small_id, $updated['variations'][0]['id'] );
 		$this->assertSame( '8.00', $updated['product']['price'] );
 		$this->assertSame( '8.00', wc_get_product( $small_id )->get_regular_price() );
 		$this->assertSame( '12.00', wc_get_product( $medium_id )->get_regular_price() );
@@ -2195,6 +2199,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		);
 		$this->assertNotWPError( $deleted );
 		$this->assertSame( array( $small_id, $large_id ), $deleted['product']['variation_ids'] );
+		$this->assertSame( array(), $deleted['variations'] );
 		$this->assertNull( get_post( $medium_id ) );
 
 		$other                       = \WC_Helper_Product::create_variation_product();
