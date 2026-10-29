@@ -260,7 +260,7 @@ class WC_REST_System_Status_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 	public function test_get_environment_info_reports_the_bundled_action_scheduler_copy(): void {
 		$environment = $this->sut->get_environment_info_per_fields( array() );
 
-		$this->assertSame( ActionSchedulerUtil::get_bundled_version(), $environment['action_scheduler']['version'] );
+		$this->assertSame( ActionSchedulerUtil::get_bundled_version(), $environment['action_scheduler']['loaded_version'] );
 		$this->assertSame( ActionSchedulerUtil::get_highest_registered_version(), $environment['action_scheduler']['registered_version'] );
 		$this->assertSame( 'woocommerce', $environment['action_scheduler']['source_type'] );
 		$this->assertSame( 'WooCommerce', $environment['action_scheduler']['source_name'] );
@@ -279,7 +279,7 @@ class WC_REST_System_Status_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 
 		$environment = $this->sut->get_environment_info_per_fields( array() );
 
-		$this->assertSame( '3.2.0', $environment['action_scheduler']['version'] );
+		$this->assertSame( '3.2.0', $environment['action_scheduler']['loaded_version'] );
 		$this->assertSame( ActionSchedulerUtil::get_bundled_version(), $environment['action_scheduler']['registered_version'], 'The registry still reports the bundled copy as the highest version' );
 		$this->assertSame( 'plugin', $environment['action_scheduler']['source_type'] );
 		$this->assertSame( 'Some Plugin', $environment['action_scheduler']['source_name'] );
@@ -297,7 +297,7 @@ class WC_REST_System_Status_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 
 		$environment = $this->sut->get_environment_info_per_fields( array() );
 
-		$this->assertNull( $environment['action_scheduler']['version'] );
+		$this->assertNull( $environment['action_scheduler']['loaded_version'] );
 		$this->assertNull( $environment['action_scheduler']['source_type'] );
 		$this->assertNull( $environment['action_scheduler']['source_name'] );
 		$this->assertNull( $environment['action_scheduler']['source_path'] );

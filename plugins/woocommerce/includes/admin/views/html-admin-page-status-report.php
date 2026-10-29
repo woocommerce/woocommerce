@@ -157,7 +157,7 @@ if ( file_exists( $plugin_path ) ) {
 			<td>
 				<?php
 				$action_scheduler = $environment['action_scheduler'] ?? array();
-				$as_version       = $action_scheduler['version'] ?? null;
+				$as_version       = $action_scheduler['loaded_version'] ?? null;
 
 				if ( is_null( $as_version ) ) {
 					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . esc_html__( 'Unable to detect the Action Scheduler package.', 'woocommerce' ) . '</mark>';

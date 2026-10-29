@@ -114,7 +114,7 @@ const schemas = {
 		},
 	],
 	environment_action_scheduler: [
-		{ field: 'version', type: any( String ) },
+		{ field: 'loaded_version', type: any( String ) },
 		{ field: 'registered_version', type: any( String ) },
 		{ field: 'source_type', type: any( String ) },
 		{ field: 'source_name', type: any( String ) },

@@ -167,7 +167,7 @@ class WC_Tests_REST_System_Status extends WC_REST_Unit_Test_Case {
 
 		// The test environment loads the Action Scheduler copy bundled with WooCommerce.
 		$action_scheduler = (array) $environment['action_scheduler'];
-		$this->assertSame( ActionSchedulerUtil::get_bundled_version(), $action_scheduler['version'] );
+		$this->assertSame( ActionSchedulerUtil::get_bundled_version(), $action_scheduler['loaded_version'] );
 		$this->assertSame( ActionSchedulerUtil::get_highest_registered_version(), $action_scheduler['registered_version'] );
 		$this->assertSame( 'woocommerce', $action_scheduler['source_type'] );
 		$this->assertSame( 'WooCommerce', $action_scheduler['source_name'] );

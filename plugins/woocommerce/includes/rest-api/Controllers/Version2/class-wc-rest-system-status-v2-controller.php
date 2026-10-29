@@ -174,7 +174,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 							'context'     => array( 'view' ),
 							'readonly'    => true,
 							'properties'  => array(
-								'version'            => array(
+								'loaded_version'     => array(
 									'description' => __( 'Version of the loaded copy, or null when none is loaded.', 'woocommerce' ),
 									'type'        => array( 'string', 'null' ),
 									'context'     => array( 'view' ),
@@ -1142,7 +1142,7 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 		$action_scheduler_path   = ActionSchedulerUtil::get_loaded_path();
 		$action_scheduler_source = null === $action_scheduler_path ? null : ActionSchedulerUtil::get_loaded_source();
 		$action_scheduler        = array(
-			'version'            => ActionSchedulerUtil::get_loaded_version(),
+			'loaded_version'     => ActionSchedulerUtil::get_loaded_version(),
 			'registered_version' => ActionSchedulerUtil::get_highest_registered_version(),
 			'source_type'        => $action_scheduler_source['type'] ?? null,
 			'source_name'        => $action_scheduler_source['name'] ?? null,
