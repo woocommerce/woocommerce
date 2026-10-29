@@ -216,6 +216,31 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Creating a product after a report exists queues a re-check.
+	 */
+	public function test_new_product_queues_recheck(): void {
+		wc_get_container()->get( AgentReadiness::class )->refresh_report();
+
+		WC_Helper_Product::create_simple_product();
+
+		$this->assertCount( 1, $this->pending( ScheduledScan::RECHECK_HOOK ) );
+	}
+
+	/**
+	 * @testdox With the feature disabled a re-check leaves the stored report as it was.
+	 */
+	public function test_recheck_with_feature_disabled(): void {
+		$readiness = wc_get_container()->get( AgentReadiness::class );
+		$readiness->refresh_report();
+		WC_Helper_Product::create_simple_product();
+		update_option( 'woocommerce_feature_agent_readiness_enabled', 'no' );
+
+		$this->sut->recheck();
+
+		$this->assertSame( 0, $readiness->get_cached_report()['products'] );
+	}
+
+	/**
 	 * @testdox A product change while a requested scan is waiting queues no re-check.
 	 */
 	public function test_product_change_with_pending_scan(): void {
@@ -244,13 +269,14 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 		};
 		add_filter( 'pre_http_request', $count );
 		WC_Helper_Product::create_simple_product();
+		$daily = as_schedule_single_action( time() + DAY_IN_SECONDS, ScheduledScan::DAILY_HOOK, array(), ScheduledScan::GROUP );
 
 		$this->sut->recheck();
 		remove_filter( 'pre_http_request', $count );
 
 		$this->assertSame( 0, $requests );
 		$this->assertSame( 1, wc_get_container()->get( AgentReadiness::class )->get_cached_report()['products'] );
-		$this->assertCount( 0, $this->pending( ScheduledScan::DAILY_HOOK ) );
+		$this->assertSame( array( $daily ), array_map( 'intval', $this->pending( ScheduledScan::DAILY_HOOK ) ) );
 	}
 
 	/**
