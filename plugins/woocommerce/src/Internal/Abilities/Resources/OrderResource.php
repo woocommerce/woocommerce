@@ -103,7 +103,7 @@ class OrderResource {
 			'id',
 			array(
 				'schema'       => array( 'type' => 'integer' ),
-				'get_callback' => DataFields::getter( 'id' ),
+				'get_callback' => static fn( \WC_Order $order ) => $order->get_id(),
 			)
 		);
 		AbilityResources::register_field(
@@ -114,16 +114,34 @@ class OrderResource {
 					'type' => 'string',
 					'enum' => self::get_output_status_slugs(),
 				),
-				'get_callback' => DataFields::getter( 'status' ),
+				'get_callback' => static fn( \WC_Order $order ) => $order->get_status(),
 			)
 		);
-		DataFields::register_currency( self::NAME, static fn( \WC_Order $order ) => $order->get_currency() );
+		AbilityResources::register_field(
+			self::NAME,
+			'currency',
+			array(
+				'schema'       => array(
+					'type' => 'string',
+					'enum' => array_keys( get_woocommerce_currencies() ),
+				),
+				'get_callback' => static fn( \WC_Order $order ) => $order->get_currency(),
+			)
+		);
+		AbilityResources::register_field(
+			self::NAME,
+			'currency_symbol',
+			array(
+				'schema'       => array( 'type' => 'string' ),
+				'get_callback' => static fn( \WC_Order $order ) => html_entity_decode( get_woocommerce_currency_symbol( $order->get_currency() ), ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401 ),
+			)
+		);
 		AbilityResources::register_field(
 			self::NAME,
 			'total',
 			array(
 				'schema'       => array( 'type' => 'string' ),
-				'get_callback' => DataFields::getter( 'total' ),
+				'get_callback' => static fn( \WC_Order $order ) => $order->get_total(),
 			)
 		);
 		AbilityResources::register_field(
@@ -131,7 +149,7 @@ class OrderResource {
 			'customer_id',
 			array(
 				'schema'       => array( 'type' => 'integer' ),
-				'get_callback' => DataFields::getter( 'customer_id' ),
+				'get_callback' => static fn( \WC_Order $order ) => $order->get_customer_id(),
 			)
 		);
 		AbilityResources::register_field(
@@ -142,7 +160,7 @@ class OrderResource {
 					'type'   => array( 'string', 'null' ),
 					'format' => 'email',
 				),
-				'get_callback'  => DataFields::getter( 'billing_email', static fn( $email ) => '' === $email ? null : $email ),
+				'get_callback'  => static fn( \WC_Order $order ) => '' === $order->get_billing_email() ? null : $order->get_billing_email(),
 				'personal_data' => true,
 			)
 		);
@@ -151,7 +169,7 @@ class OrderResource {
 			'payment_method',
 			array(
 				'schema'       => array( 'type' => 'string' ),
-				'get_callback' => DataFields::getter( 'payment_method' ),
+				'get_callback' => static fn( \WC_Order $order ) => $order->get_payment_method(),
 			)
 		);
 		AbilityResources::register_field(
@@ -159,10 +177,31 @@ class OrderResource {
 			'payment_method_title',
 			array(
 				'schema'       => array( 'type' => 'string' ),
-				'get_callback' => DataFields::getter( 'payment_method_title' ),
+				'get_callback' => static fn( \WC_Order $order ) => $order->get_payment_method_title(),
 			)
 		);
-		DataFields::register_dates( self::NAME, 'created', 'modified' );
+		$date_schema = array(
+			'type'   => array( 'string', 'null' ),
+			'format' => 'date-time',
+		);
+		foreach ( array( 'date_created', 'date_modified' ) as $prop ) {
+			AbilityResources::register_field(
+				self::NAME,
+				$prop,
+				array(
+					'schema'       => $date_schema,
+					'get_callback' => static fn( \WC_Order $order ) => wc_rest_prepare_date_response( $order->{'get_' . $prop}(), false ),
+				)
+			);
+			AbilityResources::register_field(
+				self::NAME,
+				$prop . '_gmt',
+				array(
+					'schema'       => $date_schema,
+					'get_callback' => static fn( \WC_Order $order ) => wc_rest_prepare_date_response( $order->{'get_' . $prop}() ),
+				)
+			);
+		}
 		AbilityResources::register_field(
 			self::NAME,
 			'line_items',
@@ -201,7 +240,7 @@ class OrderResource {
 				$prop,
 				array(
 					'schema'       => array( 'type' => $type ),
-					'get_callback' => DataFields::getter( $prop ),
+					'get_callback' => static fn( \WC_Order_Item_Product $item ) => $item->{'get_' . $prop}(),
 				)
 			);
 		}
