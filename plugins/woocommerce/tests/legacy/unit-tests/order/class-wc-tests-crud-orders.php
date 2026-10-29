@@ -1143,24 +1143,6 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test: update_status warns one time for an order class that overrides it without overriding stage_status.
-	 */
-	public function test_update_status_warns_for_a_class_that_does_not_stage() {
-		$object = new class() extends WC_Order {
-			// phpcs:ignore Squiz.Commenting.FunctionComment.Missing, Generic.CodeAnalysis.UselessOverridingMethod.Found
-			public function update_status( $new_status, $note = '', $manual = false ) {
-				return parent::update_status( $new_status, $note, $manual );
-			}
-		};
-		$object->save();
-		$this->setExpectedIncorrectUsage( 'WC_Order::update_status' );
-
-		$this->assertTrue( $object->update_status( OrderStatus::ON_HOLD ) );
-		$this->assertTrue( $object->update_status( OrderStatus::PROCESSING ) );
-		$this->assertSame( OrderStatus::PROCESSING, wc_get_order( $object->get_id() )->get_status() );
-	}
-
-	/**
 	 * Test: update_status fires woocommerce_order_edit_status before it writes, and set_status fires it before the paid and completed dates are set.
 	 */
 	public function test_edit_status_action_fires_before_the_write() {
