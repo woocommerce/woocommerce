@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Resolve shortcodes before generating download paths

@@ -45,6 +45,24 @@ class WC_Product_Download_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Shortcode download paths are allowed only when validate_file() accepts them.
+	 *
+	 * @testWith ["[s3 bucket=\"file.pdf\"]", true]
+	 *           ["[../wp-config.php]", false]
+	 *           ["[../../secret]", false]
+	 *           ["[:C/windows]", false]
+	 *
+	 * @param string $file    Download file path stored as a shortcode.
+	 * @param bool   $allowed Whether the shortcode is an allowed filetype.
+	 */
+	public function test_shortcode_file_paths_must_pass_validate_file( string $file, bool $allowed ): void {
+		$download = new WC_Product_Download();
+		$download->set_file( $file );
+
+		$this->assertSame( $allowed, $download->is_allowed_filetype(), $file );
+	}
+
+	/**
 	 * Test that download URLs are automatically added to the approved directories list (for
 	 * "admin"-level users) but that they are not automatically added in other cases.
 	 */
