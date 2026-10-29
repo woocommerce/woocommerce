@@ -1327,6 +1327,20 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should stop reporting tokens in the same request once a user's last token is deleted.
+	 */
+	public function test_delete_for_user_resets_the_memoized_has_tokens(): void {
+		$data_store = new PushTokensDataStore();
+		$this->create_push_token_for_user( $data_store, 106 );
+
+		$this->assertTrue( $data_store->has_tokens(), 'Memoizes has_tokens() before the delete.' );
+
+		$data_store->delete_for_user( 106 );
+
+		$this->assertFalse( $data_store->has_tokens(), 'has_tokens() should be read again after the delete.' );
+	}
+
+	/**
 	 * @testdox Should return only the tokens last registered strictly before the cutoff.
 	 */
 	public function test_get_stale_token_ids_excludes_tokens_registered_at_or_after_the_cutoff(): void {

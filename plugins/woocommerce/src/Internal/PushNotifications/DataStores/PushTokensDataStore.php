@@ -297,6 +297,7 @@ class PushTokensDataStore {
 		// Anything read earlier in this request now includes deleted tokens.
 		$this->tokens_by_roles_cache = array();
 		$this->token_count           = null;
+		$this->has_tokens            = null;
 
 		return $deleted;
 	}
