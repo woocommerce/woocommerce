@@ -1,6 +1,8 @@
 <?php
 namespace Automattic\WooCommerce\StoreApi\Utilities;
 
+use Automattic\WooCommerce\Utilities\StringUtil;
+
 /**
  * DraftOrderTrait
  *
@@ -59,8 +61,8 @@ trait DraftOrderTrait {
 
 	/**
 	 * Whether the argument can serve as the session's draft order: a checkout-draft, or a pending/failed order
-	 * the shopper can still pay as placed (its cart hash matches, a priced order that needs shipping still
-	 * ships to the customer's destination, and its tax location has not moved).
+	 * the shopper can still pay as placed (its cart hash matches, the cart keeps its counted coupons, a priced order
+	 * that needs shipping still ships to the customer's destination, and its tax location has not moved).
 	 *
 	 * @param \WC_Order $order_object Order object to check.
 	 * @return boolean Whether the order is valid as a draft order.
@@ -83,6 +85,7 @@ trait DraftOrderTrait {
 		if (
 			$order_object->needs_payment()
 			&& $order_object->has_cart_hash( wc()->cart->get_cart_hash() )
+			&& $this->cart_keeps_counted_coupons( $order_object )
 			&& (
 				$this->order_awaits_first_address( $order_object )
 				|| ( $this->order_ships_to_customer_destination( $order_object ) && $this->order_taxed_at_customer_location( $order_object ) )
@@ -239,6 +242,85 @@ trait DraftOrderTrait {
 		}
 
 		return $location;
+	}
+
+	/**
+	 * Whether a sync from the cart would keep the coupons the order counted. The cart hash does not cover coupons, and
+	 * a sync that swapped or dropped a counted coupon would leave it counted with no order carrying it. An order that
+	 * counted nothing, e.g. a failed one, may follow the cart. When the cart holds a coupon an extension supplies
+	 * without a stored record, such as the one WooCommerce Subscriptions puts in place of a parent order's coupons, the
+	 * order may follow the cart as long as the cart adds no stored coupon the order lacks. Compares formatted codes,
+	 * not `_coupons_hash`, which only the Store API sync writes. The flag is read through the data store, because
+	 * the order object may be one held since before its usage was counted.
+	 *
+	 * @param \WC_Order $order_object Order object to check.
+	 * @return bool
+	 */
+	private function cart_keeps_counted_coupons( \WC_Order $order_object ): bool {
+		$data_store = $order_object->get_data_store();
+
+		if ( ! $data_store instanceof \WC_Data_Store || ! $data_store->has_callable( 'get_recorded_coupon_usage_counts' ) ) {
+			return true;
+		}
+
+		// @phpstan-ignore method.notFound (the call is proxied by WC_Data_Store::__call() and guarded by has_callable() above)
+		if ( ! $data_store->get_recorded_coupon_usage_counts( $order_object ) ) {
+			return true;
+		}
+
+		$normalize = static function ( array $codes ): array {
+			$codes = array_map( fn( $code ) => (string) wc_format_coupon_code( (string) $code ), $codes );
+			$codes = array_unique( array_filter( $codes, fn( $code ) => ! StringUtil::is_null_or_whitespace( $code ) ) );
+			sort( $codes, SORT_STRING );
+
+			return $codes;
+		};
+
+		$order_codes = $normalize( $order_object->get_coupon_codes() );
+
+		if ( $normalize( wc()->cart->get_applied_coupons() ) === $order_codes ) {
+			return true;
+		}
+
+		$cart_stored_codes  = array();
+		$has_extension_code = false;
+
+		foreach ( wc()->cart->get_applied_coupons() as $code ) {
+			if ( StringUtil::is_null_or_whitespace( (string) $code ) ) {
+				continue;
+			}
+
+			if ( $this->is_stored_coupon_code( (string) $code ) ) {
+				$cart_stored_codes[] = $code;
+			} else {
+				$has_extension_code = true;
+			}
+		}
+
+		return $has_extension_code && ! array_diff( $normalize( $cart_stored_codes ), $order_codes );
+	}
+
+	/**
+	 * Whether a coupon with this code is stored: one wc_get_coupon_id_by_code() finds, or a coupon post with the code
+	 * in any status. wc_get_coupon_id_by_code() only finds published coupons, so a coupon trashed after the order was
+	 * placed would otherwise pass for an extension's code.
+	 *
+	 * @param string $code Coupon code as applied to the cart.
+	 * @return bool
+	 */
+	private function is_stored_coupon_code( string $code ): bool {
+		global $wpdb;
+
+		if ( wc_get_coupon_id_by_code( $code ) ) {
+			return true;
+		}
+
+		return (bool) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT ID FROM $wpdb->posts WHERE LOWER(post_title) = LOWER(%s) AND post_type = 'shop_coupon' LIMIT 1",
+				wc_sanitize_coupon_code( $code )
+			)
+		);
 	}
 
 	/**
