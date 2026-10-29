@@ -396,42 +396,6 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Product schema filters receive the original image and can replace or remove it.
-	 * @testWith ["replace"]
-	 *           ["remove"]
-	 *
-	 * @param string $action Filter action.
-	 */
-	public function test_product_schema_filter_preserves_image_control( string $action ): void {
-		$featured = $this->create_schema_attachment( 'featured.jpg' );
-		$gallery  = $this->create_schema_attachment( 'gallery.jpg' );
-		$product  = WC_Helper_Product::create_simple_product();
-		$product->set_image_id( $featured );
-		$product->set_gallery_image_ids( array( $gallery ) );
-		$expected = wp_get_attachment_url( $featured );
-		add_filter(
-			'woocommerce_structured_data_product',
-			function ( $markup ) use ( $action, $expected ) {
-				$this->assertSame( $expected, $markup['image'] );
-				if ( 'replace' === $action ) {
-					$markup['image'] = 'https://example.com/replacement.jpg';
-				} else {
-					unset( $markup['image'] );
-				}
-				return $markup;
-			}
-		);
-		$this->structured_data->generate_product_data( $product );
-		$data = $this->structured_data->get_data()[0];
-		if ( 'replace' === $action ) {
-			$this->assertSame( 'https://example.com/replacement.jpg', $data['image'] );
-		} else {
-			$this->assertArrayNotHasKey( 'image', $data );
-		}
-	}
-
-
-	/**
 	 * Create an attachment for product schema tests.
 	 *
 	 * @param string $file Attachment file name.

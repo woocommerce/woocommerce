@@ -255,8 +255,8 @@ class WC_Structured_Data {
 			'description' => wp_strip_all_tags( do_shortcode( $product->get_short_description() ? $product->get_short_description() : $product->get_description() ) ),
 		);
 
-		if ( $image ) {
-			$markup['image'] = $image;
+		if ( $images ) {
+			$markup['image'] = 1 === count( $images ) ? $images[0] : $images;
 		}
 
 		// Declare SKU or fallback to ID.
@@ -571,18 +571,7 @@ class WC_Structured_Data {
 			return;
 		}
 
-		/**
-		 * Filters the structured data for a product.
-		 *
-		 * @since 3.0.0
-		 * @param array      $markup Product structured data.
-		 * @param WC_Product $product Product object.
-		 */
-		$markup = apply_filters( 'woocommerce_structured_data_product', $markup, $product );
-		if ( is_array( $markup ) && ( $image ? isset( $markup['image'] ) && $markup['image'] === $image : ! array_key_exists( 'image', $markup ) ) && $images ) {
-			$markup['image'] = 1 === count( $images ) ? $images[0] : $images;
-		}
-		$this->set_data( $markup );
+		$this->set_data( apply_filters( 'woocommerce_structured_data_product', $markup, $product ) );
 	}
 
 	/**
