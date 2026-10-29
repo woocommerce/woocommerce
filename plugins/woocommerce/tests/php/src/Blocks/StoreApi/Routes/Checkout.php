@@ -2669,6 +2669,37 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
+	 * @testdox Existing order payment should tax an order that ships nothing and holds no address at its billing address.
+	 */
+	public function test_checkout_order_taxes_virtual_order_without_address_at_billing() {
+		$this->set_taxes_based_on( 'shipping' );
+		$this->enable_taxes_with_us_ca_rate();
+
+		// A merchant-created order for a virtual product, awaiting the shopper's details.
+		$virtual_product = \WC_Helper_Product::create_simple_product( true, array( 'virtual' => true ) );
+		$order           = \WC_Helper_Order::create_order( 0, $virtual_product );
+		$order->set_billing_address( array_fill_keys( array( 'city', 'state', 'postcode', 'country' ), '' ) );
+		$order->save();
+
+		$billing = array(
+			'city'     => 'San Francisco',
+			'state'    => 'CA',
+			'postcode' => '94103',
+			'country'  => 'US',
+		);
+
+		// The shipping address of an order that ships nothing is not validated, so it must not set the tax.
+		$response = $this->dispatch_pay_for_order_request( $order, $billing, $this->get_different_destination() );
+
+		$this->assertEquals( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+
+		$stored_order = wc_get_order( $order->get_id() );
+		$this->assertEquals( 'US', $stored_order->get_shipping_country() );
+		$this->assertEquals( 'CA', $stored_order->get_shipping_state() );
+		$this->assertGreaterThan( 0, (float) $stored_order->get_total_tax() );
+	}
+
+	/**
 	 * @testdox Existing order payment should reject a first shipping address away from the billing address the order ships to.
 	 */
 	public function test_checkout_order_rejects_first_shipping_address_away_from_billing() {
