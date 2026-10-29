@@ -33,6 +33,25 @@ class StatusTabTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The tab lists the products it counts but doesn't check.
+	 */
+	public function test_render_not_checked_counts(): void {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+		$hidden = WC_Helper_Product::create_simple_product();
+		$hidden->set_catalog_visibility( 'hidden' );
+		$hidden->save();
+		WC_Helper_Product::create_external_product();
+		wc_get_container()->get( AgentReadiness::class )->refresh_report();
+
+		ob_start();
+		wc_get_container()->get( StatusTab::class )->render();
+		$html = (string) ob_get_clean();
+
+		$this->assertStringContainsString( 'Hidden from your catalog: 1', $html );
+		$this->assertStringContainsString( 'Product type not supported yet: 1', $html );
+	}
+
+	/**
 	 * @testdox The tab asks for a first run when no report is cached.
 	 */
 	public function test_render_without_report(): void {

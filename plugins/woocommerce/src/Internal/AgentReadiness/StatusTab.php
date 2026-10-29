@@ -143,6 +143,7 @@ class StatusTab implements RegisterHooksInterface {
 			echo '</p></div>';
 		}
 		$this->render_channels( $report['channels'] ?? array(), (int) ( $report['products'] ?? 0 ) );
+		$this->render_not_checked( (int) ( $report['hidden_from_catalog'] ?? 0 ), (int) ( $report['unsupported_types'] ?? 0 ) );
 		$this->render_checks( $report['checks'] ?? array(), $report['channels'] ?? array() );
 	}
 
@@ -206,6 +207,32 @@ class StatusTab implements RegisterHooksInterface {
 			</tbody>
 		</table>
 		<?php
+	}
+
+	/**
+	 * Published products the scan counts but doesn't check.
+	 *
+	 * @param int $hidden      Products hidden from the shop catalog.
+	 * @param int $unsupported Products of a type agents don't support yet.
+	 */
+	private function render_not_checked( int $hidden, int $unsupported ): void {
+		$lines = array();
+		if ( $hidden > 0 ) {
+			/* translators: %d: number of products. */
+			$lines[] = sprintf( __( 'Hidden from your catalog: %d', 'woocommerce' ), $hidden );
+		}
+		if ( $unsupported > 0 ) {
+			/* translators: %d: number of products. */
+			$lines[] = sprintf( __( 'Product type not supported yet: %d', 'woocommerce' ), $unsupported );
+		}
+		if ( empty( $lines ) ) {
+			return;
+		}
+		echo '<p class="description">' . esc_html__( 'Not checked, because agents don\'t see these products:', 'woocommerce' ) . '</p><ul>';
+		foreach ( $lines as $line ) {
+			echo '<li>' . esc_html( $line ) . '</li>';
+		}
+		echo '</ul>';
 	}
 
 	/**

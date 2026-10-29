@@ -8,11 +8,12 @@ defined( 'ABSPATH' ) || exit;
 /**
  * One pass over the published catalog for the readiness checks.
  *
- * Walks published products in batches, most recently modified first, tests
- * each against every rule once and tallies product statuses per channel. Stops
- * after PRODUCT_LIMIT products so the scan stays inside one request. Grouped
- * and external products are left out: neither carries its own price or
- * identifiers.
+ * Walks published simple and variable products in batches, most recently
+ * modified first, tests each against every rule once and tallies product
+ * statuses per channel. Stops after PRODUCT_LIMIT products so the scan stays
+ * inside one request. Products hidden from the shop catalog are the merchant's
+ * choice and other product types are not supported by agents yet, so both are
+ * counted, not checked.
  *
  * @since 11.4.0
  */
@@ -22,7 +23,7 @@ class ProductScan {
 
 	public const PRODUCT_LIMIT = 5000;
 
-	private const SKIPPED_TYPES = array( 'grouped', 'external' );
+	public const SUPPORTED_TYPES = array( 'simple', 'variable' );
 
 	public const NOT_LISTABLE = 'not_listable';
 	public const WITH_GAPS    = 'with_gaps';
@@ -41,6 +42,20 @@ class ProductScan {
 	 * @var int
 	 */
 	private int $products = 0;
+
+	/**
+	 * Published products of a supported type hidden from the shop catalog.
+	 *
+	 * @var int
+	 */
+	private int $hidden_from_catalog = 0;
+
+	/**
+	 * Published products of a type agents don't support yet.
+	 *
+	 * @var int
+	 */
+	private int $unsupported_types = 0;
 
 	/**
 	 * Product statuses by channel id.
@@ -71,7 +86,19 @@ class ProductScan {
 	public static function covers( \WC_Product $product ): bool {
 		return 'publish' === $product->get_status()
 			&& ! $product instanceof \WC_Product_Variation
-			&& ! in_array( $product->get_type(), self::SKIPPED_TYPES, true );
+			&& in_array( self::stored_type( $product ), self::SUPPORTED_TYPES, true )
+			&& ! in_array( $product->get_catalog_visibility(), array( 'search', 'hidden' ), true );
+	}
+
+	/**
+	 * The product type as stored, which the scan query reads. A product whose
+	 * type's plugin is inactive loads as simple, but keeps its stored type.
+	 *
+	 * @param \WC_Product $product Product.
+	 */
+	private static function stored_type( \WC_Product $product ): string {
+		$type = \WC_Product_Factory::get_product_type( $product->get_id() );
+		return is_string( $type ) && '' !== $type ? $type : 'simple';
 	}
 
 	/**
@@ -82,16 +109,31 @@ class ProductScan {
 	 * @param int                                                             $ids_limit     Product ids kept per rule.
 	 */
 	public function evaluate( array $rules, array $channel_rules, int $ids_limit ): void {
-		$this->results   = array_fill_keys(
+		$this->results             = array_fill_keys(
 			array_keys( $rules ),
 			array(
 				'count'       => 0,
 				'product_ids' => array(),
 			)
 		);
-		$this->products  = 0;
-		$this->statuses  = array();
-		$this->truncated = false;
+		$this->products            = 0;
+		$this->statuses            = array();
+		$this->truncated           = false;
+		$this->hidden_from_catalog = self::count_published( array( self::supported_type_query(), self::catalog_query( 'IN' ) ) );
+		$this->unsupported_types   = self::count_published(
+			array(
+				array(
+					'taxonomy' => 'product_type',
+					'field'    => 'slug',
+					'terms'    => self::SUPPORTED_TYPES,
+					'operator' => 'NOT IN',
+				),
+				array(
+					'taxonomy' => 'product_type',
+					'operator' => 'EXISTS',
+				),
+			)
+		);
 
 		$flush_runtime_cache = wp_cache_supports( 'flush_runtime' );
 		$page                = 1;
@@ -109,12 +151,8 @@ class ProductScan {
 					),
 					'no_found_rows'  => true,
 					'tax_query'      => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
-						array(
-							'taxonomy' => 'product_type',
-							'field'    => 'slug',
-							'terms'    => self::SKIPPED_TYPES,
-							'operator' => 'NOT IN',
-						),
+						self::supported_type_query(),
+						self::catalog_query( 'NOT IN' ),
 					),
 				)
 			);
@@ -144,6 +182,60 @@ class ProductScan {
 			}
 			++$page;
 		} while ( self::BATCH_SIZE === $batch_count );
+	}
+
+	/**
+	 * Tax query for a supported type. A product with no type term loads as simple.
+	 *
+	 * @return array<string|int, mixed>
+	 */
+	private static function supported_type_query(): array {
+		return array(
+			'relation' => 'OR',
+			array(
+				'taxonomy' => 'product_type',
+				'field'    => 'slug',
+				'terms'    => self::SUPPORTED_TYPES,
+			),
+			array(
+				'taxonomy' => 'product_type',
+				'operator' => 'NOT EXISTS',
+			),
+		);
+	}
+
+	/**
+	 * Tax query on the shop catalog: "Search results only" and "Hidden" both
+	 * carry the exclude-from-catalog term.
+	 *
+	 * @param string $operator IN for hidden products, NOT IN for the rest.
+	 * @return array<string, mixed>
+	 */
+	private static function catalog_query( string $operator ): array {
+		return array(
+			'taxonomy' => 'product_visibility',
+			'field'    => 'name',
+			'terms'    => array( 'exclude-from-catalog' ),
+			'operator' => $operator,
+		);
+	}
+
+	/**
+	 * Count published products matching a tax query.
+	 *
+	 * @param array<int, array<string|int, mixed>> $tax_query Tax query clauses.
+	 */
+	private static function count_published( array $tax_query ): int {
+		$query = new \WP_Query(
+			array(
+				'post_type'      => 'product',
+				'post_status'    => 'publish',
+				'posts_per_page' => 1,
+				'fields'         => 'ids',
+				'tax_query'      => $tax_query, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+			)
+		);
+		return (int) $query->found_posts;
 	}
 
 	/**
@@ -204,6 +296,20 @@ class ProductScan {
 	 */
 	public function products(): int {
 		return $this->products;
+	}
+
+	/**
+	 * Published products of a supported type hidden from the shop catalog, not checked.
+	 */
+	public function hidden_from_catalog(): int {
+		return $this->hidden_from_catalog;
+	}
+
+	/**
+	 * Published products of a type agents don't support yet, not checked.
+	 */
+	public function unsupported_types(): int {
+		return $this->unsupported_types;
 	}
 
 	/**
