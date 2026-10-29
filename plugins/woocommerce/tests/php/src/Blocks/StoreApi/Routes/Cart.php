@@ -772,6 +772,43 @@ class Cart extends ControllerTestCase {
 	}
 
 	/**
+	 * @testdox A registered customer Cart-Token neither selects the Store API session handler nor waives the nonce unless that customer is logged in.
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $log_in_other_user Whether another customer is logged in when the token is used.
+	 */
+	public function test_customer_cart_token_only_applies_to_that_customer( bool $log_in_other_user ): void {
+		$customer_id = (string) $this->factory->user->create( array( 'role' => 'customer' ) );
+		$token       = CartTokenUtils::get_cart_token( $customer_id );
+
+		wp_set_current_user( $log_in_other_user ? $this->factory->user->create( array( 'role' => 'customer' ) ) : 0 );
+
+		$old_server = $_SERVER;
+
+		try {
+			$_SERVER['REQUEST_URI']     = '/' . rest_get_url_prefix() . '/wc/store/v1/cart/add-item';
+			$_SERVER['HTTP_CART_TOKEN'] = $token;
+
+			$authentication = new Authentication();
+			$this->assertSame( 'WC_Session_Handler', $authentication->maybe_use_store_api_session_handler( 'WC_Session_Handler' ), 'The token should not select the Store API session handler' );
+
+			$request = new \WP_REST_Request( 'POST', '/wc/store/v1/cart/add-item' );
+			$request->set_body_params(
+				array(
+					'id'       => $this->products[2]->get_id(),
+					'quantity' => 1,
+				)
+			);
+			$response = rest_get_server()->dispatch( $request );
+
+			$this->assertSame( 401, $response->get_status(), 'The token should not waive the nonce check' );
+		} finally {
+			$_SERVER = $old_server;
+		}
+	}
+
+	/**
 	 * Nested Cart-Token should be ignored in a batch request.
 	 */
 	public function test_batch_sub_request_cart_token_does_not_waive_nonce() {

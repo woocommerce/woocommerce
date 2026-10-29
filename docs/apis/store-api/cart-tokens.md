@@ -24,3 +24,7 @@ curl --header "Cart-Token: 12345" --request GET https://example-store.com/wp-jso
 ```
 
 The same method will allow you to checkout using a `Cart-Token` on the `/checkout` route.
+
+## Logged-in customers
+
+A `Cart-Token` returned to a guest works on its own. A `Cart-Token` returned while a customer is logged in only works while that customer is still logged in, so it stops working when they log out. Send it alongside the customer's authentication, for example an application password. If it's sent without that authentication, the Store API ignores the token and treats the request as if no token was sent.
