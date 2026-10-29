@@ -1,4 +1,4 @@
 Significance: minor
 Type: update
 
-Product abilities: accept registered product types, with virtual and downloadable as separate fields, and let the owner of a type choose its Core fields with the woocommerce_ability_product_type_fields filter.
+Product abilities: accept registered product types, with virtual and downloadable as separate fields, list the fields of each type in the input schema, and let the owner of a type or of an extension field choose what a type takes with the woocommerce_ability_product_type_fields filter.

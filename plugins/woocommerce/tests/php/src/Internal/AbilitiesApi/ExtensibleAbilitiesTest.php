@@ -1629,13 +1629,62 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			$this->assertSame( array( 'integer', 'null' ), $extensions['other_ext']['properties']['count']['type'] );
 			$this->assertArrayNotHasKey( 'code', $extensions['test-ext']['properties'] );
 			$this->assertSame( 1, substr_count( wp_json_encode( $schema ), '"color"' ) );
-			foreach ( $schema['oneOf'] ?? array() as $branch ) {
-				$this->assertSame( 'object', $branch['properties']['extensions']['type'] );
-				$this->assertArrayNotHasKey( 'properties', $branch['properties']['extensions'] );
-			}
+			$this->assertArrayNotHasKey( 'oneOf', $schema );
 		}
 		$order = $this->get_ability( 'woocommerce/order-update-status' )['input_schema'];
 		$this->assertArrayNotHasKey( 'extensions', $order['properties'] );
+	}
+
+	/**
+	 * @testdox Should let the owner of an extension field remove it from a product type with the woocommerce_ability_product_type_fields filter.
+	 */
+	public function test_product_type_fields_filter_removes_an_extension_field_from_a_type(): void {
+		$remove_color = static fn( array $fields, string $type ) => 'grouped' === $type ? array_diff( $fields, array( 'test-ext.color' ) ) : $fields;
+		$simple       = \WC_Helper_Product::create_simple_product();
+		add_filter( 'woocommerce_ability_product_type_fields', $remove_color, 10, 2 );
+
+		try {
+			$schema      = $this->get_ability( 'woocommerce/product-create' )['input_schema'];
+			$description = $schema['properties']['type']['description'];
+			$rejected    = $this->run_ability_response(
+				'woocommerce/product-create',
+				array(
+					'name'             => 'Box',
+					'type'             => 'grouped',
+					'grouped_products' => array( $simple->get_id() ),
+					'extensions'       => array( 'test-ext' => array( 'color' => 'red' ) ),
+				)
+			);
+			$created     = $this->run_ability(
+				'woocommerce/product-create',
+				array(
+					'name'       => 'Box',
+					'type'       => 'grouped',
+					'extensions' => array( 'other_ext' => array( 'count' => 2 ) ),
+				)
+			);
+			$pen         = $this->run_ability(
+				'woocommerce/product-update',
+				array(
+					'id'         => $simple->get_id(),
+					'extensions' => array( 'test-ext' => array( 'color' => 'red' ) ),
+				)
+			);
+		} finally {
+			remove_filter( 'woocommerce_ability_product_type_fields', $remove_color, 10 );
+		}
+
+		$this->assertStringContainsString( 'simple: name, sku, regular_price, sale_price, description, short_description, status, virtual, downloadable, manage_stock, stock_quantity, stock_status, extensions.test-ext.color, extensions.other_ext.count, extensions.other_ext.size.', $description );
+		$this->assertStringContainsString( 'grouped: name, sku, description, short_description, status, grouped_products, extensions.other_ext.count, extensions.other_ext.size.', $description );
+		$this->assertArrayHasKey( 'color', $schema['properties']['extensions']['properties']['test-ext']['properties'] );
+		$this->assertSame( 400, $rejected->get_status() );
+		$this->assertSame( 'woocommerce_product_field_unsupported', $rejected->get_data()['code'] );
+		$this->assertSame(
+			'The grouped product type does not take extensions.test-ext.color. It takes name, sku, description, short_description, status, grouped_products, extensions.other_ext.count, extensions.other_ext.size.',
+			$rejected->get_data()['message']
+		);
+		$this->assertSame( 2, $created['product']['extensions']['other_ext']['count'] );
+		$this->assertSame( 'red', $pen['product']['extensions']['test-ext']['color'] );
 	}
 
 	/**

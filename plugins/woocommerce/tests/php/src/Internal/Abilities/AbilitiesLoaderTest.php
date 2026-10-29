@@ -328,9 +328,9 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$expected_types = array( 'simple', 'grouped', 'external' );
 
 		$this->assertSame( array( 'simple', 'grouped', 'external', 'variable' ), $query_schema['properties']['type']['enum'] ?? array() );
-		$this->assertSame( $expected_types, $this->get_product_types_from_schema_branches( $create_schema ) );
+		$this->assertSame( $expected_types, $create_schema['properties']['type']['enum'] ?? array() );
 		$this->assertSame( $expected_types, $update_schema['properties']['type']['enum'] ?? array() );
-		$this->assertSame( 'simple', $this->get_product_type_schema_branch( $create_schema, 'simple' )['properties']['type']['default'] ?? null );
+		$this->assertSame( 'simple', $create_schema['properties']['type']['default'] ?? null );
 		$this->assertArrayNotHasKey( 'default', $update_schema['properties']['type'] ?? array() );
 		$this->assertArrayNotHasKey(
 			'product_type_alias',
@@ -341,40 +341,30 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should expose only type-relevant product fields in create branches, and every field in the flat update schema.
+	 * @testdox Should list every field in the flat create and update schemas, and the fields of each type in the type description.
 	 */
-	public function test_product_mutation_schema_branches_only_include_type_relevant_fields(): void {
+	public function test_product_mutation_schemas_list_the_fields_of_each_type(): void {
 		$create_schema = wp_get_ability( 'woocommerce/product-create' )->get_input_schema();
 		$update_schema = wp_get_ability( 'woocommerce/product-update' )->get_input_schema();
 
-		$simple_properties   = $this->get_product_type_schema_branch( $create_schema, 'simple' )['properties'];
-		$external_properties = $this->get_product_type_schema_branch( $create_schema, 'external' )['properties'];
-		$grouped_properties  = $this->get_product_type_schema_branch( $create_schema, 'grouped' )['properties'];
-		$update_properties   = $update_schema['properties'];
+		foreach ( array( $create_schema, $update_schema ) as $schema ) {
+			$this->assertArrayNotHasKey( 'oneOf', $schema );
+			$this->assertFalse( $schema['additionalProperties'] );
+			foreach ( array( 'type', 'virtual', 'downloadable', 'regular_price', 'external_url', 'grouped_products', 'manage_stock' ) as $field ) {
+				$this->assertArrayHasKey( $field, $schema['properties'] );
+			}
 
-		$this->assertArrayHasKey( 'virtual', $simple_properties );
-		$this->assertArrayHasKey( 'downloadable', $simple_properties );
-		$this->assertArrayNotHasKey( 'external_url', $simple_properties );
-		$this->assertArrayNotHasKey( 'button_text', $simple_properties );
-		$this->assertArrayNotHasKey( 'grouped_products', $simple_properties );
+			$description = $schema['properties']['type']['description'];
+			$this->assertStringContainsString( 'simple: name, sku, regular_price, sale_price, description, short_description, status, virtual, downloadable, manage_stock, stock_quantity, stock_status.', $description );
+			$this->assertStringContainsString( 'external: name, sku, regular_price, sale_price, description, short_description, status, external_url, button_text.', $description );
+			$this->assertStringContainsString( 'grouped: name, sku, description, short_description, status, grouped_products.', $description );
+		}
 
-		$this->assertArrayNotHasKey( 'manage_stock', $external_properties );
-		$this->assertArrayNotHasKey( 'stock_quantity', $external_properties );
-		$this->assertArrayNotHasKey( 'grouped_products', $external_properties );
-		$this->assertArrayNotHasKey( 'virtual', $external_properties );
-
-		$this->assertArrayNotHasKey( 'regular_price', $grouped_properties );
-		$this->assertArrayNotHasKey( 'sale_price', $grouped_properties );
-		$this->assertArrayNotHasKey( 'stock_status', $grouped_properties );
-
-		$this->assertArrayNotHasKey( 'oneOf', $update_schema );
+		$this->assertSame( array( 'name' ), $create_schema['required'] );
+		$this->assertArrayNotHasKey( 'id', $create_schema['properties'] );
+		$this->assertStringContainsString( 'A product without a type is simple.', $create_schema['properties']['type']['description'] );
 		$this->assertSame( array( 'id' ), $update_schema['required'] );
-		$this->assertFalse( $update_schema['additionalProperties'] );
-		$this->assertArrayHasKey( 'type', $update_properties );
-		$this->assertArrayHasKey( 'regular_price', $update_properties );
-		$this->assertArrayHasKey( 'external_url', $update_properties );
-		$this->assertArrayHasKey( 'grouped_products', $update_properties );
-		$this->assertArrayHasKey( 'manage_stock', $update_properties );
+		$this->assertStringNotContainsString( 'without a type', $update_schema['properties']['type']['description'] );
 	}
 
 	/**
@@ -1717,13 +1707,13 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertNotWPError( $subscription );
 		$this->created_product_ids[] = $subscription['product']['id'];
 
-		$this->assertContains( 'test-bundle', $this->get_product_types_from_schema_branches( $create_schema ) );
-		$this->assertNotContains( 'test-missing', $this->get_product_types_from_schema_branches( $create_schema ) );
+		$this->assertContains( 'test-bundle', $create_schema['properties']['type']['enum'] );
+		$this->assertNotContains( 'test-missing', $create_schema['properties']['type']['enum'] );
 		$this->assertContains( 'test-bundle', $update_schema['properties']['type']['enum'] );
 		$this->assertContains( 'test-subscription', $update_schema['properties']['type']['enum'] );
 		$this->assertNotContains( 'test-missing', $update_schema['properties']['type']['enum'] );
-		$this->assertArrayNotHasKey( 'regular_price', $this->get_product_type_schema_branch( $create_schema, 'test-bundle' )['properties'] );
-		$this->assertArrayHasKey( 'regular_price', $this->get_product_type_schema_branch( $create_schema, 'test-subscription' )['properties'] );
+		$this->assertStringContainsString( 'test-bundle: name, sku, description, short_description, status, virtual, downloadable.', $create_schema['properties']['type']['description'] );
+		$this->assertStringContainsString( 'test-subscription: name, sku, regular_price, sale_price, description, short_description, status, virtual, downloadable, manage_stock, stock_quantity, stock_status.', $create_schema['properties']['type']['description'] );
 		$this->assertSame( 'test-bundle', $bundle['product']['type'] );
 		$this->assertTrue( $bundle['product']['virtual'] );
 		$this->assertTrue( $bundle['product']['downloadable'] );
@@ -1731,6 +1721,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertSame( '9.00', $subscription['product']['regular_price'] );
 		$this->assertWPError( $bundle_price );
 		$this->assertSame( 'woocommerce_product_field_unsupported', $bundle_price->get_error_code() );
+		$this->assertSame( 'The test-bundle product type does not take regular_price. It takes name, sku, description, short_description, status, virtual, downloadable.', $bundle_price->get_error_message() );
 		$this->assertWPError( $missing_class );
 		$this->assertSame( 'woocommerce_invalid_product_type', $missing_class->get_error_code() );
 	}
@@ -1819,10 +1810,9 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertNotWPError( $bundle );
 		$this->created_product_ids[] = $bundle['product']['id'];
 
-		$bundle_properties = $this->get_product_type_schema_branch( $create_schema, 'test-bundle' )['properties'];
-		$this->assertArrayHasKey( 'regular_price', $bundle_properties );
-		$this->assertArrayNotHasKey( 'sale_price', $bundle_properties );
-		$this->assertArrayNotHasKey( 'regular_price', $this->get_product_type_schema_branch( $create_schema, 'grouped' )['properties'] );
+		$description = $create_schema['properties']['type']['description'];
+		$this->assertStringContainsString( 'test-bundle: name, sku, regular_price, description, short_description, status, virtual, downloadable.', $description );
+		$this->assertStringContainsString( 'grouped: name, sku, description, short_description, status, grouped_products.', $description );
 		$this->assertSame( '9.00', $bundle['product']['regular_price'] );
 	}
 
@@ -1942,6 +1932,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		$this->assertWPError( $result );
 		$this->assertSame( 'woocommerce_product_field_unsupported', $result->get_error_code() );
+		$this->assertSame( 'The grouped product type does not take regular_price. It takes name, sku, description, short_description, status, grouped_products.', $result->get_error_message() );
 	}
 
 	/**
@@ -1978,7 +1969,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			$input_schema  = wp_get_ability( 'woocommerce/product-create' )->get_input_schema();
 			$output_schema = wp_get_ability( 'woocommerce/product-create' )->get_output_schema();
 
-			$this->assertSame( 'number', $this->get_product_type_schema_branch( $input_schema, 'simple' )['properties']['stock_quantity']['type'] ?? null );
+			$this->assertSame( 'number', $input_schema['properties']['stock_quantity']['type'] ?? null );
 			$this->assertSame(
 				array( 'number', 'null' ),
 				$output_schema['properties']['product']['properties']['stock_quantity']['type'] ?? null
@@ -2907,44 +2898,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertSame( $registration_args['category'], $ability->get_category() );
 		$this->assertSame( $registration_args['input_schema'], $ability->get_input_schema() );
 		$this->assertSame( $registration_args['output_schema'], $ability->get_output_schema() );
-	}
-
-	/**
-	 * Get product types from a branched product input schema.
-	 *
-	 * @param array $schema Input schema.
-	 * @return array<int, string>
-	 */
-	private function get_product_types_from_schema_branches( array $schema ): array {
-		$types = array();
-
-		foreach ( $schema['oneOf'] ?? array() as $branch ) {
-			$type = $branch['properties']['type']['enum'][0] ?? null;
-
-			if ( is_string( $type ) ) {
-				$types[] = $type;
-			}
-		}
-
-		return array_values( array_unique( $types ) );
-	}
-
-	/**
-	 * Get a product input schema branch for a product type.
-	 *
-	 * @param array  $schema       Input schema.
-	 * @param string $product_type Product type.
-	 * @return array
-	 */
-	private function get_product_type_schema_branch( array $schema, string $product_type ): array {
-		foreach ( $schema['oneOf'] ?? array() as $branch ) {
-			if ( in_array( $product_type, $branch['properties']['type']['enum'] ?? array(), true ) ) {
-				return $branch;
-			}
-		}
-
-		$this->fail( "Missing product type schema branch: {$product_type}" );
-		return array();
 	}
 
 	/**

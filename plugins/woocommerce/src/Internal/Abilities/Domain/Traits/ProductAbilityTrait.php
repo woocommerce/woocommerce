@@ -25,84 +25,67 @@ trait ProductAbilityTrait {
 	 * @return array
 	 */
 	protected static function get_product_create_input_schema(): array {
-		return array(
-			'type'  => 'object',
-			'oneOf' => self::get_product_type_input_schema_branches(),
-		);
+		return self::get_product_mutation_input_schema( true );
 	}
 
 	/**
 	 * Get the product update input schema.
 	 *
-	 * The schema lists the fields of every supported product type. The update
-	 * refuses a field that the type of the loaded product does not support.
-	 *
 	 * @return array
 	 */
 	protected static function get_product_update_input_schema(): array {
-		$product_types = self::get_supported_product_types();
-		$fields        = array();
+		return self::get_product_mutation_input_schema( false );
+	}
 
-		foreach ( $product_types as $product_type ) {
-			$product_config = self::get_product_type_config( $product_type );
-			if ( ! is_wp_error( $product_config ) ) {
-				$fields = array_merge( $fields, $product_config['fields'] );
-			}
+	/**
+	 * Get the input schema of product-create or product-update.
+	 *
+	 * The schema is one flat object with the fields of every supported product
+	 * type. The description of `type` lists the fields that each type takes,
+	 * and the ability refuses a field that the type does not take with
+	 * `woocommerce_product_field_unsupported`, naming the fields it takes.
+	 *
+	 * @param bool $creating Whether the schema is for product-create.
+	 * @return array
+	 */
+	private static function get_product_mutation_input_schema( bool $creating ): array {
+		$configs = self::get_supported_product_type_configs();
+		$fields  = array_merge( ...array_values( array_column( $configs, 'fields' ) ) );
+		$lines   = array();
+
+		foreach ( $configs as $product_type => $config ) {
+			$extension_fields = array_map(
+				static fn( string $field ): string => 'extensions.' . $field,
+				$config['extension_fields']
+			);
+			$lines[]          = $product_type . ': ' . implode( ', ', array_merge( $config['fields'], $extension_fields ) ) . '.';
 		}
+
+		$type_schema                 = self::get_product_type_schema( array_keys( $configs ) );
+		$type_schema['description'] .= ' ' . __( 'Each type takes these fields.', 'woocommerce' ) . ' ' . implode( ' ', $lines );
+
+		if ( $creating ) {
+			$type_schema['default']      = ProductType::SIMPLE;
+			$type_schema['description'] .= ' ' . __( 'A product without a type is simple.', 'woocommerce' );
+		}
+
+		$properties = $creating ? array() : array(
+			'id' => array(
+				'type'    => 'integer',
+				'minimum' => 1,
+			),
+		);
 
 		return array(
 			'type'                 => 'object',
 			'properties'           => array_merge(
-				array(
-					'id'   => array(
-						'type'    => 'integer',
-						'minimum' => 1,
-					),
-					'type' => self::get_product_type_schema( $product_types ),
-				),
+				$properties,
+				array( 'type' => $type_schema ),
 				self::get_product_mutation_field_schemas_for_fields( $fields )
 			),
-			'required'             => array( 'id' ),
+			'required'             => array( $creating ? 'name' : 'id' ),
 			'additionalProperties' => false,
 		);
-	}
-
-	/**
-	 * Get the product create input schema branches, one for each supported product type.
-	 *
-	 * @return array<int, array>
-	 */
-	private static function get_product_type_input_schema_branches(): array {
-		$branches = array();
-
-		foreach ( self::get_supported_product_types() as $product_type ) {
-			$product_config = self::get_product_type_config( $product_type );
-			if ( is_wp_error( $product_config ) ) {
-				continue;
-			}
-
-			$required    = array( 'name' );
-			$type_schema = self::get_product_type_schema( array( $product_type ) );
-
-			if ( ProductType::SIMPLE === $product_type ) {
-				$type_schema['default']      = ProductType::SIMPLE;
-				$type_schema['description'] .= ' ' . __( 'A product without a type is simple.', 'woocommerce' );
-			} else {
-				$required[] = 'type';
-			}
-
-			$branches[] = array(
-				'type'                 => 'object',
-				'properties'           => array_merge(
-					array( 'type' => $type_schema ),
-					self::get_product_mutation_field_schemas_for_fields( $product_config['fields'] )
-				),
-				'required'             => $required,
-				'additionalProperties' => false,
-			);
-		}
-
-		return $branches;
 	}
 
 	/**
@@ -213,24 +196,34 @@ trait ProductAbilityTrait {
 	 * @return array<int, string>
 	 */
 	protected static function get_supported_product_types(): array {
-		$product_types = array();
+		return array_keys( self::get_supported_product_type_configs() );
+	}
+
+	/**
+	 * Get the configuration of every supported product type, keyed by type.
+	 *
+	 * @return array<string, array{fields: array<int, string>, extension_fields: array<int, string>, product_props: array<string, mixed>}>
+	 */
+	private static function get_supported_product_type_configs(): array {
+		$configs = array();
 
 		foreach ( array_keys( wc_get_product_types() ) as $product_type ) {
 			$product_type = (string) $product_type;
+			$config       = self::get_product_class_config( \WC_Product_Factory::get_product_classname( 0, $product_type ), $product_type );
 
-			if ( ! is_wp_error( self::get_product_class_config( \WC_Product_Factory::get_product_classname( 0, $product_type ), $product_type ) ) ) {
-				$product_types[] = $product_type;
+			if ( ! is_wp_error( $config ) ) {
+				$configs[ $product_type ] = $config;
 			}
 		}
 
-		return $product_types;
+		return $configs;
 	}
 
 	/**
 	 * Get the configuration of a product type.
 	 *
 	 * @param string $product_type Product type.
-	 * @return array{fields: array<int, string>, product_props: array<string, mixed>}|\WP_Error
+	 * @return array{fields: array<int, string>, extension_fields: array<int, string>, product_props: array<string, mixed>}|\WP_Error
 	 */
 	protected static function get_product_type_config( string $product_type ) {
 		if ( ! isset( wc_get_product_types()[ $product_type ] ) ) {
@@ -244,12 +237,13 @@ trait ProductAbilityTrait {
 	 * Get the configuration of a product class.
 	 *
 	 * The product class decides which Core fields apply. A class that extends
-	 * a Core class gets the fields of that class. The owner of a type changes
-	 * the list with the `woocommerce_ability_product_type_fields` filter.
+	 * a Core class gets the fields of that class. Every extension field applies
+	 * by default. The `woocommerce_ability_product_type_fields` filter changes
+	 * both lists.
 	 *
 	 * @param string $classname    Product class.
 	 * @param string $product_type Product type.
-	 * @return array{fields: array<int, string>, product_props: array<string, mixed>}|\WP_Error
+	 * @return array{fields: array<int, string>, extension_fields: array<int, string>, product_props: array<string, mixed>}|\WP_Error
 	 */
 	private static function get_product_class_config( string $classname, string $product_type ) {
 		if ( is_a( $classname, \WC_Product_Variable::class, true ) ) {
@@ -287,24 +281,38 @@ trait ProductAbilityTrait {
 			}
 		}
 
+		$extension_fields = array();
+		if ( ExtensibleAbilities::is_enabled() ) {
+			foreach ( ExtensibleAbilities::get_fields( 'product' ) as $namespace => $namespace_fields ) {
+				foreach ( $namespace_fields as $field => $args ) {
+					if ( isset( $args['update_callback'] ) ) {
+						$extension_fields[] = $namespace . '.' . $field;
+					}
+				}
+			}
+		}
+
 		/**
-		 * Filter the Core fields that the product abilities accept for a product type.
+		 * Filter the fields that the product abilities accept for a product type.
 		 *
-		 * WooCommerce picks the fields from the product class. The owner of a
-		 * type adds a Core field that its type needs, such as a price for a
-		 * bundle, or removes one. A name that is not a Core field is ignored.
+		 * WooCommerce picks the Core fields from the product class, and adds
+		 * every writable extension field as `<namespace>.<field>`. The owner of a type
+		 * adds a Core field that its type needs, such as a price for a bundle.
+		 * The owner of an extension field removes it from the types it does not
+		 * apply to. A name that is not a Core field or a registered extension
+		 * field is ignored.
 		 *
 		 * @since 11.4.0
 		 *
 		 * @param array<int, string> $fields       Field names.
 		 * @param string             $product_type Product type.
-		 * @param string             $classname    Product class.
 		 */
-		$fields = apply_filters( 'woocommerce_ability_product_type_fields', $fields, $product_type, $classname );
+		$fields = (array) apply_filters( 'woocommerce_ability_product_type_fields', array_merge( $fields, $extension_fields ), $product_type );
 
 		return array(
-			'fields'        => array_values( array_intersect( array_keys( self::get_product_mutation_field_schemas() ), (array) $fields ) ),
-			'product_props' => $product_props,
+			'fields'           => array_values( array_intersect( array_keys( self::get_product_mutation_field_schemas() ), $fields ) ),
+			'extension_fields' => array_values( array_intersect( $extension_fields, $fields ) ),
+			'product_props'    => $product_props,
 		);
 	}
 
@@ -459,7 +467,7 @@ trait ProductAbilityTrait {
 	 * @return null|\WP_Error
 	 */
 	protected static function set_product_props_from_input( \WC_Product $product, array $input, array $product_config ) {
-		$validation_error = self::validate_product_fields_for_config( $input, $product_config );
+		$validation_error = self::validate_product_fields_for_config( $product, $input, $product_config );
 		if ( is_wp_error( $validation_error ) ) {
 			return $validation_error;
 		}
@@ -527,27 +535,40 @@ trait ProductAbilityTrait {
 	}
 
 	/**
-	 * Validate that input fields are supported for the configured product type.
+	 * Refuse a Core or extension field that the product type does not take.
 	 *
-	 * @param array $input          Ability input.
-	 * @param array $product_config Product type configuration.
+	 * @param \WC_Product $product        Product object.
+	 * @param array       $input          Ability input.
+	 * @param array       $product_config Product type configuration.
 	 * @return null|\WP_Error
 	 */
-	private static function validate_product_fields_for_config( array $input, array $product_config ) {
-		$shared_fields          = array( 'id', 'type', 'extensions' );
-		$supported_fields       = array_merge( $shared_fields, $product_config['fields'] );
-		$unsupported_field_keys = array_diff( array_keys( $input ), $supported_fields );
+	private static function validate_product_fields_for_config( \WC_Product $product, array $input, array $product_config ) {
+		$sent = array_diff( array_keys( $input ), array( 'id', 'type', 'extensions' ) );
+		foreach ( (array) ( $input['extensions'] ?? array() ) as $namespace => $fields ) {
+			foreach ( array_keys( (array) $fields ) as $field ) {
+				$sent[] = 'extensions.' . $namespace . '.' . $field;
+			}
+		}
 
-		if ( empty( $unsupported_field_keys ) ) {
+		$extension_fields = array_map(
+			static fn( string $field ): string => 'extensions.' . $field,
+			$product_config['extension_fields']
+		);
+		$supported        = array_merge( $product_config['fields'], $extension_fields );
+		$unsupported      = array_diff( $sent, $supported );
+
+		if ( empty( $unsupported ) ) {
 			return null;
 		}
 
 		return new \WP_Error(
 			'woocommerce_product_field_unsupported',
 			sprintf(
-				/* translators: %s is a comma-separated list of unsupported product fields. */
-				__( 'These fields are not supported for the selected product type: %s.', 'woocommerce' ),
-				implode( ', ', $unsupported_field_keys )
+				/* translators: 1: product type, 2: comma-separated list of the fields sent, 3: comma-separated list of the fields the type takes. */
+				__( 'The %1$s product type does not take %2$s. It takes %3$s.', 'woocommerce' ),
+				$product->get_type(),
+				implode( ', ', $unsupported ),
+				implode( ', ', $supported )
 			),
 			array( 'status' => 400 )
 		);
