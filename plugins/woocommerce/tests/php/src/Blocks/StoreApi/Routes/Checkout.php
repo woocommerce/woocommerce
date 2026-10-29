@@ -3056,42 +3056,6 @@ class Checkout extends \WP_Test_REST_TestCase {
 	}
 
 	/**
-<<<<<<< HEAD
-=======
-	 * @testdox Rejecting payment because the new billing email cannot use the coupon releases the row this order added, not another order's row.
-	 */
-	public function test_checkout_order_with_changed_email_releases_own_coupon_row() {
-		$coupon = new \WC_Coupon();
-		$coupon->set_code( 'route-changed-email' );
-		$coupon->set_amount( 2 );
-		$coupon->set_usage_limit_per_user( 1 );
-		$coupon->save();
-
-		$buyer_order = \WC_Helper_Order::create_order( 0 );
-		$buyer_order->set_billing_email( 'buyer@example.com' );
-		$buyer_order->set_status( OrderStatus::PENDING );
-		$buyer_order->save();
-		$buyer_order->apply_coupon( $coupon->get_code() );
-
-		$order = \WC_Helper_Order::create_order( 0 );
-		$order->set_billing_email( 'reserve@example.com' );
-		$order->set_status( OrderStatus::PENDING );
-		$order->save();
-		$order->apply_coupon( $coupon->get_code() );
-
-		// Only the email changes, so the address guard lets the request reach the coupon check.
-		$response = $this->dispatch_pay_for_order_request( $order, array( 'email' => 'buyer@example.com' ) );
-
-		$this->assertSame( 409, $response->get_status(), print_r( $response->get_data(), true ) );
-		$this->assertSame( 'woocommerce_rest_order_coupon_errors', $response->get_data()['code'] );
-
-		$coupon = new \WC_Coupon( 'route-changed-email' );
-		$this->assertSame( array( 'buyer@example.com' ), array_values( $coupon->get_used_by() ) );
-		$this->assertEquals( 1, $coupon->get_usage_count() );
-	}
-
-	/**
->>>>>>> cd1ef2e8c1 (Store API: reject pay-for-order address changes that would re-price the order (#67404))
 	 * @testdox Checkout refuses to complete a cancelled unpaid non-zero order.
 	 */
 	public function test_checkout_rejects_cancelled_unpaid_non_zero_order(): void {
