@@ -69,12 +69,12 @@ Data callbacks also receive the current `WP_REST_Request` as their last paramete
 
 ```php
 function my_cart_item_callback( $cart_item, $request ) {
-	$context = $request ? $request->get_param( 'my-context' ) : '';
+	$context = $request ? ( $request->get_query_params()['my-context'] ?? '' ) : '';
 	// ...
 }
 ```
 
-Product responses can be cached by a CDN for guests, so only vary your data on the request's URL query parameters, not on its headers or cookies.
+Product responses can be cached by a CDN for guests, so only vary your data on the request's URL query parameters (`get_query_params()`), not on its headers, cookies or body.
 
 ## Things To Consider
 
