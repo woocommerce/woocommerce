@@ -30,6 +30,7 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 		delete_option( AgentReadiness::REPORT_OPTION );
 		as_unschedule_all_actions( ScheduledScan::RUN_NOW_HOOK );
 		as_unschedule_all_actions( ScheduledScan::DAILY_HOOK );
+		as_unschedule_all_actions( ScheduledScan::RECHECK_HOOK );
 		$this->sut = wc_get_container()->get( ScheduledScan::class );
 	}
 
@@ -39,6 +40,7 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		as_unschedule_all_actions( ScheduledScan::RUN_NOW_HOOK );
 		as_unschedule_all_actions( ScheduledScan::DAILY_HOOK );
+		as_unschedule_all_actions( ScheduledScan::RECHECK_HOOK );
 		delete_option( 'woocommerce_feature_agent_readiness_enabled' );
 		parent::tearDown();
 	}
@@ -173,5 +175,97 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 
 		$this->assertNull( wc_get_container()->get( AgentReadiness::class )->get_cached_report() );
 		$this->assertFalse( as_has_scheduled_action( ScheduledScan::DAILY_HOOK ) );
+	}
+
+	/**
+	 * @testdox Product changes before the first report queue no re-check.
+	 */
+	public function test_product_change_without_report_queues_nothing(): void {
+		WC_Helper_Product::create_simple_product();
+
+		$this->assertCount( 0, $this->pending( ScheduledScan::RECHECK_HOOK ) );
+	}
+
+	/**
+	 * @testdox Saves, a variation save and a trash share one re-check, which drops the fixed product from the report.
+	 */
+	public function test_product_changes_share_one_recheck(): void {
+		$product   = WC_Helper_Product::create_simple_product();
+		$variable  = WC_Helper_Product::create_variation_product();
+		$readiness = wc_get_container()->get( AgentReadiness::class );
+		$readiness->refresh_report();
+		$this->assertContains( $product->get_id(), $this->example_ids( 'missing_brand' ) );
+
+		wp_set_object_terms( $product->get_id(), 'Acme', 'product_brand' );
+		$product->save();
+		$variation = wc_get_product( $variable->get_children()[0] );
+		$variation->set_regular_price( '12' );
+		$variation->save();
+		$variable->delete();
+
+		$pending = $this->pending( ScheduledScan::RECHECK_HOOK );
+		$this->assertCount( 1, $pending );
+		$due = as_next_scheduled_action( ScheduledScan::RECHECK_HOOK, array(), ScheduledScan::GROUP );
+		$this->assertGreaterThan( time() + ScheduledScan::RECHECK_DELAY - 60, $due, 'The re-check waits so a burst of saves shares it' );
+
+		$this->sut->recheck();
+
+		$report = $readiness->get_cached_report();
+		$this->assertSame( 1, $report['products'], 'The trashed variable product is gone' );
+		$this->assertNotContains( $product->get_id(), $this->example_ids( 'missing_brand' ), 'The product with a brand now passes' );
+	}
+
+	/**
+	 * @testdox A product change while a requested scan is waiting queues no re-check.
+	 */
+	public function test_product_change_with_pending_scan(): void {
+		wc_get_container()->get( AgentReadiness::class )->refresh_report();
+		$this->sut->queue();
+
+		WC_Helper_Product::create_simple_product();
+
+		$this->assertCount( 0, $this->pending( ScheduledScan::RECHECK_HOOK ) );
+	}
+
+	/**
+	 * @testdox A re-check rebuilds the report without fetching the rules file or moving the daily run.
+	 */
+	public function test_recheck_skips_rules_fetch(): void {
+		add_filter(
+			'woocommerce_agent_readiness_rules_url',
+			static function () {
+				return 'https://rules.example/agent-readiness.json';
+			}
+		);
+		$requests = 0;
+		$count    = static function ( $preempt ) use ( &$requests ) {
+			++$requests;
+			return $preempt;
+		};
+		add_filter( 'pre_http_request', $count );
+		WC_Helper_Product::create_simple_product();
+
+		$this->sut->recheck();
+		remove_filter( 'pre_http_request', $count );
+
+		$this->assertSame( 0, $requests );
+		$this->assertSame( 1, wc_get_container()->get( AgentReadiness::class )->get_cached_report()['products'] );
+		$this->assertCount( 0, $this->pending( ScheduledScan::DAILY_HOOK ) );
+	}
+
+	/**
+	 * Example product ids the stored report keeps for a check.
+	 *
+	 * @param string $check_id Check id.
+	 * @return array<int, int>
+	 */
+	private function example_ids( string $check_id ): array {
+		$checks = wc_get_container()->get( AgentReadiness::class )->get_cached_report()['checks'];
+		foreach ( $checks as $check ) {
+			if ( $check_id === $check['id'] ) {
+				return $check['product_ids'];
+			}
+		}
+		return array();
 	}
 }
