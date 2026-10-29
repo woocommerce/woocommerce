@@ -3,6 +3,7 @@
  */
 import { render } from '@testing-library/react';
 import React from 'react';
+import { useUser } from '@woocommerce/data';
 
 jest.mock( '@woocommerce/navigation', () => ( {
 	getNewPath: jest.fn( () => '/new-path' ),
@@ -170,6 +171,30 @@ describe( 'ProductCardFooter free trial', () => {
 		);
 
 		expect( getByText( 'Installed' ) ).toBeInTheDocument();
+		expect( queryByText( '14 day free trial' ) ).toBeNull();
+	} );
+
+	it( 'shows "Add to Store" over the trial copy', () => {
+		( useUser as jest.Mock ).mockReturnValueOnce( {
+			user: { id: 1 },
+			currentUserCan: () => true,
+		} );
+
+		const { getByRole, queryByText } = render(
+			<MarketplaceContext.Provider value={ context }>
+				<ProductCardFooter
+					product={ {
+						...paidProduct,
+						isInstallable: true,
+						freeTrialLengthDays: 14,
+					} }
+				/>
+			</MarketplaceContext.Provider>
+		);
+
+		expect(
+			getByRole( 'button', { name: 'Add to Store' } )
+		).toBeInTheDocument();
 		expect( queryByText( '14 day free trial' ) ).toBeNull();
 	} );
 } );
