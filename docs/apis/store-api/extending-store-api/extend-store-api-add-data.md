@@ -74,7 +74,7 @@ function my_cart_item_callback( $cart_item, $request ) {
 }
 ```
 
-Product responses can be cached by a CDN for guests, so only vary your data on the request's URL query parameters (`get_query_params()`), not on its headers, cookies or body.
+Product responses can be cached by a CDN for guests, so only vary your data on the request's URL query parameters (`get_query_params()`), not on its headers, cookies or body. Any query parameter your data depends on must also be part of the CDN's cache key, since some CDNs ignore or strip query strings.
 
 ## Things To Consider
 
