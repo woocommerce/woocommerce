@@ -15,6 +15,8 @@
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Enums\DimensionUnit;
+use Automattic\WooCommerce\Enums\WeightUnit;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
 
@@ -558,6 +560,37 @@ class WC_Structured_Data {
 		// Check we have required data.
 		if ( empty( $markup['aggregateRating'] ) && empty( $markup['offers'] ) && empty( $markup['review'] ) ) {
 			return;
+		}
+
+		$measurement_product = $selected_variation ?? $product;
+		$weight_unit         = get_option( 'woocommerce_weight_unit' );
+		$dimension_unit      = get_option( 'woocommerce_dimension_unit' );
+		$measurements        = array(
+			'weight' => $measurement_product->get_weight(),
+			'width'  => $measurement_product->get_width(),
+			'height' => $measurement_product->get_height(),
+			'depth'  => $measurement_product->get_length(),
+		);
+		foreach ( $measurements as $property => $value ) {
+			if ( ! is_numeric( $value ) || ! is_finite( (float) $value ) || (float) $value <= 0 ) {
+				continue;
+			}
+			if ( 'weight' === $property && in_array( $weight_unit, WeightUnit::get_all(), true ) ) {
+				$value     = wc_get_weight( (float) $value, WeightUnit::KILOGRAM, $weight_unit );
+				$unit_code = 'KGM';
+			} elseif ( 'weight' !== $property && in_array( $dimension_unit, DimensionUnit::get_all(), true ) ) {
+				$value     = wc_get_dimension( (float) $value, DimensionUnit::CENTIMETER, $dimension_unit );
+				$unit_code = 'CMT';
+			} else {
+				continue;
+			}
+			if ( is_finite( (float) $value ) && $value > 0 && ! isset( $markup[ $property ] ) ) {
+				$markup[ $property ] = array(
+					'@type'    => 'QuantitativeValue',
+					'value'    => (float) $value,
+					'unitCode' => $unit_code,
+				);
+			}
 		}
 
 		$this->set_data( apply_filters( 'woocommerce_structured_data_product', $markup, $product ) );
