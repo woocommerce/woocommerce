@@ -360,6 +360,7 @@ class WC_Order extends WC_Abstract_Order {
 			if ( $manual_update && $this->staging_status ) {
 				$this->pending_edit_status = $result['to'];
 			} elseif ( $manual_update ) {
+				$this->pending_edit_status = null;
 				do_action( 'woocommerce_order_edit_status', $this->get_id(), $result['to'] );
 			}
 
