@@ -2704,6 +2704,18 @@ class Checkout extends \WP_Test_REST_TestCase {
 		);
 		$order->save();
 
+		add_filter(
+			'woocommerce_get_order_address',
+			static function ( $address, $address_type ) {
+				if ( 'billing' === $address_type ) {
+					$address['postcode'] = 'FILTERED';
+				}
+				return $address;
+			},
+			10,
+			2
+		);
+
 		$billing = array(
 			'city'    => 'San Francisco',
 			'country' => 'US',
@@ -2720,6 +2732,33 @@ class Checkout extends \WP_Test_REST_TestCase {
 		$this->assertEquals( 'CA', $stored_order->get_shipping_state() );
 		$this->assertEquals( '94103', $stored_order->get_shipping_postcode() );
 		$this->assertEquals( 4.0, (float) $stored_order->get_total_tax() );
+	}
+
+	/**
+	 * @testdox Existing order address updates should re-check shipping needs after copying billing to shipping.
+	 */
+	public function test_existing_order_address_update_rechecks_shipping_needs_after_copying_billing() {
+		$virtual_product = \WC_Helper_Product::create_simple_product( true, array( 'virtual' => true ) );
+		$order           = \WC_Helper_Order::create_order( 0, $virtual_product );
+		$billing         = $order->get_address( 'billing' );
+		$shipping        = array_merge( $billing, $this->get_different_destination() );
+		$order->set_billing_country( '' );
+		$order->save();
+
+		$shipping_countries = array();
+		add_filter(
+			'woocommerce_order_needs_shipping',
+			static function ( $needs_shipping, $filtered_order ) use ( &$shipping_countries ) {
+				$shipping_countries[] = $filtered_order->get_shipping_country();
+				return 'US' === $filtered_order->get_shipping_country() || $needs_shipping;
+			},
+			10,
+			2
+		);
+
+		( new OrderController() )->update_existing_order_addresses( $order, $billing, $shipping );
+
+		$this->assertSame( array( 'GB', 'US' ), $shipping_countries );
 	}
 
 	/**
