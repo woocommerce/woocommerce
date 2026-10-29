@@ -155,7 +155,8 @@ class ReadinessRestController extends RestApiControllerBase {
 	/**
 	 * Turn UCP on or off. Turning it on fails with a 409 while a required setup check fails.
 	 *
-	 * @param WP_REST_Request<array<string, mixed>> $request Request.
+	 * @param WP_REST_Request $request Request.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
 	 * @return array{enabled:bool,status:string,failing_checks:array<int,string>}|\WP_Error
 	 */
 	protected function set_ucp_enabled( WP_REST_Request $request ) {

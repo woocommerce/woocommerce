@@ -131,7 +131,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	/**
 	 * Render the read-only blocks and the switch, then the store policy fields.
 	 */
-	public function output() {
+	public function output(): void {
 		$this->enqueue_script();
 
 		$checks  = $this->setup_checks->all();
