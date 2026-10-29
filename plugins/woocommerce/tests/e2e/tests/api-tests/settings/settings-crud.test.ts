@@ -672,21 +672,31 @@ test.describe( 'Settings API tests: CRUD', () => {
 			expect( response.status() ).toEqual( 200 );
 
 			// retrieve the updated settings values
-			const countriesUpdatedResponse = await request.get(
-				'./wp-json/wc/v3/settings/general/woocommerce_allowed_countries'
-			);
-			const countriesUpdatedResponseJSON =
-				await countriesUpdatedResponse.json();
-			expect( countriesUpdatedResponseJSON.value ).toEqual(
-				'all_except'
-			);
+			// Other API specs write to the same options group in parallel, which can
+			// briefly leave a stale `alloptions` entry with an object cache, so poll.
+			await expect
+				.poll(
+					async () => {
+						const countriesUpdatedResponse = await request.get(
+							'./wp-json/wc/v3/settings/general/woocommerce_allowed_countries'
+						);
+						return ( await countriesUpdatedResponse.json() ).value;
+					},
+					{ timeout: 10_000 }
+				)
+				.toEqual( 'all_except' );
 
-			const currencyUpdatedResponse = await request.get(
-				'./wp-json/wc/v3/settings/general/woocommerce_currency'
-			);
-			const currencyUpdatedResponseJSON =
-				await currencyUpdatedResponse.json();
-			expect( currencyUpdatedResponseJSON.value ).toEqual( 'GBP' );
+			await expect
+				.poll(
+					async () => {
+						const currencyUpdatedResponse = await request.get(
+							'./wp-json/wc/v3/settings/general/woocommerce_currency'
+						);
+						return ( await currencyUpdatedResponse.json() ).value;
+					},
+					{ timeout: 10_000 }
+				)
+				.toEqual( 'GBP' );
 
 			// call API to restore the settings options
 			await request.put( './wp-json/wc/v3/settings/general/batch', {
