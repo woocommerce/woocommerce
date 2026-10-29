@@ -113,6 +113,22 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox With UCP already on and a required check failing, the switch says the checks still need fixing.
+	 */
+	public function test_output_switch_on_with_failing_checks(): void {
+		$page = $this->page();
+		update_option( 'woocommerce_feature_ucp_enabled', 'yes' );
+
+		ob_start();
+		$page->output();
+		$html = (string) ob_get_clean();
+
+		$this->assertStringContainsString( 'aria-checked="true"', $html );
+		$this->assertStringContainsString( 'required setup checks below still need fixing.', $html );
+		$this->assertStringNotContainsString( 'AI agents can now find and shop your store.</span>', $html );
+	}
+
+	/**
 	 * @testdox Saving keeps a stored draft refund page the dropdown can't show, and syncs the shared options.
 	 */
 	public function test_save_keeps_draft_page_and_syncs_shared_options(): void {

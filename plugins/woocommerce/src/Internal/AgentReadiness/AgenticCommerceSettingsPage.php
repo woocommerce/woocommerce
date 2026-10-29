@@ -287,7 +287,10 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	private function render_switch( int $failing_required ): void {
 		$enabled = UcpUtils::is_enabled();
 		$message = '';
-		if ( $enabled ) {
+		if ( $enabled && $failing_required > 0 ) {
+			/* translators: %d: number of failing required setup checks. */
+			$message = sprintf( _n( 'AI agents can shop your store, but %d required setup check below still needs fixing.', 'AI agents can shop your store, but %d required setup checks below still need fixing.', $failing_required, 'woocommerce' ), $failing_required );
+		} elseif ( $enabled ) {
 			$message = __( 'AI agents can now find and shop your store.', 'woocommerce' );
 		} elseif ( $failing_required > 0 ) {
 			/* translators: %d: number of failing required setup checks. */
