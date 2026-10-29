@@ -1,16 +1,15 @@
 /**
  * External dependencies
  */
-import {
-	applyFormat,
-	insert,
-	create,
-	toHTMLString,
-} from '@wordpress/rich-text';
+import { applyFormat } from '@wordpress/rich-text';
+import type {
+	RichTextValue,
+	RichTextFormat as WPFormat,
+} from '@wordpress/rich-text/build-types/types';
 import { __ } from '@wordpress/i18n';
 import { BlockControls } from '@wordpress/block-editor';
 import { ToolbarButton, ToolbarGroup } from '@wordpress/components';
-import { useSelect, useDispatch } from '@wordpress/data';
+import { useSelect } from '@wordpress/data';
 import { useCallback, useState } from '@wordpress/element';
 import { createHigherOrderComponent } from '@wordpress/compose';
 import * as React from '@wordpress/element';
@@ -19,7 +18,9 @@ import * as React from '@wordpress/element';
  * Internal dependencies
  */
 import {
-	getCursorPosition,
+	getElementRange,
+	renameTagComment,
+	insertPersonalizationTag,
 	replacePersonalizationTagsWithHTMLComments,
 } from '../../components/personalization-tags/rich-text-utils';
 import { PersonalizationTagsModal } from '../../components/personalization-tags/personalization-tags-modal';
@@ -51,8 +52,17 @@ function disableCertainRichTextFormats() {
 	} );
 }
 
+// The bundled RichText types omit these properties.
+type LooseFormat = {
+	type: string;
+	attributes?: Record< string, string >;
+	unregisteredAttributes?: Record< string, string >;
+};
+
 type Props = {
 	contentRef: React.RefObject< HTMLElement >;
+	value: RichTextValue;
+	onChange: ( value: RichTextValue ) => void;
 };
 
 /**
@@ -60,83 +70,15 @@ type Props = {
  *
  * @param root0
  * @param root0.contentRef
+ * @param root0.value
+ * @param root0.onChange
  */
-function PersonalizationTagsButton( { contentRef }: Props ) {
+function PersonalizationTagsButton( { contentRef, value, onChange }: Props ) {
 	const [ isModalOpened, setIsModalOpened ] = useState( false );
-	const selectedBlockId = useSelect( ( select ) =>
-		select( 'core/block-editor' ).getSelectedBlockClientId()
-	);
-
-	const { updateBlockAttributes } = useDispatch( 'core/block-editor' );
-
-	// Get the current block attributes
-	const blockAttributes: object = useSelect( ( select ) => {
-		const attributes =
-			select( 'core/block-editor' ).getBlockAttributes( selectedBlockId );
-
-		return attributes;
-	} );
-
-	// Some blocks, such as the Button block, store the content in `text` attribute.
-	const blockContentKey = 'text' in blockAttributes ? 'text' : 'content';
-
-	// After first saving the content does not have property originalHTML, so we need to check for content as well
-	const blockContent =
-		blockAttributes?.[ blockContentKey ]?.originalHTML ||
-		blockAttributes?.[ blockContentKey ] ||
-		'';
-
 	const handleInsert = useCallback(
-		( tag: string, linkText: string | null ) => {
-			let { start, end } = getCursorPosition( contentRef, blockContent );
-
-			let updatedContent = '';
-			// When we pass linkText, we want to insert the tag as a link
-			if ( linkText ) {
-				let richTextValue = create( { html: blockContent } );
-
-				// Insert the new text into the current selection or at the cursor
-				richTextValue = insert( richTextValue, linkText, start, end );
-
-				end = start + linkText.length;
-				// The link is inserted via registered format type to avoid breaking the content
-				richTextValue = applyFormat(
-					richTextValue,
-					{
-						type: 'woocommerce-email-editor/link-shortcode',
-						// @ts-expect-error attributes property is missing in build type for WPFormat type
-						attributes: {
-							'data-link-href': tag,
-							contenteditable: 'false',
-							style: 'text-decoration: underline;',
-						},
-					},
-					start,
-					end
-				);
-				updatedContent = toHTMLString( { value: richTextValue } );
-			} else {
-				let richTextValue = create( { html: blockContent } );
-				richTextValue = insert(
-					richTextValue,
-					create( { html: `<!--${ tag }-->&nbsp;` } ), // Add a non-breaking space to avoid an issue when WP renderer removes blog containing only a comment
-					start,
-					end
-				);
-				updatedContent = toHTMLString( { value: richTextValue } );
-			}
-
-			void updateBlockAttributes( selectedBlockId, {
-				[ blockContentKey ]: updatedContent,
-			} );
-		},
-		[
-			blockContent,
-			blockContentKey,
-			contentRef,
-			selectedBlockId,
-			updateBlockAttributes,
-		]
+		( tag: string, linkText: string | null ) =>
+			onChange( insertPersonalizationTag( value, tag, linkText ) ),
+		[ value, onChange ]
 	);
 
 	return (
@@ -154,45 +96,73 @@ function PersonalizationTagsButton( { contentRef }: Props ) {
 				/>
 				<PersonalizationTagsPopover
 					contentRef={ contentRef }
-					onUpdate={ ( originalTag, updatedTag ) => {
-						// When we update the tag, we need to add brackets to the tag, because the popover removes them
-						const updatedContent = blockContent.replace(
-							`<!--[${ originalTag }]-->`,
-							`<!--[${ updatedTag }]-->`
-						);
-						void updateBlockAttributes( selectedBlockId, {
-							[ blockContentKey ]: updatedContent,
-						} );
+					onUpdate={ ( _originalTag, updatedTag, anchor ) => {
+						const updated =
+							anchor &&
+							renameTagComment(
+								value,
+								getElementRange( contentRef.current, anchor ),
+								updatedTag
+							);
+						if ( updated ) {
+							onChange( updated );
+						}
 					} }
 				/>
 				<PersonalizationTagsLinkPopover
 					contentRef={ contentRef }
-					onUpdate={ ( htmlElement, newTag, newText ) => {
-						const oldTag = htmlElement
-							.getAttribute( 'data-link-href' )
-							.replace( /[.*+?^${}()|[\]\\]/g, '\\$&' );
-						const regex = new RegExp(
-							`<a([^>]*?)data-link-href="${ oldTag }"([^>]*?)>${ htmlElement.textContent }</a>`,
-							'gi'
+					onUpdate={ ( linkElement, newTag, newText ) => {
+						const range = getElementRange(
+							contentRef.current,
+							linkElement,
+							true
 						);
-
-						// Replace the matched link with the new link
-						const updatedContent = blockContent.replace(
-							regex,
-							( _, beforeAttrs, afterAttrs ) => {
-								// Construct the new <a> tag
-								return `<a${ beforeAttrs }data-link-href="${ newTag }"${ afterAttrs }>${ newText }</a>`;
-							}
+						const formats = ( ( range &&
+							value.formats[ range.start ] ) ||
+							[] ) as LooseFormat[];
+						const isLinkFormat = ( format: LooseFormat ) =>
+							format.attributes?.[ 'data-link-href' ] !==
+								undefined ||
+							format.unregisteredAttributes?.[
+								'data-link-href'
+							] !== undefined;
+						if ( ! range || ! formats.some( isLinkFormat ) ) {
+							return;
+						}
+						// Never turn the link into a plain tag: empty text keeps the old text.
+						const text = newText.trim()
+							? newText
+							: value.text.slice( range.start, range.end );
+						let result = insertPersonalizationTag(
+							{
+								...value,
+								start: range.start,
+								end: range.end,
+							},
+							newTag,
+							text
 						);
-						void updateBlockAttributes( selectedBlockId, {
-							content: updatedContent,
-						} );
+						// Re-apply the formatting that surrounded the old link.
+						formats
+							.filter( ( format ) => ! isLinkFormat( format ) )
+							.forEach( ( format ) => {
+								result = {
+									...applyFormat(
+										result,
+										format as unknown as WPFormat,
+										range.start,
+										range.start + text.length
+									),
+									activeFormats: [],
+								} as RichTextValue;
+							} );
+						onChange( result );
 					} }
 				/>
 				<PersonalizationTagsModal
 					isOpened={ isModalOpened }
-					onInsert={ ( value, linkText ) => {
-						handleInsert( value, linkText );
+					onInsert={ ( tag, linkText ) => {
+						handleInsert( tag, linkText );
 						setIsModalOpened( false );
 					} }
 					closeCallback={ () => setIsModalOpened( false ) }

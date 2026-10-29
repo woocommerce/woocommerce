@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent fatal errors in the cart, coupons, and download permissions when a product, parent product, or category was deleted.
