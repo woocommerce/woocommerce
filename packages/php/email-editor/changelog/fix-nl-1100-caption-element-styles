@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Apply a caption color chosen in the email design to image, gallery, table and embed captions in the sent email.
