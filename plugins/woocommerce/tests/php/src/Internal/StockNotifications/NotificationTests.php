@@ -267,6 +267,25 @@ class NotificationTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that the stage key methods set the hash in memory and save nothing.
+	 */
+	public function test_stage_keys_save_nothing() {
+		$notification = new Notification();
+		$notification->set_product_id( 1 );
+		$notification->set_user_email( 'test@example.com' );
+		$notification->save();
+
+		$verification_key = $notification->stage_verification_key();
+		$unsubscribe_key  = $notification->stage_unsubscribe_key();
+		$this->assertTrue( $notification->check_verification_key( $verification_key ) );
+		$this->assertTrue( $notification->check_unsubscribe_key( $unsubscribe_key ) );
+
+		$stored = new Notification( $notification->get_id() );
+		$this->assertFalse( $stored->check_verification_key( $verification_key ) );
+		$this->assertFalse( $stored->check_unsubscribe_key( $unsubscribe_key ) );
+	}
+
+	/**
 	 * Test verification key persistence.
 	 */
 	public function test_verification_key_persistence() {

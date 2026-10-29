@@ -851,4 +851,27 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 		remove_filter( 'woocommerce_logger_log_message', $log_spy, 10 );
 	}
 
+	/**
+	 * @testdox stage_delivery_result() counts a failure in memory, and the next save writes it.
+	 */
+	public function test_stage_delivery_result_changes_the_webhook_in_memory_only() {
+		$webhook = new WC_Webhook();
+		$webhook->set_status( 'active' );
+		$webhook->set_topic( 'order.created' );
+		$webhook->set_delivery_url( 'https://example.com/webhook' );
+		$webhook->set_user_id( 1 );
+		$webhook->set_failure_count( 0 );
+		$webhook->save();
+
+		$webhook->stage_delivery_result( 500 );
+		$this->assertSame( 1, $webhook->get_failure_count() );
+		$this->assertSame( 0, wc_get_webhook( $webhook->get_id() )->get_failure_count() );
+
+		$webhook->save();
+		$this->assertSame( 1, wc_get_webhook( $webhook->get_id() )->get_failure_count() );
+
+		$webhook->stage_delivery_result( 200 );
+		$webhook->save();
+		$this->assertSame( 0, wc_get_webhook( $webhook->get_id() )->get_failure_count() );
+	}
 }
