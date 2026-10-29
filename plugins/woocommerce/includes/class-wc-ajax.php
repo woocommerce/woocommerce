@@ -672,6 +672,11 @@ class WC_AJAX {
 			wp_die();
 		}
 
+		// Match the product page, which shows variation details only after the product password is entered.
+		if ( post_password_required( $variable_product->get_id() ) ) {
+			wp_die();
+		}
+
 		$data_store   = WC_Data_Store::load( 'product' );
 		$variation_id = $data_store->find_matching_product_variation( $variable_product, wp_unslash( $_POST ) );
 		$variation    = $variation_id ? $variable_product->get_available_variation( $variation_id ) : false;
