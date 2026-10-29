@@ -1452,8 +1452,8 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			'test-ext',
 			static function ( array $saved, ActionableAbility $ability, array $context ) use ( &$contexts ) {
 				$contexts[] = array(
-					'saved'   => array_map( static fn( \WC_Data $object ) => $object->get_id(), $saved ),
-					'deleted' => array_map( static fn( \WC_Data $object ) => $object->get_id(), $context['deleted'] ),
+					'saved'   => array_map( static fn( \WC_Data $item ) => $item->get_id(), $saved ),
+					'deleted' => array_map( static fn( \WC_Data $item ) => $item->get_id(), $context['deleted'] ),
 					'input'   => $context['input'],
 				);
 				return null;
