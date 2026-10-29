@@ -46,18 +46,6 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 	private $original_init_action_count;
 
 	/**
-	 * Check if Abilities API is in WordPress core.
-	 *
-	 * WordPress 6.9+ has the Abilities API in core with different class names than the vendor package.
-	 * We detect this by checking for the core class name (plural "Categories" instead of singular "Category").
-	 *
-	 * @return bool True if Abilities API is in core, false if using vendor package.
-	 */
-	private function are_abilities_in_wp_core(): bool {
-		return class_exists( 'WP_Ability_Categories_Registry' );
-	}
-
-	/**
 	 * Set up before each test
 	 */
 	public function setUp(): void {
@@ -67,30 +55,11 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 		$this->abilities_categories_init_action = 'wp_abilities_api_categories_init';
 		$this->category_registry_class          = 'WP_Ability_Categories_Registry';
 
-		// WordPress 6.9+ requires did_action('init') to return truthy before abilities API can be used.
-		// Save the original value and set to 1. Doesn't hurt pre-6.9 versions.
+		// The Abilities API requires did_action('init') to return truthy before it can be used.
 		$this->original_init_action_count = $wp_actions['init'] ?? null;
 		$wp_actions['init']               = 1; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
 		parent::setUp();
-
-		// Ensure Abilities API REST routes are registered if needed.
-		if ( function_exists( 'wp_register_ability' ) && class_exists( 'WP_REST_Abilities_Init' ) ) {
-			$routes = $this->server->get_routes();
-
-			// Check if any Abilities API routes are already registered.
-			$has_abilities_routes = false;
-			foreach ( $routes as $route => $handlers ) {
-				if ( strpos( $route, '/wp-abilities/v1/' ) === 0 ) {
-					$has_abilities_routes = true;
-					break;
-				}
-			}
-
-			if ( ! $has_abilities_routes ) {
-				\WP_REST_Abilities_Init::register_routes( $this->server );
-			}
-		}
 	}
 
 	/**
@@ -381,14 +350,6 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 	 * @group abilities-api
 	 */
 	public function test_rest_endpoints_are_registered() {
-		// WordPress 6.9+ uses core controllers with different namespace, earlier versions use vendor package.
-		$are_abilities_in_wp_core = $this->are_abilities_in_wp_core();
-		if ( $are_abilities_in_wp_core ) {
-			$this->assertTrue( class_exists( 'WP_REST_Abilities_V1_List_Controller' ), 'WordPress 6.9+ should have WP_REST_Abilities_V1_List_Controller class' );
-		} else {
-			$this->assertTrue( class_exists( '\WP_REST_Abilities_Init' ), 'Bootstrap should load WP_REST_Abilities_Init class' );
-		}
-
 		$list_endpoint = '/wp-abilities/v1/abilities';
 		$run_endpoint  = '/wp-abilities/v1/abilities/(?P<name>[a-zA-Z0-9\\-\\/]+?)/run';
 
@@ -690,9 +651,7 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 	 * @param string $ability_id The ability ID to clean up.
 	 */
 	private function cleanup_ability( $ability_id ) {
-		if ( function_exists( 'wp_unregister_ability' ) ) {
-			wp_unregister_ability( $ability_id );
-		}
+		wp_unregister_ability( $ability_id );
 	}
 
 	/**
@@ -701,8 +660,6 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 	 * @param string $category_id The category ID to clean up.
 	 */
 	private function cleanup_category( $category_id ) {
-		if ( function_exists( 'wp_unregister_ability_category' ) ) {
-			wp_unregister_ability_category( $category_id );
-		}
+		wp_unregister_ability_category( $category_id );
 	}
 }
