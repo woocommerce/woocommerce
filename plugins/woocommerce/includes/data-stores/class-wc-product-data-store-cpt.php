@@ -1465,6 +1465,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * The exclusion must keep reading `_sale_price_dates_to` exactly the way
 	 * get_ending_sales() does, or a product ends up in neither queue. See the note there.
 	 *
+	 * Sale prices of '' and '0' are excluded because wc_apply_sale_state_for_product() skips
+	 * them, so the price never changes and the product would match on every run. '0.00' is
+	 * applied and settles, so it must stay matched: do not replace this with `> 0`.
+	 *
 	 * Keep the exclusion as NOT EXISTS: the LEFT JOIN ... IS NULL rewrite is faster on MariaDB
 	 * but materially slower on MySQL.
 	 *
@@ -1488,6 +1492,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 					AND postmeta.meta_value > 0
 					AND postmeta.meta_value < %s
 					AND postmeta_2.meta_value != postmeta_3.meta_value
+					AND postmeta_3.meta_value NOT IN ( '', '0' )
 					AND NOT EXISTS (
 						SELECT 1 FROM {$wpdb->postmeta} as ended
 						WHERE ended.post_id = postmeta.post_id
