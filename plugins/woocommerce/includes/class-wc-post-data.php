@@ -463,6 +463,7 @@ class WC_Post_Data {
 				$data_store = WC_Data_Store::load( 'product-variable' );
 				$data_store->delete_variations( $id, true );
 				$data_store->delete_from_lookup_table( $id, 'wc_product_meta_lookup' );
+				WC_Cache_Helper::invalidate_cache_group( 'product_' . $id );
 				$container->get( ProductAttributesLookupDataStore::class )->on_product_deleted( $id );
 
 				$parent_id = wp_get_post_parent_id( $id );
@@ -474,6 +475,7 @@ class WC_Post_Data {
 			case 'product_variation':
 				$data_store = WC_Data_Store::load( 'product' );
 				$data_store->delete_from_lookup_table( $id, 'wc_product_meta_lookup' );
+				WC_Cache_Helper::invalidate_cache_group( 'product_' . $id );
 				wc_delete_product_transients( wp_get_post_parent_id( $id ) );
 				$container->get( ProductAttributesLookupDataStore::class )->on_product_deleted( $id );
 

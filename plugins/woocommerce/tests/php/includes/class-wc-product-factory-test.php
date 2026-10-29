@@ -25,4 +25,18 @@ class WC_Product_Factory_Test extends WC_Unit_Test_Case {
 			$GLOBALS['post'] = $old_post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restore the prior global.
 		}
 	}
+
+	/**
+	 * @testdox get_product returns false for a variation whose parent was deleted after the variation was loaded.
+	 */
+	public function test_get_product_returns_false_for_variation_of_deleted_parent(): void {
+		$parent       = WC_Helper_Product::create_variation_product();
+		$variation_id = $parent->get_children()[0];
+
+		$this->assertInstanceOf( WC_Product_Variation::class, wc_get_product( $variation_id ) );
+
+		$parent->delete( true );
+
+		$this->assertFalse( wc_get_product( $variation_id ) );
+	}
 }
