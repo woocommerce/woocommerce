@@ -100,7 +100,8 @@ class ReadinessRestController extends RestApiControllerBase {
 	/**
 	 * The stored report and whether a scan is pending.
 	 *
-	 * @param WP_REST_Request<array<string, mixed>> $request Request.
+	 * @param WP_REST_Request $request Request.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
 	 * @return array{report:array<string,mixed>|null,scan_pending:bool}
 	 */
 	protected function get_status( WP_REST_Request $request ): array {
@@ -113,7 +114,8 @@ class ReadinessRestController extends RestApiControllerBase {
 	/**
 	 * Queue a scan, then answer like GET.
 	 *
-	 * @param WP_REST_Request<array<string, mixed>> $request Request.
+	 * @param WP_REST_Request $request Request.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
 	 * @return \WP_REST_Response
 	 */
 	protected function queue_scan( WP_REST_Request $request ): \WP_REST_Response {
