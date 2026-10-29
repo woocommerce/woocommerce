@@ -3079,12 +3079,6 @@ parameters:
 			path: includes/admin/class-wc-admin-upload-downloadable-product.php
 
 		-
-			message: '#^Negated boolean expression is always false\.$#'
-			identifier: booleanNot.alwaysFalse
-			count: 1
-			path: includes/admin/class-wc-admin-upload-downloadable-product.php
-
-		-
 			message: '#^Parameter \#2 \$callback of function add_action expects callable\(\)\: mixed, array\{\$this\(WC_Admin_Upload_Downloadable_Product\), ''media_upload…''\} given\.$#'
 			identifier: argument.type
 			count: 1
@@ -3941,12 +3935,6 @@ parameters:
 			identifier: variable.undefined
 			count: 1
 			path: includes/admin/helper/views/html-section-notices.php
-
-		-
-			message: '#^Binary operation "\." between string and non\-empty\-array\|non\-falsy\-string results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: includes/admin/importers/class-wc-product-csv-importer-controller.php
 
 		-
 			message: '#^Method WC_Product_CSV_Importer_Controller\:\:add_error\(\) has no return type specified\.$#'
@@ -8455,18 +8443,6 @@ parameters:
 			path: includes/class-wc-ajax.php
 
 		-
-			message: '#^Cannot call method get_total\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Cannot call method get_total_refunded\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: includes/class-wc-ajax.php
-
-		-
 			message: '#^Cannot call method get_zone_name\(\) on bool\|WC_Shipping_Zone\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -10099,12 +10075,6 @@ parameters:
 			path: includes/class-wc-cart.php
 
 		-
-			message: '#^Cannot call method get_attributes\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: includes/class-wc-cart.php
-
-		-
 			message: '#^Method WC_Cart\:\:check_cart_items\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -10623,12 +10593,6 @@ parameters:
 		-
 			message: '#^Call to an undefined method object\:\:increase_usage_count\(\)\.$#'
 			identifier: method.notFound
-			count: 1
-			path: includes/class-wc-coupon.php
-
-		-
-			message: '#^Cannot access property \$name on WP_Error\|WP_Term\|null\.$#'
-			identifier: property.nonObject
 			count: 1
 			path: includes/class-wc-coupon.php
 
@@ -19771,12 +19735,6 @@ parameters:
 			path: includes/import/abstract-wc-product-importer.php
 
 		-
-			message: '#^Parameter \#2 \$array of function array_map expects array, list\<string\>\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/import/abstract-wc-product-importer.php
-
-		-
 			message: '#^Parameter \#2 \$callback of function array_filter expects \(callable\(string\)\: bool\)\|null, ''strlen'' given\.$#'
 			identifier: argument.type
 			count: 1
@@ -25201,12 +25159,6 @@ parameters:
 			path: includes/rest-api/Controllers/Version2/class-wc-rest-network-orders-v2-controller.php
 
 		-
-			message: '#^Argument of an invalid type array\<int\|WP_Comment\>\|int supplied for foreach, only iterables are supported\.$#'
-			identifier: foreach.nonIterable
-			count: 1
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-order-notes-v2-controller.php
-
-		-
 			message: '#^Function remove_filter invoked with 4 parameters, 2\-3 required\.$#'
 			identifier: arguments.count
 			count: 1
@@ -25238,12 +25190,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$comment_id of function get_comment_meta expects int, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-order-notes-v2-controller.php
-
-		-
-			message: '#^Parameter \#1 \$note of method WC_REST_Order_Notes_V2_Controller\:\:prepare_item_for_response\(\) expects WP_Comment, int\|WP_Comment given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/rest-api/Controllers/Version2/class-wc-rest-order-notes-v2-controller.php
@@ -33904,24 +33850,6 @@ parameters:
 			path: includes/wc-order-functions.php
 
 		-
-			message: '#^Cannot call method get_download_expiry\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/wc-order-functions.php
-
-		-
-			message: '#^Cannot call method get_download_limit\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: includes/wc-order-functions.php
-
-		-
-			message: '#^Cannot call method get_id\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/wc-order-functions.php
-
-		-
 			message: '#^Cannot call method get_total\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -34824,7 +34752,7 @@ parameters:
 		-
 			message: '#^Expected 2 @param tags, found 1\.$#'
 			identifier: paramTag.count
-			count: 2
+			count: 1
 			path: includes/wc-template-functions.php
 
 		-
@@ -37756,30 +37684,6 @@ parameters:
 			path: src/Admin/API/Notice.php
 
 		-
-			message: '#^Instantiated class Automattic\\WooCommerce\\Admin\\API\\WP_Error not found\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Notice.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Notice\:\:dissmiss_notice\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Notice.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Notice\:\:dissmiss_notice\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\WP_REST_Response\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Notice.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Notice\:\:dissmiss_notice\(\) should return Automattic\\WooCommerce\\Admin\\API\\WP_Error\|Automattic\\WooCommerce\\Admin\\API\\WP_REST_Response but returns WP_REST_Response\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/Notice.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Notice\:\:register_routes\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -38926,20 +38830,8 @@ parameters:
 			path: src/Admin/API/ProductAttributeTerms.php
 
 		-
-			message: '#^Instantiated class Automattic\\WooCommerce\\Admin\\API\\WP_Error not found\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/ProductAttributeTerms.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\ProductAttributeTerms\:\:get_custom_attribute_by_slug\(\) should return object but returns array\.$#'
 			identifier: return.type
-			count: 1
-			path: src/Admin/API/ProductAttributeTerms.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\ProductAttributeTerms\:\:get_custom_attribute_permissions_check\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\WP_Error\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Admin/API/ProductAttributeTerms.php
 
@@ -47044,12 +46936,6 @@ parameters:
 			path: src/Blocks/Assets/Api.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\Assets\\Api\:\:get_file_version\(\) should return string but returns int\<0, max\>\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Blocks/Assets/Api.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\Assets\\Api\:\:register_script\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -50314,26 +50200,8 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductTag.php
 
 		-
-			message: '#^Iterating over an object of an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block_List\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductTemplate.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductTemplate\:\:initialize\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockTypes/ProductTemplate.php
-
-		-
-			message: '#^Parameter \#1 \$inner_blocks of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductTemplate\:\:block_core_post_template_uses_featured_image\(\) expects Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block_List, WP_Block_List given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductTemplate.php
-
-		-
-			message: '#^Parameter \$inner_blocks of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductTemplate\:\:block_core_post_template_uses_featured_image\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block_List\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Blocks/BlockTypes/ProductTemplate.php
 
@@ -64225,12 +64093,6 @@ parameters:
 			path: src/Internal/StockNotifications/Emails/CustomerStockNotificationEmail.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\StockNotifications\\Emails\\CustomerStockNotificationEmail\:\:trigger\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/StockNotifications/Emails/CustomerStockNotificationEmail.php
-
-		-
 			message: '#^Parameter \#1 \$object_or_string of function is_a expects object, WP_User\|false given\.$#'
 			identifier: argument.type
 			count: 1
@@ -65779,12 +65641,6 @@ parameters:
 			path: src/StoreApi/Routes/V1/Checkout.php
 
 		-
-			message: '#^Cannot access offset string on 0\|0\.0\|''''\|''0''\|array\<string, array\|string\>\|false\|null\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/StoreApi/Routes/V1/Checkout.php
-
-		-
 			message: '#^Expression on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.expr
 			count: 2
@@ -65829,12 +65685,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\Checkout\:\:get_request_payment_data\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
-			count: 1
-			path: src/StoreApi/Routes/V1/Checkout.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\Checkout\:\:get_request_payment_data\(\) should return array but returns array\<string, array\|string\>\|float\|int\|string\|false\|null\.$#'
-			identifier: return.type
 			count: 1
 			path: src/StoreApi/Routes/V1/Checkout.php
 
@@ -66037,12 +65887,6 @@ parameters:
 			path: src/StoreApi/Routes/V1/CheckoutOrder.php
 
 		-
-			message: '#^Cannot access offset string on 0\|0\.0\|''''\|''0''\|array\<string, array\|string\>\|false\|null\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/StoreApi/Routes/V1/CheckoutOrder.php
-
-		-
 			message: '#^Instanceof between Automattic\\WooCommerce\\StoreApi\\Payments\\PaymentResult and Automattic\\WooCommerce\\StoreApi\\Payments\\PaymentResult will always evaluate to true\.$#'
 			identifier: instanceof.alwaysTrue
 			count: 1
@@ -66069,12 +65913,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\CheckoutOrder\:\:get_request_payment_data\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
-			count: 1
-			path: src/StoreApi/Routes/V1/CheckoutOrder.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\CheckoutOrder\:\:get_request_payment_data\(\) should return array but returns array\<string, array\|string\>\|float\|int\|string\|false\|null\.$#'
-			identifier: return.type
 			count: 1
 			path: src/StoreApi/Routes/V1/CheckoutOrder.php
 
@@ -67667,12 +67505,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/StoreApi/Utilities/ProductQuery.php
-
-		-
-			message: '#^Cannot unset offset ''outofstock'' on list\<string\>\.$#'
-			identifier: unset.offset
-			count: 1
-			path: src/StoreApi/Utilities/ProductQueryFilters.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Utilities\\ProductQueryFilters\:\:get_attribute_counts\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'

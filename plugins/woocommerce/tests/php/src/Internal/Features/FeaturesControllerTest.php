@@ -283,7 +283,7 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Feature definition initialization is safe when a translation callback checks a feature.
+	 * @testdox Feature definition initialization is safe when a translation callback checks a feature, and the notice stays in English.
 	 */
 	public function test_feature_definition_initialization_is_reentrant_safe() {
 		$reflection_class = new \ReflectionClass( $this->sut );
@@ -303,15 +303,13 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		$notices                   = array();
 
 		$gettext_filter  = function ( $translation, $text, $domain ) use ( &$reentrant_feature_enabled, &$translation_count ) {
-			unset( $text, $domain ); // Avoid parameter not used PHPCS errors.
-
 			++$translation_count;
 
 			if ( null === $reentrant_feature_enabled ) {
 				$reentrant_feature_enabled = $this->sut->feature_is_enabled( 'order_withdrawal' );
 			}
 
-			return $translation;
+			return 'woocommerce' === $domain ? 'Übersetzt: ' . $text : $translation;
 		};
 		$notice_listener = function ( $function_name, $message, $version ) use ( &$notices, $notice_function ) {
 			if ( $notice_function === $function_name ) {
@@ -335,7 +333,7 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		$this->assertFalse( $reentrant_feature_enabled );
 		$this->assertGreaterThan( 0, $translation_count );
 		$this->assertCount( 1, $notices );
-		$this->assertStringContainsString( 'Use the woocommerce_init action or later.', $notices[0]['message'] );
+		$this->assertStringStartsWith( 'FeaturesController methods that access feature definitions should not be called while feature definitions are being initialized. Use the woocommerce_init action or later.', $notices[0]['message'], 'The reentry notice should be the English message.' );
 		$this->assertSame( '11.3.0', $notices[0]['version'] );
 		$this->assertNotNull( $this->sut->get_feature_definition( 'order_withdrawal' ) );
 	}
@@ -427,9 +425,17 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox 'declare_compatibility' fails when invoked from outside the 'before_woocommerce_init' action.
+	 * @testdox 'declare_compatibility' fails when invoked from outside the 'before_woocommerce_init' action, with an English notice.
 	 */
 	public function test_declare_compatibility_outside_before_woocommerce_init_hook() {
+		add_filter(
+			'gettext',
+			function ( $translation, $text, $domain ) {
+				return 'woocommerce' === $domain ? 'Übersetzt: ' . $text : $translation;
+			},
+			10,
+			3
+		);
 		$function = null;
 		$message  = null;
 		$version  = null;
@@ -571,9 +577,17 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox 'get_compatible_features_for_plugin' fails when invoked before the 'woocommerce_init' hook.
+	 * @testdox 'get_compatible_features_for_plugin' fails when invoked before the 'woocommerce_init' hook, with an English notice.
 	 */
 	public function test_get_compatible_features_for_plugin_before_woocommerce_init_hook() {
+		add_filter(
+			'gettext',
+			function ( $translation, $text, $domain ) {
+				return 'woocommerce' === $domain ? 'Übersetzt: ' . $text : $translation;
+			},
+			10,
+			3
+		);
 		$function = null;
 		$message  = null;
 		$version  = null;

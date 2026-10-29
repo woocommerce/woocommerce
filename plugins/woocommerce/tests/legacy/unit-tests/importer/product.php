@@ -406,6 +406,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 			'attributes:value1'    => array( $importer, 'parse_comma_field' ),
 			'attributes:visible1'  => array( $importer, 'parse_bool_field' ),
 			'attributes:taxonomy1' => array( $importer, 'parse_bool_field' ),
+			'attributes:default1'  => array( $importer, 'parse_attribute_default_field' ),
 			'downloads:url1'       => array( $importer, 'parse_download_file_field' ),
 			'meta:_my_field'       => 'wp_kses_post',
 			// Columns that merely contain a special name must fall back to wc_clean.
@@ -416,7 +417,6 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 			'a downloads:url1'     => 'wc_clean',
 			// Special columns handled elsewhere still get the default callback.
 			'attributes:name1'     => 'wc_clean',
-			'attributes:default1'  => 'wc_clean',
 			'downloads:name1'      => 'wc_clean',
 		);
 
@@ -663,7 +663,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'short_description'  => 'Lorem ipsum dolor sit amet, at exerci civibus appetere sit, iuvaret hendrerit mea no. Eam integre feugait liberavisse an.',
 				'description'        => 'Lorem ipsum dolor sit amet, at exerci civibus appetere sit, iuvaret hendrerit mea no. Eam integre feugait liberavisse an.',
 				'date_on_sale_from'  => '2023-07-08 05:10:15',
-				'date_on_sale_to'    => '2023/07/13',
+				'date_on_sale_to'    => '2023-07-13 23:59:59',
 				'tax_status'         => ProductTaxStatus::TAXABLE,
 				'tax_class'          => 'standard',
 				'stock_status'       => ProductStockStatus::IN_STOCK,
