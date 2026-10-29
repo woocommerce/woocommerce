@@ -967,6 +967,10 @@ describe( 'Address Suggestions Component', () => {
 	} );
 
 	describe( 'Address Selection', () => {
+		afterEach( () => {
+			jest.useRealTimers();
+		} );
+
 		test( 'should populate address fields when address is selected', async () => {
 			// Setup suggestions
 			billingAddressInput.value = '123';
@@ -1004,6 +1008,8 @@ describe( 'Address Suggestions Component', () => {
 		} );
 
 		test( 'should dispatch bubbling change events so delegated listeners see the filled fields', async () => {
+			jest.useFakeTimers();
+
 			const changedIds = [];
 			const onChange = ( event ) => changedIds.push( event.target.id );
 			document.body.addEventListener( 'change', onChange );
@@ -1011,12 +1017,12 @@ describe( 'Address Suggestions Component', () => {
 			billingAddressInput.value = '123';
 			billingAddressInput.focus();
 			billingAddressInput.dispatchEvent( new Event( 'input' ) );
-			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
+			await jest.advanceTimersByTimeAsync( 150 );
 
 			document
 				.querySelector( '#address_suggestions_billing .suggestions-list li' )
 				.click();
-			await new Promise( ( resolve ) => setTimeout( resolve, 250 ) );
+			await jest.advanceTimersByTimeAsync( 250 );
 
 			document.body.removeEventListener( 'change', onChange );
 
@@ -1032,6 +1038,8 @@ describe( 'Address Suggestions Component', () => {
 		} );
 
 		test( 'should bubble the native change event once for Select2 fields without a separate jQuery trigger', async () => {
+			jest.useFakeTimers();
+
 			const jQueryTrigger = jest.fn();
 			window.jQuery = jest.fn( ( element ) => ( {
 				hasClass: jest.fn(
@@ -1051,12 +1059,12 @@ describe( 'Address Suggestions Component', () => {
 			billingAddressInput.value = '123';
 			billingAddressInput.focus();
 			billingAddressInput.dispatchEvent( new Event( 'input' ) );
-			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
+			await jest.advanceTimersByTimeAsync( 150 );
 
 			document
 				.querySelector( '#address_suggestions_billing .suggestions-list li' )
 				.click();
-			await new Promise( ( resolve ) => setTimeout( resolve, 250 ) );
+			await jest.advanceTimersByTimeAsync( 250 );
 
 			document.body.removeEventListener( 'change', onChange );
 
@@ -1069,6 +1077,8 @@ describe( 'Address Suggestions Component', () => {
 		} );
 
 		test( 'should ask the checkout to refresh once the address fields are filled', async () => {
+			jest.useFakeTimers();
+
 			let cityAtRefresh;
 			const jQueryTrigger = jest.fn( ( event ) => {
 				if ( event === 'update_checkout' ) {
@@ -1085,7 +1095,7 @@ describe( 'Address Suggestions Component', () => {
 			billingAddressInput.value = '123';
 			billingAddressInput.focus();
 			billingAddressInput.dispatchEvent( new Event( 'input' ) );
-			await new Promise( ( resolve ) => setTimeout( resolve, 150 ) );
+			await jest.advanceTimersByTimeAsync( 150 );
 
 			document
 				.querySelector( '#address_suggestions_billing .suggestions-list li' )
@@ -1094,7 +1104,7 @@ describe( 'Address Suggestions Component', () => {
 			// Before the delayed fields are filled there is no refresh request.
 			expect( jQueryTrigger ).not.toHaveBeenCalledWith( 'update_checkout' );
 
-			await new Promise( ( resolve ) => setTimeout( resolve, 250 ) );
+			await jest.advanceTimersByTimeAsync( 250 );
 
 			expect( document.getElementById( 'billing_city' ).value ).toBe( 'City' );
 			expect( jQueryTrigger ).toHaveBeenCalledWith( 'update_checkout' );
