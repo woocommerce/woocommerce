@@ -295,7 +295,8 @@ describe( 'changeCartItemQuantity', () => {
 describe( 'addItemToCart', () => {
 	// `receiveCart` updates the cart that `getCartData` returns, like the store.
 	const createAddItemMocks = (
-		items: Array< { key: string; id: number; quantity: number } >
+		items: Array< { key: string; id: number; quantity: number } >,
+		hasCartLoaded = true
 	) => {
 		let cart = { items };
 		return {
@@ -306,7 +307,10 @@ describe( 'addItemToCart', () => {
 				} ),
 				finishAddingToCart: jest.fn(),
 			},
-			select: { getCartData: jest.fn( () => cart ) },
+			select: {
+				getCartData: jest.fn( () => cart ),
+				hasFinishedResolution: jest.fn( () => hasCartLoaded ),
+			},
 		};
 	};
 
@@ -359,6 +363,27 @@ describe( 'addItemToCart', () => {
 			9,
 			true,
 			[ { id: 9, quantity: 1 } ]
+		);
+	} );
+
+	it( 'should not report products when the cart has not loaded yet', async () => {
+		// The existing line isn't in the store yet, so it would look newly added.
+		const { dispatch, select } = createAddItemMocks( [], false );
+		mockApiFetchWithHeaders.mockResolvedValueOnce( {
+			response: {
+				items: [
+					{ key: 'line-3', id: 3, quantity: 2 },
+					{ key: 'line-5', id: 5, quantity: 1 },
+				],
+			},
+		} );
+
+		await addItemToCart( 5, 1, [] )( { dispatch, select } as never );
+
+		expect( dispatch.finishAddingToCart ).toHaveBeenCalledWith(
+			5,
+			true,
+			undefined
 		);
 	} );
 

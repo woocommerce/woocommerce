@@ -492,12 +492,17 @@ export const addItemToCart =
 			} );
 			// Read the cart once the response arrives: adds batched with this
 			// one have already been received, so they aren't reported again.
-			const previousItems = select.getCartData().items;
+			// Until the cart has loaded, existing lines would look newly added.
+			const previousItems = select.hasFinishedResolution( 'getCartData' )
+				? select.getCartData().items
+				: null;
 			dispatch.receiveCart( response );
 			dispatch.finishAddingToCart(
 				productId,
 				true,
-				getAddedProducts( previousItems, response.items )
+				previousItems
+					? getAddedProducts( previousItems, response.items )
+					: undefined
 			);
 			return response;
 		} catch ( error ) {
