@@ -40,7 +40,7 @@ class ProductResource {
 			'id',
 			array(
 				'schema'       => array( 'type' => 'integer' ),
-				'get_callback' => DataFields::getter( 'id' ),
+				'get_callback' => static fn( \WC_Product $product ) => $product->get_id(),
 			)
 		);
 		AbilityResources::register_field(
@@ -48,7 +48,7 @@ class ProductResource {
 			'name',
 			array(
 				'schema'       => $string,
-				'get_callback' => DataFields::getter( 'name' ),
+				'get_callback' => static fn( \WC_Product $product ) => $product->get_name(),
 			)
 		);
 		AbilityResources::register_field(
@@ -56,7 +56,7 @@ class ProductResource {
 			'slug',
 			array(
 				'schema'       => $string,
-				'get_callback' => DataFields::getter( 'slug' ),
+				'get_callback' => static fn( \WC_Product $product ) => $product->get_slug(),
 			)
 		);
 		AbilityResources::register_field(
@@ -68,7 +68,7 @@ class ProductResource {
 					'description' => __( 'Product permalink, or null when no public permalink is available.', 'woocommerce' ),
 					'format'      => 'uri',
 				),
-				'get_callback' => DataFields::getter( 'permalink', static fn( $permalink ) => false === $permalink ? null : $permalink ),
+				'get_callback' => static fn( \WC_Product $product ) => false === $product->get_permalink() ? null : $product->get_permalink(),
 			)
 		);
 		AbilityResources::register_field(
@@ -80,7 +80,7 @@ class ProductResource {
 					'description' => __( 'Internal product type slug, such as simple, external, grouped, or variable.', 'woocommerce' ),
 					'enum'        => array_keys( wc_get_product_types() ),
 				),
-				'get_callback' => DataFields::getter( 'type' ),
+				'get_callback' => static fn( \WC_Product $product ) => $product->get_type(),
 			)
 		);
 		AbilityResources::register_field(
@@ -91,7 +91,7 @@ class ProductResource {
 					'type' => 'string',
 					'enum' => self::get_output_status_slugs(),
 				),
-				'get_callback' => DataFields::getter( 'status' ),
+				'get_callback' => static fn( \WC_Product $product ) => $product->get_status(),
 			)
 		);
 		AbilityResources::register_field(
@@ -99,16 +99,34 @@ class ProductResource {
 			'sku',
 			array(
 				'schema'       => $string,
-				'get_callback' => DataFields::getter( 'sku' ),
+				'get_callback' => static fn( \WC_Product $product ) => $product->get_sku(),
 			)
 		);
-		DataFields::register_currency( self::NAME, static fn() => get_woocommerce_currency() );
+		AbilityResources::register_field(
+			self::NAME,
+			'currency',
+			array(
+				'schema'       => array(
+					'type' => 'string',
+					'enum' => array_keys( get_woocommerce_currencies() ),
+				),
+				'get_callback' => static fn() => get_woocommerce_currency(),
+			)
+		);
+		AbilityResources::register_field(
+			self::NAME,
+			'currency_symbol',
+			array(
+				'schema'       => array( 'type' => 'string' ),
+				'get_callback' => static fn() => html_entity_decode( get_woocommerce_currency_symbol( get_woocommerce_currency() ), ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401 ),
+			)
+		);
 		AbilityResources::register_field(
 			self::NAME,
 			'price',
 			array(
 				'schema'       => $price_schema,
-				'get_callback' => DataFields::getter( 'price' ),
+				'get_callback' => static fn( \WC_Product $product ) => $product->get_price(),
 			)
 		);
 		AbilityResources::register_field(
@@ -116,7 +134,7 @@ class ProductResource {
 			'regular_price',
 			array(
 				'schema'       => $price_schema,
-				'get_callback' => DataFields::getter( 'regular_price' ),
+				'get_callback' => static fn( \WC_Product $product ) => $product->get_regular_price(),
 			)
 		);
 		AbilityResources::register_field(
@@ -124,7 +142,7 @@ class ProductResource {
 			'sale_price',
 			array(
 				'schema'       => $price_schema,
-				'get_callback' => DataFields::getter( 'sale_price' ),
+				'get_callback' => static fn( \WC_Product $product ) => $product->get_sale_price(),
 			)
 		);
 		AbilityResources::register_field(
@@ -135,7 +153,7 @@ class ProductResource {
 					'type' => 'string',
 					'enum' => array_keys( wc_get_product_stock_status_options() ),
 				),
-				'get_callback' => DataFields::getter( 'stock_status' ),
+				'get_callback' => static fn( \WC_Product $product ) => $product->get_stock_status(),
 			)
 		);
 		AbilityResources::register_field(
@@ -146,7 +164,7 @@ class ProductResource {
 					'type'        => array( self::get_stock_quantity_schema_type(), 'null' ),
 					'description' => __( 'Current stock quantity, or null when no stock quantity is set.', 'woocommerce' ),
 				),
-				'get_callback' => DataFields::getter( 'stock_quantity', static fn( $quantity ) => null === $quantity ? null : wc_stock_amount( $quantity ) ),
+				'get_callback' => static fn( \WC_Product $product ) => null === $product->get_stock_quantity() ? null : wc_stock_amount( $product->get_stock_quantity() ),
 			)
 		);
 		foreach ( array( 'manage_stock', 'virtual', 'downloadable' ) as $prop ) {
@@ -155,7 +173,7 @@ class ProductResource {
 				$prop,
 				array(
 					'schema'       => $boolean,
-					'get_callback' => DataFields::getter( $prop, 'boolval' ),
+					'get_callback' => static fn( \WC_Product $product ) => (bool) $product->{'get_' . $prop}(),
 				)
 			);
 		}
@@ -168,7 +186,7 @@ class ProductResource {
 					'description' => __( 'External product URL for external products.', 'woocommerce' ),
 					'format'      => 'uri',
 				),
-				'get_callback' => DataFields::getter( 'product_url', null, \WC_Product_External::class ),
+				'get_callback' => static fn( \WC_Product $product ) => $product instanceof \WC_Product_External ? $product->get_product_url() : null,
 			)
 		);
 		AbilityResources::register_field(
@@ -179,7 +197,7 @@ class ProductResource {
 					'type'        => array( 'string', 'null' ),
 					'description' => __( 'Button text for external products.', 'woocommerce' ),
 				),
-				'get_callback' => DataFields::getter( 'button_text', null, \WC_Product_External::class ),
+				'get_callback' => static fn( \WC_Product $product ) => $product instanceof \WC_Product_External ? $product->get_button_text() : null,
 			)
 		);
 		AbilityResources::register_field(
@@ -194,7 +212,28 @@ class ProductResource {
 				'get_callback' => static fn( \WC_Product $product ) => $product instanceof \WC_Product_Grouped ? array_map( 'absint', $product->get_children( 'edit' ) ) : array(),
 			)
 		);
-		DataFields::register_dates( self::NAME, 'created', 'modified' );
+		$date_schema = array(
+			'type'   => array( 'string', 'null' ),
+			'format' => 'date-time',
+		);
+		foreach ( array( 'date_created', 'date_modified' ) as $prop ) {
+			AbilityResources::register_field(
+				self::NAME,
+				$prop,
+				array(
+					'schema'       => $date_schema,
+					'get_callback' => static fn( \WC_Product $product ) => wc_rest_prepare_date_response( $product->{'get_' . $prop}(), false ),
+				)
+			);
+			AbilityResources::register_field(
+				self::NAME,
+				$prop . '_gmt',
+				array(
+					'schema'       => $date_schema,
+					'get_callback' => static fn( \WC_Product $product ) => wc_rest_prepare_date_response( $product->{'get_' . $prop}() ),
+				)
+			);
+		}
 	}
 
 	/**
