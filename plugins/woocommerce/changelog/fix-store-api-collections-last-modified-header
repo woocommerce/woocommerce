@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix product blocks showing an outdated product list after a product is edited while the page or editor stays open.
