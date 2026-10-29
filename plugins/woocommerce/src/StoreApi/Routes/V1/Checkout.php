@@ -10,6 +10,7 @@ use Automattic\WooCommerce\StoreApi\Utilities\DraftOrderTrait;
 use Automattic\WooCommerce\StoreApi\Utilities\OrderController;
 use Automattic\WooCommerce\StoreApi\Utilities\SessionConcurrencyGuard;
 use Automattic\WooCommerce\Checkout\Helpers\ReserveStockException;
+use Automattic\WooCommerce\Internal\Customers\NewCustomerSession;
 use Automattic\WooCommerce\StoreApi\Utilities\CheckoutTrait;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\AbstractAddressSchema;
 use Automattic\WooCommerce\StoreApi\Schemas\V1\BillingAddressSchema;
@@ -1170,10 +1171,8 @@ class Checkout extends AbstractCartRoute {
 		$order = $this->get_order_or_throw();
 
 		if ( $this->should_create_customer_account( $request ) ) {
-			$customer_id = wc_create_new_customer(
-				$request['billing_address']['email'],
-				'',
-				'',
+			$customer_id = wc_get_container()->get( NewCustomerSession::class )->create_customer(
+				(string) ( $request['billing_address']['email'] ?? '' ),
 				[
 					'first_name' => $request['billing_address']['first_name'],
 					'last_name'  => $request['billing_address']['last_name'],
@@ -1189,11 +1188,8 @@ class Checkout extends AbstractCartRoute {
 				);
 			}
 
-			// Associate customer with the order.
+			// Associate customer with the order. The shopper stays logged out until they set a password.
 			$order->set_customer_id( $customer_id );
-
-			// Set the customer auth cookie.
-			wc_set_customer_auth_cookie( $customer_id );
 			wc_log_order_step( '[Store API #6::process_customer] Created new customer', array( 'customer_id' => $customer_id ) );
 		}
 

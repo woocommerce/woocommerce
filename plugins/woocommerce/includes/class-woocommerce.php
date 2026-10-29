@@ -422,6 +422,7 @@ final class WooCommerce {
 		$container->get( TaxRateVersionStringInvalidator::class );
 		$container->get( OrderMilestoneEasterEgg::class );
 		$container->get( CustomerEmailVerification::class );
+		$container->get( Automattic\WooCommerce\Internal\Customers\NewCustomerSession::class );
 		$container->get( OrderLogsCleanupHelper::class );
 		$container->get( ChequeSettings::class );
 		$container->get( SettingsScreen::class );

@@ -9,6 +9,7 @@
  */
 
 use Automattic\WooCommerce\Enums\OrderInternalStatus;
+use Automattic\WooCommerce\Internal\Customers\NewCustomerSession;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\Internal\Utilities\Users;
 use Automattic\WooCommerce\Utilities\OrderUtil;
@@ -631,6 +632,12 @@ function wc_customer_has_capability( $allcaps, $caps, $args ) {
 				$order = wc_get_order( $order_id );
 
 				if ( $order && ( $user_id === $order->get_user_id() || ! $order->get_user_id() ) ) {
+					$allcaps['pay_for_order'] = true;
+					break;
+				}
+
+				// An account created in this session has no password yet, so a logged out shopper can pay for its orders like a guest order.
+				if ( 0 === $user_id && $order instanceof WC_Order && wc_get_container()->get( NewCustomerSession::class )->is_unverified_new_customer_order( $order ) ) {
 					$allcaps['pay_for_order'] = true;
 				}
 				break;
