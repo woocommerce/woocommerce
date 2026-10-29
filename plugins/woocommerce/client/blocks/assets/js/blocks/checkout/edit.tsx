@@ -128,6 +128,7 @@ export const Edit = ( {
 				<BlockSettings
 					attributes={ attributes }
 					setAttributes={ setAttributes }
+					blockType="checkout"
 				/>
 			</InspectorControls>
 			<EditorProvider

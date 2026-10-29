@@ -101,6 +101,7 @@ class OpenGraph {
 				continue;
 			}
 			$root = array_key_first( $group );
+			// Media details cannot start a group; the :url alias is also a valid root.
 			if ( ! is_string( $root ) || preg_match( '/^og:(image|video|audio):(?!url$)/D', $root ) ) {
 				continue;
 			}

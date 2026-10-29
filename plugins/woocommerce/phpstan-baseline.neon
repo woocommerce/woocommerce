@@ -3079,12 +3079,6 @@ parameters:
 			path: includes/admin/class-wc-admin-upload-downloadable-product.php
 
 		-
-			message: '#^Negated boolean expression is always false\.$#'
-			identifier: booleanNot.alwaysFalse
-			count: 1
-			path: includes/admin/class-wc-admin-upload-downloadable-product.php
-
-		-
 			message: '#^Parameter \#2 \$callback of function add_action expects callable\(\)\: mixed, array\{\$this\(WC_Admin_Upload_Downloadable_Product\), ''media_upload…''\} given\.$#'
 			identifier: argument.type
 			count: 1
@@ -3941,12 +3935,6 @@ parameters:
 			identifier: variable.undefined
 			count: 1
 			path: includes/admin/helper/views/html-section-notices.php
-
-		-
-			message: '#^Binary operation "\." between string and non\-empty\-array\|non\-falsy\-string results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: includes/admin/importers/class-wc-product-csv-importer-controller.php
 
 		-
 			message: '#^Method WC_Product_CSV_Importer_Controller\:\:add_error\(\) has no return type specified\.$#'
@@ -19744,12 +19732,6 @@ parameters:
 			message: '#^Method WC_Product_Importer\:\:set_variation_data\(\) should return WC_Product\|WP_Error but return statement is missing\.$#'
 			identifier: return.missing
 			count: 2
-			path: includes/import/abstract-wc-product-importer.php
-
-		-
-			message: '#^Parameter \#2 \$array of function array_map expects array, list\<string\>\|false given\.$#'
-			identifier: argument.type
-			count: 1
 			path: includes/import/abstract-wc-product-importer.php
 
 		-
@@ -50254,26 +50236,8 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductTag.php
 
 		-
-			message: '#^Iterating over an object of an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block_List\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductTemplate.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductTemplate\:\:initialize\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockTypes/ProductTemplate.php
-
-		-
-			message: '#^Parameter \#1 \$inner_blocks of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductTemplate\:\:block_core_post_template_uses_featured_image\(\) expects Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block_List, WP_Block_List given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductTemplate.php
-
-		-
-			message: '#^Parameter \$inner_blocks of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductTemplate\:\:block_core_post_template_uses_featured_image\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block_List\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Blocks/BlockTypes/ProductTemplate.php
 
@@ -64165,12 +64129,6 @@ parameters:
 			path: src/Internal/StockNotifications/Emails/CustomerStockNotificationEmail.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\StockNotifications\\Emails\\CustomerStockNotificationEmail\:\:trigger\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/StockNotifications/Emails/CustomerStockNotificationEmail.php
-
-		-
 			message: '#^Parameter \#1 \$object_or_string of function is_a expects object, WP_User\|false given\.$#'
 			identifier: argument.type
 			count: 1
@@ -65719,12 +65677,6 @@ parameters:
 			path: src/StoreApi/Routes/V1/Checkout.php
 
 		-
-			message: '#^Cannot access offset string on 0\|0\.0\|''''\|''0''\|array\<string, array\|string\>\|false\|null\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/StoreApi/Routes/V1/Checkout.php
-
-		-
 			message: '#^Expression on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.expr
 			count: 2
@@ -65769,12 +65721,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\Checkout\:\:get_request_payment_data\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
-			count: 1
-			path: src/StoreApi/Routes/V1/Checkout.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\Checkout\:\:get_request_payment_data\(\) should return array but returns array\<string, array\|string\>\|float\|int\|string\|false\|null\.$#'
-			identifier: return.type
 			count: 1
 			path: src/StoreApi/Routes/V1/Checkout.php
 
@@ -65977,12 +65923,6 @@ parameters:
 			path: src/StoreApi/Routes/V1/CheckoutOrder.php
 
 		-
-			message: '#^Cannot access offset string on 0\|0\.0\|''''\|''0''\|array\<string, array\|string\>\|false\|null\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/StoreApi/Routes/V1/CheckoutOrder.php
-
-		-
 			message: '#^Instanceof between Automattic\\WooCommerce\\StoreApi\\Payments\\PaymentResult and Automattic\\WooCommerce\\StoreApi\\Payments\\PaymentResult will always evaluate to true\.$#'
 			identifier: instanceof.alwaysTrue
 			count: 1
@@ -66009,12 +65949,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\CheckoutOrder\:\:get_request_payment_data\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
-			count: 1
-			path: src/StoreApi/Routes/V1/CheckoutOrder.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\CheckoutOrder\:\:get_request_payment_data\(\) should return array but returns array\<string, array\|string\>\|float\|int\|string\|false\|null\.$#'
-			identifier: return.type
 			count: 1
 			path: src/StoreApi/Routes/V1/CheckoutOrder.php
 
@@ -67607,12 +67541,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/StoreApi/Utilities/ProductQuery.php
-
-		-
-			message: '#^Cannot unset offset ''outofstock'' on list\<string\>\.$#'
-			identifier: unset.offset
-			count: 1
-			path: src/StoreApi/Utilities/ProductQueryFilters.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Utilities\\ProductQueryFilters\:\:get_attribute_counts\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
