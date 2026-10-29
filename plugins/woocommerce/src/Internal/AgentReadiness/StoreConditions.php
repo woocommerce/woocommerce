@@ -68,7 +68,7 @@ class StoreConditions {
 				'blocks' => 'ucp',
 				'label'  => __( 'Universal Commerce Protocol (UCP) is off', 'woocommerce' ),
 				'why'    => __( 'Shopping agents that use UCP cannot read your catalog.', 'woocommerce' ),
-				'fix'    => __( 'Turn on agentic commerce in the extension that connects your store to AI agents.', 'woocommerce' ),
+				'fix'    => __( 'Turn on "Let AI agents shop your store" under WooCommerce > Settings > Agentic commerce.', 'woocommerce' ),
 			),
 			array(
 				'id'     => 'pretty_permalinks',

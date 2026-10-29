@@ -9695,3 +9695,61 @@ body.woocommerce-settings-payments-section_legacy {
 		}
 	}
 }
+
+// Settings > Agentic commerce.
+.wc-agentic-commerce-counts {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 16px;
+
+	li {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+		min-inline-size: 180px;
+		padding: 12px 16px;
+		background: #fff;
+		border: 1px solid #dcdcde;
+	}
+
+	strong {
+		font-size: 1.6em;
+		line-height: 1.2;
+	}
+}
+
+.wc-agentic-commerce-badge {
+	display: inline-block;
+	padding: 0 8px;
+	border-radius: 2px;
+	font-weight: 600;
+	background: #f0f0f1;
+	color: #1d2327;
+
+	&--pass {
+		background: #edfaef;
+		color: $green;
+	}
+
+	&--fix {
+		background: #fcf0f1;
+		color: $red;
+	}
+
+	&--check {
+		background: #fcf9e8;
+		color: #8a6100;
+	}
+}
+
+.wc-agentic-commerce-checks {
+	max-inline-size: 900px;
+
+	td:first-child {
+		inline-size: 80px;
+	}
+}
+
+.wc-agentic-commerce-ucp-switch {
+	vertical-align: middle;
+}
