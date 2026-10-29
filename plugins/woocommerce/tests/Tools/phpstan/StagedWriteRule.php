@@ -26,13 +26,14 @@ use PHPStan\Rules\RuleErrorBuilder;
 
 /**
  * Reports a method of a WC_Data subclass that writes to the database outside save(), unless it also calls a
- * stage_*() method on $this, which marks it as the saving twin of a stage method.
+ * stage_*() method on $this, which marks it as the saving twin of a stage method. Methods of the save pipeline
+ * and deletes are exempt.
  *
  * @implements Rule<InClassMethodNode>
  */
 final class StagedWriteRule implements Rule {
 
-	private const ALLOWED_METHODS = array( 'save', 'create', 'update', 'delete', 'read', 'apply_changes', 'save_items', 'save_meta_data' );
+	private const ALLOWED_METHODS = array( 'save', 'create', 'update', 'read', 'apply_changes', 'save_items', 'save_meta_data', 'validate_props', 'before_data_store_save_or_update', 'after_data_store_save_or_update' );
 
 	private const DATA_STORE_WRITE_PREFIXES = array( 'update', 'delete', 'increase', 'decrease', 'set', 'sync', 'create', 'save' );
 
@@ -60,7 +61,8 @@ final class StagedWriteRule implements Rule {
 		$class  = $node->getClassReflection();
 		$method = $node->getOriginalNode();
 
-		if ( ! $class->isSubclassOf( 'WC_Data' ) || $method->isStatic() || null === $method->stmts || in_array( $method->name->toLowerString(), self::ALLOWED_METHODS, true ) ) {
+		$name = $method->name->toLowerString();
+		if ( ! $class->isSubclassOf( 'WC_Data' ) || $method->isStatic() || null === $method->stmts || in_array( $name, self::ALLOWED_METHODS, true ) || 0 === strpos( $name, 'delete' ) ) {
 			return array();
 		}
 

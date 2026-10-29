@@ -534,12 +534,24 @@ class Notification extends \WC_Data {
 	 * @return string The generated verification key.
 	 */
 	public function get_verification_key( bool $persist ): string {
-		$key = wp_generate_password( 20, false );
-		$this->update_meta_data( 'verification_action_key', time() . ':' . wp_fast_hash( $key ) );
+		$key = $this->stage_verification_key();
 
 		if ( $persist ) {
 			$this->save();
 		}
+
+		return $key;
+	}
+
+	/**
+	 * Generate a verification key and set its hash in memory. The next save() writes it.
+	 *
+	 * @since 11.4.0
+	 * @return string The generated verification key.
+	 */
+	public function stage_verification_key(): string {
+		$key = wp_generate_password( 20, false );
+		$this->update_meta_data( 'verification_action_key', time() . ':' . wp_fast_hash( $key ) );
 
 		return $key;
 	}
@@ -565,12 +577,24 @@ class Notification extends \WC_Data {
 	 * @return string The generated unsubscribe key.
 	 */
 	public function get_unsubscribe_key( bool $persist ): string {
-		$key = wp_generate_password( 20, false );
-		$this->update_meta_data( 'unsubscribe_action_key', wp_fast_hash( $key ) );
+		$key = $this->stage_unsubscribe_key();
 
 		if ( $persist ) {
 			$this->save();
 		}
+
+		return $key;
+	}
+
+	/**
+	 * Generate an unsubscribe key and set its hash in memory. The next save() writes it.
+	 *
+	 * @since 11.4.0
+	 * @return string The generated unsubscribe key.
+	 */
+	public function stage_unsubscribe_key(): string {
+		$key = wp_generate_password( 20, false );
+		$this->update_meta_data( 'unsubscribe_action_key', wp_fast_hash( $key ) );
 
 		return $key;
 	}
