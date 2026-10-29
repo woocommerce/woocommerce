@@ -3079,12 +3079,6 @@ parameters:
 			path: includes/admin/class-wc-admin-upload-downloadable-product.php
 
 		-
-			message: '#^Negated boolean expression is always false\.$#'
-			identifier: booleanNot.alwaysFalse
-			count: 1
-			path: includes/admin/class-wc-admin-upload-downloadable-product.php
-
-		-
 			message: '#^Parameter \#2 \$callback of function add_action expects callable\(\)\: mixed, array\{\$this\(WC_Admin_Upload_Downloadable_Product\), ''media_upload…''\} given\.$#'
 			identifier: argument.type
 			count: 1
@@ -3941,12 +3935,6 @@ parameters:
 			identifier: variable.undefined
 			count: 1
 			path: includes/admin/helper/views/html-section-notices.php
-
-		-
-			message: '#^Binary operation "\." between string and non\-empty\-array\|non\-falsy\-string results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: includes/admin/importers/class-wc-product-csv-importer-controller.php
 
 		-
 			message: '#^Method WC_Product_CSV_Importer_Controller\:\:add_error\(\) has no return type specified\.$#'
@@ -19744,12 +19732,6 @@ parameters:
 			message: '#^Method WC_Product_Importer\:\:set_variation_data\(\) should return WC_Product\|WP_Error but return statement is missing\.$#'
 			identifier: return.missing
 			count: 2
-			path: includes/import/abstract-wc-product-importer.php
-
-		-
-			message: '#^Parameter \#2 \$array of function array_map expects array, list\<string\>\|false given\.$#'
-			identifier: argument.type
-			count: 1
 			path: includes/import/abstract-wc-product-importer.php
 
 		-
@@ -37702,30 +37684,6 @@ parameters:
 			path: src/Admin/API/Notice.php
 
 		-
-			message: '#^Instantiated class Automattic\\WooCommerce\\Admin\\API\\WP_Error not found\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Notice.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Notice\:\:dissmiss_notice\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Notice.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Notice\:\:dissmiss_notice\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\WP_REST_Response\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Notice.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Notice\:\:dissmiss_notice\(\) should return Automattic\\WooCommerce\\Admin\\API\\WP_Error\|Automattic\\WooCommerce\\Admin\\API\\WP_REST_Response but returns WP_REST_Response\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/Notice.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Notice\:\:register_routes\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -38872,20 +38830,8 @@ parameters:
 			path: src/Admin/API/ProductAttributeTerms.php
 
 		-
-			message: '#^Instantiated class Automattic\\WooCommerce\\Admin\\API\\WP_Error not found\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/ProductAttributeTerms.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\ProductAttributeTerms\:\:get_custom_attribute_by_slug\(\) should return object but returns array\.$#'
 			identifier: return.type
-			count: 1
-			path: src/Admin/API/ProductAttributeTerms.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\ProductAttributeTerms\:\:get_custom_attribute_permissions_check\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\WP_Error\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Admin/API/ProductAttributeTerms.php
 
@@ -67559,12 +67505,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/StoreApi/Utilities/ProductQuery.php
-
-		-
-			message: '#^Cannot unset offset ''outofstock'' on list\<string\>\.$#'
-			identifier: unset.offset
-			count: 1
-			path: src/StoreApi/Utilities/ProductQueryFilters.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Utilities\\ProductQueryFilters\:\:get_attribute_counts\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
