@@ -2019,6 +2019,61 @@ describe( 'WooCommerce Cart Interactivity API Store', () => {
 			} );
 		} );
 
+		it( 'omits products when the cycle starts before the cart was fetched from the server', async () => {
+			( getConfig as jest.Mock ).mockReturnValue( {} );
+			// The rendered cart is stale: the server cart already has product 3.
+			global.fetch = jest.fn( async ( _url, init?: RequestInit ) => {
+				const serverCart = {
+					items: [
+						makeKeyedLine( { key: 'k3', id: 3, quantity: 2 } ),
+						...( init?.body
+							? [
+									makeKeyedLine( {
+										key: 'k5',
+										id: 5,
+										quantity: 1,
+									} ),
+								]
+							: [] ),
+					],
+					totals: {},
+					errors: [],
+				};
+				return new Response(
+					JSON.stringify(
+						init?.body
+							? {
+									responses: [
+										{ status: 200, body: serverCart },
+									],
+								}
+							: serverCart
+					),
+					{ headers: { Nonce: 'test-nonce-123' } }
+				);
+			} ) as unknown as typeof fetch;
+			jest.isolateModules( () => require( '../cart' ) );
+			const actions = mockRegisteredStore?.actions as Store[ 'actions' ];
+			seedCart( [] );
+
+			// The add starts while the first cart refresh is still in flight.
+			await Promise.all( [
+				runAction( actions.refreshCartItems() ),
+				runAction(
+					actions.addCartItem( {
+						id: 5,
+						quantityToAdd: 1,
+						type: 'simple',
+					} )
+				),
+			] );
+			await flushMicrotasks();
+
+			expect( triggerAddedToCartEvent ).toHaveBeenCalledWith( {
+				preserveCartData: true,
+			} );
+		} );
+
 		it( 'only lists products whose quantity went up in the legacy event payload', async () => {
 			( getConfig as jest.Mock ).mockReturnValue( {} );
 			mockBatchFetch();

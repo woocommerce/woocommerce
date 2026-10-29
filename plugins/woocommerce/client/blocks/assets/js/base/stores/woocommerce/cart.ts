@@ -492,8 +492,10 @@ function preloadA11y(): void {
  */
 let cartQueue: MutationQueue< Cart, CartMutationMeta > | null = null;
 
-// The cart as it was when the current mutation cycle started.
+// The cart as it was when the current mutation cycle started, if it came from
+// the server. The cart rendered with the page can be stale (e.g. page cache).
 let cartBeforeCycle: Cart | null = null;
+let hasServerCart = false;
 
 /**
  * Send a cart request through the queue.
@@ -513,14 +515,16 @@ async function sendCartRequest(
 				Nonce: stateRef.nonce,
 			} ),
 			takeSnapshot: () => {
-				cartBeforeCycle = JSON.parse( JSON.stringify( stateRef.cart ) );
-				return cartBeforeCycle as Cart;
+				const snapshot = JSON.parse( JSON.stringify( stateRef.cart ) );
+				cartBeforeCycle = hasServerCart ? snapshot : null;
+				return snapshot;
 			},
 			rollback: ( snapshot ) => {
 				stateRef.cart = snapshot;
 			},
 			commit: ( serverState ) => {
 				stateRef.cart = serverState;
+				hasServerCart = true;
 			},
 			onProcessingChange: ( isProcessing ) => {
 				stateRef.isCartUpdating = isProcessing;
@@ -558,10 +562,12 @@ async function sendCartRequest(
 				if ( anyAdd ) {
 					triggerAddedToCartEvent( {
 						preserveCartData: true,
-						products: getAddedProducts(
-							cartBeforeCycle?.items ?? [],
-							stateRef.cart.items
-						),
+						...( cartBeforeCycle && {
+							products: getAddedProducts(
+								cartBeforeCycle.items,
+								stateRef.cart.items
+							),
+						} ),
 					} );
 				}
 
@@ -1239,6 +1245,7 @@ const { actions } = store< Store >(
 
 					// Updates the local cart.
 					state.cart = json;
+					hasServerCart = true;
 
 					// Resets the timeout.
 					refreshTimeout = 3000;
