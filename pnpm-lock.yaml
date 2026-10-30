@@ -2468,7 +2468,7 @@ importers:
         version: 5.1.0
       js-yaml:
         specifier: ^4.3.1
-        version: 4.3.1
+        version: 4.3.2
       json-refs:
         specifier: ^3.0.15
         version: 3.0.15
@@ -4143,7 +4143,7 @@ importers:
         version: 4.0.3
       js-yaml:
         specifier: ^4.3.1
-        version: 4.3.1
+        version: 4.3.2
       luxon:
         specifier: ^3.4.4
         version: 3.7.2
@@ -14990,8 +14990,8 @@ packages:
     resolution: {integrity: sha512-6EuL879VkRA+1Cz578mKMiKvjPNEuk6+r1JaFzoSWejZmtf7xWbIyw1e3KkxlkzTIt9Taw6JBhEppG7utc1P+w==}
     hasBin: true
 
-  js-yaml@4.3.1:
-    resolution: {integrity: sha512-CY6crGq313MX8GkwvB7tzgp99vjQxY1++5y10/BKN/GUfHqWaOGQMNZkBvqSzsZKWk/ijwHlWzzkLulsGHhjWQ==}
+  js-yaml@4.3.2:
+    resolution: {integrity: sha512-SFNOvSJ+Dgf/9An904Yx+CgSlIPCkIpao4qo51lpee25TIRejdH3rhR4EZMGoNx3/TP3O+wzWuiTFl4sqbltzA==}
     hasBin: true
 
   jscodeshift@0.13.1:
@@ -33543,7 +33543,7 @@ snapshots:
   cosmiconfig@8.3.6(typescript@5.7.3):
     dependencies:
       import-fresh: 3.3.1
-      js-yaml: 4.3.1
+      js-yaml: 4.3.2
       parse-json: 5.2.0
       path-type: 4.0.0
     optionalDependencies:
@@ -33553,7 +33553,7 @@ snapshots:
     dependencies:
       env-paths: 2.2.1
       import-fresh: 3.3.1
-      js-yaml: 4.3.1
+      js-yaml: 4.3.2
       parse-json: 5.2.0
     optionalDependencies:
       typescript: 5.7.3
@@ -37136,7 +37136,7 @@ snapshots:
       argparse: 1.0.10
       esprima: 4.0.1
 
-  js-yaml@4.3.1:
+  js-yaml@4.3.2:
     dependencies:
       argparse: 2.0.1
 
@@ -37778,7 +37778,7 @@ snapshots:
       get-stdin: 9.0.0
       glob: 7.2.3
       ignore: 5.2.4
-      js-yaml: 4.3.1
+      js-yaml: 4.3.2
       jsonc-parser: 3.0.0
       markdownlint: 0.25.1
       markdownlint-rule-helpers: 0.16.0
