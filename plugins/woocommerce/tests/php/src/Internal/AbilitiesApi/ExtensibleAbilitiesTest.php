@@ -1946,6 +1946,46 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should refuse an order class whose parent overrides update_status() without stage_status(), and name that parent.
+	 */
+	public function test_an_order_class_below_an_unstaged_parent_is_refused(): void {
+		$order_class  = get_class(
+			new class() extends TestUnstagedOrder {
+				/**
+				 * Mark the order, then stage the status.
+				 *
+				 * @param string       $new_status    Status to change the order to.
+				 * @param string|false $note          Optional note.
+				 * @param bool         $manual_update Whether a person made the change.
+				 * @return array
+				 */
+				public function stage_status( $new_status, $note = '', $manual_update = false ) {
+					$this->update_meta_data( '_test_staged', 'yes' );
+					return parent::stage_status( $new_status, $note, $manual_update );
+				}
+			}
+		);
+		$filter_class = static fn() => $order_class;
+		add_filter( 'woocommerce_order_class', $filter_class, 100 );
+		$order        = \WC_Helper_Order::create_order();
+
+		$response = $this->run_ability_response(
+			'woocommerce/order-update-status',
+			array(
+				'id'     => $order->get_id(),
+				'status' => 'completed',
+			)
+		);
+
+		remove_filter( 'woocommerce_order_class', $filter_class, 100 );
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'woocommerce_order_status_staging_unsupported', $response->get_data()['code'] );
+		$this->assertStringContainsString( TestUnstagedOrder::class, $response->get_data()['message'] );
+		$this->assertStringContainsString( 'stage_status()', $response->get_data()['message'] );
+		$this->assertSame( 'pending', wc_get_order( $order->get_id() )->get_status() );
+	}
+
+	/**
 	 * @testdox Should run a validator on the changed product, after the field callbacks, and save nothing when it refuses.
 	 */
 	public function test_a_validator_sees_the_changed_product(): void {

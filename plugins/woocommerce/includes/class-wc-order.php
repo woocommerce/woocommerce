@@ -300,9 +300,11 @@ class WC_Order extends WC_Abstract_Order {
 
 		if ( null !== $status ) {
 			/**
-			 * Fires for a manual status change of an order. For a change that
-			 * stage_status() staged, it fires when the order is saved, before
-			 * it is written.
+			 * Fires for a manual status change of an order, before the change
+			 * is written, so a listener that reloads the order sees the old row.
+			 * After set_status(), it fires before the paid and completed dates
+			 * are set. After stage_status() or update_status(), it fires from
+			 * save(), with those dates already set on the order object.
 			 *
 			 * @since 3.0.0
 			 * @param int    $order_id Order ID.
@@ -429,8 +431,8 @@ class WC_Order extends WC_Abstract_Order {
 	 * calls this method, then save().
 	 *
 	 * An order class that overrides update_status() with rules of its own must override this method
-	 * too, with the same rules. Abilities stage a status change with this method only when no class
-	 * below the one that declares it overrides update_status().
+	 * too, in the same class, with the same rules. Abilities stage a status change with this method
+	 * only when every class that declares update_status() also declares this method.
 	 *
 	 * @since 11.4.0
 	 * @param string       $new_status    Status to change the order to. No internal wc- prefix is required.

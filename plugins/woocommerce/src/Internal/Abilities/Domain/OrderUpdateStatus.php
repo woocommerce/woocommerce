@@ -138,10 +138,15 @@ class OrderUpdateStatus extends ActionableAbility {
 			return self::update_status( $subject, $status, self::get_note( $input ) );
 		}
 
-		if ( ! StagedMethod::supports( $subject, 'update_status', 'stage_status' ) ) {
+		$unstaged_class = StagedMethod::unstaged_class( $subject, 'update_status', 'stage_status' );
+		if ( null !== $unstaged_class ) {
 			return new \WP_Error(
 				'woocommerce_order_status_staging_unsupported',
-				__( 'This order type does not support this change yet.', 'woocommerce' ),
+				sprintf(
+					/* translators: %s: PHP class name of the order. */
+					__( 'This order type does not support this change yet. The class %s overrides update_status() and needs to override stage_status() too.', 'woocommerce' ),
+					$unstaged_class
+				),
 				array( 'status' => 400 )
 			);
 		}

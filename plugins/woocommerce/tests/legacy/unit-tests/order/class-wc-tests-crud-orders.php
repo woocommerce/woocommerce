@@ -1143,7 +1143,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test: update_status fires woocommerce_order_edit_status before it writes, and set_status fires it before the paid and completed dates are set.
+	 * Test: update_status fires woocommerce_order_edit_status before it writes and after the paid and completed dates are set, and set_status fires it before those dates are set.
 	 */
 	public function test_edit_status_action_fires_before_the_write() {
 		$events   = array();
@@ -1167,7 +1167,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$set = array( null !== $object->get_date_paid( 'edit' ), null !== $object->get_date_completed( 'edit' ) );
 
 		remove_action( 'woocommerce_order_edit_status', $listener );
-		$this->assertSame( OrderStatus::PENDING, $events[0][0] );
+		$this->assertSame( array( OrderStatus::PENDING, false, false ), $events[0] );
 		$this->assertSame( array( OrderStatus::PENDING, true, true ), $events[1] );
 		$this->assertSame( array( true, true ), $set );
 	}
