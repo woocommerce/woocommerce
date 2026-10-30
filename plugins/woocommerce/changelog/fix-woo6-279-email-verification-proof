@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Verify customer email ownership only with a password credential bound to its emailed recipient.
