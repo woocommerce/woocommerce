@@ -1294,6 +1294,11 @@ class WC_Install {
 		add_option( 'woocommerce_thumbnail_image_width', '300', '', 'yes' );
 		add_option( 'woocommerce_checkout_highlight_required_fields', 'yes', '', 'yes' );
 		add_option( 'woocommerce_demo_store', 'no', '', 'no' );
+		add_option( 'woocommerce_custom_orders_table_data_sync_enabled', 'no', '', 'yes' );
+		add_option( 'woocommerce_custom_orders_table_background_sync_mode', 'off', '', 'yes' );
+		add_option( 'woocommerce_catalog_columns', '4', '', 'yes' );
+		add_option( 'woocommerce_catalog_rows', '4', '', 'yes' );
+		add_option( 'woocommerce_default_catalog_orderby', 'menu_order', '', 'yes' );
 
 		if ( self::is_new_install() ) {
 			// Define initial tax classes.
