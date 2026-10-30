@@ -495,9 +495,11 @@ class ExtensibleAbilities {
 	 * no extension fields. For example, a validator refuses a product change that
 	 * would break a subscription plan.
 	 *
-	 * Core's product abilities run validators. Core's order abilities keep their
-	 * trunk write for now, so validators for `order` run only in the
-	 * ActionableAbility classes of extensions.
+	 * Core's product abilities and order-update-status run validators. An order
+	 * validator sees the order with its new status staged, including the paid
+	 * and completed dates that the status sets. While the feature is on,
+	 * order-update-status refuses an order class that cannot stage a status
+	 * change. See WC_Order::stage_status().
 	 *
 	 * @since 11.3.0
 	 *
