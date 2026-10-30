@@ -48,18 +48,18 @@ class ProductOpenGraphTags {
 		$gallery   = $product->get_gallery_image_ids();
 		$image_ids = array_merge( array( $product->get_image_id() ), is_array( $gallery ) ? $gallery : array() );
 		$image_ids = array_unique( array_filter( array_map( 'intval', $image_ids ) ) );
-		$urls      = array();
-		foreach ( array_chunk( $image_ids, 6 ) as $image_batch ) {
+		if ( ! empty( $image_ids ) ) {
 			// Prime caches to reduce future queries.
-			_prime_post_caches( $image_batch );
-			foreach ( $image_batch as $image_id ) {
-				$image = $this->get_image_tags( $image_id, $product->get_name() );
-				if ( $image && ! in_array( $image['og:image'], $urls, true ) ) {
-					$tags[] = $image;
-					$urls[] = $image['og:image'];
-					if ( 6 === count( $urls ) ) {
-						break 2;
-					}
+			_prime_post_caches( $image_ids );
+		}
+		$urls = array();
+		foreach ( $image_ids as $image_id ) {
+			$image = $this->get_image_tags( $image_id, $product->get_name() );
+			if ( $image && ! in_array( $image['og:image'], $urls, true ) ) {
+				$tags[] = $image;
+				$urls[] = $image['og:image'];
+				if ( 6 === count( $urls ) ) {
+					break;
 				}
 			}
 		}
