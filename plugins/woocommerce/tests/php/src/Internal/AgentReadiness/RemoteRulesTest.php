@@ -124,6 +124,7 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 	 * @testdox With no URL set nothing is fetched and the bundled rules apply.
 	 */
 	public function test_no_url_makes_no_request(): void {
+		add_filter( 'woocommerce_agent_readiness_rules_url', '__return_empty_string' );
 		$this->assertFalse( $this->sut->refresh() );
 		$this->assertSame( array(), $this->requests );
 		$this->assertSame( array(), $this->sut->channel_rules() );
@@ -354,7 +355,7 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 	 */
 	public function test_shipped_rules_file_is_a_subset_of_the_code(): void {
 		$path = dirname( __DIR__, 5 ) . '/src/Internal/AgentReadiness/rules.json';
-		$file = json_decode( (string) file_get_contents( $path ), true );
+		$file = json_decode( (string) file_get_contents( $path ), true ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Local file.
 		$this->assertIsArray( $file );
 		$this->assertIsArray( $file['checks'] );
 

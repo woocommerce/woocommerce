@@ -15,9 +15,8 @@ defined( 'ABSPATH' ) || exit;
  * day. Only a GET is made; no store data is sent. A failed fetch keeps the
  * last good copy, and with no copy the bundled checks apply.
  *
- * No URL is set until the file is served. It will live at PUBLISHED_URL, the
- * same host as the payment gateway suggestions. The
- * woocommerce_agent_readiness_rules_url filter sets the URL.
+ * The file is fetched from PUBLISHED_URL, the same host as the payment gateway
+ * suggestions; the woocommerce_agent_readiness_rules_url filter changes it.
  *
  * @since 11.4.0
  */
@@ -41,13 +40,12 @@ class RemoteRules {
 	public function refresh(): bool {
 		/**
 		 * Filters the URL of the agent readiness rules file. Empty means the bundled checks only.
-		 * Set this to RemoteRules::PUBLISHED_URL once that endpoint exists.
 		 *
 		 * @since 11.4.0
 		 *
 		 * @param string $url Rules file URL.
 		 */
-		$url = apply_filters( 'woocommerce_agent_readiness_rules_url', '' );
+		$url = apply_filters( 'woocommerce_agent_readiness_rules_url', self::PUBLISHED_URL );
 		if ( ! is_string( $url ) || '' === $url ) {
 			return false;
 		}
