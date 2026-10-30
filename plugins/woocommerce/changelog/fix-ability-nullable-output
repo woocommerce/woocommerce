@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Omit absent Core ability output fields and declare one value type for each field.

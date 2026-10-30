@@ -90,12 +90,15 @@ class OrderNotesQuery extends AbstractDomainAbility implements AbilityDefinition
 		return array(
 			'notes' => array_map(
 				static function ( $note ): array {
-					return array(
-						'id'            => (int) $note->id,
-						'author'        => (string) $note->added_by,
-						'date_created'  => $note->date_created ? $note->date_created->format( 'c' ) : null,
-						'note'          => (string) $note->content,
-						'customer_note' => (bool) $note->customer_note,
+					return array_filter(
+						array(
+							'id'            => (int) $note->id,
+							'author'        => (string) $note->added_by,
+							'date_created'  => $note->date_created ? $note->date_created->format( 'c' ) : null,
+							'note'          => (string) $note->content,
+							'customer_note' => (bool) $note->customer_note,
+						),
+						static fn( $value ) => null !== $value
 					);
 				},
 				$notes
@@ -140,7 +143,7 @@ class OrderNotesQuery extends AbstractDomainAbility implements AbilityDefinition
 							'id'            => array( 'type' => 'integer' ),
 							'author'        => array( 'type' => 'string' ),
 							'date_created'  => array(
-								'type'   => array( 'string', 'null' ),
+								'type'   => 'string',
 								'format' => 'date-time',
 							),
 							'note'          => array( 'type' => 'string' ),
