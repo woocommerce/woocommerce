@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Preserve registered customer identity when guest orders are imported, deleted or anonymized.
