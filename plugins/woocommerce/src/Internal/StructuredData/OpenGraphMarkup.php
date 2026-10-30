@@ -39,7 +39,7 @@ class OpenGraphMarkup {
 		/**
 		 * Metadata ownership rules.
 		 *
-		 * @var array<string, array{detect?: string, match: string, exists: bool}> $tag_groups
+		 * @var array<string, array{detect?: string, match: string|string[], exists: bool}> $tag_groups
 		 */
 		$tag_groups = array(
 			'image'        => array(
@@ -48,11 +48,28 @@ class OpenGraphMarkup {
 				'exists' => false,
 			),
 			'prices'       => array(
-				'match'  => '/^(product:(sale_)?price(:|_)|og:price:)/',
+				'match'  => array(
+					'product:price:amount',
+					'product:price:currency',
+					'product:sale_price:amount',
+					'product:sale_price:currency',
+					'product:sale_price_dates:start',
+					'product:sale_price_dates:end',
+					'og:price:amount',
+					'og:price:currency',
+					'og:price:standard_amount',
+					'og:price:start_date',
+					'og:price:end_date',
+				),
 				'exists' => false,
 			),
 			'availability' => array(
 				'match'  => '/^(product|og):availability$/D',
+				'exists' => false,
+			),
+			'video'        => array(
+				'detect' => '/^og:video(?::url)?$/D',
+				'match'  => '/^og:video(?::|$)/D',
 				'exists' => false,
 			),
 		);
@@ -92,7 +109,7 @@ class OpenGraphMarkup {
 					continue;
 				}
 				foreach ( $tag_groups as $group_name => $group ) {
-					if ( preg_match( $group['detect'] ?? $group['match'], $property ) ) {
+					if ( self::matches_property( $group['detect'] ?? $group['match'], $property ) ) {
 						$tag_groups[ $group_name ]['exists'] = true;
 					}
 				}
@@ -108,7 +125,7 @@ class OpenGraphMarkup {
 			}
 			foreach ( $candidate as $property => $value ) {
 				foreach ( $tag_groups as $group ) {
-					if ( $group['exists'] && preg_match( $group['match'], $property ) ) {
+					if ( $group['exists'] && self::matches_property( $group['match'], $property ) ) {
 						unset( $tags[ $index ] );
 						continue 3;
 					}
@@ -128,6 +145,17 @@ class OpenGraphMarkup {
 		}
 
 		return self::insert_tags( $processor->get_updated_html(), $tags );
+	}
+
+	/**
+	 * Check whether a property belongs to a metadata group.
+	 *
+	 * @param string|string[] $matcher  Pattern or property names.
+	 * @param string          $property Metadata property.
+	 * @return bool
+	 */
+	private static function matches_property( $matcher, string $property ): bool {
+		return is_array( $matcher ) ? in_array( $property, $matcher, true ) : 1 === preg_match( $matcher, $property );
 	}
 
 	/**

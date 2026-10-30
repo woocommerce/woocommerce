@@ -73,6 +73,18 @@ class ProductOpenGraphTags {
 			$tags[] = array( $property => $value );
 		}
 
+		foreach ( wc_get_container()->get( ProductMediaSources::class )->get_sources( $product ) as $media => $source ) {
+			$root  = 'og:' . $media;
+			$group = array();
+			foreach ( $source as $detail => $value ) {
+				$group[ 'url' === $detail ? $root : $root . ':' . $detail ] = $value;
+			}
+			if ( 'https' === wp_parse_url( $source['url'], PHP_URL_SCHEME ) ) {
+				$group[ $root . ':secure_url' ] = $source['url'];
+			}
+			$tags[] = $group;
+		}
+
 		return $tags;
 	}
 
