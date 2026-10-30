@@ -375,6 +375,7 @@ class WC_Install {
 		'11.4.0'   => array(
 			'wc_update_1140_re_enable_autoload_options',
 			'wc_update_1140_add_mpn_to_product_lookup_table',
+			'wc_update_1140_autoload_options_for_hpos_and_product_catalog',
 		),
 	);
 
