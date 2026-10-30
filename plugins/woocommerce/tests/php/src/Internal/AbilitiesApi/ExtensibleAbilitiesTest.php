@@ -1454,6 +1454,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 				$contexts[] = array(
 					'saved'   => array_map( static fn( \WC_Data $item ) => $item->get_id(), $saved ),
 					'deleted' => array_map( static fn( \WC_Data $item ) => $item->get_id(), $context['deleted'] ),
+					'trashed' => array_map( static fn( \WC_Data $item ) => $item->get_id(), $context['trashed'] ),
 					'input'   => $context['input'],
 				);
 				return null;
@@ -1478,6 +1479,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 				'force' => true,
 			)
 		);
+		$this->run_ability( 'woocommerce/product-delete', array( 'id' => $created['product']['id'] ) );
 		$this->run_ability(
 			'woocommerce/product-delete',
 			array(
@@ -1486,7 +1488,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			)
 		);
 
-		$this->assertCount( 4, $contexts );
+		$this->assertCount( 5, $contexts );
 		$this->assertSame( array(), $contexts[0]['deleted'] );
 		$this->assertSame( array( $created['product']['id'] ), $contexts[1]['saved'] );
 		$this->assertSame( array( $created['product']['variation_ids'][1] ), $contexts[1]['deleted'] );
@@ -1494,7 +1496,10 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->assertSame( array( $created['product']['id'] ), $contexts[2]['saved'], 'A variation delete saves the parent.' );
 		$this->assertSame( array( $created['product']['variation_ids'][0] ), $contexts[2]['deleted'] );
 		$this->assertSame( array(), $contexts[3]['saved'] );
-		$this->assertSame( array( $created['product']['id'] ), $contexts[3]['deleted'], 'A parent delete reports the parent; its variations were deleted before.' );
+		$this->assertSame( array(), $contexts[3]['deleted'], 'A trash deletes nothing for good.' );
+		$this->assertSame( array( $created['product']['id'] ), $contexts[3]['trashed'], 'A trash reports the parent as trashed.' );
+		$this->assertSame( array( $created['product']['id'] ), $contexts[4]['deleted'], 'A parent delete reports the parent; its variations were deleted before.' );
+		$this->assertSame( array(), $contexts[4]['trashed'] );
 	}
 
 	/**

@@ -53,11 +53,18 @@ class ProductDelete extends ActionableAbility {
 	private ?\WC_Product_Variable $parent = null;
 
 	/**
-	 * The objects the call deleted.
+	 * The objects the call deleted for good.
 	 *
 	 * @var \WC_Product[]
 	 */
 	private array $deleted = array();
+
+	/**
+	 * The objects the call moved to the trash.
+	 *
+	 * @var \WC_Product[]
+	 */
+	private array $trashed = array();
 
 	/**
 	 * Get the ability registration arguments.
@@ -121,6 +128,7 @@ class ProductDelete extends ActionableAbility {
 		$this->force      = ! empty( $input['force'] );
 		$this->parent     = null;
 		$this->deleted    = array();
+		$this->trashed    = array();
 
 		$product = self::get_product_from_input( $input );
 
@@ -203,8 +211,8 @@ class ProductDelete extends ActionableAbility {
 			}
 		}
 
-		$this->deleted = array_merge( array( clone $subject ), $variations );
-		$deleted       = $subject->delete( $force );
+		$removed = array_merge( array( clone $subject ), $variations );
+		$deleted = $subject->delete( $force );
 
 		if (
 			! $deleted
@@ -218,6 +226,12 @@ class ProductDelete extends ActionableAbility {
 			);
 		}
 
+		if ( $force ) {
+			$this->deleted = $removed;
+		} else {
+			$this->trashed = $removed;
+		}
+
 		if ( null !== $this->parent ) {
 			self::sync_variable_parent( $this->parent );
 		}
@@ -227,12 +241,21 @@ class ProductDelete extends ActionableAbility {
 
 	/**
 	 * The product and, for a variable product, its variations, as they were
-	 * before the delete. A forced delete clears the ID of the live object.
+	 * before a forced delete, which clears the ID of the live object.
 	 *
 	 * @return \WC_Product[]
 	 */
 	protected function get_deleted_objects(): array {
 		return $this->deleted;
+	}
+
+	/**
+	 * The product and, for a variable product, its variations, when the call trashed them.
+	 *
+	 * @return \WC_Product[]
+	 */
+	protected function get_trashed_objects(): array {
+		return $this->trashed;
 	}
 
 	/**
