@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Omit absent ability output fields while preserving null input for extension value deletion.
+Omit absent Core and nested extension ability output values while preserving null input for extension value deletion.

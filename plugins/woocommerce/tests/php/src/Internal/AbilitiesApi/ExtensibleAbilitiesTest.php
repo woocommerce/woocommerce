@@ -1265,6 +1265,162 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should omit nested nulls without changing extension registrations or null deletion inputs.
+	 */
+	public function test_nested_nullable_extension_output(): void {
+		$registered = array(
+			'type'                 => 'object',
+			'properties'           => array(
+				'label'  => array(
+					'type'    => array( 'string', 'null' ),
+					'enum'    => array( 'gift', null ),
+					'default' => null,
+				),
+				'count'  => array( 'type' => array( 'integer', 'null' ) ),
+				'active' => array( 'type' => array( 'boolean', 'null' ) ),
+				'empty'  => array( 'type' => 'string' ),
+				'never'  => array( 'type' => 'null' ),
+				'child'  => array(
+					'type'       => 'object',
+					'properties' => array( 'label' => array( 'type' => array( 'string', 'null' ) ) ),
+				),
+				'list'   => array(
+					'type'  => 'array',
+					'items' => array( 'type' => array( 'integer', 'null' ) ),
+				),
+				'map'    => array(
+					'type'                 => 'object',
+					'additionalProperties' => array( 'type' => array( 'integer', 'null' ) ),
+				),
+			),
+			'required'             => array( 'label', 'count', 'never', 'empty' ),
+			'additionalProperties' => false,
+		);
+		$value      = array(
+			'label'  => null,
+			'count'  => 0,
+			'active' => false,
+			'empty'  => '',
+			'never'  => null,
+			'child'  => array( 'label' => null ),
+			'list'   => array( null, 0, null, 2 ),
+			'map'    => array(
+				'absent' => null,
+				'zero'   => 0,
+			),
+		);
+		add_action(
+			'woocommerce_extensible_abilities_init',
+			static function () use ( $registered, $value ): void {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'        => 'product',
+						'namespace'       => 'nested',
+						'field'           => 'details',
+						'schema'          => $registered,
+						'get_callback'    => static fn() => $value,
+						'update_callback' => '__return_null',
+					)
+				);
+			}
+		);
+		$product = \WC_Helper_Product::create_simple_product();
+		$ability = $this->get_ability( 'woocommerce/product-update' );
+		$schema  = $ability['output_schema']['properties']['product']['properties']['extensions']['properties']['nested']['properties']['details'];
+		$this->assertSame( 'string', $schema['properties']['label']['type'] );
+		$this->assertSame( array( 'gift' ), $schema['properties']['label']['enum'] );
+		$this->assertArrayNotHasKey( 'default', $schema['properties']['label'] );
+		$this->assertArrayNotHasKey( 'never', $schema['properties'] );
+		$this->assertSame( array( 'empty' ), $schema['required'] );
+		$this->assertSame( 'integer', $schema['properties']['list']['items']['type'] );
+		$this->assertSame( 'integer', $schema['properties']['map']['additionalProperties']['type'] );
+		$this->assertSame( $registered, ExtensibleAbilities::get_fields( 'product' )['nested']['details']['schema'] );
+		$this->assertSame( $registered['properties'], $ability['input_schema']['properties']['extensions']['properties']['nested']['properties']['details']['properties'] );
+
+		$result = $this->run_ability(
+			'woocommerce/product-update',
+			array(
+				'id'   => $product->get_id(),
+				'name' => 'Nested output',
+			)
+		);
+		$output = $result['product']['extensions']['nested']['details'];
+		$this->assertArrayNotHasKey( 'label', $output );
+		$this->assertArrayNotHasKey( 'never', $output );
+		$this->assertSame( 0, $output['count'] );
+		$this->assertFalse( $output['active'] );
+		$this->assertSame( '', $output['empty'] );
+		$this->assertSame( '{}', wp_json_encode( $output['child'] ) );
+		$this->assertSame( '[0,2]', wp_json_encode( $output['list'] ) );
+		$this->assertArrayNotHasKey( 'absent', $output['map'] );
+		$this->assertSame( 0, $output['map']['zero'] );
+		$this->assertTrue( rest_validate_value_from_schema( $output, $schema ) );
+	}
+
+	/**
+	 * @testdox Should leave null-only fields out of the output schema and response.
+	 */
+	public function test_null_only_extension_output(): void {
+		add_action(
+			'woocommerce_extensible_abilities_init',
+			static function (): void {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'     => 'product',
+						'namespace'    => 'null-only',
+						'field'        => 'absent',
+						'schema'       => array( 'type' => 'null' ),
+						'get_callback' => '__return_null',
+					)
+				);
+			}
+		);
+		$schema = $this->get_output_schema( 'woocommerce/product-update' );
+		$this->assertArrayNotHasKey( 'null-only', $schema['properties']['product']['properties']['extensions']['properties'] );
+		$output = ExtensibleAbilities::add_fields_to_object( array(), 'product', new \WC_Product_Simple() );
+		$this->assertArrayNotHasKey( 'null-only', $output['extensions'] ?? array() );
+	}
+
+	/**
+	 * @testdox Should normalize nullable array items, dictionaries and alternative schemas.
+	 * @testWith [{"type":"array","items":{"type":"object","properties":{"label":{"type":["string","null"]}},"required":["label"]}}, [{"label":null},{"label":"gift"}], "[{},{\"label\":\"gift\"}]"]
+	 *           [{"type":"object","patternProperties":{"^item":{"type":["integer","null"]}}}, {"item1":null,"item2":0}, "{\"item2\":0}"]
+	 *           [{"type":"object","additionalProperties":{"type":["integer","null"]}}, {"0":0,"1":null}, "{\"0\":0}"]
+	 *           [{"type":"array","items":{"type":"null"}}, [null,null], "[]"]
+	 *           [{"type":"object","properties":{"absent":{"type":"null"}},"required":["absent"],"additionalProperties":false}, {"absent":null}, "{}"]
+	 *           [{"type":["object","null"],"anyOf":[{"type":"object","properties":{"label":{"type":["string","null"]}},"required":["label"]},{"type":"null"}]}, {"label":null}, "{}"]
+	 *           [{"type":["object","null"],"oneOf":[{"type":"object","properties":{"label":{"type":["string","null"]}},"required":["label"]},{"type":"null"}]}, {"label":null}, "{}"]
+	 *           [{"type":"object","properties":{"label":{"anyOf":[{"type":"string"},{"type":"null"}]}},"required":["label"]}, {"label":null}, "{}"]
+	 *           [{"type":"object","anyOf":[{"type":"object","properties":{"child":{"type":"object","properties":{"label":{"type":["string","null"]}}}}}]}, {"child":{"label":null}}, "{\"child\":{}}"]
+	 *
+	 * @param array  $registered Registered schema.
+	 * @param mixed  $value      Callback value.
+	 * @param string $expected   Expected JSON output.
+	 */
+	public function test_nested_nullable_schema_shapes( array $registered, $value, string $expected ): void {
+		add_action(
+			'woocommerce_extensible_abilities_init',
+			static function () use ( $registered, $value ): void {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'     => 'product',
+						'namespace'    => 'shapes',
+						'field'        => 'value',
+						'schema'       => $registered,
+						'get_callback' => static fn() => $value,
+					)
+				);
+			}
+		);
+		$schema = $this->get_output_schema( 'woocommerce/product-update' )['properties']['product']['properties']['extensions']['properties']['shapes']['properties']['value'];
+		$output = ExtensibleAbilities::add_fields_to_object( array(), 'product', new \WC_Product_Simple() )['extensions']['shapes']['value'];
+		$this->assertSame( $expected, wp_json_encode( $output ) );
+		$this->assertTrue( rest_validate_value_from_schema( $output, $schema ) );
+		$this->assertStringNotContainsString( '"null"', wp_json_encode( $schema ) );
+		$this->assertNotSame( array(), $schema['properties'] ?? null, 'An empty PHP array encodes as a JSON list, not a properties object.' );
+	}
+
+	/**
 	 * @testdox Should leave out and report one time a value that does not match its schema, and keep the output valid.
 	 */
 	public function test_a_value_that_does_not_match_its_schema_is_left_out(): void {
