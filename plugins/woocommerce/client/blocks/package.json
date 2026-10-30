@@ -193,7 +193,6 @@
 		"msw": "2.10.4",
 		"playwright-ctrf-json-reporter": "0.0.27",
 		"postcss": "catalog:tooling",
-		"postcss-color-function": "4.1.0",
 		"postcss-loader": "4.3.x",
 		"prettier": "catalog:tooling",
 		"progress-bar-webpack-plugin": "2.1.x",
