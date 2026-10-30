@@ -1202,6 +1202,38 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should keep an empty array for an array as an empty list, with and without the JSON check.
+	 */
+	public function test_an_empty_array_for_an_array_is_an_empty_list(): void {
+		$output = $this->read_field_values(
+			array(
+				'flat'      => array( array( 'type' => 'array' ), array() ),
+				'checked'   => array(
+					array(
+						'type'  => 'array',
+						'items' => array( 'type' => 'object' ),
+					),
+					array(),
+				),
+				'in_object' => array(
+					array(
+						'type'       => 'object',
+						'properties' => array(
+							'list' => array(
+								'type'  => 'array',
+								'items' => array( 'type' => 'string' ),
+							),
+						),
+					),
+					array( 'list' => array() ),
+				),
+			)
+		);
+
+		$this->assertSame( '{"flat":[],"checked":[],"in_object":{"list":[]}}', wp_json_encode( $output ) );
+	}
+
+	/**
 	 * @testdox Should leave out and report a list for an object, and a date-time with no UTC offset, also when nested.
 	 */
 	public function test_a_value_that_breaks_the_json_rules_is_left_out_and_reported(): void {
