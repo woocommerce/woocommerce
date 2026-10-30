@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Require a click before installing payment gateways or enabling automated taxes from setup tasks.
