@@ -29,6 +29,8 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		// Report tests stay offline: store output checks would load the test site's pages.
+		StoreOutputChecksTest::block_requests();
 		$store_conditions = new StoreConditions();
 		$store_conditions->init( new ComingSoonHelper() );
 		$output_checks = new StoreOutputChecks();

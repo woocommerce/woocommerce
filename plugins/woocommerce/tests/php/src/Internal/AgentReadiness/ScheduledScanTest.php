@@ -25,6 +25,8 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		// Report tests stay offline: store output checks would load the test site's pages.
+		StoreOutputChecksTest::block_requests();
 		update_option( 'woocommerce_feature_agent_readiness_enabled', 'yes' );
 		delete_option( AgentReadiness::REPORT_OPTION );
 		as_unschedule_all_actions( ScheduledScan::RUN_NOW_HOOK );

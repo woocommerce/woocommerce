@@ -21,6 +21,8 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 	public function setUp(): void {
 		add_filter( 'pre_option_woocommerce_feature_agent_readiness_enabled', array( __CLASS__, 'enabled' ) );
 		parent::setUp();
+		// Report tests stay offline: store output checks would load the test site's pages.
+		StoreOutputChecksTest::block_requests();
 		delete_option( AgentReadiness::REPORT_OPTION );
 		as_unschedule_all_actions( ScheduledScan::RUN_NOW_HOOK );
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );

@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+Comment: Agent readiness: robots.txt and sitemap checks, behind an experimental flag; nothing ships to merchants.
+

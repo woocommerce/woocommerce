@@ -55,6 +55,15 @@ Store-wide conditions (`StoreConditions`) are reported first because they affect
 
 `StoreOutputChecks` runs in the background scan only. It loads the store's own pages as a logged-out visitor (`StoreResponses`): only URLs on the store's host, redirects followed on that host only, a 5 second timeout and 512 KB per response, each URL once per scan, nothing at all in coming soon mode. Its results go into the report's `store_checks` with the same keys, with `ok` set to `null` when the store couldn't load its own page ("Couldn't check"). They are always `recommended`, so they never block the UCP switch.
 
+| Id | Passes when |
+| --- | --- |
+| `robots_txt_present` | `/robots.txt` is served as text. |
+| `robots_allows_ai_search_bots` | No robots.txt rule keeps OAI-SearchBot, ChatGPT-User, Claude-User or PerplexityBot from the home page. |
+| `robots_not_blocking_llms_txt` | No robots.txt rule keeps those crawlers from `/llms.txt`. |
+| `sitemap_lists_products` | The WordPress sitemap includes products, or a sitemap listed in robots.txt or at `/sitemap_index.xml` or `/sitemap.xml` names a product sitemap or product pages. |
+
+robots.txt is loaded from the store, so a file at the site root and a host's changes count. When the store can't load it, or answers with an error or a login page, it is read as WordPress serves it: the file at the site root, or the `robots_txt` filter output with pretty permalinks. So the robots.txt checks always give an answer; only the sitemap check can be "couldn't check".
+
 ## Report format
 
 `AgentReadiness::get_report()` returns:
