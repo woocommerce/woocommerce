@@ -41,7 +41,7 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 
 		$report = $this->sut->get_report();
 
-		$this->assertSame( array( 'generated_at', 'products', 'products_with_issues', 'hidden_from_catalog', 'unsupported_types', 'store_checks', 'channels', 'checks', 'truncated' ), array_keys( $report ) );
+		$this->assertSame( array( 'generated_at', 'products', 'hidden_from_catalog', 'unsupported_types', 'store_checks', 'channels', 'checks', 'truncated' ), array_keys( $report ) );
 		$this->assertFalse( $report['truncated'] );
 		$this->assertSame( array( 'id', 'ok', 'blocks', 'label', 'why', 'fix' ), array_keys( $report['store_checks'][0] ) );
 		$this->assertSame( array( 'chatgpt', 'google', 'copilot' ), array_keys( $report['channels'] ) );
@@ -60,7 +60,6 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 		$this->assertSame( ReadinessRule::EFFECT_NOT_LISTABLE, $checks['missing_brand']['channels']['chatgpt']['effect'] );
 
 		$this->assertSame( 1, $report['products'] );
-		$this->assertSame( 1, $report['products_with_issues'] );
 		$this->assertSame( 1, $report['channels']['chatgpt']['not_listable'], 'No brand and no image keep the product off ChatGPT' );
 		$this->assertSame( 0, $report['channels']['chatgpt']['listable'] );
 	}
@@ -91,19 +90,6 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 		$this->assertSame( ReadinessRule::EFFECT_NOT_LISTABLE, $checks['missing_gtin']['channels']['google']['effect'] );
 		$this->assertArrayNotHasKey( 'bing', $checks['missing_gtin']['channels'] );
 		$this->assertArrayNotHasKey( 'google', $checks['title_too_long']['channels'] );
-	}
-
-	/**
-	 * @testdox A product complete on every channel is not counted as having issues.
-	 */
-	public function test_products_with_issues_skips_complete_products(): void {
-		WC_Helper_Product::create_simple_product();
-		add_filter( 'woocommerce_agent_readiness_rules', '__return_empty_array' );
-
-		$report = $this->sut->get_report();
-
-		$this->assertSame( 1, $report['products'] );
-		$this->assertSame( 0, $report['products_with_issues'] );
 	}
 
 	/**

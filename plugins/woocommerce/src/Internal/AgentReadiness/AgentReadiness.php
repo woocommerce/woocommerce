@@ -153,7 +153,7 @@ class AgentReadiness {
 	/**
 	 * Run every check over the catalog.
 	 *
-	 * @return array{generated_at:string,products:int,products_with_issues:int,hidden_from_catalog:int,unsupported_types:int,store_checks:array<int,array<string,mixed>>,channels:array<string,array<string,mixed>>,checks:array<int,array<string,mixed>>,truncated:bool}
+	 * @return array{generated_at:string,products:int,hidden_from_catalog:int,unsupported_types:int,store_checks:array<int,array<string,mixed>>,channels:array<string,array<string,mixed>>,checks:array<int,array<string,mixed>>,truncated:bool}
 	 */
 	public function get_report(): array {
 		$active        = $this->get_active_rules();
@@ -179,15 +179,14 @@ class AgentReadiness {
 		}
 
 		return array(
-			'generated_at'         => gmdate( 'c' ),
-			'products'             => $scan->products(),
-			'products_with_issues' => $scan->products_with_issues(),
-			'hidden_from_catalog'  => $scan->hidden_from_catalog(),
-			'unsupported_types'    => $scan->unsupported_types(),
-			'store_checks'         => $this->store_conditions->all(),
-			'channels'             => $scan->channel_totals(),
-			'checks'               => $checks,
-			'truncated'            => $scan->truncated(),
+			'generated_at'        => gmdate( 'c' ),
+			'products'            => $scan->products(),
+			'hidden_from_catalog' => $scan->hidden_from_catalog(),
+			'unsupported_types'   => $scan->unsupported_types(),
+			'store_checks'        => $this->store_conditions->all(),
+			'channels'            => $scan->channel_totals(),
+			'checks'              => $checks,
+			'truncated'           => $scan->truncated(),
 		);
 	}
 

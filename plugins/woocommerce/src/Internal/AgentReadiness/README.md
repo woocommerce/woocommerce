@@ -54,10 +54,9 @@ Store-wide conditions (`StoreConditions`) are reported first because they affect
 ```php
 array(
 	'generated_at' => '2026-10-28T12:00:00+00:00',
-	'products'             => 120, // Published simple and variable products checked.
-	'products_with_issues' => 31,  // Not complete on at least one channel.
-	'hidden_from_catalog'  => 4,   // Not checked: catalog visibility "Search results only" or "Hidden", the merchant's choice.
-	'unsupported_types'    => 6,   // Not checked: grouped, external, subscription, bundle and other types agents don't support yet.
+	'products'            => 120,  // Published simple and variable products checked.
+	'hidden_from_catalog' => 4,    // Not checked: catalog visibility "Search results only" or "Hidden", the merchant's choice.
+	'unsupported_types'   => 6,    // Not checked: grouped, external, subscription, bundle and other types agents don't support yet.
 	'store_checks' => array(
 		// blocks: 'listing' (every product on every channel), 'ucp' (the catalog for UCP agents) or 'checkout' (agent orders).
 		array( 'id' => 'launched', 'ok' => true, 'blocks' => 'listing', 'label' => '…', 'why' => '…', 'fix' => '…' ),
