@@ -36,7 +36,6 @@ import {
 } from '../constants';
 import {
 	addProductCollectionToQueryPaginationParentOrAncestor,
-	getDefaultValueOfFilterable,
 	getDefaultValueOfInherit,
 } from '../utils';
 import {
@@ -250,30 +249,6 @@ describe( 'Product Collection page-context defaults', () => {
 			property: 'inherit',
 			templateSlug: 'taxonomy-product_brand',
 		},
-		{
-			caseName: 'post filtering',
-			getDefault: getDefaultValueOfFilterable,
-			property: 'filterable',
-			templateSlug: 'post',
-		},
-		{
-			caseName: 'home filtering',
-			getDefault: getDefaultValueOfFilterable,
-			property: 'filterable',
-			templateSlug: 'home',
-		},
-		{
-			caseName: 'index filtering',
-			getDefault: getDefaultValueOfFilterable,
-			property: 'filterable',
-			templateSlug: 'index',
-		},
-		{
-			caseName: 'Single Product filtering',
-			getDefault: getDefaultValueOfFilterable,
-			property: 'filterable',
-			templateSlug: 'single-product',
-		},
 	] as const )(
 		'allows only the first collection to own $caseName',
 		( { getDefault, property, templateSlug } ) => {
@@ -316,7 +291,6 @@ describe( 'Product Collection page-context defaults', () => {
 const createPreviewAttributes = (): ProductCollectionAttributes => ( {
 	...DEFAULT_ATTRIBUTES,
 	convertedFromProducts: false,
-	filterable: false,
 	hideControls: [],
 	query: {
 		...DEFAULT_QUERY,

@@ -127,6 +127,13 @@ h2.wc-block-mini-cart__title {
 		font-weight: 600;
 		margin-bottom: $gap;
 
+		// While the cart updates, show a placeholder the width of the outdated subtotal instead of the amount.
+		// The text fill is hidden instead of the color, since the placeholder is drawn with currentColor.
+		.wc-block-components-totals-item__value.is-loading {
+			@include skeleton-animation();
+			-webkit-text-fill-color: transparent;
+		}
+
 		.wc-block-components-totals-item__description {
 			@include font-x-small-locked;
 			display: none;

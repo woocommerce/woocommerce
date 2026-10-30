@@ -698,16 +698,6 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 			add_filter( 'posts_clauses', array( $this, 'filter_stock_status_post_clauses' ) );
 		}
 
-		// Shipping class taxonomy.
-		if ( ! empty( $_GET['product_shipping_class'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			$query_vars['tax_query'][] = array(
-				'taxonomy' => 'product_shipping_class',
-				'field'    => 'slug',
-				'terms'    => sanitize_title( wp_unslash( $_GET['product_shipping_class'] ) ),
-				'operator' => 'IN',
-			);
-		}
-
 		// Search using CRUD.
 		if ( ! empty( $query_vars['s'] ) ) {
 			$search_term                  = wc_clean( wp_unslash( $query_vars['s'] ) );
@@ -721,6 +711,22 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 				$query_vars['product_search_default_order'] = $default_search_order;
 			}
 			unset( $query_vars['s'] );
+		}
+
+		// Shipping class taxonomy. Drop the query var so core adds no direct-product tax condition (which
+		// would exclude a variable product whose variation alone uses the class), and carry the slug on a
+		// private marker so the replacement clause applies only to this query, via a subquery that also
+		// matches those parents.
+		if ( ! empty( $_GET['product_shipping_class'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			unset( $query_vars['product_shipping_class'] );
+
+			$shipping_class = wp_unslash( $_GET['product_shipping_class'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			if ( is_array( $shipping_class ) ) {
+				$shipping_class = reset( $shipping_class ); // Single-select filter: the first value wins.
+			}
+
+			$query_vars['wc_shipping_class_filter'] = is_string( $shipping_class ) ? sanitize_title( $shipping_class ) : '';
+			add_filter( 'posts_clauses', array( $this, 'filter_shipping_class_post_clauses' ), 10, 2 );
 		}
 
 		return $query_vars;
@@ -987,6 +993,7 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 		remove_filter( 'posts_clauses', array( $this, 'filter_downloadable_post_clauses' ) );
 		remove_filter( 'posts_clauses', array( $this, 'filter_virtual_post_clauses' ) );
 		remove_filter( 'posts_clauses', array( $this, 'filter_stock_status_post_clauses' ) );
+		remove_filter( 'posts_clauses', array( $this, 'filter_shipping_class_post_clauses' ) );
 		if ( $this->use_cogs_lookup_column ) {
 			remove_filter( 'posts_clauses', array( $this, 'order_by_cogs_value_asc_post_clauses' ) );
 			remove_filter( 'posts_clauses', array( $this, 'order_by_cogs_value_desc_post_clauses' ) );
@@ -1176,6 +1183,63 @@ class WC_Admin_List_Table_Products extends WC_Admin_List_Table {
 				$args['where'] .= $wpdb->prepare( ' AND wc_product_meta_lookup.stock_status=%s ', $stock_status );
 			}
 		}
+		return $args;
+	}
+
+	/**
+	 * Restrict the products list to a shipping class, including variable products whose variations use it.
+	 *
+	 * The taxonomy applies to both products and variations, but this list shows only products, so a matching
+	 * variation is resolved to its parent. Only published variations qualify their parent, matching the
+	 * catalog's out-of-stock filter. The slug is read from the query's own marker so the clause applies only
+	 * to the marked list query and not to any other query that runs while the filter is registered.
+	 *
+	 * @since 11.3.0
+	 * @param array    $args  SQL clause pieces (join, where, etc).
+	 * @param WP_Query $query The query being filtered.
+	 * @return array
+	 */
+	public function filter_shipping_class_post_clauses( $args, $query ) {
+		global $wpdb;
+
+		if ( ! isset( $query->query_vars['wc_shipping_class_filter'] ) ) {
+			return $args;
+		}
+
+		$shipping_class = $query->query_vars['wc_shipping_class_filter'];
+		if ( ! is_string( $shipping_class ) || '' === $shipping_class ) {
+			// Marked query with an empty or invalid slug: keep the filter active but match nothing.
+			$args['where'] .= ' AND 0 = 1 ';
+			return $args;
+		}
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$args['where'] .= $wpdb->prepare(
+			" AND {$wpdb->posts}.ID IN (
+				SELECT DISTINCT
+					CASE
+						WHEN shipping_class_posts.post_type = 'product_variation' THEN shipping_class_posts.post_parent
+						ELSE shipping_class_posts.ID
+					END
+				FROM {$wpdb->term_relationships} shipping_class_tr
+				INNER JOIN {$wpdb->term_taxonomy} shipping_class_tt
+					ON shipping_class_tt.term_taxonomy_id = shipping_class_tr.term_taxonomy_id
+					AND shipping_class_tt.taxonomy = 'product_shipping_class'
+				INNER JOIN {$wpdb->terms} shipping_class_terms
+					ON shipping_class_terms.term_id = shipping_class_tt.term_id
+					AND shipping_class_terms.slug = %s
+				INNER JOIN {$wpdb->posts} shipping_class_posts
+					ON shipping_class_posts.ID = shipping_class_tr.object_id
+				WHERE shipping_class_posts.post_type = 'product'
+					OR (
+						shipping_class_posts.post_type = 'product_variation'
+						AND shipping_class_posts.post_status = 'publish'
+					)
+			) ",
+			$shipping_class
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
 		return $args;
 	}
 

@@ -1,27 +1,12 @@
 name: 'PHPStan Analysis'
 
 on:
-    pull_request:
-        paths:
-            - 'plugins/woocommerce/**/*.php'
-            - 'plugins/woocommerce/composer.json'
-            - 'plugins/woocommerce/composer.lock'
-            - 'plugins/woocommerce/phpstan.neon'
-            - 'plugins/woocommerce/phpstan-baseline.neon'
-    push:
-        paths:
-            - 'plugins/woocommerce/**/*.php'
-            - 'plugins/woocommerce/composer.json'
-            - 'plugins/woocommerce/composer.lock'
-            - 'plugins/woocommerce/phpstan.neon'
-            - 'plugins/woocommerce/phpstan-baseline.neon'
-        branches:
-            - 'trunk'
-            - 'release/*'
-
-concurrency:
-    group: phpstan-${{ github.event_name == 'push' && github.run_id || github.event_name }}-${{ github.ref }}
-    cancel-in-progress: true
+    workflow_call:
+        inputs:
+            refName:
+                description: 'The ref to analyze. Defaults to the caller workflow ref.'
+                required: false
+                type: string
 
 env:
     FORCE_COLOR: 1
@@ -34,6 +19,8 @@ jobs:
         steps:
             - uses: 'actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0' # v7.0.0
               name: 'Checkout'
+              with:
+                  ref: ${{ inputs.refName }}
 
             - uses: './.github/actions/setup-woocommerce-monorepo'
               id: 'setup-monorepo'

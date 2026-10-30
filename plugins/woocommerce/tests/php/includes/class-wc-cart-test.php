@@ -779,6 +779,95 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Completing an order and ordering again preserves percent escapes and the selected variation.
+	 * @testWith ["Black%20White"]
+	 *           [""]
+	 * @param string $variation_value Fixed value or an Any variation.
+	 */
+	public function test_order_again_preserves_custom_attribute_percent_escapes( string $variation_value ): void {
+		$user_id = $this->factory->user->create();
+		wp_set_current_user( $user_id );
+		WC()->cart->empty_cart();
+
+		$product   = new WC_Product_Variable();
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Finish' );
+		$attribute->set_options( array( 'Black%20White', 'Gloss' ) );
+		$attribute->set_variation( true );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_attributes( array( 'finish' => $variation_value ) );
+		$variation->set_regular_price( '10' );
+		$variation->save();
+
+		$this->assertContains( 'Black%20White', wc_get_product( $product->get_id() )->get_variation_attributes()['Finish'], 'The ordered option must be available on the product.' );
+
+		$order = wc_create_order( array( 'customer_id' => $user_id ) );
+		$order->add_product( $variation, 1, array( 'variation' => array( 'finish' => 'Black%20White' ) ) );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		$order_items = wc_get_order( $order->get_id() )->get_items();
+		$order_item  = reset( $order_items );
+		$this->assertSame( 'Black%20White', $order_item->get_meta( 'finish' ), 'Stored order metadata should contain the literal selected value.' );
+
+		$sut    = new WC_Cart_Session( WC()->cart );
+		$method = new ReflectionMethod( WC_Cart_Session::class, 'populate_cart_from_order' );
+		$method->setAccessible( true );
+		$cart = $method->invoke( $sut, $order->get_id(), array() );
+
+		$this->assertCount( 1, $cart, 'The ordered variation should be restored.' );
+		$item = reset( $cart );
+		$this->assertSame( $variation->get_id(), $item['variation_id'], 'The variation ID must survive reordering.' );
+		$this->assertSame( 'Black%20White', $item['variation']['attribute_finish'], 'Reordering must preserve the selected custom value.' );
+	}
+
+	/**
+	 * @testdox Custom attribute values containing a percent escape can be added to the cart.
+	 */
+	public function test_add_to_cart_accepts_custom_attribute_values_containing_percent_escapes() {
+		WC()->cart->empty_cart();
+		WC()->session->set( 'wc_notices', null );
+
+		$product   = new WC_Product_Variable();
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Finish' );
+		$attribute->set_options( array( 'Black%20White', 'Gloss' ) );
+		$attribute->set_visible( true );
+		$attribute->set_variation( true );
+		$product->set_name( 'Percent Escape Product' );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$fixed_variation = new WC_Product_Variation();
+		$fixed_variation->set_parent_id( $product->get_id() );
+		$fixed_variation->set_attributes( array( 'finish' => 'Black%20White' ) );
+		$fixed_variation->set_regular_price( '10' );
+		$fixed_variation->save();
+
+		$cart_item_key = WC()->cart->add_to_cart( $product->get_id(), 1, $fixed_variation->get_id(), array( 'attribute_finish' => 'Black%20White' ) );
+
+		$this->assertNotFalse( $cart_item_key, 'A posted value matching the stored option must pass validation.' );
+		$this->assertSame( 'Black%20White', WC()->cart->get_cart_item( $cart_item_key )['variation']['attribute_finish'], 'The percent escape must survive sanitization unaltered.' );
+
+		WC()->cart->empty_cart();
+
+		$any_variation = new WC_Product_Variation();
+		$any_variation->set_parent_id( $product->get_id() );
+		$any_variation->set_attributes( array( 'finish' => '' ) );
+		$any_variation->set_regular_price( '10' );
+		$any_variation->save();
+
+		$any_cart_item_key = WC()->cart->add_to_cart( $product->get_id(), 1, $any_variation->get_id(), array( 'attribute_finish' => 'Black%20White' ) );
+
+		$this->assertNotFalse( $any_cart_item_key, 'A posted value for an Any attribute must validate against the configured options.' );
+		$this->assertSame( 'Black%20White', WC()->cart->get_cart_item( $any_cart_item_key )['variation']['attribute_finish'], 'The percent escape must survive sanitization on the Any path too.' );
+	}
+
+	/**
 	 * @testdox should throw a notice to the cart if using an invalid product_id.
 	 */
 	public function test_add_variation_to_the_cart_invalid_product() {
@@ -1005,6 +1094,40 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		WC()->cart->get_customer()->set_shipping_state( '' );
 		WC()->cart->get_customer()->set_shipping_city( '' );
 		WC()->cart->get_customer()->set_shipping_postcode( '' );
+	}
+
+	/**
+	 * @testdox show_shipping() checks the billing fields when shipping is forced to the billing address, so a removed billing postcode no longer hides shipping.
+	 *
+	 * @testWith [ "billing_only", true ]
+	 *           [ "billing", false ]
+	 *           [ "shipping", false ]
+	 *
+	 * @param string $ship_to_destination Value of the woocommerce_ship_to_destination option.
+	 * @param bool   $expected            Expected show_shipping() result with an empty postcode.
+	 */
+	public function test_show_shipping_reads_billing_fields_when_shipping_is_forced_to_billing( string $ship_to_destination, bool $expected ): void {
+		$remove_billing_address = static function ( $fields ) {
+			unset( $fields['billing']['billing_city'], $fields['billing']['billing_address_1'], $fields['billing']['billing_postcode'] );
+			return $fields;
+		};
+		add_filter( 'woocommerce_checkout_fields', $remove_billing_address );
+		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
+		update_option( 'woocommerce_ship_to_destination', $ship_to_destination );
+
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+		WC()->customer->set_shipping_location( 'US', 'NY', '', '' );
+
+		try {
+			$this->assertSame( $expected, WC()->cart->show_shipping(), 'Shipping should only stay hidden while the shopper has a postcode field to fill in.' );
+
+			WC()->customer->set_shipping_location( 'US', '', '', '' );
+			$this->assertFalse( WC()->cart->show_shipping(), 'A removed postcode must not stop the state from being required.' );
+		} finally {
+			remove_filter( 'woocommerce_checkout_fields', $remove_billing_address );
+			WC()->customer->set_shipping_location( '', '', '', '' );
+		}
 	}
 
 	/**

@@ -67,17 +67,6 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 		$this->abilities_categories_init_action = 'wp_abilities_api_categories_init';
 		$this->category_registry_class          = 'WP_Ability_Categories_Registry';
 
-		/*
-		 * Explicitly ensure the abilities API bootstrap file is loaded for tests.
-		 * WordPress 6.9+ has abilities API in core, so we don't need to load the vendor version.
-		 */
-		if ( ! function_exists( 'wp_register_ability' ) ) {
-			$bootstrap_file = WP_PLUGIN_DIR . '/woocommerce/vendor/wordpress/abilities-api/includes/bootstrap.php';
-			if ( file_exists( $bootstrap_file ) ) {
-				require $bootstrap_file;
-			}
-		}
-
 		// WordPress 6.9+ requires did_action('init') to return truthy before abilities API can be used.
 		// Save the original value and set to 1. Doesn't hurt pre-6.9 versions.
 		$this->original_init_action_count = $wp_actions['init'] ?? null;
@@ -119,7 +108,7 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 		// Clean up test category.
 		$this->cleanup_category( 'test' );
 
-		// Reset abilities registry singleton to allow fresh abilities_api_init in next test.
+		// Reset abilities registry singleton to allow fresh wp_abilities_api_init in next test.
 		if ( class_exists( 'WP_Abilities_Registry' ) ) {
 			$reflection        = new \ReflectionClass( 'WP_Abilities_Registry' );
 			$instance_property = $reflection->getProperty( 'instance' );

@@ -260,6 +260,21 @@ const ValidatedTextInput = forwardRef<
 			validateInput,
 		] );
 
+		/**
+		 * Run validation again when it changes without remounting (data store level change).
+		 */
+		const isRequired = !! rest.required;
+		const previousIsRequired = useRef( isRequired );
+
+		useEffect( () => {
+			if ( previousIsRequired.current === isRequired ) {
+				return;
+			}
+
+			previousIsRequired.current = isRequired;
+			validateInput( true );
+		}, [ isRequired, validateInput ] );
+
 		// Remove validation errors when unmounted.
 		useEffect( () => {
 			return () => {

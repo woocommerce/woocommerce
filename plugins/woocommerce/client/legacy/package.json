@@ -23,7 +23,7 @@
 	},
 	"devDependencies": {
 		"@types/node": "^24.1.0",
-		"@wordpress/scripts": "32.6.0",
+		"@wordpress/scripts": "catalog:tooling",
 		"@wordpress/stylelint-config": "catalog:tooling",
 		"chokidar": "^3.6.0",
 		"eslint": "^10.0.0",
@@ -39,11 +39,13 @@
 		"grunt-sass": "3.1.0",
 		"grunt-stylelint": "0.20.1",
 		"jest-fixed-jsdom": "^0.0.10",
+		"jquery": "3.7.1",
+		"jquery4": "npm:jquery@4.0.0",
 		"sass": "^1.69.5",
 		"stylelint": "catalog:tooling"
 	},
 	"dependencies": {
-		"sourcebuster": "github:woocommerce/sourcebuster-js#d7f4616d5a17e17db925ca1842457f309379d861"
+		"sourcebuster": "github:woocommerce/sourcebuster-js#b28980f98d8ed3f35ac84974e603a6c3bd103752"
 	},
 	"config": {
 		"ci": {

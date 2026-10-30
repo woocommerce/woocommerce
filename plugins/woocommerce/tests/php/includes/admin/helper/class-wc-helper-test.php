@@ -9,10 +9,18 @@ use Automattic\Jetpack\Constants;
 class WC_Helper_Test extends \WC_Unit_Test_Case {
 
 	/**
+	 * $_GET as it was before the test, since the WordPress test case doesn't restore it.
+	 *
+	 * @var array
+	 */
+	private $original_get = array();
+
+	/**
 	 * Set up before each test.
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		$this->original_get = $_GET; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		$this->cleanup_helper_transients();
 		WC_Helper::flush_local_woo_products_cache();
 	}
@@ -23,7 +31,7 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 	public function tearDown(): void {
 		$this->cleanup_helper_transients();
 		$this->cleanup_auto_update_state();
-		unset( $_GET['page'] );
+		$_GET = $this->original_get;
 		parent::tearDown();
 	}
 
@@ -167,6 +175,19 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 		$transient_value = get_transient( '_woocommerce_helper_subscriptions' );
 		$this->assertNotEquals( 'corrupted_string_data', $transient_value, 'Corrupted string transient should have been replaced' );
 		$this->assertIsArray( $transient_value, 'Transient should now be an array' );
+	}
+
+	/**
+	 * @testdox has_cached_subscriptions is true only while a subscription list is cached.
+	 */
+	public function test_has_cached_subscriptions_reflects_the_transient(): void {
+		$this->assertFalse( WC_Helper::has_cached_subscriptions(), 'No transient means no cached list.' );
+
+		set_transient( '_woocommerce_helper_subscriptions', 'corrupted_string_data', HOUR_IN_SECONDS );
+		$this->assertFalse( WC_Helper::has_cached_subscriptions(), 'A corrupted transient is not a usable list.' );
+
+		set_transient( '_woocommerce_helper_subscriptions', array(), HOUR_IN_SECONDS );
+		$this->assertTrue( WC_Helper::has_cached_subscriptions(), 'An empty list is still a cached list.' );
 	}
 
 	/**
@@ -347,6 +368,51 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 			get_transient( WC_Helper_API_Backoff::TRANSIENT_PREFIX . WC_Helper_API_Backoff::REQUEST_TYPE_SUBSCRIPTIONS ),
 			'Only a 429 should record a backoff window'
 		);
+	}
+
+	/**
+	 * @testdox get_subscriptions labels the request with the screen it comes from.
+	 * @testWith ["/wp-admin/admin-ajax.php", "woocommerce_load_status_widget", "dashboard-widget"]
+	 *           ["/wp-admin/admin-ajax.php", "heartbeat", "heartbeat-api"]
+	 *           ["/wp-admin/admin.php?page=wc-admin", "", "inbox-notes"]
+	 *
+	 * @param string $request_uri The request URI.
+	 * @param string $action      The ajax action, if any.
+	 * @param string $expected    The source label the request should carry.
+	 */
+	public function test_get_subscriptions_labels_the_request_source( string $request_uri, string $action, string $expected ): void {
+		$previous_uri           = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : null;
+		$_SERVER['REQUEST_URI'] = $request_uri;
+		if ( '' !== $action ) {
+			$_REQUEST['action'] = $action;
+		}
+		$requested_url = '';
+		$capture       = static function ( $preempt, $args, $url ) use ( &$requested_url ) {
+			$requested_url = $url;
+			return $preempt;
+		};
+		add_filter( 'pre_http_request', $capture, 9, 3 );
+
+		try {
+			$this->fetch_subscriptions_with_response(
+				array(
+					'response' => array( 'code' => 200 ),
+					'body'     => '[]',
+				)
+			);
+		} finally {
+			remove_filter( 'pre_http_request', $capture, 9 );
+			unset( $_REQUEST['action'] );
+			if ( null === $previous_uri ) {
+				unset( $_SERVER['REQUEST_URI'] );
+			} else {
+				$_SERVER['REQUEST_URI'] = $previous_uri;
+			}
+		}
+
+		parse_str( (string) wp_parse_url( $requested_url, PHP_URL_QUERY ), $query );
+
+		$this->assertSame( $expected, $query['source'] ?? '', 'The source label is what WooCommerce.com attributes the request to.' );
 	}
 
 	/**
@@ -1366,5 +1432,120 @@ class WC_Helper_Test extends \WC_Unit_Test_Case {
 			WC_Helper_API_Backoff::is_rate_limited( WC_Helper_API_Backoff::REQUEST_TYPE_UPDATE_CHECK ),
 			'Connecting should clear the update-check backoff'
 		);
+	}
+
+	/**
+	 * @testdox validate_funnel_id should keep 1 to 64 letters, digits, dashes and underscores, and drop anything else.
+	 *
+	 * @testWith ["0a5b6c1e-2d3f-4a5b-8c9d-0e1f2a3b4c5d", "0a5b6c1e-2d3f-4a5b-8c9d-0e1f2a3b4c5d"]
+	 *           ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"]
+	 *           ["aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", ""]
+	 *           ["", ""]
+	 *           ["id with spaces", ""]
+	 *           ["valid-id\n", ""]
+	 *           [["valid-id"], ""]
+	 *
+	 * @param mixed  $funnel_id Candidate id.
+	 * @param string $expected  Expected return value.
+	 */
+	public function test_validate_funnel_id( $funnel_id, string $expected ): void {
+		$this->assertSame( $expected, WC_Helper_API::validate_funnel_id( $funnel_id ) );
+	}
+
+	/**
+	 * @testdox Starting a connection should put one new funnel id in the redirect URI and pass the same id to the connect start hook.
+	 */
+	public function test_connect_puts_funnel_id_in_redirect_uri_and_hook(): void {
+		$_GET = array(
+			'page'              => 'wc-addons',
+			'section'           => 'helper',
+			'wc-helper-connect' => '1',
+			'wc-helper-nonce'   => wp_create_nonce( 'connect' ),
+		);
+
+		$request_token_redirect_uri = null;
+		$http_mock                  = static function ( $preempt, $args, $url ) use ( &$request_token_redirect_uri ) {
+			if ( false !== strpos( $url, 'oauth/request_token' ) ) {
+				$request_token_redirect_uri = $args['body']['redirect_uri'];
+			}
+			return array(
+				'response' => array( 'code' => 200 ),
+				'body'     => wp_json_encode( 'test-secret' ),
+			);
+		};
+		add_filter( 'pre_http_request', $http_mock, 10, 3 );
+
+		$hook_funnel_id = null;
+		$hook_spy       = static function ( $funnel_id ) use ( &$hook_funnel_id ) {
+			$hook_funnel_id = $funnel_id;
+		};
+		add_action( 'woocommerce_helper_connect_start', $hook_spy );
+
+		$authorize_url = null;
+		$redirect_stop = static function ( $location ) {
+			throw new \RuntimeException( $location ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+		};
+		add_filter( 'wp_redirect', $redirect_stop );
+
+		try {
+			WC_Helper::current_screen( (object) array( 'id' => 'woocommerce_page_wc-addons' ) );
+		} catch ( \RuntimeException $e ) {
+			$authorize_url = $e->getMessage();
+		} finally {
+			remove_filter( 'pre_http_request', $http_mock, 10 );
+			remove_action( 'woocommerce_helper_connect_start', $hook_spy );
+			remove_filter( 'wp_redirect', $redirect_stop );
+		}
+
+		$this->assertTrue( wp_is_uuid( (string) $hook_funnel_id, 4 ), 'The hook should receive a UUID v4 funnel id' );
+
+		wp_parse_str( (string) wp_parse_url( (string) $request_token_redirect_uri, PHP_URL_QUERY ), $request_token_args );
+		$this->assertSame( $hook_funnel_id, $request_token_args['funnel_id'] ?? null, 'The redirect URI sent to request_token should carry the funnel id' );
+
+		wp_parse_str( (string) wp_parse_url( (string) $authorize_url, PHP_URL_QUERY ), $authorize_args );
+		$this->assertSame( $request_token_redirect_uri, $authorize_args['redirect_uri'] ?? null, 'The authorize URL should carry the same redirect URI' );
+		$this->assertArrayNotHasKey( 'funnel_id', $authorize_args, 'The funnel id should travel only inside the redirect URI' );
+	}
+
+	/**
+	 * @testdox Returning from WooCommerce.com should send a valid funnel id in the access token request, and none when it is invalid or missing.
+	 *
+	 * @testWith ["0a5b6c1e-2d3f-4a5b-8c9d-0e1f2a3b4c5d", "0a5b6c1e-2d3f-4a5b-8c9d-0e1f2a3b4c5d"]
+	 *           ["not valid!", null]
+	 *           [null, null]
+	 *
+	 * @param string|null $funnel_id Funnel id in the return URL, null when the URL has none.
+	 * @param string|null $expected  Funnel id expected in the request body, null when absent.
+	 */
+	public function test_return_sends_funnel_id_in_access_token_request( ?string $funnel_id, ?string $expected ): void {
+		$_GET = array(
+			'page'             => 'wc-addons',
+			'section'          => 'helper',
+			'wc-helper-return' => '1',
+			'wc-helper-nonce'  => wp_create_nonce( 'connect' ),
+			'request_token'    => 'test-request-token',
+		);
+		if ( null !== $funnel_id ) {
+			$_GET['funnel_id'] = $funnel_id;
+		}
+
+		$access_token_body = null;
+		$http_mock         = static function ( $preempt, $args, $url ) use ( &$access_token_body ) {
+			if ( false !== strpos( $url, 'oauth/access_token' ) ) {
+				$access_token_body = $args['body'];
+			}
+			return array( 'response' => array( 'code' => 500 ) );
+		};
+		add_filter( 'pre_http_request', $http_mock, 10, 3 );
+
+		try {
+			WC_Helper::current_screen( (object) array( 'id' => 'woocommerce_page_wc-addons' ) );
+			$this->fail( 'A failed access token request should stop the return handler' );
+		} catch ( WPDieException $e ) {
+			$this->assertIsArray( $access_token_body, 'The access token request should have been sent' );
+			$this->assertSame( $expected, $access_token_body['funnel_id'] ?? null );
+		} finally {
+			remove_filter( 'pre_http_request', $http_mock, 10 );
+		}
 	}
 }

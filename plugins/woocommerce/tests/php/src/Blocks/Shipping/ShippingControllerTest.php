@@ -97,10 +97,8 @@ class ShippingControllerTest extends \WC_Unit_Test_Case {
 			foreach ( $this->previous_shipping_address as $key => $value ) {
 				WC()->customer->{"set_shipping_{$key}"}( $value );
 			}
-			// A test may null WC()->shipping, which leaves a dynamic property on the WC singleton,
-			// and register a lone pickup method on the shared WC_Shipping. Undo both.
+			// A test may null WC()->shipping, which leaves a dynamic property on the WC singleton.
 			unset( WC()->shipping );
-			WC()->shipping()->unregister_shipping_methods();
 		} finally {
 			parent::tearDown();
 		}
