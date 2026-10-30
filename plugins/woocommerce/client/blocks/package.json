@@ -158,7 +158,6 @@
 		"@wordpress/stylelint-config": "catalog:tooling",
 		"@wordpress/theme": "catalog:wp-bundled",
 		"ajv-cli": "3.3.x",
-		"allure-playwright": "^2.9.2",
 		"autoprefixer": "10.4.14",
 		"babel-jest": "29.5.x",
 		"babel-loader": "9.2.x",

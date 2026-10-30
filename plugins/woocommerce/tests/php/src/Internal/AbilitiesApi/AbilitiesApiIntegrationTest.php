@@ -108,7 +108,7 @@ class AbilitiesApiIntegrationTest extends \WC_REST_Unit_Test_Case {
 		// Clean up test category.
 		$this->cleanup_category( 'test' );
 
-		// Reset abilities registry singleton to allow fresh abilities_api_init in next test.
+		// Reset abilities registry singleton to allow fresh wp_abilities_api_init in next test.
 		if ( class_exists( 'WP_Abilities_Registry' ) ) {
 			$reflection        = new \ReflectionClass( 'WP_Abilities_Registry' );
 			$instance_property = $reflection->getProperty( 'instance' );
