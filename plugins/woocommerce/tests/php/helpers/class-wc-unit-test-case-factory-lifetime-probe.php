@@ -50,7 +50,6 @@ class WC_Unit_Test_Case_Factory_Lifetime_Probe extends WC_Unit_Test_Case {
 	 * @return bool Whether the factory property is initialized.
 	 */
 	public function is_factory_initialized(): bool {
-		$property = new ReflectionProperty( WC_Unit_Test_Case::class, 'factory' );
-		return $property->isInitialized( $this );
+		return array_key_exists( 'factory', get_object_vars( $this ) );
 	}
 }
