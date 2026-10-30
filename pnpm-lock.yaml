@@ -319,7 +319,7 @@ importers:
         version: 1.0.4
       moment:
         specifier: ^2.29.4
-        version: 2.30.1
+        version: 2.31.0
       node-stream-zip:
         specifier: ^1.15.0
         version: 1.15.0
@@ -569,7 +569,7 @@ importers:
         version: 6.0.0
       moment:
         specifier: ^2.29.4
-        version: 2.30.1
+        version: 2.31.0
       moment-timezone:
         specifier: ^0.5.43
         version: 0.5.48
@@ -578,7 +578,7 @@ importers:
         version: 15.8.1
       react-dates:
         specifier: ^21.8.0
-        version: 21.8.0(@babel/runtime@7.25.7)(moment@2.30.1)(react-dom@18.3.1(react@18.3.1))(react-with-direction@1.4.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
+        version: 21.8.0(@babel/runtime@7.25.7)(moment@2.31.0)(react-dom@18.3.1(react@18.3.1))(react-with-direction@1.4.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       react-transition-group:
         specifier: ^4.4.5
         version: 4.4.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -995,7 +995,7 @@ importers:
         version: 2.3.0
       moment:
         specifier: ^2.18.1
-        version: 2.30.1
+        version: 2.31.0
       qs:
         specifier: ^6.11.2
         version: 6.15.1
@@ -1095,7 +1095,7 @@ importers:
         version: 4.18.1
       moment:
         specifier: ^2.29.4
-        version: 2.30.1
+        version: 2.31.0
       qs:
         specifier: ^6.11.2
         version: 6.15.1
@@ -1508,7 +1508,7 @@ importers:
         version: 3.4.2(react@18.3.1)
       moment:
         specifier: ^2.29.4
-        version: 2.30.1
+        version: 2.31.0
       react-intersection-observer:
         specifier: ^9.8.1
         version: 9.16.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -3274,7 +3274,7 @@ importers:
         version: 2.9.4(webpack@5.97.1)
       moment:
         specifier: ^2.29.4
-        version: 2.30.1
+        version: 2.31.0
       moment-timezone:
         specifier: ^0.5.43
         version: 0.5.48
@@ -15755,8 +15755,8 @@ packages:
   moment-timezone@0.5.48:
     resolution: {integrity: sha512-f22b8LV1gbTO2ms2j2z13MuPogNoh5UzxL3nzNAYKGraILnbGc9NEE6dyiiiLv46DGRb8A4kg8UKWLjPthxBHw==}
 
-  moment@2.30.1:
-    resolution: {integrity: sha512-uEmtNhbDOrWPFS+hdjFCBfy9f2YoyzRpwcl+DqpC6taX21FzsTLQVbMV/W7PzNSX6x/bhC1zA3c2UQ5NzH6how==}
+  moment@2.31.0:
+    resolution: {integrity: sha512-0acOTfMiWOheYS4eoWb80yYMb/JLvVv9SHbs2PehaDzfUG0Bw855SKyk0IKTnPGa5+U2bmi3W68l1+sGLX/pvw==}
 
   motion-dom@11.18.1:
     resolution: {integrity: sha512-g76KvA001z+atjfxczdRtw/RXOM3OMSdd1f4DL77qCTF/+avrRJiawSG4yDibEQ215sr9kpinSlX2pCTJ9zbhw==}
@@ -27686,9 +27686,9 @@ snapshots:
       highlight-words-core: 1.2.3
       lodash: 4.18.1
       memize: 1.1.0
-      moment: 2.30.1
+      moment: 2.31.0
       re-resizable: 6.11.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      react-dates: 17.2.0(moment@2.30.1)(react-dom@18.3.1(react@18.3.1))(react-with-direction@1.4.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
+      react-dates: 17.2.0(moment@2.31.0)(react-dom@18.3.1(react@18.3.1))(react-with-direction@1.4.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
       react-resize-aware: 3.1.1(react@18.3.1)
       react-spring: 8.0.27(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react-use-gesture: 9.1.3(react@18.3.1)
@@ -29400,26 +29400,26 @@ snapshots:
     dependencies:
       '@babel/runtime': 7.29.10
       '@wordpress/deprecated': 3.58.0
-      moment: 2.30.1
+      moment: 2.31.0
       moment-timezone: 0.5.48
 
   '@wordpress/date@5.20.0':
     dependencies:
       '@babel/runtime': 7.25.7
       '@wordpress/deprecated': 4.57.0
-      moment: 2.30.1
+      moment: 2.31.0
       moment-timezone: 0.5.48
 
   '@wordpress/date@5.33.1':
     dependencies:
       '@wordpress/deprecated': 4.57.0
-      moment: 2.30.1
+      moment: 2.31.0
       moment-timezone: 0.5.48
 
   '@wordpress/date@5.57.0':
     dependencies:
       '@wordpress/deprecated': 4.57.0
-      moment: 2.30.1
+      moment: 2.31.0
       moment-timezone: 0.5.48
 
   '@wordpress/dependency-extraction-webpack-plugin@6.43.1-next.v.202604091042.0(webpack@5.97.1)':
@@ -38640,9 +38640,9 @@ snapshots:
 
   moment-timezone@0.5.48:
     dependencies:
-      moment: 2.30.1
+      moment: 2.31.0
 
-  moment@2.30.1: {}
+  moment@2.31.0: {}
 
   motion-dom@11.18.1:
     dependencies:
@@ -40099,20 +40099,20 @@ snapshots:
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
 
-  react-dates@17.2.0(moment@2.30.1)(react-dom@18.3.1(react@18.3.1))(react-with-direction@1.4.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1):
+  react-dates@17.2.0(moment@2.31.0)(react-dom@18.3.1(react@18.3.1))(react-with-direction@1.4.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1):
     dependencies:
       airbnb-prop-types: 2.16.0(react@18.3.1)
       consolidated-events: 2.0.2
       is-touch-device: 1.0.1
       lodash: 4.18.1
-      moment: 2.30.1
+      moment: 2.31.0
       object.assign: 4.1.7
       object.values: 1.2.1
       prop-types: 15.8.1
       react: 18.3.1
       react-addons-shallow-compare: 15.6.3
       react-dom: 18.3.1(react@18.3.1)
-      react-moment-proptypes: 1.8.1(moment@2.30.1)
+      react-moment-proptypes: 1.8.1(moment@2.31.0)
       react-outside-click-handler: 1.3.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react-portal: 4.3.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react-with-styles: 3.2.3(react-with-direction@1.4.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1)
@@ -40120,7 +40120,7 @@ snapshots:
     transitivePeerDependencies:
       - react-with-direction
 
-  react-dates@21.8.0(@babel/runtime@7.25.7)(moment@2.30.1)(react-dom@18.3.1(react@18.3.1))(react-with-direction@1.4.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1):
+  react-dates@21.8.0(@babel/runtime@7.25.7)(moment@2.31.0)(react-dom@18.3.1(react@18.3.1))(react-with-direction@1.4.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1))(react@18.3.1):
     dependencies:
       '@babel/runtime': 7.25.7
       airbnb-prop-types: 2.16.0(react@18.3.1)
@@ -40128,14 +40128,14 @@ snapshots:
       enzyme-shallow-equal: 1.0.7
       is-touch-device: 1.0.1
       lodash: 4.18.1
-      moment: 2.30.1
+      moment: 2.31.0
       object.assign: 4.1.7
       object.values: 1.2.1
       prop-types: 15.8.1
       raf: 3.4.1
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
-      react-moment-proptypes: 1.8.1(moment@2.30.1)
+      react-moment-proptypes: 1.8.1(moment@2.31.0)
       react-outside-click-handler: 1.3.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react-portal: 4.3.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       react-with-direction: 1.4.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -40244,9 +40244,9 @@ snapshots:
       react-lifecycles-compat: 3.0.4
       warning: 4.0.3
 
-  react-moment-proptypes@1.8.1(moment@2.30.1):
+  react-moment-proptypes@1.8.1(moment@2.31.0):
     dependencies:
-      moment: 2.30.1
+      moment: 2.31.0
 
   react-number-format@5.4.5(react-dom@18.3.1(react@18.3.1))(react@18.3.1):
     dependencies:
@@ -43096,7 +43096,7 @@ snapshots:
     dependencies:
       chalk: 2.4.2
       glob: 7.2.3
-      moment: 2.30.1
+      moment: 2.31.0
       php-parser: 3.5.1
       text-table: 0.2.0
 
