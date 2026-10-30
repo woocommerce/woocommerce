@@ -136,11 +136,11 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	public function register_test_fields(): void {
 		ExtensibleAbilities::register_field(
 			array(
-				'resource'     => 'product',
-				'namespace'    => 'test-ext',
-				'field'        => 'code',
-				'schema'       => self::CODE_SCHEMA,
-				'get_callback' => static function ( \WC_Product $product ) {
+				'resource'      => 'product',
+				'namespace'     => 'test-ext',
+				'field'         => 'code',
+				'output_schema' => self::CODE_SCHEMA,
+				'get_callback'  => static function ( \WC_Product $product ) {
 					$code = $product->get_meta( '_test_code' );
 					return '' === $code ? null : $code;
 				},
@@ -148,33 +148,33 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		);
 		ExtensibleAbilities::register_field(
 			array(
-				'resource'     => 'product',
-				'namespace'    => 'other_ext',
-				'field'        => 'code',
-				'schema'       => array( 'type' => 'integer' ),
-				'get_callback' => static function ( \WC_Product $product ) {
+				'resource'      => 'product',
+				'namespace'     => 'other_ext',
+				'field'         => 'code',
+				'output_schema' => array( 'type' => 'integer' ),
+				'get_callback'  => static function ( \WC_Product $product ) {
 					return '' === $product->get_meta( '_test_code' ) ? null : 7;
 				},
 			)
 		);
 		ExtensibleAbilities::register_field(
 			array(
-				'resource'     => 'order',
-				'namespace'    => 'test-ext',
-				'field'        => 'note',
-				'schema'       => array( 'type' => 'string' ),
-				'get_callback' => static function ( \WC_Order $order ) {
+				'resource'      => 'order',
+				'namespace'     => 'test-ext',
+				'field'         => 'note',
+				'output_schema' => array( 'type' => 'string' ),
+				'get_callback'  => static function ( \WC_Order $order ) {
 					return 'order-' . $order->get_id();
 				},
 			)
 		);
 		ExtensibleAbilities::register_field(
 			array(
-				'resource'     => 'order_item',
-				'namespace'    => 'test-ext',
-				'field'        => 'gift',
-				'schema'       => array( 'type' => 'string' ),
-				'get_callback' => static function ( \WC_Order_Item $item ) {
+				'resource'      => 'order_item',
+				'namespace'     => 'test-ext',
+				'field'         => 'gift',
+				'output_schema' => array( 'type' => 'string' ),
+				'get_callback'  => static function ( \WC_Order_Item $item ) {
 					return 'item-' . $item->get_id();
 				},
 			)
@@ -195,14 +195,15 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		foreach ( $writable as list( $resource, $namespace, $field, $schema ) ) {
 			ExtensibleAbilities::register_field(
 				array(
-					'resource'        => $resource,
-					'namespace'       => $namespace,
-					'field'           => $field,
-					'schema'          => $schema,
-					'get_callback'    => static function ( \WC_Data $data ) use ( $field ) {
+					'resource'      => $resource,
+					'namespace'     => $namespace,
+					'field'         => $field,
+					'output_schema' => $schema,
+					'input_schema'  => self::nullable( $schema ),
+					'get_callback'  => static function ( \WC_Data $data ) use ( $field ) {
 						return $data->meta_exists( '_test_' . $field ) ? $data->get_meta( '_test_' . $field ) : null;
 					},
-					'update_callback' => static function ( \WC_Data $data, $value ) use ( $field ) {
+					'set_callback'  => static function ( \WC_Data $data, $value ) use ( $field ) {
 						self::$received[ $field ] = $value;
 						if ( 'reject' === $value || -1 === $value ) {
 							return new \WP_Error( 'test_rejected', 'Rejected.' );
@@ -223,6 +224,20 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 				)
 			);
 		}
+	}
+
+	/**
+	 * The schema of a writable test field, which declares null to delete the value.
+	 *
+	 * @param array<string, mixed> $schema Schema of the value.
+	 * @return array<string, mixed>
+	 */
+	private static function nullable( array $schema ): array {
+		$schema['type'] = array( $schema['type'], 'null' );
+		if ( isset( $schema['enum'] ) ) {
+			$schema['enum'][] = null;
+		}
+		return $schema;
 	}
 
 	/**
@@ -938,11 +953,11 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 		ExtensibleAbilities::register_field(
 			array(
-				'resource'     => 'product',
-				'namespace'    => 'late-ext',
-				'field'        => 'code',
-				'schema'       => array( 'type' => 'string' ),
-				'get_callback' => static fn() => 'late',
+				'resource'      => 'product',
+				'namespace'     => 'late-ext',
+				'field'         => 'code',
+				'output_schema' => array( 'type' => 'string' ),
+				'get_callback'  => static fn() => 'late',
 			)
 		);
 		$products = array_column( $this->run_ability( 'woocommerce/products-query', array( 'search' => 'Pen late' ) )['products'], null, 'id' );
@@ -961,11 +976,11 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$register_field    = static function () {
 			ExtensibleAbilities::register_field(
 				array(
-					'resource'     => 'ticket',
-					'namespace'    => 'test-ext',
-					'field'        => 'code',
-					'schema'       => array( 'type' => 'string' ),
-					'get_callback' => static fn() => 'T1',
+					'resource'      => 'ticket',
+					'namespace'     => 'test-ext',
+					'field'         => 'code',
+					'output_schema' => array( 'type' => 'string' ),
+					'get_callback'  => static fn() => 'T1',
 				)
 			);
 		};
@@ -1022,11 +1037,11 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 		ExtensibleAbilities::register_field(
 			array(
-				'resource'     => 'product',
-				'namespace'    => 'test-ext',
-				'field'        => 'code',
-				'schema'       => array( 'type' => 'string' ),
-				'get_callback' => static fn() => 'T1',
+				'resource'      => 'product',
+				'namespace'     => 'test-ext',
+				'field'         => 'code',
+				'output_schema' => array( 'type' => 'string' ),
+				'get_callback'  => static fn() => 'T1',
 			)
 		);
 		remove_action( 'doing_it_wrong_run', $capture, 10 );
@@ -1114,11 +1129,11 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	public function test_invalid_and_duplicate_fields_are_refused(): void {
 		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_field' );
 		$valid = array(
-			'resource'     => 'order',
-			'namespace'    => 'test-ext',
-			'field'        => 'note',
-			'schema'       => array( 'type' => 'string' ),
-			'get_callback' => static fn() => 'second',
+			'resource'      => 'order',
+			'namespace'     => 'test-ext',
+			'field'         => 'note',
+			'output_schema' => array( 'type' => 'string' ),
+			'get_callback'  => static fn() => 'second',
 		);
 		AbilitiesLoader::register_core_resources();
 		$this->register_test_fields();
@@ -1126,7 +1141,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		ExtensibleAbilities::register_field( $valid );
 		ExtensibleAbilities::register_field( array_merge( $valid, array( 'namespace' => 'Test Ext' ) ) );
 		ExtensibleAbilities::register_field( array_merge( $valid, array( 'field' => '' ) ) );
-		ExtensibleAbilities::register_field( array_merge( $valid, array( 'field' => 'other' ), array( 'schema' => null ) ) );
+		ExtensibleAbilities::register_field( array_merge( $valid, array( 'field' => 'other' ), array( 'output_schema' => null ) ) );
 		ExtensibleAbilities::register_field( array_merge( $valid, array( 'field' => 'other' ), array( 'get_callback' => 'not_a_function' ) ) );
 		ExtensibleAbilities::register_field(
 			array_merge(
@@ -1137,13 +1152,13 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 				)
 			)
 		);
-		ExtensibleAbilities::register_field( array_merge( $valid, array( 'field' => 'other' ), array( 'schema' => array( 'description' => 'x' ) ) ) );
+		ExtensibleAbilities::register_field( array_merge( $valid, array( 'field' => 'other' ), array( 'output_schema' => array( 'description' => 'x' ) ) ) );
 		ExtensibleAbilities::register_field(
 			array_merge(
 				$valid,
 				array( 'field' => 'other' ),
 				array(
-					'schema' => array(
+					'output_schema' => array(
 						'type'     => 'string',
 						'required' => true,
 					),
@@ -1161,33 +1176,418 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should leave out a field that throws or fails sanitization, cast a value to its schema type, and keep a null that the schema allows.
+	 * @testdox Should refuse an output schema without one non-null type at any depth, and a malformed schema.
+	 * @dataProvider provider_refused_output_schemas
+	 * @param array $schema Output schema.
+	 */
+	public function test_a_refused_output_schema_does_not_register_the_field( array $schema ): void {
+		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_field' );
+		AbilitiesLoader::register_core_resources();
+
+		ExtensibleAbilities::register_field(
+			array(
+				'resource'      => 'order',
+				'namespace'     => 'refused',
+				'field'         => 'value',
+				'output_schema' => $schema,
+				'get_callback'  => '__return_null',
+			)
+		);
+
+		$this->assertArrayNotHasKey( 'refused', ExtensibleAbilities::get_fields( 'order' ) );
+	}
+
+	/**
+	 * Output schemas that register_field() refuses.
+	 *
+	 * @return array<string, array{0: array<string, mixed>}>
+	 */
+	public function provider_refused_output_schemas(): array {
+		$nullable = array( 'type' => array( 'string', 'null' ) );
+		return array(
+			'top level null'        => array( $nullable ),
+			'only null'             => array( array( 'type' => 'null' ) ),
+			'nested null'           => array(
+				array(
+					'type'       => 'object',
+					'properties' => array( 'a' => $nullable ),
+				),
+			),
+			'items'                 => array(
+				array(
+					'type'  => 'array',
+					'items' => $nullable,
+				),
+			),
+			'additional properties' => array(
+				array(
+					'type'                 => 'object',
+					'additionalProperties' => $nullable,
+				),
+			),
+			'pattern properties'    => array(
+				array(
+					'type'              => 'object',
+					'patternProperties' => array( '^a' => $nullable ),
+				),
+			),
+			'anyOf'                 => array( array( 'anyOf' => array( array( 'type' => 'string' ) ) ) ),
+			'oneOf'                 => array( array( 'oneOf' => array( array( 'type' => 'string' ) ) ) ),
+			'allOf'                 => array( array( 'allOf' => array( array( 'type' => 'string' ) ) ) ),
+			'anyOf next to type'    => array(
+				array(
+					'type'  => 'string',
+					'anyOf' => array( array( 'type' => 'string' ) ),
+				),
+			),
+			'nested oneOf'          => array(
+				array(
+					'type'       => 'object',
+					'properties' => array( 'a' => array( 'oneOf' => array( array( 'type' => 'string' ), array( 'type' => 'null' ) ) ) ),
+				),
+			),
+			'nullable'              => array(
+				array(
+					'type'     => 'string',
+					'nullable' => true,
+				),
+			),
+			'nested enum with null' => array(
+				array(
+					'type'  => 'array',
+					'items' => array(
+						'type' => 'string',
+						'enum' => array( 'a', null ),
+					),
+				),
+			),
+			'type list of one'      => array( array( 'type' => array( 'string' ) ) ),
+			'enum with null'        => array(
+				array(
+					'type' => 'string',
+					'enum' => array( 'a', null ),
+				),
+			),
+			'enum with two types'   => array(
+				array(
+					'type' => 'string',
+					'enum' => array( 'a', 1 ),
+				),
+			),
+			'string or integer'     => array( array( 'type' => array( 'string', 'integer' ) ) ),
+			'object or array'       => array( array( 'type' => array( 'object', 'array' ) ) ),
+			'unknown type'          => array( array( 'type' => 'text' ) ),
+			'no nested type'        => array(
+				array(
+					'type'       => 'object',
+					'properties' => array( 'a' => array( 'description' => 'x' ) ),
+				),
+			),
+			'malformed property'    => array(
+				array(
+					'type'       => 'object',
+					'properties' => array( 'a' => true ),
+				),
+			),
+			'empty properties'      => array(
+				array(
+					'type'       => 'object',
+					'properties' => array(),
+				),
+			),
+		);
+	}
+
+	/**
+	 * @testdox Should refuse a malformed input schema and a malformed query filter schema.
+	 * @dataProvider provider_malformed_schemas
+	 * @param array $schema Schema.
+	 */
+	public function test_a_malformed_schema_is_refused( array $schema ): void {
+		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_field' );
+		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_query_filter' );
+		AbilitiesLoader::register_core_resources();
+
+		ExtensibleAbilities::register_field(
+			array(
+				'resource'      => 'order',
+				'namespace'     => 'refused',
+				'field'         => 'value',
+				'output_schema' => array( 'type' => 'string' ),
+				'get_callback'  => '__return_null',
+				'input_schema'  => $schema,
+				'set_callback'  => '__return_null',
+			)
+		);
+		ExtensibleAbilities::register_query_filter(
+			array(
+				'resource'  => 'order',
+				'namespace' => 'refused',
+				'filter'    => 'value',
+				'schema'    => $schema + array( 'type' => 'object' ),
+				'callback'  => '__return_empty_array',
+			)
+		);
+
+		$this->assertArrayNotHasKey( 'refused', ExtensibleAbilities::get_fields( 'order' ) );
+		$this->assertSame(
+			array( 'type' => 'object' ),
+			ExtensibleAbilities::add_query_filters_schema( array( 'type' => 'object' ), 'order' )
+		);
+	}
+
+	/**
+	 * Schemas that are malformed for a field input and for a query filter.
+	 *
+	 * @return array<string, array{0: array<string, mixed>}>
+	 */
+	public function provider_malformed_schemas(): array {
+		$object = array( 'type' => 'object' );
+		return array(
+			'properties true'             => array( $object + array( 'properties' => array( 'a' => true ) ) ),
+			'properties empty'            => array( $object + array( 'properties' => array() ) ),
+			'properties null'             => array( $object + array( 'properties' => null ) ),
+			'properties list'             => array( $object + array( 'properties' => array( array( 'type' => 'string' ) ) ) ),
+			'pattern properties string'   => array( $object + array( 'patternProperties' => 'a' ) ),
+			'nested without type'         => array( $object + array( 'properties' => array( 'a' => array( 'description' => 'x' ) ) ) ),
+			'items list'                  => array(
+				array(
+					'type'  => 'array',
+					'items' => array( array( 'type' => 'string' ) ),
+				),
+			),
+			'additional properties empty' => array( $object + array( 'additionalProperties' => array() ) ),
+			'additional properties null'  => array( $object + array( 'additionalProperties' => null ) ),
+			'required true'               => array( $object + array( 'required' => true ) ),
+			'nested required true'        => array(
+				$object + array(
+					'properties' => array(
+						'a' => array(
+							'type'     => 'string',
+							'required' => true,
+						),
+					),
+				),
+			),
+			'empty enum'                  => array( $object + array( 'enum' => array() ) ),
+			'enum of another type'        => array( $object + array( 'enum' => array( 'a' ) ) ),
+			'empty type list'             => array( array( 'type' => array() ) ),
+			'unknown type in a list'      => array( array( 'type' => array( 'string', 'text' ) ) ),
+			'empty anyOf'                 => array( $object + array( 'anyOf' => array() ) ),
+			'anyOf not a list'            => array( $object + array( 'anyOf' => array( 'type' => 'string' ) ) ),
+			'anyOf with a bad branch'     => array( $object + array( 'anyOf' => array( array( 'properties' => array( 'a' => true ) ) ) ) ),
+		);
+	}
+
+	/**
+	 * @testdox Should publish an input schema with null, a combinator or a branch without a type as declared, and an output schema as declared.
+	 */
+	public function test_valid_schemas_are_published_as_declared(): void {
+		$input_schemas = array(
+			'type_list'   => array( 'type' => array( 'string', 'null' ) ),
+			'any_of'      => array( 'anyOf' => array( array( 'type' => 'string' ), array( 'type' => 'null' ) ) ),
+			'enum_null'   => array(
+				'type' => array( 'string', 'null' ),
+				'enum' => array( 'a', null ),
+			),
+			'branch'      => array(
+				'type'  => 'object',
+				'anyOf' => array( array( 'required' => array( 'a' ) ), array( 'required' => array( 'b' ) ) ),
+			),
+			'nested_null' => array(
+				'type'       => 'object',
+				'properties' => array( 'a' => array( 'type' => array( 'string', 'null' ) ) ),
+				'required'   => array( 'a' ),
+			),
+			'different'   => array(
+				'type'                 => 'object',
+				'properties'           => array( 'delete' => array( 'type' => 'boolean' ) ),
+				'additionalProperties' => false,
+			),
+		);
+		$output_schema = array(
+			'type'                 => 'object',
+			'properties'           => array(
+				'tags' => array(
+					'type'  => 'array',
+					'items' => array(
+						'type' => 'string',
+						'enum' => array( 'a', 'b' ),
+					),
+				),
+			),
+			'additionalProperties' => false,
+		);
+		add_action(
+			'woocommerce_extensible_abilities_init',
+			static function () use ( $input_schemas, $output_schema ) {
+				foreach ( $input_schemas as $field => $input_schema ) {
+					ExtensibleAbilities::register_field(
+						array(
+							'resource'      => 'product',
+							'namespace'     => 'declared',
+							'field'         => $field,
+							'output_schema' => $output_schema,
+							'get_callback'  => '__return_null',
+							'input_schema'  => $input_schema,
+							'set_callback'  => '__return_null',
+						)
+					);
+				}
+			}
+		);
+		$this->reset_registries();
+
+		$published_input  = $this->get_ability( 'woocommerce/product-update' )['input_schema']['properties']['extensions']['properties']['declared']['properties'];
+		$published_output = $this->get_output_schema( 'woocommerce/product-update' )['properties']['product']['properties']['extensions']['properties']['declared']['properties'];
+
+		$this->assertSame( $input_schemas, $published_input );
+		$this->assertSame( array_fill_keys( array_keys( $input_schemas ), $output_schema ), $published_output );
+	}
+
+	/**
+	 * @testdox Should need get_callback and output_schema, a complete write pair, and refuse the old arguments.
+	 */
+	public function test_a_field_needs_complete_arguments(): void {
+		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_field' );
+		AbilitiesLoader::register_core_resources();
+		$base = array(
+			'resource'  => 'order',
+			'namespace' => 'refused',
+			'field'     => 'value',
+		);
+		$read = array(
+			'get_callback'  => '__return_null',
+			'output_schema' => array( 'type' => 'string' ),
+		);
+		$sets = array(
+			array(),
+			array( 'get_callback' => '__return_null' ),
+			array( 'output_schema' => array( 'type' => 'string' ) ),
+			array(
+				'get_callback' => '__return_null',
+				'schema'       => array( 'type' => 'string' ),
+			),
+			array(
+				'set_callback' => '__return_null',
+				'input_schema' => array( 'type' => 'string' ),
+			),
+			$read + array( 'set_callback' => '__return_null' ),
+			$read + array( 'input_schema' => array( 'type' => 'string' ) ),
+			$read + array(
+				'input_schema' => array( 'type' => 'string' ),
+				'set_callback' => 'not_a_function',
+			),
+		);
+		foreach ( $sets as $args ) {
+			ExtensibleAbilities::register_field( $base + $args );
+		}
+
+		$this->assertArrayNotHasKey( 'refused', ExtensibleAbilities::get_fields( 'order' ) );
+	}
+
+	/**
+	 * @testdox Should list a read-only field only in the output, and refuse a write to it.
+	 */
+	public function test_a_read_only_field_is_only_in_the_output(): void {
+		add_action( 'woocommerce_extensible_abilities_init', array( $this, 'register_test_fields' ) );
+		$this->reset_registries();
+		$product = \WC_Helper_Product::create_simple_product();
+
+		$response = $this->run_ability_response(
+			'woocommerce/product-update',
+			array(
+				'id'         => $product->get_id(),
+				'extensions' => array( 'test-ext' => array( 'code' => 'x' ) ),
+			)
+		);
+
+		$input_schema = $this->get_ability( 'woocommerce/product-update' )['input_schema']['properties']['extensions']['properties'];
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertArrayNotHasKey( 'code', $input_schema['test-ext']['properties'] );
+		$this->assertArrayHasKey( 'code', $this->get_output_schema( 'woocommerce/product-update' )['properties']['product']['properties']['extensions']['properties']['test-ext']['properties'] );
+	}
+
+	/**
+	 * @testdox Should refuse a null input unless the input schema declares it, at the top level and nested.
+	 */
+	public function test_a_null_input_passes_only_where_it_is_declared(): void {
+		$received = array();
+		add_action(
+			'woocommerce_extensible_abilities_init',
+			static function () use ( &$received ) {
+				$fields = array(
+					'plain'           => array( 'type' => 'string' ),
+					'nested_declared' => array(
+						'type'       => 'object',
+						'properties' => array( 'a' => array( 'type' => array( 'string', 'null' ) ) ),
+					),
+					'nested_refused'  => array(
+						'type'       => 'object',
+						'properties' => array( 'a' => array( 'type' => 'string' ) ),
+					),
+				);
+				foreach ( $fields as $field => $schema ) {
+					ExtensibleAbilities::register_field(
+						array(
+							'resource'      => 'product',
+							'namespace'     => 'nulls',
+							'field'         => $field,
+							'output_schema' => array( 'type' => 'string' ),
+							'get_callback'  => '__return_null',
+							'input_schema'  => $schema,
+							'set_callback'  => static function ( \WC_Data $data, $value ) use ( &$received, $field ) {
+								$received[ $field ] = $value;
+							},
+						)
+					);
+				}
+			}
+		);
+		$this->reset_registries();
+		$product = \WC_Helper_Product::create_simple_product();
+		$write   = fn( array $fields ) => $this->run_ability_response(
+			'woocommerce/product-update',
+			array(
+				'id'         => $product->get_id(),
+				'extensions' => array( 'nulls' => $fields ),
+			)
+		);
+
+		$this->assertSame( 400, $write( array( 'plain' => null ) )->get_status() );
+		$this->assertSame( 400, $write( array( 'nested_refused' => array( 'a' => null ) ) )->get_status() );
+		$this->assertSame( 200, $write( array( 'nested_declared' => array( 'a' => null ) ) )->get_status() );
+		$this->assertSame( array( 'nested_declared' => array( 'a' => null ) ), $received );
+	}
+
+	/**
+	 * @testdox Should leave out a field that throws, returns null or fails sanitization, and cast a value to its schema type.
 	 */
 	public function test_field_values_follow_their_schema(): void {
 		AbilitiesLoader::register_core_resources();
 		$this->register_test_fields();
 		$fields = array(
 			'broken' => array(
-				'schema'       => array( 'type' => 'string' ),
-				'get_callback' => static function () {
+				'output_schema' => array( 'type' => 'string' ),
+				'get_callback'  => static function () {
 					throw new \RuntimeException( 'Broken' );
 				},
 			),
 			'count'  => array(
-				'schema'       => array( 'type' => 'integer' ),
-				'get_callback' => static fn() => '12',
+				'output_schema' => array( 'type' => 'integer' ),
+				'get_callback'  => static fn() => '12',
 			),
 			'empty'  => array(
-				'schema'       => array( 'type' => array( 'string', 'null' ) ),
-				'get_callback' => '__return_null',
+				'output_schema' => array( 'type' => 'string' ),
+				'get_callback'  => '__return_null',
 			),
 			'dupes'  => array(
-				'schema'       => array(
+				'output_schema' => array(
 					'type'        => 'array',
 					'items'       => array( 'type' => 'integer' ),
 					'uniqueItems' => true,
 				),
-				'get_callback' => static fn() => array( '12', 12 ),
+				'get_callback'  => static fn() => array( '12', 12 ),
 			),
 		);
 		foreach ( $fields as $field => $args ) {
@@ -1203,13 +1603,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 		$output = ExtensibleAbilities::add_fields_to_object( array(), 'order', $order );
 
-		$this->assertSame(
-			array(
-				'count' => 12,
-				'empty' => null,
-			),
-			$output['extensions']['values']
-		);
+		$this->assertSame( array( 'count' => 12 ), $output['extensions']['values'] );
 	}
 
 	/**
@@ -1222,11 +1616,11 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			static function () {
 				ExtensibleAbilities::register_field(
 					array(
-						'resource'     => 'product',
-						'namespace'    => 'test-ext',
-						'field'        => 'count',
-						'schema'       => array( 'type' => 'integer' ),
-						'get_callback' => static fn() => 'many',
+						'resource'      => 'product',
+						'namespace'     => 'test-ext',
+						'field'         => 'count',
+						'output_schema' => array( 'type' => 'integer' ),
+						'get_callback'  => static fn() => 'many',
 					)
 				);
 			}
@@ -1343,7 +1737,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	/**
 	 * @testdox Should refuse the change and save nothing when an update callback throws.
 	 */
-	public function test_an_update_callback_that_throws_saves_nothing(): void {
+	public function test_a_set_callback_that_throws_saves_nothing(): void {
 		$product  = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
 		$expected = array(
 			'throw' => array( 400, 'test_thrown' ),
@@ -1369,7 +1763,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	/**
 	 * @testdox Should check every extension value before any update callback runs, when a later value fails its schema.
 	 */
-	public function test_a_value_that_fails_its_schema_runs_no_update_callback(): void {
+	public function test_a_value_that_fails_its_schema_runs_no_set_callback(): void {
 		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
 
 		$response = $this->run_ability_response(
@@ -1642,13 +2036,14 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$register = static function () {
 			ExtensibleAbilities::register_field(
 				array(
-					'resource'        => 'product',
-					'namespace'       => 'test-ext',
-					'field'           => 'plan',
-					'schema'          => array( 'type' => 'string' ),
-					'object_types'    => array( 'simple' ),
-					'get_callback'    => static fn() => 'monthly',
-					'update_callback' => static function ( \WC_Product $product, $value ) {
+					'resource'      => 'product',
+					'namespace'     => 'test-ext',
+					'field'         => 'plan',
+					'output_schema' => array( 'type' => 'string' ),
+					'input_schema'  => array( 'type' => 'string' ),
+					'object_types'  => array( 'simple' ),
+					'get_callback'  => static fn() => 'monthly',
+					'set_callback'  => static function ( \WC_Product $product, $value ) {
 						$product->update_meta_data( '_test_plan', $value );
 					},
 				)
@@ -1744,7 +2139,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should name the field and keep the message when an update_callback rejects a value.
+	 * @testdox Should name the field and keep the message when a set_callback rejects a value.
 	 */
 	public function test_a_rejected_value_names_the_field(): void {
 		$product = \WC_Helper_Product::create_simple_product();
@@ -1872,7 +2267,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should return a fixed message and the field or namespace when an update_callback or a validator throws, and save nothing.
+	 * @testdox Should return a fixed message and the field or namespace when a set_callback or a validator throws, and save nothing.
 	 */
 	public function test_a_callback_that_throws_returns_a_clear_error(): void {
 		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
@@ -1881,12 +2276,13 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			static function () {
 				ExtensibleAbilities::register_field(
 					array(
-						'resource'        => 'product',
-						'namespace'       => 'test-ext',
-						'field'           => 'broken',
-						'schema'          => array( 'type' => 'string' ),
-						'get_callback'    => '__return_null',
-						'update_callback' => static function () {
+						'resource'      => 'product',
+						'namespace'     => 'test-ext',
+						'field'         => 'broken',
+						'input_schema'  => array( 'type' => 'string' ),
+						'get_callback'  => '__return_null',
+						'output_schema' => array( 'type' => 'string' ),
+						'set_callback'  => static function () {
 							throw new \RuntimeException( 'Field broke.' );
 						},
 					)

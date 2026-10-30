@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Split the schema of an extension ability field into `output_schema` and `input_schema`, rename `update_callback` to `set_callback`, and refuse an invalid field or query filter schema at registration.
