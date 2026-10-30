@@ -7,6 +7,27 @@ const { API_BASE_URL } = process.env;
 const shouldSkip = API_BASE_URL !== undefined;
 
 /**
+ * Sends a request, retrying when the server returns a 5xx response, such as
+ * the transient SQLite lock errors seen with parallel workers.
+ *
+ * @param send Function that performs the request.
+ */
+const sendWithRetry = async < T extends { status(): number } >(
+	send: () => Promise< T >
+): Promise< T > => {
+	const maxAttempts = 3;
+	let response = await send();
+	for ( let attempt = 1; attempt < maxAttempts; attempt++ ) {
+		if ( response.status() < 500 ) {
+			break;
+		}
+		await new Promise( ( resolve ) => setTimeout( resolve, 1000 ) );
+		response = await send();
+	}
+	return response;
+};
+
+/**
  * Billing properties to update.
  */
 const updatedCustomerBilling = {
@@ -97,9 +118,11 @@ test.describe.serial( 'Orders API tests: CRUD', () => {
 					status: expectedStatus,
 				};
 				//create order with status
-				const response = await request.post( './wp-json/wc/v3/orders', {
-					data: requestPayload,
-				} );
+				const response = await sendWithRetry( () =>
+					request.post( './wp-json/wc/v3/orders', {
+						data: requestPayload,
+					} )
+				);
 				const responseJSON = await response.json();
 				expect( response.status() ).toEqual( 201 );
 				expect( typeof responseJSON.id ).toEqual( 'number' );
@@ -268,11 +291,10 @@ test.describe.serial( 'Orders API tests: CRUD', () => {
 					status: expectedOrderStatus,
 				};
 
-				const response = await request.put(
-					`./wp-json/wc/v3/orders/${ orderId }`,
-					{
+				const response = await sendWithRetry( () =>
+					request.put( `./wp-json/wc/v3/orders/${ orderId }`, {
 						data: requestPayload,
-					}
+					} )
 				);
 				const responseJSON = await response.json();
 				expect( response.status() ).toEqual( 200 );
