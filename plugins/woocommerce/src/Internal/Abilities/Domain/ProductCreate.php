@@ -120,6 +120,13 @@ class ProductCreate extends ActionableAbility {
 			);
 		}
 
+		if ( ProductType::VARIATION === $product_type ) {
+			$parent = wc_get_product( (int) ( $input['parent_id'] ?? 0 ) );
+			if ( $parent instanceof \WC_Product_Variable ) {
+				return self::get_new_variation( $parent );
+			}
+		}
+
 		return self::get_product_object_for_type( $product_type );
 	}
 
