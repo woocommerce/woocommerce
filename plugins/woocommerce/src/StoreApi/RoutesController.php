@@ -88,6 +88,9 @@ class RoutesController {
 				Routes\V1\Ucp\CatalogSearch::IDENTIFIER  => Routes\V1\Ucp\CatalogSearch::class,
 				Routes\V1\Ucp\CatalogLookup::IDENTIFIER  => Routes\V1\Ucp\CatalogLookup::class,
 				Routes\V1\Ucp\CatalogProduct::IDENTIFIER => Routes\V1\Ucp\CatalogProduct::class,
+				Routes\V1\Ucp\Carts::IDENTIFIER          => Routes\V1\Ucp\Carts::class,
+				Routes\V1\Ucp\CartsById::IDENTIFIER      => Routes\V1\Ucp\CartsById::class,
+				Routes\V1\Ucp\CartsCancel::IDENTIFIER    => Routes\V1\Ucp\CartsCancel::class,
 			],
 		];
 	}

@@ -7921,12 +7921,6 @@ parameters:
 			path: includes/admin/views/html-admin-page-status-report.php
 
 		-
-			message: '#^Variable \$path might not be defined\.$#'
-			identifier: variable.undefined
-			count: 1
-			path: includes/admin/views/html-admin-page-status-report.php
-
-		-
 			message: '#^Variable \$tools might not be defined\.$#'
 			identifier: variable.undefined
 			count: 1
@@ -35408,12 +35402,6 @@ parameters:
 			identifier: encapsedStringPart.nonString
 			count: 1
 			path: includes/wc-user-functions.php
-
-		-
-			message: '#^Binary operation "\+" between 600 and string results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: includes/wc-webhook-functions.php
 
 		-
 			message: '#^Call to an undefined method WC_Data_Store\:\:get_webhooks_ids\(\)\.$#'
