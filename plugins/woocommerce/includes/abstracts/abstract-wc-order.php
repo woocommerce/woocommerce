@@ -45,6 +45,14 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	protected $clone_mode = self::CLONE_MODE_CACHE;
 
 	/**
+	 * Callbacks that the next save() runs, keyed by name. Each entry holds the callback, its arguments, and
+	 * whether it runs after the order is written. The stage_*() methods add them.
+	 *
+	 * @var array<string, array{callback: callable, args: array, after_save: bool}>
+	 */
+	private $deferred_actions = array();
+
+	/**
 	 * Order Data array. This is the core order data exposed in APIs since 3.0.0.
 	 *
 	 * Notes: cart_tax = cart_tax is the new name for the legacy 'order_tax'
@@ -302,6 +310,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			return $this->get_id();
 		}
 
+		$deferred_actions = $this->take_deferred_actions();
+		$this->run_deferred_actions( $deferred_actions, false );
+
 		try {
 			/**
 			 * Trigger action before saving to the DB. Allows you to adjust object props before save.
@@ -341,7 +352,91 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			);
 		}
 
+		$this->run_deferred_actions( $deferred_actions, true );
+
 		return $this->get_id();
+	}
+
+	/**
+	 * Leave a callback to the next save(), which runs it before or after the order is written. An entry with
+	 * the same key replaces the earlier one, and a null callback removes it.
+	 *
+	 * @since 11.4.0
+	 * @param string        $key        Name of the entry.
+	 * @param callable|null $callback   Callback to run, or null to remove the entry.
+	 * @param array         $args       Arguments for the callback.
+	 * @param bool          $after_save True to run the callback after the order is written.
+	 */
+	protected function defer_to_save( string $key, ?callable $callback, array $args = array(), bool $after_save = false ): void {
+		if ( null === $callback ) {
+			unset( $this->deferred_actions[ $key ] );
+			return;
+		}
+
+		$this->deferred_actions[ $key ] = array(
+			'callback'   => $callback,
+			'args'       => $args,
+			'after_save' => $after_save,
+		);
+	}
+
+	/**
+	 * Take the deferred callbacks and clear the list, so that each one runs for one save only.
+	 *
+	 * @since 11.4.0
+	 * @return array
+	 */
+	protected function take_deferred_actions(): array {
+		$deferred_actions       = $this->deferred_actions;
+		$this->deferred_actions = array();
+
+		return $deferred_actions;
+	}
+
+	/**
+	 * Run the deferred callbacks that belong before or after the write.
+	 *
+	 * @since 11.4.0
+	 * @param array $deferred_actions Entries from take_deferred_actions().
+	 * @param bool  $after_save       True to run the entries that belong after the write.
+	 */
+	protected function run_deferred_actions( array $deferred_actions, bool $after_save ): void {
+		foreach ( $deferred_actions as $entry ) {
+			if ( $entry['after_save'] === $after_save ) {
+				call_user_func_array( $entry['callback'], $entry['args'] );
+			}
+		}
+	}
+
+	/**
+	 * Run a write or a hook right away when the stage method runs for its saving method, or leave it to the
+	 * next save() otherwise.
+	 *
+	 * @since 11.4.0
+	 * @param string   $key        Name of the deferred entry.
+	 * @param callable $callback   Callback to run.
+	 * @param array    $args       Arguments for the callback.
+	 * @param bool     $after_save True to run a deferred callback after the order is written.
+	 */
+	protected function write_or_defer( string $key, callable $callback, array $args = array(), bool $after_save = false ): void {
+		if ( $this->writing_through ) {
+			call_user_func_array( $callback, $args );
+			return;
+		}
+
+		$this->defer_to_save( $key, $callback, $args, $after_save );
+	}
+
+	/**
+	 * Save the order when the stage method runs for its saving method, at the point where the saving method
+	 * always saved. Do nothing otherwise.
+	 *
+	 * @since 11.4.0
+	 */
+	protected function save_if_writing_through(): void {
+		if ( $this->writing_through ) {
+			$this->save();
+		}
 	}
 
 	/**
@@ -1154,18 +1249,39 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * database deletion until the next call to save(). Custom stores overriding `delete_items()`
 	 * without also overriding `delete_items_by_ids()` retain the historical synchronous behavior.
 	 *
+	 * @uses self::stage_order_items_removal()
 	 * @param string|null $type Order item type. Default null (remove every type).
 	 * @throws Exception If persisted item IDs cannot be read or synchronous item deletion fails.
 	 * @return void
 	 */
 	public function remove_order_items( $type = null ) {
+		$this->write_through(
+			function () use ( $type ) {
+				$this->stage_order_items_removal( $type );
+			}
+		);
+	}
+
+	/**
+	 * Remove line items from the order in memory, like remove_order_items(). For a custom store that deletes
+	 * items synchronously, leave the deletion and woocommerce_removed_order_items to the next save(), which
+	 * runs them before it writes. remove_order_items() runs this method through write_through(), so it deletes
+	 * right away, as it always did.
+	 *
+	 * @since 11.4.0
+	 * @param string|null $type Order item type. Default null (remove every type).
+	 * @throws Exception If persisted item IDs cannot be read or synchronous item deletion fails.
+	 * @return void
+	 */
+	public function stage_order_items_removal( $type = null ) {
+		$this->refuse_unstaged_override( 'remove_order_items', 'stage_order_items_removal' );
 
 		// Guard against extension code passing non-string values. Anything not
 		// a string or null is ignored so it never reaches the deferred queue or
 		// the data store. Surface the misuse so it's traceable rather than silent.
 		if ( null !== $type && ! is_string( $type ) ) {
 			wc_doing_it_wrong(
-				__METHOD__,
+				__CLASS__ . '::remove_order_items',
 				sprintf( esc_html( 'remove_order_items() expects a string item type or null; received %s.' ), esc_html( gettype( $type ) ) ),
 				'11.0.0'
 			);
@@ -1187,8 +1303,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$delete_synchronously = ! $this->data_store_supports_deferred_item_deletion();
 
 		if ( $delete_synchronously && $has_persisted_items ) {
-			// @phpstan-ignore-next-line -- Required order data store method forwarded by WC_Data_Store::__call().
-			$this->data_store->delete_items( $this, $type );
+			$this->write_or_defer( 'delete_order_items_' . (string) $type, array( $this, 'delete_items_synchronously' ), array( $type ) );
 		}
 
 		if ( ! empty( $type ) ) {
@@ -1253,13 +1368,33 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 
 		if ( $delete_synchronously ) {
-			/**
-			 * This action is documented in save_items().
-			 *
-			 * @since 7.8.0
-			 */
-			do_action( 'woocommerce_removed_order_items', $this, $type );
+			$this->write_or_defer( 'removed_order_items_' . (string) $type, array( $this, 'fire_removed_order_items_action' ), array( $type ) );
 		}
+	}
+
+	/**
+	 * Delete order items through a custom store that does not defer the deletion.
+	 *
+	 * @param string|null $type Order item type, or null for every type.
+	 * @throws Exception If synchronous item deletion fails.
+	 */
+	private function delete_items_synchronously( $type ): void {
+		// @phpstan-ignore-next-line -- Required order data store method forwarded by WC_Data_Store::__call().
+		$this->data_store->delete_items( $this, $type );
+	}
+
+	/**
+	 * Fire woocommerce_removed_order_items after a synchronous deletion.
+	 *
+	 * @param string|null $type Order item type, or null for every type.
+	 */
+	private function fire_removed_order_items_action( $type ): void {
+		/**
+		 * This action is documented in save_items().
+		 *
+		 * @since 7.8.0
+		 */
+		do_action( 'woocommerce_removed_order_items', $this, $type );
 	}
 
 	/**
@@ -1717,10 +1852,30 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Apply a coupon to the order and recalculate totals.
 	 *
 	 * @since 3.2.0
+	 * @uses self::stage_coupon()
 	 * @param string|WC_Coupon $raw_coupon Coupon code or object.
 	 * @return true|WP_Error True if applied, error if not.
 	 */
 	public function apply_coupon( $raw_coupon ) {
+		return $this->write_through(
+			function () use ( $raw_coupon ) {
+				return $this->stage_coupon( $raw_coupon );
+			}
+		);
+	}
+
+	/**
+	 * Apply a coupon to the order and recalculate totals in memory, like apply_coupon(), but do not save. The
+	 * next save() writes the order and then records the coupon usage. apply_coupon() runs this method through
+	 * write_through(), so it saves and records the usage at the same points as it always did.
+	 *
+	 * @since 11.4.0
+	 * @param string|WC_Coupon $raw_coupon Coupon code or object.
+	 * @return true|WP_Error True if applied, error if not.
+	 */
+	public function stage_coupon( $raw_coupon ) {
+		$this->refuse_unstaged_override( 'apply_coupon', 'stage_coupon' );
+
 		if ( is_a( $raw_coupon, 'WC_Coupon' ) ) {
 			$coupon = $raw_coupon;
 		} elseif ( is_string( $raw_coupon ) ) {
@@ -1785,12 +1940,26 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		do_action( 'woocommerce_order_applied_coupon', $coupon, $this );
 
 		$this->set_coupon_discount_amounts( $discounts );
-		$this->save();
+		$this->save_if_writing_through();
 
 		// Recalculate totals and taxes.
-		$this->recalculate_coupons();
+		if ( $this->writing_through ) {
+			$this->recalculate_coupons();
+		} else {
+			$this->stage_recalculated_coupons();
+		}
 
-		// Record usage so counts and validation is correct.
+		$this->write_or_defer( 'record_coupon_usage_' . $coupon->get_code(), array( $this, 'record_applied_coupon_usage' ), array( $coupon ), true );
+
+		return true;
+	}
+
+	/**
+	 * Record the usage of an applied coupon, so counts and validation are correct.
+	 *
+	 * @param WC_Coupon $coupon Applied coupon.
+	 */
+	private function record_applied_coupon_usage( WC_Coupon $coupon ): void {
 		$used_by = $this->get_user_id();
 
 		if ( ! $used_by && is_callable( array( $this, 'get_billing_email' ) ) ) {
@@ -1812,8 +1981,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 
 		wc_update_coupon_usage_counts( $this->get_id() );
-
-		return true;
 	}
 
 	/**
@@ -1930,10 +2097,31 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @since 3.2.0
 	 * @since 7.6.0 Returns a boolean indicating success.
 	 *
+	 * @uses self::stage_coupon_removal()
 	 * @param  string $code Coupon code.
 	 * @return bool TRUE if coupon was removed, FALSE otherwise.
 	 */
 	public function remove_coupon( $code ) {
+		return $this->write_through(
+			function () use ( $code ) {
+				return $this->stage_coupon_removal( $code );
+			}
+		);
+	}
+
+	/**
+	 * Remove a coupon from the order and recalculate totals in memory, like remove_coupon(), but do not save.
+	 * The next save() lowers the coupon usage count before it writes, and fires woocommerce_order_removed_coupon
+	 * after it writes. remove_coupon() runs this method through write_through(), so it does both at the same
+	 * points as it always did.
+	 *
+	 * @since 11.4.0
+	 * @param  string $code Coupon code.
+	 * @return bool True if the coupon was removed, false otherwise.
+	 */
+	public function stage_coupon_removal( $code ) {
+		$this->refuse_unstaged_override( 'remove_coupon', 'stage_coupon_removal' );
+
 		$coupons = $this->get_items( 'coupon' );
 		/**
 		 * Data store wrapper.
@@ -1959,10 +2147,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 					// Mirror the stored flag into this instance so clearing it below is tracked as a change and saved.
 					$this->set_recorded_coupon_usage_counts( true );
 
-					$identities = $this->get_coupon_usage_identities();
-					$coupon_object->decrease_usage_count( $identities[ $coupon_object->get_id() ] ?? $used_by );
-					unset( $identities[ $coupon_object->get_id() ] );
-					$this->save_coupon_usage_identities( $identities );
+					$this->write_or_defer( 'release_coupon_usage_' . $coupon_object->get_code(), array( $this, 'release_removed_coupon_usage' ), array( $coupon_object, $used_by ) );
 
 					$remaining_codes = array_filter( $this->get_coupon_codes(), fn( $remaining_code ) => ! StringUtil::is_null_or_whitespace( $remaining_code ) );
 					if ( ! $remaining_codes ) {
@@ -1970,23 +2155,49 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 					}
 				}
 
-				$this->recalculate_coupons();
+				if ( $this->writing_through ) {
+					$this->recalculate_coupons();
+				} else {
+					$this->stage_recalculated_coupons();
+				}
 
-				/**
-				 * Action hook fired when a coupon is removed from an order.
-				 *
-				 * @param  WC_Coupon $coupon_object The removed coupon object.
-				 * @param  WC_Order  $order         The current order object.
-				 *
-				 * @since 10.8.0
-				 */
-				do_action( 'woocommerce_order_removed_coupon', $coupon_object, $this );
+				$this->write_or_defer( 'removed_coupon_' . $coupon_object->get_code(), array( $this, 'fire_removed_coupon_action' ), array( $coupon_object ), true );
 
 				return true;
 			}
 		}
 
 		return false;
+	}
+
+	/**
+	 * Lower the usage count of a removed coupon, and forget the identity it was counted under.
+	 *
+	 * @param WC_Coupon  $coupon_object Removed coupon.
+	 * @param int|string $used_by       User ID or billing email to use when no identity was stored.
+	 */
+	private function release_removed_coupon_usage( WC_Coupon $coupon_object, $used_by ): void {
+		$identities = $this->get_coupon_usage_identities();
+		$coupon_object->decrease_usage_count( $identities[ $coupon_object->get_id() ] ?? $used_by );
+		unset( $identities[ $coupon_object->get_id() ] );
+		$this->save_coupon_usage_identities( $identities );
+	}
+
+	/**
+	 * Fire woocommerce_order_removed_coupon for a removed coupon.
+	 *
+	 * @param WC_Coupon $coupon_object Removed coupon.
+	 */
+	private function fire_removed_coupon_action( WC_Coupon $coupon_object ): void {
+		/**
+		 * Action hook fired when a coupon is removed from an order.
+		 *
+		 * @param  WC_Coupon $coupon_object The removed coupon object.
+		 * @param  WC_Order  $order         The current order object.
+		 *
+		 * @since 10.8.0
+		 */
+		do_action( 'woocommerce_order_removed_coupon', $coupon_object, $this );
 	}
 
 	/**
@@ -2029,9 +2240,27 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * This method is public since WooCommerce 3.8.0.
 	 *
 	 * @since 3.2.0
+	 * @uses self::stage_recalculated_coupons()
 	 * @return void
 	 */
 	public function recalculate_coupons() {
+		$this->write_through(
+			function () {
+				$this->stage_recalculated_coupons();
+			}
+		);
+	}
+
+	/**
+	 * Apply all coupons in this order again to all line items and recalculate totals and taxes in memory, like
+	 * recalculate_coupons(), but do not save. recalculate_coupons() runs this method through write_through().
+	 *
+	 * @since 11.4.0
+	 * @return void
+	 */
+	public function stage_recalculated_coupons() {
+		$this->refuse_unstaged_override( 'recalculate_coupons', 'stage_recalculated_coupons' );
+
 		// Reset line item totals.
 		foreach ( $this->get_items() as $item ) {
 			$item->set_total( $item->get_subtotal() );
@@ -2084,7 +2313,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$this->set_item_discount_amounts( $discounts );
 
 		// Recalculate totals and taxes.
-		$this->calculate_totals( true );
+		if ( $this->writing_through ) {
+			$this->calculate_totals( true );
+		} else {
+			$this->stage_totals( true );
+		}
 	}
 
 	/**
@@ -2171,9 +2404,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		if ( $coupon_discounts ) {
 			foreach ( $coupon_discounts as $coupon_code => $amount ) {
-				$item_id = isset( $coupon_code_to_id[ $coupon_code ] ) ? $coupon_code_to_id[ $coupon_code ] : 0;
+				$item_id       = isset( $coupon_code_to_id[ $coupon_code ] ) ? $coupon_code_to_id[ $coupon_code ] : 0;
+				$unsaved_item  = $item_id || $this->writing_through ? null : $this->get_unsaved_coupon_item( $coupon_code );
+				$reuse_unsaved = null !== $unsaved_item;
 
-				if ( ! $item_id ) {
+				if ( $reuse_unsaved ) {
+					$coupon_item = $unsaved_item;
+				} elseif ( ! $item_id ) {
 					$coupon_item = new WC_Order_Item_Coupon();
 					$coupon_item->set_code( $coupon_code );
 
@@ -2212,21 +2449,64 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				$coupon_item->set_discount( $amount );
 				$coupon_item->set_discount_tax( $discount_tax );
 
-				$this->add_item( $coupon_item );
+				if ( ! $reuse_unsaved ) {
+					$this->add_item( $coupon_item );
+				}
 			}
 		}
+	}
+
+	/**
+	 * Find the unsaved coupon item for a code. A staged coupon has no ID until the order is saved.
+	 *
+	 * @param string $coupon_code Coupon code.
+	 * @return WC_Order_Item_Coupon|null
+	 */
+	private function get_unsaved_coupon_item( string $coupon_code ): ?WC_Order_Item_Coupon {
+		foreach ( $this->get_items( 'coupon' ) as $coupon_item ) {
+			if ( $coupon_item instanceof WC_Order_Item_Coupon && ! $coupon_item->get_id() && $coupon_item->get_code() === $coupon_code ) {
+				return $coupon_item;
+			}
+		}
+
+		return null;
 	}
 
 	/**
 	 * Add a product line item to the order. This is the only line item type with
 	 * its own method because it saves looking up order amounts (costs are added up for you).
 	 *
+	 * @uses self::stage_product_item()
 	 * @param  WC_Product $product Product object.
 	 * @param  int        $qty Quantity to add.
 	 * @param  array      $args Args for the added product, including an optional tax location for its price.
 	 * @return int
 	 */
 	public function add_product( $product, $qty = 1, $args = array() ) {
+		return $this->write_through(
+			function () use ( $product, $qty, $args ) {
+				return $this->stage_product_item( $product, $qty, $args );
+			}
+		)->get_id();
+	}
+
+	/**
+	 * Build a product line item and add it to the order in memory, like add_product(), but do not save the
+	 * item. The next save() of the order writes it. add_product() runs this method through write_through(), so
+	 * it saves the item first, as it always did.
+	 *
+	 * An order class that overrides add_product() with rules of its own must override this method too, with
+	 * the same rules.
+	 *
+	 * @since 11.4.0
+	 * @param  WC_Product $product Product object.
+	 * @param  int        $qty Quantity to add.
+	 * @param  array      $args Args for the added product, including an optional tax location for its price.
+	 * @return WC_Order_Item_Product The item, saved only when add_product() runs this method.
+	 */
+	public function stage_product_item( $product, $qty = 1, $args = array() ) {
+		$this->refuse_unstaged_override( 'add_product', 'stage_product_item' );
+
 		if ( $product ) {
 			$order = ArrayUtil::get_value_or_default( $args, 'order' );
 			$total = wc_get_price_excluding_tax(
@@ -2273,11 +2553,23 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$item->set_props( $args );
 		$item->set_backorder_meta();
 		$item->set_order_id( $this->get_id() );
-		$item->save();
+		$this->write_or_defer( 'save_product_item_' . spl_object_id( $item ), array( $item, 'save' ) );
 		$this->add_item( $item );
-		wc_do_deprecated_action( 'woocommerce_order_add_product', array( $this->get_id(), $item->get_id(), $product, $qty, $args ), '3.0', 'woocommerce_new_order_item action instead' );
+		$this->write_or_defer( 'add_product_action_' . spl_object_id( $item ), array( $this, 'fire_add_product_action' ), array( $item, $product, $qty, $args ), true );
 		wp_cache_delete( 'order-needs-processing-' . $this->get_id(), 'orders' );
-		return $item->get_id();
+		return $item;
+	}
+
+	/**
+	 * Fire the deprecated woocommerce_order_add_product action for a saved product item.
+	 *
+	 * @param WC_Order_Item_Product $item    Saved item.
+	 * @param WC_Product|false      $product Product object.
+	 * @param int                   $qty     Quantity added.
+	 * @param array                 $args    Args for the added product, after the defaults.
+	 */
+	private function fire_add_product_action( $item, $product, $qty, $args ): void {
+		wc_do_deprecated_action( 'woocommerce_order_add_product', array( $this->get_id(), $item->get_id(), $product, $qty, $args ), '3.0', 'woocommerce_new_order_item action instead' );
 	}
 
 	/*
@@ -2332,9 +2624,29 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Calculate shipping total.
 	 *
 	 * @since 2.2
+	 * @uses self::stage_shipping_total()
 	 * @return float
 	 */
 	public function calculate_shipping() {
+		$this->write_through(
+			function () {
+				$this->stage_shipping_total();
+			}
+		);
+
+		return $this->get_shipping_total();
+	}
+
+	/**
+	 * Calculate the shipping total in memory, like calculate_shipping(), but do not save.
+	 * calculate_shipping() runs this method through write_through().
+	 *
+	 * @since 11.4.0
+	 * @return void
+	 */
+	public function stage_shipping_total() {
+		$this->refuse_unstaged_override( 'calculate_shipping', 'stage_shipping_total' );
+
 		$shipping_total = 0;
 
 		foreach ( $this->get_shipping_methods() as $shipping ) {
@@ -2342,9 +2654,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 
 		$this->set_shipping_total( $shipping_total );
-		$this->save();
-
-		return $this->get_shipping_total();
+		$this->save_if_writing_through();
 	}
 
 	/**
@@ -2475,10 +2785,29 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 *
 	 * Will use the base country unless customer addresses are set.
 	 *
+	 * @uses self::stage_taxes()
 	 * @param array $args Added in 3.0.0 to pass things like location.
 	 * @return void
 	 */
 	public function calculate_taxes( $args = array() ) {
+		$this->write_through(
+			function () use ( $args ) {
+				$this->stage_taxes( $args );
+			}
+		);
+	}
+
+	/**
+	 * Calculate the taxes of the items and update the tax items in memory, like calculate_taxes(), but do not
+	 * save. calculate_taxes() runs this method through write_through().
+	 *
+	 * @since 11.4.0
+	 * @param array $args Override the tax location.
+	 * @return void
+	 */
+	public function stage_taxes( $args = array() ) {
+		$this->refuse_unstaged_override( 'calculate_taxes', 'stage_taxes' );
+
 		do_action( 'woocommerce_order_before_calculate_taxes', $args, $this );
 
 		$calculate_tax_for  = $this->get_tax_location( $args );
@@ -2513,7 +2842,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			}
 		}
 
-		$this->update_taxes();
+		if ( $this->writing_through ) {
+			$this->update_taxes();
+		} else {
+			$this->stage_tax_items();
+		}
 	}
 
 	/**
@@ -2534,9 +2867,28 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Update tax lines for the order based on the line item taxes themselves.
 	 *
+	 * @uses self::stage_tax_items()
 	 * @return void
 	 */
 	public function update_taxes() {
+		$this->write_through(
+			function () {
+				$this->stage_tax_items();
+			}
+		);
+	}
+
+	/**
+	 * Update the tax items of the order from the item taxes in memory, like update_taxes(), but do not save.
+	 * The next save() writes the changed tax items before it writes the order. update_taxes() runs this method
+	 * through write_through(), so it saves at the same points as it always did.
+	 *
+	 * @since 11.4.0
+	 * @return void
+	 */
+	public function stage_tax_items() {
+		$this->refuse_unstaged_override( 'update_taxes', 'stage_tax_items' );
+
 		$cart_taxes     = array();
 		$shipping_taxes = array();
 		$existing_taxes = $this->get_taxes();
@@ -2585,7 +2937,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$tax->set_shipping_tax_total( ! empty( $shipping_taxes[ $tax_rate_id ] ) ? $shipping_taxes[ $tax_rate_id ] : 0 );
 
 			$saved_rate_ids[] = $tax_rate_id;
-			$tax->save();
+			$this->write_or_defer( 'save_tax_item_' . spl_object_id( $tax ), array( $tax, 'save' ) );
 		}
 
 		$new_rate_ids = wp_parse_id_list( array_diff( array_keys( $cart_taxes + $shipping_taxes ), $saved_rate_ids ) );
@@ -2608,7 +2960,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		$this->set_shipping_tax( array_sum( $shipping_taxes ) );
 		$this->set_cart_tax( array_sum( $cart_taxes ) );
-		$this->save();
+		$this->save_if_writing_through();
 	}
 
 	/**
@@ -2643,10 +2995,34 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Calculate totals by looking at the contents of the order. Stores the totals and returns the orders final total.
 	 *
 	 * @since 2.2
+	 * @uses self::stage_totals()
 	 * @param  bool $and_taxes Calc taxes if true.
 	 * @return float calculated grand total.
 	 */
 	public function calculate_totals( $and_taxes = true ) {
+		return $this->write_through(
+			function () use ( $and_taxes ) {
+				return $this->stage_totals( $and_taxes );
+			}
+		);
+	}
+
+	/**
+	 * Calculate totals, and taxes when asked, in memory, like calculate_totals(), but do not save.
+	 * calculate_totals() runs this method through write_through(), so it saves at the same points as it
+	 * always did.
+	 *
+	 * Called directly, this method leaves woocommerce_order_after_calculate_totals to the next save(), which
+	 * fires it right before the write, so a listener that changes the order gets its change written. The new
+	 * tax items have no IDs yet when the action fires; read them from the order object, not from the database.
+	 *
+	 * @since 11.4.0
+	 * @param  bool $and_taxes Calc taxes if true.
+	 * @return float calculated grand total.
+	 */
+	public function stage_totals( $and_taxes = true ) {
+		$this->refuse_unstaged_override( 'calculate_totals', 'stage_totals' );
+
 		do_action( 'woocommerce_order_before_calculate_totals', $and_taxes, $this );
 
 		$fees_total        = 0;
@@ -2679,9 +3055,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$fees_total += (float) $item->get_total();
 		}
 
-		// Calculate taxes for items, shipping, discounts. Note; this also triggers save().
-		if ( $and_taxes ) {
+		// Calculate taxes for items, shipping, discounts. Note; when writing through, this also triggers save().
+		if ( $and_taxes && $this->writing_through ) {
 			$this->calculate_taxes();
+		} elseif ( $and_taxes ) {
+			$this->stage_taxes();
 		}
 
 		// Sum taxes again so we can work out how much tax was discounted. This uses original values, not those possibly rounded to 2dp.
@@ -2705,11 +3083,40 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$this->calculate_cogs_total_value();
 		}
 
-		do_action( 'woocommerce_order_after_calculate_totals', $and_taxes, $this );
+		$this->write_or_defer( 'after_calculate_totals', array( $this, 'fire_after_calculate_totals_action' ), array( $and_taxes, ! $this->writing_through ) );
 
-		$this->save();
+		$this->save_if_writing_through();
 
 		return $this->get_total();
+	}
+
+	/**
+	 * Fire woocommerce_order_after_calculate_totals. A direct calculate_totals() call passes two arguments, as
+	 * it always did; a staged call adds a third.
+	 *
+	 * @param bool $and_taxes Whether the taxes were calculated too.
+	 * @param bool $staged    Whether the totals were staged and are not yet saved.
+	 */
+	private function fire_after_calculate_totals_action( $and_taxes, bool $staged ): void {
+		if ( ! $staged ) {
+			/**
+			 * This action is documented below.
+			 *
+			 * @since 3.3.0
+			 */
+			do_action( 'woocommerce_order_after_calculate_totals', $and_taxes, $this );
+			return;
+		}
+
+		/**
+		 * Fires after the order totals are calculated, before they are saved.
+		 *
+		 * @param bool              $and_taxes Whether the taxes were calculated too.
+		 * @param WC_Abstract_Order $order     Order object.
+		 * @param bool              $staged    Whether the totals were staged and are not yet saved. Absent on a direct calculate_totals() call. When true, the order and its tax items are in memory and have no IDs yet; use the $order object, not the database. @since 11.4.0
+		 * @since 3.3.0
+		 */
+		do_action( 'woocommerce_order_after_calculate_totals', $and_taxes, $this, true );
 	}
 
 	/**

@@ -37,13 +37,6 @@ class WC_Order extends WC_Abstract_Order {
 	private $staging_status = false;
 
 	/**
-	 * Status that the next save() fires woocommerce_order_edit_status for, or null when there is none.
-	 *
-	 * @var string|null
-	 */
-	private $pending_edit_status = null;
-
-	/**
 	 * Order Data array. This is the core order data exposed in APIs since 3.0.0.
 	 *
 	 * @since 3.0.0
@@ -146,6 +139,7 @@ class WC_Order extends WC_Abstract_Order {
 	 * Sales are also recorded for products.
 	 * Finally, record the date of payment.
 	 *
+	 * @uses self::stage_payment_complete()
 	 * @param string $transaction_id Optional transaction id to store in post meta.
 	 * @return bool success
 	 */
@@ -155,52 +149,11 @@ class WC_Order extends WC_Abstract_Order {
 		}
 
 		try {
-			do_action( 'woocommerce_pre_payment_complete', $this->get_id(), $transaction_id );
-
-			if ( WC()->session ) {
-				WC()->session->set( 'order_awaiting_payment', false );
-			}
-
-			/**
-			 * Filters the valid order statuses for payment complete.
-			 *
-			 * @param array    $valid_completed_statuses Array of valid order statuses for payment complete.
-			 * @param WC_Order $this                     Order object.
-			 * @since 2.7.0
-			 */
-			$valid_completed_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment_complete', OrderStatus::PAYMENT_COMPLETE_STATUSES, $this );
-			if ( $this->has_status( $valid_completed_statuses ) ) {
-				if ( ! empty( $transaction_id ) ) {
-					$this->set_transaction_id( $transaction_id );
+			$this->write_through(
+				function () use ( $transaction_id ) {
+					return $this->stage_payment_complete( $transaction_id );
 				}
-				if ( ! $this->get_date_paid( 'edit' ) ) {
-					$this->set_date_paid( time() );
-				}
-
-				/**
-				 * Filters the order status to set after payment complete.
-				 *
-				 * @param string   $status        Order status.
-				 * @param int      $order_id      Order ID.
-				 * @param WC_Order $this          Order object.
-				 * @since 2.7.0
-				 */
-				$next_status = apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? OrderStatus::PROCESSING : OrderStatus::COMPLETED, $this->get_id(), $this );
-
-				$transaction_id = $this->get_transaction_id();
-				$payment_method = $this->get_payment_method_title();
-
-				// translators: %1$s is the payment method, %2$s is the transaction id.
-				$payment_complete_note = $payment_method && $transaction_id ? sprintf( __( 'Payment via %1$s (%2$s).', 'woocommerce' ), $payment_method, $transaction_id ) : __( 'Payment complete.', 'woocommerce' );
-
-				$this->set_status( $next_status, false );
-				$this->add_order_note( $payment_complete_note, false, false, array( 'note_group' => OrderNoteGroup::PAYMENT ) );
-				$this->save();
-
-				do_action( 'woocommerce_payment_complete', $this->get_id(), $transaction_id );
-			} else {
-				do_action( 'woocommerce_payment_complete_order_status_' . $this->get_status(), $this->get_id(), $transaction_id );
-			}
+			);
 		} catch ( Exception $e ) {
 			/**
 			 * If there was an error completing the payment, log to a file and add an order note so the admin can take action.
@@ -219,6 +172,90 @@ class WC_Order extends WC_Abstract_Order {
 			$this->add_order_note( __( 'Payment complete event failed.', 'woocommerce' ) . ' ' . $e->getMessage(), false, false, array( 'note_group' => OrderNoteGroup::ERROR ) );
 			return false;
 		}
+		return true;
+	}
+
+	/**
+	 * Make the in-memory changes of payment_complete(): the transaction ID, the paid date and the payment
+	 * complete status. Leave the payment note and woocommerce_payment_complete to the next save(), which adds
+	 * the note before it writes and fires the action after it writes. payment_complete() runs this method
+	 * through write_through(), so it adds the note, saves and fires the action right away, as it always did.
+	 *
+	 * When the order status is not one that payment can complete, the order does not change, the
+	 * woocommerce_payment_complete_order_status_<status> action fires right away, and the method returns false.
+	 *
+	 * An order class that overrides payment_complete() with rules of its own must override this method too,
+	 * with the same rules.
+	 *
+	 * @since 11.4.0
+	 * @param string $transaction_id Optional transaction ID to store.
+	 * @return bool True when the order has changes for save() to write.
+	 */
+	public function stage_payment_complete( $transaction_id = '' ) {
+		$this->refuse_unstaged_override( 'payment_complete', 'stage_payment_complete' );
+
+		/**
+		 * Fires before the payment of an order is completed.
+		 *
+		 * @param int    $order_id       Order ID.
+		 * @param string $transaction_id Transaction ID passed to payment_complete().
+		 * @since 2.1.0
+		 */
+		do_action( 'woocommerce_pre_payment_complete', $this->get_id(), $transaction_id );
+
+		if ( WC()->session ) {
+			WC()->session->set( 'order_awaiting_payment', false );
+		}
+
+		/**
+		 * Filters the valid order statuses for payment complete.
+		 *
+		 * @param array    $valid_completed_statuses Array of valid order statuses for payment complete.
+		 * @param WC_Order $this                     Order object.
+		 * @since 2.7.0
+		 */
+		$valid_completed_statuses = apply_filters( 'woocommerce_valid_order_statuses_for_payment_complete', OrderStatus::PAYMENT_COMPLETE_STATUSES, $this );
+		if ( ! $this->has_status( $valid_completed_statuses ) ) {
+			/**
+			 * Fires when payment completes for an order whose status payment cannot complete.
+			 *
+			 * @param int    $order_id       Order ID.
+			 * @param string $transaction_id Transaction ID passed to payment_complete().
+			 * @since 2.1.0
+			 */
+			do_action( 'woocommerce_payment_complete_order_status_' . $this->get_status(), $this->get_id(), $transaction_id );
+			return false;
+		}
+
+		if ( ! empty( $transaction_id ) ) {
+			$this->set_transaction_id( $transaction_id );
+		}
+		if ( ! $this->get_date_paid( 'edit' ) ) {
+			$this->set_date_paid( time() );
+		}
+
+		/**
+		 * Filters the order status to set after payment complete.
+		 *
+		 * @param string   $status        Order status.
+		 * @param int      $order_id      Order ID.
+		 * @param WC_Order $this          Order object.
+		 * @since 2.7.0
+		 */
+		$next_status = apply_filters( 'woocommerce_payment_complete_order_status', $this->needs_processing() ? OrderStatus::PROCESSING : OrderStatus::COMPLETED, $this->get_id(), $this );
+
+		$transaction_id = $this->get_transaction_id();
+		$payment_method = $this->get_payment_method_title();
+
+		// translators: %1$s is the payment method, %2$s is the transaction id.
+		$payment_complete_note = $payment_method && $transaction_id ? sprintf( __( 'Payment via %1$s (%2$s).', 'woocommerce' ), $payment_method, $transaction_id ) : __( 'Payment complete.', 'woocommerce' );
+
+		$this->set_status( $next_status, false );
+
+		$this->write_or_defer( 'payment_complete_note', array( $this, 'add_order_note' ), array( $payment_complete_note, false, false, array( 'note_group' => OrderNoteGroup::PAYMENT ) ) );
+		$this->save_if_writing_through();
+		$this->write_or_defer( 'payment_complete', 'do_action', array( 'woocommerce_payment_complete', $this->get_id(), $transaction_id ), true );
+
 		return true;
 	}
 
@@ -295,27 +332,14 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return int order ID
 	 */
 	public function save() {
-		$status                    = $this->pending_edit_status;
-		$this->pending_edit_status = null;
-
-		if ( null !== $status ) {
-			/**
-			 * Fires for a manual status change of an order, before the change
-			 * is written, so a listener that reloads the order sees the old row.
-			 * After set_status(), it fires before the paid and completed dates
-			 * are set. After stage_status() or update_status(), it fires from
-			 * save(), with those dates already set on the order object.
-			 *
-			 * @since 3.0.0
-			 * @param int    $order_id Order ID.
-			 * @param string $status   New status, without the wc- prefix.
-			 */
-			do_action( 'woocommerce_order_edit_status', $this->get_id(), $status );
-		}
+		$deferred_actions = $this->take_deferred_actions();
+		$this->run_deferred_actions( $deferred_actions, false );
 
 		$this->maybe_set_user_billing_email();
 		parent::save();
 		$this->status_transition();
+
+		$this->run_deferred_actions( $deferred_actions, true );
 
 		return $this->get_id();
 	}
@@ -359,9 +383,22 @@ class WC_Order extends WC_Abstract_Order {
 				'manual' => (bool) $manual_update,
 			);
 
-			$this->pending_edit_status = $manual_update && $this->staging_status ? $result['to'] : null;
+			$this->defer_to_save( 'order_edit_status', null );
 
-			if ( $manual_update && ! $this->staging_status ) {
+			if ( $manual_update && $this->staging_status ) {
+				$this->defer_to_save( 'order_edit_status', 'do_action', array( 'woocommerce_order_edit_status', $this->get_id(), $result['to'] ) );
+			} elseif ( $manual_update ) {
+				/**
+				 * Fires for a manual status change of an order, before the change
+				 * is written, so a listener that reloads the order sees the old row.
+				 * After set_status(), it fires before the paid and completed dates
+				 * are set. After stage_status() or update_status(), it fires from
+				 * save(), with those dates already set on the order object.
+				 *
+				 * @since 3.0.0
+				 * @param int    $order_id Order ID.
+				 * @param string $status   New status, without the wc- prefix.
+				 */
 				do_action( 'woocommerce_order_edit_status', $this->get_id(), $result['to'] );
 			}
 
@@ -431,8 +468,8 @@ class WC_Order extends WC_Abstract_Order {
 	 * update_status() calls this method, then save().
 	 *
 	 * An order class that overrides update_status() with rules of its own must override this method
-	 * too, in the same class, with the same rules. Abilities stage a status change with this method
-	 * only when every class that declares update_status() also declares this method.
+	 * too, in the same class, with the same rules. A direct call of this method refuses a class that has
+	 * not done that. update_status() runs this method through write_through(), so it keeps working.
 	 *
 	 * @since 11.4.0
 	 * @param string       $new_status    Status to change the order to. No internal wc- prefix is required.
@@ -441,6 +478,8 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return array
 	 */
 	public function stage_status( $new_status, $note = '', $manual_update = false ) {
+		$this->refuse_unstaged_override( 'update_status', 'stage_status' );
+
 		$this->staging_status = true;
 		try {
 			return $this->set_status( $new_status, $note, $manual_update );
@@ -464,7 +503,11 @@ class WC_Order extends WC_Abstract_Order {
 		}
 
 		try {
-			$this->stage_status( $new_status, $note, $manual );
+			$this->write_through(
+				function () use ( $new_status, $note, $manual ) {
+					return $this->stage_status( $new_status, $note, $manual );
+				}
+			);
 			$this->save();
 		} catch ( Exception $e ) {
 			$logger = wc_get_logger();
@@ -2137,6 +2180,33 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return int                       Comment ID.
 	 */
 	public function add_order_note( $note, $is_customer_note = 0, $added_by_user = false, $meta_data = array() ) {
+		return $this->insert_order_note( $note, $is_customer_note, $added_by_user, $meta_data );
+	}
+
+	/**
+	 * Queue a note for the order in memory. The next save() adds it with add_order_note() after the write, so
+	 * the note sees the saved order and woocommerce_order_note_added fires after the write.
+	 *
+	 * @since 11.4.0
+	 * @param  string $note              Note to add.
+	 * @param  int    $is_customer_note  Is this a note for the customer?.
+	 * @param  bool   $added_by_user     Was the note added by a user?.
+	 * @param  array  $meta_data         Optional meta data to add to the note. Key value pairs.
+	 */
+	public function stage_order_note( $note, $is_customer_note = 0, $added_by_user = false, $meta_data = array() ): void {
+		$this->defer_to_save( uniqid( 'order_note_', true ), array( $this, 'add_order_note' ), array( $note, $is_customer_note, $added_by_user, $meta_data ), true );
+	}
+
+	/**
+	 * Insert a note (comment) for the order. add_order_note() calls it.
+	 *
+	 * @param  string $note              Note to add.
+	 * @param  int    $is_customer_note  Is this a note for the customer?.
+	 * @param  bool   $added_by_user     Was the note added by a user?.
+	 * @param  array  $meta_data         Optional meta data to add to the note. Key value pairs.
+	 * @return int                       Comment ID.
+	 */
+	private function insert_order_note( $note, $is_customer_note, $added_by_user, $meta_data ) {
 		if ( ! $this->get_id() ) {
 			return 0;
 		}

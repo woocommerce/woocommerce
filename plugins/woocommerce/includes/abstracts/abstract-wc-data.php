@@ -10,6 +10,8 @@
  * @package     WooCommerce\Classes
  */
 
+use Automattic\WooCommerce\Internal\Utilities\StagedMethod;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -24,6 +26,15 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @package  WooCommerce\Abstracts
  */
 abstract class WC_Data {
+
+	/**
+	 * Whether a stage_*() method runs for its saving method, so it saves and writes at the same points as the
+	 * saving method always did. write_through() sets it.
+	 *
+	 * @since 11.4.0
+	 * @var bool
+	 */
+	protected $writing_through = false;
 
 	/**
 	 * Clone mode constant: Duplicate mode clears meta IDs (default, for backward compatibility).
@@ -148,6 +159,56 @@ abstract class WC_Data {
 	public function __construct( $read = 0 ) {
 		$this->data         = array_merge( $this->data, $this->extra_data );
 		$this->default_data = $this->data;
+	}
+
+	/**
+	 * Run a stage_*() method for its saving method. While it runs, the stage method saves and writes at the
+	 * same points, and fires its hooks in the same order, as the saving method always did. It also does not
+	 * refuse the object, so a class that has not adopted the stage method keeps working.
+	 *
+	 * @since 11.4.0
+	 * @param callable $stage Callback that calls the stage method.
+	 * @return mixed What the stage method returns.
+	 */
+	protected function write_through( callable $stage ) {
+		$writing_through       = $this->writing_through;
+		$this->writing_through = true;
+		try {
+			return $stage();
+		} finally {
+			$this->writing_through = $writing_through;
+		}
+	}
+
+	/**
+	 * Refuse a direct call of a stage_*() method when a class overrides its saving method without overriding the
+	 * stage method too. Staging would skip the rules of that override. A saving method that runs its stage method
+	 * through write_through() is not refused, so a class that has not adopted the stage method keeps working.
+	 *
+	 * @since 11.4.0
+	 * @param string $method       Saving method, for example add_product.
+	 * @param string $stage_method Stage method, for example stage_product_item.
+	 * @throws WC_Data_Exception When a class has not adopted the stage method.
+	 */
+	protected function refuse_unstaged_override( string $method, string $stage_method ): void {
+		if ( $this->writing_through ) {
+			return;
+		}
+
+		$class_name = StagedMethod::unstaged_class( $this, $method, $stage_method );
+		if ( null !== $class_name ) {
+			throw new WC_Data_Exception(
+				'woocommerce_data_staging_unsupported',
+				sprintf(
+					/* translators: 1: PHP class name of the object, 2: method that the class overrides, 3: method that the class needs to override. */
+					__( 'This object does not support this change yet. The class %1$s overrides %2$s() and needs to override %3$s() too.', 'woocommerce' ),
+					$class_name,
+					$method,
+					$stage_method
+				),
+				400
+			);
+		}
 	}
 
 	/**

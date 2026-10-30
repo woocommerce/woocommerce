@@ -181,7 +181,11 @@ abstract class ActionableAbility extends \WP_Ability {
 			return $updates;
 		}
 
-		$changed = $this->change( $subject, $input );
+		try {
+			$changed = $this->change( $subject, $input );
+		} catch ( \WC_Data_Exception $e ) {
+			return new \WP_Error( $e->getErrorCode(), $e->getMessage(), $e->getErrorData() );
+		}
 		if ( is_wp_error( $changed ) ) {
 			return $changed;
 		}

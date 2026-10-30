@@ -16,6 +16,7 @@ parameters:
 		- includes/react-admin/feature-config.php (?)
 	bootstrapFiles:
 		- vendor/autoload.php
+		- tests/Tools/phpstan/StagedWriteRule.php
 	scanDirectories:
 		- vendor/wordpress/abilities-api
 		- packages/action-scheduler
@@ -43,5 +44,50 @@ parameters:
 		-
 			message: '#Call to an undefined static method Automattic\\WooCommerce\\StoreApi\\Schemas\\V1\\AbstractSchema::prepare_product_price_response\(\)#'
 			path: src/StoreApi/Utilities/ProductItemTrait.php
+		# Deprecated code; phpcs excludes this folder too.
+		-
+			identifier: woocommerce.stagedWrite
+			path: includes/legacy/*
+		# stage_order_note() only queues the note. The next save() calls add_order_note(), so an override of that method still runs.
+		-
+			identifier: woocommerce.stagedTwinRefusal
+			message: '#^Method WC_Order::stage_order_note\(\) must start with#'
+			path: includes/class-wc-order.php
+		# The save point that stage_*() methods share: it saves only while the saving method runs the stage method.
+		-
+			identifier: woocommerce.stagedWrite
+			message: '#^Method WC_Abstract_Order::save_if_writing_through\(\) writes outside save\(\)\.#'
+			path: includes/abstracts/abstract-wc-order.php
+		# Payment tokens live in a data store table apart from the order data, and the write takes no order change to stage.
+		-
+			identifier: woocommerce.stagedWrite
+			message: '#^Method WC_Abstract_Order::add_payment_token\(\) writes outside save\(\)\.#'
+			path: includes/abstracts/abstract-wc-order.php
+		# The one place that inserts a note row: add_order_note() calls it, and save() runs add_order_note() for notes that stage_order_note() queued.
+		-
+			identifier: woocommerce.stagedWrite
+			message: '#^Method WC_Order::insert_order_note\(\) writes outside save\(\)\.#'
+			path: includes/class-wc-order.php
+		# Usage counts change through atomic data store updates; a save would rewrite them from stale values.
+		-
+			identifier: woocommerce.stagedWrite
+			message: '#^Method WC_Coupon::(increase|decrease)_usage_count\(\) writes outside save\(\)\.#'
+			path: includes/class-wc-coupon.php
+		# Download counts change through an atomic SQL update; a save writes the whole row and would reopen the race the update avoids.
+		-
+			identifier: woocommerce.stagedWrite
+			message: '#^Method WC_Customer_Download::track_download\(\) writes outside save\(\)\.#'
+			path: includes/class-wc-customer-download.php
+		# A zone object does not hold its shipping methods; add_shipping_method() inserts the row and returns its ID. A twin needs the zone to carry its methods in memory and write them in save() first.
+		-
+			identifier: woocommerce.stagedWrite
+			message: '#^Method WC_Shipping_Zone::add_shipping_method\(\) writes outside save\(\)\.#'
+			path: includes/class-wc-shipping-zone.php
 	parallel:
 		maximumNumberOfProcesses: 4
+
+services:
+	-
+		class: Automattic\WooCommerce\Testing\Tools\phpstan\StagedWriteRule
+		tags:
+			- phpstan.rules.rule

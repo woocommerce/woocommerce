@@ -5,16 +5,20 @@
 
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\Internal\Orders;
+namespace Automattic\WooCommerce\Internal\Utilities;
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * A Core order method that sets and saves in one call, paired with the method that only stages the change in
- * memory. The first method calls the stage method, then save(). For example: update_status() and stage_status().
+ * A WC_Data method that sets and saves in one call, paired with the method that only stages the change in memory.
+ * The first method runs the stage method through WC_Data::write_through(), then saves. For example: update_status()
+ * and stage_status().
  *
  * A class that overrides the first method with rules of its own must override the stage method too, at the same
- * level. Otherwise an ability that stages the change skips those rules, so the ability refuses the class.
+ * level. Otherwise a direct call of the stage method skips those rules, so the stage method refuses the class.
+ * The class keeps working through the first method. A stage method starts with
+ * WC_Data::refuse_unstaged_override(), and PHPStan reports one that does not. An override of a stage method must
+ * call the parent's stage method, because that call runs the refusal.
  *
  * @internal
  * @since 11.4.0
