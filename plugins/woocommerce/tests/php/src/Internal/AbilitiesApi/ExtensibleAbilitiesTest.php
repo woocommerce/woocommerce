@@ -1482,6 +1482,242 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Send extension fields to the product update ability, and check the refusal and that nothing is saved.
+	 *
+	 * @param array  $extensions Value of the `extensions` input.
+	 * @param string $code       Expected error code.
+	 * @param string $message    Expected error message.
+	 */
+	private function assert_field_refused( array $extensions, string $code, string $message ): void {
+		$product  = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+		$response = $this->run_ability_response(
+			'woocommerce/product-update',
+			array(
+				'id'         => $product->get_id(),
+				'name'       => 'Pencil',
+				'extensions' => $extensions,
+			)
+		);
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( array( $code, $message ), array( $response->get_data()['code'], $response->get_data()['message'] ) );
+		$this->assertSame( 'Pen', wc_get_product( $product->get_id() )->get_name() );
+	}
+
+	/**
+	 * @testdox Should name a bad field on a variation, and suggest only the fields that apply to a variation.
+	 */
+	public function test_a_bad_field_on_a_variation_is_refused_by_name(): void {
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () {
+				foreach ( array( 'simple_only' => array( 'simple' ), 'variation_only' => array( 'variation' ) ) as $field => $object_types ) {
+					ExtensibleAbilities::register_field(
+						array(
+							'resource'        => 'product',
+							'namespace'       => 'typed-ext',
+							'field'           => $field,
+							'schema'          => array( 'type' => 'string' ),
+							'object_types'    => $object_types,
+							'get_callback'    => static fn() => 'value',
+							'update_callback' => static function ( \WC_Product $product, $value ) use ( $field ) {
+								$product->update_meta_data( '_test_' . $field, $value );
+							},
+						)
+					);
+				}
+			}
+		);
+		$this->reset_registries();
+		AbilitiesLoader::init_extensions();
+
+		$cases = array(
+			array(
+				array( 'typed-ext' => array( 'typo' => 'x' ) ),
+				'woocommerce_ability_unknown_field',
+				'The extension namespace "typed-ext" has no field "typo". The fields you can write in this namespace are: variation_only. Use one of them, or remove "typed-ext.typo" from the input.',
+			),
+			array(
+				array( 'nope' => array( 'x' => 'y' ) ),
+				'woocommerce_ability_unknown_field_namespace',
+				'No extension registered the namespace "nope" for this ability. Remove it from the input, or use a namespace from the input schema.',
+			),
+			array(
+				array( 'test-ext' => array( 'code' => 'A2' ) ),
+				'woocommerce_ability_field_not_writable',
+				'The extension field "test-ext.code" is read-only. Remove it from the input.',
+			),
+		);
+		foreach ( $cases as list( $extensions, $code, $message ) ) {
+			$input = $this->get_shirt_input();
+
+			$input['variations'][0]['extensions'] = $extensions;
+
+			$response = $this->run_ability_response( 'woocommerce/product-create', $input );
+
+			$this->assertSame( 400, $response->get_status() );
+			$this->assertSame( array( $code, $message ), array( $response->get_data()['code'], $response->get_data()['message'] ) );
+			$this->assertSame( 0, wc_get_product_id_by_sku( 'shirt-s' ) );
+		}
+	}
+
+	/**
+	 * @testdox Should refuse a list of values in a namespace with the field position as the field name.
+	 */
+	public function test_a_list_in_a_namespace_is_refused_by_name(): void {
+		$this->assert_field_refused(
+			array( 'nope' => array( 'red' ) ),
+			'woocommerce_ability_unknown_field_namespace',
+			'No extension registered the namespace "nope" for this ability. Remove it from the input, or use a namespace from the input schema.'
+		);
+	}
+
+	/**
+	 * @testdox Should name an unregistered namespace that does not hold an object, and leave a registered one to the input schema.
+	 */
+	public function test_a_namespace_value_that_is_not_an_object(): void {
+		$this->assert_field_refused(
+			array( 'nope' => 'red' ),
+			'woocommerce_ability_unknown_field_namespace',
+			'No extension registered the namespace "nope" for this ability. Remove it from the input, or use a namespace from the input schema.'
+		);
+
+		$product  = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+		$response = $this->run_ability_response(
+			'woocommerce/product-update',
+			array(
+				'id'         => $product->get_id(),
+				'extensions' => array( 'test-ext' => 'red' ),
+			)
+		);
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'ability_invalid_input', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Should say that the field is read-only, and save nothing.
+	 */
+	public function test_a_read_only_field_is_refused_by_name(): void {
+		$this->assert_field_refused(
+			array( 'test-ext' => array( 'code' => 'A2' ) ),
+			'woocommerce_ability_field_not_writable',
+			'The extension field "test-ext.code" is read-only. Remove it from the input.'
+		);
+	}
+
+	/**
+	 * @testdox Should name every read-only field in one refusal, across namespaces, and save nothing.
+	 */
+	public function test_all_read_only_fields_are_refused_together(): void {
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'     => 'product',
+						'namespace'    => 'other_ext',
+						'field'        => 'serial',
+						'schema'       => array( 'type' => 'string' ),
+						'get_callback' => static fn() => 'S1',
+					)
+				);
+			}
+		);
+		$this->reset_registries();
+		AbilitiesLoader::init_extensions();
+
+		$this->assert_field_refused(
+			array(
+				'test-ext'  => array(
+					'color' => 'red',
+					'code'  => 'A2',
+				),
+				'other_ext' => array( 'serial' => 'S2' ),
+			),
+			'woocommerce_ability_field_not_writable',
+			'The extension fields "test-ext.code", "other_ext.serial" are read-only. Remove them from the input.'
+		);
+	}
+
+	/**
+	 * @testdox Should say that the namespace has no writable fields when the field does not exist and all its fields are read-only.
+	 */
+	public function test_an_unknown_field_in_a_read_only_namespace_is_refused(): void {
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'     => 'product',
+						'namespace'    => 'read_only_ext',
+						'field'        => 'code',
+						'schema'       => array( 'type' => 'string' ),
+						'get_callback' => static fn() => 'A1',
+					)
+				);
+			}
+		);
+
+		$this->assert_field_refused(
+			array( 'read_only_ext' => array( 'cdoe' => 'A2' ) ),
+			'woocommerce_ability_unknown_field',
+			'The extension namespace "read_only_ext" has no field "cdoe", and it has no fields you can write. Remove "read_only_ext.cdoe" from the input.'
+		);
+	}
+
+	/**
+	 * @testdox Should list the writable fields of the namespace when the field does not exist, and save nothing.
+	 */
+	public function test_an_unknown_field_is_refused_with_the_writable_fields(): void {
+		$this->assert_field_refused(
+			array( 'other_ext' => array( 'cuont' => 3 ) ),
+			'woocommerce_ability_unknown_field',
+			'The extension namespace "other_ext" has no field "cuont". The fields you can write in this namespace are: count, size. Use one of them, or remove "other_ext.cuont" from the input.'
+		);
+	}
+
+	/**
+	 * @testdox Should say that no extension registered the namespace, and save nothing.
+	 */
+	public function test_an_unregistered_namespace_is_refused_by_name(): void {
+		$this->assert_field_refused(
+			array( 'nope' => array( 'x' => 'red' ) ),
+			'woocommerce_ability_unknown_field_namespace',
+			'No extension registered the namespace "nope" for this ability. Remove it from the input, or use a namespace from the input schema.'
+		);
+	}
+
+	/**
+	 * @testdox Should accept extension fields in product create, and none in order status update.
+	 */
+	public function test_product_create_writes_fields_and_order_status_update_does_not(): void {
+		$order = \WC_Helper_Order::create_order();
+
+		$created = $this->run_ability(
+			'woocommerce/product-create',
+			array(
+				'name'       => 'Mug',
+				'extensions' => array( 'test-ext' => array( 'color' => 'blue' ) ),
+			)
+		);
+		$schema  = $this->get_ability( 'woocommerce/order-update-status' )['input_schema'];
+
+		$this->assertSame( 'blue', wc_get_product( $created['product']['id'] )->get_meta( '_test_color' ) );
+		$this->assertArrayNotHasKey( 'extensions', $schema['properties'] );
+	}
+
+	/**
+	 * @testdox Should keep the extensions input schema closed.
+	 */
+	public function test_the_extensions_input_schema_stays_closed(): void {
+		$extensions = $this->get_ability( 'woocommerce/product-update' )['input_schema']['properties']['extensions'];
+
+		$this->assertFalse( $extensions['additionalProperties'] );
+		$this->assertFalse( $extensions['properties']['test-ext']['additionalProperties'] );
+	}
+
+	/**
 	 * @testdox Should refuse the change and save nothing when an update callback throws.
 	 */
 	public function test_an_update_callback_that_throws_saves_nothing(): void {
