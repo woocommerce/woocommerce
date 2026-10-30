@@ -576,7 +576,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^9.0.1"
+			"pinVersion": "^11.1.1"
 		},
 		{
 			"label": "Testing related dependencies: React 18",
@@ -640,7 +640,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "3.4.14"
+			"pinVersion": "3.4.17"
 		},
 		{
 			"dependencies": [

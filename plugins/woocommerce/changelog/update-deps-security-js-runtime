@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Update bundled JavaScript libraries, including DOMPurify, zod, uuid, qs and moment, to versions that fix reported security issues.
