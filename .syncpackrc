@@ -640,7 +640,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "3.4.14"
+			"pinVersion": "3.4.17"
 		},
 		{
 			"dependencies": [
