@@ -53,14 +53,14 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		};
 		// phpcs:enable Generic.CodeAnalysis, Squiz.Commenting
 
-		WC()->cart->empty_cart();
-
-		// Emptying the cart reads the checkout fields, and get_checkout_fields() caches them on the
-		// WC()->checkout() singleton for the rest of the process, so a woocommerce_checkout_fields
-		// filter a test adds below would otherwise be ignored.
+		// WC()->checkout() is a process-global singleton whose get_checkout_fields() caches the
+		// filtered field list on first call and keeps it across tests, so reset it or a test's
+		// woocommerce_checkout_fields filter is ignored once an earlier test has populated the cache.
 		( function () {
 			$this->fields = null;
 		} )->call( WC()->checkout() );
+
+		WC()->cart->empty_cart();
 
 		add_filter( 'woocommerce_checkout_registration_enabled', '__return_true' );
 	}
