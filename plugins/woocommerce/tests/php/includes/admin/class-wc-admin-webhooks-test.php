@@ -57,8 +57,14 @@ class WC_Admin_Webhooks_Test extends WC_Unit_Test_Case {
 
 		$capture = function ( $response, $parsed_args ) use ( &$captured_args ) {
 			$captured_args[] = $parsed_args;
+
+			// A real non-blocking request returns immediately with no response code.
+			// Mirror that so the test exercises the production path instead of a
+			// synthetic success that would clear pending_delivery on its own.
+			$code = empty( $parsed_args['blocking'] ) ? false : 200;
+
 			return array(
-				'response' => array( 'code' => 200 ),
+				'response' => array( 'code' => $code ),
 				'body'     => '',
 			);
 		};
@@ -80,6 +86,11 @@ class WC_Admin_Webhooks_Test extends WC_Unit_Test_Case {
 		foreach ( $captured_args as $args ) {
 			$this->assertFalse( $args['blocking'], 'Bulk activation pings must not block the request.' );
 		}
+
+		$this->assertFalse(
+			wc_get_webhook( $webhook->get_id() )->get_pending_delivery(),
+			'Bulk activation should clear pending delivery so the webhook does not re-ping on every later save.'
+		);
 	}
 
 	/**

@@ -223,6 +223,16 @@ class WC_Admin_Webhooks {
 
 				$webhook->set_status( $status );
 				$webhook->save();
+
+				// The non-blocking ping above can't be verified, so deliver_ping() returns
+				// early and never clears pending_delivery. Clear it after the ping is
+				// dispatched, otherwise the webhook stays flagged and re-pings on every
+				// later save.
+				if ( 'active' === $status && $webhook->get_pending_delivery() ) {
+					$webhook->set_pending_delivery( false );
+					$webhook->save();
+				}
+
 				++$updated;
 			}
 		} finally {
