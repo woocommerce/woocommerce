@@ -342,7 +342,8 @@ class WC_Shortcodes {
 
 		$product = is_object( $product_data ) && in_array( $product_data->post_type, array( 'product', 'product_variation' ), true ) ? wc_setup_product_data( $product_data ) : false;
 
-		if ( ! $product ) {
+		if ( ! $product || ! $product->is_viewable() ) {
+			wc_setup_product_data( $post );
 			return '';
 		}
 
@@ -392,7 +393,7 @@ class WC_Shortcodes {
 
 		$product = is_object( $product_data ) && in_array( $product_data->post_type, array( 'product', 'product_variation' ), true ) ? wc_setup_product_data( $product_data ) : false;
 
-		if ( ! $product ) {
+		if ( ! $product || ! $product->is_viewable() ) {
 			return '';
 		}
 
