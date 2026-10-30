@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
+use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -33,7 +34,7 @@ class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefiniti
 	 * @return array
 	 */
 	public static function get_registration_args(): array {
-		$output_schema                        = self::get_collection_output_schema( 'terms', self::get_term_schema() );
+		$output_schema                        = self::get_collection_output_schema( 'terms', ExtensibleAbilities::add_fields_schema( self::get_term_schema(), 'product_term' ) );
 		$output_schema['properties']['total'] = array(
 			'type'        => 'integer',
 			'description' => __( 'Total number of matching terms across all pages.', 'woocommerce' ),
@@ -174,7 +175,7 @@ class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefiniti
 				}
 			}
 		}
-		return $output;
+		return ExtensibleAbilities::add_fields_to_object( $output, 'product_term', $term );
 	}
 
 	/**

@@ -7,7 +7,9 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Abilities\Domain;
 
+use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductTermsQuery;
+use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 
 /**
  * Tests product term reads through the registered ability.
@@ -15,11 +17,37 @@ use Automattic\WooCommerce\Internal\Abilities\Domain\ProductTermsQuery;
 class ProductTermsQueryTest extends \WC_Unit_Test_Case {
 
 	/**
+	 * Process state restored after each test.
+	 *
+	 * @var array
+	 */
+	private $saved_state = array();
+
+	/**
 	 * Set up ability registration.
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		foreach ( array( 'resources', 'fields' ) as $name ) {
+			$property = new \ReflectionProperty( ExtensibleAbilities::class, $name );
+			$property->setAccessible( true );
+			$this->saved_state[ $name ] = $property->getValue();
+			$property->setValue( null, array() );
+		}
+		update_option( 'woocommerce_feature_extensible_abilities_enabled', 'no' );
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+	}
+
+	/**
+	 * Restore extension state.
+	 */
+	public function tearDown(): void {
+		foreach ( $this->saved_state as $name => $value ) {
+			$property = new \ReflectionProperty( ExtensibleAbilities::class, $name );
+			$property->setAccessible( true );
+			$property->setValue( null, $value );
+		}
+		parent::tearDown();
 	}
 
 	/**
@@ -234,5 +262,59 @@ class ProductTermsQueryTest extends \WC_Unit_Test_Case {
 		$this->assertWPError( $ability->execute( array( 'taxonomy' => 'product_cat' ) ) );
 		wp_set_current_user( 0 );
 		$this->assertWPError( $ability->execute( array( 'taxonomy' => 'product_cat' ) ) );
+	}
+
+	/**
+	 * @testdox Should expose extension schema and WP_Term fields only while the feature is enabled.
+	 * @testWith ["product_cat"]
+	 *           ["product_tag"]
+	 *           ["product_brand"]
+	 * @param string $taxonomy Taxonomy.
+	 */
+	public function test_extension_fields( string $taxonomy ): void {
+		$id       = self::factory()->term->create( array( 'taxonomy' => $taxonomy ) );
+		$other_id = self::factory()->term->create( array( 'taxonomy' => $taxonomy ) );
+		$input    = array(
+			'taxonomy' => $taxonomy,
+			'include'  => array( $id, $other_id ),
+		);
+		$baseline = ProductTermsQuery::execute( $input );
+		$schema   = ProductTermsQuery::get_registration_args()['output_schema'];
+		update_option( 'woocommerce_feature_extensible_abilities_enabled', 'yes' );
+		$this->assertSame( $baseline, ProductTermsQuery::execute( $input ) );
+		$this->assertSame( $schema, ProductTermsQuery::get_registration_args()['output_schema'] );
+		add_action( 'woocommerce_extensible_abilities_resources_init', array( AbilitiesLoader::class, 'register_core_resources' ), 0 );
+		do_action( 'woocommerce_extensible_abilities_resources_init' );
+		add_action(
+			'woocommerce_extensible_abilities_init',
+			static function () {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'     => 'product_term',
+						'namespace'    => 'test-ext',
+						'field'        => 'taxonomy',
+						'schema'       => array(
+							'type'  => 'string',
+							'title' => 'Taxonomy',
+						),
+						'get_callback' => static function ( \WP_Term $term ) {
+								return $term->taxonomy;
+						},
+					)
+				);
+			}
+		);
+		do_action( 'woocommerce_extensible_abilities_init' );
+		$ability = new \WP_Ability( ProductTermsQuery::get_name(), ProductTermsQuery::get_registration_args() );
+		$result  = $ability->execute( $input );
+		$this->assertIsArray( $result );
+		$this->assertCount( 2, $result['terms'] );
+		foreach ( $result['terms'] as $term ) {
+			$this->assertSame( $taxonomy, $term['extensions']['test-ext']['taxonomy'] );
+		}
+		$this->assertSame( 'string', $ability->get_output_schema()['properties']['terms']['items']['properties']['extensions']['properties']['test-ext']['properties']['taxonomy']['type'] );
+		update_option( 'woocommerce_feature_extensible_abilities_enabled', 'no' );
+		$this->assertSame( $baseline, ProductTermsQuery::execute( $input ) );
+		$this->assertSame( $schema, ProductTermsQuery::get_registration_args()['output_schema'] );
 	}
 }
