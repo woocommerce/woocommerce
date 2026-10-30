@@ -50,7 +50,7 @@ class ProductOpenGraphTags {
 		$tags[] = array( 'twitter:card' => $image ? 'summary_large_image' : 'summary' );
 
 		$brand_ids = $product->get_brand_ids();
-		if ( 1 === count( $brand_ids ) ) {
+		if ( is_array( $brand_ids ) && 1 === count( $brand_ids ) ) {
 			$brand = get_term( reset( $brand_ids ), 'product_brand' );
 			if ( $brand instanceof \WP_Term ) {
 				$tags[] = array( 'product:brand' => $brand->name );
@@ -63,6 +63,18 @@ class ProductOpenGraphTags {
 				'og:rating_scale' => '5',
 				'og:rating_count' => (string) $product->get_rating_count(),
 			);
+		}
+
+		foreach ( wc_get_container()->get( ProductMediaSources::class )->get_sources( $product ) as $media => $source ) {
+			$root  = 'og:' . $media;
+			$group = array();
+			foreach ( $source as $detail => $value ) {
+				$group[ 'url' === $detail ? $root : $root . ':' . $detail ] = $value;
+			}
+			if ( 'https' === wp_parse_url( $source['url'], PHP_URL_SCHEME ) ) {
+				$group[ $root . ':secure_url' ] = $source['url'];
+			}
+			$tags[] = $group;
 		}
 
 		return $tags;

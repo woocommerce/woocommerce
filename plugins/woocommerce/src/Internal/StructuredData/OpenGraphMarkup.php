@@ -42,9 +42,18 @@ class OpenGraphMarkup {
 		 * @var array<string, array{detect?: string, match: string, exists: bool}> $tag_groups
 		 */
 		$tag_groups = array(
-			'image' => array(
+			'image'   => array(
 				'detect' => '/^og:image(?::url)?$/D',
 				'match'  => '/^og:image(?::|$)/D',
+				'exists' => false,
+			),
+			'video'   => array(
+				'detect' => '/^og:video(?::url)?$/D',
+				'match'  => '/^og:video(?::|$)/D',
+				'exists' => false,
+			),
+			'brand'   => array(
+				'match'  => '/^(product|og):brand$/D',
 				'exists' => false,
 			),
 			'ratings' => array(

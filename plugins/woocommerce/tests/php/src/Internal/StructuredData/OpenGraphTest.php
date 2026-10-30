@@ -143,6 +143,29 @@ class OpenGraphTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should leave both brand aliases to a provider that supplies either one.
+	 * @testWith ["product:brand", "og:brand"]
+	 *           ["og:brand", "product:brand"]
+	 *
+	 * @param string $provider_property Provider's brand property.
+	 * @param string $other_property Other brand property.
+	 */
+	public function test_existing_brand_suppresses_fallback_aliases( string $provider_property, string $other_property ): void {
+		$brand = wp_insert_term( 'Store brand', 'product_brand' );
+		$this->assertIsArray( $brand );
+		$this->product->set_brand_ids( array( $brand['term_id'] ) );
+		$this->product->save();
+
+		$tags = $this->render_meta_tags( '' );
+		$this->assertSame( array( 'Store brand' ), $tags['product:brand'] ?? array() );
+		$this->assertSame( array( 'Store brand' ), $tags['og:brand'] ?? array() );
+
+		$tags = $this->render_meta_tags( '<meta property="' . $provider_property . '" content="Provider brand">' );
+		$this->assertSame( array( 'Provider brand' ), $tags[ $provider_property ] ?? array() );
+		$this->assertArrayNotHasKey( $other_property, $tags );
+	}
+
+	/**
 	 * @testdox Should allow disabling Open Graph output without changing existing metadata.
 	 */
 	public function test_enable_filter_disables_output(): void {
