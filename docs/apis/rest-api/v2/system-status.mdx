@@ -58,14 +58,14 @@ The system status API allows you to view all system status items.
 
 ### System status - Action Scheduler properties
 
-| Attribute            | Type    | Description                                                                                          |
-| -------------------- | ------- | ---------------------------------------------------------------------------------------------------- |
-| `loaded_version`     | string  | Version of the loaded copy, or null when none is loaded. `READ-ONLY`                                 |
-| `registered_version` | string  | Newest version installed, which may differ from the loaded one. `READ-ONLY`                          |
-| `source_type`        | string  | What loads the copy. Options: `woocommerce`, `plugin`, `mu-plugin`, `theme` and `other`. `READ-ONLY` |
-| `source_name`        | string  | Name of the plugin or theme that loads the copy. Empty when unknown. `READ-ONLY`                     |
-| `source_path`        | string  | Directory of the loaded copy. `READ-ONLY`                                                            |
-| `is_risky`           | boolean | Does the loaded copy lack features WooCommerce relies on? `READ-ONLY`                                |
+| Attribute            | Type           | Description                                                                                                                                      |
+| -------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `loaded_version`     | string or null | Version of the loaded copy. `null` when no copy is loaded. `READ-ONLY`                                                                            |
+| `registered_version` | string or null | Newest version installed, which may differ from the loaded one. `null` when no copy is loaded. `READ-ONLY`                                        |
+| `source_type`        | string or null | What loads the copy. Options: `woocommerce`, `plugin`, `mu-plugin`, `theme` and `other`. `null` when no copy is loaded. `READ-ONLY`               |
+| `source_name`        | string or null | Name of the plugin or theme that loads the copy, `WooCommerce` for the bundled copy. Empty when unknown, `null` when no copy is loaded. `READ-ONLY` |
+| `source_path`        | string or null | Directory of the loaded copy. `null` when no copy is loaded. `READ-ONLY`                                                                          |
+| `is_risky`           | boolean        | Does the loaded copy lack features WooCommerce relies on? `READ-ONLY`                                                                             |
 
 ### System status - Database properties
 | Attribute                | Type   | Description                                                       |
