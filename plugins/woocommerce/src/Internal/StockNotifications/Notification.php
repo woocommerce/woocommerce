@@ -534,7 +534,11 @@ class Notification extends \WC_Data {
 	 * @return string The generated verification key.
 	 */
 	public function get_verification_key( bool $persist ): string {
-		$key = $this->stage_verification_key();
+		$key = $this->write_through(
+			function () {
+				return $this->stage_verification_key();
+			}
+		);
 
 		if ( $persist ) {
 			$this->save();
@@ -550,6 +554,8 @@ class Notification extends \WC_Data {
 	 * @return string The generated verification key.
 	 */
 	public function stage_verification_key(): string {
+		$this->refuse_unstaged_override( 'get_verification_key', 'stage_verification_key' );
+
 		$key = wp_generate_password( 20, false );
 		$this->update_meta_data( 'verification_action_key', time() . ':' . wp_fast_hash( $key ) );
 
@@ -577,7 +583,11 @@ class Notification extends \WC_Data {
 	 * @return string The generated unsubscribe key.
 	 */
 	public function get_unsubscribe_key( bool $persist ): string {
-		$key = $this->stage_unsubscribe_key();
+		$key = $this->write_through(
+			function () {
+				return $this->stage_unsubscribe_key();
+			}
+		);
 
 		if ( $persist ) {
 			$this->save();
@@ -593,6 +603,8 @@ class Notification extends \WC_Data {
 	 * @return string The generated unsubscribe key.
 	 */
 	public function stage_unsubscribe_key(): string {
+		$this->refuse_unstaged_override( 'get_unsubscribe_key', 'stage_unsubscribe_key' );
+
 		$key = wp_generate_password( 20, false );
 		$this->update_meta_data( 'unsubscribe_action_key', wp_fast_hash( $key ) );
 

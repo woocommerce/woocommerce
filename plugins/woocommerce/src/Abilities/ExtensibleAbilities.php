@@ -464,9 +464,10 @@ class ExtensibleAbilities {
 	 *
 	 * Core's product abilities and order-update-status run validators. An order
 	 * validator sees the order with its new status staged, including the paid
-	 * and completed dates that the status sets. While the feature is on,
-	 * order-update-status refuses an order class that cannot stage a status
-	 * change. See WC_Order::stage_status().
+	 * and completed dates that the status sets. A stage_*() method refuses a class
+	 * that overrides its saving method without overriding the stage method too, so
+	 * the ability refuses that class while the feature is on. See
+	 * WC_Data::refuse_unstaged_override().
 	 *
 	 * @since 11.3.0
 	 *

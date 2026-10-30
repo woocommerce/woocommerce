@@ -192,6 +192,8 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return bool True when the order has changes for save() to write.
 	 */
 	public function stage_payment_complete( $transaction_id = '' ) {
+		$this->refuse_unstaged_override( 'payment_complete', 'stage_payment_complete' );
+
 		/**
 		 * Fires before the payment of an order is completed.
 		 *
@@ -468,8 +470,8 @@ class WC_Order extends WC_Abstract_Order {
 	 * update_status() calls this method, then save().
 	 *
 	 * An order class that overrides update_status() with rules of its own must override this method
-	 * too, in the same class, with the same rules. Abilities stage a status change with this method
-	 * only when every class that declares update_status() also declares this method.
+	 * too, in the same class, with the same rules. A direct call of this method refuses a class that has
+	 * not done that. update_status() runs this method through write_through(), so it keeps working.
 	 *
 	 * @since 11.4.0
 	 * @param string       $new_status    Status to change the order to. No internal wc- prefix is required.
@@ -478,6 +480,8 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return array
 	 */
 	public function stage_status( $new_status, $note = '', $manual_update = false ) {
+		$this->refuse_unstaged_override( 'update_status', 'stage_status' );
+
 		$this->staging_status = true;
 		try {
 			return $this->set_status( $new_status, $note, $manual_update );
@@ -501,7 +505,11 @@ class WC_Order extends WC_Abstract_Order {
 		}
 
 		try {
-			$this->stage_status( $new_status, $note, $manual );
+			$this->write_through(
+				function () use ( $new_status, $note, $manual ) {
+					return $this->stage_status( $new_status, $note, $manual );
+				}
+			);
 			$this->save();
 		} catch ( Exception $e ) {
 			$logger = wc_get_logger();
