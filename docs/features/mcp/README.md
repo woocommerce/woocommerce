@@ -268,9 +268,9 @@ WooCommerce Core
 
 ### Core Components
 
-**Abilities Registry** ([`AbilitiesRegistry.php`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/Abilities/AbilitiesRegistry.php))
+**Abilities Loader** ([`AbilitiesLoader.php`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/Abilities/AbilitiesLoader.php))
 
-- Initializes WooCommerce ability categories and loaders
+- Registers WooCommerce ability categories and abilities when the Abilities API initializes
 - Bridges WordPress Abilities API with WooCommerce operations
 - Enables ability discovery for MCP servers and other Abilities API consumers
 

@@ -22,7 +22,7 @@ use Automattic\WooCommerce\Internal\DownloadPermissionsAdjuster;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\LegacyAssets\LegacySelect2UsageTracker;
 use Automattic\WooCommerce\Internal\MCP\McpEndpointRemoval;
-use Automattic\WooCommerce\Internal\Abilities\AbilitiesRegistry;
+use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesTracking;
 use Automattic\WooCommerce\Internal\ProductAttributes\VisualAttributeTermAdmin;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
@@ -408,7 +408,7 @@ final class WooCommerce {
 		$container->get( EmailImprovements::class );
 		$container->get( DeferredEmailQueue::class );
 		$container->get( AddressProviderController::class );
-		$container->get( AbilitiesRegistry::class );
+		AbilitiesLoader::init();
 		$container->get( McpEndpointRemoval::class );
 		$container->get( CouponCodeLookupInvalidator::class );
 		$container->get( ProductVersionStringInvalidator::class );
