@@ -181,6 +181,108 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test block link styles through the complete rendering pipeline.
+	 *
+	 * @testdox Block link colors from theme.json are inlined and palette presets are resolved.
+	 * @testWith ["#123456"]
+	 *           ["var:preset|color|author-link"]
+	 *
+	 * @param string $color Theme.json link color.
+	 */
+	public function test_render_inlines_block_link_colors( string $color ): void {
+		add_filter( 'woocommerce_email_editor_site_style_sync_enabled', '__return_false' );
+		add_filter(
+			'woocommerce_email_editor_theme_json',
+			static function ( $theme ) use ( $color ) {
+				$theme->merge(
+					new \WP_Theme_JSON(
+						array(
+							'version'  => 3,
+							'settings' => array(
+								'color' => array(
+									'palette' => array(
+										array(
+											'slug'  => 'author-link',
+											'name'  => 'Author link',
+											'color' => '#123456',
+										),
+									),
+								),
+							),
+							'styles'   => array(
+								'elements' => array( 'link' => array( 'color' => array( 'text' => '#654321' ) ) ),
+								'blocks'   => array(
+									'core/post-author' => array(
+										'elements' => array( 'link' => array( 'color' => array( 'text' => $color ) ) ),
+									),
+								),
+							),
+						),
+						'custom'
+					)
+				);
+				return $theme;
+			}
+		);
+		$author_id = $this->factory->user->create( array( 'display_name' => 'Email author' ) );
+		$this->assertIsInt( $author_id );
+		wp_update_post(
+			array(
+				'ID'          => $this->email_post->ID,
+				'post_author' => $author_id,
+			)
+		);
+		$email_post = get_post( $this->email_post->ID );
+		$this->assertInstanceOf( \WP_Post::class, $email_post );
+		$this->email_post  = $email_post;
+		$template          = new \WP_Block_Template();
+		$template->id      = 'template-id';
+		$template->content = '<!-- wp:post-author {"isLink":true,"showAvatar":false} /-->';
+
+		$content = $this->renderer->render( $this->email_post, $template );
+		$styles  = $this->getStylesValueForTag( $content, 'a' );
+
+		$this->assertStringContainsString( '<a ', $content, 'The Post Author block should render a link.' );
+		$this->assertIsString( $styles, 'The author link should have inline styles.' );
+		$this->assertStringContainsString( 'color: #123456', $styles, 'The block link color should be inlined as its palette value.' );
+		$this->assertStringNotContainsString( 'var(', $styles, 'The sent link should not depend on CSS custom properties.' );
+	}
+
+	/**
+	 * Test the existing root and layout selector behavior after normalization.
+	 *
+	 * @testdox Root and layout selectors keep their exclusions and existing inline colors.
+	 * @testWith [":root :where(.selector-test a:where(:not(.alignfull)))"]
+	 *           [".selector-test > :where(:not(.alignleft):not(.alignright):not(.alignfull))"]
+	 *
+	 * @param string $selector WordPress root or layout selector.
+	 */
+	public function test_render_inlines_root_and_layout_selectors( string $selector ): void {
+		add_filter(
+			'woocommerce_email_content_renderer_styles',
+			static function ( $styles ) use ( $selector ) {
+				return $styles . $selector . ' { color: #123456; }';
+			}
+		);
+		$template          = new \WP_Block_Template();
+		$template->id      = 'template-id';
+		$template->content = '<!-- wp:paragraph --><p class="selector-test"><a href="https://example.com">Link</a><a class="alignfull" href="https://example.com">Excluded</a><a style="color:#abcdef" href="https://example.com">Custom color</a></p><!-- /wp:paragraph -->';
+
+		$content = $this->renderer->render( $this->email_post, $template );
+		$html    = new \WP_HTML_Tag_Processor( $content );
+		$colors  = array();
+		while ( $html->next_tag( array( 'tag_name' => 'a' ) ) ) {
+			$style    = $html->get_attribute( 'style' );
+			$colors[] = is_string( $style ) ? $style : '';
+		}
+
+		$this->assertCount( 3, $colors, 'All three links should render.' );
+		$this->assertStringContainsString( 'color: #123456', $colors[0], 'The root or layout selector should inline its color.' );
+		$this->assertStringNotContainsString( '#123456', $colors[1], 'The alignfull link must stay excluded.' );
+		$this->assertStringContainsString( 'color: #abcdef', $colors[2], 'The explicit inline color must retain precedence.' );
+	}
+
+	/**
 	 * Test render_without_css_inline() returns HTML and collected CSS.
 	 */
 	public function testRenderWithoutCssInlineReturnsArray(): void {
