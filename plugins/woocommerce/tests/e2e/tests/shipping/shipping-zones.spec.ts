@@ -506,7 +506,11 @@ test( 'keeps a zone edit made while an earlier save is in flight', async ( {
 	await expect( page.locator( '.blockUI' ) ).toHaveCount( 0 );
 	await expect( page.getByLabel( 'Zone name' ) ).toHaveValue( secondName );
 
+	const secondSave = page.waitForResponse( ( response ) =>
+		isSaveChanges( new URL( response.url() ) )
+	);
 	await page.locator( '#submit' ).click();
+	await secondSave;
 	await expect( page.locator( '#submit' ) ).toBeDisabled();
 
 	const saved = await restApi.get(

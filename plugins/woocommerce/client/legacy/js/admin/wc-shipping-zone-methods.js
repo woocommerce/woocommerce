@@ -40,6 +40,11 @@
 						snapshot = _.clone( this.changes ),
 						changes  = _.clone( this.changes );
 
+					// Mark a save in flight: disable the button so a second save cannot start, and
+					// let render() keep the rows blocked through a mid-request zone edit.
+					this.isSaving = true;
+					$save_button.prop( 'disabled', true );
+
 					// Special handling for an empty 'zone_locations' array, which jQuery filters out during $.post().
 					if ( _.has( changes, 'zone_locations' ) && _.isEmpty( changes.zone_locations ) ) {
 						changes.zone_locations = [''];
@@ -61,6 +66,8 @@
 					} );
 				},
 				onSaveFailure: function() {
+					shippingMethod.isSaving = false;
+
 					window.alert( data.strings.save_failed );
 
 					// Nothing was saved, so redraw from the model, which releases the table.
@@ -77,6 +84,8 @@
 					}
 				},
 				onSaveResponse: function( response, textStatus, snapshot ) {
+					shippingMethod.isSaving = false;
+
 					if (
 						'success' !== textStatus ||
 						! response ||
@@ -233,6 +242,11 @@
 					}
 
 					this.initTooltips();
+
+					// render() unblocks the rows; re-apply the block if a save is still in flight.
+					if ( this.model.isSaving ) {
+						this.block();
+					}
 				},
 				initTooltips: function() {
 					$( '#tiptip_holder' ).removeAttr( 'style' );
@@ -301,6 +315,13 @@
 				},
 				setUnloadConfirmation: function() {
 					this.needsUnloadConfirm = true;
+
+					// A mid-request edit must not re-enable the button, or it could start a second,
+					// concurrent save while this one is still in flight.
+					if ( this.model.isSaving ) {
+						return;
+					}
+
 					$save_button.prop( 'disabled', false );
 					$save_button.removeClass( 'is-busy' );
 				},
