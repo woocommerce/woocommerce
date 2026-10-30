@@ -184,15 +184,6 @@ describe( 'getCollection with a Last-Modified header', () => {
 		expect( controls.dispatch ).not.toHaveBeenCalled();
 	} );
 
-	it( 'still accepts a Unix timestamp header', () => {
-		const { value } = fetchWithHeader( String( timestamp ) );
-		runInvalidation( value, timestamp - 60 );
-		expect( controls.dispatch ).toHaveBeenCalledWith(
-			STORE_KEY,
-			'invalidateResolutionForStore'
-		);
-	} );
-
 	it( 'ignores a header it cannot read', () => {
 		const { value, headers } = fetchWithHeader( 'not a date' );
 		const expected = receiveCollection(

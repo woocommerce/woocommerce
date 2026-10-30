@@ -13,22 +13,6 @@ import { STORE_KEY, DEFAULT_EMPTY_ARRAY } from './constants';
 import { apiFetchWithHeadersControl } from '../shared-controls';
 
 /**
- * Read a Last-Modified header as a Unix timestamp in seconds.
- *
- * The Store API sends an HTTP-date; a bare Unix timestamp is still accepted.
- *
- * @param {string} value Header value.
- * @return {number} Unix timestamp in seconds, or 0 when the value cannot be read.
- */
-const parseLastModifiedHeader = ( value ) => {
-	if ( /^\d+$/.test( value ) ) {
-		return parseInt( value, 10 );
-	}
-	const time = Date.parse( value );
-	return Number.isNaN( time ) ? 0 : Math.floor( time / 1000 );
-};
-
-/**
  * Check if the store needs invalidating due to a change in last modified headers.
  *
  * @param {number} timestamp Last update timestamp.
@@ -74,8 +58,10 @@ export function* getCollection( namespace, resourceName, query, ids ) {
 			yield apiFetchWithHeadersControl( { path: route + queryString } );
 
 		if ( headers && headers.get && headers.has( 'last-modified' ) ) {
-			const lastModified = parseLastModifiedHeader(
-				headers.get( 'last-modified' )
+			// The header is an HTTP-date. A value that cannot be parsed gives
+			// NaN and is ignored.
+			const lastModified = Math.floor(
+				Date.parse( headers.get( 'last-modified' ) ) / 1000
 			);
 			// Do any invalidation before the collection is received to prevent
 			// this query running again.
