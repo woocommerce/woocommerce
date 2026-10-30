@@ -192,15 +192,11 @@ const jsConfig = {
 								__dirname,
 								'../../../../pnpm-lock.yaml'
 							),
-							require.resolve(
-								'@woocommerce/dependency-extraction-webpack-plugin'
-							),
-							require.resolve(
-								'@woocommerce/internal-build/style-build'
-							),
+							require.resolve( '@woocommerce/dependency-extraction-webpack-plugin' ),
+							require.resolve( '@woocommerce/internal-build/style-build' ),
 						],
 					},
-			  },
+				},
 	entry: getEntryPoints(),
 	output: {
 		filename: ( data ) => {
@@ -267,9 +263,7 @@ const jsConfig = {
 								isHot &&
 								require.resolve( 'react-refresh/babel' ),
 							isProduction &&
-								require.resolve(
-									'babel-plugin-transform-react-remove-prop-types'
-								),
+								require.resolve( 'babel-plugin-transform-react-remove-prop-types' ),
 						].filter( Boolean ),
 						cacheDirectory: path.resolve(
 							__dirname,
