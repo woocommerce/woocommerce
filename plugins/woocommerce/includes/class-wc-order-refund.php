@@ -164,6 +164,8 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	 * @return WP_Error
 	 */
 	public function stage_coupon( $raw_coupon ) {
+		$this->refuse_unstaged_override( 'apply_coupon', 'stage_coupon' );
+
 		return new WP_Error( 'invalid_coupon', __( 'Coupons cannot be applied to refunds.', 'woocommerce' ) );
 	}
 

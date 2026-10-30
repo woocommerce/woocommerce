@@ -7,6 +7,7 @@
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
+use Automattic\WooCommerce\Internal\Utilities\StagedMethod;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
 
@@ -1363,6 +1364,139 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$this->assertSame( 1, did_action( 'woocommerce_order_removed_coupon' ) - $removed );
 		$this->assertCount( 0, wc_get_order( $order->get_id() )->get_items( 'coupon' ) );
 		$this->assertEquals( 50, wc_get_order( $order->get_id() )->get_total() );
+	}
+
+	/**
+	 * Build an order of a class that overrides the saving methods without overriding their stage_*() methods.
+	 *
+	 * @return WC_Order
+	 */
+	private function get_order_that_has_not_adopted_stage_methods() {
+		// phpcs:disable Squiz.Commenting.FunctionComment.Missing, Generic.CodeAnalysis.UselessOverridingMethod.Found
+		$object = new class() extends WC_Order {
+			public function update_status( $new_status, $note = '', $manual = false ) {
+				return parent::update_status( $new_status, $note, $manual );
+			}
+			public function payment_complete( $transaction_id = '' ) {
+				return parent::payment_complete( $transaction_id );
+			}
+			public function add_product( $product, $qty = 1, $args = array() ) {
+				return parent::add_product( $product, $qty, $args );
+			}
+			public function calculate_totals( $and_taxes = true ) {
+				return parent::calculate_totals( $and_taxes );
+			}
+			public function apply_coupon( $raw_coupon ) {
+				return parent::apply_coupon( $raw_coupon );
+			}
+			public function remove_coupon( $code ) {
+				return parent::remove_coupon( $code );
+			}
+			public function recalculate_coupons() {
+				parent::recalculate_coupons();
+			}
+			public function calculate_shipping() {
+				return parent::calculate_shipping();
+			}
+			public function calculate_taxes( $args = array() ) {
+				parent::calculate_taxes( $args );
+			}
+			public function update_taxes() {
+				parent::update_taxes();
+			}
+			public function remove_order_items( $type = null ) {
+				parent::remove_order_items( $type );
+			}
+		};
+		// phpcs:enable Squiz.Commenting.FunctionComment.Missing, Generic.CodeAnalysis.UselessOverridingMethod.Found
+		$object->save();
+
+		return $object;
+	}
+
+	/**
+	 * Test: a class that overrides the saving methods and has not adopted the stage methods keeps working through the saving methods.
+	 */
+	public function test_saving_methods_work_on_a_class_that_has_not_adopted_stage_methods() {
+		$object = $this->get_order_that_has_not_adopted_stage_methods();
+		$coupon = new WC_Coupon();
+		$coupon->set_code( 'unadopted' );
+		$coupon->set_discount_type( 'fixed_cart' );
+		$coupon->set_amount( 1 );
+		$coupon->save();
+
+		$item_id = $object->add_product( WC_Helper_Product::create_simple_product(), 2 );
+		$this->assertGreaterThan( 0, $item_id );
+		$this->assertTrue( $object->apply_coupon( 'unadopted' ) );
+		$this->assertCount( 1, $object->get_items( 'coupon' ) );
+		$this->assertTrue( $object->remove_coupon( 'unadopted' ) );
+		$object->recalculate_coupons();
+		$object->calculate_shipping();
+		$object->calculate_taxes();
+		$object->update_taxes();
+		$this->assertEquals( 20, $object->calculate_totals() );
+		$this->assertTrue( $object->update_status( OrderStatus::ON_HOLD, '', true ) );
+		$this->assertTrue( $object->payment_complete( '12345' ) );
+		$object->remove_order_items( 'line_item' );
+		$object->save();
+
+		$stored = wc_get_order( $object->get_id() );
+		$this->assertSame( '12345', $stored->get_transaction_id() );
+		$this->assertCount( 0, $stored->get_items() );
+	}
+
+	/**
+	 * Test: a direct call of a stage method refuses a class that overrides its saving method without overriding the stage method.
+	 */
+	public function test_stage_methods_refuse_a_class_that_has_not_adopted_them() {
+		$calls = array(
+			'stage_status'               => array( OrderStatus::ON_HOLD, '', true ),
+			'stage_payment_complete'     => array( '12345' ),
+			'stage_product_item'         => array( WC_Helper_Product::create_simple_product() ),
+			'stage_totals'               => array(),
+			'stage_coupon'               => array( 'missing' ),
+			'stage_coupon_removal'       => array( 'missing' ),
+			'stage_recalculated_coupons' => array(),
+			'stage_shipping_total'       => array(),
+			'stage_taxes'                => array(),
+			'stage_tax_items'            => array(),
+			'stage_order_items_removal'  => array(),
+		);
+
+		foreach ( $calls as $stage_method => $args ) {
+			$object = $this->get_order_that_has_not_adopted_stage_methods();
+			try {
+				$object->$stage_method( ...$args );
+				$this->fail( $stage_method . ' did not refuse the class.' );
+			} catch ( WC_Data_Exception $e ) {
+				$this->assertSame( 'woocommerce_data_staging_unsupported', $e->getErrorCode(), $stage_method );
+				$this->assertStringContainsString( $stage_method . '()', $e->getMessage() );
+				$this->assertSame( OrderStatus::PENDING, $object->get_status(), $stage_method );
+			}
+		}
+	}
+
+	/**
+	 * Test: no stage method refuses Core's own order classes, and each stage method runs on a plain order.
+	 */
+	public function test_stage_methods_do_not_refuse_core_order_classes() {
+		$pairs = array(
+			'remove_order_items'  => 'stage_order_items_removal',
+			'apply_coupon'        => 'stage_coupon',
+			'remove_coupon'       => 'stage_coupon_removal',
+			'recalculate_coupons' => 'stage_recalculated_coupons',
+			'add_product'         => 'stage_product_item',
+			'calculate_shipping'  => 'stage_shipping_total',
+			'calculate_taxes'     => 'stage_taxes',
+			'update_taxes'        => 'stage_tax_items',
+			'calculate_totals'    => 'stage_totals',
+		);
+		foreach ( $pairs as $method => $stage_method ) {
+			$this->assertNull( StagedMethod::unstaged_class( new WC_Order(), $method, $stage_method ), $stage_method );
+			$this->assertNull( StagedMethod::unstaged_class( new WC_Order_Refund(), $method, $stage_method ), $stage_method );
+		}
+		$this->assertNull( StagedMethod::unstaged_class( new WC_Order(), 'update_status', 'stage_status' ) );
+		$this->assertNull( StagedMethod::unstaged_class( new WC_Order(), 'payment_complete', 'stage_payment_complete' ) );
 	}
 
 	/**

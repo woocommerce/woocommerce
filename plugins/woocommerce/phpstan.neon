@@ -48,6 +48,11 @@ parameters:
 		-
 			identifier: woocommerce.stagedWrite
 			path: includes/legacy/*
+		# stage_order_note() only queues the note. The next save() calls add_order_note(), so an override of that method still runs.
+		-
+			identifier: woocommerce.stagedTwinRefusal
+			message: '#^Method WC_Order::stage_order_note\(\) must start with#'
+			path: includes/class-wc-order.php
 		# The save point that stage_*() methods share: it saves only while the saving method runs the stage method.
 		-
 			identifier: woocommerce.stagedWrite

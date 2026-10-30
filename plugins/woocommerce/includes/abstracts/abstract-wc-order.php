@@ -46,14 +46,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	private $deferred_actions = array();
 
 	/**
-	 * Whether a stage_*() method runs for its saving method, so it saves and writes at the same points as the
-	 * saving method always did. write_through() sets it.
-	 *
-	 * @var bool
-	 */
-	private $writing_through = false;
-
-	/**
 	 * Order Data array. This is the core order data exposed in APIs since 3.0.0.
 	 *
 	 * Notes: cart_tax = cart_tax is the new name for the legacy 'order_tax'
@@ -388,24 +380,6 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			if ( $entry['after_save'] === $after_save ) {
 				call_user_func_array( $entry['callback'], $entry['args'] );
 			}
-		}
-	}
-
-	/**
-	 * Run a stage_*() method for its saving method. While it runs, the stage method saves and writes at the
-	 * same points, and fires its hooks in the same order, as the saving method always did.
-	 *
-	 * @since 11.4.0
-	 * @param callable $stage Callback that calls the stage method.
-	 * @return mixed What the stage method returns.
-	 */
-	protected function write_through( callable $stage ) {
-		$writing_through       = $this->writing_through;
-		$this->writing_through = true;
-		try {
-			return $stage();
-		} finally {
-			$this->writing_through = $writing_through;
 		}
 	}
 
@@ -1275,6 +1249,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return void
 	 */
 	public function stage_order_items_removal( $type = null ) {
+		$this->refuse_unstaged_override( 'remove_order_items', 'stage_order_items_removal' );
 
 		// Guard against extension code passing non-string values. Anything not
 		// a string or null is ignored so it never reaches the deferred queue or
@@ -1874,6 +1849,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return true|WP_Error True if applied, error if not.
 	 */
 	public function stage_coupon( $raw_coupon ) {
+		$this->refuse_unstaged_override( 'apply_coupon', 'stage_coupon' );
+
 		if ( is_a( $raw_coupon, 'WC_Coupon' ) ) {
 			$coupon = $raw_coupon;
 		} elseif ( is_string( $raw_coupon ) ) {
@@ -2118,6 +2095,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return bool True if the coupon was removed, false otherwise.
 	 */
 	public function stage_coupon_removal( $code ) {
+		$this->refuse_unstaged_override( 'remove_coupon', 'stage_coupon_removal' );
+
 		$coupons = $this->get_items( 'coupon' );
 		/**
 		 * Data store wrapper.
@@ -2255,6 +2234,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return void
 	 */
 	public function stage_recalculated_coupons() {
+		$this->refuse_unstaged_override( 'recalculate_coupons', 'stage_recalculated_coupons' );
+
 		// Reset line item totals.
 		foreach ( $this->get_items() as $item ) {
 			$item->set_total( $item->get_subtotal() );
@@ -2499,6 +2480,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return WC_Order_Item_Product The item, saved only when add_product() runs this method.
 	 */
 	public function stage_product_item( $product, $qty = 1, $args = array() ) {
+		$this->refuse_unstaged_override( 'add_product', 'stage_product_item' );
+
 		if ( $product ) {
 			$order = ArrayUtil::get_value_or_default( $args, 'order' );
 			$total = wc_get_price_excluding_tax(
@@ -2637,6 +2620,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return void
 	 */
 	public function stage_shipping_total() {
+		$this->refuse_unstaged_override( 'calculate_shipping', 'stage_shipping_total' );
+
 		$shipping_total = 0;
 
 		foreach ( $this->get_shipping_methods() as $shipping ) {
@@ -2796,6 +2781,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return void
 	 */
 	public function stage_taxes( $args = array() ) {
+		$this->refuse_unstaged_override( 'calculate_taxes', 'stage_taxes' );
+
 		do_action( 'woocommerce_order_before_calculate_taxes', $args, $this );
 
 		$calculate_tax_for  = $this->get_tax_location( $args );
@@ -2875,6 +2862,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return void
 	 */
 	public function stage_tax_items() {
+		$this->refuse_unstaged_override( 'update_taxes', 'stage_tax_items' );
+
 		$cart_taxes     = array();
 		$shipping_taxes = array();
 		$existing_taxes = $this->get_taxes();
@@ -3007,6 +2996,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return float calculated grand total.
 	 */
 	public function stage_totals( $and_taxes = true ) {
+		$this->refuse_unstaged_override( 'calculate_totals', 'stage_totals' );
+
 		do_action( 'woocommerce_order_before_calculate_totals', $and_taxes, $this );
 
 		$fees_total        = 0;
