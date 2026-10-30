@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep the stock hold when a shopper retries a failed payment on the classic checkout, so the items can't be sold to someone else meanwhile.
