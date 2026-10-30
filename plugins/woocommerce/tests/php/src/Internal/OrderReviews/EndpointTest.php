@@ -33,6 +33,13 @@ class EndpointTest extends WC_Unit_Test_Case {
 	private $comment_registration;
 
 	/**
+	 * The My Account page id as the test found it.
+	 *
+	 * @var mixed
+	 */
+	private $myaccount_page_id;
+
+	/**
 	 * Set up a fresh endpoint instance and a clean query.
 	 */
 	public function setUp(): void {
@@ -40,6 +47,7 @@ class EndpointTest extends WC_Unit_Test_Case {
 		// Restored verbatim in tearDown(): deleting it would not put back a
 		// store that had the setting on.
 		$this->comment_registration = get_option( 'comment_registration' );
+		$this->myaccount_page_id    = get_option( 'woocommerce_myaccount_page_id' );
 		// Feature flag gates the OrderReviews stack.
 		update_option( 'woocommerce_feature_customer_review_request_enabled', 'yes' );
 		$this->endpoint = new Endpoint();
@@ -79,6 +87,7 @@ class EndpointTest extends WC_Unit_Test_Case {
 		wp_reset_postdata();
 		wp_set_current_user( 0 );
 		update_option( 'comment_registration', $this->comment_registration );
+		update_option( 'woocommerce_myaccount_page_id', $this->myaccount_page_id );
 		delete_option( 'woocommerce_feature_customer_review_request_enabled' );
 		wp_dequeue_script( 'wc-order-review' );
 		wp_deregister_script( 'wc-order-review' );
@@ -1254,6 +1263,11 @@ class EndpointTest extends WC_Unit_Test_Case {
 
 		$this->assertStringContainsString( 'to post a review.', $html );
 		$this->assertStringContainsString(
+			'<div class="woocommerce"><div class="woocommerce-notices-wrapper">',
+			$html,
+			'The login form picks up its styles from the .woocommerce wrapper.'
+		);
+		$this->assertStringContainsString(
 			'<a href="' . esc_url( wc_get_page_permalink( 'myaccount', '' ) ) . '">',
 			$html,
 			'Shoppers without an account need a way to make one.'
@@ -1271,7 +1285,6 @@ class EndpointTest extends WC_Unit_Test_Case {
 	 */
 	public function test_registration_prompt_has_no_link_without_a_my_account_page(): void {
 		update_option( 'comment_registration', 1 );
-		$restore = get_option( 'woocommerce_myaccount_page_id' );
 		update_option( 'woocommerce_myaccount_page_id', 0 );
 
 		$order = OrderHelper::create_order( 0 );
@@ -1280,8 +1293,6 @@ class EndpointTest extends WC_Unit_Test_Case {
 		$_GET = array( 'key' => $order->get_order_key() );
 
 		$html = $this->render( $order->get_id() );
-
-		update_option( 'woocommerce_myaccount_page_id', $restore );
 
 		$end    = strpos( $html, '</div>' );
 		$notice = false === $end ? $html : substr( $html, 0, $end );
@@ -1415,164 +1426,6 @@ class EndpointTest extends WC_Unit_Test_Case {
 
 		$this->assertStringContainsString( 'Please log in to your account to review this order.', $html );
 		$this->assertStringNotContainsString( 'woocommerce-review-order__form', $html );
-	}
-
-	/**
-	 * @testdox The prompt surfaces a queued error, such as a failed sign-in.
-	 */
-	public function test_prompt_surfaces_a_queued_error_notice(): void {
-		$order = OrderHelper::create_order( self::factory()->user->create() );
-		$order->set_status( OrderStatus::COMPLETED );
-		$order->save();
-		$_GET = array( 'key' => $order->get_order_key() );
-
-		wc_add_notice( 'The password you entered is incorrect.', 'error' );
-		wc_add_notice( 'Your username is unknown.', 'error' );
-		wc_add_notice( 'Something unrelated for a later block.', 'success' );
-
-		// Only the displayed pass consumes, so stage the loop the way
-		// `the_content` would.
-		global $wp_query;
-		$wp_query->in_the_loop = true;
-
-		$html = $this->render( $order->get_id() );
-
-		$wp_query->in_the_loop = false;
-
-		$this->assertStringContainsString( 'The password you entered is incorrect.', $html );
-		$this->assertStringContainsString( 'Your username is unknown.', $html, 'Every queued error, not just the first.' );
-		$this->assertSame( 1, substr_count( $html, 'woocommerce-error' ), 'One list for all of them, as wc_print_notices() does.' );
-		$this->assertStringContainsString( 'woocommerce-notices-wrapper', $html );
-		$this->assertStringNotContainsString( 'Something unrelated for a later block.', $html );
-		$this->assertCount( 1, wc_get_notices( 'success' ), 'Non-error notices stay queued.' );
-		$this->assertCount( 0, wc_get_notices( 'error' ), 'The errors have been consumed.' );
-
-		wc_clear_notices();
-	}
-
-	/**
-	 * `the_content` is applied more than once on many sites. A pass that is not
-	 * displayed must leave the queue alone, or the visible one shows nothing.
-	 *
-	 * @testdox A render outside the loop shows the error but leaves it queued.
-	 */
-	public function test_a_render_outside_the_loop_leaves_queued_errors_alone(): void {
-		$order = OrderHelper::create_order( self::factory()->user->create() );
-		$order->set_status( OrderStatus::COMPLETED );
-		$order->save();
-		$_GET = array( 'key' => $order->get_order_key() );
-
-		wc_add_notice( 'The password you entered is incorrect.', 'error' );
-
-		$html = $this->render( $order->get_id() );
-
-		$this->assertStringContainsString( 'The password you entered is incorrect.', $html );
-		$this->assertCount( 1, wc_get_notices( 'error' ), 'Still there for the pass that is actually shown.' );
-
-		wc_clear_notices();
-	}
-
-	/**
-	 * A secondary query rendering this content — a widget, a related-posts
-	 * block — must not take the error off the queue before the main content
-	 * gets to show it.
-	 *
-	 * @testdox A render under a secondary query leaves queued errors alone.
-	 */
-	public function test_a_render_under_a_secondary_query_leaves_queued_errors_alone(): void {
-		$order = OrderHelper::create_order( self::factory()->user->create() );
-		$order->set_status( OrderStatus::COMPLETED );
-		$order->save();
-		$_GET = array( 'key' => $order->get_order_key() );
-
-		wc_add_notice( 'The password you entered is incorrect.', 'error' );
-
-		// A loop pass, but not the main query's: is_main_query() is false when
-		// $wp_query is not the same object as $wp_the_query.
-		global $wp_query;
-		$main                  = $wp_query;
-		$wp_query              = new WP_Query( array( 'post_type' => 'page' ) ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: a secondary query.
-		$wp_query->in_the_loop = true;
-
-		$html = $this->render( $order->get_id() );
-
-		$wp_query = $main; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: restore the main query.
-
-		$this->assertStringContainsString( 'The password you entered is incorrect.', $html );
-		$this->assertCount( 1, wc_get_notices( 'error' ), 'The main content still has to be able to show it.' );
-
-		wc_clear_notices();
-	}
-
-	/**
-	 * @testdox An oddly shaped queued error is normalised rather than printed as "Array".
-	 */
-	public function test_prompt_normalises_an_error_array_without_a_notice_key(): void {
-		$order = OrderHelper::create_order( self::factory()->user->create() );
-		$order->set_status( OrderStatus::COMPLETED );
-		$order->save();
-		$_GET = array( 'key' => $order->get_order_key() );
-
-		wc_set_notices(
-			array(
-				'error' => array(
-					array( 'data' => array( 'id' => 'no-notice-key' ) ),
-					array( 'notice' => 'Real failure.' ),
-				),
-			)
-		);
-
-		$html = $this->render( $order->get_id() );
-
-		$this->assertStringContainsString( 'Real failure.', $html );
-		$this->assertStringNotContainsString( 'Array', $html, 'An array notice must not be cast to a string.' );
-		$this->assertSame( 1, substr_count( $html, '<li' ), 'The entry with no message is dropped, not rendered empty.' );
-
-		wc_clear_notices();
-	}
-
-	/**
-	 * The outer `wc_kses_notice()` is the only thing between a theme's
-	 * `notices/error.php` override and unfiltered markup on the page.
-	 *
-	 * @testdox A queued error carrying disallowed markup is filtered before it reaches the page.
-	 */
-	public function test_prompt_filters_disallowed_markup_in_a_queued_error(): void {
-		$order = OrderHelper::create_order( self::factory()->user->create() );
-		$order->set_status( OrderStatus::COMPLETED );
-		$order->save();
-		$_GET = array( 'key' => $order->get_order_key() );
-
-		wc_add_notice( 'Sign-in failed.<script>alert(1)</script>', 'error' );
-
-		$html = $this->render( $order->get_id() );
-
-		$this->assertStringContainsString( 'Sign-in failed.', $html );
-		$this->assertStringNotContainsString( '<script>', $html );
-
-		wc_clear_notices();
-	}
-
-	/**
-	 * `wc_set_notices()` is public and third-party code stores bare strings
-	 * through it, which is why `wc_print_notices()` reads them defensively.
-	 *
-	 * @testdox A queued error stored as a bare string does not break the prompt.
-	 */
-	public function test_prompt_survives_an_error_queued_as_a_bare_string(): void {
-		$order = OrderHelper::create_order( self::factory()->user->create() );
-		$order->set_status( OrderStatus::COMPLETED );
-		$order->save();
-		$_GET = array( 'key' => $order->get_order_key() );
-
-		wc_set_notices( array( 'error' => array( 'Stored by a third party as a plain string.' ) ) );
-
-		$html = $this->render( $order->get_id() );
-
-		$this->assertStringContainsString( 'Stored by a third party as a plain string.', $html );
-		$this->assertStringContainsString( 'Please log in to your account to review this order.', $html );
-
-		wc_clear_notices();
 	}
 
 	/**

@@ -653,66 +653,9 @@ class Endpoint {
 	 * @return string
 	 */
 	private function render_login_prompt( string $message, string $redirect ): string {
-		$markup = wc_print_notice( $message, 'notice', array(), true );
-
-		// This is a plain WP page, so none of the hooks that normally flush
-		// queued notices fire here and a failed sign-in would give no feedback
-		// at all. Only errors are taken; anything else stays queued for
-		// whatever outputs notices later in the page.
-		$queued = (array) wc_get_notices();
-		$errors = array_filter( (array) ( $queued['error'] ?? array() ) );
-		if ( $errors ) {
-			// `the_content` is applied more than once on plenty of sites, by
-			// description builders and page builders. Only the pass that is
-			// actually displayed may take the notices off the queue, or an
-			// invisible pass swallows the sign-in error this exists to show.
-			if ( is_main_query() && in_the_loop() ) {
-				unset( $queued['error'] );
-				wc_set_notices( $queued );
-			}
-
-			// Through the template in one pass, as `wc_print_notices()` does.
-			// `wc_print_notice()` would re-apply `woocommerce_add_error` to a
-			// message that already passed through it when it was queued, and
-			// would open a separate list for each error.
-			// `wc_set_notices()` is public and a notice stored through it can be
-			// a bare string, which `notices/error.php` would fatal on.
-			$normalised = array();
-			foreach ( $errors as $error ) {
-				$normalised[] = is_array( $error )
-					? array(
-						'notice' => (string) ( $error['notice'] ?? '' ),
-						'data'   => (array) ( $error['data'] ?? array() ),
-					)
-					: array(
-						'notice' => (string) $error,
-						'data'   => array(),
-					);
-			}
-
-			$normalised = array_values(
-				array_filter(
-					$normalised,
-					function ( $notice ) {
-						return '' !== $notice['notice'];
-					}
-				)
-			);
-
-			ob_start();
-			wc_get_template(
-				'notices/error.php',
-				array(
-					'messages' => wp_list_pluck( $normalised, 'notice' ),
-					'notices'  => $normalised,
-				)
-			);
-			$markup .= wc_kses_notice( (string) ob_get_clean() );
-		}
-
 		ob_start();
 		// `.woocommerce` wrapper: the login form's styles are all nested under it.
-		echo '<div class="woocommerce"><div class="woocommerce-notices-wrapper">' . $markup . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wc_print_notice() and wc_kses_notice() both return kses-filtered markup.
+		echo '<div class="woocommerce"><div class="woocommerce-notices-wrapper">' . wc_print_notice( $message, 'notice', array(), true ) . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wc_print_notice() returns kses-filtered markup.
 		woocommerce_login_form( array( 'redirect' => $redirect ) );
 		echo '</div>';
 		return (string) ob_get_clean();
@@ -741,7 +684,7 @@ class Endpoint {
 
 		$this->maybe_mark_no_actionable_rows( $order );
 
-		echo $this->render_body( $order ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wc_get_template(), wc_print_notice(), wc_kses_notice() and woocommerce_login_form() output, escaped at source.
+		echo $this->render_body( $order ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wc_get_template(), wc_print_notice() and woocommerce_login_form() output, escaped at source.
 	}
 
 	/**
