@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\AgentReadiness;
 
+use Automattic\WooCommerce\Internal\AgentReadiness\AgenticCommerceSettings;
 use Automattic\WooCommerce\Internal\AgentReadiness\AgentReadiness;
 use Automattic\WooCommerce\Internal\AgentReadiness\ScheduledScan;
 use Automattic\WooCommerce\Internal\AgentReadiness\UcpSwitch;
@@ -102,13 +103,15 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * @testdox POST ucp refuses to turn UCP on while a required setup check fails.
 	 */
 	public function test_ucp_switch_blocked_by_failing_check(): void {
+		StoreConditionsTest::make_store_ready( $this );
+		update_option( AgenticCommerceSettings::TERMS_PAGE_OPTION, 0 );
 		update_option( 'woocommerce_feature_ucp_enabled', 'no' );
 
 		$response = $this->dispatch_ucp( true );
 
 		$this->assertSame( 409, $response->get_status() );
 		$this->assertSame( 'woocommerce_agentic_commerce_setup_incomplete', $response->get_data()['code'] );
-		$this->assertContains( 'https', $response->get_data()['data']['failing_checks'] );
+		$this->assertSame( array( 'terms_page' ), $response->get_data()['data']['failing_checks'] );
 		$this->assertSame( 'no', get_option( 'woocommerce_feature_ucp_enabled' ) );
 	}
 
