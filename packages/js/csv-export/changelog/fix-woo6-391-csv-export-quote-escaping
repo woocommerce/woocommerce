@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Escape quotes in CSV values that start with a formula character, so they stay in a single cell.
