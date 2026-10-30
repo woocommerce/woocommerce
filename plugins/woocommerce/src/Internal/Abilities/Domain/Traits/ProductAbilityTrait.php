@@ -798,9 +798,9 @@ trait ProductAbilityTrait {
 				get_woocommerce_currency_symbol(),
 				ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401
 			),
-			'price'             => $product->get_price(),
-			'regular_price'     => $product->get_regular_price(),
-			'sale_price'        => $product->get_sale_price(),
+			'price'             => self::format_amount_for_response( $product->get_price() ),
+			'regular_price'     => self::format_amount_for_response( $product->get_regular_price() ),
+			'sale_price'        => self::format_amount_for_response( $product->get_sale_price() ),
 			'stock_status'      => $product->get_stock_status(),
 			'stock_quantity'    => null === $stock_quantity ? null : wc_stock_amount( $stock_quantity ),
 			'manage_stock'      => (bool) $product->get_manage_stock(),

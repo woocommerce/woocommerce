@@ -85,6 +85,11 @@ class ExtensibleAbilities {
 	private const QUERY_ARG_KEYS = array( 'meta_query', 'tax_query', 'include_ids', 'exclude_ids' );
 
 	/**
+	 * A date-time that strict JSON schema clients accept, as RFC 3339 defines it.
+	 */
+	private const DATE_TIME_PATTERN = '/^\d{4}-\d{2}-\d{2}[Tt]\d{2}:\d{2}:\d{2}(\.\d+)?([Zz]|[+-]\d{2}:\d{2})$/';
+
+	/**
 	 * Register a resource that abilities format, so extensions can register fields on it.
 	 *
 	 * Call it inside the `woocommerce_extensible_abilities_resources_init` action. A call after that action is refused.
@@ -132,6 +137,9 @@ class ExtensibleAbilities {
 	 *                                  value. A schema that allows null, such as `array( 'integer', 'null' )`,
 	 *                                  keeps it. It reads the object it is given, not the database,
 	 *                                  because an ability can format an object before it is saved.
+	 *                                  Strict clients refuse some values that the schema check accepts, so
+	 *                                  an empty array for an `object` is sent as `{}`, and a list for an
+	 *                                  `object` or a `date-time` without a UTC offset is left out.
 	 *     @type callable $update_callback Optional. Receives the object and the value, and changes the object
 	 *                                     in memory. It returns a WP_Error to reject the value, and then
 	 *                                     nothing is saved. A field without it cannot be written. Rules:
@@ -203,6 +211,8 @@ class ExtensibleAbilities {
 			);
 			return;
 		}
+
+		$args['needs_json_check'] = self::needs_json_check( $args['schema'] );
 
 		self::$fields[ $args['resource'] ][ $args['namespace'] ][ $args['field'] ] = $args;
 	}
@@ -525,7 +535,7 @@ class ExtensibleAbilities {
 	 * Add the field values of an object to its formatted output, under
 	 * `extensions.<namespace>.<field>`. A value is cast to its schema type, so
 	 * `'12'` becomes `12` for an integer field. A field that throws or returns a
-	 * value that its schema does not allow is left out. A namespace with no
+	 * value that its schema or the JSON rules do not allow is left out. A namespace with no
 	 * values is left out, and `extensions` is left out when no namespace has
 	 * values or the feature is off.
 	 *
@@ -557,6 +567,12 @@ class ExtensibleAbilities {
 					continue;
 				}
 				$sanitized = rest_sanitize_value_from_schema( $value, $args['schema'], $field );
+				if ( ! is_wp_error( $sanitized ) && $args['needs_json_check'] ) {
+					$sanitized = self::prepare_json_value( $sanitized, $args['schema'], $field );
+					if ( is_wp_error( $sanitized ) ) {
+						self::report_left_out( $args, $sanitized->get_error_message() );
+					}
+				}
 				if ( ! is_wp_error( $sanitized ) ) {
 					$extensions[ $namespace ][ $field ] = $sanitized;
 				}
@@ -646,14 +662,27 @@ class ExtensibleAbilities {
 			return true;
 		}
 
+		if ( null !== $value ) {
+			self::report_left_out( $args, $valid->get_error_message() );
+		}
+		return false;
+	}
+
+	/**
+	 * Log and report a field that was left out, one time for each field.
+	 *
+	 * @param array<string, mixed> $args   Field arguments.
+	 * @param string               $reason Why the value was left out.
+	 */
+	private static function report_left_out( array $args, string $reason ): void {
 		$key = $args['resource'] . '.' . $args['namespace'] . '.' . $args['field'];
-		if ( null === $value || isset( self::$reported[ $key ] ) ) {
-			return false;
+		if ( isset( self::$reported[ $key ] ) ) {
+			return;
 		}
 
 		self::$reported[ $key ] = true;
 		wc_get_logger()->error(
-			sprintf( 'Ability field "%s.%s" of "%s" was left out because its value does not match its schema: %s', $args['namespace'], $args['field'], $args['resource'], $valid->get_error_message() ),
+			sprintf( 'Ability field "%s.%s" of "%s" was left out because its value does not match its schema: %s', $args['namespace'], $args['field'], $args['resource'], $reason ),
 			array( 'source' => 'extensible-abilities' )
 		);
 		wc_doing_it_wrong(
@@ -663,10 +692,78 @@ class ExtensibleAbilities {
 				$args['namespace'],
 				$args['field'],
 				$args['resource'],
-				$valid->get_error_message()
+				$reason
 			),
 			'11.3.0'
 		);
+	}
+
+	/**
+	 * Whether a schema has an `object` or a `date-time`, the two places where
+	 * the JSON rules are stricter than rest_validate_value_from_schema().
+	 * WordPress has no hook inside its validation, so prepare_json_value() walks
+	 * the value, and this keeps other fields out of that walk.
+	 *
+	 * @param array<string, mixed> $schema Schema.
+	 * @return bool
+	 */
+	private static function needs_json_check( array $schema ): bool {
+		if ( 'date-time' === ( $schema['format'] ?? null ) || in_array( 'object', (array) ( $schema['type'] ?? array() ), true ) ) {
+			return true;
+		}
+		foreach ( array_merge( array_filter( array( $schema['items'] ?? null ) ), $schema['anyOf'] ?? array(), $schema['oneOf'] ?? array() ) as $child ) {
+			if ( is_array( $child ) && self::needs_json_check( $child ) ) {
+				return true;
+			}
+		}
 		return false;
+	}
+
+	/**
+	 * Check a sanitized value against the JSON rules. An empty array for an
+	 * `object` becomes an empty object, because PHP has no other way to say `{}`.
+	 * A part with no schema stays as it is.
+	 *
+	 * @param mixed                $value  Sanitized value.
+	 * @param array<string, mixed> $schema Schema of the value.
+	 * @param string               $param  Name of the value for the error.
+	 * @return mixed|\WP_Error The value for the JSON output, or an error when the JSON rules refuse it.
+	 */
+	private static function prepare_json_value( $value, array $schema, string $param ) {
+		if ( isset( $schema['anyOf'] ) || isset( $schema['oneOf'] ) ) {
+			$matching = isset( $schema['anyOf'] ) ? rest_find_any_matching_schema( $value, $schema, $param ) : rest_find_one_matching_schema( $value, $schema, $param );
+			return is_wp_error( $matching ) ? $matching : self::prepare_json_value( $value, $matching, $param );
+		}
+
+		$type = rest_get_best_type_for_value( $value, (array) ( $schema['type'] ?? array() ) );
+		if ( 'string' === $type && 'date-time' === ( $schema['format'] ?? null ) && ! preg_match( self::DATE_TIME_PATTERN, $value ) ) {
+			return new \WP_Error( 'woocommerce_ability_invalid_date_time', sprintf( '%s is not a date-time with a UTC offset.', $param ) );
+		}
+		if ( 'array' === $type ) {
+			$children = array_fill_keys( array_keys( $value ), $schema['items'] ?? null );
+		} elseif ( 'object' === $type ) {
+			if ( empty( $value ) ) {
+				return new \stdClass();
+			}
+			if ( array_values( $value ) === $value ) {
+				return new \WP_Error( 'woocommerce_ability_invalid_object', sprintf( '%s is a list, not an object.', $param ) );
+			}
+			$children = array();
+			foreach ( array_keys( $value ) as $key ) {
+				$children[ $key ] = $schema['properties'][ $key ] ?? rest_find_matching_pattern_property_schema( (string) $key, $schema ) ?? ( $schema['additionalProperties'] ?? null );
+			}
+		} else {
+			return $value;
+		}
+
+		foreach ( $children as $key => $child_schema ) {
+			if ( is_array( $child_schema ) ) {
+				$value[ $key ] = self::prepare_json_value( $value[ $key ], $child_schema, $param . '.' . $key );
+				if ( is_wp_error( $value[ $key ] ) ) {
+					return $value[ $key ];
+				}
+			}
+		}
+		return $value;
 	}
 }

@@ -290,7 +290,7 @@ trait OrderAbilityTrait {
 				get_woocommerce_currency_symbol( $order->get_currency() ),
 				ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401
 			),
-			'total'                => $order->get_total(),
+			'total'                => self::format_amount_for_response( $order->get_total() ),
 			'customer_id'          => $order->get_customer_id(),
 			'billing_email'        => '' === $billing_email ? null : $billing_email,
 			'payment_method'       => $order->get_payment_method(),
@@ -316,8 +316,8 @@ trait OrderAbilityTrait {
 						'product_id'   => $item->get_product_id(),
 						'variation_id' => $item->get_variation_id(),
 						'quantity'     => $item->get_quantity(),
-						'subtotal'     => $item->get_subtotal(),
-						'total'        => $item->get_total(),
+						'subtotal'     => self::format_amount_for_response( $item->get_subtotal() ),
+						'total'        => self::format_amount_for_response( $item->get_total() ),
 					),
 					'order_item',
 					$item
