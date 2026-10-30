@@ -255,59 +255,62 @@ class ReadinessChecksTest extends WC_Unit_Test_Case {
 	public function test_store_conditions(): void {
 		global $wp_rewrite;
 		$permalinks = (string) get_option( 'permalink_structure' );
-		$sut        = new StoreConditions();
-		$sut->init( new ComingSoonHelper() );
+		try {
+			$sut = new StoreConditions();
+			$sut->init( new ComingSoonHelper() );
 
-		update_option( 'woocommerce_coming_soon', 'no' );
-		update_option( 'blog_public', '1' );
-		update_option( 'woocommerce_feature_ucp_enabled', 'yes' );
-		update_option( 'woocommerce_enable_guest_checkout', 'yes' );
-		$wp_rewrite->set_permalink_structure( '/%postname%/' );
-		$this->assertSame(
-			array(
-				'launched'          => true,
-				'search_visible'    => true,
-				'ucp_on'            => true,
-				'pretty_permalinks' => true,
-				'guest_checkout'    => true,
-			),
-			array_column( $sut->all(), 'ok', 'id' )
-		);
+			update_option( 'woocommerce_coming_soon', 'no' );
+			update_option( 'blog_public', '1' );
+			update_option( 'woocommerce_feature_ucp_enabled', 'yes' );
+			update_option( 'woocommerce_enable_guest_checkout', 'yes' );
+			$wp_rewrite->set_permalink_structure( '/%postname%/' );
+			$this->assertSame(
+				array(
+					'launched'          => true,
+					'search_visible'    => true,
+					'ucp_on'            => true,
+					'pretty_permalinks' => true,
+					'guest_checkout'    => true,
+				),
+				array_column( $sut->all(), 'ok', 'id' )
+			);
 
-		update_option( 'woocommerce_coming_soon', 'yes' );
-		update_option( 'woocommerce_store_pages_only', 'yes' );
-		update_option( 'blog_public', '0' );
-		update_option( 'woocommerce_feature_ucp_enabled', 'no' );
-		update_option( 'woocommerce_enable_guest_checkout', 'no' );
-		$wp_rewrite->set_permalink_structure( '' );
-		$this->assertSame(
-			array(
-				'launched'          => false,
-				'search_visible'    => false,
-				'ucp_on'            => false,
-				'pretty_permalinks' => false,
-				'guest_checkout'    => false,
-			),
-			array_column( $sut->all(), 'ok', 'id' )
-		);
+			update_option( 'woocommerce_coming_soon', 'yes' );
+			update_option( 'woocommerce_store_pages_only', 'yes' );
+			update_option( 'blog_public', '0' );
+			update_option( 'woocommerce_feature_ucp_enabled', 'no' );
+			update_option( 'woocommerce_enable_guest_checkout', 'no' );
+			$wp_rewrite->set_permalink_structure( '' );
+			$this->assertSame(
+				array(
+					'launched'          => false,
+					'search_visible'    => false,
+					'ucp_on'            => false,
+					'pretty_permalinks' => false,
+					'guest_checkout'    => false,
+				),
+				array_column( $sut->all(), 'ok', 'id' )
+			);
 
-		update_option( 'woocommerce_enable_guest_checkout', 'yes' );
-		add_filter( 'woocommerce_checkout_registration_required', '__return_true' );
-		$guest_checkout = array_column( $sut->all(), 'ok', 'id' )['guest_checkout'];
-		remove_filter( 'woocommerce_checkout_registration_required', '__return_true' );
-		$this->assertFalse( $guest_checkout, 'An extension that requires registration should fail the check' );
+			update_option( 'woocommerce_enable_guest_checkout', 'yes' );
+			add_filter( 'woocommerce_checkout_registration_required', '__return_true' );
+			$guest_checkout = array_column( $sut->all(), 'ok', 'id' )['guest_checkout'];
+			remove_filter( 'woocommerce_checkout_registration_required', '__return_true' );
+			$this->assertFalse( $guest_checkout, 'An extension that requires registration should fail the check' );
 
-		$this->assertSame(
-			array(
-				'launched'          => 'listing',
-				'search_visible'    => 'listing',
-				'ucp_on'            => 'ucp',
-				'pretty_permalinks' => 'ucp',
-				'guest_checkout'    => 'checkout',
-			),
-			array_column( $sut->all(), 'blocks', 'id' )
-		);
-		$wp_rewrite->set_permalink_structure( $permalinks );
+			$this->assertSame(
+				array(
+					'launched'          => 'listing',
+					'search_visible'    => 'listing',
+					'ucp_on'            => 'ucp',
+					'pretty_permalinks' => 'ucp',
+					'guest_checkout'    => 'checkout',
+				),
+				array_column( $sut->all(), 'blocks', 'id' )
+			);
+		} finally {
+			$wp_rewrite->set_permalink_structure( $permalinks );
+		}
 	}
 
 	/**
