@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import simpleGit from 'simple-git';
+import { simpleGit } from 'simple-git';
 import { execSync } from 'child_process';
 import { readFile, writeFile } from 'fs/promises';
 import path from 'path';
@@ -11,7 +11,10 @@ import { existsSync, readFileSync } from 'fs';
  * Internal dependencies
  */
 import { Logger } from '../../../../core/logger';
-import { checkoutRemoteBranch } from '../../../../core/git';
+import {
+	checkoutRemoteBranch,
+	GIT_IDENTITY_ENVIRONMENT,
+} from '../../../../core/git';
 import {
 	addLabelsToIssue,
 	addMilestoneToIssue,
@@ -188,6 +191,7 @@ export const updateReleaseBranchChangelogs = async (
 
 	const git = simpleGit( {
 		baseDir: tmpRepoPath,
+		allowEnvironment: GIT_IDENTITY_ENVIRONMENT,
 		unsafe: {
 			allowUnsafeHooksPath: true,
 		},
@@ -353,6 +357,7 @@ export const updateBranchChangelog = async (
 	Logger.notice( `Deleting changelogs from trunk ${ tmpRepoPath }` );
 	const git = simpleGit( {
 		baseDir: tmpRepoPath,
+		allowEnvironment: GIT_IDENTITY_ENVIRONMENT,
 		unsafe: {
 			allowUnsafeHooksPath: true,
 		},
