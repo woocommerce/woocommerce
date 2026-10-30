@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Caches\OrderCacheController;
 use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
 use Automattic\WooCommerce\Internal\Admin\Orders\EditLock;
 use Automattic\WooCommerce\Internal\BatchProcessing\{ BatchProcessingController, BatchProcessorInterface };
+use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 
@@ -384,8 +385,7 @@ class DataSynchronizer implements BatchProcessorInterface {
 	private function schedule_background_sync() {
 		$interval = $this->get_background_sync_interval();
 
-		// Calling Action Scheduler directly because WC_Action_Queue doesn't support the unique parameter yet.
-		as_schedule_recurring_action(
+		ActionSchedulerUtil::schedule_recurring(
 			time() + $interval,
 			$interval,
 			self::BACKGROUND_SYNC_EVENT_HOOK,

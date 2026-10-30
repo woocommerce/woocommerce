@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Remove the checkout step numbers setting from the Cart block.
