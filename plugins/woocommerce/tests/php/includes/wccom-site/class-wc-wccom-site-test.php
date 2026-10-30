@@ -238,19 +238,23 @@ class WC_WCCOM_Site_Test extends WC_Unit_Test_Case {
 	/**
 	 * @testdox Should accept a signed request after the ALTERNATE_WP_CRON redirect adds doing_wp_cron, but no other change.
 	 *
-	 * @testWith ["/?rest_route=%2Fwccom-site%2Fv3%2Fstatus&doing_wp_cron=1761814536.1234567890123456789012", "/wccom-site/v3/status", true]
-	 *           ["/?rest_route=/wccom-site/v3/ssr&doing_wp_cron=1761814536.1234567890123456789012", "/wccom-site/v3/ssr", null]
-	 *           ["/?rest_route=/wccom-site/v3/status&cron=1", "/wccom-site/v3/status", null]
+	 * @testWith ["/?rest_route=%2Fwccom-site%2Fv3%2Fstatus&doing_wp_cron=1761814536.1234567890123456789012", "/?rest_route=/wccom-site/v3/status", "/wccom-site/v3/status", true]
+	 *           ["/wp-json/wccom-site/v3/status?doing_wp_cron=1761814536.1234567890123456789012", "/wp-json/wccom-site/v3/status", "/wccom-site/v3/status", true]
+	 *           ["/?rest_route=/wccom-site/v3/ssr&doing_wp_cron=1761814536.1234567890123456789012", "/?rest_route=/wccom-site/v3/status", "/wccom-site/v3/ssr", false]
+	 *           ["/?rest_route=/wccom-site/v3/status&cron=1", "/?rest_route=/wccom-site/v3/status", "/wccom-site/v3/status", false]
 	 *
-	 * @param string    $received_uri Request URI the site receives.
-	 * @param string    $route        Route WordPress resolved.
-	 * @param bool|null $expected     Expected authentication_fallback() result.
+	 * @param string $received_uri Request URI the site receives.
+	 * @param string $signed_uri   Request URI WooCommerce.com signed.
+	 * @param string $route        Route WordPress resolved.
+	 * @param bool   $expected     Whether the connected user is authenticated.
 	 */
-	public function test_authentication_fallback_ignores_doing_wp_cron( string $received_uri, string $route, ?bool $expected ): void {
+	public function test_authenticate_wccom_ignores_doing_wp_cron( string $received_uri, string $signed_uri, string $route, bool $expected ): void {
 		$user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
 		$this->simulate_request( $received_uri, true );
-		$this->sign_request_for_connected_site( $user_id, '/?rest_route=/wccom-site/v3/status' );
+		$this->sign_request_for_connected_site( $user_id, $signed_uri );
 
-		$this->assertSame( $expected, self::with_rest_route_context( $route, fn() => WC_WCCOM_Site::authentication_fallback( null ) ) );
+		$user = self::with_rest_route_context( $route, fn() => WC_WCCOM_Site::authenticate_wccom( false ) );
+
+		$this->assertSame( $expected, $user instanceof WP_User && $user_id === $user->ID );
 	}
 }
