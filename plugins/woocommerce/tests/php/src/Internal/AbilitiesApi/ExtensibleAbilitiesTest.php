@@ -1161,6 +1161,205 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should send an empty array for an object as an empty object at any depth, and keep free-form parts as they are.
+	 */
+	public function test_an_empty_array_for_an_object_is_an_empty_object(): void {
+		$output = $this->read_field_values(
+			array(
+				'flat'     => array( array( 'type' => 'object' ), array() ),
+				'nullable' => array( array( 'type' => array( 'object', 'null' ) ), array() ),
+				'nested'   => array(
+					array(
+						'type'       => 'object',
+						'properties' => array( 'inner' => array( 'type' => 'object' ) ),
+					),
+					array( 'inner' => array() ),
+				),
+				'in_list'  => array(
+					array(
+						'type'  => 'array',
+						'items' => array( 'type' => 'object' ),
+					),
+					array( array() ),
+				),
+				'any_of'   => array(
+					array(
+						'type'  => 'object',
+						'anyOf' => array(
+							array( 'type' => 'object' ),
+						),
+					),
+					array(),
+				),
+				'free'     => array( array( 'type' => 'object' ), array( 'list' => array() ) ),
+			)
+		);
+
+		$this->assertSame(
+			'{"flat":{},"nullable":{},"nested":{"inner":{}},"in_list":[{}],"any_of":{},"free":{"list":[]}}',
+			wp_json_encode( $output )
+		);
+	}
+
+	/**
+	 * @testdox Should leave out and report a list for an object, and a date-time with no UTC offset, also when nested.
+	 */
+	public function test_a_value_that_breaks_the_json_rules_is_left_out_and_reported(): void {
+		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_field' );
+		$date_schema = array(
+			'type'   => 'string',
+			'format' => 'date-time',
+		);
+
+		$output = $this->read_field_values(
+			array(
+				'list'        => array( array( 'type' => 'object' ), array( 1, 2 ) ),
+				'nested_list' => array(
+					array(
+						'type'       => 'object',
+						'properties' => array( 'inner' => array( 'type' => 'object' ) ),
+					),
+					array( 'inner' => array( 1 ) ),
+				),
+				'no_offset'   => array( $date_schema, '2026-10-30T12:00:00' ),
+				'space'       => array( $date_schema, '2026-10-30 12:00:00+00:00' ),
+				'offset'      => array( $date_schema, '2026-10-30T12:00:00+02:00' ),
+				'utc'         => array( $date_schema, '2026-10-30T12:00:00Z' ),
+				'null_date'   => array(
+					array(
+						'type'   => array( 'string', 'null' ),
+						'format' => 'date-time',
+					),
+					null,
+				),
+				'numeric_key' => array( array( 'type' => 'object' ), array( 5 => 'value' ) ),
+			)
+		);
+
+		$this->assertSame(
+			array(
+				'offset'      => '2026-10-30T12:00:00+02:00',
+				'utc'         => '2026-10-30T12:00:00Z',
+				'null_date'   => null,
+				'numeric_key' => array( 5 => 'value' ),
+			),
+			$output
+		);
+	}
+
+	/**
+	 * @testdox Should record at registration which fields need the JSON check, so other fields skip it.
+	 */
+	public function test_only_a_schema_with_an_object_or_a_date_time_needs_the_json_check(): void {
+		AbilitiesLoader::register_core_resources();
+		$schemas = array(
+			'plain_string' => array( array( 'type' => 'string' ), false ),
+			'uri'          => array(
+				array(
+					'type'   => 'string',
+					'format' => 'uri',
+				),
+				false,
+			),
+			'int_list'     => array(
+				array(
+					'type'  => 'array',
+					'items' => array( 'type' => 'integer' ),
+				),
+				false,
+			),
+			'object'       => array( array( 'type' => array( 'object', 'null' ) ), true ),
+			'date_list'    => array(
+				array(
+					'type'  => 'array',
+					'items' => array(
+						'type'   => 'string',
+						'format' => 'date-time',
+					),
+				),
+				true,
+			),
+			'any_of'       => array(
+				array(
+					'type'  => array( 'string', 'array' ),
+					'anyOf' => array(
+						array( 'type' => 'string' ),
+						array(
+							'type'  => 'array',
+							'items' => array( 'type' => 'object' ),
+						),
+					),
+				),
+				true,
+			),
+		);
+		foreach ( $schemas as $field => list( $schema ) ) {
+			ExtensibleAbilities::register_field(
+				array(
+					'resource'     => 'order',
+					'namespace'    => 'checks',
+					'field'        => $field,
+					'schema'       => $schema,
+					'get_callback' => '__return_null',
+				)
+			);
+		}
+
+		$fields = ExtensibleAbilities::get_fields( 'order' )['checks'];
+		foreach ( $schemas as $field => list( , $expected ) ) {
+			$this->assertSame( $expected, $fields[ $field ]['needs_json_check'], $field );
+		}
+	}
+
+	/**
+	 * @testdox Should return a price that a filter turned into a number as a string, and save the write.
+	 */
+	public function test_a_numeric_price_filter_does_not_fail_a_read_or_a_write(): void {
+		$product = \WC_Helper_Product::create_simple_product();
+		$this->add_test_filter( 'woocommerce_product_get_price', static fn() => 12.5 );
+		$this->add_test_filter( 'woocommerce_product_get_regular_price', static fn() => 15 );
+		$this->add_test_filter( 'woocommerce_product_get_sale_price', static fn() => 12.5 );
+
+		$query = wp_get_ability( 'woocommerce/products-query' )->execute( array( 'id' => $product->get_id() ) );
+		$write = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'   => $product->get_id(),
+				'name' => 'Saved',
+			)
+		);
+
+		$this->assertNotWPError( $query );
+		$this->assertSame( '12.5', $query['products'][0]['price'] );
+		$this->assertSame( '15', $query['products'][0]['regular_price'] );
+		$this->assertSame( '12.5', $query['products'][0]['sale_price'] );
+		$this->assertNotWPError( $write );
+		$this->assertSame( '12.5', $write['product']['price'] );
+		$this->assertSame( 'Saved', get_post( $product->get_id() )->post_title );
+	}
+
+	/**
+	 * @testdox Should return an order total and line item amounts that a filter turned into numbers as strings.
+	 */
+	public function test_a_numeric_order_total_filter_does_not_fail_the_output(): void {
+		$order = \WC_Helper_Order::create_order();
+		$this->add_test_filter( 'woocommerce_order_get_total', static fn() => 40 );
+		$this->add_test_filter( 'woocommerce_order_item_get_subtotal', static fn() => 30 );
+		$this->add_test_filter( 'woocommerce_order_item_get_total', static fn() => 25.5 );
+
+		$result = wp_get_ability( 'woocommerce/orders-query' )->execute(
+			array(
+				'id'                 => $order->get_id(),
+				'include_line_items' => true,
+			)
+		);
+
+		$this->assertNotWPError( $result );
+		$this->assertSame( '40', $result['orders'][0]['total'] );
+		$this->assertSame( '30', $result['orders'][0]['line_items'][0]['subtotal'] );
+		$this->assertSame( '25.5', $result['orders'][0]['line_items'][0]['total'] );
+	}
+
+	/**
 	 * @testdox Should leave out a field that throws or fails sanitization, cast a value to its schema type, and keep a null that the schema allows.
 	 */
 	public function test_field_values_follow_their_schema(): void {
@@ -1936,6 +2135,43 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		);
 
 		$this->assertEmpty( ExtensibleAbilities::get_validators( 'order' ) );
+	}
+
+	/**
+	 * Register fields on the order resource and read their values.
+	 *
+	 * @param array<string, array{0: array<string, mixed>, 1: mixed}> $fields Schema and value, keyed by field.
+	 * @return array<string, mixed> The values under the namespace.
+	 */
+	private function read_field_values( array $fields ): array {
+		AbilitiesLoader::register_core_resources();
+		foreach ( $fields as $field => list( $schema, $value ) ) {
+			ExtensibleAbilities::register_field(
+				array(
+					'resource'     => 'order',
+					'namespace'    => 'values',
+					'field'        => $field,
+					'schema'       => $schema,
+					'get_callback' => static fn() => $value,
+				)
+			);
+		}
+
+		$output = ExtensibleAbilities::add_fields_to_object( array(), 'order', \WC_Helper_Order::create_order() );
+		return $output['extensions']['values'];
+	}
+
+	/**
+	 * Add a filter and remove it in tearDown.
+	 *
+	 * @param string   $hook          Hook name.
+	 * @param callable $callback      Callback.
+	 * @param int      $priority      Priority.
+	 * @param int      $accepted_args Number of arguments.
+	 */
+	private function add_test_filter( string $hook, callable $callback, int $priority = 10, int $accepted_args = 1 ): void {
+		add_filter( $hook, $callback, $priority, $accepted_args );
+		$this->test_actions[] = array( $hook, $callback, $priority );
 	}
 
 	/**

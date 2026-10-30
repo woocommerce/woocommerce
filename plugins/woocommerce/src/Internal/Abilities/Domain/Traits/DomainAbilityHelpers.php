@@ -32,6 +32,18 @@ trait DomainAbilityHelpers {
 	}
 
 	/**
+	 * Get a price or total as the decimal string that the output schema needs. A
+	 * filter can turn the value into a number. Any other type stays as it is, so
+	 * the output validation refuses it.
+	 *
+	 * @param mixed $amount Value from a getter of the object.
+	 * @return mixed
+	 */
+	protected static function format_amount_for_response( $amount ) {
+		return is_int( $amount ) || is_float( $amount ) ? wc_float_to_string( (float) $amount ) : $amount;
+	}
+
+	/**
 	 * Get a collection output schema.
 	 *
 	 * @param string $collection_key Collection property key.

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Send extension field values that strict JSON clients accept, and return Core ability amounts as strings when a filter turns them into numbers.
