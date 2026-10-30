@@ -1521,7 +1521,7 @@
 		"@babel/cli": "catalog:tooling",
 		"@babel/core": "catalog:tooling",
 		"@babel/preset-env": "catalog:tooling",
-		"@faker-js/faker": "^9.3.0",
+		"@faker-js/faker": "^10.6.0",
 		"@playwright/test": "^1.63.0",
 		"@typescript-eslint/eslint-plugin": "^8.63.0",
 		"@typescript-eslint/parser": "^8.63.0",
