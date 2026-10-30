@@ -99,4 +99,24 @@ class OrderCacheTest extends \WC_Unit_Test_Case {
 		$this->assertSame( $first, $first_item->get_order() );
 		$this->assertEmpty( $second_item->get_changes() );
 	}
+
+	/**
+	 * @testdox Should keep a change to a saved or pending date on an order clone away from the original.
+	 */
+	public function test_date_change_does_not_reach_cloned_order(): void {
+		$order = WC_Helper_Order::create_order();
+		$order->set_date_paid( '2026-01-15 10:00:00' );
+		$this->assertArrayHasKey( 'date_paid', $order->get_changes() );
+		$created = $order->get_date_created()->getTimestamp();
+		$paid    = $order->get_date_paid()->getTimestamp();
+
+		$copy = clone $order;
+		$copy->get_date_created()->modify( '+1 day' );
+		$copy->get_date_paid()->modify( '+1 day' );
+
+		$this->assertSame( $created, $order->get_date_created()->getTimestamp() );
+		$this->assertSame( $paid, $order->get_date_paid()->getTimestamp() );
+		$this->assertSame( $created + DAY_IN_SECONDS, $copy->get_date_created()->getTimestamp() );
+		$this->assertSame( $paid + DAY_IN_SECONDS, $copy->get_date_paid()->getTimestamp() );
+	}
 }

@@ -157,6 +157,26 @@ class ProductCacheTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should keep a change to a saved or pending date on a product clone away from the original.
+	 */
+	public function test_date_change_does_not_reach_cloned_product(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_date_on_sale_from( '2026-01-15 10:00:00' );
+		$this->assertArrayHasKey( 'date_on_sale_from', $product->get_changes() );
+		$created = $product->get_date_created()->getTimestamp();
+		$on_sale = $product->get_date_on_sale_from()->getTimestamp();
+
+		$copy = clone $product;
+		$copy->get_date_created()->modify( '+1 day' );
+		$copy->get_date_on_sale_from()->modify( '+1 day' );
+
+		$this->assertSame( $created, $product->get_date_created()->getTimestamp() );
+		$this->assertSame( $on_sale, $product->get_date_on_sale_from()->getTimestamp() );
+		$this->assertSame( $created + DAY_IN_SECONDS, $copy->get_date_created()->getTimestamp() );
+		$this->assertSame( $on_sale + DAY_IN_SECONDS, $copy->get_date_on_sale_from()->getTimestamp() );
+	}
+
+	/**
 	 * Cache the product, change the attribute and download objects on one copy, and check that another copy and the original keep their values.
 	 *
 	 * @param \WC_Product $product The product to cache.

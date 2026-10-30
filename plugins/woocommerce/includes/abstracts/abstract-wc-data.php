@@ -180,6 +180,9 @@ abstract class WC_Data {
 	 * - CLONE_MODE_DUPLICATE (default): Forces reading of Meta and clears meta IDs for duplication (backward compatible).
 	 * - CLONE_MODE_CACHE: Preserves meta IDs for caching purposes.
 	 *
+	 * The clone also gets its own date objects, because DateTime::modify() changes the object in place.
+	 * The clone is not fully isolated: an object stored as a meta value stays shared with the original.
+	 *
 	 * @since 3.0.2
 	 */
 	public function __clone() {
@@ -193,6 +196,13 @@ abstract class WC_Data {
 				// Only clear meta IDs in duplicate mode (maintains backward compatibility).
 				if ( self::CLONE_MODE_DUPLICATE === $this->clone_mode && ! empty( $meta->id ) ) {
 					$this->meta_data[ $array_key ]->id = null;
+				}
+			}
+		}
+		foreach ( array( 'data', 'changes' ) as $set ) {
+			foreach ( $this->{$set} as $prop => $value ) {
+				if ( $value instanceof DateTime ) {
+					$this->{$set}[ $prop ] = clone $value;
 				}
 			}
 		}

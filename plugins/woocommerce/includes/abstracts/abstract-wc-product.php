@@ -155,6 +155,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 
 	/**
 	 * Give the clone its own attribute and download objects.
+	 *
+	 * @since 11.4.0
 	 */
 	public function __clone() {
 		parent::__clone();
