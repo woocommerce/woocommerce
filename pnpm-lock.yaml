@@ -14387,8 +14387,8 @@ packages:
   intl-messageformat@10.7.18:
     resolution: {integrity: sha512-m3Ofv/X/tV8Y3tHXLohcuVuhWKo7BBq62cqY15etqmLxg2DZ34AGGgQDeR+SCta2+zICb1NX83af0GJmbQ1++g==}
 
-  ip-address@10.3.1:
-    resolution: {integrity: sha512-1e9d3kb97NHJTIJDZW9rKqW2h6+dFa50Dy0fpPSMQp2ADje5gvKsXmdiK6dwY5t76TaTt5+P5N1Y/LoToIxP6g==}
+  ip-address@10.7.5:
+    resolution: {integrity: sha512-t2v0rkILYv9WXmSL7TpAaU3HXgaFYOPUcH3QHgwQ++gpJuH3bqyMy4Fvt/DJCTKwzH3Cf+bAp5W/mFL39KPLzA==}
     engines: {node: '>= 12'}
 
   ipaddr.js@1.9.1:
@@ -36893,7 +36893,7 @@ snapshots:
       '@formatjs/icu-messageformat-parser': 2.11.4
       tslib: 2.8.1
 
-  ip-address@10.3.1: {}
+  ip-address@10.7.5: {}
 
   ipaddr.js@1.9.1: {}
 
@@ -41319,7 +41319,7 @@ snapshots:
 
   socks@2.8.7:
     dependencies:
-      ip-address: 10.3.1
+      ip-address: 10.7.5
       smart-buffer: 4.2.0
 
   source-map-generator@0.8.0: {}
