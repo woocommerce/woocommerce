@@ -10,6 +10,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\StructuredData;
 
 use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonRequestHandler;
 use WC_Product;
 
 defined( 'ABSPATH' ) || exit;
@@ -56,6 +57,10 @@ class OpenGraph {
 		 * @param bool $enabled Whether metadata is enabled.
 		 */
 		if ( ! apply_filters( 'woocommerce_enable_open_graph', true ) || is_preview() ) {
+			return;
+		}
+
+		if ( ComingSoonRequestHandler::is_showing_coming_soon() ) {
 			return;
 		}
 
@@ -189,7 +194,7 @@ class OpenGraph {
 	 * @return mixed
 	 */
 	public function handle_wp_template_enhancement_output_buffer( $html ) {
-		if ( ! is_string( $html ) || ! $this->tags ) {
+		if ( ! is_string( $html ) || ! $this->tags || ComingSoonRequestHandler::is_showing_coming_soon() ) {
 			return $html;
 		}
 
