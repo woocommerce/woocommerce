@@ -116,6 +116,62 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Filter values that cannot be used as an import interval.
+	 *
+	 * @return array[]
+	 */
+	public function invalid_import_interval_provider(): array {
+		return array(
+			'null'               => array( null ),
+			'non-numeric string' => array( 'abc' ),
+			'zero'               => array( 0 ),
+			'negative'           => array( -5 ),
+			'below one second'   => array( 0.5 ),
+			'infinite'           => array( INF ),
+		);
+	}
+
+	/**
+	 * Test that an invalid import interval from the filter falls back to the 12 hour default.
+	 *
+	 * @dataProvider invalid_import_interval_provider
+	 *
+	 * @param mixed $value The filter return value.
+	 */
+	public function test_invalid_import_interval_falls_back_to_default( $value ) {
+		$this->clear_scheduled_batch_processor();
+		$this->setExpectedIncorrectUsage( OrdersScheduler::class . '::get_import_interval' );
+
+		$filter = fn() => $value;
+		add_filter( 'woocommerce_analytics_import_interval', $filter );
+
+		$interval = OrdersScheduler::get_import_interval();
+		OrdersScheduler::schedule_recurring_batch_processor();
+
+		remove_filter( 'woocommerce_analytics_import_interval', $filter );
+
+		$this->assertSame( 12 * HOUR_IN_SECONDS, $interval, 'An invalid import interval should fall back to 12 hours' );
+		$this->assertTrue(
+			$this->is_batch_processor_scheduled(),
+			'An invalid import interval should still schedule the batch processor'
+		);
+	}
+
+	/**
+	 * Test that a numeric string from the filter is returned as an integer.
+	 */
+	public function test_numeric_string_import_interval_is_cast_to_int() {
+		$filter = fn() => '3600';
+		add_filter( 'woocommerce_analytics_import_interval', $filter );
+
+		$interval = OrdersScheduler::get_import_interval();
+
+		remove_filter( 'woocommerce_analytics_import_interval', $filter );
+
+		$this->assertSame( 3600, $interval );
+	}
+
+	/**
 	 * Test that handle_scheduled_import_option_change unschedules batch processor when switching to immediate import.
 	 */
 	public function test_handle_scheduled_import_option_change_unschedules_batch_when_disabling_scheduled() {
