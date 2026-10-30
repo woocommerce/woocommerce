@@ -101,10 +101,11 @@ class AgentReadiness {
 	}
 
 	/**
-	 * Field and effect per channel for each check: the bundled map, replaced
-	 * by the published rules file's map where it has one, then the
-	 * woocommerce_agent_readiness_rules filter. A check whose id is missing
-	 * from the filtered array does not run.
+	 * Field and effect per channel for each check that runs. With a stored
+	 * rules file, the file is the list: an id it leaves out does not run, and
+	 * an id code does not know is dropped. With no file, the bundled checks
+	 * run. The woocommerce_agent_readiness_rules filter runs last, and a check
+	 * whose id is missing from the filtered array does not run.
 	 *
 	 * @return array<string, array<string, array{field:string,effect:string}>>
 	 */
@@ -113,9 +114,11 @@ class AgentReadiness {
 		foreach ( $this->get_default_rules() as $id => $rule ) {
 			$bundled[ $id ] = $rule->channels();
 		}
-		// A file entry with no valid channel left keeps the bundled map.
-		$remote   = array_filter( $this->sanitize_channel_rules( $this->remote_rules->channel_rules(), $bundled ) );
-		$defaults = array_merge( $bundled, $remote );
+		if ( $this->remote_rules->has_stored_file() ) {
+			$defaults = $this->without_empty( $this->sanitize_channel_rules( $this->remote_rules->channel_rules(), $bundled ) );
+		} else {
+			$defaults = $bundled;
+		}
 
 		/**
 		 * Filters the per-channel field and effect of each agent readiness check.
@@ -123,7 +126,8 @@ class AgentReadiness {
 		 * Keys are check ids; values map a channel id (chatgpt, google, copilot)
 		 * to the feed field the check tests there and its effect: not_listable
 		 * when the channel's spec requires the field, gaps when the product
-		 * lists with a gap. Remove a check id to stop that check running.
+		 * lists with a gap. Remove a check id to stop that check running. Add
+		 * back an id the rules file left out to run that bundled check.
 		 *
 		 * @since 11.4.0
 		 *
@@ -131,7 +135,7 @@ class AgentReadiness {
 		 */
 		$filtered = apply_filters( 'woocommerce_agent_readiness_rules', $defaults );
 
-		return is_array( $filtered ) ? $this->sanitize_channel_rules( $filtered, $defaults ) : $defaults;
+		return is_array( $filtered ) ? $this->without_empty( $this->sanitize_channel_rules( $filtered, $bundled ) ) : $defaults;
 	}
 
 	/**
@@ -161,6 +165,21 @@ class AgentReadiness {
 			}
 		}
 		return $rules;
+	}
+
+	/**
+	 * Drop checks left with no valid channel.
+	 *
+	 * @param array<string, array<string, array{field:string,effect:string}>> $rules Channel map by check id.
+	 * @return array<string, array<string, array{field:string,effect:string}>>
+	 */
+	private function without_empty( array $rules ): array {
+		return array_filter(
+			$rules,
+			static function ( array $channels ): bool {
+				return array() !== $channels;
+			}
+		);
 	}
 
 	/**

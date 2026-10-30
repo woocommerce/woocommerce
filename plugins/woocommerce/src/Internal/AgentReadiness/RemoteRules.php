@@ -9,11 +9,15 @@ defined( 'ABSPATH' ) || exit;
  * Channel rules fetched from a published rules file, so a channel's spec
  * change can reach stores without a WooCommerce release.
  *
- * The file is fetched before each background scan, at most once a day. Only
- * a GET of the file is made; no store data is sent. A failed fetch keeps the
- * last good copy, and with no copy the bundled rules apply. No URL is set by
- * default until the file has a home; the woocommerce_agent_readiness_rules_url
- * filter sets one.
+ * The file is the list of checks that run. Each id has to match a check in
+ * code; an id the file leaves out does not run, and an id code does not know
+ * is ignored. The file is fetched before each background scan, at most once a
+ * day. Only a GET is made; no store data is sent. A failed fetch keeps the
+ * last good copy, and with no copy the bundled checks apply.
+ *
+ * No URL is set until the file is served. It will live at PUBLISHED_URL, the
+ * same host as the payment gateway suggestions. The
+ * woocommerce_agent_readiness_rules_url filter sets the URL.
  *
  * @since 11.4.0
  */
@@ -25,13 +29,19 @@ class RemoteRules {
 	public const OPTION = 'woocommerce_agent_readiness_remote_rules';
 
 	/**
+	 * Where the file will be served, once that endpoint exists.
+	 */
+	public const PUBLISHED_URL = 'https://woocommerce.com/wp-json/wccom/agent-readiness/1.0/rules.json';
+
+	/**
 	 * Fetch the rules file and store it when it is valid.
 	 *
 	 * @return bool Whether a new copy was stored.
 	 */
 	public function refresh(): bool {
 		/**
-		 * Filters the URL of the agent readiness rules file. Empty means the bundled rules only.
+		 * Filters the URL of the agent readiness rules file. Empty means the bundled checks only.
+		 * Set this to RemoteRules::PUBLISHED_URL once that endpoint exists.
 		 *
 		 * @since 11.4.0
 		 *
@@ -72,6 +82,15 @@ class RemoteRules {
 			false
 		);
 		return true;
+	}
+
+	/**
+	 * Whether a rules file is stored. An empty checks list still counts: the
+	 * file is then a subset of nothing, and the bundled checks do not fill in.
+	 */
+	public function has_stored_file(): bool {
+		$stored = get_option( self::OPTION );
+		return is_array( $stored ) && isset( $stored['checks'] ) && is_array( $stored['checks'] );
 	}
 
 	/**

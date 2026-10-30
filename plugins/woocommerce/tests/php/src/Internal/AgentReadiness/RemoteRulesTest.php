@@ -127,6 +127,7 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 		$this->assertFalse( $this->sut->refresh() );
 		$this->assertSame( array(), $this->requests );
 		$this->assertSame( array(), $this->sut->channel_rules() );
+		$this->assertArrayHasKey( 'missing_images', $this->agent_readiness()->get_channel_rules(), 'With no file, the bundled checks run' );
 	}
 
 	/**
@@ -153,7 +154,7 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( array( 'google' ), array_keys( $checks['missing_brand']['channels'] ), 'The file\'s map replaces the bundled one' );
 		$this->assertSame( 1, $report['channels']['google']['not_listable'] );
-		$this->assertArrayHasKey( 'chatgpt', $checks['missing_images']['channels'], 'Checks the file leaves out keep their bundled map' );
+		$this->assertArrayNotHasKey( 'missing_images', $checks, 'A check the file leaves out does not run' );
 	}
 
 	/**
@@ -175,6 +176,26 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( 'gaps', $this->sut->channel_rules( strtotime( '2027-01-30' ) )['image_too_small']['google']['effect'] );
 		$this->assertSame( 'not_listable', $this->sut->channel_rules( strtotime( '2027-01-31' ) )['image_too_small']['google']['effect'] );
+	}
+
+	/**
+	 * @testdox A failed fetch before any copy is stored is reported as a failure, and the bundled checks run.
+	 */
+	public function test_failed_fetch_with_no_copy_uses_bundled_checks(): void {
+		add_filter(
+			'woocommerce_agent_readiness_rules_url',
+			static function () {
+				return self::URL;
+			}
+		);
+		$this->answer = array(
+			'body' => 'Not found',
+			'code' => 404,
+		);
+
+		$this->assertFalse( $this->sut->refresh(), 'The failed sync is visible to the caller' );
+		$this->assertFalse( $this->sut->has_stored_file() );
+		$this->assertArrayHasKey( 'missing_images', $this->agent_readiness()->get_channel_rules(), 'The bundled checks still run' );
 	}
 
 	/**
@@ -208,7 +229,7 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Unknown checks, channels and effects in the file never reach the rules filter, an entry with nothing valid keeps the bundled map, and the filter still has the last word.
+	 * @testdox Unknown checks, channels and effects in the file never reach the rules filter, an entry with nothing valid does not run, and the filter still has the last word.
 	 */
 	public function test_file_is_sanitized_and_filter_wins(): void {
 		$this->serve(
@@ -252,9 +273,9 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 		$rules = $this->agent_readiness()->get_channel_rules();
 
 		$this->assertArrayNotHasKey( 'not_a_check', $seen );
-		$this->assertArrayNotHasKey( 'bing', $seen['title_too_long'] );
+		$this->assertArrayNotHasKey( 'title_too_long', $seen, 'Nothing valid left: the check does not run' );
 		$this->assertSame( 'not_listable', $seen['missing_gtin']['google']['effect'], 'The filter sees the file\'s valid values' );
-		$this->assertSame( 'gaps', $rules['title_too_long']['google']['effect'], 'Nothing valid left: the bundled map stays' );
+		$this->assertArrayNotHasKey( 'title_too_long', $rules );
 		$this->assertSame( 'gaps', $rules['missing_gtin']['google']['effect'] );
 	}
 
@@ -282,5 +303,26 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 		$this->sut->refresh();
 
 		$this->assertSame( array( 'google' ), array_keys( $brand_channels( $agent_readiness->get_report() ) ) );
+	}
+
+	/**
+	 * @testdox The shipped rules file names only checks the code can run, and those are the ones that run.
+	 */
+	public function test_shipped_rules_file_is_a_subset_of_the_code(): void {
+		$path = dirname( __DIR__, 5 ) . '/src/Internal/AgentReadiness/rules.json';
+		$file = json_decode( (string) file_get_contents( $path ), true );
+		$this->assertIsArray( $file );
+		$this->assertIsArray( $file['checks'] );
+
+		$known  = array_keys( ( new AgentReadiness() )->get_default_rules() );
+		$checks = array();
+		foreach ( $file['checks'] as $id => $check ) {
+			$this->assertContains( $id, $known, 'The file names a check the code does not have' );
+			$checks[ $id ] = $check['channels'];
+		}
+
+		$this->serve( $checks );
+		$this->sut->refresh();
+		$this->assertSame( array_keys( $checks ), array_keys( $this->agent_readiness()->get_channel_rules() ) );
 	}
 }

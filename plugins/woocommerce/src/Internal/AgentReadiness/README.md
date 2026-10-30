@@ -100,7 +100,11 @@ array(
 
 Channel specs change faster than WooCommerce releases, so each background scan first fetches a published rules file (`RemoteRules`). Only a GET of the file is made; no store data is sent. The URL comes from the `woocommerce_agent_readiness_rules_url` filter and is empty by default until the file has a home, so nothing is fetched unless it is set.
 
-The file has a `version` and, per check id, a `channels` map in the same shape as the `woocommerce_agent_readiness_rules` filter. A channel entry may carry `effect_from` (`{ "2027-01-31": "not_listable" }`) for a spec change announced ahead. A check in the file uses the file's map; other checks keep the bundled one, and the rules filter runs last. Unknown checks, channels and effects are dropped before the filter sees them, a file entry with nothing valid left keeps the bundled map, and a failed or malformed fetch keeps the last good copy (option `woocommerce_agent_readiness_remote_rules`). The file can change fields and effects, not add checks: a new check still needs code.
+The file has a `version` and a `checks` object. The ids in `checks` are the checks that run, and each one has to match a check shipped in code. An id the file leaves out does not run. An id code does not know, an unknown channel, or an effect other than `not_listable` or `gaps` is dropped. A check left with no valid channel does not run. With no stored file, the bundled checks run. A failed or malformed fetch keeps the last good copy (option `woocommerce_agent_readiness_remote_rules`).
+
+Per check, `channels` maps a channel id to the feed field and the effect, the same shape as the `woocommerce_agent_readiness_rules` filter. A channel entry may carry `effect_from` (`{ "2027-01-31": "not_listable" }`) for a spec change announced ahead. The filter runs last, so it can still drop a check or put a bundled one back. The file cannot add a check the code has never seen: that still needs a class.
+
+`rules.json` in this directory is the file to publish. It lists every check the code has today, so the first publish changes nothing. Removing an id there turns that check off without a WooCommerce release. It will be served from `https://woocommerce.com/wp-json/wccom/agent-readiness/1.0/rules.json`, the same host as the payment gateway suggestions (`wccom-plugins` on WooCommerce.com). Core's URL stays empty until that endpoint exists.
 
 ## Background scan and REST
 
@@ -116,7 +120,7 @@ The scan walks published simple and variable products shown in the shop catalog 
 
 ## Updating rules
 
-The per-channel field and effect live in each check's `channels()`. The final map passes through the `woocommerce_agent_readiness_rules` filter, keyed by check id, so it can change without a release. Removing a check id stops that check. Unknown channels and effects are dropped.
+The per-channel field and effect live in each check's `channels()`, and that is what runs until a rules file is stored. After that, `rules.json` is the list. The `woocommerce_agent_readiness_rules` filter still runs last. Unknown channels and effects are dropped.
 
 ## Product feeds
 
