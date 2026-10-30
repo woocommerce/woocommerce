@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
+use Automattic\WooCommerce\Internal\ProductCSVImport\DeferredRows;
 use Automattic\WooCommerce\Internal\ProductCustoms\CustomsDataValidator;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 
@@ -56,6 +57,34 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	private $original_id_map = array();
 
 	/**
+	 * Whether the current formatting callback is parsing an update's parent column.
+	 *
+	 * @var bool
+	 */
+	private $parsing_update_parent = false;
+
+	/**
+	 * Parent SKU awaiting a successful update elsewhere in the CSV.
+	 *
+	 * @var array<int, string>
+	 */
+	private $unresolved_parent_skus = array();
+
+	/**
+	 * Source file positions corresponding to parsed rows, including skipped blank lines.
+	 *
+	 * @var int[]
+	 */
+	private $parsed_file_positions = array();
+
+	/**
+	 * Final-pass batch size, saved before read_file() consumes the source row limit.
+	 *
+	 * @var int
+	 */
+	private $deferred_batch_size = 30;
+
+	/**
 	 * Initialize importer.
 	 *
 	 * @param string $file   File to read.
@@ -79,6 +108,8 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 		$this->params = wp_parse_args( $params, $default_args );
 		$this->file   = $file;
+
+		$this->deferred_batch_size = $this->params['lines'] > 0 ? (int) $this->params['lines'] : 30;
 
 		if ( isset( $this->params['mapping']['from'], $this->params['mapping']['to'] ) ) {
 			$this->params['mapping'] = array_combine( $this->params['mapping']['from'], $this->params['mapping']['to'] );
@@ -301,6 +332,14 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			return $id;
 		}
 
+		if ( $this->parsing_update_parent ) {
+			$id = $this->get_existing_parent_id( $value );
+			if ( ! $id ) {
+				$this->unresolved_parent_skus[ $this->parsing_raw_data_index ] = $value;
+			}
+			return $id ? $id : '';
+		}
+
 		$id = wc_get_product_id_by_sku( $value );
 
 		if ( $id ) {
@@ -322,6 +361,23 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		}
 
 		return '';
+	}
+
+	/**
+	 * Resolve a parent SKU only to an existing, usable variable product.
+	 *
+	 * @param string $sku Parent SKU after the parent formatting callback's transformations.
+	 * @return int Parent ID, or zero when the reference cannot be used yet.
+	 */
+	private function get_existing_parent_id( string $sku ): int {
+		$id      = wc_get_product_id_by_sku( $sku );
+		$product = $id ? wc_get_product( $id ) : false;
+
+		if ( ! $product instanceof WC_Product_Variable || in_array( $product->get_status(), array( 'importing', ProductStatus::TRASH ), true ) ) {
+			return 0;
+		}
+
+		return $product->get_id();
 	}
 
 	/**
@@ -1261,8 +1317,18 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 					$value = wp_check_invalid_utf8( $value, true );
 				}
 
-				$data[ $mapped_keys[ $id ] ] = call_user_func( $parse_functions[ $id ], $value );
+				$this->parsing_update_parent = $this->params['update_existing'] && 'parent_id' === $mapped_keys[ $id ];
+				try {
+					$data[ $mapped_keys[ $id ] ] = call_user_func( $parse_functions[ $id ], $value );
+				} finally {
+					$this->parsing_update_parent = false;
+				}
 			}
+
+			if ( isset( $this->unresolved_parent_skus[ $row_index ] ) && empty( $data['parent_id'] ) ) {
+				$data['_unresolved_parent_sku'] = $this->unresolved_parent_skus[ $row_index ];
+			}
+			$this->parsed_file_positions[] = $this->file_positions[ $row_index + 1 ];
 
 			/**
 			 * Filter product importer parsed data.
@@ -1460,9 +1526,114 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 */
 	public function import() {
 		$this->start_time = time();
-		$index            = 0;
-		$update_existing  = $this->params['update_existing'];
-		$data             = array(
+		$queue            = new DeferredRows( $this->file );
+
+		if ( $this->params['update_existing'] && 0 === $this->params['start_pos'] ) {
+			$queue->clear();
+		}
+
+		$data = $this->import_rows( $this->parsed_data );
+
+		if ( $this->params['update_existing'] && $this->file_position >= filesize( $this->file ) ) {
+			$processed_rows = ! empty( $this->parsed_data );
+			$unlimited      = $this->params['lines'] < 0 && ! $this->params['prevent_timeouts'];
+			do {
+				$batch = $queue->get_batch( $this->deferred_batch_size );
+				foreach ( $batch as $position => $row ) {
+					if ( $processed_rows && $this->params['prevent_timeouts'] && ( $this->time_exceeded() || $this->memory_exceeded() ) ) {
+						break;
+					}
+
+					$result = $this->import_rows( array( $row ), true );
+					foreach ( $result as $type => $items ) {
+						$data[ $type ] = array_merge( $data[ $type ], $items );
+					}
+					$queue->delete( $position );
+					$processed_rows = true;
+				}
+			} while ( $unlimited && ! empty( $batch ) );
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Keep the controller importing at EOF until all deferred rows have had their final attempt.
+	 *
+	 * @since 11.3.0
+	 *
+	 * @return int
+	 */
+	public function get_percent_complete() {
+		$percent = parent::get_percent_complete();
+
+		if ( $this->params['update_existing'] && 100 === $percent && ( new DeferredRows( $this->file ) )->has_rows() ) {
+			return 99;
+		}
+
+		return $percent;
+	}
+
+	/**
+	 * Identify a row's current product and the match keys it may establish on save.
+	 *
+	 * @param array $row Formatted product row.
+	 * @return array{product_id: int, identifiers: string[]} Current product and its proposed match keys.
+	 */
+	private function get_deferred_row_identity( array $row ): array {
+		$id               = absint( $row['id'] ?? 0 );
+		$sku              = $row['sku'] ?? '';
+		$global_unique_id = $this->normalize_global_unique_id( $row['global_unique_id'] ?? '' );
+		if ( ! $id && $sku ) {
+			$id = wc_get_product_id_by_sku( $sku );
+		} elseif ( ! $id && '' !== $global_unique_id ) {
+			$matched_id = $this->match_product_id_by_global_unique_id( $global_unique_id, $row['type'] ?? '' );
+			$id         = is_wp_error( $matched_id ) ? 0 : $matched_id;
+		}
+
+		$identifiers = array();
+		if ( $id ) {
+			$identifiers[] = 'id:' . $id;
+		}
+		if ( $sku ) {
+			$identifiers[] = 'sku:' . $sku;
+		}
+		if ( '' !== $global_unique_id ) {
+			$identifiers[] = 'global_unique_id:' . $global_unique_id;
+		}
+		return array(
+			'product_id'  => $id,
+			'identifiers' => $identifiers,
+		);
+	}
+
+	/**
+	 * Queue an update while retaining the product matched before any pending SKU changes.
+	 *
+	 * @param DeferredRows $queue Import's deferred rows.
+	 * @param array        $row Formatted product row.
+	 * @param array        $identity Matched product and proposed keys.
+	 * @phpstan-param array{product_id: int, identifiers: string[]} $identity
+	 */
+	private function defer_product_row( DeferredRows $queue, array $row, array $identity ): void {
+		if ( $identity['product_id'] ) {
+			$row['id'] = $identity['product_id'];
+		}
+		$queue->save( $this->file_position, $row, $identity['identifiers'] );
+	}
+
+	/**
+	 * Import formatted rows without repeating their formatting callbacks.
+	 *
+	 * @param array $rows Formatted product rows.
+	 * @param bool  $final_pass Whether unresolved parents must now report a failure.
+	 * @return array Import results.
+	 */
+	private function import_rows( array $rows, bool $final_pass = false ): array {
+		$update_existing = $this->params['update_existing'];
+		$queue           = new DeferredRows( $this->file );
+		$has_pending     = $update_existing && ! $final_pass && $queue->has_rows();
+		$data            = array(
 			'imported'            => array(),
 			'imported_variations' => array(),
 			'failed'              => array(),
@@ -1470,7 +1641,50 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			'skipped'             => array(),
 		);
 
-		foreach ( $this->parsed_data as $parsed_data_key => $parsed_data ) {
+		foreach ( $rows as $parsed_data_key => $parsed_data ) {
+			if ( $parsed_data_key > 0 && $this->params['prevent_timeouts'] && ( $this->time_exceeded() || $this->memory_exceeded() ) ) {
+				break;
+			}
+
+			if ( ! $final_pass ) {
+				$this->file_position = $this->parsed_file_positions[ $parsed_data_key ] ?? $this->file_position;
+			}
+
+			if ( $has_pending ) {
+				$identity = $this->get_deferred_row_identity( $parsed_data );
+				if ( $identity['identifiers'] && $queue->has_identifier( $identity['identifiers'][0] ) ) {
+					$this->defer_product_row( $queue, $parsed_data, $identity );
+					continue;
+				}
+			}
+
+			$missing_parent = false;
+			if ( $update_existing && isset( $parsed_data['_unresolved_parent_sku'] ) && empty( $parsed_data['parent_id'] ) ) {
+				$parent_sku = $parsed_data['_unresolved_parent_sku'];
+				$parent_id  = is_string( $parent_sku ) && '' !== $parent_sku ? $this->get_existing_parent_id( $parent_sku ) : 0;
+
+				if ( ! $parent_id ) {
+					if ( ! $final_pass && is_string( $parent_sku ) && '' !== $parent_sku ) {
+						$this->defer_product_row( $queue, $parsed_data, $this->get_deferred_row_identity( $parsed_data ) );
+						$has_pending = true;
+						continue;
+					}
+
+					$missing_parent = true;
+					$parent_id      = '';
+				}
+
+				$parsed_data['parent_id'] = $parent_id;
+			}
+			unset( $parsed_data['_unresolved_parent_sku'] );
+
+			/**
+			 * Fires before a resolved row is matched and imported, or a deferred row makes its final attempt.
+			 *
+			 * @since 3.1.0
+			 *
+			 * @param array $parsed_data Formatted product row.
+			 */
 			do_action( 'woocommerce_product_import_before_import', $parsed_data );
 
 			$id  = isset( $parsed_data['id'] ) ? absint( $parsed_data['id'] ) : 0;
@@ -1574,6 +1788,15 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 				}
 			}
 
+			if ( $missing_parent ) {
+				$data['failed'][] = new WP_Error(
+					'woocommerce_product_importer_missing_variation_parent_id',
+					__( 'Variation cannot be imported: The parent SKU does not match a variable product.', 'woocommerce' ),
+					array( 'row' => $this->get_row_id( $parsed_data ) )
+				);
+				continue;
+			}
+
 			$result = $this->process_item( $parsed_data );
 
 			if ( is_wp_error( $result ) ) {
@@ -1585,13 +1808,6 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 					$data['imported_variations'][] = $result['id'];
 			} else {
 				$data['imported'][] = $result['id'];
-			}
-
-			++$index;
-
-			if ( $this->params['prevent_timeouts'] && ( $this->time_exceeded() || $this->memory_exceeded() ) ) {
-				$this->file_position = $this->file_positions[ $index ];
-				break;
 			}
 		}
 
