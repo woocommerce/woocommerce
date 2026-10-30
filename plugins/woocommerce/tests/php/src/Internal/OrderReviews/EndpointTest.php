@@ -1231,6 +1231,27 @@ class EndpointTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * `wp_parse_str()` already decodes the arg once, so the target must not be
+	 * decoded a second time or a percent-escape in it would be lost.
+	 *
+	 * @testdox A percent-escape in the return target survives the round trip.
+	 */
+	public function test_login_redirect_preserves_percent_escapes_in_the_target(): void {
+		$review_url = home_url( '/checkout/order-received/?note=a%20b' );
+		$login_page = add_query_arg(
+			Endpoint::RETURN_QUERY_VAR,
+			rawurlencode( $review_url ),
+			home_url( '/my-account/' )
+		);
+
+		$this->assertSame(
+			$review_url,
+			$this->endpoint->maybe_return_to_review( $login_page ),
+			'A percent-escape in the target must survive, not be decoded twice.'
+		);
+	}
+
+	/**
 	 * @testdox A login redirect without the return arg is left alone.
 	 */
 	public function test_login_redirect_without_the_return_arg_is_untouched(): void {

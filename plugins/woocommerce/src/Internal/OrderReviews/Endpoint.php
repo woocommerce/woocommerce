@@ -897,7 +897,7 @@ class Endpoint {
 		wp_parse_str( $query, $args );
 		// `wp_parse_str()` yields an array for `?arg[]=…`, which is not a target.
 		$raw    = $args[ self::RETURN_QUERY_VAR ] ?? '';
-		$target = is_string( $raw ) ? rawurldecode( $raw ) : '';
+		$target = is_string( $raw ) ? $raw : '';
 
 		// Same-host only; `wp_validate_redirect()` falls back when it is not.
 		return $target ? wp_validate_redirect( $target, $redirect ) : $redirect;
