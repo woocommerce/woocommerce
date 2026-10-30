@@ -14,7 +14,6 @@ This reference maps every template and template part WooCommerce registers, when
 
 Before you begin, make sure you have the following in place:
 
-- **A current version of WooCommerce.** This guide reflects current registrations, including Products by Brand. Brands became part of WooCommerce core in 9.4 and were enabled by default starting in 9.6.
 - **A Block theme.** The template registrations and fallback behavior covered here apply to Block themes. Classic themes use a separate, PHP-based template system, covered in the [classic theme developer handbook](https://developer.woocommerce.com/docs/theming/theme-development/classic-theme-developer-handbook/).
 - **Familiarity with the Site Editor.** You should know how to open templates and view Block markup through the **Code editor**.
 - **Familiarity with WordPress's Block template hierarchy.** This guide assumes you already know how WordPress resolves a template file to a request; it focuses on what WooCommerce adds on top of that system.
@@ -136,10 +135,11 @@ A template part only renders once something includes it, so registering one chan
 <!-- wp:template-part {"slug":"mini-cart","theme":"your-theme"} /-->
 ```
 
-WooCommerce supplies six template-part files:
+WooCommerce supplies seven template-part files:
 
 - **Mini-Cart** (mini-cart) supplies the contents of the Mini-Cart drawer, the panel that opens without navigating away from the current page when a shopper adds an item to cart.
 - **Checkout header** (checkout-header) supplies the header used specifically on the Checkout template (separate from the site's main header), so a merchant can strip distracting navigation away from the payment step.
+- **Coming soon social links** (coming-soon-social-links) supplies the reusable social-links section included by WooCommerce's Coming Soon patterns.
 - **Simple, External, Variable, and Grouped product 'add-to-cart-with-options'** parts handle the add-to-cart form on the product page, one per product type. Their registry entries depend on product types registered with WooCommerce, not on whether the catalog currently contains products of each type. WooCommerce's four core product types normally make all four parts available.
 
 The four add-to-cart-with-options parts sit inside its own template part area, separate from the standard header and footer areas, and back the Add to Cart and Options Block. This lets a theme or merchant give each product type its own layout, such as a stepper for a simple product's quantity field, instead of one form that adapts its own contents internally.
@@ -234,12 +234,5 @@ These checks ultimately give you a reliable path from a bare Block theme to a fu
 
 ## References
 
-- [Theming for Woo Blocks](https://developer.woocommerce.com/docs/theming/block-theme-development/theming-woo-blocks/)
-- [Template structure and overriding templates via a theme](https://developer.woocommerce.com/docs/theming/theme-development/template-structure/)
-- [Cart and Checkout Blocks theming](https://developer.woocommerce.com/docs/theming/block-theme-development/cart-and-checkout/)
-- [Add to Cart + Options Block](https://woocommerce.com/document/add-to-cart-options-block/)
-- [Introducing Brands](https://developer.woocommerce.com/2024/10/01/introducing-brands/)
-- [WooCommerce Code Reference: BlockTemplatesRegistry.php](https://woocommerce.github.io/code-reference/files/woocommerce-src-blocks-blocktemplatesregistry.html)
-- [WooCommerce Code Reference: BlockTemplateUtils.php](https://woocommerce.github.io/code-reference/files/woocommerce-src-blocks-utils-blocktemplateutils.html)
 - [WordPress template parts](https://developer.wordpress.org/themes/templates/template-parts/)
 - [WP-CLI: wp block template](https://developer.wordpress.org/cli/commands/block/template/)

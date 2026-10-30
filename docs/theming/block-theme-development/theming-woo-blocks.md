@@ -6,6 +6,8 @@ post_title: WooCommerce block theme development
 
 :::info
 We're assuming you have some previous knowledge about block theme development and some WordPress concepts. If you are completely new to block theme development, please check [Develop Your First Low-Code Block Theme](https://learn.wordpress.org/course/develop-your-first-low-code-block-theme/) to learn about block theme development, and explore the [Create Block Theme plugin](https://wordpress.org/plugins/create-block-theme/) tool when you're ready to create a new theme.
+
+For a WooCommerce-specific starting point, [Purple](https://wordpress.org/themes/purple/) is a starter Block theme available in the WordPress.org theme directory. You can also [follow Purple's development in the WooCommerce monorepo](https://github.com/woocommerce/woocommerce/tree/trunk/themes/purple).
 :::
 
 ## General concepts

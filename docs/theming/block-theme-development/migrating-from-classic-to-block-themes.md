@@ -14,8 +14,6 @@ However, the difference is where that work happens. This page will map some clas
 
 Before you begin, make sure you have the following in place:
 
-- **WordPress 6.9 or later.** This is the minimum WordPress version required by the current WooCommerce release. Check the target WooCommerce release's `readme.txt` before supporting an older combination.
-- **A current version of WooCommerce.** Block templates and global style support require a recent WooCommerce release.
 - **Familiarity with classic WooCommerce theme development.** This page assumes working knowledge of PHP templates, action hooks, and CSS overrides.
 - **A code editor capable of editing HTML and JSON files.** Block templates are HTML and theme styles are defined in `theme.json`.
 - **The Create Block Theme plugin (optional).** This can help create or export a Block theme, but it is not required and does not automatically translate classic WooCommerce PHP templates or hooks.
@@ -111,15 +109,10 @@ Layout control in a Block theme belongs in the template itself, either by editin
 
 If you are converting an existing classic theme, the [Create Block Theme plugin](https://wordpress.org/plugins/create-block-theme/) can help generate or export a Block theme file structure and `theme.json`. Treat its output as a starting point: you still need to recreate PHP template overrides as Block markup, move layout decisions out of hooks, and translate styles deliberately.
 
-Once the base structure is in place, you can apply the WooCommerce-specific customizations covered in this section directly. The [Develop Your First Low-Code Block Theme](https://learn.wordpress.org/course/develop-your-first-low-code-block-theme/) course on Learn WordPress is a great way to establish that foundational structure.
+[Purple](https://wordpress.org/themes/purple/) is a WooCommerce starter Block theme available in the WordPress.org theme directory. Its commerce-ready templates and patterns provide a working reference or starting point for a new theme.
 
+Once the base structure is in place, you can apply the WooCommerce-specific customizations covered in this section directly. The [Develop Your First Low-Code Block Theme](https://learn.wordpress.org/course/develop-your-first-low-code-block-theme/) course on Learn WordPress is a great way to establish that foundational structure.
 
 ## References
 
-- [Classic theme developer handbook](https://developer.woocommerce.com/docs/theming/theme-development/classic-theme-developer-handbook/). The full reference for classic WooCommerce theme development.
-- [CSS styling for themes](https://developer.woocommerce.com/docs/theming/block-theme-development/css-styling/). BEM class name conventions, container queries, and handling theme style conflicts.
-- [Template hierarchy reference](/docs/theming/block-theme-development/template-hierarchy/). All WooCommerce Block templates, fallback order, and override paths.
-- [WooCommerce block references](https://developer.woocommerce.com/docs/block-development/reference/block-references/). The full list of WooCommerce Block names for use in `theme.json`.
 - [Global settings and styles](https://developer.wordpress.org/themes/global-settings-and-styles/styles/). WordPress documentation on `theme.json` and the global styles system.
-- [Create Block Theme plugin](https://wordpress.org/plugins/create-block-theme/). A tool for creating and exporting Block themes.
-- [Develop Your First Low-Code Block Theme](https://learn.wordpress.org/course/develop-your-first-low-code-block-theme/). A Learn WordPress course covering Block theme fundamentals.

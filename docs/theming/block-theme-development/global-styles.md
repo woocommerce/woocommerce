@@ -14,9 +14,7 @@ This section will cover how global styles apply across a WooCommerce store throu
 
 Before you begin, make sure you have the following in place:
 
-- **A version of WordPress supported by your WooCommerce release.** This guide's examples use `theme.json` version 3, introduced in WordPress 6.6.
 - **A Block theme.** Classic themes can also use `theme.json`, but this guide's Site Editor workflow and WooCommerce Block-template examples assume a Block theme.
-- **A current version of WooCommerce.** Block names, registered supports, and available style variations may be different in an earlier release. This guide reflects current Block registrations.
 - **Familiarity with `theme.json`.** The guidance builds directly on the `theme.json` styles and settings structure rather than introducing it from scratch.
 
 ## How global styles apply to WooCommerce Blocks
@@ -378,11 +376,6 @@ With those checks in place, you can move through a complete path from a bare Blo
 
 ## References
 
-- [WooCommerce Blocks reference](https://developer.woocommerce.com/docs/block-development/reference/block-references/).
-- [Theming WooCommerce Blocks](https://developer.woocommerce.com/docs/theming/block-theme-development/theming-woo-blocks/).
-- [On-Sale Badge Block](https://developer.woocommerce.com/docs/block-development/extensible-blocks/product-sale-badge-block/).
-- WordPress' [Global settings and styles](https://developer.wordpress.org/themes/global-settings-and-styles/).
 - WordPress' [Global settings and styles: Styles](https://developer.wordpress.org/themes/global-settings-and-styles/styles/).
 - WordPress' [Block style variations](https://developer.wordpress.org/themes/features/block-style-variations/).
 - WordPress' [Block Types REST API endpoint](https://developer.wordpress.org/rest-api/reference/block-types/).
-- [Customizing the Cart and Checkout Pages](https://woocommerce.com/document/woocommerce-store-editing/customizing-cart-and-checkout/).
