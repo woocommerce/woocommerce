@@ -235,6 +235,21 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox With no URL filter the published rules file is fetched, and while it is not served the bundled checks run.
+	 */
+	public function test_default_url_is_the_published_file(): void {
+		$this->answer = array(
+			'body' => 'Not found',
+			'code' => 404,
+		);
+
+		$this->assertFalse( $this->sut->refresh() );
+		$this->assertSame( array( RemoteRules::PUBLISHED_URL ), $this->requests );
+		$this->assertFalse( $this->sut->has_stored_file() );
+		$this->assertArrayHasKey( 'missing_images', $this->agent_readiness()->get_channel_rules(), 'The bundled checks still run' );
+	}
+
+	/**
 	 * @testdox A network error stores nothing, and the bundled checks run.
 	 */
 	public function test_network_error_uses_bundled_checks(): void {
