@@ -20,7 +20,7 @@ defined( 'ABSPATH' ) || exit;
  */
 class CatalogOpenGraphUrl {
 	/**
-	 * Get the current URL without the add-to-cart action.
+	 * Get the current URL without the add-to-cart action or private share key.
 	 *
 	 * @since 11.4.0
 	 * @return string
@@ -34,7 +34,7 @@ class CatalogOpenGraphUrl {
 		$params = array_filter(
 			explode( '&', $parts[1] ),
 			static function ( $param ) {
-				return 'add-to-cart' !== urldecode( explode( '=', $param, 2 )[0] );
+				return ! in_array( urldecode( explode( '=', $param, 2 )[0] ), array( 'add-to-cart', 'woo-share' ), true );
 			}
 		);
 		return $parts[0] . ( $params ? '?' . implode( '&', $params ) : '' );
