@@ -359,10 +359,9 @@ class WC_Order extends WC_Abstract_Order {
 				'manual' => (bool) $manual_update,
 			);
 
-			if ( $manual_update && $this->staging_status ) {
-				$this->pending_edit_status = $result['to'];
-			} elseif ( $manual_update ) {
-				$this->pending_edit_status = null;
+			$this->pending_edit_status = $manual_update && $this->staging_status ? $result['to'] : null;
+
+			if ( $manual_update && ! $this->staging_status ) {
 				do_action( 'woocommerce_order_edit_status', $this->get_id(), $result['to'] );
 			}
 
@@ -427,8 +426,9 @@ class WC_Order extends WC_Abstract_Order {
 
 	/**
 	 * Set the order status in memory, like set_status(), including the paid and completed dates, but leave
-	 * woocommerce_order_edit_status to the next save(), which fires it before it writes. update_status()
-	 * calls this method, then save().
+	 * woocommerce_order_edit_status to the next save(), which fires it before it writes. A later status
+	 * change before that save() replaces the pending action, or cancels it when the change is not manual.
+	 * update_status() calls this method, then save().
 	 *
 	 * An order class that overrides update_status() with rules of its own must override this method
 	 * too, in the same class, with the same rules. Abilities stage a status change with this method
