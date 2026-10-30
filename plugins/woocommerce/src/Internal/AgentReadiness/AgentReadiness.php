@@ -131,7 +131,8 @@ class AgentReadiness {
 		 */
 		$filtered = apply_filters( 'woocommerce_agent_readiness_rules', $defaults );
 
-		return is_array( $filtered ) ? $this->sanitize_channel_rules( $filtered, $defaults ) : $defaults;
+		// A check left with no valid channel doesn't run, as if the filter had removed it.
+		return is_array( $filtered ) ? array_filter( $this->sanitize_channel_rules( $filtered, $defaults ) ) : $defaults;
 	}
 
 	/**
