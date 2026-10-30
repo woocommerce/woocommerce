@@ -5,16 +5,10 @@ namespace Automattic\WooCommerce\Internal\AgentReadiness;
 
 use Automattic\WooCommerce\Internal\AgentReadiness\Checks\DuplicateGtinCheck;
 use Automattic\WooCommerce\Internal\AgentReadiness\Checks\ImageTooSmallCheck;
-use Automattic\WooCommerce\Internal\AgentReadiness\Checks\InvalidGtinCheck;
 use Automattic\WooCommerce\Internal\AgentReadiness\Checks\MissingBrandCheck;
 use Automattic\WooCommerce\Internal\AgentReadiness\Checks\MissingGtinCheck;
-use Automattic\WooCommerce\Internal\AgentReadiness\Checks\MissingImagesCheck;
-use Automattic\WooCommerce\Internal\AgentReadiness\Checks\MissingProductTextCheck;
 use Automattic\WooCommerce\Internal\AgentReadiness\Checks\MissingRegularPriceCheck;
-use Automattic\WooCommerce\Internal\AgentReadiness\Checks\MissingVariationImagesCheck;
-use Automattic\WooCommerce\Internal\AgentReadiness\Checks\TitleTooLongCheck;
-use Automattic\WooCommerce\Internal\AgentReadiness\Checks\UncategorisedCheck;
-use Automattic\WooCommerce\Internal\AgentReadiness\Checks\VariationAttributesNotSetCheck;
+use Automattic\WooCommerce\Internal\AgentReadiness\Checks\SimpleCheck;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -83,21 +77,22 @@ class AgentReadiness {
 	 * @return array<string, ReadinessRule>
 	 */
 	public function get_default_rules(): array {
-		$rules = array();
+		$simple = SimpleCheck::table();
+		$rules  = array();
 		foreach (
 			array(
 				new MissingRegularPriceCheck(),
-				new MissingImagesCheck(),
-				new MissingProductTextCheck(),
+				$simple['missing_images'],
+				$simple['missing_product_text'],
 				new MissingBrandCheck(),
-				new InvalidGtinCheck(),
+				$simple['invalid_gtin'],
 				new MissingGtinCheck(),
 				new DuplicateGtinCheck(),
 				new ImageTooSmallCheck(),
-				new UncategorisedCheck(),
-				new VariationAttributesNotSetCheck(),
-				new MissingVariationImagesCheck(),
-				new TitleTooLongCheck(),
+				$simple['uncategorised'],
+				$simple['variation_attributes_not_set'],
+				$simple['missing_variation_images'],
+				$simple['title_too_long'],
 			) as $rule
 		) {
 			$rules[ $rule->id() ] = $rule;
@@ -171,7 +166,7 @@ class AgentReadiness {
 	/**
 	 * Run every check over the catalog.
 	 *
-	 * @return array{generated_at:string,products:int,products_with_issues:int,hidden_from_catalog:int,unsupported_types:int,store_checks:array<int,array<string,mixed>>,channels:array<string,array<string,mixed>>,checks:array<int,array<string,mixed>>,truncated:bool}
+	 * @return array{generated_at:string,products:int,hidden_from_catalog:int,unsupported_types:int,store_checks:array<int,array<string,mixed>>,channels:array<string,array<string,mixed>>,checks:array<int,array<string,mixed>>,truncated:bool}
 	 */
 	public function get_report(): array {
 		// Rebuild the rules and the scan for each report: a long-running process may have fetched a new rules file or changed GTINs since.
@@ -200,15 +195,14 @@ class AgentReadiness {
 		}
 
 		return array(
-			'generated_at'         => gmdate( 'c' ),
-			'products'             => $scan->products(),
-			'products_with_issues' => $scan->products_with_issues(),
-			'hidden_from_catalog'  => $scan->hidden_from_catalog(),
-			'unsupported_types'    => $scan->unsupported_types(),
-			'store_checks'         => $this->store_conditions->all(),
-			'channels'             => $scan->channel_totals(),
-			'checks'               => $checks,
-			'truncated'            => $scan->truncated(),
+			'generated_at'        => gmdate( 'c' ),
+			'products'            => $scan->products(),
+			'hidden_from_catalog' => $scan->hidden_from_catalog(),
+			'unsupported_types'   => $scan->unsupported_types(),
+			'store_checks'        => $this->store_conditions->all(),
+			'channels'            => $scan->channel_totals(),
+			'checks'              => $checks,
+			'truncated'           => $scan->truncated(),
 		);
 	}
 

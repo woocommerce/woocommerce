@@ -4,7 +4,6 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\AgentReadiness;
 
 use Automattic\WooCommerce\Internal\AgentReadiness\AgentReadiness;
-use Automattic\WooCommerce\Internal\AgentReadiness\ReadinessFeedValidator;
 use Automattic\WooCommerce\Internal\AgentReadiness\ReadinessRule;
 use Automattic\WooCommerce\Internal\AgentReadiness\RemoteRules;
 use Automattic\WooCommerce\Internal\AgentReadiness\StoreConditions;
@@ -43,7 +42,7 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 
 		$report = $this->sut->get_report();
 
-		$this->assertSame( array( 'generated_at', 'products', 'products_with_issues', 'hidden_from_catalog', 'unsupported_types', 'store_checks', 'channels', 'checks', 'truncated' ), array_keys( $report ) );
+		$this->assertSame( array( 'generated_at', 'products', 'hidden_from_catalog', 'unsupported_types', 'store_checks', 'channels', 'checks', 'truncated' ), array_keys( $report ) );
 		$this->assertFalse( $report['truncated'] );
 		$this->assertSame( array( 'id', 'ok', 'blocks', 'label', 'why', 'fix' ), array_keys( $report['store_checks'][0] ) );
 		$this->assertSame( array( 'chatgpt', 'google', 'copilot' ), array_keys( $report['channels'] ) );
@@ -62,7 +61,6 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 		$this->assertSame( ReadinessRule::EFFECT_NOT_LISTABLE, $checks['missing_brand']['channels']['chatgpt']['effect'] );
 
 		$this->assertSame( 1, $report['products'] );
-		$this->assertSame( 1, $report['products_with_issues'] );
 		$this->assertSame( 1, $report['channels']['chatgpt']['not_listable'], 'No brand and no image keep the product off ChatGPT' );
 		$this->assertSame( 0, $report['channels']['chatgpt']['listable'] );
 	}
@@ -96,19 +94,6 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A product complete on every channel is not counted as having issues.
-	 */
-	public function test_products_with_issues_skips_complete_products(): void {
-		WC_Helper_Product::create_simple_product();
-		add_filter( 'woocommerce_agent_readiness_rules', '__return_empty_array' );
-
-		$report = $this->sut->get_report();
-
-		$this->assertSame( 1, $report['products'] );
-		$this->assertSame( 0, $report['products_with_issues'] );
-	}
-
-	/**
 	 * @testdox The cached report is stored by refresh_report.
 	 */
 	public function test_refresh_report_caches(): void {
@@ -120,14 +105,12 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The feed validator returns the ids of the checks a product fails.
+	 * @testdox get_failing_check_ids returns the ids of the checks a product fails.
 	 */
-	public function test_feed_validator_returns_failing_check_ids(): void {
-		$product   = WC_Helper_Product::create_simple_product( true, array( 'description' => 'A sturdy mug.' ) );
-		$validator = new ReadinessFeedValidator();
-		$validator->init( $this->sut );
+	public function test_get_failing_check_ids(): void {
+		$product = WC_Helper_Product::create_simple_product( true, array( 'description' => 'A sturdy mug.' ) );
 
-		$issues = $validator->validate_entry( array(), $product );
+		$issues = $this->sut->get_failing_check_ids( $product );
 
 		$this->assertContains( 'missing_brand', $issues );
 		$this->assertContains( 'missing_images', $issues );
@@ -136,9 +119,9 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The feed validator judges a variation by its parent and skips products the scan leaves out.
+	 * @testdox get_failing_check_ids judges a variation by its parent and skips products the scan leaves out.
 	 */
-	public function test_feed_validator_follows_scan_coverage(): void {
+	public function test_get_failing_check_ids_follows_scan_coverage(): void {
 		$variable  = WC_Helper_Product::create_variation_product();
 		$variation = wc_get_product( $variable->get_children()[0] );
 		$grouped   = WC_Helper_Product::create_grouped_product();
@@ -152,11 +135,7 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 		$hidden = WC_Helper_Product::create_variation_product();
 		$hidden->set_catalog_visibility( 'hidden' );
 		$hidden->save();
-		$validator = new ReadinessFeedValidator();
-		$validator->init( $this->sut );
-		$this->assertSame( $this->sut->get_failing_check_ids( $variable ), $validator->validate_entry( array(), $variation ) );
-		$this->assertSame( array( ReadinessFeedValidator::NOT_CHECKED ), $validator->validate_entry( array(), $grouped ), 'The feed skips products the checks leave out' );
-		$this->assertSame( array( ReadinessFeedValidator::NOT_CHECKED ), $validator->validate_entry( array(), wc_get_product( $hidden->get_children()[0] ) ), 'Nor exports a hidden product\'s variations' );
+		$this->assertSame( array(), $this->sut->get_failing_check_ids( wc_get_product( $hidden->get_children()[0] ) ), 'Nor a hidden product\'s variations' );
 	}
 
 	/**
