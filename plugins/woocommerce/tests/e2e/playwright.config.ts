@@ -34,7 +34,6 @@ export const TESTS_RESULTS_PATH = `${ TESTS_ROOT_PATH }/test-results`;
 export const STORAGE_DIR_PATH = `${ TESTS_ROOT_PATH }/.state/`;
 export const ADMIN_STATE_PATH = `${ STORAGE_DIR_PATH }/admin.json`;
 export const CUSTOMER_STATE_PATH = `${ STORAGE_DIR_PATH }/customer.json`;
-export const CONSUMER_KEY = { name: '', key: '', secret: '' };
 
 const reporter = [
 	[ 'list' ],
