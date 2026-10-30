@@ -2,7 +2,7 @@
 const os = require( 'os' );
 const fs = require( 'fs' );
 const path = require( 'path' );
-const SimpleGit = require( 'simple-git' );
+const { simpleGit: SimpleGit } = require( 'simple-git' );
 const chalk = require( 'chalk' );
 
 const formats = {
