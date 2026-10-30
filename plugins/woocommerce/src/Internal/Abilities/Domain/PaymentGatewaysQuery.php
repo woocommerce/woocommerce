@@ -71,7 +71,7 @@ class PaymentGatewaysQuery extends AbstractDomainAbility implements AbilityDefin
 	 * @since 11.4.0
 	 */
 	public static function execute( array $input ) {
-		$gateways = function_exists( 'WC' ) && WC()->payment_gateways() ? WC()->payment_gateways()->payment_gateways() : array();
+		$gateways = WC()->payment_gateways()->payment_gateways();
 
 		if ( isset( $input['id'] ) ) {
 			$id = (string) $input['id'];
@@ -91,11 +91,12 @@ class PaymentGatewaysQuery extends AbstractDomainAbility implements AbilityDefin
 
 		foreach ( $gateways as $gateway ) {
 			if ( $gateway instanceof \WC_Payment_Gateway ) {
+				// The title and description getters run checkout filters that may expect a cart.
 				$items[] = array(
 					'id'           => (string) $gateway->id,
-					'title'        => (string) $gateway->get_title(),
+					'title'        => (string) $gateway->title,
 					'method_title' => (string) $gateway->get_method_title(),
-					'description'  => (string) $gateway->get_description(),
+					'description'  => (string) $gateway->description,
 					'enabled'      => wc_string_to_bool( $gateway->enabled ),
 				);
 			}

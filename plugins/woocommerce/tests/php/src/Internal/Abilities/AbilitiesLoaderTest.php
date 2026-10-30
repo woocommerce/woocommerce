@@ -2776,6 +2776,28 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should read gateway titles and descriptions without running the checkout filters.
+	 */
+	public function test_payment_gateways_query_skips_checkout_title_and_description_filters(): void {
+		$filter = static function () {
+			return 'filtered';
+		};
+		add_filter( 'woocommerce_gateway_title', $filter );
+		add_filter( 'woocommerce_gateway_description', $filter );
+
+		try {
+			$result = wp_get_ability( 'woocommerce/payment-gateways-query' )->execute( array( 'id' => 'bacs' ) );
+		} finally {
+			remove_filter( 'woocommerce_gateway_title', $filter );
+			remove_filter( 'woocommerce_gateway_description', $filter );
+		}
+
+		$this->assertNotWPError( $result );
+		$this->assertNotSame( 'filtered', $result['gateways'][0]['title'] );
+		$this->assertNotSame( 'filtered', $result['gateways'][0]['description'] );
+	}
+
+	/**
 	 * @testdox Should let a shop manager query payment gateways.
 	 */
 	public function test_payment_gateways_query_allows_shop_manager(): void {
