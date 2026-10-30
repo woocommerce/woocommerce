@@ -86,6 +86,18 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A late scan on a queue that is still finishing other actions stays queued.
+	 */
+	public function test_late_scan_on_a_busy_queue_is_not_stalled(): void {
+		as_schedule_single_action( time() - ScheduledScan::STALLED_AFTER - 60, ScheduledScan::RUN_NOW_HOOK, array(), ScheduledScan::GROUP );
+		$other = as_schedule_single_action( time() - 60, 'woocommerce_agent_readiness_test_other' );
+		\ActionScheduler::store()->mark_complete( $other );
+
+		$this->assertFalse( $this->sut->is_stalled() );
+		as_unschedule_all_actions( 'woocommerce_agent_readiness_test_other' );
+	}
+
+	/**
 	 * @testdox A scan queued just now is pending, not stalled, and has a due date.
 	 */
 	public function test_fresh_scan_is_not_stalled(): void {

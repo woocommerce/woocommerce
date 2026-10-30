@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\AgentReadiness;
 
 use Automattic\WooCommerce\Internal\AgentReadiness\AgentReadiness;
+use Automattic\WooCommerce\Internal\AgentReadiness\ScheduledScan;
 use Automattic\WooCommerce\Internal\AgentReadiness\StatusTab;
 use WC_Helper_Product;
 use WC_Unit_Test_Case;
@@ -63,5 +64,36 @@ class StatusTabTest extends WC_Unit_Test_Case {
 
 		$this->assertStringContainsString( 'No check has run yet.', $html );
 		$this->assertStringContainsString( 'name="wc_agent_readiness_run"', $html );
+	}
+
+	/**
+	 * @testdox While a scan waits, the button is disabled and the tab says so; once it stalls, the button comes back with a warning.
+	 */
+	public function test_render_pending_and_stalled(): void {
+		delete_option( AgentReadiness::REPORT_OPTION );
+		as_unschedule_all_actions( ScheduledScan::RUN_NOW_HOOK );
+		wc_get_container()->get( ScheduledScan::class )->queue();
+
+		$html = $this->render();
+		$this->assertStringContainsString( 'Checking your products in the background.', $html );
+		$this->assertStringNotContainsString( 'No check has run yet.', $html, 'A first scan is already on its way' );
+		$this->assertMatchesRegularExpression( '/name="wc_agent_readiness_run"[^>]*disabled/', $html );
+
+		as_unschedule_all_actions( ScheduledScan::RUN_NOW_HOOK );
+		as_schedule_single_action( time() - ScheduledScan::STALLED_AFTER - 60, ScheduledScan::RUN_NOW_HOOK, array(), ScheduledScan::GROUP );
+
+		$html = $this->render();
+		$this->assertStringContainsString( 'The background check has not started', $html );
+		$this->assertDoesNotMatchRegularExpression( '/name="wc_agent_readiness_run"[^>]*disabled/', $html );
+		as_unschedule_all_actions( ScheduledScan::RUN_NOW_HOOK );
+	}
+
+	/**
+	 * The tab's HTML.
+	 */
+	private function render(): string {
+		ob_start();
+		wc_get_container()->get( StatusTab::class )->render();
+		return (string) ob_get_clean();
 	}
 }
