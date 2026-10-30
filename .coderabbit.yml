@@ -29,3 +29,42 @@ reviews:
         sufficient checks in place to prevent accidental data loss. As an example, if deleting a draft order, check that
         the order status is indeed `draft` or `checkout-draft`. Also think about whether race conditions could occur and
         delete orders that don't belong to the current customer. When in doubt, ask for clarification in the PR comments.
+    - path: '**/*.{js,jsx,ts,tsx,css,scss}'
+      instructions: |
+        For UI changes, check that the code follows the WordPress Design System (WPDS). Only flag concrete deviations
+        and skip this check for changes that don't touch UI.
+        Components:
+        - Don't hand-roll a component that `@wordpress/ui` or `@wordpress/components` already provides (Card, Badge,
+          Notice, Tooltip, Popover, Modal, Tabs, VisuallyHidden, etc.).
+        - Prefer `@wordpress/ui` and `@wordpress/components` over `@woocommerce/components` when the component is
+          already available in those packages.
+        - Prefer `@wordpress/ui` primitives over custom CSS or raw elements: `Stack` instead of `display: flex` and
+          gap/margin layouts, `Text` instead of `p` or headings with custom font styles, `Link` instead of `a`.
+        Styling:
+        - Use `--wpds-*` tokens instead of fixed hex colors, pixel font sizes, radii, or motion values. Pick the token
+          closest in semantic role (not just the nearest hex value) and make sure it exists in the installed
+          `@wordpress/theme`.
+        - Don't add legacy Sass color variables or `--wp-admin-*` tokens. Use the `--wpds-*` equivalent. Legacy
+          variables include the `@automattic/color-studio` and `@wordpress/base-styles` palettes (`$gray-700`,
+          `$studio-*`, `$alert-red`, `$white`) and the shared admin colors in
+          `packages/js/internal-build/styles/_colors.scss` (`$gray-text`, `$gray-text-hover`, `$valid-green`,
+          `$notice-yellow`, `$error-red`, `$core-orange`).
+        - Don't heavily override component styles, or restyle a component with CSS to get a variant. Use a
+          component's props instead when one exists (e.g. a font size prop on `Text` rather than CSS). Position,
+          width, and margin additions are fine because they don't change the component's appearance. If an override
+          only preserves old visuals, or stacks on another override, ask whether it is needed or whether the shared
+          component should change.
+        - Don't target internal `.components-*` (e.g. `.components-button`,
+          `.components-popover__content`) or other `@wordpress/components` class names. They aren't stable.
+        - If a WPDS component seems to misbehave, suspect a CSS reset or specificity conflict before accepting a local
+          workaround.
+        - If a workaround is needed because a WPDS component lacks a capability, it is acceptable as a temporary
+          measure. Ask for a code comment linking the upstream issue (e.g. in WordPress/gutenberg) so it reads as a
+          deliberate workaround that can be removed once the issue is fixed.
+        Copy:
+        - Button and label text uses sentence case ("Edit form", not "Edit Form").
+knowledge_base:
+    code_guidelines:
+        filePatterns:
+        - files: '.github/coderabbit/wpds-tokens.md'
+          applyTo: '**/*.{js,jsx,ts,tsx,css,scss}'
