@@ -21,8 +21,12 @@ use WP_Post;
  *
  * - It is not a checkout sub-mode like order-pay or order-received; the
  *   customer is reviewing past purchases, not transacting.
- * - It is not a my-account endpoint because the order key is the auth, so
- *   guest customers must be able to reach it without logging in.
+ * - It is not a my-account endpoint because a guest order's key is the auth,
+ *   so guest customers reach it without logging in. An order that belongs to a
+ *   registered customer requires that customer's session, the same default
+ *   `order_received` and the Store API order route apply. The opt-out is this
+ *   route's own filter; `woocommerce_order_received_verify_known_shoppers` does
+ *   not carry over.
  *
  * The route uses the same wp_posts-backed page pattern as the checkout
  * page so the active theme owns the page chrome (header, footer, sidebar)
@@ -546,6 +550,12 @@ class Endpoint {
 			exit;
 		}
 
+		// A blocked visitor gets the login prompt instead of the form, which
+		// prints no heading of its own and needs none of the form's assets.
+		if ( $order instanceof WC_Order && self::is_blocked_pending_login( $order ) ) {
+			return;
+		}
+
 		// Register the page-title suppression filters now that the request
 		// is fully authorised. Doing this here instead of `init()` keeps the
 		// filters out of every unrelated page render and removes the need
@@ -594,8 +604,117 @@ class Endpoint {
 			return '';
 		}
 
+		return $order instanceof WC_Order ? $this->render_body( $order ) : '';
+	}
+
+	/**
+	 * The page body: the review form, or a login prompt in its place. Both
+	 * render paths go through here so they cannot show different things.
+	 *
+	 * @param WC_Order $order The order being reviewed.
+	 * @return string
+	 */
+	private function render_body( WC_Order $order ): string {
+		if ( self::requires_owner_login( $order ) ) {
+			return $this->render_login_prompt(
+				__( 'Please log in to your account to review this order.', 'woocommerce' ),
+				self::get_url( $order )
+			);
+		}
+
+		if ( self::requires_registered_account() ) {
+			// Same wording the product page uses for this setting, pointing at
+			// My Account so a shopper without one can still get there.
+			// Explicit empty fallback: the default is the home page, which is no
+			// use to someone being told to sign in.
+			$account_page_url = wc_get_page_permalink( 'myaccount', '' );
+			$message          = $account_page_url
+				? sprintf(
+					/* translators: %1$s and %2$s: opening and closing link tags to the My Account page. */
+					esc_html__( 'You must be %1$slogged in%2$s to post a review.', 'woocommerce' ),
+					'<a href="' . esc_url( $account_page_url ) . '">',
+					'</a>'
+				)
+				: esc_html__( 'You must be logged in to post a review.', 'woocommerce' );
+
+			return $this->render_login_prompt( $message, self::get_url( $order ) );
+		}
+
 		ob_start();
 		wc_get_template( 'order/customer-review-order.php', array( 'order' => $order ) );
+		return (string) ob_get_clean();
+	}
+
+	/**
+	 * A notice and the login form, rendered in place of the review form.
+	 *
+	 * @param string $message  Notice text.
+	 * @param string $redirect URL to return to once signed in.
+	 * @return string
+	 */
+	private function render_login_prompt( string $message, string $redirect ): string {
+		$markup = wc_print_notice( $message, 'notice', array(), true );
+
+		// This is a plain WP page, so none of the hooks that normally flush
+		// queued notices fire here and a failed sign-in would give no feedback
+		// at all. Only errors are taken; anything else stays queued for
+		// whatever outputs notices later in the page.
+		$queued = (array) wc_get_notices();
+		$errors = array_filter( (array) ( $queued['error'] ?? array() ) );
+		if ( $errors ) {
+			// `the_content` is applied more than once on plenty of sites, by
+			// description builders and page builders. Only the pass that is
+			// actually displayed may take the notices off the queue, or an
+			// invisible pass swallows the sign-in error this exists to show.
+			if ( is_main_query() && in_the_loop() ) {
+				unset( $queued['error'] );
+				wc_set_notices( $queued );
+			}
+
+			// Through the template in one pass, as `wc_print_notices()` does.
+			// `wc_print_notice()` would re-apply `woocommerce_add_error` to a
+			// message that already passed through it when it was queued, and
+			// would open a separate list for each error.
+			// `wc_set_notices()` is public and a notice stored through it can be
+			// a bare string, which `notices/error.php` would fatal on.
+			$normalised = array();
+			foreach ( $errors as $error ) {
+				$normalised[] = is_array( $error )
+					? array(
+						'notice' => (string) ( $error['notice'] ?? '' ),
+						'data'   => (array) ( $error['data'] ?? array() ),
+					)
+					: array(
+						'notice' => (string) $error,
+						'data'   => array(),
+					);
+			}
+
+			$normalised = array_values(
+				array_filter(
+					$normalised,
+					function ( $notice ) {
+						return '' !== $notice['notice'];
+					}
+				)
+			);
+
+			ob_start();
+			wc_get_template(
+				'notices/error.php',
+				array(
+					'messages' => wp_list_pluck( $normalised, 'notice' ),
+					'notices'  => $normalised,
+				)
+			);
+			$markup .= wc_kses_notice( (string) ob_get_clean() );
+		}
+
+		ob_start();
+		// `.woocommerce` wrapper: the login form's styles are all nested under it.
+		echo '<div class="woocommerce"><div class="woocommerce-notices-wrapper">' . $markup . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wc_print_notice() and wc_kses_notice() both return kses-filtered markup.
+		woocommerce_login_form( array( 'redirect' => $redirect ) );
+		echo '</div>';
 		return (string) ob_get_clean();
 	}
 
@@ -616,11 +735,13 @@ class Endpoint {
 			return;
 		}
 
-		if ( $order instanceof WC_Order ) {
-			$this->maybe_mark_no_actionable_rows( $order );
+		if ( ! $order instanceof WC_Order ) {
+			return;
 		}
 
-		wc_get_template( 'order/customer-review-order.php', array( 'order' => $order ) );
+		$this->maybe_mark_no_actionable_rows( $order );
+
+		echo $this->render_body( $order ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wc_get_template(), wc_print_notice(), wc_kses_notice() and woocommerce_login_form() output, escaped at source.
 	}
 
 	/**
@@ -637,6 +758,13 @@ class Endpoint {
 	 * @param WC_Order $order Order being reviewed.
 	 */
 	private function maybe_mark_no_actionable_rows( WC_Order $order ): void {
+		// A visitor held at the login prompt never sees the rows, so nothing
+		// about this order is complete from their visit. Checked here rather
+		// than at each caller so a new caller cannot forget it.
+		if ( self::is_blocked_pending_login( $order ) ) {
+			return;
+		}
+
 		$completed_meta_key = SubmissionHandler::COMPLETED_META_KEY;
 		if ( $order->get_meta( $completed_meta_key ) ) {
 			return;
@@ -770,12 +898,70 @@ class Endpoint {
 			return false;
 		}
 
-		// Logged-in customer must own the order. Guests with the order key still pass.
+		// A signed-in visitor must be the order's customer. The signed-out case is
+		// handled by `requires_owner_login()`, which prompts instead of 404ing.
 		if ( $order->get_customer_id() && is_user_logged_in() && get_current_user_id() !== $order->get_customer_id() ) {
 			return false;
 		}
 
 		return true;
+	}
+
+	/**
+	 * Whether the visitor has to sign in before the form is shown, because the
+	 * order belongs to a registered customer. `order_received` and the Store API
+	 * ask the same of those orders.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param WC_Order $order The order being reviewed.
+	 * @return bool
+	 */
+	public static function requires_owner_login( WC_Order $order ): bool {
+		if ( ! $order->get_customer_id() || is_user_logged_in() ) {
+			return false;
+		}
+
+		/**
+		 * Filter whether an order that belongs to a registered customer requires
+		 * that customer to be signed in before it can be reviewed.
+		 *
+		 * Register it unconditionally: this runs both on the front end and in
+		 * `admin-ajax.php`, so an `is_admin()` guard around `add_filter()` would
+		 * open the page but leave every submission refused. Returning false does
+		 * not reopen the page on a store that also requires an account to
+		 * comment, since that requirement is checked separately.
+		 *
+		 * @since 11.4.0
+		 *
+		 * @param bool     $required Whether a session is required.
+		 * @param WC_Order $order    The order being reviewed.
+		 */
+		return (bool) apply_filters( 'woocommerce_review_order_verify_known_shoppers', true, $order );
+	}
+
+	/**
+	 * Whether the store's "users must be registered and logged in to comment"
+	 * setting blocks this visitor. `wp_new_comment()` never applies it, so this
+	 * flow has to ask for itself.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @return bool
+	 */
+	public static function requires_registered_account(): bool {
+		return ! is_user_logged_in() && (bool) get_option( 'comment_registration' );
+	}
+
+	/**
+	 * Whether the visitor is held at a login prompt instead of the review form.
+	 * One place decides this so the page and the submit handler cannot drift.
+	 *
+	 * @param WC_Order $order The order being reviewed.
+	 * @return bool
+	 */
+	private static function is_blocked_pending_login( WC_Order $order ): bool {
+		return self::requires_owner_login( $order ) || self::requires_registered_account();
 	}
 
 	/**

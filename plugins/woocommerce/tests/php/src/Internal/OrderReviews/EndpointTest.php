@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility;
 use Automattic\WooCommerce\Internal\OrderReviews\SubmissionHandler;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use WC_Helper_Product;
+use WC_Order;
 use WC_Unit_Test_Case;
 use WP_Query;
 
@@ -25,10 +26,20 @@ class EndpointTest extends WC_Unit_Test_Case {
 	private Endpoint $endpoint;
 
 	/**
+	 * The store's comment_registration setting as the test found it.
+	 *
+	 * @var mixed
+	 */
+	private $comment_registration;
+
+	/**
 	 * Set up a fresh endpoint instance and a clean query.
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		// Restored verbatim in tearDown(): deleting it would not put back a
+		// store that had the setting on.
+		$this->comment_registration = get_option( 'comment_registration' );
 		// Feature flag gates the OrderReviews stack.
 		update_option( 'woocommerce_feature_customer_review_request_enabled', 'yes' );
 		$this->endpoint = new Endpoint();
@@ -67,6 +78,7 @@ class EndpointTest extends WC_Unit_Test_Case {
 		}
 		wp_reset_postdata();
 		wp_set_current_user( 0 );
+		update_option( 'comment_registration', $this->comment_registration );
 		delete_option( 'woocommerce_feature_customer_review_request_enabled' );
 		wp_dequeue_script( 'wc-order-review' );
 		wp_deregister_script( 'wc-order-review' );
@@ -99,7 +111,7 @@ class EndpointTest extends WC_Unit_Test_Case {
 	 * @testdox wc_get_review_order_url returns a tokenized URL pointing at the new endpoint.
 	 */
 	public function test_helper_returns_tokenized_url(): void {
-		$order = OrderHelper::create_order();
+		$order = OrderHelper::create_order( 0 );
 		$url   = wc_get_review_order_url( $order );
 
 		// Path style on pretty permalinks, query-arg style on plain — accept either.
@@ -123,7 +135,7 @@ class EndpointTest extends WC_Unit_Test_Case {
 	 * @testdox The woocommerce_review_order_url filter can replace the helper output.
 	 */
 	public function test_helper_filterable(): void {
-		$order    = OrderHelper::create_order();
+		$order    = OrderHelper::create_order( 0 );
 		$override = static function () {
 			return 'https://example.test/custom';
 		};
@@ -148,7 +160,7 @@ class EndpointTest extends WC_Unit_Test_Case {
 	 * @testdox 404s when no key query arg is supplied.
 	 */
 	public function test_404_when_key_missing(): void {
-		$order = OrderHelper::create_order();
+		$order = OrderHelper::create_order( 0 );
 		$order->set_status( OrderStatus::COMPLETED );
 		$order->save();
 		$_GET = array();
@@ -163,7 +175,7 @@ class EndpointTest extends WC_Unit_Test_Case {
 	 * @testdox 404s when the supplied key does not match the order key.
 	 */
 	public function test_404_when_key_mismatched(): void {
-		$order = OrderHelper::create_order();
+		$order = OrderHelper::create_order( 0 );
 		$order->set_status( OrderStatus::COMPLETED );
 		$order->save();
 		$_GET = array( 'key' => 'wc_order_definitelywrong' );
@@ -178,7 +190,7 @@ class EndpointTest extends WC_Unit_Test_Case {
 	 * @testdox 404s when the order status is not in the eligible set.
 	 */
 	public function test_404_when_status_ineligible(): void {
-		$order = OrderHelper::create_order();
+		$order = OrderHelper::create_order( 0 );
 		$order->set_status( OrderStatus::PROCESSING );
 		$order->save();
 		$_GET = array( 'key' => $order->get_order_key() );
@@ -210,10 +222,46 @@ class EndpointTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * The guest-order fixtures cannot pin this: both login predicates are false
+	 * for them, so only a registered-customer order shows that authorisation is
+	 * decided before the login prompt. Otherwise a missing key would answer 200
+	 * for an order that exists and 404 for one that does not.
+	 *
+	 * @testWith ["missing"]
+	 *           ["mismatched"]
+	 *           ["ineligible"]
+	 *
+	 * @param string $breach Which authorisation guard to breach.
+	 */
+	public function test_authorisation_outranks_the_login_prompt_on_a_registered_customers_order( string $breach ): void {
+		$order = OrderHelper::create_order( self::factory()->user->create() );
+		$order->set_status( 'ineligible' === $breach ? OrderStatus::PROCESSING : OrderStatus::COMPLETED );
+		$order->save();
+
+		if ( 'missing' === $breach ) {
+			$_GET = array();
+		} elseif ( 'mismatched' === $breach ) {
+			$_GET = array( 'key' => 'wc_order_NOPE' );
+		} else {
+			$_GET = array( 'key' => $order->get_order_key() );
+		}
+
+		$html = $this->render( $order->get_id() );
+
+		global $wp_query;
+		$this->assertTrue( $wp_query->is_404, 'An unauthorised request must 404, whoever is asking.' );
+		$this->assertStringNotContainsString(
+			'Please log in to your account to review this order.',
+			$html,
+			'A login prompt here would confirm the order exists and who owns it.'
+		);
+	}
+
+	/**
 	 * @testdox Renders the template for a valid completed-order link.
 	 */
 	public function test_renders_template_on_success(): void {
-		$order = OrderHelper::create_order();
+		$order = OrderHelper::create_order( 0 );
 		$order->set_status( OrderStatus::COMPLETED );
 		$order->save();
 		$_GET = array( 'key' => $order->get_order_key() );
@@ -231,7 +279,7 @@ class EndpointTest extends WC_Unit_Test_Case {
 	 * @testdox render_shortcode() only renders on the managed page with a matching order key.
 	 */
 	public function test_render_shortcode_requires_managed_page_and_key(): void {
-		$order = OrderHelper::create_order();
+		$order = OrderHelper::create_order( 0 );
 		$order->set_status( OrderStatus::COMPLETED );
 		$order->save();
 
@@ -269,7 +317,7 @@ class EndpointTest extends WC_Unit_Test_Case {
 	 * @testdox The woocommerce_review_order_eligible_statuses filter widens the eligible set.
 	 */
 	public function test_eligible_statuses_filter_widens_set(): void {
-		$order = OrderHelper::create_order();
+		$order = OrderHelper::create_order( 0 );
 		$order->set_status( OrderStatus::PROCESSING );
 		$order->save();
 		$_GET = array( 'key' => $order->get_order_key() );
@@ -310,7 +358,7 @@ class EndpointTest extends WC_Unit_Test_Case {
 	public function test_gate_request_registers_title_filters_after_authorisation(): void {
 		$page_id = (int) wc_get_page_id( Endpoint::PAGE_KEY );
 
-		$order = OrderHelper::create_order();
+		$order = OrderHelper::create_order( 0 );
 		$order->set_status( OrderStatus::COMPLETED );
 		$order->save();
 
@@ -499,7 +547,7 @@ class EndpointTest extends WC_Unit_Test_Case {
 	 * @testdox Loading the page when no actionable rows remain stamps the completed-at meta.
 	 */
 	public function test_no_actionable_rows_stamps_completed_meta(): void {
-		$order   = OrderHelper::create_order();
+		$order   = OrderHelper::create_order( 0 );
 		$product = WC_Helper_Product::create_simple_product();
 		$order->set_billing_email( 'reviewed@example.test' );
 		$order->set_status( OrderStatus::COMPLETED );
@@ -536,7 +584,7 @@ class EndpointTest extends WC_Unit_Test_Case {
 	 * @testdox Loading the page with at least one actionable row leaves the completed-at meta unset.
 	 */
 	public function test_actionable_row_does_not_stamp_completed_meta(): void {
-		$order   = OrderHelper::create_order();
+		$order   = OrderHelper::create_order( 0 );
 		$product = WC_Helper_Product::create_simple_product();
 		$order->set_billing_email( 'fresh@example.test' );
 		$order->set_status( OrderStatus::COMPLETED );
@@ -558,7 +606,7 @@ class EndpointTest extends WC_Unit_Test_Case {
 	 * @testdox An item whose product has reviews closed is counted by the info notice and renders no form row, while the reviewable item still gets one.
 	 */
 	public function test_reviews_disabled_item_renders_notice_and_no_form_row(): void {
-		$order      = OrderHelper::create_order();
+		$order      = OrderHelper::create_order( 0 );
 		$reviewable = WC_Helper_Product::create_simple_product( true, array( 'name' => 'Reviewable Blue Lamp' ) );
 		$disabled   = WC_Helper_Product::create_simple_product( true, array( 'name' => 'Closed Red Kettle' ) );
 		wp_update_post(
@@ -598,7 +646,7 @@ class EndpointTest extends WC_Unit_Test_Case {
 	 * @testdox The empty-state thank-you template renders the meta line, heading, and body when no actionable rows remain.
 	 */
 	public function test_empty_state_template_renders_meta_and_thank_you(): void {
-		$order   = OrderHelper::create_order();
+		$order   = OrderHelper::create_order( 0 );
 		$product = WC_Helper_Product::create_simple_product();
 		$order->set_billing_email( 'thanks@example.test' );
 		$order->set_status( OrderStatus::COMPLETED );
@@ -635,7 +683,7 @@ class EndpointTest extends WC_Unit_Test_Case {
 	 * @testdox The empty-state template renders the nothing-to-review arm, and no form, when the order has no reviewable items.
 	 */
 	public function test_empty_state_template_renders_nothing_to_review(): void {
-		$order   = OrderHelper::create_order();
+		$order   = OrderHelper::create_order( 0 );
 		$product = WC_Helper_Product::create_simple_product();
 		$order->set_billing_email( 'nothing@example.test' );
 		$order->set_status( OrderStatus::COMPLETED );
@@ -672,7 +720,7 @@ class EndpointTest extends WC_Unit_Test_Case {
 	public function test_enqueued_script_localizes_the_submission_outcome_strings(): void {
 		$page_id = (int) wc_get_page_id( Endpoint::PAGE_KEY );
 
-		$order = OrderHelper::create_order();
+		$order = OrderHelper::create_order( 0 );
 		$order->set_status( OrderStatus::COMPLETED );
 		$order->save();
 
@@ -713,7 +761,7 @@ class EndpointTest extends WC_Unit_Test_Case {
 	 * @testdox A pre-filled row exposes the existing rating and text via data-initial-* attributes so the JS dirty gate can detect edits.
 	 */
 	public function test_row_exposes_data_initial_attributes_for_prefilled_review(): void {
-		$order      = OrderHelper::create_order();
+		$order      = OrderHelper::create_order( 0 );
 		$reviewed   = WC_Helper_Product::create_simple_product();
 		$unreviewed = WC_Helper_Product::create_simple_product();
 		$order->set_billing_email( 'prefill@example.test' );
@@ -750,7 +798,7 @@ class EndpointTest extends WC_Unit_Test_Case {
 	 * @testdox The completed-at meta is never overwritten on subsequent loads.
 	 */
 	public function test_completed_meta_is_not_overwritten(): void {
-		$order = OrderHelper::create_order();
+		$order = OrderHelper::create_order( 0 );
 		$order->set_status( OrderStatus::COMPLETED );
 		// Empty the order so the no-actionable-rows path falls through and
 		// would re-stamp `time()` if the early-return guard were removed;
@@ -1080,5 +1128,516 @@ class EndpointTest extends WC_Unit_Test_Case {
 			wp_delete_post( (int) $page->ID, true );
 		}
 		delete_option( 'woocommerce_shop_page_id' );
+	}
+
+	/**
+	 * @testdox A signed-out visitor is asked to log in, not shown the form, for a registered customer's order.
+	 */
+	public function test_signed_out_visitor_is_asked_to_log_in_for_a_registered_customers_order(): void {
+		$order = OrderHelper::create_order( self::factory()->user->create() );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		$_GET = array( 'key' => $order->get_order_key() );
+
+		$html = $this->render( $order->get_id() );
+
+		global $wp_query;
+		$this->assertFalse( $wp_query->is_404, 'A valid link should ask for a login rather than 404.' );
+		$this->assertStringContainsString( 'Please log in to your account to review this order.', $html );
+		$this->assertStringNotContainsString( 'woocommerce-review-order__form', $html );
+		$this->assertStringContainsString(
+			esc_url( Endpoint::get_url( $order ) ),
+			$html,
+			'Signing in has to come back to this order, key and all.'
+		);
+	}
+
+	/**
+	 * @testdox Signing in as the order's customer shows the form.
+	 */
+	public function test_order_owner_sees_the_form(): void {
+		$customer_id = self::factory()->user->create();
+		$order       = OrderHelper::create_order( $customer_id );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		wp_set_current_user( $customer_id );
+		$_GET = array( 'key' => $order->get_order_key() );
+
+		$html = $this->render( $order->get_id() );
+
+		$this->assertStringContainsString( 'woocommerce-review-order__form', $html );
+	}
+
+	/**
+	 * @testdox A guest order is still reachable with the key alone.
+	 */
+	public function test_guest_order_still_renders_for_a_signed_out_visitor(): void {
+		$order = OrderHelper::create_order( 0 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		$_GET = array( 'key' => $order->get_order_key() );
+
+		$html = $this->render( $order->get_id() );
+
+		$this->assertStringContainsString( 'woocommerce-review-order__form', $html );
+	}
+
+	/**
+	 * @testdox The known-shopper filter restores signed-out access.
+	 */
+	public function test_verify_known_shoppers_filter_restores_signed_out_access(): void {
+		$order = OrderHelper::create_order( self::factory()->user->create() );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		$_GET = array( 'key' => $order->get_order_key() );
+
+		$seen = null;
+		$spy  = function ( $required, $filtered_order ) use ( &$seen ) {
+			unset( $required );
+			$seen = $filtered_order;
+			return false;
+		};
+		add_filter( 'woocommerce_review_order_verify_known_shoppers', $spy, 10, 2 );
+		$html = $this->render( $order->get_id() );
+		remove_filter( 'woocommerce_review_order_verify_known_shoppers', $spy, 10 );
+
+		$this->assertStringContainsString( 'woocommerce-review-order__form', $html );
+		$this->assertInstanceOf( WC_Order::class, $seen, 'The filter is documented as receiving the order.' );
+		$this->assertSame( $order->get_id(), $seen->get_id() );
+	}
+
+	/**
+	 * The filter's docblock promises this, and a refactor of render_body() into
+	 * if/else would break the promise with nothing going red.
+	 *
+	 * @testdox Turning the known-shopper filter off does not reopen the page when an account is also required.
+	 */
+	public function test_known_shopper_filter_does_not_override_the_account_requirement(): void {
+		update_option( 'comment_registration', 1 );
+		$order = OrderHelper::create_order( self::factory()->user->create() );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		$_GET = array( 'key' => $order->get_order_key() );
+
+		add_filter( 'woocommerce_review_order_verify_known_shoppers', '__return_false' );
+		$html = $this->render( $order->get_id() );
+		remove_filter( 'woocommerce_review_order_verify_known_shoppers', '__return_false' );
+
+		$this->assertStringContainsString( 'to post a review.', $html );
+		$this->assertStringNotContainsString( 'woocommerce-review-order__form', $html );
+	}
+
+	/**
+	 * @testdox A store that requires registration to comment shows a prompt instead of the form.
+	 */
+	public function test_registration_required_replaces_the_form_with_a_prompt(): void {
+		update_option( 'comment_registration', 1 );
+
+		// The test install has no My Account page, so the linked branch only
+		// runs if one is staged here.
+		$account_page_id = (int) wp_insert_post(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+				'post_title'  => 'My account',
+				'post_name'   => 'my-account',
+			)
+		);
+		update_option( 'woocommerce_myaccount_page_id', $account_page_id );
+
+		$order = OrderHelper::create_order( 0 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		$_GET = array( 'key' => $order->get_order_key() );
+
+		$html = $this->render( $order->get_id() );
+
+		$this->assertStringContainsString( 'to post a review.', $html );
+		$this->assertStringContainsString(
+			'<a href="' . esc_url( wc_get_page_permalink( 'myaccount', '' ) ) . '">',
+			$html,
+			'Shoppers without an account need a way to make one.'
+		);
+		$this->assertStringNotContainsString( 'woocommerce-review-order__form', $html );
+		$this->assertStringContainsString(
+			esc_url( Endpoint::get_url( $order ) ),
+			$html,
+			'This arm needs the same return-here redirect as the other.'
+		);
+	}
+
+	/**
+	 * @testdox Without a My Account page the prompt says so in plain text rather than linking elsewhere.
+	 */
+	public function test_registration_prompt_has_no_link_without_a_my_account_page(): void {
+		update_option( 'comment_registration', 1 );
+		$restore = get_option( 'woocommerce_myaccount_page_id' );
+		update_option( 'woocommerce_myaccount_page_id', 0 );
+
+		$order = OrderHelper::create_order( 0 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		$_GET = array( 'key' => $order->get_order_key() );
+
+		$html = $this->render( $order->get_id() );
+
+		update_option( 'woocommerce_myaccount_page_id', $restore );
+
+		$end    = strpos( $html, '</div>' );
+		$notice = false === $end ? $html : substr( $html, 0, $end );
+		$this->assertStringContainsString( 'You must be logged in to post a review.', $notice );
+		$this->assertStringNotContainsString( '<a href', $notice, 'Nothing to link to, so do not link to the home page.' );
+	}
+
+	/**
+	 * @testdox A signed-in visitor is unaffected by the registration setting.
+	 */
+	public function test_registration_required_leaves_a_signed_in_visitor_alone(): void {
+		update_option( 'comment_registration', 1 );
+		$order = OrderHelper::create_order( 0 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		wp_set_current_user( self::factory()->user->create() );
+		$_GET = array( 'key' => $order->get_order_key() );
+
+		$html = $this->render( $order->get_id() );
+
+		$this->assertStringContainsString( 'woocommerce-review-order__form', $html );
+	}
+
+	/**
+	 * Byte-identical to `test_no_actionable_rows_stamps_completed_meta`, which
+	 * proves this fixture does stamp, apart from the store requiring an account.
+	 * So a failure here can only mean the block stopped being honoured.
+	 *
+	 * @testdox A visitor held at the login prompt does not stamp the completed-at meta.
+	 */
+	public function test_visitor_held_at_login_does_not_stamp_completed_meta(): void {
+		update_option( 'comment_registration', 1 );
+		$order   = OrderHelper::create_order( 0 );
+		$product = WC_Helper_Product::create_simple_product();
+		$order->set_billing_email( 'reviewed@example.test' );
+		$order->set_status( OrderStatus::COMPLETED );
+		foreach ( $order->get_items() as $item ) {
+			$order->remove_item( $item->get_id() );
+		}
+		$order->add_product( $product, 1 );
+		$order->save();
+
+		$comment_id = (int) wp_insert_comment(
+			array(
+				'comment_post_ID'      => $product->get_id(),
+				'comment_author'       => 'Already',
+				'comment_author_email' => 'reviewed@example.test',
+				'comment_content'      => 'Was good.',
+				'comment_type'         => 'review',
+				'comment_approved'     => 1,
+			)
+		);
+		add_comment_meta( $comment_id, ItemEligibility::ORDER_META_KEY, (int) $order->get_id(), true );
+
+		$_GET = array( 'key' => $order->get_order_key() );
+
+		$this->render( $order->get_id() );
+
+		$fresh = wc_get_order( $order->get_id() );
+		$this->assertEmpty( $fresh->get_meta( SubmissionHandler::COMPLETED_META_KEY ) );
+	}
+
+	/**
+	 * Drives `gate_request()` rather than the test-facing `render()`, so the
+	 * production path is covered too.
+	 *
+	 * @testdox gate_request() leaves the title filters and form assets alone for a blocked visitor.
+	 */
+	public function test_gate_request_skips_title_filters_and_assets_for_a_blocked_visitor(): void {
+		$page_id = (int) wc_get_page_id( Endpoint::PAGE_KEY );
+
+		$order = OrderHelper::create_order( self::factory()->user->create() );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		global $wp, $wp_query, $wp_the_query;
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: singular page query so is_page() returns true.
+		$wp_query = new WP_Query( array( 'page_id' => $page_id ) );
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: matching main query.
+		$wp_the_query = $wp_query;
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: stage a fresh WP instance carrying our query var.
+		$wp                                    = new \WP();
+		$wp->query_vars[ Endpoint::QUERY_VAR ] = (string) $order->get_id();
+		$_GET                                  = array( 'key' => $order->get_order_key() );
+
+		$this->endpoint->gate_request();
+
+		// Control: proves the staged globals really do describe a blocked
+		// visitor. It does not prove gate_request() itself reached that branch,
+		// since render_shortcode() repeats the page check.
+		$this->assertStringContainsString(
+			'Please log in to your account to review this order.',
+			$this->endpoint->render_shortcode()
+		);
+
+		$this->assertFalse(
+			has_filter( 'the_title', array( $this->endpoint, 'maybe_hide_page_title' ) ),
+			'The prompt prints no heading of its own, so the page title must survive.'
+		);
+		$this->assertFalse(
+			has_filter( 'render_block_core/post-title', array( $this->endpoint, 'maybe_hide_post_title_block' ) ),
+			'Same for the block theme path.'
+		);
+		$this->assertFalse( wp_script_is( 'wc-order-review', 'registered' ), 'The form assets are not needed.' );
+	}
+
+	/**
+	 * `render()` is only reachable from tests; this drives the shortcode the
+	 * page actually renders through.
+	 *
+	 * @testdox render_shortcode() returns the login prompt, not the form, for a blocked visitor.
+	 */
+	public function test_render_shortcode_returns_the_prompt_for_a_blocked_visitor(): void {
+		$page_id = (int) wc_get_page_id( Endpoint::PAGE_KEY );
+
+		$order = OrderHelper::create_order( self::factory()->user->create() );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		global $wp, $wp_query, $wp_the_query;
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: singular page query so is_page() returns true.
+		$wp_query = new WP_Query( array( 'page_id' => $page_id ) );
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: matching main query.
+		$wp_the_query = $wp_query;
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: stage a fresh WP instance carrying our query var.
+		$wp                                    = new \WP();
+		$wp->query_vars[ Endpoint::QUERY_VAR ] = (string) $order->get_id();
+		$_GET                                  = array( 'key' => $order->get_order_key() );
+
+		$html = $this->endpoint->render_shortcode();
+
+		$this->assertStringContainsString( 'Please log in to your account to review this order.', $html );
+		$this->assertStringNotContainsString( 'woocommerce-review-order__form', $html );
+	}
+
+	/**
+	 * @testdox The prompt surfaces a queued error, such as a failed sign-in.
+	 */
+	public function test_prompt_surfaces_a_queued_error_notice(): void {
+		$order = OrderHelper::create_order( self::factory()->user->create() );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		$_GET = array( 'key' => $order->get_order_key() );
+
+		wc_add_notice( 'The password you entered is incorrect.', 'error' );
+		wc_add_notice( 'Your username is unknown.', 'error' );
+		wc_add_notice( 'Something unrelated for a later block.', 'success' );
+
+		// Only the displayed pass consumes, so stage the loop the way
+		// `the_content` would.
+		global $wp_query;
+		$wp_query->in_the_loop = true;
+
+		$html = $this->render( $order->get_id() );
+
+		$wp_query->in_the_loop = false;
+
+		$this->assertStringContainsString( 'The password you entered is incorrect.', $html );
+		$this->assertStringContainsString( 'Your username is unknown.', $html, 'Every queued error, not just the first.' );
+		$this->assertSame( 1, substr_count( $html, 'woocommerce-error' ), 'One list for all of them, as wc_print_notices() does.' );
+		$this->assertStringContainsString( 'woocommerce-notices-wrapper', $html );
+		$this->assertStringNotContainsString( 'Something unrelated for a later block.', $html );
+		$this->assertCount( 1, wc_get_notices( 'success' ), 'Non-error notices stay queued.' );
+		$this->assertCount( 0, wc_get_notices( 'error' ), 'The errors have been consumed.' );
+
+		wc_clear_notices();
+	}
+
+	/**
+	 * `the_content` is applied more than once on many sites. A pass that is not
+	 * displayed must leave the queue alone, or the visible one shows nothing.
+	 *
+	 * @testdox A render outside the loop shows the error but leaves it queued.
+	 */
+	public function test_a_render_outside_the_loop_leaves_queued_errors_alone(): void {
+		$order = OrderHelper::create_order( self::factory()->user->create() );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		$_GET = array( 'key' => $order->get_order_key() );
+
+		wc_add_notice( 'The password you entered is incorrect.', 'error' );
+
+		$html = $this->render( $order->get_id() );
+
+		$this->assertStringContainsString( 'The password you entered is incorrect.', $html );
+		$this->assertCount( 1, wc_get_notices( 'error' ), 'Still there for the pass that is actually shown.' );
+
+		wc_clear_notices();
+	}
+
+	/**
+	 * A secondary query rendering this content — a widget, a related-posts
+	 * block — must not take the error off the queue before the main content
+	 * gets to show it.
+	 *
+	 * @testdox A render under a secondary query leaves queued errors alone.
+	 */
+	public function test_a_render_under_a_secondary_query_leaves_queued_errors_alone(): void {
+		$order = OrderHelper::create_order( self::factory()->user->create() );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		$_GET = array( 'key' => $order->get_order_key() );
+
+		wc_add_notice( 'The password you entered is incorrect.', 'error' );
+
+		// A loop pass, but not the main query's: is_main_query() is false when
+		// $wp_query is not the same object as $wp_the_query.
+		global $wp_query;
+		$main                  = $wp_query;
+		$wp_query              = new WP_Query( array( 'post_type' => 'page' ) ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: a secondary query.
+		$wp_query->in_the_loop = true;
+
+		$html = $this->render( $order->get_id() );
+
+		$wp_query = $main; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: restore the main query.
+
+		$this->assertStringContainsString( 'The password you entered is incorrect.', $html );
+		$this->assertCount( 1, wc_get_notices( 'error' ), 'The main content still has to be able to show it.' );
+
+		wc_clear_notices();
+	}
+
+	/**
+	 * @testdox An oddly shaped queued error is normalised rather than printed as "Array".
+	 */
+	public function test_prompt_normalises_an_error_array_without_a_notice_key(): void {
+		$order = OrderHelper::create_order( self::factory()->user->create() );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		$_GET = array( 'key' => $order->get_order_key() );
+
+		wc_set_notices(
+			array(
+				'error' => array(
+					array( 'data' => array( 'id' => 'no-notice-key' ) ),
+					array( 'notice' => 'Real failure.' ),
+				),
+			)
+		);
+
+		$html = $this->render( $order->get_id() );
+
+		$this->assertStringContainsString( 'Real failure.', $html );
+		$this->assertStringNotContainsString( 'Array', $html, 'An array notice must not be cast to a string.' );
+		$this->assertSame( 1, substr_count( $html, '<li' ), 'The entry with no message is dropped, not rendered empty.' );
+
+		wc_clear_notices();
+	}
+
+	/**
+	 * The outer `wc_kses_notice()` is the only thing between a theme's
+	 * `notices/error.php` override and unfiltered markup on the page.
+	 *
+	 * @testdox A queued error carrying disallowed markup is filtered before it reaches the page.
+	 */
+	public function test_prompt_filters_disallowed_markup_in_a_queued_error(): void {
+		$order = OrderHelper::create_order( self::factory()->user->create() );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		$_GET = array( 'key' => $order->get_order_key() );
+
+		wc_add_notice( 'Sign-in failed.<script>alert(1)</script>', 'error' );
+
+		$html = $this->render( $order->get_id() );
+
+		$this->assertStringContainsString( 'Sign-in failed.', $html );
+		$this->assertStringNotContainsString( '<script>', $html );
+
+		wc_clear_notices();
+	}
+
+	/**
+	 * `wc_set_notices()` is public and third-party code stores bare strings
+	 * through it, which is why `wc_print_notices()` reads them defensively.
+	 *
+	 * @testdox A queued error stored as a bare string does not break the prompt.
+	 */
+	public function test_prompt_survives_an_error_queued_as_a_bare_string(): void {
+		$order = OrderHelper::create_order( self::factory()->user->create() );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		$_GET = array( 'key' => $order->get_order_key() );
+
+		wc_set_notices( array( 'error' => array( 'Stored by a third party as a plain string.' ) ) );
+
+		$html = $this->render( $order->get_id() );
+
+		$this->assertStringContainsString( 'Stored by a third party as a plain string.', $html );
+		$this->assertStringContainsString( 'Please log in to your account to review this order.', $html );
+
+		wc_clear_notices();
+	}
+
+	/**
+	 * Flipping the shared fixtures to guest orders left `gate_request()` with
+	 * no coverage for the case the review emails actually produce.
+	 *
+	 * @testdox gate_request() registers the title filters for the signed-in owner of a registered customer's order.
+	 */
+	public function test_gate_request_registers_title_filters_for_the_signed_in_owner(): void {
+		$page_id     = (int) wc_get_page_id( Endpoint::PAGE_KEY );
+		$customer_id = self::factory()->user->create();
+
+		$order = OrderHelper::create_order( $customer_id );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+		wp_set_current_user( $customer_id );
+
+		global $wp, $wp_query, $wp_the_query;
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: singular page query so is_page() returns true.
+		$wp_query = new WP_Query( array( 'page_id' => $page_id ) );
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: matching main query.
+		$wp_the_query = $wp_query;
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: stage a fresh WP instance carrying our query var.
+		$wp                                    = new \WP();
+		$wp->query_vars[ Endpoint::QUERY_VAR ] = (string) $order->get_id();
+		$_GET                                  = array( 'key' => $order->get_order_key() );
+
+		$this->endpoint->gate_request();
+
+		$this->assertNotFalse( has_filter( 'the_title', array( $this->endpoint, 'maybe_hide_page_title' ) ) );
+		$this->assertNotFalse( has_filter( 'render_block_core/post-title', array( $this->endpoint, 'maybe_hide_post_title_block' ) ) );
+
+		remove_filter( 'the_title', array( $this->endpoint, 'maybe_hide_page_title' ), 10 );
+		remove_filter( 'render_block_core/post-title', array( $this->endpoint, 'maybe_hide_post_title_block' ), 10 );
+	}
+
+	/**
+	 * @testdox gate_request() also stops short for the registration-required arm.
+	 */
+	public function test_gate_request_stops_short_when_the_store_requires_registration(): void {
+		update_option( 'comment_registration', 1 );
+		$page_id = (int) wc_get_page_id( Endpoint::PAGE_KEY );
+
+		$order = OrderHelper::create_order( 0 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		global $wp, $wp_query, $wp_the_query;
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: singular page query so is_page() returns true.
+		$wp_query = new WP_Query( array( 'page_id' => $page_id ) );
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: matching main query.
+		$wp_the_query = $wp_query;
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: stage a fresh WP instance carrying our query var.
+		$wp                                    = new \WP();
+		$wp->query_vars[ Endpoint::QUERY_VAR ] = (string) $order->get_id();
+		$_GET                                  = array( 'key' => $order->get_order_key() );
+
+		$this->endpoint->gate_request();
+
+		// Positive control: every way the staging could be wrong also produces
+		// the two negatives above, so prove the request really did reach the
+		// blocked-visitor branch.
+		$this->assertStringContainsString( 'to post a review.', $this->endpoint->render_shortcode() );
+
+		$this->assertFalse( has_filter( 'the_title', array( $this->endpoint, 'maybe_hide_page_title' ) ) );
+		$this->assertFalse( wp_script_is( 'wc-order-review', 'registered' ) );
 	}
 }

@@ -17,10 +17,18 @@ use WPAjaxDieContinueException;
 class SubmissionHandlerTest extends WC_Unit_Test_Case {
 
 	/**
+	 * The store's comment_registration setting as the test found it.
+	 *
+	 * @var mixed
+	 */
+	private $comment_registration;
+
+	/**
 	 * Feature flag gates the OrderReviews stack.
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		$this->comment_registration = get_option( 'comment_registration' );
 		update_option( 'woocommerce_feature_customer_review_request_enabled', 'yes' );
 	}
 
@@ -33,6 +41,7 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 		update_option( 'comment_max_links', 2 );
 		update_option( 'moderation_keys', '' );
 		update_option( 'disallowed_keys', '' );
+		update_option( 'comment_registration', $this->comment_registration );
 		remove_all_filters( 'woocommerce_review_order_submitted' );
 		remove_all_filters( 'woocommerce_review_order_eligible_statuses' );
 		remove_all_filters( 'woocommerce_review_order_eligible_items' );
@@ -44,11 +53,53 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Dispatch and stop at the first `wp_send_json_*`, the way production does.
+	 * `dispatch()` lets `wp_die()` return, so the handler runs past a refusal
+	 * and the body ends up holding several JSON payloads that will not decode.
+	 *
+	 * The HTTP status is deliberately not returned: `wp_send_json()` only calls
+	 * `status_header()` when `! headers_sent()`, and the suite's bootstrap has
+	 * already written to stdout, so no status is ever set under PHPUnit. The
+	 * message identifies which guard refused instead.
+	 *
+	 * @return array{success:bool, message:string}
+	 */
+	private function dispatch_once(): array {
+
+		add_filter(
+			'wp_die_ajax_handler',
+			function () {
+				return function () {
+					throw new WPAjaxDieContinueException( 'stopped at the first response' );
+				};
+			}
+		);
+		add_filter( 'wp_doing_ajax', '__return_true' );
+
+		ob_start();
+		$handler = new SubmissionHandler();
+		try {
+			$handler->handle();
+		} catch ( WPAjaxDieContinueException $e ) {
+			unset( $e );
+		}
+		$decoded = json_decode( (string) ob_get_clean(), true );
+
+		return array(
+			'success' => is_array( $decoded ) && ! empty( $decoded['success'] ),
+			'message' => is_array( $decoded ) ? (string) ( $decoded['data']['message'] ?? '' ) : '',
+		);
+	}
+
+	/**
 	 * Build an empty completed order for review submissions.
 	 */
 	private function make_empty_order(): WC_Order {
 		$order = new WC_Order();
-		$order->set_customer_id( 1 );
+		// Guest order: the order key is the only credential, which is the case
+		// these tests exercise. Orders owned by a registered customer need that
+		// customer's session, covered separately.
+		$order->set_customer_id( 0 );
 		$order->set_billing_first_name( 'Jane' );
 		$order->set_billing_last_name( 'Doe' );
 		$order->set_billing_email( 'jane@example.test' );
@@ -89,6 +140,12 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 
 	/**
 	 * Invoke the handler and capture the JSON it would have sent.
+	 *
+	 * Note that `wp_die_ajax_handler` is filtered to a no-op here, so a
+	 * `wp_send_json_*` does not stop the handler the way it does in production:
+	 * the body can end up holding several payloads and failing to decode, and
+	 * `success` then keeps its `false` default. Assertions beyond "did not
+	 * succeed" belong on `dispatch_once()`.
 	 *
 	 * @return array{success:bool, data:mixed, status:int}
 	 */
@@ -157,9 +214,10 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 			'_wcnonce' => 'not-the-right-nonce',
 		);
 
-		$response = $this->dispatch();
+		$response = $this->dispatch_once();
 
 		$this->assertFalse( $response['success'] );
+		$this->assertSame( 'Security check failed.', $response['message'] );
 	}
 
 	/**
@@ -176,9 +234,10 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
 		);
 
-		$response = $this->dispatch();
+		$response = $this->dispatch_once();
 
 		$this->assertFalse( $response['success'] );
+		$this->assertSame( 'Order not found.', $response['message'] );
 	}
 
 	/**
@@ -892,6 +951,7 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 	 */
 	public function test_rejects_when_order_status_ineligible(): void {
 		$built = $this->make_order( 1 );
+		/** @var WC_Order $order */
 		$order = $built['order'];
 		$order->set_status( OrderStatus::PROCESSING );
 		$order->save();
@@ -909,9 +969,22 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 			),
 		);
 
-		$response = $this->dispatch();
+		$response = $this->dispatch_once();
 
 		$this->assertFalse( $response['success'] );
+		$this->assertSame( 'Order not found.', $response['message'] );
+		$this->assertSame(
+			0,
+			(int) get_comments(
+				array(
+					'post_id' => $built['product_ids'][0],
+					'type'    => 'review',
+					'count'   => true,
+					'status'  => 'all',
+				)
+			),
+			'A refusal must not store anything.'
+		);
 	}
 
 	/**
@@ -1637,5 +1710,338 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 		$this->assertEquals( 4, (float) $product->get_average_rating() );
 		$this->assertSame( array( 4 => 1 ), $product->get_rating_counts() );
 		$this->assertSame( 1, $product->get_review_count() );
+	}
+
+	/**
+	 * `make_order()` is a guest order, where requires_owner_login() is false by
+	 * construction, so only a registered-customer order shows the key is checked
+	 * before the login requirement.
+	 *
+	 * @testdox A bad key on a registered customer's order is not answered with a login prompt.
+	 */
+	public function test_key_check_outranks_the_login_requirement(): void {
+		$built = $this->make_order( 1 );
+		/** @var WC_Order $order */
+		$order = $built['order'];
+		$order->set_customer_id( self::factory()->user->create() );
+		$order->save();
+
+		$_POST = array(
+			'order_id' => $order->get_id(),
+			'key'      => 'wc_order_NOPE',
+			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
+			'reviews'  => array(
+				array(
+					'product_id'    => $built['product_ids'][0],
+					'order_item_id' => $built['item_ids'][0],
+					'rating'        => '5',
+					'text'          => 'Great product.',
+				),
+			),
+		);
+
+		$response = $this->dispatch_once();
+
+		$this->assertFalse( $response['success'] );
+		$this->assertSame(
+			'Order not found.',
+			$response['message'],
+			'A login prompt here would confirm the order exists and who owns it.'
+		);
+	}
+
+	/**
+	 * Neither new predicate fires for a signed-in visitor, so this pre-existing
+	 * check is the only thing standing between a leaked key and somebody else's
+	 * order. The page side is covered by EndpointTest::test_404_when_logged_in_customer_mismatch.
+	 *
+	 * @testdox A signed-in visitor cannot submit against another customer's order.
+	 */
+	public function test_rejects_a_submission_from_a_signed_in_non_owner(): void {
+		$built = $this->make_order( 1 );
+		/** @var WC_Order $order */
+		$order = $built['order'];
+		$order->set_customer_id( self::factory()->user->create() );
+		$order->save();
+
+		wp_set_current_user( self::factory()->user->create() );
+
+		$_POST = array(
+			'order_id' => $order->get_id(),
+			'key'      => $order->get_order_key(),
+			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
+			'reviews'  => array(
+				array(
+					'product_id'    => $built['product_ids'][0],
+					'order_item_id' => $built['item_ids'][0],
+					'rating'        => '5',
+					'text'          => 'Great product.',
+				),
+			),
+		);
+
+		$response = $this->dispatch_once();
+
+		$this->assertFalse( $response['success'] );
+		$this->assertSame( 'Order not found.', $response['message'] );
+		$this->assertSame(
+			0,
+			(int) get_comments(
+				array(
+					'post_id' => $built['product_ids'][0],
+					'type'    => 'review',
+					'count'   => true,
+					'status'  => 'all',
+				)
+			),
+			'A refusal must not store anything.'
+		);
+	}
+
+	/**
+	 * The page refuses an ineligible status before it considers who is asking,
+	 * so the submit handler has to answer the same way round. Otherwise a 403
+	 * saying a sign-in would help confirms an order the page just 404'd.
+	 *
+	 * @testdox An ineligible status is reported the same way as on the page, whoever is asking.
+	 */
+	public function test_ineligible_status_outranks_the_login_requirement(): void {
+		$built = $this->make_order( 1 );
+		/** @var WC_Order $order */
+		$order = $built['order'];
+		$order->set_customer_id( self::factory()->user->create() );
+		$order->set_status( OrderStatus::PROCESSING );
+		$order->save();
+
+		$_POST = array(
+			'order_id' => $order->get_id(),
+			'key'      => $order->get_order_key(),
+			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
+			'reviews'  => array(
+				array(
+					'product_id'    => $built['product_ids'][0],
+					'order_item_id' => $built['item_ids'][0],
+					'rating'        => '5',
+					'text'          => 'Great product.',
+				),
+			),
+		);
+
+		$response = $this->dispatch_once();
+
+		$this->assertFalse( $response['success'] );
+		$this->assertSame( 'Order not found.', $response['message'] );
+		$this->assertSame(
+			0,
+			(int) get_comments(
+				array(
+					'post_id' => $built['product_ids'][0],
+					'type'    => 'review',
+					'count'   => true,
+					'status'  => 'all',
+				)
+			),
+			'A refusal must not store anything.'
+		);
+	}
+
+	/**
+	 * @testdox A signed-out visitor cannot submit against a registered customer's order.
+	 */
+	public function test_rejects_a_signed_out_submission_for_a_registered_customers_order(): void {
+		$built = $this->make_order( 1 );
+		/** @var WC_Order $order */
+		$order = $built['order'];
+		$order->set_customer_id( self::factory()->user->create() );
+		$order->save();
+
+		$_POST = array(
+			'order_id' => $order->get_id(),
+			'key'      => $order->get_order_key(),
+			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
+			'reviews'  => array(
+				array(
+					'product_id'    => $built['product_ids'][0],
+					'order_item_id' => $built['item_ids'][0],
+					'rating'        => '5',
+					'text'          => 'Great product.',
+				),
+			),
+		);
+
+		$response = $this->dispatch_once();
+
+		$this->assertFalse( $response['success'] );
+		$this->assertSame( 'Please log in to your account to review this order.', $response['message'] );
+		$this->assertSame(
+			0,
+			(int) get_comments(
+				array(
+					'post_id' => $built['product_ids'][0],
+					'type'    => 'review',
+					'count'   => true,
+					'status'  => 'all',
+				)
+			),
+			'A refusal must not store anything.'
+		);
+	}
+
+	/**
+	 * @testdox A store that requires registration to comment rejects a signed-out submission.
+	 */
+	public function test_rejects_a_signed_out_submission_when_the_store_requires_registration(): void {
+		update_option( 'comment_registration', 1 );
+		$built = $this->make_order( 1 );
+		/** @var WC_Order $order */
+		$order = $built['order'];
+
+		$_POST = array(
+			'order_id' => $order->get_id(),
+			'key'      => $order->get_order_key(),
+			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
+			'reviews'  => array(
+				array(
+					'product_id'    => $built['product_ids'][0],
+					'order_item_id' => $built['item_ids'][0],
+					'rating'        => '5',
+					'text'          => 'Great product.',
+				),
+			),
+		);
+
+		$response = $this->dispatch_once();
+
+		$this->assertFalse( $response['success'] );
+		$this->assertSame( 'You must be logged in to post a review.', $response['message'] );
+		$this->assertSame(
+			0,
+			(int) get_comments(
+				array(
+					'post_id' => $built['product_ids'][0],
+					'type'    => 'review',
+					'count'   => true,
+					'status'  => 'all',
+				)
+			),
+			'A refusal must not store anything.'
+		);
+	}
+
+	/**
+	 * @testdox A signed-in shopper can still submit when the store requires registration.
+	 */
+	public function test_accepts_a_signed_in_submission_when_the_store_requires_registration(): void {
+		update_option( 'comment_registration', 1 );
+		wp_set_current_user( self::factory()->user->create() );
+		$built = $this->make_order( 1 );
+		/** @var WC_Order $order */
+		$order = $built['order'];
+
+		$_POST = array(
+			'order_id' => $order->get_id(),
+			'key'      => $order->get_order_key(),
+			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
+			'reviews'  => array(
+				array(
+					'product_id'    => $built['product_ids'][0],
+					'order_item_id' => $built['item_ids'][0],
+					'rating'        => '5',
+					'text'          => 'Great product.',
+				),
+			),
+		);
+
+		$response = $this->dispatch_once();
+
+		// `handle()` answers success even when every row failed, so check a
+		// review was actually stored rather than just the envelope.
+		$this->assertTrue( $response['success'] );
+		$this->assertSame(
+			1,
+			(int) get_comments(
+				array(
+					'post_id' => $built['product_ids'][0],
+					'type'    => 'review',
+					'count'   => true,
+					'status'  => 'all',
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox Turning the known-shopper filter off does not unblock submission when an account is also required.
+	 */
+	public function test_known_shopper_filter_does_not_override_the_account_requirement(): void {
+		update_option( 'comment_registration', 1 );
+		$built = $this->make_order( 1 );
+		/** @var WC_Order $order */
+		$order = $built['order'];
+		$order->set_customer_id( self::factory()->user->create() );
+		$order->save();
+
+		$_POST = array(
+			'order_id' => $order->get_id(),
+			'key'      => $order->get_order_key(),
+			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
+			'reviews'  => array(
+				array(
+					'product_id'    => $built['product_ids'][0],
+					'order_item_id' => $built['item_ids'][0],
+					'rating'        => '5',
+					'text'          => 'Great product.',
+				),
+			),
+		);
+
+		add_filter( 'woocommerce_review_order_verify_known_shoppers', '__return_false' );
+		$response = $this->dispatch_once();
+		remove_filter( 'woocommerce_review_order_verify_known_shoppers', '__return_false' );
+
+		$this->assertFalse( $response['success'] );
+		$this->assertSame( 'You must be logged in to post a review.', $response['message'] );
+	}
+
+	/**
+	 * @testdox The known-shopper filter unblocks the submit path as well as the page.
+	 */
+	public function test_verify_known_shoppers_filter_unblocks_the_submit_path(): void {
+		$built = $this->make_order( 1 );
+		/** @var WC_Order $order */
+		$order = $built['order'];
+		$order->set_customer_id( self::factory()->user->create() );
+		$order->save();
+
+		$_POST = array(
+			'order_id' => $order->get_id(),
+			'key'      => $order->get_order_key(),
+			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
+			'reviews'  => array(
+				array(
+					'product_id'    => $built['product_ids'][0],
+					'order_item_id' => $built['item_ids'][0],
+					'rating'        => '5',
+					'text'          => 'Great product.',
+				),
+			),
+		);
+
+		add_filter( 'woocommerce_review_order_verify_known_shoppers', '__return_false' );
+		$response = $this->dispatch_once();
+		remove_filter( 'woocommerce_review_order_verify_known_shoppers', '__return_false' );
+
+		$this->assertTrue( $response['success'] );
+		$this->assertSame(
+			1,
+			(int) get_comments(
+				array(
+					'post_id' => $built['product_ids'][0],
+					'type'    => 'review',
+					'count'   => true,
+					'status'  => 'all',
+				)
+			)
+		);
 	}
 }
