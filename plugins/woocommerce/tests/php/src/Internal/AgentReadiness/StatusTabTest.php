@@ -80,6 +80,7 @@ class StatusTabTest extends WC_Unit_Test_Case {
 		$this->assertMatchesRegularExpression( '/name="wc_agent_readiness_run"[^>]*disabled/', $html );
 
 		as_unschedule_all_actions( ScheduledScan::RUN_NOW_HOOK );
+		$this->age_finished_actions();
 		as_schedule_single_action( time() - ScheduledScan::STALLED_AFTER - 60, ScheduledScan::RUN_NOW_HOOK, array(), ScheduledScan::GROUP );
 
 		$html = $this->render();
@@ -95,5 +96,14 @@ class StatusTabTest extends WC_Unit_Test_Case {
 		ob_start();
 		wc_get_container()->get( StatusTab::class )->render();
 		return (string) ob_get_clean();
+	}
+
+	/**
+	 * Date every finished action an hour back, so only what the test does next
+	 * counts as recent queue activity.
+	 */
+	private function age_finished_actions(): void {
+		global $wpdb;
+		$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->prefix}actionscheduler_actions SET last_attempt_gmt = %s WHERE status = 'complete'", gmdate( 'Y-m-d H:i:s', time() - HOUR_IN_SECONDS ) ) );
 	}
 }
