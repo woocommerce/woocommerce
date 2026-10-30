@@ -78,6 +78,8 @@ class StoreOutputChecks {
 	 */
 	public const AI_SEARCH_BOTS = array( 'OAI-SearchBot', 'ChatGPT-User', 'Claude-User', 'PerplexityBot' );
 
+	private const MAX_LISTED_SITEMAPS = 5;
+
 	/**
 	 * The checks, each with a test that returns true, false, or null for couldn't check.
 	 *
@@ -196,9 +198,11 @@ class StoreOutputChecks {
 			}
 		}
 
-		$candidates = array_merge( ( new RobotsTxt( $this->robots_txt( $responses ) ) )->sitemaps(), array( '/sitemap_index.xml', '/sitemap.xml' ) );
+		// A few sitemaps from robots.txt at most, so a long list can't hold up the scan.
+		$listed     = array_slice( ( new RobotsTxt( $this->robots_txt( $responses ) ) )->sitemaps(), 0, self::MAX_LISTED_SITEMAPS );
+		$candidates = array_unique( array_merge( $listed, array( '/sitemap_index.xml', '/sitemap.xml' ) ) );
 		$unknown    = false;
-		foreach ( array_unique( $candidates ) as $url ) {
+		foreach ( $candidates as $url ) {
 			$response = $responses->get( $url );
 			if ( null === $response ) {
 				$unknown = true;
