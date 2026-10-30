@@ -203,8 +203,35 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 			'code' => 200,
 		);
 		$this->assertFalse( $this->sut->refresh() );
+		$this->answer = array(
+			'body' => '<html><body>Maintenance</body></html>',
+			'code' => 200,
+		);
+		$this->assertFalse( $this->sut->refresh() );
 
 		$this->assertSame( 'not_listable', $this->sut->channel_rules()['title_too_long']['google']['effect'] );
+	}
+
+	/**
+	 * @testdox A network error stores nothing, and the bundled checks run.
+	 */
+	public function test_network_error_uses_bundled_checks(): void {
+		add_filter(
+			'woocommerce_agent_readiness_rules_url',
+			static function () {
+				return self::URL;
+			}
+		);
+		$fail = static function () {
+			return new \WP_Error( 'http_request_failed', 'Operation timed out' );
+		};
+		add_filter( 'pre_http_request', $fail, 20 );
+
+		$this->assertFalse( $this->sut->refresh() );
+		remove_filter( 'pre_http_request', $fail, 20 );
+
+		$this->assertSame( array(), $this->sut->channel_rules() );
+		$this->assertArrayHasKey( 'missing_images', $this->agent_readiness()->get_channel_rules(), 'The bundled checks still run' );
 	}
 
 	/**
