@@ -149,9 +149,9 @@ abstract class AbstractCartRoute extends StoreApiCartRoute {
 	 * rebuild through the forced token handler, whatever ran earlier in the request.
 	 */
 	private function discard_preloaded_cart_session(): void {
-		WC()->session  = null;
-		WC()->customer = null;
-		WC()->cart     = null;
+		WC()->session  = null; // @phpstan-ignore assign.propertyType (Defaults to null; reset so load_cart() rebuilds it.)
+		WC()->customer = null; // @phpstan-ignore assign.propertyType (Same.)
+		WC()->cart     = null; // @phpstan-ignore assign.propertyType (Same.)
 		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Clears the per-process marker so load_cart() reloads.
 		unset( $GLOBALS['wp_actions']['woocommerce_load_cart_from_session'] );
 	}
