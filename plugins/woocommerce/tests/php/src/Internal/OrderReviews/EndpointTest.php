@@ -97,6 +97,49 @@ class EndpointTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Stage the globals `gate_request()` reads for a given order.
+	 *
+	 * @param \WC_Order $order Order the request is for.
+	 */
+	private function stage_review_order_request( $order ): void {
+		global $wp, $wp_query, $wp_the_query;
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: singular page query so is_page() returns true.
+		$wp_query = new WP_Query( array( 'page_id' => (int) wc_get_page_id( Endpoint::PAGE_KEY ) ) );
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: matching main query.
+		$wp_the_query = $wp_query;
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: stage a fresh WP instance carrying our query var.
+		$wp                                    = new \WP();
+		$wp->query_vars[ Endpoint::QUERY_VAR ] = (string) $order->get_id();
+		$_GET                                  = array( 'key' => $order->get_order_key() );
+	}
+
+	/**
+	 * Run `gate_request()` and return where it redirected, or null if it did not.
+	 * `gate_request()` calls `exit` after `wp_safe_redirect()`, so the redirect
+	 * is intercepted and turned into an exception the test can catch.
+	 *
+	 * @return string|null
+	 */
+	private function capture_gate_redirect(): ?string {
+		$captured = null;
+		$catch    = function ( $location ) use ( &$captured ) {
+			$captured = $location;
+			throw new \RuntimeException( 'redirected' );
+		};
+
+		add_filter( 'wp_redirect', $catch );
+		try {
+			$this->endpoint->gate_request();
+		} catch ( \RuntimeException $e ) {
+			unset( $e );
+		} finally {
+			remove_filter( 'wp_redirect', $catch );
+		}
+
+		return $captured;
+	}
+
+	/**
 	 * Run the gating + render with output captured.
 	 *
 	 * @param int $order_id Order id to dispatch.
@@ -213,7 +256,7 @@ class EndpointTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox 404s when a logged-in user does not own the order.
 	 */
-	public function test_404_when_logged_in_customer_mismatch(): void {
+	public function test_signed_in_non_owner_is_told_the_order_is_not_theirs(): void {
 		$customer_id = self::factory()->user->create();
 		$other_id    = self::factory()->user->create();
 
@@ -224,10 +267,12 @@ class EndpointTest extends WC_Unit_Test_Case {
 		wp_set_current_user( $other_id );
 		$_GET = array( 'key' => $order->get_order_key() );
 
-		$this->render( $order->get_id() );
+		$html = $this->render( $order->get_id() );
 
 		global $wp_query;
-		$this->assertTrue( $wp_query->is_404 );
+		$this->assertFalse( $wp_query->is_404, 'Signing in again cannot help, so explain rather than 404.' );
+		$this->assertStringContainsString( 'This order belongs to a different account, so you cannot review it.', $html );
+		$this->assertStringNotContainsString( 'woocommerce-review-order__form', $html );
 	}
 
 	/**
@@ -1142,22 +1187,81 @@ class EndpointTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox A signed-out visitor is asked to log in, not shown the form, for a registered customer's order.
 	 */
-	public function test_signed_out_visitor_is_asked_to_log_in_for_a_registered_customers_order(): void {
+	public function test_signed_out_visitor_is_redirected_to_log_in_for_a_registered_customers_order(): void {
 		$order = OrderHelper::create_order( self::factory()->user->create() );
 		$order->set_status( OrderStatus::COMPLETED );
 		$order->save();
-		$_GET = array( 'key' => $order->get_order_key() );
+		$this->stage_review_order_request( $order );
 
-		$html = $this->render( $order->get_id() );
+		$target = $this->capture_gate_redirect();
 
-		global $wp_query;
-		$this->assertFalse( $wp_query->is_404, 'A valid link should ask for a login rather than 404.' );
-		$this->assertStringContainsString( 'Please log in to your account to review this order.', $html );
-		$this->assertStringNotContainsString( 'woocommerce-review-order__form', $html );
+		$this->assertNotNull( $target, 'A signed-out visitor is sent to the login page.' );
+		// No My Account page in the test install, so this is the wp-login
+		// fallback; either way the return journey has to be encoded in it.
 		$this->assertStringContainsString(
-			esc_url( Endpoint::get_url( $order ) ),
-			$html,
+			rawurlencode( Endpoint::get_url( $order ) ),
+			(string) $target,
 			'Signing in has to come back to this order, key and all.'
+		);
+	}
+
+	/**
+	 * The My Account login form posts no redirect of its own, so the return
+	 * journey depends entirely on this filter reading the arg back out.
+	 *
+	 * @testdox Signing in returns the customer to the review page.
+	 */
+	public function test_login_redirect_returns_to_the_review_page(): void {
+		$order = OrderHelper::create_order( self::factory()->user->create() );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		$review_url = Endpoint::get_url( $order );
+		$login_page = add_query_arg(
+			Endpoint::RETURN_QUERY_VAR,
+			rawurlencode( $review_url ),
+			home_url( '/my-account/' )
+		);
+
+		$this->assertSame(
+			$review_url,
+			$this->endpoint->maybe_return_to_review( $login_page ),
+			'The arg carried to the login page has to bring them back.'
+		);
+	}
+
+	/**
+	 * @testdox A login redirect without the return arg is left alone.
+	 */
+	public function test_login_redirect_without_the_return_arg_is_untouched(): void {
+		$plain = home_url( '/my-account/' );
+
+		$this->assertSame( $plain, $this->endpoint->maybe_return_to_review( $plain ) );
+	}
+
+	/**
+	 * @testdox An array-shaped return arg is ignored rather than cast.
+	 */
+	public function test_login_redirect_ignores_an_array_return_arg(): void {
+		$login_page = home_url( '/my-account/?' . Endpoint::RETURN_QUERY_VAR . '[]=x' );
+
+		$this->assertSame( $login_page, $this->endpoint->maybe_return_to_review( $login_page ) );
+	}
+
+	/**
+	 * @testdox An off-site return target is refused.
+	 */
+	public function test_login_redirect_refuses_an_off_site_return_target(): void {
+		$login_page = add_query_arg(
+			Endpoint::RETURN_QUERY_VAR,
+			rawurlencode( 'https://example.org/somewhere-else' ),
+			home_url( '/my-account/' )
+		);
+
+		$this->assertSame(
+			$login_page,
+			$this->endpoint->maybe_return_to_review( $login_page ),
+			'wp_validate_redirect() must keep the shopper on this host.'
 		);
 	}
 
@@ -1226,14 +1330,13 @@ class EndpointTest extends WC_Unit_Test_Case {
 		$order = OrderHelper::create_order( self::factory()->user->create() );
 		$order->set_status( OrderStatus::COMPLETED );
 		$order->save();
-		$_GET = array( 'key' => $order->get_order_key() );
+		$this->stage_review_order_request( $order );
 
 		add_filter( 'woocommerce_review_order_verify_known_shoppers', '__return_false' );
-		$html = $this->render( $order->get_id() );
+		$target = $this->capture_gate_redirect();
 		remove_filter( 'woocommerce_review_order_verify_known_shoppers', '__return_false' );
 
-		$this->assertStringContainsString( 'to post a review.', $html );
-		$this->assertStringNotContainsString( 'woocommerce-review-order__form', $html );
+		$this->assertNotNull( $target, 'The filter does not waive the store-wide account requirement.' );
 	}
 
 	/**
@@ -1242,8 +1345,8 @@ class EndpointTest extends WC_Unit_Test_Case {
 	public function test_registration_required_replaces_the_form_with_a_prompt(): void {
 		update_option( 'comment_registration', 1 );
 
-		// The test install has no My Account page, so the linked branch only
-		// runs if one is staged here.
+		// The test install has no My Account page; stage one so the redirect
+		// has somewhere to point.
 		$account_page_id = (int) wp_insert_post(
 			array(
 				'post_type'   => 'page',
@@ -1257,26 +1360,16 @@ class EndpointTest extends WC_Unit_Test_Case {
 		$order = OrderHelper::create_order( 0 );
 		$order->set_status( OrderStatus::COMPLETED );
 		$order->save();
-		$_GET = array( 'key' => $order->get_order_key() );
+		$this->stage_review_order_request( $order );
 
-		$html = $this->render( $order->get_id() );
+		$target = $this->capture_gate_redirect();
 
-		$this->assertStringContainsString( 'to post a review.', $html );
+		$this->assertNotNull( $target, 'A store requiring an account sends the visitor to log in.' );
+		$this->assertStringStartsWith( wc_get_page_permalink( 'myaccount', '' ), (string) $target );
 		$this->assertStringContainsString(
-			'<div class="woocommerce"><div class="woocommerce-notices-wrapper">',
-			$html,
-			'The login form picks up its styles from the .woocommerce wrapper.'
-		);
-		$this->assertStringContainsString(
-			'<a href="' . esc_url( wc_get_page_permalink( 'myaccount', '' ) ) . '">',
-			$html,
-			'Shoppers without an account need a way to make one.'
-		);
-		$this->assertStringNotContainsString( 'woocommerce-review-order__form', $html );
-		$this->assertStringContainsString(
-			esc_url( Endpoint::get_url( $order ) ),
-			$html,
-			'This arm needs the same return-here redirect as the other.'
+			Endpoint::RETURN_QUERY_VAR . '=' . rawurlencode( Endpoint::get_url( $order ) ),
+			(string) $target,
+			'Signing in has to come back to this order.'
 		);
 	}
 
@@ -1290,14 +1383,12 @@ class EndpointTest extends WC_Unit_Test_Case {
 		$order = OrderHelper::create_order( 0 );
 		$order->set_status( OrderStatus::COMPLETED );
 		$order->save();
-		$_GET = array( 'key' => $order->get_order_key() );
+		$this->stage_review_order_request( $order );
 
-		$html = $this->render( $order->get_id() );
+		$target = $this->capture_gate_redirect();
 
-		$end    = strpos( $html, '</div>' );
-		$notice = false === $end ? $html : substr( $html, 0, $end );
-		$this->assertStringContainsString( 'You must be logged in to post a review.', $notice );
-		$this->assertStringNotContainsString( '<a href', $notice, 'Nothing to link to, so do not link to the home page.' );
+		$this->assertNotNull( $target );
+		$this->assertStringContainsString( 'wp-login.php', (string) $target, 'With no My Account page, fall back to wp-login.' );
 	}
 
 	/**
@@ -1361,41 +1452,20 @@ class EndpointTest extends WC_Unit_Test_Case {
 	 *
 	 * @testdox gate_request() leaves the title filters and form assets alone for a blocked visitor.
 	 */
-	public function test_gate_request_skips_title_filters_and_assets_for_a_blocked_visitor(): void {
-		$page_id = (int) wc_get_page_id( Endpoint::PAGE_KEY );
-
+	public function test_gate_request_redirects_a_signed_out_visitor_without_touching_the_page(): void {
 		$order = OrderHelper::create_order( self::factory()->user->create() );
 		$order->set_status( OrderStatus::COMPLETED );
 		$order->save();
+		$this->stage_review_order_request( $order );
 
-		global $wp, $wp_query, $wp_the_query;
-		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: singular page query so is_page() returns true.
-		$wp_query = new WP_Query( array( 'page_id' => $page_id ) );
-		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: matching main query.
-		$wp_the_query = $wp_query;
-		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: stage a fresh WP instance carrying our query var.
-		$wp                                    = new \WP();
-		$wp->query_vars[ Endpoint::QUERY_VAR ] = (string) $order->get_id();
-		$_GET                                  = array( 'key' => $order->get_order_key() );
+		$target = $this->capture_gate_redirect();
 
-		$this->endpoint->gate_request();
-
-		// Control: proves the staged globals really do describe a blocked
-		// visitor. It does not prove gate_request() itself reached that branch,
-		// since render_shortcode() repeats the page check.
-		$this->assertStringContainsString(
-			'Please log in to your account to review this order.',
-			$this->endpoint->render_shortcode()
-		);
-
+		$this->assertNotNull( $target, 'The visitor is sent to the login page.' );
 		$this->assertFalse(
 			has_filter( 'the_title', array( $this->endpoint, 'maybe_hide_page_title' ) ),
-			'The prompt prints no heading of its own, so the page title must survive.'
+			'Nothing of this page is rendered, so its title filters must not be registered.'
 		);
-		$this->assertFalse(
-			has_filter( 'render_block_core/post-title', array( $this->endpoint, 'maybe_hide_post_title_block' ) ),
-			'Same for the block theme path.'
-		);
+		$this->assertFalse( has_filter( 'render_block_core/post-title', array( $this->endpoint, 'maybe_hide_post_title_block' ) ) );
 		$this->assertFalse( wp_script_is( 'wc-order-review', 'registered' ), 'The form assets are not needed.' );
 	}
 
@@ -1405,27 +1475,17 @@ class EndpointTest extends WC_Unit_Test_Case {
 	 *
 	 * @testdox render_shortcode() returns the login prompt, not the form, for a blocked visitor.
 	 */
-	public function test_render_shortcode_returns_the_prompt_for_a_blocked_visitor(): void {
-		$page_id = (int) wc_get_page_id( Endpoint::PAGE_KEY );
-
+	public function test_render_shortcode_renders_nothing_for_a_visitor_who_must_sign_in(): void {
 		$order = OrderHelper::create_order( self::factory()->user->create() );
 		$order->set_status( OrderStatus::COMPLETED );
 		$order->save();
+		$this->stage_review_order_request( $order );
 
-		global $wp, $wp_query, $wp_the_query;
-		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: singular page query so is_page() returns true.
-		$wp_query = new WP_Query( array( 'page_id' => $page_id ) );
-		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: matching main query.
-		$wp_the_query = $wp_query;
-		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: stage a fresh WP instance carrying our query var.
-		$wp                                    = new \WP();
-		$wp->query_vars[ Endpoint::QUERY_VAR ] = (string) $order->get_id();
-		$_GET                                  = array( 'key' => $order->get_order_key() );
-
-		$html = $this->endpoint->render_shortcode();
-
-		$this->assertStringContainsString( 'Please log in to your account to review this order.', $html );
-		$this->assertStringNotContainsString( 'woocommerce-review-order__form', $html );
+		$this->assertSame(
+			'',
+			$this->endpoint->render_shortcode(),
+			'gate_request() redirects first; the shortcode must never render the form here.'
+		);
 	}
 
 	/**
@@ -1465,31 +1525,17 @@ class EndpointTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox gate_request() also stops short for the registration-required arm.
 	 */
-	public function test_gate_request_stops_short_when_the_store_requires_registration(): void {
+	public function test_gate_request_redirects_when_the_store_requires_registration(): void {
 		update_option( 'comment_registration', 1 );
-		$page_id = (int) wc_get_page_id( Endpoint::PAGE_KEY );
 
 		$order = OrderHelper::create_order( 0 );
 		$order->set_status( OrderStatus::COMPLETED );
 		$order->save();
+		$this->stage_review_order_request( $order );
 
-		global $wp, $wp_query, $wp_the_query;
-		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: singular page query so is_page() returns true.
-		$wp_query = new WP_Query( array( 'page_id' => $page_id ) );
-		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: matching main query.
-		$wp_the_query = $wp_query;
-		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: stage a fresh WP instance carrying our query var.
-		$wp                                    = new \WP();
-		$wp->query_vars[ Endpoint::QUERY_VAR ] = (string) $order->get_id();
-		$_GET                                  = array( 'key' => $order->get_order_key() );
+		$target = $this->capture_gate_redirect();
 
-		$this->endpoint->gate_request();
-
-		// Positive control: every way the staging could be wrong also produces
-		// the two negatives above, so prove the request really did reach the
-		// blocked-visitor branch.
-		$this->assertStringContainsString( 'to post a review.', $this->endpoint->render_shortcode() );
-
+		$this->assertNotNull( $target );
 		$this->assertFalse( has_filter( 'the_title', array( $this->endpoint, 'maybe_hide_page_title' ) ) );
 		$this->assertFalse( wp_script_is( 'wc-order-review', 'registered' ) );
 	}

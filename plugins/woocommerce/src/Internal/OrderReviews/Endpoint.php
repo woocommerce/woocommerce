@@ -60,6 +60,11 @@ class Endpoint {
 	public const SHORTCODE = 'woocommerce_review_order';
 
 	/**
+	 * Query arg carried to the login page so signing in returns here.
+	 */
+	public const RETURN_QUERY_VAR = 'wc_review_return';
+
+	/**
 	 * Wire the endpoint into WordPress.
 	 *
 	 * Auto-called by the WC dependency container after instantiation. The
@@ -83,6 +88,7 @@ class Endpoint {
 		// Status → Tools "Create default pages" and any other repair caller see it too.
 		add_filter( 'woocommerce_create_pages', array( $this, 'inject_review_order_page' ) );
 		add_shortcode( self::SHORTCODE, array( $this, 'render_shortcode' ) );
+		add_filter( 'woocommerce_login_redirect', array( $this, 'maybe_return_to_review' ) );
 	}
 
 	/**
@@ -550,9 +556,16 @@ class Endpoint {
 			exit;
 		}
 
-		// A blocked visitor gets the login prompt instead of the form, which
-		// prints no heading of its own and needs none of the form's assets.
-		if ( $order instanceof WC_Order && self::is_blocked_pending_login( $order ) ) {
+		// Sign-in is handled by the store's login page, not by this one, so the
+		// redirect happens here on `template_redirect`, before any output.
+		if ( $order instanceof WC_Order && self::requires_login( $order ) ) {
+			wp_safe_redirect( self::login_url( $order ) );
+			exit;
+		}
+
+		// Someone signed in as a different customer cannot be helped by signing
+		// in again; they get an explanation instead of the form.
+		if ( $order instanceof WC_Order && self::viewer_is_another_customer( $order ) ) {
 			return;
 		}
 
@@ -615,29 +628,16 @@ class Endpoint {
 	 * @return string
 	 */
 	private function render_body( WC_Order $order ): string {
-		if ( self::requires_owner_login( $order ) ) {
-			return $this->render_login_prompt(
-				__( 'Please log in to your account to review this order.', 'woocommerce' ),
-				self::get_url( $order )
-			);
+		if ( self::viewer_is_another_customer( $order ) ) {
+			ob_start();
+			echo '<div class="woocommerce"><div class="woocommerce-notices-wrapper">' . wc_print_notice( __( 'This order belongs to a different account, so you cannot review it.', 'woocommerce' ), 'error', array(), true ) . '</div></div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wc_print_notice() returns kses-filtered markup.
+			return (string) ob_get_clean();
 		}
 
-		if ( self::requires_registered_account() ) {
-			// Same wording the product page uses for this setting, pointing at
-			// My Account so a shopper without one can still get there.
-			// Explicit empty fallback: the default is the home page, which is no
-			// use to someone being told to sign in.
-			$account_page_url = wc_get_page_permalink( 'myaccount', '' );
-			$message          = $account_page_url
-				? sprintf(
-					/* translators: %1$s and %2$s: opening and closing link tags to the My Account page. */
-					esc_html__( 'You must be %1$slogged in%2$s to post a review.', 'woocommerce' ),
-					'<a href="' . esc_url( $account_page_url ) . '">',
-					'</a>'
-				)
-				: esc_html__( 'You must be logged in to post a review.', 'woocommerce' );
-
-			return $this->render_login_prompt( $message, self::get_url( $order ) );
+		// A visitor who needs to sign in was redirected on `template_redirect`;
+		// reaching here means the shortcode ran outside that path.
+		if ( self::requires_login( $order ) ) {
+			return '';
 		}
 
 		ob_start();
@@ -645,21 +645,6 @@ class Endpoint {
 		return (string) ob_get_clean();
 	}
 
-	/**
-	 * A notice and the login form, rendered in place of the review form.
-	 *
-	 * @param string $message  Notice text.
-	 * @param string $redirect URL to return to once signed in.
-	 * @return string
-	 */
-	private function render_login_prompt( string $message, string $redirect ): string {
-		ob_start();
-		// `.woocommerce` wrapper: the login form's styles are all nested under it.
-		echo '<div class="woocommerce"><div class="woocommerce-notices-wrapper">' . wc_print_notice( $message, 'notice', array(), true ) . '</div>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wc_print_notice() returns kses-filtered markup.
-		woocommerce_login_form( array( 'redirect' => $redirect ) );
-		echo '</div>';
-		return (string) ob_get_clean();
-	}
 
 	/**
 	 * Render the Review Order body directly. Public so unit tests can drive
@@ -701,10 +686,9 @@ class Endpoint {
 	 * @param WC_Order $order Order being reviewed.
 	 */
 	private function maybe_mark_no_actionable_rows( WC_Order $order ): void {
-		// A visitor held at the login prompt never sees the rows, so nothing
-		// about this order is complete from their visit. Checked here rather
-		// than at each caller so a new caller cannot forget it.
-		if ( self::is_blocked_pending_login( $order ) ) {
+		// A visitor who never sees the rows completes nothing. Checked here
+		// rather than at each caller so a new caller cannot forget it.
+		if ( self::requires_login( $order ) || self::viewer_is_another_customer( $order ) ) {
 			return;
 		}
 
@@ -841,12 +825,6 @@ class Endpoint {
 			return false;
 		}
 
-		// A signed-in visitor must be the order's customer. The signed-out case is
-		// handled by `requires_owner_login()`, which prompts instead of 404ing.
-		if ( $order->get_customer_id() && is_user_logged_in() && get_current_user_id() !== $order->get_customer_id() ) {
-			return false;
-		}
-
 		return true;
 	}
 
@@ -897,14 +875,75 @@ class Endpoint {
 	}
 
 	/**
-	 * Whether the visitor is held at a login prompt instead of the review form.
-	 * One place decides this so the page and the submit handler cannot drift.
+	 * Send a customer back to the Review Order page after signing in.
+	 *
+	 * The My Account login form posts no `redirect` of its own, so
+	 * `WC_Form_Handler::process_login()` falls back to the referer — the login
+	 * page URL, which still carries the return arg this route added.
+	 *
+	 * @internal
+	 *
+	 * @param string $redirect Where WooCommerce intends to send the customer.
+	 * @return string
+	 */
+	public function maybe_return_to_review( $redirect ): string {
+		$redirect = (string) $redirect;
+		$query    = (string) wp_parse_url( $redirect, PHP_URL_QUERY );
+		if ( '' === $query ) {
+			return $redirect;
+		}
+
+		$args = array();
+		wp_parse_str( $query, $args );
+		// `wp_parse_str()` yields an array for `?arg[]=…`, which is not a target.
+		$raw    = $args[ self::RETURN_QUERY_VAR ] ?? '';
+		$target = is_string( $raw ) ? rawurldecode( $raw ) : '';
+
+		// Same-host only; `wp_validate_redirect()` falls back when it is not.
+		return $target ? wp_validate_redirect( $target, $redirect ) : $redirect;
+	}
+
+	/**
+	 * Whether this visitor has to sign in before the order can be reviewed:
+	 * the order belongs to a registered customer who is not signed in, or the
+	 * store only accepts reviews from registered accounts.
 	 *
 	 * @param WC_Order $order The order being reviewed.
 	 * @return bool
 	 */
-	private static function is_blocked_pending_login( WC_Order $order ): bool {
+	private static function requires_login( WC_Order $order ): bool {
+		if ( is_user_logged_in() ) {
+			return false;
+		}
+
 		return self::requires_owner_login( $order ) || self::requires_registered_account();
+	}
+
+	/**
+	 * Whether the visitor is signed in as somebody other than the order's
+	 * customer. Signing in again cannot help them.
+	 *
+	 * @param WC_Order $order The order being reviewed.
+	 * @return bool
+	 */
+	private static function viewer_is_another_customer( WC_Order $order ): bool {
+		$customer_id = (int) $order->get_customer_id();
+
+		return $customer_id > 0 && is_user_logged_in() && get_current_user_id() !== $customer_id;
+	}
+
+	/**
+	 * The store's login page, returning here once the customer has signed in.
+	 *
+	 * @param WC_Order $order The order being reviewed.
+	 * @return string
+	 */
+	private static function login_url( WC_Order $order ): string {
+		$account_page = wc_get_page_permalink( 'myaccount', '' );
+
+		return $account_page
+			? add_query_arg( self::RETURN_QUERY_VAR, rawurlencode( self::get_url( $order ) ), $account_page )
+			: wp_login_url( self::get_url( $order ) );
 	}
 
 	/**

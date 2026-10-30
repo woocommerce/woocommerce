@@ -111,9 +111,9 @@ class SubmissionHandler {
 			wp_send_json_error( array( 'message' => __( 'Order not found.', 'woocommerce' ) ), 404 );
 		}
 
-		// A signed-in user must be the order's customer.
+		// Signed in as somebody else: say so, the way the page does.
 		if ( $order->get_customer_id() && is_user_logged_in() && get_current_user_id() !== $order->get_customer_id() ) {
-			wp_send_json_error( array( 'message' => __( 'Order not found.', 'woocommerce' ) ), 404 );
+			wp_send_json_error( array( 'message' => __( 'This order belongs to a different account, so you cannot review it.', 'woocommerce' ) ), 403 );
 		}
 
 		// Reuse the same eligibility filter the page-load endpoint uses so the

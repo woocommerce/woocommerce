@@ -1783,7 +1783,7 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 		$response = $this->dispatch_once();
 
 		$this->assertFalse( $response['success'] );
-		$this->assertSame( 'Order not found.', $response['message'] );
+		$this->assertSame( 'This order belongs to a different account, so you cannot review it.', $response['message'] );
 		$this->assertSame(
 			0,
 			(int) get_comments(
