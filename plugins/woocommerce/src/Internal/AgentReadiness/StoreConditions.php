@@ -55,11 +55,11 @@ class StoreConditions {
 		global $wp_rewrite;
 
 		$settings_url = static fn( string $tab ): string => admin_url( 'admin.php?page=wc-settings&tab=' . $tab );
-		$policy_page  = static fn( string $id, string $option, string $level, string $name, string $label, string $why ): array => array(
+		$policy_page  = static fn( string $id, string $option, string $name, string $label, string $why ): array => array(
 			'id'      => $id,
 			'ok'      => self::is_published_page( (int) get_option( $option ) ),
 			'blocks'  => 'checkout',
-			'level'   => $level,
+			'level'   => self::LEVEL_RECOMMENDED,
 			'name'    => $name,
 			'label'   => $label,
 			'why'     => $why,
@@ -72,7 +72,7 @@ class StoreConditions {
 				'id'      => 'launched',
 				'ok'      => $this->coming_soon_helper->is_site_live(),
 				'blocks'  => 'listing',
-				'level'   => self::LEVEL_RECOMMENDED,
+				'level'   => self::LEVEL_REQUIRED,
 				'name'    => __( 'Store is launched', 'woocommerce' ),
 				'label'   => __( 'Store is in coming soon mode', 'woocommerce' ),
 				'why'     => __( 'Visitors, crawlers and shopping agents see a holding page instead of your products.', 'woocommerce' ),
@@ -126,7 +126,6 @@ class StoreConditions {
 			$policy_page(
 				'privacy_page',
 				AgenticCommerceSettings::PRIVACY_PAGE_OPTION,
-				self::LEVEL_REQUIRED,
 				__( 'Privacy policy page is selected', 'woocommerce' ),
 				__( 'No privacy policy page', 'woocommerce' ),
 				__( 'Agents link shoppers to your privacy policy before they buy.', 'woocommerce' )
@@ -134,7 +133,6 @@ class StoreConditions {
 			$policy_page(
 				'terms_page',
 				AgenticCommerceSettings::TERMS_PAGE_OPTION,
-				self::LEVEL_REQUIRED,
 				__( 'Terms and conditions page is selected', 'woocommerce' ),
 				__( 'No terms and conditions page', 'woocommerce' ),
 				__( 'Agents link shoppers to your terms before they buy.', 'woocommerce' )
@@ -142,7 +140,6 @@ class StoreConditions {
 			$policy_page(
 				'refund_returns_page',
 				AgenticCommerceSettings::REFUND_RETURNS_PAGE_OPTION,
-				self::LEVEL_REQUIRED,
 				__( 'Refund and returns page is selected', 'woocommerce' ),
 				__( 'No refund and returns page', 'woocommerce' ),
 				__( 'Agents link shoppers to your return terms before they buy.', 'woocommerce' )
@@ -150,7 +147,6 @@ class StoreConditions {
 			$policy_page(
 				'shipping_policy_page',
 				AgenticCommerceSettings::SHIPPING_POLICY_PAGE_OPTION,
-				self::LEVEL_RECOMMENDED,
 				__( 'Shipping policy page is selected', 'woocommerce' ),
 				__( 'No shipping policy page', 'woocommerce' ),
 				__( 'Shoppers ask agents about delivery times and costs.', 'woocommerce' )

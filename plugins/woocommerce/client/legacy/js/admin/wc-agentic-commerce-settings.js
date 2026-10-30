@@ -67,4 +67,19 @@
 			}, 2000 );
 		} );
 	} );
+
+	const summary = document.getElementById( 'woocommerce_return_policy_summary' );
+	if ( summary ) {
+		const counter = document.createElement( 'p' );
+		counter.className = 'description';
+		counter.setAttribute( 'aria-live', 'polite' );
+		const update = () => {
+			counter.textContent = settings.i18n.counter
+				.replace( '%1$d', String( Array.from( summary.value ).length ) )
+				.replace( '%2$d', String( settings.maxLength ) );
+		};
+		summary.insertAdjacentElement( 'afterend', counter );
+		summary.addEventListener( 'input', update );
+		update();
+	}
 } )();

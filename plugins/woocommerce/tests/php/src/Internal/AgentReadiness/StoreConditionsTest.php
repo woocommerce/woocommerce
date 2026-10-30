@@ -48,7 +48,17 @@ class StoreConditionsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A draft or trashed policy page fails its check like an unset one.
+	 * @testdox Coming soon mode is required.
+	 */
+	public function test_coming_soon_required(): void {
+		self::make_store_ready( $this );
+		update_option( 'woocommerce_coming_soon', 'yes' );
+
+		$this->assertSame( array( 'launched' ), $this->sut->failing_required() );
+	}
+
+	/**
+	 * @testdox A draft or trashed policy page fails its check like an unset one, as a recommendation.
 	 *
 	 * @testWith ["draft"]
 	 *           ["trash"]
@@ -67,7 +77,11 @@ class StoreConditionsTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertSame( array( 'refund_returns_page' ), $this->sut->failing_required() );
+		$checks = array_column( $this->sut->all(), null, 'id' );
+
+		$this->assertFalse( $checks['refund_returns_page']['ok'] );
+		$this->assertSame( StoreConditions::LEVEL_RECOMMENDED, $checks['refund_returns_page']['level'] );
+		$this->assertSame( array(), $this->sut->failing_required(), 'A missing policy page does not block the switch' );
 	}
 
 	/**
@@ -97,23 +111,13 @@ class StoreConditionsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Make every required check pass: HTTPS home URL, pretty permalinks and published policy pages.
+	 * Make every required check pass: store launched, HTTPS home URL and pretty permalinks.
 	 *
 	 * @param WC_Unit_Test_Case $test_case Test case, for its permalink helper.
 	 */
 	public static function make_store_ready( WC_Unit_Test_Case $test_case ): void {
 		add_filter( 'pre_option_home', static fn() => 'https://example.org' );
 		$test_case->set_permalink_structure( '/%postname%/' );
-		foreach ( array( AgenticCommerceSettings::PRIVACY_PAGE_OPTION, AgenticCommerceSettings::TERMS_PAGE_OPTION, AgenticCommerceSettings::REFUND_RETURNS_PAGE_OPTION ) as $option ) {
-			update_option(
-				$option,
-				self::factory()->post->create(
-					array(
-						'post_type'   => 'page',
-						'post_status' => 'publish',
-					)
-				)
-			);
-		}
+		update_option( 'woocommerce_coming_soon', 'no' );
 	}
 }

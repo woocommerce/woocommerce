@@ -26,6 +26,14 @@ class AgenticCommerceSettings implements RegisterHooksInterface {
 
 	public const SHIPPING_POLICY_PAGE_OPTION = 'woocommerce_shipping_policy_page_id';
 
+	public const FAQ_PAGE_OPTION = 'woocommerce_faq_page_id';
+
+	/**
+	 * Saved now, sent to agents once UCP has a return policy description field.
+	 */
+	public const RETURN_POLICY_SUMMARY_OPTION = 'woocommerce_return_policy_summary';
+
+	public const RETURN_POLICY_SUMMARY_MAX_LENGTH = 300;
 
 	/**
 	 * Features controller.

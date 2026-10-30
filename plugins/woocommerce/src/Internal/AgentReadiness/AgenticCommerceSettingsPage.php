@@ -68,6 +68,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 		parent::__construct();
 
 		add_filter( 'woocommerce_admin_settings_sanitize_option', array( $this, 'sanitize_page_option' ), 10, 3 );
+		add_filter( 'woocommerce_admin_settings_sanitize_option_' . AgenticCommerceSettings::RETURN_POLICY_SUMMARY_OPTION, array( $this, 'sanitize_return_policy_summary' ), 10, 3 );
 		add_action( 'woocommerce_settings_' . self::POLICIES_SECTION . '_after', array( $this, 'render_policies_footnote' ) );
 	}
 
@@ -105,13 +106,25 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 			array(
 				'title' => __( 'Store policies', 'woocommerce' ),
 				'type'  => 'title',
-				'desc'  => __( 'AI agents share these with shoppers before they buy, so they know your return, shipping and privacy terms up front. Agents link shoppers to these pages.', 'woocommerce' ),
+				'desc'  => __( 'AI agents share these with shoppers before they buy.', 'woocommerce' ),
 				'id'    => self::POLICIES_SECTION,
+			),
+			array(
+				'title'       => __( 'Return policy summary', 'woocommerce' ),
+				'desc'        => __( 'Optional. Agents quote this when a shopper asks about returns.', 'woocommerce' ),
+				'id'          => AgenticCommerceSettings::RETURN_POLICY_SUMMARY_OPTION,
+				'type'        => 'textarea',
+				'default'     => '',
+				'placeholder' => __( '30-day returns on unused items. Free return shipping in the US.', 'woocommerce' ),
+				'css'         => 'min-width:300px; height: 80px;',
+				'desc_at_end' => true,
+				'autoload'    => false,
 			),
 			$page_field( AgenticCommerceSettings::REFUND_RETURNS_PAGE_OPTION, __( 'Refund and returns', 'woocommerce' ) ),
 			$page_field( AgenticCommerceSettings::SHIPPING_POLICY_PAGE_OPTION, __( 'Shipping policy', 'woocommerce' ) ),
 			$page_field( AgenticCommerceSettings::PRIVACY_PAGE_OPTION, __( 'Privacy policy', 'woocommerce' ) ),
 			$page_field( AgenticCommerceSettings::TERMS_PAGE_OPTION, __( 'Terms and conditions', 'woocommerce' ) ),
+			$page_field( AgenticCommerceSettings::FAQ_PAGE_OPTION, __( 'FAQ', 'woocommerce' ), __( 'Optional.', 'woocommerce' ) ),
 			array(
 				'type' => 'sectionend',
 				'id'   => self::POLICIES_SECTION,
@@ -178,6 +191,21 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 				static fn ( $page_id ) => $page_id > 0
 			)
 		);
+	}
+
+	/**
+	 * Plain text, cut to the maximum length.
+	 *
+	 * @internal
+	 *
+	 * @param mixed $value     Sanitized value.
+	 * @param mixed $option    Field definition.
+	 * @param mixed $raw_value Posted value.
+	 * @return string
+	 */
+	public function sanitize_return_policy_summary( $value, $option, $raw_value ): string {
+		$text = sanitize_textarea_field( is_string( $raw_value ) ? $raw_value : '' );
+		return mb_substr( $text, 0, AgenticCommerceSettings::RETURN_POLICY_SUMMARY_MAX_LENGTH );
 	}
 
 	/**
@@ -381,11 +409,14 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 			self::SCRIPT_HANDLE,
 			'wcAgenticCommerceSettings',
 			array(
-				'path' => '/wc/v3/agent-readiness/ucp',
-				'i18n' => array(
+				'path'      => '/wc/v3/agent-readiness/ucp',
+				'maxLength' => AgenticCommerceSettings::RETURN_POLICY_SUMMARY_MAX_LENGTH,
+				'i18n'      => array(
 					'on'          => __( 'AI agents can now find and shop your store.', 'woocommerce' ),
 					'error'       => __( 'The setting could not be changed. Reload the page and try again.', 'woocommerce' ),
 					'copied'      => __( 'Copied', 'woocommerce' ),
+					/* translators: 1: characters used, 2: character limit. */
+					'counter'     => __( '%1$d of %2$d characters', 'woocommerce' ),
 					'statusLabel' => array(
 						UcpSwitch::STATUS_ACTIVE          => __( 'Active', 'woocommerce' ),
 						UcpSwitch::STATUS_OFF             => __( 'Off', 'woocommerce' ),

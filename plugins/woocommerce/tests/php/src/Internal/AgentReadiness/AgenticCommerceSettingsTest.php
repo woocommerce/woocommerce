@@ -146,7 +146,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Saving keeps a stored draft refund page the dropdown can't show, and syncs the shared options.
+	 * @testdox Saving keeps a stored draft refund page the dropdown can't show, syncs the shared options and cuts the return summary to plain text.
 	 */
 	public function test_save_keeps_draft_page_and_syncs_shared_options(): void {
 		$draft     = self::factory()->post->create(
@@ -170,6 +170,8 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 				AgenticCommerceSettings::PRIVACY_PAGE_OPTION => (string) $published,
 				AgenticCommerceSettings::TERMS_PAGE_OPTION => (string) $draft,
 				AgenticCommerceSettings::SHIPPING_POLICY_PAGE_OPTION => (string) $published,
+				AgenticCommerceSettings::FAQ_PAGE_OPTION   => (string) $published,
+				AgenticCommerceSettings::RETURN_POLICY_SUMMARY_OPTION => '<b>30-day</b> returns. ' . str_repeat( 'x', 400 ),
 			)
 		);
 
@@ -177,6 +179,11 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$this->assertSame( $published, (int) get_option( AgenticCommerceSettings::PRIVACY_PAGE_OPTION ), 'Privacy policy is the WordPress option' );
 		$this->assertSame( '', (string) get_option( AgenticCommerceSettings::TERMS_PAGE_OPTION, '' ), 'A draft page id is not saved' );
 		$this->assertSame( $published, (int) get_option( AgenticCommerceSettings::SHIPPING_POLICY_PAGE_OPTION ) );
+		$this->assertSame( $published, (int) get_option( AgenticCommerceSettings::FAQ_PAGE_OPTION ) );
+
+		$summary = (string) get_option( AgenticCommerceSettings::RETURN_POLICY_SUMMARY_OPTION );
+		$this->assertSame( AgenticCommerceSettings::RETURN_POLICY_SUMMARY_MAX_LENGTH, mb_strlen( $summary ), 'The summary is cut to 300 characters' );
+		$this->assertStringStartsWith( '30-day returns.', $summary, 'The summary is plain text' );
 	}
 
 	/**
