@@ -257,7 +257,9 @@ test.describe( `${ blockData.name } Block`, () => {
 			await expect( minusButton ).toBeVisible();
 			await expect( plusButton ).toBeVisible();
 
-			const input = page.getByLabel( 'Product quantity' );
+			const input = page.getByLabel( `${ productName } quantity`, {
+				exact: true,
+			} );
 
 			await expect( input ).toHaveValue( '1' );
 			await input.evaluate( ( element ) => {
