@@ -48,6 +48,26 @@ class StoreConditionsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A required condition that couldn't be checked does not block the switch.
+	 */
+	public function test_couldnt_check_is_not_failing(): void {
+		$conditions = array(
+			array(
+				'id'    => 'unknown',
+				'ok'    => null,
+				'level' => StoreConditions::LEVEL_REQUIRED,
+			),
+			array(
+				'id'    => 'failing',
+				'ok'    => false,
+				'level' => StoreConditions::LEVEL_REQUIRED,
+			),
+		);
+
+		$this->assertSame( array( 'failing' ), $this->sut->failing_required( $conditions ) );
+	}
+
+	/**
 	 * @testdox Coming soon mode is required.
 	 */
 	public function test_coming_soon_required(): void {

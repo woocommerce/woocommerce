@@ -138,15 +138,42 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	public function output(): void {
 		$this->enqueue_script();
 
+		$report  = $this->agent_readiness->get_cached_report();
 		$checks  = $this->store_conditions->all();
 		$failing = $this->store_conditions->failing_required( $checks );
 
 		echo '<p>' . esc_html__( 'Let AI shopping assistants find your products, build a cart, and send shoppers to your checkout to pay. Uses the Universal Commerce Protocol (UCP).', 'woocommerce' ) . '</p>';
-		$this->render_visibility( $this->agent_readiness->get_cached_report() );
+		$this->render_visibility( $report );
 		$this->render_switch( count( $failing ) );
-		$this->render_status( $checks, $this->ucp_switch->status( $failing ) );
+		$this->render_status( array_merge( $checks, self::scanned_checks( $report, $checks ) ), $this->ucp_switch->status( $failing ) );
 
 		parent::output();
+	}
+
+	/**
+	 * Store checks the last scan ran that aren't read live here: the ones that
+	 * read what the store returns. Never required, so they don't affect the switch.
+	 *
+	 * @param array<string, mixed>|null    $report Stored report.
+	 * @param array<int, array{id:string}> $live   Store conditions read now.
+	 * @return array<int, array{id:string,level:string,ok:bool|null,name:string,fix_url:string}>
+	 */
+	private static function scanned_checks( ?array $report, array $live ): array {
+		$live_ids = array_column( $live, 'id' );
+		$scanned  = array();
+		foreach ( is_array( $report['store_checks'] ?? null ) ? $report['store_checks'] : array() as $check ) {
+			if ( ! is_array( $check ) || ! isset( $check['id'], $check['name'] ) || in_array( $check['id'], $live_ids, true ) ) {
+				continue;
+			}
+			$scanned[] = array(
+				'id'      => (string) $check['id'],
+				'level'   => StoreConditions::LEVEL_RECOMMENDED,
+				'ok'      => isset( $check['ok'] ) ? (bool) $check['ok'] : null,
+				'name'    => (string) $check['name'],
+				'fix_url' => (string) ( $check['fix_url'] ?? '' ),
+			);
+		}
+		return $scanned;
 	}
 
 	/**
@@ -310,8 +337,8 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	/**
 	 * Status badge, discovery URL and one row per store condition. UCP itself is the switch above, so it is not listed.
 	 *
-	 * @param array<int, array{id:string,level:string,ok:bool,name:string,fix_url:string}> $checks Store conditions.
-	 * @param string                                                                       $status UcpSwitch status.
+	 * @param array<int, array{id:string,level:string,ok:bool|null,name:string,fix_url:string}> $checks Store conditions.
+	 * @param string                                                                            $status UcpSwitch status.
 	 */
 	private function render_status( array $checks, string $status ): void {
 		$statuses = array(
@@ -340,7 +367,9 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 			<tbody>
 				<?php foreach ( $checks as $check ) : ?>
 					<?php
-					if ( $check['ok'] ) {
+					if ( null === $check['ok'] ) {
+						$badge = array( 'check', __( 'Couldn\'t check', 'woocommerce' ) );
+					} elseif ( $check['ok'] ) {
 						$badge = array( 'pass', __( 'Pass', 'woocommerce' ) );
 					} elseif ( StoreConditions::LEVEL_REQUIRED === $check['level'] ) {
 						$badge = array( 'fix', __( 'Fix', 'woocommerce' ) );
@@ -352,7 +381,9 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 						<td><mark class="wc-agentic-commerce-badge wc-agentic-commerce-badge--<?php echo esc_attr( $badge[0] ); ?>"><?php echo esc_html( $badge[1] ); ?></mark></td>
 						<td><?php echo esc_html( $check['name'] ); ?></td>
 						<td>
-							<?php if ( ! $check['ok'] ) : ?>
+							<?php if ( null === $check['ok'] ) : ?>
+								<?php esc_html_e( 'Your store could not load its own page. The next check tries again.', 'woocommerce' ); ?>
+							<?php elseif ( ! $check['ok'] ) : ?>
 								<a href="<?php echo esc_url( $check['fix_url'] ); ?>"><?php echo esc_html( $this->fix_link_text( $check['fix_url'] ) ); ?></a>
 							<?php endif; ?>
 						</td>

@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+Comment: Agent readiness: load the store's own pages for store checks, behind an experimental flag; nothing ships to merchants.
+
