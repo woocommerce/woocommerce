@@ -15133,12 +15133,6 @@ parameters:
 			path: includes/class-wc-structured-data.php
 
 		-
-			message: '#^Parameter \#1 \$product of callable ''wc_get_price…'' expects WC_Product, WC_Product\|false\|null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: includes/class-wc-structured-data.php
-
-		-
 			message: '#^Parameter \#2 \$callback of function array_filter expects \(callable\(WC_Product\|false\|null\)\: bool\)\|null, ''wc_products_array…'' given\.$#'
 			identifier: argument.type
 			count: 1
