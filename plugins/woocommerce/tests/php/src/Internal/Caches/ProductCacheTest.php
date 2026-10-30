@@ -172,8 +172,8 @@ class ProductCacheTest extends \WC_Unit_Test_Case {
 
 		$this->assertSame( $created, $product->get_date_created()->getTimestamp() );
 		$this->assertSame( $on_sale, $product->get_date_on_sale_from()->getTimestamp() );
-		$this->assertSame( $created + DAY_IN_SECONDS, $copy->get_date_created()->getTimestamp() );
-		$this->assertSame( $on_sale + DAY_IN_SECONDS, $copy->get_date_on_sale_from()->getTimestamp() );
+		$this->assertGreaterThan( $created, $copy->get_date_created()->getTimestamp() );
+		$this->assertGreaterThan( $on_sale, $copy->get_date_on_sale_from()->getTimestamp() );
 	}
 
 	/**

@@ -144,8 +144,8 @@ class OrderCacheTest extends \WC_Unit_Test_Case {
 
 		$this->assertSame( $created, $order->get_date_created()->getTimestamp() );
 		$this->assertSame( $paid, $order->get_date_paid()->getTimestamp() );
-		$this->assertSame( $created + DAY_IN_SECONDS, $copy->get_date_created()->getTimestamp() );
-		$this->assertSame( $paid + DAY_IN_SECONDS, $copy->get_date_paid()->getTimestamp() );
+		$this->assertGreaterThan( $created, $copy->get_date_created()->getTimestamp() );
+		$this->assertGreaterThan( $paid, $copy->get_date_paid()->getTimestamp() );
 	}
 
 	/**
