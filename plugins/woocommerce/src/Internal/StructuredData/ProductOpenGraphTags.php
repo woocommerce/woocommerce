@@ -43,7 +43,8 @@ class ProductOpenGraphTags {
 		foreach ( $this->get_site_tags() as $property => $value ) {
 			$tags[] = array( $property => $value );
 		}
-		$image_ids = array_merge( array( $product->get_image_id() ), $product->get_gallery_image_ids() );
+		$gallery   = $product->get_gallery_image_ids();
+		$image_ids = array_merge( array( $product->get_image_id() ), is_array( $gallery ) ? $gallery : array() );
 		$image_ids = array_slice( array_unique( array_filter( array_map( 'intval', $image_ids ) ) ), 0, 6 );
 		if ( ! empty( $image_ids ) ) {
 			// Prime caches to reduce future queries.
