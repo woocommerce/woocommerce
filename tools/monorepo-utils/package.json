@@ -46,7 +46,7 @@
 		"ora": "^5.4.1",
 		"promptly": "^3.2.0",
 		"semver": "^7.5.4",
-		"simple-git": "^3.21.0"
+		"simple-git": "^4.0.2"
 	},
 	"devDependencies": {
 		"@types/jest": "29.5.x",

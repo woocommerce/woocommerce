@@ -22,7 +22,7 @@
 		"@woocommerce/monorepo-utils": "workspace:*",
 		"commander": "^9.5.0",
 		"dotenv": "^10.0.0",
-		"simple-git": "^3.21.0"
+		"simple-git": "^4.0.2"
 	},
 	"devDependencies": {
 		"@types/jest": "29.5.x",

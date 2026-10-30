@@ -553,7 +553,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^3.21.0"
+			"pinVersion": "^4.0.2"
 		},
 		{
 			"dependencyTypes": [
