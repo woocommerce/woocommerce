@@ -46,6 +46,8 @@ class OpenGraphTest extends WC_Unit_Test_Case {
 
 		update_option( 'woocommerce_coming_soon', 'no' );
 		update_option( 'blogname', 'Test store' );
+		update_option( 'woocommerce_currency', 'USD' );
+		update_option( 'woocommerce_price_num_decimals', 2 );
 
 		$image_id = self::factory()->attachment->create(
 			array(
@@ -108,6 +110,67 @@ class OpenGraphTest extends WC_Unit_Test_Case {
 		$this->assertSame( array( 'Product photo' ), $tags['og:image:alt'], 'Image alternative text should be added.' );
 		$this->assertSame( array( 'image/jpeg' ), $tags['og:image:type'], 'Image MIME type should be added.' );
 		$this->assertSame( array( 'summary_large_image' ), $tags['twitter:card'], 'Products with an image should use a large image card.' );
+		$this->assertSame( array( '10.00' ), $tags['product:price:amount'], 'The product price should be added.' );
+		$this->assertSame( array( 'USD' ), $tags['product:price:currency'], 'The store currency should be added.' );
+	}
+
+	/**
+	 * @testdox Should render sale prices and sale dates in product metadata.
+	 */
+	public function test_sale_price_and_dates(): void {
+		$start = time() - DAY_IN_SECONDS;
+		$end   = time() + DAY_IN_SECONDS;
+		$this->product->set_regular_price( '10' );
+		$this->product->set_sale_price( '8' );
+		$this->product->set_date_on_sale_from( $start );
+		$this->product->set_date_on_sale_to( $end );
+		$this->product->save();
+
+		$tags = $this->render_meta_tags( '' );
+		$this->assertSame( array( '8.00' ), $tags['product:sale_price:amount'] );
+		$this->assertSame( array( 'USD' ), $tags['product:sale_price:currency'] );
+		$this->assertSame( array( '8.00' ), $tags['og:price:amount'] );
+		$this->assertSame( array( '10.00' ), $tags['og:price:standard_amount'] );
+		$this->assertSame( array( $this->product->get_date_on_sale_from()->format( DATE_ATOM ) ), $tags['product:sale_price_dates:start'] );
+		$this->assertSame( array( $this->product->get_date_on_sale_to()->format( DATE_ATOM ) ), $tags['product:sale_price_dates:end'] );
+		$this->assertSame( $tags['product:sale_price_dates:start'], $tags['og:price:start_date'] );
+		$this->assertSame( $tags['product:sale_price_dates:end'], $tags['og:price:end_date'] );
+	}
+
+	/**
+	 * @testdox Should render the corresponding availability for each stock status.
+	 * @testWith ["instock", "in stock", "instock"]
+	 *           ["outofstock", "out of stock", "out of stock"]
+	 *           ["onbackorder", "available for order", "backorder"]
+	 *
+	 * @param string $status Product stock status.
+	 * @param string $product_availability Product availability value.
+	 * @param string $og_availability Open Graph availability value.
+	 */
+	public function test_stock_availability( string $status, string $product_availability, string $og_availability ): void {
+		$this->product->set_stock_status( $status );
+		$this->product->save();
+		$tags = $this->render_meta_tags( '' );
+
+		$this->assertSame( array( $product_availability ), $tags['product:availability'] );
+		$this->assertSame( array( $og_availability ), $tags['og:availability'] );
+	}
+
+	/**
+	 * @testdox Should omit prices for variable and grouped products.
+	 * @testWith ["create_variation_product"]
+	 *           ["create_grouped_product"]
+	 *
+	 * @param string $factory Product fixture method.
+	 */
+	public function test_omits_price_for_products_without_a_single_price( string $factory ): void {
+		$product = WC_Helper_Product::$factory();
+		$this->go_to( $product->get_permalink() );
+		$tags = $this->render_meta_tags( '' );
+
+		$this->assertSame( array( $product->get_name() ), $tags['og:title'] );
+		$this->assertArrayNotHasKey( 'product:price:amount', $tags );
+		$this->assertArrayNotHasKey( 'og:price:amount', $tags );
 	}
 
 	/**
@@ -128,7 +191,9 @@ class OpenGraphTest extends WC_Unit_Test_Case {
 			<meta property="og:description" content="SEO description">
 			<meta property="og:image" content="https://example.org/seo.jpg">
 			<meta property="og:image:width" content="600">
-			<meta name="twitter:card" content="summary">'
+			<meta name="twitter:card" content="summary">
+			<meta property="product:price:amount" content="25.00">
+			<meta property="product:price:currency" content="EUR">'
 		);
 
 		$this->assertSame( array( 'SEO title' ), $tags['og:title'], 'An existing title should be preserved without duplication.' );
@@ -140,6 +205,8 @@ class OpenGraphTest extends WC_Unit_Test_Case {
 		$this->assertArrayNotHasKey( 'og:image:type', $tags, 'The featured image MIME type should not describe another provider\'s image.' );
 		$this->assertSame( array( 'summary' ), $tags['twitter:card'], 'An existing Twitter card should be preserved.' );
 		$this->assertSame( array( 'product' ), $tags['og:type'], 'Missing metadata should still be added alongside existing tags.' );
+		$this->assertSame( array( '25.00' ), $tags['product:price:amount'], 'An existing price should be preserved without duplication.' );
+		$this->assertSame( array( 'EUR' ), $tags['product:price:currency'], 'An existing currency should be preserved without duplication.' );
 	}
 
 	/**
@@ -164,10 +231,16 @@ class OpenGraphTest extends WC_Unit_Test_Case {
 				$this->assertInstanceOf( WC_Product::class, $context, 'The filter context should be a product.' );
 				$this->assertSame( $this->product->get_id(), $context->get_id(), 'The filter should receive the queried product.' );
 
-				$tags['og:title']      = 'Custom & "title"';
-				$tags['twitter:title'] = 'Twitter title';
-				$tags['twitter:card']  = 'summary';
-				unset( $tags['og:description'], $tags['og:type'] );
+				foreach ( $tags as $index => $group ) {
+					if ( isset( $group['og:description'] ) || isset( $group['og:type'] ) ) {
+						unset( $tags[ $index ] );
+					} elseif ( isset( $group['og:title'] ) ) {
+						$tags[ $index ]['og:title'] = 'Custom & "title"';
+					} elseif ( isset( $group['twitter:card'] ) ) {
+						$tags[ $index ]['twitter:card'] = 'summary';
+					}
+				}
+				$tags[] = array( 'twitter:title' => 'Twitter title' );
 
 				return $tags;
 			},
@@ -191,8 +264,16 @@ class OpenGraphTest extends WC_Unit_Test_Case {
 		add_filter(
 			'woocommerce_open_graph_tags',
 			static function ( $tags ) {
-				$tags['product:price:amount']   = '19.99';
-				$tags['product:price:currency'] = 'USD';
+				foreach ( $tags as $index => $group ) {
+					unset( $group['product:price:amount'], $group['product:price:currency'] );
+					if ( $group ) {
+						$tags[ $index ] = $group;
+					} else {
+						unset( $tags[ $index ] );
+					}
+				}
+				$tags[] = array( 'product:price:amount' => '19.99' );
+				$tags[] = array( 'product:price:currency' => 'USD' );
 
 				return $tags;
 			}
