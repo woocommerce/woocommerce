@@ -11,7 +11,7 @@ use Automattic\WooCommerce\Enums\CurrencyPosition;
  * The position is read from the filtered price format rather than the `woocommerce_currency_pos`
  * option, so extensions that filter `woocommerce_price_format` (e.g. currency switchers) apply here too.
  *
- * @since 11.3.0
+ * @since 11.4.0
  */
 class CurrencySymbol {
 
