@@ -98,7 +98,7 @@ class ProductUpdate extends ActionableAbility {
 	 * @param array $input Ability input.
 	 * @return \WC_Product|\WP_Error
 	 */
-	public function load( array $input ) {
+	protected function load( array $input ) {
 		$this->variations = array(
 			'save'       => array(),
 			'delete'     => array(),
@@ -159,7 +159,7 @@ class ProductUpdate extends ActionableAbility {
 	 * @param array       $input   Ability input.
 	 * @return null|\WP_Error|array<int, array{0: \WC_Product_Variation, 1: array}> The variations that the input names, each with the `extensions` input of its `variations` item.
 	 */
-	public function change( $subject, array $input ) {
+	protected function change( $subject, array $input ) {
 		$product_config = self::get_product_config_for_product( $subject );
 
 		if ( is_wp_error( $product_config ) ) {
@@ -214,7 +214,7 @@ class ProductUpdate extends ActionableAbility {
 	 * @param \WC_Product $subject Changed product.
 	 * @return null|\WP_Error
 	 */
-	public function save( $subject ) {
+	protected function save( $subject ) {
 		$error = self::save_product( $subject, 'woocommerce_product_update_failed' );
 		if ( is_wp_error( $error ) ) {
 			return $error;
@@ -236,7 +236,7 @@ class ProductUpdate extends ActionableAbility {
 	 * @param \WC_Product $subject Saved product.
 	 * @return array
 	 */
-	public function prepare_response( $subject ): array {
+	protected function prepare_response( $subject ): array {
 		return self::format_product_mutation_response( $subject, $this->variations['save'] );
 	}
 

@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\Tests\Internal\AbilitiesApi;
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 use Automattic\WooCommerce\Abilities\ActionableAbility;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
+use Automattic\WooCommerce\Internal\Abilities\Domain\ProductUpdate;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
@@ -1933,6 +1934,44 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->assertArrayNotHasKey( 'code', $schema['properties']['test-ext']['properties'] );
 		$this->assertSame( 'Pencil', wc_get_product( $product->get_id() )->get_name() );
 		$this->assertSame( array( 'color' => 'green' ), $output['extensions']['test-ext'] );
+	}
+
+	/**
+	 * @testdox Should run a subclass of a Core write ability with its fields and validators.
+	 */
+	public function test_a_subclass_of_a_core_ability_runs_the_change(): void {
+		$product          = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+		$validator_called = false;
+		$this->register_validator(
+			'product',
+			'test-ext',
+			static function ( $subject ) use ( &$validator_called ) {
+				$validator_called = true;
+				return 'Pencil (extended)' === $subject->get_name() ? null : new \WP_Error( 'test_refused', 'Refused.' );
+			}
+		);
+		$this->add_test_action(
+			'wp_abilities_api_init',
+			static function () {
+				$args                  = ProductUpdate::get_registration_args();
+				$args['ability_class'] = TestProductUpdateSubclassAbility::class;
+				wp_register_ability( 'test-ext/product-update', $args );
+			},
+			20
+		);
+
+		$output = $this->run_ability(
+			'test-ext/product-update',
+			array(
+				'id'         => $product->get_id(),
+				'name'       => 'Pencil',
+				'extensions' => array( 'test-ext' => array( 'color' => 'blue' ) ),
+			)
+		);
+
+		$this->assertTrue( $validator_called );
+		$this->assertSame( 'Pencil (extended)', wc_get_product( $product->get_id() )->get_name() );
+		$this->assertSame( 'blue', $output['product']['extensions']['test-ext']['color'] );
 	}
 
 	/**
