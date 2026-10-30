@@ -185,6 +185,9 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 		$variation = wc_get_product( $variable->get_children()[0] );
 
 		$this->assertSame( $variable->get_id(), $this->sut->check_product( $variation )['product_id'] );
+		$orphan = new \WC_Product_Variation();
+		$orphan->set_parent_id( $variable->get_id() + 1000 );
+		$this->assertNull( $this->sut->check_product( $orphan ), 'A variation without a parent is left out' );
 		$this->assertNull( $this->sut->check_product( WC_Helper_Product::create_grouped_product() ) );
 		$this->assertNull( $this->sut->check_product( WC_Helper_Product::create_simple_product( true, array( 'status' => 'draft' ) ) ) );
 		$this->assertNull( $this->sut->check_product( WC_Helper_Product::create_simple_product( true, array( 'catalog_visibility' => 'hidden' ) ) ) );
