@@ -23,10 +23,6 @@ defined( 'ABSPATH' ) || exit;
  * as stalled (Action Scheduler is not running on the site), and the next
  * request runs the scan in that request instead of waiting on it.
  *
- * Saving or trashing a product queues one more scan 5 minutes later, once a
- * report exists, so a fixed product leaves the report without waiting a day.
- * Saves in those 5 minutes share it.
- *
  * @since 11.4.0
  */
 class ScheduledScan implements RegisterHooksInterface {
@@ -38,22 +34,6 @@ class ScheduledScan implements RegisterHooksInterface {
 	public const GROUP = 'woocommerce-agent-readiness';
 
 	public const STALLED_AFTER = 10 * MINUTE_IN_SECONDS;
-
-	public const RECHECK_HOOK = 'woocommerce_agent_readiness_recheck';
-
-	public const RECHECK_DELAY = 5 * MINUTE_IN_SECONDS;
-
-	/**
-	 * Product hooks that queue a re-check.
-	 */
-	private const PRODUCT_CHANGE_HOOKS = array(
-		'woocommerce_new_product',
-		'woocommerce_update_product',
-		'woocommerce_new_product_variation',
-		'woocommerce_update_product_variation',
-		'woocommerce_trash_product',
-		'woocommerce_delete_product',
-	);
 
 	/**
 	 * Features controller.
@@ -97,38 +77,6 @@ class ScheduledScan implements RegisterHooksInterface {
 	public function register(): void {
 		add_action( self::RUN_NOW_HOOK, array( $this, 'run' ) );
 		add_action( self::DAILY_HOOK, array( $this, 'run' ) );
-		add_action( self::RECHECK_HOOK, array( $this, 'recheck' ) );
-		foreach ( self::PRODUCT_CHANGE_HOOKS as $hook ) {
-			add_action( $hook, array( $this, 'handle_product_change' ) );
-		}
-	}
-
-	/**
-	 * Queue a re-check after a product change, once a report exists and no
-	 * scan is already waiting.
-	 *
-	 * @internal
-	 */
-	public function handle_product_change(): void {
-		if ( ! $this->features_controller->feature_is_enabled( StatusTab::FEATURE_ID )
-			|| null === $this->agent_readiness->get_cached_report()
-			|| $this->is_pending()
-			|| ActionSchedulerUtil::has_scheduled_action( self::RECHECK_HOOK, array(), self::GROUP ) ) {
-			return;
-		}
-		as_schedule_single_action( time() + self::RECHECK_DELAY, self::RECHECK_HOOK, array(), self::GROUP );
-	}
-
-	/**
-	 * Rebuild the report after product changes. Unlike a full run, it doesn't
-	 * fetch the rules file or move the daily run.
-	 *
-	 * @internal
-	 */
-	public function recheck(): void {
-		if ( $this->features_controller->feature_is_enabled( StatusTab::FEATURE_ID ) ) {
-			$this->agent_readiness->refresh_report();
-		}
 	}
 
 	/**
