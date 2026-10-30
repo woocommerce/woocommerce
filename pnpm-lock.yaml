@@ -295,8 +295,8 @@ importers:
         specifier: ^4.1.2
         version: 4.1.2
       copy-webpack-plugin:
-        specifier: 13.0.x
-        version: 13.0.1(webpack@5.97.1(@swc/core@1.15.24)(esbuild@0.27.7))
+        specifier: 14.0.x
+        version: 14.0.0(webpack@5.97.1(@swc/core@1.15.24)(esbuild@0.27.7))
       core-js:
         specifier: ^3.34.0
         version: 3.49.0
@@ -3241,8 +3241,8 @@ importers:
         specifier: 3.3.7
         version: 3.3.7
       copy-webpack-plugin:
-        specifier: 13.0.x
-        version: 13.0.1(webpack@5.97.1(@swc/core@1.15.24)(esbuild@0.27.7))
+        specifier: 14.0.x
+        version: 14.0.0(webpack@5.97.1(@swc/core@1.15.24)(esbuild@0.27.7))
       css-loader:
         specifier: 6.11.x
         version: 6.11.0(webpack@5.97.1)
@@ -3722,8 +3722,8 @@ importers:
         specifier: 5.2.x
         version: 5.2.2(webpack@5.97.1)
       copy-webpack-plugin:
-        specifier: 13.0.x
-        version: 13.0.1(webpack@5.97.1(@swc/core@1.15.24)(esbuild@0.27.7))
+        specifier: 14.0.x
+        version: 14.0.0(webpack@5.97.1(@swc/core@1.15.24)(esbuild@0.27.7))
       core-js:
         specifier: 3.25.0
         version: 3.25.0
@@ -4180,8 +4180,8 @@ importers:
         specifier: workspace:*
         version: link:../../packages/js/eslint-plugin
       copy-webpack-plugin:
-        specifier: 13.0.x
-        version: 13.0.1(webpack@5.97.1(@swc/core@1.15.24)(esbuild@0.27.7))
+        specifier: 14.0.x
+        version: 14.0.0(webpack@5.97.1(@swc/core@1.15.24)(esbuild@0.27.7))
       eslint:
         specifier: ^10.0.0
         version: 10.7.0(jiti@2.6.1)
@@ -12089,9 +12089,9 @@ packages:
     peerDependencies:
       webpack: ^5.1.0
 
-  copy-webpack-plugin@13.0.1:
-    resolution: {integrity: sha512-J+YV3WfhY6W/Xf9h+J1znYuqTye2xkBUIGyTPWuBAT27qajBa5mR4f8WBmfDY3YjRftT2kqZZiLi1qf0H+UOFw==}
-    engines: {node: '>= 18.12.0'}
+  copy-webpack-plugin@14.0.0:
+    resolution: {integrity: sha512-3JLW90aBGeaTLpM7mYQKpnVdgsUZRExY55giiZgLuX/xTQRUs1dOCwbBnWnvY6Q6rfZoXMNwzOQJCSZPppfqXA==}
+    engines: {node: '>= 20.9.0'}
     peerDependencies:
       webpack: ^5.1.0
 
@@ -18024,6 +18024,10 @@ packages:
 
   serialize-javascript@6.0.2:
     resolution: {integrity: sha512-Saa1xPByTTq2gdeFZYLLo+RFE35NHZkAbqZeWNd3BpzppeVisAqpDjcp8dyf6uIvEqJRd46jemmyA4iFIeVk8g==}
+
+  serialize-javascript@7.1.4:
+    resolution: {integrity: sha512-FqlEuoTq/zRmA4Lg6aOqyH3lCHbUtCB0bmHCeFniX2GBdDqMJM3FwdvEhlE5Pim1dlt2FfBdVPmUNNiGhhKqpw==}
+    engines: {node: '>=20.0.0'}
 
   seroval-plugins@1.5.2:
     resolution: {integrity: sha512-qpY0Cl+fKYFn4GOf3cMiq6l72CpuVaawb6ILjubOQ+diJ54LfOWaSSPsaswN8DRPIPW4Yq+tE1k5aKd7ILyaFg==}
@@ -25924,7 +25928,7 @@ snapshots:
       debug: 4.4.3(supports-color@9.4.0)
       minimatch: 10.2.5
       semver: 7.8.5
-      tinyglobby: 0.2.16
+      tinyglobby: 0.2.17
       ts-api-utils: 2.5.0(typescript@5.7.3)
       typescript: 5.7.3
     transitivePeerDependencies:
@@ -25939,7 +25943,7 @@ snapshots:
       debug: 4.4.3(supports-color@9.4.0)
       minimatch: 10.2.5
       semver: 7.8.5
-      tinyglobby: 0.2.16
+      tinyglobby: 0.2.17
       ts-api-utils: 2.5.0(typescript@5.7.3)
       typescript: 5.7.3
     transitivePeerDependencies:
@@ -33601,13 +33605,13 @@ snapshots:
       serialize-javascript: 6.0.2
       webpack: 5.97.1(@swc/core@1.15.24)(esbuild@0.27.7)(uglify-js@3.19.3)(webpack-cli@5.1.4)
 
-  copy-webpack-plugin@13.0.1(webpack@5.97.1(@swc/core@1.15.24)(esbuild@0.27.7)):
+  copy-webpack-plugin@14.0.0(webpack@5.97.1(@swc/core@1.15.24)(esbuild@0.27.7)):
     dependencies:
       glob-parent: 6.0.2
       normalize-path: 3.0.0
       schema-utils: 4.3.3
-      serialize-javascript: 6.0.2
-      tinyglobby: 0.2.16
+      serialize-javascript: 7.1.4
+      tinyglobby: 0.2.17
       webpack: 5.97.1(@swc/core@1.15.24)(esbuild@0.27.7)(webpack-cli@5.1.4)
 
   core-js-compat@3.49.0:
@@ -40498,6 +40502,8 @@ snapshots:
   serialize-javascript@6.0.2:
     dependencies:
       randombytes: 2.1.0
+
+  serialize-javascript@7.1.4: {}
 
   seroval-plugins@1.5.2(seroval@1.5.3):
     dependencies:
