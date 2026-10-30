@@ -37,6 +37,9 @@ A channel whose spec does not ask for the field is left out of the check's map.
 | `variation_attributes_not_set` | variant_dict, gaps | color, size, gaps | color, sizes, gaps |
 | `missing_variation_images` | image_url, gaps | image_link, gaps | imageLink, gaps |
 | `title_too_long` | title, gaps | title, gaps | title, gaps |
+| `image_alt_text` | | | |
+
+`image_alt_text` (the main image has no alt text) is about the product page, not a feed: no channel's spec asks for it. A check with no channel map lists its products but doesn't change the channel totals. The rules filter can still remove it; a check whose channels the filter empties doesn't run.
 
 A variable product with some priced variations fails `missing_regular_price` but counts as `gaps`, not `not_listable`, in the channel totals, since its priced variations still list.
 
@@ -49,7 +52,7 @@ Only published simple and variable products are checked, the types agents suppor
 - Products hidden from the shop catalog (catalog visibility "Search results only" or "Hidden"). Agents see the products shoppers see in the shop, so hiding one is the merchant's choice, not a problem.
 - Products of any other type: grouped, external, subscription, booking, bundle and so on. A product keeps its stored type when its plugin is inactive, so it stays in this group.
 
-Store-wide conditions (`StoreConditions`) are reported first because they affect every product: coming soon mode and "Discourage search engines" hide the products, UCP off, no HTTPS and Plain permalinks (no `/.well-known/ucp`) hide the catalog from UCP agents, and guest checkout off stops agents placing orders. Missing policy pages and order emails off weaken agent orders. Each condition's `blocks` says which, so a reader can tell a hidden store from one agents can't buy from.
+Store-wide conditions (`StoreConditions`) are reported first because they affect every product: coming soon mode and "Discourage search engines" hide the products, UCP off, no HTTPS and Plain permalinks (no `/.well-known/ucp`) hide the catalog from UCP agents, and guest checkout off or no payment method turned on stops agents placing orders. Missing policy pages and order emails off weaken agent orders. Each condition's `blocks` says which, so a reader can tell a hidden store from one agents can't buy from.
 
 ## Store output checks
 

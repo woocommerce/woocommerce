@@ -438,7 +438,8 @@ class ProductScan {
 				continue;
 			}
 			$channels = $rule->channels_for( $product, $channel_rules[ $id ] ?? array() );
-			if ( ! empty( $channels ) ) {
+			// A check with no channel (about the product page, not a feed) still counts the product.
+			if ( ! empty( $channels ) || empty( $channel_rules[ $id ] ?? array() ) ) {
 				$failed[ (string) $id ] = $channels;
 			}
 		}

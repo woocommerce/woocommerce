@@ -93,6 +93,7 @@ class AgentReadiness {
 				$simple['variation_attributes_not_set'],
 				$simple['missing_variation_images'],
 				$simple['title_too_long'],
+				$simple['image_alt_text'],
 			) as $rule
 		) {
 			$rules[ $rule->id() ] = $rule;
@@ -127,8 +128,15 @@ class AgentReadiness {
 		 */
 		$filtered = apply_filters( 'woocommerce_agent_readiness_rules', $defaults );
 
-		// A check left with no valid channel doesn't run, as if the filter had removed it.
-		return is_array( $filtered ) ? array_filter( $this->sanitize_channel_rules( $filtered, $defaults ) ) : $defaults;
+		if ( ! is_array( $filtered ) ) {
+			return $defaults;
+		}
+		// A check left with no valid channel doesn't run, as if the filter had removed it, unless it never had one.
+		return array_filter(
+			$this->sanitize_channel_rules( $filtered, $defaults ),
+			static fn( array $channels, $id ): bool => ! empty( $channels ) || empty( $defaults[ $id ] ),
+			ARRAY_FILTER_USE_BOTH
+		);
 	}
 
 	/**

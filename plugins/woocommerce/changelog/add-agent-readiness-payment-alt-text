@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+Comment: Agent readiness: payment method and image alt text checks, behind an experimental flag; nothing ships to merchants.
+
