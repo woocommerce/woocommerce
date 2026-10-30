@@ -443,13 +443,14 @@ if ( ! isProduction || WC_ADMIN_PHASE === 'development' ) {
 			allowedHosts: 'auto',
 			host: 'localhost',
 			port: 8887,
-			proxy: {
-				'/assets/client/admin': {
+			proxy: [
+				{
+					context: [ '/assets/client/admin' ],
 					pathRewrite: {
 						'^/assets/client/admin': '',
 					},
 				},
-			},
+			],
 		};
 	}
 }
