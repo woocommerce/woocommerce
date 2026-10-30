@@ -564,7 +564,7 @@ class ExtensibleAbilities {
 	 * transaction of the ActionableAbility.
 	 *
 	 * A sync registered for a resource runs only when an object of that resource
-	 * was saved or deleted in the call. It runs once per call, not once per
+	 * was saved, deleted or trashed in the call. It runs once per call, not once per
 	 * object. The saved objects can belong to more than one resource, so a sync
 	 * reads the objects it owns and ignores the rest.
 	 *
@@ -578,8 +578,10 @@ class ExtensibleAbilities {
 	 *     @type callable $callback  Receives `\WC_Data[] $saved`, the ActionableAbility and `array $context`.
 	 *                               `$saved` is every saved object of the call, the primary object first
 	 *                               unless the call deleted it.
-	 *                               `$context['deleted']` is every object the call deleted, as it was before
-	 *                               the delete, with its ID, and
+	 *                               `$context['deleted']` is every object the call deleted for good, as it
+	 *                               was before the delete, with its ID. `$context['trashed']` is every object
+	 *                               the call moved to the trash; it can be restored, so a sync keeps what a
+	 *                               restore needs. And
 	 *                               `$context['input']` is the input of the call, so a sync can skip work
 	 *                               when the call did not write its fields. It returns a WP_Error to
 	 *                               refuse, and then every save of the call is undone. A thrown exception

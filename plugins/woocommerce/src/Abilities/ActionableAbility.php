@@ -133,14 +133,26 @@ abstract class ActionableAbility extends \WP_Ability {
 	}
 
 	/**
-	 * The objects that save() deleted, for the syncs. An ability that deletes
-	 * objects collects them in save() and returns them here.
+	 * The objects that save() deleted for good, for the syncs. An ability that
+	 * deletes objects collects them in save() and returns them here.
 	 *
 	 * @since 11.4.0
 	 *
 	 * @return \WC_Data[]
 	 */
 	protected function get_deleted_objects(): array {
+		return array();
+	}
+
+	/**
+	 * The objects that save() moved to the trash, for the syncs. A trashed
+	 * object can be restored, so a sync keeps what a restore needs.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @return \WC_Data[]
+	 */
+	protected function get_trashed_objects(): array {
 		return array();
 	}
 
@@ -211,12 +223,12 @@ abstract class ActionableAbility extends \WP_Ability {
 			}
 		} catch ( \Throwable $e ) {
 			wc_transaction_query( 'rollback' );
-			self::forget_rolled_back_objects( $objects, $this->get_deleted_objects() );
+			self::forget_rolled_back_objects( $objects, array_merge( $this->get_deleted_objects(), $this->get_trashed_objects() ) );
 			throw $e;
 		}
 		if ( is_wp_error( $saved ) ) {
 			wc_transaction_query( 'rollback' );
-			self::forget_rolled_back_objects( $objects, $this->get_deleted_objects() );
+			self::forget_rolled_back_objects( $objects, array_merge( $this->get_deleted_objects(), $this->get_trashed_objects() ) );
 			return $saved;
 		}
 		wc_transaction_query( 'commit' );
@@ -226,8 +238,8 @@ abstract class ActionableAbility extends \WP_Ability {
 
 	/**
 	 * Run the syncs of each resource that the call saved or deleted, once,
-	 * after the last save and before the commit. A deleted object is not in
-	 * the saved list, even when it was the primary object.
+	 * after the last save and before the commit. A deleted or trashed object
+	 * is not in the saved list, even when it was the primary object.
 	 *
 	 * @param array<int, array{0: \WC_Data, 1: array, 2: string}> $objects The primary object and the secondary objects, with their resources.
 	 * @param array                                               $input   Ability input.
@@ -235,7 +247,8 @@ abstract class ActionableAbility extends \WP_Ability {
 	 */
 	private function sync( array $objects, array $input ): ?\WP_Error {
 		$deleted   = $this->get_deleted_objects();
-		$gone      = array_map( static fn( $item ) => get_class( $item ) . ':' . $item->get_id(), $deleted );
+		$trashed   = $this->get_trashed_objects();
+		$gone      = array_map( static fn( $item ) => get_class( $item ) . ':' . $item->get_id(), array_merge( $deleted, $trashed ) );
 		$saved     = array_values(
 			array_filter(
 				array_column( $objects, 0 ),
@@ -243,11 +256,12 @@ abstract class ActionableAbility extends \WP_Ability {
 			)
 		);
 		$resources = array_column( $objects, 2 );
-		if ( ! empty( $deleted ) ) {
+		if ( ! empty( $deleted ) || ! empty( $trashed ) ) {
 			$resources[] = $this->get_resource();
 		}
 		$context = array(
 			'deleted' => array_values( $deleted ),
+			'trashed' => array_values( $trashed ),
 			'input'   => $input,
 		);
 		foreach ( array_unique( $resources ) as $resource_name ) {
