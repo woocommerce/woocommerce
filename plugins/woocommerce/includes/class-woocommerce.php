@@ -408,7 +408,7 @@ final class WooCommerce {
 		$container->get( EmailImprovements::class );
 		$container->get( DeferredEmailQueue::class );
 		$container->get( AddressProviderController::class );
-		AbilitiesLoader::init();
+		$container->get( AbilitiesLoader::class );
 		$container->get( McpEndpointRemoval::class );
 		$container->get( CouponCodeLookupInvalidator::class );
 		$container->get( ProductVersionStringInvalidator::class );
