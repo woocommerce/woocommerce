@@ -1532,7 +1532,7 @@
 		"@wordpress/browserslist-config": "next",
 		"@wordpress/e2e-test-utils-playwright": "catalog:wp-min",
 		"@wordpress/env": "catalog:tooling",
-		"axios": "^0.33.0",
+		"axios": "^0.34.0",
 		"config": "3.3.7",
 		"dotenv": "^10.0.0",
 		"eslint": "^10.0.0",
