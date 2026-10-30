@@ -2178,6 +2178,186 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Register a variable product type with a variation class of its own, the way
+	 * an extension does, and a field limited to that variation class.
+	 *
+	 * @internal
+	 */
+	private function register_variation_subclass(): void {
+		$this->add_test_action(
+			'product_type_selector',
+			static fn( array $types ): array => $types + array( 'test-variable' => 'Test variable' )
+		);
+		$this->add_test_action(
+			'woocommerce_data_stores',
+			static fn( array $stores ): array => $stores + array(
+				'product-test-variable'  => 'WC_Product_Variable_Data_Store_CPT',
+				'product-test_variation' => 'WC_Product_Variation_Data_Store_CPT',
+			)
+		);
+		$this->add_test_action(
+			'woocommerce_product_class',
+			static function ( $classname, $product_type, $post_type, $product_id ) {
+				if ( 'test-variable' === $product_type ) {
+					return TestVariableProduct::class;
+				}
+				if ( 'test_variation' === $product_type ) {
+					return TestVariationProduct::class;
+				}
+				if ( 'variation' === $product_type && $product_id > 0 && has_term( 'test-variable', 'product_type', (int) wp_get_post_parent_id( $product_id ) ) ) {
+					return TestVariationProduct::class;
+				}
+				return $classname;
+			},
+			10,
+			4
+		);
+		$this->add_test_action(
+			'woocommerce_ability_variation_product_type',
+			static fn( string $type, \WC_Product_Variable $parent_product ): string => 'test-variable' === $parent_product->get_type() ? 'test_variation' : $type,
+			10,
+			2
+		);
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'        => 'product',
+						'namespace'       => 'test-ext',
+						'field'           => 'plan',
+						'schema'          => array( 'type' => 'string' ),
+						'object_types'    => array( 'test_variation' ),
+						'get_callback'    => static fn( \WC_Product $product ) => $product->get_meta( '_test_plan' ),
+						'update_callback' => static function ( \WC_Product $product, $value ) {
+							$product->update_meta_data( '_test_plan', $value );
+						},
+					)
+				);
+			}
+		);
+	}
+
+	/**
+	 * @testdox Should read a saved variation whose class extends the variation class.
+	 */
+	public function test_reads_a_variation_of_a_subclass(): void {
+		$this->register_variation_subclass();
+
+		$parent_product = new TestVariableProduct();
+		$parent_product->set_name( 'Test variable' );
+		$parent_product->save();
+		$variation = new \WC_Product_Variation();
+		$variation->set_parent_id( $parent_product->get_id() );
+		$variation->save();
+
+		$read = $this->run_ability( 'woocommerce/products-query', array( 'id' => $variation->get_id() ) );
+
+		$this->assertInstanceOf( TestVariationProduct::class, wc_get_product( $variation->get_id() ) );
+		$this->assertSame( 'test_variation', $read['products'][0]['type'] );
+	}
+
+	/**
+	 * @testdox Should build a new variation with the class that the parent type asks for, and write a field limited to it.
+	 */
+	public function test_creates_variations_of_a_subclass_with_their_fields(): void {
+		$this->register_variation_subclass();
+
+		$input                                = $this->get_shirt_input();
+		$input['type']                        = 'test-variable';
+		$input['attributes'][0]['options'][]  = 'L';
+		$input['variations'][0]['extensions'] = array( 'test-ext' => array( 'plan' => 'monthly' ) );
+		$created                              = $this->run_ability( 'woocommerce/product-create', $input );
+		$new_item                             = array(
+			'attributes' => array(
+				array(
+					'name'   => 'Size',
+					'option' => 'L',
+				),
+			),
+			'extensions' => array( 'test-ext' => array( 'plan' => 'yearly' ) ),
+		);
+		$updated                              = $this->run_ability(
+			'woocommerce/product-update',
+			array(
+				'id'         => $created['product']['id'],
+				'variations' => array( $new_item ),
+			)
+		);
+		$variation_id                         = $created['variations'][0]['id'];
+
+		$this->assertSame( 'test-variable', $created['product']['type'] );
+		$this->assertSame( 'test_variation', $created['variations'][0]['type'] );
+		$this->assertSame( 'monthly', $created['variations'][0]['extensions']['test-ext']['plan'] );
+		$this->assertInstanceOf( TestVariationProduct::class, wc_get_product( $variation_id ) );
+		$this->assertSame( 'product_variation', get_post_type( $variation_id ) );
+		$this->assertSame( 'monthly', wc_get_product( $variation_id )->get_meta( '_test_plan' ) );
+		$this->assertSame( 'test_variation', $updated['variations'][0]['type'] );
+		$this->assertSame( 'yearly', wc_get_product( $updated['variations'][0]['id'] )->get_meta( '_test_plan' ) );
+	}
+
+	/**
+	 * @testdox Should build the variation class of the parent when a variation is created on its own.
+	 */
+	public function test_creates_a_single_variation_of_a_subclass(): void {
+		$this->register_variation_subclass();
+
+		$input               = $this->get_shirt_input();
+		$input['type']       = 'test-variable';
+		$input['variations'] = array();
+		$parent_id           = $this->run_ability( 'woocommerce/product-create', $input )['product']['id'];
+
+		$created = $this->run_ability(
+			'woocommerce/product-create',
+			array(
+				'type'       => 'variation',
+				'parent_id'  => $parent_id,
+				'attributes' => array(
+					array(
+						'name'   => 'Size',
+						'option' => 'S',
+					),
+				),
+				'extensions' => array( 'test-ext' => array( 'plan' => 'monthly' ) ),
+			)
+		);
+
+		$this->assertSame( 'test_variation', $created['product']['type'] );
+		$this->assertSame( 'monthly', wc_get_product( $created['product']['id'] )->get_meta( '_test_plan' ) );
+	}
+
+	/**
+	 * @testdox Should keep plain variations for a plain variable product, and refuse a field limited to a subclass on them.
+	 */
+	public function test_plain_variable_product_builds_plain_variations(): void {
+		$this->register_variation_subclass();
+
+		$created = $this->run_ability( 'woocommerce/product-create', $this->get_shirt_input() );
+
+		$input = $this->get_shirt_input();
+		unset( $input['sku'], $input['variations'][0]['sku'], $input['variations'][1]['sku'] );
+		$input['variations'][0]['extensions'] = array( 'test-ext' => array( 'plan' => 'monthly' ) );
+		$refused                              = $this->run_ability_response( 'woocommerce/product-create', $input );
+
+		$this->assertSame( 'variation', $created['variations'][0]['type'] );
+		$this->assertSame( \WC_Product_Variation::class, get_class( wc_get_product( $created['variations'][0]['id'] ) ) );
+		$this->assertSame( 400, $refused->get_status() );
+		$this->assertSame( 'woocommerce_ability_field_object_type', $refused->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Should refuse a variation type that does not build a variation.
+	 */
+	public function test_refuses_a_variation_type_that_is_not_a_variation(): void {
+		$this->add_test_action( 'woocommerce_ability_variation_product_type', static fn(): string => 'simple' );
+
+		$refused = $this->run_ability_response( 'woocommerce/product-create', $this->get_shirt_input() );
+
+		$this->assertSame( 400, $refused->get_status() );
+		$this->assertSame( 'woocommerce_invalid_product_type', $refused->get_data()['code'] );
+	}
+
+	/**
 	 * @testdox Should not apply a field with object_types to an object without a callable get_type().
 	 */
 	public function test_a_field_with_object_types_does_not_apply_to_an_object_of_unknown_type(): void {

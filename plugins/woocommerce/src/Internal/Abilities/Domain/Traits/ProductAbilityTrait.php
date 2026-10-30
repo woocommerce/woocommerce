@@ -716,6 +716,41 @@ trait ProductAbilityTrait {
 	}
 
 	/**
+	 * Build a new variation of a parent, in memory.
+	 *
+	 * The product factory picks the class of a saved variation from its post,
+	 * and a new variation has no post yet. The owner of a variable type names
+	 * the type of its variations here, so the fields and validators of that type
+	 * run before the save.
+	 *
+	 * @param \WC_Product_Variable $parent_product Parent, saved or not.
+	 * @return \WC_Product_Variation|\WP_Error
+	 */
+	protected static function get_new_variation( \WC_Product_Variable $parent_product ) {
+		/**
+		 * Filter the product type of a new variation of a variable product.
+		 *
+		 * The product factory must build a `WC_Product_Variation` subclass for
+		 * the type, by its class name or through the `woocommerce_product_class`
+		 * filter. The subclass must have a data store and answer true to
+		 * `is_type( 'variation' )`, as WooCommerce expects of any variation.
+		 *
+		 * @since 11.4.0
+		 *
+		 * @param string               $variation_type Product type. Default `variation`.
+		 * @param \WC_Product_Variable $parent_product Parent, saved or not.
+		 */
+		$variation_type = (string) apply_filters( 'woocommerce_ability_variation_product_type', ProductType::VARIATION, $parent_product );
+		$variation      = self::get_product_object_for_type( $variation_type );
+
+		if ( is_wp_error( $variation ) || $variation instanceof \WC_Product_Variation ) {
+			return $variation;
+		}
+
+		return self::get_invalid_product_type_error();
+	}
+
+	/**
 	 * Build the variations that a `variations` input names, in memory. An item
 	 * with an `id` loads that variation of the parent and changes it, or marks
 	 * it for deletion. An item without one builds a new variation. Each saved
@@ -776,12 +811,9 @@ trait ProductAbilityTrait {
 					continue;
 				}
 			} else {
-				$variation = self::get_product_object_for_type( ProductType::VARIATION );
+				$variation = self::get_new_variation( $parent_product );
 				if ( is_wp_error( $variation ) ) {
 					return $variation;
-				}
-				if ( ! $variation instanceof \WC_Product_Variation ) {
-					return self::get_invalid_product_type_error();
 				}
 				if ( $parent_product->get_id() > 0 ) {
 					$variation->set_parent_id( $parent_product->get_id() );
@@ -1579,7 +1611,7 @@ trait ProductAbilityTrait {
 			return true;
 		}
 		foreach ( $args['object_types'] as $object_type ) {
-			if ( is_a( (string) \WC_Product_Factory::get_classname_from_product_type( $object_type ), \WC_Product_Variation::class, true ) ) {
+			if ( is_a( \WC_Product_Factory::get_product_classname( 0, $object_type ), \WC_Product_Variation::class, true ) ) {
 				return true;
 			}
 		}
@@ -1615,7 +1647,6 @@ trait ProductAbilityTrait {
 				'type'              => array(
 					'type'        => 'string',
 					'description' => __( 'Internal product type slug, such as simple, external, grouped, variable or variation.', 'woocommerce' ),
-					'enum'        => self::get_supported_product_types(),
 				),
 				'status'            => array(
 					'type' => 'string',
