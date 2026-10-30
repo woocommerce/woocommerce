@@ -12,7 +12,7 @@ Checks published simple and variable products against the product data specs of 
 
 ## Checks
 
-Each check is a `ReadinessRule` in `Checks/`. Per channel it names the feed field it tests and an effect:
+Each check is a `ReadinessRule` in `Checks/`: a row in `SimpleCheck::table()` when it is only data, or its own class when its result changes per product (price, brand, GTIN, duplicate GTIN, image size). Per channel it names the feed field it tests and an effect:
 
 - `not_listable`: the channel's spec requires the field, so the product can't be listed there without it.
 - `gaps`: the product lists, but is harder to find or shows a warning.
@@ -54,10 +54,9 @@ Store-wide conditions (`StoreConditions`) are reported first because they affect
 ```php
 array(
 	'generated_at' => '2026-10-28T12:00:00+00:00',
-	'products'             => 120, // Published simple and variable products checked.
-	'products_with_issues' => 31,  // Not complete on at least one channel.
-	'hidden_from_catalog'  => 4,   // Not checked: catalog visibility "Search results only" or "Hidden", the merchant's choice.
-	'unsupported_types'    => 6,   // Not checked: grouped, external, subscription, bundle and other types agents don't support yet.
+	'products'            => 120,  // Published simple and variable products checked.
+	'hidden_from_catalog' => 4,    // Not checked: catalog visibility "Search results only" or "Hidden", the merchant's choice.
+	'unsupported_types'   => 6,    // Not checked: grouped, external, subscription, bundle and other types agents don't support yet.
 	'store_checks' => array(
 		// blocks: 'listing' (every product on every channel), 'ucp' (the catalog for UCP agents) or 'checkout' (agent orders).
 		array( 'id' => 'launched', 'ok' => true, 'blocks' => 'listing', 'label' => '…', 'why' => '…', 'fix' => '…' ),
@@ -109,9 +108,9 @@ The scan walks published simple and variable products shown in the shop catalog 
 
 The per-channel field and effect live in each check's `channels()`. The final map passes through the `woocommerce_agent_readiness_rules` filter, keyed by check id, so it can change without a release. Removing a check id stops that check. Unknown channels and effects are dropped.
 
-## Product feed integration
+## Product feeds
 
-`ReadinessFeedValidator` implements `ProductFeed\Feed\FeedValidatorInterface` and returns the ids of the checks a product fails, so feed integrations can reuse the checks. It judges a variation by its parent, as the scan counts it, and returns `not_checked` for products the scan leaves out (other types, hidden from the shop catalog, unpublished), so a feed skips them instead of exporting them unchecked. The rules are built once per request. The feed framework skips rows with issues, so an integration that only wants to report gaps should wrap it.
+`AgentReadiness::get_failing_check_ids( $product )` returns the ids of the checks a product fails, so a feed integration can reuse them. It judges a variation by its parent, as the scan counts it, and returns an empty list for products the scan leaves out.
 
 Core's UCP catalog mapper (`src/Internal/ProductFeed/Mapping/UcpProductMapper.php`) sends no brand and no GTIN today, so a product that passes `missing_brand` and `missing_gtin` still doesn't give agents those fields through it.
 
