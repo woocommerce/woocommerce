@@ -7,9 +7,9 @@ import { select } from '@wordpress/data';
  * Internal dependencies
  */
 import { initDomTracking } from '../dom-tracking';
-import { recordEvent } from '..';
+import { recordEvent } from '../event-pipeline';
 
-jest.mock( '..', () => ( {
+jest.mock( '../event-pipeline', () => ( {
 	recordEvent: jest.fn(),
 	isEventTrackingEnabled: () => true,
 } ) );

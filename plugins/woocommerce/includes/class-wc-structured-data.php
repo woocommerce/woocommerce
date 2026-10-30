@@ -15,6 +15,8 @@
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Enums\DimensionUnit;
+use Automattic\WooCommerce\Enums\WeightUnit;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
 
@@ -558,6 +560,41 @@ class WC_Structured_Data {
 		// Check we have required data.
 		if ( empty( $markup['aggregateRating'] ) && empty( $markup['offers'] ) && empty( $markup['review'] ) ) {
 			return;
+		}
+
+		$measurement_product = $selected_variation ?? $product;
+		$weight_units        = array(
+			WeightUnit::KILOGRAM => 'KGM',
+			WeightUnit::GRAM     => 'GRM',
+			WeightUnit::POUND    => 'LBR',
+			WeightUnit::OUNCE    => 'ONZ',
+		);
+		$dimension_units     = array(
+			DimensionUnit::METER      => 'MTR',
+			DimensionUnit::CENTIMETER => 'CMT',
+			DimensionUnit::MILLIMETER => 'MMT',
+			DimensionUnit::INCH       => 'INH',
+			DimensionUnit::YARD       => 'YRD',
+		);
+		$weight_unit         = get_option( 'woocommerce_weight_unit' );
+		$dimension_unit      = get_option( 'woocommerce_dimension_unit' );
+		$measurements        = array(
+			'weight' => $measurement_product->get_weight(),
+			'width'  => $measurement_product->get_width(),
+			'height' => $measurement_product->get_height(),
+			'depth'  => $measurement_product->get_length(),
+		);
+		foreach ( $measurements as $property => $value ) {
+			$unit  = 'weight' === $property ? $weight_unit : $dimension_unit;
+			$units = 'weight' === $property ? $weight_units : $dimension_units;
+			if ( ! is_numeric( $value ) || ! is_finite( (float) $value ) || (float) $value <= 0 || ! is_string( $unit ) || ! isset( $units[ $unit ] ) || isset( $markup[ $property ] ) ) {
+				continue;
+			}
+			$markup[ $property ] = array(
+				'@type'    => 'QuantitativeValue',
+				'value'    => (float) $value,
+				'unitCode' => $units[ $unit ],
+			);
 		}
 
 		$this->set_data( apply_filters( 'woocommerce_structured_data_product', $markup, $product ) );

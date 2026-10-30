@@ -1873,6 +1873,342 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Date-only "date on sale to" values are stored as end-of-day to match admin behaviour (#35321).
+	 */
+	public function test_parse_date_on_sale_to_field_date_only_is_end_of_day() {
+		$csv_file = __DIR__ . '/sample.csv';
+		$importer = new WC_Product_CSV_Importer( $csv_file );
+
+		$this->assertSame( '2099-01-26 23:59:59', $importer->parse_date_on_sale_to_field( '2099-01-26' ) );
+		$this->assertSame( '2022-10-25 23:59:59', $importer->parse_date_on_sale_to_field( '2022-10-25' ) );
+	}
+
+	/**
+	 * @testdox "date on sale to" values that already include a time component are preserved.
+	 */
+	public function test_parse_date_on_sale_to_field_preserves_time_component() {
+		$csv_file = __DIR__ . '/sample.csv';
+		$importer = new WC_Product_CSV_Importer( $csv_file );
+
+		$this->assertSame( '2099-01-26 10:30:00', $importer->parse_date_on_sale_to_field( '2099-01-26 10:30:00' ) );
+		$this->assertSame( '2099-01-26 10:30', $importer->parse_date_on_sale_to_field( '2099-01-26 10:30' ) );
+		$this->assertSame( '2099-01-26T10:30:00Z', $importer->parse_date_on_sale_to_field( '2099-01-26T10:30:00Z' ) );
+	}
+
+	/**
+	 * @testdox "date on sale to" date-only values that carry a timezone are preserved.
+	 */
+	public function test_parse_date_on_sale_to_field_preserves_timezone_qualified_date() {
+		$csv_file = __DIR__ . '/sample.csv';
+		$importer = new WC_Product_CSV_Importer( $csv_file );
+
+		$this->assertSame( '2099-01-26Z', $importer->parse_date_on_sale_to_field( '2099-01-26Z' ) );
+		$this->assertSame( '2099-01-26 +02:00', $importer->parse_date_on_sale_to_field( '2099-01-26 +02:00' ) );
+	}
+
+	/**
+	 * @testdox "date on sale to" values with a colonless time component are preserved.
+	 */
+	public function test_parse_date_on_sale_to_field_preserves_colonless_time_component() {
+		$csv_file = __DIR__ . '/sample.csv';
+		$importer = new WC_Product_CSV_Importer( $csv_file );
+
+		$this->assertSame( '20990126T103000', $importer->parse_date_on_sale_to_field( '20990126T103000' ) );
+		$this->assertSame( 'January 26, 2099 10am', $importer->parse_date_on_sale_to_field( 'January 26, 2099 10am' ) );
+		$this->assertSame( '2099-01-26 10.30', $importer->parse_date_on_sale_to_field( '2099-01-26 10.30' ) );
+		// Epoch syntax parses as a relative expression.
+		$this->assertSame( '@4073068800', $importer->parse_date_on_sale_to_field( '@4073068800' ) );
+	}
+
+	/**
+	 * @testdox Relative "date on sale to" expressions are never bumped to end-of-day.
+	 */
+	public function test_parse_date_on_sale_to_field_preserves_relative_expressions() {
+		$csv_file = __DIR__ . '/sample.csv';
+		$importer = new WC_Product_CSV_Importer( $csv_file );
+
+		$this->assertSame( 'now', $importer->parse_date_on_sale_to_field( 'now' ) );
+		$this->assertSame( '+1 week', $importer->parse_date_on_sale_to_field( '+1 week' ) );
+		$this->assertSame( 'tomorrow', $importer->parse_date_on_sale_to_field( 'tomorrow' ) );
+	}
+
+	/**
+	 * @testdox Date-only "date on sale to" values in non-Y-m-d formats are normalised to Y-m-d end-of-day.
+	 */
+	public function test_parse_date_on_sale_to_field_alternate_date_formats() {
+		$csv_file = __DIR__ . '/sample.csv';
+		$importer = new WC_Product_CSV_Importer( $csv_file );
+
+		$this->assertSame( '2099-01-26 23:59:59', $importer->parse_date_on_sale_to_field( '26-01-2099' ) );
+		$this->assertSame( '2099-01-26 23:59:59', $importer->parse_date_on_sale_to_field( '2099/01/26' ) );
+		$this->assertSame( '2099-01-26 23:59:59', $importer->parse_date_on_sale_to_field( 'January 26, 2099' ) );
+	}
+
+	/**
+	 * @testdox Date-only "date on sale to" values with a leading weekday name (Excel "Long Date") are bumped to end-of-day.
+	 */
+	public function test_parse_date_on_sale_to_field_weekday_prefixed_date_only_is_end_of_day() {
+		$csv_file = __DIR__ . '/sample.csv';
+		$importer = new WC_Product_CSV_Importer( $csv_file );
+
+		$this->assertSame( '2099-01-26 23:59:59', $importer->parse_date_on_sale_to_field( 'Monday, January 26, 2099' ) );
+		$this->assertSame( '2099-01-26 23:59:59', $importer->parse_date_on_sale_to_field( 'Mon 26 Jan 2099' ) );
+		$this->assertSame( '2099-01-26 23:59:59', $importer->parse_date_on_sale_to_field( 'Monday 26 January 2099' ) );
+	}
+
+	/**
+	 * @testdox Weekday-prefixed "date on sale to" values with a time, and bare or relative weekdays, are preserved.
+	 */
+	public function test_parse_date_on_sale_to_field_weekday_prefixed_values_with_time_or_relative_are_preserved() {
+		$csv_file = __DIR__ . '/sample.csv';
+		$importer = new WC_Product_CSV_Importer( $csv_file );
+
+		$this->assertSame( 'Monday, January 26, 2099 00:00:00', $importer->parse_date_on_sale_to_field( 'Monday, January 26, 2099 00:00:00' ) );
+		$this->assertSame( 'Monday, January 26, 2099 10:00', $importer->parse_date_on_sale_to_field( 'Monday, January 26, 2099 10:00' ) );
+		$this->assertSame( 'next monday', $importer->parse_date_on_sale_to_field( 'next monday' ) );
+		$this->assertSame( 'monday', $importer->parse_date_on_sale_to_field( 'monday' ) );
+	}
+
+	/**
+	 * @testdox "date on sale to" Unix timestamps are normalised to ISO8601 without being shifted to end-of-day.
+	 */
+	public function test_parse_date_on_sale_to_field_unix_timestamp_preserved() {
+		$csv_file = __DIR__ . '/sample.csv';
+		$importer = new WC_Product_CSV_Importer( $csv_file );
+
+		// The Unix timestamp 4073068800 corresponds to 2099-01-26 00:00:00 UTC.
+		$this->assertSame( '2099-01-26T00:00:00Z', $importer->parse_date_on_sale_to_field( '4073068800' ) );
+	}
+
+	/**
+	 * @testdox Empty / invalid "date on sale to" values are returned as null.
+	 */
+	public function test_parse_date_on_sale_to_field_empty_and_invalid() {
+		$csv_file = __DIR__ . '/sample.csv';
+		$importer = new WC_Product_CSV_Importer( $csv_file );
+
+		$this->assertNull( $importer->parse_date_on_sale_to_field( '' ) );
+		$this->assertNull( $importer->parse_date_on_sale_to_field( 'not-a-date' ) );
+	}
+
+	/**
+	 * @testdox Importing a CSV with a date-only "date sale price ends" stores end-of-day, matching admin (#35321).
+	 */
+	public function test_import_date_on_sale_to_date_only_is_end_of_day() {
+		// Non-UTC zone so any day drift shows up.
+		update_option( 'timezone_string', 'Pacific/Auckland' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_sku( 'issue-35321-sku' );
+		$product->set_regular_price( '10.00' );
+		$product->save();
+
+		$timed_product = WC_Helper_Product::create_simple_product();
+		$timed_product->set_sku( 'issue-35321-timed-sku' );
+		$timed_product->set_regular_price( '10.00' );
+		$timed_product->save();
+
+		$excel_product = WC_Helper_Product::create_simple_product();
+		$excel_product->set_sku( 'issue-35321-excel-sku' );
+		$excel_product->set_regular_price( '10.00' );
+		$excel_product->save();
+
+		// wp_tempnam() always appends .tmp; the importer requires a .csv/.txt extension.
+		$tmp_path = wp_tempnam( 'wc-csv' );
+		$csv_path = $tmp_path . '.csv';
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.rename_rename -- Tests rename a tmp file we control.
+		rename( $tmp_path, $csv_path );
+		$lines = array(
+			'"ID","date sale price starts","date sale price ends","Sale price"',
+			sprintf( '%d,"2022-10-25","2099-01-26","2.00"', $product->get_id() ),
+			sprintf( '%d,"2022-10-25 09:00:00","2099-01-26 10:30:00","2.00"', $timed_product->get_id() ),
+			// Excel "Long Date" cell format.
+			sprintf( '%d,"Tuesday, October 25, 2022","Monday, January 26, 2099","2.00"', $excel_product->get_id() ),
+		);
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Tests write to a tmp file we control.
+		file_put_contents( $csv_path, implode( "\n", $lines ) . "\n" );
+
+		$importer = new WC_Product_CSV_Importer(
+			$csv_path,
+			array(
+				'update_existing' => true,
+				'parse'           => true,
+				'mapping'         => array(
+					'ID'                     => 'id',
+					'date sale price starts' => 'date_on_sale_from',
+					'date sale price ends'   => 'date_on_sale_to',
+					'Sale price'             => 'sale_price',
+				),
+			)
+		);
+		$importer->import();
+
+		$updated   = wc_get_product( $product->get_id() );
+		$date_to   = $updated->get_date_on_sale_to();
+		$date_from = $updated->get_date_on_sale_from();
+
+		$this->assertNotNull( $date_to, 'date_on_sale_to should be set' );
+		$this->assertNotNull( $date_from, 'date_on_sale_from should be set' );
+		$this->assertSame( '23:59:59', $date_to->date( 'H:i:s' ), 'date_on_sale_to should be end-of-day (site-local) to match admin' );
+		$this->assertSame( '2099-01-26', $date_to->date( 'Y-m-d' ), 'date_on_sale_to calendar day must not drift in a non-UTC site timezone' );
+		$this->assertSame( '00:00:00', $date_from->date( 'H:i:s' ), 'date_on_sale_from should remain start-of-day' );
+		$this->assertSame( '2022-10-25', $date_from->date( 'Y-m-d' ) );
+
+		$updated_timed   = wc_get_product( $timed_product->get_id() );
+		$timed_date_to   = $updated_timed->get_date_on_sale_to();
+		$timed_date_from = $updated_timed->get_date_on_sale_from();
+
+		$this->assertNotNull( $timed_date_to, 'timed date_on_sale_to should be set' );
+		$this->assertNotNull( $timed_date_from, 'timed date_on_sale_from should be set' );
+		$this->assertSame( '2099-01-26 10:30:00', $timed_date_to->date( 'Y-m-d H:i:s' ), 'explicit end time must be preserved site-local, not bumped to end-of-day' );
+		$this->assertSame( '2022-10-25 09:00:00', $timed_date_from->date( 'Y-m-d H:i:s' ), 'explicit start time must be preserved site-local' );
+
+		$updated_excel = wc_get_product( $excel_product->get_id() );
+		$this->assertSame( '2099-01-26 23:59:59', $updated_excel->get_date_on_sale_to()->date( 'Y-m-d H:i:s' ), 'weekday-prefixed date-only end date must be bumped to end-of-day' );
+		$this->assertSame( '2022-10-25 00:00:00', $updated_excel->get_date_on_sale_from()->date( 'Y-m-d H:i:s' ) );
+
+		WC_Helper_Product::delete_product( $product->get_id() );
+		WC_Helper_Product::delete_product( $timed_product->get_id() );
+		WC_Helper_Product::delete_product( $excel_product->get_id() );
+		wp_delete_file( $csv_path );
+	}
+
+	/**
+	 * @testdox Re-importing the same CSV leaves the sale-end timestamp and the pending end-sale action unchanged.
+	 */
+	public function test_import_date_on_sale_to_reimport_is_idempotent() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_sku( 'issue-35321-idempotent-sku' );
+		$product->set_regular_price( '10.00' );
+		$product->save();
+
+		// wp_tempnam() always appends .tmp; the importer requires a .csv/.txt extension.
+		$tmp_path = wp_tempnam( 'wc-csv' );
+		$csv_path = $tmp_path . '.csv';
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.rename_rename -- Tests rename a tmp file we control.
+		rename( $tmp_path, $csv_path );
+		$lines = array(
+			'"ID","date sale price starts","date sale price ends","Sale price"',
+			sprintf( '%d,"2022-10-25","2099-01-26","2.00"', $product->get_id() ),
+		);
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Tests write to a tmp file we control.
+		file_put_contents( $csv_path, implode( "\n", $lines ) . "\n" );
+
+		$make_importer = function () use ( $csv_path ) {
+			return new WC_Product_CSV_Importer(
+				$csv_path,
+				array(
+					'update_existing' => true,
+					'parse'           => true,
+					'mapping'         => array(
+						'ID'                     => 'id',
+						'date sale price starts' => 'date_on_sale_from',
+						'date sale price ends'   => 'date_on_sale_to',
+						'Sale price'             => 'sale_price',
+					),
+				)
+			);
+		};
+
+		// Args and group per wc_schedule_product_sale_events() in wc-product-functions.php.
+		$pending_end_actions = function () use ( $product ) {
+			return as_get_scheduled_actions(
+				array(
+					'hook'     => 'wc_product_end_scheduled_sale',
+					'args'     => array( 'product_id' => $product->get_id() ),
+					'group'    => 'woocommerce-sales',
+					'status'   => ActionScheduler_Store::STATUS_PENDING,
+					'per_page' => 10,
+				),
+				'ids'
+			);
+		};
+
+		$make_importer()->import();
+		$first = wc_get_product( $product->get_id() )->get_date_on_sale_to();
+
+		$this->assertNotNull( $first, 'date_on_sale_to should be set after the first import' );
+		$this->assertSame( '23:59:59', $first->date( 'H:i:s' ) );
+		$first_timestamp = $first->getTimestamp();
+		$this->assertCount( 1, $pending_end_actions(), 'exactly one pending end-sale action after the first import' );
+
+		$make_importer()->import();
+		$second = wc_get_product( $product->get_id() )->get_date_on_sale_to();
+
+		$this->assertSame( $first_timestamp, $second->getTimestamp(), 're-import must not change the stored sale-end timestamp' );
+		$this->assertSame( '23:59:59', $second->date( 'H:i:s' ), 'the end-of-day bump must not compound on re-import' );
+		$this->assertCount( 1, $pending_end_actions(), 'still exactly one pending end-sale action after re-import' );
+
+		WC_Helper_Product::delete_product( $product->get_id() );
+		wp_delete_file( $csv_path );
+	}
+
+	/**
+	 * @testdox Re-importing a date-only value stored as midnight before the fix moves it to 23:59:59 and reschedules the end-sale action (#35321).
+	 */
+	public function test_import_date_on_sale_to_first_reimport_after_upgrade_is_not_a_noop() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_sku( 'issue-35321-upgrade-sku' );
+		$product->set_regular_price( '10.00' );
+		// Midnight is what the importer stored for a date-only value before the fix.
+		$product->set_date_on_sale_to( '2099-01-26 00:00:00' );
+		$product->save();
+
+		$pending_end_actions = function () use ( $product ) {
+			return as_get_scheduled_actions(
+				array(
+					'hook'     => 'wc_product_end_scheduled_sale',
+					'args'     => array( 'product_id' => $product->get_id() ),
+					'group'    => 'woocommerce-sales',
+					'status'   => ActionScheduler_Store::STATUS_PENDING,
+					'per_page' => 10,
+				),
+				'ids'
+			);
+		};
+
+		$before = wc_get_product( $product->get_id() )->get_date_on_sale_to();
+		$this->assertSame( '00:00:00', $before->date( 'H:i:s' ), 'the pre-upgrade value should start at midnight' );
+
+		// wp_tempnam() always appends .tmp; the importer requires a .csv/.txt extension.
+		$tmp_path = wp_tempnam( 'wc-csv' );
+		$csv_path = $tmp_path . '.csv';
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.rename_rename -- Tests rename a tmp file we control.
+		rename( $tmp_path, $csv_path );
+		$lines = array(
+			'"ID","date sale price ends","Sale price"',
+			sprintf( '%d,"2099-01-26","2.00"', $product->get_id() ),
+		);
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Tests write to a tmp file we control.
+		file_put_contents( $csv_path, implode( "\n", $lines ) . "\n" );
+
+		$importer = new WC_Product_CSV_Importer(
+			$csv_path,
+			array(
+				'update_existing' => true,
+				'parse'           => true,
+				'mapping'         => array(
+					'ID'                   => 'id',
+					'date sale price ends' => 'date_on_sale_to',
+					'Sale price'           => 'sale_price',
+				),
+			)
+		);
+		$importer->import();
+
+		$after = wc_get_product( $product->get_id() )->get_date_on_sale_to();
+
+		$this->assertNotNull( $after, 'date_on_sale_to should still be set after the re-import' );
+		$this->assertSame( '23:59:59', $after->date( 'H:i:s' ), 'the same date-only value re-imported after upgrade should move to end-of-day' );
+		$this->assertSame( '2099-01-26', $after->date( 'Y-m-d' ), 'the calendar day should not change' );
+		$this->assertNotSame( $before->getTimestamp(), $after->getTimestamp(), 'the stored timestamp must change: this re-import is not a no-op' );
+		$this->assertCount( 1, $pending_end_actions(), 'exactly one pending end-sale action after the re-import, rescheduled for the new end-of-day time' );
+
+		WC_Helper_Product::delete_product( $product->get_id() );
+		wp_delete_file( $csv_path );
+	}
+
+	/**
 	 * @testdox Constructing the importer with a CSV file that cannot be opened should fail with a clear error.
 	 */
 	public function test_unopenable_csv_file_fails_with_clear_error() {
@@ -2114,6 +2450,651 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		} finally {
 			wp_delete_file( $file );
 		}
+	}
+
+	/**
+	 * Import temporary CSV contents, by default with "Update existing products" enabled.
+	 *
+	 * @param string     $csv             CSV contents.
+	 * @param array|null $mapping         Column mapping, or null for ID, Type, SKU and Name.
+	 * @param bool       $update_existing Whether existing products are updated.
+	 * @return array Import results.
+	 */
+	private function import_csv_rows( string $csv, ?array $mapping = null, bool $update_existing = true ): array {
+		$file = get_temp_dir() . 'product-import-' . wp_generate_uuid4() . '.csv';
+		file_put_contents( $file, $csv ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Temporary CSV fixture.
+
+		try {
+			$importer = new WC_Product_CSV_Importer(
+				$file,
+				array(
+					'parse'           => true,
+					'update_existing' => $update_existing,
+					'mapping'         => $mapping ?? array(
+						'ID'   => 'id',
+						'Type' => 'type',
+						'SKU'  => 'sku',
+						'Name' => 'name',
+					),
+				)
+			);
+
+			return $importer->import();
+		} finally {
+			wp_delete_file( $file );
+		}
+	}
+
+	/**
+	 * @testdox Should update the product matched by SKU when a row's ID does not exist on the site and existing products are being updated.
+	 */
+	public function test_import_falls_back_to_sku_when_id_does_not_exist_40274(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_sku( 'IMPORT-40274-A' );
+		$product->set_name( 'Original name' );
+		$product->save();
+
+		$missing_id = $product->get_id() + 1000;
+		$csv        = "ID,Type,SKU,Name\n{$missing_id},simple,IMPORT-40274-A,Updated by SKU\n" . ( $missing_id + 1 ) . ",simple,IMPORT-40274-NONE,Row with no match\n";
+
+		$data = $this->import_csv_rows( $csv );
+
+		$this->assertSame( array( $product->get_id() ), $data['updated'], 'The row with a missing ID updates the product matched by SKU' );
+		$this->assertEmpty( $data['failed'], 'A row whose ID is missing but whose SKU exists must not fail' );
+		$this->assertEmpty( $data['imported'], 'An update import never creates products' );
+		$this->assertCount( 1, $data['skipped'], 'A row matching neither ID nor SKU is still skipped' );
+		$this->assertSame( 'No matching product exists to update.', $data['skipped'][0]->get_error_message(), 'The skipped row says nothing matched' );
+		$this->assertSame( 'Updated by SKU', wc_get_product( $product->get_id() )->get_name(), 'The matched product gets the row\'s data' );
+		$this->assertSame( 0, wc_get_product_id_by_sku( 'IMPORT-40274-NONE' ), 'The unmatched row creates no product' );
+	}
+
+	/**
+	 * @testdox Should explain the conflict when a row's ID and SKU point at two different existing products.
+	 */
+	public function test_import_explains_id_and_sku_conflict_40274(): void {
+		$matched_by_id = WC_Helper_Product::create_simple_product();
+		$matched_by_id->set_sku( 'IMPORT-40274-B' );
+		$matched_by_id->save();
+
+		$owns_sku = WC_Helper_Product::create_simple_product();
+		$owns_sku->set_sku( 'IMPORT-40274-C' );
+		$owns_sku->save();
+
+		$csv = "ID,Type,SKU,Name\n{$matched_by_id->get_id()},simple,IMPORT-40274-C,Conflicting row\n";
+
+		$data = $this->import_csv_rows( $csv );
+
+		$this->assertEmpty( $data['updated'], 'A conflicting row updates nothing' );
+		$this->assertCount( 1, $data['failed'], 'A conflicting row fails' );
+		$message = $data['failed'][0]->get_error_message();
+		$this->assertStringContainsString( 'Invalid or duplicated SKU.', $message, 'The original error is kept' );
+		$this->assertStringContainsString( sprintf( 'matches product #%d', $matched_by_id->get_id() ), $message, 'The hint names the product matched by ID' );
+		$this->assertStringContainsString( sprintf( 'belongs to product #%d', $owns_sku->get_id() ), $message, 'The hint names the product that owns the SKU' );
+		$this->assertSame( 'IMPORT-40274-B', wc_get_product( $matched_by_id->get_id() )->get_sku(), 'The product matched by ID keeps its own SKU' );
+	}
+
+	/**
+	 * @testdox Should update a variation matched by SKU when its ID does not exist and its parent resolves.
+	 */
+	public function test_import_falls_back_to_sku_for_variation_rows_40274(): void {
+		$parent = WC_Helper_Product::create_variation_product();
+		$parent->set_sku( 'IMPORT-40274-PARENT' );
+		$parent->save();
+		$variation = wc_get_product( $parent->get_children()[0] );
+		$variation->set_sku( 'IMPORT-40274-VAR' );
+		$variation->save();
+
+		$missing_id = $variation->get_id() + 1000;
+		$csv        = "ID,Type,SKU,Regular price,Parent\n{$missing_id},variation,IMPORT-40274-VAR,42,IMPORT-40274-PARENT\n";
+
+		$data = $this->import_csv_rows(
+			$csv,
+			array(
+				'ID'            => 'id',
+				'Type'          => 'type',
+				'SKU'           => 'sku',
+				'Regular price' => 'regular_price',
+				'Parent'        => 'parent_id',
+			)
+		);
+
+		$this->assertSame( array( $variation->get_id() ), $data['updated'], 'The variation row updates the variation matched by SKU' );
+		$this->assertEmpty( $data['failed'], 'A variation row with a valid parent does not fail' );
+		$updated = wc_get_product( $variation->get_id() );
+		$this->assertSame( '42', $updated->get_regular_price(), 'The matched variation gets the row\'s price' );
+		$this->assertSame( $parent->get_id(), $updated->get_parent_id(), 'The variation must stay attached to its parent' );
+	}
+
+	/**
+	 * @testdox Should fail a variation row whose parent cannot be found instead of detaching the variation.
+	 */
+	public function test_import_fails_variation_row_with_missing_parent_40274(): void {
+		$parent = WC_Helper_Product::create_variation_product();
+		$parent->set_sku( 'IMPORT-40274-PARENT-B' );
+		$parent->save();
+		$variation = wc_get_product( $parent->get_children()[0] );
+		$variation->set_sku( 'IMPORT-40274-VAR-B' );
+		$variation->save();
+		$original_name = $variation->get_name();
+
+		$missing_id = $variation->get_id() + 1000;
+		$csv        = "ID,Type,SKU,Name,Parent\n{$missing_id},variation,IMPORT-40274-VAR-B,Renamed variation,id:" . ( $missing_id + 1 ) . "\n";
+
+		$data = $this->import_csv_rows(
+			$csv,
+			array(
+				'ID'     => 'id',
+				'Type'   => 'type',
+				'SKU'    => 'sku',
+				'Name'   => 'name',
+				'Parent' => 'parent_id',
+			)
+		);
+
+		$this->assertEmpty( $data['updated'], 'A row with a missing parent updates nothing' );
+		$this->assertCount( 1, $data['failed'], 'A row with a missing parent fails' );
+		$this->assertStringContainsString( 'parent does not exist', $data['failed'][0]->get_error_message(), 'The failure names the missing parent' );
+		$unchanged = wc_get_product( $variation->get_id() );
+		$this->assertSame( $parent->get_id(), $unchanged->get_parent_id(), 'A failed row must not change the parent' );
+		$this->assertSame( $original_name, $unchanged->get_name(), 'A failed row must not change the name' );
+	}
+
+	/**
+	 * @testdox Should not match a row to a product of the other post type by SKU, so nothing is converted.
+	 */
+	public function test_import_sku_fallback_refuses_variation_to_simple_match_40274(): void {
+		$simple = WC_Helper_Product::create_simple_product();
+		$simple->set_sku( 'IMPORT-40274-SIMPLE' );
+		$simple->save();
+
+		$missing_id = $simple->get_id() + 1000;
+		$csv        = "ID,Type,SKU,Name\n{$missing_id},variation,IMPORT-40274-SIMPLE,Should stay a simple product\n";
+
+		$data = $this->import_csv_rows( $csv );
+
+		$this->assertEmpty( $data['updated'], 'A variation row must not update a simple product' );
+		$this->assertCount( 1, $data['failed'], 'A variation row for a simple product fails' );
+		$this->assertStringContainsString( 'Invalid or duplicated SKU.', $data['failed'][0]->get_error_message(), 'The row fails on the SKU the simple product owns' );
+		$this->assertSame( 'product', get_post_type( $simple->get_id() ), 'The simple product must not be converted to a variation' );
+	}
+
+	/**
+	 * @testdox Should not match by SKU when the type the row would save differs from the matched product's type.
+	 */
+	public function test_import_sku_fallback_refuses_other_saved_types_40274(): void {
+		$parent = WC_Helper_Product::create_variation_product();
+		$parent->set_sku( 'IMPORT-40274-TYPE-PARENT' );
+		$parent->save();
+		$variation = wc_get_product( $parent->get_children()[0] );
+		$variation->set_sku( 'IMPORT-40274-TYPE-VAR' );
+		$variation->save();
+
+		$missing_id = $variation->get_id() + 1000;
+		$csv        = "ID,Type,SKU,Name\n" .
+			"{$missing_id},,IMPORT-40274-TYPE-VAR,Empty type saves as simple\n" .
+			( $missing_id + 1 ) . ",simple,IMPORT-40274-TYPE-PARENT,Simple row for a variable product\n";
+
+		$data = $this->import_csv_rows( $csv );
+
+		$this->assertEmpty( $data['updated'], 'Neither row may update the product matched by SKU' );
+		$this->assertCount( 2, $data['failed'], 'Both rows fail' );
+		$this->assertSame( 'Invalid product.', $data['failed'][0]->get_error_message(), 'The empty-type row fails on its missing ID' );
+		$this->assertSame( 'Invalid product.', $data['failed'][1]->get_error_message(), 'The simple row fails on its missing ID' );
+		$this->assertSame( 'product_variation', get_post_type( $variation->get_id() ), 'The variation must not be converted to a simple product' );
+		$this->assertSame( ProductType::VARIABLE, WC_Product_Factory::get_product_type( $parent->get_id() ), 'The variable product must not be converted to a simple product' );
+	}
+
+	/**
+	 * @testdox Should not use the first column as the SKU when the file has no SKU column.
+	 */
+	public function test_import_without_sku_column_does_not_use_first_column_as_sku_40274(): void {
+		$csv = "ID,Type,Name\n987654,simple,Product without a SKU column\n";
+
+		$data = $this->import_csv_rows(
+			$csv,
+			array(
+				'ID'   => 'id',
+				'Type' => 'type',
+				'Name' => 'name',
+			),
+			false
+		);
+
+		$this->assertCount( 1, $data['imported'], 'The row is imported as a new product' );
+		$this->assertSame( '', wc_get_product( $data['imported'][0] )->get_sku(), 'The ID must not be saved as the SKU' );
+	}
+
+	/**
+	 * @testdox Should match by SKU when the SKU cell has surrounding spaces, as the saved SKU is trimmed too.
+	 */
+	public function test_import_sku_fallback_trims_the_row_sku_40274(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_sku( 'IMPORT-40274-TRIM' );
+		$product->save();
+
+		$missing_id = $product->get_id() + 1000;
+		$csv        = "ID,Type,SKU,Name\n{$missing_id},simple,\" IMPORT-40274-TRIM \",Updated by trimmed SKU\n";
+
+		$data = $this->import_csv_rows( $csv );
+
+		$this->assertSame( array( $product->get_id() ), $data['updated'], 'The padded SKU matches the product' );
+		$this->assertSame( 'Updated by trimmed SKU', wc_get_product( $product->get_id() )->get_name(), 'The matched product gets the row\'s data' );
+	}
+
+	/**
+	 * @testdox Should match each row by its own SKU when the file repeats a missing ID, so one product is not updated twice.
+	 */
+	public function test_import_sku_fallback_does_not_reuse_mapping_for_repeated_ids_40274(): void {
+		$product_a = WC_Helper_Product::create_simple_product();
+		$product_a->set_sku( 'IMPORT-40274-REPEAT-A' );
+		$product_a->set_name( 'Original A' );
+		$product_a->save();
+
+		$product_c = WC_Helper_Product::create_simple_product();
+		$product_c->set_sku( 'IMPORT-40274-REPEAT-C' );
+		$product_c->save();
+		wp_set_object_terms( $product_c->get_id(), 'import-40274-kept-tag', 'product_tag' );
+
+		$id_one = $product_c->get_id() + 1000;
+		$id_two = $id_one + 1;
+		$csv    = "ID,Type,SKU,Name\n" .
+			"{$id_one},simple,IMPORT-40274-REPEAT-A,Title A\n" .
+			"{$id_one},simple,IMPORT-40274-REPEAT-B,Title B\n" .
+			"{$id_two},simple,IMPORT-40274-REPEAT-C,Title C\n" .
+			"{$id_two},variation,IMPORT-40274-REPEAT-C,Title C\n";
+
+		$data = $this->import_csv_rows( $csv );
+
+		$this->assertSame( array( $product_a->get_id(), $product_c->get_id() ), $data['updated'], 'Only the rows whose own SKU matches update a product' );
+		$this->assertCount( 1, $data['skipped'], 'The repeated ID with an unknown SKU is skipped' );
+		$this->assertSame( 'No matching product exists to update.', $data['skipped'][0]->get_error_message(), 'The unknown SKU matches nothing' );
+		$this->assertCount( 1, $data['failed'], 'The repeated ID with a variation type is refused' );
+		$updated_a = wc_get_product( $product_a->get_id() );
+		$this->assertSame( 'Title A', $updated_a->get_name(), 'Product A keeps the first row\'s name' );
+		$this->assertSame( 'IMPORT-40274-REPEAT-A', $updated_a->get_sku(), 'Product A keeps its SKU' );
+		$this->assertSame( 'product', get_post_type( $product_c->get_id() ), 'The simple product must not be converted to a variation' );
+		$this->assertTrue( has_term( 'import-40274-kept-tag', 'product_tag', $product_c->get_id() ), 'The simple product keeps its tags' );
+	}
+
+	/**
+	 * @testdox Should fail a variation row with an unusable parent, or an ID that is not a product, before converting the post its ID points at.
+	 */
+	public function test_import_checks_variation_parent_before_converting_the_product_40274(): void {
+		$simple = WC_Helper_Product::create_simple_product();
+		$simple->set_sku( 'IMPORT-40274-PARENT-CHECK' );
+		$simple->save();
+		wp_set_object_terms( $simple->get_id(), 'import-40274-parent-check-tag', 'product_tag' );
+		$blank_parent = WC_Helper_Product::create_simple_product();
+		$page         = self::factory()->post->create( array( 'post_type' => 'page' ) );
+
+		$csv = "ID,Type,SKU,Name,Parent\n" .
+			"{$simple->get_id()},variation,,Should stay simple,id:" . ( $simple->get_id() + 1000 ) . "\n" .
+			"{$blank_parent->get_id()},variation,,Should stay simple too,\n" .
+			"{$page},variation,IMPORT-40274-PARENT-CHECK,Should stay a page,\n";
+
+		$data = $this->import_csv_rows(
+			$csv,
+			array(
+				'ID'     => 'id',
+				'Type'   => 'type',
+				'SKU'    => 'sku',
+				'Name'   => 'name',
+				'Parent' => 'parent_id',
+			)
+		);
+
+		$this->assertCount( 3, $data['failed'], 'Each variation row fails' );
+		$this->assertSame( 'woocommerce_product_importer_missing_variation_parent_id', $data['failed'][0]->get_error_code(), 'The row fails on its missing parent' );
+		$this->assertSame( 'woocommerce_product_importer_missing_variation_parent_id', $data['failed'][1]->get_error_code(), 'A product turning into a variation needs a parent' );
+		$this->assertSame( 'woocommerce_product_csv_importer_invalid_id', $data['failed'][2]->get_error_code(), 'A post that is not a product is refused' );
+		$this->assertSame( 'product', get_post_type( $simple->get_id() ), 'The product must not be converted to a variation' );
+		$this->assertSame( 'product', get_post_type( $blank_parent->get_id() ), 'The product with a blank Parent cell must not be converted' );
+		$this->assertSame( 'page', get_post_type( $page ), 'The page must not be converted to a variation' );
+		$this->assertTrue( has_term( 'import-40274-parent-check-tag', 'product_tag', $simple->get_id() ), 'The product keeps its tags' );
+	}
+
+	/**
+	 * @testdox Should fail an update row whose parent is not an existing variable product instead of moving the variation.
+	 */
+	public function test_import_update_requires_an_existing_variable_parent_40274(): void {
+		$parent = WC_Helper_Product::create_variation_product();
+		$parent->set_sku( 'IMPORT-40274-REAL-PARENT' );
+		$parent->save();
+		$children = $parent->get_children();
+
+		$simple = WC_Helper_Product::create_simple_product();
+		$simple->set_sku( 'IMPORT-40274-SIMPLE-PARENT' );
+		$simple->save();
+
+		$placeholder = WC_Helper_Product::create_variation_product();
+		wp_update_post(
+			array(
+				'ID'          => $placeholder->get_id(),
+				'post_status' => 'importing',
+			)
+		);
+
+		$first  = wc_get_product( $children[0] );
+		$second = wc_get_product( $children[1] );
+		$third  = wc_get_product( $children[2] );
+		$csv    = "ID,Type,SKU,Name,Parent\n" .
+			"{$first->get_id()},variation,{$first->get_sku()},Unknown parent,IMPORT-40274-NO-SUCH-PARENT\n" .
+			"{$second->get_id()},variation,{$second->get_sku()},Simple parent,IMPORT-40274-SIMPLE-PARENT\n" .
+			"{$third->get_id()},variation,{$third->get_sku()},Importing parent,id:{$placeholder->get_id()}\n";
+
+		$data = $this->import_csv_rows(
+			$csv,
+			array(
+				'ID'     => 'id',
+				'Type'   => 'type',
+				'SKU'    => 'sku',
+				'Name'   => 'name',
+				'Parent' => 'parent_id',
+			)
+		);
+
+		$this->assertEmpty( $data['updated'], 'No variation may be moved' );
+		$this->assertCount( 3, $data['failed'], 'Each row fails' );
+		$this->assertSame( 'woocommerce_product_importer_variation_parent_not_variable', $data['failed'][0]->get_error_code(), 'An unknown parent SKU, resolved to a placeholder, is refused' );
+		$this->assertSame( 'woocommerce_product_importer_variation_parent_not_variable', $data['failed'][1]->get_error_code(), 'A simple parent is refused' );
+		$this->assertSame( 'woocommerce_product_importer_variation_parent_not_variable', $data['failed'][2]->get_error_code(), 'A variable parent still being imported is refused' );
+		$this->assertSame( $parent->get_id(), wc_get_product( $first->get_id() )->get_parent_id(), 'The first variation keeps its parent' );
+		$this->assertSame( $parent->get_id(), wc_get_product( $second->get_id() )->get_parent_id(), 'The second variation keeps its parent' );
+		$this->assertSame( $parent->get_id(), wc_get_product( $third->get_id() )->get_parent_id(), 'The third variation keeps its parent' );
+	}
+
+	/**
+	 * @testdox Should keep a variation's parent and apply its attributes when its Parent cell is blank, and check the parent of rows without a Type column.
+	 */
+	public function test_import_blank_parent_keeps_parent_and_untyped_rows_are_checked_40274(): void {
+		$parent   = WC_Helper_Product::create_variation_product();
+		$children = $parent->get_children();
+		$csv      = "ID,Name,Parent,Attribute 1 name,Attribute 1 value(s),Attribute 1 global\n" .
+			"{$children[0]},Blank parent,,size,large,1\n" .
+			"{$children[1]},Missing parent,id:" . ( max( $children ) + 1000 ) . ",size,large,1\n";
+
+		$data = $this->import_csv_rows(
+			$csv,
+			array(
+				'ID'                   => 'id',
+				'Name'                 => 'name',
+				'Parent'               => 'parent_id',
+				'Attribute 1 name'     => 'attributes:name1',
+				'Attribute 1 value(s)' => 'attributes:value1',
+				'Attribute 1 global'   => 'attributes:taxonomy1',
+			)
+		);
+
+		$this->assertSame( array( $children[0] ), $data['updated'], 'The row with a blank Parent cell is updated' );
+		$this->assertSame( $parent->get_id(), wc_get_product( $children[0] )->get_parent_id(), 'A blank Parent cell keeps the parent' );
+		$this->assertSame( 'large', wc_get_product( $children[0] )->get_attribute( 'pa_size' ), 'The row\'s attributes still apply' );
+		$this->assertCount( 1, $data['failed'], 'The row naming a missing parent fails' );
+		$this->assertSame( 'woocommerce_product_importer_missing_variation_parent_id', $data['failed'][0]->get_error_code(), 'The untyped row fails on its parent' );
+		$this->assertSame( $parent->get_id(), wc_get_product( $children[1] )->get_parent_id(), 'The failed row keeps the parent' );
+	}
+
+	/**
+	 * @testdox Should not add the SKU hint to a failure about the row's own type.
+	 */
+	public function test_import_does_not_add_sku_hint_to_invalid_type_errors_40274(): void {
+		$matched_by_id = WC_Helper_Product::create_simple_product();
+		$owns_sku      = WC_Helper_Product::create_simple_product();
+		$owns_sku->set_sku( 'IMPORT-40274-HINT' );
+		$owns_sku->save();
+
+		$data = $this->import_csv_rows( "ID,Type,SKU,Name\n{$matched_by_id->get_id()},not-a-type,IMPORT-40274-HINT,Bad type\n" );
+
+		$this->assertCount( 1, $data['failed'], 'A row with an unknown type fails' );
+		$this->assertSame( 'Invalid product type.', $data['failed'][0]->get_error_message(), 'The type error is shown on its own' );
+	}
+
+	/**
+	 * @testdox Should match SKUs and SKU references that the exporter escaped with a leading apostrophe.
+	 */
+	public function test_import_unescapes_exported_skus_40274(): void {
+		$parent = WC_Helper_Product::create_variation_product();
+		$parent->set_sku( '-IMPORT-40274-DASH-PARENT' );
+		$parent->save();
+		$variation = wc_get_product( $parent->get_children()[0] );
+		$variation->set_sku( '=IMPORT-40274-DASH-VAR' );
+		$variation->save();
+
+		$missing_id = $variation->get_id() + 1000;
+		$csv        = "ID,Type,SKU,Regular price,Parent\n{$missing_id},variation,'=IMPORT-40274-DASH-VAR,42,'-IMPORT-40274-DASH-PARENT\n";
+
+		$data = $this->import_csv_rows(
+			$csv,
+			array(
+				'ID'            => 'id',
+				'Type'          => 'type',
+				'SKU'           => 'sku',
+				'Regular price' => 'regular_price',
+				'Parent'        => 'parent_id',
+			)
+		);
+
+		$this->assertSame( array( $variation->get_id() ), $data['updated'], 'The escaped SKU matches the variation' );
+		$updated = wc_get_product( $variation->get_id() );
+		$this->assertSame( '=IMPORT-40274-DASH-VAR', $updated->get_sku(), 'The SKU is saved without the apostrophe' );
+		$this->assertSame( $parent->get_id(), $updated->get_parent_id(), 'The escaped parent SKU resolves to the parent' );
+	}
+
+	/**
+	 * @testdox Should match by SKU a variation whose class reports an extension's variation subtype.
+	 */
+	public function test_import_sku_fallback_matches_extension_variation_subtypes_40274(): void {
+		$subtype_class = get_class(
+			new class() extends WC_Product_Variation {
+				/**
+				 * Get the extension's variation subtype.
+				 *
+				 * @return string
+				 */
+				public function get_type() {
+					return 'import-40274-sub-variation';
+				}
+			}
+		);
+
+		$parent       = WC_Helper_Product::create_variation_product();
+		$variation_id = $parent->get_children()[0];
+		$variation    = wc_get_product( $variation_id );
+		$variation->set_sku( 'IMPORT-40274-SUBTYPE' );
+		$variation->save();
+
+		$use_subtype = function ( $classname, $product_type, $context, $product_id ) use ( $subtype_class, $variation_id ) {
+			return ( 'import-40274-sub-variation' === $product_type || $variation_id === (int) $product_id ) ? $subtype_class : $classname;
+		};
+		$export_type = function ( $types ) {
+			return $types + array( 'import-40274-sub-variation' => 'Subtype variations' );
+		};
+		$data_store  = function ( $stores ) {
+			return $stores + array( 'product-import-40274-sub-variation' => 'WC_Product_Variation_Data_Store_CPT' );
+		};
+		add_filter( 'woocommerce_product_class', $use_subtype, 10, 4 );
+		add_filter( 'woocommerce_exporter_product_types', $export_type );
+		add_filter( 'woocommerce_data_stores', $data_store );
+
+		$data = $this->import_csv_rows( "ID,Type,SKU,Name\n" . ( $variation_id + 1000 ) . ",import-40274-sub-variation,IMPORT-40274-SUBTYPE,Subtype row\n" );
+
+		$this->assertSame( array( $variation_id ), $data['updated'], 'The subtype row updates the variation matched by SKU' );
+		$this->assertSame( 'product_variation', get_post_type( $variation_id ), 'The variation stays a variation' );
+	}
+
+	/**
+	 * @testdox Should not match by SKU a row that refers to other products by IDs from the site its own ID came from.
+	 */
+	public function test_import_sku_fallback_refuses_rows_with_id_references_40274(): void {
+		$parent    = WC_Helper_Product::create_variation_product();
+		$variation = wc_get_product( $parent->get_children()[0] );
+		$variation->set_sku( 'IMPORT-40274-ID-REF' );
+		$variation->save();
+		$unrelated = WC_Helper_Product::create_variation_product();
+
+		$csv = "ID,Type,SKU,Name,Parent\n" . ( $unrelated->get_id() + 1000 ) . ",variation,IMPORT-40274-ID-REF,From another site,id:{$unrelated->get_id()}\n";
+
+		$data = $this->import_csv_rows(
+			$csv,
+			array(
+				'ID'     => 'id',
+				'Type'   => 'type',
+				'SKU'    => 'sku',
+				'Name'   => 'name',
+				'Parent' => 'parent_id',
+			)
+		);
+
+		$this->assertEmpty( $data['updated'], 'The row must not update the variation matched by SKU' );
+		$this->assertCount( 1, $data['failed'], 'The row fails' );
+		$this->assertSame( $parent->get_id(), wc_get_product( $variation->get_id() )->get_parent_id(), 'The variation keeps its parent' );
+	}
+
+	/**
+	 * @testdox Should match a variation by SKU when the file has no Type column.
+	 */
+	public function test_import_sku_fallback_without_type_column_40274(): void {
+		$parent    = WC_Helper_Product::create_variation_product();
+		$variation = wc_get_product( $parent->get_children()[0] );
+		$variation->set_sku( 'IMPORT-40274-NO-TYPE' );
+		$variation->save();
+
+		$data = $this->import_csv_rows(
+			"ID,SKU,Regular price\n" . ( $variation->get_id() + 1000 ) . ",IMPORT-40274-NO-TYPE,31\n",
+			array(
+				'ID'            => 'id',
+				'SKU'           => 'sku',
+				'Regular price' => 'regular_price',
+			)
+		);
+
+		$this->assertSame( array( $variation->get_id() ), $data['updated'], 'The row updates the variation matched by SKU' );
+		$this->assertSame( '31', wc_get_product( $variation->get_id() )->get_regular_price(), 'The variation gets the row\'s price' );
+		$this->assertSame( $parent->get_id(), wc_get_product( $variation->get_id() )->get_parent_id(), 'The variation keeps its parent' );
+	}
+
+	/**
+	 * @testdox Should resolve a SKU reference to a product whose stored SKU keeps characters the import would clean.
+	 */
+	public function test_import_resolves_references_to_raw_stored_skus_40274(): void {
+		$parent = WC_Helper_Product::create_variation_product();
+		$parent->set_sku( 'IMPORT-40274  RAW' );
+		$parent->save();
+		$variation_id = $parent->get_children()[0];
+
+		$data = $this->import_csv_rows(
+			"ID,Type,Parent,Regular price\n{$variation_id},variation,IMPORT-40274  RAW,29\n",
+			array(
+				'ID'            => 'id',
+				'Type'          => 'type',
+				'Parent'        => 'parent_id',
+				'Regular price' => 'regular_price',
+			)
+		);
+
+		$this->assertSame( array( $variation_id ), $data['updated'], 'The row with the raw parent SKU is updated' );
+		$this->assertSame( $parent->get_id(), wc_get_product( $variation_id )->get_parent_id(), 'The reference resolves to the parent' );
+	}
+
+	/**
+	 * @testdox Should find a product by its stored SKU when creating products, even if the import would clean that SKU.
+	 */
+	public function test_import_create_finds_products_by_raw_stored_sku_40274(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_sku( 'IMPORT-40274  STORED' );
+		$product->save();
+
+		$data = $this->import_csv_rows( "ID,Type,SKU,Name\n" . ( $product->get_id() + 1000 ) . ",simple,IMPORT-40274  STORED,Not a duplicate\n", null, false );
+
+		$this->assertEmpty( $data['imported'], 'No duplicate product is created' );
+		$this->assertCount( 1, $data['skipped'], 'The row is skipped' );
+		$this->assertSame( 'A product with this ID already exists.', $data['skipped'][0]->get_error_message(), 'The row resolves to the existing product' );
+	}
+
+	/**
+	 * @testdox Should fail a variation row for an existing product when the file has no Parent column.
+	 */
+	public function test_import_variation_row_without_parent_column_does_not_convert_a_product_40274(): void {
+		$simple = WC_Helper_Product::create_simple_product();
+
+		$data = $this->import_csv_rows(
+			"ID,Type,Name\n{$simple->get_id()},variation,Should stay simple\n",
+			array(
+				'ID'   => 'id',
+				'Type' => 'type',
+				'Name' => 'name',
+			)
+		);
+
+		$this->assertCount( 1, $data['failed'], 'The row fails' );
+		$this->assertSame( 'woocommerce_product_importer_missing_variation_parent_id', $data['failed'][0]->get_error_code(), 'The row fails on its missing parent' );
+		$this->assertSame( 'product', get_post_type( $simple->get_id() ), 'The product must not be converted to a variation' );
+	}
+
+	/**
+	 * @testdox Should not match by SKU a product whose stored type is not registered, so the type is not rewritten.
+	 */
+	public function test_import_sku_fallback_keeps_unregistered_stored_types_40274(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_sku( 'IMPORT-40274-UNREGISTERED' );
+		$product->save();
+		wp_set_object_terms( $product->get_id(), 'import-40274-unregistered', 'product_type' );
+
+		$data = $this->import_csv_rows( "ID,Type,SKU,Name\n" . ( $product->get_id() + 1000 ) . ",simple,IMPORT-40274-UNREGISTERED,Renamed\n" );
+
+		$this->assertEmpty( $data['updated'], 'The row must not update the product' );
+		$this->assertTrue( has_term( 'import-40274-unregistered', 'product_type', $product->get_id() ), 'The stored type is kept' );
+	}
+
+	/**
+	 * @testdox Should let code outside the importer call the SKU formatting callback.
+	 */
+	public function test_import_sku_callback_is_callable_from_outside_the_importer_40274(): void {
+		$wrap_callbacks = function ( $callbacks ) {
+			return array_map(
+				function ( $callback ) {
+					return function ( $value ) use ( $callback ) {
+						return call_user_func( $callback, $value );
+					};
+				},
+				$callbacks
+			);
+		};
+		add_filter( 'woocommerce_product_importer_formatting_callbacks', $wrap_callbacks );
+
+		$data = $this->import_csv_rows( "Type,SKU,Name\nsimple,'-IMPORT-40274-WRAPPED,Wrapped callbacks\n", null, false );
+
+		$this->assertCount( 1, $data['imported'], 'The row is imported' );
+		$this->assertSame( '-IMPORT-40274-WRAPPED', wc_get_product( $data['imported'][0] )->get_sku(), 'The SKU callback ran' );
+	}
+
+	/**
+	 * @testdox Should fail a variation row with a blank Parent cell when the variation's current parent can no longer hold it.
+	 */
+	public function test_import_blank_parent_checks_the_current_parent_40274(): void {
+		$parent       = WC_Helper_Product::create_variation_product();
+		$variation_id = $parent->get_children()[0];
+		wp_update_post(
+			array(
+				'ID'          => $parent->get_id(),
+				'post_status' => 'trash',
+			)
+		);
+
+		$data = $this->import_csv_rows(
+			"ID,Name,Parent,Attribute 1 name,Attribute 1 value(s),Attribute 1 global\n{$variation_id},Trashed parent,,size,large,1\n",
+			array(
+				'ID'                   => 'id',
+				'Name'                 => 'name',
+				'Parent'               => 'parent_id',
+				'Attribute 1 name'     => 'attributes:name1',
+				'Attribute 1 value(s)' => 'attributes:value1',
+				'Attribute 1 global'   => 'attributes:taxonomy1',
+			)
+		);
+
+		$this->assertEmpty( $data['updated'], 'The row must not be reported as updated' );
+		$this->assertSame( 'woocommerce_product_importer_variation_parent_not_variable', $data['failed'][0]->get_error_code(), 'The row fails on its trashed parent' );
+		$this->assertSame( 'small', wc_get_product( $variation_id )->get_attribute( 'pa_size' ), 'The attributes are unchanged' );
 	}
 
 	/**
