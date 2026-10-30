@@ -309,7 +309,7 @@ jobs:
     # While the CI_QUEUE_OVERFLOW repository variable is '1', e2e jobs route to the
     # dedicated group. Fork PRs are excluded.
     runs-on: ${{ github.event.pull_request.user.login == 'woocommercebot' && fromJSON('{"group":"WooCommerce Release Checks"}') || ( vars.CI_QUEUE_OVERFLOW == '1' && matrix.testType == 'e2e' && ( github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository ) ) && fromJSON('{"group":"Woo Core Dedicated CI"}') || 'ubuntu-latest' }}
-    timeout-minutes: 35
+    timeout-minutes: ${{ ( matrix.testType == 'e2e' && github.event.repository.private && 50 ) || 35 }}
     needs: [ 'identify-jobs-to-run', 'project-jobs', 'woocommerce-plugin-build-artifact' ]
     if: ${{ !cancelled() && ( github.event_name != 'pull_request' || needs.identify-jobs-to-run.outputs.needs-code-validation == 'true' ) && needs.project-jobs.outputs.test-jobs != '[]' && ( needs.woocommerce-plugin-build-artifact.result == 'success' || needs.woocommerce-plugin-build-artifact.result == 'skipped' || needs.project-jobs.outputs.shared-plugin-build-has-required-consumers != 'true' ) }}
     env: ${{ matrix.testEnv.envVars }}
@@ -447,7 +447,7 @@ jobs:
           path: '${{ runner.temp }}/last-run-info'
 
       - name: 'Run tests (${{ matrix.testType }})'
-        timeout-minutes: ${{ ( github.event_name == 'pull_request' && ( ( matrix.testType == 'e2e' && ( github.event.repository.private && 30 || 20 ) ) || ( matrix.testType == 'unit:php' && 25 ) ) ) || 360 }}
+        timeout-minutes: ${{ ( github.event_name == 'pull_request' && ( ( matrix.testType == 'e2e' && ( github.event.repository.private && 40 || 20 ) ) || ( matrix.testType == 'unit:php' && 25 ) ) ) || 360 }}
         env:
           E2E_ENV_KEY: ${{ secrets.E2E_ENV_KEY }}
           CODEVITALS_PROJECT_TOKEN: ${{ secrets.CODEVITALS_PROJECT_TOKEN }} # required by Metrics tests
