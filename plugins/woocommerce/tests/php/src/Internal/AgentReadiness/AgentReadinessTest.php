@@ -79,6 +79,12 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 					'effect' => 'gaps',
 				);
 				$rules['title_too_long']['google']['effect'] = 'rejected';
+				$rules['uncategorised']                      = array(
+					'bing' => array(
+						'field'  => 'category',
+						'effect' => 'gaps',
+					),
+				);
 				return $rules;
 			}
 		);
@@ -90,6 +96,7 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 		$this->assertSame( ReadinessRule::EFFECT_NOT_LISTABLE, $checks['missing_gtin']['channels']['google']['effect'] );
 		$this->assertArrayNotHasKey( 'bing', $checks['missing_gtin']['channels'] );
 		$this->assertArrayNotHasKey( 'google', $checks['title_too_long']['channels'] );
+		$this->assertArrayNotHasKey( 'uncategorised', $checks, 'A check with no valid channel left does not run' );
 	}
 
 	/**
