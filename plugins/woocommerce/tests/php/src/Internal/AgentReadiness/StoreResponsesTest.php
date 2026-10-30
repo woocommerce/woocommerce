@@ -73,14 +73,19 @@ class StoreResponsesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A failed request is null, so the check says couldn't check; a 404 is a response.
+	 * @testdox A failed request is null, so the check says couldn't check; a 404 is a response. After the home page fails no more requests are made.
 	 */
 	public function test_failed_request_is_null(): void {
 		$this->serve( array( home_url( '/missing' ) => self::response( 404 ) ) );
 		$sut = new StoreResponses( true );
 
-		$this->assertNull( $sut->get( '/timeout' ) );
 		$this->assertSame( 404, $sut->get( '/missing' )['status'] );
+		$this->assertNull( $sut->get( '/timeout' ) );
+		$this->assertSame( 404, $sut->get( '/missing' )['status'], 'One slow page does not stop the scan' );
+		$this->assertNull( $sut->home_page() );
+		$this->assertNull( $sut->get( '/other' ) );
+		$this->assertNull( $sut->post_json( '/missing-post', array() ) );
+		$this->assertSame( array( home_url( '/missing' ), home_url( '/timeout' ), home_url( '/' ) ), $this->requested );
 	}
 
 	/**

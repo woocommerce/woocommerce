@@ -48,9 +48,9 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Answer requests by path from the home URL; anything else fails like a timeout.
+	 * Answer requests by path from the home URL; a null response fails like a timeout, and any other path is a 404.
 	 *
-	 * @param array<string, array{0:int,1:string}> $responses Status and body by path.
+	 * @param array<string, array{0:int,1:string}|null> $responses Status and body by path.
 	 */
 	private function serve( array $responses ): void {
 		add_filter(
@@ -58,14 +58,15 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 			static function ( $pre, $args, $url ) use ( $responses ) {
 				unset( $pre, $args );
 				$path = substr( $url, strlen( untrailingslashit( home_url() ) ) );
-				if ( ! isset( $responses[ $path ] ) ) {
+				if ( array_key_exists( $path, $responses ) && null === $responses[ $path ] ) {
 					return new \WP_Error( 'http_request_failed', 'Timed out' );
 				}
+				$response = $responses[ $path ] ?? array( 404, '' );
 				return array(
 					'headers'  => array(),
-					'body'     => $responses[ $path ][1],
+					'body'     => $response[1],
 					'response' => array(
-						'code'    => $responses[ $path ][0],
+						'code'    => $response[0],
 						'message' => '',
 					),
 					'cookies'  => array(),
@@ -89,7 +90,7 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 	 * @testdox On a stock store that can't load its own pages, robots.txt is read as WordPress serves it and every check passes.
 	 */
 	public function test_stock_store_passes_without_requests(): void {
-		$this->serve( array() );
+		self::block_requests();
 
 		$results = $this->results();
 
@@ -116,7 +117,7 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 	 * @testdox A robots_txt filter that blocks crawlers counts when the store can't load robots.txt.
 	 */
 	public function test_robots_txt_filter(): void {
-		$this->serve( array() );
+		self::block_requests();
 		add_filter( 'robots_txt', static fn( $output ) => $output . "User-agent: OAI-SearchBot\nDisallow: /\n" );
 
 		$this->assertFalse( $this->results()['robots_allows_ai_search_bots'] );
@@ -163,7 +164,8 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 		for ( $i = 1; $i <= 50; $i++ ) {
 			$robots .= 'Sitemap: ' . home_url( "/s$i.xml" ) . "\n";
 		}
-		$this->serve( array( '/robots.txt' => array( 200, $robots ) ) );
+		$served = array_fill_keys( array_map( static fn( int $i ): string => "/s$i.xml", range( 1, 50 ) ), array( 404, '' ) );
+		$this->serve( $served + array( '/robots.txt' => array( 200, $robots ) ) );
 		add_filter(
 			'pre_http_request',
 			static function ( $pre, $args, $url ) use ( &$requested ) {
@@ -177,6 +179,7 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 
 		$this->results();
 
+		$requested = array_filter( $requested, static fn( string $url ): bool => (bool) preg_match( '#(robots\.txt|\.xml)$#', $url ) );
 		$this->assertCount( 8, array_unique( $requested ), 'robots.txt, five listed sitemaps, /sitemap_index.xml and /sitemap.xml' );
 	}
 
@@ -205,7 +208,7 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 		$this->assertFalse( $this->results()['sitemap_lists_products'], 'A page that is not a sitemap does not count' );
 
 		remove_all_filters( 'pre_http_request' );
-		$this->serve( array() );
+		self::block_requests();
 		$this->assertNull( $this->results()['sitemap_lists_products'] );
 	}
 
@@ -338,6 +341,8 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 		$this->assertSame( array( null, null, null ), $this->product_results(), 'No product' );
 
 		$product = WC_Helper_Product::create_simple_product();
+		remove_all_filters( 'pre_http_request' );
+		$this->serve( array( self::path_of( $product ) => null ) );
 		$this->assertSame( array( null, null, null ), $this->product_results(), 'Unreachable' );
 
 		remove_all_filters( 'pre_http_request' );
