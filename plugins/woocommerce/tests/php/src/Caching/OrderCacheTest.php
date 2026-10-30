@@ -119,4 +119,32 @@ class OrderCacheTest extends \WC_Unit_Test_Case {
 		$this->assertSame( $created + DAY_IN_SECONDS, $copy->get_date_created()->getTimestamp() );
 		$this->assertSame( $paid + DAY_IN_SECONDS, $copy->get_date_paid()->getTimestamp() );
 	}
+
+	/**
+	 * @testdox Should restore the clone mode of the source item when cloning the item throws.
+	 */
+	public function test_item_clone_mode_is_restored_when_item_clone_throws(): void {
+		$item = new class() extends \WC_Order_Item_Product {
+			/**
+			 * Fail like an extension's item could.
+			 *
+			 * @throws \RuntimeException Always.
+			 */
+			public function __clone() {
+				throw new \RuntimeException( 'Item clone failed.' );
+			}
+		};
+
+		$order = new \WC_Order();
+		$order->add_item( $item );
+
+		try {
+			clone $order;
+			$this->fail( 'Expected the item clone to throw.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertSame( 'Item clone failed.', $e->getMessage() );
+		}
+
+		$this->assertSame( \WC_Data::CLONE_MODE_DUPLICATE, $item->get_clone_mode() );
+	}
 }

@@ -233,10 +233,14 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			foreach ( $items as $key => $item ) {
 				$mode = $item->get_clone_mode();
 				$item->set_clone_mode( self::CLONE_MODE_CACHE );
-				$this->items[ $group ][ $key ] = clone $item;
-				$this->items[ $group ][ $key ]->set_order( $this );
-				$this->items[ $group ][ $key ]->set_clone_mode( $mode );
-				$item->set_clone_mode( $mode );
+				try {
+					$copy = clone $item;
+				} finally {
+					$item->set_clone_mode( $mode );
+				}
+				$copy->set_order( $this );
+				$copy->set_clone_mode( $mode );
+				$this->items[ $group ][ $key ] = $copy;
 			}
 		}
 	}
