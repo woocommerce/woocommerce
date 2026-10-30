@@ -70,9 +70,9 @@ class StoreResponses {
 	 * @return array{status:int,body:string}|null
 	 */
 	private function fetch( string $url ): ?array {
-		$host = strtolower( (string) wp_parse_url( home_url(), PHP_URL_HOST ) );
+		$store = self::origin( home_url() );
 		for ( $redirects = 0; $redirects <= self::MAX_REDIRECTS; $redirects++ ) {
-			if ( strtolower( (string) wp_parse_url( $url, PHP_URL_HOST ) ) !== $host ) {
+			if ( null === $store || self::origin( $url ) !== $store ) {
 				return null;
 			}
 			$response = wp_remote_get(
@@ -99,5 +99,20 @@ class StoreResponses {
 			$url = \WP_Http::make_absolute_url( $location, $url );
 		}
 		return null;
+	}
+
+	/**
+	 * Host and port of an http(s) URL, or null for any other scheme. The port is
+	 * only the one written in the URL, so moving from http to https on the
+	 * default ports stays on the store, while another port on the same host does not.
+	 *
+	 * @param string $url URL.
+	 */
+	private static function origin( string $url ): ?string {
+		$parts = wp_parse_url( $url );
+		if ( ! is_array( $parts ) || ! in_array( strtolower( $parts['scheme'] ?? '' ), array( 'http', 'https' ), true ) || empty( $parts['host'] ) ) {
+			return null;
+		}
+		return strtolower( $parts['host'] ) . ':' . ( $parts['port'] ?? '' );
 	}
 }
