@@ -3,6 +3,7 @@
 declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\StockNotifications\Frontend;
 
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailManager;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
@@ -588,7 +589,7 @@ class SignupServiceTests extends \WC_Unit_Test_Case {
 	 */
 	public function test_parse_rejects_product_the_guest_cannot_view(): void {
 		$product = $this->create_out_of_stock_product();
-		$product->set_status( 'draft' );
+		$product->set_status( ProductStatus::DRAFT );
 		$product->save();
 
 		$data = $this->sut->parse(
@@ -607,7 +608,7 @@ class SignupServiceTests extends \WC_Unit_Test_Case {
 	 */
 	public function test_signup_accepts_unpublished_product_for_user_who_can_edit_it(): void {
 		$product = $this->create_out_of_stock_product();
-		$product->set_status( 'draft' );
+		$product->set_status( ProductStatus::DRAFT );
 		$product->save();
 
 		$user_id = $this->factory()->user->create( array( 'role' => 'shop_manager' ) );
@@ -618,8 +619,6 @@ class SignupServiceTests extends \WC_Unit_Test_Case {
 
 		$result = $this->sut->signup( $data['product_id'], $data['user_id'], $data['user_email'] );
 		$this->assertSame( SignupService::SIGNUP_SUCCESS, $result->get_code() );
-
-		\wp_set_current_user( 0 );
 	}
 
 	/**
