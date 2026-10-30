@@ -128,7 +128,7 @@
 		"redux": "^4.2.1",
 		"xstate": "4.37.1",
 		"xstate5": "npm:xstate@^5.13.1",
-		"zod": "^3.22.4"
+		"zod": "^4.6.7"
 	},
 	"devDependencies": {
 		"@automattic/color-studio": "^4.0.0",
