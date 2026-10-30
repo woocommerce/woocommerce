@@ -673,7 +673,7 @@ final class WooCommerce {
 	}
 
 	/**
-	 * Returns true if the request is a store REST API request.
+	 * Returns true if the request is a store REST API or UCP API request.
 	 *
 	 * @return bool
 	 */
@@ -682,13 +682,19 @@ final class WooCommerce {
 			return false;
 		}
 
-		// Pretty permalinks: the Store API namespace is part of the path, e.g. /wp-json/wc/store/v1/cart. Match the
+		$namespaces = array( 'wc/store/', 'wc/ucp/' );
+
+		// Pretty permalinks: the namespace is part of the path, e.g. /wp-json/wc/store/v1/cart. Match the
 		// path only (a leading slash anchors the prefix) so a REST-like query argument such as
 		// /some-page/?arg=/wp-json/wc/store/ is not mistaken for a Store API request.
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		$path = wp_parse_url( '/' . ltrim( (string) wp_unslash( $_SERVER['REQUEST_URI'] ), '/' ), PHP_URL_PATH );
-		if ( is_string( $path ) && false !== strpos( $path, '/' . trailingslashit( rest_get_url_prefix() ) . 'wc/store/' ) ) {
-			return true;
+		if ( is_string( $path ) ) {
+			foreach ( $namespaces as $namespace ) {
+				if ( false !== strpos( $path, '/' . trailingslashit( rest_get_url_prefix() ) . $namespace ) ) {
+					return true;
+				}
+			}
 		}
 
 		// Plain permalinks: the route is passed as a query parameter, e.g. ?rest_route=/wc/store/v1/cart.
@@ -696,8 +702,10 @@ final class WooCommerce {
 		if ( isset( $_GET['rest_route'] ) && is_string( $_GET['rest_route'] ) ) {
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reading the route only, no state change.
 			$rest_route = '/' . ltrim( rawurldecode( sanitize_text_field( wp_unslash( $_GET['rest_route'] ) ) ), '/' );
-			if ( 0 === strpos( $rest_route, '/wc/store/' ) ) {
-				return true;
+			foreach ( $namespaces as $namespace ) {
+				if ( 0 === strpos( $rest_route, '/' . $namespace ) ) {
+					return true;
+				}
 			}
 		}
 
