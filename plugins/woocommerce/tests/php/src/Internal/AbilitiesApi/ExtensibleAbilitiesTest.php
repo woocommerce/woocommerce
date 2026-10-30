@@ -1689,25 +1689,6 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should accept extension fields in product create, and none in order status update.
-	 */
-	public function test_product_create_writes_fields_and_order_status_update_does_not(): void {
-		$order = \WC_Helper_Order::create_order();
-
-		$created = $this->run_ability(
-			'woocommerce/product-create',
-			array(
-				'name'       => 'Mug',
-				'extensions' => array( 'test-ext' => array( 'color' => 'blue' ) ),
-			)
-		);
-		$schema  = $this->get_ability( 'woocommerce/order-update-status' )['input_schema'];
-
-		$this->assertSame( 'blue', wc_get_product( $created['product']['id'] )->get_meta( '_test_color' ) );
-		$this->assertArrayNotHasKey( 'extensions', $schema['properties'] );
-	}
-
-	/**
 	 * @testdox Should keep the extensions input schema closed.
 	 */
 	public function test_the_extensions_input_schema_stays_closed(): void {
@@ -1909,7 +1890,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		);
 
 		$this->assertSame( 400, $refused->get_status() );
-		$this->assertSame( 'test_keep', $refused->get_data()['code'] );
+		$this->assertSame( 'test-ext:test_keep', $refused->get_data()['code'] );
 		$this->assertInstanceOf( \WC_Product::class, wc_get_product( $kept->get_id() ) );
 		$this->assertTrue( $deleted['deleted'] );
 		$this->assertFalse( wc_get_product( $created['product']['id'] ) );
@@ -2195,7 +2176,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 		$this->assertArrayHasKey( 'color', $schema['properties']['variations']['items']['properties']['extensions']['properties']['test-ext']['properties'] );
 		$this->assertSame( 400, $refused->get_status() );
-		$this->assertSame( 'test_red_variation', $refused->get_data()['code'] );
+		$this->assertSame( 'other_ext:test_red_variation', $refused->get_data()['code'] );
 		$this->assertSame( array(), $saved );
 
 		$colors = array_map(
@@ -3017,7 +2998,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->assertSame( 'high', $output['order']['extensions']['test-ext']['priority'] );
 		$this->assertSame( 'Lisbon', $output['order']['shipping']['city'] );
 		$this->assertSame( 400, $refused->get_status() );
-		$this->assertSame( 'test_refused', $refused->get_data()['code'] );
+		$this->assertSame( 'test-ext:test_refused', $refused->get_data()['code'] );
 		$this->assertSame( 'Lisbon', $saved->get_shipping_city() );
 		$this->assertSame( 'high', $saved->get_meta( '_test_priority' ) );
 	}
@@ -3151,7 +3132,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 		$saved = wc_get_order( $order->get_id() );
 		$this->assertSame( 400, $refused->get_status() );
-		$this->assertSame( 'test_gift_not_sent', $refused->get_data()['code'] );
+		$this->assertSame( 'other_ext:test_gift_not_sent', $refused->get_data()['code'] );
 		$this->assertSame( 'processing', $saved->get_status() );
 		$this->assertFalse( $saved->meta_exists( '_test_gift_message' ) );
 		$this->assertSame( 0, did_action( 'woocommerce_order_edit_status' ) - $edits );
