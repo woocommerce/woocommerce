@@ -183,7 +183,7 @@ function wc_get_order_status_name( $status ) {
 	if ( ! is_string( $status ) ) {
 		wc_doing_it_wrong(
 			__FUNCTION__,
-			__( 'An invalid order status slug was supplied.', 'woocommerce' ),
+			'An invalid order status slug was supplied.',
 			'9.6'
 		);
 	}
@@ -433,6 +433,9 @@ function wc_orders_count( $status, string $type = '' ) {
 function wc_downloadable_file_permission( $download_id, $product, $order, $qty = 1, $item = null ) {
 	if ( is_numeric( $product ) ) {
 		$product = wc_get_product( $product );
+	}
+	if ( ! $product instanceof WC_Product ) {
+		return false;
 	}
 	$download = new WC_Customer_Download();
 	$download->set_download_id( $download_id );
@@ -1070,6 +1073,9 @@ function wc_update_coupon_usage_counts( $order_id ) {
 	}
 
 	if ( count( $coupon_codes ) > 0 ) {
+		$identities = $order->get_meta( '_coupon_usage_identities' );
+		$identities = is_array( $identities ) ? $identities : array();
+
 		foreach ( $coupon_codes as $code ) {
 			$coupon  = new WC_Coupon( $code );
 			$used_by = $order->get_user_id();
@@ -1080,13 +1086,23 @@ function wc_update_coupon_usage_counts( $order_id ) {
 
 			switch ( $action ) {
 				case 'reduce':
-					$coupon->decrease_usage_count( $used_by );
+					$coupon->decrease_usage_count( $identities[ $coupon->get_id() ] ?? $used_by );
 					break;
 				case 'increase':
 					$coupon->increase_usage_count( $used_by, $order );
+					if ( $coupon->get_id() ) {
+						$identities[ $coupon->get_id() ] = $used_by;
+					}
 					break;
 			}
 		}
+
+		if ( 'increase' === $action && $identities ) {
+			$order->update_meta_data( '_coupon_usage_identities', $identities );
+		} elseif ( 'reduce' === $action ) {
+			$order->delete_meta_data( '_coupon_usage_identities' );
+		}
+		$order->save_meta_data();
 		wc_release_coupons_for_order( $order );
 	}
 }
@@ -1131,8 +1147,9 @@ function wc_cancel_unpaid_orders() {
 	}
 
 	// Schedule the next event using Action Scheduler if available, otherwise fall back to WordPress cron.
+	// Not unique: this runs inside the action itself, and a unique check would see the in-progress run and schedule nothing.
 	if ( function_exists( 'as_schedule_single_action' ) ) {
-		as_schedule_single_action( time() + ( absint( $cancel_unpaid_interval ) * 60 ), 'woocommerce_cancel_unpaid_orders', array(), 'woocommerce', false );
+		as_schedule_single_action( time() + ( absint( $cancel_unpaid_interval ) * 60 ), 'woocommerce_cancel_unpaid_orders', array(), 'woocommerce' );
 	} else {
 		wp_schedule_single_event( time() + ( absint( $cancel_unpaid_interval ) * 60 ), 'woocommerce_cancel_unpaid_orders' );
 	}

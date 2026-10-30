@@ -250,7 +250,7 @@ class Embed extends Abstract_Block_Renderer {
 			return '';
 		}
 
-		return '<div style="text-align: center; margin-top: 8px;">' . Html_Processing_Helper::sanitize_caption_html( $caption ) . '</div>';
+		return '<div class="wp-element-caption" style="text-align: center; margin-top: 8px;">' . Html_Processing_Helper::sanitize_caption_html( $caption ) . '</div>';
 	}
 
 	/**
