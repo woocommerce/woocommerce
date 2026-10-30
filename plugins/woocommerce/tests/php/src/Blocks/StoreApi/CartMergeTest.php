@@ -53,15 +53,24 @@ class CartMergeTest extends WC_Unit_Test_Case {
 	private $guest_product;
 
 	/**
+	 * Request URI in place before the test changed it.
+	 *
+	 * @var string|null
+	 */
+	private $original_request_uri;
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 
 		$this->original_session = WC()->session;
-		$this->user_id          = $this->factory->user->create( array( 'role' => 'customer' ) );
-		$this->saved_product    = WC_Helper_Product::create_simple_product();
-		$this->guest_product    = WC_Helper_Product::create_simple_product();
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Restored as is in tearDown().
+		$this->original_request_uri = $_SERVER['REQUEST_URI'] ?? null;
+		$this->user_id              = $this->factory->user->create( array( 'role' => 'customer' ) );
+		$this->saved_product        = WC_Helper_Product::create_simple_product();
+		$this->guest_product        = WC_Helper_Product::create_simple_product();
 	}
 
 	/**
@@ -71,7 +80,13 @@ class CartMergeTest extends WC_Unit_Test_Case {
 		try {
 			// The parent empties the cart, resets the current user and rolls back user meta.
 			WC()->session = $this->original_session;
-			unset( $_SERVER['HTTP_CART_TOKEN'] );
+			unset( $_SERVER['HTTP_CART_TOKEN'], $_GET['rest_route'] );
+
+			if ( null === $this->original_request_uri ) {
+				unset( $_SERVER['REQUEST_URI'] );
+			} else {
+				$_SERVER['REQUEST_URI'] = $this->original_request_uri;
+			}
 		} finally {
 			parent::tearDown();
 		}
@@ -271,6 +286,54 @@ class CartMergeTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Token login saves the merged session over the stored user session, including values only the guest had.
+	 */
+	public function test_store_api_token_login_stores_merged_session(): void {
+		$this->start_store_api_guest_request(
+			array( $this->guest_product->get_id() => 1 ),
+			array(
+				'applied_coupons'       => array( 'guestcoupon' ),
+				'store_api_draft_order' => 123,
+			)
+		);
+		$this->seed_session(
+			(string) $this->user_id,
+			array( $this->saved_product->get_id() => 1 ),
+			array(
+				'store_api_draft_order' => 456,
+				'user_only_value'       => 'kept',
+			)
+		);
+		wp_set_current_user( $this->user_id );
+
+		$this->dispatch_store_api_request();
+
+		$stored = ( new SessionHandler() )->get_session( (string) $this->user_id, array() );
+
+		$this->assertSame( array( 'guestcoupon' ), maybe_unserialize( $stored['applied_coupons'] ?? null ), 'Guest coupons should be saved to the user session row.' );
+		$this->assertSame( 123, maybe_unserialize( $stored['store_api_draft_order'] ?? null ), 'Guest draft order should replace the stored value.' );
+		$this->assertSame( 'kept', maybe_unserialize( $stored['user_only_value'] ?? null ), 'Values only the user session had should be kept.' );
+	}
+
+	/**
+	 * @testdox When a guest token has no session data, later saves still track changes against the user's stored session.
+	 */
+	public function test_store_api_token_login_without_guest_data_tracks_user_session(): void {
+		$_SERVER['HTTP_CART_TOKEN'] = CartTokenUtils::get_cart_token( wc_rand_hash( 't_', 30 ) );
+		$this->seed_session( (string) $this->user_id, array( $this->saved_product->get_id() => 1 ), array( 'user_only_value' => 'stale' ) );
+		wp_set_current_user( $this->user_id );
+
+		$this->dispatch_store_api_request();
+		WC()->session->__unset( 'user_only_value' );
+		WC()->session->save_data();
+
+		$stored = ( new SessionHandler() )->get_session( (string) $this->user_id, array() );
+
+		$this->assertArrayNotHasKey( 'user_only_value', $stored, 'A value removed in this request should be removed from the stored row.' );
+		$this->assertArrayHasKey( 'cart', $stored, 'Other stored values should be kept.' );
+	}
+
+	/**
 	 * @testdox Token login fires woocommerce_guest_session_to_user_id with the guest and user session IDs.
 	 */
 	public function test_store_api_token_login_fires_guest_session_to_user_id(): void {
@@ -349,6 +412,32 @@ class CartMergeTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A guest cart id on a UCP route stays a separate cart when the shopper is logged in.
+	 * @testWith ["/wp-json/wc/ucp/v1/carts", ""]
+	 *           ["/?rest_route=%2Fwc%2Fucp%2Fv1%2Fcarts", "/wc/ucp/v1/carts"]
+	 *
+	 * @param string $request_uri Request URI.
+	 * @param string $rest_route  The rest_route query parameter, if any.
+	 */
+	public function test_ucp_route_does_not_merge_guest_cart( string $request_uri, string $rest_route ): void {
+		$guest_id = $this->start_store_api_guest_request( array( $this->guest_product->get_id() => 1 ) );
+		wp_set_current_user( $this->user_id );
+
+		if ( '' !== $rest_route ) {
+			$_GET['rest_route'] = $rest_route;
+		}
+
+		$this->dispatch_store_api_request( $request_uri );
+
+		$this->assertSame( $guest_id, WC()->session->get_customer_id(), 'The session should stay on the UCP cart.' );
+		$this->assertNotEmpty( WC()->session->get_session( $guest_id, array() ), 'The UCP cart session should not be consumed.' );
+		$this->assertEmpty(
+			get_user_meta( $this->user_id, '_woocommerce_load_saved_cart_after_login', true ),
+			'No saved-cart merge should be requested for a UCP cart.'
+		);
+	}
+
+	/**
 	 * Persist the given items as the user's saved (persistent) cart.
 	 *
 	 * @param array<int,int> $items Map of product ID to quantity.
@@ -423,8 +512,12 @@ class CartMergeTest extends WC_Unit_Test_Case {
 
 	/**
 	 * Boot a fresh Store API SessionHandler for the current Cart-Token header, as a request would.
+	 *
+	 * @param string $request_uri Request URI.
 	 */
-	private function dispatch_store_api_request(): void {
+	private function dispatch_store_api_request( string $request_uri = '/wp-json/wc/store/v1/cart' ): void {
+		$_SERVER['REQUEST_URI'] = $request_uri;
+
 		WC()->session = new SessionHandler();
 		WC()->session->init();
 	}
