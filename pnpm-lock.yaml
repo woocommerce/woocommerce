@@ -654,7 +654,7 @@ importers:
         version: 6.43.1-next.v.202604091042.0
       css-loader:
         specifier: 6.11.x
-        version: 6.11.0(webpack@5.97.1)
+        version: 6.11.0(webpack@5.97.1(@swc/core@1.15.24)(esbuild@0.27.7))
       eslint:
         specifier: ^10.0.0
         version: 10.7.0(jiti@2.6.1)
@@ -902,7 +902,7 @@ importers:
         version: 6.43.1-next.v.202604091042.0
       css-loader:
         specifier: 6.11.x
-        version: 6.11.0(webpack@5.97.1)
+        version: 6.11.0(webpack@5.97.1(@swc/core@1.15.24)(esbuild@0.27.7))
       eslint:
         specifier: ^10.0.0
         version: 10.7.0(jiti@2.6.1)
@@ -1560,7 +1560,7 @@ importers:
         version: 6.43.1-next.v.202604091042.0
       css-loader:
         specifier: 6.11.x
-        version: 6.11.0(webpack@5.97.1)
+        version: 6.11.0(webpack@5.97.1(@swc/core@1.15.24)(esbuild@0.27.7))
       eslint:
         specifier: ^10.0.0
         version: 10.7.0(jiti@2.6.1)
@@ -2167,7 +2167,7 @@ importers:
         version: 6.43.1-next.v.202604091042.0
       css-loader:
         specifier: 6.11.x
-        version: 6.11.0(webpack@5.97.1)
+        version: 6.11.0(webpack@5.97.1(@swc/core@1.15.24)(esbuild@0.27.7))
       eslint:
         specifier: ^10.0.0
         version: 10.7.0(jiti@2.6.1)
@@ -3244,7 +3244,7 @@ importers:
         version: 14.0.0(webpack@5.97.1(@swc/core@1.15.24)(esbuild@0.27.7))
       css-loader:
         specifier: 6.11.x
-        version: 6.11.0(webpack@5.97.1)
+        version: 6.11.0(webpack@5.97.1(@swc/core@1.15.24)(esbuild@0.27.7))
       eslint:
         specifier: ^10.0.0
         version: 10.7.0(jiti@2.6.1)
@@ -3728,7 +3728,7 @@ importers:
         version: 3.25.0
       css-loader:
         specifier: 6.11.x
-        version: 6.11.0(webpack@5.97.1)
+        version: 6.11.0(webpack@5.97.1(@swc/core@1.15.24)(esbuild@0.27.7))
       cssnano:
         specifier: 5.1.12
         version: 5.1.12(postcss@8.5.26)
@@ -15169,8 +15169,8 @@ packages:
     resolution: {integrity: sha512-MbjN408fEndfiQXbFQ1vnd+1NoLDsnQW41410oQBXiyXDMYH5z505juWa4KUE1LqxRC7DgOgZDbKLxHIwm27hA==}
     engines: {node: '>=0.10'}
 
-  launch-editor@2.13.2:
-    resolution: {integrity: sha512-4VVDnbOpLXy/s8rdRCSXb+zfMeFR0WlJWpET1iA9CQdlZDfwyLjUuGQzXU4VeOoey6AicSAluWan7Etga6Kcmg==}
+  launch-editor@2.14.2:
+    resolution: {integrity: sha512-NHJEb30MGBCkmZXLZwz25t37QR4aY03ZzPYUJXOJaOa92uWwExI9SBQUuIznBYc1xkD7cJNGX7oc3Nl3sq2kQQ==}
 
   lazy-cache@0.2.7:
     resolution: {integrity: sha512-gkX52wvU/R8DVMMt78ATVPFMJqfW8FPz1GZ1sVHBVQHmu/WvhIWE4cE1GBzhJNFicDeYhnwp6Rl35BcAIM3YOQ==}
@@ -18107,8 +18107,8 @@ packages:
     resolution: {integrity: sha512-7++dFhtcx3353uBaq8DDR4NuxBetBzC7ZQOhmTQInHEd6bSrXdiEyzCvG07Z44UYdLShWUyXt5M/yhz8ekcb1A==}
     engines: {node: '>=8'}
 
-  shell-quote@1.9.0:
-    resolution: {integrity: sha512-Iov+JwFv/2HcTpcwNMKd8+IWNb8tboQJNQTkAY/LLVK7gGH9jy+LGkVqPxfekHl+yMmiqXszdGWXgkfml7hjqA==}
+  shell-quote@1.12.0:
+    resolution: {integrity: sha512-PcByqNyT/38F2kDNi006HAMRJaULuBzq/FOsw3qdZvX/GA9W/jamDaRskgHjubHiftXK5sIFxLNkvrXUwcof6Q==}
     engines: {node: '>= 0.4'}
 
   shelljs@0.8.5:
@@ -31535,7 +31535,7 @@ snapshots:
       check-node-version: 4.2.1
       copy-webpack-plugin: 10.2.4(webpack@5.97.1)
       cross-spawn: 7.0.6
-      css-loader: 6.11.0(webpack@5.97.1)
+      css-loader: 6.11.0(webpack@5.97.1(@swc/core@1.15.24)(esbuild@0.27.7))
       cssnano: 6.1.2(postcss@8.5.26)
       cwd: 0.10.0
       dir-glob: 3.0.1
@@ -31639,7 +31639,7 @@ snapshots:
       check-node-version: 4.2.1
       copy-webpack-plugin: 10.2.4(webpack@5.97.1)
       cross-spawn: 7.0.6
-      css-loader: 6.11.0(webpack@5.97.1)
+      css-loader: 6.11.0(webpack@5.97.1(@swc/core@1.15.24)(esbuild@0.27.7))
       cssnano: 6.1.2(postcss@8.5.26)
       cwd: 0.10.0
       dir-glob: 3.0.1
@@ -34199,19 +34199,6 @@ snapshots:
       semver: 7.7.4
     optionalDependencies:
       webpack: 5.97.1(@swc/core@1.15.24)(esbuild@0.28.2)
-
-  css-loader@6.11.0(webpack@5.97.1):
-    dependencies:
-      icss-utils: 5.1.0(postcss@8.5.26)
-      postcss: 8.5.26
-      postcss-modules-extract-imports: 3.1.0(postcss@8.5.26)
-      postcss-modules-local-by-default: 4.2.0(postcss@8.5.26)
-      postcss-modules-scope: 3.2.1(postcss@8.5.26)
-      postcss-modules-values: 4.0.0(postcss@8.5.26)
-      postcss-value-parser: 4.2.0
-      semver: 7.7.4
-    optionalDependencies:
-      webpack: 5.97.1(@swc/core@1.15.24)(esbuild@0.27.7)(uglify-js@3.19.3)(webpack-cli@5.1.4)
 
   css-loader@7.1.4(webpack@5.97.1(@swc/core@1.15.24)(esbuild@0.28.2)):
     dependencies:
@@ -38002,10 +37989,10 @@ snapshots:
     dependencies:
       language-subtag-registry: 0.3.23
 
-  launch-editor@2.13.2:
+  launch-editor@2.14.2:
     dependencies:
       picocolors: 1.1.1
-      shell-quote: 1.9.0
+      shell-quote: 1.12.0
 
   lazy-cache@0.2.7: {}
 
@@ -38579,7 +38566,7 @@ snapshots:
     dependencies:
       schema-utils: 4.3.3
       tapable: 2.3.2
-      webpack: 5.97.1(@swc/core@1.15.24)(esbuild@0.27.7)(uglify-js@3.19.3)(webpack-cli@5.1.4)
+      webpack: 5.97.1(@swc/core@1.15.24)(esbuild@0.27.7)(webpack-cli@5.1.4)
 
   minimalistic-assert@1.0.1: {}
 
@@ -41149,7 +41136,7 @@ snapshots:
 
   shebang-regex@3.0.0: {}
 
-  shell-quote@1.9.0: {}
+  shell-quote@1.12.0: {}
 
   shelljs@0.8.5:
     dependencies:
@@ -42772,7 +42759,7 @@ snapshots:
       html-entities: 2.6.0
       http-proxy-middleware: 2.0.9(@types/express@4.17.25)(debug@4.4.3)
       ipaddr.js: 2.3.0
-      launch-editor: 2.13.2
+      launch-editor: 2.14.2
       open: 8.4.2
       p-retry: 4.6.2
       rimraf: 3.0.2
@@ -42814,7 +42801,7 @@ snapshots:
       html-entities: 2.6.0
       http-proxy-middleware: 2.0.9(@types/express@4.17.25)(debug@4.4.3)
       ipaddr.js: 2.3.0
-      launch-editor: 2.13.2
+      launch-editor: 2.14.2
       open: 8.4.2
       p-retry: 4.6.2
       rimraf: 3.0.2
@@ -42915,7 +42902,7 @@ snapshots:
       watchpack: 2.5.1
       webpack-sources: 3.3.4
     optionalDependencies:
-      webpack-cli: 5.1.4(webpack-bundle-analyzer@4.9.1)(webpack@5.97.1)
+      webpack-cli: 5.1.4(webpack-bundle-analyzer@4.9.1)(webpack-dev-server@4.15.2)(webpack@5.97.1)
     transitivePeerDependencies:
       - '@swc/core'
       - esbuild
