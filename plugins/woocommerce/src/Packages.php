@@ -125,6 +125,14 @@ class Packages {
 	protected static function get_enabled_packages() {
 		$enabled_packages = array();
 
+		// Preload option caches to minimize future queries for options that do not yet exist or are not set to autoload.
+		wp_prime_option_caches(
+			array_map(
+				static fn( $name ) => 'wc_feature_' . str_replace( '-', '_', $name ) . '_enabled',
+				array_keys( self::$merged_packages )
+			)
+		);
+
 		foreach ( self::$merged_packages as $merged_package_name => $package_class ) {
 
 			$option       = 'wc_feature_' . str_replace( '-', '_', $merged_package_name ) . '_enabled';

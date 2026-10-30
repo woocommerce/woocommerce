@@ -1,4 +1,0 @@
-Significance: minor
-Type: tweak
-
-Surface invalid payment token fields via WC_Data_Exception attributes

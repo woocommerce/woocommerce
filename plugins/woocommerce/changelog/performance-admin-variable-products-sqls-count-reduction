@@ -1,4 +1,0 @@
-Significance: minor
-Type: performance
-
-Bulk-prime variable products transients on products page in admin to reduce the number of SQL queries.
