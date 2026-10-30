@@ -94,6 +94,58 @@ class UnexpectedErrorResponseTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should omit payment arguments from local and remote error logs.
+	 */
+	public function test_omits_payment_arguments_from_error_logs(): void {
+		$previous_ignore_args = ini_set( 'zend.exception_ignore_args', '0' ); // phpcs:ignore WordPress.PHP.IniSet.Risky -- Exercise PHP traces that contain arguments.
+		try {
+			$customer = 'Žluťoučký kôň – العربية – 日本語 – 🛒';
+			$error    = ( static function ( $number, $expiry, $cvc, $name ) {
+				$error = new \TypeError( 'Fixture payment failure.' );
+				unset( $number, $expiry, $cvc, $name );
+				return $error;
+			} )( '378282246310005', '12 / 30', '2440', $customer );
+		} finally {
+			ini_set( 'zend.exception_ignore_args', $previous_ignore_args ); // phpcs:ignore WordPress.PHP.IniSet.Risky -- Restore the process setting.
+		}
+
+		$this->assertStringContainsString( '378282246310005', $error->getTraceAsString(), 'The fixture must capture payment arguments.' );
+		$this->assertSame( $customer, $error->getTrace()[0]['args'][3], 'The fixture must capture multilingual customer data.' );
+		UnexpectedErrorResponse::create( $error, self::class );
+
+		$logged = $this->captured_logs[0];
+		$record = wc_get_container()->get( RemoteLogger::class )->get_formatted_log( 'critical', $logged['message'], $logged['context'] );
+		foreach ( array( '378282246310005', '12 / 30', '2440', $customer ) as $secret ) {
+			$this->assertStringNotContainsString( $secret, wp_json_encode( $logged, JSON_UNESCAPED_UNICODE ), 'Local logs must omit call arguments.' );
+			$this->assertStringNotContainsString( $secret, wp_json_encode( $record, JSON_UNESCAPED_UNICODE ), 'Remote logs must omit call arguments.' );
+		}
+		$this->assertStringContainsString( basename( __FILE__ ), $logged['context']['backtrace'][0], 'The trace must retain the call site.' );
+		$this->assertStringStartsWith( '#0 ', $record['trace'], 'Remote logs must retain their existing trace format.' );
+	}
+
+	/**
+	 * @testdox Should log anonymous class frames without the hidden declaring path.
+	 */
+	public function test_logs_anonymous_class_frames_without_hidden_path(): void {
+		$thrower = new class() {
+			/**
+			 * Create a failure from inside an anonymous class method.
+			 *
+			 * @return \TypeError
+			 */
+			public function fail(): \TypeError {
+				return new \TypeError( 'Fixture anonymous failure.' );
+			}
+		};
+
+		UnexpectedErrorResponse::create( $thrower->fail(), self::class );
+
+		$frame = $this->captured_logs[0]['context']['backtrace'][0];
+		$this->assertStringContainsString( 'class@anonymous->fail()', $frame, 'The frame must keep the call site.' );
+		$this->assertStringNotContainsString( "\0", $frame, 'The frame must not contain the NUL byte or the path after it.' );
+	}
+
+	/**
 	 * @testdox Should log the PHP error type the failure would have produced if uncaught.
 	 * @dataProvider uncaught_error_type_provider
 	 *
