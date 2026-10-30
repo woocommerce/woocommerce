@@ -164,6 +164,29 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A failing check that applies to none of the product's channels is not reported, in the scan or for one product.
+	 */
+	public function test_check_with_no_channel_for_the_product_is_left_out(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->update_meta_data( '_wc_gla_brand', 'Acme' );
+		$product->save();
+		add_filter(
+			'woocommerce_agent_readiness_rules',
+			static function ( $rules ) {
+				$rules['missing_brand'] = array_intersect_key( $rules['missing_brand'], array( 'google' => true ) );
+				return $rules;
+			}
+		);
+
+		$checks = array_column( $this->sut->get_report()['checks'], null, 'id' );
+		$result = $this->sut->check_product( $product );
+
+		$this->assertSame( 0, $checks['missing_brand']['count'], 'The Google brand covers the only channel left' );
+		$this->assertArrayNotHasKey( 'missing_brand', $result['checks'] );
+		$this->assertNotContains( 'missing_brand', $this->sut->get_failing_check_ids( $product ) );
+	}
+
+	/**
 	 * @testdox check_product judges a variation by its parent and returns null for products the scan leaves out.
 	 */
 	public function test_check_product_coverage(): void {

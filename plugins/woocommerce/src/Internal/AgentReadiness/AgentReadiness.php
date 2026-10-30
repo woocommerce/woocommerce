@@ -289,10 +289,7 @@ class AgentReadiness {
 			$this->product_scan = new ProductScan();
 		}
 		$active = $this->get_active_rules();
-		$checks = array();
-		foreach ( $this->product_scan->failed_rule_ids( $product, $active['rules'] ) as $id ) {
-			$checks[ $id ] = $active['rules'][ $id ]->channels_for( $product, $active['channel_rules'][ $id ] ?? array() );
-		}
+		$checks = $this->product_scan->failures( $product, $active['rules'], $active['channel_rules'] );
 		return array(
 			'product_id' => $product->get_id(),
 			'checks'     => $checks,
