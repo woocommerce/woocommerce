@@ -4271,8 +4271,8 @@ function wc_update_1140_autoload_options_for_hpos_and_product_catalog(): void {
 	$defaults = array(
 		'woocommerce_custom_orders_table_data_sync_enabled' => 'no',
 		'woocommerce_custom_orders_table_background_sync_mode' => 'off',
-		'woocommerce_catalog_columns' => 4,
-		'woocommerce_catalog_rows' => 4,
+		'woocommerce_catalog_columns'         => 4,
+		'woocommerce_catalog_rows'            => 4,
 		'woocommerce_default_catalog_orderby' => 'menu_order',
 	);
 
