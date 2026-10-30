@@ -198,7 +198,7 @@ trait ProductAbilityTrait {
 		$properties = array_merge( $properties, self::get_product_mutation_field_schemas_for_fields( self::get_variation_config()['fields'], true ) );
 
 		if ( ExtensibleAbilities::is_enabled() ) {
-			$properties['extensions'] = ExtensibleAbilities::get_input_schema( 'product' );
+			$properties['extensions'] = ExtensibleAbilities::get_input_schema( 'product', array( self::class, 'field_applies_to_variations' ) );
 		}
 
 		return array(
@@ -1523,7 +1523,7 @@ trait ProductAbilityTrait {
 		$schema['properties']['variations'] = array(
 			'type'        => 'array',
 			'description' => __( 'The variations the call created or changed, in input order. Deleted variations are not listed.', 'woocommerce' ),
-			'items'       => self::get_product_output_schema(),
+			'items'       => ExtensibleAbilities::add_fields_schema( self::get_single_product_output_schema(), 'product', array( self::class, 'field_applies_to_variations' ) ),
 		);
 
 		return $schema;
@@ -1541,6 +1541,24 @@ trait ProductAbilityTrait {
 			'product'    => self::format_product_for_response( $product ),
 			'variations' => array_map( array( self::class, 'format_product_for_response' ), array_values( $variations ) ),
 		);
+	}
+
+	/**
+	 * Whether a product field can apply to a variation, from its `object_types`.
+	 *
+	 * @param array<string, mixed> $args Field arguments from `register_field()`.
+	 * @return bool
+	 */
+	public static function field_applies_to_variations( array $args ): bool {
+		if ( empty( $args['object_types'] ) ) {
+			return true;
+		}
+		foreach ( $args['object_types'] as $object_type ) {
+			if ( is_a( (string) \WC_Product_Factory::get_classname_from_product_type( $object_type ), \WC_Product_Variation::class, true ) ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**

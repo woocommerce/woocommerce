@@ -719,11 +719,12 @@ class ExtensibleAbilities {
 	 *
 	 * @since 11.3.0
 	 *
-	 * @param array<string, mixed> $schema   Object schema.
+	 * @param array<string, mixed> $schema        Object schema.
 	 * @param string               $resource_name Resource.
+	 * @param callable|null        $field_filter  Optional. Gets the arguments of a field and returns whether the schema lists it.
 	 * @return array<string, mixed>
 	 */
-	public static function add_fields_schema( array $schema, string $resource_name ): array {
+	public static function add_fields_schema( array $schema, string $resource_name, ?callable $field_filter = null ): array {
 		if ( ! self::is_enabled() || empty( self::$fields[ $resource_name ] ) ) {
 			return $schema;
 		}
@@ -734,13 +735,17 @@ class ExtensibleAbilities {
 			'additionalProperties' => false,
 		);
 		foreach ( self::$fields[ $resource_name ] ?? array() as $namespace => $fields ) {
+			$listed = null === $field_filter ? $fields : array_filter( $fields, $field_filter );
+			if ( empty( $listed ) ) {
+				continue;
+			}
 			$extensions['properties'][ $namespace ] = array(
 				'type'                 => 'object',
 				'properties'           => array_map(
 					static function ( array $args ): array {
 						return $args['schema'];
 					},
-					$fields
+					$listed
 				),
 				'additionalProperties' => false,
 			);
@@ -758,18 +763,19 @@ class ExtensibleAbilities {
 	 *
 	 * @since 11.4.0
 	 *
-	 * @param string $resource_name Resource.
+	 * @param string        $resource_name Resource.
+	 * @param callable|null $field_filter  Optional. Gets the arguments of a field and returns whether the schema lists it. The schema then accepts other fields, so the write refuses them with an error that names the field and the types it applies to.
 	 * @return array<string, mixed>
 	 */
-	public static function get_input_schema( string $resource_name ): array {
+	public static function get_input_schema( string $resource_name, ?callable $field_filter = null ): array {
 		$extensions = array(
 			'type'                 => 'object',
 			'description'          => __( 'Values to write to the fields that extensions add, keyed by extension namespace, then field. A null value deletes the value.', 'woocommerce' ),
-			'additionalProperties' => false,
+			'additionalProperties' => null !== $field_filter,
 		);
 		foreach ( self::get_fields( $resource_name ) as $namespace => $fields ) {
 			$writable = array_filter(
-				$fields,
+				null === $field_filter ? $fields : array_filter( $fields, $field_filter ),
 				static function ( array $args ): bool {
 					return isset( $args['update_callback'] );
 				}
@@ -792,7 +798,7 @@ class ExtensibleAbilities {
 					},
 					$writable
 				),
-				'additionalProperties' => false,
+				'additionalProperties' => null !== $field_filter,
 			);
 		}
 		return $extensions;
