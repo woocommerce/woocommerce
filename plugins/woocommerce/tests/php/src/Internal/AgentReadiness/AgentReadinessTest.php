@@ -4,7 +4,6 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\AgentReadiness;
 
 use Automattic\WooCommerce\Internal\AgentReadiness\AgentReadiness;
-use Automattic\WooCommerce\Internal\AgentReadiness\ReadinessFeedValidator;
 use Automattic\WooCommerce\Internal\AgentReadiness\ReadinessRule;
 use Automattic\WooCommerce\Internal\AgentReadiness\StoreConditions;
 use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonHelper;
@@ -119,14 +118,12 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The feed validator returns the ids of the checks a product fails.
+	 * @testdox get_failing_check_ids returns the ids of the checks a product fails.
 	 */
-	public function test_feed_validator_returns_failing_check_ids(): void {
-		$product   = WC_Helper_Product::create_simple_product( true, array( 'description' => 'A sturdy mug.' ) );
-		$validator = new ReadinessFeedValidator();
-		$validator->init( $this->sut );
+	public function test_get_failing_check_ids(): void {
+		$product = WC_Helper_Product::create_simple_product( true, array( 'description' => 'A sturdy mug.' ) );
 
-		$issues = $validator->validate_entry( array(), $product );
+		$issues = $this->sut->get_failing_check_ids( $product );
 
 		$this->assertContains( 'missing_brand', $issues );
 		$this->assertContains( 'missing_images', $issues );
@@ -135,9 +132,9 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The feed validator judges a variation by its parent and skips products the scan leaves out.
+	 * @testdox get_failing_check_ids judges a variation by its parent and skips products the scan leaves out.
 	 */
-	public function test_feed_validator_follows_scan_coverage(): void {
+	public function test_get_failing_check_ids_follows_scan_coverage(): void {
 		$variable  = WC_Helper_Product::create_variation_product();
 		$variation = wc_get_product( $variable->get_children()[0] );
 		$grouped   = WC_Helper_Product::create_grouped_product();
@@ -151,11 +148,7 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 		$hidden = WC_Helper_Product::create_variation_product();
 		$hidden->set_catalog_visibility( 'hidden' );
 		$hidden->save();
-		$validator = new ReadinessFeedValidator();
-		$validator->init( $this->sut );
-		$this->assertSame( $this->sut->get_failing_check_ids( $variable ), $validator->validate_entry( array(), $variation ) );
-		$this->assertSame( array( ReadinessFeedValidator::NOT_CHECKED ), $validator->validate_entry( array(), $grouped ), 'The feed skips products the checks leave out' );
-		$this->assertSame( array( ReadinessFeedValidator::NOT_CHECKED ), $validator->validate_entry( array(), wc_get_product( $hidden->get_children()[0] ) ), 'Nor exports a hidden product\'s variations' );
+		$this->assertSame( array(), $this->sut->get_failing_check_ids( wc_get_product( $hidden->get_children()[0] ) ), 'Nor a hidden product\'s variations' );
 	}
 
 	/**

@@ -5,10 +5,10 @@ namespace Automattic\WooCommerce\Tests\Internal\AgentReadiness;
 
 use Automattic\WooCommerce\Internal\AgentReadiness\Checks\DuplicateGtinCheck;
 use Automattic\WooCommerce\Internal\AgentReadiness\Checks\ImageTooSmallCheck;
-use Automattic\WooCommerce\Internal\AgentReadiness\Checks\InvalidGtinCheck;
 use Automattic\WooCommerce\Internal\AgentReadiness\Checks\MissingBrandCheck;
 use Automattic\WooCommerce\Internal\AgentReadiness\Checks\MissingGtinCheck;
 use Automattic\WooCommerce\Internal\AgentReadiness\Checks\MissingRegularPriceCheck;
+use Automattic\WooCommerce\Internal\AgentReadiness\Checks\SimpleCheck;
 use Automattic\WooCommerce\Internal\AgentReadiness\FeedChannels;
 use Automattic\WooCommerce\Internal\AgentReadiness\ProductFields;
 use Automattic\WooCommerce\Internal\AgentReadiness\ProductScan;
@@ -52,6 +52,33 @@ class ReadinessChecksTest extends WC_Unit_Test_Case {
 
 		$virtual = WC_Helper_Product::create_simple_product( true, array( 'virtual' => true ) );
 		$this->assertFalse( $sut->fails( $virtual, $this->scan ), 'A virtual product is not asked for a brand' );
+	}
+
+	/**
+	 * @testdox The simple checks cover every channel and judge categories and variations.
+	 */
+	public function test_simple_checks(): void {
+		$table = SimpleCheck::table();
+		foreach ( $table as $id => $check ) {
+			$this->assertSame( $id, $check->id() );
+			$this->assertSame( array_keys( FeedChannels::all() ), array_keys( $check->channels() ), "$id names a field on every channel" );
+		}
+
+		$simple = WC_Helper_Product::create_simple_product();
+		$this->assertTrue( $table['uncategorised']->fails( $simple, $this->scan ), 'Only the default category' );
+		$category = wp_insert_term( 'Mugs', 'product_cat' );
+		$simple->set_category_ids( array( $category['term_id'] ) );
+		$this->assertFalse( $table['uncategorised']->fails( $simple, $this->scan ) );
+		$this->assertFalse( $table['missing_variation_images']->fails( $simple, $this->scan ), 'A simple product has no variations' );
+		$this->assertFalse( $table['variation_attributes_not_set']->fails( $simple, $this->scan ) );
+
+		$variable  = WC_Helper_Product::create_variation_product();
+		$variation = wc_get_product( $variable->get_children()[0] );
+		$this->assertTrue( $table['missing_variation_images']->fails( $variable, $this->scan ), 'Variations without their own image' );
+		$attributes = $variation->get_attributes();
+		$variation->set_attributes( array_fill_keys( array_keys( $attributes ), '' ) );
+		$variation->save();
+		$this->assertTrue( $table['variation_attributes_not_set']->fails( wc_get_product( $variable->get_id() ), $this->scan ), 'A variation set to "any"' );
 	}
 
 	/**
@@ -148,7 +175,7 @@ class ReadinessChecksTest extends WC_Unit_Test_Case {
 	 * @testdox A GTIN with hyphens and spaces is normalised before validation.
 	 */
 	public function test_invalid_gtin_check_normalises_separators(): void {
-		$sut     = new InvalidGtinCheck();
+		$sut     = SimpleCheck::table()['invalid_gtin'];
 		$valid   = WC_Helper_Product::create_simple_product( true, array( 'global_unique_id' => '4006-3813 33931' ) );
 		$invalid = WC_Helper_Product::create_simple_product( true, array( 'global_unique_id' => '4006381333932' ) );
 

@@ -5,16 +5,10 @@ namespace Automattic\WooCommerce\Internal\AgentReadiness;
 
 use Automattic\WooCommerce\Internal\AgentReadiness\Checks\DuplicateGtinCheck;
 use Automattic\WooCommerce\Internal\AgentReadiness\Checks\ImageTooSmallCheck;
-use Automattic\WooCommerce\Internal\AgentReadiness\Checks\InvalidGtinCheck;
 use Automattic\WooCommerce\Internal\AgentReadiness\Checks\MissingBrandCheck;
 use Automattic\WooCommerce\Internal\AgentReadiness\Checks\MissingGtinCheck;
-use Automattic\WooCommerce\Internal\AgentReadiness\Checks\MissingImagesCheck;
-use Automattic\WooCommerce\Internal\AgentReadiness\Checks\MissingProductTextCheck;
 use Automattic\WooCommerce\Internal\AgentReadiness\Checks\MissingRegularPriceCheck;
-use Automattic\WooCommerce\Internal\AgentReadiness\Checks\MissingVariationImagesCheck;
-use Automattic\WooCommerce\Internal\AgentReadiness\Checks\TitleTooLongCheck;
-use Automattic\WooCommerce\Internal\AgentReadiness\Checks\UncategorisedCheck;
-use Automattic\WooCommerce\Internal\AgentReadiness\Checks\VariationAttributesNotSetCheck;
+use Automattic\WooCommerce\Internal\AgentReadiness\Checks\SimpleCheck;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -74,21 +68,22 @@ class AgentReadiness {
 	 * @return array<string, ReadinessRule>
 	 */
 	public function get_default_rules(): array {
-		$rules = array();
+		$simple = SimpleCheck::table();
+		$rules  = array();
 		foreach (
 			array(
 				new MissingRegularPriceCheck(),
-				new MissingImagesCheck(),
-				new MissingProductTextCheck(),
+				$simple['missing_images'],
+				$simple['missing_product_text'],
 				new MissingBrandCheck(),
-				new InvalidGtinCheck(),
+				$simple['invalid_gtin'],
 				new MissingGtinCheck(),
 				new DuplicateGtinCheck(),
 				new ImageTooSmallCheck(),
-				new UncategorisedCheck(),
-				new VariationAttributesNotSetCheck(),
-				new MissingVariationImagesCheck(),
-				new TitleTooLongCheck(),
+				$simple['uncategorised'],
+				$simple['variation_attributes_not_set'],
+				$simple['missing_variation_images'],
+				$simple['title_too_long'],
 			) as $rule
 		) {
 			$rules[ $rule->id() ] = $rule;
