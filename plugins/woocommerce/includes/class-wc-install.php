@@ -1282,7 +1282,7 @@ class WC_Install {
 						$autoload          = isset( $value['autoload'] ) ? (bool) $value['autoload'] : true;
 						$skip_initial_save = isset( $value['skip_initial_save'] ) ? (bool) $value['skip_initial_save'] : false;
 						if ( ! $skip_initial_save ) {
-							add_option( $value['id'], $value['default'], '', ( $autoload ? 'yes' : 'no' ) );
+							add_option( $value['id'], $value['default'], '', $autoload );
 						}
 					}
 				}
@@ -1290,15 +1290,15 @@ class WC_Install {
 		}
 
 		// Define other defaults if not in setting screens.
-		add_option( 'woocommerce_single_image_width', '600', '', 'yes' );
-		add_option( 'woocommerce_thumbnail_image_width', '300', '', 'yes' );
-		add_option( 'woocommerce_checkout_highlight_required_fields', 'yes', '', 'yes' );
-		add_option( 'woocommerce_demo_store', 'no', '', 'no' );
-		add_option( 'woocommerce_custom_orders_table_data_sync_enabled', 'no', '', 'yes' );
-		add_option( 'woocommerce_custom_orders_table_background_sync_mode', 'off', '', 'yes' );
-		add_option( 'woocommerce_catalog_columns', '4', '', 'yes' );
-		add_option( 'woocommerce_catalog_rows', '4', '', 'yes' );
-		add_option( 'woocommerce_default_catalog_orderby', 'menu_order', '', 'yes' );
+		add_option( 'woocommerce_single_image_width', '600', '', true );
+		add_option( 'woocommerce_thumbnail_image_width', '300', '', true );
+		add_option( 'woocommerce_checkout_highlight_required_fields', 'yes', '', true );
+		add_option( 'woocommerce_demo_store', 'no', '', false );
+		add_option( 'woocommerce_custom_orders_table_data_sync_enabled', 'no', '', true );
+		add_option( 'woocommerce_custom_orders_table_background_sync_mode', 'off', '', true );
+		add_option( 'woocommerce_catalog_columns', '4', '', true );
+		add_option( 'woocommerce_catalog_rows', '4', '', true );
+		add_option( 'woocommerce_default_catalog_orderby', 'menu_order', '', true );
 
 		if ( self::is_new_install() ) {
 			// Define initial tax classes.
