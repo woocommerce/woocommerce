@@ -306,7 +306,51 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The shipped rules file names only checks the code can run, and those are the ones that run.
+	 * @testdox A file that names nothing this code can run does not turn the bundled checks off.
+	 */
+	public function test_file_with_no_known_check_keeps_bundled_checks(): void {
+		$this->serve(
+			array(
+				'not_a_check' => array(
+					'google' => array(
+						'field'  => 'x',
+						'effect' => 'not_listable',
+					),
+				),
+			)
+		);
+
+		$this->assertTrue( $this->sut->refresh() );
+		$this->assertArrayHasKey( 'missing_images', $this->agent_readiness()->get_channel_rules() );
+	}
+
+	/**
+	 * @testdox A file with no shaped checks is a failed sync and does not replace the stored copy.
+	 */
+	public function test_file_with_no_shaped_checks_is_not_stored(): void {
+		$this->serve(
+			array(
+				'title_too_long' => array(
+					'google' => array(
+						'field'  => 'title',
+						'effect' => 'not_listable',
+					),
+				),
+			)
+		);
+		$this->assertTrue( $this->sut->refresh() );
+
+		$this->answer = array(
+			'body' => '{"version":"x","checks":{"broken":"nope"}}',
+			'code' => 200,
+		);
+
+		$this->assertFalse( $this->sut->refresh() );
+		$this->assertSame( 'not_listable', $this->sut->channel_rules()['title_too_long']['google']['effect'] );
+	}
+
+	/**
+	 * @testdox The shipped rules file names the same checks the code can run, and those are the ones that run.
 	 */
 	public function test_shipped_rules_file_is_a_subset_of_the_code(): void {
 		$path = dirname( __DIR__, 5 ) . '/src/Internal/AgentReadiness/rules.json';
@@ -320,6 +364,7 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 			$this->assertContains( $id, $known, 'The file names a check the code does not have' );
 			$checks[ $id ] = $check['channels'];
 		}
+		$this->assertSame( $known, array_keys( $checks ), 'A check in code that is missing from rules.json would not run once a store has fetched the file' );
 
 		$this->serve( $checks );
 		$this->sut->refresh();

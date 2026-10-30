@@ -115,7 +115,9 @@ class AgentReadiness {
 			$bundled[ $id ] = $rule->channels();
 		}
 		if ( $this->remote_rules->has_stored_file() ) {
-			$defaults = $this->without_empty( $this->sanitize_channel_rules( $this->remote_rules->channel_rules(), $bundled ) );
+			$from_file = $this->without_empty( $this->sanitize_channel_rules( $this->remote_rules->channel_rules(), $bundled ) );
+			// A file with no check this code can run does not turn the bundled checks off.
+			$defaults = array() !== $from_file ? $from_file : $bundled;
 		} else {
 			$defaults = $bundled;
 		}

@@ -73,6 +73,10 @@ class RemoteRules {
 				$checks[ $id ] = $check['channels'];
 			}
 		}
+		// Nothing shaped like a check. Do not replace the last good copy with an empty list.
+		if ( array() === $checks ) {
+			return false;
+		}
 		update_option(
 			self::OPTION,
 			array(
@@ -85,8 +89,8 @@ class RemoteRules {
 	}
 
 	/**
-	 * Whether a rules file is stored. An empty checks list still counts: the
-	 * file is then a subset of nothing, and the bundled checks do not fill in.
+	 * Whether a rules file is stored. A stored file whose checks the code does
+	 * not know is not used: the bundled checks run instead.
 	 */
 	public function has_stored_file(): bool {
 		$stored = get_option( self::OPTION );
