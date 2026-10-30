@@ -158,6 +158,32 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A failed rules fetch still stores a report from the bundled checks and leaves one daily run scheduled.
+	 */
+	public function test_run_with_failed_fetch_uses_bundled_checks(): void {
+		add_filter(
+			'woocommerce_agent_readiness_rules_url',
+			static function () {
+				return 'https://rules.example/agent-readiness.json';
+			}
+		);
+		$fail = static function () {
+			return new \WP_Error( 'http_request_failed', 'Operation timed out' );
+		};
+		add_filter( 'pre_http_request', $fail );
+		WC_Helper_Product::create_simple_product();
+
+		$this->sut->run();
+		remove_filter( 'pre_http_request', $fail );
+
+		$report = wc_get_container()->get( AgentReadiness::class )->get_cached_report();
+		$this->assertIsArray( $report );
+		$this->assertSame( 1, $report['products'] );
+		$this->assertContains( 'missing_images', array_column( $report['checks'], 'id' ), 'The bundled checks ran' );
+		$this->assertCount( 1, $this->pending( ScheduledScan::DAILY_HOOK ) );
+	}
+
+	/**
 	 * @testdox A scan that throws still leaves the next daily run scheduled.
 	 */
 	public function test_failed_scan_keeps_daily_run(): void {
