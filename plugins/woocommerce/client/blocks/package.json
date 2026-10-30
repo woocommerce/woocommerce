@@ -164,7 +164,7 @@
 		"babel-plugin-transform-react-remove-prop-types": "0.4.24",
 		"chalk": "4.1.2",
 		"circular-dependency-plugin": "5.2.x",
-		"copy-webpack-plugin": "13.0.x",
+		"copy-webpack-plugin": "14.0.x",
 		"core-js": "3.25.0",
 		"css-loader": "6.11.x",
 		"cssnano": "5.1.12",
