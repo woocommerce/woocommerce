@@ -35,48 +35,6 @@ class ProductTaxonomyOpenGraphTags {
 		}
 		$url = wc_get_container()->get( CatalogOpenGraphUrl::class )->get_url();
 
-		$shop        = get_post( wc_get_page_id( 'shop' ) );
-		$description = $term->description;
-		if ( '' === trim( wp_strip_all_tags( strip_shortcodes( $description ) ) ) && $shop instanceof \WP_Post && 'publish' === $shop->post_status && '' === $shop->post_password ) {
-			$description = $shop->post_excerpt;
-		}
-		if ( '' === trim( wp_strip_all_tags( strip_shortcodes( $description ) ) ) ) {
-			$description = get_bloginfo( 'description' );
-		}
-		$description = wc_get_container()->get( OpenGraphDescription::class )->clean( $description );
-		$tags        = array(
-			array( 'og:title' => $title ),
-			array( 'og:type' => 'website' ),
-			array( 'og:url' => $url ),
-			array( 'og:description' => wc_trim_string( $description ) ),
-			array( 'og:site_name' => get_bloginfo( 'name' ) ),
-		);
-		$locale      = get_locale();
-		if ( preg_match( '/^[a-z]{2,3}_[A-Z]{2}$/', $locale ) ) {
-			$tags[] = array( 'og:locale' => $locale );
-		}
-
-		$image_ids = array(
-			get_term_meta( $term->term_id, 'thumbnail_id', true ),
-			$shop instanceof \WP_Post && 'publish' === $shop->post_status && '' === $shop->post_password ? get_post_thumbnail_id( $shop ) : 0,
-			get_theme_mod( 'custom_logo' ),
-			get_option( 'site_icon' ),
-		);
-		$has_image = false;
-		foreach ( $image_ids as $image_id ) {
-			if ( ! is_numeric( $image_id ) || (int) $image_id <= 0 ) {
-				continue;
-			}
-			$image = wc_get_container()->get( OpenGraphImageTags::class )->get_tags( (int) $image_id, $title, true );
-			if ( ! $image ) {
-				continue;
-			}
-			$tags[]    = $image;
-			$has_image = true;
-			break;
-		}
-		$tags[] = array( 'twitter:card' => $has_image ? 'summary_large_image' : 'summary' );
-
-		return $tags;
+		return wc_get_container()->get( CatalogOpenGraphTags::class )->get_tags( $title, $url, $term->description, get_term_meta( $term->term_id, 'thumbnail_id', true ) );
 	}
 }
