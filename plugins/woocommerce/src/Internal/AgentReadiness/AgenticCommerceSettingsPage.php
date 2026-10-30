@@ -280,10 +280,10 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	}
 
 	/**
-	 * Status badge, discovery URL and the failing store conditions. UCP itself is the switch above, so it is not listed.
+	 * Status badge, discovery URL and one row per store condition. UCP itself is the switch above, so it is not listed.
 	 *
-	 * @param array<int, array{id:string,level:string,ok:bool,label:string,fix_url:string}> $checks Store conditions.
-	 * @param string                                                                        $status UcpSwitch status.
+	 * @param array<int, array{id:string,level:string,ok:bool,name:string,fix_url:string}> $checks Store conditions.
+	 * @param string                                                                       $status UcpSwitch status.
 	 */
 	private function render_status( array $checks, string $status ): void {
 		$statuses = array(
@@ -291,7 +291,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 			UcpSwitch::STATUS_OFF             => array( 'off', __( 'Off', 'woocommerce' ) ),
 			UcpSwitch::STATUS_NEEDS_ATTENTION => array( 'fix', __( 'Needs attention', 'woocommerce' ) ),
 		);
-		$failing  = array_filter( $checks, static fn( array $check ): bool => ! $check['ok'] && 'ucp_on' !== $check['id'] );
+		$checks   = array_filter( $checks, static fn( array $check ): bool => 'ucp_on' !== $check['id'] );
 		?>
 		<h2><?php esc_html_e( 'Status', 'woocommerce' ); ?></h2>
 		<p><?php esc_html_e( 'Checks that your store is ready for AI agents. Fix anything marked "Fix" before you turn agent shopping on; items marked "Check" are recommended.', 'woocommerce' ); ?></p>
@@ -310,24 +310,26 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 		</table>
 		<table class="widefat striped wc-agentic-commerce-checks">
 			<tbody>
-				<?php foreach ( $failing as $check ) : ?>
+				<?php foreach ( $checks as $check ) : ?>
 					<?php
-					$badge = StoreConditions::LEVEL_REQUIRED === $check['level']
-						? array( 'fix', __( 'Fix', 'woocommerce' ) )
-						: array( 'check', __( 'Check', 'woocommerce' ) );
+					if ( $check['ok'] ) {
+						$badge = array( 'pass', __( 'Pass', 'woocommerce' ) );
+					} elseif ( StoreConditions::LEVEL_REQUIRED === $check['level'] ) {
+						$badge = array( 'fix', __( 'Fix', 'woocommerce' ) );
+					} else {
+						$badge = array( 'check', __( 'Check', 'woocommerce' ) );
+					}
 					?>
 					<tr>
 						<td><mark class="wc-agentic-commerce-badge wc-agentic-commerce-badge--<?php echo esc_attr( $badge[0] ); ?>"><?php echo esc_html( $badge[1] ); ?></mark></td>
-						<td><?php echo esc_html( $check['label'] ); ?></td>
-						<td><a href="<?php echo esc_url( $check['fix_url'] ); ?>"><?php echo esc_html( $this->fix_link_text( $check['fix_url'] ) ); ?></a></td>
+						<td><?php echo esc_html( $check['name'] ); ?></td>
+						<td>
+							<?php if ( ! $check['ok'] ) : ?>
+								<a href="<?php echo esc_url( $check['fix_url'] ); ?>"><?php echo esc_html( $this->fix_link_text( $check['fix_url'] ) ); ?></a>
+							<?php endif; ?>
+						</td>
 					</tr>
 				<?php endforeach; ?>
-				<?php if ( empty( $failing ) ) : ?>
-					<tr>
-						<td><mark class="wc-agentic-commerce-badge wc-agentic-commerce-badge--pass"><?php esc_html_e( 'Pass', 'woocommerce' ); ?></mark></td>
-						<td colspan="2"><?php esc_html_e( 'Your store passes every setup check.', 'woocommerce' ); ?></td>
-					</tr>
-				<?php endif; ?>
 			</tbody>
 		</table>
 		<?php

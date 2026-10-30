@@ -111,18 +111,19 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'required setup checks below to turn this on.', $html );
 		$this->assertStringContainsString( 'aria-checked="false"', $html );
 		$this->assertStringContainsString( 'wc-agentic-commerce-badge--fix', $html );
-		$this->assertStringContainsString( 'No privacy policy page', $html, 'A failing condition is listed by its label' );
+		$this->assertStringContainsString( 'Privacy policy page is selected', $html, 'Each condition is a row, named by its passing state' );
 		$this->assertStringNotContainsString( 'Universal Commerce Protocol (UCP) is off', $html, 'UCP is the switch, not a listed check' );
 	}
 
 	/**
-	 * @testdox With every required check passing, nothing blocks the switch and only recommended checks are listed.
+	 * @testdox With every required check passing, nothing blocks the switch and recommended checks show Check, not Fix.
 	 */
 	public function test_output_on_a_ready_store(): void {
 		StoreConditionsTest::make_store_ready( $this );
 
 		$html = $this->render_page();
 
+		$this->assertStringContainsString( 'wc-agentic-commerce-badge--pass', $html );
 		$this->assertStringContainsString( 'wc-agentic-commerce-badge--check', $html );
 		$this->assertStringNotContainsString( 'wc-agentic-commerce-badge--fix', $html );
 		$this->assertStringNotContainsString( 'to turn this on.', $html );

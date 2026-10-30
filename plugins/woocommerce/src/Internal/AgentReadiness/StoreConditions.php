@@ -13,7 +13,8 @@ defined( 'ABSPATH' ) || exit;
  * whatever the product data. The readiness report and the Agentic commerce
  * settings page both read this list, so they never disagree.
  *
- * `ok` says whether the store is clear of the problem the label names.
+ * `ok` says whether the store is clear of the problem the label names;
+ * `name` is the check worded as its passing state.
  * `blocks` says what a failing condition stops: `listing` hides every product
  * on every channel, `ucp` hides the catalog from agents that use UCP,
  * `checkout` stops or weakens agent orders. A failing `required` condition
@@ -48,17 +49,18 @@ class StoreConditions {
 	/**
 	 * Every condition with its current state.
 	 *
-	 * @return array<int, array{id:string,ok:bool,blocks:string,level:string,label:string,why:string,fix:string,fix_url:string}>
+	 * @return array<int, array{id:string,ok:bool,blocks:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string}>
 	 */
 	public function all(): array {
 		global $wp_rewrite;
 
 		$settings_url = static fn( string $tab ): string => admin_url( 'admin.php?page=wc-settings&tab=' . $tab );
-		$policy_page  = static fn( string $id, string $option, string $level, string $label, string $why ): array => array(
+		$policy_page  = static fn( string $id, string $option, string $level, string $name, string $label, string $why ): array => array(
 			'id'      => $id,
 			'ok'      => self::is_published_page( (int) get_option( $option ) ),
 			'blocks'  => 'checkout',
 			'level'   => $level,
+			'name'    => $name,
 			'label'   => $label,
 			'why'     => $why,
 			'fix'     => __( 'Choose a published page under WooCommerce > Settings > Agentic commerce.', 'woocommerce' ),
@@ -71,6 +73,7 @@ class StoreConditions {
 				'ok'      => $this->coming_soon_helper->is_site_live(),
 				'blocks'  => 'listing',
 				'level'   => self::LEVEL_RECOMMENDED,
+				'name'    => __( 'Store is launched', 'woocommerce' ),
 				'label'   => __( 'Store is in coming soon mode', 'woocommerce' ),
 				'why'     => __( 'Visitors, crawlers and shopping agents see a holding page instead of your products.', 'woocommerce' ),
 				'fix'     => __( 'Launch the store under WooCommerce > Settings > Site visibility.', 'woocommerce' ),
@@ -81,6 +84,7 @@ class StoreConditions {
 				'ok'      => '0' !== (string) get_option( 'blog_public', '1' ),
 				'blocks'  => 'listing',
 				'level'   => self::LEVEL_RECOMMENDED,
+				'name'    => __( 'Search engines can index the store', 'woocommerce' ),
 				'label'   => __( 'Store is hidden from search engines', 'woocommerce' ),
 				'why'     => __( '"Discourage search engines" asks crawlers, including AI shopping crawlers, to skip your store.', 'woocommerce' ),
 				'fix'     => __( 'Clear "Discourage search engines from indexing this site" under Settings > Reading.', 'woocommerce' ),
@@ -91,6 +95,7 @@ class StoreConditions {
 				'ok'      => UcpUtils::is_enabled(),
 				'blocks'  => 'ucp',
 				'level'   => self::LEVEL_RECOMMENDED,
+				'name'    => __( 'Universal Commerce Protocol (UCP) is on', 'woocommerce' ),
 				'label'   => __( 'Universal Commerce Protocol (UCP) is off', 'woocommerce' ),
 				'why'     => __( 'Shopping agents that use UCP cannot read your catalog.', 'woocommerce' ),
 				'fix'     => __( 'Turn on "Let AI agents shop your store" under WooCommerce > Settings > Agentic commerce.', 'woocommerce' ),
@@ -101,6 +106,7 @@ class StoreConditions {
 				'ok'      => wc_site_is_https(),
 				'blocks'  => 'ucp',
 				'level'   => self::LEVEL_REQUIRED,
+				'name'    => __( 'Site uses HTTPS', 'woocommerce' ),
 				'label'   => __( 'Site does not use HTTPS', 'woocommerce' ),
 				'why'     => __( 'Agents only send shoppers to a secure checkout.', 'woocommerce' ),
 				'fix'     => __( 'Move the site to HTTPS; your host can usually turn it on.', 'woocommerce' ),
@@ -111,6 +117,7 @@ class StoreConditions {
 				'ok'      => $wp_rewrite->using_permalinks(),
 				'blocks'  => 'ucp',
 				'level'   => self::LEVEL_REQUIRED,
+				'name'    => __( 'Permalinks are not set to Plain', 'woocommerce' ),
 				'label'   => __( 'Permalinks are set to Plain', 'woocommerce' ),
 				'why'     => __( 'Your store does not serve the UCP discovery file at /.well-known/ucp, so agents cannot find your catalog and checkout.', 'woocommerce' ),
 				'fix'     => __( 'Choose any permalink structure other than Plain under Settings > Permalinks.', 'woocommerce' ),
@@ -120,6 +127,7 @@ class StoreConditions {
 				'privacy_page',
 				AgenticCommerceSettings::PRIVACY_PAGE_OPTION,
 				self::LEVEL_REQUIRED,
+				__( 'Privacy policy page is selected', 'woocommerce' ),
 				__( 'No privacy policy page', 'woocommerce' ),
 				__( 'Agents link shoppers to your privacy policy before they buy.', 'woocommerce' )
 			),
@@ -127,6 +135,7 @@ class StoreConditions {
 				'terms_page',
 				AgenticCommerceSettings::TERMS_PAGE_OPTION,
 				self::LEVEL_REQUIRED,
+				__( 'Terms and conditions page is selected', 'woocommerce' ),
 				__( 'No terms and conditions page', 'woocommerce' ),
 				__( 'Agents link shoppers to your terms before they buy.', 'woocommerce' )
 			),
@@ -134,6 +143,7 @@ class StoreConditions {
 				'refund_returns_page',
 				AgenticCommerceSettings::REFUND_RETURNS_PAGE_OPTION,
 				self::LEVEL_REQUIRED,
+				__( 'Refund and returns page is selected', 'woocommerce' ),
 				__( 'No refund and returns page', 'woocommerce' ),
 				__( 'Agents link shoppers to your return terms before they buy.', 'woocommerce' )
 			),
@@ -141,6 +151,7 @@ class StoreConditions {
 				'shipping_policy_page',
 				AgenticCommerceSettings::SHIPPING_POLICY_PAGE_OPTION,
 				self::LEVEL_RECOMMENDED,
+				__( 'Shipping policy page is selected', 'woocommerce' ),
 				__( 'No shipping policy page', 'woocommerce' ),
 				__( 'Shoppers ask agents about delivery times and costs.', 'woocommerce' )
 			),
@@ -149,6 +160,7 @@ class StoreConditions {
 				'ok'      => ! $this->registration_required(),
 				'blocks'  => 'checkout',
 				'level'   => self::LEVEL_RECOMMENDED,
+				'name'    => __( 'Guest checkout is allowed', 'woocommerce' ),
 				'label'   => __( 'Guest checkout is off', 'woocommerce' ),
 				'why'     => __( 'Shopping agents check out for shoppers without an account on your store, so they cannot place orders.', 'woocommerce' ),
 				'fix'     => __( 'Tick "Enable guest checkout" under WooCommerce > Settings > Accounts & Privacy.', 'woocommerce' ),
@@ -159,6 +171,7 @@ class StoreConditions {
 				'ok'      => $this->order_confirmation_email_enabled(),
 				'blocks'  => 'checkout',
 				'level'   => self::LEVEL_RECOMMENDED,
+				'name'    => __( 'Order confirmation emails are on', 'woocommerce' ),
 				'label'   => __( 'Order confirmation emails are off', 'woocommerce' ),
 				'why'     => __( 'Shoppers who buy through an agent get no confirmation from your store.', 'woocommerce' ),
 				'fix'     => __( 'Turn on the Processing order email under WooCommerce > Settings > Emails.', 'woocommerce' ),
