@@ -286,6 +286,41 @@ class NotificationTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that a class that overrides the key methods keeps working through them, and that the stage methods refuse it.
+	 */
+	public function test_stage_keys_refuse_a_class_that_has_not_adopted_them() {
+		// phpcs:disable Squiz.Commenting.FunctionComment.Missing, Generic.CodeAnalysis.UselessOverridingMethod.Found
+		$notification = new class() extends Notification {
+			public function get_verification_key( bool $persist ): string {
+				return parent::get_verification_key( $persist );
+			}
+			public function get_unsubscribe_key( bool $persist ): string {
+				return parent::get_unsubscribe_key( $persist );
+			}
+		};
+		// phpcs:enable Squiz.Commenting.FunctionComment.Missing, Generic.CodeAnalysis.UselessOverridingMethod.Found
+		$notification->set_product_id( 1 );
+		$notification->set_user_email( 'test@example.com' );
+		$notification->save();
+
+		$verification_key = $notification->get_verification_key( true );
+		$unsubscribe_key  = $notification->get_unsubscribe_key( true );
+		$stored           = new Notification( $notification->get_id() );
+		$this->assertTrue( $stored->check_verification_key( $verification_key ) );
+		$this->assertTrue( $stored->check_unsubscribe_key( $unsubscribe_key ) );
+
+		foreach ( array( 'stage_verification_key', 'stage_unsubscribe_key' ) as $stage_method ) {
+			try {
+				$notification->$stage_method();
+				$this->fail( $stage_method . ' did not refuse the class.' );
+			} catch ( \WC_Data_Exception $e ) {
+				$this->assertSame( 'woocommerce_data_staging_unsupported', $e->getErrorCode() );
+				$this->assertStringContainsString( $stage_method . '()', $e->getMessage() );
+			}
+		}
+	}
+
+	/**
 	 * Test verification key persistence.
 	 */
 	public function test_verification_key_persistence() {

@@ -603,7 +603,11 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			);
 		}
 
-		$this->stage_delivery_result( $response_code );
+		$this->write_through(
+			function () use ( $response_code ) {
+				$this->stage_delivery_result( $response_code );
+			}
+		);
 
 		if ( 0 !== $this->get_id() ) {
 			$this->save();
@@ -621,6 +625,8 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * @param int|string $response_code Response code, or the error code of a failed request.
 	 */
 	public function stage_delivery_result( $response_code ): void {
+		$this->refuse_unstaged_override( 'log_delivery', 'stage_delivery_result' );
+
 		if ( intval( $response_code ) >= 200 && intval( $response_code ) < 303 ) {
 			$this->set_failure_count( 0 );
 			// A successful delivery proves the delivery URL works, so it no longer needs a ping.
@@ -675,7 +681,11 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * @return bool|WP_Error
 	 */
 	public function deliver_ping() {
-		$result = $this->stage_delivery_ping();
+		$result = $this->write_through(
+			function () {
+				return $this->stage_delivery_ping();
+			}
+		);
 
 		if ( true === $result ) {
 			$this->save();
@@ -692,6 +702,8 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 * @return bool|WP_Error True when the ping succeeded, an error otherwise.
 	 */
 	public function stage_delivery_ping() {
+		$this->refuse_unstaged_override( 'deliver_ping', 'stage_delivery_ping' );
+
 		$args = array(
 			'user-agent' => sprintf( 'WooCommerce/%s Hookshot (WordPress/%s)', Constants::get_constant( 'WC_VERSION' ), $GLOBALS['wp_version'] ),
 			'body'       => 'webhook_id=' . $this->get_id(),
