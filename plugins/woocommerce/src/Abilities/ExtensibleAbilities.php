@@ -499,9 +499,13 @@ class ExtensibleAbilities {
 	 *     @type string   $namespace Slug of the extension that owns the validator, such as `subscriptions`.
 	 *     @type callable $callback  Receives the changed object and the ability, after Core's changes and the
 	 *                               field callbacks, before the one save. It returns a WP_Error to refuse the
-	 *                               change, and then nothing is saved. The error gets the namespace in its
-	 *                               data, and the 400 status when it has no status. Its message can name the
-	 *                               ability or screen to use instead. Rules:
+	 *                               change, and then nothing is saved. The other validators still run, and
+	 *                               the client gets every refusal in one error. The client sees the code
+	 *                               prefixed with the namespace, as `<namespace>:<code>`. A code that another
+	 *                               validator in the same namespace already used gets a numeric suffix, as
+	 *                               `<namespace>:<code>:2`. The error gets the
+	 *                               namespace in its data, and the 400 status when it has no status. Its
+	 *                               message can name the ability or screen to use instead. Rules:
 	 *                               1. It only reads. It does not change the object, save, send email or
 	 *                                  make HTTP requests.
 	 *                               2. It checks the ability name when the extension's own abilities

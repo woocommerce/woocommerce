@@ -2659,7 +2659,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		);
 
 		$this->assertSame( 400, $response->get_status() );
-		$this->assertSame( 'test_locked', $response->get_data()['code'] );
+		$this->assertSame( 'test-ext:test_locked', $response->get_data()['code'] );
 		$this->assertSame( 'Use test-ext/order-unlock first.', $response->get_data()['message'] );
 		$this->assertSame( 'test-ext', $response->get_data()['data']['namespace'] );
 		$this->assertSame( 1, did_action( 'woocommerce_order_status_changed' ) - $changes );
@@ -2700,6 +2700,196 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should run every validator and return all refusals in one error, and save nothing.
+	 */
+	public function test_every_validator_runs_and_all_refusals_are_returned(): void {
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+		$this->register_validator(
+			'product',
+			'first_ext',
+			static function () {
+				return new \WP_Error( 'test_first_refused', 'First refused.' );
+			}
+		);
+		$this->register_validator(
+			'product',
+			'second_ext',
+			static function () {
+				return new \WP_Error( 'test_second_refused', 'Second refused.', array( 'status' => 409 ) );
+			}
+		);
+
+		$response = $this->run_ability_response(
+			'woocommerce/product-update',
+			array(
+				'id'   => $product->get_id(),
+				'name' => 'Pencil',
+			)
+		);
+
+		$data = $response->get_data();
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'first_ext:test_first_refused', $data['code'] );
+		$this->assertSame( 'First refused.', $data['message'] );
+		$this->assertSame( 'first_ext', $data['data']['namespace'] );
+		$this->assertCount( 1, $data['additional_errors'] );
+		$this->assertSame( 'second_ext:test_second_refused', $data['additional_errors'][0]['code'] );
+		$this->assertSame( 'Second refused.', $data['additional_errors'][0]['message'] );
+		$this->assertSame( 'second_ext', $data['additional_errors'][0]['data']['namespace'] );
+		$this->assertSame( 409, $data['additional_errors'][0]['data']['status'] );
+		$this->assertSame( 'Pen', wc_get_product( $product->get_id() )->get_name() );
+	}
+
+	/**
+	 * @testdox Should keep the namespace of each refusal when validators of two namespaces return the same code.
+	 */
+	public function test_refusals_with_the_same_code_keep_their_namespace(): void {
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+		foreach ( array( 'first_ext', 'second_ext' ) as $extension_namespace ) {
+			$this->register_validator(
+				'product',
+				$extension_namespace,
+				static function () use ( $extension_namespace ) {
+					return new \WP_Error( 'test_refused', $extension_namespace . ' refused.' );
+				}
+			);
+		}
+
+		$data = $this->run_ability_response(
+			'woocommerce/product-update',
+			array(
+				'id'   => $product->get_id(),
+				'name' => 'Pencil',
+			)
+		)->get_data();
+
+		$this->assertSame( 'first_ext:test_refused', $data['code'] );
+		$this->assertSame( 'first_ext refused.', $data['message'] );
+		$this->assertSame( 'first_ext', $data['data']['namespace'] );
+		$this->assertCount( 1, $data['additional_errors'] );
+		$this->assertSame( 'second_ext:test_refused', $data['additional_errors'][0]['code'] );
+		$this->assertSame( 'second_ext refused.', $data['additional_errors'][0]['message'] );
+		$this->assertSame( 'second_ext', $data['additional_errors'][0]['data']['namespace'] );
+		$this->assertSame( 'Pen', wc_get_product( $product->get_id() )->get_name() );
+	}
+
+	/**
+	 * @testdox Should give a repeated code in the same namespace a numeric suffix, so each refusal keeps its own data.
+	 */
+	public function test_refusals_with_the_same_code_in_one_namespace_keep_their_data(): void {
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+		foreach ( array( 'name', 'price' ) as $field ) {
+			$this->register_validator(
+				'product',
+				'ns',
+				static function () use ( $field ) {
+					return new \WP_Error( 'test_refused', $field . ' refused.', array( 'field' => $field ) );
+				}
+			);
+		}
+
+		$data = $this->run_ability_response(
+			'woocommerce/product-update',
+			array(
+				'id'   => $product->get_id(),
+				'name' => 'Pencil',
+			)
+		)->get_data();
+
+		$this->assertSame( 'ns:test_refused', $data['code'] );
+		$this->assertSame( 'name refused.', $data['message'] );
+		$this->assertSame( 'name', $data['data']['field'] );
+		$this->assertCount( 1, $data['additional_errors'] );
+		$this->assertSame( 'ns:test_refused:2', $data['additional_errors'][0]['code'] );
+		$this->assertSame( 'price refused.', $data['additional_errors'][0]['message'] );
+		$this->assertSame( 'price', $data['additional_errors'][0]['data']['field'] );
+		$this->assertSame( 'Pen', wc_get_product( $product->get_id() )->get_name() );
+	}
+
+	/**
+	 * @testdox Should give a crash the suffix when a refusal in the same namespace already uses its code.
+	 */
+	public function test_a_crash_does_not_share_a_code_with_a_refusal_in_the_same_namespace(): void {
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+		$this->register_validator(
+			'product',
+			'ns',
+			static function () {
+				throw new \RuntimeException( 'Validator broke.' );
+			}
+		);
+		$this->register_validator(
+			'product',
+			'ns',
+			static function () {
+				return new \WP_Error( 'woocommerce_ability_extension_failed', 'Name refused.' );
+			}
+		);
+
+		$response = $this->run_ability_response(
+			'woocommerce/product-update',
+			array(
+				'id'   => $product->get_id(),
+				'name' => 'Pencil',
+			)
+		);
+		$data     = $response->get_data();
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'ns:woocommerce_ability_extension_failed:2', $data['code'] );
+		$this->assertSame( 'Name refused.', $data['message'] );
+		$this->assertSame( 400, $data['data']['status'] );
+		$this->assertCount( 1, $data['additional_errors'] );
+		$this->assertSame( 'ns:woocommerce_ability_extension_failed', $data['additional_errors'][0]['code'] );
+		$this->assertSame( 500, $data['additional_errors'][0]['data']['status'] );
+		$this->assertSame( 'Pen', wc_get_product( $product->get_id() )->get_name() );
+	}
+
+	/**
+	 * @testdox Should run the other validators after one throws, list the crash last, and give every code of a refusal its namespace and status.
+	 */
+	public function test_validators_run_after_a_throw_and_every_code_gets_its_namespace(): void {
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+		$this->register_validator(
+			'product',
+			'first_ext',
+			static function () {
+				throw new \RuntimeException( 'Validator broke.' );
+			}
+		);
+		$this->register_validator(
+			'product',
+			'second_ext',
+			static function () {
+				$error = new \WP_Error( 'test_name_refused', 'Name refused.' );
+				$error->add( 'test_price_refused', 'Price refused.' );
+				return $error;
+			}
+		);
+
+		$response = $this->run_ability_response(
+			'woocommerce/product-update',
+			array(
+				'id'   => $product->get_id(),
+				'name' => 'Pencil',
+			)
+		);
+		$data     = $response->get_data();
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'second_ext:test_name_refused', $data['code'] );
+		$this->assertSame( 'second_ext', $data['data']['namespace'] );
+		$this->assertCount( 2, $data['additional_errors'] );
+		$this->assertSame( 'second_ext:test_price_refused', $data['additional_errors'][0]['code'] );
+		$this->assertSame( 'second_ext', $data['additional_errors'][0]['data']['namespace'] );
+		$this->assertSame( 400, $data['additional_errors'][0]['data']['status'] );
+		$this->assertSame( 'first_ext:woocommerce_ability_extension_failed', $data['additional_errors'][1]['code'] );
+		$this->assertSame( 'first_ext', $data['additional_errors'][1]['data']['namespace'] );
+		$this->assertSame( 500, $data['additional_errors'][1]['data']['status'] );
+		$this->assertSame( 'Pen', wc_get_product( $product->get_id() )->get_name() );
+	}
+
+	/**
 	 * @testdox Should run a validator in an ActionableAbility of an extension, with that ability.
 	 */
 	public function test_a_validator_runs_in_an_extension_actionable_ability(): void {
@@ -2724,7 +2914,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		);
 
 		$this->assertSame( 400, $response->get_status() );
-		$this->assertSame( 'test_rename_refused', $response->get_data()['code'] );
+		$this->assertSame( 'other_ext:test_rename_refused', $response->get_data()['code'] );
 		$this->assertSame( 'other_ext', $response->get_data()['data']['namespace'] );
 		$this->assertSame( 'Pen', wc_get_product( $product->get_id() )->get_name() );
 	}

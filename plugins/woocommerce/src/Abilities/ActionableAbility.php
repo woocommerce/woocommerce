@@ -404,20 +404,41 @@ abstract class ActionableAbility extends \WP_Ability {
 	}
 
 	/**
-	 * Run the validators of a resource on the changed object.
+	 * Run every validator of a resource on the changed object, also after one
+	 * refuses. Each refusal gets the code `<namespace>:<code>`, so refusals with
+	 * the same code keep their own data. When the code is already taken in the
+	 * same namespace, by a refusal or by a crash, it gets a numeric suffix, as
+	 * `<namespace>:<code>:2`. A
+	 * validator that throws goes after the refusals, so the response status
+	 * comes from a refusal when there is one.
 	 *
 	 * @param \WC_Data $subject       Changed object.
 	 * @param string   $resource_name Resource of the object.
-	 * @return \WP_Error|null A WP_Error when a validator refuses the change.
+	 * @return \WP_Error|null One WP_Error with the refusals of all validators that refuse the change.
 	 */
 	private function validate( $subject, string $resource_name ): ?\WP_Error {
+		$refused = new \WP_Error();
+		$failed  = new \WP_Error();
 		foreach ( ExtensibleAbilities::get_validators( $resource_name ) as $args ) {
 			$rejected = self::run_callback( $args['callback'], array( $subject, $this ), array( 'namespace' => $args['namespace'] ) );
-			if ( null !== $rejected ) {
-				return $rejected;
+			if ( null === $rejected ) {
+				continue;
+			}
+			foreach ( $rejected->get_error_codes() as $code ) {
+				$data   = $rejected->get_error_data( $code );
+				$target = 500 === ( $data['status'] ?? null ) ? $failed : $refused;
+				$key    = $args['namespace'] . ':' . $code;
+				$n      = 1;
+				while ( in_array( $key, array_merge( $refused->get_error_codes(), $failed->get_error_codes() ), true ) ) {
+					$key = $args['namespace'] . ':' . $code . ':' . ( ++$n );
+				}
+				foreach ( $rejected->get_error_messages( $code ) as $message ) {
+					$target->add( $key, $message, $data );
+				}
 			}
 		}
-		return null;
+		$refused->merge_from( $failed );
+		return $refused->has_errors() ? $refused : null;
 	}
 
 	/**
@@ -486,15 +507,17 @@ abstract class ActionableAbility extends \WP_Ability {
 	}
 
 	/**
-	 * Add data to an error, and the 400 status when it has none.
+	 * Add data to every code of an error, and the 400 status to a code that has none.
 	 *
 	 * @param \WP_Error            $error Error.
 	 * @param array<string, mixed> $data  Data to add.
 	 * @return \WP_Error
 	 */
 	private static function with_data( \WP_Error $error, array $data ): \WP_Error {
-		$current = $error->get_error_data();
-		$error->add_data( array_merge( array( 'status' => 400 ), is_array( $current ) ? $current : array(), $data ) );
+		foreach ( $error->get_error_codes() as $code ) {
+			$current = $error->get_error_data( $code );
+			$error->add_data( array_merge( array( 'status' => 400 ), is_array( $current ) ? $current : array(), $data ), $code );
+		}
 		return $error;
 	}
 }
