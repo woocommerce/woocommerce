@@ -18,6 +18,7 @@ use Automattic\WooCommerce\Internal\Abilities\Domain\ProductCreate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductDelete;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductsQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\ProductTermsQuery;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -44,6 +45,7 @@ class AbilitiesLoader {
 		OrderNotesQuery::class,
 		OrderUpdateStatus::class,
 		ProductsQuery::class,
+		ProductTermsQuery::class,
 		ProductCreate::class,
 		ProductDelete::class,
 		ProductUpdate::class,
