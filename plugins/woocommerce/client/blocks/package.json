@@ -77,7 +77,6 @@
 		"build:storybook": "BABEL_ENV=development storybook build -c ./storybook -o ./storybook/dist",
 		"watch:build:storybook": "storybook dev -c ./storybook -p 6006 --ci",
 		"test:js": "wp-scripts test-unit-js --config tests/js/jest.config.js",
-		"test:debug": "ndb .",
 		"env:stop": "pnpm run wp-env stop",
 		"test:help": "wp-scripts test-unit-js --help",
 		"test:update": "wp-scripts test-unit-js --updateSnapshot --config tests/js/jest.config.js",
@@ -165,7 +164,7 @@
 		"babel-plugin-transform-react-remove-prop-types": "0.4.24",
 		"chalk": "4.1.2",
 		"circular-dependency-plugin": "5.2.x",
-		"copy-webpack-plugin": "13.0.x",
+		"copy-webpack-plugin": "14.0.x",
 		"core-js": "3.25.0",
 		"css-loader": "6.11.x",
 		"cssnano": "5.1.12",
@@ -194,7 +193,6 @@
 		"msw": "2.10.4",
 		"playwright-ctrf-json-reporter": "0.0.27",
 		"postcss": "catalog:tooling",
-		"postcss-color-function": "4.1.0",
 		"postcss-loader": "4.3.x",
 		"prettier": "catalog:tooling",
 		"progress-bar-webpack-plugin": "2.1.x",
@@ -272,9 +270,6 @@
 	"peerDependencies": {
 		"react": "18.3.x",
 		"react-dom": "18.3.x"
-	},
-	"optionalDependencies": {
-		"ndb": "1.1.5"
 	},
 	"lint-staged": {
 		"*.scss": [

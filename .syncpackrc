@@ -283,7 +283,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "13.0.x"
+			"pinVersion": "14.0.x"
 		},
 		{
 			"dependencies": [
@@ -553,7 +553,7 @@
 			"packages": [
 				"**"
 			],
-			"pinVersion": "^3.21.0"
+			"pinVersion": "^4.0.2"
 		},
 		{
 			"dependencyTypes": [
