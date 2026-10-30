@@ -285,10 +285,10 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$product       = $output_schema['properties']['product']['properties'] ?? array();
 
 		$this->assertSame( 'uri', $product['permalink']['format'] ?? null );
-		$this->assertSame( array( 'string', 'null' ), $product['permalink']['type'] ?? null );
+		$this->assertSame( 'string', $product['permalink']['type'] ?? null );
 		$this->assertContains( get_woocommerce_currency(), $product['currency']['enum'] ?? array() );
 		$this->assertSame(
-			array( wc_is_stock_amount_integer() ? 'integer' : 'number', 'null' ),
+			wc_is_stock_amount_integer() ? 'integer' : 'number',
 			$product['stock_quantity']['type'] ?? null
 		);
 	}
@@ -383,7 +383,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertContains( 'trash', $order['status']['enum'] ?? array() );
 		$this->assertContains( 'checkout-draft', $order['status']['enum'] ?? array() );
 		$this->assertContains( get_woocommerce_currency(), $order['currency']['enum'] ?? array() );
-		$this->assertSame( array( 'string', 'null' ), $order['billing_email']['type'] ?? null );
+		$this->assertSame( 'string', $order['billing_email']['type'] ?? null );
 		$this->assertSame( 'email', $order['billing_email']['format'] ?? null );
 		$this->assertNotEmpty( $order['line_items']['description'] ?? '' );
 		$this->assertSame( 'array', $order['line_items']['type'] ?? null );
@@ -1737,7 +1737,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 			$this->assertSame( 'number', $this->get_product_type_alias_schema_branch( $input_schema, 'physical' )['properties']['stock_quantity']['type'] ?? null );
 			$this->assertSame(
-				array( 'number', 'null' ),
+				'number',
 				$output_schema['properties']['product']['properties']['stock_quantity']['type'] ?? null
 			);
 
@@ -1755,6 +1755,46 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		} finally {
 			remove_filter( 'woocommerce_stock_amount', array( $this, 'preserve_fractional_stock_amount' ) );
 			add_filter( 'woocommerce_stock_amount', 'intval' );
+		}
+	}
+
+	/**
+	 * @testdox Should omit absent product values while keeping zero and false.
+	 */
+	public function test_product_output_omits_null_values(): void {
+		$product = new \WC_Product_Simple();
+		$product->set_stock_quantity( 0 );
+		$result = wp_get_ability( 'woocommerce/product-create' )->prepare_response( $product )['product'];
+
+		foreach ( array( 'date_created', 'date_created_gmt', 'date_modified', 'date_modified_gmt', 'external_url', 'button_text' ) as $field ) {
+			$this->assertArrayNotHasKey( $field, $result );
+		}
+		$this->assertSame( 0, $result['stock_quantity'] );
+		$this->assertFalse( $result['virtual'] );
+		$this->assertSame( '', $result['sale_price'] );
+
+		$product->set_stock_quantity( '' );
+		$this->assertArrayNotHasKey( 'stock_quantity', wp_get_ability( 'woocommerce/product-create' )->prepare_response( $product )['product'] );
+	}
+
+	/**
+	 * @testdox Should give each Core output field a single type.
+	 */
+	public function test_core_output_schemas_have_single_types(): void {
+		$check = function ( array $schema ) use ( &$check ): void {
+			if ( isset( $schema['type'] ) ) {
+				$this->assertIsString( $schema['type'] );
+				$this->assertNotSame( 'null', $schema['type'] );
+			}
+			foreach ( $schema['properties'] ?? array() as $property ) {
+				$check( $property );
+			}
+			if ( isset( $schema['items'] ) ) {
+				$check( $schema['items'] );
+			}
+		};
+		foreach ( self::CANONICAL_ABILITY_IDS as $name ) {
+			$check( wp_get_ability( $name )->get_output_schema() );
 		}
 	}
 
@@ -2062,7 +2102,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		$this->assertNotWPError( $result );
 		$this->assertSame( 'auto-draft', $result['products'][0]['status'] );
-		$this->assertNull( $result['products'][0]['permalink'] );
+		$this->assertArrayNotHasKey( 'permalink', $result['products'][0] );
 	}
 
 	/**
@@ -2315,9 +2355,9 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should return null for absent billing email values.
+	 * @testdox Should omit absent billing email values.
 	 */
-	public function test_orders_query_returns_null_for_absent_billing_email(): void {
+	public function test_orders_query_omits_absent_billing_email(): void {
 		$order = wc_create_order();
 		$this->assertNotWPError( $order );
 		$order->save();
@@ -2330,7 +2370,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertNotWPError( $result );
-		$this->assertNull( $result['orders'][0]['billing_email'] );
+		$this->assertArrayNotHasKey( 'billing_email', $result['orders'][0] );
 	}
 
 	/**

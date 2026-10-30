@@ -126,11 +126,11 @@ class ExtensibleAbilities {
 	 *     @type string   $field        Field name inside the namespace, such as `trial_length`.
 	 *     @type array    $schema       JSON schema of the value. It needs a `type`. Its `title` is the label clients show.
 	 *                                  It cannot set `required`, because a value that fails its schema is
-	 *                                  left out. For a field that is always present, allow null and return null.
+	 *                                  left out. A null value is also left out, even when the schema allows it.
 	 *     @type callable $get_callback Receives the object and returns the value. A value that the schema
 	 *                                  does not allow is left out, so return null when the object has no
-	 *                                  value. A schema that allows null, such as `array( 'integer', 'null' )`,
-	 *                                  keeps it. It reads the object it is given, not the database,
+	 *                                  value. The output schema removes null when the field has one other type.
+	 *                                  It reads the object it is given, not the database,
 	 *                                  because an ability can format an object before it is saved.
 	 *     @type callable $update_callback Optional. Receives the object and the value, and changes the object
 	 *                                     in memory. It returns a WP_Error to reject the value, and then
@@ -179,7 +179,7 @@ class ExtensibleAbilities {
 			return;
 		}
 		if ( true === ( $args['schema']['required'] ?? null ) ) {
-			wc_doing_it_wrong( __METHOD__, 'The "schema" argument cannot set "required". A value that fails its schema is left out, so allow null for a field that is always present.', '11.3.0' );
+			wc_doing_it_wrong( __METHOD__, 'The "schema" argument cannot set "required". A null value or a value that fails its schema is left out.', '11.3.0' );
 			return;
 		}
 		if ( ! is_callable( $args['get_callback'] ?? null ) ) {
@@ -523,7 +523,7 @@ class ExtensibleAbilities {
 
 	/**
 	 * Add the field values of an object to its formatted output, under
-	 * `extensions.<namespace>.<field>`. A value is cast to its schema type, so
+	 * `extensions.<namespace>.<field>`. A null value is left out. Other values are cast to their schema type, so
 	 * `'12'` becomes `12` for an integer field. A field that throws or returns a
 	 * value that its schema does not allow is left out. A namespace with no
 	 * values is left out, and `extensions` is left out when no namespace has
@@ -553,7 +553,7 @@ class ExtensibleAbilities {
 					);
 					continue;
 				}
-				if ( ! self::matches_schema( $args, $value ) ) {
+				if ( null === $value || ! self::matches_schema( $args, $value ) ) {
 					continue;
 				}
 				$sanitized = rest_sanitize_value_from_schema( $value, $args['schema'], $field );
@@ -595,7 +595,15 @@ class ExtensibleAbilities {
 				'type'                 => 'object',
 				'properties'           => array_map(
 					static function ( array $args ): array {
-						return $args['schema'];
+						$field_schema = $args['schema'];
+						$types        = array_values( array_diff( (array) $field_schema['type'], array( 'null' ) ) );
+						if ( 1 === count( $types ) ) {
+							$field_schema['type'] = $types[0];
+							if ( isset( $field_schema['enum'] ) ) {
+								$field_schema['enum'] = array_values( array_filter( $field_schema['enum'], static fn( $value ) => null !== $value ) );
+							}
+						}
+						return $field_schema;
 					},
 					$fields
 				),

@@ -1161,7 +1161,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should leave out a field that throws or fails sanitization, cast a value to its schema type, and keep a null that the schema allows.
+	 * @testdox Should leave out a field that throws or fails sanitization, cast a value to its schema type, and omit null even when the schema allows it.
 	 */
 	public function test_field_values_follow_their_schema(): void {
 		AbilitiesLoader::register_core_resources();
@@ -1206,10 +1206,62 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->assertSame(
 			array(
 				'count' => 12,
-				'empty' => null,
 			),
 			$output['extensions']['values']
 		);
+	}
+
+	/**
+	 * @testdox Should expose a nullable extension field as one output type while preserving null input deletion.
+	 */
+	public function test_nullable_extension_schema_preserves_input_deletion(): void {
+		add_action(
+			'woocommerce_extensible_abilities_init',
+			static function (): void {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'        => 'product',
+						'namespace'       => 'nullable',
+						'field'           => 'label',
+						'schema'          => array(
+							'type' => array( 'string', 'null' ),
+							'enum' => array( 'test', null ),
+						),
+						'get_callback'    => static fn( $product ) => $product->meta_exists( '_nullable_label' ) ? $product->get_meta( '_nullable_label' ) : null,
+						'update_callback' => static function ( $product, $value ): void {
+							if ( null === $value ) {
+								$product->delete_meta_data( '_nullable_label' );
+							} else {
+								$product->update_meta_data( '_nullable_label', $value );
+							}
+						},
+					)
+				);
+			}
+		);
+		$product = \WC_Helper_Product::create_simple_product();
+		$schema  = $this->get_output_schema( 'woocommerce/product-update' )['properties']['product']['properties']['extensions']['properties']['nullable']['properties']['label'];
+		$this->assertSame( 'string', $schema['type'] );
+		$this->assertSame( array( 'test' ), $schema['enum'] );
+		$this->assertSame( array( 'string', 'null' ), $this->get_ability( 'woocommerce/product-update' )['input_schema']['properties']['extensions']['properties']['nullable']['properties']['label']['type'] );
+
+		$result = $this->run_ability(
+			'woocommerce/product-update',
+			array(
+				'id'         => $product->get_id(),
+				'extensions' => array( 'nullable' => array( 'label' => 'test' ) ),
+			)
+		);
+		$this->assertSame( 'test', $result['product']['extensions']['nullable']['label'] );
+		$result = $this->run_ability(
+			'woocommerce/product-update',
+			array(
+				'id'         => $product->get_id(),
+				'extensions' => array( 'nullable' => array( 'label' => null ) ),
+			)
+		);
+		$this->assertFalse( wc_get_product( $product->get_id() )->meta_exists( '_nullable_label' ) );
+		$this->assertArrayNotHasKey( 'nullable', $result['product']['extensions'] ?? array() );
 	}
 
 	/**
