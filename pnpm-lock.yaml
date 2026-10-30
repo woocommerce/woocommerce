@@ -701,8 +701,8 @@ importers:
         specifier: 5.7.x
         version: 5.7.3
       uuid:
-        specifier: ^9.0.1
-        version: 9.0.1
+        specifier: ^11.1.1
+        version: 11.1.1
       webpack:
         specifier: catalog:tooling
         version: 5.97.1(@swc/core@1.15.24)(esbuild@0.28.2)(webpack-cli@5.1.4)
@@ -19280,6 +19280,10 @@ packages:
   utils-merge@1.0.1:
     resolution: {integrity: sha512-pMZTvIkT1d+TFGvDOqodOclx0QWkkgi6Tdoa8gC8ffGAAqz9pzPTZWAybbsHHoED/ztMtkv/VoYTYyShUn81hA==}
     engines: {node: '>= 0.4.0'}
+
+  uuid@11.1.1:
+    resolution: {integrity: sha512-vIYxrBCC/N/K+Js3qSN88go7kIfNPssr/hHCesKCQNAjmgvYS2oqr69kIufEG+O4+PfezOH4EbIeHCfFov8ZgQ==}
+    hasBin: true
 
   uuid@14.0.0:
     resolution: {integrity: sha512-Qo+uWgilfSmAhXCMav1uYFynlQO7fMFiMVZsQqZRMIXp0O7rR7qjkj+cPvBHLgBqi960QCoo/PH2/6ZtVqKvrg==}
@@ -42563,6 +42567,8 @@ snapshots:
   utility-types@3.10.0: {}
 
   utils-merge@1.0.1: {}
+
+  uuid@11.1.1: {}
 
   uuid@14.0.0: {}
 
