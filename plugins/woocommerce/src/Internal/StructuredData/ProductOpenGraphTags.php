@@ -84,6 +84,22 @@ class ProductOpenGraphTags {
 			$tags[] = array( $property => $value );
 		}
 
+		$brand_ids = $product->get_brand_ids();
+		if ( is_array( $brand_ids ) && 1 === count( $brand_ids ) ) {
+			$brand = get_term( reset( $brand_ids ), 'product_brand' );
+			if ( $brand instanceof \WP_Term ) {
+				$tags[] = array( 'product:brand' => $brand->name );
+				$tags[] = array( 'og:brand' => $brand->name );
+			}
+		}
+		if ( wc_review_ratings_enabled() && $product->get_rating_count() > 0 ) {
+			$tags[] = array(
+				'og:rating'       => (string) $product->get_average_rating(),
+				'og:rating_scale' => '5',
+				'og:rating_count' => (string) $product->get_rating_count(),
+			);
+		}
+
 		foreach ( wc_get_container()->get( ProductMediaSources::class )->get_sources( $product ) as $media => $source ) {
 			$root  = 'og:' . $media;
 			$group = array();

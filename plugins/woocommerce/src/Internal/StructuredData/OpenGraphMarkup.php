@@ -72,6 +72,14 @@ class OpenGraphMarkup {
 				'match'  => '/^og:video(?::|$)/D',
 				'exists' => false,
 			),
+			'brand'        => array(
+				'match'  => '/^(product|og):brand$/D',
+				'exists' => false,
+			),
+			'ratings'      => array(
+				'match'  => '/^og:rating(_scale|_count)?$/D',
+				'exists' => false,
+			),
 		);
 
 		$processor = new WP_HTML_Tag_Processor( $html );
