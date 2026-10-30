@@ -11,7 +11,8 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * No brand term and no brand attribute. Gift cards and virtual or
- * downloadable products are not asked for one.
+ * downloadable products are not asked for one. A brand set only in Google for
+ * WooCommerce reaches Google, so Google is left out for those products.
  *
  * @since 11.4.0
  */
@@ -63,6 +64,20 @@ class MissingBrandCheck extends AbstractReadinessCheck {
 				'effect' => self::EFFECT_GAPS,
 			),
 		);
+	}
+
+	/**
+	 * Drop Google when Google for WooCommerce sends its own brand.
+	 *
+	 * @param \WC_Product                                      $product  Product that fails the rule.
+	 * @param array<string, array{field:string,effect:string}> $channels The rule's channel map.
+	 * @return array<string, array{field:string,effect:string}>
+	 */
+	public function channels_for( \WC_Product $product, array $channels ): array {
+		if ( '' !== ProductFields::google_feed_brand( $product ) ) {
+			unset( $channels[ FeedChannels::GOOGLE ] );
+		}
+		return $channels;
 	}
 
 	/**

@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\AgentReadiness\Checks;
 
+use Automattic\WooCommerce\Internal\AgentReadiness\FeedChannels;
 use Automattic\WooCommerce\Internal\AgentReadiness\ProductFields;
 use Automattic\WooCommerce\Internal\AgentReadiness\ProductScan;
 
@@ -10,7 +11,8 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * No GTIN on the product or any of its published variations. Gift cards and
- * virtual or downloadable products are not asked for one.
+ * virtual or downloadable products are not asked for one. Google accepts a
+ * brand and MPN instead, so Google is left out when the product has both.
  *
  * @since 11.4.0
  */
@@ -49,6 +51,24 @@ class MissingGtinCheck extends AbstractReadinessCheck {
 	 */
 	public function channels(): array {
 		return self::on_every_channel( 'gtin', self::EFFECT_GAPS );
+	}
+
+	/**
+	 * Drop Google when the product has a brand and an MPN.
+	 *
+	 * @param \WC_Product                                      $product  Product that fails the rule.
+	 * @param array<string, array{field:string,effect:string}> $channels The rule's channel map.
+	 * @return array<string, array{field:string,effect:string}>
+	 */
+	public function channels_for( \WC_Product $product, array $channels ): array {
+		$brand = ProductFields::brand( $product );
+		if ( '' === $brand ) {
+			$brand = ProductFields::google_feed_brand( $product );
+		}
+		if ( '' !== $brand && '' !== ProductFields::mpn( $product ) ) {
+			unset( $channels[ FeedChannels::GOOGLE ] );
+		}
+		return $channels;
 	}
 
 	/**
