@@ -2346,6 +2346,157 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Create a variable product of the subclass type and a plain one, with two variations each.
+	 *
+	 * @return array{subclass: array, plain: array}
+	 */
+	private function create_subclass_and_plain_products(): array {
+		$this->register_variation_subclass();
+
+		$input         = $this->get_shirt_input();
+		$input['type'] = 'test-variable';
+		foreach ( $input['variations'] as $index => $variation ) {
+			$input['variations'][ $index ]['sku'] = 'test-' . $variation['sku'];
+		}
+
+		return array(
+			'plain'    => $this->run_ability( 'woocommerce/product-create', $this->get_shirt_input() ),
+			'subclass' => $this->run_ability( 'woocommerce/product-create', $input ),
+		);
+	}
+
+	/**
+	 * @testdox Should accept a variation subclass type in a query and return only the variations of its parent type.
+	 */
+	public function test_queries_variations_by_subclass_type(): void {
+		$created = $this->create_subclass_and_plain_products();
+
+		$found = $this->run_ability( 'woocommerce/products-query', array( 'type' => 'test_variation' ) )['products'];
+
+		$this->assertEqualsCanonicalizing( array_column( $created['subclass']['variations'], 'id' ), array_column( $found, 'id' ) );
+		$this->assertSame( array( 'test_variation' ), array_values( array_unique( array_column( $found, 'type' ) ) ) );
+	}
+
+	/**
+	 * @testdox Should page a variation subclass query inside the database query.
+	 */
+	public function test_pages_a_variation_subclass_query(): void {
+		$created = $this->create_subclass_and_plain_products();
+		$query   = static fn( int $page ): array => array(
+			'type'     => 'test_variation',
+			'per_page' => 1,
+			'page'     => $page,
+		);
+
+		$first  = $this->run_ability( 'woocommerce/products-query', $query( 1 ) );
+		$second = $this->run_ability( 'woocommerce/products-query', $query( 2 ) );
+		$third  = $this->run_ability( 'woocommerce/products-query', $query( 3 ) );
+
+		$this->assertSame( 2, $first['total_pages'] );
+		$this->assertCount( 1, $first['products'] );
+		$this->assertCount( 1, $second['products'] );
+		$this->assertSame( array(), $third['products'] );
+		$this->assertEqualsCanonicalizing(
+			array_column( $created['subclass']['variations'], 'id' ),
+			array( $first['products'][0]['id'], $second['products'][0]['id'] )
+		);
+	}
+
+	/**
+	 * @testdox Should combine a variation subclass type with parent_id and extension query filters.
+	 */
+	public function test_combines_a_variation_subclass_query_with_other_limits(): void {
+		$created = $this->create_subclass_and_plain_products();
+		$picked  = array( $created['subclass']['variations'][0]['id'], $created['plain']['variations'][0]['id'] );
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () use ( $picked ) {
+				ExtensibleAbilities::register_query_filter(
+					array(
+						'resource'  => 'product',
+						'namespace' => 'test-ext',
+						'filter'    => 'picked',
+						'schema'    => array( 'type' => 'boolean' ),
+						'callback'  => static fn() => array( 'include_ids' => $picked ),
+					)
+				);
+			}
+		);
+		$this->reset_registries();
+
+		$own_parent   = $this->run_ability(
+			'woocommerce/products-query',
+			array(
+				'type'      => 'test_variation',
+				'parent_id' => $created['subclass']['product']['id'],
+			)
+		);
+		$other_parent = $this->run_ability(
+			'woocommerce/products-query',
+			array(
+				'type'      => 'test_variation',
+				'parent_id' => $created['plain']['product']['id'],
+			)
+		);
+		$filtered     = $this->run_ability(
+			'woocommerce/products-query',
+			array(
+				'type'    => 'test_variation',
+				'filters' => array( 'extensions' => array( 'test-ext' => array( 'picked' => true ) ) ),
+			)
+		);
+
+		$this->assertEqualsCanonicalizing( array_column( $created['subclass']['variations'], 'id' ), array_column( $own_parent['products'], 'id' ) );
+		$this->assertSame( array(), $other_parent['products'] );
+		$this->assertSame( array( $picked[0] ), array_column( $filtered['products'], 'id' ) );
+	}
+
+	/**
+	 * @testdox Should still return plain and subclass variations for the variation type.
+	 */
+	public function test_variation_type_query_returns_every_variation(): void {
+		$created = $this->create_subclass_and_plain_products();
+
+		$found = $this->run_ability( 'woocommerce/products-query', array( 'type' => 'variation' ) )['products'];
+
+		$this->assertEqualsCanonicalizing(
+			array_merge( array_column( $created['subclass']['variations'], 'id' ), array_column( $created['plain']['variations'], 'id' ) ),
+			array_column( $found, 'id' )
+		);
+		$this->assertEqualsCanonicalizing( array( 'test_variation', 'variation' ), array_values( array_unique( array_column( $found, 'type' ) ) ) );
+	}
+
+	/**
+	 * @testdox Should refuse a query type that no registered variable type builds.
+	 */
+	public function test_refuses_a_query_type_that_is_not_listed(): void {
+		$unregistered = $this->run_ability_response( 'woocommerce/products-query', array( 'type' => 'test_variation' ) );
+
+		$this->register_variation_subclass();
+		$this->reset_registries();
+		$unknown = $this->run_ability_response( 'woocommerce/products-query', array( 'type' => 'other_variation' ) );
+
+		$this->assertSame( 400, $unregistered->get_status() );
+		$this->assertSame( 400, $unknown->get_status() );
+	}
+
+	/**
+	 * @testdox Should list a variation subclass type on the query input only.
+	 */
+	public function test_lists_a_variation_subclass_type_on_the_query_input_only(): void {
+		$type_list = fn( string $name ): array => $this->get_ability( $name )['input_schema']['properties']['type']['enum'];
+		$create    = $type_list( 'woocommerce/product-create' );
+		$update    = $type_list( 'woocommerce/product-update' );
+
+		$this->register_variation_subclass();
+		$this->reset_registries();
+
+		$this->assertContains( 'test_variation', $type_list( 'woocommerce/products-query' ) );
+		$this->assertSame( $create, array_values( array_diff( $type_list( 'woocommerce/product-create' ), array( 'test-variable' ) ) ) );
+		$this->assertSame( $update, array_values( array_diff( $type_list( 'woocommerce/product-update' ), array( 'test-variable' ) ) ) );
+	}
+
+	/**
 	 * @testdox Should refuse a variation type that does not build a variation.
 	 */
 	public function test_refuses_a_variation_type_that_is_not_a_variation(): void {

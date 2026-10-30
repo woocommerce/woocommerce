@@ -751,6 +751,31 @@ trait ProductAbilityTrait {
 	}
 
 	/**
+	 * Get the variable product types behind each variation subclass.
+	 *
+	 * A variation has no product type term, so only the type of its parent tells
+	 * which subclass it is. `variation` itself is not listed, because it covers
+	 * every variation.
+	 *
+	 * @return array<string, array<int, string>> Parent types, keyed by variation type.
+	 */
+	protected static function get_variation_subclass_parent_types(): array {
+		$parent_types = array();
+
+		foreach ( array_keys( wc_get_product_types() ) as $product_type ) {
+			$product_type = (string) $product_type;
+			$parent       = is_a( \WC_Product_Factory::get_product_classname( 0, $product_type ), \WC_Product_Variable::class, true ) ? self::get_product_object_for_type( $product_type ) : null;
+			$variation    = $parent instanceof \WC_Product_Variable ? self::get_new_variation( $parent ) : null;
+
+			if ( $variation instanceof \WC_Product_Variation && ProductType::VARIATION !== $variation->get_type() ) {
+				$parent_types[ $variation->get_type() ][] = $product_type;
+			}
+		}
+
+		return $parent_types;
+	}
+
+	/**
 	 * Build the variations that a `variations` input names, in memory. An item
 	 * with an `id` loads that variation of the parent and changes it, or marks
 	 * it for deletion. An item without one builds a new variation. Each saved
