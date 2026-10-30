@@ -10,12 +10,13 @@ namespace Automattic\WooCommerce\Abilities;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * An ability that changes one object and saves it one time. Register it with
- * a subclass as the `ability_class`. The execute callback loads the object,
- * checks the `extensions` input against the field schemas, changes the object
- * in memory, writes the fields with their `update_callback`, runs the validators
- * that ExtensibleAbilities::register_validator() adds, and then saves it. A
- * rejection from any step saves nothing.
+ * An ability that changes a primary object, and optionally secondary objects,
+ * and saves them in one call. Register it with a subclass as the
+ * `ability_class`. The execute callback loads the primary object, checks the
+ * `extensions` input against the field schemas, changes the objects in memory,
+ * writes the fields with their `update_callback`, runs the validators that
+ * ExtensibleAbilities::register_validator() adds, and then saves. A rejection
+ * from any step saves nothing.
  *
  * The input schema gets the `extensions` property of the resource, so the
  * ability accepts the fields with no extra code.
@@ -24,8 +25,23 @@ defined( 'ABSPATH' ) || exit;
  * input is ignored. An ability whose own input schema sets
  * `additionalProperties` to false rejects it instead.
  *
- * Only save() saves. The other steps must not save, send email or make HTTP
- * requests.
+ * The object that load() returns is the primary object. An ability that saves
+ * more objects returns them from change(). These are the secondary objects. Each
+ * object gets the field writes and the validators of its own resource before
+ * the first save.
+ *
+ * Only save() saves, inside a database transaction. A WP_Error or an exception
+ * from save() rolls back every row it wrote, so an ability that saves secondary
+ * objects leaves nothing behind when a later save fails. After the last save,
+ * still inside the transaction, the syncs that ExtensibleAbilities::register_sync()
+ * adds write what the saved objects imply elsewhere, such as the price range a
+ * variable parent derives from its variations, or a row in a table of the
+ * extension. A sync also sees the objects the call deleted and the input of
+ * the call. A refusal there rolls the call back too. A rollback drops the
+ * object caches of the objects the call saved or deleted. It does not undo what a sync
+ * did outside the database, such as an HTTP request, and it does nothing on a
+ * table engine without transactions. The other steps must not save, send email
+ * or make HTTP requests.
  *
  * The API is experimental while the `extensible_abilities` feature exists.
  *
@@ -53,13 +69,18 @@ abstract class ActionableAbility extends \WP_Ability {
 	abstract public function load( array $input );
 
 	/**
-	 * Change the object in memory.
+	 * Change the primary object in memory, and build the secondary objects that
+	 * save() also writes. Return the secondary objects, each with its
+	 * `extensions` input and, when it differs from get_resource(), the name of
+	 * its resource. The field writes and the validators of that resource run on
+	 * each one after the primary object, before save(). An ability that saves
+	 * only the primary object returns null.
 	 *
 	 * @since 11.3.0
 	 *
-	 * @param \WC_Data $subject Object to change.
+	 * @param \WC_Data $subject Primary object to change.
 	 * @param array    $input   Ability input.
-	 * @return null|\WP_Error A WP_Error rejects the change, and nothing is saved.
+	 * @return null|\WP_Error|array<int, array{0: \WC_Data, 1: array, 2?: string}> A WP_Error rejects the change, and nothing is saved. An array lists the secondary objects.
 	 */
 	abstract public function change( $subject, array $input );
 
@@ -100,12 +121,49 @@ abstract class ActionableAbility extends \WP_Ability {
 	}
 
 	/**
+	 * Whether the ability writes the extension fields of its resource. An
+	 * ability that does not, such as a delete, gets no `extensions` input.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @return bool
+	 */
+	protected function writes_extension_fields(): bool {
+		return true;
+	}
+
+	/**
+	 * The objects that save() deleted for good, for the syncs. An ability that
+	 * deletes objects collects them in save() and returns them here.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @return \WC_Data[]
+	 */
+	protected function get_deleted_objects(): array {
+		return array();
+	}
+
+	/**
+	 * The objects that save() moved to the trash, for the syncs. A trashed
+	 * object can be restored, so a sync keeps what a restore needs.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @return \WC_Data[]
+	 */
+	protected function get_trashed_objects(): array {
+		return array();
+	}
+
+	/**
 	 * Run the change. This is the execute callback of the ability.
 	 *
 	 * @internal
 	 *
 	 * @param mixed $input Ability input.
 	 * @return mixed|\WP_Error The output of prepare_response(), or the WP_Error of the step that refused the change.
+	 * @throws \Throwable When save() throws, after the rollback.
 	 */
 	public function execute_change( $input = null ) {
 		$input   = is_array( $input ) ? $input : array();
@@ -114,13 +172,11 @@ abstract class ActionableAbility extends \WP_Ability {
 			return $subject;
 		}
 
-		$updates = array();
-		if ( ExtensibleAbilities::is_enabled() ) {
-			$extensions = is_array( $input['extensions'] ?? null ) ? $input['extensions'] : array();
-			$updates    = $this->prepare_fields( $extensions );
-			if ( is_wp_error( $updates ) ) {
-				return $updates;
-			}
+		$enabled = ExtensibleAbilities::is_enabled();
+		$writes  = $enabled && $this->writes_extension_fields();
+		$updates = $writes ? $this->prepare_fields( $input['extensions'] ?? null, $this->get_resource() ) : array();
+		if ( is_wp_error( $updates ) ) {
+			return $updates;
 		}
 
 		$changed = $this->change( $subject, $input );
@@ -128,20 +184,123 @@ abstract class ActionableAbility extends \WP_Ability {
 			return $changed;
 		}
 
-		$rejected = $this->apply_fields( $subject, $updates );
-		if ( null === $rejected && ExtensibleAbilities::is_enabled() ) {
-			$rejected = $this->validate( $subject );
-		}
-		if ( null !== $rejected ) {
-			return $rejected;
+		$objects = array( array( $subject, $updates, $this->get_resource() ) );
+		foreach ( is_array( $changed ) ? $changed : array() as $secondary ) {
+			$resource_name = $secondary[2] ?? $this->get_resource();
+			if ( $enabled && ! ExtensibleAbilities::is_resource_registered( $resource_name ) ) {
+				wc_doing_it_wrong(
+					get_class( $this ) . '::change',
+					sprintf(
+						/* translators: %s: resource name. */
+						__( 'The "%s" resource of a secondary object is not registered, so no extension field or validator runs on it. Call ExtensibleAbilities::register_resource() first.', 'woocommerce' ),
+						$resource_name
+					),
+					'11.4.0'
+				);
+			}
+			$fields = $writes ? $this->prepare_fields( $secondary[1], $resource_name ) : array();
+			if ( is_wp_error( $fields ) ) {
+				return $fields;
+			}
+			$objects[] = array( $secondary[0], $fields, $resource_name );
 		}
 
-		$saved = $this->save( $subject );
+		foreach ( $objects as list( $object, $fields, $resource_name ) ) {
+			$rejected = $this->apply_fields( $object, $fields );
+			if ( null === $rejected && $enabled ) {
+				$rejected = $this->validate( $object, $resource_name );
+			}
+			if ( null !== $rejected ) {
+				return $rejected;
+			}
+		}
+
+		wc_transaction_query( 'start' );
+		try {
+			$saved = $this->save( $subject );
+			if ( ! is_wp_error( $saved ) && $enabled ) {
+				$saved = $this->sync( $objects, $input );
+			}
+		} catch ( \Throwable $e ) {
+			wc_transaction_query( 'rollback' );
+			self::forget_rolled_back_objects( $objects, array_merge( $this->get_deleted_objects(), $this->get_trashed_objects() ) );
+			throw $e;
+		}
 		if ( is_wp_error( $saved ) ) {
+			wc_transaction_query( 'rollback' );
+			self::forget_rolled_back_objects( $objects, array_merge( $this->get_deleted_objects(), $this->get_trashed_objects() ) );
 			return $saved;
 		}
+		wc_transaction_query( 'commit' );
 
 		return $this->prepare_response( $subject );
+	}
+
+	/**
+	 * Run the syncs of each resource that the call saved or deleted, once,
+	 * after the last save and before the commit. A deleted or trashed object
+	 * is not in the saved list, even when it was the primary object.
+	 *
+	 * @param array<int, array{0: \WC_Data, 1: array, 2: string}> $objects The primary object and the secondary objects, with their resources.
+	 * @param array                                               $input   Ability input.
+	 * @return \WP_Error|null A WP_Error when a sync refused, and then the call rolls back.
+	 */
+	private function sync( array $objects, array $input ): ?\WP_Error {
+		$deleted   = $this->get_deleted_objects();
+		$trashed   = $this->get_trashed_objects();
+		$gone      = array_map( static fn( $item ) => get_class( $item ) . ':' . $item->get_id(), array_merge( $deleted, $trashed ) );
+		$saved     = array_values(
+			array_filter(
+				array_column( $objects, 0 ),
+				static fn( $item ) => $item->get_id() > 0 && ! in_array( get_class( $item ) . ':' . $item->get_id(), $gone, true )
+			)
+		);
+		$resources = array_column( $objects, 2 );
+		if ( ! empty( $deleted ) || ! empty( $trashed ) ) {
+			$resources[] = $this->get_resource();
+		}
+		$context = array(
+			'deleted' => array_values( $deleted ),
+			'trashed' => array_values( $trashed ),
+			'input'   => $input,
+		);
+		foreach ( array_unique( $resources ) as $resource_name ) {
+			foreach ( ExtensibleAbilities::get_syncs( $resource_name ) as $args ) {
+				$rejected = self::run_callback( $args['callback'], array( $saved, $this, $context ), array( 'namespace' => $args['namespace'] ) );
+				if ( null !== $rejected ) {
+					return $rejected;
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Drop the object caches of the objects a rolled back save() touched. The
+	 * saves filled the caches with rows the rollback removed, so a read in the
+	 * same request would still see them.
+	 *
+	 * @param array<int, array{0: \WC_Data, 1: array, 2: string}> $objects The primary object and the secondary objects.
+	 * @param \WC_Data[]                                          $deleted The objects the call deleted.
+	 */
+	private static function forget_rolled_back_objects( array $objects, array $deleted = array() ): void {
+		foreach ( array_merge( $objects, array_map( static fn( $item ) => array( $item ), $deleted ) ) as list( $object ) ) {
+			$id = $object instanceof \WC_Data ? $object->get_id() : 0;
+			if ( $id <= 0 ) {
+				continue;
+			}
+			if ( $object instanceof \WC_Product ) {
+				clean_post_cache( $id );
+				wc_delete_product_transients( $id );
+				if ( $object->get_parent_id() > 0 ) {
+					clean_post_cache( $object->get_parent_id() );
+					wc_delete_product_transients( $object->get_parent_id() );
+				}
+			} elseif ( $object instanceof \WC_Abstract_Order ) {
+				wc_get_container()->get( \Automattic\WooCommerce\Caches\OrderCache::class )->remove( $id );
+				clean_post_cache( $id );
+			}
+		}
 	}
 
 	/**
@@ -153,7 +312,7 @@ abstract class ActionableAbility extends \WP_Ability {
 	 */
 	protected function prepare_properties( array $args ): array {
 		$args['execute_callback'] = array( $this, 'execute_change' );
-		if ( is_array( $args['input_schema'] ?? null ) && ExtensibleAbilities::is_enabled() ) {
+		if ( is_array( $args['input_schema'] ?? null ) && ExtensibleAbilities::is_enabled() && $this->writes_extension_fields() ) {
 			$args['input_schema'] = $this->add_extensions_input_schema( $args['input_schema'] );
 		}
 		return parent::prepare_properties( $args );
@@ -164,13 +323,14 @@ abstract class ActionableAbility extends \WP_Ability {
 	 * each field, and cast them. No callback runs here. A null value is kept as
 	 * is, to delete the value.
 	 *
-	 * @param array<string, mixed> $values Values keyed by namespace, then field.
+	 * @param mixed  $values        Values keyed by namespace, then field. Anything but an array is ignored.
+	 * @param string $resource_name Resource of the object that gets the values.
 	 * @return array|\WP_Error A list of field arguments and value pairs, or a WP_Error when a value is rejected.
 	 */
-	private function prepare_fields( array $values ) {
-		$registered = ExtensibleAbilities::get_fields( $this->get_resource() );
+	private function prepare_fields( $values, string $resource_name ) {
+		$registered = ExtensibleAbilities::get_fields( $resource_name );
 		$updates    = array();
-		foreach ( $values as $namespace => $fields ) {
+		foreach ( is_array( $values ) ? $values : array() as $namespace => $fields ) {
 			foreach ( (array) $fields as $field => $value ) {
 				$args = $registered[ $namespace ][ $field ] ?? array();
 				if ( ! isset( $args['update_callback'] ) ) {
@@ -199,6 +359,28 @@ abstract class ActionableAbility extends \WP_Ability {
 	}
 
 	/**
+	 * The error for a field that does not apply to the type of an object.
+	 *
+	 * @param string   $param        Field, as `extensions.<namespace>.<field>`.
+	 * @param string   $object_type  Type of the object.
+	 * @param string[] $object_types Types that the field applies to.
+	 * @return \WP_Error
+	 */
+	protected static function field_object_type_refusal( string $param, string $object_type, array $object_types ): \WP_Error {
+		return new \WP_Error(
+			'woocommerce_ability_field_object_type',
+			sprintf(
+				/* translators: 1: extension field, 2: object type, 3: comma-separated list of object types. */
+				__( 'The %1$s field does not apply to the %2$s type. It applies to %3$s.', 'woocommerce' ),
+				$param,
+				$object_type,
+				implode( ', ', $object_types )
+			),
+			array( 'status' => 400 )
+		);
+	}
+
+	/**
 	 * Write the checked values to the object in memory with the update_callback
 	 * of each field.
 	 *
@@ -209,17 +391,7 @@ abstract class ActionableAbility extends \WP_Ability {
 	private function apply_fields( $subject, array $updates ): ?\WP_Error {
 		foreach ( $updates as $param => list( $args, $value ) ) {
 			if ( ! ExtensibleAbilities::field_applies_to( $args, $subject ) ) {
-				return new \WP_Error(
-					'woocommerce_ability_field_object_type',
-					sprintf(
-						/* translators: 1: extension field, 2: object type, 3: comma-separated list of object types. */
-						__( 'The %1$s field does not apply to the %2$s type. It applies to %3$s.', 'woocommerce' ),
-						$param,
-						ExtensibleAbilities::get_object_type( $subject ) ?? 'unknown',
-						implode( ', ', $args['object_types'] )
-					),
-					array( 'status' => 400 )
-				);
+				return self::field_object_type_refusal( $param, ExtensibleAbilities::get_object_type( $subject ) ?? 'unknown', $args['object_types'] );
 			}
 			$rejected = self::run_callback( $args['update_callback'], array( $subject, $value ), array( 'field' => $param ) );
 			if ( null !== $rejected ) {
@@ -230,13 +402,14 @@ abstract class ActionableAbility extends \WP_Ability {
 	}
 
 	/**
-	 * Run the validators of the resource on the changed object.
+	 * Run the validators of a resource on the changed object.
 	 *
-	 * @param \WC_Data $subject Changed object.
+	 * @param \WC_Data $subject       Changed object.
+	 * @param string   $resource_name Resource of the object.
 	 * @return \WP_Error|null A WP_Error when a validator refuses the change.
 	 */
-	private function validate( $subject ): ?\WP_Error {
-		foreach ( ExtensibleAbilities::get_validators( $this->get_resource() ) as $args ) {
+	private function validate( $subject, string $resource_name ): ?\WP_Error {
+		foreach ( ExtensibleAbilities::get_validators( $resource_name ) as $args ) {
 			$rejected = self::run_callback( $args['callback'], array( $subject, $this ), array( 'namespace' => $args['namespace'] ) );
 			if ( null !== $rejected ) {
 				return $rejected;
@@ -251,7 +424,7 @@ abstract class ActionableAbility extends \WP_Ability {
 	 * logged and becomes a 500 with a fixed message, so its text never reaches
 	 * the client.
 	 *
-	 * @param callable             $callback Field update_callback or validator.
+	 * @param callable             $callback Field update_callback, validator or sync.
 	 * @param array                $args     Callback arguments.
 	 * @param array<string, mixed> $data     Data that names the field or the namespace.
 	 * @return \WP_Error|null
@@ -277,50 +450,15 @@ abstract class ActionableAbility extends \WP_Ability {
 
 	/**
 	 * Add the `extensions` property one time, at the top level of the input
-	 * schema. It lists the fields that have an update_callback, and allows null
-	 * for each one. Each `oneOf`, `anyOf` and `allOf` branch only accepts the
-	 * key, so a branch with `additionalProperties` set to false does not reject
-	 * it, and the schema does not grow with the number of branches.
+	 * schema. Each `oneOf`, `anyOf` and `allOf` branch only accepts the key, so
+	 * a branch with `additionalProperties` set to false does not reject it, and
+	 * the schema does not grow with the number of branches.
 	 *
 	 * @param array<string, mixed> $schema Input schema.
 	 * @return array<string, mixed>
 	 */
 	private function add_extensions_input_schema( array $schema ): array {
-		$extensions = array(
-			'type'                 => 'object',
-			'description'          => __( 'Values to write to the fields that extensions add, keyed by extension namespace, then field. A null value deletes the value.', 'woocommerce' ),
-			'additionalProperties' => false,
-		);
-		foreach ( ExtensibleAbilities::get_fields( $this->get_resource() ) as $namespace => $fields ) {
-			$writable = array_filter(
-				$fields,
-				static function ( array $args ): bool {
-					return isset( $args['update_callback'] );
-				}
-			);
-			if ( empty( $writable ) ) {
-				continue;
-			}
-			$extensions['properties'][ $namespace ] = array(
-				'type'                 => 'object',
-				'properties'           => array_map(
-					static function ( array $args ): array {
-						$field_schema = $args['schema'];
-						if ( isset( $field_schema['type'] ) ) {
-							$field_schema['type'] = array_values( array_unique( array_merge( (array) $field_schema['type'], array( 'null' ) ) ) );
-						}
-						if ( isset( $field_schema['enum'] ) && ! in_array( null, $field_schema['enum'], true ) ) {
-							$field_schema['enum'][] = null;
-						}
-						return $field_schema;
-					},
-					$writable
-				),
-				'additionalProperties' => false,
-			);
-		}
-
-		$schema['properties']['extensions'] = $extensions;
+		$schema['properties']['extensions'] = ExtensibleAbilities::get_input_schema( $this->get_resource() );
 		foreach ( array( 'oneOf', 'anyOf', 'allOf' ) as $keyword ) {
 			foreach ( array_keys( $schema[ $keyword ] ?? array() ) as $index ) {
 				$schema[ $keyword ][ $index ]['properties']['extensions'] = array(

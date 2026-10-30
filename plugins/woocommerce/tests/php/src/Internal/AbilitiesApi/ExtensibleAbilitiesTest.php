@@ -1410,6 +1410,427 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should run a sync once with every saved object, the primary object first, inside the transaction.
+	 */
+	public function test_a_sync_runs_once_with_every_saved_object(): void {
+		$calls = array();
+		$this->register_sync(
+			'product',
+			'test-ext',
+			static function ( array $saved, ActionableAbility $ability ) use ( &$calls ) {
+				$calls[] = array( $ability->get_name(), array_map( 'get_class', $saved ), array_map( static fn( \WC_Data $saved_object ) => $saved_object->get_id(), $saved ) );
+				$prices  = array();
+				foreach ( $saved as $object ) {
+					if ( $object instanceof \WC_Product_Variation ) {
+						$prices[] = (float) $object->get_regular_price();
+					}
+				}
+				if ( $prices && $saved[0] instanceof \WC_Product_Variable ) {
+					$saved[0]->update_meta_data( '_test_min_price', min( $prices ) );
+					$saved[0]->save();
+				}
+				return null;
+			}
+		);
+
+		$created = $this->run_ability( 'woocommerce/product-create', $this->get_shirt_input() );
+
+		$this->assertCount( 1, $calls );
+		$this->assertSame( 'woocommerce/product-create', $calls[0][0] );
+		$this->assertSame( array( 'WC_Product_Variable', 'WC_Product_Variation', 'WC_Product_Variation' ), $calls[0][1] );
+		$this->assertSame( array_merge( array( $created['product']['id'] ), $created['product']['variation_ids'] ), $calls[0][2] );
+		$this->assertSame( '10', wc_get_product( $created['product']['id'] )->get_meta( '_test_min_price' ) );
+	}
+
+	/**
+	 * @testdox Should give a sync the deleted objects and the input of the call.
+	 */
+	public function test_a_sync_gets_the_deleted_objects_and_the_input(): void {
+		$contexts = array();
+		$this->register_sync(
+			'product',
+			'test-ext',
+			static function ( array $saved, ActionableAbility $ability, array $context ) use ( &$contexts ) {
+				$contexts[] = array(
+					'saved'   => array_map( static fn( \WC_Data $item ) => $item->get_id(), $saved ),
+					'deleted' => array_map( static fn( \WC_Data $item ) => $item->get_id(), $context['deleted'] ),
+					'trashed' => array_map( static fn( \WC_Data $item ) => $item->get_id(), $context['trashed'] ),
+					'input'   => $context['input'],
+				);
+				return null;
+			}
+		);
+
+		$created = $this->run_ability( 'woocommerce/product-create', $this->get_shirt_input() );
+		$input   = array(
+			'id'         => $created['product']['id'],
+			'variations' => array(
+				array(
+					'id'     => $created['product']['variation_ids'][1],
+					'delete' => true,
+				),
+			),
+		);
+		$this->run_ability( 'woocommerce/product-update', $input );
+		$this->run_ability(
+			'woocommerce/product-delete',
+			array(
+				'id'    => $created['product']['variation_ids'][0],
+				'force' => true,
+			)
+		);
+		$this->run_ability( 'woocommerce/product-delete', array( 'id' => $created['product']['id'] ) );
+		$this->run_ability(
+			'woocommerce/product-delete',
+			array(
+				'id'    => $created['product']['id'],
+				'force' => true,
+			)
+		);
+
+		$this->assertCount( 5, $contexts );
+		$this->assertSame( array(), $contexts[0]['deleted'] );
+		$this->assertSame( array( $created['product']['id'] ), $contexts[1]['saved'] );
+		$this->assertSame( array( $created['product']['variation_ids'][1] ), $contexts[1]['deleted'] );
+		$this->assertSame( $input, $contexts[1]['input'] );
+		$this->assertSame( array( $created['product']['id'] ), $contexts[2]['saved'], 'A variation delete saves the parent.' );
+		$this->assertSame( array( $created['product']['variation_ids'][0] ), $contexts[2]['deleted'] );
+		$this->assertSame( array(), $contexts[3]['saved'] );
+		$this->assertSame( array(), $contexts[3]['deleted'], 'A trash deletes nothing for good.' );
+		$this->assertSame( array( $created['product']['id'] ), $contexts[3]['trashed'], 'A trash reports the parent as trashed.' );
+		$this->assertSame( array( $created['product']['id'] ), $contexts[4]['deleted'], 'A parent delete reports the parent; its variations were deleted before.' );
+		$this->assertSame( array(), $contexts[4]['trashed'] );
+	}
+
+	/**
+	 * @testdox Should let a validator refuse a delete, and then delete nothing.
+	 */
+	public function test_a_validator_can_refuse_a_delete(): void {
+		$this->register_validator(
+			'product',
+			'test-ext',
+			static fn( \WC_Product $product, ActionableAbility $ability ) => 'woocommerce/product-delete' === $ability->get_name() && 'keep' === $product->get_sku()
+				? new \WP_Error( 'test_keep', 'Keep it.' )
+				: null
+		);
+		$created = $this->run_ability( 'woocommerce/product-create', $this->get_shirt_input() );
+		$kept    = \WC_Helper_Product::create_simple_product( true, array( 'sku' => 'keep' ) );
+
+		$refused = $this->run_ability_response(
+			'woocommerce/product-delete',
+			array(
+				'id'    => $kept->get_id(),
+				'force' => true,
+			)
+		);
+		$deleted = $this->run_ability(
+			'woocommerce/product-delete',
+			array(
+				'id'    => $created['product']['id'],
+				'force' => true,
+			)
+		);
+
+		$this->assertSame( 400, $refused->get_status() );
+		$this->assertSame( 'test_keep', $refused->get_data()['code'] );
+		$this->assertInstanceOf( \WC_Product::class, wc_get_product( $kept->get_id() ) );
+		$this->assertTrue( $deleted['deleted'] );
+		$this->assertFalse( wc_get_product( $created['product']['id'] ) );
+		$this->assertNull( get_post( $created['product']['variation_ids'][0] ), 'The variations go with the parent.' );
+	}
+
+	/**
+	 * @testdox Should undo every save of the call when a sync returns a WP_Error.
+	 */
+	public function test_a_refusal_in_a_sync_rolls_back_the_call(): void {
+		$this->register_sync(
+			'product',
+			'test-ext',
+			static function ( array $saved ) {
+				return $saved[0] instanceof \WC_Product_Variable
+					? new \WP_Error( 'test_range_refused', 'The range is not allowed.', array( 'status' => 409 ) )
+					: null;
+			}
+		);
+
+		$response = $this->run_ability_response( 'woocommerce/product-create', $this->get_shirt_input() );
+
+		$this->assertSame( 409, $response->get_status() );
+		$this->assertSame( 'test_range_refused', $response->get_data()['code'] );
+		$this->assertSame( 'test-ext', $response->get_data()['data']['namespace'] );
+		$this->assertSame( 0, wc_get_product_id_by_sku( 'shirt-s' ) );
+		$this->assertSame(
+			array(),
+			get_posts(
+				array(
+					'post_type'   => array( 'product', 'product_variation' ),
+					'post_status' => 'any',
+					'fields'      => 'ids',
+				)
+			)
+		);
+	}
+
+	/**
+	 * @testdox Should not run a sync with the feature off.
+	 */
+	public function test_a_sync_does_not_run_with_the_feature_off(): void {
+		$fired = 0;
+		$this->register_sync(
+			'product',
+			'test-ext',
+			static function () use ( &$fired ) {
+				++$fired;
+			}
+		);
+		$this->reset_registries();
+		AbilitiesLoader::init_extensions();
+		$this->set_feature( false );
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+
+		$output = $this->run_ability(
+			'woocommerce/product-update',
+			array(
+				'id'   => $product->get_id(),
+				'name' => 'Pencil',
+			)
+		);
+
+		$this->assertNotEmpty( ExtensibleAbilities::get_syncs( 'product' ) );
+		$this->assertSame( 'Pencil', $output['product']['name'] );
+		$this->assertSame( 0, $fired );
+	}
+
+	/**
+	 * @testdox Should not run a sync of a resource that the call did not save.
+	 */
+	public function test_a_sync_of_a_resource_that_was_not_saved_does_not_run(): void {
+		$fired = 0;
+		$this->register_sync(
+			'order_item',
+			'test-ext',
+			static function () use ( &$fired ) {
+				++$fired;
+			}
+		);
+
+		$this->run_ability( 'woocommerce/product-create', $this->get_shirt_input() );
+
+		$this->assertSame( 0, $fired );
+	}
+
+	/**
+	 * @testdox Should refuse a sync on a resource that is not registered.
+	 */
+	public function test_a_sync_on_an_unregistered_resource_is_refused(): void {
+		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_sync' );
+		$this->register_sync( 'refund', 'test-ext', '__return_null' );
+		$this->reset_registries();
+		AbilitiesLoader::init_extensions();
+
+		$this->assertEmpty( ExtensibleAbilities::get_syncs( 'refund' ) );
+	}
+
+	/**
+	 * @testdox Should run the validators of a secondary object's own resource, and not those of the primary object's resource.
+	 */
+	public function test_a_secondary_object_gets_the_validators_of_its_own_resource(): void {
+		$checked = array(
+			'product'    => array(),
+			'order_item' => array(),
+		);
+		foreach ( array_keys( $checked ) as $resource_name ) {
+			$this->register_validator(
+				$resource_name,
+				'test-ext',
+				static function ( \WC_Data $subject ) use ( &$checked, $resource_name ) {
+					$checked[ $resource_name ][] = get_class( $subject );
+					return null;
+				}
+			);
+		}
+		$this->register_product_with_item_ability();
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+
+		$this->run_ability(
+			'test-ext/product-with-item',
+			array(
+				'id'   => $product->get_id(),
+				'name' => 'Pencil',
+			)
+		);
+
+		$this->assertSame( array( 'WC_Product_Simple' ), $checked['product'] );
+		$this->assertSame( array( 'WC_Order_Item_Product' ), $checked['order_item'] );
+	}
+
+	/**
+	 * @testdox Should warn when a secondary object names a resource that is not registered, and still run the call.
+	 */
+	public function test_a_secondary_object_with_an_unregistered_resource_warns(): void {
+		$this->setExpectedIncorrectUsage( TestProductWithItemAbility::class . '::change' );
+		$this->register_product_with_item_ability();
+		TestProductWithItemAbility::$item_resource = 'refund';
+		$product                                   = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+
+		try {
+			$this->run_ability(
+				'test-ext/product-with-item',
+				array(
+					'id'   => $product->get_id(),
+					'name' => 'Pencil',
+				)
+			);
+		} finally {
+			TestProductWithItemAbility::$item_resource = 'order_item';
+		}
+
+		$this->assertSame( 'Pencil', wc_get_product( $product->get_id() )->get_name() );
+	}
+
+	/**
+	 * Register the test ability that renames a product and returns an order item as a secondary object.
+	 */
+	private function register_product_with_item_ability(): void {
+		$this->add_test_action(
+			'wp_abilities_api_init',
+			static function () {
+				wp_register_ability(
+					'test-ext/product-with-item',
+					array(
+						'label'               => 'Rename product with an item',
+						'description'         => 'Renames a product and changes an order item.',
+						'category'            => 'woocommerce',
+						'input_schema'        => array(
+							'type'       => 'object',
+							'properties' => array(
+								'id'   => array( 'type' => 'integer' ),
+								'name' => array( 'type' => 'string' ),
+							),
+						),
+						'output_schema'       => array( 'type' => 'object' ),
+						'permission_callback' => '__return_true',
+						'ability_class'       => TestProductWithItemAbility::class,
+						'meta'                => array( 'show_in_rest' => true ),
+					)
+				);
+			},
+			20
+		);
+	}
+
+	/**
+	 * The input of a variable shirt with two variations.
+	 *
+	 * @return array
+	 */
+	private function get_shirt_input(): array {
+		return array(
+			'name'       => 'Shirt',
+			'type'       => 'variable',
+			'attributes' => array(
+				array(
+					'name'    => 'Size',
+					'options' => array( 'S', 'M' ),
+				),
+			),
+			'variations' => array(
+				array(
+					'attributes'    => array(
+						array(
+							'name'   => 'Size',
+							'option' => 'S',
+						),
+					),
+					'sku'           => 'shirt-s',
+					'regular_price' => '10.00',
+				),
+				array(
+					'attributes'    => array(
+						array(
+							'name'   => 'Size',
+							'option' => 'M',
+						),
+					),
+					'sku'           => 'shirt-m',
+					'regular_price' => '12.00',
+				),
+			),
+		);
+	}
+
+	/**
+	 * @testdox Should write extension fields to each variation and run validators on them before any save.
+	 */
+	public function test_variations_get_extension_fields_and_validators(): void {
+		$this->register_validator(
+			'product',
+			'other_ext',
+			static function ( \WC_Product $subject ) {
+				return $subject instanceof \WC_Product_Variation && 'red' === $subject->get_meta( '_test_color' )
+					? new \WP_Error( 'test_red_variation', 'No red variations.' )
+					: null;
+			}
+		);
+		$input = array(
+			'name'       => 'Shirt',
+			'type'       => 'variable',
+			'attributes' => array(
+				array(
+					'name'    => 'Size',
+					'options' => array( 'S', 'M' ),
+				),
+			),
+			'variations' => array(
+				array(
+					'attributes' => array(
+						array(
+							'name'   => 'Size',
+							'option' => 'S',
+						),
+					),
+					'extensions' => array( 'test-ext' => array( 'color' => 'blue' ) ),
+				),
+				array(
+					'attributes' => array(
+						array(
+							'name'   => 'Size',
+							'option' => 'M',
+						),
+					),
+					'extensions' => array( 'test-ext' => array( 'color' => 'red' ) ),
+				),
+			),
+		);
+
+		$schema  = wp_get_ability( 'woocommerce/product-create' )->get_input_schema();
+		$refused = $this->run_ability_response( 'woocommerce/product-create', $input );
+		$saved   = get_posts(
+			array(
+				'post_type'   => array( 'product', 'product_variation' ),
+				'post_status' => 'any',
+				'fields'      => 'ids',
+			)
+		);
+
+		$input['variations'][1]['extensions']['test-ext']['color'] = 'green';
+		$created = $this->run_ability( 'woocommerce/product-create', $input );
+
+		$this->assertArrayHasKey( 'color', $schema['properties']['variations']['items']['properties']['extensions']['properties']['test-ext']['properties'] );
+		$this->assertSame( 400, $refused->get_status() );
+		$this->assertSame( 'test_red_variation', $refused->get_data()['code'] );
+		$this->assertSame( array(), $saved );
+
+		$colors = array_map(
+			static function ( int $variation_id ): string {
+				return wc_get_product( $variation_id )->get_meta( '_test_color' );
+			},
+			$created['product']['variation_ids']
+		);
+		$this->assertSame( array( 'blue', 'green' ), $colors );
+	}
+
+	/**
 	 * @testdox Should call WC_Order::update_status() with the feature off and on.
 	 */
 	public function test_the_feature_off_path_calls_update_status(): void {
@@ -1618,7 +2039,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should list the writable fields one time at the top level of the product input schemas.
+	 * @testdox Should list the writable fields one time at the top level of the product input schemas, plus one time for the variations.
 	 */
 	public function test_input_schemas_list_writable_fields_one_time(): void {
 		foreach ( array( 'woocommerce/product-create', 'woocommerce/product-update' ) as $name ) {
@@ -1628,11 +2049,13 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			$this->assertSame( array( 'string', 'null' ), $extensions['test-ext']['properties']['color']['type'] );
 			$this->assertSame( array( 'integer', 'null' ), $extensions['other_ext']['properties']['count']['type'] );
 			$this->assertArrayNotHasKey( 'code', $extensions['test-ext']['properties'] );
-			$this->assertSame( 1, substr_count( wp_json_encode( $schema ), '"color"' ) );
+			$this->assertSame( 2, substr_count( wp_json_encode( $schema ), '"color"' ) );
 			$this->assertArrayNotHasKey( 'oneOf', $schema );
 		}
 		$order = $this->get_ability( 'woocommerce/order-update-status' )['input_schema'];
 		$this->assertArrayNotHasKey( 'extensions', $order['properties'] );
+		$delete = $this->get_ability( 'woocommerce/product-delete' )['input_schema'];
+		$this->assertArrayNotHasKey( 'extensions', $delete['properties'], 'A delete writes no extension fields.' );
 	}
 
 	/**
@@ -1687,6 +2110,402 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->assertSame( 'monthly', $updated['product']['extensions']['test-ext']['plan'] );
 		$this->assertSame( 'yearly', wc_get_product( $simple->get_id() )->get_meta( '_test_plan' ) );
 		$this->assertArrayNotHasKey( 'plan', $read['products'][0]['extensions']['test-ext'] ?? array() );
+	}
+
+	/**
+	 * @testdox Should list in the variation schemas only the fields that can apply to a variation.
+	 */
+	public function test_variation_schemas_list_only_the_fields_that_apply_to_a_variation(): void {
+		$register = static function () {
+			foreach ( array( 'simple_only' => array( 'simple' ), 'variation_only' => array( 'variation' ) ) as $field => $object_types ) {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'        => 'product',
+						'namespace'       => 'typed-ext',
+						'field'           => $field,
+						'schema'          => array( 'type' => 'string' ),
+						'object_types'    => $object_types,
+						'get_callback'    => static fn() => 'value',
+						'update_callback' => static function ( \WC_Product $product, $value ) use ( $field ) {
+							$product->update_meta_data( '_test_' . $field, $value );
+						},
+					)
+				);
+			}
+			ExtensibleAbilities::register_field(
+				array(
+					'resource'     => 'product',
+					'namespace'    => 'simple-only-ext',
+					'field'        => 'plan',
+					'schema'       => array( 'type' => 'string' ),
+					'object_types' => array( 'simple' ),
+					'get_callback' => static fn() => 'value',
+				)
+			);
+		};
+		add_action( 'woocommerce_extensible_abilities_init', $register );
+
+		try {
+			$ability = $this->get_ability( 'woocommerce/product-create' );
+			$output  = $this->run_ability( 'woocommerce/product-create', $this->get_shirt_input() );
+			$input   = $this->get_shirt_input();
+
+			unset( $input['sku'], $input['variations'][0]['sku'], $input['variations'][1]['sku'] );
+			$input['variations'][0]['extensions'] = array( 'typed-ext' => array( 'simple_only' => 'nope' ) );
+
+			$refused = $this->run_ability_response( 'woocommerce/product-create', $input );
+		} finally {
+			remove_action( 'woocommerce_extensible_abilities_init', $register );
+		}
+
+		$this->assertSame( 400, $refused->get_status() );
+		$this->assertSame( 'woocommerce_ability_field_object_type', $refused->get_data()['code'] );
+		$this->assertSame( 'The extensions.typed-ext.simple_only field does not apply to the variation type. It applies to simple.', $refused->get_data()['message'] );
+
+		$input_namespaces  = $ability['input_schema']['properties']['variations']['items']['properties']['extensions']['properties'];
+		$output_namespaces = $ability['output_schema']['properties']['variations']['items']['properties']['extensions']['properties'];
+		$product_input     = $ability['input_schema']['properties']['extensions']['properties'];
+		$this->assertArrayHasKey( 'simple_only', $product_input['typed-ext']['properties'] );
+		$this->assertArrayHasKey( 'variation_only', $input_namespaces['typed-ext']['properties'] );
+		$this->assertFalse( $ability['input_schema']['properties']['variations']['items']['properties']['extensions']['additionalProperties'] );
+		$this->assertFalse( $input_namespaces['typed-ext']['additionalProperties'] );
+		$this->assertArrayNotHasKey( 'simple_only', $input_namespaces['typed-ext']['properties'] );
+		$this->assertArrayHasKey( 'color', $input_namespaces['test-ext']['properties'], 'A field without object_types stays.' );
+		$this->assertArrayHasKey( 'variation_only', $output_namespaces['typed-ext']['properties'] );
+		$this->assertArrayNotHasKey( 'simple_only', $output_namespaces['typed-ext']['properties'] );
+		$this->assertArrayNotHasKey( 'simple-only-ext', $output_namespaces, 'A namespace with no field for a variation goes away.' );
+		$this->assertSame( 'value', $output['variations'][0]['extensions']['typed-ext']['variation_only'] );
+	}
+
+	/**
+	 * Register a variable product type with a variation class of its own, the way
+	 * an extension does, and a field limited to that variation class.
+	 *
+	 * @internal
+	 */
+	private function register_variation_subclass(): void {
+		$this->add_test_action(
+			'product_type_selector',
+			static fn( array $types ): array => $types + array( 'test-variable' => 'Test variable' )
+		);
+		$this->add_test_action(
+			'woocommerce_data_stores',
+			static fn( array $stores ): array => $stores + array(
+				'product-test-variable'  => 'WC_Product_Variable_Data_Store_CPT',
+				'product-test_variation' => 'WC_Product_Variation_Data_Store_CPT',
+			)
+		);
+		$this->add_test_action(
+			'woocommerce_product_class',
+			static function ( $classname, $product_type, $post_type, $product_id ) {
+				if ( 'test-variable' === $product_type ) {
+					return TestVariableProduct::class;
+				}
+				if ( 'test_variation' === $product_type ) {
+					return TestVariationProduct::class;
+				}
+				if ( 'variation' === $product_type && $product_id > 0 && has_term( 'test-variable', 'product_type', (int) wp_get_post_parent_id( $product_id ) ) ) {
+					return TestVariationProduct::class;
+				}
+				return $classname;
+			},
+			10,
+			4
+		);
+		$this->add_test_action(
+			'woocommerce_ability_variation_product_type',
+			static fn( string $type, \WC_Product_Variable $parent_product ): string => 'test-variable' === $parent_product->get_type() ? 'test_variation' : $type,
+			10,
+			2
+		);
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'        => 'product',
+						'namespace'       => 'test-ext',
+						'field'           => 'plan',
+						'schema'          => array( 'type' => 'string' ),
+						'object_types'    => array( 'test_variation' ),
+						'get_callback'    => static fn( \WC_Product $product ) => $product->get_meta( '_test_plan' ),
+						'update_callback' => static function ( \WC_Product $product, $value ) {
+							$product->update_meta_data( '_test_plan', $value );
+						},
+					)
+				);
+			}
+		);
+	}
+
+	/**
+	 * @testdox Should read a saved variation whose class extends the variation class.
+	 */
+	public function test_reads_a_variation_of_a_subclass(): void {
+		$this->register_variation_subclass();
+
+		$parent_product = new TestVariableProduct();
+		$parent_product->set_name( 'Test variable' );
+		$parent_product->save();
+		$variation = new \WC_Product_Variation();
+		$variation->set_parent_id( $parent_product->get_id() );
+		$variation->save();
+
+		$read = $this->run_ability( 'woocommerce/products-query', array( 'id' => $variation->get_id() ) );
+
+		$this->assertInstanceOf( TestVariationProduct::class, wc_get_product( $variation->get_id() ) );
+		$this->assertSame( 'test_variation', $read['products'][0]['type'] );
+	}
+
+	/**
+	 * @testdox Should build a new variation with the class that the parent type asks for, and write a field limited to it.
+	 */
+	public function test_creates_variations_of_a_subclass_with_their_fields(): void {
+		$this->register_variation_subclass();
+
+		$input                                = $this->get_shirt_input();
+		$input['type']                        = 'test-variable';
+		$input['attributes'][0]['options'][]  = 'L';
+		$input['variations'][0]['extensions'] = array( 'test-ext' => array( 'plan' => 'monthly' ) );
+		$created                              = $this->run_ability( 'woocommerce/product-create', $input );
+		$new_item                             = array(
+			'attributes' => array(
+				array(
+					'name'   => 'Size',
+					'option' => 'L',
+				),
+			),
+			'extensions' => array( 'test-ext' => array( 'plan' => 'yearly' ) ),
+		);
+		$updated                              = $this->run_ability(
+			'woocommerce/product-update',
+			array(
+				'id'         => $created['product']['id'],
+				'variations' => array( $new_item ),
+			)
+		);
+		$variation_id                         = $created['variations'][0]['id'];
+
+		$this->assertSame( 'test-variable', $created['product']['type'] );
+		$this->assertSame( 'test_variation', $created['variations'][0]['type'] );
+		$this->assertSame( 'monthly', $created['variations'][0]['extensions']['test-ext']['plan'] );
+		$this->assertInstanceOf( TestVariationProduct::class, wc_get_product( $variation_id ) );
+		$this->assertSame( 'product_variation', get_post_type( $variation_id ) );
+		$this->assertSame( 'monthly', wc_get_product( $variation_id )->get_meta( '_test_plan' ) );
+		$this->assertSame( 'test_variation', $updated['variations'][0]['type'] );
+		$this->assertSame( 'yearly', wc_get_product( $updated['variations'][0]['id'] )->get_meta( '_test_plan' ) );
+	}
+
+	/**
+	 * @testdox Should build the variation class of the parent when a variation is created on its own.
+	 */
+	public function test_creates_a_single_variation_of_a_subclass(): void {
+		$this->register_variation_subclass();
+
+		$input               = $this->get_shirt_input();
+		$input['type']       = 'test-variable';
+		$input['variations'] = array();
+		$parent_id           = $this->run_ability( 'woocommerce/product-create', $input )['product']['id'];
+
+		$created = $this->run_ability(
+			'woocommerce/product-create',
+			array(
+				'type'       => 'variation',
+				'parent_id'  => $parent_id,
+				'attributes' => array(
+					array(
+						'name'   => 'Size',
+						'option' => 'S',
+					),
+				),
+				'extensions' => array( 'test-ext' => array( 'plan' => 'monthly' ) ),
+			)
+		);
+
+		$this->assertSame( 'test_variation', $created['product']['type'] );
+		$this->assertSame( 'monthly', wc_get_product( $created['product']['id'] )->get_meta( '_test_plan' ) );
+	}
+
+	/**
+	 * @testdox Should keep plain variations for a plain variable product, and refuse a field limited to a subclass on them.
+	 */
+	public function test_plain_variable_product_builds_plain_variations(): void {
+		$this->register_variation_subclass();
+
+		$created = $this->run_ability( 'woocommerce/product-create', $this->get_shirt_input() );
+
+		$input = $this->get_shirt_input();
+		unset( $input['sku'], $input['variations'][0]['sku'], $input['variations'][1]['sku'] );
+		$input['variations'][0]['extensions'] = array( 'test-ext' => array( 'plan' => 'monthly' ) );
+		$refused                              = $this->run_ability_response( 'woocommerce/product-create', $input );
+
+		$this->assertSame( 'variation', $created['variations'][0]['type'] );
+		$this->assertSame( \WC_Product_Variation::class, get_class( wc_get_product( $created['variations'][0]['id'] ) ) );
+		$this->assertSame( 400, $refused->get_status() );
+		$this->assertSame( 'woocommerce_ability_field_object_type', $refused->get_data()['code'] );
+	}
+
+	/**
+	 * Create a variable product of the subclass type and a plain one, with two variations each.
+	 *
+	 * @return array{subclass: array, plain: array}
+	 */
+	private function create_subclass_and_plain_products(): array {
+		$this->register_variation_subclass();
+
+		$input         = $this->get_shirt_input();
+		$input['type'] = 'test-variable';
+		foreach ( $input['variations'] as $index => $variation ) {
+			$input['variations'][ $index ]['sku'] = 'test-' . $variation['sku'];
+		}
+
+		return array(
+			'plain'    => $this->run_ability( 'woocommerce/product-create', $this->get_shirt_input() ),
+			'subclass' => $this->run_ability( 'woocommerce/product-create', $input ),
+		);
+	}
+
+	/**
+	 * @testdox Should accept a variation subclass type in a query and return only the variations of its parent type.
+	 */
+	public function test_queries_variations_by_subclass_type(): void {
+		$created = $this->create_subclass_and_plain_products();
+
+		$found = $this->run_ability( 'woocommerce/products-query', array( 'type' => 'test_variation' ) )['products'];
+
+		$this->assertEqualsCanonicalizing( array_column( $created['subclass']['variations'], 'id' ), array_column( $found, 'id' ) );
+		$this->assertSame( array( 'test_variation' ), array_values( array_unique( array_column( $found, 'type' ) ) ) );
+	}
+
+	/**
+	 * @testdox Should page a variation subclass query inside the database query.
+	 */
+	public function test_pages_a_variation_subclass_query(): void {
+		$created = $this->create_subclass_and_plain_products();
+		$query   = static fn( int $page ): array => array(
+			'type'     => 'test_variation',
+			'per_page' => 1,
+			'page'     => $page,
+		);
+
+		$first  = $this->run_ability( 'woocommerce/products-query', $query( 1 ) );
+		$second = $this->run_ability( 'woocommerce/products-query', $query( 2 ) );
+		$third  = $this->run_ability( 'woocommerce/products-query', $query( 3 ) );
+
+		$this->assertSame( 2, $first['total_pages'] );
+		$this->assertCount( 1, $first['products'] );
+		$this->assertCount( 1, $second['products'] );
+		$this->assertSame( array(), $third['products'] );
+		$this->assertEqualsCanonicalizing(
+			array_column( $created['subclass']['variations'], 'id' ),
+			array( $first['products'][0]['id'], $second['products'][0]['id'] )
+		);
+	}
+
+	/**
+	 * @testdox Should combine a variation subclass type with parent_id and extension query filters.
+	 */
+	public function test_combines_a_variation_subclass_query_with_other_limits(): void {
+		$created = $this->create_subclass_and_plain_products();
+		$picked  = array( $created['subclass']['variations'][0]['id'], $created['plain']['variations'][0]['id'] );
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () use ( $picked ) {
+				ExtensibleAbilities::register_query_filter(
+					array(
+						'resource'  => 'product',
+						'namespace' => 'test-ext',
+						'filter'    => 'picked',
+						'schema'    => array( 'type' => 'boolean' ),
+						'callback'  => static fn() => array( 'include_ids' => $picked ),
+					)
+				);
+			}
+		);
+		$this->reset_registries();
+
+		$own_parent   = $this->run_ability(
+			'woocommerce/products-query',
+			array(
+				'type'      => 'test_variation',
+				'parent_id' => $created['subclass']['product']['id'],
+			)
+		);
+		$other_parent = $this->run_ability(
+			'woocommerce/products-query',
+			array(
+				'type'      => 'test_variation',
+				'parent_id' => $created['plain']['product']['id'],
+			)
+		);
+		$filtered     = $this->run_ability(
+			'woocommerce/products-query',
+			array(
+				'type'    => 'test_variation',
+				'filters' => array( 'extensions' => array( 'test-ext' => array( 'picked' => true ) ) ),
+			)
+		);
+
+		$this->assertEqualsCanonicalizing( array_column( $created['subclass']['variations'], 'id' ), array_column( $own_parent['products'], 'id' ) );
+		$this->assertSame( array(), $other_parent['products'] );
+		$this->assertSame( array( $picked[0] ), array_column( $filtered['products'], 'id' ) );
+	}
+
+	/**
+	 * @testdox Should still return plain and subclass variations for the variation type.
+	 */
+	public function test_variation_type_query_returns_every_variation(): void {
+		$created = $this->create_subclass_and_plain_products();
+
+		$found = $this->run_ability( 'woocommerce/products-query', array( 'type' => 'variation' ) )['products'];
+
+		$this->assertEqualsCanonicalizing(
+			array_merge( array_column( $created['subclass']['variations'], 'id' ), array_column( $created['plain']['variations'], 'id' ) ),
+			array_column( $found, 'id' )
+		);
+		$this->assertEqualsCanonicalizing( array( 'test_variation', 'variation' ), array_values( array_unique( array_column( $found, 'type' ) ) ) );
+	}
+
+	/**
+	 * @testdox Should refuse a query type that no registered variable type builds.
+	 */
+	public function test_refuses_a_query_type_that_is_not_listed(): void {
+		$unregistered = $this->run_ability_response( 'woocommerce/products-query', array( 'type' => 'test_variation' ) );
+
+		$this->register_variation_subclass();
+		$this->reset_registries();
+		$unknown = $this->run_ability_response( 'woocommerce/products-query', array( 'type' => 'other_variation' ) );
+
+		$this->assertSame( 400, $unregistered->get_status() );
+		$this->assertSame( 400, $unknown->get_status() );
+	}
+
+	/**
+	 * @testdox Should list a variation subclass type on the query input only.
+	 */
+	public function test_lists_a_variation_subclass_type_on_the_query_input_only(): void {
+		$type_list = fn( string $name ): array => $this->get_ability( $name )['input_schema']['properties']['type']['enum'];
+		$create    = $type_list( 'woocommerce/product-create' );
+		$update    = $type_list( 'woocommerce/product-update' );
+
+		$this->register_variation_subclass();
+		$this->reset_registries();
+
+		$this->assertContains( 'test_variation', $type_list( 'woocommerce/products-query' ) );
+		$this->assertSame( $create, array_values( array_diff( $type_list( 'woocommerce/product-create' ), array( 'test-variable' ) ) ) );
+		$this->assertSame( $update, array_values( array_diff( $type_list( 'woocommerce/product-update' ), array( 'test-variable' ) ) ) );
+	}
+
+	/**
+	 * @testdox Should refuse a variation type that does not build a variation.
+	 */
+	public function test_refuses_a_variation_type_that_is_not_a_variation(): void {
+		$this->add_test_action( 'woocommerce_ability_variation_product_type', static fn(): string => 'simple' );
+
+		$refused = $this->run_ability_response( 'woocommerce/product-create', $this->get_shirt_input() );
+
+		$this->assertSame( 400, $refused->get_status() );
+		$this->assertSame( 'woocommerce_invalid_product_type', $refused->get_data()['code'] );
 	}
 
 	/**
@@ -2018,9 +2837,10 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	 * @param string   $hook     Action name.
 	 * @param callable $callback Callback.
 	 * @param int      $priority Priority.
+	 * @param int      $accepted_args Number of arguments the callback takes.
 	 */
-	private function add_test_action( string $hook, callable $callback, int $priority = 10 ): void {
-		add_action( $hook, $callback, $priority );
+	private function add_test_action( string $hook, callable $callback, int $priority = 10, int $accepted_args = 1 ): void {
+		add_action( $hook, $callback, $priority, $accepted_args );
 		$this->test_actions[] = array( $hook, $callback, $priority );
 	}
 
@@ -2036,6 +2856,28 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			'woocommerce_extensible_abilities_init',
 			static function () use ( $resource_name, $extension_namespace, $callback ) {
 				ExtensibleAbilities::register_validator(
+					array(
+						'resource'  => $resource_name,
+						'namespace' => $extension_namespace,
+						'callback'  => $callback,
+					)
+				);
+			}
+		);
+	}
+
+	/**
+	 * Register a sync inside woocommerce_extensible_abilities_init, the way an extension does.
+	 *
+	 * @param string   $resource_name       Resource.
+	 * @param string   $extension_namespace Extension namespace.
+	 * @param callable $callback            Sync.
+	 */
+	private function register_sync( string $resource_name, string $extension_namespace, callable $callback ): void {
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () use ( $resource_name, $extension_namespace, $callback ) {
+				ExtensibleAbilities::register_sync(
 					array(
 						'resource'  => $resource_name,
 						'namespace' => $extension_namespace,
@@ -2132,9 +2974,11 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	 * @return \WP_REST_Response
 	 */
 	private function run_ability_response( string $name, array $input ): \WP_REST_Response {
-		$readonly = ! empty( wp_get_ability( $name )->get_meta()['annotations']['readonly'] );
-		$request  = new \WP_REST_Request( $readonly ? 'GET' : 'POST', '/wp-abilities/v1/abilities/' . $name . '/run' );
-		if ( $readonly ) {
+		$annotations = wp_get_ability( $name )->get_meta()['annotations'] ?? array();
+		$readonly    = ! empty( $annotations['readonly'] );
+		$method      = $readonly ? 'GET' : ( ! empty( $annotations['destructive'] ) && ! empty( $annotations['idempotent'] ) ? 'DELETE' : 'POST' );
+		$request     = new \WP_REST_Request( $method, '/wp-abilities/v1/abilities/' . $name . '/run' );
+		if ( 'POST' !== $method ) {
 			$request->set_query_params( array( 'input' => $input ) );
 		} else {
 			$request->set_header( 'Content-Type', 'application/json' );
@@ -2182,7 +3026,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	private function reset_registries(): void {
 		global $wp_actions;
 
-		foreach ( array( 'fields', 'reported', 'validators', 'filters' ) as $property ) {
+		foreach ( array( 'fields', 'reported', 'validators', 'syncs', 'filters' ) as $property ) {
 			$reflection = new \ReflectionProperty( ExtensibleAbilities::class, $property );
 			$reflection->setAccessible( true );
 			$reflection->setValue( null, array() );

@@ -251,7 +251,6 @@ class WC_Unit_Tests_Bootstrap {
 	 */
 	public function load_wc() {
 		define( 'WC_TAX_ROUNDING_MODE', 'auto' );
-		define( 'WC_USE_TRANSACTIONS', false );
 
 		update_option( 'woocommerce_enable_coupons', 'yes' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
@@ -259,6 +258,11 @@ class WC_Unit_Tests_Bootstrap {
 
 		require_once $this->plugin_dir . '/woocommerce.php';
 		FeaturePlugin::instance()->init();
+
+		// The test case wraps each test in a transaction that it rolls back. Enter
+		// that transaction one time, so every wc_transaction_query() call in a test
+		// becomes a savepoint inside it, and a rollback in the code under test is real.
+		wc_transaction_query( 'start' );
 	}
 
 	/**
