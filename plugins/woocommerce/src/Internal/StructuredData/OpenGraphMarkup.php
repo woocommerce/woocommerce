@@ -47,6 +47,11 @@ class OpenGraphMarkup {
 				'match'  => '/^og:image(?::|$)/D',
 				'exists' => false,
 			),
+			'video' => array(
+				'detect' => '/^og:video(?::url)?$/D',
+				'match'  => '/^og:video(?::|$)/D',
+				'exists' => false,
+			),
 		);
 
 		$processor = new WP_HTML_Tag_Processor( $html );
