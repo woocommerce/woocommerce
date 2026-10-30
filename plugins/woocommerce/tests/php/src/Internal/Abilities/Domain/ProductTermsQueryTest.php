@@ -169,6 +169,53 @@ class ProductTermsQueryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return image metadata with valid dates and omit missing images.
+	 * @testWith ["product_cat"]
+	 *           ["product_brand"]
+	 * @param string $taxonomy Taxonomy.
+	 */
+	public function test_image_metadata( string $taxonomy ): void {
+		update_option( 'timezone_string', 'Europe/Madrid' );
+		$id       = self::factory()->term->create( array( 'taxonomy' => $taxonomy ) );
+		$image_id = self::factory()->post->create(
+			array(
+				'post_type'      => 'attachment',
+				'post_title'     => 'Summer image',
+				'post_mime_type' => 'image/jpeg',
+				'guid'           => 'https://example.test/summer.jpg',
+			)
+		);
+		update_post_meta( $image_id, '_wp_attachment_image_alt', 'Summer products' );
+		update_term_meta( $id, 'thumbnail_id', $image_id );
+		$ability = new \WP_Ability( ProductTermsQuery::get_name(), ProductTermsQuery::get_registration_args() );
+		$result  = $ability->execute(
+			array(
+				'taxonomy' => $taxonomy,
+				'include'  => array( $id ),
+			)
+		);
+		$this->assertIsArray( $result );
+		$image = $result['terms'][0]['image'];
+		$this->assertStringEndsWith( '+00:00', $image['date_created_gmt'] );
+		$this->assertStringEndsWith( '+00:00', $image['date_modified_gmt'] );
+		$this->assertSame( $image_id, $image['id'] );
+		$this->assertSame( 'Summer image', $image['name'] );
+		$this->assertSame( 'Summer products', $image['alt'] );
+		$this->assertSame( wp_get_attachment_url( $image_id ), $image['src'] );
+		foreach ( array( 'date_created', 'date_created_gmt', 'date_modified', 'date_modified_gmt' ) as $field ) {
+			$this->assertMatchesRegularExpression( '/(?:Z|[+-]\\d{2}:\\d{2})$/', $image[ $field ] );
+		}
+		update_term_meta( $id, 'thumbnail_id', 99999999 );
+		$result = $ability->execute(
+			array(
+				'taxonomy' => $taxonomy,
+				'include'  => array( $id ),
+			)
+		);
+		$this->assertArrayNotHasKey( 'image', $result['terms'][0] );
+	}
+
+	/**
 	 * @testdox Should enforce read permissions and validate taxonomy and pagination through the ability.
 	 */
 	public function test_permissions_and_validation(): void {

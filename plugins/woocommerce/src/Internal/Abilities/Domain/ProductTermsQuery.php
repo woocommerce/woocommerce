@@ -112,6 +112,12 @@ class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefiniti
 			return $total;
 		}
 
+		$image_ids = array_filter( array_map( static fn( $term ) => (int) get_term_meta( $term->term_id, 'thumbnail_id', true ), $terms ) );
+		if ( ! empty( $image_ids ) ) {
+			// Prime caches to reduce future queries.
+			_prime_post_caches( $image_ids );
+		}
+
 		return array(
 			'terms'       => array_map( array( __CLASS__, 'format_term' ), array_values( $terms ) ),
 			'total'       => (int) $total,
@@ -140,6 +146,33 @@ class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefiniti
 			$display              = get_term_meta( $term->term_id, 'display_type', true );
 			$output['display']    = $display ? $display : 'default';
 			$output['menu_order'] = (int) get_term_meta( $term->term_id, 'order', true );
+			$image_id             = (int) get_term_meta( $term->term_id, 'thumbnail_id', true );
+			$image                = $image_id ? get_post( $image_id ) : null;
+			if ( $image && 'attachment' === $image->post_type ) {
+				$output['image'] = array(
+					'id'   => $image->ID,
+					'src'  => wp_get_attachment_url( $image->ID ),
+					'name' => get_the_title( $image ),
+					'alt'  => get_post_meta( $image->ID, '_wp_attachment_image_alt', true ),
+				);
+				foreach ( array(
+					'date_created'  => 'date',
+					'date_modified' => 'modified',
+				) as $field => $source ) {
+					foreach ( array(
+						''     => 'local',
+						'_gmt' => 'gmt',
+					) as $suffix => $timezone ) {
+						$date = get_post_datetime( $image, $source, $timezone );
+						if ( $date ) {
+							if ( 'gmt' === $timezone ) {
+								$date = $date->setTimezone( new \DateTimeZone( 'UTC' ) );
+							}
+							$output['image'][ $field . $suffix ] = $date->format( DATE_RFC3339 );
+						}
+					}
+				}
+			}
 		}
 		return $output;
 	}
@@ -240,7 +273,32 @@ class ProductTermsQuery extends AbstractDomainAbility implements AbilityDefiniti
 				'parent'      => array( 'type' => 'integer' ),
 				'display'     => array( 'type' => 'string' ),
 				'menu_order'  => array( 'type' => 'integer' ),
-
+				'image'       => array(
+					'type'                 => 'object',
+					'properties'           => array(
+						'id'                => array( 'type' => 'integer' ),
+						'src'               => array( 'type' => 'string' ),
+						'name'              => array( 'type' => 'string' ),
+						'alt'               => array( 'type' => 'string' ),
+						'date_created'      => array(
+							'type'   => 'string',
+							'format' => 'date-time',
+						),
+						'date_created_gmt'  => array(
+							'type'   => 'string',
+							'format' => 'date-time',
+						),
+						'date_modified'     => array(
+							'type'   => 'string',
+							'format' => 'date-time',
+						),
+						'date_modified_gmt' => array(
+							'type'   => 'string',
+							'format' => 'date-time',
+						),
+					),
+					'additionalProperties' => false,
+				),
 			),
 			'additionalProperties' => false,
 		);
