@@ -5,26 +5,30 @@ description: Search the source code of every WooCommerce.com marketplace extensi
 
 # Search all marketplace plugins
 
-The repo `woocommerce/all-plugins` stores each plugin as a zip in `product-packages/<slug>/<slug>.zip`. A copy with the zips unpacked lives in `~/Development/all-plugins/extracted/<slug>/`. It holds only text files (PHP, JS, JSON, CSS, and similar). The repo is private, so you need access to it.
+The repo `woocommerce/all-plugins` stores each plugin as a zip in `product-packages/<slug>/<slug>.zip`. A local copy holds the unpacked zips, in `<slug>` folders. It holds only text files (PHP, JS, JSON, CSS, and similar). The repo is private, so you need access to it.
+
+The copy lives in `~/.cache/woocommerce/all-plugins`. Set `ALL_PLUGINS_DIR` to use another folder.
+
+The skill needs `git`, `unzip`, `rg`, `curl`, and `jq`.
 
 ## Steps
 
-1. Update the copy if it is more than a few days old:
+1. Update the copy if it is more than a few days old, or create it if it does not exist:
 
    ```bash
    .ai/skills/search-all-plugins/sync.sh
    ```
 
-   Run it from the repository root. It pulls the repo and unpacks only the zips that changed. The first run takes about 30 seconds. Use `--no-pull` to skip the pull.
-2. Search with `rg` from the extracted folder. A search over all plugins takes about 3 seconds.
+   Run it from the repository root. It pulls the repo and unpacks only the zips that changed. The first run clones the repo and unpacks every zip, so it takes longer. Use `--no-pull` to skip the pull. The last line of the output is the path of the extracted folder.
+2. Search with `rg` from the extracted folder. A search over all plugins takes a few seconds.
 
    ```bash
-   cd ~/Development/all-plugins/extracted
-   rg -n --type php 'function\s+is_valid_status\s*\('
-   rg -l --type php 'extends\s+\\?(WC_Order|WC_Abstract_Order)\b' | cut -d/ -f1 | sort -u
+   cd <path from sync.sh>
+   rg -n --type php 'function\s+is_valid_status\s*\(' .
+   rg -l --type php 'extends\s+\\?(WC_Order|WC_Abstract_Order)\b' . | cut -d/ -f2 | sort -u
    ```
 
-   The first path segment is the plugin slug.
+   Always pass the `.` path. Without a path, `rg` can wait on stdin and never finish in an agent's shell. The first folder after `./` is the plugin slug.
 3. Check each match in context before you report it. A match by name is not a conflict. For a method conflict, confirm that the class extends the Core class.
 
 ## WordPress.org plugins (Veloria)

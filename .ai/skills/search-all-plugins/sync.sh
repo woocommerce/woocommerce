@@ -2,7 +2,7 @@
 # Pull woocommerce/all-plugins and unzip changed plugins into extracted/.
 set -euo pipefail
 
-REPO="${ALL_PLUGINS_DIR:-$HOME/Development/all-plugins}"
+REPO="${ALL_PLUGINS_DIR:-$HOME/.cache/woocommerce/all-plugins}"
 OUT="$REPO/extracted"
 
 if [ ! -d "$REPO/.git" ]; then
@@ -41,3 +41,4 @@ for dir in "$OUT"/*/; do
 done
 
 echo "Plugins: $(find "$OUT" -mindepth 1 -maxdepth 1 -type d | wc -l | tr -d ' ')  Updated: $(git -C "$REPO" log -1 --format=%cd --date=short)"
+echo "$OUT"
