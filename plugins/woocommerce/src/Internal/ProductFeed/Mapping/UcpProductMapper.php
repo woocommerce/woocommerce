@@ -665,7 +665,8 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 	}
 
 	/**
-	 * Build a variant's barcodes from its GTIN, normalized and validated like the product structured data.
+	 * Build a variant's barcodes from its GTIN, normalized and validated by the product structured data,
+	 * so the catalog and the structured data never disagree on a GTIN.
 	 *
 	 * A variation's GTIN is its own: the parent's identifies a different item.
 	 *
@@ -673,8 +674,12 @@ class UcpProductMapper implements ProductShapeMapperInterface {
 	 * @return array Empty, or one `{ type, value }` barcode.
 	 */
 	private function build_barcodes( \WC_Product $product ): array {
-		$gtin = (string) preg_replace( '/[^0-9]/', '', (string) $product->get_global_unique_id() );
-		if ( ! preg_match( '/^(\d{8}|\d{12,14})$/', $gtin ) ) {
+		$structured_data = WC()->structured_data;
+		if ( ! $structured_data instanceof \WC_Structured_Data ) {
+			return array();
+		}
+		$gtin = (string) $structured_data->prepare_gtin( (string) $product->get_global_unique_id() );
+		if ( ! $structured_data->is_valid_gtin( $gtin ) ) {
 			return array();
 		}
 
