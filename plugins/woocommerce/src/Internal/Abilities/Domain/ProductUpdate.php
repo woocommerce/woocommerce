@@ -137,7 +137,7 @@ class ProductUpdate extends ActionableAbility {
 		}
 
 		try {
-			if ( isset( $input['type'] ) ) {
+			if ( isset( $input['type'] ) && \WC_Product_Factory::get_product_type( $subject->get_id() ) !== $input['type'] ) {
 				self::apply_product_type_config( $subject, $product_config );
 			}
 

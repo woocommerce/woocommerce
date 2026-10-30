@@ -2097,6 +2097,45 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should apply the forced properties of a product type only when the type changes.
+	 */
+	public function test_product_update_applies_forced_properties_only_on_a_type_change(): void {
+		$grouped = new \WC_Product_Grouped();
+		$grouped->set_name( 'Grouped' );
+		$grouped->set_manage_stock( true );
+		$grouped->set_stock_quantity( 5 );
+		$grouped->save();
+		$this->created_product_ids[] = $grouped->get_id();
+
+		$simple                      = \WC_Helper_Product::create_simple_product();
+		$this->created_product_ids[] = $simple->get_id();
+		$simple->set_manage_stock( true );
+		$simple->set_stock_quantity( 5 );
+		$simple->save();
+
+		$repeated = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'   => $grouped->get_id(),
+				'type' => 'grouped',
+				'name' => 'Renamed',
+			)
+		);
+		$changed  = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'   => $simple->get_id(),
+				'type' => 'grouped',
+			)
+		);
+
+		$this->assertNotWPError( $repeated );
+		$this->assertSame( 'yes', get_post_meta( $grouped->get_id(), '_manage_stock', true ) );
+		$this->assertSame( '5', get_post_meta( $grouped->get_id(), '_stock', true ) );
+		$this->assertNotWPError( $changed );
+		$this->assertSame( 'no', get_post_meta( $simple->get_id(), '_manage_stock', true ) );
+		$this->assertSame( '', get_post_meta( $simple->get_id(), '_stock', true ) );
+	}
+
+	/**
 	 * @testdox Should reject product updates that include no changed fields.
 	 */
 	public function test_product_update_requires_at_least_one_mutation_field(): void {
