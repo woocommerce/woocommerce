@@ -15,10 +15,11 @@ use WP_REST_Request;
 class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 
 	/**
-	 * Enable the feature before the routes register.
+	 * Enable the feature before the routes register. A filter, not an option
+	 * write, since the test transaction starts in parent::setUp().
 	 */
 	public function setUp(): void {
-		update_option( 'woocommerce_feature_agent_readiness_enabled', 'yes' );
+		add_filter( 'pre_option_woocommerce_feature_agent_readiness_enabled', array( __CLASS__, 'enabled' ) );
 		parent::setUp();
 		delete_option( AgentReadiness::REPORT_OPTION );
 		as_unschedule_all_actions( ScheduledScan::RUN_NOW_HOOK );
@@ -31,9 +32,16 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 	public function tearDown(): void {
 		as_unschedule_all_actions( ScheduledScan::RUN_NOW_HOOK );
 		as_unschedule_all_actions( ScheduledScan::DAILY_HOOK );
-		delete_option( 'woocommerce_feature_agent_readiness_enabled' );
+		remove_filter( 'pre_option_woocommerce_feature_agent_readiness_enabled', array( __CLASS__, 'enabled' ) );
 		$this->set_permalink_structure( '' );
 		parent::tearDown();
+	}
+
+	/**
+	 * The feature option's value while these tests run.
+	 */
+	public static function enabled(): string {
+		return 'yes';
 	}
 
 	/**
@@ -81,6 +89,7 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * @testdox With the feature disabled the routes are not registered.
 	 */
 	public function test_routes_absent_when_feature_disabled(): void {
+		remove_filter( 'pre_option_woocommerce_feature_agent_readiness_enabled', array( __CLASS__, 'enabled' ) );
 		update_option( 'woocommerce_feature_agent_readiness_enabled', 'no' );
 		global $wp_rest_server;
 		$wp_rest_server = new \WP_REST_Server();
