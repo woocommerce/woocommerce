@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Internal\Abilities\Domain\Traits;
 
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 
@@ -782,8 +783,9 @@ trait ProductAbilityTrait {
 	 * @return array
 	 */
 	protected static function format_product_for_response( \WC_Product $product ): array {
-		$stock_quantity = $product->get_stock_quantity();
-		$permalink      = $product->get_permalink();
+		$stock_quantity   = $product->get_stock_quantity();
+		$low_stock_amount = $product->get_low_stock_amount();
+		$permalink        = $product->get_permalink();
 
 		$data = array(
 			'id'                => $product->get_id(),
@@ -809,6 +811,23 @@ trait ProductAbilityTrait {
 			'external_url'      => $product instanceof \WC_Product_External ? $product->get_product_url() : null,
 			'button_text'       => $product instanceof \WC_Product_External ? $product->get_button_text() : null,
 			'grouped_products'  => $product instanceof \WC_Product_Grouped ? array_map( 'absint', $product->get_children( 'edit' ) ) : array(),
+			'categories'        => self::format_product_terms_for_response( $product->get_category_ids( 'edit' ), 'product_cat' ),
+			'tags'              => self::format_product_terms_for_response( $product->get_tag_ids( 'edit' ), 'product_tag' ),
+			'brands'            => self::format_product_terms_for_response( $product->get_brand_ids( 'edit' ), 'product_brand' ),
+			'description'       => $product->get_description(),
+			'short_description' => $product->get_short_description(),
+			'images'            => self::format_product_images_for_response( $product ),
+			'weight'            => $product->get_weight(),
+			'dimensions'        => array(
+				'length' => $product->get_length(),
+				'width'  => $product->get_width(),
+				'height' => $product->get_height(),
+			),
+			'shipping_class'    => $product->get_shipping_class(),
+			'tax_status'        => $product->get_tax_status(),
+			'tax_class'         => $product->get_tax_class(),
+			'backorders'        => $product->get_backorders(),
+			'low_stock_amount'  => is_numeric( $low_stock_amount ) ? wc_stock_amount( (float) $low_stock_amount ) : null,
 			'date_created'      => wc_rest_prepare_date_response( $product->get_date_created(), false ),
 			'date_created_gmt'  => wc_rest_prepare_date_response( $product->get_date_created() ),
 			'date_modified'     => wc_rest_prepare_date_response( $product->get_date_modified(), false ),
@@ -816,6 +835,74 @@ trait ProductAbilityTrait {
 		);
 
 		return ExtensibleAbilities::add_fields_to_object( $data, 'product', $product );
+	}
+
+	/**
+	 * Terms of a product in one taxonomy. Loading a product caches its terms, so this adds no query per product.
+	 *
+	 * @param array<int, int|string> $term_ids Term IDs of the product.
+	 * @param string                 $taxonomy Taxonomy, such as `product_cat`.
+	 * @return array<int, array{id: int, name: string, slug: string}>
+	 */
+	private static function format_product_terms_for_response( array $term_ids, string $taxonomy ): array {
+		if ( ! taxonomy_exists( $taxonomy ) ) {
+			return array();
+		}
+
+		$terms = array();
+
+		foreach ( $term_ids as $term_id ) {
+			$term = get_term( (int) $term_id, $taxonomy );
+
+			if ( $term instanceof \WP_Term ) {
+				$terms[] = array(
+					'id'   => $term->term_id,
+					'name' => html_entity_decode( $term->name, ENT_QUOTES | ENT_HTML5 ),
+					'slug' => $term->slug,
+				);
+			}
+		}
+
+		return $terms;
+	}
+
+	/**
+	 * Featured image first, then the gallery. Unlike the REST API, a product without images gets no placeholder.
+	 *
+	 * @param \WC_Product $product Product object.
+	 * @return array<int, array{id: int, src: string, name: string, alt: string}>
+	 */
+	private static function format_product_images_for_response( \WC_Product $product ): array {
+		$images = array();
+
+		foreach ( self::get_product_image_ids( $product ) as $attachment_id ) {
+			$attachment = wp_get_attachment_image_src( $attachment_id, 'full' );
+
+			if ( ! is_array( $attachment ) ) {
+				continue;
+			}
+
+			$images[] = array(
+				'id'   => $attachment_id,
+				'src'  => (string) $attachment[0],
+				'name' => get_the_title( $attachment_id ),
+				'alt'  => (string) get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ),
+			);
+		}
+
+		return $images;
+	}
+
+	/**
+	 * Attachment IDs of a product's featured image and gallery, without duplicates.
+	 *
+	 * @param \WC_Product $product Product object.
+	 * @return array<int, int>
+	 */
+	protected static function get_product_image_ids( \WC_Product $product ): array {
+		$image_ids = array_merge( array( (int) $product->get_image_id() ), array_map( 'intval', $product->get_gallery_image_ids() ) );
+
+		return array_values( array_unique( array_filter( $image_ids ) ) );
 	}
 
 	/**
@@ -888,6 +975,70 @@ trait ProductAbilityTrait {
 						'description' => __( 'Product IDs included as children of a grouped product.', 'woocommerce' ),
 						'items'       => array( 'type' => 'integer' ),
 					),
+					'categories'        => self::get_product_terms_output_schema(),
+					'tags'              => self::get_product_terms_output_schema(),
+					'brands'            => self::get_product_terms_output_schema(),
+					'description'       => array( 'type' => 'string' ),
+					'short_description' => array( 'type' => 'string' ),
+					'images'            => array(
+						'type'        => 'array',
+						'description' => __( 'Featured image first, then the gallery.', 'woocommerce' ),
+						'items'       => array(
+							'type'                 => 'object',
+							'properties'           => array(
+								'id'   => array( 'type' => 'integer' ),
+								'src'  => array(
+									'type'   => 'string',
+									'format' => 'uri',
+								),
+								'name' => array( 'type' => 'string' ),
+								'alt'  => array( 'type' => 'string' ),
+							),
+							'additionalProperties' => false,
+						),
+					),
+					'weight'            => array(
+						'type'        => 'string',
+						'description' => sprintf(
+							/* translators: %s: weight unit, such as kg. */
+							__( 'Decimal string in %s, or empty when not set.', 'woocommerce' ),
+							get_option( 'woocommerce_weight_unit' )
+						),
+					),
+					'dimensions'        => array(
+						'type'                 => 'object',
+						'description'          => sprintf(
+							/* translators: %s: dimension unit, such as cm. */
+							__( 'Decimal strings in %s, each empty when not set.', 'woocommerce' ),
+							get_option( 'woocommerce_dimension_unit' )
+						),
+						'properties'           => array(
+							'length' => array( 'type' => 'string' ),
+							'width'  => array( 'type' => 'string' ),
+							'height' => array( 'type' => 'string' ),
+						),
+						'additionalProperties' => false,
+					),
+					'shipping_class'    => array(
+						'type'        => 'string',
+						'description' => __( 'Shipping class slug, or empty when the product has none.', 'woocommerce' ),
+					),
+					'tax_status'        => array(
+						'type' => 'string',
+						'enum' => array( ProductTaxStatus::TAXABLE, ProductTaxStatus::SHIPPING, ProductTaxStatus::NONE ),
+					),
+					'tax_class'         => array(
+						'type'        => 'string',
+						'description' => __( 'Tax class slug, or empty for the standard rate.', 'woocommerce' ),
+					),
+					'backorders'        => array(
+						'type' => 'string',
+						'enum' => array_keys( wc_get_product_backorder_options() ),
+					),
+					'low_stock_amount'  => array(
+						'type'        => array( self::get_product_stock_quantity_schema_type(), 'null' ),
+						'description' => __( 'Low stock threshold of the product, or null when the store-wide threshold applies.', 'woocommerce' ),
+					),
 					'date_created'      => array(
 						'type'   => array( 'string', 'null' ),
 						'format' => 'date-time',
@@ -908,6 +1059,26 @@ trait ProductAbilityTrait {
 				'additionalProperties' => false,
 			),
 			'product'
+		);
+	}
+
+	/**
+	 * Schema of a product's terms in one taxonomy.
+	 *
+	 * @return array
+	 */
+	private static function get_product_terms_output_schema(): array {
+		return array(
+			'type'  => 'array',
+			'items' => array(
+				'type'                 => 'object',
+				'properties'           => array(
+					'id'   => array( 'type' => 'integer' ),
+					'name' => array( 'type' => 'string' ),
+					'slug' => array( 'type' => 'string' ),
+				),
+				'additionalProperties' => false,
+			),
 		);
 	}
 
