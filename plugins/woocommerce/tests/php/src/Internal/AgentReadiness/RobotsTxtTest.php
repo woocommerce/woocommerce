@@ -39,6 +39,7 @@ class RobotsTxtTest extends WC_Unit_Test_Case {
 		$this->assertTrue( $sut->allows( 'ClaudeBot', '/llms.txt' ) );
 		$this->assertTrue( $sut->allows( 'ClaudeBot', '/tag/a' ), 'Allow wins a tie' );
 		$this->assertTrue( $sut->allows( 'ClaudeBot', '/shop/' ), 'Comments and an empty Disallow block nothing' );
+		$this->assertFalse( ( new RobotsTxt( "User-agent: *\nDisallow: /a" . str_repeat( '*', 200 ) . "z\n" ) )->allows( 'ClaudeBot', '/a' . str_repeat( 'x', 200 ) . 'z' ) );
 	}
 
 	/**

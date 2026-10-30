@@ -152,6 +152,33 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Only the first five sitemaps robots.txt lists are loaded.
+	 */
+	public function test_listed_sitemaps_capped(): void {
+		add_filter( 'wp_sitemaps_enabled', '__return_false' );
+		$requested = array();
+		$robots    = "User-agent: *\nDisallow:\n";
+		for ( $i = 1; $i <= 50; $i++ ) {
+			$robots .= 'Sitemap: ' . home_url( "/s$i.xml" ) . "\n";
+		}
+		$this->serve( array( '/robots.txt' => array( 200, $robots ) ) );
+		add_filter(
+			'pre_http_request',
+			static function ( $pre, $args, $url ) use ( &$requested ) {
+				unset( $args );
+				$requested[] = $url;
+				return $pre;
+			},
+			5,
+			3
+		);
+
+		$this->results();
+
+		$this->assertCount( 8, array_unique( $requested ), 'robots.txt, five listed sitemaps, /sitemap_index.xml and /sitemap.xml' );
+	}
+
+	/**
 	 * @testdox With the WordPress sitemap off, no sitemap is missing, and an unreachable one is couldn't check.
 	 */
 	public function test_sitemap_off(): void {

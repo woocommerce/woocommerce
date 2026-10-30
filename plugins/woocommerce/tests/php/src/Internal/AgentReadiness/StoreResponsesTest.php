@@ -99,6 +99,8 @@ class StoreResponsesTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'B', $sut->get( '/a' )['body'] );
 		$this->assertNull( $sut->get( '/c' ) );
 		$this->assertNull( $sut->get( 'https://elsewhere.test/' ) );
+		$this->assertNull( $sut->get( 'http://' . wp_parse_url( home_url(), PHP_URL_HOST ) . ':6379/' ), 'Another port on the store host is not the store' );
+		$this->assertNull( $sut->get( 'gopher://' . wp_parse_url( home_url(), PHP_URL_HOST ) . '/' ) );
 		$this->assertSame( array( home_url( '/a' ), home_url( '/b' ), home_url( '/c' ) ), $this->requested );
 	}
 
