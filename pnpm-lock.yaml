@@ -3086,8 +3086,8 @@ importers:
         specifier: npm:xstate@^5.13.1
         version: xstate@5.30.0
       zod:
-        specifier: ^3.22.4
-        version: 3.25.76
+        specifier: ^4.6.7
+        version: 4.6.7
     devDependencies:
       '@automattic/color-studio':
         specifier: ^4.0.0
