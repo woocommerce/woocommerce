@@ -19,9 +19,10 @@ defined( 'ABSPATH' ) || exit;
  * fails or times out does not end the chain; a run that finds the feature
  * disabled does.
  *
- * A requested scan that has not started 10 minutes after it was due is taken
- * as stalled (Action Scheduler is not running on the site), and the next
- * request runs the scan in that request instead of waiting on it.
+ * A requested scan that has not started 10 minutes after it was due, while no
+ * other scheduled action has finished either, is taken as stalled (Action
+ * Scheduler is not running on the site), and the next request runs the scan
+ * in that request instead of waiting on it.
  *
  * @since 11.4.0
  */
@@ -104,7 +105,9 @@ class ScheduledScan implements RegisterHooksInterface {
 	}
 
 	/**
-	 * Whether a requested scan is still waiting to start STALLED_AFTER seconds after it was due.
+	 * Whether a requested scan is still waiting to start STALLED_AFTER seconds
+	 * after it was due, and no other action has finished in that time either. A
+	 * queue that is only behind is still running, so its scan stays queued.
 	 */
 	public function is_stalled(): bool {
 		if ( ! function_exists( 'as_next_scheduled_action' ) ) {
@@ -112,7 +115,19 @@ class ScheduledScan implements RegisterHooksInterface {
 		}
 		// The timestamp of a pending action; true while it runs.
 		$due = as_next_scheduled_action( self::RUN_NOW_HOOK, array(), self::GROUP );
-		return is_int( $due ) && time() - $due > self::STALLED_AFTER;
+		if ( ! is_int( $due ) || time() - $due <= self::STALLED_AFTER ) {
+			return false;
+		}
+		$recently_finished = as_get_scheduled_actions(
+			array(
+				'status'           => \ActionScheduler_Store::STATUS_COMPLETE,
+				'modified'         => new \DateTime( '@' . ( time() - self::STALLED_AFTER ) ),
+				'modified_compare' => '>=',
+				'per_page'         => 1,
+			),
+			'ids'
+		);
+		return empty( $recently_finished );
 	}
 
 	/**
