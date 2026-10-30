@@ -104,7 +104,8 @@ class RobotsTxt {
 	 */
 	private static function matches( string $pattern, string $path ): bool {
 		$anchored = str_ends_with( $pattern, '$' );
-		$pattern  = $anchored ? substr( $pattern, 0, -1 ) : $pattern;
+		// Runs of * match the same as one, and would only add backtracking.
+		$pattern  = (string) preg_replace( '/\*+/', '*', $anchored ? substr( $pattern, 0, -1 ) : $pattern );
 		$regex    = '#^' . str_replace( '\*', '.*', preg_quote( $pattern, '#' ) ) . ( $anchored ? '$' : '' ) . '#';
 		return 1 === preg_match( $regex, $path );
 	}
