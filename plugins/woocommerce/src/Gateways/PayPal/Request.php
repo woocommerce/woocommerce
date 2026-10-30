@@ -754,6 +754,10 @@ class Request {
 				'callback_events' => array( 'SHIPPING_ADDRESS', 'SHIPPING_OPTIONS' ),
 				'callback_url'    => $this->normalize_url_for_paypal( $callback_url ),
 			);
+		} else {
+			// Revoke any callback credential from a previous payment attempt.
+			$order->update_meta_data( PayPalConstants::PAYPAL_ORDER_META_SHIPPING_CALLBACK_TOKEN, '' );
+			$order->save_meta_data();
 		}
 
 		// If the request is from PayPal JS SDK (Buttons), we need a cancel URL that is compatible with App Switch.
