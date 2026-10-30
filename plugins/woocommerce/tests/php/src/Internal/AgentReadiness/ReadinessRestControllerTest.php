@@ -116,7 +116,7 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * @testdox POST ucp turns UCP on once the required checks pass, and off again.
 	 */
 	public function test_ucp_switch_on_and_off(): void {
-		SetupChecksTest::make_store_ready( $this );
+		StoreConditionsTest::make_store_ready( $this );
 
 		$response = $this->dispatch_ucp( true );
 		$this->assertSame( 200, $response->get_status() );
@@ -146,7 +146,7 @@ class ReadinessRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * @testdox A user without manage_woocommerce can't switch UCP.
 	 */
 	public function test_ucp_switch_requires_manage_woocommerce(): void {
-		SetupChecksTest::make_store_ready( $this );
+		StoreConditionsTest::make_store_ready( $this );
 		update_option( 'woocommerce_feature_ucp_enabled', 'no' );
 		wp_set_current_user( self::factory()->user->create( array( 'role' => 'customer' ) ) );
 

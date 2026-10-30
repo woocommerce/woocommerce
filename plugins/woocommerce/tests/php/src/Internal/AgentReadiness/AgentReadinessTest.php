@@ -43,7 +43,7 @@ class AgentReadinessTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( array( 'generated_at', 'products', 'hidden_from_catalog', 'unsupported_types', 'store_checks', 'channels', 'checks', 'truncated' ), array_keys( $report ) );
 		$this->assertFalse( $report['truncated'] );
-		$this->assertSame( array( 'id', 'ok', 'blocks', 'label', 'why', 'fix' ), array_keys( $report['store_checks'][0] ) );
+		$this->assertSame( array( 'id', 'ok', 'blocks', 'level', 'label', 'why', 'fix', 'fix_url' ), array_keys( $report['store_checks'][0] ) );
 		$this->assertSame( array( 'chatgpt', 'google', 'copilot' ), array_keys( $report['channels'] ) );
 		$this->assertSame(
 			array( 'name', 'spec', 'url', 'listable', 'not_listable', 'with_gaps', 'complete' ),

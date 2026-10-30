@@ -30,11 +30,11 @@ class UcpSwitch {
 	private FeaturesController $features_controller;
 
 	/**
-	 * Setup checks.
+	 * Store conditions.
 	 *
-	 * @var SetupChecks
+	 * @var StoreConditions
 	 */
-	private SetupChecks $setup_checks;
+	private StoreConditions $store_conditions;
 
 	/**
 	 * Initialize dependencies.
@@ -42,11 +42,11 @@ class UcpSwitch {
 	 * @internal
 	 *
 	 * @param FeaturesController $features_controller Features controller.
-	 * @param SetupChecks        $setup_checks        Setup checks.
+	 * @param StoreConditions    $store_conditions    Store conditions.
 	 */
-	final public function init( FeaturesController $features_controller, SetupChecks $setup_checks ): void {
+	final public function init( FeaturesController $features_controller, StoreConditions $store_conditions ): void {
 		$this->features_controller = $features_controller;
-		$this->setup_checks        = $setup_checks;
+		$this->store_conditions    = $store_conditions;
 	}
 
 	/**
@@ -56,7 +56,7 @@ class UcpSwitch {
 	 * @return array{enabled:bool,status:string,failing_checks:array<int,string>}|\WP_Error Error when a required check fails.
 	 */
 	public function set_enabled( bool $enable ) {
-		$failing = $this->setup_checks->failing_required();
+		$failing = $this->store_conditions->failing_required();
 		if ( $enable && ! empty( $failing ) ) {
 			\WC_Tracks::record_event( 'agentic_commerce_ucp_blocked', array( 'failing_checks' => implode( ',', $failing ) ) );
 			return new \WP_Error(
@@ -94,7 +94,7 @@ class UcpSwitch {
 		if ( ! UcpUtils::is_enabled() ) {
 			return self::STATUS_OFF;
 		}
-		$failing = $failing ?? $this->setup_checks->failing_required();
+		$failing = $failing ?? $this->store_conditions->failing_required();
 		return empty( $failing ) ? self::STATUS_ACTIVE : self::STATUS_NEEDS_ATTENTION;
 	}
 }

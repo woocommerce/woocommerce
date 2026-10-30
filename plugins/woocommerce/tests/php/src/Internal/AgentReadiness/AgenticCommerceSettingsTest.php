@@ -42,6 +42,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		try {
 			set_current_screen( 'front' );
+			$this->set_permalink_structure( '' );
 		} finally {
 			parent::tearDown();
 		}
@@ -110,6 +111,22 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'required setup checks below to turn this on.', $html );
 		$this->assertStringContainsString( 'aria-checked="false"', $html );
 		$this->assertStringContainsString( 'wc-agentic-commerce-badge--fix', $html );
+		$this->assertStringContainsString( 'No privacy policy page', $html, 'A failing condition is listed by its label' );
+		$this->assertStringNotContainsString( 'Universal Commerce Protocol (UCP) is off', $html, 'UCP is the switch, not a listed check' );
+	}
+
+	/**
+	 * @testdox On a ready store only a pass line is listed, and the switch can be turned on.
+	 */
+	public function test_output_on_a_ready_store(): void {
+		StoreConditionsTest::make_store_ready( $this );
+		update_option( 'woocommerce_enable_guest_checkout', 'yes' );
+
+		$html = $this->render_page();
+
+		$this->assertStringContainsString( 'Your store passes every setup check.', $html );
+		$this->assertStringNotContainsString( 'wc-agentic-commerce-badge--fix', $html );
+		$this->assertStringNotContainsString( 'to turn this on.', $html );
 	}
 
 	/**
@@ -153,7 +170,6 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 				AgenticCommerceSettings::PRIVACY_PAGE_OPTION => (string) $published,
 				AgenticCommerceSettings::TERMS_PAGE_OPTION => (string) $draft,
 				AgenticCommerceSettings::SHIPPING_POLICY_PAGE_OPTION => (string) $published,
-				AgenticCommerceSettings::RETURN_POLICY_SUMMARY_OPTION => '<b>30-day</b> returns. ' . str_repeat( 'x', 400 ),
 			)
 		);
 
@@ -161,10 +177,6 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 		$this->assertSame( $published, (int) get_option( AgenticCommerceSettings::PRIVACY_PAGE_OPTION ), 'Privacy policy is the WordPress option' );
 		$this->assertSame( '', (string) get_option( AgenticCommerceSettings::TERMS_PAGE_OPTION, '' ), 'A draft page id is not saved' );
 		$this->assertSame( $published, (int) get_option( AgenticCommerceSettings::SHIPPING_POLICY_PAGE_OPTION ) );
-
-		$summary = (string) get_option( AgenticCommerceSettings::RETURN_POLICY_SUMMARY_OPTION );
-		$this->assertSame( AgenticCommerceSettings::RETURN_POLICY_SUMMARY_MAX_LENGTH, mb_strlen( $summary ) );
-		$this->assertStringStartsWith( '30-day returns.', $summary );
 	}
 
 	/**
@@ -208,10 +220,7 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 
 		WC_Admin_Settings::save_fields(
 			$this->page()->get_settings_for_section( '' ),
-			array(
-				AgenticCommerceSettings::TERMS_PAGE_OPTION => '',
-				AgenticCommerceSettings::RETURN_POLICY_SUMMARY_OPTION => '',
-			)
+			array( AgenticCommerceSettings::TERMS_PAGE_OPTION => '' )
 		);
 
 		$this->assertSame( '', get_option( AgenticCommerceSettings::TERMS_PAGE_OPTION ) );

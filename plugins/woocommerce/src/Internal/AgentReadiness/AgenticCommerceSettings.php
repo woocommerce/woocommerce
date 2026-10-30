@@ -26,14 +26,6 @@ class AgenticCommerceSettings implements RegisterHooksInterface {
 
 	public const SHIPPING_POLICY_PAGE_OPTION = 'woocommerce_shipping_policy_page_id';
 
-	public const FAQ_PAGE_OPTION = 'woocommerce_faq_page_id';
-
-	/**
-	 * Saved now, sent to agents once UCP has a return policy description field.
-	 */
-	public const RETURN_POLICY_SUMMARY_OPTION = 'woocommerce_return_policy_summary';
-
-	public const RETURN_POLICY_SUMMARY_MAX_LENGTH = 300;
 
 	/**
 	 * Features controller.
@@ -43,11 +35,11 @@ class AgenticCommerceSettings implements RegisterHooksInterface {
 	private FeaturesController $features_controller;
 
 	/**
-	 * Setup checks.
+	 * Store conditions.
 	 *
-	 * @var SetupChecks
+	 * @var StoreConditions
 	 */
-	private SetupChecks $setup_checks;
+	private StoreConditions $store_conditions;
 
 	/**
 	 * Readiness service.
@@ -69,13 +61,13 @@ class AgenticCommerceSettings implements RegisterHooksInterface {
 	 * @internal
 	 *
 	 * @param FeaturesController $features_controller Features controller.
-	 * @param SetupChecks        $setup_checks        Setup checks.
+	 * @param StoreConditions    $store_conditions    Store conditions.
 	 * @param AgentReadiness     $agent_readiness     Readiness service.
 	 * @param UcpSwitch          $ucp_switch          UCP switch.
 	 */
-	final public function init( FeaturesController $features_controller, SetupChecks $setup_checks, AgentReadiness $agent_readiness, UcpSwitch $ucp_switch ): void {
+	final public function init( FeaturesController $features_controller, StoreConditions $store_conditions, AgentReadiness $agent_readiness, UcpSwitch $ucp_switch ): void {
 		$this->features_controller = $features_controller;
-		$this->setup_checks        = $setup_checks;
+		$this->store_conditions    = $store_conditions;
 		$this->agent_readiness     = $agent_readiness;
 		$this->ucp_switch          = $ucp_switch;
 	}
@@ -111,7 +103,7 @@ class AgenticCommerceSettings implements RegisterHooksInterface {
 		if ( ! is_array( $pages ) || ! class_exists( \WC_Settings_Page::class, false ) ) {
 			return $pages;
 		}
-		$pages[] = new AgenticCommerceSettingsPage( $this->setup_checks, $this->agent_readiness, $this->ucp_switch );
+		$pages[] = new AgenticCommerceSettingsPage( $this->store_conditions, $this->agent_readiness, $this->ucp_switch );
 		return $pages;
 	}
 }

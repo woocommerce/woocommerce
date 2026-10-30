@@ -31,11 +31,11 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	private const PAGE_FIELD_KEY = 'agentic_commerce_page';
 
 	/**
-	 * Setup checks.
+	 * Store conditions.
 	 *
-	 * @var SetupChecks
+	 * @var StoreConditions
 	 */
-	private SetupChecks $setup_checks;
+	private StoreConditions $store_conditions;
 
 	/**
 	 * Readiness service.
@@ -54,21 +54,20 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	/**
 	 * Constructor.
 	 *
-	 * @param SetupChecks    $setup_checks    Setup checks.
-	 * @param AgentReadiness $agent_readiness Readiness service.
-	 * @param UcpSwitch      $ucp_switch      UCP switch.
+	 * @param StoreConditions $store_conditions Store conditions.
+	 * @param AgentReadiness  $agent_readiness  Readiness service.
+	 * @param UcpSwitch       $ucp_switch       UCP switch.
 	 */
-	public function __construct( SetupChecks $setup_checks, AgentReadiness $agent_readiness, UcpSwitch $ucp_switch ) {
-		$this->id              = AgenticCommerceSettings::TAB;
-		$this->label           = __( 'Agentic commerce', 'woocommerce' );
-		$this->setup_checks    = $setup_checks;
-		$this->agent_readiness = $agent_readiness;
-		$this->ucp_switch      = $ucp_switch;
+	public function __construct( StoreConditions $store_conditions, AgentReadiness $agent_readiness, UcpSwitch $ucp_switch ) {
+		$this->id               = AgenticCommerceSettings::TAB;
+		$this->label            = __( 'Agentic commerce', 'woocommerce' );
+		$this->store_conditions = $store_conditions;
+		$this->agent_readiness  = $agent_readiness;
+		$this->ucp_switch       = $ucp_switch;
 
 		parent::__construct();
 
 		add_filter( 'woocommerce_admin_settings_sanitize_option', array( $this, 'sanitize_page_option' ), 10, 3 );
-		add_filter( 'woocommerce_admin_settings_sanitize_option_' . AgenticCommerceSettings::RETURN_POLICY_SUMMARY_OPTION, array( $this, 'sanitize_return_policy_summary' ), 10, 3 );
 		add_action( 'woocommerce_settings_' . self::POLICIES_SECTION . '_after', array( $this, 'render_policies_footnote' ) );
 	}
 
@@ -106,26 +105,13 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 			array(
 				'title' => __( 'Store policies', 'woocommerce' ),
 				'type'  => 'title',
-				'desc'  => __( 'AI agents share these with shoppers before they buy, so they know your return, shipping and privacy terms up front. Agents link to your pages and can quote your return summary.', 'woocommerce' ),
+				'desc'  => __( 'AI agents share these with shoppers before they buy, so they know your return, shipping and privacy terms up front. Agents link shoppers to these pages.', 'woocommerce' ),
 				'id'    => self::POLICIES_SECTION,
-			),
-			array(
-				'title'             => __( 'Return policy summary', 'woocommerce' ),
-				'desc'              => __( 'Agents quote this when a shopper asks about returns. Leave empty to only link your refund and returns page.', 'woocommerce' ),
-				'id'                => AgenticCommerceSettings::RETURN_POLICY_SUMMARY_OPTION,
-				'type'              => 'textarea',
-				'default'           => '',
-				'placeholder'       => __( '30-day returns on unused items. Free return shipping in the US.', 'woocommerce' ),
-				'css'               => 'min-width:300px; height: 80px;',
-				'desc_at_end'       => true,
-				'autoload'          => false,
-				'custom_attributes' => array( 'maxlength' => (string) AgenticCommerceSettings::RETURN_POLICY_SUMMARY_MAX_LENGTH ),
 			),
 			$page_field( AgenticCommerceSettings::REFUND_RETURNS_PAGE_OPTION, __( 'Refund and returns', 'woocommerce' ) ),
 			$page_field( AgenticCommerceSettings::SHIPPING_POLICY_PAGE_OPTION, __( 'Shipping policy', 'woocommerce' ) ),
 			$page_field( AgenticCommerceSettings::PRIVACY_PAGE_OPTION, __( 'Privacy policy', 'woocommerce' ) ),
 			$page_field( AgenticCommerceSettings::TERMS_PAGE_OPTION, __( 'Terms and conditions', 'woocommerce' ) ),
-			$page_field( AgenticCommerceSettings::FAQ_PAGE_OPTION, __( 'FAQ', 'woocommerce' ), __( 'Optional.', 'woocommerce' ) ),
 			array(
 				'type' => 'sectionend',
 				'id'   => self::POLICIES_SECTION,
@@ -139,8 +125,8 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	public function output(): void {
 		$this->enqueue_script();
 
-		$checks  = $this->setup_checks->all();
-		$failing = $this->setup_checks->failing_required( $checks );
+		$checks  = $this->store_conditions->all();
+		$failing = $this->store_conditions->failing_required( $checks );
 
 		echo '<p>' . esc_html__( 'Let AI shopping assistants find your products, build a cart, and send shoppers to your checkout to pay. Uses the Universal Commerce Protocol (UCP).', 'woocommerce' ) . '</p>';
 		$this->render_visibility( $this->agent_readiness->get_cached_report() );
@@ -170,10 +156,10 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 		if ( in_array( $page_id, self::store_page_ids(), true ) ) {
 			return null;
 		}
-		if ( SetupChecks::is_published_page( $page_id ) ) {
+		if ( StoreConditions::is_published_page( $page_id ) ) {
 			return (string) $page_id;
 		}
-		if ( 0 === $page_id && SetupChecks::is_published_page( (int) get_option( (string) $option['id'] ) ) ) {
+		if ( 0 === $page_id && StoreConditions::is_published_page( (int) get_option( (string) $option['id'] ) ) ) {
 			return '';
 		}
 		return null;
@@ -192,21 +178,6 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 				static fn ( $page_id ) => $page_id > 0
 			)
 		);
-	}
-
-	/**
-	 * Plain text, cut to the maximum length.
-	 *
-	 * @internal
-	 *
-	 * @param mixed $value     Sanitized value.
-	 * @param mixed $option    Field definition.
-	 * @param mixed $raw_value Posted value.
-	 * @return string
-	 */
-	public function sanitize_return_policy_summary( $value, $option, $raw_value ): string {
-		$text = sanitize_textarea_field( is_string( $raw_value ) ? $raw_value : '' );
-		return mb_substr( $text, 0, AgenticCommerceSettings::RETURN_POLICY_SUMMARY_MAX_LENGTH );
 	}
 
 	/**
@@ -309,9 +280,9 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	}
 
 	/**
-	 * Status badge, discovery URL and setup checks.
+	 * Status badge, discovery URL and the failing store conditions. UCP itself is the switch above, so it is not listed.
 	 *
-	 * @param array<int, array{id:string,level:string,ok:bool,label:string,fix_url:string}> $checks Setup checks.
+	 * @param array<int, array{id:string,level:string,ok:bool,label:string,fix_url:string}> $checks Store conditions.
 	 * @param string                                                                        $status UcpSwitch status.
 	 */
 	private function render_status( array $checks, string $status ): void {
@@ -320,6 +291,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 			UcpSwitch::STATUS_OFF             => array( 'off', __( 'Off', 'woocommerce' ) ),
 			UcpSwitch::STATUS_NEEDS_ATTENTION => array( 'fix', __( 'Needs attention', 'woocommerce' ) ),
 		);
+		$failing  = array_filter( $checks, static fn( array $check ): bool => ! $check['ok'] && 'ucp_on' !== $check['id'] );
 		?>
 		<h2><?php esc_html_e( 'Status', 'woocommerce' ); ?></h2>
 		<p><?php esc_html_e( 'Checks that your store is ready for AI agents. Fix anything marked "Fix" before you turn agent shopping on; items marked "Check" are recommended.', 'woocommerce' ); ?></p>
@@ -338,26 +310,24 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 		</table>
 		<table class="widefat striped wc-agentic-commerce-checks">
 			<tbody>
-				<?php foreach ( $checks as $check ) : ?>
+				<?php foreach ( $failing as $check ) : ?>
 					<?php
-					if ( $check['ok'] ) {
-						$badge = array( 'pass', __( 'Pass', 'woocommerce' ) );
-					} elseif ( SetupChecks::LEVEL_REQUIRED === $check['level'] ) {
-						$badge = array( 'fix', __( 'Fix', 'woocommerce' ) );
-					} else {
-						$badge = array( 'check', __( 'Check', 'woocommerce' ) );
-					}
+					$badge = StoreConditions::LEVEL_REQUIRED === $check['level']
+						? array( 'fix', __( 'Fix', 'woocommerce' ) )
+						: array( 'check', __( 'Check', 'woocommerce' ) );
 					?>
 					<tr>
 						<td><mark class="wc-agentic-commerce-badge wc-agentic-commerce-badge--<?php echo esc_attr( $badge[0] ); ?>"><?php echo esc_html( $badge[1] ); ?></mark></td>
 						<td><?php echo esc_html( $check['label'] ); ?></td>
-						<td>
-							<?php if ( ! $check['ok'] ) : ?>
-								<a href="<?php echo esc_url( $check['fix_url'] ); ?>"><?php echo esc_html( $this->fix_link_text( $check['fix_url'] ) ); ?></a>
-							<?php endif; ?>
-						</td>
+						<td><a href="<?php echo esc_url( $check['fix_url'] ); ?>"><?php echo esc_html( $this->fix_link_text( $check['fix_url'] ) ); ?></a></td>
 					</tr>
 				<?php endforeach; ?>
+				<?php if ( empty( $failing ) ) : ?>
+					<tr>
+						<td><mark class="wc-agentic-commerce-badge wc-agentic-commerce-badge--pass"><?php esc_html_e( 'Pass', 'woocommerce' ); ?></mark></td>
+						<td colspan="2"><?php esc_html_e( 'Your store passes every setup check.', 'woocommerce' ); ?></td>
+					</tr>
+				<?php endif; ?>
 			</tbody>
 		</table>
 		<?php
@@ -369,7 +339,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	 * @param string $fix_url Fix URL.
 	 */
 	private function fix_link_text( string $fix_url ): string {
-		if ( str_starts_with( $fix_url, '#' ) ) {
+		if ( str_contains( $fix_url, '#' ) ) {
 			return __( 'Choose a page', 'woocommerce' );
 		}
 		return str_starts_with( $fix_url, admin_url() ) ? __( 'Open settings', 'woocommerce' ) : __( 'Learn how', 'woocommerce' );
@@ -409,14 +379,11 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 			self::SCRIPT_HANDLE,
 			'wcAgenticCommerceSettings',
 			array(
-				'path'      => '/wc/v3/agent-readiness/ucp',
-				'maxLength' => AgenticCommerceSettings::RETURN_POLICY_SUMMARY_MAX_LENGTH,
-				'i18n'      => array(
+				'path' => '/wc/v3/agent-readiness/ucp',
+				'i18n' => array(
 					'on'          => __( 'AI agents can now find and shop your store.', 'woocommerce' ),
 					'error'       => __( 'The setting could not be changed. Reload the page and try again.', 'woocommerce' ),
 					'copied'      => __( 'Copied', 'woocommerce' ),
-					/* translators: 1: characters used, 2: character limit. */
-					'counter'     => __( '%1$d of %2$d characters', 'woocommerce' ),
 					'statusLabel' => array(
 						UcpSwitch::STATUS_ACTIVE          => __( 'Active', 'woocommerce' ),
 						UcpSwitch::STATUS_OFF             => __( 'Off', 'woocommerce' ),

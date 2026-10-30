@@ -4,18 +4,18 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\AgentReadiness;
 
 use Automattic\WooCommerce\Internal\AgentReadiness\AgenticCommerceSettings;
-use Automattic\WooCommerce\Internal\AgentReadiness\SetupChecks;
+use Automattic\WooCommerce\Internal\AgentReadiness\StoreConditions;
 use WC_Unit_Test_Case;
 
 /**
- * Tests for the Agentic commerce setup checks.
+ * Tests for the store conditions' levels, which decide whether UCP can be turned on.
  */
-class SetupChecksTest extends WC_Unit_Test_Case {
+class StoreConditionsTest extends WC_Unit_Test_Case {
 
 	/**
 	 * The System Under Test.
 	 *
-	 * @var SetupChecks
+	 * @var StoreConditions
 	 */
 	private $sut;
 
@@ -24,7 +24,7 @@ class SetupChecksTest extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->sut = wc_get_container()->get( SetupChecks::class );
+		$this->sut = wc_get_container()->get( StoreConditions::class );
 	}
 
 	/**
@@ -71,7 +71,7 @@ class SetupChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Permalinks and guest checkout read StoreConditions; guest checkout is only recommended.
+	 * @testdox Plain permalinks are required; guest checkout is only recommended.
 	 */
 	public function test_store_conditions_checks(): void {
 		self::make_store_ready( $this );
@@ -82,11 +82,11 @@ class SetupChecksTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( array( 'pretty_permalinks' ), $this->sut->failing_required() );
 		$this->assertFalse( $checks['guest_checkout']['ok'] );
-		$this->assertSame( SetupChecks::LEVEL_RECOMMENDED, $checks['guest_checkout']['level'] );
+		$this->assertSame( StoreConditions::LEVEL_RECOMMENDED, $checks['guest_checkout']['level'] );
 	}
 
 	/**
-	 * @testdox HTTPS is required and links to the WordPress HTTPS help.
+	 * @testdox HTTPS is required.
 	 */
 	public function test_https_required(): void {
 		self::make_store_ready( $this );

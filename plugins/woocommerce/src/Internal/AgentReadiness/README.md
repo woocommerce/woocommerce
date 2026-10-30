@@ -45,7 +45,7 @@ Only published simple and variable products are checked, the types agents suppor
 - Products hidden from the shop catalog (catalog visibility "Search results only" or "Hidden"). Agents see the products shoppers see in the shop, so hiding one is the merchant's choice, not a problem.
 - Products of any other type: grouped, external, subscription, booking, bundle and so on. A product keeps its stored type when its plugin is inactive, so it stays in this group.
 
-Store-wide conditions (`StoreConditions`) are reported first because they affect every product: coming soon mode and "Discourage search engines" hide the products, UCP off and Plain permalinks (no `/.well-known/ucp`) hide the catalog from UCP agents, and guest checkout off stops agents placing orders. Each condition's `blocks` says which, so a reader can tell a hidden store from one agents can't buy from.
+Store-wide conditions (`StoreConditions`) are reported first because they affect every product: coming soon mode and "Discourage search engines" hide the products, UCP off, no HTTPS and Plain permalinks (no `/.well-known/ucp`) hide the catalog from UCP agents, and guest checkout off stops agents placing orders. Missing policy pages and order emails off weaken agent orders. Each condition's `blocks` says which, so a reader can tell a hidden store from one agents can't buy from.
 
 ## Report format
 
@@ -59,7 +59,7 @@ array(
 	'unsupported_types'   => 6,    // Not checked: grouped, external, subscription, bundle and other types agents don't support yet.
 	'store_checks' => array(
 		// blocks: 'listing' (every product on every channel), 'ucp' (the catalog for UCP agents) or 'checkout' (agent orders).
-		array( 'id' => 'launched', 'ok' => true, 'blocks' => 'listing', 'label' => '…', 'why' => '…', 'fix' => '…' ),
+		array( 'id' => 'launched', 'ok' => true, 'blocks' => 'listing', 'level' => 'recommended', 'label' => '…', 'why' => '…', 'fix' => '…', 'fix_url' => '…' ),
 	),
 	'channels'     => array(
 		'chatgpt' => array(
@@ -104,8 +104,8 @@ WooCommerce > Settings > Agentic commerce (`AgenticCommerceSettings`, `AgenticCo
 
 - Product counts from the stored report (`products`, `hidden_from_catalog`, `unsupported_types`), each linking to a filtered product list.
 - The UCP switch. It saves through `POST wc/v3/agent-readiness/ucp` (`{ "enabled": true }`), which answers 409 while a required setup check fails. Turning it off always works.
-- Setup checks (`SetupChecks`), required or recommended. Permalinks and guest checkout read `StoreConditions`.
-- Store policy pages and a return policy summary. Refund and returns, privacy and terms are the existing options, so they stay in sync with Advanced > Page setup and Settings > Privacy. The dropdowns list published pages only, and saving leaves a stored draft page in place. The summary (`woocommerce_return_policy_summary`, 300 characters) is stored only; UCP has no field for it yet.
+- The failing store conditions from `StoreConditions`, the same list the readiness report shows. A failing `required` condition (HTTPS, permalinks, privacy, terms and refund pages) blocks the switch; a failing `recommended` one is a warning.
+- Store policy pages. Refund and returns, privacy and terms are the existing options, so they stay in sync with Advanced > Page setup and Settings > Privacy. The dropdowns list published pages only, and saving leaves a stored draft page in place.
 
 Tracks events: `agentic_commerce_ucp_toggled` (`enabled`) and `agentic_commerce_ucp_blocked` (`failing_checks`), sent only when the store allows tracking.
 
