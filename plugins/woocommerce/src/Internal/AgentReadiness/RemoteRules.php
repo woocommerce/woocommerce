@@ -11,9 +11,9 @@ defined( 'ABSPATH' ) || exit;
  *
  * The file is the list of checks that run. Each id has to match a check in
  * code; an id the file leaves out does not run, and an id code does not know
- * is ignored. The file is fetched before each background scan, at most once a
- * day. Only a GET is made; no store data is sent. A failed fetch keeps the
- * last good copy, and with no copy the bundled checks apply.
+ * is ignored. The file is fetched before each background scan: the daily run
+ * and any scan that is asked for. Only a GET is made; no store data is sent. A
+ * failed fetch keeps the last good copy, and with no copy the bundled checks apply.
  *
  * The file is fetched from PUBLISHED_URL, the same host as the payment gateway
  * suggestions; the woocommerce_agent_readiness_rules_url filter changes it.
