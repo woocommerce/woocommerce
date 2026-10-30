@@ -2588,12 +2588,6 @@ importers:
       '@wordpress/env':
         specifier: catalog:tooling
         version: 11.17.0(@types/node@24.12.2)
-      allure-commandline:
-        specifier: ^2.32.2
-        version: 2.38.1
-      allure-playwright:
-        specifier: ^3.1.0
-        version: 3.7.1(@playwright/test@1.63.0)
       autoprefixer:
         specifier: 9.8.6
         version: 9.8.6
@@ -3711,9 +3705,6 @@ importers:
       ajv-cli:
         specifier: 3.3.x
         version: 3.3.0
-      allure-playwright:
-        specifier: ^2.9.2
-        version: 2.15.1
       autoprefixer:
         specifier: 10.4.14
         version: 10.4.14(postcss@8.5.26)
@@ -11060,29 +11051,6 @@ packages:
   ajv@8.18.0:
     resolution: {integrity: sha512-PlXPeEWMXMZ7sPYOHqmDyCJzcfNrUr3fGNKtezX14ykXOEIvyK81d+qydx89KY5O71FKMPaQ2vBfBFI5NHR63A==}
 
-  allure-commandline@2.38.1:
-    resolution: {integrity: sha512-qkoEz8/Y+K6XRlkJFmPEsT4bJFa2nHmYMkp6aEg6HaM4uewpJRI0jJsQhVWl8xZ6k6VtVr3vWnsAMPL5LPthvA==}
-    hasBin: true
-
-  allure-js-commons@2.15.1:
-    resolution: {integrity: sha512-5V/VINplbu0APnfSZOkYpKOzucO36Q2EtTD1kqjWjl7n6tj7Hh+IHCZsH3Vpk/LXRDfj9RuXugBBvwYKV5YMJw==}
-
-  allure-js-commons@3.7.1:
-    resolution: {integrity: sha512-S8tFymEzgWpp3ITGFu01z2+6KYdiNZC3sX8FbJaNgLoLWBHDBNQ0lq4lTQgkVjV6IN4TIUrnYfa2YuytWpv8WA==}
-    peerDependencies:
-      allure-playwright: 3.7.1
-    peerDependenciesMeta:
-      allure-playwright:
-        optional: true
-
-  allure-playwright@2.15.1:
-    resolution: {integrity: sha512-P1Uu1j/ptDHdYp3V5ZAeBZyt33+L+OQu0otUIEl/zkOcv0KRycHqlHwC0GEJmpgnLKvVP7s+K37LcLoSUUj3Cg==}
-
-  allure-playwright@3.7.1:
-    resolution: {integrity: sha512-uEuVz/VJWWEWvMV9iwsxSXJ3Y1RejNG8CUM13HyvMiQDfLI8xHCx7JWNSfGrBVIWVfo6+jsySpZ4Clu1EKXgYw==}
-    peerDependencies:
-      '@playwright/test': '>=1.53.0'
-
   ansi-align@2.0.0:
     resolution: {integrity: sha512-TdlOggdA/zURfMYa7ABC66j+oqfMew58KpJMbUlH3bcZP1b+cBHIHDDn5uH9INsxrHBPjsqM0tDB4jPTF/vgJA==}
 
@@ -17289,10 +17257,6 @@ packages:
 
   prop-types@15.8.1:
     resolution: {integrity: sha512-oj87CgZICdulUohogVAR7AjlC0327U4el4L6eAvOqCeudMDVU0NThNaV+b9Df4dXgSP1gXMTnPdhfe/2qDH5cg==}
-
-  properties@1.2.1:
-    resolution: {integrity: sha512-qYNxyMj1JeW54i/EWEFsM1cVwxJbtgPp8+0Wg9XjNaK6VE/c4oRi6PNu5p7w1mNXEIQIjV5Wwn8v8Gz82/QzdQ==}
-    engines: {node: '>=0.10'}
 
   proto-list@1.2.4:
     resolution: {integrity: sha512-vtK/94akxsTMhe0/cbfpR+syPuszcuwhqVjJq26CuNDgFGj682oRBXOP5MJpv2r7JtE8MsiepGIqvvOTBwn2vA==}
@@ -32688,29 +32652,6 @@ snapshots:
       json-schema-traverse: 1.0.0
       require-from-string: 2.0.2
 
-  allure-commandline@2.38.1: {}
-
-  allure-js-commons@2.15.1:
-    dependencies:
-      md5: 2.3.0
-      properties: 1.2.1
-      strip-ansi: 5.2.0
-
-  allure-js-commons@3.7.1(allure-playwright@3.7.1(@playwright/test@1.63.0)):
-    dependencies:
-      md5: 2.3.0
-    optionalDependencies:
-      allure-playwright: 3.7.1(@playwright/test@1.63.0)
-
-  allure-playwright@2.15.1:
-    dependencies:
-      allure-js-commons: 2.15.1
-
-  allure-playwright@3.7.1(@playwright/test@1.63.0):
-    dependencies:
-      '@playwright/test': 1.63.0
-      allure-js-commons: 3.7.1(allure-playwright@3.7.1(@playwright/test@1.63.0))
-
   ansi-align@2.0.0:
     dependencies:
       string-width: 2.1.1
@@ -40031,8 +39972,6 @@ snapshots:
       loose-envify: 1.4.0
       object-assign: 4.1.1
       react-is: 16.13.1
-
-  properties@1.2.1: {}
 
   proto-list@1.2.4: {}
 

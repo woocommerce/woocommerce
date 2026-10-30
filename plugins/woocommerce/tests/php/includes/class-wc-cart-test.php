@@ -223,6 +223,30 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox generate_cart_id should not depend on the order the variation attributes are listed in
+	 */
+	public function test_generate_cart_id_ignores_variation_attribute_order(): void {
+		$this->assertSame(
+			WC()->cart->generate_cart_id(
+				1,
+				2,
+				array(
+					'attribute_pa_size'   => 'small',
+					'attribute_pa_colour' => 'red',
+				)
+			),
+			WC()->cart->generate_cart_id(
+				1,
+				2,
+				array(
+					'attribute_pa_colour' => 'red',
+					'attribute_pa_size'   => 'small',
+				)
+			)
+		);
+	}
+
+	/**
 	 * @testdox should throw a notice to the cart if an "any" attribute is empty.
 	 */
 	public function test_add_variation_to_the_cart_with_empty_attributes() {
