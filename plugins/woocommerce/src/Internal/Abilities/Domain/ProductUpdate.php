@@ -74,7 +74,7 @@ class ProductUpdate extends ActionableAbility {
 
 	/**
 	 * Refuse a `variations` item that writes a field that cannot apply to a
-	 * variation, then check the input schema.
+	 * variation or that cannot be written, then check the rest of the input.
 	 *
 	 * @param mixed $input Ability input.
 	 * @return true|\WP_Error
