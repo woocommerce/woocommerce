@@ -1532,7 +1532,6 @@
 		"@wordpress/browserslist-config": "next",
 		"@wordpress/e2e-test-utils-playwright": "catalog:wp-min",
 		"@wordpress/env": "catalog:tooling",
-		"autoprefixer": "9.8.6",
 		"axios": "^0.33.0",
 		"config": "3.3.7",
 		"dotenv": "^10.0.0",
