@@ -261,7 +261,7 @@ class NotificationsProcessor {
 					/**
 					 * Action: woocommerce_customer_stock_notification_sent
 					 *
-					 * @since 11.3.0
+					 * @since 11.4.0
 					 *
 					 * Fires once a stock notification has been delivered and saved as sent.
 					 *

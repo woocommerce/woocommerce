@@ -294,7 +294,7 @@ class EmailManager {
 	/**
 	 * Deliver a stock notification, letting an integration take over delivery.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 *
 	 * @param Notification $notification The notification object.
 	 * @return bool Whether the notification was delivered.
@@ -308,7 +308,7 @@ class EmailManager {
 		/**
 		 * Filter: woocommerce_customer_stock_notification_pre_send
 		 *
-		 * @since 11.3.0
+		 * @since 11.4.0
 		 *
 		 * Take over delivery of a stock notification instead of sending the Core email.
 		 *
