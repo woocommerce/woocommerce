@@ -3659,15 +3659,17 @@ CREATE TABLE $meta_table (
 	 * @return int|bool  meta ID or false on failure
 	 */
 	public function add_meta( &$object, $meta ) { // phpcs:ignore Universal.NamingConventions.NoReservedKeywordParameterNames.objectFound
-		$add_meta        = $this->data_store_meta->add_meta( $object, $meta );
-		$meta->id        = $add_meta;
-		$changes_applied = $this->after_meta_change( $object, $meta );
+		$add_meta = $this->data_store_meta->add_meta( $object, $meta );
+		$meta->id = $add_meta;
 
-		if ( ! $changes_applied && $object instanceof WC_Abstract_Order && $this->should_backfill_post_record() ) {
+		// Write the post meta before after_meta_change(): a full order save there would add any later meta first.
+		if ( $object instanceof WC_Abstract_Order && $this->should_backfill_post_record() ) {
 			self::$backfilling_order_ids[] = $object->get_id();
 			add_post_meta( $object->get_id(), $meta->key, $meta->value );
 			self::$backfilling_order_ids = array_diff( self::$backfilling_order_ids, array( $object->get_id() ) );
 		}
+
+		$this->after_meta_change( $object, $meta );
 
 		return $add_meta;
 	}

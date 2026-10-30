@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep multi-value order meta in the same order in the posts tables as in HPOS when order data sync is on.
