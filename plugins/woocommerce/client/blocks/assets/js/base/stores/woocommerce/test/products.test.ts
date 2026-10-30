@@ -1,8 +1,4 @@
 /**
- * See ../README.md for WooCommerce Interactivity API store usage.
- */
-
-/**
  * External dependencies
  */
 import type { ProductResponseItem } from '@woocommerce/types';

@@ -1,8 +1,4 @@
 <?php
-/**
- * For shared WooCommerce Interactivity API store documentation, see plugins/woocommerce/client/blocks/assets/js/base/stores/woocommerce/README.md.
- */
-
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;

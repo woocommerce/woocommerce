@@ -1,3 +1,0 @@
-Significance: patch
-Type: dev
-Comment: Point block PHP files and shared store wrappers to Interactivity API documentation; no runtime change.

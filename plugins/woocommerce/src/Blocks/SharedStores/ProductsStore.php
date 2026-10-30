@@ -1,8 +1,4 @@
 <?php
-/**
- * See plugins/woocommerce/client/blocks/assets/js/base/stores/woocommerce/README.md for productInContext and shared store usage.
- */
-
 declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Blocks\SharedStores;
@@ -28,6 +24,9 @@ use InvalidArgumentException;
  * (client/blocks/assets/js/base/stores/woocommerce/products.ts) so that
  * directive bindings like `state.productInContext.sku` resolve during
  * server-side rendering as well as on the client.
+ *
+ * See client/blocks/assets/js/base/stores/woocommerce/README.md for the
+ * full model and consumer examples.
  *
  * This is an experimental API and may change in future versions.
  */

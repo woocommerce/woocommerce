@@ -1,8 +1,4 @@
 /**
- * See ./README.md for productInContext and shared store usage.
- */
-
-/**
  * External dependencies
  */
 import { store, getContext } from '@wordpress/interactivity';
@@ -20,6 +16,7 @@ import type { SelectedAttributes } from '@woocommerce/stores/woocommerce/cart';
  *   its own IDs).
  *
  * When present, per-element context takes precedence over the global state.
+ * See ./README.md for the full model and precedence rules.
  */
 type ProductContext = {
 	productId: number;

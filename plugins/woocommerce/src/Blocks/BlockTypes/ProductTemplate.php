@@ -1,7 +1,4 @@
 <?php
-/**
- * See plugins/woocommerce/client/blocks/assets/js/base/stores/woocommerce/README.md for productInContext and shared store usage.
- */
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
