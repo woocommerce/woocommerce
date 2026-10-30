@@ -73,6 +73,17 @@ class ProductCreate extends ActionableAbility {
 	}
 
 	/**
+	 * Refuse a `variations` item that writes a field that cannot apply to a
+	 * variation, then check the input schema.
+	 *
+	 * @param mixed $input Ability input.
+	 * @return true|\WP_Error
+	 */
+	public function validate_input( $input = null ) {
+		return self::variation_fields_refusal( $input ) ?? parent::validate_input( $input );
+	}
+
+	/**
 	 * Resource that the ability changes.
 	 *
 	 * @return string

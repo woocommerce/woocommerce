@@ -764,14 +764,14 @@ class ExtensibleAbilities {
 	 * @since 11.4.0
 	 *
 	 * @param string        $resource_name Resource.
-	 * @param callable|null $field_filter  Optional. Gets the arguments of a field and returns whether the schema lists it. The schema then accepts other fields, so the write refuses them with an error that names the field and the types it applies to.
+	 * @param callable|null $field_filter  Optional. Gets the arguments of a field and returns whether the schema lists it.
 	 * @return array<string, mixed>
 	 */
 	public static function get_input_schema( string $resource_name, ?callable $field_filter = null ): array {
 		$extensions = array(
 			'type'                 => 'object',
 			'description'          => __( 'Values to write to the fields that extensions add, keyed by extension namespace, then field. A null value deletes the value.', 'woocommerce' ),
-			'additionalProperties' => null !== $field_filter,
+			'additionalProperties' => false,
 		);
 		foreach ( self::get_fields( $resource_name ) as $namespace => $fields ) {
 			$writable = array_filter(
@@ -798,7 +798,7 @@ class ExtensibleAbilities {
 					},
 					$writable
 				),
-				'additionalProperties' => null !== $field_filter,
+				'additionalProperties' => false,
 			);
 		}
 		return $extensions;

@@ -359,6 +359,28 @@ abstract class ActionableAbility extends \WP_Ability {
 	}
 
 	/**
+	 * The error for a field that does not apply to the type of an object.
+	 *
+	 * @param string   $param        Field, as `extensions.<namespace>.<field>`.
+	 * @param string   $object_type  Type of the object.
+	 * @param string[] $object_types Types that the field applies to.
+	 * @return \WP_Error
+	 */
+	protected static function field_object_type_refusal( string $param, string $object_type, array $object_types ): \WP_Error {
+		return new \WP_Error(
+			'woocommerce_ability_field_object_type',
+			sprintf(
+				/* translators: 1: extension field, 2: object type, 3: comma-separated list of object types. */
+				__( 'The %1$s field does not apply to the %2$s type. It applies to %3$s.', 'woocommerce' ),
+				$param,
+				$object_type,
+				implode( ', ', $object_types )
+			),
+			array( 'status' => 400 )
+		);
+	}
+
+	/**
 	 * Write the checked values to the object in memory with the update_callback
 	 * of each field.
 	 *
@@ -369,17 +391,7 @@ abstract class ActionableAbility extends \WP_Ability {
 	private function apply_fields( $subject, array $updates ): ?\WP_Error {
 		foreach ( $updates as $param => list( $args, $value ) ) {
 			if ( ! ExtensibleAbilities::field_applies_to( $args, $subject ) ) {
-				return new \WP_Error(
-					'woocommerce_ability_field_object_type',
-					sprintf(
-						/* translators: 1: extension field, 2: object type, 3: comma-separated list of object types. */
-						__( 'The %1$s field does not apply to the %2$s type. It applies to %3$s.', 'woocommerce' ),
-						$param,
-						ExtensibleAbilities::get_object_type( $subject ) ?? 'unknown',
-						implode( ', ', $args['object_types'] )
-					),
-					array( 'status' => 400 )
-				);
+				return self::field_object_type_refusal( $param, ExtensibleAbilities::get_object_type( $subject ) ?? 'unknown', $args['object_types'] );
 			}
 			$rejected = self::run_callback( $args['update_callback'], array( $subject, $value ), array( 'field' => $param ) );
 			if ( null !== $rejected ) {

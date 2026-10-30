@@ -1544,6 +1544,31 @@ trait ProductAbilityTrait {
 	}
 
 	/**
+	 * The error for a `variations` item that writes a field that cannot apply to
+	 * a variation. The input schema would refuse it too, with a generic error.
+	 *
+	 * @param mixed $input Ability input.
+	 * @return \WP_Error|null
+	 */
+	private static function variation_fields_refusal( $input ): ?\WP_Error {
+		if ( ! ExtensibleAbilities::is_enabled() || ! is_array( $input['variations'] ?? null ) ) {
+			return null;
+		}
+		$registered = ExtensibleAbilities::get_fields( 'product' );
+		foreach ( $input['variations'] as $item ) {
+			foreach ( (array) ( $item['extensions'] ?? array() ) as $namespace => $fields ) {
+				foreach ( array_keys( (array) $fields ) as $field ) {
+					$args = $registered[ $namespace ][ $field ] ?? null;
+					if ( null !== $args && ! self::field_applies_to_variations( $args ) ) {
+						return self::field_object_type_refusal( 'extensions.' . $namespace . '.' . $field, ProductType::VARIATION, $args['object_types'] );
+					}
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
 	 * Whether a product field can apply to a variation, from its `object_types`.
 	 *
 	 * @param array<string, mixed> $args Field arguments from `register_field()`.

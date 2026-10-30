@@ -2167,6 +2167,8 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$product_input     = $ability['input_schema']['properties']['extensions']['properties'];
 		$this->assertArrayHasKey( 'simple_only', $product_input['typed-ext']['properties'] );
 		$this->assertArrayHasKey( 'variation_only', $input_namespaces['typed-ext']['properties'] );
+		$this->assertFalse( $ability['input_schema']['properties']['variations']['items']['properties']['extensions']['additionalProperties'] );
+		$this->assertFalse( $input_namespaces['typed-ext']['additionalProperties'] );
 		$this->assertArrayNotHasKey( 'simple_only', $input_namespaces['typed-ext']['properties'] );
 		$this->assertArrayHasKey( 'color', $input_namespaces['test-ext']['properties'], 'A field without object_types stays.' );
 		$this->assertArrayHasKey( 'variation_only', $output_namespaces['typed-ext']['properties'] );
