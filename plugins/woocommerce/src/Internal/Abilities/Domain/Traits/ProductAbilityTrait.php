@@ -809,10 +809,10 @@ trait ProductAbilityTrait {
 			'external_url'      => $product instanceof \WC_Product_External ? $product->get_product_url() : null,
 			'button_text'       => $product instanceof \WC_Product_External ? $product->get_button_text() : null,
 			'grouped_products'  => $product instanceof \WC_Product_Grouped ? array_map( 'absint', $product->get_children( 'edit' ) ) : array(),
-			'date_created'      => wc_rest_prepare_date_response( $product->get_date_created(), false ),
-			'date_created_gmt'  => wc_rest_prepare_date_response( $product->get_date_created() ),
-			'date_modified'     => wc_rest_prepare_date_response( $product->get_date_modified(), false ),
-			'date_modified_gmt' => wc_rest_prepare_date_response( $product->get_date_modified() ),
+			'date_created'      => self::format_date_for_response( $product->get_date_created(), false ),
+			'date_created_gmt'  => self::format_date_for_response( $product->get_date_created() ),
+			'date_modified'     => self::format_date_for_response( $product->get_date_modified(), false ),
+			'date_modified_gmt' => self::format_date_for_response( $product->get_date_modified() ),
 		);
 
 		return ExtensibleAbilities::add_fields_to_object( $data, 'product', $product );
