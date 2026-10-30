@@ -389,9 +389,11 @@ class WC_Order extends WC_Abstract_Order {
 
 			if ( $manual_update && ! $this->staging_status ) {
 				/**
-				 * Fires for a manual status change of an order. For a change that
-				 * stage_status() staged, it fires when the order is saved, before
-				 * it is written.
+				 * Fires for a manual status change of an order, before the change
+				 * is written, so a listener that reloads the order sees the old row.
+				 * After set_status(), it fires before the paid and completed dates
+				 * are set. After stage_status() or update_status(), it fires from
+				 * save(), with those dates already set on the order object.
 				 *
 				 * @since 3.0.0
 				 * @param int    $order_id Order ID.
