@@ -493,6 +493,16 @@ test( 'keeps a zone edit made while an earlier save is in flight', async ( {
 	await page.getByLabel( 'Zone name' ).fill( firstName );
 	await page.locator( '#submit' ).click();
 
+	// While the save is in flight every action control is locked, so no second operation can
+	// start: Save and Add method are disabled and the method rows stay blocked.
+	await expect( page.locator( '#submit' ) ).toBeDisabled();
+	await expect(
+		page.locator( '.wc-shipping-zone-add-method' )
+	).toBeDisabled();
+	await expect(
+		page.locator( '.wc-shipping-zone-method-rows .blockUI' ).first()
+	).toBeVisible();
+
 	// The zone fields stay editable while the table is blocked, so type again mid-request.
 	await page.getByLabel( 'Zone name' ).fill( secondName );
 	releaseFirstSave();
