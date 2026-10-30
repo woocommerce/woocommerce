@@ -4267,7 +4267,7 @@ function wc_update_1140_add_mpn_to_product_lookup_table(): void {
  *
  * @since 11.4.0
  */
-function wc_update_1140_autoload_options_for_hpos_and_product_catalog(): void {
+function wc_update_1140_autoload_options_for_hpos_and_product_catalog_display(): void {
 	$defaults = array(
 		'woocommerce_custom_orders_table_data_sync_enabled' => 'no',
 		'woocommerce_custom_orders_table_background_sync_mode' => 'off',
