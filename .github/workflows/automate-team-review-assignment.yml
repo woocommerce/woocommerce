@@ -1,4 +1,4 @@
-name: Add community label, Assign reviewers
+name: Add community and team labels, Assign reviewers
 
 on:
     pull_request_target:
@@ -45,6 +45,59 @@ jobs:
                           ...context.repo,
                           issue_number: context.issue.number,
                           labels: [ 'type: community contribution' ],
+                      } );
+
+    add-team-label:
+        name: Add team label
+        if: ${{ github.event.pull_request && github.event.action == 'opened' }}
+        runs-on: ubuntu-latest
+        timeout-minutes: 5
+        steps:
+            - name: Check if the author is on a labeled team
+              id: check
+              uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+              with:
+                  # The default token cannot read org team membership.
+                  github-token: ${{ secrets.PR_ASSIGN_TOKEN }}
+                  retries: 2
+                  script: |
+                      const labels = { 'big-ocean': 'team: Big Ocean' };
+                      const username = context.payload.pull_request.user.login;
+                      const matched = [];
+
+                      for ( const [ team, label ] of Object.entries( labels ) ) {
+                          try {
+                              const { data } = await github.rest.teams.getMembershipForUserInOrg( {
+                                  org: context.repo.owner,
+                                  team_slug: team,
+                                  username,
+                              } );
+
+                              if ( data.state !== 'pending' ) {
+                                  matched.push( label );
+                              }
+                          } catch ( error ) {
+                              // 404 just means "not a member". Anything else, such as an expired
+                              // token, would otherwise look like an author who is on no team.
+                              if ( error.status === 404 ) {
+                                  core.info( `${ username } is not on ${ team }.` );
+                              } else {
+                                  core.setFailed( `Could not read ${ username }'s membership of ${ team }: ${ error.message }` );
+                              }
+                          }
+                      }
+
+                      core.setOutput( 'labels', JSON.stringify( matched ) );
+
+            - name: Add team label
+              if: ${{ steps.check.outputs.labels != '[]' }}
+              uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+              with:
+                  script: |
+                      await github.rest.issues.addLabels( {
+                          ...context.repo,
+                          issue_number: context.issue.number,
+                          labels: ${{ steps.check.outputs.labels }},
                       } );
 
     assign-reviewers:
