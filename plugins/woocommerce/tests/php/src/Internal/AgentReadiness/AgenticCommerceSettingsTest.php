@@ -116,15 +116,14 @@ class AgenticCommerceSettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox On a ready store only a pass line is listed, and the switch can be turned on.
+	 * @testdox With every required check passing, nothing blocks the switch and only recommended checks are listed.
 	 */
 	public function test_output_on_a_ready_store(): void {
 		StoreConditionsTest::make_store_ready( $this );
-		update_option( 'woocommerce_enable_guest_checkout', 'yes' );
 
 		$html = $this->render_page();
 
-		$this->assertStringContainsString( 'Your store passes every setup check.', $html );
+		$this->assertStringContainsString( 'wc-agentic-commerce-badge--check', $html );
 		$this->assertStringNotContainsString( 'wc-agentic-commerce-badge--fix', $html );
 		$this->assertStringNotContainsString( 'to turn this on.', $html );
 	}
