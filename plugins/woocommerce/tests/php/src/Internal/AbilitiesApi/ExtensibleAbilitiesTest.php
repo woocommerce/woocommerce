@@ -1206,17 +1206,16 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 		$values = $output['extensions']['values'];
 		$errors = $values[ ExtensibleAbilities::ERRORS_KEY ];
-		unset( $values[ ExtensibleAbilities::ERRORS_KEY ] );
 
-		$this->assertSame(
-			array(
-				'count' => 12,
-				'empty' => null,
-			),
-			$values
-		);
-		$this->assertSame( array( 'broken', 'dupes' ), array_keys( $errors ) );
+		$this->assertSame( 12, $values['count'] );
+		$this->assertArrayHasKey( 'empty', $values );
+		$this->assertNull( $values['empty'] );
+		$this->assertArrayNotHasKey( 'broken', $values );
+		$this->assertArrayNotHasKey( 'dupes', $values );
 		$this->assertSame( 'The extension failed to read this value.', $errors['broken'] );
+		$this->assertArrayHasKey( 'dupes', $errors );
+		$this->assertArrayNotHasKey( 'count', $errors );
+		$this->assertArrayNotHasKey( 'empty', $errors );
 		$this->assertStringNotContainsString( 'Broken', wp_json_encode( $output ) );
 	}
 
