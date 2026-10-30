@@ -1,3 +1,0 @@
-Significance: minor
-Type: dev
-Comment: The agent readiness rules file now chooses which shipped checks run, and a failed fetch keeps the bundled checks.

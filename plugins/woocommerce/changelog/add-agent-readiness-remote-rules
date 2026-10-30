@@ -1,4 +1,3 @@
 Significance: minor
 Type: dev
-Comment: Experimental agent readiness checks can read channel rules from a published file; behind a hidden flag, no merchant change.
-
+Comment: Experimental agent readiness reads which checks run, and their channel rules, from a published file; behind a hidden flag.
