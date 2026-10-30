@@ -97,7 +97,7 @@ final class ActionSchedulerUtil {
 	 * Is the Action Scheduler procedural API loaded? This does not imply that Action Scheduler has
 	 * actually initialized.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 *
 	 * @return bool
 	 */
@@ -110,7 +110,7 @@ final class ActionSchedulerUtil {
 	 *
 	 * This is the copy answering calls, which can be older than the highest registered version.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 *
 	 * @return string|null The version, or null when no copy is loaded or its header cannot be read.
 	 */
@@ -130,7 +130,7 @@ final class ActionSchedulerUtil {
 	 * The highest Action Scheduler version registered with the version registry. This may not be
 	 * the loaded version.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 *
 	 * @return string|null The version, or null before `plugins_loaded` or when nothing registered.
 	 */
@@ -144,7 +144,7 @@ final class ActionSchedulerUtil {
 	/**
 	 * The version of the Action Scheduler copy bundled with WooCommerce, read from its plugin file header.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 *
 	 * @return string|null The version, or null when the header cannot be read.
 	 */
@@ -159,7 +159,7 @@ final class ActionSchedulerUtil {
 	/**
 	 * The directory of the loaded Action Scheduler copy, normalized and with a trailing slash.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 *
 	 * @return string|null The directory, or null when no copy has initialized.
 	 */
@@ -176,7 +176,7 @@ final class ActionSchedulerUtil {
 	/**
 	 * Which plugin, mu-plugin or theme the loaded Action Scheduler copy belongs to.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 *
 	 * @return array {
 	 *     @type string $type     One of 'woocommerce', 'mu-plugin', 'plugin', 'theme' or 'other'.
@@ -199,7 +199,7 @@ final class ActionSchedulerUtil {
 	/**
 	 * Every Action Scheduler copy that registered with the version registry, keyed by directory.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 *
 	 * @return array<string, string> Directory => version. Empty before Action Scheduler 3.9.1, which added the registry's source tracking.
 	 */
@@ -219,7 +219,7 @@ final class ActionSchedulerUtil {
 	/**
 	 * Does the loaded copy lack a feature core relies on? Also true if no copy is loaded.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 *
 	 * @return bool
 	 */
@@ -237,7 +237,7 @@ final class ActionSchedulerUtil {
 	 * Ascertains if a given Action Scheduler feature is available and fully supported by the loaded
 	 * version of the library.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 *
 	 * @param string $feature An ActionSchedulerFeature value.
 	 *
@@ -258,7 +258,7 @@ final class ActionSchedulerUtil {
 	/**
 	 * Can the loaded copy accept scheduling calls right now?
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 *
 	 * @return bool
 	 */
@@ -281,7 +281,7 @@ final class ActionSchedulerUtil {
 	/**
 	 * Run a callback now if the loaded copy is ready, otherwise once it becomes ready.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 *
 	 * @param callable $callback The callback to run. It receives no arguments.
 	 *
@@ -311,7 +311,7 @@ final class ActionSchedulerUtil {
 	/**
 	 * Enqueue an action to run as soon as possible, like `as_enqueue_async_action()`.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 *
 	 * @param string $hook     The hook to trigger.
 	 * @param array  $args     Arguments to pass when the hook triggers.
@@ -335,7 +335,7 @@ final class ActionSchedulerUtil {
 	 * In unusual cases where an older version of Action Scheduler has loaded, uniqueness may be emulated
 	 * and priorities may be dropped (only if necessary).
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 *
 	 * @param int    $timestamp When the job will run.
 	 * @param string $hook      The hook to trigger.
@@ -355,7 +355,7 @@ final class ActionSchedulerUtil {
 	 *
 	 * See notes for {@see self::schedule_single()} regarding `$unique` and `$priority` handling.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 *
 	 * @param int    $timestamp When the first instance of the job will run.
 	 * @param int    $interval  How long to wait between runs, in seconds.
@@ -376,7 +376,7 @@ final class ActionSchedulerUtil {
 	 *
 	 * See notes for {@see self::schedule_single()} regarding `$unique` and `$priority` handling.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 *
 	 * @param int    $timestamp The first instance of the action will be scheduled on or after this time.
 	 * @param string $schedule  A cron-link schedule string.
@@ -456,7 +456,7 @@ final class ActionSchedulerUtil {
 	 *
 	 * @internal For tests that simulate different loaded copies within one request.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 *
 	 * @return void
 	 */
@@ -488,7 +488,7 @@ final class ActionSchedulerUtil {
 			wc_doing_it_wrong(
 				__CLASS__ . '::' . $method,
 				'Action Scheduler is not loaded, so the action cannot be scheduled. Call this after Action Scheduler has initialized.',
-				'11.3.0'
+				'11.4.0'
 			);
 
 			return 0;
