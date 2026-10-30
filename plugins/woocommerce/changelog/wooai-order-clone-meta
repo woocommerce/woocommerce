@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Give each cloned order its own meta objects and its own copies of the loaded items, so an unsaved change on one order instance no longer appears on other instances from the order cache. Give each cloned product its own attribute and download objects, and give every cloned WC_Data object its own date objects, for the same reason.
+Give each cloned order its own meta objects and its own copies of the loaded items, so an unsaved change on one order instance no longer appears on other instances from the order cache. Give each cloned product its own attribute and download objects, and give every cloned WC_Data object its own date objects, for the same reason. Save only the changed fields of fee and coupon order items, so saving a stale copy no longer overwrites a value that another copy saved.
