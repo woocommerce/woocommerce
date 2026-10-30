@@ -32,6 +32,7 @@ The `.ai/skills/` directory contains procedural HOW-TO instructions:
 - **`woocommerce-git-draft-pr`** - Create draft PRs with proper template, changelog, and milestone handling
 - **`woocommerce-email-editor`** - Email editor development setup and Mailpit configuration
 - **`woocommerce-performance`** - Performance guardrails. **Invoke when writing or reviewing PHP code.**
+- **`search-all-plugins`** - Search the source code of WooCommerce.com and WordPress.org plugins. **Invoke before changing a surface that extensions can depend on.**
 
 ## Project Architecture
 
