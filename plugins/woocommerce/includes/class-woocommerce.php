@@ -516,14 +516,22 @@ final class WooCommerce {
 			);
 
 			if ( false !== strpos( $message, 'Stack trace:' ) ) {
-				$segments  = explode( 'Stack trace:', $message );
-				$message   = str_replace( PHP_EOL, ' ', trim( $segments[0] ) );
-				$backtrace = array_map(
-					'trim',
-					explode( PHP_EOL, $segments[1] )
-				);
+				$segments = explode( 'Stack trace:', $message, 2 );
+				$message  = str_replace( PHP_EOL, ' ', trim( $segments[0] ) );
 
-				$context['backtrace'] = $backtrace;
+				$context['backtrace'] = array();
+				foreach ( explode( "\n", trim( $segments[1] ) ) as $line ) {
+					// Cap each line so one huge line cannot hit the PCRE backtrack limit.
+					$line = substr( $line, 0, 4096 );
+					// Keep only frame headers, including eval, anonymous class and PHP 8.4 closure frames, and drop their arguments.
+					// PHP escapes newlines inside trace arguments, so an argument cannot start a frame line of its own.
+					if ( preg_match( '/^#\d+ (?:(?:\[internal function\]|.*?\(\d+\)): (?:\{closure[^{}\'\r\n]*+\}|[^(\r\n])++\(|\{main\})/', $line, $frame ) ) {
+						$context['backtrace'][] = '(' === substr( $frame[0], -1 ) ? $frame[0] . ')' : $frame[0];
+					} elseif ( preg_match( '/^Next ([\w\\\\]+): /', $line, $next ) ) {
+						// Keep the chained exception class, not its message.
+						$context['backtrace'][] = 'Next ' . $next[1];
+					}
+				}
 			} else {
 				$context['backtrace'] = true;
 			}
