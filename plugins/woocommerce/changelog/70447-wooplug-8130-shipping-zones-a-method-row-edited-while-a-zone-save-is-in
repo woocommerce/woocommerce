@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent shipping zone method changes from being lost when made while the zone is still saving.
