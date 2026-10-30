@@ -82,18 +82,16 @@ class ProductUpdate extends ActionableAbility {
 			return $product;
 		}
 
+		if ( $product instanceof \WC_Product_Variation ) {
+			return self::get_unsupported_product_type_error();
+		}
+
 		if ( empty( array_diff( array_keys( $input ), array( 'id' ) ) ) ) {
 			return new \WP_Error(
 				'woocommerce_product_update_no_fields',
 				__( 'At least one product field is required to update a product.', 'woocommerce' ),
 				array( 'status' => 400 )
 			);
-		}
-
-		$product_config = self::get_product_config_for_product( $product );
-
-		if ( is_wp_error( $product_config ) ) {
-			return $product_config;
 		}
 
 		if (
@@ -113,22 +111,12 @@ class ProductUpdate extends ActionableAbility {
 			);
 		}
 
-		if ( isset( $input['product_type_alias'] ) ) {
-			$product_config = self::get_product_config_for_alias( $input['product_type_alias'] );
-
-			if ( is_wp_error( $product_config ) ) {
-				return $product_config;
+		if ( isset( $input['type'] ) ) {
+			$current_config = self::get_product_config_for_product( $product );
+			if ( is_wp_error( $current_config ) ) {
+				return $current_config;
 			}
-
-			$product = wc_get_product_object( $product_config['wc_type'], $product->get_id() );
-
-			if ( ! $product ) {
-				return new \WP_Error(
-					'woocommerce_invalid_product_type',
-					__( 'Invalid product type.', 'woocommerce' ),
-					array( 'status' => 400 )
-				);
-			}
+			return self::get_product_object_for_type( (string) $input['type'], $product->get_id() );
 		}
 
 		return $product;
@@ -142,16 +130,14 @@ class ProductUpdate extends ActionableAbility {
 	 * @return null|\WP_Error
 	 */
 	public function change( $subject, array $input ) {
-		$product_config = isset( $input['product_type_alias'] )
-			? self::get_product_config_for_alias( $input['product_type_alias'] )
-			: self::get_product_config_for_product( $subject );
+		$product_config = self::get_product_config_for_product( $subject );
 
 		if ( is_wp_error( $product_config ) ) {
 			return $product_config;
 		}
 
 		try {
-			if ( isset( $input['product_type_alias'] ) ) {
+			if ( isset( $input['type'] ) && \WC_Product_Factory::get_product_type( $subject->get_id() ) !== $input['type'] ) {
 				self::apply_product_type_config( $subject, $product_config );
 			}
 
