@@ -9,6 +9,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\StructuredData;
 
+use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Enums\ProductType;
 use WC_Product;
 
 defined( 'ABSPATH' ) || exit;
@@ -21,7 +23,7 @@ defined( 'ABSPATH' ) || exit;
 class ProductOpenGraphTags {
 
 	/**
-	 * Build metadata from the product and its featured image.
+	 * Build metadata from the product and its gallery images.
 	 *
 	 * @since 11.4.0
 	 *
@@ -43,11 +45,56 @@ class ProductOpenGraphTags {
 		foreach ( $this->get_site_tags() as $property => $value ) {
 			$tags[] = array( $property => $value );
 		}
-		$image = $this->get_image_tags( (int) $product->get_image_id(), $product->get_name() );
-		if ( $image ) {
-			$tags[] = $image;
+		$gallery   = $product->get_gallery_image_ids();
+		$image_ids = array_merge( array( $product->get_image_id() ), is_array( $gallery ) ? $gallery : array() );
+		$image_ids = array_slice( array_unique( array_filter( array_map( 'intval', $image_ids ) ) ), 0, 6 );
+		if ( ! empty( $image_ids ) ) {
+			// Prime caches to reduce future queries.
+			_prime_post_caches( $image_ids );
 		}
-		$tags[] = array( 'twitter:card' => $image ? 'summary_large_image' : 'summary' );
+		$urls = array();
+		foreach ( $image_ids as $image_id ) {
+			$image = $this->get_image_tags( $image_id, $product->get_name() );
+			if ( $image && ! in_array( $image['og:image'], $urls, true ) ) {
+				$tags[] = $image;
+				$urls[] = $image['og:image'];
+			}
+		}
+		$tags[] = array( 'twitter:card' => $urls ? 'summary_large_image' : 'summary' );
+
+		$availability = array(
+			ProductStockStatus::IN_STOCK     => array(
+				'product:availability' => 'in stock',
+				'og:availability'      => 'instock',
+			),
+			ProductStockStatus::OUT_OF_STOCK => array(
+				'product:availability' => 'out of stock',
+				'og:availability'      => 'out of stock',
+			),
+			ProductStockStatus::ON_BACKORDER => array(
+				'product:availability' => 'available for order',
+				'og:availability'      => 'backorder',
+			),
+		);
+		foreach ( $availability[ $product->get_stock_status() ] ?? array() as $property => $value ) {
+			$tags[] = array( $property => $value );
+		}
+
+		foreach ( $this->get_price_tags( $product ) as $property => $value ) {
+			$tags[] = array( $property => $value );
+		}
+
+		foreach ( wc_get_container()->get( ProductMediaSources::class )->get_sources( $product ) as $media => $source ) {
+			$root  = 'og:' . $media;
+			$group = array();
+			foreach ( $source as $detail => $value ) {
+				$group[ 'url' === $detail ? $root : $root . ':' . $detail ] = $value;
+			}
+			if ( 'https' === wp_parse_url( $source['url'], PHP_URL_SCHEME ) ) {
+				$group[ $root . ':secure_url' ] = $source['url'];
+			}
+			$tags[] = $group;
+		}
 
 		return $tags;
 	}
@@ -87,6 +134,43 @@ class ProductOpenGraphTags {
 			$alt                   = get_post_meta( $image_id, '_wp_attachment_image_alt', true );
 			$tags['og:image:alt']  = is_string( $alt ) && '' !== trim( $alt ) ? $alt : $title;
 			$tags['og:image:type'] = (string) get_post_mime_type( $image_id );
+		}
+
+		return $tags;
+	}
+
+	/**
+	 * Build prices and sale dates for products with a single price.
+	 *
+	 * @param WC_Product $product Product being shared.
+	 * @return array<string, string>
+	 */
+	private function get_price_tags( WC_Product $product ): array {
+		if ( ! $product->is_type( array( ProductType::SIMPLE, ProductType::EXTERNAL ) ) || '' === $product->get_price() ) {
+			return array();
+		}
+
+		$price    = wc_format_decimal( wc_get_price_to_display( $product ), wc_get_price_decimals() );
+		$currency = get_woocommerce_currency();
+		$tags     = array(
+			'product:price:amount'   => $price,
+			'product:price:currency' => $currency,
+			'og:price:amount'        => $price,
+			'og:price:currency'      => $currency,
+		);
+		if ( $product->is_on_sale() ) {
+			$tags['product:sale_price:amount']   = $price;
+			$tags['product:sale_price:currency'] = $currency;
+			$tags['og:price:standard_amount']    = wc_format_decimal( wc_get_price_to_display( $product, array( 'price' => $product->get_regular_price() ) ), wc_get_price_decimals() );
+			foreach ( array(
+				'start' => $product->get_date_on_sale_from(),
+				'end'   => $product->get_date_on_sale_to(),
+			) as $boundary => $date ) {
+				if ( $date ) {
+					$tags[ 'product:sale_price_dates:' . $boundary ] = $date->format( DATE_ATOM );
+					$tags[ 'og:price:' . $boundary . '_date' ]       = $date->format( DATE_ATOM );
+				}
+			}
 		}
 
 		return $tags;

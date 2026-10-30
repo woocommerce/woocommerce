@@ -268,6 +268,8 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			return '';
 		}
 
+		$value = $this->unescape_data( $value );
+
 		// IDs are prefixed with id:.
 		if ( preg_match( '/^id:(\d+)$/', $value, $matches ) ) {
 			$id = intval( $matches[1] );
@@ -328,7 +330,9 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	 * Parse the ID field.
 	 *
 	 * If we're not doing an update, create a placeholder product so mapping works
-	 * for rows following this one.
+	 * for rows following this one. When updating, an ID that does not exist on
+	 * this site falls back to the product matching the row's SKU, if the row can
+	 * safely update it.
 	 *
 	 * @param string $value Field value.
 	 *
@@ -350,10 +354,8 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 		// Not updating? Make sure we have a new placeholder for this ID.
 		if ( ! $this->params['update_existing'] ) {
-			$mapped_keys      = $this->get_mapped_keys();
-			$sku_column_index = absint( array_search( 'sku', $mapped_keys, true ) );
-			$row_sku          = isset( $this->raw_data[ $this->parsing_raw_data_index ][ $sku_column_index ] ) ? $this->raw_data[ $this->parsing_raw_data_index ][ $sku_column_index ] : '';
-			$id_from_sku      = $row_sku ? wc_get_product_id_by_sku( $row_sku ) : '';
+			$row_sku     = $this->parse_sku_field( $this->get_row_value( 'sku' ) );
+			$id_from_sku = $this->get_product_id_by_row_sku();
 
 			// If row has a SKU, make sure placeholder was not made already.
 			if ( $id_from_sku ) {
@@ -375,7 +377,145 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			return $placeholder_id;
 		}
 
+		// An ID exported from another site may not exist here. Fall back to the row's SKU so the
+		// row updates the matching product instead of failing later with an invalid product error.
+		if ( ! in_array( get_post_type( $id ), array( 'product', 'product_variation' ), true ) ) {
+			$id_from_sku = $this->get_product_id_by_row_sku();
+
+			if ( $id_from_sku && $this->row_can_update_product( $id_from_sku ) ) {
+				return $id_from_sku;
+			}
+		}
+
 		return $id;
+	}
+
+	/**
+	 * Find the product with the SKU of the row being parsed, as stored or as the import cleans it.
+	 *
+	 * SKUs saved through code can keep characters the import would clean, so the stored form is tried first.
+	 *
+	 * @return int Product ID, or 0 when no product has the SKU.
+	 */
+	private function get_product_id_by_row_sku(): int {
+		$raw_sku   = $this->unescape_data( $this->get_row_value( 'sku' ) );
+		$clean_sku = sanitize_text_field( $raw_sku );
+
+		if ( '' === $clean_sku ) {
+			return 0;
+		}
+
+		$id = $raw_sku !== $clean_sku ? wc_get_product_id_by_sku( $raw_sku ) : 0;
+
+		return $id ? $id : wc_get_product_id_by_sku( $clean_sku );
+	}
+
+	/**
+	 * Get a column value of the row currently being parsed.
+	 *
+	 * @param string $key Mapped column key, such as 'sku' or 'type'.
+	 * @return string Cell value converted to UTF-8, or an empty string when the file has no such column.
+	 */
+	private function get_row_value( string $key ): string {
+		$column_index = array_search( $key, $this->get_mapped_keys(), true );
+
+		if ( false === $column_index ) {
+			return '';
+		}
+
+		return self::convert_to_utf8( (string) ( $this->raw_data[ $this->parsing_raw_data_index ][ $column_index ] ?? '' ) );
+	}
+
+	/**
+	 * Convert a cell from the file to UTF-8 before it is parsed.
+	 *
+	 * @param string $value Raw cell value.
+	 * @return string
+	 */
+	private static function convert_to_utf8( $value ): string {
+		if ( ! function_exists( 'mb_convert_encoding' ) ) {
+			return wp_check_invalid_utf8( $value, true );
+		}
+
+		$encoding = mb_detect_encoding( $value, mb_detect_order(), true );
+
+		return (string) mb_convert_encoding( $value, 'UTF-8', $encoding ? $encoding : 'UTF-8' );
+	}
+
+	/**
+	 * Whether the row can update the product its SKU matched.
+	 *
+	 * Another type would make get_product_object() convert the product. An `id:` reference in a row whose own ID
+	 * comes from another site most likely points at a product of that site as well.
+	 *
+	 * @param int $product_id Existing product ID matched by SKU.
+	 * @return bool
+	 */
+	private function row_can_update_product( int $product_id ): bool {
+		if ( ! $this->row_type_matches_product( $product_id ) ) {
+			return false;
+		}
+
+		foreach ( array( 'parent_id', 'grouped_products', 'upsell_ids', 'cross_sell_ids' ) as $key ) {
+			foreach ( $this->explode_values( $this->get_row_value( $key ) ) as $reference ) {
+				if ( 0 === strpos( $reference, 'id:' ) ) {
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Whether the row would save the product matched by SKU as the type it already has.
+	 *
+	 * A file without a Type column cannot convert anything.
+	 *
+	 * @param int $product_id Existing product ID matched by SKU.
+	 * @return bool
+	 */
+	private function row_type_matches_product( int $product_id ): bool {
+		if ( ! in_array( 'type', $this->get_mapped_keys(), true ) ) {
+			return true;
+		}
+
+		$row_type     = self::get_type_from_values( array_map( 'strtolower', $this->parse_comma_field( $this->get_row_value( 'type' ) ) ) );
+		$product_type = WC_Product_Factory::get_product_type( $product_id );
+
+		// Variations of extension types, such as subscription variations, report their own type.
+		if ( ProductType::VARIATION === $product_type && $row_type !== $product_type ) {
+			$product      = wc_get_product( $product_id );
+			$product_type = $product ? $product->get_type() : $product_type;
+		}
+
+		return $product_type === $row_type;
+	}
+
+	/**
+	 * Get the product type a parsed Type cell saves as.
+	 *
+	 * The cell also holds the virtual and downloadable flags. The first other value is the type, and an empty cell means simple.
+	 *
+	 * @param string[] $values Parsed Type cell values, lowercased.
+	 * @return string
+	 */
+	private static function get_type_from_values( array $values ): string {
+		$type = current( array_diff( $values, array( 'virtual', 'downloadable' ) ) );
+
+		return $type ? $type : ProductType::SIMPLE;
+	}
+
+	/**
+	 * Parse a SKU cell, removing the apostrophe the exporter puts before a leading =, +, - or @.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param string $value Field value.
+	 * @return string
+	 */
+	public function parse_sku_field( $value ) {
+		return sanitize_text_field( $this->unescape_data( $value ) );
 	}
 
 	/**
@@ -955,6 +1095,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			'tag_ids_spaces'    => array( $this, 'parse_tags_spaces_field' ),
 			'shipping_class_id' => array( $this, 'parse_shipping_class_field' ),
 			'images'            => array( $this, 'parse_images_field' ),
+			'sku'               => array( $this, 'parse_sku_field' ),
 			'parent_id'         => array( $this, 'parse_relative_field' ),
 			'grouped_products'  => array( $this, 'parse_relative_comma_field' ),
 			'upsell_ids'        => array( $this, 'parse_relative_comma_field' ),
@@ -1065,13 +1206,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			$data['type']         = array_map( 'strtolower', $data['type'] );
 			$data['virtual']      = in_array( 'virtual', $data['type'], true );
 			$data['downloadable'] = in_array( 'downloadable', $data['type'], true );
-
-			// Convert type to string.
-			$data['type'] = current( array_diff( $data['type'], array( 'virtual', 'downloadable' ) ) );
-
-			if ( ! $data['type'] ) {
-				$data['type'] = ProductType::SIMPLE;
-			}
+			$data['type']         = self::get_type_from_values( $data['type'] );
 		}
 
 		// Status is mapped from a special published field.
@@ -1228,7 +1363,6 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	protected function set_parsed_data() {
 		$parse_functions = $this->get_formatting_callback();
 		$mapped_keys     = $this->get_mapped_keys();
-		$use_mb          = function_exists( 'mb_convert_encoding' );
 
 		// Parse the data.
 		foreach ( $this->raw_data as $row_index => $row ) {
@@ -1249,19 +1383,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 					continue;
 				}
 
-				// Convert UTF8.
-				if ( $use_mb ) {
-					$encoding = mb_detect_encoding( $value, mb_detect_order(), true );
-					if ( $encoding ) {
-						$value = mb_convert_encoding( $value, 'UTF-8', $encoding );
-					} else {
-						$value = mb_convert_encoding( $value, 'UTF-8', 'UTF-8' );
-					}
-				} else {
-					$value = wp_check_invalid_utf8( $value, true );
-				}
-
-				$data[ $mapped_keys[ $id ] ] = call_user_func( $parse_functions[ $id ], $value );
+				$data[ $mapped_keys[ $id ] ] = call_user_func( $parse_functions[ $id ], self::convert_to_utf8( $value ) );
 			}
 
 			/**
@@ -1481,6 +1603,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			$global_unique_id = $this->normalize_global_unique_id( $parsed_data['global_unique_id'] ?? '' );
 			$id_exists        = false;
 			$sku_exists       = false;
+			$id_from_sku      = 0;
 
 			if ( $update_existing && ! $id && ! $sku && '' !== $global_unique_id ) {
 				$id = $this->match_product_id_by_global_unique_id( $global_unique_id, $parsed_data['type'] ?? '' );
@@ -1502,7 +1625,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			}
 
 			if ( $sku ) {
-				$id_from_sku = wc_get_product_id_by_sku( $sku );
+				$id_from_sku = absint( wc_get_product_id_by_sku( $sku ) );
 				$product     = $id_from_sku ? wc_get_product( $id_from_sku ) : false;
 				$sku_exists  = $product && 'importing' !== $product->get_status();
 			}
@@ -1577,6 +1700,9 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			$result = $this->process_item( $parsed_data );
 
 			if ( is_wp_error( $result ) ) {
+				if ( $id_exists && $sku_exists && $id !== $id_from_sku ) {
+					$result = $this->add_sku_conflict_hint( $result, $id, (string) $sku, $id_from_sku );
+				}
 				$result->add_data( array( 'row' => $this->get_row_id( $parsed_data ) ) );
 				$data['failed'][] = $result;
 			} elseif ( $result['updated'] ) {
@@ -1596,5 +1722,33 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		}
 
 		return $data;
+	}
+
+	/**
+	 * Explain a failed row whose ID and SKU point at two different products.
+	 *
+	 * A failure about the row's own type is left as it is.
+	 *
+	 * @param WP_Error $error       Error returned when processing the row.
+	 * @param int      $id          Existing product ID the row's ID column matched.
+	 * @param string   $sku         SKU column value of the row.
+	 * @param int      $id_from_sku Product ID that already uses the row's SKU.
+	 * @return WP_Error
+	 */
+	private function add_sku_conflict_hint( WP_Error $error, int $id, string $sku, int $id_from_sku ): WP_Error {
+		if ( 'woocommerce_product_importer_invalid_type' === $error->get_error_code() ) {
+			return $error;
+		}
+
+		$message = sprintf(
+			/* translators: 1: original error message, 2: product ID matched by the row's ID, 3: SKU, 4: product ID that already uses the SKU */
+			__( '%1$s The ID of this row matches product #%2$d, but its SKU "%3$s" already belongs to product #%4$d. Point the ID and SKU at the same product, or remove one of them.', 'woocommerce' ),
+			$error->get_error_message(),
+			$id,
+			$sku,
+			$id_from_sku
+		);
+
+		return new WP_Error( $error->get_error_code(), $message, $error->get_error_data() );
 	}
 }
