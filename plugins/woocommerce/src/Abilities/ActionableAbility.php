@@ -162,7 +162,7 @@ abstract class ActionableAbility extends \WP_Ability {
 	/**
 	 * Check `extensions.<namespace>.<field>` input values against the schema of
 	 * each field, and cast them. No callback runs here. A null value is kept as
-	 * is, to delete the value. A read-only field and the `_errors` key are ignored.
+	 * is, to delete the value.
 	 *
 	 * @param array<string, mixed> $values Values keyed by namespace, then field.
 	 * @return array|\WP_Error A list of update_callback and value pairs, or a WP_Error when a value is rejected.
@@ -173,9 +173,6 @@ abstract class ActionableAbility extends \WP_Ability {
 		foreach ( $values as $namespace => $fields ) {
 			foreach ( (array) $fields as $field => $value ) {
 				$args = $registered[ $namespace ][ $field ] ?? array();
-				if ( ExtensibleAbilities::ERRORS_KEY === $field || ( ! empty( $args ) && ! isset( $args['update_callback'] ) ) ) {
-					continue;
-				}
 				if ( ! isset( $args['update_callback'] ) ) {
 					return new \WP_Error(
 						'woocommerce_ability_field_not_writable',
@@ -268,11 +265,9 @@ abstract class ActionableAbility extends \WP_Ability {
 	/**
 	 * Add the `extensions` property one time, at the top level of the input
 	 * schema. It lists the fields that have an update_callback, and allows null
-	 * for each one. It also lists the read-only fields, with a note in their
-	 * description, so a client can send back the extensions of a read result.
-	 * Each `oneOf`, `anyOf` and `allOf` branch only accepts the key, so a
-	 * branch with `additionalProperties` set to false does not reject it, and
-	 * the schema does not grow with the number of branches.
+	 * for each one. Each `oneOf`, `anyOf` and `allOf` branch only accepts the
+	 * key, so a branch with `additionalProperties` set to false does not reject
+	 * it, and the schema does not grow with the number of branches.
 	 *
 	 * @param array<string, mixed> $schema Input schema.
 	 * @return array<string, mixed>
@@ -280,19 +275,24 @@ abstract class ActionableAbility extends \WP_Ability {
 	private function add_extensions_input_schema( array $schema ): array {
 		$extensions = array(
 			'type'                 => 'object',
-			'description'          => __( 'Values to write to the fields that extensions add, keyed by extension namespace, then field. A null value deletes the value. A read-only field is ignored.', 'woocommerce' ),
+			'description'          => __( 'Values to write to the fields that extensions add, keyed by extension namespace, then field. A null value deletes the value.', 'woocommerce' ),
 			'additionalProperties' => false,
 		);
 		foreach ( ExtensibleAbilities::get_fields( $this->get_resource() ) as $namespace => $fields ) {
+			$writable = array_filter(
+				$fields,
+				static function ( array $args ): bool {
+					return isset( $args['update_callback'] );
+				}
+			);
+			if ( empty( $writable ) ) {
+				continue;
+			}
 			$extensions['properties'][ $namespace ] = array(
 				'type'                 => 'object',
 				'properties'           => array_map(
 					static function ( array $args ): array {
 						$field_schema = $args['schema'];
-						if ( ! isset( $args['update_callback'] ) ) {
-							$field_schema['description'] = trim( ( $field_schema['description'] ?? '' ) . ' ' . __( 'Read-only. An update ignores it.', 'woocommerce' ) );
-							return $field_schema;
-						}
 						if ( isset( $field_schema['type'] ) ) {
 							$field_schema['type'] = array_values( array_unique( array_merge( (array) $field_schema['type'], array( 'null' ) ) ) );
 						}
@@ -301,12 +301,7 @@ abstract class ActionableAbility extends \WP_Ability {
 						}
 						return $field_schema;
 					},
-					$fields
-				) + array(
-					ExtensibleAbilities::ERRORS_KEY => array(
-						'type'        => 'object',
-						'description' => __( 'Ignored, so a client can send back the extensions of a read result.', 'woocommerce' ),
-					),
+					$writable
 				),
 				'additionalProperties' => false,
 			);
