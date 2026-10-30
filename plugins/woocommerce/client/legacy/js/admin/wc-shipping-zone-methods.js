@@ -435,7 +435,7 @@
 								data                    : shippingMethodView.unformatShippingMethodNumericValues( posted_data )
 							},
 							function( response, textStatus ) {
-								if ( 'success' === textStatus && response.success && response.data ) {
+								if ( 'success' === textStatus && response && response.success && response.data ) {
 									$( 'table.wc-shipping-zone-methods' ).parent().find( '#woocommerce_errors' ).remove();
 
 									// If there were errors, prepend the form.
