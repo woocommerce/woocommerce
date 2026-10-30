@@ -307,6 +307,43 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 				}
 			}
 
+			$post_type        = empty( $data['id'] ) ? false : get_post_type( absint( $data['id'] ) );
+			$is_variation_row = isset( $data['type'] ) ? ProductType::VARIATION === $data['type'] : 'product_variation' === $post_type;
+
+			if ( $is_variation_row ) {
+				// get_product_object() would turn any post with this ID into a variation.
+				if ( $post_type && ! in_array( $post_type, array( 'product', 'product_variation' ), true ) ) {
+					return new WP_Error(
+						'woocommerce_product_csv_importer_invalid_id',
+						/* translators: %d: product ID */
+						sprintf( __( 'Invalid product ID %d.', 'woocommerce' ), absint( $data['id'] ) ),
+						array(
+							'id'     => absint( $data['id'] ),
+							'status' => 401,
+						)
+					);
+				}
+
+				// A blank or missing Parent keeps an existing variation's parent, as it does for a new or placeholder row,
+				// but an existing product turning into a variation needs one.
+				$converts_product = 'product' === $post_type && 'importing' !== get_post_status( absint( $data['id'] ) );
+
+				if ( ! $converts_product && '' === ( $data['parent_id'] ?? '' ) ) {
+					unset( $data['parent_id'] );
+
+					// The kept parent still has to hold the variation, or set_variation_data() would skip the row's attributes.
+					$current_parent = 'product_variation' === $post_type ? wp_get_post_parent_id( absint( $data['id'] ) ) : 0;
+					$parent         = $current_parent ? $this->get_variation_parent( $current_parent ) : null;
+				} else {
+					// Check the parent before get_product_object() turns the post into a variation, so a row with an unusable parent changes nothing.
+					$parent = $this->get_variation_parent( $data['parent_id'] ?? null );
+				}
+
+				if ( is_wp_error( $parent ) ) {
+					return $parent;
+				}
+			}
+
 			$object   = $this->get_product_object( $data );
 			$updating = false;
 
@@ -524,34 +561,49 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	}
 
 	/**
-	 * Set variation data.
+	 * Get the parent product a variation row names.
 	 *
-	 * @param WC_Product $variation Product instance.
-	 * @param array      $data    Item data.
-	 * @return WC_Product|WP_Error
-	 * @throws Exception If data cannot be set.
+	 * An update import never fills in a placeholder parent, so there the parent must be an existing variable product.
+	 *
+	 * @param mixed $parent_id Parent ID from the row or the variation's current parent, or null when neither exists.
+	 * @return WC_Product|WP_Error The parent, or an error when it cannot hold the variation.
 	 */
-	protected function set_variation_data( &$variation, $data ) {
-		$parent = false;
+	private function get_variation_parent( $parent_id ) {
+		$parent = null === $parent_id ? false : wc_get_product( $parent_id );
 
-		// Check if parent exist.
-		if ( isset( $data['parent_id'] ) ) {
-			$parent = wc_get_product( $data['parent_id'] );
-
-			if ( $parent ) {
-				$variation->set_parent_id( $parent->get_id() );
-			}
-		}
-
-		// Stop if parent does not exists.
 		if ( ! $parent ) {
 			return new WP_Error( 'woocommerce_product_importer_missing_variation_parent_id', __( 'Variation cannot be imported: Missing parent ID or parent does not exist yet.', 'woocommerce' ), array( 'status' => 401 ) );
 		}
 
-		// Stop if parent is a product variation.
 		if ( $parent->is_type( ProductType::VARIATION ) ) {
 			return new WP_Error( 'woocommerce_product_importer_parent_set_as_variation', __( 'Variation cannot be imported: Parent product cannot be a product variation', 'woocommerce' ), array( 'status' => 401 ) );
 		}
+
+		if ( ! empty( $this->params['update_existing'] ) && ( ! $parent instanceof WC_Product_Variable || in_array( $parent->get_status(), array( 'importing', ProductStatus::TRASH ), true ) ) ) {
+			return new WP_Error( 'woocommerce_product_importer_variation_parent_not_variable', __( 'Variation cannot be imported: Parent product must be an existing variable product.', 'woocommerce' ), array( 'status' => 401 ) );
+		}
+
+		return $parent;
+	}
+
+	/**
+	 * Set variation data.
+	 *
+	 * The parent is checked by process_item() before this runs, so the error is only returned to other callers.
+	 *
+	 * @param WC_Product $variation Product instance.
+	 * @param array      $data    Item data.
+	 * @return WP_Error|null Error when the parent cannot hold the variation.
+	 * @throws Exception If data cannot be set.
+	 */
+	protected function set_variation_data( &$variation, $data ) {
+		$parent = $this->get_variation_parent( $data['parent_id'] ?? ( $variation->get_parent_id() ? $variation->get_parent_id() : null ) );
+
+		if ( is_wp_error( $parent ) ) {
+			return $parent;
+		}
+
+		$variation->set_parent_id( $parent->get_id() );
 
 		if ( isset( $data['raw_attributes'] ) ) {
 			$attributes        = array();
@@ -597,6 +649,8 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 
 			$variation->set_attributes( $attributes );
 		}
+
+		return null;
 	}
 
 	/**
@@ -883,8 +937,8 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	}
 
 	/**
-	 * Explode CSV cell values using commas by default, and handling escaped
-	 * separators.
+	 * Explode CSV cell values using commas by default, handling escaped
+	 * separators and values wrapped in double quotes.
 	 *
 	 * @since  3.2.0
 	 * @param  string $value     Value to explode.
@@ -892,11 +946,97 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * @return array
 	 */
 	protected function explode_values( $value, $separator = ',' ) {
-		$value  = str_replace( '\\,', '::separator::', $value );
-		$values = explode( $separator, $value );
-		$values = array_map( array( $this, 'explode_values_formatter' ), $values );
+		$value    = str_replace( '\\,', '::separator::', $value );
+		$segments = explode( $separator, $value );
+		$values   = $this->group_quoted_values( is_array( $segments ) ? $segments : array( $value ), $separator );
+		$values   = array_map( array( $this, 'explode_values_formatter' ), $values );
 
 		return $values;
+	}
+
+	/**
+	 * Re-join exploded segments that were wrapped in double quotes, so a quoted value
+	 * can contain the separator, as in `Red, "Blue, navy", Green`. Quotes that are
+	 * balanced inside a segment (`"Large" size`) never open or close a value.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param string[] $segments  Segments produced by splitting the cell on the separator.
+	 * @param string   $separator Separator the segments were split on.
+	 * @return string[]
+	 */
+	protected function group_quoted_values( array $segments, $separator ) {
+		$values        = array();
+		$count         = count( $segments );
+		$unclosed_from = $count;
+
+		for ( $i = 0; $i < $count; $i++ ) {
+			$segment = trim( $segments[ $i ] );
+			$end     = false;
+
+			if ( $this->opens_quoted_value( $segment ) ) {
+				if ( $this->is_self_closed_quoted_value( $segment ) ) {
+					$end = $i;
+				} elseif ( $i < $unclosed_from ) {
+					for ( $end = $i + 1; $end < $count; $end++ ) {
+						if ( $this->closes_quoted_value( trim( $segments[ $end ] ) ) ) {
+							break;
+						}
+					}
+
+					// Nothing after this segment closes a quote, so later openers cannot be closed either.
+					if ( $end >= $count ) {
+						$unclosed_from = $i;
+						$end           = false;
+					}
+				}
+			}
+
+			if ( false === $end ) {
+				$values[] = $segments[ $i ];
+				continue;
+			}
+
+			$quoted   = trim( implode( $separator, array_slice( $segments, $i, $end - $i + 1 ) ) );
+			$values[] = (string) substr( $quoted, 1, -1 );
+			$i        = $end;
+		}
+
+		return $values;
+	}
+
+	/**
+	 * Whether a trimmed segment starts a double-quoted value: it begins with a quote that the
+	 * segment either closes itself (`"Large"`) or leaves open (`"Blue`, an odd number of quotes).
+	 * A lone `"` is left as it is.
+	 *
+	 * @param string $segment Trimmed segment.
+	 * @return bool
+	 */
+	private function opens_quoted_value( string $segment ): bool {
+		return strlen( $segment ) > 1 && '"' === substr( $segment, 0, 1 ) && ( $this->is_self_closed_quoted_value( $segment ) || 1 === substr_count( $segment, '"' ) % 2 );
+	}
+
+	/**
+	 * Whether a trimmed segment is a complete double-quoted value on its own, such as `"Large"`.
+	 * A segment with more quotes, such as `"Pro" or "Max"`, is ambiguous and is left as it is.
+	 *
+	 * @param string $segment Trimmed segment.
+	 * @return bool
+	 */
+	private function is_self_closed_quoted_value( string $segment ): bool {
+		return strlen( $segment ) > 1 && '"' === substr( $segment, 0, 1 ) && '"' === substr( $segment, -1 ) && 2 === substr_count( $segment, '"' );
+	}
+
+	/**
+	 * Whether a trimmed segment ends a double-quoted value opened by an earlier segment: it ends
+	 * with a quote that is not balanced inside the segment, such as `navy"` but not `15" Wheel"` or a lone `"`.
+	 *
+	 * @param string $segment Trimmed segment.
+	 * @return bool
+	 */
+	private function closes_quoted_value( string $segment ): bool {
+		return strlen( $segment ) > 1 && '"' === substr( $segment, -1 ) && 1 === substr_count( $segment, '"' ) % 2;
 	}
 
 	/**

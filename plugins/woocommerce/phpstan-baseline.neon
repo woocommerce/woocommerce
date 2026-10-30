@@ -201,7 +201,13 @@ parameters:
 		-
 			message: '#^Offset \(int\|string\) might not exist on array\<WC_Meta_Data\>\|null\.$#'
 			identifier: offsetAccess.notFound
-			count: 5
+			count: 4
+			path: includes/abstracts/abstract-wc-data.php
+
+		-
+			message: '#^Offset \(int\|string\) might not exist on non\-empty\-array\<WC_Meta_Data\>\|null\.$#'
+			identifier: offsetAccess.notFound
+			count: 1
 			path: includes/abstracts/abstract-wc-data.php
 
 		-
@@ -277,12 +283,6 @@ parameters:
 			path: includes/abstracts/abstract-wc-data.php
 
 		-
-			message: '#^Variable \$cached_meta might not be defined\.$#'
-			identifier: variable.undefined
-			count: 1
-			path: includes/abstracts/abstract-wc-data.php
-
-		-
 			message: '#^Variable \$datetime might not be defined\.$#'
 			identifier: variable.undefined
 			count: 3
@@ -323,12 +323,6 @@ parameters:
 			identifier: phpDoc.parseError
 			count: 1
 			path: includes/abstracts/abstract-wc-integration.php
-
-		-
-			message: '#^Parameter \#1 \$objectOrClass of class ReflectionClass constructor expects class\-string\<static\(WC_Log_Handler\)\>\|static\(WC_Log_Handler\), class\-string\<static\(WC_Log_Handler\)\>\|WC_Logger_Interface given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/abstracts/abstract-wc-log-handler.php
 
 		-
 			message: '#^Method WC_Object_Query\:\:set\(\) has no return type specified\.$#'
@@ -1441,6 +1435,12 @@ parameters:
 			path: includes/admin/class-wc-admin-assets.php
 
 		-
+			message: '#^Offset ''decimal_point'' on array\{decimal_point\: string, thousands_sep\: string, int_curr_symbol\: string, currency_symbol\: string, mon_decimal_point\: string, mon_thousands_sep\: string, positive_sign\: string, negative_sign\: string, \.\.\.\} in isset\(\) always exists and is not nullable\.$#'
+			identifier: isset.offset
+			count: 1
+			path: includes/admin/class-wc-admin-assets.php
+
+		-
 			message: '#^Cannot cast numeric\-string\|WP_Error to int\.$#'
 			identifier: cast.int
 			count: 1
@@ -1471,7 +1471,7 @@ parameters:
 			path: includes/admin/class-wc-admin-attributes.php
 
 		-
-			message: '#^PHPDoc tag @param has invalid value \(int @default_max_terms_to_display Default value\.\)\: Unexpected token "@default", expected variable at offset 152 on line 4$#'
+			message: '#^PHPDoc tag @param has invalid value \(int @default_max_terms_to_display Default value\.\)\: Unexpected token "@default_max_terms_to_display", expected variable at offset 152 on line 4$#'
 			identifier: phpDoc.parseError
 			count: 1
 			path: includes/admin/class-wc-admin-attributes.php
@@ -2797,12 +2797,6 @@ parameters:
 			path: includes/admin/class-wc-admin-settings.php
 
 		-
-			message: '#^Variable \$option_display_name might not be defined\.$#'
-			identifier: variable.undefined
-			count: 1
-			path: includes/admin/class-wc-admin-settings.php
-
-		-
 			message: '#^Access to an undefined property WC_Countries\:\:\$countries\.$#'
 			identifier: property.notFound
 			count: 1
@@ -2847,6 +2841,12 @@ parameters:
 		-
 			message: '#^Property WC_Admin_Setup_Wizard\:\:\$tweets is never read, only written\.$#'
 			identifier: property.onlyWritten
+			count: 1
+			path: includes/admin/class-wc-admin-setup-wizard.php
+
+		-
+			message: '#^Variable \$checked in isset\(\) always exists and is not nullable\.$#'
+			identifier: isset.variable
 			count: 1
 			path: includes/admin/class-wc-admin-setup-wizard.php
 
@@ -3075,12 +3075,6 @@ parameters:
 		-
 			message: '#^Method WC_Admin_Upload_Downloadable_Product\:\:woocommerce_media_upload_downloadable_product\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: includes/admin/class-wc-admin-upload-downloadable-product.php
-
-		-
-			message: '#^Negated boolean expression is always false\.$#'
-			identifier: booleanNot.alwaysFalse
 			count: 1
 			path: includes/admin/class-wc-admin-upload-downloadable-product.php
 
@@ -3943,12 +3937,6 @@ parameters:
 			path: includes/admin/helper/views/html-section-notices.php
 
 		-
-			message: '#^Binary operation "\." between string and non\-empty\-array\|non\-falsy\-string results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: includes/admin/importers/class-wc-product-csv-importer-controller.php
-
-		-
 			message: '#^Method WC_Product_CSV_Importer_Controller\:\:add_error\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -4633,12 +4621,6 @@ parameters:
 			path: includes/admin/list-tables/class-wc-admin-list-table-orders.php
 
 		-
-			message: '#^Variable \$report_action might not be defined\.$#'
-			identifier: variable.undefined
-			count: 1
-			path: includes/admin/list-tables/class-wc-admin-list-table-orders.php
-
-		-
 			message: '#^Argument of an invalid type array\<WP_Term\>\|WP_Error supplied for foreach, only iterables are supported\.$#'
 			identifier: foreach.nonIterable
 			count: 2
@@ -4653,12 +4635,6 @@ parameters:
 		-
 			message: '#^Call to an undefined method object\:\:get_id\(\)\.$#'
 			identifier: method.notFound
-			count: 1
-			path: includes/admin/list-tables/class-wc-admin-list-table-products.php
-
-		-
-			message: '#^Call to function is_array\(\) with array\{\} will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
 			count: 1
 			path: includes/admin/list-tables/class-wc-admin-list-table-products.php
 
@@ -5953,7 +5929,7 @@ parameters:
 			path: includes/admin/meta-boxes/views/html-order-shipping.php
 
 		-
-			message: '#^Parameter \#1 \$text of function esc_attr expects string, int\<0, max\> given\.$#'
+			message: '#^Parameter \#1 \$text of function esc_attr expects string, int given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/admin/meta-boxes/views/html-product-attribute-inner.php
@@ -7929,12 +7905,6 @@ parameters:
 		-
 			message: '#^Parameter \#3 \$subject of function str_replace expects array\<string\>\|string, string\|false given\.$#'
 			identifier: argument.type
-			count: 1
-			path: includes/admin/views/html-admin-page-status-report.php
-
-		-
-			message: '#^Variable \$path might not be defined\.$#'
-			identifier: variable.undefined
 			count: 1
 			path: includes/admin/views/html-admin-page-status-report.php
 
@@ -10213,12 +10183,6 @@ parameters:
 			path: includes/class-wc-checkout.php
 
 		-
-			message: '#^Left side of && is always true\.$#'
-			identifier: booleanAnd.leftAlwaysTrue
-			count: 1
-			path: includes/class-wc-checkout.php
-
-		-
 			message: '#^Method WC_Checkout\:\:__get\(\) should return array\|string but return statement is missing\.$#'
 			identifier: return.missing
 			count: 1
@@ -10413,6 +10377,12 @@ parameters:
 		-
 			message: '#^Parameter \#2 \$pieces of function implode expects array, array\|string given\.$#'
 			identifier: argument.type
+			count: 1
+			path: includes/class-wc-checkout.php
+
+		-
+			message: '#^Variable \$order might not be defined\.$#'
+			identifier: variable.undefined
 			count: 1
 			path: includes/class-wc-checkout.php
 
@@ -11143,6 +11113,12 @@ parameters:
 			path: includes/class-wc-download-handler.php
 
 		-
+			message: '#^Cannot call method get_id\(\) on int\|WC_Customer_Download\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: includes/class-wc-download-handler.php
+
+		-
 			message: '#^Method WC_Download_Handler\:\:check_download_expiry\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -11835,12 +11811,6 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$ip of function rest_is_ip_address expects string, string\|null given\.$#'
 			identifier: argument.type
-			count: 1
-			path: includes/class-wc-geolocation.php
-
-		-
-			message: '#^Variable \$transient_name might not be defined\.$#'
-			identifier: variable.undefined
 			count: 1
 			path: includes/class-wc-geolocation.php
 
@@ -13023,12 +12993,6 @@ parameters:
 		-
 			message: '#^Cannot access property \$taxonomy on WP_Term\|false\.$#'
 			identifier: property.nonObject
-			count: 1
-			path: includes/class-wc-post-data.php
-
-		-
-			message: '#^Cannot call method get_type\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
 			count: 1
 			path: includes/class-wc-post-data.php
 
@@ -14911,6 +14875,12 @@ parameters:
 			path: includes/class-wc-structured-data.php
 
 		-
+			message: '#^Call to an undefined method object\:\:get_id\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: includes/class-wc-structured-data.php
+
+		-
 			message: '#^Call to an undefined method object\:\:get_image_id\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -15547,21 +15517,9 @@ parameters:
 			path: includes/class-wc-tracker.php
 
 		-
-			message: '#^Call to function is_callable\(\) with array\{Automattic\\Jetpack\\Status, ''in_safe_mode''\} will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: includes/class-wc-tracker.php
-
-		-
 			message: '#^Cannot access offset 1 on list\<string\>\|false\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
 			count: 1
-			path: includes/class-wc-tracker.php
-
-		-
-			message: '#^Cannot access offset int\<0, max\> on list\<string\>\|false\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 4
 			path: includes/class-wc-tracker.php
 
 		-
@@ -15862,6 +15820,12 @@ parameters:
 			message: '#^Parameter \#1 \$class_name of method Automattic\\WooCommerce\\Proxies\\LegacyProxy\:\:get_instance_of\(\) expects class\-string\<object\>, string given\.$#'
 			identifier: argument.type
 			count: 1
+			path: includes/class-woocommerce.php
+
+		-
+			message: '#^Parameter \#1 \$input of function array_slice expects array, list\<string\>\|false given\.$#'
+			identifier: argument.type
+			count: 2
 			path: includes/class-woocommerce.php
 
 		-
@@ -16891,8 +16855,14 @@ parameters:
 			path: includes/data-stores/class-wc-data-store-wp.php
 
 		-
-			message: '#^Cannot access offset ''year'' on array\{year\: string, month\: string, day\: string\}\|bool\|string\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
+			message: '#^Call to function in_array\(\) with arguments ''\.\.\.''\|''\<''\|''\<\=''\|''\>''\|''\>\='', array\{''\>'', ''\>\='', ''\='', ''\<\='', ''\<'', ''\.\.\.''\} and true will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: includes/data-stores/class-wc-data-store-wp.php
+
+		-
+			message: '#^Cannot assign offset ''year'' to array\<string, string\>\|string\.$#'
+			identifier: offsetAssign.dimType
 			count: 1
 			path: includes/data-stores/class-wc-data-store-wp.php
 
@@ -16936,12 +16906,6 @@ parameters:
 			message: '#^Offset 0\|1 might not exist on array\{0\: WC_DateTime, 1\?\: WC_DateTime\}\.$#'
 			identifier: offsetAccess.notFound
 			count: 4
-			path: includes/data-stores/class-wc-data-store-wp.php
-
-		-
-			message: '#^Offset 1 might not exist on array\{0\: WC_DateTime, 1\?\: WC_DateTime\}\.$#'
-			identifier: offsetAccess.notFound
-			count: 1
 			path: includes/data-stores/class-wc-data-store-wp.php
 
 		-
@@ -17455,6 +17419,12 @@ parameters:
 			path: includes/data-stores/class-wc-product-data-store-cpt.php
 
 		-
+			message: '#^If condition is always true\.$#'
+			identifier: if.alwaysTrue
+			count: 1
+			path: includes/data-stores/class-wc-product-data-store-cpt.php
+
+		-
 			message: '#^Parameter \#1 \$amount of function wc_stock_amount expects float\|int, float\|int\|null given\.$#'
 			identifier: argument.type
 			count: 4
@@ -17601,6 +17571,36 @@ parameters:
 		-
 			message: '#^Method WC_Product_Variation_Data_Store_CPT\:\:update_guid\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: includes/data-stores/class-wc-product-variation-data-store-cpt.php
+
+		-
+			message: '#^Offset ''_crosssell_ids'' might not exist on array\{sku\?\: mixed, global_unique_id\?\: mixed, manage_stock\?\: mixed, backorders\?\: mixed, stock_quantity\: float\|int, weight\?\: mixed, length\?\: mixed, width\?\: mixed, \.\.\.\}\.$#'
+			identifier: offsetAccess.notFound
+			count: 1
+			path: includes/data-stores/class-wc-product-variation-data-store-cpt.php
+
+		-
+			message: '#^Offset ''sold_individually'' might not exist on array\{sku\?\: mixed, global_unique_id\?\: mixed, manage_stock\?\: mixed, backorders\?\: mixed, stock_quantity\: float\|int, weight\?\: mixed, length\?\: mixed, width\?\: mixed, \.\.\.\}\.$#'
+			identifier: offsetAccess.notFound
+			count: 1
+			path: includes/data-stores/class-wc-product-variation-data-store-cpt.php
+
+		-
+			message: '#^Offset ''stock_quantity'' might not exist on array\{sku\?\: mixed, global_unique_id\?\: mixed, manage_stock\?\: mixed, backorders\?\: mixed, stock_quantity\?\: mixed, weight\?\: mixed, length\?\: mixed, width\?\: mixed, \.\.\.\}\.$#'
+			identifier: offsetAccess.notFound
+			count: 1
+			path: includes/data-stores/class-wc-product-variation-data-store-cpt.php
+
+		-
+			message: '#^Offset ''tax_class'' might not exist on array\{description\?\: mixed, regular_price\?\: mixed, sale_price\?\: mixed, date_on_sale_from\?\: mixed, date_on_sale_to\?\: mixed, manage_stock\?\: mixed, stock_status\?\: mixed, virtual\?\: mixed, \.\.\.\}\.$#'
+			identifier: offsetAccess.notFound
+			count: 1
+			path: includes/data-stores/class-wc-product-variation-data-store-cpt.php
+
+		-
+			message: '#^Offset ''tax_status'' might not exist on array\{sku\?\: mixed, global_unique_id\?\: mixed, manage_stock\?\: mixed, backorders\?\: mixed, stock_quantity\: float\|int, weight\?\: mixed, length\?\: mixed, width\?\: mixed, \.\.\.\}\.$#'
+			identifier: offsetAccess.notFound
 			count: 1
 			path: includes/data-stores/class-wc-product-variation-data-store-cpt.php
 
@@ -19723,6 +19723,12 @@ parameters:
 			path: includes/import/abstract-wc-product-importer.php
 
 		-
+			message: '#^Call to function class_exists\(\) with ''WC_Importer…'' and false will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 1
+			path: includes/import/abstract-wc-product-importer.php
+
+		-
 			message: '#^Method WC_Product_Importer\:\:set_image_data\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -19737,18 +19743,6 @@ parameters:
 		-
 			message: '#^Method WC_Product_Importer\:\:set_product_data\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: includes/import/abstract-wc-product-importer.php
-
-		-
-			message: '#^Method WC_Product_Importer\:\:set_variation_data\(\) should return WC_Product\|WP_Error but return statement is missing\.$#'
-			identifier: return.missing
-			count: 2
-			path: includes/import/abstract-wc-product-importer.php
-
-		-
-			message: '#^Parameter \#2 \$array of function array_map expects array, list\<string\>\|false given\.$#'
-			identifier: argument.type
 			count: 1
 			path: includes/import/abstract-wc-product-importer.php
 
@@ -22039,7 +22033,7 @@ parameters:
 			path: includes/log-handlers/class-wc-log-handler-file.php
 
 		-
-			message: '#^Parameter \#2 \$new_name of function rename expects string, bool\|string given\.$#'
+			message: '#^Parameter \#2 \$to of function rename expects string, bool\|string given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/log-handlers/class-wc-log-handler-file.php
@@ -24399,7 +24393,7 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$value of method WC_Product_Attribute\:\:set_name\(\) expects string, array\|string given\.$#'
 			identifier: argument.type
-			count: 2
+			count: 1
 			path: includes/rest-api/Controllers/Version1/class-wc-rest-products-v1-controller.php
 
 		-
@@ -24445,7 +24439,7 @@ parameters:
 			path: includes/rest-api/Controllers/Version1/class-wc-rest-products-v1-controller.php
 
 		-
-			message: '#^WP_REST_Request does not accept array\<mixed\>\.$#'
+			message: '#^WP_REST_Request does not accept array\<mixed, mixed\>\.$#'
 			identifier: offsetAssign.valueType
 			count: 1
 			path: includes/rest-api/Controllers/Version1/class-wc-rest-products-v1-controller.php
@@ -26337,7 +26331,7 @@ parameters:
 		-
 			message: '#^Call to an undefined method WC_Data\:\:get_parent_id\(\)\.$#'
 			identifier: method.notFound
-			count: 2
+			count: 4
 			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
 
 		-
@@ -26467,12 +26461,6 @@ parameters:
 			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
 
 		-
-			message: '#^Negated boolean expression is always true\.$#'
-			identifier: booleanNot.alwaysTrue
-			count: 1
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
-
-		-
 			message: '#^PHPDoc tag @extends has invalid value \(WC_REST_CRUD_Controller\)\: Unexpected token "\\n ", expected ''\<'' at offset 113 on line 5$#'
 			identifier: phpDoc.parseError
 			count: 1
@@ -26547,7 +26535,7 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$value of method WC_Product_Attribute\:\:set_name\(\) expects string, array\|string given\.$#'
 			identifier: argument.type
-			count: 2
+			count: 1
 			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
 
 		-
@@ -26601,18 +26589,6 @@ parameters:
 		-
 			message: '#^Strict comparison using \=\=\= between ''trash'' and mixed~''trash'' will always evaluate to false\.$#'
 			identifier: identical.alwaysFalse
-			count: 1
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between 0 and mixed will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 1
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
-
-		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
 			count: 1
 			path: includes/rest-api/Controllers/Version2/class-wc-rest-products-v2-controller.php
 
@@ -27307,12 +27283,6 @@ parameters:
 			path: includes/rest-api/Controllers/Version2/class-wc-rest-system-status-v2-controller.php
 
 		-
-			message: '#^Parameter \#1 \$keys of function array_fill_keys expects an array of values castable to string, array\<stromg\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-system-status-v2-controller.php
-
-		-
 			message: '#^Parameter \#1 \$size of function wc_let_to_num expects string, string\|false given\.$#'
 			identifier: argument.type
 			count: 1
@@ -27350,6 +27320,12 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$tax_class of method WC_REST_Tax_Classes_V1_Controller\:\:prepare_item_for_response\(\) expects array, array\|true given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/rest-api/Controllers/Version2/class-wc-rest-tax-classes-v2-controller.php
+
+		-
+			message: '#^Parameter \#1 \$title of function sanitize_title expects string, mixed given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/rest-api/Controllers/Version2/class-wc-rest-tax-classes-v2-controller.php
@@ -27639,12 +27615,6 @@ parameters:
 		-
 			message: '#^Parameter \#2 \$value of method WP_HTTP_Response\:\:header\(\) expects string, int given\.$#'
 			identifier: argument.type
-			count: 1
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-crud-controller.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between ''trash'' and mixed~''trash'' will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
 			count: 1
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-crud-controller.php
 
@@ -28654,6 +28624,12 @@ parameters:
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-reviews-controller.php
 
 		-
+			message: '#^Offset ''number'' might not exist on array\{author__in\?\: mixed, author__not_in\?\: mixed, comment__not_in\?\: mixed, comment__in\?\: mixed, offset\?\: mixed, order\?\: mixed, number\?\: mixed, post__in\?\: mixed, \.\.\.\}\.$#'
+			identifier: offsetAccess.notFound
+			count: 1
+			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-reviews-controller.php
+
+		-
 			message: '#^PHPDoc tag @extends has invalid value \(WC_REST_Controller\)\: Unexpected token "\\n ", expected ''\<'' at offset 115 on line 5$#'
 			identifier: phpDoc.parseError
 			count: 1
@@ -29290,6 +29266,12 @@ parameters:
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-variations-controller.php
 
 		-
+			message: '#^Parameter \#2 \$str of function explode expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/rest-api/Controllers/Version3/class-wc-rest-product-variations-controller.php
+
+		-
 			message: '#^Parameter \#2 \$value of function get_term_by expects int\|string, array\|string given\.$#'
 			identifier: argument.type
 			count: 1
@@ -29532,7 +29514,7 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$value of method WC_Product_Attribute\:\:set_name\(\) expects string, array\|string given\.$#'
 			identifier: argument.type
-			count: 2
+			count: 1
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-products-controller.php
 
 		-
@@ -29578,6 +29560,12 @@ parameters:
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-products-controller.php
 
 		-
+			message: '#^Parameter \#2 \$str of function explode expects string, mixed given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/rest-api/Controllers/Version3/class-wc-rest-products-controller.php
+
+		-
 			message: '#^Parameter \$product of method WC_REST_Products_Controller\:\:add_cogs_info_to_returned_product_data\(\) has invalid type Automattic\\WooCommerce\\Internal\\CostOfGoodsSold\\WC_Product\.$#'
 			identifier: class.notFound
 			count: 1
@@ -29592,6 +29580,12 @@ parameters:
 		-
 			message: '#^Parameter \$request of method WC_REST_Products_Controller\:\:set_cogs_info_in_product_object\(\) has invalid type Automattic\\WooCommerce\\Internal\\CostOfGoodsSold\\WP_Rest_Request\.$#'
 			identifier: class.notFound
+			count: 1
+			path: includes/rest-api/Controllers/Version3/class-wc-rest-products-controller.php
+
+		-
+			message: '#^Property WC_REST_Products_Controller\:\:\$search_mpn_arg_value \(string\) does not accept mixed\.$#'
+			identifier: assign.propertyType
 			count: 1
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-products-controller.php
 
@@ -30136,7 +30130,7 @@ parameters:
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-terms-controller.php
 
 		-
-			message: '#^Parameter \#1 \$array_arg of function usort expects TArray of array\<WP_Term\>, array\<WP_Term\>\|WP_Error given\.$#'
+			message: '#^Parameter \#1 \$array_arg of function usort expects non\-empty\-array\<WP_Term\>, non\-empty\-array\<WP_Term\>\|WP_Error given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-terms-controller.php
@@ -30145,12 +30139,6 @@ parameters:
 			message: '#^Parameter \#1 \$data_object of method WP_REST_Controller\:\:update_additional_fields_for_object\(\) expects object, WP_Error\|WP_Term\|null given\.$#'
 			identifier: argument.type
 			count: 2
-			path: includes/rest-api/Controllers/Version3/class-wc-rest-terms-controller.php
-
-		-
-			message: '#^Parameter \#1 \$input of function array_reverse expects array, array\<WP_Term\>\|WP_Error given\.$#'
-			identifier: argument.type
-			count: 1
 			path: includes/rest-api/Controllers/Version3/class-wc-rest-terms-controller.php
 
 		-
@@ -32256,7 +32244,7 @@ parameters:
 		-
 			message: '#^Access to an undefined property WC_Shipping_Rate\:\:\$cost\.$#'
 			identifier: property.notFound
-			count: 3
+			count: 1
 			path: includes/wc-cart-functions.php
 
 		-
@@ -33514,6 +33502,12 @@ parameters:
 			path: includes/wc-formatting-functions.php
 
 		-
+			message: '#^Offset ''decimal_point'' on array\{decimal_point\: string, thousands_sep\: string, int_curr_symbol\: string, currency_symbol\: string, mon_decimal_point\: string, mon_thousands_sep\: string, positive_sign\: string, negative_sign\: string, \.\.\.\} in isset\(\) always exists and is not nullable\.$#'
+			identifier: isset.offset
+			count: 1
+			path: includes/wc-formatting-functions.php
+
+		-
 			message: '#^Offset 0 might not exist on array\<string\>\|string\|null\.$#'
 			identifier: offsetAccess.notFound
 			count: 1
@@ -34199,18 +34193,6 @@ parameters:
 
 		-
 			message: '#^Cannot call method get_permalink\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/wc-product-functions.php
-
-		-
-			message: '#^Cannot call method save\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/wc-product-functions.php
-
-		-
-			message: '#^Cannot call method set_sku\(\) on WC_Product\|false\|null\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: includes/wc-product-functions.php
@@ -35200,6 +35182,18 @@ parameters:
 			path: includes/wc-update-functions.php
 
 		-
+			message: '#^Offset 1 on array\{non\-empty\-list\<string\>, non\-empty\-list\<non\-falsy\-string\>\} in empty\(\) always exists and is not falsy\.$#'
+			identifier: empty.offset
+			count: 1
+			path: includes/wc-update-functions.php
+
+		-
+			message: '#^Offset 1 on array\{non\-empty\-list\<string\>, non\-empty\-list\<string\>\} in empty\(\) always exists and is not falsy\.$#'
+			identifier: empty.offset
+			count: 1
+			path: includes/wc-update-functions.php
+
+		-
 			message: '#^Parameter \#1 \$item_id of function wc_add_order_item_meta expects int, int\<min, \-1\>\|int\<1, max\>\|true given\.$#'
 			identifier: argument.type
 			count: 11
@@ -35426,12 +35420,6 @@ parameters:
 			identifier: encapsedStringPart.nonString
 			count: 1
 			path: includes/wc-user-functions.php
-
-		-
-			message: '#^Binary operation "\+" between 600 and string results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: includes/wc-webhook-functions.php
 
 		-
 			message: '#^Call to an undefined method WC_Data_Store\:\:get_webhooks_ids\(\)\.$#'
@@ -37702,30 +37690,6 @@ parameters:
 			path: src/Admin/API/Notice.php
 
 		-
-			message: '#^Instantiated class Automattic\\WooCommerce\\Admin\\API\\WP_Error not found\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Notice.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Notice\:\:dissmiss_notice\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\WP_Error\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Notice.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Notice\:\:dissmiss_notice\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\WP_REST_Response\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/Notice.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Notice\:\:dissmiss_notice\(\) should return Automattic\\WooCommerce\\Admin\\API\\WP_Error\|Automattic\\WooCommerce\\Admin\\API\\WP_REST_Response but returns WP_REST_Response\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Admin/API/Notice.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Notice\:\:register_routes\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -38026,7 +37990,7 @@ parameters:
 			path: src/Admin/API/OnboardingProfile.php
 
 		-
-			message: '#^Parameter \#1 \$item of method Automattic\\WooCommerce\\Admin\\API\\OnboardingProfile\:\:prepare_item_for_response\(\) expects object, array given\.$#'
+			message: '#^Parameter \#1 \$item of method Automattic\\WooCommerce\\Admin\\API\\OnboardingProfile\:\:prepare_item_for_response\(\) expects object, array\<mixed\> given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Admin/API/OnboardingProfile.php
@@ -38872,20 +38836,8 @@ parameters:
 			path: src/Admin/API/ProductAttributeTerms.php
 
 		-
-			message: '#^Instantiated class Automattic\\WooCommerce\\Admin\\API\\WP_Error not found\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Admin/API/ProductAttributeTerms.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\ProductAttributeTerms\:\:get_custom_attribute_by_slug\(\) should return object but returns array\.$#'
 			identifier: return.type
-			count: 1
-			path: src/Admin/API/ProductAttributeTerms.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\ProductAttributeTerms\:\:get_custom_attribute_permissions_check\(\) has invalid return type Automattic\\WooCommerce\\Admin\\API\\WP_Error\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Admin/API/ProductAttributeTerms.php
 
@@ -39708,6 +39660,12 @@ parameters:
 		-
 			message: '#^ArrayObject\<\*NEVER\*, \*NEVER\*\> does not accept string\|WP_Error\.$#'
 			identifier: offsetAssign.valueType
+			count: 1
+			path: src/Admin/API/Reports/Categories/DataStore.php
+
+		-
+			message: '#^Cannot assign offset ''name'' to ArrayObject\<\*NEVER\*, \*NEVER\*\>\.$#'
+			identifier: offsetAssign.dimType
 			count: 1
 			path: src/Admin/API/Reports/Categories/DataStore.php
 
@@ -41560,6 +41518,12 @@ parameters:
 			path: src/Admin/API/Reports/PerformanceIndicators/Controller.php
 
 		-
+			message: '#^Access to an undefined property object\:\:\$data\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Admin/API/Reports/PerformanceIndicators/Controller.php
+
+		-
 			message: '#^Access to an undefined property object\:\:\$stat\.$#'
 			identifier: property.notFound
 			count: 3
@@ -41890,6 +41854,12 @@ parameters:
 			path: src/Admin/API/Reports/Products/DataStore.php
 
 		-
+			message: '#^Cannot assign offset ''low_stock_amount'' to ArrayObject\<\*NEVER\*, \*NEVER\*\>\.$#'
+			identifier: offsetAssign.dimType
+			count: 1
+			path: src/Admin/API/Reports/Products/DataStore.php
+
+		-
 			message: '#^Cannot call method date\(\) on WC_DateTime\|null\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -41998,6 +41968,12 @@ parameters:
 			path: src/Admin/API/Reports/Products/DataStore.php
 
 		-
+			message: '#^Offset ''low_stock_amount'' does not exist on ArrayObject\<\*NEVER\*, \*NEVER\*\>\.$#'
+			identifier: offsetAccess.notFound
+			count: 1
+			path: src/Admin/API/Reports/Products/DataStore.php
+
+		-
 			message: '#^Parameter \#1 \$array of method Automattic\\WooCommerce\\Admin\\API\\Reports\\DataStore\:\:cast_numbers\(\) expects array, ArrayObject\<\*NEVER\*, \*NEVER\*\> given\.$#'
 			identifier: argument.type
 			count: 1
@@ -42074,6 +42050,18 @@ parameters:
 			identifier: method.notFound
 			count: 1
 			path: src/Admin/API/Reports/Products/Stats/Query.php
+
+		-
+			message: '#^Offset 1 might not exist on array\{\}\|array\{non\-falsy\-string, numeric\-string, numeric\-string\}\.$#'
+			identifier: offsetAccess.notFound
+			count: 1
+			path: src/Admin/API/Reports/Products/Stats/Segmenter.php
+
+		-
+			message: '#^Offset 2 might not exist on array\{\}\|array\{non\-falsy\-string, numeric\-string, numeric\-string\}\.$#'
+			identifier: offsetAccess.notFound
+			count: 1
+			path: src/Admin/API/Reports/Products/Stats/Segmenter.php
 
 		-
 			message: '#^Variable \$segments might not be defined\.$#'
@@ -42604,6 +42592,12 @@ parameters:
 			path: src/Admin/API/Reports/TimeInterval.php
 
 		-
+			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:intervals_between\(\) should return int but returns float\|int\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Admin/API/Reports/TimeInterval.php
+
+		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\TimeInterval\:\:next_week_start\(\) should return DateTime but returns DateTime\|false\.$#'
 			identifier: return.type
 			count: 1
@@ -42796,6 +42790,24 @@ parameters:
 			path: src/Admin/API/Reports/Variations/DataStore.php
 
 		-
+			message: '#^Cannot assign offset ''attributes'' to ArrayObject\<\*NEVER\*, \*NEVER\*\>\.$#'
+			identifier: offsetAssign.dimType
+			count: 1
+			path: src/Admin/API/Reports/Variations/DataStore.php
+
+		-
+			message: '#^Cannot assign offset ''deleted'' to ArrayObject\<\*NEVER\*, \*NEVER\*\>\.$#'
+			identifier: offsetAssign.dimType
+			count: 1
+			path: src/Admin/API/Reports/Variations/DataStore.php
+
+		-
+			message: '#^Cannot assign offset ''low_stock_amount'' to ArrayObject\<\*NEVER\*, \*NEVER\*\>\.$#'
+			identifier: offsetAssign.dimType
+			count: 1
+			path: src/Admin/API/Reports/Variations/DataStore.php
+
+		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Variations\\DataStore\:\:add_from_sql_params\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -42834,6 +42846,12 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Variations\\DataStore\:\:initialize_queries\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: src/Admin/API/Reports/Variations/DataStore.php
+
+		-
+			message: '#^Offset ''low_stock_amount'' does not exist on ArrayObject\<\*NEVER\*, \*NEVER\*\>\.$#'
+			identifier: offsetAccess.notFound
 			count: 1
 			path: src/Admin/API/Reports/Variations/DataStore.php
 
@@ -42902,6 +42920,18 @@ parameters:
 			identifier: method.notFound
 			count: 1
 			path: src/Admin/API/Reports/Variations/Stats/Query.php
+
+		-
+			message: '#^Offset 1 might not exist on array\{\}\|array\{non\-falsy\-string, numeric\-string, numeric\-string\}\.$#'
+			identifier: offsetAccess.notFound
+			count: 1
+			path: src/Admin/API/Reports/Variations/Stats/Segmenter.php
+
+		-
+			message: '#^Offset 2 might not exist on array\{\}\|array\{non\-falsy\-string, numeric\-string, numeric\-string\}\.$#'
+			identifier: offsetAccess.notFound
+			count: 1
+			path: src/Admin/API/Reports/Variations/Stats/Segmenter.php
 
 		-
 			message: '#^PHPDoc tag @extends has invalid value \(WC_REST_Setting_Options_Controller\)\: Unexpected token "\\n ", expected ''\<'' at offset 97 on line 5$#'
@@ -43474,7 +43504,7 @@ parameters:
 			path: src/Admin/Features/Fulfillments/Fulfillment.php
 
 		-
-			message: '#^Binary operation "\*" between string and 1\|3\|7 results in an error\.$#'
+			message: '#^Binary operation "\*" between non\-empty\-string and 1\|3\|7 results in an error\.$#'
 			identifier: binaryOp.invalid
 			count: 1
 			path: src/Admin/Features/Fulfillments/FulfillmentUtils.php
@@ -43708,12 +43738,6 @@ parameters:
 			path: src/Admin/Features/Fulfillments/FulfillmentsSettings.php
 
 		-
-			message: '#^Negated boolean expression is always false\.$#'
-			identifier: booleanNot.alwaysFalse
-			count: 2
-			path: src/Admin/Features/Fulfillments/FulfillmentsSettings.php
-
-		-
 			message: '#^Parameter \#2 \$value of method WC_Data\:\:update_meta_data\(\) expects array\|string, true given\.$#'
 			identifier: argument.type
 			count: 1
@@ -43838,12 +43862,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/Admin/Features/Fulfillments/Providers/CanadaPostShippingProvider.php
-
-		-
-			message: '#^Comparison operation "\>" between 60\|70\|75\|80\|85\|88\|90\|92\|95\|98 and 0 is always true\.$#'
-			identifier: greater.alwaysTrue
-			count: 1
-			path: src/Admin/Features/Fulfillments/Providers/DHLShippingProvider.php
 
 		-
 			message: '#^Parameter \#1 \$str of function strtoupper expects string, string\|null given\.$#'
@@ -48376,12 +48394,6 @@ parameters:
 			path: src/Blocks/BlockTypes/CustomerAccount.php
 
 		-
-			message: '#^Trying to invoke array\{\$this\(Automattic\\WooCommerce\\Blocks\\BlockTypes\\CustomerAccount\), mixed\} but it might not be a callable\.$#'
-			identifier: callable.nonCallable
-			count: 1
-			path: src/Blocks/BlockTypes/CustomerAccount.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\FeaturedCategory\:\:get_item_image\(\) should return string but returns string\|false\.$#'
 			identifier: return.type
 			count: 1
@@ -48580,12 +48592,6 @@ parameters:
 			path: src/Blocks/BlockTypes/MiniCart.php
 
 		-
-			message: '#^Trying to invoke array\{\$this\(Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCart\), mixed\} but it might not be a callable\.$#'
-			identifier: callable.nonCallable
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCart.php
-
-		-
 			message: '#^Undefined variable\: \$attributes$#'
 			identifier: variable.undefined
 			count: 1
@@ -48653,12 +48659,6 @@ parameters:
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartProductsTableBlock\:\:render\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Blocks/BlockTypes/MiniCartProductsTableBlock.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\MiniCartProductsTableBlock\:\:render_product_details_item_markup\(\) should return string but returns string\|false\.$#'
 			identifier: return.type
 			count: 1
 			path: src/Blocks/BlockTypes/MiniCartProductsTableBlock.php
@@ -48868,6 +48868,12 @@ parameters:
 			path: src/Blocks/BlockTypes/PaymentMethodIcons.php
 
 		-
+			message: '#^Cannot call method get_title\(\) on class\-string\|object\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: src/Blocks/BlockTypes/PaymentMethodIcons.php
+
+		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\PaymentMethodIcons\:\:enqueue_data\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -48882,6 +48888,18 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$arr1 of function array_merge expects array, array\<string\>\|null given\.$#'
 			identifier: argument.type
+			count: 1
+			path: src/Blocks/BlockTypes/PaymentMethodIcons.php
+
+		-
+			message: '#^Parameter \#1 \$array_arg of function usort contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: src/Blocks/BlockTypes/PaymentMethodIcons.php
+
+		-
+			message: '#^Parameter \#2 \$callback of function usort contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
 			count: 1
 			path: src/Blocks/BlockTypes/PaymentMethodIcons.php
 
@@ -49186,18 +49204,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductCollection/NoResults.php
 
 		-
-			message: '#^Call to function is_array\(\) with array\<array\<int\>\> will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Blocks/BlockTypes/ProductCollection/QueryBuilder.php
-
-		-
-			message: '#^Call to function is_array\(\) with array\<array\> will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Blocks/BlockTypes/ProductCollection/QueryBuilder.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\QueryBuilder\:\:add_price_range_filter_posts_clauses\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -49456,7 +49462,7 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductFilterAttribute.php
 
 		-
-			message: '#^Parameter \#1 \$var of function intval expects array\|bool\|float\|int\|resource\|string\|null, string\|WP_Error given\.$#'
+			message: '#^Parameter \#1 \$var of function intval expects array\|bool\|float\|GMP\|int\|resource\|SimpleXMLElement\|string\|null, string\|WP_Error given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/ProductFilterAttribute.php
@@ -49714,12 +49720,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductGalleryLargeImage.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductGalleryLargeImage\:\:render\(\) should return string but returns string\|false\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductGalleryLargeImage.php
-
-		-
 			message: '#^Parameter \#1 \$html of function wp_interactivity_process_directives expects string, string\|false given\.$#'
 			identifier: argument.type
 			count: 1
@@ -49764,12 +49764,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductImage\:\:register_block_type_assets\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockTypes/ProductImage.php
-
-		-
-			message: '#^Parameter \#1 \$attachment_id of function wp_get_attachment_image expects int, int\|null given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/ProductImage.php
 
@@ -49872,12 +49866,6 @@ parameters:
 		-
 			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
 			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductQuery.php
-
-		-
-			message: '#^Call to function is_array\(\) with array\<array\> will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
 			count: 1
 			path: src/Blocks/BlockTypes/ProductQuery.php
 
@@ -50152,12 +50140,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductStockIndicator.php
 
 		-
-			message: '#^Variable \$content in empty\(\) always exists and is always falsy\.$#'
-			identifier: empty.variable
-			count: 1
-			path: src/Blocks/BlockTypes/ProductStockIndicator.php
-
-		-
 			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
 			identifier: class.notFound
 			count: 1
@@ -50254,26 +50236,8 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductTag.php
 
 		-
-			message: '#^Iterating over an object of an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block_List\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductTemplate.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductTemplate\:\:initialize\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Blocks/BlockTypes/ProductTemplate.php
-
-		-
-			message: '#^Parameter \#1 \$inner_blocks of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductTemplate\:\:block_core_post_template_uses_featured_image\(\) expects Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block_List, WP_Block_List given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductTemplate.php
-
-		-
-			message: '#^Parameter \$inner_blocks of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductTemplate\:\:block_core_post_template_uses_featured_image\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block_List\.$#'
-			identifier: class.notFound
 			count: 1
 			path: src/Blocks/BlockTypes/ProductTemplate.php
 
@@ -50548,6 +50512,12 @@ parameters:
 			path: src/Blocks/BlockTypes/Reviews/ProductReviewsTitle.php
 
 		-
+			message: '#^Negated boolean expression is always true\.$#'
+			identifier: booleanNot.alwaysTrue
+			count: 1
+			path: src/Blocks/BlockTypes/Reviews/ProductReviewsTitle.php
+
+		-
 			message: '#^Parameter \#2 \$product of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\Reviews\\ProductReviewsTitle\:\:get_reviews_title\(\) expects Automattic\\WooCommerce\\Blocks\\BlockTypes\\Reviews\\WC_Product, WC_Product given\.$#'
 			identifier: argument.type
 			count: 1
@@ -50604,12 +50574,6 @@ parameters:
 		-
 			message: '#^PHPDoc tag @var above a method has no effect\.$#'
 			identifier: varTag.misplaced
-			count: 1
-			path: src/Blocks/BlockTypes/SingleProduct.php
-
-		-
-			message: '#^PHPDoc tag @var does not specify variable name\.$#'
-			identifier: varTag.noVariable
 			count: 1
 			path: src/Blocks/BlockTypes/SingleProduct.php
 
@@ -51408,7 +51372,7 @@ parameters:
 		-
 			message: '#^Binary operation "\+" between int\|string and 1 results in an error\.$#'
 			identifier: binaryOp.invalid
-			count: 3
+			count: 2
 			path: src/Blocks/Templates/AbstractTemplateWithFallback.php
 
 		-
@@ -51732,7 +51696,7 @@ parameters:
 		-
 			message: '#^Access to an undefined property object\:\:\$source\.$#'
 			identifier: property.notFound
-			count: 2
+			count: 1
 			path: src/Blocks/Utils/BlockTemplateUtils.php
 
 		-
@@ -52450,6 +52414,18 @@ parameters:
 			path: src/Gateways/PayPal/WebhookHandler.php
 
 		-
+			message: '#^Offset ''decimal_point'' on array\{decimal_point\: string, thousands_sep\: string, int_curr_symbol\: string, currency_symbol\: string, mon_decimal_point\: string, mon_thousands_sep\: string, positive_sign\: string, negative_sign\: string, \.\.\.\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: src/Internal/Abilities/Domain/Traits/ProductAbilityTrait.php
+
+		-
+			message: '#^Offset ''mon_decimal_point'' on array\{decimal_point\: string, thousands_sep\: string, int_curr_symbol\: string, currency_symbol\: string, mon_decimal_point\: string, mon_thousands_sep\: string, positive_sign\: string, negative_sign\: string, \.\.\.\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: src/Internal/Abilities/Domain/Traits/ProductAbilityTrait.php
+
+		-
 			message: '#^Access to an undefined property object\:\:\$payload\.$#'
 			identifier: property.notFound
 			count: 2
@@ -52502,12 +52478,6 @@ parameters:
 			identifier: assign.propertyType
 			count: 1
 			path: src/Internal/AddressProvider/AbstractAutomatticAddressProvider.php
-
-		-
-			message: '#^Call to function is_array\(\) with array\{\} will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Internal/AddressProvider/AddressProviderController.php
 
 		-
 			message: '#^Call to function is_array\(\) with non\-empty\-array will always evaluate to true\.$#'
@@ -52844,18 +52814,6 @@ parameters:
 			identifier: class.notFound
 			count: 1
 			path: src/Internal/Admin/CustomerEffortScoreTracks.php
-
-		-
-			message: '#^Call to function is_object\(\) with WC_Email will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Internal/Admin/EmailImprovements/EmailImprovements.php
-
-		-
-			message: '#^Instanceof between WC_Email and WC_Email will always evaluate to true\.$#'
-			identifier: instanceof.alwaysTrue
-			count: 1
-			path: src/Internal/Admin/EmailImprovements/EmailImprovements.php
 
 		-
 			message: '#^Parameter \#2 \$str of function explode expects string, int\|string given\.$#'
@@ -53524,12 +53482,6 @@ parameters:
 			path: src/Internal/Admin/Logging/FileV2/SearchListTable.php
 
 		-
-			message: '#^Call to function is_array\(\) with list\<array\{string, int\}\> will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Internal/Admin/Logging/FileV2/SearchListTable.php
-
-		-
 			message: '#^Parameter \#1 \$args of method WP_List_Table\:\:set_pagination_args\(\) expects array\{total_items\?\: int, total_pages\?\: int, per_page\?\: int\}, array\{per_page\: int, total_items\: array\|int, total_pages\: \(float\|false\)\} given\.$#'
 			identifier: argument.type
 			count: 1
@@ -53668,6 +53620,12 @@ parameters:
 			path: src/Internal/Admin/MobileAppBanner.php
 
 		-
+			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\CustomizeStoreWithBlocks'' and ''get_note'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/Internal/Admin/Notes/CustomizeStoreWithBlocks.php
+
+		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\CustomizeStoreWithBlocks\:\:get_note\(\) should return Automattic\\WooCommerce\\Admin\\Notes\\Note but empty return statement found\.$#'
 			identifier: return.empty
 			count: 4
@@ -53684,6 +53642,12 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/Internal/Admin/Notes/CustomizeStoreWithBlocks.php
+
+		-
+			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\CustomizingProductCatalog'' and ''get_note'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/Internal/Admin/Notes/CustomizingProductCatalog.php
 
 		-
 			message: '#^Cannot access property \$products on array\|object\.$#'
@@ -53710,6 +53674,12 @@ parameters:
 			path: src/Internal/Admin/Notes/CustomizingProductCatalog.php
 
 		-
+			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\EUVATNumber'' and ''get_note'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/Internal/Admin/Notes/EUVATNumber.php
+
+		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\EUVATNumber\:\:get_note\(\) should return Automattic\\WooCommerce\\Admin\\Notes\\Note but empty return statement found\.$#'
 			identifier: return.empty
 			count: 2
@@ -53720,6 +53690,12 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: src/Internal/Admin/Notes/EUVATNumber.php
+
+		-
+			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\EditProductsOnTheMove'' and ''get_note'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/Internal/Admin/Notes/EditProductsOnTheMove.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\EditProductsOnTheMove\:\:get_note\(\) should return Automattic\\WooCommerce\\Admin\\Notes\\Note but empty return statement found\.$#'
@@ -53734,10 +53710,28 @@ parameters:
 			path: src/Internal/Admin/Notes/EditProductsOnTheMove.php
 
 		-
+			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\EmailImprovements'' and ''get_note'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/Internal/Admin/Notes/EmailImprovements.php
+
+		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\EmailImprovements\:\:is_applicable\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: src/Internal/Admin/Notes/EmailImprovements.php
+
+		-
+			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\ExtensionsWithoutSubscription'' and ''get_note'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/Internal/Admin/Notes/ExtensionsWithoutSubscription.php
+
+		-
+			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\FirstProduct'' and ''get_note'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/Internal/Admin/Notes/FirstProduct.php
 
 		-
 			message: '#^Cannot access property \$total on array\|object\.$#'
@@ -53756,6 +53750,18 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: src/Internal/Admin/Notes/FirstProduct.php
+
+		-
+			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\FullRefundFixDataToolNotice'' and ''get_note'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/Internal/Admin/Notes/FullRefundFixDataToolNotice.php
+
+		-
+			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\GivingFeedbackNotes'' and ''get_note'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/Internal/Admin/Notes/GivingFeedbackNotes.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\GivingFeedbackNotes\:\:get_note\(\) should return Automattic\\WooCommerce\\Admin\\Notes\\Note but empty return statement found\.$#'
@@ -53784,6 +53790,12 @@ parameters:
 		-
 			message: '#^Call to an undefined method WC_Data_Store\:\:get_notes_with_name\(\)\.$#'
 			identifier: method.notFound
+			count: 1
+			path: src/Internal/Admin/Notes/InstallJPAndWCSPlugins.php
+
+		-
+			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\InstallJPAndWCSPlugins'' and ''get_note'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
 			count: 1
 			path: src/Internal/Admin/Notes/InstallJPAndWCSPlugins.php
 
@@ -53836,6 +53848,12 @@ parameters:
 			path: src/Internal/Admin/Notes/InstallJPAndWCSPlugins.php
 
 		-
+			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\LaunchChecklist'' and ''get_note'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/Internal/Admin/Notes/LaunchChecklist.php
+
+		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\LaunchChecklist\:\:get_note\(\) should return Automattic\\WooCommerce\\Admin\\Notes\\Note but empty return statement found\.$#'
 			identifier: return.empty
 			count: 1
@@ -53846,6 +53864,12 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: src/Internal/Admin/Notes/LaunchChecklist.php
+
+		-
+			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\MagentoMigration'' and ''get_note'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/Internal/Admin/Notes/MagentoMigration.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\MagentoMigration\:\:is_applicable\(\) has no return type specified\.$#'
@@ -53864,6 +53888,12 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: src/Internal/Admin/Notes/MagentoMigration.php
+
+		-
+			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\ManageOrdersOnTheGo'' and ''get_note'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/Internal/Admin/Notes/ManageOrdersOnTheGo.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\ManageOrdersOnTheGo\:\:get_note\(\) should return Automattic\\WooCommerce\\Admin\\Notes\\Note\|null but empty return statement found\.$#'
@@ -53886,6 +53916,12 @@ parameters:
 		-
 			message: '#^Call to an undefined method WC_Data_Store\:\:get_notes_with_name\(\)\.$#'
 			identifier: method.notFound
+			count: 1
+			path: src/Internal/Admin/Notes/MarketingJetpack.php
+
+		-
+			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\MarketingJetpack'' and ''get_note'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
 			count: 1
 			path: src/Internal/Admin/Notes/MarketingJetpack.php
 
@@ -53926,6 +53962,12 @@ parameters:
 			path: src/Internal/Admin/Notes/MarketingJetpack.php
 
 		-
+			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\MigrateFromShopify'' and ''get_note'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/Internal/Admin/Notes/MigrateFromShopify.php
+
+		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\MigrateFromShopify\:\:get_note\(\) should return Automattic\\WooCommerce\\Admin\\Notes\\Note but empty return statement found\.$#'
 			identifier: return.empty
 			count: 4
@@ -53936,6 +53978,12 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: src/Internal/Admin/Notes/MigrateFromShopify.php
+
+		-
+			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\MobileApp'' and ''get_note'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/Internal/Admin/Notes/MobileApp.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\MobileApp\:\:get_note\(\) should return Automattic\\WooCommerce\\Admin\\Notes\\Note but empty return statement found\.$#'
@@ -53970,6 +54018,12 @@ parameters:
 		-
 			message: '#^Access to an undefined property object\:\:\$old_record_date\.$#'
 			identifier: property.notFound
+			count: 1
+			path: src/Internal/Admin/Notes/NewSalesRecord.php
+
+		-
+			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\NewSalesRecord'' and ''get_note'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
 			count: 1
 			path: src/Internal/Admin/Notes/NewSalesRecord.php
 
@@ -54052,6 +54106,12 @@ parameters:
 			path: src/Internal/Admin/Notes/OnboardingPayments.php
 
 		-
+			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\OnboardingPayments'' and ''get_note'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/Internal/Admin/Notes/OnboardingPayments.php
+
+		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\OnboardingPayments\:\:get_note\(\) should return Automattic\\WooCommerce\\Admin\\Notes\\Note but empty return statement found\.$#'
 			identifier: return.empty
 			count: 2
@@ -54062,6 +54122,12 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: src/Internal/Admin/Notes/OnboardingPayments.php
+
+		-
+			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\OnlineClothingStore'' and ''get_note'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/Internal/Admin/Notes/OnlineClothingStore.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\OnlineClothingStore\:\:get_note\(\) should return Automattic\\WooCommerce\\Admin\\Notes\\Note but empty return statement found\.$#'
@@ -54130,6 +54196,12 @@ parameters:
 			path: src/Internal/Admin/Notes/OrderMilestones.php
 
 		-
+			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\PaymentsMoreInfoNeeded'' and ''get_note'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/Internal/Admin/Notes/PaymentsMoreInfoNeeded.php
+
+		-
 			message: '#^Cannot call method has_incentive\(\) on Automattic\\WooCommerce\\Internal\\Admin\\WcPayWelcomePage\|null\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -54146,6 +54218,12 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: src/Internal/Admin/Notes/PaymentsMoreInfoNeeded.php
+
+		-
+			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\PaymentsRemindMeLater'' and ''get_note'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/Internal/Admin/Notes/PaymentsRemindMeLater.php
 
 		-
 			message: '#^Cannot call method has_incentive\(\) on Automattic\\WooCommerce\\Internal\\Admin\\WcPayWelcomePage\|null\.$#'
@@ -54166,6 +54244,12 @@ parameters:
 			path: src/Internal/Admin/Notes/PaymentsRemindMeLater.php
 
 		-
+			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\PerformanceOnMobile'' and ''get_note'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/Internal/Admin/Notes/PerformanceOnMobile.php
+
+		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\PerformanceOnMobile\:\:get_note\(\) should return Automattic\\WooCommerce\\Admin\\Notes\\Note but empty return statement found\.$#'
 			identifier: return.empty
 			count: 4
@@ -54176,6 +54260,12 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: src/Internal/Admin/Notes/PerformanceOnMobile.php
+
+		-
+			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\PersonalizeStore'' and ''get_note'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/Internal/Admin/Notes/PersonalizeStore.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\PersonalizeStore\:\:get_note\(\) should return Automattic\\WooCommerce\\Admin\\Notes\\Note but empty return statement found\.$#'
@@ -54190,6 +54280,12 @@ parameters:
 			path: src/Internal/Admin/Notes/PersonalizeStore.php
 
 		-
+			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\RealTimeOrderAlerts'' and ''get_note'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/Internal/Admin/Notes/RealTimeOrderAlerts.php
+
+		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\RealTimeOrderAlerts\:\:get_note\(\) should return Automattic\\WooCommerce\\Admin\\Notes\\Note but empty return statement found\.$#'
 			identifier: return.empty
 			count: 2
@@ -54200,6 +54296,24 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: src/Internal/Admin/Notes/RealTimeOrderAlerts.php
+
+		-
+			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\RefundDoubleCountToolNotice'' and ''get_note'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/Internal/Admin/Notes/RefundDoubleCountToolNotice.php
+
+		-
+			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\ScheduledUpdatesPromotion'' and ''get_note'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/Internal/Admin/Notes/ScheduledUpdatesPromotion.php
+
+		-
+			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\SellingOnlineCourses'' and ''get_note'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/Internal/Admin/Notes/SellingOnlineCourses.php
 
 		-
 			message: '#^Cannot access offset ''industry'' on object\.$#'
@@ -54218,6 +54332,12 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: src/Internal/Admin/Notes/SellingOnlineCourses.php
+
+		-
+			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\TrackingOptIn'' and ''get_note'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/Internal/Admin/Notes/TrackingOptIn.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\TrackingOptIn\:\:get_note\(\) should return Automattic\\WooCommerce\\Admin\\Notes\\Note\|null but empty return statement found\.$#'
@@ -54280,6 +54400,12 @@ parameters:
 			path: src/Internal/Admin/Notes/WooCommercePayments.php
 
 		-
+			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\WooCommercePayments'' and ''get_note'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/Internal/Admin/Notes/WooCommercePayments.php
+
+		-
 			message: '#^Cannot call method get_action\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|true\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -54338,6 +54464,12 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/Internal/Admin/Notes/WooCommercePayments.php
+
+		-
+			message: '#^Call to function method_exists\(\) with ''Automattic\\\\WooCommerce\\\\Internal\\\\Admin\\\\Notes\\\\WooCommerceSubscriptions'' and ''get_note'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/Internal/Admin/Notes/WooCommerceSubscriptions.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Notes\\WooCommerceSubscriptions\:\:get_note\(\) should return Automattic\\WooCommerce\\Admin\\Notes\\Note\|null but empty return statement found\.$#'
@@ -54940,18 +55072,6 @@ parameters:
 			path: src/Internal/Admin/Orders/ListTable.php
 
 		-
-			message: '#^Cannot call method date\(\) on WC_DateTime\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Orders/ListTable.php
-
-		-
-			message: '#^Cannot call method date_i18n\(\) on WC_DateTime\|null\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: src/Internal/Admin/Orders/ListTable.php
-
-		-
 			message: '#^Cannot call method delete\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -54959,12 +55079,6 @@ parameters:
 
 		-
 			message: '#^Cannot call method format\(\) on DateTime\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/Admin/Orders/ListTable.php
-
-		-
-			message: '#^Cannot call method getTimestamp\(\) on WC_DateTime\|null\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: src/Internal/Admin/Orders/ListTable.php
@@ -55104,12 +55218,6 @@ parameters:
 		-
 			message: '#^PHPDoc tag @param has invalid value \(object         ListTable The current instance of the class\.\)\: Unexpected token "ListTable", expected variable at offset 284 on line 7$#'
 			identifier: phpDoc.parseError
-			count: 1
-			path: src/Internal/Admin/Orders/ListTable.php
-
-		-
-			message: '#^Parameter \#1 \$function of function call_user_func expects callable\(\)\: mixed, array\{\$this\(Automattic\\WooCommerce\\Internal\\Admin\\Orders\\ListTable\), non\-falsy\-string\} given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Internal/Admin/Orders/ListTable.php
 
@@ -55402,19 +55510,7 @@ parameters:
 			path: src/Internal/Admin/Orders/PageController.php
 
 		-
-			message: '#^Parameter \#1 \$post_type of function get_post_type_object expects string, array\<string\>\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Orders/PageController.php
-
-		-
 			message: '#^Parameter \#1 \$post_type_object of function get_post_type_labels expects object, WP_Post_Type\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Orders/PageController.php
-
-		-
-			message: '#^Parameter \#1 \$type of function wc_get_order_type expects string, array\<string\>\|string given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Internal/Admin/Orders/PageController.php
@@ -56200,78 +56296,6 @@ parameters:
 			path: src/Internal/Admin/Settings/PaymentsProviders/PayPal.php
 
 		-
-			message: '#^Call to function is_callable\(\) with array\{WC_Payment_Gateway, ''get_connection_url''\} will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Internal/Admin/Settings/PaymentsProviders/PaymentGateway.php
-
-		-
-			message: '#^Call to function is_callable\(\) with array\{WC_Payment_Gateway, ''get_onboarding_not…''\} will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Internal/Admin/Settings/PaymentsProviders/PaymentGateway.php
-
-		-
-			message: '#^Call to function is_callable\(\) with array\{WC_Payment_Gateway, ''get_option''\} will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Internal/Admin/Settings/PaymentsProviders/PaymentGateway.php
-
-		-
-			message: '#^Call to function is_callable\(\) with array\{WC_Payment_Gateway, ''get_provider_links''\} will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Internal/Admin/Settings/PaymentsProviders/PaymentGateway.php
-
-		-
-			message: '#^Call to function is_callable\(\) with array\{WC_Payment_Gateway, ''get_recommended…''\} will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Internal/Admin/Settings/PaymentsProviders/PaymentGateway.php
-
-		-
-			message: '#^Call to function is_callable\(\) with array\{WC_Payment_Gateway, ''get_settings_url''\} will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Internal/Admin/Settings/PaymentsProviders/PaymentGateway.php
-
-		-
-			message: '#^Call to function is_callable\(\) with array\{WC_Payment_Gateway, ''is_account_connected''\} will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Internal/Admin/Settings/PaymentsProviders/PaymentGateway.php
-
-		-
-			message: '#^Call to function is_callable\(\) with array\{WC_Payment_Gateway, ''is_account…''\} will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Internal/Admin/Settings/PaymentsProviders/PaymentGateway.php
-
-		-
-			message: '#^Call to function is_callable\(\) with array\{WC_Payment_Gateway, ''is_connected''\} will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Internal/Admin/Settings/PaymentsProviders/PaymentGateway.php
-
-		-
-			message: '#^Call to function is_callable\(\) with array\{WC_Payment_Gateway, ''is_in_test_mode…''\} will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Internal/Admin/Settings/PaymentsProviders/PaymentGateway.php
-
-		-
-			message: '#^Call to function is_callable\(\) with array\{WC_Payment_Gateway, ''is_onboarding…''\} will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 3
-			path: src/Internal/Admin/Settings/PaymentsProviders/PaymentGateway.php
-
-		-
-			message: '#^Call to function is_callable\(\) with array\{WC_Payment_Gateway, ''is_test_mode…''\} will always evaluate to true\.$#'
-			identifier: function.alreadyNarrowedType
-			count: 1
-			path: src/Internal/Admin/Settings/PaymentsProviders/PaymentGateway.php
-
-		-
 			message: '#^Parameter \#1 \$array \(list\) of array_values is already a list, call has no effect\.$#'
 			identifier: arrayValues.list
 			count: 1
@@ -56536,10 +56560,16 @@ parameters:
 			path: src/Internal/Admin/Settings/PaymentsRestController.php
 
 		-
-			message: '#^Parameter \#1 \$haystack of function str_ends_with expects string\|null, string\|false given\.$#'
-			identifier: argument.type
+			message: '#^Left side of && is always true\.$#'
+			identifier: booleanAnd.leftAlwaysTrue
 			count: 1
-			path: src/Internal/Admin/Settings/Utils.php
+			path: src/Internal/Admin/Settings/SettingsUISchema.php
+
+		-
+			message: '#^Right side of && is always true\.$#'
+			identifier: booleanAnd.rightAlwaysTrue
+			count: 1
+			path: src/Internal/Admin/Settings/SettingsUISchema.php
 
 		-
 			message: '#^Parameter \#1 \$json of function json_decode expects string, string\|false given\.$#'
@@ -56549,12 +56579,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$str of function trim expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/Admin/Settings/Utils.php
-
-		-
-			message: '#^Parameter \#1 \$string of function substr expects string, string\|false given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Internal/Admin/Settings/Utils.php
@@ -58384,12 +58408,6 @@ parameters:
 			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
 
 		-
-			message: '#^Instanceof between WC_Abstract_Order and WC_Abstract_Order will always evaluate to true\.$#'
-			identifier: instanceof.alwaysTrue
-			count: 3
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\OrdersTableDataStore\:\:backfill_post_record\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -58557,12 +58575,6 @@ parameters:
 		-
 			message: '#^PHPDoc tag @param has invalid value \(string     The context of the operation\: ''create'' or ''update''\.\)\: Unexpected token "The", expected variable at offset 440 on line 9$#'
 			identifier: phpDoc.parseError
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
-			message: '#^Parameter \#1 \$function of function call_user_func_array expects callable\(\)\: mixed, array\{Abstract_WC_Order_Data_Store_CPT, non\-falsy\-string\} given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
 
@@ -58817,6 +58829,12 @@ parameters:
 			identifier: parameterByRef.type
 			count: 1
 			path: src/Internal/DataStores/Orders/OrdersTableMetaQuery.php
+
+		-
+			message: '#^Call to function in_array\(\) with arguments ''\.\.\.''\|''\<''\|''\<\=''\|''\>''\|''\>\='', array\{''\>'', ''\>\='', ''\='', ''\<\='', ''\<'', ''\.\.\.''\} and true will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: src/Internal/DataStores/Orders/OrdersTableQuery.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\DataStores\\Orders\\OrdersTableQuery\:\:build_count_query\(\) has no return type specified\.$#'
@@ -59551,7 +59569,7 @@ parameters:
 			path: src/Internal/Logging/RemoteLogger.php
 
 		-
-			message: '#^Parameter \#2 \$array of function implode expects array\<string\>, array\<array\|string\> given\.$#'
+			message: '#^Parameter \#2 \$array of function implode expects array\<string\>, array\<array\<mixed, mixed\>\|string\> given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Internal/Logging/RemoteLogger.php
@@ -59591,12 +59609,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/Internal/Logging/SafeGlobalFunctionProxy.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\OrderCouponDataMigrator\:\:convert_item\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/OrderCouponDataMigrator.php
 
 		-
 			message: '#^Call to an undefined method WC_Order\|WC_Order_Refund\:\:add_order_note\(\)\.$#'
@@ -59656,12 +59668,6 @@ parameters:
 			message: '#^Cannot call method get_billing_email\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
 			identifier: method.nonObject
 			count: 2
-			path: src/Internal/Orders/OrderActionsRestController.php
-
-		-
-			message: '#^Instanceof between WC_Email and WC_Email will always evaluate to true\.$#'
-			identifier: instanceof.alwaysTrue
-			count: 1
 			path: src/Internal/Orders/OrderActionsRestController.php
 
 		-
@@ -61459,32 +61465,14 @@ parameters:
 			path: src/Internal/RestApi/Routes/V4/Orders/ActionController.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Orders\\ActionController\:\:action_payment_complete\(\) is unused\.$#'
-			identifier: method.unused
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Orders/ActionController.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Orders\\ActionController\:\:action_reset_download_permissions\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
 			count: 1
 			path: src/Internal/RestApi/Routes/V4/Orders/ActionController.php
 
 		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Orders\\ActionController\:\:action_reset_download_permissions\(\) is unused\.$#'
-			identifier: method.unused
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Orders/ActionController.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Orders\\ActionController\:\:run_actions\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
-			count: 1
-			path: src/Internal/RestApi/Routes/V4/Orders/ActionController.php
-
-		-
-			message: '#^Parameter \#1 \$function of function call_user_func expects callable\(\)\: mixed, array\{\$this\(Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Orders\\ActionController\), non\-falsy\-string\} given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Internal/RestApi/Routes/V4/Orders/ActionController.php
 
@@ -61599,13 +61587,13 @@ parameters:
 		-
 			message: '#^Instanceof between WC_Order and WC_Order will always evaluate to true\.$#'
 			identifier: instanceof.alwaysTrue
-			count: 1
+			count: 2
 			path: src/Internal/RestApi/Routes/V4/Orders/Controller.php
 
 		-
 			message: '#^Left side of && is always true\.$#'
 			identifier: booleanAnd.leftAlwaysTrue
-			count: 1
+			count: 2
 			path: src/Internal/RestApi/Routes/V4/Orders/Controller.php
 
 		-
@@ -61731,6 +61719,12 @@ parameters:
 		-
 			message: '#^Strict comparison using \=\=\= between ''trash'' and mixed~''trash'' will always evaluate to false\.$#'
 			identifier: identical.alwaysFalse
+			count: 1
+			path: src/Internal/RestApi/Routes/V4/Orders/Controller.php
+
+		-
+			message: '#^Variable \$order might not be defined\.$#'
+			identifier: variable.undefined
 			count: 1
 			path: src/Internal/RestApi/Routes/V4/Orders/Controller.php
 
@@ -62043,7 +62037,7 @@ parameters:
 		-
 			message: '#^Access to an undefined property WC_Data\:\:\$post_type\.$#'
 			identifier: property.notFound
-			count: 1
+			count: 2
 			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
 
 		-
@@ -62409,7 +62403,7 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$value of method WC_Product_Attribute\:\:set_name\(\) expects string, array\|string given\.$#'
 			identifier: argument.type
-			count: 2
+			count: 1
 			path: src/Internal/RestApi/Routes/V4/Products/Controller.php
 
 		-
@@ -62809,12 +62803,6 @@ parameters:
 			path: src/Internal/RestApi/Routes/V4/Settings/Account/Schema/AccountSettingsSchema.php
 
 		-
-			message: '#^Offset ''order'' on array\{title\: mixed, description\: mixed, order\: int, fields\: list\<non\-empty\-array\>\} on left side of \?\? always exists and is not nullable\.$#'
-			identifier: nullCoalesce.offset
-			count: 2
-			path: src/Internal/RestApi/Routes/V4/Settings/Account/Schema/AccountSettingsSchema.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Settings\\Email\\Controller\:\:get_item\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
 			count: 1
@@ -63091,12 +63079,6 @@ parameters:
 			path: src/Internal/RestApi/Routes/V4/Settings/General/Schema/GeneralSettingsSchema.php
 
 		-
-			message: '#^Offset ''order'' on array\{title\: mixed, description\: mixed, order\: int, fields\: list\<non\-empty\-array\>\} on left side of \?\? always exists and is not nullable\.$#'
-			identifier: nullCoalesce.offset
-			count: 2
-			path: src/Internal/RestApi/Routes/V4/Settings/General/Schema/GeneralSettingsSchema.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Settings\\OfflinePaymentMethods\\Controller\:\:get_item_response\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
 			count: 1
@@ -63271,12 +63253,6 @@ parameters:
 			path: src/Internal/RestApi/Routes/V4/Settings/Products/Schema/ProductSettingsSchema.php
 
 		-
-			message: '#^Offset ''order'' on array\{title\: mixed, description\: mixed, order\: int, fields\: list\<non\-empty\-array\>\} on left side of \?\? always exists and is not nullable\.$#'
-			identifier: nullCoalesce.offset
-			count: 2
-			path: src/Internal/RestApi/Routes/V4/Settings/Products/Schema/ProductSettingsSchema.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Settings\\Tax\\Controller\:\:get_item\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
 			count: 1
@@ -63328,12 +63304,6 @@ parameters:
 			message: '#^Method Automattic\\WooCommerce\\Internal\\RestApi\\Routes\\V4\\Settings\\Tax\\Schema\\TaxSettingsSchema\:\:transform_setting_to_field\(\) never returns null so it can be removed from the return type\.$#'
 			identifier: return.unusedType
 			count: 1
-			path: src/Internal/RestApi/Routes/V4/Settings/Tax/Schema/TaxSettingsSchema.php
-
-		-
-			message: '#^Offset ''order'' on array\{title\: mixed, description\: mixed, order\: int, fields\: list\<non\-empty\-array\>\} on left side of \?\? always exists and is not nullable\.$#'
-			identifier: nullCoalesce.offset
-			count: 2
 			path: src/Internal/RestApi/Routes/V4/Settings/Tax/Schema/TaxSettingsSchema.php
 
 		-
@@ -63539,6 +63509,12 @@ parameters:
 			identifier: missingType.generics
 			count: 1
 			path: src/Internal/RestApi/Routes/V4/ShippingZoneMethod/ShippingMethodSchema.php
+
+		-
+			message: '#^Offset ''is_enabled'' might not exist on non\-empty\-array\{is_enabled\?\: 0\|1, method_order\?\: int\}\.$#'
+			identifier: offsetAccess.notFound
+			count: 1
+			path: src/Internal/RestApi/Routes/V4/ShippingZoneMethod/ShippingZoneMethodService.php
 
 		-
 			message: '#^Call to an undefined method WP_Error\|WP_REST_Response\:\:header\(\)\.$#'
@@ -64057,7 +64033,7 @@ parameters:
 			path: src/Internal/StockNotifications/Admin/Templates/html-admin-notification-create.php
 
 		-
-			message: '#^Parameter \#1 \$text of function esc_attr expects string, int\<min, \-1\>\|int\<1, max\> given\.$#'
+			message: '#^Parameter \#1 \$text of function esc_attr expects string, int\<1, max\> given\.$#'
 			identifier: argument.type
 			count: 2
 			path: src/Internal/StockNotifications/Admin/Templates/html-admin-notification-create.php
@@ -64160,12 +64136,6 @@ parameters:
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\StockNotifications\\Emails\\CustomerStockNotificationEmail\:\:maybe_setup_notification_locale\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Internal/StockNotifications/Emails/CustomerStockNotificationEmail.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\StockNotifications\\Emails\\CustomerStockNotificationEmail\:\:trigger\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: src/Internal/StockNotifications/Emails/CustomerStockNotificationEmail.php
@@ -64663,12 +64633,6 @@ parameters:
 			path: src/Internal/TransientFiles/TransientFilesEngine.php
 
 		-
-			message: '#^Parameter \#1 \$filename of function fopen expects string, string\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/TransientFiles/TransientFilesEngine.php
-
-		-
 			message: '#^Parameter \#1 \$fp of function fclose expects resource, resource\|false given\.$#'
 			identifier: argument.type
 			count: 1
@@ -64763,6 +64727,12 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/Internal/Utilities/FilesystemUtil.php
+
+		-
+			message: '#^Parameter \#2 \$allowed_html of function wp_kses expects array\<array\>\|string, array given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Internal/Utilities/HtmlSanitizer.php
 
 		-
 			message: '#^Action callback returns array but should not return anything\.$#'
@@ -65503,12 +65473,6 @@ parameters:
 			path: src/StoreApi/Routes/V1/CartApplyCoupon.php
 
 		-
-			message: '#^Dead catch \- WC_REST_Exception is never thrown in the try block\.$#'
-			identifier: catch.neverThrown
-			count: 1
-			path: src/StoreApi/Routes/V1/CartCoupons.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\CartCoupons\:\:get_route_delete_response\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
 			count: 1
@@ -65719,21 +65683,9 @@ parameters:
 			path: src/StoreApi/Routes/V1/Checkout.php
 
 		-
-			message: '#^Cannot access offset string on 0\|0\.0\|''''\|''0''\|array\<string, array\|string\>\|false\|null\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/StoreApi/Routes/V1/Checkout.php
-
-		-
 			message: '#^Expression on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.expr
 			count: 2
-			path: src/StoreApi/Routes/V1/Checkout.php
-
-		-
-			message: '#^Instanceof between Automattic\\WooCommerce\\StoreApi\\Payments\\PaymentResult and Automattic\\WooCommerce\\StoreApi\\Payments\\PaymentResult will always evaluate to true\.$#'
-			identifier: instanceof.alwaysTrue
-			count: 1
 			path: src/StoreApi/Routes/V1/Checkout.php
 
 		-
@@ -65769,12 +65721,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\Checkout\:\:get_request_payment_data\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
-			count: 1
-			path: src/StoreApi/Routes/V1/Checkout.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\Checkout\:\:get_request_payment_data\(\) should return array but returns array\<string, array\|string\>\|float\|int\|string\|false\|null\.$#'
-			identifier: return.type
 			count: 1
 			path: src/StoreApi/Routes/V1/Checkout.php
 
@@ -65977,18 +65923,6 @@ parameters:
 			path: src/StoreApi/Routes/V1/CheckoutOrder.php
 
 		-
-			message: '#^Cannot access offset string on 0\|0\.0\|''''\|''0''\|array\<string, array\|string\>\|false\|null\.$#'
-			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/StoreApi/Routes/V1/CheckoutOrder.php
-
-		-
-			message: '#^Instanceof between Automattic\\WooCommerce\\StoreApi\\Payments\\PaymentResult and Automattic\\WooCommerce\\StoreApi\\Payments\\PaymentResult will always evaluate to true\.$#'
-			identifier: instanceof.alwaysTrue
-			count: 1
-			path: src/StoreApi/Routes/V1/CheckoutOrder.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\CheckoutOrder\:\:cart_updated\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -66009,12 +65943,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\CheckoutOrder\:\:get_request_payment_data\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
-			count: 1
-			path: src/StoreApi/Routes/V1/CheckoutOrder.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\CheckoutOrder\:\:get_request_payment_data\(\) should return array but returns array\<string, array\|string\>\|float\|int\|string\|false\|null\.$#'
-			identifier: return.type
 			count: 1
 			path: src/StoreApi/Routes/V1/CheckoutOrder.php
 
@@ -66907,7 +66835,7 @@ parameters:
 			path: src/StoreApi/Schemas/V1/ProductAttributeSchema.php
 
 		-
-			message: '#^Parameter \#1 \$data of function esc_sql expects array\|string, int\<0, max\>\|string given\.$#'
+			message: '#^Parameter \#1 \$data of function esc_sql expects array\|string, int\|string given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/StoreApi/Schemas/V1/ProductBrandSchema.php
@@ -66919,7 +66847,7 @@ parameters:
 			path: src/StoreApi/Schemas/V1/ProductBrandSchema.php
 
 		-
-			message: '#^Parameter \#1 \$data of function esc_sql expects array\|string, int\<0, max\>\|string given\.$#'
+			message: '#^Parameter \#1 \$data of function esc_sql expects array\|string, int\|string given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/StoreApi/Schemas/V1/ProductCategorySchema.php
@@ -67315,6 +67243,12 @@ parameters:
 			path: src/StoreApi/Utilities/CartTokenUtils.php
 
 		-
+			message: '#^Instanceof between Automattic\\WooCommerce\\StoreApi\\Payments\\PaymentResult and Automattic\\WooCommerce\\StoreApi\\Payments\\PaymentResult will always evaluate to true\.$#'
+			identifier: instanceof.alwaysTrue
+			count: 1
+			path: src/StoreApi/Utilities/CheckoutTrait.php
+
+		-
 			message: '#^Access to an undefined property object\:\:\$header\.$#'
 			identifier: property.notFound
 			count: 1
@@ -67607,12 +67541,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/StoreApi/Utilities/ProductQuery.php
-
-		-
-			message: '#^Cannot unset offset ''outofstock'' on list\<string\>\.$#'
-			identifier: unset.offset
-			count: 1
-			path: src/StoreApi/Utilities/ProductQueryFilters.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Utilities\\ProductQueryFilters\:\:get_attribute_counts\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
