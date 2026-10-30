@@ -139,6 +139,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		add_action( 'delete_user', array( __CLASS__, 'delete_customer_by_user_id' ) );
 		add_action( 'remove_user_from_blog', array( __CLASS__, 'delete_customer_by_user_id' ) );
 
+		add_action( 'woocommerce_privacy_before_remove_order_personal_data', array( __CLASS__, 'anonymize_customer' ) );
 		add_action( 'woocommerce_privacy_remove_order_personal_data', array( __CLASS__, 'anonymize_customer' ) );
 
 		add_action( 'woocommerce_analytics_delete_order_stats', array( __CLASS__, 'sync_on_order_delete' ), 15, 2 );
@@ -186,13 +187,14 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Sync customers data after an order was deleted.
 	 *
-	 * When an order is deleted, the customer record is deleted from the
-	 * table if the customer has no other orders.
+	 * Remove unused guest rows while retaining registered customer profiles.
 	 *
 	 * @param int $order_id Order ID.
 	 * @param int $customer_id Customer ID.
 	 */
 	public static function sync_on_order_delete( $order_id, $customer_id ) {
+		global $wpdb;
+
 		$customer_id = absint( $customer_id );
 
 		if ( 0 === $customer_id ) {
@@ -203,7 +205,24 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 		$order_count = self::get_order_count( $customer_id );
 
 		if ( 0 === $order_count ) {
-			self::delete_customer( $customer_id );
+			$deleted = $wpdb->delete(
+				self::get_db_table_name(),
+				array(
+					'customer_id' => $customer_id,
+					'user_id'     => null,
+				),
+				array( '%d', '%d' )
+			);
+			if ( $deleted ) {
+				/**
+				 * Fires when an unused guest customer is deleted.
+				 *
+				 * @since 4.0.0
+				 * @param int $customer_id Customer lookup ID.
+				 */
+				do_action( 'woocommerce_analytics_delete_customer', $customer_id );
+				ReportsCache::invalidate();
+			}
 		}
 	}
 
@@ -213,7 +232,7 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * Only updates customer if it is the customers last order.
 	 *
 	 * @param int $post_id of order.
-	 * @return true|-1
+	 * @return bool|-1
 	 */
 	public static function sync_order_customer( $post_id ) {
 		global $wpdb;
@@ -238,17 +257,32 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 		list($data, $format) = self::get_customer_order_data_and_format( $order );
 
-		$result = $wpdb->update( self::get_db_table_name(), $data, array( 'customer_id' => $customer_id ), $format );
+		// Report attribution does not authorize updating a different customer's data.
+		$user_id = (int) $order->get_customer_id();
+		$result  = $wpdb->update(
+			self::get_db_table_name(),
+			$data,
+			array(
+				'customer_id' => $customer_id,
+				'user_id'     => $user_id > 0 ? $user_id : null,
+			),
+			$format,
+			array( '%d', '%d' )
+		);
+
+		if ( 1 !== $result ) {
+			return false;
+		}
 
 		/**
-		 * Fires when a customer is updated.
+		 * Fires after an order changes a customer's report data.
 		 *
 		 * @param int $customer_id Customer ID.
 		 * @since 4.0.0
 		 */
 		do_action( 'woocommerce_analytics_update_customer', $customer_id );
 
-		return 1 === $result;
+		return true;
 	}
 
 	/**
@@ -1147,6 +1181,10 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			$order = wc_get_order( absint( $order ) );
 		}
 
+		if ( ! $order instanceof \WC_Order ) {
+			return;
+		}
+
 		$customer_id = $wpdb->get_var(
 			$wpdb->prepare( "SELECT customer_id FROM {$wpdb->prefix}wc_order_stats WHERE order_id = %d", $order->get_id() )
 		);
@@ -1173,7 +1211,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 						billing_phone = %s,
 						shipping_phone = %s
 					WHERE
-						customer_id = %d",
+						customer_id = %d
+						AND ( user_id = %d OR ( user_id IS NULL AND %d = 0 ) )",
 				array(
 					$deleted_text,
 					$deleted_text,
@@ -1185,6 +1224,8 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 					$deleted_text,
 					$deleted_text,
 					$customer_id,
+					$order->get_customer_id(),
+					$order->get_customer_id(),
 				)
 			)
 		);
