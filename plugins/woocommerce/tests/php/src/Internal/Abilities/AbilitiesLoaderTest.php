@@ -37,6 +37,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		'woocommerce/product-update',
 		'woocommerce/product-delete',
 		'woocommerce/orders-query',
+		'woocommerce/order-update',
 		'woocommerce/order-update-status',
 		'woocommerce/order-add-note',
 		'woocommerce/order-notes-query',
@@ -234,6 +235,11 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				'readonly'    => true,
 				'idempotent'  => true,
 				'destructive' => false,
+			),
+			'woocommerce/order-update'        => array(
+				'readonly'    => false,
+				'idempotent'  => false,
+				'destructive' => true,
 			),
 			'woocommerce/order-update-status' => array(
 				'readonly'    => false,
@@ -902,6 +908,13 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 					'id' => 1,
 				),
 			),
+			'order-update'        => array(
+				'woocommerce/order-update',
+				array(
+					'id'       => 1,
+					'shipping' => array( 'city' => 'Denied' ),
+				),
+			),
 			'order-update-status' => array(
 				'woocommerce/order-update-status',
 				array(
@@ -976,6 +989,10 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		wp_set_current_user( $limited_order_manager_id );
 
 		$cases = array(
+			'woocommerce/order-update'        => array(
+				'id'       => $order->get_id(),
+				'shipping' => array( 'city' => 'Unauthorized city' ),
+			),
 			'woocommerce/order-update-status' => array(
 				'id'     => $order->get_id(),
 				'status' => 'processing',
@@ -1276,6 +1293,13 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			'orders-query'        => array(
 				'woocommerce/orders-query',
 				array( 'id' => -123 ),
+			),
+			'order-update'        => array(
+				'woocommerce/order-update',
+				array(
+					'id'       => -123,
+					'shipping' => array( 'city' => 'Invalid' ),
+				),
 			),
 			'order-update-status' => array(
 				'woocommerce/order-update-status',

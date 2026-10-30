@@ -183,10 +183,28 @@ trait OrderAbilityTrait {
 						'order_item'
 					),
 				),
+				'shipping'             => array(
+					'type'                 => 'object',
+					'description'          => __( 'Order shipping address. Countries use ISO 3166-1 alpha-2 codes, and states use WooCommerce state codes.', 'woocommerce' ),
+					'properties'           => array_fill_keys(
+						self::get_order_shipping_address_fields(),
+						array( 'type' => 'string' )
+					),
+					'additionalProperties' => false,
+				),
 			),
 			'additionalProperties' => false,
 		);
 		return ExtensibleAbilities::add_fields_schema( $schema, 'order' );
+	}
+
+	/**
+	 * Order shipping address fields that the abilities read and write.
+	 *
+	 * @return array<int, string>
+	 */
+	protected static function get_order_shipping_address_fields(): array {
+		return array( 'first_name', 'last_name', 'company', 'address_1', 'address_2', 'city', 'state', 'postcode', 'country', 'phone' );
 	}
 
 	/**
@@ -299,6 +317,7 @@ trait OrderAbilityTrait {
 			'date_created_gmt'     => wc_rest_prepare_date_response( $order->get_date_created() ),
 			'date_modified'        => wc_rest_prepare_date_response( $order->get_date_modified(), false ),
 			'date_modified_gmt'    => wc_rest_prepare_date_response( $order->get_date_modified() ),
+			'shipping'             => $order->get_address( 'shipping' ),
 		);
 
 		if ( $include_line_items ) {

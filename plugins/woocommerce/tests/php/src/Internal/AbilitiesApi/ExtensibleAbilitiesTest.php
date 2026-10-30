@@ -1678,6 +1678,73 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should write an order extension field and the shipping address in one save, and save nothing when a validator refuses.
+	 */
+	public function test_order_update_writes_extension_fields_and_runs_validators(): void {
+		$this->add_test_action(
+			'woocommerce_extensible_abilities_init',
+			static function () {
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'        => 'order',
+						'namespace'       => 'test-ext',
+						'field'           => 'priority',
+						'schema'          => array( 'type' => 'string' ),
+						'get_callback'    => static function ( \WC_Order $order ) {
+							return $order->get_meta( '_test_priority' );
+						},
+						'update_callback' => static function ( \WC_Order $order, $value ) {
+							$order->update_meta_data( '_test_priority', $value );
+						},
+					)
+				);
+			}
+		);
+		$this->register_validator(
+			'order',
+			'test-ext',
+			static function ( \WC_Order $order ) {
+				return 'Closed' === $order->get_shipping_city() ? new \WP_Error( 'test_refused', 'Refused.' ) : null;
+			}
+		);
+		$this->reset_registries();
+		AbilitiesLoader::init_extensions();
+		$order = \WC_Helper_Order::create_order();
+		$saves = 0;
+		$count = static function () use ( &$saves ) {
+			++$saves;
+		};
+		$this->add_test_action( 'woocommerce_update_order', $count );
+
+		$output  = $this->run_ability(
+			'woocommerce/order-update',
+			array(
+				'id'         => $order->get_id(),
+				'shipping'   => array( 'city' => 'Lisbon' ),
+				'extensions' => array( 'test-ext' => array( 'priority' => 'high' ) ),
+			)
+		);
+		$refused = $this->run_ability_response(
+			'woocommerce/order-update',
+			array(
+				'id'         => $order->get_id(),
+				'shipping'   => array( 'city' => 'Closed' ),
+				'extensions' => array( 'test-ext' => array( 'priority' => 'low' ) ),
+			)
+		);
+
+		wp_cache_flush();
+		$saved = wc_get_order( $order->get_id() );
+		$this->assertSame( 1, $saves );
+		$this->assertSame( 'high', $output['order']['extensions']['test-ext']['priority'] );
+		$this->assertSame( 'Lisbon', $output['order']['shipping']['city'] );
+		$this->assertSame( 400, $refused->get_status() );
+		$this->assertSame( 'test_refused', $refused->get_data()['code'] );
+		$this->assertSame( 'Lisbon', $saved->get_shipping_city() );
+		$this->assertSame( 'high', $saved->get_meta( '_test_priority' ) );
+	}
+
+	/**
 	 * @testdox Should not accept extension fields in the write abilities with the feature off.
 	 */
 	public function test_writes_do_not_change_with_the_feature_off(): void {
