@@ -267,6 +267,10 @@ class Theme_Controller {
 				case 'link':
 					$selector = 'a:not(.button-link)';
 					break;
+				case 'caption':
+					// Captions render as elements carrying core's caption class, never as a `<caption>` tag.
+					$selector = '.wp-element-caption';
+					break;
 			}
 
 			$css_elements .= wp_style_engine_get_styles( $elements_style, array( 'selector' => $selector ) )['css'] ?? '';

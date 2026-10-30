@@ -133,7 +133,7 @@ class SignupService {
 		}
 
 		$product = wc_get_product( $product_id );
-		if ( ! $product ) {
+		if ( ! $product || ! $product->is_viewable() ) {
 			return new \WP_Error( self::ERROR_INVALID_PRODUCT );
 		}
 
@@ -381,7 +381,7 @@ class SignupService {
 		}
 
 		$product = wc_get_product( $product_id );
-		if ( ! $product instanceof \WC_Product ) {
+		if ( ! $product instanceof \WC_Product || ! $product->is_viewable() ) {
 			return new \WP_Error( self::ERROR_INVALID_PRODUCT );
 		}
 
