@@ -1,7 +1,7 @@
 ---
 post_title: Cart and Checkout blocks theming
 sidebar_label: Cart and Checkout blocks theming
-sidebar_position: 4
+sidebar_position: 6
 ---
 
 # Cart and checkout blocks theming

@@ -1,0 +1,445 @@
+---
+post_title: 'Block theme development: Product page theming'
+sidebar_label: Product page theming
+sidebar_position: 4
+---
+
+# Product page theming
+
+WooCommerce's Single Product template is what a shopper will spend the most time viewing before they decide to buy. It's built from three overlapping layers: the classic PHP template, a Block-based compatibility layer that preserves the classic template's action hooks, and the fully Blockified template that default Block themes use.
+
+This guide covers Blockified templates. It builds on the [Template hierarchy reference](/docs/theming/block-theme-development/template-hierarchy/) and [Global styles for WooCommerce](/docs/theming/block-theme-development/global-styles/), so if template overrides or theme.json styling are unfamiliar concepts, start with those first.
+
+## Requirements
+
+Before you begin, make sure you have the following in place:
+
+- **A current version of WooCommerce.** This guide covers the Add to Cart \+ Options Block, which is in WooCommerce 10.0 and later.
+- **A Block theme.** Every Block discussed here renders on the Blockified Single Product template, which only Block themes use by default.
+- **Familiarity with the [Template hierarchy reference](/docs/theming/block-theme-development/template-hierarchy/).** You should understand how single-product.html resolves and how theme overrides take priority.
+- **Familiarity with the Site Editor's List View and Code editor.** Several examples in this guide need you to inspect Block markup directly rather than relying on what's visible in the canvas.
+- **Familiarity with WordPress' actions and filters.** You'll still sometimes need to extend a page from PHP rather than the Site Editor.
+- **Knowledge of Global styles for WooCommerce.** You use theme.json to style Blocks, so understanding this aspect is vital.
+- **An understanding of your catalog's product types.** Simple, variable, grouped, and external products each render a different add-to-cart form.
+
+## Anatomy of the Single Product template
+
+Locating single-product.html can be confusing, since WooCommerce's own classic template file is called single-product.php. The .html file is a Block Template that resolves through the template hierarchy. WooCommerce ships two versions:
+
+- A plain version that hands the page over to a classic PHP template.
+- The Blockified single-product.html covered here.
+
+WooCommerce chooses the correct template and a theme can override it with its own copy stored under the /templates folder. It's also editable through the Site Editor:
+
+\[DIAGRAM PLACEHOLDER *Showing the header template part, a breadcrumb and notices row, a two-column section (gallery on the left; title, rating, price, summary, add-to-cart, and meta stacked on the right), a full-width Product Details block, the Related Products pattern, then the footer template part.*\]
+
+:::tip
+Open **Templates \> Single Product** within the Site Editor and check for a single woocommerce/legacy-template Block. This means WooCommerce is using the classic PHP template. The Blockified versions use Blocks such as woocommerce/product-image-gallery and woocommerce/add-to-cart-form.
+:::
+
+The markup wraps the page in the site's shared header and footer template parts, then renders a breadcrumb trail and store notices above the two-column layout:
+
+```html
+<!-- wp:template-part {"slug":"header"} /-->
+
+<!-- wp:group {"tagName":"main","layout":{"inherit":true,"type":"constrained"}} -->
+<main class="wp-block-group">
+	<!-- wp:woocommerce/breadcrumbs /-->
+	<!-- wp:woocommerce/store-notices /-->
+
+	<!-- wp:columns {"align":"wide"} -->
+	<div class="wp-block-columns alignwide">
+		<!-- wp:column {"width":"512px"} -->
+		<div class="wp-block-column" style="flex-basis:512px">
+			<!-- wp:woocommerce/product-image-gallery /-->
+		</div>
+		<!-- /wp:column -->
+
+		<!-- wp:column -->
+		<div class="wp-block-column">
+			<!-- wp:post-title {"level": 1, "__woocommerceNamespace":"woocommerce/product-query/product-title"} /-->
+
+			<!-- wp:woocommerce/product-rating {"isDescendentOfSingleProductTemplate":true} /-->
+
+			<!-- wp:woocommerce/product-price {"isDescendentOfSingleProductTemplate":true, "fontSize":"large"} /-->
+
+			<!-- wp:post-excerpt {"__woocommerceNamespace":"woocommerce/product-query/product-summary", "excerptLength":100} /-->
+
+			<!-- wp:woocommerce/add-to-cart-form /-->
+
+			<!-- wp:woocommerce/product-meta -->
+			<div class="wp-block-woocommerce-product-meta">
+				<!-- wp:group {"layout":{"type":"flex","flexWrap":"nowrap"}} -->
+				<div class="wp-block-group">
+					<!-- wp:woocommerce/product-sku /-->
+
+					<!-- wp:post-terms {"term":"product_cat","prefix":"Category: "} /-->
+
+					<!-- wp:post-terms {"term":"product_tag","prefix":"Tags: "} /-->
+				</div>
+				<!-- /wp:group -->
+			</div>
+			<!-- /wp:woocommerce/product-meta -->
+		</div>
+		<!-- /wp:column -->
+	</div>
+	<!-- /wp:columns -->
+
+	<!-- wp:woocommerce/product-details {"align":"wide","className":"is-style-minimal"} /-->
+
+	<!-- wp:pattern {"slug":"woocommerce-blocks/related-products"} /-->
+</main>
+<!-- /wp:group -->
+
+<!-- wp:template-part {"slug":"footer"} /-->
+```
+
+Everything inside the main Group is specific to the Single Product template. The header and footer template parts are shared across every other template your theme registers. However, this guide only concerns itself with what's inside main.
+
+## The Blocks that build the page
+
+Alongside a few single Blocks, the template's primary Blocks fall into three groups: a gallery, an add-to-cart area, and the Product Details Block. This last one covers a product's description, attributes, and reviews.
+
+WooCommerce Blocks intentionally preserve the classic template's PHP action hooks by anchoring them to specific Blocks. This way, extensions written for the classic theme continue to work on a Block theme without modification.
+
+Regardless, each of these has quirks that you'll need to understand before you start moving things around.
+
+:::tip
+Every block.json referenced throughout this guide lives in `wp-content/plugins/woocommerce/client/blocks/assets/js/`. It's split between single-purpose display Blocks at `atomic/blocks/product-elements/{name}/` and container Blocks under `blocks/{name}/`.
+:::
+
+### Choosing a gallery Block
+
+The default template uses woocommerce/product-image-gallery, a single Block with no visible child Blocks. Unlike a typical Block settings panel, this has no image size, product link, or sale badge controls. Instead, it wraps around WooCommerce's classic PHP gallery functions. It's the same compatibility layer found in the Product Details Block.
+
+However, there's a second, richer gallery Block: woocommerce/product-gallery. It consists of two child Blocks: thumbnails, and a large image viewer that contains the product image, sale badge, and next/previous controls.
+
+You'll see this version if you use the Single Product Block to embed a product elsewhere on the site rather than on the Single Product template itself:
+
+```html
+<!-- wp:woocommerce/product-gallery -->
+<div class="wp-block-woocommerce-product-gallery wc-block-product-gallery">
+	<!-- wp:woocommerce/product-gallery-thumbnails /-->
+	<!-- wp:woocommerce/product-gallery-large-image -->
+	<div class="wp-block-woocommerce-product-gallery-large-image wc-block-product-gallery-large-image__inner-blocks">
+		<!-- wp:woocommerce/product-image {"showProductLink":false,"showSaleBadge":false} /-->
+		<!-- wp:woocommerce/product-sale-badge {"align":"right"} /-->
+		<!-- wp:woocommerce/product-gallery-large-image-next-previous /-->
+	</div>
+
+	<!-- /wp:woocommerce/product-gallery-large-image -->
+</div>
+<!-- /wp:woocommerce/product-gallery -->
+```
+
+If your theme's Single Product template only shows the simpler gallery and you want thumbnails and a large-image viewer instead, note that product-gallery restricts its ancestor within block.json to woocommerce/single-product. As such, the Block inserter won't offer it to you.
+
+### Two ways to add to cart
+
+Two different Blocks handle adding a product to the cart. woocommerce/add-to-cart-form renders a single form that adapts internally to the product type. It's a simpler starting point as it uses a quantitySelectorStyle attribute to switch between a text input and a stepper. Here, the Block uses the same per-product action hooks (and compatibility pattern) WooCommerce employs elsewhere, rather than use independent markup.
+
+woocommerce/add-to-cart-with-options is newer and replaces the single form with a container that renders a different template part depending on the product type: simple, variable, grouped, or external.
+
+:::tip
+A wrapper Block's markup is always empty. The editable markup for each product type is in separate files:
+
+- *wp-content/plugins/woocommerce/templates/parts/simple-product-add-to-cart-with-options.html*
+- *wp-content/plugins/woocommerce/templates/parts/variable-product-add-to-cart-with-options.html*
+- *wp-content/plugins/woocommerce/templates/parts/grouped-product-add-to-cart-with-options.html*
+- *wp-content/plugins/woocommerce/templates/parts/external-product-add-to-cart-with-options.html*
+
+To customize a layout, you'll need to override the relevant file in your theme's /parts folder.
+:::
+
+WooCommerce generates a template part reference for each registered product type without filtering by your current catalog. This is typically the four built-in types plus any extra you register.
+
+For example, a variable product's part builds its attribute selector from add-to-cart-with-options-variation-selector and its child Blocks, then adds a quantity selector and the Add to Cart Block underneath:
+
+```html
+<!-- wp:woocommerce/add-to-cart-with-options-variation-selector -->
+<div class="wp-block-woocommerce-add-to-cart-with-options-variation-selector" role="list">
+	<!-- wp:woocommerce/add-to-cart-with-options-variation-selector-attribute -->
+	<div class="wp-block-woocommerce-add-to-cart-with-options-variation-selector-attribute" role="listitem">
+		<!-- wp:group {"style":{"spacing":{"blockGap":"0.5rem","margin":{"top":"1rem","bottom":"1rem"}}},"layout":{"type":"flex","orientation":"vertical","flexWrap":"nowrap"}} -->
+		<div class="wp-block-group" style="margin-top: 1rem; margin-bottom: 1rem">
+			<!-- wp:woocommerce/add-to-cart-with-options-variation-selector-attribute-name /-->
+			<!-- wp:woocommerce/product-filter-chips -->
+			<div class="wp-block-woocommerce-product-filter-chips wc-block-product-filter-chips"></div>
+			<!-- /wp:woocommerce/product-filter-chips -->
+		</div>
+		<!-- /wp:group -->
+	</div>
+	<!-- /wp:woocommerce/add-to-cart-with-options-variation-selector-attribute -->
+</div>
+<!-- /wp:woocommerce/add-to-cart-with-options-variation-selector -->
+
+<!-- wp:woocommerce/add-to-cart-with-options-variation-description {"style":{"spacing":{"margin":{"top":"1rem","bottom":"1rem"}}}} /-->
+
+<!-- wp:woocommerce/product-stock-indicator {"style":{"spacing":{"margin":{"top":"1rem","bottom":"1rem"}}}} /-->
+
+<!-- wp:group {"layout":{"type":"flex","flexWrap":"wrap","verticalAlignment":"stretch"}} -->
+<div class="wp-block-group">
+	<!-- wp:woocommerce/add-to-cart-with-options-quantity-selector {"quantitySelectorStyle":"stepper"} /-->
+	<!-- wp:woocommerce/product-button {"textAlign":"left"} /-->
+</div>
+<!-- /wp:group -->
+```
+
+Because each product type gets its own file under a theme's /parts folder, you can override one product type's add-to-cart layout without touching the others. For instance, a grouped product needs a very different layout. Each child product renders a quantity input, checkbox, or Add to Cart button. This is decided on a per-item basis depending on whether the child product is sold individually, is out of stock, or has options.
+
+This is handled by giving each type a separate template part rather than one form with conditional logic inside it.
+
+### The Product Details Block: not as empty as it looks
+
+woocommerce/product-details can look empty as its block.json declares only an align and a hideTabTitle attribute with no default child Blocks of its own:
+
+```html
+<!-- wp:woocommerce/product-details {"className":"is-style-minimal"} -->
+<div class="wp-block-woocommerce-product-details alignwide is-style-minimal"></div>
+<!-- /wp:woocommerce/product-details -->
+```
+
+On the front end, this renders WooCommerce's Description, Additional information, and Reviews tabs. This is a compatibility fallback: when the Block has no inner Blocks, it renders the same tab markup WooCommerce generates on a singular product page.
+
+To get an editable, Blockified version of the same three tabs, add core/accordion (or woocommerce/accordion-group) inside the Product Details Block, then place them as accordion items:
+
+- woocommerce/product-description displays the product's full description.
+- woocommerce/product-specifications shows the weight, dimensions, and attributes, with showAttributes, showDimensions, and showWeight attributes to control which appear.
+- woocommerce/product-reviews gives you the review list, along with its own child Blocks for the review's form, author name, rating, date, and pagination.
+
+WooCommerce will also auto-detect tabs through the woocommerce\_product\_tabs filter. However, this only applies to third-party extensions. If you'd rather turn this off, you can use the woocommerce\_disable\_compatibility\_layer filter.
+
+:::note
+Some Blocks have permanently empty wrapper markup (such as woocommerce/add-to-cart-with-options). For those Blocks, content will be generated at render time based on the template files.
+:::
+
+## Rearranging the page layout without breaking it
+
+Swapping which template part renders for a given product type is one way of rearranging your page layout. There are also two more:
+
+- Restructuring the shared single-product.html template that every product uses.
+- Overriding the layout for one specific product.
+
+Of course, each has its own mechanics and its own limitations to contend with.
+
+### Moving Blocks: context over position
+
+The data for Product Blocks on a Single Product template doesn't rely on its position in the markup. For example, moving the Product Price Block out of its column (or out of the two-column layout entirely) still renders the correct price. This is because the data comes from the template's product context (the postId the template is rendering), not from its position in the DOM.
+
+The limitation is that several product Blocks declare an ancestor restriction in block.json, which controls the Block inserter's placement options. For instance, woocommerce/product-button restricts its ancestor to woocommerce/all-products, woocommerce/single-product, core/post-template, and woocommerce/product-template.
+
+In practice, this means the inserter won't offer you the Add to Cart Button as a top-level Block dropped directly onto an arbitrary template; it expects one of the nearby container Blocks. This is separate from the postId context:
+
+- ancestor gates where a Block can be inserted and checks against the Block's actual parents in the tree.
+- usesContext (typically postId, query, and queryId) determines what data a placed Block renders, which is resolved from the template or Query Loop it sits inside.
+
+However, while the Site Editor's **List View** will show you the Block tree, it doesn't flag which Blocks have contextual ties. The solution is to preview the front end rather than hoping the editor will catch it.
+
+### What removing a Block can break
+
+The compatibility layer means some Blocks are doing more under the hood, so removing them has consequences. WooCommerce's classic template fires a sequence of hooks around the product summary, all attached to the woocommerce\_single\_product\_summary action:
+
+| Hook | Priority | Output |
+| :---: | :---: | :---: |
+| woocommerce\_template\_single\_title | 5 | Product title |
+| woocommerce\_template\_single\_rating | 10 | Star rating |
+| woocommerce\_template\_single\_price | 10 | Price |
+| woocommerce\_template\_single\_excerpt | 20 | Short description |
+| woocommerce\_template\_single\_add\_to\_cart | 30 | Add-to-Cart form |
+| woocommerce\_template\_single\_meta | 40 | SKU, categories, tags |
+
+On the Blockified template, the woocommerce\_single\_product\_summary action is wired to the core/post-excerpt Block rendering the short description. Any extension that still adds content through this hook is anchoring itself to that Block. In practice, you'll use this for elements such as trust badges and upsell prompts.
+
+Also, Product Details only calls WordPress' the\_post() function while rendering its legacy fallback tabs. Once you make it Blockified, this call disappears. Related Products' underlying product-template Block calls the\_post() for each product in the loop, then wp\_reset\_postdata(). This restores global \$product to the product being viewed, independent of the state of Product Details.
+
+:::tip
+Before removing the Product Summary, Product Details, or Related Products Blocks from a live template, test the change against whatever extensions your store runs. An empty layout slot isn't always a visual change.
+:::
+
+### Going narrower: overriding one product
+
+The broadest scope of rearrangement applies to every product, but only one has the narrowest. On the Single Product template, this means a file named `single-product-{slug}.html` in your theme's /templates folder takes priority over single-product.html whenever you view the product. The others continue to fall back to the general template.
+
+\[DIAGRAM PLACEHOLDER\]
+*Suggested visual: a simple funnel or tree showing `single-product-{slug}.html` at the narrowest point, falling back to single-product.html, alongside the equivalent `taxonomy-product\_cat-{term}.html` falling back to taxonomy-product\_cat.html and then archive-product.html, to echo the fallback diagram already used in the Template hierarchy reference.*
+
+This would suit a flagship or seasonal product that needs a layout the rest of your catalog doesn't, while not duplicating the logic in PHP or maintaining a separate page template. Here, you can copy your theme's existing single-product.html, rename it to match the product's slug, and adjust:
+
+```text
+your-theme/
+└── templates/
+    ├── single-product.html
+    └── single-product-limited-edition-hoodie.html
+```
+
+WordPress resolves this based on the product being viewed and the same ancestor and compatibility-layer considerations also apply to a per-product override.
+
+## Styling product Blocks with theme.json
+
+The [Global styles guide](/docs/theming/block-theme-development/global-styles/) covers the general system for styling WooCommerce Blocks through theme.json. However, before you rely on that system, there are some specifics with the product page Blocks to understand.
+
+### Where a style will apply
+
+Several product Blocks declare \_\_experimentalSelector in a supports object. This tells WordPress to apply theme.json styles to a specific selector rather than the Block's outer wrapper element.
+
+```jsonc
+// woocommerce/product-image
+"__experimentalSelector": ".wc-block-components-product-image"
+
+// woocommerce/product-rating
+"__experimentalSelector": ".wc-block-components-product-rating"
+
+// woocommerce/product-price
+"__experimentalSelector": ".wp-block-woocommerce-product-price .wc-block-components-product-price"
+```
+
+These are all nested classes rather than individual Block wrappers. In practice, styling a Block in theme.json doesn't always mean styling the wrapper element. If a color or typography change through styles.blocks.woocommerce/product-price doesn't appear where you expect it in the rendered markup, check the Block's registered selector as it may have hit a nested element instead.
+
+:::tip
+Remember: a Block's registered selectors aren't visible from the Site Editor. Make sure to check the Block's block.json in the WooCommerce source, or inspect the generated global styles \<style\> tag in your browser's DevTools first.
+:::
+
+### Partial support isn't full support
+
+A Block's supports object tells you which style categories theme.json can touch for the Block, with various support on offer per-Block. As an example, woocommerce/product-button and woocommerce/product-image both declare border support as radius only. Neither exposes border color, width, or style through theme.json, even though both accept a border radius.
+
+If a design calls for a colored border around specific elements, this is a [job for CSS](https://developer.woocommerce.com/docs/theming/block-theme-development/css-styling/) rather than theme.json.
+
+This same principle applies to color: woocommerce/product-rating supports text color but not background or link color:
+
+```json
+{
+  "styles": {
+    "blocks": {
+      "woocommerce/product-rating": {
+        "color": {
+          "text": "var(--wp--preset--color--accent-1)"
+        }
+      }
+    }
+  }
+}
+```
+
+### Styling Fill and Outline directly
+
+woocommerce/product-button registers two **Fill** and **Outline** Block styles. Both are standard Block style variations that theme.json can style independently using a scoped variations property based on what supported properties you need:
+
+```json
+{
+  "styles": {
+    "blocks": {
+      "woocommerce/product-button": {
+        "color": {
+          "text": "var(--wp--preset--color--base)",
+          "background": "var(--wp--preset--color--contrast)"
+        },
+        "variations": {
+          "outline": {
+            "color": {
+              "text": "var(--wp--preset--color--contrast)"
+            }
+          }
+        }
+      }
+    }
+  }
+}
+```
+
+Because border color isn't part of this Block's supported style properties, the **Outline** style's border rendering comes from the Block's bundled stylesheet. So, theme.json can shift the text and background colors used within each variation, but not the border itself.
+
+## Practical customization examples
+
+There are a few typical tasks for the Single Product template that can stay fully within the Block system rather than reaching for PHP. This lets you edit through the Site Editor rather than tie it to a theme's code.
+
+### Building the Blockified Product Details tabs
+
+This is a good example of a Blockified version showing the compatibility layer's fallback behavior explained earlier:
+
+```html
+<!-- wp:woocommerce/product-details {"align":"wide"} -->
+<div class="wp-block-woocommerce-product-details alignwide">
+	<!-- wp:accordion -->
+	<div class="wp-block-accordion" role="group">
+		<!-- wp:accordion-item -->
+		<div class="wp-block-accordion-item">
+			<!-- wp:accordion-heading {"showIcon":false} -->
+			<h3 class="wp-block-accordion-heading">
+				<button type="button" class="wp-block-accordion-heading__toggle">
+					<span class="wp-block-accordion-heading__toggle-title">Description</span>
+				</button>
+			</h3>
+			<!-- /wp:accordion-heading -->
+			<!-- wp:accordion-panel -->
+			<div class="wp-block-accordion-panel" role="region">
+				<!-- wp:woocommerce/product-description /-->
+			</div>
+			<!-- /wp:accordion-panel -->
+		</div>
+		<!-- /wp:accordion-item -->
+	</div>
+	<!-- /wp:accordion -->
+</div>
+<!-- /wp:woocommerce/product-details -->
+```
+
+Only third-party tabs added through the woocommerce\_product\_tabs filter get automatically injected by WooCommerce, so you'll need to repeat the pattern for woocommerce/product-specifications and woocommerce/product-reviews.
+
+### Replacing Related Products with a curated pick
+
+The default Related Products pattern queries by shared categories and tags, which isn't always the right fit where you need specific product pairings, such as an accessory that goes only with one product. Swapping in a hand-picked query means changing layout and sizing attributes as well as the query attributes:
+
+```html
+<!-- wp:woocommerce/product-collection {"queryId":0,"query":{"perPage":4,"pages":1,"postType":"product","inherit":false,"woocommerceHandPickedProducts":["154","289","310","422"]},"collection":"woocommerce/product-collection/hand-picked","displayLayout":{"type":"flex","columns":4,"shrinkColumns":true},"dimensions":{"widthType":"fill"}} -->
+<div class="wp-block-woocommerce-product-collection">
+	<!-- wp:heading {"textAlign":"center","level":2,"style":{"spacing":{"margin":{"bottom":"1rem"}}}} -->
+	<h2 class="wp-block-heading has-text-align-center">You may also like</h2>
+	<!-- /wp:heading -->
+
+	<!-- wp:woocommerce/product-template -->
+		<!-- wp:woocommerce/product-image {"showSaleBadge":false,"style":{"dimensions":{"aspectRatio":"1/1"}}} -->
+		<div class="wp-block-woocommerce-product-image">
+			<!-- wp:woocommerce/product-sale-badge {"align":"right"} /-->
+		</div>
+		<!-- /wp:woocommerce/product-image -->
+
+		<!-- wp:post-title {"textAlign":"center","level":2,"fontSize":"medium","style":{"spacing":{"margin":{"bottom":"0.75rem","top":"0"}},"typography":{"lineHeight":"1.4"}},"isLink":true,"__woocommerceNamespace":"woocommerce/product-collection/product-title"} /-->
+
+		<!-- wp:woocommerce/product-price {"textAlign":"center","fontSize":"small"} /-->
+
+		<!-- wp:woocommerce/product-button {"textAlign":"center","fontSize":"small"} /-->
+	<!-- /wp:woocommerce/product-template -->
+</div>
+<!-- /wp:woocommerce/product-collection -->
+```
+
+You can replace this in place of the woocommerce-blocks/related-products pattern in your template override, then update the product IDs in woocommerceHandPickedProducts if the pairing needs to differ across your catalog.
+
+:::note
+If you like to extract reusable sections of a template into a custom Block pattern, verify your WooCommerce version's behavior first. WooCommerce currently detects whether a template contains product Blocks by parsing the template's raw content. This can affect certain behavior, such as the product class WooCommerce normally adds to the page wrapper.
+:::
+
+## References
+
+- [Theming WooCommerce Blocks](https://developer.woocommerce.com/docs/theming/block-theme-development/theming-woo-blocks/)
+- [WooCommerce Blocks reference](https://developer.woocommerce.com/docs/block-development/reference/block-references/)
+- [Single Product Block](https://woocommerce.com/document/single-product-block/)
+- [Add to Cart \+ Options Block](https://woocommerce.com/document/add-to-cart-options-block/)
+- [Accordion Block](https://wordpress.org/documentation/article/accordion-block/)
+- [Product Collection Block](https://woocommerce.com/document/woocommerce-store-editing/customizing-shop-page-catalog/product-collection-block/)
+- [Template hierarchy reference](/docs/theming/block-theme-development/template-hierarchy/)
+- [Global styles for WooCommerce](/docs/theming/block-theme-development/global-styles/)
+- [WooCommerce Code Reference: ProductDetails.php](https://woocommerce.github.io/code-reference/files/woocommerce-src-blocks-blocktypes-productdetails.html)
+- [WooCommerce Code Reference: content-single-product.php](https://woocommerce.github.io/code-reference/files/woocommerce-templates-content-single-product.html)
+
+## Next steps
+
+This guide covers the Single Product template Block by Block. The rest of the section builds outward to listing pages, Cart and Checkout, and CSS:
+
+1. [Global styles for WooCommerce](/docs/theming/block-theme-development/global-styles/). Using theme.json to style WooCommerce Blocks.
+2. [Template hierarchy reference](/docs/theming/block-theme-development/template-hierarchy/). All WooCommerce Block templates and how to override them.
+3. [Shop and archive page theming](/docs/theming/block-theme-development/shop-and-archive-page-theming/). The same Block-by-Block treatment applied to the Product Catalog and taxonomy templates.
+4. [Cart and Checkout theming](https://developer.woocommerce.com/docs/theming/block-theme-development/cart-and-checkout/). Styling the Cart and Checkout Blocks, including buttons and the mobile submit container.
+5. [CSS styling](https://developer.woocommerce.com/docs/theming/block-theme-development/css-styling/). CSS approaches and class name conventions for what theme.json doesn't cover.
+6. [Theming WooCommerce Blocks](https://developer.woocommerce.com/docs/theming/block-theme-development/theming-woo-blocks/). An overview of core concepts, Block templates, and template structure.
