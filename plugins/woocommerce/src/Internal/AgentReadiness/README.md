@@ -118,7 +118,7 @@ Next step, out of scope here: fetch the rules map from a remote JSON spec with t
 
 `AgentReadiness::get_failing_check_ids( $product )` returns the ids of the checks a product fails, so a feed integration can reuse them. It judges a variation by its parent, as the scan counts it, and returns an empty list for products the scan leaves out.
 
-Core's UCP catalog mapper (`src/Internal/ProductFeed/Mapping/UcpProductMapper.php`) sends each variant's GTIN as a barcode since #70351. UCP has no brand field, so `missing_brand` matters for the other channels, not UCP.
+Core's UCP catalog mapper (`src/Internal/ProductFeed/Mapping/UcpProductMapper.php`) does not send GTINs yet; #70351 adds each variant's GTIN as a barcode. UCP has no brand field, so `missing_brand` applies to the other channels, not UCP.
 
 ## Trying it
 

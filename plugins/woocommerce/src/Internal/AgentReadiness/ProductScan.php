@@ -423,17 +423,23 @@ class ProductScan {
 	}
 
 	/**
-	 * Ids of the rules a product fails.
+	 * The rules a product fails, with the channels each failure applies to for this product.
+	 * A rule that applies to none of the product's channels is left out.
 	 *
-	 * @param \WC_Product                  $product Product.
-	 * @param array<string, ReadinessRule> $rules   Rules by id.
-	 * @return array<int, string>
+	 * @param \WC_Product                                                     $product       Product.
+	 * @param array<string, ReadinessRule>                                    $rules         Rules by id.
+	 * @param array<string, array<string, array{field:string,effect:string}>> $channel_rules Channel map by rule id.
+	 * @return array<string, array<string, array{field:string,effect:string}>>
 	 */
-	public function failed_rule_ids( \WC_Product $product, array $rules ): array {
+	public function failures( \WC_Product $product, array $rules, array $channel_rules ): array {
 		$failed = array();
 		foreach ( $rules as $id => $rule ) {
-			if ( $rule->fails( $product, $this ) ) {
-				$failed[] = (string) $id;
+			if ( ! $rule->fails( $product, $this ) ) {
+				continue;
+			}
+			$channels = $rule->channels_for( $product, $channel_rules[ $id ] ?? array() );
+			if ( ! empty( $channels ) ) {
+				$failed[ (string) $id ] = $channels;
 			}
 		}
 		return $failed;
@@ -448,19 +454,18 @@ class ProductScan {
 	 * @param int                                                             $ids_limit     Product ids kept per rule.
 	 */
 	private function record( \WC_Product $product, array $rules, array $channel_rules, int $ids_limit ): void {
-		$failed_channels = array();
-		foreach ( $this->failed_rule_ids( $product, $rules ) as $id ) {
+		$failures = $this->failures( $product, $rules, $channel_rules );
+		foreach ( array_keys( $failures ) as $id ) {
 			$result = $this->result( $id );
 			++$result['count'];
 			if ( count( $result['product_ids'] ) < $ids_limit ) {
 				$result['product_ids'][] = $product->get_id();
 			}
 			$this->results[ $id ] = $result;
-			$failed_channels[]    = $rules[ $id ]->channels_for( $product, $channel_rules[ $id ] ?? array() );
 		}
 
 		++$this->products;
-		foreach ( self::statuses( $failed_channels ) as $channel => $status ) {
+		foreach ( self::statuses( array_values( $failures ) ) as $channel => $status ) {
 			$this->statuses[ $channel ][ $status ] = ( $this->statuses[ $channel ][ $status ] ?? 0 ) + 1;
 		}
 	}
