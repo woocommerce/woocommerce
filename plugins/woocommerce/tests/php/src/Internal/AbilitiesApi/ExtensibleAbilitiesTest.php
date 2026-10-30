@@ -1321,13 +1321,10 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			$this->assertSame( 'The extension failed to read this value.', $errors['broken'] );
 			$this->assertNotEmpty( $order['line_items'] );
 			foreach ( $order['line_items'] as $item ) {
-				$this->assertSame(
-					array(
-						'gift'                          => 'item-' . $item['id'],
-						ExtensibleAbilities::ERRORS_KEY => array( 'broken' => 'The extension failed to read this value.' ),
-					),
-					$item['extensions']['test-ext']
-				);
+				$item_extension = $item['extensions']['test-ext'];
+				$this->assertSame( 'item-' . $item['id'], $item_extension['gift'] );
+				$this->assertArrayNotHasKey( 'broken', $item_extension );
+				$this->assertSame( 'The extension failed to read this value.', $item_extension[ ExtensibleAbilities::ERRORS_KEY ]['broken'] );
 			}
 		}
 		$this->assertStringNotContainsString( 'Broken', wp_json_encode( $orders ) );
