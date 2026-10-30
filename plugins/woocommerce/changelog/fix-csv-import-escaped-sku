@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep SKUs that start with =, +, - or @ intact when re-importing a product CSV export.

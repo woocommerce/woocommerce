@@ -1,13 +1,10 @@
 /**
  * Internal dependencies
  */
-import {
-	FieldValidationStatus,
-	isBoolean,
-	isObject,
-	isString,
-	objectHasProp,
-} from '../';
+import { isBoolean } from './boolean';
+import { isObject, objectHasProp } from './object';
+import { isString } from './string';
+import type { FieldValidationStatus } from '../type-defs/validation';
 
 /**
  * Whether the given status is a valid FieldValidationStatus.

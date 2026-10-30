@@ -666,7 +666,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	public function get_cart() {
 		if ( ! did_action( 'wp_loaded' ) ) {
-			wc_doing_it_wrong( __FUNCTION__, __( 'Get cart should not be called before the wp_loaded action.', 'woocommerce' ), '2.3' );
+			wc_doing_it_wrong( __FUNCTION__, 'Get cart should not be called before the wp_loaded action.', '2.3' );
 		}
 		if ( ! did_action( 'woocommerce_load_cart_from_session' ) ) {
 			$this->session->get_cart_from_session();
@@ -1231,6 +1231,10 @@ class WC_Cart extends WC_Legacy_Cart {
 			if ( $product_data->is_type( ProductType::VARIATION ) ) {
 				$missing_attributes = array();
 				$parent_data        = wc_get_product( $product_data->get_parent_id() );
+
+				if ( ! $parent_data instanceof WC_Product ) {
+					throw new Exception( __( 'Sorry, this product cannot be added to the cart.', 'woocommerce' ) );
+				}
 
 				$variation_attributes = $product_data->get_variation_attributes();
 				// Filter out 'any' variations, which are empty, as they need to be explicitly specified while adding to cart.
@@ -2058,7 +2062,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	public function is_coupon_emails_allowed( $check_emails, $restrictions ) {
 		wc_doing_it_wrong(
 			'WC_Cart::is_coupon_emails_allowed',
-			__( 'This method has been deprecated and will be removed soon. Use Automattic\WooCommerce\Utilities\DiscountsUtil::is_coupon_emails_allowed instead.', 'woocommerce' ),
+			'This method has been deprecated and will be removed soon. Use Automattic\WooCommerce\Utilities\DiscountsUtil::is_coupon_emails_allowed instead.',
 			'9.0.0'
 		);
 
