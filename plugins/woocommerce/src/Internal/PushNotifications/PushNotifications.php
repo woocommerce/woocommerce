@@ -15,6 +15,7 @@ use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\DriverAvailabilityService;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationRetryHandler;
+use Automattic\WooCommerce\Internal\PushNotifications\Services\StaleTokenCleanupService;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\UserDataCleanupService;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\PendingNotificationStore;
 use Automattic\WooCommerce\Internal\PushNotifications\Triggers\NewOrderNotificationTrigger;
@@ -89,6 +90,10 @@ class PushNotifications {
 		// in the meantime must not leave records behind for a later reconnection
 		// to start sending against.
 		wc_get_container()->get( UserDataCleanupService::class )->register();
+
+		// Also registered ahead of the enablement check: it unschedules the
+		// cleanup while the feature is off, and tracks how long it was off.
+		wc_get_container()->get( StaleTokenCleanupService::class )->register();
 
 		// Registered ahead of the enablement check so the token list can still be
 		// read on a store that has been switched off. The controller registers the

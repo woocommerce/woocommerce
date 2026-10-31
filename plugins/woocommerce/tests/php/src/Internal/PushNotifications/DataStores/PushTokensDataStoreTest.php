@@ -9,6 +9,8 @@ use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenInvalidDataException;
 use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenNotFoundException;
 use Automattic\WooCommerce\RestApi\UnitTests\LoggerSpyTrait;
+use Automattic\WooCommerce\Tests\Internal\PushNotifications\Helpers\PushNotificationsTestTrait;
+use RuntimeException;
 use WC_Unit_Test_Case;
 
 /**
@@ -19,6 +21,7 @@ use WC_Unit_Test_Case;
 class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 
 	use LoggerSpyTrait;
+	use PushNotificationsTestTrait;
 
 	/**
 	 * Tear down the test case.
@@ -1244,31 +1247,6 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Sets the date a token was first registered and the date it was last registered.
-	 *
-	 * @param int         $post_id        The token's post ID.
-	 * @param string      $created        The first registration date, as GMT.
-	 * @param string      $modified       The last registration date, as GMT.
-	 * @param string|null $modified_local The last registration date in site time, defaulting to $modified.
-	 */
-	private function set_token_dates( int $post_id, string $created, string $modified, ?string $modified_local = null ): void {
-		global $wpdb;
-
-		$wpdb->update(
-			$wpdb->posts,
-			array(
-				'post_date'         => $created,
-				'post_date_gmt'     => $created,
-				'post_modified'     => $modified_local ?? $modified,
-				'post_modified_gmt' => $modified,
-			),
-			array( 'ID' => $post_id )
-		);
-
-		clean_post_cache( $post_id );
-	}
-
-	/**
 	 * Creates a push token owned by the given user.
 	 *
 	 * @param PushTokensDataStore $data_store The data store instance.
@@ -1346,6 +1324,205 @@ class PushTokensDataStoreTest extends WC_Unit_Test_Case {
 		$data_store->delete_for_user( 104 );
 
 		$this->assertSame( '', get_post_meta( $token_id, 'token', true ) );
+	}
+
+	/**
+	 * @testdox Should stop reporting tokens in the same request once a user's last token is deleted.
+	 */
+	public function test_delete_for_user_resets_the_memoized_has_tokens(): void {
+		$data_store = new PushTokensDataStore();
+		$this->create_push_token_for_user( $data_store, 106 );
+
+		$this->assertTrue( $data_store->has_tokens(), 'Memoizes has_tokens() before the delete.' );
+
+		$data_store->delete_for_user( 106 );
+
+		$this->assertFalse( $data_store->has_tokens(), 'has_tokens() should be read again after the delete.' );
+	}
+
+	/**
+	 * @testdox Should return only the tokens last registered strictly before the cutoff.
+	 */
+	public function test_get_stale_token_ids_excludes_tokens_registered_at_or_after_the_cutoff(): void {
+		$data_store = new PushTokensDataStore();
+		$before     = $this->create_push_token_for_user( $data_store, 101 );
+		$at         = $this->create_push_token_for_user( $data_store, 101 );
+		$after      = $this->create_push_token_for_user( $data_store, 101 );
+
+		$this->set_token_dates( $before->get_id(), '2026-01-01 00:00:00', '2026-06-30 23:59:59' );
+		$this->set_token_dates( $at->get_id(), '2026-01-01 00:00:00', '2026-07-01 00:00:00' );
+		$this->set_token_dates( $after->get_id(), '2026-01-01 00:00:00', '2026-07-01 00:00:01' );
+
+		$this->assertSame( array( $before->get_id() ), $data_store->get_stale_token_ids( '2026-07-01 00:00:00' ) );
+	}
+
+	/**
+	 * @testdox Should return stale tokens oldest first by last registration, not by ID or creation date.
+	 */
+	public function test_get_stale_token_ids_orders_by_last_registration(): void {
+		$data_store = new PushTokensDataStore();
+		$newer      = $this->create_push_token_for_user( $data_store, 101 );
+		$older      = $this->create_push_token_for_user( $data_store, 101 );
+
+		$this->set_token_dates( $newer->get_id(), '2026-01-01 00:00:00', '2026-03-01 00:00:00' );
+		$this->set_token_dates( $older->get_id(), '2026-02-01 00:00:00', '2026-02-01 00:00:00' );
+
+		$this->assertSame( array( $older->get_id(), $newer->get_id() ), $data_store->get_stale_token_ids( '2026-07-01 00:00:00' ) );
+	}
+
+	/**
+	 * @testdox Should select stale tokens by their GMT registration time, not the site's local time.
+	 */
+	public function test_get_stale_token_ids_compares_gmt_times(): void {
+		$data_store = new PushTokensDataStore();
+		$token      = $this->create_push_token_for_user( $data_store, 101 );
+
+		$this->set_token_dates( $token->get_id(), '2026-01-01 00:00:00', '2026-07-01 00:00:01', '2026-06-30 20:00:01' );
+
+		$this->assertSame( array(), $data_store->get_stale_token_ids( '2026-07-01 00:00:00' ), 'A token registered just after the cutoff in GMT should not be stale.' );
+	}
+
+	/**
+	 * @testdox Should not return old posts of other types as stale tokens.
+	 */
+	public function test_get_stale_token_ids_ignores_other_post_types(): void {
+		$data_store = new PushTokensDataStore();
+		self::factory()->post->create(
+			array(
+				'post_status'       => 'private',
+				'post_date'         => '2020-01-01 00:00:00',
+				'post_modified_gmt' => '2020-01-01 00:00:00',
+			)
+		);
+
+		$this->assertSame( array(), $data_store->get_stale_token_ids( '2026-07-01 00:00:00' ) );
+	}
+
+	/**
+	 * @testdox Should keep a token that re-registers while earlier tokens in the same call are being deleted.
+	 */
+	public function test_delete_tokens_checks_each_token_just_before_deleting_it(): void {
+		global $wpdb;
+
+		$data_store = new PushTokensDataStore();
+		$first      = $this->create_push_token_for_user( $data_store, 101 );
+		$second     = $this->create_push_token_for_user( $data_store, 101 );
+		$this->set_token_dates( $first->get_id(), '2026-01-01 00:00:00', '2026-01-01 00:00:00' );
+		$this->set_token_dates( $second->get_id(), '2026-01-01 00:00:00', '2026-01-01 00:00:00' );
+
+		add_action(
+			'before_delete_post',
+			function ( $post_id ) use ( $wpdb, $first, $second ) {
+				if ( $post_id === $first->get_id() ) {
+					$wpdb->update( $wpdb->posts, array( 'post_modified_gmt' => '2026-08-01 00:00:00' ), array( 'ID' => $second->get_id() ) );
+				}
+			}
+		);
+
+		$result = $data_store->delete_tokens( array( $first->get_id(), $second->get_id() ), '2026-07-01 00:00:00' );
+
+		$this->assertSame( array( $first->get_id() ), $result['deleted'], 'Only the token still stale at its turn should go.' );
+		$this->assertNotNull( get_post( $second->get_id() ), 'The token that re-registered mid-call should be kept.' );
+	}
+
+	/**
+	 * @testdox Should drop a deleted token's pending last-send stamp so the flush writes no orphan meta.
+	 */
+	public function test_delete_tokens_drops_pending_last_sent_at(): void {
+		global $wpdb;
+
+		$data_store = new PushTokensDataStore();
+		$token      = $this->create_push_token_for_user( $data_store, 101 );
+		$data_store->record_last_sent_at( array( $token ) );
+
+		$data_store->delete_tokens( array( $token->get_id() ) );
+		$data_store->flush_last_sent_at();
+
+		$this->assertSame(
+			'0',
+			$wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->postmeta} WHERE post_id = %d", $token->get_id() ) ),
+			'No meta should be written for a deleted token.'
+		);
+	}
+
+	/**
+	 * @testdox Should delete the tokens and refresh the counts read earlier in the request.
+	 */
+	public function test_delete_tokens_deletes_and_resets_cached_counts(): void {
+		$data_store = new PushTokensDataStore();
+		$first      = $this->create_push_token_for_user( $data_store, 101 );
+		$second     = $this->create_push_token_for_user( $data_store, 101 );
+
+		$this->assertSame( 2, $data_store->count_tokens(), 'Memoizes the count before the delete.' );
+		$this->assertTrue( $data_store->has_tokens(), 'Memoizes has_tokens() before the delete.' );
+
+		$result = $data_store->delete_tokens( array( $first->get_id(), $second->get_id() ) );
+
+		$this->assertSame( array( $first->get_id(), $second->get_id() ), $result['deleted'], 'Both tokens should be reported deleted.' );
+		$this->assertSame( array(), $result['failed'], 'Nothing should fail.' );
+		$this->assertSame( 0, $data_store->count_tokens(), 'The memoized count should be dropped after a delete.' );
+		$this->assertFalse( $data_store->has_tokens(), 'The memoized has_tokens() should be dropped after a delete.' );
+	}
+
+	/**
+	 * @testdox Should leave posts that are not push tokens untouched.
+	 */
+	public function test_delete_tokens_skips_posts_of_other_types(): void {
+		$data_store = new PushTokensDataStore();
+		$post_id    = self::factory()->post->create();
+
+		$result = $data_store->delete_tokens( array( $post_id ) );
+
+		$this->assertSame( array(), $result['deleted'] );
+		$this->assertSame( array(), $result['failed'] );
+		$this->assertNotNull( get_post( $post_id ) );
+	}
+
+	/**
+	 * @testdox Should keep a token re-registered at or after the cutoff since it was selected.
+	 */
+	public function test_delete_tokens_keeps_a_token_re_registered_since_the_cutoff(): void {
+		$data_store = new PushTokensDataStore();
+		$stale      = $this->create_push_token_for_user( $data_store, 101 );
+		$refreshed  = $this->create_push_token_for_user( $data_store, 101 );
+
+		$this->set_token_dates( $stale->get_id(), '2026-01-01 00:00:00', '2026-01-01 00:00:00' );
+		$this->set_token_dates( $refreshed->get_id(), '2026-01-01 00:00:00', '2026-07-01 00:00:00' );
+
+		$result = $data_store->delete_tokens( array( $stale->get_id(), $refreshed->get_id() ), '2026-07-01 00:00:00' );
+
+		$this->assertSame( array( $stale->get_id() ), $result['deleted'] );
+		$this->assertNotNull( get_post( $refreshed->get_id() ) );
+	}
+
+	/**
+	 * @testdox Should carry on deleting when one token cannot be deleted or its deletion throws.
+	 */
+	public function test_delete_tokens_reports_failures_without_stopping(): void {
+		$data_store = new PushTokensDataStore();
+		$refused    = $this->create_push_token_for_user( $data_store, 101 );
+		$throwing   = $this->create_push_token_for_user( $data_store, 101 );
+		$deletable  = $this->create_push_token_for_user( $data_store, 101 );
+
+		add_filter(
+			'pre_delete_post',
+			fn( $check, $post ) => $post->ID === $refused->get_id() ? false : $check,
+			10,
+			2
+		);
+		add_action(
+			'before_delete_post',
+			function ( $post_id ) use ( $throwing ) {
+				if ( $post_id === $throwing->get_id() ) {
+					throw new RuntimeException( 'A third-party callback failed.' );
+				}
+			}
+		);
+
+		$result = $data_store->delete_tokens( array( $refused->get_id(), $throwing->get_id(), $deletable->get_id() ) );
+
+		$this->assertSame( array( $deletable->get_id() ), $result['deleted'] );
+		$this->assertSame( array( $refused->get_id(), $throwing->get_id() ), $result['failed'] );
 	}
 
 	/**

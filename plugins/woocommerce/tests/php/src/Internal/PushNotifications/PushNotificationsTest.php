@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Internal\PushNotifications\Controllers\PushTokenRestC
 use Automattic\WooCommerce\Internal\PushNotifications\DataStores\PushTokensDataStore;
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
+use Automattic\WooCommerce\Internal\PushNotifications\Services\StaleTokenCleanupService;
 use Automattic\WooCommerce\Internal\PushNotifications\Triggers\NewOrderNotificationTrigger;
 use Automattic\WooCommerce\Tests\Internal\PushNotifications\Helpers\PushNotificationsTestTrait;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
@@ -391,6 +392,29 @@ class PushNotificationsTest extends WC_Unit_Test_Case {
 		$this->assertContains( PushTokenRestController::class, $registered );
 		$this->assertNotContains( PushNotificationRestController::class, $registered );
 		$this->assertNotContains( NotificationPreferencesRestController::class, $registered );
+	}
+
+	/**
+	 * @testdox Tests that on_init registers the stale token cleanup callbacks whether push notifications are enabled ($enabled) or not.
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $enabled Whether push notifications are enabled.
+	 */
+	public function test_on_init_registers_stale_token_cleanup( bool $enabled ) {
+		if ( $enabled ) {
+			$this->set_up_jetpack_connection_manager_mock( array( 'is_connected' ) );
+			$this->jetpack_connection_manager_mock->method( 'is_connected' )->willReturn( true );
+		} else {
+			add_filter( 'woocommerce_enhanced_push_notifications_disabled', '__return_true' );
+		}
+
+		wc_get_container()->get( PushNotifications::class )->on_init();
+
+		$cleanup = wc_get_container()->get( StaleTokenCleanupService::class );
+
+		$this->assertNotFalse( has_action( StaleTokenCleanupService::CLEANUP_HOOK, array( $cleanup, 'handle_stale_token_cleanup' ) ), 'The cleanup callback should always be registered.' );
+		$this->assertNotFalse( has_action( 'action_scheduler_ensure_recurring_actions', array( $cleanup, 'handle_ensure_recurring_actions' ) ), 'The scheduling callback should always be registered, to unschedule while off.' );
 	}
 
 	/**
