@@ -3,7 +3,6 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Abilities;
 
-use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesTracking;
 use WC_Unit_Test_Case;
 use WP_Error;
@@ -202,13 +201,13 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should record successful and failed calls to loader-registered extension abilities.
+	 * @testdox Should record successful and failed calls to opted-in extensions registered directly with WordPress.
 	 * @testWith [false]
 	 *           [true]
 	 *
 	 * @param bool $fail Whether the extension callback returns an error.
 	 */
-	public function test_records_loader_registered_extension_calls( bool $fail ): void {
+	public function test_records_opted_in_extension_calls( bool $fail ): void {
 		$this->register_extension_ability();
 		$this->start_mcp_tool_call();
 
@@ -226,7 +225,7 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should not track loader-registered extensions without an explicit boolean opt-in.
+	 * @testdox Should not track extensions without an explicit boolean opt-in.
 	 * @testWith [null]
 	 *           [{"track_usage":false}]
 	 *           [{"track_usage":"true"}]
@@ -238,7 +237,7 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	 * @param mixed $tracking_meta WooCommerce metadata, or null to omit it.
 	 */
 	public function test_does_not_track_extensions_without_explicit_opt_in( $tracking_meta ): void {
-		$this->register_extension_ability( true, $tracking_meta );
+		$this->register_extension_ability( $tracking_meta );
 		$this->start_mcp_tool_call();
 
 		$result = wp_get_ability( TestExtensionAbilityDefinition::ABILITY_ID )->execute();
@@ -254,7 +253,7 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should record a loader-registered extension's REST permission rejection before execution.
+	 * @testdox Should record an opted-in extension's REST permission rejection before execution.
 	 */
 	public function test_records_extension_rest_rejection_before_execution(): void {
 		$this->register_extension_ability();
@@ -288,34 +287,27 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should not adopt a pre-existing extension ability when its definition is added to the loader.
+	 * @testdox Should use the replacement ability's opt-in for execution and discovery.
+	 * @testWith [false]
+	 *           [true]
+	 *
+	 * @param bool $opt_in Whether the replacement opts into tracking.
 	 */
-	public function test_does_not_track_extension_registered_outside_loader(): void {
-		$this->register_extension_ability( false );
-		$this->register_extension_ability();
-		$this->start_mcp_tool_call();
-
-		wp_get_ability( TestExtensionAbilityDefinition::ABILITY_ID )->execute();
-		wp_get_ability( 'mcp-adapter/get-ability-info' )->execute( array( 'ability_name' => TestExtensionAbilityDefinition::ABILITY_ID ) );
-		$this->sut->handle_shutdown();
-
-		$this->assertSame( array(), $this->sut->recorded, 'A matching category or definition does not make an existing ability loader-owned' );
-	}
-
-	/**
-	 * @testdox Should stop tracking an extension ability replaced outside the loader.
-	 */
-	public function test_does_not_track_replaced_extension_ability(): void {
+	public function test_uses_replacement_extension_opt_in( bool $opt_in ): void {
 		$this->register_extension_ability();
 		wp_unregister_ability( TestExtensionAbilityDefinition::ABILITY_ID );
-		$this->register_extension_ability( false );
+		$this->register_extension_ability( $opt_in ? array( 'track_usage' => true ) : null );
 		$this->start_mcp_tool_call();
 
 		wp_get_ability( TestExtensionAbilityDefinition::ABILITY_ID )->execute();
 		wp_get_ability( 'mcp-adapter/get-ability-info' )->execute( array( 'ability_name' => TestExtensionAbilityDefinition::ABILITY_ID ) );
 		$this->sut->handle_shutdown();
 
-		$this->assertSame( array(), $this->sut->recorded, 'Loader ownership must match the current registered instance' );
+		$this->assertCount( $opt_in ? 2 : 0, $this->sut->recorded, 'Only the current registration determines tracking opt-in' );
+		if ( $opt_in ) {
+			$this->assertSame( 'wcadmin_ability_called', $this->sut->recorded[0]['_en'] );
+			$this->assertSame( 'wcadmin_ability_discovered', $this->sut->recorded[1]['_en'] );
+		}
 	}
 
 	/**
@@ -330,21 +322,6 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 		$this->sut->handle_shutdown();
 
 		$this->assertSame( array(), $this->sut->recorded );
-	}
-
-	/**
-	 * @testdox Should preserve extension tracking when the loader runs more than once.
-	 */
-	public function test_tracks_extension_after_repeated_loader_registration(): void {
-		$this->register_extension_ability();
-		$this->register_extension_ability();
-		$this->start_mcp_tool_call();
-
-		wp_get_ability( TestExtensionAbilityDefinition::ABILITY_ID )->execute();
-		$this->sut->handle_shutdown();
-
-		$this->assertCount( 1, $this->sut->recorded );
-		$this->assertSame( 'test-extension__test-extension-ability', $this->sut->recorded[0]['ability_name'] );
 	}
 
 	/**
@@ -1305,41 +1282,24 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Register the extension fixture through the WooCommerce loader or directly with WordPress.
+	 * Register the extension fixture directly with WordPress.
 	 *
-	 * @param bool  $through_loader Whether to use the WooCommerce loader.
-	 * @param mixed $tracking_meta  WooCommerce metadata, or null to omit it.
+	 * @param mixed $tracking_meta WooCommerce metadata, or null to omit it.
 	 */
-	private function register_extension_ability( bool $through_loader = true, $tracking_meta = array( 'track_usage' => true ) ): void {
-		$definitions = static function ( $classes ) {
-			$classes[] = TestExtensionAbilityDefinition::class;
-			return $classes;
-		};
-		$arguments   = static function ( $args, $name ) use ( $tracking_meta ) {
-			if ( TestExtensionAbilityDefinition::ABILITY_ID === $name ) {
-				if ( null === $tracking_meta ) {
-					unset( $args['meta']['woocommerce'] );
-				} else {
-					$args['meta']['woocommerce'] = $tracking_meta;
-				}
+	private function register_extension_ability( $tracking_meta = array( 'track_usage' => true ) ): void {
+		$register = static function () use ( $tracking_meta ): void {
+			$args = TestExtensionAbilityDefinition::get_registration_args();
+			if ( null !== $tracking_meta ) {
+				$args['meta']['woocommerce'] = $tracking_meta;
 			}
-			return $args;
-		};
-		$register    = $through_loader ? array( AbilitiesLoader::class, 'register_abilities' ) : static function (): void {
-			wp_register_ability( TestExtensionAbilityDefinition::ABILITY_ID, TestExtensionAbilityDefinition::get_registration_args() );
+			wp_register_ability( TestExtensionAbilityDefinition::ABILITY_ID, $args );
 		};
 
-		if ( $through_loader ) {
-			add_filter( 'woocommerce_ability_definition_classes', $definitions );
-		}
-		add_filter( 'wp_register_ability_args', $arguments, 10, 2 );
 		add_action( 'wp_abilities_api_init', $register );
 		try {
 			do_action( 'wp_abilities_api_init' );
 		} finally {
 			remove_action( 'wp_abilities_api_init', $register );
-			remove_filter( 'wp_register_ability_args', $arguments, 10 );
-			remove_filter( 'woocommerce_ability_definition_classes', $definitions );
 		}
 	}
 

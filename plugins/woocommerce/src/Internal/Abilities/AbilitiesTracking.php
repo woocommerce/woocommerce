@@ -14,7 +14,10 @@ use WP_REST_Request;
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Records Tracks events for WooCommerce abilities and opted-in extensions registered through its loader.
+ * Records Tracks events for WooCommerce abilities and opted-in extensions.
+ *
+ * Since 11.4.0, extensions can opt individual abilities in with `meta['woocommerce']['track_usage'] = true`,
+ * regardless of how they register with WordPress. Store usage-tracking consent is also required.
  *
  * Hooks only collect data in memory. Events are sent once per request on shutdown through the batched
  * Tracks client. Ability input and output are never recorded, except the name of a registered ability an agent
@@ -50,7 +53,7 @@ class AbilitiesTracking {
 	private const TRACKED_CHANNELS = array( 'mcp', 'rest', 'cli' );
 
 	/**
-	 * Abilities in this namespace are tracked even when registered outside the loader.
+	 * Abilities in this namespace are tracked by default.
 	 *
 	 * @var string
 	 */
@@ -918,7 +921,7 @@ class AbilitiesTracking {
 	}
 
 	/**
-	 * Whether an ability belongs to WooCommerce or explicitly opts in through its loader.
+	 * Whether an ability belongs to WooCommerce or explicitly opts in through its metadata.
 	 *
 	 * @param mixed $ability_name The ability name.
 	 * @return bool
@@ -932,7 +935,7 @@ class AbilitiesTracking {
 			return true;
 		}
 
-		if ( ! AbilitiesLoader::is_registered_ability( $ability_name ) ) {
+		if ( ! function_exists( 'wp_has_ability' ) || ! wp_has_ability( $ability_name ) ) {
 			return false;
 		}
 
