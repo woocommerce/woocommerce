@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "cases": [
+    {
+      "id": "G04E-established-mcp-v1",
+      "patch": {
+        "file": "groups/internal-helpers-and-extension-contracts/regression/mcp-helper-removal.patch"
+      },
+      "expect": {
+        "outcome": "quiet"
+      }
+    },
+    {
+      "id": "G04A-established-stripe-v1",
+      "patch": {
+        "file": "groups/internal-helpers-and-extension-contracts/controls/stripe-required-method.patch"
+      },
+      "expect": {
+        "outcome": "finding",
+        "locations": [
+          {
+            "file": "plugins/woocommerce/src/Internal/ProductFeed/Feed/FeedInterface.php",
+            "lines": [
+              65,
+              65
+            ],
+            "anchor": "public function get_entry_count(): int;"
+          }
+        ]
+      }
+    }
+  ],
+  "groups": [
+    {
+      "id": "internal-helpers-and-extension-contracts",
+      "regression": "G04E-established-mcp-v1",
+      "controls": [
+        "G04A-established-stripe-v1"
+      ]
+    }
+  ]
+}

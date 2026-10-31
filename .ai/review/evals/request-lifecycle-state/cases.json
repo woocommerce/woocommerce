@@ -1,0 +1,77 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G14A-v3",
+			"path": "plugins/woocommerce/includes/order-fragment.php",
+			"before": {
+				"file": "fixtures/G14A/before.php"
+			},
+			"after": {
+				"file": "fixtures/G14A/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/order-fragment.php",
+						"lines": [
+							5,
+							6
+						],
+						"anchor": "    $html = $render();"
+					}
+				]
+			}
+		},
+		{
+			"id": "G14B-v3",
+			"path": "plugins/woocommerce/includes/email-bootstrap.php",
+			"before": {
+				"file": "fixtures/G14B/before.php"
+			},
+			"after": {
+				"file": "fixtures/G14B/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/email-bootstrap.php",
+						"lines": [
+							14,
+							14
+						],
+						"anchor": "}, 1 );"
+					}
+				]
+			}
+		},
+		{
+			"id": "G14C-v3",
+			"path": "plugins/woocommerce/includes/order-fragment.php",
+			"before": {
+				"file": "fixtures/G14C/before.php"
+			},
+			"after": {
+				"file": "fixtures/G14C/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G14D-v3",
+			"path": "plugins/woocommerce/includes/email-bootstrap.php",
+			"before": {
+				"file": "fixtures/G14D/before.php"
+			},
+			"after": {
+				"file": "fixtures/G14D/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		}
+	]
+}

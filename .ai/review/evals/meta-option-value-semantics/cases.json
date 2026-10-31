@@ -1,0 +1,77 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G09A-v3",
+			"path": "plugins/woocommerce/includes/class-wc-meta-option-value-semantics.php",
+			"before": {
+				"file": "fixtures/G09A/before.php"
+			},
+			"after": {
+				"file": "fixtures/G09A/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-meta-option-value-semantics.php",
+						"lines": [
+							4,
+							4
+						],
+						"anchor": "    update_post_meta( $id, '_export_shipping_cost', (string) (float) $cost );"
+					}
+				]
+			}
+		},
+		{
+			"id": "G09B-v3",
+			"path": "plugins/woocommerce/includes/class-wc-meta-option-value-semantics.php",
+			"before": {
+				"file": "fixtures/G09B/before.php"
+			},
+			"after": {
+				"file": "fixtures/G09B/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-meta-option-value-semantics.php",
+						"lines": [
+							4,
+							4
+						],
+						"anchor": "    update_option( 'woocommerce_export_settings', array( 'enabled' => $enabled ) );"
+					}
+				]
+			}
+		},
+		{
+			"id": "G09C-v3",
+			"path": "plugins/woocommerce/includes/class-wc-meta-option-value-semantics.php",
+			"before": {
+				"file": "fixtures/G09C/before.php"
+			},
+			"after": {
+				"file": "fixtures/G09C/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G09D-v3",
+			"path": "plugins/woocommerce/includes/class-wc-meta-option-value-semantics.php",
+			"before": {
+				"file": "fixtures/G09D/before.php"
+			},
+			"after": {
+				"file": "fixtures/G09D/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		}
+	]
+}

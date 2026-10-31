@@ -1,0 +1,77 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G12A-v4",
+			"path": "plugins/woocommerce/includes/address-editor.php",
+			"before": {
+				"file": "fixtures/G12A/before.php"
+			},
+			"after": {
+				"file": "fixtures/G12A/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/address-editor.php",
+						"lines": [
+							4,
+							4
+						],
+						"anchor": "    return $order->get_address( 'billing' ) === $order->get_address( 'shipping' ) ? 'linked' : 'independent';"
+					}
+				]
+			}
+		},
+		{
+			"id": "G12B-v3",
+			"path": "plugins/woocommerce/includes/receipt-audience.php",
+			"before": {
+				"file": "fixtures/G12B/before.php"
+			},
+			"after": {
+				"file": "fixtures/G12B/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/receipt-audience.php",
+						"lines": [
+							4,
+							4
+						],
+						"anchor": "    return ! $order->get_customer_id() ? 'guest' : 'account';"
+					}
+				]
+			}
+		},
+		{
+			"id": "G12C-v3",
+			"path": "plugins/woocommerce/includes/address-editor.php",
+			"before": {
+				"file": "fixtures/G12C/before.php"
+			},
+			"after": {
+				"file": "fixtures/G12C/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G12D-v7",
+			"path": "plugins/woocommerce/includes/address-editor.php",
+			"before": {
+				"code": "<?php\nfinal class Order_Address_Editor {\n    public function preview( WC_Order $order, array $shipping ) {\n        $edited = clone $order;\n        $edited->set_address( $shipping, 'shipping' );\n        return $this->review_notice( $order, $edited );\n    }\n\n    private function review_notice( WC_Order $before, WC_Order $after ) {\n        $notice = 'yes' === $after->get_meta( '_copy_billing_to_shipping' )\n            ? __( 'Billing and shipping edits are linked.', 'woocommerce' )\n            : __( 'Billing and shipping edits are independent.', 'woocommerce' );\n        return array( 'notice' => $notice, 'shipping_changed' => false );\n    }\n}\n\n// Colocated review-fixture tests activate only under an already loaded WC unit-test bootstrap.\nif ( class_exists( 'WC_Unit_Test_Case', false ) ) {\n\n/** Regression coverage for previewed shipping changes. */\nclass OrderAddressEditorTest extends WC_Unit_Test_Case {\n    public function test_linked_unchanged() { $this->assert_preview( 'yes', false ); }\n    public function test_linked_changed() { $this->assert_preview( 'yes', true ); }\n    public function test_independent_unchanged() { $this->assert_preview( 'no', false ); }\n    public function test_independent_changed() { $this->assert_preview( 'no', true ); }\n\n    private function assert_preview( $linked, $changed ) {\n        $order = new WC_Order();\n        $order->set_address( array( 'city' => 'Colombo', 'postcode' => '00100' ), 'shipping' );\n        $order->update_meta_data( '_copy_billing_to_shipping', $linked );\n        $original = $order->get_address( 'shipping' );\n        $requested = $original;\n        if ( $changed ) { $requested['postcode'] = '20000'; }\n\n        $actual = ( new Order_Address_Editor() )->preview( $order, $requested );\n\n        $this->assertSame( $original, $order->get_address( 'shipping' ) );\n        $this->assertSame( $changed, $actual['shipping_changed'] );\n        $this->assertSame(\n            'yes' === $linked\n                ? __( 'Billing and shipping edits are linked.', 'woocommerce' )\n                : __( 'Billing and shipping edits are independent.', 'woocommerce' ),\n            $actual['notice']\n        );\n    }\n\n}\n}\n"
+			},
+			"after": {
+				"code": "<?php\nfinal class Order_Address_Editor {\n    public function preview( WC_Order $order, array $shipping ) {\n        $edited = clone $order;\n        $edited->set_address( $shipping, 'shipping' );\n        return $this->review_notice( $order, $edited );\n    }\n\n    private function review_notice( WC_Order $before, WC_Order $after ) {\n        $notice = 'yes' === $after->get_meta( '_copy_billing_to_shipping' )\n            ? __( 'Billing and shipping edits are linked.', 'woocommerce' )\n            : __( 'Billing and shipping edits are independent.', 'woocommerce' );\n        return array( 'notice' => $notice, 'shipping_changed' => $this->shipping_value_changed( $before, $after ) );\n    }\n    private function shipping_value_changed( WC_Order $before, WC_Order $after ) {\n        return $before->get_address( 'shipping' ) !== $after->get_address( 'shipping' );\n    }\n}\n\n// Colocated review-fixture tests activate only under an already loaded WC unit-test bootstrap.\nif ( class_exists( 'WC_Unit_Test_Case', false ) ) {\n\n/** Regression coverage for previewed shipping changes. */\nclass OrderAddressEditorTest extends WC_Unit_Test_Case {\n    public function test_linked_unchanged() { $this->assert_preview( 'yes', false ); }\n    public function test_linked_changed() { $this->assert_preview( 'yes', true ); }\n    public function test_independent_unchanged() { $this->assert_preview( 'no', false ); }\n    public function test_independent_changed() { $this->assert_preview( 'no', true ); }\n\n    private function assert_preview( $linked, $changed ) {\n        $order = new WC_Order();\n        $order->set_address( array( 'city' => 'Colombo', 'postcode' => '00100' ), 'shipping' );\n        $order->update_meta_data( '_copy_billing_to_shipping', $linked );\n        $original = $order->get_address( 'shipping' );\n        $requested = $original;\n        if ( $changed ) { $requested['postcode'] = '20000'; }\n\n        $actual = ( new Order_Address_Editor() )->preview( $order, $requested );\n\n        $this->assertSame( $original, $order->get_address( 'shipping' ) );\n        $this->assertSame( $changed, $actual['shipping_changed'] );\n        $this->assertSame(\n            'yes' === $linked\n                ? __( 'Billing and shipping edits are linked.', 'woocommerce' )\n                : __( 'Billing and shipping edits are independent.', 'woocommerce' ),\n            $actual['notice']\n        );\n    }\n\n}\n}\n"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		}
+	]
+}

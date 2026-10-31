@@ -1,0 +1,44 @@
+{
+  "version": 1,
+  "cases": [
+    {
+      "id": "tracks-event-name-original-v1",
+      "base_commit": "25ca8e656937378844d3899f8f1c6d0a9307921d",
+      "patch": {
+        "file": "groups/event-name-contract/original.patch"
+      },
+      "expect": {
+        "outcome": "quiet"
+      }
+    },
+    {
+      "id": "tracks-event-name-control-v1",
+      "base_commit": "25ca8e656937378844d3899f8f1c6d0a9307921d",
+      "patch": {
+        "file": "groups/event-name-contract/control.patch"
+      },
+      "expect": {
+        "outcome": "finding",
+        "locations": [
+          {
+            "file": "plugins/woocommerce/includes/tracks/class-wc-site-tracking.php",
+            "lines": [
+              123,
+              123
+            ],
+            "anchor": "if ( typeof name === 'string' || ! name ) {"
+          }
+        ]
+      }
+    }
+  ],
+  "groups": [
+    {
+      "id": "event-name-contract",
+      "regression": "tracks-event-name-original-v1",
+      "controls": [
+        "tracks-event-name-control-v1"
+      ]
+    }
+  ]
+}

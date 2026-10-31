@@ -1,0 +1,77 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G39B-v3",
+			"path": "plugins/woocommerce/includes/class-wc-search-label.php",
+			"before": {
+				"file": "fixtures/G39B/before.php"
+			},
+			"after": {
+				"file": "fixtures/G39B/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-search-label.php",
+						"lines": [
+							3,
+							3
+						],
+						"anchor": "add_shortcode( 'wc_entity_notice', static function() { $notice = isset( $_GET['notice'] ) && is_string( $_GET['notice'] ) ? wp_unslash( $_GET['notice'] ) : ''; $notice = wp_kses_post( $notice ); return '<div class=\"wc-notice\">' . html_entity_decode( $notice, ENT_QUOTES, 'UTF-8' ) . '</div>'; } );"
+					}
+				]
+			}
+		},
+		{
+			"id": "G39C-v3",
+			"path": "plugins/woocommerce/includes/class-wc-search-label.php",
+			"before": {
+				"file": "fixtures/G39C/before.php"
+			},
+			"after": {
+				"file": "fixtures/G39C/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G39D-v3",
+			"path": "plugins/woocommerce/client/blocks/assets/js/blocks/cart/customer-note.js",
+			"before": {
+				"file": "fixtures/G39D/before.js"
+			},
+			"after": {
+				"file": "fixtures/G39D/after.js"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G39A-v6",
+			"path": "plugins/woocommerce/includes/class-wc-search-label.php",
+			"before": {
+				"code": "<?php\n/* Shortcode rendered on a public page. */\nadd_shortcode( 'wc_search_label', static function() {\n    $query = isset( $_GET['q'] ) && is_string( $_GET['q'] ) ? wp_unslash( $_GET['q'] ) : '';\n    return '<span class=\"wc-search-label\">' . esc_html( $query ) . '</span>';\n} );\n"
+			},
+			"after": {
+				"code": "<?php\n/* Shortcode rendered on a public page. */\nadd_shortcode( 'wc_search_label', static function() {\n    $query = isset( $_GET['q'] ) && is_string( $_GET['q'] ) ? wp_unslash( $_GET['q'] ) : '';\n    return '<span class=\"wc-search-label\">' . $query . '</span>';\n} );\n"
+			},
+			"expect": {
+				"outcome": "finding",
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-search-label.php",
+						"lines": [
+							5,
+							5
+						],
+						"anchor": "    return '<span class=\"wc-search-label\">' . $query . '</span>';"
+					}
+				]
+			}
+		}
+	]
+}

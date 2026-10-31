@@ -1,0 +1,29 @@
+{
+  "dependency_snapshots": [
+    {
+      "repository": "https://github.com/WordPress/mcp-adapter",
+      "commit": "653ca8d95180b25809b1a1dc489d8305ec5beb63",
+      "version": "0.3.0",
+      "directory": "eval-context/dependencies/mcp-adapter/0.3.0"
+    },
+    {
+      "repository": "https://github.com/WordPress/mcp-adapter",
+      "commit": "1a0f9ab868e34b4375be42e873f60765e6632505",
+      "version": "0.4.1",
+      "directory": "eval-context/dependencies/mcp-adapter/0.4.1"
+    }
+  ],
+  "external_consumer": {
+    "repository": "https://github.com/woocommerce/woocommerce-gateway-stripe",
+    "commit": "c0b9a631f0563f0f9ea1b6fa216f6723372311a8",
+    "source_path": "includes/agentic-commerce/class-wc-stripe-agentic-commerce-csv-feed.php",
+    "destination": "plugins/woocommerce-gateway-stripe/includes/agentic-commerce/class-wc-stripe-agentic-commerce-csv-feed.php",
+    "blob": "554814cfe1c781033fd18620b599f2c65826cac1",
+    "sha256": "812cd7c1927ea229266d8759e0bb926f2805dbc808bf50d0a2826d9a0c0728f6"
+  },
+  "woocommerce": {
+    "repository": "https://github.com/woocommerce/woocommerce",
+    "base": "85ff2fd239407f3a2433ad39aa4eec3d8a508fbb",
+    "head": "84c07c6a7c2ee9177ced7336d571ae6fd045694b"
+  }
+}

@@ -1,0 +1,85 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G18A-v3",
+			"path": "plugins/woocommerce/src/Internal/Stock/Reservation.php",
+			"before": {
+				"file": "fixtures/G18A/before.php"
+			},
+			"after": {
+				"file": "fixtures/G18A/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"locations": [
+					{
+						"file": "plugins/woocommerce/src/Internal/Stock/Reservation.php",
+						"lines": [
+							4,
+							4
+						],
+						"anchor": "    $quantity = (int) $db->get_var( $db->prepare( 'SELECT quantity FROM stock WHERE product_id = %d', $product_id ) );"
+					},
+					{
+						"file": "plugins/woocommerce/src/Internal/Stock/Reservation.php",
+						"lines": [
+							6,
+							6
+						],
+						"anchor": "    return 1 === $db->query( $db->prepare( 'UPDATE stock SET quantity = quantity - 1 WHERE product_id = %d', $product_id ) );"
+					}
+				]
+			}
+		},
+		{
+			"id": "G18B-v3",
+			"path": "plugins/woocommerce/includes/coupon-usage.php",
+			"before": {
+				"file": "fixtures/G18B/before.php"
+			},
+			"after": {
+				"file": "fixtures/G18B/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/coupon-usage.php",
+						"lines": [
+							4,
+							6
+						],
+						"anchor": "    $row = $db->read_coupon( $coupon_id );"
+					}
+				]
+			}
+		},
+		{
+			"id": "G18C-v3",
+			"path": "plugins/woocommerce/src/Internal/Stock/Reservation.php",
+			"before": {
+				"file": "fixtures/G18C/before.php"
+			},
+			"after": {
+				"file": "fixtures/G18C/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G18D-v3",
+			"path": "plugins/woocommerce/includes/coupon-usage.php",
+			"before": {
+				"file": "fixtures/G18D/before.php"
+			},
+			"after": {
+				"file": "fixtures/G18D/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		}
+	]
+}

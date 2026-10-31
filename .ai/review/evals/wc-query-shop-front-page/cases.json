@@ -1,0 +1,77 @@
+{
+	"version": 1,
+	"cases": [
+		{
+			"id": "G13A-v3",
+			"path": "plugins/woocommerce/includes/class-wc-query.php",
+			"before": {
+				"file": "fixtures/G13A/before.php"
+			},
+			"after": {
+				"file": "fixtures/G13A/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-query.php",
+						"lines": [
+							5,
+							5
+						],
+						"anchor": "    if ( $q->get( 'page_id' ) === $shop_id || $q->get( 'pagename' ) === $shop_slug ) {"
+					}
+				]
+			}
+		},
+		{
+			"id": "G13B-v3",
+			"path": "plugins/woocommerce/includes/class-wc-query.php",
+			"before": {
+				"file": "fixtures/G13B/before.php"
+			},
+			"after": {
+				"file": "fixtures/G13B/after.php"
+			},
+			"expect": {
+				"outcome": "finding",
+				"locations": [
+					{
+						"file": "plugins/woocommerce/includes/class-wc-query.php",
+						"lines": [
+							4,
+							4
+						],
+						"anchor": "    if ( $request['is_cli'] ) { return; }"
+					}
+				]
+			}
+		},
+		{
+			"id": "G13C-v4",
+			"path": "plugins/woocommerce/includes/class-wc-query.php",
+			"before": {
+				"file": "fixtures/G13C/before.php"
+			},
+			"after": {
+				"file": "fixtures/G13C/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		},
+		{
+			"id": "G13D-v3",
+			"path": "plugins/woocommerce/includes/class-wc-query.php",
+			"before": {
+				"file": "fixtures/G13D/before.php"
+			},
+			"after": {
+				"file": "fixtures/G13D/after.php"
+			},
+			"expect": {
+				"outcome": "quiet"
+			}
+		}
+	]
+}

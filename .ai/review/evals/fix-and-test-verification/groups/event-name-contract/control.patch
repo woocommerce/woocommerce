@@ -1,0 +1,32 @@
+diff --git a/plugins/woocommerce/changelog/wooplug-7771-guard-undefined-tracks-event-name b/plugins/woocommerce/changelog/wooplug-7771-guard-undefined-tracks-event-name
+new file mode 100644
+index 0000000000000000000000000000000000000000..e4b20c120e4bd675d716c7f8e1b5f004e4f04b74
+--- /dev/null
++++ b/plugins/woocommerce/changelog/wooplug-7771-guard-undefined-tracks-event-name
+@@ -0,0 +1,4 @@
++Significance: patch
++Type: fix
++
++Skip client-side Tracks events recorded without a valid event name instead of sending them as `wcadmin_undefined`.
+diff --git a/plugins/woocommerce/includes/tracks/class-wc-site-tracking.php b/plugins/woocommerce/includes/tracks/class-wc-site-tracking.php
+index 69462ae3f04fdc29f04432673547e32d35efcb03..4cea85060147c4e015a4fc43150f7c3a564924d3 100644
+--- a/plugins/woocommerce/includes/tracks/class-wc-site-tracking.php
++++ b/plugins/woocommerce/includes/tracks/class-wc-site-tracking.php
+@@ -119,6 +119,17 @@ class WC_Site_Tracking {
+ 					return;
+ 				}
+ 
++				// Without this, a missing name is prefixed into a bogus `wcadmin_undefined` event that Tracks rejects.
++				if ( typeof name === 'string' || ! name ) {
++					if ( <?php echo 'production' !== $environment_type ? 'true' : 'false'; ?> ) {
++						/* eslint-disable no-console */
++						// Pass the value as its own argument: interpolating a Symbol (or null-prototype object) would throw.
++						console.error( 'A valid event name must be specified. Received invalid event name:', name );
++						/* eslint-enable no-console */
++					}
++					return;
++				}
++
+ 				const eventName = '<?php echo esc_attr( WC_Tracks::PREFIX ); ?>' + name;
+ 				let eventProperties = properties || {};
+ 				eventProperties = { ...eventProperties, ...<?php echo json_encode( $filtered_properties, JSON_HEX_TAG | JSON_UNESCAPED_SLASHES ); // phpcs:ignore WordPress.WP.AlternativeFunctions.json_encode_json_encode ?> };
