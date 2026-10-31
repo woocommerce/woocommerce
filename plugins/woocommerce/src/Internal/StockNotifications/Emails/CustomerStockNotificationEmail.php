@@ -15,6 +15,13 @@ use WC_Email;
 class CustomerStockNotificationEmail extends WC_Email {
 
 	/**
+	 * Unsubscribe key for the email being sent. The caller's save persists its hash.
+	 *
+	 * @var string
+	 */
+	private $unsubscribe_key = '';
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -170,9 +177,8 @@ class CustomerStockNotificationEmail extends WC_Email {
 			$product
 		);
 
-		$unsubscribe_key = $notification->get_unsubscribe_key( true );
-		$user            = $notification instanceof Notification && $notification->get_user_id() ? get_user_by( 'id', $notification->get_user_id() ) : false;
-		$is_guest        = ! is_a( $user, 'WP_User' );
+		$user     = $notification instanceof Notification && $notification->get_user_id() ? get_user_by( 'id', $notification->get_user_id() ) : false;
+		$is_guest = ! is_a( $user, 'WP_User' );
 
 		return array(
 			'button_text'      => $button_text,
@@ -181,7 +187,7 @@ class CustomerStockNotificationEmail extends WC_Email {
 				add_query_arg(
 					array(
 						'email_link_action'     => EmailActionController::ACTION_UNSUBSCRIBE,
-						'email_link_action_key' => $unsubscribe_key,
+						'email_link_action_key' => $this->unsubscribe_key,
 						'notification_id'       => $notification->get_id(),
 					),
 					home_url( '/' )
@@ -236,6 +242,7 @@ class CustomerStockNotificationEmail extends WC_Email {
 	public function prepare_email( Notification $notification ): void {
 		$this->object                         = $notification;
 		$this->recipient                      = $notification->get_user_email();
+		$this->unsubscribe_key                = $notification->get_unsubscribe_key( false );
 		$product                              = $notification->get_product();
 		$this->placeholders['{product_name}'] = preg_replace( $this->plain_search, $this->plain_replace, $product->get_name() );
 		$this->placeholders['{site_title}']   = preg_replace( $this->plain_search, $this->plain_replace, $this->get_blogname() );
