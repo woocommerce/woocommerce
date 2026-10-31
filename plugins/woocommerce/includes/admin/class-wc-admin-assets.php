@@ -537,7 +537,8 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 
 				$params = array(
 					'strings' => array(
-						'allow_reviews' => esc_js( __( 'Enable reviews', 'woocommerce' ) ),
+						'allow_reviews'           => esc_js( __( 'Enable reviews', 'woocommerce' ) ),
+						'some_products_have_term' => esc_js( __( 'Some selected products have this term', 'woocommerce' ) ),
 					),
 				);
 
