@@ -332,6 +332,8 @@ Do not import these user-facing strings from `block.json`, pass JSON properties 
 
 ## Interactivity API Stores
 
+Before changing WooCommerce Interactivity API stores or blocks that use them, read the [shared store README](plugins/woocommerce/client/blocks/assets/js/base/stores/woocommerce/README.md). It documents `productInContext` and related store usage for frontend and PHP code. Keep that guidance in the README instead of repeating it in source file headers.
+
 Most WooCommerce Interactivity API stores are **private by design**. Exception: the `woocommerce/product-filters` store is public for Product Filters inner-block extensibility.
 
 For private stores:
