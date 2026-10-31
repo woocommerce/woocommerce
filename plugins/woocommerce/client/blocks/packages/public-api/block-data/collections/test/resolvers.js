@@ -125,6 +125,79 @@ describe( 'getCollection', () => {
 	} );
 } );
 
+describe( 'getCollection with a Last-Modified header', () => {
+	const testArgs = [ 'wc/store/v1', 'products', { per_page: 1 }, [] ];
+	const httpDate = 'Tue, 20 Oct 2026 02:19:18 GMT';
+	const timestamp = 1792462758;
+
+	const fetchWithHeader = ( lastModified ) => {
+		const headers = {
+			get: ( name ) =>
+				name === 'last-modified' ? lastModified : undefined,
+			has: ( name ) => name === 'last-modified',
+		};
+		const fulfillment = getCollection( ...testArgs );
+		fulfillment.next();
+		fulfillment.next( 'https://example.org/wc/store/v1/products' );
+		const { value } = fulfillment.next( { response: [], headers } );
+		return { value, headers };
+	};
+
+	const runInvalidation = ( invalidation, storedLastModified ) => {
+		invalidation.next();
+		invalidation.next( storedLastModified );
+		invalidation.next();
+		invalidation.next();
+	};
+
+	beforeEach( () => {
+		jest.clearAllMocks();
+	} );
+
+	it( 'stores the time of an HTTP-date header as a Unix timestamp', () => {
+		const { value } = fetchWithHeader( httpDate );
+		runInvalidation( value, 0 );
+		expect( controls.dispatch ).toHaveBeenCalledWith(
+			STORE_KEY,
+			'receiveLastModified',
+			timestamp
+		);
+	} );
+
+	it( 'invalidates the store when an HTTP-date header is later than the stored time', () => {
+		const { value } = fetchWithHeader( httpDate );
+		runInvalidation( value, timestamp - 60 );
+		expect( controls.dispatch ).toHaveBeenCalledWith(
+			STORE_KEY,
+			'invalidateResolutionForStore'
+		);
+		expect( controls.dispatch ).toHaveBeenCalledWith(
+			STORE_KEY,
+			'receiveLastModified',
+			timestamp
+		);
+	} );
+
+	it( 'does not invalidate the store when the header matches the stored time', () => {
+		const { value } = fetchWithHeader( httpDate );
+		runInvalidation( value, timestamp );
+		expect( controls.dispatch ).not.toHaveBeenCalled();
+	} );
+
+	it( 'ignores a header it cannot read', () => {
+		const { value, headers } = fetchWithHeader( 'not a date' );
+		const expected = receiveCollection(
+			'wc/store/v1',
+			'products',
+			'?per_page=1',
+			[],
+			{ items: [], headers }
+		);
+		expect( value.type ).toBe( expected.type );
+		expect( value.response ).toEqual( expected.response );
+	} );
+} );
+
 describe( 'getCollectionHeader', () => {
 	let fulfillment;
 	const rewind = ( ...testArgs ) =>
