@@ -14,6 +14,9 @@ use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Registe
  */
 class WC_Meta_Box_Product_Data_Test extends WC_Unit_Test_Case {
 
+	/** Reuse only the baseline administrator; explicit actors stay per-test. */
+	protected const USE_SHARED_ADMINISTRATOR_FIXTURE = true;
+
 	/**
 	 * Original meta-box errors.
 	 *
@@ -58,7 +61,7 @@ class WC_Meta_Box_Product_Data_Test extends WC_Unit_Test_Case {
 
 		WC_Admin_Meta_Boxes::$meta_box_errors = array();
 		$this->download_directories->set_mode( Download_Directories::MODE_DISABLED );
-		wp_set_current_user( $this->factory->user->create( array( 'role' => 'administrator' ) ) );
+		wp_set_current_user( self::get_shared_administrator_fixture_id() );
 	}
 
 	/**

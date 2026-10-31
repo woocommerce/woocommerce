@@ -5,6 +5,9 @@
  * Product Custom Fields Controller tests for V3 REST API.
  */
 class WC_REST_Product_Custom_Fields_Controller_Tests extends WC_REST_Unit_Test_Case {
+
+	/** Reuse only the baseline administrator; explicit actors stay per-test. */
+	protected const USE_SHARED_ADMINISTRATOR_FIXTURE = true;
 	/**
 	 * @var WC_Product_Simple[]
 	 */
@@ -50,11 +53,7 @@ class WC_REST_Product_Custom_Fields_Controller_Tests extends WC_REST_Unit_Test_C
 		parent::setUp();
 
 		$this->endpoint = new WC_REST_Product_Custom_Fields_Controller();
-		$this->user     = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
+		$this->user     = self::get_shared_administrator_fixture_id();
 		wp_set_current_user( $this->user );
 	}
 

@@ -44,6 +44,11 @@ class WC_REST_System_Status_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		add_filter( 'pre_http_request', array( $this, 'mock_status_http_responses' ), 10, 3 );
+
+		remove_action( 'upgrader_process_complete', 'wp_version_check' );
+		remove_action( 'upgrader_process_complete', 'wp_update_plugins' );
+		remove_action( 'upgrader_process_complete', 'wp_update_themes' );
 		$this->sut = new WC_REST_System_Status_V2_Controller();
 		delete_transient( 'wc_system_status_theme_info' );
 		ActionSchedulerUtil::reset_cache();
@@ -252,6 +257,38 @@ class WC_REST_System_Status_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 		$environment = $this->sut->get_environment_info_per_fields( array() );
 
 		$this->assertSame( $expected, $environment['wp_memory_limit'] );
+	}
+
+	/**
+	 * Supply captured public responses while retaining real status report parsing.
+	 *
+	 * @param mixed  $preempt Existing HTTP preemption.
+	 * @param array  $request HTTP request arguments.
+	 * @param string $url HTTP request URL.
+	 * @return mixed Existing preemption, fixture response, or false for another request.
+	 */
+	public function mock_status_http_responses( $preempt, $request, $url ) {
+		if ( false !== $preempt ) {
+			return $preempt;
+		}
+		$host   = wp_parse_url( $url, PHP_URL_HOST );
+		$path   = wp_parse_url( $url, PHP_URL_PATH );
+		$method = $request['method'] ?? 'GET';
+
+		if ( 'api.wordpress.org' === $host && '/themes/info/1.2/' === $path && 'GET' === $method ) {
+			return array(
+				'headers'  => array(
+					'cache-for'    => '',
+					'content-type' => 'application/json; charset=UTF-8',
+				),
+				'body'     => '{"name":"Default","slug":"default","version":"1.7.2","preview_url":"https://wp-themes.com/default/","author":{"user_nicename":"wordpressdotorg","profile":"https://profiles.wordpress.org/wordpressdotorg/","avatar":"https://secure.gravatar.com/avatar/178f40079143ff7464125e4fbc88e62024a16442920a6a3d6dfa3d7e626be20d?s=96&d=monsterid&r=g","display_name":"WordPress.org","author":false,"author_url":"http://binarybonsai.com/"},"screenshot_url":"//ts.w.org/wp-content/themes/default/screenshot.png?ver=1.7.2","rating":100,"num_ratings":3,"reviews_url":"https://wordpress.org/support/theme/default/reviews/","downloaded":592381,"last_updated":"2010-06-14","last_updated_time":"2010-06-14 22:06:29","creation_time":"2010-03-26 20:14:43","homepage":"https://wordpress.org/themes/default/","download_link":"https://downloads.wordpress.org/theme/default.1.7.2.zip","requires":false,"requires_php":false,"is_commercial":false,"external_support_url":false,"is_community":true,"external_repository_url":""}',
+				'response' => array(
+					'code' => 200,
+				),
+			);
+		}
+
+		return false;
 	}
 
 	/**

@@ -7,6 +7,8 @@
 
 namespace Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks;
 
+use ReflectionReference;
+
 use ReflectionMethod;
 use ReflectionClass;
 
@@ -35,6 +37,20 @@ use ReflectionClass;
  * executed inside tests (and thus the above example won't stack-overflow).
  */
 final class FunctionsMockerHack extends CodeHack {
+	/**
+	 * Most recent immutable source transformation, independent of active mocks.
+	 *
+	 * @var array{source: string, path: string, output: string}|null
+	 */
+	private $last_transformation;
+
+	/**
+	 * Whether the constructor allowlist contains only values without references.
+	 *
+	 * @var bool
+	 */
+	private $can_cache_transformations = true;
+
 	/**
 	 * An array containing the names of the functions that will become mockable.
 	 *
@@ -83,6 +99,12 @@ final class FunctionsMockerHack extends CodeHack {
 	 */
 	private function __construct( $mockable_functions ) {
 		$this->mockable_functions = $mockable_functions;
+		foreach ( array_keys( $mockable_functions ) as $key ) {
+			if ( null !== ReflectionReference::fromArrayElement( $mockable_functions, $key ) ) {
+				$this->can_cache_transformations = false;
+				break;
+			}
+		}
 	}
 
 	/**
@@ -93,6 +115,11 @@ final class FunctionsMockerHack extends CodeHack {
 	 * @return string The hacked code.
 	 */
 	public function hack( $code, $path ) {
+		if ( $this->can_cache_transformations && null !== $this->last_transformation && $code === $this->last_transformation['source'] && $path === $this->last_transformation['path'] ) {
+			return $this->last_transformation['output'];
+		}
+		$source = $code;
+
 		$tokens = $this->tokenize( $code );
 		$code   = '';
 		$previous_token_is_non_global_function_qualifier = false;
@@ -108,6 +135,14 @@ final class FunctionsMockerHack extends CodeHack {
 				$code .= $this->token_to_string( $token );
 				$previous_token_is_non_global_function_qualifier = in_array( $token_type, self::$non_global_function_tokens, true );
 			}
+		}
+
+		if ( $this->can_cache_transformations ) {
+			$this->last_transformation = array(
+				'source' => $source,
+				'path'   => $path,
+				'output' => $code,
+			);
 		}
 
 		return $code;

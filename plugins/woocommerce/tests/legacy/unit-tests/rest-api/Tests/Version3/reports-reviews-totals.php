@@ -8,6 +8,9 @@
 
 class WC_Tests_API_Reports_Reviews_Totals extends WC_REST_Unit_Test_Case {
 
+	/** Reuse only the baseline administrator; explicit actors stay per-test. */
+	protected const USE_SHARED_ADMINISTRATOR_FIXTURE = true;
+
 	/**
 	 * Sequence number keeping each submitted review distinct from the last.
 	 *
@@ -20,11 +23,7 @@ class WC_Tests_API_Reports_Reviews_Totals extends WC_REST_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
-		$this->user = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
+		$this->user = self::get_shared_administrator_fixture_id();
 	}
 
 	/**

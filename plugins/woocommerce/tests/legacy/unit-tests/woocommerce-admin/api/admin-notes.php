@@ -13,6 +13,9 @@ use Automattic\WooCommerce\Admin\Notes\Notes;
  */
 class WC_Admin_Tests_API_Admin_Notes extends WC_REST_Unit_Test_Case {
 
+	/** Reuse only the baseline administrator; explicit actors stay per-test. */
+	protected const USE_SHARED_ADMINISTRATOR_FIXTURE = true;
+
 	/**
 	 * Endpoints.
 	 *
@@ -35,11 +38,7 @@ class WC_Admin_Tests_API_Admin_Notes extends WC_REST_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->user = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
+		$this->user = self::get_shared_administrator_fixture_id();
 
 		WC_Helper_Admin_Notes::reset_notes_dbs();
 		$this->note_ids = WC_Helper_Admin_Notes::add_notes_for_tests();

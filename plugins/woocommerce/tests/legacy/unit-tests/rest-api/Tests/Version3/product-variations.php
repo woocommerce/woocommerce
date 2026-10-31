@@ -11,17 +11,16 @@
  */
 class Product_Variations_API extends WC_REST_Unit_Test_Case {
 
+	/** Reuse only the baseline administrator; explicit actors stay per-test. */
+	protected const USE_SHARED_ADMINISTRATOR_FIXTURE = true;
+
 	/**
 	 * Setup our test server, endpoints, and user info.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 		$this->endpoint = new WC_REST_Product_Variations_Controller();
-		$this->user     = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
+		$this->user     = self::get_shared_administrator_fixture_id();
 	}
 
 	/**

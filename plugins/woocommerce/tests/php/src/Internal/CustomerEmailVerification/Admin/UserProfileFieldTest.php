@@ -12,6 +12,9 @@ use WC_Unit_Test_Case;
  */
 class UserProfileFieldTest extends WC_Unit_Test_Case {
 
+	/** Reuse only the baseline administrator; explicit actors stay per-test. */
+	protected const USE_SHARED_ADMINISTRATOR_FIXTURE = true;
+
 	/**
 	 * The System Under Test.
 	 *
@@ -34,7 +37,7 @@ class UserProfileFieldTest extends WC_Unit_Test_Case {
 		$this->sut     = wc_get_container()->get( UserProfileField::class );
 		$this->service = wc_get_container()->get( EmailVerificationService::class );
 
-		$admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$admin_id = self::get_shared_administrator_fixture_id();
 		wp_set_current_user( $admin_id );
 	}
 

@@ -24,6 +24,50 @@ use WPAjaxDieContinueException;
 class SubmissionHandlerInjectionTest extends WC_Unit_Test_Case {
 
 	/**
+	 * Product shared by the text payload matrix.
+	 *
+	 * @var int
+	 */
+	private static $text_payload_product_id = 0;
+
+	/**
+	 * Create the default product used by text payload cases.
+	 *
+	 * @param \WP_UnitTest_Factory $factory WordPress unit test factory.
+	 */
+	public static function wpSetUpBeforeClass( $factory ): void {
+		\WC_Install::create_terms();
+		$user_id = get_current_user_id();
+		wp_set_current_user( 0 );
+		try {
+			self::$text_payload_product_id = self::with_direct_product_attribute_lookup_updates(
+				static function () {
+					return WC_Helper_Product::create_simple_product()->get_id();
+				}
+			);
+		} finally {
+			wp_set_current_user( $user_id );
+		}
+	}
+
+	/**
+	 * Delete the product created outside per-test transactions.
+	 */
+	public static function wpTearDownAfterClass(): void {
+		if ( self::$text_payload_product_id ) {
+			$product = wc_get_product( self::$text_payload_product_id );
+			if ( $product ) {
+				self::with_direct_product_attribute_lookup_updates(
+					static function () use ( $product ) {
+						$product->delete( true );
+					}
+				);
+			}
+			self::$text_payload_product_id = 0;
+		}
+	}
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
@@ -128,7 +172,7 @@ class SubmissionHandlerInjectionTest extends WC_Unit_Test_Case {
 	 * @param string $payload Review text.
 	 */
 	public function test_text_payload_is_neutralised_on_insert( string $payload ): void {
-		$built   = $this->make_order();
+		$built   = $this->make_text_payload_order();
 		$comment = $this->submit_single_review( $built, $payload );
 
 		$this->assert_review_is_safe( $comment, $built );
@@ -146,7 +190,7 @@ class SubmissionHandlerInjectionTest extends WC_Unit_Test_Case {
 			$this->markTestSkipped( 'Covered by test_invalid_utf8_edit_leaves_the_review_unchanged.' );
 		}
 
-		$built    = $this->make_order();
+		$built    = $this->make_text_payload_order();
 		$original = $this->submit_single_review( $built, 'A plain first review.' );
 
 		$updated = $this->submit_single_review( $built, $payload );
@@ -176,7 +220,7 @@ class SubmissionHandlerInjectionTest extends WC_Unit_Test_Case {
 	 * @param string $payload Review text.
 	 */
 	public function test_text_payload_cannot_break_out_of_the_prefilled_row( string $payload ): void {
-		$built   = $this->make_order();
+		$built   = $this->make_text_payload_order();
 		$comment = $this->submit_single_review( $built, $payload );
 
 		$baseline = $this->render_row( $built, 'Plain' );
@@ -1200,6 +1244,36 @@ class SubmissionHandlerInjectionTest extends WC_Unit_Test_Case {
 				'post_id' => $product_id,
 				'count'   => true,
 			)
+		);
+	}
+
+	/**
+	 * Create a fresh completed order using the shared text payload product.
+	 *
+	 * @return array{order:WC_Order, product_id:int, item_id:int, product_ids:int[], item_ids:int[]}
+	 */
+	private function make_text_payload_order(): array {
+		$product = wc_get_product( self::$text_payload_product_id );
+		if ( ! $product instanceof \WC_Product ) {
+			throw new \RuntimeException( 'Unable to load the text payload product fixture.' );
+		}
+
+		$order = $this->make_order_for_products( array( $product ) );
+
+		$product_ids = array();
+		$item_ids    = array();
+		foreach ( $order->get_items() as $item ) {
+			/** @var \WC_Order_Item_Product $item */
+			$product_ids[] = (int) $item->get_product_id();
+			$item_ids[]    = (int) $item->get_id();
+		}
+
+		return array(
+			'order'       => $order,
+			'product_id'  => $product_ids[0],
+			'item_id'     => $item_ids[0],
+			'product_ids' => $product_ids,
+			'item_ids'    => $item_ids,
 		);
 	}
 

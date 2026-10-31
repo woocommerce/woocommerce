@@ -240,9 +240,6 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( '50.00', $data['total'], '20 + 30 = 50' );
 		$this->assertCount( 2, $data['breakdown']['products']['items'] );
-
-		$product_a->delete( true );
-		$product_b->delete( true );
 	}
 
 	/**
@@ -951,8 +948,6 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertArrayNotHasKey( 'variation_id', $product_item );
 		$this->assertNotEmpty( $product_item['name'] );
 		$this->assertEquals( $product->get_id(), $product_item['product_id'] );
-
-		$product->delete( true );
 	}
 
 	/**
@@ -993,8 +988,6 @@ class WC_REST_Refunds_V4_Preview_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 422, $response->get_status() );
 		$data = $response->get_data();
 		$this->assertEquals( 'order_not_refundable', $data['code'] );
-
-		$product->delete( true );
 	}
 
 	/**

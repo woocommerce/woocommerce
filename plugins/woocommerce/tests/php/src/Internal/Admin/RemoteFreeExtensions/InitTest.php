@@ -42,11 +42,6 @@ class InitTest extends WC_Unit_Test_Case {
 		}
 		$this->fixture_setup_started = true;
 
-		$this->user = $this->factory->user->create(
-			array(
-				'role' => 'administrator',
-			)
-		);
 		delete_option( 'woocommerce_show_marketplace_suggestions' );
 		$this->specs_transient_filter = function ( $value ) {
 			if ( $value ) {
