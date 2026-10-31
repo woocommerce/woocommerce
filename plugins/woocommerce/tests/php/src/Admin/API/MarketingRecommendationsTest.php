@@ -169,6 +169,21 @@ class MarketingRecommendationsTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests that the marketing and coupons categories, previously served by the legacy `recommended` endpoint, return uninstalled plugins in that category.
+	 */
+	public function test_returns_recommended_plugins_for_marketing_and_coupons_categories() {
+		$request = new WP_REST_Request( 'GET', self::ENDPOINT );
+
+		$request->set_query_params( array( 'category' => 'marketing' ) );
+		$data = rest_get_server()->dispatch( $request )->get_data();
+		$this->assertSame( array( 'Example Marketing Channel', 'Example Marketing Extension' ), wp_list_pluck( $data, 'title' ) );
+
+		$request->set_query_params( array( 'category' => 'coupons' ) );
+		$data = rest_get_server()->dispatch( $request )->get_data();
+		$this->assertSame( array( 'Example NON Marketing Extension' ), wp_list_pluck( $data, 'title' ) );
+	}
+
+	/**
 	 * Tests that the endpoint returns an error if the provided category is invalid.
 	 */
 	public function test_returns_error_if_invalid_category_provided() {
