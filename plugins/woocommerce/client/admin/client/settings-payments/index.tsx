@@ -300,6 +300,8 @@ export const SettingsPaymentsMainWrapper = () => {
 				history={
 					getHistory() as unknown as HistoryRouterProps[ 'history' ]
 				}
+				// Render route changes synchronously, as v6 did, so routes stay in step with getQuery().
+				useTransitions={ false }
 			>
 				<Routes>
 					<Route
