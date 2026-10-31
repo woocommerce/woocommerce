@@ -235,11 +235,42 @@ class OrderController {
 		}
 		$this->restore_state_names( $order, $old_states );
 
+		// Evaluate after setting the addresses so the public filter sees the request data.
 		$needs_shipping = $order->needs_shipping();
+		if ( ! $needs_shipping && empty( $old_shipping_location['country'] ) ) {
+			// An order with no address yet may take any first address, but the shipping address of an order that
+			// ships nothing is not validated while it still sets the tax. Such an order ships, and is taxed, at billing.
+			$shipping = self::get_billing_address_for_shipping( $order );
+			$order->set_shipping_address( $shipping );
+			$this->restore_state_names( $order, $old_states );
+			$needs_shipping = $order->needs_shipping();
+		}
+
 		$this->validate_addresses( $order, $needs_shipping );
 		$this->validate_location_change( $order, $old_shipping_location, $old_tax_location, $needs_shipping );
 
 		return $shipping;
+	}
+
+	/**
+	 * Gets the unfiltered billing address fields that can be copied to shipping.
+	 *
+	 * @param \WC_Order $order Order to read.
+	 * @return array
+	 */
+	private static function get_billing_address_for_shipping( \WC_Order $order ): array {
+		return [
+			'first_name' => $order->get_billing_first_name( 'edit' ),
+			'last_name'  => $order->get_billing_last_name( 'edit' ),
+			'company'    => $order->get_billing_company( 'edit' ),
+			'address_1'  => $order->get_billing_address_1( 'edit' ),
+			'address_2'  => $order->get_billing_address_2( 'edit' ),
+			'city'       => $order->get_billing_city( 'edit' ),
+			'state'      => $order->get_billing_state( 'edit' ),
+			'postcode'   => $order->get_billing_postcode( 'edit' ),
+			'country'    => $order->get_billing_country( 'edit' ),
+			'phone'      => $order->get_billing_phone( 'edit' ),
+		];
 	}
 
 	/**
