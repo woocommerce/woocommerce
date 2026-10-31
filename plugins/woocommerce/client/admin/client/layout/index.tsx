@@ -9,7 +9,6 @@ import {
 	Route,
 	Routes,
 	useLocation,
-	useMatch,
 	useParams,
 } from 'react-router-dom';
 import { identity, isFunction } from 'lodash';
@@ -69,9 +68,8 @@ const BaseLayout = ( { page }: { page: Page } ) => {
 		[]
 	);
 	const location = useLocation();
-	const matchFromRouter = useMatch( location.pathname );
 	const params = useParams();
-	const match = { params, url: matchFromRouter?.pathname };
+	const match = { params, url: location.pathname };
 	const isMarketplacePage = location.pathname.includes( '/extensions' );
 
 	usePageClasses( page );
