@@ -71,7 +71,7 @@ class ReadinessAbilities implements RegisterHooksInterface {
 	 * @internal
 	 */
 	public function register_abilities(): void {
-		if ( ! function_exists( 'wp_register_ability' ) || ! $this->features_controller->feature_is_enabled( StatusTab::FEATURE_ID ) ) {
+		if ( ! function_exists( 'wp_register_ability' ) || ! $this->features_controller->feature_is_enabled( AgenticCommerceSettings::FEATURE_ID ) ) {
 			return;
 		}
 		if ( ! wp_has_ability( self::GET_REPORT ) ) {
