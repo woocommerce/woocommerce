@@ -193,9 +193,9 @@ class StoreOutputChecks {
 	 * @param StoreResponses $responses Store responses.
 	 */
 	private function sitemap_lists_products( StoreResponses $responses ): ?bool {
-		$robots     = $this->robots_txt( $responses );
-		$listed     = null === $robots ? array() : array_slice( ( new RobotsTxt( $robots ) )->sitemaps(), 0, self::MAX_LISTED_SITEMAPS );
-		$defaults   = array( '/sitemap_index.xml', '/sitemap.xml' );
+		$robots   = $this->robots_txt( $responses );
+		$listed   = null === $robots ? array() : array_slice( ( new RobotsTxt( $robots ) )->sitemaps(), 0, self::MAX_LISTED_SITEMAPS );
+		$defaults = array( '/sitemap_index.xml', '/sitemap.xml' );
 		if ( function_exists( 'wp_sitemaps_get_server' ) && wp_sitemaps_get_server()->sitemaps_enabled() ) {
 			$defaults[] = '/wp-sitemap.xml';
 		}
