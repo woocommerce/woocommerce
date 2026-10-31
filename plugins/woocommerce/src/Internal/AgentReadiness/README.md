@@ -63,11 +63,11 @@ Store-wide conditions (`StoreConditions`) are reported first because they affect
 | `robots_txt_present` | `/robots.txt` is served as text. |
 | `robots_allows_ai_search_bots` | No robots.txt rule keeps OAI-SearchBot, ChatGPT-User, Claude-User or PerplexityBot from the home page. |
 | `robots_not_blocking_llms_txt` | No robots.txt rule keeps those crawlers from `/llms.txt`. |
-| `sitemap_lists_products` | The WordPress sitemap includes products, or a sitemap listed in robots.txt or at `/sitemap_index.xml` or `/sitemap.xml` names a product sitemap or product pages. |
-| `product_jsonld_present` | The newest published product's page has Product (or ProductGroup) JSON-LD that parses, from WooCommerce, an SEO plugin or the theme. |
-| `product_jsonld_required_fields` | That JSON-LD gives a name, an image and an offer, from one block or several. |
-| `product_offer_jsonld` | One of its offers has a price (`price`, `lowPrice` or a price specification) and an availability. |
-| `llms_txt_present` | `/llms.txt` is served as text. |
+| `sitemap_lists_products` | A sitemap listed in robots.txt, or `/wp-sitemap.xml`, `/sitemap_index.xml` or `/sitemap.xml`, names a product sitemap or product pages. |
+| `product_jsonld_present` | The newest product page has Product (or ProductGroup) JSON-LD that parses, from WooCommerce, an SEO plugin or the theme. |
+| `product_jsonld_required_fields` | That JSON-LD gives a name, an image and an offer, from one block or several. Skipped when the page has no Product JSON-LD. |
+| `product_offer_jsonld` | One of its offers has a price (`price`, `lowPrice` or a price specification, as a number or with a currency) and an availability. Skipped when the page has no Product JSON-LD. |
+| `llms_txt_present` | `/llms.txt` at the host root is served as text. |
 | `llms_txt_valid` | It starts with a `# Name` heading. |
 | `llms_txt_links_resolve` | The first five links in it to the store's own pages open (no 4xx). Links to other sites, or with a query string, aren't loaded. |
 | `open_graph_tags` | The home and product page have `og:title` and `og:image`. |
@@ -75,11 +75,11 @@ Store-wide conditions (`StoreConditions`) are reported first because they affect
 | `canonical_url` | The product page has a canonical link. |
 | `organization_schema` | The home page's JSON-LD has an Organization, or a type stores use for themselves such as OnlineStore. |
 | `ai_snippet_directives` | No robots meta tag or `X-Robots-Tag` header on the home or product page sets `nosnippet` or a `max-snippet` limit. |
-| `content_in_raw_html` | The product page's text, without scripts, has the product's name and displayed price. |
+| `content_in_raw_html` | The product page's text, without scripts or comments, has the product's name and its price as a whole amount. |
 | `ucp_profile` | With UCP on: `/.well-known/ucp` is served and names a REST endpoint. |
 | `ucp_endpoints_live` | With UCP on: a catalog search POSTed to that endpoint, or WooCommerce's when there is no profile, answers with a product list. |
 
-robots.txt is loaded from the store, so a file at the site root and a host's changes count. When the store can't load it, or answers with an error or a login page, it is read as WordPress serves it: the file at the site root, or the `robots_txt` filter output with pretty permalinks. So the robots.txt checks always give an answer; the other checks can be "couldn't check". Checks on the home and product page read the ones that loaded. The home page loads first; when it can't be reached, the scan makes no more requests, so a store that can't reach itself waits for one timeout. The product checks load one product page: the newest published, visible product without a password, among the five newest. With no such product, or when its page doesn't answer 200, they are "couldn't check".
+robots.txt is loaded from the host root, so a file at the site root and a host's changes count. A timeout, an error status, or an HTML page is "couldn't check" for the robots.txt checks. The sitemap check is "couldn't check" when robots.txt could not be read, or a candidate sitemap could not be loaded, and no fetched sitemap names products. A category sitemap does not count. Checks on the home and product page read the ones that loaded. The home page loads first; when it can't be reached, the scan makes no more requests, so a store that can't reach itself waits for one timeout. The product checks load one product page: the newest published, visible product without a password, among the five newest. With no such product, or when its page doesn't answer 200, they are "couldn't check".
 
 ## Report format
 
@@ -90,7 +90,7 @@ array(
 	'generated_at' => '2026-10-28T12:00:00+00:00',
 	'products'            => 120,  // Published simple and variable products checked.
 	'hidden_from_catalog' => 4,    // Not checked: catalog visibility "Search results only" or "Hidden", the merchant's choice.
-	'unsupported_types'   => 6,    // Not checked: grouped, external, subscription, bundle and other types agents don't support yet.
+	'unsupported_types'   => 6,    // Not checked: grouped, external, subscription, bundle and other types agents can find but can't add to a cart yet.
 	'store_checks' => array(
 		// blocks: 'listing' (every product on every channel), 'ucp' (the catalog for UCP agents) or 'checkout' (agent orders).
 		// ok: true, false, or null when a store output check couldn't load the page.
@@ -127,6 +127,16 @@ array(
 
 `AgentReadiness::check_product( $product )` judges one product as the scan does: each failing check with its field and effect per channel for that product (after per-product exceptions such as a partly priced variable product), and the product's status per channel (`not_listable`, `with_gaps`, `complete`). It returns null for products the scan leaves out, and judges a variation by its parent. Extensions that rank or fix products one at a time use it, since the stored report keeps only counts and up to 10 example ids per check.
 
+## Rules file
+
+Channel specs change faster than WooCommerce releases, so each background scan first fetches a published rules file (`RemoteRules`). Only a GET of the file is made; no store data is sent. The `woocommerce_agent_readiness_rules_url` filter changes the URL; an empty URL turns the fetch off. With no stored file, or a failed fetch, the bundled checks run.
+
+The file has a `version` and a `checks` object. The ids in `checks` are the checks that run, and each one has to match a check shipped in code. An id the file leaves out does not run. An id code does not know, an unknown channel, or an effect other than `not_listable` or `gaps` is dropped. A check left with no valid channel does not run. With no stored file, or a file that names nothing this code can run, the bundled checks run. A failed or malformed fetch keeps the last good copy (option `woocommerce_agent_readiness_remote_rules`).
+
+Per check, `channels` maps a channel id to the feed field and the effect, the same shape as the `woocommerce_agent_readiness_rules` filter. A channel entry may carry `effect_from` (`{ "2027-01-31": "not_listable" }`) for a spec change announced ahead. The filter runs last, so it can still drop a check or put a bundled one back. The file cannot add a check the code has never seen: that still needs a class.
+
+`rules.json` in this directory is the file to publish. It lists every check the code has today, so the first publish changes nothing. Removing an id there turns that check off without a WooCommerce release. It will be served from `https://woocommerce.com/wp-json/wccom/agent-readiness/1.0/rules.json`, the same host as the payment gateway suggestions (`wccom-plugins` on WooCommerce.com).
+
 ## Background scan and REST
 
 "Run check" on the Agentic commerce settings page, or `POST wc/v3/agent-readiness/scan`, queues the scan in Action Scheduler (`ScheduledScan`). The report is stored in the `woocommerce_agent_readiness_report` option (not autoloaded). Each run schedules the next one a day later, before scanning, so a failed scan doesn't stop the daily refresh; a run that finds the feature disabled does. If a queued scan still hasn't started 10 minutes after it was due and no other scheduled action has finished in that time (Action Scheduler isn't running), the next "Run check" or `POST` runs the scan in that request.
@@ -160,9 +170,7 @@ Tracks events: `agentic_commerce_ucp_toggled` (`enabled`) and `agentic_commerce_
 
 ## Updating rules
 
-The per-channel field and effect live in each check's `channels()`. The final map passes through the `woocommerce_agent_readiness_rules` filter, keyed by check id, so it can change without a release. Removing a check id stops that check. Unknown channels and effects are dropped.
-
-Next step, out of scope here: fetch the rules map from a remote JSON spec with the bundled `channels()` as the fallback, the way core polls remote specs for payment and marketing suggestions with bundled defaults.
+The per-channel field and effect live in each check's `channels()`, and that is what runs until a rules file is stored. After that, `rules.json` is the list. The `woocommerce_agent_readiness_rules` filter still runs last. Unknown channels and effects are dropped.
 
 ## Product feeds
 

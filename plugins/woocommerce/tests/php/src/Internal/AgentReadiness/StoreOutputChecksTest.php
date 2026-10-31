@@ -87,17 +87,17 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox On a stock store that can't load its own pages, robots.txt is read as WordPress serves it and every check passes.
+	 * @testdox When the store cannot load its own pages, the robots.txt and sitemap checks are couldn't check.
 	 */
-	public function test_stock_store_passes_without_requests(): void {
+	public function test_unreachable_store_couldnt_check(): void {
 		self::block_requests();
 
 		$results = $this->results();
 
-		$this->assertTrue( $results['robots_txt_present'] );
-		$this->assertTrue( $results['robots_allows_ai_search_bots'] );
-		$this->assertTrue( $results['robots_not_blocking_llms_txt'] );
-		$this->assertTrue( $results['sitemap_lists_products'], 'The WordPress sitemap includes products' );
+		$this->assertNull( $results['robots_txt_present'] );
+		$this->assertNull( $results['robots_allows_ai_search_bots'] );
+		$this->assertNull( $results['robots_not_blocking_llms_txt'] );
+		$this->assertNull( $results['sitemap_lists_products'] );
 	}
 
 	/**
@@ -114,29 +114,29 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A robots_txt filter that blocks crawlers counts when the store can't load robots.txt.
+	 * @testdox A robots_txt filter does not stand in for a robots.txt the store did not serve.
 	 */
-	public function test_robots_txt_filter(): void {
+	public function test_robots_txt_filter_is_not_the_served_file(): void {
 		self::block_requests();
 		add_filter( 'robots_txt', static fn( $output ) => $output . "User-agent: OAI-SearchBot\nDisallow: /\n" );
 
-		$this->assertFalse( $this->results()['robots_allows_ai_search_bots'] );
+		$this->assertNull( $this->results()['robots_allows_ai_search_bots'] );
 	}
 
 	/**
-	 * @testdox With Plain permalinks and no file, or a page served for every URL, there is no robots.txt.
+	 * @testdox A 404 is no robots.txt. An HTML page and a timeout are couldn't check, not a pass.
 	 */
 	public function test_no_robots_txt(): void {
-		$this->set_permalink_structure( '' );
-		$this->serve( array() );
-		$this->assertFalse( $this->results()['robots_txt_present'] );
+		$this->serve( array( '/robots.txt' => array( 404, '' ) ) );
+		$missing = $this->results();
+		$this->assertFalse( $missing['robots_txt_present'] );
+		$this->assertTrue( $missing['robots_allows_ai_search_bots'], 'A missing file blocks nothing' );
 
-		$this->set_permalink_structure( '/%postname%/' );
 		remove_all_filters( 'pre_http_request' );
 		$this->serve( array( '/robots.txt' => array( 200, '<!doctype html><title>Shop</title>' ) ) );
-		$results = $this->results();
-		$this->assertFalse( $results['robots_txt_present'] );
-		$this->assertTrue( $results['robots_allows_ai_search_bots'], 'No robots.txt blocks nothing' );
+		$html = $this->results();
+		$this->assertNull( $html['robots_txt_present'] );
+		$this->assertNull( $html['robots_allows_ai_search_bots'] );
 	}
 
 	/**
@@ -208,6 +208,18 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 		$this->assertFalse( $this->results()['sitemap_lists_products'], 'A page that is not a sitemap does not count' );
 
 		remove_all_filters( 'pre_http_request' );
+		$category_sitemap = home_url( '/wp-sitemap-taxonomies-product_cat-1.xml' );
+		$this->serve(
+			array(
+				'/robots.txt'                              => array( 200, "User-agent: *\nDisallow:\nSitemap: $category_sitemap\n" ),
+				'/wp-sitemap-taxonomies-product_cat-1.xml' => array( 200, '<sitemapindex><sitemap><loc>' . $category_sitemap . '</loc></sitemap></sitemapindex>' ),
+				'/sitemap_index.xml'                       => array( 404, '' ),
+				'/sitemap.xml'                             => array( 404, '' ),
+			)
+		);
+		$this->assertFalse( $this->results()['sitemap_lists_products'], 'A product category sitemap does not list products' );
+
+		remove_all_filters( 'pre_http_request' );
 		self::block_requests();
 		$this->assertNull( $this->results()['sitemap_lists_products'] );
 	}
@@ -277,6 +289,26 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The product page checks skip a newer product of a type the report doesn't check.
+	 */
+	public function test_product_checks_skip_unchecked_types(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_image_id( self::factory()->attachment->create_object( array( 'file' => 'image.jpg' ) ) );
+		$product->save();
+		$this->serve( array( self::path_of( $product ) => array( 200, self::page_with( array( self::core_product_jsonld( $product ) ) ) ) ) );
+		$grouped = WC_Helper_Product::create_grouped_product();
+		wp_update_post(
+			array(
+				'ID'            => $grouped->get_id(),
+				'post_date'     => gmdate( 'Y-m-d H:i:s', time() + HOUR_IN_SECONDS ),
+				'post_date_gmt' => gmdate( 'Y-m-d H:i:s', time() + HOUR_IN_SECONDS ),
+			)
+		);
+
+		$this->assertSame( array( true, true, true ), $this->product_results() );
+	}
+
+	/**
 	 * @testdox Product JSON-LD from an SEO plugin, in a @graph with its own types and offer list, passes in place of core's.
 	 */
 	public function test_seo_plugin_product_jsonld_passes(): void {
@@ -311,13 +343,13 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A product page without Product JSON-LD fails all three checks; one without a price fails only the offer check.
+	 * @testdox A product page without Product JSON-LD fails only the presence check. One without a price fails only the offer check. A price written with a currency still counts.
 	 */
 	public function test_missing_product_jsonld(): void {
 		$product = WC_Helper_Product::create_simple_product();
 		$path    = self::path_of( $product );
 		$this->serve( array( $path => array( 200, self::page_with( array( array( '@type' => 'BreadcrumbList' ) ) ) ) ) );
-		$this->assertSame( array( false, false, false ), $this->product_results() );
+		$this->assertSame( array( false, null, null ), $this->product_results() );
 
 		remove_all_filters( 'pre_http_request' );
 		$no_price = array(
@@ -331,6 +363,11 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 		);
 		$this->serve( array( $path => array( 200, self::page_with( array( $no_price ) ) ) ) );
 		$this->assertSame( array( true, true, false ), $this->product_results() );
+
+		remove_all_filters( 'pre_http_request' );
+		$no_price['offers']['price'] = '10.00 USD';
+		$this->serve( array( $path => array( 200, self::page_with( array( $no_price ) ) ) ) );
+		$this->assertSame( array( true, true, true ), $this->product_results(), 'A price with a currency code counts' );
 	}
 
 	/**

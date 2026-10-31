@@ -104,8 +104,9 @@ class StoreResponses {
 	}
 
 	/**
-	 * The newest published product shoppers can find, or null when there is none. Password protected
-	 * products are skipped, since their page shows a form instead of the product; only the five newest are looked at.
+	 * The newest published product of a type the report checks that shoppers can find, or null when there is none.
+	 * Password protected products are skipped, since their page shows a form instead of the product; only the five
+	 * newest are looked at.
 	 */
 	public function product(): ?\WC_Product {
 		if ( null === $this->product ) {
@@ -114,6 +115,7 @@ class StoreResponses {
 				array(
 					'status'     => ProductStatus::PUBLISH,
 					'visibility' => CatalogVisibility::VISIBLE,
+					'type'       => ProductScan::SUPPORTED_TYPES,
 					'limit'      => 5,
 					'orderby'    => 'date',
 					'order'      => 'DESC',
@@ -160,6 +162,7 @@ class StoreResponses {
 
 	/**
 	 * Request a URL, following redirects that stay on the store's host.
+	 * A redirect to a URL with a query string is not followed.
 	 *
 	 * @param string $url URL.
 	 * @return array{status:int,body:string,headers:array<string,string>}|null
@@ -178,6 +181,9 @@ class StoreResponses {
 				return $response;
 			}
 			$url = \WP_Http::make_absolute_url( $location, $url );
+			if ( is_string( wp_parse_url( $url, PHP_URL_QUERY ) ) ) {
+				return null;
+			}
 		}
 		return null;
 	}

@@ -268,7 +268,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 			),
 			array(
 				'count' => (int) ( $report['unsupported_types'] ?? 0 ),
-				'label' => __( 'Product type not supported yet', 'woocommerce' ),
+				'label' => __( 'Product type agents can\'t sell yet', 'woocommerce' ),
 				'url'   => $list_url( array( 'product_type' => implode( ',', $this->unsupported_product_types() ) ) ),
 			),
 		);
@@ -284,7 +284,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 			);
 		}
 		echo '</ul>';
-		echo '<p class="description">' . esc_html__( 'Supported now: simple and variable products. Grouped, external/affiliate, subscription, booking and bundle products aren\'t shown to agents yet.', 'woocommerce' ) . '</p>';
+		echo '<p class="description">' . esc_html__( 'Agents can sell simple and variable products. They may find grouped, external/affiliate, subscription, booking and bundle products, but can\'t add them to a cart yet, so these aren\'t checked.', 'woocommerce' ) . '</p>';
 	}
 
 	/**
@@ -469,6 +469,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 			UcpSwitch::STATUS_OFF             => array( 'off', __( 'Off', 'woocommerce' ) ),
 			UcpSwitch::STATUS_NEEDS_ATTENTION => array( 'fix', __( 'Needs attention', 'woocommerce' ) ),
 		);
+		$launched = array_column( $checks, 'ok', 'id' )['launched'] ?? true;
 		$checks   = array_filter( $checks, static fn( array $check ): bool => 'ucp_on' !== $check['id'] );
 		?>
 		<h2><?php esc_html_e( 'Status', 'woocommerce' ); ?></h2>
@@ -510,7 +511,13 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 						</td>
 						<td>
 							<?php if ( null === $check['ok'] ) : ?>
-								<?php esc_html_e( 'Your store could not load its own page. The next check tries again.', 'woocommerce' ); ?>
+								<?php
+								if ( $launched ) {
+									esc_html_e( 'Your store could not load its own page. The next check tries again.', 'woocommerce' );
+								} else {
+									esc_html_e( 'Launch your store to run this check.', 'woocommerce' );
+								}
+								?>
 							<?php elseif ( ! $check['ok'] && '' === $check['fix_url'] ) : ?>
 								<?php echo esc_html( $check['fix'] ); ?>
 							<?php elseif ( ! $check['ok'] ) : ?>

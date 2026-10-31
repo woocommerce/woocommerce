@@ -110,6 +110,16 @@ class StoreResponsesTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A redirect to a query string on the store host is not requested.
+	 */
+	public function test_redirect_with_query_string_is_not_followed(): void {
+		$this->serve( array( home_url( '/go' ) => self::response( 302, '', array( 'Location' => '/?add-to-cart=12' ) ) ) );
+
+		$this->assertNull( ( new StoreResponses( true ) )->get( '/go' ) );
+		$this->assertSame( array( home_url( '/go' ) ), $this->requested );
+	}
+
+	/**
 	 * @testdox A redirect loop on the store's host gives up after two redirects.
 	 */
 	public function test_redirect_loop_gives_up(): void {
