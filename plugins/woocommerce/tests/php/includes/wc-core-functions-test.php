@@ -175,6 +175,153 @@ class WC_Core_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Shop subpage rules follow the persisted base despite language filters.
+	 * @testWith ["", "shop"]
+	 *           ["woocommerce_get_shop_page_id", "shop"]
+	 *           ["option_woocommerce_shop_page_id", "shop"]
+	 *           ["woocommerce_get_shop_page_id", "boutique"]
+	 *           ["option_woocommerce_shop_page_id", "boutique"]
+	 *
+	 * @param string $shop_filter Filter translating the Shop page ID.
+	 * @param string $base       Persisted product base.
+	 */
+	public function test_wc_fix_rewrite_rules_ignores_request_language( string $shop_filter, string $base ): void {
+		$shop_ids = array();
+		foreach ( array( 'shop', 'boutique' ) as $slug ) {
+			$shop_ids[ $slug ] = self::factory()->post->create(
+				array(
+					'post_type' => 'page',
+					'post_name' => $slug,
+				)
+			);
+			$child_id          = self::factory()->post->create(
+				array(
+					'post_type'   => 'page',
+					'post_name'   => 'collection',
+					'post_parent' => $shop_ids[ $slug ],
+				)
+			);
+			self::factory()->post->create(
+				array(
+					'post_type'   => 'page',
+					'post_name'   => 'details',
+					'post_parent' => $child_id,
+				)
+			);
+		}
+		update_option( 'woocommerce_shop_page_id', $shop_ids['shop'] );
+		update_option( 'woocommerce_permalinks', array( 'product_base' => '/' . $base . '/%product_cat%' ) );
+
+		if ( '' !== $shop_filter ) {
+			add_filter( $shop_filter, static fn() => $shop_ids['boutique'] );
+		}
+		add_action(
+			'parse_query',
+			static function ( $query ) {
+				if ( 'page' === $query->get( 'post_type' ) ) {
+					$query->set( 'post__in', array( 0 ) );
+				}
+			}
+		);
+
+		$this->assertSame( array(), wc_get_page_children( $shop_ids[ $base ] ), 'The public page helper should still honor query filters.' );
+		$rules = wc_fix_rewrite_rules( array() );
+		$this->assertSame( 'index.php?pagename=' . $base . '/collection', $rules[ $base . '/collection/?$' ] ?? null );
+		$this->assertArrayHasKey( $base . '/collection/details/?$', $rules, 'Nested descendants need rules too.' );
+		$other_base = 'shop' === $base ? 'boutique' : 'shop';
+		if ( 'shop' === $base && '' !== $shop_filter ) {
+			$this->assertArrayHasKey( $other_base . '/collection/?$', $rules, 'Keep the existing filtered Shop rules alongside the stored base.' );
+		} else {
+			$this->assertArrayNotHasKey( $other_base . '/collection/?$', $rules, 'Do not add rules for an unrelated stored Shop path.' );
+		}
+	}
+
+	/**
+	 * @testdox Shop subpage rules skip pages in a status excluded from search and read only Shop descendants.
+	 */
+	public function test_wc_fix_rewrite_rules_skips_excluded_statuses_and_unrelated_pages(): void {
+		global $wpdb;
+
+		register_post_status( 'wc_hidden', array( 'exclude_from_search' => true ) );
+		$shop_page_id = $this->create_shop_page_tree();
+		self::factory()->post->create(
+			array(
+				'post_parent' => $shop_page_id,
+				'post_type'   => 'page',
+				'post_name'   => 'members',
+				'post_status' => 'wc_hidden',
+			)
+		);
+		update_option( 'woocommerce_permalinks', array( 'product_base' => '/shop' ) );
+
+		$page_queries = array();
+		$query_filter = static function ( $query ) use ( &$page_queries, $wpdb ) {
+			if ( false !== strpos( $query, "FROM {$wpdb->posts} WHERE post_type = 'page'" ) ) {
+				$page_queries[] = $query;
+			}
+
+			return $query;
+		};
+		add_filter( 'query', $query_filter );
+
+		try {
+			$rules = wc_fix_rewrite_rules( array() );
+		} finally {
+			remove_filter( 'query', $query_filter );
+			unset( $GLOBALS['wp_post_statuses']['wc_hidden'] );
+		}
+
+		$this->assertArrayHasKey( 'shop/sale/?$', $rules, 'Searchable Shop children should keep their rules.' );
+		$this->assertArrayNotHasKey( 'shop/members/?$', $rules, 'A status excluded from search should not receive a rule.' );
+		$this->assertNotEmpty( $page_queries, 'The descendant lookup should query pages directly.' );
+		foreach ( $page_queries as $page_query ) {
+			$this->assertStringContainsString( 'post_parent IN', $page_query, 'The descendant lookup should be limited to children of known parents.' );
+		}
+	}
+
+	/**
+	 * @testdox Editing a child of the stored Shop page flushes rewrite rules even when the Shop page is filtered.
+	 * @testWith ["woocommerce_get_shop_page_id"]
+	 *           ["option_woocommerce_shop_page_id"]
+	 *
+	 * @param string $shop_filter Filter translating the Shop page ID.
+	 */
+	public function test_flush_rewrite_rules_on_shop_page_save_uses_the_stored_shop_page( string $shop_filter ): void {
+		$boutique_page_id = $this->create_shop_page_tree( 0, 'boutique' );
+		$shop_page_id     = $this->create_shop_page_tree();
+		$grandchild_id    = self::factory()->post->create(
+			array(
+				'post_parent' => self::factory()->post->create(
+					array(
+						'post_parent' => $shop_page_id,
+						'post_type'   => 'page',
+					)
+				),
+				'post_type'   => 'page',
+			)
+		);
+		$unrelated_id     = self::factory()->post->create( array( 'post_type' => 'page' ) );
+		add_filter( $shop_filter, static fn() => $boutique_page_id );
+		remove_all_actions( 'woocommerce_flush_rewrite_rules' );
+		$flushes_before = did_action( 'woocommerce_flush_rewrite_rules' );
+		set_current_screen( 'page' );
+		$_GET['action'] = 'edit';
+
+		try {
+			$_GET['post'] = $unrelated_id;
+			flush_rewrite_rules_on_shop_page_save();
+			$this->assertSame( $flushes_before, did_action( 'woocommerce_flush_rewrite_rules' ), 'An unrelated page should not flush rewrite rules.' );
+
+			$_GET['post'] = $grandchild_id;
+			flush_rewrite_rules_on_shop_page_save();
+			$this->assertSame( $flushes_before + 1, did_action( 'woocommerce_flush_rewrite_rules' ), 'A descendant of the stored Shop page should flush rewrite rules.' );
+		} finally {
+			unset( $_GET['post'], $_GET['action'] );
+			set_current_screen( 'front' );
+		}
+	}
+
+	/**
 	 * Test wc_ascii_uasort_comparison() function.
 	 */
 	public function test_wc_ascii_uasort_comparison() {
