@@ -1556,7 +1556,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$response = $this->run_ability_response( 'woocommerce/product-create', $this->get_shirt_input() );
 
 		$this->assertSame( 409, $response->get_status() );
-		$this->assertSame( 'test_range_refused', $response->get_data()['code'] );
+		$this->assertSame( 'test-ext:test_range_refused', $response->get_data()['code'] );
 		$this->assertSame( 'test-ext', $response->get_data()['data']['namespace'] );
 		$this->assertSame( 0, wc_get_product_id_by_sku( 'shirt-s' ) );
 		$this->assertSame(

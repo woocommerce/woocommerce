@@ -585,7 +585,8 @@ class ExtensibleAbilities {
 	 *                               `$context['input']` is the input of the call, so a sync can skip work
 	 *                               when the call did not write its fields. It returns a WP_Error to
 	 *                               refuse, and then every save of the call is undone. A thrown exception
-	 *                               refuses it too. The error gets the namespace in its data. A sync must not
+	 *                               refuses it too. The client sees the code prefixed with the namespace, as
+	 *                               `<namespace>:<code>`, and the error gets the namespace in its data. A sync must not
 	 *                               send email or make HTTP requests, because an undo does not reach outside
 	 *                               the database.
 	 * }
