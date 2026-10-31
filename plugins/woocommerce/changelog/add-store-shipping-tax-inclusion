@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add a store setting for entering Flat rate and Local pickup costs including tax, with explicit support for extensions.
