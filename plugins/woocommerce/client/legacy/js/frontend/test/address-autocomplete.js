@@ -967,6 +967,10 @@ describe( 'Address Suggestions Component', () => {
 	} );
 
 	describe( 'Address Selection', () => {
+		afterEach( () => {
+			jest.useRealTimers();
+		} );
+
 		test( 'should populate address fields when address is selected', async () => {
 			// Setup suggestions
 			billingAddressInput.value = '123';
@@ -1001,6 +1005,111 @@ describe( 'Address Suggestions Component', () => {
 			expect( document.getElementById( 'billing_state' ).value ).toBe(
 				'CA'
 			);
+		} );
+
+		test( 'should dispatch bubbling change events so delegated listeners see the filled fields', async () => {
+			jest.useFakeTimers();
+
+			const changedIds = [];
+			const onChange = ( event ) => changedIds.push( event.target.id );
+			document.body.addEventListener( 'change', onChange );
+
+			billingAddressInput.value = '123';
+			billingAddressInput.focus();
+			billingAddressInput.dispatchEvent( new Event( 'input' ) );
+			await jest.advanceTimersByTimeAsync( 150 );
+
+			document
+				.querySelector( '#address_suggestions_billing .suggestions-list li' )
+				.click();
+			await jest.advanceTimersByTimeAsync( 250 );
+
+			document.body.removeEventListener( 'change', onChange );
+
+			expect( changedIds ).toEqual(
+				expect.arrayContaining( [
+					'billing_address_1',
+					'billing_city',
+					'billing_postcode',
+					'billing_state',
+					'billing_country',
+				] )
+			);
+		} );
+
+		test( 'should bubble the native change event once for Select2 fields without a separate jQuery trigger', async () => {
+			jest.useFakeTimers();
+
+			const jQueryTrigger = jest.fn();
+			window.jQuery = jest.fn( ( element ) => ( {
+				hasClass: jest.fn(
+					( className ) =>
+						className === 'select2-hidden-accessible' &&
+						element.id === 'billing_country'
+				),
+				trigger: jQueryTrigger,
+				select2: jest.fn(),
+				on: jest.fn(),
+			} ) );
+
+			const changedIds = [];
+			const onChange = ( event ) => changedIds.push( event.target.id );
+			document.body.addEventListener( 'change', onChange );
+
+			billingAddressInput.value = '123';
+			billingAddressInput.focus();
+			billingAddressInput.dispatchEvent( new Event( 'input' ) );
+			await jest.advanceTimersByTimeAsync( 150 );
+
+			document
+				.querySelector( '#address_suggestions_billing .suggestions-list li' )
+				.click();
+			await jest.advanceTimersByTimeAsync( 250 );
+
+			document.body.removeEventListener( 'change', onChange );
+
+			// Native listeners and Select2's own listener both get one bubbling event.
+			expect(
+				changedIds.filter( ( id ) => id === 'billing_country' )
+			).toHaveLength( 1 );
+			// A second jQuery-triggered event would run delegated jQuery handlers twice.
+			expect( jQueryTrigger ).not.toHaveBeenCalledWith( 'change' );
+		} );
+
+		test( 'should ask the checkout to refresh once the address fields are filled', async () => {
+			jest.useFakeTimers();
+
+			let cityAtRefresh;
+			const jQueryTrigger = jest.fn( ( event ) => {
+				if ( event === 'update_checkout' ) {
+					cityAtRefresh = document.getElementById( 'billing_city' ).value;
+				}
+			} );
+			window.jQuery = jest.fn( () => ( {
+				hasClass: jest.fn( () => false ),
+				trigger: jQueryTrigger,
+				select2: jest.fn(),
+				on: jest.fn(),
+			} ) );
+
+			billingAddressInput.value = '123';
+			billingAddressInput.focus();
+			billingAddressInput.dispatchEvent( new Event( 'input' ) );
+			await jest.advanceTimersByTimeAsync( 150 );
+
+			document
+				.querySelector( '#address_suggestions_billing .suggestions-list li' )
+				.click();
+
+			// Before the delayed fields are filled there is no refresh request.
+			expect( jQueryTrigger ).not.toHaveBeenCalledWith( 'update_checkout' );
+
+			await jest.advanceTimersByTimeAsync( 250 );
+
+			expect( document.getElementById( 'billing_city' ).value ).toBe( 'City' );
+			expect( jQueryTrigger ).toHaveBeenCalledWith( 'update_checkout' );
+			// The refresh must run after the fields are filled, not before.
+			expect( cityAtRefresh ).toBe( 'City' );
 		} );
 
 		test( 'should update value attribute of address fields when address is selected', async () => {
