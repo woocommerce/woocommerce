@@ -271,6 +271,58 @@ class WC_Helper_Updater_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Cached update data should be reused only while its presigned package links are still valid.
+	 *
+	 * @testWith [10, 0]
+	 *           [11.5, 1]
+	 *
+	 * @param float $age_in_hours      How long ago the cached update check was made.
+	 * @param int   $expected_requests How many update-check requests are expected.
+	 */
+	public function test_update_check_reuses_cache_only_within_package_link_lifetime( float $age_in_hours, int $expected_requests ): void {
+		$payload = array(
+			123 => array(
+				'product_id' => 123,
+				'file_id'    => 'abc123',
+			),
+		);
+
+		ksort( $payload );
+
+		set_transient(
+			'_woocommerce_helper_updates',
+			array(
+				'hash'     => md5( wp_json_encode( $payload ) ),
+				'updated'  => time() - (int) ( $age_in_hours * HOUR_IN_SECONDS ),
+				'products' => array( 123 => array( 'version' => '1.2.3' ) ),
+				'errors'   => array(),
+			),
+			WEEK_IN_SECONDS
+		);
+
+		$requests  = 0;
+		$http_mock = static function () use ( &$requests ) {
+			++$requests;
+			return array(
+				'response' => array(
+					'code'    => 200,
+					'message' => 'OK',
+				),
+				'body'     => wp_json_encode( array( 123 => array( 'version' => '1.3.0' ) ) ),
+			);
+		};
+		add_filter( 'pre_http_request', $http_mock );
+
+		try {
+			$this->call_update_check( $payload );
+		} finally {
+			remove_filter( 'pre_http_request', $http_mock );
+		}
+
+		$this->assertSame( $expected_requests, $requests );
+	}
+
+	/**
 	 * @testdox A rate-limited update check should keep the cached products instead of caching the empty result.
 	 */
 	public function test_update_check_preserves_cache_when_rate_limited(): void {

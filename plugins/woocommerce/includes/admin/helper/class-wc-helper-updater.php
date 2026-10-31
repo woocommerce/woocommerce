@@ -1097,13 +1097,18 @@ class WC_Helper_Updater {
 
 	/**
 	 * Whether cached update data is recent enough to use without a new check. The cache is kept
-	 * for a week so a failed check has something to fall back on, but it's only fresh for 12 hours.
+	 * for a week so a failed check has something to fall back on, but it's only fresh for 11 hours.
+	 *
+	 * The package URLs in the response are presigned links that WooCommerce.com sets to expire
+	 * 12 hours after the check, so the cache has to stop being fresh before they do. Otherwise
+	 * a twice-daily update run, which starts about 12 hours after the last check, could be handed
+	 * links that have just expired.
 	 *
 	 * @param array $data The cached update data.
 	 * @return bool
 	 */
 	private static function is_fresh_update_data( array $data ): bool {
-		return isset( $data['updated'] ) && is_numeric( $data['updated'] ) && (int) $data['updated'] > time() - 12 * HOUR_IN_SECONDS;
+		return isset( $data['updated'] ) && is_numeric( $data['updated'] ) && (int) $data['updated'] > time() - 11 * HOUR_IN_SECONDS;
 	}
 
 	/**
