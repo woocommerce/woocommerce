@@ -29,7 +29,7 @@ class TestOrderStatusAbility extends ActionableAbility {
 	 * @param array $input Ability input.
 	 * @return \WC_Order|\WP_Error
 	 */
-	public function load( array $input ) {
+	protected function load( array $input ) {
 		$order = wc_get_order( $input['id'] );
 		return $order ? $order : new \WP_Error( 'test_not_found', 'Not found.', array( 'status' => 404 ) );
 	}
@@ -41,7 +41,7 @@ class TestOrderStatusAbility extends ActionableAbility {
 	 * @param array     $input   Ability input.
 	 * @return null
 	 */
-	public function change( $subject, array $input ) {
+	protected function change( $subject, array $input ) {
 		$subject->set_status( $input['status'] );
 		return null;
 	}
@@ -52,7 +52,7 @@ class TestOrderStatusAbility extends ActionableAbility {
 	 * @param \WC_Order $subject Saved order.
 	 * @return array
 	 */
-	public function prepare_response( $subject ) {
+	protected function prepare_response( $subject ) {
 		return array( 'status' => $subject->get_status() );
 	}
 }
