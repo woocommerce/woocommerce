@@ -38,6 +38,13 @@ class AgentReadiness {
 	private StoreConditions $store_conditions;
 
 	/**
+	 * Store checks that read what the store returns.
+	 *
+	 * @var StoreOutputChecks
+	 */
+	private StoreOutputChecks $store_output_checks;
+
+	/**
 	 * Rules from the published rules file.
 	 *
 	 * @var RemoteRules
@@ -63,12 +70,14 @@ class AgentReadiness {
 	 *
 	 * @internal
 	 *
-	 * @param StoreConditions $store_conditions Store-wide conditions.
-	 * @param RemoteRules     $remote_rules     Rules from the published rules file.
+	 * @param StoreConditions   $store_conditions    Store-wide conditions.
+	 * @param StoreOutputChecks $store_output_checks Store checks that read what the store returns.
+	 * @param RemoteRules       $remote_rules        Rules from the published rules file.
 	 */
-	final public function init( StoreConditions $store_conditions, RemoteRules $remote_rules ): void {
-		$this->store_conditions = $store_conditions;
-		$this->remote_rules     = $remote_rules;
+	final public function init( StoreConditions $store_conditions, StoreOutputChecks $store_output_checks, RemoteRules $remote_rules ): void {
+		$this->store_conditions    = $store_conditions;
+		$this->store_output_checks = $store_output_checks;
+		$this->remote_rules        = $remote_rules;
 	}
 
 	/**
@@ -220,7 +229,7 @@ class AgentReadiness {
 			'products'            => $scan->products(),
 			'hidden_from_catalog' => $scan->hidden_from_catalog(),
 			'unsupported_types'   => $scan->unsupported_types(),
-			'store_checks'        => $this->store_conditions->all(),
+			'store_checks'        => array_merge( $this->store_conditions->all(), $this->store_output_checks->all() ),
 			'channels'            => $scan->channel_totals(),
 			'checks'              => $checks,
 			'truncated'           => $scan->truncated(),

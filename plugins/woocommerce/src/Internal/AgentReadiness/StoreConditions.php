@@ -13,8 +13,9 @@ defined( 'ABSPATH' ) || exit;
  * whatever the product data. The readiness report and the Agentic commerce
  * settings page both read this list, so they never disagree.
  *
- * `ok` says whether the store is clear of the problem the label names;
- * `name` is the check worded as its passing state.
+ * `ok` says whether the store is clear of the problem the label names, or is
+ * null when it couldn't be checked (StoreOutputChecks); `name` is the check
+ * worded as its passing state.
  * `blocks` says what a failing condition stops: `listing` hides every product
  * on every channel, `ucp` hides the catalog from agents that use UCP,
  * `checkout` stops or weakens agent orders. A failing `required` condition
@@ -179,13 +180,13 @@ class StoreConditions {
 	/**
 	 * Ids of the required conditions that fail.
 	 *
-	 * @param array<int, array{id:string,ok:bool,level:string}>|null $conditions Conditions from all(), or null to check them now.
+	 * @param array<int, array{id:string,ok:bool|null,level:string}>|null $conditions Conditions from all(), or null to check them now.
 	 * @return array<int, string>
 	 */
 	public function failing_required( ?array $conditions = null ): array {
 		$ids = array();
 		foreach ( $conditions ?? $this->all() as $condition ) {
-			if ( self::LEVEL_REQUIRED === $condition['level'] && ! $condition['ok'] ) {
+			if ( self::LEVEL_REQUIRED === $condition['level'] && false === $condition['ok'] ) {
 				$ids[] = $condition['id'];
 			}
 		}

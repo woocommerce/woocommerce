@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\AgentReadiness;
 use Automattic\WooCommerce\Internal\AgentReadiness\AgentReadiness;
 use Automattic\WooCommerce\Internal\AgentReadiness\RemoteRules;
 use Automattic\WooCommerce\Internal\AgentReadiness\StoreConditions;
+use Automattic\WooCommerce\Internal\AgentReadiness\StoreOutputChecks;
 use Automattic\WooCommerce\Internal\ComingSoon\ComingSoonHelper;
 use WC_Helper_Product;
 use WC_Unit_Test_Case;
@@ -116,7 +117,9 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 		$store_conditions = new StoreConditions();
 		$store_conditions->init( new ComingSoonHelper() );
 		$agent_readiness = new AgentReadiness();
-		$agent_readiness->init( $store_conditions, $this->sut );
+		$output_checks = new StoreOutputChecks();
+		$output_checks->init( new ComingSoonHelper() );
+		$agent_readiness->init( $store_conditions, $output_checks, $this->sut );
 		return $agent_readiness;
 	}
 
