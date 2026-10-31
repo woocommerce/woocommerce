@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add a "Split by cart item value" shipping tax class, on for new stores, so shipping tax follows the mix of items in the basket.

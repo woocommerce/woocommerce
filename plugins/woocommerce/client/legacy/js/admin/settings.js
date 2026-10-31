@@ -28,6 +28,15 @@
 			} )
 			.trigger( 'change' );
 
+		// Shipping tax split help text
+		$( 'select#woocommerce_shipping_tax_class' )
+			.on( 'change', function () {
+				$( 'tr.wc-settings-row-shipping-tax-split-help' ).toggle(
+					':split_by_item_value' === $( this ).val()
+				);
+			} )
+			.trigger( 'change' );
+
 		// Stock management
 		$( 'input#woocommerce_manage_stock' )
 			.on( 'change', function () {
