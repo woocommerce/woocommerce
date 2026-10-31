@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix tax classes with a custom slug not opening correctly in Tax settings, which could save rates to the wrong class.
