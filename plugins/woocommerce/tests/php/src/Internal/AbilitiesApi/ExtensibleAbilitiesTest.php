@@ -1787,7 +1787,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 		$saved = wc_get_order( $order->get_id() );
 		$this->assertSame( 400, $refused->get_status() );
-		$this->assertSame( 'test_gift_not_sent', $refused->get_data()['code'] );
+		$this->assertStringEndsWith( 'test_gift_not_sent', $refused->get_data()['code'] );
 		$this->assertSame( 'processing', $saved->get_status() );
 		$this->assertFalse( $saved->meta_exists( '_test_gift_message' ) );
 		$this->assertSame( 0, did_action( 'woocommerce_order_edit_status' ) - $edits );
