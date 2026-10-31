@@ -261,4 +261,153 @@ class WC_User_Functions_Tests extends WC_Unit_Test_Case {
 
 		$customer->delete();
 	}
+
+	/**
+	 * Timeframe totals reject invalid IDs while preserving guest and unfiltered behavior.
+	 */
+	public function test_timeframe_total_spent_rejects_invalid_customer_ids(): void {
+		foreach ( array( false, true ) as $hpos_enabled ) {
+			$this->toggle_cot_feature_and_usage( $hpos_enabled );
+
+			$storage_suffix = $hpos_enabled ? 'hpos' : 'cpt';
+			$customer       = WC_Helper_Customer::create_customer(
+				"timeframe-negative-$storage_suffix",
+				'password',
+				"timeframe-negative-$storage_suffix@example.com"
+			);
+			$order          = WC_Helper_Order::create_order( 0, null, array( 'status' => OrderStatus::COMPLETED ) );
+			$order->set_date_paid( '2024-02-10 12:00:00' );
+			$order->set_total( 20 );
+			$order->save();
+
+			$customer_order = WC_Helper_Order::create_order(
+				$customer->get_id(),
+				null,
+				array( 'status' => OrderStatus::COMPLETED )
+			);
+			$customer_order->set_date_paid( '2024-02-10 12:00:00' );
+			$customer_order->set_total( 30 );
+			$customer_order->save();
+
+			$timeframe = array(
+				'after'  => '2024-01-01 00:00:00',
+				'before' => '2024-03-01 00:00:00',
+			);
+
+			$this->assertSame(
+				'20.00',
+				wc_get_customer_total_spent( 0, $timeframe ),
+				'Explicit guest timeframe totals should include guest orders.'
+			);
+			$this->assertSame(
+				'0.00',
+				wc_get_customer_total_spent( PHP_INT_MAX, $timeframe ),
+				'A missing positive customer ID must not receive guest timeframe totals.'
+			);
+			$this->assertSame( '30.00', wc_get_customer_total_spent( $customer->get_id(), $timeframe ) );
+			$this->assertSame(
+				'0.00',
+				wc_get_customer_total_spent( -$customer->get_id(), $timeframe ),
+				'A negative customer ID must not resolve to another customer.'
+			);
+
+			// The unfiltered all-time behavior for these IDs is established behavior and stays untouched:
+			// for IDs without a user account the cached-meta lookup returns false (not ''), which the
+			// all-time path treats as a final value, while a negative ID normalizes to its customer.
+			$this->assertSame( '0.00', wc_get_customer_total_spent( 0 ) );
+			$this->assertSame( '0.00', wc_get_customer_total_spent( PHP_INT_MAX ) );
+			$this->assertSame( '30.00', wc_get_customer_total_spent( -$customer->get_id() ) );
+
+			$order->delete( true );
+			$customer_order->delete( true );
+			$customer->delete( true );
+		}
+	}
+
+	/**
+	 * Timeframe totals stay correct when the active customer data store does not implement the timeframe interface.
+	 *
+	 * @testdox Timeframe totals remain correct when a third-party datastore only implements the established interface.
+	 */
+	public function test_customer_total_spent_timeframe_falls_back_for_legacy_datastore(): void {
+		foreach ( array( false, true ) as $hpos_enabled ) {
+			$this->toggle_cot_feature_and_usage( $hpos_enabled );
+
+			$storage_suffix = $hpos_enabled ? 'hpos' : 'cpt';
+			$customer       = WC_Helper_Customer::create_customer( "timeframe-$storage_suffix", 'password', "timeframe-$storage_suffix@example.com" );
+			$order          = WC_Helper_Order::create_order( $customer->get_id(), null, array( 'status' => OrderStatus::COMPLETED ) );
+			$order->set_date_paid( '2024-02-10 12:00:00' );
+			$order->set_total( 20 );
+			$order->save();
+
+			$timeframe = array(
+				'after'  => '2024-01-01 00:00:00',
+				'before' => '2024-03-01 00:00:00',
+			);
+
+			$legacy_store = Mockery::mock( WC_Customer_Data_Store_Interface::class . ', ' . WC_Object_Data_Store_Interface::class );
+			$legacy_store->shouldReceive( 'read' )->andReturnNull();
+			$legacy_store->shouldReceive( 'get_total_spent' )->andReturn( '999.00' );
+			$this->assertNotInstanceOf( WC_Customer_Data_Store_Timeframe_Interface::class, $legacy_store );
+
+			$filter = static function () use ( $legacy_store ) {
+				return $legacy_store;
+			};
+			add_filter( 'woocommerce_customer_data_store', $filter );
+
+			try {
+				$legacy_customer = new WC_Customer( $customer->get_id() );
+				$this->assertSame( $customer->get_id(), $legacy_customer->get_id(), "Legacy $storage_suffix datastore should preserve the customer ID." );
+				$this->assertSame( '999.00', wc_get_customer_total_spent( $customer->get_id() ), 'The all-time total still comes from the active data store.' );
+				$this->assertSame(
+					'20.00',
+					wc_get_customer_total_spent( $customer->get_id(), $timeframe ),
+					"Legacy $storage_suffix datastore should use the core timeframe fallback."
+				);
+			} finally {
+				remove_filter( 'woocommerce_customer_data_store', $filter );
+			}
+
+			// The all-time hooks must not fire for timeframe calls, whichever store is active.
+			$all_time_value_calls = 0;
+			$all_time_query_calls = 0;
+			$all_time_value_filter = static function ( $spent ) use ( &$all_time_value_calls ) {
+				++$all_time_value_calls;
+				return $spent;
+			};
+			$all_time_query_filter = static function ( $query ) use ( &$all_time_query_calls ) {
+				++$all_time_query_calls;
+				return $query;
+			};
+			add_filter( 'woocommerce_customer_get_total_spent', $all_time_value_filter );
+			add_filter( 'woocommerce_customer_get_total_spent_query', $all_time_query_filter );
+
+			try {
+				$this->assertSame( '20.00', wc_get_customer_total_spent( $customer->get_id(), $timeframe ) );
+			} finally {
+				remove_filter( 'woocommerce_customer_get_total_spent_query', $all_time_query_filter );
+				remove_filter( 'woocommerce_customer_get_total_spent', $all_time_value_filter );
+			}
+
+			$this->assertSame( 0, $all_time_value_calls );
+			$this->assertSame( 0, $all_time_query_calls );
+
+			$order->delete( true );
+			$customer->delete( true );
+		}
+	}
+
+	/**
+	 * Invalid timeframe dates surface as exceptions through the wrapper too.
+	 */
+	public function test_wc_get_customer_total_spent_timeframe_invalid_date_throws(): void {
+		$customer = WC_Helper_Customer::create_customer( 'timeframe-invalid', 'password', 'timeframe-invalid@example.com' );
+
+		try {
+			$this->expectException( InvalidArgumentException::class );
+			wc_get_customer_total_spent( $customer->get_id(), array( 'after' => 'not-a-date' ) );
+		} finally {
+			$customer->delete( true );
+		}
+	}
 }
