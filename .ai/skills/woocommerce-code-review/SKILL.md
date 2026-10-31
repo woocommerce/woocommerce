@@ -35,6 +35,11 @@ Consult the `woocommerce-backend-dev` skill for detailed standards. Using these 
 
 - ❌ **Missing validation** - Must verify state before deletion/modification ([data-integrity.md](../woocommerce-backend-dev/data-integrity.md))
 
+**Compatibility:**
+
+- ❌ **Engine- or version-sensitive code with no cross-version check** - Raw SQL using `REGEXP` or collation-sensitive matching, statements that write many rows, changes to how serialized data is read or written, or a new database migration, without the PR saying which PHP and MySQL/MariaDB versions it was checked on ([compatibility-testing.md](../woocommerce-dev-cycle/compatibility-testing.md))
+- ❌ **Keyset paging on a meta table or per-row `UPDATE` loops** - Both scale badly on large stores ([sql-query-patterns.md](../woocommerce-performance/sql-query-patterns.md), Patterns I and J)
+
 **Testing:**
 
 - ❌ **Using `$instance` in tests** - Must use `$sut` variable name ([unit-tests.md](../woocommerce-backend-dev/unit-tests.md))
