@@ -24,11 +24,11 @@ class RemovedRestAbilitiesTest extends WC_Unit_Test_Case {
 	 */
 	public function test_removed_methods_report_incorrect_usage( string $method, callable $callback ): void {
 		$this->setExpectedIncorrectUsage( $method );
-		$abilities_before = function_exists( 'wp_get_abilities' ) ? array_keys( wp_get_abilities() ) : array();
+		$abilities_before = array_keys( wp_get_abilities() );
 
 		$callback();
 
-		$abilities_after = function_exists( 'wp_get_abilities' ) ? array_keys( wp_get_abilities() ) : array();
+		$abilities_after = array_keys( wp_get_abilities() );
 		$this->assertSame( $abilities_before, $abilities_after, 'Removed methods should not register abilities' );
 	}
 

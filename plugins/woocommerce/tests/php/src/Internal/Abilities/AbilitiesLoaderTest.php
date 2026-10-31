@@ -113,7 +113,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			$this->original_action_counts[ $action ] = $wp_actions[ $action ] ?? null;
 		}
 
-		// WordPress 6.9+ requires init to have fired before the Abilities API registry can be initialized.
+		// The Abilities API registry can only be initialized after init has fired.
 		$wp_actions['init'] = max( 1, (int) ( $wp_actions['init'] ?? 0 ) ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
 		wp_set_current_user( self::$administrator_id );
@@ -145,13 +145,13 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		}
 
 		foreach ( $this->registered_ability_ids as $ability_id ) {
-			if ( function_exists( 'wp_has_ability' ) && wp_has_ability( $ability_id ) ) {
+			if ( wp_has_ability( $ability_id ) ) {
 				wp_unregister_ability( $ability_id );
 			}
 		}
 
 		foreach ( $this->registered_category_ids as $category_id ) {
-			if ( function_exists( 'wp_has_ability_category' ) && wp_has_ability_category( $category_id ) ) {
+			if ( wp_has_ability_category( $category_id ) ) {
 				wp_unregister_ability_category( $category_id );
 			}
 		}
@@ -805,10 +805,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should register WooCommerce ability categories idempotently.
 	 */
 	public function test_ability_category_registration_is_idempotent(): void {
-		if ( ! function_exists( 'wp_register_ability_category' ) || ! function_exists( 'wp_has_ability_category' ) ) {
-			$this->markTestSkipped( 'Abilities API category registry is not available.' );
-		}
-
 		$callback = static function () {
 			AbilitiesCategories::register_categories();
 			AbilitiesCategories::register_categories();
@@ -2697,10 +2693,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * Register the WooCommerce ability category for this test.
 	 */
 	private function register_woocommerce_category(): void {
-		if ( ! function_exists( 'wp_register_ability_category' ) || ! function_exists( 'wp_has_ability_category' ) ) {
-			return;
-		}
-
 		if ( wp_has_ability_category( 'woocommerce' ) ) {
 			return;
 		}
@@ -2738,7 +2730,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 */
 	private function unregister_domain_abilities(): void {
 		foreach ( self::CANONICAL_ABILITY_IDS as $ability_id ) {
-			if ( function_exists( 'wp_has_ability' ) && wp_has_ability( $ability_id ) ) {
+			if ( wp_has_ability( $ability_id ) ) {
 				wp_unregister_ability( $ability_id );
 			}
 		}
