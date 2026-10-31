@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+Comment: Agent readiness: llms.txt, meta tag, snippet, raw HTML and UCP checks, behind an experimental flag; nothing ships to merchants.
+

@@ -48,9 +48,9 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Answer requests by path from the home URL; anything else fails like a timeout.
+	 * Answer requests by path from the home URL; a null response fails like a timeout, and any other path is a 404.
 	 *
-	 * @param array<string, array{0:int,1:string}> $responses Status and body by path.
+	 * @param array<string, array{0:int,1:string}|null> $responses Status and body by path.
 	 */
 	private function serve( array $responses ): void {
 		add_filter(
@@ -58,14 +58,15 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 			static function ( $pre, $args, $url ) use ( $responses ) {
 				unset( $pre, $args );
 				$path = substr( $url, strlen( untrailingslashit( home_url() ) ) );
-				if ( ! isset( $responses[ $path ] ) ) {
+				if ( array_key_exists( $path, $responses ) && null === $responses[ $path ] ) {
 					return new \WP_Error( 'http_request_failed', 'Timed out' );
 				}
+				$response = $responses[ $path ] ?? array( 404, '' );
 				return array(
 					'headers'  => array(),
-					'body'     => $responses[ $path ][1],
+					'body'     => $response[1],
 					'response' => array(
-						'code'    => $responses[ $path ][0],
+						'code'    => $response[0],
 						'message' => '',
 					),
 					'cookies'  => array(),
@@ -89,7 +90,7 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 	 * @testdox When the store cannot load its own pages, the robots.txt and sitemap checks are couldn't check.
 	 */
 	public function test_unreachable_store_couldnt_check(): void {
-		$this->serve( array() );
+		self::block_requests();
 
 		$results = $this->results();
 
@@ -116,7 +117,7 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 	 * @testdox A robots_txt filter does not stand in for a robots.txt the store did not serve.
 	 */
 	public function test_robots_txt_filter_is_not_the_served_file(): void {
-		$this->serve( array() );
+		self::block_requests();
 		add_filter( 'robots_txt', static fn( $output ) => $output . "User-agent: OAI-SearchBot\nDisallow: /\n" );
 
 		$this->assertNull( $this->results()['robots_allows_ai_search_bots'] );
@@ -163,7 +164,8 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 		for ( $i = 1; $i <= 50; $i++ ) {
 			$robots .= 'Sitemap: ' . home_url( "/s$i.xml" ) . "\n";
 		}
-		$this->serve( array( '/robots.txt' => array( 200, $robots ) ) );
+		$served = array_fill_keys( array_map( static fn( int $i ): string => "/s$i.xml", range( 1, 50 ) ), array( 404, '' ) );
+		$this->serve( $served + array( '/robots.txt' => array( 200, $robots ) ) );
 		add_filter(
 			'pre_http_request',
 			static function ( $pre, $args, $url ) use ( &$requested ) {
@@ -177,6 +179,7 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 
 		$this->results();
 
+		$requested = array_filter( $requested, static fn( string $url ): bool => (bool) preg_match( '#(robots\.txt|\.xml)$#', $url ) );
 		$this->assertCount( 8, array_unique( $requested ), 'robots.txt, five listed sitemaps, /sitemap_index.xml and /sitemap.xml' );
 	}
 
@@ -217,7 +220,7 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 		$this->assertFalse( $this->results()['sitemap_lists_products'], 'A product category sitemap does not list products' );
 
 		remove_all_filters( 'pre_http_request' );
-		$this->serve( array() );
+		self::block_requests();
 		$this->assertNull( $this->results()['sitemap_lists_products'] );
 	}
 
@@ -281,6 +284,23 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 		}
 		$product = wc_get_product( $product->get_id() );
 		$this->serve( array( self::path_of( $product ) => array( 200, self::page_with( array( self::core_product_jsonld( $product ) ) ) ) ) );
+
+		$this->assertSame( array( true, true, true ), $this->product_results() );
+	}
+
+	/**
+	 * @testdox The product page checks skip a newer product of a type the report doesn't check.
+	 */
+	public function test_product_checks_skip_unchecked_types(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_image_id( self::factory()->attachment->create_object( array( 'file' => 'image.jpg' ) ) );
+		$product->set_date_created( time() - HOUR_IN_SECONDS );
+		$product->save();
+		$product = wc_get_product( $product->get_id() );
+		$this->serve( array( self::path_of( $product ) => array( 200, self::page_with( array( self::core_product_jsonld( $product ) ) ) ) ) );
+		$grouped = new \WC_Product_Grouped();
+		$grouped->set_name( 'Newer grouped product' );
+		$grouped->save();
 
 		$this->assertSame( array( true, true, true ), $this->product_results() );
 	}
@@ -355,6 +375,8 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 		$this->assertSame( array( null, null, null ), $this->product_results(), 'No product' );
 
 		$product = WC_Helper_Product::create_simple_product();
+		remove_all_filters( 'pre_http_request' );
+		$this->serve( array( self::path_of( $product ) => null ) );
 		$this->assertSame( array( null, null, null ), $this->product_results(), 'Unreachable' );
 
 		remove_all_filters( 'pre_http_request' );
