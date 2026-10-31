@@ -258,6 +258,37 @@ class AgentReadiness {
 	}
 
 	/**
+	 * Store checks as they stand now: the store conditions read live, then the
+	 * store output checks from the stored report, since those run only in the scan.
+	 * Output checks are always recommended, whatever the stored report says.
+	 *
+	 * @param array<string, mixed>|null                                                                                                               $report Stored report.
+	 * @param array<int, array{id:string,ok:bool|null,blocks:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string}>|null $live   Store conditions already read, or null to read them.
+	 * @return array<int, array{id:string,ok:bool|null,blocks:string,level:string,name:string,label:string,why:string,fix:string,fix_url:string}>
+	 */
+	public function get_store_checks( ?array $report, ?array $live = null ): array {
+		$checks   = $live ?? $this->store_conditions->all();
+		$live_ids = array_column( $checks, 'id' );
+		foreach ( is_array( $report['store_checks'] ?? null ) ? $report['store_checks'] : array() as $check ) {
+			if ( ! is_array( $check ) || ! isset( $check['id'], $check['name'] ) || in_array( $check['id'], $live_ids, true ) ) {
+				continue;
+			}
+			$checks[] = array(
+				'id'      => (string) $check['id'],
+				'ok'      => isset( $check['ok'] ) ? (bool) $check['ok'] : null,
+				'blocks'  => (string) ( $check['blocks'] ?? '' ),
+				'level'   => StoreConditions::LEVEL_RECOMMENDED,
+				'name'    => (string) $check['name'],
+				'label'   => (string) ( $check['label'] ?? '' ),
+				'why'     => (string) ( $check['why'] ?? '' ),
+				'fix'     => (string) ( $check['fix'] ?? '' ),
+				'fix_url' => (string) ( $check['fix_url'] ?? '' ),
+			);
+		}
+		return $checks;
+	}
+
+	/**
 	 * Run the report and store it. Not autoloaded: only the readiness screens read it.
 	 *
 	 * @return array<string, mixed>

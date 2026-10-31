@@ -135,6 +135,12 @@ The same shape is meant for every consumer: this Status tab, an outside scan of 
 
 The scan walks published simple and variable products shown in the shop catalog in batches of 200, most recently modified first, primes meta, terms, images and variations per batch, and stops at 5,000 products.
 
+## Abilities
+
+While the feature is enabled, `ReadinessAbilities` registers abilities in the WordPress Abilities API, shown in REST and to MCP clients, for users with `manage_woocommerce`:
+
+- `woocommerce/get-agent-readiness` returns `{ report, scan_pending }` like `GET wc/v3/agent-readiness`, with `store_checks` read now (`AgentReadiness::get_store_checks()`): settings changed since the scan show their current state, and store output checks come from the stored report.
+
 ## Agentic commerce settings page
 
 WooCommerce > Settings > Agentic commerce (`AgenticCommerceSettings`, `AgenticCommerceSettingsPage`) shows while the feature is enabled:
