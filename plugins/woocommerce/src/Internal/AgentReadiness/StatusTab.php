@@ -299,7 +299,7 @@ class StatusTab implements RegisterHooksInterface {
 							<p><?php echo esc_html( (string) $check['why'] ); ?></p>
 							<p><a href="<?php echo esc_url( (string) $check['fix_url'] ); ?>"><?php echo esc_html( (string) $check['fix'] ); ?></a></p>
 						</td>
-						<td><?php echo wp_kses_post( implode( '<br />', $this->channel_tags( (array) $check['channels'], $channels ) ) ); ?></td>
+						<td><?php echo empty( $check['channels'] ) ? esc_html__( 'Product page only', 'woocommerce' ) : wp_kses_post( implode( '<br />', $this->channel_tags( (array) $check['channels'], $channels ) ) ); ?></td>
 						<td><?php echo esc_html( (string) (int) $check['count'] ); ?></td>
 						<td><?php echo wp_kses_post( implode( '<br />', $this->product_links( (array) $check['product_ids'] ) ) ); ?></td>
 					</tr>

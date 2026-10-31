@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\AgentReadiness;
 
 use Automattic\WooCommerce\Internal\AgentReadiness\AgentReadiness;
+use Automattic\WooCommerce\Internal\AgentReadiness\ReadinessRule;
 use Automattic\WooCommerce\Internal\AgentReadiness\RemoteRules;
 use Automattic\WooCommerce\Internal\AgentReadiness\StoreConditions;
 use Automattic\WooCommerce\Internal\AgentReadiness\StoreOutputChecks;
@@ -116,9 +117,9 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 	private function agent_readiness(): AgentReadiness {
 		$store_conditions = new StoreConditions();
 		$store_conditions->init( new ComingSoonHelper() );
-		$agent_readiness = new AgentReadiness();
 		$output_checks = new StoreOutputChecks();
 		$output_checks->init( new ComingSoonHelper() );
+		$agent_readiness = new AgentReadiness();
 		$agent_readiness->init( $store_conditions, $output_checks, $this->sut );
 		return $agent_readiness;
 	}
@@ -132,6 +133,28 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 		$this->assertSame( array(), $this->requests );
 		$this->assertSame( array(), $this->sut->channel_rules() );
 		$this->assertArrayHasKey( 'missing_images', $this->agent_readiness()->get_channel_rules(), 'With no file, the bundled checks run' );
+	}
+
+	/**
+	 * @testdox A fetched rules file keeps a bundled check no channel asks for, such as image alt text.
+	 */
+	public function test_fetched_rules_keep_check_with_no_channels(): void {
+		$this->serve(
+			array(
+				'missing_brand' => array(
+					'google' => array(
+						'field'  => 'brand',
+						'effect' => 'not_listable',
+					),
+				),
+			)
+		);
+		$this->assertTrue( $this->sut->refresh() );
+
+		$rules = $this->agent_readiness()->get_channel_rules();
+
+		$this->assertSame( array(), $rules['image_alt_text'] );
+		$this->assertArrayNotHasKey( 'missing_images', $rules, 'A channel check the file leaves out still does not run' );
 	}
 
 	/**
@@ -404,7 +427,8 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 		$this->assertIsArray( $file );
 		$this->assertIsArray( $file['checks'] );
 
-		$known  = array_keys( ( new AgentReadiness() )->get_default_rules() );
+		$rules  = ( new AgentReadiness() )->get_default_rules();
+		$known  = array_keys( array_filter( $rules, static fn( ReadinessRule $rule ): bool => array() !== $rule->channels() ) );
 		$checks = array();
 		foreach ( $file['checks'] as $id => $check ) {
 			$this->assertContains( $id, $known, 'The file names a check the code does not have' );
@@ -414,6 +438,6 @@ class RemoteRulesTest extends WC_Unit_Test_Case {
 
 		$this->serve( $checks );
 		$this->sut->refresh();
-		$this->assertSame( array_keys( $checks ), array_keys( $this->agent_readiness()->get_channel_rules() ) );
+		$this->assertSame( array_keys( $rules ), array_keys( $this->agent_readiness()->get_channel_rules() ), 'A check no channel asks for runs too' );
 	}
 }

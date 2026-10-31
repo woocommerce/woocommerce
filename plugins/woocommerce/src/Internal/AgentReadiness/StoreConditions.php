@@ -153,6 +153,17 @@ class StoreConditions {
 				__( 'Shoppers ask agents about delivery times and costs.', 'woocommerce' )
 			),
 			array(
+				'id'      => 'payment_method',
+				'ok'      => $this->payment_method_enabled(),
+				'blocks'  => 'checkout',
+				'level'   => self::LEVEL_RECOMMENDED,
+				'name'    => __( 'A payment method is turned on', 'woocommerce' ),
+				'label'   => __( 'No payment method is turned on', 'woocommerce' ),
+				'why'     => __( 'Shoppers sent by an agent cannot pay for their order.', 'woocommerce' ),
+				'fix'     => __( 'Turn on a payment method under WooCommerce > Settings > Payments.', 'woocommerce' ),
+				'fix_url' => $settings_url( 'checkout' ),
+			),
+			array(
 				'id'      => 'guest_checkout',
 				'ok'      => ! $this->registration_required(),
 				'blocks'  => 'checkout',
@@ -209,6 +220,19 @@ class StoreConditions {
 	private function registration_required(): bool {
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Core's hook, documented in WC_Checkout.
 		return (bool) apply_filters( 'woocommerce_checkout_registration_required', 'yes' !== get_option( 'woocommerce_enable_guest_checkout' ) );
+	}
+
+	/**
+	 * Whether any payment gateway is turned on. Whether it can take a given order
+	 * depends on the cart, so this reads the setting, not is_available().
+	 */
+	private function payment_method_enabled(): bool {
+		foreach ( WC()->payment_gateways()->payment_gateways() as $gateway ) {
+			if ( $gateway instanceof \WC_Payment_Gateway && 'yes' === $gateway->enabled ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
