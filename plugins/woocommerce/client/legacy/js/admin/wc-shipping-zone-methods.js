@@ -4,6 +4,7 @@
 		var $table          = $( '.wc-shipping-zone-methods' ),
 			$tbody          = $( '.wc-shipping-zone-method-rows' ),
 			$save_button    = $( '.wc-shipping-zone-method-save' ),
+			$add_method_button = $( '.wc-shipping-zone-add-method' ),
 			$row_template   = wp.template( 'wc-shipping-zone-method-row' ),
 			$blank_template = wp.template( 'wc-shipping-zone-method-row-blank' ),
 
@@ -40,10 +41,9 @@
 						snapshot = _.clone( this.changes ),
 						changes  = _.clone( this.changes );
 
-					// Mark a save in flight: disable the button so a second save cannot start, and
-					// let render() keep the rows blocked through a mid-request zone edit.
-					this.isSaving = true;
-					$save_button.prop( 'disabled', true );
+					// Mark an operation in flight: lock the action controls (Save, Add method, and
+					// the method rows via render()) so no other action can start mid-request.
+					setRunning( this, true );
 
 					// Special handling for an empty 'zone_locations' array, which jQuery filters out during $.post().
 					if ( _.has( changes, 'zone_locations' ) && _.isEmpty( changes.zone_locations ) ) {
@@ -66,7 +66,7 @@
 					} );
 				},
 				onSaveFailure: function() {
-					shippingMethod.isSaving = false;
+					setRunning( shippingMethod, false );
 
 					window.alert( data.strings.save_failed );
 
@@ -84,7 +84,7 @@
 					}
 				},
 				onSaveResponse: function( response, textStatus, snapshot ) {
-					shippingMethod.isSaving = false;
+					setRunning( shippingMethod, false );
 
 					if (
 						'success' !== textStatus ||
@@ -243,8 +243,8 @@
 
 					this.initTooltips();
 
-					// render() unblocks the rows; re-apply the block if a save is still in flight.
-					if ( this.model.isSaving ) {
+					// render() unblocks the rows; re-apply the block if an operation is still running.
+					if ( this.model.isRunning ) {
 						this.block();
 					}
 				},
@@ -270,6 +270,7 @@
 
 					if ( window.confirm( data.strings.delete_shipping_method_confirmation ) ) {
 						shippingMethodView.block();
+						setRunning( model, true );
 
 						// Add method to zone via ajax call
 						$.post( {
@@ -280,6 +281,7 @@
 								zone_id: data.zone_id,
 							},
 							success: function( { data } ) {
+								setRunning( model, false );
 								delete methods[instance_id];
 								changes.methods = changes.methods || data.methods;
 								model.set('methods', methods);
@@ -289,8 +291,13 @@
 								shippingMethodView.unblock();
 							},
 							error: function( jqXHR, textStatus, errorThrown ) {
+								setRunning( model, false );
 								window.alert( data.strings.remove_method_failed );
 								shippingMethodView.unblock();
+								// The delete failed; restore Save if the form was dirty before it.
+								if ( shippingMethodView.needsUnloadConfirm ) {
+									$save_button.prop( 'disabled', false );
+								}
 							},
 							dataType: 'json'
 						});
@@ -316,9 +323,9 @@
 				setUnloadConfirmation: function() {
 					this.needsUnloadConfirm = true;
 
-					// A mid-request edit must not re-enable the button, or it could start a second,
-					// concurrent save while this one is still in flight.
-					if ( this.model.isSaving ) {
+					// A mid-request edit must not re-enable the button, or it could start another
+					// action while an operation is still running.
+					if ( this.model.isRunning ) {
 						return;
 					}
 
@@ -446,6 +453,7 @@
 				onConfigureShippingMethodSubmitted: function( event, target, posted_data ) {
 					if ( 'wc-modal-shipping-method-settings' === target ) {
 						shippingMethodView.block();
+						setRunning( shippingMethod, true );
 
 						// Save method settings via ajax call
 						$.post(
@@ -661,6 +669,7 @@
 				onAddShippingMethodSubmitted: function( event, target, posted_data, closeModal ) {
 					if ( 'wc-modal-add-shipping-method' === target ) {
 						shippingMethodView.block();
+						setRunning( shippingMethod, true );
 
 						$('#btn-next').addClass( 'is-busy' );
 
@@ -706,6 +715,9 @@
 							    method      = response.data.methods[ instance_id ];
 
 							shippingMethodView.unblock();
+							// The add request is done; any follow-up settings modal re-locks on its
+							// own submit, so release here to avoid a stuck lock if it is cancelled.
+							setRunning( shippingMethod, false );
 
 							if ( method.settings_html ) {
 								method.settings_html = shippingMethodView.reformatSettingsHTML( method.settings_html );
@@ -839,6 +851,7 @@
 
 						if ( ! addButtonCalled && btnData && btnData.status === 'new' ) {
 							shippingMethodView.block();
+							setRunning( shippingMethod, true );
 
 							var view    = shippingMethodView,
 								model   = view.model,
@@ -855,6 +868,7 @@
 									zone_id: data.zone_id,
 								},
 								success: function( { data } ) {
+									setRunning( shippingMethod, false );
 									delete methods[instance_id];
 									changes.methods = changes.methods || data.methods;
 									model.set('methods', methods);
@@ -864,8 +878,13 @@
 									shippingMethodView.unblock();
 								},
 								error: function( jqXHR, textStatus, errorThrown ) {
+									setRunning( shippingMethod, false );
 									window.alert( data.strings.remove_method_failed );
 									shippingMethodView.unblock();
+									// The cleanup failed; restore Save if the form was dirty before it.
+									if ( shippingMethodView.needsUnloadConfirm ) {
+										$save_button.prop( 'disabled', false );
+									}
 								},
 								dataType: 'json'
 							});
@@ -887,6 +906,17 @@
 				model:    shippingMethod,
 				el:       $tbody
 			} );
+
+		// Lock or release the controls that start an operation. While one runs, the method rows
+		// stay blocked (via render()) and Save and Add method are disabled, so no second action can
+		// begin. Save re-enables through the unsaved-changes flow once nothing is running.
+		function setRunning( model, running ) {
+			model.isRunning = running;
+			$add_method_button.prop( 'disabled', running );
+			if ( running ) {
+				$save_button.prop( 'disabled', true );
+			}
+		}
 
 		shippingMethodView.render();
 
