@@ -91,6 +91,49 @@ class WC_Query_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Shop page queries by page ID remain page queries when a different static front page is configured.
+	 */
+	public function test_shop_page_by_page_id_is_not_treated_as_front_page_when_front_page_is_different(): void {
+		switch_theme( 'twentytwentyfour' );
+
+		$front_page_id = wp_insert_post(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+				'post_title'  => 'Home',
+			)
+		);
+		$shop_page_id  = wp_insert_post(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+				'post_title'  => 'Shop',
+			)
+		);
+
+		update_option( 'woocommerce_shop_page_id', $shop_page_id );
+		update_option( 'show_on_front', 'page' );
+		update_option( 'page_on_front', $front_page_id );
+
+		global $wp_the_query, $wp_query;
+		$previous_wp_the_query = $wp_the_query;
+		$previous_wp_query     = $wp_query;
+
+		$query        = new WP_Query();
+		$wp_the_query = $query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$wp_query     = $query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$query->query( array( 'page_id' => $shop_page_id ) );
+
+		$this->assertTrue( $query->is_page(), 'The Shop page ID request should remain a page query.' );
+		$this->assertFalse( $query->is_post_type_archive( 'product' ), 'The Shop page ID request should not become a product archive.' );
+		$this->assertSame( $shop_page_id, (int) $query->get( 'page_id' ), 'The Shop page ID should remain available for WordPress canonical redirects.' );
+		$this->assertSame( $shop_page_id, $query->queried_object_id, 'The queried object should remain the Shop page.' );
+
+		$wp_the_query = $previous_wp_the_query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$wp_query     = $previous_wp_query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+	}
+
+	/**
 	 * @testdox Product archive queries set queried_object to the Shop page.
 	 */
 	public function test_shop_page_sets_queried_object_on_product_archive(): void {
