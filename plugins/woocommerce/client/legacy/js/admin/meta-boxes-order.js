@@ -1,5 +1,5 @@
 // eslint-disable-next-line max-len
-/*global woocommerce_admin_meta_boxes, woocommerce_admin, accounting, woocommerce_admin_meta_boxes_order, wcSetClipboard, wcClearClipboard, wc_enhanced_select_params */
+/*global woocommerce_admin_meta_boxes, woocommerce_admin, accounting, round, woocommerce_admin_meta_boxes_order, wcSetClipboard, wcClearClipboard, wc_enhanced_select_params */
 
 jQuery( function ( $ ) {
 
@@ -1183,6 +1183,27 @@ jQuery( function ( $ ) {
 				return false;
 			},
 
+			/**
+			 * Match the order's tax rounding rather than accounting.js price rounding.
+			 */
+			round_tax: function( value ) {
+				if ( 'yes' === woocommerce_admin_meta_boxes.round_at_subtotal ) {
+					return value;
+				}
+
+				var decimals = woocommerce_admin_meta_boxes.currency_format_num_decimals;
+				var parts = value.toString().split( 'e' );
+				// Shift in decimal notation so values like 1.225 remain exact halfway cases.
+				var coefficient = parts[ 0 ];
+				var exponent = Number( parts[ 1 ] || 0 );
+				var shifted_exponent = exponent + Number( decimals );
+				var shifted_value = Number( coefficient + 'e' + shifted_exponent );
+				var rounding_mode = String( woocommerce_admin_meta_boxes.tax_rounding_mode );
+				var rounded_value = round( shifted_value, 0, rounding_mode );
+
+				return rounded_value / Math.pow( 10, decimals );
+			},
+
 			input_changed: function() {
 				var refund_amount     = 0;
 				var $items            = $( '.woocommerce_order_items' ).find( 'tr.item, tr.fee, tr.shipping' );
@@ -1194,6 +1215,9 @@ jQuery( function ( $ ) {
 
 					refund_cost_fields.each(function( index, el ) {
 						var field_amount = accounting.unformat( $( el ).val() || 0, woocommerce_admin.mon_decimal_point );
+						if ( $( el ).hasClass( 'refund_line_tax' ) ) {
+							field_amount = wc_meta_boxes_order_items.refunds.round_tax( field_amount );
+						}
 						refund_amount += parseFloat( round_at_subtotal ?
 							field_amount :
 							accounting.formatNumber( field_amount, woocommerce_admin_meta_boxes.currency_format_num_decimals, '' ) );
@@ -1244,16 +1268,17 @@ jQuery( function ( $ ) {
 					var $refund_line_total_tax = $( this );
 					var tax_id                 = $refund_line_total_tax.data( 'tax_id' );
 					var line_total_tax         = $( 'input.line_tax[data-tax_id="' + tax_id + '"]', $row );
-					var unit_total_tax         = accounting.unformat(
+					var total_tax              = accounting.unformat(
 						line_total_tax.data( 'total_tax' ),
 						woocommerce_admin.mon_decimal_point
-					) / qty;
+					);
+					var unit_total_tax = wc_meta_boxes_order_items.refunds.round_tax( total_tax ) / qty;
 
 					if ( 0 < unit_total_tax ) {
 
 						$refund_line_total_tax.val(
 							parseFloat( accounting.formatNumber(
-								unit_total_tax * refund_qty,
+								wc_meta_boxes_order_items.refunds.round_tax( unit_total_tax * refund_qty ),
 								woocommerce_admin_meta_boxes.rounding_precision,
 								''
 							) )
