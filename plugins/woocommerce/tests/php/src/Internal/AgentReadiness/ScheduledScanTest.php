@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\AgentReadiness;
 
 use Automattic\WooCommerce\Internal\AgentReadiness\AgentReadiness;
+use Automattic\WooCommerce\Internal\AgentReadiness\RemoteRules;
 use Automattic\WooCommerce\Internal\AgentReadiness\ScheduledScan;
 use WC_Helper_Product;
 use WC_Unit_Test_Case;
@@ -28,6 +29,7 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 		// Report tests stay offline: store output checks would load the test site's pages.
 		StoreOutputChecksTest::block_requests();
 		update_option( 'woocommerce_feature_agent_readiness_enabled', 'yes' );
+		add_filter( 'woocommerce_agent_readiness_rules_url', '__return_empty_string' );
 		delete_option( AgentReadiness::REPORT_OPTION );
 		as_unschedule_all_actions( ScheduledScan::RUN_NOW_HOOK );
 		as_unschedule_all_actions( ScheduledScan::DAILY_HOOK );
@@ -41,6 +43,7 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 		as_unschedule_all_actions( ScheduledScan::RUN_NOW_HOOK );
 		as_unschedule_all_actions( ScheduledScan::DAILY_HOOK );
 		delete_option( 'woocommerce_feature_agent_readiness_enabled' );
+		remove_filter( 'woocommerce_agent_readiness_rules_url', '__return_empty_string' );
 		parent::tearDown();
 	}
 
@@ -123,6 +126,64 @@ class ScheduledScanTest extends WC_Unit_Test_Case {
 
 		$report = wc_get_container()->get( AgentReadiness::class )->get_cached_report();
 		$this->assertSame( 1, $report['products'] );
+		$this->assertCount( 1, $this->pending( ScheduledScan::DAILY_HOOK ) );
+	}
+
+	/**
+	 * @testdox A run fetches the rules file before scanning, so the new rules shape the report.
+	 */
+	public function test_run_fetches_rules_before_scanning(): void {
+		add_filter(
+			'woocommerce_agent_readiness_rules_url',
+			static function () {
+				return 'https://rules.example/agent-readiness.json';
+			}
+		);
+		$answer = static function () {
+			return array(
+				'headers'  => array(),
+				'body'     => '{"version":"2026-11-01","checks":{"missing_brand":{"channels":{"google":{"field":"brand","effect":"not_listable"}}}}}',
+				'response' => array(
+					'code'    => 200,
+					'message' => '',
+				),
+				'cookies'  => array(),
+			);
+		};
+		add_filter( 'pre_http_request', $answer );
+		WC_Helper_Product::create_simple_product();
+
+		$this->sut->run();
+		remove_filter( 'pre_http_request', $answer );
+		delete_option( RemoteRules::OPTION );
+
+		$report = wc_get_container()->get( AgentReadiness::class )->get_cached_report();
+		$this->assertSame( 1, $report['channels']['google']['not_listable'] );
+	}
+
+	/**
+	 * @testdox A failed rules fetch still stores a report from the bundled checks and leaves one daily run scheduled.
+	 */
+	public function test_run_with_failed_fetch_uses_bundled_checks(): void {
+		add_filter(
+			'woocommerce_agent_readiness_rules_url',
+			static function () {
+				return 'https://rules.example/agent-readiness.json';
+			}
+		);
+		$fail = static function () {
+			return new \WP_Error( 'http_request_failed', 'Operation timed out' );
+		};
+		add_filter( 'pre_http_request', $fail );
+		WC_Helper_Product::create_simple_product();
+
+		$this->sut->run();
+		remove_filter( 'pre_http_request', $fail );
+
+		$report = wc_get_container()->get( AgentReadiness::class )->get_cached_report();
+		$this->assertIsArray( $report );
+		$this->assertSame( 1, $report['products'] );
+		$this->assertContains( 'missing_images', array_column( $report['checks'], 'id' ), 'The bundled checks ran' );
 		$this->assertCount( 1, $this->pending( ScheduledScan::DAILY_HOOK ) );
 	}
 
