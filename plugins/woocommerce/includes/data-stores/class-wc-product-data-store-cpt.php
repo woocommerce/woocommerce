@@ -2578,10 +2578,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			if ( isset( $query_vars[ $query_var_key ] ) && '' !== $query_vars[ $query_var_key ] ) {
 
 				// Remove any existing meta queries for the same keys to prevent conflicts.
-				$existing_queries = wp_list_pluck( $wp_query_args['meta_query'], 'key', true );
-				$meta_query_index = array_search( $db_key, $existing_queries, true );
-				if ( false !== $meta_query_index ) {
-					unset( $wp_query_args['meta_query'][ $meta_query_index ] );
+				foreach ( $wp_query_args['meta_query'] as $query_index => $query_contents ) {
+					if ( isset( $query_contents['key'] ) && $db_key === $query_contents['key'] ) {
+						unset( $wp_query_args['meta_query'][ $query_index ] );
+					}
 				}
 
 				$wp_query_args = $this->parse_date_for_wp_query( $query_vars[ $query_var_key ], $db_key, $wp_query_args );

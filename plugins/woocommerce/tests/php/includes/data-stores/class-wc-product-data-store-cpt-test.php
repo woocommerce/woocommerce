@@ -892,4 +892,38 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 
 		$this->assertSame( array( $product_abc->get_id() ), $results );
 	}
+
+	/**
+	 * @testdox Sale date query vars work with a wildcard SKU query.
+	 */
+	public function test_date_on_sale_query_with_wildcard_sku(): void {
+		$sale_from = gmdate( 'Y-m-d', time() + DAY_IN_SECONDS );
+
+		$product_with_sku = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'sku'               => 'ABC',
+				'sale_price'        => 5,
+				'date_on_sale_from' => $sale_from,
+			)
+		);
+		WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'sku'               => '',
+				'sale_price'        => 5,
+				'date_on_sale_from' => $sale_from,
+			)
+		);
+
+		$results = wc_get_products(
+			array(
+				'sku'               => '*',
+				'date_on_sale_from' => $sale_from,
+				'return'            => 'ids',
+			)
+		);
+
+		$this->assertSame( array( $product_with_sku->get_id() ), $results );
+	}
 }
