@@ -6,6 +6,7 @@ import { Button, Placeholder, SelectControl } from '@wordpress/components';
 import React, { lazy, Suspense, useEffect } from '@wordpress/element';
 import {
 	unstable_HistoryRouter as HistoryRouter,
+	type HistoryRouterProps,
 	Route,
 	Routes,
 	useLocation,
@@ -294,7 +295,12 @@ export const SettingsPaymentsMainWrapper = () => {
 	return (
 		<>
 			<Header title={ __( 'Settings', 'woocommerce' ) } />
-			<HistoryRouter history={ getHistory() }>
+			<HistoryRouter
+				// The `history` v5 object provides what HistoryRouter uses at runtime; only the types differ.
+				history={
+					getHistory() as unknown as HistoryRouterProps[ 'history' ]
+				}
+			>
 				<Routes>
 					<Route
 						path="/offline"

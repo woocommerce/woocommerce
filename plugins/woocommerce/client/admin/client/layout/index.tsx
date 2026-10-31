@@ -5,6 +5,7 @@ import { compose } from '@wordpress/compose';
 import { useSelect } from '@wordpress/data';
 import {
 	unstable_HistoryRouter as HistoryRouter,
+	type HistoryRouterProps,
 	Route,
 	Routes,
 	useLocation,
@@ -196,7 +197,12 @@ export const _Layout = () => {
 	const basename = path.substring( 0, path.lastIndexOf( '/' ) );
 
 	return (
-		<HistoryRouter history={ getHistory() }>
+		<HistoryRouter
+			// The `history` v5 object provides what HistoryRouter uses at runtime; only the types differ.
+			history={
+				getHistory() as unknown as HistoryRouterProps[ 'history' ]
+			}
+		>
 			{ /* @ts-expect-error basename is not typed */ }
 			<Routes basename={ basename }>
 				{ pages
