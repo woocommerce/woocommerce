@@ -213,12 +213,12 @@ class ExtensibleAbilities {
 		$readable = isset( $args['get_callback'] ) || isset( $args['output_schema'] );
 		$writable = isset( $args['set_callback'] ) || isset( $args['input_schema'] );
 		if ( ! $readable && ! $writable ) {
-			wc_doing_it_wrong( __METHOD__, __( 'A field needs "get_callback" and "output_schema", "set_callback" and "input_schema", or both pairs.', 'woocommerce' ), '11.4.0' );
+			wc_doing_it_wrong( __METHOD__, 'A field needs "get_callback" and "output_schema", "set_callback" and "input_schema", or both pairs.', '11.4.0' );
 			return;
 		}
 		if ( $readable ) {
 			if ( ! is_callable( $args['get_callback'] ?? null ) ) {
-				wc_doing_it_wrong( __METHOD__, __( 'The "get_callback" argument must be callable, and a field with an "output_schema" needs it.', 'woocommerce' ), '11.3.0' );
+				wc_doing_it_wrong( __METHOD__, 'The "get_callback" argument must be callable, and a field with an "output_schema" needs it.', '11.3.0' );
 				return;
 			}
 			$error = self::get_schema_error( $args['output_schema'] ?? null, 'output_schema', true );
@@ -229,7 +229,7 @@ class ExtensibleAbilities {
 		}
 		if ( $writable ) {
 			if ( ! is_callable( $args['set_callback'] ?? null ) ) {
-				wc_doing_it_wrong( __METHOD__, __( 'The "set_callback" argument must be callable, and a field with an "input_schema" needs it.', 'woocommerce' ), '11.4.0' );
+				wc_doing_it_wrong( __METHOD__, 'The "set_callback" argument must be callable, and a field with an "input_schema" needs it.', '11.4.0' );
 				return;
 			}
 			$error = self::get_schema_error( $args['input_schema'] ?? null, 'input_schema', false );
