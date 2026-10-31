@@ -181,6 +181,70 @@ class WC_Admin_Webhooks {
 	}
 
 	/**
+	 * Update the status of selected webhooks.
+	 *
+	 * @since 11.4.0
+	 * @param array  $webhooks List of webhook IDs.
+	 * @param string $status   New webhook status.
+	 * @return int Number of webhooks updated.
+	 */
+	public static function bulk_update_status( $webhooks, $status ) {
+		if ( ! array_key_exists( $status, wc_get_webhook_statuses() ) ) {
+			return 0;
+		}
+
+		// Saving an active webhook makes the data store ping its delivery URL with a
+		// blocking request. In bulk that would be one blocking request per webhook, so a
+		// slow or unreachable URL could stall or time out the whole action and leave it
+		// half-applied. Send those pings non-blocking instead; activate a webhook on its
+		// own to get the verified ping that surfaces delivery errors.
+		$non_blocking_ping = static function ( $args ) {
+			$args['blocking'] = false;
+			return $args;
+		};
+
+		if ( 'active' === $status ) {
+			add_filter( 'woocommerce_webhook_http_args', $non_blocking_ping );
+		}
+
+		$updated = 0;
+
+		try {
+			foreach ( array_unique( array_map( 'absint', $webhooks ) ) as $webhook_id ) {
+				if ( ! $webhook_id ) {
+					continue;
+				}
+
+				$webhook = wc_get_webhook( $webhook_id );
+
+				if ( ! $webhook || $status === $webhook->get_status() ) {
+					continue;
+				}
+
+				$webhook->set_status( $status );
+				$webhook->save();
+
+				// The non-blocking ping above can't be verified, so deliver_ping() returns
+				// early and never clears pending_delivery. Clear it after the ping is
+				// dispatched, otherwise the webhook stays flagged and re-pings on every
+				// later save.
+				if ( 'active' === $status && $webhook->get_pending_delivery() ) {
+					$webhook->set_pending_delivery( false );
+					$webhook->save();
+				}
+
+				++$updated;
+			}
+		} finally {
+			if ( 'active' === $status ) {
+				remove_filter( 'woocommerce_webhook_http_args', $non_blocking_ping );
+			}
+		}
+
+		return $updated;
+	}
+
+	/**
 	 * Delete webhook.
 	 */
 	private function delete() {
@@ -240,6 +304,15 @@ class WC_Admin_Webhooks {
 	 * Notices.
 	 */
 	public static function notices() {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Display-only count from the redirect after a verified bulk action.
+		if ( isset( $_GET['bulk_updated'] ) ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Display-only count.
+			$updated = absint( $_GET['bulk_updated'] );
+
+			/* translators: %d: number of webhooks updated. */
+			WC_Admin_Settings::add_message( sprintf( _n( '%d webhook updated.', '%d webhooks updated.', $updated, 'woocommerce' ), $updated ) );
+		}
+
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( isset( $_GET['deleted'] ) ) {
 			// phpcs:ignore WordPress.Security.NonceVerification.Recommended
