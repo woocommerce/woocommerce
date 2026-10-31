@@ -357,6 +357,9 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			$this->assertStringContainsString( 'Fields each type takes.', $description );
 			$this->assertStringContainsString( 'external: name, sku, regular_price, sale_price, description, short_description, status, external_url, button_text', $description );
 			$this->assertStringContainsString( 'grouped: name, sku, description, short_description, status, grouped_products', $description );
+			$this->assertStringEndsWith( 'Applies to: grouped.', $schema['properties']['grouped_products']['description'] );
+			$this->assertStringContainsString( 'Applies to: ', $schema['properties']['regular_price']['description'] );
+			$this->assertStringNotContainsString( 'Applies to: ', $schema['properties']['sku']['description'] ?? '' );
 		}
 
 		$this->assertSame( array( 'name' ), $create_schema['required'] );

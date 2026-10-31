@@ -77,11 +77,36 @@ trait ProductAbilityTrait {
 			'properties'           => array_merge(
 				$properties,
 				array( 'type' => $type_schema ),
-				self::get_product_mutation_field_schemas_for_fields( $fields )
+				self::add_product_type_notes( self::get_product_mutation_field_schemas_for_fields( $fields ), $configs )
 			),
 			'required'             => array( $creating ? 'name' : 'id' ),
 			'additionalProperties' => false,
 		);
+	}
+
+	/**
+	 * Say in the description of a field which product types take it, when not
+	 * every type does.
+	 *
+	 * @param array<string, array> $field_schemas Field schemas keyed by field.
+	 * @param array<string, array> $configs       Product type configurations keyed by type.
+	 * @return array<string, array>
+	 */
+	private static function add_product_type_notes( array $field_schemas, array $configs ): array {
+		foreach ( $field_schemas as $field => $field_schema ) {
+			$product_types = array_keys(
+				array_filter(
+					$configs,
+					static fn( array $config ): bool => in_array( $field, $config['fields'], true )
+				)
+			);
+			if ( count( $product_types ) < count( $configs ) ) {
+				/* translators: %s: Comma-separated list of product types. */
+				$applies_to                             = sprintf( __( 'Applies to: %s.', 'woocommerce' ), implode( ', ', $product_types ) );
+				$field_schemas[ $field ]['description'] = trim( ( $field_schema['description'] ?? '' ) . ' ' . $applies_to );
+			}
+		}
+		return $field_schemas;
 	}
 
 	/**
