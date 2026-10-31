@@ -197,3 +197,50 @@ export const getItemsNotInAnyFulfillment = (
 
 	return itemsFromOrder.filter( ( item ) => item.selection.length > 0 );
 };
+
+/**
+ * A pickup location the customer chose at checkout.
+ */
+export interface PickupLocation {
+	name: string;
+	address: string;
+	details: string;
+}
+
+/**
+ * Get the pickup location of a local pickup order, or null for an order that ships.
+ *
+ * A Local pickup shipping zone method stores no location, so its title stands in for the name.
+ *
+ * @param order The order received from the API
+ * @return PickupLocation | null The pickup location
+ */
+export const getOrderPickupLocation = (
+	order: Order | null
+): PickupLocation | null => {
+	if ( ! order ) {
+		return null;
+	}
+	const pickupMethodIds = [
+		'pickup_location',
+		'local_pickup',
+		...( window.wcFulfillmentSettings?.local_pickup_method_ids ?? [] ),
+	];
+	const shippingLine = ( order.shipping_lines ?? [] ).find( ( line ) =>
+		pickupMethodIds.includes( line.method_id )
+	);
+	if ( ! shippingLine ) {
+		return null;
+	}
+	const meta = ( key: string ) => {
+		const value = ( shippingLine.meta_data ?? [] ).find(
+			( datum ) => datum.key === key
+		)?.value;
+		return typeof value === 'string' ? value.trim() : '';
+	};
+	return {
+		name: meta( 'pickup_location' ) || shippingLine.method_title,
+		address: meta( 'pickup_address' ),
+		details: meta( 'pickup_details' ),
+	};
+};

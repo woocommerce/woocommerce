@@ -98,3 +98,35 @@ export function findShipmentProviderName( key: string ) {
 	);
 	return shipmentProvider ? shipmentProvider.label : '';
 }
+
+/**
+ * Get the pickup location stored on a fulfillment, or null for a shipment.
+ *
+ * @param fulfillment The fulfillment
+ * @return The pickup location
+ */
+export function getFulfillmentPickupLocation(
+	fulfillment: Fulfillment | null
+): { name: string; address: string; details: string } | null {
+	const name = getFulfillmentMeta< string >(
+		fulfillment,
+		'_pickup_location',
+		''
+	);
+	if ( ! name ) {
+		return null;
+	}
+	return {
+		name,
+		address: getFulfillmentMeta< string >(
+			fulfillment,
+			'_pickup_address',
+			''
+		),
+		details: getFulfillmentMeta< string >(
+			fulfillment,
+			'_pickup_details',
+			''
+		),
+	};
+}

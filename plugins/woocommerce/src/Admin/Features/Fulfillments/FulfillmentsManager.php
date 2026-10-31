@@ -83,6 +83,8 @@ class FulfillmentsManager {
 			'customer_fulfillment_created',
 			'customer_fulfillment_updated',
 			'customer_fulfillment_deleted',
+			'customer_fulfillment_ready_for_pickup',
+			'customer_fulfillment_preparing',
 		);
 
 		foreach ( $fulfillment_email_ids as $email_id ) {
