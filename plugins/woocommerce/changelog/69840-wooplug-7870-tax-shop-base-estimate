@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+Estimate tax from the store's postcode and city for shoppers without an address when the default location is the shop base.
