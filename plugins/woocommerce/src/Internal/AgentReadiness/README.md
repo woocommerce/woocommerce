@@ -63,12 +63,12 @@ Store-wide conditions (`StoreConditions`) are reported first because they affect
 | `robots_txt_present` | `/robots.txt` is served as text. |
 | `robots_allows_ai_search_bots` | No robots.txt rule keeps OAI-SearchBot, ChatGPT-User, Claude-User or PerplexityBot from the home page. |
 | `robots_not_blocking_llms_txt` | No robots.txt rule keeps those crawlers from `/llms.txt`. |
-| `sitemap_lists_products` | The WordPress sitemap includes products, or a sitemap listed in robots.txt or at `/sitemap_index.xml` or `/sitemap.xml` names a product sitemap or product pages. |
+| `sitemap_lists_products` | A sitemap listed in robots.txt, or `/wp-sitemap.xml`, `/sitemap_index.xml` or `/sitemap.xml`, names a product sitemap or product pages. |
 | `product_jsonld_present` | The newest published product's page has Product (or ProductGroup) JSON-LD that parses, from WooCommerce, an SEO plugin or the theme. |
 | `product_jsonld_required_fields` | That JSON-LD gives a name, an image and an offer, from one block or several. |
 | `product_offer_jsonld` | One of its offers has a price (`price`, `lowPrice` or a price specification) and an availability. |
 
-robots.txt is loaded from the store, so a file at the site root and a host's changes count. When the store can't load it, or answers with an error or a login page, it is read as WordPress serves it: the file at the site root, or the `robots_txt` filter output with pretty permalinks. So the robots.txt checks always give an answer; only the sitemap and product page checks can be "couldn't check". The product checks load one product page: the newest published, visible product without a password, among the five newest. With no such product, or when its page doesn't answer 200, they are "couldn't check".
+robots.txt is loaded from the host root, so a file at the site root and a host's changes count. A timeout, an error status, or an HTML page is "couldn't check" for the robots.txt checks. The sitemap check is "couldn't check" when robots.txt could not be read, or a candidate sitemap could not be loaded, and no fetched sitemap names products. A category sitemap does not count. The product checks load one product page: the newest published, visible product without a password, among the five newest. With no such product, or when its page doesn't answer 200, they are "couldn't check".
 
 ## Report format
 
