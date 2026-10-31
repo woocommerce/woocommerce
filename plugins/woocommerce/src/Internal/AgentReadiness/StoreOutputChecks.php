@@ -134,15 +134,15 @@ class StoreOutputChecks {
 				'id'      => 'product_jsonld_present',
 				'test'    => fn( StoreResponses $responses ): ?bool => $this->with_products( $responses, static fn( array $products ): bool => array() !== $products ),
 				'blocks'  => 'listing',
-				'name'    => __( 'Product pages have product structured data', 'woocommerce' ),
-				'label'   => __( 'No product structured data on product pages', 'woocommerce' ),
-				'why'     => __( 'AI shopping agents and search engines read the product\'s JSON-LD to get its name, price and stock without guessing from the page.', 'woocommerce' ),
-				'fix'     => __( 'WooCommerce adds it to product pages. Check whether your theme or an SEO plugin removes it, or turn on product schema in your SEO plugin.', 'woocommerce' ),
+				'name'    => __( 'The newest product page has product structured data', 'woocommerce' ),
+				'label'   => __( 'The newest product page has no product structured data', 'woocommerce' ),
+				'why'     => __( 'Shopping crawlers and search engines read the product\'s JSON-LD to get its name, price and stock without guessing from the page.', 'woocommerce' ),
+				'fix'     => __( 'WooCommerce adds it to the product page. Check whether your theme or an SEO plugin removes it, or turn on product schema in your SEO plugin.', 'woocommerce' ),
 				'fix_url' => '',
 			),
 			array(
 				'id'      => 'product_jsonld_required_fields',
-				'test'    => fn( StoreResponses $responses ): ?bool => $this->with_products( $responses, static fn( array $products ): bool => self::has_required_fields( $products ) ),
+				'test'    => fn( StoreResponses $responses ): ?bool => $this->with_products( $responses, static fn( array $products ): ?bool => array() === $products ? null : self::has_required_fields( $products ) ),
 				'blocks'  => 'listing',
 				'name'    => __( 'Product structured data has a name, image and offer', 'woocommerce' ),
 				'label'   => __( 'Product structured data is missing a name, image or offer', 'woocommerce' ),
@@ -152,7 +152,7 @@ class StoreOutputChecks {
 			),
 			array(
 				'id'      => 'product_offer_jsonld',
-				'test'    => fn( StoreResponses $responses ): ?bool => $this->with_products( $responses, static fn( array $products ): bool => self::has_priced_offer( $products ) ),
+				'test'    => fn( StoreResponses $responses ): ?bool => $this->with_products( $responses, static fn( array $products ): ?bool => array() === $products ? null : self::has_priced_offer( $products ) ),
 				'blocks'  => 'listing',
 				'name'    => __( 'Product offer has a price and stock status', 'woocommerce' ),
 				'label'   => __( 'Product offer is missing a price or stock status', 'woocommerce' ),
@@ -250,7 +250,11 @@ class StoreOutputChecks {
 	 */
 	private function with_products( StoreResponses $responses, callable $test ): ?bool {
 		$page = $responses->product_page();
-		return null === $page ? null : (bool) $test( JsonLd::items( $page['body'], 'Product', 'ProductGroup' ) );
+		if ( null === $page ) {
+			return null;
+		}
+		$result = $test( JsonLd::items( $page['body'], 'Product', 'ProductGroup' ) );
+		return null === $result ? null : (bool) $result;
 	}
 
 	/**
@@ -285,11 +289,27 @@ class StoreOutputChecks {
 		}
 		foreach ( array_merge( $offers, $nested ) as $offer ) {
 			$prices = array_merge( array( $offer['price'] ?? null, $offer['lowPrice'] ?? null ), array_column( self::as_list( $offer['priceSpecification'] ?? null ), 'price' ) );
-			if ( ! empty( $offer['availability'] ) && array() !== array_filter( $prices, 'is_numeric' ) ) {
+			if ( ! empty( $offer['availability'] ) && array() !== array_filter( $prices, array( self::class, 'has_price_amount' ) ) ) {
 				return true;
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Whether a JSON-LD price is a number, or text that contains one (`10.00`, `10,00`, `10.00 USD`).
+	 *
+	 * @param mixed $value Price value.
+	 */
+	private static function has_price_amount( $value ): bool {
+		if ( is_int( $value ) || is_float( $value ) ) {
+			return is_finite( $value );
+		}
+		if ( ! is_string( $value ) ) {
+			return false;
+		}
+		$normalized = str_replace( array( ',', ' ', "\u{00A0}" ), array( '.', '', '' ), $value );
+		return 1 === preg_match( '/-?\d+(?:\.\d+)?/', $normalized );
 	}
 
 	/**

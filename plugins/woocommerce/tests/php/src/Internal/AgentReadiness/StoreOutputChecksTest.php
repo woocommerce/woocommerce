@@ -320,13 +320,13 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A product page without Product JSON-LD fails all three checks; one without a price fails only the offer check.
+	 * @testdox A product page without Product JSON-LD fails only the presence check. One without a price fails only the offer check. A price written with a currency still counts.
 	 */
 	public function test_missing_product_jsonld(): void {
 		$product = WC_Helper_Product::create_simple_product();
 		$path    = self::path_of( $product );
 		$this->serve( array( $path => array( 200, self::page_with( array( array( '@type' => 'BreadcrumbList' ) ) ) ) ) );
-		$this->assertSame( array( false, false, false ), $this->product_results() );
+		$this->assertSame( array( false, null, null ), $this->product_results() );
 
 		remove_all_filters( 'pre_http_request' );
 		$no_price = array(
@@ -340,6 +340,11 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 		);
 		$this->serve( array( $path => array( 200, self::page_with( array( $no_price ) ) ) ) );
 		$this->assertSame( array( true, true, false ), $this->product_results() );
+
+		remove_all_filters( 'pre_http_request' );
+		$no_price['offers']['price'] = '10.00 USD';
+		$this->serve( array( $path => array( 200, self::page_with( array( $no_price ) ) ) ) );
+		$this->assertSame( array( true, true, true ), $this->product_results(), 'A price with a currency code counts' );
 	}
 
 	/**
