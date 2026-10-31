@@ -53,17 +53,19 @@ class WC_Order_Item_Fee_Data_Store extends Abstract_WC_Order_Item_Type_Data_Stor
 	 * @param WC_Order_Item_Fee $item Fee order item object.
 	 */
 	public function save_item_data( &$item ) {
-		$id          = $item->get_id();
-		$save_values = array(
-			'_fee_amount'    => $item->get_amount( 'edit' ),
-			'_tax_class'     => $item->get_tax_class( 'edit' ),
-			'_tax_status'    => $item->get_tax_status( 'edit' ),
-			'_line_total'    => $item->get_total( 'edit' ),
-			'_line_tax'      => $item->get_total_tax( 'edit' ),
-			'_line_tax_data' => $item->get_taxes( 'edit' ),
+		$id                = $item->get_id();
+		$meta_key_to_props = array(
+			'_fee_amount'    => 'amount',
+			'_tax_class'     => 'tax_class',
+			'_tax_status'    => 'tax_status',
+			'_line_total'    => 'total',
+			'_line_tax'      => 'total_tax',
+			'_line_tax_data' => 'taxes',
 		);
-		foreach ( $save_values as $key => $value ) {
-			update_metadata( 'order_item', $id, $key, $value );
+		$props_to_update   = $this->get_props_to_update( $item, $meta_key_to_props, 'order_item' );
+
+		foreach ( $props_to_update as $meta_key => $prop ) {
+			update_metadata( 'order_item', $id, $meta_key, $item->{"get_$prop"}( 'edit' ) );
 		}
 	}
 }

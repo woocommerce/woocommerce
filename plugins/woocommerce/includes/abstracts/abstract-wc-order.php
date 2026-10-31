@@ -38,6 +38,13 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	use CogsAwareTrait;
 
 	/**
+	 * Clone mode. A clone of an order keeps the meta IDs, so a cached copy does not insert its meta again.
+	 *
+	 * @var string
+	 */
+	protected $clone_mode = self::CLONE_MODE_CACHE;
+
+	/**
 	 * Order Data array. This is the core order data exposed in APIs since 3.0.0.
 	 *
 	 * Notes: cart_tax = cart_tax is the new name for the legacy 'order_tax'
@@ -210,15 +217,33 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	}
 
 	/**
-	 * This method overwrites the base class's clone method to make it a no-op. In base class WC_Data, we are unsetting the meta_id to clone.
-	 * It seems like this was done to avoid conflicting the metadata when duplicating products. However, doing that does not seems necessary for orders.
-	 * In-fact, when we do that for orders, we lose the capability to clone orders with custom meta data by caching plugins. This is because, when we clone an order object for caching, it will clone the metadata without the ID. Unfortunately, when this cached object with nulled meta ID is retrieved, WC_Data will consider it as a new meta and will insert it as a new meta-data causing duplicates.
+	 * Clone the order.
 	 *
-	 * Eventually, we should move away from overwriting the __clone method in base class itself, since it's easily possible to still duplicate the product without having to hook into the __clone method.
+	 * Orders use cache mode. A cached copy keeps its meta IDs, so it does not insert its meta again on save.
+	 * Each copy gets its own meta, item, and date objects, so a change to one copy does not reach the others.
+	 *
+	 * Eventually, Core should stop unsetting meta IDs in WC_Data::__clone() for every subclass, and make
+	 * duplication an explicit operation. Duplicating an object does not need to hook into __clone().
 	 *
 	 * @since 7.6.0
 	 */
-	public function __clone() {}
+	public function __clone() {
+		parent::__clone();
+		foreach ( $this->items as $group => $items ) {
+			foreach ( $items as $key => $item ) {
+				$mode = $item->get_clone_mode();
+				$item->set_clone_mode( self::CLONE_MODE_CACHE );
+				try {
+					$copy = clone $item;
+				} finally {
+					$item->set_clone_mode( $mode );
+				}
+				$copy->set_order( $this );
+				$copy->set_clone_mode( $mode );
+				$this->items[ $group ][ $key ] = $copy;
+			}
+		}
+	}
 
 	/**
 	 * Get internal type.
