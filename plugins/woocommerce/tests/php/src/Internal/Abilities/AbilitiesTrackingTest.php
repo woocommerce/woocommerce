@@ -562,6 +562,10 @@ class AbilitiesTrackingTest extends WC_Unit_Test_Case {
 	 * @testdox Should record only slug-like error codes.
 	 * @testWith ["tracking_test_failure", "tracking_test_failure"]
 	 *           ["Tracking-Test-Failure", "tracking_test_failure"]
+	 *           ["first_ext:test_refused", "first_ext_test_refused"]
+	 *           ["first-ext:test_refused:2", "first_ext_test_refused_2"]
+	 *           ["first_ext:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", "other"]
+	 *           ["first_ext:order 1234", "other"]
 	 *           ["customer@example.com", "other"]
 	 *           ["order 1234 for Jane", "other"]
 	 *
