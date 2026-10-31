@@ -79,7 +79,7 @@ class ReadinessRestController extends RestApiControllerBase {
 	 * Register the routes.
 	 */
 	public function register_routes(): void {
-		if ( ! $this->features_controller->feature_is_enabled( StatusTab::FEATURE_ID ) ) {
+		if ( ! $this->features_controller->feature_is_enabled( AgenticCommerceSettings::FEATURE_ID ) ) {
 			return;
 		}
 		register_rest_route(

@@ -9720,6 +9720,7 @@ body.woocommerce-settings-payments-section_legacy {
 
 .wc-agentic-commerce-badge {
 	display: inline-block;
+	white-space: nowrap;
 	padding: 0 8px;
 	border-radius: 2px;
 	font-weight: 600;
@@ -9748,6 +9749,10 @@ body.woocommerce-settings-payments-section_legacy {
 	td:first-child {
 		inline-size: 80px;
 	}
+}
+
+.wc-agentic-commerce-channels {
+	margin-block-end: 16px;
 }
 
 .wc-agentic-commerce-ucp-switch {

@@ -129,13 +129,13 @@ array(
 
 ## Background scan and REST
 
-"Run check" on the tab, or `POST wc/v3/agent-readiness/scan`, queues the scan in Action Scheduler (`ScheduledScan`). The report is stored in the `woocommerce_agent_readiness_report` option (not autoloaded). Each run schedules the next one a day later, before scanning, so a failed scan doesn't stop the daily refresh; a run that finds the feature disabled does. If a queued scan still hasn't started 10 minutes after it was due and no other scheduled action has finished in that time (Action Scheduler isn't running), the next "Run check" or `POST` runs the scan in that request.
+"Run check" on the Agentic commerce settings page, or `POST wc/v3/agent-readiness/scan`, queues the scan in Action Scheduler (`ScheduledScan`). The report is stored in the `woocommerce_agent_readiness_report` option (not autoloaded). Each run schedules the next one a day later, before scanning, so a failed scan doesn't stop the daily refresh; a run that finds the feature disabled does. If a queued scan still hasn't started 10 minutes after it was due and no other scheduled action has finished in that time (Action Scheduler isn't running), the next "Run check" or `POST` runs the scan in that request.
 
 Product changes don't update the stored report: a fixed product leaves it at the next daily scan or "Run check". On a store with 11,000 products, a scan (stopping at 5,000) took about 4 seconds and 144 MB.
 
 `GET wc/v3/agent-readiness` returns `{ "report": <report or null>, "scan_pending": <bool> }`. Both routes need `manage_woocommerce` and exist only while the feature is enabled.
 
-The same shape is meant for every consumer: this Status tab, an outside scan of a store, and extensions that rank the findings by sales or offer fixes. Check and channel ids are stable keys.
+The same shape is meant for every consumer: the Agentic commerce settings page, an outside scan of a store, and extensions that rank the findings by sales or offer fixes. Check and channel ids are stable keys.
 
 The scan walks published simple and variable products shown in the shop catalog in batches of 200, most recently modified first, primes meta, terms, images and variations per batch, and stops at 5,000 products.
 
@@ -150,9 +150,10 @@ While the feature is enabled, `ReadinessAbilities` registers abilities in the Wo
 
 WooCommerce > Settings > Agentic commerce (`AgenticCommerceSettings`, `AgenticCommerceSettingsPage`) shows while the feature is enabled:
 
-- Product counts from the stored report (`products`, `hidden_from_catalog`, `unsupported_types`), each linking to a filtered product list.
+- Product counts from the stored report (`products`, `hidden_from_catalog`, `unsupported_types`), each linking to a filtered product list, and "Run check" with the time of the last run.
 - The UCP switch. It saves through `POST wc/v3/agent-readiness/ucp` (`{ "enabled": true }`), which answers 409 while a required setup check fails. Turning it off always works.
-- One row per store condition from `StoreConditions`, the same list the readiness report shows, named by its passing state (`name`). Store output checks are added from the stored report, since they only run in the scan. A failing `required` condition (coming soon mode, HTTPS, permalinks) blocks the switch; a failing `recommended` one, such as a missing policy page, is a warning.
+- One row per store condition from `StoreConditions`, the same list the readiness report shows, named by its passing state (`name`). Store output checks are added from the stored report, since they only run in the scan. A failing row adds why it matters and what it affects (`blocks`). A failing `required` condition (coming soon mode, HTTPS, permalinks) blocks the switch; a failing `recommended` one, such as a missing policy page, is a warning.
+- Product checks from the stored report: per-channel counts, and each failing check with its channels and up to 10 example products.
 - Store policy pages and a return policy summary. Refund and returns, privacy and terms are the existing options, so they stay in sync with Advanced > Page setup and Settings > Privacy; shipping policy and FAQ are new. The dropdowns list published pages only, and saving leaves a stored draft page in place. The summary (`woocommerce_return_policy_summary`, 300 characters) is stored only; UCP has no field for it yet.
 
 Tracks events: `agentic_commerce_ucp_toggled` (`enabled`) and `agentic_commerce_ucp_blocked` (`failing_checks`), sent only when the store allows tracking.
@@ -175,4 +176,4 @@ Core's UCP catalog mapper (`src/Internal/ProductFeed/Mapping/UcpProductMapper.ph
 wp option update woocommerce_feature_agent_readiness_enabled yes
 ```
 
-Then open WooCommerce > Status > Agent readiness and select "Run check".
+Then open WooCommerce > Settings > Agentic commerce and select "Run check".
