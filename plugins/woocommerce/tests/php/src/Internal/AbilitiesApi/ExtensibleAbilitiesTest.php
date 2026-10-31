@@ -1540,6 +1540,130 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should give a validator the primary object, so a new variation can read its unsaved parent.
+	 */
+	public function test_a_validator_gets_the_primary_object(): void {
+		$seen = array();
+		$this->register_validator(
+			'product',
+			'test-ext',
+			static function ( \WC_Product $product, ActionableAbility $ability, array $context ) use ( &$seen ) {
+				if ( $product instanceof \WC_Product_Variation ) {
+					$seen[] = array( $product->get_parent_id(), $context['primary']->get_name(), $context['deleting'] );
+				}
+				return null;
+			}
+		);
+
+		$this->run_ability( 'woocommerce/product-create', $this->get_shirt_input() );
+
+		$this->assertSame(
+			array(
+				array( 0, 'Shirt', false ),
+				array( 0, 'Shirt', false ),
+			),
+			$seen
+		);
+	}
+
+	/**
+	 * @testdox Should run validators on a variation that a parent update deletes, and delete nothing when one refuses.
+	 */
+	public function test_a_validator_can_refuse_deleting_a_variation_in_an_update(): void {
+		$created = $this->run_ability( 'woocommerce/product-create', $this->get_shirt_input() );
+		$kept    = $created['product']['variation_ids'][0];
+		$other   = $created['product']['variation_ids'][1];
+		$seen    = array();
+		$this->register_validator(
+			'product',
+			'test-ext',
+			static function ( \WC_Product $product, ActionableAbility $ability, array $context ) use ( &$seen, $kept ) {
+				$seen[ $product->get_id() ] = $context['deleting'];
+				return $context['deleting'] && $kept === $product->get_id()
+					? new \WP_Error( 'test_keep', 'Keep it.' )
+					: null;
+			}
+		);
+		$this->reset_registries();
+		AbilitiesLoader::init_extensions();
+
+		$refused = $this->run_ability_response(
+			'woocommerce/product-update',
+			array(
+				'id'         => $created['product']['id'],
+				'name'       => 'Renamed',
+				'variations' => array(
+					array(
+						'id'     => $kept,
+						'delete' => true,
+					),
+				),
+			)
+		);
+		$deleted = $this->run_ability_response(
+			'woocommerce/product-update',
+			array(
+				'id'         => $created['product']['id'],
+				'variations' => array(
+					array(
+						'id'     => $other,
+						'delete' => true,
+					),
+				),
+			)
+		);
+
+		$this->assertSame( 400, $refused->get_status() );
+		$this->assertSame( 'Keep it.', $refused->get_data()['message'] );
+		$this->assertSame( 'Shirt', wc_get_product( $created['product']['id'] )->get_name() );
+		$this->assertInstanceOf( \WC_Product_Variation::class, wc_get_product( $kept ) );
+		$this->assertSame( 200, $deleted->get_status() );
+		$this->assertTrue( $seen[ $other ] );
+		$this->assertFalse( $seen[ $created['product']['id'] ] );
+		$this->assertNull( get_post( $other ) );
+	}
+
+	/**
+	 * @testdox Should run validators on the variations of a deleted parent, and delete nothing when one refuses.
+	 */
+	public function test_a_validator_can_refuse_deleting_a_variable_parent(): void {
+		$created = $this->run_ability( 'woocommerce/product-create', $this->get_shirt_input() );
+		$kept    = $created['product']['variation_ids'][1];
+		$seen    = array();
+		$refuse  = true;
+		$this->register_validator(
+			'product',
+			'test-ext',
+			static function ( \WC_Product $product, ActionableAbility $ability, array $context ) use ( &$seen, &$refuse, $kept ) {
+				$seen[ $product->get_id() ] = array( $ability->get_name(), $context['deleting'] );
+				return $refuse && $kept === $product->get_id()
+					? new \WP_Error( 'test_keep', 'Keep it.' )
+					: null;
+			}
+		);
+		$this->reset_registries();
+		AbilitiesLoader::init_extensions();
+		$input = array(
+			'id'    => $created['product']['id'],
+			'force' => true,
+		);
+
+		$refused = $this->run_ability_response( 'woocommerce/product-delete', $input );
+		$after   = wc_get_product( $created['product']['id'] );
+		$refuse  = false;
+		$deleted = $this->run_ability( 'woocommerce/product-delete', $input );
+
+		$this->assertSame( 400, $refused->get_status() );
+		$this->assertSame( 'Keep it.', $refused->get_data()['message'] );
+		$this->assertInstanceOf( \WC_Product_Variable::class, $after );
+		$this->assertTrue( $deleted['deleted'] );
+		foreach ( $created['product']['variation_ids'] as $variation_id ) {
+			$this->assertSame( array( 'woocommerce/product-delete', true ), $seen[ $variation_id ] );
+		}
+		$this->assertSame( array( 'woocommerce/product-delete', true ), $seen[ $created['product']['id'] ] );
+	}
+
+	/**
 	 * @testdox Should undo every save of the call when a sync returns a WP_Error.
 	 */
 	public function test_a_refusal_in_a_sync_rolls_back_the_call(): void {

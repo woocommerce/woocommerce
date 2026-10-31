@@ -28,7 +28,8 @@ defined( 'ABSPATH' ) || exit;
  * The object that load() returns is the primary object. An ability that saves
  * more objects returns them from change(). These are the secondary objects. Each
  * object gets the field writes and the validators of its own resource before
- * the first save.
+ * the first save. The objects that get_objects_to_delete() lists get the
+ * validators too.
  *
  * Only save() saves, inside a database transaction. A WP_Error or an exception
  * from save() rolls back every row it wrote, so an ability that saves secondary
@@ -157,6 +158,20 @@ abstract class ActionableAbility extends \WP_Ability {
 	}
 
 	/**
+	 * The objects that save() will delete or trash, for the validators. Each one
+	 * goes through the validators of the resource before the first save, with
+	 * `deleting` in the context, also when no other object of the call has it.
+	 * Its value is read after change().
+	 *
+	 * @since 11.4.0
+	 *
+	 * @return \WC_Data[]
+	 */
+	protected function get_objects_to_delete(): array {
+		return array();
+	}
+
+	/**
 	 * Run the change. This is the execute callback of the ability.
 	 *
 	 * @internal
@@ -205,11 +220,36 @@ abstract class ActionableAbility extends \WP_Ability {
 			$objects[] = array( $secondary[0], $fields, $resource_name );
 		}
 
+		$deleting = $this->get_objects_to_delete();
 		foreach ( $objects as list( $object, $fields, $resource_name ) ) {
 			$rejected = $this->apply_fields( $object, $fields );
 			if ( null === $rejected && $enabled ) {
-				$rejected = $this->validate( $object, $resource_name );
+				$rejected = $this->validate(
+					$object,
+					$resource_name,
+					array(
+						'primary'  => $subject,
+						'deleting' => in_array( $object, $deleting, true ),
+					)
+				);
 			}
+			if ( null !== $rejected ) {
+				return $rejected;
+			}
+		}
+
+		foreach ( $enabled ? $deleting : array() as $object ) {
+			if ( in_array( $object, array_column( $objects, 0 ), true ) ) {
+				continue;
+			}
+			$rejected = $this->validate(
+				$object,
+				$this->get_resource(),
+				array(
+					'primary'  => $subject,
+					'deleting' => true,
+				)
+			);
 			if ( null !== $rejected ) {
 				return $rejected;
 			}
@@ -404,13 +444,14 @@ abstract class ActionableAbility extends \WP_Ability {
 	/**
 	 * Run the validators of a resource on the changed object.
 	 *
-	 * @param \WC_Data $subject       Changed object.
-	 * @param string   $resource_name Resource of the object.
+	 * @param \WC_Data                                 $subject       Changed object.
+	 * @param string                                   $resource_name Resource of the object.
+	 * @param array{primary: \WC_Data, deleting: bool} $context       The primary object of the call, and whether the call deletes or trashes the object.
 	 * @return \WP_Error|null A WP_Error when a validator refuses the change.
 	 */
-	private function validate( $subject, string $resource_name ): ?\WP_Error {
+	private function validate( $subject, string $resource_name, array $context ): ?\WP_Error {
 		foreach ( ExtensibleAbilities::get_validators( $resource_name ) as $args ) {
-			$rejected = self::run_callback( $args['callback'], array( $subject, $this ), array( 'namespace' => $args['namespace'] ) );
+			$rejected = self::run_callback( $args['callback'], array( $subject, $this, $context ), array( 'namespace' => $args['namespace'] ) );
 			if ( null !== $rejected ) {
 				return $rejected;
 			}
