@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Abilities: Report the extension fields that failed to load in an object, with the error for each one, under `extensions.<namespace>._errors`.

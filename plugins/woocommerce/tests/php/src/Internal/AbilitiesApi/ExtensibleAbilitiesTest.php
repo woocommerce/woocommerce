@@ -1152,6 +1152,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		);
 		ExtensibleAbilities::register_field( array_merge( $valid, array( 'namespace' => '0' ) ) );
 		ExtensibleAbilities::register_field( array_merge( $valid, array( 'field' => '123' ) ) );
+		ExtensibleAbilities::register_field( array_merge( $valid, array( 'field' => ExtensibleAbilities::ERRORS_KEY ) ) );
 		$order = \WC_Helper_Order::create_order();
 
 		$this->assertSame(
@@ -1161,7 +1162,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should leave out a field that throws or fails sanitization, cast a value to its schema type, and keep a null that the schema allows.
+	 * @testdox Should leave out and report a field that throws or fails sanitization, cast a value to its schema type, and keep a null that the schema allows.
 	 */
 	public function test_field_values_follow_their_schema(): void {
 		AbilitiesLoader::register_core_resources();
@@ -1203,13 +1204,19 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 		$output = ExtensibleAbilities::add_fields_to_object( array(), 'order', $order );
 
-		$this->assertSame(
-			array(
-				'count' => 12,
-				'empty' => null,
-			),
-			$output['extensions']['values']
-		);
+		$values = $output['extensions']['values'];
+		$errors = $values[ ExtensibleAbilities::ERRORS_KEY ];
+
+		$this->assertSame( 12, $values['count'] );
+		$this->assertArrayHasKey( 'empty', $values );
+		$this->assertNull( $values['empty'] );
+		$this->assertArrayNotHasKey( 'broken', $values );
+		$this->assertArrayNotHasKey( 'dupes', $values );
+		$this->assertSame( 'The extension failed to read this value.', $errors['broken'] );
+		$this->assertArrayHasKey( 'dupes', $errors );
+		$this->assertArrayNotHasKey( 'count', $errors );
+		$this->assertArrayNotHasKey( 'empty', $errors );
+		$this->assertStringNotContainsString( 'Broken', wp_json_encode( $output ) );
 	}
 
 	/**
@@ -1247,12 +1254,79 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 		$products = array_column( $this->run_ability( 'woocommerce/products-query', array( 'search' => 'Pen' ) )['products'], null, 'id' );
 
-		$this->assertSame( array( 'code' => 'A1' ), $products[ $first->get_id() ]['extensions']['test-ext'] );
+		foreach ( $products as $product ) {
+			$this->assertStringContainsString( 'integer', $product['extensions']['test-ext'][ ExtensibleAbilities::ERRORS_KEY ]['count'] );
+		}
+		$this->assertSame( 'A1', $products[ $first->get_id() ]['extensions']['test-ext']['code'] );
 		$matches = array_filter(
 			$reported,
 			static fn( $message ) => false !== strpos( $message, '"test-ext.count" of "product"' )
 		);
 		$this->assertCount( 1, $matches );
+	}
+
+	/**
+	 * @testdox Should report the order and line item fields that fail on every order in a list, and keep the valid values.
+	 */
+	public function test_order_list_items_report_their_failed_fields(): void {
+		$this->setExpectedIncorrectUsage( ExtensibleAbilities::class . '::register_field' );
+		add_action(
+			'woocommerce_extensible_abilities_init',
+			static function () {
+				$throws = static function () {
+					throw new \RuntimeException( 'Broken' );
+				};
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'     => 'order',
+						'namespace'    => 'test-ext',
+						'field'        => 'count',
+						'schema'       => array( 'type' => 'integer' ),
+						'get_callback' => static fn() => 'many',
+					)
+				);
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'     => 'order',
+						'namespace'    => 'test-ext',
+						'field'        => 'broken',
+						'schema'       => array( 'type' => 'string' ),
+						'get_callback' => $throws,
+					)
+				);
+				ExtensibleAbilities::register_field(
+					array(
+						'resource'     => 'order_item',
+						'namespace'    => 'test-ext',
+						'field'        => 'broken',
+						'schema'       => array( 'type' => 'string' ),
+						'get_callback' => $throws,
+					)
+				);
+			}
+		);
+		\WC_Helper_Order::create_order();
+		\WC_Helper_Order::create_order();
+
+		$orders = $this->run_ability( 'woocommerce/orders-query', array( 'include_line_items' => true ) )['orders'];
+
+		$this->assertCount( 2, $orders );
+		foreach ( $orders as $order ) {
+			$extension = $order['extensions']['test-ext'];
+			$errors    = $extension[ ExtensibleAbilities::ERRORS_KEY ];
+			$this->assertSame( 'order-' . $order['id'], $extension['note'] );
+			$this->assertSame( array( 'count', 'broken' ), array_keys( $errors ) );
+			$this->assertStringContainsString( 'integer', $errors['count'] );
+			$this->assertSame( 'The extension failed to read this value.', $errors['broken'] );
+			$this->assertNotEmpty( $order['line_items'] );
+			foreach ( $order['line_items'] as $item ) {
+				$item_extension = $item['extensions']['test-ext'];
+				$this->assertSame( 'item-' . $item['id'], $item_extension['gift'] );
+				$this->assertArrayNotHasKey( 'broken', $item_extension );
+				$this->assertSame( 'The extension failed to read this value.', $item_extension[ ExtensibleAbilities::ERRORS_KEY ]['broken'] );
+			}
+		}
+		$this->assertStringNotContainsString( 'Broken', wp_json_encode( $orders ) );
 	}
 
 	/**
@@ -1336,6 +1410,61 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			}
 		}
 		$saved = wc_get_product( $product->get_id() );
+		$this->assertSame( 'Pen', $saved->get_name() );
+		$this->assertFalse( $saved->meta_exists( '_test_color' ) );
+	}
+
+	/**
+	 * @testdox Should refuse an update that contains a read-only field and save nothing.
+	 */
+	public function test_an_update_with_a_read_only_field_saves_nothing(): void {
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+		$product->update_meta_data( '_test_code', 'A1' );
+		$product->save();
+
+		$response = $this->run_ability_response(
+			'woocommerce/product-update',
+			array(
+				'id'         => $product->get_id(),
+				'name'       => 'Pencil',
+				'extensions' => array(
+					'test-ext' => array(
+						'color' => 'red',
+						'code'  => 'A1',
+					),
+				),
+			)
+		);
+
+		$saved = wc_get_product( $product->get_id() );
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'Pen', $saved->get_name() );
+		$this->assertFalse( $saved->meta_exists( '_test_color' ) );
+		$this->assertSame( 'A1', $saved->get_meta( '_test_code' ) );
+	}
+
+	/**
+	 * @testdox Should refuse an update that contains the _errors key and save nothing.
+	 */
+	public function test_an_update_with_the_errors_key_saves_nothing(): void {
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Pen' ) );
+
+		$response = $this->run_ability_response(
+			'woocommerce/product-update',
+			array(
+				'id'         => $product->get_id(),
+				'name'       => 'Pencil',
+				'extensions' => array(
+					'test-ext' => array(
+						'color'                         => 'red',
+						ExtensibleAbilities::ERRORS_KEY => array( 'count' => 'Failed.' ),
+					),
+				),
+			)
+		);
+
+		$saved = wc_get_product( $product->get_id() );
+		$this->assertSame( 400, $response->get_status() );
 		$this->assertSame( 'Pen', $saved->get_name() );
 		$this->assertFalse( $saved->meta_exists( '_test_color' ) );
 	}
