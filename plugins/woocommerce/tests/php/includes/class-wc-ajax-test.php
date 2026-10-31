@@ -3491,7 +3491,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
-	 * @testdox Percentage order fees use the stored discount total, not a filtered one.
+	 * @testdox Percentage order fees ignore a filtered discount total.
 	 */
 	public function test_add_order_fee_percentage_ignores_filtered_discount_total(): void {
 		$order = $this->create_order_with_20_percent_tax();
@@ -3500,8 +3500,206 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 
 		$fee = $this->add_order_fee_via_ajax( $order, '10%' );
 
-		// The stored discount is 10, so the base stays 90 even though the filter reports 0.
-		$this->assertEquals( 9.0, (float) $fee->get_total(), 'Percentage fee should use the stored discount total.' );
+		// The line items total 90 after the coupon, so the base stays 90 even though the filter reports no discount.
+		$this->assertEquals( 9.0, (float) $fee->get_total(), 'Percentage fee should ignore a filtered discount total.' );
+	}
+
+	/**
+	 * @testdox Percentage order fees ignore a filtered order subtotal.
+	 */
+	public function test_add_order_fee_percentage_ignores_filtered_subtotal(): void {
+		$order = $this->create_order_with_20_percent_tax();
+		add_filter( 'woocommerce_order_get_subtotal', '__return_zero' );
+
+		$fee = $this->add_order_fee_via_ajax( $order, '10%' );
+
+		// The line items total 100, so the fee stays 10 even though the filter reports a subtotal of 0.
+		$this->assertEquals( 10.0, (float) $fee->get_total(), 'Percentage fee should ignore a filtered subtotal.' );
+	}
+
+	/**
+	 * @testdox Percentage order fees ignore a filtered line item total.
+	 */
+	public function test_add_order_fee_percentage_ignores_filtered_item_total(): void {
+		$order = $this->create_order_with_20_percent_tax();
+		add_filter( 'woocommerce_order_item_get_total', '__return_zero' );
+
+		$fee = $this->add_order_fee_via_ajax( $order, '10%' );
+
+		// The stored line total is 100, so the fee stays 10. The filter also zeroes the fee when read in view context.
+		$this->assertEquals( 10.0, (float) $fee->get_total( 'edit' ), 'Percentage fee should ignore a filtered line item total.' );
+	}
+
+	/**
+	 * @testdox Percentage order fees round the line items the same way as the order subtotal.
+	 *
+	 * @testWith ["no", 24.99, 14.99]
+	 *           ["yes", 25.0, 15.0]
+	 *
+	 * @param string $round_at_subtotal Value of the "Round tax at subtotal level" option.
+	 * @param float  $expected_subtotal Expected order items subtotal.
+	 * @param float  $expected_fee      Expected fee line total.
+	 */
+	public function test_add_order_fee_percentage_rounds_line_items_like_the_subtotal( string $round_at_subtotal, float $expected_subtotal, float $expected_fee ): void {
+		update_option( 'woocommerce_tax_round_at_subtotal', $round_at_subtotal );
+		$product = WC_Helper_Product::create_simple_product();
+		$order   = new WC_Order();
+		for ( $i = 0; $i < 3; $i++ ) {
+			// 8.333333 is the net line total stored for a 10.00 price that includes 20% tax.
+			$order->add_product(
+				$product,
+				1,
+				array(
+					'subtotal' => 8.333333,
+					'total'    => 8.333333,
+				)
+			);
+		}
+		$order->calculate_totals( false );
+		$order->save();
+		$this->assertEquals( $expected_subtotal, (float) $order->get_subtotal(), 'Fixture order should show the expected items subtotal.' );
+
+		$fee = $this->add_order_fee_via_ajax( $order, '60%' );
+
+		// Rounding each line gives 8.33 × 3 = 24.99, so 60% is 14.99; without it the base is 24.999999 and 60% is 15.00.
+		$this->assertEquals( $expected_fee, (float) $fee->get_total(), 'Percentage fee should be taken from the items subtotal the order shows.' );
+	}
+
+	/**
+	 * @testdox Percentage order fees include line items whose class does not extend WC_Order_Item_Product.
+	 */
+	public function test_add_order_fee_percentage_includes_custom_line_item_classes(): void {
+		update_option( 'woocommerce_calc_taxes', 'no' );
+		$order = new WC_Order();
+		$order->save();
+
+		// An extension's line item class with only the methods the order totals and the order editor call.
+		$custom_item = new class() extends WC_Order_Item {
+			/**
+			 * Line item amounts.
+			 *
+			 * @var array
+			 */
+			protected $extra_data = array(
+				'subtotal' => 0,
+				'total'    => 0,
+				'taxes'    => array(
+					'subtotal' => array(),
+					'total'    => array(),
+				),
+			);
+
+			/**
+			 * Get the item type.
+			 *
+			 * @return string
+			 */
+			public function get_type() {
+				return 'line_item';
+			}
+
+			/**
+			 * Get the product, none for this item.
+			 *
+			 * @return bool
+			 */
+			public function get_product() {
+				return false;
+			}
+
+			/**
+			 * Get the product ID, none for this item.
+			 *
+			 * @return int
+			 */
+			public function get_product_id() {
+				return 0;
+			}
+
+			/**
+			 * Get the variation ID, none for this item.
+			 *
+			 * @return int
+			 */
+			public function get_variation_id() {
+				return 0;
+			}
+
+			/**
+			 * Get the subtotal.
+			 *
+			 * @param string $context View or edit context.
+			 * @return string
+			 */
+			public function get_subtotal( $context = 'view' ) {
+				return $this->get_prop( 'subtotal', $context );
+			}
+
+			/**
+			 * Get the total.
+			 *
+			 * @param string $context View or edit context.
+			 * @return string
+			 */
+			public function get_total( $context = 'view' ) {
+				return $this->get_prop( 'total', $context );
+			}
+
+			/**
+			 * Get the taxes.
+			 *
+			 * @param string $context View or edit context.
+			 * @return array
+			 */
+			public function get_taxes( $context = 'view' ) {
+				return $this->get_prop( 'taxes', $context );
+			}
+
+			/**
+			 * Set the subtotal and total.
+			 *
+			 * @param string $amount Line amount.
+			 */
+			public function set_amount( $amount ) {
+				$this->set_prop( 'subtotal', wc_format_decimal( $amount ) );
+				$this->set_prop( 'total', wc_format_decimal( $amount ) );
+			}
+
+			/**
+			 * Clear the taxes, which this test does not use.
+			 *
+			 * @param array|false $raw_tax_data Tax data.
+			 */
+			public function set_taxes( $raw_tax_data ) {
+				unset( $raw_tax_data );
+				$this->set_prop(
+					'taxes',
+					array(
+						'subtotal' => array(),
+						'total'    => array(),
+					)
+				);
+			}
+		};
+		$custom_item->set_name( 'Custom line' );
+		$custom_item->set_amount( 50 );
+		add_filter(
+			'woocommerce_order_get_items',
+			function ( $items, $order, $types ) use ( $custom_item ) {
+				unset( $order );
+				if ( in_array( 'line_item', (array) $types, true ) ) {
+					$items[999999] = $custom_item;
+				}
+				return $items;
+			},
+			10,
+			3
+		);
+
+		$fee = $this->add_order_fee_via_ajax( $order, '10%' );
+
+		// The custom line totals 50, so 10% is 5. Leaving it out of the base would give 0.
+		$this->assertEquals( 5.0, (float) $fee->get_total(), 'Percentage fee should include every line item the order returns.' );
 	}
 
 	/**
