@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show refunds in the order preview only on the line items that were refunded, not on other variations or lines of the same product.
