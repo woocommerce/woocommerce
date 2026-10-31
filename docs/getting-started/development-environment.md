@@ -78,7 +78,7 @@ cd woocommerce
 
 #### Install Node
 
-You need [Node.js](https://nodejs.org/) installed to run PNPM and the build scripts. You do not need to match a specific Node version yourself: PNPM reads the version pinned in `pnpm-workspace.yaml` (`useNodeVersion`, mirrored in `.nvmrc`) and installs and uses it automatically for every script it runs.
+You need [Node.js](https://nodejs.org/) installed to run PNPM and the build scripts. Use the Node version pinned in `package.json` (`devEngines.runtime`, mirrored in `.nvmrc`); PNPM fails with an error when you run it on a different version.
 
 If you would like a tool to install and switch between Node versions, [Node Version Manager](https://github.com/nvm-sh/nvm) (nvm) is one option. With nvm installed, running `nvm install` from the repository root picks up the pinned version from `.nvmrc`. You can learn more in [the nvm GitHub repository](https://github.com/nvm-sh/nvm?tab=readme-ov-file#intro).
 

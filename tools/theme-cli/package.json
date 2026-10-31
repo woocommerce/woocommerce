@@ -15,6 +15,7 @@
 		"wp-env": "node scripts/env.mjs"
 	},
 	"devDependencies": {
+		"@woocommerce/eslint-config": "workspace:*",
 		"@wordpress/env": "catalog:tooling",
 		"@wordpress/scripts": "catalog:tooling"
 	},
