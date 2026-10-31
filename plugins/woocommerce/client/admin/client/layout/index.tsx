@@ -202,6 +202,8 @@ export const _Layout = () => {
 			history={
 				getHistory() as unknown as HistoryRouterProps[ 'history' ]
 			}
+			// Render route changes synchronously, as v6 did, so routes stay in step with getQuery().
+			useTransitions={ false }
 		>
 			{ /* @ts-expect-error basename is not typed */ }
 			<Routes basename={ basename }>
