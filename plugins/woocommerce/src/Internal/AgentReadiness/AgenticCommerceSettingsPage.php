@@ -26,6 +26,11 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	private const POLICIES_SECTION = 'agentic_commerce_policies';
 
 	/**
+	 * Example products per product check, to keep the page short. The count column has the total.
+	 */
+	private const EXAMPLES_SHOWN = 3;
+
+	/**
 	 * Marks the page dropdowns on this tab, which share options with other tabs.
 	 */
 	private const PAGE_FIELD_KEY = 'agentic_commerce_page';
@@ -453,7 +458,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	 */
 	private function product_links( array $product_ids ): array {
 		$links = array();
-		foreach ( array_slice( $product_ids, 0, AgentReadiness::PRODUCT_IDS_LIMIT ) as $product_id ) {
+		foreach ( array_slice( $product_ids, 0, self::EXAMPLES_SHOWN ) as $product_id ) {
 			$url = get_edit_post_link( (int) $product_id, 'raw' );
 			if ( ! $url ) {
 				continue;
@@ -633,7 +638,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 						<td>
 							<?php echo esc_html( $check['name'] ); ?>
 							<?php if ( false === $check['ok'] ) : ?>
-								<br /><span class="description"><?php echo esc_html( trim( ( $conflict ? __( 'Something on your store is replacing this.', 'woocommerce' ) . ' ' : '' ) . $check['why'] . ' ' . self::blocks_text( $check['blocks'] ) ) ); ?></span>
+								<br /><span class="description"><?php echo esc_html( trim( ( $conflict ? __( 'Something on your store is replacing this. If you just changed it, a page cache may show the old page for a while.', 'woocommerce' ) . ' ' : '' ) . $check['why'] . ' ' . self::blocks_text( $check['blocks'] ) ) ); ?></span>
 							<?php endif; ?>
 						</td>
 						<td>
