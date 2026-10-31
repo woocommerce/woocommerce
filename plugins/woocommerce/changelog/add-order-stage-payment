@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add non-saving stage_*() twins for the WC_Data methods that save inside themselves, so an ability can change an object and run validators before one save. Direct calls to the saving methods keep their saves and hooks. A stage_*() method refuses a class that overrides the saving method without the twin, and that class keeps working through the saving method. Add a PHPStan rule that reports writes outside save() without a twin.

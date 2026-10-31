@@ -156,13 +156,16 @@ class WC_Order_Refund extends WC_Abstract_Order {
 	}
 
 	/**
-	 * Coupons cannot be applied to refunds, so a refund never records coupon usage.
+	 * Coupons cannot be applied to refunds, so a refund never records coupon usage. apply_coupon() calls this
+	 * method, so it refuses the coupon too.
 	 *
-	 * @since 11.3.0
+	 * @since 11.4.0
 	 * @param string|WC_Coupon $raw_coupon Coupon code or object.
 	 * @return WP_Error
 	 */
-	public function apply_coupon( $raw_coupon ) {
+	public function stage_coupon( $raw_coupon ) {
+		$this->refuse_unstaged_override( 'apply_coupon', 'stage_coupon' );
+
 		return new WP_Error( 'invalid_coupon', __( 'Coupons cannot be applied to refunds.', 'woocommerce' ) );
 	}
 

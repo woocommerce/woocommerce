@@ -12763,7 +12763,7 @@ parameters:
 			path: includes/class-wc-order.php
 
 		-
-			message: '#^Method WC_Order\:\:add_order_note\(\) should return int but returns int\|false\.$#'
+			message: '#^Method WC_Order\:\:insert_order_note\(\) should return int but returns int\|false\.$#'
 			identifier: return.type
 			count: 1
 			path: includes/class-wc-order.php
@@ -12775,7 +12775,7 @@ parameters:
 			path: includes/class-wc-order.php
 
 		-
-			message: '#^PHPDoc tag @param has invalid value \(WC_Order \$this                     Order object\.\)\: Unexpected token "\$this", expected variable at offset 193 on line 5$#'
+			message: '#^PHPDoc tag @param has invalid value \(WC_Order \$this                     Order object\.\)\: Unexpected token "\$this", expected variable at offset 189 on line 5$#'
 			identifier: phpDoc.parseError
 			count: 1
 			path: includes/class-wc-order.php
@@ -12793,7 +12793,7 @@ parameters:
 			path: includes/class-wc-order.php
 
 		-
-			message: '#^PHPDoc tag @param has invalid value \(WC_Order \$this          Order object\.\)\: Unexpected token "\$this", expected variable at offset 197 on line 6$#'
+			message: '#^PHPDoc tag @param has invalid value \(WC_Order \$this          Order object\.\)\: Unexpected token "\$this", expected variable at offset 187 on line 6$#'
 			identifier: phpDoc.parseError
 			count: 1
 			path: includes/class-wc-order.php
@@ -12843,7 +12843,7 @@ parameters:
 		-
 			message: '#^Parameter \#2 \$is_customer_note of method WC_Order\:\:add_order_note\(\) expects int, false given\.$#'
 			identifier: argument.type
-			count: 5
+			count: 4
 			path: includes/class-wc-order.php
 
 		-
@@ -15692,12 +15692,6 @@ parameters:
 
 		-
 			message: '#^Method WC_Webhook\:\:enqueue\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-webhook.php
-
-		-
-			message: '#^Method WC_Webhook\:\:failed_delivery\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: includes/class-wc-webhook.php

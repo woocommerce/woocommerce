@@ -851,4 +851,92 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 		remove_filter( 'woocommerce_logger_log_message', $log_spy, 10 );
 	}
 
+	/**
+	 * @testdox A class that overrides the saving delivery methods keeps working through them, and the stage methods refuse it.
+	 */
+	public function test_stage_delivery_methods_refuse_a_class_that_has_not_adopted_them() {
+		// phpcs:disable Squiz.Commenting.FunctionComment.Missing, Generic.CodeAnalysis.UselessOverridingMethod.Found
+		$webhook = new class() extends WC_Webhook {
+			public function log_delivery( $delivery_id, $request, $response, $duration ) {
+				parent::log_delivery( $delivery_id, $request, $response, $duration );
+			}
+			public function deliver_ping() {
+				return parent::deliver_ping();
+			}
+		};
+		// phpcs:enable Squiz.Commenting.FunctionComment.Missing, Generic.CodeAnalysis.UselessOverridingMethod.Found
+		$webhook->set_status( 'active' );
+		$webhook->set_topic( 'order.created' );
+		$webhook->set_delivery_url( 'https://example.com/webhook' );
+		$webhook->set_user_id( 1 );
+		$webhook->set_failure_count( 0 );
+		$webhook->save();
+
+		$response = array(
+			'response' => array(
+				'code'    => 500,
+				'message' => 'Internal Server Error',
+			),
+			'headers'  => array(),
+			'body'     => '',
+		);
+		$request  = array(
+			'method'     => 'POST',
+			'headers'    => array(),
+			'body'       => '',
+			'user-agent' => 'test',
+		);
+		$webhook->log_delivery( 'delivery', $request, $response, 0.1 );
+		$this->assertSame( 1, wc_get_webhook( $webhook->get_id() )->get_failure_count() );
+
+		$http = static fn() => array(
+			'response' => array(
+				'code'    => 200,
+				'message' => 'OK',
+			),
+			'headers'  => array(),
+			'body'     => '',
+		);
+		add_filter( 'pre_http_request', $http );
+		$this->assertTrue( $webhook->deliver_ping() );
+		remove_filter( 'pre_http_request', $http );
+
+		$calls = array(
+			'stage_delivery_result' => array( 500 ),
+			'stage_delivery_ping'   => array(),
+		);
+		foreach ( $calls as $stage_method => $args ) {
+			try {
+				$webhook->$stage_method( ...$args );
+				$this->fail( $stage_method . ' did not refuse the class.' );
+			} catch ( WC_Data_Exception $e ) {
+				$this->assertSame( 'woocommerce_data_staging_unsupported', $e->getErrorCode() );
+				$this->assertStringContainsString( $stage_method . '()', $e->getMessage() );
+			}
+		}
+	}
+
+	/**
+	 * @testdox stage_delivery_result() counts a failure in memory, and the next save writes it.
+	 */
+	public function test_stage_delivery_result_changes_the_webhook_in_memory_only() {
+		$webhook = new WC_Webhook();
+		$webhook->set_status( 'active' );
+		$webhook->set_topic( 'order.created' );
+		$webhook->set_delivery_url( 'https://example.com/webhook' );
+		$webhook->set_user_id( 1 );
+		$webhook->set_failure_count( 0 );
+		$webhook->save();
+
+		$webhook->stage_delivery_result( 500 );
+		$this->assertSame( 1, $webhook->get_failure_count() );
+		$this->assertSame( 0, wc_get_webhook( $webhook->get_id() )->get_failure_count() );
+
+		$webhook->save();
+		$this->assertSame( 1, wc_get_webhook( $webhook->get_id() )->get_failure_count() );
+
+		$webhook->stage_delivery_result( 200 );
+		$webhook->save();
+		$this->assertSame( 0, wc_get_webhook( $webhook->get_id() )->get_failure_count() );
+	}
 }

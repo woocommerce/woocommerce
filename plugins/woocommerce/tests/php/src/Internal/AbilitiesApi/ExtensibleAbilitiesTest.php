@@ -1468,7 +1468,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 			$calls = $order_class::$calls;
 			if ( $enabled ) {
 				$this->assertSame( 400, $response->get_status() );
-				$this->assertSame( 'woocommerce_order_status_staging_unsupported', $response->get_data()['code'] );
+				$this->assertSame( 'woocommerce_data_staging_unsupported', $response->get_data()['code'] );
 				$this->assertSame( 0, $calls );
 				$this->assertSame( 'pending', wc_get_order( $order->get_id() )->get_status() );
 			} else {
@@ -1899,7 +1899,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$this->assertSame( 'test_on_hold_refused', $refused->get_data()['code'] );
 		$this->assertSame( 'processing', $updated['order']['status'] );
 		$this->assertSame( 400, $again->get_status() );
-		$this->assertSame( 'woocommerce_order_status_staging_unsupported', $again->get_data()['code'] );
+		$this->assertSame( 'woocommerce_data_staging_unsupported', $again->get_data()['code'] );
 		$this->assertSame( 'processing', wc_get_order( $order->get_id() )->get_status() );
 		$this->assertSame( 'pending', wc_get_order( $child->get_id() )->get_status() );
 	}
@@ -1979,9 +1979,48 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 		remove_filter( 'woocommerce_order_class', $filter_class, 100 );
 		$this->assertSame( 400, $response->get_status() );
-		$this->assertSame( 'woocommerce_order_status_staging_unsupported', $response->get_data()['code'] );
+		$this->assertSame( 'woocommerce_data_staging_unsupported', $response->get_data()['code'] );
 		$this->assertStringContainsString( TestUnstagedOrder::class, $response->get_data()['message'] );
 		$this->assertStringContainsString( 'stage_status()', $response->get_data()['message'] );
+		$this->assertSame( 'pending', wc_get_order( $order->get_id() )->get_status() );
+	}
+
+	/**
+	 * @testdox Should refuse an ability that calls a stage method on an order class that overrides the saving method only, and save nothing.
+	 */
+	public function test_any_ability_that_stages_refuses_an_unadopted_order_class(): void {
+		$order_class  = get_class(
+			new class() extends \WC_Order {
+				/**
+				 * Mark the order, then complete the payment.
+				 *
+				 * @param string $transaction_id Transaction ID.
+				 * @return bool
+				 */
+				public function payment_complete( $transaction_id = '' ) {
+					$this->update_meta_data( '_test_override', 'yes' );
+					return parent::payment_complete( $transaction_id );
+				}
+			}
+		);
+		$filter_class = static fn() => $order_class;
+		add_filter( 'woocommerce_order_class', $filter_class, 100 );
+		$this->register_order_status_ability( TestOrderStageAbility::class );
+		$this->reset_registries();
+		$order = \WC_Helper_Order::create_order();
+
+		$response = $this->run_ability_response(
+			'test-ext/order-status',
+			array(
+				'id'     => $order->get_id(),
+				'status' => 'completed',
+			)
+		);
+
+		remove_filter( 'woocommerce_order_class', $filter_class, 100 );
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'woocommerce_data_staging_unsupported', $response->get_data()['code'] );
+		$this->assertStringContainsString( 'stage_payment_complete()', $response->get_data()['message'] );
 		$this->assertSame( 'pending', wc_get_order( $order->get_id() )->get_status() );
 	}
 
@@ -2107,6 +2146,36 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should refuse a class outside WC_Data that overrides a saving method without its stage method.
+	 */
+	public function test_refuse_unstaged_override_works_for_a_class_outside_wc_data(): void {
+		$adopted   = new class() extends TestStagedService {
+			/**
+			 * Save an item.
+			 */
+			public function add_item(): void {}
+
+			/**
+			 * Stage an item.
+			 */
+			public function stage_item(): void {}
+		};
+		$unadopted = new class() extends TestStagedService {
+			/**
+			 * Save an item.
+			 */
+			public function add_item(): void {}
+		};
+
+		ExtensibleAbilities::refuse_unstaged_override( new TestStagedService(), 'add_item', 'stage_item' );
+		ExtensibleAbilities::refuse_unstaged_override( $adopted, 'add_item', 'stage_item' );
+
+		$this->expectException( \WC_Data_Exception::class );
+		$this->expectExceptionMessage( 'overrides add_item() and needs to override stage_item() too' );
+		ExtensibleAbilities::refuse_unstaged_override( $unadopted, 'add_item', 'stage_item' );
+	}
+
+	/**
 	 * @testdox Should not run validators with the feature off.
 	 */
 	public function test_validators_do_not_run_with_the_feature_off(): void {
@@ -2224,11 +2293,13 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 
 	/**
 	 * Register test-ext/order-status, an ActionableAbility of an extension that changes orders.
+	 *
+	 * @param string $ability_class Class of the ability.
 	 */
-	private function register_order_status_ability(): void {
+	private function register_order_status_ability( string $ability_class = TestOrderStatusAbility::class ): void {
 		$this->add_test_action(
 			'wp_abilities_api_init',
-			static function () {
+			static function () use ( $ability_class ) {
 				wp_register_ability(
 					'test-ext/order-status',
 					array(
@@ -2245,7 +2316,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 						),
 						'output_schema'       => array( 'type' => 'object' ),
 						'permission_callback' => '__return_true',
-						'ability_class'       => TestOrderStatusAbility::class,
+						'ability_class'       => $ability_class,
 						'meta'                => array( 'show_in_rest' => true ),
 					)
 				);
