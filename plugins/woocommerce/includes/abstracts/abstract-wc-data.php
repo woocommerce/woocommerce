@@ -10,7 +10,7 @@
  * @package     WooCommerce\Classes
  */
 
-use Automattic\WooCommerce\Internal\Utilities\StagedMethod;
+use Automattic\WooCommerce\Abilities\ExtensibleAbilities;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -195,20 +195,7 @@ abstract class WC_Data {
 			return;
 		}
 
-		$class_name = StagedMethod::unstaged_class( $this, $method, $stage_method );
-		if ( null !== $class_name ) {
-			throw new WC_Data_Exception(
-				'woocommerce_data_staging_unsupported',
-				sprintf(
-					/* translators: 1: PHP class name of the object, 2: method that the class overrides, 3: method that the class needs to override. */
-					__( 'This object does not support this change yet. The class %1$s overrides %2$s() and needs to override %3$s() too.', 'woocommerce' ),
-					$class_name,
-					$method,
-					$stage_method
-				),
-				400
-			);
-		}
+		ExtensibleAbilities::refuse_unstaged_override( $this, $method, $stage_method );
 	}
 
 	/**
