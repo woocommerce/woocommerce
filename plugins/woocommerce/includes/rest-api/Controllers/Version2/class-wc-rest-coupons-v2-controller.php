@@ -339,7 +339,7 @@ class WC_REST_Coupons_V2_Controller extends WC_REST_CRUD_Controller {
 						MetaDataUtil::update( $value, $coupon );
 						break;
 					case 'description':
-						$coupon->set_description( wp_filter_post_kses( $value ) );
+						$coupon->set_description( wp_kses_post( $value ) );
 						break;
 					default:
 						if ( is_callable( array( $coupon, "set_{$key}" ) ) ) {

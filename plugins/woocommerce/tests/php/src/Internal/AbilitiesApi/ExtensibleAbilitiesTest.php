@@ -1309,6 +1309,25 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should keep backslashes and quotes in the name and descriptions of a created product.
+	 */
+	public function test_product_create_keeps_backslashes_in_post_fields(): void {
+		$created = $this->run_ability(
+			'woocommerce/product-create',
+			array(
+				'name'              => 'Cable 1\\2" it\'s',
+				'description'       => 'Path C:\\temp',
+				'short_description' => 'Short C:\\temp',
+			)
+		);
+		$post    = get_post( $created['product']['id'] );
+
+		$this->assertSame( 'Cable 1\\2" it\'s', $post->post_title, 'The stored name should keep its backslash and quotes.' );
+		$this->assertSame( 'Path C:\\temp', $post->post_content, 'The stored description should keep its backslash.' );
+		$this->assertSame( 'Short C:\\temp', $post->post_excerpt, 'The stored short description should keep its backslash.' );
+	}
+
+	/**
 	 * @testdox Should save nothing when a value is rejected, does not match its schema, or belongs to a read-only field.
 	 */
 	public function test_a_rejected_value_saves_nothing(): void {

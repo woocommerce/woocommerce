@@ -2955,4 +2955,48 @@ class ProductsControllerTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'cost_of_goods_sold', $data, 'Shop manager should see COGS data' );
 		$this->assertArrayHasKey( 'meta_data', $data, 'Shop manager should see meta data' );
 	}
+
+	/**
+	 * @testdox Creating and updating a product keeps backslashes and quotes in its name and descriptions.
+	 */
+	public function test_create_and_update_product_keep_backslashes_in_post_fields(): void {
+		$fields         = array(
+			'name'              => 'Cable 1\\2" it\'s',
+			'description'       => 'Path C:\\temp',
+			'short_description' => 'Short C:\\temp',
+		);
+		$updated_fields = array(
+			'name'              => 'Cable 3\\4" it\'s',
+			'description'       => 'Path D:\\temp',
+			'short_description' => 'Short D:\\temp',
+		);
+
+		$request = new WP_REST_Request( 'POST', '/wc/v4/products' );
+		$request->set_body_params( $fields );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 201, $response->get_status() );
+		$this->assert_post_fields_keep_backslashes( $response->get_data(), $fields );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v4/products/' . $response->get_data()['id'] );
+		$request->set_body_params( $updated_fields );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assert_post_fields_keep_backslashes( $response->get_data(), $updated_fields );
+	}
+
+	/**
+	 * Assert a product response and its stored post keep the given name and descriptions.
+	 *
+	 * @param array $data   Product response data.
+	 * @param array $fields Expected name, description and short description.
+	 */
+	private function assert_post_fields_keep_backslashes( array $data, array $fields ): void {
+		$post = get_post( $data['id'] );
+		$this->assertSame( $fields['name'], $data['name'], 'The response name should keep its backslash and quotes.' );
+		$this->assertSame( $fields['name'], $post->post_title, 'The stored name should keep its backslash and quotes.' );
+		$this->assertSame( $fields['description'], $post->post_content, 'The stored description should keep its backslash.' );
+		$this->assertSame( $fields['short_description'], $post->post_excerpt, 'The stored short description should keep its backslash.' );
+	}
 }

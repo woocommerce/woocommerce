@@ -595,7 +595,7 @@ trait ProductAbilityTrait {
 	 */
 	private static function prepare_product_field_value( string $field, $value ) {
 		if ( in_array( $field, array( 'name', 'description', 'short_description' ), true ) && is_string( $value ) ) {
-			return wp_filter_post_kses( $value );
+			return wp_kses_post( $value );
 		}
 
 		if ( 'status' === $field && is_string( $value ) ) {

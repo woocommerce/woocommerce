@@ -858,4 +858,88 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		$store->update_product_sales( $product_id, 30.5, 'set' );
 		$this->assertSame( '30.500000', get_post_meta( $product_id, 'total_sales', true ) );
 	}
+
+	/**
+	 * @testdox Creating and updating a product keeps backslashes and quotes in its name and descriptions.
+	 */
+	public function test_create_and_update_keep_backslashes_in_post_fields(): void {
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Cable 1\\2" it\'s' );
+		$product->set_description( 'Path C:\\temp' );
+		$product->set_short_description( 'Short C:\\temp' );
+		$product->save();
+
+		$post = get_post( $product->get_id() );
+		$this->assertSame( 'Cable 1\\2" it\'s', $post->post_title, 'The created name should keep its backslash and quotes.' );
+		$this->assertSame( 'Path C:\\temp', $post->post_content, 'The created description should keep its backslash.' );
+		$this->assertSame( 'Short C:\\temp', $post->post_excerpt, 'The created short description should keep its backslash.' );
+
+		$product->set_name( 'Cable 3\\4" it\'s' );
+		$product->set_description( 'Path D:\\temp' );
+		$product->set_short_description( 'Short D:\\temp' );
+		$product->save();
+
+		$post = get_post( $product->get_id() );
+		$this->assertSame( 'Cable 3\\4" it\'s', $post->post_title, 'The updated name should keep its backslash and quotes.' );
+		$this->assertSame( 'Path D:\\temp', $post->post_content, 'The updated description should keep its backslash.' );
+		$this->assertSame( 'Short D:\\temp', $post->post_excerpt, 'The updated short description should keep its backslash.' );
+	}
+
+	/**
+	 * Values in already-slashed form, as extensions pass them after wp_filter_post_kses() or from $_POST.
+	 *
+	 * @return array<string, array{0: string, 1: string}>
+	 */
+	public function provider_already_slashed_post_fields(): array {
+		return array(
+			'output of wp_filter_post_kses()' => array( 'Men\\\'s 12\\" shirt', 'Men\'s 12" shirt' ),
+			'slashed twice'                   => array( 'Men\\\\\\\'s shirt', 'Men\\\'s shirt' ),
+		);
+	}
+
+	/**
+	 * @testdox Saving a product keeps the existing behavior for values that are already slashed.
+	 * @dataProvider provider_already_slashed_post_fields
+	 *
+	 * @param string $value    Value passed to the setters.
+	 * @param string $expected Stored value.
+	 */
+	public function test_save_unslashes_already_slashed_post_fields( string $value, string $expected ): void {
+		$product = new WC_Product_Simple();
+		$product->set_name( $value );
+		$product->set_description( $value );
+		$product->save();
+
+		$post = get_post( $product->get_id() );
+		$this->assertSame( $expected, $post->post_title, 'A created name in slashed form should be unslashed.' );
+		$this->assertSame( $expected, $post->post_content, 'A created description in slashed form should be unslashed.' );
+
+		$product->set_name( 'Renamed' );
+		$product->save();
+		$product->set_name( $value );
+		$product->set_short_description( $value );
+		$product->save();
+
+		$post = get_post( $product->get_id() );
+		$this->assertSame( $expected, $post->post_title, 'An updated name in slashed form should be unslashed.' );
+		$this->assertSame( $expected, $post->post_excerpt, 'An updated short description in slashed form should be unslashed.' );
+	}
+
+	/**
+	 * @testdox A woocommerce_new_product_data callback that slashes its values keeps working.
+	 */
+	public function test_create_unslashes_values_slashed_by_new_product_data_filter(): void {
+		add_filter(
+			'woocommerce_new_product_data',
+			function ( $data ) {
+				$data['post_title'] = wp_slash( 'Men\'s 1\\2 inch' );
+				return $data;
+			}
+		);
+
+		$product = new WC_Product_Simple();
+		$product->save();
+
+		$this->assertSame( 'Men\'s 1\\2 inch', get_post( $product->get_id() )->post_title );
+	}
 }
