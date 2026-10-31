@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Allow filtering product attributes by slug in the REST API, for example `GET /wc/v3/products/attributes?slug=pa_color`.
