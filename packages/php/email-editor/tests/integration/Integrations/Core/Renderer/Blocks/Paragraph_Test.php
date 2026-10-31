@@ -75,6 +75,34 @@ class Paragraph_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test it renders a paragraph that only contains a personalization tag
+	 */
+	public function testItRendersParagraphWithOnlyPersonalizationTag(): void {
+		$content  = '<p><!--[woocommerce/customer-first-name]--></p>';
+		$rendered = $this->paragraph_renderer->render( $content, $this->parsed_paragraph, $this->rendering_context );
+		$this->assertStringContainsString( '<!--[woocommerce/customer-first-name]-->', $rendered );
+
+		$content  = "<p>\n\t<!--[woocommerce/customer-first-name default=\"there\"]--> </p>";
+		$rendered = $this->paragraph_renderer->render( $content, $this->parsed_paragraph, $this->rendering_context );
+		$this->assertStringContainsString( '<!--[woocommerce/customer-first-name default="there"]-->', $rendered );
+
+		$content  = '<p><!--[woocommerce/customer-first-name default="[guest]"]--></p>';
+		$rendered = $this->paragraph_renderer->render( $content, $this->parsed_paragraph, $this->rendering_context );
+		$this->assertStringContainsString( '<!--[woocommerce/customer-first-name default="[guest]"]-->', $rendered );
+	}
+
+	/**
+	 * Test it does not render an empty paragraph
+	 */
+	public function testItDoesNotRenderEmptyParagraph(): void {
+		$rendered = $this->paragraph_renderer->render( '<p> </p>', $this->parsed_paragraph, $this->rendering_context );
+		$this->assertStringNotContainsString( 'email-text-block', $rendered );
+
+		$rendered = $this->paragraph_renderer->render( '<p><!-- comment --></p>', $this->parsed_paragraph, $this->rendering_context );
+		$this->assertStringNotContainsString( 'email-text-block', $rendered );
+	}
+
+	/**
 	 * Test it uses RTL default alignment when alignment is absent.
 	 */
 	public function testItRendersContentWithRtlDefaultAlignment(): void {

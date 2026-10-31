@@ -71,6 +71,14 @@ class Heading_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test it renders a heading that only contains a personalization tag
+	 */
+	public function testItRendersHeadingWithOnlyPersonalizationTag(): void {
+		$rendered = $this->heading_renderer->render( '<h1><!--[woocommerce/customer-first-name]--></h1>', $this->parsed_heading, $this->rendering_context );
+		$this->assertStringContainsString( '<!--[woocommerce/customer-first-name]-->', $rendered );
+	}
+
+	/**
 	 * Test it renders content
 	 */
 	public function testItRendersContent(): void {
