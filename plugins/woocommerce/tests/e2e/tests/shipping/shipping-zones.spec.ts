@@ -499,9 +499,7 @@ test( 'keeps a zone edit made while an earlier save is in flight', async ( {
 	await expect(
 		page.locator( '.wc-shipping-zone-add-method' )
 	).toBeDisabled();
-	await expect(
-		page.locator( '.wc-shipping-zone-method-rows .blockUI' ).first()
-	).toBeVisible();
+	await expect( page.locator( '.blockOverlay' ).first() ).toBeVisible();
 
 	// The zone fields stay editable while the table is blocked, so type again mid-request.
 	await page.getByLabel( 'Zone name' ).fill( secondName );
