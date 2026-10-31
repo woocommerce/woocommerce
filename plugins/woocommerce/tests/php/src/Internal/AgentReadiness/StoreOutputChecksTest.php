@@ -84,17 +84,17 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox On a stock store that can't load its own pages, robots.txt is read as WordPress serves it and every check passes.
+	 * @testdox When the store cannot load its own pages, the robots.txt and sitemap checks are couldn't check.
 	 */
-	public function test_stock_store_passes_without_requests(): void {
+	public function test_unreachable_store_couldnt_check(): void {
 		$this->serve( array() );
 
 		$results = $this->results();
 
-		$this->assertTrue( $results['robots_txt_present'] );
-		$this->assertTrue( $results['robots_allows_ai_search_bots'] );
-		$this->assertTrue( $results['robots_not_blocking_llms_txt'] );
-		$this->assertTrue( $results['sitemap_lists_products'], 'The WordPress sitemap includes products' );
+		$this->assertNull( $results['robots_txt_present'] );
+		$this->assertNull( $results['robots_allows_ai_search_bots'] );
+		$this->assertNull( $results['robots_not_blocking_llms_txt'] );
+		$this->assertNull( $results['sitemap_lists_products'] );
 	}
 
 	/**
@@ -111,29 +111,29 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox A robots_txt filter that blocks crawlers counts when the store can't load robots.txt.
+	 * @testdox A robots_txt filter does not stand in for a robots.txt the store did not serve.
 	 */
-	public function test_robots_txt_filter(): void {
+	public function test_robots_txt_filter_is_not_the_served_file(): void {
 		$this->serve( array() );
 		add_filter( 'robots_txt', static fn( $output ) => $output . "User-agent: OAI-SearchBot\nDisallow: /\n" );
 
-		$this->assertFalse( $this->results()['robots_allows_ai_search_bots'] );
+		$this->assertNull( $this->results()['robots_allows_ai_search_bots'] );
 	}
 
 	/**
-	 * @testdox With Plain permalinks and no file, or a page served for every URL, there is no robots.txt.
+	 * @testdox A 404 is no robots.txt. An HTML page and a timeout are couldn't check, not a pass.
 	 */
 	public function test_no_robots_txt(): void {
-		$this->set_permalink_structure( '' );
-		$this->serve( array() );
-		$this->assertFalse( $this->results()['robots_txt_present'] );
+		$this->serve( array( '/robots.txt' => array( 404, '' ) ) );
+		$missing = $this->results();
+		$this->assertFalse( $missing['robots_txt_present'] );
+		$this->assertTrue( $missing['robots_allows_ai_search_bots'], 'A missing file blocks nothing' );
 
-		$this->set_permalink_structure( '/%postname%/' );
 		remove_all_filters( 'pre_http_request' );
 		$this->serve( array( '/robots.txt' => array( 200, '<!doctype html><title>Shop</title>' ) ) );
-		$results = $this->results();
-		$this->assertFalse( $results['robots_txt_present'] );
-		$this->assertTrue( $results['robots_allows_ai_search_bots'], 'No robots.txt blocks nothing' );
+		$html = $this->results();
+		$this->assertNull( $html['robots_txt_present'] );
+		$this->assertNull( $html['robots_allows_ai_search_bots'] );
 	}
 
 	/**
@@ -201,6 +201,18 @@ class StoreOutputChecksTest extends WC_Unit_Test_Case {
 			)
 		);
 		$this->assertFalse( $this->results()['sitemap_lists_products'], 'A page that is not a sitemap does not count' );
+
+		remove_all_filters( 'pre_http_request' );
+		$category_sitemap = home_url( '/wp-sitemap-taxonomies-product_cat-1.xml' );
+		$this->serve(
+			array(
+				'/robots.txt'                              => array( 200, "User-agent: *\nDisallow:\nSitemap: $category_sitemap\n" ),
+				'/wp-sitemap-taxonomies-product_cat-1.xml' => array( 200, '<sitemapindex><sitemap><loc>' . $category_sitemap . '</loc></sitemap></sitemapindex>' ),
+				'/sitemap_index.xml'                       => array( 404, '' ),
+				'/sitemap.xml'                             => array( 404, '' ),
+			)
+		);
+		$this->assertFalse( $this->results()['sitemap_lists_products'], 'A product category sitemap does not list products' );
 
 		remove_all_filters( 'pre_http_request' );
 		$this->serve( array() );
