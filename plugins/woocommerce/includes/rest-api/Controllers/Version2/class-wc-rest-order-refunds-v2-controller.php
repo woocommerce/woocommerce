@@ -486,6 +486,12 @@ class WC_REST_Order_Refunds_V2_Controller extends WC_REST_Orders_V2_Controller {
 								'context'     => array( 'view', 'edit' ),
 								'readonly'    => true,
 							),
+							'tax_status'   => array(
+								'description' => __( 'Tax status the product had when it was added to the order.', 'woocommerce' ),
+								'type'        => 'string',
+								'context'     => array( 'view', 'edit' ),
+								'readonly'    => true,
+							),
 							'subtotal'     => array(
 								'description' => __( 'Line subtotal (before discounts).', 'woocommerce' ),
 								'type'        => 'string',

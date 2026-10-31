@@ -1488,6 +1488,134 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A line item reports the tax status it was sold with, and a request cannot change it (#70045).
+	 */
+	public function test_line_item_tax_status_is_reported_and_read_only(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_tax_status( 'none' );
+		$product->save();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders' );
+		$request->set_body_params(
+			array(
+				'line_items' => array(
+					array(
+						'product_id' => $product->get_id(),
+						'quantity'   => 1,
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 201, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertEquals( 'none', $data['line_items'][0]['tax_status'] );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $data['id'] );
+		$request->set_body_params(
+			array(
+				'line_items' => array(
+					array(
+						'id'         => $data['line_items'][0]['id'],
+						'tax_status' => 'taxable',
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( 'none', $response->get_data()['line_items'][0]['tax_status'] );
+
+		// The internal meta key would reach set_tax_status() through update_meta_data(); it is refused.
+		foreach ( array( '_tax_status', 'tax_status' ) as $key ) {
+			$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $data['id'] );
+			$request->set_body_params(
+				array(
+					'line_items' => array(
+						array(
+							'id'        => $data['line_items'][0]['id'],
+							'meta_data' => array(
+								array(
+									'key'   => $key,
+									'value' => 'taxable',
+								),
+							),
+						),
+					),
+				)
+			);
+			$response = $this->server->dispatch( $request );
+			$this->assertEquals( 400, $response->get_status(), $key );
+			// Request argument validation wraps the failure in `rest_invalid_param`, under `details`.
+			$this->assertSame( 'rest_invalid_param', $response->get_data()['code'], $key );
+			$this->assertSame( 'woocommerce_rest_invalid_order_item_meta_key', $response->get_data()['data']['details']['line_items']['code'], $key );
+		}
+
+		$item = current( wc_get_order( $data['id'] )->get_items() );
+		$this->assertEquals( 'none', $item->get_tax_status( 'edit' ) );
+	}
+
+	/**
+	 * @testdox A request refused for `_tax_status` on one line leaves the other lines unchanged, because
+	 *          the line items argument is validated before any line is saved (#70045).
+	 */
+	public function test_refused_tax_status_meta_leaves_other_lines_unchanged(): void {
+		$first  = WC_Helper_Product::create_simple_product();
+		$second = WC_Helper_Product::create_simple_product();
+		$second->set_tax_status( 'none' );
+		$second->save();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders' );
+		$request->set_body_params(
+			array(
+				'line_items' => array(
+					array(
+						'product_id' => $first->get_id(),
+						'quantity'   => 1,
+					),
+					array(
+						'product_id' => $second->get_id(),
+						'quantity'   => 1,
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 201, $response->get_status() );
+		$order_id = $response->get_data()['id'];
+		$lines    = $response->get_data()['line_items'];
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order_id );
+		$request->set_body_params(
+			array(
+				'line_items' => array(
+					array(
+						'id'       => $lines[0]['id'],
+						'quantity' => 5,
+					),
+					array(
+						'id'        => $lines[1]['id'],
+						'meta_data' => array(
+							array(
+								'key'   => '_tax_status',
+								'value' => 'taxable',
+							),
+						),
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertSame( 'rest_invalid_param', $response->get_data()['code'] );
+		$this->assertSame( 'woocommerce_rest_invalid_order_item_meta_key', $response->get_data()['data']['details']['line_items']['code'] );
+
+		$items = wc_get_order( $order_id )->get_items();
+		$this->assertEquals( 1, $items[ $lines[0]['id'] ]->get_quantity() );
+		$this->assertEquals( 'none', $items[ $lines[1]['id'] ]->get_tax_status( 'edit' ) );
+	}
+
+	/**
 	 * @testdox When a line item quantity in an order is updated via REST API, the product's stock should
 	 *          only be updated when the order is set to certain statuses.
 	 */

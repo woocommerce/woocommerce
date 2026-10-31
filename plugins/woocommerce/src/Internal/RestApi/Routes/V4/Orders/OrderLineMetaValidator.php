@@ -62,6 +62,14 @@ class OrderLineMetaValidator {
 					array( 'status' => 400 )
 				);
 			}
+			// Checked here, before any line is saved, so a refused request leaves every line as it was.
+			if ( 'line_items' === $param && is_array( $line ) && self::has_tax_status_meta_key( $line['meta_data'] ?? null ) ) {
+				return new WP_Error(
+					'woocommerce_rest_invalid_order_item_meta_key',
+					self::get_tax_status_meta_key_error_message(),
+					array( 'status' => 400 )
+				);
+			}
 		}
 
 		return true;
@@ -81,6 +89,54 @@ class OrderLineMetaValidator {
 		if ( self::has_serialized_meta_value( $meta_data ) ) {
 			throw new WC_REST_Exception( 'woocommerce_rest_invalid_order_item_meta_key', esc_html( self::get_serialized_meta_value_error_message() ), 400 );
 		}
+	}
+
+	/**
+	 * Rejects the `_tax_status` meta key on a product line.
+	 *
+	 * `tax_status` is read-only through the API: it records the status the product had when it was
+	 * added to the order. `update_meta_data()` routes an internal key to its setter, so a `meta_data`
+	 * entry would otherwise change it where the schema's `readonly` does not reach.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @param array $meta_data `meta_data` payload from the request. Cast at the call site, which can receive a non-array.
+	 * @throws WC_REST_Exception When the payload carries the `_tax_status` key.
+	 */
+	public static function assert_no_tax_status_meta_key( array $meta_data ): void {
+		if ( self::has_tax_status_meta_key( $meta_data ) ) {
+			throw new WC_REST_Exception( 'woocommerce_rest_invalid_order_item_meta_key', esc_html( self::get_tax_status_meta_key_error_message() ), 400 );
+		}
+	}
+
+	/**
+	 * Checks whether a `meta_data` payload carries the `_tax_status` key.
+	 *
+	 * @param mixed $meta_data Raw `meta_data` value from the request.
+	 * @return bool
+	 */
+	private static function has_tax_status_meta_key( $meta_data ): bool {
+		if ( ! is_array( $meta_data ) ) {
+			return false;
+		}
+
+		foreach ( MetaDataUtil::normalize( $meta_data ) as $meta ) {
+			// update_meta_data() resolves the setter from ltrim( $key, '_' ), so `tax_status` diverts too.
+			if ( is_string( $meta['key'] ) && 'tax_status' === ltrim( $meta['key'], '_' ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Gets the error message for a payload that carries the `_tax_status` key.
+	 *
+	 * @return string
+	 */
+	private static function get_tax_status_meta_key_error_message(): string {
+		return __( 'The "_tax_status" order line meta key is read-only: it records the tax status the product had when it was added to the order.', 'woocommerce' );
 	}
 
 	/**
