@@ -259,7 +259,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 			),
 			array(
 				'count' => (int) ( $report['unsupported_types'] ?? 0 ),
-				'label' => __( 'Product type agents can\'t sell yet', 'woocommerce' ),
+				'label' => __( 'Not supported yet', 'woocommerce' ),
 				'url'   => $list_url( array( 'product_type' => implode( ',', $this->unsupported_product_types() ) ) ),
 			),
 		);
@@ -275,7 +275,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 			);
 		}
 		echo '</ul>';
-		echo '<p class="description">' . esc_html__( 'Agents can sell simple and variable products. They may find grouped, external/affiliate, subscription, booking and bundle products, but can\'t add them to a cart yet, so these aren\'t checked.', 'woocommerce' ) . '</p>';
+		echo '<p class="description">' . esc_html__( 'Simple and variable products only, for now.', 'woocommerce' ) . '</p>';
 	}
 
 	/**
