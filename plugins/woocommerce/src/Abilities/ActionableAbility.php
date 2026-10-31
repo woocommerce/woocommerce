@@ -206,8 +206,7 @@ abstract class ActionableAbility extends \WP_Ability {
 				wc_doing_it_wrong(
 					get_class( $this ) . '::change',
 					sprintf(
-						/* translators: %s: resource name. */
-						__( 'The "%s" resource of a secondary object is not registered, so no extension field or validator runs on it. Call ExtensibleAbilities::register_resource() first.', 'woocommerce' ),
+						'The "%s" resource of a secondary object is not registered, so no extension field or validator runs on it. Call ExtensibleAbilities::register_resource() first.',
 						$resource_name
 					),
 					'11.4.0'
