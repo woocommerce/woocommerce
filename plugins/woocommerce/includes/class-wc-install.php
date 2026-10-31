@@ -919,6 +919,28 @@ class WC_Install {
 	}
 
 	/**
+	 * Check whether any database update step is queued or running.
+	 *
+	 * Covers the final version update, which is still queued after the update callbacks finish.
+	 *
+	 * @since 11.4.0
+	 *
+	 * @return bool
+	 */
+	public static function is_db_update_queued(): bool {
+		$queued_actions = WC()->queue()->search(
+			array(
+				'group'    => 'woocommerce-db-updates',
+				'status'   => array( ActionScheduler_Store::STATUS_PENDING, ActionScheduler_Store::STATUS_RUNNING ),
+				'per_page' => 1,
+			),
+			'ids'
+		);
+
+		return ! empty( $queued_actions );
+	}
+
+	/**
 	 * Is DB auto-update enabled? This controls whether database updates are applied without prompting the admin.
 	 * This is the default behavior since 9.9.0 and can be overridden via filter 'woocommerce_enable_auto_update_db'.
 	 *

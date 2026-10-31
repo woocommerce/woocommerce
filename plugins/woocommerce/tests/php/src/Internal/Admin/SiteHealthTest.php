@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Internal\Admin\SiteHealth;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
 use WC_Admin_Notices;
 use WC_Unit_Test_Case;
+use WC_Webhook;
 use WP_Error;
 use WP_REST_Request;
 
@@ -375,5 +376,208 @@ class SiteHealthTest extends WC_Unit_Test_Case {
 			remove_filter( 'pre_http_request', $http_callback );
 			remove_filter( 'upload_dir', $upload_dir_callback );
 		}
+	}
+
+	/**
+	 * @testdox Database update check is critical and links to the update when an update has not started.
+	 */
+	public function test_database_update_is_critical_when_update_has_not_started(): void {
+		update_option( 'woocommerce_db_version', '1.0.0' );
+
+		$result = $this->sut->run_test( 'woocommerce_database_update' );
+
+		$this->assertSame( 'critical', $result['status'], 'A pending database update should be critical.' );
+		$this->assertStringContainsString( 'do_update_woocommerce=true', $result['actions'], 'The result should let the merchant start the update.' );
+	}
+
+	/**
+	 * @testdox Database update check reports progress without an update link while the update is queued.
+	 */
+	public function test_database_update_reports_progress_when_update_is_queued(): void {
+		update_option( 'woocommerce_db_version', '1.0.0' );
+		WC()->queue()->schedule_single( time() + HOUR_IN_SECONDS, 'woocommerce_run_update_callback', array(), 'woocommerce-db-updates' );
+
+		$result = $this->sut->run_test( 'woocommerce_database_update' );
+
+		$this->assertSame( 'recommended', $result['status'], 'A running update should not be critical.' );
+		$this->assertSame( 'WooCommerce database update is scheduled', $result['label'], 'The result should report that the update is scheduled.' );
+		$this->assertSame( '', $result['actions'], 'The result should not offer to start the update again.' );
+	}
+
+	/**
+	 * @testdox Required pages check status depends on which page is missing.
+	 * @testWith ["shop", "recommended", "Shop"]
+	 *           ["cart", "critical", "Cart"]
+	 *           ["checkout", "critical", "Checkout"]
+	 *
+	 * @param string $missing_page    Page slug left unassigned.
+	 * @param string $expected_status Expected Site Health status.
+	 * @param string $page_name       Page name listed in the description.
+	 */
+	public function test_required_pages_status_depends_on_missing_page( string $missing_page, string $expected_status, string $page_name ): void {
+		foreach ( array( 'shop', 'cart', 'checkout', 'myaccount' ) as $page ) {
+			update_option( "woocommerce_{$page}_page_id", $page === $missing_page ? 0 : self::factory()->post->create( array( 'post_type' => 'page' ) ) );
+		}
+
+		$result = $this->sut->run_test( 'woocommerce_required_pages' );
+
+		$this->assertSame( $expected_status, $result['status'], 'The status should reflect whether checkout can work without the page.' );
+		$this->assertSame( "<p>These WooCommerce pages are not assigned or not published: {$page_name}.</p>", $result['description'], 'Only the missing page should be listed.' );
+	}
+
+	/**
+	 * @testdox Required pages check treats an unpublished page as missing.
+	 */
+	public function test_required_pages_treats_unpublished_page_as_missing(): void {
+		foreach ( array( 'shop', 'cart', 'checkout', 'myaccount' ) as $page ) {
+			update_option( "woocommerce_{$page}_page_id", self::factory()->post->create( array( 'post_type' => 'page' ) ) );
+		}
+		wp_update_post(
+			array(
+				'ID'          => wc_get_page_id( 'checkout' ),
+				'post_status' => 'draft',
+			)
+		);
+
+		$result = $this->sut->run_test( 'woocommerce_required_pages' );
+
+		$this->assertSame( 'critical', $result['status'], 'A draft checkout page should be reported as missing.' );
+		$this->assertStringContainsString( 'Checkout', $result['description'], 'The draft page should be listed.' );
+	}
+
+	/**
+	 * @testdox Payment methods check passes only when a payment gateway is enabled.
+	 */
+	public function test_payment_methods_check_requires_an_enabled_gateway(): void {
+		$gateways = WC()->payment_gateways()->payment_gateways();
+		$original = wp_list_pluck( $gateways, 'enabled' );
+		$this->assertNotEmpty( $gateways, 'The test needs at least one registered payment gateway.' );
+
+		try {
+			foreach ( $gateways as $gateway ) {
+				$gateway->enabled = 'no';
+			}
+			$this->assertSame( 'recommended', $this->sut->run_test( 'woocommerce_payment_methods' )['status'], 'No enabled gateways should require attention.' );
+
+			reset( $gateways )->enabled = 'yes';
+			$this->assertSame( 'good', $this->sut->run_test( 'woocommerce_payment_methods' )['status'], 'One enabled gateway should pass.' );
+		} finally {
+			foreach ( $gateways as $id => $gateway ) {
+				$gateway->enabled = $original[ $id ];
+			}
+		}
+	}
+
+	/**
+	 * @testdox Webhook deliveries check reports webhooks whose most recent delivery failed.
+	 */
+	public function test_webhook_deliveries_check_reports_failing_webhooks(): void {
+		$paused = new WC_Webhook();
+		$paused->set_props(
+			array(
+				'status'        => 'paused',
+				'topic'         => 'order.created',
+				'delivery_url'  => 'https://example.com/webhook',
+				'failure_count' => 2,
+			)
+		);
+		$paused->save();
+		$this->assertSame( 'good', $this->sut->run_test( 'woocommerce_webhook_deliveries' )['status'], 'Paused webhooks should not be reported.' );
+
+		$failure_counts = array(
+			'active'   => 1,
+			'disabled' => 6,
+		);
+		foreach ( $failure_counts as $status => $failure_count ) {
+			$webhook = new WC_Webhook();
+			$webhook->set_props(
+				array(
+					'status'        => $status,
+					'topic'         => 'order.created',
+					'delivery_url'  => 'https://example.com/webhook',
+					'failure_count' => $failure_count,
+				)
+			);
+			$webhook->save();
+		}
+
+		$result = $this->sut->run_test( 'woocommerce_webhook_deliveries' );
+
+		$this->assertSame( 'recommended', $result['status'], 'Failing webhooks should require attention.' );
+		$this->assertStringContainsString( '2 webhooks failed', $result['description'], 'Active and auto-disabled failing webhooks should both be counted.' );
+	}
+
+	/**
+	 * @testdox Scheduled actions check reports a backlog of actions more than an hour past due.
+	 */
+	public function test_past_due_actions_check_reports_backlog(): void {
+		global $wpdb;
+
+		// Actions scheduled when the test site was installed become past due as it ages, so only count this test's backlog.
+		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->actionscheduler_actions} WHERE status = %s", 'pending' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		for ( $i = 0; $i < 50; $i++ ) {
+			as_schedule_single_action( time() - 2 * HOUR_IN_SECONDS, 'wc_site_health_test_hook', array( $i ) );
+		}
+		$this->assertSame( 'good', $this->sut->run_test( 'woocommerce_past_due_actions' )['status'], 'A backlog at the threshold should pass.' );
+
+		as_schedule_single_action( time() - 2 * HOUR_IN_SECONDS, 'wc_site_health_test_hook', array( 50 ) );
+		$result = $this->sut->run_test( 'woocommerce_past_due_actions' );
+
+		$this->assertSame( 'recommended', $result['status'], 'A backlog above the threshold should require attention.' );
+		$this->assertStringContainsString( 'More than 50 scheduled actions', $result['description'], 'The result should describe the size of the backlog.' );
+	}
+
+	/**
+	 * @testdox Scheduled actions check reports a single action that is more than a day past due.
+	 */
+	public function test_past_due_actions_check_reports_action_stuck_for_a_day(): void {
+		as_schedule_single_action( time() - 2 * DAY_IN_SECONDS, 'wc_site_health_test_hook' );
+
+		$this->assertSame( 'recommended', $this->sut->run_test( 'woocommerce_past_due_actions' )['status'], 'An action stuck for over a day should require attention.' );
+	}
+
+	/**
+	 * @testdox Scheduled actions table size check runs its query without errors.
+	 */
+	public function test_scheduled_actions_table_check_runs_query(): void {
+		global $wpdb;
+
+		$result = $this->sut->run_test( 'woocommerce_scheduled_actions_table' );
+
+		$this->assertSame( 'good', $result['status'], 'A small actions table should pass.' );
+		$this->assertSame( '', $wpdb->last_error, 'The size query should not fail, since a failed query would read as a healthy table.' );
+	}
+
+	/**
+	 * @testdox Product lookup table check reports products without lookup rows, even when orphaned rows keep the counts equal, and reports regeneration in progress.
+	 */
+	public function test_product_lookup_table_check_reports_missing_rows(): void {
+		global $wpdb;
+
+		$product_ids = self::factory()->post->create_many( 2, array( 'post_type' => 'product' ) );
+		self::factory()->post->create(
+			array(
+				'post_type'   => 'product',
+				'post_status' => 'auto-draft',
+			)
+		);
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery
+		$wpdb->query( "DELETE FROM {$wpdb->wc_product_meta_lookup}" );
+		$wpdb->insert( $wpdb->wc_product_meta_lookup, array( 'product_id' => $product_ids[0] ) );
+		$wpdb->insert( $wpdb->wc_product_meta_lookup, array( 'product_id' => PHP_INT_MAX ) );
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery
+
+		$result = $this->sut->run_test( 'woocommerce_product_lookup_table' );
+
+		$this->assertSame( 'recommended', $result['status'], 'A product without a lookup row should require attention.' );
+		$this->assertStringContainsString( '1 product is missing', $result['description'], 'Only the published product should be counted, not the auto-draft.' );
+		$this->assertStringContainsString( 'regenerate_product_lookup_tables', $result['actions'], 'The result should link to the regeneration tool.' );
+
+		WC()->queue()->schedule_single( time() + HOUR_IN_SECONDS, 'wc_update_product_lookup_tables_column', array(), 'wc_update_product_lookup_tables' );
+
+		$result = $this->sut->run_test( 'woocommerce_product_lookup_table' );
+
+		$this->assertSame( 'WooCommerce product lookup table is being regenerated', $result['label'], 'A table being regenerated should be reported as in progress.' );
+		$this->assertSame( '', $result['actions'], 'The result should not offer to regenerate the table again.' );
 	}
 }
