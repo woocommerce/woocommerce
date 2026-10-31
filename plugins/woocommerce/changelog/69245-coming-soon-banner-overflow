@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Keep the coming soon banner and its dismiss button on screen in themes with boxed or offset layouts.
