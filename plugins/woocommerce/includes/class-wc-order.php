@@ -7,6 +7,7 @@
  */
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Enums\PaymentMode;
 use Automattic\WooCommerce\Enums\TaxDisplayMode;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\StoreApi\Utilities\LocalPickupUtils;
@@ -1516,6 +1517,8 @@ class WC_Order extends WC_Abstract_Order {
 	 * @return void
 	 */
 	public function set_payment_method( $payment_method = '' ) {
+		$previous_payment_method = $this->get_payment_method( 'edit' );
+
 		if ( is_object( $payment_method ) ) {
 			$this->set_payment_method( $payment_method->id );
 			$this->set_payment_method_title( $payment_method->get_title() );
@@ -1524,6 +1527,11 @@ class WC_Order extends WC_Abstract_Order {
 			$this->set_prop( 'payment_method_title', '' );
 		} else {
 			$this->set_prop( 'payment_method', $payment_method );
+		}
+
+		// A mode recorded by the previous gateway doesn't describe the new one.
+		if ( true === $this->object_read && $previous_payment_method !== $this->get_payment_method( 'edit' ) ) {
+			$this->delete_meta_data( '_wc_payment_mode' );
 		}
 	}
 
@@ -2591,6 +2599,39 @@ class WC_Order extends WC_Abstract_Order {
 	 */
 	public function is_created_via( $modus ) {
 		return apply_filters( 'woocommerce_order_is_created_via', $modus === $this->get_created_via(), $this, $modus );
+	}
+
+	/**
+	 * Get whether the order was paid in test or live mode, as recorded by its payment gateway.
+	 *
+	 * @since 11.4.0
+	 * @return string One of the PaymentMode constants, or an empty string when the gateway didn't record it.
+	 */
+	public function get_payment_mode() {
+		$mode = $this->get_meta( '_wc_payment_mode' );
+		return in_array( $mode, array( PaymentMode::TEST, PaymentMode::LIVE ), true ) ? $mode : '';
+	}
+
+	/**
+	 * Record whether the order is paid in test or live mode.
+	 *
+	 * Payment gateways should call this when they choose test or live credentials for a charge, before saving the order.
+	 * WooCommerce never sets it, so an order whose gateway doesn't call it has no payment mode.
+	 *
+	 * @since 11.4.0
+	 * @param string $mode One of the PaymentMode constants, or an empty string to clear it.
+	 * @throws WC_Data_Exception When the mode is not valid.
+	 * @return void
+	 */
+	public function set_payment_mode( $mode ) {
+		if ( '' === $mode ) {
+			$this->delete_meta_data( '_wc_payment_mode' );
+			return;
+		}
+		if ( ! in_array( $mode, array( PaymentMode::TEST, PaymentMode::LIVE ), true ) ) {
+			$this->error( 'order_invalid_payment_mode', __( 'Invalid payment mode.', 'woocommerce' ) );
+		}
+		$this->update_meta_data( '_wc_payment_mode', $mode );
 	}
 
 	/**

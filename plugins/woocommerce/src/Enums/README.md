@@ -16,6 +16,7 @@ The enum classes make it easier to reference string values and avoid typos. They
 - [OrderItemType](./OrderItemType.php) - Enumerates the possible types of an order line item.
 - [OrderStatus](./OrderStatus.php) - Enumerates the possible statuses of an order.
 - [PaymentGatewayFeatures](./PaymentGatewayFeatures.php) - Enumerates the possible features of a payment gateway.
+- [PaymentMode](./PaymentMode.php) - Enumerates the payment modes a payment gateway can record on an order.
 - [ProductStatus](./ProductStatus.php) - Enumerates the possible statuses of a product.
 - [ProductStockStatus](./ProductStockStatus.php) - Enumerates the possible stock statuses of a product.
 - [ProductType](./ProductType.php) - Enumerates the possible types of a product.

@@ -13,6 +13,7 @@
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Blocks\Domain\Services\CheckoutFields;
 use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Enums\PaymentMode;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\Admin\EmailImprovements\EmailImprovements;
 use Automattic\WooCommerce\Internal\CLI\Migrator\Core\MigratorTracker;
@@ -319,6 +320,10 @@ class WC_Tracker {
 		$data['reviews']    = self::get_review_counts();
 		$data['categories'] = self::get_category_counts();
 		$data['brands']     = self::get_brands_counts();
+
+		// Orders whose gateway recorded the payment mode. The gateway totals in `orders` count every order.
+		$data['test_orders_by_gateway'] = self::get_orders_by_gateway( PaymentMode::TEST );
+		$data['live_orders_by_gateway'] = self::get_orders_by_gateway( PaymentMode::LIVE );
 
 		// Migrator CLI statistics.
 		$data['migrator'] = self::get_migrator_data();
@@ -881,24 +886,38 @@ class WC_Tracker {
 	/**
 	 * Get order details by gateway.
 	 *
+	 * @param string $payment_mode Count only orders whose gateway recorded this PaymentMode value. Empty counts all orders.
 	 * @return array
 	 */
-	private static function get_orders_by_gateway() {
+	private static function get_orders_by_gateway( string $payment_mode = '' ) {
 		global $wpdb;
 
 		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
 			$orders_table = OrdersTableDataStore::get_orders_table_name();
+			$meta_table   = OrdersTableDataStore::get_meta_table_name();
 			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$payment_mode_clause = $payment_mode ? $wpdb->prepare(
+				"AND id IN ( SELECT order_id FROM $meta_table WHERE meta_key = '_wc_payment_mode' AND meta_value = %s )",
+				$payment_mode
+			) : '';
+
 			$orders_and_gateway_details = $wpdb->get_results(
 				"
 				SELECT IFNULL(payment_method, '') AS gateway, currency AS currency, SUM( total_amount ) AS totals, count( id ) AS counts
 				FROM $orders_table
 				WHERE status IN ( 'wc-completed', 'wc-processing', 'wc-refunded' )
+					$payment_mode_clause
 				GROUP BY gateway, currency;
 				"
 			);
 			// phpcs:enable
 		} else {
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$payment_mode_clause = $payment_mode ? $wpdb->prepare(
+				"AND orders.id IN ( SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_wc_payment_mode' AND meta_value = %s )",
+				$payment_mode
+			) : '';
+
 			$orders_and_gateway_details = $wpdb->get_results(
 				"
 				SELECT
@@ -916,11 +935,13 @@ class WC_Tracker {
 					WHERE orders.post_type = 'shop_order'
 						AND orders.post_status in ( 'wc-completed', 'wc-processing', 'wc-refunded' )
 						AND meta_key in( '_payment_method','_order_total','_order_currency')
+						$payment_mode_clause
 					GROUP BY orders.id
 				) order_gateways
 				GROUP BY gateway, currency
 				"
 			);
+			// phpcs:enable
 		}
 
 		$orders_by_gateway_currency = array();
