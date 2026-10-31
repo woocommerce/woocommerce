@@ -156,7 +156,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	 *
 	 * @param array<string, mixed>|null    $report Stored report.
 	 * @param array<int, array{id:string}> $live   Store conditions read now.
-	 * @return array<int, array{id:string,level:string,ok:bool|null,name:string,fix_url:string}>
+	 * @return array<int, array{id:string,level:string,ok:bool|null,name:string,fix:string,fix_url:string}>
 	 */
 	private static function scanned_checks( ?array $report, array $live ): array {
 		$live_ids = array_column( $live, 'id' );
@@ -170,6 +170,7 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 				'level'   => StoreConditions::LEVEL_RECOMMENDED,
 				'ok'      => isset( $check['ok'] ) ? (bool) $check['ok'] : null,
 				'name'    => (string) $check['name'],
+				'fix'     => (string) ( $check['fix'] ?? '' ),
 				'fix_url' => (string) ( $check['fix_url'] ?? '' ),
 			);
 		}
@@ -337,8 +338,8 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 	/**
 	 * Status badge, discovery URL and one row per store condition. UCP itself is the switch above, so it is not listed.
 	 *
-	 * @param array<int, array{id:string,level:string,ok:bool|null,name:string,fix_url:string}> $checks Store conditions.
-	 * @param string                                                                            $status UcpSwitch status.
+	 * @param array<int, array{id:string,level:string,ok:bool|null,name:string,fix:string,fix_url:string}> $checks Store conditions.
+	 * @param string                                                                                       $status UcpSwitch status.
 	 */
 	private function render_status( array $checks, string $status ): void {
 		$statuses = array(
@@ -390,6 +391,8 @@ class AgenticCommerceSettingsPage extends \WC_Settings_Page {
 									esc_html_e( 'Launch your store to run this check.', 'woocommerce' );
 								}
 								?>
+							<?php elseif ( ! $check['ok'] && '' === $check['fix_url'] ) : ?>
+								<?php echo esc_html( $check['fix'] ); ?>
 							<?php elseif ( ! $check['ok'] ) : ?>
 								<a href="<?php echo esc_url( $check['fix_url'] ); ?>"><?php echo esc_html( $this->fix_link_text( $check['fix_url'] ) ); ?></a>
 							<?php endif; ?>

@@ -1,0 +1,221 @@
+<?php
+declare( strict_types = 1 );
+
+namespace Automattic\WooCommerce\Tests\Internal\AgentReadiness;
+
+use Automattic\WooCommerce\Internal\AgentReadiness\StoreOutputChecks;
+use WC_Unit_Test_Case;
+
+/**
+ * Tests for the robots.txt and sitemap store checks.
+ */
+class StoreOutputChecksTest extends WC_Unit_Test_Case {
+
+	/**
+	 * The System Under Test.
+	 *
+	 * @var StoreOutputChecks
+	 */
+	private $sut;
+
+	/**
+	 * Pretty permalinks, as on a live store; no HTTP response unless a test serves one.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+		$this->set_permalink_structure( '/%postname%/' );
+		$this->sut = wc_get_container()->get( StoreOutputChecks::class );
+	}
+
+	/**
+	 * Restore plain permalinks, which live on the global rewrite object outside the rollback.
+	 */
+	public function tearDown(): void {
+		try {
+			$this->set_permalink_structure( '' );
+		} finally {
+			parent::tearDown();
+		}
+	}
+
+	/**
+	 * Fail every HTTP request, as if the store couldn't reach itself.
+	 */
+	public static function block_requests(): void {
+		add_filter( 'pre_http_request', static fn() => new \WP_Error( 'http_request_failed', 'Blocked in tests' ) );
+	}
+
+	/**
+	 * Answer requests by path from the home URL; anything else fails like a timeout.
+	 *
+	 * @param array<string, array{0:int,1:string}> $responses Status and body by path.
+	 */
+	private function serve( array $responses ): void {
+		add_filter(
+			'pre_http_request',
+			static function ( $pre, $args, $url ) use ( $responses ) {
+				unset( $pre, $args );
+				$path = substr( $url, strlen( untrailingslashit( home_url() ) ) );
+				if ( ! isset( $responses[ $path ] ) ) {
+					return new \WP_Error( 'http_request_failed', 'Timed out' );
+				}
+				return array(
+					'headers'  => array(),
+					'body'     => $responses[ $path ][1],
+					'response' => array(
+						'code'    => $responses[ $path ][0],
+						'message' => '',
+					),
+					'cookies'  => array(),
+				);
+			},
+			10,
+			3
+		);
+	}
+
+	/**
+	 * Results by check id.
+	 *
+	 * @return array<string, bool|null>
+	 */
+	private function results(): array {
+		return array_column( $this->sut->all(), 'ok', 'id' );
+	}
+
+	/**
+	 * @testdox When the store cannot load its own pages, the robots.txt and sitemap checks are couldn't check.
+	 */
+	public function test_unreachable_store_couldnt_check(): void {
+		$this->serve( array() );
+
+		$results = $this->results();
+
+		$this->assertNull( $results['robots_txt_present'] );
+		$this->assertNull( $results['robots_allows_ai_search_bots'] );
+		$this->assertNull( $results['robots_not_blocking_llms_txt'] );
+		$this->assertNull( $results['sitemap_lists_products'] );
+	}
+
+	/**
+	 * @testdox A served robots.txt that blocks an AI search crawler and llms.txt fails both checks.
+	 */
+	public function test_served_robots_txt_blocks(): void {
+		$this->serve( array( '/robots.txt' => array( 200, "User-agent: PerplexityBot\nDisallow: /\n\nUser-agent: *\nDisallow: /llms.txt\n" ) ) );
+
+		$results = $this->results();
+
+		$this->assertTrue( $results['robots_txt_present'] );
+		$this->assertFalse( $results['robots_allows_ai_search_bots'] );
+		$this->assertFalse( $results['robots_not_blocking_llms_txt'] );
+	}
+
+	/**
+	 * @testdox A robots_txt filter does not stand in for a robots.txt the store did not serve.
+	 */
+	public function test_robots_txt_filter_is_not_the_served_file(): void {
+		$this->serve( array() );
+		add_filter( 'robots_txt', static fn( $output ) => $output . "User-agent: OAI-SearchBot\nDisallow: /\n" );
+
+		$this->assertNull( $this->results()['robots_allows_ai_search_bots'] );
+	}
+
+	/**
+	 * @testdox A 404 is no robots.txt. An HTML page and a timeout are couldn't check, not a pass.
+	 */
+	public function test_no_robots_txt(): void {
+		$this->serve( array( '/robots.txt' => array( 404, '' ) ) );
+		$missing = $this->results();
+		$this->assertFalse( $missing['robots_txt_present'] );
+		$this->assertTrue( $missing['robots_allows_ai_search_bots'], 'A missing file blocks nothing' );
+
+		remove_all_filters( 'pre_http_request' );
+		$this->serve( array( '/robots.txt' => array( 200, '<!doctype html><title>Shop</title>' ) ) );
+		$html = $this->results();
+		$this->assertNull( $html['robots_txt_present'] );
+		$this->assertNull( $html['robots_allows_ai_search_bots'] );
+	}
+
+	/**
+	 * @testdox With the WordPress sitemap off, a product sitemap listed in robots.txt or at /sitemap_index.xml passes.
+	 */
+	public function test_seo_plugin_sitemap(): void {
+		add_filter( 'wp_sitemaps_enabled', '__return_false' );
+		$this->serve(
+			array(
+				'/robots.txt'            => array( 200, "User-agent: *\nDisallow:\nSitemap: " . home_url( '/seo/sitemap_index.xml' ) . "\n" ),
+				'/seo/sitemap_index.xml' => array( 200, '<sitemapindex><sitemap><loc>' . home_url( '/product-sitemap.xml' ) . '</loc></sitemap></sitemapindex>' ),
+			)
+		);
+
+		$this->assertTrue( $this->results()['sitemap_lists_products'] );
+	}
+
+	/**
+	 * @testdox Only the first five sitemaps robots.txt lists are loaded.
+	 */
+	public function test_listed_sitemaps_capped(): void {
+		add_filter( 'wp_sitemaps_enabled', '__return_false' );
+		$requested = array();
+		$robots    = "User-agent: *\nDisallow:\n";
+		for ( $i = 1; $i <= 50; $i++ ) {
+			$robots .= 'Sitemap: ' . home_url( "/s$i.xml" ) . "\n";
+		}
+		$this->serve( array( '/robots.txt' => array( 200, $robots ) ) );
+		add_filter(
+			'pre_http_request',
+			static function ( $pre, $args, $url ) use ( &$requested ) {
+				unset( $args );
+				$requested[] = $url;
+				return $pre;
+			},
+			5,
+			3
+		);
+
+		$this->results();
+
+		$this->assertCount( 8, array_unique( $requested ), 'robots.txt, five listed sitemaps, /sitemap_index.xml and /sitemap.xml' );
+	}
+
+	/**
+	 * @testdox With the WordPress sitemap off, no sitemap is missing, and an unreachable one is couldn't check.
+	 */
+	public function test_sitemap_off(): void {
+		add_filter( 'wp_sitemaps_enabled', '__return_false' );
+		$this->serve(
+			array(
+				'/robots.txt'        => array( 404, '' ),
+				'/sitemap_index.xml' => array( 404, '' ),
+				'/sitemap.xml'       => array( 200, '<urlset><url><loc>' . home_url( '/about/' ) . '</loc></url></urlset>' ),
+			)
+		);
+		$this->assertFalse( $this->results()['sitemap_lists_products'] );
+
+		remove_all_filters( 'pre_http_request' );
+		$this->serve(
+			array(
+				'/robots.txt'        => array( 404, '' ),
+				'/sitemap_index.xml' => array( 200, '<!doctype html><a href="' . home_url( '/product/beanie/' ) . '">Beanie</a>' ),
+				'/sitemap.xml'       => array( 404, '' ),
+			)
+		);
+		$this->assertFalse( $this->results()['sitemap_lists_products'], 'A page that is not a sitemap does not count' );
+
+		remove_all_filters( 'pre_http_request' );
+		$category_sitemap = home_url( '/wp-sitemap-taxonomies-product_cat-1.xml' );
+		$this->serve(
+			array(
+				'/robots.txt'                              => array( 200, "User-agent: *\nDisallow:\nSitemap: $category_sitemap\n" ),
+				'/wp-sitemap-taxonomies-product_cat-1.xml' => array( 200, '<sitemapindex><sitemap><loc>' . $category_sitemap . '</loc></sitemap></sitemapindex>' ),
+				'/sitemap_index.xml'                       => array( 404, '' ),
+				'/sitemap.xml'                             => array( 404, '' ),
+			)
+		);
+		$this->assertFalse( $this->results()['sitemap_lists_products'], 'A product category sitemap does not list products' );
+
+		remove_all_filters( 'pre_http_request' );
+		$this->serve( array() );
+		$this->assertNull( $this->results()['sitemap_lists_products'] );
+	}
+}
