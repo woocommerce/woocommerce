@@ -109,8 +109,8 @@ abstract class MetaToMetaTableMigrator extends TableMigrator {
 		$this->clear_errors();
 		$exception = null;
 
-		$to_insert = $data[0];
-		$to_update = $data[1];
+		$to_insert = $data[0] ?? array();
+		$to_update = $data[1] ?? array();
 		$to_delete = $data[2] ?? array();
 
 		try {

@@ -1,0 +1,572 @@
+<?php
+declare(strict_types=1);
+
+namespace Automattic\WooCommerce\Internal\Admin\ImportExport;
+
+use Automattic\WooCommerce\Caches\OrderCache;
+use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
+use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
+use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
+use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Adds HPOS (High-Performance Order Storage) orders to the WordPress Tools > Export file,
+ * and backfills orders created by Tools > Import into the HPOS tables.
+ *
+ * @since 11.2.0
+ */
+class HposOrderExportHandler {
+
+	/**
+	 * Number of orders loaded per query while streaming the export.
+	 */
+	private const BATCH_SIZE = 20;
+
+	/**
+	 * Number of imported orders migrated to HPOS per migrator call.
+	 */
+	private const MIGRATION_BATCH_SIZE = 50;
+
+	/**
+	 * Custom orders table controller.
+	 *
+	 * @var CustomOrdersTableController
+	 */
+	private CustomOrdersTableController $cot_controller;
+
+	/**
+	 * Data synchronizer, used to detect whether posts already mirror HPOS.
+	 *
+	 * @var DataSynchronizer
+	 */
+	private DataSynchronizer $data_synchronizer;
+
+	/**
+	 * Migrator used to backfill imported orders from the posts table into HPOS.
+	 *
+	 * @var PostsToOrdersMigrationController
+	 */
+	private PostsToOrdersMigrationController $posts_to_orders_migrator;
+
+	/**
+	 * Cost of goods sold controller, used to know whether the COGS meta is in use.
+	 *
+	 * @var CostOfGoodsSoldController
+	 */
+	private CostOfGoodsSoldController $cogs_controller;
+
+	/**
+	 * HPOS data store, used to release cached orders while streaming.
+	 *
+	 * @var OrdersTableDataStore
+	 */
+	private OrdersTableDataStore $orders_data_store;
+
+	/**
+	 * Order object cache, used to release loaded orders while streaming.
+	 *
+	 * @var OrderCache
+	 */
+	private OrderCache $order_cache;
+
+	/**
+	 * Arguments of the export currently in progress, or null outside of an export.
+	 *
+	 * @var array|null
+	 */
+	private ?array $export_args = null;
+
+	/**
+	 * IDs of order posts created by the import in progress, migrated to HPOS when it ends.
+	 *
+	 * @var int[]
+	 */
+	private array $imported_order_ids = array();
+
+	/**
+	 * Constructor. Registers the export and import hooks.
+	 */
+	public function __construct() {
+		add_action( 'export_wp', array( $this, 'handle_export_wp' ) );
+		add_action( 'rss2_head', array( $this, 'handle_rss2_head' ), 999 );
+		add_action( 'wp_import_insert_post', array( $this, 'handle_wp_import_insert_post' ) );
+		add_action( 'import_end', array( $this, 'handle_import_end' ) );
+	}
+
+	/**
+	 * Initialize dependencies.
+	 *
+	 * @internal
+	 *
+	 * @param CustomOrdersTableController      $cot_controller           Custom orders table controller.
+	 * @param DataSynchronizer                 $data_synchronizer        Data synchronizer.
+	 * @param PostsToOrdersMigrationController $posts_to_orders_migrator Posts to HPOS migrator.
+	 * @param CostOfGoodsSoldController        $cogs_controller          Cost of goods sold controller.
+	 * @param OrdersTableDataStore             $orders_data_store        HPOS data store.
+	 * @param OrderCache                       $order_cache              Order object cache.
+	 */
+	final public function init( CustomOrdersTableController $cot_controller, DataSynchronizer $data_synchronizer, PostsToOrdersMigrationController $posts_to_orders_migrator, CostOfGoodsSoldController $cogs_controller, OrdersTableDataStore $orders_data_store, OrderCache $order_cache ): void {
+		$this->cot_controller           = $cot_controller;
+		$this->data_synchronizer        = $data_synchronizer;
+		$this->posts_to_orders_migrator = $posts_to_orders_migrator;
+		$this->cogs_controller          = $cogs_controller;
+		$this->orders_data_store        = $orders_data_store;
+		$this->order_cache              = $order_cache;
+	}
+
+	/**
+	 * Remembers the export arguments so the orders can be streamed from `rss2_head`.
+	 *
+	 * @internal
+	 *
+	 * @param array $args Export arguments.
+	 */
+	public function handle_export_wp( $args ): void {
+		$this->export_args = is_array( $args ) ? $args : null;
+	}
+
+	/**
+	 * Streams HPOS orders into the WXR document.
+	 *
+	 * `rss2_head` is the only hook core fires inside the document, so this runs during
+	 * regular RSS feeds too. It only emits when `export_wp` set the arguments in this request.
+	 *
+	 * @internal
+	 */
+	public function handle_rss2_head(): void {
+		$args              = $this->export_args;
+		$this->export_args = null;
+
+		if ( null === $args || ! $this->should_export_orders( $args ) ) {
+			return;
+		}
+
+		$types = 'all' === $args['content'] ? array( 'shop_order', 'shop_order_refund' ) : array( 'shop_order' );
+		$types = array_values( array_filter( $types, array( self::class, 'post_type_can_be_exported' ) ) );
+		$page  = 1;
+
+		if ( ! $types ) {
+			return;
+		}
+
+		do {
+			/** @var int[] $order_ids */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort -- IDs because of 'return' => 'ids'.
+			$order_ids = wc_get_orders(
+				array(
+					'type'    => $types,
+					'status'  => 'all',
+					'limit'   => self::BATCH_SIZE,
+					'page'    => $page,
+					'orderby' => 'id',
+					'order'   => 'ASC',
+					'return'  => 'ids',
+				)
+			);
+			$fetched   = count( $order_ids );
+
+			foreach ( $order_ids as $order_id ) {
+				$order = wc_get_order( $order_id );
+				if ( ! $order instanceof \WC_Abstract_Order ) {
+					continue;
+				}
+
+				// Statuses are not filtered in the query, so orders whose status is no longer registered
+				// (an inactive extension's status) are exported too. Core only leaves out auto-drafts.
+				if ( OrderStatus::AUTO_DRAFT === $order->get_status( 'edit' ) ) {
+					continue;
+				}
+
+				$this->export_order_to_xml( $order );
+			}
+
+			$this->release_order_caches( $order_ids );
+			++$page;
+		} while ( self::BATCH_SIZE === $fetched );
+	}
+
+	/**
+	 * Whether core would export posts of this type, honoring the `can_export` registration argument.
+	 *
+	 * @param string $post_type Post type name.
+	 * @return bool
+	 */
+	private static function post_type_can_be_exported( string $post_type ): bool {
+		$post_type_object = get_post_type_object( $post_type );
+
+		return $post_type_object instanceof \WP_Post_Type && $post_type_object->can_export;
+	}
+
+	/**
+	 * Drops what reading a batch of orders left in the runtime caches, so memory stays flat across the export.
+	 *
+	 * @param int[] $order_ids Order IDs.
+	 */
+	private function release_order_caches( array $order_ids ): void {
+		$this->orders_data_store->clear_cached_data( $order_ids );
+
+		foreach ( $order_ids as $order_id ) {
+			wp_cache_delete( \WC_Order::generate_meta_cache_key( $order_id, 'orders' ), 'orders' );
+			$this->order_cache->remove( $order_id );
+		}
+	}
+
+	/**
+	 * Whether HPOS orders must be added to the export.
+	 *
+	 * Core already exports orders from the posts table, which is complete when posts are
+	 * authoritative or when sync is on. Only HPOS-authoritative sites with sync off miss them.
+	 *
+	 * @param array $args Export arguments.
+	 * @return bool
+	 */
+	private function should_export_orders( array $args ): bool {
+		if ( ! in_array( $args['content'] ?? '', array( 'all', 'shop_order' ), true ) ) {
+			return false;
+		}
+
+		return $this->cot_controller->custom_orders_table_usage_is_enabled()
+			&& ! $this->data_synchronizer->data_sync_is_enabled();
+	}
+
+	/**
+	 * Wraps a string in an XML CDATA section, mirroring core's `wxr_cdata()`.
+	 *
+	 * @param string $str String to wrap.
+	 * @return string
+	 */
+	private static function cdata( string $str ): string {
+		$is_valid_utf8 = function_exists( 'wp_is_valid_utf8' )
+			? wp_is_valid_utf8( $str )
+			: seems_utf8( $str ); // phpcs:ignore WordPress.WP.DeprecatedFunctions.seems_utf8Found -- Fallback for WordPress < 6.9.
+
+		if ( ! $is_valid_utf8 ) {
+			$str = (string) mb_convert_encoding( $str, 'UTF-8', 'auto' );
+		}
+
+		return '<![CDATA[' . str_replace( ']]>', ']]]]><![CDATA[>', $str ) . ']]>';
+	}
+
+	/**
+	 * Outputs one order or refund as a WXR item, shaped like the post the CPT data store would create.
+	 *
+	 * @param \WC_Abstract_Order $order The order or refund.
+	 */
+	private function export_order_to_xml( \WC_Abstract_Order $order ): void {
+		$order_id     = $order->get_id();
+		$is_refund    = $order instanceof \WC_Order_Refund;
+		$date_created = $order->get_date_created( 'edit' );
+		$date_updated = $order->get_date_modified( 'edit' ) ?? $date_created;
+		$created      = $date_created ? $date_created->date( 'Y-m-d H:i:s' ) : '';
+		$created_gmt  = $date_created ? gmdate( 'Y-m-d H:i:s', $date_created->getTimestamp() ) : '';
+		$updated      = $date_updated ? $date_updated->date( 'Y-m-d H:i:s' ) : '';
+		$updated_gmt  = $date_updated ? gmdate( 'Y-m-d H:i:s', $date_updated->getTimestamp() ) : '';
+		$link         = get_site_url( null, "?post_type={$order->get_type()}&p={$order_id}" );
+
+		if ( $is_refund ) {
+			/* translators: %s: refund ID */
+			$title    = sprintf( __( 'Refund #%s', 'woocommerce' ), $order_id );
+			$excerpt  = $order->get_reason( 'edit' );
+			$password = '';
+		} else {
+			/* translators: %s: order ID */
+			$title    = sprintf( __( 'Order #%s', 'woocommerce' ), $order_id );
+			$excerpt  = $order instanceof \WC_Order ? $order->get_customer_note( 'edit' ) : '';
+			$password = $order instanceof \WC_Order ? $order->get_order_key( 'edit' ) : '';
+		}
+
+		// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped -- CDATA sections are escaped by cdata().
+		?>
+		<item>
+			<title><?php echo self::cdata( $title ); ?></title>
+			<link><?php echo esc_url( $link ); ?></link>
+			<pubDate><?php echo esc_html( (string) mysql2date( 'D, d M Y H:i:s +0000', $created_gmt, false ) ); ?></pubDate>
+			<dc:creator><?php echo self::cdata( '' ); ?></dc:creator>
+			<guid isPermaLink="false"><?php echo esc_url( $link ); ?></guid>
+			<description></description>
+			<content:encoded><?php echo self::cdata( '' ); ?></content:encoded>
+			<excerpt:encoded><?php echo self::cdata( $excerpt ); ?></excerpt:encoded>
+			<wp:post_id><?php echo (int) $order_id; ?></wp:post_id>
+			<wp:post_date><?php echo self::cdata( $created ); ?></wp:post_date>
+			<wp:post_date_gmt><?php echo self::cdata( $created_gmt ); ?></wp:post_date_gmt>
+			<wp:post_modified><?php echo self::cdata( $updated ); ?></wp:post_modified>
+			<wp:post_modified_gmt><?php echo self::cdata( $updated_gmt ); ?></wp:post_modified_gmt>
+			<wp:comment_status><?php echo self::cdata( 'closed' ); ?></wp:comment_status>
+			<wp:ping_status><?php echo self::cdata( 'closed' ); ?></wp:ping_status>
+			<wp:post_name><?php echo self::cdata( sanitize_title( $title ) ); ?></wp:post_name>
+			<wp:status><?php echo self::cdata( self::get_post_status( $order ) ); ?></wp:status>
+			<wp:post_parent><?php echo (int) $order->get_parent_id( 'edit' ); ?></wp:post_parent>
+			<wp:menu_order>0</wp:menu_order>
+			<wp:post_type><?php echo self::cdata( $order->get_type() ); ?></wp:post_type>
+			<wp:post_password><?php echo self::cdata( $password ); ?></wp:post_password>
+			<wp:is_sticky>0</wp:is_sticky>
+		<?php
+		foreach ( $this->get_postmeta( $order ) as list( $meta_key, $meta_value ) ) {
+			// Same shape as the postmeta row core passes to the filter.
+			$meta_row = (object) array(
+				'post_id'    => $order_id,
+				'meta_key'   => $meta_key, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Not a query.
+				'meta_value' => $meta_value, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- Not a query.
+			);
+
+			/** This filter is documented in wp-admin/includes/export.php */
+			if ( apply_filters( 'wxr_export_skip_postmeta', false, $meta_key, $meta_row ) ) { // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment -- Core filter.
+				continue;
+			}
+			?>
+			<wp:postmeta>
+				<wp:meta_key><?php echo self::cdata( $meta_key ); ?></wp:meta_key>
+				<wp:meta_value><?php echo self::cdata( $meta_value ); ?></wp:meta_value>
+			</wp:postmeta>
+			<?php
+		}
+
+		foreach ( $this->get_order_notes( $order_id ) as $note ) {
+			?>
+			<wp:comment>
+				<wp:comment_id><?php echo (int) $note->comment_ID; ?></wp:comment_id>
+				<wp:comment_author><?php echo self::cdata( $note->comment_author ); ?></wp:comment_author>
+				<wp:comment_author_email><?php echo self::cdata( $note->comment_author_email ); ?></wp:comment_author_email>
+				<wp:comment_author_url><?php echo esc_url( $note->comment_author_url ); ?></wp:comment_author_url>
+				<wp:comment_author_IP><?php echo self::cdata( $note->comment_author_IP ); ?></wp:comment_author_IP>
+				<wp:comment_date><?php echo self::cdata( $note->comment_date ); ?></wp:comment_date>
+				<wp:comment_date_gmt><?php echo self::cdata( $note->comment_date_gmt ); ?></wp:comment_date_gmt>
+				<wp:comment_content><?php echo self::cdata( $note->comment_content ); ?></wp:comment_content>
+				<wp:comment_approved><?php echo self::cdata( $note->comment_approved ); ?></wp:comment_approved>
+				<wp:comment_type><?php echo self::cdata( $note->comment_type ); ?></wp:comment_type>
+				<wp:comment_parent><?php echo (int) $note->comment_parent; ?></wp:comment_parent>
+				<wp:comment_user_id><?php echo (int) $note->user_id; ?></wp:comment_user_id>
+			<?php
+			foreach ( (array) get_comment_meta( (int) $note->comment_ID ) as $meta_key => $meta_values ) {
+				foreach ( (array) $meta_values as $meta_value ) {
+					// Same shape as the commentmeta row core passes to the filter.
+					$meta_row = (object) array(
+						'comment_id' => $note->comment_ID,
+						'meta_key'   => $meta_key, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Not a query.
+						'meta_value' => $meta_value, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value -- Not a query.
+					);
+
+					/** This filter is documented in wp-admin/includes/export.php */
+					if ( apply_filters( 'wxr_export_skip_commentmeta', false, $meta_key, $meta_row ) ) { // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment -- Core filter.
+						continue;
+					}
+					?>
+				<wp:commentmeta>
+					<wp:meta_key><?php echo self::cdata( $meta_key ); ?></wp:meta_key>
+					<wp:meta_value><?php echo self::cdata( self::meta_value_to_string( $meta_value ) ); ?></wp:meta_value>
+				</wp:commentmeta>
+					<?php
+				}
+			}
+			?>
+			</wp:comment>
+			<?php
+		}
+		?>
+		</item>
+		<?php
+		// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
+	}
+
+	/**
+	 * Returns the order notes as comment objects, in the order core would export them.
+	 *
+	 * WooCommerce hides order notes from comment queries; the exclusion is lifted for this
+	 * query only, the same way `wc_get_order_notes()` does it.
+	 *
+	 * @param int $order_id Order ID.
+	 * @return \WP_Comment[]
+	 */
+	private function get_order_notes( int $order_id ): array {
+		$exclusion = array( 'WC_Comments', 'exclude_order_comments' );
+		$excluded  = has_filter( 'comments_clauses', $exclusion );
+
+		if ( $excluded ) {
+			remove_filter( 'comments_clauses', $exclusion );
+		}
+
+		$notes = get_comments(
+			array(
+				'post_id' => $order_id,
+				'type'    => 'order_note',
+				'status'  => 'approve',
+				'orderby' => 'comment_ID',
+				'order'   => 'ASC',
+			)
+		);
+
+		if ( $excluded ) {
+			add_filter( 'comments_clauses', $exclusion );
+		}
+
+		return array_filter(
+			is_array( $notes ) ? $notes : array(),
+			function ( $note ) {
+				return $note instanceof \WP_Comment;
+			}
+		);
+	}
+
+	/**
+	 * Returns the post status the order was stored with: prefixed, except for the core statuses that never are.
+	 *
+	 * The prefix is added regardless of whether the status is registered right now, so an order
+	 * holding a status from an inactive extension round-trips as `wc-<status>`, the way it was stored.
+	 *
+	 * @param \WC_Abstract_Order $order The order or refund.
+	 * @return string
+	 */
+	private static function get_post_status( \WC_Abstract_Order $order ): string {
+		$status = $order->get_status( 'edit' );
+
+		if ( in_array( $status, array( OrderStatus::AUTO_DRAFT, OrderStatus::DRAFT, OrderStatus::TRASH ), true ) ) {
+			return $status;
+		}
+
+		return 'wc-' . $status;
+	}
+
+	/**
+	 * Returns the postmeta rows for the order as the CPT data store would write them, followed by custom meta.
+	 *
+	 * Mirrors `WC_Order_Data_Store_CPT::update_post_meta()` and its parent, so the WordPress importer
+	 * can recreate a post that the posts data store, or the posts-to-HPOS migrator, reads back correctly.
+	 *
+	 * @param \WC_Abstract_Order $order The order or refund.
+	 * @return array<int, array{string, string}> List of [ meta key, meta value ] rows.
+	 */
+	private function get_postmeta( \WC_Abstract_Order $order ): array {
+		$meta = array(
+			'_order_currency'     => $order->get_currency( 'edit' ),
+			'_cart_discount'      => $order->get_discount_total( 'edit' ),
+			'_cart_discount_tax'  => $order->get_discount_tax( 'edit' ),
+			'_order_shipping'     => $order->get_shipping_total( 'edit' ),
+			'_order_shipping_tax' => $order->get_shipping_tax( 'edit' ),
+			'_order_tax'          => $order->get_cart_tax( 'edit' ),
+			'_order_total'        => $order->get_total( 'edit' ),
+			'_order_version'      => $order->get_version( 'edit' ),
+			'_prices_include_tax' => $order->get_prices_include_tax( 'edit' ),
+		);
+
+		if ( $order instanceof \WC_Order_Refund ) {
+			$meta += array(
+				'_refund_amount'    => $order->get_amount( 'edit' ),
+				'_refunded_by'      => $order->get_refunded_by( 'edit' ),
+				'_refunded_payment' => $order->get_refunded_payment( 'edit' ),
+				'_refund_reason'    => $order->get_reason( 'edit' ),
+			);
+		} elseif ( $order instanceof \WC_Order ) {
+			$date_paid      = $order->get_date_paid( 'edit' );
+			$date_completed = $order->get_date_completed( 'edit' );
+
+			$meta += array(
+				'_order_key'                    => $order->get_order_key( 'edit' ),
+				'_customer_user'                => $order->get_customer_id( 'edit' ),
+				'_payment_method'               => $order->get_payment_method( 'edit' ),
+				'_payment_method_title'         => $order->get_payment_method_title( 'edit' ),
+				'_transaction_id'               => $order->get_transaction_id( 'edit' ),
+				'_customer_ip_address'          => $order->get_customer_ip_address( 'edit' ),
+				'_customer_user_agent'          => $order->get_customer_user_agent( 'edit' ),
+				'_created_via'                  => $order->get_created_via( 'edit' ),
+				'_cart_hash'                    => $order->get_cart_hash( 'edit' ),
+				'_date_completed'               => $date_completed ? $date_completed->getTimestamp() : '',
+				'_date_paid'                    => $date_paid ? $date_paid->getTimestamp() : '',
+				'_completed_date'               => $date_completed ? $date_completed->date( 'Y-m-d H:i:s' ) : '',
+				'_paid_date'                    => $date_paid ? $date_paid->date( 'Y-m-d H:i:s' ) : '',
+				'_download_permissions_granted' => $order->get_download_permissions_granted( 'edit' ),
+				'_recorded_sales'               => $order->get_recorded_sales( 'edit' ),
+				'_recorded_coupon_usage_counts' => $order->get_recorded_coupon_usage_counts( 'edit' ),
+				'_order_stock_reduced'          => $order->get_order_stock_reduced( 'edit' ),
+				'_new_order_email_sent'         => $order->get_new_order_email_sent( 'edit' ) ? 'true' : 'false',
+			);
+
+			foreach ( array( 'billing', 'shipping' ) as $address_type ) {
+				foreach ( $order->get_address( $address_type ) as $field => $value ) {
+					$meta[ "_{$address_type}_{$field}" ] = $value;
+				}
+				$meta[ "_{$address_type}_address_index" ] = implode( ' ', $order->get_address( $address_type ) );
+			}
+
+			if ( $this->cogs_controller->feature_is_enabled() ) {
+				$meta['_cogs_total_value'] = $order->get_cogs_total_value();
+			}
+		}
+
+		$rows = array();
+		foreach ( $meta as $meta_key => $meta_value ) {
+			// The data stores persist these internal flags as yes/no.
+			$rows[] = array( $meta_key, self::meta_value_to_string( is_bool( $meta_value ) ? wc_bool_to_string( $meta_value ) : $meta_value ) );
+		}
+
+		// Custom meta can repeat a key, so it is kept as rows rather than keyed.
+		foreach ( $order->get_meta_data() as $meta_item ) {
+			$data = $meta_item->get_data();
+			if ( ! isset( $data['key'] ) || array_key_exists( $data['key'], $meta ) ) {
+				continue;
+			}
+			$rows[] = array( (string) $data['key'], self::meta_value_to_string( $data['value'] ?? '' ) );
+		}
+
+		return $rows;
+	}
+
+	/**
+	 * Converts a meta value to the string form the postmeta table would hold.
+	 *
+	 * Scalars are cast the way WordPress stores them (`true` as `1`, `false` and `null` as an empty
+	 * string). Strings that already look serialized go through `maybe_serialize()` too, because the
+	 * meta tables store them double-serialized; otherwise the importer would decode them into arrays.
+	 *
+	 * @param mixed $value Meta value.
+	 * @return string
+	 */
+	private static function meta_value_to_string( $value ): string {
+		return (string) maybe_serialize( is_scalar( $value ) || is_null( $value ) ? (string) $value : $value );
+	}
+
+	/**
+	 * Remembers order posts created by the WordPress importer.
+	 *
+	 * The importer fires this before it writes the post meta, so the migration itself
+	 * waits until `import_end`.
+	 *
+	 * @internal
+	 *
+	 * @param int|mixed $post_id The imported post ID.
+	 */
+	public function handle_wp_import_insert_post( $post_id ): void {
+		$post_id = (int) $post_id;
+
+		if ( $post_id <= 0 || ! $this->cot_controller->custom_orders_table_usage_is_enabled() ) {
+			return;
+		}
+
+		if ( in_array( get_post_type( $post_id ), wc_get_order_types( 'cot-migration' ), true ) ) {
+			$this->imported_order_ids[] = $post_id;
+		}
+	}
+
+	/**
+	 * Migrates the imported order posts into the HPOS tables.
+	 *
+	 * Runs after the importer has remapped post parents, so refunds point at the right order.
+	 * The migrator logs failures through the WooCommerce logger.
+	 *
+	 * @internal
+	 */
+	public function handle_import_end(): void {
+		$order_ids                = $this->imported_order_ids;
+		$this->imported_order_ids = array();
+
+		if ( ! $order_ids || ! $this->cot_controller->custom_orders_table_usage_is_enabled() ) {
+			return;
+		}
+
+		foreach ( array_chunk( $order_ids, self::MIGRATION_BATCH_SIZE ) as $batch ) {
+			$this->posts_to_orders_migrator->migrate_orders( $batch );
+		}
+	}
+}
