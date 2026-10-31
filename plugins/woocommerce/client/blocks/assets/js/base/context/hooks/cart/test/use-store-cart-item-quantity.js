@@ -58,18 +58,27 @@ describe( 'useStoreCartItemQuantity', () => {
 			.mockReturnValue( { type: 'changeCartItemQuantityAction' } );
 
 		registry.registerStore( CART_STORE_KEY, {
-			reducer: () => ( {} ),
+			reducer: (
+				state = {
+					delete: isPendingDelete,
+					quantity: isPendingQuantity,
+				},
+				action
+			) =>
+				action.type === 'SET_ITEM_PENDING'
+					? { ...state, ...action.pending }
+					: state,
 			actions: {
 				removeItemFromCart: mockRemoveItemFromCart,
 				changeCartItemQuantity: mockChangeCartItemQuantity,
+				setItemPending: ( pending ) => ( {
+					type: 'SET_ITEM_PENDING',
+					pending,
+				} ),
 			},
 			selectors: {
-				isItemPendingDelete: jest
-					.fn()
-					.mockReturnValue( isPendingDelete ),
-				isItemPendingQuantity: jest
-					.fn()
-					.mockReturnValue( isPendingQuantity ),
+				isItemPendingDelete: ( state ) => state.delete,
+				isItemPendingQuantity: ( state ) => state.quantity,
 			},
 		} );
 
@@ -173,5 +182,57 @@ describe( 'useStoreCartItemQuantity', () => {
 		} );
 
 		expect( result.current.isPendingDelete ).toBe( true );
+	} );
+
+	describe( 'checkout calculating count', () => {
+		const isCalculating = () =>
+			registry.select( CHECKOUT_STORE_KEY ).isCalculating();
+
+		beforeEach( () => {
+			mockUseStoreCart.useStoreCart.mockReturnValue( {
+				cartErrors: {},
+			} );
+		} );
+
+		it( 'keeps an existing hold when mounted with nothing pending', () => {
+			setupMocks( { isPendingDelete: false, isPendingQuantity: false } );
+			registry
+				.dispatch( CHECKOUT_STORE_KEY )
+				.__internalStartCalculation();
+
+			renderStoreCartItemQuantityHook( { key: '123', quantity: 1 } );
+
+			expect( isCalculating() ).toBe( true );
+		} );
+
+		it.each( [ 'quantity', 'delete' ] )(
+			'releases only its own hold when the pending %s update settles',
+			( type ) => {
+				setupMocks( {
+					isPendingDelete: type === 'delete',
+					isPendingQuantity: type === 'quantity',
+				} );
+				registry
+					.dispatch( CHECKOUT_STORE_KEY )
+					.__internalStartCalculation();
+				renderStoreCartItemQuantityHook( { key: '123', quantity: 1 } );
+
+				act( () => {
+					registry
+						.dispatch( CART_STORE_KEY )
+						.setItemPending( { [ type ]: false } );
+				} );
+
+				expect( isCalculating() ).toBe( true );
+
+				act( () => {
+					registry
+						.dispatch( CHECKOUT_STORE_KEY )
+						.__internalFinishCalculation();
+				} );
+
+				expect( isCalculating() ).toBe( false );
+			}
+		);
 	} );
 } );
