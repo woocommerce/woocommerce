@@ -77,7 +77,7 @@ class AbilitiesLoader {
 	 *
 	 * @since 10.9.0
 	 */
-	final public static function init(): void {
+	final public function init(): void {
 		if ( self::$initialized ) {
 			return;
 		}
@@ -167,10 +167,6 @@ class AbilitiesLoader {
 	 * @since 10.9.0
 	 */
 	public static function register_abilities(): void {
-		if ( ! function_exists( 'wp_register_ability' ) ) {
-			return;
-		}
-
 		foreach ( self::get_ability_definition_classes() as $class_name ) {
 			if ( ! is_string( $class_name ) || ! class_exists( $class_name ) ) {
 				continue;
@@ -195,8 +191,8 @@ class AbilitiesLoader {
 				continue;
 			}
 
-			if ( function_exists( 'wp_has_ability' ) && wp_has_ability( $ability_name ) ) {
-				$existing_ability = function_exists( 'wp_get_ability' ) ? wp_get_ability( $ability_name ) : null;
+			if ( wp_has_ability( $ability_name ) ) {
+				$existing_ability = wp_get_ability( $ability_name );
 
 				if (
 					$is_core_ability
@@ -206,7 +202,7 @@ class AbilitiesLoader {
 					continue;
 				}
 
-				if ( ! $is_core_ability || ! function_exists( 'wp_unregister_ability' ) ) {
+				if ( ! $is_core_ability ) {
 					continue;
 				}
 

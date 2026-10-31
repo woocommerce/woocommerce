@@ -81,20 +81,12 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	public function setUp(): void {
 		global $wp_actions;
 
-		if ( ! function_exists( 'wp_register_ability' ) ) {
-			require_once WC_ABSPATH . 'vendor/wordpress/abilities-api/includes/bootstrap.php';
-		}
-
 		$this->original_init_count = $wp_actions['init'] ?? null;
 		$wp_actions['init']        = max( 1, (int) ( $wp_actions['init'] ?? 0 ) ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
 		parent::setUp();
 
-		if ( class_exists( 'WP_REST_Abilities_Init' ) && ! isset( $this->server->get_routes()['/wp-abilities/v1/abilities'] ) ) {
-			\WP_REST_Abilities_Init::register_routes( $this->server );
-		}
-
-		AbilitiesLoader::init();
+		wc_get_container()->get( AbilitiesLoader::class );
 		$this->reset_registries();
 		self::$received = array();
 		wp_set_current_user( self::$administrator_id );
