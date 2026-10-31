@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show sale prices in the Store API and grouped product structured data only after the scheduled sale starts.
