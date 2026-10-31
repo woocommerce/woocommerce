@@ -2130,6 +2130,37 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should show the data of a refusal once, with no additional_data.
+	 */
+	public function test_refusal_data_is_not_repeated(): void {
+		$product = \WC_Helper_Product::create_simple_product();
+		$this->register_validator(
+			'product',
+			'test-ext',
+			static function () {
+				$error = new \WP_Error( 'test_refused', 'First message.', array( 'status' => 409 ) );
+				$error->add( 'test_refused', 'Second message.' );
+				return $error;
+			}
+		);
+
+		$response = $this->run_ability_response(
+			'woocommerce/product-update',
+			array(
+				'id'   => $product->get_id(),
+				'name' => 'Pencil',
+			)
+		);
+
+		$data = $response->get_data();
+		$this->assertSame( 409, $response->get_status() );
+		$this->assertSame( 'test-ext', $data['data']['namespace'] );
+		$this->assertArrayNotHasKey( 'additional_data', $data );
+		$this->assertSame( 'Second message.', $data['additional_errors'][0]['message'] );
+		$this->assertArrayNotHasKey( 'additional_data', $data['additional_errors'][0] );
+	}
+
+	/**
 	 * @testdox Should not run validators with the feature off.
 	 */
 	public function test_validators_do_not_run_with_the_feature_off(): void {

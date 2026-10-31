@@ -380,7 +380,9 @@ abstract class ActionableAbility extends \WP_Ability {
 	}
 
 	/**
-	 * Add data to every code of an error, and the 400 status to a code that has none.
+	 * Add data to every code of an error, and the 400 status to a code that has
+	 * none. It replaces the data of the code, because WP_Error::add_data() would
+	 * also keep the old data, and the client would see it in `additional_data`.
 	 *
 	 * @param \WP_Error            $error Error.
 	 * @param array<string, mixed> $data  Data to add.
@@ -389,7 +391,7 @@ abstract class ActionableAbility extends \WP_Ability {
 	private static function with_data( \WP_Error $error, array $data ): \WP_Error {
 		foreach ( $error->get_error_codes() as $code ) {
 			$current = $error->get_error_data( $code );
-			$error->add_data( array_merge( array( 'status' => 400 ), is_array( $current ) ? $current : array(), $data ), $code );
+			$error->error_data[ $code ] = array_merge( array( 'status' => 400 ), is_array( $current ) ? $current : array(), $data );
 		}
 		return $error;
 	}
