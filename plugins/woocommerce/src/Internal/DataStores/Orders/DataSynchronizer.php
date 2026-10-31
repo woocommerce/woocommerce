@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Internal\DataStores\Orders;
 
 use Automattic\WooCommerce\Caches\OrderCacheController;
 use Automattic\WooCommerce\Database\Migrations\CustomOrderTable\PostsToOrdersMigrationController;
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Admin\Orders\EditLock;
 use Automattic\WooCommerce\Internal\BatchProcessing\{ BatchProcessingController, BatchProcessorInterface };
 use Automattic\WooCommerce\Internal\Utilities\ActionSchedulerUtil;
@@ -527,7 +528,7 @@ class DataSynchronizer implements BatchProcessorInterface {
 	private function query_orders_pending_sync_count( $full_count = true ) {
 		global $wpdb;
 
-		$order_post_types = wc_get_order_types( 'cot-migration' );
+		$order_post_types = array_values( wc_get_order_types( 'cot-migration' ) );
 
 		$order_post_type_placeholder = implode( ', ', array_fill( 0, count( $order_post_types ), '%s' ) );
 
@@ -561,21 +562,40 @@ class DataSynchronizer implements BatchProcessorInterface {
 			return $count;
 		}
 
-		if ( $this->custom_orders_table_is_authoritative() ) {
-			$missing_orders_count_sql = $wpdb->prepare(
+		$orders_table_is_authoritative = $this->custom_orders_table_is_authoritative();
+
+		// Under posts authority, the aggregate can scan large amounts of non-order content.
+		if ( $full_count && $orders_table_is_authoritative ) {
+			// A placeholder registered as an order type can be both missing and changed, so count each condition separately.
+			$sql = $wpdb->prepare(
 				"
+SELECT
+ COUNT(CASE WHEN (posts.post_type IS NULL OR posts.post_type = '" . self::PLACEHOLDER_ORDER_POST_TYPE . "')
+  AND orders.status <> %s AND orders.type IN ($order_post_type_placeholder) THEN 1 END)
+ + COUNT(CASE WHEN posts.post_type IN ($order_post_type_placeholder)
+  AND orders.date_updated_gmt > posts.post_modified_gmt THEN 1 END) AS count
+FROM $orders_table orders
+LEFT JOIN $wpdb->posts posts ON posts.ID = orders.id",
+				// Both IN clauses need their own copy of the order-type arguments.
+				array_merge( array( OrderStatus::AUTO_DRAFT ), $order_post_types, $order_post_types )
+			);
+			$pending_count = (int) $wpdb->get_var( $sql );
+		} else {
+			if ( $orders_table_is_authoritative ) {
+				$missing_orders_count_sql = $wpdb->prepare(
+					"
 SELECT $count_clause FROM $wpdb->posts posts
 RIGHT JOIN $orders_table orders ON posts.ID=orders.id
 WHERE (posts.post_type IS NULL OR posts.post_type = '" . self::PLACEHOLDER_ORDER_POST_TYPE . "')
  AND orders.status NOT IN ( 'auto-draft' )
  AND orders.type IN ($order_post_type_placeholder)
 $limit_clause",
-				$order_post_types
-			);
-			$operator                 = '>';
-		} else {
-			$missing_orders_count_sql = $wpdb->prepare(
-				"
+					$order_post_types
+				);
+				$operator                 = '>';
+			} else {
+				$missing_orders_count_sql = $wpdb->prepare(
+					"
 SELECT $count_clause FROM $wpdb->posts posts
 LEFT JOIN $orders_table orders ON posts.ID=orders.id
 WHERE
@@ -583,29 +603,28 @@ WHERE
   AND posts.post_status != 'auto-draft'
   AND orders.id IS NULL
 $limit_clause",
-				$order_post_types
-			);
+					$order_post_types
+				);
 
-			$operator = '<';
-		}
+				$operator = '<';
+			}
 
-		$changed_orders_count_sql = $wpdb->prepare(
-			"
+			$changed_orders_count_sql = $wpdb->prepare(
+				"
 SELECT $count_clause FROM $orders_table orders
 JOIN $wpdb->posts posts ON posts.ID = orders.id
 WHERE
   posts.post_type IN ($order_post_type_placeholder)
   AND orders.date_updated_gmt $operator posts.post_modified_gmt
 $limit_clause",
-			$order_post_types
-		);
-		// phpcs:enable
+				$order_post_types
+			);
 
-		// MySQL cannot reference the same temporary table twice in one query.
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Query prepared above.
-		$pending_count = (int) $wpdb->get_var( $missing_orders_count_sql );
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared -- Query prepared above.
-		$pending_count += (int) $wpdb->get_var( $changed_orders_count_sql );
+			// MySQL cannot reference the same temporary table twice in one query.
+			$pending_count  = (int) $wpdb->get_var( $missing_orders_count_sql );
+			$pending_count += (int) $wpdb->get_var( $changed_orders_count_sql );
+		}
+		// phpcs:enable
 
 		$deleted_from_table = $this->get_current_deletion_record_meta_value();
 
