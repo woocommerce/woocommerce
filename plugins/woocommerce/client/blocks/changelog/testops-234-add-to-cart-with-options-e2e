@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+Comment: Add a Jest case for the variation selector branch that counts an already selected attribute the variation holds as "any".
+
