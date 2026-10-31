@@ -533,8 +533,9 @@ class ExtensibleAbilities {
 	/**
 	 * Add the field values of an object to its formatted output, under
 	 * `extensions.<namespace>.<field>`. A value is cast to its schema type, so
-	 * `'12'` becomes `12` for an integer field. A field that throws or returns a
-	 * value other than null that its schema does not allow is left out, and
+	 * `'12'` becomes `12` for an integer field. A null means no value, so the
+	 * field is left out. A field that throws or returns a value that its schema
+	 * does not allow is also left out, and
 	 * `extensions.<namespace>._errors.<field>` says why. A namespace with no
 	 * values and no fields left out is left out, and `extensions` is left out
 	 * when no namespace is in the output or the feature is off.
@@ -564,11 +565,14 @@ class ExtensibleAbilities {
 					$extensions[ $namespace ][ self::ERRORS_KEY ][ $field ] = __( 'The extension failed to read this value.', 'woocommerce' );
 					continue;
 				}
+				if ( null === $value ) {
+					continue;
+				}
 				$valid     = self::matches_schema( $args, $value );
 				$sanitized = true === $valid ? rest_sanitize_value_from_schema( $value, $args['schema'], $field ) : $valid;
 				if ( ! is_wp_error( $sanitized ) ) {
 					$extensions[ $namespace ][ $field ] = $sanitized;
-				} elseif ( null !== $value ) {
+				} else {
 					$extensions[ $namespace ][ self::ERRORS_KEY ][ $field ] = $sanitized->get_error_message();
 				}
 			}

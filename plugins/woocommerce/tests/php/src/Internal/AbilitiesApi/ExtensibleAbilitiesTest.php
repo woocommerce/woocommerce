@@ -1162,7 +1162,7 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should leave out and report a field that throws or fails sanitization, cast a value to its schema type, and keep a null that the schema allows.
+	 * @testdox Should leave out and report a field that throws or fails sanitization, cast a value to its schema type, and leave out a null with no report.
 	 */
 	public function test_field_values_follow_their_schema(): void {
 		AbilitiesLoader::register_core_resources();
@@ -1208,8 +1208,8 @@ class ExtensibleAbilitiesTest extends \WC_REST_Unit_Test_Case {
 		$errors = $values[ ExtensibleAbilities::ERRORS_KEY ];
 
 		$this->assertSame( 12, $values['count'] );
-		$this->assertArrayHasKey( 'empty', $values );
-		$this->assertNull( $values['empty'] );
+		$this->assertArrayNotHasKey( 'empty', $values );
+		$this->assertArrayNotHasKey( 'empty', $errors );
 		$this->assertArrayNotHasKey( 'broken', $values );
 		$this->assertArrayNotHasKey( 'dupes', $values );
 		$this->assertSame( 'The extension failed to read this value.', $errors['broken'] );
