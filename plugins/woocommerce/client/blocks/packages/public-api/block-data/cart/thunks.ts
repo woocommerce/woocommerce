@@ -2,6 +2,7 @@
  * External dependencies
  */
 import {
+	AddToCartEventProduct,
 	Cart,
 	CartResponse,
 	ApiErrorResponse,
@@ -13,6 +14,7 @@ import {
 } from '@woocommerce/types';
 import {
 	camelCaseKeys,
+	getAddedProducts,
 	hasCollectableRate,
 	triggerAddedToCartEvent,
 	triggerAddingToCartEvent,
@@ -472,7 +474,7 @@ export const addItemToCart =
 		variation: Variation[],
 		additionalData: Record< string, unknown > = {}
 	) =>
-	async ( { dispatch }: CartThunkArgs ) => {
+	async ( { dispatch, select }: CartThunkArgs ) => {
 		try {
 			dispatch.startAddingToCart( productId );
 			const { response } = await apiFetchWithHeaders< {
@@ -488,8 +490,20 @@ export const addItemToCart =
 				},
 				cache: 'no-store',
 			} );
+			// Read the cart once the response arrives: adds batched with this
+			// one have already been received, so they aren't reported again.
+			// Until the cart has loaded, existing lines would look newly added.
+			const previousItems = select.hasFinishedResolution( 'getCartData' )
+				? select.getCartData().items
+				: null;
 			dispatch.receiveCart( response );
-			dispatch.finishAddingToCart( productId );
+			dispatch.finishAddingToCart(
+				productId,
+				true,
+				previousItems
+					? getAddedProducts( previousItems, response.items )
+					: undefined
+			);
 			return response;
 		} catch ( error ) {
 			dispatch.receiveError( isApiErrorResponse( error ) ? error : null );
@@ -512,11 +526,22 @@ export function startAddingToCart( productId: number ) {
 
 /**
  * Removes the metadata of an item ID that was added.
+ *
+ * @param {number}  productId       Product ID that was added to cart.
+ * @param {boolean} [dispatchEvent] Whether to dispatch the added to cart event.
+ * @param {Array}   [products]      Products added to the cart, with the quantity added for each one.
  */
-export function finishAddingToCart( productId: number, dispatchEvent = true ) {
+export function finishAddingToCart(
+	productId: number,
+	dispatchEvent = true,
+	products?: AddToCartEventProduct[]
+) {
 	return async ( { dispatch }: CartThunkArgs ) => {
 		if ( dispatchEvent ) {
-			triggerAddedToCartEvent( { preserveCartData: true } );
+			triggerAddedToCartEvent( {
+				preserveCartData: true,
+				...( products && { products } ),
+			} );
 		}
 		dispatch.setProductsPendingAdd( productId, false );
 	};

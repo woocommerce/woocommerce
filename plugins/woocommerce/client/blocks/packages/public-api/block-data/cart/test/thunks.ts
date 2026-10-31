@@ -8,6 +8,7 @@ import { addAction, removeAction } from '@wordpress/hooks';
  * Internal dependencies
  */
 import {
+	addItemToCart,
 	changeCartItemQuantity,
 	receiveCart,
 	applyExtensionCartUpdate,
@@ -288,6 +289,118 @@ describe( 'changeCartItemQuantity', () => {
 			'item-1',
 			false
 		);
+	} );
+} );
+
+describe( 'addItemToCart', () => {
+	// `receiveCart` updates the cart that `getCartData` returns, like the store.
+	const createAddItemMocks = (
+		items: Array< { key: string; id: number; quantity: number } >,
+		hasCartLoaded = true
+	) => {
+		let cart = { items };
+		return {
+			dispatch: {
+				startAddingToCart: jest.fn(),
+				receiveCart: jest.fn( ( response ) => {
+					cart = response;
+				} ),
+				finishAddingToCart: jest.fn(),
+			},
+			select: {
+				getCartData: jest.fn( () => cart ),
+				hasFinishedResolution: jest.fn( () => hasCartLoaded ),
+			},
+		};
+	};
+
+	it( 'should pass the quantity committed by the server to finishAddingToCart', async () => {
+		const { dispatch, select } = createAddItemMocks( [
+			{ key: 'line-5', id: 5, quantity: 1 },
+		] );
+		// 3 units were requested, but the server only added 1.
+		mockApiFetchWithHeaders.mockResolvedValueOnce( {
+			response: { items: [ { key: 'line-5', id: 5, quantity: 2 } ] },
+		} );
+
+		await addItemToCart( 5, 3, [] )( { dispatch, select } as never );
+
+		expect( dispatch.finishAddingToCart ).toHaveBeenCalledWith( 5, true, [
+			{ id: 5, quantity: 1 },
+		] );
+	} );
+
+	it( 'should not report products added by other requests in the same batch', async () => {
+		const { dispatch, select } = createAddItemMocks( [] );
+		// Batched requests run in order, so the second response includes the
+		// first add.
+		mockApiFetchWithHeaders
+			.mockResolvedValueOnce( {
+				response: { items: [ { key: 'line-5', id: 5, quantity: 1 } ] },
+			} )
+			.mockResolvedValueOnce( {
+				response: {
+					items: [
+						{ key: 'line-5', id: 5, quantity: 1 },
+						{ key: 'line-9', id: 9, quantity: 1 },
+					],
+				},
+			} );
+
+		await Promise.all( [
+			addItemToCart( 5, 1, [] )( { dispatch, select } as never ),
+			addItemToCart( 9, 1, [] )( { dispatch, select } as never ),
+		] );
+
+		expect( dispatch.finishAddingToCart ).toHaveBeenNthCalledWith(
+			1,
+			5,
+			true,
+			[ { id: 5, quantity: 1 } ]
+		);
+		expect( dispatch.finishAddingToCart ).toHaveBeenNthCalledWith(
+			2,
+			9,
+			true,
+			[ { id: 9, quantity: 1 } ]
+		);
+	} );
+
+	it( 'should not report products when the cart has not loaded yet', async () => {
+		// The existing line isn't in the store yet, so it would look newly added.
+		const { dispatch, select } = createAddItemMocks( [], false );
+		mockApiFetchWithHeaders.mockResolvedValueOnce( {
+			response: {
+				items: [
+					{ key: 'line-3', id: 3, quantity: 2 },
+					{ key: 'line-5', id: 5, quantity: 1 },
+				],
+			},
+		} );
+
+		await addItemToCart( 5, 1, [] )( { dispatch, select } as never );
+
+		expect( dispatch.finishAddingToCart ).toHaveBeenCalledWith(
+			5,
+			true,
+			undefined
+		);
+	} );
+
+	it( 'should report the variation when adding by parent product ID', async () => {
+		const { dispatch, select } = createAddItemMocks( [] );
+		// The Store API resolves parent 10 + attributes to variation 11.
+		mockApiFetchWithHeaders.mockResolvedValueOnce( {
+			response: { items: [ { key: 'line-11', id: 11, quantity: 1 } ] },
+		} );
+
+		await addItemToCart( 10, 1, [ { attribute: 'Color', value: 'Blue' } ] )(
+			{ dispatch, select } as never
+		);
+
+		expect( dispatch.finishAddingToCart ).toHaveBeenCalledWith( 10, true, [
+			{ id: 11, quantity: 1 },
+		] );
 	} );
 } );
 

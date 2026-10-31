@@ -28,6 +28,7 @@ import {
 	type MutationResult,
 } from './mutation-batcher';
 import { doesCartItemMatchAttributes } from '../../utils/variations/does-cart-item-match-attributes';
+import { getAddedProducts } from '../../utils/get-added-products';
 
 export type WooCommerceConfig = {
 	messages?: {
@@ -491,6 +492,11 @@ function preloadA11y(): void {
  */
 let cartQueue: MutationQueue< Cart, CartMutationMeta > | null = null;
 
+// The cart as it was when the current mutation cycle started, if it came from
+// the server. The cart rendered with the page can be stale (e.g. page cache).
+let cartBeforeCycle: Cart | null = null;
+let hasServerCart = false;
+
 /**
  * Send a cart request through the queue.
  *
@@ -508,12 +514,17 @@ async function sendCartRequest(
 			getHeaders: () => ( {
 				Nonce: stateRef.nonce,
 			} ),
-			takeSnapshot: () => JSON.parse( JSON.stringify( stateRef.cart ) ),
+			takeSnapshot: () => {
+				const snapshot = JSON.parse( JSON.stringify( stateRef.cart ) );
+				cartBeforeCycle = hasServerCart ? snapshot : null;
+				return snapshot;
+			},
 			rollback: ( snapshot ) => {
 				stateRef.cart = snapshot;
 			},
 			commit: ( serverState ) => {
 				stateRef.cart = serverState;
+				hasServerCart = true;
 			},
 			onProcessingChange: ( isProcessing ) => {
 				stateRef.isCartUpdating = isProcessing;
@@ -549,7 +560,15 @@ async function sendCartRequest(
 				// Preserve today's relative order: the legacy event fires
 				// before the sync event.
 				if ( anyAdd ) {
-					triggerAddedToCartEvent( { preserveCartData: true } );
+					triggerAddedToCartEvent( {
+						preserveCartData: true,
+						...( cartBeforeCycle && {
+							products: getAddedProducts(
+								cartBeforeCycle.items,
+								stateRef.cart.items
+							),
+						} ),
+					} );
 				}
 
 				emitSyncEvent( {
@@ -1226,6 +1245,7 @@ const { actions } = store< Store >(
 
 					// Updates the local cart.
 					state.cart = json;
+					hasServerCart = true;
 
 					// Resets the timeout.
 					refreshTimeout = 3000;

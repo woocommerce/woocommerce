@@ -42,11 +42,12 @@ export const dispatchEvent = (
 
 export const triggerAddedToCartEvent = ( {
 	preserveCartData = false,
+	products,
 }: AddToCartEventDetail ): void => {
 	dispatchEvent( 'wc-blocks_added_to_cart', {
 		bubbles: true,
 		cancelable: true,
-		detail: { preserveCartData },
+		detail: { preserveCartData, ...( products && { products } ) },
 	} );
 };
 
