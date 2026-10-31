@@ -160,6 +160,7 @@ class StoreResponses {
 
 	/**
 	 * Request a URL, following redirects that stay on the store's host.
+	 * A redirect to a URL with a query string is not followed.
 	 *
 	 * @param string $url URL.
 	 * @return array{status:int,body:string,headers:array<string,string>}|null
@@ -178,6 +179,9 @@ class StoreResponses {
 				return $response;
 			}
 			$url = \WP_Http::make_absolute_url( $location, $url );
+			if ( is_string( wp_parse_url( $url, PHP_URL_QUERY ) ) ) {
+				return null;
+			}
 		}
 		return null;
 	}

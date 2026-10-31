@@ -219,6 +219,10 @@ class ServedOutputChecksTest extends WC_Unit_Test_Case {
 		$this->serve( $responses );
 
 		$this->assertFalse( $this->results()['content_in_raw_html'] );
+
+		$responses[ $this->product_path() ] = array( 200, self::page( '', '<h1>Blue &amp; Gold Mug</h1><!-- 10.00 --><p>100</p>' ) );
+		$this->serve( $responses );
+		$this->assertFalse( $this->results()['content_in_raw_html'], 'A price in a comment, or a longer number, does not count' );
 	}
 
 	/**

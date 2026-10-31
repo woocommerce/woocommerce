@@ -67,7 +67,7 @@ Store-wide conditions (`StoreConditions`) are reported first because they affect
 | `product_jsonld_present` | The newest product page has Product (or ProductGroup) JSON-LD that parses, from WooCommerce, an SEO plugin or the theme. |
 | `product_jsonld_required_fields` | That JSON-LD gives a name, an image and an offer, from one block or several. Skipped when the page has no Product JSON-LD. |
 | `product_offer_jsonld` | One of its offers has a price (`price`, `lowPrice` or a price specification, as a number or with a currency) and an availability. Skipped when the page has no Product JSON-LD. |
-| `llms_txt_present` | `/llms.txt` is served as text. |
+| `llms_txt_present` | `/llms.txt` at the host root is served as text. |
 | `llms_txt_valid` | It starts with a `# Name` heading. |
 | `llms_txt_links_resolve` | The first five links in it to the store's own pages open (no 4xx). Links to other sites, or with a query string, aren't loaded. |
 | `open_graph_tags` | The home and product page have `og:title` and `og:image`. |
@@ -75,7 +75,7 @@ Store-wide conditions (`StoreConditions`) are reported first because they affect
 | `canonical_url` | The product page has a canonical link. |
 | `organization_schema` | The home page's JSON-LD has an Organization, or a type stores use for themselves such as OnlineStore. |
 | `ai_snippet_directives` | No robots meta tag or `X-Robots-Tag` header on the home or product page sets `nosnippet` or a `max-snippet` limit. |
-| `content_in_raw_html` | The product page's text, without scripts, has the product's name and displayed price. |
+| `content_in_raw_html` | The product page's text, without scripts or comments, has the product's name and its price as a whole amount. |
 | `ucp_profile` | With UCP on: `/.well-known/ucp` is served and names a REST endpoint. |
 | `ucp_endpoints_live` | With UCP on: a catalog search POSTed to that endpoint, or WooCommerce's when there is no profile, answers with a product list. |
 

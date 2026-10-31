@@ -289,6 +289,16 @@ class StoreOutputChecks {
 	}
 
 	/**
+	 * A path at the host root, including when WordPress lives in a subdirectory.
+	 *
+	 * @param string $path Path from the host root, such as /llms.txt.
+	 */
+	private static function host_root( string $path ): string {
+		$home = (array) wp_parse_url( home_url() );
+		return ( $home['scheme'] ?? 'http' ) . '://' . ( $home['host'] ?? '' ) . ( isset( $home['port'] ) ? ':' . $home['port'] : '' ) . $path;
+	}
+
+	/**
 	 * The robots.txt crawlers get. '' when the store answered that there is none.
 	 * Null when it could not be read: the request failed, or the body is a page.
 	 *
@@ -297,8 +307,7 @@ class StoreOutputChecks {
 	 * @param StoreResponses $responses Store responses.
 	 */
 	private function robots_txt( StoreResponses $responses ): ?string {
-		$home     = (array) wp_parse_url( home_url() );
-		$response = $responses->get( ( $home['scheme'] ?? 'http' ) . '://' . ( $home['host'] ?? '' ) . ( isset( $home['port'] ) ? ':' . $home['port'] : '' ) . '/robots.txt' );
+		$response = $responses->get( self::host_root( '/robots.txt' ) );
 		if ( null === $response || ! in_array( $response['status'], array( 200, 404, 410 ), true ) ) {
 			return null;
 		}
@@ -480,7 +489,7 @@ class StoreOutputChecks {
 	 * @param callable       $test      Test, given the file.
 	 */
 	private function with_llms_txt( StoreResponses $responses, callable $test ): ?bool {
-		$response = $responses->get( '/llms.txt' );
+		$response = $responses->get( self::host_root( '/llms.txt' ) );
 		if ( null === $response || $response['status'] >= 500 ) {
 			return null;
 		}
@@ -568,7 +577,10 @@ class StoreOutputChecks {
 				// The amount as the store prints it, with its separators and filters, without the currency symbol.
 				$amount = PageMarkup::text( wc_price( wc_get_price_to_display( $product ) ) );
 				$amount = trim( (string) preg_replace( '/[^\d.,\x{00A0}\x{2009}\x{202F}\' ]/u', '', $amount ) );
-				return str_contains( $text, $amount );
+				if ( '' === $amount ) {
+					return false;
+				}
+				return 1 === preg_match( '/(?<!\d)' . preg_quote( $amount, '/' ) . '(?!\d)/', $text );
 			}
 		);
 	}

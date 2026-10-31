@@ -67,6 +67,7 @@ class PageMarkup {
 	 * @param string $html Page HTML.
 	 */
 	public static function text( string $html ): string {
+		$html = (string) preg_replace( '/<!--.*?-->/s', '', $html );
 		return html_entity_decode( wp_strip_all_tags( $html ), ENT_QUOTES | ENT_HTML5, 'UTF-8' );
 	}
 }
